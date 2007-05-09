@@ -1,0 +1,14 @@
+Comments
+
+generic navazani na libovolny objekt
+
+- funguje pro zalogovane i nezalogovane uzivatele
+    - s moznosti nastaveni na modelu
+- report spam
+
+- umoznuje zabanovat skupinu uzivatelu a IPcek
+- moderovani - model ma metodu can_moderate_discussion( user )
+- umoznuje prilozit obrazek k odpovedi
+- jeho uvodni karma se ridi karmou uzivatele
+- moznost uzamknout ci uplne zakazat diskuzi
+- stromova struktura
