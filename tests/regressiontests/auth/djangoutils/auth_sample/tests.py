@@ -53,11 +53,20 @@ True
 >>> User.objects.count()
 1
 
-# logout
-# >>> cl = Client()
-# POST some data, fill in the login form and repost with data intact
-# login via ~usr~hash/ and/or ~usr~sig/
+# start with fresh client
 
+>>> cl = Client()
+
+# log in via signature
+>>> resp = cl.get('/~non_existent_user~aa/logged/')
+>>> resp.status_code
+302
+>>> resp = cl.get('/logged/')
+>>> resp.status_code
+200
+
+# test decorator
+# POST some data, fill in the login form and repost with data intact
 
 # cleanup
 >>> status, response = auths.delete(uid=uid)
