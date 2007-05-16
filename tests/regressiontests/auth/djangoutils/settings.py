@@ -62,7 +62,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.doc.XViewMiddleware',
-    'nc.auth.djangoutils.AuthMiddleware'
+    'nc.auth.middleware.AuthMiddleware'
 )
 
 ROOT_URLCONF = 'djangoutils.urls'
@@ -85,5 +85,5 @@ INSTALLED_APPS = (
 AUTH_SERVER_HOST = 'localhost'
 
 AUTHENTICATION_BACKENDS = (
-    'nc.auth.djangoutils.AuthServerBackend',
+    'nc.auth.authserver.AuthServerBackend',
 )

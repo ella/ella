@@ -17,12 +17,22 @@ True
 >>> status, response = auths.get(name='NON_EXISTENT_USER')
 >>> status[0] == auths.GET_OK
 True
+>>> response['CRD']
+0
 >>> response['NAME']
 'non_existent_user'
 >>> response['SIG']
 'aa'
 >>> response['UID'] == uid
 True
+>>> status, response = auths.credit(1, uid=uid)
+>>> status[0] == auths.CREDIT_OK
+True
+>>> status, response = auths.get(name='NON_EXISTENT_USER')
+>>> status[0] == auths.GET_OK
+True
+>>> response['CRD']
+1
 >>> status, response = auths.authorize(name='NON_EXISTENT_USER', pwd='XXX')
 >>> status[0] == auths.PASSWORD_AUTH
 True

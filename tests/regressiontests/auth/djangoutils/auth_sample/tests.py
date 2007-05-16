@@ -1,6 +1,6 @@
 login = r'''
 # create user via AuthServer
->>> from nc.auth.djangoutils import get_auths
+>>> from nc.auth.authserver import get_auths
 >>> auths = get_auths()
 >>> status, response = auths.get(name='NON_EXISTENT_USER') # UNKNOWN USER
 >>> status[0] == auths.USER_DOES_NOT_EXIST
