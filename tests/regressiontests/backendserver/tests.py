@@ -30,6 +30,12 @@ datetime.datetime(2007, 3, 30, 15, 40, 48)
 20
 '''
 
+build_query = r'''
+>>> from nc.backendserver import BackendServer, LINE_TERMINATOR
+>>> bs = BackendServer(None)
+>>> bs._build_query('G', name='12', SSS=123, a1='', name2='a\r\nb')
+'G\r\na1: \r\nname2: a b\r\nname: 12\r\nSSS: 123\r\n\r\n'
+'''
 
 parse_line = r'''
 >>> from nc.backendserver import BackendServer
@@ -61,6 +67,7 @@ escape = r'''
 
 __test__ = {
     'escape' : escape,
+    'build_query' : build_query,
     'parse_line' : parse_line,
     'parse_answer' : parse_answer,
     'backend_server' : backed_server,
