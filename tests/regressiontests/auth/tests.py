@@ -38,6 +38,8 @@ True
 True
 >>> response['UID'] == uid
 True
+>>> response.has_key('HASH')
+True
 >>> status, response = auths.get(uid=uid)
 >>> status[0] == auths.GET_OK
 True
