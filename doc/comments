@@ -3,12 +3,34 @@ Comments
 generic navazani na libovolny objekt
 
 - funguje pro zalogovane i nezalogovane uzivatele
-    - s moznosti nastaveni na modelu
-- report spam
+    - s moznosti nastaveni na modelu, hierarchie: obecna (settings), model, objekt, template
+- report spam (bonzak)
 
 - umoznuje zabanovat skupinu uzivatelu a IPcek
-- moderovani - model ma metodu can_moderate_discussion( user )
+- moderovani
+	- vymazane prispevky vypadaji: "Prispevek byl odstranen z duvodu...."
+	- moderovat muze:
+		- administrator muze vse, pri uprave se zaznamena a zobrazi
+		- vlastnik objektu
+		- skupina moderators
+		- uzivatele s vysokou karmou mohou pridavat "nalepky" typu : "s timhle jdete jinam"
+
 - umoznuje prilozit obrazek k odpovedi
 - jeho uvodni karma se ridi karmou uzivatele
 - moznost uzamknout ci uplne zakazat diskuzi
 - stromova struktura
+
+
+
+banovani
+--------
+
+stejna vazba jako comment na urcity objekt
+pokud vazba nebude - je ban globalni
+
+dva modely: ban pro IPcka (i forwarded for - proxy)
+            ban pro usery
+
+
+
+
