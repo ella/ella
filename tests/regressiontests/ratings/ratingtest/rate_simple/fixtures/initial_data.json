@@ -1,0 +1,68 @@
+[
+{
+    "pk": 1,
+    "model": "ratings.modelweight",
+    "fields": { "weight": 10, "content_type": 10, "owner_field" : "owner" }
+},
+{
+    "pk": 2,
+    "model": "ratings.modelweight",
+    "fields": { "weight": 5, "content_type": 11, "owner_field" : "owner" }
+},
+{
+    "pk": "1",
+    "model": "auth.user",
+    "fields": {
+        "username": "owner",
+        "first_name": "",
+        "last_name": "",
+        "is_active": true,
+        "is_superuser": true,
+        "is_staff": true,
+        "last_login": "2007-04-24 14:02:58",
+        "groups": [],
+        "user_permissions": [],
+        "password": "sha1$fa439$b34426f2cb0a54bc6fb22072c5db8c48ba0e88fd",
+        "email": "admin@admin.cz",
+        "date_joined": "2007-04-24 14:02:50"
+    }
+},
+{
+    "pk": "2",
+    "model": "auth.user",
+    "fields": {
+        "username": "rater",
+        "first_name": "",
+        "last_name": "",
+        "is_active": true,
+        "is_superuser": true,
+        "is_staff": true,
+        "last_login": "2007-04-24 14:02:58",
+        "groups": [],
+        "user_permissions": [],
+        "password": "sha1$fa439$b34426f2cb0a54bc6fb22072c5db8c48ba0e88fd",
+        "email": "admin@admin.cz",
+        "date_joined": "2007-04-24 14:02:50"
+    }
+},
+{
+    "pk": "1",
+    "model": "rate_simple.userprofile",
+    "fields": { "user": 1, "karma": 5 }
+},
+{
+    "pk": "2",
+    "model": "rate_simple.userprofile",
+    "fields": { "user": 2, "karma": 5 }
+},
+{
+    "pk": "1",
+    "model": "rate_simple.cheapsamplemodel",
+    "fields": { "owner": 1, "title": "First Cheap Object" }
+},
+{
+    "pk": "1",
+    "model": "rate_simple.expensivesamplemodel",
+    "fields": { "owner": 1, "title": "First Cheap Object" }
+}
+]
