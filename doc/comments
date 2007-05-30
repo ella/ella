@@ -21,6 +21,12 @@ generic navazani na libovolny objekt
 - stromova struktura
 
 
+optiony
+-------
+
+* pouze pro zalogovane uzivatele / pro vsechny
+* povolena/zakazana odpoved obrazkem
+
 
 banovani
 --------
@@ -31,6 +37,11 @@ pokud vazba nebude - je ban globalni
 dva modely: ban pro IPcka (i forwarded for - proxy)
             ban pro usery
 
+
+obrazky
+-------
+
+hledisko zadavatele: ziji pouze v aplikaci comments
 
 
 
