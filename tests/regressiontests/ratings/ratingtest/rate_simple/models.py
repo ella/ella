@@ -13,10 +13,12 @@ class ExpensiveSampleModel(models.Model):
     owner = models.ForeignKey(User)
     title = models.CharField(maxlength=100)
 
-    objects = RatedManager()
+    objects = models.Manager()
+    rated = RatedManager()
 
 class CheapSampleModel(models.Model):
     owner = models.ForeignKey(User)
     title = models.CharField(maxlength=100)
 
-    objects = RatedManager()
+    objects = models.Manager()
+    rated = RatedManager()
