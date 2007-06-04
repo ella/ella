@@ -1,13 +1,13 @@
 from datetime import datetime
-
 from django.contrib.auth.models import User
 from django.db import models
 
-from nc.ratings.models import RatedManager
+from nc.ratings.models import RatedManager, INITIAL_USER_KARMA
 
 class UserProfile(models.Model):
     user = models.ForeignKey(User)
-    karma = models.IntegerField(default=5)
+    karma = models.IntegerField(default=INITIAL_USER_KARMA)
+    karma_coeficient = models.FloatField(default=1.0)
 
 class ExpensiveSampleModel(models.Model):
     owner = models.ForeignKey(User)

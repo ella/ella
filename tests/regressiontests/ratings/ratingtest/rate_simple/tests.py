@@ -1,5 +1,6 @@
 rating = r'''
 >>> from nc.ratings.models import *
+>>> Rating.objects.all().delete()
 >>> Rating.objects.count()
 0
 
@@ -60,6 +61,9 @@ template_tags = r'''
 >>> cheap_obj = CheapSampleModel.objects.all()[0]
 >>> cheap_ct = ContentType.objects.get_for_model(cheap_obj)
 
+# clear all ratings and create new ones
+>>> Rating.objects.all().delete()
+
 >>> t = Template('{% load ratings.tags %}{% rating for obj as rating %}{{rating}}')
 >>> t.render(Context({'obj' : cheap_obj}))
 '0'
@@ -104,8 +108,8 @@ top_objects = r'''
 >>> Rating.objects.all().delete()
 >>> r = Rating(target_id=cheap_obj.id, target_ct=cheap_ct, amount=1)
 >>> r.save()
->>> r = Rating(target_id=expensive_obj.id, target_ct=expensive_ct, amount=2)
->>> r.save()
+>>> r2 = Rating(target_id=expensive_obj.id, target_ct=expensive_ct, amount=2)
+>>> r2.save()
 
 >>> Rating.objects.get_top_objects(2)
 [(<ExpensiveSampleModel: ExpensiveSampleModel object>, 2), (<CheapSampleModel: CheapSampleModel object>, 1)]
@@ -114,11 +118,77 @@ top_objects = r'''
 [(<CheapSampleModel: CheapSampleModel object>, 1)]
 >>> Rating.objects.get_top_objects(10, [ExpensiveSampleModel, CheapSampleModel])
 [(<ExpensiveSampleModel: ExpensiveSampleModel object>, 2), (<CheapSampleModel: CheapSampleModel object>, 1)]
+
+# cleanup
+>>> r.delete()
+>>> r2.delete()
+>>> r = Rating(target_id=cheap_obj.id, target_ct=cheap_ct, amount=1)
+>>> r.save()
+>>> r2 = Rating(target_id=expensive_obj.id, target_ct=expensive_ct, amount=2)
+>>> r2.save()
 '''
+
+karma = r'''
+# imports
+>>> from django.contrib.contenttypes.models import ContentType
+>>> from nc.ratings.models import Rating, INITIAL_USER_KARMA
+>>> from rate_simple.models import *
+>>> from django.test import Client
+
+# clear all ratings and create new ones
+>>> Rating.objects.all().delete()
+
+# get objects to rate
+>>> cheap_obj = CheapSampleModel.rated.all()[0]
+>>> cheap_obj.rating
+0
+>>> expensive_obj = ExpensiveSampleModel.objects.all()[0]
+>>> cheap_ct = ContentType.objects.get_for_model(cheap_obj)
+>>> expensive_ct = ContentType.objects.get_for_model(expensive_obj)
+
+# login via test client
+>>> cl = Client()
+>>> cl.login(username="rater", password="admin")
+True
+
+# rate some objects, check that the rating amount is the same as user's karma
+>>> cl.get('/ratings/rate/%s/%s/up/' % (cheap_ct.id, cheap_obj.id)).status_code
+302
+>>> up = UserProfile.objects.get(user__username='rater')
+>>> up.karma
+5
+>>> Rating.objects.get_for_object(cheap_obj)
+5
+>>> cl = Client()
+>>> cl.login(username="rater2", password="admin")
+True
+>>> up.save()
+>>> cl.get('/ratings/rate/%s/%s/up/' % (cheap_ct.id, cheap_obj.id)).status_code
+302
+>>> Rating.objects.get_for_object(cheap_obj)
+15
+>>> cl.get('/ratings/rate/%s/%s/up/' % (expensive_ct.id, expensive_obj.id)).status_code
+302
+
+# recalculate the karma
+>>> from nc.ratings import karma
+>>> karma.recalculate_karma()
+True
+>>> up = UserProfile.objects.get(user__username='rater2')
+>>> up.karma == INITIAL_USER_KARMA
+True
+>>> up = UserProfile.objects.get(user__username='owner')
+>>> up.karma > INITIAL_USER_KARMA
+True
+
+
+'''
+
 __test__ = {
     'rating' : rating,
     'template_tags' : template_tags,
     'top_objects' : top_objects,
+    'karma' : karma,
 }
 
 if __name__ == '__main__':
