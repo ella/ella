@@ -6,7 +6,6 @@ ahoj
 >>> from komments.sample.models import Apple, Orange
 >>> from django.contrib.contenttypes.models import ContentType
 
-
 # few init instances
 >>> Orange(cm=10).save()
 >>> Orange(cm=20).save()
@@ -29,9 +28,9 @@ True
 >>> k = cmodels.Comment(target_ct=contenttype, target_id=a1.id, content='comment on red apple')
 >>> k.save()
 >>> cmodels.Comment.objects.filter(target_ct=contenttype, target_id=a1.id)
-[<Comment: comment[1] 'comment on ...' on red apple>]
+[<Comment: comment[1] 'comment on ...' on red apple {path:/}>]
 >>> cmodels.Comment.objects.all()
-[<Comment: comment[1] 'comment on ...' on red apple>]
+[<Comment: comment[1] 'comment on ...' on red apple {path:/}>]
 
 # and to another
 >>> package, module = ('sample', 'orange')
@@ -40,36 +39,58 @@ True
 >>> k = cmodels.Comment(target_ct=contenttype, target_id=o_id, content='content on 10kg orange')
 >>> k.save()
 >>> cmodels.Comment.objects.all()
-[<Comment: comment[1] 'comment on ...' on red apple>, <Comment: comment[2] 'content on ...' on 10cm orange>]
+[<Comment: comment[1] 'comment on ...' on red apple {path:/}>, <Comment: comment[2] 'content on ...' on 10cm orange {path:/}>]
+
 
 
 # comment forms
 >>> from nc.comments import forms as cforms
 
+>>> import datetime, time, re
+
 
 # simple rendering comment form
->>> c = cforms.CommentForm(opts={'options':'', 'target':'9:1'})
->>> print c.as_p()
-<p><label for="id_content">Content:</label> <textarea id="id_content" rows="10" cols="40" name="content"></textarea><input type="hidden" name="parent" id="id_parent" /><input type="hidden" name="hash" value="9631189444103e381fd27ba051f3c4b2" id="id_hash" /><input type="hidden" name="opts" id="id_opts" /><input type="hidden" name="target" value="9:1" id="id_target" /></p>
+>>> c = cforms.CommentForm(options={'options':'', 'target':'9:1', 'parent':1,})
+>>> sorted(c.fields.keys())
+['content', 'hash', 'options', 'parent', 'target', 'timestamp']
 
-# valid comment form
->>> c = cforms.CommentForm({'hash':'9631189444103e381fd27ba051f3c4b2', 'opts':'', 'target':'9:1', 'content': 'hohoho'})
+>>> now = datetime.datetime.now()
+>>> now = int(time.mktime(now.timetuple()))
+>>> timestamp = c.fields['timestamp'].initial
+>>> timestamp - now < 5
+True
+>>> str(c['timestamp']) == '<input type="hidden" name="timestamp" value="%s" id="id_timestamp" />' % timestamp
+True
+
+>>> hash = c.get_hash('', '9:1', timestamp)
+>>> str(c['hash']) == '<input type="hidden" name="hash" value="%s" id="id_hash" />' % hash
+True
+
+>>> str(c['options'])
+'<input type="hidden" name="options" id="id_options" />'
+>>> str(c['parent'])
+'<input type="hidden" name="parent" value="1" id="id_parent" />'
+>>> str(c['target'])
+'<input type="hidden" name="target" value="9:1" id="id_target" />'
+
+
+# data validation
+>>> c = cforms.CommentForm({'hash': c.fields['hash'].initial, # emulate recieving this form value
+...                          'timestamp': c.fields['timestamp'].initial, # emulate as hash
+...                          'options':'', 'target':'9:1', 'parent':1, 'content':'hehehehe'})
 >>> c.is_valid()
 True
 >>> newc = c.save()
->>> cmodels.Comment.objects.all()[2]
-<Comment: comment[3] 'hohoho ...' on green apple>
 
-# invalid forms
->>> c = cforms.CommentForm({'hash':'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', 'opts':'', 'target':'9:1', 'content': 'hohoho'})
+>>> cmodels.Comment.objects.all()[2]
+<Comment: comment[3] 'hehehehe ...' on green apple {path:/1/}>
+
+# hash is valid for this options, timestamp, target combination, but form is too old
+>>> c = cforms.CommentForm({'hash':'e039aeeaed60aad23127063174fa0148', 'timestamp':'1181143017',
+...                          'options':'', 'target':'9:1', 'parent':1, 'content':'hehehehe'})
 >>> c.is_valid()
 False
->>> c = cforms.CommentForm({'hash':'9631189444103e381fd27ba051f3c4b2', 'opts':'some:invalid:opts', 'target':'9:1', 'content': 'hohoho'})
->>> c.is_valid()
-False
->>> c = cforms.CommentForm({'hash':'9631189444103e381fd27ba051f3c4b2', 'opts':'', 'target':'10:5', 'content': 'hohoho'})
->>> c.is_valid()
-False
+
 
 
 
