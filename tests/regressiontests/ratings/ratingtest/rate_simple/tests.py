@@ -11,7 +11,7 @@ rating = r'''
 1
 
 # rating on not-rated object:
->>> Rating.objects.get_for_object(cheap_obj)
+>>> int(Rating.objects.get_for_object(cheap_obj))
 0
 
 # store content_types for further use
@@ -44,12 +44,12 @@ True
 >>> resp = cl.get('/ratings/rate/%s/%s/down/' % (cheap_ct.id, cheap_obj.id))
 >>> resp.status_code
 302
->>> Rating.objects.get_for_object(cheap_obj)
+>>> int(Rating.objects.get_for_object(cheap_obj))
 0
 >>> Rating.objects.count()
 2
 >>> csm = CheapSampleModel.rated.all()[0]
->>> csm.rating
+>>> int(csm.rating)
 0
 '''
 
@@ -77,17 +77,17 @@ template_tags = r'''
 ...     'ct_id' : cheap_ct.id
 ...}
 True
->>> t = Template('{% load ratings %}{% top_rated 5 as top %}{{top}}')
+>>> t = Template('{% load ratings %}{% top_rated 5 as top %}{% for rat in top %}{{rat.0}}: {{rat.1}}\n{% endfor %}')
 >>> t.render(Context())
-'[(<CheapSampleModel: CheapSampleModel object>, 6)]'
+'CheapSampleModel object: 6\n'
 
 >>> t = Template('{% load ratings %}{% top_rated 5 rate_simple.expensivesamplemodel as top %}{{top}}')
 >>> t.render(Context())
 '[]'
 
->>> t = Template('{% load ratings %}{% top_rated 5 rate_simple.expensivesamplemodel rate_simple.cheapsamplemodel as top %}{{top}}')
+>>> t = Template('{% load ratings %}{% top_rated 5 rate_simple.expensivesamplemodel rate_simple.cheapsamplemodel as top %}{% for rat in top %}{{rat.0}}: {{rat.1}}\n{% endfor %}')
 >>> t.render(Context())
-'[(<CheapSampleModel: CheapSampleModel object>, 6)]'
+'CheapSampleModel object: 6\n'
 
 >>> r.delete()
 '''
@@ -111,13 +111,13 @@ top_objects = r'''
 >>> r2 = Rating(target_id=expensive_obj.id, target_ct=expensive_ct, amount=2)
 >>> r2.save()
 
->>> Rating.objects.get_top_objects(2)
-[(<ExpensiveSampleModel: ExpensiveSampleModel object>, 2), (<CheapSampleModel: CheapSampleModel object>, 1)]
+>>> [ (str(obj), int(rat)) for obj, rat in Rating.objects.get_top_objects(2) ]
+[('ExpensiveSampleModel object', 2), ('CheapSampleModel object', 1)]
 
->>> Rating.objects.get_top_objects(1, [CheapSampleModel])
-[(<CheapSampleModel: CheapSampleModel object>, 1)]
->>> Rating.objects.get_top_objects(10, [ExpensiveSampleModel, CheapSampleModel])
-[(<ExpensiveSampleModel: ExpensiveSampleModel object>, 2), (<CheapSampleModel: CheapSampleModel object>, 1)]
+>>> [ (str(obj), int(rat)) for obj, rat in Rating.objects.get_top_objects(1, [CheapSampleModel]) ]
+[('CheapSampleModel object', 1)]
+>>> [ (str(obj), int(rat)) for obj, rat in Rating.objects.get_top_objects(10, [ExpensiveSampleModel, CheapSampleModel]) ]
+[('ExpensiveSampleModel object', 2), ('CheapSampleModel object', 1)]
 
 # cleanup
 >>> r.delete()
@@ -140,7 +140,7 @@ karma = r'''
 
 # get objects to rate
 >>> cheap_obj = CheapSampleModel.rated.all()[0]
->>> cheap_obj.rating
+>>> int(cheap_obj.rating)
 0
 >>> expensive_obj = ExpensiveSampleModel.objects.all()[0]
 >>> cheap_ct = ContentType.objects.get_for_model(cheap_obj)
@@ -157,7 +157,7 @@ True
 >>> up = UserProfile.objects.get(user__username='rater')
 >>> up.karma
 5
->>> Rating.objects.get_for_object(cheap_obj)
+>>> int(Rating.objects.get_for_object(cheap_obj))
 5
 >>> cl = Client()
 >>> cl.login(username="rater2", password="admin")
@@ -165,7 +165,7 @@ True
 >>> up.save()
 >>> cl.get('/ratings/rate/%s/%s/up/' % (cheap_ct.id, cheap_obj.id)).status_code
 302
->>> Rating.objects.get_for_object(cheap_obj)
+>>> int(Rating.objects.get_for_object(cheap_obj))
 15
 >>> cl.get('/ratings/rate/%s/%s/up/' % (expensive_ct.id, expensive_obj.id)).status_code
 302
@@ -180,8 +180,6 @@ True
 >>> up = UserProfile.objects.get(user__username='owner')
 >>> up.karma > INITIAL_USER_KARMA
 True
-
-
 '''
 
 __test__ = {
