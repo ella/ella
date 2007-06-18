@@ -64,28 +64,28 @@ template_tags = r'''
 # clear all ratings and create new ones
 >>> Rating.objects.all().delete()
 
->>> t = Template('{% load ratings.tags %}{% rating for obj as rating %}{{rating}}')
+>>> t = Template('{% load ratings %}{% rating for obj as rating %}{{rating}}')
 >>> t.render(Context({'obj' : cheap_obj}))
 '0'
 >>> r = Rating(target_ct=cheap_ct, target_id=cheap_obj.id, amount=6)
 >>> r.save()
 >>> t.render(Context({'obj' : cheap_obj}))
 '6'
->>> t = Template('{% load ratings.tags %}{% rate_urls for obj as rate_up rate_down %}{{rate_up}} {{rate_down}}')
+>>> t = Template('{% load ratings %}{% rate_urls for obj as rate_up rate_down %}{{rate_up}} {{rate_down}}')
 >>> t.render(Context({'obj' : cheap_obj})) == '/ratings/rate/%(ct_id)s/%(obj_id)s/up/ /ratings/rate/%(ct_id)s/%(obj_id)s/down/' % {
 ...     'obj_id' : cheap_obj.id,
 ...     'ct_id' : cheap_ct.id
 ...}
 True
->>> t = Template('{% load ratings.tags %}{% top_rated 5 as top %}{{top}}')
+>>> t = Template('{% load ratings %}{% top_rated 5 as top %}{{top}}')
 >>> t.render(Context())
 '[(<CheapSampleModel: CheapSampleModel object>, 6)]'
 
->>> t = Template('{% load ratings.tags %}{% top_rated 5 rate_simple.expensivesamplemodel as top %}{{top}}')
+>>> t = Template('{% load ratings %}{% top_rated 5 rate_simple.expensivesamplemodel as top %}{{top}}')
 >>> t.render(Context())
 '[]'
 
->>> t = Template('{% load ratings.tags %}{% top_rated 5 rate_simple.expensivesamplemodel rate_simple.cheapsamplemodel as top %}{{top}}')
+>>> t = Template('{% load ratings %}{% top_rated 5 rate_simple.expensivesamplemodel rate_simple.cheapsamplemodel as top %}{{top}}')
 >>> t.render(Context())
 '[(<CheapSampleModel: CheapSampleModel object>, 6)]'
 

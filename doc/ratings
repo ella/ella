@@ -1,0 +1,83 @@
+=======
+Ratings
+=======
+
+NC ratings application can be used to rate any object. It utilizes django.contrib.contenttypes application to bind to
+literally any object on any model class. It provides the user with a simple interface which comprises of one view function.
+
+Important part of the Rating application is a system for maintaining User's karma.
+
+
+Object Rating
+=============
+
+Individual object can be rated. Ratinbg is done via a simple Urle
+
+Karma
+=====
+
+Karma is similar to user's rating. It is computed from rating of object associated woth the given user. Karma extensions runs on PostgreSQL only.
+
+Karma is computed inside the DB via a set os UPDATE commands that utilize a custom SQL function which returns a coeficient based on the age of the rating.
+
+Anti-Spam mechanisms
+====================
+
+Several anti-spamming measures has been taken into account:
+For logged users:
+    only one vote per object is allowed for any logged user. Last rated objects are stored in user's session to avoid DB hits.
+
+For anonymous users:
+    only one rating in MINIMAL_ANONYMOUS_IP_DELAY is allowed form one IP address. Last rated objects are kept in cookie to minimize DB hits.
+
+
+Settings
+========
+
+Several options are available to configure the ratings app:
+
+ANONYMOUS_KARMA
+    Karma of anonymous user, defaults to 1.
+
+INITIAL_USER_KARMA
+    Karma of newly created User, defaults to 4.
+
+DEFAULT_MODEL_WEIGHT
+    Default weight of an object, default 1.
+
+MINIMAL_ANONYMOUS_IP_DELAY
+    Delay between ratings for an object from a single IP address in seconds, default is 1800 (30 minutes).
+
+RATINGS_COOKIE_NAME
+    Name of the cookie (and/or session variable) that store last rated objects.
+
+RATINGS_MAX_COOKIE_LENGTH
+    Maximal number of object IDs stored in the cookie/session, defaults to 20.
+
+RATINGS_MAX_COOKIE_AGE
+    Max age of tha rating cookie in seconds, defaults to 3600 (1 hour).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+nc.ratings
+
+Django aplikace umoznujici bodovani libovolneho objektu:
+
+- pouze UP/DOWN hlasy
+    - lze zmenit pridanim jinych urls
+- hlasy maji silu podle karmy uzivatele, karma uzivatele je pole 'karma' v uzivatelskem profilu, kazdy uzivatel ma i karma_koeficient, ktery umoznuje rapidni rust karmy treba u adminu
+- hodnoceni se zapocitava do karmy s vahou typu objektu (clanek vs komentar) se zapoctenim degradace dle casu hodnoceni
+- davkove pocitani karmy v nc.ratings.karma
+
