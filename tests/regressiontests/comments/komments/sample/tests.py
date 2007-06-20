@@ -48,11 +48,14 @@ True
 
 >>> import datetime, time, re
 
+# get contenttype id for apples
+>>> apple_ct_id = ContentType.objects.get(name='apple').id
+>>> apple_ct_string = '%d:1' % apple_ct_id
 
 # simple rendering comment form
->>> c = cforms.CommentForm(options={'options':'', 'target':'9:1', 'parent':1,})
+>>> c = cforms.CommentForm(options={'options':'', 'target':apple_ct_string, 'parent':1,})
 >>> sorted(c.fields.keys())
-['content', 'hash', 'options', 'parent', 'target', 'timestamp']
+['content', 'email', 'hash', 'nickname', 'options', 'parent', 'password', 'reg_anonym_sel', 'target', 'timestamp', 'username']
 
 >>> now = datetime.datetime.now()
 >>> now = int(time.mktime(now.timetuple()))
@@ -62,7 +65,7 @@ True
 >>> str(c['timestamp']) == '<input type="hidden" name="timestamp" value="%s" id="id_timestamp" />' % timestamp
 True
 
->>> hash = c.get_hash('', '9:1', timestamp)
+>>> hash = c.get_hash('', apple_ct_string, timestamp)
 >>> str(c['hash']) == '<input type="hidden" name="hash" value="%s" id="id_hash" />' % hash
 True
 
@@ -70,14 +73,15 @@ True
 '<input type="hidden" name="options" id="id_options" />'
 >>> str(c['parent'])
 '<input type="hidden" name="parent" value="1" id="id_parent" />'
->>> str(c['target'])
-'<input type="hidden" name="target" value="9:1" id="id_target" />'
+>>> str(c['target']) == '<input type="hidden" name="target" value="%s" id="id_target" />' % apple_ct_string
+True
 
 
-# data validation
+# data validation - this form uses hash from PREVIOUSLY generated valid form
 >>> c = cforms.CommentForm({'hash': c.fields['hash'].initial, # emulate recieving this form value
-...                          'timestamp': c.fields['timestamp'].initial, # emulate as hash
-...                          'options':'', 'target':'9:1', 'parent':1, 'content':'hehehehe'})
+...                          'timestamp': c.fields['timestamp'].initial, # same emulate as hash
+...                          'options':'', 'target':apple_ct_string, 'parent':1, 'content':'hehehehe',
+...                          'reg_anonym_sel':'AN',})
 >>> c.is_valid()
 True
 >>> newc = c.save()
@@ -85,11 +89,42 @@ True
 >>> cmodels.Comment.objects.all()[2]
 <Comment: comment[3] 'hehehehe ...' on green apple {path:/1/}>
 
+
+# get valid hash
+>>> c = cforms.CommentForm()
+>>> hash = c.get_hash('', apple_ct_string, 1181143017)
+
 # hash is valid for this options, timestamp, target combination, but form is too old
->>> c = cforms.CommentForm({'hash':'e039aeeaed60aad23127063174fa0148', 'timestamp':'1181143017',
-...                          'options':'', 'target':'9:1', 'parent':1, 'content':'hehehehe'})
+>>> c = cforms.CommentForm({'hash':hash, 'timestamp':'1181143017',
+...                          'options':'', 'target':apple_ct_string, 'parent':1,
+...                          'content':'hehehehe',
+...                          'reg_anonym_sel':'AN',})
 >>> c.is_valid()
 False
+>>> c.errors.keys()
+['timestamp']
+
+
+# form with little options
+>>> c = cforms.CommentForm(options={'options':'lo', 'target':apple_ct_string, 'parent':1,})
+>>> sorted(c.fields.keys())
+['content', 'hash', 'options', 'parent', 'password', 'target', 'timestamp', 'username']
+
+
+
+# create test user
+>>> from django.contrib.auth.models import User
+>>> User.objects.all()
+[]
+>>> u = User(username='testuser')
+>>> u.set_password('testpassword')
+>>> u.save()
+>>> User.objects.all()
+[<User: testuser>]
+>>> a = User.objects.get(username='testuser')
+>>> a.check_password('testpassword')
+True
+
 
 
 
@@ -105,4 +140,6 @@ __test__ = {
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
+
+
 
