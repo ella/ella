@@ -1,118 +1,160 @@
-komments_model = r"""
->>> print 'ahoj'
-ahoj
 
->>> from nc.comments import models as cmodels
->>> from komments.sample.models import Apple, Orange
+
+pokus = r"""
 >>> from django.contrib.contenttypes.models import ContentType
 
+>>> from nc.comments import models as cmodels
+>>> from nc.comments import forms  as cforms
+>>> from nc.comments import defaults as cdefaults
+
+>>> from komments.sample import models as tmodels
+
+>>> import pprint, datetime, time
+>>> from django import newforms as forms
+
+
 # few init instances
->>> Orange(cm=10).save()
->>> Orange(cm=20).save()
->>> Apple(color='green').save()
->>> Apple(color='red').save()
+>>> tmodels.Orange(cm=10).save()
+>>> tmodels.Orange(cm=20).save()
+>>> tmodels.Apple(color='green').save()
+>>> tmodels.Apple(color='red').save()
+
+# get apple target string
+>>> apple_ct = ContentType.objects.get(name='apple')
+>>> apple_red   = tmodels.Apple.objects.get(color='red')
+>>> apple_green = tmodels.Apple.objects.get(color='green')
+>>> apple_red_target   = '%d:%d' % (apple_ct.id, apple_red.id)
+>>> apple_green_target = '%d:%d' % (apple_ct.id, apple_green.id)
 
 
+# FORM GENERATION
 
-# get contenttype for model in app
->>> package, module = ('sample', 'apple')
->>> contenttype = ContentType.objects.get(app_label__exact=package, model__exact=module)
->>> contenttype
-<ContentType: apple>
->>> a1 = Apple.objects.get(color='red')
->>> a2 = contenttype.get_object_for_this_type(pk=a1.id)
->>> a1 == a2
+# create empty form - but form without specified target is for nothing
+>>> cform = cforms.CommentForm()
+>>> sorted(cform.fields.keys())
+['content', 'email', 'gonzo', 'nickname', 'options', 'parent', 'password', 'reg_anonym_sel', 'target', 'timestamp', 'username']
+
+# form with target
+>>> INIT_PROPS = {
+...    'target': apple_red_target,
+...}
+>>> cform = cforms.CommentForm(init_props=INIT_PROPS)
+>>> sorted(cform.fields.keys())
+['content', 'email', 'gonzo', 'nickname', 'options', 'parent', 'password', 'reg_anonym_sel', 'target', 'timestamp', 'username']
+
+# form with options
+>>> INIT_PROPS = {
+...    'target': apple_red_target,
+...    'options': 'LO',
+...}
+>>> cform = cforms.CommentForm(init_props=INIT_PROPS)
+>>> sorted(cform.fields.keys())
+['content', 'gonzo', 'options', 'parent', 'password', 'target', 'timestamp', 'username']
+
+>>> cf_unbound = cform
+
+
+# FORM VALIDATION
+
+# too old form
+>>> timestamp = datetime.datetime.now() - datetime.timedelta(0, cdefaults.FORM_TIMEOUT + 10)
+>>> timestamp = int(timestamp.strftime('%s'))
+>>> options = ''
+>>> hash = cform.get_hash(options=options, target=apple_red_target, timestamp=timestamp)
+>>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': apple_red_target,
+... 'reg_anonym_sel': 'AN', 'nickname': 'Jantar', 'content': 'Ahoj lidi.',}
+>>> cf = cforms.CommentForm(DATA)
+>>> sorted(cf.errors.keys()) == ['timestamp']
 True
 
-# try to put a comment on one object
->>> k = cmodels.Comment(target_ct=contenttype, target_id=a1.id, content='comment on red apple')
->>> k.save()
->>> cmodels.Comment.objects.filter(target_ct=contenttype, target_id=a1.id)
-[<Comment: comment[1] 'comment on ...' on red apple {path:/}>]
->>> cmodels.Comment.objects.all()
-[<Comment: comment[1] 'comment on ...' on red apple {path:/}>]
-
-# and to another
->>> package, module = ('sample', 'orange')
->>> contenttype = ContentType.objects.get(app_label__exact=package, model__exact=module)
->>> o_id = Orange.objects.get(cm=10).id
->>> k = cmodels.Comment(target_ct=contenttype, target_id=o_id, content='content on 10kg orange')
->>> k.save()
->>> cmodels.Comment.objects.all()
-[<Comment: comment[1] 'comment on ...' on red apple {path:/}>, <Comment: comment[2] 'content on ...' on 10cm orange {path:/}>]
-
-
-
-# comment forms
->>> from nc.comments import forms as cforms
-
->>> import datetime, time, re
-
-# get contenttype id for apples
->>> apple_ct_id = ContentType.objects.get(name='apple').id
->>> apple_ct_string = '%d:1' % apple_ct_id
-
-# simple rendering comment form
->>> c = cforms.CommentForm(options={'options':'', 'target':apple_ct_string, 'parent':1,})
->>> sorted(c.fields.keys())
-['content', 'email', 'hash', 'nickname', 'options', 'parent', 'password', 'reg_anonym_sel', 'target', 'timestamp', 'username']
-
->>> now = datetime.datetime.now()
->>> now = int(time.mktime(now.timetuple()))
->>> timestamp = c.fields['timestamp'].initial
->>> timestamp - now < 5
-True
->>> str(c['timestamp']) == '<input type="hidden" name="timestamp" value="%s" id="id_timestamp" />' % timestamp
-True
-
->>> hash = c.get_hash('', apple_ct_string, timestamp)
->>> str(c['hash']) == '<input type="hidden" name="hash" value="%s" id="id_hash" />' % hash
-True
-
->>> str(c['options'])
-'<input type="hidden" name="options" id="id_options" />'
->>> str(c['parent'])
-'<input type="hidden" name="parent" value="1" id="id_parent" />'
->>> str(c['target']) == '<input type="hidden" name="target" value="%s" id="id_target" />' % apple_ct_string
+# invalid hash
+>>> timestamp = datetime.datetime.now() - datetime.timedelta(0, cdefaults.FORM_TIMEOUT / 2)
+>>> timestamp = int(timestamp.strftime('%s'))
+>>> options = ''
+>>> hash = 'xxxx'
+>>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': apple_red_target,
+... 'reg_anonym_sel': 'AN', 'nickname': 'Jantar', 'content': 'Ahoj lidi.',}
+>>> cf = cforms.CommentForm(DATA)
+>>> sorted(cf.errors.keys()) == ['gonzo']
 True
 
 
-# data validation - this form uses hash from PREVIOUSLY generated valid form
->>> c = cforms.CommentForm({'hash': c.fields['hash'].initial, # emulate recieving this form value
-...                          'timestamp': c.fields['timestamp'].initial, # same emulate as hash
-...                          'options':'', 'target':apple_ct_string, 'parent':1, 'content':'hehehehe',
-...                          'reg_anonym_sel':'AN',})
->>> c.is_valid()
+# invalid target
+>>> timestamp = datetime.datetime.now() - datetime.timedelta(0, cdefaults.FORM_TIMEOUT / 2)
+>>> timestamp = int(timestamp.strftime('%s'))
+>>> options = ''
+>>> hash = cform.get_hash(options=options, target=apple_red_target, timestamp=timestamp)
+>>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': 'x:x',
+... 'reg_anonym_sel': 'AN', 'nickname': 'Jantar', 'content': 'Ahoj lidi.',}
+>>> cf = cforms.CommentForm(DATA)
+>>> sorted(cf.errors.keys()) == ['__all__', 'gonzo', 'target']
 True
->>> newc = c.save()
-
->>> cmodels.Comment.objects.all()[2]
-<Comment: comment[3] 'hehehehe ...' on green apple {path:/1/}>
 
 
-# get valid hash
->>> c = cforms.CommentForm()
->>> hash = c.get_hash('', apple_ct_string, 1181143017)
+# invalid options, almost same as invalid hash
+>>> timestamp = datetime.datetime.now() - datetime.timedelta(0, cdefaults.FORM_TIMEOUT / 2)
+>>> timestamp = int(timestamp.strftime('%s'))
+>>> options = ''
+>>> hash = cform.get_hash(options=options, target=apple_red_target, timestamp=timestamp)
+>>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': 'x:x',
+... 'reg_anonym_sel': 'AN', 'nickname': 'Jantar', 'content': 'Ahoj lidi.',}
+>>> cf = cforms.CommentForm(DATA)
+>>> sorted(cf.errors.keys()) == ['__all__', 'gonzo', 'target']
+True
 
-# hash is valid for this options, timestamp, target combination, but form is too old
->>> c = cforms.CommentForm({'hash':hash, 'timestamp':'1181143017',
-...                          'options':'', 'target':apple_ct_string, 'parent':1,
-...                          'content':'hehehehe',
-...                          'reg_anonym_sel':'AN',})
->>> c.is_valid()
-False
->>> c.errors.keys()
-['timestamp']
+# missing username, password if reg_anonym_sel is set to RE
+>>> timestamp = datetime.datetime.now() - datetime.timedelta(0, cdefaults.FORM_TIMEOUT / 2)
+>>> timestamp = int(timestamp.strftime('%s'))
+>>> options = ''
+>>> hash = cform.get_hash(options=options, target=apple_red_target, timestamp=timestamp)
+>>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': apple_red_target,
+... 'reg_anonym_sel': 'RE', 'nickname': 'Jantar', 'content': 'Ahoj lidi.',}
+>>> cf = cforms.CommentForm(DATA)
+>>> sorted(cf.errors.keys()) == ['password', 'username']
+True
+
+# missing nickname if reg_anonym_sel is set to AN
+>>> timestamp = datetime.datetime.now() - datetime.timedelta(0, cdefaults.FORM_TIMEOUT / 2)
+>>> timestamp = int(timestamp.strftime('%s'))
+>>> options = ''
+>>> hash = cform.get_hash(options=options, target=apple_red_target, timestamp=timestamp)
+>>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': apple_red_target,
+... 'reg_anonym_sel': 'AN', 'username': 'USER', 'password': 'PASSWORD', 'content': 'Ahoj lidi.',}
+>>> cf = cforms.CommentForm(DATA)
+
+>>> sorted(cf.errors.keys()) == ['nickname']
+True
+
+# save options in db
+>>> yearafter = datetime.datetime.now() + datetime.timedelta(365)
+>>> cformopt = cmodels.CommentOptions(target_ct=apple_ct, target_id=apple_red.id, options='LO', timestamp=yearafter)
+>>> cformopt.save()
+>>> cformopt.options == 'LO'
+True
+
+# invalid options with db check
+>>> timestamp = int(yearafter.strftime('%s')) + 1
+>>> options = ''
+>>> hash = cform.get_hash(options=options, target=apple_red_target, timestamp=timestamp)
+>>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': apple_red_target,
+... 'reg_anonym_sel': 'RE', 'username': 'USER', 'password': 'PASSWORD', 'content': 'Ahoj lidi.',}
+>>> cf = cforms.CommentForm(DATA)
+>>> sorted(cf.errors.keys()) == ['__all__', 'gonzo']
+True
+
+# invalid timestamp with db check
+>>> timestamp = datetime.datetime.now() - datetime.timedelta(0, cdefaults.FORM_TIMEOUT / 2)
+>>> timestamp = int(timestamp.strftime('%s'))
+>>> options = 'LO'
+>>> hash = cform.get_hash(options=options, target=apple_red_target, timestamp=timestamp)
+>>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': apple_red_target,
+... 'reg_anonym_sel': 'RE', 'username': 'USER', 'password': 'PASSWORD', 'content': 'Ahoj lidi.',}
+>>> cf = cforms.CommentForm(DATA)
+>>> sorted(cf.errors.keys()) == ['__all__', 'timestamp']
+True
 
 
-# form with little options
->>> c = cforms.CommentForm(options={'options':'lo', 'target':apple_ct_string, 'parent':1,})
->>> sorted(c.fields.keys())
-['content', 'hash', 'options', 'parent', 'password', 'target', 'timestamp', 'username']
-
-
-
-# create test user
+# user validation and blacklist
 >>> from django.contrib.auth.models import User
 >>> User.objects.all()
 []
@@ -125,6 +167,118 @@ False
 >>> a.check_password('testpassword')
 True
 
+# logged users only discussion and real user but bad password
+>>> timestamp = datetime.datetime.now() - datetime.timedelta(0, cdefaults.FORM_TIMEOUT / 2)
+>>> timestamp = int(timestamp.strftime('%s'))
+>>> options = 'LO'
+>>> target = apple_green_target
+>>> hash = cform.get_hash(options=options, target=target, timestamp=timestamp)
+>>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': target,
+... 'username': 'testuser', 'password': 'TESTPASSWORD', 'content': 'Ahoj lidi.',}
+>>> cf = cforms.CommentForm(DATA)
+>>> cf.is_valid()
+False
+>>> cf.errors
+{'__all__': [u'Invalid user.']}
+
+# bann one user
+>>> u = User(username='banneduser')
+>>> u.set_password('bannedpassword')
+>>> u.save()
+>>> b = cmodels.BannedUser(target_ct=apple_ct, target_id=apple_green.id, user=u)
+>>> b.save()
+
+# bad user
+>>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': target,
+... 'username': 'banneduser', 'password': 'bannedpassword', 'content': 'Ahoj lidi.',}
+>>> cf = cforms.CommentForm(DATA)
+>>> cf.is_valid()
+False
+>>> cf.errors
+{'__all__': [u'Banned user.']}
+
+>>> cf_invalid = cf
+
+# and good password
+>>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': target,
+... 'reg_anonym_sel': 'RE', 'username': 'testuser', 'password': 'testpassword', 'content': 'Ahoj lidi.',}
+>>> cf = cforms.CommentForm(DATA)
+>>> cf.is_valid()
+True
+
+>>> cf_valid = cf
+
+# SAVE()
+
+# try to save invalid form
+>>> cf_invalid.save()
+Traceback (most recent call last):
+  File "<stdin>", line 1, in ?
+Invalid form: you cannot save invalid form
+
+# try to save unbound form
+>>> cf_unbound.save()
+Traceback (most recent call last):
+  File "<stdin>", line 1, in ?
+Invalid form: you cannot save invalid form
+
+# save valid form
+>>> sorted(cf_valid.cleaned_data.keys())
+['content', 'gonzo', 'options', 'parent', 'password', 'target', 'target_ct', 'target_id', 'timestamp', 'user', 'username']
+
+>>> cmodels.Comment.objects.all()
+[]
+
+# emulate fast send clicking
+>>> for i in range(1, 10):
+...     cf_valid.save()
+
+>>> cmodels.Comment.objects.all()
+[<Comment: comment[1] 'Ahoj lidi. ...' on green apple {path:/}>]
+
+>>> cmodels.Comment.objects.get(pk=1).user.username
+'testuser'
+
+# redefine new timeout
+>>> OLD_TIMEOUT = cforms.defaults.POST_TIMEOUT
+>>> cforms.defaults.POST_TIMEOUT = 0.1
+>>> time.sleep(0.5)
+>>> cf_valid.save()
+>>> cmodels.Comment.objects.all()
+[<Comment: comment[1] 'Ahoj lidi. ...' on green apple {path:/}>, <Comment: comment[2] 'Ahoj lidi. ...' on green apple {path:/}>]
+
+# and put it back
+>>> cforms.defaults.POST_TIMEOUT = OLD_TIMEOUT
+
+
+# save comment from unauthorized user
+>>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': target,
+... 'reg_anonym_sel': 'AN', 'nickname': 'testuser', 'email': 'a@a.cz', 'content': 'Hello',}
+>>> cf = cforms.CommentForm(DATA)
+>>> cf.is_valid()
+False
+>>> sorted(cf.errors.keys())
+['password', 'username']
+
+>>> timestamp = datetime.datetime.now() - datetime.timedelta(0, cdefaults.FORM_TIMEOUT / 2)
+>>> timestamp = int(timestamp.strftime('%s'))
+>>> options = ''
+>>> target = apple_green_target
+>>> hash = cform.get_hash(options=options, target=target, timestamp=timestamp)
+>>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': target,
+... 'reg_anonym_sel': 'AN', 'nickname': 'testuser', 'email': 'a@a.cz', 'content': 'Hello',}
+>>> cf = cforms.CommentForm(DATA)
+>>> cf.is_valid()
+True
+>>> cf.save()
+>>> cmodels.Comment.objects.all()
+[<Comment: comment[1] 'Ahoj lidi. ...' on green apple {path:/}>, <Comment: comment[2] 'Ahoj lidi. ...' on green apple {path:/}>, <Comment: comment[3] 'Hello ...' on green apple {path:/}>]
+
+
+# TODO: add validation, if really all the values were saved into DB
+
+
+
 
 
 
@@ -132,8 +286,28 @@ True
 """
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 __test__ = {
-    'komments_model' : komments_model,
+    'pokus' : pokus,
 }
 
 
