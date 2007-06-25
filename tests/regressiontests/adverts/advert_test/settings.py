@@ -1,4 +1,4 @@
-# Django settings for advert_test project.
+# Django settings for adverts_test project.
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -77,6 +77,6 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
-    'nc.advert',
+    'nc.adverts',
     'simple_test',
 )
