@@ -7,3 +7,6 @@ django aplikace obsahujici:
     - ?? sprava profilu ?? - NE - to bude v externich systemech, ktere se diky tomuto
         modulu budou moci navazat na django.contrib.auth.models.User
 - system pro tvorbu url pro navazani na zbytek systemu (templatetag centrum_link)
+
+
+urls musi byt importovany do /
