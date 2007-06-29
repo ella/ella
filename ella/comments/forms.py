@@ -10,8 +10,8 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 
 
-from nc.comments import defaults
-from nc.comments.models import Comment, CommentOptions, BannedUser
+from ella.comments import defaults
+from ella.comments.models import Comment, CommentOptions, BannedUser
 
 from datetime import datetime, timedelta
 

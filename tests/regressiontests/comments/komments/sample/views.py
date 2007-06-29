@@ -7,7 +7,7 @@ from django.template import Context, loader
 from komments.sample.models import Apple, Orange
 from django.contrib.contenttypes.models import ContentType
 
-from nc.comments.forms import CommentForm
+from ella.comments.forms import CommentForm
 
 
 def list_apples(request):

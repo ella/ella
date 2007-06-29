@@ -80,7 +80,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'komments.sample',
-    'nc.comments',
+    'ella.comments',
 )
 
 #CACHE_BACKEND = 'dummy:///'

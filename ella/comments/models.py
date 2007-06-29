@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 
-from nc.comments import defaults
+from ella.comments import defaults
 
 from datetime import datetime
 

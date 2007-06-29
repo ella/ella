@@ -1,5 +1,5 @@
-from nc.comments.models import Comment
-from nc.comments.forms import CommentForm
+from ella.comments.models import Comment
+from ella.comments.forms import CommentForm
 
 from django import template
 from django.template import loader

@@ -3,9 +3,9 @@
 comment_form_test = r"""
 >>> from django.contrib.contenttypes.models import ContentType
 
->>> from nc.comments import models as cmodels
->>> from nc.comments import forms  as cforms
->>> from nc.comments import defaults as cdefaults
+>>> from ella.comments import models as cmodels
+>>> from ella.comments import forms  as cforms
+>>> from ella.comments import defaults as cdefaults
 
 >>> from komments.sample import models as tmodels
 

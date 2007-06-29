@@ -1,4 +1,4 @@
-# mini settings for nc.comments application
+# mini settings for ella.comments application
 # TODO: at the end check for default values from global settings
 
 from django.conf import settings

@@ -7,7 +7,7 @@ if VERSION[2] == 'newforms-admin':
     urlpatterns = patterns('',
         # NewformsAdminBranch
         ('^admin/(.*)', admin.site.root),
-        (r'^comments/', include('nc.comments.urls')),
+        (r'^comments/', include('ella.comments.urls')),
         (r'^test/', include('komments.sample.urls')),
 )
 else:
