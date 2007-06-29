@@ -47,7 +47,7 @@ class ModelWeightManager(models.Manager):
         """
         Clear out the model-weight cache. This needs to happen during database
         flushes to prevent caching of "stale" model weights IDs (see
-        nc.ratings.management.create_model_weights and ModelWeight.save() for where
+        ella.ratings.management.create_model_weights and ModelWeight.save() for where
         this gets called).
 
         Taken from django.contrib.contenttypes.models, thanks.

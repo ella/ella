@@ -2,7 +2,7 @@ from datetime import datetime
 from django.contrib.auth.models import User
 from django.db import models
 
-from nc.ratings.models import RatedManager, INITIAL_USER_KARMA
+from ella.ratings.models import RatedManager, INITIAL_USER_KARMA
 
 class UserProfile(models.Model):
     user = models.ForeignKey(User)

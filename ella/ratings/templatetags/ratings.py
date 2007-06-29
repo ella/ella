@@ -3,7 +3,7 @@ from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 
-from nc.ratings.models import Rating
+from ella.ratings.models import Rating
 register = template.Library()
 
 class RateUrlsNode(template.Node):
@@ -11,7 +11,7 @@ class RateUrlsNode(template.Node):
         self.object, self.up_name, self.down_name =  object, up_name, down_name
 
     def render(self, context):
-        obj = tenmplate.resolve_variable(self.object, context)
+        obj = template.resolve_variable(self.object, context)
         if obj:
             ct = ContentType.objects.get_for_model(obj)
             context[self.up_name] = reverse('rate_up', args=(ct.id, obj.id))
@@ -34,7 +34,7 @@ class RatingNode(template.Node):
         self.object, self.name =  object, name
 
     def render(self, context):
-        obj = tenmplate.resolve_variable(self.object, context)
+        obj = template.resolve_variable(self.object, context)
         if obj:
             context[self.name] = Rating.objects.get_for_object(obj)
         return ''

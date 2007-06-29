@@ -1,6 +1,6 @@
 from django.conf.urls.defaults import *
 
-from nc.ratings.views import *
+from ella.ratings.views import *
 
 urlpatterns = patterns('',
     # for finer-grained system, use plusminus

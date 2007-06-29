@@ -22,7 +22,7 @@ def create_model_weights(app, created_models, verbosity=2):
         created_models: ignored
         verbosity: controls verbosity of the output, if verbosity >= 2, each object saved will be printed out.
     """
-    from nc.ratings.models import ModelWeight, DEFAULT_MODEL_WEIGHT
+    from ella.ratings.models import ModelWeight, DEFAULT_MODEL_WEIGHT
     from django.contrib.contenttypes.models import ContentType
     from django.contrib.auth.models import User
 
@@ -113,7 +113,7 @@ RETURN %s;
 ''' % TIME_COEFICIENT
 
 FUNCTION_EXISTS_MYSQL = 'SELECT COUNT(*) FROM mysql.proc WHERE name = %s;'
-FUNCTION_EXISTS_PSQL = 'SELECT COUNT(*) FROM pg_proc WHERE pronam = %s;'
+FUNCTION_EXISTS_PSQL = 'SELECT COUNT(*) FROM pg_proc WHERE proname = %s;'
 
 if settings.DATABASE_ENGINE.startswith('postgresql'):
     KARMA_GET_TIME_COEFICIENT = KARMA_GET_TIME_COEFICIENT_PSQL

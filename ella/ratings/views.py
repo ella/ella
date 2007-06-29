@@ -8,7 +8,7 @@ from django.utils.translation import gettext as _
 from django.conf import settings
 from django.contrib.sites.models import Site
 
-from nc.ratings.models import *
+from ella.ratings.models import *
 
 current_site = Site.objects.get(id=settings.SITE_ID)
 

@@ -1,5 +1,5 @@
 rating = r'''
->>> from nc.ratings.models import *
+>>> from ella.ratings.models import *
 >>> Rating.objects.all().delete()
 >>> Rating.objects.count()
 0
@@ -54,7 +54,7 @@ True
 '''
 
 template_tags = r'''
->>> from nc.ratings.models import *
+>>> from ella.ratings.models import *
 >>> from rate_simple.models import *
 >>> from django.contrib.contenttypes.models import ContentType
 >>> from django.template import Template, Context
@@ -104,7 +104,7 @@ top_objects = r'''
 >>> expensive_ct = ContentType.objects.get_for_model(expensive_obj)
 
 # clear all ratings and create new ones
->>> from nc.ratings.models import Rating
+>>> from ella.ratings.models import Rating
 >>> Rating.objects.all().delete()
 >>> r = Rating(target_id=cheap_obj.id, target_ct=cheap_ct, amount=1)
 >>> r.save()
@@ -131,7 +131,7 @@ top_objects = r'''
 karma = r'''
 # imports
 >>> from django.contrib.contenttypes.models import ContentType
->>> from nc.ratings.models import Rating, INITIAL_USER_KARMA
+>>> from ella.ratings.models import Rating, INITIAL_USER_KARMA
 >>> from rate_simple.models import *
 >>> from django.test import Client
 
@@ -171,7 +171,7 @@ True
 302
 
 # recalculate the karma
->>> from nc.ratings import karma
+>>> from ella.ratings import karma
 >>> karma.recalculate_karma()
 True
 >>> up = UserProfile.objects.get(user__username='rater2')

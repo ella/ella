@@ -3,7 +3,7 @@ from django.db.models.fields import FieldDoesNotExist
 from django.conf import settings
 from django.contrib.auth.models import SiteProfileNotAvailable
 
-from nc.ratings.models import *
+from ella.ratings.models import *
 
 try:
     profile_model = models.get_model(*settings.AUTH_PROFILE_MODULE.split('.'))
