@@ -11,7 +11,9 @@
 <li>
 <p>#{{forloop.counter}}</p>
 <p>{{ comment }}</p>
-{{ comment.as_html }}
+<div>
+	{{ comment.as_html }}
+</div>
 </li>
 {% endfor %}
 </ul>

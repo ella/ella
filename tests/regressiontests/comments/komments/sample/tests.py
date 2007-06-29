@@ -1,6 +1,6 @@
 
 
-pokus = r"""
+comment_form_test = r"""
 >>> from django.contrib.contenttypes.models import ContentType
 
 >>> from nc.comments import models as cmodels
@@ -64,8 +64,8 @@ pokus = r"""
 >>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': apple_red_target,
 ... 'reg_anonym_sel': 'AN', 'nickname': 'Jantar', 'content': 'Ahoj lidi.',}
 >>> cf = cforms.CommentForm(DATA)
->>> sorted(cf.errors.keys()) == ['timestamp']
-True
+>>> sorted(cf.errors.keys())
+['timestamp']
 
 # invalid hash
 >>> timestamp = datetime.datetime.now() - datetime.timedelta(0, cdefaults.FORM_TIMEOUT / 2)
@@ -75,8 +75,8 @@ True
 >>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': apple_red_target,
 ... 'reg_anonym_sel': 'AN', 'nickname': 'Jantar', 'content': 'Ahoj lidi.',}
 >>> cf = cforms.CommentForm(DATA)
->>> sorted(cf.errors.keys()) == ['gonzo']
-True
+>>> sorted(cf.errors.keys())
+['gonzo']
 
 
 # invalid target
@@ -87,8 +87,8 @@ True
 >>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': 'x:x',
 ... 'reg_anonym_sel': 'AN', 'nickname': 'Jantar', 'content': 'Ahoj lidi.',}
 >>> cf = cforms.CommentForm(DATA)
->>> sorted(cf.errors.keys()) == ['__all__', 'gonzo', 'target']
-True
+>>> sorted(cf.errors.keys())
+['__all__', 'gonzo', 'target']
 
 
 # invalid options, almost same as invalid hash
@@ -99,8 +99,8 @@ True
 >>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': 'x:x',
 ... 'reg_anonym_sel': 'AN', 'nickname': 'Jantar', 'content': 'Ahoj lidi.',}
 >>> cf = cforms.CommentForm(DATA)
->>> sorted(cf.errors.keys()) == ['__all__', 'gonzo', 'target']
-True
+>>> sorted(cf.errors.keys())
+['__all__', 'gonzo', 'target']
 
 # missing username, password if reg_anonym_sel is set to RE
 >>> timestamp = datetime.datetime.now() - datetime.timedelta(0, cdefaults.FORM_TIMEOUT / 2)
@@ -110,8 +110,8 @@ True
 >>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': apple_red_target,
 ... 'reg_anonym_sel': 'RE', 'nickname': 'Jantar', 'content': 'Ahoj lidi.',}
 >>> cf = cforms.CommentForm(DATA)
->>> sorted(cf.errors.keys()) == ['password', 'username']
-True
+>>> sorted(cf.errors.keys())
+['password', 'username']
 
 # missing nickname if reg_anonym_sel is set to AN
 >>> timestamp = datetime.datetime.now() - datetime.timedelta(0, cdefaults.FORM_TIMEOUT / 2)
@@ -122,15 +122,15 @@ True
 ... 'reg_anonym_sel': 'AN', 'username': 'USER', 'password': 'PASSWORD', 'content': 'Ahoj lidi.',}
 >>> cf = cforms.CommentForm(DATA)
 
->>> sorted(cf.errors.keys()) == ['nickname']
-True
+>>> sorted(cf.errors.keys())
+['nickname']
 
 # save options in db
 >>> yearafter = datetime.datetime.now() + datetime.timedelta(365)
 >>> cformopt = cmodels.CommentOptions(target_ct=apple_ct, target_id=apple_red.id, options='LO', timestamp=yearafter)
 >>> cformopt.save()
->>> cformopt.options == 'LO'
-True
+>>> cformopt.options
+'LO'
 
 # invalid options with db check
 >>> timestamp = int(yearafter.strftime('%s')) + 1
@@ -139,8 +139,8 @@ True
 >>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': apple_red_target,
 ... 'reg_anonym_sel': 'RE', 'username': 'USER', 'password': 'PASSWORD', 'content': 'Ahoj lidi.',}
 >>> cf = cforms.CommentForm(DATA)
->>> sorted(cf.errors.keys()) == ['__all__', 'gonzo']
-True
+>>> sorted(cf.errors.keys())
+['__all__', 'gonzo']
 
 # invalid timestamp with db check
 >>> timestamp = datetime.datetime.now() - datetime.timedelta(0, cdefaults.FORM_TIMEOUT / 2)
@@ -150,8 +150,8 @@ True
 >>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': apple_red_target,
 ... 'reg_anonym_sel': 'RE', 'username': 'USER', 'password': 'PASSWORD', 'content': 'Ahoj lidi.',}
 >>> cf = cforms.CommentForm(DATA)
->>> sorted(cf.errors.keys()) == ['__all__', 'timestamp']
-True
+>>> sorted(cf.errors.keys())
+['__all__', 'timestamp']
 
 
 # user validation and blacklist
@@ -307,7 +307,7 @@ True
 
 
 __test__ = {
-    'pokus' : pokus,
+    'comment_form_test': comment_form_test,
 }
 
 

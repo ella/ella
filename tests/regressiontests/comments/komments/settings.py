@@ -83,3 +83,8 @@ INSTALLED_APPS = (
     'nc.comments',
 )
 
+#CACHE_BACKEND = 'dummy:///'
+#CACHE_BACKEND = 'simple:///'
+CACHE_BACKEND = 'locmem:///'
+
+
