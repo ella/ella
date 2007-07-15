@@ -2,38 +2,56 @@ from datetime import datetime
 
 from django.db import models
 from django.contrib import admin
+from django.contrib.contenttypes.models import  ContentType
+from django.utils.timesince import timesince
 
-from ella.core.models import *
+from ella.core.models import Category, Author, Source, Listing
+from ella.core.box import Box
 
 
 class Article(models.Model):
     # Titles
-    title = models.CharField(maxlength=255)
-    upper_title = models.CharField(maxlength=255, blank=True)
-    slug = models.SlugField()
+    title = models.CharField(_('Title'), maxlength=255)
+    upper_title = models.CharField(_('Upper title'), maxlength=255, blank=True)
+    slug = models.CharField(_('Slug'), maxlength=255)
+
     # Contents
-    perex = models.TextField()
-    content = models.TextField()
-#    tags = models.ForeignKey()
-#    related = models.ForeignKey()
-    # Publication and priorities
-    published = models.DateTimeField(default=datetime.now, verbose_name=_("Publication Date"))
-    updated = models.DateTimeField(blank=True)
+    perex = models.TextField(_('Perex'))
+    created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)
+    updated = models.DateTimeField(_('Updated'), blank=True, null=True)
+
     # Authors and Sources
-    author = models.ManyToManyField(Author)
-    source = models.ForeignKey(Source, blank=True, null=True)
-#    status = models
-    # Meta
-#    added_by = models.ForeignKey()
-#    modified_by = models.ForeignKey()
+    authors = models.ManyToManyField(Author, verbose_name=_('Authors'))
+    source = models.ForeignKey(Source, blank=True, null=True, verbose_name=_('Source'))
+    category = models.ForeignKey(Category, verbose_name=_('Category'))
+
+    @property
+    def main_listing(self):
+        from ella.core.cache import get_cached_object
+        return get_cached_object(
+                ContentType.objects.get_for_model(Listing),
+                target_ct=ContentType.objects.get_for_model(Article),
+                target_id=self.id
+)
+
+    def Box(self, box_type, nodelist):
+        return Box(self, box_type, nodelist)
+
+
+
+    class Meta:
+        verbose_name = _('Article')
+        verbose_name_plural = _('Articles')
 
     def __str__(self):
         return self.title
 
     def article_age(self):
-        return timesince(self.published)
-        #return (datetime.now() - self.published).days
-    article_age.short_description = _("Article Age")
+        return timesince(self.created)
+    article_age.short_description = _('Article Age')
+
+    def get_absolute_url(self):
+        return self.main_listing.get_absolute_url()
 
 def parse_nodelist(nodelist):
     for node in nodelist:
@@ -44,33 +62,40 @@ def parse_nodelist(nodelist):
 
 
 class ArticleContents(models.Model):
-    article = models.ForeignKey(Article)
-    title = models.CharField(maxlength=200)
-    content = models.TextField()
+    article = models.ForeignKey(Article, verbose_name=_('Article'))
+    title = models.CharField(_('Title'), maxlength=200, blank=True)
+    content = models.TextField(_('Content'))
 
     def save(self):
         from django import template
+        from ella.core.templatetags import core
         # parse content, discover dependencies
-        t = template.Template('{% load articles %}' + self.content)
-        for node in parse_nodelist(t.nodelist):
-            if isinstance(node, BoxTag):
-                report_dep()
-
+        #t = template.Template('{% load core %}' + self.content)
+        #for node in parse_nodelist(t.nodelist):
+        #    if isinstance(node, core.BoxTag):
+        #        report_dep()
         super(ArticleContents, self).save()
+
+    class Meta:
+        verbose_name = _('Article content')
+        verbose_name_plural = _('Article contents')
+        order_with_respect_to = 'article'
+
     def __str__(self):
         return self.title
 
 class ArticleOptions(admin.ModelAdmin):
-    list_display = ('title', 'published', 'article_age')
-    ordering = ('-published',)
+    #raw_id_fields = ('authors',)
+    list_display = ('title', 'created', 'article_age',)
+    ordering = ('-created',)
     fields = (
-        (_("Article Heading"), {'fields': ('title', 'upper_title', 'published', 'updated', 'slug')}),
-        (_("Article Contents"), {'fields': ('perex', 'content')}),
-        (_("Metadata"), {'fields': ('author', 'source')})
+        (_("Article Heading"), {'fields': ('title', 'upper_title', 'updated', 'slug')}),
+        (_("Article Contents"), {'fields': ('perex',)}),
+        (_("Metadata"), {'fields': ('category', 'authors', 'source',)})
 )
-    list_filter = ('published',)
-    search_fields = ('title', 'perex')
-    inlines = [admin.TabularInline(ArticleContents, extra=1)]
+    list_filter = ('created',)
+    search_fields = ('title', 'perex',)
+    inlines = (admin.TabularInline(ArticleContents, extra=3),)
     prepopulated_fields = {'slug' : ('title',)}
 
 admin.site.register(Article, ArticleOptions)

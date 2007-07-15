@@ -1,10 +1,10 @@
-import string
 from django import template
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, ImproperlyConfigured
 
 from ella.core.models import Listing
+from ella.core.box import BOX_INFO
 
 register = template.Library()
 
@@ -23,7 +23,7 @@ class ListingNode(template.Node):
         context[self.var_name] = Listing.objects.get_listing(**self.parameters)
         return ''
 
-@register.tag()
+@register.tag
 def listing(parser, token):
     var_name, parameters, parameters_to_resolve = listing_parse(token.split_contents())
     return ListingNode(var_name, parameters, parameters_to_resolve)
@@ -68,9 +68,9 @@ def listing_parse(input):
     if input[o] == 'with':
         o=o+1
         if input[o] == 'children':
-            params['children'] = 1
+            params['children'] = Listing.objects.IMMEDIATE
         elif input[o] == 'descendents':
-            params['children'] = 2
+            params['children'] = Listing.obects.ALL
         else:
             raise templpate.TemplateSyntaxError, "%r tag's argument 'with' required specification (with children|with descendents)" % input[0]
         o=o+1
@@ -94,8 +94,8 @@ class BoxNode(template.Node):
         self.obj, self.box_type, self.nodelist = obj, box_type, nodelist
 
     def render(self, context):
-        if isinstance(self.obj, basestring)
-            obj = template.resolve_variable(self.obj)
+        if isinstance(self.obj, basestring):
+            obj = template.resolve_variable(self.obj, context)
         else:
             obj = self.obj
 
@@ -109,7 +109,7 @@ class BoxNode(template.Node):
         # render the box itself
         box.prepare(context)
         # set the name of this box so that its children can pick up the dependencies
-        box_key = box.get_key()
+        box_key = box.get_cache_key()
         context[BOX_INFO] = (obj, box_key)
         # render the box
         result = box.render()
@@ -118,7 +118,7 @@ class BoxNode(template.Node):
 
         if BOX_INFO in context:
             # record dependecies
-            Dependency.objects.get_or_create(obj, box_key, *context[BOX_INFO],)
+            Dependency.objects.get_or_create(obj, box_key, *context[BOX_INFO])
         return result
 
 @register.tag('box')
@@ -154,6 +154,7 @@ def do_box(parser, token):
             raise template.TemplateSyntaxError, "Given object doesn't support Boxing."
 
     nodelist = parser.parse(('end' + bits[0],))
+    parser.delete_first_token()
 
     return BoxNode(obj, bits[1], nodelist)
 

@@ -114,17 +114,8 @@ class BannedUser(models.Model):
 from django import VERSION
 from django.contrib import admin
 
-if VERSION[2] == 'newforms-admin':
-    # TODO: iterable does not work
-    # issubclass([], Model) in newforms-admin/django/contrib/admin/sites.py on line 86
-    # makes no sense
-    admin.site.register([Comment, BannedUser, CommentOptions])
-
-#    admin.site.register(Comment)
-#    admin.site.register(CommentOptions)
-#    admin.site.register(BannedUser)
-else:
-    # smazat vsechny class Admin
-    pass
+admin.site.register(Comment)
+admin.site.register(BannedUser)
+admin.site.register(CommentOptions)
 
 
