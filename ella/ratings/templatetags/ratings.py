@@ -21,7 +21,16 @@ class RateUrlsNode(template.Node):
 @register.tag('rate_urls')
 def do_rate_urls(parser, token):
     """
-    {% rate_urls for OBJ as rate_up rate_down %}
+    Generate absolute urls for rating the given model up or down and store them in context.
+
+    Usage::
+
+        {% rate_urls for OBJ as var_up var_down %}
+
+    Examples::
+
+        {% rate_urls for object as url_up url_down %}
+        <a href="{{url_up}}">+</a> <a href="{{url_down}}">-</a>
     """
     bits = token.split_contents()
     if len(bits) != 6 or bits[1] != 'for' or bits[3] != 'as':
@@ -42,7 +51,16 @@ class RatingNode(template.Node):
 @register.tag('rating')
 def do_rate_urls(parser, token):
     """
-    {% rating for OBJ as rating %}
+    Get rating for the given object and store it in context under given name.
+
+    Usage::
+
+        {% rating for OBJ as VAR %}
+
+    Examples::
+
+        {% rating for object as object_rating %}
+        object {{object}} has rating of {{object_rating}}
     """
     bits = token.split_contents()
     if len(bits) != 5 or bits[1] != 'for' or bits[3] != 'as':
@@ -62,7 +80,22 @@ class TopRatedNode(template.Node):
 @register.tag('top_rated')
 def do_top_rated(parser, token):
     """
-    {% top_rated 5 [app.model ...] as var %}
+    Get list of COUNT top rated objects of given model and store them in context under given name.
+
+    Usage::
+
+        {% top_rated 5 [app.model ...] as var %}
+
+    Example::
+
+        {% top_rated 10 as top_rated_objects %}
+        {% for obj in top_rated_objects %}   ...   {% endfor %}
+
+        {% top_rated 10 articles.article as top_articles %}
+        {% for article in top_articles %}   ...   {% endfor %}
+
+        {% top_rated 10 articles.article photos.photo as top_objects %}
+        {% for obj in top_objects %}   ...   {% endfor %}
     """
     bits = token.split_contents()
     if len(bits) < 3 or bits[-2] != 'as':

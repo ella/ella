@@ -28,16 +28,16 @@ class Article(models.Model):
     @property
     def main_listing(self):
         from ella.core.cache import get_cached_object
-        return get_cached_object(
+        if not hasattr(self, '_main_listing'):
+            self._main_listing = get_cached_object(
                 ContentType.objects.get_for_model(Listing),
                 target_ct=ContentType.objects.get_for_model(Article),
                 target_id=self.id
 )
+        return self._main_listing
 
     def Box(self, box_type, nodelist):
         return Box(self, box_type, nodelist)
-
-
 
     class Meta:
         verbose_name = _('Article')

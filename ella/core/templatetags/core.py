@@ -25,6 +25,40 @@ class ListingNode(template.Node):
 
 @register.tag
 def listing(parser, token):
+    """
+    Tag that will obtain listing of top (priority-wise) objects for a given category and store them in context under given name.
+
+    Usage::
+
+        {% listing <limit>[ from <offset>][of <app.model>[, <app.model>[, ...]]][ for <category>][ with [immediate] subcategories] as <result> %}
+
+    Parameters:
+
+        ==================================  ================================================
+        Option                              Description
+        ==================================  ================================================
+        ``limit``                           Number of objects to retrieve.
+        ``from offset``                     Starting with number (1-based), starts from first
+                                            if no offset specified.
+        ``of app.model, ...``               List of allowed models, all if omitted.
+        ``for category``                    Category of the listing, all categories if not
+                                            specified. Can be either string (slug), digit (id)
+                                            or variable containing a Category object.
+        ``with [immediate] subcategories``  Include descendants of the specified category. If
+                                            ``immediate`` specified, include just the direct
+                                            children. Use just the category itself if not
+                                            specified.
+        ``as result``                       Store the resulting list in context under given
+                                            name.
+        ==================================  ================================================
+
+    Examples::
+
+        {% listing 10 of articles.article for "home_page" as obj_list %}
+        {% listing 10 of articles.article for category with subcategories as obj_list %}
+        {% listing 10 from 10 of articles.article as obj_list %}
+        {% listing 10 of articles.article, photos.photo for 1 as obj_list %}
+    """
     var_name, parameters, parameters_to_resolve = listing_parse(token.split_contents())
     return ListingNode(var_name, parameters, parameters_to_resolve)
 
@@ -125,7 +159,25 @@ class BoxNode(template.Node):
 def do_box(parser, token):
     """
     Tag Node representing our idea of a reusable box. It can handle multiple paramters in its body, that can
-    contain other django template. The boxing facility keeps track of box dependencies and allows them to
+    contain other django template. The boxing facility keeps track of box dependencies which allows it to invalidate
+    the cache of a parent box when the box itself is being invalidated.
+
+    The object is passed in context as ``object`` when rendering the box parameters.
+
+    Usage::
+
+        {% box BOXTYPE for APP_LABEL.MODEL_NAME with FIELD VALUE %}
+        {% box BOXTYPE for var_name %}
+
+    Examples::
+
+        {% box home_listing for articles.article with slug "some-slug" %}{% endbox %}
+
+        {% box home_listing for articles.article with pk object_id %}
+            template_name : {{object.get_box_template}}
+        {% endbox %}
+
+        {% box home_listing for article %}{% endbox %}
     """
     bits = token.split_contents()
 

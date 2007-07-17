@@ -185,11 +185,12 @@ class Listing(models.Model):
     target_ct = models.ForeignKey(ContentType)
     target_id = models.IntegerField()
 
-    @property
     def target(self):
         if not hasattr(self, '_target'):
             self._target = get_cached_object(self.target_ct, pk=self.target_id)
         return self._target
+    target.short_description = _('Listed object')
+    target = property(target)
 
     category = models.ForeignKey(Category, db_index=True)
 
@@ -244,6 +245,7 @@ class Listing(models.Model):
         verbose_name = _('Listing')
         verbose_name_plural = _('Listings')
         ordering = ('-publish_from',)
+        unique_together = (('category', 'target_id', 'target_ct'),)
 
 class Dependency(models.Model):
     target_ct = models.ForeignKey(ContentType, related_name='dependency_for_set')
@@ -275,6 +277,8 @@ class Dependency(models.Model):
 import widgets
 class ListingOptions(admin.ModelAdmin):
     raw_id_fields = ('target_id',)
+    list_display = ('target', 'category', 'publish_from',)
+    list_filter = ('publish_from',)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name in ('target_ct',):

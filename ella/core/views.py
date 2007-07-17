@@ -112,7 +112,7 @@ def home(request):
 )
 
 def category_detail(request, category):
-    cat = get_cached_object_or_404(CATEGORY_CT, tree_path=category)
+    cat = get_cached_object_or_404(CATEGORY_CT, tree_path=category, tree_parent__isnull=False)
     return render_to_response(
             (
                 'category/%s/detail.html' % (cat.tree_path),
