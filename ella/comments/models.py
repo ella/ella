@@ -29,7 +29,7 @@ class Comment(models.Model):
     # comment content
     content = models.TextField(_('comment content'), maxlength=defaults.COMMENT_LENGTH)
     # comment picture
-    image = models.ImageField(_('image answer'), upload_to='comment_image', blank=True)
+    image = models.ImageField(_('image answer'), upload_to='comment_image', blank=True, null=True)
 
     # tree structure
     parent = models.ForeignKey('self', verbose_name=_('tree structure parent'), blank=True, null=True)
@@ -83,12 +83,12 @@ class Comment(models.Model):
             self.path = parent.path
         super(Comment, self).save()
 
-    def __str__(self):
+    def __unicode__(self):
         if self.id:
-            return "comment[%d] '%s ...' on %s {path:%s}" % (self.id, self.content[:10],
+            return u"comment[%d] '%s ...' on %s {path:%s}" % (self.id, self.content[:10],
                     self.target_ct.get_object_for_this_type(pk=self.target_id), self.path)
         else:
-            return "unsaved comment"
+            return u"unsaved comment"
 
     class Admin:
         pass

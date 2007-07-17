@@ -28,24 +28,23 @@ CATEGORY_CT = ContentType.objects.get_for_model(Category)
 
 def object_detail(request, category, year, month, day, content_type, slug):
     ct = get_content_type(content_type)
-    try:
-        date = datetime.date(int(year), int(month), int(day))
-    except ValueError:
-        raise Http404
 
     cat = get_cached_object_or_404(CATEGORY_CT, tree_path=category)
     obj = get_cached_object_or_404(ct, slug=slug)
     try:
-        listing = get_cached_object(LISTING_CT, target_ct=ct, target_id=obj.id, category=cat)
-    except Listing.DoesNotExist:
-        listing = None
-        if Listing.objects.filter(target_ct=ct, target_id=obj.id):
+        date = datetime.date(int(year), int(month), int(day))
+        listing = get_cached_object_or_404(LISTING_CT, target_ct=ct, target_id=obj.id, category=cat)
+        if listing.publish_from.date() != date:
             raise Http404
+
+    except ValueError:
+        # incorrect date
+        raise Http404
 
     return render_to_response(
             (
-                'category/%s/%s/%s_detail.html' % (cat.tree_path, content_type, slug),
-                'category/%s/%s/base_detail.html' % (cat.tree_path, content_type),
+                'category/%s/%s.%s/%s_detail.html' % (cat.tree_path, ct.app_label, ct.model, slug),
+                'category/%s/%s.%s/base_detail.html' % (cat.tree_path, ct.app_label, ct.model),
                 'category/%s/base_detail.html' % (cat.tree_path),
                 'core/object_detail.html',
 ),
@@ -60,34 +59,42 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
     kwa = {}
     if day and month and year:
         try:
-            kwa['publish_from'] = datetime.date(int(year), int(month), int(day))
+            datetime.date(int(year), int(month), int(day))
         except ValueError:
             raise Http404
-    elif month:
+    if day:
+        kwa['publish_from__day'] = int(day)
+    if month:
+        month = int(month)
+        if month > 12:
+            raise Http404
         kwa['publish_from__month'] = month
-    elif year:
+    if year:
         kwa['publish_from__year'] = year
 
     if category:
-        kwa['category'] = get_cached_object_or_404(CATEGORY_CT, slug=category)
-
-    if content_type:
-        kwa['content_types'] = get_content_type(content_type)
         cat = get_cached_object_or_404(CATEGORY_CT, tree_path=category)
+        kwa['category'] = cat
     else:
         cat = False
+
+    if content_type:
+        ct = get_content_type(content_type)
+        kwa['content_types'] = [ ct ]
+    else:
+        ct = False
 
     # TODO: pagination
     listings = Listing.objects.get_listing(**kwa)
 
     template_list = []
-    if cat and content_type:
-        template_list.append('category/%s/%s/list.html' % (cat.tree_path, content_type))
-    if content_type:
-        template_list.append('core/content_type/%s/list.html' % content_type)
+    if cat and ct:
+        template_list.append('category/%s/%s.%s/base_list.html' % (cat.tree_path, ct.app_label, ct.model))
+    if ct:
+        template_list.append('content_type/%s.%s/base_list.html' % (ct.app_label, ct.model))
     if cat:
         template_list.append('category/%s/base_list.html' % cat.tree_path)
-    template_list.append('core/list.html')
+    template_list.append('core/base_list.html')
 
     return render_to_response(template_list, {'listings' : listings}, context_instance=RequestContext(request))
 

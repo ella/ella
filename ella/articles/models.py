@@ -43,7 +43,7 @@ class Article(models.Model):
         verbose_name = _('Article')
         verbose_name_plural = _('Articles')
 
-    def __str__(self):
+    def __unicode__(self):
         return self.title
 
     def article_age(self):
@@ -81,7 +81,7 @@ class ArticleContents(models.Model):
         verbose_name_plural = _('Article contents')
         order_with_respect_to = 'article'
 
-    def __str__(self):
+    def __unicode__(self):
         return self.title
 
 class ArticleOptions(admin.ModelAdmin):

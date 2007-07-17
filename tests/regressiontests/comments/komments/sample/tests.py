@@ -237,7 +237,7 @@ Invalid form: you cannot save invalid form
 [<Comment: comment[1] 'Ahoj lidi. ...' on green apple {path:/}>]
 
 >>> cmodels.Comment.objects.get(pk=1).user.username
-'testuser'
+u'testuser'
 
 # redefine new timeout
 >>> OLD_TIMEOUT = cforms.defaults.POST_TIMEOUT

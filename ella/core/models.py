@@ -1,4 +1,3 @@
-import string
 from datetime import datetime, timedelta
 
 from django.db import models, transaction
@@ -79,11 +78,11 @@ class Category(models.Model):
         if old_tree_path != self.tree_path:
             children = Category.objects.filter(tree_path__startswith=old_tree_path)
             for child in children:
-                child.tree_path = string.replace(child.tree_path, old_tree_path, self.tree_path)
+                child.tree_path = child.tree_path.replace(old_tree_path, self.tree_path)
                 child.save()
 
     def draw_title(self):
-        return ('&nbsp;&nbsp;' * string.count(self.tree_path, '/', 1)) + self.title
+        return ('&nbsp;&nbsp;' * self.tree_path.count('/')) + self.title
     draw_title.allow_tags = True
 
     class Meta:

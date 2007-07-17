@@ -150,8 +150,8 @@ class Rating(models.Model):
 
     objects = RatingManager()
 
-    def __str__(self):
-        return '%s points for %s' % (self.amount, self.target)
+    def __unicode__(self):
+        return u'%s points for %s' % (self.amount, self.target)
 
     class Meta:
         verbose_name = _('Rating')
@@ -220,7 +220,7 @@ from django.contrib import admin
 
 class RatingOptions(admin.ModelAdmin):
     list_filter = ('time', 'target_ct',)
-    list_display = ('__str__', 'time', 'amount', 'user',)
+    list_display = ('__unicode__', 'time', 'amount', 'user',)
 
 class ModelWeightOptions(admin.ModelAdmin):
     list_filter = ('content_type',)

@@ -66,11 +66,11 @@ template_tags = r'''
 
 >>> t = Template('{% load ratings %}{% rating for obj as rating %}{{rating}}')
 >>> t.render(Context({'obj' : cheap_obj}))
-'0'
+u'0'
 >>> r = Rating(target_ct=cheap_ct, target_id=cheap_obj.id, amount=6)
 >>> r.save()
 >>> t.render(Context({'obj' : cheap_obj}))
-'6'
+u'6'
 >>> t = Template('{% load ratings %}{% rate_urls for obj as rate_up rate_down %}{{rate_up}} {{rate_down}}')
 >>> t.render(Context({'obj' : cheap_obj})) == '/ratings/rate/%(ct_id)s/%(obj_id)s/up/ /ratings/rate/%(ct_id)s/%(obj_id)s/down/' % {
 ...     'obj_id' : cheap_obj.id,
@@ -79,15 +79,15 @@ template_tags = r'''
 True
 >>> t = Template('{% load ratings %}{% top_rated 5 as top %}{% for rat in top %}{{rat.0}}: {{rat.1}}\n{% endfor %}')
 >>> t.render(Context())
-'CheapSampleModel object: 6\n'
+u'CheapSampleModel object: 6\n'
 
 >>> t = Template('{% load ratings %}{% top_rated 5 rate_simple.expensivesamplemodel as top %}{{top}}')
 >>> t.render(Context())
-'[]'
+u'[]'
 
 >>> t = Template('{% load ratings %}{% top_rated 5 rate_simple.expensivesamplemodel rate_simple.cheapsamplemodel as top %}{% for rat in top %}{{rat.0}}: {{rat.1}}\n{% endfor %}')
 >>> t.render(Context())
-'CheapSampleModel object: 6\n'
+u'CheapSampleModel object: 6\n'
 
 >>> r.delete()
 '''
