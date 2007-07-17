@@ -30,6 +30,8 @@ class Author(models.Model):
 
     class Meta:
         ordering=('name',)
+        verbose_name = _('Author')
+        verbose_name_plural = _('Authors')
 
 class Source(models.Model):
     name = models.CharField(_('Name'), maxlength=200)
@@ -38,6 +40,11 @@ class Source(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    class Meta:
+        verbose_name = _('Source')
+        verbose_name_plural = _('Sources')
+        ordering = ('name',)
 
 CATEGORY_CACHE = {}
 class CategoryManager(CurrentSiteManager):
@@ -185,12 +192,11 @@ class Listing(models.Model):
     target_ct = models.ForeignKey(ContentType)
     target_id = models.IntegerField()
 
+    @property
     def target(self):
         if not hasattr(self, '_target'):
             self._target = get_cached_object(self.target_ct, pk=self.target_id)
         return self._target
-    target.short_description = _('Listed object')
-    target = property(target)
 
     category = models.ForeignKey(Category, db_index=True)
 

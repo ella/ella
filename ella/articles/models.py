@@ -42,6 +42,7 @@ class Article(models.Model):
     class Meta:
         verbose_name = _('Article')
         verbose_name_plural = _('Articles')
+        ordering = ('-created',)
 
     def __unicode__(self):
         return self.title
@@ -66,6 +67,7 @@ class ArticleContents(models.Model):
     title = models.CharField(_('Title'), maxlength=200, blank=True)
     content = models.TextField(_('Content'))
 
+    # @transaction.comit_on_success
     def save(self):
         from django import template
         from ella.core.templatetags import core
@@ -89,8 +91,8 @@ class ArticleOptions(admin.ModelAdmin):
     list_display = ('title', 'created', 'article_age',)
     ordering = ('-created',)
     fields = (
-        (_("Article Heading"), {'fields': ('title', 'upper_title', 'updated', 'slug')}),
-        (_("Article Contents"), {'fields': ('perex',)}),
+        (_("Article heading"), {'fields': ('title', 'upper_title', 'updated', 'slug')}),
+        (_("Article contents"), {'fields': ('perex',)}),
         (_("Metadata"), {'fields': ('category', 'authors', 'source',)})
 )
     list_filter = ('created',)
