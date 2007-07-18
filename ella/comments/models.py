@@ -29,7 +29,7 @@ class Comment(models.Model):
     # comment content
     content = models.TextField(_('comment content'), maxlength=defaults.COMMENT_LENGTH)
     # comment picture
-    image = models.ImageField(_('image answer'), upload_to='comment_image', blank=True, null=True)
+#    image = models.ImageField(_('image answer'), upload_to='comment_image', blank=True, null=True)
 
     # tree structure
     parent = models.ForeignKey('self', verbose_name=_('tree structure parent'), blank=True, null=True)
