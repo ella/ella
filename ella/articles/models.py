@@ -4,6 +4,7 @@ from django.db import models
 from django.contrib import admin
 from django.contrib.contenttypes.models import  ContentType
 from django.utils.timesince import timesince
+from django.utils.translation import ugettext_lazy as _
 
 from ella.core.models import Category, Author, Source, Listing
 from ella.core.box import Box
@@ -35,6 +36,19 @@ class Article(models.Model):
                 target_id=self.id
 )
         return self._main_listing
+
+    @property
+    def content(self):
+        if not hasattr(self, '_content'):
+            self._content = self.articlecontents_set.all()[0]
+        return self._content
+
+    @property
+    def contents(self):
+        if not hasattr(self, '_contents'):
+            self._contents = list(self.articlecontents_set.all())
+        return self._contents
+
 
     def Box(self, box_type, nodelist):
         return Box(self, box_type, nodelist)

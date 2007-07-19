@@ -9,9 +9,11 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 
 from ella.ratings.models import *
+from ella.core.cache import get_cached_object_or_404
 
-current_site = Site.objects.get(id=settings.SITE_ID)
+current_site = Site.objects.get_cuurent()
 
+CONTENT_TYPE_CT = ContentType.objects.get_for_model(ContentType)
 def rate(request, content_type_id, object_id, plusminus=1):
     """
     Add a simple up/down vote for a given object.
@@ -27,10 +29,12 @@ def rate(request, content_type_id, object_id, plusminus=1):
     Raises:
         Http404 if no content_type or model is associated with the given IDs
     """
-    ct = get_object_or_404(ContentType, pk=content_type_id)
-    target = get_object_or_404(ct.model_class(), pk=object_id)
+    ct = get_cached_object_or_404(CONTENT_TYPE_CT, pk=content_type_id)
+    target = get_cached_object_or_404(ct, pk=object_id)
 
-    if hasattr(target, 'get_absolute_url'):
+    if 'next' in request.GET and request.GET['next'].startswith('/'):
+        url = request.GET['next']
+    elif hasattr(target, 'get_absolute_url'):
         url = target.get_absolute_url()
     else:
         url = request.META.get('HTTP_REFERER', '/')
@@ -55,7 +59,7 @@ def rate(request, content_type_id, object_id, plusminus=1):
         profile = request.user.get_profile()
         kwa['amount'] = getattr(profile, 'karma', INITIAL_USER_KARMA)
 
-    kwa['amount'] = kwa['amount'] * plusminus
+    kwa['amount'] *= plusminus
 
     if request.META.has_key('REMOTE_ADDR'):
         kwa['ip_address'] = request.META['REMOTE_ADDR']

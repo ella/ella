@@ -12,6 +12,7 @@ from django.contrib.contenttypes import generic
 from django.contrib.sites.managers import CurrentSiteManager
 from django.contrib.sites.models import Site
 from django.template.defaultfilters import slugify
+from django.utils.translation import ugettext_lazy as _
 
 from ella.core.cache import get_cached_object
 
