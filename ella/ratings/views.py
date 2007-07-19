@@ -1,20 +1,17 @@
 from datetime import datetime, timedelta
 
-from django.contrib.contenttypes.models import ContentType
-from django.shortcuts import get_object_or_404
-from django.http import HttpResponseRedirect
-# gettext_lazy is not needed
-from django.utils.translation import gettext as _
-from django.conf import settings
+from django.http import HttpResponseRedirect, Http404
+from django.utils.translation import ugettext as _
 from django.contrib.sites.models import Site
+from django.views.decorators.http import require_POST
 
 from ella.ratings.models import *
-from ella.core.cache import get_cached_object_or_404
+from ella.ratings.forms import RateForm
 
-current_site = Site.objects.get_cuurent()
+current_site = Site.objects.get_current()
 
-CONTENT_TYPE_CT = ContentType.objects.get_for_model(ContentType)
-def rate(request, content_type_id, object_id, plusminus=1):
+@require_POST
+def rate(request, plusminus=1):
     """
     Add a simple up/down vote for a given object.
     redirect to object's get_absolute_url() on success.
@@ -22,15 +19,23 @@ def rate(request, content_type_id, object_id, plusminus=1):
     More granularity can be achieved via setting plusminus to something else than +/-1.
 
     Params:
-        content_type_id: model's content_type
-        object_id: id of the target object
         plusminus: rating itself
+
+    Form data:
+        POST:
+            ella.ratings.forms.RateForm
+        GET:
+            next: url to redirect to after successful attempt
 
     Raises:
         Http404 if no content_type or model is associated with the given IDs
     """
-    ct = get_cached_object_or_404(CONTENT_TYPE_CT, pk=content_type_id)
-    target = get_cached_object_or_404(ct, pk=object_id)
+    form = RateForm(request.POST)
+    if not form.is_valid():
+        raise Http404
+
+    ct = form.cleaned_data['content_type']
+    target = form.cleaned_data['target']
 
     if 'next' in request.GET and request.GET['next'].startswith('/'):
         url = request.GET['next']
@@ -65,7 +70,7 @@ def rate(request, content_type_id, object_id, plusminus=1):
         kwa['ip_address'] = request.META['REMOTE_ADDR']
 
     # do the rating
-    rt = Rating(target_ct_id=content_type_id, target_id=object_id, **kwa)
+    rt = Rating(target_ct_id=ct.id, target_id=target.id, **kwa)
     rt.save()
 
     # update anti-spam
@@ -88,6 +93,5 @@ def rate(request, content_type_id, object_id, plusminus=1):
                 domain=current_site.domain,
                 secure=None
 )
-
     return response
 

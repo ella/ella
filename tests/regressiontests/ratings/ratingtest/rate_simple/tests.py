@@ -23,7 +23,7 @@ rating = r'''
 >>> cl = Client()
 
 # rate cheap model up anonymously
->>> resp = cl.get('/ratings/rate/%s/%s/up/' % (cheap_ct.id, cheap_obj.id))
+>>> resp = cl.post('/ratings/rate/up/', {'content_type' : cheap_ct.id, 'target' : cheap_obj.id})
 >>> resp.status_code
 302
 >>> Rating.objects.get_for_object(cheap_obj) == ANONYMOUS_KARMA
@@ -31,7 +31,7 @@ True
 >>> csm = CheapSampleModel.rated.all()[0]
 >>> csm.rating == ANONYMOUS_KARMA
 True
->>> resp = cl.get('/ratings/rate/%s/%s/down/' % (cheap_ct.id, cheap_obj.id))
+>>> resp = cl.post('/ratings/rate/down/', {'content_type' : cheap_ct.id, 'target' : cheap_obj.id})
 >>> resp.status_code
 302
 
@@ -41,7 +41,7 @@ True
 
 # start with new client to erase cookie
 >>> cl = Client()
->>> resp = cl.get('/ratings/rate/%s/%s/down/' % (cheap_ct.id, cheap_obj.id))
+>>> resp = cl.post('/ratings/rate/down/', {'content_type' : cheap_ct.id, 'target' : cheap_obj.id})
 >>> resp.status_code
 302
 >>> int(Rating.objects.get_for_object(cheap_obj))
@@ -71,11 +71,8 @@ u'0'
 >>> r.save()
 >>> t.render(Context({'obj' : cheap_obj}))
 u'6'
->>> t = Template('{% load ratings %}{% rate_urls for obj as rate_up rate_down %}{{rate_up}} {{rate_down}}')
->>> t.render(Context({'obj' : cheap_obj})) == '/ratings/rate/%(ct_id)s/%(obj_id)s/up/ /ratings/rate/%(ct_id)s/%(obj_id)s/down/' % {
-...     'obj_id' : cheap_obj.id,
-...     'ct_id' : cheap_ct.id
-...}
+>>> t = Template('{% load ratings %}{% rate_form for obj as rate_form rate_up rate_down %}{{rate_form}} {{rate_up}} {{rate_down}}')
+>>> t.render(Context({'obj' : cheap_obj})) == u'<input type="hidden" name="content_type" value="%s" id="id_content_type" /><input type="hidden" name="target" value="%s" id="id_target" /> /ratings/rate/up/ /ratings/rate/down/' % (cheap_ct.id, cheap_obj.id)
 True
 >>> t = Template('{% load ratings %}{% top_rated 5 as top %}{% for rat in top %}{{rat.0}}: {{rat.1}}\n{% endfor %}')
 >>> t.render(Context())
@@ -152,7 +149,7 @@ karma = r'''
 True
 
 # rate some objects, check that the rating amount is the same as user's karma
->>> cl.get('/ratings/rate/%s/%s/up/' % (cheap_ct.id, cheap_obj.id)).status_code
+>>> cl.post('/ratings/rate/up/', {'content_type' : cheap_ct.id, 'target' : cheap_obj.id}).status_code
 302
 >>> up = UserProfile.objects.get(user__username='rater')
 >>> up.karma
@@ -163,11 +160,11 @@ True
 >>> cl.login(username="rater2", password="admin")
 True
 >>> up.save()
->>> cl.get('/ratings/rate/%s/%s/up/' % (cheap_ct.id, cheap_obj.id)).status_code
+>>> cl.post('/ratings/rate/up/', {'content_type' : cheap_ct.id, 'target' : cheap_obj.id}).status_code
 302
 >>> int(Rating.objects.get_for_object(cheap_obj))
 15
->>> cl.get('/ratings/rate/%s/%s/up/' % (expensive_ct.id, expensive_obj.id)).status_code
+>>> cl.post('/ratings/rate/up/', {'content_type' : expensive_ct.id, 'target' : expensive_obj.id}).status_code
 302
 
 # recalculate the karma
@@ -182,7 +179,34 @@ True
 True
 '''
 
+rate_form = r'''
+>>> from ella.ratings.forms import RateForm
+>>> from ella.ratings.models import Rating
+>>> from rate_simple.models import *
+>>> from django.contrib.contenttypes.models import ContentType
+>>> cheap_obj = CheapSampleModel.rated.all()[0]
+>>> cheap_ct = ContentType.objects.get_for_model(cheap_obj)
+
+# ideal case
+>>> form = RateForm({'content_type' : cheap_ct.id, 'target' : cheap_obj.id})
+>>> form.is_valid()
+True
+>>> cheap_obj == form.cleaned_data['target']
+True
+>>> cheap_ct == form.cleaned_data['content_type']
+True
+
+# bad data
+>>> form = RateForm({'content_type' : cheap_ct.id, 'target' : 0})
+>>> form.is_valid()
+False
+>>> form.errors
+{'target': [u'The given target object does not exist.']}
+
+'''
+
 __test__ = {
+    'rate_form' : rate_form,
     'rating' : rating,
     'template_tags' : template_tags,
     'top_objects' : top_objects,

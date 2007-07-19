@@ -4,39 +4,43 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 
 from ella.ratings.models import Rating
+from ella.ratings.forms import RateForm
+
 register = template.Library()
 
 class RateUrlsNode(template.Node):
-    def __init__(self, object, up_name, down_name):
-        self.object, self.up_name, self.down_name =  object, up_name, down_name
+    def __init__(self, object, form_name, up_name, down_name):
+        self.object, self.form_name, self.up_name, self.down_name = object, form_name, up_name, down_name
 
     def render(self, context):
         obj = template.resolve_variable(self.object, context)
         if obj:
             ct = ContentType.objects.get_for_model(obj)
-            context[self.up_name] = reverse('rate_up', args=(ct.id, obj.id))
-            context[self.down_name] = reverse('rate_down', args=(ct.id, obj.id))
+            context[self.form_name] = RateForm(initial={'content_type' : ct.id, 'target' : obj._get_pk_val()})
+            context[self.up_name] = reverse('rate_up')
+            context[self.down_name] = reverse('rate_down')
         return ''
 
-@register.tag('rate_urls')
+@register.tag('rate_form')
 def do_rate_urls(parser, token):
     """
     Generate absolute urls for rating the given model up or down and store them in context.
 
     Usage::
 
-        {% rate_urls for OBJ as var_up var_down %}
+        {% rate_form for OBJ as my_form var_up var_down %}
 
     Examples::
 
-        {% rate_urls for object as url_up url_down %}
-        <a href="{{url_up}}">+</a> <a href="{{url_down}}">-</a>
+        {% rate_form for object as rate_form url_up url_down %}
+        <form action="{{url_up}}" method="POST">{{rate_form}}<input type="submit" value="+"></form>
+        <form action="{{url_down}}" method="POST">{{rate_form}}<input type="submit" value="-"></form>
     """
     bits = token.split_contents()
-    if len(bits) != 6 or bits[1] != 'for' or bits[3] != 'as':
+    if len(bits) != 7 or bits[1] != 'for' or bits[3] != 'as':
         raise template.TemplateSyntaxError, "%r .... TODO ....." % token.contents.split()[0]
 
-    return RateUrlsNode(bits[2], bits[4], bits[5])
+    return RateUrlsNode(bits[2], bits[4], bits[5], bits[6])
 
 class RatingNode(template.Node):
     def __init__(self, object, name):

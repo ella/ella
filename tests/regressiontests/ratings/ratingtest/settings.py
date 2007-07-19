@@ -81,6 +81,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'ella.ratings',
+    'ella.core',
     'ratingtest.rate_simple',
 )
 

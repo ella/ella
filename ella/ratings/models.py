@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.db import models, backend, connection
 from django.contrib.auth.models import User
@@ -177,7 +177,7 @@ class Rating(models.Model):
                         target_id=self.target_id,
                         user__isnull=True,
                         ip_address=self.ip_address ,
-                        tim__gte=(self.time or datetime.now()) - timedelta(seconds=MINIMAL_ANONYMOUS_IP_DELAY)
+                        time__gte=(self.time or datetime.now()) - timedelta(seconds=MINIMAL_ANONYMOUS_IP_DELAY)
 ).count() > 0):
                 return
 
