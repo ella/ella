@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+from django.conf import settings
 from django.http import HttpResponseRedirect, Http404
 from django.utils.translation import ugettext as _
 from django.contrib.sites.models import Site
@@ -59,7 +60,7 @@ def rate(request, plusminus=1):
             return response
 
     kwa = {'amount' : ANONYMOUS_KARMA}
-    if request.user.is_authenticated():
+    if request.user.is_authenticated() and getattr(settings, 'AUTH_PROFILE_MODULE', False):
         kwa['user'] = request.user
         profile = request.user.get_profile()
         kwa['amount'] = getattr(profile, 'karma', INITIAL_USER_KARMA)
