@@ -25,7 +25,6 @@ def rate(request, plusminus=1):
     Form data:
         POST:
             ella.ratings.forms.RateForm
-        GET:
             next: url to redirect to after successful attempt
 
     Raises:
@@ -38,8 +37,8 @@ def rate(request, plusminus=1):
     ct = form.cleaned_data['content_type']
     target = form.cleaned_data['target']
 
-    if 'next' in request.GET and request.GET['next'].startswith('/'):
-        url = request.GET['next']
+    if 'next' in request.POST and request.POST['next'].startswith('/'):
+        url = request.POST['next']
     elif hasattr(target, 'get_absolute_url'):
         url = target.get_absolute_url()
     else:
