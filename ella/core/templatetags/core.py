@@ -4,7 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, ImproperlyConfigured
 
 from ella.core.models import Listing
-from ella.core.box import BOX_INFO
+from ella.core.box import BOX_INFO, Box
 
 register = template.Library()
 
@@ -133,11 +133,11 @@ class BoxNode(template.Node):
         else:
             obj = self.obj
 
-        if not hasattr(obj, 'Box'):
-            # TODO: log error
-            return ''
+        if hasattr(obj, 'Box'):
+            box = obj.Box(self.box_type, self.nodelist)
+        else:
+            box = Box(obj, self.box_type, self.nodelist)
 
-        box = obj.Box(self.box_type, self.nodelist)
         # push context stack
         context.push()
         # render the box itself
