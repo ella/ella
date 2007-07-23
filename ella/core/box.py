@@ -33,16 +33,16 @@ class Box(object):
 
     #@cache_function
     def render(self):
-        if self.teplate_name:
-            return render_to_response(self.teplate_name, {'object' : self.obj})
+        if self.template_name:
+            return loader.render_to_string(self.template_name, {'object' : self.obj})
 
         t_list = []
         base_path = 'box/%s.%s/' % (self.obj._meta.app_label, self.obj._meta.module_name)
         if hasattr(self.obj, 'slug'):
             t_list.append(base_path + '%s/%s.html' % (self.box_type, self.obj.slug))
         t_list.append(base_path + '%s.html' % (self.box_type,))
-        t_list.append(base_path + 'base_box.html' % (self.box_type,))
-        return render_to_response(t_list, {'object' : self.obj})
+        t_list.append(base_path + 'base_box.html')
+        return loader.render_to_string(t_list, {'object' : self.obj})
 
     def get_cache_key(self):
         return 'ella.core.box.Box.render:%s:%s:%s:%s' % (
