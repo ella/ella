@@ -9,7 +9,7 @@ class Box(object):
         self.obj = obj
         self.box_type = box_type
         self.nodelist = nodelist
-        self.template_name = template_name or 'box/%s.%s/%s.html' % (obj._meta.app_label, obj._meta.module_name, box_type)
+        self.template_name = template_name
 
     def parse_params(self, definition):
         for line in definition.split('\n'):
@@ -33,9 +33,16 @@ class Box(object):
 
     #@cache_function
     def render(self):
-        template = loader.get_template(self.params.get('template_name', self.template_name))
-        c = Context({'object' : self.obj})
-        return template.render(c)
+        if self.teplate_name:
+            return render_to_response(self.teplate_name, {'object' : self.obj})
+
+        t_list = []
+        base_path = 'box/%s.%s/' % (self.obj._meta.app_label, self.obj._meta.module_name)
+        if hasattr(self.obj, 'slug'):
+            t_list.append(base_path + '%s/%s.html' % (self.box_type, self.obj.slug))
+        t_list.append(base_path + '%s.html' % (self.box_type,))
+        t_list.append(base_path + 'base_box.html' % (self.box_type,))
+        return render_to_response(t_list, {'object' : self.obj})
 
     def get_cache_key(self):
         return 'ella.core.box.Box.render:%s:%s:%s:%s' % (

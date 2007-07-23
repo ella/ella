@@ -1,4 +1,5 @@
 from django.core.cache import cache
+
 class CacheDeleter(object):
     def __init__(self):
         self._register = {}
