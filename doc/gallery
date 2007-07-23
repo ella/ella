@@ -1,0 +1,35 @@
+    * ID (číslo, unikátní pro objekt, admin ho přiřazuje automaticky při uložení objektu do systému)
+    - db
+
+    * titulek
+    - title
+
+    * datum a čas (od - do)
+    - tohle resi listing
+
+    * popisek (delší text)
+    - description
+
+    * autor (odkaz na profil, nebo URL (e-mail) autora)
+    - author
+
+    * rubrika
+    - category
+
+    * klíčová slova (tagy)
+    - tagging app
+
+    * stav (publikován / draft)
+    - tohle resi listing
+
+    * priority (v primární rubrice a v dalších rubrikách)
+    - tohle resi listing
+
+    * list jednotlivých fotek (možnost přidávat, ubírat, měnit pořadí; možnost hromadného uploadu fotek)
+    - generic relation na objekty
+    - do class Meta dat order with respect to
+
+    * související objekty (články, audia, jiné galerie...)
+    - o to se stara core.dependency
+
+
