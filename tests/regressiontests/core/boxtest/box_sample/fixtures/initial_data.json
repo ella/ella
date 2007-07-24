@@ -1,0 +1,34 @@
+[
+    {
+        "model" : "box_sample.boxedobject",
+        "pk" : 1,
+        "fields" : {
+            "title" : "boxed object 1",
+            "description" : "description of boxed object 1"
+        }
+    },
+    {
+        "model" : "box_sample.boxedobject",
+        "pk" : 2,
+        "fields" : {
+            "title" : "boxed object 2",
+            "description" : "description of boxed object 2"
+        }
+    },
+    {
+        "model" : "box_sample.unboxedobject",
+        "pk" : 1,
+        "fields" : {
+            "title" : "unboxed object 1",
+            "description" : "description of unboxed object 1"
+        }
+    },
+    {
+        "model" : "box_sample.unboxedobject",
+        "pk" : 2,
+        "fields" : {
+            "title" : "unboxed object 2",
+            "description" : "description of unboxed object 2"
+        }
+    }
+]

@@ -2,6 +2,7 @@ from django import template
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, ImproperlyConfigured
+from django.utils.encoding import smart_str
 
 from ella.core.models import Listing
 from ella.core.box import *
@@ -196,7 +197,7 @@ def do_box(parser, token):
         ct = ContentType.objects.get_for_model(model)
 
         try:
-            obj = ct.get_object_for_this_type(**{bits[5] : bits[6]})
+            obj = ct.get_object_for_this_type(**{smart_str(bits[5]) : bits[6]})
         except models.ObjectDoesNotExist:
             raise template.TemplateSyntaxError, "Model %r with field %r equal to %r does not exist." % (bits[3], bits[5], bits[6])
         except AssertionError:

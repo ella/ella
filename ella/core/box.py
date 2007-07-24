@@ -40,10 +40,13 @@ class Box(object):
         # TODO add caching
         #self.render = cache_function(self.render, self.get_key())
 
+    def get_context(self):
+        return {'object' : self.obj}
+
     #@cache_function
     def render(self):
         if self.template_name:
-            return loader.render_to_string(self.template_name, {'object' : self.obj})
+            return loader.render_to_string(self.template_name, self.get_context())
 
         t_list = []
         base_path = 'box/%s.%s/' % (self.obj._meta.app_label, self.obj._meta.module_name)
@@ -52,18 +55,22 @@ class Box(object):
         t_list.append(base_path + '%s.html' % (self.box_type,))
         t_list.append(base_path + 'base_box.html')
 
-        media = self.context.dicts[-1].setdefault(MEDIA_KEY, {'js' : set([]), 'css' : set([])})
-        my_media = self.media
+        media = self._context.dicts[-1].setdefault(MEDIA_KEY, {'js' : set([]), 'css' : set([])})
+        my_media = self.get_media()
         media['js'] = media['js'].union(my_media['js'])
         media['css'] = media['css'].union(my_media['css'])
 
-        return loader.render_to_string(t_list, {'object' : self.obj})
+        return loader.render_to_string(t_list, self.get_context())
 
-    @property
-    def media(self):
+    def get_media(self):
+        if u'js' in self.params:
+            self.js.extend(self.params.getlist('js'))
+        if u'css' in self.params:
+            self.css.extend(self.params.getlist('css'))
+
         return {
-            'js' : set(self.params.getlist('js', []) + self.js),
-            'css' : set(self.params.getlist('css', []) + self.css),
+            'js' : set(self.js),
+            'css' : set(self.css),
 }
 
     def get_cache_key(self):
