@@ -89,7 +89,7 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
 
     template_list = []
     if cat and ct:
-        template_list.append('category/%s/%s.%s/base_list.html' % (cat.tree_path, ct.app_label, ct.model))
+        template_list.append('category/%s/%s.%s/list.html' % (cat.tree_path, ct.app_label, ct.model))
     if cat:
         template_list.append('category/%s/base_list.html' % cat.tree_path)
     template_list.append('core/base_list.html')
