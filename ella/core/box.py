@@ -1,10 +1,14 @@
 from django.template import loader, Context
+from django.utils.datastructures import MultiValueDict
 
 BOX_INFO = 'ella.core.box.BOX_INFO'
+MEDIA_KEY = 'ella.core.box.MEDIA_KEY'
 class Box(object):
     """
     Base Class
     """
+    js = []
+    css = []
     def __init__(self, obj, box_type, nodelist, template_name=None):
         self.obj = obj
         self.box_type = box_type
@@ -21,13 +25,18 @@ class Box(object):
                 # TODO log warning
 
     def resolve_params(self, context):
-        return dict(self.parse_params(self.nodelist.render(context)))
+        params = MultiValueDict()
+        for key, value in self.parse_params(self.nodelist.render(context)):
+            params.appendlist(key, value)
+        return params
 
     def prepare(self, context):
         context.push()
         context['object'] = self.obj
         self.params = self.resolve_params(context)
         context.pop()
+        self._context = context
+
         # TODO add caching
         #self.render = cache_function(self.render, self.get_key())
 
@@ -42,7 +51,20 @@ class Box(object):
             t_list.append(base_path + '%s/%s.html' % (self.box_type, self.obj.slug))
         t_list.append(base_path + '%s.html' % (self.box_type,))
         t_list.append(base_path + 'base_box.html')
+
+        media = self.context.dicts[-1].setdefault(MEDIA_KEY, {'js' : set([]), 'css' : set([])})
+        my_media = self.media
+        media['js'] = media['js'].union(my_media['js'])
+        media['css'] = media['css'].union(my_media['css'])
+
         return loader.render_to_string(t_list, {'object' : self.obj})
+
+    @property
+    def media(self):
+        return {
+            'js' : set(self.params.getlist('js', []) + self.js),
+            'css' : set(self.params.getlist('css', []) + self.css),
+}
 
     def get_cache_key(self):
         return 'ella.core.box.Box.render:%s:%s:%s:%s' % (

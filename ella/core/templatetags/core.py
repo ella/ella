@@ -4,7 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, ImproperlyConfigured
 
 from ella.core.models import Listing
-from ella.core.box import BOX_INFO, Box
+from ella.core.box import *
 
 register = template.Library()
 
@@ -202,11 +202,12 @@ def do_box(parser, token):
         except AssertionError:
             raise template.TemplateSyntaxError, "Model %r with field %r equal to %r does not refer to a single object." % (bits[3], bits[5], bits[6])
 
-        if not hasattr(obj, 'Box'):
-            raise template.TemplateSyntaxError, "Given object doesn't support Boxing."
-
     nodelist = parser.parse(('end' + bits[0],))
     parser.delete_first_token()
 
     return BoxNode(obj, bits[1], nodelist)
+
+@register.inclusion_tag('utils/media.html', takes_context=True)
+def do_media(context):
+    return context.dicts[:-1].get(MEDIA_KEY, None)
 
