@@ -33,7 +33,8 @@ class Article(models.Model):
             self._main_listing = get_cached_object(
                 ContentType.objects.get_for_model(Listing),
                 target_ct=ContentType.objects.get_for_model(Article),
-                target_id=self.id
+                target_id=self.id,
+                category=self.category
 )
         return self._main_listing
 

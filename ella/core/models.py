@@ -89,6 +89,18 @@ class Category(models.Model):
                 child.tree_path = child.tree_path.replace(old_tree_path, self.tree_path)
                 child.save()
 
+    def get_absolute_url(self):
+        if not self.tree_parent:
+            return reverse('root_homepage')
+        else:
+            return reverse(
+                    'category_detail',
+                    kwargs={
+                        'category' : self.tree_path[1:],
+}
+)
+
+
     def draw_title(self):
         return ('&nbsp;&nbsp;' * self.tree_path.count('/')) + self.title
     draw_title.allow_tags = True
@@ -219,7 +231,7 @@ class Listing(models.Model):
             return reverse(
                     'object_detail',
                     kwargs={
-                        'category' : category.tree_path,
+                        'category' : category.tree_path[1:],
                         'year' : self.publish_from.year,
                         'month' : self.publish_from.month,
                         'day' : self.publish_from.day,

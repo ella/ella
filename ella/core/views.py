@@ -29,7 +29,11 @@ CATEGORY_CT = ContentType.objects.get_for_model(Category)
 def object_detail(request, category, year, month, day, content_type, slug):
     ct = get_content_type(content_type)
 
-    cat = get_cached_object_or_404(CATEGORY_CT, tree_path=category)
+    if category:
+        cat = get_cached_object_or_404(CATEGORY_CT, tree_path=u'/' + category)
+    else:
+        cat = get_cached_object_or_404(CATEGORY_CT, tree_parent__isnull=True)
+
     obj = get_cached_object_or_404(ct, slug=slug)
     try:
         date = datetime.date(int(year), int(month), int(day))
@@ -73,7 +77,7 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
         kwa['publish_from__year'] = year
 
     if category:
-        cat = get_cached_object_or_404(CATEGORY_CT, tree_path=category)
+        cat = get_cached_object_or_404(CATEGORY_CT, tree_path=u'/' + category)
         kwa['category'] = cat
     else:
         cat = False
@@ -110,7 +114,7 @@ def home(request):
 )
 
 def category_detail(request, category):
-    cat = get_cached_object_or_404(CATEGORY_CT, tree_path=u'/'+category, tree_parent__isnull=False)
+    cat = get_cached_object_or_404(CATEGORY_CT, tree_path=u'/' + category, tree_parent__isnull=False)
     return render_to_response(
             (
                 'category/%s/detail.html' % (cat.tree_path),
