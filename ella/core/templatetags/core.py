@@ -208,7 +208,7 @@ def do_box(parser, token):
 
     return BoxNode(obj, bits[1], nodelist)
 
-@register.inclusion_tag('utils/media.html', takes_context=True)
-def do_media(context):
-    return context.dicts[:-1].get(MEDIA_KEY, None)
+@register.inclusion_tag('core/box_media.html', takes_context=True)
+def box_media(context):
+    return {'media' : context.dicts[-1].get(MEDIA_KEY, None)}
 

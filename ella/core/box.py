@@ -64,13 +64,19 @@ class Box(object):
 
     def get_media(self):
         if u'js' in self.params:
-            self.js.extend(self.params.getlist('js'))
+            js = set(self.js + self.params.getlist('js'))
+        else:
+            js = set(self.js)
+
         if u'css' in self.params:
-            self.css.extend(self.params.getlist('css'))
+            css = set(self.css + self.params.getlist('css'))
+        else:
+            css = set(self.css)
+
 
         return {
-            'js' : set(self.js),
-            'css' : set(self.css),
+            'js' : js,
+            'css' : css,
 }
 
     def get_cache_key(self):
