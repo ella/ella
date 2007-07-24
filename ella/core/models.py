@@ -80,7 +80,7 @@ class Category(models.Model):
         if self.tree_parent:
             self.tree_path = '%s/%s' % (self.tree_parent.tree_path, self.slug)
         else:
-            self.tree_path = '%s' % self.slug
+            self.tree_path = ''
         super(Category, self).save()
         Category.objects.clear_cache()
         if old_tree_path != self.tree_path:
@@ -211,18 +211,31 @@ class Listing(models.Model):
 
     def get_absolute_url(self):
         obj = self.target
-        return reverse(
-                'object_detail',
-                kwargs={
-                    'category' : get_cached_object(
-                                ContentType.objects.get_for_model(Category),
-                                pk=getattr(obj, 'category_id', self.category_id)
-).tree_path,
-                    'year' : self.publish_from.year,
-                    'month' : self.publish_from.month,
-                    'day' : self.publish_from.day,
-                    'content_type' : slugify(obj._meta.verbose_name_plural),
-                    'slug' : obj.slug,
+        category = get_cached_object(
+                     ContentType.objects.get_for_model(Category),
+                     pk=getattr(obj, 'category_id', self.category_id)
+)
+        if category.tree_parent:
+            return reverse(
+                    'object_detail',
+                    kwargs={
+                        'category' : category.tree_path,
+                        'year' : self.publish_from.year,
+                        'month' : self.publish_from.month,
+                        'day' : self.publish_from.day,
+                        'content_type' : slugify(obj._meta.verbose_name_plural),
+                        'slug' : obj.slug,
+}
+)
+        else:
+            return reverse(
+                    'home_object_detail',
+                    kwargs={
+                        'year' : self.publish_from.year,
+                        'month' : self.publish_from.month,
+                        'day' : self.publish_from.day,
+                        'content_type' : slugify(obj._meta.verbose_name_plural),
+                        'slug' : obj.slug,
 }
 )
 
