@@ -1,4 +1,4 @@
-# Django settings for boxtest project.
+# Django settings for coretest project.
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -65,7 +65,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.doc.XViewMiddleware',
 )
 
-ROOT_URLCONF = 'boxtest.urls'
+ROOT_URLCONF = 'coretest.urls'
 
 from os.path import dirname
 TEMPLATE_DIRS = (
