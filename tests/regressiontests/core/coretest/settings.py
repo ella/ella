@@ -1,3 +1,4 @@
+from os.path import dirname
 # Django settings for coretest project.
 
 DEBUG = True
@@ -10,7 +11,7 @@ ADMINS = (
 MANAGERS = ADMINS
 
 DATABASE_ENGINE = 'sqlite3'    # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-DATABASE_NAME = ':memory:'     # Or path to database file if using sqlite3.
+DATABASE_NAME = dirname(__file__) + '/db'     # Or path to database file if using sqlite3.
 DATABASE_USER = ''             # Not used with sqlite3.
 DATABASE_PASSWORD = ''         # Not used with sqlite3.
 DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
@@ -60,6 +61,7 @@ TEMPLATE_LOADERS = (
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
+    'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.doc.XViewMiddleware',
@@ -67,7 +69,6 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = 'coretest.urls'
 
-from os.path import dirname
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
@@ -80,6 +81,10 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
+    'django.contrib.redirects',
     'ella.core',
     'box_sample',
+    'redir_sample',
 )
+
+CACHE_BACKEND = 'dummy://'

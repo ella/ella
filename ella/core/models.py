@@ -236,7 +236,7 @@ class Listing(models.Model):
                         'month' : self.publish_from.month,
                         'day' : self.publish_from.day,
                         'content_type' : slugify(obj._meta.verbose_name_plural),
-                        'slug' : obj.slug,
+                        'slug' : getattr(obj, 'slug', str(obj._get_pk_val())),
 }
 )
         else:
@@ -247,7 +247,7 @@ class Listing(models.Model):
                         'month' : self.publish_from.month,
                         'day' : self.publish_from.day,
                         'content_type' : slugify(obj._meta.verbose_name_plural),
-                        'slug' : obj.slug,
+                        'slug' : getattr(obj, 'slug', str(obj._get_pk_val())),
 }
 )
 
