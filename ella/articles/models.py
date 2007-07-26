@@ -101,6 +101,18 @@ class ArticleContents(models.Model):
     def __unicode__(self):
         return self.title
 
+TEXTAREACLASS = 'rich_text_area'
+class ArticleContentInlineOptions(admin.TabularInline):
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        from django.newforms import widgets
+        if db_field.name == 'content':
+            return super(ArticleContentInlineOptions, self).formfield_for_dbfield(
+                    db_field,
+                    widget=widgets.Textarea(attrs={'class': TEXTAREACLASS,}),
+                    **kwargs
+)
+        return super(ArticleContentInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
+
 class ArticleOptions(admin.ModelAdmin):
     #raw_id_fields = ('authors',)
     list_display = ('title', 'created', 'article_age',)
@@ -112,8 +124,19 @@ class ArticleOptions(admin.ModelAdmin):
 )
     list_filter = ('created',)
     search_fields = ('title', 'perex',)
-    inlines = (admin.TabularInline(ArticleContents, extra=3),)
+    inlines = (ArticleContentInlineOptions(ArticleContents, extra=3),)
     prepopulated_fields = {'slug' : ('title',)}
+
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        from django.newforms import widgets
+        if db_field.name == 'perex':
+            return super(ArticleOptions, self).formfield_for_dbfield(
+                    db_field,
+                    widget=widgets.Textarea(attrs={'class': TEXTAREACLASS,}),
+                    **kwargs
+)
+        return super(ArticleOptions, self).formfield_for_dbfield(db_field, **kwargs)
+
 
 admin.site.register(Article, ArticleOptions)
 
