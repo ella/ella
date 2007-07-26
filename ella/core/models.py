@@ -94,7 +94,7 @@ class Category(models.Model):
         if self.tree_parent:
             return self.tree_path
         else:
-            return selg.slug
+            return self.slug
 
     def get_absolute_url(self):
         if not self.tree_parent:
