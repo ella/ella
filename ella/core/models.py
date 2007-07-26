@@ -89,6 +89,13 @@ class Category(models.Model):
                 child.tree_path = child.tree_path.replace(old_tree_path, self.tree_path)
                 child.save()
 
+    @property
+    def path(self):
+        if self.tree_parent:
+            return self.tree_path
+        else:
+            return selg.slug
+
     def get_absolute_url(self):
         if not self.tree_parent:
             return reverse('root_homepage')

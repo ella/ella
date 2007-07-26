@@ -47,9 +47,9 @@ def object_detail(request, category, year, month, day, content_type, slug):
 
     return render_to_response(
             (
-                'category/%s/%s.%s/%s_detail.html' % (cat.tree_path, ct.app_label, ct.model, slug),
-                'category/%s/%s.%s/base_detail.html' % (cat.tree_path, ct.app_label, ct.model),
-                'category/%s/base_detail.html' % (cat.tree_path),
+                'category/%s/%s.%s/%s_detail.html' % (cat.path, ct.app_label, ct.model, slug),
+                'category/%s/%s.%s/base_detail.html' % (cat.path, ct.app_label, ct.model),
+                'category/%s/base_detail.html' % (cat.path),
                 'core/object_detail.html',
 ),
             {
@@ -93,9 +93,9 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
 
     template_list = []
     if cat and ct:
-        template_list.append('category/%s/%s.%s/list.html' % (cat.tree_path, ct.app_label, ct.model))
+        template_list.append('category/%s/%s.%s/list.html' % (cat.path, ct.app_label, ct.model))
     if cat:
-        template_list.append('category/%s/base_list.html' % cat.tree_path)
+        template_list.append('category/%s/base_list.html' % (cat.path or cat.slug))
     template_list.append('core/base_list.html')
 
     return render_to_response(template_list, {'listings' : listings}, context_instance=RequestContext(request))
@@ -104,7 +104,7 @@ def home(request):
     cat = get_cached_object_or_404(CATEGORY_CT, tree_parent__isnull=True)
     return render_to_response(
             (
-                'category/%s/detail.html' % (cat.tree_path),
+                'category/%s/detail.html' % (cat.slug),
                 'core/category_detail.html',
 ),
             {
@@ -117,7 +117,7 @@ def category_detail(request, category):
     cat = get_cached_object_or_404(CATEGORY_CT, tree_path=u'/' + category, tree_parent__isnull=False)
     return render_to_response(
             (
-                'category/%s/detail.html' % (cat.tree_path),
+                'category/%s/detail.html' % (cat.path or cat.slug),
                 'core/category_detail.html',
 ),
             {
