@@ -18,7 +18,7 @@ class RSSTopCategoryListings(Feed):
             ct = False
 
         if bits:
-            cat = get_cached_object(CATEGORY_CT, tree_path=u'/' + u'/'.join(bits))
+            cat = get_cached_object(CATEGORY_CT, tree_path=u'/'.join(bits))
         else:
             cat = get_cached_object(CATEGORY_CT, tree_parent__isnull=True)
 

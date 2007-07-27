@@ -79,7 +79,10 @@ class Category(models.Model):
     def save(self):
         old_tree_path = self.tree_path
         if self.tree_parent:
-            self.tree_path = '%s/%s' % (self.tree_parent.tree_path, self.slug)
+            if self.tree_parent.tree_path:
+                self.tree_path = '%s/%s' % (self.tree_parent.tree_path, self.slug)
+            else:
+                self.tree_path = self.slug
         else:
             self.tree_path = ''
         super(Category, self).save()
@@ -242,7 +245,7 @@ class Listing(models.Model):
             return reverse(
                     'object_detail',
                     kwargs={
-                        'category' : category.tree_path[1:],
+                        'category' : category.tree_path,
                         'year' : self.publish_from.year,
                         'month' : self.publish_from.month,
                         'day' : self.publish_from.day,
