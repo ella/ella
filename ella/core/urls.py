@@ -1,9 +1,16 @@
 from django.conf.urls.defaults import *
 
 from ella.core.views import object_detail, list_content_type, category_detail, home
+from ella.core.feeds import RSSTopCategoryListings, AtomTopCategoryListings
+
+feeds = {
+    'rss' : RSSTopCategoryListings,
+    'atom' : AtomTopCategoryListings,
+}
 
 # list of objects in category
 urlpatterns = patterns('',
+    url(r'^feeds/(?P<url>.*)/$', 'django.contrib.syndication.views.feed', {'feed_dict': feeds}, name="feeds"),
     url(r'^(?P<category>[-\w/]+)/(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<content_type>[\w-]+)/(?P<slug>[\w-]+)/$',
         object_detail, name="object_detail"),
     url(r'^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<content_type>[\w-]+)/(?P<slug>[\w-]+)/$',

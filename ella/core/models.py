@@ -15,6 +15,7 @@ from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext_lazy as _
 
 from ella.core.cache import get_cached_object
+from ella.core.box import Box
 
 DEFAULT_LISTING_PRIORITY = getattr(settings, 'DEFAULT_LISTING_PRIORITY', 0)
 
@@ -227,6 +228,9 @@ class Listing(models.Model):
     remove = models.BooleanField(_("Remove"), help_text=_("Remove object from listing after the priority wears off?"), default=False)
 
     objects = ListingManager()
+
+    def Box(self, box_type, nodelist):
+        return Box(self.target, box_type, nodelist)
 
     def get_absolute_url(self):
         obj = self.target
