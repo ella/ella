@@ -98,7 +98,11 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
         template_list.append('category/%s/base_list.html' % (cat.path))
     template_list.append('core/base_list.html')
 
-    return render_to_response(template_list, {'content_type' : content_type, 'listings' : listings}, context_instance=RequestContext(request))
+    return render_to_response(template_list, {
+            'content_type' : content_type,
+            'listings' : listings,
+            'category' : cat,
+}, context_instance=RequestContext(request))
 
 def home(request):
     cat = get_cached_object_or_404(CATEGORY_CT, tree_parent__isnull=True)
