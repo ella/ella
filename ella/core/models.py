@@ -107,7 +107,7 @@ class Category(models.Model):
             return reverse(
                     'category_detail',
                     kwargs={
-                        'category' : self.tree_path[1:],
+                        'category' : self.tree_path,
 }
 )
 
