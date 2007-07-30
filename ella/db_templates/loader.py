@@ -1,4 +1,5 @@
 from ella.db_templates import models
+from django.template import TemplateDoesNotExist
 
 def load_template_source(template_name, template_dirs=None):
     try:
