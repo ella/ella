@@ -205,12 +205,46 @@ False
 
 '''
 
+detail_urls = r'''
+>>> from rate_simple.models import *
+>>> expensive_obj = ExpensiveSampleModel.objects.all()[0]
+>>> expensive_obj.get_absolute_url()
+'/2007/7/1/expensive-sample-models/expensivesamplemodel-1/'
+
+>>> from ella.ratings.models import Rating, ANONYMOUS_KARMA
+>>> Rating.objects.all().delete()
+>>> int(Rating.objects.get_for_object(expensive_obj))
+0
+>>> from django.test import Client
+>>> c = Client()
+>>> response = c.get('/2007/7/1/expensive-sample-models/expensivesamplemodel-1/')
+>>> response.status_code
+200
+>>> response.context['object'] == expensive_obj
+True
+>>> response = c.get('/2007/7/1/expensive-sample-models/expensivesamplemodel-1/rate/up/')
+>>> response.status_code
+302
+>>> Rating.objects.get_for_object(expensive_obj) == ANONYMOUS_KARMA
+True
+>>> c = Client()
+>>> response = c.get('/2007/7/1/expensive-sample-models/expensivesamplemodel-1/rate/down/')
+>>> response.status_code
+302
+>>> int(Rating.objects.get_for_object(expensive_obj))
+0
+>>> c.get('/2007/7/1/expensive-sample-models/expensivesamplemodel-1/rate/').status_code
+404
+
+'''
+
 __test__ = {
     'rate_form' : rate_form,
     'rating' : rating,
     'template_tags' : template_tags,
     'top_objects' : top_objects,
     'karma' : karma,
+    'detail_urls' : detail_urls,
 }
 
 if __name__ == '__main__':

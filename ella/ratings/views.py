@@ -11,33 +11,9 @@ from ella.ratings.forms import RateForm
 
 current_site = Site.objects.get_current()
 
-@require_POST
-def rate(request, plusminus=1):
-    """
-    Add a simple up/down vote for a given object.
-    redirect to object's get_absolute_url() on success.
 
-    More granularity can be achieved via setting plusminus to something else than +/-1.
-
-    Params:
-        plusminus: rating itself
-
-    Form data:
-        POST:
-            ella.ratings.forms.RateForm
-            next: url to redirect to after successful attempt
-
-    Raises:
-        Http404 if no content_type or model is associated with the given IDs
-    """
-    form = RateForm(request.POST)
-    if not form.is_valid():
-        raise Http404
-
-    ct = form.cleaned_data['content_type']
-    target = form.cleaned_data['target']
-
-    if 'next' in request.POST and request.POST['next'].startswith('/'):
+def do_rate(request, ct, target, plusminus):
+    if 'next' in request.REQUEST and request.REQUEST['next'].startswith('/'):
         url = request.POST['next']
     elif hasattr(target, 'get_absolute_url'):
         url = target.get_absolute_url()
@@ -96,3 +72,30 @@ def rate(request, plusminus=1):
 )
     return response
 
+@require_POST
+def rate(request, plusminus=1):
+    """
+    Add a simple up/down vote for a given object.
+    redirect to object's get_absolute_url() on success.
+
+    More granularity can be achieved via setting plusminus to something else than +/-1.
+
+    Params:
+        plusminus: rating itself
+
+    Form data:
+        POST:
+            ella.ratings.forms.RateForm
+            next: url to redirect to after successful attempt
+
+    Raises:
+        Http404 if no content_type or model is associated with the given IDs
+    """
+    form = RateForm(request.POST)
+    if not form.is_valid():
+        raise Http404
+
+    ct = form.cleaned_data['content_type']
+    target = form.cleaned_data['target']
+
+    return do_rate(request, ct, target, plusminus)
