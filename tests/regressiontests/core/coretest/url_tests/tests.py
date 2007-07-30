@@ -28,11 +28,36 @@ base = r'''
 200
 >>> c.get('/2007/').status_code
 200
+'''
+custom = r'''
+# custom url dispatching
+>>> from django.test.client import Client
+>>> c = Client()
+>>> from url_tests.models import SampleModel
+>>> sm = SampleModel.objects.all()[0]
+>>> sm.get_absolute_url()
+'/2007/7/1/sample-models/first-object/'
+>>> response = c.get('/2007/7/1/sample-models/first-object/')
+>>> response.status_code
+200
+>>> response.context['object'] == sm
+True
+>>> response = c.get('/2007/7/1/sample-models/first-object/action/')
+>>> response.status_code
+200
+>>> response.content
+'\ncategory:Home Page,object:SampleModel object,content_type:sample-models,listing:SampleModel object listed in Home Page'
 
+>>> response = c.get('/2007/7/1/sample-models/first-object/action/X/Y/Z/')
+>>> response.status_code
+200
+>>> response.content
+'X/Y/Z\ncategory:Home Page,object:SampleModel object,content_type:sample-models,listing:SampleModel object listed in Home Page'
 '''
 
 __test__ = {
     'base' : base,
+    'custom' : custom
 }
 
 if __name__ == '__main__':

@@ -6,6 +6,7 @@ from django.template import RequestContext
 
 from ella.core.models import Listing, Category
 from ella.core.cache import *
+from ella.core.custom_urls import dispatcher
 
 CONTENT_TYPE_MAPPING = {}
 def get_content_type(ct_name):
@@ -37,7 +38,7 @@ def get_content_type(ct_name):
 LISTING_CT = ContentType.objects.get_for_model(Listing)
 CATEGORY_CT = ContentType.objects.get_for_model(Category)
 
-def object_detail(request, category, year, month, day, content_type, slug):
+def object_detail(request, category, year, month, day, content_type, slug, url_remainder=None):
     """
     Detail view that displays a single object based on it's main listing.
 
@@ -69,6 +70,18 @@ def object_detail(request, category, year, month, day, content_type, slug):
         # incorrect date
         raise Http404
 
+    context = {
+            'listing' : listing,
+            'object' : obj,
+            'category' : cat,
+            'content_type' : content_type,
+}
+
+    if url_remainder:
+        # some custom action has been requested
+        bits = url_remainder.split('/')
+        return dispatcher.call_view(request, bits, context)
+
     return render_to_response(
             (
                 'category/%s/%s.%s/%s_detail.html' % (cat.path, ct.app_label, ct.model, slug),
@@ -76,12 +89,7 @@ def object_detail(request, category, year, month, day, content_type, slug):
                 'category/%s/base_detail.html' % (cat.path),
                 'core/object_detail.html',
 ),
-            {
-                'listing' : listing,
-                'object' : obj,
-                'category' : cat,
-                'content_type' : content_type,
-},
+            context,
             context_instance=RequestContext(request)
 )
 
