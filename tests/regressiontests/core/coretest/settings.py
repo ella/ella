@@ -85,6 +85,7 @@ INSTALLED_APPS = (
     'ella.core',
     'box_sample',
     'redir_sample',
+    'url_tests',
 )
 
 CACHE_BACKEND = 'dummy://'

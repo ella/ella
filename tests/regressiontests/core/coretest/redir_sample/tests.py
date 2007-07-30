@@ -42,7 +42,8 @@ True
 301
 >>> response.headers['Location']
 '/2007/7/1/redir-objects/redirobject-1-altered-twice/'
-
+>>> Redirect.objects.all()
+[<Redirect: /2007/7/1/redir-objects/redirobject-1-altered/ ---> /2007/7/1/redir-objects/redirobject-1-altered-twice/>, <Redirect: /2007/7/1/redir-objects/redirobject-1/ ---> /2007/7/1/redir-objects/redirobject-1-altered-twice/>]
 
 >>> o1.delete()
 >>> Redirect.objects.all()

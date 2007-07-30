@@ -152,7 +152,7 @@ class ListingManager(models.Manager):
                 qset = qset.filter(category__tree_path__startswith=category.tree_path)
 
         # filtering based on Model classes
-        if mods:
+        if mods or content_types:
             qset = qset.filter(target_ct__in=([ ContentType.objects.get_for_model(m) for m in mods ] + content_types))
 
         return qset
