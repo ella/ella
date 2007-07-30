@@ -50,7 +50,6 @@ class Source(models.Model):
 
 CATEGORY_CACHE = {}
 class CategoryManager(CurrentSiteManager):
-
     def clear_cache(self):
         global CATEGORY_CACHE
         CATEGORY_CACHE = {}
@@ -62,7 +61,6 @@ class CategoryManager(CurrentSiteManager):
             category = self.get(slug=slug)
             CATEGORY_CACHE[slug] = category
         return category
-
 
 class Category(models.Model):
     title = models.CharField(_("Category Title"), maxlength=200)
@@ -213,6 +211,12 @@ class ListingManager(models.Manager):
         return out
 
 class Listing(models.Model):
+    """
+    Listing of an object in a category. Each and every odject that have it's own detail page must have a Listing object
+    that is valid (nod expired) and places him in the object's main category. Any object can be listed in any number of
+    categories (but only once per category). Even if the object is listed in other categories besides its main category,
+    its detail page's url still belongs to the main one.
+    """
     target_ct = models.ForeignKey(ContentType)
     target_id = models.IntegerField()
 
@@ -293,7 +297,41 @@ class Listing(models.Model):
         ordering = ('-publish_from',)
         unique_together = (('category', 'target_id', 'target_ct'),)
 
+class Related(models.Model):
+    """
+    Related objects - model for recording related items. For example related articles.
+    """
+    target_ct = models.ForeignKey(ContentType, related_name='relation_for_set')
+    target_id = models.IntegerField()
+
+    source_ct = models.ForeignKey(ContentType, related_name='related_on_set')
+    source_id = models.IntegerField()
+
+    def __unicode__(self):
+        return u'%s relates to %s' % (self.source, self.target)
+
+    @property
+    def source(self):
+        if not hasattr(self, '_source'):
+            self._source = get_cached_object(self.source_ct, pk=self.source_id)
+        return self._source
+
+    @property
+    def target(self):
+        if not hasattr(self, '_target'):
+            self._target = get_cached_object(self.target_ct, pk=self.target_id)
+        return self._target
+
+    class Meta:
+        verbose_name = _('Related')
+        verbose_name_plural = _('Related')
+        ordering = ('source_ct', 'source_id',)
+
 class Dependency(models.Model):
+    """
+    Dependent objects - model for recording dependent items.
+    For example a photo used in an article is the article's dependencies.
+    """
     target_ct = models.ForeignKey(ContentType, related_name='dependency_for_set')
     target_id = models.IntegerField()
 
