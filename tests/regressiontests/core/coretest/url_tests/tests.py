@@ -33,7 +33,8 @@ custom = r'''
 # custom url dispatching
 >>> from django.test.client import Client
 >>> c = Client()
->>> from url_tests.models import SampleModel
+>>> from url_tests.models import SampleModel, register_urls
+>>> register_urls()
 >>> sm = SampleModel.objects.all()[0]
 >>> sm.get_absolute_url()
 '/2007/7/1/sample-models/first-object/'
@@ -53,6 +54,16 @@ True
 200
 >>> response.content
 'X/Y/Z\ncategory:Home Page,object:SampleModel object,content_type:sample-models,listing:SampleModel object listed in Home Page'
+
+>>> response = c.get('/2007/7/1/sample-models/first-object/otheraction/')
+>>> response.status_code
+404
+>>> response = c.get('/2007/7/1/other-sample-models/first-other-object/otheraction/')
+>>> response.status_code
+200
+>>> response.content
+'\ncategory:Home Page,object:OtherSampleModel object,content_type:other-sample-models,listing:OtherSampleModel object listed in Home Page'
+
 '''
 
 __test__ = {
