@@ -2,7 +2,7 @@ from django.db.models import ObjectDoesNotExist
 from django.core.cache import cache
 from django.http import Http404
 
-from ella.core.cache.invalidate import CD
+from ella.core.cache.invalidate import CACHE_DELETER
 
 
 KEY_FORMAT = 'alle.core.cache.utils.get_cached_object:%d:%s'
@@ -24,7 +24,7 @@ def get_cached_object(content_type, **kwargs):
     if obj is None:
         obj = content_type.get_object_for_this_type(**kwargs)
         cache.set(key, obj)
-        CD.register(content_type.model_class, lambda x: x._get_pk_val() == obj._get_pk_val(), key)
+        CACHE_DELETER.register(content_type.model_class, lambda x: x._get_pk_val() == obj._get_pk_val(), key)
     return obj
 
 def get_cached_object_or_404(content_type, **kwargs):
