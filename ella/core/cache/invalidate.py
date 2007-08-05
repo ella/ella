@@ -1,5 +1,7 @@
 from django.core.cache import cache
 from django.contrib.contenttypes.models import ContentType
+from django.dispatch import dispatcher
+from django.db.models import signals
 
 try:
     import cPickle as pickle
