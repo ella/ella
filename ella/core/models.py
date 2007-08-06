@@ -86,7 +86,7 @@ class Category(models.Model):
         super(Category, self).save()
         Category.objects.clear_cache()
         if old_tree_path != self.tree_path:
-            children = Category.objects.filter(tree_path__startswith=old_tree_path)
+            children = Category.objects.filter(tree_path__startswith=old_tree_path+'/')
             for child in children:
                 child.tree_path = child.tree_path.replace(old_tree_path, self.tree_path)
                 child.save()
