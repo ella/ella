@@ -130,7 +130,10 @@ class BoxNode(template.Node):
 
     def render(self, context):
         if isinstance(self.obj, basestring):
-            obj = template.resolve_variable(self.obj, context)
+            try:
+                obj = template.resolve_variable(self.obj, context)
+            except template.VariableDoesNotExist:
+                return ''
         else:
             obj = self.obj
 
