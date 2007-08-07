@@ -54,7 +54,10 @@ class Box(object):
         """
         Get context to render the template.
         """
-        level = self.params.get('level', 1)
+        if 'level' in self.params and self.params['level'].isdigit():
+            level = int(self.params['level'])
+        else:
+            level = 1
         return {'object' : self.obj, 'level' : level, 'next_level' : level + 1}
 
     #@cache_function

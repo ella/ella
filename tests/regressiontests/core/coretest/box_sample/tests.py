@@ -57,9 +57,30 @@ u'\n\n/some/path_to.js\n/third/path_to.js\n/some/other/path_to.js\n\n'
 u'\n/third/path_to.css\n/some/other/path_to.css\n/some/path_to.css\n\n\n'
 '''
 
+
+level = r'''
+>>> from django.template import Template, Context
+
+# empty level parameter
+>>> t = Template("{% box level_test for box_sample.boxedobject with id 1 %}{% endbox %}{% box_media %}")
+>>> t.render(Context())
+u'level: 1 next_level: 2\n\n\n\n'
+
+# some given value
+>>> t = Template("{% box level_test for box_sample.boxedobject with id 1 %}level: 3{% endbox %}{% box_media %}")
+>>> t.render(Context())
+u'level: 3 next_level: 4\n\n\n\n'
+
+# bogus value that will cause error
+>>> t = Template("{% box level_test for box_sample.boxedobject with id 1 %}level: crash{% endbox %}{% box_media %}")
+>>> t.render(Context())
+u'level: 1 next_level: 2\n\n\n\n'
+'''
+
 __test__ = {
     'base' : base,
     'media' : media,
+    'level' : level,
 }
 
 if __name__ == '__main__':
