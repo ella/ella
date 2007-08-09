@@ -23,7 +23,7 @@ class Author(models.Model):
     user = models.ForeignKey(User, blank=True, null=True)
     name = models.CharField(_('Name'), maxlength=200, blank=True)
     slug = models.CharField(_("Slug"), maxlength=200)
-    photo = models.ImageField(_('Photo'), upload_to='photos/%Y/%m/%d', blank=True)
+    #photo = models.ImageField(_('Photo'), upload_to='photos/%Y/%m/%d', blank=True)
     description = models.TextField(_('Description'), blank=True)
     text = models.TextField(_('Text'), blank=True)
 

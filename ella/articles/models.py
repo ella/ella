@@ -116,6 +116,7 @@ class ArticleContentInlineOptions(admin.TabularInline):
 class ArticleOptions(admin.ModelAdmin):
     #raw_id_fields = ('authors',)
     list_display = ('title', 'created', 'article_age',)
+    date_hierarchy = 'created'
     ordering = ('-created',)
     fields = (
         (_("Article heading"), {'fields': ('title', 'upper_title', 'updated', 'slug')}),
