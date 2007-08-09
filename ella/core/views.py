@@ -3,6 +3,7 @@ import datetime
 from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import render_to_response
 from django.template import RequestContext
+from django.core.paginator import ObjectPaginator
 
 from ella.core.models import Listing, Category
 from ella.core.cache import *
@@ -93,7 +94,7 @@ def object_detail(request, category, year, month, day, content_type, slug, url_r
             context_instance=RequestContext(request)
 )
 
-def list_content_type(request, category=None, year=None, month=None, day=None, content_type=None):
+def list_content_type(request, category=None, year=None, month=None, day=None, content_type=None, paginate_by=20):
     """
     List object's listings according to the parameters.
 
@@ -135,7 +136,15 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
     else:
         ct = False
 
-    # TODO: pagination
+    # pagination
+    if 'p' in request.GET and request.GET['p'].isdigit():
+        page = int(request.GET['p'])
+    else:
+        page = 1
+
+    paginator = ObjectPaginator(Listing.objects.get_queryset(**kwa), paginate_by)
+    kwa['count'] = paginate_by
+    kwa['offset'] = (page - 1) * paginate_by + 1
     listings = Listing.objects.get_listing(**kwa)
 
     template_list = []
@@ -146,6 +155,18 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
     template_list.append('core/base_list.html')
 
     return render_to_response(template_list, {
+            'is_paginated': paginator.pages > 1,
+            'results_per_page': paginate_by,
+            'has_next': paginator.has_next_page(page - 1),
+            'has_previous': paginator.has_previous_page(page - 1),
+            'page': page,
+            'next': page + 1,
+            'previous': page - 1,
+            'last_on_page': paginator.last_on_page(page - 1),
+            'first_on_page': paginator.first_on_page(page - 1),
+            'pages': paginator.pages,
+            'hits' : paginator.hits,
+
             'content_type' : content_type,
             'listings' : listings,
             'category' : cat,
