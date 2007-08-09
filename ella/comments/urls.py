@@ -1,7 +1,7 @@
 from django.conf.urls.defaults import *
-from ella.comments.forms import CommentForm, CommentFormPreview
+from ella.comments.views import comment_preview
 
 urlpatterns = patterns('',
-        url(r'^', CommentFormPreview(CommentForm), name="comment"),
+        url(r'^', comment_preview, name="comment"),
 )
 

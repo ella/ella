@@ -1,13 +1,9 @@
 from django import newforms as forms
-from django.contrib.formtools.preview import FormPreview
 
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 
 from django.utils.translation import gettext
-
-from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404
 
 
 from ella.comments import defaults
@@ -74,11 +70,12 @@ class CommentForm(forms.Form):
 
     def check_db_options(self, target_ct=None, target_id=None):
         """look in database, if there are no options for this discussion"""
+        from django.core.exceptions import ObjectDoesNotExist
         try:
             options = CommentOptions.objects.get(target_ct=target_ct, target_id=target_id)
             self.init_props[OPTIONS_NAME] = options.options
             self.init_props['timestamp_min_valid'] = int(options.timestamp.strftime('%s')) # TODO: everything should be datetime object...
-        except:
+        except ObjectDoesNotExist:
             pass
 
 
@@ -198,7 +195,8 @@ class CommentForm(forms.Form):
     def save(self, other_values={}):
         """save method for associated model Comment"""
         if not(self.is_bound and self.is_valid()):
-            raise 'Invalid form', 'you cannot save invalid form'
+            #raise 'Invalid form', 'you cannot save invalid form'
+            return False
 
         values = {}
         for i in Comment._meta.fields:
@@ -223,27 +221,12 @@ class CommentForm(forms.Form):
         if not len(same_posts):
             Comment(**values).save()
 
-
-class CommentFormPreview(FormPreview):
-    def done(self, request, cleaned_data):
-        CommentForm(request.POST).save(
-                other_values={'ip_address': request.META['REMOTE_ADDR']})
-        # TODO: add better redirect (object.get_absolute_url)
-        ct = get_object_or_404(ContentType, pk=cleaned_data['target_ct'].id)
-        target = get_object_or_404(ct.model_class(), pk=cleaned_data['target_id'])
-        if hasattr(target, 'get_absolute_url'):
-            url = target.get_absolute_url()
-        else:
-            url = '/'
-        return HttpResponseRedirect(url)
+    def __repr__(self):
+        return 'CommentForm for [%s] with fields %s' % (self.fields['target'].initial, sorted(self.fields.keys()))
 
 
 
 """
-TODO:
-CommentFormPreview pri registrovanem uzivateli jej prihlasi a nezobrazi jeho heslo
-CommentFormPreview zobrazi captchu
-
 Cleanup init_props key names: 'gonzo' => HASH_NAME, ...
 and maybe other init_props['string']
 

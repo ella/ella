@@ -1,3 +1,4 @@
+from os.path import dirname
 # Django settings for komments project.
 
 DEBUG = True
@@ -71,16 +72,19 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    dirname(__file__) + '/templates',
 )
 
 INSTALLED_APPS = (
+    'ella.core',
+    'ella.comments',
+    'komments.sample',
+#    'komments.coreapp',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
-    'komments.sample',
-    'ella.comments',
 )
 
 #CACHE_BACKEND = 'dummy:///'

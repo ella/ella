@@ -1,0 +1,9 @@
+<pre>
+category {{ category }}
+
+{% listing 10 of sample.orange for category as orange_list %}
+{% for o in orange_list %}
+<a href="{{ o.get_absolute_url }}">{{ o }}</a>
+{% endfor %}
+</pre>
+

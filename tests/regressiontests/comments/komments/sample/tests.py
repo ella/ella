@@ -13,12 +13,6 @@ comment_form_test = r"""
 >>> from django import newforms as forms
 
 
-# few init instances
->>> tmodels.Orange(cm=10).save()
->>> tmodels.Orange(cm=20).save()
->>> tmodels.Apple(color='green').save()
->>> tmodels.Apple(color='red').save()
-
 # get apple target string
 >>> apple_ct = ContentType.objects.get(name='apple')
 >>> apple_red   = tmodels.Apple.objects.get(color='red')
@@ -156,16 +150,6 @@ comment_form_test = r"""
 
 # user validation and blacklist
 >>> from django.contrib.auth.models import User
->>> User.objects.all()
-[]
->>> u = User(username='testuser')
->>> u.set_password('testpassword')
->>> u.save()
->>> User.objects.all()
-[<User: testuser>]
->>> a = User.objects.get(username='testuser')
->>> a.check_password('testpassword')
-True
 
 # logged users only discussion and real user but bad password
 >>> timestamp = datetime.datetime.now() - datetime.timedelta(0, cdefaults.FORM_TIMEOUT / 2)
@@ -174,7 +158,7 @@ True
 >>> target = apple_green_target
 >>> hash = cform.get_hash(options=options, target=target, timestamp=timestamp)
 >>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': target,
-... 'username': 'testuser', 'password': 'TESTPASSWORD', 'content': 'Ahoj lidi.',}
+... 'username': 'commenttestuser', 'password': 'TESTPASSWORD', 'content': 'Ahoj lidi.',}
 >>> cf = cforms.CommentForm(DATA)
 >>> cf.is_valid()
 False
@@ -182,9 +166,7 @@ False
 {'__all__': [u'Invalid user.']}
 
 # bann one user
->>> u = User(username='banneduser')
->>> u.set_password('bannedpassword')
->>> u.save()
+>>> u = User.objects.get(username='banneduser')
 >>> b = cmodels.BannedUser(target_ct=apple_ct, target_id=apple_green.id, user=u)
 >>> b.save()
 
@@ -201,7 +183,7 @@ False
 
 # and good password
 >>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': target,
-... 'reg_anonym_sel': 'RE', 'username': 'testuser', 'password': 'testpassword', 'content': 'Ahoj lidi.',}
+... 'reg_anonym_sel': 'RE', 'username': 'commenttestuser', 'password': 'testpassword', 'content': 'Ahoj lidi.',}
 >>> cf = cforms.CommentForm(DATA)
 >>> cf.is_valid()
 True
@@ -212,15 +194,11 @@ True
 
 # try to save invalid form
 >>> cf_invalid.save()
-Traceback (most recent call last):
-  File "<stdin>", line 1, in ?
-Invalid form: you cannot save invalid form
+False
 
 # try to save unbound form
 >>> cf_unbound.save()
-Traceback (most recent call last):
-  File "<stdin>", line 1, in ?
-Invalid form: you cannot save invalid form
+False
 
 # save valid form
 >>> sorted(cf_valid.cleaned_data.keys())
@@ -234,10 +212,10 @@ Invalid form: you cannot save invalid form
 ...     cf_valid.save()
 
 >>> cmodels.Comment.objects.all()
-[<Comment: comment[1] 'Ahoj lidi. ...' on green apple {path:/}>]
+[<Comment: comment [id:1] 'Ahoj lidi....' on green apple {path:}>]
 
 >>> cmodels.Comment.objects.get(pk=1).user.username
-u'testuser'
+u'commenttestuser'
 
 # redefine new timeout
 >>> OLD_TIMEOUT = cforms.defaults.POST_TIMEOUT
@@ -245,7 +223,7 @@ u'testuser'
 >>> time.sleep(0.5)
 >>> cf_valid.save()
 >>> cmodels.Comment.objects.all()
-[<Comment: comment[1] 'Ahoj lidi. ...' on green apple {path:/}>, <Comment: comment[2] 'Ahoj lidi. ...' on green apple {path:/}>]
+[<Comment: comment [id:1] 'Ahoj lidi....' on green apple {path:}>, <Comment: comment [id:2] 'Ahoj lidi....' on green apple {path:}>]
 
 # and put it back
 >>> cforms.defaults.POST_TIMEOUT = OLD_TIMEOUT
@@ -253,7 +231,7 @@ u'testuser'
 
 # save comment from unauthorized user
 >>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': target,
-... 'reg_anonym_sel': 'AN', 'nickname': 'testuser', 'email': 'a@a.cz', 'content': 'Hello',}
+... 'reg_anonym_sel': 'AN', 'nickname': 'commenttestuser', 'email': 'a@a.cz', 'content': 'Hello',}
 >>> cf = cforms.CommentForm(DATA)
 >>> cf.is_valid()
 False
@@ -266,20 +244,16 @@ False
 >>> target = apple_green_target
 >>> hash = cform.get_hash(options=options, target=target, timestamp=timestamp)
 >>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': target,
-... 'reg_anonym_sel': 'AN', 'nickname': 'testuser', 'email': 'a@a.cz', 'content': 'Hello',}
+... 'reg_anonym_sel': 'AN', 'nickname': 'commenttestuser', 'email': 'a@a.cz', 'content': 'Hello',}
 >>> cf = cforms.CommentForm(DATA)
 >>> cf.is_valid()
 True
 >>> cf.save()
 >>> cmodels.Comment.objects.all()
-[<Comment: comment[1] 'Ahoj lidi. ...' on green apple {path:/}>, <Comment: comment[2] 'Ahoj lidi. ...' on green apple {path:/}>, <Comment: comment[3] 'Hello ...' on green apple {path:/}>]
+[<Comment: comment [id:1] 'Ahoj lidi....' on green apple {path:}>, <Comment: comment [id:2] 'Ahoj lidi....' on green apple {path:}>, <Comment: comment [id:3] 'Hello...' on green apple {path:}>]
 
 
 # TODO: add validation, if really all the values were saved into DB
-
-
-
-
 
 
 
@@ -287,14 +261,88 @@ True
 
 
 
+comment_templatetags = r"""
+>>> from ella.comments import models as cmodels
+>>> from ella.comments import forms  as cforms
+>>> from komments.sample.models import Apple, Orange
+
+>>> from django.contrib.contenttypes.models import ContentType
+>>> from django.template import Template, Context
+
+>>> import pprint, datetime, time
+>>> from django import newforms as forms
+
+
+# test get_comment_form
+>>> apple = Apple.objects.get(color='red')
+>>> t = Template('''
+... {% load comments %}
+... {% get_comment_form for apple with 'LO' as comment_form %}
+... {{comment_form|pprint}}
+... ''')
+>>> t.render(Context({'apple': apple}))
+u"\n\n\nCommentForm for [12:2] with fields ['content', 'gonzo', 'options', 'parent', 'password', 'target', 'timestamp', 'username']\n"
+
+>>> apple = Apple.objects.get(color='green')
+>>> t = Template('''
+... {%% load comments %%}
+... {%% get_comment_form for sample.apple with id %d as comment_form %%}
+... {{comment_form|pprint}}
+... ''' % apple.id)
+>>> t.render(Context({'apple': apple}))
+u"\n\n\nCommentForm for [12:1] with fields ['content', 'email', 'gonzo', 'nickname', 'options', 'parent', 'password', 'reg_anonym_sel', 'target', 'timestamp', 'username']\n"
+
+>>> t = Template('''
+... {%% load comments %%}
+... {%% get_comment_form for sample.apple with id %d with 'LO' as comment_form %%}
+... {{comment_form|pprint}}
+... ''' % apple.id)
+>>> t.render(Context({'apple': apple}))
+u"\n\n\nCommentForm for [12:1] with fields ['content', 'gonzo', 'options', 'parent', 'password', 'target', 'timestamp', 'username']\n"
+
+
+# test get_comment_list
+>>> t = Template('''
+... {% load comments %}
+... {% get_comment_list for apple as comment_list %}
+... {{comment_list|pprint}}
+... ''')
+>>> t.render(Context({'apple': apple}))
+u"\n\n\n[<Comment: comment [id:3] 'Hello...' on green apple {path:}>, <Comment: comment [id:2] 'Ahoj lidi....' on green apple {path:}>, <Comment: comment [id:1] 'Ahoj lidi....' on green apple {path:}>]\n"
+
+>>> t = Template('''
+... {%% load comments %%}
+... {%% get_comment_list for sample.apple with id %d as comment_list orderby content %%}
+... {{comment_list|pprint}}
+... ''' % apple.id)
+>>> t.render(Context({'apple': apple}))
+u"\n\n\n[<Comment: comment [id:1] 'Ahoj lidi....' on green apple {path:}>, <Comment: comment [id:2] 'Ahoj lidi....' on green apple {path:}>, <Comment: comment [id:3] 'Hello...' on green apple {path:}>]\n"
+
+
+# test get_comment_count
+>>> t = Template('''
+... {% load comments %}
+... {% get_comment_count for apple as comment_count %}
+... {{comment_count}}
+... ''')
+>>> t.render(Context({'apple': apple}))
+u'\n\n\n3\n'
+
+>>> t = Template('''
+... {%% load comments %%}
+... {%% get_comment_count for sample.apple with id %d as comment_count %%}
+... {{comment_count}}
+... ''' % apple.id)
+>>> t.render(Context({'apple': apple}))
+u'\n\n\n3\n'
 
 
 
 
+"""
 
-
-
-
+"""
+"""
 
 
 
@@ -308,6 +356,7 @@ True
 
 __test__ = {
     'comment_form_test': comment_form_test,
+    'comment_templatetags': comment_templatetags,
 }
 
 

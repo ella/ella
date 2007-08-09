@@ -12,14 +12,17 @@ class CommentOptions(models.Model):
     """
     contains options string for discussion
     with immediate effect
+
+    TODO: options should not be string but boolean columns
     """
-    target_ct = models.ForeignKey(ContentType)
-    target_id = models.PositiveIntegerField()
+    target_ct = models.ForeignKey(ContentType, verbose_name=_('target content type'))
+    target_id = models.PositiveIntegerField(_('target id'))
     options = models.CharField(maxlength=defaults.OPTS_LENGTH, blank=True)
     timestamp = models.DateTimeField(default=datetime.now)
 
-    class Admin:
-        pass
+    class Meta:
+        verbose_name = _('Comment Options')
+        verbose_name_plural = _('Comment Options')
 
 class Comment(models.Model):
     # what is this comment for
@@ -47,51 +50,42 @@ class Comment(models.Model):
     submit_date = models.DateTimeField(_('date/time submitted'), default=datetime.now, editable=True)
     is_public = models.BooleanField(_('is public'), default=True)
 
-    def as_html(self):
-        """returns html repr of this comment"""
+    @property
+    def is_authorized(self):
         if self.user:
-            author = self.user.username
-            author += ' - authorized'
-        else:
-            author = self.nickname
-            author += ' - NOT authorized'
-        html = '\n'.join((
-            '<div id="nc_comments_%d">',
-            '<p>author: %s</p>',
-            '<p>submit: %s</p>',
-            '<p>%s</p>',
-            '<hr />',
-            '</div>',
-)) % (self.id, author, self.submit_date, self.content)
-
-        return html
+            return True
+        return False
 
 
-    def get_genealogy_path(self, parent=None):
+    def get_genealogy_path(self):
         """genealogy tree structure field"""
-        if parent:
-            return '%s%x%s' % (parent.path, parent.id, defaults.PATH_SEPARATOR)
-        else:
-            return defaults.PATH_SEPARATOR
+        if self.parent and self.id:
+            return '%s%s%x' % (self.parent.path, defaults.PATH_SEPARATOR, self.id)
+        return ''
 
     def save(self):
-        # TODO: create models.GenealogyField for this
-        path = self.get_genealogy_path(self.parent)
+        # TODO: maybe create models.GenealogyField for this
+        # first save to obtain primary key
+        super(Comment, self).save()
+        # do not store too long path
+        path = self.get_genealogy_path()
         if len(path) <= defaults.PATH_LENGTH:
-            self.path = self.get_genealogy_path(self.parent)
+            self.path = path
         else:
             self.path = parent.path
+        # save it all
         super(Comment, self).save()
 
     def __unicode__(self):
         if self.id:
-            return u"comment[%d] '%s ...' on %s {path:%s}" % (self.id, self.content[:10],
+            return u"comment [id:%d] '%s...' on %s {path:%s}" % (self.id, self.content[:10],
                     self.target_ct.get_object_for_this_type(pk=self.target_id), self.path)
-        else:
-            return u"unsaved comment"
+        return u"unsaved comment"
 
-    class Admin:
-        pass
+    class Meta:
+        verbose_name = _('Comment')
+        verbose_name_plural = _('Comments')
+
 
 
 class BannedUser(models.Model):
@@ -99,18 +93,22 @@ class BannedUser(models.Model):
     model with generic relation on object - same as in comment model
     ban is global if there is no relation
     """
-    target_ct = models.ForeignKey(ContentType)
-    target_id = models.PositiveIntegerField()
-    user = models.ForeignKey(User)
+    target_ct = models.ForeignKey(ContentType, verbose_name=_('target content type'))
+    target_id = models.PositiveIntegerField(_('target id'))
+    user = models.ForeignKey(User, verbose_name=_('banned author'))
 
-    class Admin:
-        pass
+    class Meta:
+        verbose_name = _('Banned User')
+        verbose_name_plural = _('Banned Users')
+
+
+class BannedIP(models.Model):
+    """TODO"""
+    pass
 
 
 
 # Register the admin options for these models.
-
-
 from django import VERSION
 from django.contrib import admin
 
