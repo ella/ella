@@ -9,8 +9,13 @@ from ella.core.cache import get_cached_object_or_404
 from django.contrib.contenttypes.models import ContentType
 
 from django.http import HttpResponseRedirect
+from django.shortcuts import render_to_response
 
 class CommentFormPreview(FormPreview):
+    preview_template = 'comments/preview.html'
+    form_template = 'comments/form.html'
+    def parse_params(self, context={}):
+        self.context = context
     def done(self, request, cleaned_data):
         CommentForm(request.POST).save(
                 other_values={'ip_address': request.META['REMOTE_ADDR']})
@@ -25,12 +30,20 @@ class CommentFormPreview(FormPreview):
 
 comment_preview = CommentFormPreview(CommentForm)
 
+def new_comment(request, object):
+    """new comment"""
+    return render_to_response('comments/new.html', {'object': object,})
+
 
 def comment(request, bits, context):
-    if len(bits) != 1 or bits[0] != 'add':
-        from django.http import Http404
-        raise Http404
-    return comment_preview(request)
+    if len(bits) == 1:
+        if bits[0] == 'add':
+            return comment_preview(request)
+        elif bits[0] == 'new':
+            return new_comment(request, context['object'])
+
+    from django.http import Http404
+    raise Http404
 
 
 def register_custom_urls():

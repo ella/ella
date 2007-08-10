@@ -1,0 +1,14 @@
+{{ object }}
+
+<hr />
+
+{% load comments %}
+<form action="../add/" method="post" id="comment_form">
+<table>
+{% get_comment_form for object with 'LO' as comment_form %}
+{{ comment_form }}
+</table>
+<input type="submit" name="Comment" value="Comment" />
+</form>
+
+

@@ -74,7 +74,7 @@ def get_comment_form(parser, token):
     """
     tokens = token.split_contents()
     tagname, object_definition_tokens, varname = parse_getforas_triplet(tokens)
-    if object_definition_tokens[-2] == u'with':
+    if len(object_definition_tokens) > 1 and object_definition_tokens[-2] == u'with':
         form_options = object_definition_tokens[-1]
         object = parse_object_definition(tagname, object_definition_tokens[:-2])
     else:

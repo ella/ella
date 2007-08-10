@@ -293,6 +293,14 @@ u"\n\n\nCommentForm for [12:2] with fields ['content', 'gonzo', 'options', 'pare
 u"\n\n\nCommentForm for [12:1] with fields ['content', 'email', 'gonzo', 'nickname', 'options', 'parent', 'password', 'reg_anonym_sel', 'target', 'timestamp', 'username']\n"
 
 >>> t = Template('''
+... {% load comments %}
+... {% get_comment_form for apple as comment_form %}
+... {{comment_form|pprint}}
+... ''')
+>>> t.render(Context({'apple': apple}))
+u"\n\n\nCommentForm for [12:1] with fields ['content', 'email', 'gonzo', 'nickname', 'options', 'parent', 'password', 'reg_anonym_sel', 'target', 'timestamp', 'username']\n"
+
+>>> t = Template('''
 ... {%% load comments %%}
 ... {%% get_comment_form for sample.apple with id %d with 'LO' as comment_form %%}
 ... {{comment_form|pprint}}
