@@ -6,6 +6,7 @@ from os import path
 from fs import change_basename
 import shutil, os, glob
 from ella.core.models import Author, Source, Category
+from ella.core.box import Box
 
 # settings default
 PHOTOS_FORMAT_QUALITY_DEFAULT = (
