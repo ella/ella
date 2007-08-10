@@ -52,8 +52,8 @@ def auto_rename(file_path, new_name):
 
 class Photo(models.Model):
 
-    def __str__(self):
-        return self.title
+    def __unicode__(self):
+        return u"%s" % (self.title)
     # do thumbnails
     def thumb(self):
         tinythumb = path.split(self.image) #.replace('\\','/').split('/')
@@ -105,8 +105,8 @@ class Photo(models.Model):
         ordering = ('-id',)
 
 class Format(models.Model):
-    def __str__(self):
-        return  "%s (%sx%s) " % (self.name, self.max_width, self.max_height)
+    def __unicode__(self):
+        return  u"%s (%sx%s) " % (self.name, self.max_width, self.max_height)
 
     name = models.CharField(maxlength=80)
     max_width = models.PositiveIntegerField()
@@ -125,16 +125,16 @@ class Format(models.Model):
         ordering = ('name', '-max_width',)
 
 class FormatedPhoto(models.Model):
-    def __str__(self):
-        return """%s - %s""" % (self.filename, self.format)
+    def __unicode__(self):
+        return u"%s - %s" % (self.filename, self.format)
 
     photo = models.ForeignKey(Photo)
     format = models.ForeignKey(Format)
     filename = models.CharField(maxlength=300, editable=False) # derive local filename and url
     crop_left = models.PositiveIntegerField(default=0)
     crop_top = models.PositiveIntegerField(default=0)
-    crop_width = models.PositiveIntegerField(default=self.photo.width)
-    crop_height = models.PositiveIntegerField(default=self.photo.height)
+    crop_width = models.PositiveIntegerField(default=0)
+    crop_height = models.PositiveIntegerField(default=0)
     width = models.PositiveIntegerField(editable=False)
     height = models.PositiveIntegerField(editable=False)
 
