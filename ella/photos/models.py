@@ -79,6 +79,10 @@ class Photo(models.Model):
     image = models.ImageField(upload_to='photos/%Y/%m/%d', height_field='height', width_field='width') # save it to YYYY/MM/DD structure
     width = models.PositiveIntegerField(editable=False)
     height = models.PositiveIntegerField(editable=False)
+
+    def Box(self, box_type, nodelist):
+        return Box(self, box_type, nodelist)
+
     # TODO zajistit unikatnost nazvu slugu
     def save(self):
         self.image = auto_rename(self.image, self.slug)
@@ -129,13 +133,12 @@ class FormatedPhoto(models.Model):
     filename = models.CharField(maxlength=300, editable=False) # derive local filename and url
     crop_left = models.PositiveIntegerField(default=0)
     crop_top = models.PositiveIntegerField(default=0)
-    crop_width = models.PositiveIntegerField(default=0)
-    crop_height = models.PositiveIntegerField(default=0)
+    crop_width = models.PositiveIntegerField(default=self.photo.width)
+    crop_height = models.PositiveIntegerField(default=self.photo.height)
     width = models.PositiveIntegerField(editable=False)
     height = models.PositiveIntegerField(editable=False)
 
     # FIXME TODO - error raises atp.
-
     # return crop
     def crop(self):
         """ Method return rectangle of crop """
