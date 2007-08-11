@@ -215,3 +215,38 @@ def do_box(parser, token):
 def box_media(context):
     return {'media' : context.dicts[-1].get(MEDIA_KEY, None)}
 
+class StaticBoxNode(template.Node):
+    def __init__(self, box_type, level):
+        self.box_type, self.level = box_type, level
+
+    def render(self, context):
+        if self.level:
+            try:
+                level = template.resolve_variable(self.level, context)
+            except template.VariableDoesNotExist:
+                level = 1
+        else:
+            level = 1
+
+        return loader.render_to_string('box/static/%s.html' % self.box_type, {'level' : level, 'next_level' : level + 1})
+
+@register.tag('staticbox')
+def do_static_box(parser, token):
+    """
+    """
+    bits = token.split_contents()
+
+    if  2 > len(bits) > 3:
+        raise template.TemplateSyntaxError, '{% staticbox BOX_TYPE [LEVEL] %}'
+
+    if len(bits) == 3:
+        level = bits[2]
+    else:
+        level = None
+
+    return StaticBoxNode(bits[1], level)
+
+@register.inclusion_tag('core/box_media.html', takes_context=True)
+def box_media(context):
+    return {'media' : context.dicts[-1].get(MEDIA_KEY, None)}
+
