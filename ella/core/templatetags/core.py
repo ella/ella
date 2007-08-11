@@ -228,13 +228,20 @@ class StaticBoxNode(template.Node):
         else:
             level = 1
 
-        return loader.render_to_string('box/static/%s.html' % self.box_type, {'level' : level, 'next_level' : level + 1})
+        context.push()
+        context['level'] = level
+        context['next_level'] = level + 1
+        t = loader.get_template('box/static/%s.html' % self.box_type)
+        resp = t.render(context)
+        context.pop()
+        return resp
+
 
 @register.tag('staticbox')
 def do_static_box(parser, token):
     """
     Include a static box (a simple template) with ``level`` and ``next_level`` variables in context.
-    If no ``LEVEL`` paramter is psecified, defaults to 1 (2 for ``next_level``).
+    If no ``LEVEL`` paramter is specified, defaults to 1 (2 for ``next_level``).
 
     Usage::
 
