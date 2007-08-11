@@ -233,6 +233,22 @@ class StaticBoxNode(template.Node):
 @register.tag('staticbox')
 def do_static_box(parser, token):
     """
+    Include a static box (a simple template) with ``level`` and ``next_level`` variables in context.
+    If no ``LEVEL`` paramter is psecified, defaults to 1 (2 for ``next_level``).
+
+    Usage::
+
+        {% staticbox BOXTYPE %}
+        {% staticbox BOXTYPE LEVEL %}
+
+    Examples::
+
+        {% staticbox home_listing %}
+
+        {% staticbox home_listing 1 %}
+
+        {% staticbox home_listing level %}
+
     """
     bits = token.split_contents()
 
