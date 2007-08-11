@@ -1,3 +1,5 @@
+import md5
+
 from django.db.models import ObjectDoesNotExist
 from django.core.cache import cache
 from django.http import Http404
@@ -18,13 +20,13 @@ def get_cached_object(content_type, **kwargs):
     Throws:
         model.DoesNotExist is propagated from content_type.get_object_for_this_type
     """
-    key = KEY_FORMAT % (content_type.id, ':'.join('%s=%s' % (key, kwargs[key]) for key in sorted(kwargs.keys())))
+    key = md5.md5(KEY_FORMAT % (content_type.id, ':'.join('%s=%s' % (key, kwargs[key]) for key in sorted(kwargs.keys())))).hexdigest()
 
     obj = cache.get(key)
     if obj is None:
         obj = content_type.get_object_for_this_type(**kwargs)
         cache.set(key, obj)
-        CACHE_DELETER.register(content_type.model_class, lambda x: x._get_pk_val() == obj._get_pk_val(), key)
+        CACHE_DELETER.register(content_type.model_class(), lambda x: x._get_pk_val() == obj._get_pk_val(), key)
     return obj
 
 def get_cached_object_or_404(content_type, **kwargs):

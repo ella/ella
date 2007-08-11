@@ -10,6 +10,7 @@ except ImportError:
 
 def parse_message(message):
     '''
+
     MESSAGE
     destination:/topic/test
     timestamp:1184944814498
@@ -20,12 +21,12 @@ def parse_message(message):
     XXY
     '''
     lines = message.split('\n')
-    if len(lines) < 2 or lines[0] != 'MESSAGE':
+    if len(lines) < 3 or lines[1] != 'MESSAGE':
         return {}, None
 
     header = {}
     body = None
-    for i in range(1, len(lines)):
+    for i in range(2, len(lines)):
         if lines[i]:
             key, value = lines[i].split(':', 1)
             header[key] = value
@@ -40,6 +41,7 @@ def parse_message(message):
 class CacheDeleter(object):
     def __init__(self):
         self._register = {}
+        self.signal_handler = self
 
     def receive(self, message):
         """
@@ -49,15 +51,8 @@ class CacheDeleter(object):
         from django.db.models import ObjectDoesNotExist
         header, body = parse_message(message)
 
-        contents = body.split(':', 1)
-        if len(contents) != 2 or not contents[0].isdigit() or not contents[1].isdigit():
-            return
-
-        try:
-            instance = pickle.loads(body)
-            self(instance.__class__, instance)
-        except:
-            pass
+        instance = pickle.loads(body)
+        self(instance.__class__, instance)
 
     def __call__(self, sender, instance):
         """
@@ -68,9 +63,13 @@ class CacheDeleter(object):
                 if test(instance):
                     cache.delete(key)
                     del self._register[sender][key]
+        return instance
 
     def register(self, model, test, key):
-        self._register.setdefault(model, {})
+        if model not in self._register:
+            self._register[model] = {}
+            dispatcher.connect(self.signal_handler, signal=signals.pre_save, sender=model)
+            dispatcher.connect(self.signal_handler, signal=signals.pre_delete, sender=model)
         self._register[model][key] = test
 
 CACHE_DELETER = CacheDeleter()
@@ -78,6 +77,7 @@ CACHE_DELETER = CacheDeleter()
 def get_propagator(conn):
     def propagate_signal(sender, instance):
         conn.send('/topic/ella', pickle.dumps(instance))
+        return instance
     return propagate_signal
 
 try:
@@ -86,12 +86,16 @@ try:
     conn = stomp.Connection('localhost', 61613)
     # register CD as listener
     conn.addlistener(CACHE_DELETER)
-    conn.subscribe('/topic/test')
+    conn.subscribe('/topic/ella')
     conn.start()
+    import time
+    time.sleep(2)
 
-    dispatcher.connect(get_propagator(conn), signal=signals.pre_save)
-    dispatcher.connect(get_propagator(conn), signal=signals.pre_delete)
+    # register to close the activeMQ connection on exit
+    import atexit
+    atexit.register(conn.disconnect)
+    CACHE_DELETER.signal_handler = get_propagator(conn)
 except:
-    dispatcher.connect(CACHE_DELETER, signal=signals.pre_save)
-    dispatcher.connect(CACHE_DELETER, signal=signals.pre_delete)
+    pass
+    # TODO: log warning, that we are running without ActiveMQ
 

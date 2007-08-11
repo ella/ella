@@ -223,9 +223,11 @@ class Listing(models.Model):
 
     @property
     def target(self):
-        if not hasattr(self, '_target'):
-            self._target = get_cached_object(self.target_ct, pk=self.target_id)
-        return self._target
+        #return self.target_ct.get_object_for_this_type(pk=self.target_id)
+        return get_cached_object(self.target_ct, pk=self.target_id)
+        #if not hasattr(self, '_target'):
+        #    self._target = get_cached_object(self.target_ct, pk=self.target_id)
+        #return self._target
 
     category = models.ForeignKey(Category, db_index=True)
 

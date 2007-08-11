@@ -20,6 +20,9 @@ def record_url(instance):
 
 def check_url(instance):
     if hasattr(instance, OLD_URL_NAME):
+        import time
+        time.sleep(1)
+
         new_path = instance.get_absolute_url()
         old_path = getattr(instance, OLD_URL_NAME)
 

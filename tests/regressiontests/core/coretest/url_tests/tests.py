@@ -13,7 +13,8 @@ base = r'''
 >>> response = c.get('/')
 >>> response.status_code
 200
->>> response.context['category'].tree_parent
+>>> response.context['category'].tree_parent is None
+True
 
 # various listings
 >>> c.get('/2007/categories/').status_code
@@ -29,6 +30,7 @@ base = r'''
 >>> c.get('/2007/').status_code
 200
 '''
+
 custom = r'''
 # custom url dispatching
 >>> from django.test.client import Client

@@ -1,0 +1,9 @@
+[
+    {
+        "pk": "1",
+        "model": "cache_tests.cachedmodel",
+        "fields": {
+            "title": "some title"
+        }
+    }
+]

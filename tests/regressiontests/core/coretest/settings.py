@@ -86,6 +86,18 @@ INSTALLED_APPS = (
     'box_sample',
     'redir_sample',
     'url_tests',
+    'cache_tests',
 )
 
-CACHE_BACKEND = 'dummy://'
+INTERNAL_IPS = (
+    '127.0.0.1',
+)
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.core.context_processors.auth',
+    'django.core.context_processors.debug',
+    'ella.core.context_processors.url_info',
+)
+
+CACHE_BACKEND = 'locmem://'
+CACHE_BACKEND = 'memcached://127.0.0.1'
