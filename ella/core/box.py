@@ -1,4 +1,4 @@
-from django.template import loader, Context
+from django.template import loader
 from django.utils.datastructures import MultiValueDict
 
 BOX_INFO = 'ella.core.box.BOX_INFO'
@@ -80,7 +80,11 @@ class Box(object):
         media['js'] = media['js'].union(my_media['js'])
         media['css'] = media['css'].union(my_media['css'])
 
-        return loader.render_to_string(t_list, self.get_context())
+        t = loader.select_template(t_list)
+        self._context.update(self.get_context())
+        resp = t.render(self._context)
+        self._context.pop()
+        return resp
 
     def get_media(self):
         """
