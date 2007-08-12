@@ -10,6 +10,7 @@ except ImportError:
 
 def parse_message(message):
     '''
+    Parse incomming messages from ActiveMQ
 
     MESSAGE
     destination:/topic/test
@@ -52,11 +53,12 @@ class CacheDeleter(object):
         header, body = parse_message(message)
 
         instance = pickle.loads(body)
+        # delegate the received signal to __call__
         self(instance.__class__, instance)
 
     def __call__(self, sender, instance):
         """
-        Process post_save signal
+        Process pre_save signal
         """
         if sender in self._register:
             for key, test in self._register[sender].items():
@@ -68,6 +70,7 @@ class CacheDeleter(object):
     def register(self, model, test, key):
         if model not in self._register:
             self._register[model] = {}
+            # start listening for the model requested
             dispatcher.connect(self.signal_handler, signal=signals.pre_save, sender=model)
             dispatcher.connect(self.signal_handler, signal=signals.pre_delete, sender=model)
         self._register[model][key] = test
@@ -76,6 +79,13 @@ CACHE_DELETER = CacheDeleter()
 
 def get_propagator(conn):
     def propagate_signal(sender, instance):
+        """
+        Trap the pre_save and pre_delete signal and
+        invalidate the relative cache entries.
+        """
+        # notify this instance right away
+        CACHE_DELETER(sender, instance)
+        # propagate the signal to others
         conn.send('/topic/ella', pickle.dumps(instance))
         return instance
     return propagate_signal
@@ -88,12 +98,13 @@ try:
     conn.addlistener(CACHE_DELETER)
     conn.subscribe('/topic/ella')
     conn.start()
+    # give it time to form a connection
     import time
     time.sleep(2)
-
     # register to close the activeMQ connection on exit
     import atexit
     atexit.register(conn.disconnect)
+    # register the proper propagation function for intercepting the proper signals
     CACHE_DELETER.signal_handler = get_propagator(conn)
 except:
     pass

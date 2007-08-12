@@ -12,8 +12,6 @@ invalidation = r'''
 True
 >>> cm.title = 'some other title'
 >>> cm.save()
->>> import time
->>> time.sleep(2)
 >>> cache.get(key) is None
 True
 '''
