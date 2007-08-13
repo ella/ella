@@ -52,11 +52,29 @@ def auto_rename(file_path, new_name):
     return new_path
 
 class Photo(models.Model):
+    # TODO FIXME how work with URLs a filenames
+
+    # title is required
+    title = models.CharField(_('Title'), maxlength=200)
+    description = models.TextField(_('Description'), blank=True)
+    slug = models.CharField(maxlength=200, unique=True, db_index=True)
+    image = models.ImageField(upload_to='photos/%Y/%m/%d', height_field='height', width_field='width') # save it to YYYY/MM/DD structure
+    width = models.PositiveIntegerField(editable=False)
+    height = models.PositiveIntegerField(editable=False)
+
+    # Authors and Sources
+    authors = models.ManyToManyField(Author, verbose_name=_('Authors') , related_name='photo_set')
+    source = models.ForeignKey(Source, blank=True, null=True, verbose_name=_('Source'))
+    category = models.ForeignKey(Category, verbose_name=_('Category'))
+
 
     def __unicode__(self):
-        return u"%s" % (self.title)
-    # do thumbnails
+        return self.title
+
     def thumb(self):
+        """
+        do thumbnails
+        """
         tinythumb = path.split(self.image) #.replace('\\','/').split('/')
         tinythumb = (tinythumb[0] , 'thumb-' + tinythumb[1])
         tinythumb = path.join(*tinythumb)
@@ -70,16 +88,6 @@ class Photo(models.Model):
                 return """<strong>%s</strong>""" % _('Thumbnail not available')
         return """<a href="%s%s"><img src="/thumb/%s" alt="Thumbnail %s" /></a>""" % (settings.MEDIA_URL, self.image, tinythumb, self.title)
     thumb.allow_tags = True
-
-    # title is required
-    # TODO FIXME how work with URLs a filenames
-
-    title = models.CharField(_('Title'), maxlength=200)
-    description = models.TextField(_('Description'), blank=True)
-    slug = models.CharField(maxlength=200, unique=True)
-    image = models.ImageField(upload_to='photos/%Y/%m/%d', height_field='height', width_field='width') # save it to YYYY/MM/DD structure
-    width = models.PositiveIntegerField(editable=False)
-    height = models.PositiveIntegerField(editable=False)
 
     def Box(self, box_type, nodelist):
         return Box(self, box_type, nodelist)
@@ -95,25 +103,20 @@ class Photo(models.Model):
         else:
             return None
 
-    # Authors and Sources
-    authors = models.ManyToManyField(Author, verbose_name=_('Authors') , related_name='photo_set')
-    source = models.ForeignKey(Source, blank=True, null=True, verbose_name=_('Source'))
-    category = models.ForeignKey(Category, verbose_name=_('Category'))
-
     class Meta:
         verbose_name = _('Photo')
         verbose_name_plural = _('Photos')
-        ordering = ('-id',)
 
 class Format(models.Model):
-    def __unicode__(self):
-        return  u"%s (%sx%s) " % (self.name, self.max_width, self.max_height)
-
     name = models.CharField(maxlength=80)
     max_width = models.PositiveIntegerField()
     max_height = models.PositiveIntegerField()
     stretch = models.BooleanField()
     resample_quality = models.IntegerField(choices=PHOTOS_FORMAT_QUALITY, default=85)
+
+    def __unicode__(self):
+        return  u"%s (%sx%s) " % (self.name, self.max_width, self.max_height)
+
     def ratio(self):
         if self.max_height:
             return float(self.max_width) / self.max_height
@@ -126,9 +129,6 @@ class Format(models.Model):
         ordering = ('name', '-max_width',)
 
 class FormatedPhoto(models.Model):
-    def __unicode__(self):
-        return u"%s - %s" % (self.filename, self.format)
-
     photo = models.ForeignKey(Photo)
     format = models.ForeignKey(Format)
     filename = models.CharField(maxlength=300, editable=False) # derive local filename and url
@@ -138,6 +138,9 @@ class FormatedPhoto(models.Model):
     crop_height = models.PositiveIntegerField(default=0)
     width = models.PositiveIntegerField(editable=False)
     height = models.PositiveIntegerField(editable=False)
+
+    def __unicode__(self):
+        return u"%s - %s" % (self.filename, self.format)
 
     # FIXME TODO - error raises atp.
     # return crop
@@ -227,7 +230,6 @@ class FormatedPhoto(models.Model):
         verbose_name = _('Formated photo')
         verbose_name_plural = _('Formated photos')
         unique_together = (('photo','format'),)
-        ordering = ('-id',)
 #   generator
 
 from django.contrib import admin
@@ -260,6 +262,12 @@ class PhotoOptions(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
     search_fields = ('title', 'image',)
 
+    def __call__(self, request, url):
+        if url and url.endswith('json'):
+            from ella.photos.views import format_photo_json
+            return format_photo_json(request, *url.split('/')[-3:-1])
+        return super(PhotoOptions, self).__call__(request, url)
+
 class FormatedPhotoOptions(admin.ModelAdmin):
     base_form = FormatedPhotoForm
     list_display = ('filename', 'format', 'width', 'height')
@@ -267,9 +275,7 @@ class FormatedPhotoOptions(admin.ModelAdmin):
     search_fields = ('filename',)
     raw_id_fields = ('photo',)
 
-#if  __name__ != '__main__':
 admin.site.register(Format, FormatOptions)
 admin.site.register(Photo, PhotoOptions)
 admin.site.register(FormatedPhoto, FormatedPhotoOptions)
 
-# Create your models here.
