@@ -68,7 +68,7 @@ class Photo(models.Model):
             except IOError:
                 # TODO Logging something wrong
                 return """<strong>%s</strong>""" % _('Thumbnail not available')
-        return """<a href="/photo/%s"><img src="/thumb/%s" alt="Thumbnail %s" /></a>""" % (self.image, tinythumb, self.title)
+        return """<a href="%s%s"><img src="/thumb/%s" alt="Thumbnail %s" /></a>""" % (settings.MEDIA_URL, self.image, tinythumb, self.title)
     thumb.allow_tags = True
 
     # title is required
@@ -258,6 +258,7 @@ class PhotoOptions(admin.ModelAdmin):
     base_form = PhotoForm
     list_display = ('title', 'image', 'width', 'height', 'thumb') ## 'authors')
     prepopulated_fields = {'slug': ('title',)}
+    search_fields = ('title', 'image',)
 
 class FormatedPhotoOptions(admin.ModelAdmin):
     base_form = FormatedPhotoForm
