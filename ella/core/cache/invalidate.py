@@ -64,7 +64,11 @@ class CacheDeleter(object):
             for key, test in self._register[sender].items():
                 if test(instance):
                     cache.delete(key)
-                    del self._register[sender][key]
+                    try:
+                        del self._register[sender][key]
+                    except KeyError:
+                        # we might be racing against ourselves via ActiveMQ
+                        pass
         return instance
 
     def register(self, model, test, key):

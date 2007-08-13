@@ -7,6 +7,7 @@ from django.db import transaction
 
 OLD_URL_NAME = '__old_url'
 
+from ella.core.cache.invalidate import CACHE_DELETER
 
 def record_url(instance):
     if instance._get_pk_val() and  hasattr(instance, 'get_absolute_url'):
@@ -15,13 +16,12 @@ def record_url(instance):
         except ObjectDoesNotExist:
             return instance
         setattr(instance, OLD_URL_NAME, old_instance.get_absolute_url())
+        CACHE_DELETER(instance.__class__, instance)
 
     return instance
 
 def check_url(instance):
     if hasattr(instance, OLD_URL_NAME):
-        import time
-        time.sleep(1)
         new_path = instance.get_absolute_url()
         old_path = getattr(instance, OLD_URL_NAME)
 
