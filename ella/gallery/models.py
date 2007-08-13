@@ -113,22 +113,6 @@ class GalleryOptions(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
 
 
-'''
-
-from ella.core import widgets
-class GalleryItemOptions(admin.ModelAdmin):
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name in ('target_ct',):
-            return forms.ModelChoiceField(
-                    queryset=ContentType.objects.all(),
-                    widget=widgets.ContentTypeWidget(db_field.name.replace('_ct', '_id')),
-)
-        elif db_field.name == 'target_id':
-            return super(GalleryOptions, self).formfield_for_dbfield(db_field, widget=widgets.ForeignKeyRawIdWidget , **kwargs)
-
-        return super(GalleryOptions, self).formfield_for_dbfield(db_field, **kwargs)
-'''
-
 
 admin.site.register(Gallery, GalleryOptions)
 admin.site.register(GalleryItem, GalleryItemOptions)
