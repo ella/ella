@@ -84,7 +84,7 @@ table.orderable-initalized .order-cell, body>tr>td.order-cell { display:none; }
 input, textarea, select { margin:2px 0; padding:2px 3px; vertical-align:middle; font-family:"Lucida Grande", Verdana, Arial, sans-serif; font-weight:normal; font-size:11px; }
 textarea { vertical-align:top !important; }
 input[type=text], input[type=password], textarea, select, .vTextField { border:1px solid #ccc; }
-textarea { font-family:fixed; font-size:130%; width:90%; height:25em; }
+textarea { font-family:fixed; font-size:130%; width:500px; height:25em; }
 
 /*  FORM BUTTONS  */
 input[type=submit], input[type=button], .submit-row input { background:white url(../img/admin/nav-bg.gif) bottom repeat-x; padding:3px; color:black; border:1px solid #bbb; border-color:#ddd #aaa #aaa #ddd; }
