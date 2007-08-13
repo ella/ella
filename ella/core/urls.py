@@ -41,6 +41,14 @@ urlpatterns = patterns('',
         object_detail, {'category' : ''}, name="home_object_detail_action"),
 
     # category listings
+    url(r'^(?P<category>[-\w/]+)/(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/$',
+        list_content_type, name="category_list_day"),
+    url(r'^(?P<category>[-\w/]+)/(?P<year>\d{4})/(?P<month>\d{1,2})/$',
+        list_content_type, name="category_list_month"),
+    url(r'^(?P<category>[-\w/]+)/(?P<year>\d{4})/$',
+        list_content_type, name="category_list_year"),
+
+    # category listings for content_type
     url(r'^(?P<category>[-\w/]+)/(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<content_type>[\w-]+)/$',
         list_content_type, name="category_list_content_type_day"),
     url(r'^(?P<category>[-\w/]+)/(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<content_type>[\w-]+)/$',

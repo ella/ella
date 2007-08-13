@@ -223,11 +223,7 @@ class Listing(models.Model):
 
     @property
     def target(self):
-        #return self.target_ct.get_object_for_this_type(pk=self.target_id)
         return get_cached_object(self.target_ct, pk=self.target_id)
-        #if not hasattr(self, '_target'):
-        #    self._target = get_cached_object(self.target_ct, pk=self.target_id)
-        #return self._target
 
     category = models.ForeignKey(Category, db_index=True)
 
@@ -240,7 +236,13 @@ class Listing(models.Model):
     objects = ListingManager()
 
     def Box(self, box_type, nodelist):
-        return Box(self.target, box_type, nodelist)
+        """
+        Delegate the boxing
+        """
+        obj = self.target
+        if hasattr(obj, 'Box'):
+            return obj.Box(box_type, nodelist)
+        return Box(obj, box_type, nodelist)
 
     def get_absolute_url(self):
         obj = self.target
@@ -276,6 +278,19 @@ class Listing(models.Model):
         # do not allow prioritizations without a priority_value
         if self.priority_value == DEFAULT_LISTING_PRIORITY:
             self.priority_from = None
+
+        obj = self.target
+        if self.category != obj.category:
+            main_listing = get_cached_object(
+                    ContentType.objects.get_for_model(Listing),
+                    category=obj.category,
+                    target_ct=self.target_ct,
+                    target_id=self.target_id
+)
+
+            if main_listing.remove:
+                self.remove = True
+                self.priority_to = min(self.priority_to, main_listing.priority_to)
         super(Listing, self).save()
 
     def __unicode__(self):
