@@ -51,6 +51,12 @@ def auto_rename(file_path, new_name):
 
     return new_path
 
+class PhotoBox(Box):
+    def get_context(self):
+        cont = super(PhotoBox, self).get_context()
+        cont.update({'title' : self.params.get('title', ''),  'alt' : self.params.get('alt', ''),})
+        return cont
+
 class Photo(models.Model):
     # TODO FIXME how work with URLs a filenames
 
@@ -75,7 +81,7 @@ class Photo(models.Model):
         """
         do thumbnails
         """
-        tinythumb = path.split(self.image) #.replace('\\','/').split('/')
+        tinythumb = path.split(self.image)
         tinythumb = (tinythumb[0] , 'thumb-' + tinythumb[1])
         tinythumb = path.join(*tinythumb)
         if not path.exists(MEDIA_ROOT + tinythumb):
@@ -90,7 +96,7 @@ class Photo(models.Model):
     thumb.allow_tags = True
 
     def Box(self, box_type, nodelist):
-        return Box(self, box_type, nodelist)
+        return PhotoBox(self, box_type, nodelist)
 
     # TODO zajistit unikatnost nazvu slugu
     def save(self):
@@ -197,9 +203,6 @@ class FormatedPhoto(models.Model):
 #   generator
 
 from django import newforms as forms
-class PhotoForm(forms.BaseForm):
-    pass
-
 class FormatedPhotoForm(forms.BaseForm):
 #    def __init__(self, *args, **kwargs):
 #        super(FormatedPhotoForm, self).__init__(*args, **kwargs)
@@ -215,7 +218,7 @@ class FormatedPhotoForm(forms.BaseForm):
             (data['crop_left'] + data['crop_width']) > photo.width or
             (data['crop_top'] + data['crop_height']) > photo.height
 ):
-            raise forms.ValidationError. _("The specified crop coordinates do not fit into the source photo.")
+            raise forms.ValidationError, _("The specified crop coordinates do not fit into the source photo.")
         return data
 
 from django.contrib import admin
@@ -225,7 +228,6 @@ class FormatOptions(admin.ModelAdmin):
 
 
 class PhotoOptions(admin.ModelAdmin):
-    base_form = PhotoForm
     list_display = ('title', 'image', 'width', 'height', 'thumb') ## 'authors')
     prepopulated_fields = {'slug': ('title',)}
     search_fields = ('title', 'image',)

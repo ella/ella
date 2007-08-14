@@ -1,9 +1,7 @@
-# Create your views here.
-from django.shortcuts import render_to_response
 from django.utils import simplejson
 from ella.photos import models
-from django import template
 from django.conf import settings
+from django.http import HttpResponse
 
 def format_photo_json(request, format, photo):
     try:
@@ -19,4 +17,4 @@ def format_photo_json(request, format, photo):
 }
     except (models.Photo.DoesNotExist, models.Format.DoesNotExist):
         content = {'error':True}
-    return render_to_response('json.html', {'content':simplejson.dumps(content)})
+    return HttpResponse(simplejson.dumps(content))
