@@ -1,0 +1,89 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2007-08-14 23:05+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: models.py:14
+msgid "Low"
+msgstr "Nízká"
+
+#: models.py:15
+msgid "Medium"
+msgstr "Střední"
+
+#: models.py:16
+msgid "Good"
+msgstr "Dobrá"
+
+#: models.py:17
+msgid "Better"
+msgstr "Lepší"
+
+#: models.py:18
+msgid "High"
+msgstr "Vysoká"
+
+#: models.py:61
+msgid "Title"
+msgstr "nadpis"
+
+#: models.py:62
+msgid "Description"
+msgstr "Popis"
+
+#: models.py:69
+msgid "Authors"
+msgstr "Autoři"
+
+#: models.py:70
+msgid "Source"
+msgstr "Zdroj"
+
+#: models.py:71
+msgid "Category"
+msgstr "Kategorie"
+
+#: models.py:93
+msgid "Thumbnail not available"
+msgstr "Náhled není k dispozici"
+
+#: models.py:119
+msgid "Photo"
+msgstr "Foto"
+
+#: models.py:120
+msgid "Photos"
+msgstr "Fotky"
+
+#: models.py:140
+msgid "Format"
+msgstr "Formát"
+
+#: models.py:141
+msgid "Formats"
+msgstr "Formáty"
+
+#: models.py:207
+msgid "Formated photo"
+msgstr "Foto ve formátu"
+
+#: models.py:208
+msgid "Formated photos"
+msgstr "Fotky ve formátu"
+
+#: models.py:225
+msgid "The specified crop coordinates do not fit into the source photo."
+msgstr "Zadané souřadnice leží mimo zdrojovou fotku."
