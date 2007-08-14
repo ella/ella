@@ -142,80 +142,44 @@ class FormatedPhoto(models.Model):
     def __unicode__(self):
         return u"%s - %s" % (self.filename, self.format)
 
-    # FIXME TODO - error raises atp.
-    # return crop
-    def crop(self):
-        """ Method return rectangle of crop """
-        return (self.crop_left, self.crop_top, self.crop_left + self.crop_width, self.crop_top + self.crop_height)
-
-    def set_crop_from_bbox(self, bbox):
-        self.crop_left = bbox[0]
-        self.crop_top = bbox[1]
-        self.crop_width = bbox[2] - bbox[0]
-        self.crop_height = bbox[3] - bbox[1]
-
-    # repair crop to be inside original photo if not
-    # and if crop is invalid (negative width or height) return False
-    def crop_valid(self):
-        # TODO: move this as validation to adminForm
-        crop = self.crop()
-        photo = self.photo
-        self.crop_left = min(crop[0], photo.width)
-        self.crop_top = min(crop[1], photo.height)
-        self.crop_width = min(crop[2] - self.crop_left , photo.width - self.crop_left)
-        self.crop_height = min(crop[3] - self.crop_top , photo.height - self.crop_top)
-        crop = self.crop()
-        return (crop[2]-crop[0] > 0) and (crop[3]-crop[1] > 0)
-
     def get_stretch_dimension(self):
         """ Method return stretch dimension of crop to fit inside max format rectangle """
-        if self.format.ratio() < self.crop_ratio() :
+        crop_ratio = float(self.crop_width) / self.crop_height
+        if self.format.ratio() < crop_ratio :
             stretch_width = self.format.max_width
-            stretch_height = min(self.format.max_height, int(stretch_width/self.crop_ratio())) # dimension must be integer
+            stretch_height = min(self.format.max_height, int(stretch_width / crop_ratio)) # dimension must be integer
         else: #if(self.photo.ratio() < self.crop_ratio()):
             stretch_height = self.format.max_height
-            stretch_width = min(self.format.max_width, int(stretch_height*self.crop_ratio()))
+            stretch_width = min(self.format.max_width, int(stretch_height * crop_ratio))
         return (stretch_width, stretch_height)
 
-    def crop_is_inside_format(self):
-        """ Check if crop rectangle is inside format maximal rectangle """
-        return (self.crop_width < self.format.max_width) and (self.crop_height < self.format.max_height)
-
     def save(self):
-        source_file = self.photo.get_image_filename()
-        source = Image.open(source_file)
-        source_bbox = source.getbbox()
-        # if valid crop do
-        if self.crop_valid():
-            bbox = self.crop()
+        source = Image.open(self.photo.get_image_filename())
+
+        # if crop specified
+        if self.crop_width and self.crop_height:
+            # generate crop
+            cropped_photo = source.crop((self.crop_left, self.crop_top, self.crop_left + self.crop_width, self.crop_top + self.crop_height))
+
         # else stay original
         else:
-            bbox = source_bbox
-            self.set_crop_from_bbox(bbox)
-        # generate crop
-        cropped_photo = source.crop(bbox)
-        # if format stretches everything (bigger & smaller crops)
-        if self.format.stretch:
-            stretched_photo = cropped_photo.resize(self.get_stretch_dimension(), Image.BICUBIC)
-        # if is crop smaller than format & stretch only bigger crops
-        elif self.crop_is_inside_format() :
-            stretched_photo = cropped_photo
-        # others
-        else:
-            stretched_photo = cropped_photo.resize(self.get_stretch_dimension())
+            self.crop_left, self.crop_top = 0, 0
+            self.crop_width, self.crop_height = source.size
+            cropped_photo = source
 
-        photo_bbox = stretched_photo.getbbox()
-        self.width, self.height = photo_bbox[2], photo_bbox[3]
+        # we don't have to resize the image if stretch isn't specified and the image fits within the format
+        if not self.format.stretch and self.crop_width < self.format.max_width and self.crop_height < self.format.max_height:
+            stretched_photo = cropped_photo
+
+        # resize image to fit format
+        else:
+            stretched_photo = cropped_photo.resize(self.get_stretch_dimension(), Image.BICUBIC)
+
+        self.width, self.height = stretched_photo.size
         self.filename = self.file(relative=True)
         stretched_photo.save(self.file(), quality=self.format.resample_quality)
-        super (FormatedPhoto, self).save()
-    # return crop_ratio
+        super(FormatedPhoto, self).save()
 
-    def crop_ratio(self):
-        if(self.crop_height) :
-            return float(self.crop_width) / self.crop_height
-        else:
-            return None
 
     # FIXME - formated photo is the same type as source photo eq. png => png, jpg => jpg
     def file(self, relative=False):
@@ -232,11 +196,6 @@ class FormatedPhoto(models.Model):
         unique_together = (('photo','format'),)
 #   generator
 
-from django.contrib import admin
-
-class FormatOptions(admin.ModelAdmin):
-    list_display = ('name', 'max_width', 'max_height', 'stretch', 'resample_quality')
-
 from django import newforms as forms
 class PhotoForm(forms.BaseForm):
     pass
@@ -247,14 +206,23 @@ class FormatedPhotoForm(forms.BaseForm):
 #        if hasattr(self, 'instance'):
 #            self.fields['photo'].required = False
 
-    # FIXME XXX
     def clean(self):
         data = self.cleaned_data
-#        if 'crop_width' not in data or 'crop_width' not in data or 'crop_left' not in data or 'crop_top' not in data:
-#            data['crop_left'], data['crop_top'], data['crop_width'], data['crop_height'] = 0, 0, 100, 100
-#        if 'crop_width' in data and 'crop_height' in data and data['crop_width'] == None and data['crop_height'] == None:
-#        raise forms.ValidationError, _("Vole, mas to blbe")
+        photo = data['photo']
+        if (
+            data['crop_left'] >  photo.width or
+            data['crop_top'] > photo.height or
+            (data['crop_left'] + data['crop_width']) > photo.width or
+            (data['crop_top'] + data['crop_height']) > photo.height
+):
+            raise forms.ValidationError. _("The specified crop coordinates do not fit into the source photo.")
         return data
+
+from django.contrib import admin
+
+class FormatOptions(admin.ModelAdmin):
+    list_display = ('name', 'max_width', 'max_height', 'stretch', 'resample_quality')
+
 
 class PhotoOptions(admin.ModelAdmin):
     base_form = PhotoForm
