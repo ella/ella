@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
-import datetime, Image
+import Image
+from datetime import datetime
 import shutil
 from os import path
 from fs import change_basename
@@ -21,7 +22,6 @@ PHOTOS_THUMB_DIMENSION_DEFAULT = (80,80)
 
 PHOTOS_FORMAT_QUALITY = getattr(settings, 'PHOTOS_FORMAT_QUALITY', PHOTOS_FORMAT_QUALITY_DEFAULT)
 PHOTOS_THUMB_DIMENSION = getattr(settings, 'PHOTOS_THUMB_DIMENSION', PHOTOS_THUMB_DIMENSION_DEFAULT)
-MEDIA_ROOT = settings.MEDIA_ROOT
 
 # from: http://code.djangoproject.com/wiki/CustomUploadAndFilters
 def auto_rename(file_path, new_name):
@@ -58,9 +58,6 @@ class PhotoBox(Box):
         return cont
 
 class Photo(models.Model):
-    # TODO FIXME how work with URLs a filenames
-
-    # title is required
     title = models.CharField(_('Title'), maxlength=200)
     description = models.TextField(_('Description'), blank=True)
     slug = models.CharField(maxlength=200, unique=True, db_index=True)
@@ -73,6 +70,8 @@ class Photo(models.Model):
     source = models.ForeignKey(Source, blank=True, null=True, verbose_name=_('Source'))
     category = models.ForeignKey(Category, verbose_name=_('Category'))
 
+    created = models.DateTimeField(default=datetime.now, editable=False)
+
 
     def __unicode__(self):
         return self.title
@@ -84,15 +83,15 @@ class Photo(models.Model):
         tinythumb = path.split(self.image)
         tinythumb = (tinythumb[0] , 'thumb-' + tinythumb[1])
         tinythumb = path.join(*tinythumb)
-        if not path.exists(MEDIA_ROOT + tinythumb):
+        if not path.exists(settings.MEDIA_ROOT + '/' + tinythumb):
             try:
-                im = Image.open(MEDIA_ROOT + self.image)
+                im = Image.open(settings.MEDIA_ROOT + '/' + self.image)
                 im.thumbnail(PHOTOS_THUMB_DIMENSION , Image.ANTIALIAS)
-                im.save(MEDIA_ROOT+tinythumb, "JPEG")
+                im.save(settings.MEDIA_ROOT + '/' + tinythumb, "JPEG")
             except IOError:
                 # TODO Logging something wrong
                 return """<strong>%s</strong>""" % _('Thumbnail not available')
-        return """<a href="%s%s"><img src="/thumb/%s" alt="Thumbnail %s" /></a>""" % (settings.MEDIA_URL, self.image, tinythumb, self.title)
+        return """<a href="%s/%s"><img src="%s/%s" alt="Thumbnail %s" /></a>""" % (settings.MEDIA_URL, self.image, settings.MEDIA_URL, tinythumb, self.title)
     thumb.allow_tags = True
 
     def Box(self, box_type, nodelist):
@@ -100,6 +99,13 @@ class Photo(models.Model):
 
     # TODO zajistit unikatnost nazvu slugu
     def save(self):
+        while True:
+            try:
+                p = Photo.objects.get(slug=self.slug).exclude(pk=self.id)
+                self.slug = '_' + self.slug
+            except Photo.DoesNotExist:
+                break
+
         self.image = auto_rename(self.image, self.slug)
         super(Photo, self).save()
 
@@ -112,6 +118,7 @@ class Photo(models.Model):
     class Meta:
         verbose_name = _('Photo')
         verbose_name_plural = _('Photos')
+        ordering = ('-created',)
 
 class Format(models.Model):
     name = models.CharField(maxlength=80)
@@ -200,16 +207,13 @@ class FormatedPhoto(models.Model):
         verbose_name = _('Formated photo')
         verbose_name_plural = _('Formated photos')
         unique_together = (('photo','format'),)
-#   generator
 
 from django import newforms as forms
 class FormatedPhotoForm(forms.BaseForm):
-#    def __init__(self, *args, **kwargs):
-#        super(FormatedPhotoForm, self).__init__(*args, **kwargs)
-#        if hasattr(self, 'instance'):
-#            self.fields['photo'].required = False
-
     def clean(self):
+        """
+        Validation function that checks the dimensions of the crop whether it fits into the original and the format.
+        """
         data = self.cleaned_data
         photo = data['photo']
         if (
@@ -224,13 +228,13 @@ class FormatedPhotoForm(forms.BaseForm):
 from django.contrib import admin
 
 class FormatOptions(admin.ModelAdmin):
-    list_display = ('name', 'max_width', 'max_height', 'stretch', 'resample_quality')
-
+    list_display = ('name', 'max_width', 'max_height', 'stretch', 'resample_quality',)
 
 class PhotoOptions(admin.ModelAdmin):
-    list_display = ('title', 'image', 'width', 'height', 'thumb') ## 'authors')
+    list_display = ('title', 'width', 'height', 'thumb') ## 'authors')
+    list_filter = ('category', 'created',)
     prepopulated_fields = {'slug': ('title',)}
-    search_fields = ('title', 'image',)
+    search_fields = ('title', 'image', 'description',)
 
     def __call__(self, request, url):
         if url and url.endswith('json'):
