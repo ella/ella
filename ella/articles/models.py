@@ -8,7 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from ella.core.models import Category, Author, Source, Listing
 from ella.core.box import Box
-
+from ella.photos.models import Photo
 
 class Article(models.Model):
     # Titles
@@ -25,6 +25,9 @@ class Article(models.Model):
     authors = models.ManyToManyField(Author, verbose_name=_('Authors'))
     source = models.ForeignKey(Source, blank=True, null=True, verbose_name=_('Source'))
     category = models.ForeignKey(Category, verbose_name=_('Category'))
+
+    # Main Photo to Article
+    photo = models.ForeignKey(Photo, blank=True, null=True, verbose_name=_('Photo'))
 
     @property
     def main_listing(self):
@@ -121,8 +124,9 @@ class ArticleOptions(admin.ModelAdmin):
     fields = (
         (_("Article heading"), {'fields': ('title', 'upper_title', 'updated', 'slug')}),
         (_("Article contents"), {'fields': ('perex',)}),
-        (_("Metadata"), {'fields': ('category', 'authors', 'source',)})
+        (_("Metadata"), {'fields': ('category', 'authors', 'source', 'photo')})
 )
+    raw_id_fields = ('photo',)
     list_filter = ('created',)
     search_fields = ('title', 'perex',)
     inlines = (ArticleContentInlineOptions(ArticleContents, extra=3),)
