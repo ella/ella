@@ -48,7 +48,7 @@ class TemplateBlock(models.Model):
     target_ct = models.ForeignKey(ContentType, null=True, blank=True)
     target_id = models.IntegerField(null=True, blank=True)
 
-    text = models.TextField(_('Definition'), blank=True)
+    text = models.TextField(_('Definition'), blank=True, editable=False)
 
     @property
     def target(self):
@@ -70,7 +70,15 @@ class TemplateBlock(models.Model):
         unique_together = (('template', 'name',),)
 
 
-class DbTemplateOptions(admin.ModelAdmin):
+class TemplateBlockInlineOptions(admin.TabularInline):
     pass
+class DbTemplateOptions(admin.ModelAdmin):
+    inlines = (TemplateBlockInlineOptions(
+                    TemplateBlock,
+                    extra=3,
+#                    raw_id_fields=('target_ct'),
+#                    fields=('', {'fields': ('name', 'box_type'),})
+),
+)
 
 admin.site.register(DbTemplate, DbTemplateOptions)
