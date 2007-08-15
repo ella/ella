@@ -1,14 +1,3 @@
-"""
-admin media
-
-usage::
-    create web access for admin_media/ directory
-
-    register javascript in newforms admin options
-    ella.admin must be on the last position in INSTALLED_APPS
-
-"""
-
 from django.contrib import admin
 
 
@@ -26,10 +15,8 @@ class EllaAdminSite(admin.AdminSite):
 
 site = EllaAdminSite()
 
-
 from ella.articles.models import Article, ArticleOptions
 ArticleOptions.js = JAVASCRIPTS
 
 site.register(Article, ArticleOptions)
-
 
