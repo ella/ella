@@ -27,7 +27,7 @@ class Article(models.Model):
     category = models.ForeignKey(Category, verbose_name=_('Category'))
 
     # Main Photo to Article
-    photo = models.ForeignKey(Photo, blank=True, null=True, verbose_name=_('Photo'))
+    #photo = models.ForeignKey(Photo, blank=True, null=True, verbose_name=_('Photo'))
 
     @property
     def main_listing(self):
