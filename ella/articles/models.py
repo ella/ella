@@ -121,10 +121,9 @@ class ArticleOptions(admin.ModelAdmin):
     fields = (
         (_("Article heading"), {'fields': ('title', 'upper_title', 'updated', 'slug')}),
         (_("Article contents"), {'fields': ('perex',)}),
-        (_("Metadata"), {'fields': ('category', 'authors', 'source')})
-#        (_("Metadata"), {'fields': ('category', 'authors', 'source', 'photo')})
+        (_("Metadata"), {'fields': ('category', 'authors', 'source', 'photo')})
 )
-#    raw_id_fields = ('photo',)
+    raw_id_fields = ('photo',)
     list_filter = ('created',)
     search_fields = ('title', 'perex',)
     inlines = (ArticleContentInlineOptions(ArticleContents, extra=3),)
