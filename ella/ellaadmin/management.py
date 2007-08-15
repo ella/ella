@@ -15,6 +15,4 @@ ArticleOptions.js = JAVASCRIPTS
 
 site.register(Article, ArticleOptions)
 
-print 'MANAGEMENT MANAGEMENT MANAGEMENT'
-
 
