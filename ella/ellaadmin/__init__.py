@@ -9,4 +9,8 @@ usage::
 
 """
 
+from ella.ellaadmin.options import site
+
+print 'INIT INIT INIT'
+
 

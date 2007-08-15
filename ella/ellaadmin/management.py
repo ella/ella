@@ -1,5 +1,7 @@
 from django.contrib import admin
+from ella.ellaadmin import site
 
+from ella.articles.models import Article, ArticleOptions
 
 TEXTAREACLASS = 'rich_text_area'
 JAVASCRIPTS = [
@@ -9,14 +11,10 @@ JAVASCRIPTS = [
     'js/MagicDOM.js',
 ]
 
-
-class EllaAdminSite(admin.AdminSite):
-    pass
-
-site = EllaAdminSite()
-
-from ella.articles.models import Article, ArticleOptions
 ArticleOptions.js = JAVASCRIPTS
 
 site.register(Article, ArticleOptions)
+
+print 'MANAGEMENT MANAGEMENT MANAGEMENT'
+
 
