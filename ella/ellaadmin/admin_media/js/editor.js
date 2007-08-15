@@ -15,7 +15,7 @@ Editor = function(area){
 			converter = (typeof(Showdown) != 'undefined') ? new Showdown.converter : false;
 			if(!area.className.include('nopreview') && converter){
 				this.container = container;
-				preView = DIV({'class': 'preview'}, '');
+				preView = DIV({'id': 'rich_preview'}, '');
 				var NS = area.nextSiblings();
 				if(NS.length < 1){
 					this.container.appendChild(preView);
@@ -119,7 +119,7 @@ Editor = function(area){
 			this.container = container;
 			if(this.enabled){
 				// Construct the entire toolbar first,
-				this.bar = UL({'class': 'toolbar'}, '');
+				this.bar = UL({'id': 'rich_toolbar'}, '');
 				// Add buttons...
 				/* --- Bold ---*/
 				new this.button(this.bar, 'B', 'Makes the selection bold', function(){
@@ -197,12 +197,13 @@ Editor = function(area){
 }
 
 Event.observe(window, 'load', function(){
-	var elements = document.getElementsByClassName('rich_text_area');
-	if(elements.length > 0){
-		var e = elements[0];
-		var tagname = new String(e.tagName);
-		if(tagname.toLowerCase() == 'textarea'){
-			var newEditor = new Editor(e);
+	document.getElementsByClassName('rich_text_area').each(function(e){
+		if(e.tagName.toLowerCase() == 'textarea'){
+			Event.observe(e, 'focus', function(){
+				if($('rich_preview')) $('rich_preview').remove();
+				if($('rich_toolbar')) $('rich_toolbar').remove();
+				new Editor(e);
+			});
 		}
-	}
+	});
 });
