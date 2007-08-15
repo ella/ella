@@ -75,7 +75,8 @@ def object_detail(request, category, year, month, day, content_type, slug, url_r
             'listing' : listing,
             'object' : obj,
             'category' : cat,
-            'content_type' : content_type,
+            'content_type_name' : content_type,
+            'content_type' : ct,
 }
 
     if url_remainder:
