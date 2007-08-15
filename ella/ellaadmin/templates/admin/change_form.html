@@ -4,7 +4,10 @@
 {% block extrahead %}{{ block.super }}
 
 {% load ellaadmin %}
-{% insert_admin_apps %}
+<script type='text/javascript'>
+paths = {% insert_admin_apps %}
+</script>
+
 
 <script type="text/javascript" src="../../../jsi18n/"></script>
 {% for js in javascript_imports %}<script type="text/javascript" src="{{ js }}"></script>
