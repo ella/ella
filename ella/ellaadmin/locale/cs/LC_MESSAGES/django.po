@@ -1,0 +1,25 @@
+# Czech translation for ella.ellaadmin app
+# Copyright (C) 2007, NetCentrum (centrum.cz)
+# This file is distributed under the same license as the ella package.
+# Jakub Vysoký <jakub@borka.cz>, 2007.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2007-08-15 20:35+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Jakub Vysoký <jakub@borka.cz>, 2007\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: templates/admin/base_site.html:4
+msgid "Ella site admin"
+msgstr "Ella správa webu"
+
+#: templates/admin/base_site.html:7
+msgid "Ella administration"
+msgstr "Ella správa"
