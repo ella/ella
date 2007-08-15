@@ -7,6 +7,7 @@ import shutil, os, glob
 
 from django.db import models
 from django.conf import settings
+from django.utils.translation import ugettext_lazy as _
 
 from ella.core.models import Author, Source, Category, Listing
 from ella.core.box import Box
