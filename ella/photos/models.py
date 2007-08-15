@@ -1,12 +1,14 @@
-from django.db import models
-from django.conf import settings
 import Image
 from datetime import datetime
 import shutil
 from os import path
 from fs import change_basename
 import shutil, os, glob
-from ella.core.models import Author, Source, Category
+
+from django.db import models
+from django.conf import settings
+
+from ella.core.models import Author, Source, Category, Listing
 from ella.core.box import Box
 
 # settings default
@@ -71,6 +73,24 @@ class Photo(models.Model):
     category = models.ForeignKey(Category, verbose_name=_('Category'))
 
     created = models.DateTimeField(default=datetime.now, editable=False)
+
+    @property
+    def main_listing(self):
+        from ella.core.cache import get_cached_object
+        try:
+            return get_cached_object(
+                    ContentType.objects.get_for_model(Listing),
+                    target_ct=ContentType.objects.get_for_model(self.__class__),
+                    target_id=self.id,
+                    category=self.category
+)
+        except Listing.DoesNotExist:
+            return None
+
+    def get_absolute_url(self):
+        listing = self.main_listing
+        if listing:
+            return listing.get_absolute_url()
 
 
     def __unicode__(self):

@@ -7,5 +7,6 @@ urlpatterns = patterns('',
 
     # Uncomment this for admin:
 #     (r'^admin/', include('django.contrib.admin.urls')),
+    (r'^', include('ella.core.urls')),
     (r'^admin/(.*)', admin.site.root),
 )

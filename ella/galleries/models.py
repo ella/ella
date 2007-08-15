@@ -1,12 +1,15 @@
+from datetime import datetime
+
 from django.db import models
-from ella.core.models import Category, Author, Category
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext
 from django.contrib import admin
 
 from ella.core.box import Box
+from ella.core.models import Category, Author, Category, Listing
+from ella.core.cache.utils import get_cached_object
 
-from datetime import datetime
 
 
 class Gallery(models.Model):
@@ -21,6 +24,24 @@ class Gallery(models.Model):
     owner = models.ForeignKey(Author, verbose_name=_('Gallery owner'), blank=True, null=True)
     category = models.ForeignKey(Category, verbose_name=_('Category'), blank=True, null=True)
     created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)
+
+    @property
+    def main_listing(self):
+        from ella.core.cache import get_cached_object
+        try:
+            return get_cached_object(
+                    ContentType.objects.get_for_model(Listing),
+                    target_ct=ContentType.objects.get_for_model(self.__class__),
+                    target_id=self.id,
+                    category=self.category
+)
+        except Listing.DoesNotExist:
+            return None
+
+    def get_absolute_url(self):
+        listing = self.main_listing
+        if listing:
+            return listing.get_absolute_url()
 
     def Box(self, box_type, nodelist):
         return Box(self, box_type, nodelist)
@@ -45,6 +66,9 @@ class GalleryItem(models.Model):
     @property
     def target(self):
         return get_cached_object(self.target_ct, pk=self.target_id)
+
+    def get_absolute_url(self):
+        return '%s%s/%s/' % (self.gallery.get_absolute_url(), ugettext('items'), self.target.slug)
 
     class Meta:
         ordering = ('order',)
@@ -121,4 +145,5 @@ admin.site.register(GalleryItem, GalleryItemOptions)
 
 
 
+from ella.galleries import management
 

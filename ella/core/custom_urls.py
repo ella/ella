@@ -1,6 +1,4 @@
 from django.http import Http404
-from django.contrib.contenttypes.models import ContentType
-
 
 class DetailDispatcher(object):
     """
@@ -9,19 +7,20 @@ class DetailDispatcher(object):
     def __init__(self):
         self.mapping = {}
 
-    def register(self, start, view, content_type=None):
+    def register(self, start, view, model=None):
         """
         Registers a new mapping to view.
 
         Params:
             start - first word of the url remainder - the key for the view
             view - the view that acts on this signal
+            model - optional, only bind to objects of this model
 
         Raises:
             AssertionError if the key is already used
         """
         assert start not in self.mapping, "You can only register one function for key %r" % start
-        self.mapping[start] = (content_type, view)
+        self.mapping[start] = (model, view)
 
 
     def call_view(self, request, bits, context):
@@ -40,9 +39,9 @@ class DetailDispatcher(object):
         if bits[0] not in self.mapping:
             raise Http404
 
-        content_type, view = self.mapping[bits[0]]
+        model, view = self.mapping[bits[0]]
 
-        if content_type is not None and content_type != ContentType.objects.get_for_model(context['object']):
+        if model is not None and model != context['object'].__class__:
             raise Http404
 
         return view(request, bits[1:], context)

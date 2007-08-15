@@ -32,27 +32,26 @@ class Article(models.Model):
     @property
     def main_listing(self):
         from ella.core.cache import get_cached_object
-        if not hasattr(self, '_main_listing'):
-            self._main_listing = get_cached_object(
-                ContentType.objects.get_for_model(Listing),
-                target_ct=ContentType.objects.get_for_model(Article),
-                target_id=self.id,
-                category=self.category
+        try:
+            return get_cached_object(
+                    ContentType.objects.get_for_model(Listing),
+                    target_ct=ContentType.objects.get_for_model(self.__class__),
+                    target_id=self.id,
+                    category=self.category
 )
-        return self._main_listing
+        except Listing.DoesNotExist:
+            return None
+
+    def get_absolute_url(self):
+        listing = self.main_listing
+        if listing:
+            return listing.get_absolute_url()
 
     @property
     def content(self):
         if not hasattr(self, '_content'):
             self._content = self.articlecontents_set.all()[0]
         return self._content
-
-    @property
-    def contents(self):
-        if not hasattr(self, '_contents'):
-            self._contents = list(self.articlecontents_set.all())
-        return self._contents
-
 
     def Box(self, box_type, nodelist):
         return Box(self, box_type, nodelist)
@@ -69,8 +68,6 @@ class Article(models.Model):
         return timesince(self.created)
     article_age.short_description = _('Article Age')
 
-    def get_absolute_url(self):
-        return self.main_listing.get_absolute_url()
 
 def parse_nodelist(nodelist):
     for node in nodelist:

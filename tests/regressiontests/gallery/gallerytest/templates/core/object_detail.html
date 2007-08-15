@@ -1,0 +1,5 @@
+{{ object }}
+
+{% for o in object.galleryitem_set.all %}
+{{ o.target.title }}
+{% endfor %}

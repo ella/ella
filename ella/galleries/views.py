@@ -12,25 +12,28 @@ from ella.galleries.models import Gallery
 def gallery_item_detail(request, gallery, item_slug=None):
     '''get GalleryItem object by its slug or first one (given by GalleryItem.order) from gallery'''
 
-    item_list = [ item.target for item in gallery.galleryitem_set.all() ]
+    item_list = [ (item, item.target) for item in gallery.galleryitem_set.all() ]
     count = len(item_list)
 
     if item_slug is None:
         previous = None
-        item = item_list[0]
-        next = item_list
+        item, target = item_list[0]
+        if count > 1:
+            next = item_list[1][0]
+        else:
+            next = None
         position = 1
     else:
-        for i, it in item_list.enumerate():
-            if it.slug == item_slug:
-                item = it
+        for i, (it, obj) in enumerate(item_list):
+            if obj.slug == item_slug:
+                item, target = it, obj
                 if i > 0:
-                    previous = item_list[i-1]
+                    previous = item_list[i-1][0]
                 else:
                     previous = None
 
                 if (i+1) < count:
-                    next = item_list[i+1]
+                    next = item_list[i+1][0]
                 else:
                     next = None
 
@@ -43,13 +46,14 @@ def gallery_item_detail(request, gallery, item_slug=None):
 
     return render_to_response(
                 [
-                    'galleries/%s/%s.html' % (gallery.slug, item.slug),
+                    'galleries/%s/%s.html' % (gallery.slug, target.slug),
                     'galleries/%s/item_detail.html' % gallery.slug,
                     'galleries/item_detail.html',
                 ],
                 {
                     'gallery': gallery,
                     'item': item,
+                    'object' : target,
                     'item_list' : item_list,
                     'next' : next,
                     'previous' : previous,
@@ -72,6 +76,6 @@ def items(request, bits, context):
 
 def register_custom_urls():
     """register all custom urls"""
-    dispatcher.register(slugify(_('items')), items, content_type=ContentType.objects.get_for_model(Gallery))
+    dispatcher.register(slugify(_('items')), items, model=Gallery)
 
 

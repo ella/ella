@@ -40,4 +40,4 @@ def register_urls():
     from url_tests import views
 
     dispatcher.register('action', views.sample_view)
-    dispatcher.register('otheraction', views.sample_view, content_type=ContentType.objects.get_for_model(OtherSampleModel))
+    dispatcher.register('otheraction', views.sample_view, model=OtherSampleModel)
