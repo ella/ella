@@ -48,20 +48,6 @@ class Source(models.Model):
         verbose_name_plural = _('Sources')
         ordering = ('name',)
 
-CATEGORY_CACHE = {}
-class CategoryManager(CurrentSiteManager):
-    def clear_cache(self):
-        global CATEGORY_CACHE
-        CATEGORY_CACHE = {}
-
-    def get_by_slug(self, slug):
-        try:
-            category = CATEGORY_CACHE[slug]
-        except KeyError:
-            category = self.get(slug=slug)
-            CATEGORY_CACHE[slug] = category
-        return category
-
 class Category(models.Model):
     title = models.CharField(_("Category Title"), maxlength=200)
     slug = models.CharField(_("Slug"), maxlength=200)
@@ -70,7 +56,7 @@ class Category(models.Model):
     description = models.TextField(_("Category Description"), blank=True)
     site = models.ForeignKey(Site)
 
-    objects = CategoryManager(field_name='site')
+    objects = CurrentSiteManager(field_name='site')
     all_objects = models.Manager()
 
     @transaction.commit_on_success
@@ -84,7 +70,6 @@ class Category(models.Model):
         else:
             self.tree_path = ''
         super(Category, self).save()
-        Category.objects.clear_cache()
         if old_tree_path != self.tree_path:
             children = Category.objects.filter(tree_path__startswith=old_tree_path+'/')
             for child in children:
