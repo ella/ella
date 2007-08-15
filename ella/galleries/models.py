@@ -47,9 +47,10 @@ class GalleryItem(models.Model):
         return get_cached_object(self.target_ct, pk=self.target_id)
 
     class Meta:
+        ordering = ('order',)
         verbose_name = _('Gallery item')
         verbose_name_plural = _('Gallery items')
-#        order_with_respect_to = 'gallery'
+        unique_together = (('gallery', 'order',),)
 
 
 class GalleryItemOptions(admin.ModelAdmin):
