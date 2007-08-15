@@ -83,15 +83,15 @@ class Photo(models.Model):
         tinythumb = path.split(self.image)
         tinythumb = (tinythumb[0] , 'thumb-' + tinythumb[1])
         tinythumb = path.join(*tinythumb)
-        if not path.exists(settings.MEDIA_ROOT + '/' + tinythumb):
+        if not path.exists(settings.MEDIA_ROOT + tinythumb):
             try:
-                im = Image.open(settings.MEDIA_ROOT + '/' + self.image)
+                im = Image.open(settings.MEDIA_ROOT + self.image)
                 im.thumbnail(PHOTOS_THUMB_DIMENSION , Image.ANTIALIAS)
-                im.save(settings.MEDIA_ROOT + '/' + tinythumb, "JPEG")
+                im.save(settings.MEDIA_ROOT + tinythumb, "JPEG")
             except IOError:
                 # TODO Logging something wrong
                 return """<strong>%s</strong>""" % _('Thumbnail not available')
-        return """<a href="%s/%s"><img src="%s/%s" alt="Thumbnail %s" /></a>""" % (settings.MEDIA_URL, self.image, settings.MEDIA_URL, tinythumb, self.title)
+        return """<a href="%s%s"><img src="%s%s" alt="Thumbnail %s" /></a>""" % (settings.MEDIA_URL, self.image, settings.MEDIA_URL, tinythumb, self.title)
     thumb.allow_tags = True
 
     def Box(self, box_type, nodelist):
