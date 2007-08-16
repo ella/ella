@@ -2,7 +2,7 @@ from django import template
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, ImproperlyConfigured
-from django.utils.encoding import smart_str
+from django.utils.encoding import smart_str, force_unicode
 
 from ella.core.models import Listing
 from ella.core.box import *
@@ -117,12 +117,9 @@ def listing_parse(input):
 
     return var_name, params, params_to_resolve
 
-
-
-def parse_params(params):
-    lines = params.split('\n')
-    # TODO: handle syntax errors (lines without ':')
-    return dict((key.strip(), value.strip()) for key, value in map(lambda x: x.split(':', 1), lines))
+class EmptyNode(template.Node):
+    def render(self, context):
+        return u''
 
 class BoxNode(template.Node):
     def __init__(self, obj, box_type, nodelist):
@@ -185,6 +182,8 @@ def do_box(parser, token):
     """
     bits = token.split_contents()
 
+    nodelist = parser.parse(('end' + bits[0],))
+    parser.delete_first_token()
 
     # {% box BOXTYPE for var_name %}                {% box BOXTYPE for content.type with PK_FIELD PK_VALUE %}
     if (len(bits) != 4 or bits[2] != 'for') and (len(bits) != 7 or bits[2] != 'for' or bits[4] != 'with'):
@@ -196,18 +195,18 @@ def do_box(parser, token):
     else:
         model = models.get_model(*bits[3].split('.'))
         if model is None:
-            raise template.TemplateSyntaxError, "Model %r does not exist" % bits[3]
+            return EmptyNode()
+            #raise template.TemplateSyntaxError, "Model %r does not exist" % bits[3]
         ct = ContentType.objects.get_for_model(model)
 
         try:
             obj = ct.get_object_for_this_type(**{smart_str(bits[5]) : bits[6]})
         except models.ObjectDoesNotExist:
-            raise template.TemplateSyntaxError, "Model %r with field %r equal to %r does not exist." % (bits[3], bits[5], bits[6])
+            return EmptyNode()
+            #raise template.TemplateSyntaxError, "Model %r with field %r equal to %r does not exist." % (bits[3], bits[5], bits[6])
         except AssertionError:
-            raise template.TemplateSyntaxError, "Model %r with field %r equal to %r does not refer to a single object." % (bits[3], bits[5], bits[6])
-
-    nodelist = parser.parse(('end' + bits[0],))
-    parser.delete_first_token()
+            return EmptyNode()
+            #raise template.TemplateSyntaxError, "Model %r with field %r equal to %r does not refer to a single object." % (bits[3], bits[5], bits[6])
 
     return BoxNode(obj, bits[1], nodelist)
 
@@ -273,3 +272,19 @@ def do_static_box(parser, token):
 def box_media(context):
     return {'media' : context.dicts[-1].get(MEDIA_KEY, None)}
 
+@register.filter
+def render(object, content_path):
+    """
+    A markdown filter that handles the rendering of any text containing markdown markup and/or django template tags.
+    Only ``{{object}}`` and ``{{MEDIA_URL}}`` are available in the context.
+    """
+    import markdown
+    from django.conf import settings
+    path = content_path.split('.')
+    content = object
+    for step in path:
+        content = getattr(content, step)
+
+    result = force_unicode(markdown.markdown(smart_str(content)))
+    t = template.Template(result)
+    return t.render(template.Context({'object' : object, 'MEDIA_URL' : settings.MEDIA_URL}))
