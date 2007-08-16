@@ -2,6 +2,7 @@ import md5
 
 from django.db.models import ObjectDoesNotExist
 from django.core.cache import cache
+from django.utils.encoding import smart_str
 from django.http import Http404
 
 from ella.core.cache.invalidate import CACHE_DELETER
@@ -20,7 +21,7 @@ def get_cached_object(content_type, **kwargs):
     Throws:
         model.DoesNotExist is propagated from content_type.get_object_for_this_type
     """
-    key = md5.md5(KEY_FORMAT % (content_type.id, ':'.join('%s=%s' % (key, kwargs[key]) for key in sorted(kwargs.keys())))).hexdigest()
+    key = md5.md5(KEY_FORMAT % (content_type.id, ':'.join('%s=%s' % (smart_str(key), smart_str(kwargs[key])) for key in sorted(kwargs.keys())))).hexdigest()
 
     obj = cache.get(key)
     if obj is None:
