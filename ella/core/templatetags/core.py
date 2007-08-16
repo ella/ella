@@ -4,7 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, ImproperlyConfigured
 from django.utils.encoding import smart_str, force_unicode
 
-from ella.core.models import Listing
+from ella.core.models import Listing, Dependency
 from ella.core.box import *
 
 register = template.Library()
@@ -153,7 +153,8 @@ class BoxNode(template.Node):
 
         if BOX_INFO in context:
             # record dependecies
-            Dependency.objects.get_or_create(obj, box_key, *context[BOX_INFO])
+            source, source_key = context[BOX_INFO]
+            Dependency.objects.report_dependency(source, source_key, obj, box_key)
         return result
 
 @register.tag('box')

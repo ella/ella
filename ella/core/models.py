@@ -299,6 +299,7 @@ class Listing(models.Model):
         ordering = ('-publish_from',)
         unique_together = (('category', 'target_id', 'target_ct'),)
 
+
 class Related(models.Model):
     """
     Related objects - model for recording related items. For example related articles.
@@ -329,6 +330,32 @@ class Related(models.Model):
         verbose_name_plural = _('Related')
         ordering = ('source_ct', 'source_id',)
 
+class DependencyManager(models.Manager):
+    def report_dependency(self, source, source_key, target, target_key):
+        source_ct = ContentType.objects.get_for_model(source)
+        target_ct = ContentType.objects.get_for_model(target)
+        dep, created = self.get_or_create(
+                    source_ct=source_ct,
+                    source_id=source._get_pk_val(),
+                    source_key=source_key,
+
+                    target_ct=target_ct,
+                    target_id=target._get_pk_val(),
+                    target_key=target_key
+)
+
+    def cascade(self, target, key):
+        target_ct = ContentType.objects.get_for_model(target)
+        qset =  self.filter(
+                    target_ct=target_ct,
+                    target_key=key
+)
+        for dep in qset:
+            CACHE_DELETER.invalidate(dep.source_ct.model_class(), key)
+        qset.delete()
+
+
+
 class Dependency(models.Model):
     """
     Dependent objects - model for recording dependent items.
@@ -336,24 +363,24 @@ class Dependency(models.Model):
     """
     target_ct = models.ForeignKey(ContentType, related_name='dependency_for_set')
     target_id = models.IntegerField()
+    target_key = models.CharField(maxlength=256, blank=True)
 
     source_ct = models.ForeignKey(ContentType, related_name='dependent_on_set')
     source_id = models.IntegerField()
+    source_key = models.CharField(maxlength=256, blank=True)
+
+    objects = DependencyManager()
 
     def __unicode__(self):
         return u'%s depends on %s' % (self.source, self.target)
 
     @property
     def source(self):
-        if not hasattr(self, '_source'):
-            self._source = get_cached_object(self.source_ct, pk=self.source_id)
-        return self._source
+        return get_cached_object(self.source_ct, pk=self.source_id)
 
     @property
     def target(self):
-        if not hasattr(self, '_target'):
-            self._target = get_cached_object(self.target_ct, pk=self.target_id)
-        return self._target
+        return get_cached_object(self.target_ct, pk=self.target_id)
 
     class Meta:
         verbose_name = _('Dependency')

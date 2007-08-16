@@ -1,6 +1,8 @@
 base = r'''
 >>> from django.template import Template, Context
 >>> t = Template("{% box some_type for app_label.model_name with id 1 %}{% endbox %}")
+
+# silently fail
 Traceback (most recent call last):
   ...
 TemplateSyntaxError: Model u'app_label.model_name' does not exist

@@ -63,13 +63,21 @@ class CacheDeleter(object):
         if sender in self._register:
             for key, test in self._register[sender].items():
                 if test(instance):
-                    cache.delete(key)
-                    try:
-                        del self._register[sender][key]
-                    except KeyError:
-                        # we might be racing against ourselves via ActiveMQ
-                        pass
+                    self.invalidate(sender, key)
         return instance
+
+    def invalidate(self, sender, key):
+        from ella.core.models import Dependency
+
+        cache.delete(key)
+        try:
+            del self._register[sender][key]
+        except KeyError:
+            # we might be racing against ourselves via ActiveMQ
+            pass
+
+        # also destroy caches that depend on us
+        Dependency.objects.cascade(sender, key)
 
     def register(self, model, test, key):
         if model not in self._register:
