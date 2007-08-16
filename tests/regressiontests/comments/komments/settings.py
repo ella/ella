@@ -79,7 +79,6 @@ INSTALLED_APPS = (
     'ella.core',
     'ella.comments',
     'komments.sample',
-#    'komments.coreapp',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

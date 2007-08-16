@@ -7,15 +7,12 @@ from django.utils.translation import gettext
 
 
 from ella.comments import defaults
+from ella.comments.defaults import OPTIONS_NAME, TARGET_NAME, HASH_NAME, PARENT_NAME, FORM_OPTIONS
 from ella.comments.models import Comment, CommentOptions, BannedUser
 
 from datetime import datetime, timedelta
 
 
-OPTIONS_NAME = defaults.OPTIONS_NAME
-TARGET_NAME = defaults.TARGET_NAME
-HASH_NAME = defaults.HASH_NAME
-PARENT_NAME = defaults.PARENT_NAME
 
 
 class CommentForm(forms.Form):
@@ -100,7 +97,13 @@ class CommentForm(forms.Form):
 
     def arrange_form_by_opts(self):
         """arrange form by options"""
-        self.add_username_inputs(anonymous=(defaults.FORM_OPTIONS['LOGGED_ONLY'] not in self.OPTIONS))
+        if FORM_OPTIONS['LOGGED_ONLY'] in self.OPTIONS:
+            self.add_username_inputs(anonymous=False)
+        elif FORM_OPTIONS['UNAUTHORIZED_ONLY'] in self.OPTIONS:
+            self.add_username_inputs(registered=False)
+        else:
+            self.add_username_inputs()
+
 
     def add_hidden_inputs(self):
         """new hidden input fields, without initial values"""

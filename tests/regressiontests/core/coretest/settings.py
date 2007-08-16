@@ -100,4 +100,4 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 )
 
 CACHE_BACKEND = 'locmem://'
-CACHE_BACKEND = 'memcached://127.0.0.1'
+#CACHE_BACKEND = 'memcached://127.0.0.1'

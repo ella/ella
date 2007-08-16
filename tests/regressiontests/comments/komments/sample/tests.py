@@ -259,6 +259,8 @@ True
 
 """
 
+comment_form_parent = r"""
+"""
 
 
 comment_templatetags = r"""
@@ -344,12 +346,38 @@ u'\n\n\n3\n'
 >>> t.render(Context({'apple': apple}))
 u'\n\n\n3\n'
 
-
-
-
 """
 
-"""
+comment_form_options = r"""
+>>> from ella.comments import models as cmodels
+>>> from ella.comments import forms  as cforms
+>>> from komments.sample.models import Apple, Orange
+
+>>> from django.contrib.contenttypes.models import ContentType
+>>> from django.template import Template, Context
+
+>>> import pprint, datetime, time
+>>> from django import newforms as forms
+
+>>> from komments.sample import models as tmodels
+
+# get apple target string
+>>> apple_ct = ContentType.objects.get(name='apple')
+>>> apple_red   = tmodels.Apple.objects.get(color='red')
+>>> apple_green = tmodels.Apple.objects.get(color='green')
+>>> apple_red_target   = '%d:%d' % (apple_ct.id, apple_red.id)
+>>> apple_green_target = '%d:%d' % (apple_ct.id, apple_green.id)
+
+
+# form with options
+>>> INIT_PROPS = {
+...    'target': apple_red_target,
+...    'options': 'UN',
+...}
+>>> cform = cforms.CommentForm(init_props=INIT_PROPS)
+>>> sorted(cform.fields.keys())
+['content', 'email', 'gonzo', 'nickname', 'options', 'parent', 'target', 'timestamp']
+
 """
 
 
@@ -365,6 +393,7 @@ u'\n\n\n3\n'
 __test__ = {
     'comment_form_test': comment_form_test,
     'comment_templatetags': comment_templatetags,
+    'comment_form_options': comment_form_options,
 }
 
 

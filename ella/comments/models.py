@@ -56,6 +56,10 @@ class Comment(models.Model):
             return True
         return False
 
+    @property
+    def is_thread_root(self):
+        return self.path == ''
+
 
     def get_genealogy_path(self):
         """genealogy tree structure field"""
