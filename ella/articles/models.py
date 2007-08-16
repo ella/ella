@@ -96,7 +96,7 @@ class ArticleContents(models.Model):
     class Meta:
         verbose_name = _('Article content')
         verbose_name_plural = _('Article contents')
-        order_with_respect_to = 'article'
+        #order_with_respect_to = 'article'
 
     def __unicode__(self):
         return self.title

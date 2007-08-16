@@ -103,7 +103,6 @@ class Category(models.Model):
         ordering = ('tree_path', 'title',)
         verbose_name = _('Category')
         verbose_name_plural = _('Categories')
-        order_with_respect_to = 'site'
 
     def __unicode__(self):
         return self.title
