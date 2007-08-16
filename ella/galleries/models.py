@@ -78,51 +78,11 @@ class GalleryItem(models.Model):
 
 
 class GalleryItemOptions(admin.ModelAdmin):
-    '''
-    TODO: tohle zmizi, je to tu jenom kvuli testovani chovani lupy oproti chovani u TabularInline
-    '''
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        from ella.core import widgets
-        import django.newforms as forms
-        if db_field.name == 'target_ct':
-            return super(GalleryItemOptions, self).formfield_for_dbfield(
-                    db_field,
-                    widget=widgets.ContentTypeWidget(db_field.name.replace('_ct', '_id')),
-                    **kwargs
-)
-            '''
-            TODO: proc tu kralik mel tohle??
-            return forms.ModelChoiceField(
-                    queryset=ContentType.objects.all(),
-                    widget=widgets.ContentTypeWidget(db_field.name.replace('_ct', '_id')),
-)
-            '''
-        elif db_field.name == 'target_id':
-            return super(GalleryItemOptions, self).formfield_for_dbfield(db_field, widget=widgets.ForeignKeyRawIdWidget , **kwargs)
-
-        return super(GalleryItemOptions, self).formfield_for_dbfield(db_field, **kwargs)
+    """TODO: pridat widget, ktery bude volat maximuv skript"""
+    pass
 
 class GalleryItemTabularOptions(admin.TabularInline):
-    '''
-    TODO:
-    funguje, az na ten javascript: az bude fungovat upravovani inlines formu, tak by to chtelo jim priradit lupicku, atd...
-    mozna jeste jo: podivat se, jak funguji formsety u inlines
-    '''
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        from ella.core import widgets
-        import django.newforms as forms
-        if db_field.name == 'target_ct':
-            return super(GalleryItemTabularOptions, self).formfield_for_dbfield(
-                    db_field,
-                    widget=widgets.ContentTypeWidget(db_field.name.replace('_ct', '_id')), # TODO: tohle nejde, protoze IDcko se musi dynamicky menit
-                    **kwargs
-)
-        elif db_field.name == 'target_id':
-            return super(GalleryItemTabularOptions, self).formfield_for_dbfield(db_field, widget=widgets.ForeignKeyRawIdWidget , **kwargs)
-
-        return super(GalleryItemTabularOptions, self).formfield_for_dbfield(db_field, **kwargs)
-
-
+    pass
 
 
 class GalleryOptions(admin.ModelAdmin):
@@ -140,7 +100,7 @@ class GalleryOptions(admin.ModelAdmin):
 
 
 admin.site.register(Gallery, GalleryOptions)
-admin.site.register(GalleryItem, GalleryItemOptions)
+#admin.site.register(GalleryItem, GalleryItemOptions)
 
 
 
