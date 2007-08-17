@@ -49,14 +49,15 @@ class CommentForm(forms.Form):
         # update defaults with form init params
         self.init_props.update(init_props)
 
-        # TODO: clean this crazy hack => except pass is way to hell
         target_ct, target_id = None, None
         try:
             target_ct, target_id = self.init_props[TARGET_NAME].split(defaults.OPTS_DELIM)
             target_ct, target_id = int(target_ct), int(target_id)
             target_contenttype = get_cached_object(ContentType.objects.get_for_model(ContentType), pk=target_ct)
             self.target_object = get_cached_object(target_contenttype, pk=target_id)
-        except:
+        except ValueError:
+            pass
+        except models.ObjectDoesNotExist:
             pass
 
         # defaults for this instance
