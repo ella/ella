@@ -24,10 +24,13 @@ POLL_USER_NOT_YET_VOTED = 0
 POLL_USER_JUST_VOTED = 1
 POLL_USER_ALLREADY_VOTED = 2
 
+CURRENT_SITE = Site.objects.get_current()
+
 def check_vote(request, poll):
     sess_jv = request.session.get(POLLS_JUST_VOTED_COOKIE_NAME, [])
     if poll.id in sess_jv:
         del request.session[POLLS_JUST_VOTED_COOKIE_NAME]
+        # TODO - del just my poll, not the entire list !
         return POLL_USER_JUST_VOTED
     # authenticated user - check session
     if request.user.is_authenticated():
@@ -43,11 +46,10 @@ def check_vote(request, poll):
         if str(poll.id) in cook:
             return POLL_USER_ALLREADY_VOTED
         if Vote.objects.filter(poll=poll, ip_address=request.META['REMOTE_ADDR']).count() > 0:
-            return 4
             return POLL_USER_ALLREADY_VOTED
         return POLL_USER_NOT_YET_VOTED
 
-#@require_POST
+@require_POST
 @transaction.commit_on_success
 def poll_vote(request, poll_id):
     """
@@ -66,7 +68,7 @@ def poll_vote(request, poll_id):
 
     url = get_next_url(request)
 
-    form = QuestionForm(poll.question, request.POST or None)
+    form = QuestionForm(poll.question, request.POST)
     if form.is_valid():
 
         # choice data from form
@@ -107,16 +109,16 @@ def poll_vote(request, poll_id):
                 value=','.join(cook),
                 max_age=POLLS_MAX_COOKIE_AGE,
                 expires=expires,
-                path='/'#,
-#                domain=Site.objects.get_current().domain,
-#                secure=None
+                path='/',
+                domain=CURRENT_SITE.domain,
+                secure=None
 )
 
         return response
 
     return render_to_response('polls/poll_form.html', {'form' : form, 'next' : url}, context_instance=RequestContext(request))
 
-#@request_POST
+@request_POST
 @transaction.commit_on_success
 def contest_vote(request, contest_id):
     # get contest content type
@@ -195,7 +197,7 @@ def quiz_vote(request, quiz_id):
         # retriev quiz results
         try:
             results = Result.objects.get(quiz=quiz, points_from__gte=points, points_to__lt=points)
-        except Exception:
+        except Result.DoesNotExist:
             # TODO LOG
             # ale chybu polykame, redaktor muze zadat blbe rozsahy
             pass
