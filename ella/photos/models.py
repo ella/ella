@@ -207,8 +207,19 @@ class FormatedPhoto(models.Model):
             stretched_photo = cropped_photo
 
         # resize image to fit format
-        else:
+        elif self.format.stretch:
             stretched_photo = cropped_photo.resize(self.get_stretch_dimension(), Image.BICUBIC)
+
+        # crop image to fit
+        else:
+            stretched_photo = cropped_photo.crop(
+                                    (
+                                        self.crop_left,
+                                        self.crop_top,
+                                        self.crop_left + min(self.crop_width, self.format.max_width),
+                                        self.crop_top + min(self.crop_height, self.format.max_height)
+)
+)
 
         self.width, self.height = stretched_photo.size
         self.filename = self.file(relative=True)
