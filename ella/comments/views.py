@@ -4,6 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.shortcuts import get_object_or_404
+from django.template import RequestContext
 
 from ella.core.cache import get_cached_object_or_404
 
@@ -43,7 +44,7 @@ def new_comment(request, object):
     context = {
         'object': object,
 }
-    return render_to_response(templates, context)
+    return render_to_response(templates, context, context_instance=RequestContext(request))
 
 def list_comments(request, object):
     templates = [
@@ -52,7 +53,7 @@ def list_comments(request, object):
     context = {
         'object': object,
 }
-    return render_to_response(templates, context)
+    return render_to_response(templates, context, context_instance=RequestContext(request))
 
 
 

@@ -26,7 +26,7 @@ comment_form_test = r"""
 # create empty form - but form without specified target is for nothing
 >>> cform = cforms.CommentForm()
 >>> sorted(cform.fields.keys())
-['content', 'email', 'gonzo', 'nickname', 'options', 'parent', 'password', 'reg_anonym_sel', 'target', 'timestamp', 'username']
+['content', 'email', 'gonzo', 'nickname', 'options', 'parent', 'password', 'reg_anonym_sel', 'subject', 'target', 'timestamp', 'username']
 
 # form with target
 >>> INIT_PROPS = {
@@ -34,7 +34,7 @@ comment_form_test = r"""
 ...}
 >>> cform = cforms.CommentForm(init_props=INIT_PROPS)
 >>> sorted(cform.fields.keys())
-['content', 'email', 'gonzo', 'nickname', 'options', 'parent', 'password', 'reg_anonym_sel', 'target', 'timestamp', 'username']
+['content', 'email', 'gonzo', 'nickname', 'options', 'parent', 'password', 'reg_anonym_sel', 'subject', 'target', 'timestamp', 'username']
 
 # form with options
 >>> INIT_PROPS = {
@@ -43,7 +43,7 @@ comment_form_test = r"""
 ...}
 >>> cform = cforms.CommentForm(init_props=INIT_PROPS)
 >>> sorted(cform.fields.keys())
-['content', 'gonzo', 'options', 'parent', 'password', 'target', 'timestamp', 'username']
+['content', 'gonzo', 'options', 'parent', 'password', 'subject', 'target', 'timestamp', 'username']
 
 >>> cf_unbound = cform
 
@@ -56,7 +56,7 @@ comment_form_test = r"""
 >>> options = ''
 >>> hash = cform.get_hash(options=options, target=apple_red_target, timestamp=timestamp)
 >>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': apple_red_target,
-... 'reg_anonym_sel': 'AN', 'nickname': 'Jantar', 'content': 'Ahoj lidi.',}
+... 'reg_anonym_sel': 'AN', 'nickname': 'Jantar', 'content': 'Ahoj lidi.', 'subject': 'prispevek',}
 >>> cf = cforms.CommentForm(DATA)
 >>> sorted(cf.errors.keys())
 ['timestamp']
@@ -67,7 +67,7 @@ comment_form_test = r"""
 >>> options = ''
 >>> hash = 'xxxx'
 >>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': apple_red_target,
-... 'reg_anonym_sel': 'AN', 'nickname': 'Jantar', 'content': 'Ahoj lidi.',}
+... 'reg_anonym_sel': 'AN', 'nickname': 'Jantar', 'content': 'Ahoj lidi.', 'subject': 'prispevek',}
 >>> cf = cforms.CommentForm(DATA)
 >>> sorted(cf.errors.keys())
 ['gonzo']
@@ -79,7 +79,7 @@ comment_form_test = r"""
 >>> options = ''
 >>> hash = cform.get_hash(options=options, target=apple_red_target, timestamp=timestamp)
 >>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': 'x:x',
-... 'reg_anonym_sel': 'AN', 'nickname': 'Jantar', 'content': 'Ahoj lidi.',}
+... 'reg_anonym_sel': 'AN', 'nickname': 'Jantar', 'content': 'Ahoj lidi.', 'subject': 'prispevek',}
 >>> cf = cforms.CommentForm(DATA)
 >>> sorted(cf.errors.keys())
 ['__all__', 'gonzo', 'target']
@@ -91,7 +91,7 @@ comment_form_test = r"""
 >>> options = ''
 >>> hash = cform.get_hash(options=options, target=apple_red_target, timestamp=timestamp)
 >>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': 'x:x',
-... 'reg_anonym_sel': 'AN', 'nickname': 'Jantar', 'content': 'Ahoj lidi.',}
+... 'reg_anonym_sel': 'AN', 'nickname': 'Jantar', 'content': 'Ahoj lidi.', 'subject': 'prispevek',}
 >>> cf = cforms.CommentForm(DATA)
 >>> sorted(cf.errors.keys())
 ['__all__', 'gonzo', 'target']
@@ -102,7 +102,7 @@ comment_form_test = r"""
 >>> options = ''
 >>> hash = cform.get_hash(options=options, target=apple_red_target, timestamp=timestamp)
 >>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': apple_red_target,
-... 'reg_anonym_sel': 'RE', 'nickname': 'Jantar', 'content': 'Ahoj lidi.',}
+... 'reg_anonym_sel': 'RE', 'nickname': 'Jantar', 'content': 'Ahoj lidi.', 'subject': 'prispevek',}
 >>> cf = cforms.CommentForm(DATA)
 >>> sorted(cf.errors.keys())
 ['password', 'username']
@@ -113,7 +113,7 @@ comment_form_test = r"""
 >>> options = ''
 >>> hash = cform.get_hash(options=options, target=apple_red_target, timestamp=timestamp)
 >>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': apple_red_target,
-... 'reg_anonym_sel': 'AN', 'username': 'USER', 'password': 'PASSWORD', 'content': 'Ahoj lidi.',}
+... 'reg_anonym_sel': 'AN', 'username': 'USER', 'password': 'PASSWORD', 'content': 'Ahoj lidi.', 'subject': 'prispevek',}
 >>> cf = cforms.CommentForm(DATA)
 
 >>> sorted(cf.errors.keys())
@@ -131,7 +131,7 @@ comment_form_test = r"""
 >>> options = ''
 >>> hash = cform.get_hash(options=options, target=apple_red_target, timestamp=timestamp)
 >>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': apple_red_target,
-... 'reg_anonym_sel': 'RE', 'username': 'USER', 'password': 'PASSWORD', 'content': 'Ahoj lidi.',}
+... 'reg_anonym_sel': 'RE', 'username': 'USER', 'password': 'PASSWORD', 'content': 'Ahoj lidi.', 'subject': 'prispevek',}
 >>> cf = cforms.CommentForm(DATA)
 >>> sorted(cf.errors.keys())
 ['__all__', 'gonzo']
@@ -142,7 +142,7 @@ comment_form_test = r"""
 >>> options = 'LO'
 >>> hash = cform.get_hash(options=options, target=apple_red_target, timestamp=timestamp)
 >>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': apple_red_target,
-... 'reg_anonym_sel': 'RE', 'username': 'USER', 'password': 'PASSWORD', 'content': 'Ahoj lidi.',}
+... 'reg_anonym_sel': 'RE', 'username': 'USER', 'password': 'PASSWORD', 'content': 'Ahoj lidi.', 'subject': 'prispevek',}
 >>> cf = cforms.CommentForm(DATA)
 >>> sorted(cf.errors.keys())
 ['__all__', 'timestamp']
@@ -158,7 +158,7 @@ comment_form_test = r"""
 >>> target = apple_green_target
 >>> hash = cform.get_hash(options=options, target=target, timestamp=timestamp)
 >>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': target,
-... 'username': 'commenttestuser', 'password': 'TESTPASSWORD', 'content': 'Ahoj lidi.',}
+... 'username': 'commenttestuser', 'password': 'TESTPASSWORD', 'content': 'Ahoj lidi.', 'subject': 'prispevek',}
 >>> cf = cforms.CommentForm(DATA)
 >>> cf.is_valid()
 False
@@ -172,7 +172,7 @@ False
 
 # bad user
 >>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': target,
-... 'username': 'banneduser', 'password': 'bannedpassword', 'content': 'Ahoj lidi.',}
+... 'username': 'banneduser', 'password': 'bannedpassword', 'content': 'Ahoj lidi.', 'subject': 'prispevek',}
 >>> cf = cforms.CommentForm(DATA)
 >>> cf.is_valid()
 False
@@ -183,7 +183,7 @@ False
 
 # and good password
 >>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': target,
-... 'reg_anonym_sel': 'RE', 'username': 'commenttestuser', 'password': 'testpassword', 'content': 'Ahoj lidi.',}
+... 'reg_anonym_sel': 'RE', 'username': 'commenttestuser', 'password': 'testpassword', 'content': 'Ahoj lidi.', 'subject': 'prispevek',}
 >>> cf = cforms.CommentForm(DATA)
 >>> cf.is_valid()
 True
@@ -202,7 +202,7 @@ False
 
 # save valid form
 >>> sorted(cf_valid.cleaned_data.keys())
-['content', 'gonzo', 'options', 'parent', 'password', 'target', 'target_ct', 'target_id', 'timestamp', 'user', 'username']
+['content', 'gonzo', 'options', 'parent', 'password', 'subject', 'target', 'target_ct', 'target_id', 'timestamp', 'user', 'username']
 
 >>> cmodels.Comment.objects.all()
 []
@@ -231,7 +231,7 @@ u'commenttestuser'
 
 # save comment from unauthorized user
 >>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': target,
-... 'reg_anonym_sel': 'AN', 'nickname': 'commenttestuser', 'email': 'a@a.cz', 'content': 'Hello',}
+... 'reg_anonym_sel': 'AN', 'nickname': 'commenttestuser', 'email': 'a@a.cz', 'content': 'Hello', 'subject': 'prispevek',}
 >>> cf = cforms.CommentForm(DATA)
 >>> cf.is_valid()
 False
@@ -244,7 +244,7 @@ False
 >>> target = apple_green_target
 >>> hash = cform.get_hash(options=options, target=target, timestamp=timestamp)
 >>> DATA = {'gonzo': hash, 'timestamp': timestamp, 'options': options, 'target': target,
-... 'reg_anonym_sel': 'AN', 'nickname': 'commenttestuser', 'email': 'a@a.cz', 'content': 'Hello',}
+... 'reg_anonym_sel': 'AN', 'nickname': 'commenttestuser', 'email': 'a@a.cz', 'content': 'Hello', 'subject': 'prispevek',}
 >>> cf = cforms.CommentForm(DATA)
 >>> cf.is_valid()
 True
@@ -283,7 +283,7 @@ comment_templatetags = r"""
 ... {{comment_form|pprint}}
 ... ''')
 >>> t.render(Context({'apple': apple}))
-u"\n\n\nCommentForm for [12:2] with fields ['content', 'gonzo', 'options', 'parent', 'password', 'target', 'timestamp', 'username']\n"
+u"\n\n\nCommentForm for [12:2] with fields ['content', 'gonzo', 'options', 'parent', 'password', 'subject', 'target', 'timestamp', 'username']\n"
 
 >>> apple = Apple.objects.get(color='green')
 >>> t = Template('''
@@ -292,7 +292,7 @@ u"\n\n\nCommentForm for [12:2] with fields ['content', 'gonzo', 'options', 'pare
 ... {{comment_form|pprint}}
 ... ''' % apple.id)
 >>> t.render(Context({'apple': apple}))
-u"\n\n\nCommentForm for [12:1] with fields ['content', 'email', 'gonzo', 'nickname', 'options', 'parent', 'password', 'reg_anonym_sel', 'target', 'timestamp', 'username']\n"
+u"\n\n\nCommentForm for [12:1] with fields ['content', 'email', 'gonzo', 'nickname', 'options', 'parent', 'password', 'reg_anonym_sel', 'subject', 'target', 'timestamp', 'username']\n"
 
 >>> t = Template('''
 ... {% load comments %}
@@ -300,7 +300,7 @@ u"\n\n\nCommentForm for [12:1] with fields ['content', 'email', 'gonzo', 'nickna
 ... {{comment_form|pprint}}
 ... ''')
 >>> t.render(Context({'apple': apple}))
-u"\n\n\nCommentForm for [12:1] with fields ['content', 'email', 'gonzo', 'nickname', 'options', 'parent', 'password', 'reg_anonym_sel', 'target', 'timestamp', 'username']\n"
+u"\n\n\nCommentForm for [12:1] with fields ['content', 'email', 'gonzo', 'nickname', 'options', 'parent', 'password', 'reg_anonym_sel', 'subject', 'target', 'timestamp', 'username']\n"
 
 >>> t = Template('''
 ... {%% load comments %%}
@@ -308,7 +308,7 @@ u"\n\n\nCommentForm for [12:1] with fields ['content', 'email', 'gonzo', 'nickna
 ... {{comment_form|pprint}}
 ... ''' % apple.id)
 >>> t.render(Context({'apple': apple}))
-u"\n\n\nCommentForm for [12:1] with fields ['content', 'gonzo', 'options', 'parent', 'password', 'target', 'timestamp', 'username']\n"
+u"\n\n\nCommentForm for [12:1] with fields ['content', 'gonzo', 'options', 'parent', 'password', 'subject', 'target', 'timestamp', 'username']\n"
 
 
 # test get_comment_list
@@ -376,7 +376,7 @@ comment_form_options = r"""
 ...}
 >>> cform = cforms.CommentForm(init_props=INIT_PROPS)
 >>> sorted(cform.fields.keys())
-['content', 'email', 'gonzo', 'nickname', 'options', 'parent', 'target', 'timestamp']
+['content', 'email', 'gonzo', 'nickname', 'options', 'parent', 'subject', 'target', 'timestamp']
 
 """
 
