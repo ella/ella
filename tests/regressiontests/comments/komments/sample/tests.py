@@ -202,7 +202,7 @@ False
 
 # save valid form
 >>> sorted(cf_valid.cleaned_data.keys())
-['content', 'gonzo', 'options', 'parent', 'password', 'subject', 'target', 'target_ct', 'target_id', 'timestamp', 'user', 'username']
+['content', 'gonzo', 'options', 'parent', 'password', 'subject', 'target', 'target_ct', 'target_id', 'target_object', 'timestamp', 'user', 'username']
 
 >>> cmodels.Comment.objects.all()
 []

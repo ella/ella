@@ -1,16 +1,19 @@
+from datetime import datetime, timedelta
+
+
 from django import newforms as forms
 
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 
-from django.utils.translation import gettext
+from django.utils.translation import ugettext
 
 
 from ella.comments import defaults
 from ella.comments.defaults import OPTIONS_NAME, TARGET_NAME, HASH_NAME, PARENT_NAME, FORM_OPTIONS, SUBJECT_LENGTH
 from ella.comments.models import Comment, CommentOptions, BannedUser
 
-from datetime import datetime, timedelta
+from ella.core.cache import get_cached_object
 
 
 
@@ -46,10 +49,13 @@ class CommentForm(forms.Form):
         # update defaults with form init params
         self.init_props.update(init_props)
 
+        # TODO: clean this crazy hack => except pass is way to hell
         target_ct, target_id = None, None
         try:
             target_ct, target_id = self.init_props[TARGET_NAME].split(defaults.OPTS_DELIM)
             target_ct, target_id = int(target_ct), int(target_id)
+            target_contenttype = get_cached_object(ContentType.objects.get_for_model(ContentType), pk=target_ct)
+            self.target_object = get_cached_object(target_contenttype, pk=target_id)
         except:
             pass
 
@@ -176,22 +182,26 @@ class CommentForm(forms.Form):
 
             user = authenticate(username=self.init_props['username'], password=self.init_props['password'])
             if not user:
-                raise ValidationError, gettext("Invalid user.")
+                raise ValidationError, ugettext("Invalid user.")
             elif len(BannedUser.objects.filter(target_ct=self.init_props['target_ct'],
                                                          target_id=self.init_props['target_id'],
                                                          user=user)) > 0:
-                raise ValidationError, gettext("Banned user.")
+                raise ValidationError, ugettext("Banned user.")
             else:
                 self.cleaned_data['user'] = user
 
-        # target_ct, target_id validation
         try:
-            # TODO: this should by obtained from cache (similar to ContentType.objects.get_for_model)
-            target_ct = ContentType.objects.get(id=self.init_props['target_ct'])
+            # target_ct, target_id validation
+            target_ct = self.init_props['target_ct']
+            target_id = self.init_props['target_id']
+            target_ct = get_cached_object(ContentType.objects.get_for_model(ContentType), pk=target_ct)
+            target_object = get_cached_object(target_ct, pk=target_id)
+
             self.cleaned_data['target_ct'] = target_ct
-            self.cleaned_data['target_id'] = self.init_props['target_id']
-        except:
-            raise ValidationError, gettext("Target object does not exist.")
+            self.cleaned_data['target_id'] = target_id
+            self.cleaned_data['target_object'] = target_object
+        except models.ObjectDoesNotExist:
+            raise ValidationError, ugettext("Target object does not exist.")
 
         return self.cleaned_data
 
