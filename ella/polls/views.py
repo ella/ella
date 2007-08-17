@@ -118,7 +118,7 @@ def poll_vote(request, poll_id):
 
     return render_to_response('polls/poll_form.html', {'form' : form, 'next' : url}, context_instance=RequestContext(request))
 
-@request_POST
+@require_POST
 @transaction.commit_on_success
 def contest_vote(request, contest_id):
     # get contest content type
