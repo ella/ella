@@ -235,7 +235,7 @@ class FormatedPhoto(models.Model):
 
 
             # shrink the photo to fit the format
-            stretched_photo = cropped_photo.resize(self.get_stretch_dimension(), Image.BICUBIC)
+            stretched_photo = cropped_photo.resize(self.get_stretch_dimension(), Image.ANTIALIAS)
 
         self.width, self.height = stretched_photo.size
         self.filename = self.file(relative=True)
