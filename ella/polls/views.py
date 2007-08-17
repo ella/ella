@@ -16,26 +16,36 @@ from ella.polls.models import Poll, Contest, Contestant, Quiz, Result, Choice, V
 
 # POLLS specific settings
 POLLS_COOKIE_NAME = getattr(settings, 'POLLS_COOKIE_NAME', 'polls_voted')
+POLLS_JUST_VOTED_COOKIE_NAME = getattr(settings, 'POLLS_JUST_VOTED_COOKIE_NAME', 'polls_just_voted_voted')
 POLLS_MAX_COOKIE_LENGTH = getattr(settings, 'POLLS_MAX_COOKIE_LENGTH', 20)
 POLLS_MAX_COOKIE_AGE = getattr(settings, 'POLLS_MAX_COOKIE_AGE', 3600)
 
+POLL_USER_NOT_YET_VOTED = 0
+POLL_USER_JUST_VOTED = 1
+POLL_USER_ALLREADY_VOTED = 2
+
 def check_vote(request, poll):
+    sess_jv = request.session.get(POLLS_JUST_VOTED_COOKIE_NAME, [])
+    if poll.id in sess_jv:
+        del request.session[POLLS_JUST_VOTED_COOKIE_NAME]
+        return POLL_USER_JUST_VOTED
     # authenticated user - check session
     if request.user.is_authenticated():
         sess = request.session.get(POLLS_COOKIE_NAME, [])
-        if (poll_ct.id, poll.id) in sess:
-            return HttpResponseRedirect(url)
+        if poll.id in sess:
+            return POLL_USER_ALLREADY_VOTED
+        if Vote.objects.filter(poll=poll, user=request.user).count() > 0:
+            return POLL_USER_ALLREADY_VOTED
+        return POLL_USER_NOT_YET_VOTED
     # anonymous - check cookie
     else:
         cook = request.COOKIES.get(POLLS_COOKIE_NAME, '').split(',')
-        if '%s:%s' % (poll_ct.id, poll.id) in cook:
-            return HttpResponseRedirect(url)
-    # check by DB
-    try:
-        user_vote = Vote.objects.get(poll=poll)
-    except Exception:
-
-
+        if str(poll.id) in cook:
+            return POLL_USER_ALLREADY_VOTED
+        if Vote.objects.filter(poll=poll, ip_address=request.META['REMOTE_ADDR']).count() > 0:
+            return 4
+            return POLL_USER_ALLREADY_VOTED
+        return POLL_USER_NOT_YET_VOTED
 
 #@require_POST
 @transaction.commit_on_success
@@ -62,6 +72,9 @@ def poll_vote(request, poll_id):
         # choice data from form
         choice = form.cleaned_data['choice']
 
+        if check_vote(request, poll) != POLL_USER_NOT_YET_VOTED:
+            return HttpResponseRedirect(url)
+
         # update anti-spam - vote saving
         kwa = {}
         if request.user.is_authenticated():
@@ -73,31 +86,33 @@ def poll_vote(request, poll_id):
         # increment votes at choice object
         if vote.id:
             choice.add_vote()
-        # zaznamenat do session a pak vymazat
-        # ...
 
         # update anti-spam - cook, sess
+        sess_jv = request.session.get(POLLS_JUST_VOTED_COOKIE_NAME, [])
+        sess_jv.append(poll.id)
+        request.session[POLLS_JUST_VOTED_COOKIE_NAME] = sess_jv
+        response = HttpResponseRedirect(url)
         if request.user.is_authenticated():
             sess = request.session.get(POLLS_COOKIE_NAME, [])
-            sess.append((poll_ct.id, poll.id))
+            sess.append(poll.id)
             request.session[POLLS_COOKIE_NAME] = sess
         else:
             cook = request.COOKIES.get(POLLS_COOKIE_NAME, '').split(',')
             if len(cook) > POLLS_MAX_COOKIE_LENGTH:
                 cook = cook[1:]
-            cook.append('%s:%s' % (poll_ct.id, poll.id))
+            cook.append(str(poll.id))
             expires = datetime.strftime(datetime.utcnow() + timedelta(seconds=POLLS_MAX_COOKIE_AGE), "%a, %d-%b-%Y %H:%M:%S GMT")
-            HttpResponseRedirect(url).set_cookie(
+            response.set_cookie(
                 POLLS_COOKIE_NAME,
                 value=','.join(cook),
                 max_age=POLLS_MAX_COOKIE_AGE,
                 expires=expires,
-                path='/',
-                domain=Site.objects.get_current().domain,
-                secure=None
+                path='/'#,
+#                domain=Site.objects.get_current().domain,
+#                secure=None
 )
 
-        return HttpResponseRedirect(url)
+        return response
 
     return render_to_response('polls/poll_form.html', {'form' : form, 'next' : url}, context_instance=RequestContext(request))
 
@@ -202,10 +217,19 @@ def get_next_url(request):
     else:
         return request.META.get('HTTP_REFERER', '/')
 
+class MyRadioSelect(forms.RadioSelect):
+    def render(self, name, value, attrs=None, choices=()):
+        return self.get_renderer(name, value, attrs, choices)
+
 class QuestionForm(forms.Form):
     """
     Question form with all its choices
     """
+    def choices(self):
+        field = self['choice']
+        for choice, input in  zip(field.field.queryset, field.as_widget(field.field.widget)):
+            yield (choice, input)
+
     def __init__(self, question, *args, **kwargs):
         super(QuestionForm, self).__init__(*args, **kwargs)
         if question.allow_multiple:
@@ -215,8 +239,10 @@ class QuestionForm(forms.Form):
         else:
             self.fields['choice'] = forms.ModelChoiceField(
                 queryset=question.choice_set.all(),
-                widget=forms.RadioSelect,
+                widget=MyRadioSelect,
                 empty_label=None)
+
+
 
 class ContestantForm(forms.Form):
     """

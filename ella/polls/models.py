@@ -1,6 +1,23 @@
 from django.db import models, backend, connection
 from django.contrib import admin
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
+from django.utils.translation import ugettext_lazy as _
+
+from ella.core.cache import get_cached_object
+from ella.core.box import Box
+
+class PollBox(Box):
+   def get_context(self):
+        from ella.polls import views
+        cont = super(PollBox, self).get_context()
+#        state = views.check_vote(self._context['request'], self.obj)
+        cont.update({
+            'state' : views.check_vote(self._context['REQUEST'], self.obj),
+            'state_voted' : views.POLL_USER_ALLREADY_VOTED,
+            'state_just_voted' : views.POLL_USER_JUST_VOTED,
+            'state_not_yet_voted' : views.POLL_USER_NOT_YET_VOTED})
+        return cont
 
 class Poll(models.Model):
     """
@@ -12,7 +29,7 @@ class Poll(models.Model):
     text_results = models.TextField(_('Text with results'))
     active_from = models.DateTimeField(_('Active from'))
     active_till = models.DateTimeField(_('Active till'))
-    question = models.ForeignKey('Question', verbose_name=_('Question'))
+    question = models.ForeignKey('Question', verbose_name=_('Question'), unique=True)
 
     def __unicode__(self):
         return self.title
@@ -21,6 +38,18 @@ class Poll(models.Model):
         verbose_name = _('Poll')
         verbose_name_plural = _('Polls')
         ordering = ('-active_from',)
+
+    def get_total_votes(self):
+        if not hasattr(self, '_total_votes'):
+            total_votes = 0
+            for choice in self.question.choice_set.all():
+                if choice.votes:
+                    total_votes += choice.votes
+            self._total_votes = total_votes
+        return self._total_votes
+
+    def Box(self, box_type, nodelist):
+        return PollBox(self, box_type, nodelist)
 
 class Question(models.Model):
     """
@@ -35,6 +64,12 @@ class Question(models.Model):
 
     def __unicode__(self):
         return self.question
+
+    def form(self):
+        from ella.polls.views import QuestionForm
+        if not hasattr(self, '_form'):
+            self._form = QuestionForm(self)
+        return self._form
 
     class Meta:
         verbose_name = _('Question')
@@ -61,6 +96,13 @@ class Choice(models.Model):
         cur = connection.cursor()
         cur.execute(UPDATE_VOTE, (self._get_pk_val(),))
         return True
+
+    def get_percentage(self):
+        t=get_cached_object(ContentType.objects.get_for_model(Poll), question=self.question).get_total_votes()
+        p = 0
+        if self.votes:
+            p = int((100.0/t)*self.votes)
+        return p
 
 UPDATE_VOTE = '''
     UPDATE
