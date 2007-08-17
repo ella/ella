@@ -1,11 +1,12 @@
+from datetime import datetime
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 
 from ella.comments import defaults
-
-from datetime import datetime
+from ella.comments import management
 
 
 class CommentOptions(models.Model):
@@ -30,6 +31,7 @@ class Comment(models.Model):
     target_id = models.PositiveIntegerField(_('target id'))
 
     # comment content
+    subject = models.TextField(_('comment subject'), maxlength=defaults.SUBJECT_LENGTH)
     content = models.TextField(_('comment content'), maxlength=defaults.COMMENT_LENGTH)
     # comment picture
 #    image = models.ImageField(_('image answer'), upload_to='comment_image', blank=True, null=True)

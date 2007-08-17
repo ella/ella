@@ -1,0 +1,121 @@
+# Czech translation for ella.comments app
+# Copyright (C) 2007, NetCentrum (centrum.cz)
+# This file is distributed under the same license as the ella package.
+# Jakub Vysoký <jakub@borka.cz>, 2007.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2007-08-17 01:39+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Jakub Vysoký <jakub@borka.cz>, 2007\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: defaults.py:37
+msgid "registered user"
+msgstr "registrovaný uživatel"
+
+#: defaults.py:38
+msgid "anonymous user"
+msgstr "anonymní uživatel"
+
+#: forms.py:179
+msgid "Invalid user."
+msgstr "Neplatný uživatel."
+
+#: forms.py:183
+msgid "Banned user."
+msgstr "Zablokovaný uživatel."
+
+#: forms.py:194
+msgid "Target object does not exist."
+msgstr "Cílový objekt neexistuje."
+
+#: models.py:19 models.py:30 models.py:102
+msgid "target content type"
+msgstr "datový typ cílového objektu"
+
+#: models.py:20 models.py:31 models.py:103
+msgid "target id"
+msgstr "id cílového objektu"
+
+#: models.py:25 models.py:26
+msgid "Comment Options"
+msgstr "Možnosti komentářů"
+
+#: models.py:34
+msgid "comment subject"
+msgstr "předmět komentáře"
+
+#: models.py:35
+msgid "comment content"
+msgstr "obsah komentáře"
+
+#: models.py:40
+msgid "tree structure parent"
+msgstr "otec ve stromové struktuře"
+
+#: models.py:41
+msgid "genealogy tree path"
+msgstr "cesta v genealogickém stromu"
+
+#: models.py:44
+msgid "authorized author"
+msgstr "autorizovaný autor"
+
+#: models.py:46
+msgid "anonymous author's nickname"
+msgstr "přezdívka anonymního autora"
+
+#: models.py:47
+msgid "authors email (optional)"
+msgstr "autorův email (nepovinný)"
+
+#: models.py:49
+msgid "ip address"
+msgstr "ip adresa"
+
+#: models.py:52
+msgid "date/time submitted"
+msgstr "datum/čas odeslání"
+
+#: models.py:53
+msgid "is public"
+msgstr "je veřejný"
+
+#: models.py:92
+msgid "Comment"
+msgstr "Komentář"
+
+#: models.py:93
+msgid "Comments"
+msgstr "Komentáře"
+
+#: models.py:104
+msgid "banned author"
+msgstr "zablokovaný uživatel"
+
+#: models.py:107
+msgid "Banned User"
+msgstr "Zablokovaný uživatel"
+
+#: models.py:108
+msgid "Banned Users"
+msgstr "Zablokovaní uživatelé"
+
+#: urls.py:12
+msgid "preview"
+msgstr "náhled"
+
+#: urls.py:15
+msgid "new"
+msgstr "nový"
+
+#: urls.py:26
+msgid "comments"
+msgstr "komentáře"

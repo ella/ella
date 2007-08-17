@@ -7,7 +7,7 @@ from django.utils.translation import gettext
 
 
 from ella.comments import defaults
-from ella.comments.defaults import OPTIONS_NAME, TARGET_NAME, HASH_NAME, PARENT_NAME, FORM_OPTIONS
+from ella.comments.defaults import OPTIONS_NAME, TARGET_NAME, HASH_NAME, PARENT_NAME, FORM_OPTIONS, SUBJECT_LENGTH
 from ella.comments.models import Comment, CommentOptions, BannedUser
 
 from datetime import datetime, timedelta
@@ -117,6 +117,7 @@ class CommentForm(forms.Form):
     def add_normal_inputs(self):
         """any other normal inputs"""
         textarea = forms.Textarea()
+        self.fields['subject'] = forms.CharField(max_length=SUBJECT_LENGTH)
         self.fields['content'] = forms.CharField(max_length=defaults.COMMENT_LENGTH, widget=textarea)
 
     def add_username_inputs(self, registered=True, anonymous=True):
@@ -190,7 +191,7 @@ class CommentForm(forms.Form):
             self.cleaned_data['target_ct'] = target_ct
             self.cleaned_data['target_id'] = self.init_props['target_id']
         except:
-            raise ValidationError, gettext("Target model error.")
+            raise ValidationError, gettext("Target object does not exist.")
 
         return self.cleaned_data
 
