@@ -26,8 +26,8 @@ class CommentFormPreview(FormPreview):
         CommentForm(request.POST).save(
                 other_values={'ip_address': request.META['REMOTE_ADDR']})
         # TODO: get_cached_object_or_404
-        ct = get_object_or_404(ContentType, pk=cleaned_data['target_ct'].id)
-        target = get_object_or_404(ct.model_class(), pk=cleaned_data['target_id'])
+        ct = get_cached_object_or_404(ContentType.objects.get_for_model(ContentType), pk=cleaned_data['target_ct'].id)
+        target = get_cached_object_or_404(ct, pk=cleaned_data['target_id'])
         if hasattr(target, 'get_absolute_url'):
             url = target.get_absolute_url()
         else:

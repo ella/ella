@@ -11,6 +11,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 
 from ella.core.models import Author, Source, Category, Listing
+from ella.core.managers import RelatedManager
 from ella.core.box import Box
 
 # settings default
@@ -75,6 +76,7 @@ class Photo(models.Model):
     category = models.ForeignKey(Category, verbose_name=_('Category'))
 
     created = models.DateTimeField(default=datetime.now, editable=False)
+
 
     @property
     def main_listing(self):
@@ -174,6 +176,7 @@ class FormatedPhoto(models.Model):
     width = models.PositiveIntegerField(editable=False)
     height = models.PositiveIntegerField(editable=False)
 
+    objects = RelatedManager()
     def __unicode__(self):
         return u"%s - %s" % (self.filename, self.format)
 

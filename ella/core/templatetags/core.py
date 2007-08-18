@@ -6,6 +6,7 @@ from django.utils.encoding import smart_str, force_unicode
 
 from ella.core.models import Listing, Dependency
 from ella.core.box import *
+from ella.core.cache.utils import get_cached_object
 
 register = template.Library()
 
@@ -201,7 +202,7 @@ def do_box(parser, token):
         ct = ContentType.objects.get_for_model(model)
 
         try:
-            obj = ct.get_object_for_this_type(**{smart_str(bits[5]) : bits[6]})
+            obj = get_cached_object(ct, **{smart_str(bits[5]) : bits[6]})
         except models.ObjectDoesNotExist:
             return EmptyNode()
             #raise template.TemplateSyntaxError, "Model %r with field %r equal to %r does not exist." % (bits[3], bits[5], bits[6])

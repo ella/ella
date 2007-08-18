@@ -1,7 +1,13 @@
 from django import template
+from django.contrib.contenttypes.models import ContentType
+
 from ella.photos.models import Photo, Format, FormatedPhoto
+from ella.core.cache.utils import get_cached_object
 
 register = template.Library()
+FORMATED_PHOTO_CT = ContentType.objects.get_for_model(FormatedPhoto)
+PHOTO_CT = ContentType.objects.get_for_model(Photo)
+FORMAT_CT = ContentType.objects.get_for_model(Format)
 
 class ImgTag(template.Node):
     def __init__(self, photo, format, var_name):
@@ -13,7 +19,10 @@ class ImgTag(template.Node):
                 photo = template.resolve_variable(self.photo, context)
             except template.VariableDoesNotExist:
                 return ''
-            formated_photo, created = FormatedPhoto.objects.get_or_create(photo=photo, format=self.format)
+            try:
+                formated_photo = get_cached_object(FORMATED_PHOTO_CT, photo=photo, format=self.format)
+            except FormatedPhoto.DoesNotExist:
+                formated_photo = FormatedPhoto.objects.create(photo=photo, format=self.format)
         else:
             formated_photo = self.photo
 
@@ -36,7 +45,7 @@ def img(parser, token):
         raise template.TemplateSyntaxError, "{% img FORMAT for VAR as VAR_NAME %} or {% img FORMAT with FIELD VALUE as VAR_NAME %}"
 
     try:
-        format = Format.objects.get(name=bits[1])
+        format = get_cached_object(FORMAT_CT, name=bits[1])
     except Format.DoesNotExist:
         raise template.TemplateSyntaxError, "Format with name %r does not exist" % bits[1]
 
@@ -50,11 +59,14 @@ def img(parser, token):
         if bits[2] != 'with':
             raise template.TemplateSyntaxError, "{% img FORMAT with FIELD VALUE as VAR_NAME %}"
         try:
-            photo = Photo.objects.get(**{str(bits[3]) : bits[4]})
+            photo = get_cached_object(PHOTO_CT, **{str(bits[3]) : bits[4]})
         except photo.DoesNotExist:
             raise template.TemplateSyntaxError, "Photo with %r of %r does not exist" % (bits[3],  bits[4])
 
-        formated_photo, created = FormatedPhoto.objects.get_or_create(photo=photo, format=format)
+        try:
+            formated_photo = get_cached_object(FORMATED_PHOTO_CT, photo=photo, format=format)
+        except FormatedPhoto.DoesNotExist:
+            formated_photo = FormatedPhoto.objects.create(photo=photo, format=format)
     else:
         raise template.TemplateSyntaxError, "{% img FORMAT for VAR as VAR_NAME %} or {% img FORMAT with FIELD VALUE as VAR_NAME %}"
 

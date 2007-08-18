@@ -16,6 +16,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from ella.core.cache import get_cached_object
 from ella.core.box import Box
+from ella.core.managers import *
 
 DEFAULT_LISTING_PRIORITY = getattr(settings, 'DEFAULT_LISTING_PRIORITY', 0)
 
@@ -78,13 +79,13 @@ class Category(models.Model):
 
     @property
     def path(self):
-        if self.tree_parent:
+        if self.tree_parent_id:
             return self.tree_path
         else:
             return self.slug
 
     def get_absolute_url(self):
-        if not self.tree_parent:
+        if not self.tree_parent_id:
             return reverse('root_homepage')
         else:
             return reverse(
@@ -107,7 +108,7 @@ class Category(models.Model):
     def __unicode__(self):
         return self.title
 
-class ListingManager(models.Manager):
+class ListingManager(RelatedManager):
     NONE = 0
     IMMEDIATE = 1
     ALL = 2
@@ -234,7 +235,7 @@ class Listing(models.Model):
                      ContentType.objects.get_for_model(Category),
                      pk=getattr(obj, 'category_id', self.category_id)
 )
-        if category.tree_parent:
+        if category.tree_parent_id:
             return reverse(
                     'object_detail',
                     kwargs={
@@ -330,18 +331,30 @@ class Related(models.Model):
         verbose_name_plural = _('Related')
         ordering = ('source_ct', 'source_id',)
 
-class DependencyManager(models.Manager):
+class DependencyManager(RelatedManager):
     def report_dependency(self, source, source_key, target, target_key):
         source_ct = ContentType.objects.get_for_model(source)
         target_ct = ContentType.objects.get_for_model(target)
-        dep, created = self.get_or_create(
-                    source_ct=source_ct,
-                    source_id=source._get_pk_val(),
-                    source_key=source_key,
+        try:
+            get_cached_object(
+                        ContentType.objects.get_for_model(Dependency),
+                        source_ct=source_ct,
+                        source_id=source._get_pk_val(),
+                        source_key=source_key,
 
-                    target_ct=target_ct,
-                    target_id=target._get_pk_val(),
-                    target_key=target_key
+                        target_ct=target_ct,
+                        target_id=target._get_pk_val(),
+                        target_key=target_key
+)
+        except Dependency.DoesNotExist:
+            dep = self.create(
+                        source_ct=source_ct,
+                        source_id=source._get_pk_val(),
+                        source_key=source_key,
+
+                        target_ct=target_ct,
+                        target_id=target._get_pk_val(),
+                        target_key=target_key
 )
 
     def cascade(self, target, key):

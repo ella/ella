@@ -8,6 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from ella.core.models import Category, Author, Source, Listing
 from ella.core.box import Box
+from ella.core.managers import RelatedManager
 from ella.photos.models import Photo
 
 class Article(models.Model):
@@ -29,6 +30,16 @@ class Article(models.Model):
     # Main Photo to Article
     photo = models.ForeignKey(Photo, blank=True, null=True, verbose_name=_('Photo'))
 
+    objects = RelatedManager()
+
+    def get_photo(self):
+        from ella.core.cache import get_cached_object
+        if not hasattr(self, '_photo'):
+            try:
+                self._photo = get_cached_object(ContentType.objects.get_for_model(Photo), pk=self.photo_id)
+            except Photo.DoesNotExist:
+                self._photo = None
+        return self._photo
     @property
     def main_listing(self):
         from ella.core.cache import get_cached_object
