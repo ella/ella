@@ -4,7 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, ImproperlyConfigured
 from django.utils.encoding import smart_str, force_unicode
 
-from ella.core.models import Listing, Dependency
+from ella.core.models import Listing, Dependency, Related
 from ella.core.box import *
 from ella.core.cache.utils import get_cached_object
 
@@ -279,14 +279,107 @@ def render(object, content_path):
     """
     A markdown filter that handles the rendering of any text containing markdown markup and/or django template tags.
     Only ``{{object}}`` and ``{{MEDIA_URL}}`` are available in the context.
+
+    Usage::
+
+        {{object|render:"property.to.render"}}
+
+    Examples::
+
+        {{article|render:"perex"}}
+        {{article|render:"content.content"}}
     """
     import markdown
     from django.conf import settings
     path = content_path.split('.')
     content = object
     for step in path:
-        content = getattr(content, step)
+        try:
+            content = getattr(content, step)
+        except:
+            raise template.TemplateSyntaxError, "Error accessing %r property of object %r" % (content_path, object)
 
     result = force_unicode(markdown.markdown(smart_str(content)))
     t = template.Template(result)
     return t.render(template.Context({'object' : object, 'MEDIA_URL' : settings.MEDIA_URL}))
+
+
+class RelatedNode(template.Node):
+    def __init__(self, obj_var, count, var_name, models=[]):
+        self.obj_var, self.count, self.var_name, self.models = obj_var, count, var_name, models
+
+    def render(self, context):
+        try:
+            obj = template.resolve_variable(self.obj_var, context)
+        except template.VariableDoesNotExist:
+            return ''
+
+        related = []
+        count = self.count
+
+        # manually entered dependencies
+        for rel in Related.objects.filter(source_ct=ContentType.objects.get_for_model(obj), source_id=obj._get_pk_val()):
+            related.append(rel)
+            count -= 1
+            if count <= 0:
+                break
+
+        # related objects vie tags
+        if self.models and count > 0:
+            from tagging.models import TaggedItem
+            for m in self.models:
+                to_add = TaggedItem.objects.get_related(self.obj, m, count)
+                for rel in to_add:
+                    if rel not in related:
+                        count -= 1
+                        related.append(rel)
+                    if count <= 0:
+                        break
+
+        # top objects in given category
+        if count > 0:
+            listings = Listing.objects.get_listing(category=obj.category, count=count, mods=self.models)
+            related.extend(listing.target for listing in listings)
+
+        context[self.var_name] = related
+        return ''
+
+@register.tag('related')
+def do_related(parser, token):
+    """
+    {% related N [app_label.Model, ...] for object as var_name %}
+    """
+    bits = token.split_contents()
+
+    if len(bits) < 6:
+        raise template.TemplateSyntaxError, "{% related N [app_label.Model, ...] for object as var_name %}"
+
+    if not bits[1].isdigit():
+        raise template.TemplateSyntaxError, "Count must be an integer."
+
+    if bits[-2] != 'as':
+        raise template.TemplateSyntaxError, "Tag must end with as var_name "
+    if bits[-4] != 'for':
+        raise template.TemplateSyntaxError, "Tag must end with for object as var_name "
+
+    mods = []
+    for m in bits[2:-5]:
+        if m == ',':
+            continue
+        if ',' in m:
+            ms = m.split()
+            for msm in ms:
+                try:
+                    mods.append(models.get_model(*msm.split('.')))
+                except:
+                    raise template.TemplateSyntaxError, "%r doesn't represent any model." % msm
+        else:
+            try:
+                mods.append(models.get_model(*m.split('.')))
+            except:
+                raise template.TemplateSyntaxError, "%r doesn't represent any model." % m
+    return RelatedNode(bits[-3], int(bits[1]), bits[-1], mods)
+
+
+
+

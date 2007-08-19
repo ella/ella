@@ -137,7 +137,7 @@ class ArticleOptions(admin.ModelAdmin):
     raw_id_fields = ('photo',)
     list_filter = ('created',)
     search_fields = ('title', 'perex',)
-    inlines = (ArticleContentInlineOptions(ArticleContents, extra=3),)
+    inlines = (ArticleContentInlineOptions(ArticleContents, extra=1),)
     prepopulated_fields = {'slug' : ('title',)}
 
     def formfield_for_dbfield(self, db_field, **kwargs):
