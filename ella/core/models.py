@@ -406,7 +406,7 @@ import widgets
 class ListingOptions(admin.ModelAdmin):
     raw_id_fields = ('target_id',)
     list_display = ('target', 'category', 'publish_from',)
-    list_filter = ('publish_from',)
+    list_filter = ('publish_from', 'category', 'target_ct',)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name in ('target_ct',):
