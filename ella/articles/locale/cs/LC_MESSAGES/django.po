@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-07-17 17:17+0200\n"
+"POT-Creation-Date: 2007-08-19 23:07+0200\n"
 "PO-Revision-Date: 2007-07-17 17:05+0200\n"
 "Last-Translator: Honza Kral <Honza.Kral@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,71 +16,82 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: models.py:14 models.py:67
+#: models.py:15 models.py:28 models.py:105
 msgid "Title"
 msgstr "Titulek"
 
-#: models.py:15
-msgid "Upper title"
-msgstr "Nadtitulek"
-
-#: models.py:16
-msgid "Slug"
-msgstr ""
-
-#: models.py:19
-msgid "Perex"
-msgstr "Perex"
-
-#: models.py:20
+#: models.py:16 models.py:34
 msgid "Created"
 msgstr "Vytvořeno"
 
-#: models.py:21
+#: models.py:17 models.py:35
 msgid "Updated"
 msgstr "Upraveno"
 
-#: models.py:24
-#msgid "Authors"
-#msgstr "Autoři"
-
-#: models.py:25
-msgid "Source"
-msgstr "Zdroj"
-
-#: models.py:26
-msgid "Category"
-msgstr "Kategorie"
-
-#: models.py:43 models.py:66
-msgid "Article"
-msgstr "Článek"
-
-#: models.py:44
-msgid "Articles"
-msgstr "Články"
-
-#: models.py:52
-msgid "Article Age"
-msgstr "Stáří článku"
-
-#: models.py:68
+#: models.py:18 models.py:106
 msgid "Content"
 msgstr "Obsah"
 
-#: models.py:82
+#: models.py:22
+msgid "Info box"
+msgstr "Info box"
+
+#: models.py:23
+msgid "Info boxes"
+msgstr "Info boxy"
+
+#: models.py:29
+msgid "Upper title"
+msgstr "Nadtitulek"
+
+#: models.py:30
+msgid "Slug"
+msgstr ""
+
+#: models.py:33
+msgid "Perex"
+msgstr "Perex"
+
+#: models.py:38
+msgid "Authors"
+msgstr "Autoři"
+
+#: models.py:39
+msgid "Source"
+msgstr "Zdroj"
+
+#: models.py:40
+msgid "Category"
+msgstr "Kategorie"
+
+#: models.py:43
+msgid "Photo"
+msgstr "Foto"
+
+#: models.py:83 models.py:104
+msgid "Article"
+msgstr "Článek"
+
+#: models.py:84
+msgid "Articles"
+msgstr "Články"
+
+#: models.py:92
+msgid "Article Age"
+msgstr "Stáří článku"
+
+#: models.py:120
 msgid "Article content"
 msgstr "Obsah článku"
 
-#: models.py:83
-#: models.py:95
+#: models.py:121 models.py:164
 msgid "Article contents"
 msgstr "Obsahy článků"
 
-#: models.py:94
+#: models.py:163
 msgid "Article heading"
 msgstr "Hlavička článku"
 
-#: models.py:96
+#: models.py:165
 msgid "Metadata"
 msgstr "Metadata"

@@ -11,6 +11,18 @@ from ella.core.box import Box
 from ella.core.managers import RelatedManager
 from ella.photos.models import Photo
 
+class InfoBox(models.Model):
+    title = models.CharField(_('Title'), maxlength=255)
+    created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)
+    updated = models.DateTimeField(_('Updated'), blank=True, null=True)
+    content = models.TextField(_('Content'))
+
+    class Meta:
+        ordering = ('-created',)
+        verbose_name = _('Info box')
+        verbose_name_plural = _('Info boxes')
+
+
 class Article(models.Model):
     # Titles
     title = models.CharField(_('Title'), maxlength=255)
@@ -123,6 +135,25 @@ class ArticleContentInlineOptions(admin.TabularInline):
                     **kwargs
 )
         return super(ArticleContentInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
+
+class InfoBoxOptions(admin.ModelAdmin):
+    list_display = ('title', 'created',)
+    date_hierarchy = 'created'
+    list_filter = ('created', 'updated',)
+    search_fields = ('title', 'content',)
+
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        from django.newforms import widgets
+        if db_field.name == 'content':
+            return super(InfoBoxOptions, self).formfield_for_dbfield(
+                    db_field,
+                    widget=widgets.Textarea(attrs={'class': TEXTAREACLASS,}),
+                    **kwargs
+)
+        return super(InfoBoxOptions, self).formfield_for_dbfield(db_field, **kwargs)
+
+
+admin.site.register(InfoBox, InfoBoxOptions)
 
 class ArticleOptions(admin.ModelAdmin):
     #raw_id_fields = ('authors',)
