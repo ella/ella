@@ -110,20 +110,27 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
         Http404 - if the specified category or content_type does not exist or if the given date is malformed.
     """
     kwa = {}
-    if day and month and year:
+    dates_kwa = {}
+    if year:
+        current_date = datetime.datetime(int(year), 1, 1)
+        dates_kwa['publish_from__year'] = int(year)
+        date_kind = 'month'
+
+    if month:
         try:
-            datetime.date(int(year), int(month), int(day))
+            current_date = datetime.datetime(int(year), int(month), 1)
         except ValueError:
             raise Http404
+        dates_kwa['publish_from__month'] = int(month)
+        date_kind = 'day'
+
     if day:
-        kwa['publish_from__day'] = int(day)
-    if month:
-        month = int(month)
-        if month > 12:
+        try:
+            current_date = datetime.datetime(int(year), int(month), int(day))
+        except ValueError:
             raise Http404
-        kwa['publish_from__month'] = month
-    if year:
-        kwa['publish_from__year'] = year
+        dates_kwa['publish_from__day'] = int(day)
+        date_kind = 'detail'
 
     if category:
         cat = get_cached_object_or_404(CATEGORY_CT, tree_path=category)
@@ -143,7 +150,10 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
     else:
         page = 1
 
-    paginator = ObjectPaginator(Listing.objects.get_queryset(**kwa), paginate_by)
+    base_qset = Listing.objects.get_queryset(**kwa)
+    kwa.update(dates_kwa)
+    qset = Listing.objects.get_queryset(**kwa)
+    paginator = ObjectPaginator(qset.filter(**dates_kwa), paginate_by)
     kwa['count'] = paginate_by
     kwa['offset'] = (page - 1) * paginate_by + 1
     listings = Listing.objects.get_listing(**kwa)
@@ -168,11 +178,21 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
             'pages': paginator.pages,
             'hits' : paginator.hits,
 
+            'year_list' : [ (d, d.strftime(DATE_REPR["year"]), d.strftime(YEAR_URLS[date_kind])) for d in base_qset.dates('publish_from', "year", order='DESC') ],
+            'date_list' : date_kind != 'detail' and [ (d, d.strftime(DATE_REPR[date_kind]), d.strftime(DATE_URLS[date_kind])) for d in qset.dates('publish_from', date_kind, order='DESC') ] or None,
+            'current_date' : current_date,
+            'current_date_text' : current_date.strftime(CURRENT_DATE_REPR[date_kind]),
+            'date_kind' : date_kind,
+
             'content_type' : content_type,
             'listings' : listings,
             'category' : cat,
 }, context_instance=RequestContext(request))
 
+DATE_URLS = {'year' : '../%Y/', 'month' : '../../%Y/%m/', 'day' : '../../../%Y/%m/%d/',}
+YEAR_URLS = {'year' : '../%Y/', 'month' : '../../%Y/', 'day' : '../../../%Y/', 'detail' : '../../../%Y/'}
+DATE_REPR = {'year' : '%Y', 'month' : '%m/%Y', 'day' : '%d/%m/%Y', 'detail' : '%d/%m/%Y',}
+CURRENT_DATE_REPR = {'year' : '', 'month' : '%Y', 'day' : '%m/%Y', 'detail' : '%d/%m/%Y',}
 def home(request):
     """
     Homepage of the actual site.
