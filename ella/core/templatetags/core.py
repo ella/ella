@@ -330,7 +330,7 @@ class RelatedNode(template.Node):
             for m in self.models:
                 to_add = TaggedItem.objects.get_related(self.obj, m, count)
                 for rel in to_add:
-                    if rel not in related:
+                    if rel != obj and rel not in related:
                         count -= 1
                         related.append(rel)
                     if count <= 0:
@@ -339,7 +339,7 @@ class RelatedNode(template.Node):
         # top objects in given category
         if count > 0:
             listings = Listing.objects.get_listing(category=obj.category, count=count, mods=self.models)
-            related.extend(listing.target for listing in listings)
+            related.extend(listing.target for listing in listings if listing.target != obj)
 
         context[self.var_name] = related
         return ''
