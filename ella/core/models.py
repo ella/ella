@@ -218,6 +218,8 @@ class Listing(models.Model):
     priority_value = models.IntegerField(_("Priority"), default=DEFAULT_LISTING_PRIORITY, blank=True)
     remove = models.BooleanField(_("Remove"), help_text=_("Remove object from listing after the priority wears off?"), default=False)
 
+    commercial = models.BooleanField(_("Commercial"), default=False)
+
     objects = ListingManager()
 
     def Box(self, box_type, nodelist):
