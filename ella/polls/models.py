@@ -88,7 +88,8 @@ class Choice(models.Model):
         return self.choice
 
     class Meta:
-        order_with_respect_to = 'question'
+        #order_with_respect_to = 'question'
+        order = ('question',)
         verbose_name = _('Choice')
         verbose_name_plural = _('Choices')
 
