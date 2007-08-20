@@ -2,6 +2,7 @@ from django.core.cache import cache
 from django.contrib.contenttypes.models import ContentType
 from django.dispatch import dispatcher
 from django.db.models import signals
+from django.conf import settings
 
 try:
     import cPickle as pickle
@@ -88,6 +89,10 @@ class CacheDeleter(object):
         self._register[model][key] = test
 
 CACHE_DELETER = CacheDeleter()
+try:
+    ACTIVE_MQ_HOST = settings.ACTIVE_MQ_HOST
+except AttributeError:
+    raise ImproperlyConfigured, "Please set ACTIVE_MQ_HOST to a valid ActiveMQ Host"
 
 def get_propagator(conn):
     def propagate_signal(sender, instance):

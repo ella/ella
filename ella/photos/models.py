@@ -222,7 +222,7 @@ class FormatedPhoto(models.Model):
         if self.crop_width < self.format.max_width and self.crop_height < self.format.max_height:
             if self.format.stretch:
                 # resize image to fit format
-                stretched_photo = cropped_photo.resize(self.get_stretch_dimension(), Image.BICUBIC)
+                stretched_photo = cropped_photo.resize(self.get_stretch_dimension(), Image.ANTIALIAS)
             else:
                 stretched_photo = cropped_photo
 
@@ -246,7 +246,7 @@ class FormatedPhoto(models.Model):
                 if self.crop_width <= fmt_width and self.crop_height <= fmt_height:
                     if self.format.stretch:
                         # resize image to fit format
-                        stretched_photo = cropped_photo.resize(self.get_stretch_dimension(), Image.BICUBIC)
+                        stretched_photo = cropped_photo.resize(self.get_stretch_dimension(), Image.ANTIALIAS)
                     else:
                         stretched_photo = cropped_photo
                 elif my_ratio > format_ratio:
