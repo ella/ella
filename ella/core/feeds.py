@@ -4,7 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.http import Http404
 
 from ella.core.models import Listing, Category
-from ella.core.views import get_content_type, CATEGORY_CT
+from ella.core.views import get_content_type
 from ella.core.cache.utils import get_cached_object
 
 NUM_IN_FEED = 10
@@ -18,9 +18,9 @@ class RSSTopCategoryListings(Feed):
             ct = False
 
         if bits:
-            cat = get_cached_object(CATEGORY_CT, tree_path=u'/'.join(bits))
+            cat = get_cached_object(Category, tree_path=u'/'.join(bits))
         else:
-            cat = get_cached_object(CATEGORY_CT, tree_parent__isnull=True)
+            cat = get_cached_object(Category, tree_parent__isnull=True)
 
         if ct:
             return (cat, ct)

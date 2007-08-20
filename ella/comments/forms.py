@@ -53,7 +53,7 @@ class CommentForm(forms.Form):
         try:
             target_ct, target_id = self.init_props[TARGET_NAME].split(defaults.OPTS_DELIM)
             target_ct, target_id = int(target_ct), int(target_id)
-            target_contenttype = get_cached_object(ContentType.objects.get_for_model(ContentType), pk=target_ct)
+            target_contenttype = get_cached_object(ContentType, pk=target_ct)
             self.target_object = get_cached_object(target_contenttype, pk=target_id)
         except ValueError:
             pass
@@ -195,7 +195,7 @@ class CommentForm(forms.Form):
             # target_ct, target_id validation
             target_ct = self.init_props['target_ct']
             target_id = self.init_props['target_id']
-            target_ct = get_cached_object(ContentType.objects.get_for_model(ContentType), pk=target_ct)
+            target_ct = get_cached_object(ContentType, pk=target_ct)
             target_object = get_cached_object(target_ct, pk=target_id)
 
             self.cleaned_data['target_ct'] = target_ct

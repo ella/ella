@@ -89,10 +89,7 @@ class CacheDeleter(object):
         self._register[model][key] = test
 
 CACHE_DELETER = CacheDeleter()
-try:
-    ACTIVE_MQ_HOST = settings.ACTIVE_MQ_HOST
-except AttributeError:
-    raise ImproperlyConfigured, "Please set ACTIVE_MQ_HOST to a valid ActiveMQ Host"
+ACTIVE_MQ_HOST = getattr(settings, 'ACTIVE_MQ_HOST', 'localhost')
 
 def get_propagator(conn):
     def propagate_signal(sender, instance):

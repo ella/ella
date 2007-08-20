@@ -199,10 +199,9 @@ def do_box(parser, token):
         if model is None:
             return EmptyNode()
             #raise template.TemplateSyntaxError, "Model %r does not exist" % bits[3]
-        ct = ContentType.objects.get_for_model(model)
 
         try:
-            obj = get_cached_object(ct, **{smart_str(bits[5]) : bits[6]})
+            obj = get_cached_object(model, **{smart_str(bits[5]) : bits[6]})
         except models.ObjectDoesNotExist:
             return EmptyNode()
             #raise template.TemplateSyntaxError, "Model %r with field %r equal to %r does not exist." % (bits[3], bits[5], bits[6])

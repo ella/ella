@@ -30,7 +30,7 @@ class Gallery(models.Model):
         from ella.core.cache import get_cached_object
         try:
             return get_cached_object(
-                    ContentType.objects.get_for_model(Listing),
+                    Listing,
                     target_ct=ContentType.objects.get_for_model(self.__class__),
                     target_id=self.id,
                     category=self.category

@@ -36,9 +36,6 @@ def get_content_type(ct_name):
             raise Http404
     return ct
 
-LISTING_CT = ContentType.objects.get_for_model(Listing)
-CATEGORY_CT = ContentType.objects.get_for_model(Category)
-
 def object_detail(request, category, year, month, day, content_type, slug, url_remainder=None):
     """
     Detail view that displays a single object based on it's main listing.
@@ -56,14 +53,14 @@ def object_detail(request, category, year, month, day, content_type, slug, url_r
     ct = get_content_type(content_type)
 
     if category:
-        cat = get_cached_object_or_404(CATEGORY_CT, tree_path=category)
+        cat = get_cached_object_or_404(Category, tree_path=category)
     else:
-        cat = get_cached_object_or_404(CATEGORY_CT, tree_parent__isnull=True)
+        cat = get_cached_object_or_404(Category, tree_parent__isnull=True)
 
     obj = get_cached_object_or_404(ct, slug=slug)
     try:
         date = datetime.date(int(year), int(month), int(day))
-        listing = get_cached_object_or_404(LISTING_CT, target_ct=ct, target_id=obj.id, category=cat)
+        listing = get_cached_object_or_404(Listing, target_ct=ct, target_id=obj.id, category=cat)
         if listing.publish_from.date() != date:
             raise Http404
 
@@ -133,7 +130,7 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
         date_kind = 'detail'
 
     if category:
-        cat = get_cached_object_or_404(CATEGORY_CT, tree_path=category)
+        cat = get_cached_object_or_404(Category, tree_path=category)
         kwa['category'] = cat
     else:
         cat = False
@@ -203,7 +200,7 @@ def home(request):
     Raise:
         Http404 if there is no base category
     """
-    cat = get_cached_object_or_404(CATEGORY_CT, tree_parent__isnull=True)
+    cat = get_cached_object_or_404(Category, tree_parent__isnull=True)
     return render_to_response(
             (
                 'category/%s/detail.html' % (cat.slug),
@@ -226,7 +223,7 @@ def category_detail(request, category):
     Raise:
         Http404 if the category doesn't exist
     """
-    cat = get_cached_object_or_404(CATEGORY_CT, tree_path=category, tree_parent__isnull=False)
+    cat = get_cached_object_or_404(Category, tree_path=category, tree_parent__isnull=False)
     return render_to_response(
             (
                 'category/%s/detail.html' % (cat.path),

@@ -233,10 +233,7 @@ class Listing(models.Model):
 
     def get_absolute_url(self):
         obj = self.target
-        category = get_cached_object(
-                     ContentType.objects.get_for_model(Category),
-                     pk=getattr(obj, 'category_id', self.category_id)
-)
+        category = get_cached_object(Category, pk=getattr(obj, 'category_id', self.category_id))
         if category.tree_parent_id:
             return reverse(
                     'object_detail',
@@ -269,7 +266,7 @@ class Listing(models.Model):
         obj = self.target
         if self.category != obj.category:
             main_listing = get_cached_object(
-                    ContentType.objects.get_for_model(Listing),
+                    Listing,
                     category=obj.category,
                     target_ct=self.target_ct,
                     target_id=self.target_id
@@ -339,7 +336,7 @@ class DependencyManager(RelatedManager):
         target_ct = ContentType.objects.get_for_model(target)
         try:
             get_cached_object(
-                        ContentType.objects.get_for_model(Dependency),
+                        Dependency,
                         source_ct=source_ct,
                         source_id=source._get_pk_val(),
                         source_key=source_key,
