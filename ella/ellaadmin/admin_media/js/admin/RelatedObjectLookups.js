@@ -96,7 +96,7 @@ observe(window, 'load', function(){
 			var nLt = document.getElementById('lookup_' + allTargets[s].id) || false;
 			if(!nLt){
 				var newLoupe = document.createElement('img');
-				newLoupe.src = '/media/img/admin/selector-search.gif';
+				newLoupe.src = adminmediapath + 'img/admin/selector-search.gif';
 				newLoupe.style.cssText = 'cursor: pointer;';
 				newLoupe.id = 'lookup_' + allTargets[s].id;
 				newLoupe.alt = loupes.length;
@@ -110,7 +110,7 @@ observe(window, 'load', function(){
 					var path = paths[selects[num].value];
 
 
-					var addr = '/admin/' + path + '/?pop=1';
+					var addr = '../../../' + path + '/?pop=1';
 					var win = window.open(addr, name, 'height=500,width=800,resizable=yes,scrollbars=yes');
 					win.focus();
 				} else {
