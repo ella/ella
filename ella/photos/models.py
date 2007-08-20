@@ -123,13 +123,6 @@ class Photo(models.Model):
 
     # TODO zajistit unikatnost nazvu slugu
     def save(self):
-        while True:
-            try:
-                p = Photo.objects.get(slug=self.slug).exclude(pk=self.id)
-                self.slug = '_' + self.slug
-            except Photo.DoesNotExist:
-                break
-
         self.image = auto_rename(self.image, self.slug)
         super(Photo, self).save()
 
