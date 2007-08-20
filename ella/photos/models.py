@@ -9,6 +9,8 @@ from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.sites.models import Site
+from django.contrib.sites.managers import CurrentSiteManager
 
 from ella.core.models import Author, Source, Category, Listing
 from ella.core.managers import RelatedManager
@@ -138,11 +140,16 @@ class Photo(models.Model):
         ordering = ('-created',)
 
 class Format(models.Model):
-    name = models.CharField(maxlength=80)
-    max_width = models.PositiveIntegerField()
-    max_height = models.PositiveIntegerField()
-    stretch = models.BooleanField()
-    resample_quality = models.IntegerField(choices=PHOTOS_FORMAT_QUALITY, default=85)
+    name = models.CharField(_('Name'), maxlength=80)
+    max_width = models.PositiveIntegerField(_('Max width'))
+    max_height = models.PositiveIntegerField(_('Max height'))
+    flexible_height = models.BooleanField(_('Flexible height'), help_text=_('Determines whether max_height is an absolute maximum, or the formatted photo can vary from max_height for flexible_max_height.'))
+    flexible_max_height = models.PositiveIntegerField(_('Flexible max height'), blank=True, null=True)
+    stretch = models.BooleanField(_('Stretch'))
+    resample_quality = models.IntegerField(_('Resample quality'), choices=PHOTOS_FORMAT_QUALITY, default=85)
+    site = models.ForeignKey(Site)
+
+    objects = CurrentSiteManager()
 
     def __unicode__(self):
         return  u"%s (%sx%s) " % (self.name, self.max_width, self.max_height)
@@ -173,14 +180,22 @@ class FormatedPhoto(models.Model):
     def __unicode__(self):
         return u"%s - %s" % (self.filename, self.format)
 
-    def get_stretch_dimension(self):
+    def get_stretch_dimension(self, flex=False):
         """ Method return stretch dimension of crop to fit inside max format rectangle """
+        # TODO: compensate for rounding error !!
         crop_ratio = float(self.crop_width) / self.crop_height
         if self.format.ratio() < crop_ratio :
             stretch_width = self.format.max_width
-            stretch_height = min(self.format.max_height, int(stretch_width / crop_ratio)) # dimension must be integer
+            if flex:
+                stretch_height = min(self.format.max_height, int(stretch_width / crop_ratio)) # dimension must be integer
+            else:
+                stretch_height = min(self.format.flexible_max_height, int(stretch_width / crop_ratio)) # dimension must be integer
+
         else: #if(self.photo.ratio() < self.crop_ratio()):
-            stretch_height = self.format.max_height
+            if flex:
+                stretch_height = self.format.flexible_max_height
+            else:
+                stretch_height = self.format.max_height
             stretch_width = min(self.format.max_width, int(stretch_height * crop_ratio))
         return (stretch_width, stretch_height)
 
@@ -216,6 +231,7 @@ class FormatedPhoto(models.Model):
                 # crop the image to conform to the format ration
                 my_ratio = float(self.photo.width) / self.photo.height
                 format_ratio = float(self.format.max_width) / self.format.max_height
+                flex = False
 
                 if my_ratio > format_ratio:
                     diff = self.photo.width - (self.format.max_width * self.photo.height / self.format.max_height)
@@ -223,15 +239,23 @@ class FormatedPhoto(models.Model):
                     self.crop_width = self.photo.width - diff
                     cropped_photo = cropped_photo.crop((self.crop_left, self.crop_top, self.crop_left + self.crop_width, self.crop_top + self.crop_height))
 
+
                 elif my_ratio < format_ratio:
-                    diff = self.photo.height - (self.format.max_height * self.photo.width / self.format.max_width)
+                    if self.format.flexible_height:
+                        format_ratio2 = float(self.format.max_width) / self.format.flexible_max_height
+                        if abs(format_ratio - my_ratio) > abs(format_ratio2 - my_ratio):
+                            flex = True
+
+                    if flex:
+                        diff = self.photo.height - (self.format.flexible_max_height * self.photo.width / self.format.max_width)
+                    else:
+                        diff = self.photo.height - (self.format.max_height * self.photo.width / self.format.max_width)
                     self.crop_top = diff / 2
                     self.crop_height = self.photo.height - diff
                     cropped_photo = cropped_photo.crop((self.crop_left, self.crop_top, self.crop_left + self.crop_width, self.crop_top + self.crop_height))
 
-
             # shrink the photo to fit the format
-            stretched_photo = cropped_photo.resize(self.get_stretch_dimension(), Image.ANTIALIAS)
+            stretched_photo = cropped_photo.resize(self.get_stretch_dimension(flex), Image.ANTIALIAS)
 
         self.width, self.height = stretched_photo.size
         self.filename = self.file(relative=True)
@@ -268,6 +292,16 @@ class FormatedPhotoForm(forms.BaseForm):
             (data['crop_top'] + data['crop_height']) > photo.height
 ):
             raise forms.ValidationError, _("The specified crop coordinates do not fit into the source photo.")
+
+        my_ratio = float(data['crop_width']) / data['crop_height']
+        fmt = data['format']
+        if fmt.flexible_height:
+            fmt_ratios = float(fmt.max_width) / fmt.flexible_max_height, float(fmt.width) / fmt.max_height
+            if my_ratio > fmt_ratios[0] or my_ratio < fmt_ratios[1]:
+                raise forms.ValidationError, _('The specified crop ratio does not agree with the defined format.')
+        elif my_ratio - (float(fmt.max_width) / fmt.max_height) > 0.01:
+            raise forms.ValidationError, _('The specified crop ratio does not agree with the defined format.')
+
         return data
 
 from django.contrib import admin

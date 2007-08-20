@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-08-14 23:05+0200\n"
+"POT-Creation-Date: 2007-08-20 03:58+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,74 +16,113 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: models.py:14
+#: models.py:21
 msgid "Low"
 msgstr "Nízká"
 
-#: models.py:15
+#: models.py:22
 msgid "Medium"
 msgstr "Střední"
 
-#: models.py:16
+#: models.py:23
 msgid "Good"
 msgstr "Dobrá"
 
-#: models.py:17
+#: models.py:24
 msgid "Better"
 msgstr "Lepší"
 
-#: models.py:18
+#: models.py:25
 msgid "High"
 msgstr "Vysoká"
 
-#: models.py:61
+#: models.py:68
 msgid "Title"
 msgstr "nadpis"
 
-#: models.py:62
+#: models.py:69
 msgid "Description"
 msgstr "Popis"
 
-#: models.py:69
+#: models.py:76
 msgid "Authors"
 msgstr "Autoři"
 
-#: models.py:70
+#: models.py:77
 msgid "Source"
 msgstr "Zdroj"
 
-#: models.py:71
+#: models.py:78
 msgid "Category"
 msgstr "Kategorie"
 
-#: models.py:93
+#: models.py:119
 msgid "Thumbnail not available"
 msgstr "Náhled není k dispozici"
 
-#: models.py:119
+#: models.py:145
 msgid "Photo"
 msgstr "Foto"
 
-#: models.py:120
+#: models.py:146
 msgid "Photos"
 msgstr "Fotky"
 
-#: models.py:140
+#: models.py:150
+msgid "Name"
+msgstr "Jméno"
+
+#: models.py:151
+msgid "Max width"
+msgstr "Max šířka"
+
+#: models.py:152
+msgid "Max height"
+msgstr "max výška"
+
+#: models.py:153
+msgid "Flexible height"
+msgstr "Pružná výška"
+
+#: models.py:153
+msgid ""
+"Determines whether max_height is an absolute maximum, or the formatted photo "
+"can vary from max_height for flexible_max_height."
+msgstr "Rozhoduje zda výška max_height je absolutní maximum , nebo výška formatované"
+"fotky může být i flexible_max_height."
+
+#: models.py:154
+msgid "Flexible max height"
+msgstr "Pružná max výška"
+
+#: models.py:155
+msgid "Stretch"
+msgstr "Roztáhnout"
+
+#: models.py:156
+msgid "Resample quality"
+msgstr "Kvalita vzorkování"
+
+#: models.py:171
 msgid "Format"
 msgstr "Formát"
 
-#: models.py:141
+#: models.py:172
 msgid "Formats"
 msgstr "Formáty"
 
-#: models.py:207
+#: models.py:283
 msgid "Formated photo"
 msgstr "Foto ve formátu"
 
-#: models.py:208
+#: models.py:284
 msgid "Formated photos"
 msgstr "Fotky ve formátu"
 
-#: models.py:225
+#: models.py:301
 msgid "The specified crop coordinates do not fit into the source photo."
+msgstr "Zadané souřadnice leží mimo zdrojovou fotku."
+
+#: models.py:308 models.py:310
+msgid "The specified crop ratio does not agree with the defined format."
 msgstr "Zadané souřadnice leží mimo zdrojovou fotku."
