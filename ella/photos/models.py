@@ -217,11 +217,31 @@ class FormatedPhoto(models.Model):
 
             auto = True
 
+        fmt_width = self.format.max_width
+        fmt_height = self.format.max_height
+
+        my_ratio = float(self.photo.width) / self.photo.height
+        format_ratio = float(fmt_width) / fmt_height
+
         stretched_photo = None
         # we don't have to resize the image if stretch isn't specified and the image fits within the format
         if self.crop_width < self.format.max_width and self.crop_height < self.format.max_height:
             if self.format.stretch:
                 # resize image to fit format
+                if auto:
+                    if my_ratio > format_ratio:
+                        diff = self.photo.width - (fmt_width * self.photo.height / fmt_height)
+                        self.crop_left = diff / 2
+                        self.crop_width = self.photo.width - diff
+                        cropped_photo = cropped_photo.crop((self.crop_left, self.crop_top, self.crop_left + self.crop_width, self.crop_top + self.crop_height))
+
+                    elif my_ratio < format_ratio:
+                        diff = self.photo.height - (fmt_height * self.photo.width / fmt_width)
+                        self.crop_top = diff / 2
+                        self.crop_height = self.photo.height - diff
+                        cropped_photo = cropped_photo.crop((self.crop_left, self.crop_top, self.crop_left + self.crop_width, self.crop_top + self.crop_height))
+
+
                 stretched_photo = cropped_photo.resize(self.get_stretch_dimension(), Image.ANTIALIAS)
             else:
                 stretched_photo = cropped_photo
@@ -230,11 +250,6 @@ class FormatedPhoto(models.Model):
         elif self.crop_width > self.format.max_width or self.crop_height > self.format.max_height:
             if auto:
                 # crop the image to conform to the format ration
-                fmt_width = self.format.max_width
-                fmt_height = self.format.max_height
-
-                my_ratio = float(self.photo.width) / self.photo.height
-                format_ratio = float(fmt_width) / fmt_height
                 flex = False
                 if my_ratio < format_ratio and self.format.flexible_height:
                         format_ratio2 = float(fmt_width) / self.format.flexible_max_height
@@ -243,13 +258,7 @@ class FormatedPhoto(models.Model):
                             fmt_height = self.format.flexible_max_height
                             format_ratio = float(fmt_width) / fmt_height
 
-                if self.crop_width <= fmt_width and self.crop_height <= fmt_height:
-                    if self.format.stretch:
-                        # resize image to fit format
-                        stretched_photo = cropped_photo.resize(self.get_stretch_dimension(), Image.ANTIALIAS)
-                    else:
-                        stretched_photo = cropped_photo
-                elif my_ratio > format_ratio:
+                if my_ratio > format_ratio:
                     diff = self.photo.width - (fmt_width * self.photo.height / fmt_height)
                     self.crop_left = diff / 2
                     self.crop_width = self.photo.width - diff
@@ -261,9 +270,19 @@ class FormatedPhoto(models.Model):
                     self.crop_height = self.photo.height - diff
                     cropped_photo = cropped_photo.crop((self.crop_left, self.crop_top, self.crop_left + self.crop_width, self.crop_top + self.crop_height))
 
-            if not stretched_photo:
-                # shrink the photo to fit the format
+                if self.crop_width < fmt_width and self.crop_height < fmt_height:
+                    if self.format.stretch:
+                        # resize image to fit format
+                        stretched_photo = cropped_photo.resize(self.get_stretch_dimension(flex), Image.ANTIALIAS)
+                    else:
+                        stretched_photo = cropped_photo
+
+
+            if stretched_photo is None:
+            # shrink the photo to fit the format
                 stretched_photo = cropped_photo.resize(self.get_stretch_dimension(flex), Image.ANTIALIAS)
+        else:
+            stretched_photo = cropped_photo
 
         self.width, self.height = stretched_photo.size
         self.filename = self.file(relative=True)
