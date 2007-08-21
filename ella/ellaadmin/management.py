@@ -16,8 +16,7 @@ JS_GENERIC_LOOKUP = 'js/admin/GenericRelatedObjectLookups.js'
 JS_JQUERY = 'js/jquery.js'
 
 ArticleOptions.js = [ JS_PROTOTYPE, JS_EDITOR, JS_SHOWDOWN, JS_MAGICDOM ]
-DbTemplateOptions.js = [ JS_GENERIC_LOOKUP, JS_JQUERY ]
-DependencyOptions.js = [ JS_GENERIC_LOOKUP, JS_JQUERY ]
+DbTemplateOptions.js = [ JS_JQUERY, JS_GENERIC_LOOKUP ]
 
 #site.register(Article, ArticleOptions)
 
