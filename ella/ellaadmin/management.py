@@ -1,18 +1,24 @@
 from django.contrib import admin
 from ella.ellaadmin import site
 
+from ella.core.models import DependencyOptions
 from ella.articles.models import Article, ArticleOptions
+from ella.db_templates.models import DbTemplateOptions
 
 TEXTAREACLASS = 'rich_text_area'
-JAVASCRIPTS = [
-    'js/prototype.js',
-    'js/editor.js',
-    'js/showdown.js',
-    'js/MagicDOM.js',
-]
 
-ArticleOptions.js = JAVASCRIPTS
+JS_PROTOTYPE = 'js/prototype.js'
+JS_EDITOR = 'js/editor.js'
+JS_SHOWDOWN = 'js/showdown.js'
+JS_MAGICDOM = 'js/MagicDOM.js'
 
-site.register(Article, ArticleOptions)
+JS_GENERIC_LOOKUP = 'js/admin/GenericRelatedObjectLookups.js'
+JS_JQUERY = 'js/jquery.js'
+
+ArticleOptions.js = [ JS_PROTOTYPE, JS_EDITOR, JS_SHOWDOWN, JS_MAGICDOM ]
+DbTemplateOptions.js = [ JS_GENERIC_LOOKUP, JS_JQUERY ]
+DependencyOptions.js = [ JS_GENERIC_LOOKUP, JS_JQUERY ]
+
+#site.register(Article, ArticleOptions)
 
 

@@ -173,13 +173,10 @@ class ArticleOptions(admin.ModelAdmin):
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         from django.newforms import widgets
+        formfield = super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
         if db_field.name == 'perex':
-            return super(ArticleOptions, self).formfield_for_dbfield(
-                    db_field,
-                    widget=widgets.Textarea(attrs={'class': TEXTAREACLASS,}),
-                    **kwargs
-)
-        return super(ArticleOptions, self).formfield_for_dbfield(db_field, **kwargs)
+            formfield.widget = widgets.Textarea(attrs={'class': TEXTAREACLASS})
+        return formfield
 
 
 admin.site.register(Article, ArticleOptions)

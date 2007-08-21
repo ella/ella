@@ -48,6 +48,7 @@ class TemplateBlock(models.Model):
     target_ct = models.ForeignKey(ContentType, null=True, blank=True)
     target_id = models.IntegerField(null=True, blank=True)
 
+#    text = models.TextField(_('Definition'), blank=True)
     text = models.TextField(_('Definition'), blank=True, editable=False)
 
     @property
@@ -71,13 +72,21 @@ class TemplateBlock(models.Model):
 
 
 class TemplateBlockInlineOptions(admin.TabularInline):
-    pass
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        from django.newforms import widgets
+        formfield = super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
+        if db_field.name == 'target_ct':
+            formfield.widget.attrs={'class': 'target_ct'}
+        if db_field.name == 'target_id':
+            formfield.widget.attrs={'class': 'target_id'}
+        return formfield
+
 class DbTemplateOptions(admin.ModelAdmin):
     inlines = (TemplateBlockInlineOptions(
-                    TemplateBlock,
-                    extra=3,
-#                    raw_id_fields=('target_ct'),
-#                    fields=('', {'fields': ('name', 'box_type'),})
+            TemplateBlock,
+            extra=3,
+#            fields=('name', 'box_type', 'target_ct', 'target_id',),
+#            raw_id_fields=('target_ct'),
 ),
 )
 

@@ -38,7 +38,7 @@ class Comment(models.Model):
 
     # tree structure
     parent = models.ForeignKey('self', verbose_name=_('tree structure parent'), blank=True, null=True)
-    path = models.CharField(_('genealogy tree path'), maxlength=defaults.PATH_LENGTH, editable=True)
+    path = models.CharField(_('genealogy tree path'), maxlength=defaults.PATH_LENGTH, blank=True, editable=True)
 
     # author if is authorized
     user = models.ForeignKey(User, verbose_name=_('authorized author'), blank=True, null=True)

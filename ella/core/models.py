@@ -418,17 +418,18 @@ class ListingOptions(admin.ModelAdmin):
 
 class DependencyOptions(admin.ModelAdmin):
     raw_id_fields = ('target_id', 'source_id',)
-
     def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name in ('target_ct', 'source_ct'):
-            return forms.ModelChoiceField(
-                    queryset=ContentType.objects.all(),
-                    widget=widgets.ContentTypeWidget(db_field.name.replace('_ct', '_id')),
-)
-        elif db_field.name in ('target_id', 'source_id'):
-            return super(DependencyOptions, self).formfield_for_dbfield(db_field, widget=widgets.ForeignKeyRawIdWidget , **kwargs)
-
-        return super(DependencyOptions, self).formfield_for_dbfield(db_field, **kwargs)
+        from django.newforms import widgets
+        formfield = super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
+        if db_field.name == 'target_ct':
+            formfield.widget.attrs={'class': 'target_ct'}
+        if db_field.name == 'target_id':
+            formfield.widget.attrs={'class': 'target_id'}
+        if db_field.name == 'source_ct':
+            formfield.widget.attrs={'class': 'target_ct'}
+        if db_field.name == 'source_id':
+            formfield.widget.attrs={'class': 'target_id'}
+        return formfield
 
 class CategoryOption(admin.ModelAdmin):
     list_display = ('draw_title', 'tree_path')
