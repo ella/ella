@@ -17,6 +17,7 @@ JS_JQUERY = 'js/jquery.js'
 
 ArticleOptions.js = [ JS_PROTOTYPE, JS_EDITOR, JS_SHOWDOWN, JS_MAGICDOM ]
 DbTemplateOptions.js = [ JS_JQUERY, JS_GENERIC_LOOKUP ]
+DependencyOptions.js = [ JS_JQUERY, JS_GENERIC_LOOKUP ]
 
 #site.register(Article, ArticleOptions)
 
