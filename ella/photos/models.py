@@ -7,7 +7,7 @@ import shutil, os, glob
 
 from django.db import models
 from django.conf import settings
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext, ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.contrib.sites.managers import CurrentSiteManager
@@ -248,9 +248,9 @@ class FormatedPhoto(models.Model):
 
         # crop image to fit
         elif self.crop_width > self.format.max_width or self.crop_height > self.format.max_height:
+            flex = False
             if auto:
                 # crop the image to conform to the format ration
-                flex = False
                 if my_ratio < format_ratio and self.format.flexible_height:
                         format_ratio2 = float(fmt_width) / self.format.flexible_max_height
                         if my_ratio < format_ratio2 or abs(format_ratio - my_ratio) > abs(format_ratio2 - my_ratio):
@@ -313,21 +313,21 @@ class FormatedPhotoForm(forms.BaseForm):
         data = self.cleaned_data
         photo = data['photo']
         if (
-            data['crop_left'] >  photo.width or
-            data['crop_top'] > photo.height or
-            (data['crop_left'] + data['crop_width']) > photo.width or
-            (data['crop_top'] + data['crop_height']) > photo.height
+            (data['crop_left'] >  photo.width) or
+            (data['crop_top'] > photo.height) or
+            ((data['crop_left'] + data['crop_width']) > photo.width) or
+            ((data['crop_top'] + data['crop_height']) > photo.height)
 ):
-            raise forms.ValidationError, _("The specified crop coordinates do not fit into the source photo.")
+            raise forms.ValidationError, ugettext("The specified crop coordinates do not fit into the source photo.")
 
         my_ratio = float(data['crop_width']) / data['crop_height']
         fmt = data['format']
         if fmt.flexible_height:
-            fmt_ratios = float(fmt.max_width) / fmt.flexible_max_height, float(fmt.width) / fmt.max_height
-            if my_ratio > fmt_ratios[0] or my_ratio < fmt_ratios[1]:
-                raise forms.ValidationError, _('The specified crop ratio does not agree with the defined format.')
+            fmt_ratios = float(fmt.max_width) / fmt.flexible_max_height, float(fmt.max_width) / fmt.max_height
+            if not(fmt_ratios[0] <= my_ratio <= fmt_ratios[1]):
+                raise forms.ValidationError, ugettext('The specified crop ratio does not agree with the defined format.')
         elif my_ratio - (float(fmt.max_width) / fmt.max_height) > 0.01:
-            raise forms.ValidationError, _('The specified crop ratio does not agree with the defined format.')
+            raise forms.ValidationError, ugettext('The specified crop ratio does not agree with the defined format.')
 
         return data
 
