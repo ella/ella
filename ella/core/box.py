@@ -1,6 +1,8 @@
 from django.template import loader
 from django.utils.datastructures import MultiValueDict
 
+from django.core.cache import cache
+
 BOX_INFO = 'ella.core.box.BOX_INFO'
 MEDIA_KEY = 'ella.core.box.MEDIA_KEY'
 class Box(object):
@@ -62,6 +64,15 @@ class Box(object):
 
     #@cache_function
     def render(self):
+        key = self.get_cache_key()
+        rend = cache.get(key)
+        if rend is None:
+            rend = self._render()
+            cache.set(key, rend)
+        return rend
+
+
+    def _render(self):
         """
         The main function that takes care of the rendering.
         """

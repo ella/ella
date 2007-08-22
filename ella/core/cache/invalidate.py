@@ -113,8 +113,8 @@ try:
     conn.subscribe('/topic/ella')
     conn.start()
     # give it time to form a connection
-    import time
-    time.sleep(2)
+    #import time
+    #time.sleep(2)
     # register to close the activeMQ connection on exit
     import atexit
     atexit.register(conn.disconnect)
