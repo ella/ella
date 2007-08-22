@@ -14,7 +14,7 @@ from django.contrib.sites.models import Site
 from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext_lazy as _
 
-from ella.core.cache import get_cached_object
+from ella.core.cache import get_cached_object, cache_this, method_key_getter
 from ella.core.box import Box
 from ella.core.managers import *
 
@@ -108,6 +108,9 @@ class Category(models.Model):
     def __unicode__(self):
         return self.title
 
+def test_listing(*args, **kwargs):
+    return [ (Listing, lambda x: True) ]
+
 class ListingManager(RelatedManager):
     NONE = 0
     IMMEDIATE = 1
@@ -144,7 +147,7 @@ class ListingManager(RelatedManager):
     def get_count(self, category=None, children=NONE, mods=[], **kwargs):
         return self.get_queryset(category, children, mods, **kwargs).count()
 
-    # FIXME add caching
+    @cache_this(method_key_getter, test_listing)
     def get_listing(self, category=None, count=10, offset=1, children=NONE, mods=[], content_types=[], **kwargs):
         """
         Get top objects for given category and potentionally also its child categories.
@@ -299,6 +302,9 @@ class Listing(models.Model):
         ordering = ('-publish_from',)
         unique_together = (('category', 'target_id', 'target_ct'),)
 
+def test_hitcount(*args, **kwargs):
+    return []
+
 class HitCountManager(models.Manager):
     def hit(self, obj):
         # TODO FIXME: optimizations and thread safety
@@ -308,10 +314,11 @@ class HitCountManager(models.Manager):
             hc.hits += 1
         hc.save()
 
+    @cache_this(method_key_getter, test_hitcount, timeout=3600)
     def get_top_objects(self, count, mods=[]):
         kwa = {}
         if mods:
-            kwa['target_ct__in'] = [ ContentType.objects.get_for_model(m).id for m in mods ]
+            kwa['target_ct__in'] = [ ContentType.objects.get_for_model(m) for m in mods ]
         return self.filter(**kwa)[:count]
 
 class HitCount(models.Model):
@@ -330,7 +337,8 @@ class HitCount(models.Model):
     @property
     def target(self):
         if not hasattr(self, '_target'):
-            self._target = get_cached_object(self.target_ct, pk=self.target_id)
+            target_ct = get_cached_object(ContentType, pk=self.target_ct_id)
+            self._target = get_cached_object(target_ct, pk=self.target_id)
         return self._target
 
     class Meta:

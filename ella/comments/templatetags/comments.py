@@ -188,13 +188,7 @@ class CommentCountNode(template.Node):
 
     def render(self, context):
         object = resolve_object(context, self.object)
-        target_ct = ContentType.objects.get_for_model(object)
-        target_id = object.id
-        kw = {
-            'target_ct': target_ct,
-            'target_id': target_id,
-}
-        comment_count = Comment.objects.filter(**kw).count()
+        comment_count = Comment.objects.get_count_for_object(object)
         context[self.varname] = comment_count
         return ''
 

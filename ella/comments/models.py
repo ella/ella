@@ -4,9 +4,11 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import smart_str
 
-from ella.comments import defaults
-from ella.comments import management
+from ella.comments import defaults, management
+from ella.core.cache.utils import cache_this, method_key_getter
+
 
 
 class CommentOptions(models.Model):
@@ -24,6 +26,19 @@ class CommentOptions(models.Model):
     class Meta:
         verbose_name = _('Comment Options')
         verbose_name_plural = _('Comment Options')
+
+
+def get_test_builder(object_order):
+    def test_for_comment(*args, **kwargs):
+        obj = args[object_order]
+        return [ (Comment, lambda x: x.target == obj) ]
+    return test_for_comment
+
+class CommentManager(models.Manager):
+    @cache_this(method_key_getter, get_test_builder(1))
+    def get_count_for_object(self, object):
+        target_ct = ContentType.objects.get_for_model(object)
+        return self.filter(target_ct=target_ct, target_id=object.id).count()
 
 class Comment(models.Model):
     # what is this comment for
@@ -52,6 +67,8 @@ class Comment(models.Model):
     submit_date = models.DateTimeField(_('date/time submitted'), default=datetime.now, editable=True)
     is_public = models.BooleanField(_('is public'), default=True)
 
+    objects = CommentManager()
+
     @property
     def is_authorized(self):
         if self.user:
@@ -62,6 +79,9 @@ class Comment(models.Model):
     def is_thread_root(self):
         return self.path == ''
 
+    @property
+    def target(self):
+        return get_cached_object(self.target_ct, pk=self.target_id)
 
     def get_genealogy_path(self):
         """genealogy tree structure field"""

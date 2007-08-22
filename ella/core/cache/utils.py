@@ -1,5 +1,10 @@
 import md5
 
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
 from django.db.models import ObjectDoesNotExist
 from django.core.cache import cache
 from django.utils.encoding import smart_str
@@ -27,13 +32,17 @@ def get_cached_object(model, **kwargs):
     else:
         content_type = ContentType.objects.get_for_model(model)
 
-    key = md5.md5(KEY_FORMAT % (content_type.id, ':'.join('%s=%s' % (smart_str(key), smart_str(kwargs[key])) for key in sorted(kwargs.keys())))).hexdigest()
+    key = md5.md5(KEY_FORMAT % (content_type.id, ':'.join('%s=%s' % (smart_str(key), pickle.dumps(kwargs[key])) for key in sorted(kwargs.keys())))).hexdigest()
 
     obj = cache.get(key)
     if obj is None:
         obj = content_type.get_object_for_this_type(**kwargs)
         cache.set(key, obj)
         CACHE_DELETER.register(content_type.model_class(), lambda x: x._get_pk_val() == obj._get_pk_val(), key)
+    else:
+        f = open('/tmp/apache.log', 'a')
+        f.write('Getting cache for %s\n' % (key))
+        f.close()
     return obj
 
 def get_cached_object_or_404(model, **kwargs):
@@ -46,4 +55,34 @@ def get_cached_object_or_404(model, **kwargs):
         return get_cached_object(model, **kwargs)
     except ObjectDoesNotExist:
         raise Http404
+
+def method_key_getter(func, *args, **kwargs):
+    import md5
+    return md5.md5(
+                '%s.%s:%s:%s' % (
+                    func.__module__,
+                    func.__name__,
+                    ', '.join(smart_str(a) for a in args[1:]),
+                    ', '.join('%s=%s' % (smart_str(key), smart_str(kwargs[key])) for key in sorted(kwargs.keys()))
+)
+).hexdigest()
+
+def cache_this(key_getter, test_builder, timeout=60*30):
+    def wrapped_decorator(func):
+        def wrapped_func(*args, **kwargs):
+            key = key_getter(func, *args, **kwargs)
+            result = cache.get(key)
+            if result is None:
+                result = func(*args, **kwargs)
+                cache.set(key, result, timeout)
+                for model, test in test_builder(*args, **kwargs):
+                    CACHE_DELETER.register(model, test, key)
+            return result
+
+        wrapped_func.__dict__ = func.__dict__
+        wrapped_func.__doc__ = func.__doc__
+        wrapped_func.__name__ = func.__name__
+
+        return wrapped_func
+    return wrapped_decorator
 
