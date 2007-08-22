@@ -299,6 +299,44 @@ class Listing(models.Model):
         ordering = ('-publish_from',)
         unique_together = (('category', 'target_id', 'target_ct'),)
 
+class HitCountManager(models.Manager):
+    def hit(self, obj):
+        # TODO FIXME: optimizations and thread safety
+        target_ct = ContentType.objects.get_for_model(obj)
+        hc, created = self.get_or_create(target_ct=target_ct, target_id=obj._get_pk_val())
+        if not created:
+            hc.hits += 1
+        hc.save()
+
+    def get_top_objects(self, count, mods=[]):
+        kwa = {}
+        if mods:
+            kwa['target_ct__in'] = [ ContentType.objects.get_for_model(m).id for m in mods ]
+        return self.filter(**kwa)[:count]
+
+class HitCount(models.Model):
+    target_ct = models.ForeignKey(ContentType)
+    target_id = models.IntegerField()
+    last_seen = models.DateTimeField(editable=False)
+
+    hits = models.PositiveIntegerField(_('Hits'), default=1)
+
+    objects = HitCountManager()
+
+    def save(self):
+        self.last_seen = datetime.now()
+        super(HitCount, self).save()
+
+    @property
+    def target(self):
+        if not hasattr(self, '_target'):
+            self._target = get_cached_object(self.target_ct, pk=self.target_id)
+        return self._target
+
+    class Meta:
+        ordering = ('-hits', '-last_seen',)
+        verbose_name = 'Hot Count'
+        verbose_name_plural = 'Hot Counts'
 
 class Related(models.Model):
     """

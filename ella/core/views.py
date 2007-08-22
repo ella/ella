@@ -5,7 +5,7 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.core.paginator import ObjectPaginator
 
-from ella.core.models import Listing, Category
+from ella.core.models import Listing, Category, HitCount
 from ella.core.cache import *
 from ella.core.custom_urls import dispatcher
 
@@ -80,6 +80,8 @@ def object_detail(request, category, year, month, day, content_type, slug, url_r
         # some custom action has been requested
         bits = url_remainder.split('/')
         return dispatcher.call_view(request, bits, context)
+
+    HitCount.objects.hit(obj)
 
     return render_to_response(
             (
