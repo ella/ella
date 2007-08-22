@@ -48,8 +48,7 @@ class TemplateBlock(models.Model):
     target_ct = models.ForeignKey(ContentType, null=True, blank=True)
     target_id = models.IntegerField(null=True, blank=True)
 
-#    text = models.TextField(_('Definition'), blank=True)
-    text = models.TextField(_('Definition'), blank=True, editable=False)
+    text = models.TextField(_('Definition'), blank=True)
 
     @property
     def target(self):
