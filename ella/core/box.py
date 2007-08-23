@@ -114,9 +114,12 @@ class Box(object):
         return {'js' : js, 'css' : css,}
 
     def get_cache_key(self):
-        return 'ella.core.box.Box.render:%s:%s:%s:%s' % (
-                self.obj.__class__.__name__,
-                self.box_type,
-                self.obj._get_pk_val(),
-                ','.join('%s:%s' % (key, self.params[key]) for key in sorted(self.params.keys()))
+        import md5
+        return md5.md5(
+                'ella.core.box.Box.render:%s:%s:%s:%s' % (
+                    self.obj.__class__.__name__,
+                    self.box_type,
+                    self.obj._get_pk_val(),
+                    ','.join('%s:%s' % (key, self.params[key]) for key in sorted(self.params.keys()))
 )
+).hexdigest()
