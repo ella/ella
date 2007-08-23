@@ -22,7 +22,11 @@ class ImgTag(template.Node):
             try:
                 formated_photo = get_cached_object(FORMATED_PHOTO_CT, photo=photo, format=self.format)
             except FormatedPhoto.DoesNotExist:
-                formated_photo = FormatedPhoto.objects.create(photo=photo, format=self.format)
+                try:
+                    formated_photo = FormatedPhoto.objects.create(photo=photo, format=self.format)
+                except IOError:
+                    context[self.var_name] = self.format.get_blank_img()
+                    return ''
         else:
             formated_photo = self.photo
 

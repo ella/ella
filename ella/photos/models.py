@@ -151,6 +151,18 @@ class Format(models.Model):
 
     objects = CurrentSiteManager()
 
+    def get_blank_img(self):
+        """
+        Return fake FormatedPhoto object to be used in templates when an error occurs in image generation.
+        """
+        out = {
+            'width' : self.max_width,
+            'height' : self.max_height,
+            'filename' : 'img/empty/%s.jpg' % (self.name),
+            'format' : self,
+}
+        return out
+
     def __unicode__(self):
         return  u"%s (%sx%s) " % (self.name, self.max_width, self.max_height)
 
