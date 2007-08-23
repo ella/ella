@@ -45,8 +45,8 @@ def check_vote(request, poll):
         cook = request.COOKIES.get(POLLS_COOKIE_NAME, '').split(',')
         if str(poll.id) in cook:
             return POLL_USER_ALLREADY_VOTED
-        if Vote.objects.filter(poll=poll, ip_address=request.META['REMOTE_ADDR']).count() > 0:
-            return POLL_USER_ALLREADY_VOTED
+        #if Vote.objects.filter(poll=poll, ip_address=request.META['REMOTE_ADDR']).count() > 0:
+        #    return POLL_USER_ALLREADY_VOTED
         return POLL_USER_NOT_YET_VOTED
 
 @require_POST

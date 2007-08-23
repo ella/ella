@@ -3,6 +3,8 @@ from django.utils.datastructures import MultiValueDict
 from django.core.cache import cache
 from django.utils.encoding import smart_str
 
+from ella.core.cache.invalidate import CACHE_DELETER
+
 BOX_INFO = 'ella.core.box.BOX_INFO'
 MEDIA_KEY = 'ella.core.box.MEDIA_KEY'
 class Box(object):
@@ -68,7 +70,8 @@ class Box(object):
         rend = cache.get(key)
         if rend is None:
             rend = self._render()
-            cache.set(key, rend)
+            #cache.set(key, rend, 30)
+            #CACHE_DELETER.register(self.obj.__class__, lambda x: x._get_pk_val() == self.obj._get_pk_val(), key)
         return rend
 
 

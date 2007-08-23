@@ -40,13 +40,7 @@ class Poll(models.Model):
         ordering = ('-active_from',)
 
     def get_total_votes(self):
-        if not hasattr(self, '_total_votes'):
-            total_votes = 0
-            for choice in self.question.choice_set.all():
-                if choice.votes:
-                    total_votes += choice.votes
-            self._total_votes = total_votes
-        return self._total_votes
+        return self.question.get_total_votes()
 
     def Box(self, box_type, nodelist):
         return PollBox(self, box_type, nodelist)
@@ -64,6 +58,15 @@ class Question(models.Model):
 
     def __unicode__(self):
         return self.question
+
+    def get_total_votes(self):
+        if not hasattr(self, '_total_votes'):
+            total_votes = 0
+            for choice in self.choice_set.all():
+                if choice.votes:
+                    total_votes += choice.votes
+            self._total_votes = total_votes
+        return self._total_votes
 
     def form(self):
         from ella.polls.views import QuestionForm
@@ -98,7 +101,7 @@ class Choice(models.Model):
         return True
 
     def get_percentage(self):
-        t=get_cached_object(ContentType.objects.get_for_model(Poll), question=self.question).get_total_votes()
+        t=get_cached_object(Question, pk=self.question_id).get_total_votes()
         p = 0
         if self.votes:
             p = int((100.0/t)*self.votes)
@@ -216,7 +219,7 @@ class QuestionOptions(admin.ModelAdmin):
     Admin options for Question model:
         * edit inline choices
     """
-    inlines = [admin.TabularInline(Choice, extra=1)]
+    inlines = [admin.TabularInline(Choice, extra=5)]
     ordering = ('question',)
 
 class ChoiceOptions(admin.ModelAdmin):
