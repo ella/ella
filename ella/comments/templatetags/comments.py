@@ -176,6 +176,7 @@ class CommentListNode(template.Node):
         kw = {
             'target_ct': target_ct,
             'target_id': target_id,
+            'is_public' : True,
 }
         comment_list = Comment.objects.filter(**kw).order_by(self.orderby)
         context[self.varname] = comment_list

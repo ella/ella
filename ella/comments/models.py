@@ -7,7 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_str
 
 from ella.comments import defaults, management
-from ella.core.cache.utils import cache_this, method_key_getter
+from ella.core.cache.utils import cache_this, method_key_getter, get_cached_object
 
 
 
