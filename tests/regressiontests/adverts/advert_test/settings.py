@@ -80,3 +80,6 @@ INSTALLED_APPS = (
     'nc.adverts',
     'simple_test',
 )
+
+
+ADVERT_SERVER_HOST = '127.0.0.1'
