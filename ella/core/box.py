@@ -1,7 +1,7 @@
 from django.template import loader
 from django.utils.datastructures import MultiValueDict
-
 from django.core.cache import cache
+from django.utils.encoding import smart_str
 
 BOX_INFO = 'ella.core.box.BOX_INFO'
 MEDIA_KEY = 'ella.core.box.MEDIA_KEY'
@@ -115,11 +115,12 @@ class Box(object):
 
     def get_cache_key(self):
         import md5
-        return md5.md5(
-                'ella.core.box.Box.render:%s:%s:%s:%s' % (
-                    self.obj.__class__.__name__,
-                    self.box_type,
-                    self.obj._get_pk_val(),
-                    ','.join('%s:%s' % (key, self.params[key]) for key in sorted(self.params.keys()))
+        return md5.md5(smart_str(
+                u'ella.core.box.Box.render:%s:%s:%s:%s' % (
+                        self.obj.__class__.__name__,
+                        self.box_type,
+                        self.obj._get_pk_val(),
+                        u','.join(u'%s:%s' % (key, self.params[key]) for key in sorted(self.params.keys()))
+)
 )
 ).hexdigest()
