@@ -158,7 +158,7 @@ class Format(models.Model):
         out = {
             'width' : self.max_width,
             'height' : self.max_height,
-            'filename' : 'img/empty/%s.jpg' % (self.name),
+            'filename' : 'img/empty/%s.png' % (self.name),
             'format' : self,
 }
         return out
@@ -192,6 +192,24 @@ class FormatedPhoto(models.Model):
     def __unicode__(self):
         return u"%s - %s" % (self.filename, self.format)
 
+    @property
+    def url(self):
+        from os import path
+        if not path.exists(settings.MEDIA_ROOT):
+            # NFS not available - we have no chance of creating it
+            return settings.MEDIA_URL + self.filename
+
+        if path.exists(settings.MEDIA_ROOT + self.filename):
+            # imgae exists
+            return settings.MEDIA_URL + self.filename
+
+        # image does not exist - try and create it
+        try:
+            self.generate()
+            return settings.MEDIA_URL + self.filename
+        except IOError:
+            return settings.MEDIA_URL + self.format.get_blank_img()
+
     def get_stretch_dimension(self, flex=False):
         """ Method return stretch dimension of crop to fit inside max format rectangle """
         # TODO: compensate for rounding error !!
@@ -211,7 +229,7 @@ class FormatedPhoto(models.Model):
             stretch_width = min(fmt_width, int(stretch_height * crop_ratio))
         return (stretch_width, stretch_height)
 
-    def save(self):
+    def generate(self):
         source = Image.open(self.photo.get_image_filename())
 
         # if crop specified
@@ -299,6 +317,13 @@ class FormatedPhoto(models.Model):
         self.width, self.height = stretched_photo.size
         self.filename = self.file(relative=True)
         stretched_photo.save(self.file(), quality=self.format.resample_quality)
+
+    def save(self):
+        import os
+        from os import path
+        if path.exists(settings.MEDIA_ROOT + self.file(relative=True)):
+            os.remove(settings.MEDIA_ROOT + self.file(relative=True))
+        self.generate()
         super(FormatedPhoto, self).save()
 
 
