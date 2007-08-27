@@ -37,7 +37,7 @@ def get_cached_object(model, **kwargs):
     obj = cache.get(key)
     if obj is None:
         obj = content_type.get_object_for_this_type(**kwargs)
-        cache.set(key, obj)
+        cache.set(key, obj, 10 * 60)
         CACHE_DELETER.register(content_type.model_class(), lambda x: x._get_pk_val() == obj._get_pk_val(), key)
     else:
         f = open('/tmp/apache.log', 'a')
@@ -67,7 +67,7 @@ def method_key_getter(func, *args, **kwargs):
 )
 ).hexdigest()
 
-def cache_this(key_getter, test_builder, timeout=60*30):
+def cache_this(key_getter, test_builder, timeout=10*60):
     def wrapped_decorator(func):
         def wrapped_func(*args, **kwargs):
             key = key_getter(func, *args, **kwargs)
