@@ -445,37 +445,31 @@ class Dependency(models.Model):
         verbose_name_plural = _('Dependencies')
         ordering = ('source_ct', 'source_id',)
 
-import widgets
 class ListingOptions(admin.ModelAdmin):
     raw_id_fields = ('target_id',)
     list_display = ('target', 'category', 'publish_from',)
     list_filter = ('publish_from', 'category', 'target_ct',)
-
     def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name in ('target_ct',):
-            return forms.ModelChoiceField(
-                    queryset=ContentType.objects.all(),
-                    widget=widgets.ContentTypeWidget(db_field.name.replace('_ct', '_id')),
-)
-        elif db_field.name == 'target_id':
-            return super(ListingOptions, self).formfield_for_dbfield(db_field, widget=widgets.ForeignKeyRawIdWidget , **kwargs)
-
-        return super(ListingOptions, self).formfield_for_dbfield(db_field, **kwargs)
+        from ella.core import widgets
+        if db_field.name == 'target_ct':
+            kwargs['widget'] = widgets.ContentTypeWidget
+        if db_field.name == 'target_id':
+            kwargs['widget'] = widgets.ForeignKeyRawIdWidget
+        return db_field.formfield(**kwargs)
 
 class DependencyOptions(admin.ModelAdmin):
     raw_id_fields = ('target_id', 'source_id',)
     def formfield_for_dbfield(self, db_field, **kwargs):
-        from django.newforms import widgets
-        formfield = super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
+        from ella.core import widgets
         if db_field.name == 'target_ct':
-            formfield.widget.attrs={'class': 'target_ct'}
+            kwargs['widget'] = widgets.ContentTypeWidget
         if db_field.name == 'target_id':
-            formfield.widget.attrs={'class': 'target_id'}
+            kwargs['widget'] = widgets.ForeignKeyRawIdWidget
         if db_field.name == 'source_ct':
-            formfield.widget.attrs={'class': 'target_ct'}
+            kwargs['widget'] = widgets.ContentTypeWidget
         if db_field.name == 'source_id':
-            formfield.widget.attrs={'class': 'target_id'}
-        return formfield
+            kwargs['widget'] = widgets.ForeignKeyRawIdWidget
+        return db_field.formfield(**kwargs)
 
 class CategoryOption(admin.ModelAdmin):
     list_display = ('draw_title', 'tree_path')

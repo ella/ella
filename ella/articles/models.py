@@ -124,17 +124,12 @@ class ArticleContents(models.Model):
     def __unicode__(self):
         return self.title
 
-TEXTAREACLASS = 'rich_text_area'
 class ArticleContentInlineOptions(admin.TabularInline):
     def formfield_for_dbfield(self, db_field, **kwargs):
-        from django.newforms import widgets
+        from ella.core import widgets
         if db_field.name == 'content':
-            return super(ArticleContentInlineOptions, self).formfield_for_dbfield(
-                    db_field,
-                    widget=widgets.Textarea(attrs={'class': TEXTAREACLASS,}),
-                    **kwargs
-)
-        return super(ArticleContentInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
+            kwargs['widget'] = widgets.RichTextAreaWidget
+        return db_field.formfield(**kwargs)
 
 class InfoBoxOptions(admin.ModelAdmin):
     list_display = ('title', 'created',)
@@ -143,17 +138,10 @@ class InfoBoxOptions(admin.ModelAdmin):
     search_fields = ('title', 'content',)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        from django.newforms import widgets
+        from ella.core import widgets
         if db_field.name == 'content':
-            return super(InfoBoxOptions, self).formfield_for_dbfield(
-                    db_field,
-                    widget=widgets.Textarea(attrs={'class': TEXTAREACLASS,}),
-                    **kwargs
-)
-        return super(InfoBoxOptions, self).formfield_for_dbfield(db_field, **kwargs)
-
-
-admin.site.register(InfoBox, InfoBoxOptions)
+            kwargs['widget'] = widgets.RichTextAreaWidget
+        return db_field.formfield(**kwargs)
 
 class ArticleOptions(admin.ModelAdmin):
     #raw_id_fields = ('authors',)
@@ -172,12 +160,11 @@ class ArticleOptions(admin.ModelAdmin):
     prepopulated_fields = {'slug' : ('title',)}
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        from django.newforms import widgets
-        formfield = super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
+        from ella.core import widgets
         if db_field.name == 'perex':
-            formfield.widget = widgets.Textarea(attrs={'class': TEXTAREACLASS})
-        return formfield
+            kwargs['widget'] = widgets.RichTextAreaWidget
+        return db_field.formfield(**kwargs)
 
-
+admin.site.register(InfoBox, InfoBoxOptions)
 admin.site.register(Article, ArticleOptions)
 

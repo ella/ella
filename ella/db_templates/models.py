@@ -72,13 +72,12 @@ class TemplateBlock(models.Model):
 
 class TemplateBlockInlineOptions(admin.TabularInline):
     def formfield_for_dbfield(self, db_field, **kwargs):
-        from django.newforms import widgets
-        formfield = super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
+        from ella.core import widgets
         if db_field.name == 'target_ct':
-            formfield.widget.attrs={'class': 'target_ct'}
+            kwargs['widget'] = widgets.ContentTypeWidget
         if db_field.name == 'target_id':
-            formfield.widget.attrs={'class': 'target_id'}
-        return formfield
+            kwargs['widget'] = widgets.ForeignKeyRawIdWidget
+        return db_field.formfield(**kwargs)
 
 class DbTemplateOptions(admin.ModelAdmin):
     inlines = (TemplateBlockInlineOptions(
