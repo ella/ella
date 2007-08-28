@@ -19,7 +19,7 @@
             "remove": false,
             "priority_to": null,
             "priority_from": null,
-            "target_ct": 18
+            "target_ct": 19
         }
     },
     {
@@ -42,7 +42,7 @@
             "remove": false,
             "priority_to": null,
             "priority_from": null,
-            "target_ct": 19
+            "target_ct": 20
         }
     }
 ]
