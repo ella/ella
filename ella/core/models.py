@@ -49,6 +49,13 @@ class Source(models.Model):
         verbose_name_plural = _('Sources')
         ordering = ('name',)
 
+class CategoryBox(Box):
+    def get_context(self):
+        cont = super(CategoryBox, self).get_context()
+        if 'photo_slug' in self.params:
+            cont['photo_slug'] = self.params['photo_slug']
+        return cont
+
 class Category(models.Model):
     title = models.CharField(_("Category Title"), maxlength=200)
     slug = models.CharField(_("Slug"), maxlength=200)
@@ -83,6 +90,9 @@ class Category(models.Model):
             return self.tree_path
         else:
             return self.slug
+
+    def Box(self, box_type, nodelist):
+        return CategoryBox(self, box_type, nodelist)
 
     def get_absolute_url(self):
         if not self.tree_parent_id:

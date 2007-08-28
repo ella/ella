@@ -1,3 +1,4 @@
+from django.conf import settings
 from django import template
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
@@ -123,17 +124,28 @@ class EmptyNode(template.Node):
         return u''
 
 class BoxNode(template.Node):
-    def __init__(self, obj, box_type, nodelist):
-        self.obj, self.box_type, self.nodelist = obj, box_type, nodelist
+    def __init__(self, box_type, nodelist, model=None, lookup=None, var_name=None):
+        self.box_type, self.nodelist, self.var_name, self.lookup, self.model = box_type, nodelist, var_name, lookup, model
+
 
     def render(self, context):
-        if isinstance(self.obj, basestring):
+        if self.model and self.lookup:
             try:
-                obj = template.resolve_variable(self.obj, context)
+                lookup_val = template.resolve_variable(self.lookup[1], context)
             except template.VariableDoesNotExist:
+                lookup_val = self.lookup[1]
+
+            try:
+                obj = get_cached_object(self.model, **{self.lookup[0] : lookup_val})
+            except models.ObjectDoesNotExist:
+                return ''
+            except AssertionError:
                 return ''
         else:
-            obj = self.obj
+            try:
+                obj = template.resolve_variable(self.var_name, context)
+            except template.VariableDoesNotExist:
+                return ''
 
         if hasattr(obj, 'Box'):
             box = obj.Box(self.box_type, self.nodelist)
@@ -193,23 +205,15 @@ def do_box(parser, token):
 
     if len(bits) == 4:
         # var_name
-        obj = bits[3]
+        return BoxNode(bits[1], nodelist, var_name=bits[3])
     else:
         model = models.get_model(*bits[3].split('.'))
         if model is None:
+            if settings.DEBUG:
+                raise template.TemplateSyntaxError, "Model %r does not exist" % bits[3]
             return EmptyNode()
-            #raise template.TemplateSyntaxError, "Model %r does not exist" % bits[3]
 
-        try:
-            obj = get_cached_object(model, **{smart_str(bits[5]) : bits[6]})
-        except models.ObjectDoesNotExist:
-            return EmptyNode()
-            #raise template.TemplateSyntaxError, "Model %r with field %r equal to %r does not exist." % (bits[3], bits[5], bits[6])
-        except AssertionError:
-            return EmptyNode()
-            #raise template.TemplateSyntaxError, "Model %r with field %r equal to %r does not refer to a single object." % (bits[3], bits[5], bits[6])
-
-    return BoxNode(obj, bits[1], nodelist)
+        return BoxNode(bits[1], nodelist, model=model, lookup=(smart_str(bits[5]), bits[6]))
 
 @register.inclusion_tag('core/box_media.html', takes_context=True)
 def box_media(context):
