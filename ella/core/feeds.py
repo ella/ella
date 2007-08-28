@@ -33,7 +33,8 @@ class RSSTopCategoryListings(Feed):
         elif obj:
             return _('Top %d objects in category %s.') % (NUM_IN_FEED, obj.title)
         else:
-            return _('Top %d objects.') % NUM_IN_FEED
+            obj = get_cached_object(Category, tree_parent__isnull=True)
+            return _('Top %d objects in category %s.') % (NUM_IN_FEED, obj.title)
 
     def items(self, obj):
         kwa = {}
@@ -43,6 +44,8 @@ class RSSTopCategoryListings(Feed):
             kwa['category'] = category
         elif obj:
             kwa['category'] = obj
+        else:
+            kwa['category'] = get_cached_object(Category, tree_parent__isnull=True)
         return Listing.objects.get_listing(count=NUM_IN_FEED, **kwa)
 
     def link(self, obj):
