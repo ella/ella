@@ -1,13 +1,27 @@
+import re
 from datetime import datetime
 
 from django.db import models
 from django.contrib import admin
+from django.utils.html import strip_tags
+
+from ella.core.box import Box
+from ella.core.cache.utils import get_cached_object_or_404
+
+class ServerBox(Box):
+    def get_context(self):
+        cont = super(ServerBox, self).get_context()
+        cont['last'] = self.obj.last
+        return cont
 
 class Server(models.Model):
     title = models.CharField(_('Title'), maxlength=100)
     domain = models.URLField(_('Domain'), verify_exists=False)
     slug = models.CharField(db_index=True, maxlength=100)
     url = models.URLField(_('Atom URL'), verify_exists=False, max_length=300)
+
+    def Box(self, box_type, nodelist):
+        return ServerBox(self, box_type, nodelist)
 
     def __unicode__(self):
         return self.title
@@ -16,6 +30,10 @@ class Server(models.Model):
         verbose_name = _('Server')
         verbose_name_plural = _('Servers')
         ordering = ('title',)
+
+    @property
+    def last(self):
+        return self.serveritem_set.all()[0]
 
     def fetch(self):
         try:
@@ -37,14 +55,12 @@ class Server(models.Model):
 }
 )
 
-import re
 PHOTO_REG = re.compile(r'<img[^>]*src="(?P<url>http://[^"]*)"')
-
 
 class ServerItem(models.Model):
     server = models.ForeignKey(Server)
     title = models.CharField(_('Title'), maxlength=100)
-    summary = models.CharField(_('Summary'), maxlength=500)
+    summary = models.TextField(_('Summary'))
     updated = models.DateTimeField(_('Updated'))
     slug = models.CharField(db_index=True, maxlength=100)
     link = models.URLField(_('Link'), verify_exists=True, max_length=400)
@@ -85,6 +101,8 @@ class ServerItem(models.Model):
             if img:
                 self.photo_url = img[0]
 
+        self.summary = strip_tags(self.summary)
+
         super(ServerItem, self).save()
 
 
@@ -92,6 +110,20 @@ class ServerOptions(admin.ModelAdmin):
     list_display = ('title', 'domain', 'url',)
     search_fields = ('domain, title', 'url',)
     prepopulated_fields = {'slug' : ('title',)}
+
+    def __call__(self, request, url):
+        if url and url.endswith('fetch'):
+            from django import http
+            pk = url.split('/')[-2]
+            server = get_cached_object_or_404(Server, pk=pk)
+            try:
+                server.fetch()
+                return http.HttpResponse('OK')
+            except:
+                return http.HttpResponse('KO')
+
+        return super(ServerOptions, self).__call__(request, url)
+
 
 class ServerItemOptions(admin.ModelAdmin):
     list_display = ('title', 'server', 'updated',)
