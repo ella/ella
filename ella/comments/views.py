@@ -39,6 +39,7 @@ class CommentFormPreview(FormPreview):
 def new_comment(request, object):
     """new comment"""
     templates = [
+        'comments/%s/comment_add.html' % object.category.path,
         'comments/base_comment_add.html',
     ]
     context = {
@@ -48,15 +49,12 @@ def new_comment(request, object):
 
 def list_comments(request, object):
     templates = [
+        'comments/%s/comment_list.html' % object.category.path,
         'comments/base_comment_list.html',
     ]
     context = {
         'object': object,
 }
     return render_to_response(templates, context, context_instance=RequestContext(request))
-
-
-
-
 
 
