@@ -5,7 +5,7 @@ from django.http import Http404
 
 from ella.core.models import Listing, Category
 from ella.core.views import get_content_type
-from ella.core.cache.utils import get_cached_object
+from ella.core.cache.utils import get_cached_object, get_cached_object_or_404
 
 NUM_IN_FEED = 10
 
@@ -18,7 +18,7 @@ class RSSTopCategoryListings(Feed):
             ct = False
 
         if bits:
-            cat = get_cached_object(Category, tree_path=u'/'.join(bits))
+            cat = get_cached_object_or_404(Category, tree_path=u'/'.join(bits))
         else:
             cat = get_cached_object(Category, tree_parent__isnull=True)
 
@@ -65,4 +65,5 @@ class RSSTopCategoryListings(Feed):
 
 class AtomTopCategoryListings(RSSTopCategoryListings):
     feed_type = Atom1Feed
+    subtitle = RSSTopCategoryListings.description
 
