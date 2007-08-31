@@ -353,8 +353,8 @@ class HitCount(models.Model):
 
     class Meta:
         ordering = ('-hits', '-last_seen',)
-        verbose_name = 'Hot Count'
-        verbose_name_plural = 'Hot Counts'
+        verbose_name = 'Hit Count'
+        verbose_name_plural = 'Hit Counts'
 
 class Related(models.Model):
     """
@@ -481,15 +481,20 @@ class DependencyOptions(admin.ModelAdmin):
             kwargs['widget'] = widgets.ForeignKeyRawIdWidget
         return db_field.formfield(**kwargs)
 
-class CategoryOption(admin.ModelAdmin):
+class CategoryOptions(admin.ModelAdmin):
     list_display = ('draw_title', 'tree_path')
     ordering = ('tree_path',)
     prepopulated_fields = {'slug': ('title',)}
 
+class HitCountOptions(admin.ModelAdmin):
+    list_display = ('target', 'hits', 'last_seen',)
+    list_filter = ('last_seen',)
+
 class AuthorOptions(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
 
-admin.site.register(Category, CategoryOption)
+admin.site.register(HitCount, HitCountOptions)
+admin.site.register(Category, CategoryOptions)
 admin.site.register(Source)
 admin.site.register(Author, AuthorOptions)
 admin.site.register(Listing, ListingOptions)
