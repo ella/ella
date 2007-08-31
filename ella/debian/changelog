@@ -1,3 +1,10 @@
+centrum-ella (0.0.13) unstable; urgency=low
+
+  * functional javascript in admin (must be copied manualy)
+  * and a lot more
+
+ -- Jakub Vysoky <kvbik@dev11.netcentrum.cz>  Fri, 31 Aug 2007 13:10:13 +0200
+
 centrum-ella (0.0.12) unstable; urgency=low
 
   * latest svn checkout
