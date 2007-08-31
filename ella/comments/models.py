@@ -3,6 +3,7 @@ from datetime import datetime
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes import generic
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_str
 
@@ -20,6 +21,7 @@ class CommentOptions(models.Model):
     """
     target_ct = models.ForeignKey(ContentType, verbose_name=_('target content type'))
     target_id = models.PositiveIntegerField(_('target id'))
+    target = generic.GenericForeignKey()
     options = models.CharField(maxlength=defaults.OPTS_LENGTH, blank=True)
     timestamp = models.DateTimeField(default=datetime.now)
 
@@ -74,6 +76,12 @@ class Comment(models.Model):
         if self.user:
             return True
         return False
+
+    @property
+    def author(self):
+        if self.is_authorized:
+            return self.user.username
+        return self.nickname
 
     @property
     def is_thread_root(self):
@@ -138,7 +146,11 @@ class BannedIP(models.Model):
 from django import VERSION
 from django.contrib import admin
 
-admin.site.register(Comment)
+class CommentsOptions(admin.ModelAdmin):
+    list_display = ('subject', 'target', 'author', 'is_public', 'path',)
+    search_fields = ('subject', 'content',)
+
+admin.site.register(Comment, CommentsOptions)
 admin.site.register(BannedUser)
 admin.site.register(CommentOptions)
 

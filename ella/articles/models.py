@@ -145,13 +145,14 @@ class InfoBoxOptions(admin.ModelAdmin):
 
 class ArticleOptions(admin.ModelAdmin):
     #raw_id_fields = ('authors',)
-    list_display = ('title', 'created', 'article_age',)
+    list_display = ('title', 'category', 'created', 'article_age', 'get_absolute_url',)
     date_hierarchy = 'created'
     ordering = ('-created',)
     fields = (
         (_("Article heading"), {'fields': ('title', 'upper_title', 'updated', 'slug')}),
         (_("Article contents"), {'fields': ('perex',)}),
-        (_("Metadata"), {'fields': ('category', 'authors', 'source', 'photo')})
+        (_("Metadata"), {'fields': ('category', 'authors', 'source', 'photo')}),
+
 )
     raw_id_fields = ('photo',)
     list_filter = ('created', 'category', 'authors',)
