@@ -5,12 +5,16 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 from django.contrib import admin
+from django.template.defaultfilters import slugify
 
 from ella.core.box import Box
 from ella.core.models import Category, Author, Category, Listing
-from ella.core.cache.utils import get_cached_object
+from ella.core.cache.utils import get_cached_object, cache_this, method_key_getter
 
 
+def gallery_test_builder(*args, **kwargs):
+    gallery = args[0]
+    return [ (Gallery, lambda x: x == gallery), (GalleryItem, lambda x: x.gallery == gallery) ]
 
 class Gallery(models.Model):
     """
@@ -53,6 +57,12 @@ class Gallery(models.Model):
     def __unicode__(self):
         return u'%s gallery' % self.title
 
+    @property
+    @cache_this(method_key_getter, gallery_test_builder)
+    def items(self):
+        return [ (item, item.target) for item in self.galleryitem_set.all() ]
+
+
 
 class GalleryItem(models.Model):
     """
@@ -67,8 +77,35 @@ class GalleryItem(models.Model):
     def target(self):
         return get_cached_object(self.target_ct, pk=self.target_id)
 
+    def _get_slug(self, item_list=None):
+        if item_list is None:
+            item_list = self.gallery.items
+
+        slug = self.target.slug
+
+        count = 0
+        for item, target in item_list:
+            if item == self:
+                break
+            if target.slug == slug:
+                count += 1
+
+        if count:
+            return slug + str(count)
+        return slug
+
+    def get_slug(self, item_list=None):
+        """
+        Return a unique slug for given gallery, even if there are more objects with the same slug.
+
+        TODO: optimize ??
+        """
+        if not hasattr(self, '_slug'):
+            self._slug = self._get_slug(item_list)
+        return self._slug
+
     def get_absolute_url(self):
-        return '%s%s/%s/' % (self.gallery.get_absolute_url(), ugettext('items'), self.target.slug)
+        return '%s%s/%s/' % (self.gallery.get_absolute_url(), slugify(ugettext('items')), self.get_slug())
 
     class Meta:
         ordering = ('order',)

@@ -1,5 +1,5 @@
 from django.contrib.contenttypes.models import ContentType
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext
 from django.template.defaultfilters import slugify
 from django.template import RequestContext
 from django.shortcuts import render_to_response
@@ -12,7 +12,7 @@ from ella.galleries.models import Gallery
 def gallery_item_detail(request, gallery, item_slug=None):
     '''get GalleryItem object by its slug or first one (given by GalleryItem.order) from gallery'''
 
-    item_list = [ (item, item.target) for item in gallery.galleryitem_set.all() ]
+    item_list = gallery.items
     count = len(item_list)
 
     if item_slug is None:
@@ -23,9 +23,10 @@ def gallery_item_detail(request, gallery, item_slug=None):
         else:
             next = None
         position = 1
+        item_slug = item.get_slug(item_list)
     else:
         for i, (it, obj) in enumerate(item_list):
-            if obj.slug == item_slug:
+            if it.get_slug(item_list) == item_slug:
                 item, target = it, obj
                 if i > 0:
                     previous = item_list[i-1][0]
@@ -46,7 +47,7 @@ def gallery_item_detail(request, gallery, item_slug=None):
 
     return render_to_response(
                 [
-                    'galleries/%s/%s.html' % (gallery.slug, target.slug),
+                    'galleries/%s/%s.html' % (gallery.slug, item_slug),
                     'galleries/%s/item_detail.html' % gallery.slug,
                     'galleries/item_detail.html',
                 ],
@@ -76,6 +77,6 @@ def items(request, bits, context):
 
 def register_custom_urls():
     """register all custom urls"""
-    dispatcher.register(slugify(_('items')), items, model=Gallery)
+    dispatcher.register(slugify(ugettext('items')), items, model=Gallery)
 
 
