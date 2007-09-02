@@ -1,5 +1,6 @@
 import re
 from datetime import datetime
+import time
 
 from django.db import models
 from django.contrib import admin
@@ -50,7 +51,7 @@ class Server(models.Model):
                     link=e['link'],
                     defaults={
                         'title' : e['title'],
-                        'updated' : datetime(*e['updated_parsed'][:6]),
+                        'updated' : datetime.fromtimestamp(time.mktime(e['updated_parsed'])),
                         'summary' : e['summary'],
 }
 )
