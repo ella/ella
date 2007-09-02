@@ -3,6 +3,18 @@ from django.http import Http404
 class DetailDispatcher(object):
     """
     Our custom url dispatcher that allows for custom actions on objects.
+
+    Usage:
+        Register your own view function for some specific URL that is appended to object's absolute url.
+        This view will then be called when this URL is used. A small dictionary containing the object,
+        it's listing, category, content_type and content_type_name will be passed to the view.
+
+    Example:
+        dispatcher.register('rate', rate_object)
+        will make the rate_object view available under /rate/...
+
+        dispatcher.register('vote', poll_vote, polls.Poll)
+        will enable you to vote for polls under their own url
     """
     def __init__(self):
         self.mapping = {}

@@ -14,7 +14,7 @@ from django.contrib.contenttypes.models import ContentType
 from ella.core.cache.invalidate import CACHE_DELETER
 
 
-KEY_FORMAT = 'alle.core.cache.utils.get_cached_object:%d:%s'
+KEY_FORMAT = 'ella.core.cache.utils.get_cached_object:%d:%s'
 def get_cached_object(model, **kwargs):
     """
     Return a cached object. If the object does not exist in the cache, create it
@@ -59,7 +59,7 @@ def get_cached_object_or_404(model, **kwargs):
 def method_key_getter(func, *args, **kwargs):
     import md5
     return md5.md5(
-                '%s.%s:%s:%s' % (
+                'ella.core.cache.utils.method_key_getter:%s.%s:%s:%s' % (
                     func.__module__,
                     func.__name__,
                     ', '.join(smart_str(a) for a in args[1:]),

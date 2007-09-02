@@ -1,15 +1,19 @@
 from django.dispatch import dispatcher
 from django.db.models import signals, ObjectDoesNotExist
 from django.contrib.redirects.models import Redirect
-from django.contrib.sites.models import Site
-
-from django.db import transaction
-
-OLD_URL_NAME = '__old_url'
+from django.conf import settings
 
 from ella.core.cache.invalidate import CACHE_DELETER
 
+# name of attribute used to store object's old URL
+OLD_URL_NAME = '__old_url'
+
+
 def record_url(instance):
+    """
+    Check if the object being changed has get_absolute_url(), if so store its value
+    for check_url.
+    """
     if instance._get_pk_val() and  hasattr(instance, 'get_absolute_url'):
         try:
             old_instance = instance._default_manager.get(pk=instance._get_pk_val())
@@ -21,12 +25,17 @@ def record_url(instance):
     return instance
 
 def check_url(instance):
+    """
+    Check if the object that was just changed has a OLD_URL_NAME set on it. If so compareit with its current absolute_url
+    and create a redirect object if necessary.
+    """
     if hasattr(instance, OLD_URL_NAME):
         new_path = instance.get_absolute_url()
         old_path = getattr(instance, OLD_URL_NAME)
 
         if old_path != new_path:
-            redirect = Redirect(site=Site.objects.get_current(), old_path=old_path, new_path=new_path)
+            redirect = Redirect(old_path=old_path, new_path=new_path)
+            redirect.site_id = settings.SITE_ID
             redirect.save()
             for r in Redirect.objects.filter(new_path=old_path):
                 r.new_path = new_path
@@ -35,6 +44,9 @@ def check_url(instance):
     return instance
 
 def drop_redirects(instance):
+    """
+    If an object is deleted, delete all its redirects.
+    """
     if hasattr(instance, 'get_absolute_url'):
         Redirect.objects.filter(new_path=instance.get_absolute_url()).delete()
 

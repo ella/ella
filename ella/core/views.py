@@ -48,7 +48,7 @@ def object_detail(request, category, year, month, day, content_type, slug, url_r
         slug - slug of the object itself
 
     Raises:
-        Http404
+        Http404 if object or listing doesn't exist or dates doesn't match
     """
     ct = get_content_type(content_type)
 
@@ -81,6 +81,7 @@ def object_detail(request, category, year, month, day, content_type, slug, url_r
         bits = url_remainder.split('/')
         return dispatcher.call_view(request, bits, context)
 
+    # increment hit counter
     HitCount.objects.hit(obj)
 
     return render_to_response(
@@ -192,6 +193,7 @@ DATE_URLS = {'year' : '../%Y/', 'month' : '../../%Y/%m/', 'day' : '../../../%Y/%
 YEAR_URLS = {'year' : '../%Y/', 'month' : '../../%Y/', 'day' : '../../../%Y/', 'detail' : '../../../%Y/'}
 DATE_REPR = {'year' : '%Y', 'month' : '%m/%Y', 'day' : '%d/%m/%Y', 'detail' : '%d/%m/%Y',}
 CURRENT_DATE_REPR = {'year' : '', 'month' : '%Y', 'day' : '%m/%Y', 'detail' : '%d/%m/%Y',}
+
 def home(request):
     """
     Homepage of the actual site.

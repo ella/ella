@@ -2,23 +2,17 @@ from datetime import datetime, timedelta
 
 from django.db import models, transaction
 from django.contrib import admin
-from django.utils.timesince import timesince
-from django import newforms as forms
 from django.core.urlresolvers import reverse
-from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import generic
 from django.contrib.sites.managers import CurrentSiteManager
 from django.contrib.sites.models import Site
 from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext_lazy as _
 
-from ella.core.cache import get_cached_object, cache_this, method_key_getter
 from ella.core.box import Box
 from ella.core.managers import *
 
-DEFAULT_LISTING_PRIORITY = getattr(settings, 'DEFAULT_LISTING_PRIORITY', 0)
 
 class Author(models.Model):
     user = models.ForeignKey(User, blank=True, null=True)
@@ -117,97 +111,6 @@ class Category(models.Model):
 
     def __unicode__(self):
         return self.title
-
-def test_listing(*args, **kwargs):
-    return [ (Listing, lambda x: True) ]
-
-class ListingManager(RelatedManager):
-    NONE = 0
-    IMMEDIATE = 1
-    ALL = 2
-
-    def clean_listings(self):
-        """
-        Method that cleans the Listing model by deleting all listings that are no longer valid.
-        Should be run periodicaly to purge the DB from unneeded data.
-        """
-        self.filter(remove=True, priority_to__lte=datetime.now()).delete()
-
-    def get_queryset(self, category=None, children=NONE, mods=[], content_types=[], **kwargs):
-        now = datetime.now()
-        qset = self.exclude(remove=True, priority_to__lte=datetime.now()).filter(publish_from__lte=now, **kwargs)
-
-        if category:
-            if children == self.NONE:
-                # only this one category
-                qset = qset.filter(category=category)
-            elif children == self.IMMEDIATE:
-                # this category and its children
-                qset = qset.filter(models.Q(category__tree_parent=category) | models.Q(category=category))
-            else:
-                # this category and all its descendants
-                qset = qset.filter(category__tree_path__startswith=category.tree_path)
-
-        # filtering based on Model classes
-        if mods or content_types:
-            qset = qset.filter(target_ct__in=([ ContentType.objects.get_for_model(m) for m in mods ] + content_types))
-
-        return qset
-
-    def get_count(self, category=None, children=NONE, mods=[], **kwargs):
-        return self.get_queryset(category, children, mods, **kwargs).count()
-
-    @cache_this(method_key_getter, test_listing)
-    def get_listing(self, category=None, count=10, offset=1, children=NONE, mods=[], content_types=[], **kwargs):
-        """
-        Get top objects for given category and potentionally also its child categories.
-
-        Params:
-            category - Category object to list objects for. None if any category will do
-            count - number of objects to output, defaults to 10
-            offset - starting with object number... 1-based
-            children - one of
-                            NONE: only this category
-                            IMMEDIATE: this category and its immediate children
-                            ALL: all descendants from the given category
-            mods - list of Models, if empty, object from all models are included
-            **kwargs - rest of the parameter are passed to the queryset unchanged
-        """
-        assert offset > 0, "Offset must be a positive integer"
-        assert count > 0, "Count must be a positive integer"
-
-        now = datetime.now()
-        qset = self.get_queryset(category, children, mods, content_types, **kwargs).select_related()
-
-        # listings with active priority override
-        active = models.Q(priority_from__isnull=False, priority_from__lte=now, priority_to__gte=now)
-
-        qsets = (
-            # modded-up objects
-            qset.filter(active, priority_value__gt=DEFAULT_LISTING_PRIORITY).order_by('-priority_value', '-publish_from'),
-            # default priority
-            qset.exclude(active).order_by('-publish_from'),
-            # modded-down priority
-            qset.filter(active, priority_value__lt=DEFAULT_LISTING_PRIORITY).order_by('-priority_value', '-publish_from'),
-)
-
-        out = []
-
-        # templates are 1-based, compensate
-        offset -= 1
-
-        # iterate through qsets until we have enough objects
-        for q in qsets:
-            data = q[offset:offset+count]
-            if data:
-                offset = 0
-                out.extend(data)
-                count -= len(data)
-                if count <= 0:
-                    break
-            elif offset != 0:
-                offset -= q.count()
-        return out
 
 class Listing(models.Model):
     """
@@ -312,25 +215,6 @@ class Listing(models.Model):
         ordering = ('-publish_from',)
         unique_together = (('category', 'target_id', 'target_ct'),)
 
-def test_hitcount(*args, **kwargs):
-    return []
-
-class HitCountManager(models.Manager):
-    def hit(self, obj):
-        # TODO FIXME: optimizations and thread safety
-        target_ct = ContentType.objects.get_for_model(obj)
-        hc, created = self.get_or_create(target_ct=target_ct, target_id=obj._get_pk_val())
-        if not created:
-            hc.hits += 1
-        hc.save()
-
-    @cache_this(method_key_getter, test_hitcount, timeout=3600)
-    def get_top_objects(self, count, mods=[]):
-        kwa = {}
-        if mods:
-            kwa['target_ct__in'] = [ ContentType.objects.get_for_model(m) for m in mods ]
-        return self.filter(**kwa)[:count]
-
 class HitCount(models.Model):
     target_ct = models.ForeignKey(ContentType)
     target_id = models.IntegerField()
@@ -385,44 +269,6 @@ class Related(models.Model):
         verbose_name = _('Related')
         verbose_name_plural = _('Related')
         ordering = ('source_ct', 'source_id',)
-
-class DependencyManager(RelatedManager):
-    def report_dependency(self, source, source_key, target, target_key):
-        source_ct = ContentType.objects.get_for_model(source)
-        target_ct = ContentType.objects.get_for_model(target)
-        try:
-            get_cached_object(
-                        Dependency,
-                        source_ct=source_ct,
-                        source_id=source._get_pk_val(),
-                        source_key=source_key,
-
-                        target_ct=target_ct,
-                        target_id=target._get_pk_val(),
-                        target_key=target_key
-)
-        except Dependency.DoesNotExist:
-            dep = self.create(
-                        source_ct=source_ct,
-                        source_id=source._get_pk_val(),
-                        source_key=source_key,
-
-                        target_ct=target_ct,
-                        target_id=target._get_pk_val(),
-                        target_key=target_key
-)
-
-    def cascade(self, target, key):
-        target_ct = ContentType.objects.get_for_model(target)
-        qset =  self.filter(
-                    target_ct=target_ct,
-                    target_key=key
-)
-        for dep in qset:
-            CACHE_DELETER.invalidate(dep.source_ct.model_class(), key)
-        qset.delete()
-
-
 
 class Dependency(models.Model):
     """
@@ -500,4 +346,5 @@ admin.site.register(Author, AuthorOptions)
 admin.site.register(Listing, ListingOptions)
 admin.site.register(Dependency , DependencyOptions)
 
+# import management to register signal handlers contained there
 from ella.core import management
