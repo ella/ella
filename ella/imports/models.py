@@ -1,6 +1,6 @@
 import re
 from datetime import datetime
-import time
+import calendar
 
 from django.db import models
 from django.contrib import admin
@@ -51,7 +51,7 @@ class Server(models.Model):
                     link=e['link'],
                     defaults={
                         'title' : e['title'],
-                        'updated' : datetime.fromtimestamp(time.mktime(e['updated_parsed'])),
+                        'updated' : datetime.utcfromtimestamp(calendar.timegm(e['updated_parsed'])),
                         'summary' : e['summary'],
 }
 )
