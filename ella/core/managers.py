@@ -131,6 +131,7 @@ class HitCountManager(models.Manager):
 
 class DependencyManager(RelatedManager):
     def report_dependency(self, source, source_key, target, target_key):
+        from ella.core.models import Dependency
         source_ct = ContentType.objects.get_for_model(source)
         target_ct = ContentType.objects.get_for_model(target)
         try:
