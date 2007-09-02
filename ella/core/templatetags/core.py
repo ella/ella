@@ -33,7 +33,7 @@ def listing(parser, token):
 
     Usage::
 
-        {% listing <limit>[ from <offset>][of <app.model>[, <app.model>[, ...]]][ for <category>][ with [immediate] subcategories] as <result> %}
+        {% listing <limit>[ from <offset>][of <app.model>[, <app.model>[, ...]]][ for <category>] as <result> %}
 
     Parameters:
 
@@ -47,10 +47,6 @@ def listing(parser, token):
         ``for category``                    Category of the listing, all categories if not
                                             specified. Can be either string (slug), digit (id)
                                             or variable containing a Category object.
-        ``with [immediate] subcategories``  Include descendants of the specified category. If
-                                            ``immediate`` specified, include just the direct
-                                            children. Use just the category itself if not
-                                            specified.
         ``as result``                       Store the resulting list in context under given
                                             name.
         ==================================  ================================================
@@ -58,7 +54,7 @@ def listing(parser, token):
     Examples::
 
         {% listing 10 of articles.article for "home_page" as obj_list %}
-        {% listing 10 of articles.article for category with subcategories as obj_list %}
+        {% listing 10 of articles.article for category as obj_list %}
         {% listing 10 from 10 of articles.article as obj_list %}
         {% listing 10 of articles.article, photos.photo for 1 as obj_list %}
     """
@@ -101,16 +97,6 @@ def listing_parse(input):
         params['category'] = input[o+1]
         params_to_resolve.append('category')
         o=o+2
-    # with
-    if input[o] == 'with':
-        o=o+1
-        if input[o] == 'children':
-            params['children'] = Listing.objects.IMMEDIATE
-        elif input[o] == 'descendents':
-            params['children'] = Listing.obects.ALL
-        else:
-            raise templpate.TemplateSyntaxError, "%r tag's argument 'with' required specification (with children|with descendents)" % input[0]
-        o=o+1
     # as
     if input[o] == 'as':
         var_name = input[o+1]
