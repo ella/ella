@@ -13,7 +13,10 @@ urlpatterns = patterns('',
     # home page
     url(r'^$', home, name="root_homepage"),
 
-    # rsss feeds
+    # export banner
+    url(r'^export/$', 'ella.core.views.export', {'count' : 3}, name="export"),
+
+    # rss feeds
     url(r'^feeds/(?P<url>.*)/$', 'django.contrib.syndication.views.feed', {'feed_dict': feeds}, name="feeds"),
 
     # list of objects regadless of category and content type

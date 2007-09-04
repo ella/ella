@@ -238,3 +238,16 @@ def category_detail(request, category):
 },
             context_instance=RequestContext(request)
 )
+def export_test(*args, **kwargs):
+    return []
+
+@cache_this(method_key_getter, export_test, timeout=60*60)
+def export(request, count, models=None):
+    if models is None:
+        from ella.articles.models import Article
+        models = [ Article, ]
+
+    cat = get_cached_object_or_404(Category, tree_parent__isnull=True)
+    listing = Listing.objects.get_listing(count=count, category=cat, mods=models)
+    return render_to_response('export_banner.html', {'category' : cat, 'listing' : listing}, context_instance=RequestContext(request))
+
