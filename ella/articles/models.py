@@ -174,7 +174,7 @@ class ArticleOptions(admin.ModelAdmin):
         if db_field.name == 'perex':
             kwargs['widget'] = widgets.RichTextAreaWidget
         if db_field.name == 'slug':
-            return forms.RegexField('^[0-9a-z-]+$')
+            return forms.RegexField('^[0-9a-z-]+$', **kwargs)
         return db_field.formfield(**kwargs)
 
 admin.site.register(InfoBox, InfoBoxOptions)
