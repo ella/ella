@@ -26,40 +26,40 @@ urlpatterns = patterns('',
     url(r'^(?P<year>\d{4})/$', list_content_type, name="list_year"),
 
     # list of objects regardless of category
-    url(r'^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<content_type>[a-z-]+)/$',
+    url(r'^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<content_type>[a-z0-9-]+)/$',
         list_content_type, name="list_content_type_day"),
-    url(r'^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<content_type>[a-z-]+)/$', list_content_type, name="list_content_type_month"),
-    url(r'^(?P<year>\d{4})/(?P<content_type>[a-z-]+)/$', list_content_type, name="list_content_type_year"),
+    url(r'^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<content_type>[a-z0-9-]+)/$', list_content_type, name="list_content_type_month"),
+    url(r'^(?P<year>\d{4})/(?P<content_type>[a-z0-9-]+)/$', list_content_type, name="list_content_type_year"),
 
     # object detail
-    url(r'^(?P<category>[-a-z/]+)/(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<content_type>[a-z-]+)/(?P<slug>[a-z-]+)/$',
+    url(r'^(?P<category>[a-z0-9-/]+)/(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<content_type>[a-z0-9-]+)/(?P<slug>[a-z0-9-]+)/$',
         object_detail, name="object_detail"),
-    url(r'^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<content_type>[a-z-]+)/(?P<slug>[a-z-]+)/$',
+    url(r'^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<content_type>[a-z0-9-]+)/(?P<slug>[a-z0-9-]+)/$',
         object_detail, {'category' : ''}, name="home_object_detail"),
 
     # object detail with custom action
-    url(r'^(?P<category>[-a-z/]+)/(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<content_type>[a-z-]+)/(?P<slug>[a-z-]+)/(?P<url_remainder>.*)/$',
+    url(r'^(?P<category>[a-z0-9-/]+)/(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<content_type>[a-z0-9-]+)/(?P<slug>[a-z0-9-]+)/(?P<url_remainder>.*)/$',
         object_detail, name="object_detail_action"),
-    url(r'^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<content_type>[a-z-]+)/(?P<slug>[a-z-]+)/(?P<url_remainder>.*)/$',
+    url(r'^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<content_type>[a-z0-9-]+)/(?P<slug>[a-z0-9-]+)/(?P<url_remainder>.*)/$',
         object_detail, {'category' : ''}, name="home_object_detail_action"),
 
     # category listings
-    url(r'^(?P<category>[-a-z/]+)/(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/$',
+    url(r'^(?P<category>[a-z0-9-/]+)/(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/$',
         list_content_type, name="category_list_day"),
-    url(r'^(?P<category>[-a-z/]+)/(?P<year>\d{4})/(?P<month>\d{1,2})/$',
+    url(r'^(?P<category>[a-z0-9-/]+)/(?P<year>\d{4})/(?P<month>\d{1,2})/$',
         list_content_type, name="category_list_month"),
-    url(r'^(?P<category>[-a-z/]+)/(?P<year>\d{4})/$',
+    url(r'^(?P<category>[a-z0-9-/]+)/(?P<year>\d{4})/$',
         list_content_type, name="category_list_year"),
 
     # category listings for content_type
-    url(r'^(?P<category>[-a-z/]+)/(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<content_type>[a-z-]+)/$',
+    url(r'^(?P<category>[a-z0-9-/]+)/(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<content_type>[a-z0-9-]+)/$',
         list_content_type, name="category_list_content_type_day"),
-    url(r'^(?P<category>[-a-z/]+)/(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<content_type>[a-z-]+)/$',
+    url(r'^(?P<category>[a-z0-9-/]+)/(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<content_type>[a-z0-9-]+)/$',
         list_content_type, name="category_list_content_type_month"),
-    url(r'^(?P<category>[-a-z/]+)/(?P<year>\d{4})/(?P<content_type>[a-z-]+)/$',
+    url(r'^(?P<category>[a-z0-9-/]+)/(?P<year>\d{4})/(?P<content_type>[a-z0-9-]+)/$',
         list_content_type, name="category_list_content_type_year"),
 
     # category homepage
-    url(r'^(?P<category>[-a-z/]+)/$', category_detail, name="category_detail"),
+    url(r'^(?P<category>[a-z0-9-/]+)/$', category_detail, name="category_detail"),
 
 )
