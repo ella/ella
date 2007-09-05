@@ -70,6 +70,14 @@ class Article(models.Model):
         if listing:
             return listing.get_absolute_url()
 
+    def full_url(self):
+        absolute_url = self.get_absolute_url()
+        if absolute_url:
+            return '<a href="%s">url</a>' % absolute_url
+        return 'no url'
+    full_url.allow_tags = True
+
+
     @property
     def content(self):
         if not hasattr(self, '_content'):
@@ -145,7 +153,7 @@ class InfoBoxOptions(admin.ModelAdmin):
 
 class ArticleOptions(admin.ModelAdmin):
     #raw_id_fields = ('authors',)
-    list_display = ('title', 'category', 'created', 'article_age', 'get_absolute_url',)
+    list_display = ('title', 'category', 'created', 'article_age', 'full_url',)
     date_hierarchy = 'created'
     ordering = ('-created',)
     fields = (
@@ -162,8 +170,11 @@ class ArticleOptions(admin.ModelAdmin):
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         from ella.core import widgets
+        from django import newforms as forms
         if db_field.name == 'perex':
             kwargs['widget'] = widgets.RichTextAreaWidget
+        if db_field.name == 'slug':
+            return forms.RegexField('^[0-9a-z-]+$')
         return db_field.formfield(**kwargs)
 
 admin.site.register(InfoBox, InfoBoxOptions)
