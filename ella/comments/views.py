@@ -8,9 +8,6 @@ from django.template import RequestContext
 
 from ella.core.cache import get_cached_object_or_404
 
-
-
-
 class CommentFormPreview(FormPreview):
     """
     TODO:
@@ -19,15 +16,24 @@ class CommentFormPreview(FormPreview):
     """
     preview_template = 'comments/base_preview_template.html'
     form_template = 'comments/base_preview_form_template.html'
+
     def parse_params(self, context={}):
         self.context = context
+
     def done(self, request, cleaned_data):
         from ella.comments.forms import CommentForm
+        if 'HTTP_X_FORWARDED_FOR' in request.META:
+            ip = reqeust.META['HTTP_X_FORWARDED_FOR']
+        else:
+            ip = request.META['REMOTE_ADDR']
+
         CommentForm(request.POST).save(
-                other_values={'ip_address': request.META['REMOTE_ADDR']})
-        # TODO: get_cached_object_or_404
+                other_values={'ip_address': ip}
+)
+
         ct = get_cached_object_or_404(ContentType, pk=cleaned_data['target_ct'].id)
         target = get_cached_object_or_404(ct, pk=cleaned_data['target_id'])
+
         if hasattr(target, 'get_absolute_url'):
             url = target.get_absolute_url()
         else:
@@ -38,22 +44,32 @@ class CommentFormPreview(FormPreview):
 
 def new_comment(request, object):
     """new comment"""
+    cat = object.category
+    opts = object._meta
     templates = [
-        'comments/%s/comment_add.html' % object.category.path,
+        'comments/%s/%s.%s/%s_comment_add.html' % (cat.path, opts.app_label, opts.module_name, objectslug),
+        'comments/%s/%s.%s/base_comment_add.html' % (cat.path, opts.app_label, opts.module_name),
+        'comments/%s/base_comment_add.html' % cat.path,
         'comments/base_comment_add.html',
     ]
     context = {
         'object': object,
+        'category': cat,
 }
     return render_to_response(templates, context, context_instance=RequestContext(request))
 
 def list_comments(request, object):
+    cat = object.category
+    opts = object._meta
     templates = [
-        'comments/%s/comment_list.html' % object.category.path,
+        'comments/%s/%s.%s/%s_comment_list.html' % (cat.path, opts.app_label, opts.module_name, objectslug),
+        'comments/%s/%s.%s/base_comment_list.html' % (cat.path, opts.app_label, opts.module_name),
+        'comments/%s/base_comment_list.html' % cat.path,
         'comments/base_comment_list.html',
     ]
     context = {
         'object': object,
+        'category': cat,
 }
     return render_to_response(templates, context, context_instance=RequestContext(request))
 
