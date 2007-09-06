@@ -83,6 +83,22 @@ class Box(object):
             return loader.render_to_string(self.template_name, self.get_context())
 
         t_list = []
+
+        # NEW
+        if hasattr(self.obj, 'category'):
+            base_path = 'box/category/%s/%s.%s/' % (self.obj.category.path, self.obj._meta.app_label, self.obj._meta.module_name)
+            if hasattr(self.obj, 'slug'):
+                t_list.append(base_path + '%s/%s.html' % (self.obj.slug, self.box_type,))
+            t_list.append(base_path + '%s.html' % (self.box_type,))
+            t_list.append(base_path + 'box.html')
+
+        base_path = 'box/content_type/%s.%s/' % (self.obj._meta.app_label, self.obj._meta.module_name)
+        if hasattr(self.obj, 'slug'):
+            t_list.append(base_path + '%s/%s.html' % (self.obj.slug, self.box_type,))
+        t_list.append(base_path + '%s.html' % (self.box_type,))
+        t_list.append(base_path + 'box.html')
+
+        # OLD
         base_path = 'box/%s.%s/' % (self.obj._meta.app_label, self.obj._meta.module_name)
         if hasattr(self.obj, 'slug'):
             t_list.append(base_path + '%s/%s.html' % (self.box_type, self.obj.slug))

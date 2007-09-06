@@ -86,6 +86,14 @@ def object_detail(request, category, year, month, day, content_type, slug, url_r
 
     return render_to_response(
             (
+                # NEW
+                'page/category/%s/%s.%s/%s/object.html' % (cat.path, ct.app_label, ct.model, slug),
+                'page/category/%s/%s.%s/object.html' % (cat.path, ct.app_label, ct.model),
+                'page/category/%s/object.html' % (cat.path),
+                'page/content_type/%s.%s/object.html' % (ct.app_label, ct.model),
+                'page/object.html',
+
+                # OLD
                 'category/%s/%s.%s/%s_detail.html' % (cat.path, ct.app_label, ct.model, slug),
                 'category/%s/%s.%s/base_detail.html' % (cat.path, ct.app_label, ct.model),
                 'category/%s/base_detail.html' % (cat.path),
@@ -134,9 +142,9 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
 
     if category:
         cat = get_cached_object_or_404(Category, tree_path=category)
-        kwa['category'] = cat
     else:
-        cat = False
+        cat = get_cached_object_or_404(Category, tree_parent__isnull=True)
+    kwa['category'] = cat
 
     if content_type:
         ct = get_content_type(content_type)
@@ -160,9 +168,21 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
 
     template_list = []
     if cat and ct:
+        # NEW
+        template_list.append('page/category/%s/%s.%s/listing.html' % (cat.path, ct.app_label, ct.model))
+
+        # OLD
         template_list.append('category/%s/%s.%s/list.html' % (cat.path, ct.app_label, ct.model))
     if cat:
+        # NEW
+        template_list.append('page/category/%s/listing.html' % (cat.path))
+
+        # OLD
         template_list.append('category/%s/base_list.html' % (cat.path))
+    # NEW
+    template_list.append('page/listing.html')
+
+    # OLD
     template_list.append('core/base_list.html')
 
     return render_to_response(template_list, {
@@ -207,6 +227,11 @@ def home(request):
     cat = get_cached_object_or_404(Category, tree_parent__isnull=True)
     return render_to_response(
             (
+                # NEW
+                'page/category/%s/category.html' % (cat.slug),
+                'page/category.html',
+
+                # OLD
                 'category/%s/detail.html' % (cat.slug),
                 'core/category_detail.html',
 ),
@@ -230,7 +255,12 @@ def category_detail(request, category):
     cat = get_cached_object_or_404(Category, tree_path=category, tree_parent__isnull=False)
     return render_to_response(
             (
-                'category/%s/detail.html' % (cat.path),
+                # NEW
+                'page/category/%s/category.html' % (cat.slug),
+                'page/category.html',
+
+                # OLD
+                'category/%s/detail.html' % (cat.slug),
                 'core/category_detail.html',
 ),
             {
