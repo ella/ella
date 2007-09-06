@@ -77,7 +77,7 @@ class TemplateBlockInlineOptions(admin.TabularInline):
             kwargs['widget'] = widgets.ContentTypeWidget
         if db_field.name == 'target_id':
             kwargs['widget'] = widgets.ForeignKeyRawIdWidget
-        return db_field.formfield(**kwargs)
+        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 class DbTemplateOptions(admin.ModelAdmin):
     inlines = (TemplateBlockInlineOptions(

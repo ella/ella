@@ -137,7 +137,7 @@ class ArticleContentInlineOptions(admin.TabularInline):
         from ella.core import widgets
         if db_field.name == 'content':
             kwargs['widget'] = widgets.RichTextAreaWidget
-        return db_field.formfield(**kwargs)
+        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 class InfoBoxOptions(admin.ModelAdmin):
     list_display = ('title', 'created',)
@@ -149,7 +149,7 @@ class InfoBoxOptions(admin.ModelAdmin):
         from ella.core import widgets
         if db_field.name == 'content':
             kwargs['widget'] = widgets.RichTextAreaWidget
-        return db_field.formfield(**kwargs)
+        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 class ArticleOptions(admin.ModelAdmin):
     #raw_id_fields = ('authors',)
@@ -174,8 +174,8 @@ class ArticleOptions(admin.ModelAdmin):
         if db_field.name == 'perex':
             kwargs['widget'] = widgets.RichTextAreaWidget
         if db_field.name == 'slug':
-            return forms.RegexField('^[0-9a-z-]+$', **kwargs)
-        return db_field.formfield(**kwargs)
+            return forms.RegexField('^[0-9a-z-]+$', max_length=255, **kwargs)
+        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 admin.site.register(InfoBox, InfoBoxOptions)
 admin.site.register(Article, ArticleOptions)

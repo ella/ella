@@ -384,7 +384,7 @@ class PhotoOptions(admin.ModelAdmin):
         if db_field.name == 'slug':
             # slug validation
             return forms.RegexField('^[0-9a-z-]+$', **kwargs)
-        return db_field.formfield(**kwargs)
+        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
     def __call__(self, request, url):
         if url and url.endswith('json'):

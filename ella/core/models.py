@@ -311,7 +311,7 @@ class ListingOptions(admin.ModelAdmin):
             kwargs['widget'] = widgets.ContentTypeWidget
         if db_field.name == 'target_id':
             kwargs['widget'] = widgets.ForeignKeyRawIdWidget
-        return db_field.formfield(**kwargs)
+        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 class DependencyOptions(admin.ModelAdmin):
     raw_id_fields = ('target_id', 'source_id',)
@@ -325,7 +325,7 @@ class DependencyOptions(admin.ModelAdmin):
             kwargs['widget'] = widgets.ContentTypeWidget
         if db_field.name == 'source_id':
             kwargs['widget'] = widgets.ForeignKeyRawIdWidget
-        return db_field.formfield(**kwargs)
+        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 class CategoryOptions(admin.ModelAdmin):
     list_display = ('draw_title', 'tree_path')
