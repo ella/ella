@@ -40,6 +40,9 @@ class DbTemplate(models.Model):
         self.text = self.get_text()
         super(DbTemplate, self).save()
 
+    def __unicode__(self):
+        return '%s <- %s' % (self.name, self.extends)
+
 
 class TemplateBlock(models.Model):
     template = models.ForeignKey(DbTemplate)

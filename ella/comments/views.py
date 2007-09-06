@@ -47,7 +47,7 @@ def new_comment(request, object):
     cat = object.category
     opts = object._meta
     templates = [
-        'comments/%s/%s.%s/%s_comment_add.html' % (cat.path, opts.app_label, opts.module_name, objectslug),
+        'comments/%s/%s.%s/%s_comment_add.html' % (cat.path, opts.app_label, opts.module_name, object.slug),
         'comments/%s/%s.%s/base_comment_add.html' % (cat.path, opts.app_label, opts.module_name),
         'comments/%s/base_comment_add.html' % cat.path,
         'comments/base_comment_add.html',
@@ -62,7 +62,7 @@ def list_comments(request, object):
     cat = object.category
     opts = object._meta
     templates = [
-        'comments/%s/%s.%s/%s_comment_list.html' % (cat.path, opts.app_label, opts.module_name, objectslug),
+        'comments/%s/%s.%s/%s_comment_list.html' % (cat.path, opts.app_label, opts.module_name, object.slug),
         'comments/%s/%s.%s/base_comment_list.html' % (cat.path, opts.app_label, opts.module_name),
         'comments/%s/base_comment_list.html' % cat.path,
         'comments/base_comment_list.html',
