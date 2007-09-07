@@ -1,27 +1,14 @@
-from django.db import models, backend, connection
+from django.db import models, connection
 from django.contrib import admin
 from django.contrib.auth.models import User
-from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 
 from ella.core.cache import get_cached_object
 from ella.core.box import Box
 
-class PollBox(Box):
-   def get_context(self):
-        from ella.polls import views
-        cont = super(PollBox, self).get_context()
-#        state = views.check_vote(self._context['request'], self.obj)
-        cont.update({
-            'state' : views.check_vote(self._context['REQUEST'], self.obj),
-            'state_voted' : views.POLL_USER_ALLREADY_VOTED,
-            'state_just_voted' : views.POLL_USER_JUST_VOTED,
-            'state_not_yet_voted' : views.POLL_USER_NOT_YET_VOTED})
-        return cont
-
-class Poll(models.Model):
+class Contest(models.Model):
     """
-    Poll model with descriptions and activation times
+    Contests with title, descriptions and activation
     """
     title = models.CharField(_('Title'), maxlength=200)
     text_announcement = models.TextField(_('Text with announcement'))
@@ -29,21 +16,33 @@ class Poll(models.Model):
     text_results = models.TextField(_('Text with results'))
     active_from = models.DateTimeField(_('Active from'))
     active_till = models.DateTimeField(_('Active till'))
-    question = models.ForeignKey('Question', verbose_name=_('Question'), unique=True)
 
     def __unicode__(self):
         return self.title
 
     class Meta:
-        verbose_name = _('Poll')
-        verbose_name_plural = _('Polls')
+        verbose_name = _('Contest')
+        verbose_name_plural = _('Contests')
         ordering = ('-active_from',)
 
-    def get_total_votes(self):
-        return self.question.get_total_votes()
+class Quiz(models.Model):
+    """
+    Quizes with title, descriptions and activation options.
+    """
+    title = models.CharField(_('title'), maxlength=200)
+    text_announcement = models.TextField(_('text with announcement'))
+    text = models.TextField(_('Text'))
+    text_results = models.TextField(_('Text with results'))
+    active_from = models.DateTimeField(_('Active from'))
+    active_till = models.DateTimeField(_('Active till'))
 
-    def Box(self, box_type, nodelist):
-        return PollBox(self, box_type, nodelist)
+    def __unicode__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = _('Quiz')
+        verbose_name_plural = _('Quizes')
+        ordering = ('-active_from',)
 
 class Question(models.Model):
     """
@@ -53,8 +52,8 @@ class Question(models.Model):
     """
     question = models.TextField(_('Question text'))
     allow_multiple = models.BooleanField(_('Allow multiple choices'), default=False)
-    quiz = models.ForeignKey('Quiz', blank=True, null=True, verbose_name=_('Quiz'))
-    contest = models.ForeignKey('Contest', blank=True, null=True, verbose_name=_('Contest'))
+    quiz = models.ForeignKey(Quiz, blank=True, null=True, verbose_name=_('Quiz'))
+    contest = models.ForeignKey(Contest, blank=True, null=True, verbose_name=_('Contest'))
 
     def __unicode__(self):
         return self.question
@@ -77,6 +76,44 @@ class Question(models.Model):
     class Meta:
         verbose_name = _('Question')
         verbose_name_plural = _('Questions')
+
+class PollBox(Box):
+   def get_context(self):
+        from ella.polls import views
+        cont = super(PollBox, self).get_context()
+        # state = views.check_vote(self._context['request'], self.obj)
+        cont.update({
+            'state' : views.check_vote(self._context['REQUEST'], self.obj),
+            'state_voted' : views.POLL_USER_ALLREADY_VOTED,
+            'state_just_voted' : views.POLL_USER_JUST_VOTED,
+            'state_not_yet_voted' : views.POLL_USER_NOT_YET_VOTED})
+        return cont
+
+class Poll(models.Model):
+    """
+    Poll model with descriptions and activation times
+    """
+    title = models.CharField(_('Title'), maxlength=200)
+    text_announcement = models.TextField(_('Text with announcement'))
+    text = models.TextField(_('Text'))
+    text_results = models.TextField(_('Text with results'))
+    active_from = models.DateTimeField(_('Active from'))
+    active_till = models.DateTimeField(_('Active till'))
+    question = models.ForeignKey(Question, verbose_name=_('Question'), unique=True)
+
+    def __unicode__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = _('Poll')
+        verbose_name_plural = _('Polls')
+        ordering = ('-active_from',)
+
+    def get_total_votes(self):
+        return self.question.get_total_votes()
+
+    def Box(self, box_type, nodelist):
+        return PollBox(self, box_type, nodelist)
 
 class Choice(models.Model):
     """
@@ -115,15 +152,15 @@ UPDATE_VOTE = '''
     WHERE
         id = %%s;
     ''' % {
-        'table' : backend.quote_name(Choice._meta.db_table),
-        'col' : backend.quote_name(Choice._meta.get_field('votes').column)
+        'table' : connection.ops.quote_name(Choice._meta.db_table),
+        'col' : connection.ops.quote_name(Choice._meta.get_field('votes').column)
 }
 
 class Vote(models.Model):
     """
     User votes to ensure unique votes. For Polls only.
     """
-    poll = models.ForeignKey('poll', verbose_name=_('Poll'))
+    poll = models.ForeignKey(Poll, verbose_name=_('Poll'))
     user = models.ForeignKey(User, blank=True, null=True, verbose_name=_('User'))
     time = models.DateTimeField(_('Time'), auto_now=True)
     ip_address = models.IPAddressField(_('IP Address'), null=True)
@@ -136,30 +173,11 @@ class Vote(models.Model):
         verbose_name_plural = _('Votes')
         ordering = ('-time',)
 
-class Contest(models.Model):
-    """
-    Contests with title, descriptions and activation
-    """
-    title = models.CharField(_('Title'), maxlength=200)
-    text_announcement = models.TextField(_('Text with announcement'))
-    text = models.TextField(_('Text'))
-    text_results = models.TextField(_('Text with results'))
-    active_from = models.DateTimeField(_('Active from'))
-    active_till = models.DateTimeField(_('Active till'))
-
-    def __unicode__(self):
-        return self.title
-
-    class Meta:
-        verbose_name = _('Contest')
-        verbose_name_plural = _('Contests')
-        ordering = ('-active_from',)
-
 class Contestant(models.Model):
     """
     Contestant info.
     """
-    contest = models.ForeignKey('Contest', verbose_name=_('Contest'))
+    contest = models.ForeignKey(Contest, verbose_name=_('Contest'))
     datetime = models.DateTimeField(_('Date and time'), auto_now_add=True)
     user = models.ForeignKey(User, null=True, blank=True, verbose_name=_('User'))
     name = models.CharField(_('First name'), maxlength=200)
@@ -177,30 +195,11 @@ class Contestant(models.Model):
         verbose_name_plural = _('Contestants')
         ordering = ('-datetime',)
 
-class Quiz(models.Model):
-    """
-    Quizes with title, descriptions and activation options.
-    """
-    title = models.CharField(_('title'), maxlength=200)
-    text_announcement = models.TextField(_('text with announcement'))
-    text = models.TextField(_('Text'))
-    text_results = models.TextField(_('Text with results'))
-    active_from = models.DateTimeField(_('Active from'))
-    active_till = models.DateTimeField(_('Active till'))
-
-    def __unicode__(self):
-        return self.title
-
-    class Meta:
-        verbose_name = _('Quiz')
-        verbose_name_plural = _('Quizes')
-        ordering = ('-active_from',)
-
 class Result(models.Model):
     """
     Quiz results for skills comparation.)
     """
-    quiz = models.ForeignKey('Quiz', verbose_name=_('Quiz'))
+    quiz = models.ForeignKey(Quiz, verbose_name=_('Quiz'))
     title = models.CharField(_('Title'), maxlength=200)
     text = models.TextField(_('Quiz results text'))
     points_from = models.IntegerField(_('Points dimension from'), null=True)
