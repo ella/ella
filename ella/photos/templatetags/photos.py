@@ -24,7 +24,7 @@ class ImgTag(template.Node):
             except FormatedPhoto.DoesNotExist:
                 try:
                     formated_photo = FormatedPhoto.objects.create(photo=photo, format=self.format)
-                except IOError:
+                except (IOError, SystemError):
                     context[self.var_name] = self.format.get_blank_img()
                     return ''
         else:

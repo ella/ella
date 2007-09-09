@@ -160,6 +160,7 @@ class Format(models.Model):
             'height' : self.max_height,
             'filename' : 'img/empty/%s.png' % (self.name),
             'format' : self,
+            'url' : settings.MEDIA_ROOT + 'img/empty/%s.png' % (self.name),
 }
         return out
 
@@ -207,8 +208,8 @@ class FormatedPhoto(models.Model):
         try:
             self.generate()
             return settings.MEDIA_URL + self.filename
-        except IOError:
-            return settings.MEDIA_URL + self.format.get_blank_img()
+        except (IOError, SystemError):
+            return self.format.get_blank_img()['url']
 
     def get_stretch_dimension(self, flex=False):
         """ Method return stretch dimension of crop to fit inside max format rectangle """
