@@ -133,6 +133,8 @@ class ArticleContents(models.Model):
         return self.title
 
 class ArticleContentInlineOptions(admin.TabularInline):
+    model = ArticleContents
+    extra = 1
     def formfield_for_dbfield(self, db_field, **kwargs):
         from ella.core import widgets
         if db_field.name == 'content':
@@ -151,6 +153,7 @@ class InfoBoxOptions(admin.ModelAdmin):
             kwargs['widget'] = widgets.RichTextAreaWidget
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
+
 class ArticleOptions(admin.ModelAdmin):
     #raw_id_fields = ('authors',)
     list_display = ('title', 'category', 'created', 'article_age', 'full_url',)
@@ -165,7 +168,7 @@ class ArticleOptions(admin.ModelAdmin):
     raw_id_fields = ('photo',)
     list_filter = ('created', 'category', 'authors',)
     search_fields = ('title', 'perex',)
-    inlines = (ArticleContentInlineOptions(ArticleContents, extra=1),)
+    inlines = (ArticleContentInlineOptions,)
     prepopulated_fields = {'slug' : ('title',)}
 
     def formfield_for_dbfield(self, db_field, **kwargs):

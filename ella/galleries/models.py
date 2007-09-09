@@ -119,7 +119,8 @@ class GalleryItemOptions(admin.ModelAdmin):
     pass
 
 class GalleryItemTabularOptions(admin.TabularInline):
-    pass
+    model = GalleryItem
+    extra = 10
 
 
 class GalleryOptions(admin.ModelAdmin):
@@ -131,7 +132,7 @@ class GalleryOptions(admin.ModelAdmin):
 )
     list_filter = ('created',)
     search_fields = ('title', 'description',)
-    inlines = (GalleryItemTabularOptions(GalleryItem, extra=10),)
+    inlines = (GalleryItemTabularOptions,)
     prepopulated_fields = {'slug': ('title',)}
 
 

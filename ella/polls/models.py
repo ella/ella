@@ -213,12 +213,16 @@ class Result(models.Model):
         verbose_name = _('Result')
         verbose_name_plural = _('results')
 
+class ChoiceTabularOptions(admin.TabularInline):
+    model = Choice
+    extra = 5
+
 class QuestionOptions(admin.ModelAdmin):
     """
     Admin options for Question model:
         * edit inline choices
     """
-    inlines = [admin.TabularInline(Choice, extra=5)]
+    inlines = (ChoiceTabularOptions,)
     ordering = ('question',)
 
 class ChoiceOptions(admin.ModelAdmin):
