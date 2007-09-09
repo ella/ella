@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from django.db import models, backend, connection
+from django.db import models, connection
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
@@ -110,9 +110,9 @@ class RatingManager(models.Manager):
             ORDER BY
                 agg.amount DESC
             LIMIT %%s''' % (
-                backend.quote_name(Rating._meta.db_table),
+                connection.ops.quote_name(Rating._meta.db_table),
                 where,
-                backend.quote_name(ContentType._meta.db_table),
+                connection.ops.quote_name(ContentType._meta.db_table),
 )
         cursor = connection.cursor()
         cursor.execute(sql, (count,))
@@ -128,7 +128,7 @@ class RatingManager(models.Manager):
         """
         content_type = ContentType.objects.get_for_model(obj)
         sql = 'SELECT SUM(amount) FROM %s WHERE target_id = %s AND target_ct_id = %s' % (
-            backend.quote_name(Rating._meta.db_table),
+            connection.ops.quote_name(Rating._meta.db_table),
             obj.id,
             content_type.id,
 )
@@ -212,7 +212,7 @@ class RatedManager(models.Manager):
                     QLeftOuterJoin(
                         'rating_agg',
                         '(SELECT target_id, SUM(amount) AS amount FROM ratings_rating WHERE target_ct_id = %d GROUP BY ratings_rating.target_id)' % ct.id,
-                        '%s.id = rating_agg.target_id' % backend.quote_name(qset.model._meta.db_table)
+                        '%s.id = rating_agg.target_id' % connection.ops.quote_name(qset.model._meta.db_table)
 )
 ).extra(select={'rating' : 'COALESCE(rating_agg.amount, 0)'})
 

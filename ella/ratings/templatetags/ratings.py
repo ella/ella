@@ -53,7 +53,7 @@ class RatingNode(template.Node):
         return ''
 
 @register.tag('rating')
-def do_rate_urls(parser, token):
+def do_rating(parser, token):
     """
     Get rating for the given object and store it in context under given name.
 
