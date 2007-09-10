@@ -76,7 +76,7 @@ class TemplateBlock(models.Model):
 class TemplateBlockInlineOptions(admin.TabularInline):
     model = TemplateBlock
     extra = 3
-    fields = ((None, {'fields' : ('name', 'box_type', 'target_ct', 'target_id',)}),)
+    fields = ((None, {'fields' : ('name', 'box_type', 'target_ct', 'target_id', 'text',)}),)
     raw_id_fields = ('target_ct',)
 
     def formfield_for_dbfield(self, db_field, **kwargs):

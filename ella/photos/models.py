@@ -384,7 +384,7 @@ class PhotoOptions(admin.ModelAdmin):
         from django import newforms as forms
         if db_field.name == 'slug':
             # slug validation
-            return forms.RegexField('^[0-9a-z-]+$', **kwargs)
+            return forms.RegexField('^[0-9a-z-]+$', max_length=255, **kwargs)
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
     def __call__(self, request, url):

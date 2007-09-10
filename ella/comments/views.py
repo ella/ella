@@ -23,7 +23,7 @@ class CommentFormPreview(FormPreview):
     def done(self, request, cleaned_data):
         from ella.comments.forms import CommentForm
         if 'HTTP_X_FORWARDED_FOR' in request.META:
-            ip = reqeust.META['HTTP_X_FORWARDED_FOR']
+            ip = request.META['HTTP_X_FORWARDED_FOR']
         else:
             ip = request.META['REMOTE_ADDR']
 
