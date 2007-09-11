@@ -54,7 +54,7 @@ class Category(models.Model):
     title = models.CharField(_("Category Title"), maxlength=200)
     slug = models.CharField(_("Slug"), maxlength=200)
     tree_parent = models.ForeignKey('self', null=True, blank=True, verbose_name=_("Parent Category"))
-    tree_path = models.CharField(maxlength=255, editable=False, unique=True)
+    tree_path = models.CharField(maxlength=255, editable=False)
     description = models.TextField(_("Category Description"), blank=True)
     site = models.ForeignKey(Site)
 
@@ -106,6 +106,7 @@ class Category(models.Model):
 
     class Meta:
         ordering = ('tree_path', 'title',)
+        unique_together = (('site', 'tree_path'),)
         verbose_name = _('Category')
         verbose_name_plural = _('Categories')
 
