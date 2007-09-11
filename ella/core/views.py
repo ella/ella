@@ -162,6 +162,10 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
     kwa.update(dates_kwa)
     qset = Listing.objects.get_queryset(**kwa)
     paginator = ObjectPaginator(qset.filter(**dates_kwa), paginate_by)
+
+    if page > paginator.pages:
+        raise Http404
+
     kwa['count'] = paginate_by
     kwa['offset'] = (page - 1) * paginate_by + 1
     listings = Listing.objects.get_listing(**kwa)

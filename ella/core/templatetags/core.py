@@ -372,3 +372,48 @@ def do_related(parser, token):
 
 
 
+
+
+class ContainerNode(template.Node):
+    def __init__(self, nodelist, parameters):
+        self.nodelist = nodelist
+        self.params = parameters
+
+    def render(self, context):
+        context.push()
+
+        for key, value in self.params.items():
+            try:
+                context[key] = template.resolve_variable(value, context)
+            except template.VariableDoesNotExist:
+                context[key] = value
+
+        content = self.nodelist.render(context)
+        context['content'] = content
+        t = template.loader.get_template('inclusion_tags/container.html')
+        resp = t.render(context)
+        context.pop()
+        return resp
+
+
+@register.tag('container')
+def do_container(parser, token):
+    bits = token.split_contents()
+    parameters = bits[1:]
+
+    if len(parameters) % 2 != 0:
+        raise template.TemplateSyntaxError, '{%% %s param "value" param2 value2 ... %%}' % bits[0]
+
+
+    parameters = dict((smart_str(key), value) for key, value in zip(parameters[0::2], parameters[1::2]))
+
+    for name in parameters.keys():
+        if name not in ('level', 'name', 'css_class', 'title'):
+            raise template.TemplateSyntaxError, "%s tag does not accept %r parameter" % (bits[0], name)
+
+    nodelist = parser.parse(('end' + bits[0],))
+    parser.delete_first_token()
+
+    return ContainerNode(nodelist, parameters)
+
+
