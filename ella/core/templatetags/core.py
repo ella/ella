@@ -388,6 +388,12 @@ class ContainerNode(template.Node):
             except template.VariableDoesNotExist:
                 context[key] = value
 
+        if 'level' in context:
+            try:
+                context['next_level'] = int(context['level']) + 1
+            except ValueError:
+                pass
+
         content = self.nodelist.render(context)
         context['content'] = content
         t = template.loader.get_template('inclusion_tags/container.html')
