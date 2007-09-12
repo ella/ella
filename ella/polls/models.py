@@ -99,6 +99,10 @@ class Question(models.Model):
             self._form = QuestionForm(self)()
         return self._form
 
+    @property
+    def choices(self):
+        return self.choice_set.all()
+
     class Meta:
         verbose_name = _('Question')
         verbose_name_plural = _('Questions')

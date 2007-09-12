@@ -119,94 +119,6 @@ def poll_vote(request, poll_id):
 
     return render_to_response('polls/poll_form.html', {'form' : form, 'next' : url}, context_instance=RequestContext(request))
 
-@require_POST
-@transaction.commit_on_success
-def contest_vote(request, contest_id):
-    # get contest content type
-    contest_ct = ContentType.objects.get_for_model(Contest)
-    # get current contest object
-    contest = get_cached_object_or_404(contest_ct, pk=contest_id)
-    forms = []
-    forms_are_valid = True
-    # questions forms
-    for question in contest.question_set.all():
-        form = QuestionForm(question)(request.POST or None, prefix=str(question.id))
-        if not form.is_valid() and forms_are_valid:
-            forms_are_valid = False
-        forms.append((question, form))
-    # contestant form
-    initial = {}
-    if request.user.is_authenticated():
-        initial['name'] = request.user.first_name
-        initial['surname'] = request.user.last_name
-        initial['email'] = request.user.email
-    contestant_form = ContestantForm(request.POST or None, initial=initial)
-    if not contestant_form.is_valid():
-        forms_are_valid = False
-    # saving contestant
-    if forms_are_valid:
-        # CHECK pouze na unikatni email ci USER
-        kwa = contestant_form.cleaned_data
-        # building choices field value
-        choices = []
-        for question, form in forms:
-            if question.allow_multiple:
-                chs = []
-                for choice in form.cleaned_data['choice']:
-                    choice.add_vote()
-                    chs.append(str(choice.id))
-                ch = str(','.join(chs))
-            else:
-                form.cleaned_data['choice'].add_vote()
-                ch = str(form.cleaned_data['choice'].id)
-            choices.append(':'.join((str(question.id), ch)))
-        kwa['choices'] = ';'.join(choices)
-        if request.user.is_authenticated():
-            kwa['user'] = request.user
-        contestant = Contestant(contest=contest, **kwa)
-        contestant.save()
-        return HttpResponseRedirect(get_next_url(request))
-    return render_to_response('polls/contest_form.html', {
-        'forms' : forms,
-        'contestant_form' : contestant_form},
-        context_instance=RequestContext(request))
-
-#@request_POST
-@transaction.commit_on_success
-def quiz_vote(request, quiz_id):
-    # get quiz content type
-    quiz_ct = ContentType.objects.get_for_model(Quiz)
-    # get current quiz object
-    quiz = get_cached_object_or_404(quiz_ct, pk=quiz_id)
-    forms = []
-    forms_are_valid = True
-    # questions forms
-    for question in quiz.question_set.all():
-        form = QuestionForm(question)(request.POST or None, prefix=str(question.id))
-        if not form.is_valid() and forms_are_valid:
-            forms_are_valid = False
-        forms.append((question, form))
-    if forms_are_valid:
-        # points
-        points = 0
-        for question, form in forms:
-            if question.allow_multiple:
-                for choice in form.cleaned_data['choice']:
-                    points += choice.points
-            else:
-                points += form.cleaned_data['choice'].points
-        # retrieve quiz results
-        try:
-            results = Result.objects.get(quiz=quiz, points_from__gte=points, points_to__lt=points)
-        except Result.DoesNotExist:
-            # TODO LOG
-            # don't propagate the error,
-            pass
-        return HttpResponseRedirect(get_next_url(request))
-    return render_to_response('polls/quiz_form.html',
-        {'forms' : forms},
-        context_instance=RequestContext(request))
-
 def get_next_url(request):
     """
     Return URL for redirection on success
@@ -260,11 +172,42 @@ class ContestantForm(forms.Form):
     phonenumber = Contestant._meta.get_field('phonenumber').formfield()
     address = Contestant._meta.get_field('address').formfield()
 
+    def clean(self):
+        # TODO - antispam
+        return self.cleaned_data
+
 class ContestWizard(Wizard):
     def __init__(self, contest_id):
         contest = get_cached_object_or_404(Contest, pk=contest_id)
+        self.contest = contest
         form_list = [ QuestionForm(q) for q in contest.question_set.all() ]
         form_list.append(ContestantForm)
+
+    def get_template(self):
+        if (self.step + 1) < len(self.form_list):
+            return 'polls/contest_step.html'
+        return 'polls/contestant_form.html'
+
+    @transaction.commit_on_success
+    def done(self, request, form_list):
+        for f in form_list:
+            assert f.is_valid(), 'ERROR'
+
+        choices = '|'.join(
+                '%d:%s' % (
+                        question.id,
+                        # TODO: and or hack
+                        question.allow_multiple and ','.join(c.id for c in f.cleaned_data['choice']) or f.cleaned_data['choice'].id)
+                    for question, f in zip(self.contest.question_set.all(), form_list[:-1])
+)
+        c = Contestant(
+                choices=choices,
+                **form_list[-1].cleaned_data
+)
+        if request.user:
+            c.user = request.user
+        c.save()
+        return HttpResponseRedirect(get_next_url(request))
 
 class QuizWizard(Wizard):
     def __init__(self, quiz):
@@ -276,9 +219,27 @@ class QuizWizard(Wizard):
         return 'polls/quiz_step.html'
 
     def done(self, request, form_list):
-        points = sum(f.is_valid() and f.cleaned_data['choice'].points for f in form_list)
+        for f in form_list:
+            assert f.is_valid(), 'ERROR'
+        points = 0
+        questions = []
+        for question, f in zip(self.quiz.question_set.all(), form_list):
+            choices = question.choices[:]
+            if question.allow_multiple:
+                points += sum(c.points for c in f.cleaned_data['choice'])
+                for ch in choices:
+                    if ch in f.cleaned_data['choice']:
+                        ch.chosen = True
+            else:
+                points += f.cleaned_data['choice'].points
+                for ch in choices:
+                    if ch == f.cleaned_data['choice']:
+                        ch.chosen = True
+                        break
+            questions.append((question, choices))
+
         result = self.quiz.get_result(points)
         result.count += 1
         result.save()
-        return render_to_response('polls/quiz_result.html', {'result' : result, 'points' : points}, context_instance=RequestContext(request))
+        return render_to_response('polls/quiz_result.html', {'result' : result, 'points' : points, 'questions' : questions}, context_instance=RequestContext(request))
 
