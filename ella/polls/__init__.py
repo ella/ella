@@ -12,4 +12,4 @@ def quiz(request, bits, context):
     return QuizWizard(quiz)(request)
 
 dispatcher.register('take', quiz, model=Quiz)
-dispatcher.register('contest', quiz, model=Contest)
+dispatcher.register('contest', contest, model=Contest)

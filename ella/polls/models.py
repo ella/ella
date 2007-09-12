@@ -21,6 +21,23 @@ class Contest(models.Model):
     active_from = models.DateTimeField(_('Active from'))
     active_till = models.DateTimeField(_('Active till'))
 
+    @property
+    def main_listing(self):
+        try:
+            return get_cached_object(
+                    Listing,
+                    target_ct=ContentType.objects.get_for_model(self.__class__),
+                    target_id=self.id,
+                    category=self.category
+)
+        except Listing.DoesNotExist:
+            return None
+
+    def get_absolute_url(self):
+        listing = self.main_listing
+        if listing:
+            return listing.get_absolute_url()
+
     def __unicode__(self):
         return self.title
 

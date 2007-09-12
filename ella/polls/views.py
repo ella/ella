@@ -166,6 +166,7 @@ class ContestantForm(forms.Form):
     """
     Contestant form
     """
+    # FIXME - all is required
     name = Contestant._meta.get_field('name').formfield()
     surname = Contestant._meta.get_field('surname').formfield()
     email = Contestant._meta.get_field('email').formfield()
@@ -177,11 +178,11 @@ class ContestantForm(forms.Form):
         return self.cleaned_data
 
 class ContestWizard(Wizard):
-    def __init__(self, contest_id):
-        contest = get_cached_object_or_404(Contest, pk=contest_id)
+    def __init__(self, contest):
         self.contest = contest
         form_list = [ QuestionForm(q) for q in contest.question_set.all() ]
         form_list.append(ContestantForm)
+        super(ContestWizard, self).__init__(form_list)
 
     def get_template(self):
         if (self.step + 1) < len(self.form_list):
@@ -196,11 +197,11 @@ class ContestWizard(Wizard):
         choices = '|'.join(
                 '%d:%s' % (
                         question.id,
-                        # TODO: and or hack
                         question.allow_multiple and ','.join(c.id for c in f.cleaned_data['choice']) or f.cleaned_data['choice'].id)
                     for question, f in zip(self.contest.question_set.all(), form_list[:-1])
 )
         c = Contestant(
+                contest=self.contest,
                 choices=choices,
                 **form_list[-1].cleaned_data
 )
