@@ -12,6 +12,7 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 
 from ella.core.cache import get_cached_object_or_404
+from ella.core.wizard import Wizard
 from ella.polls.models import Poll, Contest, Contestant, Quiz, Result, Choice, Vote
 
 # POLLS specific settings
@@ -68,7 +69,7 @@ def poll_vote(request, poll_id):
 
     url = get_next_url(request)
 
-    form = QuestionForm(poll.question, request.POST)
+    form = QuestionForm(poll.question)(request.POST)
     if form.is_valid():
 
         # choice data from form
@@ -129,7 +130,7 @@ def contest_vote(request, contest_id):
     forms_are_valid = True
     # questions forms
     for question in contest.question_set.all():
-        form = QuestionForm(question, request.POST or None, prefix=str(question.id))
+        form = QuestionForm(question)(request.POST or None, prefix=str(question.id))
         if not form.is_valid() and forms_are_valid:
             forms_are_valid = False
         forms.append((question, form))
@@ -181,7 +182,7 @@ def quiz_vote(request, quiz_id):
     forms_are_valid = True
     # questions forms
     for question in quiz.question_set.all():
-        form = QuestionForm(question, request.POST or None, prefix=str(question.id))
+        form = QuestionForm(question)(request.POST or None, prefix=str(question.id))
         if not form.is_valid() and forms_are_valid:
             forms_are_valid = False
         forms.append((question, form))
@@ -194,12 +195,12 @@ def quiz_vote(request, quiz_id):
                     points += choice.points
             else:
                 points += form.cleaned_data['choice'].points
-        # retriev quiz results
+        # retrieve quiz results
         try:
             results = Result.objects.get(quiz=quiz, points_from__gte=points, points_to__lt=points)
         except Result.DoesNotExist:
             # TODO LOG
-            # ale chybu polykame, redaktor muze zadat blbe rozsahy
+            # don't propagate the error,
             pass
         return HttpResponseRedirect(get_next_url(request))
     return render_to_response('polls/quiz_form.html',
@@ -223,27 +224,30 @@ class MyRadioSelect(forms.RadioSelect):
     def render(self, name, value, attrs=None, choices=()):
         return self.get_renderer(name, value, attrs, choices)
 
-class QuestionForm(forms.Form):
-    """
-    Question form with all its choices
-    """
-    def choices(self):
-        field = self['choice']
-        for choice, input in  zip(field.field.queryset, field.as_widget(field.field.widget)):
-            yield (choice, input)
-
-    def __init__(self, question, *args, **kwargs):
-        super(QuestionForm, self).__init__(*args, **kwargs)
-        if question.allow_multiple:
-            self.fields['choice'] = forms.ModelMultipleChoiceField(
+def QuestionForm(question):
+    if  question.allow_multiple:
+        choice_field = forms.ModelMultipleChoiceField(
                 queryset=question.choice_set.all(),
-                widget=forms.CheckboxSelectMultiple)
-        else:
-            self.fields['choice'] = forms.ModelChoiceField(
+                widget=forms.CheckboxSelectMultiple
+)
+    else:
+        choice_field = forms.ModelChoiceField(
                 queryset=question.choice_set.all(),
                 widget=MyRadioSelect,
-                empty_label=None)
+                empty_label=None
+)
 
+    class _QuestionForm(forms.Form):
+        """
+        Question form with all its choices
+        """
+        choice = choice_field
+        def choices(self):
+            field = self['choice']
+            for choice, input in  zip(field.field.queryset, field.as_widget(field.field.widget)):
+                yield (choice, input)
+
+    return _QuestionForm
 
 
 class ContestantForm(forms.Form):
@@ -255,3 +259,32 @@ class ContestantForm(forms.Form):
     email = Contestant._meta.get_field('email').formfield()
     phonenumber = Contestant._meta.get_field('phonenumber').formfield()
     address = Contestant._meta.get_field('address').formfield()
+
+class ContestWizard(Wizard):
+    def __init__(self, contest_id):
+        contest = get_cached_object_or_404(Contest, pk=contest_id)
+        form_list = [ QuestionForm(q) for q in contest.question_set.all() ]
+        form_list.append(ContestantForm)
+
+class QuizWizard(Wizard):
+    def __init__(self, quiz):
+        form_list = [ QuestionForm(q) for q in quiz.question_set.all() ]
+        self.quiz = quiz
+        super(QuizWizard, self).__init__(form_list)
+
+    def get_template(self):
+        return 'polls/quiz_step.html'
+
+    def done(self, request, form_list):
+        points = sum(f.cleaned_data['choice'].points for f in form_list)
+        result = self.quiz.get_result(points)
+        result.count += 1
+        result.save()
+        return render_to_response('polls/quiz_result.html', {'result' : result, 'points' : points}, context_instance=RequestContext(request))
+
+def quiz(request, bits, context):
+    quiz = context['object']
+    return QuizWizard(quiz)(request)
+
+from ella.core.custom_urls import dispatcher
+dispatcher.register('take', quiz, model=Quiz)

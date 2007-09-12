@@ -70,7 +70,7 @@ class Question(models.Model):
     def form(self):
         from ella.polls.views import QuestionForm
         if not hasattr(self, '_form'):
-            self._form = QuestionForm(self)
+            self._form = QuestionForm(self)()
         return self._form
 
     class Meta:
