@@ -62,7 +62,8 @@ class Box(object):
             level = int(self.params['level'])
         else:
             level = 1
-        return {'object' : self.obj, 'level' : level, 'next_level' : level + 1}
+
+        return {'object' : self.obj, 'level' : level, 'next_level' : level + 1, 'css_class' : self.params.get('css_class', '')}
 
     #@cache_function
     def render(self):
