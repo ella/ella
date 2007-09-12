@@ -276,15 +276,9 @@ class QuizWizard(Wizard):
         return 'polls/quiz_step.html'
 
     def done(self, request, form_list):
-        points = sum(f.cleaned_data['choice'].points for f in form_list)
+        points = sum(f.is_valid() and f.cleaned_data['choice'].points for f in form_list)
         result = self.quiz.get_result(points)
         result.count += 1
         result.save()
         return render_to_response('polls/quiz_result.html', {'result' : result, 'points' : points}, context_instance=RequestContext(request))
 
-def quiz(request, bits, context):
-    quiz = context['object']
-    return QuizWizard(quiz)(request)
-
-from ella.core.custom_urls import dispatcher
-dispatcher.register('take', quiz, model=Quiz)

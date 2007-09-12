@@ -2,15 +2,19 @@ from django.db import models, connection
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.contenttypes.models import  ContentType
 
 from ella.core.cache import get_cached_object
 from ella.core.box import Box
+from ella.core.models import Category, Listing
 
 class Contest(models.Model):
     """
     Contests with title, descriptions and activation
     """
     title = models.CharField(_('Title'), maxlength=200)
+    slug = models.CharField(maxlength=200, db_index=True)
+    category = models.ForeignKey(Category)
     text_announcement = models.TextField(_('Text with announcement'))
     text = models.TextField(_('Text'))
     text_results = models.TextField(_('Text with results'))
@@ -30,11 +34,33 @@ class Quiz(models.Model):
     Quizes with title, descriptions and activation options.
     """
     title = models.CharField(_('title'), maxlength=200)
+    slug = models.CharField(maxlength=200, db_index=True)
+    category = models.ForeignKey(Category)
     text_announcement = models.TextField(_('text with announcement'))
     text = models.TextField(_('Text'))
     text_results = models.TextField(_('Text with results'))
     active_from = models.DateTimeField(_('Active from'))
     active_till = models.DateTimeField(_('Active till'))
+
+    @property
+    def main_listing(self):
+        try:
+            return get_cached_object(
+                    Listing,
+                    target_ct=ContentType.objects.get_for_model(self.__class__),
+                    target_id=self.id,
+                    category=self.category
+)
+        except Listing.DoesNotExist:
+            return None
+
+    def get_absolute_url(self):
+        listing = self.main_listing
+        if listing:
+            return listing.get_absolute_url()
+
+    def get_result(self, points):
+        return get_cached_object(Result, quiz=self, points_from__lte=points, points_to__gt=points)
 
     def __unicode__(self):
         return self.title
@@ -204,7 +230,7 @@ class Result(models.Model):
     text = models.TextField(_('Quiz results text'))
     points_from = models.IntegerField(_('Points dimension from'), null=True)
     points_to = models.IntegerField(_('Points dimension to'), null=True)
-    count = models.IntegerField(_('Points count'), null=True, blank=True)
+    count = models.IntegerField(_('Points count'), default=0, blank=True)
 
     def __unicode__(self):
         return self.title
