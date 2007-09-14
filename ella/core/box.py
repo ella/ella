@@ -85,9 +85,11 @@ class Box(object):
 
         t_list = []
 
-        # NEW
-        if hasattr(self.obj, 'category'):
-            base_path = 'box/category/%s/%s.%s/' % (self.obj.category.path, self.obj._meta.app_label, self.obj._meta.module_name)
+        if hasattr(self.obj, 'category_id'):
+            from ella.core.models import Category
+            from ella.core.cache.utils import get_cached_object
+            cat = get_cached_object(Category, pk=self.obj.category_id)
+            base_path = 'box/category/%s/%s.%s/' % (cat.path, self.obj._meta.app_label, self.obj._meta.module_name)
             if hasattr(self.obj, 'slug'):
                 t_list.append(base_path + '%s/%s.html' % (self.obj.slug, self.box_type,))
             t_list.append(base_path + '%s.html' % (self.box_type,))

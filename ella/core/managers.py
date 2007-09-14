@@ -104,7 +104,7 @@ class HitCountManager(models.Manager):
             hc.hits += 1
         hc.save()
 
-    @cache_this(method_key_getter, test_hitcount, timeout=600)
+    @cache_this(method_key_getter, test_hitcount)
     def get_top_objects(self, count, mods=[]):
         """
         Return count top rated objects. Cache this for 10 minutes without any chance of cache invalidation.

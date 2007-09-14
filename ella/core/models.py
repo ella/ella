@@ -78,6 +78,11 @@ class Category(models.Model):
                 child.tree_path = child.tree_path.replace(old_tree_path, self.tree_path)
                 child.save()
 
+    def get_tree_parent(self):
+        if self.tree_parent_id:
+            return get_cached_object(Category, pk=self.tree_parent_id)
+        return None
+
     @property
     def path(self):
         if self.tree_parent_id:
@@ -181,10 +186,10 @@ class Listing(models.Model):
             self.priority_from = None
 
         obj = self.target
-        if self.category != obj.category:
+        if self.category_id != obj.category_id:
             main_listing = get_cached_object(
                     Listing,
-                    category=obj.category,
+                    category=obj.category_id,
                     target_ct=self.target_ct,
                     target_id=self.target_id
 )
@@ -195,7 +200,7 @@ class Listing(models.Model):
         super(Listing, self).save()
 
     def __unicode__(self):
-        return u'%s listed in %s' % (self.target, self.category)
+        return u'%s listed in %s' % (self.target, self.category_id)
 
     @property
     def priority(self):

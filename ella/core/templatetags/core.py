@@ -5,7 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, ImproperlyConfigured
 from django.utils.encoding import smart_str, force_unicode
 
-from ella.core.models import Listing, Dependency, Related
+from ella.core.models import Listing, Dependency, Related, Category
 from ella.core.box import *
 from ella.core.cache.utils import get_cached_object
 
@@ -327,7 +327,8 @@ class RelatedNode(template.Node):
 
         # top objects in given category
         if count > 0:
-            listings = Listing.objects.get_listing(category=obj.category, count=count, mods=self.models)
+            cat = get_cached_object(Category, pk=obj.category_id)
+            listings = Listing.objects.get_listing(category=cat, count=count, mods=self.models)
             related.extend(listing.target for listing in listings if listing.target != obj)
 
         context[self.var_name] = related

@@ -139,12 +139,12 @@ class MyRadioSelect(forms.RadioSelect):
 def QuestionForm(question):
     if  question.allow_multiple:
         choice_field = forms.ModelMultipleChoiceField(
-                queryset=question.choice_set.all(),
+                queryset=question.choices,
                 widget=forms.CheckboxSelectMultiple
 )
     else:
         choice_field = forms.ModelChoiceField(
-                queryset=question.choice_set.all(),
+                queryset=question.choices,
                 widget=MyRadioSelect,
                 empty_label=None
 )
@@ -180,7 +180,7 @@ class ContestantForm(forms.Form):
 class ContestWizard(Wizard):
     def __init__(self, contest):
         self.contest = contest
-        form_list = [ QuestionForm(q) for q in contest.question_set.all() ]
+        form_list = [ QuestionForm(q) for q in contest.questions ]
         form_list.append(ContestantForm)
         super(ContestWizard, self).__init__(form_list)
 
@@ -198,7 +198,7 @@ class ContestWizard(Wizard):
                 '%d:%s' % (
                         question.id,
                         question.allow_multiple and ','.join(c.id for c in f.cleaned_data['choice']) or f.cleaned_data['choice'].id)
-                    for question, f in zip(self.contest.question_set.all(), form_list[:-1])
+                    for question, f in zip(self.contest.questions, form_list[:-1])
 )
         c = Contestant(
                 contest=self.contest,
@@ -212,7 +212,7 @@ class ContestWizard(Wizard):
 
 class QuizWizard(Wizard):
     def __init__(self, quiz):
-        form_list = [ QuestionForm(q) for q in quiz.question_set.all() ]
+        form_list = [ QuestionForm(q) for q in quiz.questions ]
         self.quiz = quiz
         super(QuizWizard, self).__init__(form_list)
 
@@ -224,7 +224,7 @@ class QuizWizard(Wizard):
             assert f.is_valid(), 'ERROR'
         points = 0
         questions = []
-        for question, f in zip(self.quiz.question_set.all(), form_list):
+        for question, f in zip(self.quiz.questions, form_list):
             choices = question.choices[:]
             if question.allow_multiple:
                 points += sum(c.points for c in f.cleaned_data['choice'])

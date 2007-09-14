@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404
 from django.template import RequestContext
 
 from ella.core.cache import get_cached_object_or_404
+from ella.core.models import Category
 
 class CommentFormPreview(FormPreview):
     """
@@ -44,7 +45,7 @@ class CommentFormPreview(FormPreview):
 
 def new_comment(request, object):
     """new comment"""
-    cat = object.category
+    cat = get_cached_object_or_404(Category, pk=object.category_id)
     opts = object._meta
     templates = [
         'comments/%s/%s.%s/%s_comment_add.html' % (cat.path, opts.app_label, opts.module_name, object.slug),
@@ -59,7 +60,7 @@ def new_comment(request, object):
     return render_to_response(templates, context, context_instance=RequestContext(request))
 
 def list_comments(request, object):
-    cat = object.category
+    cat = get_cached_object_or_404(Category, pk=object.category_id)
     opts = object._meta
     templates = [
         'comments/%s/%s.%s/%s_comment_list.html' % (cat.path, opts.app_label, opts.module_name, object.slug),

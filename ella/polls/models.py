@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import  ContentType
 
-from ella.core.cache import get_cached_object
+from ella.core.cache import get_cached_object, get_cached_list
 from ella.core.box import Box
 from ella.core.models import Category, Listing
 
@@ -28,7 +28,7 @@ class Contest(models.Model):
                     Listing,
                     target_ct=ContentType.objects.get_for_model(self.__class__),
                     target_id=self.id,
-                    category=self.category
+                    category=self.category_id
 )
         except Listing.DoesNotExist:
             return None
@@ -37,6 +37,10 @@ class Contest(models.Model):
         listing = self.main_listing
         if listing:
             return listing.get_absolute_url()
+
+    @property
+    def questions(self):
+        return get_cached_list(Question, contest=self)
 
     def __unicode__(self):
         return self.title
@@ -66,10 +70,14 @@ class Quiz(models.Model):
                     Listing,
                     target_ct=ContentType.objects.get_for_model(self.__class__),
                     target_id=self.id,
-                    category=self.category
+                    category=self.category_id
 )
         except Listing.DoesNotExist:
             return None
+
+    @property
+    def questions(self):
+        return get_cached_list(Question, contest=self)
 
     def get_absolute_url(self):
         listing = self.main_listing
@@ -104,7 +112,7 @@ class Question(models.Model):
     def get_total_votes(self):
         if not hasattr(self, '_total_votes'):
             total_votes = 0
-            for choice in self.choice_set.all():
+            for choice in self.choices:
                 if choice.votes:
                     total_votes += choice.votes
             self._total_votes = total_votes
@@ -118,7 +126,7 @@ class Question(models.Model):
 
     @property
     def choices(self):
-        return self.choice_set.all()
+        return get_cached_list(Choice, question=self)
 
     class Meta:
         verbose_name = _('Question')
@@ -156,8 +164,11 @@ class Poll(models.Model):
         verbose_name_plural = _('Polls')
         ordering = ('-active_from',)
 
+    def get_question(self):
+        return get_cached_object(Question, pk=self.question_id)
+
     def get_total_votes(self):
-        return self.question.get_total_votes()
+        return self.get_question().get_total_votes()
 
     def Box(self, box_type, nodelist):
         return PollBox(self, box_type, nodelist)
@@ -185,7 +196,7 @@ class Choice(models.Model):
         return True
 
     def get_percentage(self):
-        t=get_cached_object(Question, pk=self.question_id).get_total_votes()
+        t= get_cached_object(Question, pk=self.question_id).get_total_votes()
         p = 0
         if self.votes:
             p = int((100.0/t)*self.votes)

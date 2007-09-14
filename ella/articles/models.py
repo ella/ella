@@ -60,7 +60,7 @@ class Article(models.Model):
                     Listing,
                     target_ct=ContentType.objects.get_for_model(self.__class__),
                     target_id=self.id,
-                    category=self.category
+                    category=self.category_id
 )
         except Listing.DoesNotExist:
             return None
