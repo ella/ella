@@ -65,7 +65,9 @@ class Wizard(object):
                 returns next form otherwise
         """
         # add extra_context, we don't care if somebody overrides it, as long as it remains a dict
-        self.extra_context = kwargs.get('extra_context', {})
+        self.extra_context = getattr(self, 'extra_context', {})
+        if 'extra_context' in kwargs:
+            self.extra_context.update(kwargs['extra_context'])
 
         self.parse_params(request, *args, **kwargs)
 

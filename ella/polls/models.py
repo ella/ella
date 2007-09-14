@@ -7,6 +7,7 @@ from django.contrib.contenttypes.models import  ContentType
 from ella.core.cache import get_cached_object, get_cached_list
 from ella.core.box import Box
 from ella.core.models import Category, Listing
+from ella.core.managers import RelatedManager
 
 class Contest(models.Model):
     """
@@ -20,6 +21,8 @@ class Contest(models.Model):
     text_results = models.TextField(_('Text with results'))
     active_from = models.DateTimeField(_('Active from'))
     active_till = models.DateTimeField(_('Active till'))
+
+    objects = RelatedManager()
 
     @property
     def main_listing(self):
@@ -62,6 +65,8 @@ class Quiz(models.Model):
     text_results = models.TextField(_('Text with results'))
     active_from = models.DateTimeField(_('Active from'))
     active_till = models.DateTimeField(_('Active till'))
+
+    objects = RelatedManager()
 
     @property
     def main_listing(self):
@@ -126,7 +131,8 @@ class Question(models.Model):
 
     @property
     def choices(self):
-        return get_cached_list(Choice, question=self)
+        return self.choice_set.all()
+        #return get_cached_list(Choice, question=self)
 
     class Meta:
         verbose_name = _('Question')

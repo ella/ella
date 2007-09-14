@@ -31,7 +31,7 @@ def get_cached_list(model, **kwargs):
     key = md5.md5(
             KEY_FORMAT_LIST % (
                 model._meta.app_label,
-                model._meta.module,
+                model._meta.object_name.lower(),
                 ':'.join('%s=%s' % (smart_str(key), pickle.dumps(kwargs[key])) for key in sorted(kwargs.keys()))
 )
 ).hexdigest()

@@ -182,12 +182,23 @@ class ContestWizard(Wizard):
         self.contest = contest
         form_list = [ QuestionForm(q) for q in contest.questions ]
         form_list.append(ContestantForm)
+        self.extra_context = {'contest' : contest, 'question' : self.contest.questions[0]}
         super(ContestWizard, self).__init__(form_list)
 
     def get_template(self):
         if (self.step + 1) < len(self.form_list):
-            return 'polls/contest_step.html'
-        return 'polls/contestant_form.html'
+            return (
+                    'page/category/%s/polls/contest_step.html' % self.contest.category.path,
+                    'page/polls/contest_step.html',
+)
+        return (
+                'page/category/%s/polls/contestant_form.html' % self.contest.category.path,
+                'page/polls/contestant_form.html',
+)
+
+    def process_step(self, request, form, step):
+        if (step + 1) < len(self.form_list):
+            self.extra_context['question'] = self.contest.questions[step]
 
     @transaction.commit_on_success
     def done(self, request, form_list):
@@ -214,10 +225,18 @@ class QuizWizard(Wizard):
     def __init__(self, quiz):
         form_list = [ QuestionForm(q) for q in quiz.questions ]
         self.quiz = quiz
+        self.extra_context = {'quiz' : quiz, 'question' : self.quiz.questions[0]}
         super(QuizWizard, self).__init__(form_list)
 
     def get_template(self):
-        return 'polls/quiz_step.html'
+        return (
+                'page/category/%s/polls/quiz_step.html' % self.quiz.category.path,
+                'page/polls/quiz_step.html',
+)
+
+    def process_step(self, request, form, step):
+        if (step + 1) < len(self.form_list):
+            self.extra_context['question'] = self.quiz.questions[step+1]
 
     def done(self, request, form_list):
         for f in form_list:
@@ -242,5 +261,15 @@ class QuizWizard(Wizard):
         result = self.quiz.get_result(points)
         result.count += 1
         result.save()
-        return render_to_response('polls/quiz_result.html', {'result' : result, 'points' : points, 'questions' : questions}, context_instance=RequestContext(request))
+        return render_to_response(
+                (
+                    'page/category/%s/polls/quiz_result.html' % self.quiz.category.path,
+                    'page/polls/quiz_result.html',
+), {
+                    'result' : result,
+                    'points' : points,
+                    'questions' : questions
+},
+                context_instance=RequestContext(request)
+)
 
