@@ -94,7 +94,9 @@ class Comment(models.Model):
     def get_genealogy_path(self):
         """genealogy tree structure field"""
         if self.parent and self.id:
-            return '%s%s%x' % (self.parent.path, defaults.PATH_SEPARATOR, self.id)
+            return '%s%s%d' % (self.parent.path, defaults.PATH_SEPARATOR, self.id)
+        elif self.id:
+            return '%d' % self.id
         return ''
 
     def save(self):
@@ -149,6 +151,15 @@ from django.contrib import admin
 class CommentsOptions(admin.ModelAdmin):
     list_display = ('subject', 'target', 'author', 'is_public', 'path',)
     search_fields = ('subject', 'content',)
+
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        from ella.core import widgets
+        if db_field.name == 'target_ct':
+            kwargs['widget'] = widgets.ContentTypeWidget
+        if db_field.name == 'target_id':
+            kwargs['widget'] = widgets.ForeignKeyRawIdWidget
+        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
+
 
 admin.site.register(Comment, CommentsOptions)
 admin.site.register(BannedUser)
