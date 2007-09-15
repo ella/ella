@@ -47,6 +47,13 @@ class Gallery(models.Model):
         if listing:
             return listing.get_absolute_url()
 
+    def full_url(self):
+        absolute_url = self.get_absolute_url()
+        if absolute_url:
+            return '<a href="%s">url</a>' % absolute_url
+        return 'no url'
+    full_url.allow_tags = True
+
     def Box(self, box_type, nodelist):
         return Box(self, box_type, nodelist)
 
@@ -124,7 +131,7 @@ class GalleryItemTabularOptions(admin.TabularInline):
 
 
 class GalleryOptions(admin.ModelAdmin):
-    list_display = ('title', 'created', 'category',)
+    list_display = ('title', 'created', 'category', 'full_url',)
     ordering = ('-slug',)
     fields = (
         (_("Gallery heading"), {'fields': ('title', 'slug',)}),
