@@ -63,7 +63,13 @@ class Box(object):
         else:
             level = 1
 
-        return {'object' : self.obj, 'level' : level, 'next_level' : level + 1, 'css_class' : self.params.get('css_class', '')}
+        return {
+                'object' : self.obj,
+                'level' : level,
+                'next_level' : level + 1,
+                'css_class' : self.params.get('css_class', '')
+                'name' : self.params.get('name', '')
+}
 
     #@cache_function
     def render(self):
