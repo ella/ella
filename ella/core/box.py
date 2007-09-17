@@ -67,8 +67,8 @@ class Box(object):
                 'object' : self.obj,
                 'level' : level,
                 'next_level' : level + 1,
-                'css_class' : self.params.get('css_class', '')
-                'name' : self.params.get('name', '')
+                'css_class' : self.params.get('css_class', ''),
+                'name' : self.params.get('name', ''),
 }
 
     #@cache_function
