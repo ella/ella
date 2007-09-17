@@ -261,15 +261,19 @@ class QuizWizard(Wizard):
         result = self.quiz.get_result(points)
         result.count += 1
         result.save()
+        self.extra_context.update(
+                {
+                    'result' : result,
+                    'points' : points,
+                    'questions' : questions
+}
+)
         return render_to_response(
                 (
                     'page/category/%s/polls/quiz_result.html' % self.quiz.category.path,
                     'page/polls/quiz_result.html',
-), {
-                    'result' : result,
-                    'points' : points,
-                    'questions' : questions
-},
+),
+                self.extra_context,
                 context_instance=RequestContext(request)
 )
 
