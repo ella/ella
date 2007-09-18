@@ -286,7 +286,9 @@ def render(object, content_path):
         try:
             content = getattr(content, step)
         except:
-            raise template.TemplateSyntaxError, "Error accessing %r property of object %r" % (content_path, object)
+            # TODO: log
+            #raise template.TemplateSyntaxError, "Error accessing %r property of object %r" % (content_path, object)
+            return ''
 
     result = force_unicode(markdown.markdown(smart_str(content)))
     t = template.Template(result)
