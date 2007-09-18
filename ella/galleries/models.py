@@ -101,6 +101,9 @@ class GalleryItem(models.Model):
             return slug + str(count)
         return slug
 
+    def Box(self, box_type, nodelist):
+        return Box(self.target, box_type, nodelist)
+
     def get_slug(self, item_list=None):
         """
         Return a unique slug for given gallery, even if there are more objects with the same slug.
