@@ -6,6 +6,9 @@ from django.shortcuts import render_to_response
 from django.http import Http404
 
 from ella.core.custom_urls import dispatcher
+from ella.core.cache.utils import get_cached_object
+from ella.core.models import Category
+
 from ella.galleries.models import Gallery
 
 
@@ -48,7 +51,7 @@ def gallery_item_detail(request, gallery, item_slug=None):
     return render_to_response(
                 [
                     'page/category/%s/galleries/%s/item.html' % (category.path, gallery.slug,)
-                    'page/category/%s/galleries/item.html' % (category.path,)
+                    'page/category/%s/galleries/item.html' % (category.path,),
                     'page/galleries/item.html',
                 ],
                 {
