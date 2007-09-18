@@ -44,12 +44,12 @@ def gallery_item_detail(request, gallery, item_slug=None):
             raise Http404
 
 
-
+    category = get_cached_object(Category, pk=gallery.category_id)
     return render_to_response(
                 [
-                    'galleries/%s/%s.html' % (gallery.slug, item_slug),
-                    'galleries/%s/item_detail.html' % gallery.slug,
-                    'galleries/item_detail.html',
+                    'page/category/%s/galleries/%s/item.html' % (category.path, gallery.slug,)
+                    'page/category/%s/galleries/item.html' % (category.path,)
+                    'page/galleries/item.html',
                 ],
                 {
                     'gallery': gallery,
