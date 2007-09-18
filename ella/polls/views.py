@@ -119,6 +119,41 @@ def poll_vote(request, poll_id):
 
     return render_to_response('polls/poll_form.html', {'form' : form, 'next' : url}, context_instance=RequestContext(request))
 
+@transaction.commit_on_success
+def contest_vote(request, contest_id):
+    # get current contest object
+    contest = get_cached_object_or_404(Contest, pk=contest_id)
+    forms = []
+    forms_are_valid = True
+    # questions forms
+    for question in contest.questions:
+        form = QuestionForm(question)(request.POST or None, prefix=str(question.id))
+        if not form.is_valid():
+            forms_are_valid = False
+        forms.append((question, form))
+    # contestant form
+    initial = {}
+    if request.user.is_authenticated():
+        initial['name'] = request.user.first_name
+        initial['surname'] = request.user.last_name
+        initial['email'] = request.user.email
+    contestant_form = ContestantForm(request.POST or None, initial=initial)
+    if not contestant_form.is_valid():
+        forms_are_valid = False
+    # saving contestant
+    if forms_are_valid:
+        return contest_finish(request, contest, forms)
+    return render_to_response((
+                'page/category/%s/polls/contest_form.html' % self.contest.category.path,
+                'page/polls/contest_form.html',
+), {
+                'object' : contest,
+                'forms' : forms,
+                'contestant_form' : contestant_form
+},
+            context_instance=RequestContext(request)
+)
+
 def get_next_url(request):
     """
     Return URL for redirection on success
@@ -202,24 +237,25 @@ class ContestWizard(Wizard):
 
     @transaction.commit_on_success
     def done(self, request, form_list):
-        for f in form_list:
-            assert f.is_valid(), 'ERROR'
+        return contest_finish(request, self.contest, form_list[:-1], form_list[-1])
 
-        choices = '|'.join(
-                '%d:%s' % (
-                        question.id,
-                        question.allow_multiple and ','.join(c.id for c in f.cleaned_data['choice']) or f.cleaned_data['choice'].id)
-                    for question, f in zip(self.contest.questions, form_list[:-1])
+def contest_finish(request, context, qforms, contestant_form):
+    choices = '|'.join(
+            '%d:%s' % (
+                    question.id,
+                    question.allow_multiple and ','.join(c.id for c in f.cleaned_data['choice']) or f.cleaned_data['choice'].id)
+                for question, f in zip(contest.questions, qforms)
 )
-        c = Contestant(
-                contest=self.contest,
-                choices=choices,
-                **form_list[-1].cleaned_data
+    c = Contestant(
+            contest=contest,
+            choices=choices,
+            **contestant_form.cleaned_data
 )
-        if request.user:
-            c.user = request.user
-        c.save()
-        return HttpResponseRedirect(get_next_url(request))
+    if request.user:
+        c.user = request.user
+    c.save()
+    return HttpResponseRedirect(get_next_url(request))
+
 
 class QuizWizard(Wizard):
     def __init__(self, quiz):
@@ -239,8 +275,6 @@ class QuizWizard(Wizard):
             self.extra_context['question'] = self.quiz.questions[step+1]
 
     def done(self, request, form_list):
-        for f in form_list:
-            assert f.is_valid(), 'ERROR'
         points = 0
         questions = []
         for question, f in zip(self.quiz.questions, form_list):
