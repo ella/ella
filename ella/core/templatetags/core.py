@@ -313,6 +313,27 @@ def prefix(string_list, prefix):
     t = template.Template(result)
     return t.render(template.Context({'string_list' : string_list,}))
 
+@register.filter
+def suffix(string_list, suffix):
+    """
+    Add suffix to string list (string delimited with spaces).
+
+    Usage::
+
+        {{string_list|suffix:"pre"}}
+
+    Example::
+        {{'a b'|suffix:'x'}}
+
+    Output::
+
+        ax bx
+    """
+    DELIMITER = ' '
+    result = force_unicode(DELIMITER.join([ i + suffix for i in string_list.split(DELIMITER) ]))
+    t = template.Template(result)
+    return t.render(template.Context({'string_list' : string_list,}))
+
 class RelatedNode(template.Node):
     def __init__(self, obj_var, count, var_name, models=[]):
         self.obj_var, self.count, self.var_name, self.models = obj_var, count, var_name, models
