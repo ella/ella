@@ -10,6 +10,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.template import RequestContext
 from django.conf import settings
 from django.contrib.sites.models import Site
+from django.template.defaultfilters import slugify
 
 from ella.core.cache import get_cached_object_or_404
 from ella.core.wizard import Wizard
@@ -212,6 +213,25 @@ class ContestantForm(forms.Form):
         # TODO - antispam
         return self.cleaned_data
 
+
+@transaction.commit_on_success
+def contest_finish(request, context, qforms, contestant_form):
+    choices = '|'.join(
+            '%d:%s' % (
+                    question.id,
+                    question.allow_multiple and ','.join(c.id for c in f.cleaned_data['choice']) or f.cleaned_data['choice'].id)
+                for question, f in zip(contest.questions, qforms)
+)
+    c = Contestant(
+            contest=contest,
+            choices=choices,
+            **contestant_form.cleaned_data
+)
+    if request.user:
+        c.user = request.user
+    c.save()
+    return HttpResponseRedirect(get_next_url(request))
+
 class ContestWizard(Wizard):
     def __init__(self, contest):
         self.contest = contest
@@ -235,28 +255,10 @@ class ContestWizard(Wizard):
         if (step + 1) < len(self.form_list):
             self.extra_context['question'] = self.contest.questions[step]
 
-    @transaction.commit_on_success
     def done(self, request, form_list):
         return contest_finish(request, self.contest, form_list[:-1], form_list[-1])
 
-def contest_finish(request, context, qforms, contestant_form):
-    choices = '|'.join(
-            '%d:%s' % (
-                    question.id,
-                    question.allow_multiple and ','.join(c.id for c in f.cleaned_data['choice']) or f.cleaned_data['choice'].id)
-                for question, f in zip(contest.questions, qforms)
-)
-    c = Contestant(
-            contest=contest,
-            choices=choices,
-            **contestant_form.cleaned_data
-)
-    if request.user:
-        c.user = request.user
-    c.save()
-    return HttpResponseRedirect(get_next_url(request))
-
-
+RESULT_FIELD = 'results'
 class QuizWizard(Wizard):
     def __init__(self, quiz):
         form_list = [ QuestionForm(q) for q in quiz.questions ]
@@ -277,20 +279,17 @@ class QuizWizard(Wizard):
     def done(self, request, form_list):
         points = 0
         questions = []
+        results = []
         for question, f in zip(self.quiz.questions, form_list):
-            choices = question.choices[:]
+            choices = question.choices
             if question.allow_multiple:
                 points += sum(c.points for c in f.cleaned_data['choice'])
-                for ch in choices:
-                    if ch in f.cleaned_data['choice']:
-                        ch.chosen = True
+                results.append('%d:%s' % (question.id, ','.join(c.id for c in f.cleaned_data['choice'])))
             else:
                 points += f.cleaned_data['choice'].points
-                for ch in choices:
-                    if ch == f.cleaned_data['choice']:
-                        ch.chosen = True
-                        break
-            questions.append((question, choices))
+                results.append('%d:%s' % (question.id, f.cleaned_data['choice'].id))
+
+        results = '|'.join(results)
 
         result = self.quiz.get_result(points)
         result.count += 1
@@ -299,7 +298,9 @@ class QuizWizard(Wizard):
                 {
                     'result' : result,
                     'points' : points,
-                    'questions' : questions
+                    'results' : results,
+                    'result_field': RESULT_FIELD,
+                    'result_action' : self.quiz.get_absolute_url() + slugify(_('results')) + '/'
 }
 )
         return render_to_response(
@@ -310,4 +311,52 @@ class QuizWizard(Wizard):
                 self.extra_context,
                 context_instance=RequestContext(request)
 )
+
+def result_details(request, bits, context):
+    quiz = context['object']
+    results = request.GET.get(RESULT_FIELD, '').split('|')
+    if len(results) != len(quiz.questions):
+        raise Http404
+
+    questions = []
+    for question, q_res in zip(quiz.questions, results):
+        q_id, id_list = q_res.split(':')
+        choices = question.choices
+        if question.allow_multiple:
+            cl = set(id_list.split('|'))
+            for ch in choices:
+                if str(ch.id) in cl:
+                    ch.chosen = True
+        else:
+            for ch in choices:
+                if str(ch.id) == id_list:
+                    ch.chosen = True
+                    break
+        questions.append((question, choices))
+
+    context['questions'] = questions
+
+    return render_to_response(
+            (
+                'page/category/%s/polls/quiz_result_detail.html' % context['category'],
+                'page/polls/quiz_result_detail.html',
+),
+            context,
+            context_instance=RequestContext(request)
+)
+
+
+def contest(request, context):
+    contest = context['object']
+    return ContestWizard(contest)(request)
+
+def quiz(request, context):
+    quiz = context['object']
+    return QuizWizard(quiz)(request)
+
+def register_custom_urls():
+    from ella.core.custom_urls import dispatcher
+    dispatcher.register_custom_detail(Quiz, quiz)
+    dispatcher.register_custom_detail(Contest, contest)
+    dispatcher.register(_('results'), result_details, model=Quiz)
 
