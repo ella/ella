@@ -50,7 +50,7 @@ def gallery_item_detail(request, gallery, item_slug=None):
     category = get_cached_object(Category, pk=gallery.category_id)
     return render_to_response(
                 [
-                    'page/category/%s/galleries/%s/item.html' % (category.path, gallery.slug,)
+                    'page/category/%s/galleries/%s/item.html' % (category.path, gallery.slug,),
                     'page/category/%s/galleries/item.html' % (category.path,),
                     'page/galleries/item.html',
                 ],
