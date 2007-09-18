@@ -143,7 +143,9 @@ class Format(models.Model):
     name = models.CharField(_('Name'), maxlength=80)
     max_width = models.PositiveIntegerField(_('Max width'))
     max_height = models.PositiveIntegerField(_('Max height'))
-    flexible_height = models.BooleanField(_('Flexible height'), help_text=_('Determines whether max_height is an absolute maximum, or the formatted photo can vary from max_height for flexible_max_height.'))
+    flexible_height = models.BooleanField(_('Flexible height'), help_text=_(('Determines whether max_height is an absolute maximum, '
+                                                                                 'or the formatted photo can vary from max_height for flexible_max_height.'))
+)
     flexible_max_height = models.PositiveIntegerField(_('Flexible max height'), blank=True, null=True)
     stretch = models.BooleanField(_('Stretch'))
     resample_quality = models.IntegerField(_('Resample quality'), choices=PHOTOS_FORMAT_QUALITY, default=85)
@@ -160,7 +162,7 @@ class Format(models.Model):
             'height' : self.max_height,
             'filename' : 'img/empty/%s.png' % (self.name),
             'format' : self,
-            'url' : settings.MEDIA_ROOT + 'img/empty/%s.png' % (self.name),
+            'url' : settings.MEDIA_URL + 'img/empty/%s.png' % (self.name),
 }
         return out
 
@@ -198,10 +200,10 @@ class FormatedPhoto(models.Model):
         from os import path
         if not path.exists(settings.MEDIA_ROOT):
             # NFS not available - we have no chance of creating it
-            return settings.MEDIA_URL + self.filename
+            return self.format.get_blank_img()['url']
 
         if path.exists(settings.MEDIA_ROOT + self.filename):
-            # imgae exists
+            # image exists
             return settings.MEDIA_URL + self.filename
 
         # image does not exist - try and create it
