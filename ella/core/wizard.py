@@ -92,7 +92,10 @@ class Wizard(object):
             self.step += 1
             # this was the last step
             if self.step == len(self.form_list):
-                return self.done(request, [ self.get_form(i, request.POST) for i in range(len(self.form_list)) ])
+                form_list = [self.get_form(i, request.POST) for i in range(len(self.form_list))]
+                # validate all the forms befora passing it to done()
+                for f in form_list: f.is_valid()
+                return self.done(request, form_list)
             form = self.get_form(self.step)
         return self.render(form, request)
 
@@ -117,7 +120,6 @@ class Wizard(object):
                         for i in range(self.step)
 )
         return self.render_template(request, form, prev_fields)
-
 
     # METHODS SUBCLASSES MIGHT OVERRIDE IF APPROPRIATE ########################
 
@@ -177,6 +179,8 @@ class Wizard(object):
         return render_to_response(self.get_template(), dict(
                     step_field=self.STEP_FIELD,
                     step=self.step,
+                    current_step=self.step + 1,
+                    step_count=self.step_count(),
                     form=form,
                     previous_fields=previous_fields,
                     ** self.extra_context
@@ -193,6 +197,10 @@ class Wizard(object):
         Only valid data enter here.
         """
         pass
+
+    def step_count(self):
+        """Return number of steps"""
+        return len(self.form_list)
 
     # METHODS SUBCLASSES MUST OVERRIDE ########################################
 
