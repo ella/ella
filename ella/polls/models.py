@@ -270,6 +270,13 @@ class Result(models.Model):
     points_to = models.IntegerField(_('Points dimension to'), null=True)
     count = models.IntegerField(_('Points count'), default=0, blank=True)
 
+    def total(self):
+        res = get_cached_list(Result, quiz=self.quiz)
+        return sum(r.count for r in res)
+
+    def percentage(self):
+        return self.count*100/self.total()
+
     def __unicode__(self):
         return self.title
 
@@ -320,4 +327,24 @@ admin.site.register(Vote, VoteOptions)
 admin.site.register(Contestant, ContestantOptions)
 admin.site.register(Result)
 
-from ella.polls import management
+from ella.core.custom_urls import dispatcher
+
+def contest(request, context):
+    from ella.polls.views import ContestWizard
+    contest = context['object']
+    return ContestWizard(contest)(request)
+
+def quiz(request, context):
+    from ella.polls.views import QuizWizard
+    quiz = context['object']
+    return QuizWizard(quiz)(request)
+
+def custom_result_details(request, bits, context):
+    from ella.polls.views import result_details
+    return result_details(request, bits, context)
+
+dispatcher.register_custom_detail(Quiz, quiz)
+dispatcher.register_custom_detail(Contest, contest)
+dispatcher.register(_('results'), custom_result_details, model=Quiz)
+
+

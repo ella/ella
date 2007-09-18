@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 from django.shortcuts import get_object_or_404, render_to_response
+from django.utils.translation import ugettext_lazy as _
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.core.urlresolvers import reverse
 from django import newforms as forms
@@ -344,19 +345,4 @@ def result_details(request, bits, context):
             context,
             context_instance=RequestContext(request)
 )
-
-
-def contest(request, context):
-    contest = context['object']
-    return ContestWizard(contest)(request)
-
-def quiz(request, context):
-    quiz = context['object']
-    return QuizWizard(quiz)(request)
-
-def register_custom_urls():
-    from ella.core.custom_urls import dispatcher
-    dispatcher.register_custom_detail(Quiz, quiz)
-    dispatcher.register_custom_detail(Contest, contest)
-    dispatcher.register(_('results'), result_details, model=Quiz)
 
