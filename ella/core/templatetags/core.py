@@ -292,6 +292,26 @@ def render(object, content_path):
     t = template.Template(result)
     return t.render(template.Context({'object' : object, 'MEDIA_URL' : settings.MEDIA_URL}))
 
+@register.filter
+def prefix(string_list, prefix):
+    """
+    Add prefix to string list (string delimited with spaces).
+
+    Usage::
+
+        {{string_list|prefix:"pre"}}
+
+    Example::
+        {{'a b'|prefix:'x'}}
+
+    Output::
+
+        xa xb
+    """
+    DELIMITER = ' '
+    result = force_unicode(DELIMITER.join([ prefix + i for i in string_list.split(DELIMITER) ]))
+    t = template.Template(result)
+    return t.render(template.Context({'string_list' : string_list,}))
 
 class RelatedNode(template.Node):
     def __init__(self, obj_var, count, var_name, models=[]):
