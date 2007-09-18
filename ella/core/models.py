@@ -200,7 +200,7 @@ class Listing(models.Model):
         super(Listing, self).save()
 
     def __unicode__(self):
-        return u'%s listed in %s' % (self.target, self.category_id)
+        return u'%s listed in %s' % (self.target, self.category)
 
     @property
     def priority(self):

@@ -76,10 +76,12 @@ def object_detail(request, category, year, month, day, content_type, slug, url_r
             'content_type' : ct,
 }
 
+    # check for custom actions
     if url_remainder:
-        # some custom action has been requested
         bits = url_remainder.split('/')
         return dispatcher.call_view(request, bits, context)
+    elif dispatcher.has_custom_detail(obj):
+        return dispatcher.call_custom_detail(request, context)
 
     # increment hit counter
     HitCount.objects.hit(obj)
