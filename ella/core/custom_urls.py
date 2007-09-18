@@ -1,4 +1,5 @@
 from django.http import Http404
+from django.template.defaultfilters import slugify
 
 ALL = '__ALL__'
 ROOT = '__ROOT__'
@@ -48,6 +49,7 @@ class DetailDispatcher(object):
         Raises:
             AssertionError if the key is already used
         """
+        start = slugify(start)
         if start in self.custom_mapping:
             assert not model or model not in self.custom_mapping[start], "You can only register one function for key %r and model %r" % (start, model.__name__)
             assert model is not None or ALL not in self.custom_mapping, "You can only register one function for key %r" % start
