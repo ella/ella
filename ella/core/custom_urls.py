@@ -32,6 +32,10 @@ class DetailDispatcher(object):
             raise Http404
         return self.root_mapping[model](request, context)
 
+    def register_custom_detail(self, model, view):
+        assert model not in self.root_mapping, "You can only register one function for model %r" % model.__name__
+        self.root_mapping[model] = view
+
     def register(self, start, view, model=None):
         """
         Registers a new custom_mapping to view.
