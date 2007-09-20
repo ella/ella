@@ -71,16 +71,18 @@ class Box(object):
                 'name' : self.params.get('name', ''),
 }
 
+    def get_cache_tests(self):
+        return [(self.obj.__class__, lambda x: x._get_pk_val() == self.obj._get_pk_val())]
     #@cache_function
     def render(self):
         key = self.get_cache_key()
         rend = cache.get(key)
         if rend is None:
             rend = self._render()
-            #cache.set(key, rend, 30)
-            #CACHE_DELETER.register(self.obj.__class__, lambda x: x._get_pk_val() == self.obj._get_pk_val(), key)
+            cache.set(key, rend, 30)
+            for model, test in self.get_cache_tests():
+                CACHE_DELETER.register(model, test, key)
         return rend
-
 
     def _render(self):
         """
