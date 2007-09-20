@@ -287,3 +287,7 @@ def export(request, count, models=None):
     listing = Listing.objects.get_listing(count=count, category=cat, mods=models)
     return render_to_response('export_banner.html', {'category' : cat, 'listing' : listing}, context_instance=RequestContext(request))
 
+def page_not_found(request):
+    return render_to_response('page/404.html', {}, context_instance=RequestContext(request))
+def handle_error(request):
+    return render_to_response('page/500.html', {}, context_instance=RequestContext(request))
