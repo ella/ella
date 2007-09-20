@@ -247,9 +247,10 @@ class Contestant(models.Model):
     name = models.CharField(_('First name'), maxlength=200)
     surname = models.CharField(_('Last name'), maxlength=200)
     email = models.EmailField(_('email'))
-    phonenumber = models.PhoneNumberField(_('Phone number'), null=True, blank=True)
+    phonenumber = models.CharField(_('Phone number'), maxlength=20, blank=True)
     address = models.CharField(_('Address'), maxlength=200, blank=True)
-    choices = models.TextField(_('Choices'))
+    choices = models.CharField(_('Choices'), maxlength=200, blank=True)
+    count_guess = models.IntegerField(_('Count guess'))
 
     def __unicode__(self):
         return u'%s %s' % (self.surname, self.name)
@@ -333,9 +334,9 @@ def contest(request, context):
     from ella.polls.views import contest_vote
     return contest_vote(request, context)
 
-    from ella.polls.views import ContestWizard
-    contest = context['object']
-    return ContestWizard(contest)(request)
+def conditions(request, bits, context):
+    from ella.polls.views import contest_conditions
+    return contest_conditions(request, bits, context)
 
 def quiz(request, context):
     from ella.polls.views import QuizWizard
@@ -346,8 +347,13 @@ def custom_result_details(request, bits, context):
     from ella.polls.views import result_details
     return result_details(request, bits, context)
 
+def cont_result(request, bits, context):
+    from ella.polls.views import contest_result
+    return contest_result(request, bits, context)
+
 dispatcher.register_custom_detail(Quiz, quiz)
 dispatcher.register_custom_detail(Contest, contest)
 dispatcher.register(_('results'), custom_result_details, model=Quiz)
-
+dispatcher.register(_('result'), cont_result, model=Contest)
+dispatcher.register(_('conditions'), conditions, model=Contest)
 

@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from django.shortcuts import get_object_or_404, render_to_response
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext, ugettext_lazy as _
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.core.urlresolvers import reverse
 from django import newforms as forms
@@ -150,8 +150,9 @@ def contest_vote(request, context):
             'contestant_form' : contestant_form
 })
     return render_to_response((
-                'page/category/%s/polls/contest_form.html' % context['category'].path,
-                'page/polls/contest_form.html',
+                'page/category/%s/content_type/polls.contest/%s/form.html' % (context['category'].path, contest.slug),
+                'page/category/%s/content_type/polls.contest/form.html' % context['category'].path,
+                'page/content_type/polls.contest/form.html',
 ),
             context,
             context_instance=RequestContext(request)
@@ -204,12 +205,13 @@ class ContestantForm(forms.Form):
     """
     Contestant form
     """
-    # FIXME - all is required
     name = Contestant._meta.get_field('name').formfield()
     surname = Contestant._meta.get_field('surname').formfield()
     email = Contestant._meta.get_field('email').formfield()
     phonenumber = Contestant._meta.get_field('phonenumber').formfield()
     address = Contestant._meta.get_field('address').formfield()
+    count_guess = Contestant._meta.get_field('count_guess').formfield()
+    accept_conditions = forms.BooleanField()
 
     def clean(self):
         # TODO - antispam
@@ -232,7 +234,35 @@ def contest_finish(request, contest, qforms, contestant_form):
     if request.user:
         c.user = request.user
     c.save()
-    return HttpResponseRedirect(get_next_url(request))
+    return HttpResponseRedirect(contest.get_absolute_url() + ugettext('result') + u'/')
+
+def contest_result(request, bits, context):
+    if bits:
+        raise Http404
+
+    return render_to_response(
+            (
+                'page/category/%s/content_type/polls.contest/%s/result.html' % (context['category'].path, context['object'].slug),
+                'page/category/%s/content_type/polls.contest/result.html' % context['category'].path,
+                'page/content_type/polls.contest/result.html',
+),
+            context,
+            context_instance=RequestContext(request)
+)
+
+def contest_conditions(request, bits, context):
+    if bits:
+        raise Http404
+
+    return render_to_response(
+            (
+                'page/category/%s/content_type/polls.contest/%s/conditions.html' % (context['category'].path, context['object'].slug),
+                'page/category/%s/content_type/polls.contest/conditions.html' % context['category'].path,
+                'page/content_type/polls.contest/conditions.html',
+),
+            context,
+            context_instance=RequestContext(request)
+)
 
 class ContestWizard(Wizard):
     def __init__(self, contest):
@@ -245,12 +275,14 @@ class ContestWizard(Wizard):
     def get_template(self):
         if (self.step + 1) < len(self.form_list):
             return (
-                    'page/category/%s/polls/contest_step.html' % self.contest.category.path,
-                    'page/polls/contest_step.html',
+                    'page/category/%s/content_type/polls.contest/%s/step.html' % (self.contest.category.path, self.contest.slug),
+                    'page/category/%s/content_type/polls.contest/step.html' % self.contest.category.path,
+                    'page/content_type/polls.contest/step.html',
 )
         return (
-                'page/category/%s/polls/contestant_form.html' % self.contest.category.path,
-                'page/polls/contestant_form.html',
+                'page/category/%s/content_type/polls.contest/%s/contestant_form.html' % (self.contest.category.path, self.contest.slug),
+                'page/category/%s/content_type/polls.contest/contestant_form.html' % self.contest.category.path,
+                'page/content_type/polls.contest/contestant_form.html',
 )
 
     def process_step(self, request, form, step):
@@ -270,8 +302,9 @@ class QuizWizard(Wizard):
 
     def get_template(self):
         return (
-                'page/category/%s/polls/quiz_step.html' % self.quiz.category.path,
-                'page/polls/quiz_step.html',
+                'page/category/%s/content_type/polls.quiz/%s/step.html' % (self.quiz.category.path, self.quiz.slug),
+                'page/category/%s/content_type/polls.quiz/step.html' % self.quiz.category.path,
+                'page/content_type/polls.quiz/step.html',
 )
 
     def process_step(self, request, form, step):
@@ -307,8 +340,9 @@ class QuizWizard(Wizard):
 )
         return render_to_response(
                 (
-                    'page/category/%s/polls/quiz_result.html' % self.quiz.category.path,
-                    'page/polls/quiz_result.html',
+                    'page/category/%s/content_type/polls.quiz/%s/result.html' % (self.quiz.category.path, self.quiz.slug),
+                    'page/category/%s/content_type/polls.quiz/result.html' % self.quiz.category.path,
+                    'page/content_type/polls.quiz/result.html',
 ),
                 self.extra_context,
                 context_instance=RequestContext(request)
@@ -340,8 +374,9 @@ def result_details(request, bits, context):
 
     return render_to_response(
             (
-                'page/category/%s/polls/quiz_result_detail.html' % context['category'],
-                'page/polls/quiz_result_detail.html',
+                'page/category/%s/content_type/polls.quiz/%s/result_detail.html' % (context['category'].path, quiz.slug),
+                'page/category/%s/content_type/polls.quiz/result_detail.html' % context['category'].path,
+                'page/content_type/polls.quiz/result_detail.html',
 ),
             context,
             context_instance=RequestContext(request)

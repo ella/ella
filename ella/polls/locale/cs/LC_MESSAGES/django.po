@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-08-15 13:45+0200\n"
+"POT-Creation-Date: 2007-09-20 14:52+0200\n"
 "PO-Revision-Date: 2007-08-15 13:55+0200\n"
 "Last-Translator: Ondrej Kohout <ondrej.kohout@netcentrum.cz>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,166 +16,179 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: models.py:9 models.py:98 models.py:159
+#: views.py:240 models.py:357
+#, fuzzy
+msgid "result"
+msgstr "Výsledky kvízů"
+
+#: views.py:341 models.py:286 models.py:356
+msgid "results"
+msgstr "Výsledky kvízů"
+
+#: models.py:16 models.py:157 models.py:268
 msgid "Title"
 msgstr "Titulek"
 
-#: models.py:10 models.py:99
+#: models.py:19 models.py:158
 msgid "Text with announcement"
 msgstr "Text s oznámením"
 
-#: models.py:11 models.py:100 models.py:141
+#: models.py:20 models.py:64 models.py:159
 msgid "Text"
 msgstr "Text"
 
-#: models.py:12 models.py:101 models.py:142
+#: models.py:21 models.py:65 models.py:160
 msgid "Text with results"
 msgstr "Text s výsledky"
 
-#: models.py:13 models.py:102 models.py:143
+#: models.py:22 models.py:66 models.py:161
 msgid "Active from"
 msgstr "Aktivní od"
 
-#: models.py:14 models.py:103 models.py:144
+#: models.py:23 models.py:67 models.py:162
 msgid "Active till"
 msgstr "Aktivní do"
 
-#: models.py:15 models.py:40 models.py:47
-msgid "Question"
-msgstr "Otázka"
-
-#: models.py:21 models.py:81
-msgid "Poll"
-msgstr "Anketa"
-
-#: models.py:22
-msgid "Polls"
-msgstr "Ankety"
-
-#: models.py:31
-msgid "Question text"
-msgstr "Text otázky"
-
-#: models.py:32
-msgid "Allow multiple choices"
-msgstr "Povolit více voleb/odpovědí"
-
-#: models.py:33 models.py:150 models.py:158
-msgid "Quiz"
-msgstr "Kvíz"
-
-#: models.py:34 models.py:109 models.py:117
+#: models.py:52 models.py:112 models.py:244
 msgid "Contest"
 msgstr "Soutěž"
 
-#: models.py:41
-msgid "Questions"
-msgstr "Otázky"
-
-#: models.py:48
-msgid "Choice text"
-msgstr "Text volby/odpovědi"
-
-#: models.py:49
-msgid "Points"
-msgstr "Body"
-
-#: models.py:50 models.py:91
-msgid "Votes"
-msgstr "Hlasy"
-
-#: models.py:57
-msgid "Choice"
-msgstr "Volba/odpověď"
-
-#: models.py:58 models.py:125
-msgid "Choices"
-msgstr "Volby/odpovědi"
-
-#: models.py:82 models.py:119
-msgid "User"
-msgstr "Uživatel"
-
-#: models.py:83
-msgid "Time"
-msgstr "Čas"
-
-#: models.py:84
-msgid "IP Address"
-msgstr "IP adresa"
-
-#: models.py:90
-msgid "Vote"
-msgstr "Hlas"
-
-#: models.py:110
+#: models.py:53
 msgid "Contests"
 msgstr "Soutěž"
 
-#: models.py:118
-msgid "Date and time"
-msgstr "Datum a čas"
-
-#: models.py:120
-msgid "First name"
-msgstr "Jméno"
-
-#: models.py:121
-msgid "Last name"
-msgstr "Příjmení"
-
-#: models.py:122
-msgid "email"
-msgstr "E-mail"
-
-#: models.py:123
-msgid "Phone number"
-msgstr "Telefoní číslo"
-
-#: models.py:124
-msgid "Address"
-msgstr "Adresa"
-
-#: models.py:131
-msgid "Contestant"
-msgstr "Soutěžící"
-
-#: models.py:132
-msgid "Contestants"
-msgstr "Soutěžící"
-
-#: models.py:139
+#: models.py:60
 msgid "title"
 msgstr "Titulek"
 
-#: models.py:140
+#: models.py:63
 msgid "text with announcement"
 msgstr "Text s ohlášením"
 
-#: models.py:151
+#: models.py:99 models.py:111 models.py:267
+msgid "Quiz"
+msgstr "Kvíz"
+
+#: models.py:100
 msgid "Quizes"
 msgstr "Kvízy"
 
-#: models.py:160
+#: models.py:109
+msgid "Question text"
+msgstr "Text otázky"
+
+#: models.py:110
+msgid "Allow multiple choices"
+msgstr "Povolit více voleb/odpovědí"
+
+#: models.py:138 models.py:163 models.py:186
+msgid "Question"
+msgstr "Otázka"
+
+#: models.py:139
+msgid "Questions"
+msgstr "Otázky"
+
+#: models.py:169 models.py:227
+msgid "Poll"
+msgstr "Anketa"
+
+#: models.py:170
+msgid "Polls"
+msgstr "Ankety"
+
+#: models.py:187
+msgid "Choice text"
+msgstr "Text volby/odpovědi"
+
+#: models.py:188
+msgid "Points"
+msgstr "Body"
+
+#: models.py:189 models.py:237
+msgid "Votes"
+msgstr "Hlasy"
+
+#: models.py:196
+msgid "Choice"
+msgstr "Volba/odpověď"
+
+#: models.py:197 models.py:252
+msgid "Choices"
+msgstr "Volby/odpovědi"
+
+#: models.py:228 models.py:246
+msgid "User"
+msgstr "Uživatel"
+
+#: models.py:229
+msgid "Time"
+msgstr "Čas"
+
+#: models.py:230
+msgid "IP Address"
+msgstr "IP adresa"
+
+#: models.py:236
+msgid "Vote"
+msgstr "Hlas"
+
+#: models.py:245
+msgid "Date and time"
+msgstr "Datum a čas"
+
+#: models.py:247
+msgid "First name"
+msgstr "Jméno"
+
+#: models.py:248
+msgid "Last name"
+msgstr "Příjmení"
+
+#: models.py:249
+msgid "email"
+msgstr "E-mail"
+
+#: models.py:250
+msgid "Phone number"
+msgstr "Telefoní číslo"
+
+#: models.py:251
+msgid "Address"
+msgstr "Adresa"
+
+#: models.py:253
+msgid "Count guess"
+msgstr "Odhad počtu"
+
+#: models.py:259
+msgid "Contestant"
+msgstr "Soutěžící"
+
+#: models.py:260
+msgid "Contestants"
+msgstr "Soutěžící"
+
+#: models.py:269
 msgid "Quiz results text"
 msgstr "Text s výsledkem kvízu"
 
-#: models.py:161
+#: models.py:270
 msgid "Points dimension from"
 msgstr "Rozsah bodů od"
 
-#: models.py:162
+#: models.py:271
 msgid "Points dimension to"
 msgstr "Rozsah bodů do"
 
-#: models.py:163
+#: models.py:272
 msgid "Points count"
 msgstr "Počet bodů"
 
-#: models.py:169
+#: models.py:285
 msgid "Result"
 msgstr "Výsledek kvízu"
 
-#: models.py:170
-msgid "results"
-msgstr "Výsledky kvízů"
+#: models.py:358
+msgid "conditions"
+msgstr "podmínky"
