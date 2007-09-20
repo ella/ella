@@ -72,8 +72,14 @@ class Box(object):
 }
 
     def get_cache_tests(self):
-        return [(self.obj.__class__, lambda x: x._get_pk_val() == self.obj._get_pk_val())]
-    #@cache_function
+        from ella.db_templates.models import DbTemplate
+        test_list = [ (self.obj.__class__, lambda x: x._get_pk_val() == self.obj._get_pk_val()) ]
+        if DbTemplate._meta.installed:
+            test_list.extend(
+                [ (DbTemplate, lambda x: x.name == t.name) for t in self._get_template_list() ]
+)
+        return test_list
+
     def render(self):
         key = self.get_cache_key()
         rend = cache.get(key)
@@ -84,15 +90,8 @@ class Box(object):
                 CACHE_DELETER.register(model, test, key)
         return rend
 
-    def _render(self):
-        """
-        The main function that takes care of the rendering.
-        """
-        if self.template_name:
-            return loader.render_to_string(self.template_name, self.get_context())
-
+    def _get_template_list(self):
         t_list = []
-
         if hasattr(self.obj, 'category_id'):
             from ella.core.models import Category
             from ella.core.cache.utils import get_cached_object
@@ -115,6 +114,17 @@ class Box(object):
             t_list.append(base_path + '%s/%s.html' % (self.box_type, self.obj.slug))
         t_list.append(base_path + '%s.html' % (self.box_type,))
         t_list.append(base_path + 'base_box.html')
+
+        return t_list
+
+    def _render(self):
+        """
+        The main function that takes care of the rendering.
+        """
+        if self.template_name:
+            return loader.render_to_string(self.template_name, self.get_context())
+
+        t_list = self._get_template_list()
 
         media = self._context.dicts[-1].setdefault(MEDIA_KEY, {'js' : set([]), 'css' : set([])})
         my_media = self.get_media()
