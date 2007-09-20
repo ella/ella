@@ -247,8 +247,8 @@ class Contestant(models.Model):
     name = models.CharField(_('First name'), maxlength=200)
     surname = models.CharField(_('Last name'), maxlength=200)
     email = models.EmailField(_('email'))
-    phonenumber = models.PhoneNumberField(_('Phone number'), null=True)
-    address = models.CharField(_('Address'), maxlength=200)
+    phonenumber = models.PhoneNumberField(_('Phone number'), null=True, blank=True)
+    address = models.CharField(_('Address'), maxlength=200, blank=True)
     choices = models.TextField(_('Choices'))
 
     def __unicode__(self):
@@ -330,6 +330,9 @@ admin.site.register(Result)
 from ella.core.custom_urls import dispatcher
 
 def contest(request, context):
+    from ella.polls.views import contest_vote
+    return contest_vote(request, context)
+
     from ella.polls.views import ContestWizard
     contest = context['object']
     return ContestWizard(contest)(request)

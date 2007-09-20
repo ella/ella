@@ -122,9 +122,9 @@ def poll_vote(request, poll_id):
     return render_to_response('polls/poll_form.html', {'form' : form, 'next' : url}, context_instance=RequestContext(request))
 
 @transaction.commit_on_success
-def contest_vote(request, contest_id):
-    # get current contest object
-    contest = get_cached_object_or_404(Contest, pk=contest_id)
+def contest_vote(request, context):
+
+    contest = context['object']
     forms = []
     forms_are_valid = True
     # questions forms
@@ -144,15 +144,16 @@ def contest_vote(request, contest_id):
         forms_are_valid = False
     # saving contestant
     if forms_are_valid:
-        return contest_finish(request, contest, forms)
+        return contest_finish(request, contest, forms, contestant_form)
+    context.update({
+            'forms' : forms,
+            'contestant_form' : contestant_form
+})
     return render_to_response((
-                'page/category/%s/polls/contest_form.html' % self.contest.category.path,
+                'page/category/%s/polls/contest_form.html' % context['category'].path,
                 'page/polls/contest_form.html',
-), {
-                'object' : contest,
-                'forms' : forms,
-                'contestant_form' : contestant_form
-},
+),
+            context,
             context_instance=RequestContext(request)
 )
 
@@ -216,12 +217,12 @@ class ContestantForm(forms.Form):
 
 
 @transaction.commit_on_success
-def contest_finish(request, context, qforms, contestant_form):
+def contest_finish(request, contest, qforms, contestant_form):
     choices = '|'.join(
             '%d:%s' % (
                     question.id,
                     question.allow_multiple and ','.join(c.id for c in f.cleaned_data['choice']) or f.cleaned_data['choice'].id)
-                for question, f in zip(contest.questions, qforms)
+                for question, f in qforms
 )
     c = Contestant(
             contest=contest,
@@ -257,7 +258,7 @@ class ContestWizard(Wizard):
             self.extra_context['question'] = self.contest.questions[step]
 
     def done(self, request, form_list):
-        return contest_finish(request, self.contest, form_list[:-1], form_list[-1])
+        return contest_finish(request, self.contest, zip(self.contest.questions, form_list[:-1]), form_list[-1])
 
 RESULT_FIELD = 'results'
 class QuizWizard(Wizard):
