@@ -184,7 +184,7 @@ class Choice(models.Model):
     Choices related to Question model ordered with respect to question
     """
     question = models.ForeignKey('Question', verbose_name=_('Question'))
-    choice = models.CharField(_('Choice text'), maxlength=200)
+    choice = models.TextField(_('Choice text'))
     points = models.IntegerField(_('Points'), blank=True, null=True)
     votes = models.IntegerField(_('Votes'), blank=True, null=True)
 
