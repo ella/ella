@@ -4,6 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.core.paginator import ObjectPaginator
+from django.conf import settings
 
 from ella.core.models import Listing, Category, HitCount
 from ella.core.cache import *
@@ -53,9 +54,9 @@ def object_detail(request, category, year, month, day, content_type, slug, url_r
     ct = get_content_type(content_type)
 
     if category:
-        cat = get_cached_object_or_404(Category, tree_path=category)
+        cat = get_cached_object_or_404(Category, tree_path=category, site__id=settings.SITE_ID)
     else:
-        cat = get_cached_object_or_404(Category, tree_parent__isnull=True)
+        cat = get_cached_object_or_404(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
 
     obj = get_cached_object_or_404(ct, slug=slug)
     try:
@@ -143,9 +144,9 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
         date_kind = 'detail'
 
     if category:
-        cat = get_cached_object_or_404(Category, tree_path=category)
+        cat = get_cached_object_or_404(Category, tree_path=category, site__id=settings.SITE_ID)
     else:
-        cat = get_cached_object_or_404(Category, tree_parent__isnull=True)
+        cat = get_cached_object_or_404(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
     kwa['category'] = cat
 
     if content_type:
@@ -230,7 +231,7 @@ def home(request):
     Raise:
         Http404 if there is no base category
     """
-    cat = get_cached_object_or_404(Category, tree_parent__isnull=True)
+    cat = get_cached_object_or_404(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
     return render_to_response(
             (
                 # NEW
@@ -258,7 +259,7 @@ def category_detail(request, category):
     Raise:
         Http404 if the category doesn't exist
     """
-    cat = get_cached_object_or_404(Category, tree_path=category, tree_parent__isnull=False)
+    cat = get_cached_object_or_404(Category, tree_path=category, site__id=settings.SITE_ID)
     return render_to_response(
             (
                 # NEW
@@ -283,7 +284,7 @@ def export(request, count, models=None):
         from ella.articles.models import Article
         models = [ Article, ]
 
-    cat = get_cached_object_or_404(Category, tree_parent__isnull=True)
+    cat = get_cached_object_or_404(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
     listing = Listing.objects.get_listing(count=count, category=cat, mods=models)
     return render_to_response('export_banner.html', {'category' : cat, 'listing' : listing}, context_instance=RequestContext(request))
 

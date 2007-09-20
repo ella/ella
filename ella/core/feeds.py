@@ -2,6 +2,7 @@ from django.contrib.syndication.feeds import Feed
 from django.utils.feedgenerator import Atom1Feed
 from django.utils.translation import ugettext_lazy as _
 from django.http import Http404
+from django.conf import settings
 
 from ella.core.models import Listing, Category
 from ella.core.views import get_content_type
@@ -18,9 +19,9 @@ class RSSTopCategoryListings(Feed):
             ct = False
 
         if bits:
-            cat = get_cached_object_or_404(Category, tree_path=u'/'.join(bits))
+            cat = get_cached_object_or_404(Category, tree_path=u'/'.join(bits), site__id=settings.SITE_ID)
         else:
-            cat = get_cached_object(Category, tree_parent__isnull=True)
+            cat = get_cached_object(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
 
         if ct:
             return (cat, ct)
@@ -33,7 +34,7 @@ class RSSTopCategoryListings(Feed):
         elif obj:
             return _('Top %d objects in category %s.') % (NUM_IN_FEED, obj.title)
         else:
-            obj = get_cached_object(Category, tree_parent__isnull=True)
+            obj = get_cached_object(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
             return _('Top %d objects in category %s.') % (NUM_IN_FEED, obj.title)
 
     def items(self, obj):
@@ -45,7 +46,7 @@ class RSSTopCategoryListings(Feed):
         elif obj:
             kwa['category'] = obj
         else:
-            kwa['category'] = get_cached_object(Category, tree_parent__isnull=True)
+            kwa['category'] = get_cached_object(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
         return Listing.objects.get_listing(count=NUM_IN_FEED, **kwa)
 
     def link(self, obj):
