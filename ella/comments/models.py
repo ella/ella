@@ -48,7 +48,14 @@ class CommentManager(models.Manager):
         qset = self.filter(target_ct=target_ct, target_id=object._get_pk_val(), is_public=True, **kwargs)
         if order_by:
             qset = qset.order_by(order_by)
-        return list(qset)
+        comment_list = list(qset)
+        for c in comment_list:
+            # TODO: ugly n^2
+            c.sons = [
+                    i for i in comment_list \
+                    if i.path.startswith(c.path) and i.level == c.level+1
+                ]
+        return comment_list
 
 class Comment(models.Model):
     # what is this comment for
@@ -63,7 +70,7 @@ class Comment(models.Model):
 
     # tree structure
     parent = models.ForeignKey('self', verbose_name=_('tree structure parent'), blank=True, null=True)
-    path = models.CharField(_('genealogy tree path'), maxlength=defaults.PATH_LENGTH, blank=True, editable=True)
+    path = models.CharField(_('genealogy tree path'), maxlength=defaults.PATH_LENGTH, blank=True, editable=False)
 
     # author if is authorized
     user = models.ForeignKey(User, verbose_name=_('authorized author'), blank=True, null=True)

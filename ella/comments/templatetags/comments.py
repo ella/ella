@@ -172,17 +172,9 @@ class CommentListNode(template.Node):
     def render(self, context):
         obj = resolve_object(context, self.object)
         comment_list = Comment.objects.get_list_for_object(obj, order_by=self.orderby)
-        context[self.varname] = self.comment_list_helper(comment_list)
+        context[self.varname] = comment_list
         return ''
 
-    def comment_list_helper(self, comment_list):
-        for c in comment_list:
-            # TODO: ugly n^2
-            c.sons = [
-                    i for i in comment_list \
-                    if i.path.startswith(c.path) and i.level == c.level+1
-                ]
-        return comment_list
 
 class CommentCountNode(template.Node):
     def __init__(self, object, varname):
