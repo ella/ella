@@ -129,8 +129,19 @@ class Question(models.Model):
             self._form = QuestionForm(self)()
         return self._form
 
+    def is_test(self):
+        if not hasattr(self, '_is_test'):
+            for ch in self.choices:
+                if ch.points == 0:
+                    self._is_test = True
+                    break
+            else:
+                self._is_test = False
+        return self._is_test
+
     @property
     def choices(self):
+        # FIXME - cache this, it is a queryset because of ModelChoiceField
         return self.choice_set.all()
         #return get_cached_list(Choice, question=self)
 
