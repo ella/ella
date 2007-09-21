@@ -131,6 +131,7 @@ class Comment(models.Model):
         return u"unsaved comment"
 
     class Meta:
+        ordering = ('-path',)
         verbose_name = _('Comment')
         verbose_name_plural = _('Comments')
 
