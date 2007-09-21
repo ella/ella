@@ -1,4 +1,5 @@
 from django.contrib.syndication.feeds import Feed
+from django.contrib.contenttypes.models import ContentType
 from django.utils.feedgenerator import Atom1Feed
 from django.utils.translation import ugettext_lazy as _
 from django.http import Http404
@@ -36,6 +37,10 @@ class RSSTopCategoryListings(Feed):
         else:
             obj = get_cached_object(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
             return _('Top %d objects in category %s.') % (NUM_IN_FEED, obj.title)
+
+    def item_guid(self, obj):
+        ct = ContentType.objects.get_for_model(obj)
+        return str((obj._get_pk_val()<<9) + ct.id)
 
     def items(self, obj):
         kwa = {}
