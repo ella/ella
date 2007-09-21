@@ -211,7 +211,7 @@ class ContestantForm(forms.Form):
     phonenumber = Contestant._meta.get_field('phonenumber').formfield()
     address = Contestant._meta.get_field('address').formfield()
     count_guess = Contestant._meta.get_field('count_guess').formfield()
-    accept_conditions = forms.BooleanField()
+    #accept_conditions = forms.BooleanField()
 
     def clean(self):
         # TODO - antispam
