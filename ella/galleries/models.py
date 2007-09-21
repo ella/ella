@@ -69,6 +69,10 @@ class Gallery(models.Model):
     def items(self):
         return [ (item, item.target) for item in self.galleryitem_set.all() ]
 
+    def get_photo(self):
+        # FIXME - go for the first actual photo, not just first item !
+        return self.items[0][1]
+
 
 
 class GalleryItem(models.Model):
