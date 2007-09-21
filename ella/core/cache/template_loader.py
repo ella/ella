@@ -6,7 +6,7 @@ from ella.core.cache.utils import cache_this
 template_source_loaders = None
 
 def get_key(func, template_name, template_dirs=None):
-    return 'ella.core.cache.teplate_loader:' + template_name
+    return 'ella.core.cache.teplate_loader:%d:%s' % (settings.SITE_ID, template_name,)
 
 def get_test(template_name, template_dirs=None):
     from ella.db_templates.models import DbTemplate
