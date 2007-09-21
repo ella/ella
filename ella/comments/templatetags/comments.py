@@ -179,8 +179,20 @@ class CommentListNode(template.Node):
             'is_public' : True,
 }
         comment_list = Comment.objects.filter(**kw).order_by(self.orderby)
-        context[self.varname] = comment_list
+        context[self.varname] = self.comment_list_helper(comment_list)
         return ''
+
+    def comment_list_helper(self, comment_list):
+        for c in comment_list:
+            # TODO: '/' should be some default value
+            c.level = len(c.path.split('/'))
+        for c in comment_list:
+            # TODO: ugly n^2
+            c.sons = [
+                    i for i in comment_list \
+                    if i.path.startswith(c.path) and i.level == c.level+1
+                ]
+        return comment_list
 
 class CommentCountNode(template.Node):
     def __init__(self, object, varname):
@@ -194,9 +206,13 @@ class CommentCountNode(template.Node):
         return ''
 
 
+def print_comment(comment):
+    return {'comment': comment}
+
 
 register = template.Library()
 register.tag('get_comment_form', get_comment_form)
 register.tag('get_comment_list', get_comment_list)
 register.tag('get_comment_count', get_comment_count)
+register.inclusion_tag('inclusion_tags/print_comment.html')(print_comment)
 
