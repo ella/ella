@@ -5,7 +5,6 @@ from django.contrib import admin
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.sites.managers import CurrentSiteManager
 from django.contrib.sites.models import Site
 from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext_lazy as _
@@ -57,9 +56,6 @@ class Category(models.Model):
     tree_path = models.CharField(maxlength=255, editable=False)
     description = models.TextField(_("Category Description"), blank=True)
     site = models.ForeignKey(Site)
-
-    objects = CurrentSiteManager(field_name='site')
-    all_objects = models.Manager()
 
     @transaction.commit_on_success
     def save(self):
