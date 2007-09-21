@@ -153,7 +153,7 @@ class Listing(models.Model):
         obj = self.target
         category = get_cached_object(Category, pk=getattr(obj, 'category_id', self.category_id))
         if category.tree_parent_id:
-            return reverse(
+            url = reverse(
                     'object_detail',
                     kwargs={
                         'category' : category.tree_path,
@@ -165,7 +165,7 @@ class Listing(models.Model):
 }
 )
         else:
-            return reverse(
+            url = reverse(
                     'home_object_detail',
                     kwargs={
                         'year' : self.publish_from.year,
@@ -175,6 +175,10 @@ class Listing(models.Model):
                         'slug' : getattr(obj, 'slug', str(obj._get_pk_val())),
 }
 )
+        if category.site_id != settings.SITE_ID:
+            site = get_cached_object(Site, pk=category.site_id)
+            return 'http://' + site.domain + url
+        return url
 
     def save(self):
         # do not allow prioritizations without a priority_value
