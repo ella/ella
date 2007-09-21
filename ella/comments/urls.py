@@ -13,10 +13,10 @@ def comments_custom_urls(request, bits, context):
             comment_preview = CommentFormPreview(CommentForm)
             return comment_preview(request)
         elif bits[0] == slugify(_('new')):
-            return new_comment(request, context['object'])
+            return new_comment(request, context)
 
     if len(bits) == 0:
-        return list_comments(request, context['object'])
+        return list_comments(request, context)
 
     from django.http import Http404
     raise Http404

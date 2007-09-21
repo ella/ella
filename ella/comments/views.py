@@ -41,37 +41,36 @@ class CommentFormPreview(FormPreview):
             url = '/'
         return HttpResponseRedirect(url)
 
-
-
-def new_comment(request, object):
+def new_comment(request, context):
     """new comment"""
-    cat = get_cached_object_or_404(Category, pk=object.category_id)
-    opts = object._meta
-    templates = [
-        'comments/%s/%s.%s/%s_comment_add.html' % (cat.path, opts.app_label, opts.module_name, object.slug),
+    cat = context['category']
+    opts = context['object']._meta
+    templates = (
+        'page/category/%s/content_type/%s.%s/%s/comments/add.html' % (cat.path, opts.app_label, opts.module_name, context['category'].slug),
+        'page/category/%s/content_type%s.%s/comments/add.html' % (cat.path, opts.app_label, opts.module_name),
+        'page/category/%s/comments/add.html' % cat.path,
+        'page/comments/add.html',
+
+        'comments/%s/%s.%s/%s_comment_add.html' % (cat.path, opts.app_label, opts.module_name, context['category'].slug),
         'comments/%s/%s.%s/base_comment_add.html' % (cat.path, opts.app_label, opts.module_name),
         'comments/%s/base_comment_add.html' % cat.path,
         'comments/base_comment_add.html',
-    ]
-    context = {
-        'object': object,
-        'category': cat,
-}
+)
     return render_to_response(templates, context, context_instance=RequestContext(request))
 
-def list_comments(request, object):
-    cat = get_cached_object_or_404(Category, pk=object.category_id)
-    opts = object._meta
-    templates = [
-        'comments/%s/%s.%s/%s_comment_list.html' % (cat.path, opts.app_label, opts.module_name, object.slug),
+def list_comments(request, context):
+    cat = context['category']
+    opts = context['object']._meta
+    templates = (
+        'page/category/%s/content_type/%s.%s/%s/comments/list.html' % (cat.path, opts.app_label, opts.module_name, context['object'].slug),
+        'page/category/%s/content_type%s.%s/comments/list.html' % (cat.path, opts.app_label, opts.module_name),
+        'page/category/%s/comments/list.html' % cat.path,
+        'page/comments/list.html',
+
+        'comments/%s/%s.%s/%s_comment_list.html' % (cat.path, opts.app_label, opts.module_name, context['category'].slug),
         'comments/%s/%s.%s/base_comment_list.html' % (cat.path, opts.app_label, opts.module_name),
         'comments/%s/base_comment_list.html' % cat.path,
         'comments/base_comment_list.html',
-    ]
-    context = {
-        'object': object,
-        'category': cat,
-}
+)
     return render_to_response(templates, context, context_instance=RequestContext(request))
-
 
