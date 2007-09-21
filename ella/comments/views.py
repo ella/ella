@@ -62,9 +62,20 @@ def new_comment(request, context):
 def list_comments(request, context):
     cat = context['category']
     opts = context['object']._meta
+    comment_list = Comment.objects.get_list_for_object(context['object'])
+    if 'ids' in request.GET:
+        ids = set(request.GET.getlist('ids'))
+        new_comment_list = []
+        for c in comment_list:
+            if str(c.id) in ids:
+                new_comment_list.append(c)
+            elif '/' in c.path and c.path[0:c.path.find('/')] in ids:
+                new_comment_list.append(c)
+        comment_list = new_comment_list
+
     context.update({
             'comment_count' : Comment.objects.get_count_for_object(context['object']),
-            'comment_list' : Comment.objects.get_list_for_object(context['object']),
+            'comment_list' : comment_list,
 })
     templates = (
         'page/category/%s/content_type/%s.%s/%s/comments/list.html' % (cat.path, opts.app_label, opts.module_name, context['object'].slug),
