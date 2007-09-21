@@ -8,6 +8,7 @@ from ella.core.cache import get_cached_object, get_cached_list
 from ella.core.box import Box
 from ella.core.models import Category, Listing
 from ella.core.managers import RelatedManager
+from ella.photos.models import Photo
 
 class Contest(models.Model):
     """
@@ -21,6 +22,7 @@ class Contest(models.Model):
     text_results = models.TextField(_('Text with results'))
     active_from = models.DateTimeField(_('Active from'))
     active_till = models.DateTimeField(_('Active till'))
+    photo = models.ForeignKey(Photo)
 
     objects = RelatedManager()
 
@@ -65,6 +67,7 @@ class Quiz(models.Model):
     text_results = models.TextField(_('Text with results'))
     active_from = models.DateTimeField(_('Active from'))
     active_till = models.DateTimeField(_('Active till'))
+    photo = models.ForeignKey(Photo)
 
     objects = RelatedManager()
 
@@ -330,9 +333,15 @@ class ContestantOptions(admin.ModelAdmin):
     ordering = ('contest', 'datetime')
     list_display = ('name', 'surname', 'user', 'datetime', 'contest', 'choices')
 
+class ContestOptions(admin.ModelAdmin):
+    raw_id_fields = ('photo',)
+
+class QuizOptions(admin.ModelAdmin):
+    raw_id_fields = ('photo',)
+
 admin.site.register(Poll)
-admin.site.register(Contest)
-admin.site.register(Quiz)
+admin.site.register(Contest, ContestOptions)
+admin.site.register(Quiz, QuizOptions)
 admin.site.register(Question, QuestionOptions)
 admin.site.register(Choice, ChoiceOptions)
 admin.site.register(Vote, VoteOptions)
