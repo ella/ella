@@ -170,22 +170,12 @@ class CommentListNode(template.Node):
         self.varname = varname
 
     def render(self, context):
-        object = resolve_object(context, self.object)
-        target_ct = ContentType.objects.get_for_model(object)
-        target_id = object.id
-        kw = {
-            'target_ct': target_ct,
-            'target_id': target_id,
-            'is_public' : True,
-}
-        comment_list = Comment.objects.filter(**kw).order_by(self.orderby)
+        obj = resolve_object(context, self.object)
+        comment_list = Comment.objects.get_list_for_object(obj, order_by=self.orderby)
         context[self.varname] = self.comment_list_helper(comment_list)
         return ''
 
     def comment_list_helper(self, comment_list):
-        for c in comment_list:
-            # TODO: '/' should be some default value
-            c.level = len(c.path.split('/'))
         for c in comment_list:
             # TODO: ugly n^2
             c.sons = [

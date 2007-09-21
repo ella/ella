@@ -8,6 +8,8 @@ from django.template import RequestContext
 
 from ella.core.cache import get_cached_object_or_404
 from ella.core.models import Category
+from ella.comments.models import Comment
+from ella.comments.forms import CommentForm
 
 class CommentFormPreview(FormPreview):
     """
@@ -22,7 +24,6 @@ class CommentFormPreview(FormPreview):
         self.context = context
 
     def done(self, request, cleaned_data):
-        from ella.comments.forms import CommentForm
         if 'HTTP_X_FORWARDED_FOR' in request.META:
             ip = request.META['HTTP_X_FORWARDED_FOR']
         else:
@@ -61,6 +62,10 @@ def new_comment(request, context):
 def list_comments(request, context):
     cat = context['category']
     opts = context['object']._meta
+    context.update({
+            'comment_count' : Comment.objects.get_count_for_object(context['object']),
+            'comment_list' : Comment.objects.get_list_for_object(context['object']),
+})
     templates = (
         'page/category/%s/content_type/%s.%s/%s/comments/list.html' % (cat.path, opts.app_label, opts.module_name, context['object'].slug),
         'page/category/%s/content_type%s.%s/comments/list.html' % (cat.path, opts.app_label, opts.module_name),
