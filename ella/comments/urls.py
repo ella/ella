@@ -8,6 +8,10 @@ def comments_custom_urls(request, bits, context):
     from ella.comments.views import CommentFormPreview, new_comment, list_comments
     from ella.comments.forms import CommentForm
 
+    if len(bits) == 2:
+        if bits[0] == slugify(_('reply')) and bits[1].isdigit():
+            return new_comment(request, context, reply=int(bits[1]))
+
     if len(bits) == 1:
         if bits[0] == slugify(_('preview')):
             comment_preview = CommentFormPreview(CommentForm)

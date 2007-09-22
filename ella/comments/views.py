@@ -10,6 +10,7 @@ from ella.core.cache import get_cached_object_or_404
 from ella.core.models import Category
 from ella.comments.models import Comment
 from ella.comments.forms import CommentForm
+from ella.comments.defaults import PARENT_NAME
 
 class CommentFormPreview(FormPreview):
     """
@@ -17,8 +18,8 @@ class CommentFormPreview(FormPreview):
     CommentFormPreview pri registrovanem uzivateli jej prihlasi a nezobrazi jeho heslo
     CommentFormPreview zobrazi captchu
     """
-    preview_template = 'comments/base_preview_template.html'
-    form_template = 'comments/base_preview_form_template.html'
+    preview_template = ('page/comments/preview.html', 'comments/base_preview_template.html',)
+    form_template = ('page/comments/form.html', 'comments/base_preview_form_template.html',)
 
     def parse_params(self, context={}):
         self.context = context
@@ -42,15 +43,27 @@ class CommentFormPreview(FormPreview):
             url = '/'
         return HttpResponseRedirect(url)
 
-def new_comment(request, context):
+def new_comment(request, context, reply=None):
     """new comment"""
     cat = context['category']
     opts = context['object']._meta
+    init_props = {
+        'target': '%d:%d' % (context['content_type'].id, context['object']._get_pk_val()),
+        'options' : 'UN', # WTF??
+}
+    if reply:
+        init_props[PARENT_NAME] = reply
+        context.update({
+                'reply' : True,
+                'parent' : get_cached_object_or_404(Comment, pk=reply, target_ct=context['content_type'], target_id=context['object']._get_pk_val()),
+})
+    form = CommentForm(init_props=init_props)
+    context['form'] = form
     templates = (
-        'page/category/%s/content_type/%s.%s/%s/comments/add.html' % (cat.path, opts.app_label, opts.module_name, context['category'].slug),
-        'page/category/%s/content_type%s.%s/comments/add.html' % (cat.path, opts.app_label, opts.module_name),
-        'page/category/%s/comments/add.html' % cat.path,
-        'page/comments/add.html',
+        'page/category/%s/content_type/%s.%s/%s/comments/form.html' % (cat.path, opts.app_label, opts.module_name, context['category'].slug),
+        'page/category/%s/content_type%s.%s/comments/form.html' % (cat.path, opts.app_label, opts.module_name),
+        'page/category/%s/comments/form.html' % cat.path,
+        'page/comments/form.html',
 
         'comments/%s/%s.%s/%s_comment_add.html' % (cat.path, opts.app_label, opts.module_name, context['category'].slug),
         'comments/%s/%s.%s/base_comment_add.html' % (cat.path, opts.app_label, opts.module_name),

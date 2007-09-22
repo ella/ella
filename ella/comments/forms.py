@@ -204,6 +204,13 @@ class CommentForm(forms.Form):
         except models.ObjectDoesNotExist:
             raise ValidationError, ugettext("Target object does not exist.")
 
+        parent = self.cleaned_data[PARENT_NAME]
+        if parent:
+            try:
+                self.cleaned_data[PARENT_NAME] = get_cached_object(Comment, pk=parent, target_ct=target_ct, target_id=target_id)
+            except models.ObjectDoesNotExist:
+                raise ValidationError, ugettext("You are responding to a non-existent comment.")
+
         return self.cleaned_data
 
 
