@@ -99,12 +99,16 @@ class HitCountManager(models.Manager):
     def hit(self, obj):
         # TODO FIXME: optimizations and thread safety
         target_ct = ContentType.objects.get_for_model(obj)
-        hc, created = self.get_or_create(target_ct=target_ct, target_id=obj._get_pk_val())
-        if not created:
+        try:
+            hc = self.get(target_ct=target_ct, target_id=obj._get_pk_val(), site__id=settings.SITE_ID)
             hc.hits += 1
-        hc.save()
+        except models.ObjectDoesNotExist:
+            from ella.core.models import HitCount
+            hc = HitCount(target_ct=target_ct, target_id=obj._get_pk_val())
+            hc.site_id = settings.SITE_ID
+            hc.save()
 
-    @cache_this(method_key_getter, test_hitcount)
+    @cache_this(method_key_getter, test_hitcount, timeout=10*60)
     def get_top_objects(self, count, mods=[]):
         """
         Return count top rated objects. Cache this for 10 minutes without any chance of cache invalidation.
