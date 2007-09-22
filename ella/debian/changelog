@@ -1,3 +1,9 @@
+centrum-ella (0.0.16) unstable; urgency=low
+
+  * ella version compatible for old zdravi and new zena
+
+ -- root <root@test-repo>  Sat, 22 Sep 2007 03:32:55 +0200
+
 centrum-ella (0.0.15) unstable; urgency=low
 
   * db templates, slugs
