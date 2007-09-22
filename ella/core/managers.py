@@ -112,7 +112,7 @@ class HitCountManager(models.Manager):
         kwa = {}
         if mods:
             kwa['target_ct__in'] = [ ContentType.objects.get_for_model(m) for m in mods ]
-        return self.filter(**kwa)[:count]
+        return self.filter(site__id=settings.SITE_ID, **kwa)[:count]
 
 class DependencyManager(RelatedManager):
     def report_dependency(self, source, source_key, target, target_key):
