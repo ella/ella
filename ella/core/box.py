@@ -85,7 +85,7 @@ class Box(object):
         rend = cache.get(key)
         if rend is None:
             rend = self._render()
-            cache.set(key, rend, 30)
+            cache.set(key, rend, 20*60)
             for model, test in self.get_cache_tests():
                 CACHE_DELETER.register(model, test, key)
         return rend
