@@ -9,12 +9,15 @@ from django.template.defaultfilters import slugify
 
 from ella.core.box import Box
 from ella.core.models import Category, Author, Category, Listing
-from ella.core.cache.utils import get_cached_object, cache_this, method_key_getter
+from ella.core.cache.utils import get_cached_object, cache_this
 
 
 def gallery_test_builder(*args, **kwargs):
     gallery = args[0]
     return [ (Gallery, lambda x: x == gallery), (GalleryItem, lambda x: x.gallery == gallery) ]
+
+def get_gallery_key(func, gallery):
+    return 'ella.galleries.models.Gallery(%d).items' % gallery.id
 
 class Gallery(models.Model):
     """
@@ -65,7 +68,7 @@ class Gallery(models.Model):
         return u'%s gallery' % self.title
 
     @property
-    @cache_this(method_key_getter, gallery_test_builder)
+    @cache_this(get_gallery_key, gallery_test_builder)
     def items(self):
         return [ (item, item.target) for item in self.galleryitem_set.all() ]
 
