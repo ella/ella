@@ -85,7 +85,7 @@ class Quiz(models.Model):
 
     @property
     def questions(self):
-        return get_cached_list(Question, contest=self)
+        return get_cached_list(Question, quiz=self)
 
     def get_absolute_url(self):
         listing = self.main_listing
