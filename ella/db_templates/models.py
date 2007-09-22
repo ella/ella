@@ -1,7 +1,6 @@
 from django.db import models, transaction
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.sites.managers import CurrentSiteManager
 from django.contrib.sites.models import Site
 
 from ella.core.cache import get_cached_object
@@ -31,8 +30,6 @@ class DbTemplate(models.Model):
             text += '{% endblock %}'
         return text
 
-
-    objects = CurrentSiteManager()
     class Meta:
         ordering = ('name',)
 

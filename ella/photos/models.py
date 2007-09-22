@@ -10,7 +10,6 @@ from django.conf import settings
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
-from django.contrib.sites.managers import CurrentSiteManager
 
 from ella.core.models import Author, Source, Category, Listing
 from ella.core.managers import RelatedManager
@@ -150,8 +149,6 @@ class Format(models.Model):
     stretch = models.BooleanField(_('Stretch'))
     resample_quality = models.IntegerField(_('Resample quality'), choices=PHOTOS_FORMAT_QUALITY, default=85)
     site = models.ForeignKey(Site)
-
-    objects = CurrentSiteManager()
 
     def get_blank_img(self):
         """
