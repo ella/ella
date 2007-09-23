@@ -289,6 +289,11 @@ def export(request, count, models=None):
     return render_to_response('export_banner.html', {'category' : cat, 'listing' : listing}, context_instance=RequestContext(request))
 
 def page_not_found(request):
-    return render_to_response('page/404.html', {}, context_instance=RequestContext(request))
+    response = render_to_response('page/404.html', {}, context_instance=RequestContext(request))
+    response.status_code = 404
+    return response
+
 def handle_error(request):
-    return render_to_response('page/500.html', {}, context_instance=RequestContext(request))
+    response = render_to_response('page/500.html', {}, context_instance=RequestContext(request))
+    response.status_code = 500
+    return response
