@@ -272,6 +272,7 @@ class Contestant(models.Model):
     class Meta:
         verbose_name = _('Contestant')
         verbose_name_plural = _('Contestants')
+        unique_together = (('contest', 'email',),)
         ordering = ('-datetime',)
 
 class Result(models.Model):

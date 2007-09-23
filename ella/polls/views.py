@@ -144,7 +144,7 @@ def contest_vote(request, context):
         forms_are_valid = False
     # saving contestant
     if forms_are_valid:
-        return contest_finish(request, contest, forms, contestant_form)
+        return contest_finish(request, context, forms, contestant_form)
     context.update({
             'forms' : forms,
             'contestant_form' : contestant_form
@@ -219,7 +219,24 @@ class ContestantForm(forms.Form):
 
 
 @transaction.commit_on_success
-def contest_finish(request, contest, qforms, contestant_form):
+def contest_finish(request, context, qforms, contestant_form):
+    contest = context['object']
+    email = contestant_form.cleaned_data['email']
+    if Contestant.objects.filter(email=email, contest=contest).count() > 0:
+        context.update({
+                'duplicate' : True,
+                'forms' : qforms,
+                'contestant_form' : contestant_form,
+})
+        return render_to_response((
+                    'page/category/%s/content_type/polls.contest/%s/form.html' % (context['category'].path, contest.slug),
+                    'page/category/%s/content_type/polls.contest/form.html' % context['category'].path,
+                    'page/content_type/polls.contest/form.html',
+),
+                context,
+                context_instance=RequestContext(request)
+)
+
     choices = '|'.join(
             '%d:%s' % (
                     question.id,
@@ -290,7 +307,8 @@ class ContestWizard(Wizard):
             self.extra_context['question'] = self.contest.questions[step]
 
     def done(self, request, form_list):
-        return contest_finish(request, self.contest, zip(self.contest.questions, form_list[:-1]), form_list[-1])
+        # TODO get context somehow
+        return contest_finish(request, {'object' : self.contest, 'category' : self.contest.category}, zip(self.contest.questions, form_list[:-1]), form_list[-1])
 
 RESULT_FIELD = 'results'
 class QuizWizard(Wizard):
