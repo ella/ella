@@ -147,6 +147,7 @@ class Format(models.Model):
 )
     flexible_max_height = models.PositiveIntegerField(_('Flexible max height'), blank=True, null=True)
     stretch = models.BooleanField(_('Stretch'))
+    nocrop = models.BooleanField(_('Do not crop'))
     resample_quality = models.IntegerField(_('Resample quality'), choices=PHOTOS_FORMAT_QUALITY, default=85)
     site = models.ForeignKey(Site)
 
@@ -258,7 +259,7 @@ class FormatedPhoto(models.Model):
         if self.crop_width < self.format.max_width and self.crop_height < self.format.max_height:
             if self.format.stretch:
                 # resize image to fit format
-                if auto:
+                if auto and not self.format.nocrop:
                     if my_ratio > format_ratio:
                         diff = self.photo.width - (fmt_width * self.photo.height / fmt_height)
                         self.crop_left = diff / 2
@@ -279,7 +280,7 @@ class FormatedPhoto(models.Model):
         # crop image to fit
         elif self.crop_width > self.format.max_width or self.crop_height > self.format.max_height:
             flex = False
-            if auto:
+            if auto and not self.format.nocrop:
                 # crop the image to conform to the format ration
                 if my_ratio < format_ratio and self.format.flexible_height:
                         format_ratio2 = float(fmt_width) / self.format.flexible_max_height
