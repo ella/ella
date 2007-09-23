@@ -76,7 +76,7 @@ class Box(object):
         test_list = [ (self.obj.__class__, lambda x: x._get_pk_val() == self.obj._get_pk_val()) ]
         if DbTemplate._meta.installed:
             test_list.extend(
-                [ (DbTemplate, lambda x: x.name == t.name) for t in self._get_template_list() ]
+                [ (DbTemplate, lambda x: x.name == t) for t in self._get_template_list() ]
 )
         return test_list
 

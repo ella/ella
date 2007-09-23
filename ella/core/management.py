@@ -54,7 +54,12 @@ def drop_redirects(instance):
     If an object is deleted, delete all its redirects.
     """
     if hasattr(instance, 'get_absolute_url'):
-        Redirect.objects.filter(new_path=instance.get_absolute_url()).delete()
+        try:
+            Redirect.objects.filter(new_path=instance.get_absolute_url()).delete()
+        except:
+            # if something goes wrong with the object, not catching the exception here
+            # will cause the save() to fail, thus preventing anybody from correcting the error
+            pass
 
 dispatcher.connect(record_url, signal=signals.pre_save)
 dispatcher.connect(check_url, signal=signals.post_save)
