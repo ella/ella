@@ -309,7 +309,6 @@ class Dependency(models.Model):
         ordering = ('source_ct', 'source_id',)
 
 class ListingOptions(admin.ModelAdmin):
-    raw_id_fields = ('target_id',)
     list_display = ('target', 'category', 'publish_from',)
     list_filter = ('publish_from', 'category', 'target_ct',)
     def formfield_for_dbfield(self, db_field, **kwargs):
@@ -321,7 +320,6 @@ class ListingOptions(admin.ModelAdmin):
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 class DependencyOptions(admin.ModelAdmin):
-    raw_id_fields = ('target_id', 'source_id',)
     def formfield_for_dbfield(self, db_field, **kwargs):
         from ella.core import widgets
         if db_field.name == 'target_ct':
