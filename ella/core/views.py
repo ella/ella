@@ -90,8 +90,8 @@ def object_detail(request, category, year, month, day, content_type, slug, url_r
     return render_to_response(
             (
                 # NEW
-                'page/category/%s/%s.%s/%s/object.html' % (cat.path, ct.app_label, ct.model, slug),
-                'page/category/%s/%s.%s/object.html' % (cat.path, ct.app_label, ct.model),
+                'page/category/%s/content_type/%s.%s/%s/object.html' % (cat.path, ct.app_label, ct.model, slug),
+                'page/category/%s/content_type/%s.%s/object.html' % (cat.path, ct.app_label, ct.model),
                 'page/category/%s/object.html' % (cat.path),
                 'page/content_type/%s.%s/object.html' % (ct.app_label, ct.model),
                 'page/object.html',
@@ -174,22 +174,23 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
     listings = Listing.objects.get_listing(**kwa)
 
     template_list = []
-    if cat and ct:
+    if ct:
         # NEW
-        template_list.append('page/category/%s/%s.%s/listing.html' % (cat.path, ct.app_label, ct.model))
-
+        template_list.append('page/category/%s/content_type/%s.%s/listing.html' % (cat.path, ct.app_label, ct.model))
         # OLD
         template_list.append('category/%s/%s.%s/list.html' % (cat.path, ct.app_label, ct.model))
-    if cat:
-        # NEW
-        template_list.append('page/category/%s/listing.html' % (cat.path))
+    # NEW
+    template_list.append('page/category/%s/listing.html' % (cat.path))
 
-        # OLD
-        template_list.append('category/%s/base_list.html' % (cat.path))
+    if ct:
+        # NEW
+        template_list.append('page/content_type/%s.%s/listing.html' % (cat.path, ct.app_label, ct.model))
+
     # NEW
     template_list.append('page/listing.html')
 
     # OLD
+    template_list.append('category/%s/base_list.html' % (cat.path))
     template_list.append('core/base_list.html')
 
     return render_to_response(template_list, {
