@@ -1,3 +1,9 @@
+centrum-ella (0.0.17) unstable; urgency=low
+
+  * minor updates
+
+ -- root <root@test-repo>  Mon, 24 Sep 2007 04:44:04 +0200
+
 centrum-ella (0.0.16) unstable; urgency=low
 
   * ella version compatible for old zdravi and new zena
