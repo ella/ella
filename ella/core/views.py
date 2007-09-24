@@ -184,7 +184,7 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
 
     if ct:
         # NEW
-        template_list.append('page/content_type/%s.%s/listing.html' % (cat.path, ct.app_label, ct.model))
+        template_list.append('page/content_type/%s.%s/listing.html' % (ct.app_label, ct.model))
 
     # NEW
     template_list.append('page/listing.html')
