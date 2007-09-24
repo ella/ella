@@ -93,7 +93,7 @@ class Quiz(models.Model):
             return listing.get_absolute_url()
 
     def get_result(self, points):
-        return get_cached_object(Result, quiz=self, points_from__lte=points, points_to__gt=points)
+        return get_cached_object(Result, quiz=self, points_from__lte=points, points_to__gte=points)
 
     def __unicode__(self):
         return self.title
