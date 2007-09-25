@@ -1,3 +1,9 @@
+centrum-ella (0.0.18-2) unstable; urgency=low
+
+  * cache for comments disabled
+
+ -- root <root@test-repo>  Tue, 25 Sep 2007 12:07:48 +0200
+
 centrum-ella (0.0.18-1) unstable; urgency=low
 
   * hackin

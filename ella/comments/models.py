@@ -37,12 +37,12 @@ def get_test_builder(object_order):
     return test_for_comment
 
 class CommentManager(models.Manager):
-    @cache_this(method_key_getter, get_test_builder(1))
+#    @cache_this(method_key_getter, get_test_builder(1))
     def get_count_for_object(self, object):
         target_ct = ContentType.objects.get_for_model(object)
         return self.filter(target_ct=target_ct, target_id=object.id, is_public=True).count()
 
-    @cache_this(method_key_getter, get_test_builder(1))
+#    @cache_this(method_key_getter, get_test_builder(1))
     def get_list_for_object(self, object, order_by=None, **kwargs):
         target_ct = ContentType.objects.get_for_model(object)
         qset = self.filter(target_ct=target_ct, target_id=object._get_pk_val(), is_public=True, **kwargs)
