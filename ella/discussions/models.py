@@ -64,6 +64,7 @@ class Question(models.Model):
     class Meta:
         verbose_name = _('Question')
         verbose_name_plural = _('Questions')
+        unique_together = (('topic', 'slug',),)
         ordering = ('-created',)
 
 class QuestionOptions(admin.ModelAdmin):
