@@ -22,6 +22,13 @@ class InfoBox(models.Model):
         verbose_name = _('Info box')
         verbose_name_plural = _('Info boxes')
 
+class ArticleBox(Box):
+    def get_context(self):
+        cont = super(ArticleBox, self).get_context()
+        for var in ('redirect_id', 'idot'):
+            if var in self.params:
+                cont[var] = self.params[var]
+        return cont
 
 class Article(models.Model):
     # Titles
@@ -85,7 +92,7 @@ class Article(models.Model):
         return self._content
 
     def Box(self, box_type, nodelist):
-        return Box(self, box_type, nodelist)
+        return ArticleBox(self, box_type, nodelist)
 
     class Meta:
         verbose_name = _('Article')
