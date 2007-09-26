@@ -39,7 +39,7 @@ def check_url(instance):
         new_path = instance.get_absolute_url()
         old_path = getattr(instance, OLD_URL_NAME)
 
-        if old_path != new_path:
+        if old_path != new_path and new_path:
             redirect = Redirect(old_path=old_path, new_path=new_path)
             redirect.site_id = settings.SITE_ID
             redirect.save()
