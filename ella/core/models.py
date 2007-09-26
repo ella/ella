@@ -339,7 +339,7 @@ class CategoryOptions(admin.ModelAdmin):
 
 class HitCountOptions(admin.ModelAdmin):
     list_display = ('target', 'hits', 'last_seen',)
-    list_filter = ('last_seen',)
+    list_filter = ('last_seen', 'target_ct',)
 
 class AuthorOptions(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}

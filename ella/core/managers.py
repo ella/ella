@@ -106,7 +106,7 @@ class HitCountManager(models.Manager):
             from ella.core.models import HitCount
             hc = HitCount(target_ct=target_ct, target_id=obj._get_pk_val())
             hc.site_id = settings.SITE_ID
-            hc.save()
+        hc.save()
 
     @cache_this(method_key_getter, test_hitcount, timeout=10*60)
     def get_top_objects(self, count, mods=[]):
