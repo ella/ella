@@ -101,6 +101,7 @@ class HitCountManager(models.Manager):
         target_ct = ContentType.objects.get_for_model(obj)
         try:
             hc = self.get(target_ct=target_ct, target_id=obj._get_pk_val(), site__id=settings.SITE_ID)
+            hc.last_seen = datetime.now()
             hc.hits += 1
         except models.ObjectDoesNotExist:
             from ella.core.models import HitCount
