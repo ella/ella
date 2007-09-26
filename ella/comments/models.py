@@ -169,6 +169,7 @@ from django import VERSION
 from django.contrib import admin
 
 class CommentsOptions(admin.ModelAdmin):
+    raw_id_fields = ('parent',)
     list_display = ('subject', 'target', 'author', 'is_public', 'path',)
     search_fields = ('subject', 'content',)
 
