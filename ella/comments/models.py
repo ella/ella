@@ -131,11 +131,13 @@ class Comment(models.Model):
         # save it all
         super(Comment, self).save()
 
+    '''
     def __unicode__(self):
         if self.id:
             return u"comment [id:%d] '%s...' on %s {path:%s}" % (self.id, self.content[:10],
                     self.target_ct.get_object_for_this_type(pk=self.target_id), self.path)
         return u"unsaved comment"
+    '''
 
     class Meta:
         ordering = ('-path',)
@@ -172,6 +174,7 @@ class CommentsOptions(admin.ModelAdmin):
     raw_id_fields = ('parent',)
     list_display = ('subject', 'target', 'author', 'is_public', 'path',)
     search_fields = ('subject', 'content',)
+    raw_id_fields = ('parent',)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         from ella.core import widgets

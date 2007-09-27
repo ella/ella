@@ -170,7 +170,6 @@ class ArticleOptions(admin.ModelAdmin):
         (_("Article heading"), {'fields': ('title', 'upper_title', 'updated', 'slug')}),
         (_("Article contents"), {'fields': ('perex',)}),
         (_("Metadata"), {'fields': ('category', 'authors', 'source', 'photo')}),
-
 )
     raw_id_fields = ('photo',)
     list_filter = ('created', 'category', 'authors',)
