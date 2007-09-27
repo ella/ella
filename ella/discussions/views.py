@@ -65,20 +65,9 @@ def question(request, bits, context):
     context['object'] = question
     context['content_type'] = ContentType.objects.get_for_model(Question)
 
-    if (len(bits) >= 2) and (bits[1] == slugify(ugettext('comments'))):
-        from ella.comments.urls import comments_custom_urls
-        return  comments_custom_urls(request, bits[2:], context)
-
-    if len(bits) != 1:
-        raise http.Http404
-
-
-    return render_to_response(
-            (
-                'page/category/%s/discussions/%s/question.html' % (category.path, topic.slug,),
-                'page/category/%s/discussions/question.html' % (category.path,),
-                'page/discussions/question.html',
-),
-            context,
-            context_instance=RequestContext(request)
-)
+    if len(bits) > 1 and bits[1] == slugify(_('comments')):
+        new_bits = bits[2:]
+    else:
+        new_bits = bits[1:]
+    from ella.comments.urls import comments_custom_urls
+    return comments_custom_urls(request, new_bits, context)
