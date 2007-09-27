@@ -100,5 +100,10 @@ def ask_question(request, bits, context):
     from ella.discussions.views import ask_question as real_func
     return real_func(request, bits, context)
 
+def topic(request, context):
+    from ella.discussions.views import topic as real_func
+    return real_func(request, context)
+
 dispatcher.register(_('ask'), ask_question, model=Topic)
 dispatcher.register(_('question'), question, model=Topic)
+dispatcher.register_custom_detail(Topic, topic)
