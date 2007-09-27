@@ -3,9 +3,13 @@ from datetime import datetime
 from django.contrib.auth.models import User
 from django.db import models
 from django.contrib import admin
+from django.utils.translation import ugettext, ugettext_lazy as _
+from django.contrib.contenttypes.models import ContentType
 
 from ella.core.models import Listing, Category
+from ella.core.cache import get_cached_object
 from ella.photos.models import Photo
+from django.template.defaultfilters import slugify
 
 class Topic(models.Model):
     # ella fields
@@ -23,7 +27,6 @@ class Topic(models.Model):
 
     @property
     def main_listing(self):
-        from ella.core.cache import get_cached_object
         try:
             return get_cached_object(
                     Listing,
@@ -58,6 +61,10 @@ class Question(models.Model):
     created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)
     is_public = models.BooleanField(_('is public'), default=True)
 
+    def get_absolute_url(self):
+        top = get_cached_object(Topic, pk=self.topic_id)
+        return '%s%s/%s/' % (top.get_absolute_url(), slugify(ugettext('question')), self.slug)
+
     def __unicode__(self):
         return self.title
 
@@ -71,6 +78,7 @@ class QuestionOptions(admin.ModelAdmin):
     pass
 
 class TopicOptions(admin.ModelAdmin):
+    raw_id_fields = ('photo',)
     def formfield_for_dbfield(self, db_field, **kwargs):
         from ella.core import widgets
         from django import newforms as forms
@@ -83,3 +91,14 @@ class TopicOptions(admin.ModelAdmin):
 admin.site.register(Question, QuestionOptions)
 admin.site.register(Topic, TopicOptions)
 
+from ella.core.custom_urls import dispatcher
+
+def question(request, bits, context):
+    from ella.discussions.views import question as real_func
+    return real_func(request, bits, context)
+def ask_question(request, bits, context):
+    from ella.discussions.views import ask_question as real_func
+    return real_func(request, bits, context)
+
+dispatcher.register(_('ask'), ask_question, model=Topic)
+dispatcher.register(_('question'), question, model=Topic)
