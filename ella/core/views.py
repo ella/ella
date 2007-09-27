@@ -289,7 +289,11 @@ def export(request, count, models=None):
 
     cat = get_cached_object_or_404(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
     listing = Listing.objects.get_listing(count=count, category=cat, mods=models)
-    return render_to_response('export_banner.html', {'category' : cat, 'listing' : listing}, context_instance=RequestContext(request))
+    return render_to_response(
+            ('page/export_banner.html', 'export_banner.html',),
+            {'category' : cat, 'listing' : listing},
+            context_instance=RequestContext(request)
+)
 
 def page_not_found(request):
     response = render_to_response('page/404.html', {}, context_instance=RequestContext(request))
