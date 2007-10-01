@@ -358,14 +358,14 @@ class FormatedPhotoForm(forms.BaseForm):
 ):
             raise forms.ValidationError, ugettext("The specified crop coordinates do not fit into the source photo.")
 
-        my_ratio = float(data['crop_width']) / data['crop_height']
-        fmt = data['format']
-        if fmt.flexible_height:
-            fmt_ratios = float(fmt.max_width) / fmt.flexible_max_height, float(fmt.max_width) / fmt.max_height
-            if not(fmt_ratios[0] <= my_ratio <= fmt_ratios[1]):
-                raise forms.ValidationError, ugettext('The specified crop ratio does not agree with the defined format.')
-        elif my_ratio - (float(fmt.max_width) / fmt.max_height) > 0.01:
-            raise forms.ValidationError, ugettext('The specified crop ratio does not agree with the defined format.')
+        #my_ratio = float(data['crop_width']) / data['crop_height']
+        #fmt = data['format']
+        #if fmt.flexible_height:
+        #    fmt_ratios = float(fmt.max_width) / fmt.flexible_max_height, float(fmt.max_width) / fmt.max_height
+        #    if not(fmt_ratios[0] <= my_ratio <= fmt_ratios[1]):
+        #        raise forms.ValidationError, ugettext('The specified crop ratio does not agree with the defined format.')
+        #elif my_ratio - (float(fmt.max_width) / fmt.max_height) > 0.01:
+        #    raise forms.ValidationError, ugettext('The specified crop ratio does not agree with the defined format.')
 
         return data
 
