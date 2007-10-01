@@ -200,7 +200,10 @@ class Listing(models.Model):
         super(Listing, self).save()
 
     def __unicode__(self):
-        return u'%s listed in %s' % (self.target, self.category)
+        try:
+            return u'%s listed in %s' % (self.target, self.category)
+        except models.ObjectDoesNotExist:
+            return u'Broken listing in %s' % self.category
 
     @property
     def priority(self):
