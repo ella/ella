@@ -148,6 +148,13 @@ class ArticleContentInlineOptions(admin.TabularInline):
             kwargs['widget'] = widgets.RichTextAreaWidget
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
+from django.contrib.contenttypes import generic
+class ListingInlineOptions(admin.TabularInline):
+    model = Listing
+    extra = 2
+    fk_name = 'target_ct:target_id'
+    formset = generic.GenericInlineFormset
+
 class InfoBoxOptions(admin.ModelAdmin):
     list_display = ('title', 'created',)
     date_hierarchy = 'created'
@@ -166,7 +173,7 @@ class ArticleOptions(admin.ModelAdmin):
     list_display = ('title', 'category', 'created', 'article_age', 'full_url',)
     date_hierarchy = 'created'
     ordering = ('-created',)
-    fields = (
+    fieldsets = (
         (_("Article heading"), {'fields': ('title', 'upper_title', 'updated', 'slug')}),
         (_("Article contents"), {'fields': ('perex',)}),
         (_("Metadata"), {'fields': ('category', 'authors', 'source', 'photo')}),
@@ -174,7 +181,7 @@ class ArticleOptions(admin.ModelAdmin):
     raw_id_fields = ('photo',)
     list_filter = ('created', 'category', 'authors',)
     search_fields = ('title', 'perex',)
-    inlines = (ArticleContentInlineOptions,)
+    inlines = (ArticleContentInlineOptions, ListingInlineOptions,)
     prepopulated_fields = {'slug' : ('title',)}
 
     def formfield_for_dbfield(self, db_field, **kwargs):
