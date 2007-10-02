@@ -151,15 +151,21 @@ class Listing(models.Model):
 
     def get_absolute_url(self):
         obj = self.target
-        category = get_cached_object(Category, pk=getattr(obj, 'category_id', self.category_id))
+        if obj.category_id != self.category_id:
+            listing = obj.main_listing
+        else:
+            listing = self
+
+        category = get_cached_object(Category, pk=obj.category_id)
+
         if category.tree_parent_id:
             url = reverse(
                     'object_detail',
                     kwargs={
                         'category' : category.tree_path,
-                        'year' : self.publish_from.year,
-                        'month' : self.publish_from.month,
-                        'day' : self.publish_from.day,
+                        'year' : listing.publish_from.year,
+                        'month' : listing.publish_from.month,
+                        'day' : listing.publish_from.day,
                         'content_type' : slugify(obj._meta.verbose_name_plural),
                         'slug' : getattr(obj, 'slug', str(obj._get_pk_val())),
 }
@@ -168,9 +174,9 @@ class Listing(models.Model):
             url = reverse(
                     'home_object_detail',
                     kwargs={
-                        'year' : self.publish_from.year,
-                        'month' : self.publish_from.month,
-                        'day' : self.publish_from.day,
+                        'year' : listing.publish_from.year,
+                        'month' : listing.publish_from.month,
+                        'day' : listing.publish_from.day,
                         'content_type' : slugify(obj._meta.verbose_name_plural),
                         'slug' : getattr(obj, 'slug', str(obj._get_pk_val())),
 }
