@@ -5,7 +5,7 @@ from django.contrib import admin
 from django.utils import simplejson
 
 REG_CT_LIST = [ ContentType.objects.get_for_model(i) for i in admin.site._registry ]
-REG_CT_DICT = dict([ (i.id, '%s/%s' % (i.app_label, i.model)) for i in REG_CT_LIST ])
+REG_CT_DICT = dict([ (i.id, {'name': i.name, 'path': '%s.%s' % (i.app_label, i.model)}) for i in REG_CT_LIST ])
 REG_CT_JSON = simplejson.dumps(REG_CT_DICT, indent=2)
 
 register = template.Library()

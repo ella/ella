@@ -1,0 +1,61 @@
+#boxWrapper {
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 100;
+	width: 100%;
+	background: #000;
+	opacity: 0;
+}
+
+#boxPane {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	z-index: 200;
+	background: #ffb;
+	width: 400px;
+	height: 330px;
+	margin: -165px 0 0 -200px;
+	padding: 10px;
+	text-align: left;
+	border: 1px solid #999;
+	opacity: 0;
+}
+
+#boxPane a#boxPaneClose {
+	display: block;
+	float: right;
+	color: #333;
+	text-decoration: none;
+	border: 1px solid #ccc;
+	padding: 1px 3px;
+}
+#boxPane a#boxPaneClose:hover { border-color: #777; }
+
+#boxPane div.title { color: #555; font-size: .85em; }
+#boxPane div.input { margin-bottom: 10px; }
+#boxPane div.input input,
+#boxPane div.input select,
+#boxPane div.input textarea { width: 99%; }
+#boxPane div.input textarea { height: 65px; }
+#boxPane div#quick { font-size: .95em; }
+#boxPane div#quick a { margin-right: 10px; }
+#boxPane input#id { width: 360px; }
+#boxPane input#search { width: 20px; height: 20px; background: #fff url(/static/admin_media/img/admin/selector-search.gif) no-repeat 50% 50%; border: 1px solid #ccc; }
+#boxPane #submit { text-align: right; float: right; }
+#boxPane #submit input { width: 100px; height: 25px; }
+
+div.box-object {
+	width: 150px;
+	background: #ff80ff;
+	border: 1px solid #ccc;
+	font-weight: bold;
+	margin: 2px;
+	text-align: center;
+	padding: 50px 0;
+	font-size: 2em;
+	color: #fff;
+	cursor: pointer;
+	float: right;
+}

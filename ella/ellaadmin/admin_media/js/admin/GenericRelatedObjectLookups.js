@@ -1,7 +1,6 @@
 /* File editor.js
  * Author: Maxim Izmaylov [izmaylov.maxim@netcentrum.cz]
- * © 2007 NetCentrum s.r.o.
- * Powered with jQuery javascript library
+ * Copyright: NetCentrum @2007
  * Requirements: jquery.js
  */
 
@@ -25,7 +24,7 @@ $(function(){
 			var num = this.alt;
 			if(selects[num].selectedIndex > 0){
 				var name = this.id.replace(/^lookup_/, '').replace(/\./g, '___');
-				var path = paths[selects[num].value];
+				var path = adminapps[selects[num].value].path.replace('.', '/');
 				var addr = '../../../' + path + '/?pop=1';
 				var win = window.open(addr, name, 'height=500,width=800,resizable=yes,scrollbars=yes');
 				win.focus();

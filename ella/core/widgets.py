@@ -8,6 +8,7 @@ JS_SHOWDOWN = 'js/showdown.js'
 JS_MAGICDOM = 'js/MagicDOM.js'
 
 CLASS_RICHTEXTAREA = 'rich_text_area'
+CSS_RICHTEXTAREA = 'css/pokus.css'
 
 JS_GENERIC_LOOKUP = 'js/admin/GenericRelatedObjectLookups.js'
 JS_JQUERY = 'js/jquery.js'
@@ -31,7 +32,7 @@ class ForeignKeyRawIdWidget(forms.TextInput):
 class RichTextAreaWidget(forms.Textarea):
     class Media:
         js = (
-            settings.ADMIN_MEDIA_PREFIX + JS_PROTOTYPE,
+            settings.ADMIN_MEDIA_PREFIX + JS_JQUERY,
             settings.ADMIN_MEDIA_PREFIX + JS_EDITOR,
             settings.ADMIN_MEDIA_PREFIX + JS_SHOWDOWN,
             settings.ADMIN_MEDIA_PREFIX + JS_MAGICDOM,
