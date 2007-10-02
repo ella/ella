@@ -1,3 +1,9 @@
+centrum-ella (0.0.18-4) unstable; urgency=low
+
+  * minor model updates in listing, photos
+
+ -- root <root@test-repo>  Mon,  1 Oct 2007 11:16:49 +0200
+
 centrum-ella (0.0.18-3) unstable; urgency=low
 
   * some admin opts, hitcounts ready, ..
