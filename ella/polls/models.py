@@ -43,6 +43,9 @@ class Contest(models.Model):
         if listing:
             return listing.get_absolute_url()
 
+    def get_photo(self):
+        return get_cached_object(Photo, pk=self.photo_id)
+
     @property
     def questions(self):
         return get_cached_list(Question, contest=self)
@@ -91,6 +94,9 @@ class Quiz(models.Model):
         listing = self.main_listing
         if listing:
             return listing.get_absolute_url()
+
+    def get_photo(self):
+        return get_cached_object(Photo, pk=self.photo_id)
 
     def get_result(self, points):
         return get_cached_object(Result, quiz=self, points_from__lte=points, points_to__gte=points)
