@@ -284,7 +284,7 @@ class Result(models.Model):
     text = models.TextField(_('Quiz results text'))
     points_from = models.IntegerField(_('Points dimension from'), null=True)
     points_to = models.IntegerField(_('Points dimension to'), null=True)
-    count = models.IntegerField(_('Points count'), default=0, blank=True)
+    count = models.IntegerField(_('Count'), default=0, blank=True)
 
     def total(self):
         res = get_cached_list(Result, quiz=self.quiz)
@@ -294,7 +294,9 @@ class Result(models.Model):
         return self.count*100/self.total()
 
     def __unicode__(self):
-        return self.title
+        if self.title:
+            return self.title
+        return u'%s (%d - %d)' % (self.quiz, self.points_from, self.points_to)
 
     class Meta:
         verbose_name = _('Result')
@@ -340,6 +342,9 @@ class ContestOptions(admin.ModelAdmin):
 class QuizOptions(admin.ModelAdmin):
     raw_id_fields = ('photo',)
 
+class ResultOptions(admin.ModelAdmin):
+    list_display = ('quiz', 'points_from', 'points_to', 'count',)
+
 admin.site.register(Poll)
 admin.site.register(Contest, ContestOptions)
 admin.site.register(Quiz, QuizOptions)
@@ -347,7 +352,7 @@ admin.site.register(Question, QuestionOptions)
 admin.site.register(Choice, ChoiceOptions)
 admin.site.register(Vote, VoteOptions)
 admin.site.register(Contestant, ContestantOptions)
-admin.site.register(Result)
+admin.site.register(Result, ResultOptions)
 
 from ella.core.custom_urls import dispatcher
 

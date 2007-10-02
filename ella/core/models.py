@@ -323,6 +323,8 @@ class ListingOptions(admin.ModelAdmin):
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 class DependencyOptions(admin.ModelAdmin):
+    list_filter = ('source_ct', 'target_ct',)
+    list_display = ('source_ct', 'source', 'target_ct', 'target',)
     def formfield_for_dbfield(self, db_field, **kwargs):
         from ella.core import widgets
         if db_field.name == 'target_ct':
