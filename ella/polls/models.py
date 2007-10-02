@@ -342,10 +342,18 @@ class ContestantOptions(admin.ModelAdmin):
     ordering = ('contest', 'datetime')
     list_display = ('name', 'surname', 'user', 'datetime', 'contest', 'choices')
 
+from ella.core.models import ListingInlineOptions
+from tagging.models import TaggingInlineOptions
+
+class QuestionInlineOptions(admin.TabularInline):
+    model = Question
+
 class ContestOptions(admin.ModelAdmin):
+    inlines = (QuestionInlineOptions, ListingInlineOptions, TaggingInlineOptions,)
     raw_id_fields = ('photo',)
 
 class QuizOptions(admin.ModelAdmin):
+    inlines = (QuestionInlineOptions, ListingInlineOptions, TaggingInlineOptions,)
     raw_id_fields = ('photo',)
 
 class ResultOptions(admin.ModelAdmin):

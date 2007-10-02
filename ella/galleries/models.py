@@ -148,6 +148,8 @@ class GalleryItemTabularOptions(admin.TabularInline):
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 
+from ella.core.models import ListingInlineOptions
+from tagging.models import TaggingInlineOptions
 class GalleryOptions(admin.ModelAdmin):
     list_display = ('title', 'created', 'category', 'full_url',)
     ordering = ('-slug',)
@@ -157,7 +159,7 @@ class GalleryOptions(admin.ModelAdmin):
 )
     list_filter = ('created',)
     search_fields = ('title', 'description',)
-    inlines = (GalleryItemTabularOptions,)
+    inlines = (GalleryItemTabularOptions, ListingInlineOptions, TaggingInlineOptions,)
     prepopulated_fields = {'slug': ('title',)}
 
 

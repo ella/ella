@@ -374,7 +374,14 @@ from django.contrib import admin
 class FormatOptions(admin.ModelAdmin):
     list_display = ('name', 'max_width', 'max_height', 'stretch', 'resample_quality',)
 
+
+from tagging.models import TaggingInlineOptions
+
+class FormatedPhotoInlineOptions(admin.TabularInline):
+    model = FormatedPhoto
+
 class PhotoOptions(admin.ModelAdmin):
+    inlines = (FormatedPhotoInlineOptions, TaggingInlineOptions,)
     list_display = ('title', 'width', 'height', 'thumb') ## 'authors')
     list_filter = ('category', 'created',)
     prepopulated_fields = {'slug': ('title',)}

@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from django.contrib.contenttypes import generic
 
 from django.db import models, transaction
 from django.contrib import admin
@@ -316,6 +317,12 @@ class Dependency(models.Model):
         verbose_name = _('Dependency')
         verbose_name_plural = _('Dependencies')
         ordering = ('source_ct', 'source_id',)
+
+class ListingInlineOptions(admin.TabularInline):
+    model = Listing
+    extra = 2
+    fk_name = 'target_ct:target_id'
+    formset = generic.GenericInlineFormset
 
 class ListingOptions(admin.ModelAdmin):
     list_display = ('target', 'category', 'publish_from',)
