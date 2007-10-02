@@ -73,7 +73,7 @@ class TemplateBlock(models.Model):
 class TemplateBlockInlineOptions(admin.TabularInline):
     model = TemplateBlock
     extra = 3
-    fields = ((None, {'fields' : ('name', 'box_type', 'target_ct', 'target_id', 'text',)}),)
+    fieldsets = ((None, {'fields' : ('name', 'box_type', 'target_ct', 'target_id', 'text',)}),)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         from ella.core import widgets

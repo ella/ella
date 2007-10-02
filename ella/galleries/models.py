@@ -151,7 +151,7 @@ class GalleryItemTabularOptions(admin.TabularInline):
 class GalleryOptions(admin.ModelAdmin):
     list_display = ('title', 'created', 'category', 'full_url',)
     ordering = ('-slug',)
-    fields = (
+    fieldsets = (
         (_("Gallery heading"), {'fields': ('title', 'slug',)}),
         (_("Gallery metadata"), {'fields': ('description', 'owner', 'category')}),
 )
