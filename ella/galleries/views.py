@@ -50,6 +50,18 @@ def gallery_item_detail(request, context, item_slug=None):
         else:
             raise Http404
 
+    context['object'] = target
+
+    context.update({
+            'gallery': gallery,
+            'item': item,
+            'object' : target,
+            'item_list' : item_list,
+            'next' : next,
+            'previous' : previous,
+            'count' : count,
+            'position' : position,
+})
 
     return render_to_response(
                 [
@@ -57,16 +69,7 @@ def gallery_item_detail(request, context, item_slug=None):
                     'page/category/%s/galleries/item.html' % (category.path,),
                     'page/galleries/item.html',
                 ],
-                {
-                    'gallery': gallery,
-                    'item': item,
-                    'object' : target,
-                    'item_list' : item_list,
-                    'next' : next,
-                    'previous' : previous,
-                    'count' : count,
-                    'position' : position,
-},
+                context,
                 context_instance=RequestContext(request),
 )
 
