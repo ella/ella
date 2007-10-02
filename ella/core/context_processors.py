@@ -9,5 +9,6 @@ def url_info(request):
     return {
         'REQUEST' : request,
         'MEDIA_URL' : settings.MEDIA_URL,
+        'VERSION' : 1,
 }
 
