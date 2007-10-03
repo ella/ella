@@ -225,6 +225,12 @@ class Listing(models.Model):
         else:
             return DEFAULT_LISTING_PRIORITY
 
+
+    def full_url(self):
+        return '<a href="%s">url</a>' % self.get_absolute_url()
+    full_url.allow_tags = True
+
+
     class Meta:
         verbose_name = _('Listing')
         verbose_name_plural = _('Listings')
@@ -325,7 +331,7 @@ class ListingInlineOptions(admin.TabularInline):
     formset = generic.GenericInlineFormset
 
 class ListingOptions(admin.ModelAdmin):
-    list_display = ('target', 'category', 'publish_from',)
+    list_display = ('target', 'category', 'publish_from', 'full_url',)
     list_filter = ('publish_from', 'category', 'target_ct',)
     def formfield_for_dbfield(self, db_field, **kwargs):
         from ella.core import widgets

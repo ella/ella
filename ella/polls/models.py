@@ -286,7 +286,7 @@ class Result(models.Model):
     Quiz results for skills comparation.)
     """
     quiz = models.ForeignKey(Quiz, verbose_name=_('Quiz'))
-    title = models.CharField(_('Title'), maxlength=200)
+    title = models.CharField(_('Title'), maxlength=200, blank=True)
     text = models.TextField(_('Quiz results text'))
     points_from = models.IntegerField(_('Points dimension from'), null=True)
     points_to = models.IntegerField(_('Points dimension to'), null=True)

@@ -1,3 +1,10 @@
+centrum-ella (0.0.18-5) unstable; urgency=low
+
+  * title blank true for polls.result
+  * full_url for listing
+
+ -- root <root@test-repo>  Tue,  2 Oct 2007 12:24:04 +0200
+
 centrum-ella (0.0.18-4) unstable; urgency=low
 
   * minor model updates in listing, photos

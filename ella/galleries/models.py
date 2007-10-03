@@ -152,7 +152,7 @@ from ella.core.models import ListingInlineOptions
 from tagging.models import TaggingInlineOptions
 class GalleryOptions(admin.ModelAdmin):
     list_display = ('title', 'created', 'category', 'full_url',)
-    ordering = ('-slug',)
+    ordering = ('-created',)
     fieldsets = (
         (_("Gallery heading"), {'fields': ('title', 'slug',)}),
         (_("Gallery metadata"), {'fields': ('description', 'owner', 'category')}),

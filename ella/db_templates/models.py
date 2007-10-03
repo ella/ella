@@ -85,5 +85,6 @@ class TemplateBlockInlineOptions(admin.TabularInline):
 
 class DbTemplateOptions(admin.ModelAdmin):
     inlines = (TemplateBlockInlineOptions,)
+    list_display = ('name', 'site', 'extends',)
 
 admin.site.register(DbTemplate, DbTemplateOptions)
