@@ -308,6 +308,9 @@ class Result(models.Model):
         verbose_name = _('Result')
         verbose_name_plural = _('results')
 
+class ResultTabularOptions(admin.TabularInline):
+    model = Result
+    extra = 5
 class ChoiceTabularOptions(admin.TabularInline):
     model = Choice
     extra = 5
@@ -345,19 +348,24 @@ class ContestantOptions(admin.ModelAdmin):
 from ella.core.models import ListingInlineOptions
 from tagging.models import TaggingInlineOptions
 
-class QuestionInlineOptions(admin.TabularInline):
+class QuestionInlineOptions(admin.options.InlineModelAdmin):
     model = Question
+    inlines = (ChoiceTabularOptions,)
+    template = 'admin/edit_inline/question_tabular.html'
 
 class ContestOptions(admin.ModelAdmin):
+    list_display = ('title', 'category', 'active_from',)
+    list_filter = ('category', 'active_from',)
+    search_fields = ('title', 'text_announcement', 'text', 'text_results',)
     inlines = (QuestionInlineOptions, ListingInlineOptions, TaggingInlineOptions,)
     raw_id_fields = ('photo',)
 
 class QuizOptions(admin.ModelAdmin):
-    inlines = (QuestionInlineOptions, ListingInlineOptions, TaggingInlineOptions,)
+    list_display = ('title', 'category', 'active_from',)
+    list_filter = ('category', 'active_from',)
+    search_fields = ('title', 'text_announcement', 'text', 'text_results',)
+    inlines = (QuestionInlineOptions, ResultTabularOptions,  ListingInlineOptions, TaggingInlineOptions,)
     raw_id_fields = ('photo',)
-
-class ResultOptions(admin.ModelAdmin):
-    list_display = ('quiz', 'points_from', 'points_to', 'count',)
 
 admin.site.register(Poll)
 admin.site.register(Contest, ContestOptions)
@@ -366,7 +374,6 @@ admin.site.register(Question, QuestionOptions)
 admin.site.register(Choice, ChoiceOptions)
 admin.site.register(Vote, VoteOptions)
 admin.site.register(Contestant, ContestantOptions)
-admin.site.register(Result, ResultOptions)
 
 from ella.core.custom_urls import dispatcher
 
