@@ -145,6 +145,9 @@ class DependencyManager(RelatedManager):
                         target_id=target._get_pk_val(),
                         target_key=target_key
 )
+        except:
+            # do not report any errors
+            pass
 
     def cascade(self, target, key):
         """
