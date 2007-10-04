@@ -63,7 +63,7 @@ class ListingManager(RelatedManager):
         qset = self.get_queryset(category, mods, content_types, **kwargs).select_related()
 
         # listings with active priority override
-        active = models.Q(priority_from__isnull=False, priority_from__lte=now, priority_to__gte=now)
+        active = models.Q(priority_value__isnull=False, priority_from__isnull=False, priority_from__lte=now, priority_to__gte=now)
 
         qsets = (
             # modded-up objects

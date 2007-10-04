@@ -134,7 +134,7 @@ class Listing(models.Model):
     publish_from = models.DateTimeField(_("Start of listing"), default=datetime.now)
     priority_from = models.DateTimeField(_("Start of prioritized listing"), default=datetime.now, null=True, blank=True)
     priority_to = models.DateTimeField(_("End of prioritized listing"), default=lambda: datetime.now() + timedelta(days=7), null=True, blank=True)
-    priority_value = models.IntegerField(_("Priority"), default=DEFAULT_LISTING_PRIORITY, blank=True)
+    priority_value = models.IntegerField(_("Priority"), default=DEFAULT_LISTING_PRIORITY, blank=True, null=True)
     remove = models.BooleanField(_("Remove"), help_text=_("Remove object from listing after the priority wears off?"), default=False)
 
     commercial = models.BooleanField(_("Commercial"), default=False)
@@ -189,8 +189,9 @@ class Listing(models.Model):
 
     def save(self):
         # do not allow prioritizations without a priority_value
-        if self.priority_value == DEFAULT_LISTING_PRIORITY:
+        if not self.priority_value or self.priority_value == DEFAULT_LISTING_PRIORITY:
             self.priority_from = None
+            self.priority_to = None
 
         obj = self.target
         if self.category_id != obj.category_id:
@@ -300,11 +301,11 @@ class Dependency(models.Model):
     """
     target_ct = models.ForeignKey(ContentType, related_name='dependency_for_set')
     target_id = models.IntegerField()
-    target_key = models.CharField(maxlength=256, blank=True)
+    target_key = models.CharField(maxlength=100, blank=True)
 
     source_ct = models.ForeignKey(ContentType, related_name='dependent_on_set')
     source_id = models.IntegerField()
-    source_key = models.CharField(maxlength=256, blank=True)
+    source_key = models.CharField(maxlength=100, blank=True)
 
     objects = DependencyManager()
 
@@ -323,6 +324,7 @@ class Dependency(models.Model):
         verbose_name = _('Dependency')
         verbose_name_plural = _('Dependencies')
         ordering = ('source_ct', 'source_id',)
+        unique_together = (('target_key', 'source_key',),)
 
 class ListingInlineOptions(admin.TabularInline):
     model = Listing
