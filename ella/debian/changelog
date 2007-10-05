@@ -1,3 +1,15 @@
+centrum-ella (0.0.18-7) unstable; urgency=low
+
+  * dependency hackin
+
+ -- root <root@test-repo>  Fri,  5 Oct 2007 09:03:46 +0200
+
+centrum-ella (0.0.18-6) unstable; urgency=low
+
+  * update
+
+ -- root <root@test-repo>  Tue,  5 Oct 2007 8:00:00 +0200
+
 centrum-ella (0.0.18-5) unstable; urgency=low
 
   * title blank true for polls.result
