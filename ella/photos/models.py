@@ -373,6 +373,8 @@ from django.contrib import admin
 
 class FormatOptions(admin.ModelAdmin):
     list_display = ('name', 'max_width', 'max_height', 'stretch', 'resample_quality',)
+    list_filter = ('site', 'stretch', 'nocrop',)
+    search_fields = ('name',)
 
 
 from tagging.models import TaggingInlineOptions
