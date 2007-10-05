@@ -150,7 +150,7 @@ msgstr "Adresa"
 
 #: models.py:267
 msgid "Count guess"
-msgstr "Odhad počtu"
+msgstr "Kolik soutěžících tipujete že se zúčastní?"
 
 #: models.py:273
 msgid "Contestant"

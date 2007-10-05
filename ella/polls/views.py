@@ -251,7 +251,7 @@ def contest_finish(request, context, qforms, contestant_form):
     if request.user:
         c.user = request.user
     c.save()
-    return HttpResponseRedirect(contest.get_absolute_url() + ugettext('result') + u'/')
+    return HttpResponseRedirect(contest.get_absolute_url() +slugify(ugettext('result')) + u'/')
 
 def contest_result(request, bits, context):
     if bits:
