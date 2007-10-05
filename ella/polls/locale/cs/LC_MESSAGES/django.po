@@ -46,7 +46,7 @@ msgstr "Soutěž"
 
 #: models.py:55
 msgid "Contests"
-msgstr "Soutěž"
+msgstr "Soutěže"
 
 #: models.py:62
 msgid "title"
