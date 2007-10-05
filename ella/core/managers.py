@@ -136,15 +136,18 @@ class DependencyManager(RelatedManager):
                         target_key=target_key
 )
         except Dependency.DoesNotExist:
-            dep = self.create(
-                        source_ct=source_ct,
-                        source_id=source._get_pk_val(),
-                        source_key=source_key,
+            try:
+                dep = self.create(
+                            source_ct=source_ct,
+                            source_id=source._get_pk_val(),
+                            source_key=source_key,
 
-                        target_ct=target_ct,
-                        target_id=target._get_pk_val(),
-                        target_key=target_key
+                            target_ct=target_ct,
+                            target_id=target._get_pk_val(),
+                            target_key=target_key
 )
+            except:
+                pass
         except:
             # do not report any errors
             pass
