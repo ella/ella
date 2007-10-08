@@ -359,6 +359,13 @@ class ContestOptions(admin.ModelAdmin):
     search_fields = ('title', 'text_announcement', 'text', 'text_results',)
     inlines = (QuestionInlineOptions, ListingInlineOptions, TaggingInlineOptions,)
     raw_id_fields = ('photo',)
+    prepopulated_fields = {'slug' : ('title',)}
+
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        from django import newforms as forms
+        if db_field.name == 'slug':
+            return forms.RegexField('^[0-9a-z-]+$', max_length=255, **kwargs)
+        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 class QuizOptions(admin.ModelAdmin):
     list_display = ('title', 'category', 'active_from',)
@@ -366,6 +373,14 @@ class QuizOptions(admin.ModelAdmin):
     search_fields = ('title', 'text_announcement', 'text', 'text_results',)
     inlines = (QuestionInlineOptions, ResultTabularOptions,  ListingInlineOptions, TaggingInlineOptions,)
     raw_id_fields = ('photo',)
+    prepopulated_fields = {'slug' : ('title',)}
+
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        from django import newforms as forms
+        if db_field.name == 'slug':
+            return forms.RegexField('^[0-9a-z-]+$', max_length=255, **kwargs)
+        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
+
 
 admin.site.register(Poll)
 admin.site.register(Contest, ContestOptions)

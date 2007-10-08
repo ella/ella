@@ -1,3 +1,16 @@
+centrum-ella (0.0.18-9) unstable; urgency=low
+
+  * admin updates for polls
+  * photos updates
+
+ -- root <root@test-repo>  Mon,  8 Oct 2007 06:47:37 +0200
+
+centrum-ella (0.0.18-8) unstable; urgency=low
+
+  * contests should work now
+
+ -- root <root@test-repo>  Mon,  8 Oct 2007 02:04:08 +0200
+
 centrum-ella (0.0.18-7) unstable; urgency=low
 
   * dependency hackin
