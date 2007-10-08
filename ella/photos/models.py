@@ -60,7 +60,13 @@ def auto_rename(file_path, new_name):
 class PhotoBox(Box):
     def get_context(self):
         cont = super(PhotoBox, self).get_context()
-        cont.update({'title' : self.params.get('title', ''),  'alt' : self.params.get('alt', ''),})
+        cont.update({
+                'title' : self.params.get('title', ''),
+                'alt' : self.params.get('alt', ''),
+                'show_title' : self.params.get('show_title', ''),
+                'show_description' : self.params.get('show_description', ''),
+                'show_authors' : self.params.get('show_authors', ''),
+})
         return cont
 
 class Photo(models.Model):
