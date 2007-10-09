@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 
 from ella.core.cache import get_cached_object, cache_this, method_key_getter
+from ella.core.cache.invalidate import CACHE_DELETER
 
 DEFAULT_LISTING_PRIORITY = getattr(settings, 'DEFAULT_LISTING_PRIORITY', 0)
 
