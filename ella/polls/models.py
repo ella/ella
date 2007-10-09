@@ -168,7 +168,8 @@ class PollBox(Box):
             'state' : views.check_vote(self._context['REQUEST'], self.obj),
             'state_voted' : views.POLL_USER_ALLREADY_VOTED,
             'state_just_voted' : views.POLL_USER_JUST_VOTED,
-            'state_not_yet_voted' : views.POLL_USER_NOT_YET_VOTED})
+            'state_not_yet_voted' : views.POLL_USER_NOT_YET_VOTED,
+})
         return cont
 
     def get_cache_key(self):
