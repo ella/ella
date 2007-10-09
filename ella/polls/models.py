@@ -171,6 +171,7 @@ class PollBox(Box):
         return cont
 
     def get_cache_key(self):
+        from ella.polls import views
         return super(PollBox, self).get_cache_key() + str(views.check_vote(self._context['REQUEST'], self.obj))
 
     def get_cache_tests(self):
