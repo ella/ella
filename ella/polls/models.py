@@ -159,7 +159,7 @@ class Question(models.Model):
         verbose_name_plural = _('Questions')
 
 class PollBox(Box):
-   def get_context(self):
+    def get_context(self):
         from ella.polls import views
         cont = super(PollBox, self).get_context()
         # state = views.check_vote(self._context['request'], self.obj)
@@ -169,6 +169,12 @@ class PollBox(Box):
             'state_just_voted' : views.POLL_USER_JUST_VOTED,
             'state_not_yet_voted' : views.POLL_USER_NOT_YET_VOTED})
         return cont
+
+    def get_cache_key(self):
+        return super(PollBox, self).get_cache_key() + str(views.check_vote(self._context['REQUEST'], self.obj))
+
+    def get_cache_tests(self):
+        return super(PollBox, self).get_cache_tests() + [ (Choice, lambda x: x.poll_id == self.obj.id) ]
 
 class Poll(models.Model):
     """

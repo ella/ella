@@ -1,3 +1,8 @@
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
 from django.template import loader
 from django.utils.datastructures import MultiValueDict
 from django.core.cache import cache
@@ -160,7 +165,7 @@ class Box(object):
                         self.obj.__class__.__name__,
                         self.box_type,
                         self.obj._get_pk_val(),
-                        u','.join(u'%s:%s' % (key, self.params[key]) for key in sorted(self.params.keys()))
+                        pickle.dumps([ (key, self.params[key]) for key in sorted(self.params.keys()) ])
 )
 )
 ).hexdigest()
