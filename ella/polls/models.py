@@ -164,6 +164,7 @@ class PollBox(Box):
         cont = super(PollBox, self).get_context()
         # state = views.check_vote(self._context['request'], self.obj)
         cont.update({
+            'photo_slug' : self.paarams.get('photo_slug', '')
             'state' : views.check_vote(self._context['REQUEST'], self.obj),
             'state_voted' : views.POLL_USER_ALLREADY_VOTED,
             'state_just_voted' : views.POLL_USER_JUST_VOTED,
