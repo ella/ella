@@ -331,6 +331,12 @@ class ListingInlineOptions(admin.TabularInline):
     extra = 2
     fk_name = 'target_ct:target_id'
     formset = generic.GenericInlineFormset
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        from ella.core import widgets
+        if db_field.name == 'category':
+            kwargs['widget'] = widgets.ListingCategoryWidget
+        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
+
 
 class ListingOptions(admin.ModelAdmin):
     list_display = ('target', 'category', 'publish_from', 'full_url',)

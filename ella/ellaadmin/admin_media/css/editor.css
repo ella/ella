@@ -46,6 +46,20 @@
 #boxPane #submit { text-align: right; float: right; }
 #boxPane #submit input { width: 100px; height: 25px; }
 
+div#photo {
+	padding: 10px;
+	width: 125px;
+	background: #ffb;
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	margin: -32px 0 0 -400px;
+	display: none;
+}
+div#photo h2 { margin: 0; padding: 0; }
+div#photo div { margin-left: 5px; padding: 1px; }
+div#photo div * { padding: 0; margin: 0; }
+
 div.box-object {
 	width: 150px;
 	background: #ff80ff;

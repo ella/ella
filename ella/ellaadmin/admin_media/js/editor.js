@@ -204,15 +204,26 @@ function build(box){
 	appendTo('body').
 	append(
 		$('<a id="boxPaneClose" href="#close">&times;</a>').bind('click', { key: false }, destroy),
-		$('<form action="" method="post"></form>').
+		$('<form action="" method="post" id="mainForm"></form>').
 		append(
 			$('<h1>Vložit objekt</h1>'),
 			$('<div class="title">Typ objektu</div>'),
-			$('<div class="input"><select name="type">' + options + '</select></div>'),
+			$('<div class="input"></div>').append(
+				$('<select name="type">' + options + '</select>').change(function(){
+					if($('option', this)[this.selectedIndex].innerHTML == 'Photo'){
+						photo();
+					} else {
+						$('#photo').hide('normal', function(){
+							$(this).remove();
+						});
+					}
+				})
+			),
 			$('<div class="title">Nejčastěji používané typy:</div>'),
 			$('<div class="input" id="quick"></div>').append(
 				$('<a href="#fotka">Fotka</a>&nbsp;').bind('click', function(event){
 					objectSelect(event, 'photos.photo');
+					photo();
 				}),
 				$('<a href="#fotogalerie">Fotogalerie</a>').bind('click', function(event){
 					objectSelect(event, 'galleries.gallery');
@@ -247,6 +258,54 @@ function build(box){
 		$('input#id').val('');
 	});
 	$('body').bind('keypress', { key: true }, destroy);
+	// Object "photo"
+	var parseParameters = function(checked, key){
+		var lines = $('textarea[name="parameters"]').val().split('\n');
+		var parameters = {};
+		$.each(lines, function(i, line){
+			var keyVal = line.split(':', 2);
+			parameters[keyVal[0]] = keyVal[1];
+		});
+		if(checked && !parameters[key]){
+			parameters[key] = '1';
+			setParameters(parameters);
+		} else if(!checked && parameters[key]){
+			setParameters(parameters, key);
+		}
+	}
+	var setParameters = function(parameters, exclude){
+		var val = '';
+		$.each(parameters, function(name, param){
+			if(name != exclude && name != '' && param){
+				val += name + ':' + param + '\n';
+			}
+		});
+		$('textarea[name="parameters"]').val(val.replace(/^\n/, '').replace(/\n$/, ''));
+	}
+	var photo = function(){
+		var p = $('textarea[name="parameters"]').val();
+		$('#mainForm').append(
+			$('<div id="photo"><h2>Možnosti</h2></div>').append(
+				$('<div></div>').append(
+					$('<input type="checkbox" id="title"' + ((p.indexOf('show_title') != -1) ? ' checked="checked"' : '') + ' /> <label for="title">Název</label>').change(function(){
+						parseParameters(this.checked, 'show_title');
+					})
+				),
+				$('<div></div>').append(
+					$('<input type="checkbox" id="description"' + ((p.indexOf('show_description') != -1) ? ' checked="checked"' : '') + ' /> <label for="description">Popis</label>').change(function(){
+						parseParameters(this.checked, 'show_description');
+					})
+				),
+				$('<div></div>').append(
+					$('<input type="checkbox" id="authors"' + ((p.indexOf('show_authors') != -1) ? ' checked="checked"' : '') + ' /> <label for="authors">Autoři</label>').change(function(){
+						parseParameters(this.checked, 'show_authors');
+					})
+				)
+			)
+		);
+		$('#photo').css({'display' : 'block', 'opacity' : '0'}).animate({ opacity: 1 }, 'normal');
+	}
+	if(box.type && box.type == 'photos.photo'){photo();}
 }
 
 function destroy(event){
