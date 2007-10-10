@@ -84,7 +84,8 @@ class TemplateBlockInlineOptions(admin.TabularInline):
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 class DbTemplateOptions(admin.ModelAdmin):
+    ordering = ('description',)
     inlines = (TemplateBlockInlineOptions,)
-    list_display = ('name', 'site', 'extends',)
+    list_display = ('description', 'site', 'extends', 'name')
 
 admin.site.register(DbTemplate, DbTemplateOptions)
