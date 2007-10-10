@@ -87,9 +87,13 @@ class Article(models.Model):
 
     @property
     def content(self):
+        from ella.core.cache import get_cached_list
         if not hasattr(self, '_content'):
-            self._content = self.articlecontents_set.all()[0]
-        return self._content
+            self._contents = get_cached_list(ArticleContents, article=self)
+        if self._contents:
+            return self._contents[0]
+        else:
+            return None
 
     def Box(self, box_type, nodelist):
         return ArticleBox(self, box_type, nodelist)
