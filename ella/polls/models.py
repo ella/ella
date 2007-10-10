@@ -53,6 +53,13 @@ class Contest(models.Model):
     def __unicode__(self):
         return self.title
 
+    def full_url(self):
+        absolute_url = self.get_absolute_url()
+        if absolute_url:
+            return '<a href="%s">url</a>' % absolute_url
+        return 'no url'
+    full_url.allow_tags = True
+
     class Meta:
         verbose_name = _('Contest')
         verbose_name_plural = _('Contests')
@@ -85,6 +92,14 @@ class Quiz(models.Model):
 )
         except Listing.DoesNotExist:
             return None
+
+    def full_url(self):
+        absolute_url = self.get_absolute_url()
+        if absolute_url:
+            return '<a href="%s">url</a>' % absolute_url
+        return 'no url'
+    full_url.allow_tags = True
+
 
     @property
     def questions(self):
@@ -363,7 +378,7 @@ class QuestionInlineOptions(admin.options.InlineModelAdmin):
     template = 'admin/edit_inline/question_tabular.html'
 
 class ContestOptions(admin.ModelAdmin):
-    list_display = ('title', 'category', 'active_from',)
+    list_display = ('title', 'category', 'active_from', 'full_url',)
     list_filter = ('category', 'active_from',)
     search_fields = ('title', 'text_announcement', 'text', 'text_results',)
     inlines = (QuestionInlineOptions, ListingInlineOptions, TaggingInlineOptions,)
@@ -377,7 +392,7 @@ class ContestOptions(admin.ModelAdmin):
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 class QuizOptions(admin.ModelAdmin):
-    list_display = ('title', 'category', 'active_from',)
+    list_display = ('title', 'category', 'active_from', 'full_url',)
     list_filter = ('category', 'active_from',)
     search_fields = ('title', 'text_announcement', 'text', 'text_results',)
     inlines = (QuestionInlineOptions, ResultTabularOptions,  ListingInlineOptions, TaggingInlineOptions,)
