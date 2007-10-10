@@ -160,12 +160,11 @@ class Box(object):
 
     def get_cache_key(self):
         import md5
-        return md5.md5(smart_str(
-                u'ella.core.box.Box.render:%s:%s:%s:%s' % (
+        return md5.md5(
+                'ella.core.box.Box.render:%s:%s:%s:%s' % (
                         self.obj.__class__.__name__,
                         self.box_type,
                         self.obj._get_pk_val(),
                         pickle.dumps([ (key, self.params[key]) for key in sorted(self.params.keys()) ])
-)
 )
 ).hexdigest()
