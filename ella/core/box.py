@@ -6,7 +6,6 @@ except ImportError:
 from django.template import loader
 from django.utils.datastructures import MultiValueDict
 from django.core.cache import cache
-from django.utils.encoding import smart_str
 
 from ella.core.cache.invalidate import CACHE_DELETER
 
@@ -161,10 +160,12 @@ class Box(object):
     def get_cache_key(self):
         import md5
         return md5.md5(
-                'ella.core.box.Box.render:%s:%s:%s:%s' % (
+                pickle.dumps((
+                        'ella.core.box.Box.render:%s:%s:%s:%s',
                         self.obj.__class__.__name__,
                         self.box_type,
                         self.obj._get_pk_val(),
-                        pickle.dumps([ (key, self.params[key]) for key in sorted(self.params.keys()) ])
+                        [ (key, self.params[key]) for key in sorted(self.params.keys()) ]
+)
 )
 ).hexdigest()

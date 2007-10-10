@@ -8,12 +8,12 @@ except ImportError:
 from django.db.models import ObjectDoesNotExist
 from django.core.cache import cache
 from django.http import Http404
-
 from django.contrib.contenttypes.models import ContentType
+
 from ella.core.cache.invalidate import CACHE_DELETER
 
 
-KEY_FORMAT_LIST = 'ella.core.cache.utils.get_cached_list:%s.%s:%s'
+KEY_FORMAT_LIST = 'ella.core.cache.utils.get_cached_list'
 def get_cached_list(model, **kwargs):
     """
     Return a cached list. If the list does not exist in the cache, create it
@@ -28,10 +28,12 @@ def get_cached_list(model, **kwargs):
         model = model.model_class()
 
     key = md5.md5(
-            KEY_FORMAT_LIST % (
-                model._meta.app_label,
-                model._meta.object_name.lower(),
-                pickle.dumps([ (key, kwargs[key]) for key in sorted(kwargs.keys()) ])
+                pickle.dumps((
+                    KEY_FORMAT_LIST,
+                    model._meta.app_label,
+                    model._meta.object_name.lower(),
+                    [ (key, kwargs[key]) for key in sorted(kwargs.keys()) ]
+)
 )
 ).hexdigest()
 
@@ -42,7 +44,7 @@ def get_cached_list(model, **kwargs):
         CACHE_DELETER.register(model, lambda x: model._default_manager.filter(**kwargs).filter(pk=x._get_pk_val()) == 1, key)
     return l
 
-KEY_FORMAT_OBJECT = 'ella.core.cache.utils.get_cached_object:%s.%s:%s'
+KEY_FORMAT_OBJECT = 'ella.core.cache.utils.get_cached_object'
 def get_cached_object(model, **kwargs):
     """
     Return a cached object. If the object does not exist in the cache, create it
@@ -59,10 +61,12 @@ def get_cached_object(model, **kwargs):
         model = model.model_class()
 
     key = md5.md5(
-            KEY_FORMAT_OBJECT % (
-                model._meta.app_label,
-                model._meta.object_name.lower(),
-                pickle.dumps([ (key, kwargs[key]) for key in sorted(kwargs.keys()) ])
+            pickle.dumps((
+                    KEY_FORMAT_OBJECT,
+                    model._meta.app_label,
+                    model._meta.object_name.lower(),
+                    [ (key, kwargs[key]) for key in sorted(kwargs.keys()) ]
+)
 )
 ).hexdigest()
 
@@ -87,11 +91,13 @@ def get_cached_object_or_404(model, **kwargs):
 def method_key_getter(func, *args, **kwargs):
     import md5
     return md5.md5(
-                'ella.core.cache.utils.method_key_getter:%s.%s:%s:%s' % (
-                    func.__module__,
-                    func.__name__,
-                    pickle.dumps(args[1:]),
-                    pickle.dumps([ (key, kwargs[key]) for key in sorted(kwargs.keys()) ])
+                pickle.dumps((
+                        'ella.core.cache.utils.method_key_getter',
+                        func.__module__,
+                        func.__name__,
+                        args[1:],
+                        [ (key, kwargs[key]) for key in sorted(kwargs.keys()) ]
+)
 )
 ).hexdigest()
 
