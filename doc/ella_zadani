@@ -1,0 +1,30 @@
+Ella zadani.
+
+
+Radakcni system, ktery bude umet pracovat s clanky, aketami, fotogaleriemi, komentari, tagy a dalsimi typy objektu, ktere jsou bezne u internetovych magazinu. Cely system pobezi nad python frameworkem Django a bude k dispozici jako OpenSource.
+
+
+Nejdulezitejsi vlastnosti jsou:
+-------------------------------
+
+* Lehka rozsiritelnost.
+Veskere obsahove objekty (ankety, kometare, ...) budou staveny jako samostatne moduly a veskere umisteni na strankach bude provadeno stejnym zpusobem bez ohledu na typ vkladaneho objektu podle principu polymorfismu.
+Integrace cizich aplikaci napsanych v Djangu bude mozna bez zasahu do puvodniho kodu.
+
+* Na jedne instalaci redakcniho systemu muze bezet vice magazinu.
+Bude mozne sdilet objekty napric jednotlivymi weby pri zachovani patricneho oddeleni webu na frontendu a nastavebni ruznych prav pro ruzne magaziny.
+
+* Rychle vytvareni dalsich specializovanych magazinu.
+Nasazeni noveho magazinoveho webu by melo znamenat pouze vytvoreni HTML sablon a konfiguraci systemu. K vytvoreni dalsiho magazinu by melo stacit uprava CSS, pripadne layoutu.
+
+* Zvladani vysoke zateze
+System Ella by mel dobre zvladat vysokou zatez, tedy navstevnost kolem deseti az sta tisice zobrazeni denne. Bude toho dosazeno pomoci nekolika urovni cachovani, vcetne automaticke invalidace cache pri zmene objektu.
+
+* Velka skalovatelnost.
+Zvyseni vykonu by melo byt dosazeno pouhym pridanim dalsiho fronendoveho stroje.
+
+* Jednoduche administrativni rozhrani.
+Administrativni rozhrani by melo byt natolik intuitivni, aby s nim mohli pracovat bezni, technicky nezkuseni uzivatele - novinari.
+
+
+Obhajoba projektu bude zahrnovat demonstraci bezici instalace systemu, na kterem pobezi nekolik magazinu s vetsi zatezi (nekolik set tisic navstev denne).
