@@ -55,9 +55,6 @@ class Box(object):
         context.pop()
         self._context = context
 
-        # TODO add caching
-        #self.render = cache_function(self.render, self.get_key())
-
     def get_context(self):
         """
         Get context to render the template.
@@ -161,7 +158,7 @@ class Box(object):
         import md5
         return md5.md5(
                 pickle.dumps((
-                        'ella.core.box.Box.render:%s:%s:%s:%s',
+                        'ella.core.box.Box.render',
                         self.obj.__class__.__name__,
                         self.box_type,
                         self.obj._get_pk_val(),
