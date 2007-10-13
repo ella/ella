@@ -3,6 +3,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.dispatch import dispatcher
 from django.db.models import signals
 from django.conf import settings
+from django.utils.datastructures import MultiValueDict
 
 try:
     import cPickle as pickle
@@ -62,9 +63,11 @@ class CacheDeleter(object):
         Process pre_save signal
         """
         if sender in self._register:
-            for key, test in self._register[sender].items():
-                if test(instance):
-                    self.invalidate(sender, key)
+            model_tests = self._register[sender]
+            for key in model_tests.keys():
+                for t in model_tests.getlist(key):
+                    if test(instance):
+                        self.invalidate(sender, key)
         return instance
 
     def invalidate(self, sender, key):
@@ -82,11 +85,11 @@ class CacheDeleter(object):
 
     def register(self, model, test, key):
         if model not in self._register:
-            self._register[model] = {}
+            self._register[model] = MultiValueDict()
             # start listening for the model requested
             dispatcher.connect(self.signal_handler, signal=signals.pre_save, sender=model)
             dispatcher.connect(self.signal_handler, signal=signals.pre_delete, sender=model)
-        self._register[model][key] = test
+        self._register[model].appendlist(key, test)
 
 CACHE_DELETER = CacheDeleter()
 ACTIVE_MQ_HOST = getattr(settings, 'ACTIVE_MQ_HOST', 'localhost')
