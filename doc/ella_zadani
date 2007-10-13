@@ -1,42 +1,74 @@
 Ella zadani
 ===========
 
-
 Radakcni system, ktery bude umet pracovat s clanky, aketami, fotogaleriemi, komentari, tagy a dalsimi typy objektu,
-ktere jsou bezne u internetovych magazinu. Cely system bude vyuzivat python framework Django a bude k dispozici jako OpenSource.
-
+ktere jsou bezne u internetovych magazinu. Cely system bude vyuzivat python framework Django a bude k dispozici jako
+OpenSource.
 
 Nejdulezitejsi vlastnosti jsou:
 -------------------------------
 
 * Lehka rozsiritelnost.
-Veskere obsahove objekty (ankety, kometare, ...) budou staveny jako samostatne moduly
-a veskere umisteni na strankach bude provadeno stejnym zpusobem bez ohledu na typ vkladaneho objektu podle principu polymorfismu.
-Integrace cizich aplikaci napsanych v Djangu bude mozna bez zasahu do puvodniho kodu.
+Veskere obsahove objekty (ankety, kometare, ...) budou staveny jako samostatne moduly a veskere umisteni na strankach
+bude provadeno stejnym zpusobem bez ohledu na typ vkladaneho objektu podle principu polymorfismu. Integrace cizich
+aplikaci napsanych v Djangu bude mozna bez zasahu do puvodniho kodu.
+Pro pridani noveho typu objektu bude postacujici dodat sadu HTML sablon a zaregistrovat pripadne specialni akce, ktere
+se k tomuto objektu vazi (napriklad hlasovani v ankete ci odeslani prihlasky do souteze).
 
 * System hezkych a dynamickych URL
-Krome hezkych url, ktere budou fungovat pro vsechny druhy objektu,
-bude mozne taktez zaregistrovat pro libovolnou aplikaci dynamicky zbytek url - napriklad pro komentare k clanku.
-Tyto url, stejne jako zbytek systemu budou lokalizovane, cili system bude moci byt nasazen v jakemkoliv jazyce.
+System URL bude plne virtualni a optimalizovany pro vyhledavace. Dale bude na miste mechanisus pro registrovani dalsich
+URL navazanych k jednotlivym objektu (napriklad pridani komentare ci prohlizeni jedne fotky v galerii). Tyto url, stejne
+jako zbytek systemu budou lokalizovane, cili system bude moci byt nasazen v jakemkoliv jazyce.
 
-* Na jedne instalaci redakcniho systemu pobezi vice magazinu.
-Bude mozne sdilet objekty napric jednotlivymi weby pri zachovani patricneho oddeleni webu na frontendu a nastavebni ruznych prav pro ruzne magaziny.
+* Na jedne instalaci redakcniho systemu bude moznost provozovat nekolik domen s ruznym obsahem
+Bude mozne sdilet objekty napric jednotlivymi weby pri zachovani patricneho oddeleni webu na frontendu a nastaveni
+ruznych prav pro redaktory jednotlivych webu.
+
+* Prioritizace a dynamicke umistovani objektu
+Redaktori budou oci kontrolovat kdy se dany objekt objevi na webu, v jake kategorii a s jakou prioritou. Pomoci tohoto
+systemu bude mozne publikovat jeden objekt i ve vice kategoriich (ktere muzou sidlit na ryznych domenach) - detail
+objektu vsak bude vzdy nalezet jedne kategorii. U nekterych stranek (homepage, stranka kategorie) bude k dispozici
+nastroj na rozmistovani objektu do konkretnich pozic - redaktor pak bude oci rozhodnout, ktery objekt a byt v dany
+okamzik prezentovany na nejake pozici.
+
+* Reseni importu a exportu
+Ella bude schopna exportovat svuj obsah ve forme RSS a ATOM feedu. Rovnez bude schopna takove feedy z jinych webu
+zpracovavat, ukladat a zobrazovat.
 
 * Rychle vytvareni dalsich specializovanych magazinu.
-Nasazeni noveho magazinoveho webu by melo znamenat pouze vytvoreni HTML sablon a konfiguraci systemu.
-K vytvoreni dalsiho magazinu by melo stacit uprava CSS, pripadne layoutu.
+Nasazeni noveho magazinoveho webu by melo znamenat pouze vytvoreni HTML sablon a konfiguraci systemu. K vytvoreni
+dalsiho magazinu by melo stacit uprava CSS, pripadne layoutu.
 
 * Zvladani vysoke zateze
-System Ella by mel dobre zvladat vysokou zatez, tedy navstevnost kolem deseti az sta tisice zobrazeni denne.
-Bude toho dosazeno pomoci nekolika urovni cachovani, vcetne automaticke invalidace cache pri zmene objektu.
-
-* Velka skalovatelnost.
-Zvyseni vykonu by melo byt dosazeno pouhym pridanim dalsiho frontendoveho stroje.
+System Ella by mel dobre zvladat vysokou zatez, tedy navstevnost kolem nekolika set tisic zobrazeni denne. Bude toho
+dosazeno pomoci nekolika urovni cachovani, vcetne automaticke invalidace cache pri zmene objektu ci podobjektu
+(napriklad foto v clanku).
+Uzkym hrdlem celeho systemu tak z pocatku nebude databaze, jako u vetsiny systemu, ale frontendove stroje, ktere budou
+plne zamenne a bude je tak mozno pridavat bez zasahu do zbytku systemu.
 
 * Jednoduche administrativni rozhrani.
-Administrativni rozhrani by melo byt natolik intuitivni, aby s nim mohli pracovat bezni, technicky nezkuseni uzivatele - novinari.
+Administrativni rozhrani by melo byt natolik intuitivni, aby s nim mohli pracovat bezni, technicky nezkuseni uzivatele -
+novinari.
 
+Seznam podporovanych objektu v zakladni verzi:
+----------------------------------------------
 
-Obhajoba projektu bude zahrnovat demonstraci bezici instalace systemu, na kterem pobezi nekolik magazinu s vetsi zatezi (nekolik set tisic navstev denne).
+Obsahove objekty:
+* Kategorie
+* Clanek
+* Anketa
+* Foto
+* Video
+* Galerie (obsahujici libovolne objekty)
+* Kviz
+* Soutez
+
+Ostatni (vsechny tyto se dokazi vazat k libovolnemu obsahovemu objektu):
+* Komentare
+* Hodnoceni
+* Tagy
+
+Obhajoba projektu bude zahrnovat demonstraci bezici instalace systemu, na kterem pobezi nekolik magazinu s vetsi zatezi
+(nekolik set tisic navstev denne).
 
 
