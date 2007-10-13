@@ -278,10 +278,14 @@ def category_detail(request, category):
 },
             context_instance=RequestContext(request)
 )
+
 def export_test(*args, **kwargs):
     return []
 
-@cache_this(method_key_getter, export_test, timeout=60*60)
+def export_key(*args, **kwargs):
+    return 'export:%d:%d' % (settings.SITE_ID, kwargs.get('count', 0))
+
+@cache_this(export_key, export_test, timeout=60*60)
 def export(request, count, models=None):
     if models is None:
         from ella.articles.models import Article
