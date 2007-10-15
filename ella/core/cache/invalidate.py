@@ -66,7 +66,7 @@ class CacheDeleter(object):
             model_tests = self._register[sender]
             for key in model_tests.keys():
                 for t in model_tests.getlist(key):
-                    if test(instance):
+                    if t(instance):
                         self.invalidate(sender, key)
         return instance
 
