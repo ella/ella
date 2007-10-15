@@ -8,7 +8,8 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.template.defaultfilters import slugify
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _, ugettext
+from django import newforms as forms
 
 from ella.core.box import Box
 from ella.core.managers import *
@@ -326,11 +327,34 @@ class Dependency(models.Model):
         ordering = ('source_ct', 'source_id',)
         unique_together = (('target_key', 'source_key',),)
 
+class ListingInlineFormset(generic.GenericInlineFormset):
+    def clean (self):
+        if not self.cleaned_data:
+            return self.cleaned_data
+
+
+        obj = self.instance
+        cat = obj.category
+
+        for d in self.cleaned_data:
+            if d['category'] == cat:
+                main = d
+                break
+        else:
+            raise forms.ValidationError, ugettext('If an object has a listing, it must have a listing in its main category.')
+
+        if main['publish_from'] != min([ d['publish_from'] for d in self.cleaned_data]):
+            raise forms.ValidationError, ugettext('No listing can start sooner than main listing')
+
+
+
+        return self.cleaned_data
+
 class ListingInlineOptions(admin.TabularInline):
     model = Listing
     extra = 2
     fk_name = 'target_ct:target_id'
-    formset = generic.GenericInlineFormset
+    formset = ListingInlineFormset
     def formfield_for_dbfield(self, db_field, **kwargs):
         from ella.core import widgets
         if db_field.name == 'category':
