@@ -20,15 +20,15 @@ System URL bude plne virtualni a optimalizovany pro vyhledavace. Dale bude na mi
 URL navazanych k jednotlivym objektu (napriklad pridani komentare ci prohlizeni jedne fotky v galerii). Tyto url, stejne
 jako zbytek systemu budou lokalizovane, cili system bude moci byt nasazen v jakemkoliv jazyce.
 
-* Na jedne instalaci redakcniho systemu bude moznost provozovat nekolik domen s ruznym obsahem
+* Na jedne instalaci redakcniho systemu bude moznost provozovat nekolik domen s ruznym obsahem.
 Bude mozne sdilet objekty napric jednotlivymi weby pri zachovani patricneho oddeleni webu na frontendu a nastaveni
 ruznych prav pro redaktory jednotlivych webu.
 
 * Prioritizace a dynamicke umistovani objektu
-Redaktori budou oci kontrolovat kdy se dany objekt objevi na webu, v jake kategorii a s jakou prioritou. Pomoci tohoto
-systemu bude mozne publikovat jeden objekt i ve vice kategoriich (ktere muzou sidlit na ryznych domenach) - detail
+Redaktori budou moci kontrolovat, kdy se dany objekt objevi na webu, v jake kategorii a s jakou prioritou. Pomoci tohoto
+systemu bude mozne publikovat jeden objekt i ve vice kategoriich (ktere muzou sidlit na ruznych domenach) - detail
 objektu vsak bude vzdy nalezet jedne kategorii. U nekterych stranek (homepage, stranka kategorie) bude k dispozici
-nastroj na rozmistovani objektu do konkretnich pozic - redaktor pak bude oci rozhodnout, ktery objekt a byt v dany
+nastroj na rozmistovani objektu do konkretnich pozic - redaktor pak bude moci rozhodnout, ktery objekt ma byt v dany
 okamzik prezentovany na nejake pozici.
 
 * Reseni importu a exportu
