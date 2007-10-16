@@ -38,7 +38,7 @@ def load_template_source(template_name, template_dirs=None):
     return get_cache_teplate(template_name, template_dirs)
 load_template_source.is_usable = True
 
-@cache_this(get_key, get_test, timeout=60*60)
+@cache_this(get_key, get_test, timeout=10*60)
 def get_cache_teplate(template_name, template_dirs):
     for loader in template_source_loaders:
         try:
