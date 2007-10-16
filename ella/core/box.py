@@ -122,17 +122,17 @@ class Box(object):
         """
         The main function that takes care of the rendering.
         """
-        if self.template_name:
-            return loader.render_to_string(self.template_name, self.get_context())
-
-        t_list = self._get_template_list()
-
         media = self._context.dicts[-1].setdefault(MEDIA_KEY, {'js' : set([]), 'css' : set([])})
         my_media = self.get_media()
         media['js'] = media['js'].union(my_media['js'])
         media['css'] = media['css'].union(my_media['css'])
 
-        t = loader.select_template(t_list)
+        if self.template_name:
+            t = loader.get_template(self.template_name)
+        else:
+            t_list = self._get_template_list()
+            t = loader.select_template(t_list)
+
         self._context.update(self.get_context())
         resp = t.render(self._context)
         self._context.pop()
