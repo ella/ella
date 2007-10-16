@@ -174,6 +174,9 @@ class Question(models.Model):
         verbose_name_plural = _('Questions')
 
 class PollBox(Box):
+    def render(self):
+        return self._render()
+
     def get_context(self):
         from ella.polls import views
         cont = super(PollBox, self).get_context()
