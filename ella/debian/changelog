@@ -1,3 +1,15 @@
+centrum-ella (0.0.18-13) unstable; urgency=low
+
+  * edit inline clean for listing
+
+ -- root <root@test-repo>  Tue, 16 Oct 2007 01:24:27 +0200
+
+centrum-ella (0.0.18-12) unstable; urgency=low
+
+  * unicode cache errors fixed
+
+ -- root <root@test-repo>  Wed, 10 Oct 2007 09:24:05 +0200
+
 centrum-ella (0.0.18-11) unstable; urgency=low
 
   * archiv fixed
