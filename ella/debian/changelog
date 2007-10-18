@@ -1,3 +1,12 @@
+centrum-ella (0.0.18-14) unstable; urgency=low
+
+  * Fixed a bug when adding an invalid form
+  * Fixed a bug with hard-coded aciveMQ hostname
+  * admin polls validation cleanup
+  * Admin polls resultformset validation.
+
+ -- root <root@test-repo>  Thu, 18 Oct 2007 08:48:11 +0200
+
 centrum-ella (0.0.18-13) unstable; urgency=low
 
   * edit inline clean for listing
