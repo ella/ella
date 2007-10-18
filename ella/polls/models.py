@@ -349,7 +349,6 @@ class ResultFormset(InlineFormset):
                 print self.forms[i]
                 validation_error = ValidationError(ugettext('Invalid score interval %(points_from)s - %(points_to)s. Points dimension from can not be greater than point dimension to.') % self.cleaned_data[i])
                 self.forms[i]._errors = {'points_to': validation_error.messages}
-                #raise ValidationError, ugettext('Invalid score interval %(points_from)s - %(points_to)s. Points dimension from can not be greater than point dimension to.') % self.cleaned_data[i]
         if validation_error:
             raise ValidationError, ugettext('Invalid score intervals')
 
