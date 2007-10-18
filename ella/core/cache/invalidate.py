@@ -93,6 +93,7 @@ class CacheDeleter(object):
 
 CACHE_DELETER = CacheDeleter()
 ACTIVE_MQ_HOST = getattr(settings, 'ACTIVE_MQ_HOST', 'localhost')
+ACTIVE_MQ_PORT = getattr(settings, 'ACTIVE_MQ_PORT', 61613)
 
 def get_propagator(conn):
     def propagate_signal(sender, instance):
@@ -110,17 +111,16 @@ def get_propagator(conn):
 try:
     import stomp
     # initialize connection to ActiveMQ
-    conn = stomp.Connection('localhost', 61613)
+    conn = stomp.Connection(ACTIVE_MQ_HOST, ACTIVE_MQ_PORT)
     # register CD as listener
     conn.addlistener(CACHE_DELETER)
     conn.subscribe('/topic/ella')
     conn.start()
-    # give it time to form a connection
-    #import time
-    #time.sleep(2)
+
     # register to close the activeMQ connection on exit
     import atexit
     atexit.register(conn.disconnect)
+
     # register the proper propagation function for intercepting the proper signals
     CACHE_DELETER.signal_handler = get_propagator(conn)
 except:
