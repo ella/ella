@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-10-02 15:11+0200\n"
+"POT-Creation-Date: 2007-10-18 10:40+0200\n"
 "PO-Revision-Date: 2007-08-15 13:55+0200\n"
 "Last-Translator: Ondrej Kohout <ondrej.kohout@netcentrum.cz>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,178 +16,205 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: models.py:17 models.py:171 models.py:283
+#: models.py:19 models.py:203 models.py:315
 msgid "Title"
 msgstr "Titulek"
 
-#: models.py:20 models.py:172
+#: models.py:22 models.py:204
 msgid "Text with announcement"
 msgstr "Text s oznámením"
 
-#: models.py:21 models.py:66 models.py:173
+#: models.py:23 models.py:78 models.py:205
 msgid "Text"
 msgstr "Text"
 
-#: models.py:22 models.py:67 models.py:174
+#: models.py:24 models.py:79 models.py:206
 msgid "Text with results"
 msgstr "Text s výsledky"
 
-#: models.py:23 models.py:68 models.py:175
+#: models.py:25 models.py:80 models.py:207
 msgid "Active from"
 msgstr "Aktivní od"
 
-#: models.py:24 models.py:69 models.py:176
+#: models.py:26 models.py:81 models.py:208
 msgid "Active till"
 msgstr "Aktivní do"
 
-#: models.py:54 models.py:115 models.py:258
+#: models.py:66 models.py:138 models.py:290
 msgid "Contest"
 msgstr "Soutěž"
 
-#: models.py:55
+#: models.py:67
 msgid "Contests"
 msgstr "Soutěže"
 
-#: models.py:62
+#: models.py:74
 msgid "title"
 msgstr "Titulek"
 
-#: models.py:65
+#: models.py:77
 msgid "text with announcement"
 msgstr "Text s ohlášením"
 
-#: models.py:102 models.py:114 models.py:282
+#: models.py:125 models.py:137 models.py:314
 msgid "Quiz"
 msgstr "Test"
 
-#: models.py:103
+#: models.py:126
 msgid "Quizes"
 msgstr "Testy"
 
-#: models.py:112
+#: models.py:135
 msgid "Question text"
 msgstr "Text otázky"
 
-#: models.py:113
+#: models.py:136
 msgid "Allow multiple choices"
 msgstr "Povolit více voleb/odpovědí"
 
-#: models.py:152 models.py:177 models.py:200
+#: models.py:175 models.py:209 models.py:232
 msgid "Question"
 msgstr "Otázka"
 
-#: models.py:153
+#: models.py:176
 msgid "Questions"
 msgstr "Otázky"
 
-#: models.py:183 models.py:241
+#: models.py:215 models.py:273
 msgid "Poll"
 msgstr "Anketa"
 
-#: models.py:184
+#: models.py:216
 msgid "Polls"
 msgstr "Ankety"
 
-#: models.py:201
+#: models.py:233
 msgid "Choice text"
 msgstr "Text volby/odpovědi"
 
-#: models.py:202
+#: models.py:234
 msgid "Points"
 msgstr "Body"
 
-#: models.py:203 models.py:251
+#: models.py:235 models.py:283
 msgid "Votes"
 msgstr "Hlasy"
 
-#: models.py:210
+#: models.py:242
 msgid "Choice"
 msgstr "Volba/odpověď"
 
-#: models.py:211 models.py:266
+#: models.py:243 models.py:298
 msgid "Choices"
 msgstr "Volby/odpovědi"
 
-#: models.py:242 models.py:260
+#: models.py:274 models.py:292
 msgid "User"
 msgstr "Uživatel"
 
-#: models.py:243
+#: models.py:275
 msgid "Time"
 msgstr "Čas"
 
-#: models.py:244
+#: models.py:276
 msgid "IP Address"
 msgstr "IP adresa"
 
-#: models.py:250
+#: models.py:282
 msgid "Vote"
 msgstr "Hlas"
 
-#: models.py:259
+#: models.py:291
 msgid "Date and time"
 msgstr "Datum a čas"
 
-#: models.py:261
+#: models.py:293
 msgid "First name"
 msgstr "Jméno"
 
-#: models.py:262
+#: models.py:294
 msgid "Last name"
 msgstr "Příjmení"
 
-#: models.py:263
+#: models.py:295
 msgid "email"
 msgstr "E-mail"
 
-#: models.py:264
+#: models.py:296
 msgid "Phone number"
 msgstr "Telefoní číslo"
 
-#: models.py:265
+#: models.py:297
 msgid "Address"
 msgstr "Adresa"
 
-#: models.py:267
+#: models.py:299
 msgid "Count guess"
 msgstr "Kolik soutěžících tipujete že se zúčastní?"
 
-#: models.py:273
+#: models.py:305
 msgid "Contestant"
 msgstr "Soutěžící"
 
-#: models.py:274
+#: models.py:306
 msgid "Contestants"
 msgstr "Soutěžící"
 
-#: models.py:284
+#: models.py:316
 msgid "Quiz results text"
 msgstr "Text s výsledkem testu"
 
-#: models.py:285
+#: models.py:317
 msgid "Points dimension from"
 msgstr "Rozsah bodů od"
 
-#: models.py:286
+#: models.py:318
 msgid "Points dimension to"
 msgstr "Rozsah bodů do"
 
-#: models.py:287
+#: models.py:319
 msgid "Count"
 msgstr "Počet"
 
-#: models.py:302
+#: models.py:334
 msgid "Result"
 msgstr "Výsledek"
 
-#: models.py:303 models.py:382 views.py:356
+#: models.py:335 models.py:471 views.py:356
 msgid "results"
 msgstr "Výsledky"
 
-#: models.py:383 views.py:254
+#: models.py:347
+#, python-format
+msgid ""
+"Invalid score interval %(points_from)s - %(points_to)s. Points dimension "
+"from can not be greater than point dimension to."
+msgstr ""
+"Neplatný rozsah bodů %(points_from)s - %(points_to)s. Rozsah bodů od musí "
+"být větší než rozsah bodů do."
+
+#: models.py:351
+msgid "Invalid score intervals"
+msgstr "Neplatné rozsahy bodů"
+
+#: models.py:357
+#, python-format
+msgid "Score %s is covered by two answers."
+msgstr "Výsledeku %s odpovídají dvě odpovědi."
+
+#: models.py:359
+#, python-format
+msgid "Score %s is not covered by any answer."
+msgstr "Pro výsledek %s neexistuje žádná odpověď."
+
+#: models.py:472 views.py:254
 msgid "result"
 msgstr "Výsledek"
 
-#: models.py:384
+#: models.py:473
 msgid "conditions"
 msgstr "podmínky"
+
+#: templates/admin/edit_inline/question_tabular.html:14
+msgid "Delete"
+msgstr ""

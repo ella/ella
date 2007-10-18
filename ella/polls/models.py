@@ -1,8 +1,10 @@
 from django.db import models, connection
 from django.contrib import admin
 from django.contrib.auth.models import User
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _, ugettext
 from django.contrib.contenttypes.models import  ContentType
+from django.newforms.models import InlineFormset
+from django.newforms.forms import ValidationError
 
 from ella.core.cache import get_cached_object, get_cached_list
 from ella.core.box import Box
@@ -335,9 +337,36 @@ class Result(models.Model):
         verbose_name = _('Result')
         verbose_name_plural = _('results')
 
+class ResultFormset(InlineFormset):
+
+    def clean(self):
+        if not self.cleaned_data:
+            return self.cleaned_data
+
+        validation_error = None
+        for i in xrange(len(self.cleaned_data)):
+            if self.cleaned_data[i]['points_from'] > self.cleaned_data[i]['points_to']:
+                print self.forms[i]
+                validation_error = ValidationError(ugettext('Invalid score interval %(points_from)s - %(points_to)s. Points dimension from can not be greater than point dimension to.') % self.cleaned_data[i])
+                self.forms[i]._errors = {'points_to': validation_error.messages}
+                #raise ValidationError, ugettext('Invalid score interval %(points_from)s - %(points_to)s. Points dimension from can not be greater than point dimension to.') % self.cleaned_data[i]
+        if validation_error:
+            raise ValidationError, ugettext('Invalid score intervals')
+
+        intervals = [ (form_data['points_from'], form_data['points_to']) for form_data in self.cleaned_data ]
+        intervals.sort()
+        for i in xrange(len(intervals) - 1):
+            if intervals[i][1] + 1 > intervals[i+1][0]:
+                raise ValidationError, ugettext('Score %s is covered by two answers.') % (intervals[i][1])
+            elif intervals[i][1] + 1 < intervals[i+1][0]:
+                raise ValidationError, ugettext('Score %s is not covered by any answer.') % (intervals[i][1] + 1)
+        return self.cleaned_data
+
 class ResultTabularOptions(admin.TabularInline):
     model = Result
     extra = 5
+    formset = ResultFormset
+
 class ChoiceTabularOptions(admin.TabularInline):
     model = Choice
     extra = 5
