@@ -329,9 +329,8 @@ class Dependency(models.Model):
 
 class ListingInlineFormset(generic.GenericInlineFormset):
     def clean (self):
-        if not self.cleaned_data:
+        if not self.cleaned_data or not self.instance:
             return self.cleaned_data
-
 
         obj = self.instance
         cat = obj.category
@@ -345,8 +344,6 @@ class ListingInlineFormset(generic.GenericInlineFormset):
 
         if main['publish_from'] != min([ d['publish_from'] for d in self.cleaned_data]):
             raise forms.ValidationError, ugettext('No listing can start sooner than main listing')
-
-
 
         return self.cleaned_data
 
