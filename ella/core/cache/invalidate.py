@@ -63,33 +63,43 @@ class CacheDeleter(object):
         Process pre_save signal
         """
         if sender in self._register:
-            model_tests = self._register[sender]
-            for key in model_tests.keys():
-                for t in model_tests.getlist(key):
+            pks, tests = self._register[sender]
+            if instance._get_pk_val() in pks:
+                for key in pks.getlist(instance._get_pk_val()):
+                    self.invalidate(sender, key, from_test=False)
+                del pks[instance._get_pk_val()]
+
+            for key in tests.keys():
+                for t in tests.getlist(key):
                     if t(instance):
                         self.invalidate(sender, key)
+                        del tests[key]
+                        break
         return instance
 
-    def invalidate(self, sender, key):
+    def invalidate(self, sender, key, from_test=True):
         from ella.core.models import Dependency
 
         cache.delete(key)
-        try:
-            del self._register[sender][key]
-        except KeyError:
-            # we might be racing against ourselves via ActiveMQ
-            pass
-
         # also destroy caches that depend on us
+
         Dependency.objects.cascade(sender, key)
 
-    def register(self, model, test, key):
+    def register_model(self, model):
         if model not in self._register:
-            self._register[model] = MultiValueDict()
+            self._register[model] = (MultiValueDict(), MultiValueDict())
             # start listening for the model requested
             dispatcher.connect(self.signal_handler, signal=signals.pre_save, sender=model)
             dispatcher.connect(self.signal_handler, signal=signals.pre_delete, sender=model)
-        self._register[model].appendlist(key, test)
+
+    def register_test(self, model, test, key):
+        self.register_model(model)
+        self._register[model][1].appendlist(key, test)
+
+    def register_pk(self, instance, key):
+        self.register_model(instance.__class__)
+        self._register[instance.__class__][0].appendlist(instance._get_pk_val(), key)
+
 
 CACHE_DELETER = CacheDeleter()
 ACTIVE_MQ_HOST = getattr(settings, 'ACTIVE_MQ_HOST', 'localhost')

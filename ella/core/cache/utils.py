@@ -41,7 +41,7 @@ def get_cached_list(model, **kwargs):
     if l is None:
         l = list(model._default_manager.filter(**kwargs))
         cache.set(key, l, 10 * 60)
-        CACHE_DELETER.register(model, lambda x: model._default_manager.filter(**kwargs).filter(pk=x._get_pk_val()) == 1, key)
+        CACHE_DELETER.register_test(model, lambda x: model._default_manager.filter(**kwargs).filter(pk=x._get_pk_val()) == 1, key)
     return l
 
 KEY_FORMAT_OBJECT = 'ella.core.cache.utils.get_cached_object'
@@ -74,7 +74,7 @@ def get_cached_object(model, **kwargs):
     if obj is None:
         obj = model._default_manager.get(**kwargs)
         cache.set(key, obj, 10 * 60)
-        CACHE_DELETER.register(model, lambda x: x._get_pk_val() == obj._get_pk_val(), key)
+        CACHE_DELETER.register_pk(obj, key)
     return obj
 
 def get_cached_object_or_404(model, **kwargs):
@@ -110,7 +110,7 @@ def cache_this(key_getter, test_builder, timeout=10*60):
                 result = func(*args, **kwargs)
                 cache.set(key, result, timeout)
                 for model, test in test_builder(*args, **kwargs):
-                    CACHE_DELETER.register(model, test, key)
+                    CACHE_DELETER.register_test(model, test, key)
             return result
 
         wrapped_func.__dict__ = func.__dict__
