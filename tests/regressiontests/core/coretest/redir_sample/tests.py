@@ -5,9 +5,9 @@ base = r'''
 >>> response.status_code
 200
 >>> response.template.name
-'core/category_detail.html'
+'page/category.html'
 >>> response.context['category']
-<Category: Home Page>
+<Category: example.com/>
 
 >>> from redir_sample.models import RedirObject
 >>> o1 = RedirObject.objects.get(pk=1)
@@ -25,7 +25,7 @@ True
 >>> response = c.get('/2007/7/1/redir-objects/redirobject-1/')
 >>> response.status_code
 301
->>> response.headers['Location']
+>>> response['Location']
 '/2007/7/1/redir-objects/redirobject-1-altered/'
 >>> response = c.get('/2007/7/1/redir-objects/redirobject-1-altered/')
 >>> response.status_code
@@ -40,7 +40,7 @@ True
 >>> response = c.get('/2007/7/1/redir-objects/redirobject-1/')
 >>> response.status_code
 301
->>> response.headers['Location']
+>>> response['Location']
 '/2007/7/1/redir-objects/redirobject-1-altered-twice/'
 >>> Redirect.objects.all()
 [<Redirect: /2007/7/1/redir-objects/redirobject-1-altered/ ---> /2007/7/1/redir-objects/redirobject-1-altered-twice/>, <Redirect: /2007/7/1/redir-objects/redirobject-1/ ---> /2007/7/1/redir-objects/redirobject-1-altered-twice/>]

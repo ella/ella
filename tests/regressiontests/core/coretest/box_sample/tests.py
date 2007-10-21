@@ -13,11 +13,11 @@ u'box/box_sample.boxedobject/some_type.html\nboxed object 1\n'
 >>> t.render(Context ({}))
 Traceback (most recent call last):
   ...
-TemplateSyntaxError: Caught an exception while rendering: box/box_sample.boxedobject/other_type.html, box/box_sample.boxedobject/base_box.html
+TemplateSyntaxError: Caught an exception while rendering: box/content_type/box_sample.boxedobject/other_type.html, box/content_type/box_sample.boxedobject/box.html, box/box_sample.boxedobject/other_type.html, box/box_sample.boxedobject/base_box.html
 <BLANKLINE>
 Original Traceback (most recent call last):
   ...
-TemplateDoesNotExist: box/box_sample.boxedobject/other_type.html, box/box_sample.boxedobject/base_box.html
+TemplateDoesNotExist: box/content_type/box_sample.boxedobject/other_type.html, box/content_type/box_sample.boxedobject/box.html, box/box_sample.boxedobject/other_type.html, box/box_sample.boxedobject/base_box.html
 <BLANKLINE>
 >>> t = Template("{% box other_type for box_sample.unboxedobject with id 2 %}{% endbox %}")
 >>> t.render(Context ({}))

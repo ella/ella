@@ -49,13 +49,13 @@ True
 >>> response.status_code
 200
 >>> response.content
-'\ncategory:Home Page,content_type_name:sample-models,object:SampleModel object,content_type:sample model,listing:SampleModel object listed in Home Page'
+'\ncategory:example.com/,content_type_name:sample-models,object:SampleModel object,content_type:sample model,listing:SampleModel object listed in example.com/'
 
 >>> response = c.get('/2007/7/1/sample-models/first-object/action/X/Y/Z/')
 >>> response.status_code
 200
 >>> response.content
-'X/Y/Z\ncategory:Home Page,content_type_name:sample-models,object:SampleModel object,content_type:sample model,listing:SampleModel object listed in Home Page'
+'X/Y/Z\ncategory:example.com/,content_type_name:sample-models,object:SampleModel object,content_type:sample model,listing:SampleModel object listed in example.com/'
 
 >>> response = c.get('/2007/7/1/sample-models/first-object/otheraction/')
 >>> response.status_code
@@ -64,7 +64,7 @@ True
 >>> response.status_code
 200
 >>> response.content
-'\ncategory:Home Page,content_type_name:other-sample-models,object:OtherSampleModel object,content_type:other sample model,listing:OtherSampleModel object listed in Home Page'
+'\ncategory:example.com/,content_type_name:other-sample-models,object:OtherSampleModel object,content_type:other sample model,listing:OtherSampleModel object listed in example.com/'
 '''
 
 __test__ = {
