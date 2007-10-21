@@ -1,4 +1,4 @@
-from django.db import backend, models, transaction, connection
+from django.db import models, transaction, connection
 from django.db.models.fields import FieldDoesNotExist
 from django.conf import settings
 from django.contrib.auth.models import SiteProfileNotAvailable
@@ -79,8 +79,8 @@ def update_karma_for_ct(content_type, owner_field, weight):
         raise SiteProfileNotAvailable
     try:
         karma_coeficient = '%s.%s' % (
-                    backend.quote_name(profile_model._meta.db_table),
-                    backend.quote_name(profile_model._meta.get_field('karma_coeficient').column)
+                    connection.ops.quote_name(profile_model._meta.db_table),
+                    connection.ops.quote_name(profile_model._meta.get_field('karma_coeficient').column)
 )
     except FieldDoesNotExist:
         karma_coeficient = 1.0
@@ -88,11 +88,11 @@ def update_karma_for_ct(content_type, owner_field, weight):
     sql = UPDATE_STATEMENT % {
         'weight' : weight,
         'karma_coeficient' : karma_coeficient,
-        'profile_table' : backend.quote_name(profile_model._meta.db_table),
-        'owner_field' : backend.quote_name(content_type.model_class()._meta.get_field(owner_field).column),
-        'rating_table' : backend.quote_name(Rating._meta.db_table),
-        'obj_table' : backend.quote_name(content_type.model_class()._meta.db_table),
-        'obj_pk' : backend.quote_name(content_type.model_class()._meta.pk.column),
+        'profile_table' : connection.ops.quote_name(profile_model._meta.db_table),
+        'owner_field' : connection.ops.quote_name(content_type.model_class()._meta.get_field(owner_field).column),
+        'rating_table' : connection.ops.quote_name(Rating._meta.db_table),
+        'obj_table' : connection.ops.quote_name(content_type.model_class()._meta.db_table),
+        'obj_pk' : connection.ops.quote_name(content_type.model_class()._meta.pk.column),
 }
 
     out = open('/tmp/zena.log', 'a')
@@ -120,7 +120,7 @@ def recalculate_karma():
             %s
         SET
             karma = %%s
-    ''' %  backend.quote_name(profile_model._meta.db_table)
+    ''' %  connection.ops.quote_name(profile_model._meta.db_table)
     cursor = connection.cursor()
     cursor.execute(sql, (INITIAL_USER_KARMA,))
 
