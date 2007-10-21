@@ -80,7 +80,7 @@ class QuestionOptions(admin.ModelAdmin):
 class TopicOptions(admin.ModelAdmin):
     raw_id_fields = ('photo',)
     def formfield_for_dbfield(self, db_field, **kwargs):
-        from ella.core import widgets
+        from ella.core.admin import widgets
         from django import newforms as forms
         if db_field.name == 'perex':
             kwargs['widget'] = widgets.RichTextAreaWidget

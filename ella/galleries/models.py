@@ -140,7 +140,7 @@ class GalleryItemTabularOptions(admin.TabularInline):
     extra = 10
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        from ella.core import widgets
+        from ella.core.admin import widgets
         if db_field.name == 'target_ct':
             kwargs['widget'] = widgets.ContentTypeWidget
         if db_field.name == 'target_id':
@@ -148,7 +148,7 @@ class GalleryItemTabularOptions(admin.TabularInline):
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 
-from ella.core.models import ListingInlineOptions
+from ella.core.admin.models import ListingInlineOptions
 from tagging.models import TaggingInlineOptions
 class GalleryOptions(admin.ModelAdmin):
     list_display = ('title', 'created', 'category', 'full_url',)

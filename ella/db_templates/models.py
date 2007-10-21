@@ -77,7 +77,7 @@ class TemplateBlockInlineOptions(admin.TabularInline):
     fieldsets = ((None, {'fields' : ('name', 'box_type', 'target_ct', 'target_id', 'text',)}),)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        from ella.core import widgets
+        from ella.core.admin import widgets
         if db_field.name == 'target_ct':
             kwargs['widget'] = widgets.ContentTypeWidget
         if db_field.name == 'target_id':

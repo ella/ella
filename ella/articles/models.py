@@ -147,7 +147,7 @@ class ArticleContentInlineOptions(admin.TabularInline):
     model = ArticleContents
     extra = 1
     def formfield_for_dbfield(self, db_field, **kwargs):
-        from ella.core import widgets
+        from ella.core.admin import widgets
         if db_field.name == 'content':
             kwargs['widget'] = widgets.RichTextAreaWidget
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
@@ -159,12 +159,12 @@ class InfoBoxOptions(admin.ModelAdmin):
     search_fields = ('title', 'content',)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        from ella.core import widgets
+        from ella.core.admin import widgets
         if db_field.name == 'content':
             kwargs['widget'] = widgets.RichTextAreaWidget
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
-from ella.core.models import ListingInlineOptions
+from ella.core.admin.models import ListingInlineOptions
 from tagging.models import TaggingInlineOptions
 class ArticleOptions(admin.ModelAdmin):
     #raw_id_fields = ('authors',)
@@ -183,7 +183,7 @@ class ArticleOptions(admin.ModelAdmin):
     prepopulated_fields = {'slug' : ('title',)}
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        from ella.core import widgets
+        from ella.core.admin import widgets
         from django import newforms as forms
         if db_field.name == 'perex':
             kwargs['widget'] = widgets.RichTextAreaWidget

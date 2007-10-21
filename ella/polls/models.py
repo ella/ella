@@ -400,7 +400,7 @@ class ContestantOptions(admin.ModelAdmin):
     ordering = ('contest', 'datetime')
     list_display = ('name', 'surname', 'user', 'datetime', 'contest', 'choices')
 
-from ella.core.models import ListingInlineOptions
+from ella.core.admin.models import ListingInlineOptions
 from tagging.models import TaggingInlineOptions
 
 class QuestionInlineOptions(admin.options.InlineModelAdmin):
