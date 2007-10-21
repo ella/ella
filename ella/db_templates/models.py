@@ -2,6 +2,7 @@ from django.db import models, transaction
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
+from django.utils.translation import ugettext_lazy as _
 
 from ella.core.cache import get_cached_object
 
