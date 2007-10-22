@@ -37,7 +37,7 @@ class RichTextAreaWidget(forms.Textarea):
             settings.ADMIN_MEDIA_PREFIX + JS_JQUERY,
             settings.ADMIN_MEDIA_PREFIX + JS_EDITOR,
             settings.ADMIN_MEDIA_PREFIX + JS_SHOWDOWN,
-            settings.ADMIN_MEDIA_PREFIX + JS_MAGICDOM,
+            settings.ADMIN_MEDIA_PREFIX + 'js/editinlineadd.js', #TODO move somewhere else
 )
     def __init__(self, attrs={}):
         super(RichTextAreaWidget, self).__init__(attrs={'class': CLASS_RICHTEXTAREA})
@@ -50,5 +50,14 @@ class ListingCategoryWidget(forms.Select):
 )
     def __init__(self, attrs={}):
         super(ListingCategoryWidget, self).__init__(attrs={'class': CLASS_LISTING_CATEGORY})
+
+class IncrementWidget(forms.TextInput):
+    class Media:
+        js = (
+            settings.ADMIN_MEDIA_PREFIX + 'js/increment.js',
+            settings.ADMIN_MEDIA_PREFIX + 'js/editinlineadd.js', #TODO move somewhere else
+)
+    def __init__(self, attrs={}):
+        super(IncrementWidget, self).__init__(attrs={'class': 'increment'})
 
 

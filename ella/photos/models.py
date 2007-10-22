@@ -385,8 +385,31 @@ class FormatOptions(admin.ModelAdmin):
 
 from tagging.models import TaggingInlineOptions
 
+class CropAreaWidget(forms.TextInput):
+    class Media:
+        JS_JQUERY = 'js/jquery.js'
+        JS_INTERFACE = 'js/interface.js'
+        JS_CROP = 'js/crop.js'
+        CSS_CROP = 'css/crop.css'
+        js = (
+            settings.ADMIN_MEDIA_PREFIX + JS_JQUERY,
+            settings.ADMIN_MEDIA_PREFIX + JS_INTERFACE,
+            settings.ADMIN_MEDIA_PREFIX + JS_CROP,
+)
+        css = {
+            'screen': (settings.ADMIN_MEDIA_PREFIX + CSS_CROP,),
+}
+    def __init__(self, attrs={}):
+        super(CropAreaWidget, self).__init__(attrs={'class': 'crop'})
+
 class FormatedPhotoInlineOptions(admin.TabularInline):
     model = FormatedPhoto
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        if db_field.name == 'crop_width' or db_field.name == 'crop_height':
+            kwargs['widget'] = CropAreaWidget
+        if db_field.name == 'crop_left' or db_field.name == 'crop_top':
+            kwargs['widget'] = CropAreaWidget
+        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 class PhotoOptions(admin.ModelAdmin):
     inlines = (FormatedPhotoInlineOptions, TaggingInlineOptions,)
@@ -396,7 +419,6 @@ class PhotoOptions(admin.ModelAdmin):
     search_fields = ('title', 'image', 'description',)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        from django import newforms as forms
         if db_field.name == 'slug':
             # slug validation
             return forms.RegexField('^[0-9a-z-]+$', max_length=255, **kwargs)

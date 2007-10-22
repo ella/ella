@@ -4,7 +4,7 @@ from django.http import HttpResponse
 
 from ella.photos import models
 from ella.core.cache.utils import get_cached_object
-def format_photo_json(request, format, photo):
+def format_photo_json(request, photo, format):
     try:
         photo = get_cached_object(models.Photo, pk=photo)
         format = get_cached_object(models.Format, pk=format)
