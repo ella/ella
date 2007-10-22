@@ -1,5 +1,6 @@
 /* File editor.js
- * Rich text editor for ELLA
+ * Rich (WYSISYM) text editor for ELLA
+ * Script takes all of textarea.rich_text_area and turns them into WYSIWYM editor on focus
  * Author: Maxim Izmaylov (izmaylov.maxim@netcentrum.cz)
  * Copyright: NetCentrum @2007
  * Requirements: jquery.js, showdown.js

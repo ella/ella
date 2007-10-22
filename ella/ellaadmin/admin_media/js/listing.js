@@ -28,7 +28,7 @@ function placeButton(){
 	// Place a button behind it
 	if(suitable){
 		$(suitable.parentNode).append(
-			$('<input type="button" id="" value="[>_<]">').bind('click', function(){
+			$('<input type="button" class="ignore" value="&uarr; Main category">').bind('click', function(){
 				suitable.selectedIndex = document.getElementById('id_category').selectedIndex;
 			})
 		);
