@@ -171,6 +171,25 @@ def get_next_url(request):
     else:
         return request.META.get('HTTP_REFERER', '/')
 
+class MyCheckboxSelectMultiple(forms.CheckboxSelectMultiple):
+    def render(self, name, value, attrs=None, choices=()):
+        from itertools import chain
+        from django.utils.encoding import force_unicode
+        from django.utils.html import escape
+        if value is None: value = []
+        has_id = attrs and 'id' in attrs
+        final_attrs = self.build_attrs(attrs, name=name)
+        str_values = set([force_unicode(v) for v in value]) # Normalize to strings.
+        for i, (option_value, option_label) in enumerate(chain(self.choices, choices)):
+            # If an ID attribute was given, add a numeric index as a suffix,
+            # so that the checkboxes don't all have the same ID attribute.
+            if has_id:
+                final_attrs = dict(final_attrs, id='%s_%s' % (attrs['id'], i))
+            cb = forms.CheckboxInput(final_attrs, check_test=lambda value: value in str_values)
+            option_value = force_unicode(option_value)
+            yield u'<label>%s %s</label>' % (cb.render(name, option_value), escape(force_unicode(option_label)))
+
+
 class MyRadioSelect(forms.RadioSelect):
     def render(self, name, value, attrs=None, choices=()):
         return self.get_renderer(name, value, attrs, choices)
@@ -179,7 +198,7 @@ def QuestionForm(question):
     if  question.allow_multiple:
         choice_field = forms.ModelMultipleChoiceField(
                 queryset=question.choices,
-                widget=forms.CheckboxSelectMultiple
+                widget=MyCheckboxSelectMultiple
 )
     else:
         choice_field = forms.ModelChoiceField(
@@ -240,7 +259,7 @@ def contest_finish(request, context, qforms, contestant_form):
     choices = '|'.join(
             '%d:%s' % (
                     question.id,
-                    question.allow_multiple and ','.join(c.id for c in f.cleaned_data['choice']) or f.cleaned_data['choice'].id)
+                    question.allow_multiple and ','.join(str(c.id) for c in f.cleaned_data['choice']) or f.cleaned_data['choice'].id)
                 for question, f in qforms
 )
     c = Contestant(
@@ -337,7 +356,7 @@ class QuizWizard(Wizard):
             choices = question.choices
             if question.allow_multiple:
                 points += sum(c.points for c in f.cleaned_data['choice'])
-                results.append('%d:%s' % (question.id, ','.join(c.id for c in f.cleaned_data['choice'])))
+                results.append('%d:%s' % (question.id, ','.join(str(c.id) for c in f.cleaned_data['choice'])))
             else:
                 points += f.cleaned_data['choice'].points
                 results.append('%d:%s' % (question.id, f.cleaned_data['choice'].id))
@@ -377,7 +396,7 @@ def result_details(request, bits, context):
         q_id, id_list = q_res.split(':')
         choices = question.choices
         if question.allow_multiple:
-            cl = set(id_list.split('|'))
+            cl = set(id_list.split(','))
             for ch in choices:
                 if str(ch.id) in cl:
                     ch.chosen = True
