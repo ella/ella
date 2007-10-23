@@ -31,12 +31,22 @@ class RSSTopCategoryListings(Feed):
     def title(self, obj):
         if isinstance(obj, tuple):
             category, content_type = obj
-            return _('Top %d %s objects in category %s.') % (NUM_IN_FEED, content_type.model_class()._meta.verbose_name_plural, category.title)
+            return _('Top %(count)d %(ctype)s objects in category %(cat)s.') % {
+                    'count' : NUM_IN_FEED,
+                    'ctype' : content_type.model_class()._meta.verbose_name_plural,
+                    'cat' : category.title
+}
         elif obj:
-            return _('Top %d objects in category %s.') % (NUM_IN_FEED, obj.title)
+            return _('Top %(count)d objects in category %(cat)s.') % {
+                    'count' : NUM_IN_FEED,
+                    'cat' : obj.title
+}
         else:
             obj = get_cached_object(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
-            return _('Top %d objects in category %s.') % (NUM_IN_FEED, obj.title)
+            return _('Top %(count)d objects in category %(cat)s.') % {
+                    'count' : NUM_IN_FEED,
+                    'cat' : obj.title
+}
 
     def item_guid(self, obj):
         ct = ContentType.objects.get_for_model(obj)

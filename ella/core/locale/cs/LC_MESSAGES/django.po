@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-07-17 17:17+0200\n"
+"POT-Creation-Date: 2007-10-23 14:19+0200\n"
 "PO-Revision-Date: 2007-07-17 17:05+0200\n"
 "Last-Translator: Honza Kral <Honza.Kral@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,102 +16,144 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: models.py:22 models.py:37
+#: feeds.py:34
+#, python-format
+msgid "Top %(count)d %(ctype)s objects in category %(cat)s."
+msgstr "Prvních %(count)d objektů typu %(ctype)s z kategorie %(cat)s."
+
+#: feeds.py:40 feeds.py:46
+#, python-format
+msgid "Top %(count)d objects in category %(cat)s."
+msgstr "Prvních %(count)d objektů z kategorie %(cat)s."
+
+#: models.py:19 models.py:34
 msgid "Name"
 msgstr "Jméno"
 
-#: models.py:23 models.py:67
+#: models.py:20 models.py:55
 msgid "Slug"
 msgstr ""
 
-#: models.py:24
-msgid "Photo"
-msgstr "Foto"
-
-#: models.py:25 models.py:39
+#: models.py:22 models.py:36
 msgid "Description"
 msgstr "Popisek"
 
-#: models.py:26
+#: models.py:23
 msgid "Text"
 msgstr "Text"
 
-#: models.py:33
+#: models.py:30
 msgid "Author"
 msgstr "Autor"
 
-#: models.py:34
+#: models.py:31
 msgid "Authors"
 msgstr "Autoři"
 
-#: models.py:38
+#: models.py:35
 msgid "URL"
 msgstr "URL"
 
-#: models.py:45
+#: models.py:42
 msgid "Source"
 msgstr "Zdroj"
 
-#: models.py:46
+#: models.py:43
 msgid "Sources"
 msgstr "Zdroje"
 
-#: models.py:66
+#: models.py:54
 msgid "Category Title"
 msgstr "Název kategorie"
 
-#: models.py:68
+#: models.py:56
 msgid "Parent Category"
 msgstr "Rodičovská kategorie"
 
-#: models.py:70
+#: models.py:58
 msgid "Category Description"
 msgstr "Popis kategorie"
 
-#: models.py:97
+#: models.py:112
 msgid "Category"
 msgstr "Kategorie"
 
-#: models.py:98
+#: models.py:113
 msgid "Categories"
 msgstr "Kategorie"
 
-#: models.py:203
+#: models.py:134
 msgid "Start of listing"
 msgstr "Začátek zveřejnění"
 
-#: models.py:204
+#: models.py:135
 msgid "Start of prioritized listing"
 msgstr "Začátek prioritizace"
 
-#: models.py:205
+#: models.py:136
 msgid "End of prioritized listing"
 msgstr "Konec prioritizace"
 
-#: models.py:206
+#: models.py:137
 msgid "Priority"
 msgstr "Priorita"
 
-#: models.py:207
+#: models.py:138
 msgid "Remove"
 msgstr "Odstranit"
 
-#: models.py:207
+#: models.py:138
 msgid "Remove object from listing after the priority wears off?"
 msgstr "Vyřadit objekt z publikace po vypršení priority_"
 
-#: models.py:251
+#: models.py:140
+msgid "Commercial"
+msgstr ""
+
+#: models.py:142
+msgid "Hidden"
+msgstr "Skrytý"
+
+#: models.py:142
+msgid "Create the object's URL, but do not list it in listings?"
+msgstr "Vytvořit URL objektu, ale nezobrazovat ho ve výčtech?"
+
+#: models.py:238
 msgid "Listing"
 msgstr "Výčet"
 
-#: models.py:252
+#: models.py:239
 msgid "Listings"
 msgstr "Výčty"
 
-#: models.py:279
+#: models.py:249
+msgid "Hits"
+msgstr ""
+
+#: models.py:295 models.py:296
+msgid "Related"
+msgstr "Související"
+
+#: models.py:326
 msgid "Dependency"
 msgstr "Závislost"
 
-#: models.py:280
+#: models.py:327
 msgid "Dependencies"
 msgstr "Závislosti"
+
+#: admin/models.py:20
+msgid "Only main listing can be hidden."
+msgstr "Pouze hlavní výčet ůže být skrytý."
+
+#: admin/models.py:22
+msgid ""
+"If an object has a listing, it must have a listing in its main category."
+msgstr "Pokud má objekt výčet, musí mít i výčet v hlavní kategorii."
+
+#: admin/models.py:25
+msgid "No listing can start sooner than main listing"
+msgstr "Žádný výčet nemůže začínat dříve než hlavní výčet."
+
+#~ msgid "Photo"
+#~ msgstr "Foto"
