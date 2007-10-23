@@ -8,6 +8,7 @@ from django.newforms.forms import ValidationError
 
 from ella.core.cache import get_cached_object, get_cached_list
 from ella.core.box import Box
+from ella.core.middleware import get_current_request
 from ella.core.models import Category, Listing
 from ella.core.managers import RelatedManager
 from ella.photos.models import Photo
@@ -185,7 +186,7 @@ class PollBox(Box):
         # state = views.check_vote(self._context['request'], self.obj)
         cont.update({
             'photo_slug' : self.params.get('photo_slug', ''),
-            'state' : views.check_vote(self._context['REQUEST'], self.obj),
+            'state' : views.check_vote(get_current_request(), self.obj),
             'state_voted' : views.POLL_USER_ALLREADY_VOTED,
             'state_just_voted' : views.POLL_USER_JUST_VOTED,
             'state_not_yet_voted' : views.POLL_USER_NOT_YET_VOTED,
@@ -194,7 +195,7 @@ class PollBox(Box):
 
     def get_cache_key(self):
         from ella.polls import views
-        return super(PollBox, self).get_cache_key() + str(views.check_vote(self._context['REQUEST'], self.obj))
+        return super(PollBox, self).get_cache_key() + str(views.check_vote(get_current_request(), self.obj))
 
     def get_cache_tests(self):
         return super(PollBox, self).get_cache_tests() + [ (Choice, lambda x: x.poll_id == self.obj.id) ]

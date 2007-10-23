@@ -15,7 +15,6 @@ def url_info(request):
         VERSION = 1
 
     return {
-        'REQUEST' : request,
         'MEDIA_URL' : settings.MEDIA_URL,
         'VERSION' : VERSION,
 }
