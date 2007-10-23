@@ -13,12 +13,13 @@ class ListingInlineFormset(generic.GenericInlineFormset):
         obj = self.instance
         cat = obj.category
 
+        main = None
         for d in self.cleaned_data:
             if d['category'] == cat:
                 main = d
             elif d['hidden']:
                 raise forms.ValidationError, ugettext('Only main listing can be hidden.')
-        else:
+        if main is None:
             raise forms.ValidationError, ugettext('If an object has a listing, it must have a listing in its main category.')
 
         if main['publish_from'] != min([ d['publish_from'] for d in self.cleaned_data]):
