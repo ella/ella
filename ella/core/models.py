@@ -139,6 +139,8 @@ class Listing(models.Model):
 
     commercial = models.BooleanField(_("Commercial"), default=False)
 
+    hidden = models.BooleanField(_(""), default=False, help_text=_("Create the object's URL, but do not list it in listings?"))
+
     objects = ListingManager()
 
     def Box(self, box_type, nodelist):

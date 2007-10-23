@@ -30,7 +30,7 @@ class ListingManager(RelatedManager):
 
     def get_queryset(self, category=None, mods=[], content_types=[], **kwargs):
         now = datetime.now()
-        qset = self.exclude(remove=True, priority_to__lte=datetime.now()).filter(publish_from__lte=now, **kwargs)
+        qset = self.exclude(remove=True, priority_to__lte=datetime.now()).filter(publish_from__lte=now, **kwargs).exclude(hidden=True)
 
         if category:
             # only this one category
