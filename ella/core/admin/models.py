@@ -25,13 +25,14 @@ class ListingInlineFormset(generic.GenericInlineFormset):
 
         return self.cleaned_data
 
-class ListingInlineOptions(admin.TabularInline):
+class ListingInlineOptions(generic.GenericTabularInline):
     @property
     def model(self):
         from ella.core.models import Listing
         return Listing
     extra = 2
-    fk_name = 'target_ct:target_id'
+    ct_field_name = 'target_ct'
+    id_field_name = 'target_id'
     formset = ListingInlineFormset
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'category':
