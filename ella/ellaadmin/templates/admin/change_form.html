@@ -8,6 +8,10 @@ adminapps = {% insert_admin_apps %}
 adminmediapath = "{% admin_media_prefix %}"
 </script>
 
+<script type="text/javascript" src="{% admin_media_prefix %}js/jquery.js"></script>
+<script type="text/javascript" src="{% admin_media_prefix %}js/editinlineadd.js"></script>
+
 {{ block.super }}
+
 {% endblock %}
 

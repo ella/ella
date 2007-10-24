@@ -45,26 +45,10 @@ class ListingInlineOptions(generic.GenericTabularInline):
 class ListingOptions(admin.ModelAdmin):
     list_display = ('target', 'category', 'publish_from', 'full_url',)
     list_filter = ('publish_from', 'category', 'target_ct',)
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'target_ct':
-            kwargs['widget'] = widgets.ContentTypeWidget
-        if db_field.name == 'target_id':
-            kwargs['widget'] = widgets.ForeignKeyRawIdWidget
-        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 class DependencyOptions(admin.ModelAdmin):
     list_filter = ('source_ct', 'target_ct',)
     list_display = ('source_ct', 'source', 'target_ct', 'target',)
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'target_ct':
-            kwargs['widget'] = widgets.ContentTypeWidget
-        if db_field.name == 'target_id':
-            kwargs['widget'] = widgets.ForeignKeyRawIdWidget
-        if db_field.name == 'source_ct':
-            kwargs['widget'] = widgets.ContentTypeWidget
-        if db_field.name == 'source_id':
-            kwargs['widget'] = widgets.ForeignKeyRawIdWidget
-        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 class CategoryOptions(admin.ModelAdmin):
     list_display = ('draw_title', 'tree_path')

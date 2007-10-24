@@ -176,14 +176,6 @@ class CommentsOptions(admin.ModelAdmin):
     search_fields = ('subject', 'content',)
     raw_id_fields = ('parent',)
 
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        from ella.ellaadmin import widgets
-        if db_field.name == 'target_ct':
-            kwargs['widget'] = widgets.ContentTypeWidget
-        if db_field.name == 'target_id':
-            kwargs['widget'] = widgets.ForeignKeyRawIdWidget
-        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
-
 
 admin.site.register(Comment, CommentsOptions)
 admin.site.register(BannedUser)

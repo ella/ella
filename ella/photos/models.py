@@ -418,12 +418,6 @@ class PhotoOptions(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
     search_fields = ('title', 'image', 'description',)
 
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'slug':
-            # slug validation
-            return forms.RegexField('^[0-9a-z-]+$', max_length=255, **kwargs)
-        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
-
     def __call__(self, request, url):
         if url and url.endswith('json'):
             from ella.photos.views import format_photo_json

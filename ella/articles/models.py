@@ -182,11 +182,8 @@ class ArticleOptions(admin.ModelAdmin):
     prepopulated_fields = {'slug' : ('title',)}
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        from django import newforms as forms
         if db_field.name == 'perex':
             kwargs['widget'] = widgets.RichTextAreaWidget
-        if db_field.name == 'slug':
-            return forms.RegexField('^[0-9a-z-]+$', max_length=255, **kwargs)
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 admin.site.register(InfoBox, InfoBoxOptions)

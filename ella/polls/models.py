@@ -362,6 +362,14 @@ class ResultFormset(InlineFormset):
                 raise ValidationError, ugettext('Score %s is not covered by any answer.') % (intervals[i][1] + 1)
         return self.cleaned_data
 
+from ella.ellaadmin import widgets
+def formfield_for_dbfield(fields):
+    def _formfield_for_dbfield(self, db_field, **kwargs):
+        if db_field.name in fields:
+            kwargs['widget'] = widgets.RichTextAreaWidget
+        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
+    return _formfield_for_dbfield
+
 class ResultTabularOptions(admin.TabularInline):
     model = Result
     extra = 5
@@ -378,6 +386,9 @@ class QuestionOptions(admin.ModelAdmin):
     """
     inlines = (ChoiceTabularOptions,)
     ordering = ('question',)
+    search_fields = ('question',)
+
+    formfield_for_dbfield = formfield_for_dbfield(['question'])
 
 class ChoiceOptions(admin.ModelAdmin):
     """
@@ -401,6 +412,8 @@ class ContestantOptions(admin.ModelAdmin):
     ordering = ('contest', 'datetime')
     list_display = ('name', 'surname', 'user', 'datetime', 'contest', 'choices')
 
+    formfield_for_dbfield = formfield_for_dbfield(['text_announcement', 'text', 'text_results'])
+
 from ella.core.admin.models import ListingInlineOptions
 from tagging.models import TaggingInlineOptions
 
@@ -408,6 +421,8 @@ class QuestionInlineOptions(admin.options.InlineModelAdmin):
     model = Question
     inlines = (ChoiceTabularOptions,)
     template = 'admin/edit_inline/question_tabular.html'
+
+    formfield_for_dbfield = formfield_for_dbfield(['question'])
 
 class ContestOptions(admin.ModelAdmin):
     list_display = ('title', 'category', 'active_from', 'full_url',)
@@ -417,11 +432,7 @@ class ContestOptions(admin.ModelAdmin):
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
 
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        from django import newforms as forms
-        if db_field.name == 'slug':
-            return forms.RegexField('^[0-9a-z-]+$', max_length=255, **kwargs)
-        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
+    formfield_for_dbfield = formfield_for_dbfield(['text_announcement', 'text', 'text_results'])
 
 class QuizOptions(admin.ModelAdmin):
     list_display = ('title', 'category', 'active_from', 'full_url',)
@@ -431,14 +442,12 @@ class QuizOptions(admin.ModelAdmin):
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
 
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        from django import newforms as forms
-        if db_field.name == 'slug':
-            return forms.RegexField('^[0-9a-z-]+$', max_length=255, **kwargs)
-        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
+    formfield_for_dbfield = formfield_for_dbfield(['text_announcement', 'text', 'text_results'])
 
+class PollOptions(admin.ModelAdmin):
+    formfield_for_dbfield = formfield_for_dbfield(['text_announcement', 'text', 'text_results'])
 
-admin.site.register(Poll)
+admin.site.register(Poll, PollOptions)
 admin.site.register(Contest, ContestOptions)
 admin.site.register(Quiz, QuizOptions)
 admin.site.register(Question, QuestionOptions)

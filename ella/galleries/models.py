@@ -10,6 +10,7 @@ from django.template.defaultfilters import slugify
 from ella.core.box import Box
 from ella.core.models import Category, Author, Category, Listing
 from ella.core.cache.utils import get_cached_object, cache_this
+from ella.ellaadmin import widgets
 
 
 def gallery_test_builder(*args, **kwargs):
@@ -140,13 +141,8 @@ class GalleryItemTabularOptions(admin.TabularInline):
     extra = 10
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        from ella.ellaadmin import widgets
         if db_field.name == 'order':
             kwargs['widget'] = widgets.IncrementWidget
-        if db_field.name == 'target_ct':
-            kwargs['widget'] = widgets.ContentTypeWidget
-        if db_field.name == 'target_id':
-            kwargs['widget'] = widgets.ForeignKeyRawIdWidget
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 
@@ -164,13 +160,15 @@ class GalleryOptions(admin.ModelAdmin):
     inlines = (GalleryItemTabularOptions, ListingInlineOptions, TaggingInlineOptions,)
     prepopulated_fields = {'slug': ('title',)}
 
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        if db_field.name == 'description':
+            kwargs['widget'] = widgets.RichTextAreaWidget
+        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 
 admin.site.register(Gallery, GalleryOptions)
-#admin.site.register(GalleryItem, GalleryItemOptions)
-
-
 
 
 from ella.galleries import management
+
 

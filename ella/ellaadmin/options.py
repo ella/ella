@@ -1,16 +1,27 @@
 from django.contrib import admin
+from django import newforms as forms
 
 from ella.ellaadmin import widgets
 
 
 def mixin_ella_admin(admin_class):
+    if admin_class == admin.ModelAdmin:
+        return ExtendedModelAdmin
+
+    if EllaAdminOptionsMixin in admin_class.__bases__:
+        return admin_class
+
+
     bases = list(admin_class.__bases__)
-    admin_class.__bases__ = tuple(bases + [EllaAdminOptionsMixin])
+    admin_class.__bases__ = tuple([EllaAdminOptionsMixin] + bases)
+    return admin_class
 
 def register_ella_admin(func):
     def _register(self, model_or_iterable, admin_class=None, **options):
         admin_class = admin_class or admin.ModelAdmin
-        mixin_ella_admin(admin_class)
+        admin_class = mixin_ella_admin(admin_class)
+        for inline in admin_class.inlines:
+            inline = mixin_ella_admin(inline)
         return func(self, model_or_iterable, admin_class, **options)
     return _register
 
@@ -18,11 +29,15 @@ class EllaAdminSite(admin.AdminSite):
     def __init__(self):
         self._registry = admin.site._registry
         for options in self._registry.values():
-            mixin_ella_admin(options.__class__)
-        site.register = register_ella_admin(site.register)
+            options.__class__ = mixin_ella_admin(options.__class__)
+            for inline in options.inlines:
+                inline = mixin_ella_admin(inline)
+        admin.AdminSite.register = register_ella_admin(admin.AdminSite.register)
 
-class EllaAdminOptionsMixin(admin.ModelAdmin):
+class EllaAdminOptionsMixin(object):
     def formfield_for_dbfield(self, db_field, **kwargs):
+        if db_field.name == 'slug':
+            return forms.RegexField('^[0-9a-z-]+$', max_length=255, **kwargs)
         if db_field.name == 'target_ct':
             kwargs['widget'] = widgets.ContentTypeWidget
         if db_field.name == 'target_id':
@@ -32,6 +47,9 @@ class EllaAdminOptionsMixin(admin.ModelAdmin):
         if db_field.name == 'source_id':
             kwargs['widget'] = widgets.ForeignKeyRawIdWidget
         return super(EllaAdminOptionsMixin, self).formfield_for_dbfield(db_field, **kwargs)
+
+class ExtendedModelAdmin(EllaAdminOptionsMixin, admin.ModelAdmin):
+    pass
 
 site = EllaAdminSite()
 
