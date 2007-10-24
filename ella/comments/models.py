@@ -177,7 +177,7 @@ class CommentsOptions(admin.ModelAdmin):
     raw_id_fields = ('parent',)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        from ella.core.admin import widgets
+        from ella.ellaadmin import widgets
         if db_field.name == 'target_ct':
             kwargs['widget'] = widgets.ContentTypeWidget
         if db_field.name == 'target_id':

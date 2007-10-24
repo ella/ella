@@ -10,6 +10,7 @@ from ella.core.models import Category, Author, Source, Listing
 from ella.core.box import Box
 from ella.core.managers import RelatedManager
 from ella.photos.models import Photo
+from ella.ellaadmin import widgets
 
 class InfoBox(models.Model):
     title = models.CharField(_('Title'), maxlength=255)
@@ -147,7 +148,6 @@ class ArticleContentInlineOptions(admin.TabularInline):
     model = ArticleContents
     extra = 1
     def formfield_for_dbfield(self, db_field, **kwargs):
-        from ella.core.admin import widgets
         if db_field.name == 'content':
             kwargs['widget'] = widgets.RichTextAreaWidget
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
@@ -159,7 +159,6 @@ class InfoBoxOptions(admin.ModelAdmin):
     search_fields = ('title', 'content',)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        from ella.core.admin import widgets
         if db_field.name == 'content':
             kwargs['widget'] = widgets.RichTextAreaWidget
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
@@ -183,7 +182,6 @@ class ArticleOptions(admin.ModelAdmin):
     prepopulated_fields = {'slug' : ('title',)}
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        from ella.core.admin import widgets
         from django import newforms as forms
         if db_field.name == 'perex':
             kwargs['widget'] = widgets.RichTextAreaWidget

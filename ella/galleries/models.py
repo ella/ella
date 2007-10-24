@@ -140,7 +140,7 @@ class GalleryItemTabularOptions(admin.TabularInline):
     extra = 10
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        from ella.core.admin import widgets
+        from ella.ellaadmin import widgets
         if db_field.name == 'order':
             kwargs['widget'] = widgets.IncrementWidget
         if db_field.name == 'target_ct':

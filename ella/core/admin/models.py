@@ -3,7 +3,7 @@ from django.utils.translation import ugettext
 from django import newforms as forms
 from django.contrib.contenttypes import generic
 
-from ella.core.admin import widgets
+from ella.ellaadmin import widgets
 
 class ListingInlineFormset(generic.GenericInlineFormset):
     def clean (self):
