@@ -1,3 +1,19 @@
+centrum-ella (0.0.18-15) unstable; urgency=low
+
+  * Moved ella.core's admin to ella.core.admin
+  * javascripts for edit inline form add, cropping, gallery ui
+  * django widgets for javascript bindings
+  * Modified generic edit inlines to match new django
+  * Added hidden option to listing
+  * Removed REQUEST from context anb moved it to thread local via middleware.
+  * first draft of the ella admin options mixin. Also moved widgets from
+    ella.core.admin to ella.ellaadmin
+  * templates changed to extend admin templates copy; help_text for
+    edit_inline; variable for default glass in gallery
+  * formfield dbfield cleanup; javascript binding cleanup
+
+ -- root <root@test-repo>  Wed, 24 Oct 2007 15:10:22 +0200
+
 centrum-ella (0.0.18-14) unstable; urgency=low
 
   * Fixed a bug when adding an invalid form
