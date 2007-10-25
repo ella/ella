@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e
+
+# remove symlink for original django templates
+ELLA_ADMIN_PATH='/usr/share/python-support/centrum-ella/ella/ellaadmin'
+DJANGO_ADMIN_PATH='/usr/share/python-support/centrum-django/django/contrib/admin'
+cd $ELLA_ADMIN_PATH/templates
+[[ -s admin_orig ]] && unlink admin_orig
+
+

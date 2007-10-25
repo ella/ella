@@ -1,3 +1,9 @@
+centrum-ella (0.0.18-16) unstable; urgency=low
+
+  * prerm script
+
+ -- root <root@test-repo>  Wed, 24 Oct 2007 20:20:53 +0200
+
 centrum-ella (0.0.18-15) unstable; urgency=low
 
   * Moved ella.core's admin to ella.core.admin
