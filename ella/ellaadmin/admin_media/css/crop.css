@@ -75,3 +75,17 @@ div#cropper {
 	bottom: -10px;
 	cursor: sw-resize;
 }
+
+#cropButtons {
+	position: absolute;
+	top: 10px;
+	left: 50%;
+	z-index: 220;
+	padding: 5px;
+	width: 280px;
+	margin-left: -140px;
+}
+#cropButtons input {
+	width: 120px;
+	margin: 0 10px;
+}
