@@ -1,3 +1,9 @@
+centrum-ella (0.0.18-17) unstable; urgency=low
+
+  * js update
+
+ -- root <root@test-repo>  Fri, 26 Oct 2007 16:03:38 +0200
+
 centrum-ella (0.0.18-16) unstable; urgency=low
 
   * prerm script
