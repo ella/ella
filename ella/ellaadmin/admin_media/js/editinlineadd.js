@@ -9,44 +9,50 @@
  */
 
 $(function(){
-	$('fieldset.module').each(function(){
+	row = Array();
+	$('fieldset.module').each(function(index){
 		if(/-COUNT$/.test($(this).prev().attr('id'))){
 			var counter = $(this).prev();
+			var table = $($(this).parent().find('table')[0]);
+			row[index] = table.find('tr:last').clone();
 			$(this).append(
 				$('<input type="button" value="+1">').click(function(){
-					addObject($($(this).parent().find('table')[0]), counter, 1);
+					addObject(table, index, counter, 1);
 				}),
 				$(' <input type="button" value="+10">').click(function(){
-					addObject($($(this).parent().find('table')[0]), counter, 10);
+					addObject(table, index, counter, 10);
 				})
 			);
 		}
 	});
 });
 
-function addObject(table, counter, count){
+function addObject(table, rowIndex, counter, count){
 	var rows = table.find('tr.row1, tr.row2').length;
 	for(var x = 0; x < count; x++){
-		var newRow = $(table.find('tr.row1')[0]).clone(true).appendTo(table);
-		newRow.find('input, select').val('').removeAttr('checked');
+		var newRow = row[rowIndex].clone();
+		newRow.appendTo(table);
 		if(rows % 2){
 			newRow.removeClass('row1').addClass('row2');
+		} else {
+			newRow.removeClass('row2').addClass('row1');
 		}
-		newRow.find('input, select, img').each(function(){
+		newRow.find('input, select, img, a').each(function(){
 			if($(this).attr('id')){
-				$(this).attr('id', $(this).attr('id').replace('-0', '-' + (rows + x)));
+				$(this).attr('id', $(this).attr('id').replace(/-\d+/, '-' + (rows + x)));
 			}
 			if($(this).attr('name')){
-				$(this).attr('name', $(this).attr('name').replace('-0', '-' + (rows + x)));
+				$(this).attr('name', $(this).attr('name').replace(/-\d+/, '-' + (rows + x)));
 			}
 			if($(this).attr('alt')){
 				$(this).attr({
-					alt: $(this).attr('alt').replace('0', rows + x),
+					alt: $(this).attr('alt').replace(/\d+/, rows + x),
 					class: 'new'
 				});
 			}
 		});
 		newRow.find('.ignore').hide();
+		rows++;
 	}
 	// Update value of the binded hidden input
 	counter.val(rows + count);
