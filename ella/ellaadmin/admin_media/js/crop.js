@@ -4,9 +4,18 @@
  * Copyright: NetCentrum @2007
  * Requirements: jquery.js, interface resizeables (interface.js)
  */
-function annihilateCropper(){
-	if(!arguments[0].keyCode || arguments[0].keyCode == 27){
+
+function annihilateCropper(e, button){
+	if((!e.keyCode && button == 'cancel') || e.keyCode == 27){
+		cTop.val(lastState.top);
+		cLeft.val(lastState.left);
+		cWidth.val(lastState.width);
+		cHeight.val(lastState.height);
 		$('#wrapper, #cropper, #cropContainer').remove();
+		$('#cropper').ResizableDestroy();
+		window.location.href = '#' + itemId;
+	} else if((!e.keyCode && button == 'ok') || e.keyCode == 13){
+		$('#wrapper, #cropper, #cropContainer, #cropButtons').remove();
 		$('#cropper').ResizableDestroy();
 		window.location.href = '#' + itemId;
 	}
@@ -30,6 +39,12 @@ function buildCropper(row, itemId){
 				cTop = $(row.find('.crop_top input')[0]);
 				cWidth = $(row.find('.crop_width input')[0]);
 				cHeight = $(row.find('.crop_height input')[0]);
+				lastState = {
+					top: cTop.val(),
+					left: cLeft.val(),
+					width: cWidth.val(),
+					height: cHeight.val()
+				}
 				mh = (document.documentElement.scrollHeight || document.body.scrollHeight);
 				mw = (document.documentElement.scrollWidth || document.body.scrollWidth);
 				lb = Math.round((mw - image.width) / 2);
@@ -81,6 +96,13 @@ function buildCropper(row, itemId){
 					}
 				});
 				$(document).bind('keyup', annihilateCropper);
+				// Buttons
+				$('body').append(
+					$('<div id="cropButtons"></div>').append(
+						$('<input type="button" value="OK" />').click(function(){annihilateCropper(false, 'ok')}),
+						$('<input type="button" value="Cancel" />').click(function(){annihilateCropper(false, 'cancel')})
+					)
+				);
 			}
 		});
 	} else {
@@ -98,7 +120,7 @@ $(function(){
 				location.href = '#wrapper';
 			}, 500);
 		});
-		$(this).find('td.format select').attr('disabled', 'disabled');
+//		$(this).find('td.format select').attr('disabled', 'disabled');
 		$(this).find('td.format a').remove();
 	});
 });
