@@ -56,8 +56,8 @@ class CategoryOptions(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
 
 class HitCountOptions(admin.ModelAdmin):
-    list_display = ('target', 'hits', 'last_seen',)
-    list_filter = ('last_seen', 'target_ct', 'site',)
+    list_display = ('target', 'hits',)
+    list_filter = ('target_ct', 'site',)
 
 class AuthorOptions(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
