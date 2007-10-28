@@ -81,6 +81,7 @@ class Photo(models.Model):
     # Authors and Sources
     authors = models.ManyToManyField(Author, verbose_name=_('Authors') , related_name='photo_set')
     source = models.ForeignKey(Source, blank=True, null=True, verbose_name=_('Source'))
+    # TODO: remove - photos aren't usually valid objects for Listing, maybe factor out
     category = models.ForeignKey(Category, verbose_name=_('Category'))
 
     created = models.DateTimeField(default=datetime.now, editable=False)
