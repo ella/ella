@@ -61,8 +61,9 @@ class PhotoBox(Box):
     def get_context(self):
         cont = super(PhotoBox, self).get_context()
         cont.update({
-                'title' : self.params.get('title', ''),
+                'title' : self.params.get('title', self.obj.title),
                 'alt' : self.params.get('alt', ''),
+                'description' : self.params.get('description', self.obj.description),
                 'show_title' : self.params.get('show_title', ''),
                 'show_description' : self.params.get('show_description', ''),
                 'show_authors' : self.params.get('show_authors', ''),
