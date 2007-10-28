@@ -176,7 +176,7 @@ class ArticleOptions(admin.ModelAdmin):
         (_("Metadata"), {'fields': ('category', 'authors', 'source', 'photo')}),
 )
     raw_id_fields = ('photo',)
-    list_filter = ('created', 'category', 'authors',)
+    list_filter = ('category__site', 'created', 'category', 'authors',)
     search_fields = ('title', 'perex',)
     inlines = (ArticleContentInlineOptions, ListingInlineOptions, TaggingInlineOptions,)
     prepopulated_fields = {'slug' : ('title',)}
