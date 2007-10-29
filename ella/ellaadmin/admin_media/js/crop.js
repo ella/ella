@@ -120,7 +120,10 @@ $(function(){
 				location.href = '#wrapper';
 			}, 500);
 		});
-//		$(this).find('td.format select').attr('disabled', 'disabled');
+		$(this).find('td.format select').each(function(){
+			$(this).clone().css('display', 'none').appendTo($(this).parent());
+			$(this).attr('disabled', 'disabled').removeAttr('id').removeAttr('name');
+		});
 		$(this).find('td.format a').remove();
 	});
 });
