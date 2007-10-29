@@ -25,6 +25,7 @@ def register_ella_admin(func):
         return func(self, model_or_iterable, admin_class, **options)
     return _register
 
+
 class EllaAdminSite(admin.AdminSite):
     def __init__(self):
         self._registry = admin.site._registry
@@ -33,6 +34,7 @@ class EllaAdminSite(admin.AdminSite):
             for inline in options.inlines:
                 inline = mixin_ella_admin(inline)
         admin.AdminSite.register = register_ella_admin(admin.AdminSite.register)
+
 
 class EllaAdminOptionsMixin(object):
     def formfield_for_dbfield(self, db_field, **kwargs):
@@ -48,8 +50,25 @@ class EllaAdminOptionsMixin(object):
             kwargs['widget'] = widgets.ForeignKeyRawIdWidget
         return super(EllaAdminOptionsMixin, self).formfield_for_dbfield(db_field, **kwargs)
 
+    '''
+    def has_change_permission(self, request, obj):
+        """
+        Returns True if the given request has permission to change the given
+        Django model instance.
+
+        If `obj` is None, this should return True if the given request has
+        permission to change *any* object of the given type.
+        """
+        if obj is None:
+            return admin.ModelAdmin.has_change_permission(self, request, obj)
+        opts = self.opts
+        return models.has_permission(user, obj.category, opts.app_label + '.' + opts.get_change_permission())
+    '''
+
+
 class ExtendedModelAdmin(EllaAdminOptionsMixin, admin.ModelAdmin):
     pass
+
 
 site = EllaAdminSite()
 
