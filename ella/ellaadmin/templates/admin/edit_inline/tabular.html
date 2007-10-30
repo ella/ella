@@ -22,6 +22,9 @@
         <tr class="{% cycle row1,row2 %} {% if inline_admin_form.original or inline_admin_form.show_url %}has_original{% endif %}">
 
         <td class="original">
+          {% if inline_admin_form.form.non_field_errors %}
+            <p>{{ inline_admin_form.form.non_field_errors }}</p>
+          {% endif %}
           {% if inline_admin_form.original or inline_admin_form.show_url %}
           <p>
           {% if inline_admin_form.original %} {{ inline_admin_form.original }}{% endif %}

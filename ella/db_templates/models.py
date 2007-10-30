@@ -97,22 +97,23 @@ class TemplateBlockFormset(InlineFormset):
 
         # check that active_till datetime is greather then active_from
         validation_error = None
-        for i in xrange(len(self.cleaned_data)):
+        for i, data in enumerate(self.cleaned_data):
             # both datetimes entered
-            if self.cleaned_data[i]['active_from'] and self.cleaned_data[i]['active_till']:
-                if self.cleaned_data[i]['active_from'] > self.cleaned_data[i]['active_till']:
-                    validation_error = ValidationError(ugettext('Invalid datetime interval %(active_from)s - %(active_till)s. Block active till must be greather then Block active from' % self.cleaned_data[i]))
-                    self.forms[i]._errors = {NON_FIELD_ERRORS: validation_error.messages}
+            if data['active_from'] and data['active_till']:
+                if data['active_from'] > data['active_till']:
+                    validation_error = ValidationError(ugettext('Invalid datetime interval %(active_from)s - %(active_till)s. Block active till must be greather then Block active from') % data)
+                    self.forms[i]._errors[NON_FIELD_ERRORS] = validation_error.messages
         if validation_error:
             raise ValidationError(ugettext('grrr'))
 
-         # dictionary of blocks with tuples (active from, active till)
+        # dictionary of blocks with tuples (active from, active till)
         items = {}
         for item in self.cleaned_data:
             if not items.has_key(item['name']):
                 items[item['name']] = [(item['active_from'], item['active_till'])]
             else:
                 items[item['name']].append((item['active_from'], item['active_till']))
+        return self.cleaned_data
 
 #        errors = []
 #        for deltas in items.values():
