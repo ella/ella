@@ -1,3 +1,9 @@
+centrum-ella (0.0.18-18) unstable; urgency=low
+
+  * admin filter listing in articles
+
+ -- root <root@test-repo>  Mon, 29 Oct 2007 16:00:33 +0100
+
 centrum-ella (0.0.18-17) unstable; urgency=low
 
   * js update
