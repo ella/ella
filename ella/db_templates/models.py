@@ -91,20 +91,16 @@ class TemplateBlockFormset(InlineFormset):
         if not self.cleaned_data:
             return self.cleaned_data
 
-        # temp
-        from pprint import pprint
-        #pprint(self.cleaned_data)
-
         # check that active_till datetime is greather then active_from
         validation_error = None
         for i, data in enumerate(self.cleaned_data):
             # both datetimes entered
             if data['active_from'] and data['active_till']:
                 if data['active_from'] > data['active_till']:
-                    validation_error = ValidationError(ugettext('Invalid datetime interval %(active_from)s - %(active_till)s. Block active till must be greather then Block active from') % data)
-                    self.forms[i]._errors[NON_FIELD_ERRORS] = validation_error.messages
+                    validation_error = ValidationError(ugettext('Block active till must be greather then Block active from') % data)
+                    self.forms[i]._errors['active_till'] = validation_error.messages
         if validation_error:
-            raise ValidationError(ugettext('grrr'))
+            raise ValidationError(ugettext('Invalid datetime interval. Block active till must be greather then Block active from') % data)
 
         # dictionary of blocks with tuples (active from, active till)
         items = {}
@@ -113,20 +109,24 @@ class TemplateBlockFormset(InlineFormset):
                 items[item['name']] = [(item['active_from'], item['active_till'])]
             else:
                 items[item['name']].append((item['active_from'], item['active_till']))
+
+        # check that intervals are not in colision
+        errors = []
+        error_message = 'Block active intervals are in colision on %s. Specified interval stops at %s and next interval started at %s.'
+        for name, intervals in items.items():
+            if len(intervals) > 1:
+                intervals.sort(self.cmp_by_till)
+                for i in xrange(len(intervals)-1):
+                    try:
+                        # exact covering allwoved (00:00:00 to 00:00:00)
+                        if intervals[i][1] > intervals[i+1][0]:
+                            errors.append(error_message % (name, intervals[i][1], intervals[i+1][0]))
+                    except TypeError:
+                        errors.append(error_message % (name, 'Infinite', intervals[i+1][0]))
+        if errors:
+            raise ValidationError, errors
+
         return self.cleaned_data
-
-#        errors = []
-#        for deltas in items.values():
-#            #print "jedem %s\n" % deltas
-#            if len(deltas) > 1:
-#                deltas.sort(self.cmp_by_till)
-#                pprint(deltas)
-#                for i in xrange(len(deltas) - 1):
-#                    print "\tpokus %d: %s vs %s\n" % (i, deltas[i][1],  deltas[i+1][0])
-#                    td = deltas[i+1][0] - deltas[i][1]
-#                    print "\t\tvysledek: %s\n" % td
-
-#        raise ValidationError, 'Jebkymrdky a co ja? datum od je %s a datum do je %s' % (self.cleaned_data[0], self.cleaned_data[1])
 
 class TemplateBlockInlineOptions(admin.TabularInline):
     model = TemplateBlock
