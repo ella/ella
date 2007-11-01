@@ -1,3 +1,9 @@
+centrum-ella (0.0.18-19) unstable; urgency=low
+
+  * admin filters, prerq changed
+
+ -- root <root@test-repo>  Wed, 31 Oct 2007 22:50:02 +0100
+
 centrum-ella (0.0.18-18) unstable; urgency=low
 
   * admin filter listing in articles
