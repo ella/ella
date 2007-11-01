@@ -1,3 +1,9 @@
+centrum-ella (0.0.18-20) unstable; urgency=low
+
+  * small template change
+
+ -- root <root@test-repo>  Thu,  1 Nov 2007 16:43:41 +0100
+
 centrum-ella (0.0.18-19) unstable; urgency=low
 
   * admin filters, prerq changed
