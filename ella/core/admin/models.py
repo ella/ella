@@ -51,6 +51,7 @@ class DependencyOptions(admin.ModelAdmin):
     list_display = ('source_ct', 'source', 'target_ct', 'target',)
 
 class CategoryOptions(admin.ModelAdmin):
+    list_filter = ('site',)
     list_display = ('draw_title', 'tree_path')
     ordering = ('tree_path',)
     prepopulated_fields = {'slug': ('title',)}
