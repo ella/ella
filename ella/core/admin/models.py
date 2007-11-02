@@ -14,9 +14,22 @@ class ListingInlineFormset(generic.GenericInlineFormset):
         cat = obj.category
 
         main = None
-        for d in self.cleaned_data:
+        err = None
+        for i, d in enumerate(self.cleaned_data):
             if d['category'] == cat:
                 main = d
+                qset = obj.__class__._default_manager.filter(slug=obj.slug, category=obj.category_id)
+                if obj._get_pk_val():
+                    qset = qset.exclude(pk=obj._get_pk_val())
+
+                for o in qset:
+                    if o.main_listing and o.main_listing.publish_from.date() == d['publish_from'].date():
+                        raise forms.ValidationError(ugettext('There is already an object published in category %(category)s with slug %(slug)s on %(date)s') % {
+                                    'slug' : obj.slug,
+                                    'category' : obj.category,
+                                    'date' : d['publish_from'].date(),
+})
+
             elif d['hidden']:
                 raise forms.ValidationError, ugettext('Only main listing can be hidden.')
         if main is None:
