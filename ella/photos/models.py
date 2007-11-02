@@ -81,30 +81,8 @@ class Photo(models.Model):
     # Authors and Sources
     authors = models.ManyToManyField(Author, verbose_name=_('Authors') , related_name='photo_set')
     source = models.ForeignKey(Source, blank=True, null=True, verbose_name=_('Source'))
-    # TODO: remove - photos aren't usually valid objects for Listing, maybe factor out
-    category = models.ForeignKey(Category, verbose_name=_('Category'))
 
     created = models.DateTimeField(default=datetime.now, editable=False)
-
-
-    @property
-    def main_listing(self):
-        from ella.core.cache import get_cached_object
-        try:
-            return get_cached_object(
-                    ContentType.objects.get_for_model(Listing),
-                    target_ct=ContentType.objects.get_for_model(self.__class__),
-                    target_id=self.id,
-                    category=self.category_id
-)
-        except Listing.DoesNotExist:
-            return None
-
-    def get_absolute_url(self):
-        listing = self.main_listing
-        if listing:
-            return listing.get_absolute_url()
-
 
     def __unicode__(self):
         return self.title
@@ -130,9 +108,12 @@ class Photo(models.Model):
     def Box(self, box_type, nodelist):
         return PhotoBox(self, box_type, nodelist)
 
-    # TODO zajistit unikatnost nazvu slugu
     def save(self):
         self.image = auto_rename(self.image, self.slug)
+        # prefill the slug with the ID, it requires double save
+        if not self.id:
+            super(Photo, self).save()
+            self.slug = str(self.id) + '-' + self.slug
         super(Photo, self).save()
 
     def ratio(self):
@@ -416,7 +397,7 @@ class FormatedPhotoInlineOptions(admin.TabularInline):
 class PhotoOptions(admin.ModelAdmin):
     inlines = (FormatedPhotoInlineOptions, TaggingInlineOptions,)
     list_display = ('title', 'width', 'height', 'thumb') ## 'authors')
-    list_filter = ('category', 'created',)
+    list_filter = ('created',)
     prepopulated_fields = {'slug': ('title',)}
     search_fields = ('title', 'image', 'description',)
 
