@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.db import models, transaction
+from django.db.models import Q
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
@@ -17,10 +18,9 @@ class DbTemplate(models.Model):
     description = models.CharField(_('Description'), maxlength=500, blank=True)
     extends = models.CharField(_('Base template'), maxlength=200)
 
-    text = models.TextField(_('Definition'), editable=False)
     def get_text(self):
         text = u'{%% extends "%s" %%}' % self.extends
-        for block in self.templateblock_set.all():
+        for block in self.templateblock_set.filter(Q(active_from__isnull=True) | Q(active_from__lte=datetime.now()), Q(active_till__isnull=True) | Q(active_till__gt=datetime.now())):
             text += '{%% block %s %%}' % block.name
             if block.box_type and block.target:
                 text += '{%% box %s for %s.%s with id %s %%}' % (
@@ -37,10 +37,9 @@ class DbTemplate(models.Model):
 
     class Meta:
         ordering = ('name',)
-
-    def save(self):
-        self.text = self.get_text()
-        super(DbTemplate, self).save()
+        unique_together = (('site', 'name'),)
+        verbose_name = _('Template')
+        verbose_name_plural = _('Templates')
 
     def __unicode__(self):
         return '%s <- %s' % (self.name, self.extends)
@@ -64,12 +63,6 @@ class TemplateBlock(models.Model):
         if not hasattr(self, '_target'):
             self._target = get_cached_object(self.target_ct, pk=self.target_id)
         return self._target
-
-    @transaction.commit_on_success
-    def save(self):
-        super(TemplateBlock, self).save()
-        # regenerate the full text
-        self.template.save()
 
     class Meta:
         verbose_name = _('Teplate block')

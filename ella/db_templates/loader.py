@@ -10,7 +10,7 @@ CT_DBTEMPLATE = ContentType.objects.get_for_model(DbTemplate)
 def load_template_source(template_name, template_dirs=None):
     try:
         t = get_cached_object(CT_DBTEMPLATE, name=template_name, site__id=settings.SITE_ID)
-        return (t.text, template_name)
+        return (t.get_text(), template_name)
     except DbTemplate.DoesNotExist:
         raise TemplateDoesNotExist, template_name
 
