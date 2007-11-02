@@ -14,8 +14,7 @@ class ListingInlineFormset(generic.GenericInlineFormset):
         cat = obj.category
 
         main = None
-        err = None
-        for i, d in enumerate(self.cleaned_data):
+        for d in self.cleaned_data:
             if d['category'] == cat:
                 main = d
                 qset = obj.__class__._default_manager.filter(slug=obj.slug, category=obj.category_id)
