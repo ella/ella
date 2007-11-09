@@ -67,13 +67,15 @@ class Server(models.Model):
 )
                 # repair priority if needed
                 if not created:
-                    si.priority = importlen - index
-                    si.save()
+                    # unwanted import item has negative priority - never more update priority
+                    if si.priority >= 0:
+                        si.priority = importlen - index
+                        si.save()
                     # if in list of previous_pk remove it from list
                     if si.pk in previous_pk:
                         previous_pk.remove(si.pk)
 
-            # for all articles in last but not in this import reset priority
+            # for all articles in last but not in this import reset priority to 0
             for prev in previous_pk:
                 reset = previous.get(pk=prev)
                 reset.priority = 0
@@ -152,7 +154,7 @@ class ServerOptions(admin.ModelAdmin):
 
 
 class ServerItemOptions(admin.ModelAdmin):
-    list_display = ('title', 'server', 'updated',)
+    list_display = ('title', 'server', 'updated','priority')
     list_filter = ('server', 'updated',)
 
 admin.site.register(Server, ServerOptions)
