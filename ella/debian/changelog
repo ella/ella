@@ -1,3 +1,13 @@
+centrum-ella (0.0.18-21) unstable; urgency=low
+
+  * added missing imports
+  * Db templates are generated on the fly now. Text field femoved. Added time managing for template blocks.
+  * Added slug validation for uniqueness
+  * Added photo's ID to its slug. Removed photo's category field.
+  * cleanup
+
+ -- root <root@test-repo>  Fri,  9 Nov 2007 14:15:34 +0100
+
 centrum-ella (0.0.18-20) unstable; urgency=low
 
   * small template change
