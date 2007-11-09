@@ -11,16 +11,18 @@ from ella.core.box import Box
 from ella.core.cache.utils import get_cached_object_or_404
 
 class ServerBox(Box):
-    def get_context(self):
-        cont = super(ServerBox, self).get_context()
-        cont['last'] = self.obj.last
-        return cont
+    pass
 
 class Server(models.Model):
     title = models.CharField(_('Title'), maxlength=100)
     domain = models.URLField(_('Domain'), verify_exists=False)
     slug = models.CharField(db_index=True, maxlength=100)
     url = models.URLField(_('Atom URL'), verify_exists=False, max_length=300)
+
+
+    def regenerate (self):
+        return '<a href="%s/fetch/">%s - %s</a>' % (self.id, _('Fetch'), self.title)
+    regenerate.allow_tags = True
 
     def Box(self, box_type, nodelist):
         return ServerBox(self, box_type, nodelist)
@@ -33,9 +35,11 @@ class Server(models.Model):
         verbose_name_plural = _('Servers')
         ordering = ('title',)
 
-    @property
-    def last(self):
-        return self.serveritem_set.all()[0]
+    def get_imports_by_time(self):
+        return self.serveritem_set.order_by("-updated")
+
+    def get_imports_by_priority(self):
+        return self.serveritem_set.order_by("-priority", "-updated")
 
     def fetch(self):
         try:
@@ -46,16 +50,35 @@ class Server(models.Model):
 
         output = feedparser.parse(self.url)
         if output['status'] == 200:
-            for e in output['entries']:
+            previous = self.serveritem_set.filter(priority__gt=0)
+            previous_pk = [ k.pk for k in previous ]
+            importlen =  len(output['entries'])
+            for index in range(importlen):
+                e = output['entries'][index]
                 si, created = ServerItem.objects.get_or_create(
                     server=self,
                     link=e['link'],
                     defaults={
+                        'priority': importlen - index,
                         'title' : e['title'],
                         'updated' : datetime.utcfromtimestamp(calendar.timegm(e['updated_parsed'])),
                         'summary' : e['summary'],
 }
 )
+                # repair priority if needed
+                if not created:
+                    si.priority = importlen - index
+                    si.save()
+                    # if in list of previous_pk remove it from list
+                    if si.pk in previous_pk:
+                        previous_pk.remove(si.pk)
+
+            # for all articles in last but not in this import reset priority
+            for prev in previous_pk:
+                reset = previous.get(pk=prev)
+                reset.priority = 0
+                reset.save()
+
 
 PHOTO_REG = re.compile(r'<img[^>]*src="(?P<url>http://[^"]*)"')
 
@@ -64,6 +87,7 @@ class ServerItem(models.Model):
     title = models.CharField(_('Title'), maxlength=100)
     summary = models.TextField(_('Summary'))
     updated = models.DateTimeField(_('Updated'))
+    priority = models.IntegerField(_('Priority'), default = 0)
     slug = models.CharField(db_index=True, maxlength=100)
     link = models.URLField(_('Link'), verify_exists=True, max_length=400)
     photo_url = models.URLField(_('Image URL'), verify_exists=False, max_length=400, blank=True)
@@ -109,7 +133,7 @@ class ServerItem(models.Model):
 
 
 class ServerOptions(admin.ModelAdmin):
-    list_display = ('title', 'domain', 'url',)
+    list_display = ('title', 'domain', 'url', 'regenerate')
     search_fields = ('domain, title', 'url',)
     prepopulated_fields = {'slug' : ('title',)}
 
@@ -121,8 +145,8 @@ class ServerOptions(admin.ModelAdmin):
             try:
                 server.fetch()
                 return http.HttpResponse('OK')
-            except:
-                return http.HttpResponse('KO')
+            except Exception, e:
+                return http.HttpResponse('KO ' + str(e))
 
         return super(ServerOptions, self).__call__(request, url)
 
