@@ -18,11 +18,37 @@ class CommentFormPreview(FormPreview):
     CommentFormPreview pri registrovanem uzivateli jej prihlasi a nezobrazi jeho heslo
     CommentFormPreview zobrazi captchu
     """
-    preview_template = ('page/comments/preview.html', 'comments/base_preview_template.html',)
-    form_template = ('page/comments/form.html', 'comments/base_preview_form_template.html',)
+
+    @property
+    def preview_template(self):
+        opts = self.state['object']._meta
+        cat = self.state['category']
+        return [
+                'page/category/%s/content_type/%s.%s/%s/comments/preview.html' % (cat.path, opts.app_label, opts.module_name, self.state['object'].slug),
+                'page/category/%s/content_type%s.%s/comments/preview.html' % (cat.path, opts.app_label, opts.module_name),
+                'page/category/%s/comments/preview.html' % cat.path,
+                'page/content_type%s.%s/comments/preview.html' % (opts.app_label, opts.module_name),
+                'page/comments/preview.html',
+
+                'comments/base_preview_template.html',
+            ]
+
+    @property
+    def form_template(self):
+        opts = self.state['object']._meta
+        cat = self.state['category']
+        return [
+                'page/category/%s/content_type/%s.%s/%s/comments/form.html' % (cat.path, opts.app_label, opts.module_name, self.state['object'].slug),
+                'page/category/%s/content_type%s.%s/comments/form.html' % (cat.path, opts.app_label, opts.module_name),
+                'page/category/%s/comments/form.html' % cat.path,
+                'page/content_type%s.%s/comments/form.html' % (opts.app_label, opts.module_name),
+                'page/comments/form.html',
+
+                'comments/base_preview_form_template.html',
+            ]
 
     def parse_params(self, context={}):
-        self.context = context
+        self.state.update(context)
 
     def done(self, request, cleaned_data):
         if 'HTTP_X_FORWARDED_FOR' in request.META:
@@ -60,12 +86,12 @@ def new_comment(request, context, reply=None):
     form = CommentForm(init_props=init_props)
     context['form'] = form
     templates = (
-        'page/category/%s/content_type/%s.%s/%s/comments/form.html' % (cat.path, opts.app_label, opts.module_name, context['category'].slug),
+        'page/category/%s/content_type/%s.%s/%s/comments/form.html' % (cat.path, opts.app_label, opts.module_name, context['object'].slug),
         'page/category/%s/content_type%s.%s/comments/form.html' % (cat.path, opts.app_label, opts.module_name),
         'page/category/%s/comments/form.html' % cat.path,
         'page/comments/form.html',
 
-        'comments/%s/%s.%s/%s_comment_add.html' % (cat.path, opts.app_label, opts.module_name, context['category'].slug),
+        'comments/%s/%s.%s/%s_comment_add.html' % (cat.path, opts.app_label, opts.module_name, context['object'].slug),
         'comments/%s/%s.%s/base_comment_add.html' % (cat.path, opts.app_label, opts.module_name),
         'comments/%s/base_comment_add.html' % cat.path,
         'comments/base_comment_add.html',

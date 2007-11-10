@@ -15,7 +15,7 @@ def comments_custom_urls(request, bits, context):
     if len(bits) == 1:
         if bits[0] == slugify(_('preview')):
             comment_preview = CommentFormPreview(CommentForm)
-            return comment_preview(request)
+            return comment_preview(request, context)
         elif bits[0] == slugify(_('new')):
             return new_comment(request, context)
 
