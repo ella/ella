@@ -9,8 +9,8 @@ def mixin_ella_admin(admin_class):
         return ExtendedModelAdmin
 
     if EllaAdminOptionsMixin in admin_class.__bases__:
+        # TODO: recursive traversal to parents...
         return admin_class
-
 
     bases = list(admin_class.__bases__)
     admin_class.__bases__ = tuple([EllaAdminOptionsMixin] + bases)
@@ -50,7 +50,21 @@ class EllaAdminOptionsMixin(object):
             kwargs['widget'] = widgets.ForeignKeyRawIdWidget
         return super(EllaAdminOptionsMixin, self).formfield_for_dbfield(db_field, **kwargs)
 
-    '''
+
+    def queryset(self, request):
+        from ella.ellaadmin import models
+        from django.db.models import Q
+        q = admin.ModelAdmin.queryset(self, request)
+
+        self.model._meta.get_field('category')
+        perm = self.opts.app_label + '.' + self.opts.get_delete_permission()
+        q = q.filter(
+                Q(category__site__in=models.applicable_sites(request.user, perm)) |
+                Q(category__in=models.applicable_categories(request.user, perm))
+)
+
+        return q
+
     def has_change_permission(self, request, obj):
         """
         Returns True if the given request has permission to change the given
@@ -59,17 +73,13 @@ class EllaAdminOptionsMixin(object):
         If `obj` is None, this should return True if the given request has
         permission to change *any* object of the given type.
         """
-        if obj is None:
+        if obj is None or not hasattr(obj, 'category'):
             return admin.ModelAdmin.has_change_permission(self, request, obj)
         opts = self.opts
-        return models.has_permission(user, obj.category, opts.app_label + '.' + opts.get_change_permission())
-    '''
-
+        return models.has_permission(user, obj, obj.category, opts.get_change_permission())
 
 class ExtendedModelAdmin(EllaAdminOptionsMixin, admin.ModelAdmin):
     pass
 
-
 site = EllaAdminSite()
-
 
