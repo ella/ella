@@ -104,7 +104,7 @@ msgstr "Odstranit"
 
 #: models.py:138
 msgid "Remove object from listing after the priority wears off?"
-msgstr "Vyřadit objekt z publikace po vypršení priority_"
+msgstr "Vyřadit objekt z publikace po vypršení priority?"
 
 #: models.py:140
 msgid "Commercial"
