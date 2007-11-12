@@ -3,8 +3,6 @@ from django.utils.translation import ugettext
 from django import newforms as forms
 from django.contrib.contenttypes import generic
 
-from ella.ellaadmin import widgets
-
 class ListingInlineFormset(generic.GenericInlineFormset):
     def clean (self):
         if not self.cleaned_data or not self.instance:
@@ -50,6 +48,7 @@ class ListingInlineOptions(generic.GenericTabularInline):
     formset = ListingInlineFormset
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'category':
+            from ella.ellaadmin import widgets
             kwargs['widget'] = widgets.ListingCategoryWidget
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
