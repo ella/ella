@@ -37,40 +37,48 @@ def has_permission(user, obj, category, perm_code):
 
     return False
 
-def applicable_sites(user, permission):
-    #SELECT DISTINCT category FROM EnableCategory JOIN permission_group USING group_id WHERE user_id = 2 AND permission_id = 1;
+def applicable_sites(user, permission=None):
     group_perms = Group._meta.get_field('permissions').m2m_db_table()
     enable_site_table = SiteUserRole._meta.db_table
     qn = connection.ops.quote_name
 
-    app_label, code = permission.split('.', 1)
-    perm = Permission.objects.get(content_type__app_label=app_label, codename=code)
-
-    return [ d['site'] for d in SiteUserRole.objects.filter(user=user).extra(
+    q = SiteUserRole.objects.filter(user=user).extra(
                         tables=(group_perms,),
                         where=(
                             '%s.group_id = %s.group_id' % (qn(group_perms), qn(enable_site_table)),
-                            '%s.permission_id = %s' % (qn(group_perms), perm.id),
 )
-).distinct().values('site') ]
+).distinct().values('site')
+    if permission:
+        app_label, code = permission.split('.', 1)
+        perm = Permission.objects.get(content_type__app_label=app_label, codename=code)
+        q = q.extra(
+                where=('%s.permission_id = %s' % (qn(group_perms), perm.id),)
+)
+    return [ d['site'] for d in q ]
 
-def applicable_categories(user, permission):
-    #SELECT DISTINCT category FROM EnableCategory JOIN permission_group USING group_id WHERE user_id = 2 AND permission_id = 1;
+
+
+def applicable_categories(user, permission=None):
     group_perms = connection.ops.quote_name(Group._meta.get_field('permissions').m2m_db_table())
     enable_cat_table = connection.ops.quote_name(CategoryUserRole._meta.db_table)
     qn = connection.ops.quote_name
 
-    app_label, code = permission.split('.', 1)
-    perm = Permission.objects.get(content_type__app_label=app_label, codename=code)
 
-    return [ d['category'] for d in CategoryUserRole.objects.filter(user=user).extra(
+    q = CategoryUserRole.objects.filter(user=user).extra(
                         tables=(group_perms,),
                         where=(
                             '%s.group_id = %s.group_id' % (qn(group_perms), qn(enable_cat_table)),
-                            '%s.permission_id = %s' % (qn(group_perms), perm.id),
 )
-).distinct().values('category') ]
+).distinct().values('category')
 
+    if permission:
+        app_label, code = permission.split('.', 1)
+        perm = Permission.objects.get(content_type__app_label=app_label, codename=code)
+        q = q.extra(
+                where=('%s.permission_id = %s' % (qn(group_perms), perm.id),)
+)
+
+    return [ d['category'] for d in q ]
 
 class CategoryUserRole(models.Model):
     """
