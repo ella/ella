@@ -57,6 +57,9 @@ class EllaAdminOptionsMixin(object):
         from django.db.models.fields import FieldDoesNotExist
         q = admin.ModelAdmin.queryset(self, request)
 
+        if request.user.is_superuser:
+            return q
+
         try:
             self.model._meta.get_field('site')
             perm = self.opts.app_label + '.' + self.opts.get_change_permission()
@@ -84,10 +87,11 @@ class EllaAdminOptionsMixin(object):
         If `obj` is None, this should return True if the given request has
         permission to change *any* object of the given type.
         """
+        from ella.ellaadmin import models
         if obj is None or not hasattr(obj, 'category'):
             return admin.ModelAdmin.has_change_permission(self, request, obj)
         opts = self.opts
-        return models.has_permission(user, obj, obj.category, opts.get_change_permission())
+        return models.has_permission(request.user, obj, obj.category, opts.get_change_permission())
 
 class ExtendedModelAdmin(EllaAdminOptionsMixin, admin.ModelAdmin):
     pass

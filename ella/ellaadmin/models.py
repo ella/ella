@@ -1,5 +1,6 @@
 from django.db import models, connection
 from django.contrib.auth.models import User, Group, Permission
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _, ugettext
@@ -13,7 +14,10 @@ def has_permission(user, obj, category, perm_code):
     group_perms = Group._meta.get_field('permissions').m2m_db_table()
     perm = Permission.objects.get(content_type=ContentType.objects.get_for_model(obj), codename=perm_code)
 
-    if CategoryUserRole.objects.filter(category=categry, user=user).extra(
+    if user.has_perm(perm_code):
+        return True
+
+    if CategoryUserRole.objects.filter(category=category, user=user).extra(
                 tables=(group_perms,),
                 where=(
                     '%s.group_id = %s.group_id' % (qn(group_perms), qn(CategoryUserRole._meta.db_table)),
@@ -22,7 +26,7 @@ def has_permission(user, obj, category, perm_code):
 ).count():
         return True
 
-    if SiteUserRole.objects.filter(site=categry.site_id, user=user).extra(
+    if SiteUserRole.objects.filter(site=category.site_id, user=user).extra(
                 tables=(group_perms,),
                 where=(
                     '%s.group_id = %s.group_id' % (qn(group_perms), qn(SiteUserRole._meta.db_table)),
