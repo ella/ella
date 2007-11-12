@@ -10,7 +10,7 @@
      {% for field in inline_admin_formset.fields %}
        {% if not field.is_hidden %}
        <th{% if forloop.first %} colspan="2"{% endif %}{% if field.help_text %} title="{{ field.help_text }}"{% endif %}>
-       {{ field.label|capfirst|escape }}{% if field.help_text %}&nbsp;[?]{% endif %}
+       {{ field.label|capfirst|escape }}{% if field.help_text %}&nbsp;[*]{% endif %}
        </th>
        {% endif %}
      {% endfor %}
