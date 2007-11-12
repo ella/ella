@@ -35,45 +35,65 @@ class EllaAdminSite(admin.AdminSite):
                 inline = mixin_ella_admin(inline)
         admin.AdminSite.register = register_ella_admin(admin.AdminSite.register)
 
+class ContentTypeChoice(forms.ChoiceField):
+    def __init__(self, choices=(), required=True, widget=None, label=None, initial=None, help_text=None, *args, **kwargs):
+        super(ContentTypeChoice, self).__init__(choices, required, widget, label, initial, help_text, *args, **kwargs)
+        print initial
+
+    def clean(self, value):
+        from django.contrib.contenttypes.models import ContentType
+        value = super(ContentTypeChoice, self).clean(value)
+        return ContentType.objects.get(pk=value)
+
 
 class EllaAdminOptionsMixin(object):
     def formfield_for_dbfield(self, db_field, **kwargs):
+        from ella.core.middleware import get_current_request
+        from ella.ellaadmin.filterspecs import get_content_types
         if db_field.name == 'slug':
             return forms.RegexField('^[0-9a-z-]+$', max_length=255, **kwargs)
-        if db_field.name == 'target_ct':
+
+        elif db_field.name in ('target_ct', 'source_ct'):
             kwargs['widget'] = widgets.ContentTypeWidget
-        if db_field.name == 'target_id':
+            return ContentTypeChoice(choices=[(u'', u"---------")] + [ (c.id, c) for c in get_content_types(get_current_request().user) ], **kwargs)
+
+        elif db_field.name in ('target_id', 'source_id',):
             kwargs['widget'] = widgets.ForeignKeyRawIdWidget
-        if db_field.name == 'source_ct':
-            kwargs['widget'] = widgets.ContentTypeWidget
-        if db_field.name == 'source_id':
-            kwargs['widget'] = widgets.ForeignKeyRawIdWidget
+
         return super(EllaAdminOptionsMixin, self).formfield_for_dbfield(db_field, **kwargs)
 
 
     def queryset(self, request):
         from ella.ellaadmin import models
-        from django.db.models import Q
+        from django.db.models import Q, query
         from django.db.models.fields import FieldDoesNotExist
         q = admin.ModelAdmin.queryset(self, request)
 
         if request.user.is_superuser:
             return q
 
+        view_perm = self.opts.app_label + '.' + 'view_' + self.model._meta.module_name.lower()
+        change_perm = self.opts.app_label + '.' + 'change_' + self.model._meta.module_name.lower()
+        sites = None
+
         try:
             self.model._meta.get_field('site')
-            perm = self.opts.app_label + '.' + self.opts.get_change_permission()
-            q = q.filter(site__in=models.applicable_sites(request.user, perm))
+            sites = models.applicable_sites(request.user, view_perm) + models.applicable_sites(request.user, change_perm)
+            q = q.filter(site__in=sites)
         except FieldDoesNotExist:
             pass
 
         try:
             self.model._meta.get_field('category')
-            perm = self.opts.app_label + '.' + self.opts.get_change_permission()
-            q = q.filter(
-                    Q(category__site__in=models.applicable_sites(request.user, perm)) |
-                    Q(category__in=models.applicable_categories(request.user, perm))
-)
+            if sites is None:
+                sites = models.applicable_sites(request.user, view_perm) + models.applicable_sites(request.user, change_perm)
+            categories = models.applicable_categories(request.user, view_perm) + models.applicable_categories(request.user, change_perm)
+
+            if sites or categories:
+                # TODO: terrible hack for circumventing invalid Q(__in=[]) | Q(__in=[])
+                q = q.filter(Q(category__site__in=sites) | Q(category__in=categories))
+            else:
+                q = query.EmptyQuerySet()
         except FieldDoesNotExist:
             pass
 
@@ -96,5 +116,4 @@ class EllaAdminOptionsMixin(object):
 class ExtendedModelAdmin(EllaAdminOptionsMixin, admin.ModelAdmin):
     pass
 
-site = EllaAdminSite()
 
