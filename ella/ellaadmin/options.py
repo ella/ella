@@ -54,14 +54,25 @@ class EllaAdminOptionsMixin(object):
     def queryset(self, request):
         from ella.ellaadmin import models
         from django.db.models import Q
+        from django.db.models.fields import FieldDoesNotExist
         q = admin.ModelAdmin.queryset(self, request)
 
-        self.model._meta.get_field('category')
-        perm = self.opts.app_label + '.' + self.opts.get_delete_permission()
-        q = q.filter(
-                Q(category__site__in=models.applicable_sites(request.user, perm)) |
-                Q(category__in=models.applicable_categories(request.user, perm))
+        try:
+            self.model._meta.get_field('site')
+            perm = self.opts.app_label + '.' + self.opts.get_change_permission()
+            q = q.filter(site__in=models.applicable_sites(request.user, perm))
+        except FieldDoesNotExist:
+            pass
+
+        try:
+            self.model._meta.get_field('category')
+            perm = self.opts.app_label + '.' + self.opts.get_change_permission()
+            q = q.filter(
+                    Q(category__site__in=models.applicable_sites(request.user, perm)) |
+                    Q(category__in=models.applicable_categories(request.user, perm))
 )
+        except FieldDoesNotExist:
+            pass
 
         return q
 
