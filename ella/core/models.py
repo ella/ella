@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 
 from django.db import models, transaction
 from django.core.urlresolvers import reverse
-from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.contrib import admin
@@ -15,6 +14,7 @@ from ella.core.admin.models import *
 
 
 class Author(models.Model):
+    from django.contrib.auth.models import User
     user = models.ForeignKey(User, blank=True, null=True)
     name = models.CharField(_('Name'), maxlength=200, blank=True)
     slug = models.CharField(_("Slug"), maxlength=200)
@@ -134,7 +134,7 @@ class Listing(models.Model):
     publish_from = models.DateTimeField(_("Start of listing"), default=datetime.now)
     priority_from = models.DateTimeField(_("Start of prioritized listing"), default=datetime.now, null=True, blank=True)
     priority_to = models.DateTimeField(_("End of prioritized listing"), default=lambda: datetime.now() + timedelta(days=7), null=True, blank=True)
-    priority_value = models.IntegerField(_("Priority"), default=DEFAULT_LISTING_PRIORITY, blank=True, null=True)
+    priority_value = models.IntegerField(_("Priority"), blank=True, null=True)
     remove = models.BooleanField(_("Remove"), help_text=_("Remove object from listing after the priority wears off?"), default=False)
 
     commercial = models.BooleanField(_("Commercial"), default=False)
