@@ -189,26 +189,6 @@ class Listing(models.Model):
             return 'http://' + site.domain + url
         return url
 
-    def save(self):
-        # do not allow prioritizations without a priority_value
-        if not self.priority_value or self.priority_value == DEFAULT_LISTING_PRIORITY:
-            self.priority_from = None
-            self.priority_to = None
-
-        obj = self.target
-        if self.category_id != obj.category_id:
-            main_listing = get_cached_object(
-                    Listing,
-                    category=obj.category_id,
-                    target_ct=self.target_ct,
-                    target_id=self.target_id
-)
-
-            if main_listing.remove:
-                self.remove = True
-                self.priority_to = min(self.priority_to, main_listing.priority_to)
-        super(Listing, self).save()
-
     def __unicode__(self):
         try:
             return u'%s listed in %s' % (self.target, self.category)
