@@ -40,12 +40,13 @@ class CommentManager(models.Manager):
 #    @cache_this(method_key_getter, get_test_builder(1))
     def get_count_for_object(self, object):
         target_ct = ContentType.objects.get_for_model(object)
-        return self.filter(target_ct=target_ct, target_id=object.id, is_public=True).count()
+        return self.filter(target_ct=target_ct, target_id=object.id,).count()
 
 #    @cache_this(method_key_getter, get_test_builder(1))
     def get_list_for_object(self, object, order_by=None, **kwargs):
         target_ct = ContentType.objects.get_for_model(object)
-        qset = self.filter(target_ct=target_ct, target_id=object._get_pk_val(), is_public=True, **kwargs)
+        #qset = self.filter(target_ct=target_ct, target_id=object._get_pk_val(), is_public=True, **kwargs)
+        qset = self.filter(target_ct=target_ct, target_id=object._get_pk_val(), **kwargs)
         if order_by:
             qset = qset.order_by(order_by)
         comment_list = list(qset)
@@ -175,7 +176,16 @@ class CommentsOptions(admin.ModelAdmin):
     list_display = ('subject', 'target', 'author', 'is_public', 'path',)
     search_fields = ('subject', 'content', 'id',)
     raw_id_fields = ('parent',)
-
+    fieldsets = (
+        (_("Deletion"), {'fields': ('is_public',)}),
+        (_("Data"), {
+            'fields': (
+                    'submit_date',
+                    'target_ct', 'target_id', 'subject', 'content',
+                    'parent', 'user', 'nickname', 'email', 'ip_address',
+)
+}),
+)
 
 admin.site.register(Comment, CommentsOptions)
 admin.site.register(BannedUser)

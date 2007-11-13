@@ -188,17 +188,19 @@ class CommentCountNode(template.Node):
         return ''
 
 
-def print_comment(comment):
-    return {'comment': comment}
+def print_comment(context, comment):
+    context['comment'] = comment
+    return context
 
-def print_comment_long(comment):
-    return {'comment': comment}
+def print_comment_long(context, comment):
+    context['comment'] = comment
+    return context
 
 
 register = template.Library()
 register.tag('get_comment_form', get_comment_form)
 register.tag('get_comment_list', get_comment_list)
 register.tag('get_comment_count', get_comment_count)
-register.inclusion_tag('inclusion_tags/print_comment.html')(print_comment)
-register.inclusion_tag('inclusion_tags/print_comment_long.html')(print_comment_long)
+register.inclusion_tag('inclusion_tags/print_comment.html', takes_context=True)(print_comment)
+register.inclusion_tag('inclusion_tags/print_comment_long.html', takes_context=True)(print_comment_long)
 
