@@ -2,16 +2,13 @@ import re
 from datetime import datetime
 import calendar
 
-from django.db import models
+from django.db import models, transaction, connection
 from django.contrib import admin
 from django.utils.html import strip_tags
 from django.utils.translation import ugettext_lazy as _
 
 from ella.core.box import Box
 from ella.core.cache.utils import get_cached_object_or_404
-
-class ServerBox(Box):
-    pass
 
 class Server(models.Model):
     title = models.CharField(_('Title'), maxlength=100)
@@ -21,11 +18,8 @@ class Server(models.Model):
 
 
     def regenerate (self):
-        return '<a href="%s/fetch/">%s - %s</a>' % (self.id, _('Fetch'), self.title)
+        return u'<a href="%s/fetch/">%s - %s</a>' % (self.id, _('Fetch'), self.title)
     regenerate.allow_tags = True
-
-    def Box(self, box_type, nodelist):
-        return ServerBox(self, box_type, nodelist)
 
     def __unicode__(self):
         return self.title
@@ -41,6 +35,7 @@ class Server(models.Model):
     def get_imports_by_priority(self):
         return self.serveritem_set.order_by("-priority", "-updated")
 
+    @transaction.commit_on_success
     def fetch(self):
         try:
             import feedparser
@@ -50,8 +45,15 @@ class Server(models.Model):
 
         output = feedparser.parse(self.url)
         if output['status'] == 200:
-            previous = self.serveritem_set.filter(priority__gt=0)
-            previous_pk = [ k.pk for k in previous ]
+            # for all articles in last but not in this import reset priority to 0
+            cursor = connection.cursor()
+            cursor.execute(
+                    'UPDATE %(table)s SET %(priority)s = 0 WHERE %(priority)s > 0' % {
+                        'table' : connection.ops.quote_name(self._meta.db_table),
+                        'priority' : connection.ops.quote_name(self._meta.get_field('priority')),
+},
+                    []
+)
             importlen =  len(output['entries'])
             for index in range(importlen):
                 e = output['entries'][index]
@@ -66,21 +68,10 @@ class Server(models.Model):
 }
 )
                 # repair priority if needed
-                if not created:
+                if not created and si.priority >= 0:
                     # unwanted import item has negative priority - never more update priority
-                    if si.priority >= 0:
-                        si.priority = importlen - index
-                        si.save()
-                    # if in list of previous_pk remove it from list
-                    if si.pk in previous_pk:
-                        previous_pk.remove(si.pk)
-
-            # for all articles in last but not in this import reset priority to 0
-            for prev in previous_pk:
-                reset = previous.get(pk=prev)
-                reset.priority = 0
-                reset.save()
-
+                    si.priority = importlen - index
+                    si.save()
 
 PHOTO_REG = re.compile(r'<img[^>]*src="(?P<url>http://[^"]*)"')
 
