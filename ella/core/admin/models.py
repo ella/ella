@@ -2,6 +2,9 @@ from django.contrib import admin
 from django.utils.translation import ugettext
 from django import newforms as forms
 from django.contrib.contenttypes import generic
+from django.contrib.contenttypes.models import ContentType
+
+from ella.core.middleware import get_current_request
 
 class ListingInlineFormset(generic.GenericInlineFormset):
     def clean (self):
@@ -29,23 +32,45 @@ class ListingInlineFormset(generic.GenericInlineFormset):
 
             elif d['hidden']:
                 raise forms.ValidationError, ugettext('Only main listing can be hidden.')
-        if main is None:
-            raise forms.ValidationError, ugettext('If an object has a listing, it must have a listing in its main category.')
 
-        if main['publish_from'] != min([ d['publish_from'] for d in self.cleaned_data]):
+        # the main listing not present
+        if main is None:
+            from ella.core.models import Listing
+            try:
+                # try to retrieve it from db
+                main = Listing.objects.get(category=cat, target_ct=ContentType.objects.get_for_model(obj), target_id=obj._get_pk_val())
+                main = main.__dict__
+            except Listing.DoesNotExist:
+                raise forms.ValidationError, ugettext('If an object has a listing, it must have a listing in its main category.')
+
+        if main['publish_from'] != min([ main['publish_from'] ] + [ d['publish_from'] for d in self.cleaned_data]):
+            # TODO: move the error to the form that is at fault
             raise forms.ValidationError, ugettext('No listing can start sooner than main listing')
 
         return self.cleaned_data
+
+    def get_queryset(self):
+        """
+        Override the default so that Listings I don't have permissions to change won't show up
+        """
+        from ella.ellaadmin import applicable_categories
+
+        if self.instance is None:
+            return []
+
+        return super(ListingInlineFormset, self).get_queryset().filter(category__in=applicable_categories(get_current_request().user, 'core.change_listing'))
 
 class ListingInlineOptions(generic.GenericTabularInline):
     @property
     def model(self):
         from ella.core.models import Listing
         return Listing
+
     extra = 2
     ct_field_name = 'target_ct'
     id_field_name = 'target_id'
     formset = ListingInlineFormset
+
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'category':
             from ella.ellaadmin import widgets
