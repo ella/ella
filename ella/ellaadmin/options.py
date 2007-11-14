@@ -1,7 +1,9 @@
 from django.contrib import admin
+from django.contrib.admin.options import flatten_fieldsets
 from django import newforms as forms
 
 from ella.ellaadmin import widgets
+from ella.core.middleware import get_current_request
 
 
 def mixin_ella_admin(admin_class):
@@ -36,19 +38,34 @@ class EllaAdminSite(admin.AdminSite):
         admin.AdminSite.register = register_ella_admin(admin.AdminSite.register)
 
 class ContentTypeChoice(forms.ChoiceField):
-    def __init__(self, choices=(), required=True, widget=None, label=None, initial=None, help_text=None, *args, **kwargs):
-        super(ContentTypeChoice, self).__init__(choices, required, widget, label, initial, help_text, *args, **kwargs)
-        print initial
-
     def clean(self, value):
         from django.contrib.contenttypes.models import ContentType
         value = super(ContentTypeChoice, self).clean(value)
         return ContentType.objects.get(pk=value)
 
+class EllaAdminForm(forms.BaseForm):
+    def clean(self):
+        from ella.ellaadmin import models
+        permission = self._model._meta.app_label + '.' + self.action + '_' + self._model._meta.module_name.lower()
+        if 'category' in self.cleaned_data:
+            print 'Found category ', self.cleaned_data['category'], permission
+            if not models.has_category_permission(get_current_request().user, self._model, self.cleaned_data['category'], permission):
+                raise forms.ValidationError, ugettext("You don't have permission to change an object in category %(category)s.") % self.cleaned_data['category']
+
+        if 'site' in self.cleaned_data:
+            if not models.has_site_permission(get_current_request().user, self._model, self.cleaned_data['site'], permission):
+                raise forms.ValidationError, ugettext("You don't have permission to change an object in site %(site)s.") % self.cleaned_data['site']
+
+        return self.cleaned_data
+
+class EllaAdminEditForm(EllaAdminForm):
+    action = 'change'
+
+class EllaAdminAddForm(EllaAdminForm):
+    action = 'add'
 
 class EllaAdminOptionsMixin(object):
     def formfield_for_dbfield(self, db_field, **kwargs):
-        from ella.core.middleware import get_current_request
         from ella.ellaadmin.filterspecs import get_content_types
         if db_field.name == 'slug':
             return forms.RegexField('^[0-9a-z-]+$', max_length=255, **kwargs)
@@ -111,7 +128,47 @@ class EllaAdminOptionsMixin(object):
         if obj is None or not hasattr(obj, 'category'):
             return admin.ModelAdmin.has_change_permission(self, request, obj)
         opts = self.opts
-        return models.has_permission(request.user, obj, obj.category, opts.get_change_permission())
+        return models.has_category_permission(request.user, obj, obj.category, opts.app_label + '.' + opts.get_change_permission())
+
+    def form_add(self, request):
+        """
+        Returns a Form class for use in the admin add view.
+        """
+        if self.declared_fieldsets:
+            fields = flatten_fieldsets(self.declared_fieldsets)
+        else:
+            fields = None
+        return forms.form_for_model(self.model, fields=fields, formfield_callback=self.formfield_for_dbfield, form=EllaAdminAddForm)
+
+    def form_change(self, request, obj):
+        """
+        Returns a Form class for use in the admin change view.
+        """
+        if self.declared_fieldsets:
+            fields = flatten_fieldsets(self.declared_fieldsets)
+        else:
+            fields = None
+        return forms.form_for_instance(obj, fields=fields, formfield_callback=self.formfield_for_dbfield, form=EllaAdminEditForm)
+
+    #def formset_add(self, request):
+    #    """Returns an InlineFormSet class for use in admin add views."""
+    #    if self.declared_fieldsets:
+    #        fields = flatten_fieldsets(self.declared_fieldsets)
+    #    else:
+    #        fields = None
+    #    return forms.inline_formset(self.parent_model, self.model, fk_name=self.fk_name, fields=fields,
+    #            formfield_callback=self.formfield_for_dbfield, extra=self.extra, formset=self.formset, form=EllaAdminAddForm)
+    #
+    #def formset_change(self, request, obj):
+    #    """Returns an InlineFormSet class for use in admin change views."""
+    #    if self.declared_fieldsets:
+    #        fields = flatten_fieldsets(self.declared_fieldsets)
+    #    else:
+    #        fields = None
+    #    return forms.inline_formset(self.parent_model, self.model, fk_name=self.fk_name, fields=fields,
+    #        formfield_callback=self.formfield_for_dbfield, extra=self.extra, formset=self.formset, form=EllaAdminEditForm)
+
+
 
 class ExtendedModelAdmin(EllaAdminOptionsMixin, admin.ModelAdmin):
     pass
