@@ -49,8 +49,8 @@ class Server(models.Model):
             cursor = connection.cursor()
             cursor.execute(
                     'UPDATE %(table)s SET %(priority)s = 0 WHERE %(priority)s > 0' % {
-                        'table' : connection.ops.quote_name(self._meta.db_table),
-                        'priority' : connection.ops.quote_name(self._meta.get_field('priority')),
+                        'table' : connection.ops.quote_name(ServerItem._meta.db_table),
+                        'priority' : connection.ops.quote_name(ServerItem._meta.get_field('priority').column),
 },
                     []
 )
