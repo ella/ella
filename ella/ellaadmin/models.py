@@ -23,9 +23,9 @@ def has_category_permission(user, model, category, permission):
                 tables=(group_perms,),
                 where=(
                     '%s.group_id = %s.group_id' % (qn(group_perms), qn(CategoryUserRole._meta.db_table)),
-                    '%s.permission_id = %s' % qn(group_perms)
+                    '%s.permission_id = %%s' % qn(group_perms)
 ),
-                params = (perm.id,)
+                params=(perm.id,)
 ).count():
         return True
 
@@ -46,9 +46,9 @@ def has_site_permission(user, model, site, permission):
                 tables=(group_perms,),
                 where=(
                     '%s.group_id = %s.group_id' % (qn(group_perms), qn(SiteUserRole._meta.db_table)),
-                    '%s.permission_id = %s' % qn(group_perms)
+                    '%s.permission_id = %%s' % qn(group_perms)
 ),
-                params = (perm.id,)
+                params=(perm.id,)
 ).count():
         return True
 
@@ -69,7 +69,8 @@ def applicable_sites(user, permission=None):
         app_label, code = permission.split('.', 1)
         perm = get_cached_object(Permission, content_type__app_label=app_label, codename=code)
         q = q.extra(
-                where=('%s.permission_id = %s' % (qn(group_perms), perm.id),)
+                where=('%s.permission_id = %%s' % qn(group_perms),),
+                params=(perm.id,)
 )
     return [ d['site'] for d in q ]
 
