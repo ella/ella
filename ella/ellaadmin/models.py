@@ -6,32 +6,49 @@ from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _, ugettext
 
 from ella.core.models import Category
+from ella.core.cache import get_cached_object
 
-#@cache_this
-def has_permission(user, obj, category, perm_code):
-    qn = connection.ops.quote_name
-
-    group_perms = Group._meta.get_field('permissions').m2m_db_table()
-    perm = Permission.objects.get(content_type=ContentType.objects.get_for_model(obj), codename=perm_code)
-
-    if user.has_perm(perm_code):
+#TODO @cache_this
+def has_category_permission(user, model, category, permission):
+    if user.has_perm(permission):
         return True
+
+    qn = connection.ops.quote_name
+    group_perms = Group._meta.get_field('permissions').m2m_db_table()
+
+    app_label, code = permission.split('.', 1)
+    perm = get_cached_object(Permission, content_type__app_label=app_label, codename=code)
 
     if CategoryUserRole.objects.filter(category=category, user=user).extra(
                 tables=(group_perms,),
                 where=(
                     '%s.group_id = %s.group_id' % (qn(group_perms), qn(CategoryUserRole._meta.db_table)),
-                    '%s.permission_id = %s' % (qn(group_perms), perm.id)
+                    '%s.permission_id = %s' % qn(group_perms)
 ),
+                params = (perm.id,)
 ).count():
         return True
 
-    if SiteUserRole.objects.filter(site=category.site_id, user=user).extra(
+    # fallback to site permissions
+    return has_site_permission(user, model, category.site_id, permission)
+
+def has_site_permission(user, model, site, permission):
+    if user.has_perm(permission):
+        return True
+
+    qn = connection.ops.quote_name
+    group_perms = Group._meta.get_field('permissions').m2m_db_table()
+
+    app_label, code = permission.split('.', 1)
+    perm = get_cached_object(Permission, content_type__app_label=app_label, codename=code)
+
+    if SiteUserRole.objects.filter(site=site, user=user).extra(
                 tables=(group_perms,),
                 where=(
                     '%s.group_id = %s.group_id' % (qn(group_perms), qn(SiteUserRole._meta.db_table)),
-                    '%s.permission_id = %s' % (qn(group_perms), perm.id)
+                    '%s.permission_id = %s' % qn(group_perms)
 ),
+                params = (perm.id,)
 ).count():
         return True
 
@@ -50,7 +67,7 @@ def applicable_sites(user, permission=None):
 ).distinct().values('site')
     if permission:
         app_label, code = permission.split('.', 1)
-        perm = Permission.objects.get(content_type__app_label=app_label, codename=code)
+        perm = get_cached_object(Permission, content_type__app_label=app_label, codename=code)
         q = q.extra(
                 where=('%s.permission_id = %s' % (qn(group_perms), perm.id),)
 )
