@@ -426,6 +426,7 @@ class ContainerNode(template.Node):
         for key in CONTAINER_VARS:
             if key not in self.params:
                 context[key] = ''
+                continue
             value = self.params[key]
             try:
                 context[key] = template.resolve_variable(value, context)
