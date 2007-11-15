@@ -45,7 +45,6 @@ class CommentManager(models.Manager):
 #    @cache_this(method_key_getter, get_test_builder(1))
     def get_list_for_object(self, object, order_by=None, **kwargs):
         target_ct = ContentType.objects.get_for_model(object)
-        #qset = self.filter(target_ct=target_ct, target_id=object._get_pk_val(), is_public=True, **kwargs)
         qset = self.filter(target_ct=target_ct, target_id=object._get_pk_val(), **kwargs)
         if order_by:
             qset = qset.order_by(order_by)
