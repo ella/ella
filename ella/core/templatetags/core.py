@@ -413,6 +413,8 @@ def do_related(parser, token):
                 raise template.TemplateSyntaxError, "%r doesn't represent any model." % m
     return RelatedNode(bits[-3], int(bits[1]), bits[-1], mods)
 
+CONTAINER_VARS = ('level', 'name', 'css_class', 'title',)
+
 class ContainerNode(template.Node):
     def __init__(self, nodelist, parameters):
         self.nodelist = nodelist
@@ -421,7 +423,8 @@ class ContainerNode(template.Node):
     def render(self, context):
         context.push()
 
-        for key, value in self.params.items():
+        for key in CONTAINER_VARS:
+            value = self.params.get(key, '')
             try:
                 context[key] = template.resolve_variable(value, context)
             except template.VariableDoesNotExist:
@@ -453,7 +456,7 @@ def do_container(parser, token):
     parameters = dict((smart_str(key), value) for key, value in zip(parameters[0::2], parameters[1::2]))
 
     for name in parameters.keys():
-        if name not in ('level', 'name', 'css_class', 'title'):
+        if name not in CONTAINER_VARS:
             raise template.TemplateSyntaxError, "%s tag does not accept %r parameter" % (bits[0], name)
 
     nodelist = parser.parse(('end' + bits[0],))
