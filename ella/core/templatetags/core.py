@@ -424,7 +424,9 @@ class ContainerNode(template.Node):
         context.push()
 
         for key in CONTAINER_VARS:
-            value = self.params.get(key, '')
+            if key not in self.params:
+                context[key] = ''
+            value = self.params[key]
             try:
                 context[key] = template.resolve_variable(value, context)
             except template.VariableDoesNotExist:
