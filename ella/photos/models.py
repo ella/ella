@@ -109,11 +109,12 @@ class Photo(models.Model):
         return PhotoBox(self, box_type, nodelist)
 
     def save(self):
-        self.image = auto_rename(self.image, self.slug)
         # prefill the slug with the ID, it requires double save
         if not self.id:
             super(Photo, self).save()
             self.slug = str(self.id) + '-' + self.slug
+        # rename image by slug
+        self.image = auto_rename(self.image, self.slug)
         super(Photo, self).save()
 
     def ratio(self):
@@ -171,10 +172,10 @@ class FormatedPhoto(models.Model):
     photo = models.ForeignKey(Photo)
     format = models.ForeignKey(Format)
     filename = models.CharField(maxlength=300, editable=False) # derive local filename and url
-    crop_left = models.PositiveIntegerField(default=0)
-    crop_top = models.PositiveIntegerField(default=0)
-    crop_width = models.PositiveIntegerField(default=0)
-    crop_height = models.PositiveIntegerField(default=0)
+    crop_left = models.PositiveIntegerField()
+    crop_top = models.PositiveIntegerField()
+    crop_width = models.PositiveIntegerField()
+    crop_height = models.PositiveIntegerField()
     width = models.PositiveIntegerField(editable=False)
     height = models.PositiveIntegerField(editable=False)
 
