@@ -91,7 +91,7 @@ class Box(object):
 
     def _get_template_list(self):
         t_list = []
-        if hasattr(self.obj, 'category_id'):
+        if hasattr(self.obj, 'category_id') and self.obj.category_id:
             from ella.core.models import Category
             from ella.core.cache.utils import get_cached_object
             cat = get_cached_object(Category, pk=self.obj.category_id)
