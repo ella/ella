@@ -1,0 +1,28 @@
+====================
+Ella Cache mechanism
+====================
+
+Ella uses `Django's caching mechanism`_ internally to cache individual values.
+
+.. _Django's caching mechanism: http://www.djangoproject.com/documentation/cache/
+
+Cache levels
+============
+
+Ella caches content on multiple levels, from the lowest - caching individual
+objects (both individual and lists) as they come from the database to caching
+entire boxes on the output.  Some time consuming calculations such as the tag
+cloud, comments count etc. are cached separately via a `cache_this`_
+decorator.
+
+Cached templates
+================
+
+Ella provides a template loader (``ella.core.cache.template_loader``) that
+caches the template sources.
+
+Cache invalidation
+==================
+
+Every cache registers with CacheInvalidator a set of tests, which are then run
+against every changed object. If a test passes, the cache is destroyed.
