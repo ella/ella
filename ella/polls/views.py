@@ -198,7 +198,8 @@ def QuestionForm(question):
     if  question.allow_multiple:
         choice_field = forms.ModelMultipleChoiceField(
                 queryset=question.choices,
-                widget=MyCheckboxSelectMultiple
+                widget=MyCheckboxSelectMultiple,
+                required=False
 )
     else:
         choice_field = forms.ModelChoiceField(
