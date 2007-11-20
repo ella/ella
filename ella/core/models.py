@@ -195,19 +195,9 @@ class Listing(models.Model):
         except models.ObjectDoesNotExist:
             return u'Broken listing in %s' % self.category
 
-    @property
-    def priority(self):
-        """
-        Get the actual priority according to settings.
-        """
+    def is_active(self):
         now = datetime.now()
-        if now > self.priority_to and self.remove:
-            return None
-        elif self.priority_from <= now <= self.priority_to:
-            return self.priority_value
-        else:
-            return DEFAULT_LISTING_PRIORITY
-
+        return not (self.priority_to and now > self.priority_to and self.remove)
 
     def full_url(self):
         return '<a href="%s">url</a>' % self.get_absolute_url()
