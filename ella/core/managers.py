@@ -96,6 +96,9 @@ class ListingManager(RelatedManager):
 def test_hitcount(*args, **kwargs):
     return []
 
+def get_top_objects_key(self, count, mods=[]):
+    return method_key_getter(self, settings.SITE_ID, count, mods)
+
 class HitCountManager(models.Manager):
     def hit(self, obj):
         # TODO FIXME: optimizations and thread safety
