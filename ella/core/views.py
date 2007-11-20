@@ -58,15 +58,26 @@ def object_detail(request, category, year, month, day, content_type, slug, url_r
     else:
         cat = get_cached_object_or_404(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
 
-    obj = get_cached_object_or_404(ct, slug=slug)
-    try:
-        date = datetime.date(int(year), int(month), int(day))
-        listing = get_cached_object_or_404(Listing, target_ct=ct, target_id=obj.id, category=cat)
-        if listing.publish_from.date() != date:
-            raise Http404
+    # ger all possible listings
+    listings = get_cached_list(
+                Listing,
+                publish_from__year=year,
+                publish_from__month=month,
+                publish_from__day=day,
+                target_ct=ct,
+                category=cat
+)
 
-    except ValueError:
-        # incorrect date
+    # get the object
+    obj = get_cached_object_or_404(ct, slug=slug, pk__in=[ l.target_id for l in listings ])
+
+    listing = None
+    # find main listing
+    for l in listings:
+        if l.target_id == obj._get_pk_val():
+            listing = l
+            break
+    else:
         raise Http404
 
     context = {

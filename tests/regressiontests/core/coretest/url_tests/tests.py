@@ -37,7 +37,9 @@ custom = r'''
 >>> c = Client()
 >>> from url_tests.models import SampleModel, register_urls
 >>> register_urls()
->>> sm = SampleModel.objects.all()[0]
+
+# sample object 1
+>>> sm = SampleModel.objects.get(pk=1)
 >>> sm.get_absolute_url()
 '/2007/7/1/sample-models/first-object/'
 >>> response = c.get('/2007/7/1/sample-models/first-object/')
@@ -46,6 +48,22 @@ custom = r'''
 >>> response.context['object'] == sm
 True
 >>> response = c.get('/2007/7/1/sample-models/first-object/action/')
+>>> response.status_code
+200
+>>> response.content
+'\ncategory:example.com/,content_type_name:sample-models,object:SampleModel object,content_type:sample model,listing:SampleModel object listed in example.com/'
+
+
+# sample object 2
+>>> sm = SampleModel.objects.get(pk=2)
+>>> sm.get_absolute_url()
+'/2007/7/2/sample-models/first-object/'
+>>> response = c.get('/2007/7/2/sample-models/first-object/')
+>>> response.status_code
+200
+>>> response.context['object'] == sm
+True
+>>> response = c.get('/2007/7/2/sample-models/first-object/action/')
 >>> response.status_code
 200
 >>> response.content
