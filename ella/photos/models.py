@@ -5,7 +5,7 @@ from os import path
 from fs import change_basename
 import shutil, os, glob
 
-from django.db import models
+from django.db import models, transaction
 from django.conf import settings
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
@@ -108,6 +108,7 @@ class Photo(models.Model):
     def Box(self, box_type, nodelist):
         return PhotoBox(self, box_type, nodelist)
 
+    @transaction.commit_on_success
     def save(self):
         # prefill the slug with the ID, it requires double save
         if not self.id:
