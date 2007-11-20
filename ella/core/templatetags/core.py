@@ -138,6 +138,10 @@ class BoxNode(template.Node):
         else:
             box = Box(obj, self.box_type, self.nodelist)
 
+        if box.obj is None:
+            # TODO: log
+            return ''
+
         # push context stack
         context.push()
         # render the box itself
