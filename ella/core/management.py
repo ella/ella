@@ -40,9 +40,7 @@ def check_url(instance):
         old_path = getattr(instance, OLD_URL_NAME)
 
         if old_path != new_path and new_path:
-            redirect = Redirect(old_path=old_path, new_path=new_path)
-            redirect.site_id = settings.SITE_ID
-            redirect.save()
+            redirect, created = Redirect.objects.get_or_create(old_path=old_path, new_path=new_path, defaults={'site_id' : settings.SITE_ID})
             for r in Redirect.objects.filter(new_path=old_path):
                 r.new_path = new_path
                 r.save()
