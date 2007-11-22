@@ -26,3 +26,6 @@ Cache invalidation
 
 Every cache registers with CacheInvalidator a set of tests, which are then run
 against every changed object. If a test passes, the cache is destroyed.
+
+ActiveMQ (via ``stomp`` package) is used to propagate the signals across
+multiple frontends.
