@@ -27,7 +27,7 @@ class CommentFormPreview(FormPreview):
                 'page/category/%s/content_type/%s.%s/%s/comments/preview.html' % (cat.path, opts.app_label, opts.module_name, self.state['object'].slug),
                 'page/category/%s/content_type%s.%s/comments/preview.html' % (cat.path, opts.app_label, opts.module_name),
                 'page/category/%s/comments/preview.html' % cat.path,
-                'page/content_type%s.%s/comments/preview.html' % (opts.app_label, opts.module_name),
+                'page/content_type/%s.%s/comments/preview.html' % (opts.app_label, opts.module_name),
                 'page/comments/preview.html',
 
                 'comments/base_preview_template.html',
@@ -41,7 +41,7 @@ class CommentFormPreview(FormPreview):
                 'page/category/%s/content_type/%s.%s/%s/comments/form.html' % (cat.path, opts.app_label, opts.module_name, self.state['object'].slug),
                 'page/category/%s/content_type%s.%s/comments/form.html' % (cat.path, opts.app_label, opts.module_name),
                 'page/category/%s/comments/form.html' % cat.path,
-                'page/content_type%s.%s/comments/form.html' % (opts.app_label, opts.module_name),
+                'page/content_type/%s.%s/comments/form.html' % (opts.app_label, opts.module_name),
                 'page/comments/form.html',
 
                 'comments/base_preview_form_template.html',

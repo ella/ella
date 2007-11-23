@@ -67,3 +67,8 @@ this only on main listing by setting the hidden attribute.
 The listing is treated as usual with the exception of ``get_listing`` skips
 it.
 
+Displaying object lists
+=======================
+
+See templtetag ``listing``.
+
