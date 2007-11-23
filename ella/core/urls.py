@@ -13,8 +13,9 @@ urlpatterns = patterns('',
     # home page
     url(r'^$', home, name="root_homepage"),
 
-    # export banner
+    # export banners
     url(r'^export/$', 'ella.core.views.export', {'count' : 3}, name="export"),
+    url(r'^export/(?P<name>[a-z0-9-]+)/$', 'ella.core.views.export', {'count' : 3}, name="named_export"),
 
     # rss feeds
     url(r'^feeds/(?P<url>.*)/$', 'django.contrib.syndication.views.feed', {'feed_dict': feeds}, name="feeds"),

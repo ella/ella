@@ -298,18 +298,20 @@ def export_test(*args, **kwargs):
     return []
 
 def export_key(*args, **kwargs):
-    return 'export:%d:%d' % (settings.SITE_ID, kwargs.get('count', 0))
+    kwargs['site'] = settings.SITE_ID
+    return method_key_getter(*args, **kwargs)
 
 @cache_this(export_key, export_test, timeout=60*60)
-def export(request, count, models=None):
-    if models is None:
-        from ella.articles.models import Article
-        models = [ Article, ]
+def export(request, count, name=None, models=None):
+    t_list = []
+    if name:
+        t_list.append('page/export/%s.html' % name)
+    t_list.append('page/export/banner.html')
 
     cat = get_cached_object_or_404(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
     listing = Listing.objects.get_listing(count=count, category=cat, mods=models)
     return render_to_response(
-            ('page/export_banner.html', 'export_banner.html',),
+            t_list,
             {'category' : cat, 'listing' : listing},
             context_instance=RequestContext(request)
 )
