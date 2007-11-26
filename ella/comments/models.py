@@ -36,11 +36,20 @@ def get_test_builder(object_order):
         return [ (Comment, lambda x: x.target == obj) ]
     return test_for_comment
 
+def build_tree(comment_list):
+    for c in comment_list:
+        # TODO: ugly n^2
+        c.sons = [
+                i for i in comment_list \
+                if i.path.startswith(c.path) and i.level == c.level+1
+            ]
+    return comment_list
+
 class CommentManager(models.Manager):
 #    @cache_this(method_key_getter, get_test_builder(1))
-    def get_count_for_object(self, object):
+    def get_count_for_object(self, object, **kwargs):
         target_ct = ContentType.objects.get_for_model(object)
-        return self.filter(target_ct=target_ct, target_id=object.id,).count()
+        return self.filter(target_ct=target_ct, target_id=object.id, **kwargs).count()
 
 #    @cache_this(method_key_getter, get_test_builder(1))
     def get_list_for_object(self, object, order_by=None, **kwargs):
@@ -48,14 +57,7 @@ class CommentManager(models.Manager):
         qset = self.filter(target_ct=target_ct, target_id=object._get_pk_val(), **kwargs)
         if order_by:
             qset = qset.order_by(order_by)
-        comment_list = list(qset)
-        for c in comment_list:
-            # TODO: ugly n^2
-            c.sons = [
-                    i for i in comment_list \
-                    if i.path.startswith(c.path) and i.level == c.level+1
-                ]
-        return comment_list
+        return build_tree(list(qset))
 
 class Comment(models.Model):
     # what is this comment for

@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
+from django.utils.translation import ugettext_lazy as _
+
 from ella.core.models import Listing, Category
 
 class Apple(models.Model):
@@ -33,9 +35,6 @@ class Orange(models.Model):
 from django.contrib import admin
 from django.contrib.admin.sites import AlreadyRegistered
 
-try:
-    admin.site.register(Apple)
-    admin.site.register(Orange)
-except AlreadyRegistered:
-    pass
+admin.site.register(Apple)
+admin.site.register(Orange)
 
