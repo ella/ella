@@ -1,8 +1,8 @@
-from django.db import models, connection
-from django.contrib.auth.models import User, Group, Permission
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.sites.models import Site
+from django.db import models
 from django.contrib import admin
+from django.contrib.sites.models import Site
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import User, Group, Permission
 from django.utils.translation import ugettext_lazy as _, ugettext
 
 from ella.core.models import Category
@@ -13,19 +13,13 @@ def has_category_permission(user, model, category, permission):
     if user.has_perm(permission):
         return True
 
-    qn = connection.ops.quote_name
-    group_perms = Group._meta.get_field('permissions').m2m_db_table()
-
     app_label, code = permission.split('.', 1)
     perm = get_cached_object(Permission, content_type__app_label=app_label, codename=code)
 
-    if CategoryUserRole.objects.filter(category=category, user=user).extra(
-                tables=(group_perms,),
-                where=(
-                    '%s.group_id = %s.group_id' % (qn(group_perms), qn(CategoryUserRole._meta.db_table)),
-                    '%s.permission_id = %%s' % qn(group_perms)
-),
-                params=(perm.id,)
+    if CategoryUserRole.objects.filter(
+            category=category,
+            user=user,
+            group__permissions=perm
 ).count():
         return True
 
@@ -36,65 +30,37 @@ def has_site_permission(user, model, site, permission):
     if user.has_perm(permission):
         return True
 
-    qn = connection.ops.quote_name
-    group_perms = Group._meta.get_field('permissions').m2m_db_table()
-
     app_label, code = permission.split('.', 1)
     perm = get_cached_object(Permission, content_type__app_label=app_label, codename=code)
 
-    if SiteUserRole.objects.filter(site=site, user=user).extra(
-                tables=(group_perms,),
-                where=(
-                    '%s.group_id = %s.group_id' % (qn(group_perms), qn(SiteUserRole._meta.db_table)),
-                    '%s.permission_id = %%s' % qn(group_perms)
-),
-                params=(perm.id,)
-).count():
+    if SiteUserRole.objects.filter(site=site, user=user, group__permissions=perm).count():
         return True
 
     return False
 
 def applicable_sites(user, permission=None):
-    group_perms = Group._meta.get_field('permissions').m2m_db_table()
-    enable_site_table = SiteUserRole._meta.db_table
-    qn = connection.ops.quote_name
-
-    q = SiteUserRole.objects.filter(user=user).extra(
-                        tables=(group_perms,),
-                        where=(
-                            '%s.group_id = %s.group_id' % (qn(group_perms), qn(enable_site_table)),
-)
-).distinct().values('site')
+    q = SiteUserRole.objects.filter(user=user).distinct().values('site')
     if permission:
         app_label, code = permission.split('.', 1)
         perm = get_cached_object(Permission, content_type__app_label=app_label, codename=code)
-        q = q.extra(
-                where=('%s.permission_id = %%s' % qn(group_perms),),
-                params=(perm.id,)
-)
+        q = q.filter(group__permissions=perm)
+    else:
+        # take any permission
+        q = q.filter(group__permissions__id__isnull=False)
     return [ d['site'] for d in q ]
 
 
 
 def applicable_categories(user, permission=None):
-    group_perms = connection.ops.quote_name(Group._meta.get_field('permissions').m2m_db_table())
-    enable_cat_table = connection.ops.quote_name(CategoryUserRole._meta.db_table)
-    qn = connection.ops.quote_name
-
-
-    q = CategoryUserRole.objects.filter(user=user).extra(
-                        tables=(group_perms,),
-                        where=(
-                            '%s.group_id = %s.group_id' % (qn(group_perms), qn(enable_cat_table)),
-)
-).distinct().values('category')
+    q = CategoryUserRole.objects.filter(user=user).distinct().values('category')
 
     if permission:
         app_label, code = permission.split('.', 1)
         perm = Permission.objects.get(content_type__app_label=app_label, codename=code)
-        q = q.extra(
-                where=('%s.permission_id = %s' % (qn(group_perms), perm.id),)
-)
+        q = q.filter(group__permissions=perm)
+    else:
+        # take any permission
+        q = q.filter(group_permissions__id__isnull=False)
 
     return [ d['category'] for d in q ]
 
