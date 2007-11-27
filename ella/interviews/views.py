@@ -48,11 +48,26 @@ class ReplyForm(forms.Form):
         a.save()
         return a
 
+def detail(request, context):
+    interview = context['object']
+    context['form'] = QuestionForm()
+    return render_to_response(
+            (
+                'page/category/%s/content_type/interviews.interview/%s/object.html' % (context['category'].slug, interview.slug),
+                'page/category/%s/content_type/interviews.interview/object.html' % context['category'].slug,
+                'page/content_type/interviews.interview/object.html',
+                'page/object.html',
+),
+            context,
+            context_instance=RequestContext(request)
+)
+
 def unanswered(request, bits, context):
     if bits:
         raise Http404
 
     interview = context['object']
+    context['form'] = QuestionForm()
     return render_to_response(
             (
                 'page/category/%s/content_type/interviews.interview/%s/unanswered.html' % (context['category'].slug, interview.slug),
@@ -169,8 +184,8 @@ class QuestionFormPreview(FormPreview):
 
         return HttpResponseRedirect('..')
 
-
 dispatcher.register(slugify(ugettext('unanswered')), unanswered, model=Interview)
 dispatcher.register(slugify(ugettext('reply')), reply, model=Interview)
 dispatcher.register(slugify(ugettext('ask')), QuestionFormPreview(QuestionForm),  model=Interview)
 
+dispatcher.register_custom_detail(Interview, detail)
