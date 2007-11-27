@@ -41,8 +41,13 @@ class Interview(models.Model):
 
     # Contents
     perex = models.TextField(_('Perex'))
-    active_from = models.DateTimeField(_('Active from'))
-    active_to = models.DateTimeField(_('Active to'))
+    content = models.TextField(_('Text'))
+
+    reply_from = models.DateTimeField(_('Reply from'))
+    reply_to = models.DateTimeField(_('Reply to'))
+
+    ask_from = models.DateTimeField(_('Ask from'))
+    ask_to = models.DateTimeField(_('Ask to'))
 
     # Authors and Sources
     authors = models.ManyToManyField(Author, verbose_name=_('Authors'))
@@ -56,18 +61,44 @@ class Interview(models.Model):
 
     objects = RelatedManager()
 
-    @property
-    def active(self):
+    def can_reply(self):
         now = datetime.now()
-        return self.active_from <= now < active_to
+        return self.reply_from <= now < self.reply_to
 
-    def get_interviewees(self, request):
-        if not self.active or not request.user.is_authenticated():
-            return []
+    def can_ask(self):
+        now = datetime.now()
+        return self.ask_from <= now < self.ask_to
 
-        interviewees = get_cached_list(Interviewee, interview__pk=self.pk)
-        # TODO: filter only those interviewees that can be replying now (permission-wise)
-        return interviewees
+    def get_questions(self):
+        now = datetime.now()
+
+        q = self.question_set.all()
+
+        if now >= self.ask_to:
+            q = q.order_by('submit_date')
+        else:
+            q = q.order_by('-submit_date')
+
+        if now >= self.reply_from:
+            # only answered questions
+            q = q.filter(answer__pk__isnull=False).distinct()
+
+        # TODO: caching
+        return q
+
+    def unanswered_questions(self):
+        # TODO: caching
+        q = self.question_set.all().order_by('submit_date').filter(answer__pk__isnull=True)
+        return q
+
+    def get_interviewees(self, user):
+        if not hasattr(self, '_interviewees'):
+            if not user.is_authenticated() or not self.can_reply():
+                self._interviewees = []
+            else:
+                # TODO: filter only those interviewees that can be replying now (permission-wise)
+                self._interviewees = get_cached_list(Interviewee, interview__pk=self.pk)
+        return self._interviewees
 
     def get_photo(self):
         if not hasattr(self, '_photo'):
@@ -105,11 +136,83 @@ class Interview(models.Model):
     class Meta:
         verbose_name = _('Interview')
         verbose_name_plural = _('Interviews')
-        ordering = ('-active_from',)
+        ordering = ('-ask_from',)
 
     def __unicode__(self):
         return self.title
 
+
+class Question(models.Model):
+    interview = models.ForeignKey(Interview)
+    content = models.TextField(_('Question text'))
+
+    # author if is authorized
+    user = models.ForeignKey(User, verbose_name=_('authorized author'), blank=True, null=True, related_name='interview_question_set')
+    # author otherwise
+    nickname = models.CharField(_("anonymous author's nickname"), maxlength=200, blank=True)
+    email = models.EmailField(_('authors email (optional)'), blank=True)
+
+    # authors ip address
+    ip_address = models.IPAddressField(_('ip address'), blank=True, null=True)
+
+    # comment metadata
+    submit_date = models.DateTimeField(_('date/time submitted'), default=datetime.now, editable=True)
+    is_public = models.BooleanField(_('is public'), default=True)
+
+    def is_authorized(self):
+        if self.user_id:
+            return True
+        return False
+
+    @property
+    def author(self):
+        if self.is_authorized():
+            user = get_cached_object(User, pk=self.user_id)
+            return user.username
+        return self.nickname
+
+    @property
+    def answers(self):
+        if not hasattr(self, '_answers'):
+            # TODO: caching
+            self._answers = list(self.answer_set.all())
+        return self._answers
+
+    def answered(self):
+        return bool(self.answers)
+
+    class Meta:
+        ordering = ('-submit_date',)
+        verbose_name = _('Question')
+        verbose_name_plural = _('Questions')
+
+
+class Answer(models.Model):
+    question = models.ForeignKey(Question)
+    interviewee = models.ForeignKey(Interviewee)
+
+    submit_date = models.DateTimeField(_('date/time submitted'), default=datetime.now)
+    content = models.TextField(_('Answer text'))
+
+    class Meta:
+        ordering = ('-submit_date',)
+        verbose_name = _('Answer')
+        verbose_name_plural = _('Answer')
+
+class AnswerInlineOptions(admin.TabularInline):
+    model = Answer
+    extra = 2
+
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        if db_field.name == 'content':
+            kwargs['widget'] = widgets.RichTextAreaWidget
+        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
+
+class QuestionOptions(admin.ModelAdmin):
+    list_display = ('interview', 'author', 'submit_date',)
+    list_filter = ('submit_date',)
+    search_fields = ('content', 'nickname', 'email',)
+    inlines = (AnswerInlineOptions,)
 
 class IntervieweeOptions(admin.ModelAdmin):
     list_display = ('__str__', 'user', 'author',)
@@ -117,18 +220,20 @@ class IntervieweeOptions(admin.ModelAdmin):
     prepopulated_fields = {'slug' : ('name',)}
 
 class InterviewOptions(admin.ModelAdmin):
-    list_display = ('title', 'category', 'active_from', 'full_url',)
-    list_filter = ('category__site', 'active_from', 'category', 'authors',)
-    date_hierarchy = 'active_from'
+    list_display = ('title', 'category', 'ask_from', 'full_url',)
+    list_filter = ('category__site', 'ask_from', 'category', 'authors',)
+    date_hierarchy = 'ask_from'
     raw_id_fields = ('photo', 'interviewees',)
     search_fields = ('title', 'perex',)
     prepopulated_fields = {'slug' : ('title',)}
     inlines = (ListingInlineOptions,)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'perex':
+        if db_field.name in ('perex', 'content'):
             kwargs['widget'] = widgets.RichTextAreaWidget
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 admin.site.register(Interviewee, IntervieweeOptions)
 admin.site.register(Interview, InterviewOptions)
+admin.site.register(Question, QuestionOptions)
+
