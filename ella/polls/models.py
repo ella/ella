@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.db import models, connection
 from django.contrib import admin
 from django.contrib.auth.models import User
@@ -12,6 +14,11 @@ from ella.core.middleware import get_current_request
 from ella.core.models import Category, Listing
 from ella.core.managers import RelatedManager
 from ella.photos.models import Photo
+
+
+ACTIVITY_NOT_YET_ACTIVE = 0
+ACTIVITY_ACTIVE = 1
+ACTIVITY_CLOSED = 2
 
 class Contest(models.Model):
     """
@@ -127,6 +134,14 @@ class Quiz(models.Model):
         verbose_name_plural = _('Quizes')
         ordering = ('-active_from',)
 
+    @property
+    def current_text(self):
+        return current_text(self)
+
+    @property
+    def current_activity_state(self):
+        return current_activity_state(self)
+
 class Question(models.Model):
     """
     Questions used in
@@ -135,6 +150,7 @@ class Question(models.Model):
     """
     question = models.TextField(_('Question text'))
     allow_multiple = models.BooleanField(_('Allow multiple choices'), default=False)
+    allow_no_choice = models.BooleanField(_('Allow no choice'), default=False)
     quiz = models.ForeignKey(Quiz, blank=True, null=True, verbose_name=_('Quiz'))
     contest = models.ForeignKey(Contest, blank=True, null=True, verbose_name=_('Contest'))
 
@@ -177,6 +193,12 @@ class Question(models.Model):
         verbose_name_plural = _('Questions')
 
 class PollBox(Box):
+
+    def __init__(self, obj, box_type, nodelist, template_name=None):
+        super(PollBox, self).__init__(obj, box_type, nodelist, template_name)
+        from ella.polls import views
+        self.state = views.check_vote(get_current_request(), self.obj)
+
     def render(self):
         return self._render()
 
@@ -184,18 +206,23 @@ class PollBox(Box):
         from ella.polls import views
         cont = super(PollBox, self).get_context()
         # state = views.check_vote(self._context['request'], self.obj)
+        print self.state
         cont.update({
             'photo_slug' : self.params.get('photo_slug', ''),
-            'state' : views.check_vote(get_current_request(), self.obj),
+            'state' : self.state,
             'state_voted' : views.POLL_USER_ALLREADY_VOTED,
             'state_just_voted' : views.POLL_USER_JUST_VOTED,
             'state_not_yet_voted' : views.POLL_USER_NOT_YET_VOTED,
+            'state_no_choice' : views.POLL_USER_NO_CHOICE,
+            'activity_not_yet_active' : ACTIVITY_NOT_YET_ACTIVE,
+            'activity_active' : ACTIVITY_ACTIVE,
+            'activity_closed' : ACTIVITY_CLOSED,
 })
         return cont
 
     def get_cache_key(self):
         from ella.polls import views
-        return super(PollBox, self).get_cache_key() + str(views.check_vote(get_current_request(), self.obj))
+        return super(PollBox, self).get_cache_key() + str(self.state)
 
     def get_cache_tests(self):
         return super(PollBox, self).get_cache_tests() + [ (Choice, lambda x: x.poll_id == self.obj.id) ]
@@ -208,8 +235,8 @@ class Poll(models.Model):
     text_announcement = models.TextField(_('Text with announcement'))
     text = models.TextField(_('Text'))
     text_results = models.TextField(_('Text with results'))
-    active_from = models.DateTimeField(_('Active from'))
-    active_till = models.DateTimeField(_('Active till'))
+    active_from = models.DateTimeField(_('Active from'), default=datetime.now, null=True, blank=True)
+    active_till = models.DateTimeField(_('Active till'), null=True, blank=True)
     question = models.ForeignKey(Question, verbose_name=_('Question'), unique=True)
 
     def __unicode__(self):
@@ -228,6 +255,14 @@ class Poll(models.Model):
 
     def Box(self, box_type, nodelist):
         return PollBox(self, box_type, nodelist)
+
+    @property
+    def current_text(self):
+        return current_text(self)
+
+    @property
+    def current_activity_state(self):
+        return current_activity_state(self)
 
 class Choice(models.Model):
     """
@@ -301,6 +336,7 @@ class Contestant(models.Model):
     address = models.CharField(_('Address'), maxlength=200, blank=True)
     choices = models.CharField(_('Choices'), maxlength=200, blank=True)
     count_guess = models.IntegerField(_('Count guess'))
+    winner = models.BooleanField(_('Winner'), default=False)
 
     def __unicode__(self):
         return u'%s %s' % (self.surname, self.name)
@@ -310,6 +346,21 @@ class Contestant(models.Model):
         verbose_name_plural = _('Contestants')
         unique_together = (('contest', 'email',),)
         ordering = ('-datetime',)
+
+    @property
+    def points(self):
+        points = 0
+        for q in self.choices.split('|'):
+            vs = q.split(':')
+            for v in vs[1].split(','):
+                points += get_cached_object(Choice, pk=v).points
+        return points
+
+    @property
+    def count_guess_difference(self):
+        # FIXME tady se mi nezda ten celkovej pocet, ufff
+        all = get_cached_list(Contestant, contest=self.contest)
+        return abs(self.count_guess - len(all))
 
 class Result(models.Model):
     """
@@ -408,8 +459,10 @@ class ContestantOptions(admin.ModelAdmin):
     """
     Admin options for Contestant
     """
-    ordering = ('contest', 'datetime')
-    list_display = ('name', 'surname', 'user', 'datetime', 'contest', 'choices')
+    ordering = ('contest', 'points', 'count_guess_difference', 'datetime')
+    #list_display = ('name', 'surname', 'user', 'datetime', 'contest', 'choices', 'points', 'count_guess_difference', 'winner')
+    list_display = ('name', 'surname', 'user', 'datetime', 'contest', 'choices', 'points', 'winner')
+    list_filter = ('contest',)
 
     formfield_for_dbfield = formfield_for_dbfield(['text_announcement', 'text', 'text_results'])
 
@@ -445,6 +498,23 @@ class QuizOptions(admin.ModelAdmin):
 
 class PollOptions(admin.ModelAdmin):
     formfield_for_dbfield = formfield_for_dbfield(['text_announcement', 'text', 'text_results'])
+
+def current_text(obj):
+    a = current_activity_state(obj)
+    if a is ACTIVITY_NOT_YET_ACTIVE:
+        return obj.text_announcement
+    elif a is ACTIVITY_CLOSED:
+        return obj.text_results
+    else:
+        return obj.text
+
+def current_activity_state(obj):
+    if obj.active_till and obj.active_till < datetime.now():
+        return ACTIVITY_CLOSED
+    elif obj.active_from and obj.active_from > datetime.now():
+        return ACTIVITY_NOT_YET_ACTIVE
+    else:
+        return ACTIVITY_ACTIVE
 
 admin.site.register(Poll, PollOptions)
 admin.site.register(Contest, ContestOptions)

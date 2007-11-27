@@ -20,21 +20,32 @@ from ella.polls.models import Poll, Contest, Contestant, Quiz, Result, Choice, V
 # POLLS specific settings
 POLLS_COOKIE_NAME = getattr(settings, 'POLLS_COOKIE_NAME', 'polls_voted')
 POLLS_JUST_VOTED_COOKIE_NAME = getattr(settings, 'POLLS_JUST_VOTED_COOKIE_NAME', 'polls_just_voted_voted')
+POLLS_NO_CHOICE_COOKIE_NAME = getattr(settings, 'POLLS_NO_CHOICE_COOKIE_NAME', 'polls_no_choice')
 POLLS_MAX_COOKIE_LENGTH = getattr(settings, 'POLLS_MAX_COOKIE_LENGTH', 20)
 POLLS_MAX_COOKIE_AGE = getattr(settings, 'POLLS_MAX_COOKIE_AGE', 604800)
 
 POLL_USER_NOT_YET_VOTED = 0
 POLL_USER_JUST_VOTED = 1
 POLL_USER_ALLREADY_VOTED = 2
+POLL_USER_NO_CHOICE = 3
 
 CURRENT_SITE = Site.objects.get_current()
 
 def check_vote(request, poll):
     sess_jv = request.session.get(POLLS_JUST_VOTED_COOKIE_NAME, [])
+    # removing just voted info from session
     if poll.id in sess_jv:
         del request.session[POLLS_JUST_VOTED_COOKIE_NAME]
         # TODO - del just my poll, not the entire list !
         return POLL_USER_JUST_VOTED
+    # removing no vote info from session
+    sess_nv = request.session.get(POLLS_NO_CHOICE_COOKIE_NAME, [])
+    print poll.id
+    print sess_nv
+    if poll.id in sess_nv:
+        del request.session[POLLS_NO_CHOICE_COOKIE_NAME]
+        # TODO - del just my poll, not the entire list !
+        return POLL_USER_NO_CHOICE
     # authenticated user - check session
     if request.user.is_authenticated():
         sess = request.session.get(POLLS_COOKIE_NAME, [])
@@ -119,6 +130,15 @@ def poll_vote(request, poll_id):
 
         return response
 
+    # no choice
+    # FIXME how to catch specific error? try to catch validationError exc?
+    if not poll.question.allow_no_choice and form['choice'].errors:
+        sess_nv = request.session.get(POLLS_NO_CHOICE_COOKIE_NAME, [])
+        sess_nv.append(poll.id)
+        request.session[POLLS_NO_CHOICE_COOKIE_NAME] = sess_nv
+        return HttpResponseRedirect(url)
+
+    # choice required
     return render_to_response('polls/poll_form.html', {'form' : form, 'next' : url}, context_instance=RequestContext(request))
 
 @transaction.commit_on_success
@@ -199,13 +219,14 @@ def QuestionForm(question):
         choice_field = forms.ModelMultipleChoiceField(
                 queryset=question.choices,
                 widget=MyCheckboxSelectMultiple,
-                required=False
+                required = not question.allow_no_choice
 )
     else:
         choice_field = forms.ModelChoiceField(
                 queryset=question.choices,
                 widget=MyRadioSelect,
-                empty_label=None
+                empty_label=None,
+                required = not question.allow_no_choice
 )
 
     class _QuestionForm(forms.Form):
