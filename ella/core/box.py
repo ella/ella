@@ -107,13 +107,6 @@ class Box(object):
         t_list.append(base_path + '%s.html' % (self.box_type,))
         t_list.append(base_path + 'box.html')
 
-        # OLD
-        base_path = 'box/%s.%s/' % (self.obj._meta.app_label, self.obj._meta.module_name)
-        if hasattr(self.obj, 'slug'):
-            t_list.append(base_path + '%s/%s.html' % (self.box_type, self.obj.slug))
-        t_list.append(base_path + '%s.html' % (self.box_type,))
-        t_list.append(base_path + 'base_box.html')
-
         return t_list
 
     def _render(self):

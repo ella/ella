@@ -56,9 +56,9 @@ def reply(request, bits, context):
         # list of all questions
         return render_to_response(
                 (
-                    'page/category/%s/interviews/%s/question_list.html' % (context['category'].slug, interview.slug),
-                    'page/category/%s/interviews/question_list.html' % context['category'].slug,
-                    'page/interviews/question_list.html',
+                    'page/category/%s/content_type/interviews.interview/%s/question_list.html' % (context['category'].slug, interview.slug),
+                    'page/category/%s/content_type/interviews.interview/question_list.html' % context['category'].slug,
+                    'page/content_type/interviews.interview/question_list.html',
 ),
                 context,
                 context_instance=RequestContext(request)
@@ -90,9 +90,9 @@ def reply(request, bits, context):
 
     return render_to_response(
             (
-                'page/category/%s/interviews/%s/answer_form.html' % (context['category'].slug, interview.slug),
-                'page/category/%s/interviews/answer_form.html' % context['category'].slug,
-                'page/interviews/answer_form.html',
+                'page/category/%s/content_type/interviews.interview/%s/answer_form.html' % (context['category'].slug, interview.slug),
+                'page/category/%s/content_type/interviews.interview/answer_form.html' % context['category'].slug,
+                'page/content_type/interviews.interview/answer_form.html',
 ),
             context,
             context_instance=RequestContext(request)
@@ -119,9 +119,9 @@ class QuestionFormPreview(FormPreview):
         interview = self.state['object']
         cat = self.state['category']
         return [
-                'page/category/%s/interviews/%s/ask_preview.html' % (cat.path, interview.slug),
-                'page/category/%s/interviews/ask_preview.html' % cat.path,
-                'page/interviews/ask_preview.html',
+                'page/category/%s/content_type/interviews.interview/%s/ask_preview.html' % (cat.path, interview.slug),
+                'page/category/%s/content_type/interviews.interview/ask_preview.html' % cat.path,
+                'page/content_type/interviews.interview/ask_preview.html',
             ]
 
     @property
@@ -129,9 +129,9 @@ class QuestionFormPreview(FormPreview):
         interview = self.state['object']
         cat = self.state['category']
         return [
-                'page/category/%s/interviews/%s/ask_form.html' % (cat.path, interview.slug),
-                'page/category/%s/interviews/ask_form.html' % cat.path,
-                'page/interviews/ask_form.html',
+                'page/category/%s/content_type/interviews.interview/%s/ask_form.html' % (cat.path, interview.slug),
+                'page/category/%s/content_type/interviews.interview/ask_form.html' % cat.path,
+                'page/content_type/interviews.interview/ask_form.html',
             ]
 
     def parse_params(self, bits, context):

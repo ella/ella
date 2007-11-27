@@ -47,9 +47,9 @@ def ask_question(request, bits, context):
     category = context['category']
     return render_to_response(
             (
-                'page/category/%s/discussions/%s/ask.html' % (category.path, topic.slug,),
-                'page/category/%s/discussions/ask.html' % (category.path,),
-                'page/discussions/ask.html',
+                'page/category/%s/content_type/discussions.question/%s/ask.html' % (category.path, topic.slug,),
+                'page/category/%s/content_type/discussions.question/ask.html' % (category.path,),
+                'page/content_type/discussions.question/ask.html',
 ),
             context,
             context_instance=RequestContext(request)

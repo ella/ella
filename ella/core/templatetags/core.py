@@ -138,7 +138,7 @@ class BoxNode(template.Node):
         else:
             box = Box(obj, self.box_type, self.nodelist)
 
-        if box.obj is None:
+        if not box.obj:
             # TODO: log
             return ''
 

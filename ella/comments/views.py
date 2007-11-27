@@ -29,8 +29,6 @@ class CommentFormPreview(FormPreview):
                 'page/category/%s/comments/preview.html' % cat.path,
                 'page/content_type/%s.%s/comments/preview.html' % (opts.app_label, opts.module_name),
                 'page/comments/preview.html',
-
-                'comments/base_preview_template.html',
             ]
 
     @property
@@ -43,8 +41,6 @@ class CommentFormPreview(FormPreview):
                 'page/category/%s/comments/form.html' % cat.path,
                 'page/content_type/%s.%s/comments/form.html' % (opts.app_label, opts.module_name),
                 'page/comments/form.html',
-
-                'comments/base_preview_form_template.html',
             ]
 
     def parse_params(self, context={}):
@@ -90,11 +86,6 @@ def new_comment(request, context, reply=None):
         'page/category/%s/content_type%s.%s/comments/form.html' % (cat.path, opts.app_label, opts.module_name),
         'page/category/%s/comments/form.html' % cat.path,
         'page/comments/form.html',
-
-        'comments/%s/%s.%s/%s_comment_add.html' % (cat.path, opts.app_label, opts.module_name, context['object'].slug),
-        'comments/%s/%s.%s/base_comment_add.html' % (cat.path, opts.app_label, opts.module_name),
-        'comments/%s/base_comment_add.html' % cat.path,
-        'comments/base_comment_add.html',
 )
     return render_to_response(templates, context, context_instance=RequestContext(request))
 
@@ -121,11 +112,6 @@ def list_comments(request, context):
         'page/category/%s/content_type%s.%s/comments/list.html' % (cat.path, opts.app_label, opts.module_name),
         'page/category/%s/comments/list.html' % cat.path,
         'page/comments/list.html',
-
-        'comments/%s/%s.%s/%s_comment_list.html' % (cat.path, opts.app_label, opts.module_name, context['category'].slug),
-        'comments/%s/%s.%s/base_comment_list.html' % (cat.path, opts.app_label, opts.module_name),
-        'comments/%s/base_comment_list.html' % cat.path,
-        'comments/base_comment_list.html',
 )
     return render_to_response(templates, context, context_instance=RequestContext(request))
 

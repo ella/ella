@@ -65,9 +65,9 @@ def gallery_item_detail(request, context, item_slug=None):
 
     return render_to_response(
                 [
-                    'page/category/%s/galleries/%s/item.html' % (category.path, gallery.slug,),
-                    'page/category/%s/galleries/item.html' % (category.path,),
-                    'page/galleries/item.html',
+                    'page/category/%s/content_type/galleries.gallery/%s/item.html' % (category.path, gallery.slug,),
+                    'page/category/%s/content_type/galleries.gallery/item.html' % (category.path,),
+                    'page/content_type/galleries.gallery/item.html',
                 ],
                 context,
                 context_instance=RequestContext(request),
