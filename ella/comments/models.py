@@ -94,14 +94,15 @@ class Comment(models.Model):
 
     @property
     def is_authorized(self):
-        if self.user:
+        if self.user_id:
             return True
         return False
 
     @property
     def author(self):
         if self.is_authorized:
-            return self.user.username
+            user = get_cached_object(User, pk=self.user_id)
+            return user.username
         return self.nickname
 
     @property
