@@ -32,7 +32,7 @@ class ReplyForm(forms.Form):
         if hasattr(self, 'interviewee'):
             interviewee = self.interviewee.pk
         else:
-            interviewee = self.clened_data['interviewee']
+            interviewee = self.cleaned_data['interviewee']
 
         request = get_current_request()
         if 'HTTP_X_FORWARDED_FOR' in request.META:
@@ -48,6 +48,20 @@ class ReplyForm(forms.Form):
         a.save()
         return a
 
+def unanswered(request, bits, context):
+    if bits:
+        raise Http404
+
+    interview = context['object']
+    return render_to_response(
+            (
+                'page/category/%s/content_type/interviews.interview/%s/unanswered.html' % (context['category'].slug, interview.slug),
+                'page/category/%s/content_type/interviews.interview/unanswered.html' % context['category'].slug,
+                'page/content_type/interviews.interview/unanswered.html',
+),
+            context,
+            context_instance=RequestContext(request)
+)
 
 def reply(request, bits, context):
     interview = context['object']
@@ -56,9 +70,9 @@ def reply(request, bits, context):
         # list of all questions
         return render_to_response(
                 (
-                    'page/category/%s/content_type/interviews.interview/%s/question_list.html' % (context['category'].slug, interview.slug),
-                    'page/category/%s/content_type/interviews.interview/question_list.html' % context['category'].slug,
-                    'page/content_type/interviews.interview/question_list.html',
+                    'page/category/%s/content_type/interviews.interview/%s/reply.html' % (context['category'].slug, interview.slug),
+                    'page/category/%s/content_type/interviews.interview/reply.html' % context['category'].slug,
+                    'page/content_type/interviews.interview/reply.html',
 ),
                 context,
                 context_instance=RequestContext(request)
@@ -156,7 +170,7 @@ class QuestionFormPreview(FormPreview):
         return HttpResponseRedirect('..')
 
 
-dispatcher.register(slugify(ugettext('unanswered')), reply, model=Interview)
+dispatcher.register(slugify(ugettext('unanswered')), unanswered, model=Interview)
 dispatcher.register(slugify(ugettext('reply')), reply, model=Interview)
 dispatcher.register(slugify(ugettext('ask')), QuestionFormPreview(QuestionForm),  model=Interview)
 

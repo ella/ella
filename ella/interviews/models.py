@@ -88,7 +88,7 @@ class Interview(models.Model):
 
     def unanswered_questions(self):
         # TODO: caching
-        q = self.question_set.all().order_by('submit_date').filter(answer__pk__isnull=True)
+        q = self.question_set.all().order_by('submit_date').exclude(pk__in=[ q['id'] for q in self.question_set.filter(answer__pk__isnull=False).values('id') ])
         return q
 
     def get_interviewees(self, user):
