@@ -116,6 +116,7 @@ def reply(request, bits, context):
         return HttpResponseRedirect('..')
 
     context['form'] = form
+    context['question'] = question
 
     return render_to_response(
             (
