@@ -81,7 +81,12 @@ def unanswered(request, bits, context):
 def reply(request, bits, context):
     interview = context['object']
 
-    if not bits:
+    interviewees = interview.get_interviewees(request.user)
+    if not interviewees:
+        # no permission
+        raise Http404
+
+    elif not bits:
         # list of all questions
         return render_to_response(
                 (
@@ -95,11 +100,6 @@ def reply(request, bits, context):
 
     elif len(bits) != 1:
         # some bogus URL
-        raise Http404
-
-    interviewees = interview.get_interviewees(request.user)
-    if not interviewees:
-        # no permission
         raise Http404
 
     # no point in caching individual questions
