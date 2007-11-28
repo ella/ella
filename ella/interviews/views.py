@@ -128,7 +128,7 @@ def reply(request, bits, context):
 )
 
 class QuestionForm(forms.Form):
-    nickname = Question._meta.get_field('nickname').formfield()
+    nickname = Question._meta.get_field('nickname').formfield(required=True)
     email = Question._meta.get_field('email').formfield()
     content = Question._meta.get_field('content').formfield()
 
