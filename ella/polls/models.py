@@ -498,6 +498,10 @@ class QuizOptions(admin.ModelAdmin):
 
 class PollOptions(admin.ModelAdmin):
     formfield_for_dbfield = formfield_for_dbfield(['text_announcement', 'text', 'text_results'])
+    list_display = ('title', 'question',)
+    list_filter = ('active_from',)
+    search_fields = ('title', 'text_announcement', 'text', 'text_results', 'question__question',)
+    raw_id_fields = ('question',)
 
 def current_text(obj):
     a = current_activity_state(obj)
