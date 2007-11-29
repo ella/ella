@@ -75,6 +75,23 @@ class Contest(models.Model):
         verbose_name_plural = _('Contests')
         ordering = ('-active_from',)
 
+    @property
+    def current_text(self):
+        return current_text(self)
+
+    @property
+    def current_activity_state(self):
+        return current_activity_state(self)
+
+    @property
+    def build_right_choices(self):
+        return '|'.join(
+            '%d:%s' % (
+                q.id,
+                ','.join(str(c.id) for c in sorted(q.choices, key=lambda ch: ch.id) if c.points > 0)
+) for q in sorted(self.questions, key=lambda q: q.id)
+)
+
 class Quiz(models.Model):
     """
     Quizes with title, descriptions and activation options.
@@ -206,7 +223,6 @@ class PollBox(Box):
         from ella.polls import views
         cont = super(PollBox, self).get_context()
         # state = views.check_vote(self._context['request'], self.obj)
-        print self.state
         cont.update({
             'photo_slug' : self.params.get('photo_slug', ''),
             'state' : self.state,
@@ -232,9 +248,9 @@ class Poll(models.Model):
     Poll model with descriptions and activation times
     """
     title = models.CharField(_('Title'), maxlength=200)
-    text_announcement = models.TextField(_('Text with announcement'))
-    text = models.TextField(_('Text'))
-    text_results = models.TextField(_('Text with results'))
+    text_announcement = models.TextField(_('Text with announcement'), blank=True, null=True)
+    text = models.TextField(_('Text'), blank=True, null=True)
+    text_results = models.TextField(_('Text with results'), blank=True, null=True)
     active_from = models.DateTimeField(_('Active from'), default=datetime.now, null=True, blank=True)
     active_till = models.DateTimeField(_('Active till'), null=True, blank=True)
     question = models.ForeignKey(Question, verbose_name=_('Question'), unique=True)
@@ -358,7 +374,7 @@ class Contestant(models.Model):
 
     @property
     def count_guess_difference(self):
-        # FIXME tady se mi nezda ten celkovej pocet, ufff
+        # TODO get contestant_count as property of Contest
         all = get_cached_list(Contestant, contest=self.contest)
         return abs(self.count_guess - len(all))
 
@@ -459,10 +475,8 @@ class ContestantOptions(admin.ModelAdmin):
     """
     Admin options for Contestant
     """
-    ordering = ('contest', 'points', 'count_guess_difference', 'datetime')
-    #list_display = ('name', 'surname', 'user', 'datetime', 'contest', 'choices', 'points', 'count_guess_difference', 'winner')
-    list_display = ('name', 'surname', 'user', 'datetime', 'contest', 'choices', 'points', 'winner')
-    list_filter = ('contest',)
+    ordering = ('datetime')
+    list_display = ('name', 'surname', 'user', 'datetime', 'contest', 'points', 'count_guess_difference', 'winner')
 
     formfield_for_dbfield = formfield_for_dbfield(['text_announcement', 'text', 'text_results'])
 
@@ -477,6 +491,12 @@ class QuestionInlineOptions(admin.options.InlineModelAdmin):
     formfield_for_dbfield = formfield_for_dbfield(['question'])
 
 class ContestOptions(admin.ModelAdmin):
+#
+#    def __call__(self, request, url):
+#        if url and url.endswitch('who_is_right'):
+#            try:
+#                Contest.show_right_contestants()
+#
     list_display = ('title', 'category', 'active_from', 'full_url',)
     list_filter = ('category', 'active_from',)
     search_fields = ('title', 'text_announcement', 'text', 'text_results',)

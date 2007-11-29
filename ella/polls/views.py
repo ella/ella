@@ -15,7 +15,7 @@ from django.template.defaultfilters import slugify
 
 from ella.core.cache import get_cached_object_or_404
 from ella.core.wizard import Wizard
-from ella.polls.models import Poll, Contest, Contestant, Quiz, Result, Choice, Vote
+from ella.polls.models import Poll, Contest, Contestant, Quiz, Result, Choice, Vote, ACTIVITY_NOT_YET_ACTIVE, ACTIVITY_ACTIVE, ACTIVITY_CLOSED
 
 # POLLS specific settings
 POLLS_COOKIE_NAME = getattr(settings, 'POLLS_COOKIE_NAME', 'polls_voted')
@@ -40,8 +40,6 @@ def check_vote(request, poll):
         return POLL_USER_JUST_VOTED
     # removing no vote info from session
     sess_nv = request.session.get(POLLS_NO_CHOICE_COOKIE_NAME, [])
-    print poll.id
-    print sess_nv
     if poll.id in sess_nv:
         del request.session[POLLS_NO_CHOICE_COOKIE_NAME]
         # TODO - del just my poll, not the entire list !
@@ -167,7 +165,10 @@ def contest_vote(request, context):
         return contest_finish(request, context, forms, contestant_form)
     context.update({
             'forms' : forms,
-            'contestant_form' : contestant_form
+            'contestant_form' : contestant_form,
+            'activity_not_yet_active' : ACTIVITY_NOT_YET_ACTIVE,
+            'activity_active' : ACTIVITY_ACTIVE,
+            'activity_closed' : ACTIVITY_CLOSED
 })
     return render_to_response((
                 'page/category/%s/content_type/polls.contest/%s/form.html' % (context['category'].path, contest.slug),
@@ -281,9 +282,10 @@ def contest_finish(request, context, qforms, contestant_form):
     choices = '|'.join(
             '%d:%s' % (
                     question.id,
-                    question.allow_multiple and ','.join(str(c.id) for c in f.cleaned_data['choice']) or f.cleaned_data['choice'].id)
-                for question, f in qforms
+                    question.allow_multiple and ','.join(str(c.id) for c in sorted(f.cleaned_data['choice'], key=lambda ch: ch.id)) or f.cleaned_data['choice'].id)
+                for question, f in sorted(qforms,key=lambda q: q[0].id)
 )
+    print choices
     c = Contestant(
             contest=contest,
             choices=choices,
@@ -376,12 +378,13 @@ class QuizWizard(Wizard):
         results = []
         for question, f in zip(self.quiz.questions, form_list):
             choices = question.choices
-            if question.allow_multiple:
-                points += sum(c.points for c in f.cleaned_data['choice'])
-                results.append('%d:%s' % (question.id, ','.join(str(c.id) for c in f.cleaned_data['choice'])))
-            else:
-                points += f.cleaned_data['choice'].points
-                results.append('%d:%s' % (question.id, f.cleaned_data['choice'].id))
+            if not question.allow_no_choice:
+                if question.allow_multiple:
+                    points += sum(c.points for c in f.cleaned_data['choice'])
+                    results.append('%d:%s' % (question.id, ','.join(str(c.id) for c in f.cleaned_data['choice'])))
+                else:
+                    points += f.cleaned_data['choice'].points
+                    results.append('%d:%s' % (question.id, f.cleaned_data['choice'].id))
 
         results = '|'.join(results)
 
@@ -440,4 +443,3 @@ def result_details(request, bits, context):
             context,
             context_instance=RequestContext(request)
 )
-
