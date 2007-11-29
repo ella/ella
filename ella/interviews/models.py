@@ -91,7 +91,11 @@ class Interview(models.Model):
         q = self.question_set.all().order_by('submit_date').exclude(pk__in=[ q['id'] for q in self.question_set.filter(answer__pk__isnull=False).values('id') ])
         return q
 
-    def get_interviewees(self, user):
+    def get_interviewees(self, user=None):
+        if not user:
+            from ella.core.middleware import get_current_request
+            request = get_current_request()
+            user = request.user
         if not hasattr(self, '_interviewees'):
             if not user.is_authenticated() or not self.can_reply():
                 self._interviewees = []
