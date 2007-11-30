@@ -1,0 +1,149 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2007-11-30 12:46+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: models.py:19
+msgid "Name"
+msgstr "Jméno"
+
+#: models.py:20 models.py:40
+msgid "Slug"
+msgstr ""
+
+#: models.py:21
+msgid "Description"
+msgstr "Popis"
+
+#: models.py:24
+msgid "Interviewee"
+msgstr "Host"
+
+#: models.py:25 models.py:55
+msgid "Interviewees"
+msgstr "Hosté"
+
+#: models.py:38
+msgid "Title"
+msgstr "Nadpis"
+
+#: models.py:39
+msgid "Upper title"
+msgstr "Nadtitulek"
+
+#: models.py:43
+msgid "Perex"
+msgstr "Perex"
+
+#: models.py:44
+msgid "Text"
+msgstr "Text"
+
+#: models.py:46
+msgid "Reply from"
+msgstr "Odpovídat od"
+
+#: models.py:47
+msgid "Reply to"
+msgstr "Odpovídat do"
+
+#: models.py:49
+msgid "Ask from"
+msgstr "Dotazy od"
+
+#: models.py:50
+msgid "Ask to"
+msgstr "Dotazy do"
+
+#: models.py:53
+msgid "Authors"
+msgstr "Autoři"
+
+#: models.py:54
+msgid "Source"
+msgstr "Zdroj"
+
+#: models.py:57
+msgid "Category"
+msgstr "Kategorie"
+
+#: models.py:60
+msgid "Photo"
+msgstr "Foto"
+
+#: models.py:141
+msgid "Interview"
+msgstr "Rozhovor"
+
+#: models.py:142
+msgid "Interviews"
+msgstr "Rozhovory"
+
+#: models.py:151
+msgid "Question text"
+msgstr "Text otázky"
+
+#: models.py:154
+msgid "authorized author"
+msgstr "Přihlášený uživatel"
+
+#: models.py:156
+msgid "anonymous author's nickname"
+msgstr "Přezdívka"
+
+#: models.py:157
+msgid "authors email (optional)"
+msgstr "Email (nepovinné)"
+
+#: models.py:160
+msgid "ip address"
+msgstr "IP adresa"
+
+#: models.py:163 models.py:198
+msgid "date/time submitted"
+msgstr "Datum a čas uložení"
+
+#: models.py:164
+msgid "is public"
+msgstr "Je veřejný"
+
+#: models.py:190
+msgid "Question"
+msgstr "Otázka"
+
+#: models.py:191
+msgid "Questions"
+msgstr "Otázky"
+
+#: models.py:199
+msgid "Answer text"
+msgstr "Text odpovědi"
+
+#: models.py:203 models.py:204
+msgid "Answer"
+msgstr "Odpověď"
+
+#: views.py:188
+msgid "unanswered"
+msgstr "Nezodpovězené"
+
+#: views.py:189
+msgid "reply"
+msgstr "odpoved"
+
+#: views.py:190
+msgid "ask"
+msgstr "dotaz"

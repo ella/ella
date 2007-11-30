@@ -241,3 +241,5 @@ admin.site.register(Interviewee, IntervieweeOptions)
 admin.site.register(Interview, InterviewOptions)
 admin.site.register(Question, QuestionOptions)
 
+from ella.interviews import views
+views.register_views()

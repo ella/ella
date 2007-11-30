@@ -9,8 +9,7 @@ from ella.core.custom_urls import dispatcher
 from ella.core.middleware import get_current_request
 from ella.interviews.models import Interview, Question, Answer
 
-#from django.utils.translation import ugettext
-ugettext = lambda x: x
+
 class ReplyForm(forms.Form):
     content = Answer._meta.get_field('content').formfield()
 
@@ -185,8 +184,10 @@ class QuestionFormPreview(FormPreview):
 
         return HttpResponseRedirect('..')
 
-dispatcher.register(slugify(ugettext('unanswered')), unanswered, model=Interview)
-dispatcher.register(slugify(ugettext('reply')), reply, model=Interview)
-dispatcher.register(slugify(ugettext('ask')), QuestionFormPreview(QuestionForm),  model=Interview)
+def register_views():
+    from django.utils.translation import ugettext
+    dispatcher.register(slugify(ugettext('unanswered')), unanswered, model=Interview)
+    dispatcher.register(slugify(ugettext('reply')), reply, model=Interview)
+    dispatcher.register(slugify(ugettext('ask')), QuestionFormPreview(QuestionForm),  model=Interview)
 
-dispatcher.register_custom_detail(Interview, detail)
+    dispatcher.register_custom_detail(Interview, detail)
