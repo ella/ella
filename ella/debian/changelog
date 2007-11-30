@@ -1,3 +1,9 @@
+centrum-ella (0.0.18-25) unstable; urgency=low
+
+  * no repo, i need all my packages
+
+ -- root <root@test-repo>  Fri, 30 Nov 2007 10:44:02 +0100
+
 centrum-ella (0.0.18-21) unstable; urgency=low
 
   * added missing imports
