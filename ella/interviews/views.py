@@ -164,7 +164,7 @@ class QuestionFormPreview(FormPreview):
             ]
 
     def parse_params(self, bits, context):
-        if not context['object'].can_ask():
+        if not context['object'].can_ask() or bits:
             raise Http404
         self.state.update(context)
 
