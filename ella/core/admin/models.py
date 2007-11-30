@@ -49,6 +49,7 @@ class ListingInlineFormset(generic.GenericInlineFormset):
 
         return self.cleaned_data
 
+    '''
     def get_queryset(self):
         """
         Override the default so that Listings I don't have permissions to change won't show up
@@ -59,6 +60,7 @@ class ListingInlineFormset(generic.GenericInlineFormset):
             return []
 
         return super(ListingInlineFormset, self).get_queryset().filter(category__in=applicable_categories(get_current_request().user, 'core.change_listing'))
+    '''
 
 class ListingInlineOptions(generic.GenericTabularInline):
     @property

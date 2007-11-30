@@ -72,7 +72,7 @@ class EllaAdminOptionsMixin(object):
 
         elif db_field.name in ('target_ct', 'source_ct'):
             kwargs['widget'] = widgets.ContentTypeWidget
-            return ContentTypeChoice(choices=[(u'', u"---------")] + [ (c.id, c) for c in get_content_types(get_current_request().user) ], **kwargs)
+#            return ContentTypeChoice(choices=[(u'', u"---------")] + [ (c.id, c) for c in get_content_types(get_current_request().user) ], **kwargs)
 
         elif db_field.name in ('target_id', 'source_id',):
             kwargs['widget'] = widgets.ForeignKeyRawIdWidget
