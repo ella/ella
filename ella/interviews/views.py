@@ -22,7 +22,11 @@ class ReplyForm(forms.Form):
         if len(interviewees) == 1:
             self.interviewee = interviewees[0]
         else:
-            self.fields['interviewee'] = forms.ChoiceField(choices=[ (u'', u'--------') ] + [ (i.pk, unicode(i)) for i in interviewees ])
+            from django.utils.translation import ugettext
+            self.fields['interviewee'] = forms.ChoiceField(
+                    choices=[ (u'', u'--------') ] + [ (i.pk, unicode(i)) for i in interviewees ],
+                    label=ugettext('Interviewee')
+)
 
     def save(self):
         if not self.is_valid():
