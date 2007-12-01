@@ -8,7 +8,7 @@ from django.contrib.contenttypes.models import  ContentType
 from django.newforms.models import InlineFormset
 from django.newforms.forms import ValidationError
 
-from ella.core.cache import get_cached_object, get_cached_list
+from ella.core.cache import get_cached_object, get_cached_list, get_cached_object_or_404
 from ella.core.box import Box
 from ella.core.middleware import get_current_request
 from ella.core.models import Category, Listing
@@ -84,13 +84,21 @@ class Contest(models.Model):
         return current_activity_state(self)
 
     @property
-    def build_right_choices(self):
+    def right_choices(self):
         return '|'.join(
             '%d:%s' % (
                 q.id,
                 ','.join(str(c.id) for c in sorted(q.choices, key=lambda ch: ch.id) if c.points > 0)
 ) for q in sorted(self.questions, key=lambda q: q.id)
 )
+
+    def correct_answers(self):
+        return u'<a href="%s/correct_answers/">%s - %s</a>' % (self.id, _('Correct Answers'), self.title)
+    correct_answers.allow_tags = True
+
+    def get_correct_answers(self):
+        count = Contestant.objects.filter(contest=self).count()
+        return Contestant.objects.filter(contest=self).filter(choices=self.right_choices).extra(select={'count_guess_difference' : 'ABS(`count_guess` - %d)' % count}).order_by('count_guess_difference')
 
 class Quiz(models.Model):
     """
@@ -372,12 +380,6 @@ class Contestant(models.Model):
                 points += get_cached_object(Choice, pk=v).points
         return points
 
-    @property
-    def count_guess_difference(self):
-        # TODO get contestant_count as property of Contest
-        all = get_cached_list(Contestant, contest=self.contest)
-        return abs(self.count_guess - len(all))
-
 class Result(models.Model):
     """
     Quiz results for skills comparation.)
@@ -475,8 +477,8 @@ class ContestantOptions(admin.ModelAdmin):
     """
     Admin options for Contestant
     """
-    ordering = ('datetime')
-    list_display = ('name', 'surname', 'user', 'datetime', 'contest', 'points', 'count_guess_difference', 'winner')
+    ordering = ('datetime',)
+    list_display = ('name', 'surname', 'user', 'datetime', 'contest', 'points', 'winner')
 
     formfield_for_dbfield = formfield_for_dbfield(['text_announcement', 'text', 'text_results'])
 
@@ -491,13 +493,20 @@ class QuestionInlineOptions(admin.options.InlineModelAdmin):
     formfield_for_dbfield = formfield_for_dbfield(['question'])
 
 class ContestOptions(admin.ModelAdmin):
-#
-#    def __call__(self, request, url):
-#        if url and url.endswitch('who_is_right'):
-#            try:
-#                Contest.show_right_contestants()
-#
-    list_display = ('title', 'category', 'active_from', 'full_url',)
+
+    def __call__(self, request, url):
+        if url and url.endswith('correct_answers'):
+            from django.shortcuts import render_to_response
+            pk = url.split('/')[-2]
+            contest = get_cached_object_or_404(Contest, pk=pk)
+            contestants = contest.get_correct_answers()
+            title = u'%s \'%s\': %s' % (Contest._meta.verbose_name, contest.title, _('Correct Answers'))
+            module_name = Contestant._meta.module_name
+            return render_to_response('admin/correct_answers.html',
+                {'contestants' : contestants, 'title' : title, 'module_name' : module_name})
+        return super(ContestOptions, self).__call__(request, url)
+
+    list_display = ('title', 'category', 'active_from', 'correct_answers', 'full_url',)
     list_filter = ('category', 'active_from',)
     search_fields = ('title', 'text_announcement', 'text', 'text_results',)
     inlines = (QuestionInlineOptions, ListingInlineOptions, TaggingInlineOptions,)

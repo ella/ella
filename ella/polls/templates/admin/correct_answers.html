@@ -1,0 +1,36 @@
+{% extends "admin/change_list.html" %}
+{% block content_title %}<h1>{{ title }}</h1>{% endblock %}
+{% block content %}
+<div id="content-main">
+<div class="module" id="changelist">
+<table cellspacing="0">
+    <thead>
+        <tr>
+            <th class="sorted ascending">{% trans 'Count Guess Difference' %}</th>
+            <th>{% trans 'Name' %}</th>
+            <th>{% trans 'Surname' %}</th>
+            <th>{% trans 'User' %}</th>
+            <th>{% trans 'Email' %}</th>
+            <th>{% trans 'Phonenumber' %}</th>
+            <th>{% trans 'Address' %}</th>
+            <th>{% trans 'Winner' %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for contestant in contestants %}
+        <tr class="{% cycle 'row1' 'row2' %}">
+            <td>{{ contestant.count_guess_difference }}</td>
+            <th><a href="../../../{{ module_name }}/{{ contestant.id }}/" target="_blank">{{ contestant.name }}</a></th>
+            <td>{{ contestant.surname }}</td>
+            <td>{{ contestant.user }}</td>
+            <td>{{ contestant.email }}</td>
+            <td>{{ contestant.phonenumber }}</td>
+            <td>{{ contestant.address }}</td>
+            <td>{% if contestant.winner %}{% trans 'Yes' %}{% else %}{% trans 'No' %}{% endif %}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+</div>
+{% endblock %}
