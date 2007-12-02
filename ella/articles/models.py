@@ -163,7 +163,7 @@ class InfoBoxOptions(admin.ModelAdmin):
             kwargs['widget'] = widgets.RichTextAreaWidget
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
-from ella.core.admin.models import ListingInlineOptions
+from ella.core.admin.models import ListingInlineOptions, HitCountInlineOptions
 from tagging.models import TaggingInlineOptions
 class ArticleOptions(admin.ModelAdmin):
     #raw_id_fields = ('authors',)
@@ -178,7 +178,7 @@ class ArticleOptions(admin.ModelAdmin):
     raw_id_fields = ('photo',)
     list_filter = ('category__site', 'created', 'category', 'authors',)
     search_fields = ('title', 'perex',)
-    inlines = (ArticleContentInlineOptions, ListingInlineOptions, TaggingInlineOptions,)
+    inlines = (ArticleContentInlineOptions, ListingInlineOptions, TaggingInlineOptions, HitCountInlineOptions)
     prepopulated_fields = {'slug' : ('title',)}
 
     def formfield_for_dbfield(self, db_field, **kwargs):

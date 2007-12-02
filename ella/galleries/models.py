@@ -146,7 +146,7 @@ class GalleryItemTabularOptions(admin.TabularInline):
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 
-from ella.core.admin.models import ListingInlineOptions
+from ella.core.admin.models import ListingInlineOptions, HitCountInlineOptions
 from tagging.models import TaggingInlineOptions
 class GalleryOptions(admin.ModelAdmin):
     list_display = ('title', 'created', 'category', 'full_url',)
@@ -157,7 +157,7 @@ class GalleryOptions(admin.ModelAdmin):
 )
     list_filter = ('created',)
     search_fields = ('title', 'description',)
-    inlines = (GalleryItemTabularOptions, ListingInlineOptions, TaggingInlineOptions,)
+    inlines = (GalleryItemTabularOptions, ListingInlineOptions, TaggingInlineOptions, HitCountInlineOptions)
     prepopulated_fields = {'slug': ('title',)}
 
     def formfield_for_dbfield(self, db_field, **kwargs):

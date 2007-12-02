@@ -482,7 +482,7 @@ class ContestantOptions(admin.ModelAdmin):
 
     formfield_for_dbfield = formfield_for_dbfield(['text_announcement', 'text', 'text_results'])
 
-from ella.core.admin.models import ListingInlineOptions
+from ella.core.admin.models import ListingInlineOptions, HitCountInlineOptions
 from tagging.models import TaggingInlineOptions
 
 class QuestionInlineOptions(admin.options.InlineModelAdmin):
@@ -509,7 +509,7 @@ class ContestOptions(admin.ModelAdmin):
     list_display = ('title', 'category', 'active_from', 'correct_answers', 'full_url',)
     list_filter = ('category', 'active_from',)
     search_fields = ('title', 'text_announcement', 'text', 'text_results',)
-    inlines = (QuestionInlineOptions, ListingInlineOptions, TaggingInlineOptions,)
+    inlines = (QuestionInlineOptions, ListingInlineOptions, TaggingInlineOptions, HitCountInlineOptions)
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
 
@@ -519,7 +519,7 @@ class QuizOptions(admin.ModelAdmin):
     list_display = ('title', 'category', 'active_from', 'full_url',)
     list_filter = ('category', 'active_from',)
     search_fields = ('title', 'text_announcement', 'text', 'text_results',)
-    inlines = (QuestionInlineOptions, ResultTabularOptions,  ListingInlineOptions, TaggingInlineOptions,)
+    inlines = (QuestionInlineOptions, ResultTabularOptions, ListingInlineOptions, TaggingInlineOptions, HitCountInlineOptions)
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
 

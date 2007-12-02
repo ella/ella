@@ -9,7 +9,6 @@ from django.contrib.contenttypes.models import ContentType
 from ella.ellaadmin import widgets
 from ella.photos.models import Photo
 from ella.core.managers import RelatedManager
-from ella.core.admin.models import ListingInlineOptions
 from ella.core.cache import get_cached_object, get_cached_list
 from ella.core.models import Listing, Category, Author, Source
 
@@ -223,6 +222,8 @@ class IntervieweeOptions(admin.ModelAdmin):
     search_fields = ('user__first_name', 'user__last_name', 'name', 'description', 'slug', 'author__name',)
     prepopulated_fields = {'slug' : ('name',)}
 
+from ella.core.admin.models import ListingInlineOptions, HitCountInlineOptions
+from tagging.models import TaggingInlineOptions
 class InterviewOptions(admin.ModelAdmin):
     list_display = ('title', 'category', 'ask_from', 'full_url',)
     list_filter = ('category__site', 'ask_from', 'category', 'authors',)
@@ -230,7 +231,7 @@ class InterviewOptions(admin.ModelAdmin):
     raw_id_fields = ('photo', 'interviewees',)
     search_fields = ('title', 'perex',)
     prepopulated_fields = {'slug' : ('title',)}
-    inlines = (ListingInlineOptions,)
+    inlines = (ListingInlineOptions, TaggingInlineOptions, HitCountInlineOptions)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name in ('perex', 'content'):

@@ -79,6 +79,23 @@ class ListingInlineOptions(generic.GenericTabularInline):
             kwargs['widget'] = widgets.ListingCategoryWidget
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
+class HitCountInlineOptions(generic.GenericTabularInline):
+    @property
+    def model(self):
+        from ella.core.models import HitCount
+        return HitCount
+
+    extra = 0
+    ct_field_name = 'target_ct'
+    id_field_name = 'target_id'
+    list_display = ('last_seen', 'hits',)
+    fieldsets = [ (None, {'fields': ('hits',)}) ]
+
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        if db_field.name == 'hits':
+            from ella.ellaadmin import widgets
+            kwargs['widget'] = widgets.ParagraphWidget
+        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 class ListingOptions(admin.ModelAdmin):
     list_display = ('target', 'category', 'publish_from', 'full_url',)
