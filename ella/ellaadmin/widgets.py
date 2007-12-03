@@ -52,7 +52,7 @@ class IncrementWidget(forms.TextInput):
     def __init__(self, attrs={}):
         super(IncrementWidget, self).__init__(attrs={'class': 'increment'})
 
-class ParagraphWidget(forms.Widget):
+class ParagraphInputWidget(forms.HiddenInput):
     def render(self, name, value, attrs=None):
-        return u'<p>%s</p>' % value
+        return u'<p>%s</p>%s' % (value, super(self.__class__, self).render(name, value, attrs))
 

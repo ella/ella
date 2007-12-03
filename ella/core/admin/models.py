@@ -94,7 +94,7 @@ class HitCountInlineOptions(generic.GenericTabularInline):
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'hits':
             from ella.ellaadmin import widgets
-            kwargs['widget'] = widgets.ParagraphWidget
+            kwargs['widget'] = widgets.ParagraphInputWidget
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 class ListingOptions(admin.ModelAdmin):
