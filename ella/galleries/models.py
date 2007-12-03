@@ -157,7 +157,8 @@ class GalleryOptions(admin.ModelAdmin):
 )
     list_filter = ('created',)
     search_fields = ('title', 'description',)
-    inlines = (GalleryItemTabularOptions, ListingInlineOptions, TaggingInlineOptions, HitCountInlineOptions)
+#    inlines = (GalleryItemTabularOptions, ListingInlineOptions, TaggingInlineOptions, HitCountInlineOptions)
+    inlines = (GalleryItemTabularOptions, ListingInlineOptions, TaggingInlineOptions,)
     prepopulated_fields = {'slug': ('title',)}
 
     def formfield_for_dbfield(self, db_field, **kwargs):

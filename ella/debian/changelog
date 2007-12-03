@@ -1,3 +1,14 @@
+centrum-ella (0.0.18-26) unstable; urgency=low
+
+  * Added Admin view of Contestants with correct answers
+  * submit date added to comments admin display list
+  * little workaround to see hitcouns for specific object
+    [but commented - needs better django]
+  * not only paragraph, but hidden input and paragraph
+  * Added site to box cache key
+
+ -- root <root@test-repo>  Mon,  3 Dec 2007 15:04:26 +0100
+
 centrum-ella (0.0.18-25) unstable; urgency=low
 
   * no repo, i need all my packages

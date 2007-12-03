@@ -509,7 +509,8 @@ class ContestOptions(admin.ModelAdmin):
     list_display = ('title', 'category', 'active_from', 'correct_answers', 'full_url',)
     list_filter = ('category', 'active_from',)
     search_fields = ('title', 'text_announcement', 'text', 'text_results',)
-    inlines = (QuestionInlineOptions, ListingInlineOptions, TaggingInlineOptions, HitCountInlineOptions)
+#    inlines = (QuestionInlineOptions, ListingInlineOptions, TaggingInlineOptions, HitCountInlineOptions)
+    inlines = (QuestionInlineOptions, ListingInlineOptions, TaggingInlineOptions,)
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
 
@@ -519,7 +520,8 @@ class QuizOptions(admin.ModelAdmin):
     list_display = ('title', 'category', 'active_from', 'full_url',)
     list_filter = ('category', 'active_from',)
     search_fields = ('title', 'text_announcement', 'text', 'text_results',)
-    inlines = (QuestionInlineOptions, ResultTabularOptions, ListingInlineOptions, TaggingInlineOptions, HitCountInlineOptions)
+#    inlines = (QuestionInlineOptions, ResultTabularOptions, ListingInlineOptions, TaggingInlineOptions, HitCountInlineOptions)
+    inlines = (QuestionInlineOptions, ResultTabularOptions, ListingInlineOptions, TaggingInlineOptions,)
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
 

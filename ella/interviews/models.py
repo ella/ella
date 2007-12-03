@@ -231,7 +231,8 @@ class InterviewOptions(admin.ModelAdmin):
     raw_id_fields = ('photo', 'interviewees',)
     search_fields = ('title', 'perex',)
     prepopulated_fields = {'slug' : ('title',)}
-    inlines = (ListingInlineOptions, TaggingInlineOptions, HitCountInlineOptions)
+#    inlines = (ListingInlineOptions, TaggingInlineOptions, HitCountInlineOptions)
+    inlines = (ListingInlineOptions, TaggingInlineOptions,)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name in ('perex', 'content'):
