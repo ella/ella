@@ -6,6 +6,7 @@ except ImportError:
 from django.template import loader
 from django.utils.datastructures import MultiValueDict
 from django.core.cache import cache
+from django.conf import settings
 
 from ella.core.cache.invalidate import CACHE_DELETER
 
@@ -150,6 +151,7 @@ class Box(object):
         return md5.md5(
                 pickle.dumps((
                         'ella.core.box.Box.render',
+                        settings.SITE_ID,
                         self.obj.__class__.__name__,
                         self.box_type,
                         self.obj._get_pk_val(),
