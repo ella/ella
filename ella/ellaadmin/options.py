@@ -80,6 +80,7 @@ class EllaAdminOptionsMixin(object):
         return super(EllaAdminOptionsMixin, self).formfield_for_dbfield(db_field, **kwargs)
 
 
+    '''
     def queryset(self, request):
         from ella.ellaadmin import models
         from django.db.models import Q, query
@@ -167,6 +168,7 @@ class EllaAdminOptionsMixin(object):
     #        fields = None
     #    return forms.inline_formset(self.parent_model, self.model, fk_name=self.fk_name, fields=fields,
     #        formfield_callback=self.formfield_for_dbfield, extra=self.extra, formset=self.formset, form=EllaAdminEditForm)
+    '''
 
 
 

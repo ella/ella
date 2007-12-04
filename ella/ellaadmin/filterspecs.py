@@ -52,5 +52,5 @@ class ContentTypeFilterSpec(DistinctRelatedFilterSpec):
 from django.db import models
 filterspecs.FilterSpec.register(lambda f: bool(f.rel) and not isinstance(f, models.ManyToManyField), DistinctRelatedFilterSpec)
 filterspecs.FilterSpec.register(lambda f: bool(f.rel) and f.rel.to == ContentType, ContentTypeFilterSpec)
-filterspecs.FilterSpec.register(lambda f: bool(f.rel) and  f.rel.to == Category, CategoryFilterSpec)
+#filterspecs.FilterSpec.register(lambda f: bool(f.rel) and  f.rel.to == Category, CategoryFilterSpec)
 

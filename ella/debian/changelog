@@ -1,3 +1,9 @@
+centrum-ella (0.0.18-27) unstable; urgency=low
+
+  * hotfix admin rights
+
+ -- Jakub Vysoky <jakub@borka.cz>  Tue,  4 Dec 2007 11:02:31 +0100
+
 centrum-ella (0.0.18-26) unstable; urgency=low
 
   * Added Admin view of Contestants with correct answers
