@@ -5,7 +5,7 @@ class EllaModelBackend(ModelBackend):
     def get_all_permissions(self, user_obj):
         if not hasattr(user_obj, '_perm_cache'):
             # get built-in permissions
-            user_obj._perm_cache = super(EllaModelBackend, self).get_all_permissions(user_obj)
+            user_obj._perm_cache = ModelBackend.get_all_permissions(self, user_obj)
 
             # get permissions based on site roles
             user_obj._perm_cache.update([

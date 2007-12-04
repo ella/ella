@@ -117,7 +117,7 @@ class EllaAdminOptionsMixin(object):
 
         return q
 
-    def has_change_permission(self, request, obj):
+    def has_change_permission(self, request, obj=None):
         """
         Returns True if the given request has permission to change the given
         Django model instance.
