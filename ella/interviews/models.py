@@ -67,7 +67,7 @@ class Interview(models.Model):
 
     def asking_ended(self):
         now = datetime.now()
-        return  self.ak_to > now
+        return  self.ask_to > now
 
     def can_reply(self):
         now = datetime.now()
