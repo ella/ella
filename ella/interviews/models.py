@@ -67,7 +67,7 @@ class Interview(models.Model):
 
     def asking_ended(self):
         now = datetime.now()
-        return  self.ask_to > now
+        return  self.ask_to < now
 
     def replying_started(self):
         now = datetime.now()
@@ -75,7 +75,7 @@ class Interview(models.Model):
 
     def replying_ended(self):
         now = datetime.now()
-        return  self.reply_to > now
+        return  self.reply_to < now
 
     def has_replies(self):
         answers = Answer.objects.filter(question__interview=self).count()
