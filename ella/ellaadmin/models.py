@@ -60,7 +60,7 @@ def applicable_categories(user, permission=None):
         q = q.filter(group__permissions=perm)
     else:
         # take any permission
-        q = q.filter(group_permissions__id__isnull=False)
+        q = q.filter(group__permissions__id__isnull=False)
 
     return [ d['category'] for d in q ]
 
