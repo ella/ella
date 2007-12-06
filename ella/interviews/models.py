@@ -60,13 +60,21 @@ class Interview(models.Model):
 
     objects = RelatedManager()
 
+
+    def asking_started(self):
+        now = datetime.now()
+        return  self.ask_from <= now
+
+    def asking_ended(self):
+        now = datetime.now()
+        return  self.ak_to > now
+
     def can_reply(self):
         now = datetime.now()
         return self.reply_from <= now < self.reply_to
 
     def can_ask(self):
-        now = datetime.now()
-        return self.ask_from <= now < self.ask_to
+        return self.asking_started() and not self.asking_ended()
 
     def get_questions(self):
         now = datetime.now()
