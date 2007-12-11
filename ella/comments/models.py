@@ -11,7 +11,6 @@ from ella.comments import defaults, management
 from ella.core.cache.utils import cache_this, method_key_getter, get_cached_object, get_cached_list
 
 
-
 class CommentOptions(models.Model):
     """
     contains options string for discussion
@@ -134,13 +133,11 @@ class Comment(models.Model):
         # save it all
         super(Comment, self).save()
 
-    '''
     def __unicode__(self):
         if self.id:
             return u"comment [id:%d] '%s...' on %s {path:%s}" % (self.id, self.content[:10],
                     self.target_ct.get_object_for_this_type(pk=self.target_id), self.path)
         return u"unsaved comment"
-    '''
 
     class Meta:
         ordering = ('-path',)

@@ -1,21 +1,14 @@
 from datetime import datetime, timedelta
 
-
 from django import newforms as forms
-
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
-
 from django.utils.translation import ugettext
-
 
 from ella.comments import defaults
 from ella.comments.defaults import OPTIONS_NAME, TARGET_NAME, HASH_NAME, PARENT_NAME, FORM_OPTIONS, SUBJECT_LENGTH
 from ella.comments.models import Comment, CommentOptions, BannedUser
-
 from ella.core.cache import get_cached_object
-
-
 
 
 class CommentForm(forms.Form):
@@ -29,8 +22,10 @@ class CommentForm(forms.Form):
 
 
     def set_init_props(self, data=None, init_props=defaults.INIT_PROPS):
-        """set initial form properties
+        """
+        set initial form properties
         form is created from data, if it is bound
+        TODO: !!! form should not be created this way, because fields has not constant names !!!
         from init_props, if not bound
         from options saved in database, if any
         """
@@ -88,7 +83,6 @@ class CommentForm(forms.Form):
         counts md5 hash of options
         this is simple check, if sent data are the same as expected
         (defined in options)
-
         """
         import md5
         from django.conf import settings
@@ -184,9 +178,11 @@ class CommentForm(forms.Form):
             user = authenticate(username=self.init_props['username'], password=self.init_props['password'])
             if not user:
                 raise ValidationError, ugettext("Invalid user.")
-            elif len(BannedUser.objects.filter(target_ct=self.init_props['target_ct'],
-                                                         target_id=self.init_props['target_id'],
-                                                         user=user)) > 0:
+            elif BannedUser.objects.filter(
+                    target_ct=self.init_props['target_ct'],
+                    target_id=self.init_props['target_id'],
+                    user=user
+).count():
                 raise ValidationError, ugettext("Banned user.")
             else:
                 self.cleaned_data['user'] = user
@@ -238,27 +234,16 @@ class CommentForm(forms.Form):
                 values_filter[i] = values[i]
         values_filter['submit_date__gte'] = datetime.now() - timedelta(seconds=defaults.POST_TIMEOUT)
 
-        same_posts = Comment.objects.filter(**values_filter)
-
-        if not len(same_posts):
+        same_posts = Comment.objects.filter(**values_filter).count()
+        if not same_posts:
             Comment(**values).save()
 
     def __repr__(self):
         return 'CommentForm for [%s] with fields %s' % (self.fields['target'].initial, sorted(self.fields.keys()))
 
-
-
 """
 Cleanup init_props key names: 'gonzo' => HASH_NAME, ...
 and maybe other init_props['string']
 
-should there be an SITE ForeignKey in these models?
--> update komentare/templatetags/comments.py respectively
-
-
-
 """
-
-
-
 

@@ -12,6 +12,7 @@ from ella.comments.models import Comment
 from ella.comments.forms import CommentForm
 from ella.comments.defaults import PARENT_NAME
 
+
 class CommentFormPreview(FormPreview):
     """
     TODO:
