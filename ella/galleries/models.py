@@ -155,8 +155,8 @@ class GalleryOptions(admin.ModelAdmin):
         (_("Gallery heading"), {'fields': ('title', 'slug',)}),
         (_("Gallery metadata"), {'fields': ('description', 'owner', 'category')}),
 )
-    list_filter = ('created',)
-    search_fields = ('title', 'description',)
+    list_filter = ('created', 'category',)
+    search_fields = ('title', 'description', 'slug',)
 #    inlines = (GalleryItemTabularOptions, ListingInlineOptions, TaggingInlineOptions, HitCountInlineOptions)
     inlines = (GalleryItemTabularOptions, ListingInlineOptions, TaggingInlineOptions,)
     prepopulated_fields = {'slug': ('title',)}

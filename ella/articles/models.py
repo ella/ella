@@ -166,7 +166,7 @@ class ArticleOptions(admin.ModelAdmin):
 )
     raw_id_fields = ('photo',)
     list_filter = ('category__site', 'created', 'category', 'authors',)
-    search_fields = ('title', 'perex',)
+    search_fields = ('title', 'perex', 'slug',)
 #    inlines = (ArticleContentInlineOptions, ListingInlineOptions, TaggingInlineOptions, HitCountInlineOptions)
     inlines = (ArticleContentInlineOptions, ListingInlineOptions, TaggingInlineOptions,)
     prepopulated_fields = {'slug' : ('title',)}
