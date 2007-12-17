@@ -83,6 +83,9 @@ class Contest(models.Model):
     def current_activity_state(self):
         return current_activity_state(self)
 
+    def is_active(self):
+        return is_active(self)
+
     @property
     def right_choices(self):
         return '|'.join(
@@ -166,6 +169,9 @@ class Quiz(models.Model):
     @property
     def current_activity_state(self):
         return current_activity_state(self)
+
+    def is_active(self):
+        return is_active(self)
 
 class Question(models.Model):
     """
@@ -287,6 +293,9 @@ class Poll(models.Model):
     @property
     def current_activity_state(self):
         return current_activity_state(self)
+
+    def is_active(self):
+        return is_active(self)
 
 class Choice(models.Model):
     """
@@ -550,6 +559,11 @@ def current_activity_state(obj):
         return ACTIVITY_NOT_YET_ACTIVE
     else:
         return ACTIVITY_ACTIVE
+
+def is_active(obj):
+    if obj.current_activity_state == ACTIVITY_ACTIVE:
+        return True
+    return False
 
 admin.site.register(Poll, PollOptions)
 admin.site.register(Contest, ContestOptions)

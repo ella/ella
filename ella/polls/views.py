@@ -83,6 +83,10 @@ def poll_vote(request, poll_id):
     form = QuestionForm(poll.question)(request.POST)
     if form.is_valid():
 
+        # poll must be active
+        if not poll.is_active():
+            return HttpResponseRedirect(url)
+
         # choice data from form
         choice = form.cleaned_data['choice']
 
@@ -143,6 +147,7 @@ def poll_vote(request, poll_id):
 def contest_vote(request, context):
 
     contest = context['object']
+
     forms = []
     forms_are_valid = True
     # questions forms
@@ -161,7 +166,7 @@ def contest_vote(request, context):
     if not contestant_form.is_valid():
         forms_are_valid = False
     # saving contestant
-    if forms_are_valid:
+    if forms_are_valid and contest.is_active():
         return contest_finish(request, context, forms, contestant_form)
     context.update({
             'forms' : forms,
