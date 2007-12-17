@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-10-18 10:40+0200\n"
+"POT-Creation-Date: 2007-12-14 18:53+0100\n"
 "PO-Revision-Date: 2007-08-15 13:55+0200\n"
 "Last-Translator: Ondrej Kohout <ondrej.kohout@netcentrum.cz>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,175 +16,188 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: models.py:19 models.py:203 models.py:315
+#: models.py:27 models.py:264 models.py:397
 msgid "Title"
 msgstr "Titulek"
 
-#: models.py:22 models.py:204
+#: models.py:30 models.py:265
 msgid "Text with announcement"
 msgstr "Text s oznámením"
 
-#: models.py:23 models.py:78 models.py:205
+#: models.py:31 models.py:114 models.py:266
 msgid "Text"
 msgstr "Text"
 
-#: models.py:24 models.py:79 models.py:206
+#: models.py:32 models.py:115 models.py:267
 msgid "Text with results"
 msgstr "Text s výsledky"
 
-#: models.py:25 models.py:80 models.py:207
+#: models.py:33 models.py:116 models.py:268
 msgid "Active from"
 msgstr "Aktivní od"
 
-#: models.py:26 models.py:81 models.py:208
+#: models.py:34 models.py:117 models.py:269
 msgid "Active till"
 msgstr "Aktivní do"
 
-#: models.py:66 models.py:138 models.py:290
+#: models.py:74 models.py:186 models.py:362
 msgid "Contest"
 msgstr "Soutěž"
 
-#: models.py:67
+#: models.py:75
 msgid "Contests"
 msgstr "Soutěže"
 
-#: models.py:74
+#: models.py:99 models.py:512
+msgid "Correct Answers"
+msgstr "Soutěžící se správnými odpověďmi"
+
+#: models.py:110
 msgid "title"
 msgstr "Titulek"
 
-#: models.py:77
+#: models.py:113
 msgid "text with announcement"
 msgstr "Text s ohlášením"
 
-#: models.py:125 models.py:137 models.py:314
+#: models.py:161 models.py:185 models.py:396
 msgid "Quiz"
 msgstr "Test"
 
-#: models.py:126
+#: models.py:162
 msgid "Quizes"
 msgstr "Testy"
 
-#: models.py:135
+#: models.py:182
 msgid "Question text"
 msgstr "Text otázky"
 
-#: models.py:136
+#: models.py:183
 msgid "Allow multiple choices"
 msgstr "Povolit více voleb/odpovědí"
 
-#: models.py:175 models.py:209 models.py:232
+#: models.py:184
+#, fuzzy
+msgid "Allow no choice"
+msgstr "Povolit více voleb/odpovědí"
+
+#: models.py:223 models.py:270 models.py:304
 msgid "Question"
 msgstr "Otázka"
 
-#: models.py:176
+#: models.py:224
 msgid "Questions"
 msgstr "Otázky"
 
-#: models.py:215 models.py:273
+#: models.py:276 models.py:345
 msgid "Poll"
 msgstr "Anketa"
 
-#: models.py:216
+#: models.py:277
 msgid "Polls"
 msgstr "Ankety"
 
-#: models.py:233
+#: models.py:305
 msgid "Choice text"
 msgstr "Text volby/odpovědi"
 
-#: models.py:234
+#: models.py:306
 msgid "Points"
 msgstr "Body"
 
-#: models.py:235 models.py:283
+#: models.py:307 models.py:355
 msgid "Votes"
 msgstr "Hlasy"
 
-#: models.py:242
+#: models.py:314
 msgid "Choice"
 msgstr "Volba/odpověď"
 
-#: models.py:243 models.py:298
+#: models.py:315 models.py:370
 msgid "Choices"
 msgstr "Volby/odpovědi"
 
-#: models.py:274 models.py:292
+#: models.py:346 models.py:364 templates/admin/correct_answers.html:12
 msgid "User"
 msgstr "Uživatel"
 
-#: models.py:275
+#: models.py:347
 msgid "Time"
 msgstr "Čas"
 
-#: models.py:276
+#: models.py:348
 msgid "IP Address"
 msgstr "IP adresa"
 
-#: models.py:282
+#: models.py:354
 msgid "Vote"
 msgstr "Hlas"
 
-#: models.py:291
+#: models.py:363
 msgid "Date and time"
 msgstr "Datum a čas"
 
-#: models.py:293
+#: models.py:365
 msgid "First name"
 msgstr "Jméno"
 
-#: models.py:294
+#: models.py:366
 msgid "Last name"
 msgstr "Příjmení"
 
-#: models.py:295
+#: models.py:367
 msgid "email"
 msgstr "E-mail"
 
-#: models.py:296
+#: models.py:368
 msgid "Phone number"
 msgstr "Telefoní číslo"
 
-#: models.py:297
+#: models.py:369 templates/admin/correct_answers.html:15
 msgid "Address"
 msgstr "Adresa"
 
-#: models.py:299
+#: models.py:371
 msgid "Count guess"
 msgstr "Kolik soutěžících tipujete že se zúčastní?"
 
-#: models.py:305
+#: models.py:372 templates/admin/correct_answers.html:16
+msgid "Winner"
+msgstr "Vítěz"
+
+#: models.py:378
 msgid "Contestant"
 msgstr "Soutěžící"
 
-#: models.py:306
+#: models.py:379
 msgid "Contestants"
 msgstr "Soutěžící"
 
-#: models.py:316
+#: models.py:398
 msgid "Quiz results text"
 msgstr "Text s výsledkem testu"
 
-#: models.py:317
+#: models.py:399
 msgid "Points dimension from"
 msgstr "Rozsah bodů od"
 
-#: models.py:318
+#: models.py:400
 msgid "Points dimension to"
 msgstr "Rozsah bodů do"
 
-#: models.py:319
+#: models.py:401
 msgid "Count"
 msgstr "Počet"
 
-#: models.py:334
+#: models.py:416
 msgid "Result"
 msgstr "Výsledek"
 
-#: models.py:335 models.py:471 views.py:356
+#: models.py:417 models.py:601 views.py:405
 msgid "results"
 msgstr "Výsledky"
 
-#: models.py:347
+#: models.py:428
 #, python-format
 msgid ""
 "Invalid score interval %(points_from)s - %(points_to)s. Points dimension "
@@ -193,28 +206,59 @@ msgstr ""
 "Neplatný rozsah bodů %(points_from)s - %(points_to)s. Rozsah bodů od musí "
 "být větší než rozsah bodů do."
 
-#: models.py:351
+#: models.py:431
 msgid "Invalid score intervals"
 msgstr "Neplatné rozsahy bodů"
 
-#: models.py:357
+#: models.py:437
 #, python-format
 msgid "Score %s is covered by two answers."
 msgstr "Výsledeku %s odpovídají dvě odpovědi."
 
-#: models.py:359
+#: models.py:439
 #, python-format
 msgid "Score %s is not covered by any answer."
 msgstr "Pro výsledek %s neexistuje žádná odpověď."
 
-#: models.py:472 views.py:254
+#: models.py:602 views.py:302
 msgid "result"
 msgstr "Výsledek"
 
-#: models.py:473
+#: models.py:603
 msgid "conditions"
 msgstr "podmínky"
 
+#: templates/admin/correct_answers.html:9
+#, fuzzy
+msgid "Count Guess Difference"
+msgstr "Rozdíl tipopvací otázky"
+
+#: templates/admin/correct_answers.html:10
+msgid "Name"
+msgstr "Jméno"
+
+#: templates/admin/correct_answers.html:11
+msgid "Surname"
+msgstr "Příjmení"
+
+#: templates/admin/correct_answers.html:13
+#, fuzzy
+msgid "Email"
+msgstr "E-mail"
+
+#: templates/admin/correct_answers.html:14
+#, fuzzy
+msgid "Phonenumber"
+msgstr "Telefoní číslo"
+
+#: templates/admin/correct_answers.html:29
+msgid "Yes"
+msgstr "Ano"
+
+#: templates/admin/correct_answers.html:29
+msgid "No"
+msgstr "Ne"
+
 #: templates/admin/edit_inline/question_tabular.html:14
 msgid "Delete"
-msgstr ""
+msgstr "Smazat"
