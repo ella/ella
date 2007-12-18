@@ -1,3 +1,23 @@
+centrum-ella (0.0.20) unstable; urgency=low
+
+  * from now on, there will be revision number
+  * [574]
+
+ -- Jakub Vysoky <jakub@borka.cz>  Tue, 18 Dec 2007 14:18:53 +0100
+
+centrum-ella (0.0.18-28) unstable; urgency=low
+
+  * Added some code to work with new django
+  * Corrected args in HitCountManager
+  * fixed a typo
+  * added ended and started properties to interview
+  * has_replies and replying started added
+  * removed redirect_id and idot parameters in article box context - old and
+    deprecated solution of PR articles annotations
+  * comments small cleanup but functional tests
+
+ -- Jakub Vysoky <jakub@borka.cz>  Wed, 12 Dec 2007 14:57:37 +0100
+
 centrum-ella (0.0.18-27) unstable; urgency=low
 
   * hotfix admin rights
