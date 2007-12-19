@@ -7,8 +7,9 @@ from distutils.core import setup
 from distutils.command.install import INSTALL_SCHEMES
 import os
 import sys
+import shutil
 
-PROJECT_PATHNAME = os.getcwd().split('/')[-1]
+PROJECT_PATHNAME = 'ella'
 PROJECT_NAME = 'Ella'
 PROJECT_VERSION = '0.9'
 PROJECT_DESCRIPTION = 'Ella - Django Content Management System'
@@ -36,7 +37,9 @@ for scheme in INSTALL_SCHEMES.values():
     scheme['data'] = scheme['purelib']
 
 # we have to go one directory up
-os.chdir('..')
+if os.path.isdir(PROJECT_PATHNAME):
+    shutil.rmtree(PROJECT_PATHNAME)
+shutil.copytree('.', PROJECT_PATHNAME)
 
 # Compile the list of packages available, because distutils doesn't have
 # an easy way to do this.
