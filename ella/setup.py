@@ -36,10 +36,14 @@ def fullsplit(path, result=None):
 for scheme in INSTALL_SCHEMES.values():
     scheme['data'] = scheme['purelib']
 
-# we have to go one directory up
-if os.path.isdir(PROJECT_PATHNAME):
-    shutil.rmtree(PROJECT_PATHNAME)
+# copy files into build dir
+shutil.rmtree(PROJECT_PATHNAME, True)
 shutil.copytree('.', PROJECT_PATHNAME)
+# remove dirs and files don't wanted in package
+shutil.rmtree('%s/build' % PROJECT_PATHNAME, True)
+shutil.rmtree('%s/debian' % PROJECT_PATHNAME, True)
+shutil.rmtree('%s/ella' % PROJECT_PATHNAME, True)
+os.remove('%s/setup.py' % PROJECT_PATHNAME)
 
 # Compile the list of packages available, because distutils doesn't have
 # an easy way to do this.
