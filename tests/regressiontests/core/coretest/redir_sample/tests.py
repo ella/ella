@@ -26,7 +26,7 @@ True
 >>> response.status_code
 301
 >>> response['Location']
-'/2007/7/1/redir-objects/redirobject-1-altered/'
+u'http://testserver/2007/7/1/redir-objects/redirobject-1-altered/'
 >>> response = c.get('/2007/7/1/redir-objects/redirobject-1-altered/')
 >>> response.status_code
 200
@@ -41,7 +41,7 @@ True
 >>> response.status_code
 301
 >>> response['Location']
-'/2007/7/1/redir-objects/redirobject-1-altered-twice/'
+u'http://testserver/2007/7/1/redir-objects/redirobject-1-altered-twice/'
 >>> Redirect.objects.all()
 [<Redirect: /2007/7/1/redir-objects/redirobject-1-altered/ ---> /2007/7/1/redir-objects/redirobject-1-altered-twice/>, <Redirect: /2007/7/1/redir-objects/redirobject-1/ ---> /2007/7/1/redir-objects/redirobject-1-altered-twice/>]
 

@@ -100,5 +100,5 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'ella.core.context_processors.url_info',
 )
 
-CACHE_BACKEND = 'locmem://'
-#CACHE_BACKEND = 'memcached://127.0.0.1'
+#CACHE_BACKEND = 'locmem://'
+CACHE_BACKEND = 'memcached://127.0.0.1'
