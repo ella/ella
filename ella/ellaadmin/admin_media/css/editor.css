@@ -42,7 +42,7 @@
 #boxPane div#quick { font-size: .95em; }
 #boxPane div#quick a { margin-right: 10px; }
 #boxPane input#id { width: 360px; }
-#boxPane input#search { width: 20px; height: 20px; background: #fff url(/static/admin_media/img/admin/selector-search.gif) no-repeat 50% 50%; border: 1px solid #ccc; }
+#boxPane input#search { width: 20px; height: 20px; background: #fff url(../img/admin/selector-search.gif) no-repeat 50% 50%; border: 1px solid #ccc; }
 #boxPane #submit { text-align: right; float: right; }
 #boxPane #submit input { width: 100px; height: 25px; }
 

@@ -358,7 +358,7 @@ $(function(){
 	nopreview = false;
 	onChangeTimeout = false;
 	// include additional CSS
-	$('<link rel="stylesheet" type="text/css" href="/static/admin_media/css/editor.css" />').appendTo('head');
+	$('<link rel="stylesheet" type="text/css" href="../css/editor.css" />').appendTo('head');
 	// Append editor to textareas
 	$('textarea.rich_text_area').each(function(i){
 		$(this).bind('focus', { element: this }, function(event){
