@@ -16,9 +16,9 @@ class RelatedManager(models.Manager):
     def get_query_set(self):
         return super(RelatedManager, self).get_query_set().select_related()
 
-def test_listing(*args, **kwargs):
+def invalidate_listing(key, *args, **kwargs):
     from ella.core.models import Listing
-    return [ (Listing, lambda x: True) ]
+    CACHE_DELETER.register_test(Listing, lambda x: True, key)
 
 class ListingManager(RelatedManager):
     def clean_listings(self):
@@ -45,7 +45,7 @@ class ListingManager(RelatedManager):
     def get_count(self, category=None, mods=[], **kwargs):
         return self.get_queryset(category, mods, **kwargs).count()
 
-    @cache_this(method_key_getter, test_listing)
+    @cache_this(method_key_getter, invalidate_listing)
     def get_listing(self, category=None, count=10, offset=1, mods=[], content_types=[], **kwargs):
         """
         Get top objects for given category and potentionally also its child categories.
@@ -113,7 +113,7 @@ class HitCountManager(models.Manager):
             hc.site_id = settings.SITE_ID
         hc.save()
 
-    @cache_this(get_top_objects_key, test_hitcount, timeout=10*60)
+    @cache_this(get_top_objects_key, timeout=10*60)
     def get_top_objects(self, count, mods=[]):
         """
         Return count top rated objects. Cache this for 10 minutes without any chance of cache invalidation.

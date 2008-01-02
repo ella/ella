@@ -41,7 +41,9 @@ def get_cached_list(model, **kwargs):
     if l is None:
         l = list(model._default_manager.filter(**kwargs))
         cache.set(key, l, 10 * 60)
-        CACHE_DELETER.register_test(model, lambda x: model._default_manager.filter(**kwargs).filter(pk=x._get_pk_val()) == 1, key)
+        for o in l:
+            CACHE_DELETER.register_pk(o, key)
+        #CACHE_DELETER.register_test(model, lambda x: model._default_manager.filter(**kwargs).filter(pk=x._get_pk_val()) == 1, key)
     return l
 
 KEY_FORMAT_OBJECT = 'ella.core.cache.utils.get_cached_object'
@@ -101,7 +103,7 @@ def method_key_getter(func, *args, **kwargs):
 )
 ).hexdigest()
 
-def cache_this(key_getter, test_builder, timeout=10*60):
+def cache_this(key_getter, invalidator=None, timeout=10*60):
     def wrapped_decorator(func):
         def wrapped_func(*args, **kwargs):
             key = key_getter(func, *args, **kwargs)
@@ -109,8 +111,8 @@ def cache_this(key_getter, test_builder, timeout=10*60):
             if result is None:
                 result = func(*args, **kwargs)
                 cache.set(key, result, timeout)
-                for model, test in test_builder(*args, **kwargs):
-                    CACHE_DELETER.register_test(model, test, key)
+                if invalidator:
+                    invalidator(key, *args, **kwargs)
             return result
 
         wrapped_func.__dict__ = func.__dict__

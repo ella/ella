@@ -10,12 +10,13 @@ from django.template.defaultfilters import slugify
 from ella.core.box import Box
 from ella.core.models import Category, Author, Category, Listing
 from ella.core.cache.utils import get_cached_object, cache_this
+from ella.core.cache.invalidate import CACHE_DELETER
 from ella.ellaadmin import widgets
 
 
-def gallery_test_builder(*args, **kwargs):
-    gallery = args[0]
-    return [ (Gallery, lambda x: x == gallery), (GalleryItem, lambda x: x.gallery == gallery) ]
+def gallery_cache_invalidator(key, gallery, *args, **kwargs):
+    CACHE_DELETER.register_pk(gallery, key)
+    CACHE_DELETER.register_test(GalleryItem, lambda x: x.gallery_id == gallery.pk)
 
 def get_gallery_key(func, gallery):
     return 'ella.galleries.models.Gallery(%d).items' % gallery.id
@@ -69,7 +70,7 @@ class Gallery(models.Model):
         return u'%s gallery' % self.title
 
     @property
-    @cache_this(get_gallery_key, gallery_test_builder)
+    @cache_this(get_gallery_key, gallery_cache_invalidator)
     def items(self):
         return [ (item, item.target) for item in self.galleryitem_set.all() ]
 

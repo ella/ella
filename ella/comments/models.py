@@ -28,13 +28,6 @@ class CommentOptions(models.Model):
         verbose_name = _('Comment Options')
         verbose_name_plural = _('Comment Options')
 
-
-def get_test_builder(object_order):
-    def test_for_comment(*args, **kwargs):
-        obj = args[object_order]
-        return [ (Comment, lambda x: x.target == obj) ]
-    return test_for_comment
-
 def build_tree(comment_list):
     for c in comment_list:
         # TODO: ugly n^2
@@ -45,12 +38,12 @@ def build_tree(comment_list):
     return comment_list
 
 class CommentManager(models.Manager):
-#    @cache_this(method_key_getter, get_test_builder(1))
+    # TODO @cache_this
     def get_count_for_object(self, object, **kwargs):
         target_ct = ContentType.objects.get_for_model(object)
         return self.filter(target_ct=target_ct, target_id=object.id, **kwargs).count()
 
-#    @cache_this(method_key_getter, get_test_builder(1))
+    # TODO @cache_this
     def get_list_for_object(self, object, order_by=None, **kwargs):
         target_ct = ContentType.objects.get_for_model(object)
         qset = self.filter(target_ct=target_ct, target_id=object._get_pk_val(), **kwargs)
