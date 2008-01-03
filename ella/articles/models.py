@@ -2,9 +2,9 @@ from datetime import datetime
 
 from django.db import models
 from django.contrib import admin
-from django.contrib.contenttypes.models import  ContentType
+from django.contrib.contenttypes.models import ContentType
 from django.utils.timesince import timesince
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext, ugettext_lazy as _
 
 from ella.core.models import Category, Author, Source, Listing
 from ella.core.box import Box
@@ -100,6 +100,14 @@ class Article(models.Model):
         return timesince(self.created)
     article_age.short_description = _('Article Age')
 
+    def photo_thumbnail(self):
+        photo = self.get_photo()
+        if photo:
+            return photo.thumb()
+        else:
+            return '<div class="errors"><ul class="errorlist"><li>%s</li></ul></div>' % ugettext('No main photo!')
+    photo_thumbnail.allow_tags = True
+
 
 def parse_nodelist(nodelist):
     for node in nodelist:
@@ -156,7 +164,7 @@ from ella.core.admin.models import ListingInlineOptions, HitCountInlineOptions
 from tagging.models import TaggingInlineOptions
 class ArticleOptions(admin.ModelAdmin):
     #raw_id_fields = ('authors',)
-    list_display = ('title', 'category', 'created', 'article_age', 'full_url',)
+    list_display = ('title', 'category', 'photo_thumbnail', 'created', 'article_age', 'full_url',)
     date_hierarchy = 'created'
     ordering = ('-created',)
     fieldsets = (
