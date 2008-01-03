@@ -5,7 +5,7 @@ from django.conf import settings
 JS_EDITOR = 'js/editor.js'
 JS_SHOWDOWN = 'js/showdown.js'
 CLASS_RICHTEXTAREA = 'rich_text_area'
-CSS_RICHTEXTAREA = 'css/pokus.css'
+CSS_RICHTEXTAREA = 'css/editor.css'
 
 JS_GENERIC_LOOKUP = 'js/admin/GenericRelatedObjectLookups.js'
 CLASS_TARGECT = 'target_ct'
@@ -33,6 +33,9 @@ class RichTextAreaWidget(forms.Textarea):
             settings.ADMIN_MEDIA_PREFIX + JS_EDITOR,
             settings.ADMIN_MEDIA_PREFIX + JS_SHOWDOWN,
 )
+        css = {
+            'screen': (settings.ADMIN_MEDIA_PREFIX + CSS_RICHTEXTAREA,),
+}
     def __init__(self, attrs={}):
         super(RichTextAreaWidget, self).__init__(attrs={'class': CLASS_RICHTEXTAREA})
 
