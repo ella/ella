@@ -19,11 +19,15 @@ class DbTemplate(models.Model):
     extends = models.CharField(_('Base template'), maxlength=200)
 
     def get_text(self):
-        text = u'{%% extends "%s" %%}' % self.extends
-        for block in self.templateblock_set.filter(Q(active_from__isnull=True) | Q(active_from__lte=datetime.now()), Q(active_till__isnull=True) | Q(active_till__gt=datetime.now())):
-            text += '{%% block %s %%}' % block.name
+        text = u'{%% extends "%s" %%}\n\n' % self.extends
+
+        for block in self.templateblock_set.filter(
+                Q(active_from__isnull=True) | Q(active_from__lte=datetime.now()),
+                Q(active_till__isnull=True) | Q(active_till__gt=datetime.now())
+):
+            text += '{%% block %s %%}\n' % block.name
             if block.box_type and block.target:
-                text += '{%% box %s for %s.%s with id %s %%}' % (
+                text += '{%% box %s for %s.%s with id %s %%}\n' % (
                         block.box_type,
                         block.target_ct.app_label,
                         block.target_ct.model,
@@ -31,8 +35,16 @@ class DbTemplate(models.Model):
 )
             text += block.text + '\n'
             if block.box_type and block.target:
-                text += '{% endbox %}'
-            text += '{% endblock %}'
+                text += '{% endbox %}\n'
+            text += '{% endblock %}\n\n'
+
+        comment =  u'{% comment %}\n'
+        comment += u'name: %s\n' % self.name
+        comment += u'site: %s\n' % self.site
+        comment += u'description: %s\n' % self.description
+        comment += u'{% endcomment %}\n\n'
+        text += comment
+
         return text
 
     class Meta:
