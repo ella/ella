@@ -160,6 +160,6 @@ class BannedIP(models.Model):
 
 
 # initialization
-from ella.comments import management
-del management
+from ella.comments import register
+del register
 
