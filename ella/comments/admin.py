@@ -24,5 +24,3 @@ admin.site.register(Comment, CommentsOptions)
 admin.site.register(BannedUser)
 admin.site.register(CommentOptions)
 
-
-

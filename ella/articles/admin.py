@@ -1,8 +1,13 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
 
-from ella.articles.models import ArticleContents, Article, InfoBox
+from tagging.models import TaggingInlineOptions
+
+from ella.core.admin.models import ListingInlineOptions, HitCountInlineOptions
 from ella.ellaadmin import widgets
+
+from ella.articles.models import ArticleContents, Article, InfoBox
+
 
 class ArticleContentInlineOptions(admin.TabularInline):
     model = ArticleContents
@@ -23,10 +28,7 @@ class InfoBoxOptions(admin.ModelAdmin):
             kwargs['widget'] = widgets.RichTextAreaWidget
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
-from ella.core.admin.models import ListingInlineOptions, HitCountInlineOptions
-from tagging.models import TaggingInlineOptions
 class ArticleOptions(admin.ModelAdmin):
-    #raw_id_fields = ('authors',)
     list_display = ('title', 'category', 'photo_thumbnail', 'created', 'article_age', 'full_url',)
     date_hierarchy = 'created'
     ordering = ('-created',)
