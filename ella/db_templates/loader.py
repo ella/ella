@@ -5,6 +5,7 @@ from django.conf import settings
 from ella.db_templates.models import DbTemplate
 from ella.core.cache import get_cached_object
 
+
 CT_DBTEMPLATE = ContentType.objects.get_for_model(DbTemplate)
 
 def load_template_source(template_name, template_dirs=None):
