@@ -25,12 +25,5 @@ def comments_custom_urls(request, bits, context):
     from django.http import Http404
     raise Http404
 
-def register_custom_urls():
-    """register all custom urls"""
-    # TODO: move this piece of code somewhere else
-    from django.conf import settings
-    from django.utils import translation
-    translation.activate(settings.LANGUAGE_CODE)
-    dispatcher.register(slugify(_('comments')), comments_custom_urls)
-
+dispatcher.register(slugify(_('comments')), comments_custom_urls)
 

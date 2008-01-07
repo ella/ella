@@ -1,4 +1,7 @@
-from ella.comments.urls import register_custom_urls
+# register admin options
+from ella.comments import admin
 
-register_custom_urls()
+# register custom urls
+from ella.comments import urls
+
 

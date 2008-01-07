@@ -1,3 +1,7 @@
+'''
+dynamic comment form
+'''
+
 from datetime import datetime, timedelta
 
 from django import newforms as forms
@@ -5,10 +9,11 @@ from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext
 
+from ella.core.cache import get_cached_object
+
 from ella.comments import defaults
 from ella.comments.defaults import OPTIONS_NAME, TARGET_NAME, HASH_NAME, PARENT_NAME, FORM_OPTIONS, SUBJECT_LENGTH
 from ella.comments.models import Comment, CommentOptions, BannedUser
-from ella.core.cache import get_cached_object
 
 
 class CommentForm(forms.Form):

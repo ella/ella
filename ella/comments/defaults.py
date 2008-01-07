@@ -1,8 +1,11 @@
-'''mini settings for ella.comments application'''
+'''
+shared mini settings for ella.comments application (forms, models)
+'''
 
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
+
 
 NICKNAME_LENGTH = 50
 USERNAME_LENGTH = 50

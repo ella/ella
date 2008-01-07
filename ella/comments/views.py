@@ -8,6 +8,7 @@ from django.template import RequestContext
 
 from ella.core.cache import get_cached_object_or_404
 from ella.core.models import Category
+
 from ella.comments.models import Comment
 from ella.comments.forms import CommentForm
 from ella.comments.defaults import PARENT_NAME
