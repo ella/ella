@@ -137,8 +137,10 @@ class TemplateBlockManager(models.Manager):
                 target_id = box.lookup[1]
 
                 # TODO: params is compiled template - so it must not be TextNode
+                # but we dont't want that ugly regexp here
                 source = box.nodelist[0].source
-                params = source[0].source[source[1][0]:source[1][1]]
+                re_box = re.compile(r'{%\s+box\s[^%]+\s+%}(.*?){%\s+endbox\s+%}', re.S)
+                params = re_box.findall(source[0].source)[0]
 
                 template_block = TemplateBlock(
                         name=name, template=parent_template,

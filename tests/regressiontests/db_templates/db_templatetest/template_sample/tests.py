@@ -51,6 +51,16 @@ u'\n{% box box_type for auth.permission with id 1 %}param1:value1\r\nparam2:valu
 >>> models.TemplateBlock.objects.count()
 3
 
+# box options are saved into text
+>>> block = models.TemplateBlock.objects.create_from_string(template, '{% box box_type for auth.permission with id 1 %}param1:next_level\r\nparam2:value2\r\n{% endbox %}', 'box2')
+>>> block.text
+u'param1:next_level\r\nparam2:value2\r\n'
+
+# but it can be compiled template
+>>> block = models.TemplateBlock.objects.create_from_string(template, '{% box box_type for auth.permission with id 1 %}param1:{{next_level}}\r\nparam2:value2\r\n{% endbox %}', 'box3')
+>>> block.text
+u'param1:{{next_level}}\r\nparam2:value2\r\n'
+
 DbTemplate test
 ---------------
 >>> template_string = u'{% extends "base.html" %}{% block main %}database.html\n{% endblock %}'
@@ -68,14 +78,14 @@ InvalidTemplate: template without extends
 >>> models.DbTemplate.objects.count()
 2
 >>> models.TemplateBlock.objects.count()
-3
+5
 >>> template = models.DbTemplate.objects.create_from_string(template_string, 'name.html')
 >>> template
 <DbTemplate: name.html>
 >>> models.DbTemplate.objects.count()
 3
 >>> models.TemplateBlock.objects.count()
-4
+6
 
 dump and load
 -------------
