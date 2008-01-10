@@ -67,6 +67,7 @@ class DbTemplateOptions(admin.ModelAdmin):
     ordering = ('description',)
     inlines = (TemplateBlockInlineOptions,)
     list_display = ('description', 'site', 'extends', 'name')
+    list_filter = ('site',)
 
 admin.site.register(DbTemplate, DbTemplateOptions)
 
