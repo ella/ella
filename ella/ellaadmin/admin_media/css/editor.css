@@ -1,3 +1,15 @@
+/* RICH TEXT AREA */
+.rich_text_area {
+	font-family:monospace;
+	height:500px;
+	width:500px;
+}
+ul#rich_toolbar li {
+	display:inline;
+	margin:0pt 5px;
+	padding:0pt 5px;
+}
+
 #boxWrapper {
 	position: absolute;
 	top: 0;

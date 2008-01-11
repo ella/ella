@@ -1,6 +1,11 @@
-{% extends "admin_orig/base.html" %}
+{% extends "admin/base.html" %}
 
 {% block title %}{{ title|escape }} | {% trans 'Ella site admin' %}{% endblock %}
+
+{% block extrastyle %}
+{% load adminmedia %}
+<link rel="stylesheet" type="text/css" href="{% admin_media_prefix %}css/ellaadmin.css" />
+{% endblock %}
 
 {% block branding %}
 <h1 id="site-name">{% trans 'Ella administration' %}</h1>

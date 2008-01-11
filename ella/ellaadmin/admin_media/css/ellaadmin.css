@@ -1,0 +1,8 @@
+
+/* layout.css */
+#header { background:#D96F6F; color:#ffc; overflow:hidden; }
+
+/* login.css */
+body.login { background:#D96F6F; }
+.login #header { background:#ED3A3A; }
+
