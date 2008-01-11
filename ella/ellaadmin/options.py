@@ -67,6 +67,7 @@ class EllaAdminAddForm(EllaAdminForm):
 class EllaAdminOptionsMixin(object):
     def formfield_for_dbfield(self, db_field, **kwargs):
         from ella.ellaadmin.filterspecs import get_content_types
+        from django.db.models import ForeignKey
         if db_field.name == 'slug':
             return forms.RegexField('^[0-9a-z-]+$', max_length=255, **kwargs)
 
@@ -76,6 +77,14 @@ class EllaAdminOptionsMixin(object):
 
         elif db_field.name in ('target_id', 'source_id',):
             kwargs['widget'] = widgets.ForeignKeyRawIdWidget
+
+        if isinstance(db_field, ForeignKey):
+            #kwargs['widget'] = widgets.ExtendedforeignKeyRawIdWidget
+            #formfield = super(EllaAdminOptionsMixin, self).formfield_for_dbfield(db_field, **kwargs)
+            if db_field.name in self.raw_id_fields:
+                formfield = super(EllaAdminOptionsMixin, self).formfield_for_dbfield(db_field, **kwargs)
+                formfield.widget.render = widgets.ExtendedRelatedFieldWidgetWrapper(formfield.widget.render, db_field.rel, self.admin_site)
+                return formfield
 
         return super(EllaAdminOptionsMixin, self).formfield_for_dbfield(db_field, **kwargs)
 

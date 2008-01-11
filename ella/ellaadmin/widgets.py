@@ -1,6 +1,7 @@
 from django import newforms as forms
 from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
+from django.contrib.admin import widgets
 
 JS_EDITOR = 'js/editor.js'
 JS_SHOWDOWN = 'js/showdown.js'
@@ -26,6 +27,20 @@ class ForeignKeyRawIdWidget(forms.TextInput):
 )
     def __init__(self, attrs={}):
         super(ForeignKeyRawIdWidget, self).__init__(attrs={'class': CLASS_TARGEID})
+
+#class ExtendedforeignKeyRawIdWidget(forms.Select):
+#    def render(self, name, value, attrs=None):
+#        s = super(ExtendedforeignKeyRawIdWidget, self).render(name, value, attrs)
+#        return u'%s asdfasdf' % s
+
+class ExtendedRelatedFieldWidgetWrapper(widgets.RelatedFieldWidgetWrapper):
+    def __call__(self, name, value, *args, **kwargs):
+        rel_to = self.rel.to
+        related_url = '../../../%s/%s/%s' % (rel_to._meta.app_label, rel_to._meta.object_name.lower(), value)
+        output = [self.render_func(name, value, *args, **kwargs)]
+        if value and rel_to in self.admin_site._registry: # If the related object has an admin interface:
+            output.append(u'<a href="%s">%s</a>' % (related_url, rel_to.objects.get(pk=value)))
+        return u''.join(output)
 
 class RichTextAreaWidget(forms.Textarea):
     class Media:
