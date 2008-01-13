@@ -12,7 +12,7 @@ def get_key(func, template_name, template_dirs=None):
 def invalidate_cache(key, template_name, template_dirs=None):
     from ella.db_templates.models import DbTemplate
     if DbTemplate._meta.installed:
-        CACHE_DELETER.register_test(DbTemplate, lambda x: x.name == template_name)
+        CACHE_DELETER.register_test(DbTemplate, lambda x: x.name == template_name, key)
 
 def load_template_source(template_name, template_dirs=None):
     global template_source_loaders
