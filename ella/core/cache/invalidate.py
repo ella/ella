@@ -10,51 +10,20 @@ try:
 except ImportError:
     import pickle
 
-def parse_message(message):
-    '''
-    Parse incomming messages from ActiveMQ
-
-    MESSAGE
-    destination:/topic/test
-    timestamp:1184944814498
-    priority:0
-    expires:0
-    message-id:ID:dev11-42769-1184944719862-3:2:-1:1:3
-
-    XXY
-    '''
-    lines = message.split('\n')
-    if len(lines) < 3 or lines[1] != 'MESSAGE':
-        return {}, None
-
-    header = {}
-    body = None
-    for i in range(2, len(lines)):
-        if lines[i]:
-            key, value = lines[i].split(':', 1)
-            header[key] = value
-        elif i+1 < len(lines):
-            body = '\n'.join(lines[i+1:])
-            break
-        else:
-            break
-
-    return header, body
-
 class CacheDeleter(object):
     def __init__(self):
         self._register = {}
         self.signal_handler = self
 
-    def receive(self, message):
+    def on_error(self, header, message):
+        pass
+
+    def on_message(self, header, body):
         """
         Process message from ActiveMQ
         """
-        from ella.core.cache.utils import get_cached_object
-        from django.db.models import ObjectDoesNotExist
-        header, body = parse_message(message)
-
         instance = pickle.loads(body)
+
         # delegate the received signal to __call__
         self(instance.__class__, instance)
 
@@ -113,19 +82,26 @@ def get_propagator(conn):
         """
         # notify this instance right away
         CACHE_DELETER(sender, instance)
-        # propagate the signal to others
-        conn.send('/topic/ella', pickle.dumps(instance))
+        try:
+            # propagate the signal to others
+            conn.send(pickle.dumps(instance), destination='/topic/ella')
+        except:
+            pass
         return instance
     return propagate_signal
 
 try:
     import stomp
+
     # initialize connection to ActiveMQ
-    conn = stomp.Connection(ACTIVE_MQ_HOST, ACTIVE_MQ_PORT)
+    conn = stomp.Connection([(ACTIVE_MQ_HOST, ACTIVE_MQ_PORT)], '', '')
+
     # register CD as listener
-    conn.addlistener(CACHE_DELETER)
-    conn.subscribe('/topic/ella')
+    conn.add_listener(CACHE_DELETER)
+
     conn.start()
+    conn.connect()
+    conn.subscribe(destination='/topic/ella')
 
     # register to close the activeMQ connection on exit
     import atexit
