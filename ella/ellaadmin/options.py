@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.contrib.admin.options import flatten_fieldsets
 from django import newforms as forms
+from django.shortcuts import render_to_response
+from django import http
 
 from ella.ellaadmin import widgets
 from ella.core.middleware import get_current_request
@@ -36,6 +38,17 @@ class EllaAdminSite(admin.AdminSite):
             for inline in options.inlines:
                 inline = mixin_ella_admin(inline)
         admin.AdminSite.register = register_ella_admin(admin.AdminSite.register)
+
+    def root(self, request, url):
+        try:
+            return super(EllaAdminSite, self).root(request, url)
+        except http.Http404:
+            if url.startswith('e/cache/status'):
+                from ella.ellaadmin.memcached import cache_status
+                return cache_status(request)
+            else:
+                raise
+
 
 class ContentTypeChoice(forms.ChoiceField):
     def clean(self, value):
