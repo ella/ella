@@ -293,6 +293,11 @@ function build(box){
 					})
 				),
 				$('<div></div>').append(
+					$('<input type="checkbox" id="description"' + ((p.indexOf('show_detail') != -1) ? ' checked="checked"' : '') + ' /> <label for="description">Detail</label>').change(function(){
+						parseParameters(this.checked, 'show_detail');
+					})
+				),
+				$('<div></div>').append(
 					$('<input type="checkbox" id="description"' + ((p.indexOf('show_description') != -1) ? ' checked="checked"' : '') + ' /> <label for="description">Popis</label>').change(function(){
 						parseParameters(this.checked, 'show_description');
 					})

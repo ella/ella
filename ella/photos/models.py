@@ -67,6 +67,7 @@ class PhotoBox(Box):
                 'show_title' : self.params.get('show_title', ''),
                 'show_description' : self.params.get('show_description', ''),
                 'show_authors' : self.params.get('show_authors', ''),
+                'show_detail' : self.params.get('show_detail', ''),
 })
         return cont
 
