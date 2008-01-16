@@ -8,6 +8,6 @@ def url_info(request):
 
     return {
         'MEDIA_URL' : settings.MEDIA_URL,
-        'VERSION' : settings.VERSION,
+        'VERSION' : getattr(settings, 'VERSION', 1)
 }
 
