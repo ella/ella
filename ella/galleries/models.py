@@ -16,7 +16,7 @@ from ella.ellaadmin import widgets
 
 def gallery_cache_invalidator(key, gallery, *args, **kwargs):
     CACHE_DELETER.register_pk(gallery, key)
-    CACHE_DELETER.register_test(GalleryItem, lambda x: x.gallery_id == gallery.pk)
+    CACHE_DELETER.register_test(GalleryItem, lambda x: x.gallery_id == gallery.pk, key)
 
 def get_gallery_key(func, gallery):
     return 'ella.galleries.models.Gallery(%d).items' % gallery.id
