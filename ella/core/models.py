@@ -107,7 +107,7 @@ class Category(models.Model):
     draw_title.allow_tags = True
 
     class Meta:
-        ordering = ('site', 'title',)
+        ordering = ('title',)
         unique_together = (('site', 'tree_path'),)
         verbose_name = _('Category')
         verbose_name_plural = _('Categories')
@@ -200,7 +200,8 @@ class Listing(models.Model):
         return not (self.priority_to and now > self.priority_to and self.remove)
 
     def full_url(self):
-        return '<a href="%s">url</a>' % self.get_absolute_url()
+        from django.utils.safestring import mark_safe
+        return mark_safe('<a href="%s">url</a>' % self.get_absolute_url())
     full_url.allow_tags = True
 
 

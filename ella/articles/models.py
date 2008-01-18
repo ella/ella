@@ -69,9 +69,10 @@ class Article(models.Model):
             return listing.get_absolute_url()
 
     def full_url(self):
+        from django.utils.safestring import mark_safe
         absolute_url = self.get_absolute_url()
         if absolute_url:
-            return '<a href="%s">url</a>' % absolute_url
+            return mark_safe('<a href="%s">url</a>' % absolute_url)
         return 'no url'
     full_url.allow_tags = True
 

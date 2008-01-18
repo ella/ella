@@ -92,6 +92,7 @@ class Photo(models.Model):
         """
         do thumbnails
         """
+        from django.utils.safestring import mark_safe
         tinythumb = path.split(self.image)
         tinythumb = (tinythumb[0] , 'thumb-' + tinythumb[1])
         tinythumb = path.join(*tinythumb)
@@ -103,7 +104,7 @@ class Photo(models.Model):
             except IOError:
                 # TODO Logging something wrong
                 return """<strong>%s</strong>""" % _('Thumbnail not available')
-        return """<a href="%s%s"><img src="%s%s" alt="Thumbnail %s" /></a>""" % (settings.MEDIA_URL, self.image, settings.MEDIA_URL, tinythumb, self.title)
+        return mark_safe("""<a href="%s%s"><img src="%s%s" alt="Thumbnail %s" /></a>""" % (settings.MEDIA_URL, self.image, settings.MEDIA_URL, tinythumb, self.title))
     thumb.allow_tags = True
 
     def Box(self, box_type, nodelist):
