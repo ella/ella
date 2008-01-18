@@ -78,10 +78,10 @@ class DbTemplateManager(models.Manager):
 
 
 class DbTemplate(models.Model):
-    name = models.CharField(_('Name'), maxlength=200, db_index=True)
+    name = models.CharField(_('Name'), max_length=200, db_index=True)
     site = models.ForeignKey(Site)
-    description = models.CharField(_('Description'), maxlength=500, blank=True)
-    extends = models.CharField(_('Base template'), maxlength=200)
+    description = models.CharField(_('Description'), max_length=500, blank=True)
+    extends = models.CharField(_('Base template'), max_length=200)
 
     objects = DbTemplateManager()
 
@@ -153,8 +153,8 @@ class TemplateBlockManager(models.Manager):
 
 class TemplateBlock(models.Model):
     template = models.ForeignKey(DbTemplate)
-    name = models.CharField(_('Name'), maxlength=200)
-    box_type = models.CharField(_('Box type'), maxlength=200, blank=True)
+    name = models.CharField(_('Name'), max_length=200)
+    box_type = models.CharField(_('Box type'), max_length=200, blank=True)
     target_ct = models.ForeignKey(ContentType, null=True, blank=True)
     target_id = models.IntegerField(null=True, blank=True)
     active_from = models.DateTimeField(_('Block active from'), default=datetime.now, null=True, blank=True)

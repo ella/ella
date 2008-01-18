@@ -72,9 +72,9 @@ class PhotoBox(Box):
         return cont
 
 class Photo(models.Model):
-    title = models.CharField(_('Title'), maxlength=200)
+    title = models.CharField(_('Title'), max_length=200)
     description = models.TextField(_('Description'), blank=True)
-    slug = models.CharField(maxlength=200, unique=True, db_index=True)
+    slug = models.CharField(max_length=200, unique=True, db_index=True)
     image = models.ImageField(upload_to='photos/%Y/%m/%d', height_field='height', width_field='width') # save it to YYYY/MM/DD structure
     width = models.PositiveIntegerField(editable=False)
     height = models.PositiveIntegerField(editable=False)
@@ -131,7 +131,7 @@ class Photo(models.Model):
         ordering = ('-created',)
 
 class Format(models.Model):
-    name = models.CharField(_('Name'), maxlength=80)
+    name = models.CharField(_('Name'), max_length=80)
     max_width = models.PositiveIntegerField(_('Max width'))
     max_height = models.PositiveIntegerField(_('Max height'))
     flexible_height = models.BooleanField(_('Flexible height'), help_text=_(('Determines whether max_height is an absolute maximum, '
@@ -173,7 +173,7 @@ class Format(models.Model):
 class FormatedPhoto(models.Model):
     photo = models.ForeignKey(Photo)
     format = models.ForeignKey(Format)
-    filename = models.CharField(maxlength=300, editable=False) # derive local filename and url
+    filename = models.CharField(max_length=300, editable=False) # derive local filename and url
     crop_left = models.PositiveIntegerField()
     crop_top = models.PositiveIntegerField()
     crop_width = models.PositiveIntegerField()

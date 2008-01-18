@@ -16,8 +16,8 @@ from ella.core.admin.models import *
 class Author(models.Model):
     from django.contrib.auth.models import User
     user = models.ForeignKey(User, blank=True, null=True)
-    name = models.CharField(_('Name'), maxlength=200, blank=True)
-    slug = models.CharField(_("Slug"), maxlength=200)
+    name = models.CharField(_('Name'), max_length=200, blank=True)
+    slug = models.CharField(_("Slug"), max_length=200)
     #photo = models.ImageField(_('Photo'), upload_to='photos/%Y/%m/%d', blank=True)
     description = models.TextField(_('Description'), blank=True)
     text = models.TextField(_('Text'), blank=True)
@@ -31,7 +31,7 @@ class Author(models.Model):
         verbose_name_plural = _('Authors')
 
 class Source(models.Model):
-    name = models.CharField(_('Name'), maxlength=200)
+    name = models.CharField(_('Name'), max_length=200)
     url = models.URLField(_('URL'), blank=True)
     description = models.TextField(_('Description'), blank=True)
 
@@ -51,10 +51,10 @@ class CategoryBox(Box):
         return cont
 
 class Category(models.Model):
-    title = models.CharField(_("Category Title"), maxlength=200)
-    slug = models.CharField(_("Slug"), maxlength=200)
+    title = models.CharField(_("Category Title"), max_length=200)
+    slug = models.CharField(_("Slug"), max_length=200)
     tree_parent = models.ForeignKey('self', null=True, blank=True, verbose_name=_("Parent Category"))
-    tree_path = models.CharField(maxlength=255, editable=False)
+    tree_path = models.CharField(max_length=255, editable=False)
     description = models.TextField(_("Category Description"), blank=True)
     site = models.ForeignKey(Site)
 
@@ -273,11 +273,11 @@ class Dependency(models.Model):
     """
     target_ct = models.ForeignKey(ContentType, related_name='dependency_for_set')
     target_id = models.IntegerField()
-    target_key = models.CharField(maxlength=100, blank=True)
+    target_key = models.CharField(max_length=100, blank=True)
 
     source_ct = models.ForeignKey(ContentType, related_name='dependent_on_set')
     source_id = models.IntegerField()
-    source_key = models.CharField(maxlength=100, blank=True)
+    source_key = models.CharField(max_length=100, blank=True)
 
     objects = DependencyManager()
 

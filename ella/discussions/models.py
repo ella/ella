@@ -13,13 +13,13 @@ from django.template.defaultfilters import slugify
 
 class Topic(models.Model):
     # ella fields
-    slug = models.CharField(_('Slug'), db_index=True, maxlength=255)
+    slug = models.CharField(_('Slug'), db_index=True, max_length=255)
     category = models.ForeignKey(Category, verbose_name=_('Category'))
 
     photo = models.ForeignKey(Photo, blank=True, null=True, verbose_name=_('Photo'))
     created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)
 
-    title = models.CharField(_('Title'), maxlength=255)
+    title = models.CharField(_('Title'), max_length=255)
     description = models.TextField(_('Description'))
 
     def __unicode__(self):
@@ -44,15 +44,15 @@ class Topic(models.Model):
 
 class Question(models.Model):
     topic = models.ForeignKey(Topic)
-    slug = models.CharField(_('Slug'), db_index=True, maxlength=255)
+    slug = models.CharField(_('Slug'), db_index=True, max_length=255)
 
-    title = models.CharField(_('Title'), maxlength=255)
+    title = models.CharField(_('Title'), max_length=255)
     description = models.TextField(_('Description'))
 
     # author if is authorized
     user = models.ForeignKey(User, verbose_name=_('authorized author'), blank=True, null=True)
     # author otherwise
-    nickname = models.CharField(_("anonymous author's nickname"), maxlength=255, blank=True)
+    nickname = models.CharField(_("anonymous author's nickname"), max_length=255, blank=True)
     email = models.EmailField(_('authors email (optional)'), blank=True)
 
     # authors ip address

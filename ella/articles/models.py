@@ -11,7 +11,7 @@ from ella.core.managers import RelatedManager
 from ella.photos.models import Photo
 
 class InfoBox(models.Model):
-    title = models.CharField(_('Title'), maxlength=255)
+    title = models.CharField(_('Title'), max_length=255)
     created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)
     updated = models.DateTimeField(_('Updated'), blank=True, null=True)
     content = models.TextField(_('Content'))
@@ -23,9 +23,9 @@ class InfoBox(models.Model):
 
 class Article(models.Model):
     # Titles
-    title = models.CharField(_('Title'), maxlength=255)
-    upper_title = models.CharField(_('Upper title'), maxlength=255, blank=True)
-    slug = models.CharField(_('Slug'), db_index=True, maxlength=255)
+    title = models.CharField(_('Title'), max_length=255)
+    upper_title = models.CharField(_('Upper title'), max_length=255, blank=True)
+    slug = models.CharField(_('Slug'), db_index=True, max_length=255)
 
     # Contents
     perex = models.TextField(_('Perex'))
@@ -117,7 +117,7 @@ def parse_nodelist(nodelist):
 
 class ArticleContents(models.Model):
     article = models.ForeignKey(Article, verbose_name=_('Article'))
-    title = models.CharField(_('Title'), maxlength=200, blank=True)
+    title = models.CharField(_('Title'), max_length=200, blank=True)
     content = models.TextField(_('Content'))
 
     # @transaction.comit_on_success

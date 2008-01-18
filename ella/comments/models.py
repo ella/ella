@@ -22,7 +22,7 @@ class CommentOptions(models.Model):
     target_ct = models.ForeignKey(ContentType, verbose_name=_('target content type'))
     target_id = models.PositiveIntegerField(_('target id'))
     target = generic.GenericForeignKey()
-    options = models.CharField(maxlength=defaults.OPTS_LENGTH, blank=True)
+    options = models.CharField(max_length=defaults.OPTS_LENGTH, blank=True)
     timestamp = models.DateTimeField(default=datetime.now)
 
     class Meta:
@@ -58,19 +58,19 @@ class Comment(models.Model):
     target_id = models.PositiveIntegerField(_('target id'))
 
     # comment content
-    subject = models.TextField(_('comment subject'), maxlength=defaults.SUBJECT_LENGTH)
-    content = models.TextField(_('comment content'), maxlength=defaults.COMMENT_LENGTH)
+    subject = models.TextField(_('comment subject'), max_length=defaults.SUBJECT_LENGTH)
+    content = models.TextField(_('comment content'), max_length=defaults.COMMENT_LENGTH)
     # comment picture
 #    image = models.ImageField(_('image answer'), upload_to='comment_image', blank=True, null=True)
 
     # tree structure
     parent = models.ForeignKey('self', verbose_name=_('tree structure parent'), blank=True, null=True)
-    path = models.CharField(_('genealogy tree path'), maxlength=defaults.PATH_LENGTH, blank=True, editable=False)
+    path = models.CharField(_('genealogy tree path'), max_length=defaults.PATH_LENGTH, blank=True, editable=False)
 
     # author if is authorized
     user = models.ForeignKey(User, verbose_name=_('authorized author'), blank=True, null=True)
     # author otherwise
-    nickname = models.CharField(_("anonymous author's nickname"), maxlength=defaults.NICKNAME_LENGTH, blank=True)
+    nickname = models.CharField(_("anonymous author's nickname"), max_length=defaults.NICKNAME_LENGTH, blank=True)
     email = models.EmailField(_('authors email (optional)'), blank=True)
     # authors ip address
     ip_address = models.IPAddressField(_('ip address'), blank=True, null=True)

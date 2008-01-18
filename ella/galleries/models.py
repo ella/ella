@@ -26,10 +26,10 @@ class Gallery(models.Model):
     Definition of objects gallery
     """
     # Gallery heading
-    title = models.CharField(_('Title'), maxlength=255)
-    slug = models.CharField(_('Slug'), maxlength=255)
+    title = models.CharField(_('Title'), max_length=255)
+    slug = models.CharField(_('Slug'), max_length=255)
     # Gallery metadata
-    description = models.CharField(_('Description'), maxlength=3000, blank=True)
+    description = models.CharField(_('Description'), max_length=3000, blank=True)
     owner = models.ForeignKey(Author, verbose_name=_('Gallery owner'), blank=True, null=True)
     category = models.ForeignKey(Category, verbose_name=_('Category'), blank=True, null=True)
     created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)

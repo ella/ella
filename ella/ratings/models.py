@@ -64,7 +64,7 @@ class ModelWeight(models.Model):
     """
     content_type = models.OneToOneField(ContentType)
     weight = models.IntegerField(_('Weight'), default=DEFAULT_MODEL_WEIGHT)
-    owner_field = models.CharField(_('Owner field'), maxlength=30, help_text=_('Name of the field on target model that identifies the owner of the object'))
+    owner_field = models.CharField(_('Owner field'), max_length=30, help_text=_('Name of the field on target model that identifies the owner of the object'))
 
     objects = ModelWeightManager()
 
@@ -148,7 +148,7 @@ class Rating(models.Model):
     time = models.DateTimeField(_('Time'), default=datetime.now, editable=False)
     user = models.ForeignKey(User, blank=True, null=True)
     amount = models.IntegerField(_('Amount'))
-    ip_address = models.CharField(_('IP Address'), maxlength="15", blank=True)
+    ip_address = models.CharField(_('IP Address'), max_length="15", blank=True)
 
     objects = RatingManager()
 

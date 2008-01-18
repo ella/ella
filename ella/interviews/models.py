@@ -15,8 +15,8 @@ from ella.core.models import Listing, Category, Author, Source
 class Interviewee(models.Model):
     user = models.ForeignKey(User, null=True, blank=True)
     author = models.ForeignKey(Author, null=True, blank=True)
-    name = models.CharField(_('Name'), maxlength=200, blank=True)
-    slug = models.CharField(_('Slug'), maxlength=200)
+    name = models.CharField(_('Name'), max_length=200, blank=True)
+    slug = models.CharField(_('Slug'), max_length=200)
     description = models.TextField(_('Description'), blank=True)
 
     class Meta:
@@ -34,9 +34,9 @@ class Interviewee(models.Model):
 
 class Interview(models.Model):
     # Titles
-    title = models.CharField(_('Title'), maxlength=255)
-    upper_title = models.CharField(_('Upper title'), maxlength=255, blank=True)
-    slug = models.CharField(_('Slug'), db_index=True, maxlength=255)
+    title = models.CharField(_('Title'), max_length=255)
+    upper_title = models.CharField(_('Upper title'), max_length=255, blank=True)
+    slug = models.CharField(_('Slug'), db_index=True, max_length=255)
 
     # Contents
     perex = models.TextField(_('Perex'))
@@ -172,7 +172,7 @@ class Question(models.Model):
     # author if is authorized
     user = models.ForeignKey(User, verbose_name=_('authorized author'), blank=True, null=True, related_name='interview_question_set')
     # author otherwise
-    nickname = models.CharField(_("anonymous author's nickname"), maxlength=200, blank=True)
+    nickname = models.CharField(_("anonymous author's nickname"), max_length=200, blank=True)
     email = models.EmailField(_('authors email (optional)'), blank=True)
 
     # authors ip address

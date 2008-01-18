@@ -24,8 +24,8 @@ class Contest(models.Model):
     """
     Contests with title, descriptions and activation
     """
-    title = models.CharField(_('Title'), maxlength=200)
-    slug = models.CharField(maxlength=200, db_index=True)
+    title = models.CharField(_('Title'), max_length=200)
+    slug = models.CharField(max_length=200, db_index=True)
     category = models.ForeignKey(Category)
     text_announcement = models.TextField(_('Text with announcement'))
     text = models.TextField(_('Text'))
@@ -107,8 +107,8 @@ class Quiz(models.Model):
     """
     Quizes with title, descriptions and activation options.
     """
-    title = models.CharField(_('title'), maxlength=200)
-    slug = models.CharField(maxlength=200, db_index=True)
+    title = models.CharField(_('title'), max_length=200)
+    slug = models.CharField(max_length=200, db_index=True)
     category = models.ForeignKey(Category)
     text_announcement = models.TextField(_('text with announcement'))
     text = models.TextField(_('Text'))
@@ -261,7 +261,7 @@ class Poll(models.Model):
     """
     Poll model with descriptions and activation times
     """
-    title = models.CharField(_('Title'), maxlength=200)
+    title = models.CharField(_('Title'), max_length=200)
     text_announcement = models.TextField(_('Text with announcement'), blank=True, null=True)
     text = models.TextField(_('Text'), blank=True, null=True)
     text_results = models.TextField(_('Text with results'), blank=True, null=True)
@@ -362,12 +362,12 @@ class Contestant(models.Model):
     contest = models.ForeignKey(Contest, verbose_name=_('Contest'))
     datetime = models.DateTimeField(_('Date and time'), auto_now_add=True)
     user = models.ForeignKey(User, null=True, blank=True, verbose_name=_('User'))
-    name = models.CharField(_('First name'), maxlength=200)
-    surname = models.CharField(_('Last name'), maxlength=200)
+    name = models.CharField(_('First name'), max_length=200)
+    surname = models.CharField(_('Last name'), max_length=200)
     email = models.EmailField(_('email'))
-    phonenumber = models.CharField(_('Phone number'), maxlength=20, blank=True)
-    address = models.CharField(_('Address'), maxlength=200, blank=True)
-    choices = models.CharField(_('Choices'), maxlength=200, blank=True)
+    phonenumber = models.CharField(_('Phone number'), max_length=20, blank=True)
+    address = models.CharField(_('Address'), max_length=200, blank=True)
+    choices = models.CharField(_('Choices'), max_length=200, blank=True)
     count_guess = models.IntegerField(_('Count guess'))
     winner = models.BooleanField(_('Winner'), default=False)
 
@@ -394,7 +394,7 @@ class Result(models.Model):
     Quiz results for skills comparation.)
     """
     quiz = models.ForeignKey(Quiz, verbose_name=_('Quiz'))
-    title = models.CharField(_('Title'), maxlength=200, blank=True)
+    title = models.CharField(_('Title'), max_length=200, blank=True)
     text = models.TextField(_('Quiz results text'))
     points_from = models.IntegerField(_('Points dimension from'), null=True)
     points_to = models.IntegerField(_('Points dimension to'), null=True)
