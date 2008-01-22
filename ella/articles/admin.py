@@ -4,7 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 from tagging.models import TaggingInlineOptions
 
 from ella.core.admin.models import ListingInlineOptions, HitCountInlineOptions
-from ella.ellaadmin import widgets
+from ella.ellaadmin import fields
 
 from ella.articles.models import ArticleContents, Article, InfoBox
 
@@ -14,7 +14,7 @@ class ArticleContentInlineOptions(admin.TabularInline):
     extra = 1
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'content':
-            kwargs['widget'] = widgets.RichTextAreaWidget
+            return fields.RichTextAreaField(**kwargs)
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 class InfoBoxOptions(admin.ModelAdmin):
@@ -25,7 +25,7 @@ class InfoBoxOptions(admin.ModelAdmin):
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'content':
-            kwargs['widget'] = widgets.RichTextAreaWidget
+            return fields.RichTextAreaField(**kwargs)
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 class ArticleOptions(admin.ModelAdmin):
@@ -46,7 +46,7 @@ class ArticleOptions(admin.ModelAdmin):
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'perex':
-            kwargs['widget'] = widgets.RichTextAreaWidget
+            return fields.RichTextAreaField(**kwargs)
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 admin.site.register(InfoBox, InfoBoxOptions)

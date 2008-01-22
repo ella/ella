@@ -282,8 +282,6 @@ def render(object, content_path):
         {{article|render:"perex"}}
         {{article|render:"content.content"}}
     """
-    import markdown
-    from django.conf import settings
     path = content_path.split('.')
     content = object
     for step in path:
@@ -294,9 +292,15 @@ def render(object, content_path):
             #raise template.TemplateSyntaxError, "Error accessing %r property of object %r" % (content_path, object)
             return ''
 
-    result = force_unicode(markdown.markdown(smart_str(content)))
-    t = template.Template(result)
+    t = render_str(content)
     return t.render(template.Context({'object' : object, 'MEDIA_URL' : settings.MEDIA_URL}))
+
+def render_str(content):
+    "Render string with markdown and/or django template tags and return template."
+
+    import markdown
+    result = force_unicode(markdown.markdown(smart_str(content)))
+    return template.Template(result)
 
 @register.filter
 def prefix(string_list, prefix):
