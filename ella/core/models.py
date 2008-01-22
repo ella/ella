@@ -199,6 +199,10 @@ class Listing(models.Model):
         now = datetime.now()
         return not (self.priority_to and now > self.priority_to and self.remove)
 
+    def is_published(self):
+        now = datetime.now()
+        return (now > self.publish_from)
+
     def full_url(self):
         from django.utils.safestring import mark_safe
         return mark_safe('<a href="%s">url</a>' % self.get_absolute_url())

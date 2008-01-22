@@ -84,6 +84,10 @@ def object_detail(request, category, year, month, day, content_type, slug, url_r
         # expired listing
         raise Http404
 
+    if not (listing.is_published() or request.user.is_staff):
+        # future listing
+        raise Http404
+
     context = {
             'listing' : listing,
             'object' : obj,
