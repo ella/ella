@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-01-07 22:31+0100\n"
+"POT-Creation-Date: 2008-01-23 14:49+0100\n"
 "PO-Revision-Date: 2008-01-07 22:32+0100\n"
 "Last-Translator: Vitek Pliska <whit@jizak.cz>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -27,12 +27,14 @@ msgstr "náhled"
 msgid "success"
 msgstr "hotovo"
 
-#: urls.py:17
+#: urls.py:24 views.py:76
+msgid "send mail"
+msgstr "poslat mail"
+
 #: views.py:76
 msgid "error"
 msgstr "chyba"
 
-#: views.py:76
-msgid "send mail"
-msgstr "poslat mail"
-
+#, fuzzy
+#~ msgid "send-mail"
+#~ msgstr "poslat mail"
