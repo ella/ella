@@ -103,7 +103,7 @@ class Photo(models.Model):
                 im.save(settings.MEDIA_ROOT + tinythumb, "JPEG")
             except IOError:
                 # TODO Logging something wrong
-                return """<strong>%s</strong>""" % _('Thumbnail not available')
+                return mark_safe("""<strong>%s</strong>""" % ugettext('Thumbnail not available'))
         return mark_safe("""<a href="%s%s"><img src="%s%s" alt="Thumbnail %s" /></a>""" % (settings.MEDIA_URL, self.image, settings.MEDIA_URL, tinythumb, self.title))
     thumb.allow_tags = True
 

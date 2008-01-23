@@ -105,6 +105,7 @@ class Article(models.Model):
         if photo:
             return mark_safe(photo.thumb())
         else:
+            from django.utils.safestring import mark_safe
             return mark_safe('<div class="errors"><ul class="errorlist"><li>%s</li></ul></div>' % ugettext('No main photo!'))
     photo_thumbnail.allow_tags = True
 
