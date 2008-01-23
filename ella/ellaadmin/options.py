@@ -1,3 +1,6 @@
+from django.shortcuts import render_to_response
+from django import template
+
 from django.contrib import admin
 from django.contrib.admin.options import flatten_fieldsets
 from django import newforms as forms
@@ -40,15 +43,53 @@ class EllaAdminSite(admin.AdminSite):
         admin.AdminSite.register = register_ella_admin(admin.AdminSite.register)
 
     def root(self, request, url):
+
         try:
             return super(EllaAdminSite, self).root(request, url)
         except http.Http404:
+            url = url.rstrip('/') # Trim trailing slash, if it exists.
             if url.startswith('e/cache/status'):
                 from ella.ellaadmin.memcached import cache_status
                 return cache_status(request)
+            elif url == 'object_info':
+                return self.object_info(request)
             else:
                 raise
 
+    def object_info(self, request):
+        from django.utils import simplejson
+        from django.http import HttpResponse, HttpResponseBadRequest, Http404
+        from django.db.models import ObjectDoesNotExist
+        from ella.core.cache import get_cached_object
+        from django.contrib.contenttypes.models import ContentType
+        from django.core.urlresolvers import reverse
+        response = {}
+        #mimetype = 'application/json'
+        mimetype = 'text/html'
+
+        if not request.GET.has_key('ct_id') or not request.GET.has_key('ob_id'):
+            return HttpResponseBadRequest()
+
+        ct_id = request.GET['ct_id']
+        ob_id = request.GET['ob_id']
+
+        try:
+            ct = ContentType.objects.get(pk=ct_id)
+            response['content_type_name'] = ct.name
+            response['content_type'] = ct.model
+        except ObjectDoesNotExist:
+            raise Http404('REQUESTED CONTENT TYPE DOES NOT EXIST')
+
+        try:
+            ob = get_cached_object(ct, pk=ob_id)
+            response['name'] = ob.__str__()
+            if hasattr(ob, 'get_absolute_url'):
+                response['url'] = ob.get_absolute_url()
+            response['admin_url'] = reverse('admin', args=['%s/%s/%d' % (ct.app_label, ct.model, ob.pk)])
+        except ObjectDoesNotExist:
+            raise Http404('REQUESTED OBJECT DOES NOT EXIST')
+
+        return HttpResponse(simplejson.dumps(response, indent=2), mimetype=mimetype)
 
 class ContentTypeChoice(forms.ChoiceField):
     def clean(self, value):
