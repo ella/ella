@@ -21,8 +21,9 @@ def record_url(instance):
             return instance
         try:
             url = old_instance.get_absolute_url()
-            setattr(instance, OLD_URL_NAME, url)
-            CACHE_DELETER(instance.__class__, instance)
+            if url is not None:
+                setattr(instance, OLD_URL_NAME, url)
+                CACHE_DELETER(instance.__class__, instance)
         except:
             # if something goes wrong with the object, not catching the exception here
             # will cause the save() to fail, thus preventing anybody from correcting the error
