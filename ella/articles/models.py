@@ -100,11 +100,12 @@ class Article(models.Model):
     article_age.short_description = _('Article Age')
 
     def photo_thumbnail(self):
+        from django.utils.safestring import mark_safe
         photo = self.get_photo()
         if photo:
-            return photo.thumb()
+            return mark_safe(photo.thumb())
         else:
-            return '<div class="errors"><ul class="errorlist"><li>%s</li></ul></div>' % ugettext('No main photo!')
+            return mark_safe('<div class="errors"><ul class="errorlist"><li>%s</li></ul></div>' % ugettext('No main photo!'))
     photo_thumbnail.allow_tags = True
 
 
