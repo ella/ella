@@ -8,6 +8,7 @@ from django.db import models, transaction
 from django.conf import settings
 
 from ella.utils.filemanipulation import file_rename
+from ella.db import fields
 
 
 class Type(models.Model):
@@ -25,7 +26,7 @@ class Source(models.Model):
     slug = models.CharField(_('Slug'), db_index=True, max_length=255)
     file = models.FileField(_('Source file'), upload_to='media/source/%Y/%m/%d')
     type = models.ForeignKey(Type, verbose_name=_('Type of this file'))
-    metadata = models.TextField(_('Meta data'), blank=True,
+    metadata = fields.XMLMetaDataField(_('Meta data'), blank=True, schema_path='type.metadata_schema', schema_type=None,
             help_text=_('meta data xml - should be generated after file save'))
 
     description = models.TextField(_('Description'), blank=True)
@@ -72,11 +73,13 @@ class FormattedFile(models.Model):
             help_text=_('upload this file only if you do not want it created automaticly'))
     metadata = models.TextField(_('Meta data'), blank=True,
             help_text=_('meta data xml - should be generated after file save'))
+#    metadata = xmlfields.XMLMetaDataField(_('Meta data'), blank=True, schema_path='type.metadata_schema', schema_type=None,
+#            help_text=_('meta data xml - should be generated after file save'))
     exit_status = models.IntegerField(_('Exit status'), blank=True, null=True)
 
     @property
     def type(self):
-        return self.formatted.to_type
+        return self.format.to_type
 
     @transaction.commit_on_success
     def save(self):
