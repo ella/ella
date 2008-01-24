@@ -6,6 +6,7 @@ from django.db import models, transaction, connection
 from django.contrib import admin
 from django.utils.html import strip_tags
 from django.utils.translation import ugettext_lazy as _
+from django.utils.safestring import mark_safe
 
 from ella.core.box import Box
 from ella.core.cache.utils import get_cached_object_or_404
@@ -23,7 +24,7 @@ class Server(models.Model):
     category = models.ForeignKey(Category, blank=True, null=True, verbose_name=_('Category'))
 
     def regenerate (self):
-        return u'<a href="%s/fetch/">%s - %s</a>' % (self.id, _('Fetch'), self.title)
+        return mark_safe(u'<a href="%s/fetch/">%s - %s</a>' % (self.id, _('Fetch'), self.title))
     regenerate.allow_tags = True
 
     def __unicode__(self):

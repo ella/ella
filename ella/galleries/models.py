@@ -6,6 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 from django.contrib import admin
 from django.template.defaultfilters import slugify
+from django.utils.safestring import mark_safe
 
 from ella.core.box import Box
 from ella.core.models import Category, Author, Category, Listing
@@ -36,7 +37,6 @@ class Gallery(models.Model):
 
     @property
     def main_listing(self):
-        from ella.core.cache import get_cached_object
         try:
             return get_cached_object(
                     Listing,
@@ -53,7 +53,6 @@ class Gallery(models.Model):
             return listing.get_absolute_url()
 
     def full_url(self):
-        from django.utils.safestring import mark_safe
         absolute_url = self.get_absolute_url()
         if absolute_url:
             return mark_safe('<a href="%s">url</a>' % absolute_url)

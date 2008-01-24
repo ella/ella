@@ -12,6 +12,7 @@ from django.template import RequestContext
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.template.defaultfilters import slugify
+from django.utils.safestring import mark_safe
 
 from ella.core.cache import get_cached_object_or_404
 from ella.core.wizard import Wizard
@@ -213,7 +214,7 @@ class MyCheckboxSelectMultiple(forms.CheckboxSelectMultiple):
                 final_attrs = dict(final_attrs, id='%s_%s' % (attrs['id'], i))
             cb = forms.CheckboxInput(final_attrs, check_test=lambda value: value in str_values)
             option_value = force_unicode(option_value)
-            yield u'<label>%s %s</label>' % (cb.render(name, option_value), escape(force_unicode(option_label)))
+            yield mark_safe(u'<label>%s %s</label>' % (cb.render(name, option_value), escape(force_unicode(option_label))))
 
 
 class MyRadioSelect(forms.RadioSelect):
