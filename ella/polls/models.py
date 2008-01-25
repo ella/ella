@@ -97,6 +97,7 @@ class Contest(models.Model):
 )
 
     def correct_answers(self):
+        from django.utils.safestring import mark_safe
         return mark_safe(u'<a href="%s/correct_answers/">%s - %s</a>' % (self.id, _('Correct Answers'), self.title))
     correct_answers.allow_tags = True
 
