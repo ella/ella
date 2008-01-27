@@ -50,6 +50,9 @@ class CategoryBox(Box):
             cont['photo_slug'] = self.params['photo_slug']
         return cont
 
+def get_category_key(func, category):
+    return 'ella.core.models.Category(%d)' % category.id
+
 class Category(models.Model):
     title = models.CharField(_("Category Title"), max_length=200)
     slug = models.CharField(_("Slug"), max_length=200)
@@ -112,6 +115,7 @@ class Category(models.Model):
         verbose_name = _('Category')
         verbose_name_plural = _('Categories')
 
+    @cache_this(get_category_key)
     def __unicode__(self):
         return '%s/%s' % (self.site.name, self.tree_path)
 
