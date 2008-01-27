@@ -71,7 +71,7 @@ class CacheDeleter(object):
 
 
 CACHE_DELETER = CacheDeleter()
-ACTIVE_MQ_HOST = getattr(settings, 'ACTIVE_MQ_HOST', 'localhost')
+ACTIVE_MQ_HOST = getattr(settings, 'ACTIVE_MQ_HOST', None)
 ACTIVE_MQ_PORT = getattr(settings, 'ACTIVE_MQ_PORT', 61613)
 
 def get_propagator(conn):
