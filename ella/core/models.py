@@ -95,14 +95,19 @@ class Category(models.Model):
 
     def get_absolute_url(self):
         if not self.tree_parent_id:
-            return reverse('root_homepage')
+            url = reverse('root_homepage')
         else:
-            return reverse(
+            url = reverse(
                     'category_detail',
                     kwargs={
                         'category' : self.tree_path,
 }
 )
+        if category.site_id != settings.SITE_ID:
+            site = get_cached_object(Site, pk=self.site_id)
+            return 'http://' + site.domain + url
+        return url
+
 
 
     def draw_title(self):
