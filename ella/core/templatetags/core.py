@@ -421,7 +421,7 @@ def do_related(parser, token):
                 raise template.TemplateSyntaxError, "%r doesn't represent any model." % m
     return RelatedNode(bits[-3], int(bits[1]), bits[-1], mods)
 
-CONTAINER_VARS = ('level', 'name', 'css_class', 'title',)
+CONTAINER_VARS = ('level', 'name', 'css_class',)
 
 class ContainerNode(template.Node):
     def __init__(self, nodelist, parameters):
