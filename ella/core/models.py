@@ -103,7 +103,7 @@ class Category(models.Model):
                         'category' : self.tree_path,
 }
 )
-        if category.site_id != settings.SITE_ID:
+        if self.site_id != settings.SITE_ID:
             site = get_cached_object(Site, pk=self.site_id)
             return 'http://' + site.domain + url
         return url
