@@ -176,13 +176,14 @@ class Wizard(object):
                 hashes for finished forms and old data in form of hidden fields
             any additional data stored in self.extra_context
         """
+        from django.utils.safestring import mark_safe
         return render_to_response(self.get_template(), dict(
                     step_field=self.STEP_FIELD,
                     step=self.step,
                     current_step=self.step + 1,
                     step_count=self.step_count(),
                     form=form,
-                    previous_fields=previous_fields,
+                    previous_fields=mark_safe(previous_fields),
                     ** self.extra_context
 ), context_instance=RequestContext(request))
 
