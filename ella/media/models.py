@@ -1,4 +1,5 @@
 from datetime import datetime
+from django.core.exceptions import ObjectDoesNotExist
 import commands # this means, we are unix specific
 from os import path
 
@@ -11,22 +12,34 @@ from ella.utils.filemanipulation import file_rename
 from ella.db import fields
 
 
+class TypeXMLField(fields.XMLField):
+    def get_schema_content(self, instance):
+        from os.path import dirname
+        fp = open("%s/relaxng.xml" % dirname(__file__), 'r')
+        schema = fp.read()
+        fp.close()
+        return schema
+
 class Type(models.Model):
     name = models.CharField(_('Type name'), max_length=80)
     extension = models.CharField(_('File extension'), max_length=10, blank=True,
             help_text=_('formatted file extension of this type will be changed to this value if given'))
-    metadata_schema = models.TextField(_('Meta data schema'), blank=True,
+    metadata_schema = TypeXMLField(_('Meta data schema'), blank=True,
             help_text=_('every media file validates its xml meta data to this schema'))
 
     def __unicode__(self):
         return self.name
+
+class SourceXMLField(fields.XMLField):
+    def get_schema_content(self, instance):
+        return instance.type.metadata_schema
 
 class Source(models.Model):
     title = models.CharField(_('Title'), max_length=255)
     slug = models.CharField(_('Slug'), db_index=True, max_length=255)
     file = models.FileField(_('Source file'), upload_to='media/source/%Y/%m/%d')
     type = models.ForeignKey(Type, verbose_name=_('Type of this file'))
-    metadata = fields.XMLMetaDataField(_('Meta data'), blank=True, schema_path='type.metadata_schema', schema_type=None,
+    metadata = SourceXMLField(_('Meta data'), blank=True, schema_type=None,
             help_text=_('meta data xml - should be generated after file save'))
 
     description = models.TextField(_('Description'), blank=True)
@@ -66,15 +79,19 @@ class Format(models.Model):
     def __unicode__(self):
         return self.name
 
+class FormattedFileXMLField(fields.XMLField):
+    def get_schema_content(self, instance):
+        return instance.format.to_type.metadata_schema
+
 class FormattedFile(models.Model):
     source = models.ForeignKey(Source, verbose_name=_('Source file'))
     format = models.ForeignKey(Format, verbose_name=_('Format'))
     file = models.FileField(_('Formatted file'), upload_to='media/formatted/%Y/%m/%d', blank=True,
             help_text=_('upload this file only if you do not want it created automaticly'))
-    metadata = models.TextField(_('Meta data'), blank=True,
-            help_text=_('meta data xml - should be generated after file save'))
-#    metadata = xmlfields.XMLMetaDataField(_('Meta data'), blank=True, schema_path='type.metadata_schema', schema_type=None,
+#    metadata = models.TextField(_('Meta data'), blank=True,
 #            help_text=_('meta data xml - should be generated after file save'))
+    metadata = FormattedFileXMLField(_('Meta data'), blank=True, schema_type=None,
+            help_text=_('meta data xml - should be generated after file save'))
     exit_status = models.IntegerField(_('Exit status'), blank=True, null=True)
 
     @property
