@@ -299,7 +299,10 @@ def render_str(content):
     "Render string with markdown and/or django template tags and return template."
 
     import markdown
-    result = force_unicode(markdown.markdown(smart_str(content)))
+    if getattr(markdown, 'version', False) and markdown.version[1]>=6:
+        result = force_unicode(markdown.markdown(content))
+    else:
+        result = force_unicode(markdown.markdown(smart_str(content)))
     return template.Template(result)
 
 @register.filter
