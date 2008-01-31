@@ -50,6 +50,7 @@ class XMLFormField(forms.fields.Field):
             return u''
         value = smart_unicode(value)
 
+        # FIXME: problem with pre_save signal(?), schema seems sometimes empty, but isn't
         if self.schema == '':
             return value
 
@@ -67,19 +68,17 @@ class XMLFormField(forms.fields.Field):
             raise ValidationError(self.error_messages['parse_schema_fail'])
 
         relaxng = etree.RelaxNG(relaxng_doc)
-        log = relaxng.error_log
+
+        from lxml.etree import XMLSyntaxError, DocumentInvalid
 
         try:
             doc = etree.parse(StringIO(value))
-        except:
-            raise ValidationError(self.error_messages['syntax_error'] % log.last_error)
+        except XMLSyntaxError, e:
+            raise ValidationError(self.error_messages['syntax_error'] % e)
 
         try:
-            relaxng(doc)
-        except:
-            raise ValidationError(self.error_messages['syntax_error'] % log.last_error)
-
-#        if not relaxng(doc):
-#            raise ValidationError(self.error_messages['syntax_error'] % log)
+            relaxng.assertValid(doc)
+        except DocumentInvalid, e:
+            raise ValidationError(self.error_messages['syntax_error'] % e)
 
         return value
