@@ -1,6 +1,9 @@
 import re
 from datetime import datetime
 import calendar
+import sys
+import locale
+import codecs
 
 from django.db import models, transaction, connection
 from django.contrib import admin
@@ -13,8 +16,13 @@ from ella.core.cache.utils import get_cached_object_or_404
 from ella.photos.models import Photo
 from ella.core.models import Category
 
+
 ELLA_IMPORT_COUNT = 10
 PHOTO_REG = re.compile(r'<img[^>]*src="(?P<url>http://[^"]*)"')
+
+# be able to redirect any non-ascii prints
+sys.stdout = codecs.getwriter(locale.getdefaultlocale()[1])(sys.__stdout__)
+
 
 class Server(models.Model):
     title = models.CharField(_('Title'), max_length=100)
@@ -223,8 +231,9 @@ def fetch_all():
             print "OK %s " % (server.title,)
         except Exception, e:
             error_count = error_count + 1
-            print "KO %s - %s" % (server.title, str(e))
+            print "KO %s - %s" % (server.title, e)
     return error_count
 
 admin.site.register(Server, ServerOptions)
 admin.site.register(ServerItem, ServerItemOptions)
+
