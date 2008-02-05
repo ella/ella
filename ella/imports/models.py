@@ -1,9 +1,6 @@
 import re
 from datetime import datetime
 import calendar
-import sys
-import locale
-import codecs
 import urllib
 
 from django.db import models, transaction, connection
@@ -21,9 +18,6 @@ from ella.core.models import Category
 
 ELLA_IMPORT_COUNT = 10
 PHOTO_REG = re.compile(r'<img[^>]*src="(?P<url>http://[^"]*)"')
-
-# be able to redirect any non-ascii prints
-sys.stdout = codecs.getwriter(locale.getdefaultlocale()[1])(sys.__stdout__)
 
 
 class Server(models.Model):
@@ -197,18 +191,6 @@ class ServerItem(models.Model):
         self.summary = strip_tags(self.summary)
 
         super(ServerItem, self).save()
-
-
-def fetch_all():
-    error_count = 0
-    for server in Server.objects.all():
-        try:
-            server.fetch()
-            print "OK %s " % (server.title,)
-        except Exception, e:
-            error_count = error_count + 1
-            print "KO %s - %s" % (server.title, e)
-    return error_count
 
 
 # initialization
