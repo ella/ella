@@ -199,30 +199,6 @@ class ServerItem(models.Model):
         super(ServerItem, self).save()
 
 
-class ServerOptions(admin.ModelAdmin):
-    list_display = ('title', 'domain', 'url', 'regenerate')
-    search_fields = ('domain, title', 'url',)
-    prepopulated_fields = {'slug' : ('title',)}
-
-    def __call__(self, request, url):
-        if url and url.endswith('fetch'):
-            from django import http
-            pk = url.split('/')[-2]
-            server = get_cached_object_or_404(Server, pk=pk)
-            try:
-                server.fetch()
-                return http.HttpResponse('OK')
-            except Exception, e:
-                return http.HttpResponse('KO ' + str(e))
-
-        return super(ServerOptions, self).__call__(request, url)
-
-
-class ServerItemOptions(admin.ModelAdmin):
-    list_display = ('title', 'server', 'updated','priority')
-    list_filter = ('server', 'updated',)
-    raw_id_fields = ('photo',)
-
 def fetch_all():
     error_count = 0
     for server in Server.objects.all():
@@ -234,6 +210,8 @@ def fetch_all():
             print "KO %s - %s" % (server.title, e)
     return error_count
 
-admin.site.register(Server, ServerOptions)
-admin.site.register(ServerItem, ServerItemOptions)
+
+# initialization
+from ella.imports import register
+del register
 
