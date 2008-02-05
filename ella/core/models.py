@@ -12,7 +12,6 @@ from ella.core.box import Box
 from ella.core.managers import *
 from ella.core.admin.models import *
 
-
 class Author(models.Model):
     from django.contrib.auth.models import User
     user = models.ForeignKey(User, blank=True, null=True)
@@ -115,7 +114,7 @@ class Category(models.Model):
     draw_title.allow_tags = True
 
     class Meta:
-        ordering = ('title',)
+        ordering = ('site', 'title',)
         unique_together = (('site', 'tree_path'),)
         verbose_name = _('Category')
         verbose_name_plural = _('Categories')

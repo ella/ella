@@ -107,8 +107,8 @@ class DependencyOptions(admin.ModelAdmin):
 
 class CategoryOptions(admin.ModelAdmin):
     list_filter = ('site',)
-    list_display = ('draw_title', 'tree_path')
-    ordering = ('tree_path',)
+    list_display = ('draw_title', 'tree_path', '__unicode__')
+    ordering = ('site', 'tree_path',)
     prepopulated_fields = {'slug': ('title',)}
 
 class HitCountOptions(admin.ModelAdmin):
