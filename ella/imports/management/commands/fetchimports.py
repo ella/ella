@@ -1,6 +1,8 @@
-from django.core.management.base import NoArgsCommand
 from optparse import make_option
 import sys
+
+from django.core.management.base import NoArgsCommand
+
 
 class Command(NoArgsCommand):
     help = 'Fetch all registered imports'
@@ -9,3 +11,4 @@ class Command(NoArgsCommand):
         errors = fetch_all()
         if errors:
             sys.exit(errors)
+

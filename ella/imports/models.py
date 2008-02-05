@@ -4,12 +4,14 @@ import calendar
 import sys
 import locale
 import codecs
+import urllib
 
 from django.db import models, transaction, connection
 from django.contrib import admin
 from django.utils.html import strip_tags
 from django.utils.translation import ugettext_lazy as _
 from django.utils.safestring import mark_safe
+from django.template.defaultfilters import slugify
 
 from ella.core.box import Box
 from ella.core.cache.utils import get_cached_object_or_404
@@ -155,7 +157,6 @@ class ServerItem(models.Model):
         unique_together = (('server', 'slug',),)
 
     def save(self):
-        from django.template.defaultfilters import slugify
         if not self.slug:
             slug = slugify(self.title)
             try:
@@ -181,7 +182,6 @@ class ServerItem(models.Model):
                 self.photo_url = img[0]
 
         if self.photo_url and not self.photo and not self.server.category:
-            import urllib
             image = urllib.urlopen(self.photo_url)
             image_raw = image.read()
             image.close()
