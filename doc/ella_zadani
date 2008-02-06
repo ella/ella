@@ -1,21 +1,20 @@
-
 ========
 CMS Ella
 ========
 
-Zadání:
--------
+Zadání
+------
 
 Redakční systém, který bude umět pracovat s články, fotogaleriemi, anketami, komentáři
 a dalšími typy objektů, které jsou běžné u internetových magazínu.
-Celý systém bude využívat Python_ framework Django_ a bude publikován jako OpenSource.
+Celý systém bude využívat Python_ framework Django_ a bude publikován jako Open source.
 
 .. _Python: http://www.python.org/
 .. _Django: http://www.djangoproject.com/
 
 
-Nejdůležitější vlastnosti:
---------------------------
+Nejdůležitější vlastnosti
+-------------------------
 
 Lehká rozšiřitelnost
 ~~~~~~~~~~~~~~~~~~~~
@@ -64,31 +63,35 @@ při změně objektu či podobjektu (například foto v článku).
 které budou plně záměnné a bude je tak možno přidávat bez zásahu do zbytku systému.
 
 
-Podporované objekty v základní verzi:
--------------------------------------
+Podporované objekty v základní verzi
+------------------------------------
 
-Obsahové objekty (uspořádané do kategorií):
+Obsahové objekty
+~~~~~~~~~~~~~~~~
+uspořádané do kategorií
 
  * Článek
  * Galerie
  * Test
  * Soutěž
 
-Ostatní (objekty, které lze buď navázat na či začlenit do libovolného objektu):
+Ostatní objekty
+~~~~~~~~~~~~~~~
+tyto lze buď navázat na, či začlenit do libovolného objektu
 
  * Anketa
  * Foto
  * Komentáře
 
-Objekty z externích aplikací:
-
+Objekty z externích aplikací
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Tagy_
 
 .. _Tagy: http://code.google.com/p/django-tagging/
 
 
-Obhajoba:
----------
+Obhajoba
+--------
 
 Obhajoba projektu bude zahrnovat demonstraci běžící instalace systému,
 na kterém poběží několik magazínu s větší zátěží (několik set tisíc návštěv denně).
