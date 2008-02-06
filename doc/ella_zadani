@@ -3,84 +3,84 @@
 CMS Ella
 ========
 
-Zadani:
+Zadání:
 -------
 
-Redakcni system, ktery bude umet pracovat s clanky, fotogaleriemi, anketami, komentari
-a dalsimi typy objektu, ktere jsou bezne u internetovych magazinu.
-Cely system bude vyuzivat Python_ framework Django_ a bude publikovan jako OpenSource.
+Redakční systém, který bude umět pracovat s články, fotogaleriemi, anketami, komentáři
+a dalšími typy objektů, které jsou běžné u internetových magazínu.
+Celý systém bude využívat Python_ framework Django_ a bude publikován jako OpenSource.
 
 .. _Python: http://www.python.org/
 .. _Django: http://www.djangoproject.com/
 
 
-Nejdulezitejsi vlastnosti:
+Nejdůležitější vlastnosti:
 --------------------------
 
-Lehka rozsiritelnost
+Lehká rozšiřitelnost
 ~~~~~~~~~~~~~~~~~~~~
-Veskere obsahove objekty (clanky, ankety, kometare, ...) budou staveny jako samostatne moduly a jejich umisteni na strankach
-bude provadeno stejnym zpusobem bez ohledu na typ vkladaneho objektu podle principu polymorfismu.
+Veškeré obsahové objekty (články, ankety, kometáře, ...) budou stavěny jako samostatné moduly a jejich umístění na stránkách
+bude prováděno stejným způsobem bez ohledu na typ vkládaného objektu podle principu polymorfismu.
 
-Pro pridani noveho typu objektu bude stacit dodat sadu HTML sablon a zaregistrovat pripadne specialni akce,
-ktere se k tomuto objektu vazi (napriklad odeslani komentare ci hlasovani v ankete).
+Pro přidání nového typu objektu bude stačit dodat sadu HTML šablon a zaregistrovat případné speciální akce,
+které se k tomuto objektu váží (například odeslání komentáře či hlasování v anketě).
 
-System hezkych a dynamickych URL
+Systém hezkých a dynamických URL
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-K jednotlivym objektum bude mozne dynamicky registrovat dalsi URL,
-diky kterym pujde napriklad pridat komentar ci prohlednout objekt z galerie.
-Tyto URL, stejne jako zbytek systemu budou lokalizovane, cili system bude moci byt nasazen v jakemkoliv jazyce,
-a bude tedy takzvane optimalizovany pro vyhledavace.
+K jednotlivým objektům bude možné dynamicky registrovat další URL,
+díky kterým půjde například přidat komentář či prohlédnout objekt z galerie.
+Tyto URL, stejně jako zbytek systému budou lokalizované. Systém tedy bude moci být nasazen v jakémkoliv jazyce,
+a bude takzvaně optimalizovaný pro vyhledávače.
 
-Vice domen s ruznym obsahem na jedne instalaci
+Více domén s různým obsahem na jedné instalaci
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Objekty bude mozne sdilet napric jednotlivymi weby
+Objekty bude možné sdílet napříč jednotlivými weby.
 
-Prioritizace a dynamicke umistovani objektu
+Prioritizace a dynamické umísťování objektů
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Redaktori budou moci kontrolovat, kdy se dany objekt objevi na webu, v jake kategorii a s jakou prioritou.
-Pomoci tohoto systemu bude mozne publikovat jeden objekt i ve vice kategoriich (ktere muzou sidlit na ruznych domenach)
-- detail objektu vsak bude vzdy nalezet jedne kategorii.
+Redaktoři budou moci kontrolovat, kdy se daný objekt objeví na webu, v jaké kategorii a s jakou prioritou.
+Pomoci tohoto systému bude možné publikovat jeden objekt i ve více kategoriích (ty mohou sídlit na různých doménách)
+- detail objektu však bude vždy náležet jedné kategorii.
 
-U nekterych stranek (homepage, stranka kategorie) bude k dispozici nastroj na rozmistovani objektu do konkretnich pozic
-- redaktor pak bude moci rozhodnout, ktery objekt ma byt v dany okamzik prezentovany na nejake pozici.
+U některých stránek (homepage, stránka kategorie) bude k dispozici nástroj na rozmísťování objektů do konkrétních pozic
+- redaktor pak bude moci rozhodnout, který objekt má být v daný okamžik prezentován na jaké pozici.
 
-Reseni importu a exportu
+Řešení importů a exportů
 ~~~~~~~~~~~~~~~~~~~~~~~~
-Ella bude schopna exportovat svuj obsah ve forme RSS a ATOM feedu.
-Rovnez bude schopna takove feedy z jinych webu zpracovavat, ukladat a zobrazovat.
+Ella bude schopna exportovat svůj obsah ve formě RSS a ATOM feedu.
+Rovněž bude schopna takové feedy z jiných webu zpracovávat, ukládat a zobrazovat.
 
-Rychle vytvareni dalsich specializovanych magazinu
+Rychlé vytváření dalších specializovaných magazínu
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Nasazeni noveho magazinoveho webu by melo znamenat pouze vytvoreni HTML sablon a konfiguraci systemu.
+Nasazení nového magazínového webu by mělo znamenat pouze vytvoření HTML šablon a konfiguraci systému.
 
-Zvladani vysoke zateze
+Zvládání vysoké zátěže
 ~~~~~~~~~~~~~~~~~~~~~~
-System Ella by mel dobre zvladat vysokou zatez, tedy navstevnost kolem nekolika set tisic zobrazeni denne.
-Bude toho dosazeno pomoci nekolika urovni cachovani,wvcetne automaticke invalidace cache
-pri zmene objektu ci podobjektu (napriklad foto v clanku).
+Systém Ella by měl dobře zvládat vysokou zátěž, tedy návštěvnost kolem několika set tisíc zobrazení denně.
+Bude toho dosaženo pomoci několika úrovni cachování, včetně automatické invalidace cache
+při změně objektu či podobjektu (například foto v článku).
 
-Uzkym hrdlem celeho systemu tak z pocatku nebude databaze, jako u vetsiny systemu, ale frontendove stroje,
-ktere budou plne zamenne a bude je tak mozno pridavat bez zasahu do zbytku systemu.
+Úzkým hrdlem celého systému tak z počátku nebude databáze, jako u většiny systémů, ale frontendové stroje,
+které budou plně záměnné a bude je tak možno přidávat bez zásahu do zbytku systému.
 
 
-Podporovane objekty v zakladni verzi:
+Podporované objekty v základní verzi:
 -------------------------------------
 
-Obsahove objekty (usporadane do kategorii):
+Obsahové objekty (uspořádané do kategorií):
 
- * Clanek
+ * Článek
  * Galerie
  * Test
- * Soutez
+ * Soutěž
 
-Ostatni (objekty, ktere lze bud navazat na ci zaclenit do libovolneho objektu):
+Ostatní (objekty, které lze buď navázat na či začlenit do libovolného objektu):
 
  * Anketa
  * Foto
- * Komentare
+ * Komentáře
 
-Objekty z externich aplikaci:
+Objekty z externích aplikací:
 
  * Tagy_
 
@@ -90,7 +90,6 @@ Objekty z externich aplikaci:
 Obhajoba:
 ---------
 
-Obhajoba projektu bude zahrnovat demonstraci bezici instalace systemu,
-na kterem pobezi nekolik magazinu s vetsi zatezi
-(nekolik set tisic navstev denne).
+Obhajoba projektu bude zahrnovat demonstraci běžící instalace systému,
+na kterém poběží několik magazínu s větší zátěží (několik set tisíc návštěv denně).
 
