@@ -1,74 +1,96 @@
-Ella zadani
-===========
 
-Radakcni system, ktery bude umet pracovat s clanky, aketami, fotogaleriemi, komentari, tagy a dalsimi typy objektu,
-ktere jsou bezne u internetovych magazinu. Cely system bude vyuzivat python framework Django a bude k dispozici jako
-OpenSource.
+========
+CMS Ella
+========
 
-Nejdulezitejsi vlastnosti jsou:
--------------------------------
+Zadani:
+-------
 
-* Lehka rozsiritelnost.
-Veskere obsahove objekty (ankety, kometare, ...) budou staveny jako samostatne moduly a veskere umisteni na strankach
-bude provadeno stejnym zpusobem bez ohledu na typ vkladaneho objektu podle principu polymorfismu. Integrace cizich
-aplikaci napsanych v Djangu bude mozna bez zasahu do puvodniho kodu.
-Pro pridani noveho typu objektu bude postacujici dodat sadu HTML sablon a zaregistrovat pripadne specialni akce, ktere
-se k tomuto objektu vazi (napriklad hlasovani v ankete ci odeslani prihlasky do souteze).
+Redakcni system, ktery bude umet pracovat s clanky, fotogaleriemi, anketami, komentari
+a dalsimi typy objektu, ktere jsou bezne u internetovych magazinu.
+Cely system bude vyuzivat Python_ framework Django_ a bude publikovan jako OpenSource.
 
-* System hezkych a dynamickych URL
-System URL bude plne virtualni a optimalizovany pro vyhledavace. Dale bude na miste mechanisus pro registrovani dalsich
-URL navazanych k jednotlivym objektu (napriklad pridani komentare ci prohlizeni jedne fotky v galerii). Tyto url, stejne
-jako zbytek systemu budou lokalizovane, cili system bude moci byt nasazen v jakemkoliv jazyce.
+.. _Python: http://www.python.org/
+.. _Django: http://www.djangoproject.com/
 
-* Na jedne instalaci redakcniho systemu bude moznost provozovat nekolik domen s ruznym obsahem.
-Bude mozne sdilet objekty napric jednotlivymi weby pri zachovani patricneho oddeleni webu na frontendu a nastaveni
-ruznych prav pro redaktory jednotlivych webu.
 
-* Prioritizace a dynamicke umistovani objektu
-Redaktori budou moci kontrolovat, kdy se dany objekt objevi na webu, v jake kategorii a s jakou prioritou. Pomoci tohoto
-systemu bude mozne publikovat jeden objekt i ve vice kategoriich (ktere muzou sidlit na ruznych domenach) - detail
-objektu vsak bude vzdy nalezet jedne kategorii. U nekterych stranek (homepage, stranka kategorie) bude k dispozici
-nastroj na rozmistovani objektu do konkretnich pozic - redaktor pak bude moci rozhodnout, ktery objekt ma byt v dany
-okamzik prezentovany na nejake pozici.
+Nejdulezitejsi vlastnosti:
+--------------------------
 
-* Reseni importu a exportu
-Ella bude schopna exportovat svuj obsah ve forme RSS a ATOM feedu. Rovnez bude schopna takove feedy z jinych webu
-zpracovavat, ukladat a zobrazovat.
+Lehka rozsiritelnost
+~~~~~~~~~~~~~~~~~~~~
+Veskere obsahove objekty (clanky, ankety, kometare, ...) budou staveny jako samostatne moduly a jejich umisteni na strankach
+bude provadeno stejnym zpusobem bez ohledu na typ vkladaneho objektu podle principu polymorfismu.
 
-* Rychle vytvareni dalsich specializovanych magazinu.
-Nasazeni noveho magazinoveho webu by melo znamenat pouze vytvoreni HTML sablon a konfiguraci systemu. K vytvoreni
-dalsiho magazinu by melo stacit uprava CSS, pripadne layoutu.
+Pro pridani noveho typu objektu bude stacit dodat sadu HTML sablon a zaregistrovat pripadne specialni akce,
+ktere se k tomuto objektu vazi (napriklad odeslani komentare ci hlasovani v ankete).
 
-* Zvladani vysoke zateze
-System Ella by mel dobre zvladat vysokou zatez, tedy navstevnost kolem nekolika set tisic zobrazeni denne. Bude toho
-dosazeno pomoci nekolika urovni cachovani, vcetne automaticke invalidace cache pri zmene objektu ci podobjektu
-(napriklad foto v clanku).
-Uzkym hrdlem celeho systemu tak z pocatku nebude databaze, jako u vetsiny systemu, ale frontendove stroje, ktere budou
-plne zamenne a bude je tak mozno pridavat bez zasahu do zbytku systemu.
+System hezkych a dynamickych URL
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+K jednotlivym objektum bude mozne dynamicky registrovat dalsi URL,
+diky kterym pujde napriklad pridat komentar ci prohlednout objekt z galerie.
+Tyto URL, stejne jako zbytek systemu budou lokalizovane, cili system bude moci byt nasazen v jakemkoliv jazyce,
+a bude tedy takzvane optimalizovany pro vyhledavace.
 
-* Jednoduche administrativni rozhrani.
-Administrativni rozhrani by melo byt natolik intuitivni, aby s nim mohli pracovat bezni, technicky nezkuseni uzivatele -
-novinari.
+Vice domen s ruznym obsahem na jedne instalaci
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Objekty bude mozne sdilet napric jednotlivymi weby
 
-Seznam podporovanych objektu v zakladni verzi:
-----------------------------------------------
+Prioritizace a dynamicke umistovani objektu
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Redaktori budou moci kontrolovat, kdy se dany objekt objevi na webu, v jake kategorii a s jakou prioritou.
+Pomoci tohoto systemu bude mozne publikovat jeden objekt i ve vice kategoriich (ktere muzou sidlit na ruznych domenach)
+- detail objektu vsak bude vzdy nalezet jedne kategorii.
 
-Obsahove objekty:
-* Kategorie
-* Clanek
-* Anketa
-* Foto
-* Video
-* Galerie (obsahujici libovolne objekty)
-* Kviz
-* Soutez
+U nekterych stranek (homepage, stranka kategorie) bude k dispozici nastroj na rozmistovani objektu do konkretnich pozic
+- redaktor pak bude moci rozhodnout, ktery objekt ma byt v dany okamzik prezentovany na nejake pozici.
 
-Ostatni (vsechny tyto se dokazi vazat k libovolnemu obsahovemu objektu):
-* Komentare
-* Hodnoceni
-* Tagy
+Reseni importu a exportu
+~~~~~~~~~~~~~~~~~~~~~~~~
+Ella bude schopna exportovat svuj obsah ve forme RSS a ATOM feedu.
+Rovnez bude schopna takove feedy z jinych webu zpracovavat, ukladat a zobrazovat.
 
-Obhajoba projektu bude zahrnovat demonstraci bezici instalace systemu, na kterem pobezi nekolik magazinu s vetsi zatezi
+Rychle vytvareni dalsich specializovanych magazinu
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Nasazeni noveho magazinoveho webu by melo znamenat pouze vytvoreni HTML sablon a konfiguraci systemu.
+
+Zvladani vysoke zateze
+~~~~~~~~~~~~~~~~~~~~~~
+System Ella by mel dobre zvladat vysokou zatez, tedy navstevnost kolem nekolika set tisic zobrazeni denne.
+Bude toho dosazeno pomoci nekolika urovni cachovani,wvcetne automaticke invalidace cache
+pri zmene objektu ci podobjektu (napriklad foto v clanku).
+
+Uzkym hrdlem celeho systemu tak z pocatku nebude databaze, jako u vetsiny systemu, ale frontendove stroje,
+ktere budou plne zamenne a bude je tak mozno pridavat bez zasahu do zbytku systemu.
+
+
+Podporovane objekty v zakladni verzi:
+-------------------------------------
+
+Obsahove objekty (usporadane do kategorii):
+
+ * Clanek
+ * Galerie
+ * Test
+ * Soutez
+
+Ostatni (objekty, ktere lze bud navazat na ci zaclenit do libovolneho objektu):
+
+ * Anketa
+ * Foto
+ * Komentare
+
+Objekty z externich aplikaci:
+
+ * Tagy_
+
+.. _Tagy: http://code.google.com/p/django-tagging/
+
+
+Obhajoba:
+---------
+
+Obhajoba projektu bude zahrnovat demonstraci bezici instalace systemu,
+na kterem pobezi nekolik magazinu s vetsi zatezi
 (nekolik set tisic navstev denne).
-
 
