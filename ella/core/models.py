@@ -123,6 +123,14 @@ class Category(models.Model):
     def __unicode__(self):
         return '%s/%s' % (self.site.name, self.tree_path)
 
+    def base_template(self):
+        from django.template import loader
+        t_list =  (
+                'page/category/%s/base_category.html' % (self.path),
+                'page/base_category.html',
+)
+        return loader.select_template(t_list)
+
 class Listing(models.Model):
     """
     Listing of an object in a category. Each and every odject that have it's own detail page must have a Listing object
