@@ -110,6 +110,6 @@ try:
     # register the proper propagation function for intercepting the proper signals
     CACHE_DELETER.signal_handler = get_propagator(conn)
 except:
-    pass
     # TODO: log warning, that we are running without ActiveMQ
+    pass
 
