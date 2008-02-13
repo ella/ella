@@ -5,8 +5,8 @@ from ella.core.models import Category, Listing
 
 class RedirObject(models.Model):
     category = models.ForeignKey(Category)
-    title = models.CharField(maxlength=100)
-    slug =  models.CharField(maxlength=100)
+    title = models.CharField(max_length=100)
+    slug =  models.CharField(max_length=100)
 
     @property
     def main_listing(self):

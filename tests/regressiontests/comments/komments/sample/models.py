@@ -5,7 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 from ella.core.models import Listing, Category
 
 class Apple(models.Model):
-    color = models.CharField(maxlength=20)
+    color = models.CharField(max_length=20)
 
     def __unicode__(self):
         return u'%s apple' % (self.color,)
@@ -14,7 +14,7 @@ class Apple(models.Model):
 
 class Orange(models.Model):
     cm = models.PositiveIntegerField()
-    slug = models.CharField(_('Slug'), maxlength=255)
+    slug = models.CharField(_('Slug'), max_length=255)
     category = models.ForeignKey(Category, verbose_name=_('Category'))
 
     @property

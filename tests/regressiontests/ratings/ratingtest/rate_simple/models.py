@@ -13,9 +13,9 @@ class UserProfile(models.Model):
 
 class ExpensiveSampleModel(models.Model):
     owner = models.ForeignKey(User)
-    title = models.CharField(maxlength=100)
+    title = models.CharField(max_length=100)
     category = models.ForeignKey(Category)
-    slug = models.CharField(maxlength=100)
+    slug = models.CharField(max_length=100)
 
     objects = models.Manager()
     rated = RatedManager()
@@ -34,7 +34,7 @@ class ExpensiveSampleModel(models.Model):
 
 class CheapSampleModel(models.Model):
     owner = models.ForeignKey(User)
-    title = models.CharField(maxlength=100)
+    title = models.CharField(max_length=100)
 
     objects = models.Manager()
     rated = RatedManager()
