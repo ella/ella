@@ -64,7 +64,7 @@ class ArticleOptions(admin.ModelAdmin):
         """
         #FIXME: will omit articles without listing (outer join takes 1:30 to finish)
         #TODO: verigy if the sorting isn't overriden in ChangeList
-        qset = super(ArticleOptions, self).queryset()
+        qset = super(ArticleOptions, self).queryset(request)
         qset = qset.extra(
                 tables=[ Listing._meta.db_table, ],
                 where=where_lookup,
