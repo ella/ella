@@ -16,6 +16,8 @@ class ArticleContentInlineOptions(admin.TabularInline):
     extra = 1
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'content':
+            if db_field.blank:
+                kwargs['required'] = False
             return fields.RichTextAreaField(**kwargs)
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
@@ -27,6 +29,8 @@ class InfoBoxOptions(admin.ModelAdmin):
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'content':
+            if db_field.blank:
+                kwargs['required'] = False
             return fields.RichTextAreaField(**kwargs)
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
