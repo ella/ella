@@ -3,8 +3,6 @@ from datetime import datetime
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
-from django.utils.translation import ugettext
-from django.contrib import admin
 from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
 
@@ -12,7 +10,6 @@ from ella.core.box import Box
 from ella.core.models import Category, Author, Category, Listing
 from ella.core.cache.utils import get_cached_object, cache_this
 from ella.core.cache.invalidate import CACHE_DELETER
-from ella.ellaadmin import widgets
 
 
 def gallery_cache_invalidator(key, gallery, *args, **kwargs):
@@ -31,6 +28,7 @@ class Gallery(models.Model):
     slug = models.CharField(_('Slug'), max_length=255)
     # Gallery metadata
     description = models.CharField(_('Description'), max_length=3000, blank=True)
+    content = models.TextField(_('Content'), blank=True)
     owner = models.ForeignKey(Author, verbose_name=_('Gallery owner'), blank=True, null=True)
     category = models.ForeignKey(Category, verbose_name=_('Category'), blank=True, null=True)
     created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)
@@ -79,7 +77,6 @@ class Gallery(models.Model):
         return self.items[0][1]
 
 
-
 class GalleryItem(models.Model):
     """
     Specific object in gallery
@@ -124,7 +121,7 @@ class GalleryItem(models.Model):
         return self._slug
 
     def get_absolute_url(self):
-        return '%s%s/%s/' % (self.gallery.get_absolute_url(), slugify(ugettext('items')), self.get_slug())
+        return '%s%s/%s/' % (self.gallery.get_absolute_url(), slugify(_('items')), self.get_slug())
 
     class Meta:
         ordering = ('order',)
@@ -132,45 +129,7 @@ class GalleryItem(models.Model):
         verbose_name_plural = _('Gallery items')
         unique_together = (('gallery', 'order',),)
 
-
-class GalleryItemOptions(admin.ModelAdmin):
-    """TODO: pridat widget, ktery bude volat maximuv skript"""
-    pass
-
-class GalleryItemTabularOptions(admin.TabularInline):
-    model = GalleryItem
-    extra = 10
-
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'order':
-            kwargs['widget'] = widgets.IncrementWidget
-        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
-
-
-from ella.core.admin.models import ListingInlineOptions, HitCountInlineOptions
-from tagging.models import TaggingInlineOptions
-class GalleryOptions(admin.ModelAdmin):
-    list_display = ('title', 'created', 'category', 'full_url',)
-    ordering = ('-created',)
-    fieldsets = (
-        (_("Gallery heading"), {'fields': ('title', 'slug',)}),
-        (_("Gallery metadata"), {'fields': ('description', 'owner', 'category')}),
-)
-    list_filter = ('created', 'category',)
-    search_fields = ('title', 'description', 'slug',)
-#    inlines = (GalleryItemTabularOptions, ListingInlineOptions, TaggingInlineOptions, HitCountInlineOptions)
-    inlines = (GalleryItemTabularOptions, ListingInlineOptions, TaggingInlineOptions,)
-    prepopulated_fields = {'slug': ('title',)}
-
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'description':
-            kwargs['widget'] = widgets.RichTextAreaWidget
-        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
-
-
-admin.site.register(Gallery, GalleryOptions)
-
-
-from ella.galleries import management
-
+# initialization
+from ella.galleries import register
+del register
 

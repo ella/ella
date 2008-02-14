@@ -9,6 +9,8 @@ from ella.core.templatetags.core import render_str
 
 import re
 
+# FIXME: we have blank=True in models, but RichTextAreaField is still required!
+
 class RichTextAreaField(fields.Field):
     widget = RichTextAreaWidget
     default_error_messages = {
@@ -26,12 +28,6 @@ class RichTextAreaField(fields.Field):
 
         link = match.group(1)
 
-        # create test link with GET parameter "ift=t" for our objects with future listing
-        if '?' in link:
-            tlink = link + '&ift=t'
-        else:
-            tlink = link + '?ift=t'
-
         import urllib2
         headers = {
             "Accept": "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5",
@@ -42,12 +38,23 @@ class RichTextAreaField(fields.Field):
 }
 
         try:
-            req = urllib2.Request(tlink, None, headers)
+            req = urllib2.Request(link, None, headers)
             urllib2.urlopen(req)
         except ValueError:
             self.invalid_links.append(link)
-        except: # urllib2.URLError, httplib.InvalidURL, etc.
-            self.broken_links.append(link)
+        except:
+
+            # try with GET parameter "ift=t" for our objects with future listing
+            if '?' in link:
+                tlink = link + '&ift=t'
+            else:
+                tlink = link + '?ift=t'
+
+            try:
+                req = urllib2.Request(tlink, None, headers)
+                urllib2.urlopen(req)
+            except:
+                self.broken_links.append(link)
 
     def clean(self, value):
         "Validates markdown and temlate (box) syntax, validates links and check if exists."
