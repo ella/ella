@@ -3,11 +3,52 @@
 	font-family:monospace;
 	height:500px;
 	width:500px;
+	float: left;
 }
 ul#rich_toolbar li {
 	display:inline;
-	margin:0pt 5px;
-	padding:0pt 5px;
+	margin:0pt 3px;
+	padding:2px 5px;
+	cursor: pointer;
+	background: #ddd;
+	border: 1px outset #ddd;
+}
+
+
+#rich_preview * {
+	background: transparent;
+	color: #000;
+	text-align: left;
+	margin: 0; padding: 0;
+}
+#rich_preview {
+	background: #ffe;
+	float: left;
+	font: normal 9pt "Trebuchet MS", Arial, Verdana, sans-serif;
+	padding: 3px 5px;
+	margin: 0 5px;
+	border: 1px solid #ddd;
+	width: 400px;
+	height: 500px;
+	overflow: auto;
+}
+
+#rich_preview p, #rich_preview ul, #rich_preview ol {
+	margin: .8em auto;
+}
+#rich_preview ul, #rich_preview ol, #rich_preview li {
+	margin-left: 1.2em;
+}
+#rich_preview h1, #rich_preview h2 {
+	font-size: 11pt;
+	margin: .3em 0;
+}
+#rich_preview h2 {
+	font-size: 10pt;
+}
+#rich_preview a, #rich_preview a:link, #rich_preview a:visited {
+	text-decoration: underline;
+	color: #3C568A;
 }
 
 #boxWrapper {
@@ -72,15 +113,15 @@ div#photo h2 { margin: 0; padding: 0; }
 div#photo div { margin-left: 5px; padding: 1px; }
 div#photo div * { padding: 0; margin: 0; }
 
-div.box-object {
+#rich_preview div.box-object {
 	width: 150px;
-	background: #ff80ff;
+	background: #E7B52C;
 	border: 1px solid #ccc;
 	font-weight: bold;
 	margin: 2px;
 	text-align: center;
 	padding: 50px 0;
-	font-size: 2em;
+	font-size: 1.5em;
 	color: #fff;
 	cursor: pointer;
 	float: right;
