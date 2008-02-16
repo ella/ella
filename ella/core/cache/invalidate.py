@@ -90,26 +90,27 @@ def get_propagator(conn):
         return instance
     return propagate_signal
 
-try:
-    import stomp
+if ACTIVE_MQ_HOST:
+    try:
+        import stomp
 
-    # initialize connection to ActiveMQ
-    conn = stomp.Connection([(ACTIVE_MQ_HOST, ACTIVE_MQ_PORT)], '', '')
+        # initialize connection to ActiveMQ
+        conn = stomp.Connection([(ACTIVE_MQ_HOST, ACTIVE_MQ_PORT)], '', '')
 
-    # register CD as listener
-    conn.add_listener(CACHE_DELETER)
+        # register CD as listener
+        conn.add_listener(CACHE_DELETER)
 
-    conn.start()
-    conn.connect()
-    conn.subscribe(destination='/topic/ella')
+        conn.start()
+        conn.connect()
+        conn.subscribe(destination='/topic/ella')
 
-    # register to close the activeMQ connection on exit
-    import atexit
-    atexit.register(conn.disconnect)
+        # register to close the activeMQ connection on exit
+        import atexit
+        atexit.register(conn.disconnect)
 
-    # register the proper propagation function for intercepting the proper signals
-    CACHE_DELETER.signal_handler = get_propagator(conn)
-except:
-    # TODO: log warning, that we are running without ActiveMQ
-    pass
+        # register the proper propagation function for intercepting the proper signals
+        CACHE_DELETER.signal_handler = get_propagator(conn)
+    except:
+        # TODO: log warning, that we are running without ActiveMQ
+        pass
 
