@@ -36,15 +36,6 @@ class InfoBoxOptions(admin.ModelAdmin):
 
 
 
-##
-# prepare lookup for ArticleOptions.queryset()
-##
-qn = connection.ops.quote_name
-where_lookup = (
-        '%s.target_ct_id = %d' % (qn(Listing._meta.db_table),ContentType.objects.get_for_model(Article).id),
-        '%s.target_id = %s.id' % (qn(Listing._meta.db_table), qn(Article._meta.db_table)),
-        '%s.category_id = %s.category_id' % (qn(Listing._meta.db_table), qn(Article._meta.db_table)),
-)
 
 class ArticleOptions(admin.ModelAdmin):
     list_display = ('title', 'category', 'photo_thumbnail', 'created', 'article_age', 'full_url',)
@@ -58,7 +49,6 @@ class ArticleOptions(admin.ModelAdmin):
     raw_id_fields = ('photo',)
     list_filter = ('category__site', 'created', 'category', 'authors',)
     search_fields = ('title', 'upper_title', 'perex', 'slug',)
-#    inlines = (ArticleContentInlineOptions, ListingInlineOptions, TaggingInlineOptions, HitCountInlineOptions)
     inlines = (ArticleContentInlineOptions, ListingInlineOptions, TaggingInlineOptions,)
     prepopulated_fields = {'slug' : ('title',)}
 
@@ -67,7 +57,16 @@ class ArticleOptions(admin.ModelAdmin):
         Add listing to the query and sort on publish_from.
         """
         #FIXME: will omit articles without listing (outer join takes 1:30 to finish)
-        #TODO: verigy if the sorting isn't overriden in ChangeList
+        #TODO: verigy if the sorting isn't overriden in ChangeList - FIXME - it is
+
+        # prepare lookup for ArticleOptions.queryset()
+        qn = connection.ops.quote_name
+        where_lookup = (
+                '%s.target_ct_id = %d' % (qn(Listing._meta.db_table),ContentType.objects.get_for_model(Article).id),
+                '%s.target_id = %s.id' % (qn(Listing._meta.db_table), qn(Article._meta.db_table)),
+                '%s.category_id = %s.category_id' % (qn(Listing._meta.db_table), qn(Article._meta.db_table)),
+)
+
         qset = super(ArticleOptions, self).queryset(request)
         qset = qset.extra(
                 tables=[ Listing._meta.db_table, ],
