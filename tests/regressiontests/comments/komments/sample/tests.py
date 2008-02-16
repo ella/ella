@@ -288,37 +288,37 @@ comment_templatetags = r"""
 >>> t = Template('''
 ... {% load comments %}
 ... {% get_comment_form for apple with 'LO' as comment_form %}
-... {{comment_form|pprint}}
+... {{comment_form|pprint|safe}}
 ... ''')
 >>> t.render(Context({'apple': apple_red})) == \
-... u"\n\n\nCommentForm for [%s] with fields [&#39;content&#39;, &#39;gonzo&#39;, &#39;options&#39;, &#39;parent&#39;, &#39;password&#39;, &#39;subject&#39;, &#39;target&#39;, &#39;timestamp&#39;, &#39;username&#39;]\n" % apple_red_target
+... u"\n\n\nCommentForm for [%s] with fields ['content', 'gonzo', 'options', 'parent', 'password', 'subject', 'target', 'timestamp', 'username']\n" % apple_red_target
 True
 
 >>> t = Template('''
 ... {%% load comments %%}
 ... {%% get_comment_form for sample.apple with id %d as comment_form %%}
-... {{comment_form|pprint}}
+... {{comment_form|pprint|safe}}
 ... ''' % apple_green.id)
 >>> t.render(Context({'apple': apple_green})) == \
-... u"\n\n\nCommentForm for [%s] with fields [&#39;content&#39;, &#39;email&#39;, &#39;gonzo&#39;, &#39;nickname&#39;, &#39;options&#39;, &#39;parent&#39;, &#39;password&#39;, &#39;reg_anonym_sel&#39;, &#39;subject&#39;, &#39;target&#39;, &#39;timestamp&#39;, &#39;username&#39;]\n" % apple_green_target
+... u"\n\n\nCommentForm for [%s] with fields ['content', 'email', 'gonzo', 'nickname', 'options', 'parent', 'password', 'reg_anonym_sel', 'subject', 'target', 'timestamp', 'username']\n" % apple_green_target
 True
 
 >>> t = Template('''
 ... {% load comments %}
 ... {% get_comment_form for apple as comment_form %}
-... {{comment_form|pprint}}
+... {{comment_form|pprint|safe}}
 ... ''')
 >>> t.render(Context({'apple': apple_green})) == \
-... u"\n\n\nCommentForm for [%s] with fields [&#39;content&#39;, &#39;email&#39;, &#39;gonzo&#39;, &#39;nickname&#39;, &#39;options&#39;, &#39;parent&#39;, &#39;password&#39;, &#39;reg_anonym_sel&#39;, &#39;subject&#39;, &#39;target&#39;, &#39;timestamp&#39;, &#39;username&#39;]\n" % apple_green_target
+... u"\n\n\nCommentForm for [%s] with fields ['content', 'email', 'gonzo', 'nickname', 'options', 'parent', 'password', 'reg_anonym_sel', 'subject', 'target', 'timestamp', 'username']\n" % apple_green_target
 True
 
 >>> t = Template('''
 ... {%% load comments %%}
 ... {%% get_comment_form for sample.apple with id %d with 'LO' as comment_form %%}
-... {{comment_form|pprint}}
+... {{comment_form|pprint|safe}}
 ... ''' % apple_green.id)
 >>> t.render(Context({'apple': apple_green})) == \
-... u"\n\n\nCommentForm for [%s] with fields [&#39;content&#39;, &#39;gonzo&#39;, &#39;options&#39;, &#39;parent&#39;, &#39;password&#39;, &#39;subject&#39;, &#39;target&#39;, &#39;timestamp&#39;, &#39;username&#39;]\n" % apple_green_target
+... u"\n\n\nCommentForm for [%s] with fields ['content', 'gonzo', 'options', 'parent', 'password', 'subject', 'target', 'timestamp', 'username']\n" % apple_green_target
 True
 
 
@@ -326,18 +326,18 @@ True
 >>> t = Template('''
 ... {% load comments %}
 ... {% get_comment_list for apple as comment_list %}
-... {{comment_list|pprint}}
+... {{comment_list|pprint|safe}}
 ... ''')
 >>> t.render(Context({'apple': apple_green}))
-u'\n\n\n[&lt;Comment: comment [id:3] &#39;Hello...&#39; on green apple {path:3}&gt;,\n &lt;Comment: comment [id:2] &#39;Ahoj lidi....&#39; on green apple {path:2}&gt;,\n &lt;Comment: comment [id:1] &#39;Ahoj lidi....&#39; on green apple {path:1}&gt;]\n'
+u"\n\n\n[<Comment: comment [id:3] 'Hello...' on green apple {path:3}>,\n <Comment: comment [id:2] 'Ahoj lidi....' on green apple {path:2}>,\n <Comment: comment [id:1] 'Ahoj lidi....' on green apple {path:1}>]\n"
 
 >>> t = Template('''
 ... {%% load comments %%}
 ... {%% get_comment_list for sample.apple with id %d as comment_list orderby content %%}
-... {{comment_list|pprint}}
+... {{comment_list|pprint|safe}}
 ... ''' % apple_green.id)
 >>> t.render(Context({'apple': apple_green}))
-u'\n\n\n[&lt;Comment: comment [id:1] &#39;Ahoj lidi....&#39; on green apple {path:1}&gt;,\n &lt;Comment: comment [id:2] &#39;Ahoj lidi....&#39; on green apple {path:2}&gt;,\n &lt;Comment: comment [id:3] &#39;Hello...&#39; on green apple {path:3}&gt;]\n'
+u"\n\n\n[<Comment: comment [id:1] 'Ahoj lidi....' on green apple {path:1}>,\n <Comment: comment [id:2] 'Ahoj lidi....' on green apple {path:2}>,\n <Comment: comment [id:3] 'Hello...' on green apple {path:3}>]\n"
 
 
 # test get_comment_count
