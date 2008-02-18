@@ -60,7 +60,7 @@ class EllaAdminSite(admin.AdminSite):
         from django.utils import simplejson
         from django.http import HttpResponse, HttpResponseBadRequest, Http404
         from django.db.models import ObjectDoesNotExist
-        from ella.core.cache import get_cached_object
+        from ella.core.cache import get_cached_object_or_404
         from django.contrib.contenttypes.models import ContentType
         from django.core.urlresolvers import reverse
         response = {}
@@ -73,21 +73,15 @@ class EllaAdminSite(admin.AdminSite):
         ct_id = request.GET['ct_id']
         ob_id = request.GET['ob_id']
 
-        try:
-            ct = ContentType.objects.get(pk=ct_id)
-            response['content_type_name'] = ct.name
-            response['content_type'] = ct.model
-        except ObjectDoesNotExist:
-            raise Http404('REQUESTED CONTENT TYPE DOES NOT EXIST')
+        ct = get_cached_object_or_404(ContentType, pk=ct_id)
+        response['content_type_name'] = ct.name
+        response['content_type'] = ct.model
 
-        try:
-            ob = get_cached_object(ct, pk=ob_id)
-            response['name'] = ob.__str__()
-            if hasattr(ob, 'get_absolute_url'):
-                response['url'] = ob.get_absolute_url()
-            response['admin_url'] = reverse('admin', args=['%s/%s/%d' % (ct.app_label, ct.model, ob.pk)])
-        except ObjectDoesNotExist:
-            raise Http404('REQUESTED OBJECT DOES NOT EXIST')
+        ob = get_cached_object_or_404(ct, pk=ob_id)
+        response['name'] = str(ob)
+        if hasattr(ob, 'get_absolute_url'):
+            response['url'] = ob.get_absolute_url()
+        response['admin_url'] = reverse('admin', args=['%s/%s/%d' % (ct.app_label, ct.model, ob.pk)])
 
         return HttpResponse(simplejson.dumps(response, indent=2), mimetype=mimetype)
 
