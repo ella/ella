@@ -52,28 +52,28 @@ class ArticleOptions(admin.ModelAdmin):
     inlines = (ArticleContentInlineOptions, ListingInlineOptions, TaggingInlineOptions,)
     prepopulated_fields = {'slug' : ('title',)}
 
-    def queryset(self, request):
-        """
-        Add listing to the query and sort on publish_from.
-        """
-        #FIXME: will omit articles without listing (outer join takes 1:30 to finish)
-        #TODO: verigy if the sorting isn't overriden in ChangeList - FIXME - it is
+    #def queryset(self, request):
+    #    """
+    #    Add listing to the query and sort on publish_from.
+    #    """
+    #    #FIXME: will omit articles without listing (outer join takes 1:30 to finish)
+    #    #TODO: verigy if the sorting isn't overriden in ChangeList - FIXME - it is
 
-        # prepare lookup for ArticleOptions.queryset()
-        qn = connection.ops.quote_name
-        where_lookup = (
-                '%s.target_ct_id = %d' % (qn(Listing._meta.db_table),ContentType.objects.get_for_model(Article).id),
-                '%s.target_id = %s.id' % (qn(Listing._meta.db_table), qn(Article._meta.db_table)),
-                '%s.category_id = %s.category_id' % (qn(Listing._meta.db_table), qn(Article._meta.db_table)),
-)
+    #    # prepare lookup for ArticleOptions.queryset()
+    #    qn = connection.ops.quote_name
+    #    where_lookup = (
+    #            '%s.target_ct_id = %d' % (qn(Listing._meta.db_table),ContentType.objects.get_for_model(Article).id),
+    #            '%s.target_id = %s.id' % (qn(Listing._meta.db_table), qn(Article._meta.db_table)),
+    #            '%s.category_id = %s.category_id' % (qn(Listing._meta.db_table), qn(Article._meta.db_table)),
+    #)
 
-        qset = super(ArticleOptions, self).queryset(request)
-        qset = qset.extra(
-                tables=[ Listing._meta.db_table, ],
-                where=where_lookup,
-                select={'publish_from' : '%s.publish_from' % qn(Listing._meta.db_table),},
-).order_by('-publish_from')
-        return qset
+    #    qset = super(ArticleOptions, self).queryset(request)
+    #    qset = qset.extra(
+    #            tables=[ Listing._meta.db_table, ],
+    #            where=where_lookup,
+    #            select={'publish_from' : '%s.publish_from' % qn(Listing._meta.db_table),},
+    #).order_by('-publish_from')
+    #    return qset
 
 
     def formfield_for_dbfield(self, db_field, **kwargs):
