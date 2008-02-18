@@ -6,7 +6,7 @@ from django.db import connection
 from tagging.models import TaggingInlineOptions
 
 from ella.core.models import Listing
-from ella.core.admin.models import ListingInlineOptions, HitCountInlineOptions
+from ella.core.admin import ListingInlineOptions, HitCountInlineOptions
 from ella.ellaadmin import fields
 from ella.articles.models import ArticleContents, Article, InfoBox
 

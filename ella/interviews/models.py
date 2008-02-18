@@ -243,7 +243,7 @@ class IntervieweeOptions(admin.ModelAdmin):
     search_fields = ('user__first_name', 'user__last_name', 'name', 'description', 'slug', 'author__name',)
     prepopulated_fields = {'slug' : ('name',)}
 
-from ella.core.admin.models import ListingInlineOptions, HitCountInlineOptions
+from ella.core.admin import ListingInlineOptions, HitCountInlineOptions
 from tagging.models import TaggingInlineOptions
 class InterviewOptions(admin.ModelAdmin):
     list_display = ('title', 'category', 'ask_from', 'full_url',)

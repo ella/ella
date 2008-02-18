@@ -7,6 +7,8 @@ from django.contrib.contenttypes import generic
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
+from ella.core.cache import get_cached_object
+
 # ratings - specific settings
 ANONYMOUS_KARMA = getattr(settings, 'ANONYMOUS_KARMA', 1)
 INITIAL_USER_KARMA = getattr(settings, 'ANONYMOUS_KARMA', 4)
@@ -117,7 +119,7 @@ class RatingManager(models.Manager):
         cursor = connection.cursor()
         cursor.execute(sql, (count,))
 
-        return [ (models.get_model(*row[:2])._default_manager.get(pk=row[2]), row[3]) for row in cursor.fetchall() ]
+        return [ (get_cached_object(models.get_model(*row[:2]),  pk=row[2]), row[3]) for row in cursor.fetchall() ]
 
     def get_for_object(self, obj):
         """

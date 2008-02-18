@@ -494,7 +494,7 @@ class ContestantOptions(admin.ModelAdmin):
 
     formfield_for_dbfield = formfield_for_dbfield(['text_announcement', 'text', 'text_results'])
 
-from ella.core.admin.models import ListingInlineOptions, HitCountInlineOptions
+from ella.core.admin import ListingInlineOptions, HitCountInlineOptions
 from tagging.models import TaggingInlineOptions
 
 class QuestionInlineOptions(admin.options.InlineModelAdmin):

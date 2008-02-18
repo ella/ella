@@ -1,18 +1,44 @@
 from django.contrib import admin
+from django.utils.translation import ugettext_lazy as _, ugettext
+from django.newforms.models import BaseModelFormSet
+from django import newforms as forms
+from django.contrib.contenttypes.models import ContentType
+
+from tagging.models import TaggingInlineOptions
+
 from ella.galleries.models import Gallery, GalleryItem
 from ella.ellaadmin import fields, widgets
-from ella.core.admin.models import ListingInlineOptions
-from tagging.models import TaggingInlineOptions
-from django.utils.translation import ugettext_lazy as _
+from ella.core.admin import ListingInlineOptions
+from ella.core.cache import get_cached_object
 
 
 class GalleryItemOptions(admin.ModelAdmin):
     """TODO: pridat widget, ktery bude volat maximuv skript"""
     pass
 
+class GalleryItemFormset(BaseModelFormSet):
+
+    def clean (self):
+        if not self.cleaned_data or not self.instance:
+            return self.cleaned_data
+
+        obj = self.instance
+        items = set([])
+
+        for d in self.cleaned_data:
+            target = (d['target_ct_id'], d['target_id'],)
+            # check for duplicities
+            if target in items:
+                obj = get_cached_object(get_cached_object(ContentType, pk=d['target_ct_id']), pk=d['target_id'])
+                raise forms.ValidationError, ugettext('There are two references to %s in this gallery') % obj
+            items.add(target)
+
+        return self.cleaned_data
+
 class GalleryItemTabularOptions(admin.TabularInline):
     model = GalleryItem
     extra = 10
+    formset = GalleryItemFormset
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'order':

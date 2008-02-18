@@ -10,7 +10,6 @@ from django.utils.translation import ugettext_lazy as _
 
 from ella.core.box import Box
 from ella.core.managers import *
-from ella.core.admin.models import *
 
 class Author(models.Model):
     from django.contrib.auth.models import User
@@ -319,10 +318,6 @@ class Dependency(models.Model):
         ordering = ('source_ct', 'source_id',)
         unique_together = (('target_key', 'source_key',),)
 
-admin.site.register(HitCount, HitCountOptions)
-admin.site.register(Category, CategoryOptions)
-admin.site.register(Source)
-admin.site.register(Author, AuthorOptions)
-admin.site.register(Listing, ListingOptions)
-admin.site.register(Dependency , DependencyOptions)
+from ella.core import register
+del register
 

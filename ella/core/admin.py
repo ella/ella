@@ -5,6 +5,7 @@ from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 
 from ella.core.middleware import get_current_request
+from ella.core.models import *
 
 class ListingInlineFormset(generic.GenericInlineFormset):
     def clean (self):
@@ -63,11 +64,7 @@ class ListingInlineFormset(generic.GenericInlineFormset):
     '''
 
 class ListingInlineOptions(generic.GenericTabularInline):
-    @property
-    def model(self):
-        from ella.core.models import Listing
-        return Listing
-
+    model = Listing
     extra = 2
     ct_field_name = 'target_ct'
     id_field_name = 'target_id'
@@ -80,11 +77,7 @@ class ListingInlineOptions(generic.GenericTabularInline):
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 class HitCountInlineOptions(generic.GenericTabularInline):
-    @property
-    def model(self):
-        from ella.core.models import HitCount
-        return HitCount
-
+    model = HitCount
     extra = 0
     ct_field_name = 'target_ct'
     id_field_name = 'target_id'
@@ -117,4 +110,11 @@ class HitCountOptions(admin.ModelAdmin):
 
 class AuthorOptions(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
+
+admin.site.register(HitCount, HitCountOptions)
+admin.site.register(Category, CategoryOptions)
+admin.site.register(Source)
+admin.site.register(Author, AuthorOptions)
+admin.site.register(Listing, ListingOptions)
+admin.site.register(Dependency , DependencyOptions)
 
