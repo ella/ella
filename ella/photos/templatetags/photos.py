@@ -1,5 +1,6 @@
 from django import template
 from django.conf import settings
+from django.db import IntegrityError
 
 from ella.photos.models import Photo, Format, FormatedPhoto
 from ella.core.cache.utils import get_cached_object
@@ -21,7 +22,7 @@ class ImgTag(template.Node):
             except FormatedPhoto.DoesNotExist:
                 try:
                     formated_photo = FormatedPhoto.objects.create(photo=photo, format=self.format)
-                except (IOError, SystemError):
+                except (IOError, SystemError, IntegrityError):
                     context[self.var_name] = self.format.get_blank_img()
                     return ''
         else:
