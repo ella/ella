@@ -11,10 +11,11 @@ from django.newforms.forms import ValidationError
 from ella.core.cache import get_cached_object, get_cached_list, get_cached_object_or_404
 from ella.core.box import Box
 from ella.core.middleware import get_current_request
-from ella.core.models import Category, Listing
+from ella.core.models import Category, Author, Source, Listing
 from ella.core.managers import RelatedManager
 from ella.photos.models import Photo
 
+from ella.core.models import Category, Author, Source, Listing
 
 ACTIVITY_NOT_YET_ACTIVE = 0
 ACTIVITY_ACTIVE = 1
@@ -118,6 +119,9 @@ class Quiz(models.Model):
     active_from = models.DateTimeField(_('Active from'))
     active_till = models.DateTimeField(_('Active till'))
     photo = models.ForeignKey(Photo)
+
+    # Authors and Sources
+    authors = models.ManyToManyField(Author, verbose_name=_('Authors'))
 
     objects = RelatedManager()
 
@@ -271,6 +275,11 @@ class Poll(models.Model):
     active_from = models.DateTimeField(_('Active from'), default=datetime.now, null=True, blank=True)
     active_till = models.DateTimeField(_('Active till'), null=True, blank=True)
     question = models.ForeignKey(Question, verbose_name=_('Question'), unique=True)
+
+    # Authors and Sources
+##    authors = models.ManyToManyField(Author, verbose_name=_('Authors'))
+## z quizu:
+##    quiz = models.ForeignKey(Quiz, blank=True, null=True, verbose_name=_('Quiz'))
 
     def __unicode__(self):
         return self.title
@@ -494,7 +503,7 @@ class ContestantOptions(admin.ModelAdmin):
 
     formfield_for_dbfield = formfield_for_dbfield(['text_announcement', 'text', 'text_results'])
 
-from ella.core.admin import ListingInlineOptions, HitCountInlineOptions
+from ella.core.admin.models import ListingInlineOptions, HitCountInlineOptions
 from tagging.models import TaggingInlineOptions
 
 class QuestionInlineOptions(admin.options.InlineModelAdmin):
