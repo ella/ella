@@ -15,8 +15,6 @@ from ella.core.models import Category, Author, Source, Listing
 from ella.core.managers import RelatedManager
 from ella.photos.models import Photo
 
-from ella.core.models import Category, Author, Source, Listing
-
 ACTIVITY_NOT_YET_ACTIVE = 0
 ACTIVITY_ACTIVE = 1
 ACTIVITY_CLOSED = 2
@@ -275,11 +273,6 @@ class Poll(models.Model):
     active_from = models.DateTimeField(_('Active from'), default=datetime.now, null=True, blank=True)
     active_till = models.DateTimeField(_('Active till'), null=True, blank=True)
     question = models.ForeignKey(Question, verbose_name=_('Question'), unique=True)
-
-    # Authors and Sources
-##    authors = models.ManyToManyField(Author, verbose_name=_('Authors'))
-## z quizu:
-##    quiz = models.ForeignKey(Quiz, blank=True, null=True, verbose_name=_('Quiz'))
 
     def __unicode__(self):
         return self.title
