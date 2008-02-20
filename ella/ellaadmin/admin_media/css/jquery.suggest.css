@@ -20,6 +20,7 @@
 	.ac_over {
 		cursor: pointer;
 		background-color: #F0F0B8;
+		background-color: #999;
 	}
 
 	.ac_match {
