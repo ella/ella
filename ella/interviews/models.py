@@ -5,6 +5,7 @@ from django.contrib import admin
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
+from django.conf import settings
 
 from ella.ellaadmin import widgets
 from ella.photos.models import Photo
@@ -204,6 +205,8 @@ class Question(models.Model):
 
     def answered(self):
         return bool(self.answers)
+    answered.short_description= _('Answered')
+    answered.boolean = True
 
     class Meta:
         ordering = ('-submit_date',)
@@ -233,7 +236,7 @@ class AnswerInlineOptions(admin.TabularInline):
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 class QuestionOptions(admin.ModelAdmin):
-    list_display = ('interview', 'author', 'submit_date',)
+    list_display = ('interview', 'author', 'submit_date', 'answered',)
     list_filter = ('submit_date',)
     search_fields = ('content', 'nickname', 'email',)
     inlines = (AnswerInlineOptions,)
