@@ -41,6 +41,7 @@ class Position(models.Model):
         active_till = not self.active_till or self.active_till > now
         return active_from and active_till
     is_active.short_description = _('Active')
+    is_active.boolean = True
 
     def __unicode__(self):
         return '%s:%s' % (self.category, self.name)
