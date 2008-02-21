@@ -295,6 +295,6 @@
 	})(jQuery);
 
 jQuery( function() {
-    jQuery(".vSuggestField").suggest("http://dev11.netcentrum.cz:8060/t/", {selectFirst: true} );
-    jQuery(".vSuggestMultipleField").suggest( "http://dev11.netcentrum.cz:8060/t/", {selectFirst: true} );
+    jQuery(".vSuggestField").suggest( tagSuggesterUrl, {selectFirst: true} );
+    jQuery(".vSuggestMultipleField").suggest( tagSuggesterUrl, {selectFirst: true} );
 } );

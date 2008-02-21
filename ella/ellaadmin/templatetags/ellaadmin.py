@@ -26,6 +26,17 @@ def get_hits_link(parser, token):
             '"%s" tag requires exactly two arguments - content_type_id and object_id.' % token.contents.split()[0]
     return FormatHitsLink(ct_id, o_id)
 
+
+class TagSuggesterUrl(template.Node):
+    def render(self, context):
+        from django.core.urlresolvers import reverse
+        return reverse('tag_suggester')
+
+@register.tag
+def tag_suggester_url(parser, token):
+    return TagSuggesterUrl()
+
+
 class FormatHitsLink(template.Node):
 
     def __init__(self, target_ct, target_id):
