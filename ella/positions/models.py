@@ -8,6 +8,7 @@ from django.contrib.contenttypes import generic
 from django.conf import settings
 
 from ella.core.models import Category
+from ella.core.box import Box
 
 
 class PositionManager(models.Manager):
@@ -34,6 +35,17 @@ class Position(models.Model):
     text = models.TextField(_('Definition'), blank=True)
 
     objects = PositionManager()
+
+    def Box(self, box_type, nodelist):
+        """Delegate the boxing"""
+        obj = self.target
+
+        if self.box_type:
+            box_type = self.box_type
+
+        if hasattr(obj, 'Box'):
+            return obj.Box(box_type, nodelist)
+        return Box(obj, box_type, nodelist)
 
     def is_active(self):
         now = datetime.now()
