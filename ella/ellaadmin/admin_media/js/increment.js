@@ -13,18 +13,18 @@ $(function(){
 				var elId = $(this).attr('id').replace('inc-', '') - 0;
 				var order = $('#inc-' + (elId - 1)).val();
 				if(elId > 0 && order != '' && /^\d+$/.test(order)){
-					$(this).val(order - 0 + 1);
+					$(this).val(order - 0 + 10);
 				} else if(elId > 1 && (order == '' || /\w/.test(order))){
 					for(var x = elId - 2; x >= 0; x--){
 						order = $('#inc-' + x).val();
 						if(order != '' && /^\d+$/.test(order)){
-							$(this).val(order - 0 + 1);
+							$(this).val(order - 0 + 10);
 							return;
 						}
 					}
-					$(this).val(1);
+					$(this).val(10);
 				} else {
-					$(this).val(1);
+					$(this).val(10);
 				}
 			}
 		}).keyup(function(event){
