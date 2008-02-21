@@ -3,6 +3,7 @@ from django.conf import settings
 
 from ella.utils.templatetags import parse_getforas_triplet
 from ella.core.models import Category
+from ella.core.cache import get_cached_object
 from ella.positions.models import Position
 
 
@@ -10,7 +11,7 @@ register = template.Library()
 
 
 @register.tag
-def positions(parser, token):
+def position(parser, token):
     """
     Obtain all active positions for given category or list of categories.
     Put all of them in context variable.
@@ -18,43 +19,46 @@ def positions(parser, token):
 
     Syntax::
 
-        {% positions for CATEGORY[,NEXT_CATEGORY[,NEXT_CATEGORY]] as VARNAME %}
+        {% position POSITION_NAME for CATEGORY %}
+        {% position POSITION_NAME for CATEGORY using BOX_TYPE %}
 
     Example usage::
 
-        {% positions for category as active_positions %}
-        {% positions for category,homepage as positions_fallback_homepage %}
+        {% position top_left for category %}
     """
-    tokens = token.split_contents()
-    tag_name, categories, var_name = parse_getforas_triplet(tokens)
-    categories = categories[0].split(',')
-    return PositionsNode(categories, var_name)
+    bits = token.split_contents()
+    nodelist = parser.parse(('end' + bits[0],))
+    parser.delete_first_token()
 
-class PositionsNode(template.Node):
-    def __init__(self, categories, var_name):
-        self.categories = categories
-        self.var_name = var_name
+    if len(bits) == 4 and bits[2] == 'for':
+        pos_name, category = bits[1], bits[3]
+        box_type = None
+    elif len(bits) == 6 and bits[2] == 'for' and bits[4] == 'using':
+        pos_name, category, box_type = bits[1], bits[3], bits[5]
+    else:
+        raise TemplateSyntaxError, 'Invalid syntex: {% position POSITION_NAME for CATEGORY %}'
+
+
+    return PositionNode(category, pos_name, nodelist, box_type)
+
+class PositionNode(template.Node):
+    def __init__(self, category, position, nodelist, box_type):
+        self.category, self.position, self.nodelist, self.box_type = category, position, nodelist, box_type
 
     def render(self, context):
-        cat_positions = []
-        positions = {}
+        try:
+            cat = template.resolve_variable(self.category, context)
+            if not isinstance(cat, Category):
+                cat = get_cached_object(Category, site=settings.SITE_ID, slug=self.category)
+        except template.VariableDoesNotExist, Category.DoesNotExist:
+            return ''
 
-        # resolve category variables or use it as category title
-        for cat in self.categories:
-            if not isinstance(cat, basestring):
-                continue
-            try:
-                pos = Position.objects.get_active_positions(category=template.resolve_variable(cat, context))
-            except template.VariableDoesNotExist:
-                pos = Position.objects.get_active_positions(category__title=cat, category__site=settings.SITE_ID)
-            cat_positions.append(pos)
+        try:
+            pos = Position.objects.get_active_position(cat, self.position)
+        except Position.DoesNotExist:
+            return ''
 
-        # get positions for first category and fallback on follow-ups
-        for pos in cat_positions[::-1]:
-            positions.update(dict([ (p.name, p) for p in pos ]))
-
-        context[self.var_name] = positions
-        return ''
+        return pos.render(context, self.nodelist, self.box_type)
 
 
 # TODO: udelat tag: {% position NEWS for CATEGORY using BOX_NAME %}

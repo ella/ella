@@ -9,69 +9,22 @@ positions_template_tag = r"""
 
 >>> c = Context({'category': c2,})
 
-render with and withou fallback
+render with and without fallback
 -------------------------------
+override box_type in template
+-----------------------------
 
 >>> t = Template('''{% spaceless %}
 ... {% load positions %}
-... {% positions for category,homepage as a %}
-... {% if a.featured_one or a.featured_two or a.featured_three %}
-... {{a.featured_one}},
-... {{a.featured_two}},
-... {{a.featured_three}},
-... {% endif %}
+... {% position featured_one for category %}{% endposition %}
+... {% position featured_two for category using db %}{% endposition %}
+... {% position featured_three for category %}{% endposition %}
 ... {% endspaceless %}''')
 >>> print t.render(c)
-example.com/first-category:featured_one,
-example.com/first-category:featured_two,
-example.com/:featured_three,
-
->>> t = Template('''{% spaceless %}
-... {% load positions %}
-... {% positions for category as active_positions %}
-... {{active_positions.featured_one}},
-... {{active_positions.featured_two}},
-... {{active_positions.featured_three}},
-... {% endspaceless %}''')
->>> print t.render(c)
-example.com/first-category:featured_one,
-example.com/first-category:featured_two,
-,
-
->>> t = Template('''{% spaceless %}
-... {% load positions %}
-... {% positions for category as active_positions %}
-... {{active_positions.featured_one.target}}
-... {% endspaceless %}''')
->>> t.render(c)
-u'admin'
-
-render default box
-------------------
-
->>> t = Template('''{% spaceless %}
-... {% load positions %}
-... {% positions for category as active_positions %}
-... {% box featured_one for active_positions.featured_one %}
-... css_class:css_class
-... {% endbox %}
-... {% endspaceless %}''')
->>> t.render(c)
-u'<p class="base css_class">admin</p>'
-
-override box_type in db
------------------------
-
->>> p = Position.objects.get(name='featured_one')
->>> p.box_type = 'db'
->>> p.text = 'css_class:db_css_class'
->>> p.save()
->>> t.render(c)
-u'<p class="db db_css_class">admin</p>'
+<p class="base ">admin</p><p class="db ">admin</p><p class="base ">admin</p>
 
 
 TODO:
-* handle category names "some nice name of category"
 * handle position names "some-nice-name-of-position"
 
 """

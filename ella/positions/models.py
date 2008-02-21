@@ -13,13 +13,20 @@ from ella.core.box import Box
 
 
 class PositionManager(models.Manager):
-    def get_active_positions(self, **lookup):
+    def get_active_position(self, category, name):
         now = datetime.now()
-        return self.filter(
-                    Q(active_from__isnull=True) | Q(active_from__lte=now),
-                    Q(active_till__isnull=True) | Q(active_till__gt=now),
-                    **lookup
+        while True:
+            try:
+                return self.get(
+                        Q(active_from__isnull=True) | Q(active_from__lte=now),
+                        Q(active_till__isnull=True) | Q(active_till__gt=now),
+                        category=category, name=name
 )
+            except Position.DoesNotExist:
+                if category.tree_parent:
+                    category = category.tree_parent
+                else:
+                    raise
 
 class Position(models.Model):
     category = models.ForeignKey(Category, verbose_name=_('Category'))
@@ -49,21 +56,18 @@ class Position(models.Model):
         """Delegate the boxing"""
         obj = self.target
 
-        if self.box_type:
-            box_type = self.box_type
-        if self.text:
-            nodelist = Template(self.text).nodelist
-
         if hasattr(obj, 'Box'):
             return obj.Box(box_type, nodelist)
         return Box(obj, box_type, nodelist)
 
-    def render(self, context, box_type=None, nodelist=None):
-        if self.target and hasattr(self.target, 'Box'):
-            b = self.target.Box(box_type or self.box_type, nodelist or Template(self.text).nodelist)
+    def render(self, context, nodelist, box_type=None):
+        if self.target:
+            if not box_type:
+                box_type = self.box_type
+            b = self.Box(box_type, nodelist)
             b.prepare(context)
             return b.render()
-        return Template(self.text or '').render(context)
+        return Template(self.text).render(context)
 
     def __unicode__(self):
         return '%s:%s' % (self.category, self.name)

@@ -72,24 +72,10 @@
     }
   },
   {
-    "pk": 3,
-    "model": "positions.position",
-    "fields": {
-      "category": 2,
-      "name": "featured_three",
-      "text": "",
-      "active_till": "1900-01-02 12:00:00",
-      "target_id": 1,
-      "box_type": "",
-      "active_from": "1900-01-01 12:00:00",
-      "target_ct": 14
-    }
-  },
-  {
     "pk": 4,
     "model": "positions.position",
     "fields": {
-      "category": 1,
+      "category": 2,
       "name": "featured_three",
       "text": "",
       "active_till": null,
