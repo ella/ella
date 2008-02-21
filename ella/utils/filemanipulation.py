@@ -4,7 +4,7 @@ import os
 from django.conf import settings
 
 
-def file_rename(old_path='', new_name='', new_ext='', move=True):
+def file_rename(old_path='', new_name='', new_ext=None, move=True):
     """
     Renames a file, keeping the extension.
 
@@ -27,12 +27,9 @@ def file_rename(old_path='', new_name='', new_ext='', move=True):
     # get important three parts
     dir_base, old_name, extension = split_path(old_path)
 
-    if not new_ext:
+    if new_ext is None:
         # if new extension is not given, use old one
         new_ext = extension
-    else:
-        # if it is, complete trailing dot
-        new_ext = '.%s' % new_ext
 
     # to be sure createpath again
     old_file = old_name + extension
