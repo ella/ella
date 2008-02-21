@@ -30,6 +30,14 @@ u'example.com/first-category:featured_one,\nexample.com/first-category:featured_
 >>> t.render(c)
 u'example.com/first-category:featured_one,\nexample.com/first-category:featured_two,\n,'
 
+>>> t = Template('''{% spaceless %}
+... {% load positions %}
+... {% positions for category as active_positions %}
+... {{active_positions.featured_one.target}}
+... {% endspaceless %}''')
+>>> t.render(c)
+u'admin'
+
 
 TODO:
 * handle category names "some nice name of category"

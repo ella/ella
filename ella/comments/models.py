@@ -21,7 +21,7 @@ class CommentOptions(models.Model):
     """
     target_ct = models.ForeignKey(ContentType, verbose_name=_('target content type'))
     target_id = models.PositiveIntegerField(_('target id'))
-    target = generic.GenericForeignKey()
+    target = generic.GenericForeignKey(ct_field="target_ct", fk_field="target_id")
     options = models.CharField(max_length=defaults.OPTS_LENGTH, blank=True)
     timestamp = models.DateTimeField(default=datetime.now)
 

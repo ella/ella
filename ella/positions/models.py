@@ -25,7 +25,7 @@ class Position(models.Model):
 
     target_ct = models.ForeignKey(ContentType, verbose_name=_('Target content type'), null=True, blank=True)
     target_id = models.PositiveIntegerField(_('Target id'), null=True, blank=True)
-    target = generic.GenericForeignKey()
+    target = generic.GenericForeignKey(ct_field="target_ct", fk_field="target_id")
 
     active_from = models.DateTimeField(_('Position active from'), null=True, blank=True)
     active_till = models.DateTimeField(_('Position active till'), null=True, blank=True)
