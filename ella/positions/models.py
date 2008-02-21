@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.conf import settings
+from django.template import Template
 
 from ella.core.models import Category
 from ella.core.box import Box
@@ -36,17 +37,6 @@ class Position(models.Model):
 
     objects = PositionManager()
 
-    def Box(self, box_type, nodelist):
-        """Delegate the boxing"""
-        obj = self.target
-
-        if self.box_type:
-            box_type = self.box_type
-
-        if hasattr(obj, 'Box'):
-            return obj.Box(box_type, nodelist)
-        return Box(obj, box_type, nodelist)
-
     def is_active(self):
         now = datetime.now()
         active_from = not self.active_from or self.active_from <= now
@@ -54,6 +44,26 @@ class Position(models.Model):
         return active_from and active_till
     is_active.short_description = _('Active')
     is_active.boolean = True
+
+    def Box(self, box_type, nodelist):
+        """Delegate the boxing"""
+        obj = self.target
+
+        if self.box_type:
+            box_type = self.box_type
+        if self.text:
+            nodelist = Template(self.text).nodelist
+
+        if hasattr(obj, 'Box'):
+            return obj.Box(box_type, nodelist)
+        return Box(obj, box_type, nodelist)
+
+    def render(self, context, box_type=None, nodelist=None):
+        if self.target and hasattr(self.target, 'Box'):
+            b = self.target.Box(box_type or self.box_type, nodelist or Template(self.text).nodelist)
+            b.prepare(context)
+            return b.render()
+        return Template(self.text or '').render(context)
 
     def __unicode__(self):
         return '%s:%s' % (self.category, self.name)

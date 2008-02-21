@@ -51,10 +51,11 @@ class PositionsNode(template.Node):
 
         # get positions for first category and fallback on follow-ups
         for pos in cat_positions[::-1]:
-            positions.update(
-                        dict([ (p.name, p) for p in pos ])
-)
+            positions.update(dict([ (p.name, p) for p in pos ]))
 
         context[self.var_name] = positions
         return ''
+
+
+# TODO: udelat tag: {% position NEWS for CATEGORY using BOX_NAME %}
 
