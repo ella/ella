@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _, ugettext
-from django.newforms.models import BaseModelFormSet
+from django.newforms.models import InlineFormset
 from django import newforms as forms
 from django.contrib.contenttypes.models import ContentType
 
@@ -16,7 +16,7 @@ class GalleryItemOptions(admin.ModelAdmin):
     """TODO: pridat widget, ktery bude volat maximuv skript"""
     pass
 
-class GalleryItemFormset(BaseModelFormSet):
+class GalleryItemFormset(InlineFormset):
 
     def clean (self):
         if not self.cleaned_data or not self.instance:
