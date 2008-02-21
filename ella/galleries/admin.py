@@ -26,7 +26,7 @@ class GalleryItemFormset(InlineFormset):
         items = set([])
 
         for d in self.cleaned_data:
-            target = (d['target_ct_id'], d['target_id'],)
+            target = (d['target_ct'].id, d['target_id'],)
             # check for duplicities
             if target in items:
                 obj = get_cached_object(get_cached_object(ContentType, pk=d['target_ct_id']), pk=d['target_id'])
