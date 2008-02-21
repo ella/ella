@@ -403,7 +403,8 @@ class Result(models.Model):
     text = models.TextField(_('Quiz results text'))
     points_from = models.IntegerField(_('Points dimension from'), null=True)
     points_to = models.IntegerField(_('Points dimension to'), null=True)
-    count = models.IntegerField(_('Count'), default=0, blank=True)
+    count = models.IntegerField(_('Count'), blank=False, null=False)
+
 
     def total(self):
         res = get_cached_list(Result, quiz=self.quiz)
