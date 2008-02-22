@@ -75,7 +75,7 @@
     "pk": 4,
     "model": "positions.position",
     "fields": {
-      "category": 2,
+      "category": 1,
       "name": "featured_three",
       "text": "",
       "active_till": null,

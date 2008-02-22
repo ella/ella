@@ -19,8 +19,8 @@ def position(parser, token):
 
     Syntax::
 
-        {% position POSITION_NAME for CATEGORY %}
-        {% position POSITION_NAME for CATEGORY using BOX_TYPE %}
+        {% position POSITION_NAME for CATEGORY [nofallback] %}
+        {% position POSITION_NAME for CATEGORY using BOX_TYPE [nofallback] %}
 
     Example usage::
 
@@ -30,20 +30,26 @@ def position(parser, token):
     nodelist = parser.parse(('end' + bits[0],))
     parser.delete_first_token()
 
+    nofallback = False
+    if bits[-1] == 'nofallback':
+        nofallback = True
+        bits.pop()
+
     if len(bits) == 4 and bits[2] == 'for':
         pos_name, category = bits[1], bits[3]
         box_type = None
     elif len(bits) == 6 and bits[2] == 'for' and bits[4] == 'using':
         pos_name, category, box_type = bits[1], bits[3], bits[5]
     else:
-        raise TemplateSyntaxError, 'Invalid syntex: {% position POSITION_NAME for CATEGORY %}'
+        raise TemplateSyntaxError, 'Invalid syntex: {% position POSITION_NAME for CATEGORY [nofallback] %}'
 
 
-    return PositionNode(category, pos_name, nodelist, box_type)
+    return PositionNode(category, pos_name, nodelist, box_type, nofallback)
 
 class PositionNode(template.Node):
-    def __init__(self, category, position, nodelist, box_type):
+    def __init__(self, category, position, nodelist, box_type, nofallback):
         self.category, self.position, self.nodelist, self.box_type = category, position, nodelist, box_type
+        self.nofallback = nofallback
 
     def render(self, context):
         try:
@@ -54,7 +60,7 @@ class PositionNode(template.Node):
             return ''
 
         try:
-            pos = Position.objects.get_active_position(cat, self.position)
+            pos = Position.objects.get_active_position(cat, self.position, self.nofallback)
         except Position.DoesNotExist:
             return ''
 

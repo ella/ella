@@ -13,18 +13,22 @@ from ella.core.box import Box
 
 
 class PositionManager(models.Manager):
-    def get_active_position(self, category, name):
+    def get_active_position(self, category, name, nofallback=False):
         now = datetime.now()
+        lookup = (Q(active_from__isnull=True) | Q(active_from__lte=now)) & (Q(active_till__isnull=True) | Q(active_till__gt=now))
         while True:
             try:
-                return self.get(
-                        Q(active_from__isnull=True) | Q(active_from__lte=now),
-                        Q(active_till__isnull=True) | Q(active_till__gt=now),
-                        category=category, name=name
-)
+                return self.get(lookup, category=category, name=name)
             except Position.DoesNotExist:
-                if category.tree_parent:
+                # if nofallback was specified, do not look into parent categories
+                if nofallback:
+                    raise
+
+                # traverse the category tree to the top otherwise
+                elif category.tree_parent:
                     category = category.tree_parent
+
+                # we reached the top and still haven't found the position - raise
                 else:
                     raise
 

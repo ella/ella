@@ -24,6 +24,17 @@ override box_type in template
 <p class="base ">admin</p><p class="db ">admin</p><p class="base ">admin</p>
 
 
+Non existing position and position without fallback
+---------------------------------------------------
+
+>>> t = Template('''{% spaceless %}
+... {% load positions %}
+... {% position featured_four for category %}{% endposition %}
+... {% position featured_three for category nofallback %}{% endposition %}
+... {% endspaceless %}''')
+>>> t.render(c)
+u''
+
 TODO:
 * handle position names "some-nice-name-of-position"
 
