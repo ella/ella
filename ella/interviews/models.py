@@ -1,13 +1,10 @@
 from datetime import datetime
 
 from django.db import models
-from django.contrib import admin
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
-from django.conf import settings
 
-from ella.ellaadmin import widgets
 from ella.photos.models import Photo
 from ella.core.managers import RelatedManager
 from ella.core.cache import get_cached_object, get_cached_list
@@ -83,8 +80,7 @@ class Interview(models.Model):
         return answers > 0
 
     def can_reply(self):
-        now = datetime.now()
-        return self.reply_from <= now < self.reply_to
+        return self.replying_started() and not self.replying_ended()
 
     def can_ask(self):
         return self.asking_started() and not self.asking_ended()
@@ -184,24 +180,16 @@ class Question(models.Model):
     submit_date = models.DateTimeField(_('date/time submitted'), default=datetime.now, editable=True)
     is_public = models.BooleanField(_('is public'), default=True)
 
-    def is_authorized(self):
-        if self.user_id:
-            return True
-        return False
-
     @property
     def author(self):
-        if self.is_authorized():
+        if self.user_id():
             user = get_cached_object(User, pk=self.user_id)
             return user.username
         return self.nickname
 
     @property
     def answers(self):
-        if not hasattr(self, '_answers'):
-            # TODO: caching
-            self._answers = list(self.answer_set.all())
-        return self._answers
+        return get_cached_list(Answer, question__pk=self.pk)
 
     def answered(self):
         return bool(self.answers)
@@ -226,46 +214,7 @@ class Answer(models.Model):
         verbose_name = _('Answer')
         verbose_name_plural = _('Answer')
 
-class AnswerInlineOptions(admin.TabularInline):
-    model = Answer
-    extra = 2
+# initialization
+from ella.comments import register
+del register
 
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'content':
-            kwargs['widget'] = widgets.RichTextAreaWidget
-        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
-
-class QuestionOptions(admin.ModelAdmin):
-    list_display = ('interview', 'author', 'submit_date', 'answered',)
-    list_filter = ('submit_date',)
-    search_fields = ('content', 'nickname', 'email',)
-    inlines = (AnswerInlineOptions,)
-
-class IntervieweeOptions(admin.ModelAdmin):
-    list_display = ('__str__', 'user', 'author',)
-    search_fields = ('user__first_name', 'user__last_name', 'name', 'description', 'slug', 'author__name',)
-    prepopulated_fields = {'slug' : ('name',)}
-
-from ella.core.admin import ListingInlineOptions, HitCountInlineOptions
-from tagging.models import TaggingInlineOptions
-class InterviewOptions(admin.ModelAdmin):
-    list_display = ('title', 'category', 'ask_from', 'full_url',)
-    list_filter = ('category__site', 'ask_from', 'category', 'authors',)
-    date_hierarchy = 'ask_from'
-    raw_id_fields = ('photo', 'interviewees',)
-    search_fields = ('title', 'perex',)
-    prepopulated_fields = {'slug' : ('title',)}
-#    inlines = (ListingInlineOptions, TaggingInlineOptions, HitCountInlineOptions)
-    inlines = (ListingInlineOptions, TaggingInlineOptions,)
-
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name in ('perex', 'content'):
-            kwargs['widget'] = widgets.RichTextAreaWidget
-        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
-
-admin.site.register(Interviewee, IntervieweeOptions)
-admin.site.register(Interview, InterviewOptions)
-admin.site.register(Question, QuestionOptions)
-
-from ella.interviews import views
-views.register_views()

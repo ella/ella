@@ -2,12 +2,10 @@ from django.http import Http404, HttpResponseRedirect
 from django import newforms as forms
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
-from django.template.defaultfilters import slugify
 from django.contrib.formtools.preview import FormPreview
 
-from ella.core.custom_urls import dispatcher
 from ella.core.middleware import get_current_request
-from ella.interviews.models import Interview, Question, Answer
+from ella.interviews.models import Question, Answer
 
 
 class ReplyForm(forms.Form):
@@ -188,10 +186,3 @@ class QuestionFormPreview(FormPreview):
 
         return HttpResponseRedirect('..')
 
-def register_views():
-    from django.utils.translation import ugettext
-    dispatcher.register(slugify(ugettext('unanswered')), unanswered, model=Interview)
-    dispatcher.register(slugify(ugettext('reply')), reply, model=Interview)
-    dispatcher.register(slugify(ugettext('ask')), QuestionFormPreview(QuestionForm),  model=Interview)
-
-    dispatcher.register_custom_detail(Interview, detail)
