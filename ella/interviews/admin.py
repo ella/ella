@@ -4,7 +4,8 @@ from tagging.models import TaggingInlineOptions
 
 from ella.ellaadmin import widgets
 from ella.core.admin import ListingInlineOptions, HitCountInlineOptions
-from ella.core.interviews import Interview, Question, Interviewee, Answer
+from ella.interviews.models import Interview, Question, Interviewee, Answer
+
 
 class AnswerInlineOptions(admin.TabularInline):
     model = Answer
@@ -40,6 +41,7 @@ class InterviewOptions(admin.ModelAdmin):
         if db_field.name in ('perex', 'content'):
             kwargs['widget'] = widgets.RichTextAreaWidget
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
+
 
 admin.site.register(Interviewee, IntervieweeOptions)
 admin.site.register(Interview, InterviewOptions)

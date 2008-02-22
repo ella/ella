@@ -1,6 +1,6 @@
 # register admin options
-from ella.comments import admin
+from ella.interviews import admin
 
 # register custom urls
-from ella.comments import urls
+from ella.interviews import urls
 

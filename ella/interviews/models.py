@@ -10,6 +10,7 @@ from ella.core.managers import RelatedManager
 from ella.core.cache import get_cached_object, get_cached_list
 from ella.core.models import Listing, Category, Author, Source
 
+
 class Interviewee(models.Model):
     user = models.ForeignKey(User, null=True, blank=True)
     author = models.ForeignKey(Author, null=True, blank=True)
@@ -153,7 +154,6 @@ class Interview(models.Model):
         return 'no url'
     full_url.allow_tags = True
 
-
     class Meta:
         verbose_name = _('Interview')
         verbose_name_plural = _('Interviews')
@@ -214,7 +214,8 @@ class Answer(models.Model):
         verbose_name = _('Answer')
         verbose_name_plural = _('Answer')
 
+
 # initialization
-from ella.comments import register
+from ella.interviews import register
 del register
 
