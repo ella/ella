@@ -35,6 +35,20 @@ Non existing position and position without fallback
 >>> t.render(c)
 u''
 
+
+>>> t = Template('''{% spaceless %}
+... {% load positions %}
+... {% ifposition featured_four for category %}YES1{% else %}NO1{% endifposition %}
+... {% ifposition featured_three for category nofallback %}YES2{% else %}NO2{% endifposition %}
+... {% ifposition featured_three for category %}YES3{% endifposition %}
+... {% endspaceless %}''')
+>>> print t.render(c)
+NO1
+NO2
+YES3
+
+
+
 TODO:
 * handle position names "some-nice-name-of-position"
 
