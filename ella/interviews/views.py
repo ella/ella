@@ -9,6 +9,7 @@ from ella.interviews.models import Question, Answer
 
 
 class ReplyForm(forms.Form):
+    """ A form representing the reply, it also contains the mechanism needed to actually save the reply. """
     content = Answer._meta.get_field('content').formfield()
 
     def __init__(self, interview, interviewees, question, *args, **kwargs):
@@ -50,6 +51,7 @@ class ReplyForm(forms.Form):
         return a
 
 def detail(request, context):
+    """ Custom object detail function that adds a QuestionForm to the context. """
     interview = context['object']
     context['form'] = QuestionForm()
     return render_to_response(
@@ -64,7 +66,9 @@ def detail(request, context):
 )
 
 def unanswered(request, bits, context):
+    """ Display unanswered questions via rendering page/content_type/interviews.interview/unanswered.html template. """
     if bits:
+        # invalid URL
         raise Http404
 
     interview = context['object']
@@ -80,6 +84,14 @@ def unanswered(request, bits, context):
 )
 
 def reply(request, bits, context):
+    """
+    If called without parameters will display a list of questions
+    (via rendering page/content_type/interviews.interview/reply.html template).
+
+    Can be also called as reply/PK/ which will then display a ReplyForm for the given question.
+
+    Raises Http404 on any error or missing permissions.
+    """
     interview = context['object']
 
     interviewees = interview.get_interviewees(request.user)
@@ -130,6 +142,7 @@ def reply(request, bits, context):
 )
 
 class QuestionForm(forms.Form):
+    """ Ask a question. If current user is authenticated, don't ask him for nick/email. """
     nickname = Question._meta.get_field('nickname').formfield(required=True)
     email = Question._meta.get_field('email').formfield()
     content = Question._meta.get_field('content').formfield()
@@ -145,6 +158,7 @@ class QuestionForm(forms.Form):
 
 
 class QuestionFormPreview(FormPreview):
+    """ FormPreview subclass that handles the question asking mechanism. """
     @property
     def preview_template(self):
         interview = self.state['object']
@@ -166,11 +180,13 @@ class QuestionFormPreview(FormPreview):
             ]
 
     def parse_params(self, bits, context):
+        """ Store the context provided by ella to self.state. """
         if not context['object'].can_ask() or bits:
             raise Http404
         self.state.update(context)
 
     def done(self, request, cleaned_data):
+        """ Save the question itself. """
 
         if 'HTTP_X_FORWARDED_FOR' in request.META:
             ip = request.META['HTTP_X_FORWARDED_FOR']

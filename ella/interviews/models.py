@@ -117,7 +117,6 @@ class Interview(models.Model):
             if not user.is_authenticated() or not self.can_reply():
                 self._interviewees = []
             else:
-                # TODO: filter only those interviewees that can be replying now (permission-wise)
                 self._interviewees = get_cached_list(Interviewee, interview__pk=self.pk)
         return self._interviewees
 
