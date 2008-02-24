@@ -2,14 +2,13 @@ from datetime import datetime
 
 from django.contrib.auth.models import User
 from django.db import models
-from django.contrib import admin
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
+from django.template.defaultfilters import slugify
 
 from ella.core.models import Listing, Category
 from ella.core.cache import get_cached_object
 from ella.photos.models import Photo
-from django.template.defaultfilters import slugify
 
 class Topic(models.Model):
     # ella fields
@@ -74,33 +73,7 @@ class Question(models.Model):
         unique_together = (('topic', 'slug',),)
         ordering = ('-created',)
 
-class QuestionOptions(admin.ModelAdmin):
-    pass
+# initialization
+from ella.discussions import register
+del register
 
-class TopicOptions(admin.ModelAdmin):
-    raw_id_fields = ('photo',)
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        from ella.ellaadmin import widgets
-        if db_field.name == 'perex':
-            kwargs['widget'] = widgets.RichTextAreaWidget
-        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
-
-admin.site.register(Question, QuestionOptions)
-admin.site.register(Topic, TopicOptions)
-
-from ella.core.custom_urls import dispatcher
-
-def question(request, bits, context):
-    from ella.discussions.views import question as real_func
-    return real_func(request, bits, context)
-def ask_question(request, bits, context):
-    from ella.discussions.views import ask_question as real_func
-    return real_func(request, bits, context)
-
-def topic(request, context):
-    from ella.discussions.views import topic as real_func
-    return real_func(request, context)
-
-dispatcher.register(_('ask'), ask_question, model=Topic)
-dispatcher.register(_('question'), question, model=Topic)
-dispatcher.register_custom_detail(Topic, topic)
