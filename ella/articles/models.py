@@ -5,7 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.timesince import timesince
 from django.utils.translation import ugettext, ugettext_lazy as _
 
-from ella.core.models import Category, Author, Source, Listing
+from ella.core.models import Category, Author, Source, Listing, HitCount
 from ella.core.box import Box
 from ella.core.managers import RelatedManager
 from ella.photos.models import Photo
@@ -41,6 +41,19 @@ class Article(models.Model):
     photo = models.ForeignKey(Photo, blank=True, null=True, verbose_name=_('Photo'))
 
     objects = RelatedManager()
+
+    def get_hits(self):
+      from ella.core.cache import get_cached_object
+      try:
+         Hits=get_cached_object(HitCount,
+            target_ct=ContentType.objects.get_for_model(self.__class__),
+            target_id=self.id,
+)
+         mHits=Hits.hits
+      except HitCount.DoesNotExist:
+         mHits=0
+      return mHits
+    get_hits.short_description = _('Hit Counts')
 
     def get_photo(self):
         from ella.core.cache import get_cached_object
