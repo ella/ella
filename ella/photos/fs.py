@@ -1,6 +1,6 @@
 import os
 
-def change_basename(file_path, new_name):
+def change_basename(file_path, new_name, change_ext=None):
     # Extract path: 'news/img'
     path = os.path.dirname(file_path)
 
@@ -10,6 +10,8 @@ def change_basename(file_path, new_name):
     original, ext = os.path.splitext(curr_name)
 
     # Return the new path: 'news/img/new_name.jpg'
+    if change_ext:
+        ext = change_ext
     return os.path.join(path, new_name + ext).replace('\\', '/')
 
 # def change_basename

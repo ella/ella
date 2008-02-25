@@ -3,6 +3,7 @@ from datetime import datetime
 import shutil
 from os import path
 from fs import change_basename
+from imageop import ImageStretch, detect_img_type
 import shutil, os, glob
 
 from django.db import models, transaction
@@ -14,6 +15,7 @@ from django.contrib.sites.models import Site
 from ella.core.models import Author, Source, Category, Listing
 from ella.core.managers import RelatedManager
 from ella.core.box import Box
+from ella.utils.filemanipulation import file_rename
 
 # settings default
 PHOTOS_FORMAT_QUALITY_DEFAULT = (
@@ -29,8 +31,14 @@ PHOTOS_THUMB_DIMENSION_DEFAULT = (80,80)
 PHOTOS_FORMAT_QUALITY = getattr(settings, 'PHOTOS_FORMAT_QUALITY', PHOTOS_FORMAT_QUALITY_DEFAULT)
 PHOTOS_THUMB_DIMENSION = getattr(settings, 'PHOTOS_THUMB_DIMENSION', PHOTOS_THUMB_DIMENSION_DEFAULT)
 
+PHOTOS_TYPE_EXTENSION = {
+    'JPEG': '.jpg',
+    'PNG': '.png',
+    'GIF': '.gif'
+}
+
 # from: http://code.djangoproject.com/wiki/CustomUploadAndFilters
-def auto_rename(file_path, new_name):
+def auto_rename(file_path, new_name, extension=None):
     """
     Renames a file, keeping the extension.
 
@@ -40,22 +48,19 @@ def auto_rename(file_path, new_name):
 
     Returns the new file path on success or the original file_path on error.
     """
-    # Return if no file given
     if file_path == '':
         return ''
-    # Get the new name
-    new_path = change_basename(file_path, new_name)
-
-    # Changed?
+    suff = None
+    if extension:
+        suff = '.%s' % extension
+    new_path = change_basename(file_path, new_name, suff)
     if new_path != file_path:
-        # Try to rename
         try:
             shutil.move(os.path.join(settings.MEDIA_ROOT, file_path), os.path.join(settings.MEDIA_ROOT, new_path))
         except IOError:
-            # Error? Restore original name
             new_path = file_path
-
     return new_path
+
 
 class PhotoBox(Box):
     def get_context(self):
@@ -93,14 +98,21 @@ class Photo(models.Model):
         do thumbnails
         """
         from django.utils.safestring import mark_safe
-        tinythumb = path.split(self.image)
-        tinythumb = (tinythumb[0] , 'thumb-' + tinythumb[1])
-        tinythumb = path.join(*tinythumb)
-        if not path.exists(settings.MEDIA_ROOT + tinythumb):
+        spl = path.split(self.image)
+        woExtension = spl[1].rsplit('.', 1)[0]
+        imageType = detect_img_type(settings.MEDIA_ROOT + self.image)
+        if not imageType:
+            return mark_safe("""<strong>%s</strong>""" % ugettext('Thumbnail not available'))
+        ext = PHOTOS_TYPE_EXTENSION[ imageType ]
+        filename = 'thumb-%s%s' % (woExtension, ext)
+        tPath = (spl[0] , filename)
+        tinythumb = path.join(*tPath)
+        tinythumbPath = settings.MEDIA_ROOT + tinythumb
+        if not path.exists(tinythumbPath):
             try:
                 im = Image.open(settings.MEDIA_ROOT + self.image)
                 im.thumbnail(PHOTOS_THUMB_DIMENSION , Image.ANTIALIAS)
-                im.save(settings.MEDIA_ROOT + tinythumb, "JPEG")
+                im.save(tinythumbPath, imageType)
             except IOError:
                 # TODO Logging something wrong
                 return mark_safe("""<strong>%s</strong>""" % ugettext('Thumbnail not available'))
@@ -117,7 +129,8 @@ class Photo(models.Model):
             super(Photo, self).save()
             self.slug = str(self.id) + '-' + self.slug
         # rename image by slug
-        self.image = auto_rename(self.image, self.slug)
+        imageType = detect_img_type(settings.MEDIA_ROOT + self.image)
+        self.image = file_rename(self.image, self.slug, PHOTOS_TYPE_EXTENSION[ imageType ])
         super(Photo, self).save()
 
     def ratio(self):
@@ -130,6 +143,7 @@ class Photo(models.Model):
         verbose_name = _('Photo')
         verbose_name_plural = _('Photos')
         ordering = ('-created',)
+
 
 class Format(models.Model):
     name = models.CharField(_('Name'), max_length=80)
@@ -171,6 +185,7 @@ class Format(models.Model):
         verbose_name_plural = _('Formats')
         ordering = ('name', '-max_width',)
 
+
 class FormatedPhoto(models.Model):
     photo = models.ForeignKey(Photo)
     format = models.ForeignKey(Format)
@@ -204,113 +219,14 @@ class FormatedPhoto(models.Model):
         except (IOError, SystemError):
             return self.format.get_blank_img()['url']
 
-    def get_stretch_dimension(self, flex=False):
-        """ Method return stretch dimension of crop to fit inside max format rectangle """
-        # TODO: compensate for rounding error !!
-        fmt_width = self.format.max_width
-        if flex:
-            fmt_height = self.format.flexible_max_height
-        else:
-            fmt_height = self.format.max_height
-
-        crop_ratio = float(self.crop_width) / self.crop_height
-        format_ratio = float(fmt_width) / fmt_height
-        if format_ratio < crop_ratio :
-            stretch_width = fmt_width
-            stretch_height = min(fmt_height, int(stretch_width / crop_ratio)) # dimension must be integer
-        else: #if(self.photo.ratio() < self.crop_ratio()):
-            stretch_height = fmt_height
-            stretch_width = min(fmt_width, int(stretch_height * crop_ratio))
-        return (stretch_width, stretch_height)
 
     def generate(self):
-        source = Image.open(self.photo.get_image_filename())
-
-        # if crop specified
-        if self.crop_width and self.crop_height:
-            # generate crop
-            cropped_photo = source.crop((self.crop_left, self.crop_top, self.crop_left + self.crop_width, self.crop_top + self.crop_height))
-
-            auto = False
-
-        # else stay original
-        else:
-            self.crop_left, self.crop_top = 0, 0
-            self.crop_width, self.crop_height = source.size
-            cropped_photo = source
-
-            auto = True
-
-        fmt_width = self.format.max_width
-        fmt_height = self.format.max_height
-
-        my_ratio = float(self.photo.width) / self.photo.height
-        format_ratio = float(fmt_width) / fmt_height
-
-        stretched_photo = None
-        # we don't have to resize the image if stretch isn't specified and the image fits within the format
-        if self.crop_width < self.format.max_width and self.crop_height < self.format.max_height:
-            if self.format.stretch:
-                # resize image to fit format
-                if auto and not self.format.nocrop:
-                    if my_ratio > format_ratio:
-                        diff = self.photo.width - (fmt_width * self.photo.height / fmt_height)
-                        self.crop_left = diff / 2
-                        self.crop_width = self.photo.width - diff
-                        cropped_photo = cropped_photo.crop((self.crop_left, self.crop_top, self.crop_left + self.crop_width, self.crop_top + self.crop_height))
-
-                    elif my_ratio < format_ratio:
-                        diff = self.photo.height - (fmt_height * self.photo.width / fmt_width)
-                        self.crop_top = diff / 2
-                        self.crop_height = self.photo.height - diff
-                        cropped_photo = cropped_photo.crop((self.crop_left, self.crop_top, self.crop_left + self.crop_width, self.crop_top + self.crop_height))
-
-
-                stretched_photo = cropped_photo.resize(self.get_stretch_dimension(), Image.ANTIALIAS)
-            else:
-                stretched_photo = cropped_photo
-
-        # crop image to fit
-        elif self.crop_width > self.format.max_width or self.crop_height > self.format.max_height:
-            flex = False
-            if auto and not self.format.nocrop:
-                # crop the image to conform to the format ration
-                if my_ratio < format_ratio and self.format.flexible_height:
-                        format_ratio2 = float(fmt_width) / self.format.flexible_max_height
-                        if my_ratio < format_ratio2 or abs(format_ratio - my_ratio) > abs(format_ratio2 - my_ratio):
-                            flex = True
-                            fmt_height = self.format.flexible_max_height
-                            format_ratio = float(fmt_width) / fmt_height
-
-                if my_ratio > format_ratio:
-                    diff = self.photo.width - (fmt_width * self.photo.height / fmt_height)
-                    self.crop_left = diff / 2
-                    self.crop_width = self.photo.width - diff
-                    cropped_photo = cropped_photo.crop((self.crop_left, self.crop_top, self.crop_left + self.crop_width, self.crop_top + self.crop_height))
-
-                elif my_ratio < format_ratio:
-                    diff = self.photo.height - (fmt_height * self.photo.width / fmt_width)
-                    self.crop_top = diff / 2
-                    self.crop_height = self.photo.height - diff
-                    cropped_photo = cropped_photo.crop((self.crop_left, self.crop_top, self.crop_left + self.crop_width, self.crop_top + self.crop_height))
-
-                if self.crop_width < fmt_width and self.crop_height < fmt_height:
-                    if self.format.stretch:
-                        # resize image to fit format
-                        stretched_photo = cropped_photo.resize(self.get_stretch_dimension(flex), Image.ANTIALIAS)
-                    else:
-                        stretched_photo = cropped_photo
-
-
-            if stretched_photo is None:
-            # shrink the photo to fit the format
-                stretched_photo = cropped_photo.resize(self.get_stretch_dimension(flex), Image.ANTIALIAS)
-        else:
-            stretched_photo = cropped_photo
-
+        i = ImageStretch(filename=self.photo.get_image_filename(), formated_photo=self)
+        stretched_photo = i.stretch_image()
         self.width, self.height = stretched_photo.size
         self.filename = self.file(relative=True)
         stretched_photo.save(self.file(), quality=self.format.resample_quality)
+
 
     def save(self):
         import os
@@ -362,6 +278,8 @@ class FormatedPhotoForm(forms.BaseForm):
 
         return data
 
+
+
 from django.contrib import admin
 
 class FormatOptions(admin.ModelAdmin):
@@ -386,17 +304,18 @@ class CropAreaWidget(forms.TextInput):
         css = {
             'screen': (settings.ADMIN_MEDIA_PREFIX + CSS_CROP,),
 }
+
     def __init__(self, attrs={}):
         super(CropAreaWidget, self).__init__(attrs={'class': 'crop'})
+
 
 class FormatedPhotoInlineOptions(admin.TabularInline):
     model = FormatedPhoto
     def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'crop_width' or db_field.name == 'crop_height':
-            kwargs['widget'] = CropAreaWidget
-        if db_field.name == 'crop_left' or db_field.name == 'crop_top':
+        if db_field.name in ['crop_width', 'crop_height', 'crop_left', 'crop_top']:
             kwargs['widget'] = CropAreaWidget
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
+
 
 class PhotoOptions(admin.ModelAdmin):
     inlines = (FormatedPhotoInlineOptions, TaggingInlineOptions,)
@@ -411,12 +330,14 @@ class PhotoOptions(admin.ModelAdmin):
             return format_photo_json(request, *url.split('/')[-3:-1])
         return super(PhotoOptions, self).__call__(request, url)
 
+
 class FormatedPhotoOptions(admin.ModelAdmin):
     base_form = FormatedPhotoForm
     list_display = ('filename', 'format', 'width', 'height')
     list_filter = ('format',)
     search_fields = ('filename',)
     raw_id_fields = ('photo',)
+
 
 admin.site.register(Format, FormatOptions)
 admin.site.register(Photo, PhotoOptions)
