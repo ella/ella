@@ -335,7 +335,7 @@ class ContestWizard(Wizard):
         self.contest = contest
         form_list = [ QuestionForm(q) for q in contest.questions ]
         form_list.append(ContestantForm)
-        self.extra_context = {'object' : contest, 'question' : self.contest.questions[0]}
+        self.extra_context = {'object' : contest, 'question' : contest.questions[0], 'category' : contest.category,}
         super(ContestWizard, self).__init__(form_list)
 
     def get_template(self):
@@ -364,7 +364,7 @@ class QuizWizard(Wizard):
     def __init__(self, quiz):
         form_list = [ QuestionForm(q) for q in quiz.questions ]
         self.quiz = quiz
-        self.extra_context = {'object' : quiz, 'question' : self.quiz.questions[0]}
+        self.extra_context = {'object' : quiz, 'question' : quiz.questions[0], 'category' : quiz.category,}
         super(QuizWizard, self).__init__(form_list)
 
     def get_template(self):
