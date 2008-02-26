@@ -1,0 +1,71 @@
+from django.utils.translation import ugettext, ugettext_lazy as _
+from django.utils.safestring import mark_safe
+from django.contrib.contenttypes.models import ContentType
+
+
+from ella.core.cache import get_cached_object
+from ella.core.models import Listing, Category, HitCount
+from ella.photos.models import Photo
+
+class Publishable(object):
+
+    @property
+    def main_listing(self):
+        try:
+            return get_cached_object(
+                    Listing,
+                    target_ct=ContentType.objects.get_for_model(self.__class__),
+                    target_id=self.id,
+                    category=self.category_id
+)
+        except Listing.DoesNotExist:
+            return None
+
+    def get_absolute_url(self):
+        listing = self.main_listing
+        if listing:
+            return listing.get_absolute_url()
+
+    def get_category(self):
+        return get_cached_object(Category, pk=self.category_id)
+
+
+    def get_photo(self):
+        if not hasattr(self, '_photo'):
+            try:
+                self._photo = get_cached_object(Photo, pk=self.photo_id)
+            except Photo.DoesNotExist:
+                self._photo = None
+        return self._photo
+
+    def get_description(self):
+        return self.description
+
+
+    # Custom admin fields
+    def full_url(self):
+        absolute_url = self.get_absolute_url()
+        if absolute_url:
+            return mark_safe('<a href="%s">url</a>' % absolute_url)
+        return 'no url'
+    full_url.allow_tags = True
+
+    def photo_thumbnail(self):
+        photo = self.get_photo()
+        if photo:
+            return mark_safe(photo.thumb())
+        else:
+            return mark_safe('<div class="errors"><ul class="errorlist"><li>%s</li></ul></div>' % ugettext('No main photo!'))
+    photo_thumbnail.allow_tags = True
+
+    def get_hits(self):
+      try:
+         hits=get_cached_object(HitCount,
+            target_ct=ContentType.objects.get_for_model(self.__class__),
+            target_id=self.id,
+)
+         return hits.hits
+      except HitCount.DoesNotExist:
+         return 0
+    get_hits.short_description = _('Hit Counts')
+

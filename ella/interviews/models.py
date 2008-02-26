@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 
+from ella.db.models import Publishable
 from ella.photos.models import Photo
 from ella.core.managers import RelatedManager
 from ella.core.cache import get_cached_object, get_cached_list
@@ -31,7 +32,7 @@ class Interviewee(models.Model):
         return self.name
 
 
-class Interview(models.Model):
+class Interview(models.Model, Publishable):
     # Titles
     title = models.CharField(_('Title'), max_length=255)
     upper_title = models.CharField(_('Upper title'), max_length=255, blank=True)
@@ -120,38 +121,8 @@ class Interview(models.Model):
                 self._interviewees = get_cached_list(Interviewee, interview__pk=self.pk)
         return self._interviewees
 
-    def get_photo(self):
-        if not hasattr(self, '_photo'):
-            try:
-                self._photo = get_cached_object(Photo, pk=self.photo_id)
-            except Photo.DoesNotExist:
-                self._photo = None
-        return self._photo
-
-    @property
-    def main_listing(self):
-        try:
-            return get_cached_object(
-                    Listing,
-                    target_ct=ContentType.objects.get_for_model(self.__class__),
-                    target_id=self.id,
-                    category=self.category_id
-)
-        except Listing.DoesNotExist:
-            return None
-
-    def get_absolute_url(self):
-        listing = self.main_listing
-        if listing:
-            return listing.get_absolute_url()
-
-    def full_url(self):
-        from django.utils.safestring import mark_safe
-        absolute_url = self.get_absolute_url()
-        if absolute_url:
-            return mark_safe('<a href="%s">url</a>' % absolute_url)
-        return 'no url'
-    full_url.allow_tags = True
+    def get_description(self):
+        return self.perex
 
     class Meta:
         verbose_name = _('Interview')

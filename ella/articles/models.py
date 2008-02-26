@@ -5,7 +5,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.timesince import timesince
 from django.utils.translation import ugettext, ugettext_lazy as _
 
-from ella.core.models import Category, Author, Source, Listing, HitCount
+from ella.db.models import Publishable
+from ella.core.models import Category, Author, Source
 from ella.core.box import Box
 from ella.core.managers import RelatedManager
 from ella.photos.models import Photo
@@ -21,7 +22,7 @@ class InfoBox(models.Model):
         verbose_name = _('Info box')
         verbose_name_plural = _('Info boxes')
 
-class Article(models.Model):
+class Article(models.Model, Publishable):
     # Titles
     title = models.CharField(_('Title'), max_length=255)
     upper_title = models.CharField(_('Upper title'), max_length=255, blank=True)
@@ -42,54 +43,6 @@ class Article(models.Model):
 
     objects = RelatedManager()
 
-    def get_hits(self):
-      from ella.core.cache import get_cached_object
-      try:
-         Hits=get_cached_object(HitCount,
-            target_ct=ContentType.objects.get_for_model(self.__class__),
-            target_id=self.id,
-)
-         mHits=Hits.hits
-      except HitCount.DoesNotExist:
-         mHits=0
-      return mHits
-    get_hits.short_description = _('Hit Counts')
-
-    def get_photo(self):
-        from ella.core.cache import get_cached_object
-        if not hasattr(self, '_photo'):
-            try:
-                self._photo = get_cached_object(Photo, pk=self.photo_id)
-            except Photo.DoesNotExist:
-                self._photo = None
-        return self._photo
-    @property
-    def main_listing(self):
-        from ella.core.cache import get_cached_object
-        try:
-            return get_cached_object(
-                    Listing,
-                    target_ct=ContentType.objects.get_for_model(self.__class__),
-                    target_id=self.id,
-                    category=self.category_id
-)
-        except Listing.DoesNotExist:
-            return None
-
-    def get_absolute_url(self):
-        listing = self.main_listing
-        if listing:
-            return listing.get_absolute_url()
-
-    def full_url(self):
-        from django.utils.safestring import mark_safe
-        absolute_url = self.get_absolute_url()
-        if absolute_url:
-            return mark_safe('<a href="%s">url</a>' % absolute_url)
-        return 'no url'
-    full_url.allow_tags = True
-
-
     @property
     def content(self):
         from ella.core.cache import get_cached_list
@@ -99,6 +52,9 @@ class Article(models.Model):
             return self._contents[0]
         else:
             return None
+
+    def get_description(self):
+        return self.perex
 
     class Meta:
         verbose_name = _('Article')
@@ -112,40 +68,11 @@ class Article(models.Model):
         return timesince(self.created)
     article_age.short_description = _('Article Age')
 
-    def photo_thumbnail(self):
-        from django.utils.safestring import mark_safe
-        photo = self.get_photo()
-        if photo:
-            return mark_safe(photo.thumb())
-        else:
-            from django.utils.safestring import mark_safe
-            return mark_safe('<div class="errors"><ul class="errorlist"><li>%s</li></ul></div>' % ugettext('No main photo!'))
-    photo_thumbnail.allow_tags = True
-
-
-def parse_nodelist(nodelist):
-    for node in nodelist:
-        yield node
-        for subnodelist in [ getattr(node, key) for key in dir(node) if key.startswith('nodelist') ]:
-            for subnode in parse_nodelist(subnodelist):
-                yield subnode
-
 
 class ArticleContents(models.Model):
     article = models.ForeignKey(Article, verbose_name=_('Article'))
     title = models.CharField(_('Title'), max_length=200, blank=True)
     content = models.TextField(_('Content'))
-
-    # @transaction.comit_on_success
-    def save(self):
-        from django import template
-        from ella.core.templatetags import core
-        # parse content, discover dependencies
-        #t = template.Template('{% load core %}' + self.content)
-        #for node in parse_nodelist(t.nodelist):
-        #    if isinstance(node, core.BoxTag):
-        #        report_dep()
-        super(ArticleContents, self).save()
 
     class Meta:
         verbose_name = _('Article content')

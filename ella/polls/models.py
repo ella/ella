@@ -8,10 +8,11 @@ from django.contrib.contenttypes.models import  ContentType
 from django.newforms.models import InlineFormset
 from django.newforms.forms import ValidationError
 
+from ella.db.models import Publishable
 from ella.core.cache import get_cached_object, get_cached_list, get_cached_object_or_404
 from ella.core.box import Box
 from ella.core.middleware import get_current_request
-from ella.core.models import Category, Author, Source, Listing
+from ella.core.models import Category, Author, Source
 from ella.core.managers import RelatedManager
 from ella.photos.models import Photo
 
@@ -19,7 +20,7 @@ ACTIVITY_NOT_YET_ACTIVE = 0
 ACTIVITY_ACTIVE = 1
 ACTIVITY_CLOSED = 2
 
-class Contest(models.Model):
+class Contest(models.Model, Publishable):
     """
     Contests with title, descriptions and activation
     """
@@ -36,39 +37,11 @@ class Contest(models.Model):
     objects = RelatedManager()
 
     @property
-    def main_listing(self):
-        try:
-            return get_cached_object(
-                    Listing,
-                    target_ct=ContentType.objects.get_for_model(self.__class__),
-                    target_id=self.id,
-                    category=self.category_id
-)
-        except Listing.DoesNotExist:
-            return None
-
-    def get_absolute_url(self):
-        listing = self.main_listing
-        if listing:
-            return listing.get_absolute_url()
-
-    def get_photo(self):
-        return get_cached_object(Photo, pk=self.photo_id)
-
-    @property
     def questions(self):
         return get_cached_list(Question, contest=self)
 
     def __unicode__(self):
         return self.title
-
-    def full_url(self):
-        from django.utils.safestring import mark_safe
-        absolute_url = self.get_absolute_url()
-        if absolute_url:
-            return mark_safe('<a href="%s">url</a>' % absolute_url)
-        return 'no url'
-    full_url.allow_tags = True
 
     class Meta:
         verbose_name = _('Contest')
@@ -104,7 +77,7 @@ class Contest(models.Model):
         count = Contestant.objects.filter(contest=self).count()
         return Contestant.objects.filter(contest=self).filter(choices=self.right_choices).extra(select={'count_guess_difference' : 'ABS(`count_guess` - %d)' % count}).order_by('count_guess_difference')
 
-class Quiz(models.Model):
+class Quiz(models.Model, Publishable):
     """
     Quizes with title, descriptions and activation options.
     """
@@ -124,37 +97,8 @@ class Quiz(models.Model):
     objects = RelatedManager()
 
     @property
-    def main_listing(self):
-        try:
-            return get_cached_object(
-                    Listing,
-                    target_ct=ContentType.objects.get_for_model(self.__class__),
-                    target_id=self.id,
-                    category=self.category_id
-)
-        except Listing.DoesNotExist:
-            return None
-
-    def full_url(self):
-        from django.utils.safestring import mark_safe
-        absolute_url = self.get_absolute_url()
-        if absolute_url:
-            return mark_safe('<a href="%s">url</a>' % absolute_url)
-        return 'no url'
-    full_url.allow_tags = True
-
-
-    @property
     def questions(self):
         return get_cached_list(Question, quiz=self)
-
-    def get_absolute_url(self):
-        listing = self.main_listing
-        if listing:
-            return listing.get_absolute_url()
-
-    def get_photo(self):
-        return get_cached_object(Photo, pk=self.photo_id)
 
     def get_result(self, points):
         return get_cached_object(Result, quiz=self, points_from__lte=points, points_to__gte=points)

@@ -7,7 +7,8 @@ from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
 
 from ella.core.box import Box
-from ella.core.models import Category, Author, Category, Listing
+from ella.db.models import Publishable
+from ella.core.models import Category, Author, Category
 from ella.core.cache.utils import get_cached_object, cache_this
 from ella.core.cache.invalidate import CACHE_DELETER
 
@@ -19,7 +20,7 @@ def gallery_cache_invalidator(key, gallery, *args, **kwargs):
 def get_gallery_key(func, gallery):
     return 'ella.galleries.models.Gallery(%d).items' % gallery.id
 
-class Gallery(models.Model):
+class Gallery(models.Model, Publishable):
     """
     Definition of objects gallery
     """
@@ -32,33 +33,6 @@ class Gallery(models.Model):
     owner = models.ForeignKey(Author, verbose_name=_('Gallery owner'), blank=True, null=True)
     category = models.ForeignKey(Category, verbose_name=_('Category'), blank=True, null=True)
     created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)
-
-    @property
-    def main_listing(self):
-        try:
-            return get_cached_object(
-                    Listing,
-                    target_ct=ContentType.objects.get_for_model(self.__class__),
-                    target_id=self.id,
-                    category=self.category_id
-)
-        except Listing.DoesNotExist:
-            return None
-
-    def get_absolute_url(self):
-        listing = self.main_listing
-        if listing:
-            return listing.get_absolute_url()
-
-    def full_url(self):
-        absolute_url = self.get_absolute_url()
-        if absolute_url:
-            return mark_safe('<a href="%s">url</a>' % absolute_url)
-        return 'no url'
-    full_url.allow_tags = True
-
-    def Box(self, box_type, nodelist):
-        return Box(self, box_type, nodelist)
 
     class Meta:
         verbose_name = _('Gallery')
