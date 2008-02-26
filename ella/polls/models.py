@@ -1,26 +1,52 @@
 from datetime import datetime
 
 from django.db import models, connection
-from django.contrib import admin
 from django.contrib.auth.models import User
-from django.utils.translation import ugettext_lazy as _, ugettext
-from django.contrib.contenttypes.models import  ContentType
-from django.newforms.models import InlineFormset
-from django.newforms.forms import ValidationError
+from django.utils.translation import ugettext_lazy as _
+from django.utils.safestring import mark_safe
 
 from ella.db.models import Publishable
-from ella.core.cache import get_cached_object, get_cached_list, get_cached_object_or_404
+from ella.core.cache import get_cached_object, get_cached_list
 from ella.core.box import Box
 from ella.core.middleware import get_current_request
-from ella.core.models import Category, Author, Source
+from ella.core.models import Category, Author
 from ella.core.managers import RelatedManager
 from ella.photos.models import Photo
+
 
 ACTIVITY_NOT_YET_ACTIVE = 0
 ACTIVITY_ACTIVE = 1
 ACTIVITY_CLOSED = 2
 
-class Contest(models.Model, Publishable):
+
+class FloatingStateModel(object):
+
+    @property
+    def current_text(self):
+        a = current_activity_state(self)
+        if a is ACTIVITY_NOT_YET_ACTIVE:
+            return self.text_announcement
+        elif a is ACTIVITY_CLOSED:
+            return self.text_results
+        else:
+            return self.text
+
+    @property
+    def current_activity_state(self):
+        if self.active_till and self.active_till < datetime.now():
+            return ACTIVITY_CLOSED
+        elif self.active_from and self.active_from > datetime.now():
+            return ACTIVITY_NOT_YET_ACTIVE
+        else:
+            return ACTIVITY_ACTIVE
+
+    def is_active(self):
+        if self.current_activity_state == ACTIVITY_ACTIVE:
+            return True
+        return False
+
+
+class Contest(models.Model, Publishable, FloatingStateModel):
     """
     Contests with title, descriptions and activation
     """
@@ -40,25 +66,6 @@ class Contest(models.Model, Publishable):
     def questions(self):
         return get_cached_list(Question, contest=self)
 
-    def __unicode__(self):
-        return self.title
-
-    class Meta:
-        verbose_name = _('Contest')
-        verbose_name_plural = _('Contests')
-        ordering = ('-active_from',)
-
-    @property
-    def current_text(self):
-        return current_text(self)
-
-    @property
-    def current_activity_state(self):
-        return current_activity_state(self)
-
-    def is_active(self):
-        return is_active(self)
-
     @property
     def right_choices(self):
         return '|'.join(
@@ -69,13 +76,25 @@ class Contest(models.Model, Publishable):
 )
 
     def correct_answers(self):
-        from django.utils.safestring import mark_safe
         return mark_safe(u'<a href="%s/correct_answers/">%s - %s</a>' % (self.id, _('Correct Answers'), self.title))
     correct_answers.allow_tags = True
 
     def get_correct_answers(self):
         count = Contestant.objects.filter(contest=self).count()
-        return Contestant.objects.filter(contest=self).filter(choices=self.right_choices).extra(select={'count_guess_difference' : 'ABS(`count_guess` - %d)' % count}).order_by('count_guess_difference')
+        return (Contestant.objects
+            .filter(contest=self)
+            .filter(choices=self.right_choices)
+            .extra(select={'count_guess_difference' : 'ABS(`count_guess` - %d)' % count})
+            .order_by('count_guess_difference'))
+
+    def __unicode__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = _('Contest')
+        verbose_name_plural = _('Contests')
+        ordering = ('-active_from',)
+
 
 class Quiz(models.Model, Publishable):
     """
@@ -111,16 +130,6 @@ class Quiz(models.Model, Publishable):
         verbose_name_plural = _('Quizes')
         ordering = ('-active_from',)
 
-    @property
-    def current_text(self):
-        return current_text(self)
-
-    @property
-    def current_activity_state(self):
-        return current_activity_state(self)
-
-    def is_active(self):
-        return is_active(self)
 
 class Question(models.Model):
     """
@@ -134,8 +143,11 @@ class Question(models.Model):
     quiz = models.ForeignKey(Quiz, blank=True, null=True, verbose_name=_('Quiz'))
     contest = models.ForeignKey(Contest, blank=True, null=True, verbose_name=_('Contest'))
 
-    def __unicode__(self):
-        return self.question
+    @property
+    def choices(self):
+        # FIXME - cache this, it is a queryset because of ModelChoiceField
+        return self.choice_set.all()
+        #return get_cached_list(Choice, question=self)
 
     def get_total_votes(self):
         if not hasattr(self, '_total_votes'):
@@ -162,11 +174,8 @@ class Question(models.Model):
                 self._is_test = False
         return self._is_test
 
-    @property
-    def choices(self):
-        # FIXME - cache this, it is a queryset because of ModelChoiceField
-        return self.choice_set.all()
-        #return get_cached_list(Choice, question=self)
+    def __unicode__(self):
+        return self.question
 
     class Meta:
         verbose_name = _('Question')
@@ -175,8 +184,8 @@ class Question(models.Model):
 class PollBox(Box):
 
     def __init__(self, obj, box_type, nodelist, template_name=None):
-        super(PollBox, self).__init__(obj, box_type, nodelist, template_name)
         from ella.polls import views
+        super(PollBox, self).__init__(obj, box_type, nodelist, template_name)
         self.state = views.check_vote(get_current_request(), self.obj)
 
     def render(self):
@@ -206,6 +215,7 @@ class PollBox(Box):
     def get_cache_tests(self):
         return super(PollBox, self).get_cache_tests() + [ (Choice, lambda x: x.poll_id == self.obj.id) ]
 
+
 class Poll(models.Model):
     """
     Poll model with descriptions and activation times
@@ -218,14 +228,6 @@ class Poll(models.Model):
     active_till = models.DateTimeField(_('Active till'), null=True, blank=True)
     question = models.ForeignKey(Question, verbose_name=_('Question'), unique=True)
 
-    def __unicode__(self):
-        return self.title
-
-    class Meta:
-        verbose_name = _('Poll')
-        verbose_name_plural = _('Polls')
-        ordering = ('-active_from',)
-
     def get_question(self):
         return get_cached_object(Question, pk=self.question_id)
 
@@ -235,16 +237,14 @@ class Poll(models.Model):
     def Box(self, box_type, nodelist):
         return PollBox(self, box_type, nodelist)
 
-    @property
-    def current_text(self):
-        return current_text(self)
+    def __unicode__(self):
+        return self.title
 
-    @property
-    def current_activity_state(self):
-        return current_activity_state(self)
+    class Meta:
+        verbose_name = _('Poll')
+        verbose_name_plural = _('Polls')
+        ordering = ('-active_from',)
 
-    def is_active(self):
-        return is_active(self)
 
 class Choice(models.Model):
     """
@@ -255,25 +255,24 @@ class Choice(models.Model):
     points = models.IntegerField(_('Points'), blank=True, null=True)
     votes = models.IntegerField(_('Votes'), blank=True, null=True)
 
-    def __unicode__(self):
-        return self.choice
-
-    class Meta:
-        #order_with_respect_to = 'question'
-        verbose_name = _('Choice')
-        verbose_name_plural = _('Choices')
-
     def add_vote(self):
         cur = connection.cursor()
         cur.execute(UPDATE_VOTE, (self._get_pk_val(),))
         return True
 
     def get_percentage(self):
-        t= get_cached_object(Question, pk=self.question_id).get_total_votes()
+        t = get_cached_object(Question, pk=self.question_id).get_total_votes()
         p = 0
         if self.votes:
             p = int((100.0/t)*self.votes)
         return p
+
+    def __unicode__(self):
+        return self.choice
+
+    class Meta:
+        verbose_name = _('Choice')
+        verbose_name_plural = _('Choices')
 
 UPDATE_VOTE = '''
     UPDATE
@@ -286,6 +285,7 @@ UPDATE_VOTE = '''
         'table' : connection.ops.quote_name(Choice._meta.db_table),
         'col' : connection.ops.quote_name(Choice._meta.get_field('votes').column)
 }
+
 
 class Vote(models.Model):
     """
@@ -304,6 +304,7 @@ class Vote(models.Model):
         verbose_name_plural = _('Votes')
         ordering = ('-time',)
 
+
 class Contestant(models.Model):
     """
     Contestant info.
@@ -320,6 +321,15 @@ class Contestant(models.Model):
     count_guess = models.IntegerField(_('Count guess'))
     winner = models.BooleanField(_('Winner'), default=False)
 
+    @property
+    def points(self):
+        points = 0
+        for q in self.choices.split('|'):
+            vs = q.split(':')
+            for v in vs[1].split(','):
+                points += get_cached_object(Choice, pk=v).points
+        return points
+
     def __unicode__(self):
         return u'%s %s' % (self.surname, self.name)
 
@@ -329,14 +339,6 @@ class Contestant(models.Model):
         unique_together = (('contest', 'email',),)
         ordering = ('-datetime',)
 
-    @property
-    def points(self):
-        points = 0
-        for q in self.choices.split('|'):
-            vs = q.split(':')
-            for v in vs[1].split(','):
-                points += get_cached_object(Choice, pk=v).points
-        return points
 
 class Result(models.Model):
     """
@@ -348,7 +350,6 @@ class Result(models.Model):
     points_from = models.IntegerField(_('Points dimension from'), null=True)
     points_to = models.IntegerField(_('Points dimension to'), null=True)
     count = models.IntegerField(_('Count'), blank=False, null=False)
-
 
     def total(self):
         res = get_cached_list(Result, quiz=self.quiz)
@@ -366,189 +367,7 @@ class Result(models.Model):
         verbose_name = _('Result')
         verbose_name_plural = _('results')
 
-class ResultFormset(InlineFormset):
 
-    def clean(self):
-        if not self.cleaned_data:
-            return self.cleaned_data
-
-        validation_error = None
-        for i in xrange(len(self.cleaned_data)):
-            if self.cleaned_data[i]['points_from'] > self.cleaned_data[i]['points_to']:
-                validation_error = ValidationError(ugettext('Invalid score interval %(points_from)s - %(points_to)s. Points dimension from can not be greater than point dimension to.') % self.cleaned_data[i])
-                self.forms[i]._errors = {'points_to': validation_error.messages}
-        if validation_error:
-            raise ValidationError, ugettext('Invalid score intervals')
-
-        intervals = [ (form_data['points_from'], form_data['points_to']) for form_data in self.cleaned_data ]
-        intervals.sort()
-        for i in xrange(len(intervals) - 1):
-            if intervals[i][1] + 1 > intervals[i+1][0]:
-                raise ValidationError, ugettext('Score %s is covered by two answers.') % (intervals[i][1])
-            elif intervals[i][1] + 1 < intervals[i+1][0]:
-                raise ValidationError, ugettext('Score %s is not covered by any answer.') % (intervals[i][1] + 1)
-        return self.cleaned_data
-
-from ella.ellaadmin import widgets
-def formfield_for_dbfield(fields):
-    def _formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name in fields:
-            kwargs['widget'] = widgets.RichTextAreaWidget
-        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
-    return _formfield_for_dbfield
-
-class ResultTabularOptions(admin.TabularInline):
-    model = Result
-    extra = 5
-    formset = ResultFormset
-
-class ChoiceTabularOptions(admin.TabularInline):
-    model = Choice
-    extra = 5
-
-class QuestionOptions(admin.ModelAdmin):
-    """
-    Admin options for Question model:
-        * edit inline choices
-    """
-    inlines = (ChoiceTabularOptions,)
-    ordering = ('question',)
-    search_fields = ('question',)
-
-    formfield_for_dbfield = formfield_for_dbfield(['question'])
-
-class ChoiceOptions(admin.ModelAdmin):
-    """
-    Admin options for Choices
-    """
-    ordering = ('question', 'choice')
-    list_display = ('question', 'choice', 'votes', 'points')
-    search_fields = ('choice',)
-
-class VoteOptions(admin.ModelAdmin):
-    """
-    Admin options for votes
-    """
-    ordering = ('time',)
-    list_display = ('time', 'poll', 'user', 'ip_address')
-
-class ContestantOptions(admin.ModelAdmin):
-    """
-    Admin options for Contestant
-    """
-    ordering = ('datetime',)
-    list_display = ('name', 'surname', 'user', 'datetime', 'contest', 'points', 'winner')
-
-    formfield_for_dbfield = formfield_for_dbfield(['text_announcement', 'text', 'text_results'])
-
-from ella.core.admin import ListingInlineOptions, HitCountInlineOptions
-from tagging.models import TaggingInlineOptions
-
-class QuestionInlineOptions(admin.options.InlineModelAdmin):
-    model = Question
-    inlines = (ChoiceTabularOptions,)
-    template = 'admin/edit_inline/question_tabular.html'
-
-    formfield_for_dbfield = formfield_for_dbfield(['question'])
-
-class ContestOptions(admin.ModelAdmin):
-
-    def __call__(self, request, url):
-        if url and url.endswith('correct_answers'):
-            from django.shortcuts import render_to_response
-            pk = url.split('/')[-2]
-            contest = get_cached_object_or_404(Contest, pk=pk)
-            contestants = contest.get_correct_answers()
-            title = u'%s \'%s\': %s' % (Contest._meta.verbose_name, contest.title, _('Correct Answers'))
-            module_name = Contestant._meta.module_name
-            return render_to_response('admin/correct_answers.html',
-                {'contestants' : contestants, 'title' : title, 'module_name' : module_name})
-        return super(ContestOptions, self).__call__(request, url)
-
-    list_display = ('title', 'category', 'active_from', 'correct_answers', 'full_url',)
-    list_filter = ('category', 'active_from',)
-    search_fields = ('title', 'text_announcement', 'text', 'text_results',)
-#    inlines = (QuestionInlineOptions, ListingInlineOptions, TaggingInlineOptions, HitCountInlineOptions)
-    inlines = (QuestionInlineOptions, ListingInlineOptions, TaggingInlineOptions,)
-    raw_id_fields = ('photo',)
-    prepopulated_fields = {'slug' : ('title',)}
-
-    formfield_for_dbfield = formfield_for_dbfield(['text_announcement', 'text', 'text_results'])
-
-class QuizOptions(admin.ModelAdmin):
-    list_display = ('title', 'category', 'active_from', 'full_url',)
-    list_filter = ('category', 'active_from',)
-    search_fields = ('title', 'text_announcement', 'text', 'text_results',)
-#    inlines = (QuestionInlineOptions, ResultTabularOptions, ListingInlineOptions, TaggingInlineOptions, HitCountInlineOptions)
-    inlines = (QuestionInlineOptions, ResultTabularOptions, ListingInlineOptions, TaggingInlineOptions,)
-    raw_id_fields = ('photo',)
-    prepopulated_fields = {'slug' : ('title',)}
-
-    formfield_for_dbfield = formfield_for_dbfield(['text_announcement', 'text', 'text_results'])
-
-class PollOptions(admin.ModelAdmin):
-    formfield_for_dbfield = formfield_for_dbfield(['text_announcement', 'text', 'text_results'])
-    list_display = ('title', 'question',)
-    list_filter = ('active_from',)
-    search_fields = ('title', 'text_announcement', 'text', 'text_results', 'question__question',)
-    raw_id_fields = ('question',)
-
-def current_text(obj):
-    a = current_activity_state(obj)
-    if a is ACTIVITY_NOT_YET_ACTIVE:
-        return obj.text_announcement
-    elif a is ACTIVITY_CLOSED:
-        return obj.text_results
-    else:
-        return obj.text
-
-def current_activity_state(obj):
-    if obj.active_till and obj.active_till < datetime.now():
-        return ACTIVITY_CLOSED
-    elif obj.active_from and obj.active_from > datetime.now():
-        return ACTIVITY_NOT_YET_ACTIVE
-    else:
-        return ACTIVITY_ACTIVE
-
-def is_active(obj):
-    if obj.current_activity_state == ACTIVITY_ACTIVE:
-        return True
-    return False
-
-admin.site.register(Poll, PollOptions)
-admin.site.register(Contest, ContestOptions)
-admin.site.register(Quiz, QuizOptions)
-admin.site.register(Question, QuestionOptions)
-admin.site.register(Choice, ChoiceOptions)
-admin.site.register(Vote, VoteOptions)
-admin.site.register(Contestant, ContestantOptions)
-
-from ella.core.custom_urls import dispatcher
-
-def contest(request, context):
-    from ella.polls.views import contest_vote
-    return contest_vote(request, context)
-
-def conditions(request, bits, context):
-    from ella.polls.views import contest_conditions
-    return contest_conditions(request, bits, context)
-
-def quiz(request, context):
-    from ella.polls.views import QuizWizard
-    quiz = context['object']
-    return QuizWizard(quiz)(request)
-
-def custom_result_details(request, bits, context):
-    from ella.polls.views import result_details
-    return result_details(request, bits, context)
-
-def cont_result(request, bits, context):
-    from ella.polls.views import contest_result
-    return contest_result(request, bits, context)
-
-dispatcher.register_custom_detail(Quiz, quiz)
-dispatcher.register_custom_detail(Contest, contest)
-dispatcher.register(_('results'), custom_result_details, model=Quiz)
-dispatcher.register(_('result'), cont_result, model=Contest)
-dispatcher.register(_('conditions'), conditions, model=Contest)
+from ella.polls import register
+del register
 

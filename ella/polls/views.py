@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from itertools import chain
 
 from django.shortcuts import get_object_or_404, render_to_response
 from django.utils.translation import ugettext, ugettext_lazy as _
@@ -13,6 +14,8 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
+from django.utils.encoding import force_unicode
+from django.utils.html import escape
 
 from ella.core.cache import get_cached_object_or_404
 from ella.core.wizard import Wizard
@@ -200,9 +203,6 @@ def get_next_url(request):
 
 class MyCheckboxSelectMultiple(forms.CheckboxSelectMultiple):
     def render(self, name, value, attrs=None, choices=()):
-        from itertools import chain
-        from django.utils.encoding import force_unicode
-        from django.utils.html import escape
         if value is None: value = []
         has_id = attrs and 'id' in attrs
         final_attrs = self.build_attrs(attrs, name=name)
@@ -291,7 +291,6 @@ def contest_finish(request, context, qforms, contestant_form):
                     question.allow_multiple and ','.join(str(c.id) for c in sorted(f.cleaned_data['choice'], key=lambda ch: ch.id)) or f.cleaned_data['choice'].id)
                 for question, f in sorted(qforms,key=lambda q: q[0].id)
 )
-    print choices
     c = Contestant(
             contest=contest,
             choices=choices,
@@ -449,3 +448,20 @@ def result_details(request, bits, context):
             context,
             context_instance=RequestContext(request)
 )
+
+def contest(request, context):
+    return contest_vote(request, context)
+
+def conditions(request, bits, context):
+    return contest_conditions(request, bits, context)
+
+def quiz(request, context):
+    quiz = context['object']
+    return QuizWizard(quiz)(request)
+
+def custom_result_details(request, bits, context):
+    return result_details(request, bits, context)
+
+def cont_result(request, bits, context):
+    return contest_result(request, bits, context)
+
