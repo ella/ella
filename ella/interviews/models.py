@@ -181,7 +181,7 @@ class Question(models.Model):
 
     @property
     def author(self):
-        if self.user_id():
+        if self.user_id:
             user = get_cached_object(User, pk=self.user_id)
             return user.username
         return self.nickname
