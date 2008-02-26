@@ -455,8 +455,8 @@ class ContainerNode(template.Node):
         return resp
 
 
-@register.tag('container')
-def container(parser, token):
+@register.tag
+def container_begin(parser, token):
     bits = token.split_contents()
     parameters = bits[1:]
 
@@ -473,6 +473,6 @@ def container(parser, token):
     return ContainerNode(parameters)
 
 @register.inclusion_tag('inclusion_tags/container_end.html', takes_context=True)
-def endcontainer(context):
+def container_end(context):
     return context
 
