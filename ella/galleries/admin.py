@@ -35,6 +35,7 @@ class GalleryItemFormset(InlineFormset):
 
         return self.cleaned_data
 
+
 class GalleryItemTabularOptions(admin.TabularInline):
     model = GalleryItem
     extra = 10
@@ -44,6 +45,7 @@ class GalleryItemTabularOptions(admin.TabularInline):
         if db_field.name == 'order':
             kwargs['widget'] = widgets.IncrementWidget
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
+
 
 class GalleryOptions(admin.ModelAdmin):
     list_display = ('title', 'created', 'category', 'full_url',)
@@ -63,5 +65,6 @@ class GalleryOptions(admin.ModelAdmin):
                 kwargs['required'] = False
             return fields.RichTextAreaField(**kwargs)
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
+
 
 admin.site.register(Gallery, GalleryOptions)

@@ -5,12 +5,14 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
+from django.utils.datastructures import SortedDict
 
 from ella.core.box import Box
 from ella.db.models import Publishable
 from ella.core.models import Category, Author, Category
 from ella.core.cache.utils import get_cached_object, cache_this
 from ella.core.cache.invalidate import CACHE_DELETER
+from ella.photos.models import Photo
 
 
 def gallery_cache_invalidator(key, gallery, *args, **kwargs):
@@ -34,21 +36,38 @@ class Gallery(models.Model, Publishable):
     category = models.ForeignKey(Category, verbose_name=_('Category'), blank=True, null=True)
     created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)
 
+    @property
+    @cache_this(get_gallery_key, gallery_cache_invalidator)
+    def items(self):
+        slugs_count = {}
+        itms = [ (item, item.target) for item in self.galleryitem_set.all() ]
+        slugs_unique = set((i[1].slug for i in itms))
+        res = SortedDict()
+
+        for item, target in itms:
+            slug = target.slug
+            if slug not in slugs_count:
+                slugs_count[slug] = 1
+                res[slug] = (item, target)
+            else:
+                while "%s%s" % (slug, slugs_count[slug]) in slugs_unique:
+                    slugs_count[slug] += 1
+                new_slug = "%s%s" % (slug, slugs_count[slug])
+                slugs_unique.add(new_slug)
+                res[new_slug] = (item, target)
+        return res
+
+    def get_photo(self):
+        for item in self.items.itervalues():
+            if isinstance(item[1], Photo):
+                return item[1]
+
     class Meta:
         verbose_name = _('Gallery')
         verbose_name_plural = _('Galleries')
 
     def __unicode__(self):
         return u'%s gallery' % self.title
-
-    @property
-    @cache_this(get_gallery_key, gallery_cache_invalidator)
-    def items(self):
-        return [ (item, item.target) for item in self.galleryitem_set.all() ]
-
-    def get_photo(self):
-        # FIXME - go for the first actual photo, not just first item !
-        return self.items[0][1]
 
 
 class GalleryItem(models.Model):
@@ -62,36 +81,28 @@ class GalleryItem(models.Model):
 
     @property
     def target(self):
-        return get_cached_object(self.target_ct, pk=self.target_id)
+        ct = get_cached_object(ContentType, pk=self.target_ct_id)
+        return get_cached_object(ct, pk=self.target_id)
 
-    def _get_slug(self, item_list=None):
-        if item_list is None:
-            item_list = self.gallery.items
+    def _get_slug(self):
+        if not hasattr(self, '_item_list'):
+            self._item_list = self.gallery.items
 
-        slug = self.target.slug
-
-        count = 0
-        for item, target in item_list:
-            if item == self:
-                break
-            if target.slug == slug:
-                count += 1
-
-        if count:
-            return slug + str(count)
-        return slug
+        for slug, item in self._item_list.items():
+            if item[0] == self:
+                return slug
+        else:
+            raise Http404
 
     def Box(self, box_type, nodelist):
         return Box(self.target, box_type, nodelist)
 
-    def get_slug(self, item_list=None):
+    def get_slug(self):
         """
         Return a unique slug for given gallery, even if there are more objects with the same slug.
-
-        TODO: optimize ??
         """
         if not hasattr(self, '_slug'):
-            self._slug = self._get_slug(item_list)
+            self._slug = self._get_slug()
         return self._slug
 
     def get_absolute_url(self):

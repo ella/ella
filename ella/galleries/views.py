@@ -1,13 +1,11 @@
 from django.contrib.contenttypes.models import ContentType
-from django.utils.translation import ugettext
-from django.template.defaultfilters import slugify
 from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.http import Http404
 
 from ella.core.custom_urls import dispatcher
-
 from ella.galleries.models import Gallery
+from ella.photos.models import Photo
 
 
 def gallery_item_detail(request, context, item_slug=None):
@@ -15,48 +13,40 @@ def gallery_item_detail(request, context, item_slug=None):
 
     gallery = context['object']
     category = context['category']
-    item_list = gallery.items
-    count = len(item_list)
+    item_sorted_dict = gallery.items
+    count = len(item_sorted_dict)
+    next = None
+    previous = None
 
     if count == 0:
         raise Http404
         # TODO: log empty gallery
 
     if item_slug is None:
-        previous = None
-        item, target = item_list[0]
+        item, target = item_sorted_dict.value_for_index(0)
         if count > 1:
-            next = item_list[1][0]
-        else:
-            next = None
+            next = item_sorted_dict.value_for_index(1)[0]
         position = 1
-        item_slug = item.get_slug(item_list)
     else:
-        for i, (it, obj) in enumerate(item_list):
-            if it.get_slug(item_list) == item_slug:
-                item, target = it, obj
-                if i > 0:
-                    previous = item_list[i-1][0]
-                else:
-                    previous = None
-
-                if (i+1) < count:
-                    next = item_list[i+1][0]
-                else:
-                    next = None
-
-                position = i + 1
-                break
-        else:
+        try:
+            item, target = item_sorted_dict[item_slug]
+        except KeyError:
             raise Http404
+        item_index = item_sorted_dict.keyOrder.index(item_slug)
+        if item_index > 0:
+            previous = item_sorted_dict.value_for_index(item_index-1)[0]
+        if (item_index+1) < count:
+            next = item_sorted_dict.value_for_index(item_index+1)[0]
+        position = item_index + 1
 
     context['object'] = target
+    print isinstance(target, Photo)
 
     context.update({
             'gallery': gallery,
             'item': item,
             'object' : target,
-            'item_list' : item_list,
+            'item_list' : item_sorted_dict.values(),
             'next' : next,
             'previous' : previous,
             'count' : count,
@@ -78,10 +68,5 @@ def items(request, bits, context):
         raise Http404
 
     return gallery_item_detail(request, context, bits[0])
-
-def register_custom_urls():
-    """register all custom urls"""
-    dispatcher.register_custom_detail(Gallery, gallery_item_detail)
-    dispatcher.register(slugify(ugettext('items')), items, model=Gallery)
 
 

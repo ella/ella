@@ -1,3 +1,2 @@
-# register admin options
 from ella.galleries import admin
-from ella.galleries import management
+from ella.galleries import urls
