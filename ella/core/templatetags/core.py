@@ -427,8 +427,7 @@ def do_related(parser, token):
 CONTAINER_VARS = ('level', 'name', 'css_class',)
 
 class ContainerNode(template.Node):
-    def __init__(self, nodelist, parameters):
-        self.nodelist = nodelist
+    def __init__(self, parameters):
         self.params = parameters
 
     def render(self, context):
@@ -450,16 +449,14 @@ class ContainerNode(template.Node):
             except ValueError:
                 pass
 
-        content = self.nodelist.render(context)
-        context['content'] = content
-        t = template.loader.get_template('inclusion_tags/container.html')
+        t = template.loader.get_template('inclusion_tags/container_begin.html')
         resp = t.render(context)
         context.pop()
         return resp
 
 
 @register.tag('container')
-def do_container(parser, token):
+def container(parser, token):
     bits = token.split_contents()
     parameters = bits[1:]
 
@@ -473,9 +470,9 @@ def do_container(parser, token):
         if name not in CONTAINER_VARS:
             raise template.TemplateSyntaxError, "%s tag does not accept %r parameter" % (bits[0], name)
 
-    nodelist = parser.parse(('end' + bits[0],))
-    parser.delete_first_token()
+    return ContainerNode(parameters)
 
-    return ContainerNode(nodelist, parameters)
-
+@register.inclusion_tag('inclusion_tags/container_end.html', takes_context=True)
+def endcontainer(context):
+    return context
 
