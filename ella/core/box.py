@@ -108,6 +108,9 @@ class Box(object):
         t_list.append(base_path + '%s.html' % (self.box_type,))
         t_list.append(base_path + 'box.html')
 
+        t_list.append('box/%s.html' % self.box_type)
+        t_list.append('box/box.html')
+
         return t_list
 
     def _render(self):
