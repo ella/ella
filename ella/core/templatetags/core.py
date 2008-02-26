@@ -426,7 +426,7 @@ def do_related(parser, token):
 
 CONTAINER_VARS = ('level', 'name', 'css_class',)
 
-class ContainerNode(template.Node):
+class ContainerBeginNode(template.Node):
     def __init__(self, parameters):
         self.params = parameters
 
@@ -451,9 +451,14 @@ class ContainerNode(template.Node):
 
         t = template.loader.get_template('inclusion_tags/container_begin.html')
         resp = t.render(context)
-        context.pop()
         return resp
 
+class ContainerEndNode(template.Node):
+    def render(self, context):
+        t = template.loader.get_template('inclusion_tags/container_end.html')
+        resp = t.render(context)
+        context.pop()
+        return resp
 
 @register.tag
 def container_begin(parser, token):
@@ -463,16 +468,15 @@ def container_begin(parser, token):
     if len(parameters) % 2 != 0:
         raise template.TemplateSyntaxError, '{%% %s param "value" param2 value2 ... %%}' % bits[0]
 
-
     parameters = dict((smart_str(key), value) for key, value in zip(parameters[0::2], parameters[1::2]))
 
     for name in parameters.keys():
         if name not in CONTAINER_VARS:
             raise template.TemplateSyntaxError, "%s tag does not accept %r parameter" % (bits[0], name)
 
-    return ContainerNode(parameters)
+    return ContainerBeginNode(parameters)
 
-@register.inclusion_tag('inclusion_tags/container_end.html', takes_context=True)
-def container_end(context):
-    return context
+@register.tag
+def container_end(parser, token):
+    return ContainerEndNode()
 
