@@ -7,7 +7,7 @@ comment_form_test = r"""
 >>> from ella.comments import forms  as cforms
 >>> from ella.comments import defaults as cdefaults
 
->>> from komments.sample import models as tmodels
+>>> from commenttest.sample import models as tmodels
 
 >>> import pprint, datetime, time
 >>> from django import newforms as forms
@@ -273,7 +273,7 @@ comment_templatetags = r"""
 >>> from ella.comments import forms  as cforms
 >>> from ella.comments import defaults as cdefaults
 
->>> from komments.sample import models as tmodels
+>>> from commenttest.sample import models as tmodels
 
 # get apple target string
 >>> apple_ct = ContentType.objects.get_for_model(tmodels.Apple)
@@ -362,7 +362,7 @@ u'\n\n\n3\n'
 comment_form_options = r"""
 >>> from ella.comments import models as cmodels
 >>> from ella.comments import forms  as cforms
->>> from komments.sample.models import Apple, Orange
+>>> from commenttest.sample.models import Apple, Orange
 
 >>> from django.contrib.contenttypes.models import ContentType
 >>> from django.template import Template, Context
@@ -370,7 +370,7 @@ comment_form_options = r"""
 >>> import pprint, datetime, time
 >>> from django import newforms as forms
 
->>> from komments.sample import models as tmodels
+>>> from commenttest.sample import models as tmodels
 
 # get apple target string
 >>> apple_ct = ContentType.objects.get_for_model(tmodels.Apple)

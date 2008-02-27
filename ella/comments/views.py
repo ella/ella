@@ -2,25 +2,18 @@ from django.contrib.formtools.preview import FormPreview
 from django.contrib.contenttypes.models import ContentType
 
 from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response
-from django.shortcuts import get_object_or_404
+from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
 from ella.core.cache import get_cached_object_or_404
-from ella.core.models import Category
 
 from ella.comments.models import Comment
 from ella.comments.forms import CommentForm
-from ella.comments.defaults import PARENT_NAME
+from ella.comments.defaults import FORM_OPTIONS
 
 
 class CommentFormPreview(FormPreview):
-    """
-    TODO:
-    CommentFormPreview pri registrovanem uzivateli jej prihlasi a nezobrazi jeho heslo
-    CommentFormPreview zobrazi captchu
-    """
-
+    """comment form preview with extended template calls"""
     @property
     def preview_template(self):
         opts = self.state['object']._meta
@@ -68,15 +61,15 @@ class CommentFormPreview(FormPreview):
         return HttpResponseRedirect(url)
 
 def new_comment(request, context, reply=None):
-    """new comment"""
+    """new comment for specified object"""
     cat = context['category']
     opts = context['object']._meta
     init_props = {
         'target': '%d:%d' % (context['content_type'].id, context['object']._get_pk_val()),
-        'options' : 'UN', # WTF??
+        'options' : FORM_OPTIONS['UNAUTHORIZED_ONLY'],
 }
     if reply:
-        init_props[PARENT_NAME] = reply
+        init_props['parent'] = reply
         context.update({
                 'reply' : True,
                 'parent' : get_cached_object_or_404(Comment, pk=reply, target_ct=context['content_type'], target_id=context['object']._get_pk_val()),
@@ -92,6 +85,7 @@ def new_comment(request, context, reply=None):
     return render_to_response(templates, context, context_instance=RequestContext(request))
 
 def list_comments(request, context):
+    """list comments for specified object"""
     cat = context['category']
     opts = context['object']._meta
     comment_list = Comment.objects.get_list_for_object(context['object'])

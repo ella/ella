@@ -1,5 +1,5 @@
 from os.path import dirname
-# Django settings for komments project.
+# Django settings for commenttest project.
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -66,7 +66,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.doc.XViewMiddleware',
 )
 
-ROOT_URLCONF = 'komments.urls'
+ROOT_URLCONF = 'commenttest.urls'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
@@ -78,7 +78,7 @@ TEMPLATE_DIRS = (
 INSTALLED_APPS = (
     'ella.core',
     'ella.comments',
-    'komments.sample',
+    'commenttest.sample',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

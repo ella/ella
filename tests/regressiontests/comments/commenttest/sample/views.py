@@ -4,7 +4,7 @@ from django.shortcuts import render_to_response
 
 from django.template import Context, loader
 
-from komments.sample.models import Apple, Orange
+from commenttest.sample.models import Apple, Orange
 from django.contrib.contenttypes.models import ContentType
 
 from ella.comments.forms import CommentForm

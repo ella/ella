@@ -13,15 +13,11 @@ from ella.comments import defaults
 
 
 class CommentOptions(models.Model):
-    """
-    contains options string for discussion
-    with immediate effect
-
-    TODO: options should not be string but boolean columns
-    """
-    target_ct = models.ForeignKey(ContentType, verbose_name=_('target content type'))
-    target_id = models.PositiveIntegerField(_('target id'))
+    """contains comment options string for object"""
+    target_ct = models.ForeignKey(ContentType, verbose_name=_('Target content type'))
+    target_id = models.PositiveIntegerField(_('Target id'))
     target = generic.GenericForeignKey(ct_field="target_ct", fk_field="target_id")
+    # TODO: options should not be string but boolean columns
     options = models.CharField(max_length=defaults.OPTS_LENGTH, blank=True)
     timestamp = models.DateTimeField(default=datetime.now)
 
@@ -30,8 +26,9 @@ class CommentOptions(models.Model):
         verbose_name_plural = _('Comment Options')
 
 def build_tree(comment_list):
+    """create nested comments"""
     for c in comment_list:
-        # TODO: ugly n^2
+        # ugly n^2
         c.sons = [
                 i for i in comment_list \
                 if i.path.startswith(c.path) and i.level == c.level+1
@@ -39,12 +36,12 @@ def build_tree(comment_list):
     return comment_list
 
 class CommentManager(models.Manager):
-    # TODO @cache_this
+    #@cache_this
     def get_count_for_object(self, object, **kwargs):
         target_ct = ContentType.objects.get_for_model(object)
         return self.filter(target_ct=target_ct, target_id=object.id, **kwargs).count()
 
-    # TODO @cache_this
+    #@cache_this
     def get_list_for_object(self, object, order_by=None, **kwargs):
         target_ct = ContentType.objects.get_for_model(object)
         qset = self.filter(target_ct=target_ct, target_id=object._get_pk_val(), **kwargs)
@@ -53,37 +50,38 @@ class CommentManager(models.Manager):
         return build_tree(list(qset))
 
 class Comment(models.Model):
+    """generic comments' model """
     # what is this comment for
-    target_ct = models.ForeignKey(ContentType, verbose_name=_('target content type'))
-    target_id = models.PositiveIntegerField(_('target id'))
+    target_ct = models.ForeignKey(ContentType, verbose_name=_('Target content type'))
+    target_id = models.PositiveIntegerField(_('Target id'))
 
     # comment content
-    subject = models.TextField(_('comment subject'), max_length=defaults.SUBJECT_LENGTH)
-    content = models.TextField(_('comment content'), max_length=defaults.COMMENT_LENGTH)
+    subject = models.TextField(_('Comment subject'), max_length=defaults.SUBJECT_LENGTH)
+    content = models.TextField(_('Comment content'), max_length=defaults.COMMENT_LENGTH)
     # comment picture
-#    image = models.ImageField(_('image answer'), upload_to='comment_image', blank=True, null=True)
+    #image = models.ImageField(_('Image answer'), upload_to='comment_image', blank=True, null=True)
 
     # tree structure
-    parent = models.ForeignKey('self', verbose_name=_('tree structure parent'), blank=True, null=True)
-    path = models.CharField(_('genealogy tree path'), max_length=defaults.PATH_LENGTH, blank=True, editable=False)
+    parent = models.ForeignKey('self', verbose_name=_('Tree structure parent'), blank=True, null=True)
+    path = models.CharField(_('Genealogy tree path'), max_length=defaults.PATH_LENGTH, blank=True, editable=False)
 
-    # author if is authorized
-    user = models.ForeignKey(User, verbose_name=_('authorized author'), blank=True, null=True)
-    # author otherwise
-    nickname = models.CharField(_("anonymous author's nickname"), max_length=defaults.NICKNAME_LENGTH, blank=True)
-    email = models.EmailField(_('authors email (optional)'), blank=True)
-    # authors ip address
-    ip_address = models.IPAddressField(_('ip address'), blank=True, null=True)
+    # authorized author
+    user = models.ForeignKey(User, verbose_name=_('Authorized author'), blank=True, null=True)
+    # anonymous author
+    nickname = models.CharField(_("Anonymous author's nickname"), max_length=defaults.NICKNAME_LENGTH, blank=True)
+    email = models.EmailField(_('Authors email (optional)'), blank=True)
+    # author's ip address
+    ip_address = models.IPAddressField(_('IP address'), blank=True, null=True)
 
     # comment metadata
-    submit_date = models.DateTimeField(_('date/time submitted'), default=datetime.now, editable=True)
-    is_public = models.BooleanField(_('is public'), default=True)
+    submit_date = models.DateTimeField(_('Time submitted'), default=datetime.now, editable=True)
+    is_public = models.BooleanField(_('Is public'), default=True)
 
     objects = CommentManager()
 
     @property
     def level(self):
-        return len(self.path.split('/'))
+        return len(self.path.split(defaults.PATH_SEPARATOR))
 
     @property
     def is_authorized(self):
@@ -139,15 +137,15 @@ class Comment(models.Model):
         verbose_name_plural = _('Comments')
 
 
-
 class BannedUser(models.Model):
     """
-    model with generic relation on object - same as in comment model
+    model with generic relation on object
+    same as in comment model
     ban is global if there is no relation
     """
-    target_ct = models.ForeignKey(ContentType, verbose_name=_('target content type'))
-    target_id = models.PositiveIntegerField(_('target id'))
-    user = models.ForeignKey(User, verbose_name=_('banned author'))
+    target_ct = models.ForeignKey(ContentType, verbose_name=_('Target content type'))
+    target_id = models.PositiveIntegerField(_('Target id'))
+    user = models.ForeignKey(User, verbose_name=_('Banned author'))
 
     class Meta:
         verbose_name = _('Banned User')
@@ -155,7 +153,6 @@ class BannedUser(models.Model):
 
 
 class BannedIP(models.Model):
-    """TODO"""
     pass
 
 

@@ -7,29 +7,11 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils.encoding import smart_str
 
+from ella.utils.templatetags import parse_getforas_triplet
 
 
-def parse_getforas_triplet(tokens):
-    """parse typical get_whatever ``for`` blah.blah blah ``as`` ``varname`` triplet"""
-    tagname = tokens[0]
-    object_definition_tokens = tokens[2:-2]
-    varname = tokens[-1]
+register = template.Library()
 
-    try:
-        fortoken = tokens[1]
-    except IndexError:
-        raise template.TemplateSyntaxError, "Second argument in %r tag must be 'for'" % tagname
-    if fortoken != 'for':
-        raise template.TemplateSyntaxError, "Second argument in %r tag must be 'for'" % tagname
-
-    try:
-        astoken = tokens[-2]
-    except IndexError:
-        raise template.TemplateSyntaxError, "Last but one argument in %r tag must be 'as'" % tagname
-    if astoken != 'as':
-        raise template.TemplateSyntaxError, "Last but one argument in %r tag must be 'as'" % tagname
-
-    return tagname, object_definition_tokens, varname
 
 def parse_object_definition(tagname, od_tokens):
     """parse object definition tokens APP_LABEL.MODEL_NAME with FIELD VALUE"""
@@ -57,6 +39,7 @@ def parse_object_definition(tagname, od_tokens):
     return obj
 
 
+@register.tag
 def get_comment_form(parser, token):
     """
     Gets a comment form for the given params.
@@ -84,6 +67,7 @@ def get_comment_form(parser, token):
     return CommentFormNode(object, form_options, varname)
 
 
+@register.tag
 def get_comment_list(parser, token):
     """
     Gets comments for the given params and populates the template context with
@@ -115,6 +99,7 @@ def get_comment_list(parser, token):
 
     return CommentListNode(object, orderby, varname)
 
+@register.tag
 def get_comment_count(parser, token):
     """
     Gets comment count for the given params and populates the template context
@@ -137,7 +122,6 @@ def get_comment_count(parser, token):
     return CommentCountNode(object, varname)
 
 
-
 def resolve_object(context, obj):
     if isinstance(obj, basestring):
         try:
@@ -145,6 +129,7 @@ def resolve_object(context, obj):
         except template.VariableDoesNotExist:
             raise template.TemplateSyntaxError, "Invalid variable '%r'" % obj
     return obj
+
 
 class CommentFormNode(template.Node):
     def __init__(self, object, form_options, varname):
@@ -188,19 +173,14 @@ class CommentCountNode(template.Node):
         return ''
 
 
+@register.inclusion_tag('inclusion_tags/print_comment.html', takes_context=True)
 def print_comment(context, comment):
     context['comment'] = comment
     return context
 
+
+@register.inclusion_tag('inclusion_tags/print_comment_long.html', takes_context=True)
 def print_comment_long(context, comment):
     context['comment'] = comment
     return context
-
-
-register = template.Library()
-register.tag('get_comment_form', get_comment_form)
-register.tag('get_comment_list', get_comment_list)
-register.tag('get_comment_count', get_comment_count)
-register.inclusion_tag('inclusion_tags/print_comment.html', takes_context=True)(print_comment)
-register.inclusion_tag('inclusion_tags/print_comment_long.html', takes_context=True)(print_comment_long)
 

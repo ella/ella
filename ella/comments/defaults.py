@@ -1,10 +1,9 @@
-'''
+"""
 shared mini settings for ella.comments application (forms, models)
-'''
+"""
 
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
-from django.conf import settings
 
 
 NICKNAME_LENGTH = 50
@@ -20,11 +19,6 @@ FORM_OPTIONS = {
     'UNAUTHORIZED_ONLY': 'UN',
 }
 
-OPTIONS_NAME = 'options'
-TARGET_NAME = 'target'
-HASH_NAME = 'gonzo'
-PARENT_NAME = 'parent'
-
 PATH_LENGTH=500
 PATH_SEPARATOR='/'
 
@@ -36,10 +30,10 @@ USER_CHOICE=(
 FORM_TIMEOUT = 3600
 POST_TIMEOUT = 3600
 INIT_PROPS = {
-    OPTIONS_NAME: '',
-    TARGET_NAME: '',
-    HASH_NAME: '',
-    PARENT_NAME: None,
+    'options': '',
+    'target': '',
+    'gonzo': '',
+    'parent': None,
 }
 
 FORM_TIMEOUT = getattr(settings, 'COMMENTS_FORM_TIMEOUT', FORM_TIMEOUT)

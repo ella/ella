@@ -1,5 +1,5 @@
 from django.conf.urls.defaults import *
-from komments.sample.views import *
+from commenttest.sample.views import *
 
 
 urlpatterns = patterns('',
