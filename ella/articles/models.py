@@ -15,6 +15,7 @@ from ella.photos.models import Photo
 
 
 class InfoBox(models.Model):
+    """Defines embedable text model."""
     title = models.CharField(_('Title'), max_length=255)
     created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)
     updated = models.DateTimeField(_('Updated'), blank=True, null=True)
@@ -26,6 +27,7 @@ class InfoBox(models.Model):
         verbose_name_plural = _('Info boxes')
 
 class Article(models.Model, Publishable):
+    """Defines article model."""
     # Titles
     title = models.CharField(_('Title'), max_length=255)
     upper_title = models.CharField(_('Upper title'), max_length=255, blank=True)
@@ -48,6 +50,7 @@ class Article(models.Model, Publishable):
 
     @property
     def content(self):
+        """Returns first item from ArticleContents linked to current article"""
         if not hasattr(self, '_contents'):
             self._contents = get_cached_list(ArticleContents, article=self)
         if self._contents:
@@ -56,6 +59,7 @@ class Article(models.Model, Publishable):
             return None
 
     def get_description(self):
+        """Overrides Publishable.get_description method"""
         return self.perex
 
     class Meta:
@@ -67,11 +71,15 @@ class Article(models.Model, Publishable):
         return self.title
 
     def article_age(self):
+        """Returns time since article was created"""
         return timesince(self.created)
     article_age.short_description = _('Article Age')
 
 
 class ArticleContents(models.Model):
+    """Defines article's contents model.
+
+    One article can have multiple contets. (1:N)"""
     article = models.ForeignKey(Article, verbose_name=_('Article'))
     title = models.CharField(_('Title'), max_length=200, blank=True)
     content = models.TextField(_('Content'))
