@@ -10,10 +10,19 @@ from django.template import Template
 
 from ella.core.models import Category
 from ella.core.box import Box
-
+from ella.core.cache import get_cached_object
 
 class PositionManager(models.Manager):
     def get_active_position(self, category, name, nofallback=False):
+        """
+        Get active position for given position name.
+
+        params:
+            category - Category model to look for
+            name - name of the position
+            nofallback - if True than do not fall back to parent
+                        category if active position is not found for category
+        """
         now = datetime.now()
         lookup = (Q(active_from__isnull=True) | Q(active_from__lte=now)) & (Q(active_till__isnull=True) | Q(active_till__gt=now))
         while True:
@@ -32,12 +41,19 @@ class PositionManager(models.Manager):
                     raise
 
 class Position(models.Model):
+    " Represents a position on a page belonging to a certain category. "
     category = models.ForeignKey(Category, verbose_name=_('Category'))
     name = models.CharField(_('Name'), max_length=200)
 
     target_ct = models.ForeignKey(ContentType, verbose_name=_('Target content type'), null=True, blank=True)
     target_id = models.PositiveIntegerField(_('Target id'), null=True, blank=True)
-    target = generic.GenericForeignKey(ct_field="target_ct", fk_field="target_id")
+
+    @property
+    def target(self):
+        if not hasattr(self, '_target'):
+            target_ct = get_cached_object(ContentType, pk=self.target_ct_id)
+            self._target = get_cached_object(target_ct, pk=self.target_id)
+        return self._target
 
     active_from = models.DateTimeField(_('Position active from'), null=True, blank=True)
     active_till = models.DateTimeField(_('Position active till'), null=True, blank=True)
@@ -56,7 +72,7 @@ class Position(models.Model):
     is_active.boolean = True
 
     def Box(self, box_type, nodelist):
-        """Delegate the boxing"""
+        " Delegate the boxing. "
         obj = self.target
 
         if hasattr(obj, 'Box'):
@@ -64,6 +80,7 @@ class Position(models.Model):
         return Box(obj, box_type, nodelist)
 
     def render(self, context, nodelist, box_type=None):
+        " Render the position. "
         if self.target:
             if not box_type:
                 box_type = self.box_type
