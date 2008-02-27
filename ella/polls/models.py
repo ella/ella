@@ -23,7 +23,7 @@ class FloatingStateModel(object):
 
     @property
     def current_text(self):
-        a = current_activity_state(self)
+        a = self.current_activity_state
         if a is ACTIVITY_NOT_YET_ACTIVE:
             return self.text_announcement
         elif a is ACTIVITY_CLOSED:
@@ -96,7 +96,7 @@ class Contest(models.Model, Publishable, FloatingStateModel):
         ordering = ('-active_from',)
 
 
-class Quiz(models.Model, Publishable):
+class Quiz(models.Model, Publishable, FloatingStateModel):
     """
     Quizes with title, descriptions and activation options.
     """
@@ -216,7 +216,7 @@ class PollBox(Box):
         return super(PollBox, self).get_cache_tests() + [ (Choice, lambda x: x.poll_id == self.obj.id) ]
 
 
-class Poll(models.Model):
+class Poll(models.Model, FloatingStateModel):
     """
     Poll model with descriptions and activation times
     """
