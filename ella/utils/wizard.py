@@ -1,4 +1,7 @@
 """
+http://code.djangoproject.com/ticket/3218
+
+
 USAGE:
     views:
         class MyWizard(Wizard):
