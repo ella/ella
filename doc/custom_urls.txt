@@ -9,13 +9,13 @@ Registering your own action
 ===========================
 
 To register your own action use ``ella.core.custom_urls.dispatcher``.
-Supply your view function that looks like this:
+Supply your view function that looks like this::
 
     def my_action( request, url_bits, context ):
         ...
         return HttpResponse( ... )
 
-register it under some name:
+register it under some name::
 
     dispatcher.register( 'my-action', my_action )
     # or for a given model only:
@@ -36,14 +36,14 @@ Where:
 
 It will then be availible on the desired URL.
 
-.. listing: ../listing/
+.. _`listing`: ./listing.html
 
 Replacing the ``object_detail``
 ===============================
 
 In some cases you may wish to replace Ella's default behaviour when displaying
 an object. This you can do via the same ``dispatcher`` with a function with a
-signature of:
+signature of::
 
     def my_action( request, context ):
         ...
@@ -52,3 +52,4 @@ signature of:
 Where ``context`` is the same dictionary as with custom actions.
 
 ``HitCount`` for the object is incremented even when using custom detail view.
+

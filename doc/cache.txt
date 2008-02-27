@@ -12,8 +12,10 @@ Cache levels
 Ella caches content on multiple levels, from the lowest - caching individual
 objects (both individual and lists) as they come from the database to caching
 entire boxes on the output.  Some time consuming calculations such as the tag
-cloud, comments count etc. are cached separately via a `cache_this`_
+cloud, comments count etc. are cached separately via a `cache_this`__
 decorator.
+
+__ `ella.core.cache.cache_this`_
 
 Cached templates
 ================
@@ -42,8 +44,8 @@ arguments (same as ``QuerySet.get()``. It constructs a cache key using these
 parameters. ``get_cached_list`` behaves exactly the same but returns list of
 objects matching the lookup parameters instead.
 
-ella.core.cache.cache_this
---------------------------
+_`ella.core.cache.cache_this`
+-----------------------------
 
 ``cache_this`` is a decorator used to cache individual function calls.
 
@@ -52,17 +54,22 @@ ella.core.cache.cache_this
 
 Where:
 
-    * ``key_getter`` is a function that accepts same arguments as the decorated
-        function and returns the cache key
-    * ``invalidator`` (optional) is a function that accepts the cache key and
-        any arguments accepted by the decorated function and registers any
-        invalidation tests may be required
-    * ``timeout`` (default 10 minutes) is time in seconds that defines the
-        cache's timeout period.
+:key_getter:
+    is a function that accepts same arguments as the decorated
+    function and returns the cache key
 
-Example:
+:invalidator:
+    (optional) is a function that accepts the cache key and
+    any arguments accepted by the decorated function and registers any
+    invalidation tests may be required
 
-   def get_key( func, template_name, template_dirs=None ):
+:timeout:
+    (default 10 minutes) is time in seconds that defines the
+    cache's timeout period.
+
+Example::
+
+    def get_key( func, template_name, template_dirs=None ):
        return 'ella.core.cache.teplate_loader:%d:%s' % ( settings.SITE_ID, template_name, )
 
     def invalidate_cache( key, template_name, template_dirs=None ):
@@ -73,9 +80,4 @@ Example:
     @cache_this( get_key, invalidate_cache, timeout=10*60 )
     def get_cache_teplate( template_name, template_dirs ):
         ...
-
-
-
-
-
 

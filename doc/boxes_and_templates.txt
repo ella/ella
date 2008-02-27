@@ -8,9 +8,10 @@ Template hierarchies
 All template names throughout Ella are designed in such a way that would allow
 for easy overriding for specific objects. For example you can easily and
 directly specify how a list of artciles in certain category (one with slug
-`some-category`) should look like just by creating a template called
+`some-category`) should look like just by creating a template called::
 
     page/category/some-category/content_type/articles.article/listing.html
+
 
 Common templates
 ----------------
@@ -18,28 +19,28 @@ Common templates
 The Ella's core functionality use following templates:
 
 
-    # Object detail:
-    page/category/CATEGORY-SLUG/content_type/APP_LABEL.MODEL/SLUG/object.html
-    page/category/CATEGORY-SLUG/content_type/APP_LABEL.MODEL/object.html
-    page/category/CATEGORY-SLUG/object.html
-    page/content_type/APP_LABEL.MODEL/object.html
-    page/object.html
+Object detail:
+    * page/category/``CATEGORY-SLUG``/content_type/``APP_LABEL.MODEL``/``SLUG``/object.html
+    * page/category/``CATEGORY-SLUG``/content_type/``APP_LABEL.MODEL``/object.html
+    * page/category/``CATEGORY-SLUG``/object.html
+    * page/content_type/``APP_LABEL.MODEL``/object.html
+    * page/object.html
 
-    # Object listing
-    page/category/CATEGORY-SLUG/content_type/APP_LABEL.MODEL/listing.html
-    page/category/CATEGORY-SLUG/listing.html
-    page/content_type/APP_LABEL.MODEL/listing.html
-    page/listing.html
+Object listing:
+    * page/category/``CATEGORY-SLUG``/content_type/``APP_LABEL.MODEL``/listing.html
+    * page/category/``CATEGORY-SLUG``/listing.html
+    * page/content_type/``APP_LABEL.MODEL``/listing.html
+    * page/listing.html
 
-    # Category homepage
-    page/category/CATEGORY-SLUG/category.html
-    page/category.html
+Category homepage:
+    * page/category/``CATEGORY-SLUG``/category.html
+    * page/category.html
 
 Where:
 
-    * ``CATEGORY-SLUG`` - slug of the category
-    * ``APP_LABEL.MODEL`` - name of the relevant model
-    * ``SLUG`` - slug of the model (if applicable)
+| ``CATEGORY-SLUG``: slug of the category
+| ``APP_LABEL.MODEL``: name of the relevant model
+| ``SLUG``: slug of the model (if applicable)
 
 This hierarchy ensures that the most specific template for a given task is
 used. In some cases, such as listing all objects from a given category, not
@@ -55,11 +56,11 @@ same pattern. For example here is how ``ella.comments`` look for its form
 template:
 
 
-    page/category/CATEGORY-SLUG/content_type/APP_LABEL.MODEL/SLUG/comments/form.html
-    page/category/CATEGORY-SLUG/content_type/APP_LABEL.MODEL/comments/form.html
-    page/category/CATEGORY-SLUG/comments/form.html
-    page/content_type/APP_LABEL.MODEL/comments/form.html
-    page/comments/form.html
+    * page/category/``CATEGORY-SLUG``/content_type/``APP_LABEL.MODEL``/``SLUG``/comments/form.html
+    * page/category/``CATEGORY-SLUG``/content_type/``APP_LABEL.MODEL``/comments/form.html
+    * page/category/``CATEGORY-SLUG``/comments/form.html
+    * page/content_type/``APP_LABEL.MODEL``/comments/form.html
+    * page/comments/form.html
 
 Object manifestation in HTML
 ============================
@@ -70,13 +71,13 @@ the object in the database (``slug``, ``pk``, etc.) or variable to look up in
 the context. The object is then rendered in a template with a corresponding
 name. The lookup hierarchy for boxes is:
 
-    box/category/CATEGORY-SLUG/content_type/APP_LABEL.MODEL/SLUG/BOX_NAME.html
-    box/category/CATEGORY-SLUG/content_type/APP_LABEL.MODEL/BOX_NAME.html
-    box/category/CATEGORY-SLUG/content_type/APP_LABEL.MODEL/box.html
-    box/content_type/APP_LABEL.MODEL/SLUG/BOX_NAME.html
-    box/content_type/APP_LABEL.MODEL/BOX_NAME.html
-    box/content_type/APP_LABEL.MODEL/box.html
-    box/BOX_NAME.html
-    box/box.html
+    * box/category/``CATEGORY-SLUG``/content_type/``APP_LABEL.MODEL``/``SLUG``/BOX_NAME.html
+    * box/category/``CATEGORY-SLUG``/content_type/``APP_LABEL.MODEL``/BOX_NAME.html
+    * box/category/``CATEGORY-SLUG``/content_type/``APP_LABEL.MODEL``/box.html
+    * box/content_type/``APP_LABEL.MODEL``/``SLUG``/BOX_NAME.html
+    * box/content_type/``APP_LABEL.MODEL``/BOX_NAME.html
+    * box/content_type/``APP_LABEL.MODEL``/box.html
+    * box/BOX_NAME.html
+    * box/box.html
 
 

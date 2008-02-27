@@ -16,7 +16,7 @@ Object detail
 -------------
 
 By creating a ``Listing`` for an object in it's category it is assigned a URL.
-The URL is in format
+The URL is in format::
 
     /path/to/category/year/month/day/content_type_name/object_slug/
 
@@ -25,13 +25,13 @@ Lists
 
 Miscelaneous lists of objects:
 
-Objects of a given type in a category:
+Objects of a given type in a category::
 
     /path/to/category/year/month/day/content_type_name/
     /path/to/category/year/month/content_type_name/
     /path/to/category/year/content_type_name/
 
-Objects regrdless of type:
+Objects regrdless of type::
 
     /path/to/category/year/month/day/
     /path/to/category/year/month/
@@ -70,5 +70,5 @@ it.
 Displaying object lists
 =======================
 
-See templtetag ``listing``.
+See templatetag ``listing``.
 
