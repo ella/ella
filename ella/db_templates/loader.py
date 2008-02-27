@@ -9,6 +9,7 @@ from ella.core.cache import get_cached_object
 CT_DBTEMPLATE = ContentType.objects.get_for_model(DbTemplate)
 
 def load_template_source(template_name, template_dirs=None):
+    " template loader conforming to django's API "
     try:
         t = get_cached_object(CT_DBTEMPLATE, name=template_name, site__id=settings.SITE_ID)
         return (t.get_text(), template_name)

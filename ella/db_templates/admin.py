@@ -6,6 +6,7 @@ from ella.db_templates.models import DbTemplate, TemplateBlock
 
 
 class TemplateBlockFormset(InlineFormset):
+    " Custom formset enabling us to supply custom validation. "
 
     @staticmethod
     def cmp_by_till(f, t):
@@ -17,6 +18,7 @@ class TemplateBlockFormset(InlineFormset):
             return cmp(f[1], t[1])
 
     def clean(self):
+        " Validate that the template's activity don't overlap. "
         if not self.cleaned_data:
             return self.cleaned_data
 
