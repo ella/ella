@@ -166,5 +166,5 @@ class ImageStretch(ImageOperation):
         elif cropped:
             stretched_photo = cropped
         else:
-            stretched_photo = cropped_photo
+            stretched_photo = self.__cropped_photo
         return stretched_photo
