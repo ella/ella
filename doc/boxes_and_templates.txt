@@ -76,5 +76,7 @@ name. The lookup hierarchy for boxes is:
     box/content_type/APP_LABEL.MODEL/SLUG/BOX_NAME.html
     box/content_type/APP_LABEL.MODEL/BOX_NAME.html
     box/content_type/APP_LABEL.MODEL/box.html
+    box/BOX_NAME.html
+    box/box.html
 
 
