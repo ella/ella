@@ -18,7 +18,7 @@ from django.utils.encoding import force_unicode
 from django.utils.html import escape
 
 from ella.core.cache import get_cached_object_or_404
-from ella.core.wizard import Wizard
+from ella.utils.wizard import Wizard
 from ella.polls.models import Poll, Contest, Contestant, Quiz, Result, Choice, Vote, ACTIVITY_NOT_YET_ACTIVE, ACTIVITY_ACTIVE, ACTIVITY_CLOSED
 
 # POLLS specific settings
