@@ -12,13 +12,10 @@ from ella.core.admin import ListingInlineOptions
 from ella.core.cache import get_cached_object
 
 
-class GalleryItemOptions(admin.ModelAdmin):
-    """TODO: pridat widget, ktery bude volat maximuv skript"""
-    pass
-
 class GalleryItemFormset(InlineFormset):
 
     def clean (self):
+        """Searches for duplicate references to the same object in one gallery."""
         if not self.cleaned_data or not self.instance:
             return self.cleaned_data
 

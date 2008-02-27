@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-08-19 23:07+0200\n"
+"POT-Creation-Date: 2008-02-27 20:03+0100\n"
 "PO-Revision-Date: 2007-07-17 17:05+0200\n"
 "Last-Translator: Honza Kral <Honza.Kral@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,70 +16,79 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: views.py:79 models.py:71
-msgid "items"
-msgstr "Prvky"
+#: admin.py:33
+#, python-format
+msgid "There are two references to %s in this gallery"
+msgstr "V této galerii existuji dva odkazy na %s"
 
-#: models.py:20
-msgid "Title"
-msgstr "Titulek"
-
-#: models.py:21
-msgid "Slug"
-msgstr ""
-
-#: models.py:23
-msgid "Description"
-msgstr "Popis"
-
-#: models.py:24
-msgid "Gallery owner"
-msgstr "Vlastník galerie"
-
-#: models.py:25
-msgid "Category"
-msgstr "Kategorie"
-
-#: models.py:26
-msgid "Created"
-msgstr "Vytvořeno"
-
-#: models.py:50
-msgid "Gallery"
-msgstr "Galerie"
-
-#: models.py:51
-msgid "Galleries"
-msgstr "Galerie"
-
-#: models.py:61
-msgid "Parent gallery"
-msgstr "Rodičovská galerie"
-
-#: models.py:62
-msgid "Target content type"
-msgstr "Typ objektu"
-
-#: models.py:63
-msgid "Target ID"
-msgstr "ID objektu"
-
-#: models.py:64
-msgid "Object order"
-msgstr "Pořadí objektu"
-
-#: models.py:75
-msgid "Gallery item"
-msgstr "Prvek galerie"
-
-#: models.py:76
-msgid "Gallery items"
-msgstr "Prvky galerií"
-
-#: models.py:92
+#: admin.py:54
 msgid "Gallery heading"
 msgstr "Hlavička galerie"
 
-#: models.py:93
+#: admin.py:55
 msgid "Gallery metadata"
 msgstr "Metadata galerie"
+
+#: models.py:30
+msgid "Title"
+msgstr "Titulek"
+
+#: models.py:31
+msgid "Slug"
+msgstr "Slug"
+
+#: models.py:33
+msgid "Description"
+msgstr "Popis"
+
+#: models.py:34
+msgid "Content"
+msgstr "Obsah"
+
+#: models.py:35
+msgid "Gallery owner"
+msgstr "Vlastník galerie"
+
+#: models.py:36
+msgid "Category"
+msgstr "Kategorie"
+
+#: models.py:37
+msgid "Created"
+msgstr "Vytvořeno"
+
+#: models.py:74
+msgid "Gallery"
+msgstr "Galerie"
+
+#: models.py:75
+msgid "Galleries"
+msgstr "Galerie"
+
+#: models.py:85
+msgid "Parent gallery"
+msgstr "Rodičovská galerie"
+
+#: models.py:86
+msgid "Target content type"
+msgstr "Typ objektu"
+
+#: models.py:87
+msgid "Target ID"
+msgstr "ID objektu"
+
+#: models.py:88
+msgid "Object order"
+msgstr "Pořadí objektu"
+
+#: models.py:118 urls.py:9
+msgid "items"
+msgstr "Prvky"
+
+#: models.py:122
+msgid "Gallery item"
+msgstr "Prvek galerie"
+
+#: models.py:123
+msgid "Gallery items"
+msgstr "Prvky galerií"

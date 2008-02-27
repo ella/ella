@@ -16,6 +16,7 @@ from ella.photos.models import Photo
 
 
 def gallery_cache_invalidator(key, gallery, *args, **kwargs):
+    """Registers gallery cache invalidator test in the cache system."""
     CACHE_DELETER.register_pk(gallery, key)
     CACHE_DELETER.register_test(GalleryItem, lambda x: x.gallery_id == gallery.pk, key)
 
@@ -39,6 +40,9 @@ class Gallery(models.Model, Publishable):
     @property
     @cache_this(get_gallery_key, gallery_cache_invalidator)
     def items(self):
+        """
+        Returns sorted dict of gallery items. Unique items slugs are used as keys. Values are tuples of items and its targets.
+        """
         slugs_count = {}
         itms = [ (item, item.target) for item in self.galleryitem_set.all() ]
         slugs_unique = set((i[1].slug for i in itms))
@@ -58,6 +62,11 @@ class Gallery(models.Model, Publishable):
         return res
 
     def get_photo(self):
+        """
+        Returns first Photo item in the gallery.
+
+        Overrides Publishable.get_photo.
+        """
         for item in self.items.itervalues():
             if isinstance(item[1], Photo):
                 return item[1]
@@ -81,6 +90,7 @@ class GalleryItem(models.Model):
 
     @property
     def target(self):
+        """Returns item's target object."""
         ct = get_cached_object(ContentType, pk=self.target_ct_id)
         return get_cached_object(ct, pk=self.target_id)
 
