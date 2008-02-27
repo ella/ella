@@ -8,9 +8,14 @@ from ella.core.models import Listing, Category, HitCount
 from ella.photos.models import Photo
 
 class Publishable(object):
+    """
+    Abstract interface-like class that defines method's common to all objects that
+    serve as primary content (can have a listing).
+    """
 
     @property
     def main_listing(self):
+        " Return object's main listing, that is the object's listing in its primary category "
         try:
             return get_cached_object(
                     Listing,
@@ -22,15 +27,18 @@ class Publishable(object):
             return None
 
     def get_absolute_url(self):
+        " Get object's URL. "
         listing = self.main_listing
         if listing:
             return listing.get_absolute_url()
 
     def get_category(self):
+        " Get object's primary Category."
         return get_cached_object(Category, pk=self.category_id)
 
 
     def get_photo(self):
+        " Get object's Photo. "
         if not hasattr(self, '_photo'):
             try:
                 self._photo = get_cached_object(Photo, pk=self.photo_id)
@@ -42,7 +50,9 @@ class Publishable(object):
         return self.description
 
 
+    ##
     # Custom admin fields
+    ##
     def full_url(self):
         absolute_url = self.get_absolute_url()
         if absolute_url:

@@ -8,6 +8,10 @@ from django.dispatch import dispatcher
 from django.db.models import signals
 
 class XMLField(models.TextField):
+    """
+    Custom DB field. To be used via subclassing - subclass this field and supply a get_schema_content
+    method that will return the object's XML schema to validate the content by.
+    """
     def __init__(self, verbose_name=None, name=None, schema_type=None, **kwargs):
         self.schema_type = schema_type
         self.schema = ''
