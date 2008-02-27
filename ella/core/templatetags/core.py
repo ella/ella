@@ -208,63 +208,17 @@ def do_box(parser, token):
 
         return BoxNode(bits[1], nodelist, model=model, lookup=(smart_str(bits[5]), bits[6]))
 
-@register.inclusion_tag('core/box_media.html', takes_context=True)
+@register.inclusion_tag('inclusion_tags/box_media.html', takes_context=True)
 def box_media(context):
-    return {'media' : context.dicts[-1].get(MEDIA_KEY, None)}
-
-class StaticBoxNode(template.Node):
-    def __init__(self, box_type, level):
-        self.box_type, self.level = box_type, level
-
-    def render(self, context):
-        if self.level:
-            try:
-                level = template.resolve_variable(self.level, context)
-            except template.VariableDoesNotExist:
-                level = 1
-        else:
-            level = 1
-
-        context.push()
-        context['level'] = level
-        context['next_level'] = level + 1
-        t = loader.get_template('box/static/%s.html' % self.box_type)
-        resp = t.render(context)
-        context.pop()
-        return resp
-
-
-@register.tag('staticbox')
-def do_static_box(parser, token):
     """
-    Include a static box (a simple template) with ``level`` and ``next_level`` variables in context.
-    If no ``LEVEL`` paramter is specified, defaults to 1 (2 for ``next_level``).
+    Inclusion tag rendering inclusion_tags/box_media.html template with media dictionary in it's context.
+    The dictionary contains js and css media files requested by boxes in the page
 
     Usage::
 
-        {% staticbox BOXTYPE %}
-        {% staticbox BOXTYPE LEVEL %}
-
-    Examples::
-
-        {% staticbox home_listing %}
-
-        {% staticbox home_listing 1 %}
-
-        {% staticbox home_listing level %}
-
+        {% box_media %}
     """
-    bits = token.split_contents()
-
-    if  2 > len(bits) > 3:
-        raise template.TemplateSyntaxError, '{% staticbox BOX_TYPE [LEVEL] %}'
-
-    if len(bits) == 3:
-        level = bits[2]
-    else:
-        level = None
-
-    return StaticBoxNode(bits[1], level)
+    return {'media' : context.dicts[-1].get(MEDIA_KEY, None)}
 
 @register.filter
 def render(object, content_path):
@@ -307,7 +261,7 @@ def render_str(content):
 @register.filter
 def prefix(string_list, prefix):
     """
-    Add prefix to string list (string delimited with spaces).
+    Add prefix to string list (string delimited with spaces). Used for css classes.
 
     Usage::
 
@@ -390,7 +344,14 @@ class RelatedNode(template.Node):
 @register.tag('related')
 def do_related(parser, token):
     """
-    {% related N [app_label.Model, ...] for object as var_name %}
+    Get N related models into a context variable.
+
+    Usage::
+        {% related N [app_label.Model, ...] for object as var_name %}
+
+    Example::
+        {% related 10 for object as related_list %}
+        {% related 10 articles.article, galleries.gallery for object as related_list %}
     """
     bits = token.split_contents()
 
@@ -461,6 +422,10 @@ class ContainerEndNode(template.Node):
 
 @register.tag
 def container_begin(parser, token):
+    """
+    Render inclusion_tags/container_begin.html template.
+    Takes parameters 'level', 'name' and  'css_class' and passes them to the context.
+    """
     bits = token.split_contents()
     parameters = bits[1:]
 
@@ -477,5 +442,6 @@ def container_begin(parser, token):
 
 @register.tag
 def container_end(parser, token):
+    " Render inclusion_tags/container_end.html. "
     return ContainerEndNode()
 

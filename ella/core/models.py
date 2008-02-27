@@ -17,10 +17,13 @@ from ella.core.cache import get_cached_object, cache_this
 
 
 class Author(models.Model):
+    """
+    Author of articles and other publishable content objects.
+    All fields except slug are optional.
+    """
     user = models.ForeignKey(User, blank=True, null=True)
     name = models.CharField(_('Name'), max_length=200, blank=True)
     slug = models.CharField(_('Slug'), max_length=200)
-    #photo = models.ImageField(_('Photo'), upload_to='photos/%Y/%m/%d', blank=True)
     description = models.TextField(_('Description'), blank=True)
     text = models.TextField(_('Text'), blank=True)
 
@@ -28,11 +31,15 @@ class Author(models.Model):
         return self.name
 
     class Meta:
-        ordering=('name',)
+        ordering=('name', 'slug',)
         verbose_name = _('Author')
         verbose_name_plural = _('Authors')
 
 class Source(models.Model):
+    """
+    List of sources for Photos, Articles and other content models.
+    May contain description and/or url.
+    """
     name = models.CharField(_('Name'), max_length=200)
     url = models.URLField(_('URL'), blank=True)
     description = models.TextField(_('Description'), blank=True)
@@ -46,6 +53,11 @@ class Source(models.Model):
         ordering = ('name',)
 
 class CategoryBox(Box):
+    """
+    Special Box class for category that adds 'photo_slug' parameter
+    to the box's context (if supplied).
+    """
+
     def get_context(self):
         cont = super(CategoryBox, self).get_context()
         if 'photo_slug' in self.params:
@@ -53,18 +65,30 @@ class CategoryBox(Box):
         return cont
 
 def get_category_key(func, category):
+    "Get key for caching category's __unicode__ method."
     return 'ella.core.models.Category(%d)' % category.id
 
 class Category(models.Model):
+    """
+    Basic building block of ella-based sites. All the published content is divided into categories -
+    every Publishable object
+        has a ForeignKey to it's primary Category
+        can be published in other categories (aka "secondary" categories) via Listing
+
+    Every site has exactly one root category (without a parent) that serve's as the sites's homepage.
+
+    see doc/listings.txt for more details.
+    """
     title = models.CharField(_("Category Title"), max_length=200)
     slug = models.CharField(_("Slug"), max_length=200)
     tree_parent = models.ForeignKey('self', null=True, blank=True, verbose_name=_("Parent Category"))
-    tree_path = models.CharField(max_length=255, editable=False)
+    tree_path = models.CharField(verbose_name=_("Path from root category"), max_length=255, editable=False)
     description = models.TextField(_("Category Description"), blank=True)
     site = models.ForeignKey(Site)
 
     @transaction.commit_on_success
     def save(self):
+        "Override save() to construct tree_path based on the category's parent."
         old_tree_path = self.tree_path
         if self.tree_parent:
             if self.tree_parent.tree_path:
@@ -75,23 +99,27 @@ class Category(models.Model):
             self.tree_path = ''
         super(Category, self).save()
         if old_tree_path != self.tree_path:
+            # the tree_path has changed, update children
             children = Category.objects.filter(tree_path__startswith=old_tree_path+'/').order_by('tree_path')
             for child in children:
                 child.save()
 
     def get_tree_parent(self):
+        "Cached method."
         if self.tree_parent_id:
             return get_cached_object(Category, pk=self.tree_parent_id)
         return None
 
     @property
     def path(self):
+        "Used in template paths."
         if self.tree_parent_id:
             return self.tree_path
         else:
             return self.slug
 
     def Box(self, box_type, nodelist):
+        "Return custom Box subclass."
         return CategoryBox(self, box_type, nodelist)
 
     def get_absolute_url(self):
@@ -105,14 +133,13 @@ class Category(models.Model):
 }
 )
         if self.site_id != settings.SITE_ID:
+            # prepend the domain if it doesn't match current Site
             site = get_cached_object(Site, pk=self.site_id)
             return 'http://' + site.domain + url
         return url
 
-
-
     def draw_title(self):
-        return ('&nbsp;&nbsp;' * self.tree_path.count('/')) + self.title
+        return mark_safe(('&nbsp;&nbsp;' * self.tree_path.count('/')) + self.title)
     draw_title.allow_tags = True
 
     class Meta:
@@ -125,26 +152,27 @@ class Category(models.Model):
     def __unicode__(self):
         return '%s/%s' % (self.site.name, self.tree_path)
 
-    def base_template(self):
-        t_list =  (
-                'page/category/%s/base_category.html' % (self.path),
-                'page/base_category.html',
-)
-        return loader.select_template(t_list)
-
 class Listing(models.Model):
     """
     Listing of an object in a category. Each and every odject that have it's own detail page must have a Listing object
     that is valid (nod expired) and places him in the object's main category. Any object can be listed in any number of
     categories (but only once per category). Even if the object is listed in other categories besides its main category,
     its detail page's url still belongs to the main one.
+
+    see doc/listing.txt for more details on Listings
     """
+
+    # listing's target - a Publishable object
     target_ct = models.ForeignKey(ContentType)
     target_id = models.IntegerField()
 
     @property
     def target(self):
-        return get_cached_object(self.target_ct, pk=self.target_id)
+        "Return target object via cache"
+        if not hasattr(self, '_target'):
+            target_ct = get_cached_object(ContentType, pk=self.target_ct_id)
+            self._target = get_cached_object(target_ct, pk=self.target_id)
+        return self._target
 
     category = models.ForeignKey(Category, db_index=True)
 
@@ -154,22 +182,21 @@ class Listing(models.Model):
     priority_value = models.IntegerField(_("Priority"), blank=True, null=True)
     remove = models.BooleanField(_("Remove"), help_text=_("Remove object from listing after the priority wears off?"), default=False)
 
-    commercial = models.BooleanField(_("Commercial"), default=False)
+    commercial = models.BooleanField(_("Commercial"), default=False, help_text=_("Check this if the listing is of a commercial content."))
 
     hidden = models.BooleanField(_("Hidden"), default=False, help_text=_("Create the object's URL, but do not list it in listings?"))
 
     objects = ListingManager()
 
     def Box(self, box_type, nodelist):
-        """
-        Delegate the boxing
-        """
+        " Delegate the boxing to the target's Box factory method."
         obj = self.target
         if hasattr(obj, 'Box'):
             return obj.Box(box_type, nodelist)
         return Box(obj, box_type, nodelist)
 
     def get_absolute_url(self):
+        "Get the target's absolute URL - find it's primary Listing and make a reverse() match."
         obj = self.target
         if obj.category_id != self.category_id:
             listing = obj.main_listing
@@ -213,6 +240,7 @@ class Listing(models.Model):
             return u'Broken listing in %s' % self.category
 
     def is_active(self):
+        "Return True if the listing's priority is currently active."
         now = datetime.now()
         return not (self.priority_to and now > self.priority_to and self.remove)
 
@@ -221,6 +249,7 @@ class Listing(models.Model):
         return (now > self.publish_from)
 
     def full_url(self):
+        "Full url to be shown in admin."
         return mark_safe('<a href="%s">url</a>' % self.get_absolute_url())
     full_url.allow_tags = True
 
@@ -232,9 +261,13 @@ class Listing(models.Model):
         unique_together = (('category', 'target_id', 'target_ct'),)
 
 class HitCount(models.Model):
+    """
+    Count hits for individual objects.
+    """
     target_ct = models.ForeignKey(ContentType)
     target_id = models.IntegerField()
-    last_seen = models.DateTimeField(editable=False)
+
+    last_seen = models.DateTimeField(_('Last seen'), editable=False)
     site = models.ForeignKey(Site)
 
     hits = models.PositiveIntegerField(_('Hits'), default=1)
@@ -242,6 +275,7 @@ class HitCount(models.Model):
     objects = HitCountManager()
 
     def save(self):
+        "update last seen automaticaly"
         self.last_seen = datetime.now()
         super(HitCount, self).save()
 
@@ -267,20 +301,22 @@ class Related(models.Model):
     source_ct = models.ForeignKey(ContentType, related_name='related_on_set')
     source_id = models.IntegerField()
 
-    def __unicode__(self):
-        return u'%s relates to %s' % (self.source, self.target)
-
     @property
     def source(self):
         if not hasattr(self, '_source'):
-            self._source = get_cached_object(self.source_ct, pk=self.source_id)
+            source_ct = get_cached_object(ContentType, pk=self.source_ct_id)
+            self._source = get_cached_object(source_ct, pk=self.source_id)
         return self._source
 
     @property
     def target(self):
         if not hasattr(self, '_target'):
-            self._target = get_cached_object(self.target_ct, pk=self.target_id)
+            target_ct = get_cached_object(ContentType, pk=self.target_ct_id)
+            self._target = get_cached_object(target_ct, pk=self.target_id)
         return self._target
+
+    def __unicode__(self):
+        return u'%s relates to %s' % (self.source, self.target)
 
     class Meta:
         verbose_name = _('Related')
@@ -302,16 +338,22 @@ class Dependency(models.Model):
 
     objects = DependencyManager()
 
-    def __unicode__(self):
-        return u'%s depends on %s' % (self.source, self.target)
-
     @property
     def source(self):
-        return get_cached_object(self.source_ct, pk=self.source_id)
+        if not hasattr(self, '_source'):
+            source_ct = get_cached_object(ContentType, pk=self.source_ct_id)
+            self._source = get_cached_object(source_ct, pk=self.source_id)
+        return self._source
 
     @property
     def target(self):
-        return get_cached_object(self.target_ct, pk=self.target_id)
+        if not hasattr(self, '_target'):
+            target_ct = get_cached_object(ContentType, pk=self.target_ct_id)
+            self._target = get_cached_object(target_ct, pk=self.target_id)
+        return self._target
+
+    def __unicode__(self):
+        return u'%s depends on %s' % (self.source, self.target)
 
     class Meta:
         verbose_name = _('Dependency')

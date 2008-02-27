@@ -13,6 +13,8 @@ def paginator(context, adjacent_pages=2):
     last page links in addition to those created by the object_list generic
     view.
 
+    Taken from http://www.djangosnippets.org/snippets/73/
+
     """
     s = max(1, context["page"] - adjacent_pages - max(0, context["page"]+adjacent_pages-context["pages"]))
     page_numbers = range(s, min(context["pages"], s+2*adjacent_pages)+1)

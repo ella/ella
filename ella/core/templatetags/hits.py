@@ -5,7 +5,6 @@ from ella.core.models import HitCount
 
 register = template.Library()
 
-
 class TopVisitedNode(template.Node):
     def __init__(self, count, name, mods=None):
         self.count, self.name, self.mods = count, name, mods
@@ -36,18 +35,18 @@ def do_top_visited(parser, token):
     """
     bits = token.split_contents()
     if len(bits) < 3 or bits[-2] != 'as':
-        raise template.TemplateSyntaxError, "%r .... TODO ....." % bits[0]
+        raise template.TemplateSyntaxError, "{% top_visited 5 [app.model ...] as var %}"
 
     try:
         count = int(bits[1])
     except ValueError:
-        raise template.TemplateSyntaxError, "%r .... TODO ....." % bits[0]
+        raise template.TemplateSyntaxError, "{% top_visited 5 [app.model ...] as var %}"
 
     mods = []
     for mod in bits[2:-2]:
         model = models.get_model(*mod.split('.', 1))
         if not model:
-            raise template.TemplateSyntaxError, "%r .... TODO ....." % bits[0]
+            raise template.TemplateSyntaxError, "{% top_visited 5 [app.model ...] as var %}"
         mods.append(model)
 
     return TopVisitedNode(count, bits[-1], mods)

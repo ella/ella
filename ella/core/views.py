@@ -14,6 +14,7 @@ from ella.core.cache import get_cached_list, get_cached_object_or_404, method_ke
 from ella.core.custom_urls import dispatcher
 
 
+# local cache for get_content_type()
 CONTENT_TYPE_MAPPING = {}
 
 
@@ -215,8 +216,18 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
             'pages': paginator.pages,
             'hits' : paginator.hits,
 
-            'year_list' : [ (d, d.strftime(DATE_REPR["year"]), d.strftime(YEAR_URLS[date_kind])) for d in base_qset.dates('publish_from', "year", order='DESC') ],
-            'date_list' : date_kind != 'detail' and [ (d, d.strftime(DATE_REPR[date_kind]), d.strftime(DATE_URLS[date_kind])) for d in qset.dates('publish_from', date_kind, order='DESC') ] or None,
+            # list of years with published objects
+            'year_list' : [
+                        (d, d.strftime(DATE_REPR["year"]), d.strftime(YEAR_URLS[date_kind]))
+                        for d in base_qset.dates('publish_from', "year", order='DESC')
+                    ],
+
+            # list of dates with published objects
+            'date_list' : date_kind != 'detail' and [
+                            (d, d.strftime(DATE_REPR[date_kind]), d.strftime(DATE_URLS[date_kind]))
+                            for d in qset.dates('publish_from', date_kind, order='DESC')
+                        ] or None,
+
             'current_date' : current_date,
             'current_date_text' : current_date.strftime(CURRENT_DATE_REPR[date_kind]),
             'date_kind' : date_kind,
@@ -226,6 +237,7 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
             'category' : cat,
 }, context_instance=RequestContext(request))
 
+# format lookups for year_list and date_list
 DATE_URLS = {'year' : '../%Y/', 'month' : '../../%Y/%m/', 'day' : '../../../%Y/%m/%d/',}
 YEAR_URLS = {'year' : '../%Y/', 'month' : '../../%Y/', 'day' : '../../../%Y/', 'detail' : '../../../%Y/'}
 DATE_REPR = {'year' : '%Y', 'month' : '%m/%Y', 'day' : '%d/%m/%Y', 'detail' : '%d/%m/%Y',}
@@ -277,14 +289,24 @@ def category_detail(request, category):
 )
 
 def export_test(*args, **kwargs):
+    " Cache invalidation tests for export(). "
     return []
 
 def export_key(*args, **kwargs):
+    " Cache key for export(). "
     kwargs['site'] = settings.SITE_ID
     return method_key_getter(*args, **kwargs)
 
 @cache_this(export_key, export_test, timeout=60*60)
 def export(request, count, name=None, models=None):
+    """
+    Export banners.
+
+    Params:
+        count - number of objects to pass into the template
+        name - name of the template (page/export/banner.html is default)
+        models - list of Model classes to include
+    """
     t_list = []
     if name:
         t_list.append('page/export/%s.html' % name)
@@ -298,6 +320,10 @@ def export(request, count, name=None, models=None):
             context_instance=RequestContext(request)
 )
 
+
+##
+# Error handlers
+##
 def page_not_found(request):
     response = render_to_response('page/404.html', {}, context_instance=RequestContext(request))
     response.status_code = 404

@@ -3,9 +3,7 @@ Set of tags and filters for debugging and tweaking applications.
 """
 from django import template
 
-
 register = template.Library()
-
 
 @register.inclusion_tag('debug/context.html', takes_context=True)
 def print_context(context):

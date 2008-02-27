@@ -80,31 +80,10 @@ u'level: 1 next_level: 2 ct: boxed-objects\n\n\n\n'
 '''
 
 
-static = r'''
->>> from django.template import Template, Context
-
-# empty level parameter
->>> t = Template("{% staticbox level_test %}")
->>> t.render(Context())
-u'level : 1\nnext_level : 2\n'
-
->>> t = Template("{% staticbox level_test 2 %}")
->>> t.render(Context())
-u'level : 2\nnext_level : 3\n'
-
->>> t = Template("{% staticbox level_test level %}")
->>> t.render(Context({'level' : 4}))
-u'level : 4\nnext_level : 5\n'
-
->>> t.render(Context())
-u'level : 1\nnext_level : 2\n'
-'''
-
 __test__ = {
     'base' : base,
     'media' : media,
     'level' : level,
-    'static' : static,
 }
 
 if __name__ == '__main__':
