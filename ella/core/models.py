@@ -75,9 +75,8 @@ class Category(models.Model):
             self.tree_path = ''
         super(Category, self).save()
         if old_tree_path != self.tree_path:
-            children = Category.objects.filter(tree_path__startswith=old_tree_path+'/')
+            children = Category.objects.filter(tree_path__startswith=old_tree_path+'/').order_by('tree_path')
             for child in children:
-                child.tree_path = child.tree_path.replace(old_tree_path, self.tree_path)
                 child.save()
 
     def get_tree_parent(self):
