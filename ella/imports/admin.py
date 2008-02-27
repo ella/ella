@@ -12,6 +12,7 @@ class ServerOptions(admin.ModelAdmin):
     prepopulated_fields = {'slug' : ('title',)}
 
     def __call__(self, request, url):
+        """Defines "*/fetch" page which starts the import procedure and shows the result status."""
         if url and url.endswith('fetch'):
             pk = url.split('/')[-2]
             server = get_cached_object_or_404(Server, pk=pk)

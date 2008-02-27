@@ -13,7 +13,8 @@ from django.template.defaultfilters import slugify
 from ella.core.box import Box
 from ella.core.cache.utils import get_cached_object_or_404
 from ella.photos.models import Photo
-from ella.core.models import Category
+from ella.articles.models import Article
+from ella.core.models import Category, Listing
 
 
 ELLA_IMPORT_COUNT = 10
@@ -21,23 +22,17 @@ PHOTO_REG = re.compile(r'<img[^>]*src="(?P<url>http://[^"]*)"')
 
 
 class Server(models.Model):
+    """Import source server"""
     title = models.CharField(_('Title'), max_length=100)
     domain = models.URLField(_('Domain'), verify_exists=False)
     slug = models.CharField(db_index=True, max_length=100)
     url = models.URLField(_('Atom URL'), verify_exists=False, max_length=300)
     category = models.ForeignKey(Category, blank=True, null=True, verbose_name=_('Category'))
 
-    def regenerate (self):
+    def regenerate(self):
+        """Link to inialize a fetch"""
         return mark_safe(u'<a href="%s/fetch/">%s - %s</a>' % (self.id, _('Fetch'), self.title))
     regenerate.allow_tags = True
-
-    def __unicode__(self):
-        return self.title
-
-    class Meta:
-        verbose_name = _('Server')
-        verbose_name_plural = _('Servers')
-        ordering = ('title',)
 
     def get_imports_by_time(self):
         return self.serveritem_set.order_by("-updated")
@@ -46,8 +41,7 @@ class Server(models.Model):
         return self.serveritem_set.order_by("-priority", "-updated")
 
     def get_from_category(self):
-        from ella.core.models import Listing
-        from ella.articles.models import Article
+        "Imports from other ella application, which runs on the same database."
         models = [ Article, ]
         articles = Listing.objects.get_listing(category=self.category, count=ELLA_IMPORT_COUNT, mods=models)
         output = {
@@ -74,7 +68,17 @@ class Server(models.Model):
 )
         return output
 
+    def __unicode__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = _('Server')
+        verbose_name_plural = _('Servers')
+        ordering = ('title',)
+
+
     def get_from_feed(self):
+        "Import from the RSS/Atom source."
         try:
             import feedparser
         except ImportError:
@@ -93,6 +97,7 @@ class Server(models.Model):
 
     @transaction.commit_on_success
     def fetch(self):
+        "Runs the item fetch from the category or feed (based on self.category) and saves them into ServerItem."
         if self.category:
             output = self.get_from_category()
         else:
@@ -131,6 +136,7 @@ class Server(models.Model):
                     si.save()
 
 class ServerItem(models.Model):
+    "Specific item to be imported."
     server = models.ForeignKey(Server)
     title = models.CharField(_('Title'), max_length=100)
     summary = models.TextField(_('Summary'))
@@ -151,6 +157,12 @@ class ServerItem(models.Model):
         unique_together = (('server', 'slug',),)
 
     def save(self):
+        """Overrides models.Model.save.
+
+        - Assigns unique slugs to the items.
+        - Tries to find and parse photo in summary, in case it isn't defined on the item.
+        - Saves copy of item's photo on the local servers. (Feed imports only.)
+        """
         if not self.slug:
             slug = slugify(self.title)
             try:
@@ -183,7 +195,7 @@ class ServerItem(models.Model):
             imported_photo.title = self.title
             imported_photo.slug = self.slug
             imported_photo.description = self.photo_url
-            # FIXME Correct extension of downloaded file
+            # Saves "imported.jpg" file, which has been created when importing item with picture
             imported_photo.save_image_file('imported.jpg', image_raw)
             imported_photo.save()
             self.photo = imported_photo
