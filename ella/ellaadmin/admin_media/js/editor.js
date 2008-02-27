@@ -237,7 +237,8 @@ function build(box){
 				}),*/
 				$('<a href="#clanek">Článek</a>').bind('click', function(event){
 					objectSelect(event, 'articles.article');
-				}),
+					link2object();
+}),
 				$('<a href="#anketa">Anketa</a>').bind('click', function(event){
 					objectSelect(event, 'polls.poll');
 				})
@@ -312,6 +313,11 @@ function build(box){
 		$('#photo').css({'display' : 'block', 'opacity' : '0'}).animate({ opacity: 1 }, 'normal');
 	}
 	if(box.type && box.type == 'photos.photo'){photo();}
+	var link2object = function(){
+		myFORM=document.getElementById('mainForm');
+		myFORM.method.value='link';
+	}
+	if(box.type && box.type == 'articles.article'){link2object();}
 }
 
 function destroy(event){
