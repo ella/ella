@@ -8,6 +8,7 @@ from django.template import loader
 from django.utils.datastructures import MultiValueDict
 from django.core.cache import cache
 from django.conf import settings
+from django.template.defaultfilters import slugify
 
 from ella.core.cache.invalidate import CACHE_DELETER
 
@@ -70,6 +71,7 @@ class Box(object):
             level = 1
 
         return {
+                'content_type_name' : slugify(self.obj._meta.verbose_name_plural),
                 'object' : self.obj,
                 'level' : level,
                 'next_level' : level + 1,

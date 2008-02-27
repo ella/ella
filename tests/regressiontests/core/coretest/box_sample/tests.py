@@ -13,11 +13,11 @@ u'box/box_sample.boxedobject/some_type.html\nboxed object 1\n'
 >>> t.render(Context ({}))
 Traceback (most recent call last):
   ...
-TemplateSyntaxError: Caught an exception while rendering: box/content_type/box_sample.boxedobject/other_type.html, box/content_type/box_sample.boxedobject/box.html
+TemplateSyntaxError: Caught an exception while rendering: box/content_type/box_sample.boxedobject/other_type.html, box/content_type/box_sample.boxedobject/box.html, box/other_type.html, box/box.html
 <BLANKLINE>
 Original Traceback (most recent call last):
   ...
-TemplateDoesNotExist: box/content_type/box_sample.boxedobject/other_type.html, box/content_type/box_sample.boxedobject/box.html
+TemplateDoesNotExist: box/content_type/box_sample.boxedobject/other_type.html, box/content_type/box_sample.boxedobject/box.html, box/other_type.html, box/box.html
 <BLANKLINE>
 >>> t = Template("{% box other_type for box_sample.unboxedobject with id 2 %}{% endbox %}")
 >>> t.render(Context ({}))
@@ -66,17 +66,17 @@ level = r'''
 # empty level parameter
 >>> t = Template("{% box level_test for box_sample.boxedobject with id 1 %}{% endbox %}{% box_media %}")
 >>> t.render(Context())
-u'level: 1 next_level: 2\n\n\n\n'
+u'level: 1 next_level: 2 ct: boxed-objects\n\n\n\n'
 
 # some given value
 >>> t = Template("{% box level_test for box_sample.boxedobject with id 1 %}level: 3{% endbox %}{% box_media %}")
 >>> t.render(Context())
-u'level: 3 next_level: 4\n\n\n\n'
+u'level: 3 next_level: 4 ct: boxed-objects\n\n\n\n'
 
 # bogus value that will cause error
 >>> t = Template("{% box level_test for box_sample.boxedobject with id 1 %}level: crash{% endbox %}{% box_media %}")
 >>> t.render(Context())
-u'level: 1 next_level: 2\n\n\n\n'
+u'level: 1 next_level: 2 ct: boxed-objects\n\n\n\n'
 '''
 
 
