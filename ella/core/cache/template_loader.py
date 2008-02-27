@@ -9,15 +9,6 @@ from ella.core.cache.invalidate import CACHE_DELETER
 
 template_source_loaders = None
 
-
-def get_key(func, template_name, template_dirs=None):
-    return 'ella.core.cache.teplate_loader:%d:%s' % (settings.SITE_ID, template_name,)
-
-def invalidate_cache(key, template_name, template_dirs=None):
-    from ella.db_templates.models import DbTemplate
-    if DbTemplate._meta.installed:
-        CACHE_DELETER.register_test(DbTemplate, lambda x: x.name == template_name, key)
-
 def load_template_source(template_name, template_dirs=None):
     global template_source_loaders
     if template_source_loaders is None:
@@ -42,6 +33,14 @@ def load_template_source(template_name, template_dirs=None):
 
     return get_cache_teplate(template_name, template_dirs)
 load_template_source.is_usable = True
+
+def get_key(func, template_name, template_dirs=None):
+    return 'ella.core.cache.teplate_loader:%d:%s' % (settings.SITE_ID, template_name,)
+
+def invalidate_cache(key, template_name, template_dirs=None):
+    from ella.db_templates.models import DbTemplate
+    if DbTemplate._meta.installed:
+        CACHE_DELETER.register_test(DbTemplate, lambda x: x.name == template_name, key)
 
 @cache_this(get_key, invalidate_cache, timeout=10*60)
 def get_cache_teplate(template_name, template_dirs):

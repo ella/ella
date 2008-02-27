@@ -287,16 +287,12 @@ def category_detail(request, category):
             context_instance=RequestContext(request)
 )
 
-def export_test(*args, **kwargs):
-    " Cache invalidation tests for export(). "
-    return []
-
 def export_key(*args, **kwargs):
     " Cache key for export(). "
     kwargs['site'] = settings.SITE_ID
     return method_key_getter(*args, **kwargs)
 
-@cache_this(export_key, export_test, timeout=60*60)
+@cache_this(export_key, timeout=60*60)
 def export(request, count, name=None, models=None):
     """
     Export banners.
