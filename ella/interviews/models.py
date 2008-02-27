@@ -60,7 +60,9 @@ class Interview(models.Model, Publishable):
 
     objects = RelatedManager()
 
-
+    ##
+    # utility functions to check whether we can ask and/or reply
+    ##
     def asking_started(self):
         now = datetime.now()
         return  self.ask_from <= now
@@ -88,6 +90,18 @@ class Interview(models.Model, Publishable):
         return self.asking_started() and not self.asking_ended()
 
     def get_questions(self):
+        """
+        Return list of questions.
+
+        Depending on the state of the interview it will either return
+            questions sorted by submit date
+                if asking period is over
+            questions sorted by submit date descending
+                if asking period isn't over yet
+            only questions with answers
+                if asking has started (even if it already ended)
+
+        """
         now = datetime.now()
 
         q = self.question_set.all()
@@ -110,6 +124,7 @@ class Interview(models.Model, Publishable):
         return q
 
     def get_interviewees(self, user=None):
+        " Get interviews that the current user can answer in behalf of. "
         if not user:
             from ella.core.middleware import get_current_request
             request = get_current_request()
@@ -122,6 +137,7 @@ class Interview(models.Model, Publishable):
         return self._interviewees
 
     def get_description(self):
+        " Override Publishable.get_description. "
         return self.perex
 
     class Meta:

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-11-30 13:59+0100\n"
+"POT-Creation-Date: 2008-02-27 21:20+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,139 +16,143 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: models.py:19
+#: models.py:18
 msgid "Name"
 msgstr "Jméno"
 
-#: models.py:20 models.py:40
+#: models.py:19 models.py:39
 msgid "Slug"
 msgstr ""
 
-#: models.py:21
+#: models.py:20
 msgid "Description"
 msgstr "Popis"
 
-#: models.py:24
+#: models.py:23 views.py:27
 msgid "Interviewee"
 msgstr "Host"
 
-#: models.py:25 models.py:55
+#: models.py:24 models.py:54
 msgid "Interviewees"
 msgstr "Hosté"
 
-#: models.py:38
+#: models.py:37
 msgid "Title"
 msgstr "Nadpis"
 
-#: models.py:39
+#: models.py:38
 msgid "Upper title"
 msgstr "Nadtitulek"
 
-#: models.py:43
+#: models.py:42
 msgid "Perex"
 msgstr "Perex"
 
-#: models.py:44
+#: models.py:43
 msgid "Text"
 msgstr "Text"
 
-#: models.py:46
+#: models.py:45
 msgid "Reply from"
 msgstr "Odpovídat od"
 
-#: models.py:47
+#: models.py:46
 msgid "Reply to"
 msgstr "Odpovídat do"
 
-#: models.py:49
+#: models.py:48
 msgid "Ask from"
 msgstr "Dotazy od"
 
-#: models.py:50
+#: models.py:49
 msgid "Ask to"
 msgstr "Dotazy do"
 
-#: models.py:53
+#: models.py:52
 msgid "Authors"
 msgstr "Autoři"
 
-#: models.py:54
+#: models.py:53
 msgid "Source"
 msgstr "Zdroj"
 
-#: models.py:57
+#: models.py:56
 msgid "Category"
 msgstr "Kategorie"
 
-#: models.py:60
+#: models.py:59
 msgid "Photo"
 msgstr "Foto"
 
-#: models.py:141
+#: models.py:144
 msgid "Interview"
 msgstr "Rozhovor"
 
-#: models.py:142
+#: models.py:145
 msgid "Interviews"
 msgstr "Rozhovory"
 
-#: models.py:151
+#: models.py:154
 msgid "Question text"
 msgstr "Text otázky"
 
-#: models.py:154
+#: models.py:157
 msgid "authorized author"
 msgstr "Přihlášený uživatel"
 
-#: models.py:156
+#: models.py:159
 msgid "anonymous author's nickname"
 msgstr "Přezdívka"
 
-#: models.py:157
+#: models.py:160
 msgid "authors email (optional)"
 msgstr "Email (nepovinné)"
 
-#: models.py:160
+#: models.py:163
 msgid "ip address"
 msgstr "IP adresa"
 
-#: models.py:163 models.py:198
+#: models.py:166 models.py:195
 msgid "date/time submitted"
 msgstr "Datum a čas uložení"
 
-#: models.py:164
+#: models.py:167
 msgid "is public"
 msgstr "Je veřejný"
 
-#: models.py:190
+#: models.py:182
+#, fuzzy
+msgid "Answered"
+msgstr "Zodpovězeno"
+
+#: models.py:187
 msgid "Question"
 msgstr "Otázka"
 
-#: models.py:191
+#: models.py:188
 msgid "Questions"
 msgstr "Otázky"
 
-#: models.py:199
+#: models.py:196
 msgid "Answer text"
 msgstr "Text odpovědi"
 
-#: models.py:203 models.py:204
+#: models.py:200 models.py:201
 msgid "Answer"
 msgstr "Odpověď"
 
-#: views.py:28
-#, fuzzy
-msgid "interviewee"
-msgstr "Host"
-
-#: views.py:193
+#: urls.py:9
 msgid "unanswered"
 msgstr "Nezodpovězené"
 
-#: views.py:194
+#: urls.py:10
 msgid "reply"
 msgstr "odpoved"
 
-#: views.py:195
+#: urls.py:11
 msgid "ask"
 msgstr "dotaz"
+
+#, fuzzy
+#~ msgid "interviewee"
+#~ msgstr "Host"
