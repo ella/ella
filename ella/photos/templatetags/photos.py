@@ -34,9 +34,7 @@ class ImgTag(template.Node):
 @register.tag
 def img(parser, token):
     """
-    Ahoj
-
-    Examples::
+    Examples:
 
         {% img FORMAT for VAR as VAR_NAME %}
         {% img FORMAT with FIELD VALUE as VAR_NAME %}

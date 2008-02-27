@@ -1,4 +1,5 @@
 import Image
+
 from ella.utils.filemanipulation import file_rename
 
 
@@ -12,7 +13,7 @@ def detect_img_type(imagePath):
 
 
 
-class ImageOperation:
+class ImageOperation(object):
 
     def __init__(self, **kwargs):
         self.image = None
@@ -21,11 +22,9 @@ class ImageOperation:
         elif 'image' in kwargs:
             self.image = kwargs['image']
 
-
     def open_image(self, filename):
         ''' Nacte obrazek. Vraci image objekt (PIL). '''
         self.image = Image.open(filename)
-
 
     def save_image(self, image, filename, format='JPEG', **kwargs):
         self.image.save(filename, format, **kwargs)
@@ -40,11 +39,10 @@ class ImageStretch(ImageOperation):
             raise KeyError('formated_photo kwarg missing!')
         self.__fpi = kwargs['formated_photo']
 
-
     def __get_stretch_dimension(self, flex=False):
         """ Method return stretch dimension of crop to fit inside max format rectangle """
         fpi = self.__fpi
-        # TODO: compensate for rounding error !!
+        # TODO: compensate for rounding error
         self.__fmt_width = fpi.format.max_width
         if flex:
             self.__fmt_height = fpi.format.flexible_max_height
@@ -60,7 +58,6 @@ class ImageStretch(ImageOperation):
             stretch_height = self.__fmt_height
             stretch_width = min(self.__fmt_width, int(stretch_height * crop_ratio))
         return (stretch_width, stretch_height)
-
 
     def resize_if_needed(self):
         cropped_photo = self.__cropped_photo
@@ -122,14 +119,11 @@ class ImageStretch(ImageOperation):
                         stretched_photo = cropped_photo.resize(self.__get_stretch_dimension(flex), Image.ANTIALIAS)
                     else:
                         stretched_photo = cropped_photo
-
-
             if stretched_photo is None:
             # shrink the photo to fit the format
                 return cropped_photo.resize(self.__get_stretch_dimension(flex), Image.ANTIALIAS)
         else:
             return None
-
 
     def crop_if_needed(self):
         fpi = self.__fpi
@@ -146,7 +140,6 @@ class ImageStretch(ImageOperation):
             cropped_photo = source
             self.__auto = True
         return cropped_photo
-
 
     def stretch_image(self):
         ''' Stretchne obrazek a vrati ho. '''
