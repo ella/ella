@@ -16,7 +16,6 @@ def mixin_ella_admin(admin_class):
         return ExtendedModelAdmin
 
     if EllaAdminOptionsMixin in admin_class.__bases__:
-        # TODO: recursive traversal to parents...
         return admin_class
 
     bases = list(admin_class.__bases__)
@@ -121,7 +120,6 @@ class EllaAdminOptionsMixin(object):
 
         elif db_field.name in ('target_ct', 'source_ct'):
             kwargs['widget'] = widgets.ContentTypeWidget
-#            return ContentTypeChoice(choices=[(u'', u"---------")] + [ (c.id, c) for c in get_content_types(get_current_request().user) ], **kwargs)
 
         elif db_field.name in ('target_id', 'source_id',):
             kwargs['widget'] = widgets.ForeignKeyRawIdWidget
@@ -136,6 +134,9 @@ class EllaAdminOptionsMixin(object):
 
 
     '''
+    First semi-working draft of category-based permissions. It will allow permissions to be set per-site and per category
+    effectively hiding the content the user has no permission to see/change.
+
     def queryset(self, request):
         from ella.ellaadmin import models
         from django.db.models import Q, query

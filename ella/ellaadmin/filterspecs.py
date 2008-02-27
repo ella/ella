@@ -1,3 +1,7 @@
+"""
+First semi-working draft of category-based permissions. It will allow permissions to be set per-site and per category
+effectively hiding the content the user has no permission to see/change.
+"""
 from django.contrib.admin import filterspecs
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Permission
@@ -21,12 +25,14 @@ def get_content_types(user):
     return choices
 
 class DistinctRelatedFilterSpec(filterspecs.RelatedFilterSpec):
+    " Only display models that appear somewhere. "
     def __init__(self, f, request, params, model, model_admin, field_path=None):
         super(DistinctRelatedFilterSpec, self).__init__(f, request, params, model, model_admin, field_path=field_path)
         if field_path is None:
             self.lookup_choices = f.rel.to._default_manager.filter(pk__in=[ d[f.name] for d in model._default_manager.distinct().values(f.name) ])
 
 class CategoryFilterSpec(DistinctRelatedFilterSpec):
+    " FilterSpec for admin that only display's categories the user has permission for. "
     def __init__(self, f, request, params, model, model_admin, field_path=None):
         super(CategoryFilterSpec, self).__init__(f, request, params, model, model_admin, field_path=field_path)
         if request.user.is_superuser:
@@ -44,6 +50,7 @@ class CategoryFilterSpec(DistinctRelatedFilterSpec):
             self.lookup_choices = []
 
 class ContentTypeFilterSpec(DistinctRelatedFilterSpec):
+    ' Display only applicable content types. '
     def __init__(self, f, request, params, model, model_admin, field_path=None):
         super(ContentTypeFilterSpec, self).__init__(f, request, params, model, model_admin, field_path=field_path)
         self.lookup_choices = self.lookup_choices.filter(pk__in=[ ct.id for ct in get_content_types(request.user) ])

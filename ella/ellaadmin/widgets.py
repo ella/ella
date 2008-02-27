@@ -18,10 +18,12 @@ CLASS_LISTING_CATEGORY = 'listing_category'
 
 
 class ContentTypeWidget(forms.Select):
+    " Custom widget adding a class to attrs. "
     def __init__(self, attrs={}):
         super(ContentTypeWidget, self).__init__(attrs={'class': CLASS_TARGECT})
 
 class ForeignKeyRawIdWidget(forms.TextInput):
+    " Custom widget adding a class to attrs. "
     class Media:
         js = (
             settings.ADMIN_MEDIA_PREFIX + JS_GENERIC_LOOKUP,
@@ -30,6 +32,7 @@ class ForeignKeyRawIdWidget(forms.TextInput):
         super(ForeignKeyRawIdWidget, self).__init__(attrs={'class': CLASS_TARGEID})
 
 class ExtendedRelatedFieldWidgetWrapper(widgets.RelatedFieldWidgetWrapper):
+    'Custom widget to be used in admin that includes name and link to the target.'
     def __call__(self, name, value, *args, **kwargs):
         rel_to = self.rel.to
         related_url = '../../../%s/%s/%s' % (rel_to._meta.app_label, rel_to._meta.object_name.lower(), value)
@@ -39,6 +42,7 @@ class ExtendedRelatedFieldWidgetWrapper(widgets.RelatedFieldWidgetWrapper):
         return mark_safe(u''.join(output))
 
 class RichTextAreaWidget(forms.Textarea):
+    'Widget representing the RichTextEditor. '
     class Media:
         js = (
             settings.ADMIN_MEDIA_PREFIX + JS_EDITOR,
@@ -60,6 +64,7 @@ class ListingCategoryWidget(forms.Select):
         super(ListingCategoryWidget, self).__init__(attrs={'class': CLASS_LISTING_CATEGORY})
 
 class IncrementWidget(forms.TextInput):
+    'Self incrementing widget.'
     class Media:
         js = (
             settings.ADMIN_MEDIA_PREFIX + 'js/increment.js',

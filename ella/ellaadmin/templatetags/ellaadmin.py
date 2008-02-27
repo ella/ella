@@ -38,7 +38,6 @@ def tag_suggester_url(parser, token):
 
 
 class FormatHitsLink(template.Node):
-
     def __init__(self, target_ct, target_id):
         self.target_ct = target_ct
         self.target_id = target_id

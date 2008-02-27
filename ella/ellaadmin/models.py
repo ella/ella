@@ -1,3 +1,7 @@
+"""
+First semi-working draft of category-based permissions. It will allow permissions to be set per-site and per category
+effectively hiding the content the user has no permission to see/change.
+"""
 from django.db import models
 from django.contrib import admin
 from django.contrib.sites.models import Site

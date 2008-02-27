@@ -1,4 +1,4 @@
-from widgets import RichTextAreaWidget
+import re
 
 from django.newforms import fields
 from django.newforms.util import ValidationError
@@ -6,10 +6,8 @@ from django.utils.encoding import smart_unicode
 from django.utils.translation import ugettext_lazy as _
 
 from ella.core.templatetags.core import render_str
+from ella.ellaadmin.widgets import RichTextAreaWidget
 
-import re
-
-# FIXME: we have blank=True in models, but RichTextAreaField is still required!
 
 class RichTextAreaField(fields.Field):
     widget = RichTextAreaWidget
@@ -65,19 +63,21 @@ class RichTextAreaField(fields.Field):
         value = smart_unicode(value)
 
         # validate markdown links
-        l = re.compile('\[.+\]\((.+)\)')
-        self.invalid_links = []
-        self.broken_links  = []
-        l.sub(self._check_url, value)
+        # commented out due to incomplete specs, will probably be replaced by JS validation
 
-        i = self.error_messages['url_error'] % ', '.join(self.invalid_links)
-        b = self.error_messages['link_error'] % ', '.join(self.broken_links)
-        if self.invalid_links and self.broken_links:
-            raise ValidationError("%s %s" % (i, b))
-        elif self.invalid_links:
-            raise ValidationError(i)
-        elif self.broken_links:
-            raise ValidationError(b)
+        #l = re.compile('\[.+\]\((.+)\)')
+        #self.invalid_links = []
+        #self.broken_links  = []
+        #l.sub(self._check_url, value)
+
+        #i = self.error_messages['url_error'] % ', '.join(self.invalid_links)
+        #b = self.error_messages['link_error'] % ', '.join(self.broken_links)
+        #if self.invalid_links and self.broken_links:
+        #    raise ValidationError("%s %s" % (i, b))
+        #elif self.invalid_links:
+        #    raise ValidationError(i)
+        #elif self.broken_links:
+        #    raise ValidationError(b)
 
         # test render template
         try:

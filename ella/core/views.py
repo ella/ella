@@ -90,9 +90,8 @@ def object_detail(request, category, year, month, day, content_type, slug, url_r
         raise Http404
 
     if not (listing.is_published() or request.user.is_staff):
-        if not 'ift' in request.GET or request.GET['ift']!='t':
-            # future listing, but pass if GET has attribute ift=t (Link is valid in RichTextField)
-            raise Http404
+        # future listing, render if accessed by logged in staff member
+        raise Http404
 
     context = {
             'listing' : listing,
