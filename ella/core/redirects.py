@@ -5,6 +5,7 @@ from django.conf import settings
 
 from ella.core.cache.invalidate import CACHE_DELETER
 
+
 # name of attribute used to store object's old URL
 OLD_URL_NAME = '__old_url'
 
@@ -60,6 +61,8 @@ def drop_redirects(instance):
             # will cause the save() to fail, thus preventing anybody from correcting the error
             pass
 
+
 dispatcher.connect(record_url, signal=signals.pre_save)
 dispatcher.connect(check_url, signal=signals.post_save)
 dispatcher.connect(drop_redirects, signal=signals.pre_delete)
+

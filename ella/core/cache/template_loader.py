@@ -1,10 +1,14 @@
+import warnings
+
 from django.template import TemplateDoesNotExist
 from django.conf import settings
 
 from ella.core.cache.utils import cache_this
 from ella.core.cache.invalidate import CACHE_DELETER
 
+
 template_source_loaders = None
+
 
 def get_key(func, template_name, template_dirs=None):
     return 'ella.core.cache.teplate_loader:%d:%s' % (settings.SITE_ID, template_name,)
@@ -30,8 +34,9 @@ def load_template_source(template_name, template_dirs=None):
             except AttributeError:
                 raise ImproperlyConfigured, 'Module "%s" does not define a "%s" callable template source loader' % (module, attr)
             if not func.is_usable:
-                import warnings
-                warnings.warn("Your TEMPLATE_LOADERS setting includes %r, but your Python installation doesn't support that type of template loading. Consider removing   +that line from TEMPLATE_LOADERS." % path)
+                warnings.warn((
+                    "Your TEMPLATE_LOADERS setting includes %r, but your Python installation "
+                    "doesn't support that type of template loading. Consider removing that line from TEMPLATE_LOADERS.") % path)
             else:
                 template_source_loaders.append(func)
 
@@ -47,5 +52,4 @@ def get_cache_teplate(template_name, template_dirs):
         except TemplateDoesNotExist:
             pass
     raise TemplateDoesNotExist, template_name
-
 

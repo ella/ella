@@ -9,7 +9,9 @@ from ella.core.models import Listing, Category
 from ella.core.views import get_content_type
 from ella.core.cache.utils import get_cached_object, get_cached_object_or_404
 
-NUM_IN_FEED = 10
+
+NUM_IN_FEED = getattr(settings, 'RSS_NUM_IN_FEED', 10)
+
 
 class RSSTopCategoryListings(Feed):
     def get_object(self, bits):

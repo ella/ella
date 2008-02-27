@@ -127,8 +127,6 @@ class EllaAdminOptionsMixin(object):
             kwargs['widget'] = widgets.ForeignKeyRawIdWidget
 
         if isinstance(db_field, ForeignKey):
-            #kwargs['widget'] = widgets.ExtendedforeignKeyRawIdWidget
-            #formfield = super(EllaAdminOptionsMixin, self).formfield_for_dbfield(db_field, **kwargs)
             if db_field.name in self.raw_id_fields:
                 formfield = super(EllaAdminOptionsMixin, self).formfield_for_dbfield(db_field, **kwargs)
                 formfield.widget.render = widgets.ExtendedRelatedFieldWidgetWrapper(formfield.widget.render, db_field.rel, self.admin_site)

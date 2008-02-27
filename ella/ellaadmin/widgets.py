@@ -1,7 +1,8 @@
 from django import newforms as forms
-from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 from django.contrib.admin import widgets
+from django.utils.safestring import mark_safe
+
 
 JS_EDITOR = 'js/editor.js'
 JS_SHOWDOWN = 'js/showdown.js'
@@ -28,14 +29,8 @@ class ForeignKeyRawIdWidget(forms.TextInput):
     def __init__(self, attrs={}):
         super(ForeignKeyRawIdWidget, self).__init__(attrs={'class': CLASS_TARGEID})
 
-#class ExtendedforeignKeyRawIdWidget(forms.Select):
-#    def render(self, name, value, attrs=None):
-#        s = super(ExtendedforeignKeyRawIdWidget, self).render(name, value, attrs)
-#        return u'%s asdfasdf' % s
-
 class ExtendedRelatedFieldWidgetWrapper(widgets.RelatedFieldWidgetWrapper):
     def __call__(self, name, value, *args, **kwargs):
-        from django.utils.safestring import mark_safe
         rel_to = self.rel.to
         related_url = '../../../%s/%s/%s' % (rel_to._meta.app_label, rel_to._meta.object_name.lower(), value)
         output = [self.render_func(name, value, *args, **kwargs)]
@@ -56,6 +51,7 @@ class RichTextAreaWidget(forms.Textarea):
         super(RichTextAreaWidget, self).__init__(attrs={'class': CLASS_RICHTEXTAREA})
 
 class ListingCategoryWidget(forms.Select):
+    """register javascript for duplicating main category to edit inline listing"""
     class Media:
         js = (
             settings.ADMIN_MEDIA_PREFIX + JS_LISTING_CATEGORY,
@@ -72,6 +68,7 @@ class IncrementWidget(forms.TextInput):
         super(IncrementWidget, self).__init__(attrs={'class': 'increment'})
 
 class ParagraphInputWidget(forms.HiddenInput):
+    """show value without simpe way editing it"""
     def render(self, name, value, attrs=None):
         return mark_safe(u'<p>%s</p>%s' % (value, super(self.__class__, self).render(name, value, attrs)))
 

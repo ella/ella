@@ -1,16 +1,22 @@
-import datetime
+from datetime import datetime
 
 from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.core.paginator import ObjectPaginator
 from django.conf import settings
+from django.template.defaultfilters import slugify
+from django.db import models
+from django.http import Http404
 
 from ella.core.models import Listing, Category, HitCount
-from ella.core.cache import *
+from ella.core.cache import get_cached_list, get_cached_object_or_404, method_key_getter, cache_this
 from ella.core.custom_urls import dispatcher
 
+
 CONTENT_TYPE_MAPPING = {}
+
+
 def get_content_type(ct_name):
     """
     A helper function that returns ContentType object based on its slugified verbose_name_plural.
@@ -26,8 +32,6 @@ def get_content_type(ct_name):
     try:
         ct = CONTENT_TYPE_MAPPING[ct_name]
     except KeyError:
-        from django.db import models
-        from django.template.defaultfilters import slugify
         for model in models.get_models():
             if ct_name == slugify(model._meta.verbose_name_plural):
                 ct = ContentType.objects.get_for_model(model)
@@ -138,13 +142,13 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
     kwa = {}
     dates_kwa = {}
     if year:
-        current_date = datetime.datetime(int(year), 1, 1)
+        current_date = datetime(int(year), 1, 1)
         dates_kwa['publish_from__year'] = int(year)
         date_kind = 'month'
 
     if month:
         try:
-            current_date = datetime.datetime(int(year), int(month), 1)
+            current_date = datetime(int(year), int(month), 1)
         except ValueError:
             raise Http404
         dates_kwa['publish_from__month'] = int(month)
@@ -152,7 +156,7 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
 
     if day:
         try:
-            current_date = datetime.datetime(int(year), int(month), int(day))
+            current_date = datetime(int(year), int(month), int(day))
         except ValueError:
             raise Http404
         dates_kwa['publish_from__day'] = int(day)

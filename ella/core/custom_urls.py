@@ -1,8 +1,9 @@
 from django.http import Http404
 from django.template.defaultfilters import slugify
 
+
 ALL = '__ALL__'
-ROOT = '__ROOT__'
+
 
 class DetailDispatcher(object):
     """
@@ -88,3 +89,4 @@ class DetailDispatcher(object):
         return view(request, bits[1:], context)
 
 dispatcher = DetailDispatcher()
+

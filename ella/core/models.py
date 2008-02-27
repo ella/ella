@@ -4,18 +4,22 @@ from django.db import models, transaction
 from django.core.urlresolvers import reverse
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
-from django.contrib import admin
 from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext_lazy as _
+from django.conf import settings
+from django.utils.safestring import mark_safe
+from django.contrib.auth.models import User
+from django.template import loader
 
 from ella.core.box import Box
-from ella.core.managers import *
+from ella.core.managers import ListingManager, HitCountManager, DependencyManager
+from ella.core.cache import get_cached_object, cache_this
+
 
 class Author(models.Model):
-    from django.contrib.auth.models import User
     user = models.ForeignKey(User, blank=True, null=True)
     name = models.CharField(_('Name'), max_length=200, blank=True)
-    slug = models.CharField(_("Slug"), max_length=200)
+    slug = models.CharField(_('Slug'), max_length=200)
     #photo = models.ImageField(_('Photo'), upload_to='photos/%Y/%m/%d', blank=True)
     description = models.TextField(_('Description'), blank=True)
     text = models.TextField(_('Text'), blank=True)
@@ -123,7 +127,6 @@ class Category(models.Model):
         return '%s/%s' % (self.site.name, self.tree_path)
 
     def base_template(self):
-        from django.template import loader
         t_list =  (
                 'page/category/%s/base_category.html' % (self.path),
                 'page/base_category.html',
@@ -219,7 +222,6 @@ class Listing(models.Model):
         return (now > self.publish_from)
 
     def full_url(self):
-        from django.utils.safestring import mark_safe
         return mark_safe('<a href="%s">url</a>' % self.get_absolute_url())
     full_url.allow_tags = True
 
@@ -317,6 +319,7 @@ class Dependency(models.Model):
         verbose_name_plural = _('Dependencies')
         ordering = ('source_ct', 'source_id',)
         unique_together = (('target_key', 'source_key',),)
+
 
 from ella.core import register
 del register

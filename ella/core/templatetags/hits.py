@@ -2,7 +2,10 @@ from django import template
 
 from ella.core.models import HitCount
 
+
 register = template.Library()
+
+
 class TopVisitedNode(template.Node):
     def __init__(self, count, name, mods=None):
         self.count, self.name, self.mods = count, name, mods
@@ -48,3 +51,4 @@ def do_top_visited(parser, token):
         mods.append(model)
 
     return TopVisitedNode(count, bits[-1], mods)
+

@@ -7,7 +7,9 @@ from django.contrib.contenttypes.models import ContentType
 from ella.core.cache import get_cached_object, cache_this, method_key_getter
 from ella.core.cache.invalidate import CACHE_DELETER
 
+
 DEFAULT_LISTING_PRIORITY = getattr(settings, 'DEFAULT_LISTING_PRIORITY', 0)
+
 
 class RelatedManager(models.Manager):
     """
@@ -16,9 +18,8 @@ class RelatedManager(models.Manager):
     def get_query_set(self):
         return super(RelatedManager, self).get_query_set().select_related()
 
-def invalidate_listing(key, *args, **kwargs):
-    from ella.core.models import Listing
-    CACHE_DELETER.register_test(Listing, lambda x: True, key)
+def invalidate_listing(key, self, *args, **kwargs):
+    CACHE_DELETER.register_test(self.model, lambda x: True, key)
 
 class ListingManager(RelatedManager):
     def clean_listings(self):
@@ -93,23 +94,19 @@ class ListingManager(RelatedManager):
                 offset -= q.count()
         return out
 
-def test_hitcount(*args, **kwargs):
-    return []
-
 def get_top_objects_key(func, self, count, mods=[]):
     return method_key_getter(func, self, settings.SITE_ID, count, mods)
 
 class HitCountManager(models.Manager):
     def hit(self, obj):
-        # TODO FIXME: optimizations and thread safety
+        # TODO: optimizations and thread safety - UPSERT needed
         target_ct = ContentType.objects.get_for_model(obj)
         try:
             hc = self.get(target_ct=target_ct, target_id=obj._get_pk_val())
             hc.last_seen = datetime.now()
             hc.hits += 1
         except models.ObjectDoesNotExist:
-            from ella.core.models import HitCount
-            hc = HitCount(target_ct=target_ct, target_id=obj._get_pk_val())
+            hc = self.model(target_ct=target_ct, target_id=obj._get_pk_val())
             hc.site_id = settings.SITE_ID
         hc.save()
 
@@ -125,12 +122,11 @@ class HitCountManager(models.Manager):
 
 class DependencyManager(RelatedManager):
     def report_dependency(self, source, source_key, target, target_key):
-        from ella.core.models import Dependency
         source_ct = ContentType.objects.get_for_model(source)
         target_ct = ContentType.objects.get_for_model(target)
         try:
             get_cached_object(
-                        Dependency,
+                        self.model,
                         source_ct=source_ct,
                         source_id=source._get_pk_val(),
                         source_key=source_key,
@@ -139,7 +135,7 @@ class DependencyManager(RelatedManager):
                         target_id=target._get_pk_val(),
                         target_key=target_key
 )
-        except Dependency.DoesNotExist:
+        except self.model.DoesNotExist:
             try:
                 dep = self.create(
                             source_ct=source_ct,

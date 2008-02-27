@@ -1,11 +1,13 @@
 from django.contrib import admin
-from django.utils.translation import ugettext
+from django.utils.translation import ugettext as _
 from django import newforms as forms
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 
+from ella.ellaadmin import widgets
 from ella.core.middleware import get_current_request
-from ella.core.models import *
+from ella.core.models import Author, Source, Category, Listing, HitCount, Dependency
+
 
 class ListingInlineFormset(generic.GenericInlineFormset):
     def clean (self):
@@ -25,28 +27,28 @@ class ListingInlineFormset(generic.GenericInlineFormset):
 
                 for o in qset:
                     if o.main_listing and o.main_listing.publish_from.date() == d['publish_from'].date():
-                        raise forms.ValidationError(ugettext('There is already an object published in category %(category)s with slug %(slug)s on %(date)s') % {
+                        raise forms.ValidationError(
+                                _('There is already an object published in category %(category)s with slug %(slug)s on %(date)s') % {
                                     'slug' : obj.slug,
                                     'category' : obj.category,
                                     'date' : d['publish_from'].date(),
 })
 
             elif d['hidden']:
-                raise forms.ValidationError, ugettext('Only main listing can be hidden.')
+                raise forms.ValidationError, _('Only main listing can be hidden.')
 
         # the main listing not present
         if main is None:
-            from ella.core.models import Listing
             try:
                 # try to retrieve it from db
                 main = Listing.objects.get(category=cat, target_ct=ContentType.objects.get_for_model(obj), target_id=obj._get_pk_val())
                 main = main.__dict__
             except Listing.DoesNotExist:
-                raise forms.ValidationError, ugettext('If an object has a listing, it must have a listing in its main category.')
+                raise forms.ValidationError, _('If an object has a listing, it must have a listing in its main category.')
 
         if main['publish_from'] != min([ main['publish_from'] ] + [ d['publish_from'] for d in self.cleaned_data]):
             # TODO: move the error to the form that is at fault
-            raise forms.ValidationError, ugettext('No listing can start sooner than main listing')
+            raise forms.ValidationError, _('No listing can start sooner than main listing')
 
         return self.cleaned_data
 
@@ -72,7 +74,6 @@ class ListingInlineOptions(generic.GenericTabularInline):
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'category':
-            from ella.ellaadmin import widgets
             kwargs['widget'] = widgets.ListingCategoryWidget
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
@@ -86,7 +87,6 @@ class HitCountInlineOptions(generic.GenericTabularInline):
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'hits':
-            from ella.ellaadmin import widgets
             kwargs['widget'] = widgets.ParagraphInputWidget
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
@@ -110,6 +110,7 @@ class HitCountOptions(admin.ModelAdmin):
 
 class AuthorOptions(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
+
 
 admin.site.register(HitCount, HitCountOptions)
 admin.site.register(Category, CategoryOptions)

@@ -2,14 +2,17 @@ from django.conf import settings
 from django import template
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ObjectDoesNotExist, ImproperlyConfigured
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils.encoding import smart_str, force_unicode
+from django.template import loader
 
 from ella.core.models import Listing, Dependency, Related, Category
-from ella.core.box import *
 from ella.core.cache.utils import get_cached_object
+from ella.core.box import BOX_INFO, MEDIA_KEY, Box
+
 
 register = template.Library()
+
 
 class ListingNode(template.Node):
     def __init__(self, var_name, parameters, parameters_to_resolve):
@@ -262,10 +265,6 @@ def do_static_box(parser, token):
         level = None
 
     return StaticBoxNode(bits[1], level)
-
-@register.inclusion_tag('core/box_media.html', takes_context=True)
-def box_media(context):
-    return {'media' : context.dicts[-1].get(MEDIA_KEY, None)}
 
 @register.filter
 def render(object, content_path):

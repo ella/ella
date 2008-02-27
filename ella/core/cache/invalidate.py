@@ -1,14 +1,14 @@
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
 from django.core.cache import cache
-from django.contrib.contenttypes.models import ContentType
 from django.dispatch import dispatcher
 from django.db.models import signals
 from django.conf import settings
 from django.utils.datastructures import MultiValueDict
 
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
 
 class CacheDeleter(object):
     def __init__(self):

@@ -1,7 +1,10 @@
 from django import template
 
+
 register = template.Library()
 
+
+@register.inclusion_tag('inclusion_tags/paginator.html', takes_context=True)
 def paginator(context, adjacent_pages=2):
     """
     To be used in conjunction with the object_list generic view.
@@ -27,6 +30,4 @@ def paginator(context, adjacent_pages=2):
         'show_first': 1 not in page_numbers,
         'show_last': context['pages'] not in page_numbers,
 }
-
-register.inclusion_tag('inclusion_tags/paginator.html', takes_context=True)(paginator)
 

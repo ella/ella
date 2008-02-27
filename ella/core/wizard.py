@@ -26,14 +26,19 @@ USAGE:
         {% endfor %}
 
 """
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+import md5
+
 from django.conf import settings
 from django.http import Http404
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
-
+from django.utils.safestring import mark_safe
 from django import newforms as forms
-import cPickle as pickle
-import md5
+
 
 class Wizard(object):
     PREFIX="%d"
@@ -176,7 +181,6 @@ class Wizard(object):
                 hashes for finished forms and old data in form of hidden fields
             any additional data stored in self.extra_context
         """
-        from django.utils.safestring import mark_safe
         return render_to_response(self.get_template(), dict(
                     step_field=self.STEP_FIELD,
                     step=self.step,

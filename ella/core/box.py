@@ -1,3 +1,4 @@
+from md5 import md5
 try:
     import cPickle as pickle
 except ImportError:
@@ -10,8 +11,11 @@ from django.conf import settings
 
 from ella.core.cache.invalidate import CACHE_DELETER
 
+
 BOX_INFO = 'ella.core.box.BOX_INFO'
 MEDIA_KEY = 'ella.core.box.MEDIA_KEY'
+
+
 class Box(object):
     """
     Base Class that handles the boxing mechanism.
@@ -94,7 +98,7 @@ class Box(object):
         t_list = []
         if hasattr(self.obj, 'category_id') and self.obj.category_id:
             from ella.core.models import Category
-            from ella.core.cache.utils import get_cached_object
+            from ella.core.cache import get_cached_object
             cat = get_cached_object(Category, pk=self.obj.category_id)
             base_path = 'box/category/%s/content_type/%s.%s/' % (cat.path, self.obj._meta.app_label, self.obj._meta.module_name)
             if hasattr(self.obj, 'slug'):
@@ -150,15 +154,13 @@ class Box(object):
         return {'js' : js, 'css' : css,}
 
     def get_cache_key(self):
-        import md5
-        return md5.md5(
-                pickle.dumps((
-                        'ella.core.box.Box.render',
-                        settings.SITE_ID,
-                        self.obj.__class__.__name__,
-                        self.box_type,
-                        self.obj._get_pk_val(),
-                        [ (key, self.params[key]) for key in sorted(self.params.keys()) ]
-)
-)
-).hexdigest()
+        dumps = pickle.dumps((
+                    'ella.core.box.Box.render',
+                    settings.SITE_ID,
+                    self.obj.__class__.__name__,
+                    self.box_type,
+                    self.obj._get_pk_val(),
+                    [ (key, self.params[key]) for key in sorted(self.params.keys()) ]
+))
+        return md5(dumps).hexdigest()
+

@@ -3,6 +3,7 @@ from django.conf.urls.defaults import *
 from ella.core.views import object_detail, list_content_type, category_detail, home
 from ella.core.feeds import RSSTopCategoryListings, AtomTopCategoryListings
 
+
 feeds = {
     'rss' : RSSTopCategoryListings,
     'atom' : AtomTopCategoryListings,
@@ -64,3 +65,4 @@ urlpatterns = patterns('',
     url(r'^(?P<category>[a-z0-9-/]+)/$', category_detail, name="category_detail"),
 
 )
+

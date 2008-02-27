@@ -1,5 +1,4 @@
-import md5
-
+from md5 import md5
 try:
     import cPickle as pickle
 except ImportError:
@@ -14,6 +13,8 @@ from ella.core.cache.invalidate import CACHE_DELETER
 
 
 KEY_FORMAT_LIST = 'ella.core.cache.utils.get_cached_list'
+
+
 def get_cached_list(model, **kwargs):
     """
     Return a cached list. If the list does not exist in the cache, create it
@@ -27,15 +28,13 @@ def get_cached_list(model, **kwargs):
     if isinstance(model, ContentType):
         model = model.model_class()
 
-    key = md5.md5(
-                pickle.dumps((
-                    KEY_FORMAT_LIST,
-                    model._meta.app_label,
-                    model._meta.object_name.lower(),
-                    [ (key, kwargs[key]) for key in sorted(kwargs.keys()) ]
-)
-)
-).hexdigest()
+    dumps = pickle.dumps((
+                KEY_FORMAT_LIST,
+                model._meta.app_label,
+                model._meta.object_name.lower(),
+                [ (key, kwargs[key]) for key in sorted(kwargs.keys()) ]
+))
+    key = md5(dumps).hexdigest()
 
     l = cache.get(key)
     if l is None:
@@ -62,15 +61,13 @@ def get_cached_object(model, **kwargs):
     if isinstance(model, ContentType):
         model = model.model_class()
 
-    key = md5.md5(
-            pickle.dumps((
-                    KEY_FORMAT_OBJECT,
-                    model._meta.app_label,
-                    model._meta.object_name.lower(),
-                    [ (key, kwargs[key]) for key in sorted(kwargs.keys()) ]
-)
-)
-).hexdigest()
+    dumps = pickle.dumps((
+                KEY_FORMAT_OBJECT,
+                model._meta.app_label,
+                model._meta.object_name.lower(),
+                [ (key, kwargs[key]) for key in sorted(kwargs.keys()) ]
+))
+    key = md5(dumps).hexdigest()
 
     obj = cache.get(key)
     if obj is None:
@@ -91,17 +88,14 @@ def get_cached_object_or_404(model, **kwargs):
         raise Http404
 
 def method_key_getter(func, *args, **kwargs):
-    import md5
-    return md5.md5(
-                pickle.dumps((
-                        'ella.core.cache.utils.method_key_getter',
-                        func.__module__,
-                        func.__name__,
-                        args[1:],
-                        [ (key, kwargs[key]) for key in sorted(kwargs.keys()) ]
-)
-)
-).hexdigest()
+    dumps = pickle.dumps((
+                'ella.core.cache.utils.method_key_getter',
+                func.__module__,
+                func.__name__,
+                args[1:],
+                [ (key, kwargs[key]) for key in sorted(kwargs.keys()) ]
+))
+    return md5(dumps).hexdigest()
 
 def cache_this(key_getter, invalidator=None, timeout=10*60):
     def wrapped_decorator(func):
