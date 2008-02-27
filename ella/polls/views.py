@@ -35,6 +35,14 @@ POLL_USER_NO_CHOICE = 3
 
 CURRENT_SITE = Site.objects.get_current()
 
+# UTILS:
+def get_template(poll_type, template_name, path, slug):
+    return (
+        'page/category/%s/content_type/polls.%s/%s/%s.html' % (path, poll_type, slug, template_name,),
+        'page/category/%s/content_type/polls.%s/%s.html' % (path, poll_type, template_name,),
+        'page/content_type/polls.%s/%s.html' % (poll_type, template_name),
+)
+
 def check_vote(request, poll):
     sess_jv = request.session.get(POLLS_JUST_VOTED_COOKIE_NAME, [])
     # removing just voted info from session
@@ -179,11 +187,7 @@ def contest_vote(request, context):
             'activity_active' : ACTIVITY_ACTIVE,
             'activity_closed' : ACTIVITY_CLOSED
 })
-    return render_to_response((
-                'page/category/%s/content_type/polls.contest/%s/form.html' % (context['category'].path, contest.slug),
-                'page/category/%s/content_type/polls.contest/form.html' % context['category'].path,
-                'page/content_type/polls.contest/form.html',
-),
+    return render_to_response(get_template('contest', 'form', context['category'].path, contest.slug),
             context,
             context_instance=RequestContext(request)
 )
@@ -265,7 +269,6 @@ class ContestantForm(forms.Form):
         # TODO - antispam
         return self.cleaned_data
 
-
 @transaction.commit_on_success
 def contest_finish(request, context, qforms, contestant_form):
     contest = context['object']
@@ -276,11 +279,7 @@ def contest_finish(request, context, qforms, contestant_form):
                 'forms' : qforms,
                 'contestant_form' : contestant_form,
 })
-        return render_to_response((
-                    'page/category/%s/content_type/polls.contest/%s/form.html' % (context['category'].path, contest.slug),
-                    'page/category/%s/content_type/polls.contest/form.html' % context['category'].path,
-                    'page/content_type/polls.contest/form.html',
-),
+        return render_to_response(get_template('contest', 'form', context['category'].path, contest.slug),
                 context,
                 context_instance=RequestContext(request)
 )
@@ -306,11 +305,7 @@ def contest_result(request, bits, context):
         raise Http404
 
     return render_to_response(
-            (
-                'page/category/%s/content_type/polls.contest/%s/result.html' % (context['category'].path, context['object'].slug),
-                'page/category/%s/content_type/polls.contest/result.html' % context['category'].path,
-                'page/content_type/polls.contest/result.html',
-),
+            get_template('contest', 'result', context['category'].path, context['object'].slug),
             context,
             context_instance=RequestContext(request)
 )
@@ -320,11 +315,7 @@ def contest_conditions(request, bits, context):
         raise Http404
 
     return render_to_response(
-            (
-                'page/category/%s/content_type/polls.contest/%s/conditions.html' % (context['category'].path, context['object'].slug),
-                'page/category/%s/content_type/polls.contest/conditions.html' % context['category'].path,
-                'page/content_type/polls.contest/conditions.html',
-),
+            get_template('contest', 'conditions', context['category'].path, context['object'].slug),
             context,
             context_instance=RequestContext(request)
 )
@@ -339,16 +330,8 @@ class ContestWizard(Wizard):
 
     def get_template(self):
         if (self.step + 1) < len(self.form_list):
-            return (
-                    'page/category/%s/content_type/polls.contest/%s/step.html' % (self.contest.category.path, self.contest.slug),
-                    'page/category/%s/content_type/polls.contest/step.html' % self.contest.category.path,
-                    'page/content_type/polls.contest/step.html',
-)
-        return (
-                'page/category/%s/content_type/polls.contest/%s/contestant_form.html' % (self.contest.category.path, self.contest.slug),
-                'page/category/%s/content_type/polls.contest/contestant_form.html' % self.contest.category.path,
-                'page/content_type/polls.contest/contestant_form.html',
-)
+            return get_template('contest', 'step', self.contest.category.path, self.contest.slug),
+        return get_template('contest', 'contestant_form', self.contest.category.path, self.contest.slug),
 
     def process_step(self, request, form, step):
         if (step + 1) < len(self.form_list):
@@ -367,11 +350,7 @@ class QuizWizard(Wizard):
         super(QuizWizard, self).__init__(form_list)
 
     def get_template(self):
-        return (
-                'page/category/%s/content_type/polls.quiz/%s/step.html' % (self.quiz.category.path, self.quiz.slug),
-                'page/category/%s/content_type/polls.quiz/step.html' % self.quiz.category.path,
-                'page/content_type/polls.quiz/step.html',
-)
+        return get_template('quiz', 'step', self.quiz.category.path, self.quiz.slug)
 
     def process_step(self, request, form, step):
         if (step + 1) < len(self.form_list):
@@ -406,11 +385,7 @@ class QuizWizard(Wizard):
 }
 )
         return render_to_response(
-                (
-                    'page/category/%s/content_type/polls.quiz/%s/result.html' % (self.quiz.category.path, self.quiz.slug),
-                    'page/category/%s/content_type/polls.quiz/result.html' % self.quiz.category.path,
-                    'page/content_type/polls.quiz/result.html',
-),
+                get_template('quiz', 'result', self.quiz.category.path, self.quiz.slug),
                 self.extra_context,
                 context_instance=RequestContext(request)
 )
@@ -440,11 +415,7 @@ def result_details(request, bits, context):
     context['questions'] = questions
 
     return render_to_response(
-            (
-                'page/category/%s/content_type/polls.quiz/%s/result_detail.html' % (context['category'].path, quiz.slug),
-                'page/category/%s/content_type/polls.quiz/result_detail.html' % context['category'].path,
-                'page/content_type/polls.quiz/result_detail.html',
-),
+            get_template('quiz', 'result_detail', context['category'].path, quiz.slug),
             context,
             context_instance=RequestContext(request)
 )
