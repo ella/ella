@@ -119,7 +119,7 @@ class ImageStretch(ImageOperation):
                 if fpi.crop_width < self.__fmt_width and fpi.crop_height < self.__fmt_height:
                     if fpi.format.stretch:
                         # resize image to fit format
-                        stretched_photo = cropped_photo.resize(get_stretch_dimension(fpi, flex), Image.ANTIALIAS)
+                        stretched_photo = cropped_photo.resize(self.__get_stretch_dimension(flex), Image.ANTIALIAS)
                     else:
                         stretched_photo = cropped_photo
 
