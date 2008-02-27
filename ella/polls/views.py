@@ -44,6 +44,18 @@ def get_template(poll_type, template_name, path, slug):
 )
 
 def check_vote(request, poll):
+    """
+    To avoid multiple poll votes of the same user.
+
+    Uses sessions (authenticatedd users) or cookies (annonymous users) at first.
+    Then it looks it up in Votes.
+
+    Return choices:
+     * User not yet voted
+     * User just voted
+     * User allready voted
+     * User try to vote with no choice (usefull to display a message in a Poll box)
+    """
     sess_jv = request.session.get(POLLS_JUST_VOTED_COOKIE_NAME, [])
     # removing just voted info from session
     if poll.id in sess_jv:
@@ -69,8 +81,8 @@ def check_vote(request, poll):
         cook = request.COOKIES.get(POLLS_COOKIE_NAME, '').split(',')
         if str(poll.id) in cook:
             return POLL_USER_ALLREADY_VOTED
-        #if Vote.objects.filter(poll=poll, ip_address=request.META['REMOTE_ADDR']).count() > 0:
-        #    return POLL_USER_ALLREADY_VOTED
+        if Vote.objects.filter(poll=poll, ip_address=request.META['REMOTE_ADDR']).count() > 0:
+            return POLL_USER_ALLREADY_VOTED
         return POLL_USER_NOT_YET_VOTED
 
 @require_POST
@@ -254,9 +266,6 @@ def QuestionForm(question):
 
 
 class ContestantForm(forms.Form):
-    """
-    Contestant form
-    """
     name = Contestant._meta.get_field('name').formfield()
     surname = Contestant._meta.get_field('surname').formfield()
     email = Contestant._meta.get_field('email').formfield()

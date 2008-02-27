@@ -20,9 +20,20 @@ ACTIVITY_CLOSED = 2
 
 
 class FloatingStateModel(object):
+    """
+    Objects life-cycles depends on its activity datetimes
 
+                | NOT_YET_ACTIVE
+    active_from +---------------
+                | ACTIVE
+    active_till +---------------
+                | CLOSED
+    """
     @property
     def current_text(self):
+        """
+        Objects text content depends on its current life-cycle stage
+        """
         a = self.current_activity_state
         if a is ACTIVITY_NOT_YET_ACTIVE:
             return self.text_announcement
@@ -33,6 +44,9 @@ class FloatingStateModel(object):
 
     @property
     def current_activity_state(self):
+        """
+        Objects current life-cycle stage
+        """
         if self.active_till and self.active_till < datetime.now():
             return ACTIVITY_CLOSED
         elif self.active_from and self.active_from > datetime.now():
@@ -41,6 +55,9 @@ class FloatingStateModel(object):
             return ACTIVITY_ACTIVE
 
     def is_active(self):
+        """
+        Returns True if the object is in the ACTIVE life-cycle stage. Otherwise returns False
+        """
         if self.current_activity_state == ACTIVITY_ACTIVE:
             return True
         return False
@@ -76,10 +93,16 @@ class Contest(models.Model, Publishable, FloatingStateModel):
 )
 
     def correct_answers(self):
+        """
+        Admin's list column with a link to the list of contestants with correct answers on the current contest
+        """
         return mark_safe(u'<a href="%s/correct_answers/">%s - %s</a>' % (self.id, _('Correct Answers'), self.title))
     correct_answers.allow_tags = True
 
     def get_correct_answers(self):
+        """
+        Returns queryset of contestants with correct answers on the current contest
+        """
         count = Contestant.objects.filter(contest=self).count()
         return (Contestant.objects
             .filter(contest=self)
@@ -120,6 +143,9 @@ class Quiz(models.Model, Publishable, FloatingStateModel):
         return get_cached_list(Question, quiz=self)
 
     def get_result(self, points):
+        """
+        Returns cached quiz result by the reached points
+        """
         return get_cached_object(Result, quiz=self, points_from__lte=points, points_to__gte=points)
 
     def __unicode__(self):
@@ -165,6 +191,9 @@ class Question(models.Model):
         return self._form
 
     def is_test(self):
+        """
+        True if it is question of a Test object. Otherwise False (Polls, Quiz, ...)
+        """
         if not hasattr(self, '_is_test'):
             for ch in self.choices:
                 if ch.points == 0:
@@ -256,11 +285,17 @@ class Choice(models.Model):
     votes = models.IntegerField(_('Votes'), blank=True, null=True)
 
     def add_vote(self):
+        """
+        Add a vote dirrectly to DB
+        """
         cur = connection.cursor()
         cur.execute(UPDATE_VOTE, (self._get_pk_val(),))
         return True
 
     def get_percentage(self):
+        """
+        Compute and return percentage representation of choice object to its question's total votes
+        """
         t = get_cached_object(Question, pk=self.question_id).get_total_votes()
         p = 0
         if self.votes:
@@ -274,6 +309,7 @@ class Choice(models.Model):
         verbose_name = _('Choice')
         verbose_name_plural = _('Choices')
 
+# add_vote SQL query
 UPDATE_VOTE = '''
     UPDATE
         %(table)s
@@ -289,7 +325,7 @@ UPDATE_VOTE = '''
 
 class Vote(models.Model):
     """
-    User votes to ensure unique votes. For Polls only.
+    User votes records to ensure unique votes. For Polls only.
     """
     poll = models.ForeignKey(Poll, verbose_name=_('Poll'))
     user = models.ForeignKey(User, blank=True, null=True, verbose_name=_('User'))
@@ -323,6 +359,9 @@ class Contestant(models.Model):
 
     @property
     def points(self):
+        """
+        Parse choices represented as a string and returns reached points count
+        """
         points = 0
         for q in self.choices.split('|'):
             vs = q.split(':')
@@ -342,7 +381,7 @@ class Contestant(models.Model):
 
 class Result(models.Model):
     """
-    Quiz results for skills comparation.)
+    Quiz results for knowledge comparation.)
     """
     quiz = models.ForeignKey(Quiz, verbose_name=_('Quiz'))
     title = models.CharField(_('Title'), max_length=200, blank=True)
@@ -352,10 +391,16 @@ class Result(models.Model):
     count = models.IntegerField(_('Count'), blank=False, null=False)
 
     def total(self):
+        """
+        Returns count of displayed quiz results
+        """
         res = get_cached_list(Result, quiz=self.quiz)
         return sum(r.count for r in res)
 
     def percentage(self):
+        """
+        Returns percentage ratio of current Result views
+        """
         return self.count*100/self.total()
 
     def __unicode__(self):
