@@ -18,8 +18,10 @@ def gallery_func(func, value, param):
 
 @register.filter
 def gallery_offset(value, param):
+    " Helper template filter to calculate position of the preview pane. "
     return gallery_func(lambda x,y,z: (math.floor((x-1) / float(y))) * z, value, param)
 
 @register.filter
 def gallery_width(value, param):
+    " Helper template filter to calculate width of the preview pane. "
     return gallery_func(lambda x,y,z: (math.ceil(x / float(y))) * z, value, param)

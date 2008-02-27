@@ -54,16 +54,17 @@ def gallery_item_detail(request, context, item_slug=None):
 })
 
     return render_to_response(
-                [
+                (
                     'page/category/%s/content_type/galleries.gallery/%s/item.html' % (category.path, gallery.slug,),
                     'page/category/%s/content_type/galleries.gallery/item.html' % (category.path,),
                     'page/content_type/galleries.gallery/item.html',
-                ],
+),
                 context,
                 context_instance=RequestContext(request),
 )
 
 def items(request, bits, context):
+    " Wrapper around gallery_item_detail. "
     if len(bits) != 1:
         raise Http404
 
