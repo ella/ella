@@ -1,0 +1,26 @@
+========================
+Ella gallery application
+========================
+
+Gallery application is typicaly used for encapsulating photo gallery, but in
+fact it can carry any object that can be presented in any way to the end user.
+
+
+Features
+========
+
+- Every gallery item is given a slug unique in certain gallery.
+- Every item can be accessed by that unique slug
+- Galleries can carry any set of meaningful objects (set of articles,
+	contests, ...)
+
+
+Data models
+===========
+
+Gallery application consists of two basic data models.
+
+- Gallery: Holds gallery meta information (name, slug, etc..)
+- GalleryItem: Implements relation between specific Gallery and any data model
+	from any other application (but usualy photos.Photo)
+

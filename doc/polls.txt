@@ -1,0 +1,27 @@
+======================
+Ella polls application
+======================
+
+Polls application implements voting system for several diffrent interfaces:
+polls, quizes and contests.
+
+Features
+========
+- Every object can be opened for votes (active) in limited time period. There
+	are alternative texts to present in closed state.
+- Contests have one specific question ('Guess how many users will participate
+	in this contests:') which is used to help selecting winner from more users
+	with all correct ansers. Admin system has interface for that.
+
+
+Data models
+===========
+
+- Polls: Implements (usualy inline) simple polls with one question and one
+	possible answer. (E.g.: "Are you a vegetarian?" Yes/No)
+- Contest: Implements contest with questins, winners, and contestants contact
+	information. There are several questions with only one right answer.
+- Quiz: Quiz users answer questions with rated answers. User gets evaluation depending
+	on the total rating they achive. (Usage e.g.: "How good are you in
+	geography?")
+
