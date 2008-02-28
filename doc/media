@@ -1,0 +1,126 @@
+https://trac.netcentrum.cz/ella/wiki/ReseniMedia:
+
+==============
+aplikace Media
+==============
+
+Aplikace s vazbou na CMS Ella, vyuziva jeji databazi (EllaDB)
+a pripadne pozadavky z jinych systemu bude uspokojovat
+prostrednictvim `ella embeddingu <./ReseniEllaEmbedding/>`_.
+
+.. `[ReseniEllaEmbedding ella embeddingu]`:trac:
+
+V teto casti dokumentace budou popsany hlavni casti.
+
+Upload
+------
+
+- taha velke soubory, bere metainfromace `bere metainformace <./MediaUploadMeta/>`_
+
+- velke soubory (1d)
+
+  * prozkoumat propojeni na lighttpd
+  * nasadit streaming upload v Djangu
+
+- autorizace (1/2d)
+
+  * napojeni na Auth
+  * kontrolovani souctu cookie
+  * ?jak Upload vi, ze soubor neni verejny?
+
+- metainformace ve formulari (1h)
+- spocita hash souboru (ihned)
+- ulozi na Storage
+
+  * FS namountovany (ihned)
+  * FPT, ... (1/2d)
+
+- posila hash+meta do Message Queue (ihned)
+- v pripade `raw deduplikace <./MediaRawDeduplikace/>`_ posila signal svemu Encoderu (1/2d)
+
+.. `[MediaUploadMeta bere metainformace]`:trac:
+.. `[MediaRawDeduplikace raw deduplikace]`:trac:
+
+Message Queue (AcitveMQ)
+------------------------
+
+- nasazeni v Djangu (2d)
+- predbihani mezi pozadavky podle priority (Source+Format+priorita) (1d)
+- mozna uprava chovani
+
+  * zkus dorucit OR doruc jinam (??d)
+
+Ella
+----
+
+- modely (Source, FormattedFile, Format, ..) (1d)
+- boxy (+ API pro kodery) (1d + koder)
+- `embedovane renderovani <./ReseniEllaEmbedding>`_ (napr. v Aktualne) (?d)
+- kontroluje, zda nedostava jiz zpracovane soubory (podle hashe) (ihned)
+
+.. `[ReseniEllaEmbedding embedovane renderovani]`:trac:
+
+Encoder
+-------
+
+- co kdyz nema pristup k Source
+
+  * pokud nema na sve Storage pozadovany Source file zada o nej Maintenance (ihned)
+  * jiny pristup: neprijme pozadavek, .... (1d)
+
+- obsahuje prostredky na enkodovani (ffmpeg skripty, ...) - nasadit, odladit (2,3d)
+- vytvoreni RAW varianty + odesilaci minilogika (1d)
+- stavy: prijimam/neprijimam video (to muze byt ovlivneno pristupem k datum) (1d)
+- vytvoreny FormattedFile uklada na Storage a vysila signal (ihned)
+
+Maintenance
+-----------
+
+- ma pristup na vsechny Storage a do EllaDB
+- na pozadani (zpravou z Message Queue) kopiruje data ze Storage A na B
+- po obdrzeni zpravy ohledne vytvoreni FormattedFile
+  rozdistribuuje soubor do vsech Storage
+- ma pristup k:
+
+  * download statistikam
+  * vytizenosti (cpu, disk)
+
+- muze mazat
+
+
+--------------------------------------------------
+
+https://trac.netcentrum.cz/ella/wiki/ReseniEllaEmbedding:
+
+==============
+Ella Emdebbing
+==============
+
+napriklad pomoci SOAPu renderovat Ella box
+
+
+--------------------------------------------------
+
+https://trac.netcentrum.cz/ella/wiki/MediaUploadMeta:
+
+=====================
+Media upload metadata
+=====================
+
+Jaka metadata musim dostat spolecne se zdrojovym souborem?
+
+
+--------------------------------------------------
+
+https://trac.netcentrum.cz/ella/wiki/MediaRawDeduplikace:
+
+===============
+Raw deduplikace
+===============
+
+Reseni Media Source souboru, ve kterem Upload pouze prijme soubor
+a ulozi jej na Storage, rekne svemu Encoderu (signal, nebo primo?),
+ten odstrani zbytecna data ze souboru, spocita hash a teprve potom
+vyda signal na ulozeni v EllaDB
+Co je ovsem potom Source - puvodni original nebo RAW?
+
