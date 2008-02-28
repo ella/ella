@@ -12,6 +12,9 @@ Every model can be published in any number of categories
 URLs
 ====
 
+Standard urls definitions to be used in any Ella-based application can be found in
+``ella.core.urls``.
+
 Object detail
 -------------
 

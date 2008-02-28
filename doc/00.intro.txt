@@ -2,12 +2,19 @@
 Ella CMS
 ========
 
-Ella is a Content Management System based on Python web framework Django.
+Ella is a Content Management System based on `Python`_ web framework `Django`_.
 But for starting an application using Ella, only knowledge about
 adding Python modules to PYTHONPATH is essential.
 
-For creating site using Ella Django template language and some
-Django knowledge is necessary.
+It is a set of Django applications designed to work together. Thus, for
+details on deployment and configuration please refer to `Django documentation`_.
+
+For creating site using Ella, working knowledge of Django and its templating
+language is paramount.
+
+.. _Python: http://www.python.org/
+.. _Django: http://www.djangoproject.com/
+.. _Django documentation: http://www.djangoproject.com/documentation/
 
 Ella test
 =========
@@ -17,14 +24,15 @@ For starting first Ella project, there is simple howto screencast
 in ``./doc/`` directory (``./doc/ella_start.mpeg``).
 
 Small Ella project in ella_test directory is
-basically outcome of ``ella_start`` screencast.
+basically outcome of ``ella_start`` screencast. It represents minimal applcation
+built on Ella.
 
 Instalation
 ===========
 
-Almost all dependecies are copied here in this package,
+Almost all dependecies are distributed with Ella in this package,
 There are some other dependecies, but they are
-common in any linux distriution even in windows platforms.
+common in any linux distriution and even on Windows platforms.
 
 Prerequisities not contained in this package:
 
@@ -37,14 +45,17 @@ Main python modules found in here:
 
  * python-feedparser
  * python-markdown
- * python-memcache (if you enable caching)
- * python-stomp (if you run more than one process)
+ * python-memcache (if you enable caching via `memcached`_)
+ * python-stomp (if you run more than one process and wish to use cache
+   invalidation via `ActiveMQ`_)
 
 Directory ``./ella_test/pythonpath`` can be used
 as base for PYTHONPATH enviroment variable.
 
 Ella has ``setup.py`` for python-distutils installation.
 
+.. _memcached: http://www.danga.com/memcached/
+.. _ActiveMQ: http://activemq.apache.org/
 
 .. raw:: latex
 
