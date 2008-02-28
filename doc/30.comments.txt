@@ -36,8 +36,3 @@ Also you can use special inclusion tag::
 
 With this inclusion tag you can create nested (threded) comments' list.
 
-
-.. raw:: latex
-
-   \newpage
-

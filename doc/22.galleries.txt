@@ -24,8 +24,3 @@ Gallery application consists of two basic data models.
 - GalleryItem: Implements relation between specific Gallery and any data model
 	from any other application (but usualy photos.Photo)
 
-
-.. raw:: latex
-
-   \newpage
-

@@ -53,8 +53,3 @@ Where ``context`` is the same dictionary as with custom actions.
 
 ``HitCount`` for the object is incremented even when using custom detail view.
 
-
-.. raw:: latex
-
-   \newpage
-

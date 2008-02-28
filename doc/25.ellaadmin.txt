@@ -1,0 +1,21 @@
+=====================
+Ellaadmin application
+=====================
+
+Features
+========
+
+Wrapper around newforms admin. It changes some form widgets in one place
+and adds javascript helpers. Even for non-Ella applications.
+
+There is small starter for stronger admin permissions based on site and category.
+
+Installation
+============
+
+Only a small notice about installation ellaadmin app.
+Because it extends some ``django.contrib.admin`` templates
+symlink called ``admin_orig`` to ``django/contrib/admin/templates/admin``
+must be created. And ``ella.ellaadmin`` application must in be INSTALLED_APPS
+before ``django.contrib.admin``.
+

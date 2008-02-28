@@ -57,7 +57,3 @@ Ella has ``setup.py`` for python-distutils installation.
 .. _memcached: http://www.danga.com/memcached/
 .. _ActiveMQ: http://activemq.apache.org/
 
-.. raw:: latex
-
-   \newpage
-

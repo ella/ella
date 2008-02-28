@@ -18,8 +18,3 @@ Data models
 - Server: Source server configuration and type
 - ServerItem: Specific item to be imported
 
-
-.. raw:: latex
-
-   \newpage
-
