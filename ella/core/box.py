@@ -74,7 +74,8 @@ class Box(object):
 
         return {
                 'content_type_name' : '.'.join((self.obj._meta.app_label, self.obj._meta.module_name)),
-                'content_type_verbose_name' : self.obj._meta.verbose_name_plural,
+                'content_type_verbose_name' : self.obj._meta.verbose_name,
+                'content_type_verbose_name_plural' : self.obj._meta.verbose_name_plural,
                 'object' : self.obj,
                 'level' : level,
                 'next_level' : level + 1,
