@@ -1,0 +1,47 @@
+========
+Ella CMS
+========
+
+Ella is a Content Management System based on Python web framework Django.
+But for starting an application using Ella, only knowledge about
+adding Python modules to PYTHONPATH is essential.
+
+For creating site using Ella Django template language and some
+Django knowledge is necessary.
+
+Ella test
+=========
+
+In Django terms an application is called project.
+For starting first Ella project, there is simple howto screencast
+in ``./doc/`` directory (``./doc/ella_start.mpeg``).
+
+Small Ella project in ella_test directory is
+basically outcome of ``ella_start`` screencast.
+
+Instalation
+===========
+
+Almost all dependecies are copied here in this package,
+There are some other dependecies, but they are
+common in any linux distriution even in windows platforms.
+
+Prerequisities not contained in this package:
+
+ * python-docutils
+ * python-imaging
+
+Main python modules found in here:
+
+ * django (patched newforms admin version)
+
+ * python-feedparser
+ * python-markdown
+ * python-memcache (if you enable caching)
+ * python-stomp (if you run more than one process)
+
+Directory ``./ella_test/pythonpath`` can be used
+as base for PYTHONPATH enviroment variable.
+
+Ella has ``setup.py`` for python-distutils installation.
+

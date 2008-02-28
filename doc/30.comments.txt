@@ -3,10 +3,14 @@ Ella universal commenting system
 ================================
 
 This application is inspired by django.contrib.comments
-but the major difference between them is ella.comments
+but the major difference between them is that ella.comments
 is using newforms from django trunk.
 
-Also there is used only one model in ella.comments.
+There is used only one model in ella.comments instead of two
+for free and authorized in django.contrib.comments.
+
+Every comment has got Foreign key to its parent, this gives it
+the ability to traverse comments and print them as threads.
 
 Set up is pretty easy as is installing any other django application::
 
@@ -16,7 +20,7 @@ Set up is pretty easy as is installing any other django application::
         [...]
     )
 
-And after then you have got full access to usefull templatetags::
+After then you have got full access to usefull templatetags::
 
     {% load comments %}
 
@@ -29,4 +33,6 @@ Also you can use special inclusion tag::
     {% get_comment_list for object as comment_list %}
     {% for comment in comment_list %}
     {% print_comment comment %}
+
+With this inclusion tag you can create nested (threded) comments' list.
 

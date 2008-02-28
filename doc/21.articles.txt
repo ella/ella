@@ -1,0 +1,16 @@
+=========================
+Ella Articles application
+=========================
+
+Simple django application for managing Articles.
+An article is typical publishable object,
+which means, if you define slug field and category,
+you can create listing for it and as a result
+you have got url address for this object.
+
+Features
+========
+
+- every Artcile has one or more contents
+- for really dummy usage, there is InfoBox model
+
