@@ -191,9 +191,6 @@ class Question(models.Model):
         return self._form
 
     def is_test(self):
-        """
-        True if it is question of a Test object. Otherwise False (Polls, Quiz, ...)
-        """
         if not hasattr(self, '_is_test'):
             for ch in self.choices:
                 if ch.points == 0:
