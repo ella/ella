@@ -1,4 +1,5 @@
 from django import template
+from django.template import TemplateSyntaxError
 from django.conf import settings
 
 from ella.utils.templatetags import parse_getforas_triplet
@@ -41,7 +42,7 @@ def position(parser, token):
     elif len(bits) == 6 and bits[2] == 'for' and bits[4] == 'using':
         pos_name, category, box_type = bits[1], bits[3], bits[5]
     else:
-        raise TemplateSyntaxError, 'Invalid syntex: {% position POSITION_NAME for CATEGORY [nofallback] %}'
+        raise TemplateSyntaxError, 'Invalid syntax: {% position POSITION_NAME for CATEGORY [nofallback] %}'
 
 
     return PositionNode(category, pos_name, nodelist, box_type, nofallback)
@@ -93,7 +94,7 @@ def ifposition(parser, token):
     elif len(bits) == 6 and bits[2] == 'for' and bits[4] == 'using':
         pos_name, category, box_type = bits[1], bits[3], bits[5]
     else:
-        raise TemplateSyntaxError, 'Invalid syntex: {% position POSITION_NAME for CATEGORY [nofallback] %}'
+        raise TemplateSyntaxError, 'Invalid syntax: {% position POSITION_NAME for CATEGORY [nofallback] %}'
 
     nodelist_true = parser.parse(('else', end_tag))
     token = parser.next_token()
