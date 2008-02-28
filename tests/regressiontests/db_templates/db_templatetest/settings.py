@@ -78,6 +78,7 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
+    'ella.core',
     'ella.db_templates',
     'template_sample',
 )
