@@ -24,3 +24,8 @@ Position
 - box name and box definition can be overriden
 - activity: position can be defined in time
 
+
+.. raw:: latex
+
+   \newpage
+

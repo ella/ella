@@ -81,3 +81,7 @@ name. The lookup hierarchy for boxes is:
     * box/box.html
 
 
+.. raw:: latex
+
+   \newpage
+

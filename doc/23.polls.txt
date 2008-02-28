@@ -25,3 +25,8 @@ Data models
 	on the total rating they achive. (Usage e.g.: "How good are you in
 	geography?")
 
+
+.. raw:: latex
+
+   \newpage
+

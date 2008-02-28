@@ -81,3 +81,8 @@ Example::
     def get_cache_teplate( template_name, template_dirs ):
         ...
 
+
+.. raw:: latex
+
+   \newpage
+

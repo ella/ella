@@ -45,3 +45,8 @@ as base for PYTHONPATH enviroment variable.
 
 Ella has ``setup.py`` for python-distutils installation.
 
+
+.. raw:: latex
+
+   \newpage
+

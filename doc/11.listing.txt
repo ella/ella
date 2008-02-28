@@ -72,3 +72,8 @@ Displaying object lists
 
 See templatetag ``listing``.
 
+
+.. raw:: latex
+
+   \newpage
+

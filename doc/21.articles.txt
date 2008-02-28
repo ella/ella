@@ -14,3 +14,8 @@ Features
 - every Artcile has one or more contents
 - for really dummy usage, there is InfoBox model
 
+
+.. raw:: latex
+
+   \newpage
+
