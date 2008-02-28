@@ -238,7 +238,7 @@ function build(box){
 				$('<a href="#clanek">Článek</a>').bind('click', function(event){
 					objectSelect(event, 'articles.article');
 					link2object();
-}),
+				}),
 				$('<a href="#anketa">Anketa</a>').bind('click', function(event){
 					objectSelect(event, 'polls.poll');
 				})
@@ -316,6 +316,7 @@ function build(box){
 	var link2object = function(){
 		myFORM=document.getElementById('mainForm');
 		myFORM.method.value='link';
+		myFORM.parameters.value='name:'+myFORM.parameters.value;
 	}
 	if(box.type && box.type == 'articles.article'){link2object();}
 }
