@@ -8,7 +8,7 @@ Standards-Version: 3.7.2
 
 Package: centrum-ella
 Architecture: all
-Depends: ${python:Depends}, ${misc:Depends}, centrum-django, centrum-python-stomp, python-markdown, python-feedparser
+Depends: ${python:Depends}, ${misc:Depends}, centrum-django, centrum-python-stomp, python-markdown, python-feedparser, python-imaging
 Description: Ella - Django Content Management System
 
 
