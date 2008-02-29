@@ -6,6 +6,7 @@ from tagging.models import TaggingInlineOptions
 
 from ella.core.admin import ListingInlineOptions, HitCountInlineOptions
 from ella.ellaadmin import widgets
+from ella.core.cache import get_cached_object_or_404
 from ella.polls.models import Poll, Contest, Contestant, Quiz, Result, Choice, Vote, Question
 
 def formfield_for_dbfield(fields):
