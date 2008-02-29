@@ -20,7 +20,7 @@ class CommentFormPreview(FormPreview):
         cat = self.state['category']
         return [
                 'page/category/%s/content_type/%s.%s/%s/comments/preview.html' % (cat.path, opts.app_label, opts.module_name, self.state['object'].slug),
-                'page/category/%s/content_type%s.%s/comments/preview.html' % (cat.path, opts.app_label, opts.module_name),
+                'page/category/%s/content_type/%s.%s/comments/preview.html' % (cat.path, opts.app_label, opts.module_name),
                 'page/category/%s/comments/preview.html' % cat.path,
                 'page/content_type/%s.%s/comments/preview.html' % (opts.app_label, opts.module_name),
                 'page/comments/preview.html',
@@ -32,7 +32,7 @@ class CommentFormPreview(FormPreview):
         cat = self.state['category']
         return [
                 'page/category/%s/content_type/%s.%s/%s/comments/form.html' % (cat.path, opts.app_label, opts.module_name, self.state['object'].slug),
-                'page/category/%s/content_type%s.%s/comments/form.html' % (cat.path, opts.app_label, opts.module_name),
+                'page/category/%s/content_type/%s.%s/comments/form.html' % (cat.path, opts.app_label, opts.module_name),
                 'page/category/%s/comments/form.html' % cat.path,
                 'page/content_type/%s.%s/comments/form.html' % (opts.app_label, opts.module_name),
                 'page/comments/form.html',
@@ -78,7 +78,7 @@ def new_comment(request, context, reply=None):
     context['form'] = form
     templates = (
         'page/category/%s/content_type/%s.%s/%s/comments/form.html' % (cat.path, opts.app_label, opts.module_name, context['object'].slug),
-        'page/category/%s/content_type%s.%s/comments/form.html' % (cat.path, opts.app_label, opts.module_name),
+        'page/category/%s/content_type/%s.%s/comments/form.html' % (cat.path, opts.app_label, opts.module_name),
         'page/category/%s/comments/form.html' % cat.path,
         'page/comments/form.html',
 )
@@ -105,7 +105,7 @@ def list_comments(request, context):
 })
     templates = (
         'page/category/%s/content_type/%s.%s/%s/comments/list.html' % (cat.path, opts.app_label, opts.module_name, context['object'].slug),
-        'page/category/%s/content_type%s.%s/comments/list.html' % (cat.path, opts.app_label, opts.module_name),
+        'page/category/%s/content_type/%s.%s/comments/list.html' % (cat.path, opts.app_label, opts.module_name),
         'page/category/%s/comments/list.html' % cat.path,
         'page/comments/list.html',
 )
