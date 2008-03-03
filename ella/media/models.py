@@ -8,10 +8,25 @@ from django.conf import settings
 
 from ella.db import fields
 from ella.media.queue import QUEUE as ELLA_QUEUE
+from ella.core.box import Box
+from ella.photos.models import Photo
+from ella.db.models import Publishable
 
 
 ACTIVE_MQ_HOST = getattr(settings, 'ACTIVE_MQ_HOST', None)
 
+
+class MediaBox(Box):
+    def get_context(self):
+
+        "Updates box context with media-specific variables."
+        cont = super(MediaBox, self).get_context()
+        cont.update({
+                'formatted_files' : self.params.get('formatted_files', self.obj.formatted_files()),
+                'title' : self.params.get('title', self.obj.title),
+                'alt' : self.params.get('alt', ''),
+})
+        return cont
 
 class RelaxXMLField(fields.XMLField):
     def get_schema_content(self, instance):
@@ -53,12 +68,14 @@ class SourceManager(models.Manager):
 )
             ELLA_QUEUE.put('ella/media/encoder/formattedfile', formattedfile)
 
+# TODO: asi prejmenovat?, toto se dava do boxu
 class Source(models.Model):
     title = models.CharField(_('Title'), max_length=255)
     slug = models.CharField(_('Slug'), db_index=True, max_length=255)
     hash = models.CharField(_('Content hash'), db_index=True, max_length=40)
     url = models.URLField(_('File url'), verify_exists=False, max_length=300)
     type = models.ForeignKey(Type, verbose_name=_('Type of this file'))
+    preview = models.ForeignKey(Photo, verbose_name=_('Preview image'), null=True, blank=True, related_name='photo')
     metadata = models.TextField(_('Meta data'), blank=True,
             help_text=_('meta data xml - should be generated after file save'))
 
@@ -67,11 +84,17 @@ class Source(models.Model):
 
     objects = SourceManager()
 
+    def formatted_files(self):
+        return FormattedFile.objects.select_related().filter(source=self.id)
+
+    def Box(self, box_type, nodelist):
+        return MediaBox(self, box_type, nodelist)
+
     def __unicode__(self):
         return self.title
 
 class FormatManager(models.Manager):
-    def create_from_queue(data):
+    def create_from_queue(self, data):
         # TODO: create format after updating any on encoder
         pass
 
@@ -87,6 +110,7 @@ class Format(models.Model):
 
     def __unicode__(self):
         return self.name
+
 
 class FormattedFileManager(models.Manager):
     def create_from_queue(self, data):
@@ -115,7 +139,6 @@ class FormattedFile(models.Model):
 
     def __unicode__(self):
         return "%s-%s" % (self.source.title, self.format.name)
-
 
 # initialization
 from ella.media import register

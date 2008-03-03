@@ -20,6 +20,7 @@ class SourceOptions(admin.ModelAdmin):
     list_filter = ('type', 'uploaded',)
     search_fields = ('title', 'slug', 'description',)
 
+    raw_id_fields = ('preview',)
 
 admin.site.register([ Type, Format, ])
 admin.site.register(Source, SourceOptions)
