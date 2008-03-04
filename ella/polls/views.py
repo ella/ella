@@ -21,6 +21,7 @@ from ella.core.cache import get_cached_object_or_404
 from ella.utils.wizard import Wizard
 from ella.polls.models import Poll, Contest, Contestant, Quiz, Result, Choice, Vote, ACTIVITY_NOT_YET_ACTIVE, ACTIVITY_ACTIVE, ACTIVITY_CLOSED
 
+
 # POLLS specific settings
 POLLS_COOKIE_NAME = getattr(settings, 'POLLS_COOKIE_NAME', 'polls_voted')
 POLLS_JUST_VOTED_COOKIE_NAME = getattr(settings, 'POLLS_JUST_VOTED_COOKIE_NAME', 'polls_just_voted_voted')
@@ -34,6 +35,7 @@ POLL_USER_ALLREADY_VOTED = 2
 POLL_USER_NO_CHOICE = 3
 
 CURRENT_SITE = Site.objects.get_current()
+
 
 # UTILS:
 def get_template(poll_type, template_name, path, slug):
@@ -84,6 +86,7 @@ def check_vote(request, poll):
         if Vote.objects.filter(poll=poll, ip_address=request.META['REMOTE_ADDR']).count() > 0:
             return POLL_USER_ALLREADY_VOTED
         return POLL_USER_NOT_YET_VOTED
+
 
 @require_POST
 @transaction.commit_on_success
