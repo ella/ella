@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.newforms.models import InlineFormset
+from django.shortcuts import render_to_response
 
 from tagging.models import TaggingInlineOptions
 
@@ -8,6 +9,7 @@ from ella.core.admin import ListingInlineOptions, HitCountInlineOptions
 from ella.ellaadmin import widgets
 from ella.core.cache import get_cached_object_or_404
 from ella.polls.models import Poll, Contest, Contestant, Quiz, Result, Choice, Vote, Question
+
 
 def formfield_for_dbfield(fields):
     def _formfield_for_dbfield(self, db_field, **kwargs):
@@ -23,9 +25,12 @@ class ResultFormset(InlineFormset):
             return self.cleaned_data
 
         validation_error = None
-        for i in xrange(len(self.cleaned_data)):
-            if self.cleaned_data[i]['points_from'] > self.cleaned_data[i]['points_to']:
-                validation_error = ValidationError(ugettext('Invalid score interval %(points_from)s - %(points_to)s. Points dimension from can not be greater than point dimension to.') % self.cleaned_data[i])
+        for d in self.cleaned_data:
+            if d['points_from'] > d['points_to']:
+                validation_error = ValidationError(ugettext(
+                        'Invalid score interval %(points_from)s - %(points_to)s.'
+                        'Points dimension from can not be greater than point dimension to.') % d
+)
                 self.forms[i]._errors = {'points_to': validation_error.messages}
         if validation_error:
             raise ValidationError, ugettext('Invalid score intervals')
@@ -94,11 +99,10 @@ class ContestOptions(admin.ModelAdmin):
 
     def __call__(self, request, url):
         if url and url.endswith('correct_answers'):
-            from django.shortcuts import render_to_response
             pk = url.split('/')[-2]
             contest = get_cached_object_or_404(Contest, pk=pk)
             contestants = contest.get_correct_answers()
-            title = u'%s \'%s\': %s' % (Contest._meta.verbose_name, contest.title, _('Correct Answers'))
+            title = u"%s '%s': %s" % (Contest._meta.verbose_name, contest.title, _('Correct Answers'))
             module_name = Contestant._meta.module_name
             return render_to_response('admin/correct_answers.html',
                 {'contestants' : contestants, 'title' : title, 'module_name' : module_name})
