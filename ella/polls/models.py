@@ -278,7 +278,8 @@ class Choice(models.Model):
     """
     question = models.ForeignKey('Question', verbose_name=_('Question'))
     choice = models.TextField(_('Choice text'))
-    points = models.IntegerField(_('Points'), blank=True, null=True)
+##    points = models.IntegerField(_('Points'), blank=True, null=True)
+    points = models.IntegerField(_('Points'), blank=False, null=True)
     votes = models.IntegerField(_('Votes'), blank=True, null=True)
 
     def add_vote(self):
