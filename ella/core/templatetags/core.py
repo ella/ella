@@ -10,6 +10,9 @@ from ella.core.models import Listing, Dependency, Related, Category
 from ella.core.cache.utils import get_cached_object
 from ella.core.box import BOX_INFO, MEDIA_KEY, Box
 
+import logging
+log = logging.getLogger('ella.core.templatetags')
+
 
 register = template.Library()
 
@@ -113,6 +116,7 @@ class EmptyNode(template.Node):
         return u''
 
 class BoxNode(template.Node):
+
     def __init__(self, box_type, nodelist, model=None, lookup=None, var_name=None):
         self.box_type, self.nodelist, self.var_name, self.lookup, self.model = box_type, nodelist, var_name, lookup, model
 
@@ -126,20 +130,17 @@ class BoxNode(template.Node):
 
             try:
                 obj = get_cached_object(self.model, **{self.lookup[0] : lookup_val})
-            except models.ObjectDoesNotExist:
-                if settings.DEBUG:
-                    raise
+            except models.ObjectDoesNotExist, e:
+                log.error('BoxNode: %s (%s : %s)' % (str(e), self.lookup[0], lookup_val))
                 return ''
-            except AssertionError:
-                if settings.DEBUG:
-                    raise
+            except AssertionError, e:
+                log.error('BoxNode: %s (%s : %s)' % (str(e), self.lookup[0], lookup_val))
                 return ''
         else:
             try:
                 obj = template.resolve_variable(self.var_name, context)
-            except template.VariableDoesNotExist:
-                if settings.DEBUG:
-                    raise
+            except template.VariableDoesNotExist, e:
+                log.error('BoxNode: %s (%s)' % self.varname)
                 return ''
 
         if hasattr(obj, 'Box'):
@@ -148,9 +149,7 @@ class BoxNode(template.Node):
             box = Box(obj, self.box_type, self.nodelist)
 
         if not box.obj:
-            # TODO: log
-            if settings.DEBUG:
-                raise ObjectDoesNotExist, 'Box does not exists'
+            log.warning('BoxNode: Box does not exists.')
             return ''
 
         # push context stack
