@@ -3,7 +3,7 @@ from django.utils.safestring import mark_safe
 from django.contrib.contenttypes.models import ContentType
 
 
-from ella.core.cache import get_cached_object
+from ella.core.cache import get_cached_object, get_cached_list
 from ella.core.models import Listing, Category, HitCount
 from ella.photos.models import Photo
 
@@ -69,13 +69,11 @@ class Publishable(object):
     photo_thumbnail.allow_tags = True
 
     def get_hits(self):
-      try:
-         hits=get_cached_object(HitCount,
+        # there can be more hitcounts for various sites
+        hits = sum(i.hits for i in get_cached_list(HitCount,
             target_ct=ContentType.objects.get_for_model(self.__class__),
             target_id=self.id,
-)
-         return hits.hits
-      except HitCount.DoesNotExist:
-         return 0
+))
+        return hits
     get_hits.short_description = _('Hit Counts')
 

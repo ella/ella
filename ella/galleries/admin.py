@@ -24,10 +24,11 @@ class GalleryItemFormset(InlineFormset):
         items = set([])
 
         for d in self.cleaned_data:
+            # TODO: why cleaned data does not have target_ct_id prop?
             target = (d['target_ct'].id, d['target_id'],)
             # check for duplicities
             if target in items:
-                obj = get_cached_object(get_cached_object(ContentType, pk=d['target_ct_id']), pk=d['target_id'])
+                obj = get_cached_object(get_cached_object(ContentType, pk=d['target_ct'].id), pk=d['target_id'])
                 raise forms.ValidationError, ugettext('There are two references to %s in this gallery') % obj
             items.add(target)
 

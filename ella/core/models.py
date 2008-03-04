@@ -268,7 +268,7 @@ class HitCount(models.Model):
     target_id = models.IntegerField()
 
     last_seen = models.DateTimeField(_('Last seen'), editable=False)
-    site = models.ForeignKey(Site)
+    site = models.ForeignKey(Site) # what for?
 
     hits = models.PositiveIntegerField(_('Hits'), default=1)
 
