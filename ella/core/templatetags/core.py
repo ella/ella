@@ -127,13 +127,19 @@ class BoxNode(template.Node):
             try:
                 obj = get_cached_object(self.model, **{self.lookup[0] : lookup_val})
             except models.ObjectDoesNotExist:
+                if settings.DEBUG:
+                    raise
                 return ''
             except AssertionError:
+                if settings.DEBUG:
+                    raise
                 return ''
         else:
             try:
                 obj = template.resolve_variable(self.var_name, context)
             except template.VariableDoesNotExist:
+                if settings.DEBUG:
+                    raise
                 return ''
 
         if hasattr(obj, 'Box'):
@@ -143,6 +149,8 @@ class BoxNode(template.Node):
 
         if not box.obj:
             # TODO: log
+            if settings.DEBUG:
+                raise ObjectDoesNotExist, 'Box does not exists'
             return ''
 
         # push context stack
