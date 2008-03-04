@@ -25,9 +25,9 @@ clean test dir, create test file
 emulate upload of a file
 
 >>> from ella.media.uploader.models import Upload
->>> from ella.media.models import Source, FormattedFile
+>>> from ella.media.models import Media, FormattedFile
 
->>> Upload.objects.count() == Source.objects.count() == FormattedFile.objects.count() == 0
+>>> Upload.objects.count() == Media.objects.count() == FormattedFile.objects.count() == 0
 True
 >>> u = Upload(file=file_name, title='test file', type='file')
 >>> u.save()
@@ -51,7 +51,7 @@ STATUS:
 <BLANKLINE>
 >>> Upload.objects.values('hash')
 [{'hash': u'894aa55a08ddb4e0e94fa50348ddd5fa3ea58a3f'}]
->>> Source.objects.values('hash')
+>>> Media.objects.values('hash')
 [{'hash': u'894aa55a08ddb4e0e94fa50348ddd5fa3ea58a3f'}]
 >>> FormattedFile.objects.values('hash')
 [{'hash': u'0c6fc1f631cba5ba7209adf34e8ddfb9fda27258'}, {'hash': u'b323823bd53410fe55c8154b1f63564815da3592'}]

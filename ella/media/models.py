@@ -11,6 +11,7 @@ from ella.media.queue import QUEUE as ELLA_QUEUE
 from ella.core.box import Box
 from ella.photos.models import Photo
 from ella.db.models import Publishable
+from ella.core.models import Author, Source, Category
 
 
 ACTIVE_MQ_HOST = getattr(settings, 'ACTIVE_MQ_HOST', None)
@@ -50,9 +51,9 @@ class Type(models.Model):
     def __unicode__(self):
         return self.name
 
-class SourceManager(models.Manager):
+class MediaManager(models.Manager):
     def create_from_queue(self, data):
-        """create Source object"""
+        """create Media (source) object"""
         data['type'] = Type.objects.get_or_create(name=data['type'])[0]
         data['slug'] = slugify(data['title'])
         source = self.create(**data)
@@ -68,21 +69,27 @@ class SourceManager(models.Manager):
 )
             ELLA_QUEUE.put('ella/media/encoder/formattedfile', formattedfile)
 
-# TODO: asi prejmenovat?, toto se dava do boxu
-class Source(models.Model):
+
+class Media(models.Model, Publishable):
     title = models.CharField(_('Title'), max_length=255)
     slug = models.CharField(_('Slug'), db_index=True, max_length=255)
-    hash = models.CharField(_('Content hash'), db_index=True, max_length=40)
     url = models.URLField(_('File url'), verify_exists=False, max_length=300)
-    type = models.ForeignKey(Type, verbose_name=_('Type of this file'))
     preview = models.ForeignKey(Photo, verbose_name=_('Preview image'), null=True, blank=True, related_name='photo')
+    type = models.ForeignKey(Type, verbose_name=_('Type of this file'))
+    hash = models.CharField(_('Content hash'), db_index=True, max_length=40)
+
     metadata = models.TextField(_('Meta data'), blank=True,
             help_text=_('meta data xml - should be generated after file save'))
+
+    # Authors and Sources
+    authors = models.ManyToManyField(Author, verbose_name=_('Authors'))
+    source = models.ForeignKey(Source, blank=True, null=True, verbose_name=_('Source'))
+    category = models.ForeignKey(Category, verbose_name=_('Category'), null=True)
 
     description = models.TextField(_('Description'), blank=True)
     uploaded = models.DateTimeField(default=datetime.now, editable=False)
 
-    objects = SourceManager()
+    objects = MediaManager()
 
     def formatted_files(self):
         return FormattedFile.objects.select_related().filter(source=self.id)
@@ -92,6 +99,15 @@ class Source(models.Model):
 
     def __unicode__(self):
         return self.title
+
+    def get_absolute_url(self):
+        if self.main_listing:
+            return self.main_listing.get_absolute_url()
+
+    class Meta:
+        verbose_name = _('Media')
+        verbose_name_plural = _('Medias')
+
 
 class FormatManager(models.Manager):
     def create_from_queue(self, data):
@@ -115,12 +131,12 @@ class Format(models.Model):
 class FormattedFileManager(models.Manager):
     def create_from_queue(self, data):
         """create FormattedFile object"""
-        data['source'] = Source.objects.get(hash=data['source'])
+        data['source'] = Media.objects.get(hash=data['source'])
         data['format'] = Format.objects.get(name=data['format'])
         formattedfile = self.create(**data)
 
 class FormattedFile(models.Model):
-    source = models.ForeignKey(Source, verbose_name=_('Source file'))
+    source = models.ForeignKey(Media, verbose_name=_('Source file'))
     format = models.ForeignKey(Format, verbose_name=_('Format'))
     hash = models.CharField(_('Content hash'), db_index=True, max_length=40)
     url = models.URLField(_('File url'), verify_exists=False, max_length=300)

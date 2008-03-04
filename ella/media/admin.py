@@ -1,6 +1,8 @@
 from django.contrib import admin
 
-from ella.media.models import Type, Source, Format, FormattedFile
+from ella.media.models import Type, Media, Format, FormattedFile
+from ella.core.admin import ListingInlineOptions
+from tagging.models import TaggingInlineOptions
 
 
 class FormattedFileInlineOptions(admin.TabularInline):
@@ -12,7 +14,7 @@ class FormattedFileOptions(admin.ModelAdmin):
     list_display = ('__unicode__', 'hash', 'source', 'format',)
     raw_id_fields = ('source',)
 
-class SourceOptions(admin.ModelAdmin):
+class MediaOptions(admin.ModelAdmin):
     inlines = (FormattedFileInlineOptions,)
     prepopulated_fields = {'slug' : ('title',)}
 
@@ -22,7 +24,10 @@ class SourceOptions(admin.ModelAdmin):
 
     raw_id_fields = ('preview',)
 
+    inlines = (ListingInlineOptions, TaggingInlineOptions,)
+
+
 admin.site.register([ Type, Format, ])
-admin.site.register(Source, SourceOptions)
+admin.site.register(Media, MediaOptions)
 admin.site.register(FormattedFile, FormattedFileOptions)
 
