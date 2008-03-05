@@ -1,6 +1,6 @@
 # register admin options
-from ella.polls import admin
+from ella.polls.admin import *
 
 # register custom urls
-from ella.polls import urls
+from ella.polls.urls import *
 
