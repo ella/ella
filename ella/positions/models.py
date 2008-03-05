@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 from django.db import models
 from django.db.models import Q
@@ -51,8 +52,11 @@ class Position(models.Model):
     @property
     def target(self):
         if not hasattr(self, '_target'):
-            target_ct = get_cached_object(ContentType, pk=self.target_ct_id)
-            self._target = get_cached_object(target_ct, pk=self.target_id)
+            try:
+                target_ct = get_cached_object(ContentType, pk=self.target_ct_id)
+                self._target = get_cached_object(target_ct, pk=self.target_id)
+            except ObjectDoesNotExist:
+                return None
         return self._target
 
     active_from = models.DateTimeField(_('Position active from'), null=True, blank=True)
