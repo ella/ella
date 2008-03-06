@@ -67,9 +67,6 @@ class Position(models.Model):
 
     objects = PositionManager()
 
-    class Meta:
-        unique_together = (('category','name',),)
-
     def is_active(self):
         now = datetime.now()
         active_from = not self.active_from or self.active_from <= now
