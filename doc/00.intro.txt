@@ -16,6 +16,7 @@ language is paramount.
 .. _Django: http://www.djangoproject.com/
 .. _Django documentation: http://www.djangoproject.com/documentation/
 
+
 Ella test
 =========
 
@@ -27,6 +28,7 @@ Small Ella project in ella_test directory is
 basically outcome of ``ella_start`` screencast. It represents minimal applcation
 built on Ella.
 
+
 Dependencies
 ============
 
@@ -34,15 +36,27 @@ All django dependencies
 -----------------------
 That's especially python (version >= 2.4). And
 database connector module. We use MySQL as database with mysql-python module.
-But django supports Postgres, SQLite and Oracle as well. Please consult
-django web site for details (http://djangoproject.com).
+But django supports Postgres, SQLite and Oracle as well.
+Please consult `django web site`_ for details.
+
+.. _`django web site`: http://www.djangoproject.com/documentation/settings/#database-engine
 
 Django
 ------
-Please use attached django version. It's based on django's newforms admin
-branch, but it also contains patches from flowing tickets:
+Please use attached django version. It's based on `django's newforms admin branch`_.
+This Ella version is dependent on `revision 7022`_, with these patches applied:
 
-TODO
+`[5922] <http://code.djangoproject.com/ticket/5922/>`_,
+`[5833] <http://code.djangoproject.com/ticket/5833/>`_,
+`[3400] <http://code.djangoproject.com/ticket/3400/>`_,
+`[5923] <http://code.djangoproject.com/ticket/5923/>`_,
+`[5780] <http://code.djangoproject.com/ticket/5780/>`_,
+`[5765] <http://code.djangoproject.com/ticket/5765/>`_,
+`[5735] <http://code.djangoproject.com/ticket/5735/>`_,
+`[4667] <http://code.djangoproject.com/ticket/4667/>`_
+
+.. _`django's newforms admin branch`: http://code.djangoproject.com/wiki/NewformsAdminBranch
+.. _`revision 7022`: http://code.djangoproject.com/changeset/7022
 
 Additional modules
 ------------------
@@ -64,11 +78,13 @@ Main python modules found in here:
  * python-stomp (if you run more than one process and wish to use cache
    invalidation via `ActiveMQ`_)
 
+.. _ActiveMQ: http://activemq.apache.org/
+.. _memcached: http://www.danga.com/memcached/
+
 Instalation
 ===========
 
-There are to ways how to install ella.
-
+There are two ways how to install ella.
 
 Non-root, local
 ---------------
@@ -77,9 +93,9 @@ This is best when you don't have root priviledges, you just don't want to
 bother with python distutils packege system, or you have another Django
 version on your system (please, pay attention to proper PYTHONPATH setup).
 
-Set your PYTHONPATH env. variable the the directory
-``./ella_test/pythonpath``. In case there is already another version of
-django, please make sure, that ./ella_test/pythonpath is before the location
+Set your PYTHONPATH enviroment variable the the directory
+``/path/to/ella_test/pythonpath``. In case there is already another version of
+django, please make sure, that ``/path/to/ella_test/pythonpath`` is before the location
 of other django version.
 
 Uninstal is as easy as deleting the extracted files and removing the entry
@@ -88,8 +104,15 @@ from the PYTHONPATH.
 Root, system wide
 -----------------
 
-Ella has ``setup.py`` for python-distutils installation.
+Ella has ``setup.py`` for `python-distutils installation`_.
+Note that there is no easy command to remove files installed via ``distutils``.
+But in case of Ella, only one directory named ella is created in ``site-packages`` directory.
 
-.. _memcached: http://www.danga.com/memcached/
-.. _ActiveMQ: http://activemq.apache.org/
+Small hint on the end, how to get full path of any python module::
+
+    >>> import ella
+    >>> ella.__file__
+    '/usr/lib/python2.4/site-packages/ella/__init__.pyc'
+
+.. _`python-distutils installation`: http://docs.python.org/inst/inst.html
 
