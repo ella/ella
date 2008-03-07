@@ -16,6 +16,10 @@ class AnswerInlineOptions(admin.TabularInline):
             kwargs['widget'] = widgets.RichTextAreaWidget
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
+class QuestionInlineOptions(admin.TabularInline):
+    model = Question
+    extra = 0
+
 class QuestionOptions(admin.ModelAdmin):
     list_display = ('interview', 'author', 'submit_date', 'answered',)
     list_filter = ('submit_date',)
@@ -34,7 +38,7 @@ class InterviewOptions(admin.ModelAdmin):
     raw_id_fields = ('photo', 'interviewees',)
     search_fields = ('title', 'perex',)
     prepopulated_fields = {'slug' : ('title',)}
-    inlines = (ListingInlineOptions, TaggingInlineOptions,)
+    inlines = (QuestionInlineOptions, ListingInlineOptions, TaggingInlineOptions)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name in ('perex', 'content'):
