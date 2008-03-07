@@ -140,7 +140,7 @@ class BoxNode(template.Node):
             try:
                 obj = template.resolve_variable(self.var_name, context)
             except template.VariableDoesNotExist, e:
-                log.error('BoxNode: %s (%s)' % self.varname)
+                log.error('BoxNode: %s' % e)
                 return ''
 
         if hasattr(obj, 'Box'):
