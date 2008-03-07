@@ -183,7 +183,7 @@ class Question(models.Model):
     answered.boolean = True
 
     class Meta:
-        ordering = ('-submit_date',)
+	ordering = ('submit_date',)
         verbose_name = _('Question')
         verbose_name_plural = _('Questions')
 
