@@ -5,6 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.encoding import smart_str, force_unicode
 from django.template import loader
+from django.template.defaultfilters import stringfilter
 
 from ella.core.models import Listing, Dependency, Related, Category
 from ella.core.cache.utils import get_cached_object
@@ -254,6 +255,16 @@ def render(object, content_path):
 
     t = render_str(content)
     return t.render(template.Context({'object' : object, 'MEDIA_URL' : settings.MEDIA_URL}))
+
+@register.filter
+@stringfilter
+def brutalizer(text):
+    """ blurs IP address  """
+    import re
+    m = re.match(r'^(\d{1,3}\.\d{1,3}\.\d{1,3}\.)\d{1,3}.*', text)
+    if not m:
+        return text
+    return m.group(1)
 
 def render_str(content):
     "Render string with markdown and/or django template tags and return template."
