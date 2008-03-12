@@ -264,7 +264,7 @@ def ipblur(text): # brutalizer ;-)
     m = re.match(r'^(\d{1,3}\.\d{1,3}\.\d{1,3}\.)\d{1,3}.*', text)
     if not m:
         return text
-    return m.group(1)
+    return '%sxxx' % m.group(1)
 
 
 def render_str(content):
