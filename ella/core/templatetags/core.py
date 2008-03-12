@@ -258,13 +258,14 @@ def render(object, content_path):
 
 @register.filter
 @stringfilter
-def brutalizer(text):
+def ipblur(text): # brutalizer ;-)
     """ blurs IP address  """
     import re
     m = re.match(r'^(\d{1,3}\.\d{1,3}\.\d{1,3}\.)\d{1,3}.*', text)
     if not m:
         return text
     return m.group(1)
+
 
 def render_str(content):
     "Render string with markdown and/or django template tags and return template."
