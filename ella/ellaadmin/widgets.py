@@ -51,8 +51,8 @@ class RichTextAreaWidget(forms.Textarea):
         css = {
             'screen': (settings.ADMIN_MEDIA_PREFIX + CSS_RICHTEXTAREA,),
 }
-    def __init__(self, attrs={}):
-        super(RichTextAreaWidget, self).__init__(attrs={'class': CLASS_RICHTEXTAREA})
+    def __init__(self, height=None, attrs={}):
+        super(RichTextAreaWidget, self).__init__(attrs={'class': CLASS_RICHTEXTAREA + ' ' + str(height)})
 
 class ListingCategoryWidget(forms.Select):
     """register javascript for duplicating main category to edit inline listing"""

@@ -14,7 +14,7 @@ from ella.polls.models import Poll, Contest, Contestant, Quiz, Result, Choice, V
 def formfield_for_dbfield(fields):
     def _formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name in fields:
-            kwargs['widget'] = widgets.RichTextAreaWidget
+            kwargs['widget'] = widgets.RichTextAreaWidget(height='small')
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
     return _formfield_for_dbfield
 

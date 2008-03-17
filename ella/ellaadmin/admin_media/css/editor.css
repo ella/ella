@@ -5,6 +5,9 @@
 	width:500px;
 	float: left;
 }
+.rich_text_area.small {
+	height: 100px;
+}
 ul#rich_toolbar li {
 	display:inline;
 	margin:0pt 3px;
