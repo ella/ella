@@ -20,7 +20,7 @@ class MediaOptions(admin.ModelAdmin):
 
     list_display = ('title', 'hash', 'type',)
     list_filter = ('type', 'uploaded',)
-    search_fields = ('title', 'slug', 'description',)
+    search_fields = ('title', 'slug', 'description', 'content',)
 
     raw_id_fields = ('preview',)
 

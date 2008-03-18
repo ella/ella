@@ -86,7 +86,9 @@ class Media(models.Model, Publishable):
     source = models.ForeignKey(Source, blank=True, null=True, verbose_name=_('Source'))
     category = models.ForeignKey(Category, verbose_name=_('Category'), null=True)
 
+    # content
     description = models.TextField(_('Description'), blank=True)
+    content = models.TextField(_('Content'), blank=True)
     uploaded = models.DateTimeField(default=datetime.now, editable=False)
 
     objects = MediaManager()
