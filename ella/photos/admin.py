@@ -1,6 +1,7 @@
 from django import newforms as forms
 from django.contrib import admin
 from django.conf import settings
+from django.utils.translation import ugettext
 
 from tagging.models import TaggingInlineOptions
 
