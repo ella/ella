@@ -2,6 +2,8 @@ from django.contrib import admin
 
 from ella.media.models import Type, Media, Format, FormattedFile
 from ella.core.admin import ListingInlineOptions
+from ella.ellaadmin import fields
+
 from tagging.models import TaggingInlineOptions
 
 
@@ -26,6 +28,11 @@ class MediaOptions(admin.ModelAdmin):
 
     inlines = (ListingInlineOptions, TaggingInlineOptions,)
 
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        if db_field.name in ['description', 'content']:
+            kwargs['required'] = not db_field.blank
+            return fields.RichTextAreaField(**kwargs)
+        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 admin.site.register([ Type, Format, ])
 admin.site.register(Media, MediaOptions)
