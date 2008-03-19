@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from itertools import chain
+import time
 
 from django.shortcuts import get_object_or_404, render_to_response
 from django.utils.translation import ugettext, ugettext_lazy as _
@@ -28,6 +29,7 @@ POLLS_JUST_VOTED_COOKIE_NAME = getattr(settings, 'POLLS_JUST_VOTED_COOKIE_NAME',
 POLLS_NO_CHOICE_COOKIE_NAME = getattr(settings, 'POLLS_NO_CHOICE_COOKIE_NAME', 'polls_no_choice')
 POLLS_MAX_COOKIE_LENGTH = getattr(settings, 'POLLS_MAX_COOKIE_LENGTH', 20)
 POLLS_MAX_COOKIE_AGE = getattr(settings, 'POLLS_MAX_COOKIE_AGE', 604800)
+POLLS_IP_VOTE_TRESHOLD = 10 * 60
 
 POLL_USER_NOT_YET_VOTED = 0
 POLL_USER_JUST_VOTED = 1
@@ -83,7 +85,9 @@ def check_vote(request, poll):
         cook = request.COOKIES.get(POLLS_COOKIE_NAME, '').split(',')
         if str(poll.id) in cook:
             return POLL_USER_ALLREADY_VOTED
-        if Vote.objects.filter(poll=poll, ip_address=request.META['REMOTE_ADDR']).count() > 0:
+        treshold = datetime.fromtimestamp(time.time() - POLLS_IP_VOTE_TRESHOLD)
+        voteCount = Vote.objects.filter(poll=poll, ip_address=request.META['REMOTE_ADDR'], time__gte=treshold).count()
+        if voteCount > 0:
             return POLL_USER_ALLREADY_VOTED
         return POLL_USER_NOT_YET_VOTED
 
