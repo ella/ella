@@ -24,7 +24,7 @@ class MediaOptions(admin.ModelAdmin):
     list_filter = ('type', 'uploaded',)
     search_fields = ('title', 'slug', 'description', 'content',)
 
-    raw_id_fields = ('preview',)
+    raw_id_fields = ('photo',)
 
     inlines = (ListingInlineOptions, TaggingInlineOptions,)
 
