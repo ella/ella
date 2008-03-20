@@ -8,6 +8,7 @@ from django.conf import settings
 
 from ella.db import fields
 from ella.media.queue import QUEUE as ELLA_QUEUE
+from ella.core.cache.utils import get_cached_object
 from ella.core.box import Box
 from ella.photos.models import Photo
 from ella.db.models import Publishable
@@ -74,7 +75,7 @@ class Media(models.Model, Publishable):
     title = models.CharField(_('Title'), max_length=255)
     slug = models.CharField(_('Slug'), db_index=True, max_length=255)
     url = models.URLField(_('File url'), verify_exists=False, max_length=300)
-    preview = models.ForeignKey(Photo, verbose_name=_('Preview image'), null=True, blank=True, related_name='photo')
+    photo = models.ForeignKey(Photo, verbose_name=_('Preview image'), null=True, blank=True, related_name='photo')
     type = models.ForeignKey(Type, verbose_name=_('Type of this file'))
     hash = models.CharField(_('Content hash'), db_index=True, max_length=40)
 
@@ -108,7 +109,7 @@ class Media(models.Model, Publishable):
 
     class Meta:
         verbose_name = _('Media')
-        verbose_name_plural = _('Medias')
+        verbose_name_plural = _('Media')
 
 
 class FormatManager(models.Manager):
@@ -154,6 +155,8 @@ class FormattedFile(models.Model):
 
     class Meta:
         unique_together = (('source', 'format'),)
+        verbose_name = _('Formatted file')
+        verbose_name_plural = _('Formatted files')
 
     def __unicode__(self):
         return "%s-%s" % (self.source.title, self.format.name)
