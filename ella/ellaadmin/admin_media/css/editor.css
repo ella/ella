@@ -31,8 +31,10 @@ ul#rich_toolbar li {
 	padding: 3px 5px;
 	margin: 0 5px;
 	border: 1px solid #ddd;
-	width: 400px;
-	height: 500px;
+/*	width: 400px;
+        height: 500px; */
+        width: 500px;
+	height: 300px;
 	overflow: auto;
 }
 

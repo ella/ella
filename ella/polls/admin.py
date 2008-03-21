@@ -92,6 +92,7 @@ class QuestionInlineOptions(admin.options.InlineModelAdmin):
     model = Question
     inlines = (ChoiceTabularOptions,)
     template = 'admin/edit_inline/question_tabular.html'
+    extra=10
 
     formfield_for_dbfield = formfield_for_dbfield(['question'])
 
