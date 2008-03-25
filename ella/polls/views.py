@@ -36,8 +36,7 @@ POLL_USER_JUST_VOTED = 1
 POLL_USER_ALLREADY_VOTED = 2
 POLL_USER_NO_CHOICE = 3
 
-CURRENT_SITE = Site.objects.get_current()
-
+CURRENT_SITE = None
 
 # UTILS:
 def get_template(poll_type, template_name, path, slug):
@@ -135,6 +134,10 @@ def poll_vote(request, poll_id):
         # increment votes at choice object
         if vote.id:
             choice.add_vote()
+
+        global CURRENT_SITE
+        if not CURRENT_SITE:
+            CURRENT_SITE = Site.objects.get_current()
 
         # update anti-spam - cook, sess
         sess_jv = request.session.get(POLLS_JUST_VOTED_COOKIE_NAME, [])
