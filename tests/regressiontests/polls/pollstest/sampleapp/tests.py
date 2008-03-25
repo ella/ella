@@ -329,8 +329,8 @@ Contest is now inactive
 >>> response = cl.get(c.get_absolute_url())
 >>> response.status_code
 200
->>> response.content
-'\n<p>This is some contest results\n</p>\n\n\n'
+>>> response.context[1]['object'].is_active()
+False
 
 Contest activation
 ------------------
@@ -402,8 +402,6 @@ Vailid (and right) vote of chico@buqrque.cz (better count_guess)
 u'1:2|2:4,5|3:8'
 >>> cn.points
 4
-
-!!! TODO - opravit fixstuury - tohle nize to zatim resi:
 
 >>> q = c.question_set.get(question='Second question')
 >>> q.allow_no_choice = True

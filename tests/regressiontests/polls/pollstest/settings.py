@@ -11,7 +11,7 @@ ADMINS = (
 MANAGERS = ADMINS
 
 DATABASE_ENGINE = 'sqlite3'    # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-DATABASE_NAME = 'c:\polltst.sqlite3'     # Or path to database file if using sqlite3.
+DATABASE_NAME = ':memory:'     # Or path to database file if using sqlite3.
 #TEST_DATABASE_NAME = DATABASE_NAME
 DATABASE_USER = ''             # Not used with sqlite3.
 DATABASE_PASSWORD = ''         # Not used with sqlite3.
