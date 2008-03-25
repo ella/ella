@@ -1,0 +1,36 @@
+{% ifequal state state_just_voted %}Thanks for youre vote{% endifequal %}
+{% ifequal state state_no_choice %}Choose at least one choice{% endifequal %}
+<h2>{{ object.question.question }}</h2>
+<form action="{% url polls_vote object.id %}" method="post">
+<ul>
+{% for choice, input in object.question.form.choices %}
+    <li>
+    {% ifequal object.current_activity_state activity_active %}
+        {% ifnotequal state state_not_yet_voted %}
+            {% ifequal state state_no_choice %}
+                <p>{{ input }}</p>
+            {% else %}
+                <p>{{ choice }}</p>
+            {% endifequal %}
+        {% else %}
+            <p>{{ input }}</p>
+        {% endifnotequal %}
+    {% else %}
+        <p>{ choice }}</p>
+    {% endifequal %}
+    {{ choice.get_percentage }}
+    {% ifnotequal state state_not_yet_voted %}
+        <p>{{ choice.votes|default:"0" }}</p>
+    {% endifnotequal %}
+    </li>
+{% endfor %}
+</ul>
+{% ifequal object.current_activity_state activity_active %}
+    {% ifequal state state_not_yet_voted %}
+        <input type="submit" />
+    {% endifequal %}
+    {% ifequal state state_no_choice %}
+        <input type="submit" />
+    {% endifequal %}
+{% endifequal %}
+</form>
