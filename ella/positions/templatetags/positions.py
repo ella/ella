@@ -44,12 +44,12 @@ def position(parser, token):
     else:
         raise TemplateSyntaxError, 'Invalid syntax: {% position POSITION_NAME for CATEGORY [nofallback] %}'
 
-
     return PositionNode(category, pos_name, nodelist, box_type, nofallback)
 
 class PositionNode(template.Node):
     def __init__(self, category, position, nodelist, box_type, nofallback):
-        self.category, self.position, self.nodelist, self.box_type = category, position, nodelist, box_type
+        self.category, self.position = category, position
+        self.nodelist, self.box_type = nodelist, box_type
         self.nofallback = nofallback
 
     def render(self, context):
@@ -68,7 +68,6 @@ class PositionNode(template.Node):
         return pos.render(context, self.nodelist, self.box_type)
 
 
-
 @register.tag
 def ifposition(parser, token):
     """
@@ -81,7 +80,6 @@ def ifposition(parser, token):
     """
     bits = list(token.split_contents())
     end_tag = 'end' + bits[0]
-
 
     nofallback = False
     if bits[-1] == 'nofallback':
@@ -104,7 +102,6 @@ def ifposition(parser, token):
         parser.delete_first_token()
     else:
         nodelist_false = template.NodeList()
-
 
     return IfPositionNode(category, pos_name, nofallback, nodelist_true, nodelist_false)
 

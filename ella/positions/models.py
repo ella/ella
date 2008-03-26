@@ -78,20 +78,23 @@ class Position(models.Model):
     def Box(self, box_type, nodelist):
         " Delegate the boxing. "
         obj = self.target
-
         if hasattr(obj, 'Box'):
             return obj.Box(box_type, nodelist)
         return Box(obj, box_type, nodelist)
 
-    def render(self, context, nodelist, box_type=None):
+    def render(self, context, nodelist, box_type):
         " Render the position. "
-        if self.target:
-            if not box_type:
-                box_type = self.box_type
-            b = self.Box(box_type, nodelist)
-            b.prepare(context)
-            return b.render()
-        return Template(self.text).render(context)
+        if not self.target:
+            return Template(self.text).render(context)
+
+        if self.box_type:
+            box_type = self.box_type
+        if self.text:
+            nodelist = Template(self.text).nodelist
+
+        b = self.Box(box_type, nodelist)
+        b.prepare(context)
+        return b.render()
 
     def __unicode__(self):
         return '%s:%s' % (self.category, self.name)
