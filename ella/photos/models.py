@@ -30,6 +30,7 @@ PHOTOS_THUMB_DIMENSION_DEFAULT = (80,80)
 
 PHOTOS_FORMAT_QUALITY = getattr(settings, 'PHOTOS_FORMAT_QUALITY', PHOTOS_FORMAT_QUALITY_DEFAULT)
 PHOTOS_THUMB_DIMENSION = getattr(settings, 'PHOTOS_THUMB_DIMENSION', PHOTOS_THUMB_DIMENSION_DEFAULT)
+PHOTOS_DO_URL_CHECK = getattr(settings, 'PHOTOS_DO_URL_CHECK', False)
 
 PHOTOS_TYPE_EXTENSION = {
     'JPEG': '.jpg',
@@ -188,6 +189,9 @@ class FormatedPhoto(models.Model):
     @property
     def url(self):
         "Returns url of the photo file."
+        if not PHOTOS_DO_URL_CHECK:
+            return settings.MEDIA_URL + self.filename
+
         if not path.exists(settings.MEDIA_ROOT):
             # NFS not available - we have no chance of creating it
             return self.format.get_blank_img()['url']
