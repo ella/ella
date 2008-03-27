@@ -74,11 +74,12 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
+    'django.contrib.admin', # django auth test bug
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
     'ella.core',
     'ella.db_templates',
-    'template_sample',
+    'db_templatetest.sample',
 )

@@ -1,4 +1,22 @@
-base = r'''
+ct_correction = r"""
+i really want ContentType for permission object to be 4
+-------------------------------------------------------
+
+>>> from django.contrib.contenttypes.models import ContentType
+
+>>> permission_ct = ContentType.objects.get(name='permission')
+>>> four_ct = ContentType.objects.get(pk=4)
+
+>>> four_ct.delete()
+
+>>> four_ct.id = permission_ct.id
+>>> permission_ct.id = 4
+
+>>> four_ct.save()
+>>> permission_ct.save()
+"""
+
+base = r"""
 >>> from ella.db_templates import models
 >>> t = models.DbTemplate.objects.get(name="database.html")
 >>> t.get_text()
@@ -21,9 +39,9 @@ u'{% extends "base.html" %}\n\n{% block main %}\n{% box box_type for auth.permis
 >>> temp = loader.get_template("database_block.html")
 >>> temp.render(Context())
 u'disk - templates/base.html\n\nauth | message | Can add message\n\n\n'
-'''
+"""
 
-load = r'''
+load = r"""
 >>> from ella.db_templates import models
 >>> from django.template import Template
 
@@ -95,17 +113,12 @@ dump and load
 >>> db_template = models.DbTemplate.objects.create_from_string(template_dump, 'name.html')
 >>> template_dump == db_template.get_text()
 True
+"""
 
 
-'''
-
-__test__ = {
-    'base' : base,
-    'load' : load,
-}
-
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
-
+from django.utils.datastructures import SortedDict
+__test__ = SortedDict()
+__test__[1] = ct_correction
+__test__[2] = base
+__test__[3] = load
 
