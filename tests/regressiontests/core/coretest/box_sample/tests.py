@@ -66,17 +66,17 @@ level = r'''
 # empty level parameter
 >>> t = Template("{% box level_test for box_sample.boxedobject with id 1 %}{% endbox %}{% box_media %}")
 >>> t.render(Context())
-u'level: 1 next_level: 2 ct: boxed-objects\n\n\n\n'
+u'level: 1 next_level: 2 ct: box_sample.boxedobject\n\n\n\n'
 
 # some given value
 >>> t = Template("{% box level_test for box_sample.boxedobject with id 1 %}level: 3{% endbox %}{% box_media %}")
 >>> t.render(Context())
-u'level: 3 next_level: 4 ct: boxed-objects\n\n\n\n'
+u'level: 3 next_level: 4 ct: box_sample.boxedobject\n\n\n\n'
 
 # bogus value that will cause error
 >>> t = Template("{% box level_test for box_sample.boxedobject with id 1 %}level: crash{% endbox %}{% box_media %}")
 >>> t.render(Context())
-u'level: 1 next_level: 2 ct: boxed-objects\n\n\n\n'
+u'level: 1 next_level: 2 ct: box_sample.boxedobject\n\n\n\n'
 '''
 
 
