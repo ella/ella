@@ -42,7 +42,6 @@ def gallery_item_detail(request, context, item_slug=None):
         position = item_index + 1
 
     context['object'] = target
-    print isinstance(target, Photo)
 
     context.update({
             'gallery': gallery,
