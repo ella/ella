@@ -28,7 +28,7 @@
             "remove": false,
             "priority_to": null,
             "priority_from": null,
-            "target_ct": 20
+            "target_ct": 13
         }
     },
     {
@@ -42,7 +42,7 @@
             "remove": false,
             "priority_to": null,
             "priority_from": null,
-            "target_ct": 20
+            "target_ct": 13
         }
     },
     {
@@ -65,7 +65,7 @@
             "remove": false,
             "priority_to": null,
             "priority_from": null,
-            "target_ct": 21
+            "target_ct": 14
         }
     }
 ]
