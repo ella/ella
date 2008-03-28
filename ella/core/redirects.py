@@ -61,16 +61,16 @@ def drop_redirects(instance):
             # will cause the save() to fail, thus preventing anybody from correcting the error
             pass
 
-
-from django.db import models
-from ella.core.models import Listing
 from ella.db.models import Publishable
-for m in models.get_models():
-    if Publishable in m.__bases__:
-        dispatcher.connect(record_url, signal=signals.pre_save, sender=m)
-        dispatcher.connect(check_url, signal=signals.post_save, sender=m)
-        dispatcher.connect(drop_redirects, signal=signals.pre_delete, sender=m)
+from ella.core.models import Listing
+def connect_model(sender):
+    if not Publishable in sender.__bases__:
+        return
+    dispatcher.connect(record_url, signal=signals.pre_save, sender=sender)
+    dispatcher.connect(check_url, signal=signals.post_save, sender=sender)
+    dispatcher.connect(drop_redirects, signal=signals.pre_delete, sender=sender)
 
-dispatcher.connect(record_url, signal=signals.pre_save, sender=Listing)
-dispatcher.connect(check_url, signal=signals.post_save, sender=Listing)
-dispatcher.connect(drop_redirects, signal=signals.pre_delete, sender=Listing)
+for m in Publishable.__subclasses__() + [Listing]:
+    connect_model(m)
+
+dispatcher.connect(connect_model, signal=signals.class_prepared)

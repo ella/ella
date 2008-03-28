@@ -52,7 +52,7 @@
             "remove": false,
             "priority_to": null,
             "priority_from": null,
-            "target_ct": 12
+            "target_ct": 19
         }
     },
     {
@@ -66,7 +66,7 @@
             "remove": false,
             "priority_to": null,
             "priority_from": null,
-            "target_ct": 12
+            "target_ct": 19
         }
     }
 ]
