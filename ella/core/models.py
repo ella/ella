@@ -253,6 +253,21 @@ class Listing(models.Model):
         return mark_safe('<a href="%s">url</a>' % self.get_absolute_url())
     full_url.allow_tags = True
 
+    def save(self):
+        " If Listing is created, we create HitCount object "
+
+        # we should non-cached target
+        target_ct = get_cached_object(ContentType, pk=self.target_ct_id)
+        target = target_ct.model_class().objects.get(pk=self.target_id)
+
+        if target.category_id == self.category_id:
+            if not self.id:
+                HitCount.objects.create(target_ct=self.target_ct, target_id=self.target_id, site=self.category.site)
+            else:
+                hc = HitCount.objects.get(target_ct=self.target_ct, target_id=self.target_id)
+                hc.site = self.category.site
+                hc.save()
+        super(Listing, self).save()
 
     class Meta:
         verbose_name = _('Listing')
