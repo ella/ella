@@ -7,7 +7,7 @@ from django.contrib.contenttypes import generic
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_str
 
-from ella.core.cache.utils import cache_this, method_key_getter, get_cached_object, get_cached_list
+from ella.core.cache.utils import cache_this, get_cached_object, get_cached_list
 
 from ella.comments import defaults
 

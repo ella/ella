@@ -10,7 +10,7 @@ from django.db import models
 from django.http import Http404
 
 from ella.core.models import Listing, Category, HitCount
-from ella.core.cache import get_cached_list, get_cached_object_or_404, method_key_getter, cache_this
+from ella.core.cache import get_cached_list, get_cached_object_or_404, cache_this
 from ella.core.custom_urls import dispatcher
 
 
@@ -287,13 +287,13 @@ def category_detail(request, category):
             context_instance=RequestContext(request)
 )
 
-def get_export_key(func, request, count, name='', mods=[]):
-    return 'ella.core.views.export:%d:%d:%s:%s' % (
-            settings.SITE_ID, count, name, ''.join(mods)
+def get_export_key(func, request, count, name=''):
+    return 'ella.core.views.export:%d:%d:%s' % (
+            settings.SITE_ID, count, name
 )
 
 @cache_this(get_export_key, timeout=60*60)
-def export(request, count, name='', models=[]):
+def export(request, count, name=''):
     """
     Export banners.
 
@@ -308,7 +308,7 @@ def export(request, count, name='', models=[]):
     t_list.append('page/export/banner.html')
 
     cat = get_cached_object_or_404(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
-    listing = Listing.objects.get_listing(count=count, category=cat, mods=models)
+    listing = Listing.objects.get_listing(count=count, category=cat)
     return render_to_response(
             t_list,
             {'category' : cat, 'listing' : listing},

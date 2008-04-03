@@ -3,8 +3,9 @@ from datetime import datetime
 from django.db import connection, models
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
+from django.utils.encoding import smart_str
 
-from ella.core.cache import get_cached_object, cache_this, method_key_getter
+from ella.core.cache import get_cached_object, cache_this
 from ella.core.cache.invalidate import CACHE_DELETER
 
 
@@ -20,6 +21,17 @@ class RelatedManager(models.Manager):
 
 def invalidate_listing(key, self, *args, **kwargs):
     CACHE_DELETER.register_test(self.model, lambda x: True, key)
+
+def get_listings_key(func, self, category=None, count=10, offset=1, mods=[], content_types=[], **kwargs):
+    c = category and  category.id or ''
+    if kwargs:
+        kw = ','.join(''.join((k, smart_str(v))) for k, v in kwargs.items())
+    else:
+        kw = ''
+
+    return 'ella.core.managers.ListingManager.get_listing:%s:%d:%d:%s:%s:%s' % (
+            c, count, offset, ''.join(mods), ''.join(content_types), kw
+)
 
 class ListingManager(RelatedManager):
     def clean_listings(self):
@@ -46,7 +58,7 @@ class ListingManager(RelatedManager):
     def get_count(self, category=None, mods=[], **kwargs):
         return self.get_queryset(category, mods, **kwargs).count()
 
-    @cache_this(method_key_getter, invalidate_listing)
+    @cache_this(get_listings_key, invalidate_listing)
     def get_listing(self, category=None, count=10, offset=1, mods=[], content_types=[], **kwargs):
         """
         Get top objects for given category and potentionally also its child categories.

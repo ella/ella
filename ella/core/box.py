@@ -1,16 +1,18 @@
-from md5 import md5
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
+#from md5 import md5
+#try:
+#    import cPickle as pickle
+#except ImportError:
+#    import pickle
 
 from django.template import loader
 from django.utils.datastructures import MultiValueDict
+from django.utils.encoding import smart_str
 from django.core.cache import cache
 from django.conf import settings
 from django.template.defaultfilters import slugify
 
 from ella.core.cache.invalidate import CACHE_DELETER
+from ella.core.cache.utils import normalize_key
 
 
 BOX_INFO = 'ella.core.box.BOX_INFO'
@@ -160,13 +162,12 @@ class Box(object):
 
     def get_cache_key(self):
         " Return a cache key constructed from the box's parameters. "
-        dumps = pickle.dumps((
-                    'ella.core.box.Box.render',
-                    settings.SITE_ID,
-                    self.obj.__class__.__name__,
-                    self.box_type,
-                    self.obj._get_pk_val(),
-                    [ (key, self.params[key]) for key in sorted(self.params.keys()) ]
-))
-        return md5(dumps).hexdigest()
+        if self.params:
+            pars = ','.join(':'.join((smart_str(key), smart_str(self.params[key]))) for key in sorted(self.params.keys()))
+        else:
+            pars = ''
+        return normalize_key('ella.core.box.Box.render:%d:%s:%s:%d:%s' % (
+                    settings.SITE_ID, self.obj.__class__.__name__, smart_str(self.box_type), self.obj.pk, pars
+)
+)
 

@@ -1,18 +1,33 @@
-from md5 import md5
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
+#from md5 import md5
+#try:
+#    import cPickle as pickle
+#except ImportError:
+#    import pickle
 
 from django.db.models import ObjectDoesNotExist
 from django.core.cache import cache
 from django.http import Http404
 from django.contrib.contenttypes.models import ContentType
+from django.utils.encoding import smart_str
 
 from ella.core.cache.invalidate import CACHE_DELETER
 
+TABLE = ''.join([ chr(x) for x in range(256)])
+DELETE_CHARS = ''.join([ chr(x) for x in range(33)])
+def normalize_key(key):
+    return smart_str(key).translate(TABLE, DELETE_CHARS)
+
 
 KEY_FORMAT_LIST = 'ella.core.cache.utils.get_cached_list'
+KEY_FORMAT_OBJECT = 'ella.core.cache.utils.get_cached_object'
+
+def _get_key(start, model, kwargs):
+    return normalize_key(start + ':'.join((
+                model._meta.app_label,
+                model._meta.object_name,
+                ','.join(':'.join((key, smart_str(kwargs[key]))) for key in sorted(kwargs.keys()))
+)))
+
 
 
 def get_cached_list(model, **kwargs):
@@ -28,13 +43,7 @@ def get_cached_list(model, **kwargs):
     if isinstance(model, ContentType):
         model = model.model_class()
 
-    dumps = pickle.dumps((
-                KEY_FORMAT_LIST,
-                model._meta.app_label,
-                model._meta.object_name.lower(),
-                [ (key, kwargs[key]) for key in sorted(kwargs.keys()) ]
-))
-    key = md5(dumps).hexdigest()
+    key = _get_key(KEY_FORMAT_LIST, model, kwargs)
 
     l = cache.get(key)
     if l is None:
@@ -45,7 +54,6 @@ def get_cached_list(model, **kwargs):
         #CACHE_DELETER.register_test(model, lambda x: model._default_manager.filter(**kwargs).filter(pk=x._get_pk_val()) == 1, key)
     return l
 
-KEY_FORMAT_OBJECT = 'ella.core.cache.utils.get_cached_object'
 def get_cached_object(model, **kwargs):
     """
     Return a cached object. If the object does not exist in the cache, create it
@@ -61,13 +69,7 @@ def get_cached_object(model, **kwargs):
     if isinstance(model, ContentType):
         model = model.model_class()
 
-    dumps = pickle.dumps((
-                KEY_FORMAT_OBJECT,
-                model._meta.app_label,
-                model._meta.object_name.lower(),
-                [ (key, kwargs[key]) for key in sorted(kwargs.keys()) ]
-))
-    key = md5(dumps).hexdigest()
+    key = _get_key(KEY_FORMAT_OBJECT, model, kwargs)
 
     obj = cache.get(key)
     if obj is None:
@@ -86,16 +88,6 @@ def get_cached_object_or_404(model, **kwargs):
         return get_cached_object(model, **kwargs)
     except ObjectDoesNotExist:
         raise Http404
-
-def method_key_getter(func, *args, **kwargs):
-    dumps = pickle.dumps((
-                'ella.core.cache.utils.method_key_getter',
-                func.__module__,
-                func.__name__,
-                args[1:],
-                [ (key, kwargs[key]) for key in sorted(kwargs.keys()) ]
-))
-    return md5(dumps).hexdigest()
 
 def cache_this(key_getter, invalidator=None, timeout=10*60):
     def wrapped_decorator(func):
