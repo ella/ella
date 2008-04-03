@@ -305,6 +305,7 @@ class HitCount(models.Model):
         ordering = ('-hits', '-last_seen',)
         verbose_name = 'Hit Count'
         verbose_name_plural = 'Hit Counts'
+        unique_together = ('target_ct', 'target_id')
 
 class Related(models.Model):
     """
