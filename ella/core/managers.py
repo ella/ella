@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from django.db import models
+from django.db import connection, models
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 
@@ -99,16 +99,15 @@ def get_top_objects_key(func, self, count, mods=[]):
 
 class HitCountManager(models.Manager):
     def hit(self, obj):
-        # TODO: optimizations and thread safety - UPSERT needed
         target_ct = ContentType.objects.get_for_model(obj)
-        try:
-            hc = self.get(target_ct=target_ct, target_id=obj._get_pk_val())
-            hc.last_seen = datetime.now()
-            hc.hits += 1
-        except models.ObjectDoesNotExist:
+
+        cursor = connection.cursor()
+        res = cursor.execute('UPDATE core_hitcount SET hits=hits+1 WHERE target_ct_id=%s AND target_id=%s', [ target_ct.id, obj._get_pk_val() ])
+
+        if res<1:
             hc = self.model(target_ct=target_ct, target_id=obj._get_pk_val())
             hc.site_id = settings.SITE_ID
-        hc.save()
+            hc.save()
 
     @cache_this(get_top_objects_key, timeout=10*60)
     def get_top_objects(self, count, mods=[]):
