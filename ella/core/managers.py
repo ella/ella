@@ -95,7 +95,9 @@ class ListingManager(RelatedManager):
         return out
 
 def get_top_objects_key(func, self, count, mods=[]):
-    return method_key_getter(func, self, settings.SITE_ID, count, mods)
+    return 'ella.core.managers.HitCountManager.get_top_objects_key:%d:%d:%s' % (
+            settings.SITE_ID, count, ''.join(mods)
+)
 
 class HitCountManager(models.Manager):
     def hit(self, obj):
