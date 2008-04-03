@@ -11,9 +11,17 @@ from django.template import Template
 
 from ella.core.models import Category
 from ella.core.box import Box
-from ella.core.cache import get_cached_object
+from ella.core.cache import get_cached_object, CACHE_DELETER, cache_this
+
+def get_position_key(func, self, category, name, nofallback):
+    return 'ella.positions.models.PositionManager.get_active_position:%d:%s:%s' % (
+            category.pk, name, nofallback and '1' or '0'
+)
+def invalidate_cache(key,  self, category, name, nofallback=False):
+    CACHE_DELETER.register_test(Position, lambda x: x.category == category and x.name == name)
 
 class PositionManager(models.Manager):
+    @cache_this(get_position_key, invalidate_cache, timeout=10*60)
     def get_active_position(self, category, name, nofallback=False):
         """
         Get active position for given position name.
