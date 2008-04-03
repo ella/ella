@@ -287,13 +287,13 @@ def category_detail(request, category):
             context_instance=RequestContext(request)
 )
 
-def export_key(*args, **kwargs):
-    " Cache key for export(). "
-    kwargs['site'] = settings.SITE_ID
-    return method_key_getter(*args, **kwargs)
+def get_export_key(func, request, count, name='', mods=[]):
+    return 'ella.core.views.export:%d:%d:%s:%s' % (
+            settings.SITE_ID, count, name, ''.join(mods)
+)
 
-@cache_this(export_key, timeout=60*60)
-def export(request, count, name=None, models=None):
+@cache_this(get_export_key, timeout=60*60)
+def export(request, count, name='', models=[]):
     """
     Export banners.
 
