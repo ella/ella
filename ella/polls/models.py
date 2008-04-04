@@ -110,6 +110,9 @@ class Contest(models.Model, Publishable, FloatingStateModel):
             .extra(select={'count_guess_difference' : 'ABS(`count_guess` - %d)' % count})
             .order_by('count_guess_difference'))
 
+    def get_description(self):
+        return self.text_announcement
+
     def __unicode__(self):
         return self.title
 
@@ -147,6 +150,9 @@ class Quiz(models.Model, Publishable, FloatingStateModel):
         Returns cached quiz result by the reached points
         """
         return get_cached_object(Result, quiz=self, points_from__lte=points, points_to__gte=points)
+
+    def get_description(self):
+        return self.text_announcement
 
     def __unicode__(self):
         return self.title
