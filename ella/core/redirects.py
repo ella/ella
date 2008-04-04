@@ -61,6 +61,9 @@ def drop_redirects(instance):
             # will cause the save() to fail, thus preventing anybody from correcting the error
             pass
 
+'''
+# disabled until we resolve circular imports when viewed via apache
+
 from ella.db.models import Publishable
 from ella.core.models import Listing
 def connect_model(sender):
@@ -74,3 +77,8 @@ for m in Publishable.__subclasses__() + [Listing]:
     connect_model(m)
 
 dispatcher.connect(connect_model, signal=signals.class_prepared)
+'''
+dispatcher.connect(record_url, signal=signals.pre_save)
+dispatcher.connect(check_url, signal=signals.post_save)
+dispatcher.connect(drop_redirects, signal=signals.pre_delete)
+
