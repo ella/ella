@@ -1,3 +1,4 @@
+import logging
 from django import http, newforms as forms
 from django.template import RequestContext, loader
 from django.shortcuts import render_to_response
@@ -6,16 +7,40 @@ from django.utils.translation import ugettext, ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 from django.views.generic.list_detail import object_list
 
-from ella.discussions.models import Question, Topic
+from ella.discussions.models import *
 from ella.core.cache.utils import get_cached_object_or_404
 
+
 class QuestionForm(forms.Form):
+    '''
     title = Question._meta.get_field('title').formfield()
     nickname = Question._meta.get_field('nickname').formfield()
     email = Question._meta.get_field('email').formfield()
     description = Question._meta.get_field('description').formfield()
+    '''
+    # TODO update accordingly to model.py
+    pass
+
+
+def threads(request, bits, context):
+    """ Threads view (list of threads accordingly to given topic. """
+    topic = context['object']
+    category = context['category']
+    thrList = TopicThread.objects.filter(topic=topic)
+    context['threads'] = thrList
+    tplList = (
+        'page/category/%s/content_type/discussions.question/%s/threads.html' % (category.path, topic.slug,),
+        'page/category/%s/content_type/discussions.question/threads.html' % (category.path,),
+        'page/content_type/discussions.question/threads.html',
+)
+    return render_to_response(
+        tplList,
+        context,
+        context_instance=RequestContext(request)
+)
 
 def ask_question(request, bits, context):
+    log.debug('ask_question() view')
     if bits:
         raise http.Http404
 
@@ -55,7 +80,9 @@ def ask_question(request, bits, context):
             context_instance=RequestContext(request)
 )
 
+
 def question(request, bits, context):
+    log.debug('question() view')
     if not bits:
         raise http.Http404
 
@@ -73,10 +100,12 @@ def question(request, bits, context):
     from ella.comments.urls import comments_custom_urls
     return comments_custom_urls(request, new_bits, context)
 
+
 def topic(request, context):
     top = context['object']
     cat = context['category']
     slug = top.slug
+    log.debug('topic() view')
     # TODO: add caching
     ct = ContentType.objects.get_for_model(Topic)
     t_list = [
@@ -93,11 +122,11 @@ def topic(request, context):
 
     return object_list(
             request,
-            queryset=top.question_set.all(),
+            queryset=top.topicthread_set.all(),
             extra_context=context,
             paginate_by=10,
             template_name=loader.select_template(t_list).name,
             **kwargs
 )
 
-
+log = logging.getLogger('ella.discussions')
