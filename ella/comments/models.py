@@ -8,6 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_str
 
 from ella.core.cache.utils import cache_this, get_cached_object, get_cached_list
+from ella.ellaadmin.options import admin_url
 
 from ella.comments import defaults
 
@@ -111,6 +112,9 @@ class Comment(models.Model):
         elif self.id:
             return '%d' % self.id
         return ''
+
+    def get_admin_url(self):
+        return admin_url(self)
 
     def save(self):
         # TODO: maybe create models.GenealogyField for this

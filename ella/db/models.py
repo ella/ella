@@ -2,10 +2,11 @@ from django.utils.translation import ugettext, ugettext_lazy as _
 from django.utils.safestring import mark_safe
 from django.contrib.contenttypes.models import ContentType
 
-
 from ella.core.cache import get_cached_object, get_cached_list
 from ella.core.models import Listing, Category, HitCount
 from ella.photos.models import Photo
+from ella.ellaadmin.options import admin_url
+
 
 class Publishable(object):
     """
@@ -31,6 +32,9 @@ class Publishable(object):
         listing = self.main_listing
         if listing:
             return listing.get_absolute_url()
+
+    def get_admin_url(self):
+        return admin_url(self)
 
     def get_category(self):
         " Get object's primary Category."
