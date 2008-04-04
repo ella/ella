@@ -248,9 +248,10 @@ def render(object, content_path):
     for step in path:
         try:
             content = getattr(content, step)
+            if callable(content):
+                content = content()
         except:
             # TODO: log
-            #raise template.TemplateSyntaxError, "Error accessing %r property of object %r" % (content_path, object)
             return ''
 
     t = render_str(content)
