@@ -13,6 +13,7 @@ from django.template.defaultfilters import slugify
 
 from ella.core.cache.invalidate import CACHE_DELETER
 from ella.core.cache.utils import normalize_key
+from ella.core.cache.template_loader import select_template
 
 
 BOX_INFO = 'ella.core.box.BOX_INFO'
@@ -139,7 +140,7 @@ class Box(object):
             t = loader.get_template(self.template_name)
         else:
             t_list = self._get_template_list()
-            t = loader.select_template(t_list)
+            t = select_template(t_list)
 
         self._context.update(self.get_context())
         resp = t.render(self._context)
@@ -167,7 +168,7 @@ class Box(object):
         else:
             pars = ''
         return normalize_key('ella.core.box.Box.render:%d:%s:%s:%d:%s' % (
-                    settings.SITE_ID, self.obj.__class__.__name__, smart_str(self.box_type), self.obj.pk, pars
+                    settings.SITE_ID, self.obj.__class__.__name__, str(self.box_type), self.obj.pk, pars
 )
 )
 

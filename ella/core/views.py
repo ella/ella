@@ -1,7 +1,6 @@
 from datetime import datetime
 
 from django.contrib.contenttypes.models import ContentType
-from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.core.paginator import ObjectPaginator
 from django.conf import settings
@@ -12,11 +11,11 @@ from django.http import Http404
 from ella.core.models import Listing, Category, HitCount
 from ella.core.cache import get_cached_list, get_cached_object_or_404, cache_this
 from ella.core.custom_urls import dispatcher
+from ella.core.cache.template_loader import render_to_response
 
 
 # local cache for get_content_type()
 CONTENT_TYPE_MAPPING = {}
-
 
 def get_content_type(ct_name):
     """

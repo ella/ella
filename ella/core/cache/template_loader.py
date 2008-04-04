@@ -1,7 +1,8 @@
 import warnings
 
-from django.template import TemplateDoesNotExist
+from django.template import TemplateDoesNotExist, loader
 from django.conf import settings
+from django.http import HttpResponse
 
 from ella.core.cache.utils import cache_this
 from ella.core.cache.invalidate import CACHE_DELETER
@@ -52,3 +53,33 @@ def get_cache_teplate(template_name, template_dirs):
             pass
     raise TemplateDoesNotExist, template_name
 
+def get_sel_template_key(func, template_list):
+    return 'ella.core.cache.template_loader.select_template:' + ','.join(template_list)[:200]
+
+@cache_this(get_sel_template_key, timeout=10*60)
+def find_template(template_list):
+    for template in template_list:
+        try:
+            source, origin = loader.find_template_source(template)
+            return (source, origin, template)
+        except loader.TemplateDoesNotExist:
+            pass
+    raise loader.TemplateDoesNotExist, ', '.join(template_list)
+
+def select_template(template_list):
+    source, origin, template_name = find_template(template_list)
+    return loader.get_template_from_string(source, origin, template_name)
+
+def render_to_response(template_name, dictionary=None, context_instance=None):
+    if isinstance(template_name, (list, tuple)):
+        t = select_template(template_name)
+    else:
+        t = loader.get_template(template_name)
+    dictionary = dictionary or {}
+
+    if context_instance:
+        context_instance.update(dictionary)
+    else:
+        context_instance = Context(dictionary)
+
+    return HttpResponse(t.render(context_instance))

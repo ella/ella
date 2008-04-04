@@ -28,9 +28,13 @@ def get_listings_key(func, self, category=None, count=10, offset=1, mods=[], con
         kw = ','.join(''.join((k, smart_str(v))) for k, v in kwargs.items())
     else:
         kw = ''
+    if content_types:
+        cts = ''.join(map(str, content_types))
+    else:
+        cts = ''
 
     return 'ella.core.managers.ListingManager.get_listing:%s:%d:%d:%s:%s:%s' % (
-            c, count, offset, ''.join(mods), ''.join(content_types), kw
+            c, count, offset, ''.join(mods), cts, kw
 )
 
 class ListingManager(RelatedManager):

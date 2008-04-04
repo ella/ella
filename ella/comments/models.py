@@ -36,8 +36,20 @@ def build_tree(comment_list):
             ]
     return comment_list
 
+def get_count_key(func, self, object, **kwargs):
+    if kwargs:
+        kw = ','.join(':'.join((key, smart_str(kwargs[key]))) for key in sorted(kwargs.keys()))
+    else:
+        kw = ''
+    return 'ella.comments.models.CommentManager.get_count_for_object:%s:%s:%d:%s' % (
+            object._meta.app_label,
+            object._meta.object_name,
+            object.pk,
+            kw
+)
+
 class CommentManager(models.Manager):
-    #@cache_this
+    @cache_this(get_count_key, timeout=10*60)
     def get_count_for_object(self, object, **kwargs):
         target_ct = ContentType.objects.get_for_model(object)
         return self.filter(target_ct=target_ct, target_id=object.id, **kwargs).count()
