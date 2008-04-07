@@ -64,7 +64,7 @@ class PhotoOptions(admin.ModelAdmin):
     list_display = ('title', 'width', 'height', 'thumb') ## 'authors')
     list_filter = ('created',)
     prepopulated_fields = {'slug': ('title',)}
-    search_fields = ('title', 'image', 'description',)
+    search_fields = ('title', 'image', 'description', 'id',)
 
     def __call__(self, request, url):
         if url and url.endswith('json'):
