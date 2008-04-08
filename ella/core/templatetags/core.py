@@ -4,13 +4,11 @@ from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.encoding import smart_str, force_unicode
-from django.utils.safestring import mark_safe
 from django.template import loader
 from django.template.defaultfilters import stringfilter
 
 from ella.core.models import Listing, Dependency, Related, Category
-from ella.core.cache.utils import get_cached_object, cache_this
-from ella.core.cache.invalidate import CACHE_DELETER
+from ella.core.cache.utils import get_cached_object
 from ella.core.box import BOX_INFO, MEDIA_KEY, Box
 
 import logging
@@ -143,7 +141,7 @@ class BoxNode(template.Node):
             try:
                 obj = template.resolve_variable(self.var_name, context)
             except template.VariableDoesNotExist, e:
-                log.error('BoxNode: Template variable does not exist.')
+                log.error('BoxNode: Template variable does not exist. var_name=%s' % self.var_name)
                 return ''
 
         if hasattr(obj, 'Box'):
@@ -230,19 +228,8 @@ def box_media(context):
     """
     return {'media' : context.dicts[-1].get(MEDIA_KEY, None)}
 
-def get_render_key(func, object, content_path):
-    return 'ella.core.templateatgs.core.render:%s:%s:%d:%s' % (
-            object._meta.app_label,
-            object._meta.object_name,
-            object.pk,
-            content_path
-)
-
-def register_test(key, object, content_path):
-    CACHE_DELETER.register_pk(object, key)
-
-@cache_this(get_render_key, register_test, timeout=10*60)
-def _render(object, content_path):
+@register.filter
+def render(object, content_path):
     """
     A markdown filter that handles the rendering of any text containing markdown markup and/or django template tags.
     Only ``{{object}}`` and ``{{MEDIA_URL}}`` are available in the context.
@@ -261,18 +248,13 @@ def _render(object, content_path):
     for step in path:
         try:
             content = getattr(content, step)
-            if callable(content):
-                content = content()
         except:
             # TODO: log
+            #raise template.TemplateSyntaxError, "Error accessing %r property of object %r" % (content_path, object)
             return ''
 
     t = render_str(content)
     return t.render(template.Context({'object' : object, 'MEDIA_URL' : settings.MEDIA_URL}))
-
-@register.filter
-def render(object, content_path):
-    return mark_safe(_render(object, content_path))
 
 @register.filter
 @stringfilter
