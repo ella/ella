@@ -24,17 +24,12 @@ def invalidate_listing(key, self, *args, **kwargs):
 
 def get_listings_key(func, self, category=None, count=10, offset=1, mods=[], content_types=[], **kwargs):
     c = category and  category.id or ''
-    if kwargs:
-        kw = ','.join(''.join((k, smart_str(v))) for k, v in kwargs.items())
-    else:
-        kw = ''
-    if content_types:
-        cts = ''.join(map(str, content_types))
-    else:
-        cts = ''
 
     return 'ella.core.managers.ListingManager.get_listing:%s:%d:%d:%s:%s:%s' % (
-            c, count, offset, ''.join(mods), cts, kw
+            c, count, offset,
+            ','.join('.'.join((model._meta.app_label, model._meta.object_name)) for model in mods),
+            ','.join(map(str, content_types)),
+            ','.join(':'.join((k, smart_str(v))) for k, v in kwargs.items()),
 )
 
 class ListingManager(RelatedManager):
