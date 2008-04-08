@@ -12,8 +12,8 @@ from django.conf import settings
 from django.template.defaultfilters import slugify
 
 from ella.core.cache.invalidate import CACHE_DELETER
-from ella.core.cache.utils import normalize_key
 from ella.core.cache.template_loader import select_template
+from ella.core.cache.utils import normalize_key
 
 
 BOX_INFO = 'ella.core.box.BOX_INFO'
@@ -95,7 +95,7 @@ class Box(object):
 
     def render(self):
         " Cached wrapper around self._render(). "
-        key = self.get_cache_key()
+        key = normalize_key(self.get_cache_key())
         rend = cache.get(key)
         if rend is None:
             rend = self._render()
@@ -167,8 +167,7 @@ class Box(object):
             pars = ','.join(':'.join((smart_str(key), smart_str(self.params[key]))) for key in sorted(self.params.keys()))
         else:
             pars = ''
-        return normalize_key('ella.core.box.Box.render:%d:%s:%s:%d:%s' % (
+        return 'ella.core.box.Box.render:%d:%s:%s:%d:%s' % (
                     settings.SITE_ID, self.obj.__class__.__name__, str(self.box_type), self.obj.pk, pars
-)
 )
 

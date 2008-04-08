@@ -1,8 +1,4 @@
-#from md5 import md5
-#try:
-#    import cPickle as pickle
-#except ImportError:
-#    import pickle
+from md5 import md5
 
 from django.db.models import ObjectDoesNotExist
 from django.core.cache import cache
@@ -12,11 +8,8 @@ from django.utils.encoding import smart_str
 
 from ella.core.cache.invalidate import CACHE_DELETER
 
-TABLE = ''.join([ chr(x) for x in range(256)])
-DELETE_CHARS = ''.join([ chr(x) for x in range(33)])
 def normalize_key(key):
-    return smart_str(key).translate(TABLE, DELETE_CHARS)
-
+    return md5(key).hexdigest()
 
 KEY_FORMAT_LIST = 'ella.core.cache.utils.get_cached_list'
 KEY_FORMAT_OBJECT = 'ella.core.cache.utils.get_cached_object'
@@ -92,7 +85,7 @@ def get_cached_object_or_404(model, **kwargs):
 def cache_this(key_getter, invalidator=None, timeout=10*60):
     def wrapped_decorator(func):
         def wrapped_func(*args, **kwargs):
-            key = key_getter(func, *args, **kwargs)
+            key = normalize_key(key_getter(func, *args, **kwargs))
             result = cache.get(key)
             if result is None:
                 result = func(*args, **kwargs)
