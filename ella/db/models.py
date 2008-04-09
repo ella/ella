@@ -53,6 +53,12 @@ class Publishable(object):
     def get_description(self):
         return self.description
 
+    def get_title(self):
+        myTitle=self.title
+        if myTitle:
+           return '%s' % (self.title,)
+        else:
+           return '%s' % (self.draw_title(),)
 
     ##
     # Custom admin fields

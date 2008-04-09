@@ -13,6 +13,8 @@ from ella.core.models import Category
 from ella.core.box import Box
 from ella.core.cache import get_cached_object, CACHE_DELETER, cache_this
 
+from ella.db.models import Publishable
+
 def get_position_key(func, self, category, name, nofallback):
     return 'ella.positions.models.PositionManager.get_active_position:%d:%s:%s' % (
             category.pk, name, nofallback and '1' or '0'
@@ -75,6 +77,22 @@ class Position(models.Model):
 
     objects = PositionManager()
 
+#############
+    def show_title(self):
+      if not self.target:
+         return '-- empty position --'
+      else:
+         return '%s [%s]' % (self.target.title, self.target_ct,)
+    show_title.short_description = _('Title')
+
+    def is_filled(self):
+      if self.target:
+         return True
+      else:
+      	 return False
+    is_filled.short_description = _('Filled')
+    is_filled.boolean = True
+#############
     def is_active(self):
         now = datetime.now()
         active_from = not self.active_from or self.active_from <= now
