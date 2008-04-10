@@ -2,7 +2,7 @@
 Ella Positions application
 ==========================
 
-You can dafine named positions and create DB entry for each category.
+You can define named positions and create DB entry for each category.
 After then in templates you can call special templatetag
 which gets box for specified positioned object.
 

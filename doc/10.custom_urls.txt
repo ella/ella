@@ -3,7 +3,7 @@ Custom URL extensions
 =====================
 
 Ella allows you to register custom actions on individual objects and/or
-replace the default (rendering a template) vith custom view function.
+replace the default (rendering a template) with custom view function.
 
 Registering your own action
 ===========================

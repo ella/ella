@@ -3,7 +3,7 @@ Ella Listing system
 ===================
 
 When you create a publishable object (``Article``, ``Gallery``, etc.) and wish
-to actually publish it, you do that by creating and appropriate ``Listing``
+to actually publish it, you do that by creating an appropriate ``Listing``
 model.
 
 Every model can be published in any number of categories

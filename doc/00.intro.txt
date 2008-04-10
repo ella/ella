@@ -25,7 +25,7 @@ For starting first Ella project, there is simple howto screencast
 in ``./doc/`` directory (``./doc/ella_start.mpeg``).
 
 Small Ella project in ella_test directory is
-basically outcome of ``ella_start`` screencast. It represents minimal applcation
+basically outcome of ``ella_start`` screencast. It represents minimal application
 built on Ella.
 
 

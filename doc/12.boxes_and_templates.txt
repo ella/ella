@@ -44,7 +44,7 @@ Where:
 
 This hierarchy ensures that the most specific template for a given task is
 used. In some cases, such as listing all objects from a given category, not
-all steps of the ierrchy are applicable
+all steps of the hierrchy are applicable
 (``page/content_type/APP_LABEL.MODEL/listing.html`` in this example).
 
 
