@@ -20,6 +20,10 @@ STATE_OK = 'ok'
 STATE_INVALID = 'invalid'
 STATE_NOT_ACTIVE = 'not_active'
 STATE_BAD_LOGIN_OR_PASSWORD = 'bad_password'
+CT_THREAD = ContentType.objects.get(
+    app_label='discussions',
+    model='TopicThread'
+)
 
 
 class QuestionForm(forms.Form):
@@ -32,15 +36,60 @@ class QuestionForm(forms.Form):
     content = forms.CharField(required=True, widget=forms.Textarea)
 
 
+class ThreadForm(QuestionForm):
+    title = forms.CharField(required=True)
+
+
 class LoginForm(forms.Form):
     username = forms.CharField(required=True)
     password = forms.CharField(required=True, widget=forms.PasswordInput)
+
+
+class RegistrationForm(forms.Form):
+    username = forms.CharField(required=True)
+    password = forms.CharField(required=True, widget=forms.PasswordInput)
+    password_again = forms.CharField(required=True, widget=forms.PasswordInput)
+    email = forms.EmailField()
 
 
 def get_ip(request):
     if 'HTTP_X_FORWARDED_FOR' in request.META:
         return request.META['HTTP_X_FORWARDED_FOR']
     return request.META['REMOTE_ADDR']
+
+
+def add_post(content, thread, user, ip='0.0.0.0'):
+    """
+    PARAMS
+    content: post content
+    thread: TopicThread instance
+    ip: IP address
+    """
+    content = filter_banned_strings(content)
+    comment_set = get_comments_on_thread(thread).order_by('submit_date')
+    parent = None
+    if comment_set.count() > 0:
+        parent = comment_set[0]
+    cmt = Comment(
+        content=content,
+        subject='',
+        ip_address=ip,
+        target_ct=CT_THREAD,
+        target_id=thread.id,
+        parent=parent,
+        user=user,
+)
+    cmt.save()
+
+
+def register_user(data):
+    #TODO test whether username already exists
+    #TODO send activation e-mail, create cron script (?) to deactivate new user accounts within 2 days, if user didn't click to activation link.
+    if User.objects.get(username__exact=data['username']):
+        return 'USERNAME_EXISTS'
+    usr = User(data['username'], data['email'], data['password'])
+    usr.is_staff = False
+    usr.save()
 
 
 def get_category_topics_url(category):
@@ -81,6 +130,7 @@ def posts(request, bits, context):
         return http.Http404('Unsupported url. Slug of topic-thread needed.')
     frm = QuestionForm()
     frmLogin = LoginForm()
+    frmReg = RegistrationForm()
     topic = context['object']
     category = context['category']
     # category.slug/year/_(topics)
@@ -100,6 +150,10 @@ def posts(request, bits, context):
         elif bits[1] == 'logout':
             logout(request)
             return http.HttpResponseRedirect(thr.get_absolute_url())
+        elif bits[1] == 'register':
+            f = RegistrationForm(request.POST)
+            if f.is_valid():
+                register_user(f.cleaned_data)
     else:
         if request.POST:
             frm = QuestionForm(request.POST)
@@ -107,31 +161,13 @@ def posts(request, bits, context):
                 context['question_form_state'] = STATE_INVALID
             context['question_form_state'] = STATE_OK
             if frm.is_valid():
-                ctThread = ContentType.objects.get(
-                    app_label='discussions',
-                    model='TopicThread'
-)
-                content = frm.cleaned_data['content']
-                content = filter_banned_strings(content)
-                comment_set = get_comments_on_thread(thr).order_by('submit_date')
-                parent = None
-                if comment_set.count() > 0:
-                    parent = comment_set[0]
-                usr = get_user(request)
-                cmt = Comment(
-                    content=content,
-                    subject='',
-                    ip_address=get_ip(request),
-                    target_ct=ctThread,
-                    target_id=thr.id,
-                    parent=parent,
-                    user=usr,
-)
-                cmt.save()
+                add_post(frm.cleaned_data['content'], thr, get_user(request), get_ip(request))
     comment_set = get_comments_on_thread(thr).order_by('submit_date')
     context['thread'] = thr
     context['posts'] = comment_set
     context['login_form'] = frmLogin
+    context['reg_form'] = frmReg
+    context['reg_form_action'] = '%sregister/' % request.get_full_path()
     context['question_form'] = frm
     context['question_form_action'] = request.get_full_path() #request.build_absolute_uri()
     context['login_form_action'] = '%slogin/' % request.get_full_path()
@@ -148,32 +184,36 @@ def posts(request, bits, context):
 )
 
 
-def ask_question(request, bits, context):
-    if bits:
-        raise http.Http404
-
+def create_thread(request, bits, context):
+    """ creates new thread (that is new TopciThread and first Comment) """
     topic = context['object']
+    frmThread = ThreadForm(request.POST or None)
+    context['login_frmThread_state'] = STATE_UNAUTHORIZED
+    frmLogin = LoginForm()
+    frmLogin = LoginForm(request.POST or None)
+    if frmLogin.is_valid():
+        state = process_login(request, frmLogin.cleaned_data)
+        if state == STATE_OK:
+            url = '%s%s' % (topic.get_absolute_url(), slugify(_('create thread')))
+            return http.HttpResponseRedirect(url)
+        context['login_frmThread_state'] = state
 
-    form = QuestionForm(request.POST or None)
-    if form.is_valid():
-        ip = get_ip(request)
-        q = Question(**form.cleaned_data)
-        q.topic = topic
-        q.ip_address = ip
-
-        slug = slugify(form.cleaned_data['title'])
-        if Question.objects.filter(topic=topic, slug=slug).count() != 0:
-            suffix = 1
-            while Question.objects.filter(topic=topic, slug=(slug + str(suffix))).count() != 0:
-                suffix += 1
-            slug = slug + str(suffx)
-        q.slug = slug
-
-        q.save()
-
-        return http.HttpResponseRedirect(q.get_absolute_url())
-
-    context['form'] = form
+    if frmThread.is_valid():
+        data = frmThread.cleaned_data
+        thr = TopicThread(
+            title=data['title'],
+            slug=slugify(data['title']),
+            created=datetime.now(),
+            author=get_user(request),
+            topic=topic
+)
+        thr.save()
+        add_post(data['content'], thr, get_user(request), get_ip(request))
+    context['login_frmThread'] = frmLogin
+    context['login_frmThread_action'] = '%slogin/' % request.get_full_path()
+    context['logout_frmThread_action'] = '%slogout/' % request.get_full_path()
+    context['question_frmThread'] = frmThread
+    context['question_frmThread_action'] = request.get_full_path()
     category = context['category']
     return render_to_response(
             (

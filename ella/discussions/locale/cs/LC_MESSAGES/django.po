@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Discussions 0.1 - draft\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-04-10 11:54+0200\n"
+"POT-Creation-Date: 2008-04-10 13:45+0200\n"
 "PO-Revision-Date: 2008-03-19 17:00+0100\n"
 "Last-Translator: Jonas Fiala <jonas.fiala@netcentrum.cz>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -69,10 +69,6 @@ msgstr "příspěvky"
 msgid "Thread"
 msgstr "Vlákno"
 
-#: models.py:202
-msgid "thread"
-msgstr "vlákno"
-
 #: models.py:203
 msgid "Threads"
 msgstr "Vlákna"
@@ -81,11 +77,15 @@ msgstr "Vlákna"
 msgid "Expression"
 msgstr ""
 
-#: views.py:82
+#: urls.py:11
+msgid "create thread"
+msgstr "vytvořit vlákno"
+
+#: views.py:52
 msgid "topics"
 msgstr "témata"
 
-#: views.py:196
+#: views.py:205
 msgid "comments"
 msgstr "komentáře"
 

@@ -51,7 +51,7 @@ Poznamky k registraci:
 http://www.b-list.org/weblog/2006/sep/02/django-tips-user-registration/
 """
 
-ACTIVITY_PERIOD = 6  # Thred activity (hours)
+ACTIVITY_PERIOD = 6  # Thread activity (hours)
 
 
 def get_comments_on_thread(thread):
