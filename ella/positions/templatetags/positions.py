@@ -73,7 +73,7 @@ def ifposition(parser, token):
     """
     Syntax::
 
-        {% ifposition POSITION_NAME for CATEGORY [nofallback] %}
+        {% ifposition POSITION_NAME ... for CATEGORY [nofallback] %}
         {% else %}
         {% endifposition %}
 
@@ -86,13 +86,11 @@ def ifposition(parser, token):
         nofallback = True
         bits.pop()
 
-    if len(bits) == 4 and bits[2] == 'for':
-        pos_name, category = bits[1], bits[3]
-        box_type = None
-    elif len(bits) == 6 and bits[2] == 'for' and bits[4] == 'using':
-        pos_name, category, box_type = bits[1], bits[3], bits[5]
+    if len(bits) >= 4 and bits[-2] == 'for':
+        category = bits.pop()
+        pos_names = bits[1:-1]
     else:
-        raise TemplateSyntaxError, 'Invalid syntax: {% position POSITION_NAME for CATEGORY [nofallback] %}'
+        raise TemplateSyntaxError, 'Invalid syntax: {% position POSITION_NAME ... for CATEGORY [nofallback] %}'
 
     nodelist_true = parser.parse(('else', end_tag))
     token = parser.next_token()
@@ -103,22 +101,27 @@ def ifposition(parser, token):
     else:
         nodelist_false = template.NodeList()
 
-    return IfPositionNode(category, pos_name, nofallback, nodelist_true, nodelist_false)
+    return IfPositionNode(category, pos_names, nofallback, nodelist_true, nodelist_false)
 
 class IfPositionNode(template.Node):
-    def __init__(self, category, position, nofallback, nodelist_true, nodelist_false):
-        self.category, self.position = category, position
+    def __init__(self, category, positions, nofallback, nodelist_true, nodelist_false):
+        self.category, self.positions = category, positions
         self.nofallback, self.nodelist_true, self.nodelist_false = nofallback, nodelist_true, nodelist_false
 
     def render(self, context):
         try:
             cat = template.resolve_variable(self.category, context)
-
             if not isinstance(cat, Category):
                 cat = get_cached_object(Category, site=settings.SITE_ID, slug=self.category)
 
-            pos = Position.objects.get_active_position(cat, self.position, self.nofallback)
-            return self.nodelist_true.render(context)
         except (Position.DoesNotExist, template.VariableDoesNotExist, Category.DoesNotExist):
             return self.nodelist_false.render(context)
+
+        for pos in self.positions:
+            try:
+                Position.objects.get_active_position(cat, pos, self.nofallback)
+                return self.nodelist_true.render(context)
+            except Position.DoesNotExist:
+                pass
+        return self.nodelist_false.render(context)
 

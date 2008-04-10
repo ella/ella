@@ -23,6 +23,13 @@ NO1
 NO2
 YES3
 
+>>> t = Template('''{% spaceless %}
+... {% load positions %}
+... {% ifposition featured_four featured_three for category %}YES1{% else %}NO1{% endifposition %}
+... {% endspaceless %}''')
+>>> print t.render(c)
+YES1
+
 """
 
 position_template_tag = r"""
