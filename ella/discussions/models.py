@@ -1,4 +1,5 @@
 from datetime import datetime
+from datetime import timedelta
 import unicodedata
 import logging
 
@@ -25,6 +26,7 @@ usr.comment_set.filter(target_ct=ctThread)
 
 
 === Vypis vlaken tematu ===
+qset = TopicThread.objects.filter(topic=Topic.objects.get(pk=1))
 
 
 === Prispevky vlakna ===
@@ -44,7 +46,18 @@ qset.latest('submit_date')
 
 === URL prispevk. formulare ===
 http://localhost:8000/testovaci-kategorie/2008/3/28/temata/prvni-pomoc/dotaz/
+
+Poznamky k registraci:
+http://www.b-list.org/weblog/2006/sep/02/django-tips-user-registration/
 """
+
+ACTIVITY_PERIOD = 6  # Thred activity (hours)
+
+
+def get_comments_on_thread(thread):
+    ctThread = ContentType.objects.get(app_label='discussions', model='TopicThread')
+    qset = Comment.objects.filter(target_ct=ctThread)
+    return qset.filter(target_id=thread.id)
 
 
 def remove_diacritical(text):
@@ -98,6 +111,31 @@ class Topic(models.Model, Publishable):
     photo_thumb.allow_tags = True
 
 
+    @property
+    def get_description(self):
+        return self.description
+
+
+    def get_threads(self):
+        return TopicThread.objects.filter(topic=self)
+
+
+    def get_threads_by_date(self):
+        return self.get_threads().order_by('created')
+
+
+    def get_threads_by_activity(self):
+        act = {}
+        for t in self.get_threads_by_date():
+            act[t] = t.activity
+        items = act.items()
+        items = [(v, k) for (k, v) in items]
+        items.sort()
+        items.reverse()
+        items = [(k, v) for (v, k) in items]
+        return [key for key, value in items]
+
+
     class Meta:
         verbose_name = _('Topic')
         verbose_name_plural = _('Topics')
@@ -122,21 +160,34 @@ class TopicThread(models.Model):
 
 
     def __load_posts(self):
-        if not self.__posts:
-            from django.contrib.contenttypes.models import ContentType
-            ctThread = ContentType.objects.get(app_label='discussions', model='TopicThread')
-            qset = Comment.objects.filter(target_ct=ctThread)
-            self.__posts = qset.filter(target_id=self.pk)
+        if self.__posts:
+            return
+        ctThread = ContentType.objects.get(app_label='discussions', model='TopicThread')
+        qset = Comment.objects.filter(target_ct=ctThread)
+        self.__posts = qset.filter(target_id=self.pk)
 
 
     def get_absolute_url(self):
         base = self.topic.get_absolute_url()
-        return '%s%s' % (base, slugify(_('threads')))
+        return '%s%s/%s' % (base, slugify(_('posts')), self.slug)
 
 
     def num_posts(self):
         self.__load_posts()
         return self.__posts.count()
+
+
+    def get_posts_by_date(self):
+        self.__load_posts()
+        return self.__posts.order_by('submit_date')
+
+
+    @property
+    def activity(self):
+        d = timedelta(hours=ACTIVITY_PERIOD)
+        when = datetime.now() - d
+        qset = self.get_posts_by_date()
+        return qset.filter(submit_date__gte=when).count()
 
 
     def last_post(self):

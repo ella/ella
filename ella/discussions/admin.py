@@ -14,7 +14,7 @@ from django.utils.translation import ugettext_lazy as _
 
 class PostOptions(admin.ModelAdmin):
     ordering = ('-submit_date',)
-    list_display = ('subject', 'submit_date', 'target', 'author', 'is_public', 'path',)
+    list_display = ('content', 'submit_date', 'target', 'author', 'is_public', 'path',)
     search_fields = ('subject', 'content', 'id',)
     raw_id_fields = ('parent',)
     fieldsets = (
@@ -24,18 +24,13 @@ class PostOptions(admin.ModelAdmin):
                     'submit_date',
                     'content',
                     'target_id',
+                    'target_ct', # TODO udelat omezujici widget/field - povolit jen TopicThread c.t.
                     'parent',
                     'user',
                     'ip_address',
 )
 }),
 )
-
-
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'XX':
-            kwargs['widget'] = HiddenInput
-        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 
     def queryset(self, request):

@@ -1,7 +1,11 @@
 from django.test.testcases import TestCase
+
 from ella.photos.imageop import *
 import Image, ImageDraw
 from sets import Set
+import settings
+
+from ella.photos import models
 
 
 
@@ -52,6 +56,7 @@ class FormatedPhotoFake:
 
 
 class ImageopTestCase(TestCase):
+    fixtures = ['photodata.json']
     '''
     100x100 pix x 3 bytes RGB
     X........X
@@ -114,7 +119,7 @@ class ImageopTestCase(TestCase):
         draw.line(coords, fill=self.RGB_LINE_MIDDLE)
         coords = (0, width / 2, width, width / 2)
         draw.line(coords, fill=self.RGB_LINE_MIDDLE)
-        im.save('/home/jonas.fiala/tmp/source.png', 'PNG')
+        im.save('%s/testik.png' % settings.MEDIA_ROOT, 'PNG')
         self.iStretch = ImageStretch(image=im, formated_photo=self.__ff)
 
 
@@ -124,7 +129,7 @@ class ImageopTestCase(TestCase):
         img = self.iStretch
         res = img.crop_if_needed()
         self.assertEquals(img.image.tostring(), res.tostring())
-        res.save('/home/jonas.fiala/tmp/crop1.png', 'PNG')
+        #res.save('/home/jonas.fiala/tmp/crop1.png', 'PNG')
 
 
     def testCrop2(self):
@@ -148,7 +153,7 @@ class ImageopTestCase(TestCase):
         self.assertTrue(tlFound)
         self.assertEquals(counter, 0)
         self.assertNotEquals(img.image.tostring(), res.tostring())
-        res.save('/home/jonas.fiala/tmp/crop2.png', 'PNG')
+        #res.save('/home/jonas.fiala/tmp/crop2.png', 'PNG')
 
 
     def testResizeIfNeeded1(self):
@@ -166,7 +171,7 @@ class ImageopTestCase(TestCase):
         img = self.iStretch
         img._ImageStretch__cropped_photo = img.crop_if_needed()
         res = img.resize_if_needed()
-        res.save('/home/jonas.fiala/tmp/resize1.png', 'PNG')
+        #res.save('/home/jonas.fiala/tmp/resize1.png', 'PNG')
         self.assertEquals(res.size, (FORMAT_MAX, FORMAT_MAX))
 
 
@@ -202,7 +207,7 @@ class ImageopTestCase(TestCase):
         ff.crop_left = 0
         img = self.iStretch
         res = img.stretch_image()
-        res.save('/home/jonas.fiala/tmp/stretch1.png', 'PNG')
+        #res.save('/home/jonas.fiala/tmp/stretch1.png', 'PNG')
         self.assertEquals(res.size, (FORMAT_MAX, FORMAT_MAX))
         # all color corners should be found
         counter = 0
@@ -230,7 +235,7 @@ class ImageopTestCase(TestCase):
         ff.crop_left = 0
         img = self.iStretch
         res = img.stretch_image()
-        res.save('/home/jonas.fiala/tmp/stretch2.png', 'PNG')
+        #res.save('/home/jonas.fiala/tmp/stretch2.png', 'PNG')
         self.assertEquals(res.size, (FORMAT_MAX, FORMAT_MAX))
         # top left corner should be found
         tlFound = False
