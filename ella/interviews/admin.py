@@ -9,11 +9,11 @@ from ella.interviews.models import Interview, Question, Interviewee, Answer
 
 class AnswerInlineOptions(admin.TabularInline):
     model = Answer
-    extra = 2
+    extra = 1
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'content':
-            kwargs['widget'] = widgets.RichTextAreaWidget
+            kwargs['widget'] = widgets.RichTextAreaWidget(height='small')
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 class QuestionInlineOptions(admin.TabularInline):
@@ -22,7 +22,7 @@ class QuestionInlineOptions(admin.TabularInline):
 
 class QuestionOptions(admin.ModelAdmin):
     list_display = ('interview', 'author', 'submit_date', 'answered',)
-    list_filter = ('submit_date',)
+    list_filter = ('submit_date', 'interview',)
     search_fields = ('content', 'nickname', 'email',)
     inlines = (AnswerInlineOptions,)
 
