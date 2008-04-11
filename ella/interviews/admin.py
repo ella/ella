@@ -32,8 +32,8 @@ class IntervieweeOptions(admin.ModelAdmin):
     prepopulated_fields = {'slug' : ('name',)}
 
 class InterviewOptions(admin.ModelAdmin):
-    list_display = ('title', 'category', 'ask_from', 'full_url',)
-    list_filter = ('category__site', 'ask_from', 'category', 'authors',)
+    list_display = ('title', 'category', 'ask_from', 'reply_from', 'full_url',)
+    list_filter = ('category__site', 'ask_from', 'reply_from', 'category', 'authors',)
     date_hierarchy = 'ask_from'
     raw_id_fields = ('photo', 'interviewees',)
     search_fields = ('title', 'perex',)
