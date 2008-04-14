@@ -1,4 +1,3 @@
-
 ifposition_template_tag = r"""
 >>> from django.template import Template, Context, add_to_builtins
 >>> from ella.core.models import Category
@@ -116,7 +115,6 @@ u''
 """
 TODO:
 * handle position names "some-nice-name-of-position"
-* positions add to builtins
 """
 
 
