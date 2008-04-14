@@ -85,17 +85,13 @@ class DbTemplate(models.Model):
     def get_text(self):
         text = [ u'{%% extends "%s" %%}' % self.extends, '' ]
 
+        now = datetime.now()
         filter = (
-                Q(active_from__isnull=True) | Q(active_from__lte=datetime.now()),
-                Q(active_till__isnull=True) | Q(active_till__gt=datetime.now()),
+                Q(active_from__isnull=True) | Q(active_from__lte=now),
+                Q(active_till__isnull=True) | Q(active_till__gt=now),
 )
         for block in self.templateblock_set.filter(*filter):
-            text.append((
-                    '{%% block %s %%}' % block.name,
-                    block.get_text(),
-                    '{% endblock %}',
-                    '',
-))
+            text.append('{%% block %s %%}\n%s\n{%% endblock %%}\n' % (block.name, block.get_text()))
 
         text.append(self.get_meta())
 
@@ -103,7 +99,7 @@ class DbTemplate(models.Model):
 
     def get_meta(self):
         meta = (
-                u'{% comment %}'
+                u'{% comment %}',
                 u'name: %s' % self.name,
                 u'site: %s' % self.site,
                 u'description: %s' % self.description,
@@ -156,7 +152,7 @@ class TemplateBlock(models.Model):
     box_type = models.CharField(_('Box type'), max_length=200, blank=True)
     target_ct = models.ForeignKey(ContentType, null=True, blank=True)
     target_id = models.IntegerField(null=True, blank=True)
-    active_from = models.DateTimeField(_('Block active from'), default=datetime.now, null=True, blank=True)
+    active_from = models.DateTimeField(_('Block active from'), null=True, blank=True)
     active_till = models.DateTimeField(_('Block active till'), null=True, blank=True)
 
     text = models.TextField(_('Definition'), blank=True)

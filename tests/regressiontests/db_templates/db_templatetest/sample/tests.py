@@ -1,19 +1,19 @@
 ct_correction = r"""
-i really want ContentType for permission object to be 4
--------------------------------------------------------
+change TemplateBlock ContentType foreign key
+--------------------------------------------
 
 >>> from django.contrib.contenttypes.models import ContentType
+>>> from django.contrib.auth.models import Permission
+>>> from ella.db_templates.models import TemplateBlock
 
->>> permission_ct = ContentType.objects.get(name='permission')
->>> four_ct = ContentType.objects.get(pk=4)
-
->>> four_ct.delete()
-
->>> four_ct.id = permission_ct.id
->>> permission_ct.id = 4
-
->>> four_ct.save()
->>> permission_ct.save()
+>>> permission_ct = ContentType.objects.get_for_model(Permission)
+>>> for i in TemplateBlock.objects.filter(target_ct__id=4):
+...     i.target_ct
+...     i.target_ct = permission_ct
+...     i.save()
+...     i.target_ct
+<ContentType: user>
+<ContentType: permission>
 """
 
 base = r"""
@@ -32,13 +32,14 @@ u'disk - templates/base.html\n\ndisk.html\n\n'
 u'disk - templates/base.html\n\ndatabase.html\n\n'
 
 >>> models.DbTemplate.objects.get(name="database_block.html").save()
+
 >>> source, origin = loader.find_template_source("database_block.html")
 >>> source
 u'{% extends "base.html" %}\n\n{% block main %}\n{% box box_type for auth.permission with id 1 %}\nparam1:value1\nparam2:value2\n{% endbox %}\n{% endblock %}\n\n{% comment %}\nname: database_block.html\nsite: example.com\ndescription: Sample template stored in database with boxes\n{% endcomment %}\n'
 
 >>> temp = loader.get_template("database_block.html")
 >>> temp.render(Context())
-u'disk - templates/base.html\n\nauth | message | Can add message\n\n\n'
+u'disk - templates/base.html\n\nadmin | log entry | Can add log entry\n\n\n'
 """
 
 load = r"""
@@ -116,9 +117,7 @@ True
 """
 
 
-from django.utils.datastructures import SortedDict
-__test__ = SortedDict()
-__test__[1] = ct_correction
-__test__[2] = base
-__test__[3] = load
+__test__ = {
+    'all': ct_correction + base + load,
+}
 

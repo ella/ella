@@ -1,7 +1,7 @@
 from django.conf.urls.defaults import *
 
 # Uncomment this for admin:
-#from django.contrib import admin
+from django.contrib import admin
 
 urlpatterns = patterns('',
     # Example:
@@ -11,5 +11,5 @@ urlpatterns = patterns('',
     #(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment this for admin:
-    #('^admin/(.*)', admin.site.root),
+    ('^admin/(.*)', admin.site.root),
 )

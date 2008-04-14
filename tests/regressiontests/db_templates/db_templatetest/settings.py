@@ -1,4 +1,4 @@
-# Django settings for db_templates project.
+# Django settings for db_templatetest project.
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -65,7 +65,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.doc.XViewMiddleware',
 )
 
-ROOT_URLCONF = 'db_templates.urls'
+ROOT_URLCONF = 'db_templatetest.urls'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
@@ -83,3 +83,4 @@ INSTALLED_APPS = (
     'ella.db_templates',
     'db_templatetest.sample',
 )
+

@@ -1,5 +1,17 @@
 [
     {
+        "pk": 1,
+        "model": "auth.user",
+        "fields": {
+            "username": "admin",
+            "is_active": true,
+            "is_superuser": true,
+            "is_staff": true,
+            "password": "sha1$cef52$f619aaf4e9ba9f171cdac20445066bdaf47347b4",
+            "email": "a@a.cz"
+        }
+    },
+    {
         "model" : "db_templates.dbtemplate",
         "pk" : "1",
         "fields" : {
@@ -28,7 +40,9 @@
             "box_type" : "box_type",
             "target_ct" : 4,
             "target_id" : 1,
-            "text" : "param1:value1\nparam2:value2"
+            "text" : "param1:value1\nparam2:value2",
+            "active_from" : null,
+            "active_till" : null
         }
     },
     {
@@ -40,7 +54,9 @@
             "box_type" : "",
             "target_ct" : null,
             "target_id" : null,
-            "text" : "database.html"
+            "text" : "database.html",
+            "active_from" : null,
+            "active_till" : null
         }
     }
 ]
