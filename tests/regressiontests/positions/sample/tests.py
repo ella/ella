@@ -1,8 +1,10 @@
 
 ifposition_template_tag = r"""
->>> from django.template import Template, Context
+>>> from django.template import Template, Context, add_to_builtins
 >>> from ella.core.models import Category
 >>> from ella.positions.models import Position
+
+>>> add_to_builtins('ella.positions.templatetags.positions')
 
 >>> cat = Category.objects.get(title='homepage')
 >>> cat = Category.objects.get(title='first category')
@@ -13,7 +15,6 @@ ifposition template tag
 -----------------------
 
 >>> t = Template('''{% spaceless %}
-... {% load positions %}
 ... {% ifposition featured_four for category %}YES1{% else %}NO1{% endifposition %}
 ... {% ifposition featured_three for category nofallback %}YES2{% else %}NO2{% endifposition %}
 ... {% ifposition featured_three for category %}YES3{% endifposition %}
@@ -24,7 +25,6 @@ NO2
 YES3
 
 >>> t = Template('''{% spaceless %}
-... {% load positions %}
 ... {% ifposition featured_four featured_three for category %}YES1{% else %}NO1{% endifposition %}
 ... {% endspaceless %}''')
 >>> print t.render(c)
@@ -33,9 +33,11 @@ YES1
 """
 
 position_template_tag = r"""
->>> from django.template import Template, Context
+>>> from django.template import Template, Context, add_to_builtins
 >>> from ella.core.models import Category
 >>> from ella.positions.models import Position
+
+>>> add_to_builtins('ella.positions.templatetags.positions')
 
 >>> cat = Category.objects.get(title='homepage')
 >>> cat = Category.objects.get(title='first category')
@@ -46,7 +48,6 @@ render default box
 ------------------
 
 >>> t = Template('''{% spaceless %}
-... {% load positions %}
 ... {% position featured_one for category using featured_one %}
 ... css_class:css_class
 ... {% endposition %}
@@ -93,7 +94,6 @@ render with and without fallback override box_type in template
 --------------------------------------------------------------
 
 >>> t = Template('''{% spaceless %}
-... {% load positions %}
 ... {% position featured_one for category %}{% endposition %}
 ... {% position featured_two for category using db %}{% endposition %}
 ... {% position featured_three for category %}{% endposition %}
@@ -105,7 +105,6 @@ non existing position and position without fallback
 ---------------------------------------------------
 
 >>> t = Template('''{% spaceless %}
-... {% load positions %}
 ... {% position featured_four for category %}{% endposition %}
 ... {% position featured_three for category nofallback %}{% endposition %}
 ... {% endspaceless %}''')
@@ -117,6 +116,7 @@ u''
 """
 TODO:
 * handle position names "some-nice-name-of-position"
+* positions add to builtins
 """
 
 
