@@ -5,7 +5,7 @@ from django.db import models, transaction
 from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
-from django.utils.translation import ugettext_lazy as _, ugettext
+from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from django.template import Template
 from django.template.loader_tags import ExtendsNode, BlockNode
@@ -33,13 +33,11 @@ def get_blocks(block_list):
         # TODO: ugly
         block_source = re_block.findall(node.source[0].source[source_start:source_end])[0][1]
 
-        blocks.append(
-                {
-                    'name': node.name,
-                    'node': node,
-                    'source': block_source
-}
-)
+        blocks.append({
+                'name': node.name,
+                'node': node,
+                'source': block_source
+})
 
     return blocks
 
@@ -76,7 +74,6 @@ class DbTemplateManager(models.Manager):
         return db_template
 
 
-
 class DbTemplate(models.Model):
     name = models.CharField(_('Name'), max_length=200, db_index=True)
     site = models.ForeignKey(Site)
@@ -86,31 +83,33 @@ class DbTemplate(models.Model):
     objects = DbTemplateManager()
 
     def get_text(self):
-        text = []
-        text.append(u'{%% extends "%s" %%}' % self.extends)
-        text.append('')
+        text = [ u'{%% extends "%s" %%}' % self.extends, '' ]
 
-        for block in self.templateblock_set.filter(
-                    Q(active_from__isnull=True) | Q(active_from__lte=datetime.now()),
-                    Q(active_till__isnull=True) | Q(active_till__gt=datetime.now())
-):
-            text.append('{%% block %s %%}' % block.name)
-            text.append(block.get_text())
-            text.append('{% endblock %}')
-            text.append('')
+        filter = (
+                Q(active_from__isnull=True) | Q(active_from__lte=datetime.now()),
+                Q(active_till__isnull=True) | Q(active_till__gt=datetime.now()),
+)
+        for block in self.templateblock_set.filter(*filter):
+            text.append((
+                    '{%% block %s %%}' % block.name,
+                    block.get_text(),
+                    '{% endblock %}',
+                    '',
+))
 
         text.append(self.get_meta())
 
         return '\n'.join(text)
 
     def get_meta(self):
-        meta = []
-        meta.append(u'{% comment %}')
-        meta.append(u'name: %s' % self.name)
-        meta.append(u'site: %s' % self.site)
-        meta.append(u'description: %s' % self.description)
-        meta.append(u'{% endcomment %}')
-        meta.append('')
+        meta = (
+                u'{% comment %}'
+                u'name: %s' % self.name,
+                u'site: %s' % self.site,
+                u'description: %s' % self.description,
+                u'{% endcomment %}',
+                '',
+)
 
         return '\n'.join(meta)
 
@@ -177,12 +176,11 @@ class TemplateBlock(models.Model):
 
         if self.box_type and self.target:
             text.append('{%% box %s for %s.%s with id %s %%}' % (
-                        self.box_type,
-                        self.target_ct.app_label,
-                        self.target_ct.model,
-                        self.target_id
-)
-)
+                    self.box_type,
+                    self.target_ct.app_label,
+                    self.target_ct.model,
+                    self.target_id
+))
 
         text.append(self.text.strip())
 

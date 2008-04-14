@@ -1,12 +1,13 @@
 from django.contrib import admin
 from django.newforms.models import InlineFormset
 from django.newforms.forms import ValidationError, NON_FIELD_ERRORS
+from django.utils.translation import ugettext as _
 
 from ella.db_templates.models import DbTemplate, TemplateBlock
 
 
 class TemplateBlockFormset(InlineFormset):
-    " Custom formset enabling us to supply custom validation. "
+    "Custom formset enabling us to supply custom validation."
 
     @staticmethod
     def cmp_by_till(f, t):
@@ -28,10 +29,10 @@ class TemplateBlockFormset(InlineFormset):
             # both datetimes entered
             if data['active_from'] and data['active_till']:
                 if data['active_from'] > data['active_till']:
-                    validation_error = ValidationError(ugettext('Block active till must be greather then Block active from') % data)
+                    validation_error = ValidationError(_('Block active till must be greather then Block active from'))
                     self.forms[i]._errors['active_till'] = validation_error.messages
         if validation_error:
-            raise ValidationError(ugettext('Invalid datetime interval. Block active till must be greather then Block active from') % data)
+            raise ValidationError(_('Invalid datetime interval. Block active till must be greather then Block active from'))
 
         # dictionary of blocks with tuples (active from, active till)
         items = {}
@@ -43,7 +44,7 @@ class TemplateBlockFormset(InlineFormset):
 
         # check that intervals are not in colision
         errors = []
-        error_message = 'Block active intervals are in colision on %s. Specified interval stops at %s and next interval started at %s.'
+        error_message = _('Block active intervals are in colision on %s. Specified interval stops at %s and next interval started at %s.')
         for name, intervals in items.items():
             if len(intervals) > 1:
                 intervals.sort(self.cmp_by_till)
@@ -68,7 +69,7 @@ class TemplateBlockInlineOptions(admin.TabularInline):
 class DbTemplateOptions(admin.ModelAdmin):
     ordering = ('description',)
     inlines = (TemplateBlockInlineOptions,)
-    list_display = ('description', 'site', 'extends', 'name')
+    list_display = ('name', 'site', 'extends', 'description',)
     list_filter = ('site',)
 
 admin.site.register(DbTemplate, DbTemplateOptions)
