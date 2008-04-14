@@ -5,6 +5,7 @@ it is inspired by django.contrib.comments but based on newforms
 
 from md5 import md5
 from datetime import datetime, timedelta
+import time
 
 from django import newforms as forms
 from django.db import models
@@ -45,7 +46,7 @@ class CommentForm(forms.Form):
         self.init_props = defaults.INIT_PROPS.copy()
 
         # set actual time
-        now = int(datetime.now().strftime('%s'))
+        now = int(time.time())
         self.init_props['timestamp'] = now
         self.init_props['timestamp_min'] = now - defaults.FORM_TIMEOUT
 
