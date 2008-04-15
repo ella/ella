@@ -1,5 +1,7 @@
 import logging
 from time import strftime
+import smtplib
+from mailer import create_mail
 from django import http, newforms as forms
 from django.template import RequestContext, loader
 from django.shortcuts import render_to_response
@@ -8,6 +10,7 @@ from django.utils.translation import ugettext, ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth import authenticate, login, logout, get_user
 from django.views.generic.list_detail import object_list
+from django.contrib.formtools.preview import FormPreview
 
 from ella.discussions.models import *
 from ella.comments.models import Comment
@@ -20,10 +23,7 @@ STATE_OK = 'ok'
 STATE_INVALID = 'invalid'
 STATE_NOT_ACTIVE = 'not_active'
 STATE_BAD_LOGIN_OR_PASSWORD = 'bad_password'
-CT_THREAD = ContentType.objects.get(
-    app_label='discussions',
-    model='TopicThread'
-)
+
 
 
 class QuestionForm(forms.Form):
@@ -52,6 +52,107 @@ class RegistrationForm(forms.Form):
     email = forms.EmailField()
 
 
+    def clean_username(self):
+        if User.objects.filter(username__exact=self.cleaned_data['username']):
+            raise forms.ValidationError(_('Username already exists. Please choose another one.'))
+        return self.cleaned_data['username']
+
+
+    def register_user(self):
+        if not(self.is_bound and self.is_valid()):
+            return False
+        data = self.cleaned_data
+        if User.objects.filter(username__exact=data['username']):
+            return False
+        usr = User.objects.create_user(data['username'], data['email'], data['password'])
+        usr.is_staff = False
+        usr.save()
+        return usr
+
+
+class RegistrationFormPreview(FormPreview):
+
+    def __init__(self, form, **kwargs):
+        self.__done_url = kwargs.get('done_url', '/')
+        super(self.__class__, self).__init__(form)
+
+    def parse_params(self, context={}):
+        self.state.update(context)
+
+    def done(self, request, cleaned_data):
+        f = RegistrationForm(request.POST)
+        usr = f.register_user()
+        if usr:
+            send_activation_email(usr)
+            process_login(request, f.cleaned_data)
+            request.POST = {}
+        return http.HttpResponseRedirect(self.__done_url)
+
+    @property
+    def preview_template(self):
+        category = self.state['category']
+        return [
+                'page/category/%s/content_type/discussions.question/regform_preview.html' % category.path,
+                'page/content_type/discussions.question/regform_preview.html',
+                'page/discussions/regform_preview.html',
+            ]
+
+    @property
+    def form_template(self):
+        category = self.state['category']
+        return [
+                'page/category/%s/content_type/discussions.question/regform.html' % category.path,
+                'page/content_type/discussions.question/regform.html',
+                'page/discussions/regform.html',
+            ]
+
+
+def send_activation_email(user):
+    # mail templates encoded in utf8, internally converted into latin2 while sending e-mails.
+    # (tested on Outlook Express and various webmails)
+    #TODO send activation e-mail, create cron script (?) to deactivate new user accounts within 2 days, if user didn't click to activation link.
+    def render(tpl, user):
+        c = Context({'user': user})
+        t = Template(tpl)
+        return t.render(c)
+
+    def plaintext():
+        tpl = find_template_source('page/discussions/regmail.txt')
+        if len(tpl) > 0:
+            return render(tpl[0], user)
+
+    def htmltext():
+        tpl = find_template_source('page/discussions/regmail.html')
+        if len(tpl) > 0:
+            return render(tpl[0], user)
+
+    from django.template import Context, Template
+    from django.template.loader import find_template_source
+    """
+    Keyword Arguments:
+    mailfrom
+    mailto
+    subject
+    images [list]
+    attachements [list]
+    plaintext
+    htmltext
+    """
+    mailfrom = 'diskuze.zena@dev11.netcentrum.cz'
+    msg = create_mail(
+        mailfrom=mailfrom,
+        mailto=user.email,
+        subject='Aktivace Vaseho diskuzniho konta na zena.cz',
+        plaintext=plaintext(),
+        htmltext=htmltext()
+)
+    smtp = smtplib.SMTP('127.0.0.1')
+    smtp.sendmail(mailfrom, user.email, msg.as_string())
+    log.info('Activation e-mail sent to [%s]' % user.email)
+    smtp.quit()
+
+
+
 def get_ip(request):
     if 'HTTP_X_FORWARDED_FOR' in request.META:
         return request.META['HTTP_X_FORWARDED_FOR']
@@ -67,6 +168,7 @@ def add_post(content, thread, user, ip='0.0.0.0'):
     """
     content = filter_banned_strings(content)
     comment_set = get_comments_on_thread(thread).order_by('submit_date')
+    CT_THREAD = ContentType.objects.get_for_model(TopicThread)
     parent = None
     if comment_set.count() > 0:
         parent = comment_set[0]
@@ -80,16 +182,6 @@ def add_post(content, thread, user, ip='0.0.0.0'):
         user=user,
 )
     cmt.save()
-
-
-def register_user(data):
-    #TODO test whether username already exists
-    #TODO send activation e-mail, create cron script (?) to deactivate new user accounts within 2 days, if user didn't click to activation link.
-    if User.objects.get(username__exact=data['username']):
-        return 'USERNAME_EXISTS'
-    usr = User(data['username'], data['email'], data['password'])
-    usr.is_staff = False
-    usr.save()
 
 
 def get_category_topics_url(category):
@@ -130,7 +222,6 @@ def posts(request, bits, context):
         return http.Http404('Unsupported url. Slug of topic-thread needed.')
     frm = QuestionForm()
     frmLogin = LoginForm()
-    frmReg = RegistrationForm()
     topic = context['object']
     category = context['category']
     # category.slug/year/_(topics)
@@ -151,27 +242,29 @@ def posts(request, bits, context):
             logout(request)
             return http.HttpResponseRedirect(thr.get_absolute_url())
         elif bits[1] == 'register':
-            f = RegistrationForm(request.POST)
-            if f.is_valid():
-                register_user(f.cleaned_data)
+            reg_form_prev = RegistrationFormPreview(RegistrationForm, done_url=thr.get_absolute_url())
+            return reg_form_prev(request, context)
     else:
+        # receiving new post to thread in QuestionForm
         if request.POST:
             frm = QuestionForm(request.POST)
             if not frm.is_valid():
                 context['question_form_state'] = STATE_INVALID
-            context['question_form_state'] = STATE_OK
-            if frm.is_valid():
+            elif frm.cleaned_data['content'].strip():
+                context['question_form_state'] = STATE_OK
                 add_post(frm.cleaned_data['content'], thr, get_user(request), get_ip(request))
+            else:
+                context['question_form_state'] = STATE_INVALID
     comment_set = get_comments_on_thread(thr).order_by('submit_date')
+    thread_url = '%s/' % thr.get_absolute_url()
     context['thread'] = thr
     context['posts'] = comment_set
     context['login_form'] = frmLogin
-    context['reg_form'] = frmReg
-    context['reg_form_action'] = '%sregister/' % request.get_full_path()
+    context['register_form_url'] = '%sregister/' % thread_url
     context['question_form'] = frm
-    context['question_form_action'] = request.get_full_path() #request.build_absolute_uri()
-    context['login_form_action'] = '%slogin/' % request.get_full_path()
-    context['logout_form_action'] = '%slogout/' % request.get_full_path()
+    context['question_form_action'] = thread_url #request.build_absolute_uri()
+    context['login_form_action'] = '%slogin/' % thread_url
+    context['logout_form_action'] = '%slogout/' % thread_url
     tplList = (
         'page/category/%s/content_type/discussions.question/%s/posts.html' % (category.path, topic.slug,),
         'page/category/%s/content_type/discussions.question/posts.html' % (category.path,),

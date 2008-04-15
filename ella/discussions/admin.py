@@ -37,7 +37,7 @@ class PostOptions(admin.ModelAdmin):
         """ return only Comments which are related to discussion threads. """
         from django.contrib.contenttypes.models import ContentType
         qset = super(self.__class__, self).queryset(request)
-        ctThread = ContentType.objects.get(app_label='discussions', model='TopicThread')
+        ctThread = ContentType.objects.get_for_model(TopicThread)
         return qset.filter(target_ct=ctThread)
 
 

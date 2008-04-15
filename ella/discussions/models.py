@@ -21,7 +21,7 @@ from ella.photos.models import Photo
 HOWTO:
 === Prispevky uzivatele ===
 usr=User.objects.get(username='testjf')
-ctThread = ContentType.objects.get(app_label='discussions', model='TopicThread')
+ctThread = ContentType.objects.get_for_model(TopicThread)
 usr.comment_set.filter(target_ct=ctThread)
 
 
@@ -55,7 +55,7 @@ ACTIVITY_PERIOD = 6  # Thread activity (hours)
 
 
 def get_comments_on_thread(thread):
-    ctThread = ContentType.objects.get(app_label='discussions', model='TopicThread')
+    ctThread = ContentType.objects.get_for_model(TopicThread)
     qset = Comment.objects.filter(target_ct=ctThread)
     return qset.filter(target_id=thread.id)
 
@@ -162,7 +162,7 @@ class TopicThread(models.Model):
     def __load_posts(self):
         if self.__posts:
             return
-        ctThread = ContentType.objects.get(app_label='discussions', model='TopicThread')
+        ctThread = ContentType.objects.get_for_model(TopicThread)
         qset = Comment.objects.filter(target_ct=ctThread)
         self.__posts = qset.filter(target_id=self.pk)
 
