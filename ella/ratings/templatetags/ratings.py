@@ -3,44 +3,60 @@ from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 
-from ella.ratings.models import Rating
+from ella.ratings.models import Rating, TotalRate
 from ella.ratings.forms import RateForm
+from django.utils.translation import ugettext as _
 
 register = template.Library()
 
 class RateUrlsNode(template.Node):
-    def __init__(self, object, form_name, up_name, down_name):
-        self.object, self.form_name, self.up_name, self.down_name = object, form_name, up_name, down_name
+    def __init__(self, object, up_name, down_name, form_name=None):
+        self.object, self.up_name, self.down_name = object, up_name, down_name
+        self.form_name = form_name
 
     def render(self, context):
         obj = template.resolve_variable(self.object, context)
-        if obj:
+        if obj and hasattr(obj, 'get_absolute_url'):
+            context[self.up_name] = '%s%s/%s/' % (obj.get_absolute_url(), _('rate'), _('up'))
+            context[self.down_name] = '%s%s/%s/' % (obj.get_absolute_url(), _('rate'), _('down'))
+        elif obj:
             ct = ContentType.objects.get_for_model(obj)
             context[self.form_name] = RateForm(initial={'content_type' : ct.id, 'target' : obj._get_pk_val()})
             context[self.up_name] = reverse('rate_up')
             context[self.down_name] = reverse('rate_down')
         return ''
 
-@register.tag('rate_form')
+@register.tag('rate_urls')
 def do_rate_urls(parser, token):
     """
     Generate absolute urls for rating the given model up or down and store them in context.
 
     Usage::
 
-        {% rate_form for OBJ as my_form var_up var_down %}
+        {% rate_urls for OBJ as  var_up var_down %}
+
+        {% rate_urls for OBJ as my_form var_up var_down %}
 
     Examples::
 
-        {% rate_form for object as rate_form url_up url_down %}
+        {% rate_urls for object as url_up url_down %}
+        <form action="{{url_up}}" method="POST"><input type="submit" value="+"></form>
+        <form action="{{url_down}}" method="POST"><input type="submit" value="-"></form>
+
+        {% rate_urls for object as rate_form url_up url_down %}
         <form action="{{url_up}}" method="POST">{{rate_form}}<input type="submit" value="+"></form>
         <form action="{{url_down}}" method="POST">{{rate_form}}<input type="submit" value="-"></form>
     """
     bits = token.split_contents()
-    if len(bits) != 7 or bits[1] != 'for' or bits[3] != 'as':
+    if (len(bits) != 6 and len(bits) != 7) or bits[1] != 'for' or bits[3] != 'as':
         raise template.TemplateSyntaxError, "%r .... TODO ....." % token.contents.split()[0]
 
-    return RateUrlsNode(bits[2], bits[4], bits[5], bits[6])
+
+    if len(bits) == 6:
+        return RateUrlsNode(bits[2], bits[4], bits[5])
+    else:
+        return RateUrlsNode(bits[2], bits[5], bits[6], bits[4])
+
 
 class RatingNode(template.Node):
     def __init__(self, object, name):
@@ -49,7 +65,7 @@ class RatingNode(template.Node):
     def render(self, context):
         obj = template.resolve_variable(self.object, context)
         if obj:
-            context[self.name] = Rating.objects.get_for_object(obj)
+            context[self.name] = TotalRate.objects.get_total_rating(obj)
         return ''
 
 @register.tag('rating')
@@ -78,7 +94,7 @@ class TopRatedNode(template.Node):
         self.count, self.name, self.mods = count, name, mods
 
     def render(self, context):
-        context[self.name] = Rating.objects.get_top_objects(self.count, self.mods)
+        context[self.name] = TotalRate.objects.get_top_objects(self.count, self.mods)
         return ''
 
 @register.tag('top_rated')

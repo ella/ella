@@ -61,6 +61,34 @@ msgstr "Hodnocení"
 msgid "Ratings"
 msgstr "Hodnocení"
 
+#: models.py:196
+msgid "Total rate"
+msgstr "Celkové hodnocení"
+
+#: models.py:197
+msgid "Total rates"
+msgstr "Celková hodnocení"
+
+#: models.py:262
+msgid "People"
+msgstr "Lidé"
+
+#: models.py:264
+msgid "Period"
+msgstr "Období"
+
+#: models.py:265
+msgid "Detract"
+msgstr "Odstranit"
+
+#: models.py:273
+msgid "Aggregation"
+msgstr "Agregace"
+
+#: models.py:274
+msgid "Aggregations"
+msgstr "Agregace"
+
 #: views.py:43
 msgid "You have already rated this object."
 msgstr "Tento objekt jste již hodnotil/a."

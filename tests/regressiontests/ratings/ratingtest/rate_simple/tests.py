@@ -1,17 +1,19 @@
 rating = r'''
 >>> from ella.ratings.models import *
 >>> Rating.objects.all().delete()
+>>> TotalRate.objects.all().delete()
 >>> Rating.objects.count()
 0
+>>> TotalRate.objects.count()
+0
 
->>>
 >>> from rate_simple.models import *
 >>> cheap_obj = CheapSampleModel.objects.all()[0]
 >>> cheap_obj.owner.id
 1
 
 # rating on not-rated object:
->>> int(Rating.objects.get_for_object(cheap_obj))
+>>> int(TotalRate.objects.get_total_rating(cheap_obj))
 0
 
 # store content_types for further use
@@ -26,17 +28,14 @@ rating = r'''
 >>> resp = cl.post('/ratings/rate/up/', {'content_type' : cheap_ct.id, 'target' : cheap_obj.id})
 >>> resp.status_code
 302
->>> Rating.objects.get_for_object(cheap_obj) == ANONYMOUS_KARMA
-True
->>> csm = CheapSampleModel.rated.all()[0]
->>> csm.rating == ANONYMOUS_KARMA
+>>> TotalRate.objects.get_total_rating(cheap_obj) == ANONYMOUS_KARMA*RATINGS_COEFICIENT
 True
 >>> resp = cl.post('/ratings/rate/down/', {'content_type' : cheap_ct.id, 'target' : cheap_obj.id})
 >>> resp.status_code
 302
 
 # blocked by anti-spam
->>> Rating.objects.get_for_object(cheap_obj) == ANONYMOUS_KARMA
+>>> TotalRate.objects.get_total_rating(cheap_obj) == ANONYMOUS_KARMA*RATINGS_COEFICIENT
 True
 
 # start with new client to erase cookie
@@ -44,13 +43,10 @@ True
 >>> resp = cl.post('/ratings/rate/down/', {'content_type' : cheap_ct.id, 'target' : cheap_obj.id})
 >>> resp.status_code
 302
->>> int(Rating.objects.get_for_object(cheap_obj))
+>>> int(TotalRate.objects.get_total_rating(cheap_obj))
 0
 >>> Rating.objects.count()
 2
->>> csm = CheapSampleModel.rated.all()[0]
->>> int(csm.rating)
-0
 '''
 
 template_tags = r'''
@@ -58,35 +54,47 @@ template_tags = r'''
 >>> from rate_simple.models import *
 >>> from django.contrib.contenttypes.models import ContentType
 >>> from django.template import Template, Context
+>>> expansive_obj = ExpensiveSampleModel.objects.all()[0]
+>>> expansive_ct = ContentType.objects.get_for_model(expansive_obj)
 >>> cheap_obj = CheapSampleModel.objects.all()[0]
 >>> cheap_ct = ContentType.objects.get_for_model(cheap_obj)
 
 # clear all ratings and create new ones
 >>> Rating.objects.all().delete()
+>>> TotalRate.objects.all().delete()
 
 >>> t = Template('{% load ratings %}{% rating for obj as rating %}{{rating}}')
->>> t.render(Context({'obj' : cheap_obj}))
-u'0'
->>> r = Rating(target_ct=cheap_ct, target_id=cheap_obj.id, amount=6)
+>>> t.render(Context({'obj' : expansive_obj}))
+u'0.0'
+>>> r = Rating(target_ct=expansive_ct, target_id=expansive_obj.id, amount=6)
 >>> r.save()
->>> t.render(Context({'obj' : cheap_obj}))
-u'6'
->>> t = Template('{% load ratings %}{% rate_form for obj as rate_form rate_up rate_down %}{{rate_form}} {{rate_up}} {{rate_down}}')
+>>> r2 = Rating(target_ct=cheap_ct, target_id=cheap_obj.id, amount=4)
+>>> r2.save()
+>>> tr = TotalRate(target_ct=expansive_ct, target_id=expansive_obj.id, amount=10)
+>>> tr.save()
+>>> t.render(Context({'obj' : expansive_obj}))
+u'16.6'
+>>> t = Template('{% load ratings %}{% rate_urls for obj as up down %}{{up}} {{down}}')
+>>> t.render(Context({'obj' : expansive_obj})) == u'%(url)srate/up/ %(url)srate/down/' % {'url' : expansive_obj.get_absolute_url(),}
+True
+>>> t = Template('{% load ratings %}{% rate_urls for obj as rate_form rate_up rate_down %}{{rate_form}} {{rate_up}} {{rate_down}}')
 >>> t.render(Context({'obj' : cheap_obj})) == u'<input type="hidden" name="content_type" value="%s" id="id_content_type" /><input type="hidden" name="target" value="%s" id="id_target" /> /ratings/rate/up/ /ratings/rate/down/' % (cheap_ct.id, cheap_obj.id)
 True
 >>> t = Template('{% load ratings %}{% top_rated 5 as top %}{% for rat in top %}{{rat.0}}: {{rat.1}}\n{% endfor %}')
 >>> t.render(Context())
-u'CheapSampleModel object: 6\n'
+u'ExpensiveSampleModel object: 16.6\nCheapSampleModel object: 4.4\n'
 
->>> t = Template('{% load ratings %}{% top_rated 5 rate_simple.expensivesamplemodel as top %}{{top}}')
+>>> r2.delete()
+>>> t = Template('{% load ratings %}{% top_rated 5 rate_simple.cheapsamplemodel as top %}{{top}}')
 >>> t.render(Context())
 u'[]'
 
->>> t = Template('{% load ratings %}{% top_rated 5 rate_simple.expensivesamplemodel rate_simple.cheapsamplemodel as top %}{% for rat in top %}{{rat.0}}: {{rat.1}}\n{% endfor %}')
+>>> t = Template('{% load ratings %}{% top_rated 5 rate_simple.cheapsamplemodel rate_simple.expensivesamplemodel as top %}{% for rat in top %}{{rat.0}}: {{rat.1}}\n{% endfor %}')
 >>> t.render(Context())
-u'CheapSampleModel object: 6\n'
+u'ExpensiveSampleModel object: 16.6\n'
 
 >>> r.delete()
+>>> tr.delete()
 '''
 
 top_objects = r'''
@@ -101,43 +109,124 @@ top_objects = r'''
 >>> expensive_ct = ContentType.objects.get_for_model(expensive_obj)
 
 # clear all ratings and create new ones
->>> from ella.ratings.models import Rating
+>>> from ella.ratings.models import Rating, TotalRate
 >>> Rating.objects.all().delete()
+>>> TotalRate.objects.all().delete()
 >>> r = Rating(target_id=cheap_obj.id, target_ct=cheap_ct, amount=1)
 >>> r.save()
 >>> r2 = Rating(target_id=expensive_obj.id, target_ct=expensive_ct, amount=2)
 >>> r2.save()
+>>> tr = TotalRate(target_id=cheap_obj.id, target_ct=cheap_ct, amount=3)
+>>> tr.save()
+>>> tr2 = TotalRate(target_id=expensive_obj.id, target_ct=expensive_ct, amount=4)
+>>> tr2.save()
 
->>> [ (str(obj), int(rat)) for obj, rat in Rating.objects.get_top_objects(2) ]
-[('ExpensiveSampleModel object', 2), ('CheapSampleModel object', 1)]
+>>> [ (str(obj), int(rat)) for obj, rat in TotalRate.objects.get_top_objects(2) ]
+[('ExpensiveSampleModel object', 6), ('CheapSampleModel object', 4)]
 
->>> [ (str(obj), int(rat)) for obj, rat in Rating.objects.get_top_objects(1, [CheapSampleModel]) ]
-[('CheapSampleModel object', 1)]
->>> [ (str(obj), int(rat)) for obj, rat in Rating.objects.get_top_objects(10, [ExpensiveSampleModel, CheapSampleModel]) ]
-[('ExpensiveSampleModel object', 2), ('CheapSampleModel object', 1)]
+>>> [ (str(obj), int(rat)) for obj, rat in TotalRate.objects.get_top_objects(1, [CheapSampleModel]) ]
+[('CheapSampleModel object', 4)]
+>>> [ (str(obj), int(rat)) for obj, rat in TotalRate.objects.get_top_objects(10, [ExpensiveSampleModel, CheapSampleModel]) ]
+[('ExpensiveSampleModel object', 6), ('CheapSampleModel object', 4)]
 
 # cleanup
 >>> r.delete()
 >>> r2.delete()
+>>> tr.delete()
+>>> tr2.delete()
+'''
+
+aggregation = r'''
+# imports
+>>> from django.contrib.contenttypes.models import ContentType
+>>> from ella.ratings.models import Agg, Rating, TotalRate, ANONYMOUS_KARMA, RATINGS_COEFICIENT
+>>> from rate_simple.models import *
+
+# clear all ratings and create new ones
+>>> Rating.objects.all().delete()
+>>> Agg.objects.all().delete()
+>>> TotalRate.objects.all().delete()
+>>> cheap_obj = CheapSampleModel.objects.all()[0]
+>>> cheap_ct = ContentType.objects.get_for_model(cheap_obj)
+>>> expensive_obj = ExpensiveSampleModel.objects.all()[0]
+>>> expensive_ct = ContentType.objects.get_for_model(expensive_obj)
+
 >>> r = Rating(target_id=cheap_obj.id, target_ct=cheap_ct, amount=1)
 >>> r.save()
 >>> r2 = Rating(target_id=expensive_obj.id, target_ct=expensive_ct, amount=2)
 >>> r2.save()
+>>> r3 = Rating(target_id=cheap_obj.id, target_ct=cheap_ct, amount=1)
+>>> r3.save()
+
+>>> Rating.objects.count()
+3
+>>> TotalRate.objects.get_total_rating(cheap_obj) == ANONYMOUS_KARMA*RATINGS_COEFICIENT + ANONYMOUS_KARMA*RATINGS_COEFICIENT
+True
+
+# aggregation data
+>>> from ella.ratings import aggregation
+>>> aggregation.transfer_data()
+True
+>>> Rating.objects.count()
+3
+>>> TotalRate.objects.get_total_rating(cheap_obj) == ANONYMOUS_KARMA*RATINGS_COEFICIENT + ANONYMOUS_KARMA*RATINGS_COEFICIENT
+True
+>>> Agg.objects.count()
+0
+>>> TotalRate.objects.count()
+0
+>>> a = Agg(target_id=cheap_obj.id, target_ct=cheap_ct, amount=4, time='2006-02-07', people=4, period='y')
+>>> a.save()
+>>> a2 = Agg(target_id=expensive_obj.id, target_ct=expensive_ct, amount=2, time='2006-02-07', people=2, period='y')
+>>> a2.save()
+>>> a3 = Agg(target_id=cheap_obj.id, target_ct=cheap_ct, amount=1, time='2006-05-07', people=1, period='y')
+>>> a3.save()
+
+>>> aggregation.transfer_data()
+True
+>>> Agg.objects.count()
+2
+>>> Rating.objects.count()
+3
+>>> TotalRate.objects.count()
+2
+
+# amount with time function in database
+>>> trs = TotalRate.objects.all()[0]
+>>> trs.amount
+Decimal("0.20")
+>>> trs2 = TotalRate.objects.all()[1]
+>>> trs2.amount
+Decimal("0.50")
+>>> TotalRate.objects.get_total_rating(cheap_obj)
+Decimal("2.7")
+>>> TotalRate.objects.get_total_rating(expensive_obj)
+Decimal("2.4")
+
+# cleanup
+>>> r.delete()
+>>> r2.delete()
+>>> r3.delete()
+>>> a.delete()
+>>> a2.delete()
+>>> a3.delete()
+>>> TotalRate.objects.all().delete()
 '''
 
 karma = r'''
 # imports
 >>> from django.contrib.contenttypes.models import ContentType
->>> from ella.ratings.models import Rating, INITIAL_USER_KARMA
+>>> from ella.ratings.models import Rating, TotalRate, INITIAL_USER_KARMA
 >>> from rate_simple.models import *
 >>> from django.test import Client
 
 # clear all ratings and create new ones
 >>> Rating.objects.all().delete()
+>>> TotalRate.objects.all().delete()
 
 # get objects to rate
->>> cheap_obj = CheapSampleModel.rated.all()[0]
->>> int(cheap_obj.rating)
+>>> cheap_obj = CheapSampleModel.objects.all()[0]
+>>> int(TotalRate.objects.get_total_rating(cheap_obj))
 0
 >>> expensive_obj = ExpensiveSampleModel.objects.all()[0]
 >>> cheap_ct = ContentType.objects.get_for_model(cheap_obj)
@@ -148,22 +237,27 @@ karma = r'''
 >>> cl.login(username="rater", password="admin")
 True
 
+>>> tr = TotalRate(target_id=cheap_obj.id, target_ct=cheap_ct, amount=3)
+>>> tr.save()
+>>> tr2 = TotalRate(target_id=expensive_obj.id, target_ct=expensive_ct, amount=4)
+>>> tr2.save()
+
 # rate some objects, check that the rating amount is the same as user's karma
 >>> cl.post('/ratings/rate/up/', {'content_type' : cheap_ct.id, 'target' : cheap_obj.id}).status_code
 302
 >>> up = UserProfile.objects.get(user__username='rater')
 >>> up.karma
-5
->>> int(Rating.objects.get_for_object(cheap_obj))
-5
+Decimal("5.0")
+>>> TotalRate.objects.get_total_rating(cheap_obj)
+Decimal("8.5")
 >>> cl = Client()
 >>> cl.login(username="rater2", password="admin")
 True
 >>> up.save()
 >>> cl.post('/ratings/rate/up/', {'content_type' : cheap_ct.id, 'target' : cheap_obj.id}).status_code
 302
->>> int(Rating.objects.get_for_object(cheap_obj))
-15
+>>> TotalRate.objects.get_total_rating(cheap_obj)
+Decimal("19.5")
 >>> cl.post('/ratings/rate/up/', {'content_type' : expensive_ct.id, 'target' : expensive_obj.id}).status_code
 302
 
@@ -177,6 +271,8 @@ True
 >>> up = UserProfile.objects.get(user__username='owner')
 >>> up.karma > INITIAL_USER_KARMA
 True
+>>> up.karma
+Decimal("38.5")
 '''
 
 rate_form = r'''
@@ -184,7 +280,7 @@ rate_form = r'''
 >>> from ella.ratings.models import Rating
 >>> from rate_simple.models import *
 >>> from django.contrib.contenttypes.models import ContentType
->>> cheap_obj = CheapSampleModel.rated.all()[0]
+>>> cheap_obj = CheapSampleModel.objects.all()[0]
 >>> cheap_ct = ContentType.objects.get_for_model(cheap_obj)
 
 # ideal case
@@ -211,9 +307,10 @@ detail_urls = r'''
 >>> expensive_obj.get_absolute_url()
 '/2007/7/1/expensive-sample-models/expensivesamplemodel-1/'
 
->>> from ella.ratings.models import Rating, ANONYMOUS_KARMA
+>>> from ella.ratings.models import Rating, TotalRate, ANONYMOUS_KARMA, RATINGS_COEFICIENT
 >>> Rating.objects.all().delete()
->>> int(Rating.objects.get_for_object(expensive_obj))
+>>> TotalRate.objects.all().delete()
+>>> int(TotalRate.objects.get_total_rating(expensive_obj))
 0
 >>> from django.test import Client
 >>> c = Client()
@@ -225,25 +322,25 @@ True
 >>> response = c.get('/2007/7/1/expensive-sample-models/expensivesamplemodel-1/rate/up/')
 >>> response.status_code
 302
->>> Rating.objects.get_for_object(expensive_obj) == ANONYMOUS_KARMA
+>>> TotalRate.objects.get_total_rating(expensive_obj) == ANONYMOUS_KARMA*RATINGS_COEFICIENT
 True
 >>> c = Client()
 >>> response = c.get('/2007/7/1/expensive-sample-models/expensivesamplemodel-1/rate/down/')
 >>> response.status_code
 302
->>> int(Rating.objects.get_for_object(expensive_obj))
+>>> int(TotalRate.objects.get_total_rating(expensive_obj))
 0
 >>> c.get('/2007/7/1/expensive-sample-models/expensivesamplemodel-1/rate/').status_code
 404
-
 '''
 
 __test__ = {
-    'rate_form' : rate_form,
+    'karma' : karma,
     'rating' : rating,
+    #'aggregation' : aggregation,
     'template_tags' : template_tags,
     'top_objects' : top_objects,
-    'karma' : karma,
+    'rate_form' : rate_form,
     'detail_urls' : detail_urls,
 }
 

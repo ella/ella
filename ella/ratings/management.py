@@ -75,69 +75,30 @@ def create_all_model_weights(verbosity=2):
 
 
 ##
-# sql commands that will install plpgsql language to the database
-##
-INSTALL_PLPGSQL = (
-    r'''CREATE OR REPLACE FUNCTION plpgsql_call_handler() RETURNS language_handler AS
-        '$libdir/plpgsql' LANGUAGE C;''',
-
-    r'''CREATE OR REPLACE FUNCTION plpgsql_validator(oid) RETURNS void AS
-        '$libdir/plpgsql' LANGUAGE C;''',
-
-    r'''CREATE TRUSTED PROCEDURAL LANGUAGE plpgsql
-        HANDLER plpgsql_call_handler
-            VALIDATOR plpgsql_validator;''',
-)
-
-##
 # install our function
 #   TODO: parametrize the individual rows
 #       - let the user supply breaking points (50, 100, 200), tangents (-1, -1/2, -1/4), shift(100) and end value (10)
 ##
 TIME_COEFICIENT = \
-r'''(((sign(days + 1) + 1) / 2) *  ((sign(50 - days) + 1) / 2)) * (-days + 100) +
+r'''((((sign(days + 1) + 1) / 2) *  ((sign(50 - days) + 1) / 2)) * (-days + 100) +
     (((sign(days - 50) + 1) / 2) *  ((sign(100 - days) + 1) / 2)) * (-days/2.0 - 25 + 100) +
     (((sign(days - 100) + 1) / 2) *  ((sign(200 - days) + 1) / 2)) * (-days/4.0 - 50 + 100) +
-    10
+    10)/100
 '''
 
-KARMA_GET_TIME_COEFICIENT_PSQL =  r'''CREATE OR REPLACE FUNCTION karma_get_time_coeficient(days INTEGER) returns INTEGER AS $$
-    BEGIN
-        RETURN %s;
-    END
-    $$ language plpgsql;
-''' % TIME_COEFICIENT
-
-KARMA_GET_TIME_COEFICIENT_MYSQL = r'''CREATE FUNCTION karma_get_time_coeficient(days INTEGER) RETURNS INTEGER NO SQL
+KARMA_GET_TIME_COEFICIENT_MYSQL = r'''CREATE FUNCTION karma_get_time_coeficient(days INTEGER) RETURNS DECIMAL(10,2) NO SQL
 RETURN %s;
 ''' % TIME_COEFICIENT
 
 FUNCTION_EXISTS_MYSQL = 'SELECT COUNT(*) FROM mysql.proc WHERE name = %s;'
-FUNCTION_EXISTS_PSQL = 'SELECT COUNT(*) FROM pg_proc WHERE proname = %s;'
 
-if settings.DATABASE_ENGINE.startswith('postgresql'):
-    KARMA_GET_TIME_COEFICIENT = KARMA_GET_TIME_COEFICIENT_PSQL
-    FUNCTION_EXISTS = FUNCTION_EXISTS_PSQL
-elif settings.DATABASE_ENGINE == 'mysql':
+
+if settings.DATABASE_ENGINE == 'mysql':
     KARMA_GET_TIME_COEFICIENT = KARMA_GET_TIME_COEFICIENT_MYSQL
     FUNCTION_EXISTS = FUNCTION_EXISTS_MYSQL
 else:
-    print "Warning - some karma-related functions may not work properly under your DB, consider using PostgreSQL or MySQL 5."
+    print "Warning - some karma-related functions may not work properly under your DB, consider using MySQL 5."
 
-def install_plpgsql(app, created_models, verbosity=2):
-    """
-    Install PL/pgSQL language for PostgreSQL, if not already installed.
-    """
-    cursor = connection.cursor()
-    # check if the language isn't already installed
-    sql = "SELECT COUNT(*) FROM pg_language WHERE lanname = %s;"
-    cursor.execute(sql, ('plpgsql',))
-    row = cursor.fetchone()
-    if row[0] == 0:
-        if verbosity >= 2:
-            print "Installing PL/pgSQL language"
-        for sql in INSTALL_PLPGSQL:
-            cursor.execute(sql, ())
 
 def install_sql_functions(app, created_models, verbosity=2):
     """
@@ -157,9 +118,8 @@ def install_sql_functions(app, created_models, verbosity=2):
         cursor.execute(KARMA_GET_TIME_COEFICIENT)
 
 # bind the functions to run after syncdb
-if settings.DATABASE_ENGINE.startswith('postgresql'):
-    dispatcher.connect(install_plpgsql, signal=signals.post_syncdb)
-if settings.DATABASE_ENGINE.startswith('postgresql') or settings.DATABASE_ENGINE == 'mysql':
+
+if settings.DATABASE_ENGINE == 'mysql':
     dispatcher.connect(install_sql_functions, signal=signals.post_syncdb)
 dispatcher.connect(create_model_weights, signal=signals.post_syncdb)
 

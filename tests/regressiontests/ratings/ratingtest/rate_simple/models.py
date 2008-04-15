@@ -1,15 +1,17 @@
 from datetime import datetime
+from decimal import Decimal
+
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
-from ella.ratings.models import RatedManager, INITIAL_USER_KARMA
+from ella.ratings.models import INITIAL_USER_KARMA
 from ella.core.models import Category, Listing
 
 class UserProfile(models.Model):
     user = models.ForeignKey(User)
-    karma = models.IntegerField(default=INITIAL_USER_KARMA)
-    karma_coeficient = models.FloatField(default=1.0)
+    karma = models.DecimalField(default=INITIAL_USER_KARMA, max_digits=10, decimal_places=1)
+    karma_coeficient = models.DecimalField(default=Decimal("1.0"), max_digits=3, decimal_places=1)
 
 class ExpensiveSampleModel(models.Model):
     owner = models.ForeignKey(User)
@@ -18,7 +20,6 @@ class ExpensiveSampleModel(models.Model):
     slug = models.CharField(max_length=100)
 
     objects = models.Manager()
-    rated = RatedManager()
 
     @property
     def main_listing(self):
@@ -37,4 +38,3 @@ class CheapSampleModel(models.Model):
     title = models.CharField(max_length=100)
 
     objects = models.Manager()
-    rated = RatedManager()

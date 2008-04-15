@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.db import models, transaction, connection
 from django.db.models.fields import FieldDoesNotExist
 from django.conf import settings
@@ -11,40 +13,18 @@ except (ImportError, ImproperlyConfigured, AttributeError):
     profile_model = None
 
 
-UPDATE_STATEMENT_PSQL = '''
-        UPDATE
-            %(profile_table)s
-        SET
-            karma = karma + (%(karma_coeficient)s * agg.amount)
-        FROM
-            (
-                SELECT
-                    obj_tab.%(owner_field)s AS owner_id,
-                    SUM(ratings.amount * (karma_get_time_coeficient(current_date - DATE(ratings.time)))) * %(weight)s AS amount,
-                    COUNT(*) AS cnt
-                FROM
-                    %(rating_table)s ratings JOIN %(obj_table)s obj_tab ON (ratings.target_id = obj_tab.%(obj_pk)s)
-                WHERE
-                    ratings.target_ct_id = %%s
-                GROUP BY
-                    obj_tab.%(owner_field)s
-) agg
-        WHERE
-            %(profile_table)s.user_id = agg.owner_id;
-'''
-
-UPDATE_STATEMENT_MYSQL = '''
+UPDATE_STATEMENT_MYSQL_AGG = '''
     UPDATE
         %(profile_table)s,
         (
             SELECT
                 obj_tab.%(owner_field)s AS owner_id,
-                SUM(ratings.amount * (karma_get_time_coeficient(current_date - DATE(ratings.time)))) * %(weight)s AS amount,
+                SUM(aggregation.amount) * %(weight)s AS amount,
                 COUNT(*) AS cnt
             FROM
-                %(rating_table)s ratings JOIN %(obj_table)s obj_tab ON (ratings.target_id = obj_tab.%(obj_pk)s)
+                 %(aggreg_table)s aggregation JOIN %(obj_table)s obj_tab ON (aggregation.target_id = obj_tab.%(obj_pk)s)
             WHERE
-                ratings.target_ct_id = %%s
+                aggregation.target_ct_id = %%(ct_type)s
             GROUP BY
                 obj_tab.%(owner_field)s
 ) AS agg
@@ -54,12 +34,33 @@ UPDATE_STATEMENT_MYSQL = '''
         %(profile_table)s.user_id = agg.owner_id;
 '''
 
+UPDATE_STATEMENT_MYSQL_RATE = '''
+    UPDATE
+        %(profile_table)s,
+        (
+            SELECT
+                obj_tab.%(owner_field)s AS owner_id,
+                SUM(ratings.amount * %(rating_coeficient)s)* %(weight)s AS amount,
+                COUNT(*) AS cnt
+            FROM
+                %(rating_table)s ratings JOIN %(obj_table)s obj_tab ON (ratings.target_id = obj_tab.%(obj_pk)s)
+            WHERE
+                ratings.target_ct_id = %%(ct_type)s
+            GROUP BY
+                obj_tab.%(owner_field)s
+) AS rate
+    SET
+        karma = karma + (%(karma_coeficient)s * rate.amount)
+    WHERE
+        %(profile_table)s.user_id = rate.owner_id;
+'''
+
+
 if settings.DATABASE_ENGINE == 'mysql':
-    UPDATE_STATEMENT = UPDATE_STATEMENT_MYSQL
-elif settings.DATABASE_ENGINE.startswith('postgresql'):
-    UPDATE_STATEMENT = UPDATE_STATEMENT_PSQL
+    UPDATE_STATEMENT_AGG = UPDATE_STATEMENT_MYSQL_AGG
+    UPDATE_STATEMENT_RATE = UPDATE_STATEMENT_MYSQL_RATE
 else:
-    raise ImproperlyConfigured, "Use MySQL or Postgres for karma functionality"
+    raise ImproperlyConfigured, "Use MySQL for karma functionality"
 
 def update_karma_for_ct(content_type, owner_field, weight):
     """
@@ -83,11 +84,25 @@ def update_karma_for_ct(content_type, owner_field, weight):
                     connection.ops.quote_name(profile_model._meta.get_field('karma_coeficient').column)
 )
     except FieldDoesNotExist:
-        karma_coeficient = 1.0
+        karma_coeficient = Decimal("1.0")
 
-    sql = UPDATE_STATEMENT % {
+    sql = UPDATE_STATEMENT_AGG % {
         'weight' : weight,
         'karma_coeficient' : karma_coeficient,
+        'profile_table' : connection.ops.quote_name(profile_model._meta.db_table),
+        'owner_field' : connection.ops.quote_name(content_type.model_class()._meta.get_field(owner_field).column),
+        'aggreg_table' : connection.ops.quote_name(TotalRate._meta.db_table),
+        'obj_table' : connection.ops.quote_name(content_type.model_class()._meta.db_table),
+        'obj_pk' : connection.ops.quote_name(content_type.model_class()._meta.pk.column),
+}
+
+    cursor = connection.cursor()
+    cursor.execute(sql, {'ct_type' : content_type.id,})
+
+    sql = UPDATE_STATEMENT_RATE % {
+        'weight' : weight,
+        'karma_coeficient' : karma_coeficient,
+        'rating_coeficient' : RATINGS_COEFICIENT,
         'profile_table' : connection.ops.quote_name(profile_model._meta.db_table),
         'owner_field' : connection.ops.quote_name(content_type.model_class()._meta.get_field(owner_field).column),
         'rating_table' : connection.ops.quote_name(Rating._meta.db_table),
@@ -95,13 +110,8 @@ def update_karma_for_ct(content_type, owner_field, weight):
         'obj_pk' : connection.ops.quote_name(content_type.model_class()._meta.pk.column),
 }
 
-    out = open('/tmp/zena.log', 'a')
-    out.write(str(content_type.id) + '\n')
-    out.write(sql + '\n')
-    out.close()
+    cursor.execute(sql, {'ct_type' : content_type.id,})
 
-    cursor = connection.cursor()
-    cursor.execute(sql, (content_type.id,))
 
 
 @transaction.commit_on_success
@@ -130,3 +140,4 @@ def recalculate_karma():
 
 if __name__ == '__main__':
     recalculate_karma()
+

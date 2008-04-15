@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from decimal import Decimal
 
 from django.db import models, connection
 from django.contrib.auth.models import User
@@ -6,8 +7,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
-
-from ella.core.cache import get_cached_object
 
 # ratings - specific settings
 ANONYMOUS_KARMA = getattr(settings, 'ANONYMOUS_KARMA', 1)
@@ -17,6 +16,14 @@ MINIMAL_ANONYMOUS_IP_DELAY = getattr(settings, 'MINIMAL_ANONYMOUS_IP_DELAY', 180
 RATINGS_COOKIE_NAME = getattr(settings, 'RATINGS_COOKIE_NAME', 'ratings_voted')
 RATINGS_MAX_COOKIE_LENGTH = getattr(settings, 'RATINGS_MAX_COOKIE_LENGTH', 20)
 RATINGS_MAX_COOKIE_AGE = getattr(settings, 'RATINGS_MAX_COOKIE_AGE', 3600)
+RATINGS_COEFICIENT = getattr(settings, 'RATINGS_COEFICIENT', Decimal("1.1"))
+
+PERIOD_CHOICES = (
+    ('d', 'day'),
+    ('m', 'month'),
+    ('w', 'week'),
+    ('y', 'year'),
+)
 
 
 MODEL_WEIGHT_CACHE = {}
@@ -82,7 +89,38 @@ class ModelWeight(models.Model):
         verbose_name_plural = _('Model weights')
         ordering = ('-weight',)
 
-class RatingManager(models.Manager):
+class TotalRateManager(models.Manager):
+
+    def get_total_rating(self, obj):
+        """
+        Return total amount from TotalRate and Rating tables.
+
+        Params:
+                obj: object to work with
+        """
+        rate = Rating.objects.get_for_object(obj)
+        aggr = TotalRate.objects.get_for_object(obj)
+        return (rate+aggr).quantize(Decimal(".0"))
+
+    def get_for_object(self, obj):
+        """
+        Return the agg rating for a given object.
+
+        Params:
+                obj: object to work with
+        """
+        content_type = ContentType.objects.get_for_model(obj)
+        sql = '''SELECT SUM(amount)
+                 FROM %s
+                 WHERE target_id = %%s AND target_ct_id = %%s''' % (
+            connection.ops.quote_name(TotalRate._meta.db_table),
+)
+        cursor = connection.cursor()
+        cursor.execute(sql, (obj.id, content_type.id))
+        result = cursor.fetchone()
+        return result[0] or Decimal("0")
+
+
     def get_top_objects(self, count, mods=[]):
         """
         Return count objects with the highest rating.
@@ -91,35 +129,153 @@ class RatingManager(models.Manager):
             count: number of objects to return
             mods: if specified, limit the result to given model classes
         """
-        where = ''
+        where_rate = ''
+        where_agg = ''
         if mods:
-            where = ' WHERE target_ct_id IN (%s) ' % ', '.join('%s' % ContentType.objects.get_for_model(m).id for m in mods)
+            where_agg = ' WHERE total.target_ct_id IN (%s) ' % ', '.join('%s' % ContentType.objects.get_for_model(m).id for m in mods)
+            where_rate = ' WHERE new.target_ct_id IN (%s) ' % ', '.join('%s' % ContentType.objects.get_for_model(m).id for m in mods)
 
         sql = '''
-            SELECT
-                ct.app_label, ct.model, agg.target_id, agg.amount
+            SELECT DISTINCT
+                ct.app_label, ct.model, tr.target_id, tr.amount
             FROM
                 (
+                    (
                     SELECT
-                        target_ct_id,
-                        target_id,
-                        SUM(amount) as amount
-                    FROM %s
-                    %s
-                    GROUP BY
-                        target_ct_id, target_id
-) agg JOIN %s ct on ct.id = agg.target_ct_id
-            ORDER BY
-                agg.amount DESC
-            LIMIT %%s''' % (
-                connection.ops.quote_name(Rating._meta.db_table),
-                where,
-                connection.ops.quote_name(ContentType._meta.db_table),
+                        total.target_ct_id, total.target_id, total.amount + COALESCE(new.sum,0) as amount
+                    FROM
+                        %(total_tab)s as total LEFT OUTER JOIN
+                        (
+                         SELECT target_ct_id, target_id, SUM(amount * %(coef)s) as sum FROM %(rate_tab)s GROUP BY target_ct_id, target_id
+) as new ON total.target_ct_id = new.target_ct_id and total.target_id = new.target_id
+                    %(cond_agg)s
 )
+                    UNION
+                    (
+                    SELECT
+                        new.target_ct_id, new.target_id, COALESCE(total.amount,0) + new.sum as amount
+                    FROM
+                        %(total_tab)s as total RIGHT OUTER JOIN
+                        (
+                         SELECT target_ct_id, target_id, SUM(amount * %(coef)s) as sum FROM %(rate_tab)s GROUP BY target_ct_id, target_id
+) as new ON total.target_ct_id = new.target_ct_id and total.target_id = new.target_id
+                    %(cond_rate)s
+)
+
+) tr JOIN %(ct_tab)s ct on ct.id = tr.target_ct_id
+            ORDER BY
+                tr.amount DESC
+            LIMIT %%s''' % {
+                'total_tab' : connection.ops.quote_name(TotalRate._meta.db_table),
+                'cond_agg' : where_agg,
+                'cond_rate' : where_rate,
+                'coef' : RATINGS_COEFICIENT,
+                'ct_tab' : connection.ops.quote_name(ContentType._meta.db_table),
+                'rate_tab' : connection.ops.quote_name(Rating._meta.db_table),
+}
         cursor = connection.cursor()
         cursor.execute(sql, (count,))
 
-        return [ (get_cached_object(models.get_model(*row[:2]),  pk=row[2]), row[3]) for row in cursor.fetchall() ]
+        return [ (models.get_model(*row[:2])._default_manager.get(pk=row[2]), row[3].quantize(Decimal(".0"))) for row in cursor.fetchall() ]
+
+class TotalRate(models.Model):
+    """
+    save all rating for individual object.
+    """
+    target_ct = models.ForeignKey(ContentType, db_index=True)
+    target_id = models.PositiveIntegerField(_('Object ID'), db_index=True)
+    target = generic.GenericForeignKey('target_ct', 'target_id')
+    amount = models.DecimalField(_('Amount'), max_digits=10, decimal_places=2)
+
+    objects = TotalRateManager()
+
+    def __unicode__(self):
+        return u'%s points for %s' % (self.amount, self.target)
+
+    class Meta:
+        verbose_name = _('Total rate')
+        verbose_name_plural = _('Total rates')
+
+
+
+class AggManager(models.Manager):
+
+    def copy_agg_to_agg(self, time_limit, time_format, time_period):
+        """
+        Coppy aggregated Agg data to table Agg
+
+        time_limit: limit for time of transfering data
+
+        time_format: format for destiny DATE_FORMAT
+
+        time_period: is a period of aggregation data
+        """
+
+        sql = '''INSERT INTO %(tab)s (detract, period, people, amount, time, target_ct_id, target_id)
+                 SELECT 1, %(pe)s, SUM(people), SUM(amount), DATE(time), target_ct_id, target_id
+                 FROM %(tab)s
+                 WHERE time <= %%(li)s and detract = 0
+                 GROUP BY target_ct_id, target_id, DATE_FORMAT(time, %%(format)s)''' % {
+            'tab' : connection.ops.quote_name(Agg._meta.db_table),
+            'pe' : time_period
+}
+
+        cursor = connection.cursor()
+        cursor.execute(sql, {'li' : time_limit,'format' : time_format})
+
+    def agg_assume(self):
+        """
+        update objects field detract for futhure possibility aggregation
+        """
+        sql = 'UPDATE %s SET detract = 0' % (
+            connection.ops.quote_name(Agg._meta.db_table),
+)
+        cursor = connection.cursor()
+        cursor.execute(sql, ())
+
+    def agg_to_totalrate(self):
+        """
+        Transfer aggregation data from table Agg to table TotalRate
+        """
+
+        sql = '''INSERT INTO %(tab_tr)s (amount, target_ct_id, target_id)
+                 SELECT SUM(amount * (karma_get_time_coeficient(DATEDIFF(current_date, DATE(time))))), target_ct_id, target_id
+                 FROM %(tab_agg)s
+                 GROUP BY target_ct_id, target_id''' % {
+            'tab_agg' : connection.ops.quote_name(Agg._meta.db_table),
+            'tab_tr' : connection.ops.quote_name(TotalRate._meta.db_table)
+}
+
+        cursor = connection.cursor()
+        cursor.execute(sql, ())
+
+
+class Agg(models.Model):
+    """
+    Aggregation of rating objects.
+    """
+    target_ct = models.ForeignKey(ContentType, db_index=True)
+    target_id = models.PositiveIntegerField(_('Object ID'), db_index=True)
+    target = generic.GenericForeignKey('target_ct', 'target_id')
+
+    time = models.DateField(_('Time'))
+    people = models.IntegerField(_('People'))
+    amount = models.DecimalField(_('Amount'), max_digits=10, decimal_places=2)
+    period = models.CharField(_('Period'), max_length="1", choices=PERIOD_CHOICES)
+    detract = models.IntegerField(_('Detract'), default=0, max_length=1)
+
+    objects = AggManager()
+
+    def __unicode__(self):
+        return u'%s points for %s' % (self.amount, self.target)
+
+    class Meta:
+        verbose_name = _('Aggregation')
+        verbose_name_plural = _('Aggregations')
+        ordering = ('-time',)
+
+
+class RatingManager(models.Manager):
 
     def get_for_object(self, obj):
         """
@@ -129,7 +285,8 @@ class RatingManager(models.Manager):
             obj: object to work with
         """
         content_type = ContentType.objects.get_for_model(obj)
-        sql = 'SELECT SUM(amount) FROM %s WHERE target_id = %s AND target_ct_id = %s' % (
+        sql = 'SELECT SUM(amount * %s) FROM %s WHERE target_id = %s AND target_ct_id = %s' % (
+            RATINGS_COEFICIENT,
             connection.ops.quote_name(Rating._meta.db_table),
             obj.id,
             content_type.id,
@@ -137,7 +294,32 @@ class RatingManager(models.Manager):
         cursor = connection.cursor()
         cursor.execute(sql, ())
         result = cursor.fetchone()
-        return result[0] or 0
+        return result[0] or Decimal("0")
+
+    def copy_rate_to_agg(self, time_limit, time_format, time_period):
+        """
+        Coppy aggregated Rating to table Agg
+
+        time_limit: limit for time of transfering data
+
+        time_format: format for destiny DATE_FORMAT
+
+        time_period: is a period of aggregation data
+        """
+
+        sql = '''INSERT INTO %(tb)s (detract, period, people, amount, time, target_ct_id, target_id)
+                 SELECT 0,%(pe)s, COUNT(*), SUM(amount), DATE(time), target_ct_id, target_id
+                 FROM %(tab)s
+                 WHERE time <= %%(li)s
+                 GROUP BY target_ct_id, target_id, DATE_FORMAT(time, %%(format)s)''' % {
+            'tab' : connection.ops.quote_name(Rating._meta.db_table),
+            'tb' : connection.ops.quote_name(Agg._meta.db_table),
+            'pe' : time_period,
+}
+
+        cursor = connection.cursor()
+        cursor.execute(sql, {'li' : time_limit,'format' : time_format})
+
 
 class Rating(models.Model):
     """
@@ -149,7 +331,7 @@ class Rating(models.Model):
 
     time = models.DateTimeField(_('Time'), default=datetime.now, editable=False)
     user = models.ForeignKey(User, blank=True, null=True)
-    amount = models.IntegerField(_('Amount'))
+    amount = models.DecimalField(_('Amount'), max_digits=10, decimal_places=2)
     ip_address = models.CharField(_('IP Address'), max_length="15", blank=True)
 
     objects = RatingManager()
@@ -185,40 +367,6 @@ class Rating(models.Model):
 
         super(Rating, self).save()
 
-from django.db.models import Q
-from django.utils.datastructures import SortedDict
-
-class QLeftOuterJoin(Q):
-    """
-    Django ORM hack that enables you to specify outer join.
-    """
-    def __init__(self, alias, table, where):
-        self.alias, self.table, self.where = alias, table, where
-
-    def get_sql(self, opts):
-        """
-        Return the appropriate SQL fragments
-        """
-        joins = SortedDict()
-        joins[self.alias] = (self.table, 'LEFT OUTER JOIN', self.where)
-        return (joins, [], [])
-
-class RatedManager(models.Manager):
-    def get_query_set(self):
-        """
-        Overriden method that adds rating field to the queryset
-        """
-        qset = super(RatedManager, self).get_query_set()
-        ct = ContentType.objects.get_for_model(qset.model)
-        return qset.filter(
-                    QLeftOuterJoin(
-                        'rating_agg',
-                        '(SELECT target_id, SUM(amount) AS amount FROM ratings_rating WHERE target_ct_id = %d GROUP BY ratings_rating.target_id)' % ct.id,
-                        '%s.id = rating_agg.target_id' % connection.ops.quote_name(qset.model._meta.db_table)
-)
-).extra(select={'rating' : 'COALESCE(rating_agg.amount, 0)'})
-
-
 
 from django.contrib import admin
 
@@ -226,10 +374,16 @@ class RatingOptions(admin.ModelAdmin):
     list_filter = ('time', 'target_ct',)
     list_display = ('__unicode__', 'time', 'amount', 'user',)
 
+class TotalRateOptions(admin.ModelAdmin):
+    list_filter = ('target_ct',)
+    list_display = ('__unicode__', 'amount')
+
 class ModelWeightOptions(admin.ModelAdmin):
     list_filter = ('content_type',)
     list_display = ('content_type', 'weight', 'owner_field',)
 
 admin.site.register(Rating, RatingOptions)
+admin.site.register(TotalRate, TotalRateOptions)
 admin.site.register(ModelWeight, ModelWeightOptions)
+
 
