@@ -116,6 +116,7 @@ class HitCountManager(models.Manager):
 
         cursor = connection.cursor()
         res = cursor.execute('UPDATE core_hitcount SET hits=hits+1 WHERE target_ct_id=%s AND target_id=%s', [ target_ct.id, obj._get_pk_val() ])
+        cursor.execute('COMMIT')
 
         if res<1:
             hc = self.model(target_ct=target_ct, target_id=obj._get_pk_val())
