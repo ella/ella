@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from django.db import connection, models
+from django.db import connection, models, transaction
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.utils.encoding import smart_str
@@ -111,12 +111,14 @@ def get_top_objects_key(func, self, count, mods=[]):
 )
 
 class HitCountManager(models.Manager):
+
+    @transaction.commit_on_success
     def hit(self, obj):
         target_ct = ContentType.objects.get_for_model(obj)
 
         cursor = connection.cursor()
         res = cursor.execute('UPDATE core_hitcount SET hits=hits+1 WHERE target_ct_id=%s AND target_id=%s', [ target_ct.id, obj._get_pk_val() ])
-        cursor.execute('COMMIT')
+        transaction.set_dirty()
 
         if res<1:
             hc = self.model(target_ct=target_ct, target_id=obj._get_pk_val())
