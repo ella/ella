@@ -84,10 +84,11 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.redirects',
     'ella.core',
-    'box_sample',
-    'redir_sample',
-    'url_tests',
-    'cache_tests',
+    'coretest.box_sample',
+    'coretest.redir_sample',
+    'coretest.url_tests',
+    'coretest.cache_tests',
+    'coretest.templatetags_sample',
 )
 
 INTERNAL_IPS = (

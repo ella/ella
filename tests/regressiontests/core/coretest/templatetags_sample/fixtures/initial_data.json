@@ -1,0 +1,14 @@
+[
+  {
+    "pk": 1,
+    "model": "auth.user",
+    "fields": {
+      "username": "admin",
+      "is_active": true,
+      "is_superuser": true,
+      "is_staff": true,
+      "password": "sha1$cef52$f619aaf4e9ba9f171cdac20445066bdaf47347b4",
+      "email": "a@a.cz"
+    }
+  }
+]

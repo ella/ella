@@ -29,9 +29,8 @@ class ListingNode(template.Node):
     def render(self, context):
         for key in self.parameters_to_resolve:
             self.parameters[key] = template.resolve_variable(self.parameters[key], context)
-        #if isinstance(self.parameters['category'], basestring):
-        #    if  self.parameters['category'].isdigit() -- ID to lookup
-        #    else: SLUG to lookup
+        if self.parameters.has_key('category') and isinstance(self.parameters['category'], basestring):
+            self.parameters['category'] = get_cached_object(Category, tree_path=self.parameters['category'], site__id=settings.SITE_ID)
         context[self.var_name] = Listing.objects.get_listing(**self.parameters)
         return ''
 
@@ -54,7 +53,7 @@ def listing(parser, token):
                                             if no offset specified.
         ``of app.model, ...``               List of allowed models, all if omitted.
         ``for category``                    Category of the listing, all categories if not
-                                            specified. Can be either string (slug), digit (id)
+                                            specified. Can be either string (slug),
                                             or variable containing a Category object.
         ``as result``                       Store the resulting list in context under given
                                             name.
@@ -65,7 +64,7 @@ def listing(parser, token):
         {% listing 10 of articles.article for "home_page" as obj_list %}
         {% listing 10 of articles.article for category as obj_list %}
         {% listing 10 from 10 of articles.article as obj_list %}
-        {% listing 10 of articles.article, photos.photo for 1 as obj_list %}
+        {% listing 10 of articles.article, photos.photo as obj_list %}
     """
     var_name, parameters, parameters_to_resolve = listing_parse(token.split_contents())
     return ListingNode(var_name, parameters, parameters_to_resolve)
