@@ -116,7 +116,7 @@ class Position(models.Model):
         if self.box_type:
             box_type = self.box_type
         if self.text:
-            nodelist = Template(self.text).nodelist
+            nodelist = Template('%s\n%s' % (nodelist.render({}), self.text)).nodelist
 
         b = self.Box(box_type, nodelist)
         b.prepare(context)

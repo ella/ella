@@ -89,6 +89,20 @@ and back
 >>> t.render(c)
 u'<p class="base css_class">admin</p>'
 
+defined text in position does not override all position params defined in template
+----------------------------------------------------------------------------------
+
+>>> t = Template('''{% spaceless %}
+... {% position featured_one for category using named_box %}
+... name:FEATURED_ONE
+... css_class:css_class
+... {% endposition %}
+... {% endspaceless %}''')
+>>> p.text = 'name:FEATURED_ONE_DB'
+>>> p.save()
+>>> print t.render(c)
+<h1>FEATURED_ONE_DB</h1><p class="base css_class">admin</p>
+
 render with and without fallback override box_type in template
 --------------------------------------------------------------
 
