@@ -201,6 +201,27 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
 
     template_list.append('page/listing.html')
 
+
+    url_prepend = ''
+    url_apend = ''
+    if ct:
+        url_prepend = '../'
+        url_apend = content_type + '/'
+
+    # list of years with published objects
+    year_list = [
+            (d, d.strftime(DATE_REPR["year"]), url_prepend + d.strftime(YEAR_URLS[date_kind]))
+            for d in base_qset.dates('publish_from', "year", order='DESC')
+        ]
+
+    # list of dates with published objects
+    date_list = None
+    if date_kind != 'detail':
+        date_list = [
+                (d, d.strftime(DATE_REPR[date_kind]), url_prepend + d.strftime(DATE_URLS[date_kind]) + url_apend)
+                for d in qset.dates('publish_from', date_kind, order='DESC')
+            ]
+
     return render_to_response(template_list, {
             'is_paginated': paginator.pages > 1,
             'results_per_page': paginate_by,
@@ -214,18 +235,8 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
             'pages': paginator.pages,
             'hits' : paginator.hits,
 
-            # list of years with published objects
-            'year_list' : [
-                        (d, d.strftime(DATE_REPR["year"]), d.strftime(YEAR_URLS[date_kind]))
-                        for d in base_qset.dates('publish_from', "year", order='DESC')
-                    ],
-
-            # list of dates with published objects
-            'date_list' : date_kind != 'detail' and [
-                            (d, d.strftime(DATE_REPR[date_kind]), d.strftime(DATE_URLS[date_kind]))
-                            for d in qset.dates('publish_from', date_kind, order='DESC')
-                        ] or None,
-
+            'year_list' : year_list,
+            'date_list' : date_list,
             'current_date' : current_date,
             'current_date_text' : current_date.strftime(CURRENT_DATE_REPR[date_kind]),
             'date_kind' : date_kind,
@@ -236,10 +247,10 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
 }, context_instance=RequestContext(request))
 
 # format lookups for year_list and date_list
-DATE_URLS = {'year' : '../%Y/', 'month' : '../../%Y/%m/', 'day' : '../../../%Y/%m/%d/',}
-YEAR_URLS = {'year' : '../%Y/', 'month' : '../../%Y/', 'day' : '../../../%Y/', 'detail' : '../../../%Y/'}
+DATE_URLS = {'month' : '../%Y/%m/', 'day' : '../../%Y/%m/%d/',}
+YEAR_URLS = {'month' : '../%Y/', 'day' : '../../%Y/', 'detail' : '../../../%Y/',}
 DATE_REPR = {'year' : '%Y', 'month' : '%m/%Y', 'day' : '%d/%m/%Y', 'detail' : '%d/%m/%Y',}
-CURRENT_DATE_REPR = {'year' : '', 'month' : '%Y', 'day' : '%m/%Y', 'detail' : '%d/%m/%Y',}
+CURRENT_DATE_REPR = {'month' : '%Y', 'day' : '%m/%Y', 'detail' : '%d/%m/%Y',}
 
 def home(request):
     """
