@@ -51,6 +51,21 @@ Poznamky k registraci:
 http://www.b-list.org/weblog/2006/sep/02/django-tips-user-registration/
 """
 
+"""
+TODO 2008-04-16:
+1. prihlaseny admin - muze kliknout na IDcko.
+
+2. profil Zaneta posle (polozky)
+
+3. Sherlock -- pripravit export (zeptat se Ondry na detaily)
+
+4. poradny - podivat se na atlas.cz
+   - otazky posilaj ianon. uzivatele
+   - otazky nejsou hned videt na webu
+   - videt jsou zodpovezene otazky + odpovedi.
+   - po kliknuti na odpoved odbornika, bude stranka s odpovedi + komentari uzivatelu.
+"""
+
 ACTIVITY_PERIOD = 6  # Thread activity (hours)
 
 
@@ -59,7 +74,6 @@ def get_comments_on_thread(thread):
     qset = Comment.objects.filter(target_ct=ctThread)
     return qset.filter(target_id=thread.id)
 
-
 def remove_diacritical(text):
     line = unicodedata.normalize('NFKD', text)
     output = ''
@@ -67,7 +81,6 @@ def remove_diacritical(text):
         if not unicodedata.combining(c):
             output += c
     return output
-
 
 class Topic(models.Model, Publishable):
     # ella fields
@@ -78,10 +91,8 @@ class Topic(models.Model, Publishable):
     photo = models.ForeignKey(Photo, blank=True, null=True, verbose_name=_('Photo'))
     created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)
 
-
     def __unicode__(self):
         return self.title
-
 
     @property
     def main_listing(self):
@@ -95,12 +106,10 @@ class Topic(models.Model, Publishable):
         except Listing.DoesNotExist:
             return None
 
-
     def get_absolute_url(self):
         listing = self.main_listing
         if listing:
             return listing.get_absolute_url()
-
 
     def photo_thumb(self):
         """ Displays Topic photo thumbnail in admin. """
@@ -110,31 +119,31 @@ class Topic(models.Model, Publishable):
         return mark_safe(out)
     photo_thumb.allow_tags = True
 
-
     @property
     def get_description(self):
         return self.description
 
-
     def get_threads(self):
         return TopicThread.objects.filter(topic=self)
 
-
     def get_threads_by_date(self):
-        return self.get_threads().order_by('created')
-
+        return self.get_threads().order_by('-created')
 
     def get_threads_by_activity(self):
         act = {}
-        for t in self.get_threads_by_date():
+        for t in self.get_threads_by_date().order_by('created'):
             act[t] = t.activity
-        items = act.items()
-        items = [(v, k) for (k, v) in items]
-        items.sort()
-        items.reverse()
-        items = [(k, v) for (v, k) in items]
-        return [key for key, value in items]
+        tmp = act.items()
+        tmp = [(v, k) for (k, v) in tmp]
+        tmp.sort()
+        tmp.reverse()
+        tmp = [(k, v) for (v, k) in tmp]
+        out = [key for key, value in tmp]
+        return out
 
+    def get_threads_by_view(self):
+        """ returns the most viewed threads """
+        return None
 
     class Meta:
         verbose_name = _('Topic')
@@ -154,10 +163,8 @@ class TopicThread(models.Model):
         super(self.__class__, self).__init__(*args, **kwargs)
         self.__posts = []
 
-
     def __unicode__(self):
         return self.title
-
 
     def __load_posts(self):
         if self.__posts:
@@ -166,21 +173,21 @@ class TopicThread(models.Model):
         qset = Comment.objects.filter(target_ct=ctThread)
         self.__posts = qset.filter(target_id=self.pk)
 
-
     def get_absolute_url(self):
         base = self.topic.get_absolute_url()
         return '%s%s/%s' % (base, slugify(_('posts')), self.slug)
 
-
+    @property
     def num_posts(self):
         self.__load_posts()
         return self.__posts.count()
-
 
     def get_posts_by_date(self):
         self.__load_posts()
         return self.__posts.order_by('submit_date')
 
+    def __cmp__(self, other):
+        return cmp(self.activity, other.activity)
 
     @property
     def activity(self):
@@ -189,7 +196,6 @@ class TopicThread(models.Model):
         qset = self.get_posts_by_date()
         return qset.filter(submit_date__gte=when).count()
 
-
     def last_post(self):
         self.__load_posts()
         # FIXME check list length, sort by date to get the latest item.
@@ -197,44 +203,15 @@ class TopicThread(models.Model):
             return ''
         return self.__posts.order_by('-submit_date')[0]
 
-
     class Meta:
         verbose_name = _('Thread')
         verbose_name_plural = _('Threads')
         ordering = ('title',)
 
 
-"""
-class Post(models.Model):
-    title = models.CharField(_('Title'), max_length=255)
-    post = models.TextField(_('Post'))
-    thread = models.ForeignKey(TopicThread)
-    slug = models.CharField(_('Slug'), db_index=True, max_length=255)
-    user = models.ForeignKey(User, verbose_name=_('authorized author'))
-    # authors ip address
-    ip_address = models.IPAddressField(_('ip address'), blank=True, null=True)
-    created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)
-
-
-    def get_absolute_url(self):
-        top = get_cached_object(Topic, pk=self.topic_id)
-        return '%s%s/%s/' % (top.get_absolute_url(), slugify(ugettext('question')), self.slug)
-
-    def __unicode__(self):
-        return self.title
-
-    class Meta:
-        verbose_name = _('Post')
-        verbose_name_plural = _('Posts')
-        unique_together = (('thread', 'slug',),)
-        ordering = ('-created',)
-"""
-
-
 class BannedString(models.Model):
     expression = models.CharField(_('Expression'), db_index=True, max_length=20)
     isregexp = models.BooleanField(default=False)
-
 
     def __unicode__(self):
         return remove_diacritical(self.expression)
@@ -242,7 +219,6 @@ class BannedString(models.Model):
 
 class BannedUser(models.Model):
     user = models.ForeignKey(User, related_name='banned_user')
-
 
     def __unicode__(self):
         return self.user

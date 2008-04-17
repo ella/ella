@@ -11,7 +11,6 @@ from ella.ellaadmin.options import EllaAdminSite
 from django.utils.translation import ugettext_lazy as _
 
 
-
 class PostOptions(admin.ModelAdmin):
     ordering = ('-submit_date',)
     list_display = ('content', 'submit_date', 'target', 'author', 'is_public', 'path',)
@@ -32,7 +31,6 @@ class PostOptions(admin.ModelAdmin):
 }),
 )
 
-
     def queryset(self, request):
         """ return only Comments which are related to discussion threads. """
         from django.contrib.contenttypes.models import ContentType
@@ -40,13 +38,10 @@ class PostOptions(admin.ModelAdmin):
         ctThread = ContentType.objects.get_for_model(TopicThread)
         return qset.filter(target_ct=ctThread)
 
-
-
 class TopicThreadOptions(admin.ModelAdmin):
     list_display = ('title', 'topic', 'created', 'author',)
     search_fields = ('title', 'author', 'id',)
     prepopulated_fields = {'slug': ('title',)}
-
 
 class TopicOptions(admin.ModelAdmin):
     raw_id_fields = ('photo',)
@@ -54,12 +49,10 @@ class TopicOptions(admin.ModelAdmin):
     list_display = ('title', 'photo_thumb', 'created',)
     inlines = (ListingInlineOptions,)
 
-
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'perex':
             kwargs['widget'] = widgets.RichTextAreaWidget
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
-
 
 class MyAdmin(admin.AdminSite):
     pass

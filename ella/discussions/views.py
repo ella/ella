@@ -1,7 +1,6 @@
 import logging
 from time import strftime
 import smtplib
-from mailer import create_mail
 from django import http, newforms as forms
 from django.template import RequestContext, loader
 from django.shortcuts import render_to_response
@@ -12,9 +11,12 @@ from django.contrib.auth import authenticate, login, logout, get_user
 from django.views.generic.list_detail import object_list
 from django.contrib.formtools.preview import FormPreview
 
+from ella.discussions.mailer import create_mail
 from ella.discussions.models import *
 from ella.comments.models import Comment
 from ella.core.cache.utils import get_cached_object_or_404
+from ella.core.models import HitCount
+#from registration.views import *
 
 
 STATE_UNAUTHORIZED = 'unauthorized'
@@ -35,15 +37,12 @@ class QuestionForm(forms.Form):
     """
     content = forms.CharField(required=True, widget=forms.Textarea)
 
-
 class ThreadForm(QuestionForm):
     title = forms.CharField(required=True)
-
 
 class LoginForm(forms.Form):
     username = forms.CharField(required=True)
     password = forms.CharField(required=True, widget=forms.PasswordInput)
-
 
 class RegistrationForm(forms.Form):
     username = forms.CharField(required=True)
@@ -51,12 +50,10 @@ class RegistrationForm(forms.Form):
     password_again = forms.CharField(required=True, widget=forms.PasswordInput)
     email = forms.EmailField()
 
-
     def clean_username(self):
         if User.objects.filter(username__exact=self.cleaned_data['username']):
             raise forms.ValidationError(_('Username already exists. Please choose another one.'))
         return self.cleaned_data['username']
-
 
     def register_user(self):
         if not(self.is_bound and self.is_valid()):
@@ -68,7 +65,6 @@ class RegistrationForm(forms.Form):
         usr.is_staff = False
         usr.save()
         return usr
-
 
 class RegistrationFormPreview(FormPreview):
 
@@ -106,11 +102,12 @@ class RegistrationFormPreview(FormPreview):
                 'page/discussions/regform.html',
             ]
 
-
 def send_activation_email(user):
     # mail templates encoded in utf8, internally converted into latin2 while sending e-mails.
     # (tested on Outlook Express and various webmails)
     #TODO send activation e-mail, create cron script (?) to deactivate new user accounts within 2 days, if user didn't click to activation link.
+    from django.template import Context, Template
+    from django.template.loader import find_template_source, render_to_string
     def render(tpl, user):
         c = Context({'user': user})
         t = Template(tpl)
@@ -119,15 +116,13 @@ def send_activation_email(user):
     def plaintext():
         tpl = find_template_source('page/discussions/regmail.txt')
         if len(tpl) > 0:
-            return render(tpl[0], user)
+            return render_to_string(tpl[0], user)
 
     def htmltext():
         tpl = find_template_source('page/discussions/regmail.html')
         if len(tpl) > 0:
-            return render(tpl[0], user)
+            return render_to_string(tpl[0], user)
 
-    from django.template import Context, Template
-    from django.template.loader import find_template_source
     """
     Keyword Arguments:
     mailfrom
@@ -151,13 +146,10 @@ def send_activation_email(user):
     log.info('Activation e-mail sent to [%s]' % user.email)
     smtp.quit()
 
-
-
 def get_ip(request):
     if 'HTTP_X_FORWARDED_FOR' in request.META:
         return request.META['HTTP_X_FORWARDED_FOR']
     return request.META['REMOTE_ADDR']
-
 
 def add_post(content, thread, user, ip='0.0.0.0'):
     """
@@ -183,11 +175,9 @@ def add_post(content, thread, user, ip='0.0.0.0'):
 )
     cmt.save()
 
-
 def get_category_topics_url(category):
     # category.slug/year/_(topics)
     return '/%s/%s/%s/' % (category.slug, strftime('%Y'), slugify(_('topics')))
-
 
 def process_login(request, login_data):
     usr = authenticate(username=login_data['username'], password=login_data['password'])
@@ -197,7 +187,6 @@ def process_login(request, login_data):
         return STATE_NOT_ACTIVE
     login(request, usr)
     return STATE_OK #user is logged in
-
 
 def filter_banned_strings(content):
     REPLACEMENT = '***'
@@ -213,7 +202,6 @@ def filter_banned_strings(content):
             out = out[ :position ] + REPLACEMENT + out[ poslen: ]
             position = out.find(word)
     return out
-
 
 def posts(request, bits, context):
     # TODO !!! REFACTOR !!!
@@ -255,14 +243,16 @@ def posts(request, bits, context):
                 add_post(frm.cleaned_data['content'], thr, get_user(request), get_ip(request))
             else:
                 context['question_form_state'] = STATE_INVALID
-    comment_set = get_comments_on_thread(thr).order_by('submit_date')
+        else:
+            HitCount.objects.hit(thr) # increment view counter
+    comment_set = get_comments_on_thread(thr).filter(is_public__exact=True).order_by('submit_date')
     thread_url = '%s/' % thr.get_absolute_url()
     context['thread'] = thr
     context['posts'] = comment_set
     context['login_form'] = frmLogin
     context['register_form_url'] = '%sregister/' % thread_url
     context['question_form'] = frm
-    context['question_form_action'] = thread_url #request.build_absolute_uri()
+    context['question_form_action'] = thread_url
     context['login_form_action'] = '%slogin/' % thread_url
     context['logout_form_action'] = '%slogout/' % thread_url
     tplList = (
@@ -275,7 +265,6 @@ def posts(request, bits, context):
         context,
         context_instance=RequestContext(request)
 )
-
 
 def create_thread(request, bits, context):
     """ creates new thread (that is new TopciThread and first Comment) """
@@ -318,7 +307,6 @@ def create_thread(request, bits, context):
             context_instance=RequestContext(request)
 )
 
-
 def question(request, bits, context):
     log.debug('question() view')
     if not bits:
@@ -337,7 +325,6 @@ def question(request, bits, context):
         new_bits = bits[1:]
     from ella.comments.urls import comments_custom_urls
     return comments_custom_urls(request, new_bits, context)
-
 
 def topic(request, context):
     top = context['object']  # topic
