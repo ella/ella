@@ -269,6 +269,7 @@ class Poll(models.Model, FloatingStateModel):
 
     def get_total_votes(self):
         return self.get_question().get_total_votes()
+    get_total_votes.short_description = _('Votes in total')
 
     def Box(self, box_type, nodelist):
         return PollBox(self, box_type, nodelist)
