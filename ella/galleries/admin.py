@@ -45,7 +45,7 @@ class GalleryItemTabularOptions(admin.TabularInline):
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 class GalleryOptions(admin.ModelAdmin):
-    list_display = ('title', 'created', 'category', 'full_url',)
+    list_display = ('title', 'created', 'category', 'get_hits', 'full_url',)
     ordering = ('-created',)
     fieldsets = (
         (_("Gallery heading"), {'fields': ('title', 'slug',)}),

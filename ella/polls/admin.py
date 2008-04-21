@@ -109,7 +109,7 @@ class ContestOptions(admin.ModelAdmin):
                 {'contestants' : contestants, 'title' : title, 'module_name' : module_name})
         return super(ContestOptions, self).__call__(request, url)
 
-    list_display = ('title', 'category', 'active_from', 'correct_answers', 'get_all_answers_count', 'full_url',)
+    list_display = ('title', 'category', 'active_from', 'correct_answers', 'get_all_answers_count', 'get_hits', 'full_url',)
     list_filter = ('category', 'active_from',)
     search_fields = ('title', 'text_announcement', 'text', 'text_results',)
 #    inlines = (QuestionInlineOptions, ListingInlineOptions, TaggingInlineOptions, HitCountInlineOptions)
@@ -120,7 +120,7 @@ class ContestOptions(admin.ModelAdmin):
     formfield_for_dbfield = formfield_for_dbfield(['text_announcement', 'text', 'text_results'])
 
 class QuizOptions(admin.ModelAdmin):
-    list_display = ('title', 'category', 'active_from', 'full_url',)
+    list_display = ('title', 'category', 'active_from', 'get_hits', 'full_url',)
     list_filter = ('category', 'active_from',)
     search_fields = ('title', 'text_announcement', 'text', 'text_results',)
 #    inlines = (QuestionInlineOptions, ResultTabularOptions, ListingInlineOptions, TaggingInlineOptions, HitCountInlineOptions)
