@@ -99,6 +99,10 @@ class Contest(models.Model, Publishable, FloatingStateModel):
         return mark_safe(u'<a href="%s/correct_answers/">%s - %s</a>' % (self.id, _('Correct Answers'), self.title))
     correct_answers.allow_tags = True
 
+    def get_all_answers_count(self):
+        return Contestant.objects.filter(contest=self).count()
+    get_all_answers_count.short_description = _('Participants in total')
+
     def get_correct_answers(self):
         """
         Returns queryset of contestants with correct answers on the current contest
