@@ -37,6 +37,10 @@ class CacheDeleter(object):
         msg = pickle.dumps(instance)
         self._send(msg, 'pk', key)
 
+    def register_dependency(self, src_key, obj_key):
+        self._send('', 'dep', src_key, obj_key)
+
+
 CACHE_DELETER = CacheDeleter()
 ACTIVE_MQ_HOST = getattr(settings, 'ACTIVE_MQ_HOST', None)
 ACTIVE_MQ_PORT = getattr(settings, 'ACTIVE_MQ_PORT', 61613)

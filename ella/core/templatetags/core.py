@@ -170,6 +170,8 @@ class BoxNode(template.Node):
             # record dependecies
             source, source_key = context[BOX_INFO]
             Dependency.objects.report_dependency(source, source_key, obj, box_key)
+            # TODO: prepare dependencies external in Cache Invalidator
+            CACHE_DELETER.register_dependency(source_key, box_key)
         return result
 
 @register.tag('box')

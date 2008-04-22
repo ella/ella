@@ -172,12 +172,13 @@ class DependencyManager(RelatedManager):
         When an object is deleted from cache, this method will invalidate all objects
         dependent on the one being deleted.
         """
+        from ella.core.management.commands.cacheinvalidator import CacheInvalidator as CI
         target_ct = ContentType.objects.get_for_model(target)
         qset =  self.filter(
                     target_ct=target_ct,
                     target_key=key
 )
         for dep in qset:
-            CACHE_DELETER.invalidate(dep.source_ct.model_class(), key)
+            CI.invalidate(dep.source_ct.model_class(), key)
         qset.delete()
 

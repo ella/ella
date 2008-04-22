@@ -19,6 +19,7 @@ AMQ_DESTINATION = '/topic/ella'
 class CacheInvalidator(object):
     def __init__(self):
         self._register = {}
+        self._dependencies = {}
 
     def on_error(self, headers, message):
         log.error('ActiveMQ/Stomp on_error')
@@ -45,6 +46,8 @@ class CacheInvalidator(object):
         elif type == 'del':
             inst = pickle.loads(message)
             self.run(inst.__class__, inst)
+        elif type == 'dep':
+            self.register_dependency(key, model)
 
     def append_model(self, model):
         " Append model to _registry "
@@ -63,6 +66,13 @@ class CacheInvalidator(object):
 
         self.append_model(instance.__class__)
         self._register[instance.__class__][0].appendlist(instance._get_pk_val(), key)
+
+    def register_dependency(self, src_key, obj_key):
+        pass
+#        if src_key not in self._dependencies:
+#            self._dependencies[src_key] = MultiValueDict()
+
+
 
     def _check_test(self, instance, test_str):
         " Check test params on instance "
