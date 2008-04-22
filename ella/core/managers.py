@@ -20,7 +20,7 @@ class RelatedManager(models.Manager):
         return super(RelatedManager, self).get_query_set().select_related()
 
 def invalidate_listing(key, self, *args, **kwargs):
-    CACHE_DELETER.register_test(self.model, lambda x: True, key)
+    CACHE_DELETER.register_test(self.model, '', key)
 
 def get_listings_key(func, self, category=None, count=10, offset=1, mods=[], content_types=[], **kwargs):
     c = category and  category.id or ''

@@ -24,19 +24,18 @@ class CacheDeleter(object):
     def on_disconnected(self):
         log.error('AMQ: Connection was lost!')
 
-    def send(self, msg, type, key=None, test=None):
+    def _send(self, msg, type, key=None, model=None):
         " Send message to AMQ "
         if self.conn:
-            headers = {'Type': type, 'Key': key, 'Test': test}
+            headers = {'Type': type, 'Key': key, 'Model': model}
             self.conn.send(msg, headers=headers, destination=AMQ_DESTINATION)
 
     def register_test(self, model, test, key):
-        msg = pickle.dumps(model)
-        self.send(msg, 'test', key, test)
+        self._send(test, 'test', key, model.__class__)
 
     def register_pk(self, instance, key):
         msg = pickle.dumps(instance)
-        self.send(msg, 'pk', key)
+        self._send(msg, 'pk', key)
 
 CACHE_DELETER = CacheDeleter()
 ACTIVE_MQ_HOST = getattr(settings, 'ACTIVE_MQ_HOST', None)

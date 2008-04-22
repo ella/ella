@@ -41,7 +41,7 @@ def get_key(func, template_name, template_dirs=None):
 def invalidate_cache(key, template_name, template_dirs=None):
     from ella.db_templates.models import DbTemplate
     if DbTemplate._meta.installed:
-        CACHE_DELETER.register_test(DbTemplate, lambda x: x.name == template_name, key)
+        CACHE_DELETER.register_test(DbTemplate, "name:%s" % template_name, key)
 
 @cache_this(get_key, invalidate_cache, timeout=10*60)
 def get_cache_teplate(template_name, template_dirs):

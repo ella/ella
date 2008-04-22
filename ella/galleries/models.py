@@ -18,7 +18,7 @@ from ella.photos.models import Photo
 def gallery_cache_invalidator(key, gallery, *args, **kwargs):
     """Registers gallery cache invalidator test in the cache system."""
     CACHE_DELETER.register_pk(gallery, key)
-    CACHE_DELETER.register_test(GalleryItem, lambda x: x.gallery_id == gallery.pk, key)
+    CACHE_DELETER.register_test(GalleryItem, 'gallery_id:%s' % gallery.pk, key)
 
 def get_gallery_key(func, gallery):
     return 'ella.galleries.models.Gallery.items:%d' % gallery.id

@@ -7,7 +7,7 @@ invalidation = r'''
 >>> cm = CachedModel.objects.get(pk=1)
 >>> key = 'CachedModel:%d' % cm.id
 >>> cache.set(key, cm)
->>> invalidate.CACHE_DELETER.register_test(CachedModel, lambda x: x.id == 1, key)
+>>> invalidate.CACHE_DELETER.register_test(CachedModel, 'id:1', key)
 >>> cm == cache.get(key)
 True
 >>> cm.title = 'some other title'

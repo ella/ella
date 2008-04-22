@@ -91,7 +91,7 @@ class Box(object):
         from ella.db_templates.models import DbTemplate
         if not DbTemplate._meta.installed:
             return []
-        return [ (DbTemplate, lambda x: x.name == t) for t in self._get_template_list() ]
+        return [ (DbTemplate, 'name:%s' % t) for t in self._get_template_list() ]
 
     def render(self):
         " Cached wrapper around self._render(). "

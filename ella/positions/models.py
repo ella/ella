@@ -20,7 +20,7 @@ def get_position_key(func, self, category, name, nofallback):
             category.pk, name, nofallback and '1' or '0'
 )
 def invalidate_cache(key,  self, category, name, nofallback=False):
-    CACHE_DELETER.register_test(Position, lambda x: x.category == category and x.name == name, key)
+    CACHE_DELETER.register_test(Position, "category_id:%s;name:%s" % (category.pk, name) , key)
 
 class PositionManager(models.Manager):
     @cache_this(get_position_key, invalidate_cache, timeout=10*60)

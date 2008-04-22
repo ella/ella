@@ -5,14 +5,16 @@ from django.core.cache import cache
 from django.http import Http404
 from django.contrib.contenttypes.models import ContentType
 from django.utils.encoding import smart_str
+from django.conf import settings
 
 from ella.core.cache.invalidate import CACHE_DELETER
 
-def normalize_key(key):
-    return md5(key).hexdigest()
-
 KEY_FORMAT_LIST = 'ella.core.cache.utils.get_cached_list'
 KEY_FORMAT_OBJECT = 'ella.core.cache.utils.get_cached_object'
+CACHE_TIMEOUT = getattr(settings, 'CACHE_TIMEOUT', 10*60)
+
+def normalize_key(key):
+    return md5(key).hexdigest()
 
 def _get_key(start, model, kwargs):
     return normalize_key(start + ':'.join((
@@ -20,8 +22,6 @@ def _get_key(start, model, kwargs):
                 model._meta.object_name,
                 ','.join(':'.join((key, smart_str(kwargs[key]))) for key in sorted(kwargs.keys()))
 )))
-
-
 
 def get_cached_list(model, **kwargs):
     """
@@ -41,7 +41,7 @@ def get_cached_list(model, **kwargs):
     l = cache.get(key)
     if l is None:
         l = list(model._default_manager.filter(**kwargs))
-        cache.set(key, l, 10 * 60)
+        cache.set(key, l, CACHE_TIMEOUT)
         for o in l:
             CACHE_DELETER.register_pk(o, key)
         #CACHE_DELETER.register_test(model, lambda x: model._default_manager.filter(**kwargs).filter(pk=x._get_pk_val()) == 1, key)
@@ -67,7 +67,7 @@ def get_cached_object(model, **kwargs):
     obj = cache.get(key)
     if obj is None:
         obj = model._default_manager.get(**kwargs)
-        cache.set(key, obj, 10 * 60)
+        cache.set(key, obj, CACHE_TIMEOUT)
         CACHE_DELETER.register_pk(obj, key)
     return obj
 
@@ -82,7 +82,7 @@ def get_cached_object_or_404(model, **kwargs):
     except ObjectDoesNotExist:
         raise Http404
 
-def cache_this(key_getter, invalidator=None, timeout=10*60):
+def cache_this(key_getter, invalidator=None, timeout=CACHE_TIMEOUT):
     def wrapped_decorator(func):
         def wrapped_func(*args, **kwargs):
             key = normalize_key(key_getter(func, *args, **kwargs))
@@ -100,4 +100,3 @@ def cache_this(key_getter, invalidator=None, timeout=10*60):
 
         return wrapped_func
     return wrapped_decorator
-

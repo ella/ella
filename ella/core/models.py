@@ -283,7 +283,7 @@ class HitCount(models.Model):
     target_id = models.IntegerField()
 
     last_seen = models.DateTimeField(_('Last seen'), editable=False)
-    site = models.ForeignKey(Site) # what for?
+    site = models.ForeignKey(Site)
 
     hits = models.PositiveIntegerField(_('Hits'), default=1)
 
@@ -380,4 +380,3 @@ class Dependency(models.Model):
 
 from ella.core import register
 del register
-

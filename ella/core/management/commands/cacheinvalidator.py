@@ -19,7 +19,6 @@ AMQ_DESTINATION = '/topic/ella'
 class CacheInvalidator(object):
     def __init__(self):
         self._register = {}
-        #self.signal_handler = self
 
     def on_error(self, headers, message):
         log.error('ActiveMQ/Stomp on_error')
@@ -33,33 +32,54 @@ class CacheInvalidator(object):
 
         type = headers['type']
         key = headers['key']
-        test = headers['test']
-        inst = pickle.loads(message)
 
         # debug
         log.debug('CI: I received a message type %s' % type)
 
         if type == 'pk':
+            inst = pickle.loads(message)
             self.append_pk(inst, key)
         elif type == 'test':
-            self.append_test(inst, test, key)
+            model = headers['model']
+            self.append_test(model, message, key)
         elif type == 'del':
+            inst = pickle.loads(message)
             self.run(inst.__class__, inst)
 
     def append_model(self, model):
+        " Append model to _registry "
+
         if model not in self._register:
             self._register[model] = (MultiValueDict(), MultiValueDict())
 
     def append_test(self, model, test, key):
+        " Append invalidation test to _registry "
+
         self.append_model(model)
         self._register[model][1].appendlist(key, test)
 
     def append_pk(self, instance, key):
+        " Append PK to _registry "
+
         self.append_model(instance.__class__)
         self._register[instance.__class__][0].appendlist(instance._get_pk_val(), key)
 
+    def _check_test(self, instance, test_str):
+        " Check test params on instance "
+
+        if not test_str:
+            return True
+
+        # Parse string
+        for par in test_str.split(';'):
+            foo = par.split(':')
+            if not (instance.getattr(instance, foo[0].strip()) == foo[1].strip()):
+                return False
+        return True
+
     def run(self, sender, instance):
-        " Process pre_save signal "
+        " Process cache invalidation PKs and tests "
+
         if sender in self._register:
             pks, tests = self._register[sender]
             if instance._get_pk_val() in pks:
@@ -67,14 +87,14 @@ class CacheInvalidator(object):
                     self.invalidate(sender, key, from_test=False)
                 del pks[instance._get_pk_val()]
 
+            log.debug('TESTS: %s' % tests)
             for key in tests.keys():
                 for t in tests.getlist(key):
                     log.debug('Test: %s: %s' % (type(t), t))
-                    # FIXME: we can't send test function via AMQ
-#                    if t(instance):
-#                        self.invalidate(sender, key)
-#                        del tests[key]
-#                        break
+                    if self._check_test(instance, t):
+                        self.invalidate(sender, key)
+                        del tests[key]
+                        break
 #        return instance
 
     def invalidate(self, sender, key, from_test=True):
