@@ -24,6 +24,30 @@
         }
     },
     {
+        "pk": "3",
+        "model": "core.category",
+        "fields": {
+            "tree_parent": 2,
+            "description": "Sub cat one",
+            "title": "Sub cat one",
+            "site": 1,
+            "tree_path": "cat/subcat1",
+            "slug": "subcat1"
+        }
+    },
+    {
+        "pk": "4",
+        "model": "core.category",
+        "fields": {
+            "tree_parent": 2,
+            "description": "Sub cat two",
+            "title": "Sub cat two",
+            "site": 1,
+            "tree_path": "cat/subcat2",
+            "slug": "subcat2"
+        }
+    },
+    {
         "pk": 1,
         "model": "redir_sample.redirobject",
         "fields": {
@@ -60,6 +84,20 @@
         "model": "core.listing",
         "fields": {
             "category": 2,
+            "publish_from": "2007-07-01 00:00:00",
+            "priority_value": 0,
+            "target_id": 2,
+            "remove": false,
+            "priority_to": null,
+            "priority_from": null,
+            "target_ct": 19
+        }
+    },
+    {
+        "pk": "7",
+        "model": "core.listing",
+        "fields": {
+            "category": 3,
             "publish_from": "2007-07-01 00:00:00",
             "priority_value": 0,
             "target_id": 2,

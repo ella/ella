@@ -3,7 +3,8 @@ listing = r"""
 >>> from django.template import Template, Context
 
 >>> cat = Category.objects.get(pk=1)
->>> c = Context({'category': cat,})
+>>> sub_cat = Category.objects.get(pk=2)
+>>> c = Context({'category': cat, 'sub_category': sub_cat,})
 
 almost same templates like in doc strings
 -----------------------------------------
@@ -18,21 +19,40 @@ u'[<Listing: RedirObject object listed in example.com/>]'
 
 >>> t3 = Template('{% listing 2 from 1 of redir_sample.redirobject as obj_list %}{{obj_list|safe}}')
 >>> t3.render(c)
-u'[<Listing: RedirObject object listed in example.com/>, <Listing: RedirObject object listed in example.com//cat>]'
+u'[<Listing: RedirObject object listed in example.com/>, <Listing: RedirObject object listed in example.com/cat>]'
+
+
+
+>>> t4 = Template('{% listing 10 of redir_sample.redirobject for category as obj_list %}{{obj_list|safe}}')
+>>> t4.render(c)
+u'[<Listing: RedirObject object listed in example.com/>]'
+
+>>> t5 = Template('{% listing 10 of redir_sample.redirobject for category with children as obj_list %}{{obj_list|safe}}')
+>>> t5.render(c)
+u'[<Listing: RedirObject object listed in example.com/>, <Listing: RedirObject object listed in example.com/cat>]'
+
+>>> t6 = Template('{% listing 10 of redir_sample.redirobject for category with descendents as obj_list %}{{obj_list|safe}}')
+>>> t6.render(c)
+u'[<Listing: RedirObject object listed in example.com/>, <Listing: RedirObject object listed in example.com/cat>, <Listing: RedirObject object listed in example.com/cat/subcat1>]'
+
+>>> t7 = Template('{% listing 10 of redir_sample.redirobject for sub_category with descendents as obj_list %}{{obj_list|safe}}')
+>>> t7.render(c)
+u'[<Listing: RedirObject object listed in example.com/cat>, <Listing: RedirObject object listed in example.com/cat/subcat1>]'
 
 manualy specified every contenttype, everything and objects.all are the same
 ----------------------------------------------------------------------------
 
->>> t4 = Template('{% listing 10 of redir_sample.redirobject, url_tests.samplemodel, url_tests.othersamplemodel as obj_list %}{{obj_list|safe}}')
->>> t4.render(c)
-u'[<Listing: SampleModel object listed in example.com/>, <Listing: RedirObject object listed in example.com/>, <Listing: RedirObject object listed in example.com//cat>, <Listing: SampleModel object listed in example.com/>, <Listing: OtherSampleModel object listed in example.com/>]'
+>>> t8 = Template('{% listing 10 of redir_sample.redirobject, url_tests.samplemodel, url_tests.othersamplemodel as obj_list %}{{obj_list|safe}}')
+>>> t8.render(c)
+u'[<Listing: SampleModel object listed in example.com/>, <Listing: RedirObject object listed in example.com/>, <Listing: RedirObject object listed in example.com/cat>, <Listing: RedirObject object listed in example.com/cat/subcat1>, <Listing: SampleModel object listed in example.com/>, <Listing: OtherSampleModel object listed in example.com/>]'
 
->>> t5 = Template('{% listing 10 as obj_list %}{{obj_list|safe}}')
->>> t5.render(c)
-u'[<Listing: SampleModel object listed in example.com/>, <Listing: RedirObject object listed in example.com/>, <Listing: RedirObject object listed in example.com//cat>, <Listing: SampleModel object listed in example.com/>, <Listing: OtherSampleModel object listed in example.com/>]'
+>>> t9 = Template('{% listing 10 as obj_list %}{{obj_list|safe}}')
+>>> t9.render(c)
+u'[<Listing: SampleModel object listed in example.com/>, <Listing: RedirObject object listed in example.com/>, <Listing: RedirObject object listed in example.com/cat>, <Listing: SampleModel object listed in example.com/>, <Listing: OtherSampleModel object listed in example.com/>, <Listing: RedirObject object listed in example.com/cat/subcat1>]'
 
 >>> unicode(Listing.objects.all())
-u'[<Listing: SampleModel object listed in example.com/>, <Listing: RedirObject object listed in example.com/>, <Listing: RedirObject object listed in example.com//cat>, <Listing: SampleModel object listed in example.com/>, <Listing: OtherSampleModel object listed in example.com/>]'
+u'[<Listing: SampleModel object listed in example.com/>, <Listing: RedirObject object listed in example.com/>, <Listing: RedirObject object listed in example.com/cat>, <Listing: SampleModel object listed in example.com/>, <Listing: OtherSampleModel object listed in example.com/>, <Listing: RedirObject object listed in example.com/cat/subcat1>]'
+
 
 """
 

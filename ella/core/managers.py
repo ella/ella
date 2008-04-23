@@ -33,6 +33,10 @@ def get_listings_key(func, self, category=None, count=10, offset=1, mods=[], con
 )
 
 class ListingManager(RelatedManager):
+    NONE = 0
+    IMMEDIATE = 1
+    ALL = 2
+
     def clean_listings(self):
         """
         Method that cleans the Listing model by deleting all listings that are no longer valid.
@@ -40,13 +44,22 @@ class ListingManager(RelatedManager):
         """
         self.filter(remove=True, priority_to__lte=datetime.now()).delete()
 
-    def get_queryset(self, category=None, mods=[], content_types=[], **kwargs):
+    def get_queryset(self, category=None, children=NONE, mods=[], content_types=[], **kwargs):
         now = datetime.now()
         qset = self.exclude(remove=True, priority_to__lte=datetime.now()).filter(publish_from__lte=now, **kwargs).exclude(hidden=True)
 
         if category:
-            # only this one category
-            qset = qset.filter(category=category)
+            if children == self.NONE:
+                # only this one category
+                qset = qset.filter(category=category)
+            elif children == self.IMMEDIATE:
+                # this category and its children
+                qset = qset.filter(models.Q(category__tree_parent=category) | models.Q(category=category))
+            elif children == self.ALL:
+                # this category and all its descendants
+                qset = qset.filter(category__tree_path__startswith=category.tree_path)
+            else:
+                raise AttributeError('Invalid children value (%s) - should be one of (%s, %s, %s)' % (children, self.NONE, self.IMMEDIATE, self.ALL))
 
         # filtering based on Model classes
         if mods or content_types:
@@ -54,11 +67,11 @@ class ListingManager(RelatedManager):
 
         return qset
 
-    def get_count(self, category=None, mods=[], **kwargs):
-        return self.get_queryset(category, mods, **kwargs).count()
+    def get_count(self, category=None, children=NONE, mods=[], **kwargs):
+        return self.get_queryset(category, children, mods, **kwargs).count()
 
     @cache_this(get_listings_key, invalidate_listing)
-    def get_listing(self, category=None, count=10, offset=1, mods=[], content_types=[], **kwargs):
+    def get_listing(self, category=None, children=NONE, count=10, offset=1, mods=[], content_types=[], **kwargs):
         """
         Get top objects for given category and potentionally also its child categories.
 
@@ -73,7 +86,7 @@ class ListingManager(RelatedManager):
         assert count > 0, "Count must be a positive integer"
 
         now = datetime.now()
-        qset = self.get_queryset(category, mods, content_types, **kwargs).select_related()
+        qset = self.get_queryset(category, children, mods, content_types, **kwargs).select_related()
 
         # listings with active priority override
         active = models.Q(priority_value__isnull=False, priority_from__isnull=False, priority_from__lte=now, priority_to__gte=now)

@@ -41,7 +41,7 @@ def listing(parser, token):
 
     Usage::
 
-        {% listing <limit>[ from <offset>][of <app.model>[, <app.model>[, ...]]][ for <category>] as <result> %}
+        {% listing <limit>[ from <offset>][of <app.model>[, <app.model>[, ...]]][ for <category> ] [with children|descendents] as <result> %}
 
     Parameters:
 
@@ -53,8 +53,10 @@ def listing(parser, token):
                                             if no offset specified.
         ``of app.model, ...``               List of allowed models, all if omitted.
         ``for category``                    Category of the listing, all categories if not
-                                            specified. Can be either string (slug),
+                                            specified. Can be either string (tree path),
                                             or variable containing a Category object.
+        ``with children``                   Include items from direct subcategories.
+        ``with descendents``                Include items from all descend subcategories.
         ``as result``                       Store the resulting list in context under given
                                             name.
         ==================================  ================================================
@@ -63,6 +65,8 @@ def listing(parser, token):
 
         {% listing 10 of articles.article for "home_page" as obj_list %}
         {% listing 10 of articles.article for category as obj_list %}
+        {% listing 10 of articles.article for category with children as obj_list %}
+        {% listing 10 of articles.article for category with descendents as obj_list %}
         {% listing 10 from 10 of articles.article as obj_list %}
         {% listing 10 of articles.article, photos.photo as obj_list %}
     """
@@ -105,6 +109,17 @@ def listing_parse(input):
         params['category'] = input[o+1]
         params_to_resolve.append('category')
         o=o+2
+    # with
+    if input[o] == 'with':
+        o=o+1
+        if input[o] == 'children':
+            params['children'] = Listing.objects.IMMEDIATE
+        elif input[o] == 'descendents':
+            params['children'] = Listing.objects.ALL
+        else:
+            raise template.TemplateSyntaxError, "%r tag's argument 'with' required specification (with children|with descendents)" % input[0]
+        o=o+1
+
     # as
     if input[o] == 'as':
         var_name = input[o+1]
