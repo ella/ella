@@ -19,7 +19,7 @@
             "description": "Cat",
             "title": "Cat",
             "site": 1,
-            "tree_path": "/cat",
+            "tree_path": "cat",
             "slug": "cat"
         }
     },
