@@ -47,8 +47,7 @@ class CacheDeleter(object):
         """
         try:
             # propagate the signal to Cache Invalidator
-            self.conn.send(pickle.dumps(instance), headers={'Type':'del','Key':None,'Test':None}, destination=AMQ_DESTINATION)
-            log.debug('TO AMQ: %s' % instance)
+            self._send(pickle.dumps(instance), 'del')
         except:
             log.error('Can not send message to AMQ.')
         return instance
@@ -67,9 +66,6 @@ class CacheDeleter(object):
 
     def disconnect(self):
         self.conn.stop()
-
-
-
 
 CACHE_DELETER = CacheDeleter()
 ACTIVE_MQ_HOST = getattr(settings, 'ACTIVE_MQ_HOST', None)

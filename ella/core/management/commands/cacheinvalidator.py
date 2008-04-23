@@ -5,6 +5,7 @@ except ImportError:
 
 import time
 import logging
+import stomp
 from optparse import make_option
 from django.core.cache import cache
 from django.core.management.base import BaseCommand, CommandError
@@ -47,6 +48,7 @@ class CacheInvalidator(object):
             inst = pickle.loads(message)
             self.run(inst.__class__, inst)
         elif type == 'dep':
+            model = headers['model']
             self.register_dependency(key, model)
 
     def append_model(self, model):
@@ -67,12 +69,12 @@ class CacheInvalidator(object):
         self.append_model(instance.__class__)
         self._register[instance.__class__][0].appendlist(instance._get_pk_val(), key)
 
-    def register_dependency(self, src_key, obj_key):
-        pass
-#        if src_key not in self._dependencies:
-#            self._dependencies[src_key] = MultiValueDict()
-
-
+    def register_dependency(self, src_key, dst_key):
+#        pass
+        if src_key not in self._dependencies:
+            self._dependencies[src_key] = list()
+        self._dependencies[src_key].append(dst_key)
+        log.debug('DEP: %s' % self._dependencies)
 
     def _check_test(self, instance, test_str):
         " Check test params on instance "
@@ -112,7 +114,15 @@ class CacheInvalidator(object):
         cache.delete(key)
         # also destroy caches that depend on us
         log.debug('INVALIDATE key %s' % key)
-        Dependency.objects.cascade(sender, key)
+
+        # Process cache dependencies
+        if key in self._dependencies.keys():
+            for dst in self._dependencies[key]:
+                log.debug('DEPENDENCY INVALIDATE key %s' % dst)
+                cache.delete(dst)
+            del self._dependencies[key]
+
+        #Dependency.objects.cascade(sender, key)
 
 
 ACTIVE_MQ_HOST = getattr(settings, 'ACTIVE_MQ_HOST', None)
@@ -134,7 +144,6 @@ class Command(BaseCommand):
             raise CommandError('CI: ActiveMQ host not defined!')
 
         try:
-            import stomp
 
             # initialize connection for CI
             conn = stomp.Connection([(ACTIVE_MQ_HOST, ACTIVE_MQ_PORT)])
@@ -144,13 +153,13 @@ class Command(BaseCommand):
             conn.subscribe(destination=AMQ_DESTINATION, ack='auto')
             log.info('CI: Now listen on "%s"' % AMQ_DESTINATION)
 
-            try:
-                while True:
-                    time.sleep(1)
-            except KeyboardInterrupt:
-                conn.unsubscribe(destination=AMQ_DESTINATION)
-                conn.disconnect()
-                log.info('CI: Connection was closed...')
+            while True:
+                time.sleep(1)
+
+        except KeyboardInterrupt:
+            conn.unsubscribe(destination=AMQ_DESTINATION)
+            conn.stop()
+            log.info('CI: Connection was closed...')
 
         except:
             raise CommandError('CI: Can not initialize stomp connection!')

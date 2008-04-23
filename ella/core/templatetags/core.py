@@ -2,13 +2,11 @@ from django.conf import settings
 from django import template
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ObjectDoesNotExist
 from django.utils.encoding import smart_str, force_unicode
 from django.utils.safestring import mark_safe
-from django.template import loader
 from django.template.defaultfilters import stringfilter
 
-from ella.core.models import Listing, Dependency, Related, Category
+from ella.core.models import Listing, Related, Category
 from ella.core.cache.utils import get_cached_object, cache_this
 from ella.core.cache.invalidate import CACHE_DELETER
 from ella.core.box import BOX_INFO, MEDIA_KEY, Box
@@ -184,8 +182,6 @@ class BoxNode(template.Node):
         if BOX_INFO in context:
             # record dependecies
             source, source_key = context[BOX_INFO]
-            Dependency.objects.report_dependency(source, source_key, obj, box_key)
-            # TODO: prepare dependencies external in Cache Invalidator
             CACHE_DELETER.register_dependency(source_key, box_key)
         return result
 
