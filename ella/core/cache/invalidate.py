@@ -40,48 +40,50 @@ class CacheDeleter(object):
     def register_dependency(self, src_key, obj_key):
         self._send('', 'dep', src_key, obj_key)
 
-
-CACHE_DELETER = CacheDeleter()
-ACTIVE_MQ_HOST = getattr(settings, 'ACTIVE_MQ_HOST', None)
-ACTIVE_MQ_PORT = getattr(settings, 'ACTIVE_MQ_PORT', 61613)
-
-def get_propagator(conn):
-    def propagate_signal(sender, instance):
+    def propagate_signal(self, sender, instance):
         """
         Trap the pre_save and pre_delete signal and
         invalidate the relative cache entries.
         """
         try:
             # propagate the signal to Cache Invalidator
-            conn.send(pickle.dumps(instance), headers={'Type':'del','Key':None,'Test':None}, destination=AMQ_DESTINATION)
+            self.conn.send(pickle.dumps(instance), headers={'Type':'del','Key':None,'Test':None}, destination=AMQ_DESTINATION)
             log.debug('TO AMQ: %s' % instance)
         except:
             log.error('Can not send message to AMQ.')
         return instance
-    return propagate_signal
+
+    def connect(self, *args, **kwargs):
+        import stomp
+
+        # initialize connection to ActiveMQ
+        self.conn = stomp.Connection(*args, **kwargs)
+        self.conn.start()
+        self.conn.connect()
+
+        # register to close the activeMQ connection on exit
+        import atexit
+        atexit.register(self.disconnect)
+
+    def disconnect(self):
+        self.conn.stop()
+
+
+
+
+CACHE_DELETER = CacheDeleter()
+ACTIVE_MQ_HOST = getattr(settings, 'ACTIVE_MQ_HOST', None)
+ACTIVE_MQ_PORT = getattr(settings, 'ACTIVE_MQ_PORT', 61613)
 
 
 if ACTIVE_MQ_HOST:
     try:
-        import stomp
-
-        # initialize connection to ActiveMQ
-        conn = stomp.Connection([(ACTIVE_MQ_HOST, ACTIVE_MQ_PORT)])
-        conn.start()
-        conn.connect()
-
-        # register to close the activeMQ connection on exit
-        import atexit
-        atexit.register(conn.disconnect)
-
-        # register the proper propagation function for intercepting the proper signals
-        CACHE_DELETER.signal_handler = get_propagator(conn)
-        CACHE_DELETER.conn = conn
+        CACHE_DELETER.connect([(ACTIVE_MQ_HOST, ACTIVE_MQ_PORT)])
 
         # start listening for any model
-        dispatcher.connect(CACHE_DELETER.signal_handler, signal=signals.pre_save)
-        dispatcher.connect(CACHE_DELETER.signal_handler, signal=signals.pre_delete)
+        # register the proper propagation function for intercepting the proper signals
+        dispatcher.connect(CACHE_DELETER.propagate_signal, signal=signals.pre_save)
+        dispatcher.connect(CACHE_DELETER.propagate_signal, signal=signals.pre_delete)
         log.debug('Start listening for any model')
-
     except:
         log.warning('ActiveMQ not running')
