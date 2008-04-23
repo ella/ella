@@ -2,6 +2,7 @@ import logging
 from time import strftime
 import smtplib
 from django import http, newforms as forms
+from django.core.urlresolvers import reverse
 from django.template import RequestContext, loader
 from django.shortcuts import render_to_response
 from django.template.defaultfilters import slugify
@@ -11,12 +12,11 @@ from django.contrib.auth import authenticate, login, logout, get_user
 from django.views.generic.list_detail import object_list
 from django.contrib.formtools.preview import FormPreview
 
-from ella.discussions.mailer import create_mail
 from ella.discussions.models import *
 from ella.comments.models import Comment
 from ella.core.cache.utils import get_cached_object_or_404
 from ella.core.models import HitCount
-#from registration.views import *
+import djangoapps.registration.views as reg_views
 
 
 STATE_UNAUTHORIZED = 'unauthorized'
@@ -65,86 +65,6 @@ class RegistrationForm(forms.Form):
         usr.is_staff = False
         usr.save()
         return usr
-
-class RegistrationFormPreview(FormPreview):
-
-    def __init__(self, form, **kwargs):
-        self.__done_url = kwargs.get('done_url', '/')
-        super(self.__class__, self).__init__(form)
-
-    def parse_params(self, context={}):
-        self.state.update(context)
-
-    def done(self, request, cleaned_data):
-        f = RegistrationForm(request.POST)
-        usr = f.register_user()
-        if usr:
-            send_activation_email(usr)
-            process_login(request, f.cleaned_data)
-            request.POST = {}
-        return http.HttpResponseRedirect(self.__done_url)
-
-    @property
-    def preview_template(self):
-        category = self.state['category']
-        return [
-                'page/category/%s/content_type/discussions.question/regform_preview.html' % category.path,
-                'page/content_type/discussions.question/regform_preview.html',
-                'page/discussions/regform_preview.html',
-            ]
-
-    @property
-    def form_template(self):
-        category = self.state['category']
-        return [
-                'page/category/%s/content_type/discussions.question/regform.html' % category.path,
-                'page/content_type/discussions.question/regform.html',
-                'page/discussions/regform.html',
-            ]
-
-def send_activation_email(user):
-    # mail templates encoded in utf8, internally converted into latin2 while sending e-mails.
-    # (tested on Outlook Express and various webmails)
-    #TODO send activation e-mail, create cron script (?) to deactivate new user accounts within 2 days, if user didn't click to activation link.
-    from django.template import Context, Template
-    from django.template.loader import find_template_source, render_to_string
-    def render(tpl, user):
-        c = Context({'user': user})
-        t = Template(tpl)
-        return t.render(c)
-
-    def plaintext():
-        tpl = find_template_source('page/discussions/regmail.txt')
-        if len(tpl) > 0:
-            return render_to_string(tpl[0], user)
-
-    def htmltext():
-        tpl = find_template_source('page/discussions/regmail.html')
-        if len(tpl) > 0:
-            return render_to_string(tpl[0], user)
-
-    """
-    Keyword Arguments:
-    mailfrom
-    mailto
-    subject
-    images [list]
-    attachements [list]
-    plaintext
-    htmltext
-    """
-    mailfrom = 'diskuze.zena@dev11.netcentrum.cz'
-    msg = create_mail(
-        mailfrom=mailfrom,
-        mailto=user.email,
-        subject='Aktivace Vaseho diskuzniho konta na zena.cz',
-        plaintext=plaintext(),
-        htmltext=htmltext()
-)
-    smtp = smtplib.SMTP('127.0.0.1')
-    smtp.sendmail(mailfrom, user.email, msg.as_string())
-    log.info('Activation e-mail sent to [%s]' % user.email)
-    smtp.quit()
 
 def get_ip(request):
     if 'HTTP_X_FORWARDED_FOR' in request.META:
@@ -230,8 +150,7 @@ def posts(request, bits, context):
             logout(request)
             return http.HttpResponseRedirect(thr.get_absolute_url())
         elif bits[1] == 'register':
-            reg_form_prev = RegistrationFormPreview(RegistrationForm, done_url=thr.get_absolute_url())
-            return reg_form_prev(request, context)
+            return http.HttpResponseRedirect(reverse('registration_register'))
     else:
         # receiving new post to thread in QuestionForm
         if request.POST:

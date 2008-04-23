@@ -16,6 +16,7 @@ from ella.core.box import Box
 from ella.db.models import Publishable
 from ella.comments.models import Comment
 from ella.photos.models import Photo
+from ella.discussions.managers import *
 
 """
 HOWTO:
@@ -157,6 +158,8 @@ class TopicThread(models.Model):
     created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)
     author = models.ForeignKey(User, verbose_name=_('authorized author'),)
     topic = models.ForeignKey(Topic)
+
+    objects = TopicThreadManager()
     # TODO (NAVSTEVNOST) hit count? Should be automatic by Ella (?) - prove it.
 
     def __init__(self, *args, **kwargs):
@@ -206,7 +209,7 @@ class TopicThread(models.Model):
     class Meta:
         verbose_name = _('Thread')
         verbose_name_plural = _('Threads')
-        ordering = ('title',)
+        #ordering = ('title',)
 
 
 class BannedString(models.Model):

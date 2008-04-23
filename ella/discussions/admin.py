@@ -66,9 +66,10 @@ discussions_admin.register(BannedString)
 discussions_admin.register(User)
 from ella.photos.models import Photo, FormatedPhoto
 from ella.photos.admin import PhotoOptions, FormatedPhotoOptions
+from djangoapps.registration.models import *
 discussions_admin.register(Photo, PhotoOptions)
+discussions_admin.register(RegistrationProfile, RegistrationProfileOptions)
 #discussions_admin.register(FormatedPhoto, FormatedPhotoOptions)
-
 
 # threadedcomments are registered automaticaly by their module
 admin.site.register(Topic, TopicOptions)

@@ -80,7 +80,7 @@ most_active_tpltag = r"""
 >>> t = Template(tpl)
 >>> cx = Context({'category': categ})
 >>> t.render(cx)
-u'"Prvni tema""Vlakno Three""Vlakno Two""Vlakno One""Druhe tema""Vlakno Wife ;-)""Vlakno Four"'
+u'"Prvni tema""Vlakno Three""Vlakno Two""Vlakno One""Druhe tema""Vlakno Four""Vlakno Wife ;-)"'
 """
 
 
@@ -104,6 +104,8 @@ most_active_tpltag_string = r"""
 >>> from ella.discussions.models import *
 >>> from ella.discussions.templatetags.discussions import *
 >>> from ella.comments.models import Comment
+>>> for i in Comment.objects.all():
+...     i.delete()
 
 >>> ct = ContentType.objects.get_for_model(TopicThread)
 >>> thr = TopicThread.objects.get(title="Vlakno Two")
@@ -130,7 +132,8 @@ most_active_tpltag_without_for = r"""
 >>> tpl = '''
 ...   {% block container %}
 ...     {% load discussions %}
-...     {% get_most_active_threads %}
+...     {% get_most_active_threads as thr %}
+...     {{thr}}
 ...   {% endblock %}
 ... '''
 >>> tpl_lines = tpl.split('\n')
@@ -142,6 +145,8 @@ most_active_tpltag_without_for = r"""
 >>> from django.contrib.contenttypes.models import ContentType
 >>> from ella.discussions.models import *
 >>> from ella.discussions.templatetags.discussions import *
+>>> for i in Comment.objects.all():
+...     i.delete()
 
 >>> ct = ContentType.objects.get_for_model(TopicThread)
 >>> thr = TopicThread.objects.get(title="Vlakno Two")
@@ -161,7 +166,7 @@ most_active_tpltag_without_for = r"""
 >>> t = Template(tpl)
 >>> cx = Context({'category': categ})
 >>> t.render(cx)
-u'[<TopicThread: Vlakno Wife ;-)>, <TopicThread: Vlakno Four>, <TopicThread: Vlakno Two>, <TopicThread: Vlakno One>, <TopicThread: Vlakno Three>]'
+u'[&lt;TopicThread: Vlakno Wife ;-)&gt;, &lt;TopicThread: Vlakno Four&gt;, &lt;TopicThread: Vlakno Two&gt;, &lt;TopicThread: Vlakno One&gt;, &lt;TopicThread: Vlakno Three&gt;]'
 """
 
 newest_threads_tpltag = r"""
@@ -192,6 +197,8 @@ newest_threads_tpltag = r"""
 >>> from django.contrib.contenttypes.models import ContentType
 >>> from ella.discussions.models import *
 >>> from ella.discussions.templatetags.discussions import *
+>>> for i in Comment.objects.all():
+...     i.delete()
 >>> categ = Category.objects.get(pk=2)
 >>> t = Template(tpl)
 >>> cx = Context({'category': categ})
@@ -219,6 +226,8 @@ newest_threads_tpltag_string = r"""
 >>> from django.contrib.contenttypes.models import ContentType
 >>> from ella.discussions.models import *
 >>> from ella.discussions.templatetags.discussions import *
+>>> for i in Comment.objects.all():
+...     i.delete()
 >>> categ = Category.objects.get(pk=2)
 >>> t = Template(tpl)
 >>> cx = Context({'category': categ})
@@ -246,12 +255,76 @@ filled_threads_tpltag_string = r"""
 >>> from django.contrib.contenttypes.models import ContentType
 >>> from ella.discussions.models import *
 >>> from ella.discussions.templatetags.discussions import *
+>>> for i in Comment.objects.all():
+...     i.delete()
+>>> ct = ContentType.objects.get_for_model(TopicThread)
+>>> thr_w = TopicThread.objects.get(title="Vlakno Wife ;-)")
+>>> thr = TopicThread.objects.get(title="Vlakno Four")
+>>> c = Comment(content='new comment',subject='',ip_address='1.2.3.4', \
+... target_ct=ct,target_id=thr._get_pk_val(),parent=None,user=User.objects.get(username="admin"))
+>>> c.save()
+>>> c = Comment(content='new comment to vlakno four #2',subject='',ip_address='1.2.3.4', \
+... target_ct=ct,target_id=thr._get_pk_val(),parent=None,user=User.objects.get(username="admin"))
+>>> c.save()
+>>> c = Comment(content='new comment to vlakno four',subject='',ip_address='1.2.3.4', \
+... target_ct=ct,target_id=thr._get_pk_val(),parent=None,user=User.objects.get(username="admin"))
+>>> c.save()
+
+>>> thr.num_posts
+3
+>>> thr_w.num_posts
+0
+
 >>> categ = Category.objects.get(pk=2)
 >>> t = Template(tpl)
 >>> cx = Context({'category': categ})
 >>> t.render(cx)
-u'"Vlakno Wife ;-)""Vlakno Four"'
+u'"Vlakno Four"'
 """
+
+filled_threads_tpltag_all = r"""
+>>> tpl = '''
+...   {% block container %}
+...     {% load discussions %}
+...     {% get_most_filled_threads as thr %}
+...     {% for i in thr %}
+...         "{{i}}"
+...     {% endfor %}
+...   {% endblock %}
+... '''
+>>> tpl_lines = tpl.split('\n')
+>>> tpl_lines = map(lambda z: z.strip(), tpl_lines)
+>>> tpl = ''.join(tpl_lines)
+
+>>> from django import template
+>>> from django.template import Context, Template
+>>> from ella.core.models import Category
+>>> from django.contrib.contenttypes.models import ContentType
+>>> from ella.discussions.models import *
+>>> from ella.discussions.templatetags.discussions import *
+>>> for i in Comment.objects.all():
+...     i.delete()
+>>> ct = ContentType.objects.get_for_model(TopicThread)
+>>> thr_w = TopicThread.objects.get(title="Vlakno Wife ;-)")
+>>> thr = TopicThread.objects.get(title="Vlakno Four")
+>>> c = Comment(content='new comment',subject='',ip_address='1.2.3.4', \
+... target_ct=ct,target_id=thr._get_pk_val(),parent=None,user=User.objects.get(username="admin"))
+>>> c.save()
+>>> c = Comment(content='new comment to vlakno four #2',subject='',ip_address='1.2.3.4', \
+... target_ct=ct,target_id=thr._get_pk_val(),parent=None,user=User.objects.get(username="admin"))
+>>> c.save()
+>>> c = Comment(content='new comment to vlakno four',subject='',ip_address='1.2.3.4', \
+... target_ct=ct,target_id=thr._get_pk_val(),parent=None,user=User.objects.get(username="admin"))
+>>> c.save()
+
+>>> categ = Category.objects.get(pk=2)
+>>> t = Template(tpl)
+>>> cx = Context({'category': categ})
+>>> t.render(cx)
+u'"Vlakno Four"'
+"""
+
+
 
 __test__ = {
     'discussions_filter_banned_strings': banned_strings,
@@ -263,5 +336,6 @@ __test__ = {
     'discussions_newest_threads_template_tag': newest_threads_tpltag,
     'discussions_newest_threads_template_tag_string': newest_threads_tpltag_string,
     'discussions_filled_threads_template_tag_string': filled_threads_tpltag_string,
+    'discussions_filled_threads_template_tag_all_topics': filled_threads_tpltag_all,
 }
 
