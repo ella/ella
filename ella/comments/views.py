@@ -6,6 +6,7 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
 from ella.core.cache import get_cached_object_or_404
+from ella.core.views import get_templates_from_listing
 
 from ella.comments.models import Comment
 from ella.comments.forms import CommentForm
@@ -16,27 +17,11 @@ class CommentFormPreview(FormPreview):
     """comment form preview with extended template calls"""
     @property
     def preview_template(self):
-        opts = self.state['object']._meta
-        cat = self.state['category']
-        return [
-                'page/category/%s/content_type/%s.%s/%s/comments/preview.html' % (cat.path, opts.app_label, opts.module_name, self.state['object'].slug),
-                'page/category/%s/content_type/%s.%s/comments/preview.html' % (cat.path, opts.app_label, opts.module_name),
-                'page/category/%s/comments/preview.html' % cat.path,
-                'page/content_type/%s.%s/comments/preview.html' % (opts.app_label, opts.module_name),
-                'page/comments/preview.html',
-            ]
+        return get_templates_from_listing('comments/preview.html', listing=self.state['listing'])
 
     @property
     def form_template(self):
-        opts = self.state['object']._meta
-        cat = self.state['category']
-        return [
-                'page/category/%s/content_type/%s.%s/%s/comments/form.html' % (cat.path, opts.app_label, opts.module_name, self.state['object'].slug),
-                'page/category/%s/content_type/%s.%s/comments/form.html' % (cat.path, opts.app_label, opts.module_name),
-                'page/category/%s/comments/form.html' % cat.path,
-                'page/content_type/%s.%s/comments/form.html' % (opts.app_label, opts.module_name),
-                'page/comments/form.html',
-            ]
+        return get_templates_from_listing('comments/form.html', listing=self.state['listing'])
 
     def parse_params(self, context={}):
         self.state.update(context)
@@ -62,8 +47,6 @@ class CommentFormPreview(FormPreview):
 
 def new_comment(request, context, reply=None):
     """new comment for specified object"""
-    cat = context['category']
-    opts = context['object']._meta
     init_props = {
         'target': '%d:%d' % (context['content_type'].id, context['object']._get_pk_val()),
         'options' : FORM_OPTIONS['UNAUTHORIZED_ONLY'],
@@ -76,18 +59,11 @@ def new_comment(request, context, reply=None):
 })
     form = CommentForm(init_props=init_props)
     context['form'] = form
-    templates = (
-        'page/category/%s/content_type/%s.%s/%s/comments/form.html' % (cat.path, opts.app_label, opts.module_name, context['object'].slug),
-        'page/category/%s/content_type/%s.%s/comments/form.html' % (cat.path, opts.app_label, opts.module_name),
-        'page/category/%s/comments/form.html' % cat.path,
-        'page/comments/form.html',
-)
+    templates = get_templates_from_listing('comments/form.html', context['listing'])
     return render_to_response(templates, context, context_instance=RequestContext(request))
 
 def list_comments(request, context):
     """list comments for specified object"""
-    cat = context['category']
-    opts = context['object']._meta
     comment_list = Comment.objects.get_list_for_object(context['object'])
     if 'ids' in request.GET:
         ids = set(request.GET.getlist('ids'))
@@ -103,11 +79,6 @@ def list_comments(request, context):
             'comment_count' : Comment.objects.get_count_for_object(context['object']),
             'comment_list' : comment_list,
 })
-    templates = (
-        'page/category/%s/content_type/%s.%s/%s/comments/list.html' % (cat.path, opts.app_label, opts.module_name, context['object'].slug),
-        'page/category/%s/content_type/%s.%s/comments/list.html' % (cat.path, opts.app_label, opts.module_name),
-        'page/category/%s/comments/list.html' % cat.path,
-        'page/comments/list.html',
-)
+    templates = get_templates_from_listing('comments/list.html', context['listing'])
     return render_to_response(templates, context, context_instance=RequestContext(request))
 
