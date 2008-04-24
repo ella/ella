@@ -113,16 +113,20 @@ def object_detail(request, category, year, month, day, content_type, slug, url_r
     HitCount.objects.hit(obj)
 
     return render_to_response(
-            (
-                'page/category/%s/content_type/%s.%s/%s/object.html' % (cat.path, ct.app_label, ct.model, slug),
-                'page/category/%s/content_type/%s.%s/object.html' % (cat.path, ct.app_label, ct.model),
-                'page/category/%s/object.html' % (cat.path),
-                'page/content_type/%s.%s/object.html' % (ct.app_label, ct.model),
-                'page/object.html',
-),
-            context,
-            context_instance=RequestContext(request)
+        get_templates('object.html', slug, cat, ct),
+        context,
+        context_instance=RequestContext(request)
 )
+
+def get_templates(name, slug, category, ct):
+    return (
+        'page/category/%s/content_type/%s.%s/%s/%s' % (category.path, ct.app_label, ct.model, slug, name),
+        'page/category/%s/content_type/%s.%s/%s' % (category.path, ct.app_label, ct.model, name),
+        'page/category/%s/%s' % (category.path, name),
+        'page/content_type/%s.%s/%s' % (ct.app_label, ct.model, name),
+        'page/%s' % (name,),
+)
+
 
 def list_content_type(request, category=None, year=None, month=None, day=None, content_type=None, paginate_by=20):
     """
