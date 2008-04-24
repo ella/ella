@@ -2,6 +2,8 @@ from django.utils.translation import ugettext as _
 from django.conf import settings
 from django.template.defaultfilters import slugify
 from django.contrib.formtools.preview import FormPreview
+from django.contrib.sites.models import Site
+from django.core import mail
 
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
@@ -9,36 +11,20 @@ from django.template.loader import render_to_string
 from django.template import RequestContext
 
 from ella.core.cache.utils import get_cached_object_or_404
+from ella.core.views import get_templates_from_listing
 
-from django.core import mail
 from forms import SendMailForm
-from django.contrib.sites.models import Site
+
 
 class SendMailFormPreview(FormPreview):
 
     @property
     def preview_template(self):
-        opts = self.state['object']._meta
-        cat = self.state['category']
-        return [
-                'page/category/%s/content_type/%s.%s/%s/sendmail/preview.html' % (cat.path, opts.app_label, opts.module_name, self.state['object'].slug),
-                'page/category/%s/content_type%s.%s/sendmail/preview.html' % (cat.path, opts.app_label, opts.module_name),
-                'page/category/%s/sendmail/preview.html' % cat.path,
-                'page/content_type/%s.%s/sendmail/preview.html' % (opts.app_label, opts.module_name),
-                'page/sendmail/preview.html',
-            ]
+        return get_templates_from_listing('sendmail/preview.html', self.state['listing'])
 
     @property
     def form_template(self):
-        opts = self.state['object']._meta
-        cat = self.state['category']
-        return [
-                'page/category/%s/content_type/%s.%s/%s/sendmail/form.html' % (cat.path, opts.app_label, opts.module_name, self.state['object'].slug),
-                'page/category/%s/content_type%s.%s/sendmail/form.html' % (cat.path, opts.app_label, opts.module_name),
-                'page/category/%s/sendmail/form.html' % cat.path,
-                'page/content_type/%s.%s/sendmail/form.html' % (opts.app_label, opts.module_name),
-                'page/sendmail/form.html',
-            ]
+        return get_templates_from_listing('sendmail/form.html', self.state['listing'])
 
     def parse_params(self, context={}):
         self.state.update(context)
@@ -79,19 +65,11 @@ class SendMailFormPreview(FormPreview):
 
 
 def new_mail(request, context):
-
-    cat = context['category']
-    opts = context['object']._meta
     init_props = {
         'target': '%d:%d' % (context['content_type'].id, context['object']._get_pk_val()),
 }
     form = SendMailForm(init_props=init_props)
     context['form'] = form
-    templates = (
-        'page/category/%s/content_type/%s.%s/%s/sendmail/form.html' % (cat.path, opts.app_label, opts.module_name, context['object'].slug),
-        'page/category/%s/content_type%s.%s/sendmail/form.html' % (cat.path, opts.app_label, opts.module_name),
-        'page/category/%s/sendmail/form.html' % cat.path,
-        'page/sendmail/form.html',
-)
+    templates = get_templates_from_listing('sendmail/form.html', context['listing'])
     return render_to_response(templates, context, context_instance=RequestContext(request))
 
