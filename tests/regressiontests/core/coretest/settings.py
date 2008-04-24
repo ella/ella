@@ -107,3 +107,13 @@ CACHE_BACKEND = 'memcached://127.0.0.1:11211'
 ACTIVE_MQ_HOST = 'localhost'
 
 VERSION = 1
+
+TEST_RUNNER = 'coretest.tests_with_coverage.my_run_tests'
+
+COVERAGE_MODULES = (
+    'ella.core.views',
+    'ella.core.models',
+    'ella.core.cache.utils',
+    'ella.core.box',
+    'ella.core.custom_urls',
+)
