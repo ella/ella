@@ -110,8 +110,8 @@ class Publishable(object):
     def get_hits(self):
         # there can be more hitcounts for various sites
         hits = sum(i.hits for i in get_cached_list(HitCount,
-            target_ct=ContentType.objects.get_for_model(self.__class__),
-            target_id=self.id,
+            placement__target_ct=ContentType.objects.get_for_model(self.__class__),
+            placement__target_id=self.id,
 ))
         return hits
     get_hits.short_description = _('Hit Counts')
