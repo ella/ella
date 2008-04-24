@@ -89,18 +89,56 @@
             "target_ct": 22
         }
     },
-     {
-        "pk": "4",
-        "model": "core.listing",
+    {
+       "pk": "4",
+       "model": "core.listing",
+       "fields": {
+           "category": 1,
+           "publish_from": "2007-07-01 00:00:00",
+           "priority_value": 0,
+           "placement": 4,
+           "remove": false,
+           "priority_to": null,
+           "priority_from": null
+        }
+    },
+    {
+        "pk": "6",
+        "model": "core.category",
+        "fields": {
+            "tree_parent": 4,
+            "description": "Sub sub cat",
+            "title": "Sub cat two",
+            "site": 1,
+            "tree_path": "cat/subcat2/subsubcat",
+            "slug": "subsubcat"
+        }
+    },
+    {
+        "pk": "13",
+        "model": "core.placement",
         "fields": {
             "category": 1,
+            "slug": "first-other-object",
             "publish_from": "2007-07-01 00:00:00",
-            "priority_value": 0,
-            "placement": 4,
-            "remove": false,
-            "priority_to": null,
-            "priority_from": null
-         }
-     }
+            "publish_to": null,
+            "target_id": 1,
+            "target_ct": 22,
+            "static": true
+        }
+    },
+    {
+        "pk": "14",
+        "model": "core.placement",
+        "fields": {
+            "category": 6,
+            "slug": "first-other-object",
+            "publish_from": "2007-07-01 00:00:00",
+            "publish_to": null,
+            "target_id": 1,
+            "target_ct": 22,
+            "static": true
+        }
+    }
 
 ]

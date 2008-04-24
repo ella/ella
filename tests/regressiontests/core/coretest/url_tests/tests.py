@@ -83,6 +83,16 @@ True
 200
 >>> response.content
 '\ncategory:example.com/,content_type_name:other-sample-models,object:OtherSampleModel object,content_type:other sample model,listing:OtherSampleModel object placed in example.com/'
+
+# simple static listing
+>>> response = c.get('/static/other-sample-models/first-other-object/')
+>>> response.status_code
+200
+>>> response = c.get('/cat/subcat2/subsubcat/static/other-sample-models/first-other-object/otheraction/')
+>>> response.status_code
+200
+>>> response.content
+'\ncategory:example.com/cat/subcat2/subsubcat,content_type_name:other-sample-models,object:OtherSampleModel object,content_type:other sample model,listing:OtherSampleModel object placed in example.com/cat/subcat2/subsubcat'
 '''
 
 __test__ = {
