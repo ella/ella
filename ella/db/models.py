@@ -13,12 +13,12 @@ from ella.ellaadmin.options import admin_url
 class Publishable(object):
     """
     Abstract interface-like class that defines method's common to all objects that
-    serve as primary content (can have a listing).
+    serve as primary content (can have a placement).
     """
 
     @property
     def main_placement(self):
-        " Return object's main listing, that is the object's listing in its primary category "
+        " Return object's main placement, that is the object's placement in its primary category "
         if not hasattr(self, '_main_placement'):
             try:
                 # TODO - check and if we don't have category, take the only placement that exists in current site

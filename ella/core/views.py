@@ -43,17 +43,17 @@ def get_content_type(ct_name):
 
 def object_detail(request, category, content_type, slug, year=None, month=None, day=None, url_remainder=None):
     """
-    Detail view that displays a single object based on it's main listing.
+    Detail view that displays a single object based on it's main placement.
 
     Params:
         request - HttpRequest supplied by Django
         category - base Category tree_path (empty if home category)
-        year, month, day - date matching the ``publish_from`` field of the ``Listing`` object
+        year, month, day - date matching the ``publish_from`` field of the ``Placement`` object
         content_type - slugified verbose_name_plural of the target model
         slug - slug of the object itself
 
     Raises:
-        Http404 if object or listing doesn't exist or dates doesn't match
+        Http404 if object or placement doesn't exist or dates doesn't match
     """
     ct = get_content_type(content_type)
 
@@ -75,13 +75,13 @@ def object_detail(request, category, content_type, slug, year=None, month=None, 
         placement = get_cached_object_or_404(Placement, category=cat, target_ct=ct, slug=slug, static=True)
 
     if not (placement.is_active() or request.user.is_staff):
-        # future listing, render if accessed by logged in staff member
+        # future placement, render if accessed by logged in staff member
         raise Http404
 
     obj = placement.target
 
     context = {
-            'listing' : placement,
+            'placement' : placement,
             'object' : obj,
             'category' : cat,
             'content_type_name' : content_type,
@@ -114,7 +114,7 @@ def object_detail(request, category, content_type, slug, year=None, month=None, 
 
 def list_content_type(request, category=None, year=None, month=None, day=None, content_type=None, paginate_by=20):
     """
-    List object's listings according to the parameters.
+    List objects' listings according to the parameters.
 
     Params:
         request - HttpRequest supplied by Django

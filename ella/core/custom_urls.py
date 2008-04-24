@@ -12,7 +12,7 @@ class DetailDispatcher(object):
     Usage:
         Register your own view function for some specific URL that is appended to object's absolute url.
         This view will then be called when this URL is used. A small dictionary containing the object,
-        it's listing, category, content_type and content_type_name will be passed to the view.
+        it's placement, category, content_type and content_type_name will be passed to the view.
 
     Example:
         dispatcher.register('rate', rate_object)
@@ -69,7 +69,7 @@ class DetailDispatcher(object):
             request - Django's HttpRequest
             bits - url remainder splitted by '/'
             context - a dictionary containing the object,
-                      it's listing, category and content_type name
+                      it's placement, category and content_type name
 
         Raises:
             Http404 if no view is associated with bits[0] for content_type of the object

@@ -51,7 +51,7 @@ True
 >>> response.status_code
 200
 >>> response.content
-'\ncategory:example.com/,content_type_name:sample-models,object:SampleModel object,content_type:sample model,listing:SampleModel object placed in example.com/'
+'\ncategory:example.com/,content_type:sample model,content_type_name:sample-models,object:SampleModel object,placement:SampleModel object placed in example.com/'
 
 
 # sample object 2
@@ -67,13 +67,13 @@ True
 >>> response.status_code
 200
 >>> response.content
-'\ncategory:example.com/,content_type_name:sample-models,object:SampleModel object,content_type:sample model,listing:SampleModel object placed in example.com/'
+'\ncategory:example.com/,content_type:sample model,content_type_name:sample-models,object:SampleModel object,placement:SampleModel object placed in example.com/'
 
 >>> response = c.get('/2007/7/1/sample-models/first-object/action/X/Y/Z/')
 >>> response.status_code
 200
 >>> response.content
-'X/Y/Z\ncategory:example.com/,content_type_name:sample-models,object:SampleModel object,content_type:sample model,listing:SampleModel object placed in example.com/'
+'X/Y/Z\ncategory:example.com/,content_type:sample model,content_type_name:sample-models,object:SampleModel object,placement:SampleModel object placed in example.com/'
 
 >>> response = c.get('/2007/7/1/sample-models/first-object/otheraction/')
 >>> response.status_code
@@ -82,7 +82,7 @@ True
 >>> response.status_code
 200
 >>> response.content
-'\ncategory:example.com/,content_type_name:other-sample-models,object:OtherSampleModel object,content_type:other sample model,listing:OtherSampleModel object placed in example.com/'
+'\ncategory:example.com/,content_type:other sample model,content_type_name:other-sample-models,object:OtherSampleModel object,placement:OtherSampleModel object placed in example.com/'
 
 # simple static listing
 >>> response = c.get('/static/other-sample-models/first-other-object/')
@@ -92,7 +92,7 @@ True
 >>> response.status_code
 200
 >>> response.content
-'\ncategory:example.com/cat/subcat2/subsubcat,content_type_name:other-sample-models,object:OtherSampleModel object,content_type:other sample model,listing:OtherSampleModel object placed in example.com/cat/subcat2/subsubcat'
+'\ncategory:example.com/cat/subcat2/subsubcat,content_type:other sample model,content_type_name:other-sample-models,object:OtherSampleModel object,placement:OtherSampleModel object placed in example.com/cat/subcat2/subsubcat'
 '''
 
 __test__ = {

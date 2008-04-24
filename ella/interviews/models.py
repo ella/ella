@@ -9,7 +9,7 @@ from ella.db.models import Publishable
 from ella.photos.models import Photo
 from ella.core.managers import RelatedManager
 from ella.core.cache import get_cached_object, get_cached_list
-from ella.core.models import Listing, Category, Author, Source
+from ella.core.models import Category, Author, Source
 
 
 class Interviewee(models.Model):
@@ -32,7 +32,7 @@ class Interviewee(models.Model):
         return self.name
 
 
-class Interview(models.Model, Publishable):
+class Interview(Publishable, models.Model):
     # Titles
     title = models.CharField(_('Title'), max_length=255)
     upper_title = models.CharField(_('Upper title'), max_length=255, blank=True)

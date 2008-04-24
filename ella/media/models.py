@@ -71,7 +71,7 @@ class MediaManager(models.Manager):
             ELLA_QUEUE.put('ella/media/encoder/formattedfile', formattedfile)
 
 
-class Media(models.Model, Publishable):
+class Media(Publishable, models.Model):
     title = models.CharField(_('Title'), max_length=255)
     slug = models.CharField(_('Slug'), db_index=True, max_length=255)
     url = models.URLField(_('File url'), verify_exists=False, max_length=300)
@@ -102,10 +102,6 @@ class Media(models.Model, Publishable):
 
     def __unicode__(self):
         return self.title
-
-    def get_absolute_url(self):
-        if self.main_listing:
-            return self.main_listing.get_absolute_url()
 
     class Meta:
         verbose_name = _('Media')

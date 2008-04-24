@@ -1,7 +1,6 @@
 from django.db import models
-from django.contrib.contenttypes.models import ContentType
 
-from ella.core.models import Category, Listing
+from ella.core.models import Category
 from ella.db.models import Publishable
 
 class RedirObject(Publishable, models.Model):

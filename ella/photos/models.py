@@ -11,7 +11,6 @@ from django.utils.translation import ugettext, ugettext_lazy as _
 from django.contrib.sites.models import Site
 from django.utils.safestring import mark_safe
 
-#from ella.core.models import Author, Source, Category, Listing
 from ella.core.models import Author, Source
 from ella.core.managers import RelatedManager
 from ella.core.box import Box

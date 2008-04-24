@@ -23,7 +23,7 @@ def gallery_cache_invalidator(key, gallery, *args, **kwargs):
 def get_gallery_key(func, gallery):
     return 'ella.galleries.models.Gallery.items:%d' % gallery.id
 
-class Gallery(models.Model, Publishable):
+class Gallery(Publishable, models.Model):
     """
     Definition of objects gallery
     """

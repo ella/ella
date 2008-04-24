@@ -1,16 +1,15 @@
 from django.db import models
-from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 
-from ella.core.models import Listing, Category
+from ella.core.models import Category
 from ella.db.models import Publishable
 
-class SampleModel(models.Model, Publishable):
+class SampleModel(Publishable, models.Model):
     text = models.TextField()
     slug = models.CharField(_('Slug'), max_length=255)
     category = models.ForeignKey(Category, verbose_name=_('Category'))
 
-class OtherSampleModel(models.Model, Publishable):
+class OtherSampleModel(Publishable, models.Model):
     text = models.TextField()
     slug = models.CharField(_('Slug'), max_length=255)
     category = models.ForeignKey(Category, verbose_name=_('Category'))

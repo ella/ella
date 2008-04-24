@@ -63,7 +63,7 @@ class FloatingStateModel(object):
         return False
 
 
-class Contest(models.Model, Publishable, FloatingStateModel):
+class Contest(Publishable, models.Model, FloatingStateModel):
     """
     Contests with title, descriptions and activation
     """
@@ -126,7 +126,7 @@ class Contest(models.Model, Publishable, FloatingStateModel):
         ordering = ('-active_from',)
 
 
-class Quiz(models.Model, Publishable, FloatingStateModel):
+class Quiz(Publishable, models.Model, FloatingStateModel):
     """
     Quizes with title, descriptions and activation options.
     """
