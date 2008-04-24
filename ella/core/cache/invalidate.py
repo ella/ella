@@ -3,6 +3,7 @@ try:
 except ImportError:
     import pickle
 
+import stomp
 from django.dispatch import dispatcher
 from django.db.models import signals
 from django.conf import settings
@@ -45,24 +46,20 @@ class CacheDeleter(object):
         Trap the pre_save and pre_delete signal and
         invalidate the relative cache entries.
         """
+        # log about received signal
+        log.debug('Signal from "%s" received.' % sender)
         try:
             # propagate the signal to Cache Invalidator
             self._send(pickle.dumps(instance), 'del')
         except:
             log.error('Can not send message to AMQ.')
-        return instance
 
     def connect(self, *args, **kwargs):
-        import stomp
 
         # initialize connection to ActiveMQ
         self.conn = stomp.Connection(*args, **kwargs)
         self.conn.start()
         self.conn.connect()
-
-        # register to close the activeMQ connection on exit
-        import atexit
-        atexit.register(self.disconnect)
 
     def disconnect(self):
         self.conn.stop()

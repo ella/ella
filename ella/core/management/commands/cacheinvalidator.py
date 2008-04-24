@@ -34,7 +34,7 @@ class CacheInvalidator(object):
         key = headers['key']
 
         # debug
-        log.debug('CI: I received a message type %s' % type)
+        log.debug('I received a message type %s' % type)
 
         if type == 'pk':
             inst = pickle.loads(message)
