@@ -67,43 +67,25 @@
     },
     {
         "pk": "1",
-        "model": "core.listing",
+        "model": "core.placement",
         "fields": {
             "category": 1,
             "publish_from": "2007-07-01 00:00:00",
-            "priority_value": 0,
+            "publish_to": null,
             "target_id": 1,
-            "remove": false,
-            "priority_to": null,
-            "priority_from": null,
+            "slug": "redirobject-1",
             "target_ct": 19
         }
     },
     {
         "pk": "2",
-        "model": "core.listing",
+        "model": "core.placement",
         "fields": {
             "category": 2,
             "publish_from": "2007-07-01 00:00:00",
-            "priority_value": 0,
+            "publish_to": null,
             "target_id": 2,
-            "remove": false,
-            "priority_to": null,
-            "priority_from": null,
-            "target_ct": 19
-        }
-    },
-    {
-        "pk": "7",
-        "model": "core.listing",
-        "fields": {
-            "category": 3,
-            "publish_from": "2007-07-01 00:00:00",
-            "priority_value": 0,
-            "target_id": 2,
-            "remove": false,
-            "priority_to": null,
-            "priority_from": null,
+            "slug": "redirobject-2",
             "target_ct": 19
         }
     }

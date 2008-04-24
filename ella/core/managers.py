@@ -32,6 +32,11 @@ def get_listings_key(func, self, category=None, count=10, offset=1, mods=[], con
             ','.join(':'.join((k, smart_str(v))) for k, v in kwargs.items()),
 )
 
+class PlacementManager(RelatedManager):
+    def get_static_placements(self, category):
+        now = datetime.now()
+        return self.filter(models.Q(publish_to__gt=now) | models.Q(publish_to__isnull=True),  publish_from__lt=now, category=category, static=True)
+
 class ListingManager(RelatedManager):
     NONE = 0
     IMMEDIATE = 1
@@ -46,7 +51,7 @@ class ListingManager(RelatedManager):
 
     def get_queryset(self, category=None, children=NONE, mods=[], content_types=[], **kwargs):
         now = datetime.now()
-        qset = self.exclude(remove=True, priority_to__lte=datetime.now()).filter(publish_from__lte=now, **kwargs).exclude(hidden=True)
+        qset = self.exclude(remove=True, priority_to__lte=datetime.now()).filter(publish_from__lte=now, **kwargs)
 
         if category:
             if children == self.NONE:
@@ -63,7 +68,7 @@ class ListingManager(RelatedManager):
 
         # filtering based on Model classes
         if mods or content_types:
-            qset = qset.filter(target_ct__in=([ ContentType.objects.get_for_model(m) for m in mods ] + content_types))
+            qset = qset.filter(placement__target_ct__in=([ ContentType.objects.get_for_model(m) for m in mods ] + content_types))
 
         return qset
 
@@ -126,17 +131,13 @@ def get_top_objects_key(func, self, count, mods=[]):
 class HitCountManager(models.Manager):
 
     @transaction.commit_on_success
-    def hit(self, obj):
-        target_ct = ContentType.objects.get_for_model(obj)
-
+    def hit(self, placement):
         cursor = connection.cursor()
-        res = cursor.execute('UPDATE core_hitcount SET hits=hits+1 WHERE target_ct_id=%s AND target_id=%s', [ target_ct.id, obj._get_pk_val() ])
+        res = cursor.execute('UPDATE core_hitcount SET hits=hits+1 WHERE placement_id=%s', (placement.pk,))
         transaction.set_dirty()
 
-        if res<1:
-            hc = self.model(target_ct=target_ct, target_id=obj._get_pk_val())
-            hc.site_id = settings.SITE_ID
-            hc.save()
+        if res < 1:
+            hc = self.create(placement=placement)
 
     @cache_this(get_top_objects_key, timeout=10*60)
     def get_top_objects(self, count, mods=[]):
@@ -146,7 +147,7 @@ class HitCountManager(models.Manager):
         kwa = {}
         if mods:
             kwa['target_ct__in'] = [ ContentType.objects.get_for_model(m) for m in mods ]
-        return self.filter(site__id=settings.SITE_ID, **kwa)[:count]
+        return self.filter(placement__category__site__id=settings.SITE_ID, **kwa)[:count]
 
 class DependencyManager(RelatedManager):
     def report_dependency(self, source, source_key, target, target_key):

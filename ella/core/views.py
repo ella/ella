@@ -8,7 +8,7 @@ from django.template.defaultfilters import slugify
 from django.db import models
 from django.http import Http404
 
-from ella.core.models import Listing, Category, HitCount
+from ella.core.models import Listing, Category, HitCount, Placement
 from ella.core.cache import get_cached_list, get_cached_object_or_404, cache_this
 from ella.core.custom_urls import dispatcher
 from ella.core.cache.template_loader import render_to_response
@@ -41,7 +41,7 @@ def get_content_type(ct_name):
             raise Http404
     return ct
 
-def object_detail(request, category, year, month, day, content_type, slug, url_remainder=None):
+def object_detail(request, category, content_type, slug, year=None, month=None, day=None, url_remainder=None):
     """
     Detail view that displays a single object based on it's main listing.
 
@@ -62,38 +62,26 @@ def object_detail(request, category, year, month, day, content_type, slug, url_r
     else:
         cat = get_cached_object_or_404(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
 
-    # ger all possible listings
-    listings = get_cached_list(
-                Listing,
-                publish_from__year=year,
-                publish_from__month=month,
-                publish_from__day=day,
-                target_ct=ct,
-                category=cat
+    if year:
+        d = datetime(int(year), int(month), int(day))
+        placement = get_cached_object_or_404(Placement,
+                    publish_from=d,
+                    target_ct=ct,
+                    category=cat,
+                    slug=slug,
+                    static=False
 )
-
-    # get the object
-    obj = get_cached_object_or_404(ct, slug=slug, pk__in=[ l.target_id for l in listings ])
-
-    listing = None
-    # find main listing
-    for l in listings:
-        if l.target_id == obj._get_pk_val():
-            listing = l
-            break
     else:
-        raise Http404
+        placement = get_cached_object_or_404(Placement, category=cat, target_ct=ct, slug=slug, static=True)
 
-    if not listing.is_active():
-        # expired listing
-        raise Http404
-
-    if not (listing.is_published() or request.user.is_staff):
+    if not (placement.is_active() or request.user.is_staff):
         # future listing, render if accessed by logged in staff member
         raise Http404
 
+    obj = placement.target
+
     context = {
-            'listing' : listing,
+            'listing' : placement,
             'object' : obj,
             'category' : cat,
             'content_type_name' : content_type,

@@ -77,8 +77,8 @@ for m in Publishable.__subclasses__() + [Listing]:
     connect_model(m)
 
 dispatcher.connect(connect_model, signal=signals.class_prepared)
-'''
 dispatcher.connect(record_url, signal=signals.pre_save)
 dispatcher.connect(check_url, signal=signals.post_save)
 dispatcher.connect(drop_redirects, signal=signals.pre_delete)
 
+'''

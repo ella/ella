@@ -3,7 +3,7 @@ from django.utils.safestring import mark_safe
 from django.contrib.contenttypes.models import ContentType
 
 from ella.core.cache import get_cached_object, get_cached_list
-from ella.core.models import Listing, Category, HitCount
+from ella.core.models import Placement, Category, HitCount
 from ella.photos.models import Photo
 from ella.ellaadmin.options import admin_url
 
@@ -15,27 +15,47 @@ class Publishable(object):
     """
 
     @property
-    def main_listing(self):
+    def main_placement(self):
         " Return object's main listing, that is the object's listing in its primary category "
-        try:
-            return get_cached_object(
-                    Listing,
-                    target_ct=ContentType.objects.get_for_model(self.__class__),
-                    target_id=self.id,
-                    category=self.category_id
+        if not hasattr(self, '_main_placement'):
+            try:
+                # TODO - check and if we don't have category, take the only placement that exists in current site
+                self._main_placement = get_cached_object(
+                        Placement,
+                        target_ct=ContentType.objects.get_for_model(self.__class__),
+                        target_id=self.pk,
+                        category=self.category_id
 )
-        except Listing.DoesNotExist:
-            return None
+            except Placement.DoesNotExist:
+                self._main_placement = None
+        return self._main_placement
 
     def get_absolute_url(self):
         " Get object's URL. "
-        listing = self.main_listing
-        if listing:
-            return listing.get_absolute_url()
+        placement = self.main_placement
+        if placement:
+            return placement.get_absolute_url()
 
     def get_admin_url(self):
         return admin_url(self)
 
+    def save(self):
+        if self.pk:
+            old_self = self.__class__._default_manager.get(pk=self.pk)
+            # the slug has changed
+            if old_self.slug != self.slug:
+                for plc in Placement.objects.filter(
+                    target_id=self.pk,
+                    target_ct=ContentType.objects.get_for_model(self.__class__)):
+                    if plc.slug == old_self.slug:
+                        plc.slug = self.slug
+                        plc.save()
+        Model.save(self)
+
+
+    ##
+    # various metadata
+    ##
     def get_category(self):
         " Get object's primary Category."
         return get_cached_object(Category, pk=self.category_id)
