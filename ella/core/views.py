@@ -118,29 +118,40 @@ def object_detail(request, category, year, month, day, content_type, slug, url_r
         context_instance=RequestContext(request)
 )
 
-def get_templates(name, slug=None, category=None, ct=None):
+def get_templates(name, slug=None, category=None, app_label=None, model_label=None):
     """
     Returns templates in following format and order:
-        'page/category/%s/content_type/%s.%s/%s/%s' % (category.path, ct.app_label, ct.model, slug, name),
-        'page/category/%s/content_type/%s.%s/%s' % (category.path, ct.app_label, ct.model, name),
+        'page/category/%s/content_type/%s.%s/%s/%s' % (category.path, app_label, model_label, slug, name),
+        'page/category/%s/content_type/%s.%s/%s' % (category.path, app_label, model_label, name),
         'page/category/%s/%s' % (category.path, name),
-        'page/content_type/%s.%s/%s' % (ct.app_label, ct.model, name),
+        'page/content_type/%s.%s/%s' % (app_label, model_label, name),
         'page/%s' % name,
 
     TODO: Allow Placement() as parameter?
     """
     templates = []
     if category:
-        if ct:
+        if app_label and model_label:
             if slug:
-                templates.append('page/category/%s/content_type/%s.%s/%s/%s' % (category.path, ct.app_label, ct.model, slug, name))
-            templates.append('page/category/%s/content_type/%s.%s/%s' % (category.path, ct.app_label, ct.model, name))
+                templates.append('page/category/%s/content_type/%s.%s/%s/%s' % (category.path, app_label, model_label, slug, name))
+            templates.append('page/category/%s/content_type/%s.%s/%s' % (category.path, app_label, model_label, name))
         templates.append('page/category/%s/%s' % (category.path, name))
-    if ct:
-        templates.append('page/content_type/%s.%s/%s' % (ct.app_label, ct.model, name))
+    if app_label and model_label:
+        templates.append('page/content_type/%s.%s/%s' % (app_label, model_label, name))
     templates.append('page/%s' % name)
     return templates
 
+def get_templates_from_listing(name, listing, slug=None, category=None, app_label=None, model_label=None):
+    """ Returns template list by listing. """
+    if slug is None:
+        slug = listing.target.slug
+    if category is None:
+        category = listing.category
+    if app_label is None:
+        app_label = listing.target._meta.app_label
+    if model_label is None:
+        model_label = listing.target._meta.module_name
+    return get_templates(name, slug, category, app_label, model_label)
 
 def list_content_type(request, category=None, year=None, month=None, day=None, content_type=None, paginate_by=20):
     """
