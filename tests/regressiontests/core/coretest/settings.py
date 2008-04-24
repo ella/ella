@@ -11,7 +11,7 @@ ADMINS = (
 MANAGERS = ADMINS
 
 DATABASE_ENGINE = 'sqlite3'    # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-DATABASE_NAME = ':memory:'     # Or path to database file if using sqlite3.
+DATABASE_NAME = '/tmp/coretests.db'     # Or path to database file if using sqlite3.
 DATABASE_USER = ''             # Not used with sqlite3.
 DATABASE_PASSWORD = ''         # Not used with sqlite3.
 DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
@@ -101,7 +101,9 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'ella.core.context_processors.url_info',
 )
 
-CACHE_BACKEND = 'locmem://'
-#CACHE_BACKEND = 'memcached://127.0.0.1'
+#CACHE_BACKEND = 'locmem://'
+# we need this for testing caching over ActiveMQ
+CACHE_BACKEND = 'memcached://127.0.0.1:11211'
+ACTIVE_MQ_HOST = 'localhost'
 
 VERSION = 1

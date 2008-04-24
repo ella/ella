@@ -6,12 +6,10 @@ except ImportError:
 import time
 import logging
 import stomp
-from optparse import make_option
 from django.core.cache import cache
 from django.core.management.base import BaseCommand, CommandError
 from django.utils.datastructures import MultiValueDict
 from django.conf import settings
-from ella.core.models import Dependency
 
 log = logging.getLogger('cache')
 
@@ -70,11 +68,9 @@ class CacheInvalidator(object):
         self._register[instance.__class__][0].appendlist(instance._get_pk_val(), key)
 
     def register_dependency(self, src_key, dst_key):
-#        pass
         if src_key not in self._dependencies:
             self._dependencies[src_key] = list()
         self._dependencies[src_key].append(dst_key)
-        log.debug('DEP: %s' % self._dependencies)
 
     def _check_test(self, instance, test_str):
         " Check test params on instance "
@@ -83,9 +79,9 @@ class CacheInvalidator(object):
             return True
 
         # Parse string
-        for par in test_str.split(';'):
-            foo = par.split(':')
-            if not (instance.getattr(instance, foo[0].strip()) == foo[1].strip()):
+        for subtest in test_str.split(';'):
+            attr = subtest.split(':')
+            if not (instance.getattr(instance, attr[0].strip()) == attr[1].strip()):
                 return False
         return True
 
@@ -99,10 +95,8 @@ class CacheInvalidator(object):
                     self.invalidate(sender, key, from_test=False)
                 del pks[instance._get_pk_val()]
 
-            log.debug('TESTS: %s' % tests)
             for key in tests.keys():
                 for t in tests.getlist(key):
-                    log.debug('Test: %s: %s' % (type(t), t))
                     if self._check_test(instance, t):
                         self.invalidate(sender, key)
                         del tests[key]
@@ -113,16 +107,14 @@ class CacheInvalidator(object):
         " Invaidate cache "
         cache.delete(key)
         # also destroy caches that depend on us
-        log.debug('INVALIDATE key %s' % key)
+        log.debug('Invalidate key "%s".' % key)
 
         # Process cache dependencies
         if key in self._dependencies.keys():
             for dst in self._dependencies[key]:
-                log.debug('DEPENDENCY INVALIDATE key %s' % dst)
+                log.debug('Dependency invalidate key "%s".' % dst)
                 cache.delete(dst)
             del self._dependencies[key]
-
-        #Dependency.objects.cascade(sender, key)
 
 
 ACTIVE_MQ_HOST = getattr(settings, 'ACTIVE_MQ_HOST', None)
@@ -131,17 +123,10 @@ ACTIVE_MQ_PORT = getattr(settings, 'ACTIVE_MQ_PORT', 61613)
 class Command(BaseCommand):
     help = 'Run cache invalidator.'
 
-    option_list = BaseCommand.option_list + (
-        make_option('--foreground', default='false', dest='foreground',
-            help='Run in foreground mode. Use Ctrl+C for exit.'),
-)
-
     def handle(self,  *ct_names, **options):
 
-        foreground = options.get('foreground')
-
         if not ACTIVE_MQ_HOST:
-            raise CommandError('CI: ActiveMQ host not defined!')
+            raise CommandError('ActiveMQ host not defined!')
 
         try:
 
@@ -151,7 +136,7 @@ class Command(BaseCommand):
             conn.start()
             conn.connect()
             conn.subscribe(destination=AMQ_DESTINATION, ack='auto')
-            log.info('CI: Now listen on "%s"' % AMQ_DESTINATION)
+            log.info('CI now listen on "%s"' % AMQ_DESTINATION)
 
             while True:
                 time.sleep(1)
@@ -159,7 +144,7 @@ class Command(BaseCommand):
         except KeyboardInterrupt:
             conn.unsubscribe(destination=AMQ_DESTINATION)
             conn.stop()
-            log.info('CI: Connection was closed...')
+            log.info('Connection was closed...')
 
         except:
-            raise CommandError('CI: Can not initialize stomp connection!')
+            raise CommandError('Can not initialize stomp connection!')
