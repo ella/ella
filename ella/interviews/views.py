@@ -5,6 +5,7 @@ from django.template import RequestContext
 from django.contrib.formtools.preview import FormPreview
 
 from ella.core.middleware import get_current_request
+from ella.core.views import get_templates_from_listing
 from ella.interviews.models import Question, Answer
 
 
@@ -54,15 +55,11 @@ def detail(request, context):
     """ Custom object detail function that adds a QuestionForm to the context. """
     interview = context['object']
     context['form'] = QuestionForm()
+    templates = get_templates_from_listing('object.html', context['listing'])
     return render_to_response(
-            (
-                'page/category/%s/content_type/interviews.interview/%s/object.html' % (context['category'].slug, interview.slug),
-                'page/category/%s/content_type/interviews.interview/object.html' % context['category'].slug,
-                'page/content_type/interviews.interview/object.html',
-                'page/object.html',
-),
-            context,
-            context_instance=RequestContext(request)
+        templates,
+        context,
+        context_instance=RequestContext(request)
 )
 
 def unanswered(request, bits, context):
