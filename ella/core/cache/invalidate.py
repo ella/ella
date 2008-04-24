@@ -60,10 +60,6 @@ class CacheDeleter(object):
         self.conn.start()
         self.conn.connect()
 
-        # register to close the activeMQ connection on exit
-        import atexit
-        atexit.register(self.disconnect)
-
     def disconnect(self):
         self.conn.stop()
 
