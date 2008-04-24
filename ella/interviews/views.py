@@ -55,9 +55,8 @@ def detail(request, context):
     """ Custom object detail function that adds a QuestionForm to the context. """
     interview = context['object']
     context['form'] = QuestionForm()
-    templates = get_templates_from_listing('object.html', context['listing'])
     return render_to_response(
-        templates,
+        get_templates_from_listing('object.html', context['listing']),
         context,
         context_instance=RequestContext(request)
 )
@@ -71,13 +70,9 @@ def unanswered(request, bits, context):
     interview = context['object']
     context['form'] = QuestionForm()
     return render_to_response(
-            (
-                'page/category/%s/content_type/interviews.interview/%s/unanswered.html' % (context['category'].slug, interview.slug),
-                'page/category/%s/content_type/interviews.interview/unanswered.html' % context['category'].slug,
-                'page/content_type/interviews.interview/unanswered.html',
-),
-            context,
-            context_instance=RequestContext(request)
+        get_templates_from_listing('unanswered.html', context['listing']),
+        context,
+        context_instance=RequestContext(request)
 )
 
 def reply(request, bits, context):
@@ -99,13 +94,9 @@ def reply(request, bits, context):
     elif not bits:
         # list of all questions
         return render_to_response(
-                (
-                    'page/category/%s/content_type/interviews.interview/%s/reply.html' % (context['category'].slug, interview.slug),
-                    'page/category/%s/content_type/interviews.interview/reply.html' % context['category'].slug,
-                    'page/content_type/interviews.interview/reply.html',
-),
-                context,
-                context_instance=RequestContext(request)
+            get_templates_from_listing('reply.html', context['listing']),
+            context,
+            context_instance=RequestContext(request)
 )
 
     elif len(bits) != 1:
@@ -129,13 +120,9 @@ def reply(request, bits, context):
     context['question'] = question
 
     return render_to_response(
-            (
-                'page/category/%s/content_type/interviews.interview/%s/answer_form.html' % (context['category'].slug, interview.slug),
-                'page/category/%s/content_type/interviews.interview/answer_form.html' % context['category'].slug,
-                'page/content_type/interviews.interview/answer_form.html',
-),
-            context,
-            context_instance=RequestContext(request)
+        get_templates_from_listing('answer_form.html', context['listing']),
+        context,
+        context_instance=RequestContext(request)
 )
 
 class QuestionForm(forms.Form):
@@ -158,23 +145,11 @@ class QuestionFormPreview(FormPreview):
     """ FormPreview subclass that handles the question asking mechanism. """
     @property
     def preview_template(self):
-        interview = self.state['object']
-        cat = self.state['category']
-        return [
-                'page/category/%s/content_type/interviews.interview/%s/ask_preview.html' % (cat.path, interview.slug),
-                'page/category/%s/content_type/interviews.interview/ask_preview.html' % cat.path,
-                'page/content_type/interviews.interview/ask_preview.html',
-            ]
+        return get_templates_from_listing('ask_preview.html', self.state['listing']),
 
     @property
     def form_template(self):
-        interview = self.state['object']
-        cat = self.state['category']
-        return [
-                'page/category/%s/content_type/interviews.interview/%s/ask_form.html' % (cat.path, interview.slug),
-                'page/category/%s/content_type/interviews.interview/ask_form.html' % cat.path,
-                'page/content_type/interviews.interview/ask_form.html',
-            ]
+        return get_templates_from_listing('ask_form.html', self.state['listing']),
 
     def parse_params(self, bits, context):
         """ Store the context provided by ella to self.state. """
