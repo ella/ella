@@ -146,7 +146,7 @@ class HitCountManager(models.Manager):
         """
         kwa = {}
         if mods:
-            kwa['target_ct__in'] = [ ContentType.objects.get_for_model(m) for m in mods ]
+            kwa['placement__target_ct__in'] = [ ContentType.objects.get_for_model(m) for m in mods ]
         return self.filter(placement__category__site__id=settings.SITE_ID, **kwa)[:count]
 
 class DependencyManager(RelatedManager):

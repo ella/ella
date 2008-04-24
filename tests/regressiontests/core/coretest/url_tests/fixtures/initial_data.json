@@ -41,6 +41,33 @@
             "target_ct": 21
         }
     },
+     {
+         "pk": "3",
+        "model": "core.listing",
+         "fields": {
+            "category": 1,
+            "publish_from": "2007-07-01 00:00:00",
+            "priority_value": 0,
+            "placement": 3,
+            "remove": false,
+            "priority_to": null,
+            "priority_from": null
+         }
+     },
+     {
+         "pk": "10",
+        "model": "core.listing",
+         "fields": {
+            "category": 1,
+            "publish_from": "2007-07-02 00:00:00",
+            "priority_value": 0,
+            "placement": 10,
+            "remove": false,
+            "priority_to": null,
+            "priority_from": null
+         }
+     },
+
     {
         "model" : "url_tests.othersamplemodel",
         "pk" : 1,
@@ -61,5 +88,19 @@
             "target_id": 1,
             "target_ct": 22
         }
-    }
+    },
+     {
+        "pk": "4",
+        "model": "core.listing",
+        "fields": {
+            "category": 1,
+            "publish_from": "2007-07-01 00:00:00",
+            "priority_value": 0,
+            "placement": 4,
+            "remove": false,
+            "priority_to": null,
+            "priority_from": null
+         }
+     }
+
 ]

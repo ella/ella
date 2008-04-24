@@ -1,6 +1,8 @@
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.utils.safestring import mark_safe
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.redirects.models import Redirect
+from django.db.models import Model
 
 from ella.core.cache import get_cached_object, get_cached_list
 from ella.core.models import Placement, Category, HitCount
@@ -40,17 +42,24 @@ class Publishable(object):
         return admin_url(self)
 
     def save(self):
-        if self.pk:
+        if self.pk: # only run on update
+            # get old self
             old_self = self.__class__._default_manager.get(pk=self.pk)
             # the slug has changed
             if old_self.slug != self.slug:
-                for plc in Placement.objects.filter(
-                    target_id=self.pk,
-                    target_ct=ContentType.objects.get_for_model(self.__class__)):
+                for plc in list(Placement.objects.filter(
+                        target_id=self.pk,
+                        target_ct=ContentType.objects.get_for_model(self.__class__)
+).exclude(category=self.category_id)) + [self.main_placement]:
                     if plc.slug == old_self.slug:
                         plc.slug = self.slug
                         plc.save()
-        Model.save(self)
+        return Model.save(self)
+
+    def delete(self):
+        url = self.get_absolute_url()
+        Redirect.objects.filter(new_path=url).delete()
+        return Model.delete(self)
 
 
     ##

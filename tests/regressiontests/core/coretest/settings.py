@@ -101,11 +101,11 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'ella.core.context_processors.url_info',
 )
 
-#CACHE_BACKEND = 'locmem://'
 # we need this for testing caching over ActiveMQ
 CACHE_BACKEND = 'memcached://127.0.0.1:11211'
 ACTIVE_MQ_HOST = 'localhost'
 
+CACHE_BACKEND = 'dummy://'
 VERSION = 1
 
 TEST_RUNNER = 'coretest.tests_with_coverage.my_run_tests'

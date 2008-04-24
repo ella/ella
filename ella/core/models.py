@@ -9,6 +9,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from django.utils.safestring import mark_safe
 from django.contrib.auth.models import User
+from django.contrib.redirects.models import Redirect
 from django.template import loader
 
 from ella.core.box import Box
