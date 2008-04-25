@@ -113,7 +113,7 @@ def object_detail(request, category, year, month, day, content_type, slug, url_r
     HitCount.objects.hit(obj)
 
     return render_to_response(
-        get_templates('object.html', slug, cat, ct),
+        get_templates('object.html', slug, cat, ct.app_label, ct.model),
         context,
         context_instance=RequestContext(request)
 )
