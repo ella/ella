@@ -19,6 +19,7 @@ from django.utils.encoding import force_unicode
 from django.utils.html import escape
 
 from ella.core.cache import get_cached_object_or_404
+from ella.core.views import get_templates_from_listing
 from ella.utils.wizard import Wizard
 from ella.polls.models import Poll, Contest, Contestant, Quiz, Result, Choice, Vote, ACTIVITY_NOT_YET_ACTIVE, ACTIVITY_ACTIVE, ACTIVITY_CLOSED
 
@@ -38,13 +39,6 @@ POLL_USER_NO_CHOICE = 3
 
 CURRENT_SITE = None
 
-# UTILS:
-def get_template(poll_type, template_name, path, slug):
-    return (
-        'page/category/%s/content_type/polls.%s/%s/%s.html' % (path, poll_type, slug, template_name,),
-        'page/category/%s/content_type/polls.%s/%s.html' % (path, poll_type, template_name,),
-        'page/content_type/polls.%s/%s.html' % (poll_type, template_name),
-)
 
 def check_vote(request, poll):
     """
@@ -209,9 +203,10 @@ def contest_vote(request, context):
             'activity_active' : ACTIVITY_ACTIVE,
             'activity_closed' : ACTIVITY_CLOSED
 })
-    return render_to_response(get_template('contest', 'form', context['category'].path, contest.slug),
-            context,
-            context_instance=RequestContext(request)
+    return render_to_response(
+        get_templates_from_listing('form.html', context['listing']),
+        context,
+        context_instance=RequestContext(request)
 )
 
 def get_next_url(request):
@@ -298,9 +293,10 @@ def contest_finish(request, context, qforms, contestant_form):
                 'forms' : qforms,
                 'contestant_form' : contestant_form,
 })
-        return render_to_response(get_template('contest', 'form', context['category'].path, contest.slug),
-                context,
-                context_instance=RequestContext(request)
+        return render_to_response(
+            get_templates_from_listing('form.html', context['listing']),
+            context,
+            context_instance=RequestContext(request)
 )
 
     choices = '|'.join(
@@ -324,9 +320,9 @@ def contest_result(request, bits, context):
         raise Http404
 
     return render_to_response(
-            get_template('contest', 'result', context['category'].path, context['object'].slug),
-            context,
-            context_instance=RequestContext(request)
+        get_templates_from_listing('result.html', context['listing']),
+        context,
+        context_instance=RequestContext(request)
 )
 
 def contest_conditions(request, bits, context):
@@ -334,9 +330,9 @@ def contest_conditions(request, bits, context):
         raise Http404
 
     return render_to_response(
-            get_template('contest', 'conditions', context['category'].path, context['object'].slug),
-            context,
-            context_instance=RequestContext(request)
+        get_templates_from_listing('conditions.html', context['listing']),
+        context,
+        context_instance=RequestContext(request)
 )
 
 class ContestWizard(Wizard):
@@ -349,8 +345,8 @@ class ContestWizard(Wizard):
 
     def get_template(self):
         if (self.step + 1) < len(self.form_list):
-            return get_template('contest', 'step', self.contest.category.path, self.contest.slug),
-        return get_template('contest', 'contestant_form', self.contest.category.path, self.contest.slug),
+            return get_templates_from_listing('step.html', self.extra_context['listing'])
+        return get_templates_from_listing('contest_form', self.extra_context['listing'])
 
     def process_step(self, request, form, step):
         if (step + 1) < len(self.form_list):
@@ -369,7 +365,7 @@ class QuizWizard(Wizard):
         super(QuizWizard, self).__init__(form_list)
 
     def get_template(self):
-        return get_template('quiz', 'step', self.quiz.category.path, self.quiz.slug)
+        return get_templates_from_listing('step.html', self.extra_context['listing'])
 
     def process_step(self, request, form, step):
         if (step + 1) < len(self.form_list):
@@ -404,7 +400,7 @@ class QuizWizard(Wizard):
 }
 )
         return render_to_response(
-                get_template('quiz', 'result', self.quiz.category.path, self.quiz.slug),
+                get_templates_from_listing('result.html', self.extra_context['listing']),
                 self.extra_context,
                 context_instance=RequestContext(request)
 )
@@ -434,7 +430,7 @@ def result_details(request, bits, context):
     context['questions'] = questions
 
     return render_to_response(
-            get_template('quiz', 'result_detail', context['category'].path, quiz.slug),
+            get_templates_from_listing('result_detail.html', context['listing']),
             context,
             context_instance=RequestContext(request)
 )
@@ -447,7 +443,7 @@ def conditions(request, bits, context):
 
 def quiz(request, context):
     quiz = context['object']
-    return QuizWizard(quiz)(request)
+    return QuizWizard(quiz)(request, extra_context=context)
 
 def custom_result_details(request, bits, context):
     return result_details(request, bits, context)
