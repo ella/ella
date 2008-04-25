@@ -29,6 +29,19 @@ True
 200
 >>> c.get('/2007/').status_code
 200
+>>> response = c.get('/export/')
+>>> response.status_code
+200
+>>> response.context['category'].tree_parent is None
+True
+>>> 'listing' in response.context
+True
+>>> response.content
+'Base export bannerSampleModel object listed in example.com/RedirObject object listed in example.com/SampleModel object listed in example.com/\n'
+>>> c.get('/export/test1/').content
+'test1 export bannerSampleModel object listed in example.com/RedirObject object listed in example.com/SampleModel object listed in example.com/\n'
+>>> c.get('/export/test2/').content
+'Base export bannerSampleModel object listed in example.com/RedirObject object listed in example.com/SampleModel object listed in example.com/\n'
 '''
 
 custom = r'''
