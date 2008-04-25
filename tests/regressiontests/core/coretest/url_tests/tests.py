@@ -48,8 +48,12 @@ custom = r'''
 # custom url dispatching
 >>> from django.test.client import Client
 >>> c = Client()
->>> from url_tests.models import SampleModel, register_urls
+>>> from url_tests.models import SampleModel, register_urls, register_urls_bad
 >>> register_urls()
+>>> register_urls_bad()
+Traceback (most recent call last):
+  ...
+AssertionError: You can only register one function for key u'action'
 
 # sample object 1
 >>> sm = SampleModel.objects.get(pk=1)

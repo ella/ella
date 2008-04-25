@@ -53,7 +53,7 @@ class DetailDispatcher(object):
         start = slugify(start)
         if start in self.custom_mapping:
             assert not model or model not in self.custom_mapping[start], "You can only register one function for key %r and model %r" % (start, model.__name__)
-            assert model is not None or ALL not in self.custom_mapping, "You can only register one function for key %r" % start
+            assert model is not None or ALL not in self.custom_mapping[start], "You can only register one function for key %r" % start
 
         map = self.custom_mapping.setdefault(start, {})
         if model:

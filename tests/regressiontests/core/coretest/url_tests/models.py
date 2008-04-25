@@ -14,6 +14,11 @@ class OtherSampleModel(Publishable, models.Model):
     slug = models.CharField(_('Slug'), max_length=255)
     category = models.ForeignKey(Category, verbose_name=_('Category'))
 
+def register_urls_bad():
+    from ella.core.custom_urls import dispatcher
+    from url_tests import views
+
+    dispatcher.register('action', views.other_sample_view)
 def register_urls():
     from ella.core.custom_urls import dispatcher
     from url_tests import views
