@@ -88,6 +88,8 @@ True
 >>> response = c.get('/static/other-sample-models/first-other-object/')
 >>> response.status_code
 200
+>>> response.content
+'Sample detail:\ncategory:example.com/,content_type:other sample model,content_type_name:other-sample-models,object:OtherSampleModel object,placement:OtherSampleModel object placed in example.com/'
 >>> response = c.get('/cat/subcat2/subsubcat/static/other-sample-models/first-other-object/otheraction/')
 >>> response.status_code
 200

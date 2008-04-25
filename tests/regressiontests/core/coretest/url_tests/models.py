@@ -20,3 +20,4 @@ def register_urls():
 
     dispatcher.register('action', views.sample_view)
     dispatcher.register('otheraction', views.sample_view, model=OtherSampleModel)
+    dispatcher.register_custom_detail(OtherSampleModel, views.sample_custom_view)
