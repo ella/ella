@@ -195,16 +195,17 @@ class Placement(models.Model):
         if not self.slug:
             self.slug = getattr(self.target, 'slug', self.target_id)
 
-        old_self = Placement.objects.get(pk=self.pk)
+        if self.pk:
+            old_self = Placement.objects.get(pk=self.pk)
 
-        old_path = old_self.get_absolute_url()
-        new_path = self.get_absolute_url()
+            old_path = old_self.get_absolute_url()
+            new_path = self.get_absolute_url()
 
-        if old_path != new_path and new_path:
-            redirect, created = Redirect.objects.get_or_create(old_path=old_path, new_path=new_path, defaults={'site_id' : settings.SITE_ID})
-            for r in Redirect.objects.filter(new_path=old_path).exclude(pk=redirect.pk):
-                r.new_path = new_path
-                r.save()
+            if old_path != new_path and new_path:
+                redirect, created = Redirect.objects.get_or_create(old_path=old_path, new_path=new_path, defaults={'site_id' : settings.SITE_ID})
+                for r in Redirect.objects.filter(new_path=old_path).exclude(pk=redirect.pk):
+                    r.new_path = new_path
+                    r.save()
 
         super(Placement, self).save()
 

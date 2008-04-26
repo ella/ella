@@ -263,13 +263,13 @@ CONTEST
 
 >>> c = Contest.objects.get(slug='some-contest')
 
-Needs listing...
+Needs placement...
 >>> from django.contrib.contenttypes.models import ContentType
 >>> target_ct = ContentType.objects.get(app_label="polls", model="contest")
->>> from ella.core.models import Listing
+>>> from ella.core.models import Placement
 >>> publish_from = datetime.now() - timedelta(1)
->>> l = Listing(category=c.category, publish_from=publish_from, target_ct=target_ct, target_id=c.pk)
->>> l.save()
+>>> p = Placement(category=c.category, publish_from=publish_from, target_ct=target_ct, target_id=c.pk, slug='')
+>>> p.save()
 
 CONTEST LIFE CYCLE
 ==================

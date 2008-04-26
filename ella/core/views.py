@@ -63,9 +63,10 @@ def object_detail(request, category, content_type, slug, year=None, month=None, 
         cat = get_cached_object_or_404(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
 
     if year:
-        d = datetime(int(year), int(month), int(day))
         placement = get_cached_object_or_404(Placement,
-                    publish_from=d,
+                    publish_from__year=year,
+                    publish_from__month=month,
+                    publish_from__day=day,
                     target_ct=ct,
                     category=cat,
                     slug=slug,
