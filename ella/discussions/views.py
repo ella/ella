@@ -3,16 +3,19 @@ from time import strftime
 import smtplib
 from django import http, newforms as forms
 from django.core.urlresolvers import reverse
-from django.template import RequestContext, loader
+from django.template import RequestContext, loader, Context
 from django.shortcuts import render_to_response
 from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth import authenticate, login, logout, get_user
+from django.contrib.auth.models import User
 from django.views.generic.list_detail import object_list
 from django.contrib.formtools.preview import FormPreview
+from django.core.paginator import ObjectPaginator
+from django.conf import settings
 
-from ella.discussions.models import *
+from ella.discussions.models import get_comments_on_thread, Topic, TopicThread, BannedString, BannedUser
 from ella.comments.models import Comment
 from ella.core.cache.utils import get_cached_object_or_404
 from ella.core.models import HitCount
@@ -95,6 +98,42 @@ def add_post(content, thread, user, ip='0.0.0.0'):
 )
     cmt.save()
 
+def paginate_queryset_for_request(request, qset):
+    """ returns appropriate page for view. Page number should
+        be set in GET variable 'p', if not set first page is returned.
+    """
+    paginate_by = settings.DISCUSSIONS_PAGINATE_BY
+    # ugly son of a bitch - adding object property at runtime?!
+    i = 1
+    for c in qset:
+        setattr(c, 'comment_number', i)
+        i += 1
+    paginator = ObjectPaginator(qset, paginate_by)
+    page_no = request.GET.get('p', paginator.page_range[0])
+    try:
+        page_no = int(page_no)
+        if not page_no in paginator.page_range:
+            page_no = paginator.page_range[0]
+    except Exception:
+        page_no = paginator.page_range[0]
+    context = {}
+    objs = paginator.get_page(page_no - 1)
+    context['object_list'] = objs
+    context.update({
+        'is_paginated': paginator.pages > 1,
+        'results_per_page': paginate_by,
+        'has_next': paginator.has_next_page(page_no - 1),
+        'has_previous': paginator.has_previous_page(page_no - 1),
+        'page': page_no,
+        'next': page_no + 1,
+        'previous': page_no - 1,
+        'last_on_page': paginator.last_on_page(page_no - 1),
+        'first_on_page': paginator.first_on_page(page_no - 1),
+        'pages': paginator.pages,
+        'hits': paginator.hits,
+})
+    return context
+
 def get_category_topics_url(category):
     # category.slug/year/_(topics)
     return '/%s/%s/%s/' % (category.slug, strftime('%Y'), slugify(_('topics')))
@@ -123,11 +162,36 @@ def filter_banned_strings(content):
             position = out.find(word)
     return out
 
+def new_posts_since_last_login(request):
+    """ View all posted things since last login. """
+    return http.HttpResponse('neco')
+
+def user_posts(request, username):
+    """
+    View all posts posted by user with username.
+    1. Najit uzivatele, pokud neexistuje, vratit chybovou stranku
+    2. Nalezt vsechny prispevky uzivatele, vyprintit + strankovani.
+    3. done
+    """
+    users = User.objects.filter(username=username)
+    if not users:
+        raise http.Http404('User does not exist!')
+    u = users[0]
+    CT = ContentType.objects.get_for_model(TopicThread)
+    qset = Comment.objects.filter(target_ct=CT).filter(user=u)
+    context = Context()
+    context.update(paginate_queryset_for_request(request, qset))
+    return render_to_response(
+        ('page/content_type/discussions.question/user_posts.html',),
+        context,
+        context_instance=RequestContext(request)
+)
+
 def posts(request, bits, context):
     # TODO !!! REFACTOR !!!
     """ Posts view (list of posts associated to given topic) """
     if not bits:
-        return http.Http404('Unsupported url. Slug of topic-thread needed.')
+        raise http.Http404('Unsupported url. Slug of topic-thread needed.')
     frm = QuestionForm()
     frmLogin = LoginForm()
     topic = context['object']
@@ -152,7 +216,7 @@ def posts(request, bits, context):
         elif bits[1] == 'register':
             return http.HttpResponseRedirect(reverse('registration_register'))
     else:
-        # receiving new post to thread in QuestionForm
+        # receiving new post in QuestionForm
         if request.POST:
             frm = QuestionForm(request.POST)
             if not frm.is_valid():
@@ -174,6 +238,7 @@ def posts(request, bits, context):
     context['question_form_action'] = thread_url
     context['login_form_action'] = '%slogin/' % thread_url
     context['logout_form_action'] = '%slogout/' % thread_url
+    context.update(paginate_queryset_for_request(request, comment_set))
     tplList = (
         'page/category/%s/content_type/discussions.question/%s/posts.html' % (category.path, topic.slug,),
         'page/category/%s/content_type/discussions.question/posts.html' % (category.path,),
@@ -264,10 +329,11 @@ def topic(request, context):
     kwargs = {}
     if 'p' in request.GET:
         kwargs['page'] = request.GET['p']
-
+    qset = top.topicthread_set.all()
+    #context.update(paginate_queryset_for_request(request, qset))
     return object_list(
             request,
-            queryset=top.topicthread_set.all(),
+            queryset=qset,
             extra_context=context,
             paginate_by=10,
             template_name=loader.select_template(t_list).name,

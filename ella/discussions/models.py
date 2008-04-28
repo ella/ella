@@ -16,7 +16,7 @@ from ella.core.box import Box
 from ella.db.models import Publishable
 from ella.comments.models import Comment
 from ella.photos.models import Photo
-from ella.discussions.managers import *
+from ella.discussions.managers import TopicThreadManager
 
 """
 HOWTO:
