@@ -1,0 +1,81 @@
+[
+    {
+        "model" : "admin_tests.sampleadminobject",
+        "pk" : 1,
+        "fields" : {
+            "slug" : "sample1",
+            "category" : 1
+        }
+    },
+    {
+        "pk": "21",
+        "model": "core.placement",
+        "fields": {
+            "category": 1,
+            "slug": "sample1",
+            "publish_from": "2007-07-01 00:00:00",
+            "publish_to": null,
+            "target_id": 2,
+            "target_ct": 24
+        }
+    },
+    {
+        "pk": "22",
+        "model": "core.placement",
+        "fields": {
+            "category": 2,
+            "slug": "sample1",
+            "publish_from": "2007-07-01 00:00:00",
+            "publish_to": "2007-08-01 00:00:00",
+            "target_id": 2,
+            "target_ct": 24
+        }
+    },
+    {
+        "model" : "admin_tests.sampleadminobject",
+        "pk" : 2,
+        "fields" : {
+            "slug" : "sample2",
+            "category" : 1
+        }
+    },
+    {
+        "model" : "admin_tests.emptyadminobject",
+        "pk" : 1,
+        "fields" : {
+            "content" : "empty 1"
+        }
+    },
+    {
+        "pk": "23",
+        "model": "core.placement",
+        "fields": {
+            "category": 1,
+            "slug": "empty1",
+            "publish_from": "2007-07-01 00:00:00",
+            "publish_to": "2007-08-01 00:00:00",
+            "target_id": 1,
+            "target_ct": 25
+        }
+    },
+    {
+        "pk": "24",
+        "model": "core.placement",
+        "fields": {
+            "category": 2,
+            "slug": "empty2",
+            "publish_from": "2007-07-01 00:00:00",
+            "publish_to": "2007-08-01 00:00:00",
+            "target_id": 1,
+            "target_ct": 25
+        }
+    },
+    {
+        "model" : "admin_tests.emptyadminobject",
+        "pk" : 2,
+        "fields" : {
+            "content" : "empty 2"
+        }
+    }
+]
+

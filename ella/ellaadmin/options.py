@@ -118,6 +118,7 @@ class EllaAdminOptionsMixin(object):
         from ella.ellaadmin.filterspecs import get_content_types
         from django.db.models import ForeignKey
         if db_field.name == 'slug':
+            kwargs.setdefault('required', not db_field.blank)
             return forms.RegexField('^[0-9a-z-]+$', max_length=255, **kwargs)
 
         elif db_field.name in ('target_ct', 'source_ct'):

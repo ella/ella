@@ -3,6 +3,7 @@ from django.utils.translation import ugettext as _
 from django import newforms as forms
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import Q
 
 from ella.ellaadmin import widgets
 from ella.core.middleware import get_current_request
@@ -11,44 +12,61 @@ from ella.core.models import Author, Source, Category, Listing, HitCount, Depend
 
 class PlacementInlineFormset(generic.GenericInlineFormset):
     def clean (self):
-        if not self.cleaned_data or not self.instance:
+        # no data - nothing to validate
+        if not self.cleaned_data or not self.instance or not self.cleaned_data[0]:
             return self.cleaned_data
 
         obj = self.instance
-        cat = obj.category
+        cat = getattr(obj, 'category', None)
+        obj_slug = getattr(obj, 'slug', obj.pk)
+        target_ct=ContentType.objects.get_for_model(obj)
 
         main = None
         for d in self.cleaned_data:
-            if d['category'] == cat:
-                main = d
-                qset = obj.__class__._default_manager.filter(slug=obj.slug, category=obj.category_id)
-                if obj._get_pk_val():
-                    qset = qset.exclude(pk=obj._get_pk_val())
+            # empty form
+            if not d: break
 
-                for o in qset:
-                    if o.main_listing and o.main_listing.publish_from.date() == d['publish_from'].date():
-                        raise forms.ValidationError(
-                                _('There is already an object published in category %(category)s with slug %(slug)s on %(date)s') % {
-                                    'slug' : obj.slug,
-                                    'category' : obj.category,
-                                    'date' : d['publish_from'].date(),
+            if cat and cat == d['category']:
+                main = d
+
+
+            # allow placements that do not overlap
+            q = Q(publish_to__isnull=True, publish_to__lt=d['publish_from'])
+            if d['publish_to']:
+                q |= Q(publish_from__gt=d['publish_to'])
+
+            slug = d.get('slug', obj_slug)
+            # try and find conflicting placement
+            qset = Placement.objects.filter(q,
+                category=d['category'],
+                target_ct=target_ct,
+                slug=slug,
+                static=d['static'],
+)
+
+            # check for same date in URL
+            if not d['static']:
+                qset = qset.filter(
+                    publish_from__year=d['publish_from'].year,
+                    publish_from__month=d['publish_from'].month,
+                    publish_from__day=d['publish_from'].day,
+)
+
+            # exclude current object from search
+            if d['id']:
+                qset = qset.exclude(pk=d['id'])
+
+            if qset:
+                plac = qset[0]
+                raise forms.ValidationError(
+                        _('There is already a Placement object published in category %(category)s with slug %(slug)s referring to %(target)s.') % {
+                            'slug' : slug,
+                            'category' : plac.category,
+                            'target' : plac.target,
 })
 
-            elif d['hidden']:
-                raise forms.ValidationError, _('Only main listing can be hidden.')
-
-        # the main listing not present
-        if main is None:
-            try:
-                # try to retrieve it from db
-                main = Listing.objects.get(category=cat, target_ct=ContentType.objects.get_for_model(obj), target_id=obj._get_pk_val())
-                main = main.__dict__
-            except Listing.DoesNotExist:
-                raise forms.ValidationError, _('If an object has a listing, it must have a listing in its main category.')
-
-        if main['publish_from'] != min([ main['publish_from'] ] + [ d['publish_from'] for d in self.cleaned_data]):
-            # TODO: move the error to the form that is at fault
-            raise forms.ValidationError, _('No listing can start sooner than main listing')
+        if cat and not main:
+            raise forms.ValidationError(_('If object has a category, it must have a main placement.'))
 
         return self.cleaned_data
 
@@ -66,6 +84,7 @@ class PlacementInlineOptions(generic.GenericTabularInline):
     extra = 2
     ct_field_name = 'target_ct'
     id_field_name = 'target_id'
+    formset = PlacementInlineFormset
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'category':

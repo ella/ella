@@ -89,6 +89,7 @@ INSTALLED_APPS = (
     'coretest.url_tests',
     'coretest.cache_tests',
     'coretest.templatetags_sample',
+    'coretest.admin_tests',
 )
 
 INTERNAL_IPS = (
@@ -116,4 +117,6 @@ COVERAGE_MODULES = (
     'ella.core.cache.utils',
     'ella.core.box',
     'ella.core.custom_urls',
+    'ella.core.admin',
+    'ella.db.models',
 )
