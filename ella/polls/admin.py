@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _, ugettext
-from django.newforms.models import InlineFormset
+from django.newforms.models import BaseInlineFormset
 from django.shortcuts import render_to_response
 
 from tagging.models import TaggingInlineOptions
@@ -18,7 +18,7 @@ def formfield_for_dbfield(fields):
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
     return _formfield_for_dbfield
 
-class ResultFormset(InlineFormset):
+class ResultFormset(BaseInlineFormset):
 
     def clean(self):
         if not self.cleaned_data:

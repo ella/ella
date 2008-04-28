@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _, ugettext
-from django.newforms.models import InlineFormset
+from django.newforms.models import BaseInlineFormset
 from django import newforms as forms
 from django.contrib.contenttypes.models import ContentType
 
@@ -12,7 +12,7 @@ from ella.core.admin import ListingInlineOptions
 from ella.core.cache import get_cached_object
 
 
-class GalleryItemFormset(InlineFormset):
+class GalleryItemFormset(BaseInlineFormset):
     " Override default FormSet to allow for custom validation."
 
     def clean (self):

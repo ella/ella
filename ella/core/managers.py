@@ -51,7 +51,7 @@ class ListingManager(RelatedManager):
 
     def get_queryset(self, category=None, children=NONE, mods=[], content_types=[], **kwargs):
         now = datetime.now()
-        qset = self.exclude(remove=True, priority_to__lte=datetime.now()).filter(publish_from__lte=now, **kwargs)
+        qset = self.filter(publish_from__lte=now, **kwargs)
 
         if category:
             if children == self.NONE:
@@ -73,7 +73,10 @@ class ListingManager(RelatedManager):
         return qset
 
     def get_count(self, category=None, children=NONE, mods=[], **kwargs):
-        return self.get_queryset(category, children, mods, **kwargs).count()
+        now = datetime.now()
+        # no longer active listings
+        deleted = models.Q(remove=True, priority_to__isnull=False, priority_to__lte=now)
+        return self.get_queryset(category, children, mods, **kwargs).exclude(deleted).count()
 
     @cache_this(get_listings_key, invalidate_listing)
     def get_listing(self, category=None, children=NONE, count=10, offset=1, mods=[], content_types=[], **kwargs):
@@ -91,10 +94,15 @@ class ListingManager(RelatedManager):
         assert count > 0, "Count must be a positive integer"
 
         now = datetime.now()
-        qset = self.get_queryset(category, children, mods, content_types, **kwargs).select_related()
+        qset = self.get_queryset(category, children, mods, content_types, **kwargs)
 
         # listings with active priority override
-        active = models.Q(priority_value__isnull=False, priority_from__isnull=False, priority_from__lte=now, priority_to__gte=now)
+        active = models.Q(
+                    priority_value__isnull=False,
+                    priority_from__isnull=False,
+                    priority_from__lte=now,
+                    priority_to__gte=now
+)
 
         qsets = (
             # modded-up objects
@@ -110,9 +118,13 @@ class ListingManager(RelatedManager):
         # templates are 1-based, compensate
         offset -= 1
 
+        # no longer active listings UGLY TERRIBLE HACK DUE TO queryset-refactor not handling .exclude properly
+        # FIXME TODO
+        deleted = models.Q(remove=True, priority_to__isnull=False, priority_to__lte=now)
+
         # iterate through qsets until we have enough objects
         for q in qsets:
-            data = q[offset:offset+count]
+            data = q.exclude(deleted)[offset:offset+count]
             if data:
                 offset = 0
                 out.extend(data)
