@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from ella.media.models import Type, Media, Format, FormattedFile
-from ella.core.admin import ListingInlineOptions
+from ella.core.admin import PlacementInlineOptions
 from ella.ellaadmin import fields
 
 from tagging.models import TaggingInlineOptions
@@ -26,7 +26,7 @@ class MediaOptions(admin.ModelAdmin):
 
     raw_id_fields = ('photo',)
 
-    inlines = (ListingInlineOptions, TaggingInlineOptions,)
+    inlines = (PlacementInlineOptions, TaggingInlineOptions,)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name in ['description', 'content']:

@@ -159,7 +159,7 @@ class Placement(models.Model):
     target_id = models.IntegerField()
     category = models.ForeignKey(Category, db_index=True)
     publish_from = models.DateTimeField(_("Start of listing"), default=datetime.now)
-    publish_to = models.DateTimeField(_("End of prioritized listing"), null=True, blank=True)
+    publish_to = models.DateTimeField(_("End of listing"), null=True, blank=True)
     slug = models.CharField(max_length=100, blank=True)
 
     static = models.BooleanField(default=False)
@@ -173,6 +173,11 @@ class Placement(models.Model):
 
     def __unicode__(self):
         return u'%s placed in %s' % (self.target, self.category)
+
+    def full_url(self):
+        "Full url to be shown in admin."
+        return mark_safe('<a href="%s">url</a>' % self.get_absolute_url())
+    full_url.allow_tags = True
 
     @property
     def target(self):
@@ -189,7 +194,6 @@ class Placement(models.Model):
     @transaction.commit_on_success
     def save(self):
         " If Listing is created, we create HitCount object "
-        # TODO: FIXME - if we have multiple placements on different sites, this wouldn't work
         hc, created = HitCount.objects.get_or_create(placement=self)
 
         if not self.slug:
@@ -302,6 +306,10 @@ class HitCount(models.Model):
         "update last seen automaticaly"
         self.last_seen = datetime.now()
         super(HitCount, self).save()
+
+    def target(self):
+        return self.placement.target
+
 
     class Meta:
         ordering = ('-hits', '-last_seen',)

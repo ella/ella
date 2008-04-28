@@ -6,10 +6,10 @@ from django.contrib.contenttypes.models import ContentType
 
 from ella.ellaadmin import widgets
 from ella.core.middleware import get_current_request
-from ella.core.models import Author, Source, Category, Listing, HitCount, Dependency
+from ella.core.models import Author, Source, Category, Listing, HitCount, Dependency, Placement
 
 
-class ListingInlineFormset(generic.GenericInlineFormset):
+class PlacementInlineFormset(generic.GenericInlineFormset):
     def clean (self):
         if not self.cleaned_data or not self.instance:
             return self.cleaned_data
@@ -52,47 +52,30 @@ class ListingInlineFormset(generic.GenericInlineFormset):
 
         return self.cleaned_data
 
-    '''
-    def get_queryset(self):
-        """
-        Override the default so that Listings I don't have permissions to change won't show up
-        """
-        from ella.ellaadmin import applicable_categories
-
-        if self.instance is None:
-            return []
-
-        return super(ListingInlineFormset, self).get_queryset().filter(category__in=applicable_categories(get_current_request().user, 'core.change_listing'))
-    '''
-
-class ListingInlineOptions(generic.GenericTabularInline):
+class ListingInlineOptions(admin.TabularInline):
     model = Listing
-    extra = 2
-    ct_field_name = 'target_ct'
-    id_field_name = 'target_id'
-    formset = ListingInlineFormset
+    extra = 3
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'category':
             kwargs['widget'] = widgets.ListingCategoryWidget
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
-class HitCountInlineOptions(generic.GenericTabularInline):
-    model = HitCount
-    extra = 0
+class PlacementInlineOptions(generic.GenericTabularInline):
+    model = Placement
+    extra = 2
     ct_field_name = 'target_ct'
     id_field_name = 'target_id'
-    list_display = ('last_seen', 'hits',)
-    fieldsets = [ (None, {'fields': ('hits',)}) ]
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'hits':
-            kwargs['widget'] = widgets.ParagraphInputWidget
+        if db_field.name == 'category':
+            kwargs['widget'] = widgets.ListingCategoryWidget
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
-class ListingOptions(admin.ModelAdmin):
+class PlacementOptions(admin.ModelAdmin):
     list_display = ('target', 'category', 'publish_from', 'full_url',)
     list_filter = ('publish_from', 'category', 'target_ct',)
+    inlines = [ ListingInlineOptions, ]
 
 class DependencyOptions(admin.ModelAdmin):
     list_filter = ('source_ct', 'target_ct',)
@@ -106,7 +89,7 @@ class CategoryOptions(admin.ModelAdmin):
 
 class HitCountOptions(admin.ModelAdmin):
     list_display = ('target', 'hits',)
-    list_filter = ('target_ct', 'site',)
+    list_filter = ('placement__target_ct', 'placement__category__site',)
 
 class AuthorOptions(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
@@ -116,6 +99,6 @@ admin.site.register(HitCount, HitCountOptions)
 admin.site.register(Category, CategoryOptions)
 admin.site.register(Source)
 admin.site.register(Author, AuthorOptions)
-admin.site.register(Listing, ListingOptions)
+admin.site.register(Placement, PlacementOptions)
 admin.site.register(Dependency , DependencyOptions)
 

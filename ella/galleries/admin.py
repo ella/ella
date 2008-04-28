@@ -8,7 +8,7 @@ from tagging.models import TaggingInlineOptions
 
 from ella.galleries.models import Gallery, GalleryItem
 from ella.ellaadmin import fields, widgets
-from ella.core.admin import ListingInlineOptions
+from ella.core.admin import PlacementInlineOptions
 from ella.core.cache import get_cached_object
 
 
@@ -53,7 +53,7 @@ class GalleryOptions(admin.ModelAdmin):
 )
     list_filter = ('created', 'category',)
     search_fields = ('title', 'description', 'slug',)
-    inlines = (GalleryItemTabularOptions, ListingInlineOptions, TaggingInlineOptions,)
+    inlines = (GalleryItemTabularOptions, PlacementInlineOptions, TaggingInlineOptions,)
     prepopulated_fields = {'slug': ('title',)}
 
     def formfield_for_dbfield(self, db_field, **kwargs):

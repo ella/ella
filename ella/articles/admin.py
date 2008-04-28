@@ -6,7 +6,7 @@ from django.db import connection
 from tagging.models import TaggingInlineOptions
 
 from ella.core.models import Listing
-from ella.core.admin import ListingInlineOptions, HitCountInlineOptions
+from ella.core.admin import PlacementInlineOptions
 from ella.ellaadmin import fields
 from ella.articles.models import ArticleContents, Article, InfoBox
 
@@ -48,7 +48,7 @@ class ArticleOptions(admin.ModelAdmin):
     raw_id_fields = ('photo',)
     list_filter = ('category__site', 'created', 'category', 'authors',)
     search_fields = ('title', 'upper_title', 'perex', 'slug',)
-    inlines = (ArticleContentInlineOptions, ListingInlineOptions, TaggingInlineOptions,)
+    inlines = (ArticleContentInlineOptions, PlacementInlineOptions, TaggingInlineOptions,)
     prepopulated_fields = {'slug' : ('title',)}
 
 
