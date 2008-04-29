@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.utils.translation import ugettext as _
 from django import newforms as forms
+from django.newforms import models as modelforms
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
@@ -8,13 +9,63 @@ from django.db.models import Q
 from ella.ellaadmin import widgets
 from ella.core.middleware import get_current_request
 from ella.core.models import Author, Source, Category, Listing, HitCount, Dependency, Placement
+from ella.core.cache import get_cached_list
+
+class PlacementForm(modelforms.ModelForm):
+
+    class Meta:
+        model = Placement
+
+    def __init__(self, *args, **kwargs):
+        initial = []
+        if 'initial' in kwargs:
+            initial = [ c.id for c in Category.objects.distinct().filter(listing__placement=kwargs['initial']['id']) ]
+
+        self.base_fields['listings'] = modelforms.ModelMultipleChoiceField(Category.objects.all(), cache_choices=True, required=False, initial=initial)
+        super(PlacementForm, self).__init__(*args, **kwargs)
 
 
 class PlacementInlineFormset(generic.GenericInlineFormset):
+
+    def save_existing(self, form, instance, commit=True):
+        instance = super(PlacementInlineFormset, self).save_existing(form, instance, commit)
+        return self.save_listings(form, instance, commit)
+
+    def save_new(self, form, commit=True):
+        instance = super(PlacementInlineFormset, self).save_new(form, commit)
+        return self.save_listings(form, instance, commit)
+
+    def save_listings(self, form, instance, commit=True):
+        list_cats = form.cleaned_data.pop('listings')
+
+        def save_listings():
+            listings = dict([ (l.category, l) for l in Listing.objects.filter(placement=instance.pk) ])
+
+            for c in list_cats:
+                if not c in listings:
+                    # create listing
+                    print 'Creating listing for ', c
+                    l = Listing(placement=instance, category=c, publish_from=instance.publish_from)
+                    l.save()
+                else:
+                    del listings[c]
+            for l in listings.values():
+                l.delete()
+
+        if commit:
+            save_listings()
+        else:
+            save_m2m = form.save_m2m
+            def save_all():
+                save_m2m()
+                save_listings()
+            form.save_m2m = save_all
+        return instance
+
     def clean (self):
         # no data - nothing to validate
-        if not self.cleaned_data or not self.instance or not self.cleaned_data[0]:
-            return self.cleaned_data
+        if not self.is_valid() or not self.cleaned_data or not self.instance or not self.cleaned_data[0]:
+            return
 
         obj = self.instance
         cat = getattr(obj, 'category', None)
@@ -68,7 +119,7 @@ class PlacementInlineFormset(generic.GenericInlineFormset):
         if cat and not main:
             raise forms.ValidationError(_('If object has a category, it must have a main placement.'))
 
-        return self.cleaned_data
+        return
 
 class ListingInlineOptions(admin.TabularInline):
     model = Listing
@@ -85,6 +136,8 @@ class PlacementInlineOptions(generic.GenericTabularInline):
     ct_field_name = 'target_ct'
     id_field_name = 'target_id'
     formset = PlacementInlineFormset
+    form = PlacementForm
+    fieldsets = [ (None, {'fields' : ('category','publish_from', 'publish_to', 'slug', 'static', 'listings',)}), ]
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'category':
