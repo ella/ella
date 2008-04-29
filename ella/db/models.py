@@ -42,7 +42,7 @@ class Publishable(object):
         return admin_url(self)
 
     def save(self):
-        if self.pk: # only run on update
+        if self.pk and hasattr(self, 'slug'): # only run on update
             # get old self
             old_self = self.__class__._default_manager.get(pk=self.pk)
             # the slug has changed
