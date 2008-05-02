@@ -15,6 +15,9 @@ KEY_FORMAT_LIST = 'ella.core.cache.utils.get_cached_list'
 KEY_FORMAT_OBJECT = 'ella.core.cache.utils.get_cached_object'
 
 def _get_key(start, model, kwargs):
+    for key, val in kwargs.iteritems():
+        if hasattr(val, 'pk'):
+            kwargs[key] = val.pk
     return normalize_key(start + ':'.join((
                 model._meta.app_label,
                 model._meta.object_name,

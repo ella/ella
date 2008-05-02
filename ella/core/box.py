@@ -84,6 +84,7 @@ class Box(object):
                 'next_level' : level + 1,
                 'css_class' : self.params.get('css_class', ''),
                 'name' : self.params.get('name', ''),
+                'box' : self,
 }
 
     def get_cache_tests(self):
