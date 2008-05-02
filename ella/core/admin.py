@@ -44,7 +44,6 @@ class PlacementInlineFormset(generic.GenericInlineFormset):
             for c in list_cats:
                 if not c in listings:
                     # create listing
-                    print 'Creating listing for ', c
                     l = Listing(placement=instance, category=c, publish_from=instance.publish_from)
                     l.save()
                 else:
