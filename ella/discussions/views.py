@@ -1,6 +1,7 @@
 import logging
 from time import strftime
 import smtplib
+from datetime import datetime
 from django import http, newforms as forms
 from django.core.urlresolvers import reverse
 from django.template import RequestContext, loader, Context
@@ -43,6 +44,7 @@ class QuestionForm(forms.Form):
 
 class ThreadForm(QuestionForm):
     title = forms.CharField(required=True)
+    content = forms.CharField(required=True, widget=forms.Textarea)
 
 class LoginForm(forms.Form):
     username = forms.CharField(required=True)
@@ -283,15 +285,14 @@ def create_thread(request, bits, context):
     """ creates new thread (that is new TopciThread and first Comment) """
     topic = context['object']
     frmThread = ThreadForm(request.POST or None)
-    context['login_frmThread_state'] = STATE_UNAUTHORIZED
-    frmLogin = LoginForm()
+    context['login_form_state'] = STATE_UNAUTHORIZED
     frmLogin = LoginForm(request.POST or None)
     if frmLogin.is_valid():
         state = process_login(request, frmLogin.cleaned_data)
         if state == STATE_OK:
             url = '%s%s' % (topic.get_absolute_url(), slugify(_('create thread')))
             return http.HttpResponseRedirect(url)
-        context['login_frmThread_state'] = state
+        context['login_form_state'] = state
 
     if frmThread.is_valid():
         data = frmThread.cleaned_data
@@ -304,11 +305,12 @@ def create_thread(request, bits, context):
 )
         thr.save()
         add_post(data['content'], thr, get_user(request), get_ip(request))
-    context['login_frmThread'] = frmLogin
-    context['login_frmThread_action'] = '%slogin/' % request.get_full_path()
-    context['logout_frmThread_action'] = '%slogout/' % request.get_full_path()
-    context['question_frmThread'] = frmThread
-    context['question_frmThread_action'] = request.get_full_path()
+        return http.HttpResponseRedirect(topic.get_absolute_url())
+    context['login_form'] = frmLogin
+    context['login_form_action'] = '%slogin/' % request.get_full_path()
+    context['logout_form_action'] = '%slogout/' % request.get_full_path()
+    context['question_form'] = frmThread
+    context['question_form_action'] = request.get_full_path()
     category = context['category']
     return render_to_response(
             (
