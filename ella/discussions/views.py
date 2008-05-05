@@ -110,7 +110,13 @@ def paginate_queryset_for_request(request, qset):
     paginate_by = settings.DISCUSSIONS_PAGINATE_BY
     # ugly son of a bitch - adding object property at runtime?!
     for i, c in enumerate(qset):
-        setattr(c, 'comment_number', i + 1)
+        ct = ContentType.objects.get_for_model(c)
+        setattr(c, 'item_number', i + 1)
+        setattr(
+            c,
+            'get_admin_url',
+            reverse('discussions_admin', args=['%s/%s/%d' % (ct.app_label, ct.model, c._get_pk_val())])
+)
     paginator = ObjectPaginator(qset, paginate_by)
     page_no = request.GET.get('p', paginator.page_range[0])
     try:
@@ -192,9 +198,6 @@ def view_unread(request):
 def user_posts(request, username):
     """
     View all posts posted by user with username.
-    1. Najit uzivatele, pokud neexistuje, vratit chybovou stranku
-    2. Nalezt vsechny prispevky uzivatele, vyprintit + strankovani.
-    3. done
     """
     users = User.objects.filter(username=username)
     if not users:
@@ -251,7 +254,10 @@ def posts(request, bits, context):
                 context['question_form_state'] = STATE_INVALID
         else:
             HitCount.objects.hit(thr) # increment view counter
-    comment_set = get_comments_on_thread(thr).filter(is_public__exact=True).order_by('submit_date')
+    if request.user.is_staff:
+        comment_set = get_comments_on_thread(thr).order_by('submit_date')
+    else:
+        comment_set = get_comments_on_thread(thr).filter(is_public__exact=True).order_by('submit_date')
     thread_url = '%s/' % thr.get_absolute_url()
     context['thread'] = thr
     context['posts'] = comment_set
