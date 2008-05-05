@@ -1,3 +1,4 @@
+import logging
 from django import template
 from django.core.exceptions import ObjectDoesNotExist
 from ella.core.models import Listing
@@ -46,7 +47,7 @@ def do_tag_process(token, cls):
     if len(tokens) >= 5:
         tagname, object_definition_tokens, varname = parse_getforas_triplet(tokens)
         return cls(object_definition_tokens, varname)
-    elif len(tokens) == 3:
+    elif len(tokens) == 3: # {% template_tag as variable %}
         varname = parse_getas_tuple(tokens)
         return cls(None, varname)
     return cls()
@@ -104,7 +105,7 @@ class FilledThreadsNode(template.Node):
         self.__variable = variable
 
     def __get_all(self, context):
-        out = TopicThread.objects.get_most_filled()
+        out = TopicThread.most_filled.all()
         context[self.__variable] = out
         return ''
 
@@ -113,14 +114,11 @@ class FilledThreadsNode(template.Node):
             topic = topic_from_tpl_var(topic, context)
         if not topic:
             return []
-        return TopicThread.objects.get_most_filled().filter(topic=topic)
+        return TopicThread.most_filled.filter(topic=topic)
 
     def render(self, context):
         if not self.__tokens:
             return self.__get_all(context)
-
-        def mycmp(first, second):
-            return cmp(second.num_posts, first.num_posts)
 
         topic_name = self.__tokens[0].strip()
         context[self.__variable] = self.__get_one(topic_name, context)
@@ -133,7 +131,7 @@ class ViewedThreadsNode(template.Node):
         self.__variable = variable
 
     def __get_all(self, context):
-        out = TopicThread.objects.get_most_viewed()
+        out = TopicThread.most_viewed.all()
         context[self.__variable] = out
         return ''
 
@@ -142,14 +140,11 @@ class ViewedThreadsNode(template.Node):
             topic = topic_from_tpl_var(topic, context)
         if not topic:
             return []
-        return TopicThread.objects.get_most_viewed().filter(topic=topic)
+        return TopicThread.most_viewed.filter(topic=topic)
 
     def render(self, context):
         if not self.__tokens:
             return self.__get_all(context)
-
-        def mycmp(first, second):
-            return cmp(second.num_posts, first.num_posts)
 
         topic_name = self.__tokens[0].strip()
         context[self.__variable] = self.__get_one(topic_name, context)
@@ -162,7 +157,7 @@ class NewestPostsNode(template.Node):
         self.__variable = variable
 
     def __get_all(self, context):
-        out = TopicThread.objects.get_most_viewed()
+        out = TopicThread.most_viewed.all()
         context[self.__variable] = out
         return ''
 
@@ -171,17 +166,25 @@ class NewestPostsNode(template.Node):
             topic = topic_from_tpl_var(topic, context)
         if not topic:
             return []
-        return TopicThread.objects.get_with_newest_posts().filter(topic=topic)
+        return TopicThread.with_newest_posts.filter(topic=topic)
 
     def render(self, context):
         if not self.__tokens:
             return self.__get_all(context)
 
-        def mycmp(first, second):
-            return cmp(second.num_posts, first.num_posts)
-
         topic_name = self.__tokens[0].strip()
         context[self.__variable] = self.__get_one(topic_name, context)
+        return ''
+
+class UnreadPostsNode(template.Node):
+
+    def __init__(self, definition_tokens=None, variable=None):
+        self.__tokens = definition_tokens
+        self.__variable = variable
+
+    def render(self, context):
+        out = TopicThread.all_unread_posts.all()
+        context[self.__variable] = out
         return ''
 
 @register.tag
@@ -298,3 +301,18 @@ def get_thread_pagination(context, thread):
         'page_range': p.page_range,
         'thread_url': thread.get_absolute_url(),
 }
+
+@register.tag
+def get_unread_posts(parser, token):
+    """
+    Get all unread posts for authorized user.
+
+    Syntax::
+        {% get_unread_posts %}
+    """
+    tokens = token.split_contents()
+    if len(tokens) == 3: # {% template_tag as variable %}
+        varname = parse_getas_tuple(tokens)
+    else:
+        raise TemplateSyntaxError('Wrong syntax, usage: get_unread_posts as variable.')
+    return UnreadPostsNode(None, varname)

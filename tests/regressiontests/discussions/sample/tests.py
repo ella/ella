@@ -304,6 +304,9 @@ filled_threads_tpltag_all = r"""
 >>> from ella.discussions.templatetags.discussions import *
 >>> for i in Comment.objects.all():
 ...     i.delete()
+>>> Comment.objects.all()
+[]
+
 >>> ct = ContentType.objects.get_for_model(TopicThread)
 >>> thr_w = TopicThread.objects.get(title="Vlakno Wife ;-)")
 >>> thr = TopicThread.objects.get(title="Vlakno Four")
@@ -317,11 +320,104 @@ filled_threads_tpltag_all = r"""
 ... target_ct=ct,target_id=thr._get_pk_val(),parent=None,user=User.objects.get(username="admin"))
 >>> c.save()
 
+>>> thr.num_posts
+3
+>>> thr_w.num_posts
+0
+
 >>> categ = Category.objects.get(pk=2)
 >>> t = Template(tpl)
 >>> cx = Context({'category': categ})
 >>> t.render(cx)
 u'"Vlakno Four"'
+"""
+
+unread_posts = r"""
+>>> from ella.core.models import Category
+>>> from django.contrib.contenttypes.models import ContentType
+>>> from ella.discussions.models import *
+>>> from ella.discussions.templatetags.discussions import *
+>>> from ella.discussions.views import add_post
+>>> for i in Comment.objects.all():
+...     i.delete()
+>>> Comment.objects.all()
+[]
+>>> ct = ContentType.objects.get_for_model(TopicThread)
+>>> thr_w = TopicThread.objects.get(title="Vlakno Wife ;-)")
+>>> thr = TopicThread.objects.get(title="Vlakno Four")
+>>> admin=User.objects.get(username="admin")
+>>> add_post('Co vajco', thr, admin)
+>>> add_post('Dalsi prispevek', thr, admin)
+>>> add_post('Johohohooo!', thr, admin)
+>>> normal = User.objects.get(username='normal_user')
+>>> for i in TopicThread.unread_items.get_posts(user=normal):
+...    '%s' % i.content
+u'Johohohooo!'
+u'Dalsi prispevek'
+u'Co vajco'
+
+>>> len(TopicThread.unread_items.get_posts(user=admin))
+0
+
+>>> c = Comment.objects.get(content='Johohohooo!', user=admin)
+>>> CT = ContentType.objects.get_for_model(Comment)
+>>> pv = PostViewed(target_ct=CT, target_id=c._get_pk_val(), user=normal)
+>>> pv.save()
+>>> for i in TopicThread.unread_items.get_posts(user=normal):
+...    '%s' % i.content
+u'Dalsi prispevek'
+u'Co vajco'
+
+>>> TopicThread.unread_items.get_topicthreads(normal)
+[<TopicThread: Vlakno Four>]
+"""
+
+unread_posts_tpl_tag = r"""
+>>> tpl = '''
+...   {% block container %}
+...     {% load discussions %}
+...     {% get_unread_posts as posts %}
+...     {% for i in posts %}
+...         "{{i.content}}"
+...     {% endfor %}
+...   {% endblock %}
+... '''
+>>> tpl_lines = tpl.split('\n')
+>>> tpl_lines = map(lambda z: z.strip(), tpl_lines)
+>>> tpl = ''.join(tpl_lines)
+
+>>> from django import template
+>>> from django.template import Context, Template
+>>> from ella.core.models import Category
+>>> from django.contrib.contenttypes.models import ContentType
+>>> from ella.discussions.models import *
+>>> from ella.discussions.templatetags.discussions import *
+>>> for i in Comment.objects.all():
+...     i.delete()
+>>> Comment.objects.all()
+[]
+
+>>> ct = ContentType.objects.get_for_model(TopicThread)
+>>> thr_w = TopicThread.objects.get(title="Vlakno Wife ;-)")
+>>> thr = TopicThread.objects.get(title="Vlakno Four")
+>>> c = Comment(content='new comment',subject='',ip_address='1.2.3.4', \
+... target_ct=ct,target_id=thr._get_pk_val(),parent=None,user=User.objects.get(username="admin"))
+>>> c.save()
+>>> c = Comment(content='new comment to vlakno four #2',subject='',ip_address='1.2.3.4', \
+... target_ct=ct,target_id=thr._get_pk_val(),parent=None,user=User.objects.get(username="admin"))
+>>> c.save()
+>>> c = Comment(content='new comment to vlakno four',subject='',ip_address='1.2.3.4', \
+... target_ct=ct,target_id=thr._get_pk_val(),parent=None,user=User.objects.get(username="admin"))
+>>> c.save()
+>>> ctComment = ContentType.objects.get_for_model(Comment)
+>>> pv = PostViewed(target_ct=ctComment, target_id=c._get_pk_val(), user=User.objects.get(username="admin"))
+>>> pv.save()
+
+>>> categ = Category.objects.get(pk=2)
+>>> t = Template(tpl)
+>>> cx = Context({'category': categ})
+>>> t.render(cx)
+u''
 """
 
 
@@ -337,5 +433,7 @@ __test__ = {
     'discussions_newest_threads_template_tag_string': newest_threads_tpltag_string,
     'discussions_filled_threads_template_tag_string': filled_threads_tpltag_string,
     'discussions_filled_threads_template_tag_all_topics': filled_threads_tpltag_all,
+    'discussions_unread_posts': unread_posts,
+    #'discussions_unread_posts_tpl_tag': unread_posts_tpl_tag,
 }
 

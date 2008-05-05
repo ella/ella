@@ -9,13 +9,14 @@ from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth import authenticate, login, logout, get_user
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AnonymousUser
 from django.views.generic.list_detail import object_list
 from django.contrib.formtools.preview import FormPreview
 from django.core.paginator import ObjectPaginator
 from django.conf import settings
 
-from ella.discussions.models import get_comments_on_thread, Topic, TopicThread, BannedString, BannedUser
+from ella.discussions.models import get_comments_on_thread, Topic, TopicThread, \
+BannedString, BannedUser, PostViewed
 from ella.comments.models import Comment
 from ella.core.cache.utils import get_cached_object_or_404
 from ella.core.models import HitCount
@@ -97,6 +98,10 @@ def add_post(content, thread, user, ip='0.0.0.0'):
         user=user,
 )
     cmt.save()
+    # post is viewed by its autor
+    CT = ContentType.objects.get_for_model(Comment)
+    post_viewed = PostViewed(target_ct=CT, target_id=cmt._get_pk_val(), user=user)
+    post_viewed.save()
 
 def paginate_queryset_for_request(request, qset):
     """ returns appropriate page for view. Page number should
@@ -104,10 +109,8 @@ def paginate_queryset_for_request(request, qset):
     """
     paginate_by = settings.DISCUSSIONS_PAGINATE_BY
     # ugly son of a bitch - adding object property at runtime?!
-    i = 1
-    for c in qset:
-        setattr(c, 'comment_number', i)
-        i += 1
+    for i, c in enumerate(qset):
+        setattr(c, 'comment_number', i + 1)
     paginator = ObjectPaginator(qset, paginate_by)
     page_no = request.GET.get('p', paginator.page_range[0])
     try:
@@ -118,6 +121,15 @@ def paginate_queryset_for_request(request, qset):
         page_no = paginator.page_range[0]
     context = {}
     objs = paginator.get_page(page_no - 1)
+    # make objs viewed by user TODO presunout nasledujici podminku nekam jinam
+    if not isinstance(request.user, AnonymousUser):
+        CT = ContentType.objects.get_for_model(Comment)
+        for item in objs:
+            pv = PostViewed.objects.filter(target_ct=CT, target_id=item._get_pk_val())
+            if pv:
+                continue
+            post_viewed = PostViewed(target_ct=CT, target_id=item._get_pk_val(), user=request.user)
+            post_viewed.save()
     context['object_list'] = objs
     context.update({
         'is_paginated': paginator.pages > 1,
@@ -162,9 +174,20 @@ def filter_banned_strings(content):
             position = out.find(word)
     return out
 
-def new_posts_since_last_login(request):
+def view_unread(request):
     """ View all posted things since last login. """
-    return http.HttpResponse('neco')
+    if not isinstance(request.user, User):
+        raise http.Http404('User does not exist!')
+    u = request.user
+    #qset = TopicThread.unread_items.get_posts(request.user)
+    qset = TopicThread.unread_items.get_topicthreads(request.user)
+    context = Context()
+    context.update(paginate_queryset_for_request(request, qset))
+    return render_to_response(
+        ('page/content_type/discussions.question/unread_threads.html',),
+        context,
+        context_instance=RequestContext(request)
+)
 
 def user_posts(request, username):
     """
