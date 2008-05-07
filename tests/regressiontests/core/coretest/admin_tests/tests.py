@@ -42,12 +42,13 @@ True
 [{}, {}]
 
 
-# create first placement
+# create first placement and one listing
 >>> data = empty_data.copy()
 >>> data.update(MultiValueDict({
 ...     "core-placement-target_ct-target_id-0-category": ["1"],
 ...     "core-placement-target_ct-target_id-0-publish_from_0": ["2007-07-01"],
 ...     "core-placement-target_ct-target_id-0-publish_from_1": ["00:00:00"],
+...     "core-placement-target_ct-target_id-0-listings": ["1"],
 ...}))
 >>> pifi = pif(data=data, files={}, instance=sao1)
 >>> pifi.is_valid()
@@ -55,13 +56,36 @@ True
 >>> pifi.errors
 [{}, {}]
 >>> pifi.cleaned_data
-[{'category': <Category: example.com/>, 'publish_from': datetime.datetime(2007, 7, 1, 0, 0), 'listings': [], 'publish_to': None, 'id': None, 'static': False, 'slug': u''}, {}]
+[{'category': <Category: example.com/>, 'publish_from': datetime.datetime(2007, 7, 1, 0, 0), 'listings': [<Category: example.com/>], 'publish_to': None, 'id': None, 'static': False, 'slug': u''}, {}]
 >>> objs = pifi.save()
 >>> placement = objs[0]
 >>> placement.slug
 u'sample1'
+>>> placement.listing_set.all()
+[<Listing: SampleAdminObject object listed in example.com/>]
 >>> sao1.get_absolute_url()
 '/2007/7/1/sample-admin-objects/sample1/'
+
+
+# delete the created listing
+>>> data = empty_data.copy()
+>>> data.update(MultiValueDict({
+...     "core-placement-target_ct-target_id-TOTAL_FORMS": ["2"],
+...     "core-placement-target_ct-target_id-INITIAL_FORMS": ["1"],
+...
+...     "core-placement-target_ct-target_id-0-id": [str(placement.pk)],
+...     "core-placement-target_ct-target_id-0-category": ["1"],
+...     "core-placement-target_ct-target_id-0-publish_from_0": ["2007-07-01"],
+...     "core-placement-target_ct-target_id-0-publish_from_1": ["00:00:00"],
+...     "core-placement-target_ct-target_id-0-listings": [],
+...}))
+>>> pifi = pif(data=data, files={}, instance=sao1)
+>>> pifi.is_valid()
+True
+>>> objs = pifi.save()
+>>> from ella.core.models import Listing
+>>> Listing.objects.filter(placement=placement)
+[]
 '''
 
 __test__ = {
