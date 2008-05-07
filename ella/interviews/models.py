@@ -99,7 +99,7 @@ class Interview(Publishable, models.Model):
             questions sorted by submit date descending
                 if asking period isn't over yet
             only questions with answers
-                if asking has started (even if it already ended)
+                if replying has started (even if it already ended)
 
         """
         now = datetime.now()
@@ -186,6 +186,9 @@ class Question(models.Model):
         ordering = ('submit_date',)
         verbose_name = _('Question')
         verbose_name_plural = _('Questions')
+
+    def __unicode__(self):
+        return self.content[:20]
 
 
 class Answer(models.Model):
