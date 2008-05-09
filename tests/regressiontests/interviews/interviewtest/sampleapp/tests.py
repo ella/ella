@@ -3,15 +3,23 @@ interview_test = """
 INTERVIEW
 =========
 
->>> from ella.interviews import models, views
+>>> from datetime import datetime, timedelta
+
 >>> from django.test.client import Client
 >>> from django.core.urlresolvers import reverse
->>> from datetime import datetime, timedelta
 >>> from django.template.defaultfilters import slugify
 >>> from django.utils.translation import ugettext
+>>> from django.http import HttpRequest
+>>> from django.contrib.auth.models import AnonymousUser
+
+>>> from ella.interviews import models, views
 
 >>> now = datetime.now()
 
+>>> def get_fake_request():
+...     r = HttpRequest()
+...     r.META['HTTP_X_FORWARDED_FOR'] = '1.2.3.4'
+...     return r
 
 Database models
 ---------------
@@ -195,6 +203,27 @@ False
 >>> resp.status_code
 404
 
+>>> data = {'nickname': 'Peter', 'email': 'not_valid_email@', 'content': 'Why??'}
+
+>>> qf = views.QuestionForm(data)
+>>> qf.is_valid()
+False
+
+>>> data['email'] = 'a@b.cz'
+>>> qf = views.QuestionForm(data)
+>>> qf.is_valid()
+True
+>>> request = get_fake_request()
+>>> request.user = AnonymousUser()
+>>> qfp = views.QuestionFormPreview(request)
+>>> qfp.state = {'object': i1}
+>>> resp = qfp.done(request, qf.cleaned_data)
+>>> resp.status_code
+302
+>>> models.Question.objects.all()
+[<Question: How are you?>, <Question: Where are you?>, <Question: Why??>]
+
+
 # Unanswred
 >>> cl1 = Client()
 >>> unanswered_url = url + slugify(ugettext('unanswered')) + '/'
@@ -203,6 +232,9 @@ u'/2000/1/1/interviews/int-1/unanswered/'
 >>> resp = cl1.get(unanswered_url)
 >>> resp.status_code
 200
+>>> i1 = models.Interview.objects.get(pk=1)
+>>> i1.unanswered_questions()
+[<Question: Where are you?>, <Question: Why??>]
 
 # Reply
 >>> i1.can_reply()
@@ -224,6 +256,30 @@ True
 >>> resp = cl2.get(reply_url)
 >>> resp.status_code
 200
+
+
+>>> rf = views.ReplyForm(i1, i1.get_interviewees(), q2)
+>>> rf.is_valid()
+False
+>>> rf.save()
+Traceback (most recent call last):
+    ...
+ValueError: Cannot save an invalid form.
+
+>>> data = {'content': 'Home, alone',}
+>>> rf = views.ReplyForm(i1, i1.get_interviewees(), q2, data)
+>>> rf.is_valid()
+True
+>>> get_current_request_bak = views.get_current_request
+>>> views.get_current_request = get_fake_request
+>>> answer = rf.save()
+>>> views.get_current_request = get_current_request_bak
+>>> answer
+<Answer: Answer object>
+>>> i1.unanswered_questions()
+[<Question: Why??>]
+
+
 
 
 
