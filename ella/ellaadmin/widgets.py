@@ -35,7 +35,7 @@ class ExtendedRelatedFieldWidgetWrapper(widgets.RelatedFieldWidgetWrapper):
     'Custom widget to be used in admin that includes name and link to the target.'
     def __call__(self, name, value, *args, **kwargs):
         rel_to = self.rel.to
-        related_url = '../../../%s/%s/%s' % (rel_to._meta.app_label, rel_to._meta.object_name.lower(), value)
+        related_url = '../../../%s/%s/%s/' % (rel_to._meta.app_label, rel_to._meta.object_name.lower(), value)
         output = [self.render_func(name, value, *args, **kwargs)]
         if value and rel_to in self.admin_site._registry: # If the related object has an admin interface:
             output.append(u'<a href="%s">%s</a>' % (related_url, rel_to.objects.get(pk=value)))
