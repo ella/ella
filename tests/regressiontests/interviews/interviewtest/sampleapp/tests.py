@@ -7,6 +7,8 @@ INTERVIEW
 >>> from django.test.client import Client
 >>> from django.core.urlresolvers import reverse
 >>> from datetime import datetime, timedelta
+>>> from django.template.defaultfilters import slugify
+>>> from django.utils.translation import ugettext
 
 >>> now = datetime.now()
 
@@ -160,6 +162,10 @@ False
 
 VIEWS
 =====
+
+
+
+# Detail
 >>> url = i1.get_absolute_url()
 >>> url
 '/2000/1/1/interviews/int-1/'
@@ -168,6 +174,59 @@ VIEWS
 >>> resp = cl1.get(url)
 >>> resp.status_code
 200
+
+# Ask form
+>>> i1.ask_to = now + timedelta(10)
+>>> i1.can_ask()
+True
+>>> i1.save()
+>>> cl1 = Client()
+>>> ask_url = url + slugify(ugettext('ask')) + '/'
+>>> ask_url
+u'/2000/1/1/interviews/int-1/ask/'
+>>> resp = cl1.get(ask_url)
+>>> resp.status_code
+200
+>>> i1.ask_to = now - timedelta(1)
+>>> i1.save()
+>>> i1.can_ask()
+False
+>>> resp = cl1.get(ask_url)
+>>> resp.status_code
+404
+
+# Unanswred
+>>> cl1 = Client()
+>>> unanswered_url = url + slugify(ugettext('unanswered')) + '/'
+>>> unanswered_url
+u'/2000/1/1/interviews/int-1/unanswered/'
+>>> resp = cl1.get(unanswered_url)
+>>> resp.status_code
+200
+
+# Reply
+>>> i1.can_reply()
+False
+>>> cl1 = Client()
+>>> reply_url = url + slugify(ugettext('reply')) + '/'
+>>> reply_url
+u'/2000/1/1/interviews/int-1/reply/'
+>>> resp = cl1.get(reply_url)
+>>> resp.status_code
+404
+>>> i1.reply_to = now + timedelta(10)
+>>> i1.save()
+>>> i1.can_reply()
+True
+>>> cl2 = Client()
+>>> cl2.login(username='admin', password='admin')
+True
+>>> resp = cl2.get(reply_url)
+>>> resp.status_code
+200
+
+
+
 
 
 
