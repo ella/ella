@@ -268,6 +268,11 @@ class Listing(models.Model):
 
     objects = ListingManager()
 
+    @property
+    def target(self):
+        return self.placement.target
+
+
     def Box(self, box_type, nodelist):
         " Delegate the boxing to the target's Box factory method."
         obj = self.target
