@@ -146,8 +146,13 @@ Interviewee
 
 Answer
 ------
+>>> i1.has_replies()
+False
 >>> a1 = models.Answer(question=q1, interviewee=iee1, content='Fine!')
 >>> a1.save()
+>>> i1.has_replies()
+True
+
 
 Question
 --------
