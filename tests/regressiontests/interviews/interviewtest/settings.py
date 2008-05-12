@@ -96,3 +96,12 @@ SESSION_COOKIE_DOMAIN = ''
 
 # temporary fix so that the tests will work - remove when cache invalidation works
 CACHE_BACKEND='dummy://'
+
+
+TEST_RUNNER = 'interviewtest.tests_with_coverage.my_run_tests'
+
+COVERAGE_MODULES = (
+    'ella.interviews.models',
+    'ella.interviews.views',
+    'ella.interviews.urls',
+)
