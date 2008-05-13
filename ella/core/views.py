@@ -326,13 +326,13 @@ def category_detail(request, category):
             context_instance=RequestContext(request)
 )
 
-def get_export_key(func, request, count, name=''):
-    return 'ella.core.views.export:%d:%d:%s' % (
-            settings.SITE_ID, count, name
+def get_export_key(func, request, count, name='', content_type=None):
+    return 'ella.core.views.export:%d:%d:%s:%s' % (
+            settings.SITE_ID, count, name, content_type
 )
 
 @cache_this(get_export_key, timeout=60*60)
-def export(request, count, name=''):
+def export(request, count, name='', content_type=None):
     """
     Export banners.
 
@@ -351,7 +351,8 @@ def export(request, count, name=''):
     return render_to_response(
             t_list,
             {'category' : cat, 'listing' : listing},
-            context_instance=RequestContext(request)
+            context_instance=RequestContext(request),
+            content_type=content_type
 )
 
 

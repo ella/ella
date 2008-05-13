@@ -15,6 +15,7 @@ urlpatterns = patterns('',
     url(r'^$', home, name="root_homepage"),
 
     # export banners
+    url(r'^export/xml/(?P<name>[a-z0-9-]+)/$', 'ella.core.views.export', {'count' : 3, 'content_type' : 'text/xml'}, name="named_export_xml"),
     url(r'^export/$', 'ella.core.views.export', {'count' : 3}, name="export"),
     url(r'^export/(?P<name>[a-z0-9-]+)/$', 'ella.core.views.export', {'count' : 3}, name="named_export"),
 
