@@ -4,7 +4,7 @@ from django.contrib.contenttypes import generic
 from django.newforms.widgets import *
 from ella.core.admin import PlacementInlineOptions
 from ella.ellaadmin import widgets
-from ella.discussions.models import *
+from ella.discussions.models import TopicThread, Topic, BannedUser, BannedString, get_comments_on_thread
 from ella.comments.models import Comment
 from ella.comments.admin import CommentsOptions
 from ella.ellaadmin.options import EllaAdminSite

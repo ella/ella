@@ -17,6 +17,24 @@
       "date_joined": "2008-01-22 14:35:12"
     }
   },
+  {
+    "pk": 2,
+    "model": "auth.user",
+    "fields": {
+      "username": "normal_user",
+      "first_name": "",
+      "last_name": "",
+      "is_active": true,
+      "is_superuser": false,
+      "is_staff": false,
+      "last_login": "2008-01-22 14:35:12",
+      "groups": [],
+      "user_permissions": [],
+      "password": "sha1$cef52$f619aaf4e9ba9f171cdac20445066bdaf47347b4",
+      "email": "a@a.cz",
+      "date_joined": "2008-01-22 14:35:12"
+    }
+  },
 
   {
     "pk": 2,

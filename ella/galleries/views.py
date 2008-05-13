@@ -5,6 +5,7 @@ from django.http import Http404
 from django.utils.translation import ungettext
 
 from ella.core.custom_urls import dispatcher
+from ella.core.views import get_templates_from_listing
 from ella.galleries.models import Gallery
 from ella.photos.models import Photo
 
@@ -13,7 +14,6 @@ def gallery_item_detail(request, context, item_slug=None):
     '''get GalleryItem object by its slug or first one (given by GalleryItem.order) from gallery'''
 
     gallery = context['object']
-    category = context['category']
     item_sorted_dict = gallery.items
     count = len(item_sorted_dict)
     count_str = ungettext('%(count)d object total', '%(count)d objects total', count)  % {'count': count}
@@ -56,13 +56,9 @@ def gallery_item_detail(request, context, item_slug=None):
 })
 
     return render_to_response(
-                (
-                    'page/category/%s/content_type/galleries.gallery/%s/item.html' % (category.path, gallery.slug,),
-                    'page/category/%s/content_type/galleries.gallery/item.html' % (category.path,),
-                    'page/content_type/galleries.gallery/item.html',
-),
-                context,
-                context_instance=RequestContext(request),
+        get_templates_from_listing('item.html', context['listing']),
+        context,
+        context_instance=RequestContext(request),
 )
 
 def items(request, bits, context):

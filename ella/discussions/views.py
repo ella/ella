@@ -1,18 +1,23 @@
 import logging
 from time import strftime
 import smtplib
+from datetime import datetime
 from django import http, newforms as forms
 from django.core.urlresolvers import reverse
-from django.template import RequestContext, loader
+from django.template import RequestContext, loader, Context
 from django.shortcuts import render_to_response
 from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth import authenticate, login, logout, get_user
+from django.contrib.auth.models import User, AnonymousUser
 from django.views.generic.list_detail import object_list
 from django.contrib.formtools.preview import FormPreview
+from django.core.paginator import ObjectPaginator
+from django.conf import settings
 
-from ella.discussions.models import *
+from ella.discussions.models import get_comments_on_thread, Topic, TopicThread, \
+BannedString, BannedUser, PostViewed
 from ella.comments.models import Comment
 from ella.core.cache.utils import get_cached_object_or_404
 from ella.core.models import HitCount
@@ -39,6 +44,7 @@ class QuestionForm(forms.Form):
 
 class ThreadForm(QuestionForm):
     title = forms.CharField(required=True)
+    content = forms.CharField(required=True, widget=forms.Textarea)
 
 class LoginForm(forms.Form):
     username = forms.CharField(required=True)
@@ -94,6 +100,59 @@ def add_post(content, thread, user, ip='0.0.0.0'):
         user=user,
 )
     cmt.save()
+    # post is viewed by its autor
+    CT = ContentType.objects.get_for_model(Comment)
+    post_viewed = PostViewed(target_ct=CT, target_id=cmt._get_pk_val(), user=user)
+    post_viewed.save()
+
+def paginate_queryset_for_request(request, qset):
+    """ returns appropriate page for view. Page number should
+        be set in GET variable 'p', if not set first page is returned.
+    """
+    paginate_by = settings.DISCUSSIONS_PAGINATE_BY
+    # ugly son of a bitch - adding object property at runtime?!
+    for i, c in enumerate(qset):
+        ct = ContentType.objects.get_for_model(c)
+        setattr(c, 'item_number', i + 1)
+        setattr(
+            c,
+            'get_admin_url',
+            reverse('discussions_admin', args=['%s/%s/%d' % (ct.app_label, ct.model, c._get_pk_val())])
+)
+    paginator = ObjectPaginator(qset, paginate_by)
+    page_no = request.GET.get('p', paginator.page_range[0])
+    try:
+        page_no = int(page_no)
+        if not page_no in paginator.page_range:
+            page_no = paginator.page_range[0]
+    except Exception:
+        page_no = paginator.page_range[0]
+    context = {}
+    objs = paginator.get_page(page_no - 1)
+    # make objs viewed by user TODO presunout nasledujici podminku nekam jinam
+    if not isinstance(request.user, AnonymousUser):
+        CT = ContentType.objects.get_for_model(Comment)
+        for item in objs:
+            pv = PostViewed.objects.filter(target_ct=CT, target_id=item._get_pk_val())
+            if pv:
+                continue
+            post_viewed = PostViewed(target_ct=CT, target_id=item._get_pk_val(), user=request.user)
+            post_viewed.save()
+    context['object_list'] = objs
+    context.update({
+        'is_paginated': paginator.pages > 1,
+        'results_per_page': paginate_by,
+        'has_next': paginator.has_next_page(page_no - 1),
+        'has_previous': paginator.has_previous_page(page_no - 1),
+        'page': page_no,
+        'next': page_no + 1,
+        'previous': page_no - 1,
+        'last_on_page': paginator.last_on_page(page_no - 1),
+        'first_on_page': paginator.first_on_page(page_no - 1),
+        'pages': paginator.pages,
+        'hits': paginator.hits,
+})
+    return context
 
 def get_category_topics_url(category):
     # category.slug/year/_(topics)
@@ -123,11 +182,44 @@ def filter_banned_strings(content):
             position = out.find(word)
     return out
 
+def view_unread(request):
+    """ View all posted things since last login. """
+    if not isinstance(request.user, User):
+        raise http.Http404('User does not exist!')
+    u = request.user
+    #qset = TopicThread.unread_items.get_posts(request.user)
+    qset = TopicThread.unread_items.get_topicthreads(request.user)
+    context = Context()
+    context.update(paginate_queryset_for_request(request, qset))
+    return render_to_response(
+        ('page/content_type/discussions.question/unread_threads.html',),
+        context,
+        context_instance=RequestContext(request)
+)
+
+def user_posts(request, username):
+    """
+    View all posts posted by user with username.
+    """
+    users = User.objects.filter(username=username)
+    if not users:
+        raise http.Http404('User does not exist!')
+    u = users[0]
+    CT = ContentType.objects.get_for_model(TopicThread)
+    qset = Comment.objects.filter(target_ct=CT).filter(user=u)
+    context = Context()
+    context.update(paginate_queryset_for_request(request, qset))
+    return render_to_response(
+        ('page/content_type/discussions.question/user_posts.html',),
+        context,
+        context_instance=RequestContext(request)
+)
+
 def posts(request, bits, context):
     # TODO !!! REFACTOR !!!
     """ Posts view (list of posts associated to given topic) """
     if not bits:
-        return http.Http404('Unsupported url. Slug of topic-thread needed.')
+        raise http.Http404('Unsupported url. Slug of topic-thread needed.')
     frm = QuestionForm()
     frmLogin = LoginForm()
     topic = context['object']
@@ -152,7 +244,7 @@ def posts(request, bits, context):
         elif bits[1] == 'register':
             return http.HttpResponseRedirect(reverse('registration_register'))
     else:
-        # receiving new post to thread in QuestionForm
+        # receiving new post in QuestionForm
         if request.POST:
             frm = QuestionForm(request.POST)
             if not frm.is_valid():
@@ -164,7 +256,10 @@ def posts(request, bits, context):
                 context['question_form_state'] = STATE_INVALID
         else:
             HitCount.objects.hit(thr) # increment view counter
-    comment_set = get_comments_on_thread(thr).filter(is_public__exact=True).order_by('submit_date')
+    if request.user.is_staff:
+        comment_set = get_comments_on_thread(thr).order_by('submit_date')
+    else:
+        comment_set = get_comments_on_thread(thr).filter(is_public__exact=True).order_by('submit_date')
     thread_url = '%s/' % thr.get_absolute_url()
     context['thread'] = thr
     context['posts'] = comment_set
@@ -174,6 +269,7 @@ def posts(request, bits, context):
     context['question_form_action'] = thread_url
     context['login_form_action'] = '%slogin/' % thread_url
     context['logout_form_action'] = '%slogout/' % thread_url
+    context.update(paginate_queryset_for_request(request, comment_set))
     tplList = (
         'page/category/%s/content_type/discussions.question/%s/posts.html' % (category.path, topic.slug,),
         'page/category/%s/content_type/discussions.question/posts.html' % (category.path,),
@@ -189,15 +285,14 @@ def create_thread(request, bits, context):
     """ creates new thread (that is new TopciThread and first Comment) """
     topic = context['object']
     frmThread = ThreadForm(request.POST or None)
-    context['login_frmThread_state'] = STATE_UNAUTHORIZED
-    frmLogin = LoginForm()
+    context['login_form_state'] = STATE_UNAUTHORIZED
     frmLogin = LoginForm(request.POST or None)
     if frmLogin.is_valid():
         state = process_login(request, frmLogin.cleaned_data)
         if state == STATE_OK:
             url = '%s%s' % (topic.get_absolute_url(), slugify(_('create thread')))
             return http.HttpResponseRedirect(url)
-        context['login_frmThread_state'] = state
+        context['login_form_state'] = state
 
     if frmThread.is_valid():
         data = frmThread.cleaned_data
@@ -210,11 +305,12 @@ def create_thread(request, bits, context):
 )
         thr.save()
         add_post(data['content'], thr, get_user(request), get_ip(request))
-    context['login_frmThread'] = frmLogin
-    context['login_frmThread_action'] = '%slogin/' % request.get_full_path()
-    context['logout_frmThread_action'] = '%slogout/' % request.get_full_path()
-    context['question_frmThread'] = frmThread
-    context['question_frmThread_action'] = request.get_full_path()
+        return http.HttpResponseRedirect(topic.get_absolute_url())
+    context['login_form'] = frmLogin
+    context['login_form_action'] = '%slogin/' % request.get_full_path()
+    context['logout_form_action'] = '%slogout/' % request.get_full_path()
+    context['question_form'] = frmThread
+    context['question_form_action'] = request.get_full_path()
     category = context['category']
     return render_to_response(
             (
@@ -264,10 +360,11 @@ def topic(request, context):
     kwargs = {}
     if 'p' in request.GET:
         kwargs['page'] = request.GET['p']
-
+    qset = top.topicthread_set.all()
+    #context.update(paginate_queryset_for_request(request, qset))
     return object_list(
             request,
-            queryset=top.topicthread_set.all(),
+            queryset=qset,
             extra_context=context,
             paginate_by=10,
             template_name=loader.select_template(t_list).name,

@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes import generic
 from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
 
@@ -16,7 +17,7 @@ from ella.core.box import Box
 from ella.db.models import Publishable
 from ella.comments.models import Comment
 from ella.photos.models import Photo
-from ella.discussions.managers import *
+from ella.discussions.managers import MostFilledManager, MostViewedManager, WithNewestPostsManager, UnreadItemsManager
 
 """
 HOWTO:
@@ -115,7 +116,6 @@ class Topic(Publishable, models.Model):
     def photo_thumb(self):
         """ Displays Topic photo thumbnail in admin. """
         # TODO odstranit absolutni URL - bylo jen k rychlemu testu
-        out = '<img src="http://dev11.netcentrum.cz:8060/static/photos/2008/03/11/thumb-131293-pivoo.jpg" alt=""/>'
         out = self.photo.thumb()
         return mark_safe(out)
     photo_thumb.allow_tags = True
@@ -151,6 +151,23 @@ class Topic(Publishable, models.Model):
         verbose_name_plural = _('Topics')
         ordering = ('-created',)
 
+class PostViewed(models.Model):
+    """ posts viewed by user """
+    # TODO rename and reside the model. It should be called ItemViewed or something like that.
+    target_ct = models.ForeignKey(ContentType, verbose_name=_('Target content type'))
+    target_id = models.PositiveIntegerField(_('Target id'))
+    target = generic.GenericForeignKey(ct_field="target_ct", fk_field="target_id")
+    user = models.ForeignKey(User)
+
+    def __unicode__(self):
+        return '%s viewed by %s' % (self.target.__unicode__(), self.user.username)
+
+    def save(self):
+        pv = PostViewed.objects.filter(target_ct=self.target_ct, target_id=self.target_id, user=self.user)
+        if pv:
+            raise Exception('PostViewed object already exists for ct=%s target_id=%d user=%s' % \
+            (str(self.target_ct), self.target_id, self.user))
+        super(self.__class__, self).save()
 
 class TopicThread(models.Model):
     title = models.CharField(_('Title'), max_length=255)
@@ -159,7 +176,11 @@ class TopicThread(models.Model):
     author = models.ForeignKey(User, verbose_name=_('authorized author'),)
     topic = models.ForeignKey(Topic)
 
-    objects = TopicThreadManager()
+    objects = models.manager.Manager()
+    most_filled = MostFilledManager()
+    most_viewed = MostViewedManager()
+    with_newest_posts = WithNewestPostsManager()
+    unread_items = UnreadItemsManager()
     # TODO (NAVSTEVNOST) hit count? Should be automatic by Ella (?) - prove it.
 
     def __init__(self, *args, **kwargs):

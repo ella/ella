@@ -102,16 +102,45 @@ def object_detail(request, category, content_type, slug, year=None, month=None, 
     HitCount.objects.hit(placement)
 
     return render_to_response(
-            (
-                'page/category/%s/content_type/%s.%s/%s/object.html' % (cat.path, ct.app_label, ct.model, slug),
-                'page/category/%s/content_type/%s.%s/object.html' % (cat.path, ct.app_label, ct.model),
-                'page/category/%s/object.html' % (cat.path),
-                'page/content_type/%s.%s/object.html' % (ct.app_label, ct.model),
-                'page/object.html',
-),
-            context,
-            context_instance=RequestContext(request)
+        get_templates('object.html', slug, cat, ct.app_label, ct.model),
+        context,
+        context_instance=RequestContext(request)
 )
+
+def get_templates(name, slug=None, category=None, app_label=None, model_label=None):
+    """
+    Returns templates in following format and order:
+        'page/category/%s/content_type/%s.%s/%s/%s' % (category.path, app_label, model_label, slug, name),
+        'page/category/%s/content_type/%s.%s/%s' % (category.path, app_label, model_label, name),
+        'page/category/%s/%s' % (category.path, name),
+        'page/content_type/%s.%s/%s' % (app_label, model_label, name),
+        'page/%s' % name,
+
+    TODO: Allow Placement() as parameter?
+    """
+    templates = []
+    if category:
+        if app_label and model_label:
+            if slug:
+                templates.append('page/category/%s/content_type/%s.%s/%s/%s' % (category.path, app_label, model_label, slug, name))
+            templates.append('page/category/%s/content_type/%s.%s/%s' % (category.path, app_label, model_label, name))
+        templates.append('page/category/%s/%s' % (category.path, name))
+    if app_label and model_label:
+        templates.append('page/content_type/%s.%s/%s' % (app_label, model_label, name))
+    templates.append('page/%s' % name)
+    return templates
+
+def get_templates_from_listing(name, listing, slug=None, category=None, app_label=None, model_label=None):
+    """ Returns template list by listing. """
+    if slug is None:
+        slug = listing.target.slug
+    if category is None:
+        category = listing.category
+    if app_label is None:
+        app_label = listing.target._meta.app_label
+    if model_label is None:
+        model_label = listing.target._meta.module_name
+    return get_templates(name, slug, category, app_label, model_label)
 
 def list_content_type(request, category=None, year=None, month=None, day=None, content_type=None, paginate_by=20):
     """
@@ -286,13 +315,13 @@ def category_detail(request, category):
             context_instance=RequestContext(request)
 )
 
-def get_export_key(func, request, count, name=''):
-    return 'ella.core.views.export:%d:%d:%s' % (
-            settings.SITE_ID, count, name
+def get_export_key(func, request, count, name='', content_type=None):
+    return 'ella.core.views.export:%d:%d:%s:%s' % (
+            settings.SITE_ID, count, name, content_type
 )
 
 @cache_this(get_export_key, timeout=60*60)
-def export(request, count, name=''):
+def export(request, count, name='', content_type=None):
     """
     Export banners.
 
@@ -311,7 +340,8 @@ def export(request, count, name=''):
     return render_to_response(
             t_list,
             {'category' : cat, 'listing' : listing},
-            context_instance=RequestContext(request)
+            context_instance=RequestContext(request),
+            content_type=content_type
 )
 
 

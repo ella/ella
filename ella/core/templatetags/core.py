@@ -1,3 +1,5 @@
+from md5 import md5
+
 from django.conf import settings
 from django import template
 from django.db import models
@@ -243,11 +245,17 @@ def box_media(context):
     return {'media' : context.dicts[-1].get(MEDIA_KEY, None)}
 
 def get_render_key(func, object, content_path):
-    return 'ella.core.templateatgs.core.render:%s:%s:%d:%s' % (
-            object._meta.app_label,
-            object._meta.object_name,
-            object.pk,
-            content_path
+    if hasattr(object, '_meta'):
+        return 'ella.core.templatetags.core.render:%s:%s:%d:%s' % (
+                object._meta.app_label,
+                object._meta.object_name,
+                object.pk,
+                content_path
+)
+    else:
+        return 'ella.core.templatetags.core.render:%s:%s' % (
+                md5(smart_str(object)).hexdigest(),
+                content_path
 )
 
 def register_test(key, object, content_path):
@@ -277,7 +285,7 @@ def _render(object, content_path):
                 content = content()
         except:
             # TODO: log
-            return ''
+            pass
 
     t = render_str(content)
     return t.render(template.Context({'object' : object, 'MEDIA_URL' : settings.MEDIA_URL}))
