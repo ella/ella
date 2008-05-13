@@ -130,16 +130,16 @@ def get_templates(name, slug=None, category=None, app_label=None, model_label=No
     templates.append('page/%s' % name)
     return templates
 
-def get_templates_from_listing(name, listing, slug=None, category=None, app_label=None, model_label=None):
-    """ Returns template list by listing. """
+def get_templates_from_placement(name, placement, slug=None, category=None, app_label=None, model_label=None):
+    """ Returns template list by placement. """
     if slug is None:
-        slug = listing.target.slug
+        slug = placement.slug
     if category is None:
-        category = listing.category
+        category = placement.category
     if app_label is None:
-        app_label = listing.target._meta.app_label
+        app_label = placement.target._meta.app_label
     if model_label is None:
-        model_label = listing.target._meta.module_name
+        model_label = placement.target._meta.module_name
     return get_templates(name, slug, category, app_label, model_label)
 
 def list_content_type(request, category=None, year=None, month=None, day=None, content_type=None, paginate_by=20):

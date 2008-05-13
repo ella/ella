@@ -19,7 +19,7 @@ from django.utils.encoding import force_unicode
 from django.utils.html import escape
 
 from ella.core.cache import get_cached_object_or_404
-from ella.core.views import get_templates_from_listing
+from ella.core.views import get_templates_from_placement
 from ella.utils.wizard import Wizard
 from ella.polls.models import Poll, Contest, Contestant, Quiz, Result, Choice, Vote, ACTIVITY_NOT_YET_ACTIVE, ACTIVITY_ACTIVE, ACTIVITY_CLOSED
 
@@ -204,7 +204,7 @@ def contest_vote(request, context):
             'activity_closed' : ACTIVITY_CLOSED
 })
     return render_to_response(
-        get_templates_from_listing('form.html', context['listing']),
+        get_templates_from_placement('form.html', context['placement']),
         context,
         context_instance=RequestContext(request)
 )
@@ -294,7 +294,7 @@ def contest_finish(request, context, qforms, contestant_form):
                 'contestant_form' : contestant_form,
 })
         return render_to_response(
-            get_templates_from_listing('form.html', context['listing']),
+            get_templates_from_placement('form.html', context['placement']),
             context,
             context_instance=RequestContext(request)
 )
@@ -320,7 +320,7 @@ def contest_result(request, bits, context):
         raise Http404
 
     return render_to_response(
-        get_templates_from_listing('result.html', context['listing']),
+        get_templates_from_placement('result.html', context['placement']),
         context,
         context_instance=RequestContext(request)
 )
@@ -330,7 +330,7 @@ def contest_conditions(request, bits, context):
         raise Http404
 
     return render_to_response(
-        get_templates_from_listing('conditions.html', context['listing']),
+        get_templates_from_placement('conditions.html', context['placement']),
         context,
         context_instance=RequestContext(request)
 )
@@ -345,8 +345,8 @@ class ContestWizard(Wizard):
 
     def get_template(self):
         if (self.step + 1) < len(self.form_list):
-            return get_templates_from_listing('step.html', self.extra_context['listing'])
-        return get_templates_from_listing('contest_form', self.extra_context['listing'])
+            return get_templates_from_placement('step.html', self.extra_context['placement'])
+        return get_templates_from_placement('contest_form', self.extra_context['placement'])
 
     def process_step(self, request, form, step):
         if (step + 1) < len(self.form_list):
@@ -365,7 +365,7 @@ class QuizWizard(Wizard):
         super(QuizWizard, self).__init__(form_list)
 
     def get_template(self):
-        return get_templates_from_listing('step.html', self.extra_context['listing'])
+        return get_templates_from_placement('step.html', self.extra_context['placement'])
 
     def process_step(self, request, form, step):
         if (step + 1) < len(self.form_list):
@@ -400,7 +400,7 @@ class QuizWizard(Wizard):
 }
 )
         return render_to_response(
-                get_templates_from_listing('result.html', self.extra_context['listing']),
+                get_templates_from_placement('result.html', self.extra_context['placement']),
                 self.extra_context,
                 context_instance=RequestContext(request)
 )
@@ -430,7 +430,7 @@ def result_details(request, bits, context):
     context['questions'] = questions
 
     return render_to_response(
-            get_templates_from_listing('result_detail.html', context['listing']),
+            get_templates_from_placement('result_detail.html', context['placement']),
             context,
             context_instance=RequestContext(request)
 )

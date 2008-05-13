@@ -6,7 +6,7 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
 from ella.core.cache import get_cached_object_or_404
-from ella.core.views import get_templates_from_listing
+from ella.core.views import get_templates_from_placement
 
 from ella.comments.models import Comment
 from ella.comments.forms import CommentForm
@@ -17,11 +17,11 @@ class CommentFormPreview(FormPreview):
     """comment form preview with extended template calls"""
     @property
     def preview_template(self):
-        return get_templates_from_listing('comments/preview.html', listing=self.state['listing'])
+        return get_templates_from_placement('comments/preview.html', placement=self.state['placement'])
 
     @property
     def form_template(self):
-        return get_templates_from_listing('comments/form.html', listing=self.state['listing'])
+        return get_templates_from_placement('comments/form.html', placement=self.state['placement'])
 
     def parse_params(self, context={}):
         self.state.update(context)
@@ -59,7 +59,7 @@ def new_comment(request, context, reply=None):
 })
     form = CommentForm(init_props=init_props)
     context['form'] = form
-    templates = get_templates_from_listing('comments/form.html', context['listing'])
+    templates = get_templates_from_placement('comments/form.html', context['placement'])
     return render_to_response(templates, context, context_instance=RequestContext(request))
 
 def list_comments(request, context):
@@ -79,6 +79,6 @@ def list_comments(request, context):
             'comment_count' : Comment.objects.get_count_for_object(context['object']),
             'comment_list' : comment_list,
 })
-    templates = get_templates_from_listing('comments/list.html', context['listing'])
+    templates = get_templates_from_placement('comments/list.html', context['placement'])
     return render_to_response(templates, context, context_instance=RequestContext(request))
 

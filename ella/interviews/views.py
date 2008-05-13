@@ -5,7 +5,7 @@ from django.template import RequestContext
 from django.contrib.formtools.preview import FormPreview
 
 from ella.core.middleware import get_current_request
-from ella.core.views import get_templates_from_listing
+from ella.core.views import get_templates_from_placement
 from ella.interviews.models import Question, Answer
 
 
@@ -56,7 +56,7 @@ def detail(request, context):
     interview = context['object']
     context['form'] = QuestionForm()
     return render_to_response(
-        get_templates_from_listing('object.html', context['listing']),
+        get_templates_from_placement('object.html', context['placement']),
         context,
         context_instance=RequestContext(request)
 )
@@ -70,7 +70,7 @@ def unanswered(request, bits, context):
     interview = context['object']
     context['form'] = QuestionForm()
     return render_to_response(
-        get_templates_from_listing('unanswered.html', context['listing']),
+        get_templates_from_placement('unanswered.html', context['placement']),
         context,
         context_instance=RequestContext(request)
 )
@@ -94,7 +94,7 @@ def reply(request, bits, context):
     elif not bits:
         # list of all questions
         return render_to_response(
-            get_templates_from_listing('reply.html', context['listing']),
+            get_templates_from_placement('reply.html', context['placement']),
             context,
             context_instance=RequestContext(request)
 )
@@ -120,7 +120,7 @@ def reply(request, bits, context):
     context['question'] = question
 
     return render_to_response(
-        get_templates_from_listing('answer_form.html', context['listing']),
+        get_templates_from_placement('answer_form.html', context['placement']),
         context,
         context_instance=RequestContext(request)
 )
@@ -145,11 +145,11 @@ class QuestionFormPreview(FormPreview):
     """ FormPreview subclass that handles the question asking mechanism. """
     @property
     def preview_template(self):
-        return get_templates_from_listing('ask_preview.html', self.state['listing']),
+        return get_templates_from_placement('ask_preview.html', self.state['placement'])
 
     @property
     def form_template(self):
-        return get_templates_from_listing('ask_form.html', self.state['listing']),
+        return get_templates_from_placement('ask_form.html', self.state['placement'])
 
     def parse_params(self, bits, context):
         """ Store the context provided by ella to self.state. """
