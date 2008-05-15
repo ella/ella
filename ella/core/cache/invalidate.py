@@ -75,7 +75,7 @@ if ACTIVE_MQ_HOST:
 
         # start listening for any model
         # register the proper propagation function for intercepting the proper signals
-        #dispatcher.connect(CACHE_DELETER.propagate_signal, signal=signals.pre_save)
+        dispatcher.connect(CACHE_DELETER.propagate_signal, signal=signals.pre_save)
         dispatcher.connect(CACHE_DELETER.propagate_signal, signal=signals.post_save)
         dispatcher.connect(CACHE_DELETER.propagate_signal, signal=signals.pre_delete)
         log.debug('Start listening for any model')
