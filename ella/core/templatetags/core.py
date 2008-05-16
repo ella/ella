@@ -261,7 +261,7 @@ def get_render_key(func, object, content_path):
 def register_test(key, object, content_path):
     CACHE_DELETER.register_pk(object, key)
 
-@cache_this(get_render_key, register_test, timeout=10*60)
+@cache_this(get_render_key, register_test, timeout=getattr(settings, 'CACHE_TIMEOUT', 10*60))
 def _render(object, content_path):
     """
     A markdown filter that handles the rendering of any text containing markdown markup and/or django template tags.

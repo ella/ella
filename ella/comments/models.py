@@ -6,6 +6,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_str
+from django.conf import settings
 
 from ella.core.cache.utils import cache_this, get_cached_object, get_cached_list
 from ella.ellaadmin.options import admin_url
@@ -49,7 +50,7 @@ def get_count_key(func, self, object, **kwargs):
 )
 
 class CommentManager(models.Manager):
-    @cache_this(get_count_key, timeout=10*60)
+    @cache_this(get_count_key, timeout=getattr(settings, 'CACHE_TIMEOUT', 10*60))
     def get_count_for_object(self, object, **kwargs):
         target_ct = ContentType.objects.get_for_model(object)
         return self.filter(target_ct=target_ct, target_id=object.id, **kwargs).count()
