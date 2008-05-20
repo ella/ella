@@ -1,4 +1,5 @@
 from django import template
+from django.db import models
 
 from ella.core.models import HitCount
 
