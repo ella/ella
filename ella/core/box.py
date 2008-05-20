@@ -99,7 +99,7 @@ class Box(object):
         rend = cache.get(key)
         if rend is None:
             rend = self._render()
-            cache.set(key, rend, 20*60)
+            cache.set(key, rend, getattr(settings, 'CACHE_TIMEOUT', 20*60))
             for model, test in self.get_cache_tests():
                 CACHE_DELETER.register_test(model, test, key)
             CACHE_DELETER.register_pk(self.obj, key)
