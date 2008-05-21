@@ -16,11 +16,16 @@ CACHE_TIMEOUT = getattr(settings, 'CACHE_TIMEOUT', 10*60)
 def normalize_key(key):
     return md5(key).hexdigest()
 
+def dump_param(param):
+    if hasattr(param, 'pk'):
+        return '|'.join((param._meta.app_label, param._meta.object_name, str(param.pk)))
+    return smart_str(param)
+
 def _get_key(start, model, kwargs):
     return normalize_key(start + ':'.join((
                 model._meta.app_label,
                 model._meta.object_name,
-                ','.join(':'.join((key, smart_str(kwargs[key]))) for key in sorted(kwargs.keys()))
+                ','.join(':'.join((key, dump_param(kwargs[key]))) for key in sorted(kwargs.keys()))
 )))
 
 def get_cached_list(model, **kwargs):
