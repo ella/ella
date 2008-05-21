@@ -32,7 +32,7 @@ class CacheDeleter(object):
             self.conn.send(msg, headers=headers, destination=AMQ_DESTINATION)
 
     def register_test(self, model, test, key):
-        self._send(test, 'test', key, model.__class__)
+        self._send(test, 'test', key, model)
 
     def register_pk(self, instance, key):
         msg = pickle.dumps(instance)
@@ -77,7 +77,7 @@ if ACTIVE_MQ_HOST:
         # register the proper propagation function for intercepting the proper signals
         dispatcher.connect(CACHE_DELETER.propagate_signal, signal=signals.pre_save)
         dispatcher.connect(CACHE_DELETER.propagate_signal, signal=signals.post_save)
-        dispatcher.connect(CACHE_DELETER.propagate_signal, signal=signals.pre_delete)
+        dispatcher.connect(CACHE_DELETER.propagate_signal, signal=signals.post_delete)
         log.debug('Start listening for any model')
     except:
         log.warning('ActiveMQ not running')

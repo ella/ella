@@ -33,9 +33,6 @@ class CacheInvalidator(object):
         type = headers['type']
         key = headers['key']
 
-        # debug
-        log.debug('I received a message type %s' % type)
-
         if type == 'pk':
             inst = pickle.loads(message)
             self.append_pk(inst, key)
@@ -44,7 +41,7 @@ class CacheInvalidator(object):
             self.append_test(model, message, key)
         elif type == 'del':
             inst = pickle.loads(message)
-            self.run(inst.__class__, inst)
+            self.run(str(inst.__class__), inst)
         elif type == 'dep':
             model = headers['model']
             self.register_dependency(key, model)
@@ -54,26 +51,32 @@ class CacheInvalidator(object):
 
         if model not in self._register:
             self._register[model] = (MultiValueDict(), MultiValueDict())
+            log.debug('CI appended model: %s' % model)
 
     def append_test(self, model, test, key):
         " Append invalidation test to _registry "
 
         self.append_model(model)
         self._register[model][1].appendlist(key, test)
+        log.debug('CI appended test - model: %s, test: %s, key: %s' % (model, test, key))
 
     def append_pk(self, instance, key):
         " Append PK to _registry "
 
         self.append_model(instance.__class__)
         self._register[instance.__class__][0].appendlist(instance._get_pk_val(), key)
+#        log.debug('CI appended PK, model: %s, pk: %s, key: %s' % (instance.__class__, instance._get_pk_val(), key))
 
     def register_dependency(self, src_key, dst_key):
         if src_key not in self._dependencies:
             self._dependencies[src_key] = list()
         self._dependencies[src_key].append(dst_key)
+        log.debug('CI register dependency, src: %s, dst: %s' % (src_key, dst_key))
 
     def _check_test(self, instance, test_str):
         " Check test params on instance "
+
+        log.debug('Trying test "%s" for %s.' % (test_str, instance))
 
         if not test_str:
             return True
@@ -81,27 +84,36 @@ class CacheInvalidator(object):
         # Parse string
         for subtest in test_str.split(';'):
             attr = subtest.split(':')
-            if not (instance.getattr(instance, attr[0].strip()) == attr[1].strip()):
+            if not (str(instance.__getattribute__(attr[0].strip())) == attr[1].strip()):
+                log.debug('CI False subtest %s, value was %s' % (subtest, instance.__getattribute__(attr[0].strip())))
                 return False
+        log.debug('CI True test(s) %s on %s.' % (test_str, instance))
         return True
 
     def run(self, sender, instance):
         " Process cache invalidation PKs and tests "
 
+        log.debug('CI start processing invalidation sender: %s, inst: %s.' % (sender, instance))
+
         if sender in self._register:
+            log.debug('CI Sender %s is in _register.' % sender)
             pks, tests = self._register[sender]
+            print "PKs:"
+            print pks
+            print "Tests:"
+            print tests
             if instance._get_pk_val() in pks:
                 for key in pks.getlist(instance._get_pk_val()):
                     self.invalidate(sender, key, from_test=False)
                 del pks[instance._get_pk_val()]
 
+            print self._register[sender]
             for key in tests.keys():
                 for t in tests.getlist(key):
                     if self._check_test(instance, t):
                         self.invalidate(sender, key)
                         del tests[key]
                         break
-#        return instance
 
     def invalidate(self, sender, key, from_test=True):
         " Invaidate cache "
