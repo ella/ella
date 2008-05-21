@@ -105,3 +105,33 @@ def cache_this(key_getter, invalidator=None, timeout=CACHE_TIMEOUT):
 
         return wrapped_func
     return wrapped_decorator
+
+from django.db.models.fields.related import ForeignKey, ReverseSingleRelatedObjectDescriptor
+class CachedForeignKey(ForeignKey):
+    def contribute_to_class(self, cls, name):
+        super(CachedForeignKey, self).contribute_to_class(cls, name)
+        setattr(cls, self.name, CachedReverseSingleRelatedObjectDescriptor(self))
+
+class CachedReverseSingleRelatedObjectDescriptor(ReverseSingleRelatedObjectDescriptor):
+    def __get__(self, instance, instance_type=None):
+        if instance is None:
+            raise AttributeError, "%s must be accessed via instance" % self.field.name
+        cache_name = self.field.get_cache_name()
+        try:
+            return getattr(instance, cache_name)
+        except AttributeError:
+            val = getattr(instance, self.field.attname)
+            if val is None:
+                # If NULL is an allowed value, return it.
+                if self.field.null:
+                    return None
+                raise self.field.rel.to.DoesNotExist
+            other_field = self.field.rel.get_related_field()
+            if other_field.rel:
+                params = {'%s__pk' % self.field.rel.field_name: val}
+            else:
+                params = {'%s__exact' % self.field.rel.field_name: val}
+            rel_obj = get_cached_object(self.field.rel.to, **params)
+            setattr(instance, cache_name, rel_obj)
+            return rel_obj
+
