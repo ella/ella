@@ -23,7 +23,7 @@ def invalidate_cache(key,  self, category, name, nofallback=False):
     CACHE_DELETER.register_test(Position, "category_id:%s;name:%s" % (category.pk, name) , key)
 
 class PositionManager(models.Manager):
-    @cache_this(get_position_key, invalidate_cache, timeout=getattr(settings, 'CACHE_TIMEOUT', 10*60))
+    @cache_this(get_position_key, invalidate_cache)
     def get_active_position(self, category, name, nofallback=False):
         """
         Get active position for given position name.

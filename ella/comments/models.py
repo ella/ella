@@ -6,7 +6,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_str
-from django.conf import settings
 
 from ella.core.cache.invalidate import CACHE_DELETER
 from ella.core.cache.utils import cache_this, get_cached_object
@@ -62,12 +61,12 @@ def invalidate_cache(key,  self, object, **kwargs):
     CACHE_DELETER.register_test(Comment, "target_id:%s;target_ct_id:%s" % (object.pk, target_ct.pk) , key)
 
 class CommentManager(models.Manager):
-    @cache_this(get_count_key, timeout=getattr(settings, 'CACHE_TIMEOUT', 10*60))
+    @cache_this(get_count_key)
     def get_count_for_object(self, object, **kwargs):
         target_ct = ContentType.objects.get_for_model(object)
         return self.filter(target_ct=target_ct, target_id=object.id, **kwargs).count()
 
-    @cache_this(get_list_key, invalidate_cache, timeout=getattr(settings, 'CACHE_TIMEOUT', 10*60))
+    @cache_this(get_list_key, invalidate_cache)
     def get_list_for_object(self, object, order_by=None, **kwargs):
         target_ct = ContentType.objects.get_for_model(object)
         qset = self.filter(target_ct=target_ct, target_id=object._get_pk_val(), **kwargs)
