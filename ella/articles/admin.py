@@ -1,12 +1,9 @@
 from django.contrib import admin
-from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
-from django.db import connection
 
 from tagging.models import TaggingInlineOptions
 
-from ella.core.models import Listing
-from ella.core.admin import ListingInlineOptions, HitCountInlineOptions
+from ella.core.admin import ListingInlineOptions
 from ella.ellaadmin import fields
 from ella.articles.models import ArticleContents, Article, InfoBox
 

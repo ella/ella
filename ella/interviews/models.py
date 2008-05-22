@@ -3,13 +3,12 @@ from datetime import datetime
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
-from django.contrib.contenttypes.models import ContentType
 
 from ella.db.models import Publishable
 from ella.photos.models import Photo
 from ella.core.managers import RelatedManager
 from ella.core.cache import get_cached_object, get_cached_list
-from ella.core.models import Listing, Category, Author, Source
+from ella.core.models import Category, Author, Source
 
 
 class Interviewee(models.Model):

@@ -79,17 +79,17 @@ class Position(models.Model):
 
 #############
     def show_title(self):
-      if not self.target:
-         return '-- empty position --'
-      else:
-         return '%s [%s]' % (self.target.title, self.target_ct,)
+        if not self.target:
+            return '-- empty position --'
+        else:
+            return '%s [%s]' % (self.target.title, self.target_ct,)
     show_title.short_description = _('Title')
 
     def is_filled(self):
-      if self.target:
-         return True
-      else:
-      	 return False
+        if self.target:
+            return True
+        else:
+            return False
     is_filled.short_description = _('Filled')
     is_filled.boolean = True
 #############
