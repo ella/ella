@@ -22,7 +22,6 @@ class CacheInvalidator(object):
 
     def on_error(self, headers, message):
         log.error('ActiveMQ/Stomp on_error')
-        print 'received an error %s' % message
 
     def on_disconnected(self):
         log.error('CI: Connection was lost!')
@@ -83,7 +82,6 @@ class CacheInvalidator(object):
         for subtest in test_str.split(';'):
             attr = subtest.split(':')
             if not (str(instance.__getattribute__(attr[0].strip())) == attr[1].strip()):
-                log.debug('CI False subtest %s, value was %s' % (subtest, instance.__getattribute__(attr[0].strip())))
                 return False
         log.debug('CI True test(s) %s on %s.' % (test_str, instance))
         return True
@@ -98,16 +96,11 @@ class CacheInvalidator(object):
         if sender in self._register:
             log.debug('CI Sender %s is in _register.' % sender)
             pks, tests = self._register[sender]
-            print "PKs:"
-            print pks
-            print "Tests:"
-            print tests
             if instance._get_pk_val() in pks:
                 for key in pks.getlist(instance._get_pk_val()):
                     self.invalidate(sender, key, from_test=False)
                 del pks[instance._get_pk_val()]
 
-            print self._register[sender]
             for key in tests.keys():
                 for t in tests.getlist(key):
                     if self._check_test(instance, t):
@@ -118,13 +111,12 @@ class CacheInvalidator(object):
     def invalidate(self, sender, key, from_test=True):
         " Invaidate cache "
         cache.delete(key)
-        # also destroy caches that depend on us
-        log.debug('Invalidate key "%s".' % key)
+        log.debug('CI invalidate key "%s".' % key)
 
         # Process cache dependencies
         if key in self._dependencies.keys():
             for dst in self._dependencies[key]:
-                log.debug('Dependency invalidate key "%s".' % dst)
+                log.debug('CI dependency invalidate key "%s".' % dst)
                 cache.delete(dst)
             del self._dependencies[key]
 

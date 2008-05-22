@@ -175,7 +175,7 @@ class BoxNode(template.Node):
         box.prepare(context)
         # set the name of this box so that its children can pick up the dependencies
         box_key = box.get_cache_key()
-        context[BOX_INFO] = (obj, box_key)
+        context[BOX_INFO] = box_key
         # render the box
         result = box.render()
         # restore the context
@@ -183,7 +183,7 @@ class BoxNode(template.Node):
 
         if BOX_INFO in context:
             # record dependecies
-            source, source_key = context[BOX_INFO]
+            source_key = context[BOX_INFO]
             CACHE_DELETER.register_dependency(source_key, box_key)
         return result
 
