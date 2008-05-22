@@ -34,17 +34,13 @@ class CacheInvalidator(object):
         key = headers['key']
 
         if type == 'pk':
-            inst = pickle.loads(message)
-            self.append_pk(inst, key)
+            self.append_pk(pickle.loads(message), key)
         elif type == 'test':
-            model = headers['model']
-            self.append_test(model, message, key)
+            self.append_test(headers['model'], message, key)
         elif type == 'del':
-            inst = pickle.loads(message)
-            self.run(str(inst.__class__), inst)
+            self.run(pickle.loads(message))
         elif type == 'dep':
-            model = headers['model']
-            self.register_dependency(key, model)
+            self.register_dependency(key, headers['model'])
 
     def append_model(self, model):
         " Append model to _registry "
@@ -63,8 +59,10 @@ class CacheInvalidator(object):
     def append_pk(self, instance, key):
         " Append PK to _registry "
 
-        self.append_model(instance.__class__)
-        self._register[instance.__class__][0].appendlist(instance._get_pk_val(), key)
+        # We need key for _register as string
+        modelkey = str(instance.__class__)
+        self.append_model(modelkey)
+        self._register[modelkey][0].appendlist(instance._get_pk_val(), key)
 #        log.debug('CI appended PK, model: %s, pk: %s, key: %s' % (instance.__class__, instance._get_pk_val(), key))
 
     def register_dependency(self, src_key, dst_key):
@@ -90,8 +88,10 @@ class CacheInvalidator(object):
         log.debug('CI True test(s) %s on %s.' % (test_str, instance))
         return True
 
-    def run(self, sender, instance):
+    def run(self, instance):
         " Process cache invalidation PKs and tests "
+
+        sender = str(instance.__class__)
 
         log.debug('CI start processing invalidation sender: %s, inst: %s.' % (sender, instance))
 
