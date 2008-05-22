@@ -28,7 +28,7 @@ def _get_key(start, model, kwargs):
                 ','.join(':'.join((key, dump_param(kwargs[key]))) for key in sorted(kwargs.keys()))
 )))
 
-def get_cached_list(model, **kwargs):
+def get_cached_list(model, *args, **kwargs):
     """
     Return a cached list. If the list does not exist in the cache, create it
     and register it for invalidation if any object from the list is updated (check via _get_pk_val()).
@@ -45,7 +45,7 @@ def get_cached_list(model, **kwargs):
 
     l = cache.get(key)
     if l is None:
-        l = list(model._default_manager.filter(**kwargs))
+        l = list(model._default_manager.filter(*args, **kwargs))
         cache.set(key, l, CACHE_TIMEOUT)
         for o in l:
             CACHE_DELETER.register_pk(o, key)
