@@ -13,11 +13,9 @@ from ella.core.models import Category, Author
 from ella.core.managers import RelatedManager
 from ella.photos.models import Photo
 
-
 ACTIVITY_NOT_YET_ACTIVE = 0
 ACTIVITY_ACTIVE = 1
 ACTIVITY_CLOSED = 2
-
 
 class FloatingStateModel(object):
     """
