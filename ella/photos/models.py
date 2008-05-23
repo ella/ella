@@ -14,6 +14,7 @@ from django.utils.safestring import mark_safe
 from ella.core.models import Author, Source
 from ella.core.managers import RelatedManager
 from ella.core.box import Box
+from ella.core.cache.utils import get_cached_object
 from ella.utils.filemanipulation import file_rename
 
 # settings default
@@ -118,6 +119,20 @@ class Photo(models.Model):
             return float(self.width) / self.height
         else:
             return None
+
+    def get_formated_photo(self, format):
+        "Return formated photo"
+        format_object = Format.objects.get(name=format)
+        try:
+            formated_photo = get_cached_object(FormatedPhoto, photo=self, format=format_object)
+        except FormatedPhoto.DoesNotExist:
+            try:
+                formated_photo = FormatedPhoto.objects.create(photo=self, format=format_object)
+            except (IOError, SystemError, IntegrityError):
+                context[self.var_name] = self.format.get_blank_img()
+                return None
+
+        return formated_photo
 
     def __unicode__(self):
         return self.title
