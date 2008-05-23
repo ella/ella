@@ -91,7 +91,7 @@ class ContestantOptions(admin.ModelAdmin):
 class QuestionInlineOptions(admin.options.InlineModelAdmin):
     model = Question
     inlines = (ChoiceTabularOptions,)
-    template = 'admin/edit_inline/question_tabular.html'
+    template = 'admin/polls/question/edit_inline/tabular.html'
     extra=10
 
     formfield_for_dbfield = formfield_for_dbfield(['question'])
@@ -105,7 +105,7 @@ class ContestOptions(admin.ModelAdmin):
             contestants = contest.get_correct_answers()
             title = u"%s '%s': %s" % (Contest._meta.verbose_name, contest.title, _('Correct Answers'))
             module_name = Contestant._meta.module_name
-            return render_to_response('admin/correct_answers.html',
+            return render_to_response('admin/polls/answer/correct.html',
                 {'contestants' : contestants, 'title' : title, 'module_name' : module_name})
         return super(ContestOptions, self).__call__(request, url)
 
