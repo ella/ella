@@ -126,12 +126,7 @@ class CachedReverseSingleRelatedObjectDescriptor(ReverseSingleRelatedObjectDescr
                 if self.field.null:
                     return None
                 raise self.field.rel.to.DoesNotExist
-            other_field = self.field.rel.get_related_field()
-            if other_field.rel:
-                params = {'%s__pk' % self.field.rel.field_name: val}
-            else:
-                params = {'%s__exact' % self.field.rel.field_name: val}
-            rel_obj = get_cached_object(self.field.rel.to, **params)
+            rel_obj = get_cached_object(self.field.rel.to, pk=val)
             setattr(instance, cache_name, rel_obj)
             return rel_obj
 
