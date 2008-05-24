@@ -60,12 +60,18 @@ TEMPLATE_LOADERS = (
 #     'django.template.loaders.eggs.load_template_source',
 )
 
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.core.context_processors.auth',
+    'django.core.context_processors.request',
+    'ella.core.context_processors.url_info',
+)
+
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.doc.XViewMiddleware',
-    'ella.core.middleware.ThreadLocalsMiddleware',
+#    'ella.core.middleware.ThreadLocalsMiddleware',
 )
 
 ROOT_URLCONF = 'interviewtest.urls'

@@ -90,6 +90,12 @@ INSTALLED_APPS = (
     'sampleapp',
 )
 
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.core.context_processors.auth',
+    'django.core.context_processors.request',
+    'ella.core.context_processors.url_info',
+)
+
 SESSION_COOKIE_DOMAIN = 'testserver'
 
 # temporary fix so that the tests will work - remove when cache invalidation works

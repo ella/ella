@@ -13,9 +13,10 @@ class ReplyForm(forms.Form):
     """ A form representing the reply, it also contains the mechanism needed to actually save the reply. """
     content = Answer._meta.get_field('content').formfield()
 
-    def __init__(self, interview, interviewees, question, *args, **kwargs):
+    def __init__(self, interview, interviewees, question, request, *args, **kwargs):
         self.interview = interview
         self.question = question
+        self.request = request
 
         super(ReplyForm, self).__init__(*args, **kwargs)
 
@@ -37,11 +38,10 @@ class ReplyForm(forms.Form):
         else:
             interviewee = self.cleaned_data['interviewee']
 
-        request = get_current_request()
-        if 'HTTP_X_FORWARDED_FOR' in request.META:
-            ip = request.META['HTTP_X_FORWARDED_FOR']
+        if 'HTTP_X_FORWARDED_FOR' in self.request.META:
+            ip = self.request.META['HTTP_X_FORWARDED_FOR']
         else:
-            ip = request.META['REMOTE_ADDR']
+            ip = self.request.META['REMOTE_ADDR']
 
         a = Answer(
                 question=self.question,
@@ -54,7 +54,7 @@ class ReplyForm(forms.Form):
 def detail(request, context):
     """ Custom object detail function that adds a QuestionForm to the context. """
     interview = context['object']
-    context['form'] = QuestionForm()
+    context['form'] = QuestionForm(request=request)
     return render_to_response(
         get_templates_from_placement('object.html', context['placement']),
         context,
@@ -68,7 +68,7 @@ def unanswered(request, bits, context):
         raise Http404
 
     interview = context['object']
-    context['form'] = QuestionForm()
+    context['form'] = QuestionForm(request=request)
     return render_to_response(
         get_templates_from_placement('unanswered.html', context['placement']),
         context,
@@ -110,7 +110,7 @@ def reply(request, bits, context):
             interview=interview
 )
 
-    form = ReplyForm(interview, interviewees, question, request.POST or None)
+    form = ReplyForm(interview, interviewees, question, request, request.POST or None)
     if form.is_valid():
         form.save()
         # go back to the question list
@@ -132,17 +132,31 @@ class QuestionForm(forms.Form):
     content = Question._meta.get_field('content').formfield()
 
     def __init__(self, *args, **kwargs):
+        if 'request' in kwargs:
+            self.request = kwargs.pop('request')
         super(QuestionForm, self).__init__(*args, **kwargs)
 
-        request = get_current_request()
         # if a user is logged in, do not ask for nick and/or email
-        if request.user.is_authenticated():
+        if self.request.user.is_authenticated():
             del self.fields['nickname']
             del self.fields['email']
 
+class QuestionDescriptor(object):
+    def __get__(self, qfp, obj_type=None):
+        qfp.form_class.request = qfp.request
+        return qfp.form_class
 
 class QuestionFormPreview(FormPreview):
     """ FormPreview subclass that handles the question asking mechanism. """
+    form = QuestionDescriptor()
+    def __call__(self, request, *args, **kwargs):
+        self.request = request
+        return super(QuestionFormPreview, self).__call__(request, *args, **kwargs)
+
+    def __init__(self, form):
+        self.form_class = form
+        self.state = {}
+
     @property
     def preview_template(self):
         return get_templates_from_placement('ask_preview.html', self.state['placement'])

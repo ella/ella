@@ -10,7 +10,7 @@ INTERVIEW
 >>> from django.template.defaultfilters import slugify
 >>> from django.utils.translation import ugettext
 >>> from django.http import HttpRequest
->>> from django.contrib.auth.models import AnonymousUser
+>>> from django.contrib.auth.models import AnonymousUser, User
 
 >>> from ella.interviews import models, views
 
@@ -261,9 +261,10 @@ True
 >>> resp = cl2.get(reply_url)
 >>> resp.status_code
 200
+>>> user = User.objects.get(username='admin')
 
 
->>> rf = views.ReplyForm(i1, i1.get_interviewees(), q2)
+>>> rf = views.ReplyForm(i1, i1.get_interviewees(user), q2, request)
 >>> rf.is_valid()
 False
 >>> rf.save()
@@ -272,13 +273,10 @@ Traceback (most recent call last):
 ValueError: Cannot save an invalid form.
 
 >>> data = {'content': 'Home, alone',}
->>> rf = views.ReplyForm(i1, i1.get_interviewees(), q2, data)
+>>> rf = views.ReplyForm(i1, i1.get_interviewees(user), q2, request, data)
 >>> rf.is_valid()
 True
->>> get_current_request_bak = views.get_current_request
->>> views.get_current_request = get_fake_request
 >>> answer = rf.save()
->>> views.get_current_request = get_current_request_bak
 >>> answer
 <Answer: Answer object>
 >>> i1.unanswered_questions()
