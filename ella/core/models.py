@@ -315,7 +315,6 @@ class HitCount(models.Model):
     def target(self):
         return self.placement.target
 
-
     class Meta:
         ordering = ('-hits', '-last_seen',)
         verbose_name = 'Hit Count'
