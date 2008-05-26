@@ -176,9 +176,9 @@ class Listing(models.Model):
 
     category = models.ForeignKey(Category, db_index=True)
 
-    publish_from = models.DateTimeField(_("Start of listing"), default=datetime.now)
-    priority_from = models.DateTimeField(_("Start of prioritized listing"), default=datetime.now, null=True, blank=True)
-    priority_to = models.DateTimeField(_("End of prioritized listing"), default=lambda: datetime.now() + timedelta(days=7), null=True, blank=True)
+    publish_from = models.DateTimeField(_("Start of listing"))
+    priority_from = models.DateTimeField(_("Start of prioritized listing"), null=True, blank=True)
+    priority_to = models.DateTimeField(_("End of prioritized listing"), null=True, blank=True)
     priority_value = models.IntegerField(_("Priority"), blank=True, null=True)
     remove = models.BooleanField(_("Remove"), help_text=_("Remove object from listing after the priority wears off?"), default=False)
 
