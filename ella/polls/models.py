@@ -360,7 +360,7 @@ class Contestant(models.Model):
     email = models.EmailField(_('email'))
     phonenumber = models.CharField(_('Phone number'), max_length=20, blank=True)
     address = models.CharField(_('Address'), max_length=200, blank=True)
-    choices = models.CharField(_('Choices'), max_length=200, blank=True)
+    choices = models.TextField(_('Choices'), blank=True)
     count_guess = models.IntegerField(_('Count guess'))
     winner = models.BooleanField(_('Winner'), default=False)
 
