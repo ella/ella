@@ -17,6 +17,9 @@ def normalize_key(key):
     return md5(key).hexdigest()
 
 def _get_key(start, model, kwargs):
+    for key, val in kwargs.iteritems():
+        if hasattr(val, 'pk'):
+            kwargs[key] = val.pk
     return normalize_key(start + ':'.join((
                 model._meta.app_label,
                 model._meta.object_name,
