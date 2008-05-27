@@ -145,11 +145,11 @@ class QuestionFormPreview(FormPreview):
     """ FormPreview subclass that handles the question asking mechanism. """
     @property
     def preview_template(self):
-        return get_templates_from_listing('ask_preview.html', self.state['listing']),
+        return get_templates_from_listing('ask_preview.html', self.state['listing'])
 
     @property
     def form_template(self):
-        return get_templates_from_listing('ask_form.html', self.state['listing']),
+        return get_templates_from_listing('ask_form.html', self.state['listing'])
 
     def parse_params(self, bits, context):
         """ Store the context provided by ella to self.state. """
