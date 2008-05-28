@@ -20,8 +20,7 @@ DEPS_KEY = getattr(settings, 'CI_DEPS_KEY', 'ella_ci_deps')
 class CacheInvalidator(object):
     def __init__(self):
         self._register = self._register_get()
-        print self._register
-        self._dependencies = {}
+        self._dependencies = self._dependencies_get()
 
     def _register_get(self):
         r = cache.get(REGISTER_KEY)
@@ -31,6 +30,15 @@ class CacheInvalidator(object):
 
     def _register_save(self):
         cache.set(REGISTER_KEY, self._register)
+
+    def _dependencies_get(self):
+        d = cache.get(DEPS_KEY)
+        if not d:
+            return {}
+        return d
+
+    def _dependencies_save(self):
+        cache.set(DEPS_KEY, self._dependencies)
 
     def on_error(self, headers, message):
         log.error('ActiveMQ/Stomp on_error')
@@ -82,6 +90,7 @@ class CacheInvalidator(object):
         if src_key not in self._dependencies:
             self._dependencies[src_key] = list()
         self._dependencies[src_key].append(dst_key)
+        self._dependencies_save()
         log.debug('CI register dependency, src: %s, dst: %s' % (src_key, dst_key))
 
     def _check_test(self, instance, test_str):
@@ -135,6 +144,7 @@ class CacheInvalidator(object):
                 log.debug('CI dependency invalidate key "%s".' % dst)
                 cache.delete(dst)
             del self._dependencies[key]
+            self._dependencies_save()
 
 
 ACTIVE_MQ_HOST = getattr(settings, 'ACTIVE_MQ_HOST', None)
