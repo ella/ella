@@ -13,12 +13,24 @@ from django.conf import settings
 
 log = logging.getLogger('cache')
 
-AMQ_DESTINATION = '/topic/ella'
+AMQ_DESTINATION = getattr(settings, 'CI_AMQ_DESTINATION', '/topic/ella')
+REGISTER_KEY = getattr(settings, 'CI_REGISTER_KEY', 'ella_ci_register')
+DEPS_KEY = getattr(settings, 'CI_DEPS_KEY', 'ella_ci_deps')
 
 class CacheInvalidator(object):
     def __init__(self):
-        self._register = {}
+        self._register = self._register_get()
+        print self._register
         self._dependencies = {}
+
+    def _register_get(self):
+        r = cache.get(REGISTER_KEY)
+        if not r:
+            return {}
+        return r
+
+    def _register_save(self):
+        cache.set(REGISTER_KEY, self._register)
 
     def on_error(self, headers, message):
         log.error('ActiveMQ/Stomp on_error')
@@ -53,6 +65,7 @@ class CacheInvalidator(object):
 
         self.append_model(model)
         self._register[model][1].appendlist(key, test)
+        self._register_save()
         log.debug('CI appended test - model: %s, test: %s, key: %s' % (model, test, key))
 
     def append_pk(self, instance, key):
@@ -62,6 +75,7 @@ class CacheInvalidator(object):
         modelkey = str(instance.__class__)
         self.append_model(modelkey)
         self._register[modelkey][0].appendlist(instance._get_pk_val(), key)
+        self._register_save()
 #        log.debug('CI appended PK, model: %s, pk: %s, key: %s' % (instance.__class__, instance._get_pk_val(), key))
 
     def register_dependency(self, src_key, dst_key):
@@ -100,12 +114,14 @@ class CacheInvalidator(object):
                 for key in pks.getlist(instance._get_pk_val()):
                     self.invalidate(sender, key, from_test=False)
                 del pks[instance._get_pk_val()]
+                self._register_save()
 
             for key in tests.keys():
                 for t in tests.getlist(key):
                     if self._check_test(instance, t):
                         self.invalidate(sender, key)
                         del tests[key]
+                        self._register_save()
                         break
 
     def invalidate(self, sender, key, from_test=True):

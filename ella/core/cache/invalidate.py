@@ -10,7 +10,7 @@ from django.conf import settings
 
 import logging
 log = logging.getLogger('cache')
-AMQ_DESTINATION = '/topic/ella'
+AMQ_DESTINATION = getattr(settings, 'CI_AMQ_DESTINATION', '/topic/ella')
 
 
 class CacheDeleter(object):
