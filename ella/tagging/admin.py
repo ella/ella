@@ -32,14 +32,18 @@ class TagInlineFormset(generic.GenericInlineFormset):
         ti.save()
 
     def save_existing(self, form, instance, commit=True):
-        instance = super(TagInlineFormset, self).save_existing(form, instance, commit)
+        instance = super(self.__class__, self).save_existing(form, instance, commit)
         self.__add_category(form, instance, commit)
         return instance
 
     def save_new(self, form, commit=True):
-        instance = super(TagInlineFormset, self).save_new(form, commit)
+        instance = super(self.__class__, self).save_new(form, commit)
         self.__add_category(form, self.instance, commit)
         return instance
+
+    def clean(self):
+        cleaned_data = super(self.__class__, self).clean()
+        import pdb;pdb.set_trace()
 
 class TaggingInlineOptionsSimple(admin.TabularInline):
     model = TaggedItem

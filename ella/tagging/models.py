@@ -498,6 +498,8 @@ class TaggedItemManager(models.Manager):
 """
 TODO:
 1. cachovani castych dotazu (napr. zjistovani tagu pro objekt ci kategorii)
+
+2. testy  core/admin/editinline test
 """
 
 class Tag(models.Model):
