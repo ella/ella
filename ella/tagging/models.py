@@ -1,6 +1,7 @@
 """
 Models and managers for generic tagging.
 """
+import re
 
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
@@ -18,6 +19,9 @@ from ella.tagging.validators import isTag
 qn = connection.ops.quote_name
 
 parse_lookup = None
+
+class WrongTagFormat(Exception):
+    pass
 
 ############
 # Managers #
@@ -64,6 +68,8 @@ class TagManager(models.Manager):
         tag_name = tag_name.strip()
         if settings.FORCE_LOWERCASE_TAGS:
             tag_name = tag_name.lower()
+        if re.findall(r'[^\w^\s^,]', tag_name, re.UNICODE):
+            raise WrongTagFormat
         tag, created = self.get_or_create(name=tag_name)
         ctype = ContentType.objects.get_for_model(obj)
         cat = None
@@ -486,6 +492,11 @@ class TaggedItemManager(models.Manager):
 ##########
 # Models #
 ##########
+
+"""
+TODO:
+1. cachovani castych dotazu (napr. zjistovani tagu pro objekt ci kategorii)
+"""
 
 class Tag(models.Model):
     """

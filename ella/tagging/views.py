@@ -84,8 +84,6 @@ def tag_form_view(request, **kwargs):
         f = TagForm()
     return render_to_response(
         'tag_form.html',
-        {
-            'form': f,
-}
+        {'form': f,}
 )
 

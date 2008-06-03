@@ -45,22 +45,26 @@ class FormatHitsLink(template.Node):
     def render(self, context):
         from django.utils.safestring import mark_safe
         from ella.core.cache import get_cached_list
-        from ella.core.models import HitCount
+        from ella.core.models import HitCount, Placement
         from django.template import resolve_variable
         try:
             tct = resolve_variable(self.target_ct, context)
             oid = resolve_variable(self.target_id, context)
             # TODO: this improve speed but it's dirty
-            if not tct in [16,28,29,55,32]:
-                return ''
+            #if not tct in [16,28,29,55,32]:
+            #    return ''
             hl = get_cached_list(
-                    HitCount,
+                    Placement,
                     target_ct=tct,
                     target_id=oid
 )
             l = ''
             for h in hl:
-                l += '<li><a href="../../../core/hitcount/%d/" class="viewsitelink">Hits (%s): %d</a></li>' % (h.id, h.site.name, h.hits)
+                hit_count = HitCount.objects.get(placement=h)
+                if not hit_count:
+                    continue
+                l += '<li><a href="../../../core/hitcount/%d/" class="viewsitelink">Hits: %d</a></li>' \
+                % (hit_count._get_pk_val(), hit_count.hits)
             return mark_safe(l)
         except (HitCount.DoesNotExist, template.VariableDoesNotExist):
             return ''

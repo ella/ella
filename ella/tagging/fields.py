@@ -169,24 +169,25 @@ class SuggestTagAdminField(forms.fields.Field):
 }
     def __init__(self, db_field, *args, **kwargs):
         self.rel = db_field.rel
+        self.object_category = kwargs.get('category', None)
         self.widget = SuggestTagAdminWidget(db_field, **kwargs)
         super(SuggestTagAdminField, self).__init__(*args, **kwargs)
-
 
     def clean(self, value):
         from django.newforms.util import ValidationError
         super(SuggestTagAdminField, self).clean(value)
+        if not self.object_category:
+            raise ValidationError(_('Tagged object must be related to category!'))
         isFound = Tag.objects.filter(name=value)
         if len(isFound) == 1:
             tag = isFound[0]
         elif len(isFound) > 1:
             raise ValidationError(self.error_messages['found_too_much'] % value)
         elif len(isFound) == 0:
-            tag, status = Tag.objects.get_or_create(name=value)
+            tag, status = Tag.objects.add_tag(self.object_category, value)
             if not status:
                 raise ValidationError(self.error_messages['not_found'] % value)
         return tag
-
 
 class SuggestTagWidget(forms.TextInput):
 
@@ -198,17 +199,14 @@ class SuggestTagWidget(forms.TextInput):
             'screen': (settings.ADMIN_MEDIA_PREFIX + CSS_SUGGEST,),
 }
 
-
     def __init__(self, attrs={}):
         super(SuggestTagWidget, self).__init__(attrs)
-
 
     def render(self, name, value, attrs=None):
         if not attrs.has_key('class'):
           attrs['class'] = 'vSuggestMultipleField' # The JavaScript looks for this hook.
         output = [super(SuggestTagWidget, self).render(name, value, attrs)]
         return mark_safe(u''.join(output))
-
 
 class SuggestTagField(forms.fields.Field):
     MULTIPLE_DIVIDER = ','

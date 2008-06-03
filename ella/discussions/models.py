@@ -55,6 +55,8 @@ http://www.b-list.org/weblog/2006/sep/02/django-tips-user-registration/
 
 """
 TODO:
+4. Udelat (v placements verzi) vypis temat pro urc. kategorii (vc. easy sablony)
+
 1* Kontrolovat pri zakladani vlakna stejny title -> achtung a nenechat zalozit.
 
 2* profil Zaneta posle (polozky)
