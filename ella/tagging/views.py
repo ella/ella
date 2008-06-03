@@ -61,7 +61,6 @@ from ella.tagging.fields import SuggestTagField
 import urllib
 
 def tags_json_view(request, **kwargs):
-    mimetype = 'text/html'
     tag_begin = ''
     if 'q' in request:
         tag_begin = request['q']
@@ -73,7 +72,7 @@ def tags_json_view(request, **kwargs):
         data = Tag.objects.filter(name__startswith=start.lower())
         for item in data:
             ft.append(item.__unicode__().encode('utf-8'))
-    return HttpResponse('\n'.join(ft), mimetype=mimetype)
+    return HttpResponse('\n'.join(ft), mimetype='text/html')
 
 class TagForm(forms.Form):
     tags = SuggestTagField()
