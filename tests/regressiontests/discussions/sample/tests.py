@@ -341,6 +341,7 @@ unread_posts = r"""
 >>> for i in Comment.objects.all():
 ...     i.delete()
 >>> Comment.objects.all()
+[]
 >>> ct = ContentType.objects.get_for_model(TopicThread)
 >>> thr_w = TopicThread.objects.get(title="Vlakno Wife ;-)")
 >>> thr = TopicThread.objects.get(title="Vlakno Four")
@@ -349,25 +350,25 @@ unread_posts = r"""
 >>> add_post('Dalsi prispevek', thr, admin)
 >>> add_post('Johohohooo!', thr, admin)
 >>> normal = User.objects.get(username='normal_user')
->>> for i in TopicThread.unread_items.get_posts(user=normal):
+>>> for i in TopicThread.objects.get_unread_posts(user=normal):
 ...    '%s' % i.content
 u'Johohohooo!'
 u'Dalsi prispevek'
 u'Co vajco'
 
->>> len(TopicThread.unread_items.get_posts(user=admin))
+>>> len(TopicThread.objects.get_unread_posts(user=admin))
 0
 
 >>> c = Comment.objects.get(content='Johohohooo!', user=admin)
 >>> CT = ContentType.objects.get_for_model(Comment)
 >>> pv = PostViewed(target_ct=CT, target_id=c._get_pk_val(), user=normal)
 >>> pv.save()
->>> for i in TopicThread.unread_items.get_posts(user=normal):
+>>> for i in TopicThread.objects.get_unread_posts(user=normal):
 ...    '%s' % i.content
 u'Dalsi prispevek'
 u'Co vajco'
 
->>> TopicThread.unread_items.get_topicthreads(normal)
+>>> TopicThread.objects.get_unread_topicthreads(normal)
 [<TopicThread: Vlakno Four>]
 """
 

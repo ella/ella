@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, connection
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from ella.comments.models import Comment
