@@ -1,9 +1,6 @@
 """
 Models and managers for generic tagging.
 """
-# Python 2.3 compatibility
-if not hasattr(__builtins__, 'set'):
-    from sets import Set as set
 
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
@@ -497,9 +494,6 @@ class Tag(models.Model):
         verbose_name = _('tag')
         verbose_name_plural = _('tags')
 
-    class Admin:
-        pass
-
     def __unicode__(self):
         return self.name
 
@@ -520,9 +514,6 @@ class TaggedItem(models.Model):
         unique_together = (('tag', 'content_type', 'object_id'),)
         verbose_name = _('tagged item')
         verbose_name_plural = _('tagged items')
-
-    class Admin:
-        pass
 
     def __unicode__(self):
         return u'%s [%s]' % (self.object, self.tag)

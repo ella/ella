@@ -27,7 +27,7 @@ cloud_for_model = r"""
 [<Tag: a>]
 """ #}}}
 
-tag_category = r"""
+cloud_category = r"""
 #{{{
 >>> from ella.core.models import Category
 >>> from ella.tagging.models import *
@@ -54,38 +54,27 @@ tag_category = r"""
 [u'ahoj', u'blabla', u'fireball']
 """#}}}
 
+tag_priority = r"""
 #{{{
-"""
-zo zc zR zF
-asdasd
-asdasd
-    asdfas#{{{
-    asdas
-    asd
-    ada
-    sdas
-    d#}}}
-adasda
-sdasd
-adsd
-"""
-#}}}
+>>> from ella.core.models import Category
+>>> from ella.tagging.models import *
+>>> from sample.models import *
+>>> for t in TaggedItem.objects.all():
+...     t.delete()
+>>> for t in Tag.objects.all():
+...     t.delete()
+"""#}}}
+
 
 """
 TODO TESTY:
 1. otestovat stezenjni funkcionalitu (tag cloud)
 2. tagy v dvou urovnich priority
 3. naseptavac
-
-- vzit ze stareho django tagging
-  pouze modely + nase upravy
-- priority TaggedItem
-- tag cloud per category
-- naseptavac
-- common.urls -> tagging.views
+4. tagy v kategoriich
 """
 
 __test__ = {
     'ellatagging_cloud': cloud_for_model,
-    'ellatagging_category': tag_category,
+    'ellatagging_category': cloud_category,
 }
