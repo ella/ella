@@ -21,11 +21,6 @@ class TopicThreadManager(models.Manager):
             target_id
 ) AS _rate
         """ % ct_thread._get_pk_val()
-        subquery="""
-        (
-        1 , 2
-) AS _rate
-        """ % ct_thread._get_pk_val()
         cond = 'discussions_topicthread.id = _rate.target_id'
         return self.model.objects.extra(
             select={'cnt': '_rate.comment_count'},
