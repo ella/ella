@@ -254,13 +254,15 @@ class TagManager(models.Manager):
 
     def cloud_for_category(self, category, **kwargs):
         """ returns tag cloud for all objects in certain category. """
-        priority, steps = kwargs.get('priority', None), kwargs.get('steps', 4)
+        priority, steps = kwargs.get('priority', PRIMARY_TAG), kwargs.get('steps', 4)
         distribution = kwargs.get('distribution', LOGARITHMIC)
         prio_sql = ''
         if type(priority) == int:
             prio_sql = 'AND tagging_taggeditem.priority = %d' % priority
         elif type(priority) == tuple:
             prio_sql = 'AND tagging_taggeditem.priority IN %s' % str(priority)
+        else:
+            raise TypeError('kwarg priority should be tuple or int type. %s' % str(type(priority)))
         sql = """
         SELECT
             tagging_tag.id, COUNT(tagging_tag.name) AS cnt
@@ -513,13 +515,13 @@ class TaggedItemManager(models.Manager):
 TODO:
 1. cachovani castych dotazu (napr. zjistovani tagu pro objekt ci kategorii)
 
-3. vytvorit formular: <priorita> <seznam tagu dane priority>
+3* vytvorit formular: <priorita> <seznam tagu dane priority>
 
-2. testy  core/admin/editinline test
+2* testy core/admin/editinline test
 
-4. kesovani
-
-5. pridat do Publishible get_tags() nebo neco takoveho na ziskani seznamu tagu k objektu
+5* pridat do Publishible get_tags() nebo neco takoveho na ziskani seznamu tagu k objektu
+   (reseni: existuji metody Tag a TaggedItem manageru, pro sablony jsou tpltagy jako
+   tag_cloud_for_category a podobne)
 """
 
 class Tag(models.Model):

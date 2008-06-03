@@ -42,6 +42,9 @@ cloud_category = r"""
 ...     t.delete()
 
 >>> cat = Category.objects.get(pk=2)
+>>> cat is None
+False
+
 >>> s = IchBinLadin(organisation='johohoo', category=Category.objects.get(pk=3))
 >>> t = IchBinLadin(organisation='vachler art', category=cat)
 >>> l = IchBinLadin(organisation='santa cruz aupair', category=cat)
@@ -57,6 +60,10 @@ cloud_category = r"""
 >>> ti, created = Tag.objects.add_tag(t, 'ahoj')
 >>> ti, created = Tag.objects.add_tag(m, 'ahoj')
 >>> ti, created = Tag.objects.add_tag(m, 'blabla')
+
+>>> cat is None
+False
+
 >>> res = Tag.objects.cloud_for_category(cat)  # all tags in category (priority independent)
 >>> res
 [<Tag: ahoj>, <Tag: blabla>, <Tag: fireball>]
@@ -215,6 +222,91 @@ True
 [{'priority': 100, 'tag': [<Tag: nazdar>], 'id': None}, {'priority': 90, 'tag': [<Tag: ahoj>], 'id': None}]
 """
 
+
+cloud_category_tag = """
+>>> from django import template
+>>> from django.template import Context, Template
+>>> from django.contrib.contenttypes.models import ContentType
+>>> import ella.tagging.utils
+>>> from ella.core.models import Category
+>>> from ella.tagging.models import *
+>>> from sample.models import *
+>>> for t in TaggedItem.objects.all():
+...     t.delete()
+>>> for t in Tag.objects.all():
+...     t.delete()
+
+>>> cat = Category.objects.get(pk=2)
+>>> s = IchBinLadin(organisation='johohoo', category=Category.objects.get(pk=3))
+>>> t = IchBinLadin(organisation='vachler art', category=cat)
+>>> l = IchBinLadin(organisation='santa cruz aupair', category=cat)
+>>> m = IchBinLadin(organisation='co to e', category=cat)
+>>> s.save(); t.save(); l.save(); m.save()
+>>> ti, created = Tag.objects.add_tag(l, 'ahoj')
+>>> ti, created = Tag.objects.add_tag(l, 'blabla')
+>>> ti, created = Tag.objects.add_tag(s, 'nonono')
+>>> ti, created = Tag.objects.add_tag(s, 'ahoj')
+>>> ti, created = Tag.objects.add_tag(t, 'fireball')
+>>> ti, created = Tag.objects.add_tag(t, 'fireball')
+>>> ti, created = Tag.objects.add_tag(t, 'fireball')
+>>> ti, created = Tag.objects.add_tag(t, 'ahoj')
+>>> ti, created = Tag.objects.add_tag(m, 'ahoj')
+>>> ti, created = Tag.objects.add_tag(m, 'blabla')
+>>> res = Tag.objects.cloud_for_category(cat)  # all tags in category (priority independent)
+
+>>> tpl = '''
+...   {% block container %}
+...     {% load tagging %}
+...     {% tag_cloud_for_category "first-category" as cloud %}
+...     {% for tag in cloud %}
+...         "{{tag}}:{{tag.count}}"
+...     {% endfor %}
+...   {% endblock %}
+... '''
+>>> tpl_lines = tpl.split('\\n')
+>>> tpl_lines = map(lambda z: z.strip(), tpl_lines)
+>>> tpl = ''.join(tpl_lines)
+>>> t = Template(tpl)
+>>> cx = Context({'category': cat})
+>>> t.render(cx)
+u'"ahoj:3""blabla:2""fireball:1"'
+
+>>> tpl = '''
+...   {% block container %}
+...     {% load tagging %}
+...     {% tag_cloud_for_category "first-category" as cloud with priority=PRIMARY_TAG %}
+...     {% for tag in cloud %}
+...         "{{tag}}:{{tag.count}}"
+...     {% endfor %}
+...   {% endblock %}
+... '''
+>>> tpl_lines = tpl.split('\\n')
+>>> tpl_lines = map(lambda z: z.strip(), tpl_lines)
+>>> tpl = ''.join(tpl_lines)
+>>> t = Template(tpl)
+>>> cx = Context({'category': cat})
+>>> t.render(cx)
+u'"ahoj:3""blabla:2""fireball:1"'
+"""
+
+
+category_from_tpl_var_test = """
+>>> from django import template
+>>> from django.template import Context, Template
+>>> from ella.core.models import Category
+>>> from ella.tagging.templatetags.tagging import category_from_tpl_var
+>>> cat = Category.objects.get(pk=2)
+>>> cx = Context({'category': cat})
+>>> category_from_tpl_var('category', cx)
+<Category: example.com/first-category>
+
+# return category by slug
+
+>>> category_from_tpl_var('"first-category"', cx)
+<Category: example.com/first-category>
+"""
+
+
 """
 TODO TESTY:
 1. otestovat stezenjni funkcionalitu (tag cloud)
@@ -224,9 +316,11 @@ TODO TESTY:
 """
 
 __test__ = {
-    'ellatagging_cloud': cloud_for_model, # deleted functionality
+    'ellatagging_cloud': cloud_for_model,
     'ellatagging_category': cloud_category,
     #'ellatagging_priority': tag_priority,
     #'ellatagging_suggester': suggester_response,
     'ellatagging_admin_options': options_test,
+    'ellatagging_category_from_tpl_var': category_from_tpl_var_test,
+    'ellatagging_cloud_for_category_tpltag': cloud_category_tag,
 }
