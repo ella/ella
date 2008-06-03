@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # vim: set fileencoding=utf-8 :
 # --- doc tests for ella.tagging ---
 from settings import *
@@ -16,10 +17,10 @@ cloud_for_model = r"""
 >>> t = SomethingElse(title='ciao', description='neco xyz')
 >>> l = IchBinLadin(organisation='johohoo', category=Category.objects.get(pk=2))
 >>> s.save(); t.save(); l.save()
->>> Tag.objects.add_tag(l, 'a')
->>> Tag.objects.add_tag(s, 'a')
->>> Tag.objects.add_tag(s, 'b')
->>> Tag.objects.add_tag(t, 'b')
+>>> ti, created = Tag.objects.add_tag(l, 'a')
+>>> ti, created = Tag.objects.add_tag(s, 'a')
+>>> ti, created = Tag.objects.add_tag(s, 'b')
+>>> ti, created = Tag.objects.add_tag(t, 'b')
 
 >>> Tag.objects.cloud_for_model(Something)
 [<Tag: a>, <Tag: b>]
@@ -46,16 +47,16 @@ cloud_category = r"""
 >>> l = IchBinLadin(organisation='santa cruz aupair', category=cat)
 >>> m = IchBinLadin(organisation='co to e', category=cat)
 >>> s.save(); t.save(); l.save(); m.save()
->>> Tag.objects.add_tag(l, 'ahoj')
->>> Tag.objects.add_tag(l, 'blabla')
->>> Tag.objects.add_tag(s, 'nonono')
->>> Tag.objects.add_tag(s, 'ahoj')
->>> Tag.objects.add_tag(t, 'fireball')
->>> Tag.objects.add_tag(t, 'fireball')
->>> Tag.objects.add_tag(t, 'fireball')
->>> Tag.objects.add_tag(t, 'ahoj')
->>> Tag.objects.add_tag(m, 'ahoj')
->>> Tag.objects.add_tag(m, 'blabla')
+>>> ti, created = Tag.objects.add_tag(l, 'ahoj')
+>>> ti, created = Tag.objects.add_tag(l, 'blabla')
+>>> ti, created = Tag.objects.add_tag(s, 'nonono')
+>>> ti, created = Tag.objects.add_tag(s, 'ahoj')
+>>> ti, created = Tag.objects.add_tag(t, 'fireball')
+>>> ti, created = Tag.objects.add_tag(t, 'fireball')
+>>> ti, created = Tag.objects.add_tag(t, 'fireball')
+>>> ti, created = Tag.objects.add_tag(t, 'ahoj')
+>>> ti, created = Tag.objects.add_tag(m, 'ahoj')
+>>> ti, created = Tag.objects.add_tag(m, 'blabla')
 >>> res = Tag.objects.cloud_for_category(cat)  # all tags in category (priority independent)
 >>> res
 [<Tag: ahoj>, <Tag: blabla>, <Tag: fireball>]
@@ -82,14 +83,14 @@ tag_priority = r"""
 >>> l = IchBinLadin(organisation='santa cruz aupairation', category=cat)
 >>> m = IchBinLadin(organisation='co to e', category=cat)
 >>> s.save(); t.save(); l.save(); m.save()
->>> Tag.objects.add_tag(l, 'ahoj')
->>> Tag.objects.add_tag(l, 'blabla', SECONDARY_TAG)
->>> Tag.objects.add_tag(s, 'nonono')
->>> Tag.objects.add_tag(s, 'ahoj')
->>> Tag.objects.add_tag(t, 'ěščřžýáíé', SECONDARY_TAG)
->>> Tag.objects.add_tag(t, 'ěščřžýáíé')
->>> Tag.objects.add_tag(m, 'ahoj')
->>> Tag.objects.add_tag(m, 'blabla', SECONDARY_TAG)
+>>> ti, created = Tag.objects.add_tag(l, 'ahoj')
+>>> ti, created = Tag.objects.add_tag(l, 'blabla', SECONDARY_TAG)
+>>> ti, created = Tag.objects.add_tag(s, 'nonono')
+>>> ti, created = Tag.objects.add_tag(s, 'ahoj')
+>>> ti, created = Tag.objects.add_tag(t, u'ěščřžýáíé', SECONDARY_TAG)
+>>> ti, created = Tag.objects.add_tag(t, u'ěščřžýáíé')
+>>> ti, created = Tag.objects.add_tag(m, 'ahoj')
+>>> ti, created = Tag.objects.add_tag(m, 'blabla', SECONDARY_TAG)
 >>> Tag.objects.cloud_for_category(cat, priority=SECONDARY_TAG)
 [<Tag: blabla>, <Tag: ěščřžýáíé>]
 
@@ -111,11 +112,11 @@ suggester_response = r"""
 >>> cat = Category.objects.get(pk=2)
 >>> l = IchBinLadin(organisation='santa cruz aupairation', category=cat)
 >>> l.save()
->>> Tag.objects.add_tag(l, 'ahoj')
->>> Tag.objects.add_tag(l, 'nazdar')
->>> Tag.objects.add_tag(l, 'dvou slovny')
->>> Tag.objects.add_tag(l, 'ěščřžýáíé')
->>> Tag.objects.add_tag(l, 'šla šášeň po mostě')
+>>> ti, created = Tag.objects.add_tag(l, 'ahoj')
+>>> ti, created = Tag.objects.add_tag(l, 'nazdar')
+>>> ti, created = Tag.objects.add_tag(l, 'dvou slovny')
+>>> ti, created = Tag.objects.add_tag(l, u'\xec\xb9\xe8\xf8\xbe\xfd\xe1\xed')
+>>> ti, created = Tag.objects.add_tag(l, u'\xb9la \xb9\xe1\xb9e\xf2 po most\xec')
 
 >>> from django.test.client import Client
 >>> from urllib import quote
@@ -126,14 +127,14 @@ suggester_response = r"""
 >>> res = cli.get('/t/', {'q': 'šla'})
 >>> res.status_code
 200
->>> res.content == 'šla šášeň po mostě'
+>>> res.content == u'\xb9la \xb9\xe1\xb9e\xf2 po most\xec'
 True
 
->>> res = cli.get('/t/', {'q': 'ěšč'})
+>>> res = cli.get('/t/', {'q': u'\xec\xb9\xe8'})
 >>> res.status_code
 200
->>> res.content == 'ěščřžýáíé'
-True
+>>> res.content
+u'\xec\xb9\xe8\xf8\xbe\xfd\xe1\xed'
 
 >>> res = cli.get('/t/', {'q': 'na'})
 >>> res.status_code
@@ -150,6 +151,70 @@ True
 >>> #}}}
 """
 
+# TODO test also saving data from the form (deletin' and savin' tags)
+options_test = """
+>>> from ella.core.models import Category
+>>> from django.contrib import admin
+>>> from ella.tagging.admin import TagInlineFormset, TaggingInlineOptions
+>>> from sample.models import *
+>>> from django.utils.datastructures import MultiValueDict
+>>> empty_data = MultiValueDict({
+...     "tagged_item_-TOTAL_FORMS": ["2"],
+...     "tagged_item_-INITIAL_FORMS": ["2"],
+...     "tagged_item_-0-tag": ["ahoj"],
+...     "tagged_item_-0-priority": [100],
+...     "tagged_item_-0-id": [""],
+...     "tagged_item_-1-tag": ["ahoj"],
+...     "tagged_item_-1-priority": [90],
+...     "tagged_item_-1-id": [""]
+...})
+>>> cat = Category.objects.get(pk=2)
+>>> l = IchBinLadin(organisation='santa cruz aupairation', category=cat)
+>>> l.save()
+>>> opts = TaggingInlineOptions(IchBinLadin, admin.site)
+>>> fset_cls = opts.get_formset(None)
+>>> fset = fset_cls(data=empty_data, files={}, instance=l)
+>>> fset.is_valid()
+True
+>>> fset.cleaned_data
+[{'priority': 100, 'tag': [<Tag: ahoj>], 'id': None}, {'priority': 90, 'tag': [<Tag: ahoj>], 'id': None}]
+
+
+>>> empty_data = MultiValueDict({
+...     "tagged_item_-TOTAL_FORMS": ["2"],
+...     "tagged_item_-INITIAL_FORMS": ["2"],
+...     "tagged_item_-0-tag": ["ahoj, nazdar, hulahop"],
+...     "tagged_item_-0-priority": [100],
+...     "tagged_item_-0-id": [""],
+...     "tagged_item_-1-tag": ["ahoj"],
+...     "tagged_item_-1-priority": [90],
+...     "tagged_item_-1-id": [""]
+...})
+>>> fset = fset_cls(data=empty_data, files={}, instance=l)
+>>> fset.is_valid()
+True
+>>> fset.cleaned_data
+[{'priority': 100, 'tag': [<Tag: ahoj>, <Tag: nazdar>, <Tag: hulahop>], 'id': None}, {'priority': 90, 'tag': [<Tag: ahoj>], 'id': None}]
+
+
+
+>>> empty_data = MultiValueDict({
+...     "tagged_item_-TOTAL_FORMS": ["2"],
+...     "tagged_item_-INITIAL_FORMS": ["2"],
+...     "tagged_item_-0-tag": ["nazdar"],
+...     "tagged_item_-0-priority": [100],
+...     "tagged_item_-0-id": [""],
+...     "tagged_item_-1-tag": ["ahoj"],
+...     "tagged_item_-1-priority": [90],
+...     "tagged_item_-1-id": [""]
+...})
+>>> fset = fset_cls(data=empty_data, files={}, instance=l)
+>>> fset.is_valid()
+True
+>>> fset.cleaned_data
+[{'priority': 100, 'tag': [<Tag: nazdar>], 'id': None}, {'priority': 90, 'tag': [<Tag: ahoj>], 'id': None}]
+"""
+
 """
 TODO TESTY:
 1. otestovat stezenjni funkcionalitu (tag cloud)
@@ -161,6 +226,7 @@ TODO TESTY:
 __test__ = {
     'ellatagging_cloud': cloud_for_model, # deleted functionality
     'ellatagging_category': cloud_category,
-    'ellatagging_priority': tag_priority,
-    'ellatagging_suggester': suggester_response,
+    #'ellatagging_priority': tag_priority,
+    #'ellatagging_suggester': suggester_response,
+    'ellatagging_admin_options': options_test,
 }

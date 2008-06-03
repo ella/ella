@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib import admin
 from ella.db.models import Publishable
 from ella.core.models import Category
+from ella.tagging.admin import TaggingInlineOptions
 
 class Something(models.Model):
     description = models.CharField(max_length=200)
@@ -24,3 +25,7 @@ class IchBinLadin(Publishable, models.Model):
     def __unicode__(self):
         return self.organisation
 
+class IchBinLadinOptions(admin.ModelAdmin):
+    inlines = (TaggingInlineOptions,)
+
+#admin.site.register(IchBinLadin, IchBinLadinOptions)

@@ -18,8 +18,6 @@ class TagInlineForm(modelforms.ModelForm):
 
 class TagInlineFormset(modelforms.BaseModelFormSet):
     def __init__(self, data=None, files=None, instance=None):
-        # instance ... <Article: neco>
-        # self.extra_forms, self.initial_forms ... formulare formsetu
         self.queryset = None
         self.instance = instance
         tags_by_prio = {}
@@ -30,6 +28,8 @@ class TagInlineFormset(modelforms.BaseModelFormSet):
                 if not ti.priority in tags_by_prio:
                     tags_by_prio[ ti.priority ] = []
                 tags_by_prio[ ti.priority ].append(ti.tag)
+            # sort aplhabeticaly
+            map(lambda x: x.sort(), tags_by_prio.values())
             for k, v in tags_by_prio.items():
                 initial.append({'priority': k, 'tag': v})
         super(modelforms.BaseModelFormSet, self).__init__(
@@ -39,31 +39,39 @@ class TagInlineFormset(modelforms.BaseModelFormSet):
             initial=initial
 )
 
-    def save_existing(self, form, instance, commit=True):
-        instance = super(self.__class__, self).save_existing(form, instance, commit)
-        # mmj. se vola instance._meta.fields[ n ].save_form_data(instance, cleaned_data[f.name])
-        import pdb;pdb.set_trace()
-        return instance
-
-    def save_new(self, form, commit=True):
-        instance = super(self.__class__, self).save_new(form, commit)
-        import pdb;pdb.set_trace()
-        return instance
-
     def save(self):
-        # self.initial
-        import pdb;pdb.set_trace()
         for d in self.cleaned_data:
-            d['priority']
-            d['tags']
+            if 'priority' not in d or 'tag' not in d:
+                continue
+            obj = self.instance
+            ct = ContentType.objects.get_for_model(obj)
+            tis = TaggedItem.objects.filter(
+                content_type=ct,
+                object_id=obj._get_pk_val(),
+                priority=d['priority']
+)
+            tags_before = set(map(lambda x: x.tag, tis))
+            saved_tags = []
+            for t in d['tag']:
+                if t in saved_tags:
+                    continue
+                ti, created = Tag.objects.add_tag(obj, t.name, int(d['priority']))
+                saved_tags.append(ti.tag)
+            st = set(saved_tags)
+            if tags_before == st:
+                continue
+            diff = tags_before - st
+            while diff:
+                ti = TaggedItem.objects.get(
+                    tag=diff.pop(),
+                    content_type=ct,
+                    object_id=obj._get_pk_val(),
+                    priority=d['priority']
+)
+                ti.delete()
 
 
     """
-    def get_queryset(self):
-        if self.queryset:
-            return self.queryset
-        return self.model._default_manager.get_queryset()
-
     def __add_category(self, form, instance, commit):
         if not commit:
             return
@@ -86,16 +94,6 @@ class TagInlineFormset(modelforms.BaseModelFormSet):
 )
         ti.category = obj.category
         ti.save()
-
-    def save_existing(self, form, instance, commit=True):
-        instance = super(self.__class__, self).save_existing(form, instance, commit)
-        self.__add_category(form, instance, commit)
-        return instance
-
-    def save_new(self, form, commit=True):
-        instance = super(self.__class__, self).save_new(form, commit)
-        self.__add_category(form, self.instance, commit)
-        return instance
     """
 
 

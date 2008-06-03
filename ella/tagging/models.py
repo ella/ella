@@ -75,12 +75,13 @@ class TagManager(models.Manager):
             raise WrongTagFormat
         if len(tag_name.split(TAG_DELIMITER)) > 1:
             raise AttributeError(_('Multiple tags were given: "%s".') % tag_name)
+        tag_name = tag_name.strip()
         tag, created = self.get_or_create(name=tag_name)
         ctype = ContentType.objects.get_for_model(obj)
         cat = None
         if hasattr(obj, 'get_category'):
             cat = obj.get_category()
-        TaggedItem._default_manager.get_or_create(
+        return TaggedItem._default_manager.get_or_create(
             tag=tag,
             content_type=ctype,
             object_id=obj.pk,
@@ -544,6 +545,9 @@ class Tag(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    def __cmp__(self, other):
+        return cmp(self.name, other.name)
 
 class TaggedItem(models.Model):
     """

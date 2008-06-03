@@ -222,6 +222,7 @@ class SuggestTagAdminField(forms.fields.Field):
         from django.newforms.util import ValidationError
         super(SuggestTagAdminField, self).clean(value)
         tag_name = value.split(TAG_DELIMITER)
+        tag_name = map(lambda x: x.strip(), tag_name)
         if not tag_name:
             return value
         tags = []

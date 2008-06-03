@@ -53,6 +53,13 @@
       "tree_path": "",
       "slug": "homepage"
     }
-  }
+  },
 
+  {
+    "pk": 1,
+    "model": "tagging.tag",
+    "fields": {
+      "name": "ahoj"
+    }
+  }
 ]
