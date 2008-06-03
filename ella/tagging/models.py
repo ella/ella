@@ -58,14 +58,6 @@ class TagManager(models.Manager):
         """
         Associates the given object with a tag.
         """
-        """
-        tag_names = parse_tag_input(tag_name)
-        if not len(tag_names):
-            raise AttributeError(_('No tags were given: "%s".') % tag_name)
-        if len(tag_names) > 1:
-            raise AttributeError(_('Multiple tags were given: "%s".') % tag_name)
-        tag_name = tag_names[0]
-        """
         tag_name = tag_name.strip()
         if not tag_name:
             raise AttributeError(_('No tags were given: "%s".') % tag_name)

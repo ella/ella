@@ -116,3 +116,7 @@ class Publishable(object):
         return hits
     get_hits.short_description = _('Hit Counts')
 
+    """
+    def get_tags(self):
+        from ella.tagging.models import TaggedItem
+    """

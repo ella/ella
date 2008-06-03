@@ -28,3 +28,4 @@ def register(model, tag_descriptor_attr='tags',
     # Add custom manager
     ModelTaggedItemManager().contribute_to_class(model,
                                                  tagged_item_manager_attr)
+
