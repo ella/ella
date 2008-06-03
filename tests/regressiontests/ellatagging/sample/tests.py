@@ -1,3 +1,4 @@
+# vim: set fileencoding=utf-8 :
 # --- doc tests for ella.tagging ---
 from settings import *
 
@@ -94,6 +95,56 @@ tag_priority = r"""
 [<Tag: ahoj>, <Tag: ěščřžýáíé>]
 """#}}}
 
+suggester_response = r"""
+#{{{
+>>> from ella.tagging.utils import PRIMARY_TAG, SECONDARY_TAG
+>>> from ella.tagging.models import *
+>>> from sample.models import *
+>>> for t in TaggedItem.objects.all():
+...     t.delete()
+>>> for t in Tag.objects.all():
+...     t.delete()
+
+>>> cat = Category.objects.get(pk=2)
+>>> l = IchBinLadin(organisation='santa cruz aupairation', category=cat)
+>>> l.save()
+>>> Tag.objects.add_tag(l, 'ahoj')
+>>> Tag.objects.add_tag(l, 'nazdar')
+>>> Tag.objects.add_tag(l, 'dvou slovny')
+>>> Tag.objects.add_tag(l, 'ěščřžýáíé')
+>>> Tag.objects.add_tag(l, 'šla šášeň po mostě')
+
+>>> from django.test.client import Client
+>>> from urllib import quote
+>>> cli = Client();
+
+
+>>> # simple one word tags:
+>>> res = cli.get('/t/', {'q': 'šla'})
+>>> res.status_code
+200
+>>> res.content == 'šla šášeň po mostě'
+True
+
+>>> res = cli.get('/t/', {'q': 'ěšč'})
+>>> res.status_code
+200
+>>> res.content == 'ěščřžýáíé'
+True
+
+>>> res = cli.get('/t/', {'q': 'na'})
+>>> res.status_code
+200
+>>> res.content
+'nazdar'
+
+>>> # two word tag
+>>> res = cli.get('/t/', {'q': 'dvo'})
+>>> res.status_code
+200
+>>> res.content
+'dvou slovny'
+"""#}}}
 
 """
 TODO TESTY:
@@ -107,4 +158,5 @@ __test__ = {
     'ellatagging_cloud': cloud_for_model, # deleted functionality
     'ellatagging_category': cloud_category,
     'ellatagging_priority': tag_priority,
+    'ellatagging_suggester': suggester_response,
 }

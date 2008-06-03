@@ -63,7 +63,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.doc.XViewMiddleware',
 )
 
-ROOT_URLCONF = 'tagging.urls'
+ROOT_URLCONF = 'ellatagging.urls'
 
 TEMPLATE_DIRS = (
     dirname(__file__) + '/templates',

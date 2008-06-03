@@ -162,7 +162,6 @@ class SuggestTagAdminWidget(forms.TextInput):
         return mark_safe(u''.join(output))
 
 
-
 class SuggestTagAdminField(forms.fields.Field):
     default_error_messages = {
         'not_found': u'Tag "%s" is not found.',

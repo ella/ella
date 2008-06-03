@@ -50,3 +50,43 @@ def tagged_object_list(request, queryset_or_model=None, tag=None,
             Tag.objects.related_for_model(tag_instance, queryset_or_model,
                                           counts=related_tag_counts)
     return object_list(request, queryset, **kwargs)
+
+
+# --- suggest
+
+from django.http import HttpResponse
+from django import newforms as forms
+from django.shortcuts import render_to_response
+from ella.tagging.fields import SuggestTagField
+import urllib
+
+def tags_json_view(request, **kwargs):
+    mimetype = 'text/html'
+    tag_begin = ''
+    if 'q' in request:
+        tag_begin = request['q']
+    elif 'tag' in kwargs:
+        tag_begin = kwargs['tag']
+    start = tag_begin.strip()
+    ft = []
+    if len(start) > 0:
+        data = Tag.objects.filter(name__startswith=start.lower())
+        for item in data:
+            ft.append(item.__unicode__().encode('utf-8'))
+    return HttpResponse('\n'.join(ft), mimetype=mimetype)
+
+class TagForm(forms.Form):
+    tags = SuggestTagField()
+
+def tag_form_view(request, **kwargs):
+    if 'tags' in request:
+        f = TagForm({'tags':request['tags']})
+    else:
+        f = TagForm()
+    return render_to_response(
+        'tag_form.html',
+        {
+            'form': f,
+}
+)
+

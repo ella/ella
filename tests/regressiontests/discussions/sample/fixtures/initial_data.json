@@ -102,6 +102,21 @@
             "target_ct": 15
         }
     },
+     {
+        "pk": "3",
+        "model": "core.listing",
+        "fields": {
+            "placement": 3,
+            "category": 2,
+            "publish_from": "2007-07-01 00:00:00",
+            "priority_value": 0,
+            "remove": false,
+            "commercial": false,
+            "priority_to": null,
+            "priority_from": null
+        }
+    },
+
   {
     "pk": 2,
     "model": "discussions.topic",
@@ -115,7 +130,7 @@
     }
   },
      {
-        "pk": "4",
+        "pk": 4,
         "model": "core.placement",
         "fields": {
             "category": 2,
@@ -124,6 +139,20 @@
             "publish_to": null,
             "slug": "druhe-tema",
             "target_ct": 15
+        }
+    },
+     {
+        "pk": 5,
+        "model": "core.listing",
+        "fields": {
+            "placement": 4,
+            "category": 2,
+            "publish_from": "2007-06-01 00:00:10",
+            "priority_value": 0,
+            "remove": false,
+            "commercial": false,
+            "priority_to": null,
+            "priority_from": null
         }
     },
 

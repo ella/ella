@@ -17,7 +17,7 @@ from ella.core.box import Box
 from ella.db.models import Publishable
 from ella.comments.models import Comment
 from ella.photos.models import Photo
-from ella.discussions.managers import MostFilledManager, MostViewedManager, WithNewestPostsManager, UnreadItemsManager
+from ella.discussions.managers import TopicThreadManager
 
 """
 HOWTO:
@@ -176,11 +176,8 @@ class TopicThread(models.Model):
     author = models.ForeignKey(User, verbose_name=_('authorized author'),)
     topic = models.ForeignKey(Topic)
 
-    objects = models.manager.Manager()
-    most_filled = MostFilledManager()
-    most_viewed = MostViewedManager()
-    with_newest_posts = WithNewestPostsManager()
-    unread_items = UnreadItemsManager()
+    objects = TopicThreadManager()
+
     # TODO (NAVSTEVNOST) hit count? Should be automatic by Ella (?) - prove it.
 
     def __init__(self, *args, **kwargs):

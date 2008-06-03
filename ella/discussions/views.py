@@ -187,8 +187,7 @@ def view_unread(request):
     if not isinstance(request.user, User):
         raise http.Http404('User does not exist!')
     u = request.user
-    #qset = TopicThread.unread_items.get_posts(request.user)
-    qset = TopicThread.unread_items.get_topicthreads(request.user)
+    qset = TopicThread.objects.get_unread_topicthreads(request.user)
     context = Context()
     context.update(paginate_queryset_for_request(request, qset))
     return render_to_response(

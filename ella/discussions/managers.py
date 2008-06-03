@@ -4,14 +4,14 @@ from django.contrib.contenttypes.models import ContentType
 from ella.comments.models import Comment
 
 
-class MostFilledManager(models.Manager):
+class TopicThreadManager(models.Manager):
 
-    def get_query_set(self):
+    def get_most_filled(self):
         ct_thread = ContentType.objects.get_for_model(self.model)
         subquery="""
         (
         SELECT
-            COUNT(id) AS comment_count,
+            COUNT(*) AS comment_count,
             target_id
         FROM
             comments_comment
@@ -21,6 +21,11 @@ class MostFilledManager(models.Manager):
             target_id
 ) AS _rate
         """ % ct_thread._get_pk_val()
+        subquery="""
+        (
+        1 , 2
+) AS _rate
+        """ % ct_thread._get_pk_val()
         cond = 'discussions_topicthread.id = _rate.target_id'
         return self.model.objects.extra(
             select={'cnt': '_rate.comment_count'},
@@ -28,10 +33,7 @@ class MostFilledManager(models.Manager):
             where=[cond]
 ).order_by('-cnt')
 
-
-class MostViewedManager(models.Manager):
-
-    def get_query_set(self):
+    def get_most_viewed(self):
         ct_thread = ContentType.objects.get_for_model(self.model)
         subquery="""
         (
@@ -51,9 +53,7 @@ class MostViewedManager(models.Manager):
             where=[cond]
 ).order_by('-cnt')
 
-class WithNewestPostsManager(models.Manager):
-
-    def get_query_set(self):
+    def get_with_newest_posts(self):
         ct_thread = ContentType.objects.get_for_model(self.model)
         subquery="""
         (
@@ -67,17 +67,15 @@ class WithNewestPostsManager(models.Manager):
             target_id
         ORDER BY
             submit_date DESC
-) AS _res
+) AS _rslt
         """ % ct_thread._get_pk_val()
-        cond = 'discussions_topicthread.id = _res.target_id'
+        cond = 'discussions_topicthread.id = _rslt.target_id'
         return self.model.objects.extra(
             tables=[subquery],
             where=[cond]
 )
 
-class UnreadItemsManager(models.Manager):
-
-    def get_posts(self, user):
+    def get_unread_posts(self, user):
         CT = ContentType.objects.get_for_model(self.model)
         qset = Comment.objects.filter(target_ct=CT).extra(
             tables=[ '''
@@ -98,7 +96,7 @@ class UnreadItemsManager(models.Manager):
 )
         return qset
 
-    def get_topicthreads(self, user):
+    def get_unread_topicthreads(self, user):
         CT = ContentType.objects.get_for_model(self.model)
         cur = connection.cursor()
         sql = '''
@@ -136,5 +134,5 @@ class UnreadItemsManager(models.Manager):
             setattr(item, 'unread_post_count', unread_count[i])
         return out
 
-    def get_topics(self, user):
+    def get_unread_topics(self, user):
         pass
