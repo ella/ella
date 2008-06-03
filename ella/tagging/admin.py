@@ -48,6 +48,7 @@ class TagInlineFormset(modelforms.BaseModelFormSet):
             tis = TaggedItem.objects.filter(
                 content_type=ct,
                 object_id=obj._get_pk_val(),
+                category=obj.category,
                 priority=d['priority']
 )
             tags_before = set(map(lambda x: x.tag, tis))
@@ -66,6 +67,7 @@ class TagInlineFormset(modelforms.BaseModelFormSet):
                     tag=diff.pop(),
                     content_type=ct,
                     object_id=obj._get_pk_val(),
+                    category=obj.category,
                     priority=d['priority']
 )
                 ti.delete()
