@@ -15,13 +15,14 @@ from django.utils.encoding import smart_unicode
 from django.conf import settings
 
 from ella.tagging.models import Tag
-from ella.tagging.utils import edit_string_for_tags, PRIMARY_TAG, SECONDARY_TAG
+from ella.tagging.utils import edit_string_for_tags, PRIMARY_TAG, SECONDARY_TAG, TAG_DELIMITER
 from ella.tagging.validators import isTagList
 
 
 class TagPriorityAdminField(forms.fields.Field):
     def __init__(self, db_field, *args, **kwargs):
         values = (
+            ('', ''),
             (PRIMARY_TAG, _('primary tag')),
             (SECONDARY_TAG, _('secondary tag')),
 )
@@ -134,14 +135,12 @@ class TagField(CharField):
 
 # --- suggest
 
-
-
 JS_SUGGEST = 'js/jquery.suggest.js'
 JS_SUGGEST_MULTIPLE = 'js/jquery.suggest.multiple.js'
 CSS_SUGGEST = 'css/jquery.suggest.css'
 
 class SuggestTagAdminWidget(forms.TextInput):
-
+    """ one suggest field per one tag (admin version) """
     class Media:
         js = (
             settings.ADMIN_MEDIA_PREFIX + JS_SUGGEST,
@@ -154,7 +153,7 @@ class SuggestTagAdminWidget(forms.TextInput):
     def __init__(self, db_field, attrs={}):
         self.rel = db_field.rel
         self.value = db_field
-        super(SuggestTagAdminWidget, self).__init__(attrs)
+        super(self.__class__, self).__init__(attrs)
 
 
     def render(self, name, value, attrs=None):
@@ -169,39 +168,69 @@ class SuggestTagAdminWidget(forms.TextInput):
                 tag = Tag.objects.get(pk=value)
             elif type(value) in [str, unicode]:
                 tag = Tag.objects.get(name=value)
-            output = [super(SuggestTagAdminWidget, self).render(name, tag.name, attrs)]
+            output = [super(self.__class__, self).render(name, tag.name, attrs)]
         else:
-            output = [super(SuggestTagAdminWidget, self).render(name, value, attrs)]
+            output = [super(self.__class__, self).render(name, value, attrs)]
+        return mark_safe(u''.join(output))
+
+class SuggestMultipleTagAdminWidget(forms.TextInput):
+
+    class Media:
+        js = (
+            settings.ADMIN_MEDIA_PREFIX + JS_SUGGEST_MULTIPLE,
+)
+        css = {
+            'screen': (settings.ADMIN_MEDIA_PREFIX + CSS_SUGGEST,),
+}
+
+
+    def __init__(self, db_field, attrs={}):
+        self.rel = db_field.rel
+        self.value = db_field
+        super(self.__class__, self).__init__(attrs)
+
+
+    def render(self, name, value, attrs=None):
+        if self.rel.limit_choices_to:
+            url = '?' + '&amp;'.join(['%s=%s' % (k, v) for k, v in self.rel.limit_choices_to.items()])
+        else:
+            url = ''
+        if not attrs.has_key('class'):
+          attrs['class'] = 'vForeignKeyRawIdAdminField vSuggestField' # The JavaScript looks for this hook.
+        tag_values = ''
+        if type(value) == list: # list of Tag instances
+            for tag in value:
+                tag_values += tag.name + TAG_DELIMITER
+        elif type(value) == unicode or type(value) == str:
+            for tag in value.split(TAG_DELIMITER):
+                tag_values += tag + TAG_DELIMITER
+        if tag_values.endswith(TAG_DELIMITER):
+            tag_values = tag_values[:-1]
+        output = [super(self.__class__, self).render(name, tag_values, attrs)]
         return mark_safe(u''.join(output))
 
 
 class SuggestTagAdminField(forms.fields.Field):
-    default_error_messages = {
-        'not_found': u'Tag "%s" is not found.',
-        'found_too_much': u'Multiple tags found as "%s".',
-}
+    """ uses multitag text field  """
     def __init__(self, db_field, *args, **kwargs):
         self.rel = db_field.rel
         self.object_category = kwargs.get('category', None)
-        self.widget = SuggestTagAdminWidget(db_field, **kwargs)
+        self.widget = SuggestMultipleTagAdminWidget(db_field, **kwargs)
         super(SuggestTagAdminField, self).__init__(*args, **kwargs)
 
     def clean(self, value):
         from django.newforms.util import ValidationError
         super(SuggestTagAdminField, self).clean(value)
-        isFound = Tag.objects.filter(name=value)
-        if len(isFound) == 1:
-            tag = isFound[0]
-        elif len(isFound) > 1:
-            raise ValidationError(self.error_messages['found_too_much'] % value)
-        elif len(isFound) == 0:
-            tag, status = Tag.objects.get_or_create(name=value)
-            if not status:
-                raise ValidationError(self.error_messages['not_found'] % value)
-        return tag
+        tag_name = value.split(TAG_DELIMITER)
+        if not tag_name:
+            return value
+        tags = []
+        for t in tag_name:
+            tag, status = Tag.objects.get_or_create(name=t)
+            tags.append(tag)
+        return tags
 
 class SuggestTagWidget(forms.TextInput):
-
     class Media:
         js = (
             settings.ADMIN_MEDIA_PREFIX + JS_SUGGEST_MULTIPLE,

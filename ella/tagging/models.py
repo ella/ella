@@ -13,8 +13,9 @@ from ella.core.models import Category
 
 from ella.tagging import settings
 from ella.tagging.utils import calculate_cloud, get_tag_list, get_queryset_and_model, parse_tag_input
-from ella.tagging.utils import LOGARITHMIC, PRIMARY_TAG
+from ella.tagging.utils import LOGARITHMIC, PRIMARY_TAG, TAG_DELIMITER
 from ella.tagging.validators import isTag
+from ella.core.cache.utils import get_cached_list
 
 qn = connection.ops.quote_name
 
@@ -70,8 +71,10 @@ class TagManager(models.Manager):
             raise AttributeError(_('No tags were given: "%s".') % tag_name)
         if settings.FORCE_LOWERCASE_TAGS:
             tag_name = tag_name.lower()
-        if re.findall(r'[^\w^\s^,]', tag_name, re.UNICODE):
+        if re.findall(r'[^\w^\s^%s]' % TAG_DELIMITER, tag_name, re.UNICODE):
             raise WrongTagFormat
+        if len(tag_name.split(TAG_DELIMITER)) > 1:
+            raise AttributeError(_('Multiple tags were given: "%s".') % tag_name)
         tag, created = self.get_or_create(name=tag_name)
         ctype = ContentType.objects.get_for_model(obj)
         cat = None
@@ -85,14 +88,20 @@ class TagManager(models.Manager):
             priority=tag_priority,
 )
 
-    def get_for_object(self, obj):
+    def get_for_object(self, obj, **kwargs):
         """
         Create a queryset matching all tags associated with the given
         object.
         """
         ctype = ContentType.objects.get_for_model(obj)
-        return self.filter(items__content_type__pk=ctype.pk,
-                           items__object_id=obj.pk)
+        prio = kwargs.get('priority', None)
+        kw = {
+            'items__content_type__pk': ctype.pk,
+            'items__object_id': obj.pk
+}
+        if prio:
+            kw['items__priority'] = prio
+        return get_cached_list(Tag, **kw)
 
     def _get_usage(self, model, counts=False, min_count=None, extra_joins=None, extra_criteria=None, params=None):
         """
@@ -327,6 +336,18 @@ class TaggedItemManager(models.Manager):
           Once the queryset-refactor branch lands in trunk, this can be
           tidied up significantly.
     """
+    def get_for_object(self, obj, **kwargs):
+        """ returns tagged items for object """
+        ct = ContentType.objects.get_for_model(obj)
+        prio = kwargs.get('priority', None)
+        kw = {
+            'content_type': ct,
+            'object_id': obj._get_pk_val(),
+}
+        if prio:
+            kw['priority'] = prio
+        return self.model.objects.filter(**kw)
+
     def get_by_model(self, queryset_or_model, tags):
         """
         Create a ``QuerySet`` containing instances of the specified
@@ -499,7 +520,13 @@ class TaggedItemManager(models.Manager):
 TODO:
 1. cachovani castych dotazu (napr. zjistovani tagu pro objekt ci kategorii)
 
+3. vytvorit formular: <priorita> <seznam tagu dane priority>
+
 2. testy  core/admin/editinline test
+
+4. kesovani
+
+5. pridat do Publishible get_tags() nebo neco takoveho na ziskani seznamu tagu k objektu
 """
 
 class Tag(models.Model):

@@ -16,6 +16,9 @@ LOGARITHMIC, LINEAR = 1, 2
 PRIMARY_TAG   = 100
 SECONDARY_TAG = 90
 
+# tag delimiter for multiple tags
+TAG_DELIMITER = ','
+
 
 def parse_tag_input(input):
     """
