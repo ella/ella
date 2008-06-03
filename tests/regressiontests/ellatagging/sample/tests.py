@@ -26,7 +26,8 @@ cloud_for_model = r"""
 
 >>> Tag.objects.cloud_for_model(IchBinLadin)
 [<Tag: a>]
-""" #}}}
+>>> #}}}
+"""
 
 cloud_category = r"""
 #{{{
@@ -61,7 +62,8 @@ cloud_category = r"""
 
 >>> map(lambda x: x.count, res)
 [3, 2, 1]
-"""#}}}
+>>> #}}}
+"""
 
 tag_priority = r"""
 #{{{
@@ -93,7 +95,8 @@ tag_priority = r"""
 
 >>> Tag.objects.cloud_for_category(cat, priority=PRIMARY_TAG)
 [<Tag: ahoj>, <Tag: ěščřžýáíé>]
-"""#}}}
+>>> #}}}
+"""
 
 suggester_response = r"""
 #{{{
@@ -144,7 +147,8 @@ True
 200
 >>> res.content
 'dvou slovny'
-"""#}}}
+>>> #}}}
+"""
 
 """
 TODO TESTY:

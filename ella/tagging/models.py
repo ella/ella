@@ -17,10 +17,7 @@ from ella.tagging.validators import isTag
 
 qn = connection.ops.quote_name
 
-try:
-    from django.db.models.query import parse_lookup
-except ImportError:
-    parse_lookup = None
+parse_lookup = None
 
 ############
 # Managers #
@@ -155,23 +152,11 @@ class TagManager(models.Manager):
         """
         if filters is None: filters = {}
 
-        if not parse_lookup:
-            # post-queryset-refactor (hand off to usage_for_queryset)
-            queryset = model._default_manager.filter()
-            for f in filters.items():
-                queryset.query.add_filter(f)
-            usage = self.usage_for_queryset(queryset, counts, min_count)
-        else:
-            # pre-queryset-refactor
-            extra_joins = ''
-            extra_criteria = ''
-            params = []
-            if len(filters) > 0:
-                joins, where, params = parse_lookup(filters.items(), model._meta)
-                extra_joins = ' '.join(['%s %s AS %s ON %s' % (join_type, table, alias, condition)
-                                        for (alias, (table, join_type, condition)) in joins.items()])
-                extra_criteria = 'AND %s' % (' AND '.join(where))
-            usage = self._get_usage(model, counts, min_count, extra_joins, extra_criteria, params)
+        # post-queryset-refactor (hand off to usage_for_queryset)
+        queryset = model._default_manager.filter()
+        for f in filters.items():
+            queryset.query.add_filter(f)
+        usage = self.usage_for_queryset(queryset, counts, min_count)
 
         return usage
 
