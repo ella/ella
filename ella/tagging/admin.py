@@ -3,76 +3,62 @@ from django.contrib.contenttypes import generic
 from django.newforms import models as modelforms
 from ella.tagging.models import Tag, TaggedItem
 from django.utils.translation import ugettext_lazy as _
+from ella.tagging.fields import SuggestTagAdminField, TagPriorityAdminField
+from django.contrib.contenttypes.models import ContentType
 
-class TaggingForm(modelforms.ModelForm):
-    class Meta:
-        model = TaggedItem
+class TagInlineFormset(generic.GenericInlineFormset):
 
-    def __init__(self, *args, **kwargs):
-        initial = []
-        if 'initial' in kwargs:
-            initial = [ c.id for c in Category.objects.distinct().filter(listing__placement=kwargs['initial']['id']) ]
-
-        self.base_fields['listings'] = modelforms.ModelMultipleChoiceField(Category.objects.all(), cache_choices=True, required=False, initial=initial)
-        super(PlacementForm, self).__init__(*args, **kwargs)
-
-
-class PlacementInlineFormset(generic.GenericInlineFormset):
-    def save_existing(self, form, instance, commit=True):
-        instance = super(PlacementInlineFormset, self).save_existing(form, instance, commit)
-        return self.save_listings(form, instance, commit)
-
-    def save_new(self, form, commit=True):
-        instance = super(PlacementInlineFormset, self).save_new(form, commit)
-        return self.save_listings(form, instance, commit)
-
-    def save_listings(self, form, instance, commit=True):
-        list_cats = form.cleaned_data.pop('listings')
-
-        def save_listings():
-            listings = dict([ (l.category, l) for l in Listing.objects.filter(placement=instance.pk) ])
-
-            for c in list_cats:
-                if not c in listings:
-                    # create listing
-                    l = Listing(placement=instance, category=c, publish_from=instance.publish_from)
-                    l.save()
-                else:
-                    del listings[c]
-            for l in listings.values():
-                l.delete()
-
-        if commit:
-            save_listings()
+    def __add_category(self, form, instance, commit):
+        if not commit:
+            return
+        if not hasattr(instance, 'category'):
+            return
+        # kategorii ziskam: [self.]instance.object.category
+        # v teto chvili je ulozeny TaggedItem ok, ale s prazdnym polem "category"
+        # self.get_queryset() vrati QSet instanci TaggedItem
+        # form.cleaned_data obsahuje slovnik atributu ukladaneho: {'tag': <Tag: kremenac>, 'id': None}
+        if isinstance(instance, TaggedItem):
+            obj = instance.object
         else:
-            save_m2m = form.save_m2m
-            def save_all():
-                save_m2m()
-                save_listings()
-            form.save_m2m = save_all
+            obj = instance
+        tag = form.cleaned_data['tag']
+        ct = ContentType.objects.get_for_model(type(obj)) # tagged object ContentType
+        ti = TaggedItem.objects.get(
+            content_type=ct,
+            object_id=obj._get_pk_val(),
+            tag=tag
+)
+        ti.category = obj.category
+        ti.save()
+
+    def save_existing(self, form, instance, commit=True):
+        instance = super(TagInlineFormset, self).save_existing(form, instance, commit)
+        self.__add_category(form, instance, commit)
         return instance
 
+    def save_new(self, form, commit=True):
+        instance = super(TagInlineFormset, self).save_new(form, commit)
+        self.__add_category(form, self.instance, commit)
+        return instance
 
 class TaggingInlineOptionsSimple(admin.TabularInline):
     model = TaggedItem
     extra = 0
 
 class TaggingInlineOptions(generic.GenericTabularInline):
-    fields = ('tag',)
+    fields = ('tag', 'priority',)
     raw_id_fields = ('tag',)
     model = TaggedItem
     extra = 4
     id_field_name = 'object_id'
     ct_field_name = 'content_type'
-    formset = TaggingForm
+    formset = TagInlineFormset
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        from ella.tagging.fields import SuggestTagAdminField
         if db_field.name == 'tag':
-            import pdb;pdb.set_trace()
-            if hasattr(self.parent_model, 'category'):
-                kwargs['category'] = self.parent_model.category
             return SuggestTagAdminField(db_field, **kwargs)
+        elif db_field.name == 'priority':
+            return TagPriorityAdminField(db_field, **kwargs)
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 class TagOptions(admin.ModelAdmin):

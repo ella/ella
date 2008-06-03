@@ -66,6 +66,8 @@ class TagManager(models.Manager):
         tag_name = tag_names[0]
         """
         tag_name = tag_name.strip()
+        if not tag_name:
+            raise AttributeError(_('No tags were given: "%s".') % tag_name)
         if settings.FORCE_LOWERCASE_TAGS:
             tag_name = tag_name.lower()
         if re.findall(r'[^\w^\s^,]', tag_name, re.UNICODE):

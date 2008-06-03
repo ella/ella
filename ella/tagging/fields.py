@@ -6,10 +6,30 @@ from django.db.models.fields import CharField
 from django.dispatch import dispatcher
 from django.utils.translation import ugettext_lazy as _
 
-from ella.tagging import settings
+from django import newforms as forms
+from ella.ellaadmin import widgets as ellaadminwidgets
+from ella.ellaadmin import options
+from django.contrib.admin import widgets
+from django.utils.safestring import mark_safe
+from django.utils.encoding import smart_unicode
+from django.conf import settings
+
 from ella.tagging.models import Tag
-from ella.tagging.utils import edit_string_for_tags
+from ella.tagging.utils import edit_string_for_tags, PRIMARY_TAG, SECONDARY_TAG
 from ella.tagging.validators import isTagList
+
+
+class TagPriorityAdminField(forms.fields.Field):
+    def __init__(self, db_field, *args, **kwargs):
+        values = (
+            (PRIMARY_TAG, _('primary tag')),
+            (SECONDARY_TAG, _('secondary tag')),
+)
+        self.widget = forms.Select(None, values, **kwargs)
+        super(self.__class__, self).__init__(*args, **kwargs)
+
+    def clean(self, value):
+        return super(self.__class__, self).clean(value)
 
 class TagField(CharField):
     """
@@ -114,13 +134,6 @@ class TagField(CharField):
 
 # --- suggest
 
-from django import newforms as forms
-from ella.ellaadmin import widgets as ellaadminwidgets
-from ella.ellaadmin import options
-from django.contrib.admin import widgets
-from django.utils.safestring import mark_safe
-from django.utils.encoding import smart_unicode
-from django.conf import settings
 
 
 JS_SUGGEST = 'js/jquery.suggest.js'
@@ -176,15 +189,13 @@ class SuggestTagAdminField(forms.fields.Field):
     def clean(self, value):
         from django.newforms.util import ValidationError
         super(SuggestTagAdminField, self).clean(value)
-        if not self.object_category:
-            raise ValidationError(_('Tagged object must be related to category!'))
         isFound = Tag.objects.filter(name=value)
         if len(isFound) == 1:
             tag = isFound[0]
         elif len(isFound) > 1:
             raise ValidationError(self.error_messages['found_too_much'] % value)
         elif len(isFound) == 0:
-            tag, status = Tag.objects.add_tag(self.object_category, value)
+            tag, status = Tag.objects.get_or_create(name=value)
             if not status:
                 raise ValidationError(self.error_messages['not_found'] % value)
         return tag
