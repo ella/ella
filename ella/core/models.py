@@ -276,7 +276,7 @@ class Listing(models.Model):
 
     def Box(self, box_type, nodelist):
         " Delegate the boxing to the target's Box factory method."
-        obj = self.target
+        obj = self.placement.target
         if hasattr(obj, 'Box'):
             return obj.Box(box_type, nodelist)
         return Box(obj, box_type, nodelist)

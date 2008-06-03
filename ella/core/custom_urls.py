@@ -74,7 +74,6 @@ class DetailDispatcher(object):
         Raises:
             Http404 if no view is associated with bits[0] for content_type of the object
         """
-        import pdb;pdb.set_trace()
         if bits[0] not in self.custom_mapping:
             raise Http404
 
