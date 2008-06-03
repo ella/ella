@@ -18,9 +18,8 @@ class TopicThreadManager(models.Manager):
         WHERE
             target_ct_id = %d
         GROUP BY
-            target_id
-) AS _rate
-        """ % ct_thread._get_pk_val()
+        target_id
+) AS _rate""" % ct_thread._get_pk_val()
         cond = 'discussions_topicthread.id = _rate.target_id'
         return self.model.objects.extra(
             select={'cnt': '_rate.comment_count'},
@@ -29,24 +28,8 @@ class TopicThreadManager(models.Manager):
 ).order_by('-cnt')
 
     def get_most_viewed(self):
-        ct_thread = ContentType.objects.get_for_model(self.model)
-        subquery="""
-        (
-        SELECT
-            hits,
-            target_id
-        FROM
-            core_hitcount
-        WHERE
-            target_ct_id = %d
-) AS _hitcount
-        """ % ct_thread._get_pk_val()
-        cond = 'discussions_topicthread.id = _hitcount.target_id'
-        return self.model.objects.extra(
-            select={'cnt': '_hitcount.hits'},
-            tables=[subquery],
-            where=[cond]
-).order_by('-cnt')
+        """ returns queryset of most viewed TopicThread instances. """
+        return []
 
     def get_with_newest_posts(self):
         ct_thread = ContentType.objects.get_for_model(self.model)

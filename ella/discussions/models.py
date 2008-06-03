@@ -165,21 +165,17 @@ class TopicThread(models.Model):
 
     objects = TopicThreadManager()
 
-    # TODO (NAVSTEVNOST) hit count? Should be automatic by Ella (?) - prove it.
-
     def __init__(self, *args, **kwargs):
         super(self.__class__, self).__init__(*args, **kwargs)
-        self.__posts = []
 
     def __unicode__(self):
         return self.title
 
-    def __load_posts(self):
-        if hasattr(self, '__posts'):
-            return
+    @property
+    def posts(self):
         ctThread = ContentType.objects.get_for_model(TopicThread)
         qset = Comment.objects.filter(target_ct=ctThread)
-        self.__posts = qset.filter(target_id=self.pk)
+        return qset.filter(target_id=self.pk)
 
     def get_absolute_url(self):
         base = self.topic.get_absolute_url()
@@ -187,12 +183,10 @@ class TopicThread(models.Model):
 
     @property
     def num_posts(self):
-        self.__load_posts()
-        return self.__posts.count()
+        return self.posts.count()
 
     def get_posts_by_date(self):
-        self.__load_posts()
-        return self.__posts.order_by('submit_date')
+        return self.posts.order_by('submit_date')
 
     def __cmp__(self, other):
         return cmp(self.activity, other.activity)
@@ -205,16 +199,14 @@ class TopicThread(models.Model):
         return qset.filter(submit_date__gte=when).count()
 
     def last_post(self):
-        self.__load_posts()
         # FIXME check list length, sort by date to get the latest item.
-        if not self.__posts:
+        if not self.posts:
             return ''
-        return self.__posts.order_by('-submit_date')[0]
+        return self.posts.order_by('-submit_date')[0]
 
     class Meta:
         verbose_name = _('Thread')
         verbose_name_plural = _('Threads')
-        #ordering = ('title',)
 
 
 class BannedString(models.Model):

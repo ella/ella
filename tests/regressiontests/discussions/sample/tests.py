@@ -279,7 +279,7 @@ filled_threads_tpltag_string = r"""
 >>> # UNCOMMENT THIS! t.render(cx)
 >>> # TopicThread.objects.get_most_filled().filter(topic=Topic.objects.get(pk=2))
 >>> TopicThread.objects.get_most_filled()
-u'"Vlakno Four"'
+[<TopicThread: Vlakno Four>]
 """
 
 filled_threads_tpltag_all = r"""
@@ -341,7 +341,6 @@ unread_posts = r"""
 >>> for i in Comment.objects.all():
 ...     i.delete()
 >>> Comment.objects.all()
-[]
 >>> ct = ContentType.objects.get_for_model(TopicThread)
 >>> thr_w = TopicThread.objects.get(title="Vlakno Wife ;-)")
 >>> thr = TopicThread.objects.get(title="Vlakno Four")
@@ -418,6 +417,8 @@ unread_posts_tpl_tag = r"""
 >>> cx = Context({'category': categ})
 >>> t.render(cx)
 u''
+=======
+>>>>>>> Day changes (problems with subselects in managers.py):tests/regressiontests/discussions/sample/tests.py
 """
 
 
@@ -431,10 +432,18 @@ __test__ = {
     'disucssions_most_active_template_tag_without_for': most_active_tpltag_without_for,
     'discussions_newest_threads_template_tag': newest_threads_tpltag,
     'discussions_newest_threads_template_tag_string': newest_threads_tpltag_string,
+<<<<<<< HEAD:tests/regressiontests/discussions/sample/tests.py
+=======
+    'discussions_filled_threads_template_tag_string': filled_threads_tpltag_string,
+>>>>>>> Day changes (problems with subselects in managers.py):tests/regressiontests/discussions/sample/tests.py
     'discussions_filled_threads_template_tag_all_topics': filled_threads_tpltag_all,
+<<<<<<< HEAD:tests/regressiontests/discussions/sample/tests.py
     'discussions_unread_posts': unread_posts,
     #'discussions_unread_posts_tpl_tag': unread_posts_tpl_tag,
     #'discussions_filled_threads_template_tag_string': filled_threads_tpltag_string,
     #'discussions_filled_threads_template_tag_all_topics': filled_threads_tpltag_all,
+=======
+    'discussions_most_viewed_threads': most_viewed_threads,
+>>>>>>> Day changes (problems with subselects in managers.py):tests/regressiontests/discussions/sample/tests.py
 }
 
