@@ -10,9 +10,16 @@ class Something(models.Model):
     def __unicode__(self):
         return '%s: %s...' % (self.title, self.description[:20])
 
+class SomethingElse(models.Model):
+    description = models.CharField(max_length=200)
+    title = models.CharField(max_length=50)
+
+    def __unicode__(self):
+        return '%s: %s...' % (self.title, self.description[:20])
+
 class IchBinLadin(Publishable, models.Model):
     organisation = models.CharField(max_length=50)
-    category  = models.ForeignKey(Category) # publishable son has to declare foreignkey to category! (dig why it couldn't be inherited in qsrf?)
+    category  = models.ForeignKey(Category) # publishable son has to declare foreignkey to category! (dig why it couldn't be inherited by qsrf?)
 
     def __unicode__(self):
         return self.organisation

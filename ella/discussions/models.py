@@ -84,7 +84,7 @@ def remove_diacritical(text):
             output += c
     return output
 
-class Topic(Publishable, models.Model):
+class Topic(models.Model, Publishable):
     # ella fields
     title = models.CharField(_('Title'), max_length=255)
     description = models.TextField(_('Description'))
@@ -191,7 +191,7 @@ class TopicThread(models.Model):
         return self.title
 
     def __load_posts(self):
-        if self.__posts:
+        if hasattr(self, '__posts'):
             return
         ctThread = ContentType.objects.get_for_model(TopicThread)
         qset = Comment.objects.filter(target_ct=ctThread)

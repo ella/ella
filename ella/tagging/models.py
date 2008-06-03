@@ -12,7 +12,7 @@ from ella.core.models import Category
 
 from ella.tagging import settings
 from ella.tagging.utils import calculate_cloud, get_tag_list, get_queryset_and_model, parse_tag_input
-from ella.tagging.utils import LOGARITHMIC
+from ella.tagging.utils import LOGARITHMIC, PRIMARY_TAG
 from ella.tagging.validators import isTag
 
 qn = connection.ops.quote_name
@@ -52,7 +52,7 @@ class TagManager(models.Manager):
                 tag, created = self.get_or_create(name=tag_name)
                 TaggedItem._default_manager.create(tag=tag, object=obj)
 
-    def add_tag(self, obj, tag_name):
+    def add_tag(self, obj, tag_name, tag_priority=PRIMARY_TAG):
         """
         Associates the given object with a tag.
         """
@@ -70,7 +70,12 @@ class TagManager(models.Manager):
         if hasattr(obj, 'get_category'):
             cat = obj.get_category()
         TaggedItem._default_manager.get_or_create(
-            tag=tag, content_type=ctype, object_id=obj.pk, category=cat)
+            tag=tag,
+            content_type=ctype,
+            object_id=obj.pk,
+            category=cat,
+            priority=tag_priority,
+)
 
     def get_for_object(self, obj):
         """
@@ -249,27 +254,40 @@ class TagManager(models.Manager):
             related.append(tag)
         return related
 
-    def cloud_for_category(self, category):
+    def cloud_for_category(self, category, **kwargs):
         """ returns tag cloud for all objects in certain category. """
-        # najit objekty v kategorii, a k nim tagy.
+        priority, steps = kwargs.get('priority', None), kwargs.get('steps', 4)
+        distribution = kwargs.get('distribution', LOGARITHMIC)
+        prio_sql = ''
+        if type(priority) == int:
+            prio_sql = 'AND tagging_taggeditem.priority = %d' % priority
+        elif type(priority) == tuple:
+            prio_sql = 'AND tagging_taggeditem.priority IN %s' % str(priority)
         sql = """
         SELECT
-            tagging_tag.id
+            tagging_tag.id, COUNT(tagging_tag.name) AS cnt
         FROM
             tagging_taggeditem,
             tagging_tag
         WHERE
             tagging_taggeditem.category_id = %d
+            %s
             AND
             tagging_tag.id = tagging_taggeditem.tag_id
         GROUP BY
             tagging_tag.name
-        """ % category._get_pk_val()
+        ORDER BY
+            cnt DESC
+        """ % (category._get_pk_val(), prio_sql)
         cur = connection.cursor()
         cur.execute(sql)
         data = cur.fetchall()
-        tag_ids = map(lambda x: x[0], data)
-        return Tag.objects.filter(pk__in=tag_ids)
+        tags = []
+        for tag_id, cnt in data:
+            o = Tag.objects.get(pk=tag_id)
+            setattr(o, 'count', cnt)
+            tags.append(o)
+        return calculate_cloud(tags, steps, distribution)
 
     def cloud_for_model(self, model, steps=4, distribution=LOGARITHMIC,
                         filters=None, min_count=None):
@@ -506,12 +524,13 @@ class TaggedItem(models.Model):
     object_id    = models.PositiveIntegerField(_('object id'), db_index=True)
     object       = generic.GenericForeignKey('content_type', 'object_id')
     category     = models.ForeignKey(Category, editable=False, null=True)
+    priority     = models.IntegerField(db_index=True)
 
     objects = TaggedItemManager()
 
     class Meta:
         # Enforce unique tag association per object
-        unique_together = (('tag', 'content_type', 'object_id'),)
+        unique_together = (('tag', 'content_type', 'object_id', 'priority'),)
         verbose_name = _('tagged item')
         verbose_name_plural = _('tagged items')
 

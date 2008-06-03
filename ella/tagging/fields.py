@@ -110,9 +110,6 @@ class TagField(CharField):
         return super(TagField, self).formfield(**defaults)
 
 
-# Helper
-def tags2str(tagset):
-    return u' '.join([t.name for t in tagset])
 
 
 # --- suggest

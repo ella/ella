@@ -9,9 +9,13 @@ from django.db.models.query import QuerySet
 from django.utils.encoding import force_unicode
 from django.utils.translation import ugettext as _
 
-# Python 2.3 compatibility
-if not hasattr(__builtins__, 'set'):
-    from sets import Set as set
+# Font size distribution algorithms
+LOGARITHMIC, LINEAR = 1, 2
+
+# tag priority e.g. staff assigned tags vs. user tags
+PRIMARY_TAG   = 100
+SECONDARY_TAG = 90
+
 
 def parse_tag_input(input):
     """
@@ -212,9 +216,6 @@ def get_tag(tag):
         pass
 
     return None
-
-# Font size distribution algorithms
-LOGARITHMIC, LINEAR = 1, 2
 
 def _calculate_thresholds(min_weight, max_weight, steps):
     delta = (max_weight - min_weight) / float(steps)
