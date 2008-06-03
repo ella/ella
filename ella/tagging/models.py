@@ -69,8 +69,11 @@ class TagManager(models.Manager):
             tag_name = tag_name.lower()
         tag, created = self.get_or_create(name=tag_name)
         ctype = ContentType.objects.get_for_model(obj)
+        cat = None
+        if hasattr(obj, 'get_category'):
+            cat = obj.get_category()
         TaggedItem._default_manager.get_or_create(
-            tag=tag, content_type=ctype, object_id=obj.pk)
+            tag=tag, content_type=ctype, object_id=obj.pk, category=cat)
 
     def get_for_object(self, obj):
         """
@@ -248,6 +251,28 @@ class TagManager(models.Manager):
                 tag.count = row[2]
             related.append(tag)
         return related
+
+    def cloud_for_category(self, category):
+        """ returns tag cloud for all objects in certain category. """
+        # najit objekty v kategorii, a k nim tagy.
+        sql = """
+        SELECT
+            tagging_tag.id
+        FROM
+            tagging_taggeditem,
+            tagging_tag
+        WHERE
+            tagging_taggeditem.category_id = %d
+            AND
+            tagging_tag.id = tagging_taggeditem.tag_id
+        GROUP BY
+            tagging_tag.name
+        """ % category._get_pk_val()
+        cur = connection.cursor()
+        cur.execute(sql)
+        data = cur.fetchall()
+        tag_ids = map(lambda x: x[0], data)
+        return Tag.objects.filter(pk__in=tag_ids)
 
     def cloud_for_model(self, model, steps=4, distribution=LOGARITHMIC,
                         filters=None, min_count=None):
@@ -486,7 +511,7 @@ class TaggedItem(models.Model):
     content_type = models.ForeignKey(ContentType, verbose_name=_('content type'))
     object_id    = models.PositiveIntegerField(_('object id'), db_index=True)
     object       = generic.GenericForeignKey('content_type', 'object_id')
-    category = models.ForeignKey(Category, editable=False, null=True)
+    category     = models.ForeignKey(Category, editable=False, null=True)
 
     objects = TaggedItemManager()
 

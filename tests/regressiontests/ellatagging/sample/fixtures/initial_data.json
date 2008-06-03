@@ -19,6 +19,18 @@
   },
 
   {
+    "pk": 3,
+    "model": "core.category",
+    "fields": {
+      "tree_parent": 1,
+      "description": "",
+      "title": "second category",
+      "site": 1,
+      "tree_path": "second-category",
+      "slug": "second-category"
+    }
+  },
+  {
     "pk": 2,
     "model": "core.category",
     "fields": {
