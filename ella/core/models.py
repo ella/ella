@@ -194,10 +194,6 @@ class Placement(models.Model):
     @transaction.commit_on_success
     def save(self):
         " If Listing is created, we create HitCount object "
-        # First, save Placement
-        super(Placement, self).save()
-        # Then, save HitCount (needs placement_id)
-        hc, created = HitCount.objects.get_or_create(placement=self)
 
         if not self.slug:
             self.slug = getattr(self.target, 'slug', self.target_id)
@@ -213,6 +209,10 @@ class Placement(models.Model):
                 for r in Redirect.objects.filter(new_path=old_path).exclude(pk=redirect.pk):
                     r.new_path = new_path
                     r.save()
+        # First, save Placement
+        super(Placement, self).save()
+        # Then, save HitCount (needs placement_id)
+        hc, created = HitCount.objects.get_or_create(placement=self)
 
     def get_absolute_url(self):
         obj = self.target

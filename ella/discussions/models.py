@@ -84,7 +84,7 @@ def remove_diacritical(text):
             output += c
     return output
 
-class Topic(models.Model, Publishable):
+class Topic(Publishable, models.Model):
     # ella fields
     title = models.CharField(_('Title'), max_length=255)
     description = models.TextField(_('Description'))
@@ -96,26 +96,31 @@ class Topic(models.Model, Publishable):
     def __unicode__(self):
         return self.title
 
+    """
     @property
-    def main_listing(self):
-        try:
-            return get_cached_object(
-                    Listing,
-                    target_ct=ContentType.objects.get_for_model(self.__class__),
-                    target_id=self.id,
-                    category=self.category_id
+    def main_placement(self):
+        " Return object's main placement, that is the object's placement in its primary category "
+        if not hasattr(self, '_main_placement'):
+            try:
+                # TODO - check and if we don't have category, take the only placement that exists in current site
+                self._main_placement = get_cached_object(
+                        Placement,
+                        target_ct=ContentType.objects.get_for_model(self.__class__),
+                        target_id=self.pk,
+                        category=self.category_id
 )
-        except Listing.DoesNotExist:
-            return None
+            except Placement.DoesNotExist:
+                self._main_placement = None
+        return self._main_placement
+    """
 
     def get_absolute_url(self):
-        listing = self.main_listing
-        if listing:
-            return listing.get_absolute_url()
+        place = self.main_placement
+        if place:
+            return place.get_absolute_url()
 
     def photo_thumb(self):
         """ Displays Topic photo thumbnail in admin. """
-        # TODO odstranit absolutni URL - bylo jen k rychlemu testu
         out = self.photo.thumb()
         return mark_safe(out)
     photo_thumb.allow_tags = True
