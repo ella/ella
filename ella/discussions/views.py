@@ -17,7 +17,7 @@ from django.core.paginator import ObjectPaginator
 from django.conf import settings
 
 from ella.discussions.models import get_comments_on_thread, Topic, TopicThread, \
-BannedString, BannedUser, PostViewed
+BannedString, BannedUser, PostViewed, DuplicationError
 from ella.comments.models import Comment
 from ella.core.cache.utils import get_cached_object_or_404
 import djangoapps.registration.views as reg_views
@@ -157,7 +157,7 @@ def paginate_queryset_for_request(request, qset):
 
 def get_category_topics_url(category):
     # category.slug/year/_(topics)
-    return '/%s/%s/%s/' % (category.slug, strftime('%Y'), slugify(_('topics')))
+    return '/%s/%s/%s/' % (category.slug, slugify(_('static')), slugify(_('topics')))
 
 def process_login(request, login_data):
     usr = authenticate(username=login_data['username'], password=login_data['password'])
@@ -303,9 +303,12 @@ def create_thread(request, bits, context):
             author=get_user(request),
             topic=topic
 )
-        thr.save()
-        add_post(data['content'], thr, get_user(request), get_ip(request))
-        return http.HttpResponseRedirect(topic.get_absolute_url())
+        try:
+            thr.save()
+            add_post(data['content'], thr, get_user(request), get_ip(request))
+            return http.HttpResponseRedirect(topic.get_absolute_url())
+        except DuplicationError:
+            context['error'] = _('Thread with given title already exist.')
     context['login_form'] = frmLogin
     context['login_form_action'] = '%slogin/' % request.get_full_path()
     context['logout_form_action'] = '%slogout/' % request.get_full_path()

@@ -55,16 +55,17 @@ http://www.b-list.org/weblog/2006/sep/02/django-tips-user-registration/
 
 """
 TODO:
-1. Kontrolovat pri zakladani vlakna stejny title -> achtung a nenechat zalozit.
+1* Kontrolovat pri zakladani vlakna stejny title -> achtung a nenechat zalozit.
 
-2. profil Zaneta posle (polozky)
+2* profil Zaneta posle (polozky)
 
 3. Sherlock -- zkontrolovat sherlock objekt.
-
 """
 
 ACTIVITY_PERIOD = 6  # Thread activity (hours)
 
+class DuplicationError(Exception):
+    pass
 
 def get_comments_on_thread(thread):
     ctThread = ContentType.objects.get_for_model(TopicThread)
@@ -166,6 +167,12 @@ class TopicThread(models.Model):
 
     def __unicode__(self):
         return self.title
+
+    def save(self):
+        thr = TopicThread.objects.filter(title=self.title)
+        if thr and not self.pk:
+            raise DuplicationError('TopicThread with title "%s" already exist.' % self.title)
+        super(self.__class__, self).save()
 
     @property
     def posts(self):
