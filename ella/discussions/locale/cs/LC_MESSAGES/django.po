@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Discussions 0.1 - draft\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-05-05 16:54+0200\n"
+"POT-Creation-Date: 2008-06-03 11:08+0200\n"
 "PO-Revision-Date: 2008-03-19 17:00+0100\n"
 "Last-Translator: Jonas Fiala <jonas.fiala@netcentrum.cz>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,63 +23,63 @@ msgstr "Smazání"
 msgid "Data"
 msgstr "Data"
 
-#: models.py:89 models.py:173
+#: models.py:87 models.py:158
 msgid "Title"
 msgstr "Titulek"
 
-#: models.py:90
+#: models.py:88
 msgid "Description"
 msgstr "Popis"
 
-#: models.py:91 models.py:174
+#: models.py:89 models.py:159
 msgid "Slug"
 msgstr "Slug"
 
-#: models.py:92
+#: models.py:90
 msgid "Category"
 msgstr "Kategorie"
 
-#: models.py:93
+#: models.py:91
 msgid "Photo"
 msgstr "Fotka"
 
-#: models.py:94 models.py:175
+#: models.py:92 models.py:160
 msgid "Created"
 msgstr "Vytvořeno"
 
-#: models.py:150
+#: models.py:135
 msgid "Topic"
 msgstr "Téma"
 
-#: models.py:151
+#: models.py:136
 msgid "Topics"
 msgstr "Témata"
 
-#: models.py:157
+#: models.py:142
 msgid "Target content type"
 msgstr ""
 
-#: models.py:158
+#: models.py:143
 msgid "Target id"
 msgstr ""
 
-#: models.py:176
+#: models.py:161
 msgid "authorized author"
 msgstr "Autor - uživatel"
 
-#: models.py:202 urls.py:10
+#: models.py:187 urls.py:10
 msgid "posts"
 msgstr "příspěvky"
 
-#: models.py:231
+#: models.py:217
 msgid "Thread"
 msgstr "Vlákno"
 
-#: models.py:232
+#: models.py:218
 msgid "Threads"
 msgstr "Vlákna"
 
-#: models.py:237
+#: models.py:222
 msgid "Expression"
 msgstr "Výraz"
 
@@ -87,15 +87,23 @@ msgstr "Výraz"
 msgid "create thread"
 msgstr "vytvořit vlákno"
 
-#: views.py:61
+#: views.py:60
 msgid "Username already exists. Please choose another one."
 msgstr "Uživatelské jméno již existuje, prosím, zadejte jiné."
 
-#: views.py:159
+#: views.py:160
+msgid "static"
+msgstr ""
+
+#: views.py:160
 msgid "topics"
 msgstr "témata"
 
-#: views.py:337
+#: views.py:311
+msgid "Thread with given title already exist."
+msgstr ""
+
+#: views.py:340
 msgid "comments"
 msgstr "komentáře"
 

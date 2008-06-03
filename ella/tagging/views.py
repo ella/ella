@@ -72,7 +72,8 @@ def tags_json_view(request, **kwargs):
         data = Tag.objects.filter(name__startswith=start.lower())
         for item in data:
             ft.append(item.__unicode__().encode('utf-8'))
-    return HttpResponse('\n'.join(ft), mimetype='text/html')
+    res = HttpResponse('\n'.join(ft), mimetype='text/html;charset=utf-8')
+    return res
 
 class TagForm(forms.Form):
     tags = SuggestTagField()
