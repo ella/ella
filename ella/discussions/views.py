@@ -20,7 +20,6 @@ from ella.discussions.models import get_comments_on_thread, Topic, TopicThread, 
 BannedString, BannedUser, PostViewed
 from ella.comments.models import Comment
 from ella.core.cache.utils import get_cached_object_or_404
-from ella.core.models import HitCount
 import djangoapps.registration.views as reg_views
 
 
@@ -256,7 +255,7 @@ def posts(request, bits, context):
             else:
                 context['question_form_state'] = STATE_INVALID
         else:
-            HitCount.objects.hit(thr) # increment view counter
+            thr.hit() # increment view counter
     if request.user.is_staff:
         comment_set = get_comments_on_thread(thr).order_by('submit_date')
     else:

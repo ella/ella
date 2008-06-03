@@ -332,6 +332,7 @@ filled_threads_tpltag_all = r"""
 u'"Vlakno Four"'
 """
 
+<<<<<<< HEAD:tests/regressiontests/discussions/sample/tests.py
 unread_posts = r"""
 >>> from ella.core.models import Category
 >>> from django.contrib.contenttypes.models import ContentType
@@ -417,8 +418,13 @@ unread_posts_tpl_tag = r"""
 >>> cx = Context({'category': categ})
 >>> t.render(cx)
 u''
-=======
->>>>>>> Day changes (problems with subselects in managers.py):tests/regressiontests/discussions/sample/tests.py
+"""
+
+
+most_viewed_threads = """
+>>> from ella.discussions.models import TopicThread
+>>> TopicThread.objects.get_most_viewed()
+[<TopicThread: Vlakno Wife ;-)>, <TopicThread: Vlakno Four>, <TopicThread: Vlakno Three>, <TopicThread: Vlakno Two>, <TopicThread: Vlakno One>]
 """
 
 
@@ -432,18 +438,12 @@ __test__ = {
     'disucssions_most_active_template_tag_without_for': most_active_tpltag_without_for,
     'discussions_newest_threads_template_tag': newest_threads_tpltag,
     'discussions_newest_threads_template_tag_string': newest_threads_tpltag_string,
-<<<<<<< HEAD:tests/regressiontests/discussions/sample/tests.py
-=======
     'discussions_filled_threads_template_tag_string': filled_threads_tpltag_string,
->>>>>>> Day changes (problems with subselects in managers.py):tests/regressiontests/discussions/sample/tests.py
     'discussions_filled_threads_template_tag_all_topics': filled_threads_tpltag_all,
-<<<<<<< HEAD:tests/regressiontests/discussions/sample/tests.py
     'discussions_unread_posts': unread_posts,
     #'discussions_unread_posts_tpl_tag': unread_posts_tpl_tag,
     #'discussions_filled_threads_template_tag_string': filled_threads_tpltag_string,
     #'discussions_filled_threads_template_tag_all_topics': filled_threads_tpltag_all,
-=======
     'discussions_most_viewed_threads': most_viewed_threads,
->>>>>>> Day changes (problems with subselects in managers.py):tests/regressiontests/discussions/sample/tests.py
 }
 

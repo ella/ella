@@ -29,7 +29,7 @@ class TopicThreadManager(models.Manager):
 
     def get_most_viewed(self):
         """ returns queryset of most viewed TopicThread instances. """
-        return []
+        return self.model.objects.order_by('-hit_counts')
 
     def get_with_newest_posts(self):
         ct_thread = ContentType.objects.get_for_model(self.model)

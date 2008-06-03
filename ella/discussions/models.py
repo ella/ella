@@ -54,18 +54,13 @@ http://www.b-list.org/weblog/2006/sep/02/django-tips-user-registration/
 """
 
 """
-TODO 2008-04-16:
-1. prihlaseny admin - muze kliknout na IDcko.
+TODO:
+1. Kontrolovat pri zakladani vlakna stejny title -> achtung a nenechat zalozit.
 
 2. profil Zaneta posle (polozky)
 
-3. Sherlock -- pripravit export (zeptat se Ondry na detaily)
+3. Sherlock -- zkontrolovat sherlock objekt.
 
-4. poradny - podivat se na atlas.cz
-   - otazky posilaj ianon. uzivatele
-   - otazky nejsou hned videt na webu
-   - videt jsou zodpovezene otazky + odpovedi.
-   - po kliknuti na odpoved odbornika, bude stranka s odpovedi + komentari uzivatelu.
 """
 
 ACTIVITY_PERIOD = 6  # Thread activity (hours)
@@ -162,6 +157,7 @@ class TopicThread(models.Model):
     created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)
     author = models.ForeignKey(User, verbose_name=_('authorized author'),)
     topic = models.ForeignKey(Topic)
+    hit_counts = models.PositiveIntegerField(default=0)
 
     objects = TopicThreadManager()
 
@@ -190,6 +186,10 @@ class TopicThread(models.Model):
 
     def __cmp__(self, other):
         return cmp(self.activity, other.activity)
+
+    def hit(self):
+        self.hit_counts += 1
+        self.save()
 
     @property
     def activity(self):
