@@ -5,6 +5,7 @@ from django.utils.translation import ugettext as _
 from ella.tagging.models import Tag, TaggedItem
 from ella.core.models import Category
 from ella.tagging.utils import LINEAR, LOGARITHMIC, PRIMARY_TAG, SECONDARY_TAG
+import ella.tagging.utils as utils
 
 register = Library()
 
@@ -75,14 +76,19 @@ class TaggedObjectsNode(Node):
         return ''
 
 class TagCloudForCategoryNode(Node):
-    def __init__(self, category, context_var):
+    def __init__(self, category, context_var, **kwargs):
         self.category = category
         self.context_var = context_var
+        self.priority = kwargs.get('priority', None)
 
     def render(self, context):
         self.category = category_from_tpl_var(self.category, context)
-        context[ self.context_var ] = \
-        Tag.objects.cloud_for_category(self.category)
+        if self.priority:
+            context[ self.context_var ] = \
+            Tag.objects.cloud_for_category(self.category, priority=self.priority)
+        else:
+            context[ self.context_var ] = \
+            Tag.objects.cloud_for_category(self.category)
         return ''
 
 @register.tag
@@ -167,7 +173,7 @@ def __cloud_ext_params(bits):
                             'values': str(valid_vals),
 }
 )
-                kwargs[str(name)] = getattr(ella.tagging.utils, value)
+                kwargs[str(name)] = getattr(utils, value)
             else:
                 raise TemplateSyntaxError(_("%(tag)s tag was given an invalid option: '%(option)s'") % {
                     'tag': bits[0],

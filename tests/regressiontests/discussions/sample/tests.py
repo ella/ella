@@ -332,7 +332,6 @@ filled_threads_tpltag_all = r"""
 u'"Vlakno Four"'
 """
 
-<<<<<<< HEAD:tests/regressiontests/discussions/sample/tests.py
 unread_posts = r"""
 >>> from ella.core.models import Category
 >>> from django.contrib.contenttypes.models import ContentType

@@ -256,7 +256,7 @@ cloud_category_tag = """
 
 >>> tpl = '''
 ...   {% block container %}
-...     {% load tagging %}
+...     {% load tagging_tags %}
 ...     {% tag_cloud_for_category "first-category" as cloud %}
 ...     {% for tag in cloud %}
 ...         "{{tag}}:{{tag.count}}"
@@ -273,7 +273,7 @@ u'"ahoj:3""blabla:2""fireball:1"'
 
 >>> tpl = '''
 ...   {% block container %}
-...     {% load tagging %}
+...     {% load tagging_tags %}
 ...     {% tag_cloud_for_category "first-category" as cloud with priority=PRIMARY_TAG %}
 ...     {% for tag in cloud %}
 ...         "{{tag}}:{{tag.count}}"
@@ -294,7 +294,7 @@ category_from_tpl_var_test = """
 >>> from django import template
 >>> from django.template import Context, Template
 >>> from ella.core.models import Category
->>> from ella.tagging.templatetags.tagging import category_from_tpl_var
+>>> from ella.tagging.templatetags.tagging_tags import category_from_tpl_var
 >>> cat = Category.objects.get(pk=2)
 >>> cx = Context({'category': cat})
 >>> category_from_tpl_var('category', cx)
