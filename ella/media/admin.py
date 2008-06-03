@@ -4,7 +4,7 @@ from ella.media.models import Type, Media, Format, FormattedFile
 from ella.core.admin import PlacementInlineOptions
 from ella.ellaadmin import fields
 
-from tagging.models import TaggingInlineOptions
+from ella.tagging.admin import TaggingInlineOptions
 
 
 class FormattedFileInlineOptions(admin.TabularInline):

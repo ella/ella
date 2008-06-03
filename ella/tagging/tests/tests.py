@@ -2,13 +2,13 @@
 tests = r"""
 >>> import os
 >>> from django import newforms as forms
->>> from tagging.forms import TagField
->>> from tagging import settings
->>> from tagging.models import Tag, TaggedItem
->>> from tagging.tests.models import Article, Link, Perch, Parrot, FormTest
->>> from tagging.utils import calculate_cloud, get_tag_list, get_tag, parse_tag_input
->>> from tagging.utils import LINEAR
->>> from tagging.validators import isTagList, isTag
+>>> from ella.tagging.forms import TagField
+>>> from ella.tagging import settings
+>>> from ella.tagging.models import Tag, TaggedItem
+>>> from ella.tagging.tests.models import Article, Link, Perch, Parrot, FormTest
+>>> from ella.tagging.utils import calculate_cloud, get_tag_list, get_tag, parse_tag_input
+>>> from ella.tagging.utils import LINEAR
+>>> from ella.tagging.validators import isTagList, isTag
 
 #############
 # Utilities #
@@ -412,7 +412,7 @@ u'test5'
 >>> spaces = Tag.objects.create(name='spa ces')
 >>> comma = Tag.objects.create(name='com,ma')
 
->>> from tagging.utils import edit_string_for_tags
+>>> from ella.tagging.utils import edit_string_for_tags
 >>> edit_string_for_tags([plain])
 u'plain'
 >>> edit_string_for_tags([plain, spaces])

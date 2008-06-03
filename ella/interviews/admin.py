@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from tagging.models import TaggingInlineOptions
+from ella.tagging.admin import TaggingInlineOptions
 
 from ella.ellaadmin import widgets
 from ella.core.admin import PlacementInlineOptions

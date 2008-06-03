@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.contenttypes import generic
 from ella.tagging.models import Tag, TaggedItem
 
 class TaggingInlineOptionsSimple(admin.TabularInline):
@@ -13,7 +14,7 @@ class TaggingInlineOptions(generic.GenericTabularInline):
     ct_field_name = 'content_type'
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        from tagging.fields import SuggestTagAdminField
+        from ella.tagging.fields import SuggestTagAdminField
         if db_field.name == 'tag':
             return SuggestTagAdminField(db_field, **kwargs)
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)

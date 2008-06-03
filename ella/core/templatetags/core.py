@@ -379,7 +379,7 @@ class RelatedNode(template.Node):
 
         # related objects vie tags
         if self.models and count > 0:
-            from tagging.models import TaggedItem
+            from ella.tagging.models import TaggedItem
             for m in self.models:
                 to_add = TaggedItem.objects.get_related(self.obj, m, count)
                 for rel in to_add:

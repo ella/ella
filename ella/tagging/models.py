@@ -11,10 +11,12 @@ from django.db import connection, models
 from django.db.models.query import QuerySet
 from django.utils.translation import ugettext_lazy as _
 
-from tagging import settings
-from tagging.utils import calculate_cloud, get_tag_list, get_queryset_and_model, parse_tag_input
-from tagging.utils import LOGARITHMIC
-from tagging.validators import isTag
+from ella.core.models import Category
+
+from ella.tagging import settings
+from ella.tagging.utils import calculate_cloud, get_tag_list, get_queryset_and_model, parse_tag_input
+from ella.tagging.utils import LOGARITHMIC
+from ella.tagging.validators import isTag
 
 qn = connection.ops.quote_name
 
@@ -484,6 +486,7 @@ class TaggedItem(models.Model):
     content_type = models.ForeignKey(ContentType, verbose_name=_('content type'))
     object_id    = models.PositiveIntegerField(_('object id'), db_index=True)
     object       = generic.GenericForeignKey('content_type', 'object_id')
+    category = models.ForeignKey(Category, editable=False, null=True)
 
     objects = TaggedItemManager()
 

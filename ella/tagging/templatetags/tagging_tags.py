@@ -2,8 +2,8 @@ from django.db.models import get_model
 from django.template import Library, Node, TemplateSyntaxError, Variable, resolve_variable
 from django.utils.translation import ugettext as _
 
-from tagging.models import Tag, TaggedItem
-from tagging.utils import LINEAR, LOGARITHMIC
+from ella.tagging.models import Tag, TaggedItem
+from ella.tagging.utils import LINEAR, LOGARITHMIC
 
 register = Library()
 

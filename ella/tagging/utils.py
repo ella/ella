@@ -157,7 +157,7 @@ def get_tag_list(tags):
        * A ``Tag`` ``QuerySet``.
 
     """
-    from tagging.models import Tag
+    from ella.tagging.models import Tag
     if isinstance(tags, Tag):
         return [tags]
     elif isinstance(tags, QuerySet) and tags.model is Tag:
@@ -199,7 +199,7 @@ def get_tag(tag):
 
     If no matching tag can be found, ``None`` will be returned.
     """
-    from tagging.models import Tag
+    from ella.tagging.models import Tag
     if isinstance(tag, Tag):
         return tag
 

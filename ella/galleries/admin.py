@@ -4,7 +4,7 @@ from django.newforms.models import BaseInlineFormset
 from django import newforms as forms
 from django.contrib.contenttypes.models import ContentType
 
-from tagging.models import TaggingInlineOptions
+from ella.tagging.admin import TaggingInlineOptions
 
 from ella.galleries.models import Gallery, GalleryItem
 from ella.ellaadmin import fields, widgets
