@@ -26,6 +26,7 @@ class Box(object):
     """
     js = []
     css = []
+    can_double_render = False
     def __init__(self, obj, box_type, nodelist, template_name=None):
         """
         Params:
@@ -95,6 +96,9 @@ class Box(object):
 
     def render(self):
         " Cached wrapper around self._render(). "
+        if getattr(settings, 'DOUBLE_RENDER', False) and self.can_double_render:
+            if 'SECOND_RENDER' not in self._context:
+                return self.double_render()
         key = self.get_cache_key()
         rend = cache.get(key)
         if rend is None:
@@ -104,6 +108,15 @@ class Box(object):
                 CACHE_DELETER.register_test(model, test, key)
             CACHE_DELETER.register_pk(self.obj, key)
         return rend
+
+    def double_render(self):
+        return '''{%% box %(box_type)s for %(app_label)s.%(module_name)s with pk %(pk)s %%}{%% endbox %%}''' % {
+                'box_type' : self.box_type,
+                'app_label' : self.obj._meta.app_label,
+                'module_name' : self.obj._meta.module_name,
+                'pk' : self.obj.pk,
+                'params' : '\n'.join(('%s:%s' % item for item in self.params.items()))
+}
 
     def _get_template_list(self):
         " Get the hierarchy of templates belonging to the object/box_type given. "

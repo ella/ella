@@ -169,19 +169,20 @@ class BoxNode(template.Node):
             log.warning('BoxNode: Box does not exists.')
             return ''
 
-        # push context stack
-        context.push()
         # render the box itself
         box.prepare(context)
         # set the name of this box so that its children can pick up the dependencies
         box_key = box.get_cache_key()
+
+        # push context stack
+        context.push()
         context[BOX_INFO] = (obj, box_key)
         # render the box
         result = box.render()
         # restore the context
         context.pop()
 
-        if BOX_INFO in context:
+        if not (getattr(settings, 'DOUBLE_RENDER', False) and box.can_double_render) and BOX_INFO in context:
             # record dependecies
             source, source_key = context[BOX_INFO]
             CACHE_DELETER.register_dependency(source_key, box_key)

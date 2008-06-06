@@ -215,6 +215,8 @@ class Question(models.Model):
         verbose_name_plural = _('Questions')
 
 class PollBox(Box):
+    can_double_render = True
+
     def prepare(self, context):
         from ella.polls import views
         super(PollBox, self).prepare(context)
