@@ -7,7 +7,8 @@ from django.contrib.contenttypes import generic
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_str
 
-from ella.core.cache.utils import cache_this, get_cached_object, get_cached_list
+from ella.core.cache.invalidate import CACHE_DELETER
+from ella.core.cache.utils import cache_this, get_cached_object
 from ella.ellaadmin.options import admin_url
 
 from ella.comments import defaults
@@ -36,25 +37,36 @@ def build_tree(comment_list):
             ]
     return comment_list
 
-def get_count_key(func, self, object, **kwargs):
+def get_key(object, type, **kwargs):
     if kwargs:
         kw = ','.join(':'.join((key, smart_str(kwargs[key]))) for key in sorted(kwargs.keys()))
     else:
         kw = ''
-    return 'ella.comments.models.CommentManager.get_count_for_object:%s:%s:%d:%s' % (
+    return 'ella.comments.models.CommentManager.get_%s_for_object:%s:%s:%d:%s' % (
+            type,
             object._meta.app_label,
             object._meta.object_name,
             object.pk,
             kw
 )
 
+def get_count_key(func, self, object, **kwargs):
+    return get_key(object, 'count', **kwargs)
+
+def get_list_key(func, self, object, **kwargs):
+    return get_key(object, 'list', **kwargs)
+
+def invalidate_cache(key,  self, object, **kwargs):
+    target_ct = ContentType.objects.get_for_model(object)
+    CACHE_DELETER.register_test(Comment, "target_id:%s;target_ct_id:%s" % (object.pk, target_ct.pk) , key)
+
 class CommentManager(models.Manager):
-    @cache_this(get_count_key, timeout=10*60)
+    @cache_this(get_count_key)
     def get_count_for_object(self, object, **kwargs):
         target_ct = ContentType.objects.get_for_model(object)
         return self.filter(target_ct=target_ct, target_id=object.id, **kwargs).count()
 
-    #@cache_this
+    @cache_this(get_list_key, invalidate_cache)
     def get_list_for_object(self, object, order_by=None, **kwargs):
         target_ct = ContentType.objects.get_for_model(object)
         qset = self.filter(target_ct=target_ct, target_id=object._get_pk_val(), **kwargs)
@@ -137,7 +149,7 @@ class Comment(models.Model):
         if len(path) <= defaults.PATH_LENGTH:
             self.path = path
         else:
-            self.path = parent.path
+            self.path = self.parent.path
         # save it all
         super(Comment, self).save()
 

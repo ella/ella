@@ -1,8 +1,6 @@
-from decimal import Decimal
-
-from django.db import models, transaction, connection
+from django.core.exceptions import ImproperlyConfigured
+from django.db import transaction
 from django.db.models.fields import FieldDoesNotExist
-from django.conf import settings
 from django.contrib.auth.models import SiteProfileNotAvailable
 
 from ella.ratings.models import *

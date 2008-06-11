@@ -1,4 +1,3 @@
-from django.contrib.contenttypes.models import ContentType
 from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.http import Http404
@@ -6,8 +5,6 @@ from django.utils.translation import ungettext
 
 from ella.core.custom_urls import dispatcher
 from ella.core.views import get_templates_from_placement
-from ella.galleries.models import Gallery
-from ella.photos.models import Photo
 
 
 def gallery_item_detail(request, context, item_slug=None):

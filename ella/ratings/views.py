@@ -1,6 +1,3 @@
-from datetime import datetime, timedelta
-
-from django.conf import settings
 from django.http import HttpResponseRedirect, Http404
 from django.utils.translation import ugettext as _
 from django.contrib.sites.models import Site

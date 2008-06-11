@@ -1,15 +1,8 @@
-#from md5 import md5
-#try:
-#    import cPickle as pickle
-#except ImportError:
-#    import pickle
-
 from django.template import loader
 from django.utils.datastructures import MultiValueDict
 from django.utils.encoding import smart_str
 from django.core.cache import cache
 from django.conf import settings
-from django.template.defaultfilters import slugify
 
 from ella.core.cache.invalidate import CACHE_DELETER
 from ella.core.cache.template_loader import select_template
@@ -85,6 +78,7 @@ class Box(object):
                 'next_level' : level + 1,
                 'css_class' : self.params.get('css_class', ''),
                 'name' : self.params.get('name', ''),
+                'box' : self,
 }
 
     def get_cache_tests(self):
@@ -103,7 +97,7 @@ class Box(object):
         rend = cache.get(key)
         if rend is None:
             rend = self._render()
-            cache.set(key, rend, 20*60)
+            cache.set(key, rend, getattr(settings, 'CACHE_TIMEOUT', 20*60))
             for model, test in self.get_cache_tests():
                 CACHE_DELETER.register_test(model, test, key)
             CACHE_DELETER.register_pk(self.obj, key)

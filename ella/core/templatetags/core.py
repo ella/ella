@@ -176,7 +176,8 @@ class BoxNode(template.Node):
 
         # push context stack
         context.push()
-        context[BOX_INFO] = (obj, box_key)
+        context[BOX_INFO] = box_key
+
         # render the box
         result = box.render()
         # restore the context
@@ -184,7 +185,7 @@ class BoxNode(template.Node):
 
         if not (getattr(settings, 'DOUBLE_RENDER', False) and box.can_double_render) and BOX_INFO in context:
             # record dependecies
-            source, source_key = context[BOX_INFO]
+            source_key = context[BOX_INFO]
             CACHE_DELETER.register_dependency(source_key, box_key)
         return result
 
@@ -262,7 +263,7 @@ def get_render_key(func, object, content_path):
 def register_test(key, object, content_path):
     CACHE_DELETER.register_pk(object, key)
 
-@cache_this(get_render_key, register_test, timeout=10*60)
+@cache_this(get_render_key, register_test)
 def _render(object, content_path):
     """
     A markdown filter that handles the rendering of any text containing markdown markup and/or django template tags.

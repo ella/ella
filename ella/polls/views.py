@@ -2,13 +2,12 @@ from datetime import datetime, timedelta
 from itertools import chain
 import time
 
-from django.shortcuts import get_object_or_404, render_to_response
+from django.shortcuts import render_to_response
 from django.utils.translation import ugettext, ugettext_lazy as _
-from django.http import HttpResponseRedirect, HttpResponse, Http404
-from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect, Http404
 from django import newforms as forms
 from django.views.decorators.http import require_POST
-from django.db import transaction, connection
+from django.db import transaction
 from django.contrib.contenttypes.models import ContentType
 from django.template import RequestContext
 from django.conf import settings
@@ -21,7 +20,7 @@ from django.utils.html import escape
 from ella.core.cache import get_cached_object_or_404
 from ella.core.views import get_templates_from_placement
 from ella.utils.wizard import Wizard
-from ella.polls.models import Poll, Contest, Contestant, Quiz, Result, Choice, Vote, ACTIVITY_NOT_YET_ACTIVE, ACTIVITY_ACTIVE, ACTIVITY_CLOSED
+from ella.polls.models import Poll, Contestant, Vote, ACTIVITY_NOT_YET_ACTIVE, ACTIVITY_ACTIVE, ACTIVITY_CLOSED
 
 
 # POLLS specific settings

@@ -1,5 +1,6 @@
 import warnings
 
+from django.core.exceptions import ImproperlyConfigured
 from django.template import TemplateDoesNotExist, loader
 from django.conf import settings
 from django.http import HttpResponse
@@ -43,7 +44,7 @@ def invalidate_cache(key, template_name, template_dirs=None):
     if DbTemplate._meta.installed:
         CACHE_DELETER.register_test(DbTemplate, "name:%s" % template_name, key)
 
-@cache_this(get_key, invalidate_cache, timeout=10*60)
+@cache_this(get_key, invalidate_cache, timeout=getattr(settings, 'CACHE_TIMEOUT', 10*60))
 def get_cache_teplate(template_name, template_dirs):
     for loader in template_source_loaders:
         try:
@@ -56,7 +57,7 @@ def get_cache_teplate(template_name, template_dirs):
 def get_sel_template_key(func, template_list):
     return 'ella.core.cache.template_loader.select_template:' + ','.join(template_list)[:200]
 
-@cache_this(get_sel_template_key, timeout=10*60)
+@cache_this(get_sel_template_key, timeout=getattr(settings, 'CACHE_TIMEOUT', 10*60))
 def find_template(template_list):
     for template in template_list:
         try:

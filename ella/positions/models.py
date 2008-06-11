@@ -21,7 +21,7 @@ def invalidate_cache(key,  self, category, name, nofallback=False):
     CACHE_DELETER.register_test(Position, "category_id:%s;name:%s" % (category.pk, name) , key)
 
 class PositionManager(models.Manager):
-    @cache_this(get_position_key, invalidate_cache, timeout=10*60)
+    @cache_this(get_position_key, invalidate_cache)
     def get_active_position(self, category, name, nofallback=False):
         """
         Get active position for given position name.
@@ -77,17 +77,17 @@ class Position(models.Model):
 
 #############
     def show_title(self):
-      if not self.target:
-         return '-- empty position --'
-      else:
-         return '%s [%s]' % (self.target.title, self.target_ct,)
+        if not self.target:
+            return '-- empty position --'
+        else:
+            return '%s [%s]' % (self.target.title, self.target_ct,)
     show_title.short_description = _('Title')
 
     def is_filled(self):
-      if self.target:
-         return True
-      else:
-      	 return False
+        if self.target:
+            return True
+        else:
+            return False
     is_filled.short_description = _('Filled')
     is_filled.boolean = True
 #############

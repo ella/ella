@@ -12,11 +12,9 @@ from ella.core.models import Category, Author
 from ella.core.managers import RelatedManager
 from ella.photos.models import Photo
 
-
 ACTIVITY_NOT_YET_ACTIVE = 0
 ACTIVITY_ACTIVE = 1
 ACTIVITY_CLOSED = 2
-
 
 class FloatingStateModel(object):
     """
@@ -357,7 +355,7 @@ class Contestant(models.Model):
     email = models.EmailField(_('email'))
     phonenumber = models.CharField(_('Phone number'), max_length=20, blank=True)
     address = models.CharField(_('Address'), max_length=200, blank=True)
-    choices = models.CharField(_('Choices'), max_length=200, blank=True)
+    choices = models.TextField(_('Choices'), blank=True)
     count_guess = models.IntegerField(_('Count guess'))
     winner = models.BooleanField(_('Winner'), default=False)
 

@@ -1,4 +1,5 @@
-from os.path import dirname
+from os.path import dirname, isfile, join
+import logging.config
 # Django settings for coretest project.
 
 DEBUG = True
@@ -105,6 +106,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 # we need this for testing caching over ActiveMQ
 CACHE_BACKEND = 'memcached://127.0.0.1:11211'
 ACTIVE_MQ_HOST = 'localhost'
+#ACTIVE_MQ_HOST = None
 
 CACHE_BACKEND = 'dummy://'
 VERSION = 1
@@ -120,3 +122,13 @@ COVERAGE_MODULES = (
     'ella.core.admin',
     'ella.db.models',
 )
+
+# set up default loggers
+LOGGING_CONFIG_FILE = join(dirname(__file__), 'logger.conf')
+
+def init_logger():
+    "init logger with previously defined LOGGING_CONFIG_FILE"
+    if globals().has_key('LOGGING_CONFIG_FILE') and isfile(LOGGING_CONFIG_FILE):
+        logging.config.fileConfig(LOGGING_CONFIG_FILE)
+init_logger()
+

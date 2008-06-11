@@ -2,7 +2,6 @@ from django import template
 from django.template import TemplateSyntaxError
 from django.conf import settings
 
-from ella.utils.templatetags import parse_getforas_triplet
 from ella.core.models import Category
 from ella.core.cache import get_cached_object
 from ella.positions.models import Position

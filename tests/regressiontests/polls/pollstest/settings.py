@@ -86,8 +86,8 @@ INSTALLED_APPS = (
     'ella.core',
     'ella.polls',
     'ella.photos',
-    'tagging',
-    'sampleapp',
+    'ella.tagging',
+    'pollstest.sampleapp',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
