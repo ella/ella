@@ -160,7 +160,7 @@ class Placement(models.Model):
     category = models.ForeignKey(Category, db_index=True)
     publish_from = models.DateTimeField(_("Start of listing"), default=datetime.now)
     publish_to = models.DateTimeField(_("End of listing"), null=True, blank=True)
-    slug = models.CharField(max_length=100, blank=True)
+    slug = models.CharField(max_length=255, blank=True)
 
     static = models.BooleanField(default=False)
 
