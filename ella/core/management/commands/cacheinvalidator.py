@@ -6,6 +6,7 @@ except ImportError:
 import time
 import logging
 import stomp
+import socket
 from django.core.cache import cache
 from django.core.management.base import BaseCommand, CommandError
 from django.utils.datastructures import MultiValueDict
@@ -14,6 +15,9 @@ from django.conf import settings
 log = logging.getLogger('cache')
 
 AMQ_DESTINATION = getattr(settings, 'CI_AMQ_DESTINATION', '/topic/ella')
+AMQ_HOST = getattr(settings, 'ACTIVE_MQ_HOST', None)
+AMQ_PORT = getattr(settings, 'ACTIVE_MQ_PORT', 61613)
+
 REGISTER_KEY = getattr(settings, 'CI_REGISTER_KEY', 'ella_ci_register')
 DEPS_KEY = getattr(settings, 'CI_DEPS_KEY', 'ella_ci_deps')
 
@@ -147,21 +151,26 @@ class CacheInvalidator(object):
             self._dependencies_save()
 
 
-ACTIVE_MQ_HOST = getattr(settings, 'ACTIVE_MQ_HOST', None)
-ACTIVE_MQ_PORT = getattr(settings, 'ACTIVE_MQ_PORT', 61613)
-
 class Command(BaseCommand):
     help = 'Run cache invalidator.'
 
     def handle(self,  *ct_names, **options):
 
-        if not ACTIVE_MQ_HOST:
+        if not AMQ_HOST:
             raise CommandError('ActiveMQ host not defined!')
+
+        try:
+            # check connection to defined AMQ
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.connect((AMQ_HOST, AMQ_PORT))
+            s.close()
+        except:
+            raise CommandError('Can\'t connect to defined AMQ server %s:%s!' % (AMQ_HOST, AMQ_PORT))
 
         try:
 
             # initialize connection for CI
-            conn = stomp.Connection([(ACTIVE_MQ_HOST, ACTIVE_MQ_PORT)])
+            conn = stomp.Connection([(AMQ_HOST, AMQ_PORT)])
             conn.add_listener(CacheInvalidator())
             conn.start()
             conn.connect()

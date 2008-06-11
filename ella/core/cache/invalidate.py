@@ -4,14 +4,19 @@ except ImportError:
     import pickle
 
 import stomp
+import logging
+import socket
 from django.dispatch import dispatcher
 from django.db.models import signals
 from django.conf import settings
 
-import logging
 log = logging.getLogger('cache')
 AMQ_DESTINATION = getattr(settings, 'CI_AMQ_DESTINATION', '/topic/ella')
+AMQ_HOST = getattr(settings, 'ACTIVE_MQ_HOST', None)
+AMQ_PORT = getattr(settings, 'ACTIVE_MQ_PORT', 61613)
 
+class MsgWrapper(object):
+    pass
 
 class CacheDeleter(object):
     def __init__(self):
@@ -65,20 +70,17 @@ class CacheDeleter(object):
         self.conn.stop()
 
 CACHE_DELETER = CacheDeleter()
-ACTIVE_MQ_HOST = getattr(settings, 'ACTIVE_MQ_HOST', None)
-ACTIVE_MQ_PORT = getattr(settings, 'ACTIVE_MQ_PORT', 61613)
 
 
-if ACTIVE_MQ_HOST:
+if AMQ_HOST:
     try:
         # check connection to defined AMQ
-        import socket
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((ACTIVE_MQ_HOST, ACTIVE_MQ_PORT))
+        s.connect((AMQ_HOST, AMQ_PORT))
         s.close()
 
         # connection checked, connect CACHE_DELETER
-        CACHE_DELETER.connect([(ACTIVE_MQ_HOST, ACTIVE_MQ_PORT)])
+        CACHE_DELETER.connect([(AMQ_HOST, AMQ_PORT)])
 
         # start listening for any model
         dispatcher.connect(CACHE_DELETER.propagate_signal, signal=signals.post_save)
