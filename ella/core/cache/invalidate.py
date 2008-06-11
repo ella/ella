@@ -71,11 +71,16 @@ ACTIVE_MQ_PORT = getattr(settings, 'ACTIVE_MQ_PORT', 61613)
 
 if ACTIVE_MQ_HOST:
     try:
+        # check connection to defined AMQ
+        import socket
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((ACTIVE_MQ_HOST, ACTIVE_MQ_PORT))
+        s.close()
+
+        # connection checked, connect CACHE_DELETER
         CACHE_DELETER.connect([(ACTIVE_MQ_HOST, ACTIVE_MQ_PORT)])
 
         # start listening for any model
-        # register the proper propagation function for intercepting the proper signals
-        # dispatcher.connect(CACHE_DELETER.propagate_signal, signal=signals.pre_save)
         dispatcher.connect(CACHE_DELETER.propagate_signal, signal=signals.post_save)
         dispatcher.connect(CACHE_DELETER.propagate_signal, signal=signals.post_delete)
         log.debug('Start listening for any model')
