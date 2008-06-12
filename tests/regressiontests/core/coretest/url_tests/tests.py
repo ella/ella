@@ -29,14 +29,31 @@ True
 200
 >>> c.get('/2007/').status_code
 200
+>>> response = c.get('/export/')
+>>> response.status_code
+200
+>>> response.context['category'].tree_parent is None
+True
+>>> 'listing' in response.context
+True
+>>> response.content
+'Base export bannerSampleModel object listed in example.com/RedirObject object listed in example.com/SampleModel object listed in example.com/\n'
+>>> c.get('/export/test1/').content
+'test1 export bannerSampleModel object listed in example.com/RedirObject object listed in example.com/SampleModel object listed in example.com/\n'
+>>> c.get('/export/test2/').content
+'Base export bannerSampleModel object listed in example.com/RedirObject object listed in example.com/SampleModel object listed in example.com/\n'
 '''
 
 custom = r'''
 # custom url dispatching
 >>> from django.test.client import Client
 >>> c = Client()
->>> from url_tests.models import SampleModel, register_urls
+>>> from url_tests.models import SampleModel, register_urls, register_urls_bad
 >>> register_urls()
+>>> register_urls_bad()
+Traceback (most recent call last):
+  ...
+AssertionError: You can only register one function for key u'action'
 
 # sample object 1
 >>> sm = SampleModel.objects.get(pk=1)
@@ -51,7 +68,7 @@ True
 >>> response.status_code
 200
 >>> response.content
-'\ncategory:example.com/,content_type_name:sample-models,object:SampleModel object,content_type:sample model,listing:SampleModel object listed in example.com/'
+'\ncategory:example.com/,content_type:sample model,content_type_name:sample-models,object:SampleModel object,placement:SampleModel object placed in example.com/'
 
 
 # sample object 2
@@ -67,13 +84,13 @@ True
 >>> response.status_code
 200
 >>> response.content
-'\ncategory:example.com/,content_type_name:sample-models,object:SampleModel object,content_type:sample model,listing:SampleModel object listed in example.com/'
+'\ncategory:example.com/,content_type:sample model,content_type_name:sample-models,object:SampleModel object,placement:SampleModel object placed in example.com/'
 
 >>> response = c.get('/2007/7/1/sample-models/first-object/action/X/Y/Z/')
 >>> response.status_code
 200
 >>> response.content
-'X/Y/Z\ncategory:example.com/,content_type_name:sample-models,object:SampleModel object,content_type:sample model,listing:SampleModel object listed in example.com/'
+'X/Y/Z\ncategory:example.com/,content_type:sample model,content_type_name:sample-models,object:SampleModel object,placement:SampleModel object placed in example.com/'
 
 >>> response = c.get('/2007/7/1/sample-models/first-object/otheraction/')
 >>> response.status_code
@@ -82,12 +99,24 @@ True
 >>> response.status_code
 200
 >>> response.content
-'\ncategory:example.com/,content_type_name:other-sample-models,object:OtherSampleModel object,content_type:other sample model,listing:OtherSampleModel object listed in example.com/'
+'\ncategory:example.com/,content_type:other sample model,content_type_name:other-sample-models,object:OtherSampleModel object,placement:OtherSampleModel object placed in example.com/'
+
+# simple static listing
+>>> response = c.get('/static/other-sample-models/first-other-object/')
+>>> response.status_code
+200
+>>> response.content
+'Sample detail:\ncategory:example.com/,content_type:other sample model,content_type_name:other-sample-models,object:OtherSampleModel object,placement:OtherSampleModel object placed in example.com/'
+>>> response = c.get('/cat/subcat2/subsubcat/static/other-sample-models/first-other-object/otheraction/')
+>>> response.status_code
+200
+>>> response.content
+'\ncategory:example.com/cat/subcat2/subsubcat,content_type:other sample model,content_type_name:other-sample-models,object:OtherSampleModel object,placement:OtherSampleModel object placed in example.com/cat/subcat2/subsubcat'
 '''
 
 __test__ = {
     'base' : base,
-    'custom' : custom
+    'custom' : custom,
 }
 
 if __name__ == '__main__':

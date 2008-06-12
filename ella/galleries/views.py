@@ -3,7 +3,8 @@ from django.shortcuts import render_to_response
 from django.http import Http404
 from django.utils.translation import ungettext
 
-from ella.core.views import get_templates_from_listing
+from ella.core.custom_urls import dispatcher
+from ella.core.views import get_templates_from_placement
 
 
 def gallery_item_detail(request, context, item_slug=None):
@@ -52,7 +53,7 @@ def gallery_item_detail(request, context, item_slug=None):
 })
 
     return render_to_response(
-        get_templates_from_listing('item.html', context['listing']),
+        get_templates_from_placement('item.html', context['placement']),
         context,
         context_instance=RequestContext(request),
 )

@@ -1,9 +1,11 @@
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.utils.safestring import mark_safe
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.redirects.models import Redirect
+from django.db.models import Model
 
 from ella.core.cache import get_cached_object, get_cached_list
-from ella.core.models import Listing, Category, HitCount
+from ella.core.models import Placement, Category, HitCount
 from ella.photos.models import Photo
 from ella.ellaadmin.options import admin_url
 
@@ -11,31 +13,58 @@ from ella.ellaadmin.options import admin_url
 class Publishable(object):
     """
     Abstract interface-like class that defines method's common to all objects that
-    serve as primary content (can have a listing).
+    serve as primary content (can have a placement).
     """
 
     @property
-    def main_listing(self):
-        " Return object's main listing, that is the object's listing in its primary category "
-        try:
-            return get_cached_object(
-                    Listing,
-                    target_ct=ContentType.objects.get_for_model(self.__class__),
-                    target_id=self.id,
-                    category=self.category_id
+    def main_placement(self):
+        " Return object's main placement, that is the object's placement in its primary category "
+        if not hasattr(self, '_main_placement'):
+            try:
+                # TODO - check and if we don't have category, take the only placement that exists in current site
+                self._main_placement = get_cached_object(
+                        Placement,
+                        target_ct=ContentType.objects.get_for_model(self.__class__),
+                        target_id=self.pk,
+                        category=self.category_id
 )
-        except Listing.DoesNotExist:
-            return None
+            except Placement.DoesNotExist:
+                self._main_placement = None
+        return self._main_placement
 
     def get_absolute_url(self):
         " Get object's URL. "
-        listing = self.main_listing
-        if listing:
-            return listing.get_absolute_url()
+        placement = self.main_placement
+        if placement:
+            return placement.get_absolute_url()
 
     def get_admin_url(self):
         return admin_url(self)
 
+    def save(self):
+        if self.pk and hasattr(self, 'slug'): # only run on update
+            # get old self
+            old_self = self.__class__._default_manager.get(pk=self.pk)
+            # the slug has changed
+            if old_self.slug != self.slug:
+                for plc in list(Placement.objects.filter(
+                        target_id=self.pk,
+                        target_ct=ContentType.objects.get_for_model(self.__class__)
+).exclude(category=self.category_id)) + [self.main_placement]:
+                    if plc.slug == old_self.slug:
+                        plc.slug = self.slug
+                        plc.save()
+        return Model.save(self)
+
+    def delete(self):
+        url = self.get_absolute_url()
+        Redirect.objects.filter(new_path=url).delete()
+        return Model.delete(self)
+
+
+    ##
+    # various metadata
+    ##
     def get_category(self):
         " Get object's primary Category."
         return get_cached_object(Category, pk=self.category_id)
@@ -81,9 +110,13 @@ class Publishable(object):
     def get_hits(self):
         # there can be more hitcounts for various sites
         hits = sum(i.hits for i in get_cached_list(HitCount,
-            target_ct=ContentType.objects.get_for_model(self.__class__),
-            target_id=self.id,
+            placement__target_ct=ContentType.objects.get_for_model(self.__class__),
+            placement__target_id=self.id,
 ))
         return hits
     get_hits.short_description = _('Hit Counts')
 
+    """
+    def get_tags(self):
+        from ella.tagging.models import TaggedItem
+    """

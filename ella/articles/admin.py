@@ -1,9 +1,9 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
 
-from tagging.models import TaggingInlineOptions
+from ella.tagging.admin import TaggingInlineOptions
 
-from ella.core.admin import ListingInlineOptions
+from ella.core.admin import PlacementInlineOptions
 from ella.ellaadmin import fields
 from ella.articles.models import ArticleContents, Article, InfoBox
 
@@ -45,7 +45,7 @@ class ArticleOptions(admin.ModelAdmin):
     raw_id_fields = ('photo',)
     list_filter = ('category__site', 'created', 'category', 'authors',)
     search_fields = ('title', 'upper_title', 'perex', 'slug',)
-    inlines = (ArticleContentInlineOptions, ListingInlineOptions, TaggingInlineOptions,)
+    inlines = (ArticleContentInlineOptions, PlacementInlineOptions, TaggingInlineOptions,)
     prepopulated_fields = {'slug' : ('title',)}
 
 

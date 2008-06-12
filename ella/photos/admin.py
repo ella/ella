@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.conf import settings
 from django.utils.translation import ugettext
 
-from tagging.models import TaggingInlineOptions
+from ella.tagging.admin import TaggingInlineOptions
 
 from ella.photos.models import FormatedPhoto, Format, Photo
 from ella.photos.views import format_photo_json

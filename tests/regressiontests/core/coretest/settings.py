@@ -90,6 +90,7 @@ INSTALLED_APPS = (
     'coretest.url_tests',
     'coretest.cache_tests',
     'coretest.templatetags_sample',
+    'coretest.admin_tests',
 )
 
 INTERNAL_IPS = (
@@ -102,13 +103,25 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'ella.core.context_processors.url_info',
 )
 
-#CACHE_BACKEND = 'locmem://'
 # we need this for testing caching over ActiveMQ
 CACHE_BACKEND = 'memcached://127.0.0.1:11211'
 ACTIVE_MQ_HOST = 'localhost'
 #ACTIVE_MQ_HOST = None
 
+CACHE_BACKEND = 'dummy://'
 VERSION = 1
+
+TEST_RUNNER = 'coretest.tests_with_coverage.my_run_tests'
+
+COVERAGE_MODULES = (
+    'ella.core.views',
+    'ella.core.models',
+    'ella.core.cache.utils',
+    'ella.core.box',
+    'ella.core.custom_urls',
+    'ella.core.admin',
+    'ella.db.models',
+)
 
 # set up default loggers
 LOGGING_CONFIG_FILE = join(dirname(__file__), 'logger.conf')
@@ -118,3 +131,4 @@ def init_logger():
     if globals().has_key('LOGGING_CONFIG_FILE') and isfile(LOGGING_CONFIG_FILE):
         logging.config.fileConfig(LOGGING_CONFIG_FILE)
 init_logger()
+

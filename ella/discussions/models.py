@@ -17,7 +17,7 @@ from ella.core.box import Box
 from ella.db.models import Publishable
 from ella.comments.models import Comment
 from ella.photos.models import Photo
-from ella.discussions.managers import MostFilledManager, MostViewedManager, WithNewestPostsManager, UnreadItemsManager
+from ella.discussions.managers import TopicThreadManager
 
 """
 HOWTO:
@@ -54,22 +54,20 @@ http://www.b-list.org/weblog/2006/sep/02/django-tips-user-registration/
 """
 
 """
-TODO 2008-04-16:
-1. prihlaseny admin - muze kliknout na IDcko.
+TODO:
+4. Udelat (v placements verzi) vypis temat pro urc. kategorii (vc. easy sablony)
 
-2. profil Zaneta posle (polozky)
+1* Kontrolovat pri zakladani vlakna stejny title -> achtung a nenechat zalozit.
 
-3. Sherlock -- pripravit export (zeptat se Ondry na detaily)
+2* profil Zaneta posle (polozky)
 
-4. poradny - podivat se na atlas.cz
-   - otazky posilaj ianon. uzivatele
-   - otazky nejsou hned videt na webu
-   - videt jsou zodpovezene otazky + odpovedi.
-   - po kliknuti na odpoved odbornika, bude stranka s odpovedi + komentari uzivatelu.
+3. Sherlock -- zkontrolovat sherlock objekt.
 """
 
 ACTIVITY_PERIOD = 6  # Thread activity (hours)
 
+class DuplicationError(Exception):
+    pass
 
 def get_comments_on_thread(thread):
     ctThread = ContentType.objects.get_for_model(TopicThread)
@@ -84,7 +82,7 @@ def remove_diacritical(text):
             output += c
     return output
 
-class Topic(models.Model, Publishable):
+class Topic(Publishable, models.Model):
     # ella fields
     title = models.CharField(_('Title'), max_length=255)
     description = models.TextField(_('Description'))
@@ -96,26 +94,13 @@ class Topic(models.Model, Publishable):
     def __unicode__(self):
         return self.title
 
-    @property
-    def main_listing(self):
-        try:
-            return get_cached_object(
-                    Listing,
-                    target_ct=ContentType.objects.get_for_model(self.__class__),
-                    target_id=self.id,
-                    category=self.category_id
-)
-        except Listing.DoesNotExist:
-            return None
-
     def get_absolute_url(self):
-        listing = self.main_listing
-        if listing:
-            return listing.get_absolute_url()
+        place = self.main_placement
+        if place:
+            return place.get_absolute_url()
 
     def photo_thumb(self):
         """ Displays Topic photo thumbnail in admin. """
-        # TODO odstranit absolutni URL - bylo jen k rychlemu testu
         out = self.photo.thumb()
         return mark_safe(out)
     photo_thumb.allow_tags = True
@@ -175,27 +160,27 @@ class TopicThread(models.Model):
     created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)
     author = models.ForeignKey(User, verbose_name=_('authorized author'),)
     topic = models.ForeignKey(Topic)
+    hit_counts = models.PositiveIntegerField(default=0)
 
-    objects = models.manager.Manager()
-    most_filled = MostFilledManager()
-    most_viewed = MostViewedManager()
-    with_newest_posts = WithNewestPostsManager()
-    unread_items = UnreadItemsManager()
-    # TODO (NAVSTEVNOST) hit count? Should be automatic by Ella (?) - prove it.
+    objects = TopicThreadManager()
 
     def __init__(self, *args, **kwargs):
         super(self.__class__, self).__init__(*args, **kwargs)
-        self.__posts = []
 
     def __unicode__(self):
         return self.title
 
-    def __load_posts(self):
-        if self.__posts:
-            return
+    def save(self):
+        thr = TopicThread.objects.filter(title=self.title)
+        if thr and not self.pk:
+            raise DuplicationError('TopicThread with title "%s" already exist.' % self.title)
+        super(self.__class__, self).save()
+
+    @property
+    def posts(self):
         ctThread = ContentType.objects.get_for_model(TopicThread)
         qset = Comment.objects.filter(target_ct=ctThread)
-        self.__posts = qset.filter(target_id=self.pk)
+        return qset.filter(target_id=self.pk)
 
     def get_absolute_url(self):
         base = self.topic.get_absolute_url()
@@ -203,15 +188,17 @@ class TopicThread(models.Model):
 
     @property
     def num_posts(self):
-        self.__load_posts()
-        return self.__posts.count()
+        return self.posts.count()
 
     def get_posts_by_date(self):
-        self.__load_posts()
-        return self.__posts.order_by('submit_date')
+        return self.posts.order_by('submit_date')
 
     def __cmp__(self, other):
         return cmp(self.activity, other.activity)
+
+    def hit(self):
+        self.hit_counts += 1
+        self.save()
 
     @property
     def activity(self):
@@ -221,16 +208,14 @@ class TopicThread(models.Model):
         return qset.filter(submit_date__gte=when).count()
 
     def last_post(self):
-        self.__load_posts()
         # FIXME check list length, sort by date to get the latest item.
-        if not self.__posts:
+        if not self.posts:
             return ''
-        return self.__posts.order_by('-submit_date')[0]
+        return self.posts.order_by('-submit_date')[0]
 
     class Meta:
         verbose_name = _('Thread')
         verbose_name_plural = _('Threads')
-        #ordering = ('title',)
 
 
 class BannedString(models.Model):

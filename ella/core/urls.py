@@ -1,4 +1,5 @@
 from django.conf.urls.defaults import *
+from django.utils.translation import ugettext as _
 
 from ella.core.views import object_detail, list_content_type, category_detail, home
 from ella.core.feeds import RSSTopCategoryListings, AtomTopCategoryListings
@@ -33,6 +34,16 @@ urlpatterns = patterns('',
         list_content_type, name="list_content_type_day"),
     url(r'^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<content_type>[a-z0-9-]+)/$', list_content_type, name="list_content_type_month"),
     url(r'^(?P<year>\d{4})/(?P<content_type>[a-z0-9-]+)/$', list_content_type, name="list_content_type_year"),
+
+    # static detail
+    url(r'^(?P<category>[a-z0-9-/]+)/%s/(?P<content_type>[a-z0-9-]+)/(?P<slug>[a-z0-9-]+)/$' % _('static'), object_detail, name='static_detail'),
+    url(r'^%s/(?P<content_type>[a-z0-9-]+)/(?P<slug>[a-z0-9-]+)/$' % _('static'), object_detail, {'category' : ''}, name='home_static_detail'),
+
+    # static detail with custom action
+    url(r'^(?P<category>[a-z0-9-/]+)/%s/(?P<content_type>[a-z0-9-]+)/(?P<slug>[a-z0-9-]+)/(?P<url_remainder>.*)/$' % _('static'),
+        object_detail, name='static_detail_action'),
+    url(r'^%s/(?P<content_type>[a-z0-9-]+)/(?P<slug>[a-z0-9-]+)/(?P<url_remainder>.*)/$' % _('static'),
+        object_detail, {'category' : ''}, name='home_static_detail_action'),
 
     # object detail
     url(r'^(?P<category>[a-z0-9-/]+)/(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<content_type>[a-z0-9-]+)/(?P<slug>[a-z0-9-]+)/$',

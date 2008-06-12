@@ -8,7 +8,7 @@ from django.template.defaultfilters import slugify
 from django.db import models
 from django.http import Http404
 
-from ella.core.models import Listing, Category, HitCount
+from ella.core.models import Listing, Category, HitCount, Placement
 from ella.core.cache import get_cached_list, get_cached_object_or_404, cache_this
 from ella.core.custom_urls import dispatcher
 from ella.core.cache.template_loader import render_to_response
@@ -41,19 +41,19 @@ def get_content_type(ct_name):
             raise Http404
     return ct
 
-def object_detail(request, category, year, month, day, content_type, slug, url_remainder=None):
+def object_detail(request, category, content_type, slug, year=None, month=None, day=None, url_remainder=None):
     """
-    Detail view that displays a single object based on it's main listing.
+    Detail view that displays a single object based on it's main placement.
 
     Params:
         request - HttpRequest supplied by Django
         category - base Category tree_path (empty if home category)
-        year, month, day - date matching the ``publish_from`` field of the ``Listing`` object
+        year, month, day - date matching the ``publish_from`` field of the ``Placement`` object
         content_type - slugified verbose_name_plural of the target model
         slug - slug of the object itself
 
     Raises:
-        Http404 if object or listing doesn't exist or dates doesn't match
+        Http404 if object or placement doesn't exist or dates doesn't match
     """
     ct = get_content_type(content_type)
 
@@ -62,38 +62,27 @@ def object_detail(request, category, year, month, day, content_type, slug, url_r
     else:
         cat = get_cached_object_or_404(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
 
-    # ger all possible listings
-    listings = get_cached_list(
-                Listing,
-                publish_from__year=year,
-                publish_from__month=month,
-                publish_from__day=day,
-                target_ct=ct,
-                category=cat
+    if year:
+        placement = get_cached_object_or_404(Placement,
+                    publish_from__year=year,
+                    publish_from__month=month,
+                    publish_from__day=day,
+                    target_ct=ct,
+                    category=cat,
+                    slug=slug,
+                    static=False
 )
-
-    # get the object
-    obj = get_cached_object_or_404(ct, slug=slug, pk__in=[ l.target_id for l in listings ])
-
-    listing = None
-    # find main listing
-    for l in listings:
-        if l.target_id == obj._get_pk_val():
-            listing = l
-            break
     else:
+        placement = get_cached_object_or_404(Placement, category=cat, target_ct=ct, slug=slug, static=True)
+
+    if not (placement.is_active() or request.user.is_staff):
+        # future placement, render if accessed by logged in staff member
         raise Http404
 
-    if not listing.is_active():
-        # expired listing
-        raise Http404
-
-    if not (listing.is_published() or request.user.is_staff):
-        # future listing, render if accessed by logged in staff member
-        raise Http404
+    obj = placement.target
 
     context = {
-            'listing' : listing,
+            'placement' : placement,
             'object' : obj,
             'category' : cat,
             'content_type_name' : content_type,
@@ -106,11 +95,11 @@ def object_detail(request, category, year, month, day, content_type, slug, url_r
         return dispatcher.call_view(request, bits, context)
     elif dispatcher.has_custom_detail(obj):
         # increment hit counter
-        HitCount.objects.hit(obj)
+        HitCount.objects.hit(placement)
         return dispatcher.call_custom_detail(request, context)
 
     # increment hit counter
-    HitCount.objects.hit(obj)
+    HitCount.objects.hit(placement)
 
     return render_to_response(
         get_templates('object.html', slug, cat, ct.app_label, ct.model),
@@ -141,21 +130,21 @@ def get_templates(name, slug=None, category=None, app_label=None, model_label=No
     templates.append('page/%s' % name)
     return templates
 
-def get_templates_from_listing(name, listing, slug=None, category=None, app_label=None, model_label=None):
-    """ Returns template list by listing. """
+def get_templates_from_placement(name, placement, slug=None, category=None, app_label=None, model_label=None):
+    """ Returns template list by placement. """
     if slug is None:
-        slug = listing.target.slug
+        slug = placement.slug
     if category is None:
-        category = listing.category
+        category = placement.category
     if app_label is None:
-        app_label = listing.target._meta.app_label
+        app_label = placement.target._meta.app_label
     if model_label is None:
-        model_label = listing.target._meta.module_name
+        model_label = placement.target._meta.module_name
     return get_templates(name, slug, category, app_label, model_label)
 
 def list_content_type(request, category=None, year=None, month=None, day=None, content_type=None, paginate_by=20):
     """
-    List object's listings according to the parameters.
+    List objects' listings according to the parameters.
 
     Params:
         request - HttpRequest supplied by Django

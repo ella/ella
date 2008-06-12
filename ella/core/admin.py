@@ -1,98 +1,152 @@
 from django.contrib import admin
 from django.utils.translation import ugettext as _
 from django import newforms as forms
+from django.newforms import models as modelforms
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import Q
 
 from ella.ellaadmin import widgets
 from ella.core.middleware import get_current_request
-from ella.core.models import Author, Source, Category, Listing, HitCount, Dependency
+from ella.core.models import Author, Source, Category, Listing, HitCount, Dependency, Placement
+from ella.core.cache import get_cached_list
+
+class PlacementForm(modelforms.ModelForm):
+
+    class Meta:
+        model = Placement
+
+    def __init__(self, *args, **kwargs):
+        initial = []
+        if 'initial' in kwargs:
+            initial = [ c.id for c in Category.objects.distinct().filter(listing__placement=kwargs['initial']['id']) ]
+
+        self.base_fields['listings'] = modelforms.ModelMultipleChoiceField(Category.objects.all(), cache_choices=True, required=False, initial=initial)
+        super(PlacementForm, self).__init__(*args, **kwargs)
 
 
-class ListingInlineFormset(generic.GenericInlineFormset):
+class PlacementInlineFormset(generic.GenericInlineFormset):
+
+    def save_existing(self, form, instance, commit=True):
+        instance = super(PlacementInlineFormset, self).save_existing(form, instance, commit)
+        return self.save_listings(form, instance, commit)
+
+    def save_new(self, form, commit=True):
+        instance = super(PlacementInlineFormset, self).save_new(form, commit)
+        return self.save_listings(form, instance, commit)
+
+    def save_listings(self, form, instance, commit=True):
+        list_cats = form.cleaned_data.pop('listings')
+
+        def save_listings():
+            listings = dict([ (l.category, l) for l in Listing.objects.filter(placement=instance.pk) ])
+
+            for c in list_cats:
+                if not c in listings:
+                    # create listing
+                    l = Listing(placement=instance, category=c, publish_from=instance.publish_from)
+                    l.save()
+                else:
+                    del listings[c]
+            for l in listings.values():
+                l.delete()
+
+        if commit:
+            save_listings()
+        else:
+            save_m2m = form.save_m2m
+            def save_all():
+                save_m2m()
+                save_listings()
+            form.save_m2m = save_all
+        return instance
+
     def clean (self):
-        if not self.cleaned_data or not self.instance:
-            return self.cleaned_data
+        # no data - nothing to validate
+        if not self.is_valid() or not self.cleaned_data or not self.instance or not self.cleaned_data[0]:
+            return
 
         obj = self.instance
-        cat = obj.category
+        cat = getattr(obj, 'category', None)
+        obj_slug = getattr(obj, 'slug', obj.pk)
+        target_ct=ContentType.objects.get_for_model(obj)
 
         main = None
         for d in self.cleaned_data:
-            if d['category'] == cat:
-                main = d
-                qset = obj.__class__._default_manager.filter(slug=obj.slug, category=obj.category_id)
-                if obj._get_pk_val():
-                    qset = qset.exclude(pk=obj._get_pk_val())
+            # empty form
+            if not d: break
 
-                for o in qset:
-                    if o.main_listing and o.main_listing.publish_from.date() == d['publish_from'].date():
-                        raise forms.ValidationError(
-                                _('There is already an object published in category %(category)s with slug %(slug)s on %(date)s') % {
-                                    'slug' : obj.slug,
-                                    'category' : obj.category,
-                                    'date' : d['publish_from'].date(),
+            if cat and cat == d['category']:
+                main = d
+
+
+            # allow placements that do not overlap
+            q = Q(publish_to__isnull=True, publish_to__lt=d['publish_from'])
+            if d['publish_to']:
+                q |= Q(publish_from__gt=d['publish_to'])
+
+            slug = d.get('slug', obj_slug)
+            # try and find conflicting placement
+            qset = Placement.objects.filter(q,
+                category=d['category'],
+                target_ct=target_ct,
+                slug=slug,
+                static=d['static'],
+)
+
+            # check for same date in URL
+            if not d['static']:
+                qset = qset.filter(
+                    publish_from__year=d['publish_from'].year,
+                    publish_from__month=d['publish_from'].month,
+                    publish_from__day=d['publish_from'].day,
+)
+
+            # exclude current object from search
+            if d['id']:
+                qset = qset.exclude(pk=d['id'])
+
+            if qset:
+                plac = qset[0]
+                raise forms.ValidationError(
+                        _('There is already a Placement object published in category %(category)s with slug %(slug)s referring to %(target)s.') % {
+                            'slug' : slug,
+                            'category' : plac.category,
+                            'target' : plac.target,
 })
 
-            elif d['hidden']:
-                raise forms.ValidationError, _('Only main listing can be hidden.')
+        if cat and not main:
+            raise forms.ValidationError(_('If object has a category, it must have a main placement.'))
 
-        # the main listing not present
-        if main is None:
-            try:
-                # try to retrieve it from db
-                main = Listing.objects.get(category=cat, target_ct=ContentType.objects.get_for_model(obj), target_id=obj._get_pk_val())
-                main = main.__dict__
-            except Listing.DoesNotExist:
-                raise forms.ValidationError, _('If an object has a listing, it must have a listing in its main category.')
+        return
 
-        if main['publish_from'] != min([ main['publish_from'] ] + [ d['publish_from'] for d in self.cleaned_data]):
-            # TODO: move the error to the form that is at fault
-            raise forms.ValidationError, _('No listing can start sooner than main listing')
-
-        return self.cleaned_data
-
-    '''
-    def get_queryset(self):
-        """
-        Override the default so that Listings I don't have permissions to change won't show up
-        """
-        from ella.ellaadmin import applicable_categories
-
-        if self.instance is None:
-            return []
-
-        return super(ListingInlineFormset, self).get_queryset().filter(category__in=applicable_categories(get_current_request().user, 'core.change_listing'))
-    '''
-
-class ListingInlineOptions(generic.GenericTabularInline):
+class ListingInlineOptions(admin.TabularInline):
     model = Listing
-    extra = 2
-    ct_field_name = 'target_ct'
-    id_field_name = 'target_id'
-    formset = ListingInlineFormset
+    extra = 3
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'category':
             kwargs['widget'] = widgets.ListingCategoryWidget
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
-class HitCountInlineOptions(generic.GenericTabularInline):
-    model = HitCount
-    extra = 0
+class PlacementInlineOptions(generic.GenericTabularInline):
+    model = Placement
+    extra = 2
     ct_field_name = 'target_ct'
     id_field_name = 'target_id'
-    list_display = ('last_seen', 'hits',)
-    fieldsets = [ (None, {'fields': ('hits',)}) ]
+    formset = PlacementInlineFormset
+    form = PlacementForm
+    fieldsets = [ (None, {'fields' : ('category','publish_from', 'publish_to', 'slug', 'static', 'listings',)}), ]
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'hits':
-            kwargs['widget'] = widgets.ParagraphInputWidget
+        if db_field.name == 'category':
+            kwargs['widget'] = widgets.ListingCategoryWidget
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
-class ListingOptions(admin.ModelAdmin):
+class PlacementOptions(admin.ModelAdmin):
     list_display = ('target', 'category', 'publish_from', 'full_url',)
     list_filter = ('publish_from', 'category', 'target_ct',)
+    inlines = [ ListingInlineOptions, ]
 
 class DependencyOptions(admin.ModelAdmin):
     list_filter = ('source_ct', 'target_ct',)
@@ -106,7 +160,7 @@ class CategoryOptions(admin.ModelAdmin):
 
 class HitCountOptions(admin.ModelAdmin):
     list_display = ('target', 'hits',)
-    list_filter = ('target_ct', 'site',)
+    list_filter = ('placement__target_ct', 'placement__category__site',)
 
 class AuthorOptions(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
@@ -116,6 +170,6 @@ admin.site.register(HitCount, HitCountOptions)
 admin.site.register(Category, CategoryOptions)
 admin.site.register(Source)
 admin.site.register(Author, AuthorOptions)
-admin.site.register(Listing, ListingOptions)
+admin.site.register(Placement, PlacementOptions)
 admin.site.register(Dependency , DependencyOptions)
 

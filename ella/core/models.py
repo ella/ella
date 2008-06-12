@@ -9,10 +9,11 @@ from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from django.utils.safestring import mark_safe
 from django.contrib.auth.models import User
+from django.contrib.redirects.models import Redirect
 from django.template import loader
 
 from ella.core.box import Box
-from ella.core.managers import ListingManager, HitCountManager, DependencyManager
+from ella.core.managers import ListingManager, HitCountManager, DependencyManager, PlacementManager
 from ella.core.cache import get_cached_object, cache_this
 
 
@@ -152,6 +153,99 @@ class Category(models.Model):
     def __unicode__(self):
         return '%s/%s' % (self.site.name, self.tree_path)
 
+class Placement(models.Model):
+    # listing's target - a Publishable object
+    target_ct = models.ForeignKey(ContentType)
+    target_id = models.IntegerField()
+    category = models.ForeignKey(Category, db_index=True)
+    publish_from = models.DateTimeField(_("Start of listing"), default=datetime.now)
+    publish_to = models.DateTimeField(_("End of listing"), null=True, blank=True)
+    slug = models.CharField(max_length=255, blank=True)
+
+    static = models.BooleanField(default=False)
+
+    objects = PlacementManager()
+
+    class Meta:
+        ordering = ('-publish_from',)
+        verbose_name = _('Placement')
+        verbose_name_plural = _('Placements')
+
+    def __unicode__(self):
+        return u'%s placed in %s' % (self.target, self.category)
+
+    def full_url(self):
+        "Full url to be shown in admin."
+        return mark_safe('<a href="%s">url</a>' % self.get_absolute_url())
+    full_url.allow_tags = True
+
+    @property
+    def target(self):
+        "Return target object via cache"
+        if not hasattr(self, '_target'):
+            self._target = get_cached_object(self.target_ct, pk=self.target_id)
+        return self._target
+
+    def is_active(self):
+        "Return True if the listing's priority is currently active."
+        now = datetime.now()
+        return now > self.publish_from and (self.publish_to is None or now < self.publish_to)
+
+    @transaction.commit_on_success
+    def save(self):
+        " If Listing is created, we create HitCount object "
+
+        if not self.slug:
+            self.slug = getattr(self.target, 'slug', self.target_id)
+
+        if self.pk:
+            old_self = Placement.objects.get(pk=self.pk)
+
+            old_path = old_self.get_absolute_url()
+            new_path = self.get_absolute_url()
+
+            if old_path != new_path and new_path:
+                redirect, created = Redirect.objects.get_or_create(old_path=old_path, new_path=new_path, defaults={'site_id' : settings.SITE_ID})
+                for r in Redirect.objects.filter(new_path=old_path).exclude(pk=redirect.pk):
+                    r.new_path = new_path
+                    r.save()
+        # First, save Placement
+        super(Placement, self).save()
+        # Then, save HitCount (needs placement_id)
+        hc, created = HitCount.objects.get_or_create(placement=self)
+
+    def get_absolute_url(self):
+        obj = self.target
+        category = get_cached_object(Category, pk=self.category_id)
+
+        kwargs = {
+            'content_type' : slugify(obj._meta.verbose_name_plural),
+            'slug' : self.slug,
+}
+
+        if self.static:
+            if category.tree_parent_id:
+                kwargs['category'] = category.tree_path
+                url = reverse('static_detail', kwargs=kwargs)
+            else:
+                url = reverse('home_static_detail', kwargs=kwargs)
+        else:
+            kwargs.update({
+                    'year' : self.publish_from.year,
+                    'month' : self.publish_from.month,
+                    'day' : self.publish_from.day,
+})
+            if category.tree_parent_id:
+                kwargs['category'] = category.tree_path
+                url = reverse('object_detail', kwargs=kwargs)
+            else:
+                url = reverse('home_object_detail', kwargs=kwargs)
+
+        if category.site_id != settings.SITE_ID:
+            site = get_cached_object(Site, pk=category.site_id)
+            return 'http://' + site.domain + url
+        return url
+
 class Listing(models.Model):
     """
     Listing of an object in a category. Each and every odject that have it's own detail page must have a Listing object
@@ -162,21 +256,10 @@ class Listing(models.Model):
     see doc/listing.txt for more details on Listings
     """
 
-    # listing's target - a Publishable object
-    target_ct = models.ForeignKey(ContentType)
-    target_id = models.IntegerField()
-
-    @property
-    def target(self):
-        "Return target object via cache"
-        if not hasattr(self, '_target'):
-            target_ct = get_cached_object(ContentType, pk=self.target_ct_id)
-            self._target = get_cached_object(target_ct, pk=self.target_id)
-        return self._target
-
+    placement = models.ForeignKey(Placement)
     category = models.ForeignKey(Category, db_index=True)
 
-    publish_from = models.DateTimeField(_("Start of listing"))
+    publish_from = models.DateTimeField(_("Start of listing"), default=datetime.now)
     priority_from = models.DateTimeField(_("Start of prioritized listing"), null=True, blank=True)
     priority_to = models.DateTimeField(_("End of prioritized listing"), null=True, blank=True)
     priority_value = models.IntegerField(_("Priority"), blank=True, null=True)
@@ -184,107 +267,43 @@ class Listing(models.Model):
 
     commercial = models.BooleanField(_("Commercial"), default=False, help_text=_("Check this if the listing is of a commercial content."))
 
-    hidden = models.BooleanField(_("Hidden"), default=False, help_text=_("Create the object's URL, but do not list it in listings?"))
-
     objects = ListingManager()
+
+    @property
+    def target(self):
+        return self.placement.target
+
 
     def Box(self, box_type, nodelist):
         " Delegate the boxing to the target's Box factory method."
-        obj = self.target
+        obj = self.placement.target
         if hasattr(obj, 'Box'):
             return obj.Box(box_type, nodelist)
         return Box(obj, box_type, nodelist)
 
     def get_absolute_url(self):
-        "Get the target's absolute URL - find it's primary Listing and make a reverse() match."
-        obj = self.target
-        if obj.category_id != self.category_id:
-            listing = obj.main_listing
-        else:
-            listing = self
-
-        category = get_cached_object(Category, pk=obj.category_id)
-
-        if category.tree_parent_id:
-            url = reverse(
-                    'object_detail',
-                    kwargs={
-                        'category' : category.tree_path,
-                        'year' : listing.publish_from.year,
-                        'month' : listing.publish_from.month,
-                        'day' : listing.publish_from.day,
-                        'content_type' : slugify(obj._meta.verbose_name_plural),
-                        'slug' : getattr(obj, 'slug', str(obj._get_pk_val())),
-}
-)
-        else:
-            url = reverse(
-                    'home_object_detail',
-                    kwargs={
-                        'year' : listing.publish_from.year,
-                        'month' : listing.publish_from.month,
-                        'day' : listing.publish_from.day,
-                        'content_type' : slugify(obj._meta.verbose_name_plural),
-                        'slug' : getattr(obj, 'slug', str(obj._get_pk_val())),
-}
-)
-        if category.site_id != settings.SITE_ID:
-            site = get_cached_object(Site, pk=category.site_id)
-            return 'http://' + site.domain + url
-        return url
+        return self.placement.get_absolute_url()
 
     def __unicode__(self):
-        try:
-            return u'%s listed in %s' % (self.target, self.category)
-        except models.ObjectDoesNotExist:
-            return u'Broken listing in %s' % self.category
-
-    def is_active(self):
-        "Return True if the listing's priority is currently active."
-        now = datetime.now()
-        return not (self.priority_to and now > self.priority_to and self.remove)
-
-    def is_published(self):
-        now = datetime.now()
-        return (now > self.publish_from)
+        return u'%s listed in %s' % (self.placement.target, self.category)
 
     def full_url(self):
         "Full url to be shown in admin."
         return mark_safe('<a href="%s">url</a>' % self.get_absolute_url())
     full_url.allow_tags = True
 
-    def save(self):
-        " If Listing is created, we create HitCount object "
-
-        # we should non-cached target
-        target_ct = get_cached_object(ContentType, pk=self.target_ct_id)
-        target = target_ct.model_class().objects.get(pk=self.target_id)
-
-        if target.category_id == self.category_id:
-            if not self.id:
-                HitCount.objects.create(target_ct=self.target_ct, target_id=self.target_id, site=self.category.site)
-            else:
-                hc = HitCount.objects.get(target_ct=self.target_ct, target_id=self.target_id)
-                hc.site = self.category.site
-                hc.save()
-        super(Listing, self).save()
-
     class Meta:
         verbose_name = _('Listing')
         verbose_name_plural = _('Listings')
         ordering = ('-publish_from',)
-        unique_together = (('category', 'target_id', 'target_ct'),)
 
 class HitCount(models.Model):
     """
     Count hits for individual objects.
     """
-    target_ct = models.ForeignKey(ContentType)
-    target_id = models.IntegerField()
+    placement = models.ForeignKey(Placement, primary_key=True)
 
     last_seen = models.DateTimeField(_('Last seen'), editable=False)
-    site = models.ForeignKey(Site)
-
     hits = models.PositiveIntegerField(_('Hits'), default=1)
 
     objects = HitCountManager()
@@ -294,18 +313,13 @@ class HitCount(models.Model):
         self.last_seen = datetime.now()
         super(HitCount, self).save()
 
-    @property
     def target(self):
-        if not hasattr(self, '_target'):
-            target_ct = get_cached_object(ContentType, pk=self.target_ct_id)
-            self._target = get_cached_object(target_ct, pk=self.target_id)
-        return self._target
+        return self.placement.target
 
     class Meta:
         ordering = ('-hits', '-last_seen',)
         verbose_name = 'Hit Count'
         verbose_name_plural = 'Hit Counts'
-        unique_together = ('target_ct', 'target_id')
 
 class Related(models.Model):
     """

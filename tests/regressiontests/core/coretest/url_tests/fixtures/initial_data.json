@@ -19,32 +19,55 @@
     },
     {
         "pk": "3",
-        "model": "core.listing",
+        "model": "core.placement",
         "fields": {
             "category": 1,
+            "slug": "first-object",
             "publish_from": "2007-07-01 00:00:00",
-            "priority_value": 0,
+            "publish_to": null,
             "target_id": 1,
-            "remove": false,
-            "priority_to": null,
-            "priority_from": null,
-            "target_ct": 20
+            "target_ct": 21
         }
     },
     {
         "pk": "10",
-        "model": "core.listing",
+        "model": "core.placement",
         "fields": {
+            "category": 1,
+            "slug": "first-object",
+            "publish_from": "2007-07-02 00:00:00",
+            "publish_to": null,
+            "target_id": 2,
+            "target_ct": 21
+        }
+    },
+     {
+         "pk": "3",
+        "model": "core.listing",
+         "fields": {
+            "category": 1,
+            "publish_from": "2007-07-01 00:00:00",
+            "priority_value": 0,
+            "placement": 3,
+            "remove": false,
+            "priority_to": null,
+            "priority_from": null
+         }
+     },
+     {
+         "pk": "10",
+        "model": "core.listing",
+         "fields": {
             "category": 1,
             "publish_from": "2007-07-02 00:00:00",
             "priority_value": 0,
-            "target_id": 2,
+            "placement": 10,
             "remove": false,
             "priority_to": null,
-            "priority_from": null,
-            "target_ct": 20
-        }
-    },
+            "priority_from": null
+         }
+     },
+
     {
         "model" : "url_tests.othersamplemodel",
         "pk" : 1,
@@ -56,16 +79,66 @@
     },
     {
         "pk": "4",
-        "model": "core.listing",
+        "model": "core.placement",
         "fields": {
             "category": 1,
+            "slug": "first-other-object",
             "publish_from": "2007-07-01 00:00:00",
-            "priority_value": 0,
+            "publish_to": null,
             "target_id": 1,
-            "remove": false,
-            "priority_to": null,
-            "priority_from": null,
-            "target_ct": 21
+            "target_ct": 22
+        }
+    },
+    {
+       "pk": "4",
+       "model": "core.listing",
+       "fields": {
+           "category": 1,
+           "publish_from": "2007-07-01 00:00:00",
+           "priority_value": 0,
+           "placement": 4,
+           "remove": false,
+           "priority_to": null,
+           "priority_from": null
+        }
+    },
+    {
+        "pk": "6",
+        "model": "core.category",
+        "fields": {
+            "tree_parent": 4,
+            "description": "Sub sub cat",
+            "title": "Sub cat two",
+            "site": 1,
+            "tree_path": "cat/subcat2/subsubcat",
+            "slug": "subsubcat"
+        }
+    },
+    {
+        "pk": "13",
+        "model": "core.placement",
+        "fields": {
+            "category": 1,
+            "slug": "first-other-object",
+            "publish_from": "2007-07-01 00:00:00",
+            "publish_to": null,
+            "target_id": 1,
+            "target_ct": 22,
+            "static": true
+        }
+    },
+    {
+        "pk": "14",
+        "model": "core.placement",
+        "fields": {
+            "category": 6,
+            "slug": "first-other-object",
+            "publish_from": "2007-07-01 00:00:00",
+            "publish_to": null,
+            "target_id": 1,
+            "target_ct": 22,
+            "static": true
         }
     }
+
 ]

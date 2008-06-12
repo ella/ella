@@ -1,9 +1,9 @@
 from django.contrib import admin
 
-from tagging.models import TaggingInlineOptions
+from ella.tagging.admin import TaggingInlineOptions
 
 from ella.ellaadmin import widgets
-from ella.core.admin import ListingInlineOptions, HitCountInlineOptions
+from ella.core.admin import PlacementInlineOptions
 from ella.interviews.models import Interview, Question, Interviewee, Answer
 
 
@@ -38,7 +38,7 @@ class InterviewOptions(admin.ModelAdmin):
     raw_id_fields = ('photo', 'interviewees',)
     search_fields = ('title', 'perex',)
     prepopulated_fields = {'slug' : ('title',)}
-    inlines = (QuestionInlineOptions, ListingInlineOptions, TaggingInlineOptions)
+    inlines = (QuestionInlineOptions, PlacementInlineOptions, TaggingInlineOptions)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name in ('perex', 'content'):

@@ -1,44 +1,28 @@
 from django.db import models
-from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 
-from ella.core.models import Listing, Category
+from ella.core.models import Category
+from ella.db.models import Publishable
 
-class SampleModel(models.Model):
+class SampleModel(Publishable, models.Model):
     text = models.TextField()
     slug = models.CharField(_('Slug'), max_length=255)
     category = models.ForeignKey(Category, verbose_name=_('Category'))
 
-    @property
-    def main_listing(self):
-        return Listing.objects.get(
-                target_ct=ContentType.objects.get_for_model(SampleModel),
-                target_id=self.id,
-                category=self.category
-)
-
-    def get_absolute_url(self):
-        return self.main_listing.get_absolute_url()
-
-class OtherSampleModel(models.Model):
+class OtherSampleModel(Publishable, models.Model):
     text = models.TextField()
     slug = models.CharField(_('Slug'), max_length=255)
     category = models.ForeignKey(Category, verbose_name=_('Category'))
 
-    @property
-    def main_listing(self):
-        return Listing.objects.get(
-                target_ct=ContentType.objects.get_for_model(OtherSampleModel),
-                target_id=self.id,
-                category=self.category
-)
+def register_urls_bad():
+    from ella.core.custom_urls import dispatcher
+    from url_tests import views
 
-    def get_absolute_url(self):
-        return self.main_listing.get_absolute_url()
-
+    dispatcher.register('action', views.other_sample_view)
 def register_urls():
     from ella.core.custom_urls import dispatcher
     from url_tests import views
 
     dispatcher.register('action', views.sample_view)
     dispatcher.register('otheraction', views.sample_view, model=OtherSampleModel)
+    dispatcher.register_custom_detail(OtherSampleModel, views.sample_custom_view)

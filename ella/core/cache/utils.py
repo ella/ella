@@ -16,6 +16,11 @@ CACHE_TIMEOUT = getattr(settings, 'CACHE_TIMEOUT', 10*60)
 def normalize_key(key):
     return md5(key).hexdigest()
 
+def dump_param(param):
+    if hasattr(param, 'pk'):
+        return '|'.join((param._meta.app_label, param._meta.object_name, str(param.pk)))
+    return smart_str(param)
+
 def _get_key(start, model, kwargs):
     for key, val in kwargs.iteritems():
         if hasattr(val, 'pk'):
@@ -23,10 +28,10 @@ def _get_key(start, model, kwargs):
     return normalize_key(start + ':'.join((
                 model._meta.app_label,
                 model._meta.object_name,
-                ','.join(':'.join((key, smart_str(kwargs[key]))) for key in sorted(kwargs.keys()))
+                ','.join(':'.join((key, dump_param(kwargs[key]))) for key in sorted(kwargs.keys()))
 )))
 
-def get_cached_list(model, **kwargs):
+def get_cached_list(model, *args, **kwargs):
     """
     Return a cached list. If the list does not exist in the cache, create it
     and register it for invalidation if any object from the list is updated (check via _get_pk_val()).
@@ -43,7 +48,7 @@ def get_cached_list(model, **kwargs):
 
     l = cache.get(key)
     if l is None:
-        l = list(model._default_manager.filter(**kwargs))
+        l = list(model._default_manager.filter(*args, **kwargs))
         cache.set(key, l, CACHE_TIMEOUT)
         for o in l:
             CACHE_DELETER.register_pk(o, key)
@@ -103,3 +108,28 @@ def cache_this(key_getter, invalidator=None, timeout=CACHE_TIMEOUT):
 
         return wrapped_func
     return wrapped_decorator
+
+from django.db.models.fields.related import ForeignKey, ReverseSingleRelatedObjectDescriptor
+class CachedForeignKey(ForeignKey):
+    def contribute_to_class(self, cls, name):
+        super(CachedForeignKey, self).contribute_to_class(cls, name)
+        setattr(cls, self.name, CachedReverseSingleRelatedObjectDescriptor(self))
+
+class CachedReverseSingleRelatedObjectDescriptor(ReverseSingleRelatedObjectDescriptor):
+    def __get__(self, instance, instance_type=None):
+        if instance is None:
+            raise AttributeError, "%s must be accessed via instance" % self.field.name
+        cache_name = self.field.get_cache_name()
+        try:
+            return getattr(instance, cache_name)
+        except AttributeError:
+            val = getattr(instance, self.field.attname)
+            if val is None:
+                # If NULL is an allowed value, return it.
+                if self.field.null:
+                    return None
+                raise self.field.rel.to.DoesNotExist
+            rel_obj = get_cached_object(self.field.rel.to, pk=val)
+            setattr(instance, cache_name, rel_obj)
+            return rel_obj
+

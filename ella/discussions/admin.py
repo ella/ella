@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.contenttypes import generic
 from django.newforms.widgets import *
-from ella.core.admin import ListingInlineOptions
+from ella.core.admin import PlacementInlineOptions
 from ella.ellaadmin import widgets
 from ella.discussions.models import TopicThread, Topic, BannedUser, BannedString, get_comments_on_thread
 from ella.comments.models import Comment
@@ -47,7 +47,7 @@ class TopicOptions(admin.ModelAdmin):
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug': ('title',)}
     list_display = ('title', 'photo_thumb', 'created',)
-    inlines = (ListingInlineOptions,)
+    inlines = (PlacementInlineOptions,)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'perex':

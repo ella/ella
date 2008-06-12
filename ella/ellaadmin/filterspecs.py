@@ -29,7 +29,7 @@ class DistinctRelatedFilterSpec(filterspecs.RelatedFilterSpec):
     def __init__(self, f, request, params, model, model_admin, field_path=None):
         super(DistinctRelatedFilterSpec, self).__init__(f, request, params, model, model_admin, field_path=field_path)
         if field_path is None:
-            self.lookup_choices = f.rel.to._default_manager.filter(pk__in=[ d[f.name] for d in model._default_manager.distinct().values(f.name) ])
+            self.lookup_choices = f.rel.to._default_manager.filter(pk__in=[ d[f.name] for d in model._default_manager.distinct().order_by().values(f.name) ])
 
 class CategoryFilterSpec(DistinctRelatedFilterSpec):
     " FilterSpec for admin that only display's categories the user has permission for. "

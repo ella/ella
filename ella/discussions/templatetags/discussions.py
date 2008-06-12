@@ -33,7 +33,7 @@ def topic_from_tpl_var(topic_name, context):
         # topic variable passed from template
         topic = context[topic_name]
         if isinstance(topic, Listing):
-            topic = topic.target
+            topic = topic.placement.target
         if not isinstance(topic, Topic):
             raise TemplateSyntaxError('Variable [%s] is not instance of TopicThread class.' % topic_name)
         topics = Topic.objects.filter(pk=topic._get_pk_val())
@@ -94,7 +94,6 @@ class ActiveThreadsNode(template.Node):
         topic = topic_from_tpl_var(topic_name, context)
         if topic:
             act = topic.get_threads_by_activity()
-            act = map(lambda item: item.__unicode__(), act)
         context[self.__variable] = act
         return ''
 
@@ -105,7 +104,7 @@ class FilledThreadsNode(template.Node):
         self.__variable = variable
 
     def __get_all(self, context):
-        out = TopicThread.most_filled.all()
+        out = TopicThread.objects.get_most_filled()
         context[self.__variable] = out
         return ''
 
@@ -114,7 +113,7 @@ class FilledThreadsNode(template.Node):
             topic = topic_from_tpl_var(topic, context)
         if not topic:
             return []
-        return TopicThread.most_filled.filter(topic=topic)
+        return TopicThread.objects.get_most_filled().filter(topic=topic)
 
     def render(self, context):
         if not self.__tokens:
@@ -131,7 +130,7 @@ class ViewedThreadsNode(template.Node):
         self.__variable = variable
 
     def __get_all(self, context):
-        out = TopicThread.most_viewed.all()
+        out = TopicThread.objects.get_most_viewed()
         context[self.__variable] = out
         return ''
 
@@ -140,7 +139,7 @@ class ViewedThreadsNode(template.Node):
             topic = topic_from_tpl_var(topic, context)
         if not topic:
             return []
-        return TopicThread.most_viewed.filter(topic=topic)
+        return TopicThread.objects.get_most_viewed().filter(topic=topic)
 
     def render(self, context):
         if not self.__tokens:
@@ -157,7 +156,7 @@ class NewestPostsNode(template.Node):
         self.__variable = variable
 
     def __get_all(self, context):
-        out = TopicThread.most_viewed.all()
+        out = TopicThread.objects.get_most_viewed()
         context[self.__variable] = out
         return ''
 
@@ -166,7 +165,7 @@ class NewestPostsNode(template.Node):
             topic = topic_from_tpl_var(topic, context)
         if not topic:
             return []
-        return TopicThread.with_newest_posts.filter(topic=topic)
+        return TopicThread.objects.get_with_newest_posts().filter(topic=topic)
 
     def render(self, context):
         if not self.__tokens:
@@ -183,7 +182,7 @@ class UnreadPostsNode(template.Node):
         self.__variable = variable
 
     def render(self, context):
-        out = TopicThread.all_unread_posts.all()
+        out = TopicThread.objects.get_unread_posts()
         context[self.__variable] = out
         return ''
 

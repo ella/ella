@@ -1,0 +1,65 @@
+[
+  {
+    "pk": 1,
+    "model": "auth.user",
+    "fields": {
+      "username": "admin",
+      "first_name": "",
+      "last_name": "",
+      "is_active": true,
+      "is_superuser": true,
+      "is_staff": true,
+      "last_login": "2008-01-22 14:35:12",
+      "groups": [],
+      "user_permissions": [],
+      "password": "sha1$cef52$f619aaf4e9ba9f171cdac20445066bdaf47347b4",
+      "email": "a@a.cz",
+      "date_joined": "2008-01-22 14:35:12"
+    }
+  },
+
+  {
+    "pk": 3,
+    "model": "core.category",
+    "fields": {
+      "tree_parent": 1,
+      "description": "",
+      "title": "second category",
+      "site": 1,
+      "tree_path": "second-category",
+      "slug": "second-category"
+    }
+  },
+  {
+    "pk": 2,
+    "model": "core.category",
+    "fields": {
+      "tree_parent": 1,
+      "description": "",
+      "title": "first category",
+      "site": 1,
+      "tree_path": "first-category",
+      "slug": "first-category"
+    }
+  },
+  {
+    "pk": 1,
+    "model": "core.category",
+    "fields": {
+      "tree_parent": null,
+      "description": "",
+      "title": "homepage",
+      "site": 1,
+      "tree_path": "",
+      "slug": "homepage"
+    }
+  },
+
+  {
+    "pk": 1,
+    "model": "tagging.tag",
+    "fields": {
+      "name": "ahoj"
+    }
+  }
+]

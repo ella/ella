@@ -8,7 +8,6 @@ from django.utils.safestring import mark_safe
 from ella.db.models import Publishable
 from ella.core.cache import get_cached_object, get_cached_list
 from ella.core.box import Box
-from ella.core.middleware import get_current_request
 from ella.core.models import Category, Author
 from ella.core.managers import RelatedManager
 from ella.photos.models import Photo
@@ -61,7 +60,7 @@ class FloatingStateModel(object):
         return False
 
 
-class Contest(models.Model, Publishable, FloatingStateModel):
+class Contest(Publishable, models.Model, FloatingStateModel):
     """
     Contests with title, descriptions and activation
     """
@@ -124,7 +123,7 @@ class Contest(models.Model, Publishable, FloatingStateModel):
         ordering = ('-active_from',)
 
 
-class Quiz(models.Model, Publishable, FloatingStateModel):
+class Quiz(Publishable, models.Model, FloatingStateModel):
     """
     Quizes with title, descriptions and activation options.
     """
@@ -194,9 +193,7 @@ class Question(models.Model):
 
     def form(self):
         from ella.polls.views import QuestionForm
-        if not hasattr(self, '_form'):
-            self._form = QuestionForm(self)()
-        return self._form
+        return QuestionForm(self)()
 
     def is_test(self):
         if not hasattr(self, '_is_test'):
@@ -216,14 +213,12 @@ class Question(models.Model):
         verbose_name_plural = _('Questions')
 
 class PollBox(Box):
+    can_double_render = True
 
-    def __init__(self, obj, box_type, nodelist, template_name=None):
+    def prepare(self, context):
         from ella.polls import views
-        super(PollBox, self).__init__(obj, box_type, nodelist, template_name)
-        self.state = views.check_vote(get_current_request(), self.obj)
-
-    def render(self):
-        return self._render()
+        super(PollBox, self).prepare(context)
+        self.state = views.check_vote(context['request'], self.obj)
 
     def get_context(self):
         from ella.polls import views

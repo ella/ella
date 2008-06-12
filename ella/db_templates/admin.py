@@ -1,12 +1,12 @@
 from django.contrib import admin
-from django.newforms.models import InlineFormset
+from django.newforms.models import BaseInlineFormset
 from django.newforms.forms import ValidationError, NON_FIELD_ERRORS
 from django.utils.translation import ugettext as _
 
 from ella.db_templates.models import DbTemplate, TemplateBlock
 
 
-class TemplateBlockFormset(InlineFormset):
+class TemplateBlockFormset(BaseInlineFormset):
     "Custom formset enabling us to supply custom validation."
 
     @staticmethod

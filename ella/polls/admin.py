@@ -1,11 +1,11 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _, ugettext
-from django.newforms.models import InlineFormset
+from django.newforms.models import BaseInlineFormset
 from django.shortcuts import render_to_response
 
-from tagging.models import TaggingInlineOptions
+from ella.tagging.admin import TaggingInlineOptions
 
-from ella.core.admin import ListingInlineOptions, HitCountInlineOptions
+from ella.core.admin import PlacementInlineOptions
 from ella.ellaadmin import widgets
 from ella.core.cache import get_cached_object_or_404
 from ella.polls.models import Poll, Contest, Contestant, Quiz, Result, Choice, Vote, Question
@@ -18,7 +18,7 @@ def formfield_for_dbfield(fields):
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
     return _formfield_for_dbfield
 
-class ResultFormset(InlineFormset):
+class ResultFormset(BaseInlineFormset):
 
     def clean(self):
         if not self.cleaned_data:
@@ -112,8 +112,7 @@ class ContestOptions(admin.ModelAdmin):
     list_display = ('title', 'category', 'active_from', 'correct_answers', 'get_all_answers_count', 'get_hits', 'full_url',)
     list_filter = ('category', 'active_from',)
     search_fields = ('title', 'text_announcement', 'text', 'text_results',)
-#    inlines = (QuestionInlineOptions, ListingInlineOptions, TaggingInlineOptions, HitCountInlineOptions)
-    inlines = (QuestionInlineOptions, ListingInlineOptions, TaggingInlineOptions,)
+    inlines = (QuestionInlineOptions, PlacementInlineOptions, TaggingInlineOptions,)
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
 
@@ -123,8 +122,7 @@ class QuizOptions(admin.ModelAdmin):
     list_display = ('title', 'category', 'active_from', 'get_hits', 'full_url',)
     list_filter = ('category', 'active_from',)
     search_fields = ('title', 'text_announcement', 'text', 'text_results',)
-#    inlines = (QuestionInlineOptions, ResultTabularOptions, ListingInlineOptions, TaggingInlineOptions, HitCountInlineOptions)
-    inlines = (QuestionInlineOptions, ResultTabularOptions, ListingInlineOptions, TaggingInlineOptions,)
+    inlines = (QuestionInlineOptions, ResultTabularOptions, PlacementInlineOptions, TaggingInlineOptions,)
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
 

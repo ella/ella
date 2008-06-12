@@ -17,10 +17,9 @@ from django.core.paginator import ObjectPaginator
 from django.conf import settings
 
 from ella.discussions.models import get_comments_on_thread, Topic, TopicThread, \
-BannedString, BannedUser, PostViewed
+BannedString, BannedUser, PostViewed, DuplicationError
 from ella.comments.models import Comment
 from ella.core.cache.utils import get_cached_object_or_404
-from ella.core.models import HitCount
 import djangoapps.registration.views as reg_views
 
 
@@ -109,7 +108,9 @@ def paginate_queryset_for_request(request, qset):
     """ returns appropriate page for view. Page number should
         be set in GET variable 'p', if not set first page is returned.
     """
-    paginate_by = settings.DISCUSSIONS_PAGINATE_BY
+    paginate_by = 5 # default
+    if hasattr(settings, 'DISCUSSIONS_PAGINATE_BY'):
+        paginate_by = settings.DISCUSSIONS_PAGINATE_BY
     # ugly son of a bitch - adding object property at runtime?!
     for i, c in enumerate(qset):
         ct = ContentType.objects.get_for_model(c)
@@ -156,7 +157,7 @@ def paginate_queryset_for_request(request, qset):
 
 def get_category_topics_url(category):
     # category.slug/year/_(topics)
-    return '/%s/%s/%s/' % (category.slug, strftime('%Y'), slugify(_('topics')))
+    return '/%s/%s/%s/' % (category.slug, slugify(_('static')), slugify(_('topics')))
 
 def process_login(request, login_data):
     usr = authenticate(username=login_data['username'], password=login_data['password'])
@@ -187,8 +188,7 @@ def view_unread(request):
     if not isinstance(request.user, User):
         raise http.Http404('User does not exist!')
     u = request.user
-    #qset = TopicThread.unread_items.get_posts(request.user)
-    qset = TopicThread.unread_items.get_topicthreads(request.user)
+    qset = TopicThread.objects.get_unread_topicthreads(request.user)
     context = Context()
     context.update(paginate_queryset_for_request(request, qset))
     return render_to_response(
@@ -255,7 +255,7 @@ def posts(request, bits, context):
             else:
                 context['question_form_state'] = STATE_INVALID
         else:
-            HitCount.objects.hit(thr) # increment view counter
+            thr.hit() # increment view counter
     if request.user.is_staff:
         comment_set = get_comments_on_thread(thr).order_by('submit_date')
     else:
@@ -303,9 +303,12 @@ def create_thread(request, bits, context):
             author=get_user(request),
             topic=topic
 )
-        thr.save()
-        add_post(data['content'], thr, get_user(request), get_ip(request))
-        return http.HttpResponseRedirect(topic.get_absolute_url())
+        try:
+            thr.save()
+            add_post(data['content'], thr, get_user(request), get_ip(request))
+            return http.HttpResponseRedirect(topic.get_absolute_url())
+        except DuplicationError:
+            context['error'] = _('Thread with given title already exist.')
     context['login_form'] = frmLogin
     context['login_form_action'] = '%slogin/' % request.get_full_path()
     context['logout_form_action'] = '%slogout/' % request.get_full_path()

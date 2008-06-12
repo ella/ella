@@ -31,7 +31,7 @@ class Interviewee(models.Model):
         return self.name
 
 
-class Interview(models.Model, Publishable):
+class Interview(Publishable, models.Model):
     # Titles
     title = models.CharField(_('Title'), max_length=255)
     upper_title = models.CharField(_('Upper title'), max_length=255, blank=True)
@@ -98,7 +98,7 @@ class Interview(models.Model, Publishable):
             questions sorted by submit date descending
                 if asking period isn't over yet
             only questions with answers
-                if asking has started (even if it already ended)
+                if replying has started (even if it already ended)
 
         """
         now = datetime.now()
@@ -122,12 +122,8 @@ class Interview(models.Model, Publishable):
         q = self.question_set.all().order_by('submit_date').exclude(pk__in=[ q['id'] for q in self.question_set.filter(answer__pk__isnull=False).values('id') ])
         return q
 
-    def get_interviewees(self, user=None):
+    def get_interviewees(self, user):
         " Get interviews that the current user can answer in behalf of. "
-        if not user:
-            from ella.core.middleware import get_current_request
-            request = get_current_request()
-            user = request.user
         if not hasattr(self, '_interviewees'):
             if not user.is_authenticated() or not self.can_reply():
                 self._interviewees = []
@@ -185,6 +181,9 @@ class Question(models.Model):
         ordering = ('submit_date',)
         verbose_name = _('Question')
         verbose_name_plural = _('Questions')
+
+    def __unicode__(self):
+        return self.content[:20]
 
 
 class Answer(models.Model):

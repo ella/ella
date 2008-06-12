@@ -1,18 +1,18 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _, ugettext
-from django.newforms.models import InlineFormset
+from django.newforms.models import BaseInlineFormset
 from django import newforms as forms
 from django.contrib.contenttypes.models import ContentType
 
-from tagging.models import TaggingInlineOptions
+from ella.tagging.admin import TaggingInlineOptions
 
 from ella.galleries.models import Gallery, GalleryItem
 from ella.ellaadmin import fields, widgets
-from ella.core.admin import ListingInlineOptions
+from ella.core.admin import PlacementInlineOptions
 from ella.core.cache import get_cached_object
 
 
-class GalleryItemFormset(InlineFormset):
+class GalleryItemFormset(BaseInlineFormset):
     " Override default FormSet to allow for custom validation."
 
     def clean (self):
@@ -53,7 +53,7 @@ class GalleryOptions(admin.ModelAdmin):
 )
     list_filter = ('created', 'category',)
     search_fields = ('title', 'description', 'slug',)
-    inlines = (GalleryItemTabularOptions, ListingInlineOptions, TaggingInlineOptions,)
+    inlines = (GalleryItemTabularOptions, PlacementInlineOptions, TaggingInlineOptions,)
     prepopulated_fields = {'slug': ('title',)}
 
     def formfield_for_dbfield(self, db_field, **kwargs):

@@ -11,7 +11,7 @@ from django.template.loader import render_to_string
 from django.template import RequestContext
 
 from ella.core.cache.utils import get_cached_object_or_404
-from ella.core.views import get_templates_from_listing
+from ella.core.views import get_templates_from_placement
 
 from forms import SendMailForm
 
@@ -20,11 +20,11 @@ class SendMailFormPreview(FormPreview):
 
     @property
     def preview_template(self):
-        return get_templates_from_listing('sendmail/preview.html', self.state['listing'])
+        return get_templates_from_placement('sendmail/preview.html', self.state['placement'])
 
     @property
     def form_template(self):
-        return get_templates_from_listing('sendmail/form.html', self.state['listing'])
+        return get_templates_from_placement('sendmail/form.html', self.state['placement'])
 
     def parse_params(self, context={}):
         self.state.update(context)
@@ -70,6 +70,6 @@ def new_mail(request, context):
 }
     form = SendMailForm(init_props=init_props)
     context['form'] = form
-    templates = get_templates_from_listing('sendmail/form.html', context['listing'])
+    templates = get_templates_from_placement('sendmail/form.html', context['placement'])
     return render_to_response(templates, context, context_instance=RequestContext(request))
 

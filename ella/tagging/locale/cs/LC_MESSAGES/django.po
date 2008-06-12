@@ -1,0 +1,182 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2008-05-20 19:23+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: __init__.py:22
+#, python-format
+msgid "The model %s has already been registered."
+msgstr "Model %s uz je zaregistrovan."
+
+#: fields.py:72
+#, python-format
+msgid "%s can only be set on instances."
+msgstr "%s muze byt nastaven jen pro instanci."
+
+#: fields.py:180
+msgid "Tagged object must be related to category!"
+msgstr "Taggovany objekt musi obsahovat pole kategorie!"
+
+#: forms.py:22 validators.py:19
+#, python-format
+msgid "Each tag may be no more than %s characters long."
+msgstr "Tag nesmi presahnout delku %s znaku."
+
+#: models.py:505
+msgid "name"
+msgstr "nazev"
+
+#: models.py:511 models.py:521
+msgid "tag"
+msgstr "tag"
+
+#: models.py:512
+msgid "tags"
+msgstr "tagy"
+
+#: models.py:522
+msgid "content type"
+msgstr "typ obsahu"
+
+#: models.py:523
+msgid "object id"
+msgstr "object id"
+
+#: models.py:533
+msgid "tagged item"
+msgstr "tagovana polozka"
+
+#: models.py:534
+msgid "tagged items"
+msgstr "tagy"
+
+#: utils.py:191
+msgid ""
+"If a list or tuple of tags is provided, they must all be tag names, Tag "
+"objects or Tag ids."
+msgstr ""
+
+#: utils.py:193
+msgid "The tag input given was invalid."
+msgstr "Zadany tag je neplatny."
+
+#: utils.py:235
+#, python-format
+msgid "Invalid distribution algorithm specified: %s."
+msgstr ""
+
+#: validators.py:27
+msgid "Multiple tags were given."
+msgstr "Vice tagu nelze vlozit najednou. (zadej postupne)"
+
+#: validators.py:30
+#, python-format
+msgid "A tag may be no more than %s characters long."
+msgstr "Tag nesmi byt delsi vic nez %s znaku."
+
+#: views.py:33
+msgid "tagged_object_list must be called with a queryset or a model."
+msgstr ""
+
+#: views.py:39
+msgid "tagged_object_list must be called with a tag."
+msgstr ""
+
+#: views.py:43
+#, python-format
+msgid "No Tag found matching \"%s\"."
+msgstr "Tag nenalezen \"%s\"."
+
+#: templatetags/tagging_tags.py:19
+#, python-format
+msgid "tags_for_model tag was given an invalid model: %s"
+msgstr ""
+
+#: templatetags/tagging_tags.py:32
+#, python-format
+msgid "tag_cloud_for_model tag was given an invalid model: %s"
+msgstr ""
+
+#: templatetags/tagging_tags.py:56
+#, python-format
+msgid "tagged_objects tag was given an invalid model: %s"
+msgstr ""
+
+#: templatetags/tagging_tags.py:89
+#, python-format
+msgid "%s tag requires either three or five arguments"
+msgstr ""
+
+#: templatetags/tagging_tags.py:91 templatetags/tagging_tags.py:143
+#: templatetags/tagging_tags.py:198
+#, python-format
+msgid "second argument to %s tag must be 'as'"
+msgstr "haureka! druhy argument templatetagu %s by mel byt 'as'"
+
+#: templatetags/tagging_tags.py:94 templatetags/tagging_tags.py:147
+#, python-format
+msgid "if given, fourth argument to %s tag must be 'with'"
+msgstr "pokud je zadan ctvrty argument templatetagu %s, musi byt 'with'"
+
+#: templatetags/tagging_tags.py:96
+#, python-format
+msgid "if given, fifth argument to %s tag must be 'counts'"
+msgstr "pokud je zadan paty argument templatetagu %s musi byt 'counts'"
+
+#: templatetags/tagging_tags.py:141
+#, python-format
+msgid "%s tag requires either three or between five and seven arguments"
+msgstr "%s tag vyzaduje bud 3, 5 nebo 7 argumentu ;-))"
+
+#: templatetags/tagging_tags.py:155
+#, python-format
+msgid "%(tag)s tag's '%(option)s' option was not a valid integer: '%(value)s'"
+msgstr ""
+
+#: templatetags/tagging_tags.py:164
+#, python-format
+msgid "%(tag)s tag's '%(option)s' option was not a valid choice: '%(value)s'"
+msgstr ""
+
+#: templatetags/tagging_tags.py:170
+#, python-format
+msgid "%(tag)s tag was given an invalid option: '%(option)s'"
+msgstr ""
+
+#: templatetags/tagging_tags.py:175
+#, python-format
+msgid "%(tag)s tag was given a badly formatted option: '%(option)s'"
+msgstr ""
+
+#: templatetags/tagging_tags.py:196
+#, python-format
+msgid "%s tag requires exactly three arguments"
+msgstr ""
+
+#: templatetags/tagging_tags.py:221
+#, python-format
+msgid "%s tag requires exactly five arguments"
+msgstr ""
+
+#: templatetags/tagging_tags.py:223
+#, python-format
+msgid "second argument to %s tag must be 'in'"
+msgstr ""
+
+#: templatetags/tagging_tags.py:225
+#, python-format
+msgid "fourth argument to %s tag must be 'as'"
+msgstr ""
