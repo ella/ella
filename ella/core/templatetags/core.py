@@ -12,6 +12,7 @@ from ella.core.models import Listing, Related, Category
 from ella.core.cache.utils import get_cached_object, cache_this
 from ella.core.cache.invalidate import CACHE_DELETER
 from ella.core.box import BOX_INFO, MEDIA_KEY, Box
+from ella.core.middleware import ECACHE_INFO
 
 import logging
 log = logging.getLogger('ella.core.templatetags')
@@ -183,10 +184,15 @@ class BoxNode(template.Node):
         # restore the context
         context.pop()
 
-        if not (getattr(settings, 'DOUBLE_RENDER', False) and box.can_double_render) and BOX_INFO in context:
-            # record dependecies
-            source_key = context[BOX_INFO]
+        # record parent box dependecy on child box or cached full-page on box
+        if not (getattr(settings, 'DOUBLE_RENDER', False) and box.can_double_render) \
+                                    and (BOX_INFO in context or ECACHE_INFO in context):
+            if BOX_INFO in context:
+                source_key = context[BOX_INFO]
+            elif ECACHE_INFO in context:
+                source_key = context[ECACHE_INFO]
             CACHE_DELETER.register_dependency(source_key, box_key)
+
         return result
 
 @register.tag('box')

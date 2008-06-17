@@ -62,6 +62,10 @@ class Box(object):
         context.pop()
         self._context = context
 
+        # override the default template from the parameters
+        if 'template_name' in self.params:
+            self.template_name = self.params['template_name']
+
     def get_context(self):
         " Get context to render the template. "
         if 'level' in self.params and self.params['level'].isdigit():
@@ -104,12 +108,18 @@ class Box(object):
         return rend
 
     def double_render(self):
-        return '''{%% box %(box_type)s for %(app_label)s.%(module_name)s with pk %(pk)s %%}{%% endbox %%}''' % {
+        if self.template_name:
+            t_name = self.template_name
+        else:
+            t_name = select_template(self._get_template_list()).name
+
+        return '''{%% box %(box_type)s for %(app_label)s.%(module_name)s with pk %(pk)s %%}template_name: %(template_name)s\n%(params)s{%% endbox %%}''' % {
                 'box_type' : self.box_type,
                 'app_label' : self.obj._meta.app_label,
                 'module_name' : self.obj._meta.module_name,
                 'pk' : self.obj.pk,
-                'params' : '\n'.join(('%s:%s' % item for item in self.params.items()))
+                'params' : '\n'.join(('%s:%s' % item for item in self.params.items())),
+                'template_name' : t_name,
 }
 
     def _get_template_list(self):
