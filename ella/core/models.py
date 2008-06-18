@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from django.db import models, transaction
 from django.core.urlresolvers import reverse
@@ -10,7 +10,6 @@ from django.conf import settings
 from django.utils.safestring import mark_safe
 from django.contrib.auth.models import User
 from django.contrib.redirects.models import Redirect
-from django.template import loader
 
 from ella.core.box import Box
 from ella.core.managers import ListingManager, HitCountManager, PlacementManager

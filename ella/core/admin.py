@@ -7,9 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 
 from ella.ellaadmin import widgets
-from ella.core.middleware import get_current_request
 from ella.core.models import Author, Source, Category, Listing, HitCount, Placement
-from ella.core.cache import get_cached_list
 
 class PlacementForm(modelforms.ModelForm):
 
