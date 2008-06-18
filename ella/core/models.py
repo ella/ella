@@ -353,44 +353,6 @@ class Related(models.Model):
         verbose_name_plural = _('Related')
         ordering = ('source_ct', 'source_id',)
 
-class Dependency(models.Model):
-    """
-    Dependent objects - model for recording dependent items.
-    For example a photo used in an article is the article's dependencies.
-    """
-    target_ct = models.ForeignKey(ContentType, related_name='dependency_for_set')
-    target_id = models.IntegerField()
-    target_key = models.CharField(max_length=100, blank=True)
-
-    source_ct = models.ForeignKey(ContentType, related_name='dependent_on_set')
-    source_id = models.IntegerField()
-    source_key = models.CharField(max_length=100, blank=True)
-
-    objects = DependencyManager()
-
-    @property
-    def source(self):
-        if not hasattr(self, '_source'):
-            source_ct = get_cached_object(ContentType, pk=self.source_ct_id)
-            self._source = get_cached_object(source_ct, pk=self.source_id)
-        return self._source
-
-    @property
-    def target(self):
-        if not hasattr(self, '_target'):
-            target_ct = get_cached_object(ContentType, pk=self.target_ct_id)
-            self._target = get_cached_object(target_ct, pk=self.target_id)
-        return self._target
-
-    def __unicode__(self):
-        return u'%s depends on %s' % (self.source, self.target)
-
-    class Meta:
-        verbose_name = _('Dependency')
-        verbose_name_plural = _('Dependencies')
-        ordering = ('source_ct', 'source_id',)
-        unique_together = (('target_key', 'source_key',),)
-
 
 from ella.core import register
 del register
