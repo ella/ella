@@ -8,7 +8,7 @@ from django.db.models import Q
 
 from ella.ellaadmin import widgets
 from ella.core.middleware import get_current_request
-from ella.core.models import Author, Source, Category, Listing, HitCount, Dependency, Placement
+from ella.core.models import Author, Source, Category, Listing, HitCount, Placement
 from ella.core.cache import get_cached_list
 
 class PlacementForm(modelforms.ModelForm):
@@ -148,10 +148,6 @@ class PlacementOptions(admin.ModelAdmin):
     list_filter = ('publish_from', 'category', 'target_ct',)
     inlines = [ ListingInlineOptions, ]
 
-class DependencyOptions(admin.ModelAdmin):
-    list_filter = ('source_ct', 'target_ct',)
-    list_display = ('source_ct', 'source', 'target_ct', 'target',)
-
 class CategoryOptions(admin.ModelAdmin):
     list_filter = ('site',)
     list_display = ('draw_title', 'tree_path', '__unicode__')
@@ -171,5 +167,4 @@ admin.site.register(Category, CategoryOptions)
 admin.site.register(Source)
 admin.site.register(Author, AuthorOptions)
 admin.site.register(Placement, PlacementOptions)
-admin.site.register(Dependency , DependencyOptions)
 

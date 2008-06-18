@@ -13,7 +13,7 @@ from django.contrib.redirects.models import Redirect
 from django.template import loader
 
 from ella.core.box import Box
-from ella.core.managers import ListingManager, HitCountManager, DependencyManager, PlacementManager
+from ella.core.managers import ListingManager, HitCountManager, PlacementManager
 from ella.core.cache import get_cached_object, cache_this
 
 
