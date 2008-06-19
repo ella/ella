@@ -30,6 +30,7 @@ class CacheInvalidator(object):
         r = cache.get(REGISTER_KEY)
         if not r:
             return {}
+        log.info('CI: I have loaded existing register from cache.')
         return r
 
     def _register_save(self):
@@ -39,6 +40,7 @@ class CacheInvalidator(object):
         d = cache.get(DEPS_KEY)
         if not d:
             return {}
+        log.info('CI: I have loaded existing dependencies from cache.')
         return d
 
     def _dependencies_save(self):
@@ -168,7 +170,6 @@ class Command(BaseCommand):
             raise CommandError('Can\'t connect to defined AMQ server %s:%s!' % (AMQ_HOST, AMQ_PORT))
 
         try:
-
             # initialize connection for CI
             conn = stomp.Connection([(AMQ_HOST, AMQ_PORT)])
             conn.add_listener(CacheInvalidator())
