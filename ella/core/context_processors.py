@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.template.defaultfilters import slugify
+from ella.core.middleware import ECACHE_INFO
 
 
 current_site = Site.objects.get_current()
@@ -19,3 +20,11 @@ def url_info(request):
         'SITE_NAME' : current_site_name,
 }
 
+def cache(request):
+
+    if not hasattr(request, '_cache_middleware_key'):
+        return {}
+
+    return {
+        ECACHE_INFO: getattr(request, '_cache_middleware_key'),
+}
