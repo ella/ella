@@ -24,3 +24,9 @@ Position
 - box name and box definition can be overriden
 - activity: position can be defined in time
 
+
+Notes on usage
+==============
+When "injecting" of HTML is needed through specific position (Definition field)
+her fields ``target_id`` and ``target_ct_id`` should be empty.
+Otherwise value in ``Definition`` field is not rendered.

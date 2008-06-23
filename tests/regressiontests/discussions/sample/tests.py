@@ -441,9 +441,10 @@ __test__ = {
     'discussions_filled_threads_template_tag_string': filled_threads_tpltag_string,
     'discussions_filled_threads_template_tag_all_topics': filled_threads_tpltag_all,
     'discussions_unread_posts': unread_posts,
+    'discussions_most_viewed_threads': most_viewed_threads,
+
     #'discussions_unread_posts_tpl_tag': unread_posts_tpl_tag,
     #'discussions_filled_threads_template_tag_string': filled_threads_tpltag_string,
     #'discussions_filled_threads_template_tag_all_topics': filled_threads_tpltag_all,
-    'discussions_most_viewed_threads': most_viewed_threads,
 }
 

@@ -2,6 +2,7 @@
 Models and managers for generic tagging.
 """
 import re
+import logging
 
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
@@ -15,11 +16,37 @@ from ella.tagging import settings
 from ella.tagging.utils import calculate_cloud, get_tag_list, get_queryset_and_model, parse_tag_input
 from ella.tagging.utils import LOGARITHMIC, PRIMARY_TAG, TAG_DELIMITER
 from ella.tagging.validators import isTag
-from ella.core.cache.utils import get_cached_list
+from ella.core.cache.utils import get_cached_list, cache_this, delete_cached_object
+from ella.core.cache.invalidate import CACHE_DELETER
+
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 
 qn = connection.ops.quote_name
-
 parse_lookup = None
+log = logging.getLogger('ella.tagging')
+TIMEOUT_SHORT = 60 # sec.
+
+def get_key_get_for_object(func, self, obj, **kwargs):
+    if not isinstance(obj, models.Model):
+        raise Exception('cannot calculate key for tag cloud when obj is not django ORM model')
+    out = 'ella.tagging.models.TagManager.get_for_object:%d' \
+        % (obj.pk)
+    return out
+
+def get_key_cloud_for_category(func, self, category, **kwargs):
+    out = 'ella.tagging.models.TagManager.cloud_for_category:%d:%d' \
+        % (category.pk, kwargs.get('priority', PRIMARY_TAG))
+    return out
+
+def get_key_cloud_for_model(func, self, model, steps=4, distribution=LOGARITHMIC,
+                            filters=None, min_count=None):
+    ct_model = ContentType.objects.get_for_model(model)
+    out = 'ella.tagging.models.TagManager.cloud_for_model:%d:%d:%d:%s:%s' \
+        % (ct_model.pk, steps, distribution, str(filters), str(min_count))
+    return out
 
 class WrongTagFormat(Exception):
     pass
@@ -73,6 +100,10 @@ class TagManager(models.Manager):
         cat = None
         if hasattr(obj, 'get_category'):
             cat = obj.get_category()
+            inv_key = get_key_cloud_for_category(None, self, cat, priority=tag_priority) # cache key for category tag cloud.
+            delete_cached_object(inv_key)  # invalidate cached clouds for category ``cat`` TODO .. delete from cache via invalidator
+        inv_key = get_key_get_for_object(None, self, obj) # invalidate tags returned by TagManager.get_for_object
+        delete_cached_object(inv_key) # TODO delete from cache via invalidator
         return TaggedItem._default_manager.get_or_create(
             tag=tag,
             content_type=ctype,
@@ -81,6 +112,7 @@ class TagManager(models.Manager):
             priority=tag_priority,
 )
 
+    @cache_this(get_key_get_for_object, None)
     def get_for_object(self, obj, **kwargs):
         """
         Create a queryset matching all tags associated with the given
@@ -94,7 +126,8 @@ class TagManager(models.Manager):
 }
         if prio:
             kw['items__priority'] = prio
-        return get_cached_list(Tag, **kw)
+        # make list form QuerySet object because of problems with saving QS into memcached TODO solve the problem!
+        return list(Tag.objects.filter(**kw).all())
 
     def _get_usage(self, model, counts=False, min_count=None, extra_joins=None, extra_criteria=None, params=None):
         """
@@ -252,6 +285,7 @@ class TagManager(models.Manager):
             related.append(tag)
         return related
 
+    @cache_this(get_key_cloud_for_category, None)
     def cloud_for_category(self, category, **kwargs):
         """ returns tag cloud for all objects in certain category. """
         priority, steps = kwargs.get('priority', PRIMARY_TAG), kwargs.get('steps', 4)
@@ -289,6 +323,7 @@ class TagManager(models.Manager):
             tags.append(o)
         return calculate_cloud(tags, steps, distribution)
 
+    @cache_this(get_key_cloud_for_model, None, TIMEOUT_SHORT)
     def cloud_for_model(self, model, steps=4, distribution=LOGARITHMIC,
                         filters=None, min_count=None):
         """
@@ -341,7 +376,7 @@ class TaggedItemManager(models.Manager):
 }
         if prio:
             kw['priority'] = prio
-        return self.model.objects.filter(**kw)
+        return get_cached_list(TaggedItem, **kw)
 
     def get_by_model(self, queryset_or_model, tags):
         """
@@ -511,18 +546,6 @@ class TaggedItemManager(models.Manager):
 # Models #
 ##########
 
-"""
-TODO:
-1. cachovani castych dotazu (napr. zjistovani tagu pro objekt ci kategorii)
-
-3* vytvorit formular: <priorita> <seznam tagu dane priority>
-
-2* testy core/admin/editinline test
-
-5* pridat do Publishible get_tags() nebo neco takoveho na ziskani seznamu tagu k objektu
-   (reseni: existuji metody Tag a TaggedItem manageru, pro sablony jsou tpltagy jako
-   tag_cloud_for_category a podobne)
-"""
 
 class Tag(models.Model):
     """

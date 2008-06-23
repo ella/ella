@@ -2,9 +2,12 @@ from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.contenttypes import generic
 from django.newforms.widgets import *
+from django.http import HttpResponseRedirect
 from ella.core.admin import PlacementInlineOptions
+from ella.core.cache.utils import delete_cached_object
 from ella.ellaadmin import widgets
 from ella.discussions.models import TopicThread, Topic, BannedUser, BannedString, get_comments_on_thread
+from ella.discussions.cache import get_key_comments_on_thread__spec_filter, get_key_comments_on_thread__by_submit_date
 from ella.comments.models import Comment
 from ella.comments.admin import CommentsOptions
 from ella.ellaadmin.options import EllaAdminSite
@@ -31,12 +34,30 @@ class PostOptions(admin.ModelAdmin):
 }),
 )
 
+    def __call__(self, request, url):
+        if 'memorize_referer' in request.GET and 'HTTP_REFERER' in request.META:
+            if 'admin_redirect_after_change' not in request.session:
+                request.session['admin_redirect_after_change'] = request.META['HTTP_REFERER']
+        return super(self.__class__, self).__call__(request, url)
+
     def queryset(self, request):
         """ return only Comments which are related to discussion threads. """
         from django.contrib.contenttypes.models import ContentType
         qset = super(self.__class__, self).queryset(request)
         ctThread = ContentType.objects.get_for_model(TopicThread)
         return qset.filter(target_ct=ctThread)
+
+    def save_change(self, request, model, form, formsets=None):
+        """ custom redirection back to thread page on portal """
+        out = super(self.__class__, self).save_change(request, model, form, formsets)
+        if isinstance(out, HttpResponseRedirect) and 'admin_redirect_after_change' in request.session:
+            out = HttpResponseRedirect(request.session['admin_redirect_after_change'])
+            del request.session['admin_redirect_after_change']
+        thr = form.instance.target
+        if isinstance(thr, TopicThread): # invalidate cached thread posts
+            delete_cached_object(get_key_comments_on_thread__spec_filter(None, thr))
+            delete_cached_object(get_key_comments_on_thread__by_submit_date(None, thr))
+        return out
 
 class TopicThreadOptions(admin.ModelAdmin):
     list_display = ('title', 'topic', 'created', 'author',)

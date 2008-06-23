@@ -16,10 +16,13 @@ from django.contrib.formtools.preview import FormPreview
 from django.core.paginator import ObjectPaginator
 from django.conf import settings
 
-from ella.discussions.models import get_comments_on_thread, Topic, TopicThread, \
-BannedString, BannedUser, PostViewed, DuplicationError
+from ella.discussions.models import BannedString, BannedUser, Topic, TopicThread, \
+PostViewed, DuplicationError, get_comments_on_thread
+from ella.discussions.cache import comments_on_thread__by_submit_date, get_key_comments_on_thread__by_submit_date, \
+comments_on_thread__spec_filter, get_key_comments_on_thread__spec_filter
 from ella.comments.models import Comment
-from ella.core.cache.utils import get_cached_object_or_404
+from ella.core.cache.utils import get_cached_object_or_404, get_cached_list, cache_this, \
+normalize_key, delete_cached_object
 import djangoapps.registration.views as reg_views
 
 
@@ -49,28 +52,6 @@ class LoginForm(forms.Form):
     username = forms.CharField(required=True)
     password = forms.CharField(required=True, widget=forms.PasswordInput)
 
-class RegistrationForm(forms.Form):
-    username = forms.CharField(required=True)
-    password = forms.CharField(required=True, widget=forms.PasswordInput)
-    password_again = forms.CharField(required=True, widget=forms.PasswordInput)
-    email = forms.EmailField()
-
-    def clean_username(self):
-        if User.objects.filter(username__exact=self.cleaned_data['username']):
-            raise forms.ValidationError(_('Username already exists. Please choose another one.'))
-        return self.cleaned_data['username']
-
-    def register_user(self):
-        if not(self.is_bound and self.is_valid()):
-            return False
-        data = self.cleaned_data
-        if User.objects.filter(username__exact=data['username']):
-            return False
-        usr = User.objects.create_user(data['username'], data['email'], data['password'])
-        usr.is_staff = False
-        usr.save()
-        return usr
-
 def get_ip(request):
     if 'HTTP_X_FORWARDED_FOR' in request.META:
         return request.META['HTTP_X_FORWARDED_FOR']
@@ -83,6 +64,10 @@ def add_post(content, thread, user, ip='0.0.0.0'):
     thread: TopicThread instance
     ip: IP address
     """
+    # invalidate cached thread posts
+    delete_cached_object(get_key_comments_on_thread__by_submit_date(None, thread))
+    delete_cached_object(get_key_comments_on_thread__spec_filter(None, thread))
+
     content = filter_banned_strings(content)
     comment_set = get_comments_on_thread(thread).order_by('submit_date')
     CT_THREAD = ContentType.objects.get_for_model(TopicThread)
@@ -134,7 +119,7 @@ def paginate_queryset_for_request(request, qset):
     if not isinstance(request.user, AnonymousUser):
         CT = ContentType.objects.get_for_model(Comment)
         for item in objs:
-            pv = PostViewed.objects.filter(target_ct=CT, target_id=item._get_pk_val())
+            pv = PostViewed.objects.filter(target_ct=CT, target_id=item._get_pk_val(), user=request.user)
             if pv:
                 continue
             post_viewed = PostViewed(target_ct=CT, target_id=item._get_pk_val(), user=request.user)
@@ -228,7 +213,6 @@ def posts(request, bits, context):
     context['topics_url'] = get_category_topics_url(category)
     context['question_form_state'] = STATE_EMPTY
     context['login_form_state'] = STATE_UNAUTHORIZED
-    thrList = TopicThread.objects.filter(topic=topic)
     thr = TopicThread.objects.get(slug=bits[0])
     if len(bits) > 1:
         if bits[1] == 'login':
@@ -257,9 +241,9 @@ def posts(request, bits, context):
         else:
             thr.hit() # increment view counter
     if request.user.is_staff:
-        comment_set = get_comments_on_thread(thr).order_by('submit_date')
+        comment_set = comments_on_thread__by_submit_date(thr) # specialized function created because of caching
     else:
-        comment_set = get_comments_on_thread(thr).filter(is_public__exact=True).order_by('submit_date')
+        comment_set = comments_on_thread__spec_filter(thr) # specialized function created because of caching
     thread_url = '%s/' % thr.get_absolute_url()
     context['thread'] = thr
     context['posts'] = comment_set
@@ -306,6 +290,7 @@ def create_thread(request, bits, context):
         try:
             thr.save()
             add_post(data['content'], thr, get_user(request), get_ip(request))
+            #TODO invalidate cached thread list
             return http.HttpResponseRedirect(topic.get_absolute_url())
         except DuplicationError:
             context['error'] = _('Thread with given title already exist.')

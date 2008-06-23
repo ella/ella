@@ -318,9 +318,10 @@ TODO TESTY:
 __test__ = {
     'ellatagging_cloud': cloud_for_model,
     'ellatagging_category': cloud_category,
-    #'ellatagging_priority': tag_priority,
-    #'ellatagging_suggester': suggester_response,
     'ellatagging_admin_options': options_test,
     'ellatagging_category_from_tpl_var': category_from_tpl_var_test,
     'ellatagging_cloud_for_category_tpltag': cloud_category_tag,
+
+    #'ellatagging_priority': tag_priority,
+    #'ellatagging_suggester': suggester_response,
 }

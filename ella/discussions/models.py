@@ -12,7 +12,8 @@ from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
 
 from ella.core.models import Listing, Category
-from ella.core.cache import get_cached_object
+from ella.core.cache.utils import get_cached_list, cache_this, normalize_key, delete_cached_object
+from ella.core.cache.invalidate import CACHE_DELETER
 from ella.core.box import Box
 from ella.db.models import Publishable
 from ella.comments.models import Comment
@@ -53,18 +54,9 @@ Poznamky k registraci:
 http://www.b-list.org/weblog/2006/sep/02/django-tips-user-registration/
 """
 
-"""
-TODO:
-4. Udelat (v placements verzi) vypis temat pro urc. kategorii (vc. easy sablony)
-
-1* Kontrolovat pri zakladani vlakna stejny title -> achtung a nenechat zalozit.
-
-2* profil Zaneta posle (polozky)
-
-3. Sherlock -- zkontrolovat sherlock objekt.
-"""
 
 ACTIVITY_PERIOD = 6  # Thread activity (hours)
+
 
 class DuplicationError(Exception):
     pass
@@ -208,7 +200,6 @@ class TopicThread(models.Model):
         return qset.filter(submit_date__gte=when).count()
 
     def last_post(self):
-        # FIXME check list length, sort by date to get the latest item.
         if not self.posts:
             return ''
         return self.posts.order_by('-submit_date')[0]

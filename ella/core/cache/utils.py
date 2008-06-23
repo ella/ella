@@ -1,4 +1,5 @@
 from md5 import md5
+import logging
 
 from django.db.models import ObjectDoesNotExist
 from django.core.cache import cache
@@ -9,9 +10,15 @@ from django.conf import settings
 
 from ella.core.cache.invalidate import CACHE_DELETER
 
+log = logging.getLogger('ella.core.cache.utils')
+
 KEY_FORMAT_LIST = 'ella.core.cache.utils.get_cached_list'
 KEY_FORMAT_OBJECT = 'ella.core.cache.utils.get_cached_object'
 CACHE_TIMEOUT = getattr(settings, 'CACHE_TIMEOUT', 10*60)
+
+def delete_cached_object(key, auto_normalize=True):
+    """ proxy function for direct object deletion from cache. May be implemented through ActiveMQ in future. """
+    cache.delete(normalize_key(key))
 
 def normalize_key(key):
     return md5(key).hexdigest()
@@ -48,6 +55,7 @@ def get_cached_list(model, *args, **kwargs):
 
     l = cache.get(key)
     if l is None:
+        log.debug('get_cached_list(model=%s), object not cached.' % str(model))
         l = list(model._default_manager.filter(*args, **kwargs))
         cache.set(key, l, CACHE_TIMEOUT)
         for o in l:
@@ -96,6 +104,7 @@ def cache_this(key_getter, invalidator=None, timeout=CACHE_TIMEOUT):
             key = normalize_key(key_getter(func, *args, **kwargs))
             result = cache.get(key)
             if result is None:
+                log.debug('cache_this(key=%s), object not cached.' % key)
                 result = func(*args, **kwargs)
                 cache.set(key, result, timeout)
                 if invalidator:
