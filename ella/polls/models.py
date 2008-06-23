@@ -242,7 +242,7 @@ class PollBox(Box):
         return super(PollBox, self).get_cache_key() + str(self.state)
 
     def get_cache_tests(self):
-        return super(PollBox, self).get_cache_tests() + [ (Choice, lambda x: x.poll_id == self.obj.id) ]
+        return super(PollBox, self).get_cache_tests() + [ (Choice, 'poll_id:%s' % self.obj.id) ]
 
 
 class Poll(models.Model, FloatingStateModel):
