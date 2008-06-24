@@ -26,7 +26,7 @@ class ThreadLocalsMiddleware(object):
 
 class DoubleRenderMiddleware(object):
     def process_response(self, request, response):
-        if response.status_code != 200 or not getattr(settings, 'DOUBLE_RENDER', False):
+        if response.status_code != 200 or not response['Content-Type'].startswith('text') or not getattr(settings, 'DOUBLE_RENDER', False):
             return response
 
         c = template.RequestContext(request, {'SECOND_RENDER': True})
