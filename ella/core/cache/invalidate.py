@@ -3,9 +3,7 @@ try:
 except ImportError:
     import pickle
 
-import stomp
 import logging
-import socket
 from django.dispatch import dispatcher
 from django.db.models import signals
 from django.conf import settings
@@ -74,6 +72,9 @@ CACHE_DELETER = CacheDeleter()
 
 if AMQ_HOST:
     try:
+        import stomp
+        import socket
+
         # check connection to defined AMQ
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((AMQ_HOST, AMQ_PORT))
@@ -88,3 +89,4 @@ if AMQ_HOST:
         log.debug('Start listening for any model')
     except:
         log.warning('ActiveMQ not running')
+
