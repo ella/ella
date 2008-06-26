@@ -26,6 +26,9 @@ class TemplateBlockFormset(BaseInlineFormset):
         # check that active_till datetime is greather then active_from
         validation_error = None
         for i, data in enumerate(self.cleaned_data):
+            # don't bother with empty edit-inlines
+            if not data:
+                continue
             # both datetimes entered
             if data['active_from'] and data['active_till']:
                 if data['active_from'] > data['active_till']:
@@ -37,6 +40,9 @@ class TemplateBlockFormset(BaseInlineFormset):
         # dictionary of blocks with tuples (active from, active till)
         items = {}
         for item in self.cleaned_data:
+            # don't bother with empty edit-inlines
+            if not data:
+                continue
             if not items.has_key(item['name']):
                 items[item['name']] = [(item['active_from'], item['active_till'])]
             else:
