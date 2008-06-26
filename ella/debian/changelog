@@ -1,3 +1,9 @@
+centrum-ella (0.2.1) unstable; urgency=low
+
+  * build from revision [1083]
+
+ -- root <root@lab4.lab.netc>  Thu, 26 Jun 2008 13:37:15 +0200
+
 centrum-ella (0.2.0) unstable; urgency=low
 
   * build from revision [1081]
