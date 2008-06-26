@@ -21,18 +21,23 @@ function placeButton(){
 	});
 	// Check if there's at least one suiteable select
 	if(byCategory || byCategory === 0){
-		suitable = $('select.listing_category')[byCategory];
+		suitable = byCategory
 	} else if(byEmptiness || byEmptiness === 0){
-		suitable = $('select.listing_category')[byEmptiness];
+		suitable = byEmptiness
 	}
+	suitable_select = $('select.listing_category')[suitable];
+	suitable_multi = $('#id_core-placement-target_ct-target_id-' + suitable + '-listings')[0];
 	// Place a button behind it
-	if(suitable){
-		$(suitable.parentNode).append(
+	if(suitable_select){
+		$(suitable_select.parentNode).append(
 			$('<input type="button" class="ignore" value="&uarr; Main category">').bind('click', function(){
-				suitable.selectedIndex = document.getElementById('id_category').selectedIndex;
+				a = document.getElementById('id_category').selectedIndex
+				suitable_select.selectedIndex = a;
+				suitable_multi.selectedIndex = a-1;
 			})
 		);
 	}
 }
 
 $(placeButton);
+
