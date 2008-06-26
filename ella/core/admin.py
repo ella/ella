@@ -129,7 +129,7 @@ class ListingInlineOptions(admin.TabularInline):
 
 class PlacementInlineOptions(generic.GenericTabularInline):
     model = Placement
-    extra = 2
+    extra = 1
     ct_field_name = 'target_ct'
     id_field_name = 'target_id'
     formset = PlacementInlineFormset

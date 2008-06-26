@@ -157,9 +157,9 @@ class Placement(models.Model):
     target_ct = models.ForeignKey(ContentType)
     target_id = models.IntegerField()
     category = models.ForeignKey(Category, db_index=True)
-    publish_from = models.DateTimeField(_("Start of listing"), default=datetime.now)
-    publish_to = models.DateTimeField(_("End of listing"), null=True, blank=True)
-    slug = models.SlugField(_('Slug'), max_length=255)
+    publish_from = models.DateTimeField(_("Start of visibility"), default=datetime.now)
+    publish_to = models.DateTimeField(_("End of visibility"), null=True, blank=True)
+    slug = models.SlugField(_('Slug'), max_length=255, blank=True)
 
     static = models.BooleanField(default=False)
 
