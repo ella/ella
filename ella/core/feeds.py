@@ -18,7 +18,7 @@ class RSSTopCategoryListings(Feed):
         try:
             ct = get_content_type(bits[-1])
             bits = bits[:-1]
-        except Http404:
+        except (Http404, IndexError):
             ct = False
 
         if bits:
