@@ -213,7 +213,7 @@ class Placement(models.Model):
         # Then, save HitCount (needs placement_id)
         hc, created = HitCount.objects.get_or_create(placement=self)
 
-    def get_absolute_url(self):
+    def get_absolute_url(self, domain=False):
         obj = self.target
         category = get_cached_object(Category, pk=self.category_id)
 
@@ -240,7 +240,7 @@ class Placement(models.Model):
             else:
                 url = reverse('home_object_detail', kwargs=kwargs)
 
-        if category.site_id != settings.SITE_ID:
+        if category.site_id != settings.SITE_ID or domain:
             site = get_cached_object(Site, pk=category.site_id)
             return 'http://' + site.domain + url
         return url

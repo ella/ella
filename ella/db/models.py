@@ -32,11 +32,14 @@ class Publishable(object):
                 self._main_placement = None
         return self._main_placement
 
-    def get_absolute_url(self):
+    def get_absolute_url(self, domain=False):
         " Get object's URL. "
         placement = self.main_placement
         if placement:
-            return placement.get_absolute_url()
+            return placement.get_absolute_url(domain=domain)
+
+    def get_domain_url(self):
+        return self.get_absolute_url(domain=True)
 
     def get_admin_url(self):
         return admin_url(self)
