@@ -186,8 +186,8 @@ class TemplateBlock(models.Model):
         return '\n'.join(text)
 
     class Meta:
-        verbose_name = _('Teplate block')
-        verbose_name_plural = _('Teplate blocks')
+        verbose_name = _('Template block')
+        verbose_name_plural = _('Template blocks')
         unique_together = (('template', 'name',),)
 
     def __unicode__(self):
