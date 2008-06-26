@@ -22,7 +22,7 @@ class Server(models.Model):
     """Import source server"""
     title = models.CharField(_('Title'), max_length=100)
     domain = models.URLField(_('Domain'), verify_exists=False)
-    slug = models.CharField(db_index=True, max_length=100)
+    slug = models.SlugField(_('Slug'), max_length=255)
     url = models.URLField(_('Atom URL'), verify_exists=False, max_length=300)
     category = models.ForeignKey(Category, blank=True, null=True, verbose_name=_('Category'))
 
@@ -139,7 +139,7 @@ class ServerItem(models.Model):
     summary = models.TextField(_('Summary'))
     updated = models.DateTimeField(_('Updated'))
     priority = models.IntegerField(_('Priority'), default = 0)
-    slug = models.CharField(db_index=True, max_length=100)
+    slug = models.SlugField(_('Slug'), max_length=255)
     link = models.URLField(_('Link'), verify_exists=True, max_length=400)
     photo_url = models.URLField(_('Image URL'), verify_exists=False, max_length=400, blank=True)
     photo = models.ForeignKey(Photo, blank=True, null=True, verbose_name=_('Photo'))

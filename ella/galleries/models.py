@@ -28,7 +28,7 @@ class Gallery(Publishable, models.Model):
     """
     # Gallery heading
     title = models.CharField(_('Title'), max_length=255)
-    slug = models.CharField(_('Slug'), max_length=255)
+    slug = models.SlugField(_('Slug'), max_length=255)
     # Gallery metadata
     description = models.CharField(_('Description'), max_length=3000, blank=True)
     content = models.TextField(_('Content'), blank=True)

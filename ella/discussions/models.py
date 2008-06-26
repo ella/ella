@@ -78,7 +78,7 @@ class Topic(Publishable, models.Model):
     # ella fields
     title = models.CharField(_('Title'), max_length=255)
     description = models.TextField(_('Description'))
-    slug = models.CharField(_('Slug'), db_index=True, max_length=255)
+    slug = models.SlugField(_('Slug'), max_length=255)
     category = models.ForeignKey(Category, verbose_name=_('Category'))
     photo = models.ForeignKey(Photo, blank=True, null=True, verbose_name=_('Photo'))
     created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)
@@ -148,7 +148,7 @@ class PostViewed(models.Model):
 
 class TopicThread(models.Model):
     title = models.CharField(_('Title'), max_length=255)
-    slug = models.CharField(_('Slug'), db_index=True, max_length=255)
+    slug = models.SlugField(_('Slug'), max_length=255)
     created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)
     author = models.ForeignKey(User, verbose_name=_('authorized author'),)
     topic = models.ForeignKey(Topic)

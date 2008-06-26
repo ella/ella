@@ -15,7 +15,7 @@ class Interviewee(models.Model):
     user = models.ForeignKey(User, null=True, blank=True)
     author = models.ForeignKey(Author, null=True, blank=True)
     name = models.CharField(_('Name'), max_length=200, blank=True)
-    slug = models.CharField(_('Slug'), max_length=200)
+    slug = models.SlugField(_('Slug'), max_length=255)
     description = models.TextField(_('Description'), blank=True)
 
     class Meta:
@@ -35,7 +35,7 @@ class Interview(Publishable, models.Model):
     # Titles
     title = models.CharField(_('Title'), max_length=255)
     upper_title = models.CharField(_('Upper title'), max_length=255, blank=True)
-    slug = models.CharField(_('Slug'), db_index=True, max_length=255)
+    slug = models.SlugField(_('Slug'), max_length=255)
 
     # Contents
     perex = models.TextField(_('Perex'))

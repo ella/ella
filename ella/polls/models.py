@@ -65,7 +65,7 @@ class Contest(Publishable, models.Model, FloatingStateModel):
     Contests with title, descriptions and activation
     """
     title = models.CharField(_('Title'), max_length=200)
-    slug = models.CharField(max_length=200, db_index=True)
+    slug = models.SlugField(_('Slug'), max_length=255)
     category = models.ForeignKey(Category)
     text_announcement = models.TextField(_('Text with announcement'))
     text = models.TextField(_('Text'))
@@ -128,7 +128,7 @@ class Quiz(Publishable, models.Model, FloatingStateModel):
     Quizes with title, descriptions and activation options.
     """
     title = models.CharField(_('title'), max_length=200)
-    slug = models.CharField(max_length=200, db_index=True)
+    slug = models.SlugField(_('Slug'), max_length=255)
     category = models.ForeignKey(Category)
     text_announcement = models.TextField(_('text with announcement'))
     text = models.TextField(_('Text'))

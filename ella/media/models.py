@@ -73,7 +73,7 @@ class MediaManager(models.Manager):
 
 class Media(Publishable, models.Model):
     title = models.CharField(_('Title'), max_length=255)
-    slug = models.CharField(_('Slug'), db_index=True, max_length=255)
+    slug = models.SlugField(_('Slug'), max_length=255)
     url = models.URLField(_('File url'), verify_exists=False, max_length=300)
     photo = models.ForeignKey(Photo, verbose_name=_('Preview image'), null=True, blank=True, related_name='photo')
     type = models.ForeignKey(Type, verbose_name=_('Type of this file'))

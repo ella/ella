@@ -23,7 +23,7 @@ class Author(models.Model):
     """
     user = models.ForeignKey(User, blank=True, null=True)
     name = models.CharField(_('Name'), max_length=200, blank=True)
-    slug = models.CharField(_('Slug'), max_length=200)
+    slug = models.SlugField(_('Slug'), max_length=255)
     description = models.TextField(_('Description'), blank=True)
     text = models.TextField(_('Text'), blank=True)
 
@@ -80,7 +80,7 @@ class Category(models.Model):
     see doc/listings.txt for more details.
     """
     title = models.CharField(_("Category Title"), max_length=200)
-    slug = models.CharField(_("Slug"), max_length=200)
+    slug = models.SlugField(_('Slug'), max_length=255)
     tree_parent = models.ForeignKey('self', null=True, blank=True, verbose_name=_("Parent Category"))
     tree_path = models.CharField(verbose_name=_("Path from root category"), max_length=255, editable=False)
     description = models.TextField(_("Category Description"), blank=True)
@@ -159,7 +159,7 @@ class Placement(models.Model):
     category = models.ForeignKey(Category, db_index=True)
     publish_from = models.DateTimeField(_("Start of listing"), default=datetime.now)
     publish_to = models.DateTimeField(_("End of listing"), null=True, blank=True)
-    slug = models.CharField(max_length=255, blank=True)
+    slug = models.SlugField(_('Slug'), max_length=255)
 
     static = models.BooleanField(default=False)
 

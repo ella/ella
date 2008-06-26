@@ -28,7 +28,7 @@ class Article(Publishable, models.Model):
     # Titles
     title = models.CharField(_('Title'), max_length=255)
     upper_title = models.CharField(_('Upper title'), max_length=255, blank=True)
-    slug = models.CharField(_('Slug'), db_index=True, max_length=255)
+    slug = models.SlugField(_('Slug'), max_length=255)
 
     # Contents
     perex = models.TextField(_('Perex'))
