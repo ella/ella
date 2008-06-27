@@ -24,6 +24,9 @@ class GalleryItemFormset(BaseInlineFormset):
         items = set([])
 
         for d in self.cleaned_data:
+            # don't bother with empty edit-inlines
+            if not d:
+                continue
             # TODO: why cleaned data does not have target_ct_id prop?
             target = (d['target_ct'].id, d['target_id'],)
             # check for duplicities
