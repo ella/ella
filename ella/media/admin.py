@@ -1,27 +1,27 @@
 from django.contrib import admin
 
-from ella.media.models import Type, Media, Format, FormattedFile
+from ella.media.models import Media, Format, FormattedMedia
 from ella.core.admin import PlacementInlineOptions
 from ella.ellaadmin import fields
 
 from ella.tagging.admin import TaggingInlineOptions
 
 
-class FormattedFileInlineOptions(admin.TabularInline):
-    model = FormattedFile
+class FormattedMediaInlineOptions(admin.TabularInline):
+    model = FormattedMedia
     extra = 2
     fieldsets = ((None, {'fields' : ('format', 'url', 'status',)}),)
 
-class FormattedFileOptions(admin.ModelAdmin):
+class FormattedMediaOptions(admin.ModelAdmin):
     list_display = ('__unicode__', 'hash', 'source', 'format',)
     raw_id_fields = ('source',)
 
 class MediaOptions(admin.ModelAdmin):
-    inlines = (FormattedFileInlineOptions,)
+    inlines = (FormattedMediaInlineOptions,)
     prepopulated_fields = {'slug' : ('title',)}
 
-    list_display = ('title', 'hash', 'type',)
-    list_filter = ('type', 'uploaded',)
+    list_display = ('title', 'hash',)
+    list_filter = ('uploaded',)
     search_fields = ('title', 'slug', 'description', 'content',)
 
     raw_id_fields = ('photo',)
@@ -34,7 +34,7 @@ class MediaOptions(admin.ModelAdmin):
             return fields.RichTextAreaField(**kwargs)
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
-admin.site.register([ Type, Format, ])
+admin.site.register(Format)
 admin.site.register(Media, MediaOptions)
-admin.site.register(FormattedFile, FormattedFileOptions)
+admin.site.register(FormattedMedia, FormattedMediaOptions)
 
