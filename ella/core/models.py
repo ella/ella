@@ -143,7 +143,7 @@ class Category(models.Model):
     draw_title.allow_tags = True
 
     class Meta:
-        ordering = ('site', 'title',)
+        ordering = ('site', 'tree_path', 'title',)
         unique_together = (('site', 'tree_path'),)
         verbose_name = _('Category')
         verbose_name_plural = _('Categories')
