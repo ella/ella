@@ -122,7 +122,7 @@ class Photo(models.Model):
 
     def get_formated_photo(self, format):
         "Return formated photo"
-        format_object = Format.objects.get(name=format)
+        format_object = Format.objects.get(name=format, site=settings.SITE_ID)
         try:
             formated_photo = get_cached_object(FormatedPhoto, photo=self, format=format_object)
         except FormatedPhoto.DoesNotExist:
