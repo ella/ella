@@ -27,7 +27,7 @@ class ResultFormset(BaseInlineFormset):
         validation_error = None
         for d in self.cleaned_data:
             # don't bother with empty edit-inlines
-            if not data:
+            if not d:
                 continue
             if d['points_from'] > d['points_to']:
                 validation_error = ValidationError(ugettext(
@@ -38,7 +38,7 @@ class ResultFormset(BaseInlineFormset):
         if validation_error:
             raise ValidationError, ugettext('Invalid score intervals')
 
-        intervals = [ (form_data['points_from'], form_data['points_to']) for form_data in self.cleaned_data ]
+        intervals = [ (form_data['points_from'], form_data['points_to']) for form_data in self.cleaned_data if form_data ]
         intervals.sort()
         for i in xrange(len(intervals) - 1):
             if intervals[i][1] + 1 > intervals[i+1][0]:
