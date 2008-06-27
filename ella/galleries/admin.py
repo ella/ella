@@ -21,8 +21,6 @@ class GalleryItemFormset(BaseInlineFormset):
             # TODO: this is only hotfix
             return {}
 
-        print self.cleaned_data
-
         if not self.cleaned_data or not self.instance:
             return self.cleaned_data
 
