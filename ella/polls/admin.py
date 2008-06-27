@@ -26,6 +26,9 @@ class ResultFormset(BaseInlineFormset):
 
         validation_error = None
         for d in self.cleaned_data:
+            # don't bother with empty edit-inlines
+            if not data:
+                continue
             if d['points_from'] > d['points_to']:
                 validation_error = ValidationError(ugettext(
                         'Invalid score interval %(points_from)s - %(points_to)s.'
