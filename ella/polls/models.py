@@ -4,6 +4,7 @@ from django.db import models, connection
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
 from django.utils.safestring import mark_safe
+from django.conf import settings
 
 from ella.db.models import Publishable
 from ella.core.cache import get_cached_object, get_cached_list
@@ -15,6 +16,7 @@ from ella.photos.models import Photo
 ACTIVITY_NOT_YET_ACTIVE = 0
 ACTIVITY_ACTIVE = 1
 ACTIVITY_CLOSED = 2
+DOUBLE_RENDER = getattr(settings, 'DOUBLE_RENDER', False)
 
 class FloatingStateModel(object):
     """
@@ -216,9 +218,12 @@ class PollBox(Box):
     can_double_render = True
 
     def prepare(self, context):
-        from ella.polls import views
         super(PollBox, self).prepare(context)
-        self.state = views.check_vote(context['request'], self.obj)
+        SECOND_RENDER = context.get('SECOND_RENDER', False)
+        self.state = None
+        if DOUBLE_RENDER and SECOND_RENDER or context.has_key('request'):
+            from ella.polls import views
+            self.state = views.check_vote(context['request'], self.obj)
 
     def get_context(self):
         from ella.polls import views
