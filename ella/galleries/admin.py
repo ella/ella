@@ -15,8 +15,14 @@ from ella.core.cache import get_cached_object
 class GalleryItemFormset(BaseInlineFormset):
     " Override default FormSet to allow for custom validation."
 
-    def clean (self):
+    def clean(self):
         """Searches for duplicate references to the same object in one gallery."""
+        if not hasattr(self, 'cleaned_data'):
+            # TODO: this is only hotfix
+            return {}
+
+        print self.cleaned_data
+
         if not self.cleaned_data or not self.instance:
             return self.cleaned_data
 
