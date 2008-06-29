@@ -24,8 +24,15 @@ TemplateSyntaxError: advert tag does not accept 'unknown_parameter' parameter
 u'<!-- AD MISSING SERVER/SECTION (null)/(null) -->'
 '''
 
+backend_srv = """
+>>> from nc.backendserver import *
+>>> 123
+123
+"""
+
 __test__ = {
     'adverts' : adverts,
+    'backend_server': backend_srv,
 }
 
 if __name__ == '__main__':

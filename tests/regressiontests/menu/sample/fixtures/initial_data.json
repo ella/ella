@@ -1,0 +1,80 @@
+[
+  {
+    "pk": 2,
+    "model": "core.category",
+    "fields": {
+      "tree_parent": 1,
+      "description": "",
+      "title": "nested category",
+      "site": 1,
+      "tree_path": "nested-category",
+      "slug": "nested-category"
+    }
+  },
+  {
+    "pk": 1,
+    "model": "core.category",
+    "fields": {
+      "tree_parent": null,
+      "description": "",
+      "title": "homepage",
+      "site": 1,
+      "tree_path": "",
+      "slug": "homepage"
+    }
+  },
+
+  {
+      "pk": 1,
+      "model": "menu.menu",
+      "fields": {
+          "slug": "main-menu",
+          "site": 1,
+          "category": 1
+      }
+  },
+
+  {
+      "pk": 1,
+      "model": "menu.menuitem",
+      "fields": {
+          "url": "http://www.ellaproject.cz",
+          "label": "Prvni polozka",
+          "menu": 1,
+          "order": 1
+      }
+  },
+  {
+      "pk": 2,
+      "model": "menu.menuitem",
+      "fields": {
+          "url": "http://www.stdout.cz",
+          "label": "Druha polozka",
+          "menu": 1,
+          "order": 2
+      }
+  },
+  {
+      "pk": 3,
+      "model": "menu.menuitem",
+      "fields": {
+          "parent": 2,
+          "label": "Odkaz ven",
+          "menu": 1,
+          "url": "http://stdout.cz",
+          "order": 2
+      }
+  },
+  {
+      "pk": 4,
+      "model": "menu.menuitem",
+      "fields": {
+          "parent": 2,
+          "label": "Odkaz na kategorii",
+          "menu": 1,
+          "target_id": 1,
+          "target_ct": 3,
+          "order": 1
+      }
+  }
+]
