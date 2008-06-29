@@ -3,6 +3,7 @@ from django.utils.translation import ugettext, ugettext_lazy as _
 from django.contrib.sites.models import Site
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
+from django.template.defaultfilters import slugify
 
 from ella.core.cache import CachedForeignKey
 from ella.core.models import Category
@@ -18,6 +19,13 @@ class Menu(models.Model):
 
     def __unicode__(self):
         return unicode('%s for category %s on %s' % (self.slug, self.category, self.site))
+
+    @property
+    def menu_slug(self):
+        return unicode(self.slug)
+
+    class Meta:
+        ordering = ('slug', 'category', 'site')
 
 class MenuItem(models.Model):
     parent = CachedForeignKey('self', blank=True, null=True, verbose_name=_('parent'))
@@ -41,12 +49,18 @@ class MenuItem(models.Model):
         #return get_cached_list(MenuItem, parent=self.pk)
         return MenuItem.objects.filter(parent=self.pk).order_by('order')
 
-    @property
     def get_url(self):
+        """ url magic for fancier notation esp. in templates """
         if self.url:
             return self.url
-        elif isinstance(self.target, Publishable):
+        elif isinstance(self.target, (Publishable, Category)):
             return self.target.get_absolute_url()
+
+    def get_slug(self):
+        if isinstance(self.target, (Publishable, Category)):
+            return self.target.slug
+        elif self.label:
+            return slugify(self.label)
 
     class Meta:
         verbose_name = _('Menu item')

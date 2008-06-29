@@ -7,6 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils.encoding import smart_str
 from django.template import TemplateSyntaxError, Variable
+from django.conf import settings
 
 from ella.utils.templatetags import parse_getforas_triplet
 from ella.menu.models import Menu, MenuItem
@@ -73,7 +74,7 @@ class MenuForSpecificObjectNode(template.Node):
             log.warning('There are no Category instances returned by filter(%s)' % kw)
             return ''
         cat = cats[0]
-        menus = Menu.objects.filter(slug=self.menu_slug, category=cat)
+        menus = Menu.objects.filter(slug=self.menu_slug, category=cat, site=settings.SITE_ID)
         if not menus:
             log.warning('There are no Menu instances named "%s" for object %s' % (self.menu_slug, self.object))
             return ''
@@ -88,7 +89,7 @@ class MenuForObjectNode(template.Node):
         self.object = Variable(self.object).resolve(context)
         if not isinstance(self.object, Category):
             raise TemplateSyntaxError('Object should be instance of Category class. type is %s' % type(self.object))
-        menus = Menu.objects.filter(slug=self.menu_slug, category=self.object)
+        menus = Menu.objects.filter(slug=self.menu_slug, category=self.object, site=settings.SITE_ID)
         if not menus:
             log.warning('There are no Menu instances named "%s" for object %s' % (self.menu_slug, self.object))
             return ''
@@ -99,7 +100,7 @@ class MenuSimpleNode(template.Node):
         self.menu_slug = menu_slug
 
     def render(self, context):
-        menus = Menu.objects.filter(slug=self.menu_slug)
+        menus = Menu.objects.filter(slug=self.menu_slug, site=settings.SITE_ID)
         if not menus:
             log.warning('There are no Menu instances named "%s"' % self.menu_slug)
             return ''

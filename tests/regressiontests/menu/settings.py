@@ -1,4 +1,4 @@
-# Django settings for discussions app.
+# Django settings for menu app.
 
 from os.path import dirname
 
@@ -63,7 +63,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.doc.XViewMiddleware',
 )
 
-ROOT_URLCONF = 'discussions.urls'
+ROOT_URLCONF = 'menu.urls'
 
 TEMPLATE_DIRS = (
     dirname(__file__) + '/templates',

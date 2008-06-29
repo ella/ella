@@ -177,7 +177,21 @@ highlight = """
 >>> cx = Context({'category': cat})
 >>> t = Template(tpl)
 >>> t.render(cx)
-u'Vysvitit menu "Odkaz na kategorii" a "Odkaz na kategorii"'
+u'templates/inclusion_tags/menu/category/homepage/main-menu.html template. "Prvni polozka subitems: []""Druha polozka subitems: [&lt;MenuItem: Odkaz na kategorii&gt;, &lt;MenuItem: Odkaz ven&gt;]"\\nSOMETHING SELECTED?SELECTED "Druha polozka"'
+"""
+
+properties_test = """
+>>> from ella.core.models import Category
+>>> from ella.menu.models import Menu, MenuItem
+>>> mi = MenuItem.objects.get(pk=4)
+>>> mi.get_slug()
+u'homepage'
+>>> mi.get_url()
+'/'
+
+>>> mi = MenuItem.objects.get(pk=2)
+>>> mi.subitems
+[<MenuItem: Odkaz na kategorii>, <MenuItem: Odkaz ven>]
 """
 
 __test__ = {
@@ -185,5 +199,6 @@ __test__ = {
     'menu_for_object': menu_for_object,
     'menu_for_generic': menu_for_generic,
     'highlight_selected': highlight,
+    'properties': properties_test,
 }
 
