@@ -16,6 +16,7 @@ class Menu(models.Model):
     slug = models.SlugField(_('Slug'), max_length=255)
     site = models.ForeignKey(Site)
     category = models.ForeignKey(Category, null=True, blank=True)
+    description = models.TextField(blank=True)
 
     def __unicode__(self):
         return unicode('%s for category %s on %s' % (self.slug, self.category, self.site))
@@ -36,6 +37,7 @@ class MenuItem(models.Model):
     label = models.CharField(max_length=100, blank=True)
     menu = models.ForeignKey(Menu)
     order = models.IntegerField(default=1)
+    description = models.TextField(blank=True)
 
     objects = MenuItemManager()
 
