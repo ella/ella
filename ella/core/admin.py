@@ -144,10 +144,14 @@ class PlacementInlineOptions(generic.GenericTabularInline):
             kwargs['widget'] = widgets.ListingCategoryWidget
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
+class HitCountInlineOptions(admin.TabularInline):
+    model = HitCount
+    extra = 0
+
 class PlacementOptions(admin.ModelAdmin):
     list_display = ('target', 'category', 'publish_from', 'full_url',)
     list_filter = ('publish_from', 'category', 'target_ct',)
-    inlines = [ ListingInlineOptions, ]
+    inlines = [ ListingInlineOptions, HitCountInlineOptions ]
 
 class CategoryOptions(admin.ModelAdmin):
     list_filter = ('site',)
