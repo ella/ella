@@ -7,8 +7,6 @@ from django.dispatch import dispatcher
 from django.utils.translation import ugettext_lazy as _
 
 from django import newforms as forms
-from ella.ellaadmin import widgets as ellaadminwidgets
-from ella.ellaadmin import options
 from django.contrib.admin import widgets
 from django.utils.safestring import mark_safe
 from django.utils.encoding import smart_unicode

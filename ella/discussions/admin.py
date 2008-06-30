@@ -10,7 +10,6 @@ from ella.discussions.models import TopicThread, Topic, BannedUser, BannedString
 from ella.discussions.cache import get_key_comments_on_thread__spec_filter, get_key_comments_on_thread__by_submit_date
 from ella.comments.models import Comment
 from ella.comments.admin import CommentsOptions
-from ella.ellaadmin.options import EllaAdminSite
 from django.utils.translation import ugettext_lazy as _
 
 
