@@ -207,7 +207,6 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
 
     kwa['count'] = paginate_by
     kwa['offset'] = (page_no - 1) * paginate_by + 1
-#    listings = Listing.objects.get_listing(**kwa)
     page = paginator.page(page_no)
     listings = page.object_list
 
@@ -243,17 +242,9 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
             ]
 
     return render_to_response(template_list, {
+            'page': page,
             'is_paginated': paginator.num_pages > 1,
             'results_per_page': paginate_by,
-            'has_next': page.has_next(),
-            'has_previous': page.has_previous(),
-            'page': page.number,
-            'next': page.next_page_number(),
-            'previous': page.previous_page_number(),
-            'last_on_page': page.end_index(),
-            'first_on_page': page.start_index(),
-            'pages': paginator.num_pages,
-            'hits' : paginator.count,
 
             'year_list' : year_list,
             'date_list' : date_list,

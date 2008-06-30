@@ -74,15 +74,7 @@ def detail(request, context):
     context.update({
         'is_paginated': paginator.num_pages > 1,
         'results_per_page': pagination_by,
-        'has_next': page.has_next(),
-        'has_previous': page.has_previous(),
-        'page': page_no,
-        'next': page.next_page_number(),
-        'previous': page.previous_page_number(),
-        'last_on_page': page.end_index(),
-        'first_on_page': page.start_index(),
-        'pages': paginator.num_pages,
-        'hits' : paginator.count,
+        'page': page,
         'form' : QuestionForm(request=request),
         'questions' : page.object_list,
 })

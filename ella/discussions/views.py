@@ -129,15 +129,7 @@ def paginate_queryset_for_request(request, qset):
     context.update({
         'is_paginated': paginator.num_pages > 1,
         'results_per_page': paginate_by,
-        'has_next': page.has_next(),
-        'has_previous': page.has_previous(),
-        'page': page.number,
-        'next': page.next_page_number(),
-        'previous': page.previous_page_number(),
-        'last_on_page': page.end_index(),
-        'first_on_page': paginator.start_index(),
-        'pages': paginator.num_pages,
-        'hits': paginator.count,
+        'page': page,
 })
     return context
 
