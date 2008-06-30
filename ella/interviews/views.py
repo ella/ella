@@ -3,6 +3,8 @@ from django import newforms as forms
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 from django.contrib.formtools.preview import FormPreview
+from django.core.paginator import Paginator, QuerySetPaginator
+from django.conf import settings
 
 from ella.core.middleware import get_current_request
 from ella.core.views import get_templates_from_placement
@@ -54,7 +56,38 @@ class ReplyForm(forms.Form):
 def detail(request, context):
     """ Custom object detail function that adds a QuestionForm to the context. """
     interview = context['object']
-    context['form'] = QuestionForm(request=request)
+
+    # pagination
+    pagination_by = getattr(settings, 'INTERVIEW_PAGINATION_PER_PAGE', 5)
+
+    if 'p' in request.GET and request.GET['p'].isdigit():
+        page = int(request.GET['p'])
+    else:
+        page = 1
+
+    qset = interview.get_questions()
+    paginator = QuerySetPaginator(qset, pagination_by)
+    page_content = paginator.page(page)
+
+    if page > paginator.num_pages:
+        raise Http404
+
+    context.update({
+        'is_paginated': paginator.num_pages > 1,
+        'results_per_page': pagination_by,
+        'has_next': page_content.has_next(),
+        'has_previous': page_content.has_previous(),
+        'page': page,
+        'next': page_content.next_page_number(),
+        'previous': page_content.previous_page_number(),
+        'last_on_page': page_content.end_index(),
+        'first_on_page': page_content.start_index(),
+        'pages': paginator.num_pages,
+        'hits' : paginator.count,
+        'form' : QuestionForm(request=request),
+        'questions' : page_content.object_list,
+})
+
     return render_to_response(
         get_templates_from_placement('object.html', context['placement']),
         context,
