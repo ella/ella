@@ -18,7 +18,6 @@ register = template.Library()
 MENU_TPL_VAR = 'menu_var' # template variable name
 log = logging.getLogger('ella.menu')
 
-
 def highlight_items(context, menu_items, obj):
     howto = """
     core/views.py object_detail, creates context like that:
@@ -32,6 +31,7 @@ def highlight_items(context, menu_items, obj):
     core/views.py  home, context contains 'category' only
     core/views.py  category_detail,  context contains 'category' only
     """
+    #TODO highlight by url
     def process_highlight(ct, obj_pk):
         for i in out:
             if i.target_ct == ct and i.target_id == obj_pk:
@@ -76,7 +76,7 @@ class MenuForSpecificObjectNode(template.Node):
         cat = cats[0]
         menus = Menu.objects.filter(slug=self.menu_slug, category=cat, site=settings.SITE_ID)
         if not menus:
-            log.warning('There are no Menu instances named "%s" for object %s' % (self.menu_slug, self.object))
+            log.warning('There are no Menu instances named "%s" for category %s' % (self.menu_slug, cat))
             return ''
         return render_common(context, menus[0], cat)
 
@@ -117,11 +117,12 @@ def get_template_list(menu, target):
         path = '%s/%s' % (name, target.path)
         cat = target
         templates.append('%s/category/%s/%s' % (prefix, cat.path, name))
-        #TODO iterate over category parents and add their template paths to templates list
+        #iterate over category parents and add their template paths to templates list
         c = cat
         while c.tree_parent:
             c = c.tree_parent
             templates.append('%s/category/%s/%s' % (prefix, c.path, name))
+        templates.append('%s/%s' % (prefix, name))
     elif hasattr(target, 'category'):
         cat = target.category
         if hasattr(target, '_meta'):
