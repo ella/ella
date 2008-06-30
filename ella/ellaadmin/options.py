@@ -2,6 +2,7 @@ from django.utils.functional import memoize
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.shortcuts import render_to_response
 from django import template
+from django.db.models import ForeignKey
 
 from django.contrib import admin
 from django.contrib.admin.options import flatten_fieldsets
@@ -86,6 +87,58 @@ class EllaAdminSite(admin.AdminSite):
 
         return HttpResponse(simplejson.dumps(response, indent=2), mimetype=mimetype)
 
+class EllaAdminOptionsMixin(object):
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        if db_field.name == 'slug':
+            kwargs.setdefault('required', not db_field.blank)
+            return forms.RegexField('^[0-9a-z-]+$', max_length=255, **kwargs)
+
+        elif db_field.name in ('target_ct', 'source_ct'):
+            kwargs['widget'] = widgets.ContentTypeWidget
+
+        elif db_field.name in ('target_id', 'source_id',):
+            kwargs['widget'] = widgets.ForeignKeyRawIdWidget
+
+        if isinstance(db_field, ForeignKey):
+            if db_field.name in self.raw_id_fields:
+                formfield = super(EllaAdminOptionsMixin, self).formfield_for_dbfield(db_field, **kwargs)
+                formfield.widget.render = widgets.ExtendedRelatedFieldWidgetWrapper(formfield.widget.render, db_field.rel, self.admin_site)
+                return formfield
+
+        return super(EllaAdminOptionsMixin, self).formfield_for_dbfield(db_field, **kwargs)
+
+class ExtendedModelAdmin(EllaAdminOptionsMixin, admin.ModelAdmin):
+    pass
+
+_admin_root_cache = {} # maps model to admin url
+ADMIN_NAME = 'admin'
+ADMIN_SCHEME = 'http'
+
+def admin_root(model):
+    """return admin list url"""
+    try:
+        root = '/%s' % reverse(ADMIN_NAME, args=['']).strip('/')
+    except NoReverseMatch:
+        try:
+            root = '%s://%s' % (ADMIN_SCHEME, Site.objects.get(name=ADMIN_NAME).domain)
+        except Site.DoesNotExist:
+            root = '/%s' % ADMIN_NAME
+    app_label = model._meta.app_label
+    model_name = model._meta.module_name
+    return '%s/%s/%s' % (root, app_label, model_name)
+admin_root = memoize(admin_root, _admin_root_cache, 1)
+
+def admin_url(obj):
+    """return valid admin edit page url"""
+    root = admin_root(obj.__class__)
+    return '%s/%d/' % (root, obj._get_pk_val())
+
+
+site = EllaAdminSite()
+
+
+
+'''
 class ContentTypeChoice(forms.ChoiceField):
     def clean(self, value):
         from django.contrib.contenttypes.models import ContentType
@@ -113,32 +166,11 @@ class EllaAdminEditForm(EllaAdminForm):
 class EllaAdminAddForm(EllaAdminForm):
     action = 'add'
 
-class EllaAdminOptionsMixin(object):
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        from ella.ellaadmin.filterspecs import get_content_types
-        from django.db.models import ForeignKey
-        if db_field.name == 'slug':
-            kwargs.setdefault('required', not db_field.blank)
-            return forms.RegexField('^[0-9a-z-]+$', max_length=255, **kwargs)
-
-        elif db_field.name in ('target_ct', 'source_ct'):
-            kwargs['widget'] = widgets.ContentTypeWidget
-
-        elif db_field.name in ('target_id', 'source_id',):
-            kwargs['widget'] = widgets.ForeignKeyRawIdWidget
-
-        if isinstance(db_field, ForeignKey):
-            if db_field.name in self.raw_id_fields:
-                formfield = super(EllaAdminOptionsMixin, self).formfield_for_dbfield(db_field, **kwargs)
-                formfield.widget.render = widgets.ExtendedRelatedFieldWidgetWrapper(formfield.widget.render, db_field.rel, self.admin_site)
-                return formfield
-
-        return super(EllaAdminOptionsMixin, self).formfield_for_dbfield(db_field, **kwargs)
-
-
-    '''
+class EllaAdminOptionsMixin(EllaAdminOptionsMixin):
+    """
     First semi-working draft of category-based permissions. It will allow permissions to be set per-site and per category
     effectively hiding the content the user has no permission to see/change.
+    """
 
     def queryset(self, request):
         from ella.ellaadmin import models
@@ -227,34 +259,8 @@ class EllaAdminOptionsMixin(object):
     #        fields = None
     #    return forms.inline_formset(self.parent_model, self.model, fk_name=self.fk_name, fields=fields,
     #        formfield_callback=self.formfield_for_dbfield, extra=self.extra, formset=self.formset, form=EllaAdminEditForm)
-    '''
+'''
 
 
 
-class ExtendedModelAdmin(EllaAdminOptionsMixin, admin.ModelAdmin):
-    pass
-
-
-_admin_root_cache = {} # maps model to admin url
-ADMIN_NAME = 'admin'
-ADMIN_SCHEME = 'http'
-
-def admin_root(model):
-    """return admin list url"""
-    try:
-        root = '/%s' % reverse(ADMIN_NAME, args=['']).strip('/')
-    except NoReverseMatch:
-        try:
-            root = '%s://%s' % (ADMIN_SCHEME, Site.objects.get(name=ADMIN_NAME).domain)
-        except Site.DoesNotExist:
-            root = '/%s' % ADMIN_NAME
-    app_label = model._meta.app_label
-    model_name = model._meta.module_name
-    return '%s/%s/%s' % (root, app_label, model_name)
-admin_root = memoize(admin_root, _admin_root_cache, 1)
-
-def admin_url(obj):
-    """return valid admin edit page url"""
-    root = admin_root(obj.__class__)
-    return '%s/%d/' % (root, obj._get_pk_val())
 
