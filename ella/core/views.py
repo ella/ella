@@ -250,8 +250,8 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
             'page': page.number,
             'next': page.next_page_number(),
             'previous': page.previous_page_number(),
-            'last_on_page': page.end_index,
-            'first_on_page': page.start_index,
+            'last_on_page': page.end_index(),
+            'first_on_page': page.start_index(),
             'pages': paginator.num_pages,
             'hits' : paginator.count,
 
