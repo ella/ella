@@ -15,7 +15,7 @@ from ella.db.models import Publishable
 class Menu(models.Model):
     slug = models.SlugField(_('Slug'), max_length=255)
     site = models.ForeignKey(Site)
-    category = models.ForeignKey(Category, null=True, blank=True)
+    category = models.ForeignKey(Category)
     description = models.TextField(blank=True)
 
     def __unicode__(self):
@@ -42,9 +42,16 @@ class MenuItem(models.Model):
     objects = MenuItemManager()
 
     def __unicode__(self):
-        if self.label:
-            return self.label
-        return unicode(self.target)
+        out = '<UNKNOWN>'
+        #import pdb;pdb.set_trace()
+        if self.target and not self.label:
+            if hasattr(self.target, 'title'):
+                out = self.target.title
+            elif hasattr(self.target, 'slug'):
+                out = self.target.slug
+        elif self.label:
+            out = self.label
+        return unicode(out)
 
     @property
     def subitems(self):
