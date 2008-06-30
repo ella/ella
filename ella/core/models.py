@@ -245,6 +245,9 @@ class Placement(models.Model):
             return 'http://' + site.domain + url
         return url
 
+    class Meta:
+        unique_together = (('category', 'target_ct', 'target_id'),)
+
 class Listing(models.Model):
     """
     Listing of an object in a category. Each and every odject that have it's own detail page must have a Listing object
