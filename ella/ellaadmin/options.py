@@ -2,7 +2,7 @@ from django.utils.functional import memoize
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.shortcuts import render_to_response
 from django import template
-from django.db.models import ForeignKey
+from django.db.models import ForeignKey, SlugField
 
 from django.contrib import admin
 from django.contrib.admin.options import flatten_fieldsets
@@ -10,6 +10,7 @@ from django import newforms as forms
 from django.shortcuts import render_to_response
 from django import http
 from django.contrib.sites.models import Site
+from django.utils.translation import ugettext_lazy as _
 
 from ella.ellaadmin import widgets
 from ella.core.middleware import get_current_request
@@ -89,9 +90,15 @@ class EllaAdminSite(admin.AdminSite):
 
 class EllaAdminOptionsMixin(object):
     def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'slug':
-            kwargs.setdefault('required', not db_field.blank)
-            return forms.RegexField('^[0-9a-z-]+$', max_length=255, **kwargs)
+        if isinstance(db_field, SlugField):
+            params = {
+                'required': not db_field.blank,
+                'max_length': db_field.max_length,
+                'label': db_field.name,
+                'error_message': _('Enter a valid slug.'),
+}
+            kwargs.update(params)
+            return forms.RegexField('^[0-9a-z-]+$', **kwargs)
 
         elif db_field.name in ('target_ct', 'source_ct'):
             kwargs['widget'] = widgets.ContentTypeWidget
