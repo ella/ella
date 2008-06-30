@@ -17,20 +17,13 @@ class GalleryItemFormset(BaseInlineFormset):
 
     def clean(self):
         """Searches for duplicate references to the same object in one gallery."""
-        if not hasattr(self, 'cleaned_data'):
-            # TODO: this is only hotfix
-            return {}
-
-        if not self.cleaned_data or not self.instance:
-            return self.cleaned_data
+        if not self.is_valid():
+            return
 
         obj = self.instance
         items = set([])
 
-        for d in self.cleaned_data:
-            # don't bother with empty edit-inlines
-            if not d:
-                continue
+        for i,d in ((i,d) for i,d in enumerate(self.cleaned_data) if d):
             # TODO: why cleaned data does not have target_ct_id prop?
             target = (d['target_ct'].id, d['target_id'],)
             # check for duplicities

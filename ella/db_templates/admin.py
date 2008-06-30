@@ -20,18 +20,18 @@ class TemplateBlockFormset(BaseInlineFormset):
 
     def clean(self):
         " Validate that the template's activity don't overlap. "
-        if not self.cleaned_data:
-            return self.cleaned_data
+        if not self.is_valid():
+            return
 
         # check that active_till datetime is greather then active_from
         validation_error = None
-        for i, data in enumerate(self.cleaned_data):
+        for i,d in ((i,d) for i,d in enumerate(self.cleaned_data) if d):
             # don't bother with empty edit-inlines
-            if not data:
+            if not d:
                 continue
             # both datetimes entered
-            if data['active_from'] and data['active_till']:
-                if data['active_from'] > data['active_till']:
+            if d['active_from'] and d['active_till']:
+                if d['active_from'] > d['active_till']:
                     validation_error = ValidationError(_('Block active till must be greather then Block active from'))
                     self.forms[i]._errors['active_till'] = validation_error.messages
         if validation_error:
@@ -39,14 +39,11 @@ class TemplateBlockFormset(BaseInlineFormset):
 
         # dictionary of blocks with tuples (active from, active till)
         items = {}
-        for item in self.cleaned_data:
-            # don't bother with empty edit-inlines
-            if not data:
-                continue
-            if not items.has_key(item['name']):
-                items[item['name']] = [(item['active_from'], item['active_till'])]
+        for i,d in ((i,d) for i,d in enumerate(self.cleaned_data) if d):
+            if not items.has_key(d['name']):
+                items[d['name']] = [(d['active_from'], d['active_till'])]
             else:
-                items[item['name']].append((item['active_from'], item['active_till']))
+                items[d['name']].append((d['active_from'], d['active_till']))
 
         # check that intervals are not in colision
         errors = []

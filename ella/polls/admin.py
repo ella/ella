@@ -21,14 +21,11 @@ def formfield_for_dbfield(fields):
 class ResultFormset(BaseInlineFormset):
 
     def clean(self):
-        if not self.cleaned_data:
-            return self.cleaned_data
+        if not self.is_valid():
+            return
 
         validation_error = None
-        for d in self.cleaned_data:
-            # don't bother with empty edit-inlines
-            if not d:
-                continue
+        for i,d in ((i,d) for i,d in enumerate(self.cleaned_data) if d):
             if d['points_from'] > d['points_to']:
                 validation_error = ValidationError(ugettext(
                         'Invalid score interval %(points_from)s - %(points_to)s.'
