@@ -13,8 +13,11 @@ class ArticleContentInlineOptions(admin.TabularInline):
     extra = 1
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'content':
-            if db_field.blank:
-                kwargs['required'] = False
+            params = {
+                'required': not db_field.blank,
+                'label': db_field.name,
+}
+            kwargs.update(params)
             return fields.RichTextAreaField(**kwargs)
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
