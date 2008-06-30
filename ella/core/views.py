@@ -2,14 +2,14 @@ from datetime import datetime
 
 from django.contrib.contenttypes.models import ContentType
 from django.template import RequestContext
-from django.core.paginator import ObjectPaginator
+from django.core.paginator import QuerySetPaginator
 from django.conf import settings
 from django.template.defaultfilters import slugify
 from django.db import models
 from django.http import Http404
 
 from ella.core.models import Listing, Category, HitCount, Placement
-from ella.core.cache import get_cached_list, get_cached_object_or_404, cache_this
+from ella.core.cache import get_cached_object_or_404, cache_this
 from ella.core.custom_urls import dispatcher
 from ella.core.cache.template_loader import render_to_response
 
@@ -193,21 +193,23 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
 
     # pagination
     if 'p' in request.GET and request.GET['p'].isdigit():
-        page = int(request.GET['p'])
+        page_no = int(request.GET['p'])
     else:
-        page = 1
+        page_no = 1
 
     base_qset = Listing.objects.get_queryset(**kwa)
     kwa.update(dates_kwa)
     qset = Listing.objects.get_queryset(**kwa)
-    paginator = ObjectPaginator(qset.filter(**dates_kwa), paginate_by)
+    paginator = QuerySetPaginator(qset.filter(**dates_kwa), paginate_by)
 
-    if page > paginator.pages:
+    if page_no > paginator.num_pages or page_no < 1:
         raise Http404
 
     kwa['count'] = paginate_by
-    kwa['offset'] = (page - 1) * paginate_by + 1
-    listings = Listing.objects.get_listing(**kwa)
+    kwa['offset'] = (page_no - 1) * paginate_by + 1
+#    listings = Listing.objects.get_listing(**kwa)
+    page = paginator.page(page_no)
+    listings = page.object_list
 
     template_list = []
     if ct:
@@ -241,17 +243,17 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
             ]
 
     return render_to_response(template_list, {
-            'is_paginated': paginator.pages > 1,
+            'is_paginated': paginator.num_pages > 1,
             'results_per_page': paginate_by,
-            'has_next': paginator.has_next_page(page - 1),
-            'has_previous': paginator.has_previous_page(page - 1),
-            'page': page,
-            'next': page + 1,
-            'previous': page - 1,
-            'last_on_page': paginator.last_on_page(page - 1),
-            'first_on_page': paginator.first_on_page(page - 1),
-            'pages': paginator.pages,
-            'hits' : paginator.hits,
+            'has_next': page.has_next(),
+            'has_previous': page.has_previous(),
+            'page': page.number,
+            'next': page.next_page_number(),
+            'previous': page.previous_page_number(),
+            'last_on_page': page.end_index,
+            'first_on_page': page.start_index,
+            'pages': paginator.num_pages,
+            'hits' : paginator.count,
 
             'year_list' : year_list,
             'date_list' : date_list,

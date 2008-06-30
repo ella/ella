@@ -13,7 +13,7 @@ from django.contrib.auth import authenticate, login, logout, get_user
 from django.contrib.auth.models import User, AnonymousUser
 from django.views.generic.list_detail import object_list
 from django.contrib.formtools.preview import FormPreview
-from django.core.paginator import ObjectPaginator
+from django.core.paginator import QuerySetPaginator
 from django.conf import settings
 
 from ella.discussions.models import BannedString, BannedUser, Topic, TopicThread, \
@@ -105,7 +105,7 @@ def paginate_queryset_for_request(request, qset):
             'get_admin_url',
             reverse('discussions_admin', args=['%s/%s/%d' % (ct.app_label, ct.model, c._get_pk_val())])
 )
-    paginator = ObjectPaginator(qset, paginate_by)
+    paginator = QuerySetPaginator(qset, paginate_by)
     page_no = request.GET.get('p', paginator.page_range[0])
     try:
         page_no = int(page_no)
@@ -114,7 +114,8 @@ def paginate_queryset_for_request(request, qset):
     except Exception:
         page_no = paginator.page_range[0]
     context = {}
-    objs = paginator.get_page(page_no - 1)
+    page = paginator.page(page_no)
+    objs = page.object_list
     # make objs viewed by user TODO presunout nasledujici podminku nekam jinam
     if not isinstance(request.user, AnonymousUser):
         CT = ContentType.objects.get_for_model(Comment)
@@ -126,17 +127,17 @@ def paginate_queryset_for_request(request, qset):
             post_viewed.save()
     context['object_list'] = objs
     context.update({
-        'is_paginated': paginator.pages > 1,
+        'is_paginated': paginator.num_pages > 1,
         'results_per_page': paginate_by,
-        'has_next': paginator.has_next_page(page_no - 1),
-        'has_previous': paginator.has_previous_page(page_no - 1),
-        'page': page_no,
-        'next': page_no + 1,
-        'previous': page_no - 1,
-        'last_on_page': paginator.last_on_page(page_no - 1),
-        'first_on_page': paginator.first_on_page(page_no - 1),
-        'pages': paginator.pages,
-        'hits': paginator.hits,
+        'has_next': page.has_next(),
+        'has_previous': page.has_previous(),
+        'page': page.number,
+        'next': page.next_page_number(),
+        'previous': page.previous_page_number(),
+        'last_on_page': page.end_index(),
+        'first_on_page': paginator.start_index(),
+        'pages': paginator.num_pages,
+        'hits': paginator.count,
 })
     return context
 

@@ -3,10 +3,9 @@ from django import newforms as forms
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 from django.contrib.formtools.preview import FormPreview
-from django.core.paginator import Paginator, QuerySetPaginator
+from django.core.paginator import QuerySetPaginator
 from django.conf import settings
 
-from ella.core.middleware import get_current_request
 from ella.core.views import get_templates_from_placement
 from ella.interviews.models import Question, Answer
 
@@ -61,31 +60,31 @@ def detail(request, context):
     pagination_by = getattr(settings, 'INTERVIEW_PAGINATION_PER_PAGE', 5)
 
     if 'p' in request.GET and request.GET['p'].isdigit():
-        page = int(request.GET['p'])
+        page_no = int(request.GET['p'])
     else:
-        page = 1
+        page_no = 1
 
     qset = interview.get_questions()
     paginator = QuerySetPaginator(qset, pagination_by)
-    page_content = paginator.page(page)
+    page = paginator.page(page_no)
 
-    if page > paginator.num_pages:
+    if page_no > paginator.num_pages or page_no < 1:
         raise Http404
 
     context.update({
         'is_paginated': paginator.num_pages > 1,
         'results_per_page': pagination_by,
-        'has_next': page_content.has_next(),
-        'has_previous': page_content.has_previous(),
-        'page': page,
-        'next': page_content.next_page_number(),
-        'previous': page_content.previous_page_number(),
-        'last_on_page': page_content.end_index(),
-        'first_on_page': page_content.start_index(),
+        'has_next': page.has_next(),
+        'has_previous': page.has_previous(),
+        'page': page_no,
+        'next': page.next_page_number(),
+        'previous': page.previous_page_number(),
+        'last_on_page': page.end_index(),
+        'first_on_page': page.start_index(),
         'pages': paginator.num_pages,
         'hits' : paginator.count,
         'form' : QuestionForm(request=request),
-        'questions' : page_content.object_list,
+        'questions' : page.object_list,
 })
 
     return render_to_response(
