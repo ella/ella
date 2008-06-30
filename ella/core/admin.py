@@ -19,7 +19,8 @@ class PlacementForm(modelforms.ModelForm):
         if 'initial' in kwargs:
             initial = [ c.id for c in Category.objects.distinct().filter(listing__placement=kwargs['initial']['id']) ]
 
-        self.base_fields['listings'] = modelforms.ModelMultipleChoiceField(Category.objects.all(), cache_choices=True, required=False, initial=initial)
+        self.base_fields['listings'] = modelforms.ModelMultipleChoiceField(
+                Category.objects.all(), label=_('Category'), cache_choices=True, required=False, initial=initial)
         super(PlacementForm, self).__init__(*args, **kwargs)
 
 
