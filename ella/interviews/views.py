@@ -71,7 +71,9 @@ def detail(request, context):
     if page_no > paginator.num_pages or page_no < 1:
         raise Http404
 
+    interviewees = interview.get_interviewees(request.user)
     context.update({
+        'interviewees': interviewees,
         'is_paginated': paginator.num_pages > 1,
         'results_per_page': pagination_by,
         'page': page,
@@ -92,6 +94,8 @@ def unanswered(request, bits, context):
         raise Http404
 
     interview = context['object']
+    interviewees = interview.get_interviewees(request.user)
+    context['interviewees'] = interviewees
     context['form'] = QuestionForm(request=request)
     return render_to_response(
         get_templates_from_placement('unanswered.html', context['placement']),
@@ -111,6 +115,7 @@ def reply(request, bits, context):
     interview = context['object']
 
     interviewees = interview.get_interviewees(request.user)
+    context['interviewees'] = interviewees
     if not interviewees:
         # no permission
         raise Http404

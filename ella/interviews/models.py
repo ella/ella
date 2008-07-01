@@ -27,7 +27,8 @@ class Interviewee(models.Model):
         if self.author_id:
             return unicode(get_cached_object(Author, pk=self.author_id))
         elif self.user_id:
-            return unicode(get_cached_object(User, pk=self.user_id))
+            user = get_cached_object(User, pk=self.user_id)
+            return user.first_name + ' ' + user.last_name
         return self.name
 
 
@@ -124,12 +125,14 @@ class Interview(Publishable, models.Model):
 
     def get_interviewees(self, user):
         " Get interviews that the current user can answer in behalf of. "
-        if not hasattr(self, '_interviewees'):
-            if not user.is_authenticated() or not self.can_reply():
-                self._interviewees = []
+        if not user.is_authenticated() or not self.can_reply():
+            interviewees = []
+        else:
+            if user.has_perm('interviews.add_answer'):
+                interviewees = get_cached_list(Interviewee, interview__pk=self.pk)
             else:
-                self._interviewees = get_cached_list(Interviewee, interview__pk=self.pk)
-        return self._interviewees
+                interviewees = get_cached_list(Interviewee, interview__pk=self.pk, user=user)
+        return interviewees
 
     def get_description(self):
         " Override Publishable.get_description. "

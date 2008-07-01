@@ -10,7 +10,7 @@ class IntervieweesNode(template.Node):
     def render(self, context):
         try:
             i = template.Variable(self.interview).resolve(context)
-            context[self.var_name] = i.get_interviewees(context['users'])
+            context[self.var_name] = i.get_interviewees(context['user'])
         except template.VariableDoesNotExist, e:
             pass
         return ''
