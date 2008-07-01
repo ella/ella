@@ -29,7 +29,7 @@ class ListingNode(template.Node):
 
     def render(self, context):
         for key in self.parameters_to_resolve:
-            self.parameters[key] = template.resolve_variable(self.parameters[key], context)
+            self.parameters[key] = template.Variable(self.parameters[key]).resolve(context)
         if self.parameters.has_key('category') and isinstance(self.parameters['category'], basestring):
             self.parameters['category'] = get_cached_object(Category, tree_path=self.parameters['category'], site__id=settings.SITE_ID)
         context[self.var_name] = Listing.objects.get_listing(**self.parameters)
@@ -142,7 +142,7 @@ class BoxNode(template.Node):
     def render(self, context):
         if self.model and self.lookup:
             try:
-                lookup_val = template.resolve_variable(self.lookup[1], context)
+                lookup_val = template.Variable(self.lookup[1]).resolve(context)
             except template.VariableDoesNotExist:
                 lookup_val = self.lookup[1]
 
@@ -156,7 +156,7 @@ class BoxNode(template.Node):
                 return ''
         else:
             try:
-                obj = template.resolve_variable(self.var_name, context)
+                obj = template.Variable(self.var_name).resolve(context)
             except template.VariableDoesNotExist, e:
                 log.error('BoxNode: Template variable does not exist. var_name=%s' % self.var_name)
                 return ''
@@ -371,7 +371,7 @@ class RelatedNode(template.Node):
 
     def render(self, context):
         try:
-            obj = template.resolve_variable(self.obj_var, context)
+            obj = template.Variable(self.obj_var).resolve(context)
         except template.VariableDoesNotExist:
             return ''
 
@@ -464,7 +464,7 @@ class ContainerBeginNode(template.Node):
                 continue
             value = self.params[key]
             try:
-                context[key] = template.resolve_variable(value, context)
+                context[key] = template.Variable(value).resolve(context)
             except template.VariableDoesNotExist:
                 context[key] = value
 

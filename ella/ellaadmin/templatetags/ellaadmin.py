@@ -46,10 +46,9 @@ class FormatHitsLink(template.Node):
         from django.utils.safestring import mark_safe
         from ella.core.cache import get_cached_list
         from ella.core.models import HitCount, Placement
-        from django.template import resolve_variable
         try:
-            tct = resolve_variable(self.target_ct, context)
-            oid = resolve_variable(self.target_id, context)
+            tct = template.Variable(self.target_ct).resolve(context)
+            oid = template.Variable(self.target_id).resolve(context)
             # TODO: this improve speed but it's dirty
             #if not tct in [16,28,29,55,32]:
             #    return ''

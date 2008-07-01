@@ -15,7 +15,7 @@ class RateUrlsNode(template.Node):
         self.form_name = form_name
 
     def render(self, context):
-        obj = template.resolve_variable(self.object, context)
+        obj = template.Variable(self.object).resolve(context)
         if obj and hasattr(obj, 'get_absolute_url'):
             context[self.up_name] = '%s%s/%s/' % (obj.get_absolute_url(), _('rate'), _('up'))
             context[self.down_name] = '%s%s/%s/' % (obj.get_absolute_url(), _('rate'), _('down'))
@@ -63,7 +63,7 @@ class RatingNode(template.Node):
         self.object, self.name =  object, name
 
     def render(self, context):
-        obj = template.resolve_variable(self.object, context)
+        obj = template.Variable(self.object).resolve(context)
         if obj:
             context[self.name] = TotalRate.objects.get_total_rating(obj)
         return ''

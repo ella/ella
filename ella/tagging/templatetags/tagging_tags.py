@@ -1,5 +1,5 @@
 from django.db.models import get_model
-from django.template import Library, Node, TemplateSyntaxError, Variable, resolve_variable
+from django.template import Library, Node, TemplateSyntaxError, Variable
 from django.utils.translation import ugettext as _
 
 from ella.tagging.models import Tag, TaggedItem

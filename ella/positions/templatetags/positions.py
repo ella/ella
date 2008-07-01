@@ -53,7 +53,7 @@ class PositionNode(template.Node):
 
     def render(self, context):
         try:
-            cat = template.resolve_variable(self.category, context)
+            cat = template.Variable(self.category).resolve(context)
             if not isinstance(cat, Category):
                 cat = get_cached_object(Category, site=settings.SITE_ID, slug=self.category)
         except template.VariableDoesNotExist, Category.DoesNotExist:
@@ -109,7 +109,7 @@ class IfPositionNode(template.Node):
 
     def render(self, context):
         try:
-            cat = template.resolve_variable(self.category, context)
+            cat = template.Variable(self.category).resolve(context)
             if not isinstance(cat, Category):
                 cat = get_cached_object(Category, site=settings.SITE_ID, slug=self.category)
 

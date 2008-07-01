@@ -14,7 +14,7 @@ class ImgTag(template.Node):
     def render(self, context):
         if isinstance(self.photo, basestring):
             try:
-                photo = template.resolve_variable(self.photo, context)
+                photo = template.Variable(self.photo).resolve(context)
             except template.VariableDoesNotExist:
                 return ''
             try:

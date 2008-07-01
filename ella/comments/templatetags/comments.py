@@ -125,7 +125,7 @@ def get_comment_count(parser, token):
 def resolve_object(context, obj):
     if isinstance(obj, basestring):
         try:
-            obj = template.resolve_variable(obj, context)
+            obj = template.Variable(obj).resolve(context)
         except template.VariableDoesNotExist:
             raise template.TemplateSyntaxError, "Invalid variable '%r'" % obj
     return obj
