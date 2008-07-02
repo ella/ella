@@ -11,20 +11,19 @@ log = logging.getLogger('ella.menu')
 
 def highlight_mark(item, obj, stack=[]):
     if item == obj:
+        log.debug('Highlighting item %s' % item)
         setattr(item, 'selected_item', True)
         setattr(item, 'mark', True)
     if item in stack:
+        log.debug('Highlighting stack item %s' % item)
         setattr(item, 'mark', True)
     return item
 
 class MenuItemManager(models.Manager):
 
+    # TODO @cache_this, pocitat klic zatim podle kategorie (koderi pouzivaji v {% menu%} zatim jen category objekty
     def get_level(self, menu, level, obj):
         log.debug('looking for menu level %s' % level)
-        # najit level (MenuItem) kde je ``obj``.
-        # pokud ma MI.parent, jit vys a kazdou uroven si ulozit do zasobniku.
-        # az se dostane na MI.parent == None, popnou zasobnik tolikrat, kolikaty level je chteny a ten vratit.
-        # Domyslet jak v pripade ze chce vsechny dalsi polozky, jak je vratit (nestaci jen volani na .subitems a vyresit to zanoreni na urovni sablon??)
         if not obj:
             qs = self.model.objects.filter(menu=menu)
         else:
@@ -41,6 +40,7 @@ class MenuItemManager(models.Manager):
         log.debug('stack: %s' % stack)
         if level == 1:
             qs = self.model.objects.filter(menu=menu, parent__isnull=True)
+            # TODO najit potomky a nechat pomoci nich naplnit stack
             out = qs.order_by('order')
             return map(lambda x: highlight_mark(x, obj, stack), out)
         stack_item = 'UNASSIGNED'
