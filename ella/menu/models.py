@@ -42,6 +42,10 @@ class MenuItem(models.Model):
     objects = MenuItemManager()
 
     def __unicode__(self):
+        return unicode('%s:%s/%s' % (self.menu,self.parent_name, self.title))
+
+    @property
+    def title(self):
         out = '<UNKNOWN>'
         if self.target and not self.label:
             if hasattr(self.target, 'title'):
@@ -57,13 +61,13 @@ class MenuItem(models.Model):
             out += '#' # mark selected item
         if hasattr(self, 'mark') and settings.DEBUG:
             out += '*' # mark selected item
-        return unicode('%s/%s' % (self.parent_name, out))
+        return out
 
     @property
     def parent_name(self):
         if self.parent is None:
             return ''
-        return unicode(self.parent)
+        return self.parent.title
 
     @property
     def subitems(self):
