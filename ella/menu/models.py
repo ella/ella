@@ -4,6 +4,7 @@ from django.contrib.sites.models import Site
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.template.defaultfilters import slugify
+from django.conf import settings
 
 from ella.core.cache import CachedForeignKey
 from ella.core.models import Category
@@ -15,18 +16,17 @@ from ella.db.models import Publishable
 class Menu(models.Model):
     slug = models.SlugField(_('Slug'), max_length=255)
     site = models.ForeignKey(Site)
-    category = models.ForeignKey(Category)
     description = models.TextField(blank=True)
 
     def __unicode__(self):
-        return unicode('%s for category %s on %s' % (self.slug, self.category, self.site))
+        return unicode('%s on %s' % (self.slug, self.site))
 
     @property
     def menu_slug(self):
         return unicode(self.slug)
 
     class Meta:
-        ordering = ('slug', 'category', 'site')
+        ordering = ('slug', 'site')
 
 class MenuItem(models.Model):
     parent = CachedForeignKey('self', blank=True, null=True, verbose_name=_('parent'))
@@ -43,7 +43,6 @@ class MenuItem(models.Model):
 
     def __unicode__(self):
         out = '<UNKNOWN>'
-        #import pdb;pdb.set_trace()
         if self.target and not self.label:
             if hasattr(self.target, 'title'):
                 out = self.target.title
@@ -51,7 +50,20 @@ class MenuItem(models.Model):
                 out = self.target.slug
         elif self.label:
             out = self.label
-        return unicode(out)
+        else:
+            out = 'ct=%s, ct_id=%s' % (self.target_ct, self.target_id)
+
+        if hasattr(self, 'selected_item') and settings.DEBUG:
+            out += '#' # mark selected item
+        if hasattr(self, 'mark') and settings.DEBUG:
+            out += '*' # mark selected item
+        return unicode('%s/%s' % (self.parent_name, out))
+
+    @property
+    def parent_name(self):
+        if self.parent is None:
+            return ''
+        return self.parent
 
     @property
     def subitems(self):
@@ -74,6 +86,7 @@ class MenuItem(models.Model):
     class Meta:
         verbose_name = _('Menu item')
         verbose_name_plural = _('Menu items')
+        ordering = ('menu', 'order',)
 
 
 # initialization

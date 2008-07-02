@@ -48,8 +48,7 @@ class MenuItemOptions(admin.ModelAdmin):
 
 class MenuOptions(admin.ModelAdmin):
     form = MenuForm
-    list_display = ('menu_slug', 'category', 'site')
-    list_filter = ('category',)
+    list_display = ('menu_slug', 'site')
 
 
 admin.site.register(Menu, MenuOptions)
