@@ -133,7 +133,18 @@ class ListingManager(RelatedManager):
                     break
             elif offset != 0:
                 offset -= q.count()
-        return out
+        # HOTFIX only
+        if not out:
+            return out
+        res = []
+        listed_targets = []
+        for item in out:
+            tgt = item.placement.target
+            if tgt in listed_targets:
+                continue
+            listed_targets.append(tgt)
+            res.append(item)
+        return res
 
 def get_top_objects_key(func, self, count, mods=[]):
     return 'ella.core.managers.HitCountManager.get_top_objects_key:%d:%d:%s' % (
