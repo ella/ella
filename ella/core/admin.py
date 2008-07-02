@@ -78,7 +78,7 @@ class PlacementInlineFormset(generic.GenericInlineFormset):
             # empty form
             if not d: break
 
-            if cat and cat == d['category']:
+            if cat and cat == cat and cat:
                 main = d
 
 
@@ -91,9 +91,8 @@ class PlacementInlineFormset(generic.GenericInlineFormset):
             # try and find conflicting placement
             qset = Placement.objects.filter(q,
                 category=d['category'],
-                target_ct=target_ct,
                 slug=slug,
-                static=d['static'],
+                static=d['static']
 )
 
             # check for same date in URL
@@ -116,6 +115,17 @@ class PlacementInlineFormset(generic.GenericInlineFormset):
                             'category' : plac.category,
                             'target' : plac.target,
 })
+
+            qset = Placement.objects.filter(
+                        target_id=obj.pk,
+                        target_ct=target_ct,
+)
+
+            if 'id' in d:
+                qset = qset.exclude(id=d['id'])
+
+            if qset:
+                raise forms.ValidationError('Chyba')
 
         if cat and not main:
             raise forms.ValidationError(_('If object has a category, it must have a main placement.'))
