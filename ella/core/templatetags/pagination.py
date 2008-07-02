@@ -16,6 +16,9 @@ def paginator(context, adjacent_pages=2):
     Taken from http://www.djangosnippets.org/snippets/73/
 
     """
+    if not 'page' in context:
+        # improper use of paginator tag, bail out
+        return {}
 
     page = context['page']
     page_no = int(page.number)
