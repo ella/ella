@@ -61,7 +61,7 @@ class MenuItem(models.Model):
             out += '#' # mark selected item
         if hasattr(self, 'mark') and settings.DEBUG:
             out += '*' # mark selected item
-        return '%s/%s' % (self.parent_name, self.title)
+        return '%s/%s' % (self.parent_name, out)
 
     @property
     def parent_name(self):
