@@ -162,7 +162,7 @@ class HitCountInlineOptions(admin.TabularInline):
 class PlacementOptions(admin.ModelAdmin):
     list_display = ('target', 'category', 'publish_from', 'full_url',)
     list_filter = ('publish_from', 'category', 'target_ct',)
-    inlines = [ ListingInlineOptions, HitCountInlineOptions ]
+    inlines = [ ListingInlineOptions ]
 
 class CategoryOptions(admin.ModelAdmin):
     list_filter = ('site',)
