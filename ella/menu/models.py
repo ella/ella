@@ -63,7 +63,7 @@ class MenuItem(models.Model):
     def parent_name(self):
         if self.parent is None:
             return ''
-        return self.parent
+        return unicode(self.parent)
 
     @property
     def subitems(self):
