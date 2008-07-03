@@ -29,6 +29,13 @@ class MenuItemManager(models.Manager):
         else:
             ct = ContentType.objects.get_for_model(obj)
             qs = self.model.objects.filter(menu=menu, target_ct=ct, target_id=obj.pk)
+            if not qs and isinstance(obj, Category):
+                par = obj.tree_parent
+                while par:
+                    qs = self.model.objects.filter(menu=menu, target_ct=ct, target_id=par.pk)
+                    par = par.tree_parent
+                    if qs:
+                        break
         if not qs:
             log.error('Empty QuerySet! Women and children first')
             return None

@@ -20,7 +20,7 @@ menu_simple = """
 >>> cx = Context({'context': 'is not important there'})
 >>> t = Template(tpl)
 >>> t.render(cx)
-u'templates/inclusion_tags/menu/main-menu.html template"/Prvni polozka subitems: []""/Druha polozka subitems: [&lt;MenuItem: /Druha polozka/Odkaz na kategorii&gt;, &lt;MenuItem: /Druha polozka/Odkaz ven&gt;]"\\n'
+u'templates/inclusion_tags/menu/main-menu.html template"main-menu on example.com:/Prvni polozka subitems: []""main-menu on example.com:/Druha polozka subitems: [&lt;MenuItem: main-menu on example.com:/Druha polozka/Odkaz na kategorii&gt;, &lt;MenuItem: main-menu on example.com:/Druha polozka/Odkaz ven&gt;]"\\n'
 
 # test non-existing menu slug
 
@@ -59,17 +59,17 @@ menu_for_object = """
 >>> cx = Context({'cat': cat})
 >>> t = Template(tpl)
 >>> t.render(cx)
-u'templates/inclusion_tags/menu/category/homepage/main-menu.html template. "/Prvni polozka subitems: []""/Druha polozka subitems: [&lt;MenuItem: /Druha polozka/Odkaz na kategorii&gt;, &lt;MenuItem: /Druha polozka/Odkaz ven&gt;]"\\n'
+u'templates/inclusion_tags/menu/category/homepage/main-menu.html template. "main-menu on example.com:/Prvni polozka subitems: []""main-menu on example.com:/Druha polozka subitems: [&lt;MenuItem: main-menu on example.com:/Druha polozka/Odkaz na kategorii&gt;, &lt;MenuItem: main-menu on example.com:/Druha polozka/Odkaz ven&gt;]"\\n'
 
 >>> m = Menu.objects.get(slug='main-menu')
 >>> xcat = Category.objects.get(pk=2)  # try another category for first level
 >>> MenuItem.objects.get_level(m, 1, xcat)
-[<MenuItem: /Prvni polozka>, <MenuItem: /Druha polozka>]
+[<MenuItem: main-menu on example.com:/Prvni polozka>, <MenuItem: main-menu on example.com:/Druha polozka>]
 
 >>> m = Menu.objects.get(slug='main-menu')
 >>> xcat = Category.objects.get(pk=3)  # try another category for first level
 >>> MenuItem.objects.get_level(m, 1, xcat)
-[<MenuItem: /Prvni polozka>, <MenuItem: /Druha polozka>]
+[<MenuItem: main-menu on example.com:/Prvni polozka>, <MenuItem: main-menu on example.com:/Druha polozka>]
 
 
 # test non-existing menu slug
@@ -107,8 +107,8 @@ u''
 ...     t.render(cx)
 ... except TemplateSyntaxError, e:
 ...     pass
->>> type(e)
-<class 'django.template.TemplateSyntaxError'>
+>>> e.__class__.__name__
+'TemplateSyntaxError'
 >>> unicode(e.message)
 u"Object should be instance of Category class. type is <class 'ella.menu.models.MenuItem'>"
 
@@ -117,29 +117,29 @@ u"Object should be instance of Category class. type is <class 'ella.menu.models.
 >>> cat = Category.objects.get(pk=1)
 >>> m = Menu.objects.get(slug='main-menu')
 >>> MenuItem.objects.get_level(m, 2, cat)
-[<MenuItem: /Druha polozka/Odkaz na kategorii>, <MenuItem: /Druha polozka/Odkaz ven>]
+[<MenuItem: main-menu on example.com:/Druha polozka/Odkaz na kategorii>, <MenuItem: main-menu on example.com:/Druha polozka/Odkaz ven>]
 
 >>> m = Menu.objects.get(slug='main-menu')
 >>> xcat = Category.objects.get(pk=2)  # try another category
 >>> MenuItem.objects.get_level(m, 2, xcat)
-[<MenuItem: /Druha polozka/Odkaz na kategorii>, <MenuItem: /Druha polozka/Odkaz ven>]
+[<MenuItem: main-menu on example.com:/Druha polozka/Odkaz na kategorii>, <MenuItem: main-menu on example.com:/Druha polozka/Odkaz ven>]
 
 >>> m = Menu.objects.get(slug='main-menu')
 >>> xcat = Category.objects.get(pk=3)  # try another category
 >>> MenuItem.objects.get_level(m, 2, xcat)
-[<MenuItem: /Druha polozka/Odkaz na kategorii>, <MenuItem: /Druha polozka/Odkaz ven>]
+[<MenuItem: main-menu on example.com:/Druha polozka/Odkaz na kategorii>, <MenuItem: main-menu on example.com:/Druha polozka/Odkaz ven>]
 
 # second nested level
 
 >>> m = Menu.objects.get(slug='main-menu')
 >>> xcat = Category.objects.get(pk=2)  # try another category
 >>> MenuItem.objects.get_level(m, 3, xcat)
-[<MenuItem: /Druha polozka/Odkaz ven/N2 Odkaz ven>, <MenuItem: /Druha polozka/Odkaz ven/N2 Dalsi odkaz ven>, <MenuItem: /Druha polozka/Odkaz ven/N2 nested category>]
+[<MenuItem: main-menu on example.com:/Druha polozka/Odkaz ven/N2 Odkaz ven>, <MenuItem: main-menu on example.com:/Druha polozka/Odkaz ven/N2 Dalsi odkaz ven>, <MenuItem: main-menu on example.com:/Druha polozka/Odkaz ven/N2 nested category>]
 
 >>> m = Menu.objects.get(slug='main-menu')
 >>> xcat = Category.objects.get(pk=3)  # try another category
 >>> MenuItem.objects.get_level(m, 3, xcat)
-[<MenuItem: /Druha polozka/Odkaz ven/N2 Odkaz ven>, <MenuItem: /Druha polozka/Odkaz ven/N2 Dalsi odkaz ven>, <MenuItem: /Druha polozka/Odkaz ven/N2 nested category>]
+[<MenuItem: main-menu on example.com:/Druha polozka/Odkaz ven/N2 Odkaz ven>, <MenuItem: main-menu on example.com:/Druha polozka/Odkaz ven/N2 Dalsi odkaz ven>, <MenuItem: main-menu on example.com:/Druha polozka/Odkaz ven/N2 nested category>]
 
 # first nested level (temmplate tag)
 
@@ -155,7 +155,7 @@ u"Object should be instance of Category class. type is <class 'ella.menu.models.
 >>> cx = Context({'cat': cat})
 >>> t = Template(tpl)
 >>> t.render(cx)
-u'templates/inclusion_tags/menu/category/homepage/main-menu.html template. "/Druha polozka/Odkaz na kategorii subitems: []""/Druha polozka/Odkaz ven subitems: [&lt;MenuItem: /Druha polozka/Odkaz ven/N2 Odkaz ven&gt;, &lt;MenuItem: /Druha polozka/Odkaz ven/N2 Dalsi odkaz ven&gt;, &lt;MenuItem: /Druha polozka/Odkaz ven/N2 nested category&gt;]"\\n'
+u'templates/inclusion_tags/menu/category/homepage/main-menu.html template. "main-menu on example.com:/Druha polozka/Odkaz na kategorii subitems: []""main-menu on example.com:/Druha polozka/Odkaz ven subitems: [&lt;MenuItem: main-menu on example.com:/Druha polozka/Odkaz ven/N2 Odkaz ven&gt;, &lt;MenuItem: main-menu on example.com:/Druha polozka/Odkaz ven/N2 Dalsi odkaz ven&gt;, &lt;MenuItem: main-menu on example.com:/Druha polozka/Odkaz ven/N2 nested category&gt;]"\\n'
 """
 
 menu_for_generic = """
@@ -176,7 +176,7 @@ menu_for_generic = """
 >>> cx = Context({})
 >>> t = Template(tpl)
 >>> t.render(cx)
-u'templates/inclusion_tags/menu/category/homepage/main-menu.html template. "/Prvni polozka subitems: []""/Druha polozka subitems: [&lt;MenuItem: /Druha polozka/Odkaz na kategorii&gt;, &lt;MenuItem: /Druha polozka/Odkaz ven&gt;]"\\n'
+u'templates/inclusion_tags/menu/category/homepage/main-menu.html template. "main-menu on example.com:/Prvni polozka subitems: []""main-menu on example.com:/Druha polozka subitems: [&lt;MenuItem: main-menu on example.com:/Druha polozka/Odkaz na kategorii&gt;, &lt;MenuItem: main-menu on example.com:/Druha polozka/Odkaz ven&gt;]"\\n'
 
 # multiple filter arguments in tpl tag
 
@@ -192,7 +192,7 @@ u'templates/inclusion_tags/menu/category/homepage/main-menu.html template. "/Prv
 >>> cx = Context({})
 >>> t = Template(tpl)
 >>> t.render(cx)
-u'templates/inclusion_tags/menu/category/homepage/main-menu.html template. "/Prvni polozka subitems: []""/Druha polozka subitems: [&lt;MenuItem: /Druha polozka/Odkaz na kategorii&gt;, &lt;MenuItem: /Druha polozka/Odkaz ven&gt;]"\\n'
+u'templates/inclusion_tags/menu/category/homepage/main-menu.html template. "main-menu on example.com:/Prvni polozka subitems: []""main-menu on example.com:/Druha polozka subitems: [&lt;MenuItem: main-menu on example.com:/Druha polozka/Odkaz na kategorii&gt;, &lt;MenuItem: main-menu on example.com:/Druha polozka/Odkaz ven&gt;]"\\n'
 
 # level test
 
@@ -208,7 +208,7 @@ u'templates/inclusion_tags/menu/category/homepage/main-menu.html template. "/Prv
 >>> cx = Context({})
 >>> t = Template(tpl)
 >>> t.render(cx)
-u'templates/inclusion_tags/menu/category/homepage/main-menu.html template. "/Prvni polozka subitems: []""/Druha polozka subitems: [&lt;MenuItem: /Druha polozka/Odkaz na kategorii&gt;, &lt;MenuItem: /Druha polozka/Odkaz ven&gt;]"\\n'
+u'templates/inclusion_tags/menu/category/homepage/main-menu.html template. "main-menu on example.com:/Prvni polozka subitems: []""main-menu on example.com:/Druha polozka subitems: [&lt;MenuItem: main-menu on example.com:/Druha polozka/Odkaz na kategorii&gt;, &lt;MenuItem: main-menu on example.com:/Druha polozka/Odkaz ven&gt;]"\\n'
 
 >>> tpl = '''
 ...   {% block container %}
@@ -222,7 +222,7 @@ u'templates/inclusion_tags/menu/category/homepage/main-menu.html template. "/Prv
 >>> cx = Context({})
 >>> t = Template(tpl)
 >>> t.render(cx)
-u'templates/inclusion_tags/menu/category/homepage/main-menu.html template. "/Druha polozka/Odkaz na kategorii subitems: []""/Druha polozka/Odkaz ven subitems: [&lt;MenuItem: /Druha polozka/Odkaz ven/N2 Odkaz ven&gt;, &lt;MenuItem: /Druha polozka/Odkaz ven/N2 Dalsi odkaz ven&gt;, &lt;MenuItem: /Druha polozka/Odkaz ven/N2 nested category&gt;]"\\n'
+u'templates/inclusion_tags/menu/category/homepage/main-menu.html template. "main-menu on example.com:/Druha polozka/Odkaz na kategorii subitems: []""main-menu on example.com:/Druha polozka/Odkaz ven subitems: [&lt;MenuItem: main-menu on example.com:/Druha polozka/Odkaz ven/N2 Odkaz ven&gt;, &lt;MenuItem: main-menu on example.com:/Druha polozka/Odkaz ven/N2 Dalsi odkaz ven&gt;, &lt;MenuItem: main-menu on example.com:/Druha polozka/Odkaz ven/N2 nested category&gt;]"\\n'
 
 # nonexisting category
 
@@ -254,19 +254,19 @@ highlight = """
 >>> cat = Category.objects.get(pk=1)
 >>> mis = MenuItem.objects.get_level(m, 1, cat)
 >>> map(lambda m: '%s:%s' % (m, hasattr(m, 'mark')), mis)
-['/Prvni polozka:False', '/Druha polozka:True']
+['main-menu on example.com:/Prvni polozka:False', 'main-menu on example.com:/Druha polozka:True']
 
 >>> m = Menu.objects.get(slug='main-menu')
 >>> cat = Category.objects.get(pk=2) # highlight when nested category is selected
 >>> mis = MenuItem.objects.get_level(m, 1, cat)
 >>> map(lambda m: '%s:%s' % (m, hasattr(m, 'mark')), mis)
-['/Prvni polozka:False', '/Druha polozka:True']
+['main-menu on example.com:/Prvni polozka:False', 'main-menu on example.com:/Druha polozka:True']
 
 >>> m = Menu.objects.get(slug='main-menu')
 >>> cat = Category.objects.get(pk=3) # highlight when nested category is selected
 >>> mis = MenuItem.objects.get_level(m, 1, cat)
 >>> map(lambda m: '%s:%s' % (m, hasattr(m, 'mark')), mis)
-['/Prvni polozka:False', '/Druha polozka:True']
+['main-menu on example.com:/Prvni polozka:False', 'main-menu on example.com:/Druha polozka:True']
 
 # first nested level
 
@@ -274,13 +274,13 @@ highlight = """
 >>> cat = Category.objects.get(pk=2)
 >>> mis = MenuItem.objects.get_level(m, 2, cat)
 >>> map(lambda m: '%s:%s' % (m, hasattr(m, 'mark')), mis)
-['/Druha polozka/Odkaz na kategorii:False', '/Druha polozka/Odkaz ven:True']
+['main-menu on example.com:/Druha polozka/Odkaz na kategorii:False', 'main-menu on example.com:/Druha polozka/Odkaz ven:True']
 
 >>> m = Menu.objects.get(slug='main-menu')
 >>> cat = Category.objects.get(pk=3)
 >>> mis = MenuItem.objects.get_level(m, 2, cat)
 >>> map(lambda m: '%s:%s' % (m, hasattr(m, 'mark')), mis)
-['/Druha polozka/Odkaz na kategorii:False', '/Druha polozka/Odkaz ven:True']
+['main-menu on example.com:/Druha polozka/Odkaz na kategorii:False', 'main-menu on example.com:/Druha polozka/Odkaz ven:True']
 
 # second nested level
 
@@ -288,13 +288,13 @@ highlight = """
 >>> cat = Category.objects.get(pk=2) # not enough nested category to highlight menu items
 >>> mis = MenuItem.objects.get_level(m, 3, cat)
 >>> map(lambda m: '%s:%s' % (m, hasattr(m, 'mark')), mis)
-['/Druha polozka/Odkaz ven/N2 Odkaz ven:False', '/Druha polozka/Odkaz ven/N2 Dalsi odkaz ven:False', '/Druha polozka/Odkaz ven/N2 nested category:False']
+['main-menu on example.com:/Druha polozka/Odkaz ven/N2 Odkaz ven:False', 'main-menu on example.com:/Druha polozka/Odkaz ven/N2 Dalsi odkaz ven:False', 'main-menu on example.com:/Druha polozka/Odkaz ven/N2 nested category:False']
 
 >>> m = Menu.objects.get(slug='main-menu')
 >>> cat = Category.objects.get(pk=3)
 >>> mis = MenuItem.objects.get_level(m, 3, cat)
 >>> map(lambda m: '%s:%s' % (m, hasattr(m, 'mark')), mis)
-['/Druha polozka/Odkaz ven/N2 Odkaz ven:False', '/Druha polozka/Odkaz ven/N2 Dalsi odkaz ven:False', '/Druha polozka/Odkaz ven/N2 nested category:True']
+['main-menu on example.com:/Druha polozka/Odkaz ven/N2 Odkaz ven:False', 'main-menu on example.com:/Druha polozka/Odkaz ven/N2 Dalsi odkaz ven:False', 'main-menu on example.com:/Druha polozka/Odkaz ven/N2 nested category:True']
 
 >>> tpl = '''
 ...   {% block container %}
@@ -327,7 +327,7 @@ u'homepage'
 
 >>> mi = MenuItem.objects.get(pk=2)
 >>> mi.subitems
-[<MenuItem: /Druha polozka/Odkaz na kategorii>, <MenuItem: /Druha polozka/Odkaz ven>]
+[<MenuItem: main-menu on example.com:/Druha polozka/Odkaz na kategorii>, <MenuItem: main-menu on example.com:/Druha polozka/Odkaz ven>]
 """
 
 __test__ = {
