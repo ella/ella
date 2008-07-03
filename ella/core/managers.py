@@ -136,7 +136,7 @@ class ListingManager(RelatedManager):
                         continue
                     listed_targets.add(tgt)
                     cnt += 1
-                out.extend(data)
+                    out.append(l)
                 count -= cnt
                 if count <= 0:
                     break
