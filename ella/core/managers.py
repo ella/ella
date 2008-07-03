@@ -122,29 +122,27 @@ class ListingManager(RelatedManager):
         # FIXME TODO
         deleted = models.Q(remove=True, priority_to__isnull=False, priority_to__lte=now)
 
+        listed_targets = set([])
+
         # iterate through qsets until we have enough objects
         for q in qsets:
             data = q.exclude(deleted)[offset:offset+count]
             if data:
                 offset = 0
+                cnt = 0
+                for l in data:
+                    tgt = l.placement_id
+                    if tgt in listed_targets:
+                        continue
+                    listed_targets.add(tgt)
+                    cnt += 1
                 out.extend(data)
-                count -= len(data)
+                count -= cnt
                 if count <= 0:
                     break
             elif offset != 0:
                 offset -= q.count()
-        # HOTFIX only
-        if not out:
-            return out
-        res = []
-        listed_targets = []
-        for item in out:
-            tgt = item.placement.target
-            if tgt in listed_targets:
-                continue
-            listed_targets.append(tgt)
-            res.append(item)
-        return res
+        return out
 
 def get_top_objects_key(func, self, count, mods=[]):
     return 'ella.core.managers.HitCountManager.get_top_objects_key:%d:%d:%s' % (
