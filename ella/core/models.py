@@ -171,7 +171,10 @@ class Placement(models.Model):
         verbose_name_plural = _('Placements')
 
     def __unicode__(self):
-        return u'%s placed in %s' % (self.target, self.category)
+        try:
+            return u'%s placed in %s' % (self.target, self.category)
+        except:
+            return 'Broken placement'
 
     def full_url(self):
         "Full url to be shown in admin."
