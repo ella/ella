@@ -3,6 +3,9 @@ try:
 except ImportError:
     from django.utils._threading_local import local
 
+import logging
+log = logging.getLogger('ella.core.middleware')
+
 from django import template
 from django.core.cache import cache
 from django.middleware.cache import CacheMiddleware
@@ -29,9 +32,12 @@ class DoubleRenderMiddleware(object):
         if response.status_code != 200 or not response['Content-Type'].startswith('text') or not getattr(settings, 'DOUBLE_RENDER', False):
             return response
 
-        c = template.RequestContext(request, {'SECOND_RENDER': True})
-        t = template.Template(response.content)
-        response.content = t.render(c)
+        try:
+            c = template.RequestContext(request, {'SECOND_RENDER': True})
+            t = template.Template(response.content)
+            response.content = t.render(c)
+        except Exception, e:
+            log.warning('Failed to double render on (%s)', e)
         return response
 
 
