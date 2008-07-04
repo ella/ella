@@ -61,15 +61,15 @@ def invalidate_cache(key,  self, object, **kwargs):
     CACHE_DELETER.register_test(Comment, "target_id:%s;target_ct_id:%s" % (object.pk, target_ct.pk) , key)
 
 class CommentManager(models.Manager):
-    @cache_this(get_count_key)
+    #@cache_this(get_count_key)
     def get_count_for_object(self, object, **kwargs):
         target_ct = ContentType.objects.get_for_model(object)
         return self.filter(target_ct=target_ct, target_id=object.id, **kwargs).count()
 
-    @cache_this(get_list_key, invalidate_cache)
+    #@cache_this(get_list_key, invalidate_cache)
     def get_list_for_object(self, object, order_by=None, **kwargs):
         target_ct = ContentType.objects.get_for_model(object)
-        qset = self.filter(target_ct=target_ct, target_id=object._get_pk_val(), **kwargs)
+        qset = self.filter(target_ct=target_ct, target_id=object.pk, **kwargs)
         if order_by:
             qset = qset.order_by(order_by)
         return build_tree(list(qset))
