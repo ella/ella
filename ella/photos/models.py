@@ -4,7 +4,7 @@ from os import path
 from imageop import ImageStretch, detect_img_type
 import os
 
-from django.db import models, transaction
+from django.db import models, transaction, IntegrityError
 from django.conf import settings
 from django.utils.translation import ugettext, ugettext_lazy as _
 #from django.contrib.contenttypes.models import ContentType
@@ -129,7 +129,6 @@ class Photo(models.Model):
             try:
                 formated_photo = FormatedPhoto.objects.create(photo=self, format=format_object)
             except (IOError, SystemError, IntegrityError):
-                context[self.var_name] = self.format.get_blank_img()
                 return None
 
         return formated_photo
