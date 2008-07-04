@@ -181,9 +181,10 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
 
     if category:
         cat = get_cached_object_or_404(Category, tree_path=category, site__id=settings.SITE_ID)
+        kwa['category__tree_path__startswith'] = category
     else:
         cat = get_cached_object_or_404(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
-    kwa['category'] = cat
+        kwa['category'] = cat
 
     if content_type:
         ct = get_content_type(content_type)
