@@ -166,7 +166,7 @@ class BoxNode(template.Node):
         else:
             box = Box(obj, self.box_type, self.nodelist)
 
-        if not box.obj:
+        if not box or not box.obj:
             log.warning('BoxNode: Box does not exists.')
             return ''
 

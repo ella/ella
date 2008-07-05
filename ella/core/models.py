@@ -281,7 +281,10 @@ class Listing(models.Model):
 
     def Box(self, box_type, nodelist):
         " Delegate the boxing to the target's Box factory method."
-        obj = self.placement.target
+        try:
+            obj = self.placement.target
+        except:
+            return None
         if hasattr(obj, 'Box'):
             return obj.Box(box_type, nodelist)
         return Box(obj, box_type, nodelist)
@@ -290,7 +293,10 @@ class Listing(models.Model):
         return self.placement.get_absolute_url()
 
     def __unicode__(self):
-        return u'%s listed in %s' % (self.placement.target, self.category)
+        try:
+            return u'%s listed in %s' % (self.placement.target, self.category)
+        except:
+            return 'Broken listing'
 
     def full_url(self):
         "Full url to be shown in admin."
