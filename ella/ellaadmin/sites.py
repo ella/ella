@@ -1,5 +1,6 @@
 import copy
 
+from django import http
 from django.db import models
 from django.contrib import admin
 from django.views.decorators.cache import never_cache
@@ -46,14 +47,45 @@ class EllaAdminSite(admin.AdminSite):
             return super(EllaAdminSite, self).root(request, url)
         except http.Http404:
             url = url.rstrip('/') # Trim trailing slash, if it exists.
-            if url.startswith('e/cache/status'):
+            if url.startswith('ella/cache/status'):
                 from ella.ellaadmin.memcached import cache_status
                 return cache_status(request)
             elif url == 'object_info':
+                # TODO: make the same as previous - startswith('ella/...')
+                # even more - ella/content_type -> admin list for app/model
+                #             ella/content_type/id -> app/model/id
                 return self.object_info(request)
             else:
                 raise
 
+    def object_info(self, request):
+        from django.utils import simplejson
+        from django.http import HttpResponse, HttpResponseBadRequest, Http404
+        from django.db.models import ObjectDoesNotExist
+        from ella.core.cache import get_cached_object_or_404
+        from django.contrib.contenttypes.models import ContentType
+        response = {}
+        #mimetype = 'application/json'
+        mimetype = 'text/html'
 
-my_admin_site = EllaAdminSite(EllaAdminOptionsMixin)
+        if not request.GET.has_key('ct_id') or not request.GET.has_key('ob_id'):
+            return HttpResponseBadRequest()
+
+        ct_id = request.GET['ct_id']
+        ob_id = request.GET['ob_id']
+
+        ct = get_cached_object_or_404(ContentType, pk=ct_id)
+        response['content_type_name'] = ct.name
+        response['content_type'] = ct.model
+
+        ob = get_cached_object_or_404(ct, pk=ob_id)
+        response['name'] = str(ob)
+        if hasattr(ob, 'get_absolute_url'):
+            response['url'] = ob.get_absolute_url()
+        response['admin_url'] = reverse('admin', args=['%s/%s/%d' % (ct.app_label, ct.model, ob.pk)])
+
+        return HttpResponse(simplejson.dumps(response, indent=2), mimetype=mimetype)
+
+
+site = EllaAdminSite(EllaAdminOptionsMixin)
 
