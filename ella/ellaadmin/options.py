@@ -144,7 +144,7 @@ def admin_url(obj):
     return '%s/%d/' % (root, obj._get_pk_val())
 
 
-site = EllaAdminSite()
+#site = EllaAdminSite()
 
 
 
