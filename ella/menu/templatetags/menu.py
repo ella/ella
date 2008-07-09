@@ -14,9 +14,11 @@ from ella.menu.models import Menu, MenuItem
 from ella.core.cache.template_loader import select_template
 from ella.core.models import Category
 
+
 register = template.Library()
 MENU_TPL_VAR = 'menu_var' # template variable name
 log = logging.getLogger('ella.menu')
+
 
 def highlight_items(context, menu_items, obj):
     howto = """

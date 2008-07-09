@@ -17,6 +17,7 @@ from ella.core.cache.template_loader import render_to_response
 # local cache for get_content_type()
 CONTENT_TYPE_MAPPING = {}
 
+
 def get_content_type(ct_name):
     """
     A helper function that returns ContentType object based on its slugified verbose_name_plural.

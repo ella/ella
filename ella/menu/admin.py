@@ -8,14 +8,15 @@ from django.http import HttpResponseRedirect
 from django.utils.translation import ugettext_lazy as _
 from django import newforms as forms
 from django.newforms import ModelForm
-from django.conf import settings
 
 from ella.core.cache.utils import delete_cached_object
 from ella.ellaadmin import widgets
 from ella.ellaadmin.options import EllaAdminSite
 from ella.menu.models import MenuItem, Menu
 
+
 log = logging.getLogger('ella.menu')
+
 
 class MenuItemForm(ModelForm):
     def clean(self):

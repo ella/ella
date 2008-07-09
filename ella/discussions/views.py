@@ -33,6 +33,7 @@ STATE_INVALID = 'invalid'
 STATE_NOT_ACTIVE = 'not_active'
 STATE_BAD_LOGIN_OR_PASSWORD = 'bad_password'
 
+DISCUSSIONS_PAGINATE_BY = getattr(settings, 'DISCUSSIONS_PAGINATE_BY', 5)
 
 
 class QuestionForm(forms.Form):
@@ -93,9 +94,7 @@ def paginate_queryset_for_request(request, qset):
     """ returns appropriate page for view. Page number should
         be set in GET variable 'p', if not set first page is returned.
     """
-    paginate_by = 5 # default
-    if hasattr(settings, 'DISCUSSIONS_PAGINATE_BY'):
-        paginate_by = settings.DISCUSSIONS_PAGINATE_BY
+    paginate_by = DISCUSSIONS_PAGINATE_BY
     # ugly son of a bitch - adding object property at runtime?!
     for i, c in enumerate(qset):
         ct = ContentType.objects.get_for_model(c)

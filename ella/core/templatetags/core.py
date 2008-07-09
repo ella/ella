@@ -1,3 +1,4 @@
+import logging
 from md5 import md5
 
 from django.conf import settings
@@ -14,11 +15,11 @@ from ella.core.cache.invalidate import CACHE_DELETER
 from ella.core.box import BOX_INFO, MEDIA_KEY, Box
 from ella.core.middleware import ECACHE_INFO
 
-import logging
+
 log = logging.getLogger('ella.core.templatetags')
-
-
 register = template.Library()
+
+DOUBLE_RENDER = getattr(settings, 'DOUBLE_RENDER', False)
 
 
 class ListingNode(template.Node):
@@ -185,8 +186,7 @@ class BoxNode(template.Node):
         context.pop()
 
         # record parent box dependecy on child box or cached full-page on box
-        if not (getattr(settings, 'DOUBLE_RENDER', False) and box.can_double_render) \
-                                    and (BOX_INFO in context or ECACHE_INFO in context):
+        if not (DOUBLE_RENDER and box.can_double_render) and (BOX_INFO in context or ECACHE_INFO in context):
             if BOX_INFO in context:
                 source_key = context[BOX_INFO]
             elif ECACHE_INFO in context:

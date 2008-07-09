@@ -10,6 +10,9 @@ from ella.core.views import get_templates_from_placement
 from ella.interviews.models import Question, Answer
 
 
+INTERVIEW_PAGINATION_PER_PAGE = getattr(settings, 'INTERVIEW_PAGINATION_PER_PAGE', 5)
+
+
 class ReplyForm(forms.Form):
     """ A form representing the reply, it also contains the mechanism needed to actually save the reply. """
     content = Answer._meta.get_field('content').formfield()
@@ -57,7 +60,7 @@ def detail(request, context):
     interview = context['object']
 
     # pagination
-    pagination_by = getattr(settings, 'INTERVIEW_PAGINATION_PER_PAGE', 5)
+    pagination_by = INTERVIEW_PAGINATION_PER_PAGE
 
     if 'p' in request.GET and request.GET['p'].isdigit():
         page_no = int(request.GET['p'])

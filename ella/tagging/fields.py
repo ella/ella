@@ -15,6 +15,7 @@ from django.conf import settings
 from ella.tagging.models import Tag
 from ella.tagging.utils import edit_string_for_tags, PRIMARY_TAG, SECONDARY_TAG, TAG_DELIMITER
 from ella.tagging.validators import isTagList
+from ella.tagging.settings import FORCE_LOWERCASE_TAGS
 
 
 class TagPriorityAdminField(forms.fields.Field):
@@ -89,7 +90,7 @@ class TagField(CharField):
         """
         if instance is None:
             raise AttributeError(_('%s can only be set on instances.') % self.name)
-        if settings.FORCE_LOWERCASE_TAGS and value is not None:
+        if FORCE_LOWERCASE_TAGS and value is not None:
             value = value.lower()
         self._set_instance_tag_cache(instance, value)
 

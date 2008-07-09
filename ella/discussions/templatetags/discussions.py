@@ -10,8 +10,11 @@ from django.template import TemplateSyntaxError
 from ella.utils.templatetags import parse_getforas_triplet
 
 
+DISCUSSIONS_PAGINATE_BY = getattr(settings, 'DISCUSSIONS_PAGINATE_BY', 5)
+
 register = template.Library()
 log = logging.getLogger('ella.discussions')
+
 
 # TODO move routine to ella.utils.templatetags?
 def parse_getas_tuple(tokens):
@@ -293,7 +296,7 @@ def get_thread_pagination(context, thread):
             % str(type(thread))
 )
     qset = get_comments_on_thread(thread)
-    p = ObjectPaginator(qset, settings.DISCUSSIONS_PAGINATE_BY)
+    p = ObjectPaginator(qset, DISCUSSIONS_PAGINATE_BY)
     return {
         'pages': p.pages,
         'has_more_pages': p.pages > 1,

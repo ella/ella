@@ -1,3 +1,4 @@
+
 from django.template import loader
 from django.utils.datastructures import MultiValueDict
 from django.utils.encoding import smart_str
@@ -11,6 +12,9 @@ from ella.core.cache.utils import normalize_key
 
 BOX_INFO = 'ella.core.box.BOX_INFO'
 MEDIA_KEY = 'ella.core.box.MEDIA_KEY'
+
+CACHE_TIMEOUT = getattr(settings, 'CACHE_TIMEOUT', 10*60)
+DOUBLE_RENDER = getattr(settings, 'DOUBLE_RENDER', False)
 
 
 class Box(object):
@@ -94,14 +98,14 @@ class Box(object):
 
     def render(self):
         " Cached wrapper around self._render(). "
-        if getattr(settings, 'DOUBLE_RENDER', False) and self.can_double_render:
+        if DOUBLE_RENDER and self.can_double_render:
             if 'SECOND_RENDER' not in self._context:
                 return self.double_render()
         key = self.get_cache_key()
         rend = cache.get(key)
         if rend is None:
             rend = self._render()
-            cache.set(key, rend, getattr(settings, 'CACHE_TIMEOUT', 20*60))
+            cache.set(key, rend, CACHE_TIMEOUT)
             for model, test in self.get_cache_tests():
                 CACHE_DELETER.register_test(model, test, key)
             CACHE_DELETER.register_pk(self.obj, key)

@@ -9,7 +9,9 @@ from ella.core.cache.utils import cache_this
 from ella.core.cache.invalidate import CACHE_DELETER
 
 
+CACHE_TIMEOUT = getattr(settings, 'CACHE_TIMEOUT', 10*60)
 template_source_loaders = None
+
 
 def load_template_source(template_name, template_dirs=None):
     global template_source_loaders
@@ -44,7 +46,7 @@ def invalidate_cache(key, template_name, template_dirs=None):
     if DbTemplate._meta.installed:
         CACHE_DELETER.register_test(DbTemplate, "name:%s" % template_name, key)
 
-@cache_this(get_key, invalidate_cache, timeout=getattr(settings, 'CACHE_TIMEOUT', 10*60))
+@cache_this(get_key, invalidate_cache, timeout=CACHE_TIMEOUT)
 def get_cache_template(template_name, template_dirs):
     for loader in template_source_loaders:
         try:
@@ -57,7 +59,7 @@ def get_cache_template(template_name, template_dirs):
 def get_sel_template_key(func, template_list):
     return 'ella.core.cache.template_loader.select_template:' + ','.join(template_list)[:200]
 
-@cache_this(get_sel_template_key, timeout=getattr(settings, 'CACHE_TIMEOUT', 10*60))
+@cache_this(get_sel_template_key, timeout=CACHE_TIMEOUT)
 def find_template(template_list):
     for template in template_list:
         try:

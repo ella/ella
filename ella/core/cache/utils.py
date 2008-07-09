@@ -10,11 +10,13 @@ from django.conf import settings
 
 from ella.core.cache.invalidate import CACHE_DELETER
 
+
 log = logging.getLogger('ella.core.cache.utils')
 
 KEY_FORMAT_LIST = 'ella.core.cache.utils.get_cached_list'
 KEY_FORMAT_OBJECT = 'ella.core.cache.utils.get_cached_object'
 CACHE_TIMEOUT = getattr(settings, 'CACHE_TIMEOUT', 10*60)
+
 
 def delete_cached_object(key, auto_normalize=True):
     """ proxy function for direct object deletion from cache. May be implemented through ActiveMQ in future. """

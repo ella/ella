@@ -14,7 +14,11 @@ from django.conf import settings
 
 from ella.core.cache.utils import normalize_key
 
+
 ECACHE_INFO = 'ella.core.middleware.ECACHE_INFO'
+
+DOUBLE_RENDER = getattr(settings, 'DOUBLE_RENDER', False)
+
 
 _thread_locals = local()
 def get_current_request():
@@ -29,7 +33,7 @@ class ThreadLocalsMiddleware(object):
 
 class DoubleRenderMiddleware(object):
     def process_response(self, request, response):
-        if response.status_code != 200 or not response['Content-Type'].startswith('text') or not getattr(settings, 'DOUBLE_RENDER', False):
+        if response.status_code != 200 or not response['Content-Type'].startswith('text') or not DOUBLE_RENDER:
             return response
 
         try:

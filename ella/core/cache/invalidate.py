@@ -8,10 +8,13 @@ from django.dispatch import dispatcher
 from django.db.models import signals
 from django.conf import settings
 
+
 log = logging.getLogger('cache')
+
 AMQ_DESTINATION = getattr(settings, 'CI_AMQ_DESTINATION', '/topic/ella')
 AMQ_HOST = getattr(settings, 'ACTIVE_MQ_HOST', None)
 AMQ_PORT = getattr(settings, 'ACTIVE_MQ_PORT', 61613)
+
 
 class MsgWrapper(object):
     pass

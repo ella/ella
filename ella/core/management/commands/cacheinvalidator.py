@@ -12,6 +12,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.utils.datastructures import MultiValueDict
 from django.conf import settings
 
+
 log = logging.getLogger('cache')
 
 AMQ_DESTINATION = getattr(settings, 'CI_AMQ_DESTINATION', '/topic/ella')
@@ -20,6 +21,7 @@ AMQ_PORT = getattr(settings, 'ACTIVE_MQ_PORT', 61613)
 
 REGISTER_KEY = getattr(settings, 'CI_REGISTER_KEY', 'ella_ci_register')
 DEPS_KEY = getattr(settings, 'CI_DEPS_KEY', 'ella_ci_deps')
+
 
 class CacheInvalidator(object):
     def __init__(self):
