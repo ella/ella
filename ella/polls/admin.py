@@ -11,21 +11,6 @@ from ella.core.cache import get_cached_object_or_404
 from ella.polls.models import Poll, Contest, Contestant, Quiz, Result, Choice, Vote, Question
 
 
-class PollsAdminOptions(admin.ModelAdmin):
-    rich_text_fields = ()
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name in self.rich_text_fields:
-            kwargs['widget'] = widgets.RichTextAreaWidget(height='small')
-        return super(PollsAdminOptions, self).formfield_for_dbfield(db_field, **kwargs)
-
-class PollsInlineAdminOptions(admin.TabularInline):
-    rich_text_fields = ()
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name in self.rich_text_fields:
-            kwargs['widget'] = widgets.RichTextAreaWidget(height='small')
-        return super(PollsInlineAdminOptions, self).formfield_for_dbfield(db_field, **kwargs)
-
-
 class ResultFormset(BaseInlineFormset):
     def clean(self):
         if not self.is_valid():
@@ -60,7 +45,7 @@ class ChoiceTabularOptions(admin.TabularInline):
     model = Choice
     extra = 5
 
-class QuestionOptions(PollsAdminOptions):
+class QuestionOptions(admin.ModelAdmin):
     """
     Admin options for Question model:
         * edit inline choices
@@ -68,7 +53,7 @@ class QuestionOptions(PollsAdminOptions):
     inlines = (ChoiceTabularOptions,)
     ordering = ('question',)
     search_fields = ('question',)
-    rich_text_fields = ('question',)
+    rich_text_fields = {'small': ('question',)}
 
 class ChoiceOptions(admin.ModelAdmin):
     """
@@ -85,23 +70,23 @@ class VoteOptions(admin.ModelAdmin):
     ordering = ('time',)
     list_display = ('time', 'poll', 'user', 'ip_address')
 
-class ContestantOptions(PollsAdminOptions):
+class ContestantOptions(admin.ModelAdmin):
     """
     Admin options for Contestant
     """
     ordering = ('datetime',)
     list_display = ('name', 'surname', 'user', 'datetime', 'contest', 'points', 'winner')
-    rich_text_fields = ('text_announcement', 'text', 'text_results',)
+    rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}
 
-class QuestionInlineOptions(PollsInlineAdminOptions):
+class QuestionInlineOptions(admin.TabularInline):
     model = Question
     inlines = (ChoiceTabularOptions,)
     template = 'admin/polls/question/edit_inline/tabular.html'
     extra = 10
-    rich_text_fields = ('question',)
+    rich_text_fields = {'small': ('question',)}
     fieldsets = ((None, {'fields' : ('question', 'allow_multiple', 'allow_no_choice',)}),)
 
-class ContestOptions(PollsAdminOptions):
+class ContestOptions(admin.ModelAdmin):
     def __call__(self, request, url):
         if url and url.endswith('correct_answers'):
             pk = url.split('/')[-2]
@@ -119,19 +104,19 @@ class ContestOptions(PollsAdminOptions):
     inlines = (QuestionInlineOptions, PlacementInlineOptions, TaggingInlineOptions,)
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
-    rich_text_fields = ('text_announcement', 'text', 'text_results',)
+    rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}
 
-class QuizOptions(PollsAdminOptions):
+class QuizOptions(admin.ModelAdmin):
     list_display = ('title', 'category', 'active_from', 'get_hits', 'full_url',)
     list_filter = ('category', 'active_from',)
     search_fields = ('title', 'text_announcement', 'text', 'text_results',)
     inlines = (QuestionInlineOptions, ResultTabularOptions, PlacementInlineOptions, TaggingInlineOptions,)
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
-    rich_text_fields = ('text_announcement', 'text', 'text_results',)
+    rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}
 
-class PollOptions(PollsAdminOptions):
-    rich_text_fields = ('text_announcement', 'text', 'text_results',)
+class PollOptions(admin.ModelAdmin):
+    rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}
     list_display = ('title', 'question', 'get_total_votes',)
     list_filter = ('active_from',)
     search_fields = ('title', 'text_announcement', 'text', 'text_results', 'question__question',)

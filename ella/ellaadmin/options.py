@@ -1,19 +1,15 @@
 from django.utils.functional import memoize
 from django.core.urlresolvers import reverse, NoReverseMatch
-from django.shortcuts import render_to_response
-from django import template
 from django.db.models import ForeignKey, SlugField
 
 from django.contrib import admin
 from django.contrib.admin.options import flatten_fieldsets
 from django import newforms as forms
-from django.shortcuts import render_to_response
 from django import http
 from django.contrib.sites.models import Site
 from django.utils.translation import ugettext_lazy as _
 
-from ella.ellaadmin import widgets
-from ella.core.middleware import get_current_request
+from ella.ellaadmin import widgets, fields
 
 
 def mixin_ella_admin(admin_class):
@@ -91,20 +87,31 @@ class EllaAdminSite(admin.AdminSite):
 class EllaAdminOptionsMixin(object):
     def formfield_for_dbfield(self, db_field, **kwargs):
         if isinstance(db_field, SlugField):
-            params = {
+            kwargs.update({
                 'required': not db_field.blank,
                 'max_length': db_field.max_length,
                 'label': db_field.name,
                 'error_message': _('Enter a valid slug.'),
-}
-            kwargs.update(params)
+})
             return forms.RegexField('^[0-9a-z-]+$', **kwargs)
 
-        elif db_field.name in ('target_ct', 'source_ct'):
-            kwargs['widget'] = widgets.ContentTypeWidget
+        for css_class, rich_text_fields in getattr(self, 'rich_text_fields', {}).iteritems():
+            if db_field.name in rich_text_fields:
+                kwargs.update({
+                    'required': not db_field.blank,
+                    'label': db_field.name,
+})
+                rich_text_field = fields.RichTextAreaField(**kwargs)
+                if css_class:
+                    rich_text_field.widget.attrs['class'] += ' %s' % css_class
+                return rich_text_field
 
-        elif db_field.name in ('target_id', 'source_id',):
+        if db_field.name in ('target_ct', 'source_ct', 'content_type',):
+            kwargs['widget'] = widgets.ContentTypeWidget
+        elif db_field.name in ('target_id', 'source_id', 'object_id',):
             kwargs['widget'] = widgets.ForeignKeyRawIdWidget
+
+
 
         '''
         # RelatedFieldWidgetWrapper in new django is little bit cleaner

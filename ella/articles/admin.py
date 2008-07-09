@@ -4,37 +4,20 @@ from django.utils.translation import ugettext_lazy as _
 from ella.tagging.admin import TaggingInlineOptions
 
 from ella.core.admin import PlacementInlineOptions
-from ella.ellaadmin import fields
 from ella.articles.models import ArticleContents, Article, InfoBox
 
 
 class ArticleContentInlineOptions(admin.TabularInline):
     model = ArticleContents
     extra = 1
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'content':
-            params = {
-                'required': not db_field.blank,
-                'label': db_field.name,
-}
-            kwargs.update(params)
-            return fields.RichTextAreaField(**kwargs)
-        return super(ArticleContentInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
-
+    rich_text_fields = {None: ('content',)}
 
 class InfoBoxOptions(admin.ModelAdmin):
     list_display = ('title', 'created',)
     date_hierarchy = 'created'
     list_filter = ('created', 'updated',)
     search_fields = ('title', 'content',)
-
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'content':
-            if db_field.blank:
-                kwargs['required'] = False
-            return fields.RichTextAreaField(**kwargs)
-        return super(InfoBoxOptions, self).formfield_for_dbfield(db_field, **kwargs)
-
+    rich_text_fields = {None: ('content',)}
 
 class ArticleOptions(admin.ModelAdmin):
     list_display = ('title', 'category', 'photo_thumbnail', 'created', 'article_age', 'get_hits', 'full_url',)
@@ -50,12 +33,8 @@ class ArticleOptions(admin.ModelAdmin):
     search_fields = ('title', 'upper_title', 'perex', 'slug', 'authors__name', 'authors__slug',)
     inlines = (ArticleContentInlineOptions, PlacementInlineOptions, TaggingInlineOptions,)
     prepopulated_fields = {'slug' : ('title',)}
+    rich_text_fields = {None: ('perex',)}
 
-
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'perex':
-            return fields.RichTextAreaField(**kwargs)
-        return super(ArticleOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
 admin.site.register(InfoBox, InfoBoxOptions)
 admin.site.register(Article, ArticleOptions)
