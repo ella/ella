@@ -2,6 +2,10 @@ from django import newforms as forms
 from django.conf import settings
 from django.contrib.admin import widgets
 from django.utils.safestring import mark_safe
+from django.utils.text import capfirst, truncate_words
+
+from ella.core.cache import get_cached_object
+from ella.ellaadmin.utils import admin_url
 
 
 JS_EDITOR = 'js/editor.js'
@@ -22,14 +26,14 @@ class ContentTypeWidget(forms.Select):
     def __init__(self, attrs={}):
         super(ContentTypeWidget, self).__init__(attrs={'class': CLASS_TARGECT})
 
-class ForeignKeyRawIdWidget(forms.TextInput):
+class ForeignKeyGenericRawIdWidget(forms.TextInput):
     " Custom widget adding a class to attrs. "
     class Media:
         js = (
             settings.ADMIN_MEDIA_PREFIX + JS_GENERIC_LOOKUP,
 )
     def __init__(self, attrs={}):
-        super(ForeignKeyRawIdWidget, self).__init__(attrs={'class': CLASS_TARGEID})
+        super(ForeignKeyGenericRawIdWidget, self).__init__(attrs={'class': CLASS_TARGEID})
 
 class ExtendedRelatedFieldWidgetWrapper(widgets.RelatedFieldWidgetWrapper):
     'Custom widget to be used in admin that includes name and link to the target.'
@@ -79,4 +83,11 @@ class ParagraphInputWidget(forms.HiddenInput):
     """show value without simpe way editing it"""
     def render(self, name, value, attrs=None):
         return mark_safe(u'<p>%s</p>%s' % (value, super(ParagraphInputWidget, self).render(name, value, attrs)))
+
+class ForeignKeyRawIdWidget(widgets.ForeignKeyRawIdWidget):
+    def label_for_value(self, value):
+        obj = self.rel.to.objects.get(pk=value)
+        label = truncate_words(obj, 14)
+        adm = admin_url(obj)
+        return '&nbsp;<a href="%s">%s</a>' % (adm, label)
 

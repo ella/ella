@@ -8,7 +8,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils import simplejson
 
 from ella.core.cache import get_cached_object_or_404
-from ella.ellaadmin.options import EllaAdminOptionsMixin, admin_url
+from ella.ellaadmin.options import EllaAdminOptionsMixin
+from ella.ellaadmin.utils import admin_url
 
 
 class EllaAdminSite(admin.AdminSite):
@@ -20,7 +21,8 @@ class EllaAdminSite(admin.AdminSite):
     def mixin_admin(self, admin_class):
         """dynamically add custom admin_opts as other base class"""
         if self.admin_opts not in admin_class.__bases__:
-            class Mix(self.admin_opts, admin_class): pass
+            class Mix(admin_class, self.admin_opts): pass
+            Mix.__bases__ = tuple(list(Mix.__bases__) + list(admin_class.__bases__))
             return Mix
         return admin_class
 

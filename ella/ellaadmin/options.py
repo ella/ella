@@ -1,11 +1,8 @@
-from django.utils.functional import memoize
-from django.core.urlresolvers import reverse, NoReverseMatch
 from django.db.models import ForeignKey, SlugField
 
 from django.contrib import admin
 from django.contrib.admin.options import flatten_fieldsets
 from django import newforms as forms
-from django.contrib.sites.models import Site
 from django.utils.translation import ugettext_lazy as _
 
 from ella.ellaadmin import widgets, fields
@@ -33,48 +30,16 @@ class EllaAdminOptionsMixin(object):
                     rich_text_field.widget.attrs['class'] += ' %s' % css_class
                 return rich_text_field
 
+        if db_field.name in self.raw_id_fields and isinstance(db_field, ForeignKey):
+            kwargs['widget'] = widgets.ForeignKeyRawIdWidget(db_field.rel)
+            return db_field.formfield(**kwargs)
+
         if db_field.name in ('target_ct', 'source_ct', 'content_type',):
             kwargs['widget'] = widgets.ContentTypeWidget
         elif db_field.name in ('target_id', 'source_id', 'object_id',):
-            kwargs['widget'] = widgets.ForeignKeyRawIdWidget
-
-        '''
-        # RelatedFieldWidgetWrapper in new django is little bit cleaner
-        if isinstance(db_field, ForeignKey):
-            if db_field.name in self.raw_id_fields:
-                formfield = super(EllaAdminOptionsMixin, self).formfield_for_dbfield(db_field, **kwargs)
-                formfield.widget.render = widgets.ExtendedRelatedFieldWidgetWrapper(formfield.widget.render, db_field.rel, self.admin_site)
-                return formfield
-        '''
+            kwargs['widget'] = widgets.ForeignKeyGenericRawIdWidget
 
         return super(EllaAdminOptionsMixin, self).formfield_for_dbfield(db_field, **kwargs)
-
-class ExtendedModelAdmin(EllaAdminOptionsMixin, admin.ModelAdmin):
-    pass
-
-
-_admin_root_cache = {} # maps model to admin url
-ADMIN_NAME = 'admin'
-ADMIN_SCHEME = 'http'
-
-def admin_root(model):
-    """return admin list url"""
-    try:
-        root = '/%s' % reverse(ADMIN_NAME, args=['']).strip('/')
-    except NoReverseMatch:
-        try:
-            root = '%s://%s' % (ADMIN_SCHEME, Site.objects.get(name=ADMIN_NAME).domain)
-        except Site.DoesNotExist:
-            root = '/%s' % ADMIN_NAME
-    app_label = model._meta.app_label
-    model_name = model._meta.module_name
-    return '%s/%s/%s' % (root, app_label, model_name)
-admin_root = memoize(admin_root, _admin_root_cache, 1)
-
-def admin_url(obj):
-    """return valid admin edit page url"""
-    root = admin_root(obj.__class__)
-    return '%s/%d/' % (root, obj._get_pk_val())
 
 
 
