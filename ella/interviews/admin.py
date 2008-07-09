@@ -14,7 +14,7 @@ class AnswerInlineOptions(admin.TabularInline):
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'content':
             kwargs['widget'] = widgets.RichTextAreaWidget(height='small')
-        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
+        return super(AnswerInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
 class QuestionInlineOptions(admin.TabularInline):
     model = Question
@@ -43,7 +43,7 @@ class InterviewOptions(admin.ModelAdmin):
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name in ('perex', 'content'):
             kwargs['widget'] = widgets.RichTextAreaWidget
-        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
+        return super(InterviewOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
 
 admin.site.register(Interviewee, IntervieweeOptions)

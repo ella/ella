@@ -139,7 +139,7 @@ class ListingInlineOptions(admin.TabularInline):
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'category':
             kwargs['widget'] = widgets.ListingCategoryWidget
-        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
+        return super(ListingInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
 class PlacementInlineOptions(generic.GenericTabularInline):
     model = Placement
@@ -153,7 +153,7 @@ class PlacementInlineOptions(generic.GenericTabularInline):
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'category':
             kwargs['widget'] = widgets.ListingCategoryWidget
-        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
+        return super(PlacementInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
 class HitCountInlineOptions(admin.TabularInline):
     model = HitCount

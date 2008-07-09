@@ -13,7 +13,7 @@ class TagInlineForm(modelforms.ModelForm):
         model = TaggedItem
 
     def __init__(self, *args, **kwargs):
-        super(self.__class__, self).__init__(*args, **kwargs)
+        super(TagInlineForm, self).__init__(*args, **kwargs)
 
 
 class TagInlineFormset(modelforms.BaseModelFormSet):
@@ -117,7 +117,7 @@ class TaggingInlineOptions(generic.GenericTabularInline):
             return SuggestTagAdminField(db_field, **kwargs)
         elif db_field.name == 'priority':
             return TagPriorityAdminField(db_field, **kwargs)
-        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
+        return super(TaggingInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
 class TagOptions(admin.ModelAdmin):
     ordernig = ('name',)

@@ -75,5 +75,5 @@ class IncrementWidget(forms.TextInput):
 class ParagraphInputWidget(forms.HiddenInput):
     """show value without simpe way editing it"""
     def render(self, name, value, attrs=None):
-        return mark_safe(u'<p>%s</p>%s' % (value, super(self.__class__, self).render(name, value, attrs)))
+        return mark_safe(u'<p>%s</p>%s' % (value, super(ParagraphInputWidget, self).render(name, value, attrs)))
 

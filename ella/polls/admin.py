@@ -11,11 +11,11 @@ from ella.core.cache import get_cached_object_or_404
 from ella.polls.models import Poll, Contest, Contestant, Quiz, Result, Choice, Vote, Question
 
 
-def formfield_for_dbfield(fields):
+def formfield_for_dbfield(klass, fields):
     def _formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name in fields:
             kwargs['widget'] = widgets.RichTextAreaWidget(height='small')
-        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
+        return super(klass, self).formfield_for_dbfield(db_field, **kwargs)
     return _formfield_for_dbfield
 
 class ResultFormset(BaseInlineFormset):
@@ -62,7 +62,7 @@ class QuestionOptions(admin.ModelAdmin):
     ordering = ('question',)
     search_fields = ('question',)
 
-    formfield_for_dbfield = formfield_for_dbfield(['question'])
+    formfield_for_dbfield = formfield_for_dbfield(QuestionOptions, ['question'])
 
 class ChoiceOptions(admin.ModelAdmin):
     """
@@ -86,7 +86,7 @@ class ContestantOptions(admin.ModelAdmin):
     ordering = ('datetime',)
     list_display = ('name', 'surname', 'user', 'datetime', 'contest', 'points', 'winner')
 
-    formfield_for_dbfield = formfield_for_dbfield(['text_announcement', 'text', 'text_results'])
+    formfield_for_dbfield = formfield_for_dbfield(ContestantOptions, ['text_announcement', 'text', 'text_results'])
 
 class QuestionInlineOptions(admin.options.InlineModelAdmin):
     model = Question
@@ -94,7 +94,7 @@ class QuestionInlineOptions(admin.options.InlineModelAdmin):
     template = 'admin/polls/question/edit_inline/tabular.html'
     extra=10
 
-    formfield_for_dbfield = formfield_for_dbfield(['question'])
+    formfield_for_dbfield = formfield_for_dbfield(QuestionInlineOptions, ['question'])
 
 class ContestOptions(admin.ModelAdmin):
 
@@ -116,7 +116,7 @@ class ContestOptions(admin.ModelAdmin):
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
 
-    formfield_for_dbfield = formfield_for_dbfield(['text_announcement', 'text', 'text_results'])
+    formfield_for_dbfield = formfield_for_dbfield(ContestOptions, ['text_announcement', 'text', 'text_results'])
 
 class QuizOptions(admin.ModelAdmin):
     list_display = ('title', 'category', 'active_from', 'get_hits', 'full_url',)
@@ -126,10 +126,10 @@ class QuizOptions(admin.ModelAdmin):
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
 
-    formfield_for_dbfield = formfield_for_dbfield(['text_announcement', 'text', 'text_results'])
+    formfield_for_dbfield = formfield_for_dbfield(QuizOptions, ['text_announcement', 'text', 'text_results'])
 
 class PollOptions(admin.ModelAdmin):
-    formfield_for_dbfield = formfield_for_dbfield(['text_announcement', 'text', 'text_results'])
+    formfield_for_dbfield = formfield_for_dbfield(PollOptions, ['text_announcement', 'text', 'text_results'])
     list_display = ('title', 'question', 'get_total_votes',)
     list_filter = ('active_from',)
     search_fields = ('title', 'text_announcement', 'text', 'text_results', 'question__question',)

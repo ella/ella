@@ -42,7 +42,7 @@ class GalleryItemTabularOptions(admin.TabularInline):
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'order':
             kwargs['widget'] = widgets.IncrementWidget
-        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
+        return super(GalleryItemTabularOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
 class GalleryOptions(admin.ModelAdmin):
     list_display = ('title', 'created', 'category', 'get_hits', 'full_url',)
@@ -61,6 +61,6 @@ class GalleryOptions(admin.ModelAdmin):
             if db_field.blank:
                 kwargs['required'] = False
             return fields.RichTextAreaField(**kwargs)
-        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
+        return super(GalleryOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
 admin.site.register(Gallery, GalleryOptions)

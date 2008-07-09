@@ -32,7 +32,7 @@ class MediaOptions(admin.ModelAdmin):
         if db_field.name in ['description', 'content']:
             kwargs['required'] = not db_field.blank
             return fields.RichTextAreaField(**kwargs)
-        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
+        return super(MediaOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
 admin.site.register(Format)
 admin.site.register(Media, MediaOptions)

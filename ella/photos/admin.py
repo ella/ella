@@ -56,7 +56,7 @@ class FormatedPhotoInlineOptions(admin.TabularInline):
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name in ['crop_width', 'crop_height', 'crop_left', 'crop_top']:
             kwargs['widget'] = CropAreaWidget
-        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
+        return super(FormatedPhotoInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
 
 class PhotoOptions(admin.ModelAdmin):

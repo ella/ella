@@ -19,7 +19,7 @@ class ArticleContentInlineOptions(admin.TabularInline):
 }
             kwargs.update(params)
             return fields.RichTextAreaField(**kwargs)
-        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
+        return super(ArticleContentInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
 
 class InfoBoxOptions(admin.ModelAdmin):
@@ -33,7 +33,7 @@ class InfoBoxOptions(admin.ModelAdmin):
             if db_field.blank:
                 kwargs['required'] = False
             return fields.RichTextAreaField(**kwargs)
-        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
+        return super(InfoBoxOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
 
 class ArticleOptions(admin.ModelAdmin):
@@ -55,7 +55,7 @@ class ArticleOptions(admin.ModelAdmin):
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'perex':
             return fields.RichTextAreaField(**kwargs)
-        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
+        return super(ArticleOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
 admin.site.register(InfoBox, InfoBoxOptions)
 admin.site.register(Article, ArticleOptions)
