@@ -99,9 +99,9 @@ class QuestionInlineOptions(PollsInlineAdminOptions):
     template = 'admin/polls/question/edit_inline/tabular.html'
     extra = 10
     rich_text_fields = ('question',)
+    fieldsets = ((None, {'fields' : ('question', 'allow_multiple', 'allow_no_choice',)}),)
 
 class ContestOptions(PollsAdminOptions):
-
     def __call__(self, request, url):
         if url and url.endswith('correct_answers'):
             pk = url.split('/')[-2]
