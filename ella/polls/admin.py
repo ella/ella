@@ -18,8 +18,15 @@ class PollsAdminOptions(admin.ModelAdmin):
             kwargs['widget'] = widgets.RichTextAreaWidget(height='small')
         return super(PollsAdminOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
-class ResultFormset(BaseInlineFormset):
+class PollsInlineAdminOptions(admin.TabularInline):
+    rich_text_fields = ()
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        if db_field.name in self.rich_text_fields:
+            kwargs['widget'] = widgets.RichTextAreaWidget(height='small')
+        return super(PollsInlineAdminOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
+
+class ResultFormset(BaseInlineFormset):
     def clean(self):
         if not self.is_valid():
             return
@@ -86,7 +93,7 @@ class ContestantOptions(PollsAdminOptions):
     list_display = ('name', 'surname', 'user', 'datetime', 'contest', 'points', 'winner')
     rich_text_fields = ('text_announcement', 'text', 'text_results',)
 
-class QuestionInlineOptions(PollsAdminOptions):
+class QuestionInlineOptions(PollsInlineAdminOptions):
     model = Question
     inlines = (ChoiceTabularOptions,)
     template = 'admin/polls/question/edit_inline/tabular.html'
