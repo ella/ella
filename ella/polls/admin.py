@@ -11,12 +11,12 @@ from ella.core.cache import get_cached_object_or_404
 from ella.polls.models import Poll, Contest, Contestant, Quiz, Result, Choice, Vote, Question
 
 
-def formfield_for_dbfield(klass, fields):
-    def _formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name in fields:
+class PollsAdminOptions(admin.ModelAdmin):
+    rich_text_fields = ()
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        if db_field.name in self.rich_text_fields:
             kwargs['widget'] = widgets.RichTextAreaWidget(height='small')
-        return super(klass, self).formfield_for_dbfield(db_field, **kwargs)
-    return _formfield_for_dbfield
+        return super(PollsAdminOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
 class ResultFormset(BaseInlineFormset):
 
@@ -53,7 +53,7 @@ class ChoiceTabularOptions(admin.TabularInline):
     model = Choice
     extra = 5
 
-class QuestionOptions(admin.ModelAdmin):
+class QuestionOptions(PollsAdminOptions):
     """
     Admin options for Question model:
         * edit inline choices
@@ -61,8 +61,7 @@ class QuestionOptions(admin.ModelAdmin):
     inlines = (ChoiceTabularOptions,)
     ordering = ('question',)
     search_fields = ('question',)
-
-    formfield_for_dbfield = formfield_for_dbfield(QuestionOptions, ['question'])
+    rich_text_fields = ('question',)
 
 class ChoiceOptions(admin.ModelAdmin):
     """
@@ -79,24 +78,22 @@ class VoteOptions(admin.ModelAdmin):
     ordering = ('time',)
     list_display = ('time', 'poll', 'user', 'ip_address')
 
-class ContestantOptions(admin.ModelAdmin):
+class ContestantOptions(PollsAdminOptions):
     """
     Admin options for Contestant
     """
     ordering = ('datetime',)
     list_display = ('name', 'surname', 'user', 'datetime', 'contest', 'points', 'winner')
+    rich_text_fields = ('text_announcement', 'text', 'text_results',)
 
-    formfield_for_dbfield = formfield_for_dbfield(ContestantOptions, ['text_announcement', 'text', 'text_results'])
-
-class QuestionInlineOptions(admin.options.InlineModelAdmin):
+class QuestionInlineOptions(PollsAdminOptions):
     model = Question
     inlines = (ChoiceTabularOptions,)
     template = 'admin/polls/question/edit_inline/tabular.html'
-    extra=10
+    extra = 10
+    rich_text_fields = ('question',)
 
-    formfield_for_dbfield = formfield_for_dbfield(QuestionInlineOptions, ['question'])
-
-class ContestOptions(admin.ModelAdmin):
+class ContestOptions(PollsAdminOptions):
 
     def __call__(self, request, url):
         if url and url.endswith('correct_answers'):
@@ -115,21 +112,19 @@ class ContestOptions(admin.ModelAdmin):
     inlines = (QuestionInlineOptions, PlacementInlineOptions, TaggingInlineOptions,)
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
+    rich_text_fields = ('text_announcement', 'text', 'text_results',)
 
-    formfield_for_dbfield = formfield_for_dbfield(ContestOptions, ['text_announcement', 'text', 'text_results'])
-
-class QuizOptions(admin.ModelAdmin):
+class QuizOptions(PollsAdminOptions):
     list_display = ('title', 'category', 'active_from', 'get_hits', 'full_url',)
     list_filter = ('category', 'active_from',)
     search_fields = ('title', 'text_announcement', 'text', 'text_results',)
     inlines = (QuestionInlineOptions, ResultTabularOptions, PlacementInlineOptions, TaggingInlineOptions,)
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
+    rich_text_fields = ('text_announcement', 'text', 'text_results',)
 
-    formfield_for_dbfield = formfield_for_dbfield(QuizOptions, ['text_announcement', 'text', 'text_results'])
-
-class PollOptions(admin.ModelAdmin):
-    formfield_for_dbfield = formfield_for_dbfield(PollOptions, ['text_announcement', 'text', 'text_results'])
+class PollOptions(PollsAdminOptions):
+    rich_text_fields = ('text_announcement', 'text', 'text_results',)
     list_display = ('title', 'question', 'get_total_votes',)
     list_filter = ('active_from',)
     search_fields = ('title', 'text_announcement', 'text', 'text_results', 'question__question',)
