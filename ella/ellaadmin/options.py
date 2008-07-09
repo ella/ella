@@ -5,84 +5,11 @@ from django.db.models import ForeignKey, SlugField
 from django.contrib import admin
 from django.contrib.admin.options import flatten_fieldsets
 from django import newforms as forms
-from django import http
 from django.contrib.sites.models import Site
 from django.utils.translation import ugettext_lazy as _
 
 from ella.ellaadmin import widgets, fields
 
-
-def mixin_ella_admin(admin_class):
-    if admin_class == admin.ModelAdmin:
-        return ExtendedModelAdmin
-
-    if EllaAdminOptionsMixin in admin_class.__bases__:
-        return admin_class
-
-    bases = list(admin_class.__bases__)
-    admin_class.__bases__ = tuple([EllaAdminOptionsMixin] + bases)
-    return admin_class
-
-def register_ella_admin(func):
-    def _register(self, model_or_iterable, admin_class=None, **options):
-        admin_class = admin_class or admin.ModelAdmin
-        admin_class = mixin_ella_admin(admin_class)
-        for inline in admin_class.inlines:
-            inline = mixin_ella_admin(inline)
-        return func(self, model_or_iterable, admin_class, **options)
-    return _register
-
-
-class EllaAdminSite(admin.AdminSite):
-    def __init__(self):
-        self._registry = admin.site._registry
-        for options in self._registry.values():
-            options.__class__ = mixin_ella_admin(options.__class__)
-            for inline in options.inlines:
-                inline = mixin_ella_admin(inline)
-        admin.AdminSite.register = register_ella_admin(admin.AdminSite.register)
-
-    def root(self, request, url):
-
-        try:
-            return super(EllaAdminSite, self).root(request, url)
-        except http.Http404:
-            url = url.rstrip('/') # Trim trailing slash, if it exists.
-            if url.startswith('e/cache/status'):
-                from ella.ellaadmin.memcached import cache_status
-                return cache_status(request)
-            elif url == 'object_info':
-                return self.object_info(request)
-            else:
-                raise
-
-    def object_info(self, request):
-        from django.utils import simplejson
-        from django.http import HttpResponse, HttpResponseBadRequest, Http404
-        from django.db.models import ObjectDoesNotExist
-        from ella.core.cache import get_cached_object_or_404
-        from django.contrib.contenttypes.models import ContentType
-        response = {}
-        #mimetype = 'application/json'
-        mimetype = 'text/html'
-
-        if not request.GET.has_key('ct_id') or not request.GET.has_key('ob_id'):
-            return HttpResponseBadRequest()
-
-        ct_id = request.GET['ct_id']
-        ob_id = request.GET['ob_id']
-
-        ct = get_cached_object_or_404(ContentType, pk=ct_id)
-        response['content_type_name'] = ct.name
-        response['content_type'] = ct.model
-
-        ob = get_cached_object_or_404(ct, pk=ob_id)
-        response['name'] = str(ob)
-        if hasattr(ob, 'get_absolute_url'):
-            response['url'] = ob.get_absolute_url()
-        response['admin_url'] = reverse('admin', args=['%s/%s/%d' % (ct.app_label, ct.model, ob.pk)])
-
-        return HttpResponse(simplejson.dumps(response, indent=2), mimetype=mimetype)
 
 class EllaAdminOptionsMixin(object):
     def formfield_for_dbfield(self, db_field, **kwargs):
@@ -111,8 +38,6 @@ class EllaAdminOptionsMixin(object):
         elif db_field.name in ('target_id', 'source_id', 'object_id',):
             kwargs['widget'] = widgets.ForeignKeyRawIdWidget
 
-
-
         '''
         # RelatedFieldWidgetWrapper in new django is little bit cleaner
         if isinstance(db_field, ForeignKey):
@@ -126,6 +51,7 @@ class EllaAdminOptionsMixin(object):
 
 class ExtendedModelAdmin(EllaAdminOptionsMixin, admin.ModelAdmin):
     pass
+
 
 _admin_root_cache = {} # maps model to admin url
 ADMIN_NAME = 'admin'
@@ -149,9 +75,6 @@ def admin_url(obj):
     """return valid admin edit page url"""
     root = admin_root(obj.__class__)
     return '%s/%d/' % (root, obj._get_pk_val())
-
-
-#site = EllaAdminSite()
 
 
 

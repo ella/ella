@@ -4,8 +4,11 @@ from django import http
 from django.db import models
 from django.contrib import admin
 from django.views.decorators.cache import never_cache
+from django.contrib.contenttypes.models import ContentType
+from django.utils import simplejson
 
-from ella.ellaadmin.options import EllaAdminOptionsMixin
+from ella.core.cache import get_cached_object_or_404
+from ella.ellaadmin.options import EllaAdminOptionsMixin, admin_url
 
 
 class EllaAdminSite(admin.AdminSite):
@@ -46,45 +49,67 @@ class EllaAdminSite(admin.AdminSite):
         try:
             return super(EllaAdminSite, self).root(request, url)
         except http.Http404:
-            url = url.rstrip('/') # Trim trailing slash, if it exists.
-            if url.startswith('ella/cache/status'):
-                from ella.ellaadmin.memcached import cache_status
-                return cache_status(request)
-            elif url == 'object_info':
-                # TODO: make the same as previous - startswith('ella/...')
-                # even more - ella/content_type -> admin list for app/model
-                #             ella/content_type/id -> app/model/id
-                return self.object_info(request)
-            else:
-                raise
+            if url.startswith('ella/'):
+                return self.root_ella(request, url)
+            raise
 
-    def object_info(self, request):
-        from django.utils import simplejson
-        from django.http import HttpResponse, HttpResponseBadRequest, Http404
-        from django.db.models import ObjectDoesNotExist
-        from ella.core.cache import get_cached_object_or_404
-        from django.contrib.contenttypes.models import ContentType
-        response = {}
-        #mimetype = 'application/json'
-        mimetype = 'text/html'
+    def root_ella(self, request, url):
+        url = url.lstrip('ella/')
+        url = url.rstrip('/')
 
-        if not request.GET.has_key('ct_id') or not request.GET.has_key('ob_id'):
-            return HttpResponseBadRequest()
+        if url.startswith('cache/status'):
+            from ella.ellaadmin.memcached import cache_status
+            return cache_status(request)
 
-        ct_id = request.GET['ct_id']
-        ob_id = request.GET['ob_id']
+        if url.split('/')[0].isdigit():
+            url_parts = url.split('/')
+            contenttype = get_cached_object_or_404(ContentType, pk=url_parts[0])
+            url_parts.pop(0)
+            return self.root_contenttype(request, contenttype, *url_parts)
 
-        ct = get_cached_object_or_404(ContentType, pk=ct_id)
-        response['content_type_name'] = ct.name
-        response['content_type'] = ct.model
+        raise http.Http404
 
-        ob = get_cached_object_or_404(ct, pk=ob_id)
-        response['name'] = str(ob)
-        if hasattr(ob, 'get_absolute_url'):
-            response['url'] = ob.get_absolute_url()
-        response['admin_url'] = reverse('admin', args=['%s/%s/%d' % (ct.app_label, ct.model, ob.pk)])
+    def root_contenttype(self, request, contenttype, *url_parts):
+        """
+        prepare redirect to admin_list view, objects change_view,
+        other special views (delete, history, ..) and hook our own views
+        """
+        get_params = request.GET and '?%s' % request.GET.urlencode() or ''
+        changelist_view = '../../%s/%s' % (contenttype.app_label, contenttype.model,)
 
-        return HttpResponse(simplejson.dumps(response, indent=2), mimetype=mimetype)
+        if not len(url_parts):
+            # redirect to admin changelist list for this contet type
+            redir = '%s/%s' % (changelist_view, get_params)
+            return http.HttpResponseRedirect(redir)
+
+        if not url_parts[0].isdigit:
+            # we don't handle actions on content type itself
+            raise http.Http404
+
+        if len(url_parts) == 1:
+            # redirect to admin change view for specific object
+            redir = '../%s/%s/%s' % (changelist_view, url_parts[0], get_params)
+            return http.HttpResponseRedirect(redir)
+
+        if len(url_parts) == 2 and url_parts[1] == 'info':
+            # object_detail for some ajax raw_id widget
+            mimetype = 'text/html' or 'application/json' # ?:)
+            obj = get_cached_object_or_404(contenttype, pk=url_parts[0])
+            response = {
+                'name': str(obj),
+                'content_type_name': contenttype.name,
+                'content_type': contenttype.model,
+                'url': getattr(obj, 'get_absolute_url', lambda:None)(),
+                'admin_url': admin_url(obj),
+}
+            return http.HttpResponse(simplejson.dumps(response, indent=2), mimetype=mimetype)
+
+        if len(url_parts) == 2:
+            # some action on specific object (delete, history, ..)
+            redir = '../../%s/%s/%s/%s' % (changelist_view, url_parts[0], url_parts[1], get_params)
+            return http.HttpResponseRedirect(redir)
+
+        raise http.Http404
 
 
 site = EllaAdminSite(EllaAdminOptionsMixin)
