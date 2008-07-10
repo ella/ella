@@ -21,7 +21,7 @@ def cache_status(request):
     # get first memcached URI
     if not settings.CACHE_BACKEND.startswith('memcached://'):
         raise http.Http404('invalid cache backend')
-    cache_hosts = settings.CACHE_BACKEND.lstrip('memcached://').rstrip('/')
+    cache_hosts = settings.CACHE_BACKEND.split('/')[2]
     cache_hosts = cache_hosts.split(';')
 
     class Stats:
