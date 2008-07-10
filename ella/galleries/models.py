@@ -90,8 +90,7 @@ class GalleryItem(models.Model):
     @property
     def target(self):
         """Returns item's target object."""
-        ct = get_cached_object(ContentType, pk=self.target_ct_id)
-        return get_cached_object(ct, pk=self.target_id)
+        return get_cached_object(self.target_ct, pk=self.target_id)
 
     def _get_slug(self):
         if not hasattr(self, '_item_list'):
