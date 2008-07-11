@@ -22,7 +22,7 @@ class EllaAdminSite(admin.AdminSite):
         """dynamically add custom admin_opts as other base class"""
         if self.admin_opts not in admin_class.__bases__:
             class Mix(admin_class, self.admin_opts): pass
-            Mix.__bases__ = tuple(list(Mix.__bases__) + list(admin_class.__bases__))
+            Mix.__bases__ = Mix.__bases__ + admin_class.__bases__
             return Mix
         return admin_class
 
