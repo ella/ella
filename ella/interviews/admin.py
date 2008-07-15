@@ -17,6 +17,7 @@ class AnswerInlineOptions(admin.TabularInline):
         return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
 
 class QuestionInlineOptions(admin.TabularInline):
+    raw_id_fields = ('user',)
     model = Question
     extra = 0
 
