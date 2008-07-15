@@ -124,12 +124,13 @@ ADMIN_SCHEME = 'http'
 def admin_root(model):
     """return admin list url"""
     try:
-        root = '/%s' % reverse(ADMIN_NAME, args=['']).strip('/')
+        root = reverse(ADMIN_NAME, args=['']).strip('/')
+        root = root and '/%s' % root or root
     except NoReverseMatch:
         try:
             root = '%s://%s' % (ADMIN_SCHEME, Site.objects.get(name=ADMIN_NAME).domain)
         except Site.DoesNotExist:
-            root = '/%s' % ADMIN_NAME
+            root = ''
     app_label = model._meta.app_label
     model_name = model._meta.module_name
     return '%s/%s/%s' % (root, app_label, model_name)
