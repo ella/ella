@@ -62,7 +62,12 @@ class ListingManager(RelatedManager):
                 qset = qset.filter(models.Q(category__tree_parent=category) | models.Q(category=category))
             elif children == self.ALL:
                 # this category and all its descendants
-                qset = qset.filter(category__tree_path__startswith=category.tree_path)
+                if category.tree_parent_id:
+                    tp = category.tree_path
+                else:
+                    tp = category.slug
+                qset = qset.filter(category__tree_path__startswith=tp)
+
             else:
                 raise AttributeError('Invalid children value (%s) - should be one of (%s, %s, %s)' % (children, self.NONE, self.IMMEDIATE, self.ALL))
 
