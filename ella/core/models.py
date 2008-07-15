@@ -303,6 +303,25 @@ class Listing(models.Model):
         return mark_safe('<a href="%s">url</a>' % self.get_absolute_url())
     full_url.allow_tags = True
 
+    def target_admin(self):
+        return mark_safe('<a href="%s">%s</a>' % (self.target.get_admin_url(), self.target,))
+        return mark_safe('<a href="%s">%s</a>' % (self.target.get_admin_url(), _('edit'),))
+    target_admin.allow_tags = True
+    target_admin.short_description = _('target edit url')
+
+    def target_ct(self):
+        return self.target._meta.verbose_name
+
+    def target_hitcounts(self):
+        hits = HitCount.objects.get(placement=self.placement)
+        return mark_safe('<strong>%d</strong>' % hits.hits)
+    target_hitcounts.allow_tags = True
+    target_hitcounts.short_description = _('hit counts')
+
+    def dot(self):
+        return '-'
+    dot.short_description = ''
+
     class Meta:
         verbose_name = _('Listing')
         verbose_name_plural = _('Listings')

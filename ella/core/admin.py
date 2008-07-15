@@ -164,6 +164,12 @@ class PlacementOptions(admin.ModelAdmin):
     list_filter = ('publish_from', 'category', 'target_ct',)
     inlines = [ ListingInlineOptions ]
 
+class ListingOptions(admin.ModelAdmin):
+    list_display = ('target_admin', 'target_ct', 'publish_from', 'category', 'dot', 'target_hitcounts', 'full_url',)
+    list_display_links = ('dot',)
+    list_filter = ('publish_from', 'category__site', 'category', 'placement__target_ct',)
+    raw_id_fields = ('placement',)
+
 class CategoryOptions(admin.ModelAdmin):
     list_filter = ('site',)
     list_display = ('draw_title', 'tree_path', '__unicode__')
@@ -183,4 +189,5 @@ admin.site.register(Category, CategoryOptions)
 admin.site.register(Source)
 admin.site.register(Author, AuthorOptions)
 admin.site.register(Placement, PlacementOptions)
+admin.site.register(Listing, ListingOptions)
 
