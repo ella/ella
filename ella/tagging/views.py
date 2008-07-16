@@ -10,6 +10,7 @@ from django.db import connection
 from ella.tagging.models import Tag, TaggedItem
 from ella.tagging.utils import get_tag, get_queryset_and_model
 from ella.core.models import Placement
+from ella.db.models import Publishable
 
 def tagged_object_list(request, queryset_or_model=None, tag=None,
         related_tags=False, related_tag_counts=True, **kwargs):
@@ -76,8 +77,10 @@ def _get_tagged_placements(tag_name):
             t.tag_id = %(tag_id)d
             AND
             p.publish_from <= NOW()
+        GROUP BY
+            p.id
         ORDER BY
-            publish_from, publish_to
+            p.publish_from, p.publish_to
     """ % {
         'tag_id': tag.pk,
         'tab_tagged_item': qn(TaggedItem._meta.db_table),
@@ -97,7 +100,7 @@ def tagged_publishables(request, tag_name):
             things.append(t)
     cx = Context({'objects': things})
     return render_to_response(
-        ['page/tagged_placements.html'],
+        ['page/tagging/view_publishables.html'],
         cx,
         context_instance=RequestContext(request)
 )
