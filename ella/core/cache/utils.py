@@ -97,8 +97,8 @@ def get_cached_object_or_404(model, **kwargs):
     """
     try:
         return get_cached_object(model, **kwargs)
-    except ObjectDoesNotExist:
-        raise Http404
+    except ObjectDoesNotExist, e:
+        raise Http404('Reason: %s' % str(e))
 
 def cache_this(key_getter, invalidator=None, timeout=CACHE_TIMEOUT):
     def wrapped_decorator(func):
