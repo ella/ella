@@ -4,9 +4,13 @@ Tagging related views.
 from django.http import Http404
 from django.utils.translation import ugettext as _
 from django.views.generic.list_detail import object_list
+from django.template import RequestContext, loader, Context
+from django.db import connection
 
 from ella.tagging.models import Tag, TaggedItem
 from ella.tagging.utils import get_tag, get_queryset_and_model
+from ella.core.models import Placement
+from ella.db.models import Publishable
 
 def tagged_object_list(request, queryset_or_model=None, tag=None,
         related_tags=False, related_tag_counts=True, **kwargs):
@@ -50,6 +54,56 @@ def tagged_object_list(request, queryset_or_model=None, tag=None,
             Tag.objects.related_for_model(tag_instance, queryset_or_model,
                                           counts=related_tag_counts)
     return object_list(request, queryset, **kwargs)
+
+#@cache_this TODO
+def _get_tagged_placements(tag_name):
+    """ returns placements """
+    tags = Tag.objects.filter(name=tag_name)
+    qn = connection.ops.quote_name
+    if not tags:
+        return []
+    tag = tags[0]
+    sql = """
+        SELECT
+            p.id
+        FROM
+            %(tab_tagged_item)s AS t,
+            %(tab_placement)s AS p
+        WHERE
+            p.target_id = t.object_id
+            AND
+            p.target_ct_id = t.content_type_id
+            AND
+            t.tag_id = %(tag_id)d
+            AND
+            p.publish_from <= NOW()
+        GROUP BY
+            p.id
+        ORDER BY
+            p.publish_from, p.publish_to
+    """ % {
+        'tag_id': tag.pk,
+        'tab_tagged_item': qn(TaggedItem._meta.db_table),
+        'tab_placement': qn(Placement._meta.db_table),
+}
+    cursor = connection.cursor()
+    cursor.execute(sql)
+    placements = map(lambda row: Placement.objects.get(pk=row[0]), cursor.fetchall())
+    return placements
+
+def tagged_publishables(request, tag_name):
+    """ return tagged Publishable objects (i.e. Articles, Galleries,...) """
+    things = []
+    for p in _get_tagged_placements(tag_name):
+        t = p.target
+        if isinstance(t, Publishable):
+            things.append(t)
+    cx = Context({'objects': things})
+    return render_to_response(
+        ['page/tagging/view_publishables.html'],
+        cx,
+        context_instance=RequestContext(request)
+)
 
 
 # --- suggest

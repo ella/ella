@@ -13,6 +13,120 @@ from ella.interviews.models import Question, Answer
 INTERVIEW_PAGINATION_PER_PAGE = getattr(settings, 'INTERVIEW_PAGINATION_PER_PAGE', 5)
 
 
+def _get_page_no(request):
+    if 'p' in request.GET and request.GET['p'].isdigit():
+        return int(request.GET['p'])
+    return 1
+
+def _paginate_qset(request, qset):
+    page_no = _get_page_no(request)
+    paginator = QuerySetPaginator(qset, INTERVIEW_PAGINATION_PER_PAGE)
+    page = paginator.page(page_no)
+    return {
+        'page': page,
+        'is_paginated': paginator.num_pages > 1,
+        'results_per_page': INTERVIEW_PAGINATION_PER_PAGE
+}
+
+def detail(request, context):
+    """ Custom object detail function that adds a QuestionForm to the context. """
+    interview = context['object']
+    page_no = _get_page_no(request)
+    qset = interview.get_questions()
+    paginator = QuerySetPaginator(qset, INTERVIEW_PAGINATION_PER_PAGE)
+    page = paginator.page(page_no)
+
+    if page_no > paginator.num_pages or page_no < 1:
+        raise Http404
+
+    interviewees = interview.get_interviewees(request.user)
+    context.update({
+        'interviewees': interviewees,
+        'is_paginated': paginator.num_pages > 1,
+        'results_per_page': INTERVIEW_PAGINATION_PER_PAGE,
+        'page': page,
+        'form' : QuestionForm(request=request),
+        'questions' : page.object_list,
+})
+
+    return render_to_response(
+        get_templates_from_placement('object.html', context['placement']),
+        context,
+        context_instance=RequestContext(request)
+)
+
+def unanswered(request, bits, context):
+    """ Display unanswered questions via rendering page/content_type/interviews.interview/unanswered.html template. """
+    if bits:
+        # invalid URL
+        raise Http404
+
+    interview = context['object']
+    interviewees = interview.get_interviewees(request.user)
+    context['interviewees'] = interviewees
+    context['form'] = QuestionForm(request=request)
+    # result pagination
+    qset = interview.unanswered_questions()
+    context.update(_paginate_qset(request, qset))
+    return render_to_response(
+        get_templates_from_placement('unanswered.html', context['placement']),
+        context,
+        context_instance=RequestContext(request)
+)
+
+def reply(request, bits, context):
+    """
+    If called without parameters will display a list of questions
+    (via rendering page/content_type/interviews.interview/reply.html template).
+
+    Can be also called as reply/PK/ which will then display a ReplyForm for the given question.
+
+    Raises Http404 on any error or missing permissions.
+    """
+    interview = context['object']
+
+    interviewees = interview.get_interviewees(request.user)
+    context['interviewees'] = interviewees
+
+    if not interviewees:
+        # no permission
+        raise Http404
+
+    qset = interview.question_set.all()
+    context.update(_paginate_qset(request, qset))
+    if not bits:
+        # list of all questions
+        return render_to_response(
+            get_templates_from_placement('reply.html', context['placement']),
+            context,
+            context_instance=RequestContext(request)
+)
+    elif len(bits) != 1:
+        # some bogus URL
+        raise Http404
+
+    # no point in caching individual questions
+    question = get_object_or_404(
+            Question,
+            pk=bits[0],
+            interview=interview
+)
+
+    form = ReplyForm(interview, interviewees, question, request, request.POST or None)
+    if form.is_valid():
+        form.save()
+        # go back to the question list
+        return HttpResponseRedirect('..')
+
+    context['form'] = form
+    context['question'] = question
+
+    return render_to_response(
+        get_templates_from_placement('answer_form.html', context['placement']),
+        context,
+        context_instance=RequestContext(request)
+)
+
 class ReplyForm(forms.Form):
     """ A form representing the reply, it also contains the mechanism needed to actually save the reply. """
     content = Answer._meta.get_field('content').formfield()
@@ -54,108 +168,6 @@ class ReplyForm(forms.Form):
 )
         a.save()
         return a
-
-def detail(request, context):
-    """ Custom object detail function that adds a QuestionForm to the context. """
-    interview = context['object']
-
-    # pagination
-    pagination_by = INTERVIEW_PAGINATION_PER_PAGE
-
-    if 'p' in request.GET and request.GET['p'].isdigit():
-        page_no = int(request.GET['p'])
-    else:
-        page_no = 1
-
-    qset = interview.get_questions()
-    paginator = QuerySetPaginator(qset, pagination_by)
-    page = paginator.page(page_no)
-
-    if page_no > paginator.num_pages or page_no < 1:
-        raise Http404
-
-    interviewees = interview.get_interviewees(request.user)
-    context.update({
-        'interviewees': interviewees,
-        'is_paginated': paginator.num_pages > 1,
-        'results_per_page': pagination_by,
-        'page': page,
-        'form' : QuestionForm(request=request),
-        'questions' : page.object_list,
-})
-
-    return render_to_response(
-        get_templates_from_placement('object.html', context['placement']),
-        context,
-        context_instance=RequestContext(request)
-)
-
-def unanswered(request, bits, context):
-    """ Display unanswered questions via rendering page/content_type/interviews.interview/unanswered.html template. """
-    if bits:
-        # invalid URL
-        raise Http404
-
-    interview = context['object']
-    interviewees = interview.get_interviewees(request.user)
-    context['interviewees'] = interviewees
-    context['form'] = QuestionForm(request=request)
-    return render_to_response(
-        get_templates_from_placement('unanswered.html', context['placement']),
-        context,
-        context_instance=RequestContext(request)
-)
-
-def reply(request, bits, context):
-    """
-    If called without parameters will display a list of questions
-    (via rendering page/content_type/interviews.interview/reply.html template).
-
-    Can be also called as reply/PK/ which will then display a ReplyForm for the given question.
-
-    Raises Http404 on any error or missing permissions.
-    """
-    interview = context['object']
-
-    interviewees = interview.get_interviewees(request.user)
-    context['interviewees'] = interviewees
-    if not interviewees:
-        # no permission
-        raise Http404
-
-    elif not bits:
-        # list of all questions
-        return render_to_response(
-            get_templates_from_placement('reply.html', context['placement']),
-            context,
-            context_instance=RequestContext(request)
-)
-
-    elif len(bits) != 1:
-        # some bogus URL
-        raise Http404
-
-    # no point in caching individual questions
-    question = get_object_or_404(
-            Question,
-            pk=bits[0],
-            interview=interview
-)
-
-    form = ReplyForm(interview, interviewees, question, request, request.POST or None)
-    if form.is_valid():
-        form.save()
-        # go back to the question list
-        return HttpResponseRedirect('..')
-
-    context['form'] = form
-    context['question'] = question
-
-    return render_to_response(
-        get_templates_from_placement('answer_form.html', context['placement']),
-        context,
-        context_instance=RequestContext(request)
-)
 
 class QuestionForm(forms.Form):
     """ Ask a question. If current user is authenticated, don't ask him for nick/email. """

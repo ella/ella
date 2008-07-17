@@ -42,7 +42,6 @@ class EllaAdminOptionsMixin(object):
         return super(EllaAdminOptionsMixin, self).formfield_for_dbfield(db_field, **kwargs)
 
 
-
 '''
 class ContentTypeChoice(forms.ChoiceField):
     def clean(self, value):

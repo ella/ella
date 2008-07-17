@@ -12,6 +12,7 @@ class AnswerInlineOptions(admin.TabularInline):
     rich_text_fields = {'small': ('content',)}
 
 class QuestionInlineOptions(admin.TabularInline):
+    raw_id_fields = ('user',)
     model = Question
     extra = 0
 

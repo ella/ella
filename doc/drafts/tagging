@@ -25,9 +25,14 @@ Q: How to get tag cloud for all objects in category?
 A: Tag.objects.cloud_for_category( category, priority=PRIMARY_TAG, steps=4, distribution=LOGARITHMIC)
 
 
+Templates
+=========
+page/tagging/listing.html
+page/tagging/view_publishables.html  (when list of publishable objects associated with tag are viewed)
+
+
 Template tags
 =============
-
 
 Template tag -- cloud for categorry
 -----------------------------------
