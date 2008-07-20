@@ -5,7 +5,6 @@ from django.newforms.util import ValidationError
 from django.utils.encoding import smart_unicode
 from django.utils.translation import ugettext_lazy as _
 
-from ella.core.templatetags.core import render_str
 from ella.ellaadmin.widgets import RichTextAreaWidget
 
 
@@ -81,6 +80,7 @@ class RichTextAreaField(fields.Field):
 
         # test render template
         try:
+            from ella.core.templatetags.core import render_str
             render_str(value)
         except:
             raise ValidationError(self.error_messages['syntax_error'])
