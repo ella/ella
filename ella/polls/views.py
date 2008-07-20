@@ -5,7 +5,7 @@ import time
 from django.shortcuts import render_to_response
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.http import HttpResponseRedirect, Http404
-from django import newforms as forms
+from django import forms
 from django.views.decorators.http import require_POST
 from django.db import transaction
 from django.contrib.contenttypes.models import ContentType

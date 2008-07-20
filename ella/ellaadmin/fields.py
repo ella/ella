@@ -1,7 +1,7 @@
 import re
 
-from django.newforms import fields
-from django.newforms.util import ValidationError
+from django.forms import fields
+from django.forms.util import ValidationError
 from django.utils.encoding import smart_unicode
 from django.utils.translation import ugettext_lazy as _
 

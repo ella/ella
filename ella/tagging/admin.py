@@ -1,8 +1,8 @@
 from django.contrib import admin
 from django.contrib.contenttypes import generic
-from django.newforms import models as modelforms
-from django.newforms import model_to_dict
-from django import newforms as forms
+from django.forms import models as modelforms
+from django.forms import model_to_dict
+from django import forms
 from ella.tagging.models import Tag, TaggedItem
 from django.utils.translation import ugettext_lazy as _
 from ella.tagging.fields import SuggestTagAdminField, TagPriorityAdminField

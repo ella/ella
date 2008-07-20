@@ -2,7 +2,7 @@ from django.db.models import ForeignKey, SlugField
 
 from django.contrib import admin
 from django.contrib.admin.options import flatten_fieldsets
-from django import newforms as forms
+from django import forms
 from django.utils.translation import ugettext_lazy as _
 
 from ella.ellaadmin import widgets, fields

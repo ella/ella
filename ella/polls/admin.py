@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _, ugettext
-from django.newforms.models import BaseInlineFormset
+from django.forms.models import BaseInlineFormset
 from django.shortcuts import render_to_response
 
 from ella.tagging.admin import TaggingInlineOptions

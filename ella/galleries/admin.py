@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _, ugettext
-from django.newforms.models import BaseInlineFormset
-from django import newforms as forms
+from django.forms.models import BaseInlineFormset
+from django import forms
 from django.contrib.contenttypes.models import ContentType
 
 from ella.tagging.admin import TaggingInlineOptions

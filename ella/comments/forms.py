@@ -7,13 +7,13 @@ from md5 import md5
 from datetime import datetime, timedelta
 import time
 
-from django import newforms as forms
+from django import forms
 from django.db import models
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext as _
 from django.core.exceptions import ObjectDoesNotExist
-from django.newforms.util import ValidationError
+from django.forms.util import ValidationError
 from django.contrib.auth import authenticate, login
 
 from ella.core.cache import get_cached_object

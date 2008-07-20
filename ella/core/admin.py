@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
-from django import newforms as forms
-from django.newforms import models as modelforms
+from django import forms
+from django.forms import models as modelforms
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q

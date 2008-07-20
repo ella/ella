@@ -1,4 +1,4 @@
-from django import newforms as forms
+from django import forms
 from django.conf import settings
 from django.contrib.admin import widgets
 from django.utils.safestring import mark_safe

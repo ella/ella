@@ -1,6 +1,6 @@
 from django.db import models
-from django.newforms.util import ValidationError
-import django.newforms as forms
+from django.forms.util import ValidationError
+from django import forms
 from django.utils.encoding import smart_unicode
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ImproperlyConfigured
