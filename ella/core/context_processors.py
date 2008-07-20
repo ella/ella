@@ -4,6 +4,10 @@ from django.template.defaultfilters import slugify
 from ella.core.middleware import ECACHE_INFO
 
 
+MEDIA_URL = getattr(settings, 'MEDIA_URL', '')
+VERSION = getattr(settings, 'VERSION', 1)
+SERVER_NAME = getattr(settings, 'SERVER_NAME', 'server')
+
 current_site = Site.objects.get_current()
 current_site_name = slugify(current_site.name)
 
@@ -15,8 +19,9 @@ def url_info(request):
     """
 
     return {
-        'MEDIA_URL' : settings.MEDIA_URL,
-        'VERSION' : getattr(settings, 'VERSION', 1),
+        'MEDIA_URL' : MEDIA_URL,
+        'VERSION' : VERSION,
+        'SERVER_NAME' : SERVER_NAME,
         'SITE_NAME' : current_site_name,
 }
 

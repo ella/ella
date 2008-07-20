@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_lazy as _
 from django import newforms as forms
 from django.newforms import models as modelforms
 from django.contrib.contenttypes import generic
@@ -134,7 +134,8 @@ class PlacementInlineFormset(generic.GenericInlineFormset):
 
 class ListingInlineOptions(admin.TabularInline):
     model = Listing
-    extra = 3
+    extra = 2
+    fieldsets = ((None, {'fields' : ('category','publish_from', 'priority_from', 'priority_to', 'priority_value', 'remove', 'commercial',)}),)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'category':
@@ -148,7 +149,7 @@ class PlacementInlineOptions(generic.GenericTabularInline):
     id_field_name = 'target_id'
     formset = PlacementInlineFormset
     form = PlacementForm
-    fieldsets = [ (None, {'fields' : ('category','publish_from', 'publish_to', 'slug', 'static', 'listings',)}), ]
+    fieldsets = ((None, {'fields' : ('category','publish_from', 'publish_to', 'slug', 'static', 'listings',)}),)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'category':
@@ -162,11 +163,15 @@ class HitCountInlineOptions(admin.TabularInline):
 class PlacementOptions(admin.ModelAdmin):
     list_display = ('target', 'category', 'publish_from', 'full_url',)
     list_filter = ('publish_from', 'category', 'target_ct',)
-    inlines = [ ListingInlineOptions ]
+    inlines = (ListingInlineOptions,)
+    fieldsets = (
+        (_('target'), {'fields': ('target_ct', 'target_id', 'slug', 'category',), 'classes': ('wide',)},),
+        (_('time'), {'fields': ('publish_from','publish_to', 'static',), 'classes': ('wide',)},),
+)
 
 class ListingOptions(admin.ModelAdmin):
-    list_display = ('target_admin', 'target_ct', 'publish_from', 'category', 'dot', 'target_hitcounts', 'full_url',)
-    list_display_links = ('dot',)
+    list_display = ('target_admin', 'target_ct', 'publish_from', 'category', 'placement_admin', 'target_hitcounts', 'target_url',)
+    list_display_links = ()
     list_filter = ('publish_from', 'category__site', 'category', 'placement__target_ct',)
     raw_id_fields = ('placement',)
 

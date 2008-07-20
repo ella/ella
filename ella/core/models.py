@@ -11,6 +11,7 @@ from django.utils.safestring import mark_safe
 from django.contrib.auth.models import User
 from django.contrib.redirects.models import Redirect
 
+from ella.ellaadmin.options import admin_url
 from ella.core.box import Box
 from ella.core.managers import ListingManager, HitCountManager, PlacementManager
 from ella.core.cache import get_cached_object, cache_this
@@ -298,19 +299,20 @@ class Listing(models.Model):
         except:
             return 'Broken listing'
 
-    def full_url(self):
+    def target_admin(self):
+        return mark_safe('<a href="%s">%s</a>' % (admin_url(self.target), self.target,))
+    target_admin.allow_tags = True
+    target_admin.short_description = _('edit target')
+
+    def target_url(self):
         "Full url to be shown in admin."
         return mark_safe('<a href="%s">url</a>' % self.get_absolute_url())
-    full_url.allow_tags = True
-
-    def target_admin(self):
-        return mark_safe('<a href="%s">%s</a>' % (self.target.get_admin_url(), self.target,))
-        return mark_safe('<a href="%s">%s</a>' % (self.target.get_admin_url(), _('edit'),))
-    target_admin.allow_tags = True
-    target_admin.short_description = _('target edit url')
+    target_url.allow_tags = True
+    target_url.short_description = _('target url')
 
     def target_ct(self):
         return self.target._meta.verbose_name
+    target_ct.short_description = _('target ct')
 
     def target_hitcounts(self):
         hits = HitCount.objects.get(placement=self.placement)
@@ -318,9 +320,10 @@ class Listing(models.Model):
     target_hitcounts.allow_tags = True
     target_hitcounts.short_description = _('hit counts')
 
-    def dot(self):
-        return '-'
-    dot.short_description = ''
+    def placement_admin(self):
+        return mark_safe('<a href="%s">%s</a>' % (admin_url(self.placement), '::',))
+    placement_admin.allow_tags = True
+    placement_admin.short_description = ''
 
     class Meta:
         verbose_name = _('Listing')
