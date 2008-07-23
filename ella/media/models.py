@@ -7,8 +7,6 @@ from django.db import models
 from django.conf import settings
 
 from ella.db import fields
-from ella.media.queue import QUEUE as ELLA_QUEUE
-from ella.core.cache.utils import get_cached_object
 from ella.core.box import Box
 from ella.photos.models import Photo
 from ella.db.models import Publishable
@@ -27,26 +25,7 @@ class MetadataXMLField(fields.XMLField):
         return instance.type.metadata_schema
 
 
-class MediaManager(models.Manager):
-    pass
-    '''
-    def create_from_queue(self, data):
-        """create Media (source) object"""
-        data['type'], c = Format.objects.get_or_create(name=data['type'])
-        data['slug'] = slugify(data['title'])
-        source = self.create(**data)
 
-        # pass all wanted formats to encoder
-        for format in Format.objects.filter(from_type=source.type):
-            formattedfile = dict(
-                        source_hash = source.hash,
-                        formatted_file_name = '%s-%s' % (source.hash, format),
-                        source_file_type = format.from_type,
-                        formatted_file_type = format.to_type,
-                        format_name = format.name,
-)
-            ELLA_QUEUE.put('ella/media/encoder/formattedfile', formattedfile)
-    '''
 
 
 class MediaBox(Box):
@@ -54,7 +33,7 @@ class MediaBox(Box):
         "Updates box context with media-specific variables."
         cont = super(MediaBox, self).get_context()
         cont.update({
-                'formatted_files' : self.params.get('formatted_files', self.obj.formatted_files()),
+                'formatted_media' : self.params.get('formatted_media', self.obj.formatted_media()),
                 'title' : self.params.get('title', self.obj.title),
                 'alt' : self.params.get('alt', ''),
 })
@@ -80,8 +59,6 @@ class Media(Publishable, models.Model):
     text = models.TextField(_('Content'), blank=True)
     uploaded = models.DateTimeField(default=datetime.now, editable=False)
 
-    objects = MediaManager()
-
     def formatted_media(self):
         return FormattedMedia.objects.select_related().filter(source=self.id)
 
@@ -96,33 +73,14 @@ class Media(Publishable, models.Model):
         verbose_name_plural = _('Media')
 
 
-class FormatManager(models.Manager):
-    pass
-    '''
-    def create_from_queue(self, data):
-        # TODO: create format after updating any on encoder
-        pass
-    '''
+
 
 class Format(models.Model):
     name = models.CharField(_('Format name'), max_length=80,
             help_text=_('this should be in some sluggy format'))
 
-    objects = FormatManager()
-
     def __unicode__(self):
         return self.name
-
-
-class FormattedMediaManager(models.Manager):
-    pass
-    '''
-    def create_from_queue(self, data):
-        """create FormattedMedia object"""
-        data['source'] = Media.objects.get(hash=data['source'])
-        data['format'] = Format.objects.get(name=data['format'])
-        formattedfile = self.create(**data)
-    '''
 
 class FormattedMedia(models.Model):
     source = models.ForeignKey(Media, verbose_name=_('Source file'))
@@ -132,8 +90,6 @@ class FormattedMedia(models.Model):
     metadata = models.TextField(_('Meta data'), blank=True,
             help_text=_('meta data xml - should be generated after file save'))
     status = models.IntegerField(_('Exit status'), blank=True, null=True)
-
-    objects = FormattedMediaManager()
 
     class Meta:
         unique_together = (('source', 'format'),)
