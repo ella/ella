@@ -84,10 +84,11 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
+    'django.contrib.redirects',
 )
 
-#CACHE_BACKEND = 'dummy:///'
+CACHE_BACKEND = 'dummy:///'
 #CACHE_BACKEND = 'simple:///'
-CACHE_BACKEND = 'locmem:///'
+#CACHE_BACKEND = 'locmem:///'
 
 
