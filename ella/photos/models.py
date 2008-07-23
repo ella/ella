@@ -91,7 +91,7 @@ class Photo(models.Model):
             except IOError:
                 # TODO Logging something wrong
                 return mark_safe("""<strong>%s</strong>""" % ugettext('Thumbnail not available'))
-        return mark_safe("""<a href="%s%s"><img src="%s%s" alt="Thumbnail %s" /></a>""" % (settings.MEDIA_URL, self.image, settings.MEDIA_URL, tinythumb, self.title))
+        return mark_safe("""<a href="%s%s"><img src="%s%s" alt="Thumbnail %s" /></a>""" % (settings.MEDIA_URL, str(self.image).replace('\\', '/'), settings.MEDIA_URL, tinythumb.replace('\\', '/'), self.title))
     thumb.allow_tags = True
 
     def Box(self, box_type, nodelist):
@@ -203,7 +203,7 @@ class FormatedPhoto(models.Model):
     def url(self):
         "Returns url of the photo file."
         if not PHOTOS_DO_URL_CHECK:
-            return settings.MEDIA_URL + self.filename
+            return settings.MEDIA_URL + str(self.filename).replace('\\', '/')
 
         if not path.exists(settings.MEDIA_ROOT):
             # NFS not available - we have no chance of creating it
@@ -211,7 +211,7 @@ class FormatedPhoto(models.Model):
 
         if path.exists(path.join(settings.MEDIA_ROOT, self.filename)):
             # image exists
-            return settings.MEDIA_URL + self.filename
+            return settings.MEDIA_URL + str(self.filename).replace('\\', '/')
 
         # image does not exist - try and create it
         try:
