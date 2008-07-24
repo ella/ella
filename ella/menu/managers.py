@@ -6,6 +6,7 @@ from django.contrib.contenttypes.models import ContentType
 
 # from ella.menu.models import * # problem with concrete import Menu, MenuItem models
 from ella.core.models import Category
+from ella.core.cache.utils import cache_this
 
 log = logging.getLogger('ella.menu')
 
@@ -19,10 +20,23 @@ def highlight_mark(item, obj, stack=[]):
         setattr(item, 'mark', True)
     return item
 
+def get_level_key(func, self, menu, level, obj):
+    return 'ella.menu.managers.get_level:%s:%s:%s' % (menu, level, obj)
+
 class MenuItemManager(models.Manager):
 
-    # TODO @cache_this, pocitat klic zatim podle kategorie (koderi pouzivaji v {% menu%} zatim jen category objekty
+    @cache_this(get_level_key)
     def get_level(self, menu, level, obj):
+        """
+        TODO (cz)::
+            Hledame menu urovne ``level``, kde je vybranou polozkou ``obj``.
+            Pokud ``obj`` neni odkazovana primo v navolene urovni ``level``,
+            snazime se aspon udelat highlight, pokud je to mozne (je-li ``level``
+            +-1 uroven od polozky).
+
+        Returns::
+            [MenuItem, ..., MenuItem]
+        """
         log.debug('looking for menu level %s' % level)
         if not obj:
             qs = self.model.objects.filter(menu=menu)
@@ -58,3 +72,4 @@ class MenuItemManager(models.Manager):
         # highlight items, and mark selected item
         out = qs.order_by('order')
         return map(lambda x: highlight_mark(x, obj, stack), out)
+
