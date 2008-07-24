@@ -37,8 +37,11 @@ def get_key_get_for_object(func, self, obj, **kwargs):
     return out
 
 def get_key_cloud_for_category(func, self, category, **kwargs):
+    key_id = -1
+    if category:
+        key_id = category.pk
     out = 'ella.tagging.models.TagManager.cloud_for_category:%d:%d' \
-        % (category.pk, kwargs.get('priority', PRIMARY_TAG))
+        % (key_id, kwargs.get('priority', PRIMARY_TAG))
     return out
 
 def get_key_cloud_for_model(func, self, model, steps=4, distribution=LOGARITHMIC,
@@ -292,11 +295,14 @@ class TagManager(models.Manager):
         distribution = kwargs.get('distribution', LOGARITHMIC)
         prio_sql = ''
         if type(priority) == int:
-            prio_sql = 'AND tagging_taggeditem.priority = %d' % priority
+            prio_sql = 'tagging_taggeditem.priority = %d AND' % priority
         elif type(priority) == tuple:
-            prio_sql = 'AND tagging_taggeditem.priority IN %s' % str(priority)
+            prio_sql = 'tagging_taggeditem.priority IN %s AND' % str(priority)
         else:
             raise TypeError('kwarg priority should be tuple or int type. %s' % str(type(priority)))
+        category_sql = ''
+        if category:
+            category_sql = 'tagging_taggeditem.category_id = %d AND' % category.pk
         sql = """
         SELECT
             tagging_tag.id, COUNT(tagging_tag.name) AS cnt
@@ -304,15 +310,14 @@ class TagManager(models.Manager):
             tagging_taggeditem,
             tagging_tag
         WHERE
-            tagging_taggeditem.category_id = %d
             %s
-            AND
+            %s
             tagging_tag.id = tagging_taggeditem.tag_id
         GROUP BY
             tagging_tag.name
         ORDER BY
             cnt DESC
-        """ % (category._get_pk_val(), prio_sql)
+        """ % (category_sql, prio_sql)
         cur = connection.cursor()
         cur.execute(sql)
         data = cur.fetchall()
@@ -322,6 +327,9 @@ class TagManager(models.Manager):
             setattr(o, 'count', cnt)
             tags.append(o)
         return calculate_cloud(tags, steps, distribution)
+
+    def cloud(self):
+        return self.cloud_for_category(None)
 
     @cache_this(get_key_cloud_for_model, None, TIMEOUT_SHORT)
     def cloud_for_model(self, model, steps=4, distribution=LOGARITHMIC,

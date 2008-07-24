@@ -92,34 +92,6 @@ def _get_tagged_placements(tag_name):
     placements = map(lambda row: Placement.objects.get(pk=row[0]), cursor.fetchall())
     return placements
 
-"""
-def tag_list_for_model(request, tag=None, model=None, **kwargs):
-    tag_ct = ContentType.objects.get_for_model(Tag)
-    tag = get_cached_object_or_404(tag_ct, name=tag)
-    queryset = TaggedItem.objects.filter(tag=tag, category__site__id=settings.SITE_ID).extra(
-                    tables=[Listing._meta.db_table],
-                    where=[
-                        'core_listing.target_ct_id = tagged_item.content_type_id',
-                        'core_listing.target_id = tagged_item.object_id',
-                        'core_listing.category_id = tagged_item.category_id',
-                        'core_listing.publish_from < now()',
-                    ]
-)
-    t_list = []
-    if model:
-        model = get_content_type(model)
-        queryset = queryset.filter(content_type=model)
-        t_list.append('page/content_type/%s.%s/tagging/%s/listing.html' % (model._meta.app_label, model._meta.module_name, slugify(tag.name)))
-        t_list.append('page/content_type/%s.%s/tagging/listing.html' % (model._meta.app_label, model._meta.module_name))
-    t_list.extend(('page/tagging/%s/listing.html' % slugify(tag.name), 'page/tagging/listing.html'))
-    kwargs['template_name'] = loader.select_template(t_list).name
-    kwargs['paginate_by'] = 10
-    kwargs['extra_context'] = {'tag': tag}
-    if 'p' in request.GET:
-        kwargs['page'] = request.GET['p']
-    return object_list(request, queryset=queryset, **kwargs)
-"""
-
 def tagged_publishables(request, tag):
     """ return tagged Publishable objects (i.e. Articles, Galleries,...) """
     things = []
@@ -143,7 +115,6 @@ def tagged_publishables(request, tag):
         cx,
         context_instance=RequestContext(request)
 )
-
 
 # --- suggest
 
