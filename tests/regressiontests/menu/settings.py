@@ -12,9 +12,9 @@ ADMINS = (
 MANAGERS = ADMINS
 
 DATABASE_ENGINE = 'sqlite3'    # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'ado_mssql'.
-#DATABASE_NAME = ':memory:'
+DATABASE_NAME = ':memory:'
 #DATABASE_NAME = '/tmp/menu.db'
-#TEST_DATABASE_NAME = DATABASE_NAME
+TEST_DATABASE_NAME = DATABASE_NAME
 LOGGING_CONFIG_FILE = dirname(__file__) + '/logger.conf'
 
 # Local time zone for this installation. Choices can be found here:

@@ -37,6 +37,7 @@ class MenuItemManager(models.Manager):
         Returns::
             [MenuItem, ..., MenuItem]
         """
+
         log.debug('looking for menu level %s' % level)
         if not obj:
             qs = self.model.objects.filter(menu=menu)
@@ -65,6 +66,9 @@ class MenuItemManager(models.Manager):
             out = qs.order_by('order')
             return map(lambda x: highlight_mark(x, obj, stack), out)
         stack_item = 'UNASSIGNED'
+        if len(stack) < (level - 1):
+            log.warning('Wrong menu level %d! Stack length %d. Stack: %s' % (level, len(stack), str(stack)))
+            return []
         for i in range(level - 1):
             stack_item = stack.pop()
             qs = self.model.objects.filter(menu=menu, parent=stack_item)
@@ -72,4 +76,3 @@ class MenuItemManager(models.Manager):
         # highlight items, and mark selected item
         out = qs.order_by('order')
         return map(lambda x: highlight_mark(x, obj, stack), out)
-
