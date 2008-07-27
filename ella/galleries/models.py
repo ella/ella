@@ -122,7 +122,3 @@ class GalleryItem(models.Model):
         verbose_name_plural = _('Gallery items')
         unique_together = (('gallery', 'order',),)
 
-# initialization
-from ella.galleries import register
-del register
-

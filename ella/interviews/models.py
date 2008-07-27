@@ -201,8 +201,3 @@ class Answer(models.Model):
         verbose_name = _('Answer')
         verbose_name_plural = _('Answer')
 
-
-# initialization
-from ella.interviews import register
-del register
-
