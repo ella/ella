@@ -1,3 +1,6 @@
+from os.path import isfile
+import logging.config
+
 from django.utils.itercompat import is_iterable
 from django.conf import settings
 
@@ -37,4 +40,10 @@ def call_modules(auto_discover=()):
                 inst()
             except ImportError:
                 pass
+
+def init_logger():
+    """init logger with LOGGING_CONFIG_FILE settings option"""
+    LOGGING_CONFIG_FILE = getattr(settings, 'LOGGING_CONFIG_FILE', None)
+    if isinstance(LOGGING_CONFIG_FILE, basestring) and isfile(LOGGING_CONFIG_FILE):
+        logging.config.fileConfig(LOGGING_CONFIG_FILE)
 
