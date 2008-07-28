@@ -129,9 +129,14 @@ class ListingManager(RelatedManager):
 
         listed_targets = set([])
 
+        ct2 = count
+
         # iterate through qsets until we have enough objects
+        # TODO FIXME: Tady je to rozbity. Jednak tam chci napr. 9 objektu i po vyhazeni duplicit. Dale potrebuju,
+        # aby duplicity nevznikly ani pri pouziti vicekrat za sebou (tj. jednou mam 9 objektu from 2, pak 12 from 11,
+        # mezitim pri prvnim pouziti vyhazuju duplicity...bleee)
         for q in qsets:
-            data = q.exclude(deleted)[offset:offset+count]
+            data = q.exclude(deleted)[offset:]
             if data:
                 offset = 0
                 cnt = 0
@@ -142,6 +147,8 @@ class ListingManager(RelatedManager):
                     listed_targets.add(tgt)
                     cnt += 1
                     out.append(l)
+                    if len(out) >= ct2:
+                        break
                 count -= cnt
                 if count <= 0:
                     break

@@ -167,6 +167,7 @@ class Placement(models.Model):
     objects = PlacementManager()
 
     class Meta:
+        unique_together = (('category', 'target_ct', 'target_id'),)
         ordering = ('-publish_from',)
         verbose_name = _('Placement')
         verbose_name_plural = _('Placements')
@@ -249,8 +250,6 @@ class Placement(models.Model):
             return 'http://' + site.domain + url
         return url
 
-    class Meta:
-        unique_together = (('category', 'target_ct', 'target_id'),)
 
 class Listing(models.Model):
     """
