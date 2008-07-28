@@ -3,11 +3,11 @@ import logging
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.contenttypes import generic
-from django.newforms.widgets import *
+from django.forms.widgets import *
 from django.http import HttpResponseRedirect
 from django.utils.translation import ugettext_lazy as _
-from django import newforms as forms
-from django.newforms import ModelForm
+from django import forms
+from django.forms import ModelForm
 
 from ella.core.cache.utils import delete_cached_object
 from ella.ellaadmin import widgets

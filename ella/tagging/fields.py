@@ -6,7 +6,7 @@ from django.db.models.fields import CharField
 from django.dispatch import dispatcher
 from django.utils.translation import ugettext_lazy as _
 
-from django import newforms as forms
+from django import forms
 from django.contrib.admin import widgets
 from django.utils.safestring import mark_safe
 from django.utils.encoding import smart_unicode
@@ -26,10 +26,10 @@ class TagPriorityAdminField(forms.fields.Field):
             (SECONDARY_TAG, _('secondary tag')),
 )
         self.widget = forms.Select(None, values, **kwargs)
-        super(self.__class__, self).__init__(*args, **kwargs)
+        super(TagPriorityAdminField, self).__init__(*args, **kwargs)
 
     def clean(self, value):
-        return super(self.__class__, self).clean(value)
+        return super(TagPriorityAdminField, self).clean(value)
 
 class TagField(CharField):
     """
@@ -152,7 +152,7 @@ class SuggestTagAdminWidget(forms.TextInput):
     def __init__(self, db_field, attrs={}):
         self.rel = db_field.rel
         self.value = db_field
-        super(self.__class__, self).__init__(attrs)
+        super(SuggestTagAdminWidget, self).__init__(attrs)
 
 
     def render(self, name, value, attrs=None):
@@ -167,9 +167,9 @@ class SuggestTagAdminWidget(forms.TextInput):
                 tag = Tag.objects.get(pk=value)
             elif type(value) in [str, unicode]:
                 tag = Tag.objects.get(name=value)
-            output = [super(self.__class__, self).render(name, tag.name, attrs)]
+            output = [super(SuggestTagAdminWidget, self).render(name, tag.name, attrs)]
         else:
-            output = [super(self.__class__, self).render(name, value, attrs)]
+            output = [super(SuggestTagAdminWidget, self).render(name, value, attrs)]
         return mark_safe(u''.join(output))
 
 class SuggestMultipleTagAdminWidget(forms.TextInput):
@@ -186,7 +186,7 @@ class SuggestMultipleTagAdminWidget(forms.TextInput):
     def __init__(self, db_field, attrs={}):
         self.rel = db_field.rel
         self.value = db_field
-        super(self.__class__, self).__init__(attrs)
+        super(SuggestMultipleTagAdminWidget, self).__init__(attrs)
 
 
     def render(self, name, value, attrs=None):
@@ -205,7 +205,7 @@ class SuggestMultipleTagAdminWidget(forms.TextInput):
                 tag_values += tag + TAG_DELIMITER
         if tag_values.endswith(TAG_DELIMITER):
             tag_values = tag_values[:-1]
-        output = [super(self.__class__, self).render(name, tag_values, attrs)]
+        output = [super(SuggestMultipleTagAdminWidget, self).render(name, tag_values, attrs)]
         return mark_safe(u''.join(output))
 
 
@@ -218,7 +218,7 @@ class SuggestTagAdminField(forms.fields.Field):
         super(SuggestTagAdminField, self).__init__(*args, **kwargs)
 
     def clean(self, value):
-        from django.newforms.util import ValidationError
+        from django.forms.util import ValidationError
         super(SuggestTagAdminField, self).clean(value)
         tag_name = value.split(TAG_DELIMITER)
         tag_name = map(lambda x: x.strip(), tag_name)

@@ -9,7 +9,7 @@ from django.utils.encoding import smart_str
 
 from ella.core.cache.invalidate import CACHE_DELETER
 from ella.core.cache.utils import cache_this, get_cached_object
-from ella.ellaadmin.options import admin_url
+from ella.ellaadmin.utils import admin_url
 
 from ella.comments import defaults
 

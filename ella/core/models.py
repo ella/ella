@@ -11,7 +11,7 @@ from django.utils.safestring import mark_safe
 from django.contrib.auth.models import User
 from django.contrib.redirects.models import Redirect
 
-from ella.ellaadmin.options import admin_url
+from ella.ellaadmin.utils import admin_url
 from ella.core.box import Box
 from ella.core.managers import ListingManager, HitCountManager, PlacementManager
 from ella.core.cache import get_cached_object, cache_this

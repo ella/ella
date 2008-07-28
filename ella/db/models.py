@@ -7,7 +7,7 @@ from django.db.models import Model
 from ella.core.cache import get_cached_object, get_cached_list
 from ella.core.models import Placement, Category, HitCount
 from ella.photos.models import Photo
-from ella.ellaadmin.options import admin_url
+from ella.ellaadmin.utils import admin_url
 
 
 class Publishable(object):

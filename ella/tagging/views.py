@@ -119,7 +119,7 @@ def tagged_publishables(request, tag):
 # --- suggest
 
 from django.http import HttpResponse
-from django import newforms as forms
+from django import forms
 from django.shortcuts import render_to_response
 from ella.tagging.fields import SuggestTagField
 import urllib

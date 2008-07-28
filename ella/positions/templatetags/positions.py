@@ -57,7 +57,7 @@ class PositionNode(template.Node):
             if not isinstance(cat, Category):
                 cat = get_cached_object(Category, site=settings.SITE_ID, slug=self.category)
         except template.VariableDoesNotExist, Category.DoesNotExist:
-            return ''
+            cat = get_cached_object(Category, site=settings.SITE_ID, tree_parent__isnull=True)
 
         try:
             pos = Position.objects.get_active_position(cat, self.position, self.nofallback)

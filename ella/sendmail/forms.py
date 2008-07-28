@@ -3,7 +3,7 @@ from datetime import datetime
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 
-from django import newforms as forms
+from django import forms
 from django.utils.translation import ugettext as _
 
 from ella.core.cache import get_cached_object
@@ -106,7 +106,7 @@ class SendMailForm(forms.Form):
 
     def clean(self):
         """registered user validation and other cleaning"""
-        from django.newforms.util import ValidationError
+        from django.forms.util import ValidationError
 
         try:
             # target_ct, target_id validation

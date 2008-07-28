@@ -1,4 +1,4 @@
-from django import newforms as forms
+from django import forms
 from ella.core.cache import get_cached_object
 from django.utils.translation import ugettext as _
 from django.contrib.contenttypes.models import ContentType

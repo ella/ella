@@ -40,7 +40,7 @@ from django.http import Http404
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from django.utils.safestring import mark_safe
-from django import newforms as forms
+from django import forms
 
 
 class Wizard(object):

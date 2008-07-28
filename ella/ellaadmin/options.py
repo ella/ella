@@ -1,149 +1,45 @@
-from django.utils.functional import memoize
-from django.core.urlresolvers import reverse, NoReverseMatch
-from django.shortcuts import render_to_response
-from django import template
 from django.db.models import ForeignKey, SlugField
 
 from django.contrib import admin
 from django.contrib.admin.options import flatten_fieldsets
-from django import newforms as forms
-from django.shortcuts import render_to_response
-from django import http
-from django.contrib.sites.models import Site
+from django import forms
 from django.utils.translation import ugettext_lazy as _
 
-from ella.ellaadmin import widgets
-from ella.core.middleware import get_current_request
+from ella.ellaadmin import widgets, fields
 
-
-def mixin_ella_admin(admin_class):
-    if admin_class == admin.ModelAdmin:
-        return ExtendedModelAdmin
-
-    if EllaAdminOptionsMixin in admin_class.__bases__:
-        return admin_class
-
-    bases = list(admin_class.__bases__)
-    admin_class.__bases__ = tuple([EllaAdminOptionsMixin] + bases)
-    return admin_class
-
-def register_ella_admin(func):
-    def _register(self, model_or_iterable, admin_class=None, **options):
-        admin_class = admin_class or admin.ModelAdmin
-        admin_class = mixin_ella_admin(admin_class)
-        for inline in admin_class.inlines:
-            inline = mixin_ella_admin(inline)
-        return func(self, model_or_iterable, admin_class, **options)
-    return _register
-
-
-class EllaAdminSite(admin.AdminSite):
-    def __init__(self):
-        self._registry = admin.site._registry
-        for options in self._registry.values():
-            options.__class__ = mixin_ella_admin(options.__class__)
-            for inline in options.inlines:
-                inline = mixin_ella_admin(inline)
-        admin.AdminSite.register = register_ella_admin(admin.AdminSite.register)
-
-    def root(self, request, url):
-
-        try:
-            return super(EllaAdminSite, self).root(request, url)
-        except http.Http404:
-            url = url.rstrip('/') # Trim trailing slash, if it exists.
-            if url.startswith('e/cache/status'):
-                from ella.ellaadmin.memcached import cache_status
-                return cache_status(request)
-            elif url == 'object_info':
-                return self.object_info(request)
-            else:
-                raise
-
-    def object_info(self, request):
-        from django.utils import simplejson
-        from django.http import HttpResponse, HttpResponseBadRequest, Http404
-        from django.db.models import ObjectDoesNotExist
-        from ella.core.cache import get_cached_object_or_404
-        from django.contrib.contenttypes.models import ContentType
-        response = {}
-        #mimetype = 'application/json'
-        mimetype = 'text/html'
-
-        if not request.GET.has_key('ct_id') or not request.GET.has_key('ob_id'):
-            return HttpResponseBadRequest()
-
-        ct_id = request.GET['ct_id']
-        ob_id = request.GET['ob_id']
-
-        ct = get_cached_object_or_404(ContentType, pk=ct_id)
-        response['content_type_name'] = ct.name
-        response['content_type'] = ct.model
-
-        ob = get_cached_object_or_404(ct, pk=ob_id)
-        response['name'] = str(ob)
-        if hasattr(ob, 'get_absolute_url'):
-            response['url'] = ob.get_absolute_url()
-        response['admin_url'] = reverse('admin', args=['%s/%s/%d' % (ct.app_label, ct.model, ob.pk)])
-
-        return HttpResponse(simplejson.dumps(response, indent=2), mimetype=mimetype)
 
 class EllaAdminOptionsMixin(object):
     def formfield_for_dbfield(self, db_field, **kwargs):
         if isinstance(db_field, SlugField):
-            params = {
+            kwargs.update({
                 'required': not db_field.blank,
                 'max_length': db_field.max_length,
                 'label': db_field.name,
                 'error_message': _('Enter a valid slug.'),
-}
-            kwargs.update(params)
+})
             return forms.RegexField('^[0-9a-z-]+$', **kwargs)
 
-        elif db_field.name in ('target_ct', 'source_ct'):
+        for css_class, rich_text_fields in getattr(self, 'rich_text_fields', {}).iteritems():
+            if db_field.name in rich_text_fields:
+                kwargs.update({
+                    'required': not db_field.blank,
+                    'label': db_field.name,
+})
+                rich_text_field = fields.RichTextAreaField(**kwargs)
+                if css_class:
+                    rich_text_field.widget.attrs['class'] += ' %s' % css_class
+                return rich_text_field
+
+        if db_field.name in self.raw_id_fields and isinstance(db_field, ForeignKey):
+            kwargs['widget'] = widgets.ForeignKeyRawIdWidget(db_field.rel)
+            return db_field.formfield(**kwargs)
+
+        if db_field.name in ('target_ct', 'source_ct', 'content_type',):
             kwargs['widget'] = widgets.ContentTypeWidget
-
-        elif db_field.name in ('target_id', 'source_id',):
-            kwargs['widget'] = widgets.ForeignKeyRawIdWidget
-
-        if isinstance(db_field, ForeignKey):
-            if db_field.name in self.raw_id_fields:
-                formfield = super(EllaAdminOptionsMixin, self).formfield_for_dbfield(db_field, **kwargs)
-                formfield.widget.render = widgets.ExtendedRelatedFieldWidgetWrapper(formfield.widget.render, db_field.rel, self.admin_site)
-                return formfield
+        elif db_field.name in ('target_id', 'source_id', 'object_id',):
+            kwargs['widget'] = widgets.ForeignKeyGenericRawIdWidget
 
         return super(EllaAdminOptionsMixin, self).formfield_for_dbfield(db_field, **kwargs)
-
-class ExtendedModelAdmin(EllaAdminOptionsMixin, admin.ModelAdmin):
-    pass
-
-_admin_root_cache = {} # maps model to admin url
-ADMIN_NAME = 'admin'
-ADMIN_SCHEME = 'http'
-
-def admin_root(model):
-    """return admin list url"""
-    try:
-        root = reverse(ADMIN_NAME, args=['']).strip('/')
-        root = root and '/%s' % root or root
-    except NoReverseMatch:
-        try:
-            root = '%s://%s' % (ADMIN_SCHEME, Site.objects.get(name=ADMIN_NAME).domain)
-        except Site.DoesNotExist:
-            root = ''
-    app_label = model._meta.app_label
-    model_name = model._meta.module_name
-    return '%s/%s/%s' % (root, app_label, model_name)
-admin_root = memoize(admin_root, _admin_root_cache, 1)
-
-def admin_url(obj):
-    """return valid admin edit page url"""
-    root = admin_root(obj.__class__)
-    return '%s/%d/' % (root, obj._get_pk_val())
-
-
-site = EllaAdminSite()
-
 
 
 '''

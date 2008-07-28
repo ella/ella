@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _, ugettext
-from django.newforms.models import BaseInlineFormset
+from django.forms.models import BaseInlineFormset
 from django.shortcuts import render_to_response
 
 from ella.tagging.admin import TaggingInlineOptions
@@ -11,15 +11,7 @@ from ella.core.cache import get_cached_object_or_404
 from ella.polls.models import Poll, Contest, Contestant, Quiz, Result, Choice, Vote, Question
 
 
-def formfield_for_dbfield(fields):
-    def _formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name in fields:
-            kwargs['widget'] = widgets.RichTextAreaWidget(height='small')
-        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
-    return _formfield_for_dbfield
-
 class ResultFormset(BaseInlineFormset):
-
     def clean(self):
         if not self.is_valid():
             return
@@ -61,8 +53,7 @@ class QuestionOptions(admin.ModelAdmin):
     inlines = (ChoiceTabularOptions,)
     ordering = ('question',)
     search_fields = ('question',)
-
-    formfield_for_dbfield = formfield_for_dbfield(['question'])
+    rich_text_fields = {'small': ('question',)}
 
 class ChoiceOptions(admin.ModelAdmin):
     """
@@ -85,19 +76,17 @@ class ContestantOptions(admin.ModelAdmin):
     """
     ordering = ('datetime',)
     list_display = ('name', 'surname', 'user', 'datetime', 'contest', 'points', 'winner')
+    rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}
 
-    formfield_for_dbfield = formfield_for_dbfield(['text_announcement', 'text', 'text_results'])
-
-class QuestionInlineOptions(admin.options.InlineModelAdmin):
+class QuestionInlineOptions(admin.TabularInline):
     model = Question
     inlines = (ChoiceTabularOptions,)
     template = 'admin/polls/question/edit_inline/tabular.html'
-    extra=10
-
-    formfield_for_dbfield = formfield_for_dbfield(['question'])
+    extra = 10
+    rich_text_fields = {'small': ('question',)}
+    fieldsets = ((None, {'fields' : ('question', 'allow_multiple', 'allow_no_choice',)}),)
 
 class ContestOptions(admin.ModelAdmin):
-
     def __call__(self, request, url):
         if url and url.endswith('correct_answers'):
             pk = url.split('/')[-2]
@@ -115,8 +104,7 @@ class ContestOptions(admin.ModelAdmin):
     inlines = (QuestionInlineOptions, PlacementInlineOptions, TaggingInlineOptions,)
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
-
-    formfield_for_dbfield = formfield_for_dbfield(['text_announcement', 'text', 'text_results'])
+    rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}
 
 class QuizOptions(admin.ModelAdmin):
     list_display = ('title', 'category', 'active_from', 'get_hits', 'full_url',)
@@ -125,11 +113,10 @@ class QuizOptions(admin.ModelAdmin):
     inlines = (QuestionInlineOptions, ResultTabularOptions, PlacementInlineOptions, TaggingInlineOptions,)
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
-
-    formfield_for_dbfield = formfield_for_dbfield(['text_announcement', 'text', 'text_results'])
+    rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}
 
 class PollOptions(admin.ModelAdmin):
-    formfield_for_dbfield = formfield_for_dbfield(['text_announcement', 'text', 'text_results'])
+    rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}
     list_display = ('title', 'question', 'get_total_votes',)
     list_filter = ('active_from',)
     search_fields = ('title', 'text_announcement', 'text', 'text_results', 'question__question',)

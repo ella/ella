@@ -10,7 +10,7 @@ comment_form_test = r"""
 >>> from commenttest.sample import models as tmodels
 
 >>> import pprint, datetime, time
->>> from django import newforms as forms
+>>> from django import forms
 
 # get apple target string
 >>> apple_ct = ContentType.objects.get_for_model(tmodels.Apple)
@@ -264,7 +264,7 @@ comment_form_parent = r"""
 
 comment_templatetags = r"""
 >>> import pprint, datetime, time
->>> from django import newforms as forms
+>>> from django import forms
 
 >>> from django.contrib.contenttypes.models import ContentType
 >>> from django.template import Template, Context
@@ -411,7 +411,7 @@ comment_form_options = r"""
 >>> from django.template import Template, Context
 
 >>> import pprint, datetime, time
->>> from django import newforms as forms
+>>> from django import forms
 
 >>> from commenttest.sample import models as tmodels
 

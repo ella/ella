@@ -2,7 +2,8 @@ import logging
 from time import strftime
 import smtplib
 from datetime import datetime
-from django import http, newforms as forms
+from django import http
+from django import forms
 from django.core.urlresolvers import reverse
 from django.template import RequestContext, loader, Context
 from django.shortcuts import render_to_response

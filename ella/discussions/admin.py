@@ -1,11 +1,10 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.contenttypes import generic
-from django.newforms.widgets import *
+from django.forms.widgets import *
 from django.http import HttpResponseRedirect
 from ella.core.admin import PlacementInlineOptions
 from ella.core.cache.utils import delete_cached_object
-from ella.ellaadmin import widgets
 from ella.discussions.models import TopicThread, Topic, BannedUser, BannedString, get_comments_on_thread
 from ella.discussions.cache import get_key_comments_on_thread__spec_filter, get_key_comments_on_thread__by_submit_date
 from ella.comments.models import Comment
@@ -37,18 +36,18 @@ class PostOptions(admin.ModelAdmin):
         if 'memorize_referer' in request.GET and 'HTTP_REFERER' in request.META:
             if 'admin_redirect_after_change' not in request.session:
                 request.session['admin_redirect_after_change'] = request.META['HTTP_REFERER']
-        return super(self.__class__, self).__call__(request, url)
+        return super(PostOptions, self).__call__(request, url)
 
     def queryset(self, request):
         """ return only Comments which are related to discussion threads. """
         from django.contrib.contenttypes.models import ContentType
-        qset = super(self.__class__, self).queryset(request)
+        qset = super(PostOptions, self).queryset(request)
         ctThread = ContentType.objects.get_for_model(TopicThread)
         return qset.filter(target_ct=ctThread)
 
     def save_change(self, request, model, form, formsets=None):
         """ custom redirection back to thread page on portal """
-        out = super(self.__class__, self).save_change(request, model, form, formsets)
+        out = super(PostOptions, self).save_change(request, model, form, formsets)
         if isinstance(out, HttpResponseRedirect) and 'admin_redirect_after_change' in request.session:
             out = HttpResponseRedirect(request.session['admin_redirect_after_change'])
             del request.session['admin_redirect_after_change']
@@ -68,11 +67,7 @@ class TopicOptions(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
     list_display = ('title', 'photo_thumb', 'created',)
     inlines = (PlacementInlineOptions,)
-
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'perex':
-            kwargs['widget'] = widgets.RichTextAreaWidget
-        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
+    rich_text_fields = {None: ('perex',)}
 
 class MyAdmin(admin.AdminSite):
     pass

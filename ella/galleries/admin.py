@@ -1,13 +1,13 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _, ugettext
-from django.newforms.models import BaseInlineFormset
-from django import newforms as forms
+from django.forms.models import BaseInlineFormset
+from django import forms
 from django.contrib.contenttypes.models import ContentType
 
 from ella.tagging.admin import TaggingInlineOptions
 
 from ella.galleries.models import Gallery, GalleryItem
-from ella.ellaadmin import fields, widgets
+from ella.ellaadmin import widgets
 from ella.core.admin import PlacementInlineOptions
 from ella.core.cache import get_cached_object
 
@@ -42,7 +42,7 @@ class GalleryItemTabularOptions(admin.TabularInline):
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'order':
             kwargs['widget'] = widgets.IncrementWidget
-        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
+        return super(GalleryItemTabularOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
 class GalleryOptions(admin.ModelAdmin):
     list_display = ('title', 'created', 'category', 'get_hits', 'full_url',)
@@ -55,12 +55,7 @@ class GalleryOptions(admin.ModelAdmin):
     search_fields = ('title', 'description', 'slug',)
     inlines = (GalleryItemTabularOptions, PlacementInlineOptions, TaggingInlineOptions,)
     prepopulated_fields = {'slug': ('title',)}
-
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'description' or db_field.name == 'content':
-            if db_field.blank:
-                kwargs['required'] = False
-            return fields.RichTextAreaField(**kwargs)
-        return super(self.__class__, self).formfield_for_dbfield(db_field, **kwargs)
+    rich_text_fields = {None: ('description', 'content',)}
 
 admin.site.register(Gallery, GalleryOptions)
+
