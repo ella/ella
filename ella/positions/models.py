@@ -123,8 +123,3 @@ class Position(models.Model):
     def __unicode__(self):
         return '%s:%s' % (self.category, self.name)
 
-
-# initialization
-from ella.positions import register
-del register
-

@@ -419,7 +419,3 @@ class Result(models.Model):
         verbose_name = _('Result')
         verbose_name_plural = _('results')
 
-
-from ella.polls import register
-del register
-

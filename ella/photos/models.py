@@ -256,5 +256,3 @@ class FormatedPhoto(models.Model):
         verbose_name_plural = _('Formated photos')
         unique_together = (('photo','format'),)
 
-from ella.photos import register
-del register

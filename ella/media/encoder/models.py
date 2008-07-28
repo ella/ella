@@ -118,8 +118,3 @@ class FormattedFile(models.Model):
     def __unicode__(self):
         return "%s-%s" % (self.source_hash, self.format.name)
 
-
-# initialization
-from ella.media.encoder import register
-del register
-

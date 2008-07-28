@@ -340,6 +340,49 @@ u"\n\n\n[<Comment: comment [id:3] 'Hello...' on green apple {path:3}>,\n <Commen
 u"\n\n\n[<Comment: comment [id:1] 'Ahoj lidi....' on green apple {path:1}>,\n <Comment: comment [id:2] 'Ahoj lidi....' on green apple {path:2}>,\n <Comment: comment [id:3] 'Hello...' on green apple {path:3}>]\n"
 
 
+# test comment_count
+>>> t = Template('''
+... {% load comments %}
+... {% comment_count for apple %}
+... ''')
+>>> t.render(Context({'apple': apple_green}))
+u'\n\n3\n'
+
+>>> t = Template('''
+... {%% load comments %%}
+... {%% comment_count for sample.apple with id %d %%}
+... ''' % apple_green.id)
+>>> t.render(Context({'apple': apple_green}))
+u'\n\n3\n'
+
+# comment_count with double_render
+>>> from django.templatetags import comments
+>>> comments.DOUBLE_RENDER = True
+
+# test comment_count
+>>> t = Template('''
+... {% load comments %}
+... {% comment_count for apple %}
+... ''')
+>>> t.render(Context({'apple': apple_green})) == u'\n\n{%% load comments %%}{%% comment_count for sample.apple with pk %d %%}\n' % apple_green.pk
+True
+>>> t = Template(t.render(Context({'apple': apple_green})))
+>>> t.render(Context({'SECOND_RENDER' : True}))
+u'\n\n3\n'
+
+>>> t = Template('''
+... {%% load comments %%}
+... {%% comment_count for sample.apple with pk %d %%}
+... ''' % apple_green.id)
+>>> t.render(Context({'apple': apple_green})) == u'\n\n{%% load comments %%}{%% comment_count for sample.apple with pk %d %%}\n' % apple_green.pk
+True
+>>> t = Template(t.render(Context({'apple': apple_green})))
+>>> t.render(Context({'SECOND_RENDER' : True}))
+u'\n\n3\n'
+
+# comment_count with double_render
+>>> comments.DOUBLE_RENDER = False
+
 # test get_comment_count
 >>> t = Template('''
 ... {% load comments %}

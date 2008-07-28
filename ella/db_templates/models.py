@@ -193,8 +193,3 @@ class TemplateBlock(models.Model):
     def __unicode__(self):
         return '%s' % self.name
 
-
-# initialization
-from ella.db_templates import register
-del register
-

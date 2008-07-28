@@ -5,6 +5,7 @@ from django.http import Http404
 from django.utils.translation import ugettext as _
 from django.views.generic.list_detail import object_list
 from django.template import RequestContext, loader, Context
+from django.template.defaultfilters import slugify
 from django.db import connection
 
 from ella.tagging.models import Tag, TaggedItem
@@ -91,20 +92,29 @@ def _get_tagged_placements(tag_name):
     placements = map(lambda row: Placement.objects.get(pk=row[0]), cursor.fetchall())
     return placements
 
-def tagged_publishables(request, tag_name):
+def tagged_publishables(request, tag):
     """ return tagged Publishable objects (i.e. Articles, Galleries,...) """
     things = []
-    for p in _get_tagged_placements(tag_name):
+    for p in _get_tagged_placements(tag):
         t = p.target
         if isinstance(t, Publishable):
             things.append(t)
-    cx = Context({'objects': things})
+    cx = Context({
+        'objects': things,
+        'paginate_by': 10,
+        'tag': tag,
+        'extra_context': {'tag': tag},
+        'object_list': things,
+})
     return render_to_response(
-        ['page/tagging/view_publishables.html'],
+        [
+            'page/tagging/%s/listing.html' % slugify(tag),
+            'page/tagging/listing.html',
+            #'page/tagging/view_publishables.html',
+        ],
         cx,
         context_instance=RequestContext(request)
 )
-
 
 # --- suggest
 

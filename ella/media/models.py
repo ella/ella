@@ -99,7 +99,3 @@ class FormattedMedia(models.Model):
     def __unicode__(self):
         return "%s - %s" % (self.source.title, self.format.name)
 
-# initialization
-from ella.media import register
-del register
-

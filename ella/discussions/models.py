@@ -223,10 +223,5 @@ class BannedUser(models.Model):
     def __unicode__(self):
         return self.user
 
-
-
-# initialization
-from ella.discussions import register
-del register
-
 log = logging.getLogger('ella.discussions')
+
