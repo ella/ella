@@ -6,10 +6,13 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils.encoding import smart_str
+from django.conf import settings
 
-from ella.utils.templatetags import parse_getforas_triplet
+from ella.utils.templatetags import parse_getfor, parse_getforas_triplet
+from ella.core.cache import get_cached_object
 
 
+DOUBLE_RENDER = getattr(settings, 'DOUBLE_RENDER', False)
 register = template.Library()
 
 
@@ -21,10 +24,9 @@ def parse_object_definition(tagname, od_tokens):
         model = models.get_model(*od_tokens[0].split('.'))
         if model is None:
             raise template.TemplateSyntaxError, "%r tag: Model %r does not exist" % (tagname, od_tokens[0])
-        ct = ContentType.objects.get_for_model(model)
 
         try:
-            obj = ct.get_object_for_this_type(**{smart_str(od_tokens[2]) : od_tokens[3]})
+            obj = get_cached_object(model,  **{smart_str(od_tokens[2]) : od_tokens[3]})
         except models.ObjectDoesNotExist:
             raise template.TemplateSyntaxError, "%r tag: Model %r with field %r equal to %r does not exist." % (
                     tagname, od_tokens[0], od_tokens[2], od_tokens[3]
@@ -100,6 +102,14 @@ def get_comment_list(parser, token):
     return CommentListNode(object, orderby, varname)
 
 @register.tag
+def comment_count(parser, token):
+    tokens = token.split_contents()
+    tagname, object_definition_tokens = parse_getfor(tokens)
+    object = parse_object_definition(tagname, object_definition_tokens)
+
+    return CommentCountNode(object, output=True)
+
+@register.tag
 def get_comment_count(parser, token):
     """
     Gets comment count for the given params and populates the template context
@@ -162,13 +172,22 @@ class CommentListNode(template.Node):
 
 
 class CommentCountNode(template.Node):
-    def __init__(self, object, varname):
+    def __init__(self, object, varname=None, output=False):
         self.object = object
         self.varname = varname
+        self.output = output
 
     def render(self, context):
         object = resolve_object(context, self.object)
         comment_count = Comment.objects.get_count_for_object(object)
+        if self.output:
+            if DOUBLE_RENDER and 'SECOND_RENDER' not in context:
+                return '{%% load comments %%}{%% comment_count for %(app_label)s.%(module_name)s with pk %(pk)s %%}' % {
+                    'app_label' : object._meta.app_label,
+                    'module_name' : object._meta.module_name,
+                    'pk' : object.pk,
+}
+            return str(comment_count)
         context[self.varname] = comment_count
         return ''
 

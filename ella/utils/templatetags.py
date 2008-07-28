@@ -1,7 +1,7 @@
 from django.template import TemplateSyntaxError
 
 
-def parse_getforas_triplet(tokens):
+def parse_getfor(tokens):
     """parse typical ``get_whatever`` **for** ``blah.blah blah`` **as** ``varname`` triplet"""
     tag_name = tokens[0]
 
@@ -10,6 +10,13 @@ def parse_getforas_triplet(tokens):
         if tokens[1] != 'for': raise error
     except IndexError:
         raise error
+
+    return tag_name, tokens[2:]
+
+
+def parse_getforas_triplet(tokens):
+    """parse typical ``get_whatever`` **for** ``blah.blah blah`` **as** ``varname`` triplet"""
+    tag_name, definition = parse_getfor(tokens[:-2])
 
     error = TemplateSyntaxError("Last but one argument in '%s' tag must be 'as'" % tag_name)
     try:
