@@ -183,8 +183,3 @@ class BannedUser(models.Model):
 class BannedIP(models.Model):
     pass
 
-
-# initialization
-from ella.comments import register
-del register
-

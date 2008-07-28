@@ -386,6 +386,3 @@ class Related(models.Model):
         verbose_name_plural = _('Related')
         ordering = ('source_ct', 'source_id',)
 
-
-from ella.core import register
-del register

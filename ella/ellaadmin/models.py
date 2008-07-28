@@ -116,3 +116,4 @@ class CategoryUserRoleOptions(admin.ModelAdmin):
 
 admin.site.register(CategoryUserRole, CategoryUserRoleOptions)
 admin.site.register(SiteUserRole, SiteUserRoleOptions)
+

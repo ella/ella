@@ -92,7 +92,3 @@ class MenuItem(models.Model):
         verbose_name_plural = _('Menu items')
         ordering = ('menu', 'order',)
 
-
-# initialization
-from ella.menu import register
-del register

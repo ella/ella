@@ -51,8 +51,3 @@ class Upload(models.Model):
     def __unicode__(self):
         return self.hash
 
-
-# initialization
-from ella.media.uploader import register
-del register
-

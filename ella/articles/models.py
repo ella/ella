@@ -89,8 +89,3 @@ class ArticleContents(models.Model):
     def __unicode__(self):
         return self.title
 
-
-# initialization
-from ella.articles import register
-del register
-

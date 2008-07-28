@@ -201,8 +201,3 @@ class ServerItem(models.Model):
 
         super(ServerItem, self).save()
 
-
-# initialization
-from ella.imports import register
-del register
-
