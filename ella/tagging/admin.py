@@ -17,7 +17,7 @@ class TagInlineForm(modelforms.ModelForm):
 
 
 class TagInlineFormset(modelforms.BaseModelFormSet):
-    def __init__(self, data=None, files=None, instance=None):
+    def __init__(self, data=None, files=None, instance=None, save_as_new=None):
         self.queryset = None
         self.instance = instance
         tags_by_prio = {}
