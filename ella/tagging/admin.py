@@ -40,6 +40,9 @@ class TagInlineFormset(modelforms.BaseModelFormSet):
 )
 
     def save(self):
+        self.new_objects = []
+        self.changed_objects = []
+        self.deleted_objects = []
         for d in self.cleaned_data:
             if 'priority' not in d or 'tag' not in d:
                 continue
