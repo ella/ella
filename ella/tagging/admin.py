@@ -76,32 +76,6 @@ class TagInlineFormset(modelforms.BaseModelFormSet):
                 ti.delete()
 
 
-    """
-    def __add_category(self, form, instance, commit):
-        if not commit:
-            return
-        if not hasattr(instance, 'category'):
-            return
-        # kategorii ziskam: [self.]instance.object.category
-        # v teto chvili je ulozeny TaggedItem ok, ale s prazdnym polem "category"
-        # self.get_queryset() vrati QSet instanci TaggedItem
-        # form.cleaned_data obsahuje slovnik atributu ukladaneho: {'tag': <Tag: kremenac>, 'id': None}
-        if isinstance(instance, TaggedItem):
-            obj = instance.object
-        else:
-            obj = instance
-        tag = form.cleaned_data['tag']
-        ct = ContentType.objects.get_for_model(type(obj)) # tagged object ContentType
-        ti = TaggedItem.objects.get(
-            content_type=ct,
-            object_id=obj._get_pk_val(),
-            tag=tag
-)
-        ti.category = obj.category
-        ti.save()
-    """
-
-
 class TaggingInlineOptionsSimple(admin.TabularInline):
     model = TaggedItem
     extra = 0
