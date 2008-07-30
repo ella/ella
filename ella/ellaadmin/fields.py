@@ -98,7 +98,10 @@ class CategorySuggestField(fields.Field):
 
     def clean(self, value):
         from ella.core.models import Category
-        return Category.objects.get(tree_path=value)
+        try:
+            return Category.objects.get(tree_path=value)
+        except:
+            raise ValidationError(self.error_messages['not_found'])
 
 #class CategorySuggestListingField(CategorySuggestField):
 #    def __init__(self, *args, **kwargs):

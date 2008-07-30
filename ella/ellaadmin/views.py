@@ -1,4 +1,5 @@
 from django.http import HttpResponse
+from django.db.models import Q
 from ella.core.models import Category
 
 def category_suggest_view(request, **kwargs):
@@ -10,7 +11,8 @@ def category_suggest_view(request, **kwargs):
     start = cat_begin.strip()
     ft = []
     if len(start) > 0:
-        data = Category.objects.filter(slug__startswith=start.lower())
+        lookup = Q(slug__startswith=start.lower()) | Q(title__startswith=start) | Q(tree_path__startswith=start.lower())
+        data = Category.objects.filter(lookup)
         for item in data:
             ft.append(item.__unicode__().encode('utf-8'))
     res = HttpResponse('\n'.join(ft), mimetype='text/html;charset=utf-8')
