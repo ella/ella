@@ -35,15 +35,6 @@ class ArticleOptions(admin.ModelAdmin):
     prepopulated_fields = {'slug' : ('title',)}
     rich_text_fields = {None: ('perex',)}
 
-    # TODO: generic suggester
-    # suggest_fields = {'category': ('title','slug','tree_path',)}
-
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        from ella.ellaadmin import fields
-        if db_field.name == 'category':
-            return fields.CategorySuggestField(db_field, **kwargs)
-        return super(ArticleOptions, self).formfield_for_dbfield(db_field, **kwargs)
-
 
 admin.site.register(InfoBox, InfoBoxOptions)
 admin.site.register(Article, ArticleOptions)

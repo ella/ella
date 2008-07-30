@@ -5,7 +5,7 @@ from django.forms.util import ValidationError
 from django.utils.encoding import smart_unicode
 from django.utils.translation import ugettext_lazy as _
 
-from ella.ellaadmin.widgets import RichTextAreaWidget, CategorySuggestAdminWidget
+from ella.ellaadmin.widgets import RichTextAreaWidget, CategorySuggestAdminWidget, ListingCategoryWidget
 
 
 class RichTextAreaField(fields.Field):
@@ -100,11 +100,11 @@ class CategorySuggestField(fields.Field):
         from ella.core.models import Category
         try:
             return Category.objects.get(tree_path=value)
-        except:
-            raise ValidationError(self.error_messages['not_found'])
+        except Category.DoesNotExist:
+            raise ValidationError(self.error_messages['not_found'] % value)
 
-#class CategorySuggestListingField(CategorySuggestField):
-#    def __init__(self, *args, **kwargs):
-#        self.widget = ListingCategoryWidget(*args, **kwargs)
-#        super(CategorySuggestListingField, self).__init__(*args, **kwargs)
+class CategorySuggestListingField(CategorySuggestField):
+    def __init__(self, *args, **kwargs):
+        self.widget = ListingCategoryWidget(*args, **kwargs)
+        super(CategorySuggestListingField, self).__init__(*args, **kwargs)
 

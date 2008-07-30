@@ -91,11 +91,14 @@ class CategorySuggestAdminWidget(forms.TextInput):
         if not attrs.has_key('class'):
           attrs['class'] = 'vForeignKeyRawIdAdminField vCatSuggestField' # The JavaScript looks for this hook.
         if value:
-            if type(value) in [long, int]:
-                cat = Category.objects.get(pk=value)
-            elif type(value) in [str, unicode]:
-                cat = Category.objects.get(tree_path=value)
-            output = [super(self.__class__, self).render(name, cat.tree_path, attrs)]
+            try:
+                if type(value) in [long, int]:
+                    cat = Category.objects.get(pk=value)
+                elif type(value) in [str, unicode]:
+                    cat = Category.objects.get(tree_path=value)
+                output = [super(self.__class__, self).render(name, cat.tree_path, attrs)]
+            except Category.DoesNotExist:
+                output = [super(self.__class__, self).render(name, value, attrs)]
         else:
             output = [super(self.__class__, self).render(name, value, attrs)]
         return mark_safe(u''.join(output))
