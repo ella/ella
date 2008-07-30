@@ -6,6 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.template.loader import render_to_string
 
 from ella.reminders.library import library
+from ella.core.cache import get_cached_object
 
 class DeliveryMethod(models.Model):
     title = models.CharField(_('Title'), max_length=255)
@@ -82,12 +83,18 @@ class Calendar(models.Model):
     def subscribe(self, contact):
         self.subscribers.add(contact)
 
-    def unsubscibe(self, user):
-        self.subscribers.filter(contact__user=user).delete()
+    def unsubscribe(self, user):
+        self.subscribers.filter(user=user).delete()
+
+    def get_event(self, slug):
+        return get_cached_object(Event, slug=slug)
+
+    def next_events(self, count=10):
+        return self.event_set.filter(date__gte=date.today())[:count]
 
     class Meta:
-        verbose_name = _('Reminder')
-        verbose_name_plural = _('Reminders')
+        verbose_name = _('Calendar')
+        verbose_name_plural = _('Calendars')
         ordering = ('-created',)
 
     def __unicode__(self):
