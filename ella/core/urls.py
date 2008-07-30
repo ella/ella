@@ -1,4 +1,5 @@
 from django.conf.urls.defaults import *
+from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext as _
 
 from ella.core.views import object_detail, list_content_type, category_detail, home
@@ -10,7 +11,6 @@ feeds = {
     'atom' : AtomTopCategoryListings,
 }
 
-# list of objects in category
 urlpatterns = patterns('',
     # home page
     url(r'^$', home, name="root_homepage"),
@@ -36,13 +36,13 @@ urlpatterns = patterns('',
     url(r'^(?P<year>\d{4})/(?P<content_type>[a-z0-9-]+)/$', list_content_type, name="list_content_type_year"),
 
     # static detail
-    url(r'^(?P<category>[a-z0-9-/]+)/%s/(?P<content_type>[a-z0-9-]+)/(?P<slug>[a-z0-9-]+)/$' % _('static'), object_detail, name='static_detail'),
-    url(r'^%s/(?P<content_type>[a-z0-9-]+)/(?P<slug>[a-z0-9-]+)/$' % _('static'), object_detail, {'category' : ''}, name='home_static_detail'),
+    url(r'^(?P<category>[a-z0-9-/]+)/%s/(?P<content_type>[a-z0-9-]+)/(?P<slug>[a-z0-9-]+)/$' % slugify(_('static')), object_detail, name='static_detail'),
+    url(r'^%s/(?P<content_type>[a-z0-9-]+)/(?P<slug>[a-z0-9-]+)/$' % slugify(_('static')), object_detail, {'category' : ''}, name='home_static_detail'),
 
     # static detail with custom action
-    url(r'^(?P<category>[a-z0-9-/]+)/%s/(?P<content_type>[a-z0-9-]+)/(?P<slug>[a-z0-9-]+)/(?P<url_remainder>.*)/$' % _('static'),
+    url(r'^(?P<category>[a-z0-9-/]+)/%s/(?P<content_type>[a-z0-9-]+)/(?P<slug>[a-z0-9-]+)/(?P<url_remainder>.*)/$' % slugify(_('static')),
         object_detail, name='static_detail_action'),
-    url(r'^%s/(?P<content_type>[a-z0-9-]+)/(?P<slug>[a-z0-9-]+)/(?P<url_remainder>.*)/$' % _('static'),
+    url(r'^%s/(?P<content_type>[a-z0-9-]+)/(?P<slug>[a-z0-9-]+)/(?P<url_remainder>.*)/$' % slugify(_('static')),
         object_detail, {'category' : ''}, name='home_static_detail_action'),
 
     # object detail
