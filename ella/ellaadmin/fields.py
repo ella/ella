@@ -5,7 +5,7 @@ from django.forms.util import ValidationError
 from django.utils.encoding import smart_unicode
 from django.utils.translation import ugettext_lazy as _
 
-from ella.ellaadmin.widgets import RichTextAreaWidget
+from ella.ellaadmin.widgets import RichTextAreaWidget, CategorySuggestAdminWidget
 
 
 class RichTextAreaField(fields.Field):
@@ -86,3 +86,22 @@ class RichTextAreaField(fields.Field):
             raise ValidationError(self.error_messages['syntax_error'])
 
         return value
+
+class CategorySuggestField(fields.Field):
+    default_error_messages = {
+        'not_found': u'Category "%s" is not found.',
+        'found_too_much': u'Multiple categories found as "%s".',
+}
+    def __init__(self, *args, **kwargs):
+        self.widget = CategorySuggestAdminWidget(*args, **kwargs)
+        super(CategorySuggestField, self).__init__(*args, **kwargs)
+
+    def clean(self, value):
+        from ella.core.models import Category
+        return Category.objects.get(tree_path=value)
+
+#class CategorySuggestListingField(CategorySuggestField):
+#    def __init__(self, *args, **kwargs):
+#        self.widget = ListingCategoryWidget(*args, **kwargs)
+#        super(CategorySuggestListingField, self).__init__(*args, **kwargs)
+

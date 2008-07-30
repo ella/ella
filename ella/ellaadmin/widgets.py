@@ -61,6 +61,45 @@ class RichTextAreaWidget(forms.Textarea):
             css_class += ' %s' % height
         super(RichTextAreaWidget, self).__init__(attrs={'class': css_class})
 
+JS_SUGGEST = 'js/jquery.suggest.js'
+JS_SUGGEST_MULTIPLE = 'js/jquery.suggest.multiple.js'
+CSS_SUGGEST = 'css/jquery.suggest.css'
+
+class CategorySuggestAdminWidget(forms.TextInput):
+    """ one suggest field category (admin version) """
+    class Media:
+        js = (
+            settings.ADMIN_MEDIA_PREFIX + JS_SUGGEST,
+)
+        css = {
+            'screen': (settings.ADMIN_MEDIA_PREFIX + CSS_SUGGEST,),
+}
+
+
+    def __init__(self, db_field, attrs={}):
+        self.rel = db_field.rel
+        self.value = db_field
+        super(self.__class__, self).__init__(attrs)
+
+
+    def render(self, name, value, attrs=None):
+        from ella.core.models import Category
+        if self.rel.limit_choices_to:
+            url = '?' + '&amp;'.join(['%s=%s' % (k, v) for k, v in self.rel.limit_choices_to.items()])
+        else:
+            url = ''
+        if not attrs.has_key('class'):
+          attrs['class'] = 'vForeignKeyRawIdAdminField vCatSuggestField' # The JavaScript looks for this hook.
+        if value:
+            if type(value) in [long, int]:
+                cat = Category.objects.get(pk=value)
+            elif type(value) in [str, unicode]:
+                cat = Category.objects.get(tree_path=value)
+            output = [super(self.__class__, self).render(name, cat.tree_path, attrs)]
+        else:
+            output = [super(self.__class__, self).render(name, value, attrs)]
+        return mark_safe(u''.join(output))
+
 class ListingCategoryWidget(forms.Select):
     """register javascript for duplicating main category to edit inline listing"""
     class Media:
