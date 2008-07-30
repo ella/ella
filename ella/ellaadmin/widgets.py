@@ -96,7 +96,7 @@ class CategorySuggestAdminWidget(forms.TextInput):
                     cat = Category.objects.get(pk=value)
                 elif type(value) in [str, unicode]:
                     cat = Category.objects.get(tree_path=value)
-                output = [super(self.__class__, self).render(name, cat.tree_path, attrs)]
+                output = [super(self.__class__, self).render(name, "%s:%s" % (cat.site.name,cat.tree_path), attrs)]
             except Category.DoesNotExist:
                 output = [super(self.__class__, self).render(name, value, attrs)]
         else:

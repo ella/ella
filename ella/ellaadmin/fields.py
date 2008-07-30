@@ -89,7 +89,7 @@ class RichTextAreaField(fields.Field):
 
 class CategorySuggestField(fields.Field):
     default_error_messages = {
-        'not_found': u'Category "%s" is not found.',
+        'not_exist': u'Category "%s" does not exist.',
         'found_too_much': u'Multiple categories found as "%s".',
 }
     def __init__(self, *args, **kwargs):
@@ -99,9 +99,9 @@ class CategorySuggestField(fields.Field):
     def clean(self, value):
         from ella.core.models import Category
         try:
-            return Category.objects.get(tree_path=value)
+            return Category.objects.get(tree_path=value.split(':')[1])
         except Category.DoesNotExist:
-            raise ValidationError(self.error_messages['not_found'] % value)
+            raise ValidationError(self.error_messages['not_exist'] % value)
 
 class CategorySuggestListingField(CategorySuggestField):
     def __init__(self, *args, **kwargs):
