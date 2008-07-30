@@ -7,7 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from ella.tagging.admin import TaggingInlineOptions
 
 from ella.galleries.models import Gallery, GalleryItem
-from ella.ellaadmin import widgets
+from ella.ellaadmin import widgets, fields
 from ella.core.admin import PlacementInlineOptions
 from ella.core.cache import get_cached_object
 
@@ -56,6 +56,11 @@ class GalleryOptions(admin.ModelAdmin):
     inlines = (GalleryItemTabularOptions, PlacementInlineOptions, TaggingInlineOptions,)
     prepopulated_fields = {'slug': ('title',)}
     rich_text_fields = {None: ('description', 'content',)}
+
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        if db_field.name == 'category':
+            return fields.CategorySuggestField(db_field, **kwargs)
+        return super(GalleryOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
 admin.site.register(Gallery, GalleryOptions)
 

@@ -19,6 +19,11 @@ CLASS_TARGEID = 'target_id'
 
 JS_LISTING_CATEGORY = 'js/listing.js'
 CLASS_LISTING_CATEGORY = 'listing_category'
+JS_PLACEMENT_CATEGORY = 'js/placement_category.js'
+CLASS_PLACEMENT_CATEGORY = 'placement_category'
+
+JS_SUGGEST = 'js/jquery.suggest.js'
+CSS_SUGGEST = 'css/jquery.suggest.css'
 
 
 class ContentTypeWidget(forms.Select):
@@ -51,6 +56,7 @@ class RichTextAreaWidget(forms.Textarea):
         js = (
             settings.ADMIN_MEDIA_PREFIX + JS_EDITOR,
             settings.ADMIN_MEDIA_PREFIX + JS_SHOWDOWN,
+            settings.ADMIN_MEDIA_PREFIX + JS_PLACEMENT_CATEGORY,
 )
         css = {
             'screen': (settings.ADMIN_MEDIA_PREFIX + CSS_RICHTEXTAREA,),
@@ -61,12 +67,7 @@ class RichTextAreaWidget(forms.Textarea):
             css_class += ' %s' % height
         super(RichTextAreaWidget, self).__init__(attrs={'class': css_class})
 
-JS_SUGGEST = 'js/jquery.suggest.js'
-JS_SUGGEST_MULTIPLE = 'js/jquery.suggest.multiple.js'
-CSS_SUGGEST = 'css/jquery.suggest.css'
-
 class CategorySuggestAdminWidget(forms.TextInput):
-    """ one suggest field category (admin version) """
     class Media:
         js = (
             settings.ADMIN_MEDIA_PREFIX + JS_SUGGEST,
@@ -100,8 +101,14 @@ class CategorySuggestAdminWidget(forms.TextInput):
             except Category.DoesNotExist:
                 output = [super(self.__class__, self).render(name, value, attrs)]
         else:
-            output = [super(self.__class__, self).render(name, value, attrs)]
+            output = [super(self.__class__, self).render(name, '', attrs)]
         return mark_safe(u''.join(output))
+
+class PlacementCategoryWidget(CategorySuggestAdminWidget):
+    def __init__(self, db_field, attrs={}):
+        self.rel = db_field.rel
+        self.value = db_field
+        super(self.__class__, self).__init__(attrs)
 
 class ListingCategoryWidget(forms.Select):
     """register javascript for duplicating main category to edit inline listing"""

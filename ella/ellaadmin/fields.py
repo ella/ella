@@ -5,11 +5,11 @@ from django.forms.util import ValidationError
 from django.utils.encoding import smart_unicode
 from django.utils.translation import ugettext_lazy as _
 
-from ella.ellaadmin.widgets import RichTextAreaWidget, CategorySuggestAdminWidget, ListingCategoryWidget
+from ella.ellaadmin import widgets
 
 
 class RichTextAreaField(fields.Field):
-    widget = RichTextAreaWidget
+    widget = widgets.RichTextAreaWidget
     default_error_messages = {
         'syntax_error': _('Bad syntax in markdown formatting or template tags.'),
         'url_error':  _('Some links are invalid: %s.'),
@@ -93,18 +93,22 @@ class CategorySuggestField(fields.Field):
         'found_too_much': u'Multiple categories found as "%s".',
 }
     def __init__(self, *args, **kwargs):
-        self.widget = CategorySuggestAdminWidget(*args, **kwargs)
+        self.widget = widgets.CategorySuggestAdminWidget(*args, **kwargs)
         super(CategorySuggestField, self).__init__(*args, **kwargs)
 
     def clean(self, value):
         from ella.core.models import Category
+
+        if not value:
+            raise ValidationError('This field is mandatory.')
+        val = value.split(':')
         try:
-            return Category.objects.get(tree_path=value.split(':')[1])
+            return Category.objects.get(site__name=val[0], tree_path=val[1])
         except Category.DoesNotExist:
             raise ValidationError(self.error_messages['not_exist'] % value)
 
-class CategorySuggestListingField(CategorySuggestField):
+class CategorySuggestPlacementField(CategorySuggestField):
     def __init__(self, *args, **kwargs):
-        self.widget = ListingCategoryWidget(*args, **kwargs)
-        super(CategorySuggestListingField, self).__init__(*args, **kwargs)
+        self.widget = widgets.PlacementCategoryWidget(*args, **kwargs)
+        super(CategorySuggestPlacementField, self).__init__(*args, **kwargs)
 

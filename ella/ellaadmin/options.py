@@ -14,7 +14,7 @@ class EllaAdminOptionsMixin(object):
             kwargs.update({
                 'required': not db_field.blank,
                 'max_length': db_field.max_length,
-                'label': db_field.name,
+                'label': db_field.verbose_name,
                 'error_message': _('Enter a valid slug.'),
 })
             return forms.RegexField('^[0-9a-z-]+$', **kwargs)
