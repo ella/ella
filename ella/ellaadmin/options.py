@@ -23,7 +23,7 @@ class EllaAdminOptionsMixin(object):
             if db_field.name in rich_text_fields:
                 kwargs.update({
                     'required': not db_field.blank,
-                    'label': db_field.name,
+                    'label': db_field.verbose_name,
 })
                 rich_text_field = fields.RichTextAreaField(**kwargs)
                 if css_class:
