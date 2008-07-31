@@ -7,12 +7,9 @@ import logging
 log = logging.getLogger('ella.core.middleware')
 
 from django import template
-from django.core.cache import cache
-from django.middleware.cache import CacheMiddleware
-from django.utils.cache import get_cache_key, learn_cache_key, add_never_cache_headers
+from django.middleware.cache import CacheMiddleware as DjangoCacheMiddleware
+from django.utils.cache import get_cache_key, add_never_cache_headers
 from django.conf import settings
-
-from ella.core.cache.utils import normalize_key
 
 
 ECACHE_INFO = 'ella.core.middleware.ECACHE_INFO'
@@ -44,12 +41,19 @@ class DoubleRenderMiddleware(object):
             log.warning('Failed to double render on (%s)', e)
         return response
 
-
-class CacheMiddleware(CacheMiddleware):
+class CacheMiddleware(DjangoCacheMiddleware):
     def process_request(self, request):
         resp = super(CacheMiddleware, self).process_request(request)
 
         if resp is None:
             request._cache_middleware_key = get_cache_key(request, self.key_prefix)
+
+        return resp
+
+    def process_response(self, request, response):
+        resp = super(CacheMiddleware, self).process_response(request, response)
+
+        # never cache headers + ETag
+        add_never_cache_headers(resp)
 
         return resp
