@@ -55,7 +55,8 @@
 				// requires jquery.dimension plugin
 				var offset = $input.offset();
 				$results.css({
-					top: (offset.top + input.offsetHeight) + 'px',
+					// FIXME: Dirty offset setting for new admin
+					top: (offset.top + input.offsetHeight - 124) + 'px',
 					left: offset.left + 'px'
 				});
 			}
