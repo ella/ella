@@ -100,7 +100,8 @@ class TotalRateManager(models.Manager):
         """
         rate = Rating.objects.get_for_object(obj)
         aggr = TotalRate.objects.get_for_object(obj)
-        return (rate+aggr).quantize(Decimal(".0"))
+        sum = Decimal(str(rate)) + aggr
+        return sum.quantize(Decimal(".0"))
 
     def get_for_object(self, obj):
         """
