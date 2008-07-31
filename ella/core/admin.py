@@ -142,11 +142,6 @@ class ListingInlineOptions(admin.TabularInline):
     extra = 2
     fieldsets = ((None, {'fields' : ('category','publish_from', 'priority_from', 'priority_to', 'priority_value', 'remove', 'commercial',)}),)
 
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'category':
-            return fields.CategorySuggestField(db_field, **kwargs)
-        return super(ListingInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
-
 class PlacementInlineOptions(generic.GenericTabularInline):
     model = Placement
     extra = 1
@@ -155,11 +150,6 @@ class PlacementInlineOptions(generic.GenericTabularInline):
     formset = PlacementInlineFormset
     form = PlacementForm
     fieldsets = ((None, {'fields' : ('category', 'publish_from', 'publish_to', 'slug', 'static', 'listings',)}),)
-
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'category':
-            return fields.CategorySuggestField(db_field, **kwargs)
-        return super(PlacementInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
 class HitCountInlineOptions(admin.TabularInline):
     model = HitCount
@@ -173,11 +163,6 @@ class PlacementOptions(admin.ModelAdmin):
         (_('target'), {'fields': ('target_ct', 'target_id', 'slug', 'category',), 'classes': ('wide',)},),
         (_('time'), {'fields': ('publish_from','publish_to', 'static',), 'classes': ('wide',)},),
 )
-
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'category':
-            return fields.CategorySuggestField(db_field, **kwargs)
-        return super(PlacementOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
 class ListingOptions(admin.ModelAdmin):
     list_display = ('target_admin', 'target_ct', 'publish_from', 'category', 'placement_admin', 'target_hitcounts', 'target_url',)

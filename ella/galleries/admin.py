@@ -57,10 +57,5 @@ class GalleryOptions(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
     rich_text_fields = {None: ('description', 'content',)}
 
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'category':
-            return fields.CategorySuggestField(db_field, **kwargs)
-        return super(GalleryOptions, self).formfield_for_dbfield(db_field, **kwargs)
-
 admin.site.register(Gallery, GalleryOptions)
 
