@@ -100,11 +100,11 @@ class CategorySuggestField(fields.Field):
         from ella.core.models import Category
 
         if not value:
-            raise ValidationError('This field is mandatory.')
+            raise ValidationError(_('This field is required.'))
         val = value.split(':')
         try:
             return Category.objects.get(site__name=val[0], tree_path=val[1])
-        except Category.DoesNotExist:
+        except (Category.DoesNotExist, IndexError):
             raise ValidationError(self.error_messages['not_exist'] % value)
 
 class CategorySuggestPlacementField(CategorySuggestField):

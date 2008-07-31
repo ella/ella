@@ -8,13 +8,11 @@ def category_suggest_view(request, **kwargs):
         cat_begin = request['q']
     elif 'cat' in kwargs:
         cat_begin = kwargs['cat']
-    start = cat_begin.strip()
+    start = cat_begin.strip().lower()
     ft = []
-    if len(start) > 0:
-        lookup = Q(slug__startswith=start.lower()) | Q(title__startswith=start) | Q(tree_path__startswith=start.lower())
+    if len(start) > 1:
+        lookup = Q(slug__startswith=start) | Q(title__istartswith=start) | Q(tree_path__startswith=start)
         data = Category.objects.filter(lookup).values('site__name','tree_path',)
         for item in data:
-            str = "%s:%s" % (item['site__name'], item['tree_path'])
-            ft.append(str.encode('utf-8'))
-    res = HttpResponse('\n'.join(ft), mimetype='text/html;charset=utf-8')
-    return res
+            ft.append("%s:%s".encode('utf-8') % (item['site__name'], item['tree_path']))
+    return HttpResponse('\n'.join(ft), mimetype='text/html;charset=utf-8')

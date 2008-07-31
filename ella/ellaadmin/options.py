@@ -1,7 +1,5 @@
 from django.db.models import ForeignKey, SlugField
 
-from django.contrib import admin
-from django.contrib.admin.options import flatten_fieldsets
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 
@@ -30,8 +28,8 @@ class EllaAdminOptionsMixin(object):
                     rich_text_field.widget.attrs['class'] += ' %s' % css_class
                 return rich_text_field
 
-#        if db_field.name == 'category':
-#            return fields.CategorySuggestField(db_field, **kwargs)
+        if db_field.name == 'category':
+            return fields.CategorySuggestField(db_field, **kwargs)
 
         if db_field.name in self.raw_id_fields and isinstance(db_field, ForeignKey):
             kwargs['widget'] = widgets.ForeignKeyRawIdWidget(db_field.rel)
