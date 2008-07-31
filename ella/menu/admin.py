@@ -11,7 +11,6 @@ from django.forms import ModelForm
 
 from ella.core.cache.utils import delete_cached_object
 from ella.ellaadmin import widgets
-from ella.ellaadmin.options import EllaAdminSite
 from ella.menu.models import MenuItem, Menu
 
 
