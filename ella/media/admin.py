@@ -7,7 +7,6 @@ from ella.tagging.admin import TaggingInlineOptions
 
 
 class MediaOptions(admin.ModelAdmin):
-    inlines = (FormattedMediaInlineOptions,)
     prepopulated_fields = {'slug' : ('title',)}
 
     list_display = ('title',)

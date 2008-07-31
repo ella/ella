@@ -57,9 +57,6 @@ class Media(Publishable, models.Model):
     text = models.TextField(_('Content'), blank=True)
     uploaded = models.DateTimeField(default=datetime.now, editable=False)
 
-    def formatted_media(self):
-        return FormattedMedia.objects.select_related().filter(source=self.id)
-
     def Box(self, box_type, nodelist):
         return MediaBox(self, box_type, nodelist)
 
@@ -69,4 +66,5 @@ class Media(Publishable, models.Model):
     class Meta:
         verbose_name = _('Media')
         verbose_name_plural = _('Media')
+
 
