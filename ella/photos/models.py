@@ -31,6 +31,8 @@ PHOTOS_THUMB_DIMENSION_DEFAULT = (80,80)
 PHOTOS_FORMAT_QUALITY = getattr(settings, 'PHOTOS_FORMAT_QUALITY', PHOTOS_FORMAT_QUALITY_DEFAULT)
 PHOTOS_THUMB_DIMENSION = getattr(settings, 'PHOTOS_THUMB_DIMENSION', PHOTOS_THUMB_DIMENSION_DEFAULT)
 PHOTOS_DO_URL_CHECK = getattr(settings, 'PHOTOS_DO_URL_CHECK', False)
+CUSTOM_SUBDIR = getattr(settings, 'PHOTOS_CUSTOM_SUBDIR', '')
+UPLOAD_TO = CUSTOM_SUBDIR and 'photos/%s/%%Y/%%m/%%d' % CUSTOM_SUBDIR or 'photos/%Y/%m/%d'
 
 PHOTOS_TYPE_EXTENSION = {
     'JPEG': '.jpg',
@@ -59,7 +61,7 @@ class Photo(models.Model):
     title = models.CharField(_('Title'), max_length=200)
     description = models.TextField(_('Description'), blank=True)
     slug = models.SlugField(_('Slug'), max_length=255)
-    image = models.ImageField(upload_to='photos/%Y/%m/%d', height_field='height', width_field='width') # save it to YYYY/MM/DD structure
+    image = models.ImageField(upload_to=UPLOAD_TO , height_field='height', width_field='width') # save it to YYYY/MM/DD structure
     width = models.PositiveIntegerField(editable=False)
     height = models.PositiveIntegerField(editable=False)
 
