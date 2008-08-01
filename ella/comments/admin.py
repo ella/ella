@@ -2,9 +2,9 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib import admin
 
 from ella.comments.models import Comment, BannedUser, CommentOptions
+from ella.ellaadmin.options import EllaAdminOptionsMixin
 
-
-class CommentsOptions(admin.ModelAdmin):
+class CommentsOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     ordering = ('-submit_date',)
     list_display = ('subject', 'submit_date', 'target', 'author', 'is_public', 'path',)
     search_fields = ('subject', 'content', 'id',)

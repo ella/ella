@@ -10,9 +10,9 @@ from ella.discussions.cache import get_key_comments_on_thread__spec_filter, get_
 from ella.comments.models import Comment
 from ella.comments.admin import CommentsOptions
 from django.utils.translation import ugettext_lazy as _
+from ella.ellaadmin.options import EllaAdminOptionsMixin
 
-
-class PostOptions(admin.ModelAdmin):
+class PostOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     ordering = ('-submit_date',)
     list_display = ('content', 'submit_date', 'target', 'author', 'is_public', 'path',)
     search_fields = ('subject', 'content', 'id',)
@@ -57,12 +57,12 @@ class PostOptions(admin.ModelAdmin):
             delete_cached_object(get_key_comments_on_thread__by_submit_date(None, thr))
         return out
 
-class TopicThreadOptions(admin.ModelAdmin):
+class TopicThreadOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     list_display = ('title', 'topic', 'created', 'author',)
     search_fields = ('title', 'author', 'id',)
     prepopulated_fields = {'slug': ('title',)}
 
-class TopicOptions(admin.ModelAdmin):
+class TopicOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug': ('title',)}
     list_display = ('title', 'photo_thumb', 'created',)

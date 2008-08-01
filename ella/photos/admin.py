@@ -4,6 +4,7 @@ from django.conf import settings
 from django.utils.translation import ugettext
 
 from ella.tagging.admin import TaggingInlineOptions
+from ella.ellaadmin.options import EllaAdminOptionsMixin
 
 from ella.photos.models import FormatedPhoto, Format, Photo
 from ella.photos.views import format_photo_json
@@ -59,7 +60,7 @@ class FormatedPhotoInlineOptions(admin.TabularInline):
         return super(FormatedPhotoInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
 
-class PhotoOptions(admin.ModelAdmin):
+class PhotoOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     inlines = (FormatedPhotoInlineOptions, TaggingInlineOptions,)
     list_display = ('title', 'width', 'height', 'thumb') ## 'authors')
     list_filter = ('created',)
@@ -72,7 +73,7 @@ class PhotoOptions(admin.ModelAdmin):
         return super(PhotoOptions, self).__call__(request, url)
 
 
-class FormatedPhotoOptions(admin.ModelAdmin):
+class FormatedPhotoOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     base_form = FormatedPhotoForm
     list_display = ('filename', 'format', 'width', 'height')
     list_filter = ('format',)
