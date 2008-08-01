@@ -42,7 +42,10 @@ class Media(Publishable, models.Model):
     # content
     description = models.TextField(_('Description'), blank=True)
     text = models.TextField(_('Content'), blank=True)
-    uploaded = models.DateTimeField(default=datetime.now, editable=False)
+
+    # stats
+    created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)
+    updated = models.DateTimeField(_('Updated'), blank=True, null=True)
 
     def Box(self, box_type, nodelist):
         return MediaBox(self, box_type, nodelist)

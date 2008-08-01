@@ -10,7 +10,7 @@ class MediaOptions(admin.ModelAdmin):
     prepopulated_fields = {'slug' : ('title',)}
 
     list_display = ('title',)
-    list_filter = ('uploaded',)
+    list_filter = ('created', 'updated',)
     search_fields = ('title', 'slug', 'description', 'content',)
 
     raw_id_fields = ('photo',)
