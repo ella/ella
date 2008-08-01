@@ -2,7 +2,8 @@ from django import template
 from django.conf import settings
 from django.db import IntegrityError
 
-from ella.media.models import Media, FormattedMedia, Format
+from ella.media.models import Media
+from nc.cdnclient.models import Source, Format, Target
 from ella.core.cache.utils import get_cached_object
 
 register = template.Library()
@@ -19,13 +20,9 @@ class MediaTag(template.Node):
             except template.VariableDoesNotExist:
                 return ''
             try:
-                formatted_media = get_cached_object(FormattedMedia, source=media, format=self.format)
+                formatted_media = get_cached_object(Target, source=media.file, format=self.format)
             except FormattedMedia.DoesNotExist:
-                try:
-                    formatted_media = FormattedMedia.objects.create(source=media, format=self.format)
-                except (IOError, SystemError, IntegrityError):
-#                    context[self.var_name] = self.format.get_blank_img()
-                    return ''
+                return ''
         else:
             formatted_media = self.media
 
@@ -65,9 +62,9 @@ def media(parser, token):
             raise template.TemplateSyntaxError, "Media with %r of %r does not exist" % (bits[3],  bits[4])
 
         try:
-            formatted_media = get_cached_object(FormattedMedia, source=media, format=format)
-        except FormattedMedia.DoesNotExist:
-            formatted_media = FormattedMedia.objects.create(source=media, format=format)
+            formatted_media = get_cached_object(Target, source=media.file, format=format)
+        except Target.DoesNotExist:
+            raise template.TemplateSyntaxError, "Format %r for media with %r of %r does not exist" % (bits[1], bits[3],  bits[4])
     else:
         raise template.TemplateSyntaxError, "{% media FORMAT for VAR as VAR_NAME %} or {% media FORMAT with FIELD VALUE as VAR_NAME %}"
 

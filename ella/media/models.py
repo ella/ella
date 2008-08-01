@@ -35,7 +35,6 @@ class MediaBox(Box):
         "Updates box context with media-specific variables."
         cont = super(MediaBox, self).get_context()
         cont.update({
-                'formatted_media' : self.params.get('formatted_media', self.obj.formatted_media()),
                 'title' : self.params.get('title', self.obj.title),
                 'alt' : self.params.get('alt', ''),
 })
