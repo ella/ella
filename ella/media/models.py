@@ -1,11 +1,9 @@
 from datetime import datetime
 from os import path
 
-from django.template.defaultfilters import slugify
-from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext_lazy as _
 from django.db import models
-from django.conf import settings
+
 
 
 
@@ -53,22 +51,6 @@ class Media(Publishable, models.Model):
     def __unicode__(self):
         return self.title
 
-    def save(self):
-
-        if (self.photo is None):
-            file_name = Photo._meta.get_field_by_name('image')[0].get_directory_name() \
-                      + 'screenshot-' + self.file.token
-            self.file.create_thumb(settings.MEDIA_ROOT + file_name)
-            photo = Photo()
-            photo.title = "%s screenshot" % self.title
-            photo.slug = slugify(photo.title)
-            photo.image = file_name
-            photo.width = 320
-            photo.height = 240
-            photo.save()
-            self.photo = photo
-
-        super(Media, self).save()
 
     class Meta:
         verbose_name = _('Media')
