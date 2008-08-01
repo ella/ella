@@ -1,0 +1,3 @@
+{% for rem in reminders %}
+    <a href="{{ rem|slugify }}/">{{ rem }}</a><br />
+{% endfor %}

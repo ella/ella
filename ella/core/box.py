@@ -7,7 +7,7 @@ from django.conf import settings
 
 from ella.core.cache.invalidate import CACHE_DELETER
 from ella.core.cache.template_loader import select_template
-from ella.core.cache.utils import normalize_key
+from ella.core.cache.utils import normalize_key, get_cached_object
 
 
 BOX_INFO = 'ella.core.box.BOX_INFO'
@@ -131,7 +131,6 @@ class Box(object):
         t_list = []
         if hasattr(self.obj, 'category_id') and self.obj.category_id:
             from ella.core.models import Category
-            from ella.core.cache import get_cached_object
             cat = get_cached_object(Category, pk=self.obj.category_id)
             base_path = 'box/category/%s/content_type/%s.%s/' % (cat.path, self.obj._meta.app_label, self.obj._meta.module_name)
             if hasattr(self.obj, 'slug'):

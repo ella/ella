@@ -1,7 +1,5 @@
 from django.db.models import ForeignKey, SlugField
 
-from django.contrib import admin
-from django.contrib.admin.options import flatten_fieldsets
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 
@@ -14,7 +12,7 @@ class EllaAdminOptionsMixin(object):
             kwargs.update({
                 'required': not db_field.blank,
                 'max_length': db_field.max_length,
-                'label': db_field.name,
+                'label': db_field.verbose_name,
                 'error_message': _('Enter a valid slug.'),
 })
             return forms.RegexField('^[0-9a-z-]+$', **kwargs)
@@ -29,6 +27,9 @@ class EllaAdminOptionsMixin(object):
                 if css_class:
                     rich_text_field.widget.attrs['class'] += ' %s' % css_class
                 return rich_text_field
+
+        if db_field.name == 'category':
+            return fields.CategorySuggestField(db_field, **kwargs)
 
         if db_field.name in self.raw_id_fields and isinstance(db_field, ForeignKey):
             kwargs['widget'] = widgets.ForeignKeyRawIdWidget(db_field.rel)

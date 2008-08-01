@@ -19,6 +19,11 @@ CLASS_TARGEID = 'target_id'
 
 JS_LISTING_CATEGORY = 'js/listing.js'
 CLASS_LISTING_CATEGORY = 'listing_category'
+JS_PLACEMENT_CATEGORY = 'js/placement_category.js'
+CLASS_PLACEMENT_CATEGORY = 'placement_category'
+
+JS_SUGGEST = 'js/jquery.suggest.js'
+CSS_SUGGEST = 'css/jquery.suggest.css'
 
 
 class ContentTypeWidget(forms.Select):
@@ -51,6 +56,7 @@ class RichTextAreaWidget(forms.Textarea):
         js = (
             settings.ADMIN_MEDIA_PREFIX + JS_EDITOR,
             settings.ADMIN_MEDIA_PREFIX + JS_SHOWDOWN,
+            settings.ADMIN_MEDIA_PREFIX + JS_PLACEMENT_CATEGORY,
 )
         css = {
             'screen': (settings.ADMIN_MEDIA_PREFIX + CSS_RICHTEXTAREA,),
@@ -60,6 +66,49 @@ class RichTextAreaWidget(forms.Textarea):
         if height:
             css_class += ' %s' % height
         super(RichTextAreaWidget, self).__init__(attrs={'class': css_class})
+
+class CategorySuggestAdminWidget(forms.TextInput):
+    class Media:
+        js = (
+            settings.ADMIN_MEDIA_PREFIX + JS_SUGGEST,
+)
+        css = {
+            'screen': (settings.ADMIN_MEDIA_PREFIX + CSS_SUGGEST,),
+}
+
+
+    def __init__(self, db_field, attrs={}):
+        self.rel = db_field.rel
+        self.value = db_field
+        super(self.__class__, self).__init__(attrs)
+
+
+    def render(self, name, value, attrs=None):
+        from ella.core.models import Category
+        if self.rel.limit_choices_to:
+            url = '?' + '&amp;'.join(['%s=%s' % (k, v) for k, v in self.rel.limit_choices_to.items()])
+        else:
+            url = ''
+        if not attrs.has_key('class'):
+          attrs['class'] = 'vForeignKeyRawIdAdminField vCatSuggestField' # The JavaScript looks for this hook.
+        if value:
+            try:
+                if type(value) in [long, int]:
+                    cat = Category.objects.get(pk=value)
+                elif type(value) in [str, unicode]:
+                    cat = Category.objects.get(tree_path=value)
+                output = [super(self.__class__, self).render(name, "%s:%s" % (cat.site.name,cat.tree_path), attrs)]
+            except Category.DoesNotExist:
+                output = [super(self.__class__, self).render(name, value, attrs)]
+        else:
+            output = [super(self.__class__, self).render(name, '', attrs)]
+        return mark_safe(u''.join(output))
+
+class PlacementCategoryWidget(CategorySuggestAdminWidget):
+    def __init__(self, db_field, attrs={}):
+        self.rel = db_field.rel
+        self.value = db_field
+        super(self.__class__, self).__init__(attrs)
 
 class ListingCategoryWidget(forms.Select):
     """register javascript for duplicating main category to edit inline listing"""

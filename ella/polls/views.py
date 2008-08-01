@@ -309,7 +309,7 @@ def contest_finish(request, context, qforms, contestant_form):
             choices=choices,
             **contestant_form.cleaned_data
 )
-    if request.user:
+    if request.user.is_authenticated():
         c.user = request.user
     c.save()
     return HttpResponseRedirect(contest.get_absolute_url() +slugify(ugettext('result')) + u'/')

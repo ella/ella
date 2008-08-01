@@ -7,7 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from ella.tagging.admin import TaggingInlineOptions
 
 from ella.galleries.models import Gallery, GalleryItem
-from ella.ellaadmin import widgets
+from ella.ellaadmin import widgets, fields
 from ella.core.admin import PlacementInlineOptions
 from ella.core.cache import get_cached_object
 
