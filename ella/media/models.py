@@ -17,24 +17,6 @@ from ella.db.models import Publishable
 from ella.core.models import Author, Source, Category
 
 from nc.cdnclient.models import MediaField
-from nc.cdnclient.files import Thumb
-
-
-
-class RelaxXMLField(fields.XMLField):
-    def get_schema_content(self, instance):
-        fp = open("%s/relaxng.xml" % path.dirname(__file__), 'r')
-        schema = fp.read()
-        fp.close()
-        return schema
-
-class MetadataXMLField(fields.XMLField):
-    def get_schema_content(self, instance):
-        return instance.type.metadata_schema
-
-
-
-
 
 class MediaBox(Box):
     def get_context(self):
