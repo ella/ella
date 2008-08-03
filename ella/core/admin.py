@@ -143,11 +143,6 @@ class ListingInlineOptions(admin.TabularInline):
     extra = 2
     fieldsets = ((None, {'fields' : ('category','publish_from', 'priority_from', 'priority_to', 'priority_value', 'remove', 'commercial',)}),)
 
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'category':
-            kwargs['widget'] = widgets.ListingCategoryWidget
-        return super(ListingInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
-
 class PlacementInlineOptions(EllaAdminOptionsMixin, generic.GenericTabularInline):
     model = Placement
     extra = 1
@@ -156,11 +151,6 @@ class PlacementInlineOptions(EllaAdminOptionsMixin, generic.GenericTabularInline
     formset = PlacementInlineFormset
     form = PlacementForm
     fieldsets = ((None, {'fields' : ('category', 'publish_from', 'publish_to', 'slug', 'static', 'listings',)}),)
-
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'category':
-            kwargs['widget'] = widgets.ListingCategoryWidget
-        return super(PlacementInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
 class HitCountInlineOptions(admin.TabularInline):
     model = HitCount
