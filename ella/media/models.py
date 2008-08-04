@@ -56,4 +56,11 @@ class Media(Publishable, models.Model):
         verbose_name = _('Media')
         verbose_name_plural = _('Media')
 
+class Section(models.Model):
+    media = models.ForeignKey(Media)
 
+    title = models.CharField(_('Title'), max_length=255)
+    description = models.TextField(_('Description'), blank=True)
+
+    time = models.PositiveIntegerField(_('Start time in miliseconds'))
+    duration = models.PositiveIntegerField(_('Duration in miliseconds'))

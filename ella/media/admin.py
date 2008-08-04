@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from ella.media.models import Media
+from ella.media.models import Media, Section
 
 
 from ella.core.admin import PlacementInlineOptions
@@ -33,7 +33,8 @@ class MediaForm(ModelForm):
 
         return instance
 
-
+class SectionInline(admin.TabularInline):
+    model = Section
 
 class MediaOptions(admin.ModelAdmin):
 
@@ -49,7 +50,7 @@ class MediaOptions(admin.ModelAdmin):
 
     raw_id_fields = ('photo',)
 
-    inlines = (PlacementInlineOptions, TaggingInlineOptions,)
+    inlines = (PlacementInlineOptions, TaggingInlineOptions, SectionInline)
 
 #    rich_text_fields = {None: ('description', 'content',)}
 
