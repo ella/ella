@@ -29,7 +29,7 @@ class MediaBox(Box):
 class Media(Publishable, models.Model):
     title = models.CharField(_('Title'), max_length=255)
     slug = models.SlugField(_('Slug'), max_length=255)
-    photo = models.ForeignKey(Photo, verbose_name=_('Preview image'), null=True, blank=True, related_name='photo')
+    photo = models.ForeignKey(Photo, verbose_name=_('Preview image'), null=True, blank=True)
     file = MediaField()
 
     # Authors and Sources
