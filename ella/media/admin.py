@@ -51,7 +51,7 @@ class MediaOptions(admin.ModelAdmin):
 
     inlines = (PlacementInlineOptions, TaggingInlineOptions,)
 
-    rich_text_fields = {None: ('description', 'content',)}
+#    rich_text_fields = {None: ('description', 'content',)}
 
 
 admin.site.register(Media, MediaOptions)
