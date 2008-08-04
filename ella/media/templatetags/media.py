@@ -21,7 +21,7 @@ class MediaTag(template.Node):
                 return ''
             try:
                 formatted_media = get_cached_object(Target, source=media.file, format=self.format)
-            except FormattedMedia.DoesNotExist:
+            except Target.DoesNotExist:
                 return ''
         else:
             formatted_media = self.media
