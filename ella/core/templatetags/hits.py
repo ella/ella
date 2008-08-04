@@ -71,7 +71,6 @@ class HitCountNode(template.Node):
             return '{%% load hits %%}{%% hitcount for %(place_pk)s %%}' % {
                 'place_pk' : place.pk,
 }
-        print "!!!!!!!!!!!! I try increase hit for %s" % place
         HitCount.objects.hit(place)
         return ''
 
