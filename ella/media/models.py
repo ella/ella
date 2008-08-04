@@ -64,3 +64,6 @@ class Section(models.Model):
 
     time = models.PositiveIntegerField(_('Start time in miliseconds'))
     duration = models.PositiveIntegerField(_('Duration in miliseconds'))
+
+    def __unicode__(self):
+        return 'Chapter %s' % self.title
