@@ -1,4 +1,5 @@
-from datetime import datetime
+from math import floor
+from datetime import datetime, timedelta
 from os import path
 
 from django.utils.translation import ugettext_lazy as _
@@ -15,6 +16,30 @@ from ella.db.models import Publishable
 from ella.core.models import Author, Source, Category
 
 from nc.cdnclient.models import MediaField
+
+
+class MediaTime(int):
+    """
+    Time in miliseconds
+
+    Like int type with seconds method (because you often need time seconds)
+    """
+    def seconds(self):
+        return float(self) / 1000
+
+class MediaTimeField(models.PositiveIntegerField):
+    """
+    Like PositiveIntegerField but returns MediaTime instead of int
+    """
+    __metaclass__ = models.SubfieldBase
+
+    def to_python(self, value):
+        if value == "" or value is None:
+            return None
+        elif isinstance(value, MediaTime):
+            return value
+        else:
+            return MediaTime(value)
 
 class MediaBox(Box):
     def get_context(self):
@@ -65,8 +90,8 @@ class Section(models.Model):
     title = models.CharField(_('Title'), max_length=255)
     description = models.TextField(_('Description'), blank=True)
 
-    time = models.PositiveIntegerField(_('Start time in miliseconds'))
-    duration = models.PositiveIntegerField(_('Duration in miliseconds'))
+    time = MediaTimeField(_('Start time in miliseconds'))
+    duration = MediaTimeField(_('Duration in miliseconds'))
 
     def __unicode__(self):
         return 'Chapter %s' % self.title
