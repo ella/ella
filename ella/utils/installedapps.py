@@ -41,7 +41,7 @@ def call_modules(auto_discover=()):
                 inst = getattr(mod, '__install__', lambda:None)
                 inst()
             except ImportError, e:
-                logging.warning('Probably problem during importing autodiscovered module! %s' % traceback.format_exc())
+                logging.warning('problem during discovering %s - %s\n%s' % (imp, e, traceback.format_exc()))
 
 def init_logger():
     """init logger with LOGGING_CONFIG_FILE settings option"""
