@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<playlist>
+    <collection>
+        <id>{{ object.slug }}</id>
+        <title>{{ object.get_title }}</title>
+        <description>{{ object.get_description }}</description>
+        <videoHomePageTitle>{{ object.get_title }}</videoHomePageTitle>
+        <videoHomePageURL>{{ object.get_domain_url }}</videoHomePageURL>
+        <videoPages>
+         <!--
+            <item>
+                <title>centrum.cz</title>
+                <url><![CDATA[http://www.centrum.cz]]></url>
+            </item>
+          -->
+        </videoPages>
+        <relatedVideos>
+          <!--
+            <item>
+                <title>Jak sekat trávu</title>
+                <description>shlédnuto 3.698.756x</description>
+                <img><![CDATA[imgs/img1.jpg]]></img>
+                <url><![CDATA[http://www.centrum.cz]]></url>
+            </item>
+           -->
+        </relatedVideos>
+
+        <mobileVideoLink>{{ object.get_domain_url }}</mobileVideoLink>
+
+
+        <placeToWebHTML><![CDATA[<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" name="VP" width="437" height="480" id="VP"><param name="movie" value="main.swf" /><param name="quality" value="high" /><param name="bgcolor" value="#000000" /><param name="allowScriptAccess" value="sameDomain" /><embed src="main.swf" quality="high" bgcolor="#000000" width="437" height="480" name="VP" align="middle" play="true"  loop="false" quality="high" allowScriptAccess="sameDomain" type="application/x-shockwave-flash" pluginspage="http://www.adobe.com/go/getflashplayer"></embed></object></noscript>]]></placeToWebHTML>
+        <getLink>{{ object.get_domain_url }}</getLink>
+
+        <preview>imgs/preview.jpg</preview>
+
+        {% load media %}{% media flash-video for object as formatted %}
+        <items>
+            <item>
+                <path>{{ formatted }} </path>
+                <fileStream>false</fileStream>
+                <duration>100</duration>
+            </item>
+        </items>
+
+
+        <chapters>
+            {% for section in object.get_sections %}
+            <chapter>
+                <time>{{ section.time.seconds }}</time>
+                <title>{{ section.title }}</title>
+            </chapter>
+            {% endfor %}
+        </chapters>
+
+
+    </collection>
+
+
+    <messages>
+        <message name="continuePlayInFullscreen">Pokračuj v přehrávání ve fullscreen</message>
+        <message name="continuePlay">Pokračuj v přehrávání</message>
+
+
+        <message name="downloadTitle">Stáhnout video</message>
+        <message name="downloadVideo">Stáhnout video v mobilním formátu do PC</message>
+        <message name="downloadButton">Stáhnout</message>
+        <message name="sendVideo">Zaslat video na mobilní telefon</message>
+        <message name="phoneNumber">Tel. číslo</message>
+        <message name="phoneNumberInput">+420777123456</message>
+        <message name="sendVideoButton">Odeslat</message>
+        <message name="sendToPhoneInfo">Při zaslání videa na mobilní telefon platíte za příchozí SMS 5,- a za data stahování videosouboru do mobilního telefonu.</message>
+
+        <message name="moreInfoNextPagesTitle">Stránky s tímto videem</message>
+        <message name="moreInfoNext">další</message>
+
+
+        <message name="shareVideoTitle">Sdílet video</message>
+        <message name="sendEmail">Poslat na email:</message>
+        <message name="sendEmailButton">Odeslat</message>
+        <message name="placeToWeb">Umístit na web:</message>
+        <message name="placeToWebButton">Kopírovat</message>
+        <message name="getLink">Získat odkaz:</message>
+        <message name="getLinkButton">Kopírovat</message>
+        <message name="internetShare">Sdílet na internetu</message>
+
+        <message name="relatedTitle">Související videa</message>
+    </messages>
+
+</playlist>
