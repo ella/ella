@@ -31,6 +31,9 @@ class EllaAdminOptionsMixin(object):
         if db_field.name == 'category':
             return fields.CategorySuggestField(db_field, **kwargs)
 
+        if db_field.name == 'authors':
+            return fields.AuthorSuggestField(db_field, **kwargs)
+
         if db_field.name in self.raw_id_fields and isinstance(db_field, ForeignKey):
             kwargs['widget'] = widgets.ForeignKeyRawIdWidget(db_field.rel)
             return db_field.formfield(**kwargs)

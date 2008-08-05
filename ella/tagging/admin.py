@@ -85,7 +85,7 @@ class TaggingInlineOptions(EllaAdminOptionsMixin, generic.GenericTabularInline):
     fields = ('tag', 'priority',)
     raw_id_fields = ('tag',)
     model = TaggedItem
-    extra = 4
+    extra = 2
     id_field_name = 'object_id'
     ct_field_name = 'content_type'
     formset = TagInlineFormset
