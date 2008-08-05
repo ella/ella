@@ -1,3 +1,5 @@
+from os import path
+
 from django.contrib import admin
 
 from ella.media.models import Media, Section
@@ -5,6 +7,7 @@ from ella.media.models import Media, Section
 
 from ella.core.admin import PlacementInlineOptions
 from ella.photos.models import Photo
+from ella.photos.imageop import get_img_size
 from ella.tagging.admin import TaggingInlineOptions
 
 from django.conf import settings
@@ -24,8 +27,9 @@ class MediaForm(ModelForm):
             photo.title = "%s screenshot" % instance.title
             photo.slug = slugify(photo.title)
             photo.image = file_name
-            photo.width = 320
-            photo.height = 240
+            size = get_img_size(path.join(settings.MEDIA_ROOT, file_name))
+            photo.width = size['width']
+            photo.height = size['height']
             photo.save()
             instance.photo = photo
         if commit:
