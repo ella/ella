@@ -51,6 +51,9 @@ class Media(Publishable, models.Model):
     def __unicode__(self):
         return self.title
 
+    def get_sections(self):
+        return self.section_set.all()
+
 
     class Meta:
         verbose_name = _('Media')
