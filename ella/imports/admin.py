@@ -5,8 +5,9 @@ from ella.core.cache.utils import get_cached_object_or_404
 
 from ella.imports.models import Server, ServerItem
 
+from ella.ellaadmin.options import EllaAdminOptionsMixin
 
-class ServerOptions(admin.ModelAdmin):
+class ServerOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     list_display = ('title', 'domain', 'url', 'regenerate')
     search_fields = ('domain, title', 'url',)
     prepopulated_fields = {'slug' : ('title',)}
@@ -24,7 +25,7 @@ class ServerOptions(admin.ModelAdmin):
 
         return super(ServerOptions, self).__call__(request, url)
 
-class ServerItemOptions(admin.ModelAdmin):
+class ServerItemOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     list_display = ('title', 'server', 'updated','priority')
     list_filter = ('server', 'updated',)
     raw_id_fields = ('photo',)

@@ -28,8 +28,11 @@ class EllaAdminOptionsMixin(object):
                     rich_text_field.widget.attrs['class'] += ' %s' % css_class
                 return rich_text_field
 
-#        if db_field.name == 'category':
-#            return fields.CategorySuggestField(db_field, **kwargs)
+        if db_field.name == 'category':
+            return fields.CategorySuggestField(db_field, **kwargs)
+
+        if db_field.name == 'authors':
+            return fields.AuthorSuggestField(db_field, **kwargs)
 
         if db_field.name in self.raw_id_fields and isinstance(db_field, ForeignKey):
             kwargs['widget'] = widgets.ForeignKeyRawIdWidget(db_field.rel)

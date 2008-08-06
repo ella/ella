@@ -36,3 +36,10 @@ Also you can use special inclusion tag::
 
 With this inclusion tag you can create nested (threded) comments' list.
 
+
+Template tag {% get_comment_form %}
+-----------------------------------
+Note that when notation like {% get_comment_form for object with 'LO' as comment_form %} is used
+available options are:
+'LO' ... stands for only logged in users form.
+'UN' ... stands for only unknown users form.

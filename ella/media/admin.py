@@ -4,7 +4,6 @@ from django.contrib import admin
 
 from ella.media.models import Media, Section
 
-
 from ella.core.admin import PlacementInlineOptions
 from ella.photos.models import Photo
 from ella.photos.imageop import get_img_size

@@ -4,7 +4,7 @@ from django.forms.forms import ValidationError, NON_FIELD_ERRORS
 from django.utils.translation import ugettext as _
 
 from ella.db_templates.models import DbTemplate, TemplateBlock
-
+from ella.ellaadmin.options import EllaAdminOptionsMixin
 
 class TemplateBlockFormset(BaseInlineFormset):
     "Custom formset enabling us to supply custom validation."
@@ -63,7 +63,7 @@ class TemplateBlockFormset(BaseInlineFormset):
 
         return self.cleaned_data
 
-class TemplateBlockInlineOptions(admin.TabularInline):
+class TemplateBlockInlineOptions(EllaAdminOptionsMixin, admin.TabularInline):
     model = TemplateBlock
     extra = 3
     fieldsets = ((None, {'fields' : ('name', 'box_type', 'target_ct', 'target_id', 'active_from', 'active_till', 'text',)}),)

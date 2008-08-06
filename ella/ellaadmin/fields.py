@@ -107,6 +107,30 @@ class CategorySuggestField(fields.Field):
         except (Category.DoesNotExist, IndexError):
             raise ValidationError(self.error_messages['not_exist'] % value)
 
+class AuthorSuggestField(fields.Field):
+    default_error_messages = {
+        'not_exist': 'Author "%s" does not exist.',
+        'found_too_much': u'Multiple authors found as "%s".',
+}
+    def __init__(self, *args, **kwargs):
+        self.widget = widgets.AuthorsSuggestAdminWidget(*args, **kwargs)
+        super(AuthorSuggestField, self).__init__(*args, **kwargs)
+
+    def clean(self, value):
+        from ella.core.models import Author
+
+        if not value:
+            raise ValidationError(_('This field is required.'))
+        vals = value.split(',')
+        ids = []
+        for v in vals:
+            id = int(v.split(':')[0])
+            ids.append(id)
+        try:
+            return Author.objects.filter(pk__in=ids)
+        except (Author.DoesNotExist, IndexError):
+            raise ValidationError(self.error_messages['not_exist'] % value)
+
 class CategorySuggestPlacementField(CategorySuggestField):
     def __init__(self, *args, **kwargs):
         self.widget = widgets.PlacementCategoryWidget(*args, **kwargs)

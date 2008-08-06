@@ -1,10 +1,13 @@
 from django import template
 from django.db import models
+from django.conf import settings
+from django.template import Variable, VariableDoesNotExist
 
-from ella.core.models import HitCount
+from ella.core.models import HitCount, Placement
 
-
+DOUBLE_RENDER = getattr(settings, 'DOUBLE_RENDER', False)
 register = template.Library()
+
 
 class TopVisitedNode(template.Node):
     def __init__(self, count, name, mods=None):
@@ -51,4 +54,36 @@ def do_top_visited(parser, token):
         mods.append(model)
 
     return TopVisitedNode(count, bits[-1], mods)
+
+
+class HitCountNode(template.Node):
+    def __init__(self, place):
+        self.place = place
+
+    def render(self, context):
+        try:
+            place = Variable(self.place).resolve(context)
+        except VariableDoesNotExist:
+            place = Placement.objects.get(pk=self.place)
+        except Placement.DoesNotExist:
+            return ''
+        if DOUBLE_RENDER and 'SECOND_RENDER' not in context:
+            return '{%% load hits %%}{%% hitcount for %(place_pk)s %%}' % {
+                'place_pk' : place.pk,
+}
+        HitCount.objects.hit(place)
+        return ''
+
+@register.tag
+def hitcount(parser, token):
+    """
+    Increment hit counter via template tag
+
+    Usage::
+        {% hitcount for placement %}
+        {% hitcount for 12 %}
+    """
+    bits = token.split_contents()
+    place = bits[2]
+    return HitCountNode(place)
 

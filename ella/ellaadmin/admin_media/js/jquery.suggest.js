@@ -55,8 +55,7 @@
 				// requires jquery.dimension plugin
 				var offset = $input.offset();
 				$results.css({
-					// FIXME: Dirty offset setting for new admin
-					top: (offset.top + input.offsetHeight - 124) + 'px',
+					top: (offset.top + input.offsetHeight) + 'px',
 					left: offset.left + 'px'
 				});
 			}
@@ -174,6 +173,7 @@
 				for (var i = 0; i < items.length; i++)
 					html += '<li>' + items[i] + '</li>';
 
+				resetPosition();
 				$results.html(html).show();
 
 				$results

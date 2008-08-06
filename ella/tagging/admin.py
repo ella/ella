@@ -7,6 +7,7 @@ from ella.tagging.models import Tag, TaggedItem
 from django.utils.translation import ugettext_lazy as _
 from ella.tagging.fields import SuggestTagAdminField, TagPriorityAdminField
 from django.contrib.contenttypes.models import ContentType
+from ella.ellaadmin.options import EllaAdminOptionsMixin
 
 class TagInlineForm(modelforms.ModelForm):
     class Meta:
@@ -80,11 +81,11 @@ class TaggingInlineOptionsSimple(admin.TabularInline):
     model = TaggedItem
     extra = 0
 
-class TaggingInlineOptions(generic.GenericTabularInline):
+class TaggingInlineOptions(EllaAdminOptionsMixin, generic.GenericTabularInline):
     fields = ('tag', 'priority',)
     raw_id_fields = ('tag',)
     model = TaggedItem
-    extra = 4
+    extra = 2
     id_field_name = 'object_id'
     ct_field_name = 'content_type'
     formset = TagInlineFormset

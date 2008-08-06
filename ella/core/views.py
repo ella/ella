@@ -96,11 +96,11 @@ def object_detail(request, category, content_type, slug, year=None, month=None, 
         return dispatcher.call_view(request, bits, context)
     elif dispatcher.has_custom_detail(obj):
         # increment hit counter
-        HitCount.objects.hit(placement)
+#        HitCount.objects.hit(placement)
         return dispatcher.call_custom_detail(request, context)
 
     # increment hit counter
-    HitCount.objects.hit(placement)
+#    HitCount.objects.hit(placement)
 
     return render_to_response(
         get_templates('object.html', slug, cat, ct.app_label, ct.model),

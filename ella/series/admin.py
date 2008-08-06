@@ -1,7 +1,8 @@
 from django.contrib import admin
 from ella.series.models import Serie, SeriePart
+from ella.ellaadmin.options import EllaAdminOptionsMixin
 
-class SerieAdmin(admin.ModelAdmin):
+class SerieAdmin(EllaAdminOptionsMixin, admin.ModelAdmin):
     list_display = ('title', 'started', 'is_active')
     list_filter = ('started', 'finished',)
     prepopulated_fields = {'slug': ('title',)}
@@ -10,7 +11,7 @@ class SerieAdmin(admin.ModelAdmin):
     rich_text_fields = {None: ('description',)}
 
 
-class SeriePartAdmin(admin.ModelAdmin):
+class SeriePartAdmin(EllaAdminOptionsMixin, admin.ModelAdmin):
     list_display = ('target', 'target_ct', 'serie', 'part_no',)
     list_filter = ('serie','target_ct',)
 
