@@ -14,7 +14,6 @@ def detect_img_type(imagePath):
 def get_img_size(imagePath):
     """ returns tuple (width, height) of image """
     try:
-        import pdb; pdb.set_trace()
         im = Image.open(imagePath)
         return {
             'width': im.size[0],
