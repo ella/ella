@@ -19,7 +19,7 @@ class MediaForm(ModelForm):
     def save(self, commit=True):
 
         instance = super(MediaForm, self).save(False)
-        if (instance.photo is None):
+        if (commit and instance.photo is None):
             dir_name = Photo._meta.get_field_by_name('image')[0].get_directory_name()
             file_name = path.join(dir_name, 'screenshot-' + instance.file.token)
             try:
