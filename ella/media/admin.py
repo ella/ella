@@ -1,4 +1,4 @@
-from os import path
+from os import path, makedirs
 
 from django.contrib import admin
 
@@ -20,9 +20,14 @@ class MediaForm(ModelForm):
 
         instance = super(MediaForm, self).save(False)
         if (instance.photo is None):
-            file_name = Photo._meta.get_field_by_name('image')[0].get_directory_name() \
-                      + 'screenshot-' + instance.file.token
-            instance.file.create_thumb(settings.MEDIA_ROOT + file_name)
+            dir_name = Photo._meta.get_field_by_name('image')[0].get_directory_name()
+            file_name = path.join(dir_name, 'screenshot-' + instance.file.token)
+            try:
+                makedirs(path.join(settings.MEDIA_ROOT, dir_name))
+            except OSError:
+                # Directory already exists
+                pass
+            instance.file.create_thumb(path.join(settings.MEDIA_ROOT, file_name))
             photo = Photo()
             photo.title = "%s screenshot" % instance.title
             photo.slug = slugify(photo.title)
