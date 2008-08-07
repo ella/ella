@@ -2,6 +2,7 @@ from django import template
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
+from django.template.defaultfilters import slugify
 
 from ella.ratings.models import Rating, TotalRate
 from ella.ratings.forms import RateForm
@@ -24,6 +25,22 @@ class RateUrlsNode(template.Node):
             context[self.form_name] = RateForm(initial={'content_type' : ct.id, 'target' : obj._get_pk_val()})
             context[self.up_name] = reverse('rate_up')
             context[self.down_name] = reverse('rate_down')
+        return ''
+
+class RateUrlNode(template.Node):
+    def __init__(self, object, url_var_name, form_name=None):
+        self.object = object
+        self.url_var_name =url_var_name
+        self.form_name = form_name
+
+    def render(self, context):
+        obj = template.Variable(self.object).resolve(context)
+        if obj and hasattr(obj, 'get_absolute_url'):
+            context[self.url_var_name] = '%s%s/' % (obj.get_absolute_url(), slugify(_('rate by value')))
+        elif obj:
+            ct = ContentType.objects.get_for_model(obj)
+            context[self.form_name] = RateForm(initial={'content_type' : ct.id, 'target' : obj._get_pk_val()})
+            context[self.url_var_name] = reverse('rate')
         return ''
 
 @register.tag('rate_urls')
@@ -50,13 +67,32 @@ def do_rate_urls(parser, token):
     bits = token.split_contents()
     if (len(bits) != 6 and len(bits) != 7) or bits[1] != 'for' or bits[3] != 'as':
         raise template.TemplateSyntaxError, "%r .... TODO ....." % token.contents.split()[0]
-
-
     if len(bits) == 6:
         return RateUrlsNode(bits[2], bits[4], bits[5])
     else:
         return RateUrlsNode(bits[2], bits[5], bits[6], bits[4])
 
+@register.tag
+def rate_url(parser, token):
+    """
+    Fills template variable specified in argument ``tpl_var`` with URL for sending rating value.
+
+    Usage::
+
+        {% rate_url for object as tpl_var %}
+
+    Example::
+
+        {% rate_url for object as r_url %}
+        <form action="{{r_url}}" method="POST">
+            <input type="text" name="rating" value="0"/>
+            <input type="submit" value="Rate it"/>
+        </form>
+    """
+    bits = token.split_contents()
+    if len(bits) != 5:
+        raise template.TemplateSyntaxError('rate_rul template tag should be used like this: {% rate_url for object as tpl_var %}')
+    return RateUrlNode(bits[2], bits[4])
 
 class RatingNode(template.Node):
     def __init__(self, object, name):

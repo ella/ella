@@ -10,7 +10,6 @@ current_site = Site.objects.get_current()
 
 UPDOWN = {'up' : 1, 'down' : -1}
 
-
 def do_rate(request, ct, target, plusminus):
     if 'next' in request.REQUEST and request.REQUEST['next'].startswith('/'):
         url = request.POST['next']
@@ -71,6 +70,18 @@ def do_rate(request, ct, target, plusminus):
 )
     return response
 
+def rate_by_value(request, bits, context):
+    val = request.POST.get('rating', None)
+    if not val:
+        raise ValueError('rating field not found in POST')
+    plusminus = float(val)
+    return do_rate(
+        request,
+        context['content_type'],
+        context['object'],
+        plusminus
+)
+
 @require_POST
 def rate_post(request, plusminus=1):
     """
@@ -102,4 +113,4 @@ def rate_post(request, plusminus=1):
 def rate(request, bits, context):
     if len(bits) != 1 or bits[0] not in UPDOWN:
         raise Http404
-    return do_rate(request, context['content_type'], context['object'], UPDOWN[bits[0]])
+    return do_rate(request, context['content_type'], context['object'], UPDOWN[ bits[0] ])
