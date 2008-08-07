@@ -3,7 +3,7 @@ from django import forms
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 from django.contrib.formtools.preview import FormPreview
-from django.core.paginator import QuerySetPaginator
+from django.core.paginator import QuerySetPaginator, EmptyPage
 from django.conf import settings
 
 from ella.core.views import get_templates_from_placement
@@ -34,10 +34,11 @@ def detail(request, context):
     page_no = _get_page_no(request)
     qset = interview.get_questions()
     paginator = QuerySetPaginator(qset, INTERVIEW_PAGINATION_PER_PAGE)
-    page = paginator.page(page_no)
 
     if page_no > paginator.num_pages or page_no < 1:
         raise Http404
+
+    page = paginator.page(page_no)
 
     interviewees = interview.get_interviewees(request.user)
     context.update({
