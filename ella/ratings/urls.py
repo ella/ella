@@ -1,9 +1,5 @@
-from django.conf.urls.defaults import *
+from django.http import Http404
 
-from ella.ratings.views import *
-
-urlpatterns = patterns('',
-    # for finer-grained system, use plusminus
-    url(r'^rate/up/$', rate, {'plusminus' : 1}, name='rate_up'),
-    url(r'^rate/down/$', rate, {'plusminus' : -1}, name='rate_down'),
-)
+from ella.core.custom_urls import dispatcher
+from ella.ratings.views import rate
+dispatcher.register('rate',  rate)

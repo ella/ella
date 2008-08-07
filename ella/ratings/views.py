@@ -8,6 +8,8 @@ from ella.ratings.forms import RateForm
 
 current_site = Site.objects.get_current()
 
+UPDOWN = {'up' : 1, 'down' : -1}
+
 
 def do_rate(request, ct, target, plusminus):
     if 'next' in request.REQUEST and request.REQUEST['next'].startswith('/'):
@@ -70,7 +72,7 @@ def do_rate(request, ct, target, plusminus):
     return response
 
 @require_POST
-def rate(request, plusminus=1):
+def rate_post(request, plusminus=1):
     """
     Add a simple up/down vote for a given object.
     redirect to object's get_absolute_url() on success.
@@ -96,3 +98,8 @@ def rate(request, plusminus=1):
     target = form.cleaned_data['target']
 
     return do_rate(request, ct, target, plusminus)
+
+def rate(request, bits, context):
+    if len(bits) != 1 or bits[0] not in UPDOWN:
+        raise Http404
+    return do_rate(request, context['content_type'], context['object'], UPDOWN[bits[0]])
