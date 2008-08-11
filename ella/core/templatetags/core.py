@@ -510,3 +510,30 @@ def container_end(parser, token):
     " Render inclusion_tags/container_end.html. "
     return ContainerEndNode()
 
+class CategoriesNode(template.Node):
+    def __init__(self, varname, category_parent=None):
+        self.varname = varname
+        self.category_parent = category_parent
+
+    def render(self, context):
+        if not self.category_parent:
+            cats = Category.objects.all()
+        context[self.varname] = cats
+        return ''
+
+@register.tag
+def get_categories(parser, token):
+    """
+    Gets list of categories. Categories can be filtered by its parent.
+
+    Syntax::
+
+        {% get_categories as VARNAME %}
+        {% get_categories with parent "parent-slug" as VARNAME %}
+    """
+    # TODO implement ..with parent "parent-slug"
+    tokens = token.split_contents()
+    if len(tokens) != 3 or tokens[1] != 'as':
+        raise TemplateSyntaxError('Only supported syntax is {% get_categories as VARNAME %} at the moment.')
+    varname = tokens[2]
+    return CategoriesNode(varname)
