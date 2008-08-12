@@ -75,7 +75,7 @@ def rate_by_value(request, bits, context):
     if not val:
         raise ValueError('rating field not found in POST')
     plusminus = float(val)
-    if -1 <= plusminus <= 1:
+    if not -1 <= plusminus <= 1:
         raise ValueError('rating value should be in <-1, 1>')
     return do_rate(
         request,
