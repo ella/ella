@@ -87,4 +87,15 @@
         <message name="relatedTitle">Související videa</message>
     </messages>
 
+    <settings>
+        <autoplay>true</autoplay>
+        <iframeURL><![CDATA[/static/jaknato/swf/player/iframe.html]]></iframeURL>
+    </settings>
+
+    <adverts>
+        <advert name="videoBefore"><![CDATA[oMKQwcwvN7ZucY04Fo7CJQtI7EGjTFCcyqtcMg2IzrL.K7]]></advert>
+        <advert name="text" disappearDelay="10"><![CDATA[uVHq3JG8490YVoN6.WqfrXNkYMmq_2MSNNltj4nXCur.a7]]></advert>
+        <advert name="relatedVideoBanner"><![CDATA[pCDxW52vDIpNgxvSxKOKeRW27mEtUptG8oRrXcyUpwv.37]]></advert>
+    </adverts>
+
 </playlist>
