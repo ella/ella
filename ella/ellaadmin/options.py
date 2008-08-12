@@ -29,6 +29,7 @@ class EllaAdminOptionsMixin(object):
                 return rich_text_field
 
         if db_field.name == 'category':
+            kwargs['label'] = db_field.verbose_name
             return fields.CategorySuggestField(db_field, **kwargs)
 
         if db_field.name == 'authors':

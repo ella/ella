@@ -78,7 +78,7 @@ class CategorySuggestAdminWidget(forms.TextInput):
 }
 
 
-    def __init__(self, db_field, attrs={}):
+    def __init__(self, db_field, attrs={}, **kwargs):
         self.rel = db_field.rel
         self.value = db_field
         super(self.__class__, self).__init__(attrs)
