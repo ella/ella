@@ -4,6 +4,7 @@ from django.forms import fields
 from django.forms.util import ValidationError
 from django.utils.encoding import smart_unicode
 from django.utils.translation import ugettext_lazy as _
+from django.db.models.fields.related import ForeignKey
 
 from ella.ellaadmin import widgets
 
@@ -93,14 +94,21 @@ class CategorySuggestField(fields.Field):
         'found_too_much': u'Multiple categories found as "%s".',
 }
     def __init__(self, *args, **kwargs):
+        self.dbfield = args[0]
         self.widget = widgets.CategorySuggestAdminWidget(*args, **kwargs)
         super(CategorySuggestField, self).__init__(*args, **kwargs)
 
     def clean(self, value):
         from ella.core.models import Category
 
-        if not value:
+        field = self.dbfield
+        blank = False
+        if isinstance(field, ForeignKey) and hasattr(field, 'blank'):
+            blank = field.blank
+        if not value and not blank:
             raise ValidationError(_('This field is required.'))
+        elif not value and blank:
+            return
         val = value.split(':')
         try:
             return Category.objects.get(site__name=val[0], tree_path=val[1])
