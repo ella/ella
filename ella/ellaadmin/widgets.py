@@ -2,9 +2,8 @@ from django import forms
 from django.conf import settings
 from django.contrib.admin import widgets
 from django.utils.safestring import mark_safe
-from django.utils.text import capfirst, truncate_words
+from django.utils.text import truncate_words
 
-from ella.core.cache import get_cached_object
 from ella.ellaadmin.utils import admin_url
 
 
