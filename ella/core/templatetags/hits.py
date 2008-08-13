@@ -63,6 +63,9 @@ class HitCountNode(template.Node):
     def render(self, context):
         try:
             place = Variable(self.place).resolve(context)
+            # FIXME fuckin' hotfix. Neni jasne proc, ale Variable(u'5798').resolve(context) projde a vrati 5798 hodnotu, misto vyhozeni vyjimky ze promenna neex.
+            if not isinstance(place, Placement):
+                place = Placement.objects.get(pk=place)
         except VariableDoesNotExist:
             place = Placement.objects.get(pk=self.place)
         except Placement.DoesNotExist:
