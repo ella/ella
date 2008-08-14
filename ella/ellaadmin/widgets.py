@@ -56,7 +56,9 @@ class RichTextAreaWidget(forms.Textarea):
         js = (
             settings.ADMIN_MEDIA_PREFIX + JS_EDITOR,
             settings.ADMIN_MEDIA_PREFIX + JS_SHOWDOWN,
+            # FIXME: i don't know why js is not loaded in ListingCategoryWidget
             settings.ADMIN_MEDIA_PREFIX + JS_PLACEMENT_CATEGORY,
+            settings.ADMIN_MEDIA_PREFIX + JS_LISTING_CATEGORY,
 )
         css = {
             'screen': (settings.ADMIN_MEDIA_PREFIX + CSS_RICHTEXTAREA,),
