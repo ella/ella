@@ -4,7 +4,7 @@ from django.conf import settings
 from django.template import Variable, VariableDoesNotExist
 
 from ella.core.models import HitCount, Placement
-
+from ella.core.cache import get_cached_object
 DOUBLE_RENDER = getattr(settings, 'DOUBLE_RENDER', False)
 register = template.Library()
 
@@ -57,21 +57,23 @@ def do_top_visited(parser, token):
 
 
 class HitCountNode(template.Node):
-    def __init__(self, place):
-        self.place = place
+    def __init__(self, place, pk):
+        self.place, self.pk = place, pk
 
     def render(self, context):
-        try:
-            place = Variable(self.place).resolve(context)
-            # FIXME fuckin' hotfix. Neni jasne proc, ale Variable(u'5798').resolve(context) projde a vrati 5798 hodnotu, misto vyhozeni vyjimky ze promenna neex.
-            if not isinstance(place, Placement):
-                place = Placement.objects.get(pk=place)
-        except VariableDoesNotExist:
-            place = Placement.objects.get(pk=self.place)
-        except Placement.DoesNotExist:
-            return ''
+        if self.pk:
+            try:
+                place = get_cached_object(Placement, pk=self.place)
+            except Placement.DoesNotExist:
+                return ''
+        else:
+            try:
+                place = Variable(self.place).resolve(context)
+            except VariableDoesNotExist:
+                return ''
+
         if DOUBLE_RENDER and 'SECOND_RENDER' not in context:
-            return '{%% load hits %%}{%% hitcount for %(place_pk)s %%}' % {
+            return '{%% load hits %%}{%% hitcount for pk %(place_pk)s %%}' % {
                 'place_pk' : place.pk,
 }
         HitCount.objects.hit(place)
@@ -84,9 +86,16 @@ def hitcount(parser, token):
 
     Usage::
         {% hitcount for placement %}
-        {% hitcount for 12 %}
+        {% hitcount for pk 12 %}
     """
     bits = token.split_contents()
-    place = bits[2]
-    return HitCountNode(place)
+    pk = False
+    if len(bits) == 3 and bits[1] == 'for':
+        place = bits[2]
+    elif len(bits) == 4 and bits[1] == 'for' and bits[2] == 'pk':
+        place = bits[3]
+        pk = True
+    else:
+        raise template.TemplateSyntaxError('{% hitcount for [pk] {placement|pk} %}')
+    return HitCountNode(place, pk)
 
