@@ -49,3 +49,4 @@ def init_logger():
     if isinstance(LOGGING_CONFIG_FILE, basestring) and isfile(LOGGING_CONFIG_FILE):
         logging.config.fileConfig(LOGGING_CONFIG_FILE)
 
+init_logger()
