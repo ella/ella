@@ -521,6 +521,16 @@ class CategoriesNode(template.Node):
         context[self.varname] = cats
         return ''
 
+class CategoriesExclusionNode(template.Node):
+    def __init__(self, varname, exclude):
+        self.varname = varname
+        self.exclude = exclude
+
+    def render(self, context):
+        cats = Category.objects.exclude(slug__in=self.exclude)
+        context[self.varname] = cats
+        return ''
+
 @register.tag
 def get_categories(parser, token):
     """
@@ -528,12 +538,22 @@ def get_categories(parser, token):
 
     Syntax::
 
-        {% get_categories as VARNAME %}
+        {% get_categories as VARNAME [exclude category-slug1 slug2 ... slugN] %}
         {% get_categories with parent "parent-slug" as VARNAME %}
     """
     # TODO implement ..with parent "parent-slug"
     tokens = token.split_contents()
-    if len(tokens) != 3 or tokens[1] != 'as':
-        raise TemplateSyntaxError('Only supported syntax is {% get_categories as VARNAME %} at the moment.')
-    varname = tokens[2]
-    return CategoriesNode(varname)
+    if len(tokens) == 3 and tokens[1] == 'as':
+        varname = tokens[2]
+        return CategoriesNode(varname)
+    elif len(tokens) >= 5 and tokens[1] == 'as' and tokens[3] == 'exclude':
+        varname = tokens[2]
+        exc = []
+        for t in tokens[4:]:
+            if t[0] == '"' and t[-1] == '"':
+                exc.append(t[1:-1])
+                continue
+            exc.append(t)
+        return CategoriesExclusionNode(varname, exc)
+    else:
+        raise TemplateSyntaxError('get_categories tag syntax is {% get_categories as VARNAME %}')
