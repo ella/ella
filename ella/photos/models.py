@@ -112,7 +112,8 @@ class Photo(models.Model):
             self.slug = str(self.id) + '-' + self.slug
         # rename image by slug
         imageType = detect_img_type(path.join(settings.MEDIA_ROOT, self.image))
-        self.image = file_rename(self.image, self.slug, PHOTOS_TYPE_EXTENSION[ imageType ])
+        if imageType is not None:
+            self.image = file_rename(self.image, self.slug, PHOTOS_TYPE_EXTENSION[ imageType ])
         super(Photo, self).save()
 
     def ratio(self):

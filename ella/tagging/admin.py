@@ -49,12 +49,20 @@ class TagInlineFormset(modelforms.BaseModelFormSet):
                 continue
             obj = self.instance
             ct = ContentType.objects.get_for_model(obj)
-            tis = TaggedItem.objects.filter(
-                content_type=ct,
-                object_id=obj._get_pk_val(),
-                category=obj.category,
-                priority=d['priority']
+            if hasattr(obj, 'category'):
+                tis = TaggedItem.objects.filter(
+                    content_type=ct,
+                    object_id=obj._get_pk_val(),
+                    category=obj.category,
+                    priority=d['priority']
 )
+            else:
+                tis = TaggedItem.objects.filter(
+                    content_type=ct,
+                    object_id=obj._get_pk_val(),
+                    priority=d['priority']
+)
+
             tags_before = set(map(lambda x: x.tag, tis))
             saved_tags = []
             for t in d['tag']:
@@ -71,7 +79,7 @@ class TagInlineFormset(modelforms.BaseModelFormSet):
                     tag=diff.pop(),
                     content_type=ct,
                     object_id=obj._get_pk_val(),
-                    category=obj.category,
+#                    category=obj.category,
                     priority=d['priority']
 )
                 ti.delete()
