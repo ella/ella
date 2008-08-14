@@ -1,4 +1,5 @@
 from datetime import datetime
+import logging
 
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
@@ -12,6 +13,7 @@ INIT_PROPS = {
     'target': '',
     'gonzo': '',
 }
+log = logging.getLogger('ella.sendmail')
 
 class SendMailForm(forms.Form):
 
@@ -50,10 +52,10 @@ class SendMailForm(forms.Form):
             target_ct, target_id = int(target_ct), int(target_id)
             target_contenttype = get_cached_object(ContentType, pk=target_ct)
             self.target_object = get_cached_object(target_contenttype, pk=target_id)
-        except ValueError:
-            pass
-        except models.ObjectDoesNotExist:
-            pass
+        except ValueError, ve:
+            log.error('ValueError: %s' % str(ve))
+        except models.ObjectDoesNotExist, e:
+            log.error('Object does not exist: %s' % str(e))
 
         # defaults for this instance
         self.init_props['target_ct'] = target_ct
@@ -122,3 +124,12 @@ class SendMailForm(forms.Form):
             raise ValidationError, _("Target object does not exist.")
 
         return self.cleaned_data
+
+
+class SendBuddyForm(SendMailForm):
+
+    def add_normal_inputs(self):
+        """any other normal inputs"""
+        textarea = forms.Textarea()
+        self.fields['sender_mail'] = forms.EmailField()
+        self.fields['recipient_mail'] = forms.EmailField()
