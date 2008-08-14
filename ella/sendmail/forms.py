@@ -1,6 +1,8 @@
 from datetime import datetime
 import logging
+import md5
 
+from django.conf import settings
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 
@@ -14,6 +16,17 @@ INIT_PROPS = {
     'gonzo': '',
 }
 log = logging.getLogger('ella.sendmail')
+
+
+def compute_hash(target='', timestamp=''):
+    """
+    counts md5 hash of options
+    this is simple check, if sent data are the same as expected
+    (defined in options)
+
+    """
+    timestamp = str(timestamp)
+    return md5.new('-'.join((target, timestamp, settings.SECRET_KEY,))).hexdigest()
 
 class SendMailForm(forms.Form):
 
@@ -62,7 +75,8 @@ class SendMailForm(forms.Form):
         self.init_props['target_id'] = target_id
 
         # defaults continue
-        self.init_props['gonzo'] = self.get_hash(self.init_props['target'], self.init_props['timestamp'])
+        #self.init_props['gonzo'] = compute_hash(self.init_props['target'], self.init_props['timestamp'])
+        self.init_props['gonzo'] = compute_hash(self.init_props['target'])
 
     def init_form(self, init_props={}):
         """create form by given init_props"""
@@ -91,19 +105,6 @@ class SendMailForm(forms.Form):
         self.fields['gonzo'].initial = self.init_props['gonzo']
         self.fields['target'].initial = self.init_props['target']
         self.fields['timestamp'].initial = self.init_props['timestamp']
-
-
-    def get_hash(self, target='', timestamp=''):
-        """
-        counts md5 hash of options
-        this is simple check, if sent data are the same as expected
-        (defined in options)
-
-        """
-        import md5
-        from django.conf import settings
-        timestamp = str(timestamp)
-        return md5.new('-'.join((target, timestamp, settings.SECRET_KEY,))).hexdigest()
 
 
     def clean(self):
