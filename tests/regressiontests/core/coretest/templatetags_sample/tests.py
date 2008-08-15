@@ -55,9 +55,55 @@ u'[<Listing: SampleModel object listed in example.com/>, <Listing: RedirObject o
 
 
 """
+hits = r"""
+>>> from django.template import Template, Context
+>>> from ella.core.models import Placement, HitCount
+>>> place =  Placement.objects.all()[0]
 
+# test comment_count
+>>> t = Template('{% load hits %}{% hitcount for place %}')
+>>> t.render(Context({'place': place}))
+u''
+>>> HitCount.objects.get(pk=place.pk).hits
+1
+
+>>> t = Template('{%% load hits %%}{%% hitcount for pk %s %%}' % place.pk)
+>>> t.render(Context({}))
+u''
+>>> HitCount.objects.get(pk=place.pk).hits
+2
+
+# hitcount with double_render
+>>> from django.templatetags import hits
+>>> hits.DOUBLE_RENDER = True
+
+# test hitcount
+>>> t = Template('{% load hits %}{% hitcount for place %}')
+>>> t.render(Context({'place': place})) == u'{%% load hits %%}{%% hitcount for pk %d %%}' % place.pk
+True
+>>> t = Template(t.render(Context({'place': place})))
+>>> t.render(Context({'SECOND_RENDER' : True}))
+u''
+>>> HitCount.objects.get(pk=place.pk).hits
+3
+
+>>> t = Template('{%% load hits %%}{%% hitcount for pk %s %%}' % place.pk)
+>>> t.render(Context({})) == u'{%% load hits %%}{%% hitcount for pk %d %%}' % place.pk
+True
+>>> t = Template(t.render(Context({})))
+>>> t.render(Context({'SECOND_RENDER' : True}))
+u''
+>>> HitCount.objects.get(pk=place.pk).hits
+4
+
+# hitcount with double_render
+>>> hits.DOUBLE_RENDER = False
+
+
+"""
 
 __test__ = {
-    'listing' : listing,
+#    'listing' : listing,
+    'hits' : hits
 }
 

@@ -17,3 +17,4 @@ class SeriePartAdmin(EllaAdminOptionsMixin, admin.ModelAdmin):
 
 admin.site.register(Serie, SerieAdmin)
 admin.site.register(SeriePart, SeriePartAdmin)
+

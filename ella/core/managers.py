@@ -154,10 +154,10 @@ class HitCountManager(models.Manager):
     @transaction.commit_on_success
     def hit(self, placement):
         cursor = connection.cursor()
-        res = cursor.execute('UPDATE core_hitcount SET hits=hits+1 WHERE placement_id=%s', (placement.pk,))
+        cursor.execute('UPDATE core_hitcount SET hits=hits+1 WHERE placement_id=%s', (placement.pk,))
         transaction.set_dirty()
 
-        if res < 1:
+        if cursor.rowcount < 1:
             hc = self.create(placement=placement)
 
     @cache_this(get_top_objects_key, timeout=10*60)
