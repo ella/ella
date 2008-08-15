@@ -5,10 +5,14 @@ from django.forms import models as modelforms
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
+from django.conf import settings
 
 from ella.ellaadmin import widgets
 from ella.ellaadmin.options import EllaAdminOptionsMixin
 from ella.core.models import Author, Source, Category, Listing, HitCount, Placement
+
+USE_SUGGESTERS =  getattr(settings, 'USE_SUGGESTERS', False)
+
 
 class PlacementForm(modelforms.ModelForm):
 
@@ -143,7 +147,12 @@ class ListingInlineOptions(admin.TabularInline):
     extra = 2
     fieldsets = ((None, {'fields' : ('category','publish_from', 'priority_from', 'priority_to', 'priority_value', 'remove', 'commercial',)}),)
 
-class PlacementInlineOptions(EllaAdminOptionsMixin, generic.GenericTabularInline):
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        if db_field.name == 'category' and not USE_SUGGESTERS:
+            kwargs['widget'] = widgets.ListingCategoryWidget
+        return super(ListingInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
+
+class PlacementInlineOptions(generic.GenericTabularInline):
     model = Placement
     extra = 1
     ct_field_name = 'target_ct'
@@ -151,6 +160,12 @@ class PlacementInlineOptions(EllaAdminOptionsMixin, generic.GenericTabularInline
     formset = PlacementInlineFormset
     form = PlacementForm
     fieldsets = ((None, {'fields' : ('category', 'publish_from', 'publish_to', 'slug', 'static', 'listings',)}),)
+
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        if db_field.name == 'category' and not USE_SUGGESTERS:
+            kwargs['widget'] = widgets.ListingCategoryWidget
+        return super(PlacementInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
+
 
 class HitCountInlineOptions(admin.TabularInline):
     model = HitCount

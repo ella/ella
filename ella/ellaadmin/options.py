@@ -1,10 +1,12 @@
 from django.db.models import ForeignKey, SlugField
 
 from django import forms
+from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
 from ella.ellaadmin import widgets, fields
 
+USE_SUGGESTERS =  getattr(settings, 'USE_SUGGESTERS', False)
 
 class EllaAdminOptionsMixin(object):
     def formfield_for_dbfield(self, db_field, **kwargs):
@@ -28,12 +30,15 @@ class EllaAdminOptionsMixin(object):
                     rich_text_field.widget.attrs['class'] += ' %s' % css_class
                 return rich_text_field
 
-        if db_field.name == 'category':
-            kwargs['label'] = db_field.verbose_name
-            return fields.CategorySuggestField(db_field, **kwargs)
+        # FIXME: Dirty solution for suggesters only in new zenaadmin
+        if USE_SUGGESTERS:
+            if db_field.name == 'category':
+                kwargs['label'] = db_field.verbose_name
+                return fields.CategorySuggestField(db_field, **kwargs)
 
-        if db_field.name == 'authors':
-            return fields.AuthorSuggestField(db_field, **kwargs)
+            if db_field.name == 'authors':
+                kwargs['label'] = db_field.verbose_name
+                return fields.AuthorSuggestField(db_field, **kwargs)
 
         if db_field.name in self.raw_id_fields and isinstance(db_field, ForeignKey):
             kwargs['widget'] = widgets.ForeignKeyRawIdWidget(db_field.rel)

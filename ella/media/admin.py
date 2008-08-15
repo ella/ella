@@ -8,6 +8,7 @@ from ella.core.admin import PlacementInlineOptions
 from ella.photos.models import Photo
 from ella.photos.imageop import get_img_size
 from ella.tagging.admin import TaggingInlineOptions
+from ella.ellaadmin.options import EllaAdminOptionsMixin
 
 from django.conf import settings
 from django.contrib.admin import widgets
@@ -60,7 +61,7 @@ class MediaForm(ModelForm):
 class SectionInline(admin.TabularInline):
     model = Section
 
-class MediaOptions(admin.ModelAdmin):
+class MediaOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
 
     def __init__(self, *args, **kwargs):
         super(MediaOptions, self).__init__(*args, **kwargs)
@@ -77,11 +78,10 @@ class MediaOptions(admin.ModelAdmin):
     list_filter = ('created', 'updated',)
     search_fields = ('title', 'slug', 'description', 'content',)
 
-#    raw_id_fields = ('photo',)
-
     inlines = (PlacementInlineOptions, TaggingInlineOptions, SectionInline)
 
-#    rich_text_fields = {None: ('description', 'content',)}
+    rich_text_fields = {None: ('description', 'text',)}
 
 
 admin.site.register(Media, MediaOptions)
+
