@@ -5,8 +5,6 @@ from django.template import Variable, VariableDoesNotExist
 
 from ella.core.models import HitCount, Placement
 from ella.core.cache import get_cached_object
-
-
 DOUBLE_RENDER = getattr(settings, 'DOUBLE_RENDER', False)
 register = template.Library()
 
