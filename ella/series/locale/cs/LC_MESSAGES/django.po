@@ -1,0 +1,70 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2008-07-29 17:18+0200\n"
+"PO-Revision-Date: 2008-07-29 17:20+0100\n"
+"Last-Translator: Vítek Pliska <vtek.pliska@netcentrum.cz>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: models.py:13
+msgid "Title"
+msgstr "Nadpis"
+
+#: models.py:14
+msgid "Slug"
+msgstr "Slug"
+
+#: models.py:15
+msgid "Perex"
+msgstr "Perex"
+
+#: models.py:16
+msgid "Description"
+msgstr "Popis"
+
+#: models.py:18
+msgid "Started"
+msgstr "Začátek"
+
+#: models.py:19
+msgid "Finished"
+msgstr "Ukončeno"
+
+#: models.py:28
+msgid "Active"
+msgstr "Aktivní"
+
+#: models.py:35
+#: models.py:41
+msgid "Serie"
+msgstr "Seriál"
+
+#: models.py:36
+msgid "Series"
+msgstr "Seriály"
+
+#: models.py:44
+msgid "Part no."
+msgstr "Číslo dílu"
+
+#: models.py:54
+msgid "in serie"
+msgstr "v seriálu"
+
+#: models.py:59
+msgid "Serie part"
+msgstr "Díl seriálu"
+
+#: models.py:60
+msgid "Serie parts"
+msgstr "Díly seriálu"
+

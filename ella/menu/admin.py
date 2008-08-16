@@ -11,9 +11,8 @@ from django.forms import ModelForm
 
 from ella.core.cache.utils import delete_cached_object
 from ella.ellaadmin import widgets
-from ella.ellaadmin.options import EllaAdminSite
 from ella.menu.models import MenuItem, Menu
-
+from ella.ellaadmin.options import EllaAdminOptionsMixin
 
 log = logging.getLogger('ella.menu')
 
@@ -47,7 +46,7 @@ class MenuItemOptions(admin.ModelAdmin):
     list_display = ('__unicode__', 'menu',)
     list_filter = ('menu',)
 
-class MenuOptions(admin.ModelAdmin):
+class MenuOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     form = MenuForm
     list_display = ('menu_slug', 'site')
 

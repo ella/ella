@@ -95,6 +95,7 @@ class ListingManager(RelatedManager):
             mods - list of Models, if empty, object from all models are included
             **kwargs - rest of the parameter are passed to the queryset unchanged
         """
+        # TODO try to write  SQL (.extra())
         assert offset > 0, "Offset must be a positive integer"
         assert count > 0, "Count must be a positive integer"
 
@@ -122,32 +123,26 @@ class ListingManager(RelatedManager):
 
         # templates are 1-based, compensate
         offset -= 1
+        limit = offset + count
 
         # no longer active listings UGLY TERRIBLE HACK DUE TO queryset-refactor not handling .exclude properly
         # FIXME TODO
         deleted = models.Q(remove=True, priority_to__isnull=False, priority_to__lte=now)
 
-        listed_targets = set([])
-
         # iterate through qsets until we have enough objects
+        listed_targets = set([])
         for q in qsets:
-            data = q.exclude(deleted)[offset:offset+count]
+            data = q.exclude(deleted)
             if data:
-                offset = 0
-                cnt = 0
                 for l in data:
                     tgt = l.placement_id
                     if tgt in listed_targets:
                         continue
                     listed_targets.add(tgt)
-                    cnt += 1
                     out.append(l)
-                count -= cnt
-                if count <= 0:
-                    break
-            elif offset != 0:
-                offset -= q.count()
-        return out
+                    if len(out) == limit:
+                        return out[offset:limit]
+        return out[offset:offset + count]
 
 def get_top_objects_key(func, self, count, mods=[]):
     return 'ella.core.managers.HitCountManager.get_top_objects_key:%d:%d:%s' % (
@@ -159,10 +154,10 @@ class HitCountManager(models.Manager):
     @transaction.commit_on_success
     def hit(self, placement):
         cursor = connection.cursor()
-        res = cursor.execute('UPDATE core_hitcount SET hits=hits+1 WHERE placement_id=%s', (placement.pk,))
+        cursor.execute('UPDATE core_hitcount SET hits=hits+1 WHERE placement_id=%s', (placement.pk,))
         transaction.set_dirty()
 
-        if res < 1:
+        if cursor.rowcount < 1:
             hc = self.create(placement=placement)
 
     @cache_this(get_top_objects_key, timeout=10*60)

@@ -7,10 +7,10 @@ from django.contrib.contenttypes.models import ContentType
 from ella.tagging.admin import TaggingInlineOptions
 
 from ella.galleries.models import Gallery, GalleryItem
-from ella.ellaadmin import widgets
+from ella.ellaadmin import widgets, fields
 from ella.core.admin import PlacementInlineOptions
 from ella.core.cache import get_cached_object
-
+from ella.ellaadmin.options import EllaAdminOptionsMixin
 
 class GalleryItemFormset(BaseInlineFormset):
     " Override default FormSet to allow for custom validation."
@@ -34,7 +34,7 @@ class GalleryItemFormset(BaseInlineFormset):
 
         return self.cleaned_data
 
-class GalleryItemTabularOptions(admin.TabularInline):
+class GalleryItemTabularOptions(EllaAdminOptionsMixin, admin.TabularInline):
     model = GalleryItem
     extra = 10
     formset = GalleryItemFormset
@@ -44,7 +44,7 @@ class GalleryItemTabularOptions(admin.TabularInline):
             kwargs['widget'] = widgets.IncrementWidget
         return super(GalleryItemTabularOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
-class GalleryOptions(admin.ModelAdmin):
+class GalleryOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     list_display = ('title', 'created', 'category', 'get_hits', 'full_url',)
     ordering = ('-created',)
     fieldsets = (

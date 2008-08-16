@@ -176,6 +176,7 @@
 				for (var i = 0; i < items.length; i++)
 					html += '<li>' + items[i] + '</li>';
 
+				resetPosition();
 				$results.html(html).show();
 
 				$results
@@ -306,4 +307,8 @@
 jQuery( function() {
     jQuery(".vSuggestField").suggest( tagSuggesterUrl, {selectFirst: true} );
     jQuery(".vSuggestMultipleField").suggest( tagSuggesterUrl, {selectFirst: true} );
+} );
+
+jQuery( function() {
+    jQuery(".vSuggestMultipleFieldAuthor").suggest( '/a/', {selectFirst: true} );
 } );

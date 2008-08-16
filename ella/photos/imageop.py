@@ -11,7 +11,16 @@ def detect_img_type(imagePath):
     except IOError:
         return None
 
-
+def get_img_size(imagePath):
+    """ returns tuple (width, height) of image """
+    try:
+        im = Image.open(imagePath)
+        return {
+            'width': im.size[0],
+            'height': im.size[1]
+}
+    except IOError:
+        return None
 
 class ImageOperation(object):
 
@@ -28,8 +37,6 @@ class ImageOperation(object):
 
     def save_image(self, image, filename, format='JPEG', **kwargs):
         self.image.save(filename, format, **kwargs)
-
-
 
 class ImageStretch(ImageOperation):
 
@@ -83,7 +90,6 @@ class ImageStretch(ImageOperation):
             return cropped_photo.resize(self.__get_stretch_dimension(), Image.ANTIALIAS)
         else:
             return None
-
 
     def crop_to_fit(self):
         # crop image to fit

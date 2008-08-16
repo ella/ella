@@ -103,6 +103,19 @@ def get_comment_list(parser, token):
 
 @register.tag
 def comment_count(parser, token):
+    """
+    Print comment count for the given params.
+
+    Syntax::
+
+        {% comment_count for APP_LABEL.MODEL_NAME with FIELD VALUE %}
+        {% comment_count for OBJECT %}
+
+    Example usage::
+
+        {% comment_count for testapp.apple with id 1 %}
+        {% comment_count for object %}
+    """
     tokens = token.split_contents()
     tagname, object_definition_tokens = parse_getfor(tokens)
     object = parse_object_definition(tagname, object_definition_tokens)

@@ -4,12 +4,13 @@ from django.forms import fields
 from django.forms.util import ValidationError
 from django.utils.encoding import smart_unicode
 from django.utils.translation import ugettext_lazy as _
+from django.db.models.fields.related import ForeignKey
 
-from ella.ellaadmin.widgets import RichTextAreaWidget
+from ella.ellaadmin import widgets
 
 
 class RichTextAreaField(fields.Field):
-    widget = RichTextAreaWidget
+    widget = widgets.RichTextAreaWidget
     default_error_messages = {
         'syntax_error': _('Bad syntax in markdown formatting or template tags.'),
         'url_error':  _('Some links are invalid: %s.'),
@@ -86,3 +87,60 @@ class RichTextAreaField(fields.Field):
             raise ValidationError(self.error_messages['syntax_error'])
 
         return value
+
+class CategorySuggestField(fields.Field):
+    default_error_messages = {
+        'not_exist': u'Category "%s" does not exist.',
+        'found_too_much': u'Multiple categories found as "%s".',
+}
+    def __init__(self, *args, **kwargs):
+        self.dbfield = args[0]
+        self.widget = widgets.CategorySuggestAdminWidget(*args, **kwargs)
+        super(CategorySuggestField, self).__init__(*args, **kwargs)
+
+    def clean(self, value):
+        from ella.core.models import Category
+
+        field = self.dbfield
+        blank = False
+        if isinstance(field, ForeignKey) and hasattr(field, 'blank'):
+            blank = field.blank
+        if not value and not blank:
+            raise ValidationError(_('This field is required.'))
+        elif not value and blank:
+            return
+        val = value.split(':')
+        try:
+            return Category.objects.get(site__name=val[0], tree_path=val[1])
+        except (Category.DoesNotExist, IndexError):
+            raise ValidationError(self.error_messages['not_exist'] % value)
+
+class AuthorSuggestField(fields.Field):
+    default_error_messages = {
+        'not_exist': 'Author "%s" does not exist.',
+        'found_too_much': u'Multiple authors found as "%s".',
+}
+    def __init__(self, *args, **kwargs):
+        self.widget = widgets.AuthorsSuggestAdminWidget(*args, **kwargs)
+        super(AuthorSuggestField, self).__init__(*args, **kwargs)
+
+    def clean(self, value):
+        from ella.core.models import Author
+
+        if not value:
+            raise ValidationError(_('This field is required.'))
+        vals = value.split(',')
+        ids = []
+        for v in vals:
+            id = int(v.split(':')[0])
+            ids.append(id)
+        try:
+            return Author.objects.filter(pk__in=ids)
+        except (Author.DoesNotExist, IndexError):
+            raise ValidationError(self.error_messages['not_exist'] % value)
+
+class CategorySuggestPlacementField(CategorySuggestField):
+    def __init__(self, *args, **kwargs):
+        self.widget = widgets.PlacementCategoryWidget(*args, **kwargs)
+        super(CategorySuggestPlacementField, self).__init__(*args, **kwargs)
+

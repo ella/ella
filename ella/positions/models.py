@@ -36,7 +36,7 @@ class PositionManager(models.Manager):
         lookup = (Q(active_from__isnull=True) | Q(active_from__lte=now)) & (Q(active_till__isnull=True) | Q(active_till__gt=now))
         while True:
             try:
-                return self.get(lookup, category=category, name=name)
+                return self.get(lookup, category=category, name=name, disabled=False)
             except Position.DoesNotExist:
                 # if nofallback was specified, do not look into parent categories
                 if nofallback:
@@ -72,6 +72,7 @@ class Position(models.Model):
 
     box_type = models.CharField(_('Box type'), max_length=200, blank=True)
     text = models.TextField(_('Definition'), blank=True)
+    disabled = models.BooleanField(_('Disabled'), default=False)
 
     objects = PositionManager()
 
@@ -92,6 +93,8 @@ class Position(models.Model):
     is_filled.boolean = True
 #############
     def is_active(self):
+        if self.disabled:
+            return False
         now = datetime.now()
         active_from = not self.active_from or self.active_from <= now
         active_till = not self.active_till or self.active_till > now

@@ -7,6 +7,7 @@ from ella.tagging.models import Tag, TaggedItem
 from django.utils.translation import ugettext_lazy as _
 from ella.tagging.fields import SuggestTagAdminField, TagPriorityAdminField
 from django.contrib.contenttypes.models import ContentType
+from ella.ellaadmin.options import EllaAdminOptionsMixin
 
 class TagInlineForm(modelforms.ModelForm):
     class Meta:
@@ -40,17 +41,28 @@ class TagInlineFormset(modelforms.BaseModelFormSet):
 )
 
     def save(self):
+        self.new_objects = []
+        self.changed_objects = []
+        self.deleted_objects = []
         for d in self.cleaned_data:
             if 'priority' not in d or 'tag' not in d:
                 continue
             obj = self.instance
             ct = ContentType.objects.get_for_model(obj)
-            tis = TaggedItem.objects.filter(
-                content_type=ct,
-                object_id=obj._get_pk_val(),
-                category=obj.category,
-                priority=d['priority']
+            if hasattr(obj, 'category'):
+                tis = TaggedItem.objects.filter(
+                    content_type=ct,
+                    object_id=obj._get_pk_val(),
+                    category=obj.category,
+                    priority=d['priority']
 )
+            else:
+                tis = TaggedItem.objects.filter(
+                    content_type=ct,
+                    object_id=obj._get_pk_val(),
+                    priority=d['priority']
+)
+
             tags_before = set(map(lambda x: x.tag, tis))
             saved_tags = []
             for t in d['tag']:
@@ -67,47 +79,21 @@ class TagInlineFormset(modelforms.BaseModelFormSet):
                     tag=diff.pop(),
                     content_type=ct,
                     object_id=obj._get_pk_val(),
-                    category=obj.category,
+#                    category=obj.category,
                     priority=d['priority']
 )
                 ti.delete()
-
-
-    """
-    def __add_category(self, form, instance, commit):
-        if not commit:
-            return
-        if not hasattr(instance, 'category'):
-            return
-        # kategorii ziskam: [self.]instance.object.category
-        # v teto chvili je ulozeny TaggedItem ok, ale s prazdnym polem "category"
-        # self.get_queryset() vrati QSet instanci TaggedItem
-        # form.cleaned_data obsahuje slovnik atributu ukladaneho: {'tag': <Tag: kremenac>, 'id': None}
-        if isinstance(instance, TaggedItem):
-            obj = instance.object
-        else:
-            obj = instance
-        tag = form.cleaned_data['tag']
-        ct = ContentType.objects.get_for_model(type(obj)) # tagged object ContentType
-        ti = TaggedItem.objects.get(
-            content_type=ct,
-            object_id=obj._get_pk_val(),
-            tag=tag
-)
-        ti.category = obj.category
-        ti.save()
-    """
 
 
 class TaggingInlineOptionsSimple(admin.TabularInline):
     model = TaggedItem
     extra = 0
 
-class TaggingInlineOptions(generic.GenericTabularInline):
+class TaggingInlineOptions(EllaAdminOptionsMixin, generic.GenericTabularInline):
     fields = ('tag', 'priority',)
     raw_id_fields = ('tag',)
     model = TaggedItem
-    extra = 4
+    extra = 2
     id_field_name = 'object_id'
     ct_field_name = 'content_type'
     formset = TagInlineFormset

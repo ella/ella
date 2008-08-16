@@ -1,5 +1,7 @@
 from os.path import isfile
 import logging.config
+import logging
+import traceback
 
 from django.utils.itercompat import is_iterable
 from django.conf import settings
@@ -38,8 +40,8 @@ def call_modules(auto_discover=()):
                 mod = __import__(imp, {}, {}, [''])
                 inst = getattr(mod, '__install__', lambda:None)
                 inst()
-            except ImportError:
-                pass
+            except ImportError, e:
+                logging.warning('problem during discovering %s - %s\n%s' % (imp, e, traceback.format_exc()))
 
 def init_logger():
     """init logger with LOGGING_CONFIG_FILE settings option"""

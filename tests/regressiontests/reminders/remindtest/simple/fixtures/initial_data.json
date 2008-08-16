@@ -1,0 +1,60 @@
+[
+  {
+    "pk": 1,
+    "model": "auth.user",
+    "fields": {
+      "username": "admin",
+      "first_name": "",
+      "last_name": "",
+      "is_active": true,
+      "is_superuser": true,
+      "is_staff": true,
+      "last_login": "2008-07-29 20:39:49",
+      "groups": [],
+      "user_permissions": [],
+      "password": "sha1$f4e19$23284c5c06076451cfb23cf4e9f9fe2c40c3da4a",
+      "email": "admin@ella.cz",
+      "date_joined": "2008-07-29 20:39:49"
+    }
+  },
+  {
+    "pk": 1,
+    "model": "reminders.deliverymethod",
+    "fields": {
+        "title": "Mail",
+        "slug": "mail",
+        "function": "ella.reminders.delivery.mail"
+    }
+  },
+  {
+    "pk": 1,
+    "model": "reminders.contact",
+    "fields": {
+        "user": 1,
+        "delivery_method": 1,
+        "contact": "some@email.com"
+    }
+  },
+  {
+    "pk": 1,
+    "model": "reminders.calendar",
+    "fields": {
+        "title": "Sample calendar",
+        "slug": "sample-calendar",
+        "created": "2008-07-29 20:39:49",
+        "subscribers": [1]
+    }
+  },
+  {
+    "pk": 1,
+    "model": "reminders.event",
+    "fields": {
+        "calendar": 1,
+        "title": "Sample event",
+        "slug": "sample-event",
+        "date": "2008-07-29",
+        "description": "Some short description",
+        "text": "... and some longer text"
+    }
+  }
+]

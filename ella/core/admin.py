@@ -5,9 +5,14 @@ from django.forms import models as modelforms
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
+from django.conf import settings
 
 from ella.ellaadmin import widgets
+from ella.ellaadmin.options import EllaAdminOptionsMixin
 from ella.core.models import Author, Source, Category, Listing, HitCount, Placement
+
+USE_SUGGESTERS =  getattr(settings, 'USE_SUGGESTERS', False)
+
 
 class PlacementForm(modelforms.ModelForm):
 
@@ -143,7 +148,7 @@ class ListingInlineOptions(admin.TabularInline):
     fieldsets = ((None, {'fields' : ('category','publish_from', 'priority_from', 'priority_to', 'priority_value', 'remove', 'commercial',)}),)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'category':
+        if db_field.name == 'category' and not USE_SUGGESTERS:
             kwargs['widget'] = widgets.ListingCategoryWidget
         return super(ListingInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
@@ -157,15 +162,16 @@ class PlacementInlineOptions(generic.GenericTabularInline):
     fieldsets = ((None, {'fields' : ('category', 'publish_from', 'publish_to', 'slug', 'static', 'listings',)}),)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'category':
+        if db_field.name == 'category' and not USE_SUGGESTERS:
             kwargs['widget'] = widgets.ListingCategoryWidget
         return super(PlacementInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
+
 
 class HitCountInlineOptions(admin.TabularInline):
     model = HitCount
     extra = 0
 
-class PlacementOptions(admin.ModelAdmin):
+class PlacementOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     list_display = ('target', 'category', 'publish_from', 'full_url',)
     list_filter = ('publish_from', 'category', 'target_ct',)
     inlines = (ListingInlineOptions,)
@@ -174,13 +180,13 @@ class PlacementOptions(admin.ModelAdmin):
         (_('time'), {'fields': ('publish_from','publish_to', 'static',), 'classes': ('wide',)},),
 )
 
-class ListingOptions(admin.ModelAdmin):
+class ListingOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     list_display = ('target_admin', 'target_ct', 'publish_from', 'category', 'placement_admin', 'target_hitcounts', 'target_url',)
     list_display_links = ()
     list_filter = ('publish_from', 'category__site', 'category', 'placement__target_ct',)
     raw_id_fields = ('placement',)
 
-class CategoryOptions(admin.ModelAdmin):
+class CategoryOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     list_filter = ('site',)
     list_display = ('draw_title', 'tree_path', '__unicode__')
     ordering = ('site', 'tree_path',)
@@ -190,7 +196,7 @@ class HitCountOptions(admin.ModelAdmin):
     list_display = ('target', 'hits',)
     list_filter = ('placement__target_ct', 'placement__category__site',)
 
-class AuthorOptions(admin.ModelAdmin):
+class AuthorOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
 
 

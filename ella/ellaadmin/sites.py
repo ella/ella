@@ -26,6 +26,7 @@ class EllaAdminSite(admin.AdminSite):
             return Mix
         return admin_class
 
+
     def model_page(self, request, app_label, model_name, rest_of_url=None):
         """
         Handles the model-specific functionality of the admin site, delegating
@@ -39,13 +40,14 @@ class EllaAdminSite(admin.AdminSite):
         try:
             admin_obj = copy.deepcopy(self._registry[model])
             admin_obj.admin_site = self
-            admin_obj.__class__ = self.mixin_admin(admin_obj.__class__)
-            for i in admin_obj.inline_instances:
-                i.__class__ = self.mixin_admin(i.__class__)
+         #   admin_obj.__class__ = self.mixin_admin(admin_obj.__class__)
+         #   for i in admin_obj.inline_instances:
+         #       i.__class__ = self.mixin_admin(i.__class__)
         except KeyError:
             raise http.Http404("This model exists but has not been registered with the admin site.")
         return admin_obj(request, rest_of_url)
     model_page = never_cache(model_page)
+
 
     def root(self, request, url):
         try:

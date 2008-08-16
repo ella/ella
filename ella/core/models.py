@@ -158,7 +158,7 @@ class Placement(models.Model):
     target_ct = models.ForeignKey(ContentType)
     target_id = models.IntegerField()
     category = models.ForeignKey(Category, db_index=True)
-    publish_from = models.DateTimeField(_("Start of visibility"), default=datetime.now)
+    publish_from = models.DateTimeField(_("Start of visibility")) #, default=datetime.now)
     publish_to = models.DateTimeField(_("End of visibility"), null=True, blank=True)
     slug = models.SlugField(_('Slug'), max_length=255, blank=True)
 
@@ -167,6 +167,7 @@ class Placement(models.Model):
     objects = PlacementManager()
 
     class Meta:
+        unique_together = (('category', 'target_ct', 'target_id'),)
         ordering = ('-publish_from',)
         verbose_name = _('Placement')
         verbose_name_plural = _('Placements')
@@ -249,8 +250,6 @@ class Placement(models.Model):
             return 'http://' + site.domain + url
         return url
 
-    class Meta:
-        unique_together = (('category', 'target_ct', 'target_id'),)
 
 class Listing(models.Model):
     """
@@ -265,7 +264,7 @@ class Listing(models.Model):
     placement = models.ForeignKey(Placement)
     category = models.ForeignKey(Category, db_index=True)
 
-    publish_from = models.DateTimeField(_("Start of listing"), default=datetime.now)
+    publish_from = models.DateTimeField(_("Start of listing")) #, default=datetime.now)
     priority_from = models.DateTimeField(_("Start of prioritized listing"), null=True, blank=True)
     priority_to = models.DateTimeField(_("End of prioritized listing"), null=True, blank=True)
     priority_value = models.IntegerField(_("Priority"), blank=True, null=True)

@@ -1,10 +1,13 @@
 from django import template
 from django.db import models
+from django.conf import settings
+from django.template import Variable, VariableDoesNotExist
 
-from ella.core.models import HitCount
-
-
+from ella.core.models import HitCount, Placement
+from ella.core.cache import get_cached_object
+DOUBLE_RENDER = getattr(settings, 'DOUBLE_RENDER', False)
 register = template.Library()
+
 
 class TopVisitedNode(template.Node):
     def __init__(self, count, name, mods=None):
@@ -51,4 +54,48 @@ def do_top_visited(parser, token):
         mods.append(model)
 
     return TopVisitedNode(count, bits[-1], mods)
+
+
+class HitCountNode(template.Node):
+    def __init__(self, place, pk):
+        self.place, self.pk = place, pk
+
+    def render(self, context):
+        if self.pk:
+            try:
+                place = get_cached_object(Placement, pk=self.place)
+            except Placement.DoesNotExist:
+                return ''
+        else:
+            try:
+                place = Variable(self.place).resolve(context)
+            except VariableDoesNotExist:
+                return ''
+
+        if DOUBLE_RENDER and 'SECOND_RENDER' not in context:
+            return '{%% load hits %%}{%% hitcount for pk %(place_pk)s %%}' % {
+                'place_pk' : place.pk,
+}
+        HitCount.objects.hit(place)
+        return ''
+
+@register.tag
+def hitcount(parser, token):
+    """
+    Increment hit counter via template tag
+
+    Usage::
+        {% hitcount for placement %}
+        {% hitcount for pk 12 %}
+    """
+    bits = token.split_contents()
+    pk = False
+    if len(bits) == 3 and bits[1] == 'for':
+        place = bits[2]
+    elif len(bits) == 4 and bits[1] == 'for' and bits[2] == 'pk':
+        place = bits[3]
+        pk = True
+    else:
+        raise template.TemplateSyntaxError('{% hitcount for [pk] {placement|pk} %}')
+    return HitCountNode(place, pk)
 

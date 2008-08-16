@@ -2,20 +2,19 @@ from django.contrib import admin
 
 from ella.media.models import Media, Format, FormattedMedia
 from ella.core.admin import PlacementInlineOptions
-
 from ella.tagging.admin import TaggingInlineOptions
-
+from ella.ellaadmin.options import EllaAdminOptionsMixin
 
 class FormattedMediaInlineOptions(admin.TabularInline):
     model = FormattedMedia
     extra = 2
     fieldsets = ((None, {'fields' : ('format', 'url', 'status',)}),)
 
-class FormattedMediaOptions(admin.ModelAdmin):
+class FormattedMediaOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     list_display = ('__unicode__', 'hash', 'source', 'format',)
     raw_id_fields = ('source',)
 
-class MediaOptions(admin.ModelAdmin):
+class MediaOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     inlines = (FormattedMediaInlineOptions,)
     prepopulated_fields = {'slug' : ('title',)}
 

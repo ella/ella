@@ -56,7 +56,7 @@ class PositionNode(template.Node):
             cat = template.Variable(self.category).resolve(context)
             if not isinstance(cat, Category):
                 cat = get_cached_object(Category, site=settings.SITE_ID, slug=self.category)
-        except template.VariableDoesNotExist, Category.DoesNotExist:
+        except (template.VariableDoesNotExist, Category.DoesNotExist):
             cat = get_cached_object(Category, site=settings.SITE_ID, tree_parent__isnull=True)
 
         try:

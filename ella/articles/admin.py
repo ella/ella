@@ -5,21 +5,21 @@ from ella.tagging.admin import TaggingInlineOptions
 
 from ella.core.admin import PlacementInlineOptions
 from ella.articles.models import ArticleContents, Article, InfoBox
+from ella.ellaadmin.options import EllaAdminOptionsMixin
 
-
-class ArticleContentInlineOptions(admin.TabularInline):
+class ArticleContentInlineOptions(EllaAdminOptionsMixin, admin.TabularInline):
     model = ArticleContents
     extra = 1
     rich_text_fields = {None: ('content',)}
 
-class InfoBoxOptions(admin.ModelAdmin):
+class InfoBoxOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     list_display = ('title', 'created',)
     date_hierarchy = 'created'
     list_filter = ('created', 'updated',)
     search_fields = ('title', 'content',)
     rich_text_fields = {None: ('content',)}
 
-class ArticleOptions(admin.ModelAdmin):
+class ArticleOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     list_display = ('title', 'category', 'photo_thumbnail', 'created', 'article_age', 'get_hits', 'full_url',)
     date_hierarchy = 'created'
     ordering = ('-created',)
