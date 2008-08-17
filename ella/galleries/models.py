@@ -9,7 +9,7 @@ from django.utils.datastructures import SortedDict
 from ella.core.box import Box
 from ella.db.models import Publishable
 from ella.core.models import Category, Author
-from ella.core.cache.utils import get_cached_object, cache_this
+from ella.core.cache.utils import get_cached_object, cache_this, CachedGenericForeignKey
 from ella.core.cache.invalidate import CACHE_DELETER
 from ella.photos.models import Photo
 
@@ -87,10 +87,7 @@ class GalleryItem(models.Model):
     target_id = models.IntegerField(_('Target ID'), db_index=True)
     order = models.IntegerField(_('Object order')) # TODO: order with respect to
 
-    @property
-    def target(self):
-        """Returns item's target object."""
-        return get_cached_object(self.target_ct, pk=self.target_id)
+    target = CachedGenericForeignKey(ct_field="target_ct", fk_field="target_id")
 
     def _get_slug(self):
         if not hasattr(self, '_item_list'):

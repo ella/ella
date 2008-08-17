@@ -11,7 +11,7 @@ from django.template import Template
 
 from ella.core.models import Category
 from ella.core.box import Box
-from ella.core.cache import get_cached_object, CACHE_DELETER, cache_this
+from ella.core.cache import get_cached_object, CACHE_DELETER, cache_this, CachedGenericForeignKey
 
 def get_position_key(func, self, category, name, nofallback):
     return 'ella.positions.models.PositionManager.get_active_position:%d:%s:%s' % (
@@ -57,15 +57,7 @@ class Position(models.Model):
     target_ct = models.ForeignKey(ContentType, verbose_name=_('Target content type'), null=True, blank=True)
     target_id = models.PositiveIntegerField(_('Target id'), null=True, blank=True)
 
-    @property
-    def target(self):
-        if not hasattr(self, '_target'):
-            try:
-                target_ct = get_cached_object(ContentType, pk=self.target_ct_id)
-                self._target = get_cached_object(target_ct, pk=self.target_id)
-            except ObjectDoesNotExist:
-                return None
-        return self._target
+    target = CachedGenericForeignKey('target_ct', 'target_id')
 
     active_from = models.DateTimeField(_('Position active from'), null=True, blank=True)
     active_till = models.DateTimeField(_('Position active till'), null=True, blank=True)
