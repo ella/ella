@@ -21,6 +21,8 @@ register = template.Library()
 
 DOUBLE_RENDER = getattr(settings, 'DOUBLE_RENDER', False)
 
+# unique results from multiple {% listing %} templatetags
+_listing_unique_buffer = set()
 
 class ListingNode(template.Node):
     def __init__(self, var_name, parameters, parameters_to_resolve):
@@ -33,7 +35,10 @@ class ListingNode(template.Node):
             self.parameters[key] = template.Variable(self.parameters[key]).resolve(context)
         if self.parameters.has_key('category') and isinstance(self.parameters['category'], basestring):
             self.parameters['category'] = get_cached_object(Category, tree_path=self.parameters['category'], site__id=settings.SITE_ID)
-        context[self.var_name] = Listing.objects.get_listing(**self.parameters)
+        out = Listing.objects.get_listing(**self.parameters)
+        print 'Listed target ids: %s' % map(lambda x: x.placement_id, out)
+        map(lambda x: _listing_unique_buffer.add(x.placement_id),out)
+        context[self.var_name] = out
         return ''
 
 @register.tag
@@ -127,6 +132,13 @@ def listing_parse(input):
         var_name = input[o+1]
     else:
         raise template.TemplateSyntaxError, "%r tag requires 'as' argument" % input[0]
+
+    # unique
+    if input[-1].lower() == 'unique':
+        params['unique'] = _listing_unique_buffer
+    if input[-1].lower() == 'unique-reset':
+        _listing_unique_buffer.clear()
+        params['unique'] = _listing_unique_buffer
 
     return var_name, params, params_to_resolve
 

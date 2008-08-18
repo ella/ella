@@ -84,7 +84,7 @@ class ListingManager(RelatedManager):
         return self.get_queryset(category, children, mods, **kwargs).exclude(deleted).count()
 
     @cache_this(get_listings_key, invalidate_listing)
-    def get_listing(self, category=None, children=NONE, count=10, offset=1, mods=[], content_types=[], **kwargs):
+    def get_listing(self, category=None, children=NONE, count=10, offset=1, mods=[], content_types=[], unique=None, **kwargs):
         """
         Get top objects for given category and potentionally also its child categories.
 
@@ -129,8 +129,13 @@ class ListingManager(RelatedManager):
         # FIXME TODO
         deleted = models.Q(remove=True, priority_to__isnull=False, priority_to__lte=now)
 
+        # take out not unwanted objects
+        if unique:
+            listed_targets = unique.copy()
+            print listed_targets
+        else:
+            listed_targets = set([])
         # iterate through qsets until we have enough objects
-        listed_targets = set([])
         for q in qsets:
             data = q.exclude(deleted)
             if data:
