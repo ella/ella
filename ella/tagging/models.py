@@ -16,7 +16,7 @@ from ella.tagging import settings
 from ella.tagging.utils import calculate_cloud, get_tag_list, get_queryset_and_model, parse_tag_input
 from ella.tagging.utils import LOGARITHMIC, PRIMARY_TAG, TAG_DELIMITER
 from ella.tagging.validators import isTag
-from ella.core.cache.utils import get_cached_list, cache_this, delete_cached_object
+from ella.core.cache.utils import get_cached_list, cache_this, delete_cached_object, CachedGenericForeignKey
 from ella.core.cache.invalidate import CACHE_DELETER
 
 try:
@@ -581,7 +581,7 @@ class TaggedItem(models.Model):
     tag          = models.ForeignKey(Tag, verbose_name=_('tag'), related_name='items')
     content_type = models.ForeignKey(ContentType, verbose_name=_('content type'))
     object_id    = models.PositiveIntegerField(_('object id'), db_index=True)
-    object       = generic.GenericForeignKey('content_type', 'object_id')
+    object       = CachedGenericForeignKey('content_type', 'object_id')
     category     = models.ForeignKey(Category, editable=False, null=True)
     priority     = models.IntegerField(db_index=True)
 

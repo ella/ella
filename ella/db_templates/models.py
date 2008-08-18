@@ -10,7 +10,7 @@ from django.conf import settings
 from django.template import Template
 from django.template.loader_tags import ExtendsNode, BlockNode
 
-from ella.core.cache import get_cached_object
+from ella.core.cache import get_cached_object, CachedGenericForeignKey
 from ella.core.templatetags.core import BoxNode
 
 
@@ -159,13 +159,7 @@ class TemplateBlock(models.Model):
 
     objects = TemplateBlockManager()
 
-    @property
-    def target(self):
-        if not self.target_id or not self.target_ct:
-            return None
-        if not hasattr(self, '_target'):
-            self._target = get_cached_object(self.target_ct, pk=self.target_id)
-        return self._target
+    target = CachedGenericForeignKey(ct_field="target_ct", fk_field="target_id")
 
     def get_text(self):
         text = []

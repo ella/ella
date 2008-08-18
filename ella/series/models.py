@@ -4,7 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 
 from ella.core.models import Category
-from ella.core.cache.utils import get_cached_object, get_cached_list
+from ella.core.cache.utils import get_cached_object, get_cached_list, CachedGenericForeignKey
 from ella.db.models import Publishable
 from ella.core.box import Box
 
@@ -32,7 +32,7 @@ class Serie(models.Model, Publishable):
     is_active.boolean = True
 
     def __unicode__(self):
-        return u"%s" % self.title
+        return self.title
 
     class Meta:
         verbose_name = _('Serie')
@@ -46,12 +46,8 @@ class SeriePart(models.Model):
     target_id = models.IntegerField()
     part_no = models.PositiveSmallIntegerField(_('Part no.'), default=1)
 
-    @property
-    def target(self):
-        "Return target object via cache"
-        if not hasattr(self, '_target'):
-            self._target = get_cached_object(self.target_ct, pk=self.target_id)
-        return self._target
+    target = CachedGenericForeignKey('target_ct', 'target_id')
+
 
     def __unicode__(self):
         return u"%s %s: %s" % (self.target,_('in serie'),self.serie)

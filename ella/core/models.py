@@ -14,7 +14,7 @@ from django.contrib.redirects.models import Redirect
 from ella.ellaadmin.utils import admin_url
 from ella.core.box import Box
 from ella.core.managers import ListingManager, HitCountManager, PlacementManager
-from ella.core.cache import get_cached_object, cache_this
+from ella.core.cache import get_cached_object, cache_this, CachedGenericForeignKey
 
 
 class Author(models.Model):
@@ -157,6 +157,7 @@ class Placement(models.Model):
     # listing's target - a Publishable object
     target_ct = models.ForeignKey(ContentType)
     target_id = models.IntegerField()
+    target = CachedGenericForeignKey('target_ct', 'target_id')
     category = models.ForeignKey(Category, db_index=True)
     publish_from = models.DateTimeField(_("Start of visibility")) #, default=datetime.now)
     publish_to = models.DateTimeField(_("End of visibility"), null=True, blank=True)
@@ -183,12 +184,6 @@ class Placement(models.Model):
         return mark_safe('<a href="%s">url</a>' % self.get_absolute_url())
     full_url.allow_tags = True
 
-    @property
-    def target(self):
-        "Return target object via cache"
-        if not hasattr(self, '_target'):
-            self._target = get_cached_object(self.target_ct, pk=self.target_id)
-        return self._target
 
     def is_active(self):
         "Return True if the listing's priority is currently active."
@@ -359,23 +354,11 @@ class Related(models.Model):
     """
     target_ct = models.ForeignKey(ContentType, related_name='relation_for_set')
     target_id = models.IntegerField()
+    target = CachedGenericForeignKey('target_ct', 'target_id')
 
     source_ct = models.ForeignKey(ContentType, related_name='related_on_set')
     source_id = models.IntegerField()
-
-    @property
-    def source(self):
-        if not hasattr(self, '_source'):
-            source_ct = get_cached_object(ContentType, pk=self.source_ct_id)
-            self._source = get_cached_object(source_ct, pk=self.source_id)
-        return self._source
-
-    @property
-    def target(self):
-        if not hasattr(self, '_target'):
-            target_ct = get_cached_object(ContentType, pk=self.target_ct_id)
-            self._target = get_cached_object(target_ct, pk=self.target_id)
-        return self._target
+    source = CachedGenericForeignKey('source_ct', 'source_id')
 
     def __unicode__(self):
         return u'%s relates to %s' % (self.source, self.target)
