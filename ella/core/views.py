@@ -44,7 +44,7 @@ def get_content_type(ct_name):
 
 def object_detail(request, category, content_type, slug, year=None, month=None, day=None, url_remainder=None):
     """
-    Detail view that displays a single object based on it's main placement.
+    Detail view that displays a single object based on its main placement.
 
     Params:
         request - HttpRequest supplied by Django
