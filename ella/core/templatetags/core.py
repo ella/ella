@@ -21,9 +21,6 @@ register = template.Library()
 
 DOUBLE_RENDER = getattr(settings, 'DOUBLE_RENDER', False)
 
-# unique results from multiple {% listing %} templatetags
-_listing_unique_buffer = set()
-
 class ListingNode(template.Node):
     def __init__(self, var_name, parameters, parameters_to_resolve):
         self.var_name = var_name
@@ -31,12 +28,21 @@ class ListingNode(template.Node):
         self.parameters_to_resolve = parameters_to_resolve
 
     def render(self, context):
+        unique_var_name = None
         for key in self.parameters_to_resolve:
+            if key == 'unique':
+                unique_var_name = self.parameters[key]
+            if key == 'unique' and unique_var_name not in context.dicts[-1]: # autocreate variable in context
+                self.parameters[key] = context.dicts[-1][ unique_var_name ] = set()
+                continue
             self.parameters[key] = template.Variable(self.parameters[key]).resolve(context)
         if self.parameters.has_key('category') and isinstance(self.parameters['category'], basestring):
             self.parameters['category'] = get_cached_object(Category, tree_path=self.parameters['category'], site__id=settings.SITE_ID)
         out = Listing.objects.get_listing(**self.parameters)
-        map(lambda x: _listing_unique_buffer.add(x.placement_id),out)
+
+        if 'unique' in self.parameters:
+            unique = self.parameters['unique'] #context[unique_var_name]
+            map(lambda x: unique.add(x.placement_id),out)
         context[self.var_name] = out
         return ''
 
@@ -133,11 +139,9 @@ def listing_parse(input):
         raise template.TemplateSyntaxError, "%r tag requires 'as' argument" % input[0]
 
     # unique
-    if input[-1].lower() == 'unique':
-        params['unique'] = _listing_unique_buffer
-    if input[-1].lower() == 'unique-reset':
-        _listing_unique_buffer.clear()
-        params['unique'] = _listing_unique_buffer
+    if input[-2].lower() == 'unique':
+        params['unique'] = input[-1]
+        params_to_resolve.append('unique')
 
     return var_name, params, params_to_resolve
 
