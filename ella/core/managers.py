@@ -132,7 +132,6 @@ class ListingManager(RelatedManager):
         # take out not unwanted objects
         if unique:
             listed_targets = unique.copy()
-            print listed_targets
         else:
             listed_targets = set([])
         # iterate through qsets until we have enough objects

@@ -36,7 +36,6 @@ class ListingNode(template.Node):
         if self.parameters.has_key('category') and isinstance(self.parameters['category'], basestring):
             self.parameters['category'] = get_cached_object(Category, tree_path=self.parameters['category'], site__id=settings.SITE_ID)
         out = Listing.objects.get_listing(**self.parameters)
-        print 'Listed target ids: %s' % map(lambda x: x.placement_id, out)
         map(lambda x: _listing_unique_buffer.add(x.placement_id),out)
         context[self.var_name] = out
         return ''
