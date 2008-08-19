@@ -53,7 +53,7 @@ class SendMailForm(forms.Form):
         self.init_props = INIT_PROPS.copy()
 
         # set actual time
-        now = int(datetime.now().strftime('%s'))
+        now = int(datetime.now().strftime(r'%s'))
         self.init_props['timestamp'] = now
 
         # update defaults with form init params
