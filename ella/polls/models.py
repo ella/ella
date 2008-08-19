@@ -124,6 +124,15 @@ class Contest(Publishable, models.Model, FloatingStateModel):
         verbose_name_plural = _('Contests')
         ordering = ('-active_from',)
 
+class QuizBox(Box):
+    def get_context(self):
+        "Updates box context with photo-specific variables."
+        from ella.polls.views import QuestionForm
+        cont = super(QuizBox, self).get_context()
+        questions = self.obj.questions
+        cont['questions'] = questions
+        cont['form'] = QuestionForm(questions[0])(prefix='0')
+        return cont
 
 class Quiz(Publishable, models.Model, FloatingStateModel):
     """
@@ -143,6 +152,9 @@ class Quiz(Publishable, models.Model, FloatingStateModel):
     authors = models.ManyToManyField(Author, verbose_name=_('Authors'))
 
     objects = RelatedManager()
+
+    def Box(self, box_type, nodelist):
+        return QuizBox(self, box_type, nodelist)
 
     @property
     def questions(self):
