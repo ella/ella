@@ -535,7 +535,7 @@ class TaggedItemManager(models.Manager):
             'tag': qn(self.model._meta.get_field('tag').rel.to._meta.db_table),
             'content_type_id': content_type.pk,
             'related_content_type_id': related_content_type.pk,
-            'limit_offset': num is not None and connection.ops.limit_offset_sql(num) or '',
+            'limit_offset': num is not None and 'LIMIT %d' % num or '',
 }
 
         cursor = connection.cursor()
