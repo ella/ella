@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <playlist>
     <collection>
-        <id>{{ object.slug }}</id>
-        <title>{{ object.get_title }}</title>
-        <description>{{ object.get_description }}</description>
-        <videoHomePageTitle>{{ object.get_title }}</videoHomePageTitle>
-        <videoHomePageURL>{{ object.get_domain_url }}</videoHomePageURL>
+        <id>{{ media.slug }}</id>
+        <title>{{ media.get_title }}</title>
+        <description>{{ media.get_description }}</description>
+        <videoHomePageTitle>{{ media.get_title }}</videoHomePageTitle>
+        <videoHomePageURL>{{ media.get_domain_url }}</videoHomePageURL>
         <videoPages>
          <!--
             <item>
@@ -25,16 +25,16 @@
            -->
         </relatedVideos>
 
-        <mobileVideoLink>{{ object.get_domain_url }}</mobileVideoLink>
+        <mobileVideoLink>{{ media.get_domain_url }}</mobileVideoLink>
 
 
         <placeToWebHTML><![CDATA[<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" name="VP" width="437" height="480" id="VP"><param name="movie" value="main.swf" /><param name="quality" value="high" /><param name="bgcolor" value="#000000" /><param name="allowScriptAccess" value="sameDomain" /><embed src="main.swf" quality="high" bgcolor="#000000" width="437" height="480" name="VP" align="middle" play="true"  loop="false" quality="high" allowScriptAccess="sameDomain" type="application/x-shockwave-flash" pluginspage="http://www.adobe.com/go/getflashplayer"></embed></object></noscript>]]></placeToWebHTML>
-        <getLink>{{ object.get_domain_url }}</getLink>
+        <getLink>{{ media.get_domain_url }}</getLink>
 
-        {% load photos %}{% img base for object.get_photo as thumb %}
+        {% load photos %}{% img base for media.get_photo as thumb %}
         <preview>{{ thumb.url }}</preview>
 
-        {% load media %}{% media flash-video for object as formatted %}
+        {% load media %}{% media flash-video for media as formatted %}
         <items>
             <item>
                 <path>{{ formatted }} </path>
@@ -43,9 +43,16 @@
             </item>
         </items>
 
+        <bookmarks>
+            <bookmark title="linkuj.cz" url="http://linkuj.cz/?id=linkuj&amp;url={{ media.get_domain_url|urlencode }}&amp;title={{ media.get_title|urlencode }}&amp;imgsrc=&amp;description={{ media.get_description|urlencode }}" />
+            <bookmark title="bomba.cz" url="http://www.bomba.cz/video/pridat/?url={{ media.get_domain_url|urlencode }}" />
+            <bookmark title="del.icio.us" url="http://del.icio.us/post?url={{ media.get_domain_url|urlencode }}&amp;title={{ media.get_title|urlencode }}" />
+            <bookmark title="digg.com" url="http://digg.com/submit?phase=2&amp;url={{ media.get_domain_url|urlencode }}" />
+
+        </bookmarks>
 
         <chapters>
-            {% for section in object.get_sections %}
+            {% for section in media.get_sections %}
             <chapter>
                 <time>{{ section.time.seconds }}</time>
                 <title>{{ section.title }}</title>
