@@ -404,7 +404,7 @@ class RelatedNode(template.Node):
         if self.models and count > 0:
             from ella.tagging.models import TaggedItem
             for m in self.models:
-                to_add = TaggedItem.objects.get_related(self.obj, m, count)
+                to_add = TaggedItem.objects.get_related(obj, m, count)
                 for rel in to_add:
                     if rel != obj and rel not in related:
                         count -= 1
@@ -447,7 +447,7 @@ def do_related(parser, token):
         raise template.TemplateSyntaxError, "Tag must end with for object as var_name "
 
     mods = []
-    for m in bits[2:-5]:
+    for m in bits[2:-4]:
         if m == ',':
             continue
         if ',' in m:
