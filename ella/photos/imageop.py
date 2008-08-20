@@ -138,22 +138,14 @@ class ImageStretch(ImageOperation):
         if fpi.crop_width and fpi.crop_height:
             # generate crop
             cropBox = (fpi.crop_left, fpi.crop_top, fpi.crop_left + fpi.crop_width, fpi.crop_top + fpi.crop_height)
+            cropped_photo = source.crop(cropBox)
             self.__auto = False
-            return source.crop(cropBox)
-        else:
-            # try to find already existing formated photo with the same ratio and use it's crop coordinates
-            for fp in fpi.photo.formatedphoto_set.exclude(pk=fpi.pk).select_related('format'):
-                if fp.format.ratio() == fpi.format.ratio():
-                    fpi.crop_width, fpi.crop_height =  fp.crop_width, fp.crop_height
-                    fpi.crop_left, fpi.crop_top = fp.crop_left, fp.crop_top
-                    cropBox = (fpi.crop_left, fpi.crop_top, fpi.crop_left + fpi.crop_width, fpi.crop_top + fpi.crop_height)
-                    self.__auto = False
-                    return  source.crop(cropBox)
-            # else stay original
+        else: # else stay original
             fpi.crop_left, fpi.crop_top = 0, 0
             fpi.crop_width, fpi.crop_height = source.size
+            cropped_photo = source
             self.__auto = True
-        return source
+        return cropped_photo
 
     def stretch_image(self):
         ''' Stretchne obrazek a vrati ho. '''

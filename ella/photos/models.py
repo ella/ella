@@ -174,7 +174,10 @@ class Format(models.Model):
 
     def ratio(self):
         "Return photo's width to height ratio"
-        return float(self.max_width) / self.max_height
+        if self.max_height:
+            return float(self.max_width) / self.max_height
+        else:
+            return None
 
     def __unicode__(self):
         return  u"%s (%sx%s) " % (self.name, self.max_width, self.max_height)
