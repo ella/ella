@@ -52,6 +52,11 @@ class MediaBox(Box):
         return cont
 
 class Media(Publishable, models.Model):
+    """
+    Media object
+
+    Build around nc.cdnclient.models.MediaField and adds fields like title, photo,...
+    """
     title = models.CharField(_('Title'), max_length=255)
     slug = models.SlugField(_('Slug'), max_length=255)
     photo = models.ForeignKey(Photo, verbose_name=_('Preview image'), null=True, blank=True)
@@ -70,23 +75,44 @@ class Media(Publishable, models.Model):
     created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)
     updated = models.DateTimeField(_('Updated'), blank=True, null=True)
 
+    def get_sections(self):
+        """
+        Return sections (chapters) for this media
+        """
+        return self.section_set.all()
+
+    def get_home(self):
+        """
+        Returns home object for media
+
+        Media se vetsinou nezobrazuje jak je, ale nejak konkretne pouzita
+        (napr. v navodu). Home object urcuje ktere uziti je hlavni, tzn.
+        hlavne kam maji vest linky
+
+        Zatim natvrdo navod (kus elly zavisi na jednom konktretnim vyuziti)
+        """
+        return self.instruction_set.all()[0]
+
+    def get_absolute_url(self, domain=False):
+        """
+        Returns absolute url of home object
+        """
+        return self.get_home().get_absolute_url(domain=domain)
+
     def Box(self, box_type, nodelist):
         return MediaBox(self, box_type, nodelist)
 
     def __unicode__(self):
         return self.title
 
-    def get_sections(self):
-        return self.section_set.all()
-
-    def get_absolute_url(self, domain=False):
-        return self.instruction_set.all()[0].get_absolute_url(domain=domain)
-
     class Meta:
         verbose_name = _('Media')
         verbose_name_plural = _('Media')
 
 class Section(models.Model):
+    """
+    Represents section (chapter) in media
+    """
     media = models.ForeignKey(Media)
 
     title = models.CharField(_('Title'), max_length=255)
