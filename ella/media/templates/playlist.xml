@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+{% load media %}{% load photos %}<?xml version="1.0" encoding="utf-8"?>
 <playlist>
     <collection>
         <id>{{ media.slug }}</id>
@@ -15,27 +15,29 @@
           -->
         </videoPages>
         <relatedVideos>
-          <!--
+        {% related 10 instruction.instruction for media.get_home as related_list %}
+        {% for related in related_list %}
             <item>
-                <title>Jak sekat trávu</title>
-                <description>shlédnuto 3.698.756x</description>
-                <img><![CDATA[imgs/img1.jpg]]></img>
-                <url><![CDATA[http://www.centrum.cz]]></url>
+                <title>{{ related.get_title }}</title>
+                <description>{{ related.get_description }}</description>
+                {% img base for media.get_photo as thumb %}
+                <img>{{ thumb.url }}</img>
+                <url>{{ related.get_domain_url }}</url>
             </item>
-           -->
+        {% endfor %}
         </relatedVideos>
 
-        {% load media %}{% media mobile-video for media as formatted %}
+        {% media mobile-video for media as formatted %}
         <mobileVideoLink>{{ formatted }}</mobileVideoLink>
 
 
         <placeToWebHTML><![CDATA[<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" name="VP" width="437" height="480" id="VP"><param name="movie" value="main.swf" /><param name="quality" value="high" /><param name="bgcolor" value="#000000" /><param name="allowScriptAccess" value="sameDomain" /><embed src="main.swf" quality="high" bgcolor="#000000" width="437" height="480" name="VP" align="middle" play="true"  loop="false" quality="high" allowScriptAccess="sameDomain" type="application/x-shockwave-flash" pluginspage="http://www.adobe.com/go/getflashplayer"></embed></object></noscript>]]></placeToWebHTML>
         <getLink>{{ media.get_domain_url }}</getLink>
 
-        {% load photos %}{% img base for media.get_photo as thumb %}
+        {% img base for media.get_photo as thumb %}
         <preview>{{ thumb.url }}</preview>
 
-        {% load media %}{% media flash-video for media as formatted %}
+        {% media flash-video for media as formatted %}
         <items>
             <item>
                 <path>{{ formatted }} </path>
