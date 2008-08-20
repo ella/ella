@@ -79,6 +79,8 @@ class Media(Publishable, models.Model):
     def get_sections(self):
         return self.section_set.all()
 
+    def get_absolute_url(self, domain=False):
+        return self.instruction_set.all()[0].get_absolute_url(domain=domain)
 
     class Meta:
         verbose_name = _('Media')
