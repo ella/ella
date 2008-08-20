@@ -1,4 +1,5 @@
 from datetime import datetime
+import time
 import logging
 import md5
 
@@ -53,7 +54,7 @@ class SendMailForm(forms.Form):
         self.init_props = INIT_PROPS.copy()
 
         # set actual time
-        now = int(datetime.now().strftime(r'%s'))
+        now = int(time.mktime(datetime.now().timetuple()))
         self.init_props['timestamp'] = now
 
         # update defaults with form init params
