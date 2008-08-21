@@ -4,10 +4,10 @@ from django.contrib import admin
 
 from ella.media.models import Media, Section
 
-from ella.core.admin import PlacementInlineOptions
+#from ella.core.admin import PlacementInlineOptions
 from ella.photos.models import Photo
 from ella.photos.imageop import get_img_size
-from ella.tagging.admin import TaggingInlineOptions
+#from ella.tagging.admin import TaggingInlineOptions
 from ella.ellaadmin.options import EllaAdminOptionsMixin
 
 from django.conf import settings
@@ -78,7 +78,8 @@ class MediaOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     list_filter = ('created', 'updated',)
     search_fields = ('title', 'slug', 'description', 'content',)
 
-    inlines = (PlacementInlineOptions, TaggingInlineOptions, SectionInline)
+#    inlines = (PlacementInlineOptions, TaggingInlineOptions, SectionInline)
+    inlines = (SectionInline,)
 
     rich_text_fields = {None: ('description', 'text',)}
 
