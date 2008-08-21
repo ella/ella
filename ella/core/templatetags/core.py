@@ -381,8 +381,13 @@ def suffix(string_list, suffix):
     return t.render(template.Context({'string_list' : string_list,}))
 
 class RelatedNode(template.Node):
-    def __init__(self, obj_var, count, var_name, models=[]):
+    def __init__(self, obj_var, count, var_name, models=[], all_categories=True):
+        """
+        Parameters::
+        all_categories ... fetches listings even from different categories than obj_var's category
+        """
         self.obj_var, self.count, self.var_name, self.models = obj_var, count, var_name, models
+        self.all_categories = all_categories
 
     def render(self, context):
         try:
@@ -416,6 +421,11 @@ class RelatedNode(template.Node):
         if count > 0:
             cat = get_cached_object(Category, pk=obj.category_id)
             listings = Listing.objects.get_listing(category=cat, count=count, mods=self.models)
+            ext = [ listing.target for listing in listings if listing.target != obj ]
+            related.extend(ext)
+            count -= len(ext)
+        if self.all_categories and count > 0:
+            listings = Listing.objects.get_listing(count=count, mods=self.models)
             related.extend(listing.target for listing in listings if listing.target != obj)
 
         context[self.var_name] = related
@@ -427,11 +437,12 @@ def do_related(parser, token):
     Get N related models into a context variable.
 
     Usage::
-        {% related N [app_label.Model, ...] for object as var_name %}
+        {% related N [app_label.Model, ...] [ALLCATEGORIES] for object as var_name %}
 
     Example::
         {% related 10 for object as related_list %}
         {% related 10 articles.article, galleries.gallery for object as related_list %}
+        {% related 10 articles.article, galleries.gallery ALLCATEGORIES for object as related_list %}
     """
     bits = token.split_contents()
 
@@ -446,8 +457,14 @@ def do_related(parser, token):
     if bits[-4] != 'for':
         raise template.TemplateSyntaxError, "Tag must end with for object as var_name "
 
+    mods_to_slice = -4
+    all_categories = False
+    if bits[-5] == 'ALLCATEGORIES':
+        all_categories = True
+        mods_to_slice = -5
+
     mods = []
-    for m in bits[2:-4]:
+    for m in bits[2:mods_to_slice]:
         if m == ',':
             continue
         if ',' in m:
@@ -462,7 +479,7 @@ def do_related(parser, token):
                 mods.append(models.get_model(*m.split('.')))
             except:
                 raise template.TemplateSyntaxError, "%r doesn't represent any model." % m
-    return RelatedNode(bits[-3], int(bits[1]), bits[-1], mods)
+    return RelatedNode(bits[-3], int(bits[1]), bits[-1], mods, all_categories)
 
 CONTAINER_VARS = ('level', 'name', 'css_class',)
 
