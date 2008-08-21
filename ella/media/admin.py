@@ -2,7 +2,7 @@ from os import path, makedirs
 
 from django.contrib import admin
 
-from ella.media.models import Media, Section
+from ella.media.models import Media, Section, Usage
 
 #from ella.core.admin import PlacementInlineOptions
 from ella.photos.models import Photo
@@ -65,6 +65,9 @@ class MediaForm(ModelForm):
 class SectionInline(admin.TabularInline):
     model = Section
 
+class UsageInline(admin.TabularInline):
+    model = Usage
+
 class MediaOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
 
     def __init__(self, *args, **kwargs):
@@ -83,7 +86,7 @@ class MediaOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     search_fields = ('title', 'slug', 'description', 'content',)
 
 #    inlines = (PlacementInlineOptions, TaggingInlineOptions, SectionInline)
-    inlines = (SectionInline,)
+    inlines = (SectionInline, UsageInline)
 
     rich_text_fields = {None: ('description', 'text',)}
 

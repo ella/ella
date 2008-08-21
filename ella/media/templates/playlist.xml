@@ -7,12 +7,12 @@
         <videoHomePageTitle>{{ media.get_title }}</videoHomePageTitle>
         <videoHomePageURL>{{ media.get_domain_url }}</videoHomePageURL>
         <videoPages>
-         <!--
+        {% for usage in media.get_usage %}
             <item>
-                <title>centrum.cz</title>
-                <url><![CDATA[http://www.centrum.cz]]></url>
+                <title>{{ usage.title }}</title>
+                <url>{{ usage.url }}</url>
             </item>
-          -->
+        {% endfor %}
         </videoPages>
         <relatedVideos>
         {% related 10 instruction.instruction for media.get_home as related_list %}

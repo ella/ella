@@ -77,9 +77,15 @@ class Media(Publishable, models.Model):
 
     def get_sections(self):
         """
-        Return sections (chapters) for this media
+        Returns sections (chapters) for this media
         """
         return self.section_set.all()
+
+    def get_usage(self):
+        """
+        Returns sites where media is used
+        """
+        return self.usage_set.all().order_by('-priority')
 
     def get_home(self):
         """
@@ -123,3 +129,13 @@ class Section(models.Model):
 
     def __unicode__(self):
         return 'Chapter %s' % self.title
+
+class Usage(models.Model):
+    """
+    Sites where media is used
+    """
+    media = models.ForeignKey(Media)
+
+    title = models.CharField(_('Title'), max_length=255)
+    url = models.URLField(_('Url'), max_length=255)
+    priority = models.SmallIntegerField(_('Priority'))
