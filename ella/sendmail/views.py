@@ -141,10 +141,11 @@ def xml_for_player_view(request, context):
         if fld not in request.POST:
             res = xml_response(RESPONSE_ERROR, _('Mail not sent because of mandatory parameters were not passed. Please specify all of them.'))
             return HttpResponse(res, mimetype='text/xml;charset=utf-8') # nothing to respond
+    Ct = ContentType.objects.get_for_id(context['content_type'].id)
     params = {
         'sender_mail': request.POST['sender_mail'],
         'recipient_mail': request.POST['recipient_mail'],
-        'target_object': request.POST['target'],
+        'target_object': context['object'],
         'custom_message': request.POST.get('custom_message', ''),
 }
     send_it(**params)
