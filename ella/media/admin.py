@@ -18,7 +18,9 @@ from django.template.defaultfilters import slugify
 
 class PhotoWidget(widgets.ForeignKeyRawIdWidget):
     """
-    Widget for photo with option generate screenshit from video
+    Widget for photo with option to generate screenshot from video
+
+    todo: more user friendly form
     """
     def render(self, name, value, attrs=None):
         print value
@@ -29,7 +31,9 @@ class PhotoWidget(widgets.ForeignKeyRawIdWidget):
               super(PhotoWidget, self).render(name, value, attrs),)
 
 class MediaForm(ModelForm):
-
+    """
+    Generates thumb when media is saved
+    """
     def save(self, commit=True):
         instance = super(MediaForm, self).save(False)
         if (commit and self.data.has_key('photo_auto')):
