@@ -1,5 +1,6 @@
 import logging
 from smtplib import SMTP
+from xml.dom.minidom import Document
 
 from django.utils.translation import ugettext as _
 from django.conf import settings
@@ -19,6 +20,7 @@ from ella.core.views import get_templates_from_placement
 
 from ella.sendmail.forms import SendMailForm, compute_hash
 from ella.sendmail.mailer import create_mail
+from ella.sendmail.models import Mail
 
 
 log = logging.getLogger('ella.sendmail')
@@ -94,6 +96,10 @@ def send_it(**kwargs):
     smtp.sendmail(settings.ELLA_SENDMAIL_FROM_MAIL, recipient_mail, eml.as_string())
     smtp.quit()
     log.info('e-mail to buddy sent to [%s]' % recipient_mail)
+    m =Mail(recipient=recipient_mail, sender=settings.ELLA_SENDMAIL_SMTP_SERVER)
+    m.target_ct = ContentType.objects.get_for_model(target)
+    m.target_id = target.pk
+    m.save()
 
 
 def new_mail(request, context):
@@ -105,6 +111,45 @@ def new_mail(request, context):
     templates = get_templates_from_placement('sendmail/form.html', context['placement'])
     return render_to_response(templates, context, context_instance=RequestContext(request))
 
+def xml_response(response_code, message):
+    """
+    Returns::
+
+    <response>
+        <code>100</code>
+        <message>Alles gute.</message>
+    </response>
+    """
+    doc = Document()
+    doc.encoding = 'utf-8'
+    res = doc.createElement('response')
+    doc.appendChild(res)
+    code = doc.createElement('code')
+    code.appendChild(doc.createTextNode(str(response_code)))
+    msg = doc.createElement('message')
+    msg.appendChild(doc.createTextNode(message))
+    res.appendChild(code)
+    res.appendChild(msg)
+    return doc.toxml('utf-8')
+
+def xml_for_player_view(request, context):
+    """ View which returns XML to be used with Flash player etc."""
+    RESPONSE_OK = 200
+    RESPONSE_ERROR = 500
+    mandatory_fields = ('sender_mail', 'recipient_mail', 'target_object', 'custom_message')
+    for fld in mandatory_fields:
+        if fld not in request.POST:
+            res = xml_response(RESPONSE_ERROR, 'Mail not sent because of mandatory parameters was not passed. Please specify all of them.')
+            return HttpResponse(res, mimetype='text/xml;charset=utf-8') # nothing to respond
+    params = {
+        'sender_mail': request.POST['sender_mail'],
+        'recipient_mail': request.POST['recipient_mail'],
+        'target_object': request.POST['target'],
+        'custom_message': request.POST.get('custom_message', ''),
+}
+    send_it(**params)
+    res = xml_response(RESPONSE_OK, 'E-Mail successfully sent.')
+    return HttpResponse(res, mimetype='text/xml;charset=utf-8')
 
 def sendmail_custom_urls(request, bits, context):
     if len(bits) == 1:
@@ -115,19 +160,8 @@ def sendmail_custom_urls(request, bits, context):
             return new_mail(request, context)
         elif bits[0] == slugify(_('error')):
             log.error('Error during sending e-mail to a buddy')
-        elif bits[0] == slugify(_('raw')):
-            if 'sender_mail' not in request.POST:
-                obj = context['object']
-                ct = ContentType.objects.get_for_model(obj)
-                target = '%d:%d' % (obj.pk, ct.pk)
-                return HttpResponse(compute_hash(target))
-            params = {
-                'sender_mail': request.POST['sender_mail'],
-                'recipient_mail': request.POST['recipient_mail'],
-                'target_object': request.POST['target'],
-                'custom_message': request.POST.get('custom_message', ''),
-}
-            return send_it(**params)
+        elif bits[0] == slugify('xml'):
+            return xml_for_player_view(request, context)
 
     if len(bits) == 0:
         return new_mail(request, context)
