@@ -139,7 +139,7 @@ def xml_for_player_view(request, context):
     mandatory_fields = ('sender_mail', 'recipient_mail', 'target_object', 'custom_message')
     for fld in mandatory_fields:
         if fld not in request.POST:
-            res = xml_response(RESPONSE_ERROR, 'Mail not sent because of mandatory parameters was not passed. Please specify all of them.')
+            res = xml_response(RESPONSE_ERROR, _('Mail not sent because of mandatory parameters were not passed. Please specify all of them.'))
             return HttpResponse(res, mimetype='text/xml;charset=utf-8') # nothing to respond
     params = {
         'sender_mail': request.POST['sender_mail'],
@@ -148,7 +148,7 @@ def xml_for_player_view(request, context):
         'custom_message': request.POST.get('custom_message', ''),
 }
     send_it(**params)
-    res = xml_response(RESPONSE_OK, 'E-Mail successfully sent.')
+    res = xml_response(RESPONSE_OK, _('E-Mail successfully sent.'))
     return HttpResponse(res, mimetype='text/xml;charset=utf-8')
 
 def sendmail_custom_urls(request, bits, context):
