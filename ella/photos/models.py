@@ -53,6 +53,7 @@ class PhotoBox(Box):
                 'show_description' : self.params.get('show_description', ''),
                 'show_authors' : self.params.get('show_authors', ''),
                 'show_detail' : self.params.get('show_detail', ''),
+                'link_url': self.params.get('link_url', ''),
 })
         return cont
 
@@ -174,10 +175,7 @@ class Format(models.Model):
 
     def ratio(self):
         "Return photo's width to height ratio"
-        if self.max_height:
-            return float(self.max_width) / self.max_height
-        else:
-            return None
+        return float(self.max_width) / self.max_height
 
     def __unicode__(self):
         return  u"%s (%sx%s) " % (self.name, self.max_width, self.max_height)

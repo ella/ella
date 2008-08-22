@@ -29,7 +29,8 @@ $(function(){
 			var objectList = function(id){
 				var name = id.replace(/^lookup_/, '').replace(/\./g, '___');
 				var path = adminapps[selects[num].value].path.replace('.', '/');
-				var addr = '../../../' + path + '/?pop=1';
+				var prefix = typeof(admin_url) != "undefined" ? admin_url : '../../..';
+				var addr = prefix + '/' + path + '/?pop=1';
 				var win = window.open(addr, name, 'height=500,width=800,resizable=yes,scrollbars=yes');
 				win.focus();
 			}

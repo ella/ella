@@ -6,7 +6,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.template.defaultfilters import slugify
 from django.utils.datastructures import SortedDict
 
-from ella.core.box import Box
 from ella.db.models import Publishable
 from ella.core.models import Category, Author
 from ella.core.cache.utils import get_cached_object, cache_this, CachedGenericForeignKey
@@ -98,9 +97,6 @@ class GalleryItem(models.Model):
                 return slug
         else:
             raise Http404
-
-    def Box(self, box_type, nodelist):
-        return Box(self.target, box_type, nodelist)
 
     def get_slug(self):
         """
