@@ -1,12 +1,17 @@
 """
 Tagging related views.
 """
-from django.http import Http404
+import urllib
+
+from django.http import Http404, HttpResponse
 from django.utils.translation import ugettext as _
 from django.views.generic.list_detail import object_list
 from django.template import RequestContext, loader, Context
 from django.template.defaultfilters import slugify
+from django.shortcuts import render_to_response
+from ella.tagging.fields import SuggestTagField
 from django.db import connection
+from django import forms
 
 from ella.tagging.models import Tag, TaggedItem
 from ella.tagging.utils import get_tag, get_queryset_and_model
@@ -117,12 +122,6 @@ def tagged_publishables(request, tag):
 )
 
 # --- suggest
-
-from django.http import HttpResponse
-from django import forms
-from django.shortcuts import render_to_response
-from ella.tagging.fields import SuggestTagField
-import urllib
 
 def tags_json_view(request, **kwargs):
     tag_begin = ''
