@@ -3,7 +3,7 @@
     <collection>
         <id>{{ media.slug }}</id>
         <title>{{ media.get_title }}</title>
-        <description>{{ media.get_description }}</description>
+        <description>{{ media.get_description|striptags }}</description>
         <videoHomePageTitle>{{ media.get_title }}</videoHomePageTitle>
         <videoHomePageURL>{{ media.get_domain_url }}</videoHomePageURL>
         <videoPages>
@@ -19,7 +19,7 @@
         {% for related in related_list %}
             <item>
                 <title>{{ related.get_title }}</title>
-                <description>{{ related.get_description }}</description>
+                <description>{{ related.get_description|striptags }}</description>
                 {% img base for media.get_photo as thumb %}
                 <img>{{ thumb.url }}</img>
                 <url>{{ related.get_domain_url }}</url>
