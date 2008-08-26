@@ -95,13 +95,16 @@ def rate_url(parser, token):
     return RateUrlNode(bits[2], bits[4])
 
 class RatingNode(template.Node):
-    def __init__(self, object, name):
-        self.object, self.name =  object, name
+    def __init__(self, object, name, precision=None):
+        self.object, self.name, self.precision =  object, name, precision
 
     def render(self, context):
         obj = template.Variable(self.object).resolve(context)
         if obj:
-            context[self.name] = TotalRate.objects.get_total_rating(obj)
+            value = TotalRate.objects.get_total_rating(obj)
+            if (self.precision):
+                value = round(float(value) / self.precision) * self.precision
+            context[self.name] = value
         return ''
 
 @register.tag('rating')
@@ -112,6 +115,7 @@ def do_rating(parser, token):
     Usage::
 
         {% rating for OBJ as VAR %}
+        {% rating for OBJ as VAR precision 0.5 %}
 
     Examples::
 
@@ -119,10 +123,13 @@ def do_rating(parser, token):
         object {{object}} has rating of {{object_rating}}
     """
     bits = token.split_contents()
-    if len(bits) != 5 or bits[1] != 'for' or bits[3] != 'as':
+    if (len(bits) != 5 and (len(bits) != 7 or bits[5] != 'precision')) or bits[1] != 'for' or bits[3] != 'as':
         raise template.TemplateSyntaxError, "%r .... TODO ....." % token.contents.split()[0]
 
-    return RatingNode(bits[2], bits[4])
+    if len(bits) == 7:
+        return RatingNode(bits[2], bits[4], float(bits[6]))
+    else:
+        return RatingNode(bits[2], bits[4])
 
 
 class TopRatedNode(template.Node):

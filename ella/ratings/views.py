@@ -1,7 +1,8 @@
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.utils.translation import ugettext as _
 from django.contrib.sites.models import Site
 from django.views.decorators.http import require_POST
+from django.utils import simplejson
 
 from ella.ratings.models import *
 from ella.ratings.forms import RateForm
@@ -10,27 +11,35 @@ current_site = Site.objects.get_current()
 
 UPDOWN = {'up' : 1, 'down' : -1}
 
-def do_rate(request, ct, target, plusminus):
-    if 'next' in request.REQUEST and request.REQUEST['next'].startswith('/'):
-        url = request.POST['next']
-    elif hasattr(target, 'get_absolute_url'):
-        url = target.get_absolute_url()
+def get_response(request, target, message=None):
+    if (request.is_ajax()):
+        json = simplejson.dumps({'message':message or _('Your rating was succesfully added.')})
+        return HttpResponse(json)
     else:
-        url = request.META.get('HTTP_REFERER', '/')
-    response = HttpResponseRedirect(url)
+        if message:
+            request.user.message_set.create(message=message)
+
+        if 'next' in request.REQUEST and request.REQUEST['next'].startswith('/'):
+            url = request.POST['next']
+        elif hasattr(target, 'get_absolute_url'):
+            url = target.get_absolute_url()
+        else:
+            url = request.META.get('HTTP_REFERER', '/')
+        return HttpResponseRedirect(url)
+
+def do_rate(request, ct, target, plusminus):
 
     # ANTI-SPAM shortcuts
     if request.user.is_authenticated():
         cook = request.session.get(RATINGS_COOKIE_NAME, [])
         if (ct.id, target.id) in cook:
-            request.user.message_set.create(message=_('You have already rated this object.'))
-            return response
+            return get_response(request, target, _('You have already rated this object.'))
     else:
         # check anti spam cookie
         cook = request.COOKIES.get(RATINGS_COOKIE_NAME, '').split(',')
         if '%s:%s' % (ct.id, target.id) in cook:
             # fail silently
-            return response
+            return get_response(request, target)
 
     kwa = {'amount' : ANONYMOUS_KARMA}
     if request.user.is_authenticated():
@@ -55,18 +64,19 @@ def do_rate(request, ct, target, plusminus):
     if request.user.is_authenticated():
         cook.append((ct.id, target.id))
         request.session[RATINGS_COOKIE_NAME] = cook
-        request.user.message_set.create(message=_('Your rating was succesfully added.'))
-    else:
-        cook.append('%s:%s' % (ct.id, target.id))
-        expores = datetime.strftime(datetime.utcnow() + timedelta(seconds=RATINGS_MAX_COOKIE_AGE), "%a, %d-%b-%Y %H:%M:%S GMT")
-        response.set_cookie(
-                RATINGS_COOKIE_NAME,
-                value=','.join(cook),
-                max_age=RATINGS_MAX_COOKIE_AGE,
-                expires=expores,
-                path='/',
-                domain=current_site.domain,
-                secure=None
+        return get_response(request, target, message=_('Your rating was succesfully added.'))
+
+    cook.append('%s:%s' % (ct.id, target.id))
+    expores = datetime.strftime(datetime.utcnow() + timedelta(seconds=RATINGS_MAX_COOKIE_AGE), "%a, %d-%b-%Y %H:%M:%S GMT")
+    response =  get_response(request, target)
+    response.set_cookie(
+            RATINGS_COOKIE_NAME,
+            value=','.join(cook),
+            max_age=RATINGS_MAX_COOKIE_AGE,
+            expires=expores,
+            path='/',
+            domain=current_site.domain,
+            secure=None
 )
     return response
 
