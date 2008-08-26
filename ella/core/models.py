@@ -168,7 +168,7 @@ class Placement(models.Model):
     objects = PlacementManager()
 
     class Meta:
-        unique_together = (('category', 'target_ct', 'target_id'),)
+        #unique_together = (('category', 'target_ct', 'target_id'),)
         ordering = ('-publish_from',)
         verbose_name = _('Placement')
         verbose_name_plural = _('Placements')
