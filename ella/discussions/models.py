@@ -123,6 +123,9 @@ class Topic(Publishable, models.Model):
         """ returns the most viewed threads """
         return None
 
+    def get_text(self):
+        return ''
+
     class Meta:
         verbose_name = _('Topic')
         verbose_name_plural = _('Topics')

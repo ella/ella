@@ -21,6 +21,9 @@ class Serie(models.Model, Publishable):
     started = models.DateField(_('Started'))
     finished = models.DateField(_('Finished'), null=True, blank=True)
 
+    def get_text(self):
+        return self.descending
+
     @property
     def parts(self):
         return get_cached_list(SeriePart, serie=self)
