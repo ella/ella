@@ -53,6 +53,7 @@ class PhotoBox(Box):
                 'show_description' : self.params.get('show_description', ''),
                 'show_authors' : self.params.get('show_authors', ''),
                 'show_detail' : self.params.get('show_detail', ''),
+                'link_url': self.params.get('link_url', ''),
 })
         return cont
 

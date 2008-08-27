@@ -92,6 +92,9 @@ class Publishable(object):
         else:
             return '%s' % (self.draw_title(),)
 
+    def get_text(self):
+        return sef.text
+
     ##
     # Custom admin fields
     ##

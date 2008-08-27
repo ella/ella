@@ -60,6 +60,9 @@ class Interview(Publishable, models.Model):
 
     objects = RelatedManager()
 
+    def get_text(self):
+        return self.content
+
     ##
     # utility functions to check whether we can ask and/or reply
     ##

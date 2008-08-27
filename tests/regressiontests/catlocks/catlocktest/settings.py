@@ -1,9 +1,8 @@
-from os.path import dirname, isfile, join
-import logging.config
-# Django settings for coretest project.
+# Django settings for catlocktest project.
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+DEBUG_PROPAGATE_EXCEPTIONS = True
 
 ADMINS = (
     # ('Your Name', 'your_email@domain.com'),
@@ -12,22 +11,21 @@ ADMINS = (
 MANAGERS = ADMINS
 
 DATABASE_ENGINE = 'sqlite3'    # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-DATABASE_NAME = '/tmp/coretests.db'     # Or path to database file if using sqlite3.
+DATABASE_NAME = '/tmp/catlock.db'             # Or path to database file if using sqlite3.
 DATABASE_USER = ''             # Not used with sqlite3.
 DATABASE_PASSWORD = ''         # Not used with sqlite3.
 DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
 DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
 
 # Local time zone for this installation. Choices can be found here:
-# http://www.postgresql.org/docs/8.1/static/datetime-keywords.html#DATETIME-TIMEZONE-SET-TABLE
-# although not all variations may be possible on all operating systems.
+# http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
+# although not all choices may be available on all operating systems.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
 TIME_ZONE = 'America/Chicago'
 
 # Language code for this installation. All choices can be found here:
-# http://www.w3.org/TR/REC-html40/struct/dirlang.html#langcodes
-# http://blogs.law.harvard.edu/tech/stories/storyReader$15
+# http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
 
 SITE_ID = 1
@@ -51,7 +49,7 @@ MEDIA_URL = ''
 ADMIN_MEDIA_PREFIX = '/media/'
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'u4yutg3$(+)3lckkdabtv(30g(iq%j2f8l#in5pd)*^9!e^x_p'
+SECRET_KEY = 'w_lb&w=3ct-y1@ft8de$bfk=b+t=76q)xjvca0j$0hv+=!j3k*'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -62,14 +60,14 @@ TEMPLATE_LOADERS = (
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
-    'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.doc.XViewMiddleware',
+    'ella.catlocks.middleware.CategoryLockMiddleware',
 )
 
-ROOT_URLCONF = 'coretest.urls'
-
+ROOT_URLCONF = 'ella.core.urls'
+from os.path import dirname
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
@@ -85,38 +83,6 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.redirects',
     'ella.core',
-    'coretest.box_sample',
-    'coretest.redir_sample',
-    'coretest.url_tests',
-    'coretest.cache_tests',
-    'coretest.templatetags_sample',
-    'coretest.admin_tests',
+    'ella.catlocks',
+    'catlocktest.catlock_test',
 )
-
-INTERNAL_IPS = (
-    '127.0.0.1',
-)
-
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'django.core.context_processors.auth',
-    'django.core.context_processors.debug',
-    'ella.core.context_processors.url_info',
-)
-
-# we need this for testing caching over ActiveMQ
-CACHE_BACKEND = 'memcached://127.0.0.1:11211'
-ACTIVE_MQ_HOST = 'localhost'
-#ACTIVE_MQ_HOST = None
-
-CACHE_BACKEND = 'dummy://'
-VERSION = 1
-
-# set up default loggers
-LOGGING_CONFIG_FILE = join(dirname(__file__), 'logger.conf')
-
-def init_logger():
-    "init logger with previously defined LOGGING_CONFIG_FILE"
-    if globals().has_key('LOGGING_CONFIG_FILE') and isfile(LOGGING_CONFIG_FILE):
-        logging.config.fileConfig(LOGGING_CONFIG_FILE)
-init_logger()
-

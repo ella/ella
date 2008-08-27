@@ -82,6 +82,9 @@ class Media(Publishable, models.Model):
 
     objects = MediaManager()
 
+    def get_text(self):
+        return ''
+
     def formatted_media(self):
         return FormattedMedia.objects.select_related().filter(source=self.id)
 

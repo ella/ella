@@ -1,0 +1,67 @@
+[
+    {
+        "pk": "1",
+        "model": "core.category",
+        "fields": {
+            "tree_parent": null,
+            "description": "Top Cat",
+            "title": "top cat",
+            "site": 1,
+            "tree_path": "",
+            "slug": "top-cat"
+        }
+    },
+    {
+        "pk": "2",
+        "model": "core.category",
+        "fields": {
+            "tree_parent": 1,
+            "description": "Locked cat",
+            "title": "Locked cat",
+            "site": 1,
+            "tree_path": "locked-cat",
+            "slug": "locked-cat"
+        }
+    },
+    {
+        "pk": "3",
+        "model": "core.category",
+        "fields": {
+            "tree_parent": 1,
+            "description": "Locked cat 2",
+            "title": "Locked cat2",
+            "site": 1,
+            "tree_path": "locked-cat-two",
+            "slug": "locked-cat-two"
+        }
+    },
+    {
+        "pk": "4",
+        "model": "core.category",
+        "fields": {
+            "tree_parent": 2,
+            "description": "Locked subcat",
+            "title": "Locked subcat",
+            "site": 1,
+            "tree_path": "locked-cat/locked-subcat",
+            "slug": "locked-subcat"
+        }
+    },
+    {
+        "pk": "1",
+        "model": "catlocks.categorylock",
+        "fields": {
+            "category": 2,
+            "password": "pwd"
+        }
+    },
+    {
+        "pk": "2",
+        "model": "catlocks.categorylock",
+        "fields": {
+            "category": 3,
+            "password": "anotherpwd"
+        }
+    }
+]
+

@@ -8,30 +8,16 @@ from django.conf import settings
 
 from ella.core.views import get_templates_from_placement
 from ella.interviews.models import Question, Answer
+from ella.utils.paginator import paginate_qset, get_page_no
 
 
 INTERVIEW_PAGINATION_PER_PAGE = getattr(settings, 'INTERVIEW_PAGINATION_PER_PAGE', 5)
 
 
-def _get_page_no(request):
-    if 'p' in request.GET and request.GET['p'].isdigit():
-        return int(request.GET['p'])
-    return 1
-
-def _paginate_qset(request, qset):
-    page_no = _get_page_no(request)
-    paginator = QuerySetPaginator(qset, INTERVIEW_PAGINATION_PER_PAGE)
-    page = paginator.page(page_no)
-    return {
-        'page': page,
-        'is_paginated': paginator.num_pages > 1,
-        'results_per_page': INTERVIEW_PAGINATION_PER_PAGE
-}
-
 def detail(request, context):
     """ Custom object detail function that adds a QuestionForm to the context. """
     interview = context['object']
-    page_no = _get_page_no(request)
+    page_no = get_page_no(request)
     qset = interview.get_questions()
     paginator = QuerySetPaginator(qset, INTERVIEW_PAGINATION_PER_PAGE)
 
@@ -68,7 +54,7 @@ def unanswered(request, bits, context):
     context['form'] = QuestionForm(request=request)
     # result pagination
     qset = interview.unanswered_questions()
-    context.update(_paginate_qset(request, qset))
+    context.update(paginate_qset(request, qset))
     return render_to_response(
         get_templates_from_placement('unanswered.html', context['placement']),
         context,
@@ -94,7 +80,7 @@ def reply(request, bits, context):
         raise Http404
 
     qset = interview.question_set.all()
-    context.update(_paginate_qset(request, qset))
+    context.update(paginate_qset(request, qset))
     if not bits:
         # list of all questions
         return render_to_response(

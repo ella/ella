@@ -1,8 +1,3 @@
-try:
-    from threading import local
-except ImportError:
-    from django.utils._threading_local import local
-
 import logging
 log = logging.getLogger('ella.core.middleware')
 
@@ -15,18 +10,6 @@ from django.conf import settings
 ECACHE_INFO = 'ella.core.middleware.ECACHE_INFO'
 
 DOUBLE_RENDER = getattr(settings, 'DOUBLE_RENDER', False)
-
-
-_thread_locals = local()
-def get_current_request():
-    return getattr(_thread_locals, 'request', None)
-
-class ThreadLocalsMiddleware(object):
-    """Middleware that gets various objects from the
-    request object and saves them in thread local storage."""
-
-    def process_request(self, request):
-        _thread_locals.request = request
 
 class DoubleRenderMiddleware(object):
     def process_response(self, request, response):

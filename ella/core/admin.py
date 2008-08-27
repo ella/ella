@@ -185,6 +185,7 @@ class ListingOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     list_display_links = ()
     list_filter = ('publish_from', 'category__site', 'category', 'placement__target_ct',)
     raw_id_fields = ('placement',)
+    date_hierarchy = 'publish_from'
 
 class CategoryOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     list_filter = ('site',)
