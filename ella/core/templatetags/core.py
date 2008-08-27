@@ -142,6 +142,9 @@ def listing_parse(input):
     if input[-2].lower() == 'unique':
         params['unique'] = input[-1]
         params_to_resolve.append('unique')
+    elif input[-1].lower() == 'unique':
+        params['unique'] = 'unique_set_default'
+        params_to_resolve.append('unique')
 
     return var_name, params, params_to_resolve
 
