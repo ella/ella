@@ -1,3 +1,9 @@
+centrum-ella (0.2.31.0) unstable; urgency=low
+
+  * build from revision [1446]
+
+ -- Jakub Vysoky <jakub@borka.cz>  Wed, 27 Aug 2008 20:17:24 +0200
+
 centrum-ella (0.2.30.0) unstable; urgency=low
 
   * version raised
