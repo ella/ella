@@ -71,6 +71,8 @@ def listing(parser, token):
         ``with descendents``                Include items from all descend subcategories.
         ``as result``                       Store the resulting list in context under given
                                             name.
+        ``unique [unique_set_name]``        Unique items across multiple listings.
+                                            Name of context variable used to hold the data is optional.
         ==================================  ================================================
 
     Examples::
@@ -81,6 +83,12 @@ def listing(parser, token):
         {% listing 10 of articles.article for category with descendents as obj_list %}
         {% listing 10 from 10 of articles.article as obj_list %}
         {% listing 10 of articles.article, photos.photo as obj_list %}
+
+        Unique items across multiple listnings::
+        {% listing 10 for category_uno as obj_list unique %}
+        {% listing 4 for category_duo as obj_list unique %}
+        {% listing 10 for category_uno as obj_list unique unique_set_name %}
+        {% listing 4 for category_duo as obj_list unique unique_set_name %}
     """
     var_name, parameters, parameters_to_resolve = listing_parse(token.split_contents())
     return ListingNode(var_name, parameters, parameters_to_resolve)
