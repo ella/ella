@@ -48,10 +48,8 @@
 
         <bookmarks>
             <bookmark title="linkuj.cz" url="http://linkuj.cz/?id=linkuj&amp;url={{ media.get_domain_url|urlencode }}&amp;title={{ media.get_title|urlencode }}&amp;imgsrc=&amp;description={{ media.get_description|urlencode }}" />
-            <bookmark title="bomba.cz" url="http://www.bomba.cz/video/pridat/?url={{ media.get_domain_url|urlencode }}" />
             <bookmark title="del.icio.us" url="http://del.icio.us/post?url={{ media.get_domain_url|urlencode }}&amp;title={{ media.get_title|urlencode }}" />
-            <bookmark title="digg.com" url="http://digg.com/submit?phase=2&amp;url={{ media.get_domain_url|urlencode }}" />
-
+            <bookmark title="vybrali.sme.sk" url="http://vybrali.sme.sk/submit.php?url={{ media.get_domain_url|urlencode }}" />
         </bookmarks>
 
         <chapters>
