@@ -93,7 +93,7 @@ class Publishable(object):
             return '%s' % (self.draw_title(),)
 
     def get_text(self):
-        return sef.text
+        return self.text
 
     ##
     # Custom admin fields
