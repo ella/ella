@@ -76,13 +76,13 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
+    'ella.core',
+    'ella.catlocks',
+    'catlocktest.catlock_test',
     'django.contrib.auth',
     'django.contrib.admin',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.redirects',
-    'ella.core',
-    'ella.catlocks',
-    'catlocktest.catlock_test',
 )
