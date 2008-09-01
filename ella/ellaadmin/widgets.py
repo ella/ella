@@ -129,7 +129,7 @@ class AuthorsSuggestAdminWidget(forms.TextInput):
         else:
             url = ''
         if not attrs.has_key('class'):
-            attrs['class'] = 'vForeignKeyRawIdAdminField vSuggestMultipleFieldAuthor' # The JavaScript looks for this hook.
+            attrs['class'] = 'vSuggestMultipleFieldAuthor' # The JavaScript looks for this hook.
         if value:
             a_values = ''
             try:
