@@ -406,6 +406,8 @@ class QuizWizard(Wizard):
 
 def result_details(request, bits, context):
     quiz = context['object']
+    if not quiz.has_correct_answers:
+        raise Http404
     results = request.GET.get(RESULT_FIELD, '').split('|')
     if len(results) != len(quiz.questions):
         raise Http404
