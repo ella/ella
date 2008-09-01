@@ -35,12 +35,10 @@ class FormatOptions(admin.ModelAdmin):
 
 class CropAreaWidget(forms.TextInput):
     class Media:
-        JS_JQUERY = 'js/jquery.js'
         JS_INTERFACE = 'js/interface.js'
         JS_CROP = 'js/crop.js'
         CSS_CROP = 'css/crop.css'
         js = (
-            settings.ADMIN_MEDIA_PREFIX + JS_JQUERY,
             settings.ADMIN_MEDIA_PREFIX + JS_INTERFACE,
             settings.ADMIN_MEDIA_PREFIX + JS_CROP,
 )
