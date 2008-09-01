@@ -9,7 +9,7 @@ from django.utils.encoding import smart_str, force_unicode
 from django.utils.safestring import mark_safe
 from django.template.defaultfilters import stringfilter
 
-from ella.core.models import Listing, Related, Category
+from ella.core.models import Listing, Related, Category, LISTING_UNIQUE_DEFAULT_SET
 from ella.core.cache.utils import get_cached_object, cache_this
 from ella.core.cache.invalidate import CACHE_DELETER
 from ella.core.box import BOX_INFO, MEDIA_KEY, Box
@@ -151,7 +151,7 @@ def listing_parse(input):
         params['unique'] = input[-1]
         params_to_resolve.append('unique')
     elif input[-1].lower() == 'unique':
-        params['unique'] = 'unique_set_default'
+        params['unique'] = LISTING_UNIQUE_DEFAULT_SET
         params_to_resolve.append('unique')
 
     return var_name, params, params_to_resolve
