@@ -26,7 +26,7 @@ def author_suggest_view(request, **kwargs):
     start = beg.strip().lower()
     ft = []
     if len(start) > 1:
-        lookup = Q(slug__startswith=start) | Q(name__istartswith=start)
+        lookup = Q(slug__startswith=start) | Q(name__icontains=start)
         data = Author.objects.filter(lookup).values('pk','name',)
         for item in data:
             ft.append("%s:%s".encode('utf-8') % (item['pk'], item['name']))

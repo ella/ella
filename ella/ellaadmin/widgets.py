@@ -140,8 +140,6 @@ class AuthorsSuggestAdminWidget(forms.TextInput):
                 elif type(value) in [unicode, str]:
                     for a in value.split(','):
                         a_values += a + ','
-                if a_values.endswith(','):
-                    a_values = a_values[:-1]
                 output = [super(self.__class__, self).render(name, a_values, attrs)]
             except:
                 output = [super(self.__class__, self).render(name, value, attrs)]

@@ -11,9 +11,6 @@ from ella.ellaadmin import widgets
 from ella.ellaadmin.options import EllaAdminOptionsMixin
 from ella.core.models import Author, Source, Category, Listing, HitCount, Placement
 
-USE_SUGGESTERS =  getattr(settings, 'USE_SUGGESTERS', False)
-
-
 class PlacementForm(modelforms.ModelForm):
 
     class Meta:
@@ -148,8 +145,7 @@ class ListingInlineOptions(admin.TabularInline):
     fieldsets = ((None, {'fields' : ('category','publish_from', 'priority_from', 'priority_to', 'priority_value', 'remove', 'commercial',)}),)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'category' and not USE_SUGGESTERS:
-            kwargs['widget'] = widgets.ListingCategoryWidget
+        kwargs['widget'] = widgets.ListingCategoryWidget
         return super(ListingInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
 class PlacementInlineOptions(generic.GenericTabularInline):
@@ -162,8 +158,7 @@ class PlacementInlineOptions(generic.GenericTabularInline):
     fieldsets = ((None, {'fields' : ('category', 'publish_from', 'publish_to', 'slug', 'static', 'listings',)}),)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'category' and not USE_SUGGESTERS:
-            kwargs['widget'] = widgets.ListingCategoryWidget
+        kwargs['widget'] = widgets.ListingCategoryWidget
         return super(PlacementInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
 
