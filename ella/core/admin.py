@@ -145,7 +145,8 @@ class ListingInlineOptions(admin.TabularInline):
     fieldsets = ((None, {'fields' : ('category','publish_from', 'priority_from', 'priority_to', 'priority_value', 'remove', 'commercial',)}),)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        kwargs['widget'] = widgets.ListingCategoryWidget
+        if db_field.name == 'category':
+            kwargs['widget'] = widgets.ListingCategoryWidget
         return super(ListingInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
 class PlacementInlineOptions(generic.GenericTabularInline):
