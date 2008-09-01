@@ -65,11 +65,13 @@ def send_it(**kwargs):
     """
     Mandatory arguments::
 
+    sender_name
     sender_mail
     recipient_mail
     target_object
     custom_message
     """
+    sender_name = kwargs.get('sender_name', '')
     sender_mail = kwargs['sender_mail']
     recipient_mail = kwargs['recipient_mail']
     target = kwargs['target_object']
@@ -79,6 +81,7 @@ def send_it(**kwargs):
     mail_body = render_to_string('page/sendmail/mail-body.html', {
         'custom_message' : custom_message,
         'sender_mail' : sender_mail,
+        'sender_name': sender_name,
         'target' : target,
         'site' : site})
     mail_subject = render_to_string('page/sendmail/mail-subject.html', {
@@ -132,17 +135,18 @@ def xml_response(response_code, message):
     res.appendChild(msg)
     return doc.toxml('utf-8')
 
-def xml_for_player_view(request, context):
+def xml_sendmail_view(request, context):
     """ View which returns XML to be used with Flash player etc."""
     RESPONSE_OK = 200
     RESPONSE_ERROR = 500
-    mandatory_fields = ('sender_mail', 'recipient_mail', 'target_object', 'custom_message')
+    mandatory_fields = ('sender_mail', 'sender_name', 'recipient_mail', 'target_object', 'custom_message',)
     for fld in mandatory_fields:
         if fld not in request.POST:
             res = xml_response(RESPONSE_ERROR, _('Mail not sent because of mandatory parameters were not passed. Please specify all of them.'))
             return HttpResponse(res, mimetype='text/xml;charset=utf-8') # nothing to respond
     Ct = ContentType.objects.get_for_id(context['content_type'].id)
     params = {
+        'sender_name': request.POST['sender_name'],
         'sender_mail': request.POST['sender_mail'],
         'recipient_mail': request.POST['recipient_mail'],
         'target_object': context['object'],
@@ -162,7 +166,7 @@ def sendmail_custom_urls(request, bits, context):
         elif bits[0] == slugify(_('error')):
             log.error('Error during sending e-mail to a buddy')
         elif bits[0] == slugify('xml'):
-            return xml_for_player_view(request, context)
+            return xml_sendmail_view(request, context)
 
     if len(bits) == 0:
         return new_mail(request, context)
