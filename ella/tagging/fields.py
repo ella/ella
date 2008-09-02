@@ -226,8 +226,9 @@ class SuggestTagAdminField(forms.fields.Field):
             return value
         tags = []
         for t in tag_name:
-            tag, status = Tag.objects.get_or_create(name=t)
-            tags.append(tag)
+            if not t=='':
+                tag, status = Tag.objects.get_or_create(name=t)
+                tags.append(tag)
         return tags
 
 class SuggestTagWidget(forms.TextInput):
