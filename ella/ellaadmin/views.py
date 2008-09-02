@@ -1,7 +1,10 @@
 from django.http import HttpResponse
+from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Q
+
 from ella.core.models import Category, Author
 
+@staff_member_required
 def category_suggest_view(request, **kwargs):
     cat_begin = ''
     if 'q' in request:
@@ -17,6 +20,7 @@ def category_suggest_view(request, **kwargs):
             ft.append("%s:%s".encode('utf-8') % (item['site__name'], item['tree_path']))
     return HttpResponse('\n'.join(ft), mimetype='text/html;charset=utf-8')
 
+@staff_member_required
 def author_suggest_view(request, **kwargs):
     beg = ''
     if 'q' in request:
