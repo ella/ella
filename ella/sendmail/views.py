@@ -139,7 +139,7 @@ def xml_sendmail_view(request, context):
     """ View which returns XML to be used with Flash player etc."""
     RESPONSE_OK = 200
     RESPONSE_ERROR = 500
-    mandatory_fields = ('sender_mail', 'sender_name', 'recipient_mail', 'target_object', 'custom_message',)
+    mandatory_fields = ('sender_mail', 'sender_name', 'recipient_mail', 'custom_message',)
     for fld in mandatory_fields:
         if fld not in request.POST:
             res = xml_response(RESPONSE_ERROR, _('Mail not sent because of mandatory parameters were not passed. Please specify all of them.'))
