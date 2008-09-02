@@ -89,7 +89,8 @@ def send_it(**kwargs):
         'site' : site})
 
     eml = create_mail(
-        mailfrom=settings.ELLA_SENDMAIL_FROM_MAIL,
+        #mailfrom=settings.ELLA_SENDMAIL_FROM_MAIL,
+        mailfrom=sender_mail,
         mailto=recipient_mail,
         subject=mail_subject,
         plaintext=mail_body,

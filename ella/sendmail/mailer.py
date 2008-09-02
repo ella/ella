@@ -8,6 +8,7 @@ from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
 from email.MIMEImage import MIMEImage
 from email.MIMENonMultipart import MIMENonMultipart
+from email.Header import Header
 
 
 def __uni2iso(text):
@@ -51,7 +52,8 @@ def create_mail(**kwargs):
 
     msgRoot = MIMEMultipart('related')
     msgRoot.add_header('X-Mailer', kwargs.get('xmailer', 'Ella CMS'))
-    msgRoot['Subject'] = kwargs.get('subject', 'CMS E-mail')
+    subj = Header(kwargs.get('subject', 'CMS E-mail'), CHARSET)
+    msgRoot['Subject'] = subj
     msgRoot['From'] = strFrom
     msgRoot['To'] = kwargs.get('mailto', 'unknown@recipient.net')
     msgRoot.set_charset(CHARSET)
