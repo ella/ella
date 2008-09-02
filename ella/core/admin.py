@@ -159,7 +159,8 @@ class PlacementInlineOptions(generic.GenericTabularInline):
     fieldsets = ((None, {'fields' : ('category', 'publish_from', 'publish_to', 'slug', 'static', 'listings',)}),)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        kwargs['widget'] = widgets.ListingCategoryWidget
+        if db_field.name == 'category':
+            kwargs['widget'] = widgets.ListingCategoryWidget
         return super(PlacementInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
 
