@@ -42,6 +42,7 @@ class SendMailFormPreview(FormPreview):
         sender_mail = cleaned_data['sender_mail']
         recipient_mail = cleaned_data['recipient_mail']
         target = cleaned_data['target_object']
+        sender_name = cleaned_data.get('sender_name', '')
 
         if hasattr(target, 'get_absolute_url'):
             url = target.get_absolute_url()
@@ -51,6 +52,7 @@ class SendMailFormPreview(FormPreview):
         try:
             send_it(
                 sender_mail=sender_mail,
+                sender_name=sender_name,
                 recipient_mail=recipient_mail,
                 target_object=target,
                 custom_message=cleaned_data['custom_message'],
@@ -89,7 +91,6 @@ def send_it(**kwargs):
         'site' : site})
 
     eml = create_mail(
-        #mailfrom=settings.ELLA_SENDMAIL_FROM_MAIL,
         mailfrom=sender_mail,
         mailto=recipient_mail,
         subject=mail_subject,
