@@ -4,9 +4,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 
 from ella.core.models import Category
-from ella.core.cache.utils import get_cached_object, get_cached_list, CachedGenericForeignKey
+from ella.core.cache.utils import get_cached_list, CachedGenericForeignKey
 from ella.db.models import Publishable
-from ella.core.box import Box
 
 
 class Serie(Publishable, models.Model):
@@ -22,7 +21,7 @@ class Serie(Publishable, models.Model):
     finished = models.DateField(_('Finished'), null=True, blank=True)
 
     def get_text(self):
-        return self.descending
+        return self.description
 
     @property
     def parts(self):
@@ -63,5 +62,3 @@ class SeriePart(models.Model):
         ordering = ('serie','part_no',)
         verbose_name=_('Serie part')
         verbose_name_plural=_('Serie parts')
-
-

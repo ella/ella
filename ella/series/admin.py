@@ -2,13 +2,18 @@ from django.contrib import admin
 from ella.series.models import Serie, SeriePart
 from ella.ellaadmin.options import EllaAdminOptionsMixin
 
+from ella.core.admin import PlacementInlineOptions
+from ella.tagging.admin import TaggingInlineOptions
+
 class SerieAdmin(EllaAdminOptionsMixin, admin.ModelAdmin):
     list_display = ('title', 'started', 'is_active')
     list_filter = ('started', 'finished',)
     prepopulated_fields = {'slug': ('title',)}
     search_fields = ('title', 'perex',)
 
-    rich_text_fields = {None: ('description',)}
+    inlines = [PlacementInlineOptions, TaggingInlineOptions]
+
+    rich_text_fields = {None: ('perex', 'description',)}
 
 
 class SeriePartAdmin(EllaAdminOptionsMixin, admin.ModelAdmin):
