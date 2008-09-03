@@ -10,6 +10,7 @@ from ella.catlocks.models import CategoryLock
 from ella.catlocks.forms import CATEGORY_LOCK_FORM
 
 CATEGORY_LOCK_PASSWD = '__CATEGORY_LOCK_PASSWD__'
+CATEGORY_LOCK_ERR_CAT = 'CATEGORY_LOCK_ERR_CAT'
 
 class CategoryLockMiddleware(object):
     def __init__(self):
@@ -34,6 +35,10 @@ class CategoryLockMiddleware(object):
         else:
             form = cl.form()
 
+        request.session[CATEGORY_LOCK_ERR_CAT] = cl.category
+
+        url = request.META.get('HTTP_REFERER', '/')
+        return HttpResponseRedirect(url)
         # render password form
         return HttpResponseForbidden(render_to_string('page/category_lock/form.html', {'category': cl.category, 'form': form}))
 
@@ -45,4 +50,9 @@ class CategoryLockMiddleware(object):
             else:
                 log.warning('%s is protected, but no password found.', request.path)
                 return HttpResponseForbidden()
+
+    def process_response(self, request, response):
+        if request.method != 'POST' and CATEGORY_LOCK_ERR_CAT in request.session:
+            del request.session[CATEGORY_LOCK_ERR_CAT]
+        return response
 
