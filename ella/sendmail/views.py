@@ -80,12 +80,15 @@ def send_it(**kwargs):
     custom_message = kwargs['custom_message']
     site = get_cached_object_or_404(Site, pk=settings.SITE_ID)
 
-    mail_body = render_to_string('page/sendmail/mail-body.html', {
+    render_args = {
         'custom_message' : custom_message,
         'sender_mail' : sender_mail,
         'sender_name': sender_name,
         'target' : target,
-        'site' : site})
+        'site' : site
+}
+    mail_body = render_to_string('page/sendmail/mail-body.txt', render_args)
+    mail_body_html = render_to_string('page/sendmail/mail-body.html', render_args)
     mail_subject = render_to_string('page/sendmail/mail-subject.html', {
         'sender_mail' : sender_mail,
         'site' : site})
@@ -95,7 +98,7 @@ def send_it(**kwargs):
         mailto=recipient_mail,
         subject=mail_subject,
         plaintext=mail_body,
-        htmltext=mail_body
+        htmltext=mail_body_html
 )
     smtp = SMTP(settings.ELLA_SENDMAIL_SMTP_SERVER)
     smtp.sendmail(settings.ELLA_SENDMAIL_FROM_MAIL, recipient_mail, eml.as_string())
