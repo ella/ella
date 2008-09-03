@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-09-03 15:05+0200\n"
+"POT-Creation-Date: 2008-09-03 15:40+0200\n"
 "PO-Revision-Date: 2008-01-07 22:32+0100\n"
 "Last-Translator: Vitek Pliska <whit@jizak.cz>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,53 +15,56 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: .\forms.py:98 .\forms.py:136
+#: forms.py:98 forms.py:136
 msgid "Sender email"
 msgstr "Váš email"
 
-#: .\forms.py:99 .\forms.py:137
+#: forms.py:99 forms.py:138
+msgid "Sender name"
+msgstr "Vaše jméno"
+
+#: forms.py:100 forms.py:137
 msgid "Recipient email"
 msgstr "Email přítele"
 
-#: .\forms.py:100
+#: forms.py:101
 msgid "Email message"
 msgstr "Zpráva"
 
-#: .\forms.py:126
+#: forms.py:127
 msgid "Target object does not exist."
 msgstr "Cílový objekt neexistuje."
 
-#: .\models.py:10
+#: models.py:10
 msgid "content type"
 msgstr ""
 
-#: .\models.py:11
+#: models.py:11
 msgid "target id"
 msgstr ""
 
-#: .\urls.py:7 .\views.py:60
+#: urls.py:7 views.py:62
 msgid "send mail"
 msgstr "poslat mail"
 
-#: .\views.py:60 .\views.py:167
+#: views.py:62 views.py:168
 msgid "error"
 msgstr "chyba"
 
-#: .\views.py:146
+#: views.py:147
 msgid ""
 "Mail not sent because of mandatory parameters were not passed. Please "
 "specify all of them."
 msgstr ""
 
-#: .\views.py:157
+#: views.py:158
 msgid "E-Mail successfully sent."
-msgstr ""
+msgstr "E-Mail byl úspěšně odeslán."
 
-#: .\views.py:162
+#: views.py:163
 msgid "preview"
 msgstr "náhled"
 
-#: .\views.py:165
+#: views.py:166
 msgid "success"
 msgstr "hotovo"
-
