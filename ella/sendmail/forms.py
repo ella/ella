@@ -8,7 +8,7 @@ from django.db import models
 from django.contrib.contenttypes.models import ContentType
 
 from django import forms
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_lazy as _
 
 from ella.core.cache import get_cached_object
 
@@ -95,9 +95,9 @@ class SendMailForm(forms.Form):
     def add_normal_inputs(self):
         """any other normal inputs"""
         textarea = forms.Textarea()
-        self.fields['sender_mail'] = forms.EmailField()
-        self.fields['recipient_mail'] = forms.EmailField()
-        self.fields['custom_message'] = forms.CharField(max_length=300, required=False, widget=textarea)
+        self.fields['sender_mail'] = forms.EmailField(label=_("Sender email"))
+        self.fields['recipient_mail'] = forms.EmailField(label=_("Recipient email"))
+        self.fields['custom_message'] = forms.CharField(max_length=300, required=False, widget=textarea, label=_("Email message"))
 
 
     def fill_form_values(self):
@@ -133,5 +133,5 @@ class SendBuddyForm(SendMailForm):
     def add_normal_inputs(self):
         """any other normal inputs"""
         textarea = forms.Textarea()
-        self.fields['sender_mail'] = forms.EmailField()
-        self.fields['recipient_mail'] = forms.EmailField()
+        self.fields['sender_mail'] = forms.EmailField(label=_("Sender email"))
+        self.fields['recipient_mail'] = forms.EmailField(label=_("Recipient email"))
