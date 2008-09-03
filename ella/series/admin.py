@@ -12,7 +12,7 @@ class SerieAdmin(EllaAdminOptionsMixin, admin.ModelAdmin):
 
 
 class SeriePartAdmin(EllaAdminOptionsMixin, admin.ModelAdmin):
-    list_display = ('target', 'target_ct', 'serie', 'part_no',)
+    list_display = ('target_admin', 'target_ct', 'serie', 'part_no',)
     list_filter = ('serie','target_ct',)
 
 admin.site.register(Serie, SerieAdmin)

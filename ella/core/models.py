@@ -179,6 +179,10 @@ class Placement(models.Model):
         except:
             return 'Broken placement'
 
+    def target_admin(self):
+        return self.target
+    target_admin.short_description = _('Target')
+
     def full_url(self):
         "Full url to be shown in admin."
         return mark_safe('<a href="%s">url</a>' % self.get_absolute_url())

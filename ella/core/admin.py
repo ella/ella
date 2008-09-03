@@ -169,7 +169,7 @@ class HitCountInlineOptions(admin.TabularInline):
     extra = 0
 
 class PlacementOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
-    list_display = ('target', 'category', 'publish_from', 'full_url',)
+    list_display = ('target_admin', 'category', 'publish_from', 'full_url',)
     list_filter = ('publish_from', 'category', 'target_ct',)
     inlines = (ListingInlineOptions,)
     fieldsets = (

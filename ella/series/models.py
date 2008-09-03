@@ -9,7 +9,7 @@ from ella.db.models import Publishable
 from ella.core.box import Box
 
 
-class Serie(models.Model, Publishable):
+class Serie(Publishable, models.Model):
 
     title = models.CharField(_('Title'), max_length=96)
     slug = models.SlugField(_('Slug'), unique=True)
@@ -51,6 +51,9 @@ class SeriePart(models.Model):
 
     target = CachedGenericForeignKey('target_ct', 'target_id')
 
+    def target_admin(self):
+        return self.target
+    target_admin.short_description = _('Target')
 
     def __unicode__(self):
         return u"%s %s: %s" % (self.target,_('in serie'),self.serie)
