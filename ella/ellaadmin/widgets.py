@@ -129,7 +129,7 @@ class AuthorsSuggestAdminWidget(forms.TextInput):
         else:
             url = ''
         if not attrs.has_key('class'):
-            attrs['class'] = 'vForeignKeyRawIdAdminField vSuggestMultipleFieldAuthor' # The JavaScript looks for this hook.
+            attrs['class'] = 'vSuggestMultipleFieldAuthor' # The JavaScript looks for this hook.
         if value:
             a_values = ''
             try:
@@ -140,8 +140,6 @@ class AuthorsSuggestAdminWidget(forms.TextInput):
                 elif type(value) in [unicode, str]:
                     for a in value.split(','):
                         a_values += a + ','
-                if a_values.endswith(','):
-                    a_values = a_values[:-1]
                 output = [super(self.__class__, self).render(name, a_values, attrs)]
             except:
                 output = [super(self.__class__, self).render(name, value, attrs)]

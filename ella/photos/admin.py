@@ -35,12 +35,10 @@ class FormatOptions(admin.ModelAdmin):
 
 class CropAreaWidget(forms.TextInput):
     class Media:
-        JS_JQUERY = 'js/jquery.js'
         JS_INTERFACE = 'js/interface.js'
         JS_CROP = 'js/crop.js'
         CSS_CROP = 'css/crop.css'
         js = (
-            settings.ADMIN_MEDIA_PREFIX + JS_JQUERY,
             settings.ADMIN_MEDIA_PREFIX + JS_INTERFACE,
             settings.ADMIN_MEDIA_PREFIX + JS_CROP,
 )
@@ -65,7 +63,7 @@ class PhotoOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     list_display = ('title', 'width', 'height', 'thumb') ## 'authors')
     list_filter = ('created',)
     prepopulated_fields = {'slug': ('title',)}
-    search_fields = ('title', 'image', 'description', 'id',)
+    search_fields = ('title', 'image', 'description', 'id', 'tags__tag__name',)
 
     def __call__(self, request, url):
         if url and url.endswith('json'):

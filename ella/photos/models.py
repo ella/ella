@@ -7,7 +7,7 @@ import os
 from django.db import models, transaction, IntegrityError
 from django.conf import settings
 from django.utils.translation import ugettext, ugettext_lazy as _
-#from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes import generic
 from django.contrib.sites.models import Site
 from django.utils.safestring import mark_safe
 
@@ -16,6 +16,7 @@ from ella.core.managers import RelatedManager
 from ella.core.box import Box
 from ella.core.cache.utils import get_cached_object
 from ella.utils.filemanipulation import file_rename
+from ella.tagging.models import TaggedItem
 
 # settings default
 PHOTOS_FORMAT_QUALITY_DEFAULT = (
@@ -71,6 +72,8 @@ class Photo(models.Model):
     source = models.ForeignKey(Source, blank=True, null=True, verbose_name=_('Source'))
 
     created = models.DateTimeField(default=datetime.now, editable=False)
+
+    tags = generic.GenericRelation(TaggedItem)
 
     def thumb(self):
         """

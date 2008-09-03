@@ -147,6 +147,7 @@ class Quiz(Publishable, models.Model, FloatingStateModel):
     active_from = models.DateTimeField(_('Active from'))
     active_till = models.DateTimeField(_('Active till'))
     photo = models.ForeignKey(Photo)
+    has_correct_answers = models.BooleanField(_('Has correct answers'))
 
     # Authors and Sources
     authors = models.ManyToManyField(Author, verbose_name=_('Authors'))

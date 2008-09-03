@@ -238,7 +238,7 @@
                     for (i = 0; i < tags.length - 1; i++) {
                         val += tags[i] + multiDivider;
                     }
-					$input.val(val + $currentResult.text());
+					$input.val(val + $currentResult.text() + multiDivider);
 					$results.hide();
 
 					if (options.onSelect)

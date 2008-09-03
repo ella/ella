@@ -1,4 +1,4 @@
-/* File editor.js
+/* File .js
  * Rich (WYSISYM) text editor for ELLA
  * Script takes all of textarea.rich_text_area and turns them into WYSIWYM editor on focus
  * Author: Maxim Izmaylov (izmaylov.maxim@netcentrum.cz)
@@ -316,7 +316,7 @@ function build(box){
 	var link2object = function(){
 		myFORM=document.getElementById('mainForm');
 		myFORM.method.value='link';
-		myFORM.parameters.value='name:'+myFORM.parameters.value;
+		myFORM.parameters.value='text:'+myFORM.parameters.value;
 	}
 	if(box.type && box.type == 'articles.article'){link2object();}
 }
