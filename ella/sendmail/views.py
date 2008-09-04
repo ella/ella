@@ -92,6 +92,7 @@ def send_it(**kwargs):
     mail_subject = render_to_string('page/sendmail/mail-subject.html', {
         'sender_mail' : sender_mail,
         'site' : site})
+    mail_subject = mail_subject.strip()
 
     eml = create_mail(
         mailfrom=sender_mail,
