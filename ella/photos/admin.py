@@ -63,7 +63,7 @@ class PhotoOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     list_display = ('title', 'width', 'height', 'thumb') ## 'authors')
     list_filter = ('created',)
     prepopulated_fields = {'slug': ('title',)}
-    search_fields = ('title', 'image', 'description', 'id', 'tags__tag__name',)
+    search_fields = ('title', 'image', 'description', 'id',) # FIXME: 'tags__tag__name',)
 
     def __call__(self, request, url):
         if url and url.endswith('json'):
