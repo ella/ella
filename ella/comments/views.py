@@ -7,6 +7,7 @@ from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.template.defaultfilters import slugify
+from django.utils.translation import ugettext as _
 
 from ella.core.cache import get_cached_object_or_404
 from ella.core.views import get_templates_from_placement
