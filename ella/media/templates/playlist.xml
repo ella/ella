@@ -65,7 +65,7 @@
     </collection>
 
 
-    <messages>
+   <messages>
 		<message name="sectionButtonContinuePlay">Pokračovat v přehrávání</message>
 		<message name="sectionButtonPlayAgain">Přehrát znovu</message>
 		<message name="sectionButtonShareVideo">Sdílet video</message>
@@ -99,6 +99,23 @@
 		<message name="internetShare">Sdílet na internetu:</message>
 
 		<message name="relatedTitle">Související videa</message>
+		<message name="videoIsUnavailable">Video je dočasně nedostupné.</message>
+
+		<!-- EMAIL SENDING -->
+		<message name="yourEmailBadFormat">Váš email je ve špatném formátu.</message>
+		<message name="yourNameIsEmpty">Není vyplněno Vaše jméno.</message>
+		<message name="receiverEmailBadFormat">Email příjemce je ve špatném formátu.</message>
+		<message name="sendindEmail">ODESÍLÁM...</message>
+		<message name="emailSent">ODESLÁNO</message>
+		<message name="emailSendingPHPError">Email nebyl odeslán.</message>
+		<message name="emailSendingASError">Nastala chyba. Email nebyl odeslán.</message>
+
+		<!-- RIGHT MENU -->
+		<message name="rightMenuFullscreen">fullscreen</message>
+		<message name="rightMenuCropVideo">ořez obrazu</message>
+		<message name="rightMenuLowQualityVideo">nízká kvalita</message>
+		<message name="rightMenuStandardQualityVideo">standardní kvalita</message>
+		<message name="rightMenuHighQualityVideo">vysoká kvalita</message>
 	</messages>
 
     <settings>
