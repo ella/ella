@@ -51,7 +51,6 @@ class CommentFormPreview(FormPreview):
         return HttpResponseRedirect(url)
 
 def new_comment(request, context, reply=None):
-    import pdb;pdb.set_trace()
     """new comment for specified object"""
     init_props = {
         'target': '%d:%d' % (context['content_type'].id, context['object']._get_pk_val()),
