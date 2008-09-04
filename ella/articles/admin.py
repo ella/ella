@@ -30,7 +30,7 @@ class ArticleOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
 )
     raw_id_fields = ('photo',)
     list_filter = ('category__site', 'created', 'category', 'authors',)
-    search_fields = ('title', 'upper_title', 'perex', 'slug', 'authors__name', 'authors__slug', 'tags__tag__name',)
+    search_fields = ('title', 'upper_title', 'perex', 'slug', 'authors__name', 'authors__slug',) # FIXME: 'tags__tag__name',)
     inlines = (ArticleContentInlineOptions, PlacementInlineOptions, TaggingInlineOptions,)
     prepopulated_fields = {'slug' : ('title',)}
     rich_text_fields = {None: ('perex',)}

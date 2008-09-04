@@ -6,7 +6,7 @@ from ella.core.cache import CachedForeignKey
 from ella.catlocks.forms import CategoryLockForm
 
 class CategoryLock(models.Model):
-    category = CachedForeignKey(Category)
+    category = CachedForeignKey(Category, verbose_name=_('Category'), unique=True)
     password = models.CharField(_('Password'), max_length=255)
 
     class Meta:
