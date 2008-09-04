@@ -67,11 +67,13 @@ class CommentManager(models.Manager):
         return self.filter(target_ct=target_ct, target_id=object.id, **kwargs).count()
 
     #@cache_this(get_list_key, invalidate_cache)
-    def get_list_for_object(self, object, order_by=None, **kwargs):
+    def get_list_for_object(self, object, order_by=None, limit=None, **kwargs):
         target_ct = ContentType.objects.get_for_model(object)
         qset = self.filter(target_ct=target_ct, target_id=object.pk, **kwargs)
         if order_by:
             qset = qset.order_by(order_by)
+        if limit:
+            qset = qset[:limit]
         return build_tree(list(qset))
 
 class Comment(models.Model):
