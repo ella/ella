@@ -52,16 +52,16 @@ class SendMailFormPreview(FormPreview):
         else:
             url = '/'
 
-#        try:
-        mail.send_mail(
-            subject=mail_subject,
-            message=mail_body,
-            from_email=sender_mail,
-            recipient_list=[recipient_mail])
-#        except:
-#            return HttpResponseRedirect("%s%s/%s/" % (url, slugify(_('send mail')), slugify(_('error'))))
-#
-#        return HttpResponseRedirect(url)
+        try:
+            mail.send_mail(
+                subject=mail_subject,
+                message=mail_body,
+                from_email=sender_mail,
+                recipient_list=[recipient_mail])
+        except:
+            return HttpResponseRedirect("%s%s/%s/" % (url, slugify(_('send mail')), slugify(_('error'))))
+
+        return HttpResponseRedirect("%s%s/%s/" % (url, slugify(_('send mail')), slugify(_('success'))))
 
 
 def new_mail(request, context):
@@ -71,5 +71,9 @@ def new_mail(request, context):
     form = SendMailForm(init_props=init_props)
     context['form'] = form
     templates = get_templates_from_placement('sendmail/form.html', context['placement'])
+    return render_to_response(templates, context, context_instance=RequestContext(request))
+
+def success(request, context):
+    templates = get_templates_from_placement('sendmail/success.html', context['placement'])
     return render_to_response(templates, context, context_instance=RequestContext(request))
 
