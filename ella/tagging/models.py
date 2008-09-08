@@ -103,10 +103,10 @@ class TagManager(models.Manager):
         cat = None
         if hasattr(obj, 'get_category'):
             cat = obj.get_category()
-            inv_key = get_key_cloud_for_category(None, self, cat, priority=tag_priority) # cache key for category tag cloud.
-            delete_cached_object(inv_key)  # invalidate cached clouds for category ``cat`` TODO .. delete from cache via invalidator
-        inv_key = get_key_get_for_object(None, self, obj) # invalidate tags returned by TagManager.get_for_object
-        delete_cached_object(inv_key) # TODO delete from cache via invalidator
+            #inv_key = get_key_cloud_for_category(None, self, cat, priority=tag_priority) # cache key for category tag cloud.
+            #delete_cached_object(inv_key)  # invalidate cached clouds for category ``cat`` TODO .. delete from cache via invalidator
+        #inv_key = get_key_get_for_object(None, self, obj) # invalidate tags returned by TagManager.get_for_object
+        #delete_cached_object(inv_key) # TODO delete from cache via invalidator
         return TaggedItem._default_manager.get_or_create(
             tag=tag,
             content_type=ctype,
@@ -115,7 +115,7 @@ class TagManager(models.Manager):
             priority=tag_priority,
 )
 
-    @cache_this(get_key_get_for_object, None)
+    #@cache_this(get_key_get_for_object, None)
     def get_for_object(self, obj, **kwargs):
         """
         Create a queryset matching all tags associated with the given
@@ -288,7 +288,7 @@ class TagManager(models.Manager):
             related.append(tag)
         return related
 
-    @cache_this(get_key_cloud_for_category, None)
+    #@cache_this(get_key_cloud_for_category, None)
     def cloud_for_category(self, category, **kwargs):
         """ returns tag cloud for all objects in certain category. """
         priority, steps = kwargs.get('priority', PRIMARY_TAG), kwargs.get('steps', 4)
@@ -331,7 +331,7 @@ class TagManager(models.Manager):
     def cloud(self):
         return self.cloud_for_category(None)
 
-    @cache_this(get_key_cloud_for_model, None, TIMEOUT_SHORT)
+    #@cache_this(get_key_cloud_for_model, None, TIMEOUT_SHORT)
     def cloud_for_model(self, model, steps=4, distribution=LOGARITHMIC,
                         filters=None, min_count=None):
         """
@@ -384,7 +384,8 @@ class TaggedItemManager(models.Manager):
 }
         if prio:
             kw['priority'] = prio
-        return get_cached_list(TaggedItem, **kw)
+        return TaggedItem.objects.filter(**kw)
+        #return get_cached_list(TaggedItem, **kw)
 
     def get_by_model(self, queryset_or_model, tags):
         """
