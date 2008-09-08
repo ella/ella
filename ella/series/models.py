@@ -4,7 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 
 from ella.core.models import Category
-from ella.core.cache.utils import get_cached_list, CachedGenericForeignKey
+from ella.core.cache.utils import get_cached_list, CachedGenericForeignKey, CachedForeignKey
 from ella.db.models import Publishable
 
 
@@ -43,12 +43,16 @@ class Serie(Publishable, models.Model):
 
 class SeriePart(models.Model):
 
-    serie = models.ForeignKey(Serie, verbose_name=_('Serie'))
-    target_ct = models.ForeignKey(ContentType)
+    # TODO: coz tady misto target_ct a target_id atd.. udelat odkaz rovnou na placement???
+
+    serie = CachedForeignKey(Serie, verbose_name=_('Serie'))
+    target_ct = CachedForeignKey(ContentType)
     target_id = models.IntegerField()
     part_no = models.PositiveSmallIntegerField(_('Part no.'), default=1)
 
     target = CachedGenericForeignKey('target_ct', 'target_id')
+
+#    objects = SeriePartManager()
 
     def target_admin(self):
         return self.target
