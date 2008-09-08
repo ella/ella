@@ -52,16 +52,16 @@ class SendMailFormPreview(FormPreview):
         else:
             url = '/'
 
-        try:
-            mail.send_mail(
-                subject=mail_subject,
-                message=mail_body,
-                from_email=sender_mail,
-                recipient_list=[recipient_mail])
-        except:
-            return HttpResponseRedirect("%s%s/%s/" % (url, slugify(_('send mail')), slugify(_('error'))))
-
-        return HttpResponseRedirect(url)
+#        try:
+        mail.send_mail(
+            subject=mail_subject,
+            message=mail_body,
+            from_email=sender_mail,
+            recipient_list=[recipient_mail])
+#        except:
+#            return HttpResponseRedirect("%s%s/%s/" % (url, slugify(_('send mail')), slugify(_('error'))))
+#
+#        return HttpResponseRedirect(url)
 
 
 def new_mail(request, context):
