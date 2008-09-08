@@ -25,7 +25,7 @@ msgstr "Vaše jméno"
 
 #: forms.py:100 forms.py:137
 msgid "Recipient email"
-msgstr "Email přítele"
+msgstr "Email příjemnce"
 
 #: forms.py:101
 msgid "Email message"
