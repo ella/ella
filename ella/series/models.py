@@ -58,7 +58,7 @@ class SeriePart(models.Model):
         return u"%s %s: %s" % (self.target,_('in serie'),self.serie)
 
     class Meta:
-        unique_together=(('serie', 'target_ct', 'target_id',),)
+        unique_together=(('target_ct', 'target_id',),)
         ordering = ('serie','part_no',)
         verbose_name=_('Serie part')
         verbose_name_plural=_('Serie parts')
