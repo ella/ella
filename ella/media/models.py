@@ -87,24 +87,6 @@ class Media(Publishable, models.Model):
         """
         return self.usage_set.all().order_by('-priority')
 
-    def get_home(self):
-        """
-        Returns home object for media
-
-        Media se vetsinou nezobrazuje jak je, ale nejak konkretne pouzita
-        (napr. v navodu). Home object urcuje ktere uziti je hlavni, tzn.
-        hlavne kam maji vest linky
-
-        Zatim natvrdo navod (kus elly zavisi na jednom konktretnim vyuziti)
-        """
-        return self.instruction_set.all()[0]
-
-    def get_absolute_url(self, domain=False):
-        """
-        Returns absolute url of home object
-        """
-        return self.get_home().get_absolute_url(domain=domain)
-
     def Box(self, box_type, nodelist):
         return MediaBox(self, box_type, nodelist)
 
