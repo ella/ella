@@ -120,18 +120,18 @@ class CommentForm(forms.Form):
     def add_normal_inputs(self):
         """any other normal inputs"""
         textarea = forms.Textarea()
-        self.fields['subject'] = forms.CharField(max_length=defaults.SUBJECT_LENGTH, label=_('Comment subject'))
-        self.fields['content'] = forms.CharField(max_length=defaults.COMMENT_LENGTH, widget=textarea, label=_('Comment content'))
+        self.fields['subject'] = forms.CharField(max_length=defaults.SUBJECT_LENGTH, label=_('Comment subject:'))
+        self.fields['content'] = forms.CharField(max_length=defaults.COMMENT_LENGTH, widget=textarea, label=_('Comment content:'))
 
     def add_username_inputs(self, registered=True, anonymous=True):
         """add user validation fields"""
         if registered:
-            self.fields['username'] = forms.CharField(max_length=defaults.USERNAME_LENGTH, label=_('Authorized author'))
-            self.fields['password'] = forms.CharField(widget=forms.PasswordInput(), label=_('Password'))
+            self.fields['username'] = forms.CharField(max_length=defaults.USERNAME_LENGTH, label=_('Authorized author:'))
+            self.fields['password'] = forms.CharField(widget=forms.PasswordInput(), label=_('Password:'))
 
         if anonymous:
-            self.fields['nickname'] = forms.CharField(max_length=defaults.NICKNAME_LENGTH, label=_("Nickname"))
-            self.fields['email'] = forms.EmailField(required=False, label=_('Email'))
+            self.fields['nickname'] = forms.CharField(max_length=defaults.NICKNAME_LENGTH, label=_("Nickname:"))
+            self.fields['email'] = forms.EmailField(required=False, label=_('Email:'))
 
         if registered and anonymous:
             self.fields['reg_anonym_sel'] = forms.CharField(max_length=3, required=True,
