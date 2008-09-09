@@ -6,6 +6,7 @@ from django import forms
 from ella.tagging.models import Tag, TaggedItem
 from django.utils.translation import ugettext_lazy as _
 from ella.tagging.fields import SuggestTagAdminField, TagPriorityAdminField
+from ella.tagging.utils import PRIMARY_TAG
 from django.contrib.contenttypes.models import ContentType
 from ella.ellaadmin.options import EllaAdminOptionsMixin
 
@@ -45,8 +46,10 @@ class TagInlineFormset(modelforms.BaseModelFormSet):
         self.changed_objects = []
         self.deleted_objects = []
         for d in self.cleaned_data:
-            if 'priority' not in d or 'tag' not in d:
+            if 'tag' not in d:
                 continue
+            if 'priority' not in d:
+                d['priority']=PRIMARY_TAG
             obj = self.instance
             ct = ContentType.objects.get_for_model(obj)
             if hasattr(obj, 'category'):
@@ -90,10 +93,10 @@ class TaggingInlineOptionsSimple(admin.TabularInline):
     extra = 0
 
 class TaggingInlineOptions(EllaAdminOptionsMixin, generic.GenericTabularInline):
-    fields = ('tag', 'priority',)
+    fields = ('tag',)# 'priority',)
     raw_id_fields = ('tag',)
     model = TaggedItem
-    extra = 2
+    extra = 1
     id_field_name = 'object_id'
     ct_field_name = 'content_type'
     formset = TagInlineFormset
@@ -101,8 +104,8 @@ class TaggingInlineOptions(EllaAdminOptionsMixin, generic.GenericTabularInline):
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'tag':
             return SuggestTagAdminField(db_field, **kwargs)
-        elif db_field.name == 'priority':
-            return TagPriorityAdminField(db_field, **kwargs)
+    #    elif db_field.name == 'priority':
+    #       return TagPriorityAdminField(db_field, **kwargs)
         return super(TaggingInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
 class TagOptions(admin.ModelAdmin):
