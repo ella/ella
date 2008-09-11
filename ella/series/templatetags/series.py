@@ -1,8 +1,8 @@
-from datetime import datetime
-
 from django import template
 
 from ella.series.models import Serie, SeriePart
+from ella.articles.models import Article
+from ella.core.models import Placement
 
 register = template.Library()
 
@@ -12,19 +12,19 @@ def get_serie(parser, token):
     Template tag get_serie.
 
     Usage::
-        {% get_serie for <placement>[ limit <X>] %}
+        {% get_serie for <placement>[ limit <X>] as <result> %}
 
     Examples::
 
-        {% get_serie for placement %}
-        {% get_serie for placement limit 10 %}
+        {% get_serie for placement as serie %}
+        {% get_serie for placement limit 10 as serie %}
     """
     params = get_serie_parse(token.split_contents())
     return SerieNode(params)
 
 def get_serie_parse(input):
-    if len(input) < 3:
-        raise template.TemplateSyntaxError("%r tag has no argument" % input[0])
+    if len(input) < 5:
+        raise template.TemplateSyntaxError("Two or more arguments are expected in %r tag" % input[0])
     params = {}
 
     o = 1
@@ -32,7 +32,17 @@ def get_serie_parse(input):
     if input[o] == 'for':
         params['for'] = input[o+1]
     else:
-        raise template.TemplateSyntaxError("Unknown argument in tag %r" % input[0])
+        raise template.TemplateSyntaxError("Unknown argument %r in tag %r" % (input[o], input[0]))
+    o = 3
+    # limit
+    if input[o] == 'limit':
+        params['limit'] = input[o+1]
+        o = o + 2
+    # as
+    if input[o] == 'as':
+        params['as'] = input[o+1]
+    else:
+        raise template.TemplateSyntaxError("%r tag requires 'as' argument" % (input[0]))
 
     return params
 
@@ -47,9 +57,12 @@ class SerieNode(template.Node):
         placement = template.Variable(self.params['for']).resolve(context)
 
         try:
-            serie_part = SeriePart.objects.get(target_ct=placement.target_ct, target_id=placement.target_id)
+            if isinstance(placement.target, Serie):
+                context[self.params['as']] = placement.target
+            else:
+                serie_part = SeriePart.objects.get(target_ct=placement.target_ct, target_id=placement.target_id)
+                context[self.params['as']] = serie_part.serie
         except SeriePart.DoesNotExist:
             return ''
 
-        context['serie'] = serie_part.serie
         return ''
