@@ -37,6 +37,7 @@ class MediaForm(forms.ModelForm):
 
 
     def generate_photo(self, instance):
+        # TODO: handle fails
         dir_name = Photo._meta.get_field_by_name('image')[0].get_directory_name()
         file_name = path.join(dir_name, 'screenshot-' + instance.file.token)
         try:
@@ -64,5 +65,8 @@ class MediaForm(forms.ModelForm):
             self.generate_photo(instance)
         if commit:
             instance.save()
+            from nc.cdnclient.forms import TargetsForm
+            form = TargetsForm(instance.file, data=self.data, prefix='file')
+            form.create_formats()
 
         return instance
