@@ -15,6 +15,8 @@ class ImgTag(template.Node):
         if isinstance(self.photo, basestring):
             try:
                 photo = template.Variable(self.photo).resolve(context)
+                if not photo:
+                    return ''
             except template.VariableDoesNotExist:
                 return ''
             try:
