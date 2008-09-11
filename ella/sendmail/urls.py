@@ -1,5 +1,6 @@
 from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext as _
+from django.http import Http404
 
 from ella.core.custom_urls import dispatcher
 
@@ -18,7 +19,6 @@ def sendmail_custom_urls(request, bits, context):
     if len(bits) == 0:
         return new_mail(request, context)
 
-    from django.http import Http404
     raise Http404
 
 dispatcher.register(slugify(_('send mail')), sendmail_custom_urls)
