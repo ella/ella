@@ -1,3 +1,15 @@
+centrum-ella (0.2.33.0) unstable; urgency=low
+
+  * Build from [1520]
+
+ -- Vitek Pliska <whit@jizak.cz>  Thu, 11 Sep 2008 16:08:19 +0200
+
+centrum-ella (0.2.32.2) unstable; urgency=low
+
+  * Build from [1496]. Searching in tags reverted.
+
+ -- Vitek Pliska <whit@jizak.cz>  Thu,  4 Sep 2008 15:11:45 +0200
+
 centrum-ella (0.2.32.1) unstable; urgency=low
 
   * Build from [1486]
