@@ -34,29 +34,32 @@ class MediaForm(ModelForm):
     """
     Generates thumb when media is saved
     """
+    def generate_photo(self, instance):
+        dir_name = Photo._meta.get_field_by_name('image')[0].get_directory_name()
+        file_name = path.join(dir_name, 'screenshot-' + instance.file.token)
+        try:
+            makedirs(path.join(settings.MEDIA_ROOT, dir_name))
+        except OSError:
+            # Directory already exists
+            pass
+        time = None
+        if self.data.has_key('photo_time') and self.data['photo_time']:
+            time = int(self.data['photo_time'])
+        instance.file.create_thumb(path.join(settings.MEDIA_ROOT, file_name), time=time)
+        photo = Photo()
+        photo.title = "%s screenshot" % instance.title
+        photo.slug = slugify(photo.title)
+        photo.image = file_name
+        size = get_img_size(path.join(settings.MEDIA_ROOT, file_name))
+        photo.width = size['width']
+        photo.height = size['height']
+        photo.save()
+        instance.photo = photo
+
     def save(self, commit=True):
         instance = super(MediaForm, self).save(False)
         if (commit and self.data.has_key('photo_auto')):
-            dir_name = Photo._meta.get_field_by_name('image')[0].get_directory_name()
-            file_name = path.join(dir_name, 'screenshot-' + instance.file.token)
-            try:
-                makedirs(path.join(settings.MEDIA_ROOT, dir_name))
-            except OSError:
-                # Directory already exists
-                pass
-            time = None
-            if self.data.has_key('photo_time') and self.data['photo_time']:
-                time = int(self.data['photo_time'])
-            instance.file.create_thumb(path.join(settings.MEDIA_ROOT, file_name), time=time)
-            photo = Photo()
-            photo.title = "%s screenshot" % instance.title
-            photo.slug = slugify(photo.title)
-            photo.image = file_name
-            size = get_img_size(path.join(settings.MEDIA_ROOT, file_name))
-            photo.width = size['width']
-            photo.height = size['height']
-            photo.save()
-            instance.photo = photo
+            self.generate_photo(instance)
         if commit:
             instance.save()
 
