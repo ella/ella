@@ -37,10 +37,11 @@
 
 
 			// help IE users if possible
-			try {
-				$results.bgiframe();
-			} catch(e) { }
-
+			if ($.browser.ie) {
+				try {
+					$results.bgiframe();
+				} catch(e) { }
+			}
 
 			// I really hate browser detection, but I don't see any other way
 			if ($.browser.mozilla)
