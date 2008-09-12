@@ -32,8 +32,8 @@ class Serie(Publishable, models.Model):
 
     @property
     def parts(self):
-        # TODO: cache, trideni, skryvani novych dilu, limit...
-        return SeriePart.objects.filter(serie=self).order_by('placement__publish_from')
+        return self.seriepart_set.filter(placement__publish_from__lte=datetime.now())
+#        return SeriePart.objects.filter(serie=self, placement__publish_from__lte=datetime.now())
 
     def is_active(self):
         today = datetime.date.today()

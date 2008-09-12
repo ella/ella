@@ -1,10 +1,6 @@
-from datetime import datetime
-
 from django import template
 
 from ella.series.models import Serie, SeriePart
-from ella.articles.models import Article
-from ella.core.models import Placement
 
 register = template.Library()
 
@@ -63,20 +59,16 @@ class SerieNode(template.Node):
                 parts = placement.target.parts
             else:
                 current_part = SeriePart.objects.get(placement=placement) # Asi pujde vzit primo z placement.target
-                parts = current_part.parts
+                parts = current_part.serie.parts
 
                 # Shall I hide newer parts?
-                if serie_part.serie.hide_newer_parts == True:
+                if current_part.serie.hide_newer_parts:
                     parts = parts.filter(placement__publish_from__lte=current_part.placement.publish_from)
 
                 # TODO: limit
 
         except SeriePart.DoesNotExist:
             return ''
-
-        # Do not show newer parts
-        now = datetime.now()
-        parts = parts.exclude(placement__publish_from__gt=now)
 
         context[self.params['as']] = parts
         return ''
