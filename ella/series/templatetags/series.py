@@ -60,7 +60,7 @@ class SerieNode(template.Node):
             if isinstance(placement.target, Serie):
                 context[self.params['as']] = placement.target
             else:
-                serie_part = SeriePart.objects.get(target_ct=placement.target_ct, target_id=placement.target_id)
+                serie_part = SeriePart.objects.get(placement=placement)
                 context[self.params['as']] = serie_part.serie
         except SeriePart.DoesNotExist:
             return ''

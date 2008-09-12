@@ -3,7 +3,7 @@ from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 
-from ella.core.models import Category
+from ella.core.models import Category, Placement
 from ella.core.cache.utils import get_cached_list, CachedGenericForeignKey, CachedForeignKey
 from ella.db.models import Publishable
 
@@ -25,7 +25,8 @@ class Serie(Publishable, models.Model):
 
     @property
     def parts(self):
-        return get_cached_list(SeriePart, serie=self)
+        # TODO: cache, trideni, skryvani novych dilu, limit...
+        return SeriePart.objects.filter(serie=self).order_by('placement__publish_from')
 
     def is_active(self):
         today = datetime.date.today()
@@ -43,14 +44,13 @@ class Serie(Publishable, models.Model):
 
 class SeriePart(models.Model):
 
-    # TODO: coz tady misto target_ct a target_id atd.. udelat odkaz rovnou na placement???
-
     serie = CachedForeignKey(Serie, verbose_name=_('Serie'))
-    target_ct = CachedForeignKey(ContentType)
-    target_id = models.IntegerField()
+    placement = CachedForeignKey(Placement)
     part_no = models.PositiveSmallIntegerField(_('Part no.'), default=1)
 
-    target = CachedGenericForeignKey('target_ct', 'target_id')
+    @property
+    def target(self):
+        return self.placement.target
 
 #    objects = SeriePartManager()
 
@@ -62,7 +62,7 @@ class SeriePart(models.Model):
         return u"%s %s: %s" % (self.target,_('in serie'),self.serie)
 
     class Meta:
-        unique_together=(('target_ct', 'target_id',),)
+        unique_together=(('placement',),)
         ordering = ('serie','part_no',)
         verbose_name=_('Serie part')
         verbose_name_plural=_('Serie parts')
