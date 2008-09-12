@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.translation import ugettext_lazy as _
 from ella.series.models import Serie, SeriePart
 from ella.ellaadmin.options import EllaAdminOptionsMixin
 
@@ -12,24 +13,28 @@ class SeriePartInlineAdmin(EllaAdminOptionsMixin, admin.TabularInline):
 
 
 class SerieAdmin(EllaAdminOptionsMixin, admin.ModelAdmin):
-    list_display = ('title', 'started', 'is_active')
+    list_display = ('title', 'photo_thumbnail', 'started', 'is_active', 'parts_count', 'get_hits',)
     list_filter = ('started', 'finished',)
     prepopulated_fields = {'slug': ('title',)}
     search_fields = ('title', 'perex',)
 
+    fieldsets = (
+        (None, {'fields': ('title',)}),
+        (_("Slug, metadata"), {'fields': ('slug', 'started', 'finished', 'hide_newer_parts',), 'classes': ['collapse'],}),
+        (_("Contents"), {'fields': ('perex', 'description', 'category', 'photo',)}),
+)
+
     raw_id_fields = ('photo',)
     rich_text_fields = {None: ('perex', 'description',)}
 
-    # TODO: admin
     inlines = [PlacementInlineOptions, SeriePartInlineAdmin, TaggingInlineOptions]
-#    inlines = [PlacementInlineOptions, TaggingInlineOptions]
 
 
 class SeriePartAdmin(EllaAdminOptionsMixin, admin.ModelAdmin):
     # TODO: admin
-    list_display = ('target_admin', 'serie', 'part_no',)
+    list_display = ('target_admin', 'serie', 'published',)
     raw_id_fields = ('placement',)
-#    list_filter = ('serie','target_ct',)
+    list_filter = ('serie',)
 
 admin.site.register(Serie, SerieAdmin)
 admin.site.register(SeriePart, SeriePartAdmin)

@@ -1,10 +1,9 @@
 from datetime import datetime
 from django.db import models
-from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 
 from ella.core.models import Category, Placement
-from ella.core.cache.utils import get_cached_list, CachedGenericForeignKey, CachedForeignKey
+from ella.core.cache.utils import CachedForeignKey
 from ella.db.models import Publishable
 from ella.photos.models import Photo
 
@@ -26,6 +25,10 @@ class Serie(Publishable, models.Model):
 
     def get_text(self):
         return self.description
+
+    def parts_count(self):
+        return len(self.parts)
+    parts_count.short_description = _('Parts')
 
     @property
     def parts(self):
@@ -49,14 +52,17 @@ class Serie(Publishable, models.Model):
 class SeriePart(models.Model):
 
     serie = CachedForeignKey(Serie, verbose_name=_('Serie'))
-    placement = CachedForeignKey(Placement)
-    part_no = models.PositiveSmallIntegerField(_('Part no.'), default=1)
+    placement = CachedForeignKey(Placement, unique=True)
+    part_no = models.PositiveSmallIntegerField(_('Part no.'), default=1, editable=False)
 
     @property
     def target(self):
         return self.placement.target
 
 #    objects = SeriePartManager()
+
+    def published(self):
+        return self.placement.publish_from
 
     def target_admin(self):
         return self.target
@@ -66,7 +72,6 @@ class SeriePart(models.Model):
         return u"%s %s: %s" % (self.target,_('in serie'),self.serie)
 
     class Meta:
-        unique_together=(('placement',),)
         ordering = ('serie','placement__publish_from',)
         verbose_name=_('Serie part')
         verbose_name_plural=_('Serie parts')

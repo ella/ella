@@ -52,7 +52,7 @@ class CategoryLockMiddleware(object):
                 return HttpResponseForbidden()
 
     def process_response(self, request, response):
-        if request.method != 'POST' and CATEGORY_LOCK_ERR_CAT in request.session:
+        if request.method != 'POST' and hasattr(request, 'session') and CATEGORY_LOCK_ERR_CAT in request.session:
             del request.session[CATEGORY_LOCK_ERR_CAT]
         return response
 
