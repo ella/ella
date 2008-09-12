@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django import template
 
 from ella.series.models import Serie, SeriePart
@@ -58,11 +60,23 @@ class SerieNode(template.Node):
 
         try:
             if isinstance(placement.target, Serie):
-                context[self.params['as']] = placement.target
+                parts = placement.target.parts
             else:
-                serie_part = SeriePart.objects.get(placement=placement)
-                context[self.params['as']] = serie_part.serie
+                current_part = SeriePart.objects.get(placement=placement) # Asi pujde vzit primo z placement.target
+                parts = current_part.parts
+
+                # Shall I hide newer parts?
+                if serie_part.serie.hide_newer_parts == True:
+                    parts = parts.filter(placement__publish_from__lte=current_part.placement.publish_from)
+
+                # TODO: limit
+
         except SeriePart.DoesNotExist:
             return ''
 
+        # Do not show newer parts
+        now = datetime.now()
+        parts = parts.exclude(placement__publish_from__gt=now)
+
+        context[self.params['as']] = parts
         return ''
