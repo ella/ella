@@ -6,6 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 from ella.core.models import Category, Placement
 from ella.core.cache.utils import get_cached_list, CachedGenericForeignKey, CachedForeignKey
 from ella.db.models import Publishable
+from ella.photos.models import Photo
 
 
 class Serie(Publishable, models.Model):
@@ -19,6 +20,9 @@ class Serie(Publishable, models.Model):
     hide_newer_parts = models.BooleanField(_('Hide newer parts'), default=False)
     started = models.DateField(_('Started'))
     finished = models.DateField(_('Finished'), null=True, blank=True)
+
+    # Main Photo to Article
+    photo = models.ForeignKey(Photo, blank=True, null=True, verbose_name=_('Photo'))
 
     def get_text(self):
         return self.description
@@ -63,6 +67,6 @@ class SeriePart(models.Model):
 
     class Meta:
         unique_together=(('placement',),)
-        ordering = ('serie','part_no',)
+        ordering = ('serie','placement__publish_from',)
         verbose_name=_('Serie part')
         verbose_name_plural=_('Serie parts')
