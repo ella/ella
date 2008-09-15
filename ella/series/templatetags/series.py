@@ -58,17 +58,19 @@ class SerieNode(template.Node):
             if isinstance(placement.target, Serie):
                 parts = placement.target.parts
             else:
-                current_part = SeriePart.objects.get(placement=placement) # Asi pujde vzit primo z placement.target
+                current_part = SeriePart.objects.get(placement=placement)
                 parts = current_part.serie.parts
 
                 # Shall I hide newer parts?
                 if current_part.serie.hide_newer_parts:
                     parts = parts.filter(placement__publish_from__lte=current_part.placement.publish_from)
 
-                # TODO: limit
-
         except SeriePart.DoesNotExist:
             return ''
+
+        # Limit
+        if self.params.has_key('limit'):
+            parts = parts[:int(self.params['limit'])]
 
         context[self.params['as']] = parts
         return ''
