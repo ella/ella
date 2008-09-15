@@ -6,6 +6,7 @@ from ella.media.forms import MediaForm
 
 class SectionInline(admin.TabularInline):
     model = Section
+    extra = 5
 
 class UsageInline(admin.TabularInline):
     model = Usage
