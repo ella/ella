@@ -65,12 +65,16 @@ class SerieNode(template.Node):
                 if current_part.serie.hide_newer_parts:
                     parts = parts.filter(placement__publish_from__lte=current_part.placement.publish_from)
 
+                # Limit
+                if self.params.has_key('limit'):
+                    current_index = list(parts).index(current_part)
+                    limit = int(self.params['limit'])
+                    lo = current_index - limit
+                    hi = current_index + limit + 1
+                    parts = parts[ lo>0 and lo or 0 : hi ]
+
         except SeriePart.DoesNotExist:
             return ''
-
-        # Limit
-        if self.params.has_key('limit'):
-            parts = parts[:int(self.params['limit'])]
 
         context[self.params['as']] = parts
         return ''
