@@ -19,7 +19,6 @@ def player_playlist(request, bits, context):
     cx = {
         'media': media,
         'object' : object,
-        'sendmail_url': '%s%s/%s/' % (media.get_absolute_url(), slugify(_('send mail')), slugify(_('xml')))
 }
     response = render_to_response('page/media/playlist.xml', RequestContext(request, cx))
     response['content-type'] = 'text/xml; charset=utf-8';
