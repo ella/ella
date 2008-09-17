@@ -51,7 +51,7 @@ class QuestionPreview(FormPreview):
 class AnswerForm(forms.ModelForm):
     class Meta:
         model = Answer
-        exclude = ('created', 'question',)
+        exclude = ('created', 'question', 'is_hidden',)
 
 class AnswerPreview(FormPreview):
     def __call__(self, request, *args, **kwargs):
@@ -92,7 +92,7 @@ def question_detail(request, question_id=None, question_slug=None):
         q = Question.objects.get(pk=int(qid))
     except Question.DoesNotExist:
         raise Http404('Question with id %d not found.' % qid)
-    answers = Answer.objects.filter(question=q)
+    answers = Answer.objects.filter(question=q, is_hidden=False)
     cx = {
         'question': q,
         'answers': answers
