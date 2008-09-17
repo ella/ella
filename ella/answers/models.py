@@ -2,6 +2,7 @@
 from django.db import models
 from django.utils.translation import ugettext as _
 from django.utils.text import wrap
+from ella.ellaadmin.utils import admin_url
 
 
 class Question(models.Model):
@@ -26,6 +27,9 @@ class Answer(models.Model):
 
     def __unicode__(self):
         return self.text
+
+    def get_admin_url(self):
+        return admin_url(self)
 
     class Meta:
         ordering = ('-created',)

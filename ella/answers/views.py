@@ -95,7 +95,8 @@ def question_detail(request, question_id=None, question_slug=None):
     answers = Answer.objects.filter(question=q, is_hidden=False)
     cx = {
         'question': q,
-        'answers': answers
+        'answers': answers,
+        'user': request.user,
 }
     cx.update(paginate_qset(request, answers, items_per_page=ANSWER_PAGE_ITEMS))
     return render_to_response(
@@ -110,6 +111,7 @@ def question_list(request):
     cx = {
         'form': form,
         'questions': all_q,
+        'user': request.user,
 }
     cx.update(paginate_qset(request, all_q, items_per_page=HP_PAGE_ITEMS))
     return render_to_response(
@@ -148,6 +150,7 @@ def question_answer(request, question_id):
     cx = {
         'question': q,
         'form': form,
+        'user': request.user,
 }
     return render_to_response(
         'page/answers/question_answer.html',
