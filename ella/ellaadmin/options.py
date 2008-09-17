@@ -32,10 +32,6 @@ class EllaAdminOptionsMixin(object):
 
         # FIXME: Dirty solution for suggesters only in new zenaadmin
         if USE_SUGGESTERS:
-            if db_field.name == 'category':
-                kwargs['label'] = db_field.verbose_name
-                return fields.CategorySuggestField(db_field, **kwargs)
-
             if db_field.name == 'authors':
                 kwargs['label'] = db_field.verbose_name
                 return fields.AuthorSuggestField(db_field, **kwargs)

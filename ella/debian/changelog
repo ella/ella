@@ -1,3 +1,45 @@
+centrum-ella (0.2.33.0) unstable; urgency=low
+
+  * Build from [1520]
+
+ -- Vitek Pliska <whit@jizak.cz>  Thu, 11 Sep 2008 16:08:19 +0200
+
+centrum-ella (0.2.32.2) unstable; urgency=low
+
+  * Build from [1496]. Searching in tags reverted.
+
+ -- Vitek Pliska <whit@jizak.cz>  Thu,  4 Sep 2008 15:11:45 +0200
+
+centrum-ella (0.2.32.1) unstable; urgency=low
+
+  * Build from [1486]
+
+ -- Vitek Pliska <whit@jizak.cz>  Wed,  3 Sep 2008 22:18:11 +0200
+
+centrum-ella (0.2.32.0) unstable; urgency=low
+
+  * Build from [1841]
+
+ -- Vitek Pliska <whit@jizak.cz>  Wed,  3 Sep 2008 18:24:15 +0200
+
+centrum-ella (0.2.31.1) unstable; urgency=low
+
+  * build from revision [1452]
+
+ -- Jakub Vysoky <jakub@borka.cz>  Fri, 29 Aug 2008 15:15:48 +0200
+
+centrum-ella (0.2.31.0) unstable; urgency=low
+
+  * build from revision [1446]
+
+ -- Jakub Vysoky <jakub@borka.cz>  Wed, 27 Aug 2008 20:17:24 +0200
+
+centrum-ella (0.2.30.0) unstable; urgency=low
+
+  * version raised
+
+ -- Jakub Vysoky <jakub@borka.cz>  Tue, 20 Aug 2008 17:00:00 +0200
+
 centrum-ella (0.2.29) unstable; urgency=low
 
   * rebuild of previous build.

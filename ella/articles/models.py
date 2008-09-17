@@ -72,6 +72,10 @@ class Article(Publishable, models.Model):
         return timesince(self.created)
     article_age.short_description = _('Article Age')
 
+    def get_text(self):
+        return self.content.content
+
+
 
 class ArticleContents(models.Model):
     """Defines article's contents model.

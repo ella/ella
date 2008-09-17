@@ -35,6 +35,9 @@ class Gallery(Publishable, models.Model):
     category = models.ForeignKey(Category, verbose_name=_('Category'), blank=True, null=True)
     created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)
 
+
+    def get_text(self):
+        return self.content
     @property
     @cache_this(get_gallery_key, gallery_cache_invalidator)
     def items(self):

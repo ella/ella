@@ -52,7 +52,7 @@ class GalleryOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
         (_("Gallery metadata"), {'fields': ('description', 'content', 'owner', 'category')}),
 )
     list_filter = ('created', 'category',)
-    search_fields = ('title', 'description', 'slug',)
+    search_fields = ('title', 'description', 'slug',) # FIXME: 'tags__tag__name',)
     inlines = (GalleryItemTabularOptions, PlacementInlineOptions, TaggingInlineOptions,)
     prepopulated_fields = {'slug': ('title',)}
     rich_text_fields = {None: ('description', 'content',)}

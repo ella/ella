@@ -8,6 +8,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.conf import settings
 from django.template import Template
+from django.utils.safestring import mark_safe
 
 from ella.core.models import Category
 from ella.core.box import Box
@@ -73,7 +74,7 @@ class Position(models.Model):
         if not self.target:
             return '-- empty position --'
         else:
-            return '%s [%s]' % (self.target.title, self.target_ct,)
+            return u'%s [%s]' % (self.target.title, self.target_ct,)
     show_title.short_description = _('Title')
 
     def is_filled(self):
@@ -116,5 +117,5 @@ class Position(models.Model):
         return b.render()
 
     def __unicode__(self):
-        return '%s:%s' % (self.category, self.name)
+        return u'%s:%s' % (self.category, self.name)
 

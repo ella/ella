@@ -132,8 +132,9 @@ class AuthorSuggestField(fields.Field):
         vals = value.split(',')
         ids = []
         for v in vals:
-            id = int(v.split(':')[0])
-            ids.append(id)
+            if not v == '':
+                id = int(v.split(':')[0])
+                ids.append(id)
         try:
             return Author.objects.filter(pk__in=ids)
         except (Author.DoesNotExist, IndexError):

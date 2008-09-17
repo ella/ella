@@ -169,7 +169,7 @@ class Placement(models.Model):
     objects = PlacementManager()
 
     class Meta:
-        unique_together = (('category', 'target_ct', 'target_id'),)
+        #unique_together = (('category', 'target_ct', 'target_id'),)
         ordering = ('-publish_from',)
         verbose_name = _('Placement')
         verbose_name_plural = _('Placements')
@@ -179,6 +179,10 @@ class Placement(models.Model):
             return u'%s placed in %s' % (self.target, self.category)
         except:
             return 'Broken placement'
+
+    def target_admin(self):
+        return self.target
+    target_admin.short_description = _('Target')
 
     def full_url(self):
         "Full url to be shown in admin."
@@ -285,8 +289,12 @@ class Listing(models.Model):
             return obj.Box(box_type, nodelist)
         return Box(obj, box_type, nodelist)
 
-    def get_absolute_url(self):
-        return self.placement.get_absolute_url()
+    def get_absolute_url(self, domain=False):
+        return self.placement.get_absolute_url(domain)
+
+    def get_domain_url(self):
+        return self.get_absolute_url(domain=True)
+
 
     def __unicode__(self):
         try:
