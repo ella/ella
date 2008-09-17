@@ -12,7 +12,7 @@ from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
 
 from ella.core.models import Listing, Category
-from ella.core.cache.utils import get_cached_list, cache_this, normalize_key, delete_cached_object
+from ella.core.cache.utils import get_cached_list, cache_this, normalize_key, delete_cached_object, CachedGenericForeignKey
 from ella.core.cache.invalidate import CACHE_DELETER
 from ella.core.box import Box
 from ella.db.models import Publishable
@@ -123,6 +123,9 @@ class Topic(Publishable, models.Model):
         """ returns the most viewed threads """
         return None
 
+    def get_text(self):
+        return ''
+
     class Meta:
         verbose_name = _('Topic')
         verbose_name_plural = _('Topics')
@@ -133,7 +136,8 @@ class PostViewed(models.Model):
     # TODO rename and reside the model. It should be called ItemViewed or something like that.
     target_ct = models.ForeignKey(ContentType, verbose_name=_('Target content type'))
     target_id = models.PositiveIntegerField(_('Target id'))
-    target = generic.GenericForeignKey(ct_field="target_ct", fk_field="target_id")
+    target = CachedGenericForeignKey(ct_field="target_ct", fk_field="target_id")
+
     user = models.ForeignKey(User)
 
     def __unicode__(self):

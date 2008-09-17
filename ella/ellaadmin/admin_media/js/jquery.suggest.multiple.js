@@ -38,10 +38,11 @@
 
 
 			// help IE users if possible
-			try {
-				$results.bgiframe();
-			} catch(e) { }
-
+			if ($.browser.ie) {
+				try {
+					$results.bgiframe();
+				} catch(e) { }
+			}
 
 			// I really hate browser detection, but I don't see any other way
 			if ($.browser.mozilla)
@@ -238,7 +239,7 @@
                     for (i = 0; i < tags.length - 1; i++) {
                         val += tags[i] + multiDivider;
                     }
-					$input.val(val + $currentResult.text());
+					$input.val(val + $currentResult.text() + multiDivider);
 					$results.hide();
 
 					if (options.onSelect)

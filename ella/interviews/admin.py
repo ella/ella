@@ -32,7 +32,7 @@ class InterviewOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     list_filter = ('category__site', 'ask_from', 'reply_from', 'category', 'authors',)
     date_hierarchy = 'ask_from'
     raw_id_fields = ('photo', 'interviewees',)
-    search_fields = ('title', 'perex',)
+    search_fields = ('title', 'perex',) # FIXME: 'tags__tag__name',)
     prepopulated_fields = {'slug' : ('title',)}
     inlines = (QuestionInlineOptions, PlacementInlineOptions, TaggingInlineOptions)
     rich_text_fields = {None: ('perex', 'content',)}

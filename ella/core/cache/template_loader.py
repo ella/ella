@@ -1,7 +1,7 @@
 import warnings
 
 from django.core.exceptions import ImproperlyConfigured
-from django.template import TemplateDoesNotExist, loader
+from django.template import TemplateDoesNotExist, loader, Context
 from django.conf import settings
 from django.http import HttpResponse
 

@@ -8,7 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_str
 
 from ella.core.cache.invalidate import CACHE_DELETER
-from ella.core.cache.utils import cache_this, get_cached_object
+from ella.core.cache.utils import cache_this, get_cached_object, CachedGenericForeignKey
 from ella.ellaadmin.utils import admin_url
 
 from ella.comments import defaults
@@ -18,7 +18,7 @@ class CommentOptions(models.Model):
     """contains comment options string for object"""
     target_ct = models.ForeignKey(ContentType, verbose_name=_('Target content type'))
     target_id = models.PositiveIntegerField(_('Target id'))
-    target = generic.GenericForeignKey(ct_field="target_ct", fk_field="target_id")
+    target = CachedGenericForeignKey(ct_field="target_ct", fk_field="target_id")
     # TODO: options should not be string but boolean columns
     options = models.CharField(max_length=defaults.OPTS_LENGTH, blank=True)
     timestamp = models.DateTimeField(default=datetime.now)
@@ -80,6 +80,8 @@ class Comment(models.Model):
     target_ct = models.ForeignKey(ContentType, verbose_name=_('Target content type'))
     target_id = models.PositiveIntegerField(_('Target id'))
 
+    target = CachedGenericForeignKey(ct_field="target_ct", fk_field="target_id")
+
     # comment content
     subject = models.TextField(_('Comment subject'), max_length=defaults.SUBJECT_LENGTH)
     content = models.TextField(_('Comment content'), max_length=defaults.COMMENT_LENGTH)
@@ -125,10 +127,6 @@ class Comment(models.Model):
     def is_thread_root(self):
         return self.path == ''
 
-    @property
-    def target(self):
-        return get_cached_object(self.target_ct, pk=self.target_id)
-
     def get_genealogy_path(self):
         """genealogy tree structure field"""
         if self.parent and self.id:
@@ -156,7 +154,7 @@ class Comment(models.Model):
     def __unicode__(self):
         if self.id:
             return u"comment [id:%d] '%s...' on %s {path:%s}" % (self.id, self.content[:10],
-                    self.target_ct.get_object_for_this_type(pk=self.target_id), self.path)
+                    self.target, self.path)
         return u"unsaved comment"
 
     class Meta:
@@ -174,6 +172,8 @@ class BannedUser(models.Model):
     target_ct = models.ForeignKey(ContentType, verbose_name=_('Target content type'))
     target_id = models.PositiveIntegerField(_('Target id'))
     user = models.ForeignKey(User, verbose_name=_('Banned author'))
+
+    target = CachedGenericForeignKey(ct_field="target_ct", fk_field="target_id")
 
     class Meta:
         verbose_name = _('Banned User')

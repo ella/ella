@@ -8,6 +8,8 @@ from django.contrib.contenttypes import generic
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
+from ella.core.cache import CachedGenericForeignKey
+
 # ratings - specific settings
 ANONYMOUS_KARMA = getattr(settings, 'ANONYMOUS_KARMA', 1)
 INITIAL_USER_KARMA = getattr(settings, 'ANONYMOUS_KARMA', 4)
@@ -184,7 +186,7 @@ class TotalRate(models.Model):
     """
     target_ct = models.ForeignKey(ContentType, db_index=True)
     target_id = models.PositiveIntegerField(_('Object ID'), db_index=True)
-    target = generic.GenericForeignKey('target_ct', 'target_id')
+    target = CachedGenericForeignKey('target_ct', 'target_id')
     amount = models.DecimalField(_('Amount'), max_digits=10, decimal_places=2)
 
     objects = TotalRateManager()

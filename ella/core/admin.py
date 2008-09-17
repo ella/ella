@@ -11,9 +11,6 @@ from ella.ellaadmin import widgets
 from ella.ellaadmin.options import EllaAdminOptionsMixin
 from ella.core.models import Author, Source, Category, Listing, HitCount, Placement
 
-USE_SUGGESTERS =  getattr(settings, 'USE_SUGGESTERS', False)
-
-
 class PlacementForm(modelforms.ModelForm):
 
     class Meta:
@@ -148,7 +145,7 @@ class ListingInlineOptions(admin.TabularInline):
     fieldsets = ((None, {'fields' : ('category','publish_from', 'priority_from', 'priority_to', 'priority_value', 'remove', 'commercial',)}),)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'category' and not USE_SUGGESTERS:
+        if db_field.name == 'category':
             kwargs['widget'] = widgets.ListingCategoryWidget
         return super(ListingInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
@@ -162,7 +159,7 @@ class PlacementInlineOptions(generic.GenericTabularInline):
     fieldsets = ((None, {'fields' : ('category', 'publish_from', 'publish_to', 'slug', 'static', 'listings',)}),)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'category' and not USE_SUGGESTERS:
+        if db_field.name == 'category':
             kwargs['widget'] = widgets.ListingCategoryWidget
         return super(PlacementInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
@@ -172,7 +169,7 @@ class HitCountInlineOptions(admin.TabularInline):
     extra = 0
 
 class PlacementOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
-    list_display = ('target', 'category', 'publish_from', 'full_url',)
+    list_display = ('target_admin', 'category', 'publish_from', 'full_url',)
     list_filter = ('publish_from', 'category', 'target_ct',)
     inlines = (ListingInlineOptions,)
     fieldsets = (
@@ -185,6 +182,7 @@ class ListingOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     list_display_links = ()
     list_filter = ('publish_from', 'category__site', 'category', 'placement__target_ct',)
     raw_id_fields = ('placement',)
+    date_hierarchy = 'publish_from'
 
 class CategoryOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     list_filter = ('site',)

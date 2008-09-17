@@ -1,6 +1,5 @@
 from os.path import isfile
-import logging.config
-import logging
+import logging, logging.config
 import traceback
 
 from django.utils.itercompat import is_iterable
@@ -30,6 +29,8 @@ def call_modules(auto_discover=()):
     this is called in project urls.py
     for registering desired modules (eg.: admin.py)
     """
+    log = logging.getLogger('ella.utils.installedapps.call_modules')
+
     for app in settings.INSTALLED_APPS:
         modules = set(auto_discover)
         if app in INSTALLED_APPS_REGISTER:
@@ -41,7 +42,7 @@ def call_modules(auto_discover=()):
                 inst = getattr(mod, '__install__', lambda:None)
                 inst()
             except ImportError, e:
-                logging.warning('problem during discovering %s - %s\n%s' % (imp, e, traceback.format_exc()))
+                log.debug('problem during discovering %s - %s\n%s' % (imp, e, traceback.format_exc()))
 
 def init_logger():
     """init logger with LOGGING_CONFIG_FILE settings option"""

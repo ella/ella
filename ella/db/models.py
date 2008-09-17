@@ -1,20 +1,30 @@
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.utils.safestring import mark_safe
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes import generic
 from django.contrib.redirects.models import Redirect
 from django.db.models import Model
 
 from ella.core.cache import get_cached_object, get_cached_list
 from ella.core.models import Placement, Category, HitCount
 from ella.photos.models import Photo
+from ella.comments.models import Comment
+from ella.tagging.models import TaggedItem
 from ella.ellaadmin.utils import admin_url
 
 
-class Publishable(object):
+class Publishable(Model):
     """
     Abstract interface-like class that defines method's common to all objects that
     serve as primary content (can have a placement).
     """
+
+    placements = generic.GenericRelation(Placement, object_id_field='target_id', content_type_field='target_ct')
+    comments = generic.GenericRelation(Comment, object_id_field='target_id', content_type_field='target_ct')
+    tags = generic.GenericRelation(TaggedItem)
+
+    class Meta:
+        abstract = True
 
     @property
     def main_placement(self):
@@ -92,6 +102,9 @@ class Publishable(object):
         else:
             return '%s' % (self.draw_title(),)
 
+    def get_text(self):
+        return self.text
+
     ##
     # Custom admin fields
     ##
@@ -123,3 +136,5 @@ class Publishable(object):
     def get_tags(self):
         from ella.tagging.models import TaggedItem
     """
+
+

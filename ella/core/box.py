@@ -86,6 +86,7 @@ class Box(object):
                 'next_level' : level + 1,
                 'css_class' : self.params.get('css_class', ''),
                 'name' : self.params.get('name', ''),
+                'text' : self.params.get('text', ''),
                 'box' : self,
 }
 

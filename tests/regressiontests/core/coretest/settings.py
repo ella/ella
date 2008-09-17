@@ -111,18 +111,6 @@ ACTIVE_MQ_HOST = 'localhost'
 CACHE_BACKEND = 'dummy://'
 VERSION = 1
 
-TEST_RUNNER = 'coretest.tests_with_coverage.my_run_tests'
-
-COVERAGE_MODULES = (
-    'ella.core.views',
-    'ella.core.models',
-    'ella.core.cache.utils',
-    'ella.core.box',
-    'ella.core.custom_urls',
-    'ella.core.admin',
-    'ella.db.models',
-)
-
 # set up default loggers
 LOGGING_CONFIG_FILE = join(dirname(__file__), 'logger.conf')
 

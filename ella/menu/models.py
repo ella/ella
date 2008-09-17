@@ -8,7 +8,7 @@ from django.conf import settings
 
 from ella.core.cache import CachedForeignKey
 from ella.core.models import Category
-from ella.core.cache import get_cached_list, get_cached_object, cache_this
+from ella.core.cache import get_cached_list, get_cached_object, cache_this, CachedGenericForeignKey
 from ella.menu.managers import MenuItemManager
 from ella.db.models import Publishable
 
@@ -32,7 +32,7 @@ class MenuItem(models.Model):
     parent = CachedForeignKey('self', blank=True, null=True, verbose_name=_('parent'))
     target_id = models.PositiveIntegerField(null=True, blank=True)
     target_ct = models.ForeignKey(ContentType, null=True, blank=True)
-    target = generic.GenericForeignKey(ct_field="target_ct", fk_field="target_id")
+    target = CachedGenericForeignKey(ct_field="target_ct", fk_field="target_id")
     url = models.URLField(blank=True)
     label = models.CharField(max_length=100, blank=True)
     menu = models.ForeignKey(Menu)

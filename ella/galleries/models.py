@@ -6,10 +6,9 @@ from django.utils.translation import ugettext_lazy as _
 from django.template.defaultfilters import slugify
 from django.utils.datastructures import SortedDict
 
-from ella.core.box import Box
 from ella.db.models import Publishable
 from ella.core.models import Category, Author
-from ella.core.cache.utils import get_cached_object, cache_this
+from ella.core.cache.utils import get_cached_object, cache_this, CachedGenericForeignKey
 from ella.core.cache.invalidate import CACHE_DELETER
 from ella.photos.models import Photo
 
@@ -36,6 +35,9 @@ class Gallery(Publishable, models.Model):
     category = models.ForeignKey(Category, verbose_name=_('Category'), blank=True, null=True)
     created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)
 
+
+    def get_text(self):
+        return self.content
     @property
     @cache_this(get_gallery_key, gallery_cache_invalidator)
     def items(self):
@@ -87,10 +89,7 @@ class GalleryItem(models.Model):
     target_id = models.IntegerField(_('Target ID'), db_index=True)
     order = models.IntegerField(_('Object order')) # TODO: order with respect to
 
-    @property
-    def target(self):
-        """Returns item's target object."""
-        return get_cached_object(self.target_ct, pk=self.target_id)
+    target = CachedGenericForeignKey(ct_field="target_ct", fk_field="target_id")
 
     def _get_slug(self):
         if not hasattr(self, '_item_list'):
@@ -101,9 +100,6 @@ class GalleryItem(models.Model):
                 return slug
         else:
             raise Http404
-
-    def Box(self, box_type, nodelist):
-        return Box(self.target, box_type, nodelist)
 
     def get_slug(self):
         """
