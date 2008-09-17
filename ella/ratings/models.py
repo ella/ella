@@ -79,12 +79,12 @@ class ModelWeight(models.Model):
 
     objects = ModelWeightManager()
 
-    def save(self):
+    def save(self, force_insert=False, force_update=False):
         """
         Clear the cache and do the save()
         """
         ModelWeight.objects.clear_cache()
-        return super(ModelWeight, self).save()
+        return super(ModelWeight, self).save(force_insert, force_update)
 
     class Meta:
         verbose_name = _('Model weight')
@@ -346,7 +346,7 @@ class Rating(models.Model):
         verbose_name_plural = _('Ratings')
         ordering = ('-time',)
 
-    def save(self):
+    def save(self, force_insert=False, force_update=False):
         """
         Modified save() method that checks for duplicit entries.
         """
@@ -367,7 +367,7 @@ class Rating(models.Model):
 ).count() > 0):
                 return
 
-        super(Rating, self).save()
+        super(Rating, self).save(force_insert, force_update)
 
 
 from django.contrib import admin

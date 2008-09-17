@@ -49,11 +49,11 @@ class Format(models.Model):
 
         return status
 
-    def save(self):
+    def save(self, force_insert=False, force_update=False):
         # TODO: saved format invoke registering message
         self.conversion_script = self.conversion_script.replace('\r\n', '\n')
         self.conversion_script = RE_SPACEEND.sub('', self.conversion_script)
-        super(Format, self).save()
+        super(Format, self).save(force_insert, force_update)
 
     def __unicode__(self):
         return self.name
@@ -101,13 +101,13 @@ class FormattedFile(models.Model):
 )
         ELLA_QUEUE.put('ella/media/formattedfile', formattedfile)
 
-    def save(self):
+    def save(self, force_insert=False, force_update=False):
         f = open(self.file, 'r')
         self.hash = sha.new(f.read()).hexdigest()
         f.close()
         self.file = file_rename(self.file, self.hash, '')
 
-        super(FormattedFile, self).save()
+        super(FormattedFile, self).save(force_insert, force_update)
 
         # send signal about successful file save
         self.send_signal()

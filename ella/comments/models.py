@@ -138,7 +138,7 @@ class Comment(models.Model):
     def get_admin_url(self):
         return admin_url(self)
 
-    def save(self):
+    def save(self, force_insert=False, force_update=False):
         # TODO: maybe create models.GenealogyField for this
         # first save to obtain primary key
         super(Comment, self).save()
@@ -149,7 +149,7 @@ class Comment(models.Model):
         else:
             self.path = self.parent.path
         # save it all
-        super(Comment, self).save()
+        super(Comment, self).save(force_insert, force_update)
 
     def __unicode__(self):
         if self.id:

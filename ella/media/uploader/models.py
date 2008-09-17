@@ -37,13 +37,13 @@ class Upload(models.Model):
 )
         ELLA_QUEUE.put('ella/media/source', source)
 
-    def save(self):
+    def save(self, force_insert=False, force_update=False):
         f = open(self.file, 'r')
         self.hash = sha.new(f.read()).hexdigest()
         f.close()
         self.file = file_rename(self.file, self.hash, '')
 
-        super(Upload, self).save()
+        super(Upload, self).save(force_insert, force_update)
 
         # send signal about successful file save
         self.send_signal()

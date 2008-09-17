@@ -12,6 +12,8 @@ from ella.ellaadmin.options import EllaAdminOptionsMixin
 from ella.core.models import Author, Source, Category, Listing, HitCount, Placement
 
 class PlacementForm(modelforms.ModelForm):
+    # create the field here to pass validation
+    listings =  modelforms.ModelMultipleChoiceField(Category.objects.all(), label=_('Category'), cache_choices=True, required=False)
 
     class Meta:
         model = Placement
@@ -180,7 +182,7 @@ class PlacementOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
 class ListingOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     list_display = ('target_admin', 'target_ct', 'publish_from', 'category', 'placement_admin', 'target_hitcounts', 'target_url',)
     list_display_links = ()
-    list_filter = ('publish_from', 'category__site', 'category', 'placement__target_ct',)
+    list_filter = ('publish_from', 'category',)
     raw_id_fields = ('placement',)
     date_hierarchy = 'publish_from'
 
@@ -192,7 +194,6 @@ class CategoryOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
 
 class HitCountOptions(admin.ModelAdmin):
     list_display = ('target', 'hits',)
-    list_filter = ('placement__target_ct', 'placement__category__site',)
 
 class AuthorOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}

@@ -88,7 +88,7 @@ class Category(models.Model):
     site = models.ForeignKey(Site)
 
     @transaction.commit_on_success
-    def save(self):
+    def save(self, force_insert=False, force_update=False):
         "Override save() to construct tree_path based on the category's parent."
         old_tree_path = self.tree_path
         if self.tree_parent:
@@ -98,7 +98,7 @@ class Category(models.Model):
                 self.tree_path = self.slug
         else:
             self.tree_path = ''
-        super(Category, self).save()
+        super(Category, self).save(force_insert, force_update)
         if old_tree_path != self.tree_path:
             # the tree_path has changed, update children
             children = Category.objects.filter(tree_path__startswith=old_tree_path+'/').order_by('tree_path')
@@ -195,7 +195,7 @@ class Placement(models.Model):
         return now > self.publish_from and (self.publish_to is None or now < self.publish_to)
 
     @transaction.commit_on_success
-    def save(self):
+    def save(self, force_insert=False, force_update=False):
         " If Listing is created, we create HitCount object "
 
         if not self.slug:
@@ -213,7 +213,7 @@ class Placement(models.Model):
                     r.new_path = new_path
                     r.save()
         # First, save Placement
-        super(Placement, self).save()
+        super(Placement, self).save(force_insert, force_update)
         # Then, save HitCount (needs placement_id)
         hc, created = HitCount.objects.get_or_create(placement=self)
 
@@ -343,10 +343,10 @@ class HitCount(models.Model):
 
     objects = HitCountManager()
 
-    def save(self):
+    def save(self, force_insert=False, force_update=False):
         "update last seen automaticaly"
         self.last_seen = datetime.now()
-        super(HitCount, self).save()
+        super(HitCount, self).save(force_insert, force_update)
 
     def target(self):
         return self.placement.target

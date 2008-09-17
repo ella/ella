@@ -560,7 +560,7 @@ class Tag(models.Model):
     """
     A tag.
     """
-    name = models.CharField(_('name'), max_length=50, unique=True, db_index=True, validator_list=[isTag])
+    name = models.CharField(_('name'), max_length=50, unique=True, db_index=True)
 
     objects = TagManager()
 

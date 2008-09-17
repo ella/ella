@@ -143,12 +143,12 @@ class PostViewed(models.Model):
     def __unicode__(self):
         return '%s viewed by %s' % (self.target.__unicode__(), self.user.username)
 
-    def save(self):
+    def save(self, force_insert=False, force_update=False):
         pv = PostViewed.objects.filter(target_ct=self.target_ct, target_id=self.target_id, user=self.user)
         if pv:
             raise Exception('PostViewed object already exists for ct=%s target_id=%d user=%s' % \
             (str(self.target_ct), self.target_id, self.user))
-        super(PostViewed, self).save()
+        super(PostViewed, self).save(force_insert, force_update)
 
 class TopicThread(models.Model):
     title = models.CharField(_('Title'), max_length=255)
@@ -166,11 +166,11 @@ class TopicThread(models.Model):
     def __unicode__(self):
         return self.title
 
-    def save(self):
+    def save(self, force_insert=False, force_update=False):
         thr = TopicThread.objects.filter(title=self.title)
         if thr and not self.pk:
             raise DuplicationError('TopicThread with title "%s" already exist.' % self.title)
-        super(TopicThread, self).save()
+        super(TopicThread, self).save(force_insert, force_update)
 
     @property
     def posts(self):

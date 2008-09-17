@@ -54,7 +54,7 @@ class Publishable(Model):
     def get_admin_url(self):
         return admin_url(self)
 
-    def save(self):
+    def save(self, force_insert=False, force_update=False):
         if self.pk and hasattr(self, 'slug'): # only run on update
             # get old self
             old_self = self.__class__._default_manager.get(pk=self.pk)
@@ -67,7 +67,7 @@ class Publishable(Model):
                     if plc.slug == old_self.slug:
                         plc.slug = self.slug
                         plc.save()
-        return Model.save(self)
+        return Model.save(self, force_insert, force_update)
 
     def delete(self):
         url = self.get_absolute_url()

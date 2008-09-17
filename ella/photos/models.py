@@ -104,7 +104,7 @@ class Photo(models.Model):
         return PhotoBox(self, box_type, nodelist)
 
     @transaction.commit_on_success
-    def save(self):
+    def save(self, force_insert=False, force_update=False):
         """Overrides models.Model.save.
 
         - Generates slug.
@@ -115,10 +115,10 @@ class Photo(models.Model):
             super(Photo, self).save()
             self.slug = str(self.id) + '-' + self.slug
         # rename image by slug
-        imageType = detect_img_type(path.join(settings.MEDIA_ROOT, self.image))
+        imageType = detect_img_type(path.join(settings.MEDIA_ROOT, self.image.name))
         if imageType is not None:
-            self.image = file_rename(self.image, self.slug, PHOTOS_TYPE_EXTENSION[ imageType ])
-        super(Photo, self).save()
+            self.image.name = file_rename(self.image.name, self.slug, PHOTOS_TYPE_EXTENSION[ imageType ])
+        super(Photo, self).save(force_insert, force_update)
 
     def ratio(self):
         "Return photo's width to height ratio"
@@ -227,13 +227,13 @@ class FormatedPhoto(models.Model):
 
     def generate(self):
         "Generates photo file in current format"
-        i = ImageStretch(filename=self.photo.get_image_filename(), formated_photo=self)
+        i = ImageStretch(filename=self.photo.image.path, formated_photo=self)
         stretched_photo = i.stretch_image()
         self.width, self.height = stretched_photo.size
         self.filename = self.file(relative=True)
         stretched_photo.save(self.file(), quality=self.format.resample_quality)
 
-    def save(self):
+    def save(self, force_insert=False, force_update=False):
         """Overrides models.Model.save
 
         - Removes old file from the FS
@@ -242,14 +242,14 @@ class FormatedPhoto(models.Model):
         if path.exists(path.join(settings.MEDIA_ROOT, self.file(relative=True))):
             os.remove(path.join(settings.MEDIA_ROOT, self.file(relative=True)))
         self.generate()
-        super(FormatedPhoto, self).save()
+        super(FormatedPhoto, self).save(force_insert, force_update)
 
     def file(self, relative=False):
         """ Method returns formated photo path - derived from format.id and source Photo filename """
         if relative:
-            source_file = path.split(self.photo.image)
+            source_file = path.split(self.photo.image.name)
         else:
-            source_file = path.split(self.photo.get_image_filename())
+            source_file = path.split(self.photo.image.file)
         return path.join(source_file[0],  str (self.format.id) + '-' + source_file[1])
 
     def __unicode__(self):
