@@ -18,6 +18,10 @@ from ella.utils.paginator import paginate_qset, get_page_no
 
 from ella.answers.models import Question, Answer
 
+# pagination
+HP_PAGE_ITEMS = 2
+ANSWER_PAGE_ITEMS = 2
+
 class QuestionForm(forms.ModelForm):
     class Meta:
         model = Question
@@ -93,7 +97,7 @@ def question_detail(request, question_id=None, question_slug=None):
         'question': q,
         'answers': answers
 }
-    cx.update(paginate_qset(request, answers))
+    cx.update(paginate_qset(request, answers, items_per_page=ANSWER_PAGE_ITEMS))
     return render_to_response(
         'page/answers/question.html',
         cx,
@@ -107,7 +111,7 @@ def question_list(request):
         'form': form,
         'questions': all_q,
 }
-    cx.update(paginate_qset(request, all_q))
+    cx.update(paginate_qset(request, all_q, items_per_page=HP_PAGE_ITEMS))
     return render_to_response(
         'page/answers/question_list.html',
         cx,
