@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.db import models
 from django.utils.translation import ugettext as _
+from django.utils.text import wrap
 
 
 class Question(models.Model):
@@ -21,6 +22,7 @@ class Answer(models.Model):
     nick = models.CharField(_('Nickname'), max_length=20)
     created = models.DateTimeField(auto_now_add=True)
     question = models.ForeignKey(Question)
+    is_hidden = models.BooleanField(_('Is hidden'), default=False)
 
     def __unicode__(self):
         return self.text
