@@ -135,6 +135,10 @@ class TotalRateManager(models.Manager):
         cursor = connection.cursor()
         cursor.execute(sql, (total,))
         (percentil,) = cursor.fetchone()
+
+        if percentil is None:
+            # First rating
+            percentil = Decimal(0)
         cursor.close()
 
         result = percentil * ref
