@@ -136,7 +136,7 @@ def do_rating(parser, token):
     bits = token.split_contents()
     if len(bits) == 5 and bits[1] == 'for' and bits[3] == 'as':
         return RatingNode(bits[2], bits[4])
-    if len(bits) == 11 and bits[1] == 'for' and bits[3] == 'max' \
+    if len(bits) == 9 and bits[1] == 'for' and bits[3] == 'max' \
             and bits[5] == 'step' and bits[7] == 'as':
         return RatingNode(bits[2], bits[8], bits[4], bits[6])
 
