@@ -61,7 +61,7 @@ class SendMailFormPreview(FormPreview):
             log.error('Error during sending e-mail to a buddy. %s' % str(e))
             return HttpResponseRedirect("%s%s/%s/" % (url, slugify(_('send mail')), slugify(_('error'))))
 
-        return HttpResponseRedirect("%s%s/%s/" % (url, slugify(_('send mail')), slugify(_('success'))))
+        return HttpResponseRedirect(url)
 
 def send_it(**kwargs):
     """
@@ -178,4 +178,3 @@ def sendmail_custom_urls(request, bits, context):
         return new_mail(request, context)
 
     raise Http404
-

@@ -5,6 +5,10 @@ from os import path
 from django.utils.translation import ugettext_lazy as _
 from django.db import models
 
+
+
+
+
 from ella.db import fields
 from ella.core.box import Box
 from ella.photos.models import Photo
@@ -83,16 +87,6 @@ class Media(Publishable, models.Model):
         """
         return self.usage_set.all().order_by('-priority')
 
-    uploaded = models.DateTimeField(default=datetime.now, editable=False)
-
-    objects = MediaManager()
-
-    def get_text(self):
-        return ''
-
-    def formatted_media(self):
-        return FormattedMedia.objects.select_related().filter(source=self.id)
-
     def Box(self, box_type, nodelist):
         return MediaBox(self, box_type, nodelist)
 
@@ -127,4 +121,3 @@ class Usage(models.Model):
     title = models.CharField(_('Title'), max_length=255)
     url = models.URLField(_('Url'), max_length=255)
     priority = models.SmallIntegerField(_('Priority'))
-

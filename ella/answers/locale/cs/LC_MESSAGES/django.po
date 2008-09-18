@@ -17,7 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 msgid "Answers"
-msgstr "Poradny"
+msgstr "Poradna"
 
 #: models.py:7
 msgid "Question"

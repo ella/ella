@@ -79,11 +79,18 @@ class Photo(models.Model):
         """
         Generates html and thumbnails for admin site.
         """
+        thumbUrl = self.thumb_url()
+        if not thumbUrl:
+            return mark_safe("""<strong>%s</strong>""" % ugettext('Thumbnail not available'))
+        return mark_safe("""<a href="%s%s"><img src="%s%s" alt="Thumbnail %s" /></a>""" % (settings.MEDIA_URL, str(self.image).replace('\\', '/'), settings.MEDIA_URL, thumbUrl.replace('\\', '/'), self.title))
+    thumb.allow_tags = True
+
+    def thumb_url(self):
         spl = path.split(self.image)
         woExtension = spl[1].rsplit('.', 1)[0]
         imageType = detect_img_type(path.join(settings.MEDIA_ROOT, self.image))
         if not imageType:
-            return mark_safe("""<strong>%s</strong>""" % ugettext('Thumbnail not available'))
+            return None
         ext = PHOTOS_TYPE_EXTENSION[ imageType ]
         filename = 'thumb-%s%s' % (woExtension, ext)
         tPath = (spl[0] , filename)
@@ -96,9 +103,8 @@ class Photo(models.Model):
                 im.save(tinythumbPath, imageType)
             except IOError:
                 # TODO Logging something wrong
-                return mark_safe("""<strong>%s</strong>""" % ugettext('Thumbnail not available'))
-        return mark_safe("""<a href="%s%s"><img src="%s%s" alt="Thumbnail %s" /></a>""" % (settings.MEDIA_URL, str(self.image).replace('\\', '/'), settings.MEDIA_URL, tinythumb.replace('\\', '/'), self.title))
-    thumb.allow_tags = True
+                return None
+        return tinythumb
 
     def Box(self, box_type, nodelist):
         return PhotoBox(self, box_type, nodelist)
@@ -142,6 +148,9 @@ class Photo(models.Model):
 
     def __unicode__(self):
         return self.title
+
+    def get_absolute_url(self):
+        return self.get_image_url()
 
     class Meta:
         verbose_name = _('Photo')

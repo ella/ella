@@ -43,8 +43,8 @@ class MenuForm(ModelForm):
 class MenuItemOptions(admin.ModelAdmin):
     form = MenuItemForm
     search_fields = ('label', 'url', 'menu',)
-    list_display = ('__unicode__', 'menu', 'order',)
-    list_filter = ('menu', 'parent',)
+    list_display = ('__unicode__', 'menu',)
+    list_filter = ('menu',)
 
 class MenuOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     form = MenuForm

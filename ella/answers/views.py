@@ -18,6 +18,10 @@ from ella.utils.paginator import paginate_qset, get_page_no
 
 from ella.answers.models import Question, Answer
 
+# pagination
+HP_PAGE_ITEMS = 2
+ANSWER_PAGE_ITEMS = 2
+
 class QuestionForm(forms.ModelForm):
     class Meta:
         model = Question
@@ -47,7 +51,7 @@ class QuestionPreview(FormPreview):
 class AnswerForm(forms.ModelForm):
     class Meta:
         model = Answer
-        exclude = ('created', 'question',)
+        exclude = ('created', 'question', 'is_hidden',)
 
 class AnswerPreview(FormPreview):
     def __call__(self, request, *args, **kwargs):
@@ -88,12 +92,13 @@ def question_detail(request, question_id=None, question_slug=None):
         q = Question.objects.get(pk=int(qid))
     except Question.DoesNotExist:
         raise Http404('Question with id %d not found.' % qid)
-    answers = Answer.objects.filter(question=q)
+    answers = Answer.objects.filter(question=q, is_hidden=False)
     cx = {
         'question': q,
-        'answers': answers
+        'answers': answers,
+        'user': request.user,
 }
-    cx.update(paginate_qset(request, answers))
+    cx.update(paginate_qset(request, answers, items_per_page=ANSWER_PAGE_ITEMS))
     return render_to_response(
         'page/answers/question.html',
         cx,
@@ -106,8 +111,9 @@ def question_list(request):
     cx = {
         'form': form,
         'questions': all_q,
+        'user': request.user,
 }
-    cx.update(paginate_qset(request, all_q))
+    cx.update(paginate_qset(request, all_q, items_per_page=HP_PAGE_ITEMS))
     return render_to_response(
         'page/answers/question_list.html',
         cx,
@@ -144,6 +150,7 @@ def question_answer(request, question_id):
     cx = {
         'question': q,
         'form': form,
+        'user': request.user,
 }
     return render_to_response(
         'page/answers/question_answer.html',

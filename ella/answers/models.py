@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 from django.db import models
 from django.utils.translation import ugettext as _
+from django.utils.text import wrap
+from ella.ellaadmin.utils import admin_url
 
 
 class Question(models.Model):
-    text = models.CharField(_(u'Question'), max_length=100)
+    text = models.CharField(_(u'Question'), max_length=200)
     specification = models.TextField(_(u'Specification'))
-    nick = models.CharField(_('Nickname'), max_length=20)
+    nick = models.CharField(_('Nickname'), max_length=150)
     created = models.DateTimeField(auto_now_add=True)
     slug = models.SlugField()
 
@@ -18,12 +20,16 @@ class Question(models.Model):
 
 class Answer(models.Model):
     text = models.TextField(_('Answer text'))
-    nick = models.CharField(_('Nickname'), max_length=20)
+    nick = models.CharField(_('Nickname'), max_length=150) # odbornici budou udavat adresu atd.
     created = models.DateTimeField(auto_now_add=True)
     question = models.ForeignKey(Question)
+    is_hidden = models.BooleanField(_('Is hidden'), default=False)
 
     def __unicode__(self):
         return self.text
+
+    def get_admin_url(self):
+        return admin_url(self)
 
     class Meta:
         ordering = ('-created',)
