@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django import template
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
@@ -50,7 +52,7 @@ def do_rate_urls(parser, token):
 
     Usage::
 
-        {% rate_urls for OBJ as  var_up var_down %}
+        {% rate_urls for OBJ as var_up var_down %}
 
         {% rate_urls for OBJ as my_form var_up var_down %}
 
@@ -95,16 +97,20 @@ def rate_url(parser, token):
     return RateUrlNode(bits[2], bits[4])
 
 class RatingNode(template.Node):
-    def __init__(self, object, name, precision=None):
-        self.object, self.name, self.precision =  object, name, precision
+    def __init__(self, object, name, max=None, step=None):
+        self.object, self.name = object, name
+        self.min, self.max, self.step = min, max, step
 
     def render(self, context):
         obj = template.Variable(self.object).resolve(context)
         if obj:
-            value = TotalRate.objects.get_total_rating(obj)
-            if (self.precision):
-                value = round(float(value) / self.precision) * self.precision
-            context[self.name] = value
+            value = 0
+            if (self.min is not None and self.max is not None):
+                value = TotalRate.objects.get_normalized_rating(obj, Decimal(self.max), Decimal(self.step))
+            else:
+                value = TotalRate.objects.get_total_rating(obj)
+            # Set as string to be able compare value in tamplate
+            context[self.name] = str(value)
         return ''
 
 @register.tag('rating')
@@ -113,23 +119,30 @@ def do_rating(parser, token):
     Get rating for the given object and store it in context under given name.
 
     Usage::
-
+        Select total rating:
         {% rating for OBJ as VAR %}
-        {% rating for OBJ as VAR precision 0.5 %}
+
+        Normalize rating from X to Y and round to Z:
+        {% rating for OBJ max X step Y as VAR %}
 
     Examples::
 
         {% rating for object as object_rating %}
         object {{object}} has rating of {{object_rating}}
+
+        {% rating for object max 1 step 0.5 as object_rating %}
+        object {{object}} has rating of {{object_rating}} from (-1, -0.5, 0, 0.5, 1)
     """
     bits = token.split_contents()
-    if (len(bits) != 5 and (len(bits) != 7 or bits[5] != 'precision')) or bits[1] != 'for' or bits[3] != 'as':
-        raise template.TemplateSyntaxError, "%r .... TODO ....." % token.contents.split()[0]
-
-    if len(bits) == 7:
-        return RatingNode(bits[2], bits[4], float(bits[6]))
-    else:
+    if len(bits) == 5 and bits[1] == 'for' and bits[3] == 'as':
         return RatingNode(bits[2], bits[4])
+    if len(bits) == 11 and bits[1] == 'for' and bits[3] == 'max' \
+            and bits[5] == 'step' and bits[7] == 'as':
+        return RatingNode(bits[2], bits[8], bits[4], bits[6])
+
+    raise template.TemplateSyntaxError, \
+        "{% rating for OBJ as VAR %} or {% rating for OBJ max X step Y as VAR %}"
+
 
 
 class TopRatedNode(template.Node):

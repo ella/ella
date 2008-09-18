@@ -105,6 +105,48 @@ class TotalRateManager(models.Manager):
         sum = Decimal(str(rate)) + aggr
         return sum.quantize(Decimal(".0"))
 
+    def get_normalized_rating(self, obj, max, step=None):
+        """
+        Returns rating normalized from min to max rounded to step
+
+        - no score (0) is always avarage (0)
+        - worst score gets always min
+        - best score gets always max
+        - results between 0 and min/max should be uniformly distributed
+        """
+
+        total = self.get_total_rating(obj)
+        if total == 0:
+            return Decimal("0").quantize(step or Decimal("1"))
+
+        # Handle positive and negative score separately
+        lt = "<"
+        gt = ">"
+        ref = max
+        if total < 0:
+            lt = ">"
+            gt = "<"
+            ref = -max
+
+        sql = "SELECT (SELECT count(*) FROM %(table)s WHERE amount %(lt)s= %%s AND amount %(gt)s 0) / (SELECT count(*) FROM %(table)s WHERE amount %(gt)s 0)" \
+            % {'table': connection.ops.quote_name(TotalRate._meta.db_table),
+               'gt' :gt, 'lt' : lt,}
+
+        cursor = connection.cursor()
+        cursor.execute(sql, (total,))
+        (percentil,) = cursor.fetchone()
+        cursor.close()
+
+        result = percentil * ref
+        if step:
+            result = (result / step).quantize(Decimal("1")) * step
+        if result < -max:
+            result = -max
+        if result > max:
+            result = max
+        return result
+
+
     def get_for_object(self, obj):
         """
         Return the agg rating for a given object.
