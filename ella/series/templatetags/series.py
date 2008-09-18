@@ -1,6 +1,9 @@
+from datetime import datetime
+
 from django import template
 
 from ella.series.models import Serie, SeriePart
+from ella.core.cache.utils import get_cached_list
 
 register = template.Library()
 
@@ -49,32 +52,28 @@ class SerieNode(template.Node):
         self.params = params
 
     def render(self, context):
-        # TODO: caching
-
-        # Get placement
         placement = template.Variable(self.params['for']).resolve(context)
 
-        try:
-            if isinstance(placement.target, Serie):
-                parts = placement.target.parts
-            else:
-                current_part = SeriePart.objects.get(placement=placement)
-                parts = current_part.serie.parts
+        if isinstance(placement.target, Serie):
+            # Get all parts for serie without unpublished parts
+            parts = placement.target.parts
+        else:
+            # Get parts for current part according to parameters
 
-                # Shall I hide newer parts?
-                if current_part.serie.hide_newer_parts:
-                    parts = parts.filter(placement__publish_from__lte=current_part.placement.publish_from)
+            try:
+                current_part = SeriePart.objects.get_part_for_placement(placement)
+            except SeriePart.DoesNotExist:
+                return ''
 
-                # Limit
-                if self.params.has_key('limit'):
-                    current_index = list(parts).index(current_part)
-                    limit = int(self.params['limit'])
-                    lo = current_index - limit
-                    hi = current_index + limit + 1
-                    parts = parts[ lo>0 and lo or 0 : hi ]
+            parts = SeriePart.objects.get_serieparts_for_current_part(current_part)
 
-        except SeriePart.DoesNotExist:
-            return ''
+            # Limit
+            if self.params.has_key('limit'):
+                current_index = parts.index(current_part)
+                limit = int(self.params['limit'])
+                lo = current_index - limit
+                hi = current_index + limit + 1
+                parts = parts[ lo>0 and lo or 0 : hi ]
 
         context[self.params['as']] = parts
         return ''

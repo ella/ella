@@ -1,10 +1,12 @@
 from django.contrib import admin
+from django.contrib.contenttypes import generic
 from django.utils.translation import ugettext_lazy as _
+
 from ella.series.models import Serie, SeriePart
 from ella.ellaadmin.options import EllaAdminOptionsMixin
-
 from ella.core.admin import PlacementInlineOptions
 from ella.tagging.admin import TaggingInlineOptions
+
 
 class SeriePartInlineAdmin(EllaAdminOptionsMixin, admin.TabularInline):
     model = SeriePart
