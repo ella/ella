@@ -24,6 +24,7 @@ CLASS_PLACEMENT_CATEGORY = 'placement_category'
 JS_SUGGEST = 'js/jquery.suggest.js'
 JS_SUGGEST_MULTIPLE = 'js/jquery.suggest.multiple.js'
 CSS_SUGGEST = 'css/jquery.suggest.css'
+JS_AUTHORADD = 'js/authoradd.js'
 
 
 class ContentTypeWidget(forms.Select):
@@ -110,6 +111,7 @@ class AuthorsSuggestAdminWidget(forms.TextInput):
     class Media:
         js = (
             settings.ADMIN_MEDIA_PREFIX + JS_SUGGEST_MULTIPLE,
+            settings.ADMIN_MEDIA_PREFIX + JS_AUTHORADD,
 )
         css = {
             'screen': (settings.ADMIN_MEDIA_PREFIX + CSS_SUGGEST,),
