@@ -8,6 +8,7 @@ from django.template.defaultfilters import slugify
 
 from ella.ratings.models import Rating, TotalRate
 from ella.ratings.forms import RateForm
+from ella.ratings.views import get_was_rated
 from django.utils.translation import ugettext as _
 
 register = template.Library()
@@ -143,6 +144,26 @@ def do_rating(parser, token):
     raise template.TemplateSyntaxError, \
         "{% rating for OBJ as VAR %} or {% rating for OBJ max X step Y as VAR %}"
 
+class WasRatedNode(template.Node):
+
+    def __init__(self, object, name):
+        self.object, self.name = object, name
+
+    def render(self, context):
+        object = template.Variable(self.object).resolve(context)
+        ct = ContentType.objects.get_for_model(object)
+        context[self.name] = get_was_rated(context['request'], ct, object)
+        return ''
+
+@register.tag('was_rated')
+def do_was_rated(parser, token):
+    """
+    {% was_rated for OBJ as VAR %}
+    """
+    bits = token.split_contents()
+    if len(bits) == 5 and bits[1] == 'for' and bits[3] == 'as':
+        return WasRatedNode(bits[2], bits[4])
+    raise template.TemplateSyntaxError, "{% was_rated for OBJ as VAR %}"
 
 
 class TopRatedNode(template.Node):
