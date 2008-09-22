@@ -95,13 +95,19 @@ def do_rate(request, ct, target, plusminus):
     set_was_rated(request, response, ct, target)
     return response
 
-def rate_by_value(request, bits, context):
-    val = request.POST.get('rating', None)
-    if not val:
-        raise ValueError('rating field not found in POST')
-    plusminus = float(val)
-    if not -1 <= plusminus <= 1:
-        raise ValueError('rating value should be in <-1, 1>')
+def rate(request, bits, context):
+    """
+    View for ella custom urls
+
+    Expects rating in POST
+    """
+    # TODO: how to use django forms together with  content_type and objct from context
+    try:
+        plusminus = Decimal(request.POST['rating'])
+    except KeyError:
+        raise Http404
+    # Allow only ratings in <-1;1> interval
+    plusminus = plusminus.max(Decimal("-1")).min(Decimal("1"))
     return do_rate(
         request,
         context['content_type'],
@@ -109,35 +115,32 @@ def rate_by_value(request, bits, context):
         plusminus
 )
 
-@require_POST
-def rate_post(request, plusminus=1):
-    """
-    Add a simple up/down vote for a given object.
-    redirect to object's get_absolute_url() on success.
 
-    More granularity can be achieved via setting plusminus to something else than +/-1.
-
-    Params:
-        plusminus: rating itself
-
-    Form data:
-        POST:
-            ella.ratings.forms.RateForm
-            next: url to redirect to after successful attempt
-
-    Raises:
-        Http404 if no content_type or model is associated with the given IDs
-    """
-    form = RateForm(request.POST)
-    if not form.is_valid():
-        raise Http404
-
-    ct = form.cleaned_data['content_type']
-    target = form.cleaned_data['target']
-
-    return do_rate(request, ct, target, plusminus)
-
-def rate(request, bits, context):
-    if len(bits) != 1 or bits[0] not in UPDOWN:
-        raise Http404
-    return do_rate(request, context['content_type'], context['object'], UPDOWN[ bits[0] ])
+# This method is not used in the moment and untested so commented out...
+#@require_POST
+#def rate_post(request, plusminus=1):
+#    """
+#    Add a simple up/down vote for a given object.
+#    redirect to object's get_absolute_url() on success.
+#
+#    More granularity can be achieved via setting plusminus to something else than +/-1.
+#
+#    Params:
+#        plusminus: rating itself
+#
+#    Form data:
+#        POST:
+#            ella.ratings.forms.RateForm
+#            next: url to redirect to after successful attempt
+#
+#    Raises:
+#        Http404 if no content_type or model is associated with the given IDs
+#    """
+#    form = RateForm(request.POST)
+#    if not form.is_valid():
+#        raise Http404
+#
+#    ct = form.cleaned_data['content_type']
+#    target = form.cleaned_data['target']
+#
+#    return do_rate(request, ct, target, plusminus)
