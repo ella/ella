@@ -11,12 +11,54 @@ current_site = Site.objects.get_current()
 
 UPDOWN = {'up' : 1, 'down' : -1}
 
+def _get_cookie(request):
+    """
+    Returns cookie split by ','
+    """
+    try:
+        return request.COOKIES[RATINGS_COOKIE_NAME].split(',')
+    except KeyError:
+        # Cookie not set
+        return []
+
+def get_was_rated(request, ct, target):
+    """
+    Returns whether object was rated by current user
+
+    Rating can fail later on db query, this checks user cookies
+    """
+    return '%s:%s' % (ct.id, target.id) in _get_cookie(request)
+
+def set_was_rated(request, response, ct, target):
+    """
+    Marks target as rated
+
+    Adds object content_type and id to RATINGS_COOKIE_NAME cookie
+    """
+    cook = _get_cookie(request)
+    if len(cook) > RATINGS_MAX_COOKIE_LENGTH:
+        cook = cook[1:]
+    cook.append('%s:%s' % (ct.id, target.id))
+    expires = datetime.strftime(datetime.utcnow() + timedelta(seconds=RATINGS_MAX_COOKIE_AGE), "%a, %d-%b-%Y %H:%M:%S GMT")
+    domain = current_site.domain
+    if domain.find(':') != -1:
+        # Remove possible port from domain
+        domain = domain[0:domain.find(':')]
+    if domain == 'localhost':
+        # Do not set domain at localhost beacause cookie spec
+        # requires at least two dots in domain name
+        domain = None
+    response.set_cookie(RATINGS_COOKIE_NAME, value=','.join(cook),
+            max_age=RATINGS_MAX_COOKIE_AGE, expires=expires,  path='/',
+            domain=domain, secure=None)
+
+
 def get_response(request, target, message=None):
     if (request.is_ajax()):
         json = simplejson.dumps({'message':message or _('Your rating was succesfully added.')})
         return HttpResponse(json)
     else:
-        if message:
+        if message and request.user.is_authenticated():
             request.user.message_set.create(message=message)
 
         if 'next' in request.REQUEST and request.REQUEST['next'].startswith('/'):
@@ -29,17 +71,8 @@ def get_response(request, target, message=None):
 
 def do_rate(request, ct, target, plusminus):
 
-    # ANTI-SPAM shortcuts
-    if request.user.is_authenticated():
-        cook = request.session.get(RATINGS_COOKIE_NAME, [])
-        if (ct.id, target.id) in cook:
-            return get_response(request, target, _('You have already rated this object.'))
-    else:
-        # check anti spam cookie
-        cook = request.COOKIES.get(RATINGS_COOKIE_NAME, '').split(',')
-        if '%s:%s' % (ct.id, target.id) in cook:
-            # fail silently
-            return get_response(request, target)
+    if get_was_rated(request, ct, target):
+        return get_response(request, target, _('You have already rated this object.'))
 
     kwa = {'amount' : ANONYMOUS_KARMA}
     if request.user.is_authenticated():
@@ -53,31 +86,13 @@ def do_rate(request, ct, target, plusminus):
     if request.META.has_key('REMOTE_ADDR'):
         kwa['ip_address'] = request.META['REMOTE_ADDR']
 
-    # do the rating
+    # Do the rating
+    # Rating will not be neccessary added but fail silently
     rt = Rating(target_ct_id=ct.id, target_id=target.id, **kwa)
     rt.save()
 
-    # update anti-spam
-    if len(cook) > RATINGS_MAX_COOKIE_LENGTH:
-        cook = cook[1:]
-
-    if request.user.is_authenticated():
-        cook.append((ct.id, target.id))
-        request.session[RATINGS_COOKIE_NAME] = cook
-        return get_response(request, target, message=_('Your rating was succesfully added.'))
-
-    cook.append('%s:%s' % (ct.id, target.id))
-    expores = datetime.strftime(datetime.utcnow() + timedelta(seconds=RATINGS_MAX_COOKIE_AGE), "%a, %d-%b-%Y %H:%M:%S GMT")
-    response =  get_response(request, target)
-    response.set_cookie(
-            RATINGS_COOKIE_NAME,
-            value=','.join(cook),
-            max_age=RATINGS_MAX_COOKIE_AGE,
-            expires=expores,
-            path='/',
-            domain=current_site.domain,
-            secure=None
-)
+    response =  get_response(request, target, message=_('Your rating was succesfully added.'))
+    set_was_rated(request, response, ct, target)
     return response
 
 def rate_by_value(request, bits, context):
