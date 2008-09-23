@@ -23,7 +23,7 @@ class Author(models.Model):
     All fields except slug are optional.
     """
     user = models.ForeignKey(User, blank=True, null=True)
-    name = models.CharField(_('Name'), max_length=200, blank=True)
+    name = models.CharField(_('Name'), max_length=200, blank=True, unique=True)
     slug = models.SlugField(_('Slug'), max_length=255)
     description = models.TextField(_('Description'), blank=True)
     text = models.TextField(_('Text'), blank=True)
