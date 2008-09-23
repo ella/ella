@@ -51,7 +51,7 @@ class QuestionPreview(FormPreview):
 class AnswerForm(forms.ModelForm):
     class Meta:
         model = Answer
-        exclude = ('created', 'question', 'is_hidden',)
+        exclude = ('created', 'question', 'is_hidden', 'authorized_user',)
 
 class AnswerPreview(FormPreview):
     def __call__(self, request, *args, **kwargs):
@@ -75,6 +75,8 @@ class AnswerPreview(FormPreview):
         form = AnswerForm(request.POST)
         q = Question.objects.get(pk=self.question_id)
         a = form.save(commit=False)
+        if request.user:
+            a.authorized_user = request.user
         a.question = q
         a.save()
         return  HttpResponseRedirect(
