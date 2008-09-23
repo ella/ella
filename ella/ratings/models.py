@@ -8,7 +8,7 @@ from django.contrib.contenttypes import generic
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
-from ella.core.cache import CachedGenericForeignKey
+from ella.core.cache import CachedGenericForeignKey, cache_this
 
 # ratings - specific settings
 ANONYMOUS_KARMA = getattr(settings, 'ANONYMOUS_KARMA', 1)
@@ -91,6 +91,9 @@ class ModelWeight(models.Model):
         verbose_name_plural = _('Model weights')
         ordering = ('-weight',)
 
+def normalized_rating_key(func, self, obj, max, step=None):
+    return 'ella.ratings.models.normalized_rating:%s.%s:%s:%s:%s' % (
+            obj._meta.app_label, obj._meta.object_name, obj.pk, max, step)
 class TotalRateManager(models.Manager):
 
     def get_total_rating(self, obj):
@@ -105,6 +108,7 @@ class TotalRateManager(models.Manager):
         sum = Decimal(str(rate)) + aggr
         return sum.quantize(Decimal(".0"))
 
+    @cache_this(normalized_rating_key)
     def get_normalized_rating(self, obj, max, step=None):
         """
         Returns rating normalized from min to max rounded to step
