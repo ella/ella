@@ -5,7 +5,7 @@ from ella.core.middleware import ECACHE_INFO
 
 
 MEDIA_URL = getattr(settings, 'MEDIA_URL', '')
-VERSION = getattr(settings, 'VERSION', 2)
+VERSION = getattr(settings, 'VERSION', 1)
 SERVER_INFO = getattr(settings, 'SERVER_INFO', {})
 
 current_site = Site.objects.get_current()
