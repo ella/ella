@@ -32,7 +32,7 @@ class Article(Publishable, models.Model):
 
     # Contents
     perex = models.TextField(_('Perex'))
-    created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)
+    created = models.DateTimeField(_('Created'), default=datetime.now, editable=False, db_index=True)
     updated = models.DateTimeField(_('Updated'), blank=True, null=True)
 
     # Authors and Sources
