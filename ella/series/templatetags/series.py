@@ -1,8 +1,9 @@
+from datetime import datetime
+
 from django import template
 
 from ella.series.models import Serie, SeriePart
-from ella.articles.models import Article
-from ella.core.models import Placement
+from ella.core.cache.utils import get_cached_list
 
 register = template.Library()
 
@@ -51,18 +52,28 @@ class SerieNode(template.Node):
         self.params = params
 
     def render(self, context):
-        # TODO: caching
-
-        # Get placement
         placement = template.Variable(self.params['for']).resolve(context)
 
-        try:
-            if isinstance(placement.target, Serie):
-                context[self.params['as']] = placement.target
-            else:
-                serie_part = SeriePart.objects.get(target_ct=placement.target_ct, target_id=placement.target_id)
-                context[self.params['as']] = serie_part.serie
-        except SeriePart.DoesNotExist:
-            return ''
+        if isinstance(placement.target, Serie):
+            # Get all parts for serie without unpublished parts
+            parts = placement.target.parts
+        else:
+            # Get parts for current part according to parameters
 
+            try:
+                current_part = SeriePart.objects.get_part_for_placement(placement)
+            except SeriePart.DoesNotExist:
+                return ''
+
+            parts = SeriePart.objects.get_serieparts_for_current_part(current_part)
+
+            # Limit
+            if self.params.has_key('limit'):
+                current_index = parts.index(current_part)
+                limit = int(self.params['limit'])
+                lo = current_index - limit
+                hi = current_index + limit + 1
+                parts = parts[ lo>0 and lo or 0 : hi ]
+
+        context[self.params['as']] = parts
         return ''

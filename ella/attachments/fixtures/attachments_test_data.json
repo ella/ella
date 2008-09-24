@@ -1,0 +1,93 @@
+[
+  {
+    "pk": 1,
+    "model": "auth.user",
+    "fields": {
+      "username": "admin",
+      "first_name": "",
+      "last_name": "",
+      "is_active": true,
+      "is_superuser": true,
+      "is_staff": true,
+      "last_login": "2008-06-28 04:23:31",
+      "groups": [],
+      "user_permissions": [],
+      "password": "sha1$7a450$7fab8dc9d18811876ecae0433930ee755e365e6d",
+      "email": "a@a.cz",
+      "date_joined": "2008-06-28 04:23:31"
+    }
+  },
+
+ {
+  "pk": 1,
+  "model": "core.author",
+  "fields": {
+   "text": "",
+   "slug": "jatro",
+   "description": "",
+   "user": null,
+   "name": "Jatro"
+  }
+ },
+ {
+  "pk": 1,
+  "model": "photos.photo",
+  "fields": {
+   "description": "jakub vysoky",
+   "title": "moje foto",
+   "image": "photos\/2008\/09\/03\/1-moje-foto.png",
+   "created": "2008-09-03 09:14:01",
+   "height": 283,
+   "width": 230,
+   "source": null,
+   "authors": [
+    1
+   ],
+   "slug": "1-moje-foto"
+  }
+ },
+
+ {
+  "pk": 1,
+  "model": "attachments.type",
+  "fields": {
+   "mimetype": "image\/png",
+   "name": "png"
+  }
+ },
+ {
+  "pk": 2,
+  "model": "attachments.type",
+  "fields": {
+   "mimetype": "text\/plain",
+   "name": "text"
+  }
+ },
+ {
+  "pk": 1,
+  "model": "attachments.attachment",
+  "fields": {
+   "description": "picture attachment",
+   "created": "2008-09-03 09:14:08",
+   "photo": 1,
+   "attachment": "attach\/2008\/09\/03\/picture.png",
+   "type": 1,
+   "slug": "some-picture",
+   "name": "some picture"
+  }
+ },
+ {
+  "pk": 2,
+  "model": "attachments.attachment",
+  "fields": {
+   "description": "simple text file",
+   "created": "2008-09-03 10:00:30",
+   "photo": null,
+   "attachment": "attach\/2008\/09\/03\/text.txt",
+   "type": 2,
+   "slug": "some-text",
+   "name": "some text"
+  }
+ }
+]
+

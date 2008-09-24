@@ -7,7 +7,7 @@ from ella.tagging.admin import TaggingInlineOptions
 from ella.ellaadmin.options import EllaAdminOptionsMixin
 
 from ella.photos.models import FormatedPhoto, Format, Photo
-from ella.photos.views import format_photo_json
+from ella.photos.views import format_photo_json, thumb_url
 
 
 class FormatedPhotoForm(forms.BaseForm):
@@ -68,6 +68,8 @@ class PhotoOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     def __call__(self, request, url):
         if url and url.endswith('json'):
             return format_photo_json(request, *url.split('/')[-3:-1])
+        if url and url.endswith('thumburl'):
+            return thumb_url(request, *url.split('/')[-3:-1])
         return super(PhotoOptions, self).__call__(request, url)
 
 

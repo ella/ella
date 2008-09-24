@@ -78,7 +78,11 @@ def check_vote(request, poll):
         if str(poll.id) in cook:
             return POLL_USER_ALLREADY_VOTED
         treshold = datetime.fromtimestamp(time.time() - POLLS_IP_VOTE_TRESHOLD)
-        voteCount = Vote.objects.filter(poll=poll, ip_address=request.META['REMOTE_ADDR'], time__gte=treshold).count()
+        if request.META.has_key('HTTP_X_FORWARDED_FOR'):
+            ip_addr = request.META['HTTP_X_FORWARDED_FOR']
+        else:
+            ip_addr = request.META['REMOTE_ADDR']
+        voteCount = Vote.objects.filter(poll=poll, ip_address=ip_addr, time__gte=treshold).count()
         if voteCount > 0:
             return POLL_USER_ALLREADY_VOTED
         return POLL_USER_NOT_YET_VOTED
@@ -120,13 +124,19 @@ def poll_vote(request, poll_id):
         kwa = {}
         if request.user.is_authenticated():
             kwa['user'] = request.user
-        if request.META.has_key('REMOTE_ADDR'):
+        if request.META.has_key('HTTP_X_FORWARDED_FOR'):
+            kwa['ip_address'] = request.META['HTTP_X_FORWARDED_FOR']
+        else:
             kwa['ip_address'] = request.META['REMOTE_ADDR']
         vote = Vote(poll=poll, **kwa)
         vote.save()
         # increment votes at choice object
-        if vote.id:
-            choice.add_vote()
+        if vote.id and choice != None:
+            if type(choice) == list:
+                for c in choice:
+                    c.add_vote()
+            else:
+                choice.add_vote()
 
         global CURRENT_SITE
         if not CURRENT_SITE:
@@ -161,14 +171,14 @@ def poll_vote(request, poll_id):
 
     # no choice
     # FIXME how to catch specific error? try to catch validationError exc?
-    if not poll.question.allow_no_choice and form['choice'].errors:
+    if form['choice'].errors:
         sess_nv = request.session.get(POLLS_NO_CHOICE_COOKIE_NAME, [])
         sess_nv.append(poll.id)
         request.session[POLLS_NO_CHOICE_COOKIE_NAME] = sess_nv
         return HttpResponseRedirect(url)
 
-    # choice required
-    return render_to_response('polls/poll_form.html', {'form' : form, 'next' : url}, context_instance=RequestContext(request))
+    # we are not here never (for now)
+    return response
 
 @transaction.commit_on_success
 def contest_vote(request, context):

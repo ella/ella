@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-02-13 16:41+0100\n"
+"POT-Creation-Date: 2008-09-22 14:58+0200\n"
 "PO-Revision-Date: 2008-02-13 16:42+0100\n"
 "Last-Translator: Vítek Pliska <vtek.pliska@netcentrum.cz>\n"
 "Language-Team: \n"
@@ -29,40 +29,48 @@ msgstr "Některé odkazy nejsou správně: %s."
 msgid "Some links are broken: %s."
 msgstr "Některé odkazy jsou nedostupné: %s."
 
-#: models.py:76
+#: fields.py:109
+msgid "This field is required."
+msgstr ""
+
+#: fields.py:131
+msgid "You have to enter an author."
+msgstr "Musíte zadat autora."
+
+#: fields.py:139
+msgid ""
+"You have entered an author incorrectly, we suggest you delete the whole "
+"field and try again."
+msgstr "Zadali jste autory, ale špatně, doporučujeme celé políčko smazat a zadat je znovu."
+
+#: models.py:80
 #, python-format
 msgid "User %(user)s is a %(group)s for %(category)s."
 msgstr ""
 
-#: models.py:83
+#: models.py:87
 msgid "User role in category"
 msgstr ""
 
-#: models.py:84
+#: models.py:88
 msgid "User roles in categories"
 msgstr ""
 
-#: models.py:95
+#: models.py:99
 #, python-format
 msgid "User %(user)s is a %(group)s for %(site)s."
 msgstr ""
 
-#: models.py:102
+#: models.py:106
 msgid "User role in site"
 msgstr ""
 
-#: models.py:103
+#: models.py:107
 msgid "User roles in site"
 msgstr ""
 
-#: options.py:107
-#, python-format
-msgid "You don't have permission to change an object in category %(category)s."
-msgstr ""
-
-#: options.py:111
-#, python-format
-msgid "You don't have permission to change an object in site %(site)s."
+#: options.py:19
+msgid "Enter a valid slug."
 msgstr ""
 
 #: templates/admin/base_site.html:3
@@ -73,11 +81,59 @@ msgstr "Ella správa webu"
 msgid "Ella administration"
 msgstr "Ella správa"
 
+#: templates/admin/change_form.html:23
+msgid "History"
+msgstr ""
+
+#: templates/admin/change_form.html:24
+msgid "View on site"
+msgstr ""
+
 #: templates/admin/edit_inline/tabular.html:17
+#: templates/admin/polls/question/edit_inline/tabular.html:14
 msgid "Delete"
+msgstr ""
+
+#: templates/admin/polls/answer/correct.html:9
+msgid "Count Guess Difference"
+msgstr ""
+
+#: templates/admin/polls/answer/correct.html:10
+msgid "Name"
+msgstr ""
+
+#: templates/admin/polls/answer/correct.html:11
+msgid "Surname"
+msgstr ""
+
+#: templates/admin/polls/answer/correct.html:12
+msgid "User"
+msgstr ""
+
+#: templates/admin/polls/answer/correct.html:13
+msgid "Email"
+msgstr ""
+
+#: templates/admin/polls/answer/correct.html:14
+msgid "Phonenumber"
+msgstr ""
+
+#: templates/admin/polls/answer/correct.html:15
+msgid "Address"
+msgstr ""
+
+#: templates/admin/polls/answer/correct.html:16
+msgid "Winner"
+msgstr ""
+
+#: templates/admin/polls/answer/correct.html:29
+msgid "Yes"
+msgstr ""
+
+#: templates/admin/polls/answer/correct.html:29
+msgid "No"
 msgstr ""
 
 #: templates/ellaadmin/memcached_status.html:3
 msgid "Home"
 msgstr ""
-

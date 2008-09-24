@@ -8,7 +8,7 @@ from django.contrib.contenttypes import generic
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
-from ella.core.cache import CachedGenericForeignKey
+from ella.core.cache import CachedGenericForeignKey, cache_this
 
 # ratings - specific settings
 ANONYMOUS_KARMA = getattr(settings, 'ANONYMOUS_KARMA', 1)
@@ -91,6 +91,9 @@ class ModelWeight(models.Model):
         verbose_name_plural = _('Model weights')
         ordering = ('-weight',)
 
+def normalized_rating_key(func, self, obj, max, step=None):
+    return 'ella.ratings.models.normalized_rating:%s.%s:%s:%s:%s' % (
+            obj._meta.app_label, obj._meta.object_name, obj.pk, max, step)
 class TotalRateManager(models.Manager):
 
     def get_total_rating(self, obj):
@@ -102,7 +105,55 @@ class TotalRateManager(models.Manager):
         """
         rate = Rating.objects.get_for_object(obj)
         aggr = TotalRate.objects.get_for_object(obj)
-        return (rate+aggr).quantize(Decimal(".0"))
+        sum = Decimal(str(rate)) + aggr
+        return sum.quantize(Decimal(".0"))
+
+    @cache_this(normalized_rating_key)
+    def get_normalized_rating(self, obj, max, step=None):
+        """
+        Returns rating normalized from min to max rounded to step
+
+        - no score (0) is always avarage (0)
+        - worst score gets always min
+        - best score gets always max
+        - results between 0 and min/max should be uniformly distributed
+        """
+
+        total = self.get_total_rating(obj)
+        if total == 0:
+            return Decimal("0").quantize(step or Decimal("1"))
+
+        # Handle positive and negative score separately
+        lt = "<"
+        gt = ">"
+        ref = max
+        if total < 0:
+            lt = ">"
+            gt = "<"
+            ref = -max
+
+        sql = "SELECT (SELECT count(*) FROM %(table)s WHERE amount %(lt)s= %%s AND amount %(gt)s 0) / (SELECT count(*) FROM %(table)s WHERE amount %(gt)s 0)" \
+            % {'table': connection.ops.quote_name(TotalRate._meta.db_table),
+               'gt' :gt, 'lt' : lt,}
+
+        cursor = connection.cursor()
+        cursor.execute(sql, (total,))
+        (percentil,) = cursor.fetchone()
+
+        if percentil is None:
+            # First rating
+            percentil = Decimal(0)
+        cursor.close()
+
+        result = percentil * ref
+        if step:
+            result = (result / step).quantize(Decimal("1")) * step
+        if result < -max:
+            result = -max
+        if result > max:
+            result = max
+        return result
+
 
     def get_for_object(self, obj):
         """
@@ -368,24 +419,5 @@ class Rating(models.Model):
                 return
 
         super(Rating, self).save()
-
-
-from django.contrib import admin
-
-class RatingOptions(admin.ModelAdmin):
-    list_filter = ('time', 'target_ct',)
-    list_display = ('__unicode__', 'time', 'amount', 'user',)
-
-class TotalRateOptions(admin.ModelAdmin):
-    list_filter = ('target_ct',)
-    list_display = ('__unicode__', 'amount')
-
-class ModelWeightOptions(admin.ModelAdmin):
-    list_filter = ('content_type',)
-    list_display = ('content_type', 'weight', 'owner_field',)
-
-admin.site.register(Rating, RatingOptions)
-admin.site.register(TotalRate, TotalRateOptions)
-admin.site.register(ModelWeight, ModelWeightOptions)
 
 

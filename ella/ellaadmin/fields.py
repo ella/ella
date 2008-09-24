@@ -128,17 +128,22 @@ class AuthorSuggestField(fields.Field):
         from ella.core.models import Author
 
         if not value:
-            raise ValidationError(_('This field is required.'))
+            raise ValidationError(_('You have to enter an author.'))
         vals = value.split(',')
         ids = []
         for v in vals:
             if not v == '':
-                id = int(v.split(':')[0])
+                try:
+                    id = int(v.split(':')[0])
+                    Author.objects.get(pk=id)
+                except (Author.DoesNotExist, IndexError):
+                    raise ValidationError(self.error_messages['not_exist'] % v)
+                except:
+                    raise ValidationError(_('You have entered an author incorrectly, we suggest you delete the whole field and try again.'))
                 ids.append(id)
-        try:
-            return Author.objects.filter(pk__in=ids)
-        except (Author.DoesNotExist, IndexError):
-            raise ValidationError(self.error_messages['not_exist'] % value)
+
+        return Author.objects.filter(pk__in=ids)
+
 
 class CategorySuggestPlacementField(CategorySuggestField):
     def __init__(self, *args, **kwargs):
