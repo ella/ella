@@ -95,4 +95,4 @@ msgstr "Tento objekt jste již hodnotil/a."
 
 #: views.py:74
 msgid "Your rating was succesfully added."
-msgstr "Vaše hodnocení bylo přidáno úspěšně."
+msgstr "Váš hlas byl započítán."
