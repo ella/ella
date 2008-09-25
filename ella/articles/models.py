@@ -23,7 +23,7 @@ class InfoBox(models.Model):
         verbose_name = _('Info box')
         verbose_name_plural = _('Info boxes')
 
-class Article(Publishable, models.Model):
+class Article(Publishable):
     """Defines article model."""
     # Titles
     title = models.CharField(_('Title'), max_length=255)
