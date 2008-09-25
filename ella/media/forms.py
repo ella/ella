@@ -18,7 +18,6 @@ class PhotoWidget(widgets.ForeignKeyRawIdWidget):
     TODO: more user friendly form
     """
     def render(self, name, value, attrs=None):
-        print value
         return mark_safe(
              'Generate photo <input type="checkbox" name="%s" %s /> at <input type="text" name="%s" /> second or use custom: %s' % \
              (name + '_auto',
