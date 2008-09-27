@@ -23,6 +23,9 @@ class CategoryLockMiddleware(object):
     def check_password(self, request, cl):
         if CATEGORY_LOCK_PASSWD in request.session and cl.password in request.session[CATEGORY_LOCK_PASSWD]:
             # everything is authenticated
+            request.GET._mutable = True
+            request.GET['nocache'] = True
+            request.GET._mutable = False
             return None
         if request.method == 'POST' and CATEGORY_LOCK_FORM in request.POST:
             # logging in
