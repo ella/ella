@@ -187,6 +187,7 @@ class ListingOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
 class CategoryOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     list_filter = ('site',)
     list_display = ('draw_title', 'tree_path', '__unicode__')
+    search_fields = ('title', 'slug',)
     ordering = ('site', 'tree_path',)
     prepopulated_fields = {'slug': ('title',)}
 

@@ -1,3 +1,15 @@
+centrum-ella (0.2.34.1) unstable; urgency=low
+
+  * Build from [1596]
+
+ -- Vitek Pliska <whit@jizak.cz>  Thu, 25 Sep 2008 08:51:20 +0200
+
+centrum-ella (0.2.34.0) unstable; urgency=low
+
+  * Build from [1594]
+
+ -- Vitek Pliska <whit@jizak.cz>  Wed, 24 Sep 2008 21:11:25 +0200
+
 centrum-ella (0.2.33.0) unstable; urgency=low
 
   * Build from [1520]

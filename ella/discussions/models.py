@@ -74,7 +74,7 @@ def remove_diacritical(text):
             output += c
     return output
 
-class Topic(Publishable, models.Model):
+class Topic(Publishable):
     # ella fields
     title = models.CharField(_('Title'), max_length=255)
     description = models.TextField(_('Description'))
