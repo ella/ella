@@ -7,6 +7,7 @@ from django.template.loader import render_to_string
 
 from ella.reminders.library import library
 from ella.core.cache import get_cached_object
+from ella.core.cache.utils import CachedForeignKey
 
 class DeliveryMethod(models.Model):
     title = models.CharField(_('Title'), max_length=255)
@@ -41,10 +42,10 @@ class DeliveryMethod(models.Model):
 )
 
 class Contact(models.Model):
-    user = models.ForeignKey(User)
+    user = CachedForeignKey(User)
     contact = models.CharField(_('Contact'), max_length=255)
 
-    delivery_method = models.ForeignKey(DeliveryMethod)
+    delivery_method = CachedForeignKey(DeliveryMethod)
 
     def __unicode__(self):
         return unicode(self.user)
@@ -92,26 +93,29 @@ class Calendar(models.Model):
     def next_events(self, count=10):
         return self.event_set.filter(date__gte=date.today())[:count]
 
+    def __unicode__(self):
+        return self.title
+
     class Meta:
         verbose_name = _('Calendar')
         verbose_name_plural = _('Calendars')
         ordering = ('-created',)
 
-    def __unicode__(self):
-        return self.title
-
 library.register(Calendar)
 
 class Event(models.Model):
-    # make this publishable ??
+    # TODO: make this publishable ??
     title = models.CharField(_('Title'), max_length=255)
     slug = models.SlugField(_('Slug'), max_length=255)
 
-    calendar = models.ForeignKey(Calendar)
+    calendar = CachedForeignKey(Calendar, verbose_name=_('Calendar'))
     date = models.DateField(_('Date'))
 
     description = models.TextField()
     text = models.TextField()
+
+    def __unicode__(self):
+        return u"%s in %s" % (self.title, self.calendar)
 
     class Meta:
         ordering = ('-date',)
