@@ -15,6 +15,11 @@ class DeliveryMethod(models.Model):
 
     function = models.CharField(_('Function'), max_length=255)
 
+    # TODO: field for regexp validation contacts?
+
+    def __unicode__(self):
+        return self.title
+
     def get_function(self):
         if not hasattr(self, '_function'):
             mod = __import__('.'.join(self.function.split('.')[:-1]), {}, {}, [self.function.split('.')[-1]])
@@ -42,16 +47,16 @@ class DeliveryMethod(models.Model):
 )
 
 class Contact(models.Model):
-    user = CachedForeignKey(User)
+    user = CachedForeignKey(User, null=True, blank=True)
     contact = models.CharField(_('Contact'), max_length=255)
 
     delivery_method = CachedForeignKey(DeliveryMethod)
 
     def __unicode__(self):
-        return unicode(self.user)
+        return u"%s: %s" % (self.delivery_method, self.contact)
 
     class Meta:
-        unique_together = (('user', 'delivery_method',),)
+        unique_together = (('contact', 'delivery_method',),)
 
 
 
@@ -77,7 +82,7 @@ class Calendar(models.Model):
     slug = models.SlugField(_('Slug'), max_length=255)
 
     created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)
-    subscribers = models.ManyToManyField(Contact)#, via=CalendarSubscription)
+    subscribers = models.ManyToManyField(Contact, blank=True)#, via=CalendarSubscription)
 
     objects = CalendarManager()
 
