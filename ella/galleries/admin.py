@@ -11,7 +11,6 @@ from ella.ellaadmin import widgets, fields
 from ella.core.admin import PlacementInlineOptions
 from ella.core.cache import get_cached_object
 from ella.ellaadmin.options import EllaAdminOptionsMixin
-from nc.exports.admin import AtlasExportInlineOptions
 
 class GalleryItemFormset(BaseInlineFormset):
     " Override default FormSet to allow for custom validation."
@@ -54,7 +53,7 @@ class GalleryOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
 )
     list_filter = ('created', 'category',)
     search_fields = ('title', 'description', 'slug',) # FIXME: 'tags__tag__name',)
-    inlines = (GalleryItemTabularOptions, PlacementInlineOptions, TaggingInlineOptions, AtlasExportInlineOptions,)
+    inlines = (GalleryItemTabularOptions, PlacementInlineOptions, TaggingInlineOptions,)
     prepopulated_fields = {'slug': ('title',)}
     rich_text_fields = {None: ('description', 'content',)}
 
