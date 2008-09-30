@@ -3,6 +3,7 @@ from django.utils.translation import ugettext_lazy as _, ugettext
 from django.forms.models import BaseInlineFormset
 from django import forms
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ObjectDoesNotExist
 
 from ella.tagging.admin import TaggingInlineOptions
 
