@@ -27,7 +27,7 @@ except ImportError:
 qn = connection.ops.quote_name
 parse_lookup = None
 log = logging.getLogger('ella.tagging')
-TIMEOUT_SHORT = 60 # sec.
+CACHE_TIMEOUT_SHORT = getattr(settings, 'CACHE_TIMEOUT_SHORT', 60)
 
 def get_key_get_for_object(func, self, obj, **kwargs):
     if not isinstance(obj, models.Model):
@@ -331,7 +331,7 @@ class TagManager(models.Manager):
     def cloud(self):
         return self.cloud_for_category(None)
 
-    #@cache_this(get_key_cloud_for_model, None, TIMEOUT_SHORT)
+    #@cache_this(get_key_cloud_for_model, None, CACHE_TIMEOUT_SHORT)
     def cloud_for_model(self, model, steps=4, distribution=LOGARITHMIC,
                         filters=None, min_count=None):
         """

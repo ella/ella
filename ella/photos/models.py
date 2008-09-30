@@ -120,10 +120,17 @@ class Photo(models.Model):
         if not self.id:
             super(Photo, self).save()
             self.slug = str(self.id) + '-' + self.slug
+        else:
+            old = Photo.objects.get(pk = self.pk)
+            image_changed = old.image != self.image
         # rename image by slug
         imageType = detect_img_type(path.join(settings.MEDIA_ROOT, self.image))
         if imageType is not None:
             self.image = file_rename(self.image, self.slug, PHOTOS_TYPE_EXTENSION[ imageType ])
+        # delete formatedphotos if new image was uploaded
+        if image_changed:
+            for f_photo in self.formatedphoto_set.all():
+                f_photo.delete()
         super(Photo, self).save()
 
     def ratio(self):
@@ -248,10 +255,17 @@ class FormatedPhoto(models.Model):
         - Removes old file from the FS
         - Generates new file.
         """
-        if path.exists(path.join(settings.MEDIA_ROOT, self.file(relative=True))):
-            os.remove(path.join(settings.MEDIA_ROOT, self.file(relative=True)))
+        self.remove_file()
         self.generate()
         super(FormatedPhoto, self).save()
+
+    def delete(self):
+        self.remove_file()
+        super(FormatedPhoto, self).delete()
+
+    def remove_file(self):
+        if path.exists(path.join(settings.MEDIA_ROOT, self.file(relative=True))):
+            os.remove(path.join(settings.MEDIA_ROOT, self.file(relative=True)))
 
     def file(self, relative=False):
         """ Method returns formated photo path - derived from format.id and source Photo filename """

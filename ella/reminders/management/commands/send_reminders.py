@@ -15,6 +15,3 @@ class Command(NoArgsCommand):
     def handle(self, *test_labels, **options):
         now = datetime.now() # TODO - allow overriding the time from commandline
         library.send_all(now)
-
-
-

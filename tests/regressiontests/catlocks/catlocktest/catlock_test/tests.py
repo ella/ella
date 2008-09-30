@@ -4,9 +4,9 @@ catlock = r'''
 >>> c.get('/').status_code
 200
 >>> c.get('/locked-cat/').status_code
-403
+302
 >>> c.get('/locked-cat/locked-subcat/').status_code
-403
+302
 >>> from ella.catlocks.forms import CATEGORY_LOCK_FORM
 >>> c.post('/locked-cat/', {CATEGORY_LOCK_FORM: u'1', 'password': 'pwd'}).status_code
 302
@@ -15,7 +15,7 @@ catlock = r'''
 >>> c.get('/locked-cat/locked-subcat/').status_code
 200
 >>> c.get('/locked-cat-two/').status_code
-403
+302
 >>> c.post('/locked-cat-two/', {CATEGORY_LOCK_FORM: u'1', 'password': 'anotherpwd'}).status_code
 302
 >>> c.get('/locked-cat-two/').status_code
