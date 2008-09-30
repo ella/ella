@@ -16,6 +16,7 @@ from ella.core.cache.template_loader import render_to_response
 
 # local cache for get_content_type()
 CONTENT_TYPE_MAPPING = {}
+CACHE_TIMEOUT_LONG = getattr(settings, 'CACHE_TIMEOUT_LONG', 60*60)
 
 
 def get_content_type(ct_name):
@@ -315,7 +316,7 @@ def get_export_key(func, request, count, name='', content_type=None):
             settings.SITE_ID, count, name, content_type
 )
 
-@cache_this(get_export_key, timeout=60*60)
+@cache_this(get_export_key, timeout=CACHE_TIMEOUT_LONG)
 def export(request, count, name='', content_type=None):
     """
     Export banners.
