@@ -131,6 +131,10 @@ class Server(models.Model):
                     # unwanted import item has negative priority - never more update priority
                     si.priority = importlen - index
                     si.save()
+            ServerItem.objects.filter(server=self, priority=0).delete()
+        else:
+            from django.core.exceptions import ImproperlyConfigured
+            raise ImproperlyConfigured('Import Failed')
 
 class ServerItem(models.Model):
     "Specific item to be imported."
