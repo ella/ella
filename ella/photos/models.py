@@ -120,6 +120,7 @@ class Photo(models.Model):
         if not self.id:
             super(Photo, self).save()
             self.slug = str(self.id) + '-' + self.slug
+            image_changed = False
         else:
             old = Photo.objects.get(pk = self.pk)
             image_changed = old.image != self.image
