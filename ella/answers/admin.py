@@ -1,5 +1,5 @@
 from django.contrib import admin
-from ella.answers.models import Question, Answer
+from ella.answers.models import Question, Answer, QuestionGroup
 from ella.ellaadmin.options import EllaAdminOptionsMixin, RefererAdminMixin
 
 class AnswerOptions(RefererAdminMixin, admin.ModelAdmin):
@@ -17,3 +17,4 @@ class QuestionOptions(admin.ModelAdmin):
 
 admin.site.register(Question, QuestionOptions)
 admin.site.register(Answer, AnswerOptions)
+admin.site.register(QuestionGroup)
