@@ -23,7 +23,7 @@ class Server(models.Model):
     title = models.CharField(_('Title'), max_length=100)
     domain = models.URLField(_('Domain'), verify_exists=False)
     slug = models.SlugField(_('Slug'), max_length=255)
-    url = models.URLField(_('Atom URL'), verify_exists=False, max_length=300)
+    url = models.URLField(_('Atom URL'), verify_exists=False, max_length=300, blank=True)
     category = models.ForeignKey(Category, blank=True, null=True, verbose_name=_('Category'))
 
     def regenerate(self):
@@ -48,17 +48,17 @@ class Server(models.Model):
         # Get structure like a feed
         for entry in articles:
             photo_url = ''
-            if entry.target.photo:
-                photo = entry.target.photo
+            if entry.target.get_photo():
+                photo = entry.target.get_photo()
             else:
                 photo = None
 
             output['entries'].append(
                 {
-                    'title': entry.target.title,
+                    'title': entry.target.get_title(),
                     'link': entry.target.get_absolute_url(),
-                    'updated': entry.target.updated,
-                    'summary': entry.target.perex,
+                    'updated': entry.publish_from,
+                    'summary': entry.target.get_description(),
                     'photo_url': photo_url,
                     'photo': photo,
 }
@@ -131,6 +131,10 @@ class Server(models.Model):
                     # unwanted import item has negative priority - never more update priority
                     si.priority = importlen - index
                     si.save()
+            ServerItem.objects.filter(server=self, priority=0).delete()
+        else:
+            from django.core.exceptions import ImproperlyConfigured
+            raise ImproperlyConfigured('Import Failed')
 
 class ServerItem(models.Model):
     "Specific item to be imported."
