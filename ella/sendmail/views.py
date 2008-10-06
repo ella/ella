@@ -171,6 +171,7 @@ def sendmail_custom_urls(request, bits, context):
             return new_mail(request, context)
         elif bits[0] == slugify(_('error')):
             log.error('Error during sending e-mail to a buddy')
+            return render_to_response('page/sendmail/sending-error.html', {}, context_instance=RequestContext(request))
         elif bits[0] == slugify('xml'):
             return xml_sendmail_view(request, context)
 
