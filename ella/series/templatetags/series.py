@@ -77,3 +77,36 @@ class SerieNode(template.Node):
 
         context[self.params['as']] = parts
         return ''
+
+@register.inclusion_tag('inclusion_tags/serie_navigation.html')
+def serie_navigation(placement):
+    """
+    Standard prev/next navigation in serie, under object
+
+    Usage::
+
+        {% serie_navigation <placement> %}
+    """
+
+    out = {}
+
+    try:
+        part = SeriePart.objects.get_part_for_placement(placement)
+    except SeriePart.DoesNotExist:
+        return out
+
+    out['current'] = part
+    parts = SeriePart.objects.get_serieparts_for_current_part(part)
+    current_index = parts.index(part)
+
+    try:
+        out['prev'] = parts[current_index-1]
+    except:
+        pass
+
+    try:
+        out['next'] = parts[current_index+1]
+    except:
+        pass
+
+    return out
