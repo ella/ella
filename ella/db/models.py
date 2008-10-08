@@ -35,21 +35,15 @@ class Publishable(Model):
 
         current_site = Site.objects.get_current()
 
-        try:
-            # TODO: what if have got multiple listings on one site?
-            placements = get_cached_list(
-                    Placement,
-                    target_ct=ContentType.objects.get_for_model(self.__class__),
-                    target_id=self.pk,
-                    category__site=current_site,
+        # TODO: what if have got multiple listings on one site?
+        placements = get_cached_list(
+                Placement,
+                target_ct=ContentType.objects.get_for_model(self.__class__),
+                target_id=self.pk,
+                category__site=current_site,
 )
-            if len(placements):
-                self._main_placement = placements[0]
-            else:
-                self._main_placement = None
-            return self._main_placement
-        except Placement.DoesNotExist:
-            self._main_placement = None
+        if placements:
+            return placements[0]
 
         try:
             # TODO - check and if we don't have category, take the only placement that exists in current site
@@ -59,7 +53,6 @@ class Publishable(Model):
                     target_id=self.pk,
                     category=self.category_id
 )
-            return self._main_placement
         except Placement.DoesNotExist:
             self._main_placement = None
 
