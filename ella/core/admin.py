@@ -123,6 +123,7 @@ class PlacementInlineFormset(generic.GenericInlineFormset):
                             'target' : plac.target,
 })
 
+            '''
             qset = Placement.objects.filter(
                         target_id=obj.pk,
                         target_ct=target_ct,
@@ -133,6 +134,7 @@ class PlacementInlineFormset(generic.GenericInlineFormset):
 
             if qset:
                 raise forms.ValidationError('Chyba')
+            '''
 
         if cat and not main:
             raise forms.ValidationError(_('If object has a category, it must have a main placement.'))
