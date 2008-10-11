@@ -21,12 +21,7 @@ class PlacementForm(modelforms.ModelForm):
     def __init__(self, *args, **kwargs):
         initial = []
         if 'initial' in kwargs:
-            # FIXME: This is a hotfix only
-            # Vypada to na django chybu, kdyz se pouzije distinct(). Do dnesni rev. 8068 oprava neni.
-            try:
-                initial = [ c.pk for c in Category.objects.distinct().filter(listing__placement=kwargs['initial']['id']) ]
-            except IndexError:
-                initial = [ c.pk for c in Category.objects.filter(listing__placement=kwargs['initial']['id']) ]
+            initial = [ c.pk for c in Category.objects.distinct().filter(listing__placement=kwargs['initial']['id']) ]
 
         self.base_fields['listings'] = modelforms.ModelMultipleChoiceField(
                 Category.objects.all(), label=_('Category'), cache_choices=True, required=False, initial=initial)
@@ -154,8 +149,8 @@ class ListingInlineOptions(admin.TabularInline):
 class PlacementInlineOptions(generic.GenericTabularInline):
     model = Placement
     extra = 1
-    ct_field_name = 'target_ct'
-    id_field_name = 'target_id'
+    ct_field = 'target_ct'
+    ct_fk_field = 'target_id'
     formset = PlacementInlineFormset
     form = PlacementForm
     fieldsets = ((None, {'fields' : ('category', 'publish_from', 'publish_to', 'slug', 'static', 'listings',)}),)
