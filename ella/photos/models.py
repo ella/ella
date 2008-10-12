@@ -112,8 +112,9 @@ class Photo(models.Model):
         """
         # prefill the slug with the ID, it requires double save
         if not self.id:
-            super(Photo, self).save()
+            super(Photo, self).save(force_insert, force_update)
             self.slug = str(self.id) + '-' + self.slug
+            force_insert, force_update = False, True
         # rename image by slug
         imageType = detect_img_type(path.join(settings.MEDIA_ROOT, self.image.name))
         if imageType is not None:
