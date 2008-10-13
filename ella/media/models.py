@@ -107,7 +107,7 @@ class Section(models.Model):
     description = models.TextField(_('Description'), blank=True)
 
     time = MediaTimeField(_('Start time in miliseconds'))
-    duration = MediaTimeField(_('Duration in miliseconds'))
+    duration = MediaTimeField(_('Duration in miliseconds'), blank=True, null=True)
 
     def __unicode__(self):
         return 'Chapter %s' % self.title
