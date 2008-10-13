@@ -46,6 +46,18 @@ class Question(models.Model):
             return True
         return False
 
+    @property
+    def first_answer(self):
+        if not self.pk:
+            return None
+        premium_answers = Answer.objects.filter(question=self, authorized_user__isnull=False).order_by('-created')
+        if premium_answers:
+            return premium_answers[0]
+        answers = Answer.objects.filter(question=self).order_by('-created')
+        if answers:
+            return answers[0]
+        return None
+
     class Meta:
         ordering = ('-created',)
 
