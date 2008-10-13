@@ -99,14 +99,9 @@ def serie_navigation(placement):
     parts = SeriePart.objects.get_serieparts_for_current_part(part)
     current_index = parts.index(part)
 
-    try:
+    if (current_index) > 0:
         out['prev'] = parts[current_index-1]
-    except:
-        pass
-
-    try:
+    if (current_index+1) < len(parts):
         out['next'] = parts[current_index+1]
-    except:
-        pass
 
     return out
