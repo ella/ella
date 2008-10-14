@@ -60,7 +60,7 @@ class MediaBox(Box):
 })
         return cont
 
-class Media(Publishable, models.Model):
+class Media(Publishable):
     title = models.CharField(_('Title'), max_length=255)
     slug = models.SlugField(_('Slug'), max_length=255)
     url = models.URLField(_('File URL'), verify_exists=False, max_length=300, blank=True)

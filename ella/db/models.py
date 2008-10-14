@@ -4,6 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.contrib.redirects.models import Redirect
 from django.db.models import Model
+from django.contrib.sites.models import Site
 
 from ella.core.cache import get_cached_object, get_cached_list
 from ella.core.models import Placement, Category, HitCount
@@ -29,17 +30,32 @@ class Publishable(Model):
     @property
     def main_placement(self):
         " Return object's main placement, that is the object's placement in its primary category "
-        if not hasattr(self, '_main_placement'):
-            try:
-                # TODO - check and if we don't have category, take the only placement that exists in current site
-                self._main_placement = get_cached_object(
-                        Placement,
-                        target_ct=ContentType.objects.get_for_model(self.__class__),
-                        target_id=self.pk,
-                        category=self.category_id
+        if hasattr(self, '_main_placement'):
+            return self._main_placement
+
+        current_site = Site.objects.get_current()
+
+        # TODO: what if have got multiple listings on one site?
+        placements = get_cached_list(
+                Placement,
+                target_ct=ContentType.objects.get_for_model(self.__class__),
+                target_id=self.pk,
+                category__site=current_site,
 )
-            except Placement.DoesNotExist:
-                self._main_placement = None
+        if placements:
+            return placements[0]
+
+        try:
+            # TODO - check and if we don't have category, take the only placement that exists in current site
+            self._main_placement = get_cached_object(
+                    Placement,
+                    target_ct=ContentType.objects.get_for_model(self.__class__),
+                    target_id=self.pk,
+                    category=self.category_id
+)
+        except Placement.DoesNotExist:
+            self._main_placement = None
+
         return self._main_placement
 
     def get_absolute_url(self, domain=False):

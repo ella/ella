@@ -22,3 +22,14 @@ def format_photo_json(request, photo, format):
     except (Photo.DoesNotExist, Format.DoesNotExist):
         content = {'error':True}
     return HttpResponse(simplejson.dumps(content))
+
+def thumb_url(request, photo):
+    try:
+        photo = get_cached_object(Photo, pk=photo)
+        url = photo.thumb_url()
+        if url: url = settings.MEDIA_URL + url
+        else: url = ''
+        content = {'url': url}
+    except (Photo.DoesNotExist):
+        content = {'url': '', 'does_not_exist': True}
+    return HttpResponse(simplejson.dumps(content))

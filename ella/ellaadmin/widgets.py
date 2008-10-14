@@ -24,6 +24,7 @@ CLASS_PLACEMENT_CATEGORY = 'placement_category'
 JS_SUGGEST = 'js/jquery.suggest.js'
 JS_SUGGEST_MULTIPLE = 'js/jquery.suggest.multiple.js'
 CSS_SUGGEST = 'css/jquery.suggest.css'
+JS_AUTHORADD = 'js/authoradd.js'
 
 
 class ContentTypeWidget(forms.Select):
@@ -110,6 +111,7 @@ class AuthorsSuggestAdminWidget(forms.TextInput):
     class Media:
         js = (
             settings.ADMIN_MEDIA_PREFIX + JS_SUGGEST_MULTIPLE,
+            settings.ADMIN_MEDIA_PREFIX + JS_AUTHORADD,
 )
         css = {
             'screen': (settings.ADMIN_MEDIA_PREFIX + CSS_SUGGEST,),
@@ -123,6 +125,7 @@ class AuthorsSuggestAdminWidget(forms.TextInput):
 
 
     def render(self, name, value, attrs=None):
+        related_url = '../../../%s/%s/add/' % (self.rel.to._meta.app_label, self.rel.to._meta.object_name.lower())
         from ella.core.models import Author
         if self.rel.limit_choices_to:
             url = '?' + '&amp;'.join(['%s=%s' % (k, v) for k, v in self.rel.limit_choices_to.items()])
@@ -145,6 +148,9 @@ class AuthorsSuggestAdminWidget(forms.TextInput):
                 output = [super(self.__class__, self).render(name, value, attrs)]
         else:
             output = [super(self.__class__, self).render(name, '', attrs)]
+        output.append('<a href="%s%s" class="add-another" id="add_id_%s" onclick="return showAddAnotherPopup(this);"> ' % \
+            (related_url, url, name))
+        output.append('<img height="10" width="10" alt="Add Another" src="%simg/admin/icon_addlink.gif"/></a>' % settings.ADMIN_MEDIA_PREFIX)
         return mark_safe(u''.join(output))
 
 class PlacementCategoryWidget(CategorySuggestAdminWidget):

@@ -120,6 +120,7 @@ class PlacementInlineFormset(generic.BaseGenericInlineFormSet):
                             'target' : plac.target,
 })
 
+            '''
             qset = Placement.objects.filter(
                         target_id=obj.pk,
                         target_ct=target_ct,
@@ -130,6 +131,7 @@ class PlacementInlineFormset(generic.BaseGenericInlineFormSet):
 
             if qset:
                 raise forms.ValidationError('Chyba')
+            '''
 
         if cat and not main:
             raise forms.ValidationError(_('If object has a category, it must have a main placement.'))
@@ -184,6 +186,7 @@ class ListingOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
 class CategoryOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     list_filter = ('site',)
     list_display = ('draw_title', 'tree_path', '__unicode__')
+    search_fields = ('title', 'slug',)
     ordering = ('site', 'tree_path',)
     prepopulated_fields = {'slug': ('title',)}
 

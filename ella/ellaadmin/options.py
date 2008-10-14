@@ -48,6 +48,23 @@ class EllaAdminOptionsMixin(object):
         return super(EllaAdminOptionsMixin, self).formfield_for_dbfield(db_field, **kwargs)
 
 
+class RefererAdminMixin(object):
+    """ Enables redirect back to site from model detail in admin. """
+    def __call__(self, request, url):
+        if 'memorize_referer' in request.GET and 'HTTP_REFERER' in request.META:
+            if 'admin_redirect_after_change' not in request.session:
+                request.session['admin_redirect_after_change'] = request.META['HTTP_REFERER']
+        return super(RefererAdminMixin, self).__call__(request, url)
+
+    def save_change(self, request, model, form):
+        """ custom redirection back to thread page on portal """
+        out = super(RefererAdminMixin, self).save_change(request, model, form)
+        if isinstance(out, HttpResponseRedirect) and 'admin_redirect_after_change' in request.session:
+            out = HttpResponseRedirect(request.session['admin_redirect_after_change'])
+            del request.session['admin_redirect_after_change']
+        return out
+
+
 '''
 class ContentTypeChoice(forms.ChoiceField):
     def clean(self, value):
