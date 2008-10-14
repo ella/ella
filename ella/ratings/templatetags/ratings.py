@@ -126,6 +126,9 @@ def do_rating(parser, token):
         Normalize rating from X to Y and round to Z:
         {% rating for OBJ max X step Y as VAR %}
 
+        Normalize rating from X to Y and round to Z:
+        {% rating for OBJ max X step Y as VAR %}
+
     Examples::
 
         {% rating for object as object_rating %}

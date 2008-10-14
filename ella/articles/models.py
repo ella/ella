@@ -23,7 +23,7 @@ class InfoBox(models.Model):
         verbose_name = _('Info box')
         verbose_name_plural = _('Info boxes')
 
-class Article(Publishable, models.Model):
+class Article(Publishable):
     """Defines article model."""
     # Titles
     title = models.CharField(_('Title'), max_length=255)
@@ -32,7 +32,7 @@ class Article(Publishable, models.Model):
 
     # Contents
     perex = models.TextField(_('Perex'))
-    created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)
+    created = models.DateTimeField(_('Created'), default=datetime.now, editable=False, db_index=True)
     updated = models.DateTimeField(_('Updated'), blank=True, null=True)
 
     # Authors and Sources

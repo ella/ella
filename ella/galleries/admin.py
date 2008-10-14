@@ -3,6 +3,7 @@ from django.utils.translation import ugettext_lazy as _, ugettext
 from django.forms.models import BaseInlineFormset
 from django import forms
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ObjectDoesNotExist
 
 from ella.tagging.admin import TaggingInlineOptions
 
@@ -16,7 +17,7 @@ class GalleryItemFormset(BaseInlineFormset):
     " Override default FormSet to allow for custom validation."
 
     def clean(self):
-        """Searches for duplicate references to the same object in one gallery."""
+        """Checks if all objects exist and searches for duplicate references to the same object in one gallery."""
         if not self.is_valid():
             return
 
@@ -26,9 +27,14 @@ class GalleryItemFormset(BaseInlineFormset):
         for i,d in ((i,d) for i,d in enumerate(self.cleaned_data) if d):
             # TODO: why cleaned data does not have target_ct_id prop?
             target = (d['target_ct'].id, d['target_id'],)
+            # check if object exists
+            try:
+                # TODO: wouldn't it be better not to take objects from cache?
+                obj = get_cached_object(get_cached_object(ContentType, pk=d['target_ct'].id), pk=d['target_id'])
+            except ObjectDoesNotExist:
+                raise forms.ValidationError, ugettext('%s with id %i does not exist') % (d['target_ct'], d['target_id'])
             # check for duplicities
             if target in items:
-                obj = get_cached_object(get_cached_object(ContentType, pk=d['target_ct'].id), pk=d['target_id'])
                 raise forms.ValidationError, ugettext('There are two references to %s in this gallery') % obj
             items.add(target)
 

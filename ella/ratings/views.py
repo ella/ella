@@ -1,11 +1,9 @@
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.utils.translation import ugettext as _
 from django.contrib.sites.models import Site
-from django.views.decorators.http import require_POST
 from django.utils import simplejson
 
 from ella.ratings.models import *
-from ella.ratings.forms import RateForm
 
 current_site = Site.objects.get_current()
 
@@ -40,14 +38,7 @@ def set_was_rated(request, response, ct, target):
         cook = cook[1:]
     cook.append('%s:%s' % (ct.id, target.id))
     expires = datetime.strftime(datetime.utcnow() + timedelta(seconds=RATINGS_MAX_COOKIE_AGE), "%a, %d-%b-%Y %H:%M:%S GMT")
-    domain = current_site.domain
-    if domain.find(':') != -1:
-        # Remove possible port from domain
-        domain = domain[0:domain.find(':')]
-    if domain == 'localhost':
-        # Do not set domain at localhost beacause cookie spec
-        # requires at least two dots in domain name
-        domain = None
+    domain = settings.SESSION_COOKIE_DOMAIN
     response.set_cookie(RATINGS_COOKIE_NAME, value=','.join(cook),
             max_age=RATINGS_MAX_COOKIE_AGE, expires=expires,  path='/',
             domain=domain, secure=None)

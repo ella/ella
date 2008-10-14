@@ -31,5 +31,5 @@ def thumb_url(request, photo):
         else: url = ''
         content = {'url': url}
     except (Photo.DoesNotExist):
-        content = {'url': ''}
+        content = {'url': '', 'does_not_exist': True}
     return HttpResponse(simplejson.dumps(content))

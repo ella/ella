@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from ella.ellaadmin.options import EllaAdminOptionsMixin
 
-from common.attachments.models import Attachment, Type
+from ella.attachments.models import Attachment, Type
 
 
 class AttachmentOptions(EllaAdminOptionsMixin, admin.ModelAdmin):

@@ -112,9 +112,8 @@ class IfPositionNode(template.Node):
             cat = template.Variable(self.category).resolve(context)
             if not isinstance(cat, Category):
                 cat = get_cached_object(Category, site=settings.SITE_ID, slug=self.category)
-
-        except (Position.DoesNotExist, template.VariableDoesNotExist, Category.DoesNotExist):
-            return self.nodelist_false.render(context)
+        except (template.VariableDoesNotExist, Category.DoesNotExist):
+            cat = get_cached_object(Category, site=settings.SITE_ID, tree_parent__isnull=True)
 
         for pos in self.positions:
             try:
