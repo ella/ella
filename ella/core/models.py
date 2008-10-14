@@ -103,7 +103,7 @@ class Category(models.Model):
             # the tree_path has changed, update children
             children = Category.objects.filter(tree_path__startswith=old_tree_path+'/').order_by('tree_path')
             for child in children:
-                child.save()
+                child.save(force_update=True)
 
     def get_tree_parent(self):
         "Cached method."

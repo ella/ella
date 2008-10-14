@@ -141,7 +141,8 @@ class Comment(models.Model):
     def save(self, force_insert=False, force_update=False):
         # TODO: maybe create models.GenealogyField for this
         # first save to obtain primary key
-        super(Comment, self).save()
+        super(Comment, self).save(force_insert, force_update)
+        force_insert, force_update = False, True
         # do not store too long path
         path = self.get_genealogy_path()
         if len(path) <= defaults.PATH_LENGTH:
