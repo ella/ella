@@ -5,7 +5,7 @@ from ella.ellaadmin.options import EllaAdminOptionsMixin, RefererAdminMixin
 class AnswerOptions(RefererAdminMixin, admin.ModelAdmin):
     ordernig = ('created','text',)
     list_display = ('text','created',)
-    list_filter = ('created', 'nick', 'question__text',)
+    list_filter = ('created', 'nick',)
     search_fields = ('name',)
 
 class AnswerInline(admin.TabularInline):
@@ -14,7 +14,3 @@ class AnswerInline(admin.TabularInline):
 
 class QuestionOptions(admin.ModelAdmin):
     inlines = (AnswerInline,)
-
-admin.site.register(Question, QuestionOptions)
-admin.site.register(Answer, AnswerOptions)
-admin.site.register(QuestionGroup)
