@@ -284,6 +284,7 @@ def home(request):
 ),
             {
                 'category' : cat,
+                'is_homepage': True,
 },
             context_instance=RequestContext(request)
 )
