@@ -45,6 +45,7 @@ class SendMailFormPreview(FormPreview):
             'site' : site})
         mail_subject = render_to_string('page/sendmail/mail-subject.html', {
             'sender_mail' : sender_mail,
+            'target' : target,
             'site' : site})
 
         if hasattr(target, 'get_absolute_url'):
