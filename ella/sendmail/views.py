@@ -3,12 +3,12 @@ from smtplib import SMTP
 from xml.dom.minidom import Document
 
 from django.utils.translation import ugettext as _
-from django.conf import settings
 from django.template.defaultfilters import slugify
 from django.contrib.formtools.preview import FormPreview
 from django.contrib.sites.models import Site
 from django.contrib.contenttypes.models import ContentType
 from django.core import mail
+from django.conf import settings
 
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import render_to_response
@@ -18,8 +18,7 @@ from django.template import RequestContext
 from ella.core.cache.utils import get_cached_object_or_404
 from ella.core.views import get_templates_from_placement
 
-from ella.sendmail.forms import SendMailForm, compute_hash
-from ella.sendmail.mailer import create_mail
+from ella.sendmail.forms import SendMailForm
 from ella.sendmail.models import Mail
 
 
@@ -40,75 +39,41 @@ class SendMailFormPreview(FormPreview):
 
     def done(self, request, cleaned_data):
         sender_mail = cleaned_data['sender_mail']
+        sender_name = cleaned_data.get('sender_name', '')
         recipient_mail = cleaned_data['recipient_mail']
         target = cleaned_data['target_object']
-        sender_name = cleaned_data.get('sender_name', '')
 
         if hasattr(target, 'get_absolute_url'):
             url = target.get_absolute_url()
         else:
             url = '/'
 
+        site = get_cached_object_or_404(Site, pk=settings.SITE_ID)
+
+        mail_body = render_to_string('page/sendmail/mail-body.txt', {
+            'custom_message' : cleaned_data['custom_message'],
+            'sender_name' : sender_name,
+            'sender_mail' : sender_mail,
+            'object' : target,
+            'site' : site})
+
+        mail_subject = render_to_string('page/sendmail/mail-subject.txt', {
+            'sender_name' : sender_name,
+            'sender_mail' : sender_mail,
+            'object' : target,
+            'site' : site})
+
         try:
-            send_it(
-                sender_mail=sender_mail,
-                sender_name=sender_name,
-                recipient_mail=recipient_mail,
-                target_object=target,
-                custom_message=cleaned_data['custom_message'],
-)
+            mail.send_mail(
+                subject=mail_subject.strip(),
+                message=mail_body,
+                from_email=sender_mail,
+                recipient_list=[recipient_mail])
         except Exception, e:
             log.error('Error during sending e-mail to a buddy. %s' % str(e))
             return HttpResponseRedirect("%s%s/%s/" % (url, slugify(_('send mail')), slugify(_('error'))))
 
         return HttpResponseRedirect(url)
-
-def send_it(**kwargs):
-    """
-    Mandatory arguments::
-
-    sender_name
-    sender_mail
-    recipient_mail
-    target_object
-    custom_message
-    """
-    sender_name = kwargs.get('sender_name', '')
-    sender_mail = kwargs['sender_mail']
-    recipient_mail = kwargs['recipient_mail']
-    target = kwargs['target_object']
-    custom_message = kwargs['custom_message']
-    site = get_cached_object_or_404(Site, pk=settings.SITE_ID)
-
-    render_args = {
-        'custom_message' : custom_message,
-        'sender_mail' : sender_mail,
-        'sender_name': sender_name,
-        'target' : target,
-        'site' : site
-}
-    mail_body = render_to_string('page/sendmail/mail-body.txt', render_args)
-    mail_body_html = render_to_string('page/sendmail/mail-body.html', render_args)
-    mail_subject = render_to_string('page/sendmail/mail-subject.html', {
-        'sender_mail' : sender_mail,
-        'site' : site})
-    mail_subject = mail_subject.strip()
-
-    eml = create_mail(
-        mailfrom=sender_mail,
-        mailto=recipient_mail,
-        subject=mail_subject,
-        plaintext=mail_body,
-        htmltext=mail_body_html
-)
-    smtp = SMTP(settings.ELLA_SENDMAIL_SMTP_SERVER)
-    smtp.sendmail(settings.ELLA_SENDMAIL_FROM_MAIL, recipient_mail, eml.as_string())
-    smtp.quit()
-    log.info('e-mail to buddy sent to [%s]' % recipient_mail)
-    m =Mail(recipient=recipient_mail, sender=settings.ELLA_SENDMAIL_SMTP_SERVER)
-    m.target_ct = ContentType.objects.get_for_model(target)
-    m.target_id = target.pk
-    m.save()
 
 
 def new_mail(request, context):
