@@ -56,7 +56,7 @@ class Server(models.Model):
             output['entries'].append(
                 {
                     'title': entry.target.get_title(),
-                    'link': entry.target.get_absolute_url(),
+                    'link': entry.get_absolute_url(),
                     'updated': entry.publish_from,
                     'summary': entry.target.get_description(),
                     'photo_url': photo_url,
