@@ -144,7 +144,6 @@ class Category(models.Model):
     draw_title.allow_tags = True
 
     class Meta:
-        ordering = ('site', 'tree_path', 'title',)
         unique_together = (('site', 'tree_path'),)
         verbose_name = _('Category')
         verbose_name_plural = _('Categories')
@@ -168,7 +167,6 @@ class Placement(models.Model):
     objects = PlacementManager()
 
     class Meta:
-        #unique_together = (('category', 'target_ct', 'target_id'),)
         ordering = ('-publish_from',)
         verbose_name = _('Placement')
         verbose_name_plural = _('Placements')
@@ -352,7 +350,6 @@ class HitCount(models.Model):
         return self.placement.target
 
     class Meta:
-        ordering = ('-hits', '-last_seen',)
         verbose_name = 'Hit Count'
         verbose_name_plural = 'Hit Counts'
 

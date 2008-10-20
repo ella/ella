@@ -192,6 +192,7 @@ class CategoryOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
 
 class HitCountOptions(admin.ModelAdmin):
     list_display = ('target', 'hits',)
+    ordering = ('-hits', '-last_seen',)
 
 class AuthorOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}

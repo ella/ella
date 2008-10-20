@@ -168,4 +168,4 @@ class HitCountManager(models.Manager):
         kwa = {}
         if mods:
             kwa['placement__target_ct__in'] = [ ContentType.objects.get_for_model(m) for m in mods ]
-        return list(self.filter(placement__category__site=settings.SITE_ID, **kwa)[:count])
+        return list(self.filter(placement__category__site=settings.SITE_ID, **kwa).order_by('-hits')[:count])
