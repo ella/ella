@@ -64,6 +64,7 @@ class MediaForm(forms.ModelForm):
             self.generate_photo(instance)
         if commit:
             instance.save()
+            self.save_m2m()
             from nc.cdnclient.forms import TargetsForm
             form = TargetsForm(instance.file, data=self.data, prefix='file')
             form.create_formats()
