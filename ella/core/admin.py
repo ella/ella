@@ -29,6 +29,7 @@ class PlacementForm(modelforms.ModelForm):
 
 
 class PlacementInlineFormset(generic.BaseGenericInlineFormSet):
+
     def __init__(self, instance=None, data=None, files=None, save_as_new=None):
         self.can_delete = True
         super(PlacementInlineFormset, self).__init__(instance=instance, data=data, files=files)
@@ -197,10 +198,12 @@ class HitCountOptions(admin.ModelAdmin):
 class AuthorOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
 
+class SourceOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
+    list_display = ('name', 'url',)
 
 admin.site.register(HitCount, HitCountOptions)
 admin.site.register(Category, CategoryOptions)
-admin.site.register(Source)
+admin.site.register(Source, SourceOptions)
 admin.site.register(Author, AuthorOptions)
 admin.site.register(Placement, PlacementOptions)
 admin.site.register(Listing, ListingOptions)

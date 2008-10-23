@@ -5,7 +5,6 @@ effectively hiding the content the user has no permission to see/change.
 from django.db import models
 from django.contrib import admin
 from django.contrib.sites.models import Site
-from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User, Group, Permission
 from django.utils.translation import ugettext_lazy as _, ugettext
 

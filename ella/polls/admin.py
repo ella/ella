@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _, ugettext
-from django.forms.models import BaseInlineFormset
+from django.forms.models import BaseInlineFormSet
 from django.shortcuts import render_to_response
 
 from ella.tagging.admin import TaggingInlineOptions
@@ -14,7 +14,7 @@ from ella.core.cache import get_cached_object_or_404
 from ella.polls.models import Poll, Contest, Contestant, Quiz, Result, Choice, Vote, Question
 
 
-class ResultFormset(BaseInlineFormset):
+class ResultFormset(BaseInlineFormSet):
     def clean(self):
         if not self.is_valid():
             return

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _, ugettext
-from django.forms.models import BaseInlineFormset
+from django.forms.models import BaseInlineFormSet
 from django import forms
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
@@ -13,7 +13,7 @@ from ella.core.admin import PlacementInlineOptions
 from ella.core.cache import get_cached_object
 from ella.ellaadmin.options import EllaAdminOptionsMixin
 
-class GalleryItemFormset(BaseInlineFormset):
+class GalleryItemFormset(BaseInlineFormSet):
     " Override default FormSet to allow for custom validation."
 
     def clean(self):
