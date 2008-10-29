@@ -19,12 +19,12 @@ def position(parser, token):
 
     Syntax::
 
-        {% position POSITION_NAME for CATEGORY [nofallback] %}
-        {% position POSITION_NAME for CATEGORY using BOX_TYPE [nofallback] %}
+        {% position POSITION_NAME for CATEGORY [nofallback] %}{% endposition %}
+        {% position POSITION_NAME for CATEGORY using BOX_TYPE [nofallback] %}{% endposition %}
 
     Example usage::
 
-        {% position top_left for category %}
+        {% position top_left for category %}{% endposition %}
     """
     bits = token.split_contents()
     nodelist = parser.parse(('end' + bits[0],))
