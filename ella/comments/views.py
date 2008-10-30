@@ -44,7 +44,9 @@ class CommentFormPreview(FormPreview):
         ct = get_cached_object_or_404(ContentType, pk=cleaned_data['target_ct'].id)
         target = get_cached_object_or_404(ct, pk=cleaned_data['target_id'])
 
-        if hasattr(target, 'get_absolute_url'):
+        if 'redir' in request.POST:
+            url = request.POST['redir']
+        elif hasattr(target, 'get_absolute_url'):
             url = target.get_absolute_url()
         else:
             url = '/'
