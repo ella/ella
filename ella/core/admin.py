@@ -97,6 +97,7 @@ class PlacementInlineFormset(generic.GenericInlineFormset):
             qset = Placement.objects.filter(
                 category=d['category'],
                 slug=slug,
+                target_ct=target_ct.pk,
                 static=d['static']
 )
 
