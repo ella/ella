@@ -62,6 +62,7 @@ class GalleryOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     inlines = (GalleryItemTabularOptions, PlacementInlineOptions, TaggingInlineOptions,)
     prepopulated_fields = {'slug': ('title',)}
     rich_text_fields = {None: ('description', 'content',)}
+    suggest_fields = {'category': ('tree_path', 'title', 'slug',), 'owner': ('name', 'slug',),}
 
 admin.site.register(Gallery, GalleryOptions)
 
