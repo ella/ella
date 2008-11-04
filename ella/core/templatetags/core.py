@@ -312,6 +312,14 @@ def ipblur(text): # brutalizer ;-)
         return text
     return '%sxxx' % m.group(1)
 
+import re
+import random
+
+@register.filter
+@stringfilter
+def emailblur(email):
+    "Obfuscates e-mail addresses - only @ and dot"
+    return mark_safe(email.replace('@', '&#64;').replace('.', '&#46;'))
 
 def render_str(content):
     "Render string with markdown and/or django template tags and return template."
