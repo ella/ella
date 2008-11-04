@@ -8,7 +8,7 @@ from django.db.models import Q
 from django.conf import settings
 
 from ella.ellaadmin import widgets
-from ella.ellaadmin.options import EllaAdminOptionsMixin
+from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin
 from ella.core.models import Author, Source, Category, Listing, HitCount, Placement
 
 class PlacementForm(modelforms.ModelForm):
@@ -173,7 +173,7 @@ class HitCountInlineOptions(admin.TabularInline):
     model = HitCount
     extra = 0
 
-class PlacementOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
+class PlacementOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     list_display = ('target_admin', 'category', 'publish_from', 'full_url',)
     list_filter = ('publish_from', 'category', 'target_ct',)
     inlines = (ListingInlineOptions,)
@@ -182,14 +182,14 @@ class PlacementOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
         (_('time'), {'fields': ('publish_from','publish_to', 'static',), 'classes': ('wide',)},),
 )
 
-class ListingOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
+class ListingOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     list_display = ('target_admin', 'target_ct', 'publish_from', 'category', 'placement_admin', 'target_hitcounts', 'target_url',)
     list_display_links = ()
     list_filter = ('publish_from', 'category',)
     raw_id_fields = ('placement',)
     date_hierarchy = 'publish_from'
 
-class CategoryOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
+class CategoryOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     list_filter = ('site',)
     list_display = ('draw_title', 'tree_path', '__unicode__')
     search_fields = ('title', 'slug',)
@@ -200,10 +200,10 @@ class HitCountOptions(admin.ModelAdmin):
     list_display = ('target', 'hits',)
     ordering = ('-hits', '-last_seen',)
 
-class AuthorOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
+class AuthorOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
 
-class SourceOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
+class SourceOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     list_display = ('name', 'url',)
 
 admin.site.register(HitCount, HitCountOptions)

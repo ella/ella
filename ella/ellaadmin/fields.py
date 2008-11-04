@@ -88,65 +88,54 @@ class RichTextAreaField(fields.Field):
 
         return value
 
-class CategorySuggestField(fields.Field):
-    default_error_messages = {
-        'not_exist': u'Category "%s" does not exist.',
-        'found_too_much': u'Multiple categories found as "%s".',
-}
-    def __init__(self, *args, **kwargs):
-        self.dbfield = args[0]
-        self.widget = widgets.CategorySuggestAdminWidget(*args, **kwargs)
-        super(CategorySuggestField, self).__init__(*args, **kwargs)
+class GenericSuggestField(fields.ChoiceField):
+
+    def __init__(self, data=[], **kwargs):
+        # i need db_field for blank/required and label, maybe not
+        self.db_field, self.model, self.lookups = data
+        self.widget = widgets.GenericSuggestAdminWidget(data, **kwargs)
+        super(GenericSuggestField, self).__init__(data, **kwargs)
 
     def clean(self, value):
-        from ella.core.models import Category
+        if self.required and not value:
+            raise ValidationError(self.error_messages['required'])
 
-        field = self.dbfield
-        blank = False
-        if isinstance(field, ForeignKey) and hasattr(field, 'blank'):
-            blank = field.blank
-        if not value and not blank:
-            raise ValidationError(_('This field is required.'))
-        elif not value and blank:
-            return
-        val = value.split(':')
-        try:
-            return Category.objects.get(site__name=val[0], tree_path=val[1])
-        except (Category.DoesNotExist, IndexError):
-            raise ValidationError(self.error_messages['not_exist'] % value)
-
-class AuthorSuggestField(fields.Field):
-    default_error_messages = {
-        'not_exist': 'Author "%s" does not exist.',
-        'found_too_much': u'Multiple authors found as "%s".',
-}
-    def __init__(self, *args, **kwargs):
-        self.widget = widgets.AuthorsSuggestAdminWidget(*args, **kwargs)
-        super(AuthorSuggestField, self).__init__(*args, **kwargs)
-
-    def clean(self, value):
-        from ella.core.models import Author
-
+        value = int(value)
         if not value:
-            raise ValidationError(_('You have to enter an author.'))
-        vals = value.split(',')
-        ids = []
-        for v in vals:
-            if not v == '':
-                try:
-                    id = int(v.split(':')[0])
-                    Author.objects.get(pk=id)
-                except (Author.DoesNotExist, IndexError):
-                    raise ValidationError(self.error_messages['not_exist'] % v)
-                except:
-                    raise ValidationError(_('You have entered an author incorrectly, we suggest you delete the whole field and try again.'))
-                ids.append(id)
+            return None
 
-        return Author.objects.filter(pk__in=ids)
+        try:
+            value = self.db_field.rel.to.objects.get(pk=value)
+        except self.db_field.rel.to.DoesNotExist:
+            raise ValidationError(self.error_messages['invalid_choice'] % {'value': value})
 
+        return value
 
-class CategorySuggestPlacementField(CategorySuggestField):
-    def __init__(self, *args, **kwargs):
-        self.widget = widgets.PlacementCategoryWidget(*args, **kwargs)
-        super(CategorySuggestPlacementField, self).__init__(*args, **kwargs)
+class GenericSuggestFieldMultiple(fields.MultipleChoiceField):
 
+    def __init__(self, data=[], **kwargs):
+        # i need db_field for blank/required and label, maybe not
+        self.db_field, self.model, self.lookups = data
+        self.widget = widgets.GenericSuggestAdminWidgetMultiple(data, **kwargs)
+        super(GenericSuggestFieldMultiple, self).__init__(data, **kwargs)
+
+    def clean(self, value):
+        if self.required and not value:
+            raise ValidationError(self.error_messages['required'])
+        elif not self.required and not value:
+            return []
+
+        value = [int(v) for v in value.split(',')]
+        if not isinstance(value, (list, tuple)):
+            raise ValidationError(self.error_messages['invalid_list'])
+
+        values = []
+
+        # Validate that each value
+        try:
+            for val in value:
+                values.append(self.db_field.rel.to.objects.get(pk=val))
+        except self.db_field.rel.to.DoesNotExist:
+            raise ValidationError(self.error_messages['invalid_choice'] % {'value': val})
+
+        return values

@@ -1,0 +1,69 @@
+/* Bublina */
+ul.suggest-bubble {
+    position: absolute;
+    display: none;
+    background-color: white;
+    border: solid 1px black;
+    list-style-type: none;
+    padding: 1px;
+}
+
+ul.suggest-bubble li {
+    list-style-type: none;
+    cursor: pointer;
+    padding: 2px;
+}
+ul.suggest-bubble li.A {
+    background-color: #7CA0C7;
+}
+ul.suggest-bubble li:hover {
+    background: #AFD0E7;
+}
+/* /Bublina */
+
+form .aligned ul.GenericSuggestField,   /* override the padding and margins from forms.css */
+form .aligned ul.GenericSuggestFieldMultiple,   /* ditto */
+ul.GenericSuggestField,
+ul.GenericSuggestFieldMultiple {
+    margin: 0;
+    padding: 0;
+    border: solid 1px #CCCCCC;
+    background-color: white;
+    float: left;
+    width: 90%;
+    vertical-align: middle;
+}
+ul.GenericSuggestField li,
+ul.GenericSuggestFieldMultiple li {
+    float: left;
+    padding: 2px;
+    list-style-type: none;
+}
+ul.GenericSuggestField input,
+ul.GenericSuggestFieldMultiple input {
+    border: none;
+    width: auto;
+    margin: 0;
+}
+li.suggest-selected-item {
+    background-color: #AFD0E7;
+    margin: 2px;
+    -moz-border-radius: 2px;
+}
+li.suggest-selected-item a {
+    cursor: pointer;
+    cursor: hand;
+    margin: 0 2px;
+    color: red;
+    font-weight: bold;
+}
+
+/* related lookup icon */
+a.suggest-related-lookup {
+    float: left;
+    padding: 4px 2px;
+}
+
+/* Debug */
+.act { border: solid 3px green !important; }
+/* /Debug */
