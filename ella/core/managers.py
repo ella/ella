@@ -66,7 +66,7 @@ class ListingManager(RelatedManager):
                     tp = category.tree_path
                 else:
                     tp = category.slug
-                qset = qset.filter(category__tree_path__startswith=tp)
+                qset = qset.filter(category__tree_path__startswith=tp, category__site=settings.SITE_ID)
 
             else:
                 raise AttributeError('Invalid children value (%s) - should be one of (%s, %s, %s)' % (children, self.NONE, self.IMMEDIATE, self.ALL))
