@@ -1,7 +1,7 @@
 (function($) { $( function() {
     ;;; DEBUG = true;
     ;;; DBG = 1;
-    var DEL_IMG = ($('a.deletelink').css('backgroundImage') || '').replace('url(','').replace(')','');
+    var DEL_IMG = '/admin_media/img/admin/icon_deletelink.gif';
     var MIN_LENGTH = 2;
     var SUGGEST_FIELD_SEPARATOR = '|';
     var SUGGEST_RECORD_SEPARATOR = "\n";
