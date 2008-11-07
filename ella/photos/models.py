@@ -128,7 +128,7 @@ class Photo(models.Model):
         # rename image by slug
         imageType = detect_img_type(path.join(settings.MEDIA_ROOT, self.image.name))
         if imageType is not None:
-            self.image = file_rename(self.image, self.slug, PHOTOS_TYPE_EXTENSION[ imageType ])
+            self.image = file_rename(self.image.name, self.slug, PHOTOS_TYPE_EXTENSION[ imageType ])
         # delete formatedphotos if new image was uploaded
         if image_changed:
             for f_photo in self.formatedphoto_set.all():
