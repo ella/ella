@@ -18,13 +18,25 @@ from forms import SendMailForm
 
 class SendMailFormPreview(FormPreview):
 
+    def __call__(self, request, *args, **kwargs):
+        self.request = request
+        return super(SendMailFormPreview, self).__call__(request, *args, **kwargs)
+
     @property
     def preview_template(self):
-        return get_templates_from_placement('sendmail/preview.html', self.state['placement'])
+        if self.request.is_ajax():
+            tpl = 'sendmail/ajax-preview.html'
+        else:
+            tpl = 'sendmail/preview.html'
+        return get_templates_from_placement(tpl, self.state['placement'])
 
     @property
     def form_template(self):
-        return get_templates_from_placement('sendmail/form.html', self.state['placement'])
+        if self.request.is_ajax():
+            tpl = 'sendmail/ajax-form.html'
+        else:
+            tpl = 'sendmail/form.html'
+        return get_templates_from_placement(tpl, self.state['placement'])
 
     def parse_params(self, context={}):
         self.state.update(context)
@@ -71,14 +83,31 @@ def new_mail(request, context):
 }
     form = SendMailForm(init_props=init_props)
     context['form'] = form
-    templates = get_templates_from_placement('sendmail/form.html', context['placement'])
+
+    if request.is_ajax():
+        tpl = 'sendmail/ajax-form.html'
+    else:
+        tpl = 'sendmail/form.html'
+
+    templates = get_templates_from_placement(tpl, context['placement'])
     return render_to_response(templates, context, context_instance=RequestContext(request))
 
 def mail_success(request, context):
-    templates = get_templates_from_placement('sendmail/success.html', context['placement'])
+    if request.is_ajax():
+        tpl = 'sendmail/ajax-success.html'
+    else:
+        tpl = 'sendmail/success.html'
+
+    templates = get_templates_from_placement(tpl, context['placement'])
     return render_to_response(templates, context, context_instance=RequestContext(request))
 
 def mail_error(request, context):
     "Problem in SMTP server, mail didn't sent"
-    templates = get_templates_from_placement('sendmail/error.html', context['placement'])
+
+    if request.is_ajax():
+        tpl = 'sendmail/ajax-error.html'
+    else:
+        tpl = 'sendmail/error.html'
+
+    templates = get_templates_from_placement(tpl, context['placement'])
     return render_to_response(templates, context, context_instance=RequestContext(request))
