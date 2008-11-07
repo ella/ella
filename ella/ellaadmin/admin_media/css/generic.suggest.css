@@ -44,11 +44,13 @@ ul.GenericSuggestFieldMultiple input {
     border: none;
     width: auto;
     margin: 0;
+/*    background: url(../img/admin/icon_addlink.gif) 0 50% no-repeat; */
 }
 li.suggest-selected-item {
     background-color: #AFD0E7;
     margin: 2px;
     -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
 }
 li.suggest-selected-item a {
     cursor: pointer;
