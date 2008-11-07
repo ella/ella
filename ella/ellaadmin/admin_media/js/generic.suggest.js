@@ -1,3 +1,6 @@
+/* TODO:
+ * neukazovat vybrané hodnoty v lupičce,
+ */
 (function($) { $( function() {
     ;;; DEBUG = true;
     ;;; DBG = 1;
@@ -385,17 +388,33 @@ function show_lookup_popup() {
     } else {
         href = this.href + '?pop=1';
     }
-    var win = window.open(href, name, 'height=1,width=800,resizable=yes,scrollbars=yes');
-    $(win).load(function() {
-        var $linx = win.jQuery('a[onclick]');
+    var sel_win = window.open(href, name, 'height=1,width=800,resizable=yes,scrollbars=yes');
+    $(sel_win).load(function() {
+        var $linx = sel_win.jQuery('a[onclick]');
         $linx.removeAttr('onclick').unbind('click').click(function() {
             this.href.match(/(\d+)\/?$/);
-            dismiss_lookup_popup(win, RegExp.$1);
+            dismiss_lookup_popup(sel_win, RegExp.$1);
             return false;
         });
-        win.resizeTo(500,800);
-    })
-    win.focus();
+        sel_win.jQuery('a.addlink').click(function() {
+            add_win = window.open(this.href.replace('?_popup=1',''), 'add_object_window', 'height=1,width=800,scrollbars=yes');
+            $(add_win).load(function() {
+                var $form = add_win.jQuery('form');
+                $form.submit(function() {
+                    add_win.close();
+                    sel_win.close();
+                });
+                $(add_win).unload( function(){ add_win.close(); } );
+                add_win.resizeTo(800,500);
+            });
+            return false;
+        });
+        $(sel_win).unload(function() {
+            sel_win.close();
+        });
+        sel_win.resizeTo(800,500);
+    });
+    sel_win.focus();
     return false;
 }
 function dismiss_lookup_popup(win, chosenId) {
@@ -404,6 +423,7 @@ function dismiss_lookup_popup(win, chosenId) {
     // This cute expression takes the first non-blank field of the item whose ID we got
     var item_str = $.grep($.map($.makeArray($('a[href='+chosenId+'/]',win.document.body).parents('tr').children()),function(n){return $(n).text()}),function(n){return/\S/.test(n)})[0]||chosenId;
     insert_value(chosenId, item_str, elem);
+    $(win).unbind('unload');
     win.close();
     $(elem).each(set_current_input);
 }
