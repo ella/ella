@@ -255,13 +255,15 @@
         insert_value(item_id, item_str);
     }
     function suggest_update($input) {
-        var $val = $input.val();
-        if ($val.length < MIN_LENGTH) {
+        var val = $input.val();
+        if (val.length < MIN_LENGTH) {
             $SUGGEST_BUBBLE.hide();
             return;
         }
+        // create a regexp that will match every occurrence of the text input value
+        var val_re = new RegExp( '(' + val.replace(/([^\w\s])/g, '\\$1') + ')', 'ig' ); // the replace does /\Q$val/
         var sug_url = $input.attr('rel');
-        $.get(sug_url+$val, {}, function(sug_result) {
+        $.get(sug_url+val, {}, function(sug_result) {
             $SUGGEST_BUBBLE.empty();
             $input.each(set_current_input); // sets $input as the current input
             var fields = $input.data('fields');
@@ -279,7 +281,7 @@
                 $.map(parsed_results, function(parsed_result) {
                     var $elem = $('<li>');
                     $elem.data('sug_result', parsed_result);
-                    $elem.text(parsed_result.REPRE);
+                    $elem.html(parsed_result.REPRE.replace(val_re, '<span class="hilite">$1</span>'));
                     $SUGGEST_BUBBLE.append($elem);
                     $elem.click(function(){suggest_select($elem);});
                 });
