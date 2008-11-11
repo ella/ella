@@ -108,6 +108,15 @@
         var $ul = $text.parents('ul:first');
         return {text: $text, hidden: $hidden, ul: $ul};
     }
+    // Make the <li>s clickable
+    function goto_edit_item() {
+        var $inputs = get_current_inputs(this);
+        var id = $(this).data('item_id');
+        var href = $inputs.text.attr('rel').replace(/suggest\/.*/, id+'/');
+        if (id) location.href = href;
+        return true;
+    }
+    $('li.suggest-selected-item').click(goto_edit_item);
     // Updates values of the hidden input based on the <li>s present
     function update_values(el) {
         var $inputs = get_current_inputs(el);
@@ -144,8 +153,8 @@
     }
     function new_item(item_id, item_str) {
         var $newli = $('<li class="suggest-selected-item">');
-        $newli.click(set_current_input);
-        var $newdel = $('<a><img src="'+DEL_IMG+'" alt="x" /></a>');
+        $newli.click(set_current_input).click(goto_edit_item);
+        var $newdel = $('<a class="suggest-delete-link"><img src="'+DEL_IMG+'" alt="x" /></a>');
         $newdel.click(set_current_input).click(delete_item);
         $newli.html( item_str ).append( $newdel ).data( 'item_id', item_id );
         return $newli;
@@ -373,8 +382,8 @@
     $ins.focus( function() {
         suggest_update( $(this) );
     });
-    $SUGGEST_BUBBLE.bind('mouseenter', function(){ MOUSE_ON_BUBBLE = true;  });
-    $SUGGEST_BUBBLE.bind('mouseleave', function(){ MOUSE_ON_BUBBLE = false; });
+    $SUGGEST_BUBBLE.bind('mouseenter', function(){ MOUSE_ON_BUBBLE = true;  return true;  });
+    $SUGGEST_BUBBLE.bind('mouseleave', function(){ MOUSE_ON_BUBBLE = false; return true; });
 }); })(jQuery);
 
 // Functions for handling popups (lupička) taken from django admin

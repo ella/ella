@@ -55,7 +55,10 @@ li.suggest-selected-item {
     -moz-border-radius: 2px;
     -webkit-border-radius: 2px;
 }
-li.suggest-selected-item a {
+li.suggest-selected-item:hover {
+    cursor: pointer;
+}
+li.suggest-selected-item a.suggest-delete-link {
     cursor: pointer;
     cursor: hand;
     margin: 0 2px;
