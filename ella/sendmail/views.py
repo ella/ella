@@ -24,6 +24,27 @@ from ella.sendmail.models import Mail
 
 log = logging.getLogger('ella.sendmail')
 
+def send_it(custom_message, sender_name, sender_mail, target_object, recipient_mail):
+
+    site = get_cached_object_or_404(Site, pk=settings.SITE_ID)
+
+    mail_body = render_to_string('page/sendmail/mail-body.txt', {
+        'custom_message' : custom_message,
+        'sender_name' : sender_name,
+        'sender_mail' : sender_mail,
+        'object' : target_object,
+        'site' : site})
+    mail_subject = render_to_string('page/sendmail/mail-subject.txt', {
+        'sender_name' : sender_name,
+        'sender_mail' : sender_mail,
+        'object' : target_object,
+        'site' : site})
+    mail.send_mail(
+        subject=mail_subject.strip(),
+        message=mail_body,
+        from_email=sender_mail,
+        recipient_list=[recipient_mail])
+
 class SendMailFormPreview(FormPreview):
     @property
     def preview_template(self):
@@ -38,41 +59,23 @@ class SendMailFormPreview(FormPreview):
 
 
     def done(self, request, cleaned_data):
-        sender_mail = cleaned_data['sender_mail']
-        sender_name = cleaned_data.get('sender_name', '')
-        recipient_mail = cleaned_data['recipient_mail']
-        target = cleaned_data['target_object']
 
+        target = cleaned_data['target_object']
         if hasattr(target, 'get_absolute_url'):
             url = target.get_absolute_url()
         else:
             url = '/'
 
-        site = get_cached_object_or_404(Site, pk=settings.SITE_ID)
-
-        mail_body = render_to_string('page/sendmail/mail-body.txt', {
-            'custom_message' : cleaned_data['custom_message'],
-            'sender_name' : sender_name,
-            'sender_mail' : sender_mail,
-            'object' : target,
-            'site' : site})
-
-        mail_subject = render_to_string('page/sendmail/mail-subject.txt', {
-            'sender_name' : sender_name,
-            'sender_mail' : sender_mail,
-            'object' : target,
-            'site' : site})
-
         try:
-            mail.send_mail(
-                subject=mail_subject.strip(),
-                message=mail_body,
-                from_email=sender_mail,
-                recipient_list=[recipient_mail])
+            send_it (
+                custom_message=cleaned_data.get('custom_message',''),
+                sender_name=cleaned_data.get('sender_name', ''),
+                sender_mail=cleaned_data.get('sender_mail', ''),
+                target_object=cleaned_data['target_object'],
+                recipient_mail=cleaned_data['recipient_mail'])
         except Exception, e:
             log.error('Error during sending e-mail to a buddy. %s' % str(e))
             return HttpResponseRedirect("%s%s/%s/" % (url, slugify(_('send mail')), slugify(_('error'))))
-
         return HttpResponseRedirect(url)
 
 
