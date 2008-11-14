@@ -88,19 +88,24 @@ class PlacementInlineFormset(generic.GenericInlineFormset):
             if cat and cat == cat and cat:
                 main = d
 
+            if d['slug'] and d['slug'] != '':
+                slug = d['slug']
+            else:
+                slug = obj_slug
 
-            # allow placements that do not overlap
-            q = Q(publish_to__isnull=True, publish_to__lt=d['publish_from'])
-            if d['publish_to']:
-                q |= Q(publish_from__gt=d['publish_to'])
-
-            slug = d.get('slug', obj_slug)
             # try and find conflicting placement
-            qset = Placement.objects.filter(q,
+            qset = Placement.objects.filter(
                 category=d['category'],
                 slug=slug,
+                target_ct=target_ct.pk,
                 static=d['static']
 )
+
+            if d['static']: # allow placements that do not overlap
+                q = Q(publish_to__lt=d['publish_from'])
+                if d['publish_to']:
+                    q |= Q(publish_from__gt=d['publish_to'])
+                qset = qset.exclude(q)
 
             # check for same date in URL
             if not d['static']:
@@ -117,8 +122,9 @@ class PlacementInlineFormset(generic.GenericInlineFormset):
             if qset:
                 plac = qset[0]
                 raise forms.ValidationError(
-                        _('There is already a Placement object published in category %(category)s with slug %(slug)s referring to %(target)s.') % {
-                            'slug' : slug,
+                        _('''There is already a Placement object published in
+                        category %(category)s with the same URL referring to %(target)s.
+                        Please change the slug or publish date.''') % {
                             'category' : plac.category,
                             'target' : plac.target,
 })
@@ -200,10 +206,12 @@ class HitCountOptions(admin.ModelAdmin):
 class AuthorOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
 
+class SourceOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
+    list_display = ('name', 'url',)
 
 admin.site.register(HitCount, HitCountOptions)
 admin.site.register(Category, CategoryOptions)
-admin.site.register(Source)
+admin.site.register(Source, SourceOptions)
 admin.site.register(Author, AuthorOptions)
 admin.site.register(Placement, PlacementOptions)
 admin.site.register(Listing, ListingOptions)
