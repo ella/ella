@@ -1,4 +1,4 @@
-centrum-ella (0.2.39.1) unstable; urgency=low
+centrum-ella (0.2.40.0) unstable; urgency=low
 
   * Added SITE_ID to cache key in find_template
 
