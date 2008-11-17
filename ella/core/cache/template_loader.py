@@ -57,7 +57,7 @@ def get_cache_template(template_name, template_dirs):
     raise TemplateDoesNotExist, template_name
 
 def get_sel_template_key(func, template_list):
-    return 'ella.core.cache.template_loader.select_template:' + ','.join(template_list)
+    return 'ella.core.cache.template_loader.select_template:%d:%s' % (settings.SITE_ID, ','.join(template_list))
 
 @cache_this(get_sel_template_key)
 def find_template(template_list):
