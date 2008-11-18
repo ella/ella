@@ -1,4 +1,5 @@
 from datetime import datetime
+from time import mktime
 
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
@@ -38,7 +39,7 @@ class SendMailForm(forms.Form):
         self.init_props = INIT_PROPS.copy()
 
         # set actual time
-        now = int(datetime.now().strftime('%s'))
+        now = int(mktime(datetime.now().timetuple()))
         self.init_props['timestamp'] = now
 
         # update defaults with form init params

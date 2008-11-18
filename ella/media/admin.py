@@ -1,35 +1,33 @@
 from django.contrib import admin
 
-from ella.media.models import Media, Format, FormattedMedia
-from ella.core.admin import PlacementInlineOptions
-from ella.tagging.admin import TaggingInlineOptions
 from ella.ellaadmin.options import EllaAdminOptionsMixin
+from ella.media.models import Media, Section, Usage
+from ella.media.forms import MediaForm
 
-class FormattedMediaInlineOptions(admin.TabularInline):
-    model = FormattedMedia
-    extra = 2
-    fieldsets = ((None, {'fields' : ('format', 'url', 'status',)}),)
+class SectionInline(admin.TabularInline):
+    model = Section
+    extra = 5
 
-class FormattedMediaOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
-    list_display = ('__unicode__', 'hash', 'source', 'format',)
-    raw_id_fields = ('source',)
+class UsageInline(admin.TabularInline):
+    model = Usage
 
 class MediaOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
-    inlines = (FormattedMediaInlineOptions,)
+
+    def __init__(self, *args, **kwargs):
+        super(MediaOptions, self).__init__(*args, **kwargs)
+        self.form = MediaForm
+
     prepopulated_fields = {'slug' : ('title',)}
 
-    list_display = ('title', 'hash',)
-    list_filter = ('uploaded',)
+    list_display = ('title',)
+    list_filter = ('created', 'updated',)
     search_fields = ('title', 'slug', 'description', 'content',)
 
-    raw_id_fields = ('photo',)
+#    inlines = (PlacementInlineOptions, TaggingInlineOptions, SectionInline)
+    inlines = (SectionInline, UsageInline)
 
-    inlines = (PlacementInlineOptions, TaggingInlineOptions,)
-
-    rich_text_fields = {None: ('description', 'content',)}
+    rich_text_fields = {None: ('description', 'text',)}
 
 
-admin.site.register(Format)
 admin.site.register(Media, MediaOptions)
-admin.site.register(FormattedMedia, FormattedMediaOptions)
 

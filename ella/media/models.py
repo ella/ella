@@ -1,74 +1,66 @@
-from datetime import datetime
+from math import floor
+from datetime import datetime, timedelta
 from os import path
 
-from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext_lazy as _
 from django.db import models
-from django.conf import settings
+
+
+
+
 
 from ella.db import fields
-from ella.media.queue import QUEUE as ELLA_QUEUE
-from ella.core.cache.utils import get_cached_object
 from ella.core.box import Box
 from ella.photos.models import Photo
 from ella.db.models import Publishable
 from ella.core.models import Author, Source, Category
 
-
-class RelaxXMLField(fields.XMLField):
-    def get_schema_content(self, instance):
-        fp = open("%s/relaxng.xml" % path.dirname(__file__), 'r')
-        schema = fp.read()
-        fp.close()
-        return schema
-
-class MetadataXMLField(fields.XMLField):
-    def get_schema_content(self, instance):
-        return instance.type.metadata_schema
+from nc.cdnclient.models import MediaField
 
 
-class MediaManager(models.Manager):
-    pass
-    '''
-    def create_from_queue(self, data):
-        """create Media (source) object"""
-        data['type'], c = Format.objects.get_or_create(name=data['type'])
-        data['slug'] = slugify(data['title'])
-        source = self.create(**data)
+class MediaTime(int):
+    """
+    Time in miliseconds
 
-        # pass all wanted formats to encoder
-        for format in Format.objects.filter(from_type=source.type):
-            formattedfile = dict(
-                        source_hash = source.hash,
-                        formatted_file_name = '%s-%s' % (source.hash, format),
-                        source_file_type = format.from_type,
-                        formatted_file_type = format.to_type,
-                        format_name = format.name,
-)
-            ELLA_QUEUE.put('ella/media/encoder/formattedfile', formattedfile)
-    '''
+    Like int type with seconds method (because you often need time seconds)
+    """
+    def seconds(self):
+        return float(self) / 1000
 
+class MediaTimeField(models.PositiveIntegerField):
+    """
+    Like PositiveIntegerField but returns MediaTime instead of int
+    """
+    __metaclass__ = models.SubfieldBase
+
+    def to_python(self, value):
+        if value == "" or value is None:
+            return None
+        elif isinstance(value, MediaTime):
+            return value
+        else:
+            return MediaTime(value)
 
 class MediaBox(Box):
     def get_context(self):
         "Updates box context with media-specific variables."
         cont = super(MediaBox, self).get_context()
         cont.update({
-                'formatted_files' : self.params.get('formatted_files', self.obj.formatted_files()),
                 'title' : self.params.get('title', self.obj.title),
                 'alt' : self.params.get('alt', ''),
 })
         return cont
 
 class Media(Publishable):
+    """
+    Media object
+
+    Build around nc.cdnclient.models.MediaField and adds fields like title, photo,...
+    """
     title = models.CharField(_('Title'), max_length=255)
     slug = models.SlugField(_('Slug'), max_length=255)
-    url = models.URLField(_('File URL'), verify_exists=False, max_length=300, blank=True)
-    photo = models.ForeignKey(Photo, verbose_name=_('Preview image'), null=True, blank=True, related_name='photo')
-    hash = models.CharField(_('Content hash'), db_index=True, max_length=50, blank=True)
-
-    metadata = models.TextField(_('Meta data'), blank=True,
-            help_text=_('meta data xml - should be generated after file save'))
+    photo = models.ForeignKey(Photo, verbose_name=_('Preview image'), null=True, blank=True)
+    file = MediaField()
 
     # Authors and Sources
     authors = models.ManyToManyField(Author, verbose_name=_('Authors'))
@@ -78,15 +70,22 @@ class Media(Publishable):
     # content
     description = models.TextField(_('Description'), blank=True)
     text = models.TextField(_('Content'), blank=True)
-    uploaded = models.DateTimeField(default=datetime.now, editable=False)
 
-    objects = MediaManager()
+    # stats
+    created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)
+    updated = models.DateTimeField(_('Updated'), blank=True, null=True)
 
-    def get_text(self):
-        return ''
+    def get_sections(self):
+        """
+        Returns sections (chapters) for this media
+        """
+        return self.section_set.all()
 
-    def formatted_media(self):
-        return FormattedMedia.objects.select_related().filter(source=self.id)
+    def get_usage(self):
+        """
+        Returns sites where media is used
+        """
+        return self.usage_set.all().order_by('-priority')
 
     def Box(self, box_type, nodelist):
         return MediaBox(self, box_type, nodelist)
@@ -98,51 +97,27 @@ class Media(Publishable):
         verbose_name = _('Media')
         verbose_name_plural = _('Media')
 
+class Section(models.Model):
+    """
+    Represents section (chapter) in media
+    """
+    media = models.ForeignKey(Media)
 
-class FormatManager(models.Manager):
-    pass
-    '''
-    def create_from_queue(self, data):
-        # TODO: create format after updating any on encoder
-        pass
-    '''
+    title = models.CharField(_('Title'), max_length=255)
+    description = models.TextField(_('Description'), blank=True)
 
-class Format(models.Model):
-    name = models.CharField(_('Format name'), max_length=80,
-            help_text=_('this should be in some sluggy format'))
-
-    objects = FormatManager()
+    time = MediaTimeField(_('Start time in miliseconds'))
+    duration = MediaTimeField(_('Duration in miliseconds'), blank=True, null=True)
 
     def __unicode__(self):
-        return self.name
+        return 'Chapter %s' % self.title
 
+class Usage(models.Model):
+    """
+    Sites where media is used
+    """
+    media = models.ForeignKey(Media)
 
-class FormattedMediaManager(models.Manager):
-    pass
-    '''
-    def create_from_queue(self, data):
-        """create FormattedMedia object"""
-        data['source'] = Media.objects.get(hash=data['source'])
-        data['format'] = Format.objects.get(name=data['format'])
-        formattedfile = self.create(**data)
-    '''
-
-class FormattedMedia(models.Model):
-    source = models.ForeignKey(Media, verbose_name=_('Source file'))
-    format = models.ForeignKey(Format, verbose_name=_('Format'))
-    hash = models.CharField(_('Content hash'), db_index=True, max_length=50, blank=True)
-    url = models.URLField(_('File url'), verify_exists=False, max_length=300, blank=True)
-    metadata = models.TextField(_('Meta data'), blank=True,
-            help_text=_('meta data xml - should be generated after file save'))
-    status = models.IntegerField(_('Exit status'), blank=True, null=True)
-
-    objects = FormattedMediaManager()
-
-    class Meta:
-        unique_together = (('source', 'format'),)
-        verbose_name = _('Formatted file')
-        verbose_name_plural = _('Formatted files')
-
-    def __unicode__(self):
-        return "%s - %s" % (self.source.title, self.format.name)
-
+    title = models.CharField(_('Title'), max_length=255)
+    url = models.URLField(_('Url'), max_length=255)
+    priority = models.SmallIntegerField(_('Priority'))
