@@ -86,9 +86,9 @@ class Photo(models.Model):
     thumb.allow_tags = True
 
     def thumb_url(self):
-        spl = path.split(self.image)
+        spl = path.split(self.image.path)
         woExtension = spl[1].rsplit('.', 1)[0]
-        imageType = detect_img_type(path.join(settings.MEDIA_ROOT, self.image))
+        imageType = detect_img_type(path.join(settings.MEDIA_ROOT, self.image.path))
         if not imageType:
             return None
         ext = PHOTOS_TYPE_EXTENSION[ imageType ]
@@ -98,7 +98,7 @@ class Photo(models.Model):
         tinythumbPath = path.join(settings.MEDIA_ROOT, tinythumb)
         if not path.exists(tinythumbPath):
             try:
-                im = Image.open(path.join(settings.MEDIA_ROOT, self.image))
+                im = Image.open(path.join(settings.MEDIA_ROOT, self.image.path))
                 im.thumbnail(PHOTOS_THUMB_DIMENSION , Image.ANTIALIAS)
                 im.save(tinythumbPath, imageType)
             except IOError:
@@ -274,7 +274,7 @@ class FormatedPhoto(models.Model):
         if relative:
             source_file = path.split(self.photo.image.name)
         else:
-            source_file = path.split(self.photo.image.file)
+            source_file = path.split(self.photo.image.path)
         return path.join(source_file[0],  str (self.format.id) + '-' + source_file[1])
 
     def __unicode__(self):
