@@ -118,7 +118,6 @@ class TotalRateManager(models.Manager):
         - best score gets always max
         - results between 0 and min/max should be uniformly distributed
         """
-
         total = self.get_total_rating(obj)
         if total == 0:
             return Decimal("0").quantize(step or Decimal("1"))
@@ -132,12 +131,13 @@ class TotalRateManager(models.Manager):
             gt = "<"
             ref = -max
 
-        sql = "SELECT (SELECT count(*) FROM %(table)s WHERE amount %(lt)s= %%s AND amount %(gt)s 0) / (SELECT count(*) FROM %(table)s WHERE amount %(gt)s 0)" \
+        ct_id = ContentType.objects.get_for_model(obj).id
+        sql = "SELECT (SELECT count(*) FROM %(table)s WHERE target_ct_id=%%s AND amount %(lt)s= %%s AND amount %(gt)s 0) / (SELECT count(*) FROM %(table)s WHERE target_ct_id=%%s AND amount %(gt)s 0)" \
             % {'table': connection.ops.quote_name(TotalRate._meta.db_table),
                'gt' :gt, 'lt' : lt,}
 
         cursor = connection.cursor()
-        cursor.execute(sql, (total,))
+        cursor.execute(sql, (ct_id, total, ct_id))
         (percentil,) = cursor.fetchone()
 
         if percentil is None:
