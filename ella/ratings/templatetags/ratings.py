@@ -98,19 +98,25 @@ def rate_url(parser, token):
     return RateUrlNode(bits[2], bits[4])
 
 class RatingNode(template.Node):
-    def __init__(self, object, name, max=None, step=None):
+    def __init__(self, object, name, max=None, step=None, min2=None):
         self.object, self.name = object, name
-        self.min, self.max, self.step = min, max, step
+        self.min, self.max, self.step, self.min2 = min, max, step, min2
 
     def render(self, context):
         obj = template.Variable(self.object).resolve(context)
         if obj:
             value = 0
-            if (self.min is not None and self.max is not None):
+            if (self.min != None and self.max!=None and self.min2 != None):
+                self.step = Decimal(self.step)
+                self.min2 = Decimal(self.min2)
+                self.max = Decimal(self.max)
+                value = TotalRate.objects.get_normalized_rating(obj, 1, self.step*2/(self.max-self.min2))
+                value = value*(self.max - self.min2)/2 + (self.max+self.min2)/2
+            elif (self.min is not None and self.max is not None):
                 value = TotalRate.objects.get_normalized_rating(obj, Decimal(self.max), Decimal(self.step))
             else:
                 value = TotalRate.objects.get_total_rating(obj)
-            # Set as string to be able compare value in tamplate
+            # Set as string to be able compare value in template
             context[self.name] = str(value)
         return ''
 
@@ -123,8 +129,11 @@ def do_rating(parser, token):
         Select total rating:
         {% rating for OBJ as VAR %}
 
-        Normalize rating from X to Y and round to Z:
+        Normalize rating to <-X, X> with step Y and round to Z:
         {% rating for OBJ max X step Y as VAR %}
+
+        Normalize rating to <X, Y> with step S and round to Z:
+        {% rating for OBJ min X max Y step S as VAR %}
 
     Examples::
 
@@ -140,6 +149,9 @@ def do_rating(parser, token):
     if len(bits) == 9 and bits[1] == 'for' and bits[3] == 'max' \
             and bits[5] == 'step' and bits[7] == 'as':
         return RatingNode(bits[2], bits[8], bits[4], bits[6])
+    if len(bits) == 11 and bits[1] == 'for' and bits[3] == 'min' \
+            and bits[5] == 'max' and bits[7] == 'step' and bits[9] == 'as':
+        return RatingNode(bits[2], bits[10], bits[6], bits[8], bits[4])
 
     raise template.TemplateSyntaxError, \
         "{% rating for OBJ as VAR %} or {% rating for OBJ max X step Y as VAR %}"
