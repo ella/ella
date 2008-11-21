@@ -97,12 +97,12 @@ class GenericSuggestField(fields.ChoiceField):
         super(GenericSuggestField, self).__init__(data, **kwargs)
 
     def clean(self, value):
-        if self.required and not value:
+        if self.required and value in fields.EMPTY_VALUES:
             raise ValidationError(self.error_messages['required'])
+        elif value in fields.EMPTY_VALUES:
+            return None
 
         value = int(value)
-        if not value:
-            return None
 
         try:
             value = self.db_field.rel.to.objects.get(pk=value)
@@ -120,9 +120,9 @@ class GenericSuggestFieldMultiple(fields.MultipleChoiceField):
         super(GenericSuggestFieldMultiple, self).__init__(data, **kwargs)
 
     def clean(self, value):
-        if self.required and not value:
+        if self.required and value in fields.EMPTY_VALUES:
             raise ValidationError(self.error_messages['required'])
-        elif not self.required and not value:
+        elif value in fields.EMPTY_VALUES:
             return []
 
         value = [int(v) for v in value.split(',')]

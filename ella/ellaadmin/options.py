@@ -91,6 +91,7 @@ class EllaAdminOptionsMixin(object):
 
         if db_field.name in getattr(self, 'suggest_fields', {}).keys() and isinstance(db_field, (ForeignKey, ManyToManyField)):
             kwargs.update({
+                'required': not db_field.blank,
                 'label': db_field.verbose_name,
 })
             if isinstance(db_field, ForeignKey):

@@ -96,10 +96,13 @@ class GenericSuggestAdminWidget(forms.TextInput):
         attrs['class'] = 'vForeignKeyRawIdAdminField hidden'
         suggest_css_class = 'GenericSuggestField'
 
-        try:
-            suggest_item = '<li class="suggest-selected-item">%s <a>x</a></li>' % getattr(self.model.objects.get(pk=value), self.lookups[0])
-        except self.model.DoesNotExist:
+        if not value:
             suggest_item = ''
+        else:
+            try:
+                suggest_item = '<li class="suggest-selected-item">%s <a>x</a></li>' % getattr(self.model.objects.get(pk=value), self.lookups[0])
+            except self.model.DoesNotExist:
+                suggest_item = ''
 
         output = [super(GenericSuggestAdminWidget, self).render(name, value, attrs)]
 
@@ -139,7 +142,7 @@ class GenericSuggestAdminWidgetMultiple(forms.TextInput):
         attrs['class'] = 'vManyToManyRawIdAdminField hidden'
         suggest_css_class = 'GenericSuggestFieldMultiple'
 
-        if value is None:
+        if not value:
             suggest_items = ''
         else:
             try:
