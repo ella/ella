@@ -145,6 +145,8 @@ class GenericSuggestAdminWidgetMultiple(forms.TextInput):
         if not value:
             suggest_items = ''
         else:
+            if not isinstance(value, (list, tuple)):
+                value = [int(v) for v in value.split(',')]
             try:
                 suggest_items = ''.join('<li class="suggest-selected-item">%s <a>x</a></li>' % \
                                          getattr(i, self.lookups[0]) for i in self.model.objects.filter(pk__in=value))
