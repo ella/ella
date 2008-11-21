@@ -109,6 +109,9 @@ class Section(models.Model):
     time = MediaTimeField(_('Start time in miliseconds'))
     duration = MediaTimeField(_('Duration in miliseconds'), blank=True, null=True)
 
+    class Meta:
+        ordering = ('id',)
+
     def __unicode__(self):
         return 'Chapter %s' % self.title
 
