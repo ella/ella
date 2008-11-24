@@ -30,7 +30,7 @@ class PlacementForm(modelforms.ModelForm):
 
 class PlacementInlineFormset(generic.BaseGenericInlineFormSet):
 
-    def __init__(self, instance=None, data=None, files=None, save_as_new=None):
+    def __init__(self, data=None, files=None, instance=None, save_as_new=None):
         self.can_delete = True
         super(PlacementInlineFormset, self).__init__(instance=instance, data=data, files=files)
 
