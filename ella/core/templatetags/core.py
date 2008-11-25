@@ -518,3 +518,114 @@ def container_end(parser, token):
     " Render inclusion_tags/container_end.html. "
     return ContainerEndNode()
 
+
+class CategoriesTreeNode(template.Node):
+    def __init__(self, tree_path=None, varname=None, limit=None):
+        self.tree_path, self.varname, self.limit = tree_path, varname, limit
+
+    def render(self, ctx):
+        if self.tree_path == self.tree_path.strip('"'):
+            try:
+                root_cat = template.Variable(self.tree_path).resolve(ctx)
+            except template.TemplateSyntaxError:
+                return ''
+        else:
+            try:
+                root_cat = get_cached_object(Category, tree_path=self.tree_path.strip('"'), site = settings.SITE_ID)
+            except Category.DoesNotExist:
+                return ''
+        try:
+            cats = Category.objects.filter(tree_parent=root_cat).order_by('title')
+            if self.limit:
+                cats = cats[:self.limit]
+            ctx.update({self.varname: cats})
+        except Category.DoesNotExist:
+            pass
+        return ''
+
+
+@register.tag
+def get_categories_tree(parser, token):
+    """
+    Returns sorted categories tree from defined path
+
+    Usage::
+
+        {% get_categories_tree from "<path_tree>" as <varname> limit <limit> %}
+        {% get_categories_tree from <category> as <varname> limit <limit> %}
+    """
+
+    bits = token.split_contents()
+    input_valid = True
+    len_bits = len(bits)
+    if len_bits not in (5, 7):
+        input_valid = False
+    if bits[1]!='from' or bits[3]!='as':
+        input_valid = False
+    if len_bits==7:
+        if bits[5]!='limit':
+            input_valid = False
+
+    if input_valid:
+        if len_bits == 5:
+            return CategoriesTreeNode(bits[2], bits[4])
+        else:
+            return CategoriesTreeNode(bits[2], bits[4], bits[6])
+    else:
+        raise template.TemplateSyntaxError('Usage of the tag %s: {%% %s from ["<path_tree>"|<category>] as <varname> limit <limit> %%}, where limit is optional (infinite by default).' % (bits[0], bits[0]))
+
+
+@register.tag
+def get_main_category(parser, token):
+    """
+    Template tag get_main_category.
+
+    Usage::
+        {% get_main_category for <category> as <result> %}
+
+    Examples::
+
+        {% get_main_category for category as maincat %}
+    """
+    params = get_main_category_parse(token.split_contents())
+    return MainCategoryNode(params)
+
+def get_main_category_parse(input):
+    if len(input) < 5:
+        raise template.TemplateSyntaxError("Two arguments are expected in %r tag" % input[0])
+    params = {}
+
+    o = 1
+    # for
+    if input[o] == 'for':
+        params['for'] = input[o+1]
+    else:
+        raise template.TemplateSyntaxError("Unknown argument %r in tag %r" % (input[o], input[0]))
+    o = 3
+    # as
+    if input[o] == 'as':
+        params['as'] = input[o+1]
+    else:
+        raise template.TemplateSyntaxError("%r tag requires 'as' argument" % (input[0]))
+
+    return params
+
+class MainCategoryNode(template.Node):
+    def __init__(self, params):
+        self.params = params
+
+    def _get_main_category(self, category):
+        if category.tree_parent == None:
+            return ''
+        if category.tree_parent.tree_parent == None:
+            return category
+        else:
+            return self._get_main_category(category.tree_parent)
+
+    def render(self, context):
+        try:
+            category = template.Variable(self.params['for']).resolve(context)
+            context[self.params['as']] = self._get_main_category(category)
+        except template.VariableDoesNotExist:
+            pass
+        return ''
