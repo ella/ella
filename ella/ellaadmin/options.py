@@ -100,8 +100,15 @@ class EllaAdminOptionsMixin(object):
 
         if db_field.name in ('target_ct', 'source_ct', 'content_type',):
             kwargs['widget'] = widgets.ContentTypeWidget
+            return db_field.formfield(**kwargs)
         elif db_field.name in ('target_id', 'source_id', 'object_id',):
             kwargs['widget'] = widgets.ForeignKeyGenericRawIdWidget
+            return db_field.formfield(**kwargs)
+
+        if db_field.name == 'order':
+            kwargs['widget'] = widgets.IncrementWidget
+            return db_field.formfield(**kwargs)
+
 
         return super(EllaAdminOptionsMixin, self).formfield_for_dbfield(db_field, **kwargs)
 

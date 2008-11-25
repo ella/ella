@@ -45,11 +45,6 @@ class GalleryItemTabularOptions(EllaAdminOptionsMixin, admin.TabularInline):
     extra = 10
     formset = GalleryItemFormset
 
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'order':
-            kwargs['widget'] = widgets.IncrementWidget
-        return super(GalleryItemTabularOptions, self).formfield_for_dbfield(db_field, **kwargs)
-
 class GalleryOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     list_display = ('title', 'created', 'category', 'get_hits', 'full_url',)
     ordering = ('-created',)
