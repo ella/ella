@@ -217,7 +217,8 @@ class TotalRateManager(models.Manager):
 
 ) tr JOIN %(ct_tab)s ct on ct.id = tr.target_ct_id
             ORDER BY
-                tr.amount DESC
+                tr.amount DESC,
+                tr.target_id
             LIMIT %%s''' % {
                 'total_tab' : connection.ops.quote_name(TotalRate._meta.db_table),
                 'cond_agg' : where_agg,
