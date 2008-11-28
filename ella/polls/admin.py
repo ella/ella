@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.forms.models import BaseInlineFormset
 from django.shortcuts import render_to_response
+from django.forms import ValidationError
 
 from ella.tagging.admin import TaggingInlineOptions
 
@@ -28,15 +29,18 @@ class ResultFormset(BaseInlineFormset):
 )
                 self.forms[i]._errors = {'points_to': validation_error.messages}
         if validation_error:
-            raise ValidationError, ugettext('Invalid score intervals')
+            raise ValidationError(ugettext('Invalid score intervals'))
 
         intervals = [ (form_data['points_from'], form_data['points_to']) for form_data in self.cleaned_data if form_data ]
+        if len(intervals)==0:
+            raise ValidationError(ugettext(u'You haven\'t specified any results. %d' % (len(intervals))))
         intervals.sort()
         for i in xrange(len(intervals) - 1):
             if intervals[i][1] + 1 > intervals[i+1][0]:
-                raise ValidationError, ugettext('Score %s is covered by two answers.') % (intervals[i][1])
+                raise ValidationError(ugettext('Score %s is covered by two answers.') % (intervals[i][1]))
             elif intervals[i][1] + 1 < intervals[i+1][0]:
-                raise ValidationError, ugettext('Score %s is not covered by any answer.') % (intervals[i][1] + 1)
+                raise ValidationError(ugettext('Score %s is not covered by any answer.') % (intervals[i][1] + 1))
+
         return self.cleaned_data
 
 class ResultTabularOptions(admin.TabularInline):
