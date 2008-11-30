@@ -112,6 +112,20 @@ class Category(models.Model):
         return None
 
     @property
+    def main_parent(self):
+        """
+        Cached. Used for highlight main category via ifequal tag.
+        """
+        def _get_main_parent(category):
+            if not category.get_tree_parent():
+                return None
+            if not category.get_tree_parent().get_tree_parent():
+                return category
+            else:
+                return _get_main_parent(category.get_tree_parent())
+        return _get_main_parent(self)
+
+    @property
     def path(self):
         "Used in template paths."
         if self.tree_parent_id:
