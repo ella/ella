@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
+from django.conf import settings
 
 from ella.tagging.admin import TaggingInlineOptions
 
@@ -31,7 +32,9 @@ class ArticleOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     raw_id_fields = ('photo',)
     list_filter = ('created', 'category', 'authors',)
     search_fields = ('title', 'upper_title', 'perex', 'slug', 'authors__name', 'authors__slug',) # FIXME: 'tags__tag__name',)
-    inlines = (ArticleContentInlineOptions, PlacementInlineOptions, TaggingInlineOptions,)
+    inlines = [ ArticleContentInlineOptions, PlacementInlineOptions ]
+    if 'ella.tagging' in settings.INSTALLED_APPS:
+        inlines.append(TaggingInlineOptions)
     prepopulated_fields = {'slug' : ('title',)}
     rich_text_fields = {None: ('perex',)}
 

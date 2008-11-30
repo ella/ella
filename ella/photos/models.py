@@ -73,7 +73,8 @@ class Photo(models.Model):
 
     created = models.DateTimeField(default=datetime.now, editable=False)
 
-    tags = generic.GenericRelation(TaggedItem)
+    if 'ella.tagging' in settings.INSTALLED_APPS:
+        tags = generic.GenericRelation(TaggedItem)
 
     def thumb(self):
         """

@@ -4,6 +4,7 @@ from django.forms.models import BaseInlineFormSet
 from django import forms
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
+from django.conf import settings
 
 from ella.tagging.admin import TaggingInlineOptions
 
@@ -54,7 +55,9 @@ class GalleryOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
 )
     list_filter = ('created', 'category',)
     search_fields = ('title', 'description', 'slug',) # FIXME: 'tags__tag__name',)
-    inlines = (GalleryItemTabularOptions, PlacementInlineOptions, TaggingInlineOptions,)
+    inlines = [ GalleryItemTabularOptions, PlacementInlineOptions ]
+    if 'ella.tagging' in settings.INSTALLED_APPS:
+        inlines.append(TaggingInlineOptions)
     prepopulated_fields = {'slug': ('title',)}
     rich_text_fields = {None: ('description', 'content',)}
     suggest_fields = {'category': ('tree_path', 'title', 'slug',), 'owner': ('name', 'slug',),}

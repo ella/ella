@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.forms.models import BaseInlineFormSet
 from django.shortcuts import render_to_response
+from django.conf import settings
 
 from ella.tagging.admin import TaggingInlineOptions
 
@@ -104,7 +105,9 @@ class ContestOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     list_display = ('title', 'category', 'active_from', 'correct_answers', 'get_all_answers_count', 'get_hits', 'full_url',)
     list_filter = ('category', 'active_from',)
     search_fields = ('title', 'text_announcement', 'text', 'text_results',)
-    inlines = (QuestionInlineOptions, PlacementInlineOptions, TaggingInlineOptions,)
+    inlines = [ QuestionInlineOptions, PlacementInlineOptions ]
+    if 'ella.tagging' in settings.INSTALLED_APPS:
+        inlines.append(TaggingInlineOptions)
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
     rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}
@@ -113,7 +116,9 @@ class QuizOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     list_display = ('title', 'category', 'active_from', 'get_hits', 'full_url',)
     list_filter = ('category', 'active_from',)
     search_fields = ('title', 'text_announcement', 'text', 'text_results',)
-    inlines = (QuestionInlineOptions, ResultTabularOptions, PlacementInlineOptions, TaggingInlineOptions,)
+    inlines = [ QuestionInlineOptions, ResultTabularOptions, PlacementInlineOptions ]
+    if 'ella.tagging' in settings.INSTALLED_APPS:
+        inlines.append(TaggingInlineOptions)
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
     rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}

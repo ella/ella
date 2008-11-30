@@ -5,6 +5,7 @@ from django.contrib.contenttypes import generic
 from django.contrib.redirects.models import Redirect
 from django.db.models import Model
 from django.contrib.sites.models import Site
+from django.conf import settings
 
 from ella.core.cache import get_cached_object, get_cached_list
 from ella.core.models import Placement, Category, HitCount
@@ -22,7 +23,9 @@ class Publishable(Model):
 
     placements = generic.GenericRelation(Placement, object_id_field='target_id', content_type_field='target_ct')
     comments = generic.GenericRelation(Comment, object_id_field='target_id', content_type_field='target_ct')
-    tags = generic.GenericRelation(TaggedItem)
+
+    if 'ella.tagging' in settings.INSTALLED_APPS:
+        tags = generic.GenericRelation(TaggedItem)
 
     class Meta:
         abstract = True

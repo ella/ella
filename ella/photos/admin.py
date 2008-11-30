@@ -59,7 +59,9 @@ class FormatedPhotoInlineOptions(admin.TabularInline):
 
 
 class PhotoOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
-    inlines = (FormatedPhotoInlineOptions, TaggingInlineOptions,)
+    inlines = [ FormatedPhotoInlineOptions ]
+    if 'ella.tagging' in settings.INSTALLED_APPS:
+        inlines.append(TaggingInlineOptions)
     list_display = ('title', 'width', 'height', 'thumb') ## 'authors')
     list_filter = ('created',)
     prepopulated_fields = {'slug': ('title',)}
