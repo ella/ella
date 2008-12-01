@@ -114,13 +114,38 @@ class RatingNode(template.Node):
                 self.step = Decimal(self.step)
                 self.min2 = Decimal(self.min2)
                 self.max = Decimal(self.max)
-                value = TotalRate.objects.get_normalized_rating(obj, 1, self.step*2/(self.max-self.min2))
+                possible_values = int((self.max - self.min2)/self.step+1)
+                value = TotalRate.objects.get_normalized_rating(obj, 1, Decimal("1.0")/(possible_values/2))
                 value = value*(self.max - self.min2)/2 + (self.max+self.min2)/2
+
+                # Due to the nature of the 'get_normalized_rating' function, an odd number
+                # of possible return values is required. If the input parameters yield
+                # an even number of possible return values, an approximation is necessary.
+                #
+                # In the following cycle, the value closest to the obtained result still
+                # fulfilling the input 'min', 'max' and 'step' parameters is being looked for.
+
+                if possible_values%2 == 0:
+                    old_value = self.min2
+                    best_approximation = self.min2
+                    while (1):
+                        cur_value = old_value + self.step
+                        if cur_value > self.max:
+                            break
+                        old_error = abs(old_value - value)
+                        cur_error = abs(cur_value - value)
+                        if cur_error <= old_error:
+                            best_approximation = cur_value
+                        elif cur_error >= best_approximation:
+                            break
+                        old_value = cur_value
+                    value = best_approximation
+
             elif (self.min is not None and self.max is not None):
                 value = TotalRate.objects.get_normalized_rating(obj, Decimal(self.max), Decimal(self.step))
             else:
                 value = TotalRate.objects.get_total_rating(obj)
-            # Set as string to be able compare value in template
+            # Set as string to be able to compare value in template
             context[self.name] = str(value)
         return ''
 
@@ -136,8 +161,16 @@ def do_rating(parser, token):
         Normalize rating to <-X, X> with step Y and round to Z:
         {% rating for OBJ max X step Y as VAR %}
 
-        Normalize rating to <X, Y> with step S and round to Z:
+        Normalize rating to <X, Y> with step S:
         {% rating for OBJ min X max Y step S as VAR %}
+
+            Notice:
+
+                In order to obtain correct results, (Y-X)/S must be in Z (integers).
+
+                Also, (Y-X)/S+1 (number of possible values the function can return)
+                should preferably be an odd number, as it better corresponds to
+                the way the 'get_normalized_rating' function works.
 
     Examples::
 
@@ -146,6 +179,7 @@ def do_rating(parser, token):
 
         {% rating for object max 1 step 0.5 as object_rating %}
         object {{object}} has rating of {{object_rating}} from (-1, -0.5, 0, 0.5, 1)
+
     """
     bits = token.split_contents()
     if len(bits) == 5 and bits[1] == 'for' and bits[3] == 'as':
