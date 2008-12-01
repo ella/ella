@@ -2,6 +2,7 @@ from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.utils.translation import ugettext as _
 from django.contrib.sites.models import Site
 from django.utils import simplejson
+from django.db import models
 
 from ella.ratings.models import *
 
@@ -25,7 +26,11 @@ def get_was_rated(request, ct, target):
 
     Rating can fail later on db query, this checks user cookies
     """
-    return '%s:%s' % (ct.id, target.id) in _get_cookie(request)
+    if isinstance(ct, ContentType):
+        ct = ct.id
+    if isinstance(target, models.Model):
+        target = target.pk
+    return '%s:%s' % (ct, target) in _get_cookie(request)
 
 def set_was_rated(request, response, ct, target):
     """

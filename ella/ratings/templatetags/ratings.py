@@ -11,7 +11,11 @@ from ella.ratings.forms import RateForm
 from ella.ratings.views import get_was_rated
 from django.utils.translation import ugettext as _
 
+from recepty import settings
+
 register = template.Library()
+
+DOUBLE_RENDER = getattr(settings, 'DOUBLE_RENDER', False)
 
 #class RateUrlsNode(template.Node):
 #    def __init__(self, object, up_name, down_name, form_name=None):
@@ -221,3 +225,71 @@ def do_top_rated(parser, token):
         mods.append(model)
 
     return TopRatedNode(count, bits[-1], mods)
+
+class IfWasRatedNode(template.Node):
+
+    def __init__(self, nodelist_true, nodelist_false, obj=None, ct=None, pk=None):
+        self.nodelist_true = nodelist_true
+        self.nodelist_false = nodelist_false
+        self.obj= None
+        if obj:
+            self.obj = template.Variable(obj)
+        self.ct = ct
+        self.pk = pk
+
+    def render(self, context):
+
+        if self.obj:
+            obj = self.obj.resolve(context)
+            ct = ContentType.objects.get_for_model(obj).id
+            pk = obj.pk
+        else:
+            ct = self.ct
+            pk = self.pk
+
+        if DOUBLE_RENDER and 'SECOND_RENDER' not in context:
+            return u"{%% load ratings %%}" \
+                   u"{%% if_was_rated %(ct)s:%(pk)s %%}" \
+                   u"%(nodelist_true)s{%% else %%}%(nodelist_false)s{%% endif_was_rated %%}" % ({
+                            'ct' : ct,
+                            'pk' : pk,
+                            'nodelist_true' : self.nodelist_true.render(context),
+                            'nodelist_false' : self.nodelist_false.render(context),
+})
+
+        if get_was_rated(context['request'], ct, pk):
+            return self.nodelist_true.render(context)
+        else:
+            return self.nodelist_false.render(context)
+
+
+@register.tag('if_was_rated')
+def do_if_was_rated(parser, token):
+    """
+    {% if_was_rated object %}...{% else %}...{% endif_was_rated %}
+    """
+    bits = token.contents.split()
+
+    if len(bits) == 2:
+        kwargs = {}
+        # Opening tag
+        obj = bits[1]
+        if ":" in obj:
+            ct,pk = obj.split(":")
+            kwargs.update({"ct":int(ct), "pk":int(pk)})
+        else:
+            kwargs.update({"obj":obj})
+        # Nodelist true
+        nodelist_true = parser.parse(('else', 'endif_was_rated'))
+        token = parser.next_token()
+        kwargs.update({"nodelist_true":nodelist_true})
+        # Nodelist false
+        if token.contents == 'else':
+            nodelist_false = parser.parse(('endif_was_rated',))
+            kwargs.update({"nodelist_false":nodelist_false})
+            parser.delete_first_token()
+        else:
+            nodelist_false = NodeList()
+        return IfWasRatedNode(**kwargs)
+
+    raise template.TemplateSyntaxError, "{%% %s object %%}" % bits[0]
