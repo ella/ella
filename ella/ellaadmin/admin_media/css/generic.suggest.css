@@ -65,9 +65,6 @@ li.suggest-selected-item a.suggest-delete-link {
     color: red;
     font-weight: bold;
 }
-.vForeignKeyRawIdAdminField.hidden {
-    display: none;
-}
 
 /* related lookup icon */
 a.suggest-related-lookup {
