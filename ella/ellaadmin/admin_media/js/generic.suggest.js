@@ -51,7 +51,7 @@
     $(SUGGEST_SELECTOR).click( set_current_input ).focus( set_current_input );
 
     // Various initializations
-    $('.hidden').css('display', 'none');
+    $('.hidden').hide();
     $ins.each(function() {
         // Parse the field names (?f=bla&f=ble)
         var rel = $(this).attr('rel');
