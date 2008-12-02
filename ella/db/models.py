@@ -80,7 +80,7 @@ class Publishable(Model):
                         target_id=self.pk,
                         target_ct=ContentType.objects.get_for_model(self.__class__)
 ).exclude(category=self.category_id)) + [self.main_placement]:
-                    if plc.slug == old_self.slug:
+                    if plc and plc.slug == old_self.slug:
                         plc.slug = self.slug
                         plc.save()
         return Model.save(self)
