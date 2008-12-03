@@ -24,7 +24,6 @@ comments_on_thread__spec_filter, get_key_comments_on_thread__spec_filter
 from ella.comments.models import Comment
 from ella.core.cache.utils import get_cached_object_or_404, get_cached_list, cache_this, \
 normalize_key, delete_cached_object
-import djangoapps.registration.views as reg_views
 
 
 STATE_UNAUTHORIZED = 'unauthorized'
@@ -100,11 +99,11 @@ def paginate_queryset_for_request(request, qset):
     for i, c in enumerate(qset):
         ct = ContentType.objects.get_for_model(c)
         setattr(c, 'item_number', i + 1)
-        setattr(
-            c,
-            'get_admin_url',
-            reverse('discussions_admin', args=['%s/%s/%d' % (ct.app_label, ct.model, c._get_pk_val())])
-)
+        #setattr(
+           # c,
+          #  'get_admin_url',
+         #   reverse('discussions_admin', args=['%s/%s/%d' % (ct.app_label, ct.model, c._get_pk_val())])
+        #)
     paginator = QuerySetPaginator(qset, paginate_by)
     page_no = request.GET.get('p', paginator.page_range[0])
     try:
@@ -194,6 +193,7 @@ def user_posts(request, username):
 )
 
 def posts(request, bits, context):
+
     # TODO !!! REFACTOR !!!
     """ Posts view (list of posts associated to given topic) """
     if not bits:
