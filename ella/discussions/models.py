@@ -154,7 +154,9 @@ class TopicThread(models.Model):
     title = models.CharField(_('Title'), max_length=255)
     slug = models.SlugField(_('Slug'), max_length=255)
     created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)
-    author = models.ForeignKey(User, verbose_name=_('authorized author'),)
+    author = models.ForeignKey(User, verbose_name=_('authorized author'), null=True, blank=True)
+    nickname = models.CharField(_("Anonymous author's nickname"), max_length=50, blank=True)
+    email = models.EmailField(_('Authors email (optional)'), blank=True)
     topic = models.ForeignKey(Topic)
     hit_counts = models.PositiveIntegerField(default=0)
 

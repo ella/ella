@@ -1,3 +1,4 @@
+import email
 import logging
 from time import strftime
 import smtplib
@@ -44,6 +45,8 @@ class QuestionForm(forms.Form):
     description = Question._meta.get_field('description').formfield()
     """
     content = forms.CharField(required=True, widget=forms.Textarea)
+    nickname = forms.CharField(required=True)
+    email = forms.EmailField(required=True)
 
 class ThreadForm(QuestionForm):
     title = forms.CharField(required=True)
@@ -58,7 +61,7 @@ def get_ip(request):
         return request.META['HTTP_X_FORWARDED_FOR']
     return request.META['REMOTE_ADDR']
 
-def add_post(content, thread, user, ip='0.0.0.0'):
+def add_post(content, thread, user = False, nickname = False, email = False, ip='0.0.0.0'):
     """
     PARAMS
     content: post content
@@ -75,20 +78,40 @@ def add_post(content, thread, user, ip='0.0.0.0'):
     parent = None
     if comment_set.count() > 0:
         parent = comment_set[0]
-    cmt = Comment(
-        content=content,
-        subject='',
-        ip_address=ip,
-        target_ct=CT_THREAD,
-        target_id=thread.id,
-        parent=parent,
-        user=user,
+
+    if (user):
+        cmt = Comment(
+            content=content,
+            subject='',
+            ip_address=ip,
+            target_ct=CT_THREAD,
+            target_id=thread.id,
+            parent=parent,
+            user=user,
 )
-    cmt.save()
-    # post is viewed by its autor
-    CT = ContentType.objects.get_for_model(Comment)
-    post_viewed = PostViewed(target_ct=CT, target_id=cmt._get_pk_val(), user=user)
-    post_viewed.save()
+
+        cmt.save()
+        # post is viewed by its autor
+        CT = ContentType.objects.get_for_model(Comment)
+        post_viewed = PostViewed(target_ct=CT, target_id=cmt._get_pk_val(), user=user)
+        post_viewed.save()
+
+    elif nickname and email:
+        cmt = Comment(
+            content=content,
+            subject='',
+            ip_address=ip,
+            target_ct=CT_THREAD,
+            target_id=thread.id,
+            parent=parent,
+            nickname=nickname,
+            email=email
+)
+
+        cmt.save()
+
+    else:
+        raise Exception("Either user or nickname and email params required!")
 
 def paginate_queryset_for_request(request, qset):
     """ returns appropriate page for view. Page number should
@@ -198,7 +221,7 @@ def posts(request, bits, context):
     """ Posts view (list of posts associated to given topic) """
     if not bits:
         raise http.Http404('Unsupported url. Slug of topic-thread needed.')
-    frm = QuestionForm()
+
     frmLogin = LoginForm()
     topic = context['object']
     category = context['category']
@@ -207,6 +230,16 @@ def posts(request, bits, context):
     context['question_form_state'] = STATE_EMPTY
     context['login_form_state'] = STATE_UNAUTHORIZED
     thr = TopicThread.objects.get(slug=bits[0])
+
+    user = get_user(request)
+    data = {}
+
+    if user.is_authenticated():
+        data['nickname'] = user.username
+        data['email'] = user.email
+
+    frm = QuestionForm(data)
+
     if len(bits) > 1:
         if bits[1] == 'login':
             f = LoginForm(request.POST)
@@ -228,7 +261,14 @@ def posts(request, bits, context):
                 context['question_form_state'] = STATE_INVALID
             elif frm.cleaned_data['content'].strip():
                 context['question_form_state'] = STATE_OK
-                add_post(frm.cleaned_data['content'], thr, get_user(request), get_ip(request))
+
+                if user:
+                    add_post(frm.cleaned_data['content'], thr, user=user, ip=get_ip(request))
+                else:
+                    add_post(frm.cleaned_data['content'], thr, nickname=frm.nickname, email=frm.email, ip=get_ip(request))
+
+                frm.clean()
+
             else:
                 context['question_form_state'] = STATE_INVALID
         else:
@@ -237,6 +277,8 @@ def posts(request, bits, context):
         comment_set = comments_on_thread__by_submit_date(thr) # specialized function created because of caching
     else:
         comment_set = comments_on_thread__spec_filter(thr) # specialized function created because of caching
+
+    comment_set = thr.get_posts_by_date()
     thread_url = '%s/' % thr.get_absolute_url()
     context['thread'] = thr
     context['posts'] = comment_set
