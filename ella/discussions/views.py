@@ -105,7 +105,7 @@ def add_post(content, thread, user = False, nickname = False, email = False, ip=
             target_id=thread.id,
             parent=parent,
             nickname=nickname,
-            email=email
+            email=email,
 )
 
         cmt.save()
@@ -262,10 +262,10 @@ def posts(request, bits, context):
             elif frm.cleaned_data['content'].strip():
                 context['question_form_state'] = STATE_OK
 
-                if user:
+                if user.is_authenticated():
                     add_post(frm.cleaned_data['content'], thr, user=user, ip=get_ip(request))
                 else:
-                    add_post(frm.cleaned_data['content'], thr, nickname=frm.nickname, email=frm.email, ip=get_ip(request))
+                    add_post(frm.cleaned_data['content'], thr, nickname=frm.cleaned_data['nickname'], email=frm.cleaned_data['email'], ip=get_ip(request))
 
                 frm.clean()
 
