@@ -22,7 +22,7 @@ from ella.discussions.models import BannedString, BannedUser, Topic, TopicThread
 PostViewed, DuplicationError, get_comments_on_thread
 from ella.discussions.cache import comments_on_thread__by_submit_date, get_key_comments_on_thread__by_submit_date, \
 comments_on_thread__spec_filter, get_key_comments_on_thread__spec_filter
-from ella.comments.models import Comment
+from ella.comments.models import Comment, build_tree
 from ella.core.cache.utils import get_cached_object_or_404, get_cached_list, cache_this, \
 normalize_key, delete_cached_object
 
@@ -47,6 +47,7 @@ class QuestionForm(forms.Form):
     content = forms.CharField(required=True, widget=forms.Textarea)
     nickname = forms.CharField(required=True)
     email = forms.EmailField(required=True)
+
 
 class ThreadForm(QuestionForm):
     title = forms.CharField(required=True)
@@ -113,6 +114,7 @@ def add_post(content, thread, user = False, nickname = False, email = False, ip=
     else:
         raise Exception("Either user or nickname and email params required!")
 
+
 def paginate_queryset_for_request(request, qset):
     """ returns appropriate page for view. Page number should
         be set in GET variable 'p', if not set first page is returned.
@@ -127,7 +129,16 @@ def paginate_queryset_for_request(request, qset):
           #  'get_admin_url',
          #   reverse('discussions_admin', args=['%s/%s/%d' % (ct.app_label, ct.model, c._get_pk_val())])
         #)
-    paginator = QuerySetPaginator(qset, paginate_by)
+    #
+
+    # queryset limitation to comments with level 1 or 2
+    qset_lim = []
+    qset = build_tree(qset)
+    for c in qset:
+        if c.level == 2 or c.level == 1:
+            qset_lim.append(c)
+
+    paginator = QuerySetPaginator(qset_lim, paginate_by)
     page_no = request.GET.get('p', paginator.page_range[0])
     try:
         page_no = int(page_no)
@@ -147,6 +158,7 @@ def paginate_queryset_for_request(request, qset):
                 continue
             post_viewed = PostViewed(target_ct=CT, target_id=item._get_pk_val(), user=request.user)
             post_viewed.save()
+
     context['object_list'] = objs
     context.update({
         'is_paginated': paginator.num_pages > 1,
@@ -266,17 +278,17 @@ def posts(request, bits, context):
                     add_post(frm.cleaned_data['content'], thr, user=user, ip=get_ip(request))
                 else:
                     add_post(frm.cleaned_data['content'], thr, nickname=frm.cleaned_data['nickname'], email=frm.cleaned_data['email'], ip=get_ip(request))
-
-                frm.clean()
-
+                frm = QuestionForm() # form reset after succesfull post
             else:
                 context['question_form_state'] = STATE_INVALID
         else:
             thr.hit() # increment view counter
-    if request.user.is_staff:
-        comment_set = comments_on_thread__by_submit_date(thr) # specialized function created because of caching
-    else:
-        comment_set = comments_on_thread__spec_filter(thr) # specialized function created because of caching
+
+    #if request.user.is_staff:
+    #    comment_set = comments_on_thread__by_submit_date(thr) # specialized function created because of caching
+    #else:
+    #    comment_set = comments_on_thread__spec_filter(thr) # specialized function created because of caching
+
 
     comment_set = thr.get_posts_by_date()
     thread_url = '%s/' % thr.get_absolute_url()

@@ -216,3 +216,7 @@ def print_comment_long(context, comment):
     context['comment'] = comment
     return context
 
+@register.inclusion_tag('inclusion_tags/print_single_comment.html', takes_context=True)
+def print_single_comment(context, comment):
+    context['comment'] = comment
+    return context
