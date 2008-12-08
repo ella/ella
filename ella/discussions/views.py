@@ -17,15 +17,17 @@ from django.views.generic.list_detail import object_list
 from django.contrib.formtools.preview import FormPreview
 from django.core.paginator import QuerySetPaginator
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 
 from ella.discussions.models import BannedString, BannedUser, Topic, TopicThread, \
 PostViewed, DuplicationError, get_comments_on_thread
 from ella.discussions.cache import comments_on_thread__by_submit_date, get_key_comments_on_thread__by_submit_date, \
 comments_on_thread__spec_filter, get_key_comments_on_thread__spec_filter
 from ella.comments.models import Comment, build_tree
+from ella.comments.forms import CommentForm
 from ella.core.cache.utils import get_cached_object_or_404, get_cached_list, cache_this, \
 normalize_key, delete_cached_object
-
+from ella.comments.defaults import FORM_OPTIONS
 
 STATE_UNAUTHORIZED = 'unauthorized'
 STATE_EMPTY = 'empty'
@@ -74,7 +76,7 @@ def add_post(content, thread, user = False, nickname = False, email = False, ip=
     delete_cached_object(get_key_comments_on_thread__spec_filter(None, thread))
 
     content = filter_banned_strings(content)
-    comment_set = get_comments_on_thread(thread).order_by('submit_date')
+    comment_set = get_comments_on_thread(thread).order_by('-parent')
     CT_THREAD = ContentType.objects.get_for_model(TopicThread)
     parent = None
     if comment_set.count() > 0:
@@ -233,7 +235,6 @@ def posts(request, bits, context):
     """ Posts view (list of posts associated to given topic) """
     if not bits:
         raise http.Http404('Unsupported url. Slug of topic-thread needed.')
-
     frmLogin = LoginForm()
     topic = context['object']
     category = context['category']
@@ -251,8 +252,7 @@ def posts(request, bits, context):
         data['email'] = user.email
 
     frm = QuestionForm(data)
-
-    if len(bits) > 1:
+    if len(bits) > 1 and bits[1] in ('login', 'logout', 'register'):
         if bits[1] == 'login':
             f = LoginForm(request.POST)
             if f.is_valid():
@@ -311,6 +311,29 @@ def posts(request, bits, context):
         context,
         context_instance=RequestContext(request)
 )
+
+
+def post_reply(request, context, reply):
+    """new reply to a post in the thread"""
+    parent = get_cached_object_or_404(Comment, pk=reply)
+    init_props = {
+        'target': '%d:%d' % (parent.target_ct.id, parent.target.id),
+        'options' : FORM_OPTIONS['UNAUTHORIZED_ONLY'],
+}
+    if reply:
+        init_props['parent'] = reply
+        context.update ({
+                'reply' : True,
+               'parent' : parent,
+})
+        form = CommentForm(init_props=init_props)
+    context['form'] = form
+    return render_to_response(
+        ('common/page/discussions/form.html',),
+        context,
+        context_instance=RequestContext(request)
+)
+
 
 def create_thread(request, bits, context):
     """ creates new thread (that is new TopciThread and first Comment) """

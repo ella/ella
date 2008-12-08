@@ -182,7 +182,7 @@ class TopicThread(models.Model):
 
     def get_absolute_url(self):
         base = self.topic.get_absolute_url()
-        return '%s%s/%s' % (base, slugify(_('posts')), self.slug)
+        return '%s%s/%s/' % (base, slugify(_('posts')), self.slug)
 
     @property
     def num_posts(self):
