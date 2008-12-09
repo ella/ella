@@ -38,6 +38,12 @@ STATE_BAD_LOGIN_OR_PASSWORD = 'bad_password'
 
 DISCUSSIONS_PAGINATE_BY = getattr(settings, 'DISCUSSIONS_PAGINATE_BY', 5)
 
+class StatusField(forms.CharField):
+
+    def clean(self, value):
+        if value not in (None, ''):
+            raise forms.ValidationError(_('This field must be empty!'))
+
 
 class QuestionForm(forms.Form):
     """
@@ -49,12 +55,16 @@ class QuestionForm(forms.Form):
 
     content = forms.CharField(required=True, widget=forms.Textarea)
     nickname = forms.CharField(required=True)
-    email = forms.EmailField(required=True)
+    email = forms.EmailField(required=False)
+    status = StatusField(required=False, label=_('If you enter anything in this field your post will be treated as spam'))
 
 
 class ThreadForm(QuestionForm):
     title = forms.CharField(required=True)
     content = forms.CharField(required=True, widget=forms.Textarea)
+    nickname = forms.CharField(required=True)
+    email = forms.EmailField(required=False)
+    status = StatusField(required=False, label=_('If you enter anything in this field your post will be treated as spam'))
 
 class LoginForm(forms.Form):
     username = forms.CharField(required=True)
@@ -230,7 +240,7 @@ def user_posts(request, username):
         context_instance=RequestContext(request)
 )
 
-def posts(request, bits, context):
+def topicthread(request, bits, context):
 
     # TODO !!! REFACTOR !!!
     """ Posts view (list of posts associated to given topic) """
@@ -306,9 +316,9 @@ def posts(request, bits, context):
     context['logout_form_action'] = '%slogout/' % thread_url
     context.update(paginate_queryset_for_request(request, comment_set))
     tplList = (
-        'page/category/%s/content_type/discussions.question/%s/posts.html' % (category.path, topic.slug,),
-        'page/category/%s/content_type/discussions.question/posts.html' % (category.path,),
-        'page/content_type/discussions.question/posts.html',
+        'page/category/%s/content_type/discussions.topicthread/%s/object.html' % (category.path, topic.slug,),
+        'page/category/%s/content_type/discussions.topicthread/object.html' % (category.path,),
+        'page/content_type/discussions.topicthread/object.html',
 )
     return render_to_response(
         tplList,
@@ -342,43 +352,53 @@ def post_reply(request, context, reply):
 def create_thread(request, bits, context):
     """ creates new thread (that is new TopciThread and first Comment) """
     topic = context['object']
+
     frmThread = ThreadForm(request.POST or None)
     context['login_form_state'] = STATE_UNAUTHORIZED
-    frmLogin = LoginForm(request.POST or None)
-    if frmLogin.is_valid():
-        state = process_login(request, frmLogin.cleaned_data)
-        if state == STATE_OK:
-            url = '%s%s' % (topic.get_absolute_url(), slugify(_('create thread')))
-            return http.HttpResponseRedirect(url)
-        context['login_form_state'] = state
+
+    user = get_user(request)
 
     if frmThread.is_valid():
         data = frmThread.cleaned_data
-        thr = TopicThread(
-            title=data['title'],
-            slug=slugify(data['title']),
-            created=datetime.now(),
-            author=get_user(request),
-            topic=topic
+
+        if user.is_authenticated():
+            thr = TopicThread(
+                title=data['title'],
+                slug=slugify(data['title']),
+                created=datetime.now(),
+                author=get_user(request),
+                topic=topic
 )
+        else:
+            thr = TopicThread(
+                title=data['title'],
+                slug=slugify(data['title']),
+                created=datetime.now(),
+                nickname=data['nickname'],
+                email=data['email'],
+                topic=topic
+)
+
         try:
             thr.save()
-            add_post(data['content'], thr, get_user(request), get_ip(request))
+
+            if user.is_authenticated():
+                add_post(data['content'], thr, user=user, ip=get_ip(request))
+            else:
+                add_post(data['content'], thr, nickname=data['nickname'], email=data['email'], ip=get_ip(request))
             #TODO invalidate cached thread list
             return http.HttpResponseRedirect(topic.get_absolute_url())
         except DuplicationError:
             context['error'] = _('Thread with given title already exist.')
-    context['login_form'] = frmLogin
-    context['login_form_action'] = '%slogin/' % request.get_full_path()
-    context['logout_form_action'] = '%slogout/' % request.get_full_path()
+
     context['question_form'] = frmThread
     context['question_form_action'] = request.get_full_path()
     category = context['category']
     return render_to_response(
             (
-                'page/category/%s/content_type/discussions.question/%s/ask.html' % (category.path, topic.slug,),
-                'page/category/%s/content_type/discussions.question/ask.html' % (category.path,),
-                'page/content_type/discussions.question/ask.html',
+                'page/category/%s/content_type/discussions.topicthread/%s/create-thread.html' % (category.path, topic.slug,),
+                'page/category/%s/content_type/discussions.topicthread/create-thread.html' % (category.path,),
+                'page/content_type/discussions.topicthread/create-thread.html',
 ),
             context,
             context_instance=RequestContext(request)
