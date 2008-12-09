@@ -6,7 +6,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils.encoding import smart_str
 from django.template import TemplateSyntaxError
-from django.core.paginator import ObjectPaginator
+from django.core.paginator import Paginator
 from django.conf import settings
 
 from ella.core.models import Listing
@@ -296,13 +296,18 @@ def get_thread_pagination(context, thread):
             % str(type(thread))
 )
     qset = get_comments_on_thread(thread)
-    p = ObjectPaginator(qset, DISCUSSIONS_PAGINATE_BY)
+    p = Paginator(qset, DISCUSSIONS_PAGINATE_BY)
     return {
         'pages': p.pages,
         'has_more_pages': p.pages > 1,
         'page_range': p.page_range,
         'thread_url': thread.get_absolute_url(),
 }
+
+@register.inclusion_tag('inclusion_tags/print_comment_discussions.html', takes_context=True)
+def print_comment_discussions(context, comment):
+    context['comment'] = comment
+    return context
 
 @register.tag
 def get_unread_posts(parser, token):
