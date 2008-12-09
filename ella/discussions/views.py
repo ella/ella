@@ -46,6 +46,7 @@ class QuestionForm(forms.Form):
     email = Question._meta.get_field('email').formfield()
     description = Question._meta.get_field('description').formfield()
     """
+
     content = forms.CharField(required=True, widget=forms.Textarea)
     nickname = forms.CharField(required=True)
     email = forms.EmailField(required=True)
@@ -244,14 +245,17 @@ def posts(request, bits, context):
     context['login_form_state'] = STATE_UNAUTHORIZED
     thr = TopicThread.objects.get(slug=bits[0])
 
+
     user = get_user(request)
-    data = {}
+    nickname_init = ''
+    email_init = ''
 
     if user.is_authenticated():
-        data['nickname'] = user.username
-        data['email'] = user.email
+        nickname_init = user.username
+        email_init = user.email
 
-    frm = QuestionForm(data)
+    frm = QuestionForm(initial = {'nickname' : nickname_init, 'email' : email_init})
+
     if len(bits) > 1 and bits[1] in ('login', 'logout', 'register'):
         if bits[1] == 'login':
             f = LoginForm(request.POST)
