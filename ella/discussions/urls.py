@@ -3,7 +3,7 @@ from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext as _
 from ella.discussions.views import post_reply
 from ella.discussions.models import Topic
-from ella.discussions.views import topic, posts, create_thread
+from ella.discussions.views import topic, topicthread, create_thread
 from ella.comments.views import CommentFormPreview
 from ella.comments.forms import CommentForm
 
@@ -16,7 +16,7 @@ def discussion_custom_urls(request, bits, context):
         if bits[2] == slugify(_('reply')) and bits[3].isdigit():
             return post_reply(request, context, reply=int(bits[3]))
 
-    return posts(request, bits, context)
+    return topicthread(request, bits, context)
 
 
 #dispatcher.register(slugify(_('ask')), ask_question, model=Topic)
