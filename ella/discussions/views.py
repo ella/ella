@@ -1,7 +1,4 @@
-import email
 import logging
-from time import strftime
-import smtplib
 from datetime import datetime
 from django import http
 from django import forms
@@ -9,24 +6,20 @@ from django.core.urlresolvers import reverse
 from django.template import RequestContext, loader, Context
 from django.shortcuts import render_to_response
 from django.template.defaultfilters import slugify
-from django.utils.translation import ugettext, ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth import authenticate, login, logout, get_user
 from django.contrib.auth.models import User, AnonymousUser
 from django.views.generic.list_detail import object_list
-from django.contrib.formtools.preview import FormPreview
 from django.core.paginator import QuerySetPaginator
 from django.conf import settings
-from django.contrib.contenttypes.models import ContentType
 
-from ella.discussions.models import BannedString, BannedUser, Topic, TopicThread, \
-PostViewed, DuplicationError, get_comments_on_thread
-from ella.discussions.cache import comments_on_thread__by_submit_date, get_key_comments_on_thread__by_submit_date, \
-comments_on_thread__spec_filter, get_key_comments_on_thread__spec_filter
+from ella.discussions.models import BannedString, Topic, TopicThread, \
+    PostViewed, DuplicationError, get_comments_on_thread
+from ella.discussions.cache import get_key_comments_on_thread__by_submit_date, get_key_comments_on_thread__spec_filter
 from ella.comments.models import Comment, build_tree
 from ella.comments.forms import CommentForm
-from ella.core.cache.utils import get_cached_object_or_404, get_cached_list, cache_this, \
-normalize_key, delete_cached_object
+from ella.core.cache.utils import get_cached_object_or_404, delete_cached_object
 from ella.comments.defaults import FORM_OPTIONS
 
 STATE_UNAUTHORIZED = 'unauthorized'
@@ -394,34 +387,35 @@ def create_thread(request, bits, context):
     context['question_form'] = frmThread
     context['question_form_action'] = request.get_full_path()
     category = context['category']
+    ct = ContentType.objects.get_for_model(TopicThread)
     return render_to_response(
             (
-                'page/category/%s/content_type/discussions.topicthread/%s/create-thread.html' % (category.path, topic.slug,),
-                'page/category/%s/content_type/discussions.topicthread/create-thread.html' % (category.path,),
-                'page/content_type/discussions.topicthread/create-thread.html',
+                'page/category/%s/content_type/%s.%s/%s/create-thread.html' % (category.path, ct.app_label, ct.model, topic.slug,),
+                'page/category/%s/content_type/%s.%s/create-thread.html' % (category.path, ct.app_label, ct.model,),
+                'page/content_type/%s.%s/create-thread.html' % (ct.app_label, ct.model,),
 ),
             context,
             context_instance=RequestContext(request)
 )
 
-def question(request, bits, context):
-    log.debug('question() view')
-    if not bits:
-        raise http.Http404
-
-    topic = context['object']
-    category = context['category']
-    question = get_cached_object_or_404(Question, topic=topic, slug=bits[0])
-    context['topic'] = topic
-    context['object'] = question
-    context['content_type'] = ContentType.objects.get_for_model(Question)
-
-    if len(bits) > 1 and bits[1] == slugify(_('comments')):
-        new_bits = bits[2:]
-    else:
-        new_bits = bits[1:]
-    from ella.comments.urls import comments_custom_urls
-    return comments_custom_urls(request, new_bits, context)
+#def question(request, bits, context):
+#    log.debug('question() view')
+#    if not bits:
+#        raise http.Http404
+#
+#    topic = context['object']
+#    category = context['category']
+#    question = get_cached_object_or_404(Question, topic=topic, slug=bits[0])
+#    context['topic'] = topic
+#    context['object'] = question
+#    context['content_type'] = ContentType.objects.get_for_model(Question)
+#
+#    if len(bits) > 1 and bits[1] == slugify(_('comments')):
+#        new_bits = bits[2:]
+#    else:
+#        new_bits = bits[1:]
+#    from ella.comments.urls import comments_custom_urls
+#    return comments_custom_urls(request, new_bits, context)
 
 def topic(request, context):
     top = context['object']  # topic

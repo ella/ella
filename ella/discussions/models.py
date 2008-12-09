@@ -168,6 +168,15 @@ class TopicThread(models.Model):
     def __unicode__(self):
         return self.title
 
+    def get_author(self):
+        if self.author:
+            return self.author.get_full_name()
+        return self.nickname
+
+    def get_description(self):
+        c = self.posts[self.posts.count()-1]
+        return c.content or ''
+
     def save(self, force_insert=False, force_update=False):
         thr = TopicThread.objects.filter(title=self.title)
         if thr and not self.pk:
