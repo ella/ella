@@ -2,9 +2,8 @@ from ella.core.custom_urls import dispatcher
 from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext as _
 from ella.discussions.views import post_reply
-from ella.discussions.models import Topic, TopicThread
+from ella.discussions.models import Topic
 from ella.discussions.views import topic, posts, create_thread
-from ella.discussions.models import TopicThread
 from ella.comments.views import CommentFormPreview
 from ella.comments.forms import CommentForm
 
