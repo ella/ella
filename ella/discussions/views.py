@@ -135,16 +135,7 @@ def paginate_queryset_for_request(request, qset):
           #  'get_admin_url',
          #   reverse('discussions_admin', args=['%s/%s/%d' % (ct.app_label, ct.model, c._get_pk_val())])
         #)
-    #
-
-    # queryset limitation to comments with level 1 or 2
-    qset_lim = []
-    qset = build_tree(qset)
-    for c in qset:
-        if c.level == 2 or c.level == 1:
-            qset_lim.append(c)
-
-    paginator = QuerySetPaginator(qset_lim, paginate_by)
+    paginator = QuerySetPaginator(qset, paginate_by)
     page_no = request.GET.get('p', paginator.page_range[0])
     try:
         page_no = int(page_no)
@@ -164,8 +155,7 @@ def paginate_queryset_for_request(request, qset):
                 continue
             post_viewed = PostViewed(target_ct=CT, target_id=item._get_pk_val(), user=request.user)
             post_viewed.save()
-
-    context['object_list'] = objs
+    context['posts'] = objs
     context.update({
         'is_paginated': paginator.num_pages > 1,
         'results_per_page': paginate_by,
