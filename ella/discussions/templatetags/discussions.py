@@ -193,6 +193,20 @@ class UnreadPostsNode(template.Node):
         context[self.__variable] = out
         return ''
 
+class ItemNumberNode(template.Node):
+    def __init__(self, mapping, object, varname, page_varname = None):
+        self.mapping, self.object, self.varname, self.page_varname = mapping, object, varname, page_varname
+
+    def render(self, context):
+        object = template.Variable(self.object).resolve(context)
+        mapping = template.Variable(self.mapping).resolve(context)
+        item_number = mapping[object._get_pk_val()]
+        context[self.varname] = item_number
+        if self.page_varname:
+            page_number = int(float(item_number)/DISCUSSIONS_PAGINATE_BY + 0.9999)
+            context[self.page_varname] = page_number
+        return ''
+
 @register.tag
 def get_most_active_threads(parser, token):
     """
@@ -323,3 +337,23 @@ def get_unread_posts(parser, token):
     else:
         raise TemplateSyntaxError('Wrong syntax, usage: get_unread_posts as variable.')
     return UnreadPostsNode(None, varname)
+
+@register.tag('get_item_number')
+def do_top_rated(parser, token):
+    """
+    Get item nuber (used for referencing at the page) from a specified object -> number dictionary.
+
+    Usage::
+
+        {% get_item_number from <mapping> for <object> as <varname> page as <page_varname> %}
+
+    Example::
+
+        {% get_item_number from item_number_mapping for obj as item_number %}
+    """
+    bits = token.split_contents()
+    if len(bits) == 7 and bits[1] == 'from' and bits[3] == 'for' and bits[5] == 'as':
+        return ItemNumberNode(bits[2], bits[4], bits[6])
+    if len(bits) == 10 and bits[1] == 'from' and bits[3] == 'for' and bits[5] == 'as' and bits[7] == 'page' and bits[8] == 'as':
+        return ItemNumberNode(bits[2], bits[4], bits[6], bits[9])
+

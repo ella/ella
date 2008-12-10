@@ -29,7 +29,7 @@ def get_ip(request):
         return request.META['HTTP_X_FORWARDED_FOR']
     return request.META['REMOTE_ADDR']
 
-def add_post(content, thread, user = False, nickname = False, email = '', ip='0.0.0.0'):
+def add_post(content, thread, user = False, nickname = False, email = '', ip='0.0.0.0', parent = None):
     """
     PARAMS
     content: post content
@@ -43,10 +43,11 @@ def add_post(content, thread, user = False, nickname = False, email = '', ip='0.
     content = filter_banned_strings(content)
     comment_set = get_comments_on_thread(thread).order_by('-parent')
     CT_THREAD = ContentType.objects.get_for_model(TopicThread)
-    parent = None
 
-    if comment_set.count() > 0:
+    if comment_set.count() > 0 and not parent:
         parent = comment_set[0]
+    elif parent:
+        parent = get_cached_object_or_404(Comment, pk = parent)
 
     if (user):
         cmt = Comment(
@@ -60,10 +61,9 @@ def add_post(content, thread, user = False, nickname = False, email = '', ip='0.
 )
 
         cmt.save()
+
         # post is viewed by its autor
-        CT = ContentType.objects.get_for_model(Comment)
-        post_viewed = PostViewed(target_ct=CT, target_id=cmt._get_pk_val(), user=user)
-        post_viewed.save()
+        make_objects_viewed(user, (cmt,))
 
     elif nickname:
         cmt = Comment(
@@ -82,21 +82,14 @@ def add_post(content, thread, user = False, nickname = False, email = '', ip='0.
     else:
         raise Exception("Either user or nickname param required!")
 
-
 def paginate_queryset_for_request(request, qset):
     """ returns appropriate page for view. Page number should
         be set in GET variable 'p', if not set first page is returned.
     """
     paginate_by = DISCUSSIONS_PAGINATE_BY
-    # ugly son of a bitch - adding object property at runtime?!
+    item_number_mapping = {}
     for i, c in enumerate(qset):
-        ct = ContentType.objects.get_for_model(c)
-        setattr(c, 'item_number', i + 1)
-        #setattr(
-           # c,
-          #  'get_admin_url',
-         #   reverse('discussions_admin', args=['%s/%s/%d' % (ct.app_label, ct.model, c._get_pk_val())])
-        #)
+        item_number_mapping[c._get_pk_val()] = i + 1
     paginator = QuerySetPaginator(qset, paginate_by)
     page_no = request.GET.get('p', paginator.page_range[0])
     try:
@@ -108,22 +101,24 @@ def paginate_queryset_for_request(request, qset):
     context = {}
     page = paginator.page(page_no)
     objs = page.object_list
-    # make objs viewed by user TODO presunout nasledujici podminku nekam jinam
-    if not isinstance(request.user, AnonymousUser):
-        CT = ContentType.objects.get_for_model(Comment)
-        for item in objs:
-            pv = PostViewed.objects.filter(target_ct=CT, target_id=item._get_pk_val(), user=request.user)
-            if pv:
-                continue
-            post_viewed = PostViewed(target_ct=CT, target_id=item._get_pk_val(), user=request.user)
-            post_viewed.save()
     context['posts'] = objs
     context.update({
         'is_paginated': paginator.num_pages > 1,
         'results_per_page': paginate_by,
         'page': page,
+        'item_number_mapping': item_number_mapping,
 })
     return context
+
+def make_objects_viewed(user, object_list):
+    if not isinstance(user, AnonymousUser) and len(object_list)>0:
+        CT = ContentType.objects.get_for_model(object_list[0])
+        for item in object_list:
+            pv = PostViewed.objects.filter(target_ct=CT, target_id=item._get_pk_val(), user=user)
+            if pv:
+                continue
+            post_viewed = PostViewed(target_ct=CT, target_id=item._get_pk_val(), user=user)
+            post_viewed.save()
 
 def get_category_topics_url(category):
     # category.slug/year/_(topics)
@@ -203,9 +198,15 @@ def topicthread(request, bits, context):
             frm.cleaned_data['content'].strip()
 
             if user.is_authenticated():
-                add_post(frm.cleaned_data['content'], thr, user=user, ip=get_ip(request))
+                if frm.cleaned_data['parent']:
+                    add_post(frm.cleaned_data['content'], thr, user=user, ip=get_ip(request), parent = frm.cleaned_data['parent'])
+                else:
+                    add_post(frm.cleaned_data['content'], thr, user=user, ip=get_ip(request))
             else:
-                add_post(frm.cleaned_data['content'], thr, nickname=frm.cleaned_data['nickname'], email=frm.cleaned_data['email'], ip=get_ip(request))
+                if frm.cleaned_data['parent']:
+                    add_post(frm.cleaned_data['content'], thr, nickname=frm.cleaned_data['nickname'], email=frm.cleaned_data['email'], ip=get_ip(request), parent = frm.cleaned_data['parent'])
+                else:
+                    add_post(frm.cleaned_data['content'], thr, nickname=frm.cleaned_data['nickname'], email=frm.cleaned_data['email'], ip=get_ip(request))
             frm = PostForm() # form reset after succesfull post
     else:
         thr.hit() # increment view counter
@@ -217,13 +218,14 @@ def topicthread(request, bits, context):
 
 
     comment_set = thr.get_posts_by_date()
-    thread_url = '%s/' % thr.get_absolute_url()
+    context.update(paginate_queryset_for_request(request, comment_set)) # adds 'posts' object list to context
+    make_objects_viewed(request.user, context['posts']) # makes the objects rendered viewed by user
+    thread_url = '%s?p=%i' % (thr.get_absolute_url(), int(float(len(comment_set))/DISCUSSIONS_PAGINATE_BY + 0.9999))
 
     context['topics_url'] = get_category_topics_url(category)
     context['thread'] = thr
     context['add_post_form'] = frm
     context['add_post_form_action'] = thread_url
-    context.update(paginate_queryset_for_request(request, comment_set))
 
     tplList = (
         'page/category/%s/content_type/discussions.topicthread/%s/object.html' % (category.path, topic.slug,),
@@ -237,9 +239,12 @@ def topicthread(request, bits, context):
 )
 
 
-def post_reply(request, context, reply):
+def post_reply(request, context, reply, thread):
     """new reply to a post in the thread"""
     parent = get_cached_object_or_404(Comment, pk=reply)
+    thr = TopicThread.objects.get(slug = thread)
+    comment_set = thr.get_posts_by_date() # this should be replaced by something not as complex... too much unnecessary information (only the number of posts in the thread is of interest)
+    thread_url = '%s?p=%i' % (thr.get_absolute_url(), int(float(len(comment_set))/DISCUSSIONS_PAGINATE_BY + 0.9999))
     init_props = {
         'target': '%d:%d' % (parent.target_ct.id, parent.target.id),
         'options' : FORM_OPTIONS['UNAUTHORIZED_ONLY'],
@@ -252,6 +257,7 @@ def post_reply(request, context, reply):
 })
         form = CommentForm(init_props=init_props)
     context['form'] = form
+    context['form_action'] = thread_url
     return render_to_response(
         ('common/page/discussions/form.html',),
         context,

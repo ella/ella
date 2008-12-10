@@ -12,6 +12,7 @@ class PostForm(forms.Form):
     nickname = forms.CharField(required=True)
     email = forms.EmailField(required=False)
     status = StatusField(required=False, label=_('If you enter anything in this field your post will be treated as spam'))
+    parent = forms.IntegerField(required=False, widget=forms.HiddenInput())
 
 
 class ThreadForm(PostForm):
