@@ -1,14 +1,13 @@
 import logging
 from datetime import datetime
 from django import http
-from django import forms
 from django.core.urlresolvers import reverse
 from django.template import RequestContext, loader, Context
 from django.shortcuts import render_to_response
 from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.auth import authenticate, login, logout, get_user
+from django.contrib.auth import get_user
 from django.contrib.auth.models import User, AnonymousUser
 from django.views.generic.list_detail import object_list
 from django.core.paginator import QuerySetPaginator
@@ -21,54 +20,16 @@ from ella.comments.models import Comment, build_tree
 from ella.comments.forms import CommentForm
 from ella.core.cache.utils import get_cached_object_or_404, delete_cached_object
 from ella.comments.defaults import FORM_OPTIONS
-
-STATE_UNAUTHORIZED = 'unauthorized'
-STATE_EMPTY = 'empty'
-STATE_OK = 'ok'
-STATE_INVALID = 'invalid'
-STATE_NOT_ACTIVE = 'not_active'
-STATE_BAD_LOGIN_OR_PASSWORD = 'bad_password'
+from forms import *
 
 DISCUSSIONS_PAGINATE_BY = getattr(settings, 'DISCUSSIONS_PAGINATE_BY', 5)
-
-class StatusField(forms.CharField):
-
-    def clean(self, value):
-        if value not in (None, ''):
-            raise forms.ValidationError(_('This field must be empty!'))
-
-
-class QuestionForm(forms.Form):
-    """
-    title = Question._meta.get_field('title').formfield()
-    nickname = Question._meta.get_field('nickname').formfield()
-    email = Question._meta.get_field('email').formfield()
-    description = Question._meta.get_field('description').formfield()
-    """
-
-    content = forms.CharField(required=True, widget=forms.Textarea)
-    nickname = forms.CharField(required=True)
-    email = forms.EmailField(required=False)
-    status = StatusField(required=False, label=_('If you enter anything in this field your post will be treated as spam'))
-
-
-class ThreadForm(QuestionForm):
-    title = forms.CharField(required=True)
-    content = forms.CharField(required=True, widget=forms.Textarea)
-    nickname = forms.CharField(required=True)
-    email = forms.EmailField(required=False)
-    status = StatusField(required=False, label=_('If you enter anything in this field your post will be treated as spam'))
-
-class LoginForm(forms.Form):
-    username = forms.CharField(required=True)
-    password = forms.CharField(required=True, widget=forms.PasswordInput)
 
 def get_ip(request):
     if 'HTTP_X_FORWARDED_FOR' in request.META:
         return request.META['HTTP_X_FORWARDED_FOR']
     return request.META['REMOTE_ADDR']
 
-def add_post(content, thread, user = False, nickname = False, email = False, ip='0.0.0.0'):
+def add_post(content, thread, user = False, nickname = False, email = '', ip='0.0.0.0'):
     """
     PARAMS
     content: post content
@@ -83,6 +44,7 @@ def add_post(content, thread, user = False, nickname = False, email = False, ip=
     comment_set = get_comments_on_thread(thread).order_by('-parent')
     CT_THREAD = ContentType.objects.get_for_model(TopicThread)
     parent = None
+
     if comment_set.count() > 0:
         parent = comment_set[0]
 
@@ -103,7 +65,7 @@ def add_post(content, thread, user = False, nickname = False, email = False, ip=
         post_viewed = PostViewed(target_ct=CT, target_id=cmt._get_pk_val(), user=user)
         post_viewed.save()
 
-    elif nickname and email:
+    elif nickname:
         cmt = Comment(
             content=content,
             subject='',
@@ -118,7 +80,7 @@ def add_post(content, thread, user = False, nickname = False, email = False, ip=
         cmt.save()
 
     else:
-        raise Exception("Either user or nickname and email params required!")
+        raise Exception("Either user or nickname param required!")
 
 
 def paginate_queryset_for_request(request, qset):
@@ -167,15 +129,6 @@ def get_category_topics_url(category):
     # category.slug/year/_(topics)
     return '/%s/%s/%s/' % (category.slug, slugify(_('static')), slugify(_('topics')))
 
-def process_login(request, login_data):
-    usr = authenticate(username=login_data['username'], password=login_data['password'])
-    if not usr:
-        return STATE_BAD_LOGIN_OR_PASSWORD
-    if not usr.is_active:
-        return STATE_NOT_ACTIVE
-    login(request, usr)
-    return STATE_OK #user is logged in
-
 def filter_banned_strings(content):
     REPLACEMENT = '***'
     out = content
@@ -195,6 +148,7 @@ def view_unread(request):
     """ View all posted things since last login. """
     if not isinstance(request.user, User):
         raise http.Http404('User does not exist!')
+
     u = request.user
     qset = TopicThread.objects.get_unread_topicthreads(request.user)
     context = Context()
@@ -212,6 +166,7 @@ def user_posts(request, username):
     users = User.objects.filter(username=username)
     if not users:
         raise http.Http404('User does not exist!')
+
     u = users[0]
     CT = ContentType.objects.get_for_model(TopicThread)
     qset = Comment.objects.filter(target_ct=CT).filter(user=u)
@@ -224,62 +179,36 @@ def user_posts(request, username):
 )
 
 def topicthread(request, bits, context):
-
-    # TODO !!! REFACTOR !!!
     """ Posts view (list of posts associated to given topic) """
     if not bits:
         raise http.Http404('Unsupported url. Slug of topic-thread needed.')
-    frmLogin = LoginForm()
+
     topic = context['object']
     category = context['category']
     # category.slug/year/_(topics)
-    context['topics_url'] = get_category_topics_url(category)
-    context['question_form_state'] = STATE_EMPTY
-    context['login_form_state'] = STATE_UNAUTHORIZED
+
     thr = TopicThread.objects.get(slug=bits[0])
-
-
     user = get_user(request)
-    nickname_init = ''
-    email_init = ''
+    initial = {}
 
     if user.is_authenticated():
-        nickname_init = user.username
-        email_init = user.email
+        initial['nickname'] = user.username
+        initial['email'] = user.email
 
-    frm = QuestionForm(initial = {'nickname' : nickname_init, 'email' : email_init})
+    frm = PostForm(initial = initial)
 
-    if len(bits) > 1 and bits[1] in ('login', 'logout', 'register'):
-        if bits[1] == 'login':
-            f = LoginForm(request.POST)
-            if f.is_valid():
-                state = process_login(request, f.cleaned_data)
-                if state == STATE_OK:
-                    return http.HttpResponseRedirect(thr.get_absolute_url())
-                context['login_form_state'] = state
-        elif bits[1] == 'logout':
-            logout(request)
-            return http.HttpResponseRedirect(thr.get_absolute_url())
-        elif bits[1] == 'register':
-            return http.HttpResponseRedirect(reverse('registration_register'))
-    else:
-        # receiving new post in QuestionForm
-        if request.POST:
-            frm = QuestionForm(request.POST)
-            if not frm.is_valid():
-                context['question_form_state'] = STATE_INVALID
-            elif frm.cleaned_data['content'].strip():
-                context['question_form_state'] = STATE_OK
+    if request.POST:
+        frm = PostForm(request.POST)
+        if frm.is_valid():
+            frm.cleaned_data['content'].strip()
 
-                if user.is_authenticated():
-                    add_post(frm.cleaned_data['content'], thr, user=user, ip=get_ip(request))
-                else:
-                    add_post(frm.cleaned_data['content'], thr, nickname=frm.cleaned_data['nickname'], email=frm.cleaned_data['email'], ip=get_ip(request))
-                frm = QuestionForm() # form reset after succesfull post
+            if user.is_authenticated():
+                add_post(frm.cleaned_data['content'], thr, user=user, ip=get_ip(request))
             else:
-                context['question_form_state'] = STATE_INVALID
-        else:
-            thr.hit() # increment view counter
+                add_post(frm.cleaned_data['content'], thr, nickname=frm.cleaned_data['nickname'], email=frm.cleaned_data['email'], ip=get_ip(request))
+            frm = PostForm() # form reset after succesfull post
+    else:
+        thr.hit() # increment view counter
 
     #if request.user.is_staff:
     #    comment_set = comments_on_thread__by_submit_date(thr) # specialized function created because of caching
@@ -289,15 +218,13 @@ def topicthread(request, bits, context):
 
     comment_set = thr.get_posts_by_date()
     thread_url = '%s/' % thr.get_absolute_url()
+
+    context['topics_url'] = get_category_topics_url(category)
     context['thread'] = thr
-    context['posts'] = comment_set
-    context['login_form'] = frmLogin
-    context['register_form_url'] = '%sregister/' % thread_url
-    context['question_form'] = frm
-    context['question_form_action'] = thread_url
-    context['login_form_action'] = '%slogin/' % thread_url
-    context['logout_form_action'] = '%slogout/' % thread_url
+    context['add_post_form'] = frm
+    context['add_post_form_action'] = thread_url
     context.update(paginate_queryset_for_request(request, comment_set))
+
     tplList = (
         'page/category/%s/content_type/discussions.topicthread/%s/object.html' % (category.path, topic.slug,),
         'page/category/%s/content_type/discussions.topicthread/object.html' % (category.path,),
@@ -333,51 +260,46 @@ def post_reply(request, context, reply):
 
 
 def create_thread(request, bits, context):
-    """ creates new thread (that is new TopciThread and first Comment) """
+    """ creates new thread (that is new TopicThread and first Comment) """
     topic = context['object']
-
     frmThread = ThreadForm(request.POST or None)
-    context['login_form_state'] = STATE_UNAUTHORIZED
-
     user = get_user(request)
 
     if frmThread.is_valid():
         data = frmThread.cleaned_data
-
-        if user.is_authenticated():
-            thr = TopicThread(
-                title=data['title'],
-                slug=slugify(data['title']),
-                created=datetime.now(),
-                author=get_user(request),
-                topic=topic
-)
-        else:
-            thr = TopicThread(
-                title=data['title'],
-                slug=slugify(data['title']),
-                created=datetime.now(),
-                nickname=data['nickname'],
-                email=data['email'],
-                topic=topic
-)
-
         try:
-            thr.save()
-
             if user.is_authenticated():
+                thr = TopicThread(
+                    title=data['title'],
+                    slug=slugify(data['title']),
+                    created=datetime.now(),
+                    author=get_user(request),
+                    topic=topic
+)
+                thr.save()
                 add_post(data['content'], thr, user=user, ip=get_ip(request))
             else:
+                thr = TopicThread(
+                    title=data['title'],
+                    slug=slugify(data['title']),
+                    created=datetime.now(),
+                    nickname=data['nickname'],
+                    email=data['email'],
+                    topic=topic
+)
+                thr.save()
                 add_post(data['content'], thr, nickname=data['nickname'], email=data['email'], ip=get_ip(request))
             #TODO invalidate cached thread list
             return http.HttpResponseRedirect(topic.get_absolute_url())
         except DuplicationError:
             context['error'] = _('Thread with given title already exist.')
 
-    context['question_form'] = frmThread
-    context['question_form_action'] = request.get_full_path()
     category = context['category']
     ct = ContentType.objects.get_for_model(TopicThread)
+
+    context['add_thread_form'] = frmThread
+    context['add_thread_form_action'] = request.get_full_path()
+
     return render_to_response(
             (
                 'page/category/%s/content_type/%s.%s/%s/create-thread.html' % (category.path, ct.app_label, ct.model, topic.slug,),
@@ -408,17 +330,19 @@ def create_thread(request, bits, context):
 #    return comments_custom_urls(request, new_bits, context)
 
 def topic(request, context):
-    top = context['object']  # topic
-    cat = context['category']
-    context['topics_url'] = get_category_topics_url(cat)
-    slug = top.slug
+    topic = context['object']  # topic
+    category = context['category']
+    slug = topic.slug
     log.debug('topic() view')
     # TODO: add caching
     ct = ContentType.objects.get_for_model(Topic)
+
+    context['topics_url'] = get_category_topics_url(category)
+
     t_list = [
-                'page/category/%s/content_type/%s.%s/%s/object.html' % (cat.path, ct.app_label, ct.model, slug),
-                'page/category/%s/content_type/%s.%s/object.html' % (cat.path, ct.app_label, ct.model),
-                'page/category/%s/object.html' % (cat.path),
+                'page/category/%s/content_type/%s.%s/%s/object.html' % (category.path, ct.app_label, ct.model, slug),
+                'page/category/%s/content_type/%s.%s/object.html' % (category.path, ct.app_label, ct.model),
+                'page/category/%s/object.html' % (category.path),
                 'page/content_type/%s.%s/object.html' % (ct.app_label, ct.model),
                 'page/object.html',
             ]
@@ -426,7 +350,7 @@ def topic(request, context):
     kwargs = {}
     if 'p' in request.GET:
         kwargs['page'] = request.GET['p']
-    qset = top.topicthread_set.all()
+    qset = topic.topicthread_set.all()
     #context.update(paginate_queryset_for_request(request, qset))
     return object_list(
             request,
