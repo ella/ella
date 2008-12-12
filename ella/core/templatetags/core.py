@@ -1,4 +1,5 @@
 import logging
+from markdown2 import Markdown
 from md5 import md5
 
 from django.conf import settings
@@ -312,9 +313,6 @@ def ipblur(text): # brutalizer ;-)
         return text
     return '%sxxx' % m.group(1)
 
-import re
-import random
-
 @register.filter
 @stringfilter
 def emailblur(email):
@@ -324,15 +322,7 @@ def emailblur(email):
 def render_str(content):
     "Render string with markdown and/or django template tags and return template."
 
-    try:
-        from markdown2 import Markdown
-        result = force_unicode(Markdown().convert(content))
-    except ImportError:
-        import markdown
-        if getattr(markdown, 'version', False) and markdown.version[1]>=6:
-            result = force_unicode(markdown.markdown(content))
-        else:
-            result = force_unicode(markdown.markdown(smart_str(content)))
+    result = Markdown().convert(content)
     return template.Template(result)
 
 @register.filter
