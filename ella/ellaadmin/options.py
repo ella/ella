@@ -1,7 +1,7 @@
 from django import forms
 from django.conf import settings
 from django.db.models.query_utils import Q
-from django.db.models import ForeignKey, SlugField, ManyToManyField
+from django.db.models import ForeignKey, SlugField, ManyToManyField, ImageField
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.utils.translation import ugettext_lazy as _
 from django.contrib import admin
@@ -88,6 +88,10 @@ class EllaAdminOptionsMixin(object):
         if db_field.name in self.raw_id_fields and isinstance(db_field, ForeignKey):
             kwargs['widget'] = widgets.ForeignKeyRawIdWidget(db_field.rel)
             return db_field.formfield(**kwargs)
+
+        if isinstance(db_field, ImageField):
+            # because we accept only (JPEG) images with RGB color profile.
+            return fields.OnlyRGBImageField(db_field, **kwargs)
 
         if db_field.name in getattr(self, 'suggest_fields', {}).keys() and isinstance(db_field, (ForeignKey, ManyToManyField)):
             kwargs.update({

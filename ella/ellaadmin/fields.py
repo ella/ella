@@ -1,13 +1,41 @@
-import re
+import Image
+from StringIO import StringIO
 
 from django.forms import fields
 from django.forms.util import ValidationError
 from django.utils.encoding import smart_unicode
 from django.utils.translation import ugettext_lazy as _
-from django.db.models.fields.related import ForeignKey
 
 from ella.ellaadmin import widgets
 
+
+class OnlyRGBImageField(fields.ImageField):
+    "Check that uploaded image is RGB"
+
+    def clean(self, data, initial=None):
+        f = super(OnlyRGBImageField, self).clean(data, initial)
+
+        if f is None:
+            return None
+        elif not data and initial:
+            return initial
+
+        if hasattr(data, 'temporary_file_path'):
+            file = data.temporary_file_path()
+        else:
+            if hasattr(data, 'read'):
+                file = StringIO(data.read())
+            else:
+                file = StringIO(data['content'])
+
+        trial_image = Image.open(file)
+
+        if trial_image.mode == 'CMYK':
+            raise ValidationError(_('This image has a CMYK color profile. We can\'t work with CMYK. Please convert it to RGB.'))
+
+        if hasattr(f, 'seek') and callable(f.seek):
+            f.seek(0)
+        return f
 
 class RichTextAreaField(fields.Field):
     widget = widgets.RichTextAreaWidget

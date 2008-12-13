@@ -9,7 +9,6 @@ from ella.ellaadmin.options import EllaAdminOptionsMixin
 from ella.photos.models import FormatedPhoto, Format, Photo
 from ella.photos.views import format_photo_json, thumb_url
 
-
 class FormatedPhotoForm(forms.BaseForm):
     def clean(self):
         """
