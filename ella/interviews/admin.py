@@ -39,8 +39,9 @@ class InterviewOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     if 'ella.tagging' in settings.INSTALLED_APPS:
         inlines.append(TaggingInlineOptions)
     rich_text_fields = {None: ('perex', 'content',)}
-    suggest_fields = {'category': ('tree_path', 'title', 'slug',), 'authors': ('name', 'slug',),
-        'source': ('name',), 'interviewees': ('name', 'author__name', 'user__first_name', 'user__last_name'),}
+#    suggest_fields = {'category': ('tree_path', 'title', 'slug',), 'authors': ('name', 'slug',),
+#        'source': ('name',), 'interviewees': ('name', 'author__name', 'user__first_name', 'user__last_name'),}
+    suggest_fields = {'authors': ('name', 'slug',), 'source': ('name',),}
 
 
 admin.site.register(Interviewee, IntervieweeOptions)

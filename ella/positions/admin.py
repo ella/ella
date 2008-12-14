@@ -8,7 +8,7 @@ class PositionOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     list_filter = ('category', 'name', 'disabled', 'active_from', 'active_till',)
     search_fields = ('box_type', 'text',)
 
-    suggest_fields = {'category': ('tree_path', 'title', 'slug',),}
+#    suggest_fields = {'category': ('tree_path', 'title', 'slug',),}
 
 admin.site.register(Position, PositionOptions)
 
