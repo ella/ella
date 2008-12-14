@@ -1,3 +1,39 @@
+centrum-ella (0.2.42.0) unstable; urgency=low
+
+  * Build from revision 1796.
+
+ -- Vitek Pliska <whit@jizak.cz>  Fri, 28 Nov 2008 17:20:07 +0100
+
+centrum-ella (0.2.41.1) unstable; urgency=low
+
+  * build from revision [1779]
+
+ -- Jakub Vysoky <jakub@borka.cz>  Fri, 21 Nov 2008 17:02:33 +0100
+
+centrum-ella (0.2.41.0) unstable; urgency=low
+
+  * build from revision [1767]
+
+ -- Jakub Vysoky <jakub@borka.cz>  Wed, 19 Nov 2008 13:57:15 +0100
+
+centrum-ella (0.2.40.0) unstable; urgency=low
+
+  * Added SITE_ID to cache key in find_template
+
+ -- Ondrej Kohout <ondrej.kohout@centrumholdings.cz>  Mon, 17 Nov 2008 18:52:28 +0100
+
+centrum-ella (0.2.39.0) unstable; urgency=low
+
+  * build from revision [1729]
+
+ -- Jakub Vysoky <jakub@borka.cz>  Fri,  7 Nov 2008 18:21:20 +0100
+
+centrum-ella (0.2.38.1) unstable; urgency=low
+
+  * build from revision [1725]
+
+ -- Jakub Vysoky <jakub@borka.cz>  Fri,  7 Nov 2008 10:25:24 +0100
+
 centrum-ella (0.2.38.0) unstable; urgency=low
 
   * Build from [1700]
