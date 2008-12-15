@@ -15,15 +15,15 @@ from django.conf import settings
 
 from ella.discussions.models import BannedString, Topic, TopicThread, \
     PostViewed, DuplicationError, get_comments_on_thread
-from ella.discussions.cache import get_key_comments_on_thread__by_submit_date, get_key_comments_on_thread__spec_filter
+from ella.discussions.cache import get_key_comments_on_thread__by_submit_date, get_key_comments_on_thread__spec_filter, comments_on_thread__spec_filter, comments_on_thread__by_submit_date
 from ella.comments.models import Comment, build_tree
 from ella.comments.forms import CommentForm
 from ella.core.cache.utils import get_cached_object_or_404, delete_cached_object
 from ella.comments.defaults import FORM_OPTIONS
 from forms import *
 
-DISCUSSIONS_PAGINATE_BY = getattr(settings, 'DISCUSSIONS_PAGINATE_BY', 10)
-THREADS_PAGINATE_BY = getattr(settings, 'THREADS_PAGINATE_BY', 10)
+DISCUSSIONS_PAGINATE_BY = getattr(settings, 'DISCUSSIONS_PAGINATE_BY', 5)
+THREADS_PAGINATE_BY = getattr(settings, 'THREADS_PAGINATE_BY', 5)
 
 def get_ip(request):
     if 'HTTP_X_FORWARDED_FOR' in request.META:
@@ -211,13 +211,12 @@ def topicthread(request, bits, context):
     else:
         thr.hit() # increment view counter
 
-    #if request.user.is_staff:
-    #    comment_set = comments_on_thread__by_submit_date(thr) # specialized function created because of caching
-    #else:
-    #    comment_set = comments_on_thread__spec_filter(thr) # specialized function created because of caching
+    if request.user.is_staff:
+        comment_set = comments_on_thread__by_submit_date(thr) # specialized function created because of caching
+    else:
+        comment_set = comments_on_thread__spec_filter(thr) # specialized function created because of caching
 
 
-    comment_set = thr.get_posts_by_date()
     context.update(paginate_queryset_for_request(request, comment_set, DISCUSSIONS_PAGINATE_BY)) # adds 'posts' object list to context
     make_objects_viewed(request.user, context['posts']) # makes the objects rendered viewed by user
     thread_url = '%s?p=%i' % (thr.get_absolute_url(), int(float(len(comment_set))/DISCUSSIONS_PAGINATE_BY + 0.9999))
@@ -243,8 +242,7 @@ def post_reply(request, context, reply, thread):
     """new reply to a post in the thread"""
     parent = get_cached_object_or_404(Comment, pk=reply)
     thr = TopicThread.objects.get(slug = thread)
-    comment_set = thr.get_posts_by_date() # this should be replaced by something not as complex... too much unnecessary information (only the number of posts in the thread is of interest)
-    thread_url = '%s?p=%i' % (thr.get_absolute_url(), int(float(len(comment_set))/DISCUSSIONS_PAGINATE_BY + 0.9999))
+    thread_url = '%s?p=%i' % (thr.get_absolute_url(), int(float(thr.num_posts+1)/DISCUSSIONS_PAGINATE_BY + 0.9999))
     init_props = {
         'target': '%d:%d' % (parent.target_ct.id, parent.target.id),
         'options' : FORM_OPTIONS['UNAUTHORIZED_ONLY'],
@@ -356,7 +354,7 @@ def topic(request, context):
     kwargs = {}
     if 'p' in request.GET:
         kwargs['page'] = request.GET['p']
-    qset = topic.topicthread_set.all().order_by('created')
+    qset = topic.topicthread_set.all().order_by('-created')
     context.update(paginate_queryset_for_request(request, qset, THREADS_PAGINATE_BY))
     return object_list(
             request,

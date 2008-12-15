@@ -200,7 +200,9 @@ class ItemNumberNode(template.Node):
     def render(self, context):
         object = template.Variable(self.object).resolve(context)
         mapping = template.Variable(self.mapping).resolve(context)
-        item_number = mapping[object._get_pk_val()]
+
+        # default value -1 for an object not present in the mapping
+        item_number = mapping.get(object._get_pk_val(), -1)
         context[self.varname] = item_number
         if self.page_varname:
             page_number = int(float(item_number)/DISCUSSIONS_PAGINATE_BY + 0.9999)
