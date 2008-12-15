@@ -186,7 +186,7 @@ class PlacementOptions(EllaAdminOptionsMixin, EllaModelAdmin):
 class ListingOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     list_display = ('target_admin', 'target_ct', 'publish_from', 'category', 'placement_admin', 'target_hitcounts', 'target_url',)
     list_display_links = ()
-    list_filter = ('publish_from', 'category',)
+    list_filter = ('publish_from', 'category__site', 'category', 'placement__target_ct',)
     raw_id_fields = ('placement',)
     date_hierarchy = 'publish_from'
 

@@ -30,7 +30,7 @@ class ArticleOptions(EllaAdminOptionsMixin, EllaModelAdmin):
         (_("Metadata"), {'fields': ('category', 'authors', 'source', 'photo')}),
 )
     raw_id_fields = ('photo',)
-    list_filter = ('created', 'category', 'authors',)
+    list_filter = ('category__site', 'created', 'category', 'authors',)
     search_fields = ('title', 'upper_title', 'perex', 'slug', 'authors__name', 'authors__slug',) # FIXME: 'tags__tag__name',)
     inlines = [ ArticleContentInlineOptions, PlacementInlineOptions ]
     if 'ella.tagging' in settings.INSTALLED_APPS:
