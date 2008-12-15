@@ -21,7 +21,7 @@ class MediaOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
 
     list_display = ('title',)
     list_filter = ('created', 'updated',)
-    search_fields = ('title', 'slug', 'description', 'content',)
+    search_fields = ('title', 'slug', 'description', 'text',)
 
 #    inlines = (PlacementInlineOptions, TaggingInlineOptions, SectionInline)
     inlines = (SectionInline, UsageInline)
