@@ -14,7 +14,7 @@ def discussion_custom_urls(request, bits, context):
             return comment_preview(request, context)
     if len(bits) == 4:
         if bits[2] == slugify(_('reply')) and bits[3].isdigit():
-            return post_reply(request, context, reply=int(bits[3]), thread=bits[0])
+            return post_reply(request, context, reply = int(bits[3]), thread = bits[0])
 
     return topicthread(request, bits, context)
 

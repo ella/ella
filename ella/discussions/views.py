@@ -22,7 +22,8 @@ from ella.core.cache.utils import get_cached_object_or_404, delete_cached_object
 from ella.comments.defaults import FORM_OPTIONS
 from forms import *
 
-DISCUSSIONS_PAGINATE_BY = getattr(settings, 'DISCUSSIONS_PAGINATE_BY', 5)
+DISCUSSIONS_PAGINATE_BY = getattr(settings, 'DISCUSSIONS_PAGINATE_BY', 10)
+THREADS_PAGINATE_BY = getattr(settings, 'THREADS_PAGINATE_BY', 10)
 
 def get_ip(request):
     if 'HTTP_X_FORWARDED_FOR' in request.META:
@@ -82,11 +83,10 @@ def add_post(content, thread, user = False, nickname = False, email = '', ip='0.
     else:
         raise Exception("Either user or nickname param required!")
 
-def paginate_queryset_for_request(request, qset):
+def paginate_queryset_for_request(request, qset, paginate_by):
     """ returns appropriate page for view. Page number should
         be set in GET variable 'p', if not set first page is returned.
     """
-    paginate_by = DISCUSSIONS_PAGINATE_BY
     item_number_mapping = {}
     for i, c in enumerate(qset):
         item_number_mapping[c._get_pk_val()] = i + 1
@@ -147,7 +147,7 @@ def view_unread(request):
     u = request.user
     qset = TopicThread.objects.get_unread_topicthreads(request.user)
     context = Context()
-    context.update(paginate_queryset_for_request(request, qset))
+    context.update(paginate_queryset_for_request(request, qset, DISCUSSIONS_PAGINATE_BY))
     return render_to_response(
         ('page/content_type/discussions.question/unread_threads.html',),
         context,
@@ -166,7 +166,7 @@ def user_posts(request, username):
     CT = ContentType.objects.get_for_model(TopicThread)
     qset = Comment.objects.filter(target_ct=CT).filter(user=u)
     context = Context()
-    context.update(paginate_queryset_for_request(request, qset))
+    context.update(paginate_queryset_for_request(request, qset, DISCUSSIONS_PAGINATE_BY))
     return render_to_response(
         ('page/content_type/discussions.question/user_posts.html',),
         context,
@@ -218,7 +218,7 @@ def topicthread(request, bits, context):
 
 
     comment_set = thr.get_posts_by_date()
-    context.update(paginate_queryset_for_request(request, comment_set)) # adds 'posts' object list to context
+    context.update(paginate_queryset_for_request(request, comment_set, DISCUSSIONS_PAGINATE_BY)) # adds 'posts' object list to context
     make_objects_viewed(request.user, context['posts']) # makes the objects rendered viewed by user
     thread_url = '%s?p=%i' % (thr.get_absolute_url(), int(float(len(comment_set))/DISCUSSIONS_PAGINATE_BY + 0.9999))
 
@@ -356,13 +356,13 @@ def topic(request, context):
     kwargs = {}
     if 'p' in request.GET:
         kwargs['page'] = request.GET['p']
-    qset = topic.topicthread_set.all()
-    #context.update(paginate_queryset_for_request(request, qset))
+    qset = topic.topicthread_set.all().order_by('created')
+    context.update(paginate_queryset_for_request(request, qset, THREADS_PAGINATE_BY))
     return object_list(
             request,
             queryset=qset,
             extra_context=context,
-            paginate_by=10,
+            paginate_by=THREADS_PAGINATE_BY,
             template_name=loader.select_template(t_list).name,
             **kwargs
 )
