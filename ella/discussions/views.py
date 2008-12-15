@@ -101,7 +101,7 @@ def paginate_queryset_for_request(request, qset, paginate_by):
     context = {}
     page = paginator.page(page_no)
     objs = page.object_list
-    context['posts'] = objs
+    context['object_list'] = objs
     context.update({
         'is_paginated': paginator.num_pages > 1,
         'results_per_page': paginate_by,
@@ -121,7 +121,6 @@ def make_objects_viewed(user, object_list):
             post_viewed.save()
 
 def get_category_topics_url(category):
-    # category.slug/year/_(topics)
     return '/%s/%s/%s/' % (category.slug, slugify(_('static')), slugify(_('topics')))
 
 def filter_banned_strings(content):
@@ -180,7 +179,6 @@ def topicthread(request, bits, context):
 
     topic = context['object']
     category = context['category']
-    # category.slug/year/_(topics)
 
     thr = TopicThread.objects.get(slug=bits[0])
     user = get_user(request)
@@ -217,8 +215,8 @@ def topicthread(request, bits, context):
         comment_set = comments_on_thread__spec_filter(thr) # specialized function created because of caching
 
 
-    context.update(paginate_queryset_for_request(request, comment_set, DISCUSSIONS_PAGINATE_BY)) # adds 'posts' object list to context
-    make_objects_viewed(request.user, context['posts']) # makes the objects rendered viewed by user
+    context.update(paginate_queryset_for_request(request, comment_set, DISCUSSIONS_PAGINATE_BY)) # adds 'object_list' object list to context
+    make_objects_viewed(request.user, context['object_list']) # makes the objects rendered viewed by user
     thread_url = '%s?p=%i' % (thr.get_absolute_url(), int(float(len(comment_set))/DISCUSSIONS_PAGINATE_BY + 0.9999))
 
     context['topics_url'] = get_category_topics_url(category)
@@ -293,7 +291,9 @@ def create_thread(request, bits, context):
 )
                 thr.save()
                 add_post(data['content'], thr, nickname=data['nickname'], email=data['email'], ip=get_ip(request))
-            #TODO invalidate cached thread list
+
+            # TODO: invalidate cached thread list
+
             return http.HttpResponseRedirect(topic.get_absolute_url())
         except DuplicationError:
             context['error'] = _('Thread with given title already exist.')
@@ -354,15 +354,14 @@ def topic(request, context):
     kwargs = {}
     if 'p' in request.GET:
         kwargs['page'] = request.GET['p']
+
     qset = topic.topicthread_set.all().order_by('-created')
     context.update(paginate_queryset_for_request(request, qset, THREADS_PAGINATE_BY))
-    return object_list(
-            request,
-            queryset=qset,
-            extra_context=context,
-            paginate_by=THREADS_PAGINATE_BY,
-            template_name=loader.select_template(t_list).name,
-            **kwargs
+
+    return render_to_response(
+            t_list,
+            context,
+            context_instance=RequestContext(request)
 )
 
 log = logging.getLogger('ella.discussions')
