@@ -293,7 +293,7 @@ class AggManager(models.Manager):
         """
 
         sql = '''INSERT INTO %(tab_tr)s (amount, target_ct_id, target_id)
-                 SELECT SUM(amount * (karma_get_time_coeficient(DATEDIFF(current_date, DATE(time))))), target_ct_id, target_id
+                 SELECT round(SUM(amount * (karma_get_time_coeficient(DATEDIFF(current_date, DATE(time))))),2), target_ct_id, target_id
                  FROM %(tab_agg)s
                  GROUP BY target_ct_id, target_id''' % {
             'tab_agg' : connection.ops.quote_name(Agg._meta.db_table),
