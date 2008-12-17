@@ -1,9 +1,13 @@
+import logging
+
 from django.contrib.formtools.preview import FormPreview
 from django.contrib.contenttypes.models import ContentType
 
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
+from django.template.defaultfilters import slugify
+from django.utils.translation import ugettext as _
 
 from ella.core.cache import get_cached_object_or_404
 from ella.core.views import get_templates_from_placement
@@ -12,6 +16,7 @@ from ella.comments.models import Comment
 from ella.comments.forms import CommentForm
 from ella.comments.defaults import FORM_OPTIONS
 
+log = logging.getLogger('ella.comments')
 
 class CommentFormPreview(FormPreview):
     """comment form preview with extended template calls"""
@@ -39,7 +44,9 @@ class CommentFormPreview(FormPreview):
         ct = get_cached_object_or_404(ContentType, pk=cleaned_data['target_ct'].id)
         target = get_cached_object_or_404(ct, pk=cleaned_data['target_id'])
 
-        if hasattr(target, 'get_absolute_url'):
+        if 'redir' in request.POST:
+            url = request.POST['redir']
+        elif hasattr(target, 'get_absolute_url'):
             url = target.get_absolute_url()
         else:
             url = '/'
@@ -81,4 +88,24 @@ def list_comments(request, context):
 })
     templates = get_templates_from_placement('comments/list.html', context['placement'])
     return render_to_response(templates, context, context_instance=RequestContext(request))
+
+def comments_custom_urls(request, bits, context):
+    if len(bits) == 2:
+        if bits[0] == slugify(_('reply')) and bits[1].isdigit():
+            return new_comment(request, context, reply=int(bits[1]))
+
+    if len(bits) == 1:
+        if bits[0] == slugify(_('preview')):
+            if request.method == 'GET':
+                log.warning('Preview should be used only with POST.')
+                raise Http404('Preview should be used only with POST.')
+            comment_preview = CommentFormPreview(CommentForm)
+            return comment_preview(request, context)
+        elif bits[0] == slugify(_('new')):
+            return new_comment(request, context)
+
+    if len(bits) == 0:
+        return list_comments(request, context)
+
+    raise Http404
 

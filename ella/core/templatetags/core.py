@@ -10,7 +10,7 @@ from django.utils.encoding import smart_str, force_unicode
 from django.utils.safestring import mark_safe
 from django.template.defaultfilters import stringfilter
 
-from ella.core.models import Listing, Related, Category
+from ella.core.models import Listing, Related, Category, LISTING_UNIQUE_DEFAULT_SET
 from ella.core.cache.utils import get_cached_object, cache_this
 from ella.core.cache.invalidate import CACHE_DELETER
 from ella.core.box import BOX_INFO, MEDIA_KEY, Box
@@ -22,7 +22,6 @@ register = template.Library()
 
 DOUBLE_RENDER = getattr(settings, 'DOUBLE_RENDER', False)
 
-
 class ListingNode(template.Node):
     def __init__(self, var_name, parameters, parameters_to_resolve):
         self.var_name = var_name
@@ -30,11 +29,22 @@ class ListingNode(template.Node):
         self.parameters_to_resolve = parameters_to_resolve
 
     def render(self, context):
+        unique_var_name = None
         for key in self.parameters_to_resolve:
+            if key == 'unique':
+                unique_var_name = self.parameters[key]
+            if key == 'unique' and unique_var_name not in context.dicts[-1]: # autocreate variable in context
+                self.parameters[key] = context.dicts[-1][ unique_var_name ] = set()
+                continue
             self.parameters[key] = template.Variable(self.parameters[key]).resolve(context)
         if self.parameters.has_key('category') and isinstance(self.parameters['category'], basestring):
             self.parameters['category'] = get_cached_object(Category, tree_path=self.parameters['category'], site__id=settings.SITE_ID)
-        context[self.var_name] = Listing.objects.get_listing(**self.parameters)
+        out = Listing.objects.get_listing(**self.parameters)
+
+        if 'unique' in self.parameters:
+            unique = self.parameters['unique'] #context[unique_var_name]
+            map(lambda x: unique.add(x.placement_id),out)
+        context[self.var_name] = out
         return ''
 
 @register.tag
@@ -62,6 +72,8 @@ def listing(parser, token):
         ``with descendents``                Include items from all descend subcategories.
         ``as result``                       Store the resulting list in context under given
                                             name.
+        ``unique [unique_set_name]``        Unique items across multiple listings.
+                                            Name of context variable used to hold the data is optional.
         ==================================  ================================================
 
     Examples::
@@ -72,6 +84,12 @@ def listing(parser, token):
         {% listing 10 of articles.article for category with descendents as obj_list %}
         {% listing 10 from 10 of articles.article as obj_list %}
         {% listing 10 of articles.article, photos.photo as obj_list %}
+
+        Unique items across multiple listnings::
+        {% listing 10 for category_uno as obj_list unique %}
+        {% listing 4 for category_duo as obj_list unique %}
+        {% listing 10 for category_uno as obj_list unique unique_set_name %}
+        {% listing 4 for category_duo as obj_list unique unique_set_name %}
     """
     var_name, parameters, parameters_to_resolve = listing_parse(token.split_contents())
     return ListingNode(var_name, parameters, parameters_to_resolve)
@@ -128,6 +146,14 @@ def listing_parse(input):
         var_name = input[o+1]
     else:
         raise template.TemplateSyntaxError, "%r tag requires 'as' argument" % input[0]
+
+    # unique
+    if input[-2].lower() == 'unique':
+        params['unique'] = input[-1]
+        params_to_resolve.append('unique')
+    elif input[-1].lower() == 'unique':
+        params['unique'] = LISTING_UNIQUE_DEFAULT_SET
+        params_to_resolve.append('unique')
 
     return var_name, params, params_to_resolve
 
@@ -368,8 +394,13 @@ def suffix(string_list, suffix):
     return t.render(template.Context({'string_list' : string_list,}))
 
 class RelatedNode(template.Node):
-    def __init__(self, obj_var, count, var_name, models=[]):
+    def __init__(self, obj_var, count, var_name, models=[], all_categories=True):
+        """
+        Parameters::
+        all_categories ... fetches listings even from different categories than obj_var's category
+        """
         self.obj_var, self.count, self.var_name, self.models = obj_var, count, var_name, models
+        self.all_categories = all_categories
 
     def render(self, context):
         try:
@@ -391,7 +422,7 @@ class RelatedNode(template.Node):
         if self.models and count > 0:
             from ella.tagging.models import TaggedItem
             for m in self.models:
-                to_add = TaggedItem.objects.get_related(self.obj, m, count)
+                to_add = TaggedItem.objects.get_related(obj, m, count)
                 for rel in to_add:
                     if rel != obj and rel not in related:
                         count -= 1
@@ -403,6 +434,11 @@ class RelatedNode(template.Node):
         if count > 0:
             cat = get_cached_object(Category, pk=obj.category_id)
             listings = Listing.objects.get_listing(category=cat, count=count, mods=self.models)
+            ext = [ listing.target for listing in listings if listing.target != obj ]
+            related.extend(ext)
+            count -= len(ext)
+        if self.all_categories and count > 0:
+            listings = Listing.objects.get_listing(count=count, mods=self.models)
             related.extend(listing.target for listing in listings if listing.target != obj)
 
         context[self.var_name] = related
@@ -414,11 +450,12 @@ def do_related(parser, token):
     Get N related models into a context variable.
 
     Usage::
-        {% related N [app_label.Model, ...] for object as var_name %}
+        {% related N [app_label.Model, ...] [ALLCATEGORIES] for object as var_name %}
 
     Example::
         {% related 10 for object as related_list %}
         {% related 10 articles.article, galleries.gallery for object as related_list %}
+        {% related 10 articles.article, galleries.gallery ALLCATEGORIES for object as related_list %}
     """
     bits = token.split_contents()
 
@@ -433,8 +470,14 @@ def do_related(parser, token):
     if bits[-4] != 'for':
         raise template.TemplateSyntaxError, "Tag must end with for object as var_name "
 
+    mods_to_slice = -4
+    all_categories = False
+    if bits[-5] == 'ALLCATEGORIES':
+        all_categories = True
+        mods_to_slice = -5
+
     mods = []
-    for m in bits[2:-5]:
+    for m in bits[2:mods_to_slice]:
         if m == ',':
             continue
         if ',' in m:
@@ -449,7 +492,7 @@ def do_related(parser, token):
                 mods.append(models.get_model(*m.split('.')))
             except:
                 raise template.TemplateSyntaxError, "%r doesn't represent any model." % m
-    return RelatedNode(bits[-3], int(bits[1]), bits[-1], mods)
+    return RelatedNode(bits[-3], int(bits[1]), bits[-1], mods, all_categories)
 
 CONTAINER_VARS = ('level', 'name', 'css_class',)
 

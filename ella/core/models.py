@@ -16,6 +16,7 @@ from ella.core.box import Box
 from ella.core.managers import ListingManager, HitCountManager, PlacementManager
 from ella.core.cache import get_cached_object, cache_this, CachedGenericForeignKey
 
+LISTING_UNIQUE_DEFAULT_SET = 'unique_set_default'
 
 class Author(models.Model):
     """
