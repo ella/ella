@@ -83,18 +83,19 @@ class Photo(models.Model):
         thumbUrl = self.thumb_url()
         if not thumbUrl:
             return mark_safe("""<strong>%s</strong>""" % ugettext('Thumbnail not available'))
-        return mark_safe("""<a href="%s"><img src="%s%s" alt="Thumbnail %s" /></a>""" % (self.image.url, settings.MEDIA_URL, thumbUrl, self.title))
+        return mark_safe("""<a href="%s"><img src="%s" alt="Thumbnail %s" /></a>""" % (self.image.url, thumbUrl, self.title))
     thumb.allow_tags = True
 
     def thumb_url(self):
-
-
+        """
+        Generates thumbnail for admin site and returns its url
+        """
         type = detect_img_type(self.image.path)
         if not type:
             return None
 
         # photos/2008/12/31/foo.jpg => photos/2008/12/31/thumb-foo.jpg
-        thumb_name = path.dirname(self.image.name) + "/" + 'thumb-%s%s' % path.splitext(path.basename(self.image.name))
+        thumb_name = path.dirname(self.image.name) + "/" + 'thumb-%s' % path.basename(self.image.name)
 
         storage = self.image.storage
         if not storage.exists(thumb_name):
@@ -105,7 +106,7 @@ class Photo(models.Model):
             except IOError:
                 # TODO Logging something wrong
                 return None
-        return thumb_name
+        return storage.url(thumb_name)
 
     def Box(self, box_type, nodelist):
         return PhotoBox(self, box_type, nodelist)
