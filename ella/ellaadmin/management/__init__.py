@@ -11,7 +11,7 @@ def _get_all_permissions(opts):
     "Returns (codename, name) for all permissions in the given opts."
     return [ (_get_permission_codename('view', opts), u'Can view %s' % (opts.verbose_name_raw)), ]
 
-def create_permissions(app, created_models, verbosity):
+def create_permissions(app, created_models, verbosity, **kwargs):
     from django.contrib.contenttypes.models import ContentType
     from django.contrib.auth.models import Permission
     app_models = get_models(app)
@@ -25,5 +25,6 @@ def create_permissions(app, created_models, verbosity):
             if created and verbosity >= 2:
                 print "Adding permission '%s'" % p
 
-dispatcher.connect(create_permissions, signal=signals.post_syncdb)
+# TODO: check functionality - its new signals in django 1.0.x
+signals.post_syncdb.connect(create_permissions)
 
