@@ -1,3 +1,21 @@
+centrum-ella (0.3.1.2) unstable; urgency=low
+
+  * Build from latest-django revision 1870.
+
+ -- Vitek Pliska <whit@jizak.cz>  Mon, 22 Dec 2008 15:58:22 +0100
+
+centrum-ella (0.3.1.1) unstable; urgency=low
+
+  * Build from django-latest revision 1865.
+
+ -- Vitek Pliska <whit@jizak.cz>  Mon, 22 Dec 2008 11:05:06 +0100
+
+centrum-ella (0.3.1.0) unstable; urgency=low
+
+  * Build from latest-django revision 1861.
+
+ -- Vitek Pliska <whit@jizak.cz>  Wed, 17 Dec 2008 12:17:57 +0100
+
 centrum-ella (0.2.43.0) unstable; urgency=low
 
   * Build from revision 1842.
