@@ -83,7 +83,7 @@ class Photo(models.Model):
         thumbUrl = self.thumb_url()
         if not thumbUrl:
             return mark_safe("""<strong>%s</strong>""" % ugettext('Thumbnail not available'))
-        return mark_safe("""<a href="%s%s"><img src="%s%s" alt="Thumbnail %s" /></a>""" % (settings.MEDIA_URL, self.image, settings.MEDIA_URL, thumbUrl, self.title))
+        return mark_safe("""<a href="%s"><img src="%s%s" alt="Thumbnail %s" /></a>""" % (self.image.url, settings.MEDIA_URL, thumbUrl, self.title))
     thumb.allow_tags = True
 
     def thumb_url(self):
