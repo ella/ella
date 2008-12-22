@@ -87,25 +87,25 @@ class Photo(models.Model):
     thumb.allow_tags = True
 
     def thumb_url(self):
-        spl = path.split(self.image.path)
-        woExtension = spl[1].rsplit('.', 1)[0]
-        imageType = detect_img_type(path.join(settings.MEDIA_ROOT, self.image.path))
-        if not imageType:
+
+
+        type = detect_img_type(self.image.path)
+        if not type:
             return None
-        ext = PHOTOS_TYPE_EXTENSION[ imageType ]
-        filename = 'thumb-%s%s' % (woExtension, ext)
-        tPath = (spl[0] , filename)
-        tinythumb = path.join(*tPath)
-        tinythumbPath = path.join(settings.MEDIA_ROOT, tinythumb)
-        if not path.exists(tinythumbPath):
+
+        # photos/2008/12/31/foo.jpg => photos/2008/12/31/thumb-foo.jpg
+        thumb_name = path.dirname(self.image.name) + "/" + 'thumb-%s%s' % path.splitext(path.basename(self.image.name))
+
+        storage = self.image.storage
+        if not storage.exists(thumb_name):
             try:
-                im = Image.open(path.join(settings.MEDIA_ROOT, self.image.path))
-                im.thumbnail(PHOTOS_THUMB_DIMENSION , Image.ANTIALIAS)
-                im.save(tinythumbPath, imageType)
+                im = Image.open(self.image.path)
+                im.thumbnail(PHOTOS_THUMB_DIMENSION, Image.ANTIALIAS)
+                im.save(storage.path(thumb_name), type)
             except IOError:
                 # TODO Logging something wrong
                 return None
-        return tinythumb
+        return thumb_name
 
     def Box(self, box_type, nodelist):
         return PhotoBox(self, box_type, nodelist)
