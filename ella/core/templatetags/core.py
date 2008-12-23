@@ -348,7 +348,8 @@ def emailblur(email):
 def render_str(content):
     "Render string with markdown and/or django template tags and return template."
 
-    result = Markdown().convert(content)
+    md = Markdown(extras=["code-friendly"])
+    result = md.convert(content)
     return template.Template(result)
 
 @register.filter
