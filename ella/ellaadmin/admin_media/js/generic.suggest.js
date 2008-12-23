@@ -25,6 +25,7 @@
     $('body').append($SUGGEST_BUBBLE);
     var $ins = $('input[rel]').filter(function(){return $(this).parents('ul:first').attr('class').indexOf('Suggest') >= 0});
 
+    // ['foo', 'bar'] => { foo: 1, bar: 1 }
     function arr2map(arr) {
         var map = {};
         for (var i = 0; i < arr.length; i++) {
@@ -123,7 +124,7 @@
         var $inputs = get_current_inputs(el);
         var ids = [];
         var repres = [];
-        $inputs.ul.find('li').not(':last').each(function() {
+        $inputs.ul.find('li.suggest-selected-item').each(function() {
             ids.push( $(this).data('item_id') );
             repres.push( $.trim(this.firstChild.data) );
         });
@@ -191,7 +192,7 @@
             ids    = ids.match(/\d+/g);
             repres = repres.match(/[^,]+/g);
             if (!ids || !repres || ids.length != repres.length) ids = repres = [];
-            $inputs.ul.find('li').not(':last').remove();
+            $inputs.ul.find('li.suggest-selected-item').remove();
             while (ids.length > 0) {
                 var id    = ids.pop();
                 var repre = repres.pop();
@@ -202,7 +203,7 @@
         else if ( /^([\d,]+)$/.test($inputs.hidden.val()) ) {
             var raw_ids = RegExp.$1;
             var ids = raw_ids.match(/\d+/g);
-            var $lis = $inputs.ul.find('li').not(':last');
+            var $lis = $inputs.ul.find('li.suggest-selected-item');
             var repres = $.map( $.makeArray($lis), function(n) {
                 return $.trim( n.firstChild.data );
             });
