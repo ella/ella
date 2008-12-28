@@ -203,9 +203,11 @@ class HitCountOptions(admin.ModelAdmin):
 
 class AuthorOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
+    search_fields = ('name',)
 
 class SourceOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     list_display = ('name', 'url',)
+    search_fields = ('name',)
 
 admin.site.register(HitCount, HitCountOptions)
 admin.site.register(Category, CategoryOptions)
