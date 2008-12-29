@@ -160,6 +160,7 @@ class Category(models.Model):
 
     class Meta:
         unique_together = (('site', 'tree_path'),)
+        ordering = ('site', 'tree_path',)
         verbose_name = _('Category')
         verbose_name_plural = _('Categories')
 
