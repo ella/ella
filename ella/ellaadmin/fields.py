@@ -5,12 +5,14 @@ from django.forms import fields
 from django.forms.util import ValidationError
 from django.utils.encoding import smart_unicode
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.admin.widgets import AdminFileWidget
 
 from ella.ellaadmin import widgets
 
 
 class OnlyRGBImageField(fields.ImageField):
     "Check that uploaded image is RGB"
+    widget = AdminFileWidget
 
     def clean(self, data, initial=None):
         f = super(OnlyRGBImageField, self).clean(data, initial)
