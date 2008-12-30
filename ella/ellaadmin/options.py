@@ -53,6 +53,28 @@ class EllaModelAdmin(admin.ModelAdmin):
         else:
             data = self.model.objects.filter(lookup).values(*lookup_fields[:2])[:SUGGEST_VIEW_LIMIT]
 
+        # sort the suggested items so that those starting with the sought term come first
+        def get_cmp_key(field):
+            if field['name']: return field['name']
+            if field['slug']: return field['slug']
+            return field.values()[0]
+        def _cmp(a,b,sought):
+            a_starts = unicode(a).lower().startswith(sought.lower())
+            b_starts = unicode(b).lower().startswith(sought.lower())
+            # if exactly one of (a,b) starts with sought, the one starting with it comes first
+            if a_starts ^ b_starts:
+                if a_starts: return -1
+                if b_starts: return +1
+            # else compare lexicographically
+            if a < b: return -1
+            if a > b: return +1
+            if a == b: return 0
+            return None
+        def cmp(a,b):
+            return _cmp(a,b,unicode(lookup_value))
+        data = list(data)
+        data.sort(cmp=cmp, key=get_cmp_key)
+
         ft = []
         for item in data:
             if SUGGEST_RETURN_ALL_FIELD:
