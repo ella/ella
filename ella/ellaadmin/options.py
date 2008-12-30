@@ -49,9 +49,9 @@ class EllaModelAdmin(admin.ModelAdmin):
                 lookup = lookup | Q(**{lookup_key: lookup_value})
 
         if SUGGEST_RETURN_ALL_FIELD:
-            data = self.model.objects.filter(lookup).values(*lookup_fields)[:SUGGEST_VIEW_LIMIT]
+            data = self.model.objects.filter(lookup).values(*lookup_fields)
         else:
-            data = self.model.objects.filter(lookup).values(*lookup_fields[:2])[:SUGGEST_VIEW_LIMIT]
+            data = self.model.objects.filter(lookup).values(*lookup_fields[:2])
 
         # sort the suggested items so that those starting with the sought term come first
         def get_cmp_key(field):
@@ -59,8 +59,8 @@ class EllaModelAdmin(admin.ModelAdmin):
             if field['slug']: return field['slug']
             return field.values()[0]
         def _cmp(a,b,sought):
-            a_starts = unicode(a).lower().startswith(sought.lower())
-            b_starts = unicode(b).lower().startswith(sought.lower())
+            a_starts = unicode(a).lower().startswith(sought)
+            b_starts = unicode(b).lower().startswith(sought)
             # if exactly one of (a,b) starts with sought, the one starting with it comes first
             if a_starts ^ b_starts:
                 if a_starts: return -1
@@ -71,9 +71,10 @@ class EllaModelAdmin(admin.ModelAdmin):
             if a == b: return 0
             return None
         def cmp(a,b):
-            return _cmp(a,b,unicode(lookup_value))
+            return _cmp(a,b,unicode(lookup_value).lower())
         data = list(data)
         data.sort(cmp=cmp, key=get_cmp_key)
+        data = data[:SUGGEST_VIEW_LIMIT]
 
         ft = []
         for item in data:
