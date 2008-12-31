@@ -55,9 +55,9 @@ class EllaModelAdmin(admin.ModelAdmin):
 
         # sort the suggested items so that those starting with the sought term come first
         def get_cmp_key(field):
-            if field.has_key('name'): return field['name']
-            if field.has_key('slug'): return field['slug']
-            return field.values()[0]
+            #if field.has_key('name'): return field['name']
+            #if field.has_key('slug'): return field['slug']
+            return field[ lookup_fields[1] ]
         def _cmp(a,b,sought):
             a_starts = unicode(a).lower().startswith(sought)
             b_starts = unicode(b).lower().startswith(sought)
