@@ -27,7 +27,7 @@ class EllaModelAdmin(admin.ModelAdmin):
             raise Http404
 
         if not ('f' in request.GET.keys() and 'q' in request.GET.keys()):
-            raise AttributeError, 'Invalid query attributes. Example: ".../?f=field_a&f=field_b&q=search_term"'
+            raise AttributeError, 'Invalid query attributes. Example: ".../?f=field_a&f=field_b&q=search_term&o=offset"'
         elif len(request.GET.get('q')) < SUGGEST_VIEW_MIN_LENGTH:
             return HttpResponse('', mimetype='text/plain;charset=utf-8')
 
@@ -59,26 +59,22 @@ class EllaModelAdmin(admin.ModelAdmin):
             data = self.model.objects.filter(lookup).values(*lookup_fields[:2])
 
         # sort the suggested items so that those starting with the sought term come first
-        def get_cmp_key(field):
-            #if field.has_key('name'): return field['name']
-            #if field.has_key('slug'): return field['slug']
-            return field[ lookup_fields[1] ]
-        def _cmp(a,b,sought):
-            a_starts = unicode(a).lower().startswith(sought)
-            b_starts = unicode(b).lower().startswith(sought)
-            # if exactly one of (a,b) starts with sought, the one starting with it comes first
-            if a_starts ^ b_starts:
-                if a_starts: return -1
-                if b_starts: return +1
-            # else compare lexicographically
-            if a < b: return -1
-            if a > b: return +1
-            if a == b: return 0
-            return None
         def cmp(a,b):
+            def _cmp(a,b,sought):
+                a_starts = unicode(a).lower().startswith(sought)
+                b_starts = unicode(b).lower().startswith(sought)
+                # if exactly one of (a,b) starts with sought, the one starting with it comes first
+                if a_starts ^ b_starts:
+                    if a_starts: return -1
+                    if b_starts: return +1
+                # else compare lexicographically
+                if a < b: return -1
+                if a > b: return +1
+                if a == b: return 0
+                return None
             return _cmp(a,b,unicode(lookup_value).lower())
         data = list(data)
-        data.sort(cmp=cmp, key=get_cmp_key)
+        data.sort(cmp=cmp, key=lambda x: x[lookup_fields[1]])
         data = data[offset:limit]
 
         ft = []
