@@ -31,6 +31,11 @@ class EllaModelAdmin(admin.ModelAdmin):
         elif len(request.GET.get('q')) < SUGGEST_VIEW_MIN_LENGTH:
             return HttpResponse('', mimetype='text/plain;charset=utf-8')
 
+        offset = 0
+        if 'o' in request.GET.keys() and request.GET.get('o'):
+            offset = int(request.GET.get('o'))
+        limit = offset + SUGGEST_VIEW_LIMIT
+
         lookup_fields = [u'id'] + request.GET.getlist('f')
         lookup_value = request.GET.get('q')
         lookup = None
@@ -74,7 +79,7 @@ class EllaModelAdmin(admin.ModelAdmin):
             return _cmp(a,b,unicode(lookup_value).lower())
         data = list(data)
         data.sort(cmp=cmp, key=get_cmp_key)
-        data = data[:SUGGEST_VIEW_LIMIT]
+        data = data[offset:limit]
 
         ft = []
         for item in data:
