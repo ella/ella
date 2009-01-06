@@ -58,6 +58,8 @@ class EllaModelAdmin(admin.ModelAdmin):
         else:
             data = self.model.objects.filter(lookup).values(*lookup_fields[:2])
 
+        cnt = len(data)
+
         # sort the suggested items so that those starting with the sought term come first
         def cmp(a,b):
             def _cmp(a,b,sought):
@@ -79,6 +81,7 @@ class EllaModelAdmin(admin.ModelAdmin):
         data = data[offset:limit]
 
         ft = []
+        ft.append('{cnt:%d}' % cnt)
         for item in data:
             if SUGGEST_RETURN_ALL_FIELD:
                 ft.append("%s".encode('utf-8') % '|'.join("%s" % item[f] for f in lookup_fields))
