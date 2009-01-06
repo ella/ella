@@ -74,6 +74,7 @@ class EllaModelAdmin(admin.ModelAdmin):
                 return None
             return _cmp(a,b,unicode(lookup_value).lower())
         data = list(data)
+        if offset >= len(data): return HttpResponse('SPECIAL: OFFSET OUT OF RANGE', mimetype='text/plain')
         data.sort(cmp=cmp, key=lambda x: x[lookup_fields[1]])
         data = data[offset:limit]
 
