@@ -144,7 +144,8 @@ class Comment(models.Model):
         # TODO: maybe create models.GenealogyField for this
         # first save to obtain primary key
         super(Comment, self).save(force_insert, force_update)
-        force_insert, force_update = False, True
+        # This can raise "Forced update did not affect any rows" exception
+#        force_insert, force_update = False, True
         # do not store too long path
         path = self.get_genealogy_path()
         if len(path) <= defaults.PATH_LENGTH:
