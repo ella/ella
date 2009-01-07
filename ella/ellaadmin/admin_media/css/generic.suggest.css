@@ -1,28 +1,63 @@
 /* Bublina */
-ul.suggest-bubble {
+div.suggest-bubble {
     position: absolute;
     display: none;
+}
+ul.suggest-list {
     background-color: white;
     border: solid 1px black;
     list-style-type: none;
     padding: 1px;
 }
 
-ul.suggest-bubble li {
+ul.suggest-list li {
     list-style-type: none;
     cursor: pointer;
     padding: 2px;
 }
-ul.suggest-bubble li.A {
+ul.suggest-list li.A {
     background-color: #7CA0C7;
 }
-ul.suggest-bubble li:hover {
-    background: #AFD0E7;
+ul.suggest-list li:hover {
+    background-color: #AFD0E7;
 }
 .suggest-bubble span.hilite {
     color: red;
 }
+.suggest-bubble div.suggest-next-page {
+    background-color: white;
+    font-weight: bold;
+    text-align: center;
+    border: solid 1px black;
+    font-size: 75%;
+}
+.suggest-bubble div.suggest-next-page a {
+    display: block;
+}
+.suggest-bubble div.suggest-next-page a,
+.suggest-bubble div.suggest-next-page a:hover,
+.suggest-bubble div.suggest-next-page a:link,
+.suggest-bubble div.suggest-next-page a:visited {
+    color: black;
+}
 /* /Bublina */
+
+/* Bublina fieldů */
+div.suggest-fields-bubble {
+    display: none;
+    position: absolute;
+    background: url(../img/triangle-left.png) no-repeat left center;
+    padding-left: 10px;
+}
+div.suggest-fields-bubble div.suggest-fields-list {
+    background-color: white;
+    border: solid 1px black;
+    -moz-border-radius: 8px;
+}
+div.suggest-fields-bubble div.suggest-fields-list table {
+    margin: 2px;
+}
+/* /Bublina fieldů */
 
 form .aligned ul.GenericSuggestField,   /* override the padding and margins from forms.css */
 form .aligned ul.GenericSuggestFieldMultiple,   /* ditto */
@@ -72,6 +107,62 @@ a.suggest-related-lookup {
     padding: 4px 2px;
 }
 /* /related lookup icon */
+
+/* lupicka popup */
+.fakewin {
+    position: fixed;
+    left: 25%;
+    top: 15%;
+    width: 50%;
+    height: 80%;
+    background-color: rgba(200, 200, 200, 0.9);
+    border: solid 1px black;
+    padding-right: 4px;
+    padding-bottom: 56px;
+}
+.fakewin-content {
+    width: 100%;
+    height: 100%;
+}
+.fakewin-title {
+    width: 100%;
+    background-color: blue;
+    color: white;
+    font-size: 20px;
+}
+.fakewin-titletext {
+    float: left;
+}
+.fakewin-closebutton {
+    background-color: red;
+    font-weight: bolder;
+    float: right;
+    margin-right: 2px;
+}
+.fakewin-closebutton:hover {
+    color: black;
+    cursor: pointer;
+}
+.clearfix {
+    clear: both;
+}
+.fakewin .fakewin-content tr:hover {
+    cursor: pointer;
+    background-color: rgb(180,180,180);
+}
+.fakewin .fakewin-content div.table {
+    min-width: 100%;
+    height: 100%;
+    overflow: auto;
+    margin-bottom: 10px;
+}
+.fakewin .fakewin-paginator {
+    border: 1px solid black;
+}
+.pod-lupickou {
+    outline: solid 2px orange;
+}
+/* /lupicka popup */
 
 /* Debug */
 .act { border: solid 3px green !important; }

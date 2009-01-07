@@ -18,11 +18,22 @@
     var BACKSPACE = 8;
     var UPARROW = 38;
     var DOWNARROW = 40;
+    var PAGEUP = 33;
+    var PAGEDOWN = 34;
 
     var MOUSE_ON_BUBBLE = false;
 
-    var $SUGGEST_BUBBLE = $('<ul class="suggest-bubble">');
-    $('body').append($SUGGEST_BUBBLE);
+    // HTML snippets
+    var $SUGGEST_BUBBLE = $('<div class="suggest-bubble"></div>');
+    var $SUGGEST_LIST = $('<ul class="suggest-list"></ul>');
+    $SUGGEST_BUBBLE.append($SUGGEST_LIST).append('<div class="suggest-next-page"><a href="#">&nabla; další strana &nabla;</a></div>');
+    var $SUGGEST_FIELDS_BUBBLE = $(
+        '<div class="suggest-fields-bubble">'           +"\n"+
+        '    <div class="suggest-fields-list">'         +"\n"+
+        '        <table></table>'                       +"\n"+
+        '    </div>'                                    +"\n"+
+        '</div>');                                      +"\n"
+    $('body').append($SUGGEST_BUBBLE).append($SUGGEST_FIELDS_BUBBLE);
     var $ins = $('input[rel]').filter(function(){return $(this).parents('ul:first').attr('class').indexOf('Suggest') >= 0});
 
     // ['foo', 'bar'] => { foo: 1, bar: 1 }
@@ -67,14 +78,14 @@
         $(this).data('fields', fields).attr('autocomplete', 'off');
 
         // Shave off the string representations from the hidden inputs upon form submit
-        $(this).parents('form:first').submit(function(){
-            $(this).find('input:hidden').each(function(){
+        $(this).parents('form:first').submit(function() {
+            $(this).find('input:hidden').each(function() {
                 $(this).val( $(this).val().replace(/#.*/, '') );
             });
             return true;
         });
 
-        // Make the popup-throwing magnifying glass not raise the default dnajgo event but rather ours which cooperates with the <ul> inputs
+        // Make the popup-throwing magnifying glass not raise the default django event but rather ours which cooperates with the <ul> inputs
         var $lens = $('#lookup_'+this.id.replace('_suggest', ''));
         $lens.removeAttr('onclick').click(show_lookup_popup);
     });
@@ -137,6 +148,10 @@
     function parse_suggest_result(result, fields) {
         if (result == null || result.length == 0) return [];
         var results = result.split(SUGGEST_RECORD_SEPARATOR);
+        var meta_str = results.shift();
+        var meta;
+        eval('meta = '+meta_str);
+        if (results.length == 0) return [];
         var parsed_results = $.map(results, function(n) {
             var values = n.split(SUGGEST_FIELD_SEPARATOR);
             var parsed_result = { id: values.shift() };
@@ -151,6 +166,7 @@
             parsed_result.REPRE = repre || parsed_result.id;
             return parsed_result;
         });
+        parsed_results.meta = meta;
         return parsed_results;
     }
     function new_item(item_id, item_str) {
@@ -165,6 +181,7 @@
     function insert_value (id, repre, el) {
         var $inputs = get_current_inputs(el);
         var multiple = is_multiple($inputs.ul);
+        $inputs.ul.removeData('offset');
         var $newli = new_item(id, repre);
         $inputs.text.val('');
         var $prev = $inputs.text.parent().prev('li');
@@ -174,7 +191,8 @@
         }
         update_values(el);
         $inputs.text.focus();
-        $SUGGEST_BUBBLE.empty().hide();
+        $SUGGEST_LIST.empty();
+        hide_bubbles();
         MOUSE_ON_BUBBLE = false;
     }
     // export this function
@@ -213,45 +231,15 @@
                 });
             }
         }
-    });/* */
-    /* Version, where titles were AJAX'ed from id's in the hidden's.* /
-    // TODO: View na get_item_by_id
-    $ins.each(function() {
-        var $inputs = get_current_inputs( this );
-        var ids = /^\d+(?:,\d+)*$/.test($inputs.hidden.val()) ? $inputs.hidden.val().match(/\d+/g) : [];
-        ;;; ids = [];   // FIXME: treba view na items podle IDcek -- ted nefungujou 1ciferna
-        var get_item_url = $inputs.text.attr('rel');
-        if (!get_item_url.match(/[?&]f=id\b/)) {
-            get_item_url = get_item_url.replace('&q=', '&f=id&q=');
-        }
-        var items = [];
-        for (var i = 0; i < ids.length; i++) {
-            var id = ids[i];
-            $.ajax({
-                type: 'GET',
-                url: get_item_url+id,
-                async: false,   // Need to have the values ready before continuing
-                success: function(result) {
-                    var parsed_results = parse_suggest_result(result, $inputs.text.data('fields'));
-                    var item_of_id = $.grep(parsed_results, function(parsed_result) {
-                        if (parsed_result.id == ids[i]) return true;
-                        else return false;
-                    })[0];
-                    items.push(item_of_id);
-                }
-            });
-        }
-        $inputs.ul.find('li').not(':last').remove();
-        while (items.length > 0) {
-            var item = items.pop();
-            item = new_item(item.id, item.REPRE);
-            $inputs.ul.prepend(item);
-        }
-    }); /* */
+    });
     $ins.each(function() {
         update_values($(this));
     });
 
+    function hide_bubbles() {
+        $SUGGEST_BUBBLE.hide();
+        $SUGGEST_FIELDS_BUBBLE.hide();
+    }
     function is_multiple( $el ) {
         if ($el.hasClass('GenericSuggestFieldMultiple')) return true;
         if ($el.parents('.GenericSuggestFieldMultiple').length > 0) return true;
@@ -268,36 +256,65 @@
         var item_str = $sug_item.data('sug_result').REPRE;
         insert_value(item_id, item_str);
     }
-    function suggest_update($input) {
+    function suggest_update($input, offset) {
         var val = $input.val();
         if (val.length < MIN_LENGTH) {
-            $SUGGEST_BUBBLE.hide();
+            hide_bubbles();
             return;
         }
         // create a regexp that will match every occurrence of the text input value
         var val_re = new RegExp( '(' + val.replace(/([^\w\s])/g, '\\$1') + ')', 'ig' ); // the replace does /\Q$val/
         var sug_url = $input.attr('rel');
+
+        if (offset == null || offset < 0)
+            offset = 0;
+        if (offset > 0) {
+            sug_url = sug_url.replace('&q', '&o='+offset+'&q');
+        }
+        $input.data('offset', offset);
+
         $.get(sug_url+val, {}, function(sug_result) {
-            $SUGGEST_BUBBLE.empty();
+            if (sug_result == 'SPECIAL: OFFSET OUT OF RANGE') {
+                suggest_update($input, 0);
+                return;
+            }
+            $SUGGEST_LIST.empty();
             $input.each(set_current_input); // sets $input as the current input
             var fields = $input.data('fields');
             var parsed_results = parse_suggest_result(sug_result, fields)
+            var meta = parsed_results.meta;
+
+            // don't suggest what's already selected
             parsed_results = $.grep(parsed_results, function(parsed_result) {
                 if ($input.data('values')[ parsed_result.id ])
                     return false;
                 else
                     return true;
             });
+
             if (parsed_results.length == 0) {
-                $SUGGEST_BUBBLE.hide();
+                hide_bubbles();
             }
             else {
+                var no_items = parsed_results.length;
+                if (offset + no_items >= meta.cnt) {
+                    $SUGGEST_BUBBLE.find('.suggest-next-page').hide();
+                }
+                else {
+                    $SUGGEST_BUBBLE.find('.suggest-next-page').show();
+                }
                 $.map(parsed_results, function(parsed_result) {
                     var $elem = $('<li>');
                     $elem.data('sug_result', parsed_result);
                     $elem.html(parsed_result.REPRE.replace(val_re, '<span class="hilite">$1</span>'));
-                    $SUGGEST_BUBBLE.append($elem);
-                    $elem.click(function(){suggest_select($elem);});
+                    $SUGGEST_LIST.append($elem);
+                    $elem.click( function() {
+                        suggest_select($elem);
+                    }).hover( function() {
+                        set_field_bubble($(this));
+                    }, function() {
+                        $SUGGEST_FIELDS_BUBBLE.hide();
+                    });
                 });
                 var pos = $input.offset();
                 pos.top += $input.outerHeight();
@@ -309,7 +326,8 @@
         });
     }
     function suggest_scroll($input, key) {
-        var $lis = $SUGGEST_BUBBLE.find('li');
+        $SUGGEST_FIELDS_BUBBLE.hide();
+        var $lis = $SUGGEST_LIST.find('li');
         var $active_elem = $lis.filter('.A:first');
         $lis.removeClass('A');
         if (key == DOWNARROW) {
@@ -317,8 +335,10 @@
                 $active_elem = $lis.eq(0);
             else {
                 $active_elem = $active_elem.next();
-                if ($active_elem.length == 0)
-                    $active_elem = $lis.eq(0);
+                if ($active_elem.length == 0) { // request next page
+                    suggest_scroll_page(1, $input);
+                    return;
+                }
             }
         }
         if (key == UPARROW) {
@@ -326,25 +346,77 @@
                 $active_elem = $lis.filter(':last');
             else {
                 $active_elem = $active_elem.prev();
-                if ($active_elem.length == 0)
-                    $active_elem = $lis.filter(':last');
+                if ($active_elem.length == 0) { // request previous page
+                    suggest_scroll_page(-1, $input);
+                    return;
+                }
             }
         }
         $active_elem.addClass('A');
+        set_field_bubble( $active_elem );
         return;
+    }
+    function suggest_scroll_page(delta, $input) {
+        if ($input == null) $input = get_current_inputs().text;
+        var offset = $input.data('offset') + delta * $SUGGEST_LIST.find('li').length;
+        suggest_update($input, offset);
+    }
+    function set_field_bubble($item) {
+        var sug_result = $item.data('sug_result');
+        var list = [];
+        var i = 0;
+        for (var k in sug_result) {
+            if (i++ == 1) { first = false; continue; }
+            if (k == 'REPRE') continue;
+            list.push('<tr><th>' + k + '</th><td>' + sug_result[ k ] + '</td></tr>');
+        }
+        if (list.length == 0) {
+            $SUGGEST_FIELDS_BUBBLE.hide();
+            return;
+        }
+        var pos = $item.offset();
+        $SUGGEST_FIELDS_BUBBLE.find('table').empty().append(
+            list.join("\n")
+        ).end().css({
+            top:  pos.top + $item.height()/2 - $SUGGEST_FIELDS_BUBBLE.height()/2,
+            left: pos.left + $item.outerWidth()
+        }).show();
+    }
+    function bubble_keyevent(key, $input) {
+        if ($input == null) input = get_current_inputs().text;
+        switch (key) {
+        case ESC:
+            hide_bubbles();
+            $input.val('');
+            break;
+        case UPARROW:
+        case DOWNARROW:
+            suggest_scroll($input, key);
+            break;
+        case CR:
+        case LF:
+            if ($SUGGEST_BUBBLE.is(':visible')) {
+                var $active_li = $SUGGEST_LIST.find('li.A:first');
+                if ($active_li.length == 0)
+                    $active_li = $SUGGEST_LIST.find('li:first');
+                suggest_select($active_li);
+            }
+            break;
+        case PAGEUP:
+        case PAGEDOWN:
+            var delta = (key == PAGEUP) ? -1 : 1;
+            suggest_scroll_page(delta, $input);
+            break;
+        }
     }
     $ins.keyup( function($event) {
         var $this = $(this);
         var key = $event.keyCode;
-        if (key == ESC) {
-            $SUGGEST_BUBBLE.hide();
-            $this.val('');
-            return;
-        }
-        else if (key == UPARROW || key == DOWNARROW) {
-            return;
-        }
-        else if (key == CR || key == LF) {
+        if (  key == CR || key ==   UPARROW || key == PAGEUP
+           || key == LF || key == DOWNARROW || key == PAGEDOWN
+        ) return;
+        else if (key == ESC) {
+            bubble_keyevent(key, $this);
             return;
         }
         else {
@@ -355,14 +427,11 @@
     $ins.keypress( function($event) {
         var key = $event.keyCode;
         var $this = $(this);
-        if (key == CR || key == LF) {
-            if ($SUGGEST_BUBBLE.filter(':visible').length == 1) {
-                var $active_li = $SUGGEST_BUBBLE.find('li.A:first');
-                if ($active_li.length == 0)
-                    $active_li = $SUGGEST_BUBBLE.find('li:first');
-                suggest_select($active_li);
-                return false;
-            }
+        if (  key == CR || key ==   UPARROW || key == PAGEUP
+           || key == LF || key == DOWNARROW || key == PAGEDOWN
+        ) {
+            bubble_keyevent(key, $this);
+            return false;
         }
         else if (key == BACKSPACE && $this.val().length == 0) {
             var $prev = $this.parent().prev();
@@ -371,70 +440,127 @@
             $prev.remove();
             update_values();
         }
-        else if (key == UPARROW || key == DOWNARROW) {
-            suggest_scroll($this, key);
-            return;// false;
-        }
         return true;
     });
     $ins.blur( function() {
         if (!MOUSE_ON_BUBBLE)
-            $SUGGEST_BUBBLE.hide();
+            hide_bubbles();
     });
     $ins.focus( function() {
-        suggest_update( $(this) );
+        if ($(this).data('internal_focus')) {
+            $(this).removeData('internal_focus');
+        }
+        else {
+            suggest_update( $(this) );
+        }
     });
-    $SUGGEST_BUBBLE.bind('mouseenter', function(){ MOUSE_ON_BUBBLE = true;  return true;  });
+
+    // Setup the behavior of the next-page widget
+    $('div.suggest-next-page a').click(function() {
+        suggest_scroll_page(1);
+        return false;
+    }).focus(function() {
+        var $input = get_current_inputs().text;
+        $input.data('internal_focus', 1);
+        $input.focus();
+    });
+
+    $SUGGEST_BUBBLE.bind('mouseenter', function(){ MOUSE_ON_BUBBLE = true;  return true; });
     $SUGGEST_BUBBLE.bind('mouseleave', function(){ MOUSE_ON_BUBBLE = false; return true; });
 }); })(jQuery);
 
 // Functions for handling popups (lupička) taken from django admin
+function parse_lupicka_data(data) {
+    data = data.substring( data.indexOf('<table'), data.indexOf('</table>')+8 );
+    var $data = $('<div>').html(data);
+    var col_names = $.map( $.makeArray($data.find('thead th')), function(n){return $.trim($(n).text())} );
+    var $trs = $data.find('tbody tr');
+    var rv = [col_names];
+    $trs.each(function() {
+        var rec = $.map( $.makeArray( $(this).find('th,td') ), function(n) { return $.trim( $(n).text() ); } );
+        $(this).find('th a').attr('href').match(/(\d+)\/$/);
+        var id = RegExp.$1;
+        rec.push( id );
+        rv.push(rec);
+    });
+    return rv;
+}
+function get_popup_content( href, $popup ) {
+    $.ajax({
+        url: href,
+        success: function(data) {
+            var rows = parse_lupicka_data(data);
+            var col_names = rows.shift();
+            var $table = $("<table></table>\n");
+            var $header = $("<tr></tr>\n");
+            for (var i = 0; i < col_names.length; i++) {
+                $header.append('<th>' + col_names[i] + '</th>');
+            }
+            $table.append($header);
+            for (var i = 0; i < rows.length; i++) {
+                var row = rows[i];
+                var id = row.pop();
+                $( '<tr><td>'+
+                    rows[i].join('</td><td>')
+                    +"</td></tr>\n"
+                )
+                .data('id',id)
+                .appendTo($table);
+            }
+            $table.find('tr:gt(0)').click( function() {
+                var chosenId = $(this).data('id');
+                var item_str = $.trim( $(this).find('td,th').eq(0).text() );
+                var elem = document.getElementById( $('div.lupicka-popup').data('input_id') );
+                insert_value(chosenId, item_str, elem);
+                dismiss_lookup_popup();
+            });
+            var $pagin_cont = $('<div class="fakewin-paginator">1 2 3 4 5</div>');
+            $popup.empty().append($('<div class="table"></div>').append($table)).append($pagin_cont);
+        }
+    });
+}
 function show_lookup_popup() {
     var name = this.id.replace(/^lookup_/, '');
-    // IE doesn't like periods in the window name, so convert temporarily.
-    name = name.replace(/\./g, '___');
     var href;
     if (this.href.search(/\?/) >= 0) {
         href = this.href + '&pop=1';
     } else {
         href = this.href + '?pop=1';
     }
-    var sel_win = window.open(href, name, 'height=1,width=800,resizable=yes,scrollbars=yes');
-    $(sel_win).load(function() {
-        var $linx = sel_win.jQuery('a[onclick]');
-        $linx.removeAttr('onclick').unbind('click').click(function() {
-            this.href.match(/(\d+)\/?$/);
-            dismiss_lookup_popup(sel_win, RegExp.$1);
-            return false;
-        });
-        sel_win.jQuery('a.addlink').click(function() {
-            add_win = window.open(this.href.replace('?_popup=1',''), 'add_object_window', 'height=1,width=800,scrollbars=yes');
-            $(add_win).load(function() {
-                var $form = add_win.jQuery('form');
-                $form.submit(function() {
-                    add_win.close();
-                    sel_win.close();
-                });
-                $(add_win).unload( function(){ add_win.close(); } );
-                add_win.resizeTo(800,500);
-            });
-            return false;
-        });
-        $(sel_win).unload(function() {
-            sel_win.close();
-        });
-        sel_win.resizeTo(800,500);
-    });
-    sel_win.focus();
+
+    var $related_item = $('#'+name+'_suggest').parents('.GenericSuggestField,.GenericSuggestFieldMultiple').eq(0);
+
+    // Create the fake popup window
+    dismiss_lookup_popup();
+    var $popup_w = $(
+        '<div class="lupicka-popup fakewin">'                       +"\n"+
+        '    <div class="fakewin-title">'                           +"\n"+
+        '        <div class="fakewin-titletext"></div>'             +"\n"+
+        '        <div class="fakewin-closebutton">&times;</div>'    +"\n"+
+        '        <div class="clearfix"></div>'                      +"\n"+
+        '    </div>'                                                +"\n"+
+        '    <div class="fakewin-content">'                         +"\n"+
+        '    </div>'                                                +"\n"+
+        '</div>'                                                    +"\n"
+    );
+    $popup_w.data('input', $related_item);
+    $related_item.addClass('pod-lupickou');
+    $popup_w.draggable().draggable('disable').resizable().data('input_id', name+'_suggest')
+    .find('.fakewin-title').bind('mouseenter', function() {
+        $popup_w.draggable('enable');
+    }).bind('mouseleave', function() {
+        $popup_w.draggable('disable');
+    }).find('.fakewin-titletext').html('&nbsp;')
+    .end().find('.fakewin-closebutton').click(dismiss_lookup_popup);
+    var $popup = $popup_w.find('div.fakewin-content');
+    $popup.text('Loading...');
+    $('body').append( $popup_w );
+    get_popup_content(href, $popup);
     return false;
 }
-function dismiss_lookup_popup(win, chosenId) {
-    var name = win.name.replace(/___/g, '.');
-    var elem = document.getElementById(name+'_suggest');
-    // This cute expression takes the first non-blank field of the item whose ID we got
-    var item_str = $.grep($.map($.makeArray($('a[href='+chosenId+'/]',win.document.body).parents('tr').children()),function(n){return $(n).text()}),function(n){return/\S/.test(n)})[0]||chosenId;
-    insert_value(chosenId, item_str, elem);
-    $(win).unbind('unload');
-    win.close();
-    $(elem).each(set_current_input);
+function dismiss_lookup_popup() {
+    var $w = $('div.lupicka-popup:first');
+    if ($w.length == 0) return;
+    $w.data('input').removeClass('pod-lupickou');
+    $w.remove();
 }
