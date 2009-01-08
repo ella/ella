@@ -262,6 +262,7 @@
             hide_bubbles();
             return;
         }
+        $SUGGEST_FIELDS_BUBBLE.hide();
         // create a regexp that will match every occurrence of the text input value
         var val_re = new RegExp( '(' + val.replace(/([^\w\s])/g, '\\$1') + ')', 'ig' ); // the replace does /\Q$val/
         var sug_url = $input.attr('rel');
@@ -275,7 +276,8 @@
 
         $.get(sug_url+val, {}, function(sug_result) {
             if (sug_result == 'SPECIAL: OFFSET OUT OF RANGE') {
-                suggest_update($input, 0);
+                if (offset > 0) suggest_update($input, 0);
+                else hide_bubbles();
                 return;
             }
             $SUGGEST_LIST.empty();
