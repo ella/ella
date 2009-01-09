@@ -58,8 +58,6 @@
             $input = $ul.eq(0).find('input').filter(function(){return this.id.indexOf('_suggest') > 0});
         $SUGGEST_BUBBLE.data('cur_input', $input);
     }
-    // Export
-    window.set_current_input = set_current_input;
     $(SUGGEST_SELECTOR).click( set_current_input ).focus( set_current_input );
 
     // Various initializations
@@ -195,8 +193,6 @@
         hide_bubbles();
         MOUSE_ON_BUBBLE = false;
     }
-    // export this function
-    window.insert_value = insert_value;
 
     // Enhance textual X's of delete links with graphical crosses used at the "delete this item from database" link
     $('li.suggest-selected-item a').html('<img src="'+DEL_IMG+'" alt="x" />')
@@ -469,100 +465,116 @@
 
     $SUGGEST_BUBBLE.bind('mouseenter', function(){ MOUSE_ON_BUBBLE = true;  return true; });
     $SUGGEST_BUBBLE.bind('mouseleave', function(){ MOUSE_ON_BUBBLE = false; return true; });
-}); })(jQuery);
 
-// Functions for handling popups (lupička) taken from django admin
-function parse_lupicka_data(data) {
-    data = data.substring( data.indexOf('<table'), data.indexOf('</table>')+8 );
-    var $data = $('<div>').html(data);
-    var col_names = $.map( $.makeArray($data.find('thead th')), function(n){return $.trim($(n).text())} );
-    var $trs = $data.find('tbody tr');
-    var rv = [col_names];
-    $trs.each(function() {
-        var rec = $.map( $.makeArray( $(this).find('th,td') ), function(n) { return $.trim( $(n).text() ); } );
-        $(this).find('th a').attr('href').match(/(\d+)\/$/);
-        var id = RegExp.$1;
-        rec.push( id );
-        rv.push(rec);
-    });
-    return rv;
-}
-function get_popup_content( href, $popup ) {
-    $.ajax({
-        url: href,
-        success: function(data) {
-            var rows = parse_lupicka_data(data);
-            var col_names = rows.shift();
-            var $table = $("<table></table>\n");
-            var $header = $("<tr></tr>\n");
-            for (var i = 0; i < col_names.length; i++) {
-                $header.append('<th>' + col_names[i] + '</th>');
+
+    // Functions for handling popups (lupička) taken from django admin
+    function parse_lupicka_data(data) {
+        data = data.substring( data.indexOf('<table'), data.indexOf('</table>')+8 );
+        var $data = $('<div>').html(data);
+        var col_names = $.map( $.makeArray($data.find('thead th')), function(n){return $.trim($(n).text())} );
+        var $trs = $data.find('tbody tr');
+        var rv = [col_names];
+        $trs.each(function() {
+            var rec = $.map( $.makeArray( $(this).find('th,td') ), function(n) { return $.trim( $(n).text() ); } );
+            $(this).find('th a').attr('href').match(/(\d+)\/$/);
+            var id = RegExp.$1;
+            rec.push( id );
+            rv.push(rec);
+        });
+        return rv;
+    }
+    function get_popup_content( href, $popup ) {
+        $.ajax({
+            url: href,
+            success: function(data) {
+                var rows = parse_lupicka_data(data);
+                var col_names = rows.shift();
+                var $table = $("<table></table>\n");
+                var $header = $("<tr></tr>\n");
+                for (var i = 0; i < col_names.length; i++) {
+                    $header.append('<th>' + col_names[i] + '</th>');
+                }
+                $table.append($header);
+                for (var i = 0; i < rows.length; i++) {
+                    var row = rows[i];
+                    var id = row.pop();
+                    $( '<tr><td>'+
+                        rows[i].join('</td><td>')
+                        +"</td></tr>\n"
+                    )
+                    .data('id',id)
+                    .appendTo($table);
+                }
+                $table.find('tr:gt(0)').click( function() {
+                    var chosenId = $(this).data('id');
+                    var item_str = $.trim( $(this).find('td,th').eq(0).text() );
+                    var elem = document.getElementById( $('div.lupicka-popup').data('input_id') );
+                    insert_value(chosenId, item_str, elem);
+                    dismiss_lookup_popup();
+                });
+                var $pagin_cont = $('<div class="fakewin-paginator"></div>');
+                $pagin_cont.append('<ul><li>a</li><li>b</li><li>c</li><li>d</li><li>e</li><li>f</li><li>g</li></ul>');
+                $popup.empty().append($('<div class="table"></div>').append($table)).append($pagin_cont);
             }
-            $table.append($header);
-            for (var i = 0; i < rows.length; i++) {
-                var row = rows[i];
-                var id = row.pop();
-                $( '<tr><td>'+
-                    rows[i].join('</td><td>')
-                    +"</td></tr>\n"
-                )
-                .data('id',id)
-                .appendTo($table);
-            }
-            $table.find('tr:gt(0)').click( function() {
-                var chosenId = $(this).data('id');
-                var item_str = $.trim( $(this).find('td,th').eq(0).text() );
-                var elem = document.getElementById( $('div.lupicka-popup').data('input_id') );
-                insert_value(chosenId, item_str, elem);
-                dismiss_lookup_popup();
-            });
-            var $pagin_cont = $('<div class="fakewin-paginator">1 2 3 4 5</div>');
-            $popup.empty().append($('<div class="table"></div>').append($table)).append($pagin_cont);
+        });
+    }
+    function show_lookup_popup() {
+        var name = this.id.replace(/^lookup_/, '');
+        var href;
+        if (this.href.search(/\?/) >= 0) {
+            href = this.href + '&pop=1';
+        } else {
+            href = this.href + '?pop=1';
         }
-    });
-}
-function show_lookup_popup() {
-    var name = this.id.replace(/^lookup_/, '');
-    var href;
-    if (this.href.search(/\?/) >= 0) {
-        href = this.href + '&pop=1';
-    } else {
-        href = this.href + '?pop=1';
+
+        var $related_item = $('#'+name+'_suggest').parents('.GenericSuggestField,.GenericSuggestFieldMultiple').eq(0);
+
+        // Create the fake popup window
+        dismiss_lookup_popup();
+        var $popup_w = $(                                                "\n"+
+            '<div class="lupicka-popup fakewin">'                       +"\n"+
+            '    <div class="fakewin-title">'                           +"\n"+
+            '        <div class="fakewin-titletext"></div>'             +"\n"+
+            '        <div class="fakewin-closebutton">&times;</div>'    +"\n"+
+            '        <div class="clearfix"></div>'                      +"\n"+
+            '    </div>'                                                +"\n"+
+            '    <div class="fakewin-content">'                         +"\n"+
+            '    </div>'                                                +"\n"+
+            '</div>'                                                    +"\n"
+        );
+        $popup_w.data('input', $related_item);
+        $related_item.addClass('pod-lupickou');
+        $popup_w.draggable().draggable('disable').resizable().data('input_id', name+'_suggest')
+        .find('.fakewin-title').bind('mouseenter', function() {
+            $popup_w.draggable('enable');
+        }).bind('mouseleave', function() {
+            $popup_w.draggable('disable');
+        }).find('.fakewin-titletext').html('&nbsp;')
+        .end().find('.fakewin-closebutton').click(dismiss_lookup_popup);
+        var $popup = $popup_w.find('div.fakewin-content');
+        $popup.text('Loading...');
+        $('body').append( $popup_w );
+        get_popup_content(href, $popup);
+        return false;
+    }
+    function dismiss_lookup_popup() {
+        var $w = $('div.lupicka-popup:first');
+        if ($w.length == 0) return;
+        $w.data('input').removeClass('pod-lupickou');
+        $w.remove();
     }
 
-    var $related_item = $('#'+name+'_suggest').parents('.GenericSuggestField,.GenericSuggestFieldMultiple').eq(0);
-
-    // Create the fake popup window
-    dismiss_lookup_popup();
-    var $popup_w = $(
-        '<div class="lupicka-popup fakewin">'                       +"\n"+
-        '    <div class="fakewin-title">'                           +"\n"+
-        '        <div class="fakewin-titletext"></div>'             +"\n"+
-        '        <div class="fakewin-closebutton">&times;</div>'    +"\n"+
-        '        <div class="clearfix"></div>'                      +"\n"+
-        '    </div>'                                                +"\n"+
-        '    <div class="fakewin-content">'                         +"\n"+
-        '    </div>'                                                +"\n"+
-        '</div>'                                                    +"\n"
-    );
-    $popup_w.data('input', $related_item);
-    $related_item.addClass('pod-lupickou');
-    $popup_w.draggable().draggable('disable').resizable().data('input_id', name+'_suggest')
-    .find('.fakewin-title').bind('mouseenter', function() {
-        $popup_w.draggable('enable');
-    }).bind('mouseleave', function() {
-        $popup_w.draggable('disable');
-    }).find('.fakewin-titletext').html('&nbsp;')
-    .end().find('.fakewin-closebutton').click(dismiss_lookup_popup);
-    var $popup = $popup_w.find('div.fakewin-content');
-    $popup.text('Loading...');
-    $('body').append( $popup_w );
-    get_popup_content(href, $popup);
-    return false;
-}
-function dismiss_lookup_popup() {
-    var $w = $('div.lupicka-popup:first');
-    if ($w.length == 0) return;
-    $w.data('input').removeClass('pod-lupickou');
-    $w.remove();
-}
+    function equidistant_array_coverage(count, characters) {
+        if (characters == null)
+            characters = 'abcčdefghijklmnoprřsštuvzž'.split('');
+        if (count >= characters.length) return characters;
+        if (count == 0) return [];
+        var len = characters.length;
+        var ofs = len / (2*count);
+        var rv = new Array(count);
+        for (var i = 0; i < count; i++) {
+            rv[i] = characters[ Math.round( ofs + (i * len) / count ) ];
+        }
+        return rv;
+    }
+}); })(jQuery);
