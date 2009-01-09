@@ -113,7 +113,7 @@ a.suggest-related-lookup {
     position: fixed;
     left: 25%;
     top: 15%;
-    width: 50%;
+/*    width: 50%;*/
     height: 80%;
     background-color: rgba(200, 200, 200, 0.9);
     border: solid 1px black;
@@ -158,6 +158,14 @@ a.suggest-related-lookup {
 }
 .fakewin .fakewin-paginator {
     border: 1px solid black;
+}
+.fakewin .fakewin-paginator ul {
+    margin: 0;
+    padding: 0;
+}
+.fakewin .fakewin-paginator li {
+    display: inline;
+    padding: 0 1px;
 }
 .pod-lupickou {
     outline: solid 2px orange;

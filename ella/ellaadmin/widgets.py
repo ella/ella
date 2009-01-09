@@ -25,6 +25,9 @@ CLASS_PLACEMENT_CATEGORY = 'placement_category'
 JS_GENERIC_SUGGEST = 'js/generic.suggest.js'
 CSS_GENERIC_SUGGEST = 'css/generic.suggest.css'
 
+# Fake windows
+JS_JQUERY_UI = 'js/jquery-ui.js'
+
 
 class ContentTypeWidget(forms.Select):
     " Custom widget adding a class to attrs. "
@@ -71,7 +74,7 @@ class RichTextAreaWidget(forms.Textarea):
 
 class GenericSuggestAdminWidget(forms.TextInput):
     class Media:
-        js = (settings.ADMIN_MEDIA_PREFIX + JS_GENERIC_SUGGEST,)
+        js = (settings.ADMIN_MEDIA_PREFIX + JS_JQUERY_UI, settings.ADMIN_MEDIA_PREFIX + JS_GENERIC_SUGGEST,)
         css = {'screen': (settings.ADMIN_MEDIA_PREFIX + CSS_GENERIC_SUGGEST,),}
 
     def __init__(self, data, attrs={}, **kwargs):
@@ -117,7 +120,7 @@ class GenericSuggestAdminWidget(forms.TextInput):
 
 class GenericSuggestAdminWidgetMultiple(forms.TextInput):
     class Media:
-        js = (settings.ADMIN_MEDIA_PREFIX + JS_GENERIC_SUGGEST,)
+        js = (settings.ADMIN_MEDIA_PREFIX + JS_JQUERY_UI, settings.ADMIN_MEDIA_PREFIX + JS_GENERIC_SUGGEST,)
         css = {'screen': (settings.ADMIN_MEDIA_PREFIX + CSS_GENERIC_SUGGEST,),}
 
     def __init__(self, data, attrs={}, **kwargs):

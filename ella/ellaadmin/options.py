@@ -61,7 +61,7 @@ class EllaModelAdmin(admin.ModelAdmin):
         cnt = len(data)
 
         # sort the suggested items so that those starting with the sought term come first
-        def cmp(a,b):
+        def compare(a,b):
             def _cmp(a,b,sought):
                 a_starts = unicode(a).lower().startswith(sought)
                 b_starts = unicode(b).lower().startswith(sought)
@@ -70,14 +70,11 @@ class EllaModelAdmin(admin.ModelAdmin):
                     if a_starts: return -1
                     if b_starts: return +1
                 # else compare lexicographically
-                if a < b: return -1
-                if a > b: return +1
-                if a == b: return 0
-                return None
+                return cmp(a,b)
             return _cmp(a,b,unicode(lookup_value).lower())
         data = list(data)
         if offset >= len(data): return HttpResponse('SPECIAL: OFFSET OUT OF RANGE', mimetype='text/plain')
-        data.sort(cmp=cmp, key=lambda x: x[lookup_fields[1]])
+        data.sort(cmp=compare, key=lambda x: x[lookup_fields[1]])
         data = data[offset:limit]
 
         ft = []

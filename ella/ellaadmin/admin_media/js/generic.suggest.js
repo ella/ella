@@ -513,7 +513,7 @@
                     dismiss_lookup_popup();
                 });
                 var $pagin_cont = $('<div class="fakewin-paginator"></div>');
-                $pagin_cont.append('<ul><li>a</li><li>b</li><li>c</li><li>d</li><li>e</li><li>f</li><li>g</li></ul>');
+                $pagin_cont.append('<ul></ul>');
                 $popup.empty().append($('<div class="table"></div>').append($table)).append($pagin_cont);
             }
         });
