@@ -578,3 +578,125 @@
         return rv;
     }
 }); })(jQuery);
+
+/*
+
+To display the documentation, enter the command:
+
+perldoc generic.suggest.js
+
+To export it to various formats, see the pod2* family of commands.
+
+=head1 NAME
+
+Generic Suggest -- autocomplete tool for ellaadmin
+
+=head1 SYNOPSIS
+
+ <html><head>
+
+ <script type="text/javascript" src="jquery.js"></script>
+ <!-- minimal jquery version tested: 1.2.6 -->
+
+ <script type="text/javascript" src="jquery-ui.js"></script>
+ <!-- jQuery UI draggable and resizable are needed for the popup fake windows to run -->
+
+ <script type="text/javascript" src="generic.suggest.js"></script>
+
+ </head><body>
+
+ <!-- An autocomplete-enabled input for a single value (despite of the <ul><li> construct) -->
+ <input class="vForeignKeyRawIdAdminField hidden" type="text" name="source" id="id_source" />
+ <!-- This is the apparently hidden input that carries the values to be sent upon submit. The first class is filled by the server part. -->
+ <ul class="GenericSuggestField">
+ <!-- The GenericSuggestField class indicates a single-value pseudo-input. -->
+     <li>
+         <input type="text" id="id_source_suggest" rel="../../../core/source/suggest/?f=name&amp;f=url&amp;q=" />
+         <!-- This is the actual text input where the autocompleting takes place.
+              The rel attribute holds the URL to which the typed-in text is concatenated and from which the results are drawn via AJAX.
+              The 'f' args denote the DB columns that are returned. ID is implicitly present and the first after it is used as the text representation.
+              It is necessary for the id to be that of the related hidden input with '_suggest' appended. -->
+     </li>
+ </ul>
+ <a href="../../../core/source/" class="suggest-related-lookup" id="lookup_id_source" onclick="return showRelatedObjectLookupPopup(this);">
+ <!-- The popup (lupička) icon. Without generic.suggest.js, it opens a new window but doesn't operate with the <ul> pseudo-inputs.
+      The onclick attribute is overriden by generic.suggest.js.
+      It is necessary for the id to be that of the related hidden input with 'lookup_' prepended. -->
+     <img src="/admin_media/img/admin/selector-search.gif" width="16" height="16" alt="Lookup" />
+ </a>
+
+ <!-- An similar input but for multiple values. -->
+ <input class="vManyToManyRawIdAdminField hidden" type="text" name="authors" value="205,1425" id="id_authors" />
+ <!-- The value attribute holds the initial values in a comma-separated list of id's. -->
+ <ul class="GenericSuggestFieldMultiple">
+ <!-- The GenericSuggestFieldMultiple class indicates a multi-value input -->
+     <!-- initial values: text representations -->
+     <li class="suggest-selected-item">
+         redakce <a class="suggest-delete-link">x</a>
+     </li>
+     <li>
+         opička <a class="suggest-delete-link">x</a>
+     </li>
+     <!-- end of initial values -->
+     <li>
+         <input type="text" id="id_authors_suggest" rel="../../../core/author/suggest/?f=name&amp;f=slug&amp;q=" />
+     </li>
+ </ul>
+ <a href="../../../core/author/" class="suggest-related-lookup" id="lookup_id_authors" onclick="return showRelatedObjectLookupPopup(this);">
+     <img src="/admin_media/img/admin/selector-search.gif" width="16" height="16" alt="Lookup" />
+ </a>
+
+=head1 DESCRIPTION
+
+This script alters the behavior and appearance of pseudo-inputs (i.e. HTML
+elements that simulate the functionality of an enhanced input) who bear the
+C<GenericSuggestField> or C<GenericSuggestFieldMultiple> class.
+
+=head2 Links of the Chain
+
+For the suggester to work on an input, there must be some conditions satisfied:
+
+=over 4
+
+=item HTML Structure
+
+1) A text / hidden input must be present that will hold the id's of the items
+sent to the server when the form is submitted. It must have an id.
+
+2) An <ul> element with class either C<GenericSuggestField> or
+C<GenericSuggestFieldMultiple>
+
+3) A text input field with the same id as the one in (1) but with C<_suggest>
+appended. It must be inside a <li> tag inside the <ul> mentioned in (2). It must
+have a C<rel> attribute whose value be the URL from where the suggested items
+can be retrieved when the text typed into this input is appended to the URL.
+
+4) If a link with the same id as (1) has but with C<lookup_> prepended is
+present, then it is also affected by generic.suggest.js.
+
+=item Server Side
+
+When the text typed into the C<*_suggest> input is appended to the URL in the
+C<rel> attribute, and a request is made, the response should be of mimetype
+C<text/plain>, the first line should be a JSON object containing metadata about
+the response. At least, the C<cnt> key should be present and contain the total
+number of results drawn from the database for the query (in particular, not the
+number of items returned). The subsequent lines of the response body are
+'|'-separated lists of the appropriate database columns. The columns are those
+present in the URL query string (C<f> fields) with C<id> always coming before
+them.
+
+A special response body in the form C<SPECIAL: OFFSET OUT OF RANGE> is also
+accepted.
+
+=item JavaScript libraries
+
+jQuery and jQuery UI must be loaded before generic.suggest.js is. Tested jQuery
+versions are 1.2.6 and 1.3b. jQuery UI must provide C<draggable> and
+C<resizable> capabilities. The jQuery UI is only required for the popups.
+
+=back
+
+=cut
+
+*/
