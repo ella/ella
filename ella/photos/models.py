@@ -161,7 +161,7 @@ class Photo(models.Model):
         return self.title
 
     def get_absolute_url(self):
-        return self.get_image_url()
+        return self.image.url
 
     class Meta:
         verbose_name = _('Photo')
