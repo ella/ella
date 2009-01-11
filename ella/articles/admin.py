@@ -1,11 +1,12 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
+from django.conf import settings
 
 from ella.tagging.admin import TaggingInlineOptions
 
 from ella.core.admin import PlacementInlineOptions
 from ella.articles.models import ArticleContents, Article, InfoBox
-from ella.ellaadmin.options import EllaAdminOptionsMixin
+from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin
 
 class ArticleContentInlineOptions(EllaAdminOptionsMixin, admin.TabularInline):
     model = ArticleContents
@@ -19,7 +20,7 @@ class InfoBoxOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     search_fields = ('title', 'content',)
     rich_text_fields = {None: ('content',)}
 
-class ArticleOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
+class ArticleOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     list_display = ('title', 'category', 'photo_thumbnail', 'created', 'article_age', 'get_hits', 'full_url',)
     date_hierarchy = 'created'
     ordering = ('-created',)
@@ -31,7 +32,9 @@ class ArticleOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     raw_id_fields = ('photo',)
     list_filter = ('category__site', 'created', 'category', 'authors',)
     search_fields = ('title', 'upper_title', 'perex', 'slug', 'authors__name', 'authors__slug',) # FIXME: 'tags__tag__name',)
-    inlines = (ArticleContentInlineOptions, PlacementInlineOptions, TaggingInlineOptions,)
+    inlines = [ ArticleContentInlineOptions, PlacementInlineOptions ]
+    if 'ella.tagging' in settings.INSTALLED_APPS:
+        inlines.append(TaggingInlineOptions)
     prepopulated_fields = {'slug' : ('title',)}
     rich_text_fields = {None: ('perex',)}
 

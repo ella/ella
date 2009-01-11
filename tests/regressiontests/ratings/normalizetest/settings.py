@@ -1,6 +1,5 @@
-# Django settings for media project.
-
 from os.path import dirname
+# Django settings for rateingtest project.
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -11,10 +10,12 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-DATABASE_ENGINE = 'sqlite3'    # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'ado_mssql'.
-#DATABASE_NAME = ':memory:'
-DATABASE_NAME = '/tmp/media.db'
-#TEST_DATABASE_NAME = DATABASE_NAME
+DATABASE_ENGINE = 'mysql'    # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'ado_mssql'.
+DATABASE_NAME = 'ella'     # Or path to database file if using sqlite3.
+DATABASE_USER = 'ella'             # Not used with sqlite3.
+DATABASE_PASSWORD = ''         # Not used with sqlite3.
+DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
+DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
 
 # Local time zone for this installation. Choices can be found here:
 # http://www.postgresql.org/docs/8.1/static/datetime-keywords.html#DATETIME-TIMEZONE-SET-TABLE
@@ -26,7 +27,7 @@ TIME_ZONE = 'America/Chicago'
 # Language code for this installation. All choices can be found here:
 # http://www.w3.org/TR/REC-html40/struct/dirlang.html#langcodes
 # http://blogs.law.harvard.edu/tech/stories/storyReader$15
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'cs'
 
 SITE_ID = 1
 
@@ -36,17 +37,19 @@ USE_I18N = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = dirname(__file__) + '/static/'
+MEDIA_ROOT = ''
 
 # URL that handles the media served from MEDIA_ROOT.
-MEDIA_URL = '/static/'
+# Example: "http://media.lawrence.com"
+MEDIA_URL = ''
 
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
-ADMIN_MEDIA_PREFIX = '/static/admin/'
+# Examples: "http://foo.com/media/", "/media/".
+ADMIN_MEDIA_PREFIX = '/media/'
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'ew@y96t6j7-*^0fkv%d-f(487lmt+kk!88a27mi27(dolptwq3'
+SECRET_KEY = 'j16bnhv)vq!9_k@=c9c^iu28kmva5-^sn$&vka#1b$_kkt9$v%'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -60,29 +63,30 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.doc.XViewMiddleware',
+    'django.middleware.transaction.TransactionMiddleware',
 )
 
-ROOT_URLCONF = 'media.urls'
+ROOT_URLCONF = 'urls'
 
 TEMPLATE_DIRS = (
-    dirname(__file__) + '/templates',
 )
 
 INSTALLED_APPS = (
-    'media.sample',
-    'ella.core',
-    'ella.media',
-    'ella.media.uploader',
-    'ella.media.encoder',
-    'django.contrib.admin',
-    'django.contrib.auth',
+#    'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.sites',
+#    'django.contrib.sessions',
+#    'django.contrib.sites',
+
+    'ella.ratings',
+#    'ella.core',
+
+    'sample',
 )
 
-CACHE_BACKEND = 'dummy:///'
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.core.context_processors.debug',
+)
 
-UPLOAD_ROOT = '/tmp/upload/'
-UPLOAD_URL  = 'http://localhost:8000/upload/'
-
+INTERNAL_IPS = (
+    '127.0.0.1',
+)

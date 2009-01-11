@@ -56,7 +56,7 @@ class Server(models.Model):
             output['entries'].append(
                 {
                     'title': entry.target.get_title(),
-                    'link': entry.target.get_absolute_url(),
+                    'link': entry.get_absolute_url(),
                     'updated': entry.publish_from,
                     'summary': entry.target.get_description(),
                     'photo_url': photo_url,
@@ -157,7 +157,7 @@ class ServerItem(models.Model):
         ordering = ('-updated',)
         unique_together = (('server', 'slug',),)
 
-    def save(self):
+    def save(self, force_insert=False, force_update=False):
         """Overrides models.Model.save.
 
         - Assigns unique slugs to the items.
@@ -203,5 +203,5 @@ class ServerItem(models.Model):
 
         self.summary = strip_tags(self.summary)
 
-        super(ServerItem, self).save()
+        super(ServerItem, self).save(force_insert, force_update)
 

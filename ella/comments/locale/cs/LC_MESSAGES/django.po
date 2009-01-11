@@ -3,12 +3,11 @@
 # This file is distributed under the same license as the ella package.
 # Jakub Vysoký <jakub@borka.cz>, 2007.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-02-27 22:36+0100\n"
+"POT-Creation-Date: 2008-09-09 16:02+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Jakub Vysoký <jakub@borka.cz>, 2007\n"
 "Language-Team: \n"
@@ -16,122 +15,150 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: admin.py:13
+#: .\admin.py:13
 msgid "Deletion"
 msgstr "Vymazání"
 
-#: admin.py:14
+#: .\admin.py:14
 msgid "Data"
-msgstr ""
+msgstr "Data"
 
-#: defaults.py:32
+#: .\defaults.py:26
 msgid "registered user"
 msgstr "registrovaný uživatel"
 
-#: defaults.py:33
+#: .\defaults.py:27
 msgid "anonymous user"
 msgstr "anonymní uživatel"
 
-#: forms.py:185
+#: .\forms.py:123
+
+msgid "Comment subject:"
+msgstr "Předmět:"
+
+#: .\forms.py:124
+
+msgid "Comment content:"
+msgstr "Váš komentář:"
+
+#: .\forms.py:129
+
+msgid "Authorized author:"
+msgstr "Autorizovaný autor:"
+
+#: .\forms.py:130
+
+msgid "Password:"
+msgstr "Heslo:"
+
+#: .\forms.py:133
+msgid "Nickname:"
+msgstr "Jméno:"
+
+#: .\forms.py:134
+msgid "Email:"
+msgstr "Email:"
+
+#: .\forms.py:178
 msgid "Invalid user."
 msgstr "Neplatný uživatel."
 
-#: forms.py:191
+#: .\forms.py:184
 msgid "Banned user."
 msgstr "Zablokovaný uživatel."
 
-#: forms.py:206
+#: .\forms.py:199
 msgid "Target object does not exist."
 msgstr "Cílový objekt neexistuje."
 
-#: forms.py:213
+#: .\forms.py:206
 msgid "You are responding to a non-existent comment."
 msgstr "Odpovídáte na neexistující komentář."
 
-#: models.py:22 models.py:57 models.py:148
-msgid "target content type"
+#: .\models.py:19 .\models.py:82 .\models.py:174
+msgid "Target content type"
 msgstr "datový typ cílového objektu"
 
-#: models.py:23 models.py:58 models.py:149
-msgid "target id"
+#: .\models.py:20 .\models.py:83 .\models.py:175
+msgid "Target id"
 msgstr "id cílového objektu"
 
-#: models.py:29 models.py:30
+#: .\models.py:27 .\models.py:28
 msgid "Comment Options"
 msgstr "Možnosti komentářů"
 
-#: models.py:61
-msgid "comment subject"
-msgstr "předmět komentáře"
+#: .\models.py:88
+msgid "Comment subject"
+msgstr "Předmět"
 
-#: models.py:62
-msgid "comment content"
-msgstr "obsah komentáře"
+#: .\models.py:89
+msgid "Comment content"
+msgstr "Váš komentář"
 
-#: models.py:67
-msgid "tree structure parent"
+#: .\models.py:94
+msgid "Tree structure parent"
 msgstr "otec ve stromové struktuře"
 
-#: models.py:68
-msgid "genealogy tree path"
+#: .\models.py:95
+msgid "Genealogy tree path"
 msgstr "cesta v genealogickém stromu"
 
-#: models.py:71
-msgid "authorized author"
-msgstr "autorizovaný autor"
+#: .\models.py:98
+msgid "Authorized author"
+msgstr "Autorizovaný autor"
 
-#: models.py:73
-msgid "anonymous author's nickname"
-msgstr "přezdívka anonymního autora"
+#: .\models.py:100
+msgid "Anonymous author's nickname"
+msgstr "Přezdívka"
 
-#: models.py:74
-msgid "authors email (optional)"
+#: .\models.py:101
+msgid "Authors email (optional)"
 msgstr "autorův email (nepovinný)"
 
-#: models.py:76
-msgid "ip address"
+#: .\models.py:103
+msgid "IP address"
 msgstr "ip adresa"
 
-#: models.py:79
-msgid "date/time submitted"
+#: .\models.py:106
+msgid "Time submitted"
 msgstr "datum/čas odeslání"
 
-#: models.py:80
-msgid "is public"
+#: .\models.py:107
+msgid "Is public"
 msgstr "je veřejný"
 
-#: models.py:138
+#: .\models.py:164
 msgid "Comment"
 msgstr "Komentář"
 
-#: models.py:139
+#: .\models.py:165
 msgid "Comments"
 msgstr "Komentáře"
 
-#: models.py:150
-msgid "banned author"
+#: .\models.py:176
+msgid "Banned author"
 msgstr "zablokovaný uživatel"
 
-#: models.py:153
+#: .\models.py:181
 msgid "Banned User"
 msgstr "Zablokovaný uživatel"
 
-#: models.py:154
+#: .\models.py:182
 msgid "Banned Users"
 msgstr "Zablokovaní uživatelé"
 
-#: urls.py:12
+#: .\urls.py:7
+msgid "comments"
+msgstr "komentáře"
+
+#: .\views.py:92
 msgid "reply"
 msgstr "odpověď"
 
-#: urls.py:16
+#: .\views.py:96
 msgid "preview"
 msgstr "náhled"
 
-#: urls.py:19
+#: .\views.py:102
 msgid "new"
 msgstr "nový"
-
-#: urls.py:28
-msgid "comments"
-msgstr "komentáře"

@@ -6,7 +6,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils.encoding import smart_str
 from django.template import TemplateSyntaxError
-from django.core.paginator import ObjectPaginator
+from django.core.paginator import Paginator
 from django.conf import settings
 
 from ella.core.models import Listing
@@ -193,6 +193,22 @@ class UnreadPostsNode(template.Node):
         context[self.__variable] = out
         return ''
 
+class ItemNumberNode(template.Node):
+    def __init__(self, mapping, object, varname, page_varname = None):
+        self.mapping, self.object, self.varname, self.page_varname = mapping, object, varname, page_varname
+
+    def render(self, context):
+        object = template.Variable(self.object).resolve(context)
+        mapping = template.Variable(self.mapping).resolve(context)
+
+        # default value -1 for an object not present in the mapping
+        item_number = mapping.get(object._get_pk_val(), -1)
+        context[self.varname] = item_number
+        if self.page_varname:
+            page_number = int(float(item_number)/DISCUSSIONS_PAGINATE_BY + 0.9999)
+            context[self.page_varname] = page_number
+        return ''
+
 @register.tag
 def get_most_active_threads(parser, token):
     """
@@ -296,13 +312,18 @@ def get_thread_pagination(context, thread):
             % str(type(thread))
 )
     qset = get_comments_on_thread(thread)
-    p = ObjectPaginator(qset, DISCUSSIONS_PAGINATE_BY)
+    p = Paginator(qset, DISCUSSIONS_PAGINATE_BY)
     return {
         'pages': p.pages,
         'has_more_pages': p.pages > 1,
         'page_range': p.page_range,
         'thread_url': thread.get_absolute_url(),
 }
+
+@register.inclusion_tag('inclusion_tags/print_comment_discussions.html', takes_context=True)
+def print_comment_discussions(context, comment):
+    context['comment'] = comment
+    return context
 
 @register.tag
 def get_unread_posts(parser, token):
@@ -318,3 +339,23 @@ def get_unread_posts(parser, token):
     else:
         raise TemplateSyntaxError('Wrong syntax, usage: get_unread_posts as variable.')
     return UnreadPostsNode(None, varname)
+
+@register.tag('get_item_number')
+def do_top_rated(parser, token):
+    """
+    Get item nuber (used for referencing at the page) from a specified object -> number dictionary.
+
+    Usage::
+
+        {% get_item_number from <mapping> for <object> as <varname> page as <page_varname> %}
+
+    Example::
+
+        {% get_item_number from item_number_mapping for obj as item_number %}
+    """
+    bits = token.split_contents()
+    if len(bits) == 7 and bits[1] == 'from' and bits[3] == 'for' and bits[5] == 'as':
+        return ItemNumberNode(bits[2], bits[4], bits[6])
+    if len(bits) == 10 and bits[1] == 'from' and bits[3] == 'for' and bits[5] == 'as' and bits[7] == 'page' and bits[8] == 'as':
+        return ItemNumberNode(bits[2], bits[4], bits[6], bits[9])
+

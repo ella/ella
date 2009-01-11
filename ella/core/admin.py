@@ -8,10 +8,12 @@ from django.db.models import Q
 from django.conf import settings
 
 from ella.ellaadmin import widgets
-from ella.ellaadmin.options import EllaAdminOptionsMixin
+from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin
 from ella.core.models import Author, Source, Category, Listing, HitCount, Placement
 
 class PlacementForm(modelforms.ModelForm):
+    # create the field here to pass validation
+    listings =  modelforms.ModelMultipleChoiceField(Category.objects.all(), label=_('Category'), cache_choices=True, required=False)
 
     class Meta:
         model = Placement
@@ -19,20 +21,16 @@ class PlacementForm(modelforms.ModelForm):
     def __init__(self, *args, **kwargs):
         initial = []
         if 'initial' in kwargs:
-            # FIXME: This is a hotfix only
-            # Vypada to na django chybu, kdyz se pouzije distinct(). Do dnesni rev. 8068 oprava neni.
-            try:
-                initial = [ c.pk for c in Category.objects.distinct().filter(listing__placement=kwargs['initial']['id']) ]
-            except IndexError:
-                initial = [ c.pk for c in Category.objects.filter(listing__placement=kwargs['initial']['id']) ]
+            initial = [ c.pk for c in Category.objects.distinct().filter(listing__placement=kwargs['initial']['id']) ]
 
         self.base_fields['listings'] = modelforms.ModelMultipleChoiceField(
                 Category.objects.all(), label=_('Category'), cache_choices=True, required=False, initial=initial)
         super(PlacementForm, self).__init__(*args, **kwargs)
 
 
-class PlacementInlineFormset(generic.GenericInlineFormset):
-    def __init__(self, instance=None, data=None, files=None, save_as_new=None):
+class PlacementInlineFormset(generic.BaseGenericInlineFormSet):
+
+    def __init__(self, data=None, files=None, instance=None, save_as_new=None):
         self.can_delete = True
         super(PlacementInlineFormset, self).__init__(instance=instance, data=data, files=files)
 
@@ -160,8 +158,8 @@ class ListingInlineOptions(admin.TabularInline):
 class PlacementInlineOptions(generic.GenericTabularInline):
     model = Placement
     extra = 1
-    ct_field_name = 'target_ct'
-    id_field_name = 'target_id'
+    ct_field = 'target_ct'
+    ct_fk_field = 'target_id'
     formset = PlacementInlineFormset
     form = PlacementForm
     fieldsets = ((None, {'fields' : ('category', 'publish_from', 'publish_to', 'slug', 'static', 'listings',)}),)
@@ -176,7 +174,7 @@ class HitCountInlineOptions(admin.TabularInline):
     model = HitCount
     extra = 0
 
-class PlacementOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
+class PlacementOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     list_display = ('target_admin', 'category', 'publish_from', 'full_url',)
     list_filter = ('publish_from', 'category', 'target_ct',)
     inlines = (ListingInlineOptions,)
@@ -185,29 +183,31 @@ class PlacementOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
         (_('time'), {'fields': ('publish_from','publish_to', 'static',), 'classes': ('wide',)},),
 )
 
-class ListingOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
+class ListingOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     list_display = ('target_admin', 'target_ct', 'publish_from', 'category', 'placement_admin', 'target_hitcounts', 'target_url',)
     list_display_links = ()
     list_filter = ('publish_from', 'category__site', 'category', 'placement__target_ct',)
     raw_id_fields = ('placement',)
     date_hierarchy = 'publish_from'
 
-class CategoryOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
+class CategoryOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     list_filter = ('site',)
     list_display = ('draw_title', 'tree_path', '__unicode__')
     search_fields = ('title', 'slug',)
-    ordering = ('site', 'tree_path',)
+    #ordering = ('site', 'tree_path',)
     prepopulated_fields = {'slug': ('title',)}
 
 class HitCountOptions(admin.ModelAdmin):
     list_display = ('target', 'hits',)
-    list_filter = ('placement__target_ct', 'placement__category__site',)
+    ordering = ('-hits', '-last_seen',)
 
-class AuthorOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
+class AuthorOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
+    search_fields = ('name',)
 
-class SourceOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
+class SourceOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     list_display = ('name', 'url',)
+    search_fields = ('name',)
 
 admin.site.register(HitCount, HitCountOptions)
 admin.site.register(Category, CategoryOptions)

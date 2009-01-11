@@ -3,8 +3,8 @@ Oldforms validators for tagging related fields - these are still
 required for basic ``django.contrib.admin`` application field validation
 until the ``newforms-admin`` branch lands in trunk.
 """
-from django.core.validators import ValidationError
 from django.utils.translation import ugettext as _
+from django.forms.util import ValidationError
 
 from ella.tagging import settings
 from ella.tagging.utils import parse_tag_input

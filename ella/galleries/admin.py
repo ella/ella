@@ -1,9 +1,10 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _, ugettext
-from django.forms.models import BaseInlineFormset
+from django.forms.models import BaseInlineFormSet
 from django import forms
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
+from django.conf import settings
 
 from ella.tagging.admin import TaggingInlineOptions
 
@@ -13,7 +14,7 @@ from ella.core.admin import PlacementInlineOptions
 from ella.core.cache import get_cached_object
 from ella.ellaadmin.options import EllaAdminOptionsMixin
 
-class GalleryItemFormset(BaseInlineFormset):
+class GalleryItemFormset(BaseInlineFormSet):
     " Override default FormSet to allow for custom validation."
 
     def clean(self):
@@ -45,11 +46,6 @@ class GalleryItemTabularOptions(EllaAdminOptionsMixin, admin.TabularInline):
     extra = 10
     formset = GalleryItemFormset
 
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'order':
-            kwargs['widget'] = widgets.IncrementWidget
-        return super(GalleryItemTabularOptions, self).formfield_for_dbfield(db_field, **kwargs)
-
 class GalleryOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     list_display = ('title', 'created', 'category', 'get_hits', 'full_url',)
     ordering = ('-created',)
@@ -59,9 +55,13 @@ class GalleryOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
 )
     list_filter = ('created', 'category',)
     search_fields = ('title', 'description', 'slug',) # FIXME: 'tags__tag__name',)
-    inlines = (GalleryItemTabularOptions, PlacementInlineOptions, TaggingInlineOptions,)
+    inlines = [ GalleryItemTabularOptions, PlacementInlineOptions ]
+    if 'ella.tagging' in settings.INSTALLED_APPS:
+        inlines.append(TaggingInlineOptions)
     prepopulated_fields = {'slug': ('title',)}
     rich_text_fields = {None: ('description', 'content',)}
+#    suggest_fields = {'category': ('tree_path', 'title', 'slug',), 'owner': ('name', 'slug',),}
+    suggest_fields = {'owner': ('name', 'slug',),}
 
 admin.site.register(Gallery, GalleryOptions)
 

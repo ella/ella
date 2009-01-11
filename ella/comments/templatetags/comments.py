@@ -77,13 +77,14 @@ def get_comment_list(parser, token):
 
     Syntax::
 
-        {% get_comment_list for APP_LABEL.MODEL_NAME with FIELD VALUE as VARNAME [orderby path|submit_date|...]%}
-        {% get_comment_list for OBJECT as VARNAME [orderby path|submit_date|...] %}
+        {% get_comment_list for APP_LABEL.MODEL_NAME with FIELD VALUE as VARNAME [orderby path|submit_date|...] [limit n]%}
+        {% get_comment_list for OBJECT as VARNAME [orderby path|submit_date|...] [limit n]%}
 
     Example usage::
 
         {% get_comment_list for testapp.apple with id 1 as comment_list orderby path %}
         {% get_comment_list for object as comment_list %}
+        {% get_comment_list for object as comment_list limit 5%}
 
     To get a list of comments in reverse order -- that is, most recent first --
     pass ``minus`` as a prefix to the last param::
@@ -91,6 +92,10 @@ def get_comment_list(parser, token):
         {% get_comment_list for testapp.apple with id 1 as comment_list orderby -submit_date %}
     """
     tokens = token.split_contents()
+    limit = None
+    if tokens[-2] == u'limit':
+        limit = tokens[-1]
+        tokens = tokens[0:-2]
     if tokens[-2] == u'orderby':
         orderby = tokens[-1]
         tagname, object_definition_tokens, varname = parse_getforas_triplet(tokens[:-2])
@@ -99,7 +104,7 @@ def get_comment_list(parser, token):
         tagname, object_definition_tokens, varname = parse_getforas_triplet(tokens)
     object = parse_object_definition(tagname, object_definition_tokens)
 
-    return CommentListNode(object, orderby, varname)
+    return CommentListNode(object, orderby, varname, limit)
 
 @register.tag
 def comment_count(parser, token):
@@ -172,14 +177,15 @@ class CommentFormNode(template.Node):
         return ''
 
 class CommentListNode(template.Node):
-    def __init__(self, object, orderby, varname):
+    def __init__(self, object, orderby, varname, limit):
         self.object = object
         self.orderby = orderby
+        self.limit = limit
         self.varname = varname
 
     def render(self, context):
         obj = resolve_object(context, self.object)
-        comment_list = Comment.objects.get_list_for_object(obj, order_by=self.orderby)
+        comment_list = Comment.objects.get_list_for_object(obj, order_by=self.orderby, limit=self.limit)
         context[self.varname] = comment_list
         return ''
 
@@ -216,3 +222,7 @@ def print_comment_long(context, comment):
     context['comment'] = comment
     return context
 
+@register.inclusion_tag('inclusion_tags/print_single_comment.html', takes_context=True)
+def print_single_comment(context, comment):
+    context['comment'] = comment
+    return context

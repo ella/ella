@@ -84,7 +84,7 @@ class ListingManager(RelatedManager):
         return self.get_queryset(category, children, mods, **kwargs).exclude(deleted).count()
 
     @cache_this(get_listings_key, invalidate_listing)
-    def get_listing(self, category=None, children=NONE, count=10, offset=1, mods=[], content_types=[], **kwargs):
+    def get_listing(self, category=None, children=NONE, count=10, offset=1, mods=[], content_types=[], unique=None, **kwargs):
         """
         Get top objects for given category and potentionally also its child categories.
 
@@ -129,8 +129,12 @@ class ListingManager(RelatedManager):
         # FIXME TODO
         deleted = models.Q(remove=True, priority_to__isnull=False, priority_to__lte=now)
 
+        # take out not unwanted objects
+        if unique:
+            listed_targets = unique.copy()
+        else:
+            listed_targets = set([])
         # iterate through qsets until we have enough objects
-        listed_targets = set([])
         for q in qsets:
             data = q.exclude(deleted)
             if data:
@@ -146,7 +150,7 @@ class ListingManager(RelatedManager):
 
 def get_top_objects_key(func, self, count, mods=[]):
     return 'ella.core.managers.HitCountManager.get_top_objects_key:%d:%d:%s' % (
-            settings.SITE_ID, count, ''.join(mods)
+            settings.SITE_ID, count, ','.join(['.'.join((model._meta.app_label, model._meta.object_name)) for model in mods])
 )
 
 class HitCountManager(models.Manager):
@@ -168,4 +172,4 @@ class HitCountManager(models.Manager):
         kwa = {}
         if mods:
             kwa['placement__target_ct__in'] = [ ContentType.objects.get_for_model(m) for m in mods ]
-        return list(self.filter(placement__category__site=settings.SITE_ID, **kwa)[:count])
+        return list(self.filter(placement__category__site=settings.SITE_ID, **kwa).order_by('-hits')[:count])

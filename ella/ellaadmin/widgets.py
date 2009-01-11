@@ -21,10 +21,12 @@ CLASS_LISTING_CATEGORY = 'listing_category'
 JS_PLACEMENT_CATEGORY = 'js/placement_category.js'
 CLASS_PLACEMENT_CATEGORY = 'placement_category'
 
-JS_SUGGEST = 'js/jquery.suggest.js'
-JS_SUGGEST_MULTIPLE = 'js/jquery.suggest.multiple.js'
-CSS_SUGGEST = 'css/jquery.suggest.css'
-JS_AUTHORADD = 'js/authoradd.js'
+# Generic suggester media files
+JS_GENERIC_SUGGEST = 'js/generic.suggest.js'
+CSS_GENERIC_SUGGEST = 'css/generic.suggest.css'
+
+# Fake windows
+JS_JQUERY_UI = 'js/jquery-ui.js'
 
 
 class ContentTypeWidget(forms.Select):
@@ -70,94 +72,102 @@ class RichTextAreaWidget(forms.Textarea):
             css_class += ' %s' % height
         super(RichTextAreaWidget, self).__init__(attrs={'class': css_class})
 
-class CategorySuggestAdminWidget(forms.TextInput):
+class GenericSuggestAdminWidget(forms.TextInput):
     class Media:
-        js = (
-            settings.ADMIN_MEDIA_PREFIX + JS_SUGGEST,
-)
-        css = {
-            'screen': (settings.ADMIN_MEDIA_PREFIX + CSS_SUGGEST,),
-}
+        js = (settings.ADMIN_MEDIA_PREFIX + JS_JQUERY_UI, settings.ADMIN_MEDIA_PREFIX + JS_GENERIC_SUGGEST,)
+        css = {'screen': (settings.ADMIN_MEDIA_PREFIX + CSS_GENERIC_SUGGEST,),}
 
+    def __init__(self, data, attrs={}, **kwargs):
+        self.db_field, self.ownmodel, self.lookups = data
+        self.model = self.db_field.rel.to
+        self.is_hidden = True
 
-    def __init__(self, db_field, attrs={}, **kwargs):
-        self.rel = db_field.rel
-        self.value = db_field
         super(self.__class__, self).__init__(attrs)
 
-
     def render(self, name, value, attrs=None):
-        from ella.core.models import Category
-        if self.rel.limit_choices_to:
-            url = '?' + '&amp;'.join(['%s=%s' % (k, v) for k, v in self.rel.limit_choices_to.items()])
+
+        # related_url for standard lookup and clreate suggest_url for JS suggest
+        related_url = '../../../%s/%s/' % (self.model._meta.app_label, self.model._meta.object_name.lower())
+        suggest_params = '&amp;'.join([ 'f=%s' % l for l in self.lookups ]) + '&amp;q='
+        suggest_url = related_url + 'suggest/?' + suggest_params
+
+        if self.db_field.rel.limit_choices_to:
+            url = '?' + '&amp;'.join(['%s=%s' % (k, v) for k, v in self.db_field.rel.limit_choices_to.items()])
         else:
             url = ''
-        if not attrs.has_key('class'):
-          attrs['class'] = 'vForeignKeyRawIdAdminField vCatSuggestField' # The JavaScript looks for this hook.
-        if value:
+
+        attrs['class'] = 'vForeignKeyRawIdAdminField hidden'
+        suggest_css_class = 'GenericSuggestField'
+
+        if not value:
+            suggest_item = ''
+        else:
             try:
-                if type(value) in [long, int]:
-                    cat = Category.objects.get(pk=value)
-                elif type(value) in [str, unicode]:
-                    cat = Category.objects.get(tree_path=value)
-                output = [super(self.__class__, self).render(name, "%s:%s" % (cat.site.name,cat.tree_path), attrs)]
-            except Category.DoesNotExist:
-                output = [super(self.__class__, self).render(name, value, attrs)]
-        else:
-            output = [super(self.__class__, self).render(name, '', attrs)]
-        return mark_safe(u''.join(output))
+                suggest_item = '<li class="suggest-selected-item">%s <a>x</a></li>' % getattr(self.model.objects.get(pk=value), self.lookups[0])
+            except self.model.DoesNotExist:
+                suggest_item = ''
 
-class AuthorsSuggestAdminWidget(forms.TextInput):
-    class Media:
-        js = (
-            settings.ADMIN_MEDIA_PREFIX + JS_SUGGEST_MULTIPLE,
-            settings.ADMIN_MEDIA_PREFIX + JS_AUTHORADD,
-)
-        css = {
-            'screen': (settings.ADMIN_MEDIA_PREFIX + CSS_SUGGEST,),
-}
+        output = [super(GenericSuggestAdminWidget, self).render(name, value, attrs)]
 
-
-    def __init__(self, db_field, attrs={}, **kwargs):
-        self.rel = db_field.rel
-        self.value = db_field
-        super(self.__class__, self).__init__(attrs)
-
-
-    def render(self, name, value, attrs=None):
-        related_url = '../../../%s/%s/add/' % (self.rel.to._meta.app_label, self.rel.to._meta.object_name.lower())
-        from ella.core.models import Author
-        if self.rel.limit_choices_to:
-            url = '?' + '&amp;'.join(['%s=%s' % (k, v) for k, v in self.rel.limit_choices_to.items()])
-        else:
-            url = ''
-        if not attrs.has_key('class'):
-            attrs['class'] = 'vSuggestMultipleFieldAuthor' # The JavaScript looks for this hook.
-        if value:
-            a_values = ''
-            try:
-                if type(value) == list:
-                    a_lst = Author.objects.filter(pk__in=value)
-                    for a in a_lst:
-                        a_values += "%s:%s," % (a.pk, a.name)
-                elif type(value) in [unicode, str]:
-                    for a in value.split(','):
-                        a_values += a + ','
-                output = [super(self.__class__, self).render(name, a_values, attrs)]
-            except:
-                output = [super(self.__class__, self).render(name, value, attrs)]
-        else:
-            output = [super(self.__class__, self).render(name, '', attrs)]
-        output.append('<a href="%s%s" class="add-another" id="add_id_%s" onclick="return showAddAnotherPopup(this);"> ' % \
+        output.append('<ul class="%s">%s<li><input type="text" id="id_%s_suggest" rel="%s" /></li></ul> ' \
+                      % (suggest_css_class, suggest_item, name, suggest_url))
+        # TODO: "id_" is hard-coded here. This should instead use the correct
+        # API to determine the ID dynamically.
+        output.append('<a href="%s%s" class="suggest-related-lookup" id="lookup_id_%s" onclick="return showRelatedObjectLookupPopup(this);"> ' % \
             (related_url, url, name))
-        output.append('<img height="10" width="10" alt="Add Another" src="%simg/admin/icon_addlink.gif"/></a>' % settings.ADMIN_MEDIA_PREFIX)
+        output.append('<img src="%simg/admin/selector-search.gif" width="16" height="16" alt="Lookup" /></a>' % settings.ADMIN_MEDIA_PREFIX)
         return mark_safe(u''.join(output))
 
-class PlacementCategoryWidget(CategorySuggestAdminWidget):
-    def __init__(self, db_field, attrs={}):
-        self.rel = db_field.rel
-        self.value = db_field
+class GenericSuggestAdminWidgetMultiple(forms.TextInput):
+    class Media:
+        js = (settings.ADMIN_MEDIA_PREFIX + JS_JQUERY_UI, settings.ADMIN_MEDIA_PREFIX + JS_GENERIC_SUGGEST,)
+        css = {'screen': (settings.ADMIN_MEDIA_PREFIX + CSS_GENERIC_SUGGEST,),}
+
+    def __init__(self, data, attrs={}, **kwargs):
+        self.db_field, self.ownmodel, self.lookups = data
+        self.model = self.db_field.rel.to
+        self.is_hidden = True
+
         super(self.__class__, self).__init__(attrs)
+
+    def render(self, name, value, attrs=None):
+
+        # related_url for standard lookup and clreate suggest_url for JS suggest
+        related_url = '../../../%s/%s/' % (self.model._meta.app_label, self.model._meta.object_name.lower())
+        suggest_params = '&amp;'.join([ 'f=%s' % l for l in self.lookups ]) + '&amp;q='
+        suggest_url = related_url + 'suggest/?' + suggest_params
+
+        if self.db_field.rel.limit_choices_to:
+            url = '?' + '&amp;'.join(['%s=%s' % (k, v) for k, v in self.db_field.rel.limit_choices_to.items()])
+        else:
+            url = ''
+
+        attrs['class'] = 'vManyToManyRawIdAdminField hidden'
+        suggest_css_class = 'GenericSuggestFieldMultiple'
+
+        if not value:
+            suggest_items = ''
+        else:
+            if not isinstance(value, (list, tuple)):
+                value = [int(v) for v in value.split(',')]
+            try:
+                suggest_items = ''.join('<li class="suggest-selected-item">%s <a>x</a></li>' % \
+                                         getattr(i, self.lookups[0]) for i in self.model.objects.filter(pk__in=value))
+                value = ','.join(["%s" % v for v in value])
+            except self.model.DoesNotExist:
+                suggest_items = ''
+
+        output = [super(GenericSuggestAdminWidgetMultiple, self).render(name, value, attrs)]
+
+        output.append('<ul class="%s">%s<li><input type="text" id="id_%s_suggest" rel="%s" /></li></ul> ' \
+                      % (suggest_css_class, suggest_items, name, suggest_url))
+        # TODO: "id_" is hard-coded here. This should instead use the correct
+        # API to determine the ID dynamically.
+        output.append('<a href="%s%s" class="suggest-related-lookup" id="lookup_id_%s" onclick="return showRelatedObjectLookupPopup(this);"> ' % \
+            (related_url, url, name))
+        output.append('<img src="%simg/admin/selector-search.gif" width="16" height="16" alt="Lookup" /></a>' % settings.ADMIN_MEDIA_PREFIX)
+        return mark_safe(u''.join(output))
+
 
 class ListingCategoryWidget(forms.Select):
     """register javascript for duplicating main category to edit inline listing"""

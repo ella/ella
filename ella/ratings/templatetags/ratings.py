@@ -2,7 +2,6 @@ from decimal import Decimal
 
 from django import template
 from django.db import models
-from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.template.defaultfilters import slugify
@@ -11,6 +10,8 @@ from ella.ratings.models import Rating, TotalRate
 from ella.ratings.forms import RateForm
 from ella.ratings.views import get_was_rated
 from django.utils.translation import ugettext as _
+
+from recepty import settings
 
 register = template.Library()
 
@@ -101,19 +102,50 @@ def rate_url(parser, token):
     return RateUrlNode(bits[2], bits[4])
 
 class RatingNode(template.Node):
-    def __init__(self, object, name, max=None, step=None):
+    def __init__(self, object, name, max=None, step=None, min2=None):
         self.object, self.name = object, name
-        self.min, self.max, self.step = min, max, step
+        self.min, self.max, self.step, self.min2 = min, max, step, min2
 
     def render(self, context):
         obj = template.Variable(self.object).resolve(context)
         if obj:
             value = 0
-            if (self.min is not None and self.max is not None):
+            if (self.min != None and self.max!=None and self.min2 != None):
+                self.step = Decimal(self.step)
+                self.min2 = Decimal(self.min2)
+                self.max = Decimal(self.max)
+                possible_values = int((self.max - self.min2)/self.step+1)
+                value = TotalRate.objects.get_normalized_rating(obj, 1, Decimal("1.0")/(possible_values/2))
+                value = value*(self.max - self.min2)/2 + (self.max+self.min2)/2
+
+                # Due to the nature of the 'get_normalized_rating' function, an odd number
+                # of possible return values is required. If the input parameters yield
+                # an even number of possible return values, an approximation is necessary.
+                #
+                # In the following cycle, the value closest to the obtained result still
+                # fulfilling the input 'min', 'max' and 'step' parameters is being looked for.
+
+                if possible_values%2 == 0:
+                    old_value = self.min2
+                    best_approximation = self.min2
+                    while (1):
+                        cur_value = old_value + self.step
+                        if cur_value > self.max:
+                            break
+                        old_error = abs(old_value - value)
+                        cur_error = abs(cur_value - value)
+                        if cur_error <= old_error:
+                            best_approximation = cur_value
+                        elif cur_error >= best_approximation:
+                            break
+                        old_value = cur_value
+                    value = best_approximation
+
+            elif (self.min is not None and self.max is not None):
                 value = TotalRate.objects.get_normalized_rating(obj, Decimal(self.max), Decimal(self.step))
             else:
                 value = TotalRate.objects.get_total_rating(obj)
-            # Set as string to be able compare value in tamplate
+            # Set as string to be able to compare value in template
             context[self.name] = str(value)
         return ''
 
@@ -126,11 +158,19 @@ def do_rating(parser, token):
         Select total rating:
         {% rating for OBJ as VAR %}
 
-        Normalize rating from X to Y and round to Z:
+        Normalize rating to <-X, X> with step Y and round to Z:
         {% rating for OBJ max X step Y as VAR %}
 
-        Normalize rating from X to Y and round to Z:
-        {% rating for OBJ max X step Y as VAR %}
+        Normalize rating to <X, Y> with step S:
+        {% rating for OBJ min X max Y step S as VAR %}
+
+            Notice:
+
+                In order to obtain correct results, (Y-X)/S must be in Z (integers).
+
+                Also, (Y-X)/S+1 (number of possible values the function can return)
+                should preferably be an odd number, as it better corresponds to
+                the way the 'get_normalized_rating' function works.
 
     Examples::
 
@@ -139,6 +179,7 @@ def do_rating(parser, token):
 
         {% rating for object max 1 step 0.5 as object_rating %}
         object {{object}} has rating of {{object_rating}} from (-1, -0.5, 0, 0.5, 1)
+
     """
     bits = token.split_contents()
     if len(bits) == 5 and bits[1] == 'for' and bits[3] == 'as':
@@ -146,6 +187,9 @@ def do_rating(parser, token):
     if len(bits) == 9 and bits[1] == 'for' and bits[3] == 'max' \
             and bits[5] == 'step' and bits[7] == 'as':
         return RatingNode(bits[2], bits[8], bits[4], bits[6])
+    if len(bits) == 11 and bits[1] == 'for' and bits[3] == 'min' \
+            and bits[5] == 'max' and bits[7] == 'step' and bits[9] == 'as':
+        return RatingNode(bits[2], bits[10], bits[6], bits[8], bits[4])
 
     raise template.TemplateSyntaxError, \
         "{% rating for OBJ as VAR %} or {% rating for OBJ max X step Y as VAR %}"
@@ -215,7 +259,6 @@ def do_top_rated(parser, token):
         mods.append(model)
 
     return TopRatedNode(count, bits[-1], mods)
-
 
 class IfWasRatedNode(template.Node):
 

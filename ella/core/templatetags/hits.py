@@ -14,7 +14,7 @@ class TopVisitedNode(template.Node):
         self.count, self.name, self.mods = count, name, mods
 
     def render(self, context):
-        context[self.name] = HitCount.objects.get_top_objects(self.count)
+        context[self.name] = HitCount.objects.get_top_objects(self.count, self.mods)
         return ''
 
 @register.tag('top_visited')

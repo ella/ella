@@ -109,7 +109,7 @@ class TaggingInlineOptions(EllaAdminOptionsMixin, generic.GenericTabularInline):
         return super(TaggingInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
 class TagOptions(admin.ModelAdmin):
-    ordernig = ('name',)
+    ordering = ('name',)
     list_display = ('name',)
     inlines = (TaggingInlineOptionsSimple,)
     search_fields = ('name',)
