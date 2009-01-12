@@ -32,9 +32,10 @@
         '    <div class="suggest-fields-list">'         +"\n"+
         '        <table></table>'                       +"\n"+
         '    </div>'                                    +"\n"+
-        '</div>');                                      +"\n"
+        '</div>'                                        +"\n"
+    );
     $('body').append($SUGGEST_BUBBLE).append($SUGGEST_FIELDS_BUBBLE);
-    var $ins = $('input[rel]').filter(function(){return $(this).parents('ul:first').attr('class').indexOf('Suggest') >= 0});
+    var $ins = $('input[rel]').filter(function(){return this.id.substr(this.id.length - '_suggest'.length) == '_suggest'});
 
     // ['foo', 'bar'] => { foo: 1, bar: 1 }
     function arr2map(arr) {
@@ -696,6 +697,47 @@ versions are 1.2.6 and 1.3b. jQuery UI must provide C<draggable> and
 C<resizable> capabilities. The jQuery UI is only required for the popups.
 
 =back
+
+=head2 Not-really-global Variables
+
+In general, variables whose name starts with dollar are instances of the jQuery
+object.
+
+A number of variables are useful throughout the whole encapsulating function.
+Apart from those defied above with UPCASE self-descriptive names, there are:
+
+=over 4
+
+=item $ins
+
+The C<$ins> variable holds the jQuery-wrapped collection of the text inputs that
+are enhanced with the autocomplete functionality.
+
+=item $SUGGEST_BUBBLE
+
+A div that contains the list of suggested items and optionally the "next page"
+widget. There's just this one and it gets hidden / showed & moved depending on
+where the user types, i.e. a new one is B<not> created when the user starts
+typing into another autocomplete-enabled input.
+
+=item $SUGGEST_LIST
+
+The list of suggested items (contained in C<$SUGGEST_BUBBLE>).
+
+=item $SUGGEST_FIELDS_BUBBLE
+
+A div containing the descriptive bubble that appears next to the active
+suggested item, showing other fields (e.g. when C<title> is showed in the list,
+this one might show C<id> and C<slug>).
+
+=back
+
+=head2 How It Works
+
+The real text inputs of the pseudo-inputs (i.e. that with C<id> ending with
+C<_suggest>) have a handler for the keyup event (they also have other handlers).
+When the keyup event is fired with other key than enter or escape, the
+L<suggest_update> function is run.
 
 =cut
 
