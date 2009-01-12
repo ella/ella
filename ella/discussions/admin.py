@@ -60,7 +60,7 @@ class TopicThreadOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
 class TopicOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug': ('title',)}
-    list_display = ('title', 'photo_thumb', 'created',)
+    list_display = ('title', 'photo_thumb', 'created', 'pk',)
     list_filter = ('category', 'created',)
     inlines = (PlacementInlineOptions,)
     rich_text_fields = {None: ('perex',)}

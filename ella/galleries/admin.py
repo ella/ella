@@ -48,7 +48,7 @@ class GalleryItemTabularOptions(EllaAdminOptionsMixin, admin.TabularInline):
     formset = GalleryItemFormset
 
 class GalleryOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
-    list_display = ('title', 'created', 'category', 'get_hits', 'full_url',)
+    list_display = ('title', 'created', 'category', 'get_hits', 'pk', 'full_url',)
     ordering = ('-created',)
     fieldsets = (
         (_("Gallery heading"), {'fields': ('title', 'slug',)}),

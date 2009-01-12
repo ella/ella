@@ -21,7 +21,7 @@ class InfoBoxOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     rich_text_fields = {None: ('content',)}
 
 class ArticleOptions(EllaAdminOptionsMixin, EllaModelAdmin):
-    list_display = ('title', 'category', 'photo_thumbnail', 'created', 'article_age', 'get_hits', 'full_url',)
+    list_display = ('title', 'category', 'photo_thumbnail', 'created', 'article_age', 'get_hits', 'pk', 'full_url',)
     date_hierarchy = 'created'
     ordering = ('-created',)
     fieldsets = (
