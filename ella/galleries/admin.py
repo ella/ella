@@ -5,6 +5,7 @@ from django import forms
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
+from django.forms.util import ValidationError
 
 from ella.tagging.admin import TaggingInlineOptions
 
