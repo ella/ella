@@ -6,6 +6,7 @@ from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 from django.conf import settings
+from django.forms.util import ValidationError
 
 from ella.ellaadmin import widgets
 from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin
@@ -119,7 +120,8 @@ class PlacementInlineFormset(generic.BaseGenericInlineFormSet):
 
             if qset:
                 plac = qset[0]
-                raise forms.ValidationError(
+                # raise forms.ValidationError(
+                raise ValidationError(
                         _('''There is already a Placement object published in
                         category %(category)s with the same URL referring to %(target)s.
                         Please change the slug or publish date.''') % {
@@ -137,11 +139,13 @@ class PlacementInlineFormset(generic.BaseGenericInlineFormSet):
                 qset = qset.exclude(id=d['id'])
 
             if qset:
-                raise forms.ValidationError('Chyba')
+                # raise forms.ValidationError('Chyba')
+                raise ValidationError('Chyba')
             '''
 
         if cat and not main:
-            raise forms.ValidationError(_('If object has a category, it must have a main placement.'))
+            # raise forms.ValidationError(_('If object has a category, it must have a main placement.'))
+            raise (_('If object has a category, it must have a main placement.'))
 
         return
 
