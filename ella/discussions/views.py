@@ -1,4 +1,4 @@
-from django.http import Http404
+from django.http import Http404, HttpResponse
 import logging
 from datetime import datetime
 from django import http
@@ -192,6 +192,10 @@ def topicthread(request, bits, context):
     frm = PostForm(initial = initial)
 
     if request.POST:
+
+        if not settings.DEBUG and not request.is_ajax():
+            return Http404, "Accept only AJAX calls."
+
         frm = PostForm(request.POST)
         if frm.is_valid():
             frm.cleaned_data['content'].strip()
@@ -207,6 +211,17 @@ def topicthread(request, bits, context):
                 else:
                     add_post(frm.cleaned_data['content'], thr, nickname=frm.cleaned_data['nickname'], email=frm.cleaned_data['email'], ip=get_ip(request))
             frm = PostForm() # form reset after succesfull post
+            return HttpResponse('', mimetype='text/plain;charset=utf-8')
+        else:
+            return render_to_response(
+                ('common/page/discussions/form.html',),
+                {
+                    'form': frm,
+                    'form_action': thr.get_absolute_url(),
+},
+                context_instance=RequestContext(request)
+)
+
     else:
         thr.hit() # increment view counter
 
