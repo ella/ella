@@ -1,3 +1,4 @@
+from django.http import Http404
 import logging
 from datetime import datetime
 from django import http
@@ -238,20 +239,36 @@ def topicthread(request, bits, context):
 
 def post_reply(request, context, reply, thread):
     """new reply to a post in the thread"""
-    parent = get_cached_object_or_404(Comment, pk=reply)
+
+
+    if not settings.DEBUG and not request.is_ajax():
+        raise Http404, "Accept only AJAX calls."
+
     thr = TopicThread.objects.get(slug = thread)
     thread_url = '%s?p=%i' % (thr.get_absolute_url(), int(float(thr.num_posts+1)/DISCUSSIONS_PAGINATE_BY + 0.9999))
-    init_props = {
-        'target': '%d:%d' % (parent.target_ct.id, parent.target.id),
-        'options' : FORM_OPTIONS['UNAUTHORIZED_ONLY'],
-}
+
+    init_props = {}
+    init_props['options'] = FORM_OPTIONS['UNAUTHORIZED_ONLY']
+    user = get_user(request)
+    if user.is_authenticated():
+        init_props['nickname'] = user.username
+        init_props['email'] = user.email
+
     if reply:
+        parent = get_cached_object_or_404(Comment, pk=reply)
+        init_props['target'] = '%d:%d' % (parent.target_ct.id, parent.target.id)
         init_props['parent'] = reply
         context.update ({
                 'reply' : True,
                'parent' : parent,
 })
         form = CommentForm(init_props=init_props)
+    else:
+        ct = ContentType.objects.get_for_model(TopicThread)
+        init_props['target'] = '%d:%d' % (ct.id, thr.id)
+        form = PostForm(initial=init_props)
+
+
     context['form'] = form
     context['form_action'] = thread_url
     return render_to_response(
@@ -266,6 +283,9 @@ def create_thread(request, bits, context):
     topic = context['object']
     frmThread = ThreadForm(request.POST or None)
     user = get_user(request)
+
+    if not settings.DEBUG and not request.is_ajax():
+        raise Http404, "Accept only AJAX calls."
 
     if frmThread.is_valid():
         data = frmThread.cleaned_data
