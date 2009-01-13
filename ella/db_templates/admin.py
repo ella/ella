@@ -75,5 +75,13 @@ class DbTemplateOptions(admin.ModelAdmin):
     list_display = ('name', 'site', 'extends', 'description',)
     list_filter = ('site',)
 
+    # TODO: DB templates export HP
+    def queryset(self, request):
+
+        if request.user.is_superuser():
+            return self.model.all()
+        else:
+            return self.model.filter(id__in=[1,2,3])
+
 admin.site.register(DbTemplate, DbTemplateOptions)
 
