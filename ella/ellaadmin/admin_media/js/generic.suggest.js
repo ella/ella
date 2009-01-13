@@ -4,6 +4,7 @@
 (function($) { $( function() {
     ;;; DEBUG = true;
     ;;; DBG = 1;
+    var VERSION = '2009.01.13';
     var DEL_IMG = ADMIN_MEDIA_URL + 'img/admin/icon_deletelink.gif';
     var MIN_LENGTH = 2;
     var SUGGEST_FIELD_SEPARATOR = '|';
@@ -253,6 +254,17 @@
         var item_str = $sug_item.data('sug_result').REPRE;
         insert_value(item_id, item_str);
     }
+
+    // This element will be cloned to generate the items in the suggest bubble
+    var $suggest_item_template = $('<li>')
+    .click( function() {
+        suggest_select($(this));
+    }).hover( function() {
+        set_field_bubble($(this));
+    }, function() {
+        $SUGGEST_FIELDS_BUBBLE.hide();
+    });
+
     function suggest_update($input, offset) {
         var val = $input.val();
         if (val.length < MIN_LENGTH) {
@@ -303,17 +315,10 @@
                     $SUGGEST_BUBBLE.find('.suggest-next-page').show();
                 }
                 $.map(parsed_results, function(parsed_result) {
-                    var $elem = $('<li>');
-                    $elem.data('sug_result', parsed_result);
-                    $elem.html(parsed_result.REPRE.replace(val_re, '<span class="hilite">$1</span>'));
-                    $SUGGEST_LIST.append($elem);
-                    $elem.click( function() {
-                        suggest_select($elem);
-                    }).hover( function() {
-                        set_field_bubble($(this));
-                    }, function() {
-                        $SUGGEST_FIELDS_BUBBLE.hide();
-                    });
+                    $suggest_item_template.clone(!!'CLONE HANDLERS')
+                    .data('sug_result', parsed_result)
+                    .html(parsed_result.REPRE.replace(val_re, '<span class="hilite">$1</span>'))
+                    .appendTo($SUGGEST_LIST);
                 });
                 var pos = $input.offset();
                 pos.top += $input.outerHeight();
@@ -592,6 +597,8 @@ To export it to various formats, see the pod2* family of commands.
 
 Generic Suggest -- autocomplete tool for ellaadmin
 
+This document describes generic.suggest.js version 2009.01.13
+
 =head1 SYNOPSIS
 
  <html><head>
@@ -626,7 +633,7 @@ Generic Suggest -- autocomplete tool for ellaadmin
      <img src="/admin_media/img/admin/selector-search.gif" width="16" height="16" alt="Lookup" />
  </a>
 
- <!-- An similar input but for multiple values. -->
+ <!-- A similar input but for multiple values. -->
  <input class="vManyToManyRawIdAdminField hidden" type="text" name="authors" value="205,1425" id="id_authors" />
  <!-- The value attribute holds the initial values in a comma-separated list of id's. -->
  <ul class="GenericSuggestFieldMultiple">
@@ -736,8 +743,56 @@ this one might show C<id> and C<slug>).
 
 The real text inputs of the pseudo-inputs (i.e. that with C<id> ending with
 C<_suggest>) have a handler for the keyup event (they also have other handlers).
-When the keyup event is fired with other key than enter or escape, the
-L<suggest_update> function is run.
+When the keyup event is fired with other key than enter, escape or a scrolling
+key, the L<suggest_update> function is run. The escape key is forwarded to the
+L<bubble_keyevent> function.
+
+The keypress handler on the same inputs forwards enter and scrolling keys to the
+L<bubble_keyevent> function. The escape key is made to delete the last selected
+item if the text input is empty.
+
+To sum up what keys are captured by which event: carriage return, line feed,
+uparrow, downarrow, page up and page down are captured by the keypress event.
+Backspace is processed by both keyup (fires L<suggest_update>) and keypress
+(deletes last selected item). All other keys are captured by the keyup event.
+
+The number of suggested items returned is limited on the server side. When there
+are more applicable results to a query than the limit, the "next page" widget is
+shown. For this to be possible, the total number of results is sent along with
+the suggested items themselves. When the widget receives focus, it is passed to
+the currently active pseudo-input's text input. This is made not to fire the
+usual actions bound to the focus event. This is for keyboard to keep controlling
+the text input even after the "next page" widget is clicked. The click event is
+processed by the widget itself though.
+
+The $SUGGEST_BUBBLE holds information about which is the currently active input
+in its data cache, i.e. C<$SUGGEST_BUBBLE.data('cur_input')>. This is updated on
+a variety of events with the C<set_current_input> function.
+
+=head2 functions
+
+=over 4
+
+=item bubble_keyevent
+
+This function executes appropriate actions on the current input based on a key
+pressed. When enter (CR or LF) is the key, the L<suggest_select> function is
+run, inserting the desired item into the pseudo-input. Uparrow and downarrow
+have expected behavior, shifting the active item up or down. When scrolled
+beyond the last or before the first item, previous or next page of results is
+requested (L<suggest_scroll>). Page up and page down request previous or next
+page as well. Escape empties the input and hides the suggest bubble.
+
+=item suggest_update
+
+This function has the responsibility for showing the appropriate content in the
+suggest bubble based on the text in the input and previous scrolling actions.
+
+=back
+
+=head1 AUTHOR
+
+Oldrich Kruza L<Oldrich.Kruza@sixtease.net>
 
 =cut
 
