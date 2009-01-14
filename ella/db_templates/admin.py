@@ -32,10 +32,10 @@ class TemplateBlockFormset(BaseInlineFormSet):
             # both datetimes entered
             if d['active_from'] and d['active_till']:
                 if d['active_from'] > d['active_till']:
-                    validation_error = ValidationError(_('Block active till must be greather then Block active from'))
+                    validation_error = ValidationError(_('Block active till must be greater than Block active from'))
                     self.forms[i]._errors['active_till'] = validation_error.messages
         if validation_error:
-            raise ValidationError(_('Invalid datetime interval. Block active till must be greather then Block active from'))
+            raise ValidationError(_('Invalid datetime interval. Block active till must be greater than Block active from'))
 
         # dictionary of blocks with tuples (active from, active till)
         items = {}
@@ -47,7 +47,7 @@ class TemplateBlockFormset(BaseInlineFormSet):
 
         # check that intervals are not in colision
         errors = []
-        error_message = _('Block active intervals are in colision on %s. Specified interval stops at %s and next interval started at %s.')
+        error_message = 'Block active intervals are in colision on %s. Specified interval stops at %s and next interval started at %s.'
         for name, intervals in items.items():
             if len(intervals) > 1:
                 intervals.sort(self.cmp_by_till)
@@ -78,10 +78,10 @@ class DbTemplateOptions(admin.ModelAdmin):
     # TODO: DB templates export HP
     def queryset(self, request):
 
-        if request.user.is_superuser():
-            return self.model.all()
+        if request.user.is_superuser:
+            return self.model.objects.all()
         else:
-            return self.model.filter(id__in=[1,2,3])
+            return self.model.objects.filter(pk__in=[401,399,397,395,393,391,389,397,373])
 
 admin.site.register(DbTemplate, DbTemplateOptions)
 
