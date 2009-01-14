@@ -771,6 +771,9 @@ a variety of events with the C<set_current_input> function.
 
 =head2 functions
 
+Rhe top-level blocks of the suggester functionality are the functions named
+C<suggest_*>.
+
 =over 4
 
 =item bubble_keyevent
@@ -780,13 +783,35 @@ pressed. When enter (CR or LF) is the key, the L<suggest_select> function is
 run, inserting the desired item into the pseudo-input. Uparrow and downarrow
 have expected behavior, shifting the active item up or down. When scrolled
 beyond the last or before the first item, previous or next page of results is
-requested (L<suggest_scroll>). Page up and page down request previous or next
-page as well. Escape empties the input and hides the suggest bubble.
+requested (L<suggest_scroll_page>). Page up and page down request previous or
+next page as well. Escape empties the input and hides the suggest bubble.
 
 =item suggest_update
 
 This function has the responsibility for showing the appropriate content in the
 suggest bubble based on the text in the input and previous scrolling actions.
+
+First parameter is the real text input whose value is the base for autocomplete
+lookup. Second parameter is the optional offset -- the ord. number of the item
+that will be displayed first in the suggest bubble.
+
+If the offset is absent or negative, zero is used instead. If the offset is out
+of range (which we'll only know by the special return string from the AJAX
+request), it will call itself with zero offset, if it was positive before.
+
+=item suggest_scroll_page
+
+Calls L<suggest_update> with changed offset. The number of currently displayed
+suggested items is added to / subtracted from the current offset. Whether adding
+or subtracting will be done is set by the first parameter (-1 => subtraction =>
+scroll up; +1 => addition => scroll down).
+
+=item suggest_scroll
+
+Takes the I<active> property (css class C<A>) from whichever suggested item had
+it and gives it to the next or previous one, based on the key passed as second
+argument (expects uparrow or downarrow). If scrolling beyond the last element or
+before the first one is attempted, L<suggest_scroll_page> is executed.
 
 =back
 
