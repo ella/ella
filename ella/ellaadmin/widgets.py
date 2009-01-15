@@ -103,7 +103,7 @@ class GenericSuggestAdminWidget(forms.TextInput):
             suggest_item = ''
         else:
             try:
-                suggest_item = '<li class="suggest-selected-item">%s <a>x</a></li>' % getattr(self.model.objects.get(pk=value), self.lookups[0])
+                suggest_item = '<li class="suggest-selected-item">%s <a class="suggest-delete-link">x</a></li>' % getattr(self.model.objects.get(pk=value), self.lookups[0])
             except self.model.DoesNotExist:
                 suggest_item = ''
 
@@ -151,7 +151,7 @@ class GenericSuggestAdminWidgetMultiple(forms.TextInput):
             if not isinstance(value, (list, tuple)):
                 value = [int(v) for v in value.split(',')]
             try:
-                suggest_items = ''.join('<li class="suggest-selected-item">%s <a>x</a></li>' % \
+                suggest_items = ''.join('<li class="suggest-selected-item">%s <a class="suggest-delete-link">x</a></li>' % \
                                          getattr(i, self.lookups[0]) for i in self.model.objects.filter(pk__in=value))
                 value = ','.join(["%s" % v for v in value])
             except self.model.DoesNotExist:
