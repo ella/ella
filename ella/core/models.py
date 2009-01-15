@@ -13,7 +13,8 @@ from django.contrib.redirects.models import Redirect
 
 from ella.ellaadmin.utils import admin_url
 from ella.core.box import Box
-from ella.core.managers import ListingManager, HitCountManager, PlacementManager
+from ella.core.managers import ListingManager, HitCountManager, PlacementManager,\
+    RelatedManager
 from ella.core.cache import get_cached_object, cache_this, CachedGenericForeignKey
 
 LISTING_UNIQUE_DEFAULT_SET = 'unique_set_default'
@@ -87,6 +88,8 @@ class Category(models.Model):
     tree_path = models.CharField(verbose_name=_("Path from root category"), max_length=255, editable=False)
     description = models.TextField(_("Category Description"), blank=True)
     site = models.ForeignKey(Site)
+
+    objects = RelatedManager()
 
     @transaction.commit_on_success
     def save(self, force_insert=False, force_update=False):
