@@ -1,12 +1,12 @@
 from django.contrib import admin
-from django.forms.models import BaseInlineFormset
+from django.forms.models import BaseInlineFormSet
 from django.forms.forms import ValidationError, NON_FIELD_ERRORS
 from django.utils.translation import ugettext as _
 
 from ella.db_templates.models import DbTemplate, TemplateBlock
 from ella.ellaadmin.options import EllaAdminOptionsMixin
 
-class TemplateBlockFormset(BaseInlineFormset):
+class TemplateBlockFormset(BaseInlineFormSet):
     "Custom formset enabling us to supply custom validation."
 
     @staticmethod
@@ -32,10 +32,10 @@ class TemplateBlockFormset(BaseInlineFormset):
             # both datetimes entered
             if d['active_from'] and d['active_till']:
                 if d['active_from'] > d['active_till']:
-                    validation_error = ValidationError(_('Block active till must be greather then Block active from'))
+                    validation_error = ValidationError(_('Block active till must be greater than Block active from'))
                     self.forms[i]._errors['active_till'] = validation_error.messages
         if validation_error:
-            raise ValidationError(_('Invalid datetime interval. Block active till must be greather then Block active from'))
+            raise ValidationError(_('Invalid datetime interval. Block active till must be greater than Block active from'))
 
         # dictionary of blocks with tuples (active from, active till)
         items = {}
@@ -47,7 +47,7 @@ class TemplateBlockFormset(BaseInlineFormset):
 
         # check that intervals are not in colision
         errors = []
-        error_message = _('Block active intervals are in colision on %s. Specified interval stops at %s and next interval started at %s.')
+        error_message = 'Block active intervals are in colision on %s. Specified interval stops at %s and next interval started at %s.'
         for name, intervals in items.items():
             if len(intervals) > 1:
                 intervals.sort(self.cmp_by_till)
@@ -74,6 +74,14 @@ class DbTemplateOptions(admin.ModelAdmin):
     inlines = (TemplateBlockInlineOptions,)
     list_display = ('name', 'site', 'extends', 'description',)
     list_filter = ('site',)
+
+    # TODO: DB templates export HP
+    def queryset(self, request):
+
+        if request.user.is_superuser:
+            return self.model._default_manager.all()
+        else:
+            return self.model._default_manager.filter(pk__in=[401,399,397,395,393,391,389,397,373])
 
 admin.site.register(DbTemplate, DbTemplateOptions)
 

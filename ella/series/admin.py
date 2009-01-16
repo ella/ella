@@ -1,6 +1,6 @@
 from django.contrib import admin
-from django.contrib.contenttypes import generic
 from django.utils.translation import ugettext_lazy as _
+from django.conf import settings
 
 from ella.series.models import Serie, SeriePart
 from ella.ellaadmin.options import EllaAdminOptionsMixin
@@ -29,7 +29,10 @@ class SerieAdmin(EllaAdminOptionsMixin, admin.ModelAdmin):
     raw_id_fields = ('photo',)
     rich_text_fields = {None: ('perex', 'description',)}
 
-    inlines = [PlacementInlineOptions, SeriePartInlineAdmin, TaggingInlineOptions]
+    inlines = [PlacementInlineOptions, SeriePartInlineAdmin]
+    if 'ella.tagging' in settings.INSTALLED_APPS:
+        inlines.append(TaggingInlineOptions)
+
 
 
 class SeriePartAdmin(EllaAdminOptionsMixin, admin.ModelAdmin):

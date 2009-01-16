@@ -1,0 +1,76 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ella.newman (admin-ng)\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-01-14 22:48+0100\n"
+"PO-Revision-Date: 2009-01-14 22:52+0100\n"
+"Last-Translator: Vitek Pliska <whit@jizak.cz>\n"
+"Language-Team: Ella <ella.project@gmail.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Czech\n"
+"X-Poedit-Country: CZECH REPUBLIC\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: models.py:10
+msgid "Title"
+msgstr "Nadpis"
+
+#: models.py:11
+msgid "Slug"
+msgstr ""
+
+#: models.py:12
+msgid "Summary"
+msgstr "Souhrn"
+
+#: models.py:13
+msgid "Detail"
+msgstr "Detailní popis"
+
+#: models.py:14
+msgid "Version"
+msgstr "Verze"
+
+#: models.py:21
+msgid "Development message"
+msgstr "Zpráva o vývoji"
+
+#: models.py:22
+msgid "Development messages"
+msgstr "Zprávy o vývoji"
+
+#: models.py:30
+msgid "Model"
+msgstr "Model"
+
+#: models.py:31
+msgid "Field"
+msgstr "Pole"
+
+#: models.py:32
+msgid "Short help"
+msgstr "Stručná nápověda"
+
+#: models.py:33
+msgid "Full message"
+msgstr "Celá zpráva"
+
+#: models.py:38
+msgid "General"
+msgstr "Obecně"
+
+#: models.py:41
+msgid "Help item"
+msgstr "Položka nápovědy"
+
+#: models.py:42
+msgid "Help items"
+msgstr "Položky nápovědy"
+

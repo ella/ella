@@ -8,6 +8,7 @@ from django.http import HttpResponseRedirect
 from django.utils.translation import ugettext_lazy as _
 from django import forms
 from django.forms import ModelForm
+from django.forms.util import ValidationError
 
 from ella.core.cache.utils import delete_cached_object
 from ella.ellaadmin import widgets

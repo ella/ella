@@ -2,13 +2,13 @@ from django import forms
 from django.contrib import admin
 from django.conf import settings
 from django.utils.translation import ugettext
+from django.forms.util import ValidationError
 
 from ella.tagging.admin import TaggingInlineOptions
 from ella.ellaadmin.options import EllaAdminOptionsMixin
 
 from ella.photos.models import FormatedPhoto, Format, Photo
 from ella.photos.views import format_photo_json, thumb_url
-
 
 class FormatedPhotoForm(forms.BaseForm):
     def clean(self):
@@ -23,7 +23,8 @@ class FormatedPhotoForm(forms.BaseForm):
             ((data['crop_left'] + data['crop_width']) > photo.width) or
             ((data['crop_top'] + data['crop_height']) > photo.height)
 ):
-            raise forms.ValidationError, ugettext("The specified crop coordinates do not fit into the source photo.")
+            # raise forms.ValidationError, ugettext("The specified crop coordinates do not fit into the source photo.")
+            raise ValidationError, ugettext("The specified crop coordinates do not fit into the source photo.")
         return data
 
 
@@ -59,11 +60,14 @@ class FormatedPhotoInlineOptions(admin.TabularInline):
 
 
 class PhotoOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
-    inlines = (FormatedPhotoInlineOptions, TaggingInlineOptions,)
-    list_display = ('title', 'width', 'height', 'thumb') ## 'authors')
+    inlines = [ FormatedPhotoInlineOptions ]
+    if 'ella.tagging' in settings.INSTALLED_APPS:
+        inlines.append(TaggingInlineOptions)
+    list_display = ('title', 'width', 'height', 'thumb', 'pk',) ## 'authors')
     list_filter = ('created',)
     prepopulated_fields = {'slug': ('title',)}
     search_fields = ('title', 'image', 'description', 'id',) # FIXME: 'tags__tag__name',)
+    suggest_fields = {'authors': ('name', 'slug',), 'source': ('name', 'url',)}
 
     def __call__(self, request, url):
         if url and url.endswith('json'):

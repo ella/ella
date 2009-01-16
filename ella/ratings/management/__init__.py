@@ -119,9 +119,9 @@ def install_sql_functions(app, created_models, verbosity=2):
 
 # bind the functions to run after syncdb
 
-if settings.DATABASE_ENGINE == 'mysql':
-    dispatcher.connect(install_sql_functions, signal=signals.post_syncdb)
-dispatcher.connect(create_model_weights, signal=signals.post_syncdb)
+#if settings.DATABASE_ENGINE == 'mysql':
+#    dispatcher.connect(install_sql_functions, signal=signals.post_syncdb)
+#dispatcher.connect(create_model_weights, signal=signals.post_syncdb)
 
 
 if __name__ == "__main__":

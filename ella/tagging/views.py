@@ -125,8 +125,8 @@ def tagged_publishables(request, tag):
 
 def tags_json_view(request, **kwargs):
     tag_begin = ''
-    if 'q' in request:
-        tag_begin = request['q']
+    if 'q' in request.GET:
+        tag_begin = request.GET.get('q')
     elif 'tag' in kwargs:
         tag_begin = kwargs['tag']
     start = tag_begin.strip()

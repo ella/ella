@@ -1,8 +1,9 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _, ugettext
-from django.forms.models import BaseInlineFormset
+from django.forms.models import BaseInlineFormSet
 from django.shortcuts import render_to_response
-from django.forms import ValidationError
+from django.conf import settings
+from django.forms.util import ValidationError
 
 from ella.tagging.admin import TaggingInlineOptions
 
@@ -15,7 +16,7 @@ from ella.core.cache import get_cached_object_or_404
 from ella.polls.models import Poll, Contest, Contestant, Quiz, Result, Choice, Vote, Question
 
 
-class ResultFormset(BaseInlineFormset):
+class ResultFormset(BaseInlineFormSet):
     def clean(self):
         if not self.is_valid():
             return
@@ -29,18 +30,15 @@ class ResultFormset(BaseInlineFormset):
 )
                 self.forms[i]._errors = {'points_to': validation_error.messages}
         if validation_error:
-            raise ValidationError(ugettext('Invalid score intervals'))
+            raise ValidationError, ugettext('Invalid score intervals')
 
         intervals = [ (form_data['points_from'], form_data['points_to']) for form_data in self.cleaned_data if form_data ]
-        if len(intervals)==0:
-            raise ValidationError(ugettext(u'You haven\'t specified any results. %d' % (len(intervals))))
         intervals.sort()
         for i in xrange(len(intervals) - 1):
             if intervals[i][1] + 1 > intervals[i+1][0]:
-                raise ValidationError(ugettext('Score %s is covered by two answers.') % (intervals[i][1]))
+                raise ValidationError, ugettext('Score %s is covered by two answers.') % (intervals[i][1])
             elif intervals[i][1] + 1 < intervals[i+1][0]:
-                raise ValidationError(ugettext('Score %s is not covered by any answer.') % (intervals[i][1] + 1))
-
+                raise ValidationError, ugettext('Score %s is not covered by any answer.') % (intervals[i][1] + 1)
         return self.cleaned_data
 
 class ResultTabularOptions(admin.TabularInline):
@@ -105,26 +103,34 @@ class ContestOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
                 {'contestants' : contestants, 'title' : title, 'module_name' : module_name})
         return super(ContestOptions, self).__call__(request, url)
 
-    list_display = ('title', 'category', 'active_from', 'correct_answers', 'get_all_answers_count', 'get_hits', 'full_url',)
+    list_display = ('title', 'category', 'active_from', 'correct_answers', 'get_all_answers_count', 'get_hits', 'pk', 'full_url',)
     list_filter = ('category', 'active_from',)
     search_fields = ('title', 'text_announcement', 'text', 'text_results',)
-    inlines = (QuestionInlineOptions, PlacementInlineOptions, TaggingInlineOptions,)
+    inlines = [ QuestionInlineOptions, PlacementInlineOptions ]
+    if 'ella.tagging' in settings.INSTALLED_APPS:
+        inlines.append(TaggingInlineOptions)
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
     rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}
 
 class QuizOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
-    list_display = ('title', 'category', 'active_from', 'get_hits', 'full_url',)
+    list_display = ('title', 'category', 'active_from', 'get_hits', 'pk', 'full_url',)
     list_filter = ('category', 'active_from',)
     search_fields = ('title', 'text_announcement', 'text', 'text_results',)
-    inlines = (QuestionInlineOptions, ResultTabularOptions, PlacementInlineOptions, TaggingInlineOptions,)
+    inlines = [ QuestionInlineOptions, ResultTabularOptions, PlacementInlineOptions ]
+    if 'ella.tagging' in settings.INSTALLED_APPS:
+        inlines.append(TaggingInlineOptions)
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
     rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}
 
+#    suggest_fields = {'category': ('tree_path', 'title', 'slug',), 'authors': ('name', 'slug',),}
+    suggest_fields = {'authors': ('name', 'slug',),}
+
+
 class PollOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}
-    list_display = ('title', 'question', 'get_total_votes',)
+    list_display = ('title', 'question', 'get_total_votes', 'pk',)
     list_filter = ('active_from',)
     search_fields = ('title', 'text_announcement', 'text', 'text_results', 'question__question',)
     raw_id_fields = ('question',)

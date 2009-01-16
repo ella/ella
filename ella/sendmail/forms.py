@@ -1,11 +1,14 @@
 from datetime import datetime
-from time import mktime
+import time
+import logging
+import md5
 
+from django.conf import settings
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 
 from django import forms
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_lazy as _
 
 from ella.core.cache import get_cached_object
 
@@ -13,6 +16,18 @@ INIT_PROPS = {
     'target': '',
     'gonzo': '',
 }
+log = logging.getLogger('ella.sendmail')
+
+
+def compute_hash(target='', timestamp=''):
+    """
+    counts md5 hash of options
+    this is simple check, if sent data are the same as expected
+    (defined in options)
+
+    """
+    timestamp = str(timestamp)
+    return md5.new('-'.join((target, timestamp, settings.SECRET_KEY,))).hexdigest()
 
 class SendMailForm(forms.Form):
 
@@ -39,7 +54,7 @@ class SendMailForm(forms.Form):
         self.init_props = INIT_PROPS.copy()
 
         # set actual time
-        now = int(mktime(datetime.now().timetuple()))
+        now = int(time.mktime(datetime.now().timetuple()))
         self.init_props['timestamp'] = now
 
         # update defaults with form init params
@@ -51,17 +66,18 @@ class SendMailForm(forms.Form):
             target_ct, target_id = int(target_ct), int(target_id)
             target_contenttype = get_cached_object(ContentType, pk=target_ct)
             self.target_object = get_cached_object(target_contenttype, pk=target_id)
-        except ValueError:
-            pass
-        except models.ObjectDoesNotExist:
-            pass
+        except ValueError, ve:
+            log.error('ValueError: %s' % str(ve))
+        except models.ObjectDoesNotExist, e:
+            log.error('Object does not exist: %s' % str(e))
 
         # defaults for this instance
         self.init_props['target_ct'] = target_ct
         self.init_props['target_id'] = target_id
 
         # defaults continue
-        self.init_props['gonzo'] = self.get_hash(self.init_props['target'], self.init_props['timestamp'])
+        #self.init_props['gonzo'] = compute_hash(self.init_props['target'], self.init_props['timestamp'])
+        self.init_props['gonzo'] = compute_hash(self.init_props['target'])
 
     def init_form(self, init_props={}):
         """create form by given init_props"""
@@ -79,9 +95,10 @@ class SendMailForm(forms.Form):
     def add_normal_inputs(self):
         """any other normal inputs"""
         textarea = forms.Textarea()
-        self.fields['sender_mail'] = forms.EmailField()
-        self.fields['recipient_mail'] = forms.EmailField()
-        self.fields['custom_message'] = forms.CharField(max_length=300, required=False, widget=textarea)
+        self.fields['sender_mail'] = forms.EmailField(label=_("Sender email:"))
+        self.fields['sender_name'] = forms.CharField(max_length=40, required=False, label=_("Sender name:"))
+        self.fields['recipient_mail'] = forms.EmailField(label=_("Recipient email:"))
+        self.fields['custom_message'] = forms.CharField(max_length=300, required=False, widget=textarea, label=_("Email message:"))
 
 
     def fill_form_values(self):
@@ -90,19 +107,6 @@ class SendMailForm(forms.Form):
         self.fields['gonzo'].initial = self.init_props['gonzo']
         self.fields['target'].initial = self.init_props['target']
         self.fields['timestamp'].initial = self.init_props['timestamp']
-
-
-    def get_hash(self, target='', timestamp=''):
-        """
-        counts md5 hash of options
-        this is simple check, if sent data are the same as expected
-        (defined in options)
-
-        """
-        import md5
-        from django.conf import settings
-        timestamp = str(timestamp)
-        return md5.new('-'.join((target, timestamp, settings.SECRET_KEY,))).hexdigest()
 
 
     def clean(self):
@@ -123,3 +127,12 @@ class SendMailForm(forms.Form):
             raise ValidationError, _("Target object does not exist.")
 
         return self.cleaned_data
+
+
+class SendBuddyForm(SendMailForm):
+
+    def add_normal_inputs(self):
+        """any other normal inputs"""
+        self.fields['sender_mail'] = forms.EmailField(label=_("Sender email:"))
+        self.fields['recipient_mail'] = forms.EmailField(label=_("Recipient email:"))
+        self.fields['sender_name'] = forms.CharField(max_length=40, required=False, label=_("Sender name:"))

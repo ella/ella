@@ -79,12 +79,12 @@ class ModelWeight(models.Model):
 
     objects = ModelWeightManager()
 
-    def save(self):
+    def save(self, force_insert=False, force_update=False):
         """
         Clear the cache and do the save()
         """
         ModelWeight.objects.clear_cache()
-        return super(ModelWeight, self).save()
+        return super(ModelWeight, self).save(force_insert, force_update)
 
     class Meta:
         verbose_name = _('Model weight')
@@ -217,7 +217,8 @@ class TotalRateManager(models.Manager):
 
 ) tr JOIN %(ct_tab)s ct on ct.id = tr.target_ct_id
             ORDER BY
-                tr.amount DESC
+                tr.amount DESC,
+                tr.target_id
             LIMIT %%s''' % {
                 'total_tab' : connection.ops.quote_name(TotalRate._meta.db_table),
                 'cond_agg' : where_agg,
@@ -292,7 +293,7 @@ class AggManager(models.Manager):
         """
 
         sql = '''INSERT INTO %(tab_tr)s (amount, target_ct_id, target_id)
-                 SELECT SUM(amount * (karma_get_time_coeficient(DATEDIFF(current_date, DATE(time))))), target_ct_id, target_id
+                 SELECT round(SUM(amount * (karma_get_time_coeficient(DATEDIFF(current_date, DATE(time))))),2), target_ct_id, target_id
                  FROM %(tab_agg)s
                  GROUP BY target_ct_id, target_id''' % {
             'tab_agg' : connection.ops.quote_name(Agg._meta.db_table),
@@ -397,7 +398,7 @@ class Rating(models.Model):
         verbose_name_plural = _('Ratings')
         ordering = ('-time',)
 
-    def save(self):
+    def save(self, force_insert=False, force_update=False):
         """
         Modified save() method that checks for duplicit entries.
         """
@@ -418,6 +419,6 @@ class Rating(models.Model):
 ).count() > 0):
                 return
 
-        super(Rating, self).save()
+        super(Rating, self).save(force_insert, force_update)
 
 

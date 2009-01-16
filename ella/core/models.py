@@ -13,9 +13,11 @@ from django.contrib.redirects.models import Redirect
 
 from ella.ellaadmin.utils import admin_url
 from ella.core.box import Box
-from ella.core.managers import ListingManager, HitCountManager, PlacementManager
+from ella.core.managers import ListingManager, HitCountManager, PlacementManager,\
+    RelatedManager
 from ella.core.cache import get_cached_object, cache_this, CachedGenericForeignKey
 
+LISTING_UNIQUE_DEFAULT_SET = 'unique_set_default'
 
 class Author(models.Model):
     """
@@ -87,8 +89,10 @@ class Category(models.Model):
     description = models.TextField(_("Category Description"), blank=True)
     site = models.ForeignKey(Site)
 
+    objects = RelatedManager()
+
     @transaction.commit_on_success
-    def save(self):
+    def save(self, force_insert=False, force_update=False):
         "Override save() to construct tree_path based on the category's parent."
         old_tree_path = self.tree_path
         if self.tree_parent:
@@ -98,18 +102,32 @@ class Category(models.Model):
                 self.tree_path = self.slug
         else:
             self.tree_path = ''
-        super(Category, self).save()
+        super(Category, self).save(force_insert, force_update)
         if old_tree_path != self.tree_path:
             # the tree_path has changed, update children
             children = Category.objects.filter(tree_path__startswith=old_tree_path+'/').order_by('tree_path')
             for child in children:
-                child.save()
+                child.save(force_update=True)
 
     def get_tree_parent(self):
         "Cached method."
         if self.tree_parent_id:
             return get_cached_object(Category, pk=self.tree_parent_id)
         return None
+
+    @property
+    def main_parent(self):
+        """
+        Cached. Used for highlight main category via ifequal tag.
+        """
+        def _get_main_parent(category):
+            if not category.get_tree_parent():
+                return None
+            if not category.get_tree_parent().get_tree_parent():
+                return category
+            else:
+                return _get_main_parent(category.get_tree_parent())
+        return _get_main_parent(self)
 
     @property
     def path(self):
@@ -144,8 +162,9 @@ class Category(models.Model):
     draw_title.allow_tags = True
 
     class Meta:
-        ordering = ('site', 'tree_path', 'title',)
         unique_together = (('site', 'tree_path'),)
+        # TODO: ordering only for admin (admin now use only first item in list)
+        ordering = ('site', 'tree_path',)
         verbose_name = _('Category')
         verbose_name_plural = _('Categories')
 
@@ -168,7 +187,6 @@ class Placement(models.Model):
     objects = PlacementManager()
 
     class Meta:
-        #unique_together = (('category', 'target_ct', 'target_id'),)
         ordering = ('-publish_from',)
         verbose_name = _('Placement')
         verbose_name_plural = _('Placements')
@@ -195,7 +213,7 @@ class Placement(models.Model):
         return now > self.publish_from and (self.publish_to is None or now < self.publish_to)
 
     @transaction.commit_on_success
-    def save(self):
+    def save(self, force_insert=False, force_update=False):
         " If Listing is created, we create HitCount object "
 
         if not self.slug:
@@ -213,7 +231,7 @@ class Placement(models.Model):
                     r.new_path = new_path
                     r.save()
         # First, save Placement
-        super(Placement, self).save()
+        super(Placement, self).save(force_insert, force_update)
         # Then, save HitCount (needs placement_id)
         hc, created = HitCount.objects.get_or_create(placement=self)
 
@@ -343,16 +361,15 @@ class HitCount(models.Model):
 
     objects = HitCountManager()
 
-    def save(self):
+    def save(self, force_insert=False, force_update=False):
         "update last seen automaticaly"
         self.last_seen = datetime.now()
-        super(HitCount, self).save()
+        super(HitCount, self).save(force_insert, force_update)
 
     def target(self):
         return self.placement.target
 
     class Meta:
-        ordering = ('-hits', '-last_seen',)
         verbose_name = 'Hit Count'
         verbose_name_plural = 'Hit Counts'
 

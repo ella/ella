@@ -73,7 +73,8 @@ class Photo(models.Model):
 
     created = models.DateTimeField(default=datetime.now, editable=False)
 
-    tags = generic.GenericRelation(TaggedItem)
+    if 'ella.tagging' in settings.INSTALLED_APPS:
+        tags = generic.GenericRelation(TaggedItem)
 
     def thumb(self):
         """
@@ -82,35 +83,36 @@ class Photo(models.Model):
         thumbUrl = self.thumb_url()
         if not thumbUrl:
             return mark_safe("""<strong>%s</strong>""" % ugettext('Thumbnail not available'))
-        return mark_safe("""<a href="%s%s"><img src="%s%s" alt="Thumbnail %s" /></a>""" % (settings.MEDIA_URL, self.image, settings.MEDIA_URL, thumbUrl, self.title))
+        return mark_safe("""<a href="%s"><img src="%s" alt="Thumbnail %s" /></a>""" % (self.image.url, thumbUrl, self.title))
     thumb.allow_tags = True
 
     def thumb_url(self):
-        spl = path.split(self.image)
-        woExtension = spl[1].rsplit('.', 1)[0]
-        imageType = detect_img_type(path.join(settings.MEDIA_ROOT, self.image))
-        if not imageType:
+        """
+        Generates thumbnail for admin site and returns its url
+        """
+        type = detect_img_type(self.image.path)
+        if not type:
             return None
-        ext = PHOTOS_TYPE_EXTENSION[ imageType ]
-        filename = 'thumb-%s%s' % (woExtension, ext)
-        tPath = (spl[0] , filename)
-        tinythumb = path.join(*tPath)
-        tinythumbPath = path.join(settings.MEDIA_ROOT, tinythumb)
-        if not path.exists(tinythumbPath):
+
+        # photos/2008/12/31/foo.jpg => photos/2008/12/31/thumb-foo.jpg
+        thumb_name = path.dirname(self.image.name) + "/" + 'thumb-%s' % path.basename(self.image.name)
+
+        storage = self.image.storage
+        if not storage.exists(thumb_name):
             try:
-                im = Image.open(path.join(settings.MEDIA_ROOT, self.image))
-                im.thumbnail(PHOTOS_THUMB_DIMENSION , Image.ANTIALIAS)
-                im.save(tinythumbPath, imageType)
+                im = Image.open(self.image.path)
+                im.thumbnail(PHOTOS_THUMB_DIMENSION, Image.ANTIALIAS)
+                im.save(storage.path(thumb_name), type)
             except IOError:
                 # TODO Logging something wrong
                 return None
-        return tinythumb
+        return storage.url(thumb_name)
 
     def Box(self, box_type, nodelist):
         return PhotoBox(self, box_type, nodelist)
 
     @transaction.commit_on_success
-    def save(self):
+    def save(self, force_insert=False, force_update=False):
         """Overrides models.Model.save.
 
         - Generates slug.
@@ -118,21 +120,22 @@ class Photo(models.Model):
         """
         # prefill the slug with the ID, it requires double save
         if not self.id:
-            super(Photo, self).save()
+            super(Photo, self).save(force_insert, force_update)
             self.slug = str(self.id) + '-' + self.slug
+            force_insert, force_update = False, True
             image_changed = False
         else:
             old = Photo.objects.get(pk = self.pk)
             image_changed = old.image != self.image
         # rename image by slug
-        imageType = detect_img_type(path.join(settings.MEDIA_ROOT, self.image))
+        imageType = detect_img_type(path.join(settings.MEDIA_ROOT, self.image.name))
         if imageType is not None:
-            self.image = file_rename(self.image, self.slug, PHOTOS_TYPE_EXTENSION[ imageType ])
+            self.image = file_rename(self.image.name, self.slug, PHOTOS_TYPE_EXTENSION[ imageType ])
         # delete formatedphotos if new image was uploaded
         if image_changed:
             for f_photo in self.formatedphoto_set.all():
                 f_photo.delete()
-        super(Photo, self).save()
+        super(Photo, self).save(force_insert, force_update)
 
     def ratio(self):
         "Return photo's width to height ratio"
@@ -158,7 +161,7 @@ class Photo(models.Model):
         return self.title
 
     def get_absolute_url(self):
-        return self.get_image_url()
+        return self.image.url
 
     class Meta:
         verbose_name = _('Photo')
@@ -244,13 +247,13 @@ class FormatedPhoto(models.Model):
 
     def generate(self):
         "Generates photo file in current format"
-        i = ImageStretch(filename=self.photo.get_image_filename(), formated_photo=self)
+        i = ImageStretch(filename=self.photo.image.path, formated_photo=self)
         stretched_photo = i.stretch_image()
         self.width, self.height = stretched_photo.size
         self.filename = self.file(relative=True)
         stretched_photo.save(self.file(), quality=self.format.resample_quality)
 
-    def save(self):
+    def save(self, force_insert=False, force_update=False):
         """Overrides models.Model.save
 
         - Removes old file from the FS
@@ -258,7 +261,7 @@ class FormatedPhoto(models.Model):
         """
         self.remove_file()
         self.generate()
-        super(FormatedPhoto, self).save()
+        super(FormatedPhoto, self).save(force_insert, force_update)
 
     def delete(self):
         self.remove_file()
@@ -271,9 +274,9 @@ class FormatedPhoto(models.Model):
     def file(self, relative=False):
         """ Method returns formated photo path - derived from format.id and source Photo filename """
         if relative:
-            source_file = path.split(self.photo.image)
+            source_file = path.split(self.photo.image.name)
         else:
-            source_file = path.split(self.photo.get_image_filename())
+            source_file = path.split(self.photo.image.path)
         return path.join(source_file[0],  str (self.format.id) + '-' + source_file[1])
 
     def __unicode__(self):

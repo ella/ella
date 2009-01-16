@@ -5,6 +5,7 @@ from django.contrib.contenttypes import generic
 from django.contrib.redirects.models import Redirect
 from django.db.models import Model
 from django.contrib.sites.models import Site
+from django.conf import settings
 
 from ella.core.cache import get_cached_object, get_cached_list
 from ella.core.models import Placement, Category, HitCount
@@ -22,7 +23,9 @@ class Publishable(Model):
 
     placements = generic.GenericRelation(Placement, object_id_field='target_id', content_type_field='target_ct')
     comments = generic.GenericRelation(Comment, object_id_field='target_id', content_type_field='target_ct')
-    tags = generic.GenericRelation(TaggedItem)
+
+    if 'ella.tagging' in settings.INSTALLED_APPS:
+        tags = generic.GenericRelation(TaggedItem)
 
     class Meta:
         abstract = True
@@ -70,7 +73,7 @@ class Publishable(Model):
     def get_admin_url(self):
         return admin_url(self)
 
-    def save(self):
+    def save(self, force_insert=False, force_update=False):
         if self.pk and hasattr(self, 'slug'): # only run on update
             # get old self
             old_self = self.__class__._default_manager.get(pk=self.pk)
@@ -80,10 +83,10 @@ class Publishable(Model):
                         target_id=self.pk,
                         target_ct=ContentType.objects.get_for_model(self.__class__)
 ).exclude(category=self.category_id)) + [self.main_placement]:
-                    if plc and plc.slug == old_self.slug:
+                    if plc.slug == old_self.slug:
                         plc.slug = self.slug
                         plc.save()
-        return Model.save(self)
+        return Model.save(self, force_insert, force_update)
 
     def delete(self):
         url = self.get_absolute_url()

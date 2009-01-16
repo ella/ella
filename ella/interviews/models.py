@@ -28,7 +28,7 @@ class Interviewee(models.Model):
             return unicode(get_cached_object(Author, pk=self.author_id))
         elif self.user_id:
             user = get_cached_object(User, pk=self.user_id)
-            return user.first_name + ' ' + user.last_name
+            return user.get_full_name()
         return self.name
 
 

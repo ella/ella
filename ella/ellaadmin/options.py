@@ -1,13 +1,92 @@
-from django.db.models import ForeignKey, SlugField
-
 from django import forms
 from django.conf import settings
-from django.http import HttpResponseRedirect
+from django.db.models.query_utils import Q
+from django.db.models import ForeignKey, SlugField, ManyToManyField, ImageField
+from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.utils.translation import ugettext_lazy as _
+from django.contrib import admin
 
 from ella.ellaadmin import widgets, fields
 
-USE_SUGGESTERS =  getattr(settings, 'USE_SUGGESTERS', False)
+SUGGEST_VIEW_LIMIT = getattr(settings, 'SUGGEST_VIEW_LIMIT', 20)
+SUGGEST_VIEW_MIN_LENGTH = getattr(settings, 'SUGGEST_VIEW_MIN_LENGTH', 2)
+SUGGEST_RETURN_ALL_FIELD = getattr(settings, 'SUGGEST_RETURN_ALL_FIELD', True)
+
+class EllaModelAdmin(admin.ModelAdmin):
+
+    def __call__(self, request, url):
+        if url and url.endswith('suggest'):
+            return self.suggest_view(request)
+
+        return super(EllaModelAdmin, self).__call__(request, url)
+
+    def suggest_view(self, request, extra_context=None):
+
+        # accepts only ajax calls if not DEBUG
+        if not request.is_ajax() and not settings.DEBUG:
+            raise Http404
+
+        if not ('f' in request.GET.keys() and 'q' in request.GET.keys()):
+            raise AttributeError, 'Invalid query attributes. Example: ".../?f=field_a&f=field_b&q=search_term&o=offset"'
+        elif len(request.GET.get('q')) < SUGGEST_VIEW_MIN_LENGTH:
+            return HttpResponse('', mimetype='text/plain;charset=utf-8')
+
+        offset = 0
+        if 'o' in request.GET.keys() and request.GET.get('o'):
+            offset = int(request.GET.get('o'))
+        limit = offset + SUGGEST_VIEW_LIMIT
+
+        lookup_fields = [u'id'] + request.GET.getlist('f')
+        lookup_value = request.GET.get('q')
+        lookup = None
+
+        model_fields = [f.name for f in self.model._meta.fields]
+
+        for f in lookup_fields:
+
+            if not (f in model_fields or f.split('__')[0] in model_fields):
+                raise AttributeError, 'Model "%s" has not field "%s". Possible fields are "%s".' \
+                                    % (self.model._meta.object_name, f, ', '.join(model_fields))
+            lookup_key = str('%s__icontains' % f)
+            if not lookup:
+                lookup = Q(**{lookup_key: lookup_value})
+            else:
+                lookup = lookup | Q(**{lookup_key: lookup_value})
+
+        if SUGGEST_RETURN_ALL_FIELD:
+            data = self.model.objects.filter(lookup).values(*lookup_fields)
+        else:
+            data = self.model.objects.filter(lookup).values(*lookup_fields[:2])
+
+        cnt = len(data)
+
+        # sort the suggested items so that those starting with the sought term come first
+        def compare(a,b):
+            def _cmp(a,b,sought):
+                a_starts = unicode(a).lower().startswith(sought)
+                b_starts = unicode(b).lower().startswith(sought)
+                # if exactly one of (a,b) starts with sought, the one starting with it comes first
+                if a_starts ^ b_starts:
+                    if a_starts: return -1
+                    if b_starts: return +1
+                # else compare lexicographically
+                return cmp(a,b)
+            return _cmp(a,b,unicode(lookup_value).lower())
+        data = list(data)
+        if offset >= len(data): return HttpResponse('SPECIAL: OFFSET OUT OF RANGE', mimetype='text/plain')
+        data.sort(cmp=compare, key=lambda x: x[lookup_fields[1]])
+        data = data[offset:limit]
+
+        ft = []
+        ft.append('{cnt:%d}' % cnt)
+        for item in data:
+            if SUGGEST_RETURN_ALL_FIELD:
+                ft.append("%s".encode('utf-8') % '|'.join("%s" % item[f] for f in lookup_fields))
+            else:
+                ft.append("%s".encode('utf-8') % '|'.join("%s" % item[f] for f in lookup_fields[:2]))
+
+        return HttpResponse('\n'.join(ft), mimetype='text/plain;charset=utf-8')
+
 
 class EllaAdminOptionsMixin(object):
     def formfield_for_dbfield(self, db_field, **kwargs):
@@ -31,20 +110,34 @@ class EllaAdminOptionsMixin(object):
                     rich_text_field.widget.attrs['class'] += ' %s' % css_class
                 return rich_text_field
 
-        # FIXME: Dirty solution for suggesters only in new zenaadmin
-        if USE_SUGGESTERS:
-            if db_field.name == 'authors':
-                kwargs['label'] = db_field.verbose_name
-                return fields.AuthorSuggestField(db_field, **kwargs)
-
         if db_field.name in self.raw_id_fields and isinstance(db_field, ForeignKey):
             kwargs['widget'] = widgets.ForeignKeyRawIdWidget(db_field.rel)
             return db_field.formfield(**kwargs)
 
+        if isinstance(db_field, ImageField):
+            # because we accept only (JPEG) images with RGB color profile.
+            return fields.OnlyRGBImageField(db_field, **kwargs)
+
+        if db_field.name in getattr(self, 'suggest_fields', {}).keys() and isinstance(db_field, (ForeignKey, ManyToManyField)):
+            kwargs.update({
+                'required': not db_field.blank,
+                'label': db_field.verbose_name,
+})
+            if isinstance(db_field, ForeignKey):
+                return fields.GenericSuggestField([db_field, self.model, self.suggest_fields[db_field.name]], **kwargs)
+            return fields.GenericSuggestFieldMultiple([db_field, self.model, self.suggest_fields[db_field.name]], **kwargs)
+
         if db_field.name in ('target_ct', 'source_ct', 'content_type',):
             kwargs['widget'] = widgets.ContentTypeWidget
+            return db_field.formfield(**kwargs)
         elif db_field.name in ('target_id', 'source_id', 'object_id',):
             kwargs['widget'] = widgets.ForeignKeyGenericRawIdWidget
+            return db_field.formfield(**kwargs)
+
+        if db_field.name == 'order':
+            kwargs['widget'] = widgets.IncrementWidget
+            return db_field.formfield(**kwargs)
+
 
         return super(EllaAdminOptionsMixin, self).formfield_for_dbfield(db_field, **kwargs)
 
@@ -64,7 +157,6 @@ class RefererAdminMixin(object):
             out = HttpResponseRedirect(request.session['admin_redirect_after_change'])
             del request.session['admin_redirect_after_change']
         return out
-
 
 
 '''

@@ -182,7 +182,8 @@ class TemplateBlock(models.Model):
     class Meta:
         verbose_name = _('Template block')
         verbose_name_plural = _('Template blocks')
-        unique_together = (('template', 'name',),)
+        # unique_together = (('template', 'name',),)
+        unique_together = (('template', 'name', 'active_from', 'active_till',),)
 
     def __unicode__(self):
         return '%s' % self.name

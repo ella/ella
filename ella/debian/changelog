@@ -1,3 +1,75 @@
+centrum-ella (0.3.1.11) unstable; urgency=low
+
+  * Build from revision 1907.
+
+ -- Vitek Pliska <whit@jizak.cz>  Sun, 11 Jan 2009 15:34:40 +0100
+
+centrum-ella (0.3.1.10) unstable; urgency=low
+
+  * Build from latest-django revision 1903.
+
+ -- Vitek Pliska <whit@jizak.cz>  Sun, 11 Jan 2009 11:50:54 +0100
+
+centrum-ella (0.3.1.9) unstable; urgency=low
+
+  * Build from latest-django revision 1896. Suggester improved.
+
+ -- Vitek Pliska <whit@jizak.cz>  Wed,  7 Jan 2009 15:14:51 +0100
+
+centrum-ella (0.3.1.8) unstable; urgency=low
+
+  * Build from django-latest revision 1890.
+
+ -- Vitek Pliska <whit@jizak.cz>  Mon,  5 Jan 2009 15:21:21 +0100
+
+centrum-ella (0.3.1.7) unstable; urgency=low
+
+  * Build from latest-django revision 1885.
+
+ -- Vitek Pliska <whit@jizak.cz>  Tue, 30 Dec 2008 16:52:01 +0100
+
+centrum-ella (0.3.1.6) unstable; urgency=low
+
+  * Build from dlango-latest revision 1876.
+
+ -- Vitek Pliska <whit@jizak.cz>  Sun, 28 Dec 2008 21:52:57 +0100
+
+centrum-ella (0.3.1.5) unstable; urgency=low
+
+  * Build from latest-django revision 1875.
+
+ -- Vitek Pliska <whit@jizak.cz>  Sun, 28 Dec 2008 00:01:47 +0100
+
+centrum-ella (0.3.1.4) unstable; urgency=low
+
+  * Build from django-latest revision 1874.
+
+ -- Vitek Pliska <whit@jizak.cz>  Fri, 26 Dec 2008 12:28:25 +0100
+
+centrum-ella (0.3.1.3) unstable; urgency=low
+
+  * Build from latest-django revision 1872.
+
+ -- Vitek Pliska <whit@jizak.cz>  Tue, 23 Dec 2008 10:36:32 +0100
+
+centrum-ella (0.3.1.2) unstable; urgency=low
+
+  * Build from latest-django revision 1870.
+
+ -- Vitek Pliska <whit@jizak.cz>  Mon, 22 Dec 2008 15:58:22 +0100
+
+centrum-ella (0.3.1.1) unstable; urgency=low
+
+  * Build from django-latest revision 1865.
+
+ -- Vitek Pliska <whit@jizak.cz>  Mon, 22 Dec 2008 11:05:06 +0100
+
+centrum-ella (0.3.1.0) unstable; urgency=low
+
+  * Build from latest-django revision 1861.
+
+ -- Vitek Pliska <whit@jizak.cz>  Wed, 17 Dec 2008 12:17:57 +0100
+
 centrum-ella (0.2.43.0) unstable; urgency=low
 
   * Build from revision 1842.

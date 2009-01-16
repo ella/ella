@@ -148,6 +148,7 @@ from django.contrib.contenttypes.generic import GenericForeignKey
 
 class CachedGenericForeignKey(GenericForeignKey):
     def __get__(self, instance, instance_type=None):
+        # Fix for django 1.0 Admin Validation
         if instance is None:
             # TODO: hotfixed
             #raise AttributeError, u"%s must be accessed via instance" % self.name

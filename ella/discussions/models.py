@@ -143,18 +143,20 @@ class PostViewed(models.Model):
     def __unicode__(self):
         return '%s viewed by %s' % (self.target.__unicode__(), self.user.username)
 
-    def save(self):
+    def save(self, force_insert=False, force_update=False):
         pv = PostViewed.objects.filter(target_ct=self.target_ct, target_id=self.target_id, user=self.user)
         if pv:
             raise Exception('PostViewed object already exists for ct=%s target_id=%d user=%s' % \
             (str(self.target_ct), self.target_id, self.user))
-        super(PostViewed, self).save()
+        super(PostViewed, self).save(force_insert, force_update)
 
 class TopicThread(models.Model):
     title = models.CharField(_('Title'), max_length=255)
     slug = models.SlugField(_('Slug'), max_length=255)
     created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)
-    author = models.ForeignKey(User, verbose_name=_('authorized author'),)
+    author = models.ForeignKey(User, verbose_name=_('authorized author'), null=True, blank=True)
+    nickname = models.CharField(_("Anonymous author's nickname"), max_length=50, blank=True)
+    email = models.EmailField(_('Authors email (optional)'), blank=True)
     topic = models.ForeignKey(Topic)
     hit_counts = models.PositiveIntegerField(default=0)
 
@@ -166,11 +168,20 @@ class TopicThread(models.Model):
     def __unicode__(self):
         return self.title
 
-    def save(self):
+    def get_author(self):
+        if self.author:
+            return self.author.get_full_name()
+        return self.nickname
+
+    def get_description(self):
+        c = self.posts[self.posts.count()-1]
+        return c.content or ''
+
+    def save(self, force_insert=False, force_update=False):
         thr = TopicThread.objects.filter(title=self.title)
         if thr and not self.pk:
             raise DuplicationError('TopicThread with title "%s" already exist.' % self.title)
-        super(TopicThread, self).save()
+        super(TopicThread, self).save(force_insert, force_update)
 
     @property
     def posts(self):
@@ -180,7 +191,7 @@ class TopicThread(models.Model):
 
     def get_absolute_url(self):
         base = self.topic.get_absolute_url()
-        return '%s%s/%s' % (base, slugify(_('posts')), self.slug)
+        return '%s%s/%s/' % (base, slugify(_('posts')), self.slug)
 
     @property
     def num_posts(self):

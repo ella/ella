@@ -304,6 +304,7 @@ def category_detail(request, category):
     return render_to_response(
             (
                 'page/category/%s/category.html' % (cat.path),
+                'page/category/%s/category.html' % (cat.main_parent.slug),
                 'page/category.html',
 ),
             {

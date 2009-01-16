@@ -1,14 +1,9 @@
 from django.contrib import admin
-from django.contrib.auth.models import User
-from django.contrib.contenttypes import generic
-from django.forms.widgets import *
 from django.http import HttpResponseRedirect
 from ella.core.admin import PlacementInlineOptions
 from ella.core.cache.utils import delete_cached_object
-from ella.discussions.models import TopicThread, Topic, BannedUser, BannedString, get_comments_on_thread
+from ella.discussions.models import TopicThread, Topic, BannedUser, BannedString
 from ella.discussions.cache import get_key_comments_on_thread__spec_filter, get_key_comments_on_thread__by_submit_date
-from ella.comments.models import Comment
-from ella.comments.admin import CommentsOptions
 from django.utils.translation import ugettext_lazy as _
 from ella.ellaadmin.options import EllaAdminOptionsMixin
 
@@ -65,29 +60,12 @@ class TopicThreadOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
 class TopicOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug': ('title',)}
-    list_display = ('title', 'photo_thumb', 'created',)
+    list_display = ('title', 'photo_thumb', 'created', 'pk',)
+    list_filter = ('category', 'created',)
     inlines = (PlacementInlineOptions,)
     rich_text_fields = {None: ('perex',)}
 
-class MyAdmin(admin.AdminSite):
-    pass
-
-
-discussions_admin = MyAdmin()
-discussions_admin.register(Comment, PostOptions)
-discussions_admin.register(Topic, TopicOptions)
-discussions_admin.register(TopicThread, TopicThreadOptions)
-discussions_admin.register(BannedString)
-discussions_admin.register(User)
-from ella.photos.models import Photo, FormatedPhoto
-from ella.photos.admin import PhotoOptions, FormatedPhotoOptions
-from djangoapps.registration.models import *
-discussions_admin.register(Photo, PhotoOptions)
-discussions_admin.register(RegistrationProfile, RegistrationProfileOptions)
-#discussions_admin.register(FormatedPhoto, FormatedPhotoOptions)
-
-# threadedcomments are registered automaticaly by their module
 admin.site.register(Topic, TopicOptions)
 admin.site.register(TopicThread, TopicThreadOptions)
-admin.site.register(BannedString)
+admin.site.register([BannedString, BannedUser])
 

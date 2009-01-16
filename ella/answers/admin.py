@@ -14,7 +14,3 @@ class AnswerInline(admin.TabularInline):
 
 class QuestionOptions(admin.ModelAdmin):
     inlines = (AnswerInline,)
-
-admin.site.register(Question, QuestionOptions)
-admin.site.register(Answer, AnswerOptions)
-admin.site.register(QuestionGroup)
