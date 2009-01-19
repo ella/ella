@@ -17,7 +17,9 @@
     var LF = 10;
     var ESC = 27;
     var BACKSPACE = 8;
+    var LEFTARROW = 37;
     var UPARROW = 38;
+    var RIGHTARROW = 39
     var DOWNARROW = 40;
     var PAGEUP = 33;
     var PAGEDOWN = 34;
@@ -416,8 +418,10 @@
     $ins.keyup( function($event) {
         var $this = $(this);
         var key = $event.keyCode;
-        if (  key == CR || key ==   UPARROW || key == PAGEUP
-           || key == LF || key == DOWNARROW || key == PAGEDOWN
+        if (  key == CR || key ==    UPARROW || key == PAGEUP
+           || key == LF || key ==  DOWNARROW || key == PAGEDOWN
+                        || key ==  LEFTARROW
+                        || key == RIGHTARROW
         ) return;
         else if (key == ESC) {
             bubble_keyevent(key, $this);
@@ -593,6 +597,8 @@ perldoc generic.suggest.js
 
 To export it to various formats, see the pod2* family of commands.
 
+=encoding utf8
+
 =head1 NAME
 
 Generic Suggest -- autocomplete tool for ellaadmin
@@ -736,6 +742,27 @@ The list of suggested items (contained in C<$SUGGEST_BUBBLE>).
 A div containing the descriptive bubble that appears next to the active
 suggested item, showing other fields (e.g. when C<title> is showed in the list,
 this one might show C<id> and C<slug>).
+
+=back
+
+=head2 Quick Modification Instructions
+
+If you want to change what the bubble contains or how it behaves, edit the
+C<$SUGGEST_BUBBLE> variable, as it is initialized and changed by the
+C<suggest_update> function.
+
+If you want to change the secondary bubble that shows up to the right of the
+highlighted suggested item, edit the C<set_field_bubble> function.
+
+If you want to change what the selected items look like, edit
+
+=over 4
+
+=item the C<new_item> or C<insert_value> function,
+
+=item the initializations,
+
+=item and the HTML generated on the server side.
 
 =back
 
