@@ -81,7 +81,7 @@ class DbTemplateOptions(admin.ModelAdmin):
         if request.user.is_superuser:
             return self.model._default_manager.all()
         else:
-            return self.model._default_manager.filter(pk__in=[401,399,397,395,393,391,389,397,373])
+            return self.model._default_manager.filter(pk__in=[401,399,397,395,393,391,389,387,373])
 
 admin.site.register(DbTemplate, DbTemplateOptions)
 
