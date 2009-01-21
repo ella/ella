@@ -80,7 +80,7 @@
         $(this).data('fields', fields).attr('autocomplete', 'off');
 
         // Shave off the string representations from the hidden inputs upon form submit
-        $(this).parents('form:first').submit(function() {
+        $(this).closest('form').submit(function() {
             $(this).find('input:hidden').each(function() {
                 $(this).val( $(this).val().replace(/#.*/, '') );
             });
@@ -94,12 +94,12 @@
 
     // Make the <ul>s behave like text input fields
     $(SUGGEST_SELECTOR).find('input:text').focus(function() {
-        $(this).parents('ul:first').css('backgroundColor', '#F4F7FB');
+        $(this).closest('ul').css('backgroundColor', '#F4F7FB');
     }).blur(function() {
-        var $ul = $(this).parents('ul:first');
+        var $ul = $(this).closest('ul');
         $ul.css('backgroundColor', $ul.data('bgcolor'));
     }).each(function() {
-        var $ul = $(this).parents('ul:first');
+        var $ul = $(this).closest('ul');
         $ul.data('bgcolor', $ul.css('backgroundColor'));
     });
     $('ul').filter(SUGGEST_SELECTOR).click(function() {
@@ -120,7 +120,7 @@
             $text = $SUGGEST_BUBBLE.data('cur_input');
         }
         var $hidden = get_hidden($text);
-        var $ul = $text.parents('ul:first');
+        var $ul = $text.closest('ul');
         return {text: $text, hidden: $hidden, ul: $ul};
     }
     // Make the <li>s clickable
