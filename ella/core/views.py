@@ -285,6 +285,7 @@ def home(request):
             {
                 'category' : cat,
                 'is_homepage': True,
+                'actual_year' : str(datetime.now().year)
 },
             context_instance=RequestContext(request)
 )
@@ -308,7 +309,8 @@ def category_detail(request, category):
                 'page/category.html',
 ),
             {
-                'category' : cat
+                'category' : cat,
+                'actual_year' : str(datetime.now().year)
 },
             context_instance=RequestContext(request)
 )
