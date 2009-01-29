@@ -14,7 +14,8 @@ class DevMessageAdmin(admin.ModelAdmin):
 
 class HelpItemAdmin(admin.ModelAdmin):
     list_display = ('__unicode__',)
-    list_filter = ('ct',)
+    list_filter = ('ct', 'lang',)
+    list_select_related = False
 
 admin.site.register(m.DevMessage, DevMessageAdmin)
 admin.site.register(m.AdminHelpItem, HelpItemAdmin)
