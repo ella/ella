@@ -90,6 +90,11 @@ class EllaModelAdmin(admin.ModelAdmin):
 
 class EllaAdminOptionsMixin(object):
     def formfield_for_dbfield(self, db_field, **kwargs):
+
+        # TODO: Only hotfix for django 9791+
+        if 'request' in kwargs:
+            del kwargs['request']
+
         if isinstance(db_field, SlugField):
             kwargs.update({
                 'required': not db_field.blank,
