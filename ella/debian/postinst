@@ -7,7 +7,7 @@ case "$1" in
 
     # symlink for original django templates
     ELLA_ADMIN_PATH='/usr/share/python-support/centrum-ella/ella/ellaadmin'
-    DJANGO_ADMIN_PATH='/usr/share/python-support/centrum-django/django/contrib/admin'
+    DJANGO_ADMIN_PATH='/usr/share/python-support/centrum-python-django/django/contrib/admin'
     cd $ELLA_ADMIN_PATH/templates
     [[ -L admin_orig ]] || ln -s $DJANGO_ADMIN_PATH/templates/admin admin_orig
 
