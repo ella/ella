@@ -1,0 +1,140 @@
+/* Please try keep all stylesheets in one file */
+
+/* primitives */
+.cb { clear: both; }
+
+a, a:link, a:visited {
+    color: darkblue;
+}
+a:hover {
+  color: darkorange;
+}
+
+p, ul, ol, h1, h2, h3, h4, h5 { margin: .2em 0; }
+
+ul, ol {
+    margin-left: 2em;
+}
+
+/* base default layout */
+* { margin: 0; padding: 0; }
+
+body {
+    font: normal normal 75%/130% Tahoma, sans-serif;
+}
+
+/* HEADER */
+
+#header {
+    background: pink;
+    overflow: auto;
+    padding: 5px;
+    border-bottom: 1px solid #ccc;
+}
+#header a, #header a:visited {
+    color: #333;
+    text-decoration: none;
+}
+
+#branding {
+    float: left;
+}
+#user-tools {
+    margin-top: 5px;
+    float: right;
+}
+
+/* BREADCRUMBS */
+div.breadcrumbs {
+    background: #ffc;
+    border-bottom: 1px solid darkorange;
+    padding: 3px 5px;
+}
+
+/* FAVORITE ITEMS */
+.favs {
+    background: #ffc;
+    height: 96px;
+    border-bottom: 1px solid darkorange;
+    padding: 5px;
+}
+
+.favs ul.items {
+    float: left;
+}
+
+.favs ul.tools {
+    float: right;
+    list-style: none;
+    font: normal 130%/150% "Trebuchet MS", sans-serif;
+}
+
+.favs ul.tools a {
+    text-decoration: none;
+}
+
+/* CONTENT */
+#content {
+    padding: 5px;
+    padding-bottom: 20px;
+}
+
+/* HP */
+div.hpbox {
+    border: 1px solid #ccc;
+    -moz-border-radius: 5px;
+    float: left;
+    margin: 5px;
+}
+div.hpbox h3 {
+    background: #ddd;
+    padding: 3px 5px;
+    border-bottom: 1px solid #ccc;
+    margin: 0;
+}
+div.hpbox div.cnt {
+    margin: 5px;
+}
+div.hpbox.devmsgs {
+    width: 50%;
+    min-width: 350px;
+}
+div.hpbox.devmsgs .item {
+    margin: 5px 0;
+    padding-bottom: 5px;
+    border-bottom: 1px dotted #ddd;
+}
+
+div.hpbox.lastlog {
+    float: right;
+    width: 250px;
+}
+
+a.icn {
+    padding-left: 20px;
+    background: transparent url(../ico/16/foo.png) 0 50% no-repeat;
+}
+a.btn {
+    padding-top: 4px; padding-bottom: 4px; padding-right: 4px;
+    border: 1px solid #ccc;
+    background-color: #ddd;
+}
+a:hover.btn {
+    background-color: #fff;
+}
+a.icn.logout { background-image: url(../ico/16/logout.png); }
+a.icn.config { background-image: url(../ico/16/configure.png); }
+a.icn.addfav { background-image: url(../ico/16/bookmark_add.png); }
+a.icn.eclear { background-image: url(../ico/16/editclear.png); }
+a.icn.home { background-image: url(../ico/16/gohome.png); }
+
+/* FOOTER */
+
+#footer {
+    background: #ffe;
+    position: fixed; left: 0; bottom: 0; right: 0;
+    clear: both;
+    border-top: 1px dotted darkorange;
+    padding: 5px;
+    text-align: right;
+}

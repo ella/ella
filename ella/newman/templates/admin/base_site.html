@@ -1,0 +1,9 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{{ title|capfirst }} | {% trans 'Ella administration' %}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{{ root_path }}">{% trans 'Ella administration' %}</a></h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

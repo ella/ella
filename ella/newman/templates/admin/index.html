@@ -1,0 +1,84 @@
+{% extends "admin/base_site.html" %}
+
+{% block favs %}
+    <div class="cb"></div>
+    <div class="favs">
+        <ul class="items">
+            <li>item1</li>
+            <li>item2</li>
+            <li>item3</li>
+            <li>item4</li>
+        </ul>
+        <ul class="tools">
+            <li><a href="" class="icn addfav">Přidat oblíbené</a></li>
+            <li><a href="" class="icn config">Nastavit panel</a></li>
+            <li><a href="{{ root_path }}logout/" class="icn logout">{% trans "Log out" %}</a></li>
+        </ul>
+    </div>
+{% endblock %}
+{% block breadcrumbs %}{% endblock %}
+{% block content_title %}{% endblock %}
+
+{% block content %}
+
+{% load newman %}
+{% get_devmsgs as msgs %}
+<div class="hpbox devmsgs">
+    <h3>Zprávy o vývoji...</h3>
+    <div class="cnt">
+        {% for msg in msgs %}
+            <div class="item">
+                <h4><a href="{{ msg.slug }}">{{ msg.title }}</a></h4>
+                <p>{{ msg.author.get_full_name }} | {{ msg.ts|date:"j.n.'y H:i" }} | {{ msg.version }}</p>
+                <p>{{ msg|render:"summary" }}</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="hpbox setup" style="width: 25%">
+    <h3>Rychlá nastavení</h3>
+    <div class="cnt">
+        <form method="post">
+            <fieldset>
+                <legend>Site-filter</legend>
+                <label><input type="checkbox" /> žena</label><br />
+                <label><input type="checkbox" /> zdraví</label><br />
+                <label><input type="checkbox" /> útulně</label><br />
+                <label><input type="checkbox" /> špunt</label><br />
+                <label><input type="checkbox" /> horoskopy</label><br />
+                <label><input type="checkbox" /> recepty</label>
+            </fieldset>
+        </form>
+    </div>
+</div>
+
+<div class="hpbox err" style="width: 25%">
+    <h3>Nahlásit chybu!</h3>
+    <div class="cnt">
+        <input type="text" />
+        <textarea></textarea>
+        <input type="submit" />
+    </div>
+</div>
+
+
+<div class="hpbox lastlog">
+    <h3>Vaše poslední akce</h3>
+    <div class="cnt">
+        {% load log %}
+        {% get_admin_log 20 as admin_log for_user user %}
+        {% if not admin_log %}
+        <p>{% trans 'None available' %}</p>
+        {% else %}
+        <ul class="actionlist">
+        {% for entry in admin_log %}
+        <li class="{% if entry.is_addition %}addlink{% endif %}{% if entry.is_change %}changelink{% endif %}{% if entry.is_deletion %}deletelink{% endif %}">{% if not entry.is_deletion %}<a href="{{ entry.get_admin_url }}">{% endif %}{{ entry.object_repr }}{% if not entry.is_deletion %}</a>{% endif %}<br /><span class="mini quiet">{% filter capfirst %}{% trans entry.content_type.name %}{% endfilter %}</span></li>
+        {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+

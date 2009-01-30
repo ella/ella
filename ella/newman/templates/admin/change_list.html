@@ -1,0 +1,46 @@
+{% extends "admin/base_site.html" %}
+{% load adminmedia admin_list i18n %}
+
+{% block bodyclass %}change-list{% endblock %}
+
+{% if not is_popup %}
+    {% block breadcrumbs %}
+    <div class="breadcrumbs">
+        <a href="../../">{% trans "Home" %}</a>
+        &rsaquo; <a href="../">{{ app_label|capfirst }}</a>
+        &rsaquo; <strong>{{ cl.opts.verbose_name_plural|capfirst }}</strong>
+    </div>
+    {% endblock %}
+{% endif %}
+
+{% block coltype %}flex{% endblock %}
+
+{% block content %}
+<div id="content-main">
+{% block object-tools %}
+{% if has_add_permission %}
+<ul class="object-tools"><li><a accesskey="A" href="add/{% if is_popup %}?_popup=1{% endif %}" class="addlink">{% blocktrans with cl.opts.verbose_name as name %}Add {{ name }}{% endblocktrans %}</a></li></ul>
+{% endif %}
+{% endblock %}
+<div class="module{% if cl.has_filters %} filtered{% endif %}" id="changelist">
+{% block search %}{% search_form cl %}{% endblock %}
+{# % block date_hierarchy %}{% date_hierarchy cl %}{% endblock % #}
+
+{% comment filters %}
+    {% block filters %}
+    {% if cl.has_filters %}
+    <div id="changelist-filter">
+    <h2>{% trans 'Filter' %}</h2>
+    {% for spec in cl.filter_specs %}
+       {% admin_list_filter cl spec %}
+    {% endfor %}
+    </div>
+    {% endif %}
+    {% endblock %}
+{% endcomment %}
+
+{% block result_list %}{% result_list cl %}{% endblock %}
+{% block pagination %}{% pagination cl %}{% endblock %}
+</div>
+</div>
+{% endblock %}
