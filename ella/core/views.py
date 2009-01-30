@@ -266,6 +266,10 @@ YEAR_URLS = {'month' : '../%Y/', 'day' : '../../%Y/', 'detail' : '../../../%Y/',
 DATE_REPR = {'year' : '%Y', 'month' : '%m/%Y', 'day' : '%d/%m/%Y', 'detail' : '%d/%m/%Y',}
 CURRENT_DATE_REPR = {'month' : '%Y', 'day' : '%m/%Y', 'detail' : '%d/%m/%Y',}
 
+def __archive_entry_year():
+    " Return actual year or ARCHIVE_ENTRY_YEAR from settings (if exists) "
+    return getattr(settings, 'ARCHIVE_ENTRY_YEAR', datetime.now().year)
+
 def home(request):
     """
     Homepage of the actual site.
@@ -285,6 +289,7 @@ def home(request):
             {
                 'category' : cat,
                 'is_homepage': True,
+                'archive_entry_year' : __archive_entry_year()
 },
             context_instance=RequestContext(request)
 )
@@ -308,7 +313,8 @@ def category_detail(request, category):
                 'page/category.html',
 ),
             {
-                'category' : cat
+                'category' : cat,
+                'archive_entry_year' : __archive_entry_year()
 },
             context_instance=RequestContext(request)
 )

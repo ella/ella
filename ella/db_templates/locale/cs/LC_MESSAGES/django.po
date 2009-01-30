@@ -3,14 +3,13 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-01-14 13:39+0100\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"PO-Revision-Date: 2009-01-23 09:27+0100\n"
+"Last-Translator: Oldrich Kruza <oldrich.kruza@centrumholdings.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -18,15 +17,14 @@ msgstr ""
 
 #: admin.py:35
 msgid "Block active till must be greater than Block active from"
-msgstr "Blok 'aktivní do' musí být větší než blok 'aktivní od'"
+msgstr "Blok musí být aktivní do pozdějšího data než odkdy je aktivní"
 
 #: admin.py:38
-msgid ""
-"Invalid datetime interval. Block active till must be greater than Block "
-"active from"
+msgid "Invalid datetime interval. Block active till must be greater than Block active from"
 msgstr ""
 
-#: models.py:78 models.py:151
+#: models.py:78
+#: models.py:151
 msgid "Name"
 msgstr "Jméno"
 
@@ -36,7 +34,7 @@ msgstr "Popis"
 
 #: models.py:81
 msgid "Base template"
-msgstr ""
+msgstr "Základní šablona"
 
 #: models.py:115
 msgid "Template"
@@ -52,11 +50,11 @@ msgstr "Typ boxu"
 
 #: models.py:155
 msgid "Block active from"
-msgstr "Blok 'aktivní od'"
+msgstr "Blok aktivní od"
 
 #: models.py:156
 msgid "Block active till"
-msgstr "Blok 'aktivní do'"
+msgstr "Blok aktivní do"
 
 #: models.py:158
 msgid "Definition"
@@ -64,8 +62,9 @@ msgstr "Definice"
 
 #: models.py:183
 msgid "Template block"
-msgstr ""
+msgstr "Blok šablony"
 
 #: models.py:184
 msgid "Template blocks"
-msgstr ""
+msgstr "Bloky šablony"
+

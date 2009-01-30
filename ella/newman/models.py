@@ -4,6 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
 
 from ella.core.cache.utils import CachedForeignKey
+from django.conf import settings
 
 class DevMessage(models.Model):
     """Development news for ella administrators."""
@@ -27,12 +28,12 @@ class DevMessage(models.Model):
         unique_together = (('slug', 'ts',),)
 
 
-# FIXME: maybe other solution than DB for help - need translations for this?
 class AdminHelpItem(models.Model):
     """Help for ella administrators, that extends django help_text functionality."""
 
     ct = CachedForeignKey(ContentType, verbose_name=_('Model'))
     field = models.CharField(_('Field'), max_length=64, blank=True)
+    lang = models.CharField(_('Language'), max_length=5, choices=settings.LANGUAGES)
     short = models.CharField(_('Short help'), max_length=255)
     long = models.TextField(_('Full message'), blank=True)
 
@@ -47,3 +48,43 @@ class AdminHelpItem(models.Model):
         ordering = ('ct', 'field',)
         unique_together = (('ct', 'field',),)
 
+
+class AdminUserDraft(models.Model):
+    """Here is auto-saved objects and user templates."""
+
+    ct = CachedForeignKey(ContentType, verbose_name=_('Model'))
+    user = CachedForeignKey(User, verbose_name=_('User'))
+    data = models.TextField(_('Data')) # TODO: JSONField
+
+    # If it's template, some info about it
+    title = models.CharField(_('Title'), max_length=64, blank=True)
+    slug = models.SlugField(_('Slug'), max_length=64, blank=True)
+
+    is_template = models.BooleanField(_('Is template'), default=False)
+    ts = models.DateTimeField(editable=False, auto_now_add=True)
+
+    def __unicode__(self):
+        if self.is_template:
+            return self.title
+        return "Autosaved %s (%s)" % (self.ct, self.ts)
+
+    class Meta:
+        verbose_name = _('Draft item')
+        verbose_name_plural = _('Draft items')
+
+
+class AdminUserFav(models.Model):
+    """Administrator's favorite items."""
+
+    ct = CachedForeignKey(ContentType, verbose_name=_('Model'))
+    user = CachedForeignKey(User, verbose_name=_('User'))
+    ordering = models.PositiveSmallIntegerField(_('Ordering'))
+
+    def __unicode__(self):
+        return "%s - %s" % (self.user, self.ct)
+
+    class Meta:
+        unique_together = (('ct', 'user',),)
+        ordering = ('ordering',)
+        verbose_name = _('Draft item')
+        verbose_name_plural = _('Draft items')

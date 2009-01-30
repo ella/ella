@@ -22,7 +22,9 @@ class Publishable(Model):
     """
 
     placements = generic.GenericRelation(Placement, object_id_field='target_id', content_type_field='target_ct')
-    comments = generic.GenericRelation(Comment, object_id_field='target_id', content_type_field='target_ct')
+
+    if 'ella.comments' in settings.INSTALLED_APPS:
+        comments = generic.GenericRelation(Comment, object_id_field='target_id', content_type_field='target_ct')
 
     if 'ella.tagging' in settings.INSTALLED_APPS:
         tags = generic.GenericRelation(TaggedItem)

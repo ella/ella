@@ -115,7 +115,7 @@ a.suggest-related-lookup {
     top: 15%;
 /*    width: 50%;*/
     height: 80%;
-    background-color: rgba(200, 200, 200, 0.9);
+    background-color: rgb(205, 205, 205);
     border: solid 1px black;
     padding-right: 4px;
     padding-bottom: 56px;

@@ -1,3 +1,27 @@
+centrum-ella (0.3.3.1) unstable; urgency=low
+
+  * build from revision [1962]
+
+ -- Jakub Vysoky <jakub@borka.cz>  Thu, 29 Jan 2009 15:07:48 +0100
+
+centrum-ella (0.3.3.0) unstable; urgency=low
+
+  * build from revision [1960]
+
+ -- Jakub Vysoky <jakub@borka.cz>  Thu, 29 Jan 2009 10:59:41 +0100
+
+centrum-ella (0.3.2.1) unstable; urgency=low
+
+  * uncommitted changelog
+
+ -- Jakub Vysoky <jakub@borka.cz>  Thu, 29 Jan 2009 10:40:05 +0100
+
+centrum-ella (0.3.2.1) unstable; urgency=low
+
+  * Build from revision 1958.
+
+ -- Jakub Vysoky <jakub@borka.cz>  Thu, 29 Jan 2009 10:40:05 +0100
+
 centrum-ella (0.3.2.0) unstable; urgency=low
 
   * Build from revision 1930.
