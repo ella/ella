@@ -1,3 +1,15 @@
+centrum-ella (0.3.3.3) unstable; urgency=low
+
+  * Build from revision 1971.
+
+ -- Vitek Pliska <whit@jizak.cz>  Sat, 31 Jan 2009 16:19:07 +0100
+
+centrum-ella (0.3.3.2) unstable; urgency=low
+
+  * Build from revision 1966. Path to django.admin fixed.
+
+ -- Vitek Pliska <whit@jizak.cz>  Fri, 30 Jan 2009 11:44:56 +0100
+
 centrum-ella (0.3.3.1) unstable; urgency=low
 
   * build from revision [1962]
