@@ -1,0 +1,113 @@
+{% extends "admin/base_site.html" %}
+{% load newman log cache %}
+
+{% block favs %}
+    <div class="cb"></div>
+    <div class="favs">
+        <ul class="items">
+            <li>
+                <a class="app article" href="{{ root_path }}articles/article/"><span>Články</span></a>
+                <a href="{{ root_path }}articles/article/add/">+ přidat</a>
+            </li>
+            <li>
+                <a class="app"><span>Galerie</span></a>
+                <a href="">+ přidat</a>
+            </li>
+            <li>
+                <a class="app"><span>Rozhovory</span></a>
+                <a href="">+ přidat</a>
+            </li>
+            <li>
+                <a class="app"><span>Positions</span></a>
+                <a href="">+ přidat</a>
+            </li>
+            <li>
+                <a class="app"><span>Fotky</span></a>
+                <a href="">+ přidat</a>
+            </li>
+            <li>
+                <a class="app"><span>Ankety</span></a>
+                <a href="">+ přidat</a>
+            </li>
+        </ul>
+        <ul class="tools">
+            <li><a href="" class="icn addfav">Přidat oblíbené</a></li>
+            <li><a href="" class="icn config">Nastavit panel</a></li>
+        </ul>
+    </div>
+{% endblock %}
+{% block breadcrumbs %}{% endblock %}
+{% block content_title %}{% endblock %}
+
+{% block content %}
+
+{% cache 600 devmsgs user.username %}
+{% get_devmsgs as msgs %}
+<div class="hpbox devmsgs">
+    <h3>Zprávy o vývoji...</h3>
+    <div class="cnt">
+        {% for msg in msgs %}
+            <div class="item">
+                <h4><a href="{{ msg.slug }}">{{ msg.title }}</a></h4>
+                <p>{{ msg.author.get_full_name }} | {{ msg.ts|date:"j.n.'y H:i" }} | {{ msg.version }}</p>
+                <p>{{ msg|render:"summary" }}</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endcache %}
+
+<div class="hpbox setup" style="width: 25%">
+    <h3>Rychlá nastavení</h3>
+    <div class="cnt">
+        <form method="post">
+            <fieldset>
+                <legend>Site-filter</legend>
+                <label><input type="checkbox" /> žena</label><br />
+                <label><input type="checkbox" /> zdraví</label><br />
+                <label><input type="checkbox" /> útulně</label><br />
+                <label><input type="checkbox" /> špunt</label><br />
+                <label><input type="checkbox" /> horoskopy</label><br />
+                <label><input type="checkbox" /> recepty</label>
+            </fieldset>
+            <fieldset class="submit-row">
+                <a class="icn btn cancel">Zrušit</a>
+                <a class="icn btn ok def">Uložit</a>
+            </fieldset>
+        </form>
+    </div>
+</div>
+
+<div class="hpbox errmsg" style="width: 25%">
+    <h3>Nahlásit chybu!</h3>
+    <div class="cnt">
+        <label for="err_subj" class="required">Předmět</label>
+        <input id="err_subj" type="text" />
+        <label for="err_text" class="required">Zpráva</label>
+        <textarea id="err_text"></textarea>
+        <div class="submit-row">
+            <a class="icn btn cancel">Zrušit</a>
+            <a class="icn btn ok def" title="Kliknutím odešlete zprávu o chybě...">Odeslat</a>
+        </div>
+    </div>
+</div>
+
+
+<div class="hpbox lastlog">
+    <h3>Vaše poslední akce</h3>
+    <div class="cnt">
+        {% get_admin_log 20 as admin_log for_user user %}
+        {% if not admin_log %}
+        <p>{% trans 'None available' %}</p>
+        {% else %}
+        <ul class="actionlist">
+        {% for entry in admin_log %}
+        <li class="{% if entry.is_addition %}addlink{% endif %}{% if entry.is_change %}changelink{% endif %}{% if entry.is_deletion %}deletelink{% endif %}">{% if not entry.is_deletion %}<a href="{{ entry.get_admin_url }}">{% endif %}{{ entry.object_repr }}{% if not entry.is_deletion %}</a>{% endif %}<br /><span class="mini quiet">{% filter capfirst %}{% trans entry.content_type.name %}{% endfilter %}</span></li>
+        {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+
