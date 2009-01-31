@@ -5,6 +5,7 @@
 
 a, a:link, a:visited {
     color: darkblue;
+    cursor: pointer;
 }
 a:hover {
   color: darkorange;
@@ -54,13 +55,42 @@ div.breadcrumbs {
 /* FAVORITE ITEMS */
 .favs {
     background: #ffc;
-    height: 96px;
+    height: 76px;
     border-bottom: 1px solid darkorange;
     padding: 5px;
 }
 
 .favs ul.items {
     float: left;
+    list-style: none;
+    margin: 0; padding: 0;
+}
+.favs ul.items li {
+    float: left;
+    margin: 2px;
+    padding: 0;
+    width: 70px;
+    height: 70px;
+    border: 1px solid #ddd;
+    -moz-border-radius: 5px;
+}
+.favs ul.items li a {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+}
+.favs ul.items li a.app {
+    background: transparent url(../ico/favs/gear.png) 50% 18px no-repeat;
+    width: 70px;
+    height: 50px;
+    font-weight: bold;
+    padding-top: 2px;
+}
+
+.favs ul.items li a.app.article { background-image: url(../ico/favs/article.png) }
+
+.favs ul.items li:hover {
+    background-color: #ffe;
 }
 
 .favs ul.tools {
@@ -109,24 +139,40 @@ div.hpbox.lastlog {
     float: right;
     width: 250px;
 }
+div.hpbox.errmsg label, div.hpbox.errmsg input, div.hpbox.errmsg textarea {
+    width: 99%;
+}
 
 a.icn {
     padding-left: 20px;
     background: transparent url(../ico/16/foo.png) 0 50% no-repeat;
 }
 a.btn {
-    padding-top: 4px; padding-bottom: 4px; padding-right: 4px;
+    padding-top: 3px; padding-bottom: 3px; padding-right: 4px;
     border: 1px solid #ccc;
+    -moz-border-radius: 4px;
     background-color: #ddd;
+    margin: 2px;
+}
+a.btn.def {
+    font-weight: bold;
+    background-color: #eee;
 }
 a:hover.btn {
-    background-color: #fff;
+    background-color: #666;
+}
+
+a.btn.icn {
+    background-position: 3px 50%;
+    padding-left: 23px;
 }
 a.icn.logout { background-image: url(../ico/16/logout.png); }
 a.icn.config { background-image: url(../ico/16/configure.png); }
 a.icn.addfav { background-image: url(../ico/16/bookmark_add.png); }
 a.icn.eclear { background-image: url(../ico/16/editclear.png); }
 a.icn.home { background-image: url(../ico/16/gohome.png); }
+a.icn.ok { background-image: url(../ico/16/ok.png); }
+a.icn.cancel { background-image: url(../ico/16/cancel.png); }
 
 /* FOOTER */
 
@@ -138,3 +184,8 @@ a.icn.home { background-image: url(../ico/16/gohome.png); }
     padding: 5px;
     text-align: right;
 }
+
+/* FORMS */
+fieldset { border: 1px solid #ddd; padding: 5px; }
+label.required { font-weight: bold; color: darkorange; }
+div.submit-row, fieldset.submit-row { border: none; clear:both; margin-top: 5px; padding: 2px 0; text-align: right; }

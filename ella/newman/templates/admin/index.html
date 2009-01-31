@@ -1,18 +1,38 @@
 {% extends "admin/base_site.html" %}
+{% load newman log cache %}
 
 {% block favs %}
     <div class="cb"></div>
     <div class="favs">
         <ul class="items">
-            <li>item1</li>
-            <li>item2</li>
-            <li>item3</li>
-            <li>item4</li>
+            <li>
+                <a class="app article" href="{{ root_path }}articles/article/"><span>Články</span></a>
+                <a href="{{ root_path }}articles/article/add/">+ přidat</a>
+            </li>
+            <li>
+                <a class="app"><span>Galerie</span></a>
+                <a href="">+ přidat</a>
+            </li>
+            <li>
+                <a class="app"><span>Rozhovory</span></a>
+                <a href="">+ přidat</a>
+            </li>
+            <li>
+                <a class="app"><span>Positions</span></a>
+                <a href="">+ přidat</a>
+            </li>
+            <li>
+                <a class="app"><span>Fotky</span></a>
+                <a href="">+ přidat</a>
+            </li>
+            <li>
+                <a class="app"><span>Ankety</span></a>
+                <a href="">+ přidat</a>
+            </li>
         </ul>
         <ul class="tools">
             <li><a href="" class="icn addfav">Přidat oblíbené</a></li>
             <li><a href="" class="icn config">Nastavit panel</a></li>
-            <li><a href="{{ root_path }}logout/" class="icn logout">{% trans "Log out" %}</a></li>
         </ul>
     </div>
 {% endblock %}
@@ -21,7 +41,7 @@
 
 {% block content %}
 
-{% load newman %}
+{% cache 600 devmsgs user.username %}
 {% get_devmsgs as msgs %}
 <div class="hpbox devmsgs">
     <h3>Zprávy o vývoji...</h3>
@@ -35,6 +55,7 @@
         {% endfor %}
     </div>
 </div>
+{% endcache %}
 
 <div class="hpbox setup" style="width: 25%">
     <h3>Rychlá nastavení</h3>
@@ -49,16 +70,25 @@
                 <label><input type="checkbox" /> horoskopy</label><br />
                 <label><input type="checkbox" /> recepty</label>
             </fieldset>
+            <fieldset class="submit-row">
+                <a class="icn btn cancel">Zrušit</a>
+                <a class="icn btn ok def">Uložit</a>
+            </fieldset>
         </form>
     </div>
 </div>
 
-<div class="hpbox err" style="width: 25%">
+<div class="hpbox errmsg" style="width: 25%">
     <h3>Nahlásit chybu!</h3>
     <div class="cnt">
-        <input type="text" />
-        <textarea></textarea>
-        <input type="submit" />
+        <label for="err_subj" class="required">Předmět</label>
+        <input id="err_subj" type="text" />
+        <label for="err_text" class="required">Zpráva</label>
+        <textarea id="err_text"></textarea>
+        <div class="submit-row">
+            <a class="icn btn cancel">Zrušit</a>
+            <a class="icn btn ok def" title="Kliknutím odešlete zprávu o chybě...">Odeslat</a>
+        </div>
     </div>
 </div>
 
@@ -66,7 +96,6 @@
 <div class="hpbox lastlog">
     <h3>Vaše poslední akce</h3>
     <div class="cnt">
-        {% load log %}
         {% get_admin_log 20 as admin_log for_user user %}
         {% if not admin_log %}
         <p>{% trans 'None available' %}</p>
