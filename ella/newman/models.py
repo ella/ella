@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 
 from ella.core.cache.utils import CachedForeignKey
 from django.conf import settings
@@ -73,8 +73,25 @@ class AdminUserDraft(models.Model):
         verbose_name_plural = _('Draft items')
 
 
+class AdminGroupFav(models.Model):
+    """Admin favorite items per group (presets)."""
+
+    ct = CachedForeignKey(ContentType, verbose_name=_('Model'))
+    group = CachedForeignKey(Group, verbose_name=_('Group'))
+    ordering = models.PositiveSmallIntegerField(_('Ordering'))
+
+    def __unicode__(self):
+        return "%s - %s" % (self.group, self.ct)
+
+    class Meta:
+        unique_together = (('ct', 'group',),)
+        ordering = ('ordering',)
+        verbose_name = _('Group fav item')
+        verbose_name_plural = _('Group fav items')
+
+
 class AdminUserFav(models.Model):
-    """Administrator's favorite items."""
+    """Admin favorite items per user."""
 
     ct = CachedForeignKey(ContentType, verbose_name=_('Model'))
     user = CachedForeignKey(User, verbose_name=_('User'))
@@ -86,5 +103,5 @@ class AdminUserFav(models.Model):
     class Meta:
         unique_together = (('ct', 'user',),)
         ordering = ('ordering',)
-        verbose_name = _('Draft item')
-        verbose_name_plural = _('Draft items')
+        verbose_name = _('User fav item')
+        verbose_name_plural = _('User fav items')

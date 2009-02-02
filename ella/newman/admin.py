@@ -17,5 +17,11 @@ class HelpItemAdmin(admin.ModelAdmin):
     list_filter = ('ct', 'lang',)
     list_select_related = False
 
+
+class GroupFavAdmin(admin.ModelAdmin):
+    list_display = ('__unicode__',)
+    list_filter = ('ct', 'group',)
+
 admin.site.register(m.DevMessage, DevMessageAdmin)
 admin.site.register(m.AdminHelpItem, HelpItemAdmin)
+admin.site.register(m.AdminGroupFav, GroupFavAdmin)
