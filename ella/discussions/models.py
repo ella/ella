@@ -97,7 +97,6 @@ class Topic(Publishable):
         return mark_safe(out)
     photo_thumb.allow_tags = True
 
-    @property
     def get_description(self):
         return self.description
 

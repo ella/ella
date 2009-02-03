@@ -1,1 +1,16 @@
 Historie a záložky s AJAXem [OK]
+
+
+
+Brzy:
+=====
+
+* ui: omezení CTs pro admina, subset který se dál omezuje oprávněními
+
+Někdy/neuspořádané:
+===================
+
+* ui: changelist - možnost nastavit počet položek na stránku per user/model
+* security: provoz na HTTPS
+* security: auto-logout z admina (+ autosave) - mám použito [wh]
+* ui: vyhledávání čehokoli z HP admina + combo na CT
