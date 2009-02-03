@@ -103,7 +103,7 @@
             <div id="footer">
                 <div class="user-tools">
                     <strong>{{ user.get_full_name }}</strong>
-                    | <a class="icn eclear" href="{{ root_path }}password_change/" onclick="cntSwitch(this.href); return false;">{% trans 'Change password' %}</a>
+                    | <a class="icn eclear autoajax" href="{{ root_path }}password_change/">{% trans 'Change password' %}</a>
                     | <a class="icn logout" href="{{ root_path }}logout/">{% trans 'Log out' %}</a>
                 </div>
             </div>
@@ -116,14 +116,7 @@
 <!-- END Container -->
 
 <script type="text/javascript" src="{% admin_media_prefix %}js/jquery-1.3.min.js"></script>
-<script type="text/javascript">
-    function cntSwitch(path) {
-        $.get(path,function(data){
-            $("#content").html(data);
-        });
-        return false;
-    }
-</script>
+<script type="text/javascript" src="{% admin_media_prefix %}js/newman.js"></script>
 
 {% block foot_js %}{% endblock %}
 
