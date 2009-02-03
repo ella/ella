@@ -10,47 +10,55 @@
     // Store the #content div, so we need not always mine it from the DOM.
     var $CONTENT = $('#content');
 
-    // Load some content to the #content div.
-    // The argument is an object with these fields:
-    // html (exclusive with url): the HTML to put there;
-    // url (exclusive with html): the URL from which to load the contents;
-    // data (optional; requires url): data to send along with the XMLHttpRequest to the server;
-    // method (optional; requires url): type of the request: GET or POST;
-    function cnt_switch(arg) {
-        function inject(data) {
-            $CONTENT.html(data);
+    // We want location.hash to exactly describe what's on the page.
+    // #url means that the result of $.get(url) be loaded into the #content div.
+    // #id::url means that the result of $.get(url) be loaded into the #id element.
+    // Any number of such specifiers can be concatenated, e.g. #/some/page/#header::/my/header/
+    function load_by_hash() {
+        var hash = location.hash.substr(1);
+        if (hash.length == 0) {
+            // TODO: A smarter reset
+            location.reload();
         }
-        if (!arg) return;
-        if (arg.url) {
-            var options = {
-                success: inject,
-                url: arg.url
-            };
-            options.type = (arg.method || 'GET').toUpperCase();
-            if (arg.data) options.data = arg.data;
-            $.ajax(options);
-            return;
-        }
-        if (arg.html) {
-            inject(html);
-            return;
+        var specifiers = hash.split('#');
+        for (var i = 0; i < specifiers.length; i++) {
+            var spec = specifiers[ i ];
+            if (spec.length == 0) continue;
+            var address = spec;
+            var $target = $CONTENT;
+            if (spec.match(/^([-\w]+)::(.+)/)) {
+                var id  = RegExp.$1;
+                address = RegExp.$2;
+                $target = $('#' + id);
+                if (!$target || $target.length == 0) {
+                    console.log('Could not find #'+id);
+                    continue;
+                }
+            }
+            if (URLS[address]) {
+                URLS[address]($target);
+                continue;
+            }
+            var url = $('<a>').attr('href', address).get(0).href;
+            $.get(url, function(data) {
+                $target.html(data);
+            });
         }
     }
 
-    // Loads a link's href or a form's action to the #content
-    function autoajax() {
-        if (this.href) {
-            cnt_switch({ url: this.href });
-            return false;
-        }
-        var $form = $(this).closest('form');
-        if (!$form) throw("Cannot autoajax this element: no encapsulating form and no href attribute found.");
-        cnt_switch({ url: $form.attr('action'), method: $form.attr('method') });
-        return false;
+    // Simulate a hashchange event fired when location.hash changes
+    var CURRENT_HASH = '';
+    function hashchange() {
+        console.log('hash: ' + location.hash);
+        load_by_hash();
     }
-    $('a.autoajax,:input.autoajax').live('click', autoajax);
-/*    $('#change_password_link').click( function() {
-        cnt_switch({ url: this.href });
-        return false;
-    });*/
+    setTimeout( function() {
+        try {
+            if (location.hash != CURRENT_HASH) {
+                CURRENT_HASH = location.hash;
+                hashchange();
+            }
+        } catch(e) { console.log(e); }
+        setTimeout(arguments.callee, 50);
+    }, 50);
 })})(jQuery);
