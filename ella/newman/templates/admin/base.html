@@ -55,13 +55,13 @@
         					<ul>
         			        {% for model in app.models %}
         			            {% if model.perms.add and model.perms.change %}
-        			                <li><a href="/{{ model.admin_url }}">{{ model.name }}</a></li>
+        			                <li><a href="{{ root_path }}{{ model.admin_url }}">{{ model.name }}</a></li>
         			            {% else %}
                                     {% if model.perms.add or model.perms.change %}
                                         {% if model.perms.add %}
-                                            <li><a href="/{{ model.admin_url }}add/">{{ model.name }} (+)</a></li>
+                                            <li><a href="{{ root_path }}{{ model.admin_url }}add/">{{ model.name }} (+)</a></li>
                                         {% else %}
-                                            <li><a href="/{{ model.admin_url }}">{{ model.name }}</a></li>
+                                            <li><a href="{{ root_path }}{{ model.admin_url }}">{{ model.name }}</a></li>
                                         {% endif %}
                                     {% endif %}
         			            {% endif %}
