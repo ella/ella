@@ -82,9 +82,9 @@
     <h3>Nahlásit chybu!</h3>
     <div class="cnt">
         <label for="err_subj" class="required">Předmět</label>
-        <input id="err_subj" type="text" />
+        <input id="err_subj" type="text" disabled="disabled" value="Poděkování za skvělý produkt!" />
         <label for="err_text" class="required">Zpráva</label>
-        <textarea id="err_text"></textarea>
+        <textarea id="err_text" disabled="disabled">Nový admin je opravdu skvělý! Moc díky. {{ user.get_full_name }}.</textarea>
         <div class="submit-row">
             <a class="icn btn cancel">Zrušit</a>
             <a class="icn btn ok def" title="Kliknutím odešlete zprávu o chybě...">Odeslat</a>

@@ -105,12 +105,16 @@ div.breadcrumbs {
 
 /* CONTENT */
 #content {
+    background: #eee;
     padding: 5px;
-    padding-bottom: 20px;
+    position: fixed;
+    top: 112px; left: 0; bottom: 28px; right: 0;
+    overflow: auto;
 }
 
 /* HP */
 div.hpbox {
+    background: #fff;
     border: 1px solid #ccc;
     -moz-border-radius: 5px;
     float: left;
@@ -189,3 +193,14 @@ a.icn.cancel { background-image: url(../ico/16/cancel.png); }
 fieldset { border: 1px solid #ddd; padding: 5px; }
 label.required { font-weight: bold; color: darkorange; }
 div.submit-row, fieldset.submit-row { border: none; clear:both; margin-top: 5px; padding: 2px 0; text-align: right; }
+
+/* TABLES */
+table {
+    border-collapse: collapse;
+}
+td, th {
+    text-align: left;
+    border: 1px solid #ddd;
+    padding: 3px;
+}
+
