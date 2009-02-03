@@ -1,3 +1,4 @@
+from django.core.files.images import get_image_dimensions
 import Image
 from datetime import datetime
 from os import path
@@ -63,7 +64,7 @@ class Photo(models.Model):
     title = models.CharField(_('Title'), max_length=200)
     description = models.TextField(_('Description'), blank=True)
     slug = models.SlugField(_('Slug'), max_length=255)
-    image = models.ImageField(upload_to=UPLOAD_TO , height_field='height', width_field='width') # save it to YYYY/MM/DD structure
+    image = models.ImageField(upload_to=UPLOAD_TO, height_field='height', width_field='width') # save it to YYYY/MM/DD structure
     width = models.PositiveIntegerField(editable=False)
     height = models.PositiveIntegerField(editable=False)
 
@@ -118,8 +119,10 @@ class Photo(models.Model):
         - Generates slug.
         - Saves image file.
         """
+
         # prefill the slug with the ID, it requires double save
         if not self.id:
+            self.width, self.height = get_image_dimensions(self.image)
             super(Photo, self).save(force_insert, force_update)
             self.slug = str(self.id) + '-' + self.slug
             force_insert, force_update = False, True
@@ -133,6 +136,7 @@ class Photo(models.Model):
             self.image = file_rename(self.image.name, self.slug, PHOTOS_TYPE_EXTENSION[ imageType ])
         # delete formatedphotos if new image was uploaded
         if image_changed:
+            self.width, self.height = get_image_dimensions(self.image)
             for f_photo in self.formatedphoto_set.all():
                 f_photo.delete()
         super(Photo, self).save(force_insert, force_update)
