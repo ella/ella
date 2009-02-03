@@ -1,3 +1,9 @@
+centrum-ella (0.3.3.4) unstable; urgency=low
+
+  * Build from revision 1980.
+
+ -- Vitek Pliska <whit@jizak.cz>  Tue,  3 Feb 2009 09:42:04 +0100
+
 centrum-ella (0.3.3.3) unstable; urgency=low
 
   * Build from revision 1971.
