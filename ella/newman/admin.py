@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from ella.newman.sites import site
 from ella.newman import models as m
 
 class DevMessageAdmin(admin.ModelAdmin):
@@ -22,6 +23,7 @@ class GroupFavAdmin(admin.ModelAdmin):
     list_display = ('__unicode__',)
     list_filter = ('ct', 'group',)
 
-admin.site.register(m.DevMessage, DevMessageAdmin)
-admin.site.register(m.AdminHelpItem, HelpItemAdmin)
-admin.site.register(m.AdminGroupFav, GroupFavAdmin)
+
+site.register(m.DevMessage, DevMessageAdmin)
+site.register(m.AdminHelpItem, HelpItemAdmin)
+site.register(m.AdminGroupFav, GroupFavAdmin)
