@@ -51,17 +51,17 @@
         		{% if menu_list %}
                         <li><a href="{{ root_path }}" style="padding: 3px 5px 2px 5px;"><img src="{% admin_media_prefix %}ico/16/gohome.png" style="border:none" alt="Dom"/></a></li>
         	    {% for app in menu_list %}
-        				<li><a href="{{ root_path }}{{ app.name|lower }}/">{% trans app.name %}</a>
+        				<li><a href="#{{ root_path }}{{ app.name|lower }}/">{% trans app.name %}</a>
         					<ul>
         			        {% for model in app.models %}
         			            {% if model.perms.add and model.perms.change %}
-        			                <li><a href="{{ root_path }}{{ model.admin_url }}">{{ model.name }}</a></li>
+        			                <li><a href="#{{ root_path }}{{ model.admin_url }}">{{ model.name }}</a></li>
         			            {% else %}
                                     {% if model.perms.add or model.perms.change %}
                                         {% if model.perms.add %}
-                                            <li><a href="{{ root_path }}{{ model.admin_url }}add/">{{ model.name }} (+)</a></li>
+                                            <li><a href="#{{ root_path }}{{ model.admin_url }}add/">{{ model.name }} (+)</a></li>
                                         {% else %}
-                                            <li><a href="{{ root_path }}{{ model.admin_url }}">{{ model.name }}</a></li>
+                                            <li><a href="#{{ root_path }}{{ model.admin_url }}">{{ model.name }}</a></li>
                                         {% endif %}
                                     {% endif %}
         			            {% endif %}

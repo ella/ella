@@ -24,6 +24,15 @@ body {
     font: normal normal 75%/130% Tahoma, sans-serif;
 }
 
+/* Dynamic */
+
+.loading {
+    opacity: 0.3;
+    /* FIXME: ikona neni videt! */
+    background-image: url(../ico/15/loading.gif);
+    background-position: center center;
+}
+
 /* HEADER */
 
 #header {

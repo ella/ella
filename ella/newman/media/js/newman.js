@@ -10,6 +10,20 @@
     // Store the #content div, so we need not always mine it from the DOM.
     var $CONTENT = $('#content');
 
+    // Take a container and a URL. Give the container the "loading" class,
+    // fetch the URL, remove the class and stuff the content into the container.
+    function load_content($container, url) {
+        if ($container && $container.length && $container.jquery) { } else {
+            console.log('Could not insert into container:');
+            console.log($container);
+            return;
+        }
+        $container.addClass('loading');
+        $.get(url, function(data) {
+            $container.removeClass('loading').html(data);
+        });
+    }
+
     // We want location.hash to exactly describe what's on the page.
     // #url means that the result of $.get(url) be loaded into the #content div.
     // #id::url means that the result of $.get(url) be loaded into the #id element.
@@ -40,16 +54,14 @@
                 continue;
             }
             var url = $('<a>').attr('href', address).get(0).href;
-            $.get(url, function(data) {
-                $target.html(data);
-            });
+            load_content($target, url);
         }
     }
 
     // Simulate a hashchange event fired when location.hash changes
     var CURRENT_HASH = '';
     function hashchange() {
-        console.log('hash: ' + location.hash);
+//        console.log('hash: ' + location.hash);
         load_by_hash();
     }
     setTimeout( function() {
