@@ -1,4 +1,5 @@
-from os.path import isfile
+from os.path import isfile, exists, sep as path_separator
+import sys
 import logging, logging.config
 import traceback
 
@@ -42,7 +43,18 @@ def call_modules(auto_discover=()):
                 inst = getattr(mod, '__install__', lambda:None)
                 inst()
             except ImportError, e:
-                log.debug('problem during discovering %s - %s\n%s' % (imp, e, traceback.format_exc()))
+                msg = 'problem during discovering %s - %s\n%s' % (imp, e, traceback.format_exc())
+                # check if problem is inside autodiscovered file (i.e. mispelled module name) OR autodiscovered file does not exists
+                mod = __import__(app, {}, {}, [''])
+                app_path = mod.__file__.split(path_separator)[:-1]
+                app_path.append('%s.py' % module)
+                mod_path = path_separator.join(app_path)
+                if not exists(mod_path):
+                    # autodiscovered file does not exist
+                    log.debug(msg)
+                else:
+                    # ImportError inside autodiscovered file
+                    log.error(msg)
 
 def init_logger():
     """init logger with LOGGING_CONFIG_FILE settings option"""
