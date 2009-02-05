@@ -6,6 +6,11 @@
     ;;;     for (var i in obj) s += i + ': ' + obj[i] + "\n";
     ;;;     alert(s);
     ;;; }
+    ;;; function carp(message) {
+    ;;;    if (window.console) {
+    ;;;        console.log(message);
+    ;;;    }
+    ;;; }
 
     // Store the #content div, so we need not always mine it from the DOM.
     var $CONTENT = $('#content');
@@ -23,7 +28,7 @@
     // Take a container and a URL. Give the container the "loading" class,
     // fetch the URL, remove the class and stuff the content into the container.
     function load_content($container, address) {
-        ;;; console.log('loading '+address+' into '+$container.attr('id'));
+        ;;; carp('loading '+address+' into '+$container.attr('id'));
 
         // An empty address means we should revert to the base state.
         // If one is not set up for the given container, reload the whole page.
@@ -38,8 +43,8 @@
 
         var url = $('<a>').attr('href', address).get(0).href;
         if ($container && $container.length && $container.jquery) { } else {
-            console.log('Could not insert into container:');
-            console.log($container);
+            carp('Could not insert into container:');
+            carp($container);
             return;
         }
         $container.addClass('loading');
@@ -72,7 +77,7 @@
                 address = RegExp.$2;
                 $target = $('#' + id);
                 if (!$target || $target.length == 0) {
-                    console.log('Could not find #'+id);
+                    carp('Could not find #'+id);
                     continue;
                 }
             }
@@ -102,7 +107,7 @@
     // Simulate a hashchange event fired when location.hash changes
     var CURRENT_HASH = '';
     function hashchange() {
-//        console.log('hash: ' + location.hash);
+//        carp('hash: ' + location.hash);
         load_by_hash();
     }
     setTimeout( function() {
@@ -111,7 +116,7 @@
                 CURRENT_HASH = location.hash;
                 hashchange();
             }
-        } catch(e) { console.log(e); }
+        } catch(e) { carp(e); }
         setTimeout(arguments.callee, 50);
     }, 50);
 })})(jQuery);
