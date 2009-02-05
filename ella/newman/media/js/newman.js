@@ -85,7 +85,10 @@
         }
         for (var k in LOADED_URLS) {
             // if this specifier didn't change, don't load it again
-            if (LOADED_URLS[k] == requested[k]) continue;
+            if (LOADED_URLS[k] == requested[k]) {
+                delete requested[k];
+                continue;
+            }
             // if this specifier is no longer present, reload the base
             if (!requested[k]) requested[k] = '';
         }
