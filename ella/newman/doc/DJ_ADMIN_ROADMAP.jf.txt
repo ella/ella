@@ -22,8 +22,20 @@ Q: Vyresit podle uzivatelskych prav zobrazovani casti adminu (tlacitka pro prida
 
 
 
-1.2 Trida ModelAdmin
+1.2 Trida ModelAdmin (options.py)
 ====================
+
+Trida obsahuje view-metody pro zobrazeni change listu, editacni obrazovku, pridani, atd.)
+Jsou pripraveny staticke promenne pro zmenu jmen sablon:
+    change_form_template, change_list_template, delete_confirmation_template, object_history_template.
+
+
+class ModelAdmin:
+    - __call__() vhodnou view metodu rozpozna podle URL predaneho parametrem.
+    - changelist_view() metoda se stara o zobrazeni change listu.
+    - *_view() metody provadi primo renderovani sablon admina
+    - napr. response_add() odbavuje request ulozeni objektu, pripravi message do cookie(?) a presmeruje
+      na stranku podle parametru v requestu (na change list, pripadne na edit view v pripade Save and continue editing atp.)
 
 1. Zaregistrovani vlastnich URL pro ModelAdmin tridu:
    [http://docs.djangoproject.com/en/dev/ref/contrib/admin/#get-urls-self]
@@ -158,6 +170,22 @@ AllValuesFilterSpec -- "posledni zachrana", registruje se jako posledni v poradi
 4. date_hierarchy(ChangeList_instance) -- tam by se hodilo obratit tu podminku, at neni cela metoda telem jedineho ifu.
 
 
+1.7 Zobrazeni filtru (flow)
+===========================
+
+1. pri vytvareni instance ChangeList se vytvori seznam instanci FiltrSpec podle property list_filer ModelAdmin instance,
+   kterou mame napsatnou.
+
+2. V sablone templates/admin/change_list.html probehne cyklus:
+   {% for spec in changeList.filter_specs %}
+      {% admin_list_filter cl spec %}
+   {% endfor %}
+
+3. {% admin_list_filter %} je inclusion tag, ktery zpracuje sablonu templates/admin/filter.html
+   Tag je implementovan v souboru templatetags/admin_list.py
+   Tag uz jen cykli nad listem vracenym metodou FilterSpec_instance.choices( ChangeList_instance )
+
+4. Ke vsem dotazum, ktere filtr provadi, ve standardnich django filtrech dochazi v konstruktoru FilterSpec.
 
 
 
