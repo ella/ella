@@ -3,8 +3,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="{{ LANGUAGE_CODE }}" xml:lang="{{ LANGUAGE_CODE }}">
 <head>
 	<title>{% block title %}{% endblock %}</title>
-	<link rel="stylesheet" type="text/css" href="{% admin_media_prefix %}css/base.css" />
-    <link rel="stylesheet" type="text/css" href="{% admin_media_prefix %}css/top-navi.css" />
+	<link rel="stylesheet" type="text/css" href="{% admin_media_prefix %}css/base.css?{{ VERSION }}" />
+    <link rel="stylesheet" type="text/css" href="{% admin_media_prefix %}css/top-navi.css?{{ VERSION }}" />
     <link rel="shortcut icon" href="{% admin_media_prefix %}img/favicon.ico" type="image/x-icon" />
 	{% block extrastyle %}{% endblock %}
 	<script type="text/javascript">var MEDIA_URL = '{% admin_media_prefix %}';</script>
@@ -18,28 +18,6 @@
 <div id="container">
 
     {% if not is_popup %}
-
-    {% comment header %}
-        <!-- Header -->
-        <div id="header">
-            <div id="branding">
-            {% block branding %}{% endblock %}
-            </div>
-            {% if user.is_authenticated and user.is_staff %}
-            <div id="user-tools">
-            <strong>{{ user.get_full_name }}</strong>
-            {% block userlinks %}
-            | <a href="{{ root_path }}password_change/">{% trans 'Change password' %}</a>
-            | <a class="icn logout" href="{{ root_path }}logout/">{% trans 'Log out' %}</a>
-            {% endblock %}
-            | <a href="">Skrýt</a>
-            </div>
-
-            {% endif %}
-            {% block nav-global %}{% endblock %}
-        </div>
-        <!-- END Header -->
-    {% endcomment %}
 
 	{% if user.is_staff %}
     	{% cache 300 topnavi user.username %}
@@ -116,8 +94,8 @@
 <!-- END Container -->
 
 <script type="text/javascript" src="{% admin_media_prefix %}js/jquery-1.3.min.js"></script>
-<script type="text/javascript" src="{% admin_media_prefix %}js/urls.js"></script>
-<script type="text/javascript" src="{% admin_media_prefix %}js/newman.js"></script>
+<script type="text/javascript" src="{% admin_media_prefix %}js/urls.js?{{ VERSION }}"></script>
+<script type="text/javascript" src="{% admin_media_prefix %}js/newman.js?{{ VERSION }}"></script>
 
 {% block foot_js %}{% endblock %}
 
