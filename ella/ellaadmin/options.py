@@ -13,8 +13,17 @@ SUGGEST_VIEW_MIN_LENGTH = getattr(settings, 'SUGGEST_VIEW_MIN_LENGTH', 2)
 SUGGEST_RETURN_ALL_FIELD = getattr(settings, 'SUGGEST_RETURN_ALL_FIELD', True)
 
 class EllaModelAdmin(admin.ModelAdmin):
+    registered_views = []
+
+    def register(cls, test_callback, view_callback):
+        cls.registered_views.append({'test': test_callback, 'view': view_callback})
+    register = classmethod(register)
 
     def __call__(self, request, url):
+        for reg in self.registered_views:
+            if reg['test'](url):
+                return reg['view'](self, request)
+
         if url and url.endswith('suggest'):
             return self.suggest_view(request)
 
