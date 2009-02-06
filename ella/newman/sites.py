@@ -13,12 +13,10 @@ class NewmanSite(admin.AdminSite):
         self.admin_opts = admin_opts
 
     def register(self, model_or_iterable, admin_class=None, **options):
-        print 'REGISTER'
         super(NewmanSite, self).register(model_or_iterable, admin_class, **options)
 
     def model_page(self, request, app_label, model_name, rest_of_url=None):
         # TODO zaridit, aby se mohla zavolat jen super metoda (problem je kvuli tridni promenne admin_site)
-        print 'MODEL PAGE !!!'
         #return super(NewmanSite, self).model_page(request, app_label, model_name, rest_of_url)
         model = models.get_model(app_label, model_name)
         if model is None:
@@ -31,7 +29,6 @@ class NewmanSite(admin.AdminSite):
         return admin_obj(request, rest_of_url)
 
     def root(self, request, url):
-        print 'ROOT !!! %s' % url
         return super(NewmanSite, self).root(request, url)
 
 site = NewmanSite()
