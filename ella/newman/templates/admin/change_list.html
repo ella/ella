@@ -26,7 +26,6 @@
 {% block search %}{% search_form cl %}{% endblock %}
 {# % block date_hierarchy %}{% date_hierarchy cl %}{% endblock % #}
 
-{% comment filters %}
     {% block filters %}
     {% if cl.has_filters %}
     <div id="changelist-filter">
@@ -37,7 +36,6 @@
     </div>
     {% endif %}
     {% endblock %}
-{% endcomment %}
 
 {% block result_list %}{% result_list cl %}{% endblock %}
 {% block pagination %}{% pagination cl %}{% endblock %}

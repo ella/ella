@@ -1,9 +1,10 @@
-from django.contrib import admin
+#from django.contrib import admin
 
 from ella.newman.sites import site
 from ella.newman import models as m
+from ella.ellaadmin.options import EllaModelAdmin
 
-class DevMessageAdmin(admin.ModelAdmin):
+class DevMessageAdmin(EllaModelAdmin):
     list_display = ('title', 'author', 'version', 'ts',)
     prepopulated_fields = {'slug': ('title',)}
 
@@ -13,13 +14,13 @@ class DevMessageAdmin(admin.ModelAdmin):
         obj.save()
 
 
-class HelpItemAdmin(admin.ModelAdmin):
+class HelpItemAdmin(EllaModelAdmin):
     list_display = ('__unicode__',)
     list_filter = ('ct', 'lang',)
     list_select_related = False
 
 
-class GroupFavAdmin(admin.ModelAdmin):
+class GroupFavAdmin(EllaModelAdmin):
     list_display = ('__unicode__',)
     list_filter = ('ct', 'group',)
 

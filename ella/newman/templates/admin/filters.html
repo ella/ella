@@ -1,0 +1,17 @@
+{# extends "admin/base_site.html" #}
+{% load adminmedia admin_list i18n %}
+
+{% block content %}
+
+    {% if cl.has_filters %} filtered {% endif %}
+
+    {% block filters %}
+        {% if cl.has_filters %}
+            <h2>{% trans 'Filter' %}</h2>
+            {% for spec in cl.filter_specs %}
+               {% admin_list_filter cl spec %}
+            {% endfor %}
+        {% endif %}
+    {% endblock %}
+
+{% endblock %}
