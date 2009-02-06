@@ -68,6 +68,8 @@ Q: Vyresit podle uzivatelskych prav zobrazovani casti adminu (tlacitka pro prida
    - na konec se Modely abecedne seradi.
    - titulek aplikace se v adminu lokalizuje jako _('%s administration') % app_label
 
+4. index(request, extra_context=None)  metoda generuje data pro hlavni stranu adminu.
+
 
 1.4 views/main.py (django.contrib.admin.views.main)
 ===================================================
@@ -106,22 +108,33 @@ ChangeList instance ma property:
 1.5 filterspecs.py (django.contrib.admin.filterspecs)
 =====================================================
 
-Obsahuje tridu FilterSpec.
+trida FilterSpec.
 - metoda (staticka) register(test, factory) -- factory je trida dedici z FilterSpec.
   napr.: FilterSpec.register(lambda f: isinstance(f, models.DateField), DateFieldFilterSpec)
 
 - metoda (staticka) create(field, request, params, model, model_admin, fieldPath=None) -- pro kazdy
   databazovy field vyzkousi udelat test vsech zaregistrovanych filtru. Pokud test vyjde,
-  vrati instanci factory tridy zaregistrovane s testem.
+  vrati instanci FilterSpec-potomka tridy zaregistrovane s testem a nepokracuje v hledani jineho vhodneho filtru.
+  Z toho plyne, ze bychom nase vlastni filtry meli registrovat driv nez se zaregistruji ty vychozi.
 
 - metoda has_output() -- vraci True/False
 
 - metoda choices(ChangeList_instance) -- NotImplementedError() / pretizit v konkretnim filtru.
+  Jeji vysledek se pouziva v metode output(), ktera se stara o vyrenderovani seznamu polozek filtru (Dle: vytvoreno atp.).
+  Struktura navratovych dat:
+  {
+      'selected': True/False,
+      'query_string': (%s__exact % field_path),
+      'display': 'zena.centrum.cz'
+  }   ...field_path je treba pro filtr podle site v clancich: 'category__site__id'.
 
 - metoda title() -- vraci verbose_name db Fieldu, pro ktery je filter trida vytvorena.
 
 - metoda output(ChangeList_instance) -- vyblije kus HTML kodu reprezentujiciho polozku filtru,
   resi take zvyrazneni uzivatelem vybraneho filtru. Pokud self.has_output() == False, tak vyplivne prazdny retezec.
+
+tridy odvozene od FilterSpec realizuji ruzne filtry, napr.: DateFieldFilterSpec, BooleanFieldFilterSpec,
+AllValuesFilterSpec -- "posledni zachrana", registruje se jako posledni v poradi.
 
 
 1.6 templatetags/admin_list.py (django.contrib.admin.templatetags.admin_list)
@@ -188,10 +201,19 @@ hodnota pro kazde ze tri uvedenych pristupovych prav.
 ==================
 
 Uzivatelska prava: staci nam-li jen hlidat prava pro zakladani/modifikaci/mazani s rozlisenim na ContentType,
-vyuzijeme stavajici mechanismy. Pripadne muzeme dopsat do django.contrib.auth.backends.backends dalsi funkce,
+vyuzijeme stavajici mechanismy. Pripadne muzeme dopsat do django.contrib.auth.backends dalsi funkce,
 ktere pouzijeme stejnym zpusobem jako jsou stavajici tj. pridame funkce do ``django.contrib.auth.models.User ``
 
 Prava muzeme overovat i v sablonach (viz vyse, pripadne manual) skrz {{ perm }}.
 
 
+Filtry: Podrobne v bodu 1.5. Filtry jsou potomci tridy FilterSpec. Registruji se pomoci staticke
+metody FilterSpec.register( test_callback, FilterSpec_potomek )
+Nase vlastni filtry bychom meli registrovat driv nez se zaregistruji vychozi. K registraci bohuzel
+dochazi hned po definici ruznych vychozich filtrovacich trid primo v modulu, tedy
+__navrhuji do FilterSpec pridat jeste jednu registracni funkci__, ktera umozni do listu filtru pridat
+registraci na zacatek, nyni se pouze appenduji.
+
 Adminovske tridy:
+Urcite vyuzijeme pretizeni AdminSite.root() pro registraci vlastnich URL at uz pro AJAX nebo jine
+veci jako je status memcached atp.
