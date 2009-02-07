@@ -6,6 +6,8 @@ Brzy:
 =====
 
 * ui: omezení CTs pro admina, subset který se dál omezuje oprávněními
+* ui: bude-li na stránce nějaký formulář v němž byly provedeny změny
+  a neuloženy, zobrazit varování pokud chce přejít jinam
 
 Někdy/neuspořádané:
 ===================
