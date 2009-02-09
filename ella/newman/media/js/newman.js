@@ -43,6 +43,11 @@
     // abstain from reloading if we have not.
     var PAGE_CHANGED = 0;
 
+    function object_empty(o) {
+        for (var k in o) return false;
+        return true;
+    }
+
     // Check if the least present request has finished and if so, shift it
     // from the queue and render the results, and then call itself recursively.
     // This effectively renders all finished requests from the first up to the
@@ -114,7 +119,6 @@
         if (MIN_LOAD == undefined || load_id < MIN_LOAD) MIN_LOAD = load_id;
         LOAD_BUF[ load_id ] = {
             target_id: target_id,
-            order: arg.order,
             address: address
         };
         $.ajax({
@@ -152,6 +156,8 @@
         // Figure out what should be reloaded and what not by comparing the requested things with the loaded ones.
         var requested = {};
         var specifiers = hash.split('#');
+        var ids_map = {};
+        var ids_arr = [];
         for (var i = 0; i < specifiers.length; i++) {
             var spec = specifiers[ i ];
             var address = spec;
@@ -161,19 +167,108 @@
                 address = RegExp.$2;
             }
             requested[ target_id ] = address;
+            ids_map[ target_id ] = 1;
+            ids_arr.push(target_id);
         }
-        for (var k in LOADED_URLS) {
-            // if this specifier didn't change, don't load it again
-            if (LOADED_URLS[k] == requested[k]) {
-                delete requested[k];
-                continue;
+        for (var k in LOADED_URLS) if (!ids_map[ target_id ]) {
+            ids_map[ target_id ] = 1;
+            ids_arr.push(target_id);
+        };
+        var is_ancestor = {};
+        for (var ai = 0; ai < ids_arr.length; ai++) {
+            for (var di = 0; di < ids_arr.length; di++) {
+                if (ai == di) continue;
+                var aid = ids_arr[ai];
+                var did = ids_arr[di];
+                var $d = $('#'+did);
+                if ($d && $d.length) {} else continue;
+                var $anc = $d.parent().closest('#'+aid);
+                if ($anc && $anc.length) {
+                    is_ancestor[ aid+','+did ] = 1;
+                }
             }
-            // if this specifier is no longer present, reload the base
-            if (!requested[k]) requested[k] = '';
+        }
+        var processed = {};
+        var reload_target = {};
+        while (!object_empty(ids_map)) {
+
+            // draw an element that's independent on any other in the list
+            var ids = [];
+            for (var id in ids_map) ids.push(id);
+            var indep;
+            for (var i = 0; i < ids.length; i++) {
+                var top_el_id = ids[i];
+                var is_independent = true;
+                for (var j = 0; j < ids.length; j++) {
+                    var low_el_id = ids[j];
+                    if (low_el_id == top_el_id) continue;
+                    if (is_ancestor[ low_el_id + ',' + top_el_id ]) {
+                        is_independent = false;
+                        break;
+                    }
+                }
+                if (is_independent) {
+                    indep = top_el_id;
+                    delete ids_map[ top_el_id ];
+                    break;
+                }
+            }
+            if (!indep) {
+                carp(ids_map);
+                throw('Cyclic graph of elements???');
+            }
+
+            var result = {};
+            for (var par in processed) {
+                // if we went over an ancestor of this element
+                if (is_ancestor[ par+','+indep ]) {
+                    // and we marked it for reload
+                    if (processed[ par ].to_reload) {
+                        // and we're not just recovering
+                        if (requested[ indep ]) {
+                            // then reload no matter if url changed or not
+                            result.to_reload = true;
+                            break;
+                        }
+                        else {
+                            // no need to recover when parent gets reloaded
+                            result.to_reload = false;
+                            delete LOADED_URLS[ indep ];    // FIXME: update on load, now's too soon!
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // If parent didn't force reload or delete,
+            if (result.to_reload == undefined) {
+                // and the thing is no longer requested and we don't have the base loaded,
+                if (!requested[ indep ] && LOADED_URLS[ indep ] != '') {
+                    // then reload the base
+                    result.to_reload = 1;
+                }
+            }
+
+            if (result.to_reload == undefined) {
+                // If the requested url changed,
+                if (requested[ indep ] != LOADED_URLS[ indep ]) {
+                    // mark for reload
+                    result.to_reload = 1;
+                }
+            }
+
+            // If we want to reload but no URL is set, default to the base
+            if (result.to_reload && !requested[ indep ]) {
+                requested[ indep ] = '';
+            }
+
+            processed[ indep ] = result;
         }
 
-        var ord = 0;
         for (var target_id in requested) {
+            if (!processed[ target_id ].to_reload) {
+                continue;
+            }
             var address = requested[ target_id ];
 
             // A specially treated specifier. The callback should set up LOADED_URLS properly.
@@ -185,8 +280,7 @@
 
             load_content({
                 target_id: target_id,
-                address: address,
-                order: ord++
+                address: address
             });
         }
     }
