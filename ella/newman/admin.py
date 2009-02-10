@@ -33,8 +33,10 @@ site.register(m.DevMessage, DevMessageAdmin)
 site.register(m.AdminHelpItem, HelpItemAdmin)
 site.register(m.AdminGroupFav, GroupFavAdmin)
 
-@filter_spec('filter_date', lambda f: isinstance(f, models.DateField))
-def muj_filtr(fspec):
+
+# Example of custom registered DateField filter. Filter is inserted to the beginning of filter chain.
+@filter_spec(lambda f: isinstance(f, models.DateField))
+def customized_date_field_filter(fspec):
     params = fspec.params; model = fspec.model; model_admin = fspec.model_admin; field_path = fspec.field_path
     fspec.field_generic = '%s__' % fspec.field_path
     fspec.date_params = dict([(k, v) for k, v in params.items() if k.startswith(fspec.field_generic)])
