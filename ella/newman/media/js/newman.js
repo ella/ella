@@ -170,10 +170,10 @@
             ids_map[ target_id ] = 1;
             ids_arr.push(target_id);
         }
-        for (var k in LOADED_URLS) if (!ids_map[ target_id ]) {
-            ids_map[ target_id ] = 1;
-            ids_arr.push(target_id);
-        };
+        for (var k in LOADED_URLS)  if (!ids_map[ k ]) {
+            ids_map[ k ] = 1;
+            ids_arr.push(k);
+        }
         var is_ancestor = {};
         for (var ai = 0; ai < ids_arr.length; ai++) {
             for (var di = 0; di < ids_arr.length; di++) {
