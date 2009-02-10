@@ -1,3 +1,5 @@
+import logging
+
 from django import template, forms
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.template import Template
@@ -5,17 +7,12 @@ from django.contrib.admin.views.main import ChangeList, ERROR_FLAG
 from django.contrib.admin.options import IncorrectLookupParameters
 from django.shortcuts import render_to_response
 
-from ella.ellaadmin.options import EllaModelAdmin
 
-def datefilter_test(url):
-    if not url:
-        return False
-    if url.endswith('filter_date'):
-        return True
-    return False
+log = logging.getLogger('ella.newman.filterspecs')
 
-def datefilter_view(model_admin, request, extra_context=None):
-    "The 'change list' admin view for this model."
+
+def customized_filter_view(model_admin, request, extra_context=None):
+    "stolen from: The 'change list' admin view for this model."
     opts = model_admin.model._meta
     app_label = opts.app_label
     try:
@@ -48,4 +45,3 @@ def datefilter_view(model_admin, request, extra_context=None):
     return HttpResponse(out, mimetype='text/plain;charset=utf-8')
 
 
-EllaModelAdmin.register(datefilter_test, datefilter_view)
