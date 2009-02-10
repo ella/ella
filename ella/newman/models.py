@@ -73,6 +73,23 @@ class AdminUserDraft(models.Model):
         verbose_name_plural = _('Draft items')
 
 
+class AdminSetting(models.Model):
+    """Custom settings for newman users/groups"""
+
+    user = CachedForeignKey(User, verbose_name=_('User'), null=True, blank=True)
+    group = CachedForeignKey(Group, verbose_name=_('Group'), null=True, blank=True)
+    var = models.SlugField(_('Variable'), max_length=64)
+    val = models.TextField(_('Value')) # TODO: JSONField with validation...
+
+    def __unicode__(self):
+        return u"%s: %s for %s" % (self.var, self.val, self.user)
+
+    class Meta:
+        unique_together = (('user','var',),('group', 'var',),)
+        verbose_name = _('Admin user setting')
+        verbose_name_plural = _('Admin user settings')
+
+
 class AdminGroupFav(models.Model):
     """Admin favorite items per group (presets)."""
 
