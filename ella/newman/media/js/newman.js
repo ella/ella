@@ -6,14 +6,11 @@
     ;;;     for (var i in obj) s += i + ': ' + obj[i] + "\n";
     ;;;     alert(s);
     ;;; }
-    ;;; function carp(message) {
-    ;;;    if (window.console) {
-    ;;;        console.log(message);
-    ;;;    }
-    ;;; }
-
-    // Store the #content div, so we need not always mine it from the DOM.
-    var $CONTENT = $('#content');
+    function carp(message) {
+        if (window.console) {
+            console.log(message);
+        }
+    }
 
     // We need to remember what URL is loaded in which element,
     // so we can load or not load content appropriately on hash change.
@@ -66,7 +63,7 @@
 
         // If the queue is empty, clean it
         if (!LOAD_BUF[ MIN_LOAD ]) {
-            ;;; carp("Emptying buffer");
+//            ;;; carp("Emptying buffer");
             LOAD_BUF = [];
             MIN_LOAD = undefined;
             MAX_LOAD = -1;
@@ -87,7 +84,7 @@
         // whatever was loaded inside, remove it from LOADED_URLS
         if (!object_empty(LOADED_URLS)) {
             var sel = '#'+keys(LOADED_URLS).join(',#');
-            $target.find(sel).each(function(){
+            $target.find(sel).each(function() {
                 delete LOADED_URLS[ this.id ];
             });
         }
@@ -100,7 +97,7 @@
         draw_ready();
     }
 
-    // This removes a request from the queue and
+    // This removes a request from the queue
     function cancel_request( load_id ) {
         var info = LOAD_BUF[ load_id ];
         delete LOAD_BUF[ load_id ];
@@ -109,8 +106,8 @@
     }
 
     // Take a container and a URL. Give the container the "loading" class,
-    // fetch the URL, push the request into the queue, and have it checked
-    // when it finishes.
+    // fetch the URL, push the request into the queue, and when it finishes,
+    // check for requests ready to be loaded into the document.
     function load_content(arg) {
         var target_id = arg.target_id;
         var address = arg.address;
@@ -278,6 +275,7 @@
 
             processed[ indep ] = result;
         }
+        // Now we figured out what to reload.
 
         for (var target_id in requested) {
             if (!processed[ target_id ].to_reload) {
