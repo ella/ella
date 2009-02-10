@@ -18,6 +18,7 @@
     // We need to remember what URL is loaded in which element,
     // so we can load or not load content appropriately on hash change.
     var LOADED_URLS = {};
+    window.LOADED_URLS = LOADED_URLS;
 
     // If the hash changes before all ajax requests complete,
     // we want to cancel the pending requests. MAX_REQUEST is actually the number
@@ -46,6 +47,11 @@
     function object_empty(o) {
         for (var k in o) return false;
         return true;
+    }
+    function keys(o) {
+        var rv = [];
+        for (var k in o) rv.push(k);
+        return rv;
     }
 
     // Check if the least present request has finished and if so, shift it
@@ -77,6 +83,15 @@
             carp('Could not find target element: #'+info.target_id);
             return;
         }
+
+        // whatever was loaded inside, remove it from LOADED_URLS
+        if (!object_empty(LOADED_URLS)) {
+            var sel = '#'+keys(LOADED_URLS).join(',#');
+            $target.find(sel).each(function(){
+                delete LOADED_URLS[ this.id ];
+            });
+        }
+
         $target.removeClass('loading').html(info.data);
         LOADED_URLS[ info.target_id ] = info.address;
         PAGE_CHANGED++;
@@ -233,7 +248,6 @@
                         else {
                             // no need to recover when parent gets reloaded
                             result.to_reload = false;
-                            delete LOADED_URLS[ indep ];    // FIXME: update on load, now's too soon!
                             break;
                         }
                     }
