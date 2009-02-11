@@ -2,6 +2,7 @@ import datetime
 
 from django.db import models
 from django.utils.translation import ugettext as _
+from django.contrib import admin
 
 from ella.newman.sites import site
 from ella.newman import models as m

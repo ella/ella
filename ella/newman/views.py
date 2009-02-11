@@ -8,10 +8,10 @@ from ella.newman.changelist import NewmanChangeList, FilterChangeList
 from django.contrib.admin.options import IncorrectLookupParameters
 from django.shortcuts import render_to_response
 
-from ella.ellaadmin.options import EllaModelAdmin
+from ella.newman.options import NewmanModelAdmin
 
 
-log = logging.getLogger('ella.newman.filterspecs')
+log = logging.getLogger('ella.newman.views')
 
 
 def filters_view(model_admin, request, extra_context=None):
@@ -81,5 +81,5 @@ def changelist_view(self, request, extra_context=None):
         'admin/change_list.html'
     ], context, context_instance=template.RequestContext(request))
 
-EllaModelAdmin.register(lambda x: x is None, changelist_view)
-EllaModelAdmin.register(lambda x: x.endswith('filters'), filters_view)
+NewmanModelAdmin.register(lambda x: x is None, changelist_view)
+NewmanModelAdmin.register(lambda x: x.endswith('filters'), filters_view)
