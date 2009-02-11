@@ -320,7 +320,7 @@ def _render(object, content_path):
                 content = content()
         except:
             # TODO: log
-            pass
+            return ''
 
     t = render_str(content)
     return t.render(template.Context({'object' : object, 'MEDIA_URL' : settings.MEDIA_URL}))
