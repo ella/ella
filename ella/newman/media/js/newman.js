@@ -316,7 +316,7 @@
     }, 50);
 
     // Set up event handlers
-    $('.hashadr').live('click', function() {
+    $('.hashadr,.hashadr-container a').live('click', function() {
         adr($(this).attr('href'));
         return false;
     });
@@ -334,10 +334,12 @@
 //
 // Alternatively, you can use <a href="bar/" class="hashadr">.
 // The hashadr class says clicks should be captured and delegated to function adr.
+// A third way is to encapsulate a link (<a>) into a .hashadr-container element.
 function adr(address, hash) {
 
     // '#' chars in the address separate invividual requests for hash modification.
     // First deal with the first one and then recurse on the subsequent ones.
+    if (address.charAt(0) == '#') address = address.substr(1);
     var hashpos = (address+'#').indexOf('#');
     var tail = address.substr(hashpos+1);
     address = address.substr(0, hashpos);
