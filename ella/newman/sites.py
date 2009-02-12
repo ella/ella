@@ -9,12 +9,12 @@ from django.contrib.contenttypes.models import ContentType
 
 
 class NewmanSite(admin.AdminSite):
-    def __init__(self, admin_opts=object):
-        super(NewmanSite, self).__init__()
-        self._registry = admin.site._registry
-        self.admin_opts = admin_opts
 
     """
+    def __init__(self, admin_opts=object):
+        super(NewmanSite, self).__init__()
+        #self._registry = admin.site._registry
+        #self.admin_opts = admin_opts
     def register(self, model_or_iterable, admin_class=None, **options):
         super(NewmanSite, self).register(model_or_iterable, admin_class, **options)
 
