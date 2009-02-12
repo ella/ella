@@ -1,16 +1,14 @@
-import copy
+from django.core.exceptions import PermissionDenied
+from django.conf import settings
+from ella.ellaadmin.options import SUGGEST_VIEW_MIN_LENGTH, SUGGEST_VIEW_LIMIT,\
+    SUGGEST_RETURN_ALL_FIELD
 
-from django import http
-from django.db import models
 from django.contrib import admin
-from django.views.decorators.cache import never_cache
-from django.contrib.contenttypes.models import ContentType
 from django.contrib.admin.options import ModelAdmin
 from django.contrib.admin.options import IncorrectLookupParameters
-from django import template, forms
+from django import template
 from django.http import HttpResponse, Http404, HttpResponseRedirect
-from django.template import Template
-from django.contrib.admin.views.main import ChangeList, ERROR_FLAG
+from django.contrib.admin.views.main import ERROR_FLAG
 from django.shortcuts import render_to_response
 
 from ella.newman.changelist import NewmanChangeList, FilterChangeList
@@ -43,13 +41,13 @@ class NewmanModelAdmin(ModelAdmin):
         return super(NewmanModelAdmin, self).__call__(request, url)
 
 
-    def filters_view(model_admin, request, extra_context=None):
+    def filters_view(self, request, extra_context=None):
         "stolen from: The 'change list' admin view for this model."
-        opts = model_admin.model._meta
+        opts = self.model._meta
         app_label = opts.app_label
         try:
-            cl = FilterChangeList(request, model_admin.model, model_admin.list_display, model_admin.list_display_links, model_admin.list_filter,
-                model_admin.date_hierarchy, model_admin.search_fields, model_admin.list_select_related, model_admin.list_per_page, model_admin)
+            cl = FilterChangeList(request, self.model, self.list_display, self.list_display_links, self.list_filter,
+                self.date_hierarchy, self.search_fields, self.list_select_related, self.list_per_page, self)
         except IncorrectLookupParameters:
             # Wacky lookup parameters were given, so redirect to the main
             # changelist page, without parameters, and pass an 'invalid=1'
@@ -64,8 +62,8 @@ class NewmanModelAdmin(ModelAdmin):
             'title': cl.title,
             'is_popup': cl.is_popup,
             'cl': cl,
-            'has_add_permission': model_admin.has_add_permission(request),
-            'root_path': model_admin.admin_site.root_path,
+            'has_add_permission': self.has_add_permission(request),
+            'root_path': self.admin_site.root_path,
             'app_label': app_label,
 }
         context.update(extra_context or {})
@@ -78,6 +76,11 @@ class NewmanModelAdmin(ModelAdmin):
 
 
     def changelist_view(self, request, extra_context=None):
+
+        # accepts only ajax calls if not DEBUG
+        if not request.is_ajax() and not settings.DEBUG:
+            raise Http404
+
         opts = self.model._meta
         app_label = opts.app_label
         if not self.has_change_permission(request, None):

@@ -46,6 +46,8 @@ class ArticleOptions(NewmanModelAdmin):
     rich_text_fields = {None: ('perex',)}
 
 
+site.unregister([InfoBox, Article])
+
 site.register(InfoBox, InfoBoxOptions)
 site.register(Article, ArticleOptions)
 
