@@ -394,7 +394,7 @@ function adr(address, hash) {
             if (address) address = target_id + '::' + address;
         }
         else {
-            start = idpos + target_id.length + '..'.length;
+            start = idpos + target_id.length + '::'.length;
             end = (hash+'#').indexOf('#', start);
         }
     }
@@ -413,7 +413,14 @@ function adr(address, hash) {
     }
     // relative address -- append to the end, but no farther than to a '?'
     else {
+        var left_anchor = hash.lastIndexOf('#', start)+1;
         start = (hash.substr(0, end)+'?').indexOf('?', start);
+
+        // cut off the directories as appropriate when the address starts with ../
+        while (address.substr(0,3) == '../' && hash.substring(left_anchor,start-1).indexOf('/') >= 0) {
+            address = address.substr(3);
+            start = hash.lastIndexOf('/', start-2)+1;
+        }
     }
 
     var newhash = hash.substr(0, start) + address + hash.substr(end);
