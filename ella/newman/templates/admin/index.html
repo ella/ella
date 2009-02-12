@@ -42,6 +42,7 @@
 {% block content %}
 
 {% cache 600 devmsgs user.username %}
+
 {% get_devmsgs as msgs %}
 <div class="hpbox devmsgs">
     <h3>Zprávy o vývoji...</h3>
@@ -56,6 +57,18 @@
     </div>
 </div>
 {% endcache %}
+
+<div class="hpbox search" style="width: 25%">
+    <h3>Hledat</h3>
+    <div class="cnt">
+        <input type="text" name="q"/>
+        <select name="ct" size="1">
+            <option value="">all</option>
+            <option value="1">Articles</option>
+        </select>
+        <a class="icn btn search def">{% trans 'Go' %}</a>
+    </div>
+</div>
 
 <div class="hpbox setup" style="width: 25%">
     <h3>Rychlá nastavení</h3>

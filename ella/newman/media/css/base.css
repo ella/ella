@@ -117,9 +117,9 @@ div.breadcrumbs {
 #content {
     background: #eee;
     padding: 5px;
-    position: fixed;
+/*    position: fixed;
     top: 112px; left: 0; bottom: 28px; right: 0;
-    overflow: auto;
+    overflow: auto; */
 }
 
 /* HP */
@@ -167,6 +167,7 @@ a.btn {
     -moz-border-radius: 4px;
     background-color: #ddd;
     margin: 2px;
+    text-decoration: none;
 }
 a.btn.def {
     font-weight: bold;
@@ -180,6 +181,7 @@ a.btn.icn {
     background-position: 3px 50%;
     padding-left: 23px;
 }
+
 a.icn.logout { background-image: url(../ico/16/logout.png); }
 a.icn.config { background-image: url(../ico/16/configure.png); }
 a.icn.addfav { background-image: url(../ico/16/bookmark_add.png); }
@@ -187,6 +189,11 @@ a.icn.eclear { background-image: url(../ico/16/editclear.png); }
 a.icn.home { background-image: url(../ico/16/gohome.png); }
 a.icn.ok { background-image: url(../ico/16/ok.png); }
 a.icn.cancel { background-image: url(../ico/16/cancel.png); }
+a.icn.recur { background-image: url(../ico/16/recur.png); }
+a.icn.na { background-image: url(../ico/16/na.png); }
+a.icn.search { background-image: url(../ico/16/search.png); }
+a.icn.filter { background-image: url(../ico/16/filter.png); }
+a.icn.add { background-image: url(../ico/16/edit_add.png); }
 
 /* FOOTER */
 
@@ -203,6 +210,8 @@ a.icn.cancel { background-image: url(../ico/16/cancel.png); }
 fieldset { border: 1px solid #ddd; padding: 5px; }
 label.required { font-weight: bold; color: darkorange; }
 div.submit-row, fieldset.submit-row { border: none; clear:both; margin-top: 5px; padding: 2px 0; text-align: right; }
+input { padding: 2px; }
+input, select, button {  margin: 1px 2px; }
 
 /* TABLES */
 table {
@@ -211,6 +220,13 @@ table {
 td, th {
     text-align: left;
     border: 1px solid #ddd;
-    padding: 3px;
+    padding: 5px;
 }
 
+#changelist table {
+    width: 100%;
+}
+#changelist table thead tr { background: #ccc; }
+#changelist table tbody tr.row1 { background: #fff; }
+#changelist table tbody tr.row2 { background: #eee; }
+#changelist table tbody tr:hover { background: #ffc; }
