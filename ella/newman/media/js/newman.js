@@ -102,6 +102,11 @@
         var info = LOAD_BUF[ load_id ];
         delete LOAD_BUF[ load_id ];
         $('#'+info.target_id).removeClass('loading');
+
+        // Restore the hash so it doesn't look like the request succeeded.
+        url_target_id = ((info.target_id == 'content') ? '' : info.target_id+'::');
+        adr(url_target_id + (LOADED_URLS[info.target_id] ? LOADED_URLS[info.target_id] : ''));
+
         carp('Failed to load '+info.address+' into '+info.target_id);
     }
 
@@ -386,7 +391,7 @@ function adr(address, hash) {
         if (idpos == -1) {
             hash += '#';
             start = end = hash.length;
-            address = target_id + '::' + address;
+            if (address) address = target_id + '::' + address;
         }
         else {
             start = idpos + target_id.length + '..'.length;
@@ -398,8 +403,13 @@ function adr(address, hash) {
     // Figure out whether we replace the address, append to it, or what.
     // Move start appropriately to denote where the part to replace starts.
 
+    // empty address -- remove the specifier
+    if (address.length == 0) {
+        start = hash.lastIndexOf('#',start);
+        start = Math.max(start,0);
+    }
     // absolute address -- replace what's in there.
-    if (address.charAt(0) == '/') {
+    else if (address.charAt(0) == '/') {
     }
     // relative address -- append to the end, but no farther than to a '?'
     else {
