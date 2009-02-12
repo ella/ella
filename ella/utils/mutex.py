@@ -18,11 +18,7 @@ class EllaMutex:
 
     def lock(self):
         " lock() - lock mutex, return False if mutex has already locked "
-        if cache.get(self.__key) != None:
-            return False
-        else:
-            cache.set(self.__key, self.__value, self.__lifetime)
-            return self.__status
+        return cache.add(self.__key, self.__value, self.__lifetime)
 
     def unlock(self):
         " unlock() - unlock mutex "
