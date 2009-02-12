@@ -314,4 +314,101 @@
         } catch(e) { carp(e); }
         setTimeout(arguments.callee, 50);
     }, 50);
+
+    // Set up event handlers
+    $('.hashadr').live('click', function() {
+        adr($(this).attr('href'));
+        return false;
+    });
 })})(jQuery);
+
+// Manipulate the hash address.
+//
+// We use http://admin/#/foo/ instead of http://admin/foo/.
+// Therefore, <a href="bar/"> won't lead to http://admin/#/foo/bar/ as we need but to http://admin/bar/.
+// To compensate for this, use <a href="javascript:adr('bar/')> instead.
+// adr('id::bar/') can be used too.
+//
+// adr('bar/#id::baz/') is the same as adr('bar/'); adr('id::baz/').
+// Absolute paths and ?var=val strings work too.
+//
+// Alternatively, you can use <a href="bar/" class="hashadr">.
+// The hashadr class says clicks should be captured and delegated to function adr.
+function adr(address, hash) {
+
+    // '#' chars in the address separate invividual requests for hash modification.
+    // First deal with the first one and then recurse on the subsequent ones.
+    var hashpos = (address+'#').indexOf('#');
+    var tail = address.substr(hashpos+1);
+    address = address.substr(0, hashpos);
+
+    if (!hash) hash = location.hash;
+
+    // Figure out which specifier is concerned.
+    var target_id = '';
+    if (address.match(/([-\w]+)::(.*)/)) {
+        target_id = RegExp.$1;
+        address   = RegExp.$2;
+    }
+
+    // If no hash is present, simply use the address.
+    if (hash.length <= 1) {
+        if (target_id.length == 0) {
+            location.hash = '#' + address;
+        }
+        else {
+            location.hash = '#' + target_id + '::' + address
+        }
+        return;
+    }
+
+    // Figure out the span in the current hash where the change applies.
+    var cur_url_start;
+    var cur_url_end;
+    if (target_id.length == 0) {
+        var start = 0, end;
+        for (; start >= 0; start = hash.indexOf('#', start+1)) {
+            end = (hash+'#').indexOf('#', start+1);
+            if (hash.substring(start, end).indexOf('::') < 0) {
+                start++;
+                break;
+            }
+        }
+        if (start < 0) {
+            hash += '#';
+            start = end = hash.length;
+        }
+    }
+    else {
+        var idpos = hash.indexOf(target_id+'::');
+        if (idpos == -1) {
+            hash += '#';
+            start = end = hash.length;
+            address = target_id + '::' + address;
+        }
+        else {
+            start = idpos + target_id.length + '..'.length;
+            end = (hash+'#').indexOf('#', start);
+        }
+    }
+    // Now, hash.substr(start,end) is the address we need to modify.
+
+    // Figure out whether we replace the address, append to it, or what.
+    // Move start appropriately to denote where the part to replace starts.
+
+    // absolute address -- replace what's in there.
+    if (address.charAt(0) == '/') {
+    }
+    // relative address -- append to the end, but no farther than to a '?'
+    else {
+        start = (hash.substr(0, end)+'?').indexOf('?', start);
+    }
+
+    var newhash = hash.substr(0, start) + address + hash.substr(end);
+    if (tail) {
+        adr(tail, newhash);
+    }
+    else {
+        location.hash = newhash;
+    }
+}
