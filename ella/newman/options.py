@@ -19,6 +19,8 @@ class NewmanModelAdmin(ModelAdmin):
 
     def __init__(self, *args, **kwargs):
         super(NewmanModelAdmin, self).__init__(*args, **kwargs)
+        if hasattr(settings, 'NEWMAN_LIST_PER_PAGE'):
+            self.list_per_page = settings.NEWMAN_LIST_PER_PAGE
         #NewmanModelAdmin.register(lambda x: x is None, self.changelist_view)
         #NewmanModelAdmin.register(lambda x: x.endswith('suggest'), self.suggest_view)
         #NewmanModelAdmin.register(lambda x: x.endswith('filters'), self.filters_view)
