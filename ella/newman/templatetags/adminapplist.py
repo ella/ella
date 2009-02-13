@@ -1,7 +1,7 @@
-from django.contrib import admin
-
 from django import template
 from django.utils.safestring import mark_safe
+
+from ella.newman import site
 
 register = template.Library()
 
@@ -15,7 +15,7 @@ class AdminApplistNode(template.Node):
         app_dict = {}
         user = req.user
 
-        for model, model_admin in admin.site._registry.items():
+        for model, model_admin in site._registry.items():
             app_label = model._meta.app_label
             has_module_perms = user.has_module_perms(app_label)
 
