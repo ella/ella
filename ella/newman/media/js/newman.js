@@ -347,6 +347,8 @@
             address = address.substr(colon_index + '::'.length);
         }
 
+        if (LOADED_URLS[target_id] == address) return;
+
         var url = adr(specifier, {just_get:1});
         var url = $('<a>').attr('href', url).get(0).href;
 
