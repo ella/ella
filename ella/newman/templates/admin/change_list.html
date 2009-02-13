@@ -26,11 +26,11 @@
     </ul>
     {% endif %}
 {% endblock %}
-<div class="module{% if cl.has_filters %} filtered{% endif %} hashadr-container" id="changelist">
+<div class="module{% if cl.has_filters %} filtered{% endif %}" id="changelist">
 
     {% block filters %}
     <div id="filters">
-        <a class="icn btn filter" href="">{% trans 'Filters' %}</a>
+        <a class="icn btn filter simpleload" href="filters::::filters/">{% trans 'Filters' %}</a>
         {% for spec in cl.filter_specs %}
            {% admin_list_filter cl spec %}
         {% endfor %}
@@ -38,7 +38,9 @@
     {% endblock %}
 
 {% block search %}{% search_form cl %}{% endblock %}
-{% block result_list %}{% result_list cl %}{% endblock %}
+<div class="hashadr-container">
+    {% block result_list %}{% result_list cl %}{% endblock %}
+</div>
 {% block pagination %}{% pagination cl %}{% endblock %}
 </div>
 </div>

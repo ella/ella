@@ -15,7 +15,6 @@
     // We need to remember what URL is loaded in which element,
     // so we can load or not load content appropriately on hash change.
     var LOADED_URLS = {};
-    window.LOADED_URLS = LOADED_URLS;
 
     // If the hash changes before all ajax requests complete,
     // we want to cancel the pending requests. MAX_REQUEST is actually the number
@@ -51,6 +50,22 @@
         return rv;
     }
 
+    function inject_content($target, data, address) {
+        // whatever was loaded inside, remove it from LOADED_URLS
+        if (!object_empty(LOADED_URLS)) {
+            var sel = '#'+keys(LOADED_URLS).join(',#');
+            $target.find(sel).each(function() {
+                delete LOADED_URLS[ this.id ];
+            });
+        }
+
+        $target.removeClass('loading').html(data);
+        if (address != undefined) {
+            LOADED_URLS[ $target.attr('id') ] = address;
+        }
+        PAGE_CHANGED++;
+    }
+
     // Check if the least present request has finished and if so, shift it
     // from the queue and render the results, and then call itself recursively.
     // This effectively renders all finished requests from the first up to the
@@ -81,17 +96,7 @@
             return;
         }
 
-        // whatever was loaded inside, remove it from LOADED_URLS
-        if (!object_empty(LOADED_URLS)) {
-            var sel = '#'+keys(LOADED_URLS).join(',#');
-            $target.find(sel).each(function() {
-                delete LOADED_URLS[ this.id ];
-            });
-        }
-
-        $target.removeClass('loading').html(info.data);
-        LOADED_URLS[ info.target_id ] = info.address;
-        PAGE_CHANGED++;
+        inject_content($target, info.data, info.address);
 
         // Check next request
         draw_ready();
@@ -319,8 +324,48 @@
         } catch(e) { carp(e); }
         setTimeout(arguments.callee, 50);
     }, 50);
+    // End of hash-driven content management
+
+    // Loads stuff from an URL to an element like load_by_hash but:
+    // - Only one specifier (id-url pair) can be given.
+    // - URL hash doesn't change.
+    // - The specifier is interpreted by adr to get the URL from which to ajax.
+    //   This results in support of relative addresses and the target_id::rel_base::address syntax.
+    function simple_load(specifier) {
+        var target_id, address;
+        var colon_index = specifier.indexOf('::');
+        if (colon_index < 0) {
+            target_id = 'content';
+            address = specifier;
+        }
+        else {
+            target_id = specifier.substr(0, colon_index);
+            address = specifier.substr(colon_index + '::'.length);
+        }
+        colon_index = address.indexOf('::');
+        if (colon_index >= 0) {
+            address = address.substr(colon_index + '::'.length);
+        }
+
+        var url = adr(specifier, {just_get:1});
+        var url = $('<a>').attr('href', url).get(0).href;
+
+        var $target = $('#'+target_id);
+        if ($target && $target.length) {} else {
+            throw("Target '#"+target_id+"' not found.");
+            return;
+        }
+        $target.addClass('loading');
+        $.get(url, function(data) {
+            inject_content($target, data, address);
+        });
+    }
 
     // Set up event handlers
+    $('.simpleload,.simpleload-container a').live('click', function() {
+        simple_load($(this).attr('href'));
+        return false;
+    });
     $('.hashadr,.hashadr-container a').live('click', function() {
         adr($(this).attr('href'));
         return false;
@@ -340,7 +385,19 @@
 // Alternatively, you can use <a href="bar/" class="hashadr">.
 // The hashadr class says clicks should be captured and delegated to function adr.
 // A third way is to encapsulate a link (<a>) into a .hashadr-container element.
-function adr(address, hash) {
+//
+// The target_id::rel_base::address syntax in a specifier means that address is taken as relative
+// to the one loaded to rel_base and the result is loaded into target_id.
+// For example, suppose that location.hash == '#id1::/foo/'. Then calling
+// adr('id2::id1::bar/') would be like doing location.hash = '#id1::/foo/#id2::/foo/bar/'.
+//
+// The second argument is an object where these fields are recognized:
+// - hash: a custom hash string to be used instead of location.hash,
+// - just_get: Instructs the function to merely return the modified address (without the target_id).
+//   Using this option disables the support of multiple '#'-separated specifiers.
+//   Other than the first one are ignored.
+function adr(address, options) {
+    var old = address;
 
     // '#' chars in the address separate invividual requests for hash modification.
     // First deal with the first one and then recurse on the subsequent ones.
@@ -349,24 +406,43 @@ function adr(address, hash) {
     var tail = address.substr(hashpos+1);
     address = address.substr(0, hashpos);
 
-    if (!hash) hash = location.hash;
+    if (!options) options = {};
+    var hash = (options.hash == undefined) ? location.hash : options.hash;
 
     // Figure out which specifier is concerned.
     var target_id = '';
-    if (address.match(/([-\w]+)::(.*)/)) {
+    // But wait, if target_id::rel_base::address was specified,
+    // then get the modifier address and insert it then as appropriate.
+    var new_address;
+    if (address.match(/([-\w]*)::([-\w]*)::(.*)/)) {
+        var rel_base;
+        target_id = RegExp.$1;
+        rel_base  = RegExp.$2;
+        address   = RegExp.$3;
+        if (rel_base.length) rel_base  += '::';
+        new_address = adr(rel_base+address, {hash:hash, just_get:1})
+        if (options.just_get) return new_address;
+    }
+    // OK, go on figuring out which specifier is concerned.
+    else if (address.match(/([-\w]*)::(.*)/)) {
         target_id = RegExp.$1;
         address   = RegExp.$2;
     }
 
     // If no hash is present, simply use the address.
     if (hash.length <= 1) {
+        var newhash;
         if (target_id.length == 0) {
-            location.hash = '#' + address;
+            newhash = address;
         }
         else {
-            location.hash = '#' + target_id + '::' + address
+            newhash = target_id + '::' + address
         }
-        return;
+        if (options.just_get) return newhash;
+        else {
+            location.hash = newhash;
+            return;
+        }
     }
 
     // Figure out the span in the current hash where the change applies.
@@ -391,7 +467,10 @@ function adr(address, hash) {
         if (idpos == -1) {
             hash += '#';
             start = end = hash.length;
-            if (address) address = target_id + '::' + address;
+            if (!options.just_get) {
+                if (    address)     address = target_id + '::' +     address;
+                if (new_address) new_address = target_id + '::' + new_address;
+            }
         }
         else {
             start = idpos + target_id.length + '::'.length;
@@ -403,29 +482,41 @@ function adr(address, hash) {
     // Figure out whether we replace the address, append to it, or what.
     // Move start appropriately to denote where the part to replace starts.
 
-    // empty address -- remove the specifier
-    if (address.length == 0) {
-        start = hash.lastIndexOf('#',start);
-        start = Math.max(start,0);
-    }
-    // absolute address -- replace what's in there.
-    else if (address.charAt(0) == '/') {
-    }
-    // relative address -- append to the end, but no farther than to a '?'
-    else {
-        var left_anchor = hash.lastIndexOf('#', start)+1;
-        start = (hash.substr(0, end)+'?').indexOf('?', start);
+    var newhash;
+    var addr_start = start;
 
-        // cut off the directories as appropriate when the address starts with ../
-        while (address.substr(0,3) == '../' && hash.substring(left_anchor,start-1).indexOf('/') >= 0) {
-            address = address.substr(3);
-            start = hash.lastIndexOf('/', start-2)+1;
+    // We've not gotten the address from a previous recursive call, thus modify the address as needed.
+    if (new_address == undefined) {
+        new_address = address;
+
+        // empty address -- remove the specifier
+        if (address.length == 0) {
+            start = hash.lastIndexOf('#',start);
+            start = Math.max(start,0);
+        }
+        // absolute address -- replace what's in there.
+        else if (address.charAt(0) == '/') {
+        }
+        // relative address -- append to the end, but no farther than to a '?'
+        else {
+            var left_anchor = hash.lastIndexOf('#', start)+1;
+            start = (hash.substr(0, end)+'?').indexOf('?', start);
+
+            // cut off the directories as appropriate when the address starts with ../
+            while (new_address.substr(0,3) == '../' && hash.substring(left_anchor,start-1).indexOf('/') >= 0) {
+                new_address = new_address.substr(3);
+                start = hash.lastIndexOf('/', start-2)+1;
+            }
         }
     }
 
-    var newhash = hash.substr(0, start) + address + hash.substr(end);
-    if (tail) {
-        adr(tail, newhash);
+    newhash = hash.substr(0, start) + new_address + hash.substr(end);
+
+    if (options.just_get) {
+        return hash.substring(addr_start, start) + new_address;
+    }
+    else if (tail) {
+        adr(tail, {hash:newhash});
     }
     else {
         location.hash = newhash;
