@@ -11,6 +11,7 @@ from django.utils.translation import ugettext_lazy as _, ugettext
 from ella.core.models import Category
 from ella.core.cache import get_cached_object
 
+''' # commented out due to this functionality was moved to ella.newman application.
 #TODO @cache_this
 def has_category_permission(user, model, category, permission):
     if user.has_perm(permission):
@@ -115,4 +116,4 @@ class CategoryUserRoleOptions(admin.ModelAdmin):
 
 admin.site.register(CategoryUserRole, CategoryUserRoleOptions)
 admin.site.register(SiteUserRole, SiteUserRoleOptions)
-
+'''

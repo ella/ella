@@ -1,10 +1,11 @@
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _, ugettext
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User, Group, Permission
+from django.conf import settings
 
 from ella.core.cache.utils import CachedForeignKey
-from django.conf import settings
+from ella.core.models import Category
 
 class DevMessage(models.Model):
     """Development news for ella administrators."""
@@ -122,3 +123,76 @@ class AdminUserFav(models.Model):
         ordering = ('ordering',)
         verbose_name = _('User fav item')
         verbose_name_plural = _('User fav items')
+
+
+# ------------------------------------
+# Permissions per Category
+# ------------------------------------
+
+class CategoryUserRole(models.Model):
+    """
+    Apply all group's permission for the given user to this category.
+    """
+    user = models.ForeignKey(User)
+    group = models.ForeignKey(Group)
+    category = models.ForeignKey(Category)
+
+    def __unicode__(self):
+        return ugettext(u'User %(user)s is a %(group)s for %(category)s.') % {
+                'user' : self.user,
+                'group' : self.group,
+                'category' : self.category,
+}
+
+    class Meta:
+        verbose_name = _("User role in category")
+        verbose_name_plural = _("User roles in categories")
+
+def has_category_permission(user, model, category, permission):
+    if user.has_perm(permission):
+        return True
+
+    app_label, code = permission.split('.', 1)
+    perm = Permission.objects.filter(content_type__app_label=app_label, codename=code)
+
+    if CategoryUserRole.objects.filter(
+            category=category,
+            user=user,
+            group__permissions=perm
+).count():
+        return True
+
+    # fallback to site permissions
+    return has_site_permission(user, model, category.site_id, permission)
+
+def cat_children(cats):
+    """ Returns all nested categories as list. cats parameter is list or tuple. """
+    # TODO cache result of this function or rewrite this function smarter or maybe query all nested categories via SQL(?).
+    sub_cats = []
+    for c in cats:
+        out = Category.objects.filter(tree_parent=c)
+        if out:
+            map(lambda o: sub_cats.append(o), out)
+            nested = cat_children(out)
+            if nested:
+                map(lambda n: sub_cats.append(n), nested)
+    return sub_cats
+
+def applicable_categories(user, permission=None):
+    from time import time
+    begin = time()
+    q = CategoryUserRole.objects.filter(user=user).distinct()
+    cats = [ a.category for a in q ]
+    app_cats = cat_children(cats)
+
+    if permission:
+        app_label, code = permission.split('.', 1)
+        perm = Permission.objects.get(content_type__app_label=app_label, codename=code)
+        q = q.filter(group__permissions=perm)
+    else:
+        # take any permission
+        q = q.filter(group__permissions__id__isnull=False)
+
+    print 'Took %f' % (time() - begin)
+    return [ d.pk for d in app_cats ]
+

@@ -30,9 +30,15 @@ class GroupFavAdmin(EllaModelAdmin):
     list_filter = ('ct', 'group',)
 
 
+class CategoryUserRoleOptions(admin.ModelAdmin):
+    list_filter = ('user', 'group', 'category',)
+    list_display = ('user', 'group', 'category',)
+
+
 site.register(m.DevMessage, DevMessageAdmin)
 site.register(m.AdminHelpItem, HelpItemAdmin)
 site.register(m.AdminGroupFav, GroupFavAdmin)
+site.register(m.CategoryUserRole, CategoryUserRoleOptions)
 
 
 # Example of custom registered DateField filter. Filter is inserted to the beginning of filter chain.

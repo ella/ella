@@ -10,8 +10,11 @@ from django import template
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.contrib.admin.views.main import ERROR_FLAG
 from django.shortcuts import render_to_response
+from django.db.models import Q, query
+from django.db.models.fields import FieldDoesNotExist
 
 from ella.newman.changelist import NewmanChangeList, FilterChangeList
+from ella.newman import models
 
 
 class NewmanModelAdmin(ModelAdmin):
@@ -78,7 +81,6 @@ class NewmanModelAdmin(ModelAdmin):
 
 
     def changelist_view(self, request, extra_context=None):
-
         # accepts only ajax calls if not DEBUG
         if not request.is_ajax() and not settings.DEBUG:
             raise Http404
@@ -184,44 +186,26 @@ class NewmanModelAdmin(ModelAdmin):
 
 
     def queryset(self, request):
-        return super(NewmanModelAdmin, self).queryset(request)
         """
-        First semi-working draft of category-based permissions. It will allow permissions to be set per-site and per category
+        First semi-working draft of category-based permissions. It will allow permissions to be set per category
         effectively hiding the content the user has no permission to see/change.
         """
-        from ella.ellaadmin import models
-        from django.db.models import Q, query
-        from django.db.models.fields import FieldDoesNotExist
+        #return super(NewmanModelAdmin, self).queryset(request)
         q = admin.ModelAdmin.queryset(self, request)
 
         view_perm = self.opts.app_label + '.' + 'view_' + self.model._meta.module_name.lower()
         change_perm = self.opts.app_label + '.' + 'change_' + self.model._meta.module_name.lower()
-        sites = None
-        #import pdb;pdb.set_trace()
-
-        try:
-            self.model._meta.get_field('site')
-            sites = models.applicable_sites(request.user, view_perm) + models.applicable_sites(request.user, change_perm)
-            #import pdb;pdb.set_trace()
-            q = q.filter(site__in=sites)
-        except FieldDoesNotExist:
-            pass
-
         try:
             self.model._meta.get_field('category')
-            if sites is None:
-                sites = models.applicable_sites(request.user, view_perm) + models.applicable_sites(request.user, change_perm)
             categories = models.applicable_categories(request.user, view_perm) + models.applicable_categories(request.user, change_perm)
-            #import pdb;pdb.set_trace()
 
-            if sites or categories:
+            if categories:
                 # TODO: terrible hack for circumventing invalid Q(__in=[]) | Q(__in=[])
-                q = q.filter(Q(category__site__in=sites) | Q(category__in=categories))
+                q = q.filter(Q(category__in=categories))
             else:
                 q = query.EmptyQuerySet()
         except FieldDoesNotExist:
             pass
-
         return q
 
     def has_change_permission(self, request, obj=None):
@@ -232,7 +216,6 @@ class NewmanModelAdmin(ModelAdmin):
         If `obj` is None, this should return True if the given request has
         permission to change *any* object of the given type.
         """
-        from ella.ellaadmin import models
         if obj is None or not hasattr(obj, 'category'):
             return admin.ModelAdmin.has_change_permission(self, request, obj)
         opts = self.opts
