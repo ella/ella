@@ -190,7 +190,8 @@ class NewmanModelAdmin(ModelAdmin):
         First semi-working draft of category-based permissions. It will allow permissions to be set per category
         effectively hiding the content the user has no permission to see/change.
         """
-        #return super(NewmanModelAdmin, self).queryset(request)
+        if request.user.is_superuser:
+            return super(NewmanModelAdmin, self).queryset(request)
         q = admin.ModelAdmin.queryset(self, request)
 
         view_perm = self.opts.app_label + '.' + 'view_' + self.model._meta.module_name.lower()
