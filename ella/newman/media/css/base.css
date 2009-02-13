@@ -116,8 +116,8 @@ div.breadcrumbs {
 /* CONTENT */
 #content {
     background: #eee;
-    padding: 5px;
-/*    position: fixed;
+/*    padding: 5px;
+    position: fixed;
     top: 112px; left: 0; bottom: 28px; right: 0;
     overflow: auto; */
 }
@@ -157,6 +157,9 @@ div.hpbox.errmsg label, div.hpbox.errmsg input, div.hpbox.errmsg textarea {
     width: 99%;
 }
 
+a.bl {
+    display: block;
+}
 a.icn {
     padding-left: 20px;
     background: transparent url(../ico/16/foo.png) 0 50% no-repeat;
@@ -230,3 +233,19 @@ td, th {
 #changelist table tbody tr.row1 { background: #fff; }
 #changelist table tbody tr.row2 { background: #eee; }
 #changelist table tbody tr:hover { background: #ffc; }
+
+/* CHANGELIST */
+#cl-toolbar * {
+    vertical-align: middle;
+}
+#cl-toolbar {
+    padding: 5px 0 10px 0;
+    background: #fff;
+}
+#cl-toolbar ul {
+    list-style: none;
+    margin: 5px;
+}
+#cl-toolbar ul li {
+    float: left;
+}

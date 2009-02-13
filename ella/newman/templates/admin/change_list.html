@@ -1,30 +1,28 @@
-{#% extends "admin/base_site.html" %#}
 {% load adminmedia admin_list i18n %}
 
-{#% block bodyclass %}change-list{% endblock %#}
-
-{% if not is_popup %}
-    {% block breadcrumbs %}
+{% block breadcrumbs %}
     <div class="breadcrumbs">
         <a href="../../">{% trans "Home" %}</a>
         &rsaquo; <a href="../">{{ app_label|capfirst }}</a>
         &rsaquo; <strong>{{ cl.opts.verbose_name_plural|capfirst }}</strong>
     </div>
-    {% endblock %}
-{% endif %}
-
-{#% block coltype %}flex{% endblock %#}
+{% endblock %}
 
 {% block content %}
 <div id="content-main">
+
 {% block object-tools %}
-    {% if has_add_permission %}
-    <ul class="object-tools">
-        <li>
-            <a href="add/{% if is_popup %}?_popup=1{% endif %}" class="hashadr icn btn add">{% blocktrans with cl.opts.verbose_name as name %}Add {{ name }}{% endblocktrans %}</a>
-        </li>
-    </ul>
-    {% endif %}
+    <div id="cl-toolbar">
+            <ul class="object-tools">
+                <li><a class="icn btn filter" href="/#/articles/article/#filters::/articles/article/filters/">{% trans 'Filters' %}</a></li>
+                {% if has_add_permission %}
+                    <li>
+                        <a href="add/{% if is_popup %}?_popup=1{% endif %}" class="hashadr icn btn add">{% blocktrans with cl.opts.verbose_name as name %}Add {{ name }}{% endblocktrans %}</a>
+                    </li>
+                {% endif %}
+            </ul>
+            <div class="cb"></div>
+    </div>
 {% endblock %}
 <div class="module{% if cl.has_filters %} filtered{% endif %}" id="changelist">
 
@@ -41,6 +39,15 @@
 <div class="hashadr-container">
     {% block result_list %}{% result_list cl %}{% endblock %}
 </div>
+
+<div class="module{% if cl.has_filters %} filtered{% endif %} hashadr-container" id="changelist">
+
+{% block filters %}
+    <div id="filters"></div>
+{% endblock %}
+
+{#% block search %}{% search_form cl %}{% endblock %#}
+{% block result_list %}{% result_list cl %}{% endblock %}
 {% block pagination %}{% pagination cl %}{% endblock %}
 </div>
 </div>

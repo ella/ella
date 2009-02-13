@@ -14,6 +14,7 @@ from ella.articles.models import ArticleContents, Article, InfoBox
 from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin
 
 from ella.newman import NewmanModelAdmin, site
+from django.utils.safestring import mark_safe
 
 class ArticleContentInlineOptions(EllaAdminOptionsMixin, admin.TabularInline):
     model = ArticleContents
@@ -28,8 +29,9 @@ class InfoBoxOptions(NewmanModelAdmin):
     rich_text_fields = {None: ('content',)}
 
 class ArticleOptions(NewmanModelAdmin):
-    list_display = ('title', 'category', 'photo_thumbnail', 'created', 'article_age', 'get_hits', 'pk', 'full_url',)
-    date_hierarchy = 'created'
+    list_display = ('title', 'category', 'photo_thumbnail', 'created', 'hitcounts', 'obj_url')
+    list_display_ext = ('article_age', 'get_hits', 'pk', 'full_url',)
+#    date_hierarchy = 'created'
     ordering = ('-created',)
     fieldsets = (
         (_("Article heading"), {'fields': ('title', 'upper_title', 'updated', 'slug')}),
@@ -44,6 +46,20 @@ class ArticleOptions(NewmanModelAdmin):
         inlines.append(TaggingInlineOptions)
     prepopulated_fields = {'slug' : ('title',)}
     rich_text_fields = {None: ('perex',)}
+    list_per_page = 20
+
+    def obj_url(self, obj):
+        if obj.get_absolute_url():
+            return mark_safe('<a href="%s">url</a>' % obj.get_absolute_url())
+        return _('No URL')
+    obj_url.allow_tags = True
+    obj_url.short_description = _('Full URL')
+
+    def hitcounts(self, obj):
+        return mark_safe('<a class="icn na" href="">?</a>')
+    hitcounts.allow_tags = True
+    hitcounts.short_description = _('Hits')
+
 
 
 
