@@ -133,7 +133,7 @@ class CategoryUserRole(models.Model):
     """
     Apply all group's permission for the given user to this category.
     """
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, limit_choices_to={'is_superuser': False})
     group = models.ForeignKey(Group)
     category = models.ForeignKey(Category)
 
