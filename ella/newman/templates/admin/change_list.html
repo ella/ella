@@ -11,44 +11,28 @@
 {% block content %}
 <div id="content-main">
 
-{% block object-tools %}
-    <div id="cl-toolbar">
-            <ul class="object-tools">
-                <li><a class="icn btn filter" href="/#/articles/article/#filters::/articles/article/filters/">{% trans 'Filters' %}</a></li>
-                {% if has_add_permission %}
-                    <li>
-                        <a href="add/{% if is_popup %}?_popup=1{% endif %}" class="hashadr icn btn add">{% blocktrans with cl.opts.verbose_name as name %}Add {{ name }}{% endblocktrans %}</a>
-                    </li>
-                {% endif %}
-            </ul>
-            <div class="cb"></div>
-    </div>
-{% endblock %}
-<div class="module{% if cl.has_filters %} filtered{% endif %}" id="changelist">
-
-    {% block filters %}
-    <div id="filters">
-        <a class="icn btn filter simpleload" href="filters::::filters/">{% trans 'Filters' %}</a>
-        {% for spec in cl.filter_specs %}
-           {% admin_list_filter cl spec %}
-        {% endfor %}
-    </div>
+    {% block object-tools %}
+        <div id="cl-toolbar">
+                <ul class="object-tools">
+                    <li><a class="icn btn filter simpleload" href="filters::::filters/">{% trans 'Filters' %}</a></li>
+                    {#% block search %}{% search_form cl %}{% endblock %#}
+                    {% if has_add_permission %}
+                        <li>
+                            <a href="add/{% if is_popup %}?_popup=1{% endif %}" class="hashadr icn btn add">{% blocktrans with cl.opts.verbose_name as name %}Add {{ name }}{% endblocktrans %}</a>
+                        </li>
+                    {% endif %}
+                </ul>
+                <div class="cb"></div>
+        </div>
     {% endblock %}
 
-{% block search %}{% search_form cl %}{% endblock %}
-<div class="hashadr-container">
-    {% block result_list %}{% result_list cl %}{% endblock %}
-</div>
+    {% block filters %}
+        <div id="filters"></div>
+    {% endblock %}
 
-<div class="module{% if cl.has_filters %} filtered{% endif %} hashadr-container" id="changelist">
-
-{% block filters %}
-    <div id="filters"></div>
-{% endblock %}
-
-{#% block search %}{% search_form cl %}{% endblock %#}
-{% block result_list %}{% result_list cl %}{% endblock %}
-{% block pagination %}{% pagination cl %}{% endblock %}
-</div>
+    <div class="hashadr-container" id="changelist">
+        {% block result_list %}{% result_list cl %}{% endblock %}
+        {% block pagination %}{% pagination cl %}{% endblock %}
+    </div>
 </div>
 {% endblock %}
