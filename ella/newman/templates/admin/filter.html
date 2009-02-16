@@ -1,18 +1,5 @@
 {% load i18n %}
-{% comment %}
-    "description": "{% blocktrans with title as filter_title %} By {{ filter_title }} {% endblocktrans %}",
-    "choices":
-    [
-    {% for choice in choices %}
-        {
-        "selected": {% if choice.selected %} 1 {% else %} 0 {% endif %},
-        "href": "{{ choice.query_string|iriencode }}",
-        "display": "{{ choice.display }}"
-        }{% if not forloop.last %},{% endif %}
-    {% endfor %}
-    ]
-{% endcomment %}
-<h3>{% blocktrans with title as filter_title %} By {{ filter_title }} {% endblocktrans %}</h3>
+<h4>{% blocktrans with title as filter_title %} By {{ filter_title }} {% endblocktrans %}</h4>
 <ul>
 {% for choice in choices %}
     <li{% if choice.selected %} class="selected"{% endif %}>

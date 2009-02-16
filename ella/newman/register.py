@@ -3,6 +3,7 @@ This module is intended as TEMPORARY. Contains registrations for testing purpose
 Useful for NewmanModelAdmin registrations and other stuff.
 """
 
+import datetime
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
@@ -15,6 +16,7 @@ from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin
 
 from ella.newman import NewmanModelAdmin, site
 from django.utils.safestring import mark_safe
+from django.db import connection
 
 class ArticleContentInlineOptions(EllaAdminOptionsMixin, admin.TabularInline):
     model = ArticleContents
@@ -29,7 +31,7 @@ class InfoBoxOptions(NewmanModelAdmin):
     rich_text_fields = {None: ('content',)}
 
 class ArticleOptions(NewmanModelAdmin):
-    list_display = ('title', 'category', 'photo_thumbnail', 'created', 'hitcounts', 'obj_url')
+    list_display = ('title', 'category', 'photo_thumbnail', 'publish_from', 'hitcounts', 'obj_url')
     list_display_ext = ('article_age', 'get_hits', 'pk', 'full_url',)
 #    date_hierarchy = 'created'
     ordering = ('-created',)
@@ -60,8 +62,35 @@ class ArticleOptions(NewmanModelAdmin):
     hitcounts.allow_tags = True
     hitcounts.short_description = _('Hits')
 
+    def publish_from(self, obj):
+        if not obj.main_placement:
+            return '--'
+        pf = obj.main_placement.publish_from
+        if datetime.datetime.now() < pf:
+            return mark_safe('<div style="background-color: darkorange;">%s</div>' % pf)
+        return pf
+    publish_from.allow_tags = True
+    publish_from.short_description = _('Publish from')
+#    publish_from.admin_order_field = 'created'
 
-
+#    def queryset(self, request):
+#        q = super(ArticleOptions, self).queryset(request)
+#        q = q.extra(
+#            select={
+#                'publish_from': 'SELECT publish_from FROM core_placement WHERE target_ct_id=16 AND target_id=articles_article.id AND core_placement.category_id=articles_article.category_id',
+#}
+#)
+#        q = q.extra(
+#            tables = ['core_placement'],
+#            where = [
+#                'target_ct_id=%s',
+#                'target_id=articles_article.id',
+#                'core_placement.category_id=articles_article.category_id'
+#            ],
+#            params = [16],
+#)
+#        raise KeyError, connection.queries
+#        return q
 
 site.register(InfoBox, InfoBoxOptions)
 site.register(Article, ArticleOptions)

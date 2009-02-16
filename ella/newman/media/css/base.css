@@ -27,12 +27,12 @@ body {
 /* Dynamic */
 
 .loading {
-    opacity: 0.3;
     /* FIXME: ikona neni videt! */
-    background-image: url(../ico/15/loading.gif);
-    background-position: center center;
-    background-repeat: no-repeat;
+    background: #000 url(../ico/15/loading.gif) 50% 50% no-repeat ! important;
+    opacity: .3;
+    z-index: 90;
 }
+
 
 /* HEADER */
 
@@ -123,12 +123,15 @@ div.breadcrumbs {
 }
 
 /* HP */
+div.hpcol {
+    float: left;
+}
 div.hpbox {
     background: #fff;
     border: 1px solid #ccc;
     -moz-border-radius: 5px;
-    float: left;
-    margin: 5px;
+    margin: 10px 5px;
+    min-width: 200px;
 }
 div.hpbox h3 {
     background: #ddd;
@@ -139,10 +142,6 @@ div.hpbox h3 {
 div.hpbox div.cnt {
     margin: 5px;
 }
-div.hpbox.devmsgs {
-    width: 50%;
-    min-width: 350px;
-}
 div.hpbox.devmsgs .item {
     margin: 5px 0;
     padding-bottom: 5px;
@@ -151,7 +150,6 @@ div.hpbox.devmsgs .item {
 
 div.hpbox.lastlog {
     float: right;
-    width: 250px;
 }
 div.hpbox.errmsg label, div.hpbox.errmsg input, div.hpbox.errmsg textarea {
     width: 99%;
@@ -197,11 +195,13 @@ a.icn.na { background-image: url(../ico/16/na.png); }
 a.icn.search { background-image: url(../ico/16/search.png); }
 a.icn.filter { background-image: url(../ico/16/filter.png); }
 a.icn.add { background-image: url(../ico/16/edit_add.png); }
+a.icn.visible { background-image: url(../ico/16/14_layer_visible.png); }
+a.icn.novisible { background-image: url(../ico/16/14_layer_novisible.png); }
 
 /* FOOTER */
 
 #footer {
-    background: #ffe;
+    background: #ffc;
     position: fixed; left: 0; bottom: 0; right: 0;
     clear: both;
     border-top: 1px dotted darkorange;
@@ -213,8 +213,7 @@ a.icn.add { background-image: url(../ico/16/edit_add.png); }
 fieldset { border: 1px solid #ddd; padding: 5px; }
 label.required { font-weight: bold; color: darkorange; }
 div.submit-row, fieldset.submit-row { border: none; clear:both; margin-top: 5px; padding: 2px 0; text-align: right; }
-input { padding: 2px; }
-input, select, button {  margin: 1px 2px; }
+input, textarea { padding: 2px 0; }
 
 /* TABLES */
 table {
@@ -248,4 +247,10 @@ td, th {
 }
 #cl-toolbar ul li {
     float: left;
+}
+
+/* CHANGELIST FILTERS */
+#filters {
+    margin: 0 5px;
+    background: #fff;
 }
