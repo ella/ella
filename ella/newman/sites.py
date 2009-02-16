@@ -1,51 +1,84 @@
-import copy
-import re
-
-from django import http
-from django.db import models
-from django.contrib import admin
-from django.views.decorators.cache import never_cache
-from django.contrib.contenttypes.models import ContentType
+from django import template
+from django.contrib import admin as django_admin
+from django.shortcuts import render_to_response
+from django.utils.translation import ugettext_lazy as _
+from django.core.exceptions import ImproperlyConfigured
 
 
-class NewmanSite(admin.AdminSite):
+class NewmanSite(django_admin.AdminSite):
 
-    """
-    def __init__(self, admin_opts=object):
-        super(NewmanSite, self).__init__()
-        #self._registry = admin.site._registry
-        #self.admin_opts = admin_opts
-    def register(self, model_or_iterable, admin_class=None, **options):
-        super(NewmanSite, self).register(model_or_iterable, admin_class, **options)
+# TODO: more dependencies in newman.
+#    def check_dependencies(self):
+#        """
+#        Check that all things needed to run the admin have been correctly installed.
+#
+#        The default implementation checks that LogEntry, ContentType and the
+#        auth context processor are installed.
+#        """
+#
+#        super(NewmanSite, self).check_dependencies()
+#        continue here...
 
-    def root(self, request, url):
-        return super(NewmanSite, self).root(request, url)
-    """
 
-    '''
-    def mixin_admin(self, admin_class):
-        """dynamically add custom admin_opts as other base class"""
-        if self.admin_opts not in admin_class.__bases__:
-            class Mix(admin_class, self.admin_opts): pass
-            Mix.__bases__ = Mix.__bases__ + admin_class.__bases__
-            return Mix
-        return admin_class
+# TODO: register newman's own URLs...
+    def get_urls(self):
+        from django.conf.urls.defaults import patterns, url, include
 
-    def model_page(self, request, app_label, model_name, rest_of_url=None):
-        # TODO zaridit, aby se mohla zavolat jen super metoda (problem je kvuli tridni promenne admin_site)
-        #return super(NewmanSite, self).model_page(request, app_label, model_name, rest_of_url)
-        model = models.get_model(app_label, model_name)
-        if model is None:
-            raise http.Http404("App %r, model %r, not found." % (app_label, model_name))
-        try:
-            admin_obj = copy.deepcopy(self._registry[model])
-            admin_obj.admin_site = self
-            admin_obj.__class__ = self.mixin_admin(admin_obj.__class__)
-            for i in admin_obj.inline_instances:
-                i.__class__ = self.mixin_admin(i.__class__)
-        except KeyError:
-            raise http.Http404("This model exists but has not been registered with the admin site.")
-        return admin_obj(request, rest_of_url)
-    '''
+        def wrap(view):
+            def wrapper(*args, **kwargs):
+                return self.admin_view(view)(*args, **kwargs)
+            return update_wrapper(wrapper, view)
+
+        urlpatterns = super(NewmanSite, self).get_urls()
+
+        urlpatterns += patterns('',
+
+)
+
+        # Admin-site-wide views.
+        urlpatterns = patterns('',
+            url(r'^$',
+                wrap(self.index),
+                name='%sadmin_index' % self.name),
+            url(r'^logout/$',
+                wrap(self.logout),
+                name='%sadmin_logout'),
+            url(r'^password_change/$',
+                wrap(self.password_change),
+                name='%sadmin_password_change' % self.name),
+            url(r'^password_change/done/$',
+                wrap(self.password_change_done),
+                name='%sadmin_password_change_done' % self.name),
+            url(r'^jsi18n/$',
+                wrap(self.i18n_javascript),
+                name='%sadmin_jsi18n' % self.name),
+            url(r'^r/(?P<content_type_id>\d+)/(?P<object_id>.+)/$',
+                'django.views.defaults.shortcut'),
+            url(r'^(?P<app_label>\w+)/$',
+                wrap(self.app_index),
+                name='%sadmin_app_list' % self.name),
+)
+
+        # Add in each model's views.
+        for model, model_admin in self._registry.iteritems():
+            urlpatterns += patterns('',
+                url(r'^%s/%s/' % (model._meta.app_label, model._meta.module_name),
+                    include(model_admin.urls))
+)
+        return urlpatterns
+
+    def index(self, request, extra_context=None):
+        """
+        Displays the main Newman index page, without installed apps.
+        """
+
+        context = {
+            'title': _('Site administration'),
+            'root_path': self.root_path,
+}
+        context.update(extra_context or {})
+        return render_to_response(self.index_template or 'admin/index.html', context,
+            context_instance=template.RequestContext(request)
+)
 
 site = NewmanSite()
