@@ -135,13 +135,13 @@ class CategoryUserRole(models.Model):
     """
     user = models.ForeignKey(User)
     group = models.ForeignKey(Group)
-    category = models.ForeignKey(Category)
+    category = models.ManyToManyField(Category)
 
     def __unicode__(self):
-        return ugettext(u'User %(user)s is a %(group)s for %(category)s.') % {
+        return ugettext(u'User %(user)s is a "%(group)s" for %(category)s.') % {
                 'user' : self.user,
                 'group' : self.group,
-                'category' : self.category,
+                'category' : [ x['slug'] for x in self.category.values() ],
 }
 
     class Meta:
@@ -179,10 +179,11 @@ def cat_children(cats):
     return sub_cats
 
 def applicable_categories(user, permission=None):
-    from time import time
-    begin = time()
     q = CategoryUserRole.objects.filter(user=user).distinct()
-    cats = [ a.category for a in q ]
+    cats = []
+    for i in q:
+        for c in i.category.all():
+            cats.append(c)
     app_cats = cat_children(cats)
 
     if permission:
@@ -193,6 +194,5 @@ def applicable_categories(user, permission=None):
         # take any permission
         q = q.filter(group__permissions__id__isnull=False)
 
-    print 'Took %f' % (time() - begin)
     return [ d.pk for d in app_cats ]
 

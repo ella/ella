@@ -95,3 +95,13 @@ class ArticleOptions(NewmanModelAdmin):
 site.register(InfoBox, InfoBoxOptions)
 site.register(Article, ArticleOptions)
 
+
+# ------------------------------------
+# Django auth model admins
+# ------------------------------------
+
+from django.contrib.auth.admin import GroupAdmin, UserAdmin
+from django.contrib.auth.models import Group, User
+
+site.register(Group, GroupAdmin)
+site.register(User, UserAdmin)

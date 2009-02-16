@@ -31,8 +31,8 @@ class GroupFavAdmin(EllaModelAdmin):
 
 
 class CategoryUserRoleOptions(admin.ModelAdmin):
-    list_filter = ('user', 'group', 'category',)
-    list_display = ('user', 'group', 'category',)
+    list_filter = ('user', 'group',)
+    list_display = ('user', 'group',)
 
 
 site.register(m.DevMessage, DevMessageAdmin)
