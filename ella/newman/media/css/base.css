@@ -256,4 +256,11 @@ td, th {
 }
 
 /* FILTERS (UN)PACKING - TEMPORARY */
-#filters ul { display: none; }
+#filters ul {
+    display: none;
+    position: absolute;
+    background-color: white;
+    border: solid 1px black;
+    list-style-position: inside;
+    padding: 2px;
+}
