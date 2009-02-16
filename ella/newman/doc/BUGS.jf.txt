@@ -1,6 +1,9 @@
+Legenda:
+CL ... changelist
+
 
 Permissions
 ===========
 1. Pokud zmenim URL editovaneho objektu na id objektu, ktery je mimo
-   povolene kategorie, kam mam pristup, bez problemu si clanek v editacnim
-   formulari zobrazim(!) a ulozim!!!
+   povolene kategorie (ty v CL nevidim), kam mam pristup, bez problemu si clanek
+   v editacnim formulari zobrazim(!) a uspesne ulozim!
