@@ -254,3 +254,6 @@ td, th {
     margin: 0 5px;
     background: #fff;
 }
+
+/* FILTERS (UN)PACKING - TEMPORARY */
+#filters ul { display: none; }

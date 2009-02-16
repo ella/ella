@@ -372,6 +372,10 @@
         adr($(this).attr('href'));
         return false;
     });
+    // Packing and unpacking filter list. To be removed when filters are reimplemented.
+    $('#filters :header').live('click', function() {
+        $(this).next(':first').filter('ul').slideToggle('slow');
+    });
 })})(jQuery);
 
 // Manipulate the hash address.
