@@ -1,7 +1,6 @@
-__doc__ = """ella.newman is next (3rd ?) generation of admin for Ella"""
+from django.contrib.admin import autodiscover
+from ella.newman.sites import site
+from ella.newman.options import NewmanModelAdmin
 
 # need to import filterspecs in __init__. filterspecs module shoud clean filters before they're assigned to ModelAdmins
-import ella.newman.filterspecs
-
-from ella.newman.sites import NewmanSite, site
-from ella.newman.options import NewmanModelAdmin
+#import ella.newman.filterspecs

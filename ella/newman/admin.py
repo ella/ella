@@ -2,14 +2,13 @@ import datetime
 
 from django.db import models
 from django.utils.translation import ugettext as _
-from django.contrib import admin
 
 from ella.newman.sites import site
+from ella.newman.options import NewmanModelAdmin
 from ella.newman import models as m
-from ella.ellaadmin.options import EllaModelAdmin
 from ella.newman.filterspecs import filter_spec
 
-class DevMessageAdmin(EllaModelAdmin):
+class DevMessageAdmin(NewmanModelAdmin):
     list_display = ('title', 'author', 'version', 'ts',)
     prepopulated_fields = {'slug': ('title',)}
 
@@ -19,18 +18,18 @@ class DevMessageAdmin(EllaModelAdmin):
         obj.save()
 
 
-class HelpItemAdmin(EllaModelAdmin):
+class HelpItemAdmin(NewmanModelAdmin):
     list_display = ('__unicode__',)
     list_filter = ('ct', 'lang',)
     list_select_related = False
 
 
-class GroupFavAdmin(EllaModelAdmin):
+class GroupFavAdmin(NewmanModelAdmin):
     list_display = ('__unicode__',)
     list_filter = ('ct', 'group',)
 
 
-class CategoryUserRoleOptions(admin.ModelAdmin):
+class CategoryUserRoleOptions(NewmanModelAdmin):
     list_filter = ('user', 'group',)
     list_display = ('user', 'group',)
 
@@ -39,6 +38,9 @@ site.register(m.DevMessage, DevMessageAdmin)
 site.register(m.AdminHelpItem, HelpItemAdmin)
 site.register(m.AdminGroupFav, GroupFavAdmin)
 site.register(m.CategoryUserRole, CategoryUserRoleOptions)
+
+# testing Options from register.py
+import register
 
 
 # Example of custom registered DateField filter. Filter is inserted to the beginning of filter chain.
