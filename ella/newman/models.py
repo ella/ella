@@ -152,30 +152,18 @@ def has_category_permission(user, model, category, permission):
     if user.has_perm(permission):
         return True
 
-    app_label, code = permission.split('.', 1)
-    perm = Permission.objects.filter(content_type__app_label=app_label, codename=code)
-
-    if CategoryUserRole.objects.filter(
-            category=category,
-            user=user,
-            group__permissions=perm
-).count():
+    has_perm = applicable_categories(user, permission)
+    if has_perm:
         return True
-
-    # fallback to site permissions
-    return has_site_permission(user, model, category.site_id, permission)
+    return False
 
 def cat_children(cats):
     """ Returns all nested categories as list. cats parameter is list or tuple. """
-    # TODO cache result of this function or rewrite this function smarter or maybe query all nested categories via SQL(?).
-    sub_cats = []
+    # TODO cache result of this function or rewrite this function smarter, maybe query all nested categories via SQL(?).
+    sub_cats = map(None, cats)
     for c in cats:
         out = Category.objects.filter(tree_parent=c)
-        if out:
-            map(lambda o: sub_cats.append(o), out)
-            nested = cat_children(out)
-            if nested:
-                map(lambda n: sub_cats.append(n), nested)
+        map(lambda o: sub_cats.append(o), cat_children(out))
     return sub_cats
 
 def applicable_categories(user, permission=None):
