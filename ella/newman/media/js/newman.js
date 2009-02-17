@@ -1,16 +1,16 @@
-( function($) { $(document).ready( function() {
-
-    // Debugging tools
-    ;;; function alert_dump(obj, name) {
-    ;;;     var s = name ? name + ":\n" : '';
-    ;;;     for (var i in obj) s += i + ': ' + obj[i] + "\n";
-    ;;;     alert(s);
-    ;;; }
-    function carp(message) {
-        if (window.console) {
-            console.log(message);
-        }
+// Debugging tools
+;;; function alert_dump(obj, name) {
+;;;     var s = name ? name + ":\n" : '';
+;;;     for (var i in obj) s += i + ': ' + obj[i] + "\n";
+;;;     alert(s);
+;;; }
+function carp(message) {
+    if (window.console) {
+        console.log(message);
     }
+}
+
+( function($) { $(document).ready( function() {
 
     // We need to remember what URL is loaded in which element,
     // so we can load or not load content appropriately on hash change.
@@ -39,6 +39,19 @@
     // so keep information about whether we manipulated the content, so we can
     // abstain from reloading if we have not.
     var PAGE_CHANGED = 0;
+
+    // Custom callbacks to be called before and after normally handling the hashchange pseudo event.
+    var PRE_HASHCHANGE_CALLBACKS = [], POST_HASHCHANGE_CALLBACKS = [];
+    window.add_hashchange_callback = function(fn, is_pre) {
+        var queue = is_pre ? PRE_HASHCHANGE_CALLBACKS : POST_HASHCHANGE_CALLBACKS;
+        var i = queue.length;
+        queue[i] = fn;
+        return i;
+    }
+    window.remove_hashchange_callback = function(id, is_pre) {
+        var queue = is_pre ? PRE_HASHCHANGE_CALLBACKS : POST_HASHCHANGE_CALLBACKS;
+        return delete queue[id];
+    }
 
     function object_empty(o) {
         for (var k in o) return false;
@@ -173,7 +186,7 @@
     // and nothing else is done for this specifier.
     function load_by_hash() {
         var hash = location.hash.substr(1);
-        ;;; carp('load #'+MAX_REQUEST+'; hash: '+hash)
+//        ;;; carp('load #'+MAX_REQUEST+'; hash: '+hash)
 
         // Figure out what should be reloaded and what not by comparing the requested things with the loaded ones.
         var requested = {};
@@ -316,10 +329,13 @@
         load_by_hash();
     }
     setTimeout( function() {
+        var q;  // queue of user-defined callbacks
         try {
             if (location.hash != CURRENT_HASH) {
                 CURRENT_HASH = location.hash;
+                q =  PRE_HASHCHANGE_CALLBACKS; for (var i = 0; i < q.length; i++) if (typeof q[i] == 'function') q[i]();
                 hashchange();
+                q = POST_HASHCHANGE_CALLBACKS; for (var i = 0; i < q.length; i++) if (typeof q[i] == 'function') q[i]();
             }
         } catch(e) { carp(e); }
         setTimeout(arguments.callee, 50);
@@ -372,10 +388,6 @@
         adr($(this).attr('href'));
         return false;
     });
-    // Packing and unpacking filter list. To be removed when filters are reimplemented.
-    $('#filters :header').live('click', function() {
-        $(this).next(':first').filter('ul').slideToggle('slow');
-    });
 })})(jQuery);
 
 // Manipulate the hash address.
@@ -403,7 +415,6 @@
 //   Using this option disables the support of multiple '#'-separated specifiers.
 //   Other than the first one are ignored.
 function adr(address, options) {
-    var old = address;
 
     // '#' chars in the address separate invividual requests for hash modification.
     // First deal with the first one and then recurse on the subsequent ones.
@@ -452,10 +463,10 @@ function adr(address, options) {
     }
 
     // Figure out the span in the current hash where the change applies.
-    var cur_url_start;
-    var cur_url_end;
+    var start = 0;
+    var end;
+    var specifier_prefix = '';
     if (target_id.length == 0) {
-        var start = 0, end;
         for (; start >= 0; start = hash.indexOf('#', start+1)) {
             end = (hash+'#').indexOf('#', start+1);
             if (hash.substring(start, end).indexOf('::') < 0) {
@@ -473,10 +484,7 @@ function adr(address, options) {
         if (idpos == -1) {
             hash += '#';
             start = end = hash.length;
-            if (!options.just_get) {
-                if (    address)     address = target_id + '::' +     address;
-                if (new_address) new_address = target_id + '::' + new_address;
-            }
+            specifier_prefix = target_id + '::';
         }
         else {
             start = idpos + target_id.length + '::'.length;
@@ -516,7 +524,7 @@ function adr(address, options) {
         }
     }
 
-    newhash = hash.substr(0, start) + new_address + hash.substr(end);
+    newhash = hash.substr(0, start) + specifier_prefix + new_address + hash.substr(end);
 
     if (options.just_get) {
         return hash.substring(addr_start, start) + new_address;
@@ -528,3 +536,16 @@ function adr(address, options) {
         location.hash = newhash;
     }
 }
+
+
+/////// END OF THE LIBRARY
+///////
+/////// BEGIN CODE FOR SPECIFIC USE
+
+
+$( function() {
+    // Packing and unpacking filter list. To be removed when filters are reimplemented.
+    $('#filters :header').live('click', function() {
+        $(this).next(':first').filter('ul').slideToggle('slow');
+    });
+});
