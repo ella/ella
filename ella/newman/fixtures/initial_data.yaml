@@ -1,0 +1,26 @@
+- fields:
+    date_joined: 2009-02-16 11:33:28
+    email: ''
+    first_name: ''
+    groups: [1]
+    is_active: 1
+    is_staff: 1
+    is_superuser: 0
+    last_login: 2009-02-16 13:28:34
+    last_name: ''
+    password: sha1$4f27d$9d42f1dd33409c6a02929c0bda2df0af564c8bcf
+    user_permissions: []
+    username: newman
+  model: auth.user
+  pk: 6235868
+- fields:
+    name: zena articles viewer
+    permissions: [149, 150, 148]
+  model: auth.group
+  pk: 12
+- fields:
+    category: [317, 25]
+    group: 12
+    user: 6235868
+  model: newman.categoryuserrole
+  pk: 1
