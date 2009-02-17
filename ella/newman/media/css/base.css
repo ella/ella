@@ -22,6 +22,7 @@ ul, ol {
 
 body {
     font: normal normal 75%/130% Tahoma, sans-serif;
+    background: #eee;
 }
 
 /* Dynamic */
@@ -115,8 +116,8 @@ div.breadcrumbs {
 
 /* CONTENT */
 #content {
-    background: #eee;
-/*    padding: 5px;
+/*    background: #eee;
+    padding: 5px;
     position: fixed;
     top: 112px; left: 0; bottom: 28px; right: 0;
     overflow: auto; */

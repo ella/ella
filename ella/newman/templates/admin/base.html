@@ -27,19 +27,19 @@
         	{% block topnavi %}
         		<div id="navi-top"><ul id="menu-top">
         		{% if menu_list %}
-                        <li><a href="{{ root_path }}" style="padding: 3px 5px 2px 5px;"><img src="{% admin_media_prefix %}ico/16/gohome.png" style="border:none" alt="Dom"/></a></li>
+                        <li><a href="{% url admin_index %}" style="padding: 3px 5px 2px 5px;"><img src="{% admin_media_prefix %}ico/16/gohome.png" style="border:none" alt="Dom"/></a></li>
         	    {% for app in menu_list %}
-        				<li><a href="#{{ root_path }}{{ app.name|lower }}/">{% trans app.name %}</a>
+        				<li><a href="#{% url admin_index %}{{ app.name|lower }}/">{% trans app.name %}</a>
         					<ul>
         			        {% for model in app.models %}
         			            {% if model.perms.add and model.perms.change %}
-        			                <li><a href="#{{ root_path }}{{ model.admin_url }}">{{ model.name }}</a></li>
+        			                <li><a href="#{% url admin_index %}{{ model.admin_url }}">{{ model.name }}</a></li>
         			            {% else %}
                                     {% if model.perms.add or model.perms.change %}
                                         {% if model.perms.add %}
-                                            <li><a href="#{{ root_path }}{{ model.admin_url }}add/">{{ model.name }} (+)</a></li>
+                                            <li><a href="#{% url admin_index %}{{ model.admin_url }}add/">{{ model.name }} (+)</a></li>
                                         {% else %}
-                                            <li><a href="#{{ root_path }}{{ model.admin_url }}">{{ model.name }}</a></li>
+                                            <li><a href="#{% url admin_index %}{{ model.admin_url }}">{{ model.name }}</a></li>
                                         {% endif %}
                                     {% endif %}
         			            {% endif %}
@@ -59,8 +59,8 @@
         <div class="favs">
             <ul class="items">
                 <li>
-                    <a class="app article" href="{{ root_path }}articles/article/"><span>Články</span></a>
-                    <a href="{{ root_path }}articles/article/add/">+ přidat</a>
+                    <a class="app article" href="#{% url admin_index %}articles/article/"><span>Články</span></a>
+                    <a href="#{% url admin_index %}articles/article/add/">+ přidat</a>
                 </li>
                 <li>
                     <a class="app"><span>Galerie</span></a>
@@ -118,8 +118,8 @@
                     <strong>{{ user.get_full_name }}</strong>
                     | {{ VERSION }}, {{ SERVER_INFO.type }}
                     | <a class="icn visible" onclick="$('#debug').toggle()">debug log</a>
-                    | <a class="icn eclear" href="#{{ root_path }}password_change/">{% trans 'Change password' %}</a>
-                    | <a class="icn logout" href="{{ root_path }}logout/">{% trans 'Log out' %}</a>
+                    | <a class="icn eclear" href="#{% url admin_password_change %}">{% trans 'Change password' %}</a>
+                    | <a class="icn logout" href="{% url %sadmin_logout %}">{% trans 'Log out' %}</a>
                 </div>
             </div>
             {% endcache %}

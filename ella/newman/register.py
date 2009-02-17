@@ -12,13 +12,11 @@ from ella.tagging.admin import TaggingInlineOptions
 
 from ella.core.admin import PlacementInlineOptions
 from ella.articles.models import ArticleContents, Article, InfoBox
-from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin
 
 from ella.newman import NewmanModelAdmin, site
 from django.utils.safestring import mark_safe
-from django.db import connection
 
-class ArticleContentInlineOptions(EllaAdminOptionsMixin, admin.TabularInline):
+class ArticleContentInlineOptions(admin.TabularInline):
     model = ArticleContents
     extra = 1
     rich_text_fields = {None: ('content',)}
@@ -43,9 +41,9 @@ class ArticleOptions(NewmanModelAdmin):
     raw_id_fields = ('photo',)
     list_filter = ('category__site', 'created', 'category', 'authors',)
     search_fields = ('title', 'upper_title', 'perex', 'slug', 'authors__name', 'authors__slug',) # FIXME: 'tags__tag__name',)
-    inlines = [ ArticleContentInlineOptions, PlacementInlineOptions ]
-    if 'ella.tagging' in settings.INSTALLED_APPS:
-        inlines.append(TaggingInlineOptions)
+#    inlines = [ ArticleContentInlineOptions, PlacementInlineOptions ]
+#    if 'ella.tagging' in settings.INSTALLED_APPS:
+#        inlines.append(TaggingInlineOptions)
     prepopulated_fields = {'slug' : ('title',)}
     rich_text_fields = {None: ('perex',)}
     list_per_page = 20
@@ -91,6 +89,9 @@ class ArticleOptions(NewmanModelAdmin):
 #)
 #        raise KeyError, connection.queries
 #        return q
+
+from ella.db.models import Publishable
+
 
 site.register(InfoBox, InfoBoxOptions)
 site.register(Article, ArticleOptions)

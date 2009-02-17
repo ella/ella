@@ -12,39 +12,44 @@ from django.contrib.admin.views.main import ERROR_FLAG
 from django.shortcuts import render_to_response
 from django.db.models import Q, query
 from django.db.models.fields import FieldDoesNotExist
+from django.utils.functional import update_wrapper
 
 from ella.newman.changelist import NewmanChangeList, FilterChangeList
 from ella.newman import models
 
+DEFAULT_LIST_PER_PAGE = getattr(settings, 'NEWMAN_LIST_PER_PAGE', 25)
 
 class NewmanModelAdmin(ModelAdmin):
     registered_views = []
 
     def __init__(self, *args, **kwargs):
         super(NewmanModelAdmin, self).__init__(*args, **kwargs)
-        if hasattr(settings, 'NEWMAN_LIST_PER_PAGE'):
-            self.list_per_page = settings.NEWMAN_LIST_PER_PAGE
+        self.list_per_page = DEFAULT_LIST_PER_PAGE
         #NewmanModelAdmin.register(lambda x: x is None, self.changelist_view)
         #NewmanModelAdmin.register(lambda x: x.endswith('suggest'), self.suggest_view)
         #NewmanModelAdmin.register(lambda x: x.endswith('filters'), self.filters_view)
 
-    def register(cls, test_callback, view_callback):
-        cls.registered_views.append({'test': test_callback, 'view': view_callback})
-    register = classmethod(register)
+    def get_urls(self):
 
-    def __call__(self, request, url):
-        for reg in self.registered_views:
-            if reg['test'](url):
-                return reg['view'](self, request)
+        from django.conf.urls.defaults import patterns, url
 
-        if not url:
-            return self.changelist_view(request)
-        elif url.endswith('suggest'):
-            return self.suggest_view(request)
-        elif url.endswith('filters'):
-            return self.filters_view(request)
-        return super(NewmanModelAdmin, self).__call__(request, url)
+        def wrap(view):
+            def wrapper(*args, **kwargs):
+                return self.admin_site.admin_view(view)(*args, **kwargs)
+            return update_wrapper(wrapper, view)
 
+        info = self.admin_site.name, self.model._meta.app_label, self.model._meta.module_name
+
+        urlpatterns = patterns('',
+            url(r'^suggest/$',
+                wrap(self.suggest_view),
+                name='%sadmin_%s_%s_suggest' % info),
+            url(r'^filters/$',
+                wrap(self.filters_view),
+                name='%sadmin_%s_%s_filters' % info),
+)
+        urlpatterns += super(NewmanModelAdmin, self).get_urls()
+        return urlpatterns
 
     def filters_view(self, request, extra_context=None):
         "stolen from: The 'change list' admin view for this model."
