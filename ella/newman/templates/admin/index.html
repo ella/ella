@@ -30,10 +30,11 @@
         <h3>Nahlásit chybu!</h3>
         <div class="cnt">
             <label for="err_subj" class="required">Předmět <span class="help"></span></label>
-            <input id="err_subj" type="text" />
+            <input id="err_subj" name="subj" type="text" />
             <label for="err_text" class="required">Zpráva</label>
-            <textarea id="err_text" rows="4"></textarea>
+            <textarea id="err_text" name="msg" rows="4"></textarea>
             <div class="submit-row">
+                <input type="hidden" name="action" value="/nm/err-report/" />
                 <a class="icn btn eclear">Vyčistit</a>
                 <a class="icn btn ok def" title="Kliknutím odešlete zprávu o chybě...">Odeslat</a>
             </div>
