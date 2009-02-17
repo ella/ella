@@ -7,3 +7,5 @@ Permissions
 1. Pokud zmenim URL editovaneho objektu na id objektu, ktery je mimo
    povolene kategorie (ty v CL nevidim), kam mam pristup, bez problemu si clanek
    v editacnim formulari zobrazim(!) a uspesne ulozim!
+
+2. Zjistit, proc Permissions nechodi s ModelInline formularema.

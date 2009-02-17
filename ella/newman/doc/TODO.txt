@@ -13,6 +13,8 @@ Brzy:
 * ui: omezení CTs pro admina, subset který se dál omezuje oprávněními
 * ui: bude-li na stránce nějaký formulář v němž byly provedeny změny
   a neuloženy, zobrazit varování pokud chce přejít jinam
+* appka Photos - musime nejak zmenit, existuji fotky, ktere se mohou pouzivat porad,
+  ale nektere jsou licencovane, ci na N pouziti apod..
 
 Někdy/neuspořádané:
 ===================
