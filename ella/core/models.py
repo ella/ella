@@ -270,7 +270,7 @@ class Placement(models.Model):
 
 class Listing(models.Model):
     """
-    Listing of an object in a category. Each and every odject that have it's own detail page must have a Listing object
+    Listing of an object in a category. Each and every object that have it's own detail page must have a Listing object
     that is valid (nod expired) and places him in the object's main category. Any object can be listed in any number of
     categories (but only once per category). Even if the object is listed in other categories besides its main category,
     its detail page's url still belongs to the main one.
