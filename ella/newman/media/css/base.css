@@ -264,3 +264,6 @@ td, th {
     list-style-position: inside;
     padding: 2px;
 }
+#filters .selected {
+    font-weight: bold;
+}

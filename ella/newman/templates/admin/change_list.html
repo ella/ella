@@ -14,7 +14,7 @@
     {% block object-tools %}
         <div id="cl-toolbar">
                 <ul class="object-tools">
-                    <li><a class="icn btn filter simpleload" href="filters::::filters/">{% trans 'Filters' %}</a></li>
+                    <li><a class="icn btn filter simpleload" href="filters::::filters/{{ cl.get_query_string }}">{% trans 'Filters' %}</a></li>
                     {#% block search %}{% search_form cl %}{% endblock %#}
                     {% if has_add_permission %}
                         <li>
