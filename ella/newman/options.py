@@ -224,7 +224,7 @@ class NewmanModelAdmin(ModelAdmin):
         view_perm = '%s.view_%s' % (opts.app_label, opts.object_name.lower())
         return request.user.has_perm(view_perm)
 
-    def has_model_permission(self, request, obj=None):
+    def has_model_view_permission(self, request, obj=None):
         """ returns True if user has permission to view this model, otherwise False. """
         # try to find view or change perm. for given user in his permissions or groups permissions
         can_change = admin.ModelAdmin.has_change_permission(self, request, obj)
@@ -258,15 +258,19 @@ class NewmanModelAdmin(ModelAdmin):
         of POST request change permission is needed.
         """
         if obj is None or not hasattr(obj, 'category'):
-            return self.has_model_permission(request, obj)
-            #return admin.ModelAdmin.has_change_permission(self, request, obj)
+            if request.method == 'POST':
+                return admin.ModelAdmin.has_change_permission(self, request, obj)
+            else:
+                return self.has_model_view_permission(request, obj)
+
         opts = self.opts
         change_perm = '%s.%s' % (opts.app_label, opts.get_change_permission())
         view_perm = '%s.view_%s' % (opts.app_label, opts.object_name.lower())
         can_view = models.has_category_permission(request.user, obj, obj.category, view_perm)
         can_change = models.has_category_permission(request.user, obj, obj.category, change_perm)
+        #TODO zjistit jestli je objekt v povolene kategorii!
 
-        if request.method == 'POST' and not can_change:
+        if request.method == 'POST' and can_change:
             return True
         elif request.method == 'GET' and (can_view or can_change):
             return True

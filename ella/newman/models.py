@@ -152,8 +152,8 @@ def has_category_permission(user, model, category, permission):
     if user.has_perm(permission):
         return True
 
-    has_perm = applicable_categories(user, permission)
-    if has_perm:
+    cats = applicable_categories(user, permission)
+    if category.pk in cats:
         return True
     return False
 
@@ -168,19 +168,22 @@ def cat_children(cats):
 
 def applicable_categories(user, permission=None):
     q = CategoryUserRole.objects.filter(user=user).distinct()
+
+    if permission:
+        app_label, code = permission.split('.', 1)
+        perms = Permission.objects.filter(content_type__app_label=app_label, codename=code)
+        if not perms:
+            # no permission found (maybe misspeled) then no categories permitted!
+            return []
+        q = q.filter(group__permissions=perms[0])
+    else:
+        # take any permission
+        q = q.filter(group__permissions__id__isnull=False)
+
     cats = []
     for i in q:
         for c in i.category.all():
             cats.append(c)
     app_cats = cat_children(cats)
-
-    if permission:
-        app_label, code = permission.split('.', 1)
-        perm = Permission.objects.get(content_type__app_label=app_label, codename=code)
-        q = q.filter(group__permissions=perm)
-    else:
-        # take any permission
-        q = q.filter(group__permissions__id__isnull=False)
-
     return [ d.pk for d in app_cats ]
 

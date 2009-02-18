@@ -4,8 +4,10 @@ CL ... changelist
 
 Permissions
 ===========
-1. Pokud zmenim URL editovaneho objektu na id objektu, ktery je mimo
+1* Pokud zmenim URL editovaneho objektu na id objektu, ktery je mimo
    povolene kategorie (ty v CL nevidim), kam mam pristup, bez problemu si clanek
    v editacnim formulari zobrazim(!) a uspesne ulozim!
 
 2. Zjistit, proc Permissions nechodi s ModelInline formularema.
+
+3. udelat funkci vracejici vypsatelne Modely na uvodni strance (ty kam ma uzivatel nejaky pristup)
