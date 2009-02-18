@@ -26,6 +26,7 @@ Zdroje, informace, projekty
 
 * http://lazypython.blogspot.com/2009/02/announcing-django-filter.htm
 * http://code.google.com/p/django-batchadmin/
+* http://www.tangerinesmash.com/writings/2009/feb/18/red-robot-studios-part-3-securing-django-ssl/
 
 
 Templates / DB Templates
