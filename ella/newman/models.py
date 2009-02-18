@@ -148,6 +148,15 @@ class CategoryUserRole(models.Model):
         verbose_name = _("User role in category")
         verbose_name_plural = _("User roles in categories")
 
+def has_model_list_permission(user, model):
+    """ returns True if user has permission to access this model in newman, otherwise False """
+    # TODO speed!
+    ct = ContentType.objects.get_for_model(model)
+    qs = CategoryUserRole.objects.filter(user=user, group__permissions__content_type=ct)
+    if qs.count():
+        return True
+    return False
+
 def has_category_permission(user, model, category, permission):
     if user.has_perm(permission):
         return True
@@ -159,7 +168,7 @@ def has_category_permission(user, model, category, permission):
 
 def cat_children(cats):
     """ Returns all nested categories as list. cats parameter is list or tuple. """
-    # TODO cache result of this function or rewrite this function smarter, maybe query all nested categories via SQL(?).
+    # TODO speed!
     sub_cats = map(None, cats)
     for c in cats:
         out = Category.objects.filter(tree_parent=c)

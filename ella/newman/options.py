@@ -268,7 +268,6 @@ class NewmanModelAdmin(ModelAdmin):
         view_perm = '%s.view_%s' % (opts.app_label, opts.object_name.lower())
         can_view = models.has_category_permission(request.user, obj, obj.category, view_perm)
         can_change = models.has_category_permission(request.user, obj, obj.category, change_perm)
-        #TODO zjistit jestli je objekt v povolene kategorii!
 
         if request.method == 'POST' and can_change:
             return True
