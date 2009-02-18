@@ -256,6 +256,29 @@ td, th {
     background: #fff;
 }
 
+/* OPERATION MESSAGES */
+#opmsg {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    margin-left:  auto;
+    margin-right: auto;
+    text-align: center;
+    margin-top: -15px;
+}
+#opmsg span {
+    padding: 5px 20px;
+    border: solid 1px black;
+    background: lightyellow;
+    font-weight: bold;
+    -moz-border-radius: 5px;
+    white-space: nowrap;
+    line-height: 220%;
+}
+#opmsg span.errmsg {
+    background-color: orange;
+}
+
 /* FILTERS (UN)PACKING - TEMPORARY */
 #filters ul {
     display: none;

@@ -571,3 +571,15 @@ $( function() {
         $(this).next(':first').filter('ul').slideToggle('slow');
     });
 });
+
+function show_message(message, options) {
+    if (!options) options = {};
+    var duration = options.duration || 5000;
+    var $br = $('<br />');
+    var $span = $('<span></span>').html(message);
+    if (options.msgclass) $span.addClass(options.msgclass);
+    $('#opmsg').append($br).append($span);
+    setTimeout(function() {
+        $span.fadeOut('slow', function(){$span.remove();$br.remove();});
+    }, duration);
+}
