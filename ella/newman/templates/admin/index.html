@@ -8,7 +8,7 @@
     <div class="hpbox setup">
         <h3>Rychlá nastavení</h3>
         <div class="cnt">
-            <form method="post">
+            <!--form method="post"-->
                 <fieldset>
                     <legend>Site-filter</legend>
                     <label><input type="checkbox" /> žena</label><br />
@@ -22,7 +22,7 @@
                     <a class="icn btn eclear">Vyčistit</a>
                     <a class="icn btn ok def">Uložit</a>
                 </fieldset>
-            </form>
+            <!--/form-->
         </div>
     </div>
 
@@ -32,9 +32,11 @@
             <label for="err_subj" class="required">Předmět <span class="help"></span></label>
             <input id="err_subj" name="subj" type="text" />
             <label for="err_text" class="required">Zpráva</label>
-            <textarea id="err_text" name="msg" rows="4"></textarea>
+            <textarea id="err_text" name="msg" rows="4" cols="53"></textarea>
             <div class="submit-row">
                 <input type="hidden" name="action" value="/nm/err-report/" />
+                <input type="hidden" name="success" onchange="alert('voila!')" />
+                <input type="hidden" name="error" onchange="alert('bad luck')" />
                 <a class="icn btn eclear">Vyčistit</a>
                 <a class="icn btn ok def" title="Kliknutím odešlete zprávu o chybě...">Odeslat</a>
             </div>

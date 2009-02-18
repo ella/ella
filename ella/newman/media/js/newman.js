@@ -547,21 +547,22 @@ $( function() {
     // Submit buttons for ajax forms
     $('.submit-row input[name=action] ~ a.icn.btn.ok.def').live('click', function() {
         var $submit_row = $(this).closest('.submit-row');
-        var action = $submit_row.find('input[name=action]').val();
-        var method = ($submit_row.find('input[name=method]').val() || 'POST').toUpperCase();
-        var data = {};
+        var  action          =  $submit_row.find('input[name=action]').val();
+        var  method          = ($submit_row.find('input[name=method]').val() || 'POST').toUpperCase();
+        var $success_trigger =  $submit_row.find('input[name=success]');
+        var $error_trigger   =  $submit_row.find('input[name=error]');
+        var  data = {};
         $submit_row.parent().find(':input').each( function() {
             if ($(this).parent().is('.submit-row')) return;
             if (!this.name) return;
             data[ this.name ] = $(this).val();
         });
-        alert_dump(data);
         $.ajax({
             url: action,
             type: method,
             data: data,
-            success: function() { alert('OK'); },
-            error: function() { alert('ERROR'); }
+            success: function() { $success_trigger.change(); },
+            error:   function() { $error_trigger.change(); }
         });
     });
 
