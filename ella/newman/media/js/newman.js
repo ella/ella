@@ -547,10 +547,22 @@ $( function() {
     // Submit buttons for ajax forms
     $('.submit-row input[name=action] ~ a.icn.btn.ok.def').live('click', function() {
         var $submit_row = $(this).closest('.submit-row');
-        var  action          =  $submit_row.find('input[name=action]').val();
-        var  method          = ($submit_row.find('input[name=method]').val() || 'POST').toUpperCase();
-        var $success_trigger =  $submit_row.find('input[name=success]');
-        var $error_trigger   =  $submit_row.find('input[name=error]');
+        var  action  =  $submit_row.find('input[name=action]').val();
+        var  method  = ($submit_row.find('input[name=method]').val() || 'POST').toUpperCase();
+        var $success =  $submit_row.find('input[name=success]');
+        var $error   =  $submit_row.find('input[name=error]');
+        var success, error;
+        if ($success && $success.length) {
+            success = function(data) { $success.get(0).onchange(data); };
+        } else {
+            success = function(data) { show_message(data); };
+        }
+        if ($error && $error.length) {
+            error = function(xhr, st) { $error.get(0).onchange(xhr, st); };
+        }
+        else {
+            error = function(xhr) { show_message(xhr.responseText, {msgclass: 'errmsg'}); };
+        }
         var  data = {};
         $submit_row.parent().find(':input').each( function() {
             if ($(this).parent().is('.submit-row')) return;
@@ -561,8 +573,8 @@ $( function() {
             url: action,
             type: method,
             data: data,
-            success: function() { $success_trigger.change(); },
-            error:   function() { $error_trigger.change(); }
+            success: success,
+            error:   error
         });
     });
 
