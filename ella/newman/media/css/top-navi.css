@@ -3,7 +3,6 @@
 	background:#eee url(../img/admin/nav-bg.gif) bottom left repeat-x;
 	height: 24px;
 	padding:0;
-	behavior: url("/media/admin/css/csshover.htc");
 	border-bottom: 1px solid #999;
 }
 ul#menu-top * {
@@ -29,7 +28,6 @@ ul#menu-top li ul {
 	position: absolute;
 	width: 170px;
 	left: 0; top: 21px;
-	-moz-opacity: .92;
 	filter: alpha(opacity=92);
 	opacity: .92;
 }
