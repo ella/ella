@@ -259,22 +259,25 @@ td, th {
 /* OPERATION MESSAGES */
 #opmsg {
     position: fixed;
-    top: 5px;
+    top: -16px;
     width: 100%;
     text-align: center;
 }
 #opmsg span {
-    text-align: left;
     padding: 5px 5px 5px 22px;
     border: solid 1px black;
     font-weight: bold;
-    -moz-border-radius: 5px;
+    line-height: 26px;
     white-space: nowrap;
-    background: lightyellow url(../ico/16/ok.png) 2px 50% no-repeat;
+    background: lightyellow url(../ico/16/info.png) 2px 50% no-repeat;
+    -moz-border-radius: 5px;
 }
 #opmsg span.errmsg {
     background-color: orange;
     background-image: url(../ico/16/messagebox_warning.png);
+}
+#opmsg span.okmsg {
+    background-image: url(../ico/16/ok.png);
 }
 
 /* FILTERS (UN)PACKING - TEMPORARY */

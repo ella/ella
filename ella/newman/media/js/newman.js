@@ -560,7 +560,7 @@ $( function() {
         if ($success && $success.length) {
             success = function(data) { $success.get(0).onchange(data); };
         } else {
-            success = function(data) { show_message(data); };
+            success = function(data) { show_message(data, {msgclass: 'okmsg'}); };
         }
         if ($error && $error.length) {
             error = function(xhr, st) { $error.get(0).onchange(xhr, st); };
