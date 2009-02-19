@@ -73,6 +73,7 @@ function carp(message) {
         }
 
         $target.removeClass('loading').html(data);
+        dec_loading();
         if (address != undefined) {
             LOADED_URLS[ $target.attr('id') ] = address;
         }
@@ -120,6 +121,7 @@ function carp(message) {
         var info = LOAD_BUF[ load_id ];
         delete LOAD_BUF[ load_id ];
         $('#'+info.target_id).removeClass('loading');
+        dec_loading();
 
         // Restore the hash so it doesn't look like the request succeeded.
         url_target_id = ((info.target_id == 'content') ? '' : info.target_id+'::');
@@ -148,6 +150,7 @@ function carp(message) {
         }
 
         $('#'+target_id).addClass('loading');
+        show_loading();
 
         var url = $('<a>').attr('href', address).get(0).href;
         var load_id = ++MAX_LOAD;
@@ -326,6 +329,7 @@ function carp(message) {
 //        carp('hash: ' + location.hash);
         MAX_REQUEST++;
         $('.loading').removeClass('loading');
+        hide_loading();
         load_by_hash();
     }
     setTimeout( function() {
@@ -374,6 +378,7 @@ function carp(message) {
             return;
         }
         $target.addClass('loading');
+        show_loading();
         $.get(url, function(data) {
             inject_content($target, data, address);
         });
@@ -586,12 +591,34 @@ $( function() {
 
 function show_message(message, options) {
     if (!options) options = {};
-    var duration = options.duration || 5000;
-    var $br = $('<br />');
+    var duration = (options.duration == undefined) ? 5000 : options.duration;
     var $span = $('<span></span>').html(message);
+    var $msg = $('<br />').add($span);
     if (options.msgclass) $span.addClass(options.msgclass);
-    $('#opmsg').append($br).append($span);
-    setTimeout(function() {
-        $span.fadeOut('slow', function(){$span.remove();$br.remove();});
+    $('#opmsg').append($msg);
+    if (duration) setTimeout(function() {
+        $span.fadeOut('slow', function(){ $msg.remove(); });
     }, duration);
+    return $msg;
+}
+
+
+// The 'loading...' message
+//                How many things need the loading message shown concurrently
+var $LOADING_MSG, LOADING_CNT = 0;
+function show_loading() {
+    LOADING_CNT++;
+    if ($LOADING_MSG) return;
+    $LOADING_MSG = show_message('loading...', {duration:0});
+}
+function hide_loading() {
+    if ($LOADING_MSG) $LOADING_MSG.remove();
+    LOADING_CNT = 0;
+    $LOADING_MSG = undefined;
+}
+function dec_loading() {
+    if (--LOADING_CNT <= 0) {
+        LOADING_CNT = 0;
+        hide_loading();
+    }
 }
