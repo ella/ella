@@ -542,6 +542,53 @@ function adr(address, options) {
     }
 }
 
+// Get an URL to a CSS or JS file, attempt to load it into the document and call callback on success.
+function request_media(url, callback) {
+    if (url.match(/\.(\w+)(?:$|\?)/))
+        var ext = RegExp.$1;
+    else throw('Unexpected URL format: '+url);
+
+    var abs_url = $('<a>').attr({href:url}).get(0).href;
+
+    function stylesheet_present(url) {
+        for (var i = 0; i < document.styleSheets.length; i++) {
+            if (document.styleSheets[i].href == url) return document.styleSheets[i];
+        }
+        return false;
+    }
+
+    if (ext == 'css') {
+        if (stylesheet_present(abs_url)) return true;
+        var tries = 100;
+        if (typeof callback == 'function') {
+            setTimeout( function() {
+                if (--tries < 0) {
+                    carp('Timed out loading CSS: '+url);
+                    return;
+                }
+                var ss;
+                if (ss = stylesheet_present(abs_url)) {
+                    if (ss.cssRules.length) callback();
+                    else {
+                        carp('CSS stylesheet empty.');
+                        return;
+                    }
+                }
+                else setTimeout(arguments.callee, 100);
+            }, 100);
+        }
+        return $('<link rel="stylesheet" type="text/css" href="'+url+'" />').appendTo($('head'));
+    }
+    else if (ext == 'js') {
+        var $scripts = $('script');
+        for (var i = 0; i < $scripts.length; i++) {
+            if ($scripts.get(i).src == abs_url) return true;
+        }
+        return $.getScript(url, callback);
+    }
+    else throw('Unrecognized media type "'+ext+'" in URL: '+url);
+}
+
 
 /////// END OF THE LIBRARY
 ///////

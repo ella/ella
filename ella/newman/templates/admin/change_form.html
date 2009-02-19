@@ -43,10 +43,11 @@
 {# JavaScript for prepopulated fields #}
 {% prepopulated_fields_js %}
 
+<script type="text/javascript">
 {% for m in media %}
-    {{ m }}
+    request_media('{{ m }}?{{ VERSION }}');
 {% endfor %}
-
+</script>
 
 </div>
 </form></div>
