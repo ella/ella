@@ -543,7 +543,8 @@ function adr(address, options) {
 }
 
 // Get an URL to a CSS or JS file, attempt to load it into the document and call callback on success.
-function request_media(url, callback) {
+function load_media(url, succ_fn, err_fn) {
+    ;;; carp('loading media '+url);
     if (url.match(/\.(\w+)(?:$|\?)/))
         var ext = RegExp.$1;
     else throw('Unexpected URL format: '+url);
@@ -560,17 +561,20 @@ function request_media(url, callback) {
     if (ext == 'css') {
         if (stylesheet_present(abs_url)) return true;
         var tries = 100;
-        if (typeof callback == 'function') {
-            setTimeout( function() {
+        if ($.isFunction(succ_fn)) {
+            setTimeout(function() {
                 if (--tries < 0) {
                     carp('Timed out loading CSS: '+url);
+                    if ($.isFunction(err_fn)) err_fn(url);
                     return;
                 }
                 var ss;
                 if (ss = stylesheet_present(abs_url)) {
-                    if (ss.cssRules.length) callback();
+
+                    if (ss.cssRules.length) succ_fn(url);
                     else {
                         carp('CSS stylesheet empty.');
+                        if ($.isFunction(err_fn)) err_fn(url);
                         return;
                     }
                 }
@@ -584,9 +588,33 @@ function request_media(url, callback) {
         for (var i = 0; i < $scripts.length; i++) {
             if ($scripts.get(i).src == abs_url) return true;
         }
-        return $.getScript(url, callback);
+        return $.ajax({
+            url:       url,
+            type:     'GET',
+            dataType: 'script',
+            success:   succ_fn,
+            error:     err_fn,
+            cache:     true
+        });
     }
     else throw('Unrecognized media type "'+ext+'" in URL: '+url);
+}
+
+
+var media_queue = [];
+function draw_media() {
+    if (media_queue.length == 0) return true;
+    var url = media_queue.shift();
+    load_media(url, draw_media, draw_media);
+}
+
+// Load a CSS / JavaScript file (given an URL) after previously requested ones have been loaded / failed loading.
+function request_media(url) {
+    var do_start = media_queue.length == 0;
+    media_queue.push(url);
+    if (do_start) {
+        setTimeout(draw_media,100);
+    }
 }
 
 
