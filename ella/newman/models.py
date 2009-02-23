@@ -1,11 +1,14 @@
 from django.db import models
+from django.db.models import Q, query, ForeignKey, ManyToManyField
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User, Group, Permission
 from django.conf import settings
 
-from ella.core.cache.utils import CachedForeignKey
+from ella.core.cache.utils import CachedForeignKey, cache_this
 from ella.core.models import Category
+
+CACHE_TIMEOUT = 10 * 60
 
 class DevMessage(models.Model):
     """Development news for ella administrators."""
@@ -86,7 +89,7 @@ class AdminSetting(models.Model):
         return u"%s: %s for %s" % (self.var, self.val, self.user)
 
     class Meta:
-        unique_together = (('user','var',),('group', 'var',),)
+        unique_together = (('user','var',),('group', 'var',), )
         verbose_name = _('Admin user setting')
         verbose_name_plural = _('Admin user settings')
 
@@ -129,6 +132,18 @@ class AdminUserFav(models.Model):
 # Permissions per Category
 # ------------------------------------
 
+# cache keys
+def key_applicable_categories(func, user, permission=None):
+    if not permission:
+        return 'ella.newman.models.applicable_categories_%d' % user.pk
+    return 'ella.newman.models.applicable_categories_%d__perm_%s' % (user.pk, permission)
+
+def key_has_category_permission(func, user, category, permission):
+    return 'ella.newman.models.has_category_permission_%d_%d__perm_%s' % (user.pk, category.pk, permission)
+
+def key_has_model_list_permission(func, user, model):
+    return 'ella.newman.models.has_model_list_permission_%d__model_%s' % (user.pk, str(model))
+
 class CategoryUserRole(models.Model):
     """
     Apply all group's permission for the given user to this category.
@@ -142,12 +157,13 @@ class CategoryUserRole(models.Model):
                 'user' : self.user,
                 'group' : self.group,
                 'category' : [ x['slug'] for x in self.category.values() ],
-}
+            }
 
     class Meta:
         verbose_name = _("User role in category")
         verbose_name_plural = _("User roles in categories")
 
+@cache_this(key_has_model_list_permission, timeout=CACHE_TIMEOUT)
 def has_model_list_permission(user, model):
     """ returns True if user has permission to access this model in newman, otherwise False """
     # TODO speed!
@@ -157,7 +173,8 @@ def has_model_list_permission(user, model):
         return True
     return False
 
-def has_category_permission(user, model, category, permission):
+@cache_this(key_has_category_permission, timeout=CACHE_TIMEOUT)
+def has_category_permission(user, category, permission):
     if user.has_perm(permission):
         return True
 
@@ -171,23 +188,27 @@ def cat_children(cats):
     # TODO speed!
     sub_cats = map(None, cats)
     for c in cats:
-        out = Category.objects.filter(tree_parent=c)
-        map(lambda o: sub_cats.append(o), cat_children(out))
+        out = Category.objects.filter( tree_parent=c )
+        map( lambda o: sub_cats.append(o), cat_children(out) )
     return sub_cats
 
+@cache_this(key_applicable_categories, timeout=CACHE_TIMEOUT)
 def applicable_categories(user, permission=None):
-    q = CategoryUserRole.objects.filter(user=user).distinct()
+    if user.is_superuser:
+        all = Category.objects.all()
+        return [ d.pk for d in all ]
 
+    q = CategoryUserRole.objects.filter( user=user ).distinct()
     if permission:
         app_label, code = permission.split('.', 1)
-        perms = Permission.objects.filter(content_type__app_label=app_label, codename=code)
+        perms = Permission.objects.filter( content_type__app_label=app_label, codename=code )
         if not perms:
             # no permission found (maybe misspeled) then no categories permitted!
             return []
-        q = q.filter(group__permissions=perms[0])
+        q = q.filter( group__permissions=perms[0] )
     else:
         # take any permission
-        q = q.filter(group__permissions__id__isnull=False)
+        q = q.filter( group__permissions__id__isnull=False )
 
     cats = []
     for i in q:
@@ -196,3 +217,30 @@ def applicable_categories(user, permission=None):
     app_cats = cat_children(cats)
     return [ d.pk for d in app_cats ]
 
+def permission_filtered_model_qs(queryset, model, user, permissions=[]):
+    """ returns Queryset filtered accordingly to given permissions """
+    if user.is_superuser:
+        return queryset
+    q = queryset
+    qs = query.EmptyQuerySet()
+    if 'category' in model._meta.get_all_field_names():
+        categories = set()
+        for p in permissions:
+            cats = applicable_categories(user, p)
+            map( lambda c: categories.add(c), cats )
+
+        if categories:
+            # TODO: terrible hack for circumventing invalid Q( __in=[] ) | Q( __in=[] )
+            if queryset.model == Category:
+                qs = q.filter( Q( pk__in=categories ) )
+            else:
+                qs = q.filter( Q( category__in=categories ) )
+    return qs
+
+def is_category_fk(db_field):
+    if not isinstance(db_field, (ForeignKey, ManyToManyField)):
+        return False
+    rel_ct = ContentType.objects.get_for_model(db_field.rel.to)
+    if rel_ct == ContentType.objects.get_for_model(Category):
+        return True
+    return False

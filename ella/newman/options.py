@@ -38,8 +38,6 @@ class NewmanModelAdmin(admin.ModelAdmin):
         super(NewmanModelAdmin, self).__init__(*args, **kwargs)
         self.list_per_page = DEFAULT_LIST_PER_PAGE
         #NewmanModelAdmin.register(lambda x: x is None, self.changelist_view)
-        #NewmanModelAdmin.register(lambda x: x.endswith('suggest'), self.suggest_view)
-        #NewmanModelAdmin.register(lambda x: x.endswith('filters'), self.filters_view)
 
     def get_urls(self):
         from django.conf.urls.defaults import patterns, url
@@ -58,7 +56,7 @@ class NewmanModelAdmin(admin.ModelAdmin):
             url(r'^filters/$',
                 wrap(self.filters_view),
                 name='%sadmin_%s_%s_filters' % info),
-)
+        )
         urlpatterns += super(NewmanModelAdmin, self).get_urls()
         return urlpatterns
 
@@ -86,13 +84,13 @@ class NewmanModelAdmin(admin.ModelAdmin):
             'has_add_permission': self.has_add_permission(request),
             'root_path': self.admin_site.root_path,
             'app_label': app_label,
-}
+        }
         context.update(extra_context or {})
         out= render_to_response(
             'admin/filters.html',
             context,
             context_instance=template.RequestContext(request)
-)
+        )
         return HttpResponse(out, mimetype='text/plain;charset=utf-8')
 
     def changelist_view(self, request, extra_context=None):
@@ -124,7 +122,7 @@ class NewmanModelAdmin(admin.ModelAdmin):
             'has_add_permission': self.has_add_permission(request),
             'root_path': self.admin_site.root_path,
             'app_label': app_label,
-}
+        }
         context.update(extra_context or {})
         return render_to_response(self.change_list_template or [
             'admin/%s/%s/change_list.html' % (app_label, opts.object_name.lower()),
@@ -140,7 +138,7 @@ class NewmanModelAdmin(admin.ModelAdmin):
         if not ('f' in request.GET.keys() and 'q' in request.GET.keys()):
             raise AttributeError, 'Invalid query attributes. Example: ".../?f=field_a&f=field_b&q=search_term&o=offset"'
         elif len(request.GET.get('q')) < SUGGEST_VIEW_MIN_LENGTH:
-            return HttpResponse('', mimetype='text/plain;charset=utf-8')
+            return HttpResponse( '', mimetype='text/plain;charset=utf-8' )
 
         offset = 0
         if 'o' in request.GET.keys() and request.GET.get('o'):
@@ -192,46 +190,21 @@ class NewmanModelAdmin(admin.ModelAdmin):
         ft.append('{cnt:%d}' % cnt)
         for item in data:
             if SUGGEST_RETURN_ALL_FIELD:
-                ft.append("%s".encode('utf-8') % '|'.join("%s" % item[f] for f in lookup_fields))
+                ft.append( "%s".encode('utf-8') % '|'.join("%s" % item[f] for f in lookup_fields) )
             else:
-                ft.append("%s".encode('utf-8') % '|'.join("%s" % item[f] for f in lookup_fields[:2]))
+                ft.append( "%s".encode('utf-8') % '|'.join("%s" % item[f] for f in lookup_fields[:2]) )
 
-        return HttpResponse('\n'.join(ft), mimetype='text/plain;charset=utf-8')
-
-
-    def queryset(self, request):
-        """
-        First semi-working draft of category-based permissions. It will allow permissions to be set per category
-        effectively hiding the content the user has no permission to see/change.
-        """
-        if request.user.is_superuser:
-            return super(NewmanModelAdmin, self).queryset(request)
-        q = admin.ModelAdmin.queryset(self, request)
-
-        view_perm = self.opts.app_label + '.' + 'view_' + self.model._meta.module_name.lower()
-        change_perm = self.opts.app_label + '.' + 'change_' + self.model._meta.module_name.lower()
-        try:
-            self.model._meta.get_field('category')
-            categories = models.applicable_categories(request.user, view_perm) + models.applicable_categories(request.user, change_perm)
-
-            if categories:
-                # TODO: terrible hack for circumventing invalid Q(__in=[]) | Q(__in=[])
-                q = q.filter(Q(category__in=categories))
-            else:
-                q = query.EmptyQuerySet()
-        except FieldDoesNotExist:
-            pass
-        return q
+        return HttpResponse( '\n'.join(ft), mimetype='text/plain;charset=utf-8' )
 
     def has_view_permission(self, request, obj):
         opts = self.opts
-        view_perm = '%s.view_%s' % (opts.app_label, opts.object_name.lower())
+        view_perm = '%s.view_%s' % ( opts.app_label, opts.object_name.lower() )
         return request.user.has_perm(view_perm)
 
     def has_model_view_permission(self, request, obj=None):
         """ returns True if user has permission to view this model, otherwise False. """
         # try to find view or change perm. for given user in his permissions or groups permissions
-        can_change = admin.ModelAdmin.has_change_permission(self, request, obj)
+        can_change = admin.ModelAdmin.has_change_permission( self, request, obj )
         can_view = self.has_view_permission(request, obj)
         if can_view or can_change:
             return True
@@ -239,12 +212,12 @@ class NewmanModelAdmin(admin.ModelAdmin):
         # find permission to view or change in CategoryUserRoles for given user
         user = request.user
         opts = self.opts
-        change_perm = '%s.%s' % (opts.app_label, opts.get_change_permission())
-        view_perm = '%s.view_%s' % (opts.app_label, opts.object_name.lower())
+        change_perm = '%s.%s' % ( opts.app_label, opts.get_change_permission() )
+        view_perm = '%s.view_%s' % ( opts.app_label, opts.object_name.lower() )
         perms = [change_perm, view_perm]
         for role in user.categoryuserrole_set.all():
             for perm in role.group.permissions.all():
-                p = '%s.%s' % (opts.app_label, perm.codename)
+                p = '%s.%s' % ( opts.app_label, perm.codename )
                 if p in perms:
                     return True
         # no permission found
@@ -263,16 +236,16 @@ class NewmanModelAdmin(admin.ModelAdmin):
         """
         if obj is None or not hasattr(obj, 'category'):
             if request.method == 'POST':
-                return admin.ModelAdmin.has_change_permission(self, request, obj)
+                return admin.ModelAdmin.has_change_permission( self, request, obj )
             else:
                 return self.has_model_view_permission(request, obj)
 
         opts = self.opts
-        change_perm = '%s.%s' % (opts.app_label, opts.get_change_permission())
-        view_perm = '%s.view_%s' % (opts.app_label, opts.object_name.lower())
-        can_view = models.has_category_permission(request.user, obj, obj.category, view_perm)
-        can_change = models.has_category_permission(request.user, obj, obj.category, change_perm)
-
+        change_perm = '%s.%s' % ( opts.app_label, opts.get_change_permission() )
+        view_perm = '%s.view_%s' % ( opts.app_label, opts.object_name.lower() )
+        can_view = models.has_category_permission( request.user, obj.category, view_perm )
+        can_change = models.has_category_permission( request.user, obj.category, change_perm )
+        
         if request.method == 'POST' and can_change:
             return True
         elif request.method == 'GET' and (can_view or can_change):
@@ -378,38 +351,54 @@ class NewmanModelAdmin(admin.ModelAdmin):
             'errors': helpers.AdminErrorList(form, formsets),
             'root_path': self.admin_site.root_path,
             'app_label': opts.app_label,
-}
+        }
         context.update(extra_context or {})
         return self.render_change_form(request, context, change=True, obj=obj)
     change_view = transaction.commit_on_success(change_view)
+
+    def restrict_field_categories(self, db_field, user, model):
+        f = db_field
+        if hasattr(f.queryset, '_newman_filtered'):
+            return
+        view_perm = get_permission('view', model)
+        change_perm = get_permission('change', model)
+        perms = (view_perm, change_perm,)
+        qs = models.permission_filtered_model_qs(f.queryset, self.model, user, perms)
+        qs._newman_filtered = True #magic variable
+        f._set_queryset(qs)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
 
         # TODO: Only hotfix for django 9791+
         if 'request' in kwargs:
+            user = kwargs['request'].user
             del kwargs['request']
-
         for css_class, rich_text_fields in getattr(self, 'rich_text_fields', {}).iteritems():
             if db_field.name in rich_text_fields:
                 kwargs.update({
                     'required': not db_field.blank,
                     'label': db_field.verbose_name,
-})
+                })
                 rich_text_field = fields.RichTextAreaField(**kwargs)
                 if css_class:
                     rich_text_field.widget.attrs['class'] += ' %s' % css_class
                 return rich_text_field
+        # filtering category field choices
+        if models.is_category_fk(db_field):
+            fld = super(NewmanModelAdmin, self).formfield_for_dbfield(db_field, **kwargs)
+            self.restrict_field_categories(fld, user, self.model)
+            return fld
 
         return super(NewmanModelAdmin, self).formfield_for_dbfield(db_field, **kwargs)
 
-    def queryset( self, request ):
+    def queryset(self, request):
         """
         First semi-working draft of category-based permissions. It will allow permissions to be set per category
         effectively hiding the content the user has no permission to see/change.
         """
         if request.user.is_superuser:
             return super(NewmanModelAdmin, self).queryset(request)
-        q = admin.ModelAdmin.queryset( self, request )
+        q = admin.ModelAdmin.queryset(self, request)
 
         view_perm = self.opts.app_label + '.' + 'view_' + self.model._meta.module_name.lower()
         change_perm = self.opts.app_label + '.' + 'change_' + self.model._meta.module_name.lower()
@@ -419,12 +408,19 @@ class NewmanModelAdmin(admin.ModelAdmin):
 
 class NewmanInlineFormSet(BaseInlineFormSet):
     def get_queryset(self):
-        user = self.form._magic_request.user
+        user = self.form._magic_user
         if not hasattr(self, '_queryset'):
             if self.queryset is not None:
                 qs = self.queryset
             else:
                 qs = self.model._default_manager.get_query_set()
+            # category base permissions
+            if not user.is_superuser and 'category' in self.model._meta.get_all_field_names():
+                view_perm = get_permission('view', self.instance)
+                change_perm = get_permission('change', self.instance)
+                perms = (view_perm, change_perm,)
+                qs = models.permission_filtered_model_qs(qs, self.model, user, perms)
+
             if self.max_num > 0:
                 self._queryset = qs[:self.max_num]
             else:
@@ -435,7 +431,7 @@ class NewmanInlineModelAdmin(InlineModelAdmin):
     formset = NewmanInlineFormSet
 
     def get_formset(self, request, obj=None):
-        setattr(self.form, '_magic_request', request) # prasarna
+        setattr(self.form, '_magic_user', request.user) # prasarna
         return super(NewmanInlineModelAdmin, self).get_formset(request, obj)
 
 class NewmanStackedInline(NewmanInlineModelAdmin):
@@ -469,7 +465,7 @@ class BaseGenericInlineFormSet(DJBaseGenericInlineFormSet):
     def get_queryset(self):
         # Avoid a circular import.
         from django.contrib.contenttypes.models import ContentType
-        user = self.form._magic_request.user
+        user = self.form._magic_user
         if self.instance is None:
             return self.model._default_manager.empty()
         out = self.model._default_manager.filter(**{
@@ -496,7 +492,7 @@ class BaseGenericInlineFormSet(DJBaseGenericInlineFormSet):
         def add_field_error(form, field_name, message):
                 err_list = ErrorList( (message,) )
                 form._errors[field_name] = err_list
-        user = self.form._magic_request.user
+        user = self.form._magic_user
 
         # Adding new object 
         for form in self.extra_forms:
@@ -530,7 +526,7 @@ class BaseGenericInlineFormSet(DJBaseGenericInlineFormSet):
         # self.initial_form[1].changed_data  #seznam zmenenych fieldu
         # self.form.base_fields['category'].queryset
 
-    def restrict_categories(self, form, user, model):
+    def restrict_field_categories(self, form, user, model):
         if 'category' not in form.base_fields:
             return
         f = form.base_fields['category']
@@ -547,8 +543,8 @@ class BaseGenericInlineFormSet(DJBaseGenericInlineFormSet):
         if i < self._initial_form_count:
             qs = self.get_queryset()[i]
             kwargs['instance'] = qs
-        user = self.form._magic_request.user
-        self.restrict_categories(self.form, user, self.model)
+        user = self.form._magic_user
+        self.restrict_field_categories(self.form, user, self.model)
         return super(BaseModelFormSet, self)._construct_form(i, **kwargs)
     
 
@@ -562,7 +558,7 @@ class GenericInlineModelAdmin(NewmanInlineModelAdmin):
         super(GenericInlineModelAdmin, self).__init__(*args, **kwargs)
 
     def get_formset(self, request, obj=None):
-        setattr(self.form, '_magic_request', request) # prasarna
+        setattr(self.form, '_magic_user', request.user) # prasarna
         if self.declared_fieldsets:
             fields = flatten_fieldsets(self.declared_fieldsets)
         else:
