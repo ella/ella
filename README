@@ -1,0 +1,15 @@
+Ella is opensource CMS based on Django framework,
+designed for flexibility.
+
+Althrough code is now used in production, we're now
+still in pre-release stage. Feel free to play with code,
+but do not expect it to be supported for production.
+
+We'll be heading there soon.
+
+Main repository lives in http://github.com/ella/ella/tree/master
+You can also track us on ohloh at https://www.ohloh.net/p/ella-cms
+
+Support is reachable in mailing list at http://groups.google.com/group/ella-project
+
+Bugtracker and friends will be available later.

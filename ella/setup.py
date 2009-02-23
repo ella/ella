@@ -73,6 +73,16 @@ setup(
     author_email = PROJECT_EMAIL,
     packages = packages,
     data_files = data_files,
+    classifiers = [
+        "Development Status :: 4 - Beta",
+        "Framework :: Django",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: BSD License",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 2.5",
+        "Programming Language :: Python :: 2.6",
+        "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    ]
 )
 
 
