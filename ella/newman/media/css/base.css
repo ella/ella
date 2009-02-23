@@ -254,7 +254,7 @@ td, th {
 /* OPERATION MESSAGES */
 #opmsg {
     position: fixed;
-    top: -16px;
+    top: -10px;
     width: 100%;
     text-align: center;
 }

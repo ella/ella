@@ -5,8 +5,10 @@ from ella.ellaadmin.options import SUGGEST_VIEW_MIN_LENGTH, SUGGEST_VIEW_LIMIT,\
 
 from django.contrib import admin
 from django.contrib.admin import helpers
-from django.contrib.admin.options import ModelAdmin
+from django.contrib.admin.options import ModelAdmin, InlineModelAdmin, BaseModelAdmin
 from django.contrib.admin.options import IncorrectLookupParameters
+from django.forms.models import BaseInlineFormSet
+from django.forms.util import ErrorDict, ErrorList
 from django import template
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.contrib.admin.views.main import ERROR_FLAG
@@ -26,7 +28,10 @@ from django.forms.formsets import all_valid
 
 DEFAULT_LIST_PER_PAGE = getattr(settings, 'NEWMAN_LIST_PER_PAGE', 25)
 
-class NewmanModelAdmin(ModelAdmin):
+def get_permission(permission_name, instance):
+    return instance._meta.app_label + '.' + '%s_' % permission_name + instance._meta.module_name.lower()
+
+class NewmanModelAdmin(admin.ModelAdmin):
     registered_views = []
 
     def __init__(self, *args, **kwargs):
@@ -37,7 +42,6 @@ class NewmanModelAdmin(ModelAdmin):
         #NewmanModelAdmin.register(lambda x: x.endswith('filters'), self.filters_view)
 
     def get_urls(self):
-
         from django.conf.urls.defaults import patterns, url
 
         def wrap(view):
@@ -91,7 +95,6 @@ class NewmanModelAdmin(ModelAdmin):
 )
         return HttpResponse(out, mimetype='text/plain;charset=utf-8')
 
-
     def changelist_view(self, request, extra_context=None):
         # accepts only ajax calls if not DEBUG
         if not request.is_ajax() and not settings.DEBUG:
@@ -128,7 +131,6 @@ class NewmanModelAdmin(ModelAdmin):
             'admin/%s/change_list.html' % app_label,
             'admin/change_list.html'
         ], context, context_instance=template.RequestContext(request))
-
 
     def suggest_view(self, request, extra_context=None):
         # accepts only ajax calls if not DEBUG
@@ -361,7 +363,8 @@ class NewmanModelAdmin(ModelAdmin):
 
         # raw media paths for ajax implementation
         raw_media = []
-        raw_media.extend(media._css['screen'])
+        if media._css.has_key('screen'):
+            raw_media.extend(media._css['screen'])
         raw_media.extend(media._js)
 
         context = {
@@ -399,3 +402,186 @@ class NewmanModelAdmin(ModelAdmin):
 
         return super(NewmanModelAdmin, self).formfield_for_dbfield(db_field, **kwargs)
 
+    def queryset( self, request ):
+        """
+        First semi-working draft of category-based permissions. It will allow permissions to be set per category
+        effectively hiding the content the user has no permission to see/change.
+        """
+        if request.user.is_superuser:
+            return super(NewmanModelAdmin, self).queryset(request)
+        q = admin.ModelAdmin.queryset( self, request )
+
+        view_perm = self.opts.app_label + '.' + 'view_' + self.model._meta.module_name.lower()
+        change_perm = self.opts.app_label + '.' + 'change_' + self.model._meta.module_name.lower()
+        perms = (view_perm, change_perm,)
+        qs = models.permission_filtered_model_qs(q, self.model, request.user, perms)
+        return qs
+
+class NewmanInlineFormSet(BaseInlineFormSet):
+    def get_queryset(self):
+        user = self.form._magic_request.user
+        if not hasattr(self, '_queryset'):
+            if self.queryset is not None:
+                qs = self.queryset
+            else:
+                qs = self.model._default_manager.get_query_set()
+            if self.max_num > 0:
+                self._queryset = qs[:self.max_num]
+            else:
+                self._queryset = qs
+        return self._queryset
+
+class NewmanInlineModelAdmin(InlineModelAdmin):
+    formset = NewmanInlineFormSet
+
+    def get_formset(self, request, obj=None):
+        setattr(self.form, '_magic_request', request) # prasarna
+        return super(NewmanInlineModelAdmin, self).get_formset(request, obj)
+
+class NewmanStackedInline(NewmanInlineModelAdmin):
+    template = 'admin/edit_inline/stacked.html'
+
+class NewmanTabularInline(NewmanInlineModelAdmin):
+    template = 'admin/edit_inline/tabular.html'
+
+# ------------------------------------
+# Generics
+# ------------------------------------
+
+from django.forms.models import BaseModelFormSet, modelformset_factory, save_instance
+from django.contrib.admin.options import flatten_fieldsets
+from django.contrib.contenttypes.generic import generic_inlineformset_factory, \
+    BaseGenericInlineFormSet as DJBaseGenericInlineFormSet
+from django.forms.formsets import DELETION_FIELD_NAME
+
+class BaseGenericInlineFormSet(DJBaseGenericInlineFormSet):
+    """
+    A formset for generic inline objects to a parent.
+    """
+    ct_field_name = "content_type"
+    ct_fk_field_name = "object_id"
+
+    def __init__(self, data=None, files=None, instance=None, save_as_new=None):
+        super(BaseGenericInlineFormSet, self).__init__(
+            data, files, instance, save_as_new
+        )
+
+    def get_queryset(self):
+        # Avoid a circular import.
+        from django.contrib.contenttypes.models import ContentType
+        user = self.form._magic_request.user
+        if self.instance is None:
+            return self.model._default_manager.empty()
+        out = self.model._default_manager.filter(**{
+            self.ct_field.name: ContentType.objects.get_for_model(self.instance),
+            self.ct_fk_field.name: self.instance.pk,
+        })
+        if user.is_superuser:
+            return out
+        # filtering -- view permitted categories only
+        if 'category' not in self.model._meta.get_all_field_names():
+            return out
+        view_perm = get_permission('view', self.instance)
+        change_perm = get_permission('change', self.instance)
+        perms = (view_perm, change_perm,)
+        qs = models.permission_filtered_model_qs(out, self.model, user, perms)
+        return qs
+
+    def full_clean(self):
+        super(BaseGenericInlineFormSet, self).full_clean()
+        if not hasattr(self.instance, 'category'):
+            return
+
+        # next part is category-based permissions (only for objects with category field)
+        def add_field_error(form, field_name, message):
+                err_list = ErrorList( (message,) )
+                form._errors[field_name] = err_list
+        user = self.form._magic_request.user
+
+        # Adding new object 
+        for form in self.extra_forms:
+            if not form.has_changed():
+                continue
+            if 'category' not in form.changed_data:
+                continue
+            add_perm = get_permission('add', form.instance)
+            c = form.cleaned_data['category']
+            if not models.has_category_permission(user, c, add_perm):
+                add_field_error( form, 'category', _('Category not permitted') )
+
+        # Changing existing object
+        for form in self.initial_forms:
+            change_perm = get_permission('change', form.instance)
+            delete_perm = get_permission('delete', form.instance)
+            if self.can_delete and form.cleaned_data[DELETION_FIELD_NAME]:
+                #import pdb;pdb.set_trace()
+                if not models.has_category_permission(user, form.instance.category, delete_perm):
+                    self._non_form_errors = _('Object deletion is not permitted.')
+            if 'category' not in form.changed_data:
+                continue
+            c = form.cleaned_data['category']
+            if not models.has_category_permission(user, c, change_perm):
+                add_field_error( form, 'category', _('Category not permitted') )
+        #err_list = ErrorList( (u'Nepovolena kategorie',) )
+        #self.initial_forms[1]._errors['category'] = err_list
+        #del self.initial_forms[1].cleaned_data['category'] #pozor, lze mazat jen kdyz byl tento sloupec opravdu zmenen.
+        #self._errors.append(
+        # self.initial_form[1].instance  # konkretni placement
+        # self.initial_form[1].changed_data  #seznam zmenenych fieldu
+        # self.form.base_fields['category'].queryset
+
+    def restrict_categories(self, form, user, model):
+        if 'category' not in form.base_fields:
+            return
+        f = form.base_fields['category']
+        if hasattr(f.queryset, '_newman_filtered'):
+            return
+        view_perm = get_permission('view', model)
+        change_perm = get_permission('change', model)
+        perms = (view_perm, change_perm,)
+        qs = models.permission_filtered_model_qs(f.queryset, self.model, user, perms)
+        qs._newman_filtered = True #magic variable
+        f._set_queryset(qs)
+
+    def _construct_form(self, i, **kwargs):
+        if i < self._initial_form_count:
+            qs = self.get_queryset()[i]
+            kwargs['instance'] = qs
+        user = self.form._magic_request.user
+        self.restrict_categories(self.form, user, self.model)
+        return super(BaseModelFormSet, self)._construct_form(i, **kwargs)
+    
+
+
+class GenericInlineModelAdmin(NewmanInlineModelAdmin):
+    ct_field = "content_type"
+    ct_fk_field = "object_id"
+    formset = BaseGenericInlineFormSet
+
+    def __init__(self, *args, **kwargs):
+        super(GenericInlineModelAdmin, self).__init__(*args, **kwargs)
+
+    def get_formset(self, request, obj=None):
+        setattr(self.form, '_magic_request', request) # prasarna
+        if self.declared_fieldsets:
+            fields = flatten_fieldsets(self.declared_fieldsets)
+        else:
+            fields = None
+        defaults = {
+            "ct_field": self.ct_field,
+            "fk_field": self.ct_fk_field,
+            "form": self.form,
+            "formfield_callback": self.formfield_for_dbfield,
+            "formset": self.formset,
+            "extra": self.extra,
+            "can_delete": True,
+            "can_order": False,
+            "fields": fields,
+        }
+        return generic_inlineformset_factory(self.model, **defaults)
+
+class GenericStackedInline(GenericInlineModelAdmin):
+    template = 'admin/edit_inline/stacked.html'
+
+class GenericTabularInline(GenericInlineModelAdmin):
+    template = 'admin/edit_inline/tabular.html'

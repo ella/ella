@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ella.newman (admin-ng)\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-01-14 22:48+0100\n"
+"POT-Creation-Date: 2009-02-20 22:27+0100\n"
 "PO-Revision-Date: 2009-01-14 22:52+0100\n"
 "Last-Translator: Vitek Pliska <whit@jizak.cz>\n"
 "Language-Team: Ella <ella.project@gmail.com>\n"
@@ -18,59 +18,395 @@ msgstr ""
 "X-Poedit-Country: CZECH REPUBLIC\n"
 "X-Poedit-SourceCharset: utf-8\n"
 
-#: models.py:10
+#: admin.py:57
+msgid "Any date"
+msgstr ""
+
+#: admin.py:58
+msgid "Today"
+msgstr ""
+
+#: admin.py:61
+msgid "Past 7 days"
+msgstr ""
+
+#: admin.py:63
+msgid "This month"
+msgstr ""
+
+#: admin.py:65
+msgid "This year"
+msgstr ""
+
+#: changelist.py:30
+#, python-format
+msgid "Select %s"
+msgstr ""
+
+#: changelist.py:30
+#, python-format
+msgid "Select %s to change"
+msgstr ""
+
+#: models.py:14 models.py:62
 msgid "Title"
 msgstr "Nadpis"
 
-#: models.py:11
+#: models.py:15 models.py:63
 msgid "Slug"
 msgstr ""
 
-#: models.py:12
+#: models.py:16
 msgid "Summary"
 msgstr "Souhrn"
 
-#: models.py:13
+#: models.py:17
 msgid "Detail"
 msgstr "Detailní popis"
 
-#: models.py:14
+#: models.py:18
 msgid "Version"
 msgstr "Verze"
 
-#: models.py:21
+#: models.py:27
 msgid "Development message"
 msgstr "Zpráva o vývoji"
 
-#: models.py:22
+#: models.py:28
 msgid "Development messages"
 msgstr "Zprávy o vývoji"
 
-#: models.py:30
+#: models.py:36 models.py:57 models.py:98 models.py:115
 msgid "Model"
 msgstr "Model"
 
-#: models.py:31
+#: models.py:37
 msgid "Field"
 msgstr "Pole"
 
-#: models.py:32
+#: models.py:38
+msgid "Language"
+msgstr ""
+
+#: models.py:39
 msgid "Short help"
 msgstr "Stručná nápověda"
 
-#: models.py:33
+#: models.py:40
 msgid "Full message"
 msgstr "Celá zpráva"
 
-#: models.py:38
+#: models.py:45
 msgid "General"
 msgstr "Obecně"
 
-#: models.py:41
+#: models.py:48
 msgid "Help item"
 msgstr "Položka nápovědy"
 
-#: models.py:42
+#: models.py:49
 msgid "Help items"
 msgstr "Položky nápovědy"
 
+#: models.py:58 models.py:81 models.py:116
+msgid "User"
+msgstr ""
+
+#: models.py:59
+#, fuzzy
+msgid "Data"
+msgstr "Detailní popis"
+
+#: models.py:65
+msgid "Is template"
+msgstr ""
+
+#: models.py:74
+msgid "Draft item"
+msgstr ""
+
+#: models.py:75
+msgid "Draft items"
+msgstr ""
+
+#: models.py:82 models.py:99
+msgid "Group"
+msgstr ""
+
+#: models.py:83
+msgid "Variable"
+msgstr ""
+
+#: models.py:84
+msgid "Value"
+msgstr ""
+
+#: models.py:91
+msgid "Admin user setting"
+msgstr ""
+
+#: models.py:92
+msgid "Admin user settings"
+msgstr ""
+
+#: models.py:100 models.py:117
+msgid "Ordering"
+msgstr ""
+
+#: models.py:108
+msgid "Group fav item"
+msgstr ""
+
+#: models.py:109
+msgid "Group fav items"
+msgstr ""
+
+#: models.py:125
+msgid "User fav item"
+msgstr ""
+
+#: models.py:126
+msgid "User fav items"
+msgstr ""
+
+#: models.py:142
+#, python-format
+msgid "User %(user)s is a \"%(group)s\" for %(category)s."
+msgstr ""
+
+#: models.py:149
+msgid "User role in category"
+msgstr ""
+
+#: models.py:150
+msgid "User roles in categories"
+msgstr ""
+
+#: options.py:77 options.py:115
+msgid "Database error"
+msgstr ""
+
+#: options.py:379 options.py:393
+msgid "Category not permitted"
+msgstr "Nepovolená kategorie."
+
+#: options.py:388
+msgid "Object deletion is not permitted."
+msgstr "Smazání objektu není povoleno."
+
+#: register.py:32 register.py:43
+msgid "Category"
+msgstr ""
+
+#: register.py:139
+#, python-format
+msgid ""
+"There is already a Placement object published in\n"
+"                        category %(category)s with the same URL referring to "
+"%(target)s.\n"
+"                        Please change the slug or publish date."
+msgstr ""
+
+#: register.py:162
+msgid "If object has a category, it must have a main placement."
+msgstr ""
+
+#: register.py:212
+msgid "Article heading"
+msgstr ""
+
+#: register.py:213
+msgid "Article contents"
+msgstr ""
+
+#: register.py:214
+msgid "Metadata"
+msgstr ""
+
+#: register.py:229
+msgid "No URL"
+msgstr ""
+
+#: register.py:231
+msgid "Full URL"
+msgstr ""
+
+#: register.py:236
+msgid "Hits"
+msgstr ""
+
+#: register.py:246
+msgid "Publish from"
+msgstr ""
+
+#: sites.py:76
+msgid "Site administration"
+msgstr ""
+
+#: views.py:60
+msgid "Your report was sent."
+msgstr ""
+
+#: views.py:62
+msgid "Subject or message is empty."
+msgstr ""
+
+#: templates/admin/app_index.html:6 templates/admin/change_list.html:5
+msgid "Home"
+msgstr ""
+
+#: templates/admin/app_index.html:8 templates/admin/app_index.html.py:15
+#, python-format
+msgid "%(name)s"
+msgstr ""
+
+#: templates/admin/app_index.html:14
+#, python-format
+msgid "Models available in the %(name)s application."
+msgstr ""
+
+#: templates/admin/app_index.html:25
+msgid "Add"
+msgstr ""
+
+#: templates/admin/app_index.html:31
+msgid "Change"
+msgstr ""
+
+#: templates/admin/app_index.html:41
+msgid "You don't have permission to edit anything."
+msgstr ""
+
+#: templates/admin/base.html:121
+#: templates/admin/auth/user/change_password.html:30
+msgid "Change password"
+msgstr ""
+
+#: templates/admin/base.html:122
+msgid "Log out"
+msgstr ""
+
+#: templates/admin/base_site.html:3 templates/admin/base_site.html.py:6
+msgid "Ella administration"
+msgstr ""
+
+#: templates/admin/change_form.html:8
+msgid "History"
+msgstr ""
+
+#: templates/admin/change_form.html:10
+msgid "View on site"
+msgstr ""
+
+#: templates/admin/change_form.html:22
+#: templates/admin/auth/user/change_password.html:6
+msgid "Please correct the error below."
+msgid_plural "Please correct the errors below."
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/admin/change_list.html:17
+msgid "Filters"
+msgstr ""
+
+#: templates/admin/change_list.html:21
+#, python-format
+msgid "Add %(name)s"
+msgstr ""
+
+#: templates/admin/filter.html:2
+#, python-format
+msgid " By %(filter_title)s "
+msgstr ""
+
+#: templates/admin/index.html:56 templates/admin/search_form.html:7
+msgid "Go"
+msgstr ""
+
+#: templates/admin/index.html:85
+msgid "None available"
+msgstr ""
+
+#: templates/admin/login.html:19
+msgid "Username:"
+msgstr ""
+
+#: templates/admin/login.html:22
+msgid "Password:"
+msgstr ""
+
+#: templates/admin/login.html:26
+msgid "Log in"
+msgstr ""
+
+#: templates/admin/search_form.html:5
+msgid "Search"
+msgstr ""
+
+#: templates/admin/search_form.html:10
+#, python-format
+msgid "1 result"
+msgid_plural "%(counter)s results"
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/admin/search_form.html:10
+#, python-format
+msgid "%(full_result_count)s total"
+msgstr ""
+
+#: templates/admin/auth/user/add_form.html:6
+msgid ""
+"First, enter a username and password. Then, you'll be able to edit more user "
+"options."
+msgstr ""
+
+#: templates/admin/auth/user/add_form.html:13
+msgid "Username"
+msgstr ""
+
+#: templates/admin/auth/user/add_form.html:20
+#: templates/admin/auth/user/change_password.html:17
+msgid "Password"
+msgstr ""
+
+#: templates/admin/auth/user/add_form.html:26
+#: templates/admin/auth/user/change_password.html:23
+msgid "Password (again)"
+msgstr ""
+
+#: templates/admin/auth/user/add_form.html:27
+#: templates/admin/auth/user/change_password.html:24
+msgid "Enter the same password as above, for verification."
+msgstr ""
+
+#: templates/admin/auth/user/change_password.html:10
+#, python-format
+msgid "Enter a new password for the user <strong>%(username)s</strong>."
+msgstr ""
+
+#: templates/registration/password_change_form.html:5
+msgid "Password change"
+msgstr ""
+
+#: templates/registration/password_change_form.html:7
+msgid ""
+"Please enter your old password, for security's sake, and then enter your new "
+"password twice so we can verify you typed it in correctly."
+msgstr ""
+
+#: templates/registration/password_change_form.html:12
+msgid "Old password:"
+msgstr ""
+
+#: templates/registration/password_change_form.html:14
+msgid "New password:"
+msgstr ""
+
+#: templates/registration/password_change_form.html:16
+msgid "Confirm password:"
+msgstr ""
+
+#: templates/registration/password_change_form.html:18
+msgid "Change my password"
+msgstr ""

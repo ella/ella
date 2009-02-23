@@ -1,6 +1,6 @@
 from django.contrib.admin import autodiscover
 from ella.newman.sites import site
-from ella.newman.options import NewmanModelAdmin
+from ella.newman.options import NewmanModelAdmin, NewmanInlineModelAdmin, NewmanStackedInline, NewmanTabularInline
 
 # need to import filterspecs in __init__. filterspecs module shoud clean filters before they're assigned to ModelAdmins
 #import ella.newman.filterspecs

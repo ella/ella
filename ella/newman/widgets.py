@@ -7,7 +7,7 @@ CLASS_RICHTEXTAREA = 'rich_text_area'
 CSS_RICHTEXTAREA = 'css/editor.css'
 
 class RichTextAreaWidget(forms.Textarea):
-    'Widget representing the RichTextEditor. '
+    'Widget representing the RichTextEditor.'
     class Media:
         js = (
             settings.ADMIN_MEDIA_PREFIX + JS_EDITOR,

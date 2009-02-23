@@ -10,6 +10,13 @@ function carp(message) {
     }
 }
 
+var _;
+if (window.gettext) _ = gettext;
+else {
+    carp('i18n broken -- gettext is not defined');
+    _ = function(s) { return s; };
+}
+
 ( function($) { $(document).ready( function() {
 
     // We need to remember what URL is loaded in which element,
@@ -684,7 +691,7 @@ var $LOADING_MSG, LOADING_CNT = 0;
 function show_loading() {
     LOADING_CNT++;
     if ($LOADING_MSG) return;
-    $LOADING_MSG = show_message('loading...', {duration:0});
+    $LOADING_MSG = show_message(_('loading...'), {duration:0});
 }
 function hide_loading() {
     if ($LOADING_MSG) $LOADING_MSG.remove();
