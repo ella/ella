@@ -431,11 +431,14 @@ class NewmanInlineFormSet(BaseInlineFormSet):
             else:
                 qs = self.model._default_manager.get_query_set()
             # category base permissions
-            if not user.is_superuser and 'category' in self.model._meta.get_all_field_names():
-                view_perm = get_permission('view', self.instance)
-                change_perm = get_permission('change', self.instance)
-                perms = (view_perm, change_perm,)
-                qs = models.permission_filtered_model_qs(qs, self.model, user, perms)
+            if not user.is_superuser:
+                for db_field in self.model._meta.fields:
+                    if not models.is_category_fk(db_field):
+                        continue
+                    view_perm = get_permission('view', self.instance)
+                    change_perm = get_permission('change', self.instance)
+                    perms = (view_perm, change_perm,)
+                    qs = models.permission_filtered_model_qs(qs, self.model, user, perms)
 
             if self.max_num > 0:
                 self._queryset = qs[:self.max_num]
