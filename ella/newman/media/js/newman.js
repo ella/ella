@@ -392,11 +392,13 @@ else {
     }
     
     // Set up event handlers
-    $('.simpleload,.simpleload-container a').live('click', function() {
+    $('.simpleload,.simpleload-container a').live('click', function(evt) {
+        if (evt.which != 1) return true;
         simple_load($(this).attr('href'));
         return false;
     });
-    $('.hashadr,.hashadr-container a').live('click', function() {
+    $('.hashadr,.hashadr-container a').live('click', function(evt) {
+        if (evt.which != 1) return true;
         adr($(this).attr('href'));
         return false;
     });
@@ -620,7 +622,7 @@ function request_media(url) {
     var do_start = media_queue.length == 0;
     media_queue.push(url);
     if (do_start) {
-        setTimeout(draw_media,100);
+        setTimeout(draw_media,20);
     }
 }
 
@@ -632,7 +634,8 @@ function request_media(url) {
 
 $( function() {
     // Submit buttons for ajax forms
-    $('.submit-row input[name=action] ~ a.icn.btn.ok.def').live('click', function() {
+    $('.submit-row input[name=action] ~ a.icn.btn.ok.def').live('click', function(evt) {
+        if (evt.which != 1) return true;
         var $submit_row = $(this).closest('.submit-row');
         var  action  =  $submit_row.find('input[name=action]').val();
         var  method  = ($submit_row.find('input[name=method]').val() || 'POST').toUpperCase();
@@ -666,7 +669,8 @@ $( function() {
     });
     
     // Packing and unpacking filter list. To be removed when filters are reimplemented.
-    $('#filters :header').live('click', function() {
+    $('#filters :header').live('click', function(evt) {
+        if (evt.which != 1) return true;
         $(this).next(':first').filter('ul').slideToggle('slow');
     });
 });
