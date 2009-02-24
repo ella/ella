@@ -25,6 +25,9 @@ from ella.newman.changelist import NewmanChangeList, FilterChangeList
 from ella.newman import models, fields
 from django.contrib.admin.util import unquote
 from django.forms.formsets import all_valid
+from django.views.decorators.http import require_POST
+from ella.newman.decorators import require_AJAX
+from django.contrib.contenttypes.models import ContentType
 
 DEFAULT_LIST_PER_PAGE = getattr(settings, 'NEWMAN_LIST_PER_PAGE', 25)
 
@@ -56,9 +59,30 @@ class NewmanModelAdmin(admin.ModelAdmin):
             url(r'^filters/$',
                 wrap(self.filters_view),
                 name='%sadmin_%s_%s_filters' % info),
+            url(r'^(.+)/draft/save/$',
+                wrap(self.save_draft_view),
+                name='%sadmin_%s_%s_save_draft' % info),
         )
         urlpatterns += super(NewmanModelAdmin, self).get_urls()
         return urlpatterns
+
+#    @require_AJAX
+#    @require_POST
+    def save_draft_view(self, request, extra_context=None):
+        "Autosave data or save as (named) template"
+        from ella.newman.models import AdminUserDraft
+
+        ct = ContentType.objects.get_for_model(self.model)
+
+        # TODO: clean old autosaved...
+
+        AdminUserDraft.objects.create(
+            ct = ct,
+            user = request.user,
+            data = request.POST.get('data')
+        )
+
+        return HttpResponse(content=_('Model data was saved'), mimetype='text/plain')
 
     def filters_view(self, request, extra_context=None):
         "stolen from: The 'change list' admin view for this model."
@@ -93,10 +117,8 @@ class NewmanModelAdmin(admin.ModelAdmin):
         )
         return HttpResponse(out, mimetype='text/plain;charset=utf-8')
 
+#    @require_AJAX
     def changelist_view(self, request, extra_context=None):
-        # accepts only ajax calls if not DEBUG
-        if not request.is_ajax() and not settings.DEBUG:
-            raise Http404
 
         opts = self.model._meta
         app_label = opts.app_label
@@ -130,10 +152,8 @@ class NewmanModelAdmin(admin.ModelAdmin):
             'admin/change_list.html'
         ], context, context_instance=template.RequestContext(request))
 
+#    @require_AJAX
     def suggest_view(self, request, extra_context=None):
-        # accepts only ajax calls if not DEBUG
-        if not request.is_ajax() and not settings.DEBUG:
-            raise Http404
 
         if not ('f' in request.GET.keys() and 'q' in request.GET.keys()):
             raise AttributeError, 'Invalid query attributes. Example: ".../?f=field_a&f=field_b&q=search_term&o=offset"'
@@ -355,10 +375,36 @@ class NewmanModelAdmin(admin.ModelAdmin):
 
             fn = fn+1
 
+        raw_inlines = {}
+        rfset_n = 0
+        for rformset in inline_admin_formsets:
+            raw_inlines[rfset_n] = {}
+            rform_n = 0
+            for rform in rformset:
+                raw_inlines[rfset_n][rform_n] = {}
+                rfieldset_n = 0
+                for inlinefieldset in rform:
+                    raw_inlines[rfset_n][rform_n][rfieldset_n] = {
+                        'name': inlinefieldset.name,
+                        'description': inlinefieldset.description,
+                        'fields': {}
+                    }
+                    for line in inlinefieldset:
+                        for field in line:
+                            raw_inlines[rfset_n][rform_n][rfieldset_n]['fields'][field.field.name] = field.field
+                    rfieldset_n = rfieldset_n+1
+                rform_n = rform_n+1
+            rfset_n = rfset_n+1
+
+        raw_frm_all = {
+            'form': raw_form,
+            'inlines': raw_inlines
+        }
+
         context = {
             'title': _('Change %s') % force_unicode(opts.verbose_name),
             'adminform': adminForm,
-            'raw_form': raw_form,
+            'raw_form': raw_frm_all,
             'object_id': object_id,
             'original': obj,
             'is_popup': request.REQUEST.has_key('_popup'),
