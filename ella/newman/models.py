@@ -1,4 +1,6 @@
-from django.db import models
+from time import time
+
+from django.db import models, connection
 from django.db.models import Q, query, ForeignKey, ManyToManyField
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.contrib.contenttypes.models import ContentType
@@ -159,41 +161,72 @@ class CategoryUserRole(models.Model):
                 'category' : [ x['slug'] for x in self.category.values() ],
             }
 
+    def save(self):
+        super(CategoryUserRole, self).save()
+        for p in self.group.permissions.all():
+            code = '%s.%s' % (p.content_type.app_label, p.codename)
+            cats = compute_applicable_categories(self.user, code)
+            for c in cats:
+                d = DenormalizedCategoryUserRole(
+                    contenttype_id=p.content_type.pk,
+                    user_id=self.user.pk,
+                    permission_codename=code,
+                    permission_id=p.pk,
+                    category_id=c
+                )
+                d.save()
+
     class Meta:
         verbose_name = _("User role in category")
         verbose_name_plural = _("User roles in categories")
 
-@cache_this(key_has_model_list_permission, timeout=CACHE_TIMEOUT)
+class DenormalizedCategoryUserRole(models.Model):
+    """ for better performance """
+    user_id = models.IntegerField()
+    permission_id = models.IntegerField()
+    permission_codename = models.CharField(max_length=100)
+    category_id = models.IntegerField()
+    contenttype_id = models.IntegerField()
+
+    class Meta:
+        unique_together = ('user_id', 'permission_codename', 'permission_id', 'category_id', 'contenttype_id')
+
+#@cache_this(key_has_model_list_permission, timeout=CACHE_TIMEOUT)
 def has_model_list_permission(user, model):
     """ returns True if user has permission to access this model in newman, otherwise False """
-    # TODO speed!
+    # this function takes cca 0.6-7msec both variants (CategoryUserRole or by querying denormalized schema)
     ct = ContentType.objects.get_for_model(model)
-    qs = CategoryUserRole.objects.filter(user=user, group__permissions__content_type=ct)
+    #qs = CategoryUserRole.objects.filter(user=user, group__permissions__content_type=ct)
+    qs = DenormalizedCategoryUserRole.objects.filter(user_id=user.id, contenttype_id=ct.pk).distinct()
     if qs.count():
         return True
     return False
 
-@cache_this(key_has_category_permission, timeout=CACHE_TIMEOUT)
+#@cache_this(key_has_category_permission, timeout=CACHE_TIMEOUT)
 def has_category_permission(user, category, permission):
     if user.has_perm(permission):
         return True
 
-    cats = applicable_categories(user, permission)
-    if category.pk in cats:
+    #takes 0.5..2 msec 
+    qs = DenormalizedCategoryUserRole.objects.filter(
+        user_id=user.id, 
+        permission_codename=permission,
+        category_id=category.pk
+    )
+    if qs.count():
         return True
     return False
 
 def cat_children(cats):
     """ Returns all nested categories as list. cats parameter is list or tuple. """
-    # TODO speed!
     sub_cats = map(None, cats)
     for c in cats:
         out = Category.objects.filter( tree_parent=c )
         map( lambda o: sub_cats.append(o), cat_children(out) )
     return sub_cats
 
-@cache_this(key_applicable_categories, timeout=CACHE_TIMEOUT)
-def applicable_categories(user, permission=None):
+#@cache_this(key_applicable_categories, timeout=CACHE_TIMEOUT)
+def compute_applicable_categories(user, permission=None):
     if user.is_superuser:
         all = Category.objects.all()
         return [ d.pk for d in all ]
@@ -217,6 +250,23 @@ def applicable_categories(user, permission=None):
     app_cats = cat_children(cats)
     return [ d.pk for d in app_cats ]
 
+def applicable_categories(user, permission=None):
+    # takes approx. 5-16msec , old version took 250+ msec
+    if user.is_superuser:
+        all = Category.objects.all()
+        return [ d.pk for d in all ]
+    if permission:
+        qs = DenormalizedCategoryUserRole.objects.filter(
+            user_id=user.id, 
+            permission_codename=permission
+        ).distinct()
+    else:
+        qs = DenormalizedCategoryUserRole.objects.filter(
+            user_id=user.id, 
+            category_id=category.pk
+        ).distinct()
+    return map(lambda x: x.category_id, qs)
+
 def permission_filtered_model_qs(queryset, model, user, permissions=[]):
     """ returns Queryset filtered accordingly to given permissions """
     if user.is_superuser:
@@ -224,17 +274,18 @@ def permission_filtered_model_qs(queryset, model, user, permissions=[]):
     q = queryset
     qs = query.EmptyQuerySet()
     if 'category' in model._meta.get_all_field_names():
-        categories = set()
-        for p in permissions:
-            cats = applicable_categories(user, p)
-            map( lambda c: categories.add(c), cats )
+        cat_qs = DenormalizedCategoryUserRole.objects.filter(
+            user_id=user.pk, 
+            permission_codename__in=permissions
+        ).distinct()
+        categories = map( lambda c: c.category_id, cat_qs )
 
         if categories:
             # TODO: terrible hack for circumventing invalid Q( __in=[] ) | Q( __in=[] )
             if queryset.model == Category:
-                qs = q.filter( Q( pk__in=categories ) )
+                qs = q.filter( pk__in=categories )
             else:
-                qs = q.filter( Q( category__in=categories ) )
+                qs = q.filter( category__in=categories )
     return qs
 
 def is_category_fk(db_field):
