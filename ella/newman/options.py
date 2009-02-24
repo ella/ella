@@ -245,7 +245,7 @@ class NewmanModelAdmin(admin.ModelAdmin):
         view_perm = '%s.view_%s' % ( opts.app_label, opts.object_name.lower() )
         can_view = models.has_category_permission( request.user, obj.category, view_perm )
         can_change = models.has_category_permission( request.user, obj.category, change_perm )
-        
+
         if request.method == 'POST' and can_change:
             return True
         elif request.method == 'GET' and (can_view or can_change):
@@ -340,9 +340,25 @@ class NewmanModelAdmin(admin.ModelAdmin):
             raw_media.extend(media._css['screen'])
         raw_media.extend(media._js)
 
+        # raw form dict
+        raw_form = {}
+        fn = 0
+        for fieldset in adminForm:
+            raw_form[fn] = {
+                'name': fieldset.name,
+                'description': fieldset.description,
+                'fields': {}
+            }
+            for line in fieldset:
+                for field in line:
+                    raw_form[fn]['fields'][field.field.name] = field.field
+
+            fn = fn+1
+
         context = {
             'title': _('Change %s') % force_unicode(opts.verbose_name),
             'adminform': adminForm,
+            'raw_form': raw_form,
             'object_id': object_id,
             'original': obj,
             'is_popup': request.REQUEST.has_key('_popup'),
@@ -494,7 +510,7 @@ class BaseGenericInlineFormSet(DJBaseGenericInlineFormSet):
                 form._errors[field_name] = err_list
         user = self.form._magic_user
 
-        # Adding new object 
+        # Adding new object
         for form in self.extra_forms:
             if not form.has_changed():
                 continue
@@ -546,7 +562,7 @@ class BaseGenericInlineFormSet(DJBaseGenericInlineFormSet):
         user = self.form._magic_user
         self.restrict_field_categories(self.form, user, self.model)
         return super(BaseModelFormSet, self)._construct_form(i, **kwargs)
-    
+
 
 
 class GenericInlineModelAdmin(NewmanInlineModelAdmin):
