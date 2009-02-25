@@ -3,6 +3,7 @@ from django.contrib import admin as django_admin
 from django.shortcuts import render_to_response
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ImproperlyConfigured
+from ella.newman.forms import SiteFilterForm
 
 
 class NewmanSite(django_admin.AdminSite):
@@ -72,9 +73,12 @@ class NewmanSite(django_admin.AdminSite):
         Displays the main Newman index page, without installed apps.
         """
 
+        site_filter_form = SiteFilterForm(user=request.user)
+
         context = {
             'title': _('Site administration'),
-}
+            'site_filter_form': site_filter_form,
+        }
         context.update(extra_context or {})
         return render_to_response(self.index_template or 'admin/index.html', context,
             context_instance=template.RequestContext(request)
