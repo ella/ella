@@ -43,3 +43,7 @@ class TestCategory(DatabaseTestCase):
         )
 
         self.assert_equals(u"nested-category/second-nested-category", category_nested_second.tree_path)
+
+    def test_proper_parent(self):
+        self.assert_equals(self.category, self.category_nested.get_tree_parent())
+
