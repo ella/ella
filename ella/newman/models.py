@@ -163,6 +163,9 @@ class CategoryUserRole(models.Model):
 
     def save(self):
         super(CategoryUserRole, self).save()
+        self.sync_denormalized()
+
+    def sync_denormalized(self):
         for p in self.group.permissions.all():
             code = '%s.%s' % (p.content_type.app_label, p.codename)
             cats = compute_applicable_categories(self.user, code)
