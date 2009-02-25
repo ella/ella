@@ -303,6 +303,7 @@ class ArticleOptions(NewmanModelAdmin):
     list_filter = ( 'category__site', 'created', 'category', 'authors', )
     search_fields = ( 'title', 'upper_title', 'perex', 'slug', 'authors__name', 'authors__slug', ) # FIXME: 'tags__tag__name', )
     inlines = [ ArticleContentInlineOptions, PlacementInlineOptions ]
+    suggest_fields = { 'authors': ('name', 'slug',), 'source': ('name', 'url',), 'category': ('title', 'tree_path'), }
 #    if 'ella.tagging' in settings.INSTALLED_APPS:
 #        inlines.append(TaggingInlineOptions)
     prepopulated_fields = { 'slug' : ( 'title', ) }

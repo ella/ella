@@ -31,3 +31,27 @@ class RichTextAreaField(fields.Field):
             raise ValidationError(self.error_messages['syntax_error'])
 
         return value
+
+class GenericSuggestField(fields.ChoiceField):
+
+    def __init__(self, data=[], **kwargs):
+        # i need db_field for blank/required and label, maybe not
+        self.db_field, self.model, self.lookups = data
+        self.widget = widgets.GenericSuggestAdminWidget(data, **kwargs)
+        super(GenericSuggestField, self).__init__(data, **kwargs)
+
+    def clean(self, value):
+        if self.required and value in fields.EMPTY_VALUES:
+            raise ValidationError(self.error_messages['required'])
+        elif value in fields.EMPTY_VALUES:
+            return None
+
+        value = int(value)
+
+        try:
+            value = self.db_field.rel.to.objects.get(pk=value)
+        except self.db_field.rel.to.DoesNotExist:
+            raise ValidationError(self.error_messages['invalid_choice'] % {'value': value})
+
+        return value
+

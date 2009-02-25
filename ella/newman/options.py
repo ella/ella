@@ -28,6 +28,7 @@ from django.forms.formsets import all_valid
 from django.views.decorators.http import require_POST
 from ella.newman.decorators import require_AJAX
 from django.contrib.contenttypes.models import ContentType
+from django.db.models.fields.related import ForeignKey, ManyToManyField
 
 DEFAULT_LIST_PER_PAGE = getattr(settings, 'NEWMAN_LIST_PER_PAGE', 25)
 
@@ -348,7 +349,9 @@ class NewmanModelAdmin(admin.ModelAdmin):
         media = self.media + adminForm.media
 
         inline_admin_formsets = []
+        raw_inlines = {}
         for inline, formset in zip(self.inline_instances, formsets):
+            raw_inlines[str(inline.model._meta)] = inline.form
             fieldsets = list(inline.get_fieldsets(request, obj))
             inline_admin_formset = helpers.InlineAdminFormSet(inline, formset, fieldsets)
             inline_admin_formsets.append(inline_admin_formset)
@@ -360,44 +363,29 @@ class NewmanModelAdmin(admin.ModelAdmin):
             raw_media.extend(media._css['screen'])
         raw_media.extend(media._js)
 
-        # raw form dict
-        raw_form = {}
-        fn = 0
-        for fieldset in adminForm:
-            raw_form[fn] = {
-                'name': fieldset.name,
-                'description': fieldset.description,
-                'fields': {}
-            }
-            for line in fieldset:
-                for field in line:
-                    raw_form[fn]['fields'][field.field.name] = field.field
-
-            fn = fn+1
-
-        raw_inlines = {}
-        rfset_n = 0
-        for rformset in inline_admin_formsets:
-            raw_inlines[rfset_n] = {}
-            rform_n = 0
-            for rform in rformset:
-                raw_inlines[rfset_n][rform_n] = {}
-                rfieldset_n = 0
-                for inlinefieldset in rform:
-                    raw_inlines[rfset_n][rform_n][rfieldset_n] = {
-                        'name': inlinefieldset.name,
-                        'description': inlinefieldset.description,
-                        'fields': {}
-                    }
-                    for line in inlinefieldset:
-                        for field in line:
-                            raw_inlines[rfset_n][rform_n][rfieldset_n]['fields'][field.field.name] = field.field
-                    rfieldset_n = rfieldset_n+1
-                rform_n = rform_n+1
-            rfset_n = rfset_n+1
+#        raw_inlines = {}
+#        rfset_n = 0
+#        for rformset in inline_admin_formsets:
+#            raw_inlines[rfset_n] = {}
+#            rform_n = 0
+#            for rform in rformset:
+#                raw_inlines[rfset_n][rform_n] = {}
+#                rfieldset_n = 0
+#                for inlinefieldset in rform:
+#                    raw_inlines[rfset_n][rform_n][rfieldset_n] = {
+#                        'name': inlinefieldset.name,
+#                        'description': inlinefieldset.description,
+#                        'fields': {}
+#                    }
+#                    for line in inlinefieldset:
+#                        for field in line:
+#                            raw_inlines[rfset_n][rform_n][rfieldset_n]['fields'][field.field.name] = field.field
+#                    rfieldset_n = rfieldset_n+1
+#                rform_n = rform_n+1
+#            rfset_n = rfset_n+1
 
         raw_frm_all = {
-            'form': raw_form,
+            'form': form,
             'inlines': raw_inlines
         }
 
@@ -445,6 +433,18 @@ class NewmanModelAdmin(admin.ModelAdmin):
                 if css_class:
                     rich_text_field.widget.attrs['class'] += ' %s' % css_class
                 return rich_text_field
+
+        if db_field.name in getattr(self, 'suggest_fields', {}).keys() and isinstance(db_field, (ForeignKey, ManyToManyField)):
+            kwargs.update({
+                'required': not db_field.blank,
+                'label': db_field.verbose_name,
+            })
+            if isinstance(db_field, ForeignKey):
+                return fields.GenericSuggestField([db_field, self.model, self.suggest_fields[db_field.name]], **kwargs)
+            #return fields.GenericSuggestFieldMultiple([db_field, self.model, self.suggest_fields[db_field.name]], **kwargs)
+
+
+
         # filtering category field choices
         if models.is_category_fk(db_field):
             fld = super(NewmanModelAdmin, self).formfield_for_dbfield(db_field, **kwargs)
