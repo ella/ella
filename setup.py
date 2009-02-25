@@ -3,7 +3,7 @@ borrowed install script from django project
 sligthly modified because of another dir hierarchy
 """
 
-from distutils.core import setup
+from setuptools import setup
 from distutils.command.install import INSTALL_SCHEMES
 import os
 import sys
