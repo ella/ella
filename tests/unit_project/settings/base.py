@@ -1,9 +1,11 @@
 import logging.config
-from os.path import dirname, join, isfile
+from os.path import dirname, join, isfile, normpath, pardir
+
+FILE_ROOT = normpath(join(dirname(__file__), pardir))
 
 USE_I18N = True
 
-MEDIA_ROOT = join(dirname(testbed.__file__), 'static')
+MEDIA_ROOT = join(FILE_ROOT, 'static')
 
 MEDIA_URL = '/static/testbed'
 
@@ -29,7 +31,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    join(dirname(testbed.__file__), 'templates'),
+    join(FILE_ROOT, 'templates'),
 
 )
 
@@ -38,6 +40,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 )
 
 INSTALLED_APPS = (
+    'ella.core',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
