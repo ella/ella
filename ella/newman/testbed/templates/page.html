@@ -1,0 +1,37 @@
+<h1>page.html</h1>
+
+<h2>container1</h2>
+{% block "container1" %}
+{{ layout.containers.0|join:"" }}
+{% endblock %}
+
+<h2>container2</h2>
+{% block "container2" %}
+{{ layout.containers.1|join:"" }}
+{% endblock %}
+
+<h2>container3</h2>
+{% block "container3" %}
+{{ layout.containers.2|join:"" }}
+{% endblock %}
+
+<h2>container4</h2>
+{% block "container4" %}
+{{ layout.containers.3|join:"" }}
+{% endblock %}
+
+<h2>container5</h2>
+{% block "container5" %}
+{{ layout.containers.4|join:"" }}
+{% endblock %}
+
+<h2>staticcontainer1</h2>
+{% block "staticcontainer1" %}
+{{ layout.static_containers.0|join:"" }}
+{% endblock %}
+
+<h2>staticcontainer2</h2>
+{% block "staticcontainer2" %}
+{{ layout.static_containers.1|join:"" }}
+{% endblock %}
+

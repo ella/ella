@@ -1,0 +1,12 @@
+- fields:
+    category: [317, 25]
+    group: 12
+    user: 6235868
+  model: newman.categoryuserrole
+  pk: 1
+- fields:
+    category: [317]
+    group: 13
+    user: 6235868
+  model: newman.categoryuserrole
+  pk: 2

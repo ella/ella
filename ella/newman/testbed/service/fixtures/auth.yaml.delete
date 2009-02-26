@@ -1,0 +1,1811 @@
+- fields: {codename: add_logentry, content_type: 8, name: Can add log entry}
+  model: auth.permission
+  pk: 22
+- fields: {codename: delete_logentry, content_type: 8, name: Can delete log entry}
+  model: auth.permission
+  pk: 24
+- fields: {codename: change_logentry, content_type: 8, name: Can change log entry}
+  model: auth.permission
+  pk: 23
+- fields: {codename: view_logentry, content_type: 8, name: Can view log entry}
+  model: auth.permission
+  pk: 216
+- fields: {codename: add_categorysectionmapping, content_type: 43, name: Can add Category
+      - section mapping}
+  model: auth.permission
+  pk: 124
+- fields: {codename: add_siteservermapping, content_type: 44, name: Can add Site -
+      server mapping}
+  model: auth.permission
+  pk: 121
+- fields: {codename: delete_categorysectionmapping, content_type: 43, name: Can delete
+      Category - section mapping}
+  model: auth.permission
+  pk: 126
+- fields: {codename: delete_siteservermapping, content_type: 44, name: Can delete
+      Site - server mapping}
+  model: auth.permission
+  pk: 123
+- fields: {codename: change_categorysectionmapping, content_type: 43, name: Can change
+      Category - section mapping}
+  model: auth.permission
+  pk: 125
+- fields: {codename: change_siteservermapping, content_type: 44, name: Can change
+      Site - server mapping}
+  model: auth.permission
+  pk: 122
+- fields: {codename: view_categorysectionmapping, content_type: 43, name: Can view
+      Category - section mapping}
+  model: auth.permission
+  pk: 173
+- fields: {codename: view_siteservermapping, content_type: 44, name: Can view Site
+      - server mapping}
+  model: auth.permission
+  pk: 172
+- fields: {codename: add_answer, content_type: 101, name: Can add answer}
+  model: auth.permission
+  pk: 433
+- fields: {codename: add_question, content_type: 105, name: Can add question}
+  model: auth.permission
+  pk: 430
+- fields: {codename: add_questiongroup, content_type: 103, name: Can add question
+      group}
+  model: auth.permission
+  pk: 437
+- fields: {codename: can_answer_as_expert, content_type: 101, name: Can answer as
+      an expert}
+  model: auth.permission
+  pk: 436
+- fields: {codename: delete_answer, content_type: 101, name: Can delete answer}
+  model: auth.permission
+  pk: 435
+- fields: {codename: delete_question, content_type: 105, name: Can delete question}
+  model: auth.permission
+  pk: 432
+- fields: {codename: delete_questiongroup, content_type: 103, name: Can delete question
+      group}
+  model: auth.permission
+  pk: 439
+- fields: {codename: change_answer, content_type: 101, name: Can change answer}
+  model: auth.permission
+  pk: 434
+- fields: {codename: change_question, content_type: 105, name: Can change question}
+  model: auth.permission
+  pk: 431
+- fields: {codename: change_questiongroup, content_type: 103, name: Can change question
+      group}
+  model: auth.permission
+  pk: 438
+- fields: {codename: view_answer, content_type: 101, name: Can view answer}
+  model: auth.permission
+  pk: 505
+- fields: {codename: view_question, content_type: 105, name: Can view question}
+  model: auth.permission
+  pk: 504
+- fields: {codename: view_questiongroup, content_type: 103, name: Can view question
+      group}
+  model: auth.permission
+  pk: 506
+- fields: {codename: add_article, content_type: 16, name: Can add Article}
+  model: auth.permission
+  pk: 46
+- fields: {codename: add_articlecontents, content_type: 17, name: Can add Article
+      content}
+  model: auth.permission
+  pk: 49
+- fields: {codename: add_infobox, content_type: 39, name: Can add Info box}
+  model: auth.permission
+  pk: 115
+- fields: {codename: delete_article, content_type: 16, name: Can delete Article}
+  model: auth.permission
+  pk: 48
+- fields: {codename: delete_articlecontents, content_type: 17, name: Can delete Article
+      content}
+  model: auth.permission
+  pk: 51
+- fields: {codename: delete_infobox, content_type: 39, name: Can delete Info box}
+  model: auth.permission
+  pk: 117
+- fields: {codename: change_article, content_type: 16, name: Can change Article}
+  model: auth.permission
+  pk: 47
+- fields: {codename: change_articlecontents, content_type: 17, name: Can change Article
+      content}
+  model: auth.permission
+  pk: 50
+- fields: {codename: change_infobox, content_type: 39, name: Can change Info box}
+  model: auth.permission
+  pk: 116
+- fields: {codename: view_article, content_type: 16, name: Can view Article}
+  model: auth.permission
+  pk: 149
+- fields: {codename: view_articlecontents, content_type: 17, name: Can view Article
+      content}
+  model: auth.permission
+  pk: 150
+- fields: {codename: view_infobox, content_type: 39, name: Can view Info box}
+  model: auth.permission
+  pk: 148
+- fields: {codename: add_astrolex, content_type: 86, name: Can add Lexicon term}
+  model: auth.permission
+  pk: 541
+- fields: {codename: add_birthperiod, content_type: 83, name: Can add Birth period}
+  model: auth.permission
+  pk: 268
+- fields: {codename: add_horoscope, content_type: 74, name: Can add Horoscope}
+  model: auth.permission
+  pk: 241
+- fields: {codename: add_lifenumber, content_type: 89, name: Can add Life number}
+  model: auth.permission
+  pk: 544
+- fields: {codename: add_lunardiary, content_type: 77, name: Can add Lunar diary}
+  model: auth.permission
+  pk: 250
+- fields: {codename: add_lunardiarycategory, content_type: 84, name: Can add Lunar
+      diary category}
+  model: auth.permission
+  pk: 271
+- fields: {codename: add_moon, content_type: 87, name: Can add Moon in Sign}
+  model: auth.permission
+  pk: 556
+- fields: {codename: add_numerologygrid, content_type: 88, name: Can add Numerology
+      grid number}
+  model: auth.permission
+  pk: 553
+- fields: {codename: add_prognosis, content_type: 81, name: Can add Prognosis}
+  model: auth.permission
+  pk: 262
+- fields: {codename: add_prognosisduration, content_type: 82, name: Can add Prognosis
+      duration}
+  model: auth.permission
+  pk: 265
+- fields: {codename: add_prognosistype, content_type: 79, name: Can add Prognosis
+      type}
+  model: auth.permission
+  pk: 256
+- fields: {codename: add_sign, content_type: 80, name: Can add Sign}
+  model: auth.permission
+  pk: 259
+- fields: {codename: add_signcompatibility, content_type: 78, name: Can add Sign compatibility}
+  model: auth.permission
+  pk: 253
+- fields: {codename: add_signdescription, content_type: 75, name: Can add Sign description}
+  model: auth.permission
+  pk: 244
+- fields: {codename: add_signdescriptiontype, content_type: 76, name: Can add Sign
+      description type}
+  model: auth.permission
+  pk: 247
+- fields: {codename: add_stone, content_type: 85, name: Can add Stone}
+  model: auth.permission
+  pk: 547
+- fields: {codename: add_stoneforsign, content_type: 147, name: Can add Stone for
+      Sign}
+  model: auth.permission
+  pk: 550
+- fields: {codename: delete_astrolex, content_type: 86, name: Can delete Lexicon term}
+  model: auth.permission
+  pk: 543
+- fields: {codename: delete_birthperiod, content_type: 83, name: Can delete Birth
+      period}
+  model: auth.permission
+  pk: 270
+- fields: {codename: delete_horoscope, content_type: 74, name: Can delete Horoscope}
+  model: auth.permission
+  pk: 243
+- fields: {codename: delete_lifenumber, content_type: 89, name: Can delete Life number}
+  model: auth.permission
+  pk: 546
+- fields: {codename: delete_lunardiary, content_type: 77, name: Can delete Lunar diary}
+  model: auth.permission
+  pk: 252
+- fields: {codename: delete_lunardiarycategory, content_type: 84, name: Can delete
+      Lunar diary category}
+  model: auth.permission
+  pk: 273
+- fields: {codename: delete_moon, content_type: 87, name: Can delete Moon in Sign}
+  model: auth.permission
+  pk: 558
+- fields: {codename: delete_numerologygrid, content_type: 88, name: Can delete Numerology
+      grid number}
+  model: auth.permission
+  pk: 555
+- fields: {codename: delete_prognosis, content_type: 81, name: Can delete Prognosis}
+  model: auth.permission
+  pk: 264
+- fields: {codename: delete_prognosisduration, content_type: 82, name: Can delete
+      Prognosis duration}
+  model: auth.permission
+  pk: 267
+- fields: {codename: delete_prognosistype, content_type: 79, name: Can delete Prognosis
+      type}
+  model: auth.permission
+  pk: 258
+- fields: {codename: delete_sign, content_type: 80, name: Can delete Sign}
+  model: auth.permission
+  pk: 261
+- fields: {codename: delete_signcompatibility, content_type: 78, name: Can delete
+      Sign compatibility}
+  model: auth.permission
+  pk: 255
+- fields: {codename: delete_signdescription, content_type: 75, name: Can delete Sign
+      description}
+  model: auth.permission
+  pk: 246
+- fields: {codename: delete_signdescriptiontype, content_type: 76, name: Can delete
+      Sign description type}
+  model: auth.permission
+  pk: 249
+- fields: {codename: delete_stone, content_type: 85, name: Can delete Stone}
+  model: auth.permission
+  pk: 549
+- fields: {codename: delete_stoneforsign, content_type: 147, name: Can delete Stone
+      for Sign}
+  model: auth.permission
+  pk: 552
+- fields: {codename: change_astrolex, content_type: 86, name: Can change Lexicon term}
+  model: auth.permission
+  pk: 542
+- fields: {codename: change_birthperiod, content_type: 83, name: Can change Birth
+      period}
+  model: auth.permission
+  pk: 269
+- fields: {codename: change_horoscope, content_type: 74, name: Can change Horoscope}
+  model: auth.permission
+  pk: 242
+- fields: {codename: change_lifenumber, content_type: 89, name: Can change Life number}
+  model: auth.permission
+  pk: 545
+- fields: {codename: change_lunardiary, content_type: 77, name: Can change Lunar diary}
+  model: auth.permission
+  pk: 251
+- fields: {codename: change_lunardiarycategory, content_type: 84, name: Can change
+      Lunar diary category}
+  model: auth.permission
+  pk: 272
+- fields: {codename: change_moon, content_type: 87, name: Can change Moon in Sign}
+  model: auth.permission
+  pk: 557
+- fields: {codename: change_numerologygrid, content_type: 88, name: Can change Numerology
+      grid number}
+  model: auth.permission
+  pk: 554
+- fields: {codename: change_prognosis, content_type: 81, name: Can change Prognosis}
+  model: auth.permission
+  pk: 263
+- fields: {codename: change_prognosisduration, content_type: 82, name: Can change
+      Prognosis duration}
+  model: auth.permission
+  pk: 266
+- fields: {codename: change_prognosistype, content_type: 79, name: Can change Prognosis
+      type}
+  model: auth.permission
+  pk: 257
+- fields: {codename: change_sign, content_type: 80, name: Can change Sign}
+  model: auth.permission
+  pk: 260
+- fields: {codename: change_signcompatibility, content_type: 78, name: Can change
+      Sign compatibility}
+  model: auth.permission
+  pk: 254
+- fields: {codename: change_signdescription, content_type: 75, name: Can change Sign
+      description}
+  model: auth.permission
+  pk: 245
+- fields: {codename: change_signdescriptiontype, content_type: 76, name: Can change
+      Sign description type}
+  model: auth.permission
+  pk: 248
+- fields: {codename: change_stone, content_type: 85, name: Can change Stone}
+  model: auth.permission
+  pk: 548
+- fields: {codename: change_stoneforsign, content_type: 147, name: Can change Stone
+      for Sign}
+  model: auth.permission
+  pk: 551
+- fields: {codename: view_astrolex, content_type: 86, name: Can view Lexicon term}
+  model: auth.permission
+  pk: 559
+- fields: {codename: view_birthperiod, content_type: 83, name: Can view Birth period}
+  model: auth.permission
+  pk: 283
+- fields: {codename: view_horoscope, content_type: 74, name: Can view Horoscope}
+  model: auth.permission
+  pk: 274
+- fields: {codename: view_lifenumber, content_type: 89, name: Can view Life number}
+  model: auth.permission
+  pk: 560
+- fields: {codename: view_lunardiary, content_type: 77, name: Can view Lunar diary}
+  model: auth.permission
+  pk: 277
+- fields: {codename: view_lunardiarycategory, content_type: 84, name: Can view Lunar
+      diary category}
+  model: auth.permission
+  pk: 284
+- fields: {codename: view_moon, content_type: 87, name: Can view Moon in Sign}
+  model: auth.permission
+  pk: 564
+- fields: {codename: view_numerologygrid, content_type: 88, name: Can view Numerology
+      grid number}
+  model: auth.permission
+  pk: 563
+- fields: {codename: view_prognosis, content_type: 81, name: Can view Prognosis}
+  model: auth.permission
+  pk: 281
+- fields: {codename: view_prognosisduration, content_type: 82, name: Can view Prognosis
+      duration}
+  model: auth.permission
+  pk: 282
+- fields: {codename: view_prognosistype, content_type: 79, name: Can view Prognosis
+      type}
+  model: auth.permission
+  pk: 279
+- fields: {codename: view_sign, content_type: 80, name: Can view Sign}
+  model: auth.permission
+  pk: 280
+- fields: {codename: view_signcompatibility, content_type: 78, name: Can view Sign
+      compatibility}
+  model: auth.permission
+  pk: 278
+- fields: {codename: view_signdescription, content_type: 75, name: Can view Sign description}
+  model: auth.permission
+  pk: 275
+- fields: {codename: view_signdescriptiontype, content_type: 76, name: Can view Sign
+      description type}
+  model: auth.permission
+  pk: 276
+- fields: {codename: view_stone, content_type: 85, name: Can view Stone}
+  model: auth.permission
+  pk: 561
+- fields: {codename: view_stoneforsign, content_type: 147, name: Can view Stone for
+      Sign}
+  model: auth.permission
+  pk: 562
+- fields: {codename: add_attachment, content_type: 97, name: Can add Attachment}
+  model: auth.permission
+  pk: 427
+- fields: {codename: add_type, content_type: 95, name: Can add Type}
+  model: auth.permission
+  pk: 424
+- fields: {codename: delete_attachment, content_type: 97, name: Can delete Attachment}
+  model: auth.permission
+  pk: 429
+- fields: {codename: delete_type, content_type: 95, name: Can delete Type}
+  model: auth.permission
+  pk: 426
+- fields: {codename: change_attachment, content_type: 97, name: Can change Attachment}
+  model: auth.permission
+  pk: 428
+- fields: {codename: change_type, content_type: 95, name: Can change Type}
+  model: auth.permission
+  pk: 425
+- fields: {codename: view_attachment, content_type: 97, name: Can view Attachment}
+  model: auth.permission
+  pk: 503
+- fields: {codename: view_type, content_type: 95, name: Can view Type}
+  model: auth.permission
+  pk: 502
+- fields: {codename: add_group, content_type: 2, name: Can add group}
+  model: auth.permission
+  pk: 4
+- fields: {codename: add_message, content_type: 1, name: Can add message}
+  model: auth.permission
+  pk: 1
+- fields: {codename: add_permission, content_type: 4, name: Can add permission}
+  model: auth.permission
+  pk: 10
+- fields: {codename: add_user, content_type: 3, name: Can add user}
+  model: auth.permission
+  pk: 7
+- fields: {codename: delete_group, content_type: 2, name: Can delete group}
+  model: auth.permission
+  pk: 6
+- fields: {codename: delete_message, content_type: 1, name: Can delete message}
+  model: auth.permission
+  pk: 3
+- fields: {codename: delete_permission, content_type: 4, name: Can delete permission}
+  model: auth.permission
+  pk: 12
+- fields: {codename: delete_user, content_type: 3, name: Can delete user}
+  model: auth.permission
+  pk: 9
+- fields: {codename: change_group, content_type: 2, name: Can change group}
+  model: auth.permission
+  pk: 5
+- fields: {codename: change_message, content_type: 1, name: Can change message}
+  model: auth.permission
+  pk: 2
+- fields: {codename: change_permission, content_type: 4, name: Can change permission}
+  model: auth.permission
+  pk: 11
+- fields: {codename: change_user, content_type: 3, name: Can change user}
+  model: auth.permission
+  pk: 8
+- fields: {codename: view_group, content_type: 2, name: Can view group}
+  model: auth.permission
+  pk: 134
+- fields: {codename: view_message, content_type: 1, name: Can view message}
+  model: auth.permission
+  pk: 133
+- fields: {codename: view_permission, content_type: 4, name: Can view permission}
+  model: auth.permission
+  pk: 136
+- fields: {codename: view_user, content_type: 3, name: Can view user}
+  model: auth.permission
+  pk: 135
+- fields: {codename: add_categorylock, content_type: 99, name: Can add Category Lock}
+  model: auth.permission
+  pk: 421
+- fields: {codename: delete_categorylock, content_type: 99, name: Can delete Category
+      Lock}
+  model: auth.permission
+  pk: 423
+- fields: {codename: change_categorylock, content_type: 99, name: Can change Category
+      Lock}
+  model: auth.permission
+  pk: 422
+- fields: {codename: view_categorylock, content_type: 99, name: Can view Category
+      Lock}
+  model: auth.permission
+  pk: 501
+- fields: {codename: add_format, content_type: 113, name: Can add format}
+  model: auth.permission
+  pk: 342
+- fields: {codename: add_source, content_type: 114, name: Can add source}
+  model: auth.permission
+  pk: 345
+- fields: {codename: add_target, content_type: 115, name: Can add target}
+  model: auth.permission
+  pk: 348
+- fields: {codename: delete_format, content_type: 113, name: Can delete format}
+  model: auth.permission
+  pk: 344
+- fields: {codename: delete_source, content_type: 114, name: Can delete source}
+  model: auth.permission
+  pk: 347
+- fields: {codename: delete_target, content_type: 115, name: Can delete target}
+  model: auth.permission
+  pk: 350
+- fields: {codename: change_format, content_type: 113, name: Can change format}
+  model: auth.permission
+  pk: 343
+- fields: {codename: change_source, content_type: 114, name: Can change source}
+  model: auth.permission
+  pk: 346
+- fields: {codename: change_target, content_type: 115, name: Can change target}
+  model: auth.permission
+  pk: 349
+- fields: {codename: view_format, content_type: 113, name: Can view format}
+  model: auth.permission
+  pk: 351
+- fields: {codename: view_source, content_type: 114, name: Can view source}
+  model: auth.permission
+  pk: 352
+- fields: {codename: view_target, content_type: 115, name: Can view target}
+  model: auth.permission
+  pk: 353
+- fields: {codename: add_bannedip, content_type: 20, name: Can add banned ip}
+  model: auth.permission
+  pk: 58
+- fields: {codename: add_banneduser, content_type: 21, name: Can add Banned User}
+  model: auth.permission
+  pk: 61
+- fields: {codename: add_comment, content_type: 18, name: Can add Comment}
+  model: auth.permission
+  pk: 52
+- fields: {codename: add_commentoptions, content_type: 19, name: Can add Comment Options}
+  model: auth.permission
+  pk: 55
+- fields: {codename: delete_bannedip, content_type: 20, name: Can delete banned ip}
+  model: auth.permission
+  pk: 60
+- fields: {codename: delete_banneduser, content_type: 21, name: Can delete Banned
+      User}
+  model: auth.permission
+  pk: 63
+- fields: {codename: delete_comment, content_type: 18, name: Can delete Comment}
+  model: auth.permission
+  pk: 54
+- fields: {codename: delete_commentoptions, content_type: 19, name: Can delete Comment
+      Options}
+  model: auth.permission
+  pk: 57
+- fields: {codename: change_bannedip, content_type: 20, name: Can change banned ip}
+  model: auth.permission
+  pk: 59
+- fields: {codename: change_banneduser, content_type: 21, name: Can change Banned
+      User}
+  model: auth.permission
+  pk: 62
+- fields: {codename: change_comment, content_type: 18, name: Can change Comment}
+  model: auth.permission
+  pk: 53
+- fields: {codename: change_commentoptions, content_type: 19, name: Can change Comment
+      Options}
+  model: auth.permission
+  pk: 56
+- fields: {codename: view_bannedip, content_type: 20, name: Can view banned ip}
+  model: auth.permission
+  pk: 153
+- fields: {codename: view_banneduser, content_type: 21, name: Can view Banned User}
+  model: auth.permission
+  pk: 154
+- fields: {codename: view_comment, content_type: 18, name: Can view Comment}
+  model: auth.permission
+  pk: 151
+- fields: {codename: view_commentoptions, content_type: 19, name: Can view Comment
+      Options}
+  model: auth.permission
+  pk: 152
+- fields: {codename: add_message, content_type: 123, name: Can add Contact form message}
+  model: auth.permission
+  pk: 409
+- fields: {codename: add_recipient, content_type: 121, name: Can add Contact form
+      recipient}
+  model: auth.permission
+  pk: 403
+- fields: {codename: delete_message, content_type: 123, name: Can delete Contact form
+      message}
+  model: auth.permission
+  pk: 413
+- fields: {codename: delete_recipient, content_type: 121, name: Can delete Contact
+      form recipient}
+  model: auth.permission
+  pk: 407
+- fields: {codename: change_message, content_type: 123, name: Can change Contact form
+      message}
+  model: auth.permission
+  pk: 411
+- fields: {codename: change_recipient, content_type: 121, name: Can change Contact
+      form recipient}
+  model: auth.permission
+  pk: 405
+- fields: {codename: view_message, content_type: 123, name: Can view Contact form
+      message}
+  model: auth.permission
+  pk: 417
+- fields: {codename: view_recipient, content_type: 121, name: Can view Contact form
+      recipient}
+  model: auth.permission
+  pk: 415
+- fields: {codename: add_contenttype, content_type: 5, name: Can add content type}
+  model: auth.permission
+  pk: 13
+- fields: {codename: delete_contenttype, content_type: 5, name: Can delete content
+      type}
+  model: auth.permission
+  pk: 15
+- fields: {codename: change_contenttype, content_type: 5, name: Can change content
+      type}
+  model: auth.permission
+  pk: 14
+- fields: {codename: view_contenttype, content_type: 5, name: Can view content type}
+  model: auth.permission
+  pk: 137
+- fields: {codename: add_author, content_type: 12, name: Can add Author}
+  model: auth.permission
+  pk: 34
+- fields: {codename: add_category, content_type: 10, name: Can add Category}
+  model: auth.permission
+  pk: 28
+- fields: {codename: add_hitcount, content_type: 40, name: Can add Hot Count}
+  model: auth.permission
+  pk: 118
+- fields: {codename: add_listing, content_type: 15, name: Can add Listing}
+  model: auth.permission
+  pk: 43
+- fields: {codename: add_placement, content_type: 63, name: Can add Placement}
+  model: auth.permission
+  pk: 221
+- fields: {codename: add_related, content_type: 13, name: Can add Related}
+  model: auth.permission
+  pk: 37
+- fields: {codename: add_source, content_type: 14, name: Can add Source}
+  model: auth.permission
+  pk: 40
+- fields: {codename: delete_author, content_type: 12, name: Can delete Author}
+  model: auth.permission
+  pk: 36
+- fields: {codename: delete_category, content_type: 10, name: Can delete Category}
+  model: auth.permission
+  pk: 30
+- fields: {codename: delete_hitcount, content_type: 40, name: Can delete Hot Count}
+  model: auth.permission
+  pk: 120
+- fields: {codename: delete_listing, content_type: 15, name: Can delete Listing}
+  model: auth.permission
+  pk: 45
+- fields: {codename: delete_placement, content_type: 63, name: Can delete Placement}
+  model: auth.permission
+  pk: 223
+- fields: {codename: delete_related, content_type: 13, name: Can delete Related}
+  model: auth.permission
+  pk: 39
+- fields: {codename: delete_source, content_type: 14, name: Can delete Source}
+  model: auth.permission
+  pk: 42
+- fields: {codename: change_author, content_type: 12, name: Can change Author}
+  model: auth.permission
+  pk: 35
+- fields: {codename: change_category, content_type: 10, name: Can change Category}
+  model: auth.permission
+  pk: 29
+- fields: {codename: change_hitcount, content_type: 40, name: Can change Hot Count}
+  model: auth.permission
+  pk: 119
+- fields: {codename: change_listing, content_type: 15, name: Can change Listing}
+  model: auth.permission
+  pk: 44
+- fields: {codename: change_placement, content_type: 63, name: Can change Placement}
+  model: auth.permission
+  pk: 222
+- fields: {codename: change_related, content_type: 13, name: Can change Related}
+  model: auth.permission
+  pk: 38
+- fields: {codename: change_source, content_type: 14, name: Can change Source}
+  model: auth.permission
+  pk: 41
+- fields: {codename: view_author, content_type: 12, name: Can view Author}
+  model: auth.permission
+  pk: 142
+- fields: {codename: view_category, content_type: 10, name: Can view Category}
+  model: auth.permission
+  pk: 141
+- fields: {codename: view_hitcount, content_type: 40, name: Can view Hit Count}
+  model: auth.permission
+  pk: 145
+- fields: {codename: view_listing, content_type: 15, name: Can view Listing}
+  model: auth.permission
+  pk: 146
+- fields: {codename: view_placement, content_type: 63, name: Can view Placement}
+  model: auth.permission
+  pk: 224
+- fields: {codename: view_related, content_type: 13, name: Can view Related}
+  model: auth.permission
+  pk: 143
+- fields: {codename: view_source, content_type: 14, name: Can view Source}
+  model: auth.permission
+  pk: 144
+- fields: {codename: add_dbtemplate, content_type: 26, name: Can add db template}
+  model: auth.permission
+  pk: 76
+- fields: {codename: add_templateblock, content_type: 25, name: Can add Teplate block}
+  model: auth.permission
+  pk: 73
+- fields: {codename: delete_dbtemplate, content_type: 26, name: Can delete db template}
+  model: auth.permission
+  pk: 78
+- fields: {codename: delete_templateblock, content_type: 25, name: Can delete Teplate
+      block}
+  model: auth.permission
+  pk: 75
+- fields: {codename: change_dbtemplate, content_type: 26, name: Can change db template}
+  model: auth.permission
+  pk: 77
+- fields: {codename: change_templateblock, content_type: 25, name: Can change Teplate
+      block}
+  model: auth.permission
+  pk: 74
+- fields: {codename: view_dbtemplate, content_type: 26, name: Can view Template}
+  model: auth.permission
+  pk: 159
+- fields: {codename: view_templateblock, content_type: 25, name: Can view Teplate
+      block}
+  model: auth.permission
+  pk: 158
+- fields: {codename: add_bannedstring, content_type: 60, name: Can add banned string}
+  model: auth.permission
+  pk: 225
+- fields: {codename: add_banneduser, content_type: 65, name: Can add banned user}
+  model: auth.permission
+  pk: 234
+- fields: {codename: add_postviewed, content_type: 64, name: Can add post viewed}
+  model: auth.permission
+  pk: 228
+- fields: {codename: add_topic, content_type: 45, name: Can add topic}
+  model: auth.permission
+  pk: 184
+- fields: {codename: add_topicthread, content_type: 62, name: Can add Thread}
+  model: auth.permission
+  pk: 231
+- fields: {codename: delete_bannedstring, content_type: 60, name: Can delete banned
+      string}
+  model: auth.permission
+  pk: 227
+- fields: {codename: delete_banneduser, content_type: 65, name: Can delete banned
+      user}
+  model: auth.permission
+  pk: 236
+- fields: {codename: delete_postviewed, content_type: 64, name: Can delete post viewed}
+  model: auth.permission
+  pk: 230
+- fields: {codename: delete_topic, content_type: 45, name: Can delete topic}
+  model: auth.permission
+  pk: 186
+- fields: {codename: delete_topicthread, content_type: 62, name: Can delete Thread}
+  model: auth.permission
+  pk: 233
+- fields: {codename: change_bannedstring, content_type: 60, name: Can change banned
+      string}
+  model: auth.permission
+  pk: 226
+- fields: {codename: change_banneduser, content_type: 65, name: Can change banned
+      user}
+  model: auth.permission
+  pk: 235
+- fields: {codename: change_postviewed, content_type: 64, name: Can change post viewed}
+  model: auth.permission
+  pk: 229
+- fields: {codename: change_topic, content_type: 45, name: Can change topic}
+  model: auth.permission
+  pk: 185
+- fields: {codename: change_topicthread, content_type: 62, name: Can change Thread}
+  model: auth.permission
+  pk: 232
+- fields: {codename: view_bannedstring, content_type: 60, name: Can view banned string}
+  model: auth.permission
+  pk: 237
+- fields: {codename: view_banneduser, content_type: 65, name: Can view banned user}
+  model: auth.permission
+  pk: 240
+- fields: {codename: view_postviewed, content_type: 64, name: Can view post viewed}
+  model: auth.permission
+  pk: 238
+- fields: {codename: view_topic, content_type: 45, name: Can view topic}
+  model: auth.permission
+  pk: 190
+- fields: {codename: view_topicthread, content_type: 62, name: Can view Thread}
+  model: auth.permission
+  pk: 239
+- fields: {codename: add_categoryuserrole, content_type: 56, name: Can add User role
+      in category}
+  model: auth.permission
+  pk: 179
+- fields: {codename: add_siteuserrole, content_type: 57, name: Can add User role in
+      site}
+  model: auth.permission
+  pk: 176
+- fields: {codename: delete_categoryuserrole, content_type: 56, name: Can delete User
+      role in category}
+  model: auth.permission
+  pk: 181
+- fields: {codename: delete_siteuserrole, content_type: 57, name: Can delete User
+      role in site}
+  model: auth.permission
+  pk: 178
+- fields: {codename: change_categoryuserrole, content_type: 56, name: Can change User
+      role in category}
+  model: auth.permission
+  pk: 180
+- fields: {codename: change_siteuserrole, content_type: 57, name: Can change User
+      role in site}
+  model: auth.permission
+  pk: 177
+- fields: {codename: view_categoryuserrole, content_type: 56, name: Can view User
+      role in category}
+  model: auth.permission
+  pk: 183
+- fields: {codename: view_siteuserrole, content_type: 57, name: Can view User role
+      in site}
+  model: auth.permission
+  pk: 182
+- fields: {codename: add_format, content_type: 67, name: Can add format}
+  model: auth.permission
+  pk: 312
+- fields: {codename: add_formattedfile, content_type: 72, name: Can add formatted
+      file}
+  model: auth.permission
+  pk: 309
+- fields: {codename: delete_format, content_type: 67, name: Can delete format}
+  model: auth.permission
+  pk: 314
+- fields: {codename: delete_formattedfile, content_type: 72, name: Can delete formatted
+      file}
+  model: auth.permission
+  pk: 311
+- fields: {codename: change_format, content_type: 67, name: Can change format}
+  model: auth.permission
+  pk: 313
+- fields: {codename: change_formattedfile, content_type: 72, name: Can change formatted
+      file}
+  model: auth.permission
+  pk: 310
+- fields: {codename: view_format, content_type: 67, name: Can view format}
+  model: auth.permission
+  pk: 316
+- fields: {codename: view_formattedfile, content_type: 72, name: Can view formatted
+      file}
+  model: auth.permission
+  pk: 315
+- fields: {codename: add_atlasexport, content_type: 124, name: Can add atlas export}
+  model: auth.permission
+  pk: 418
+- fields: {codename: delete_atlasexport, content_type: 124, name: Can delete atlas
+      export}
+  model: auth.permission
+  pk: 420
+- fields: {codename: change_atlasexport, content_type: 124, name: Can change atlas
+      export}
+  model: auth.permission
+  pk: 419
+- fields: {codename: view_atlasexport, content_type: 124, name: Can view atlas export}
+  model: auth.permission
+  pk: 500
+- fields: {codename: add_gallery, content_type: 28, name: Can add Gallery}
+  model: auth.permission
+  pk: 82
+- fields: {codename: add_galleryitem, content_type: 27, name: Can add Gallery item}
+  model: auth.permission
+  pk: 79
+- fields: {codename: delete_gallery, content_type: 28, name: Can delete Gallery}
+  model: auth.permission
+  pk: 84
+- fields: {codename: delete_galleryitem, content_type: 27, name: Can delete Gallery
+      item}
+  model: auth.permission
+  pk: 81
+- fields: {codename: change_gallery, content_type: 28, name: Can change Gallery}
+  model: auth.permission
+  pk: 83
+- fields: {codename: change_galleryitem, content_type: 27, name: Can change Gallery
+      item}
+  model: auth.permission
+  pk: 80
+- fields: {codename: view_gallery, content_type: 28, name: Can view Gallery}
+  model: auth.permission
+  pk: 161
+- fields: {codename: view_galleryitem, content_type: 27, name: Can view Gallery item}
+  model: auth.permission
+  pk: 160
+- fields: {codename: add_server, content_type: 42, name: Can add Server}
+  model: auth.permission
+  pk: 130
+- fields: {codename: add_serveritem, content_type: 41, name: Can add Server item}
+  model: auth.permission
+  pk: 127
+- fields: {codename: delete_server, content_type: 42, name: Can delete Server}
+  model: auth.permission
+  pk: 132
+- fields: {codename: delete_serveritem, content_type: 41, name: Can delete Server
+      item}
+  model: auth.permission
+  pk: 129
+- fields: {codename: change_server, content_type: 42, name: Can change Server}
+  model: auth.permission
+  pk: 131
+- fields: {codename: change_serveritem, content_type: 41, name: Can change Server
+      item}
+  model: auth.permission
+  pk: 128
+- fields: {codename: view_server, content_type: 42, name: Can view Server}
+  model: auth.permission
+  pk: 175
+- fields: {codename: view_serveritem, content_type: 41, name: Can view Server item}
+  model: auth.permission
+  pk: 174
+- fields: {codename: add_instruction, content_type: 119, name: Can add Instruction}
+  model: auth.permission
+  pk: 398
+- fields: {codename: delete_instruction, content_type: 119, name: Can delete Instruction}
+  model: auth.permission
+  pk: 400
+- fields: {codename: change_instruction, content_type: 119, name: Can change Instruction}
+  model: auth.permission
+  pk: 399
+- fields: {codename: view_instruction, content_type: 119, name: Can view Instruction}
+  model: auth.permission
+  pk: 401
+- fields: {codename: add_answer, content_type: 58, name: Can add Answer}
+  model: auth.permission
+  pk: 206
+- fields: {codename: add_interview, content_type: 55, name: Can add Interview}
+  model: auth.permission
+  pk: 200
+- fields: {codename: add_interviewee, content_type: 53, name: Can add Interviewee}
+  model: auth.permission
+  pk: 209
+- fields: {codename: add_question, content_type: 54, name: Can add Question}
+  model: auth.permission
+  pk: 203
+- fields: {codename: delete_answer, content_type: 58, name: Can delete Answer}
+  model: auth.permission
+  pk: 208
+- fields: {codename: delete_interview, content_type: 55, name: Can delete Interview}
+  model: auth.permission
+  pk: 202
+- fields: {codename: delete_interviewee, content_type: 53, name: Can delete Interviewee}
+  model: auth.permission
+  pk: 211
+- fields: {codename: delete_question, content_type: 54, name: Can delete Question}
+  model: auth.permission
+  pk: 205
+- fields: {codename: change_answer, content_type: 58, name: Can change Answer}
+  model: auth.permission
+  pk: 207
+- fields: {codename: change_interview, content_type: 55, name: Can change Interview}
+  model: auth.permission
+  pk: 201
+- fields: {codename: change_interviewee, content_type: 53, name: Can change Interviewee}
+  model: auth.permission
+  pk: 210
+- fields: {codename: change_question, content_type: 54, name: Can change Question}
+  model: auth.permission
+  pk: 204
+- fields: {codename: view_answer, content_type: 58, name: Can view Answer}
+  model: auth.permission
+  pk: 214
+- fields: {codename: view_interview, content_type: 55, name: Can view Interview}
+  model: auth.permission
+  pk: 212
+- fields: {codename: view_interviewee, content_type: 53, name: Can view Interviewee}
+  model: auth.permission
+  pk: 215
+- fields: {codename: view_question, content_type: 54, name: Can view Question}
+  model: auth.permission
+  pk: 213
+- fields: {codename: add_processor, content_type: 152, name: Can add Text processor}
+  model: auth.permission
+  pk: 583
+- fields: {codename: add_srctext, content_type: 153, name: Can add Text source}
+  model: auth.permission
+  pk: 586
+- fields: {codename: delete_processor, content_type: 152, name: Can delete Text processor}
+  model: auth.permission
+  pk: 585
+- fields: {codename: delete_srctext, content_type: 153, name: Can delete Text source}
+  model: auth.permission
+  pk: 588
+- fields: {codename: change_processor, content_type: 152, name: Can change Text processor}
+  model: auth.permission
+  pk: 584
+- fields: {codename: change_srctext, content_type: 153, name: Can change Text source}
+  model: auth.permission
+  pk: 587
+- fields: {codename: view_processor, content_type: 152, name: Can view Text processor}
+  model: auth.permission
+  pk: 589
+- fields: {codename: view_srctext, content_type: 153, name: Can view Text source}
+  model: auth.permission
+  pk: 590
+- fields: {codename: add_media, content_type: 110, name: Can add Media}
+  model: auth.permission
+  pk: 330
+- fields: {codename: add_section, content_type: 111, name: Can add section}
+  model: auth.permission
+  pk: 333
+- fields: {codename: add_usage, content_type: 112, name: Can add usage}
+  model: auth.permission
+  pk: 336
+- fields: {codename: delete_media, content_type: 110, name: Can delete Media}
+  model: auth.permission
+  pk: 332
+- fields: {codename: delete_section, content_type: 111, name: Can delete section}
+  model: auth.permission
+  pk: 335
+- fields: {codename: delete_usage, content_type: 112, name: Can delete usage}
+  model: auth.permission
+  pk: 338
+- fields: {codename: change_media, content_type: 110, name: Can change Media}
+  model: auth.permission
+  pk: 331
+- fields: {codename: change_section, content_type: 111, name: Can change section}
+  model: auth.permission
+  pk: 334
+- fields: {codename: change_usage, content_type: 112, name: Can change usage}
+  model: auth.permission
+  pk: 337
+- fields: {codename: view_media, content_type: 110, name: Can view Media}
+  model: auth.permission
+  pk: 339
+- fields: {codename: view_section, content_type: 111, name: Can view section}
+  model: auth.permission
+  pk: 340
+- fields: {codename: view_usage, content_type: 112, name: Can view usage}
+  model: auth.permission
+  pk: 341
+- fields: {codename: add_menu, content_type: 66, name: Can add menu}
+  model: auth.permission
+  pk: 288
+- fields: {codename: add_menuitem, content_type: 68, name: Can add Menu item}
+  model: auth.permission
+  pk: 285
+- fields: {codename: delete_menu, content_type: 66, name: Can delete menu}
+  model: auth.permission
+  pk: 290
+- fields: {codename: delete_menuitem, content_type: 68, name: Can delete Menu item}
+  model: auth.permission
+  pk: 287
+- fields: {codename: change_menu, content_type: 66, name: Can change menu}
+  model: auth.permission
+  pk: 289
+- fields: {codename: change_menuitem, content_type: 68, name: Can change Menu item}
+  model: auth.permission
+  pk: 286
+- fields: {codename: view_menu, content_type: 66, name: Can view menu}
+  model: auth.permission
+  pk: 292
+- fields: {codename: view_menuitem, content_type: 68, name: Can view Menu item}
+  model: auth.permission
+  pk: 291
+- fields: {codename: add_admingroupfav, content_type: 149, name: Can add Group fav
+      item}
+  model: auth.permission
+  pk: 570
+- fields: {codename: add_adminhelpitem, content_type: 144, name: Can add Help item}
+  model: auth.permission
+  pk: 528
+- fields: {codename: add_adminsetting, content_type: 148, name: Can add Admin user
+      setting}
+  model: auth.permission
+  pk: 567
+- fields: {codename: add_adminuserdraft, content_type: 145, name: Can add Draft item}
+  model: auth.permission
+  pk: 531
+- fields: {codename: add_adminuserfav, content_type: 146, name: Can add Draft item}
+  model: auth.permission
+  pk: 534
+- fields: {codename: add_categoryuserrole, content_type: 150, name: Can add User role
+      in category}
+  model: auth.permission
+  pk: 573
+- fields: {codename: add_denormalizedcategoryuserrole, content_type: 151, name: Can
+      add denormalized category user role}
+  model: auth.permission
+  pk: 579
+- fields: {codename: add_devmessage, content_type: 143, name: Can add Development
+      message}
+  model: auth.permission
+  pk: 525
+- fields: {codename: delete_admingroupfav, content_type: 149, name: Can delete Group
+      fav item}
+  model: auth.permission
+  pk: 572
+- fields: {codename: delete_adminhelpitem, content_type: 144, name: Can delete Help
+      item}
+  model: auth.permission
+  pk: 530
+- fields: {codename: delete_adminsetting, content_type: 148, name: Can delete Admin
+      user setting}
+  model: auth.permission
+  pk: 569
+- fields: {codename: delete_adminuserdraft, content_type: 145, name: Can delete Draft
+      item}
+  model: auth.permission
+  pk: 533
+- fields: {codename: delete_adminuserfav, content_type: 146, name: Can delete Draft
+      item}
+  model: auth.permission
+  pk: 536
+- fields: {codename: delete_categoryuserrole, content_type: 150, name: Can delete
+      User role in category}
+  model: auth.permission
+  pk: 575
+- fields: {codename: delete_denormalizedcategoryuserrole, content_type: 151, name: Can
+      delete denormalized category user role}
+  model: auth.permission
+  pk: 581
+- fields: {codename: delete_devmessage, content_type: 143, name: Can delete Development
+      message}
+  model: auth.permission
+  pk: 527
+- fields: {codename: change_admingroupfav, content_type: 149, name: Can change Group
+      fav item}
+  model: auth.permission
+  pk: 571
+- fields: {codename: change_adminhelpitem, content_type: 144, name: Can change Help
+      item}
+  model: auth.permission
+  pk: 529
+- fields: {codename: change_adminsetting, content_type: 148, name: Can change Admin
+      user setting}
+  model: auth.permission
+  pk: 568
+- fields: {codename: change_adminuserdraft, content_type: 145, name: Can change Draft
+      item}
+  model: auth.permission
+  pk: 532
+- fields: {codename: change_adminuserfav, content_type: 146, name: Can change Draft
+      item}
+  model: auth.permission
+  pk: 535
+- fields: {codename: change_categoryuserrole, content_type: 150, name: Can change
+      User role in category}
+  model: auth.permission
+  pk: 574
+- fields: {codename: change_denormalizedcategoryuserrole, content_type: 151, name: Can
+      change denormalized category user role}
+  model: auth.permission
+  pk: 580
+- fields: {codename: change_devmessage, content_type: 143, name: Can change Development
+      message}
+  model: auth.permission
+  pk: 526
+- fields: {codename: view_admingroupfav, content_type: 149, name: Can view Group fav
+      item}
+  model: auth.permission
+  pk: 577
+- fields: {codename: view_adminhelpitem, content_type: 144, name: Can view Help item}
+  model: auth.permission
+  pk: 538
+- fields: {codename: view_adminsetting, content_type: 148, name: Can view Admin user
+      setting}
+  model: auth.permission
+  pk: 576
+- fields: {codename: view_adminuserdraft, content_type: 145, name: Can view Draft
+      item}
+  model: auth.permission
+  pk: 539
+- fields: {codename: view_adminuserfav, content_type: 146, name: Can view Draft item}
+  model: auth.permission
+  pk: 540
+- fields: {codename: view_categoryuserrole, content_type: 150, name: Can view User
+      role in category}
+  model: auth.permission
+  pk: 578
+- fields: {codename: view_denormalizedcategoryuserrole, content_type: 151, name: Can
+      view denormalized category user role}
+  model: auth.permission
+  pk: 582
+- fields: {codename: view_devmessage, content_type: 143, name: Can view Development
+      message}
+  model: auth.permission
+  pk: 537
+- fields: {codename: add_newsletter, content_type: 141, name: Can add newsletter}
+  model: auth.permission
+  pk: 494
+- fields: {codename: add_recipient, content_type: 142, name: Can add recipient}
+  model: auth.permission
+  pk: 497
+- fields: {codename: delete_newsletter, content_type: 141, name: Can delete newsletter}
+  model: auth.permission
+  pk: 496
+- fields: {codename: delete_recipient, content_type: 142, name: Can delete recipient}
+  model: auth.permission
+  pk: 499
+- fields: {codename: change_newsletter, content_type: 141, name: Can change newsletter}
+  model: auth.permission
+  pk: 495
+- fields: {codename: change_recipient, content_type: 142, name: Can change recipient}
+  model: auth.permission
+  pk: 498
+- fields: {codename: view_newsletter, content_type: 141, name: Can view newsletter}
+  model: auth.permission
+  pk: 565
+- fields: {codename: view_recipient, content_type: 142, name: Can view recipient}
+  model: auth.permission
+  pk: 566
+- fields: {codename: add_format, content_type: 24, name: Can add Format}
+  model: auth.permission
+  pk: 70
+- fields: {codename: add_formatedphoto, content_type: 23, name: Can add Formated photo}
+  model: auth.permission
+  pk: 67
+- fields: {codename: add_photo, content_type: 22, name: Can add Photo}
+  model: auth.permission
+  pk: 64
+- fields: {codename: delete_format, content_type: 24, name: Can delete Format}
+  model: auth.permission
+  pk: 72
+- fields: {codename: delete_formatedphoto, content_type: 23, name: Can delete Formated
+      photo}
+  model: auth.permission
+  pk: 69
+- fields: {codename: delete_photo, content_type: 22, name: Can delete Photo}
+  model: auth.permission
+  pk: 66
+- fields: {codename: change_format, content_type: 24, name: Can change Format}
+  model: auth.permission
+  pk: 71
+- fields: {codename: change_formatedphoto, content_type: 23, name: Can change Formated
+      photo}
+  model: auth.permission
+  pk: 68
+- fields: {codename: change_photo, content_type: 22, name: Can change Photo}
+  model: auth.permission
+  pk: 65
+- fields: {codename: view_format, content_type: 24, name: Can view Format}
+  model: auth.permission
+  pk: 157
+- fields: {codename: view_formatedphoto, content_type: 23, name: Can view Formated
+      photo}
+  model: auth.permission
+  pk: 156
+- fields: {codename: view_photo, content_type: 22, name: Can view Photo}
+  model: auth.permission
+  pk: 155
+- fields: {codename: add_contest, content_type: 29, name: Can add Contest}
+  model: auth.permission
+  pk: 85
+- fields: {codename: add_contestant, content_type: 35, name: Can add Contestant}
+  model: auth.permission
+  pk: 103
+- fields: {codename: add_choice, content_type: 31, name: Can add Choice}
+  model: auth.permission
+  pk: 91
+- fields: {codename: add_poll, content_type: 36, name: Can add Poll}
+  model: auth.permission
+  pk: 106
+- fields: {codename: add_question, content_type: 30, name: Can add Question}
+  model: auth.permission
+  pk: 88
+- fields: {codename: add_quiz, content_type: 32, name: Can add Quiz}
+  model: auth.permission
+  pk: 94
+- fields: {codename: add_result, content_type: 33, name: Can add Result}
+  model: auth.permission
+  pk: 97
+- fields: {codename: add_vote, content_type: 34, name: Can add Vote}
+  model: auth.permission
+  pk: 100
+- fields: {codename: delete_contest, content_type: 29, name: Can delete Contest}
+  model: auth.permission
+  pk: 87
+- fields: {codename: delete_contestant, content_type: 35, name: Can delete Contestant}
+  model: auth.permission
+  pk: 105
+- fields: {codename: delete_choice, content_type: 31, name: Can delete Choice}
+  model: auth.permission
+  pk: 93
+- fields: {codename: delete_poll, content_type: 36, name: Can delete Poll}
+  model: auth.permission
+  pk: 108
+- fields: {codename: delete_question, content_type: 30, name: Can delete Question}
+  model: auth.permission
+  pk: 90
+- fields: {codename: delete_quiz, content_type: 32, name: Can delete Quiz}
+  model: auth.permission
+  pk: 96
+- fields: {codename: delete_result, content_type: 33, name: Can delete Result}
+  model: auth.permission
+  pk: 99
+- fields: {codename: delete_vote, content_type: 34, name: Can delete Vote}
+  model: auth.permission
+  pk: 102
+- fields: {codename: change_contest, content_type: 29, name: Can change Contest}
+  model: auth.permission
+  pk: 86
+- fields: {codename: change_contestant, content_type: 35, name: Can change Contestant}
+  model: auth.permission
+  pk: 104
+- fields: {codename: change_choice, content_type: 31, name: Can change Choice}
+  model: auth.permission
+  pk: 92
+- fields: {codename: change_poll, content_type: 36, name: Can change Poll}
+  model: auth.permission
+  pk: 107
+- fields: {codename: change_question, content_type: 30, name: Can change Question}
+  model: auth.permission
+  pk: 89
+- fields: {codename: change_quiz, content_type: 32, name: Can change Quiz}
+  model: auth.permission
+  pk: 95
+- fields: {codename: change_result, content_type: 33, name: Can change Result}
+  model: auth.permission
+  pk: 98
+- fields: {codename: change_vote, content_type: 34, name: Can change Vote}
+  model: auth.permission
+  pk: 101
+- fields: {codename: view_contest, content_type: 29, name: Can view Contest}
+  model: auth.permission
+  pk: 162
+- fields: {codename: view_contestant, content_type: 35, name: Can view Contestant}
+  model: auth.permission
+  pk: 168
+- fields: {codename: view_choice, content_type: 31, name: Can view Choice}
+  model: auth.permission
+  pk: 164
+- fields: {codename: view_poll, content_type: 36, name: Can view Poll}
+  model: auth.permission
+  pk: 169
+- fields: {codename: view_question, content_type: 30, name: Can view Question}
+  model: auth.permission
+  pk: 163
+- fields: {codename: view_quiz, content_type: 32, name: Can view Quiz}
+  model: auth.permission
+  pk: 165
+- fields: {codename: view_result, content_type: 33, name: Can view Result}
+  model: auth.permission
+  pk: 166
+- fields: {codename: view_vote, content_type: 34, name: Can view Vote}
+  model: auth.permission
+  pk: 167
+- fields: {codename: add_position, content_type: 59, name: Can add position}
+  model: auth.permission
+  pk: 217
+- fields: {codename: delete_position, content_type: 59, name: Can delete position}
+  model: auth.permission
+  pk: 219
+- fields: {codename: change_position, content_type: 59, name: Can change position}
+  model: auth.permission
+  pk: 218
+- fields: {codename: view_position, content_type: 59, name: Can view position}
+  model: auth.permission
+  pk: 220
+- fields: {codename: add_agg, content_type: 117, name: Can add Aggregation}
+  model: auth.permission
+  pk: 368
+- fields: {codename: add_modelweight, content_type: 47, name: Can add Model weight}
+  model: auth.permission
+  pk: 192
+- fields: {codename: add_rating, content_type: 48, name: Can add Rating}
+  model: auth.permission
+  pk: 195
+- fields: {codename: add_totalrate, content_type: 61, name: Can add Total rate}
+  model: auth.permission
+  pk: 365
+- fields: {codename: delete_agg, content_type: 117, name: Can delete Aggregation}
+  model: auth.permission
+  pk: 370
+- fields: {codename: delete_modelweight, content_type: 47, name: Can delete Model
+      weight}
+  model: auth.permission
+  pk: 194
+- fields: {codename: delete_rating, content_type: 48, name: Can delete Rating}
+  model: auth.permission
+  pk: 197
+- fields: {codename: delete_totalrate, content_type: 61, name: Can delete Total rate}
+  model: auth.permission
+  pk: 367
+- fields: {codename: change_agg, content_type: 117, name: Can change Aggregation}
+  model: auth.permission
+  pk: 369
+- fields: {codename: change_modelweight, content_type: 47, name: Can change Model
+      weight}
+  model: auth.permission
+  pk: 193
+- fields: {codename: change_rating, content_type: 48, name: Can change Rating}
+  model: auth.permission
+  pk: 196
+- fields: {codename: change_totalrate, content_type: 61, name: Can change Total rate}
+  model: auth.permission
+  pk: 366
+- fields: {codename: view_agg, content_type: 117, name: Can view Aggregation}
+  model: auth.permission
+  pk: 376
+- fields: {codename: view_modelweight, content_type: 47, name: Can view Model weight}
+  model: auth.permission
+  pk: 198
+- fields: {codename: view_rating, content_type: 48, name: Can view Rating}
+  model: auth.permission
+  pk: 199
+- fields: {codename: view_totalrate, content_type: 61, name: Can view Total rate}
+  model: auth.permission
+  pk: 375
+- fields: {codename: add_cookingtype, content_type: 125, name: Can add Cooking type}
+  model: auth.permission
+  pk: 446
+- fields: {codename: add_cuisine, content_type: 126, name: Can add Cuisine}
+  model: auth.permission
+  pk: 449
+- fields: {codename: add_ingredient, content_type: 132, name: Can add Ingredient}
+  model: auth.permission
+  pk: 467
+- fields: {codename: add_ingredientgroup, content_type: 131, name: Can add Ingredient
+      group}
+  model: auth.permission
+  pk: 464
+- fields: {codename: add_ingredientinrecipe, content_type: 137, name: Can add Ingredient
+      in recipe}
+  model: auth.permission
+  pk: 482
+- fields: {codename: add_nutrient, content_type: 128, name: Can add Nutrient}
+  model: auth.permission
+  pk: 455
+- fields: {codename: add_nutrientgroup, content_type: 127, name: Can add Nutrient
+      group}
+  model: auth.permission
+  pk: 452
+- fields: {codename: add_nutrientiningredient, content_type: 133, name: Can add Nutrient
+      in ingredient}
+  model: auth.permission
+  pk: 470
+- fields: {codename: add_oldrecipearticleredirect, content_type: 139, name: Can add
+      old recipe article redirect}
+  model: auth.permission
+  pk: 488
+- fields: {codename: add_oldrecipecategoryredirect, content_type: 140, name: Can add
+      old recipe category redirect}
+  model: auth.permission
+  pk: 491
+- fields: {codename: add_recipe, content_type: 136, name: Can add Recipe}
+  model: auth.permission
+  pk: 479
+- fields: {codename: add_recipecategoryphoto, content_type: 134, name: Can add Category
+      photo}
+  model: auth.permission
+  pk: 473
+- fields: {codename: add_recipeofday, content_type: 138, name: Can add Recipe of day}
+  model: auth.permission
+  pk: 485
+- fields: {codename: add_sidedish, content_type: 135, name: Can add Side-dish}
+  model: auth.permission
+  pk: 476
+- fields: {codename: add_unit, content_type: 129, name: Can add Unit}
+  model: auth.permission
+  pk: 458
+- fields: {codename: add_unitconversion, content_type: 130, name: Can add Unit conversion}
+  model: auth.permission
+  pk: 461
+- fields: {codename: delete_cookingtype, content_type: 125, name: Can delete Cooking
+      type}
+  model: auth.permission
+  pk: 448
+- fields: {codename: delete_cuisine, content_type: 126, name: Can delete Cuisine}
+  model: auth.permission
+  pk: 451
+- fields: {codename: delete_ingredient, content_type: 132, name: Can delete Ingredient}
+  model: auth.permission
+  pk: 469
+- fields: {codename: delete_ingredientgroup, content_type: 131, name: Can delete Ingredient
+      group}
+  model: auth.permission
+  pk: 466
+- fields: {codename: delete_ingredientinrecipe, content_type: 137, name: Can delete
+      Ingredient in recipe}
+  model: auth.permission
+  pk: 484
+- fields: {codename: delete_nutrient, content_type: 128, name: Can delete Nutrient}
+  model: auth.permission
+  pk: 457
+- fields: {codename: delete_nutrientgroup, content_type: 127, name: Can delete Nutrient
+      group}
+  model: auth.permission
+  pk: 454
+- fields: {codename: delete_nutrientiningredient, content_type: 133, name: Can delete
+      Nutrient in ingredient}
+  model: auth.permission
+  pk: 472
+- fields: {codename: delete_oldrecipearticleredirect, content_type: 139, name: Can
+      delete old recipe article redirect}
+  model: auth.permission
+  pk: 490
+- fields: {codename: delete_oldrecipecategoryredirect, content_type: 140, name: Can
+      delete old recipe category redirect}
+  model: auth.permission
+  pk: 493
+- fields: {codename: delete_recipe, content_type: 136, name: Can delete Recipe}
+  model: auth.permission
+  pk: 481
+- fields: {codename: delete_recipecategoryphoto, content_type: 134, name: Can delete
+      Category photo}
+  model: auth.permission
+  pk: 475
+- fields: {codename: delete_recipeofday, content_type: 138, name: Can delete Recipe
+      of day}
+  model: auth.permission
+  pk: 487
+- fields: {codename: delete_sidedish, content_type: 135, name: Can delete Side-dish}
+  model: auth.permission
+  pk: 478
+- fields: {codename: delete_unit, content_type: 129, name: Can delete Unit}
+  model: auth.permission
+  pk: 460
+- fields: {codename: delete_unitconversion, content_type: 130, name: Can delete Unit
+      conversion}
+  model: auth.permission
+  pk: 463
+- fields: {codename: change_cookingtype, content_type: 125, name: Can change Cooking
+      type}
+  model: auth.permission
+  pk: 447
+- fields: {codename: change_cuisine, content_type: 126, name: Can change Cuisine}
+  model: auth.permission
+  pk: 450
+- fields: {codename: change_ingredient, content_type: 132, name: Can change Ingredient}
+  model: auth.permission
+  pk: 468
+- fields: {codename: change_ingredientgroup, content_type: 131, name: Can change Ingredient
+      group}
+  model: auth.permission
+  pk: 465
+- fields: {codename: change_ingredientinrecipe, content_type: 137, name: Can change
+      Ingredient in recipe}
+  model: auth.permission
+  pk: 483
+- fields: {codename: change_nutrient, content_type: 128, name: Can change Nutrient}
+  model: auth.permission
+  pk: 456
+- fields: {codename: change_nutrientgroup, content_type: 127, name: Can change Nutrient
+      group}
+  model: auth.permission
+  pk: 453
+- fields: {codename: change_nutrientiningredient, content_type: 133, name: Can change
+      Nutrient in ingredient}
+  model: auth.permission
+  pk: 471
+- fields: {codename: change_oldrecipearticleredirect, content_type: 139, name: Can
+      change old recipe article redirect}
+  model: auth.permission
+  pk: 489
+- fields: {codename: change_oldrecipecategoryredirect, content_type: 140, name: Can
+      change old recipe category redirect}
+  model: auth.permission
+  pk: 492
+- fields: {codename: change_recipe, content_type: 136, name: Can change Recipe}
+  model: auth.permission
+  pk: 480
+- fields: {codename: change_recipecategoryphoto, content_type: 134, name: Can change
+      Category photo}
+  model: auth.permission
+  pk: 474
+- fields: {codename: change_recipeofday, content_type: 138, name: Can change Recipe
+      of day}
+  model: auth.permission
+  pk: 486
+- fields: {codename: change_sidedish, content_type: 135, name: Can change Side-dish}
+  model: auth.permission
+  pk: 477
+- fields: {codename: change_unit, content_type: 129, name: Can change Unit}
+  model: auth.permission
+  pk: 459
+- fields: {codename: change_unitconversion, content_type: 130, name: Can change Unit
+      conversion}
+  model: auth.permission
+  pk: 462
+- fields: {codename: view_cookingtype, content_type: 125, name: Can view Cooking type}
+  model: auth.permission
+  pk: 509
+- fields: {codename: view_cuisine, content_type: 126, name: Can view Cuisine}
+  model: auth.permission
+  pk: 510
+- fields: {codename: view_ingredient, content_type: 132, name: Can view Ingredient}
+  model: auth.permission
+  pk: 516
+- fields: {codename: view_ingredientgroup, content_type: 131, name: Can view Ingredient
+      group}
+  model: auth.permission
+  pk: 515
+- fields: {codename: view_ingredientinrecipe, content_type: 137, name: Can view Ingredient
+      in recipe}
+  model: auth.permission
+  pk: 521
+- fields: {codename: view_nutrient, content_type: 128, name: Can view Nutrient}
+  model: auth.permission
+  pk: 512
+- fields: {codename: view_nutrientgroup, content_type: 127, name: Can view Nutrient
+      group}
+  model: auth.permission
+  pk: 511
+- fields: {codename: view_nutrientiningredient, content_type: 133, name: Can view
+      Nutrient in ingredient}
+  model: auth.permission
+  pk: 517
+- fields: {codename: view_oldrecipearticleredirect, content_type: 139, name: Can view
+      old recipe article redirect}
+  model: auth.permission
+  pk: 523
+- fields: {codename: view_oldrecipecategoryredirect, content_type: 140, name: Can
+      view old recipe category redirect}
+  model: auth.permission
+  pk: 524
+- fields: {codename: view_recipe, content_type: 136, name: Can view Recipe}
+  model: auth.permission
+  pk: 520
+- fields: {codename: view_recipecategoryphoto, content_type: 134, name: Can view Category
+      photo}
+  model: auth.permission
+  pk: 518
+- fields: {codename: view_recipeofday, content_type: 138, name: Can view Recipe of
+      day}
+  model: auth.permission
+  pk: 522
+- fields: {codename: view_sidedish, content_type: 135, name: Can view Side-dish}
+  model: auth.permission
+  pk: 519
+- fields: {codename: view_unit, content_type: 129, name: Can view Unit}
+  model: auth.permission
+  pk: 513
+- fields: {codename: view_unitconversion, content_type: 130, name: Can view Unit conversion}
+  model: auth.permission
+  pk: 514
+- fields: {codename: add_redirect, content_type: 9, name: Can add redirect}
+  model: auth.permission
+  pk: 25
+- fields: {codename: delete_redirect, content_type: 9, name: Can delete redirect}
+  model: auth.permission
+  pk: 27
+- fields: {codename: change_redirect, content_type: 9, name: Can change redirect}
+  model: auth.permission
+  pk: 26
+- fields: {codename: view_redirect, content_type: 9, name: Can view redirect}
+  model: auth.permission
+  pk: 140
+- fields: {codename: add_mail, content_type: 118, name: Can add mail}
+  model: auth.permission
+  pk: 394
+- fields: {codename: delete_mail, content_type: 118, name: Can delete mail}
+  model: auth.permission
+  pk: 396
+- fields: {codename: change_mail, content_type: 118, name: Can change mail}
+  model: auth.permission
+  pk: 395
+- fields: {codename: view_mail, content_type: 118, name: Can view mail}
+  model: auth.permission
+  pk: 397
+- fields: {codename: add_serie, content_type: 91, name: Can add Serie}
+  model: auth.permission
+  pk: 440
+- fields: {codename: add_seriepart, content_type: 93, name: Can add Serie part}
+  model: auth.permission
+  pk: 443
+- fields: {codename: delete_serie, content_type: 91, name: Can delete Serie}
+  model: auth.permission
+  pk: 442
+- fields: {codename: delete_seriepart, content_type: 93, name: Can delete Serie part}
+  model: auth.permission
+  pk: 445
+- fields: {codename: change_serie, content_type: 91, name: Can change Serie}
+  model: auth.permission
+  pk: 441
+- fields: {codename: change_seriepart, content_type: 93, name: Can change Serie part}
+  model: auth.permission
+  pk: 444
+- fields: {codename: view_serie, content_type: 91, name: Can view Serie}
+  model: auth.permission
+  pk: 507
+- fields: {codename: view_seriepart, content_type: 93, name: Can view Serie part}
+  model: auth.permission
+  pk: 508
+- fields: {codename: add_session, content_type: 6, name: Can add session}
+  model: auth.permission
+  pk: 16
+- fields: {codename: delete_session, content_type: 6, name: Can delete session}
+  model: auth.permission
+  pk: 18
+- fields: {codename: change_session, content_type: 6, name: Can change session}
+  model: auth.permission
+  pk: 17
+- fields: {codename: view_session, content_type: 6, name: Can view session}
+  model: auth.permission
+  pk: 138
+- fields: {codename: add_site, content_type: 7, name: Can add site}
+  model: auth.permission
+  pk: 19
+- fields: {codename: delete_site, content_type: 7, name: Can delete site}
+  model: auth.permission
+  pk: 21
+- fields: {codename: change_site, content_type: 7, name: Can change site}
+  model: auth.permission
+  pk: 20
+- fields: {codename: view_site, content_type: 7, name: Can view site}
+  model: auth.permission
+  pk: 139
+- fields: {codename: add_tag, content_type: 38, name: Can add Tag}
+  model: auth.permission
+  pk: 112
+- fields: {codename: add_taggeditem, content_type: 37, name: Can add Tagged Item}
+  model: auth.permission
+  pk: 109
+- fields: {codename: delete_tag, content_type: 38, name: Can delete Tag}
+  model: auth.permission
+  pk: 114
+- fields: {codename: delete_taggeditem, content_type: 37, name: Can delete Tagged
+      Item}
+  model: auth.permission
+  pk: 111
+- fields: {codename: change_tag, content_type: 38, name: Can change Tag}
+  model: auth.permission
+  pk: 113
+- fields: {codename: change_taggeditem, content_type: 37, name: Can change Tagged
+      Item}
+  model: auth.permission
+  pk: 110
+- fields: {codename: view_tag, content_type: 38, name: Can view Tag}
+  model: auth.permission
+  pk: 171
+- fields: {codename: view_taggeditem, content_type: 37, name: Can view Tagged Item}
+  model: auth.permission
+  pk: 170
+- fields: {codename: add_upload, content_type: 70, name: Can add upload}
+  model: auth.permission
+  pk: 305
+- fields: {codename: delete_upload, content_type: 70, name: Can delete upload}
+  model: auth.permission
+  pk: 307
+- fields: {codename: change_upload, content_type: 70, name: Can change upload}
+  model: auth.permission
+  pk: 306
+- fields: {codename: view_upload, content_type: 70, name: Can view upload}
+  model: auth.permission
+  pk: 308
+- fields:
+    name: ella_admin
+    permissions: []
+  model: auth.group
+  pk: 6
+- fields:
+    name: ella_coder
+    permissions: []
+  model: auth.group
+  pk: 7
+- fields:
+    name: ella_devel
+    permissions: [268, 241, 250, 271, 262, 265, 256, 259, 253, 244, 247, 270, 243,
+      252, 273, 264, 267, 258, 261, 255, 246, 249, 269, 242, 251, 272, 263, 266, 257,
+      260, 254, 245, 248, 283, 274, 277, 284, 281, 282, 279, 280, 278, 275, 276]
+  model: auth.group
+  pk: 5
+- fields:
+    name: ella_test
+    permissions: []
+  model: auth.group
+  pk: 8
+- fields:
+    name: hitcounter
+    permissions: [118, 120, 119]
+  model: auth.group
+  pk: 3
+- fields:
+    name: korektor
+    permissions: [47, 116, 29, 83, 207, 201, 210, 204, 65, 86, 107, 89, 95]
+  model: auth.group
+  pk: 4
+- fields:
+    name: mazac
+    permissions: [48, 243, 264, 54, 223, 84, 202, 66, 87, 96, 111]
+  model: auth.group
+  pk: 9
+- fields:
+    name: recepty redaktor
+    permissions: [46, 49, 115, 48, 51, 117, 47, 50, 116, 149, 150, 148, 43, 221, 45,
+      223, 44, 222, 146, 224]
+  model: auth.group
+  pk: 13
+- fields:
+    name: redaktor
+    permissions: [46, 49, 47, 50, 58, 61, 52, 55, 60, 63, 57, 59, 62, 53, 56, 34,
+      221, 40, 223, 42, 29, 222, 41, 224, 73, 75, 74, 158, 82, 83, 127, 128, 174,
+      206, 200, 209, 203, 208, 202, 211, 205, 207, 201, 210, 204, 214, 212, 215, 213,
+      67, 64, 69, 68, 65, 85, 103, 91, 106, 88, 94, 97, 100, 105, 102, 86, 104, 92,
+      107, 89, 95, 98, 101, 217, 218, 112, 109, 114, 111, 113, 110]
+  model: auth.group
+  pk: 1
+- fields:
+    name: sefredaktor
+    permissions: [124, 126, 125, 34, 28, 36, 30, 35, 29, 130, 127, 132, 129, 131,
+      128]
+  model: auth.group
+  pk: 2
+- fields:
+    name: video
+    permissions: [345, 348, 347, 350, 346, 349, 351, 352, 353, 409, 403, 413, 407,
+      411, 405, 417, 415, 398, 400, 399, 401, 330, 333, 336, 332, 335, 338, 331, 334,
+      337, 339, 340, 341, 64, 66, 65, 155]
+  model: auth.group
+  pk: 11
+- fields:
+    name: zena articles viewer
+    permissions: [149, 150, 148, 224]
+  model: auth.group
+  pk: 12
+- fields:
+    date_joined: 2007-06-19 11:02:30
+    email: admin.ella@centrum.cz
+    first_name: admin
+    groups: []
+    is_active: 1
+    is_staff: 1
+    is_superuser: 1
+    last_login: 2008-05-15 15:13:45
+    last_name: admin
+    password: sha1$e7edd$503c1f8545f34c9e4a72758a0d1d72457c7157b3
+    user_permissions: []
+    username: admin
+  model: auth.user
+  pk: 1
+- fields:
+    date_joined: 2009-02-16 11:33:28
+    email: ''
+    first_name: ''
+    groups: []
+    is_active: 1
+    is_staff: 1
+    is_superuser: 0
+    last_login: 2009-02-16 13:28:34
+    last_name: ''
+    password: sha1$4f27d$9d42f1dd33409c6a02929c0bda2df0af564c8bcf
+    user_permissions: []
+    username: newman
+  model: auth.user
+  pk: 6235868
+
