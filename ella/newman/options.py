@@ -7,7 +7,7 @@ from django.contrib import admin
 from django.contrib.admin import helpers
 from django.contrib.admin.options import ModelAdmin, InlineModelAdmin, BaseModelAdmin
 from django.contrib.admin.options import IncorrectLookupParameters
-from django.forms.models import BaseInlineFormSet
+from django.forms.models import BaseInlineFormSet, ModelChoiceField
 from django.forms.util import ErrorDict, ErrorList
 from django import template
 from django.http import HttpResponse, Http404, HttpResponseRedirect
@@ -33,6 +33,66 @@ DEFAULT_LIST_PER_PAGE = getattr(settings, 'NEWMAN_LIST_PER_PAGE', 25)
 
 def get_permission(permission_name, instance):
     return instance._meta.app_label + '.' + '%s_' % permission_name + instance._meta.module_name.lower()
+
+class CategoryChoiceField(ModelChoiceField):
+    """ Category choice field. Choices restricted accordingly to CategoryUserRole. """
+    def __init__(self, queryset, empty_label=u"---------", cache_choices=False,
+                 required=True, widget=None, label=None, initial=None,
+                 help_text=None, to_field_name=None, *args, **kwargs):
+        kwargs.update({
+            'queryset': queryset,
+            'empty_label': empty_label,
+            'cache_choices': cache_choices,
+            'required': required,
+            'widget': widget,
+            'label': label,
+            'initial': initial,
+            'help_text': help_text,
+            'to_field_name': to_field_name
+        })
+        if not('user' in kwargs and 'model' in kwargs):
+            raise AttributeError('CategoryChoiceField requires user and model instances to be present in kwargs')
+        self.model = kwargs.pop('model')
+        self.user = kwargs.pop('user')
+        super(CategoryChoiceField, self).__init__(*args, **kwargs)
+        #self.queryset = queryset
+        #self.choice_cache = None
+
+    def _get_queryset(self):
+        if hasattr(self._queryset, '_newman_filtered'):
+            return self._queryset
+        view_perm = get_permission('view', self.model)
+        change_perm = get_permission('change', self.model)
+        perms = (view_perm, change_perm,)
+        qs = models.permission_filtered_model_qs(self._queryset, self.model, self.user, perms)
+        qs._newman_filtered = True #magic variable
+        self._set_queryset(qs)
+        return self._queryset
+
+    def _set_queryset(self, queryset):
+        self._queryset = queryset
+        self.widget.choices = self.choices
+
+    queryset = property(_get_queryset, _set_queryset)
+
+    def clean(self, value):
+        cvalue = super(CategoryChoiceField, self).clean(value)
+        return cvalue
+        # TODO unable to realize if field was modified or not (when user has view permission a hits Save.)
+        #      Permissions checks are placed in FormSets for now. CategoryChoiceField restricts category
+        #      choices at the moment.
+        # next part is category-based permissions (only for objects with category field)
+        # attempt: to do role-permission checks here (add new and change permissions checking)
+        # Adding new object
+        #TODO check wheter field was modified or not.
+        add_perm = get_permission('add', self.model)
+        if not models.has_category_permission(self.user, cvalue, add_perm):
+            raise ValidationError(_('Category not permitted'))
+        # Changing existing object
+        change_perm = get_permission('change', self.model)
+        if not models.has_category_permission(self.user, cvalue, change_perm):
+            raise ValidationError(_('Category not permitted'))
+        return cvalue
 
 class NewmanModelAdmin(admin.ModelAdmin):
     registered_views = []
@@ -254,7 +314,8 @@ class NewmanModelAdmin(admin.ModelAdmin):
         If request is GET type, at least view_permission is needed. In case
         of POST request change permission is needed.
         """
-        if obj is None or not hasattr(obj, 'category'):
+        cfield = models.model_category_fk_value(obj)
+        if obj is None or not cfield:
             if request.method == 'POST':
                 return admin.ModelAdmin.has_change_permission( self, request, obj )
             else:
@@ -263,8 +324,8 @@ class NewmanModelAdmin(admin.ModelAdmin):
         opts = self.opts
         change_perm = '%s.%s' % ( opts.app_label, opts.get_change_permission() )
         view_perm = '%s.view_%s' % ( opts.app_label, opts.object_name.lower() )
-        can_view = models.has_category_permission( request.user, obj.category, view_perm )
-        can_change = models.has_category_permission( request.user, obj.category, change_perm )
+        can_view = models.has_category_permission( request.user, cfield, view_perm )
+        can_change = models.has_category_permission( request.user, cfield, change_perm )
 
         if request.method == 'POST' and can_change:
             return True
@@ -430,7 +491,6 @@ class NewmanModelAdmin(admin.ModelAdmin):
         f._set_queryset(qs)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-
         # TODO: Only hotfix for django 9791+
         if 'request' in kwargs:
             user = kwargs['request'].user
@@ -447,9 +507,10 @@ class NewmanModelAdmin(admin.ModelAdmin):
                 return rich_text_field
         # filtering category field choices
         if models.is_category_fk(db_field):
-            fld = super(NewmanModelAdmin, self).formfield_for_dbfield(db_field, **kwargs)
-            self.restrict_field_categories(fld, user, self.model)
-            return fld
+            fld = super(NewmanModelAdmin, self).formfield_for_dbfield(db_field, **kwargs)#FIXME get fld.queryset different way
+            kwargs['model'] = self.model
+            kwargs['user'] = user 
+            return CategoryChoiceField(fld.queryset, **kwargs)
 
         return super(NewmanModelAdmin, self).formfield_for_dbfield(db_field, **kwargs)
 
@@ -540,7 +601,8 @@ class BaseGenericInlineFormSet(DJBaseGenericInlineFormSet):
         if user.is_superuser:
             return out
         # filtering -- view permitted categories only
-        if 'category' not in self.model._meta.get_all_field_names():
+        cfield = models.model_category_fk_value(self.model)
+        if not cfield:
             return out
         view_perm = get_permission('view', self.instance)
         change_perm = get_permission('change', self.instance)
@@ -550,8 +612,10 @@ class BaseGenericInlineFormSet(DJBaseGenericInlineFormSet):
 
     def full_clean(self):
         super(BaseGenericInlineFormSet, self).full_clean()
-        if not hasattr(self.instance, 'category'):
+        cfield = models.model_category_fk(self.instance)
+        if not cfield:
             return
+        cat = models.model_category_fk_value(self.instance)
 
         # next part is category-based permissions (only for objects with category field)
         def add_field_error(form, field_name, message):
@@ -563,26 +627,35 @@ class BaseGenericInlineFormSet(DJBaseGenericInlineFormSet):
         for form in self.extra_forms:
             if not form.has_changed():
                 continue
-            if 'category' not in form.changed_data:
+            if cfield.name not in form.changed_data:
                 continue
             add_perm = get_permission('add', form.instance)
-            c = form.cleaned_data['category']
+            if not models.has_object_permission(user, form.instance, change_perm):
+                self._non_form_errors = _('Creating objects is not permitted.')
+                continue
+            c = form.cleaned_data[cfield.name]
             if not models.has_category_permission(user, c, add_perm):
-                add_field_error( form, 'category', _('Category not permitted') )
+                add_field_error( form, cfield.name, _('Category not permitted') )
 
         # Changing existing object
         for form in self.initial_forms:
             change_perm = get_permission('change', form.instance)
             delete_perm = get_permission('delete', form.instance)
             if self.can_delete and form.cleaned_data[DELETION_FIELD_NAME]:
-                #import pdb;pdb.set_trace()
+                if not models.has_object_permission(user, form.instance, delete_perm):
+                    self._non_form_errors = _('Object deletion is not permitted.')
+                    continue
                 if not models.has_category_permission(user, form.instance.category, delete_perm):
                     self._non_form_errors = _('Object deletion is not permitted.')
-            if 'category' not in form.changed_data:
+                    continue
+            if cfield.name not in form.changed_data:
                 continue
-            c = form.cleaned_data['category']
+            if not models.has_object_permission(user, form.instance, change_perm):
+                self._non_form_errors = _('Object change is not permitted.')
+                continue
+            c = form.cleaned_data[cfield.name]
             if not models.has_category_permission(user, c, change_perm):
-                add_field_error( form, 'category', _('Category not permitted') )
+                add_field_error( form, cfield.name, _('Category not permitted') )
         #err_list = ErrorList( (u'Nepovolena kategorie',) )
         #self.initial_forms[1]._errors['category'] = err_list
         #del self.initial_forms[1].cleaned_data['category'] #pozor, lze mazat jen kdyz byl tento sloupec opravdu zmenen.
@@ -639,7 +712,18 @@ class GenericInlineModelAdmin(NewmanInlineModelAdmin):
             "can_order": False,
             "fields": fields,
         }
+        self.user = request.user
         return generic_inlineformset_factory(self.model, **defaults)
+
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        # filtering category field choices
+        if models.is_category_fk(db_field):
+            fld = super(GenericInlineModelAdmin, self).formfield_for_dbfield(db_field, **kwargs)#FIXME get fld.queryset different way
+            kwargs['model'] = self.model
+            kwargs['user'] = self.user 
+            return CategoryChoiceField(fld.queryset, **kwargs)
+
+        return super(GenericInlineModelAdmin, self).formfield_for_dbfield(db_field, **kwargs)
 
 class GenericStackedInline(GenericInlineModelAdmin):
     template = 'admin/edit_inline/stacked.html'

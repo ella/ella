@@ -211,11 +211,38 @@ def has_category_permission(user, category, permission):
         return True
 
     #takes 0.5..2 msec 
-    qs = DenormalizedCategoryUserRole.objects.filter(
-        user_id=user.id, 
-        permission_codename=permission,
-        category_id=category.pk
-    )
+    if type(permission) in [list, tuple]:
+        qs = DenormalizedCategoryUserRole.objects.filter(
+            user_id=user.pk, 
+            permission_codename__in=permission,
+            category_id=category.pk
+        )
+    else:
+        qs = DenormalizedCategoryUserRole.objects.filter(
+            user_id=user.pk, 
+            permission_codename=permission,
+            category_id=category.pk
+        )
+    if qs.count():
+        return True
+    return False
+
+def has_object_permission(user, obj, permission):
+    if user.has_perm(permission):
+        return True
+    ct = ContentType.objects.get_for_model(obj)
+    if type(permission) in [list, tuple]:
+        qs = DenormalizedCategoryUserRole.objects.filter(
+            user_id=user.pk,
+            permission_codename__in=permission,
+            contenttype_id=ct.pk
+        )
+    else:
+        qs = DenormalizedCategoryUserRole.objects.filter(
+            user_id=user.pk,
+            permission_codename=permission,
+            contenttype_id=ct.pk
+        )
     if qs.count():
         return True
     return False
@@ -246,10 +273,10 @@ def compute_applicable_categories(user, permission=None):
         # take any permission
         q = q.filter( group__permissions__id__isnull=False )
 
-    cats = []
+    cats = set()
     for i in q:
         for c in i.category.all():
-            cats.append(c)
+            cats.add(c)
     app_cats = cat_children(cats)
     return [ d.pk for d in app_cats ]
 
@@ -298,3 +325,27 @@ def is_category_fk(db_field):
     if rel_ct == ContentType.objects.get_for_model(Category):
         return True
     return False
+
+def model_category_fk_value(model):
+    if not model:
+        return None
+    for f in model._meta.fields:
+        if is_category_fk(f):
+            return getattr(model, f.name)
+    return None
+
+def model_category_fk(model):
+    if not model:
+        return None
+    for f in model._meta.fields:
+        if is_category_fk(f):
+            return f
+    return None
+
+def generate_test_data(filepath='/home/jonson/src/nc/ella/ella/newman/testbed/service/fixtures/test_data.yaml'):
+    from django.contrib.sites.models import Site
+    from django.core.serializers import serialize
+    FMT = 'yaml'
+    data = list(ContentType.objects.all()) + list(Category.objects.all()) + list(Site.objects.all())
+    file(filepath, 'w').write( serialize(FMT, data) )
+
