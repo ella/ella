@@ -19,8 +19,20 @@
   model: auth.group
   pk: 12
 - fields:
+    name: recepty redaktor
+    permissions: [46, 49, 115, 48, 51, 117, 47, 50, 116, 149, 150, 148, 43, 221, 45, 223, 44, 222, 146, 224]
+  model: auth.group
+  pk: 13
+- fields:
     category: [317, 25]
     group: 12
     user: 6235868
   model: newman.categoryuserrole
   pk: 1
+- fields:
+    category: [317]
+    group: 13
+    user: 6235868
+  model: newman.categoryuserrole
+  pk: 2
+
