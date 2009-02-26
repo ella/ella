@@ -22,6 +22,7 @@
     <ul class="errorlist">{% for error in adminform.form.non_field_errors %}<li>{{ error }}</li>{% endfor %}</ul>
 {% endif %}
 
+{% block fieldsets %}
 {% for fieldset in adminform %}
   {% include "admin/includes/fieldset.html" %}
 {% endfor %}
@@ -31,6 +32,7 @@
 {% for inline_admin_formset in inline_admin_formsets %}
     {% include inline_admin_formset.opts.template %}
 {% endfor %}
+{% endblock %}
 
 {% block after_related_objects %}{% endblock %}
 

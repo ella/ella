@@ -210,6 +210,14 @@ legend { padding: 2px 5px; }
 label.required { font-weight: bold; color: darkorange; }
 div.submit-row, fieldset.submit-row { border: none; clear:both; margin-top: 5px; padding: 2px 0; text-align: right; }
 input, textarea { padding: 2px 0; }
+textarea, select { vertical-align: top; }
+
+/* FORMS : article change form */
+.article-form-container { padding-left: 10px; }
+.article-form-container .multicol { float: left; }
+.article-form-container .multicol.colX { margin-left: 200px; }
+.article-form-container label { display: block; float: left; min-width: 100px; }
+.article-form-container .publish-container label { float: none; }
 
 /* TABLES */
 table {

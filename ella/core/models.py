@@ -91,7 +91,6 @@ class Category(models.Model):
 
     objects = RelatedManager()
 
-    @transaction.commit_on_success
     def save(self, force_insert=False, force_update=False):
         "Override save() to construct tree_path based on the category's parent."
         old_tree_path = self.tree_path

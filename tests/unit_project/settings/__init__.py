@@ -13,7 +13,7 @@ Thus, we're changing module into package:
   * local.py contains (2) for your specific machine. File your defaults there. 
 """
 
-from unit_project.settings.config import *
+from unit_project.settings.base import *
 from unit_project.settings.config import *
 
 try:

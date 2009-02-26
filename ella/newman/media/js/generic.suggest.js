@@ -4,7 +4,7 @@
 (function($) { $( function() {
     ;;; DEBUG = true;
     ;;; DBG = 1;
-    var VERSION = '2009.01.13';
+    var VERSION = '2009.02.26-newman';
     var DEL_IMG = MEDIA_URL + 'img/admin/icon_deletelink.gif';
     var MIN_LENGTH = 2;
     var SUGGEST_FIELD_SEPARATOR = '|';
@@ -277,6 +277,9 @@
         // create a regexp that will match every occurrence of the text input value
         var val_re = new RegExp( '(' + val.replace(/([^\w\s])/g, '\\$1') + ')', 'ig' ); // the replace does /\Q$val/
         var sug_url = $input.attr('rel');
+        // The rel attribute is a relative address.
+        // If we're using the content-by-hash library, we want it to be relative to what's in the hash.
+        if (window.adr && $.isFunction(adr)) sug_url = adr(sug_url, { just_get: 1 });
 
         if (offset == null || offset < 0)
             offset = 0;
