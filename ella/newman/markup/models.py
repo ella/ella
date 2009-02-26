@@ -45,7 +45,7 @@ class SrcText(models.Model):
         return getattr(self.target, self.field)
 
     def __unicode__(self):
-        return u"Source text for " % ()
+        return u"Source text for %s:%s" % (self.target, self.field)
 
     def output(self):
         return self.processor.convert(self.content)
