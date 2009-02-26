@@ -1,7 +1,5 @@
 from django.core.exceptions import PermissionDenied
 from django.conf import settings
-from ella.ellaadmin.options import SUGGEST_VIEW_MIN_LENGTH, SUGGEST_VIEW_LIMIT,\
-    SUGGEST_RETURN_ALL_FIELD
 
 from django.contrib import admin
 from django.contrib.admin import helpers
@@ -14,20 +12,18 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.contrib.admin.views.main import ERROR_FLAG
 from django.shortcuts import render_to_response
 from django.db import transaction
-from django.db.models import Q, query
-from django.db.models.fields import FieldDoesNotExist
+from django.db.models import Q
 from django.utils.functional import update_wrapper
 from django.utils.translation import ugettext as _
 from django.utils.encoding import force_unicode
-from django.utils.safestring import mark_safe
+
+from django.contrib.admin.util import unquote
+from django.forms.formsets import all_valid
+from django.contrib.contenttypes.models import ContentType
+from django.db.models.fields.related import ForeignKey, ManyToManyField
 
 from ella.newman.changelist import NewmanChangeList, FilterChangeList
 from ella.newman import models, fields
-from django.contrib.admin.util import unquote
-from django.forms.formsets import all_valid
-from django.views.decorators.http import require_POST
-from ella.newman.decorators import require_AJAX
-from django.contrib.contenttypes.models import ContentType
 
 DEFAULT_LIST_PER_PAGE = getattr(settings, 'NEWMAN_LIST_PER_PAGE', 25)
 
@@ -95,12 +91,10 @@ class CategoryChoiceField(ModelChoiceField):
         return cvalue
 
 class NewmanModelAdmin(admin.ModelAdmin):
-    registered_views = []
 
     def __init__(self, *args, **kwargs):
         super(NewmanModelAdmin, self).__init__(*args, **kwargs)
         self.list_per_page = DEFAULT_LIST_PER_PAGE
-        #NewmanModelAdmin.register(lambda x: x is None, self.changelist_view)
 
     def get_urls(self):
         from django.conf.urls.defaults import patterns, url
@@ -214,6 +208,10 @@ class NewmanModelAdmin(admin.ModelAdmin):
 
 #    @require_AJAX
     def suggest_view(self, request, extra_context=None):
+
+        SUGGEST_VIEW_LIMIT = getattr(settings, 'SUGGEST_VIEW_LIMIT', 20)
+        SUGGEST_VIEW_MIN_LENGTH = getattr(settings, 'SUGGEST_VIEW_MIN_LENGTH', 2)
+        SUGGEST_RETURN_ALL_FIELD = getattr(settings, 'SUGGEST_RETURN_ALL_FIELD', True)
 
         if not ('f' in request.GET.keys() and 'q' in request.GET.keys()):
             raise AttributeError, 'Invalid query attributes. Example: ".../?f=field_a&f=field_b&q=search_term&o=offset"'
@@ -405,13 +403,17 @@ class NewmanModelAdmin(admin.ModelAdmin):
                 formset = FormSet(instance=obj)
                 formsets.append(formset)
 
-        adminForm = helpers.AdminForm(form, self.get_fieldsets(request, obj), self.prepopulated_fields)
+        adminForm = admin.helpers.AdminForm(form, self.get_fieldsets(request, obj), self.prepopulated_fields)
         media = self.media + adminForm.media
 
         inline_admin_formsets = []
+        raw_inlines = {}
         for inline, formset in zip(self.inline_instances, formsets):
+            # TODO: has user permission for inline model?
+            #if request.user.has_module_perms(inline.model._meta.app_label):
+            raw_inlines[str(inline.model._meta).replace('.', '__')] = formset
             fieldsets = list(inline.get_fieldsets(request, obj))
-            inline_admin_formset = helpers.InlineAdminFormSet(inline, formset, fieldsets)
+            inline_admin_formset = admin.helpers.InlineAdminFormSet(inline, formset, fieldsets)
             inline_admin_formsets.append(inline_admin_formset)
             media = media + inline_admin_formset.media
 
@@ -421,44 +423,8 @@ class NewmanModelAdmin(admin.ModelAdmin):
             raw_media.extend(media._css['screen'])
         raw_media.extend(media._js)
 
-        # raw form dict
-        raw_form = {}
-        fn = 0
-        for fieldset in adminForm:
-            raw_form[fn] = {
-                'name': fieldset.name,
-                'description': fieldset.description,
-                'fields': {}
-            }
-            for line in fieldset:
-                for field in line:
-                    raw_form[fn]['fields'][field.field.name] = field.field
-
-            fn = fn+1
-
-        raw_inlines = {}
-        rfset_n = 0
-        for rformset in inline_admin_formsets:
-            raw_inlines[rfset_n] = {}
-            rform_n = 0
-            for rform in rformset:
-                raw_inlines[rfset_n][rform_n] = {}
-                rfieldset_n = 0
-                for inlinefieldset in rform:
-                    raw_inlines[rfset_n][rform_n][rfieldset_n] = {
-                        'name': inlinefieldset.name,
-                        'description': inlinefieldset.description,
-                        'fields': {}
-                    }
-                    for line in inlinefieldset:
-                        for field in line:
-                            raw_inlines[rfset_n][rform_n][rfieldset_n]['fields'][field.field.name] = field.field
-                    rfieldset_n = rfieldset_n+1
-                rform_n = rform_n+1
-            rfset_n = rfset_n+1
-
         raw_frm_all = {
-            'form': raw_form,
+            'form': form,
             'inlines': raw_inlines
         }
 
@@ -471,7 +437,7 @@ class NewmanModelAdmin(admin.ModelAdmin):
             'is_popup': request.REQUEST.has_key('_popup'),
             'media': raw_media,
             'inline_admin_formsets': inline_admin_formsets,
-            'errors': helpers.AdminErrorList(form, formsets),
+            'errors': admin.helpers.AdminErrorList(form, formsets),
             'root_path': self.admin_site.root_path,
             'app_label': opts.app_label,
         }
@@ -505,6 +471,18 @@ class NewmanModelAdmin(admin.ModelAdmin):
                 if css_class:
                     rich_text_field.widget.attrs['class'] += ' %s' % css_class
                 return rich_text_field
+
+        if db_field.name in getattr(self, 'suggest_fields', {}).keys() and isinstance(db_field, (ForeignKey, ManyToManyField)):
+            kwargs.update({
+                'required': not db_field.blank,
+                'label': db_field.verbose_name,
+            })
+            if isinstance(db_field, ForeignKey):
+                return fields.GenericSuggestField([db_field, self.model, self.suggest_fields[db_field.name]], **kwargs)
+            #return fields.GenericSuggestFieldMultiple([db_field, self.model, self.suggest_fields[db_field.name]], **kwargs)
+
+
+
         # filtering category field choices
         if models.is_category_fk(db_field):
             fld = super(NewmanModelAdmin, self).formfield_for_dbfield(db_field, **kwargs)#FIXME get fld.queryset different way
@@ -708,6 +686,7 @@ class GenericInlineModelAdmin(NewmanInlineModelAdmin):
             "formfield_callback": self.formfield_for_dbfield,
             "formset": self.formset,
             "extra": self.extra,
+            "max_num": self.max_num,
             "can_delete": True,
             "can_order": False,
             "fields": fields,

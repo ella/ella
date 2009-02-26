@@ -16,8 +16,7 @@ from ella.core.cache.template_loader import render_to_response
 
 # local cache for get_content_type()
 CONTENT_TYPE_MAPPING = {}
-CACHE_TIMEOUT_LONG = getattr(settings, 'CACHE_TIMEOUT_LONG', 60*60)
-
+CACHE_TIMEOUT_LONG = getattr(settings, 'CACHE_TIMEOUT_LONG', 60 * 60)
 
 def get_content_type(ct_name):
     """
@@ -44,6 +43,64 @@ def get_content_type(ct_name):
     return ct
 
 def object_detail(request, category, content_type, slug, year=None, month=None, day=None, url_remainder=None):
+    context = _object_detail(request, category, content_type, slug, year, month, day, url_remainder)
+    return render_to_response(
+        get_templates('object.html', slug, context['category'], context['content_type'].app_label, context['content_type'].model),
+        context,
+        context_instance=RequestContext(request)
+    )
+
+def category_detail(request, category):
+    context = _category_detail(request, category)
+    return render_to_response(
+            (
+            'page/category/%s/category.html' % (context["category"].path),
+            'page/category.html',
+            ),
+            context,
+            context_instance=RequestContext(request)
+        )
+
+def list_content_type(request, category=None, year=None, month=None, day=None, content_type=None, paginate_by=20):
+    context = _list_content_type(request, category, year, month, day, content_type, paginate_by)
+    if content_type:
+        ct = get_content_type(content_type)
+    else:
+        ct = False
+    template_list = []
+    if ct:
+        template_list.append('page/category/%s/content_type/%s.%s/listing.html' % (context["cat"].path, ct.app_label, ct.model))
+    template_list.append('page/category/%s/listing.html' % (context["cat"].path))
+    if ct:
+        template_list.append('page/content_type/%s.%s/listing.html' % (ct.app_label, ct.model))
+    template_list.append('page/listing.html')
+    return render_to_response(
+            template_list,
+            context,
+            context_instance=RequestContext(request)
+        )
+
+def home(request):
+    """
+    Homepage of the actual site.
+
+    Params:
+        request - HttpRequest from Django
+
+    Raise:
+        Http404 if there is no base category
+    """
+    context = _home(request)
+    return render_to_response(
+            (
+            'page/category/%s/category.html' % (context['category'].path),
+            'page/category.html',
+            ),
+            context,
+            context_instance=RequestContext(request)
+        )
+
+def _object_detail(request, category, content_type, slug, year=None, month=None, day=None, url_remainder=None):
     """
     Detail view that displays a single object based on its main placement.
 
@@ -73,7 +130,7 @@ def object_detail(request, category, content_type, slug, year=None, month=None, 
                     category=cat,
                     slug=slug,
                     static=False
-)
+                )
     else:
         placement = get_cached_object_or_404(Placement, category=cat, target_ct=ct, slug=slug, static=True)
 
@@ -89,7 +146,7 @@ def object_detail(request, category, content_type, slug, year=None, month=None, 
             'category' : cat,
             'content_type_name' : content_type,
             'content_type' : ct,
-}
+        }
 
     # check for custom actions
     if url_remainder:
@@ -97,25 +154,22 @@ def object_detail(request, category, content_type, slug, year=None, month=None, 
         return dispatcher.call_view(request, bits, context)
     elif dispatcher.has_custom_detail(obj):
         # increment hit counter
-#        HitCount.objects.hit(placement)
+#        HitCount.objects.hit( placement )
         return dispatcher.call_custom_detail(request, context)
 
     # increment hit counter
-#    HitCount.objects.hit(placement)
+#    HitCount.objects.hit( placement )
 
-    return render_to_response(
-        get_templates('object.html', slug, cat, ct.app_label, ct.model),
-        context,
-        context_instance=RequestContext(request)
-)
+    return context
+
 
 def get_templates(name, slug=None, category=None, app_label=None, model_label=None):
     """
     Returns templates in following format and order:
-        'page/category/%s/content_type/%s.%s/%s/%s' % (category.path, app_label, model_label, slug, name),
-        'page/category/%s/content_type/%s.%s/%s' % (category.path, app_label, model_label, name),
-        'page/category/%s/%s' % (category.path, name),
-        'page/content_type/%s.%s/%s' % (app_label, model_label, name),
+        'page/category/%s/content_type/%s.%s/%s/%s' % ( category.path, app_label, model_label, slug, name ),
+        'page/category/%s/content_type/%s.%s/%s' % ( category.path, app_label, model_label, name ),
+        'page/category/%s/%s' % ( category.path, name ),
+        'page/content_type/%s.%s/%s' % ( app_label, model_label, name ),
         'page/%s' % name,
 
     TODO: Allow Placement() as parameter?
@@ -132,6 +186,7 @@ def get_templates(name, slug=None, category=None, app_label=None, model_label=No
     templates.append('page/%s' % name)
     return templates
 
+
 def get_templates_from_placement(name, placement, slug=None, category=None, app_label=None, model_label=None):
     """ Returns template list by placement. """
     if slug is None:
@@ -144,7 +199,7 @@ def get_templates_from_placement(name, placement, slug=None, category=None, app_
         model_label = placement.target._meta.module_name
     return get_templates(name, slug, category, app_label, model_label)
 
-def list_content_type(request, category=None, year=None, month=None, day=None, content_type=None, paginate_by=20):
+def _list_content_type(request, category=None, year=None, month=None, day=None, content_type=None, paginate_by=20):
     """
     List objects' listings according to the parameters.
 
@@ -213,17 +268,6 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
     page = paginator.page(page_no)
     listings = page.object_list
 
-    template_list = []
-    if ct:
-        template_list.append('page/category/%s/content_type/%s.%s/listing.html' % (cat.path, ct.app_label, ct.model))
-    template_list.append('page/category/%s/listing.html' % (cat.path))
-
-    if ct:
-        template_list.append('page/content_type/%s.%s/listing.html' % (ct.app_label, ct.model))
-
-    template_list.append('page/listing.html')
-
-
     url_prepend = ''
     url_apend = ''
     if ct:
@@ -244,7 +288,7 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
                 for d in qset.dates('publish_from', date_kind, order='DESC')
             ]
 
-    return render_to_response(template_list, {
+    context = {
             'page': page,
             'is_paginated': paginator.num_pages > 1,
             'results_per_page': paginate_by,
@@ -258,13 +302,15 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
             'content_type' : content_type,
             'listings' : listings,
             'category' : cat,
-}, context_instance=RequestContext(request))
+        }
+
+    return context
 
 # format lookups for year_list and date_list
-DATE_URLS = {'month' : '../%Y/%m/', 'day' : '../../%Y/%m/%d/',}
-YEAR_URLS = {'month' : '../%Y/', 'day' : '../../%Y/', 'detail' : '../../../%Y/',}
-DATE_REPR = {'year' : '%Y', 'month' : '%m/%Y', 'day' : '%d/%m/%Y', 'detail' : '%d/%m/%Y',}
-CURRENT_DATE_REPR = {'month' : '%Y', 'day' : '%m/%Y', 'detail' : '%d/%m/%Y',}
+DATE_URLS = { 'month' : '../%Y/%m/', 'day' : '../../%Y/%m/%d/', }
+YEAR_URLS = { 'month' : '../%Y/', 'day' : '../../%Y/', 'detail' : '../../../%Y/', }
+DATE_REPR = { 'year' : '%Y', 'month' : '%m/%Y', 'day' : '%d/%m/%Y', 'detail' : '%d/%m/%Y', }
+CURRENT_DATE_REPR = { 'month' : '%Y', 'day' : '%m/%Y', 'detail' : '%d/%m/%Y', }
 
 def __archive_entry_year(category):
     " Return ARCHIVE_ENTRY_YEAR from settings (if exists) or year of the newest object in category "
@@ -272,13 +318,13 @@ def __archive_entry_year(category):
     if not year:
         now = datetime.now()
         try:
-            categories=Category.objects.filter(site__id=settings.SITE_ID, tree_path__startswith=category.tree_path)
+            categories = Category.objects.filter(site__id=settings.SITE_ID, tree_path__startswith=category.tree_path)
             year = Listing.objects.filter(category__in=categories, publish_from__lte=now)[0].publish_from.year
         except:
-            year=now.year
+            year = now.year
     return year
 
-def home(request):
+def _home(request):
     """
     Homepage of the actual site.
 
@@ -289,20 +335,15 @@ def home(request):
         Http404 if there is no base category
     """
     cat = get_cached_object_or_404(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
-    return render_to_response(
-            (
-                'page/category/%s/category.html' % (cat.path),
-                'page/category.html',
-),
-            {
+    context = {
                 'category' : cat,
                 'is_homepage': True,
-                'archive_entry_year' : __archive_entry_year(cat)
-},
-            context_instance=RequestContext(request)
-)
+                'archive_entry_year' : __archive_entry_year(cat),
+            }
 
-def category_detail(request, category):
+    return context
+
+def _category_detail(request, category):
     """
     Homepage of a given category.
 
@@ -314,23 +355,16 @@ def category_detail(request, category):
         Http404 if the category doesn't exist
     """
     cat = get_cached_object_or_404(Category, tree_path=category, site__id=settings.SITE_ID)
-    return render_to_response(
-            (
-                'page/category/%s/category.html' % (cat.path),
-                'page/category/%s/category.html' % (cat.main_parent.slug),
-                'page/category.html',
-),
-            {
+    context = {
                 'category' : cat,
                 'archive_entry_year' : __archive_entry_year(cat)
-},
-            context_instance=RequestContext(request)
-)
+            }
+    return context
 
 def get_export_key(func, request, count, name='', content_type=None):
     return 'ella.core.views.export:%d:%d:%s:%s' % (
             settings.SITE_ID, count, name, content_type
-)
+        )
 
 @cache_this(get_export_key, timeout=CACHE_TIMEOUT_LONG)
 def export(request, count, name='', content_type=None):
@@ -339,7 +373,7 @@ def export(request, count, name='', content_type=None):
 
     Params:
         count - number of objects to pass into the template
-        name - name of the template (page/export/banner.html is default)
+        name - name of the template ( page/export/banner.html is default )
         models - list of Model classes to include
     """
     t_list = []
@@ -351,10 +385,10 @@ def export(request, count, name='', content_type=None):
     listing = Listing.objects.get_listing(count=count, category=cat)
     return render_to_response(
             t_list,
-            {'category' : cat, 'listing' : listing},
+            { 'category' : cat, 'listing' : listing },
             context_instance=RequestContext(request),
             content_type=content_type
-)
+        )
 
 
 ##
