@@ -1,3 +1,4 @@
 *.py[co]
 tests/unit_project/settings/local.py
+.*.swp
 
