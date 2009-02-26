@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from django.db import models, transaction
+from django.db import models
 from django.core.urlresolvers import reverse
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
@@ -211,7 +211,6 @@ class Placement(models.Model):
         now = datetime.now()
         return now > self.publish_from and (self.publish_to is None or now < self.publish_to)
 
-    @transaction.commit_on_success
     def save(self, force_insert=False, force_update=False):
         " If Listing is created, we create HitCount object "
 
