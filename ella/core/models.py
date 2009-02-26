@@ -148,8 +148,8 @@ class Category(models.Model):
                     'category_detail',
                     kwargs={
                         'category' : self.tree_path,
-}
-)
+                    }
+                )
         if self.site_id != settings.SITE_ID:
             # prepend the domain if it doesn't match current Site
             site = get_cached_object(Site, pk=self.site_id)
