@@ -634,13 +634,14 @@ function request_media(url) {
 
 $( function() {
     // Submit buttons for ajax forms
-    $('.submit-row input[name=action] ~ a.icn.btn.ok.def').live('click', function(evt) {
+    $('.ajax-form a.ok').live('click', function(evt) {
         if (evt.which != 1) return true;
-        var $submit_row = $(this).closest('.submit-row');
-        var  action  =  $submit_row.find('input[name=action]').val();
-        var  method  = ($submit_row.find('input[name=method]').val() || 'POST').toUpperCase();
-        var $success =  $submit_row.find('input[name=success]');
-        var $error   =  $submit_row.find('input[name=error]');
+        var $form = $(this).closest('.ajax-form');
+        var $meta = $form.find('.form-metadata:first');
+        var  action  =  $meta.find('input[name=action]').val();
+        var  method  = ($meta.find('input[name=method]').val() || 'POST').toUpperCase();
+        var $success =  $meta.find('input[name=success]');
+        var $error   =  $meta.find('input[name=error]');
         var success, error;
         if ($success && $success.length) {
             success = function(data) { $success.get(0).onchange(data); };
@@ -654,8 +655,8 @@ $( function() {
             error = function(xhr) { show_message(xhr.responseText, {msgclass: 'errmsg'}); };
         }
         var  data = {};
-        $submit_row.parent().find(':input').each( function() {
-            if ($(this).parent().is('.submit-row')) return;
+        $form.find(':input').each( function() {
+            if ($(this).parent().is('.form-metadata')) return;
             if (!this.name) return;
             data[ this.name ] = $(this).val();
         });
@@ -666,6 +667,14 @@ $( function() {
             success: success,
             error:   error
         });
+    });
+    
+    $('.ajax-form a.eclear').live('click', function(evt) {
+        $(this).closest('.ajax-form').find(':input').each( function() {
+            if ($(this).parent().is('.form-metadata')) return;
+            $(this).val('');
+        });
+        return false;
     });
     
     // Packing and unpacking filter list. To be removed when filters are reimplemented.

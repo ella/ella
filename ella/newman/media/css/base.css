@@ -211,6 +211,7 @@ label.required { font-weight: bold; color: darkorange; }
 div.submit-row, fieldset.submit-row { border: none; clear:both; margin-top: 5px; padding: 2px 0; text-align: right; }
 input, textarea { padding: 2px 0; }
 textarea, select { vertical-align: top; }
+.ajax-form .form-metadata { display: none; }
 
 /* FORMS : article change form */
 .article-form-container { padding-left: 10px; }
