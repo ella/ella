@@ -225,9 +225,8 @@ class Placement(models.Model):
 
             if old_path != new_path and new_path:
                 redirect, created = Redirect.objects.get_or_create(old_path=old_path, new_path=new_path, defaults={'site_id' : settings.SITE_ID})
-                for r in Redirect.objects.filter(new_path=old_path).exclude(pk=redirect.pk):
-                    r.new_path = new_path
-                    r.save()
+                Redirect.objects.filter(new_path=old_path).exclude(pk=redirect.pk).update(new_path=new_path)
+
         # First, save Placement
         super(Placement, self).save(force_insert, force_update)
         # Then, save HitCount (needs placement_id)
