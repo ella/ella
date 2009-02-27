@@ -702,12 +702,9 @@ $( function() {
         else {
             error = function(xhr) { show_message(xhr.responseText, {msgclass: 'errmsg'}); };
         }
-        var  data = {};
-        get_inputs($form).each( function() {
-            if (!this.name) return;
-            data[ this.name ] = $(this).val();
-            $(this).val('');
-        });
+        var $inputs = get_inputs($form);
+        var data = $inputs.serialize();
+        $inputs.val('');
         $.ajax({
             url: action,
             type: method,
