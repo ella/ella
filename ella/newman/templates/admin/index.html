@@ -7,17 +7,18 @@
 
     <div class="hpbox setup">
         <h3>Rychlá nastavení</h3>
-        <div class="cnt">
-            <!--form method="post"-->
-                <fieldset>
-                    <legend>Category-filter</legend>
-                    {{ site_filter_form.sites }}
-                </fieldset>
-                <fieldset class="submit-row">
-                    <a class="icn btn eclear">Vyčistit</a>
-                    <a class="icn btn ok def">Uložit</a>
-                </fieldset>
-            <!--/form-->
+        <div class="cnt ajax-form">
+            <fieldset>
+                <legend>Category-filter</legend>
+                {{ site_filter_form.sites }}
+            </fieldset>
+            <fieldset class="submit-row">
+                <a class="icn btn eclear">Vyčistit</a>
+                <a class="icn btn ok def">Uložit</a>
+            </fieldset>
+            <div class="form-metadata">
+                <input type="hidden" name="action" value="{% url newman-save-filters %}" />
+            </div>
         </div>
     </div>
 
