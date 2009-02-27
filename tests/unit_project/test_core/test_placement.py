@@ -2,6 +2,7 @@
 from datetime import datetime
 from djangosanetesting import DatabaseTestCase
 
+from django.contrib.sites.models import Site
 from django.contrib.redirects.models import Redirect
 from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
@@ -21,7 +22,7 @@ class TestPlacement(DatabaseTestCase):
         self.category = Category.objects.create(
             title=u"你好 category",
             description=u"example testing category",
-            site_id = self.site_id,
+            site_id=self.site_id,
             slug=u"ni-hao-category",
         )
 
@@ -29,7 +30,7 @@ class TestPlacement(DatabaseTestCase):
             title=u"nested category",
             description=u"category nested in self.category",
             tree_parent=self.category,
-            site_id = self.site_id,
+            site_id=self.site_id,
             slug=u"nested-category",
         )
 
@@ -56,6 +57,28 @@ class TestPlacement(DatabaseTestCase):
 
     def test_url(self):
         self.assert_equals('/nested-category/2008/1/10/articles/first-article/', self.placement.get_absolute_url())
+
+    def test_url_on_other_site(self):
+        site = Site.objects.create(
+            name='some site',
+            domain='not-example.com'
+        )
+
+        category = Category.objects.create(
+            title=u"再见 category",
+            description=u"example testing category, second site",
+            site=site,
+            slug=u'zai-jian-category',
+        )
+        
+        p = Placement.objects.create(
+            target_ct=self.article_ct,
+            target_id=self.article.pk,
+            category=category,
+            publish_from=datetime(2008,1,10)
+        )
+
+        self.assert_equals(u'http://not-example.com/2008/1/10/articles/first-article/', p.get_absolute_url())
 
     def test_default_slug(self):
         self.assert_equals(self.article.slug, self.placement.slug)
