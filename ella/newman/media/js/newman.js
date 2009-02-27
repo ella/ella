@@ -638,8 +638,48 @@ function request_media(url) {
 $( function() {
     //// Ajax forms
     
+    // Validate
+    var validations = {
+        required: function(input) {
+            if ($(input).val()) return false;
+            else return _('Field cannot be blank.');
+        }
+    };
+    function show_form_error(input, msg) {
+        var $msg = $('<span>').addClass('form-error-msg').text(msg);
+        $('label[for='+input.id+']').append($msg);
+    }
+    /**
+     * Automatic class-driven validation.
+     * For each :input in the form, find its label and check is some of the label's classes
+     * isn't in the validations object. If so, then run the function passing it the input.
+     * If it returns *FALSE*, then this input *VALIDATES*.
+     * If it returns a true value, it is used as the error message and passed to show_form_error.
+     */
+    function validate($form) {
+        var ok = true;
+        $form.find(':input').each( function() {
+            if ($(this).parent().is('.form-metadata')) return true;
+            var $label = $('label[for='+this.id+']');
+            $label.find('span.form-error-msg').remove();
+            var classes = $label.attr('className').split(/\s+/);
+            for (var i = 0; i < classes.length; i++) {
+                var cl = classes[i];
+                if ($.isFunction(validations[ cl ])) {
+                    var err = validations[ cl ](this);
+                    if (err) {
+                        show_form_error(this, err);
+                        ok = false;
+                    }
+                }
+            }
+        });
+        return ok;
+    }
+    
     // Submit event
     function ajax_submit($form) {
+        if ( ! validate($form) ) return false;
         var $meta = $form.find('.form-metadata:first');
         var  action  =  $meta.find('input[name=action]').val();
         var  method  = ($meta.find('input[name=method]').val() || 'POST').toUpperCase();

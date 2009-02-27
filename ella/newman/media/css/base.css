@@ -213,6 +213,8 @@ input, textarea { padding: 2px 0; }
 textarea, select { vertical-align: top; }
 .ajax-form .form-metadata { display: none; }
 
+.form-error-msg { padding: 0 5px; color: red; font-weight: bold; }
+
 /* FORMS : article change form */
 .article-form-container { padding-left: 10px; }
 .article-form-container .multicol { float: left; }
