@@ -10,6 +10,9 @@ function carp(message) {
     }
 }
 
+var LF = 10, CR = 13;
+
+// localization
 var _;
 if (window.gettext) _ = gettext;
 else {
@@ -633,10 +636,10 @@ function request_media(url) {
 
 
 $( function() {
-    // Submit buttons for ajax forms
-    $('.ajax-form a.ok').live('click', function(evt) {
-        if (evt.which != 1) return true;
-        var $form = $(this).closest('.ajax-form');
+    //// Ajax forms
+    
+    // Submit event
+    function ajax_submit($form) {
         var $meta = $form.find('.form-metadata:first');
         var  action  =  $meta.find('input[name=action]').val();
         var  method  = ($meta.find('input[name=method]').val() || 'POST').toUpperCase();
@@ -667,8 +670,17 @@ $( function() {
             success: success,
             error:   error
         });
+    }
+    
+    // Submit button
+    $('.ajax-form a.ok').live('click', function(evt) {
+        if (evt.which != 1) return true;
+        var $form = $(this).closest('.ajax-form');
+        ajax_submit($form);
+        return false;
     });
     
+    // Reset button
     $('.ajax-form a.eclear').live('click', function(evt) {
         $(this).closest('.ajax-form').find(':input').each( function() {
             if ($(this).parent().is('.form-metadata')) return;
@@ -676,6 +688,15 @@ $( function() {
         });
         return false;
     });
+    
+    // Enter pressed on input
+    $('.ajax-form input').live('keypress', function(evt) {
+        if (evt.keyCode != CR && evt.keyCode != LF) return true;
+        var $form = $(this).closest('.ajax-form');
+        ajax_submit($form);
+        return false;
+    });
+    //// End of ajax forms
     
     // Packing and unpacking filter list. To be removed when filters are reimplemented.
     $('#filters :header').live('click', function(evt) {
