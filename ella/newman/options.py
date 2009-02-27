@@ -24,6 +24,7 @@ from django.db.models.fields.related import ForeignKey, ManyToManyField
 
 from ella.newman.changelist import NewmanChangeList, FilterChangeList
 from ella.newman import models, fields
+from ella.newman.decorators import require_AJAX
 
 DEFAULT_LIST_PER_PAGE = getattr(settings, 'NEWMAN_LIST_PER_PAGE', 25)
 
@@ -120,8 +121,7 @@ class NewmanModelAdmin(admin.ModelAdmin):
         urlpatterns += super(NewmanModelAdmin, self).get_urls()
         return urlpatterns
 
-#    @require_AJAX
-#    @require_POST
+    @require_AJAX
     def save_draft_view(self, request, extra_context=None):
         "Autosave data or save as (named) template"
         from ella.newman.models import AdminUserDraft
@@ -138,6 +138,7 @@ class NewmanModelAdmin(admin.ModelAdmin):
 
         return HttpResponse(content=_('Model data was saved'), mimetype='text/plain')
 
+    @require_AJAX
     def filters_view(self, request, extra_context=None):
         "stolen from: The 'change list' admin view for this model."
         opts = self.model._meta
@@ -171,7 +172,7 @@ class NewmanModelAdmin(admin.ModelAdmin):
         )
         return HttpResponse(out, mimetype='text/plain;charset=utf-8')
 
-#    @require_AJAX
+    @require_AJAX
     def changelist_view(self, request, extra_context=None):
 
         opts = self.model._meta
@@ -206,7 +207,7 @@ class NewmanModelAdmin(admin.ModelAdmin):
             'admin/change_list.html'
         ], context, context_instance=template.RequestContext(request))
 
-#    @require_AJAX
+    @require_AJAX
     def suggest_view(self, request, extra_context=None):
 
         SUGGEST_VIEW_LIMIT = getattr(settings, 'SUGGEST_VIEW_LIMIT', 20)
@@ -350,6 +351,7 @@ class NewmanModelAdmin(admin.ModelAdmin):
         # no permission found
         return False
 
+    @require_AJAX
     def change_view(self, request, object_id, extra_context=None):
         "The 'change' admin view for this model."
         model = self.model
@@ -487,7 +489,7 @@ class NewmanModelAdmin(admin.ModelAdmin):
         if models.is_category_fk(db_field):
             fld = super(NewmanModelAdmin, self).formfield_for_dbfield(db_field, **kwargs)#FIXME get fld.queryset different way
             kwargs['model'] = self.model
-            kwargs['user'] = user 
+            kwargs['user'] = user
             return CategoryChoiceField(fld.queryset, **kwargs)
 
         return super(NewmanModelAdmin, self).formfield_for_dbfield(db_field, **kwargs)
@@ -699,7 +701,7 @@ class GenericInlineModelAdmin(NewmanInlineModelAdmin):
         if models.is_category_fk(db_field):
             fld = super(GenericInlineModelAdmin, self).formfield_for_dbfield(db_field, **kwargs)#FIXME get fld.queryset different way
             kwargs['model'] = self.model
-            kwargs['user'] = self.user 
+            kwargs['user'] = self.user
             return CategoryChoiceField(fld.queryset, **kwargs)
 
         return super(GenericInlineModelAdmin, self).formfield_for_dbfield(db_field, **kwargs)
