@@ -36,6 +36,7 @@ class TestPlacement(DatabaseTestCase):
             perex=u'Some\nlonger\ntext',
             category=self.category_nested
         )
+
         self.article_ct = ContentType.objects.get_for_model(Article)
 
         self.placement = Placement.objects.create(
@@ -45,6 +46,15 @@ class TestPlacement(DatabaseTestCase):
             publish_from=datetime(2008,1,10)
         )
 
+        self.placement_home = Placement.objects.create(
+            target_ct=self.article_ct,
+            target_id=self.article.pk,
+            category=self.category,
+            publish_from=datetime(2008,1,10)
+        )
+
+    def test_home_url(self):
+        self.assert_equals('/2008/1/10/articles/first-article/', self.placement_home.get_absolute_url())
 
     def test_url(self):
         self.assert_equals('/nested-category/2008/1/10/articles/first-article/', self.placement.get_absolute_url())
@@ -62,7 +72,5 @@ class TestPlacement(DatabaseTestCase):
         self.placement.slug = 'old-article-new-slug'
         self.placement.save()
         self.assert_equals('/nested-category/2008/1/10/articles/old-article-new-slug/', self.placement.get_absolute_url())
-
-
 
 
