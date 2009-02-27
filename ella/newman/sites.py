@@ -89,7 +89,7 @@ class NewmanSite(django_admin.AdminSite):
 
             return HttpResponse(content=ugettext('Your settings was saved.'), mimetype='text/plain', status=200)
         else:
-            return HttpResponseRedirect(content=ugettext('Error in form.'), mimetype='text/plain', status=405)
+            return HttpResponse(content=ugettext('Error in form.'), mimetype='text/plain', status=405)
 
 
 site = NewmanSite()
