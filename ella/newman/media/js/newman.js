@@ -638,6 +638,12 @@ function request_media(url) {
 $( function() {
     //// Ajax forms
     
+    function get_inputs($form) {    // all except metadata
+        return $form.find(':input').filter(function() {
+            return ! $(this).parent().is('.form-metadata');
+        });
+    }
+    
     // Validate
     var validations = {
         required: function(input) {
@@ -658,8 +664,7 @@ $( function() {
      */
     function validate($form) {
         var ok = true;
-        $form.find(':input').each( function() {
-            if ($(this).parent().is('.form-metadata')) return true;
+        get_inputs($form).each( function() {
             var $label = $('label[for='+this.id+']');
             $label.find('span.form-error-msg').remove();
             var classes = $label.attr('className').split(/\s+/);
@@ -698,10 +703,10 @@ $( function() {
             error = function(xhr) { show_message(xhr.responseText, {msgclass: 'errmsg'}); };
         }
         var  data = {};
-        $form.find(':input').each( function() {
-            if ($(this).parent().is('.form-metadata')) return;
+        get_inputs($form).each( function() {
             if (!this.name) return;
             data[ this.name ] = $(this).val();
+            $(this).val('');
         });
         $.ajax({
             url: action,
