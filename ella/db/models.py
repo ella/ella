@@ -78,16 +78,16 @@ class Publishable(Model):
     def save(self, force_insert=False, force_update=False):
         if self.pk and hasattr(self, 'slug'): # only run on update
             # get old self
-            old_self = self.__class__._default_manager.get(pk=self.pk)
+            old_slug = self.__class__._default_manager.get(pk=self.pk).slug
             # the slug has changed
-            if old_self.slug != self.slug:
-                for plc in list(Placement.objects.filter(
+            if old_slug != self.slug:
+                for plc in Placement.objects.filter(
                         target_id=self.pk,
                         target_ct=ContentType.objects.get_for_model(self.__class__)
-).exclude(category=self.category_id)) + [self.main_placement]:
-                    if plc.slug == old_self.slug:
+                    ):
+                    if plc.slug == old_slug:
                         plc.slug = self.slug
-                        plc.save()
+                        plc.save(force_update=True)
         return Model.save(self, force_insert, force_update)
 
     def delete(self):
