@@ -1,4 +1,8 @@
-from hashlib import md5
+try:
+    from hashlib import md5
+except ImportError:
+    from md5 import md5
+
 import logging
 
 from django.db.models import ObjectDoesNotExist
