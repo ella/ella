@@ -14,7 +14,7 @@ from ella.core.models import Category
 from ella.core.box import Box
 from ella.core.cache import get_cached_object, CACHE_DELETER, cache_this, CachedGenericForeignKey
 
-def get_position_key(func, self, category, name, nofallback):
+def get_position_key(func, self, category, name, nofallback=False):
     return 'ella.positions.models.PositionManager.get_active_position:%d:%s:%s' % (
             category.pk, name, nofallback and '1' or '0'
 )
