@@ -251,7 +251,7 @@ class PlacementInlineFormset( options.BaseGenericInlineFormSet ):
 
 class PlacementInlineOptions( options.GenericTabularInline ):
     model = Placement
-    extra = 1
+    max_num = 1
     ct_field = 'target_ct'
     ct_fk_field = 'target_id'
     formset = PlacementInlineFormset
@@ -279,7 +279,7 @@ class ListingInlineOptions( NewmanTabularInline ):
 
 class ArticleContentInlineOptions(NewmanTabularInline):
     model = ArticleContents
-    extra = 1
+    max_num = 1
     rich_text_fields = { None: ('content',) }
 
 class InfoBoxOptions(NewmanModelAdmin):
@@ -292,7 +292,6 @@ class InfoBoxOptions(NewmanModelAdmin):
 class ArticleOptions(NewmanModelAdmin):
     list_display = ('title', 'category', 'photo_thumbnail', 'publish_from', 'hitcounts', 'obj_url')
     list_display_ext = ('article_age', 'get_hits', 'pk', 'full_url',)
-#    date_hierarchy = 'created'
     ordering = ( '-created', )
     fieldsets = (
         ( _( "Article heading" ), { 'fields': ( 'title', 'upper_title', 'updated', 'slug' ) } ),
@@ -300,12 +299,10 @@ class ArticleOptions(NewmanModelAdmin):
         ( _( "Metadata" ), { 'fields': ( 'category', 'authors', 'source', 'photo' ) } ),
     )
     raw_id_fields = ('photo',)
-    list_filter = ( 'category__site', 'created', 'category', 'authors', )
+    list_filter = ( 'category__site', 'created', 'category', )
     search_fields = ( 'title', 'upper_title', 'perex', 'slug', 'authors__name', 'authors__slug', ) # FIXME: 'tags__tag__name', )
     inlines = [ ArticleContentInlineOptions, PlacementInlineOptions ]
     suggest_fields = { 'authors': ('name', 'slug',), 'source': ('name', 'url',), 'category': ('title', 'tree_path'), }
-#    if 'ella.tagging' in settings.INSTALLED_APPS:
-#        inlines.append(TaggingInlineOptions)
     prepopulated_fields = { 'slug' : ( 'title', ) }
     rich_text_fields = { None: ('perex',) }
     list_per_page = 20
