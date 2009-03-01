@@ -2,7 +2,6 @@
     <table cellspacing="0">
         <thead>
             <tr>
-                <th>all</th>
                 {% for header in result_headers %}<th{{ header.class_attrib }}>
                 {% if header.sortable %}<a class="bl" href="{{ header.url }}">{% endif %}
                 {{ header.text|capfirst }}
@@ -12,7 +11,6 @@
         <tbody>
             {% for result in results %}
                 <tr class="{% cycle 'row1' 'row2' %}">
-                    <td><input type="checkbox"/></td>
                     {% for item in result %}{{ item }}{% endfor %}
                 </tr>
             {% endfor %}

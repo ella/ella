@@ -1,17 +1,31 @@
+{% extends "admin/ajax_content_base.html" %}
 {% load i18n admin_modify adminmedia %}
 
-{% block content %}<div id="content-main">
-
-{% block object-tools %}
-{% if change %}
-    <ul class="object-tools">
-        <li><a href="history/" class="hashadr historylink">{% trans "History" %}</a></li>
-        {% if has_absolute_url %}
-            <li><a href="../../../r/{{ content_type_id }}/{{ object_id }}/" class="viewsitelink">{% trans "View on site" %}</a></li>
-        {% endif%}
-    </ul>
-{% endif %}
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url admin_index %}">{% trans "Home" %}</a>
+    &rsaquo; <a class="hashadr" href="{% url admin_index %}{{ app_label }}/">{% trans app_label.title %}</a>
+    &rsaquo; {% if has_change_permission %}<a class="hashadr" href="../">{{ opts.verbose_name_plural|capfirst }}</a>{% else %}{{ opts.verbose_name_plural|capfirst }}{% endif %}
+    {% if title %}&rsaquo; <strong id="doc-title">{{ title }}</strong>{% endif %}
+</div>
 {% endblock %}
+
+{% block content_toolbar_content %}
+    {% if change %}
+        <ul>
+            <li><a href="history::::history/" class="icn btn simpleload history">{% trans "History" %}</a></li>
+            {% if has_absolute_url %}
+                <li><a href="{% url admin_index %}r/{{ content_type_id }}/{{ object_id }}/" class="icn btn web">{% trans "View on site" %}</a></li>
+            {% endif%}
+        </ul>
+    {% endif %}
+{% endblock %}
+
+{% block content_services %}
+<div id="history"></div>
+{% endblock %}
+
+{% block content %}
 <form {% if has_file_field %}enctype="multipart/form-data" {% endif %}action="{{ form_url }}" method="post" id="{{ opts.module_name }}_form">{% block form_top %}{% endblock %}
 <div>
 {% if save_on_top %}{% submit_row %}{% endif %}
@@ -42,15 +56,18 @@
    <script type="text/javascript">document.getElementById("{{ adminform.first_field.auto_id }}").focus();</script>
 {% endif %}
 
-{# JavaScript for prepopulated fields #}
-{% prepopulated_fields_js %}
-
-<script type="text/javascript">
-{% for m in media %}
-    request_media('{{ m }}?{{ VERSION }}');
-{% endfor %}
-</script>
-
 </div>
-</form></div>
+</form>
+{% endblock %}
+
+{% block content_js %}
+    {{ block.super }}
+    {# JavaScript for prepopulated fields #}
+    {% prepopulated_fields_js %}
+
+    <script type="text/javascript">
+    {% for m in media %}
+        request_media('{{ m }}?{{ VERSION }}');
+    {% endfor %}
+    </script>
 {% endblock %}
