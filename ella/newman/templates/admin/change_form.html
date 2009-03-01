@@ -10,9 +10,24 @@
 </div>
 {% endblock %}
 
+{% spaceless %}
 {% block content_toolbar_content %}
+    <ul style="float: left;">
+        {% if add %}
+        <li>
+            <select>
+                <option>Apply template</option>
+                <option>Template 1</option>
+                <option>Template 1</option>
+                <option>Template 1</option>
+                <option>Template 1</option>
+            </select>
+        </li>
+        {% endif %}
+        <li><a href="#" class="icn btn save" onclick="prompt('Enter a template name:');return false;">{% trans "Save as template" %}</a></li>
+    </ul>
     {% if change %}
-        <ul>
+        <ul style="float: right">
             <li><a href="history::::history/" class="icn btn simpleload history">{% trans "History" %}</a></li>
             {% if has_absolute_url %}
                 <li><a href="{% url admin_index %}r/{{ content_type_id }}/{{ object_id }}/" class="icn btn web">{% trans "View on site" %}</a></li>
@@ -20,6 +35,8 @@
         </ul>
     {% endif %}
 {% endblock %}
+{% endspaceless %}
+
 
 {% block content_services %}
 <div id="history"></div>
