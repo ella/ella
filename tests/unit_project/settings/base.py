@@ -1,5 +1,4 @@
-import logging.config
-from os.path import dirname, join, isfile, normpath, pardir
+from os.path import dirname, join, normpath, pardir
 
 FILE_ROOT = normpath(join(dirname(__file__), pardir))
 
