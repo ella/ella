@@ -43,7 +43,7 @@ class TestPublishable(DatabaseTestCase):
         self.assert_equals(None, self.publishable.main_placement)
 
     def test_main_placement_with_two_placements_on_one_site(self):
-        p = Placement.objects.create(
+        Placement.objects.create(
             target_ct=self.publishable_ct,
             target_id=self.publishable.pk,
             category=self.category,
@@ -64,7 +64,7 @@ class TestPublishable(DatabaseTestCase):
             slug=u'zai-jian-category',
         )
         
-        p = Placement.objects.create(
+        Placement.objects.create(
             target_ct=self.publishable_ct,
             target_id=self.publishable.pk,
             category=category,
