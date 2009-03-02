@@ -1,5 +1,5 @@
 from tempfile import gettempdir
-from os.path import join, dirname
+from os.path import join
 
 ADMINS = (
     # ('Your Name', 'your_email@domain.com'),
