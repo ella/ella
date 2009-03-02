@@ -22,7 +22,7 @@ class TestPublishable(DatabaseTestCase):
         self.assert_equals('http://example.com/nested-category/2008/1/10/articles/first-article/', self.publishable.get_domain_url())
 
     def test_main_placement_with_single_placement(self):
-        self.assert_equals(self.publishable.main_placement, self.placement)
+        self.assert_equals(self.placement, self.publishable.main_placement)
 
     def test_main_placement_with_single_placement_on_other_site(self):
         site = Site.objects.create(
@@ -49,7 +49,7 @@ class TestPublishable(DatabaseTestCase):
             category=self.category,
             publish_from=datetime(2008,1,10)
         )
-        self.assert_equals(self.publishable.main_placement, self.placement)
+        self.assert_equals(self.placement, self.publishable.main_placement)
 
     def test_main_placement_with_two_placements_on_two_sites(self):
         site = Site.objects.create(
@@ -71,5 +71,5 @@ class TestPublishable(DatabaseTestCase):
             publish_from=datetime(2008,1,10)
         )
 
-        self.assert_equals(self.publishable.main_placement, self.placement)
+        self.assert_equals(self.placement, self.publishable.main_placement)
 
