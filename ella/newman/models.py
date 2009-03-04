@@ -1,4 +1,5 @@
 from time import time
+import logging
 
 from django.db import models, connection
 from django.db.models import Q, query, ForeignKey, ManyToManyField
@@ -9,8 +10,10 @@ from django.conf import settings
 
 from ella.core.cache.utils import CachedForeignKey, cache_this
 from ella.core.models import Category
+from ella.newman.managers import DenormalizedCategoryUserRoleManager
 
 CACHE_TIMEOUT = 10 * 60
+log = logging.getLogger('ella.newman.models')
 
 class DevMessage(models.Model):
     """Development news for ella administrators."""
@@ -170,6 +173,14 @@ class CategoryUserRole(models.Model):
             code = '%s.%s' % (p.content_type.app_label, p.codename)
             cats = compute_applicable_categories(self.user, code)
             for c in cats:
+                existing = DenormalizedCategoryUserRole.objects.filter(
+                    contenttype_id=p.content_type.pk,
+                    user_id=self.user.pk,
+                    permission_codename=code,
+                    category_id=c
+                )
+                if existing:
+                    continue
                 d = DenormalizedCategoryUserRole(
                     contenttype_id=p.content_type.pk,
                     user_id=self.user.pk,
@@ -190,6 +201,8 @@ class DenormalizedCategoryUserRole(models.Model):
     permission_codename = models.CharField(max_length=100)
     category_id = models.IntegerField()
     contenttype_id = models.IntegerField()
+
+    objects = DenormalizedCategoryUserRoleManager()
 
     class Meta:
         unique_together = ('user_id', 'permission_codename', 'permission_id', 'category_id', 'contenttype_id')
@@ -243,6 +256,8 @@ def has_object_permission(user, obj, permission):
             permission_codename=permission,
             contenttype_id=ct.pk
         )
+    if model_category_fk(obj):
+        qs = qs.filter( category_id=model_category_fk_value(obj).pk )
     if qs.count():
         return True
     return False
@@ -267,6 +282,7 @@ def compute_applicable_categories(user, permission=None):
         perms = Permission.objects.filter( content_type__app_label=app_label, codename=code )
         if not perms:
             # no permission found (maybe misspeled) then no categories permitted!
+            log.warning('No permission [%s] found for user %s' % (permission, user.username))
             return []
         q = q.filter( group__permissions=perms[0] )
     else:
@@ -286,32 +302,20 @@ def applicable_categories(user, permission=None):
         all = Category.objects.all()
         return [ d.pk for d in all ]
     if permission:
-        qs = DenormalizedCategoryUserRole.objects.filter(
-            user_id=user.id, 
-            permission_codename=permission
-        ).distinct()
+        return DenormalizedCategoryUserRole.objects.categories_by_user_and_permission(user, permission)
     else:
-        qs = DenormalizedCategoryUserRole.objects.filter(
-            user_id=user.id, 
-            category_id=category.pk
-        ).distinct()
+        return DenormalizedCategoryUserRole.objects.categories_by_user(user)
     return map(lambda x: x.category_id, qs)
 
-def permission_filtered_model_qs(queryset, model, user, permissions=[]):
+def permission_filtered_model_qs(queryset, user, permissions=[]):
     """ returns Queryset filtered accordingly to given permissions """
     if user.is_superuser:
         return queryset
     q = queryset
     qs = query.EmptyQuerySet()
-    if 'category' in model._meta.get_all_field_names():
-        cat_qs = DenormalizedCategoryUserRole.objects.filter(
-            user_id=user.pk, 
-            permission_codename__in=permissions
-        ).distinct()
-        categories = map( lambda c: c.category_id, cat_qs )
-
+    if 'category' in queryset.model._meta.get_all_field_names():
+        categories = DenormalizedCategoryUserRole.objects.categories_by_user_and_permission(user, permissions)
         if categories:
-            # TODO: terrible hack for circumventing invalid Q( __in=[] ) | Q( __in=[] )
             if queryset.model == Category:
                 qs = q.filter( pk__in=categories )
             else:
@@ -327,6 +331,7 @@ def is_category_fk(db_field):
     return False
 
 def model_category_fk_value(model):
+    """ returns value of field related to Category """
     if not model:
         return None
     for f in model._meta.fields:
@@ -335,6 +340,7 @@ def model_category_fk_value(model):
     return None
 
 def model_category_fk(model):
+    """ returns model's field related to Category """
     if not model:
         return None
     for f in model._meta.fields:
@@ -346,6 +352,7 @@ def generate_test_data(filepath='/home/jonson/src/nc/ella/ella/newman/testbed/se
     from django.contrib.sites.models import Site
     from django.core.serializers import serialize
     FMT = 'yaml'
-    data = list(ContentType.objects.all()) + list(Category.objects.all()) + list(Site.objects.all())
+    #data = list(ContentType.objects.all()) + list(Category.objects.all()) + list(Site.objects.all())
+    data = list(Permission.objects.all())
     file(filepath, 'w').write( serialize(FMT, data) )
 
