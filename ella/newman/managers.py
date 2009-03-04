@@ -37,7 +37,7 @@ class DenormalizedCategoryUserRoleManager(models.Manager):
             'col_category': 'category_id',
             'col_code': 'permission_codename',
             'user_id': user_id,
-            'code': permission_code
+            'operator': '='
         }
         sql = '''
         SELECT
@@ -47,9 +47,22 @@ class DenormalizedCategoryUserRoleManager(models.Manager):
         WHERE
             %(tab)s.%(col_user)s = %(user_id)d
             AND
-            %(tab)s.%(col_code)s = %%s
+            %(tab)s.%(col_code)s %(operator)s %%s
         GROUP BY
             %(col_category)s
-        ''' % params
-        cur.execute(sql, [permission_code,])
+        ''' 
+        if type(permission_code) in (list, tuple,):
+            # TODO validate content of permission_code list
+            #permissions = '(%s)' % str(permission_code)[1:-1]
+            params['operator'] = 'IN'
+            msql = sql % params
+            in_list = '(%s)' % str(map(lambda x: '%s', permission_code))[1:-1]
+            in_list = '('
+            for item in permission_code:
+                in_list += '%s, '
+            in_list = '%s)' % in_list[:-2]
+            msql = msql % in_list
+            cur.execute(msql, permission_code)
+        else:
+            cur.execute(sql % params, [permission_code,])
         return map(lambda x: x[0], cur.fetchall())
