@@ -2,11 +2,9 @@ from django.core.exceptions import PermissionDenied
 from django.conf import settings
 
 from django.contrib import admin
-from django.contrib.admin import helpers
-from django.contrib.admin.options import ModelAdmin, InlineModelAdmin, BaseModelAdmin
-from django.contrib.admin.options import IncorrectLookupParameters
-from django.forms.models import BaseInlineFormSet, ModelChoiceField
-from django.forms.util import ErrorDict, ErrorList
+from django.contrib.admin.options import InlineModelAdmin, IncorrectLookupParameters
+from django.forms.models import BaseInlineFormSet
+from django.forms.util import ErrorList
 from django import template
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.contrib.admin.views.main import ERROR_FLAG
@@ -22,8 +20,9 @@ from django.forms.formsets import all_valid
 from django.contrib.contenttypes.models import ContentType
 from django.db.models.fields.related import ForeignKey, ManyToManyField
 
+
 from ella.newman.changelist import NewmanChangeList, FilterChangeList
-from ella.newman import models, fields
+from ella.newman import models, fields, widgets
 from ella.newman.decorators import require_AJAX
 
 DEFAULT_LIST_PER_PAGE = getattr(settings, 'NEWMAN_LIST_PER_PAGE', 25)
@@ -31,65 +30,40 @@ DEFAULT_LIST_PER_PAGE = getattr(settings, 'NEWMAN_LIST_PER_PAGE', 25)
 def get_permission(permission_name, instance):
     return instance._meta.app_label + '.' + '%s_' % permission_name + instance._meta.module_name.lower()
 
-class CategoryChoiceField(ModelChoiceField):
-    """ Category choice field. Choices restricted accordingly to CategoryUserRole. """
-    def __init__(self, queryset, empty_label=u"---------", cache_choices=False,
-                 required=True, widget=None, label=None, initial=None,
-                 help_text=None, to_field_name=None, *args, **kwargs):
+def formfield_for_dbfield_factory(cls, db_field, **kwargs):
+
+    if 'request' in kwargs:
+        request = kwargs.pop('request', None)
+        user = request.user
+
+    for css_class, rich_text_fields in getattr(cls, 'rich_text_fields', {}).iteritems():
+        if db_field.name in rich_text_fields:
+            kwargs.update({
+                'required': not db_field.blank,
+                'label': db_field.verbose_name,
+            })
+            rich_text_field = fields.RichTextField(**kwargs)
+            if css_class:
+                rich_text_field.widget.attrs['class'] += ' %s' % css_class
+            return rich_text_field
+
+    if db_field.name in cls.raw_id_fields and isinstance(db_field, ForeignKey):
+        kwargs['widget'] = widgets.ForeignKeyRawIdWidget(db_field.rel)
+        return db_field.formfield(**kwargs)
+
+    if db_field.name in getattr(cls, 'suggest_fields', {}).keys() \
+                        and isinstance(db_field, (ForeignKey, ManyToManyField)):
         kwargs.update({
-            'queryset': queryset,
-            'empty_label': empty_label,
-            'cache_choices': cache_choices,
-            'required': required,
-            'widget': widget,
-            'label': label,
-            'initial': initial,
-            'help_text': help_text,
-            'to_field_name': to_field_name
+            'required': not db_field.blank,
+            'label': db_field.verbose_name,
+            'model': cls.model,
+            'lookup': cls.suggest_fields[db_field.name]
         })
-        if not('user' in kwargs and 'model' in kwargs):
-            raise AttributeError('CategoryChoiceField requires user and model instances to be present in kwargs')
-        self.model = kwargs.pop('model')
-        self.user = kwargs.pop('user')
-        super(CategoryChoiceField, self).__init__(*args, **kwargs)
-        #self.queryset = queryset
-        #self.choice_cache = None
+        print db_field.name
+        return fields.AdminSuggestField(db_field, **kwargs)
 
-    def _get_queryset(self):
-        if hasattr(self._queryset, '_newman_filtered'):
-            return self._queryset
-        view_perm = get_permission('view', self.model)
-        change_perm = get_permission('change', self.model)
-        perms = (view_perm, change_perm,)
-        qs = models.permission_filtered_model_qs(self._queryset, self.model, self.user, perms)
-        qs._newman_filtered = True #magic variable
-        self._set_queryset(qs)
-        return self._queryset
+    return db_field.formfield(**kwargs)
 
-    def _set_queryset(self, queryset):
-        self._queryset = queryset
-        self.widget.choices = self.choices
-
-    queryset = property(_get_queryset, _set_queryset)
-
-    def clean(self, value):
-        cvalue = super(CategoryChoiceField, self).clean(value)
-        return cvalue
-        # TODO unable to realize if field was modified or not (when user has view permission a hits Save.)
-        #      Permissions checks are placed in FormSets for now. CategoryChoiceField restricts category
-        #      choices at the moment.
-        # next part is category-based permissions (only for objects with category field)
-        # attempt: to do role-permission checks here (add new and change permissions checking)
-        # Adding new object
-        #TODO check wheter field was modified or not.
-        add_perm = get_permission('add', self.model)
-        if not models.has_category_permission(self.user, cvalue, add_perm):
-            raise ValidationError(_('Category not permitted'))
-        # Changing existing object
-        change_perm = get_permission('change', self.model)
-        if not models.has_category_permission(self.user, cvalue, change_perm):
-            raise ValidationError(_('Category not permitted'))
-        return cvalue
 
 class NewmanModelAdmin(admin.ModelAdmin):
 
@@ -459,40 +433,7 @@ class NewmanModelAdmin(admin.ModelAdmin):
         f._set_queryset(qs)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        # TODO: Only hotfix for django 9791+
-        if 'request' in kwargs:
-            user = kwargs['request'].user
-            del kwargs['request']
-        for css_class, rich_text_fields in getattr(self, 'rich_text_fields', {}).iteritems():
-            if db_field.name in rich_text_fields:
-                kwargs.update({
-                    'required': not db_field.blank,
-                    'label': db_field.verbose_name,
-                })
-                rich_text_field = fields.RichTextAreaField(**kwargs)
-                if css_class:
-                    rich_text_field.widget.attrs['class'] += ' %s' % css_class
-                return rich_text_field
-
-        if db_field.name in getattr(self, 'suggest_fields', {}).keys() and isinstance(db_field, (ForeignKey, ManyToManyField)):
-            kwargs.update({
-                'required': not db_field.blank,
-                'label': db_field.verbose_name,
-            })
-            if isinstance(db_field, ForeignKey):
-                return fields.GenericSuggestField([db_field, self.model, self.suggest_fields[db_field.name]], **kwargs)
-            #return fields.GenericSuggestFieldMultiple([db_field, self.model, self.suggest_fields[db_field.name]], **kwargs)
-
-
-
-        # filtering category field choices
-        if models.is_category_fk(db_field):
-            fld = super(NewmanModelAdmin, self).formfield_for_dbfield(db_field, **kwargs)#FIXME get fld.queryset different way
-            kwargs['model'] = self.model
-            kwargs['user'] = user
-            return CategoryChoiceField(fld.queryset, **kwargs)
-
-        return super(NewmanModelAdmin, self).formfield_for_dbfield(db_field, **kwargs)
+        return formfield_for_dbfield_factory(self, db_field, **kwargs)
 
     def queryset(self, request):
         """
@@ -535,6 +476,9 @@ class NewmanInlineFormSet(BaseInlineFormSet):
 
 class NewmanInlineModelAdmin(InlineModelAdmin):
     formset = NewmanInlineFormSet
+
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        return formfield_for_dbfield_factory(self, db_field, **kwargs)
 
     def get_formset(self, request, obj=None):
         setattr(self.form, '_magic_user', request.user) # prasarna
@@ -697,14 +641,14 @@ class GenericInlineModelAdmin(NewmanInlineModelAdmin):
         return generic_inlineformset_factory(self.model, **defaults)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        # filtering category field choices
         if models.is_category_fk(db_field):
             fld = super(GenericInlineModelAdmin, self).formfield_for_dbfield(db_field, **kwargs)#FIXME get fld.queryset different way
-            kwargs['model'] = self.model
-            kwargs['user'] = self.user
-            return CategoryChoiceField(fld.queryset, **kwargs)
-
-        return super(GenericInlineModelAdmin, self).formfield_for_dbfield(db_field, **kwargs)
+            kwargs.update({
+                'model': self.model,
+                'user': self.user
+            })
+            return fields.CategoryChoiceField(fld.queryset, **kwargs)
+        return formfield_for_dbfield_factory(self, db_field, **kwargs)
 
 class GenericStackedInline(GenericInlineModelAdmin):
     template = 'admin/edit_inline/stacked.html'

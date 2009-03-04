@@ -1,20 +1,32 @@
 from django import template
-from django.contrib import admin as django_admin
+from django.contrib.admin.sites import AdminSite
 from django.shortcuts import render_to_response
 from django.utils.functional import update_wrapper
 from django.utils.translation import ugettext, ugettext_lazy as _
-from django.core.exceptions import ImproperlyConfigured
+from django.db import models
 
 from ella.newman.forms import SiteFilterForm
-from django.views.decorators.http import require_POST
-from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse
 from django.core.mail import EmailMessage
-from ella.newman.decorators import require_AJAX
 from ella.newman.models import AdminSetting
+from ella.newman.decorators import require_AJAX
 
 NEWMAN_URL_PREFIX = 'nm'
 
-class NewmanSite(django_admin.AdminSite):
+class NewmanSite(AdminSite):
+
+    def append_inline(self, to_models=(), inline=None):
+        """
+        Dynamic append inline to model admin options.
+        """
+        for s in to_models:
+            app_name, model_name = s.split('.')
+            model = models.get_model(app_name, model_name)
+            if model in self._registry.keys():
+                opts_class = self._registry[model].__class__
+                opts_class.inlines.append(inline)
+                self.unregister(model)
+                self.register(model, opts_class)
 
     def get_urls(self):
         from django.conf.urls.defaults import patterns, url
