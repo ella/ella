@@ -348,6 +348,9 @@ def model_category_fk(model):
             return f
     return None
 
+def get_permission(permission_name, instance):
+    return instance._meta.app_label + '.' + '%s_' % permission_name + instance._meta.module_name.lower()
+
 def generate_test_data(filepath='/home/jonson/src/nc/ella/ella/newman/testbed/service/fixtures/test_data.yaml'):
     from django.contrib.sites.models import Site
     from django.core.serializers import serialize
