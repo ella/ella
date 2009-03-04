@@ -15,6 +15,7 @@ from ella.articles.models import ArticleContents, Article, InfoBox
 
 from ella.newman import NewmanModelAdmin, NewmanTabularInline, site
 from ella.newman import options
+from ella.newman import generic as ng
 from django.utils.safestring import mark_safe
 
 # ------------------------------------
@@ -130,7 +131,7 @@ class PlacementForm( modelforms.ModelForm ):
         super( PlacementForm, self ).__init__( *args, **kwargs )
 
 
-class PlacementInlineFormset( options.BaseGenericInlineFormSet ):
+class PlacementInlineFormset( ng.BaseGenericInlineFormSet ):
     def __init__(self, data=None, files=None, instance=None, save_as_new=None):
         self.can_delete = True
         super(PlacementInlineFormset, self).__init__(instance=instance, data=data, files=files)
@@ -249,7 +250,7 @@ class PlacementInlineFormset( options.BaseGenericInlineFormSet ):
 
         return
 
-class PlacementInlineOptions( options.GenericTabularInline ):
+class PlacementInlineOptions( ng.GenericTabularInline ):
     model = Placement
     max_num = 1
     ct_field = 'target_ct'

@@ -5,6 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.forms.models import ModelChoiceField
 
 from ella.newman import widgets, models
+from ella.newman.models import get_permission
 from django.db.models.fields.related import ManyToManyField
 
 class RichTextField(fields.Field):
@@ -110,15 +111,12 @@ class CategoryChoiceField(ModelChoiceField):
         #self.choice_cache = None
 
     def _get_queryset(self):
-
-        from ella.newman.options import get_permission
-
         if hasattr(self._queryset, '_newman_filtered'):
             return self._queryset
         view_perm = get_permission('view', self.model)
         change_perm = get_permission('change', self.model)
         perms = (view_perm, change_perm,)
-        qs = models.permission_filtered_model_qs(self._queryset, self.model, self.user, perms)
+        qs = models.permission_filtered_model_qs(self._queryset, self.user, perms)
         qs._newman_filtered = True #magic variable
         self._set_queryset(qs)
         return self._queryset
@@ -130,9 +128,6 @@ class CategoryChoiceField(ModelChoiceField):
     queryset = property(_get_queryset, _set_queryset)
 
     def clean(self, value):
-
-        from ella.newman.options import get_permission
-
         cvalue = super(CategoryChoiceField, self).clean(value)
         return cvalue
         # TODO unable to realize if field was modified or not (when user has view permission a hits Save.)
