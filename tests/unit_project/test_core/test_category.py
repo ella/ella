@@ -1,40 +1,17 @@
 # -*- coding: utf-8 -*-
 from djangosanetesting import DatabaseTestCase
 
-from django.conf import settings
 from django.core.urlresolvers import reverse
 
 from ella.core.models import Category
+
+from unit_project.test_core import create_basic_categories
 
 class TestCategory(DatabaseTestCase):
 
     def setUp(self):
         super(TestCategory, self).setUp()
-
-        self.site_id = getattr(settings, "SITE_ID", 1)
-
-        self.category = Category.objects.create(
-            title=u"你好 category",
-            description=u"exmple testing category",
-            site_id = self.site_id,
-            slug=u"ni-hao-category",
-        )
-
-        self.category_nested = Category.objects.create(
-            title=u"nested category",
-            description=u"category nested in self.category",
-            tree_parent=self.category,
-            site_id = self.site_id,
-            slug=u"nested-category",
-        )
-
-        self.category_nested_second = Category.objects.create(
-            title=u" second nested category",
-            description=u"category nested in self.category_nested",
-            tree_parent=self.category_nested,
-            site_id = self.site_id,
-            slug=u"second-nested-category",
-        )
+        create_basic_categories(self)
 
     def test_proper_root_path(self):
         self.assert_equals("", self.category.tree_path)

@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ella.newman (admin-ng)\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-02-20 22:27+0100\n"
-"PO-Revision-Date: 2009-01-14 22:52+0100\n"
+"POT-Creation-Date: 2009-02-28 21:06+0100\n"
+"PO-Revision-Date: 2009-02-28 21:10+0100\n"
 "Last-Translator: Vitek Pliska <whit@jizak.cz>\n"
 "Language-Team: Ella <ella.project@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -48,214 +48,326 @@ msgstr ""
 msgid "Select %s to change"
 msgstr ""
 
-#: models.py:14 models.py:62
+#: fields.py:11
+msgid "Bad syntax in markdown formatting or template tags."
+msgstr ""
+
+#: fields.py:12
+#, python-format
+msgid "Some links are invalid: %s."
+msgstr ""
+
+#: fields.py:13
+#, python-format
+msgid "Some links are broken: %s."
+msgstr ""
+
+#: models.py:18
+#: models.py:66
 msgid "Title"
 msgstr "Nadpis"
 
-#: models.py:15 models.py:63
+#: models.py:19
+#: models.py:67
 msgid "Slug"
 msgstr ""
 
-#: models.py:16
+#: models.py:20
 msgid "Summary"
 msgstr "Souhrn"
 
-#: models.py:17
+#: models.py:21
 msgid "Detail"
 msgstr "Detailní popis"
 
-#: models.py:18
+#: models.py:22
 msgid "Version"
 msgstr "Verze"
 
-#: models.py:27
+#: models.py:31
 msgid "Development message"
 msgstr "Zpráva o vývoji"
 
-#: models.py:28
+#: models.py:32
 msgid "Development messages"
 msgstr "Zprávy o vývoji"
 
-#: models.py:36 models.py:57 models.py:98 models.py:115
+#: models.py:40
+#: models.py:61
+#: models.py:102
+#: models.py:119
 msgid "Model"
 msgstr "Model"
 
-#: models.py:37
+#: models.py:41
 msgid "Field"
 msgstr "Pole"
 
-#: models.py:38
+#: models.py:42
 msgid "Language"
 msgstr ""
 
-#: models.py:39
+#: models.py:43
 msgid "Short help"
 msgstr "Stručná nápověda"
 
-#: models.py:40
+#: models.py:44
 msgid "Full message"
 msgstr "Celá zpráva"
 
-#: models.py:45
+#: models.py:49
 msgid "General"
 msgstr "Obecně"
 
-#: models.py:48
+#: models.py:52
 msgid "Help item"
 msgstr "Položka nápovědy"
 
-#: models.py:49
+#: models.py:53
 msgid "Help items"
 msgstr "Položky nápovědy"
 
-#: models.py:58 models.py:81 models.py:116
+#: models.py:62
+#: models.py:85
+#: models.py:120
 msgid "User"
 msgstr ""
 
-#: models.py:59
+#: models.py:63
 #, fuzzy
 msgid "Data"
 msgstr "Detailní popis"
 
-#: models.py:65
+#: models.py:69
 msgid "Is template"
 msgstr ""
 
-#: models.py:74
+#: models.py:78
 msgid "Draft item"
 msgstr ""
 
-#: models.py:75
+#: models.py:79
 msgid "Draft items"
 msgstr ""
 
-#: models.py:82 models.py:99
+#: models.py:86
+#: models.py:103
 msgid "Group"
 msgstr ""
 
-#: models.py:83
+#: models.py:87
 msgid "Variable"
 msgstr ""
 
-#: models.py:84
+#: models.py:88
 msgid "Value"
 msgstr ""
 
-#: models.py:91
+#: models.py:95
 msgid "Admin user setting"
 msgstr ""
 
-#: models.py:92
+#: models.py:96
 msgid "Admin user settings"
 msgstr ""
 
-#: models.py:100 models.py:117
+#: models.py:104
+#: models.py:121
 msgid "Ordering"
 msgstr ""
 
-#: models.py:108
+#: models.py:112
 msgid "Group fav item"
 msgstr ""
 
-#: models.py:109
+#: models.py:113
 msgid "Group fav items"
 msgstr ""
 
-#: models.py:125
+#: models.py:129
 msgid "User fav item"
 msgstr ""
 
-#: models.py:126
+#: models.py:130
 msgid "User fav items"
 msgstr ""
 
-#: models.py:142
+#: models.py:158
 #, python-format
 msgid "User %(user)s is a \"%(group)s\" for %(category)s."
 msgstr ""
 
-#: models.py:149
+#: models.py:183
 msgid "User role in category"
 msgstr ""
 
-#: models.py:150
+#: models.py:184
 msgid "User roles in categories"
 msgstr ""
 
-#: options.py:77 options.py:115
-msgid "Database error"
-msgstr ""
-
-#: options.py:379 options.py:393
+#: options.py:87
+#: options.py:91
+#: options.py:618
+#: options.py:638
 msgid "Category not permitted"
 msgstr "Nepovolená kategorie."
 
-#: options.py:388
+#: options.py:139
+msgid "Model data was saved"
+msgstr ""
+
+#: options.py:156
+#: options.py:192
+msgid "Database error"
+msgstr ""
+
+#: options.py:372
+#, python-format
+msgid "%(name)s object with primary key %(key)r does not exist."
+msgstr ""
+
+#: options.py:434
+#, python-format
+msgid "Change %s"
+msgstr ""
+
+#: options.py:614
+#, fuzzy
+msgid "Creating objects is not permitted."
+msgstr "Smazání objektu není povoleno."
+
+#: options.py:626
+#: options.py:629
 msgid "Object deletion is not permitted."
 msgstr "Smazání objektu není povoleno."
 
-#: register.py:32 register.py:43
+#: options.py:634
+#, fuzzy
+msgid "Object change is not permitted."
+msgstr "Smazání objektu není povoleno."
+
+#: register.py:52
+msgid "Block active till must be greater than Block active from"
+msgstr ""
+
+#: register.py:55
+msgid "Invalid datetime interval. Block active till must be greater than Block active from"
+msgstr ""
+
+#: register.py:118
+#: register.py:129
 msgid "Category"
 msgstr ""
 
-#: register.py:139
+#: register.py:225
 #, python-format
 msgid ""
 "There is already a Placement object published in\n"
-"                        category %(category)s with the same URL referring to "
-"%(target)s.\n"
+"                        category %(category)s with the same URL referring to %(target)s.\n"
 "                        Please change the slug or publish date."
 msgstr ""
 
-#: register.py:162
+#: register.py:248
 msgid "If object has a category, it must have a main placement."
 msgstr ""
 
-#: register.py:212
+#: register.py:298
 msgid "Article heading"
 msgstr ""
 
-#: register.py:213
+#: register.py:299
 msgid "Article contents"
 msgstr ""
 
-#: register.py:214
+#: register.py:300
 msgid "Metadata"
 msgstr ""
 
-#: register.py:229
+#: register.py:316
 msgid "No URL"
 msgstr ""
 
-#: register.py:231
+#: register.py:318
 msgid "Full URL"
 msgstr ""
 
-#: register.py:236
+#: register.py:323
 msgid "Hits"
 msgstr ""
 
-#: register.py:246
+#: register.py:333
 msgid "Publish from"
 msgstr ""
 
-#: sites.py:76
+#: sites.py:62
 msgid "Site administration"
 msgstr ""
 
+#: sites.py:84
 #: views.py:60
 msgid "Your report was sent."
 msgstr ""
 
+#: sites.py:86
+msgid "SMTP error."
+msgstr ""
+
+#: sites.py:88
 #: views.py:62
 msgid "Subject or message is empty."
 msgstr ""
 
-#: templates/admin/app_index.html:6 templates/admin/change_list.html:5
+#: sites.py:102
+msgid "Your settings was saved."
+msgstr ""
+
+#: sites.py:104
+msgid "Error in form."
+msgstr ""
+
+#: licenses/models.py:9
+msgid "Content type"
+msgstr ""
+
+#: licenses/models.py:10
+msgid "Object ID"
+msgstr "ID objektu"
+
+#: licenses/models.py:13
+msgid "Max applications"
+msgstr "Max použití"
+
+#: licenses/models.py:25
+msgid "License"
+msgstr "Licence"
+
+#: licenses/models.py:26
+msgid "Licenses"
+msgstr "Licence"
+
+#: markup/models.py:26
+msgid "Text processor"
+msgstr "Textový procesor"
+
+#: markup/models.py:27
+msgid "Text processors"
+msgstr "Textové procesory"
+
+#: markup/models.py:55
+msgid "Text source"
+msgstr "Zdrojový text"
+
+#: markup/models.py:56
+msgid "Text sources"
+msgstr "Zdrojové texty"
+
+#: templates/admin/app_index.html:6
+#: templates/admin/change_list.html:5
 msgid "Home"
 msgstr ""
 
-#: templates/admin/app_index.html:8 templates/admin/app_index.html.py:15
+#: templates/admin/app_index.html:8
+#: templates/admin/app_index.html.py:15
 #, python-format
 msgid "%(name)s"
 msgstr ""
@@ -286,7 +398,8 @@ msgstr ""
 msgid "Log out"
 msgstr ""
 
-#: templates/admin/base_site.html:3 templates/admin/base_site.html.py:6
+#: templates/admin/base_site.html:3
+#: templates/admin/base_site.html.py:6
 msgid "Ella administration"
 msgstr ""
 
@@ -298,7 +411,7 @@ msgstr ""
 msgid "View on site"
 msgstr ""
 
-#: templates/admin/change_form.html:22
+#: templates/admin/change_form.html:20
 #: templates/admin/auth/user/change_password.html:6
 msgid "Please correct the error below."
 msgid_plural "Please correct the errors below."
@@ -319,7 +432,12 @@ msgstr ""
 msgid " By %(filter_title)s "
 msgstr ""
 
-#: templates/admin/index.html:56 templates/admin/search_form.html:7
+#: templates/admin/index.html:51
+msgid "All"
+msgstr ""
+
+#: templates/admin/index.html:56
+#: templates/admin/search_form.html:7
 msgid "Go"
 msgstr ""
 
@@ -356,9 +474,7 @@ msgid "%(full_result_count)s total"
 msgstr ""
 
 #: templates/admin/auth/user/add_form.html:6
-msgid ""
-"First, enter a username and password. Then, you'll be able to edit more user "
-"options."
+msgid "First, enter a username and password. Then, you'll be able to edit more user options."
 msgstr ""
 
 #: templates/admin/auth/user/add_form.html:13
@@ -390,9 +506,7 @@ msgid "Password change"
 msgstr ""
 
 #: templates/registration/password_change_form.html:7
-msgid ""
-"Please enter your old password, for security's sake, and then enter your new "
-"password twice so we can verify you typed it in correctly."
+msgid "Please enter your old password, for security's sake, and then enter your new password twice so we can verify you typed it in correctly."
 msgstr ""
 
 #: templates/registration/password_change_form.html:12
@@ -410,3 +524,4 @@ msgstr ""
 #: templates/registration/password_change_form.html:18
 msgid "Change my password"
 msgstr ""
+

@@ -10,6 +10,9 @@ a, a:link, a:visited {
 a:hover {
   color: darkorange;
 }
+a img {
+    border: none;
+}
 
 p, ul, ol, h1, h2, h3, h4, h5 { margin: .2em 0; }
 
@@ -117,6 +120,23 @@ div.breadcrumbs {
     overflow: auto; */
 }
 
+/* CONTENT TOOLBAR */
+#content-toolbar * {
+    vertical-align: middle;
+}
+#content-toolbar {
+    padding: 5px 0 10px 0;
+    background: #fff;
+}
+#content-toolbar ul {
+    list-style: none;
+    margin: 5px;
+}
+#content-toolbar ul li {
+    float: left;
+}
+
+
 /* HP */
 div.hpcol {
     float: left;
@@ -192,6 +212,9 @@ a.icn.filter { background-image: url(../ico/16/filter.png); }
 a.icn.add { background-image: url(../ico/16/edit_add.png); }
 a.icn.visible { background-image: url(../ico/16/14_layer_visible.png); }
 a.icn.novisible { background-image: url(../ico/16/14_layer_novisible.png); }
+a.icn.history { background-image: url(../ico/16/history.png); }
+a.icn.web { background-image: url(../ico/16/web.png); }
+a.icn.save { background-image: url(../ico/16/filesave.png); }
 
 /* FOOTER */
 
@@ -207,6 +230,7 @@ a.icn.novisible { background-image: url(../ico/16/14_layer_novisible.png); }
 /* FORMS */
 fieldset, legend { border: 1px solid #ddd; padding: 5px; -moz-border-radius: 5px; }
 legend { padding: 2px 5px; }
+label { display: block; clear: both; margin: 5px 0 2px 0; }
 label.required { font-weight: bold; color: darkorange; }
 div.submit-row, fieldset.submit-row { border: none; clear:both; margin-top: 5px; padding: 2px 0; text-align: right; }
 input, textarea { padding: 2px 0; }
@@ -239,22 +263,6 @@ td, th {
 #changelist table tbody tr.row1 { background: #fff; }
 #changelist table tbody tr.row2 { background: #eee; }
 #changelist table tbody tr:hover { background: #ffc; }
-
-/* CHANGELIST */
-#cl-toolbar * {
-    vertical-align: middle;
-}
-#cl-toolbar {
-    padding: 5px 0 10px 0;
-    background: #fff;
-}
-#cl-toolbar ul {
-    list-style: none;
-    margin: 5px;
-}
-#cl-toolbar ul li {
-    float: left;
-}
 
 /* CHANGELIST FILTERS */
 #filters {
