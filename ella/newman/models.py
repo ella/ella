@@ -223,16 +223,16 @@ def has_category_permission(user, category, permission):
     if user.has_perm(permission):
         return True
 
-    #takes 0.5..2 msec 
+    #takes 0.5..2 msec
     if type(permission) in [list, tuple]:
         qs = DenormalizedCategoryUserRole.objects.filter(
-            user_id=user.pk, 
+            user_id=user.pk,
             permission_codename__in=permission,
             category_id=category.pk
         )
     else:
         qs = DenormalizedCategoryUserRole.objects.filter(
-            user_id=user.pk, 
+            user_id=user.pk,
             permission_codename=permission,
             category_id=category.pk
         )
@@ -262,38 +262,42 @@ def has_object_permission(user, obj, permission):
         return True
     return False
 
-def cat_children(cats):
-    """ Returns all nested categories as list. cats parameter is list or tuple. """
+def category_children(cats):
+    """
+    Returns all nested categories as list.
+    @param cats: list of Category objects
+    """
     sub_cats = map(None, cats)
     for c in cats:
-        out = Category.objects.filter( tree_parent=c )
-        map( lambda o: sub_cats.append(o), cat_children(out) )
+        out = Category.objects.filter(tree_parent=c)
+        map(lambda o: sub_cats.append(o), category_children(out))
     return sub_cats
 
 #@cache_this(key_applicable_categories, timeout=CACHE_TIMEOUT)
 def compute_applicable_categories(user, permission=None):
+    """ Return categories accessible by given user """
     if user.is_superuser:
         all = Category.objects.all()
         return [ d.pk for d in all ]
 
-    q = CategoryUserRole.objects.filter( user=user ).distinct()
+    category_user_roles = CategoryUserRole.objects.filter(user=user).distinct()
     if permission:
         app_label, code = permission.split('.', 1)
-        perms = Permission.objects.filter( content_type__app_label=app_label, codename=code )
+        perms = Permission.objects.filter(content_type__app_label=app_label, codename=code)
         if not perms:
             # no permission found (maybe misspeled) then no categories permitted!
             log.warning('No permission [%s] found for user %s' % (permission, user.username))
             return []
-        q = q.filter( group__permissions=perms[0] )
+        category_user_roles = category_user_roles.filter(group__permissions=perms[0])
     else:
         # take any permission
-        q = q.filter( group__permissions__id__isnull=False )
+        category_user_roles = category_user_roles.filter(group__permissions__id__isnull=False)
 
-    cats = set()
-    for i in q:
-        for c in i.category.all():
-            cats.add(c)
-    app_cats = cat_children(cats)
+    unique_categories = set()
+    for category_user_role in category_user_roles:
+        for category in category_user_role.category.all():
+            unique_categories.add(category)
+    app_cats = category_children(unique_categories)
     return [ d.pk for d in app_cats ]
 
 def applicable_categories(user, permission=None):

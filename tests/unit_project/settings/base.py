@@ -43,6 +43,7 @@ INSTALLED_APPS = (
     'ella.articles',
     'ella.photos',
     'ella.positions',
+    'ella.newman',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -52,7 +53,6 @@ INSTALLED_APPS = (
 )
 
 DEFAULT_PAGE_ID = 1
-
 
 VERSION = 1
 
