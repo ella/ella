@@ -1,27 +1,24 @@
 # -*- coding: utf-8 -*-
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.sites.models import Site
-
+from django.contrib.contenttypes.models import ContentType
 
 from djangosanetesting.cases import DatabaseTestCase
 
-from ella.newman.models import CategoryUserRole, DenormalizedCategoryUserRole, has_model_list_permission
-from ella.newman.models import has_category_permission, has_object_permission, category_children, compute_applicable_categories
-from ella.newman.models import applicable_categories, permission_filtered_model_qs, is_category_fk, model_category_fk_value
-from ella.newman.models import model_category_fk
 from ella.core.models import Category, Author
 from ella.articles.models import Article, ArticleContents
-from django.contrib.contenttypes.models import ContentType
+
+from ella.newman.models import CategoryUserRole
+from ella.newman.models import has_category_permission, has_object_permission, compute_applicable_categories
+from ella.newman.models import applicable_categories, permission_filtered_model_qs, is_category_fk, model_category_fk, model_category_fk_value
 
 class UserWithPermissionTestCase(DatabaseTestCase):
 
     def setUp(self):
         super(UserWithPermissionTestCase, self).setUp()
-        #self.create_groups()
-        #call_command('syncroles', verbosity=0, notransaction=True)
 
         self.site = Site.objects.get(name='example.com')
-        # superuser
+
         self.user = User.objects.create(
             username='newman',
             first_name='Paul',
@@ -105,8 +102,8 @@ class UserWithPermissionTestCase(DatabaseTestCase):
         self.role_all.save()
 
     def _create_author_and_article(self):
-        article = Article.objects.create(title=u'Pokusny zajic', perex=u'Perex', category=self.nested_first_level_two)
-        ArticleContents.objects.create(title=u'Pokusny zajic, 你好', content=u'Long vehicle', article=article)
+        article = Article.objects.create(title=u'Testable rabbit', perex=u'Perex', category=self.nested_first_level_two)
+        ArticleContents.objects.create(title=u'Testable rabbit, 你好', content=u'Long vehicle', article=article)
         article.authors.add(self.author)
         article.save()
         self.assert_equals(1, Article.objects.count())
