@@ -155,12 +155,12 @@ class TestRolePermissions(DatabaseTestCase):
 
     def test_has_category_permission_success(self):
         self.assert_true(has_category_permission(self.user, self.nested_second_level_two, 'articles.view_article'))
+        self.assert_true(has_category_permission(self.user, self.nested_second_level_two, 'articles.add_article'))
+        self.assert_true(has_category_permission(self.user, self.nested_second_level_two, 'articles.change_article'))
+        self.assert_true(has_category_permission(self.user, self.nested_second_level_two, 'articles.delete_article'))
 
     def test_has_category_permission_invalid_permission_name(self):
         self.assert_false(has_category_permission(self.user, self.nested_second_level_two, 'articles.nonexistent'))
-
-    def test_has_category_permission_delete_success(self):
-        self.assert_true(has_category_permission(self.user, self.nested_second_level_two, 'articles.delete_article'))
 
     def test_has_category_permission_permission_not_given(self):
         self.assert_false(has_category_permission(self.user, self.nested_first_level_two, 'articles.delete_article'))
@@ -180,14 +180,15 @@ class TestRolePermissions(DatabaseTestCase):
         # test
         self.assert_true(has_object_permission(self.user, article, 'articles.view_article'))
         self.assert_true(has_object_permission(self.user, article, 'articles.change_article'))
+        self.assert_true(has_object_permission(self.user, article, 'articles.add_article'))
+
+    def test_has_object_permission_not_given(self):
+        article = self._create_author_and_article()
+        self.assert_false(has_object_permission(self.user, article, 'articles.delete_article'))
 
     def test_has_object_permission_delete_in_forbidden_category(self):
         article = self._create_author_and_article()
         self.assert_false(has_object_permission(self.user, article, 'articles.delete_article'))
-
-    def test_has_object_permission_delete_success(self):
-        article = self._create_author_and_article()
-        self.assert_true(has_object_permission(self.user, article, 'articles.delete_article'))
 
 #        # delete article in permitted category
 #        ar.category = Category.objects.get(slug__startswith='b7')
