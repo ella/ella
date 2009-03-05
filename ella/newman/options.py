@@ -208,14 +208,14 @@ class NewmanModelAdmin(admin.ModelAdmin):
             else:
                 lookup = lookup | Q(**{lookup_key: lookup_value})
         # user role based category filtering
-        if not models.is_category_model(self.model):
-            category_field = models.model_category_fk(self.model)
+        if not is_category_model(self.model):
+            category_field = model_category_fk(self.model)
             if category_field and request.user:
-                applicable = models.applicable_categories(request.user)
+                applicable = applicable_categories(request.user)
                 args_lookup = { '%s__in' % category_field.name: applicable}
                 lookup = lookup & Q(**args_lookup)
         else:
-            applicable = models.applicable_categories(request.user)
+            applicable = applicable_categories(request.user)
             lookup = lookup & Q(pk__in=applicable)
 
         if SUGGEST_RETURN_ALL_FIELD:
@@ -289,7 +289,7 @@ class NewmanModelAdmin(admin.ModelAdmin):
         If request is GET type, at least view_permission is needed. In case
         of POST request change permission is needed.
         """
-        cfield = models.model_category_fk_value(obj)
+        cfield = model_category_fk_value(obj)
         if obj is None or not cfield:
             if request.method == 'POST':
                 return admin.ModelAdmin.has_change_permission( self, request, obj )
@@ -299,8 +299,8 @@ class NewmanModelAdmin(admin.ModelAdmin):
         opts = self.opts
         change_perm = '%s.%s' % ( opts.app_label, opts.get_change_permission() )
         view_perm = '%s.view_%s' % ( opts.app_label, opts.object_name.lower() )
-        can_view = models.has_category_permission( request.user, cfield, view_perm )
-        can_change = models.has_category_permission( request.user, cfield, change_perm )
+        can_view = has_category_permission( request.user, cfield, view_perm )
+        can_change = has_category_permission( request.user, cfield, change_perm )
 
         if request.method == 'POST' and can_change:
             return True
@@ -427,10 +427,10 @@ class NewmanModelAdmin(admin.ModelAdmin):
         f = db_field
         if hasattr(f.queryset, '_newman_filtered'):
             return
-        view_perm = models.get_permission('view', model)
-        change_perm = models.get_permission('change', model)
+        view_perm = get_permission('view', model)
+        change_perm = get_permission('change', model)
         perms = (view_perm, change_perm,)
-        qs = models.permission_filtered_model_qs(f.queryset, user, perms)
+        qs = permission_filtered_model_qs(f.queryset, user, perms)
         qs._newman_filtered = True #magic variable
         f._set_queryset(qs)
 
@@ -449,7 +449,7 @@ class NewmanModelAdmin(admin.ModelAdmin):
         view_perm = self.opts.app_label + '.' + 'view_' + self.model._meta.module_name.lower()
         change_perm = self.opts.app_label + '.' + 'change_' + self.model._meta.module_name.lower()
         perms = (view_perm, change_perm,)
-        qs = models.permission_filtered_model_qs(q, request.user, perms)
+        qs = permission_filtered_model_qs(q, request.user, perms)
         return qs
 
 class NewmanInlineFormSet(BaseInlineFormSet):
@@ -463,12 +463,12 @@ class NewmanInlineFormSet(BaseInlineFormSet):
             # category base permissions
             if not user.is_superuser:
                 for db_field in self.model._meta.fields:
-                    if not models.is_category_fk(db_field):
+                    if not is_category_fk(db_field):
                         continue
-                    view_perm = models.get_permission('view', self.instance)
-                    change_perm = models.get_permission('change', self.instance)
+                    view_perm = get_permission('view', self.instance)
+                    change_perm = get_permission('change', self.instance)
                     perms = (view_perm, change_perm,)
-                    qs = models.permission_filtered_model_qs(qs, user, perms)
+                    qs = permission_filtered_model_qs(qs, user, perms)
 
             if self.max_num > 0:
                 self._queryset = qs[:self.max_num]
@@ -492,3 +492,5 @@ class NewmanStackedInline(NewmanInlineModelAdmin):
 class NewmanTabularInline(NewmanInlineModelAdmin):
     template = 'admin/edit_inline/tabular.html'
 
+from ella.newman.permission import is_category_model, is_category_fk, model_category_fk, model_category_fk_value, applicable_categories
+from ella.newman.permission import has_category_permission, get_permission, permission_filtered_model_qs

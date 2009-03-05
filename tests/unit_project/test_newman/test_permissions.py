@@ -9,8 +9,8 @@ from ella.core.models import Category, Author
 from ella.articles.models import Article, ArticleContents
 
 from ella.newman.models import CategoryUserRole
-from ella.newman.models import has_category_permission, has_object_permission, compute_applicable_categories
-from ella.newman.models import applicable_categories, permission_filtered_model_qs, is_category_fk, model_category_fk, model_category_fk_value
+from ella.newman.permission import has_category_permission, has_object_permission, compute_applicable_categories
+from ella.newman.permission import applicable_categories, permission_filtered_model_qs, is_category_fk, model_category_fk, model_category_fk_value
 
 class UserWithPermissionTestCase(DatabaseTestCase):
 

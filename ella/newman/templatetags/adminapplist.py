@@ -1,7 +1,7 @@
 from django import template
 from django.utils.safestring import mark_safe
 
-from ella.newman import site, models
+from ella.newman import site, permission
 
 register = template.Library()
 
@@ -17,7 +17,7 @@ class AdminApplistNode(template.Node):
 
         for model, model_admin in site._registry.items():
             app_label = model._meta.app_label
-            has_module_perms = user.has_module_perms(app_label) or models.has_model_list_permission(user, model)
+            has_module_perms = user.has_module_perms(app_label) or permission.has_model_list_permission(user, model)
 
             if has_module_perms:
                 perms = {

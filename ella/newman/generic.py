@@ -7,6 +7,9 @@ from django.forms.util import ErrorList
 
 from ella.newman import models, options
 from ella.newman import fields
+from ella.newman.permission import get_permission, permission_filtered_model_qs, has_category_permission
+from ella.newman.permission import model_category_fk_value, model_category_fk, has_object_permission
+from ella.newman.permission import is_category_fk, is_category_model, applicable_categories
 
 class BaseGenericInlineFormSet(DJBaseGenericInlineFormSet):
     """
@@ -33,21 +36,21 @@ class BaseGenericInlineFormSet(DJBaseGenericInlineFormSet):
         if user.is_superuser:
             return out
         # filtering -- view permitted categories only
-        cfield = models.model_category_fk_value(self.model)
+        cfield = model_category_fk_value(self.model)
         if not cfield:
             return out
-        view_perm = models.get_permission('view', self.instance)
-        change_perm = models.get_permission('change', self.instance)
+        view_perm = get_permission('view', self.instance)
+        change_perm = get_permission('change', self.instance)
         perms = (view_perm, change_perm,)
-        qs = models.permission_filtered_model_qs(out, user, perms)
+        qs = permission_filtered_model_qs(out, user, perms)
         return qs
 
     def full_clean(self):
         super(BaseGenericInlineFormSet, self).full_clean()
-        cfield = models.model_category_fk(self.instance)
+        cfield = model_category_fk(self.instance)
         if not cfield:
             return
-        cat = models.model_category_fk_value(self.instance)
+        cat = model_category_fk_value(self.instance)
 
         # next part is category-based permissions (only for objects with category field)
         def add_field_error(form, field_name, message):
@@ -57,37 +60,37 @@ class BaseGenericInlineFormSet(DJBaseGenericInlineFormSet):
 
         # Adding new object
         for form in self.extra_forms:
-            change_perm = models.get_permission('change', form.instance)
+            change_perm = get_permission('change', form.instance)
             if not form.has_changed():
                 continue
             if cfield.name not in form.changed_data:
                 continue
-            add_perm = models.get_permission('add', form.instance)
-            if not models.has_object_permission(user, form.instance, change_perm):
+            add_perm = get_permission('add', form.instance)
+            if not has_object_permission(user, form.instance, change_perm):
                 self._non_form_errors = _('Creating objects is not permitted.')
                 continue
             c = form.cleaned_data[cfield.name]
-            if not models.has_category_permission(user, c, add_perm):
+            if not has_category_permission(user, c, add_perm):
                 add_field_error( form, cfield.name, _('Category not permitted') )
 
         # Changing existing object
         for form in self.initial_forms:
-            change_perm = models.get_permission('change', form.instance)
-            delete_perm = models.get_permission('delete', form.instance)
+            change_perm = get_permission('change', form.instance)
+            delete_perm = get_permission('delete', form.instance)
             if self.can_delete and form.cleaned_data[DELETION_FIELD_NAME]:
-                if not models.has_object_permission(user, form.instance, delete_perm):
+                if not has_object_permission(user, form.instance, delete_perm):
                     self._non_form_errors = _('Object deletion is not permitted.')
                     continue
-                if not models.has_category_permission(user, form.instance.category, delete_perm):
+                if not has_category_permission(user, form.instance.category, delete_perm):
                     self._non_form_errors = _('Object deletion is not permitted.')
                     continue
             if cfield.name not in form.changed_data:
                 continue
-            if not models.has_object_permission(user, form.instance, change_perm):
+            if not has_object_permission(user, form.instance, change_perm):
                 self._non_form_errors = _('Object change is not permitted.')
                 continue
             c = form.cleaned_data[cfield.name]
-            if not models.has_category_permission(user, c, change_perm):
+            if not has_category_permission(user, c, change_perm):
                 add_field_error( form, cfield.name, _('Category not permitted') )
         #err_list = ErrorList( (u'Nepovolena kategorie',) )
         #self.initial_forms[1]._errors['category'] = err_list
@@ -103,10 +106,10 @@ class BaseGenericInlineFormSet(DJBaseGenericInlineFormSet):
         f = form.base_fields['category']
         if hasattr(f.queryset, '_newman_filtered'):
             return
-        view_perm = models.get_permission('view', model)
-        change_perm = models.get_permission('change', model)
+        view_perm = get_permission('view', model)
+        change_perm = get_permission('change', model)
         perms = (view_perm, change_perm,)
-        qs = models.permission_filtered_model_qs(f.queryset, user, perms)
+        qs = permission_filtered_model_qs(f.queryset, user, perms)
         qs._newman_filtered = True #magic variable
         f._set_queryset(qs)
 
@@ -150,7 +153,7 @@ class GenericInlineModelAdmin(options.NewmanInlineModelAdmin):
         return generic_inlineformset_factory(self.model, **defaults)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        if models.is_category_fk(db_field):
+        if is_category_fk(db_field):
             fld = super(GenericInlineModelAdmin, self).formfield_for_dbfield(db_field, **kwargs)#FIXME get fld.queryset different way
             kwargs.update({
                 'model': self.model,
