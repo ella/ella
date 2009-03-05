@@ -326,9 +326,7 @@ def is_category_fk(db_field):
     if not isinstance(db_field, (ForeignKey, ManyToManyField)):
         return False
     rel_ct = ContentType.objects.get_for_model(db_field.rel.to)
-    if rel_ct == ContentType.objects.get_for_model(Category):
-        return True
-    return False
+    return rel_ct == ContentType.objects.get_for_model(Category)
 
 def model_category_fk_value(model):
     """ returns value of field related to Category """
@@ -347,6 +345,10 @@ def model_category_fk(model):
         if is_category_fk(f):
             return f
     return None
+
+def is_category_model(model):
+    ct = ContentType.objects.get_for_model(model)
+    return ct == ContentType.objects.get_for_model(Category)
 
 def get_permission(permission_name, instance):
     return instance._meta.app_label + '.' + '%s_' % permission_name + instance._meta.module_name.lower()

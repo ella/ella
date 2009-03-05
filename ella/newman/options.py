@@ -180,11 +180,9 @@ class NewmanModelAdmin(admin.ModelAdmin):
 
     @require_AJAX
     def suggest_view(self, request, extra_context=None):
-
         SUGGEST_VIEW_LIMIT = getattr(settings, 'SUGGEST_VIEW_LIMIT', 20)
         SUGGEST_VIEW_MIN_LENGTH = getattr(settings, 'SUGGEST_VIEW_MIN_LENGTH', 2)
         SUGGEST_RETURN_ALL_FIELD = getattr(settings, 'SUGGEST_RETURN_ALL_FIELD', True)
-
         if not ('f' in request.GET.keys() and 'q' in request.GET.keys()):
             raise AttributeError, 'Invalid query attributes. Example: ".../?f=field_a&f=field_b&q=search_term&o=offset"'
         elif len(request.GET.get('q')) < SUGGEST_VIEW_MIN_LENGTH:
@@ -194,7 +192,6 @@ class NewmanModelAdmin(admin.ModelAdmin):
         if 'o' in request.GET.keys() and request.GET.get('o'):
             offset = int(request.GET.get('o'))
         limit = offset + SUGGEST_VIEW_LIMIT
-
         lookup_fields = [u'id'] + request.GET.getlist('f')
         lookup_value = request.GET.get('q')
         lookup = None
@@ -202,7 +199,6 @@ class NewmanModelAdmin(admin.ModelAdmin):
         model_fields = [f.name for f in self.model._meta.fields]
 
         for f in lookup_fields:
-
             if not (f in model_fields or f.split('__')[0] in model_fields):
                 raise AttributeError, 'Model "%s" has not field "%s". Possible fields are "%s".' \
                                     % (self.model._meta.object_name, f, ', '.join(model_fields))
@@ -211,13 +207,21 @@ class NewmanModelAdmin(admin.ModelAdmin):
                 lookup = Q(**{lookup_key: lookup_value})
             else:
                 lookup = lookup | Q(**{lookup_key: lookup_value})
+        # user role based category filtering
+        if not models.is_category_model(self.model):
+            category_field = models.model_category_fk(self.model)
+            if category_field and request.user:
+                applicable = models.applicable_categories(request.user)
+                args_lookup = { '%s__in' % category_field.name: applicable}
+                lookup = lookup & Q(**args_lookup)
+        else:
+            applicable = models.applicable_categories(request.user)
+            lookup = lookup & Q(pk__in=applicable)
 
         if SUGGEST_RETURN_ALL_FIELD:
             data = self.model.objects.filter(lookup).values(*lookup_fields)
         else:
             data = self.model.objects.filter(lookup).values(*lookup_fields[:2])
-
-        cnt = len(data)
 
         # sort the suggested items so that those starting with the sought term come first
         def compare(a,b):
@@ -231,6 +235,7 @@ class NewmanModelAdmin(admin.ModelAdmin):
                 # else compare lexicographically
                 return cmp(a,b)
             return _cmp(a,b,unicode(lookup_value).lower())
+        cnt = len(data)
         data = list(data)
         if offset >= len(data): return HttpResponse('SPECIAL: OFFSET OUT OF RANGE', mimetype='text/plain')
         data.sort(cmp=compare, key=lambda x: x[lookup_fields[1]])
