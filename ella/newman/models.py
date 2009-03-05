@@ -241,6 +241,11 @@ def has_category_permission(user, category, permission):
     return False
 
 def has_object_permission(user, obj, permission):
+    """
+    Return whether user has given permission for given object,
+    either through standard Django permission, or via permission
+    to any category that object is placed in.
+    """
     if user.has_perm(permission):
         return True
     ct = ContentType.objects.get_for_model(obj)
@@ -298,9 +303,13 @@ def compute_applicable_categories(user, permission=None):
         for category in category_user_role.category.all():
             unique_categories.add(category)
     app_cats = category_children(unique_categories)
-    return [ d.pk for d in app_cats ]
+    return list(set(d.pk for d in app_cats))
 
 def applicable_categories(user, permission=None):
+    """
+    Return list of categories accessible for given permission.
+    Use denormalized values.
+    """
     # takes approx. 5-16msec , old version took 250+ msec
     if user.is_superuser:
         all = Category.objects.all()
@@ -309,7 +318,6 @@ def applicable_categories(user, permission=None):
         return DenormalizedCategoryUserRole.objects.categories_by_user_and_permission(user, permission)
     else:
         return DenormalizedCategoryUserRole.objects.categories_by_user(user)
-    return map(lambda x: x.category_id, qs)
 
 def permission_filtered_model_qs(queryset, user, permissions=[]):
     """ returns Queryset filtered accordingly to given permissions """
