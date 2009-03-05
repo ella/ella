@@ -32,6 +32,8 @@ class UserWithPermissionTestCase(DatabaseTestCase):
             is_superuser=False
         )
 
+        self.author = Author.objects.create(name='igorko', slug='igorko')
+
         self.create_categories()
         self.create_permissions()
         self.create_groups()
@@ -102,6 +104,36 @@ class UserWithPermissionTestCase(DatabaseTestCase):
         self.role_all.category.add(self.nested_second_level_two)
         self.role_all.save()
 
+    def _create_author_and_article(self):
+        article = Article.objects.create(title=u'Pokusny zajic', perex=u'Perex', category=self.nested_first_level_two)
+        ArticleContents.objects.create(title=u'Pokusny zajic, 你好', content=u'Long vehicle', article=article)
+        article.authors.add(self.author)
+        article.save()
+        self.assert_equals(1, Article.objects.count())
+
+        return article
+
+class TestArticleForeignKeys(UserWithPermissionTestCase):
+
+    def setUp(self):
+        super(TestArticleForeignKeys, self).setUp()
+        self.article_fields = dict([(field.name, field) for field in Article._meta.fields])
+
+    def test_is_category_fk_success(self):
+        self.assert_true(is_category_fk(self.article_fields['category']))
+
+    def test_is_category_fk_title_not_fk(self):
+        self.assert_false(is_category_fk(self.article_fields['title']))
+
+    def test_model_category_fk_from_article(self):
+        self.assert_equals(self.article_fields['category'], model_category_fk(Article))
+
+    def test_model_category_fk_from_contents(self):
+        self.assert_equals(None, model_category_fk(ArticleContents))
+
+    def test_model_category_fk_value_parent_category_value(self):
+        self.assert_equals(self.nested_first_level, model_category_fk_value(self.nested_second_level))
+
 class TestCategoryPermissions(UserWithPermissionTestCase):
 
     def test_denormalized_applicable_categories_same_as_computed_ones(self):
@@ -113,7 +145,6 @@ class TestCategoryPermissions(UserWithPermissionTestCase):
         denormalized_categories.sort()
 
         self.assert_equals(computed_categories, denormalized_categories)
-
 
     def test_denormalized_applicable_categories_same_as_computed_ones_using_permissions(self):
         computed_categories = compute_applicable_categories(self.user, 'articles.view_article')
@@ -156,17 +187,6 @@ class TestCategoryPermissions(UserWithPermissionTestCase):
 
 class TestObjectPermission(UserWithPermissionTestCase):
 
-    def _create_author_and_article(self):
-        author = Author.objects.create(name='igorko', slug='igorko')
-        article = Article.objects.create(title=u'Pokusny zajic', perex=u'Perex', category=self.nested_first_level_two)
-        ArticleContents.objects.create(title=u'Pokusny zajic, 你好', content=u'Long vehicle', article=article)
-        article.authors.add(author)
-        article.save()
-        self.assert_equals(1, Article.objects.count())
-
-        return article
-
-
     def test_has_object_permission_success(self):
         article = self._create_author_and_article()
         # test
@@ -178,15 +198,27 @@ class TestObjectPermission(UserWithPermissionTestCase):
         article = self._create_author_and_article()
         self.assert_false(has_object_permission(self.user, article, 'articles.delete_article'))
 
-    def test_has_object_permission_delete_in_forbidden_category(self):
-        article = self._create_author_and_article()
-        self.assert_false(has_object_permission(self.user, article, 'articles.delete_article'))
+class TestAdminChangelistQuerySet(UserWithPermissionTestCase):
 
-#        # delete article in permitted category
-#        ar.category = Category.objects.get(slug__startswith='b7')
-#        ar.save()
-#        self.assert_true( has_object_permission(user, ar, 'articles.delete_article') )
-#        # changing, viewing article in forbidden category
-#        ar.category = Category.objects.get(slug__startswith='a3')
-#        ar.save()
-#        self.assert_false( has_object_permission(user, ar, 'articles.change_article') )
+    def test_only_viewable_articles_retrieved(self):
+        # article1
+        accessible_article = Article.objects.create(title=u'Testable rabbit', perex='Perex', category=self.nested_first_level_two)
+        accessible_article.authors.add(self.author)
+        accessible_article.save()
+
+        inaccessible_article = Article.objects.create(title='Lost rabbit', perex='Perex', category=self.nested_first_level)
+        inaccessible_article.authors.add(self.author)
+        inaccessible_article.save()
+
+        # test
+        filtered_qs = permission_filtered_model_qs(
+            Article.objects.all(),
+            self.user,
+            ['articles.view_article', 'articles.change_article']
+        )
+
+        available_articles = list(filtered_qs.all())
+
+        self.assert_equals(accessible_article, available_articles[0])
+        self.assert_equals(1, len(available_articles))
+

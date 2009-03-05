@@ -335,6 +335,9 @@ def permission_filtered_model_qs(queryset, user, permissions=[]):
     return qs
 
 def is_category_fk(db_field):
+    """
+    Return wheter given database field is ForeignKey pointing to Category
+    """
     if not isinstance(db_field, (ForeignKey, ManyToManyField)):
         return False
     rel_ct = ContentType.objects.get_for_model(db_field.rel.to)
