@@ -52,13 +52,10 @@ def run_suite(argv):
     #    argv.append(ResetMyPageDatabasePlugin.activation_parameter)
 
 #    config = Config(files=all_config_files(), plugins=DefaultPluginManager([ResetMyPageDatabasePlugin(), LiveHttpServerRunnerPlugin(), DjangoPlugin(), SeleniumPlugin()]))
-    config = Config(files=all_config_files(), plugins=DefaultPluginManager( [InitDatabasePlugin()] ))
-    #config = Config(files=all_config_files(), plugins=DefaultPluginManager())
+    #config = Config(files=all_config_files(), plugins=DefaultPluginManager( [InitDatabasePlugin()] ))
+    config = Config(files=all_config_files(), plugins=DefaultPluginManager())
     return nose.run(config=config)
 
 if __name__ == "__main__":
     import sys
-    if '--with-initdb' not in sys.argv:
-        print 'This test suite should be run with --with-initdb  parameter.'
-        sys.exit(1)
     sys.exit(not run_suite(argv=sys.argv))

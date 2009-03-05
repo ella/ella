@@ -228,7 +228,7 @@ a.icn.save { background-image: url(../ico/16/filesave.png); }
 }
 
 /* FORMS */
-fieldset, legend { border: 1px solid #ddd; padding: 5px; -moz-border-radius: 5px; }
+fieldset, legend { border: 1px solid #ddd; padding: 5px; -moz-border-radius: 5px; background: #fff; }
 legend { padding: 2px 5px; }
 label { display: block; clear: both; margin: 5px 0 2px 0; }
 label.required { font-weight: bold; color: darkorange; }
