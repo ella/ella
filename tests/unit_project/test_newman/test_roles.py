@@ -13,23 +13,10 @@ from ella.core.models import Category, Author
 from ella.articles.models import Article, ArticleContents
 from django.contrib.contenttypes.models import ContentType
 
-def get_permission(code):
-    app_label, codename = code.split('.', 1)
-    perms = Permission.objects.filter( content_type__app_label=app_label, codename=codename )
-    if perms:
-        return perms[0]
-
-def recreate_permissions(codenames, role):
-    perms = map(lambda p: get_permission(p), codenames)
-    map( lambda o: role_vca.group_vca.permissions.remove( o ), role_vca.group_vca.permissions.all() )
-    for p in perms:
-        role_vca.group_vca.permissions.add(p)
-    role.save()
-
-class TestRolePermissions(DatabaseTestCase):
+class UserWithPermissionTestCase(DatabaseTestCase):
 
     def setUp(self):
-        super(TestRolePermissions, self).setUp()
+        super(UserWithPermissionTestCase, self).setUp()
         #self.create_groups()
         #call_command('syncroles', verbosity=0, notransaction=True)
 
@@ -115,6 +102,8 @@ class TestRolePermissions(DatabaseTestCase):
         self.role_all.category.add(self.nested_second_level_two)
         self.role_all.save()
 
+class TestCategoryPermissions(UserWithPermissionTestCase):
+
     def test_denormalized_applicable_categories_same_as_computed_ones(self):
         # test applicable_categories() compare results of  compute_applicable_categories
         computed_categories = compute_applicable_categories(self.user)
@@ -165,6 +154,8 @@ class TestRolePermissions(DatabaseTestCase):
     def test_has_category_permission_permission_not_given(self):
         self.assert_false(has_category_permission(self.user, self.nested_first_level_two, 'articles.delete_article'))
 
+class TestObjectPermission(UserWithPermissionTestCase):
+
     def _create_author_and_article(self):
         author = Author.objects.create(name='igorko', slug='igorko')
         article = Article.objects.create(title=u'Pokusny zajic', perex=u'Perex', category=self.nested_first_level_two)
@@ -174,6 +165,7 @@ class TestRolePermissions(DatabaseTestCase):
         self.assert_equals(1, Article.objects.count())
 
         return article
+
 
     def test_has_object_permission_success(self):
         article = self._create_author_and_article()
