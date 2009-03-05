@@ -223,16 +223,16 @@ def has_category_permission(user, category, permission):
     if user.has_perm(permission):
         return True
 
-    #takes 0.5..2 msec 
+    #takes 0.5..2 msec
     if type(permission) in [list, tuple]:
         qs = DenormalizedCategoryUserRole.objects.filter(
-            user_id=user.pk, 
+            user_id=user.pk,
             permission_codename__in=permission,
             category_id=category.pk
         )
     else:
         qs = DenormalizedCategoryUserRole.objects.filter(
-            user_id=user.pk, 
+            user_id=user.pk,
             permission_codename=permission,
             category_id=category.pk
         )
@@ -241,6 +241,11 @@ def has_category_permission(user, category, permission):
     return False
 
 def has_object_permission(user, obj, permission):
+    """
+    Return whether user has given permission for given object,
+    either through standard Django permission, or via permission
+    to any category that object is placed in.
+    """
     if user.has_perm(permission):
         return True
     ct = ContentType.objects.get_for_model(obj)
@@ -262,41 +267,49 @@ def has_object_permission(user, obj, permission):
         return True
     return False
 
-def cat_children(cats):
-    """ Returns all nested categories as list. cats parameter is list or tuple. """
+def category_children(cats):
+    """
+    Returns all nested categories as list.
+    @param cats: list of Category objects
+    """
     sub_cats = map(None, cats)
     for c in cats:
-        out = Category.objects.filter( tree_parent=c )
-        map( lambda o: sub_cats.append(o), cat_children(out) )
+        out = Category.objects.filter(tree_parent=c)
+        map(lambda o: sub_cats.append(o), category_children(out))
     return sub_cats
 
 #@cache_this(key_applicable_categories, timeout=CACHE_TIMEOUT)
 def compute_applicable_categories(user, permission=None):
+    """ Return categories accessible by given user """
     if user.is_superuser:
         all = Category.objects.all()
         return [ d.pk for d in all ]
 
-    q = CategoryUserRole.objects.filter( user=user ).distinct()
+    category_user_roles = CategoryUserRole.objects.filter(user=user).distinct()
     if permission:
         app_label, code = permission.split('.', 1)
-        perms = Permission.objects.filter( content_type__app_label=app_label, codename=code )
+        perms = Permission.objects.filter(content_type__app_label=app_label, codename=code)
         if not perms:
             # no permission found (maybe misspeled) then no categories permitted!
             log.warning('No permission [%s] found for user %s' % (permission, user.username))
             return []
-        q = q.filter( group__permissions=perms[0] )
+        category_user_roles = category_user_roles.filter(group__permissions=perms[0])
     else:
         # take any permission
-        q = q.filter( group__permissions__id__isnull=False )
+        category_user_roles = category_user_roles.filter(group__permissions__id__isnull=False)
 
-    cats = set()
-    for i in q:
-        for c in i.category.all():
-            cats.add(c)
-    app_cats = cat_children(cats)
-    return [ d.pk for d in app_cats ]
+    unique_categories = set()
+    for category_user_role in category_user_roles:
+        for category in category_user_role.category.all():
+            unique_categories.add(category)
+    app_cats = category_children(unique_categories)
+    return list(set(d.pk for d in app_cats))
 
 def applicable_categories(user, permission=None):
+    """
+    Return list of categories accessible for given permission.
+    Use denormalized values.
+    """
     # takes approx. 5-16msec , old version took 250+ msec
     if user.is_superuser:
         all = Category.objects.all()
@@ -305,7 +318,6 @@ def applicable_categories(user, permission=None):
         return DenormalizedCategoryUserRole.objects.categories_by_user_and_permission(user, permission)
     else:
         return DenormalizedCategoryUserRole.objects.categories_by_user(user)
-    return map(lambda x: x.category_id, qs)
 
 def permission_filtered_model_qs(queryset, user, permissions=[]):
     """ returns Queryset filtered accordingly to given permissions """
@@ -323,6 +335,9 @@ def permission_filtered_model_qs(queryset, user, permissions=[]):
     return qs
 
 def is_category_fk(db_field):
+    """
+    Return wheter given database field is ForeignKey pointing to Category
+    """
     if not isinstance(db_field, (ForeignKey, ManyToManyField)):
         return False
     rel_ct = ContentType.objects.get_for_model(db_field.rel.to)
