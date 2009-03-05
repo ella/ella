@@ -2,24 +2,27 @@ from django.forms import fields
 from django.forms.util import ValidationError
 from django.utils.encoding import smart_unicode
 from django.utils.translation import ugettext_lazy as _
+from django.forms.models import ModelChoiceField
 
-from ella.newman import widgets
+from ella.newman import widgets, models
+from ella.newman.models import get_permission
+from django.db.models.fields.related import ManyToManyField
 
-class RichTextAreaField(fields.Field):
+class RichTextField(fields.Field):
     widget = widgets.RichTextAreaWidget
     default_error_messages = {
         'syntax_error': _('Bad syntax in markdown formatting or template tags.'),
         'url_error':  _('Some links are invalid: %s.'),
         'link_error':  _('Some links are broken: %s.'),
-}
+    }
 
     def __init__(self, *args, **kwargs):
         # TODO: inform widget about selected processor (JS editor..)
-        super(RichTextAreaField, self).__init__(*args, **kwargs)
+        super(RichTextField, self).__init__(*args, **kwargs)
 
     def clean(self, value):
 
-        super(RichTextAreaField, self).clean(value)
+        super(RichTextField, self).clean(value)
         if value in fields.EMPTY_VALUES:
             return u''
         value = smart_unicode(value)
@@ -32,26 +35,114 @@ class RichTextAreaField(fields.Field):
 
         return value
 
-class GenericSuggestField(fields.ChoiceField):
+class AdminSuggestField(fields.Field):
+    """
+    Admin field with AJAX suggested values.
+    Only ForeignKey or ManyToMany fields is possible.
+    """
 
-    def __init__(self, data=[], **kwargs):
-        # i need db_field for blank/required and label, maybe not
-        self.db_field, self.model, self.lookups = data
-        self.widget = widgets.GenericSuggestAdminWidget(data, **kwargs)
-        super(GenericSuggestField, self).__init__(data, **kwargs)
+    default_error_messages = {
+        'required': _(u'This field is required.'),
+        'invalid_choice': _(u'Select a valid choice. %(value)s is not one of the available choices.'),
+        'invalid_list': _(u'Enter a list of values.'),
+    }
+
+    def __init__(self, db_field, **kwargs):
+        self.widget = widgets.AdminSuggestWidget(db_field, **kwargs)
+        self.db_field = db_field
+        del (kwargs['model'], kwargs['lookup'])
+        self.is_m2m = isinstance(db_field, ManyToManyField)
+
+        super(AdminSuggestField, self).__init__(**kwargs)
 
     def clean(self, value):
         if self.required and value in fields.EMPTY_VALUES:
             raise ValidationError(self.error_messages['required'])
         elif value in fields.EMPTY_VALUES:
+            if self.is_m2m:
+                return []
             return None
 
-        value = int(value)
+        if self.is_m2m:
+            value = [int(v) for v in value.split(',')]
+            if not isinstance(value, (list, tuple)):
+                raise ValidationError(self.error_messages['invalid_list'])
+
+            values = []
+
+            try:
+                for val in value:
+                    values.append(self.db_field.rel.to.objects.get(pk=val))
+            except self.db_field.rel.to.DoesNotExist:
+                raise ValidationError(self.error_messages['invalid_choice'] % {'value': val})
+
+            return values
 
         try:
-            value = self.db_field.rel.to.objects.get(pk=value)
+            value = self.db_field.rel.to.objects.get(pk=int(value))
         except self.db_field.rel.to.DoesNotExist:
             raise ValidationError(self.error_messages['invalid_choice'] % {'value': value})
 
         return value
+
+class CategoryChoiceField(ModelChoiceField):
+    """ Category choice field. Choices restricted accordingly to CategoryUserRole. """
+
+    def __init__(self, queryset, empty_label=u"---------", cache_choices=False,
+                 required=True, widget=None, label=None, initial=None,
+                 help_text=None, to_field_name=None, *args, **kwargs):
+        kwargs.update({
+            'queryset': queryset,
+            'empty_label': empty_label,
+            'cache_choices': cache_choices,
+            'required': required,
+            'widget': widget,
+            'label': label,
+            'initial': initial,
+            'help_text': help_text,
+            'to_field_name': to_field_name
+        })
+        if not('user' in kwargs and 'model' in kwargs):
+            raise AttributeError('CategoryChoiceField requires user and model instances to be present in kwargs')
+        self.model = kwargs.pop('model')
+        self.user = kwargs.pop('user')
+        super(CategoryChoiceField, self).__init__(*args, **kwargs)
+        self.queryset = queryset
+        #self.choice_cache = None
+
+    def _get_queryset(self):
+        if hasattr(self._queryset, '_newman_filtered'):
+            return self._queryset
+        view_perm = get_permission('view', self.model)
+        change_perm = get_permission('change', self.model)
+        perms = (view_perm, change_perm,)
+        qs = models.permission_filtered_model_qs(self._queryset, self.user, perms)
+        qs._newman_filtered = True #magic variable
+        self._set_queryset(qs)
+        return self._queryset
+
+    def _set_queryset(self, queryset):
+        self._queryset = queryset
+        self.widget.choices = self.choices
+
+    queryset = property(_get_queryset, _set_queryset)
+
+    def clean(self, value):
+        cvalue = super(CategoryChoiceField, self).clean(value)
+        return cvalue
+        # TODO unable to realize if field was modified or not (when user has view permission a hits Save.)
+        #      Permissions checks are placed in FormSets for now. CategoryChoiceField restricts category
+        #      choices at the moment.
+        # next part is category-based permissions (only for objects with category field)
+        # attempt: to do role-permission checks here (add new and change permissions checking)
+        # Adding new object
+        #TODO check wheter field was modified or not.
+        add_perm = get_permission('add', self.model)
+        if not models.has_category_permission(self.user, cvalue, add_perm):
+            raise ValidationError(_('Category not permitted'))
+        # Changing existing object
+        change_perm = get_permission('change', self.model)
+        if not models.has_category_permission(self.user, cvalue, change_perm):
+            raise ValidationError(_('Category not permitted'))
+        return cvalue
 

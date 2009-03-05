@@ -49,6 +49,7 @@ div.suggest-fields-bubble {
     background: url(../img/triangle-left.png) no-repeat left center;
     padding-left: 10px;
 }
+div.suggest-fields-bubble * { border: none; }
 div.suggest-fields-bubble div.suggest-fields-list {
     background-color: white;
     border: solid 1px black;

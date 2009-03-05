@@ -1,5 +1,5 @@
 from ella.newman import site
-from ella.newman.options import GenericTabularInline
+from ella.newman.generic import GenericTabularInline
 from ella.newman.licenses.models import License
 
 LICENSED_MODELS = (

@@ -10,6 +10,9 @@ a, a:link, a:visited {
 a:hover {
   color: darkorange;
 }
+a img {
+    border: none;
+}
 
 p, ul, ol, h1, h2, h3, h4, h5 { margin: .2em 0; }
 
@@ -225,8 +228,9 @@ a.icn.save { background-image: url(../ico/16/filesave.png); }
 }
 
 /* FORMS */
-fieldset, legend { border: 1px solid #ddd; padding: 5px; -moz-border-radius: 5px; }
+fieldset, legend { border: 1px solid #ddd; padding: 5px; -moz-border-radius: 5px; background: #fff; }
 legend { padding: 2px 5px; }
+label { display: block; clear: both; margin: 5px 0 2px 0; }
 label.required { font-weight: bold; color: darkorange; }
 div.submit-row, fieldset.submit-row { border: none; clear:both; margin-top: 5px; padding: 2px 0; text-align: right; }
 input, textarea { padding: 2px 0; }
