@@ -1,3 +1,9 @@
+centrum-ella (0.3.4.1) unstable; urgency=low
+
+  * Build from centrum-maintainance 7b95a7d3d1233baae23e9f1269d610dda616cae5
+
+ -- Vitek Pliska <whit@jizak.cz>  Sun,  8 Mar 2009 08:35:39 +0100
+
 centrum-ella (0.3.4.0) unstable; urgency=low
 
   * Build from revision 2007.
