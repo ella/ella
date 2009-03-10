@@ -39,7 +39,7 @@ def create_and_place_a_publishable(case):
     case.publishable = Article.objects.create(
         title=u'First Article',
         slug=u'first-article',
-        perex=u'Some\nlonger\ntext',
+        description=u'Some\nlonger\ntext',
         category=case.category_nested
     )
 
@@ -66,7 +66,7 @@ def create_and_place_more_publishables(case):
             Article.objects.create(
                 title=u'Article number %d.' % i,
                 slug=u'article-' + chr(ord('a')+i),
-                perex=u'Some\nlonger\ntext',
+                description=u'Some\nlonger\ntext',
                 category=c
             )
         )

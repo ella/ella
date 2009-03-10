@@ -3,7 +3,6 @@ from datetime import datetime
 from django.db import models
 from django.core.urlresolvers import reverse
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import generic
 from django.contrib.sites.models import Site
 from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext_lazy as _
@@ -35,7 +34,8 @@ class Author(models.Model):
         return self.name
 
     class Meta:
-        ordering=('name', 'slug',)
+        app_label = 'core'
+        ordering = ('name', 'slug',)
         verbose_name = _('Author')
         verbose_name_plural = _('Authors')
 
@@ -52,6 +52,7 @@ class Source(models.Model):
         return self.name
 
     class Meta:
+        app_label = 'core'
         verbose_name = _('Source')
         verbose_name_plural = _('Sources')
         ordering = ('name',)
@@ -162,6 +163,7 @@ class Category(models.Model):
     draw_title.allow_tags = True
 
     class Meta:
+        app_label = 'core'
         unique_together = (('site', 'tree_path'),)
         # TODO: ordering only for admin (admin now use only first item in list)
         ordering = ('site', 'tree_path',)
@@ -187,6 +189,7 @@ class Placement(models.Model):
     objects = PlacementManager()
 
     class Meta:
+        app_label = 'core'
         ordering = ('-publish_from',)
         verbose_name = _('Placement')
         verbose_name_plural = _('Placements')
@@ -344,6 +347,7 @@ class Listing(models.Model):
     placement_admin.short_description = ''
 
     class Meta:
+        app_label = 'core'
         verbose_name = _('Listing')
         verbose_name_plural = _('Listings')
         ordering = ('-publish_from',)
@@ -368,6 +372,7 @@ class HitCount(models.Model):
         return self.placement.target
 
     class Meta:
+        app_label = 'core'
         verbose_name = 'Hit Count'
         verbose_name_plural = 'Hit Counts'
 
@@ -387,122 +392,8 @@ class Related(models.Model):
         return u'%s relates to %s' % (self.source, self.target)
 
     class Meta:
+        app_label = 'core'
         verbose_name = _('Related')
         verbose_name_plural = _('Related')
         ordering = ('source_ct', 'source_id',)
-
-class Publishable(models.Model):
-    """
-    Abstract interface-like class that defines method's common to all objects that
-    serve as primary content (can have a placement).
-    """
-
-    placements = generic.GenericRelation(Placement, object_id_field='target_id', content_type_field='target_ct')
-
-    if 'ella.comments' in settings.INSTALLED_APPS:
-        from ella.comments.models import Comment
-        comments = generic.GenericRelation(Comment, object_id_field='target_id', content_type_field='target_ct')
-
-    if 'ella.tagging' in settings.INSTALLED_APPS:
-        from ella.tagging.models import TaggedItem
-        tags = generic.GenericRelation(TaggedItem)
-
-    class Meta:
-        abstract = True
-
-    @property
-    def main_placement(self):
-        " Return object's main placement, that is the object's placement in its primary category "
-        if hasattr(self, '_main_placement'):
-            return self._main_placement
-
-        current_site = Site.objects.get_current()
-
-        # TODO: what if have got multiple listings on one site?
-        placements = get_cached_list(
-                Placement,
-                target_ct=ContentType.objects.get_for_model(self.__class__),
-                target_id=self.pk,
-                category__site=current_site,
-            )
-        if placements:
-            return placements[0]
-
-        try:
-            # TODO - check and if we don't have category, take the only placement that exists in current site
-            self._main_placement = get_cached_object(
-                    Placement,
-                    target_ct=ContentType.objects.get_for_model(self.__class__),
-                    target_id=self.pk,
-                    category=self.category_id
-                )
-        except Placement.DoesNotExist:
-            self._main_placement = None
-
-        return self._main_placement
-
-    def get_absolute_url(self, domain=False):
-        " Get object's URL. "
-        placement = self.main_placement
-        if placement:
-            return placement.get_absolute_url(domain=domain)
-
-    def get_domain_url(self):
-        return self.get_absolute_url(domain=True)
-
-    def get_admin_url(self):
-        from ella.ellaadmin.utils import admin_url
-        return admin_url(self)
-
-    def save(self, force_insert=False, force_update=False):
-        if self.pk and hasattr(self, 'slug'): # only run on update
-            # get old self
-            old_slug = self.__class__._default_manager.get(pk=self.pk).slug
-            # the slug has changed
-            if old_slug != self.slug:
-                for plc in Placement.objects.filter(
-                        target_id=self.pk,
-                        target_ct=ContentType.objects.get_for_model(self.__class__)
-                    ):
-                    if plc.slug == old_slug:
-                        plc.slug = self.slug
-                        plc.save(force_update=True)
-        return super(Publishable, self).save(force_insert, force_update)
-
-    def delete(self):
-        url = self.get_absolute_url()
-        Redirect.objects.filter(new_path=url).delete()
-        return super(Publishable, self).delete()
-
-
-    ##
-    # various metadata
-    ##
-    def get_category(self):
-        " Get object's primary Category."
-        return get_cached_object(Category, pk=self.category_id)
-
-
-    def get_photo(self):
-        from ella.photos.models import Photo
-        " Get object's Photo. "
-        if not hasattr(self, '_photo'):
-            try:
-                self._photo = get_cached_object(Photo, pk=self.photo_id)
-            except Photo.DoesNotExist:
-                self._photo = None
-        return self._photo
-
-    def get_description(self):
-        return self.description
-
-    def get_title(self):
-        myTitle=self.title
-        if myTitle:
-            return '%s' % (self.title,)
-        else:
-            return '%s' % (self.draw_title(),)
-
-    def get_text(self):
-        return self.text
 

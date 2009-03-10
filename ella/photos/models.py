@@ -12,7 +12,7 @@ from django.contrib.contenttypes import generic
 from django.contrib.sites.models import Site
 from django.utils.safestring import mark_safe
 
-from ella.core.models import Author, Source
+from ella.core.models.main import Author, Source
 from ella.core.managers import RelatedManager
 from ella.core.box import Box
 from ella.core.cache.utils import get_cached_object
