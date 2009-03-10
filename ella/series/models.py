@@ -5,7 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from ella.core.models import Category, Placement
 from ella.core.cache.utils import CachedForeignKey, get_cached_list, get_cached_object
-from ella.db.models import Publishable
+from ella.core.models import Publishable
 from ella.photos.models import Photo
 
 

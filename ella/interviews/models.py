@@ -4,7 +4,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
 
-from ella.db.models import Publishable
+from ella.core.models import Publishable
 from ella.photos.models import Photo
 from ella.core.managers import RelatedManager
 from ella.core.cache import get_cached_object, get_cached_list

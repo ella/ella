@@ -22,7 +22,7 @@ from django.conf import settings
 from ella.tagging.models import Tag, TaggedItem
 from ella.tagging.utils import get_tag, get_queryset_and_model
 from ella.core.models import Placement
-from ella.db.models import Publishable
+from ella.core.models import Publishable
 from ella.utils.paginator import paginate_qset, get_page_no
 
 from ella.answers.models import Question, Answer, QuestionGroup, get_default_timelimit, is_expert_user

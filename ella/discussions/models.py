@@ -15,7 +15,7 @@ from ella.core.models import Listing, Category
 from ella.core.cache.utils import get_cached_list, cache_this, normalize_key, delete_cached_object, CachedGenericForeignKey
 from ella.core.cache.invalidate import CACHE_DELETER
 from ella.core.box import Box
-from ella.db.models import Publishable
+from ella.core.models import Publishable
 from ella.comments.models import Comment
 from ella.photos.models import Photo
 from ella.discussions.managers import TopicThreadManager

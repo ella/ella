@@ -12,7 +12,7 @@ from django.db import models
 from ella.db import fields
 from ella.core.box import Box
 from ella.photos.models import Photo
-from ella.db.models import Publishable
+from ella.core.models import Publishable
 from ella.core.models import Author, Source, Category
 
 from nc.cdnclient.models import MediaField

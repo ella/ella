@@ -369,7 +369,7 @@ class ArticleOptions(NewmanModelAdmin):
 #        raise KeyError, connection.queries
 #        return q
 
-from ella.db.models import Publishable
+from ella.core.models import Publishable
 
 
 site.register(InfoBox, InfoBoxOptions)
