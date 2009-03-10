@@ -11,7 +11,7 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.contrib.admin.views.main import ERROR_FLAG
 from django.shortcuts import render_to_response
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, ForeignKey, ManyToManyField, ImageField
 from django.utils.functional import update_wrapper
 from django.utils.translation import ugettext as _
 from django.utils.encoding import force_unicode
@@ -19,12 +19,14 @@ from django.utils.encoding import force_unicode
 from django.contrib.admin.util import unquote
 from django.forms.formsets import all_valid
 from django.contrib.contenttypes.models import ContentType
-from django.db.models.fields.related import ForeignKey, ManyToManyField
 
 
 from ella.newman.changelist import NewmanChangeList, FilterChangeList
-from ella.newman import models, fields, widgets
+from ella.newman import models, fields, widgets, utils
 from ella.newman.decorators import require_AJAX
+from ella.newman.permission import is_category_model, is_category_fk, model_category_fk, model_category_fk_value, applicable_categories
+from ella.newman.permission import has_category_permission, get_permission, permission_filtered_model_qs
+from ella.core.models import Category
 
 DEFAULT_LIST_PER_PAGE = getattr(settings, 'NEWMAN_LIST_PER_PAGE', 25)
 
@@ -47,6 +49,10 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
                 rich_text_field.widget.attrs['class'] += ' %s' % css_class
             return rich_text_field
 
+    if isinstance(db_field, ImageField):
+        # we accept only (JPEG) images with RGB color profile.
+        return fields.RGBImageField(db_field, **kwargs)
+
     if db_field.name in cls.raw_id_fields and isinstance(db_field, ForeignKey):
         kwargs['widget'] = widgets.ForeignKeyRawIdWidget(db_field.rel)
         return db_field.formfield(**kwargs)
@@ -59,7 +65,6 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
             'model': cls.model,
             'lookup': cls.suggest_fields[db_field.name]
         })
-        print db_field.name
         return fields.AdminSuggestField(db_field, **kwargs)
 
     if db_field.__class__ in formfield_overrides:
@@ -224,11 +229,13 @@ class NewmanModelAdmin(admin.ModelAdmin):
         else:
             applicable = applicable_categories(request.user)
             lookup = lookup & Q(pk__in=applicable)
+        # user category filter
+        qs = utils.user_category_filter(self.model.objects.filter(lookup), request.user)
 
         if SUGGEST_RETURN_ALL_FIELD:
-            data = self.model.objects.filter(lookup).values(*lookup_fields)
+            data = qs.values(*lookup_fields)
         else:
-            data = self.model.objects.filter(lookup).values(*lookup_fields[:2])
+            data = qs.filter(lookup).values(*lookup_fields[:2])
 
         # sort the suggested items so that those starting with the sought term come first
         def compare(a,b):
@@ -457,7 +464,8 @@ class NewmanModelAdmin(admin.ModelAdmin):
         change_perm = self.opts.app_label + '.' + 'change_' + self.model._meta.module_name.lower()
         perms = (view_perm, change_perm,)
         qs = permission_filtered_model_qs(q, request.user, perms)
-        return qs
+        # user category filter
+        return utils.user_category_filter(qs, request.user)
 
 class NewmanInlineFormSet(BaseInlineFormSet):
     def get_queryset(self):
@@ -498,6 +506,3 @@ class NewmanStackedInline(NewmanInlineModelAdmin):
 
 class NewmanTabularInline(NewmanInlineModelAdmin):
     template = 'admin/edit_inline/tabular.html'
-
-from ella.newman.permission import is_category_model, is_category_fk, model_category_fk, model_category_fk_value, applicable_categories
-from ella.newman.permission import has_category_permission, get_permission, permission_filtered_model_qs

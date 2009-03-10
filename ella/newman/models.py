@@ -87,6 +87,13 @@ class AdminSetting(models.Model):
     def __unicode__(self):
         return u"%s: %s for %s" % (self.var, self.val, self.user)
 
+    def __get_val(self):
+        return self.val
+
+    def __set_val(self, v):
+        self.val = v
+    value = property(__get_val, __set_val)
+
     class Meta:
         unique_together = (('user','var',),('group', 'var',), )
         verbose_name = _('Admin user setting')
@@ -151,25 +158,31 @@ class CategoryUserRole(models.Model):
         self.sync_denormalized()
 
     def sync_denormalized(self):
-        from ella.newman.permission import compute_applicable_categories
+        from ella.newman.permission import compute_applicable_categories_objects
         for p in self.group.permissions.all():
             code = '%s.%s' % (p.content_type.app_label, p.codename)
-            cats = compute_applicable_categories(self.user, code)
+            cats = compute_applicable_categories_objects(self.user, code)
             for c in cats:
                 existing = DenormalizedCategoryUserRole.objects.filter(
                     contenttype_id=p.content_type.pk,
                     user_id=self.user.pk,
                     permission_codename=code,
-                    category_id=c
+                    category_id=c.pk
                 )
                 if existing:
                     continue
+                root_cat = c.main_parent
+                if not root_cat:
+                    root_cat = c #c is top category
+                elif root_cat.tree_parent_id:
+                    root_cat = root_cat.get_tree_parent()
                 d = DenormalizedCategoryUserRole(
                     contenttype_id=p.content_type.pk,
                     user_id=self.user.pk,
                     permission_codename=code,
                     permission_id=p.pk,
-                    category_id=c
+                    category_id=c.pk,
+                    root_category_id=root_cat.pk
                 )
                 d.save()
 
@@ -183,6 +196,7 @@ class DenormalizedCategoryUserRole(models.Model):
     permission_id = models.IntegerField()
     permission_codename = models.CharField(max_length=100)
     category_id = models.IntegerField()
+    root_category_id = models.IntegerField()
     contenttype_id = models.IntegerField()
 
     objects = DenormalizedCategoryUserRoleManager()
