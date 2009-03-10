@@ -52,3 +52,31 @@ def create_and_place_a_publishable(case):
         publish_from=datetime(2008,1,10)
     )
 
+def create_and_place_more_publishables(case):
+    """
+    Create an article in every category
+    """
+    case.publishable_ct = ContentType.objects.get_for_model(Article)
+    case.publishables = []
+    case.placements = []
+
+    for i, c in enumerate(Category.objects.all()):
+
+        case.publishables.append(
+            Article.objects.create(
+                title=u'Article number %d.' % i,
+                slug=u'article-' + chr(ord('a')+i),
+                perex=u'Some\nlonger\ntext',
+                category=c
+            )
+        )
+
+        case.placements.append(
+            Placement.objects.create(
+                target_ct=case.publishable_ct,
+                target_id=case.publishable.pk,
+                category=c,
+                publish_from=datetime(2008,1,10)
+            )
+        )
+
