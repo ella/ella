@@ -1,7 +1,7 @@
 try:
     import cjson
     dumps = cjson.encode
-    loads = cjson.decode #(string, all_unicode=False)
+    loads = cjson.decode
 except ImportError:
     from django.utils.simplejson import dumps, loads
 

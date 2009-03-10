@@ -26,6 +26,8 @@ else {
     // so we can load or not load content appropriately on hash change.
     var LOADED_URLS = {};
     
+    var ORIGINAL_TITLE = document.title;
+    
     // If the hash changes before all ajax requests complete,
     // we want to cancel the pending requests. MAX_REQUEST is actually the number
     // of the last hashchange event. Each ajax request then remembers the state
@@ -83,6 +85,8 @@ else {
         }
         
         $target.removeClass('loading').html(data);
+        var newtitle = $('#doc-title').text();
+        document.title = ORIGINAL_TITLE + (newtitle ? ' | '+newtitle : '');
         dec_loading();
         if (address != undefined) {
             LOADED_URLS[ $target.attr('id') ] = address;

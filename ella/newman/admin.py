@@ -1,3 +1,5 @@
+from django.conf.urls.defaults import *
+from django.http import HttpResponse
 import datetime
 
 from django.db import models
@@ -33,6 +35,20 @@ class CategoryUserRoleOptions(NewmanModelAdmin):
     list_filter = ('user', 'group',)
     list_display = ('user', 'group',)
 
+    def get_urls(self):
+        urls = patterns('',
+            url(r'^refresh/$',
+                self.refresh_view,
+                name='categoryuserrole-refresh'),
+        )
+        urls += super(CategoryUserRoleOptions, self).get_urls()
+        return urls
+
+    def refresh_view(self, request, extra_context=None):
+        from ella.newman.management.commands.syncroles import denormalize
+        # TODO: don't wait for denormalize()
+        denormalize()
+        return HttpResponse(_('All roles is now refreshed.'))
 
 site.register(m.DevMessage, DevMessageAdmin)
 site.register(m.AdminHelpItem, HelpItemAdmin)

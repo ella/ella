@@ -1,12 +1,20 @@
+import Image
+
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from StringIO import StringIO
+
 from django.forms import fields
 from django.forms.util import ValidationError
 from django.utils.encoding import smart_unicode
 from django.utils.translation import ugettext_lazy as _
 from django.forms.models import ModelChoiceField
+from django.db.models.fields.related import ManyToManyField
+from django.contrib.admin.widgets import AdminFileWidget
 
 from ella.newman import widgets, models, utils
 from ella.newman.permission import get_permission, permission_filtered_model_qs, has_category_permission
-from django.db.models.fields.related import ManyToManyField
 
 class RichTextField(fields.Field):
     widget = widgets.RichTextAreaWidget
@@ -84,6 +92,35 @@ class AdminSuggestField(fields.Field):
             raise ValidationError(self.error_messages['invalid_choice'] % {'value': value})
 
         return value
+
+class RGBImageField(fields.ImageField):
+    "Check that uploaded image is RGB"
+    widget = AdminFileWidget
+
+    def clean(self, data, initial=None):
+        f = super(RGBImageField, self).clean(data, initial)
+
+        if f is None:
+            return None
+        elif not data and initial:
+            return initial
+
+        if hasattr(data, 'temporary_file_path'):
+            file = data.temporary_file_path()
+        else:
+            if hasattr(data, 'read'):
+                file = StringIO(data.read())
+            else:
+                file = StringIO(data['content'])
+
+        trial_image = Image.open(file)
+
+        if trial_image.mode == 'CMYK':
+            raise ValidationError(_('This image has a CMYK color profile. We can\'t work with CMYK. Please convert it to RGB.'))
+
+        if hasattr(f, 'seek') and callable(f.seek):
+            f.seek(0)
+        return f
 
 class CategoryChoiceField(ModelChoiceField):
     """ Category choice field. Choices restricted accordingly to CategoryUserRole. """
