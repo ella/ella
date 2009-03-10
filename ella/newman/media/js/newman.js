@@ -85,7 +85,7 @@ else {
         }
         
         $target.removeClass('loading').html(data);
-        var newtitle = $('#content input[name=template-title]').eq(0).val();
+        var newtitle = $('#doc-title').text();
         document.title = newtitle || ORIGINAL_TITLE;
         dec_loading();
         if (address != undefined) {

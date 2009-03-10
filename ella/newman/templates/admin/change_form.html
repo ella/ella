@@ -1,8 +1,6 @@
 {% extends "admin/ajax_content_base.html" %}
 {% load i18n admin_modify adminmedia %}
 
-{% if title %}<input type="hidden" name="template-title" value="{{ title }}" />{% endif %}
-
 {% block breadcrumbs %}
 <div class="breadcrumbs">
     <a href="{% url admin_index %}">{% trans "Home" %}</a>
