@@ -10,6 +10,8 @@ from django.http import HttpResponse
 from django.core.mail import EmailMessage
 from ella.newman.models import AdminSetting
 from ella.newman.decorators import require_AJAX
+from ella.newman.utils import json_decode, json_encode
+
 
 NEWMAN_URL_PREFIX = 'nm'
 
@@ -56,7 +58,14 @@ class NewmanSite(AdminSite):
         Displays the main Newman index page, without installed apps.
         """
 
-        site_filter_form = SiteFilterForm(user=request.user)
+        data = {'sites': []}
+        try:
+            category_filter = AdminSetting.objects.get(user=request.user, var='category_filter')
+            data['sites'] = json_decode(category_filter.val)
+        except AdminSetting.DoesNotExist:
+            data['sites'] = []
+
+        site_filter_form = SiteFilterForm(data=data, user=request.user)
 
         context = {
             'title': _('Site administration'),
@@ -94,9 +103,9 @@ class NewmanSite(AdminSite):
         if site_filter_form.is_valid():
             o, c = AdminSetting.objects.get_or_create(
                 user = request.user,
-                var = 'cat_filters'
+                var = 'category_filter'
             )
-            o.val = '%s' % site_filter_form.cleaned_data['sites']
+            o.val = '%s' % json_encode(site_filter_form.cleaned_data['sites'])
             o.save()
 
             return HttpResponse(content=ugettext('Your settings was saved.'), mimetype='text/plain', status=200)
