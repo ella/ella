@@ -1,13 +1,22 @@
+from datetime import datetime
+
 from django.db import models
+from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.contrib.sites.models import Site
+from django.template.defaultfilters import slugify
+from django.core.urlresolvers import reverse
+from django.contrib.redirects.models import Redirect
+from django.utils.safestring import mark_safe
 
-from ella.core.cache import get_cached_object, get_cached_list
-from ella.core.models.main import Category, Author, Source, Placement
+from ella.ellaadmin.utils import admin_url
+from ella.core.managers import ListingManager, HitCountManager, PlacementManager
+from ella.core.cache import get_cached_object, get_cached_list, CachedGenericForeignKey
+from ella.core.models.main import Category, Author, Source
 from ella.photos.models import Photo
-from django.conf import settings
+from ella.core.box import Box
 
 class Publishable(models.Model):
     """
@@ -39,8 +48,6 @@ class Publishable(models.Model):
         if not hasattr(self, '_target'):
             self._target = self.content_type.get_object_for_this_type(pk=self.pk)
         return self._target
-
-    placements = generic.GenericRelation(Placement, object_id_field='target_id', content_type_field='target_ct')
 
     if 'ella.comments' in settings.INSTALLED_APPS:
         from ella.comments.models import Comment
@@ -91,7 +98,6 @@ class Publishable(models.Model):
         return self.get_absolute_url(domain=True)
 
     def get_admin_url(self):
-        from ella.ellaadmin.utils import admin_url
         return admin_url(self)
 
     def save(self, force_insert=False, force_update=False):
@@ -147,4 +153,205 @@ class Publishable(models.Model):
         return self.text
 
 
+class Placement(models.Model):
+    # listing's target - a Publishable object
+    target_ct = models.ForeignKey(ContentType)
+    target_id = models.IntegerField()
+    target = CachedGenericForeignKey('target_ct', 'target_id')
+    category = models.ForeignKey(Category, db_index=True)
+    publish_from = models.DateTimeField(_("Start of visibility")) #, default=datetime.now)
+    publish_to = models.DateTimeField(_("End of visibility"), null=True, blank=True)
+    slug = models.SlugField(_('Slug'), max_length=255, blank=True)
+
+    static = models.BooleanField(default=False)
+
+    objects = PlacementManager()
+
+    class Meta:
+        app_label = 'core'
+        ordering = ('-publish_from',)
+        verbose_name = _('Placement')
+        verbose_name_plural = _('Placements')
+
+    def __unicode__(self):
+        try:
+            return u'%s placed in %s' % (self.target, self.category)
+        except:
+            return 'Broken placement'
+
+    def target_admin(self):
+        return self.target
+    target_admin.short_description = _('Target')
+
+    def full_url(self):
+        "Full url to be shown in admin."
+        return mark_safe('<a href="%s">url</a>' % self.get_absolute_url())
+    full_url.allow_tags = True
+
+
+    def is_active(self):
+        "Return True if the listing's priority is currently active."
+        now = datetime.now()
+        return now > self.publish_from and (self.publish_to is None or now < self.publish_to)
+
+    def save(self, force_insert=False, force_update=False):
+        " If Listing is created, we create HitCount object "
+
+        if not self.slug:
+            self.slug = getattr(self.target, 'slug', self.target_id)
+
+        if self.pk:
+            old_self = Placement.objects.get(pk=self.pk)
+
+            old_path = old_self.get_absolute_url()
+            new_path = self.get_absolute_url()
+
+            if old_path != new_path and new_path:
+                redirect, created = Redirect.objects.get_or_create(old_path=old_path, new_path=new_path, defaults={'site_id' : settings.SITE_ID})
+                Redirect.objects.filter(new_path=old_path).exclude(pk=redirect.pk).update(new_path=new_path)
+
+        # First, save Placement
+        super(Placement, self).save(force_insert, force_update)
+        # Then, save HitCount (needs placement_id)
+        hc, created = HitCount.objects.get_or_create(placement=self)
+
+    def get_absolute_url(self, domain=False):
+        obj = self.target
+        category = get_cached_object(Category, pk=self.category_id)
+
+        kwargs = {
+            'content_type' : slugify(obj._meta.verbose_name_plural),
+            'slug' : self.slug,
+}
+
+        if self.static:
+            if category.tree_parent_id:
+                kwargs['category'] = category.tree_path
+                url = reverse('static_detail', kwargs=kwargs)
+            else:
+                url = reverse('home_static_detail', kwargs=kwargs)
+        else:
+            kwargs.update({
+                    'year' : self.publish_from.year,
+                    'month' : self.publish_from.month,
+                    'day' : self.publish_from.day,
+})
+            if category.tree_parent_id:
+                kwargs['category'] = category.tree_path
+                url = reverse('object_detail', kwargs=kwargs)
+            else:
+                url = reverse('home_object_detail', kwargs=kwargs)
+
+        if category.site_id != settings.SITE_ID or domain:
+            site = get_cached_object(Site, pk=category.site_id)
+            return 'http://' + site.domain + url
+        return url
+
+
+class Listing(models.Model):
+    """
+    Listing of an object in a category. Each and every object that have it's own detail page must have a Listing object
+    that is valid (nod expired) and places him in the object's main category. Any object can be listed in any number of
+    categories (but only once per category). Even if the object is listed in other categories besides its main category,
+    its detail page's url still belongs to the main one.
+
+    see doc/listing.txt for more details on Listings
+    """
+
+    placement = models.ForeignKey(Placement)
+    category = models.ForeignKey(Category, db_index=True)
+
+    publish_from = models.DateTimeField(_("Start of listing")) #, default=datetime.now)
+    priority_from = models.DateTimeField(_("Start of prioritized listing"), null=True, blank=True)
+    priority_to = models.DateTimeField(_("End of prioritized listing"), null=True, blank=True)
+    priority_value = models.IntegerField(_("Priority"), blank=True, null=True)
+    remove = models.BooleanField(_("Remove"), help_text=_("Remove object from listing after the priority wears off?"), default=False)
+
+    commercial = models.BooleanField(_("Commercial"), default=False, help_text=_("Check this if the listing is of a commercial content."))
+
+    objects = ListingManager()
+
+    @property
+    def target(self):
+        return self.placement.target
+
+
+    def Box(self, box_type, nodelist):
+        " Delegate the boxing to the target's Box factory method."
+        try:
+            obj = self.placement.target
+        except:
+            return None
+        if hasattr(obj, 'Box'):
+            return obj.Box(box_type, nodelist)
+        return Box(obj, box_type, nodelist)
+
+    def get_absolute_url(self, domain=False):
+        return self.placement.get_absolute_url(domain)
+
+    def get_domain_url(self):
+        return self.get_absolute_url(domain=True)
+
+
+    def __unicode__(self):
+        try:
+            return u'%s listed in %s' % (self.placement.target, self.category)
+        except:
+            return 'Broken listing'
+
+    def target_admin(self):
+        return mark_safe('<a href="%s">%s</a>' % (admin_url(self.target), self.target,))
+    target_admin.allow_tags = True
+    target_admin.short_description = _('edit target')
+
+    def target_url(self):
+        "Full url to be shown in admin."
+        return mark_safe('<a href="%s">url</a>' % self.get_absolute_url())
+    target_url.allow_tags = True
+    target_url.short_description = _('target url')
+
+    def target_ct(self):
+        return self.target._meta.verbose_name
+    target_ct.short_description = _('target ct')
+
+    def target_hitcounts(self):
+        hits = HitCount.objects.get(placement=self.placement)
+        return mark_safe('<strong>%d</strong>' % hits.hits)
+    target_hitcounts.allow_tags = True
+    target_hitcounts.short_description = _('hit counts')
+
+    def placement_admin(self):
+        return mark_safe('<a href="%s">%s</a>' % (admin_url(self.placement), '::',))
+    placement_admin.allow_tags = True
+    placement_admin.short_description = ''
+
+    class Meta:
+        app_label = 'core'
+        verbose_name = _('Listing')
+        verbose_name_plural = _('Listings')
+        ordering = ('-publish_from',)
+
+class HitCount(models.Model):
+    """
+    Count hits for individual objects.
+    """
+    placement = models.ForeignKey(Placement, primary_key=True)
+
+    last_seen = models.DateTimeField(_('Last seen'), editable=False)
+    hits = models.PositiveIntegerField(_('Hits'), default=1)
+
+    objects = HitCountManager()
+
+    def save(self, force_insert=False, force_update=False):
+        "update last seen automaticaly"
+        self.last_seen = datetime.now()
+        super(HitCount, self).save(force_insert, force_update)
+
+    def target(self):
+        return self.placement.target
+
+    class Meta:
+        app_label = 'core'
+        verbose_name = 'Hit Count'
+        verbose_name_plural = 'Hit Counts'
 
