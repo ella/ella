@@ -2,7 +2,8 @@ from django.core.exceptions import PermissionDenied
 from django.conf import settings
 
 from django.contrib import admin
-from django.contrib.admin.options import InlineModelAdmin, IncorrectLookupParameters
+from django.contrib.admin.options import InlineModelAdmin, IncorrectLookupParameters,\
+    FORMFIELD_FOR_DBFIELD_DEFAULTS
 from django.forms.models import BaseInlineFormSet
 from django.forms.util import ErrorList
 from django import template
@@ -28,6 +29,8 @@ from ella.newman.decorators import require_AJAX
 DEFAULT_LIST_PER_PAGE = getattr(settings, 'NEWMAN_LIST_PER_PAGE', 25)
 
 def formfield_for_dbfield_factory(cls, db_field, **kwargs):
+
+    formfield_overrides = dict(FORMFIELD_FOR_DBFIELD_DEFAULTS, **cls.formfield_overrides)
 
     if 'request' in kwargs:
         request = kwargs.pop('request', None)
@@ -58,6 +61,10 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
         })
         print db_field.name
         return fields.AdminSuggestField(db_field, **kwargs)
+
+    if db_field.__class__ in formfield_overrides:
+        kwargs = dict(formfield_overrides[db_field.__class__], **kwargs)
+        return db_field.formfield(**kwargs)
 
     return db_field.formfield(**kwargs)
 
