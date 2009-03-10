@@ -11,12 +11,31 @@ from django.conf import settings
 from ella.tagging.admin import TaggingInlineOptions
 
 #from ella.core.admin import PlacementInlineOptions
+from ella.core.models import Category, Author, Source
 from ella.articles.models import ArticleContents, Article, InfoBox
 
 from ella.newman import NewmanModelAdmin, NewmanTabularInline, site
 from ella.newman import options
 from ella.newman import generic as ng
 from django.utils.safestring import mark_safe
+
+# ------------------------------------
+# Categories, Authors, Sources
+# ------------------------------------
+class CategoryOptions(NewmanModelAdmin):
+    list_filter = ('site',)
+    list_display = ('draw_title', 'tree_path', '__unicode__')
+    search_fields = ('title', 'slug',)
+    #ordering = ('site', 'tree_path',)
+    prepopulated_fields = {'slug': ('title',)}
+
+class AuthorOptions(NewmanModelAdmin):
+    prepopulated_fields = {'slug': ('name',)}
+    search_fields = ('name',)
+
+class SourceOptions(NewmanModelAdmin):
+    list_display = ('name', 'url',)
+    search_fields = ('name',)
 
 # ------------------------------------
 # DbTemplates
@@ -355,6 +374,9 @@ from ella.db.models import Publishable
 
 site.register(InfoBox, InfoBoxOptions)
 site.register(Article, ArticleOptions)
+site.register(Category, CategoryOptions)
+site.register(Author, AuthorOptions)
+site.register(Source, SourceOptions)
 
 
 # ------------------------------------

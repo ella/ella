@@ -2,7 +2,8 @@ from django.core.exceptions import PermissionDenied
 from django.conf import settings
 
 from django.contrib import admin
-from django.contrib.admin.options import InlineModelAdmin, IncorrectLookupParameters
+from django.contrib.admin.options import InlineModelAdmin, IncorrectLookupParameters,\
+    FORMFIELD_FOR_DBFIELD_DEFAULTS
 from django.forms.models import BaseInlineFormSet
 from django.forms.util import ErrorList
 from django import template
@@ -28,6 +29,8 @@ from ella.newman.decorators import require_AJAX
 DEFAULT_LIST_PER_PAGE = getattr(settings, 'NEWMAN_LIST_PER_PAGE', 25)
 
 def formfield_for_dbfield_factory(cls, db_field, **kwargs):
+
+    formfield_overrides = dict(FORMFIELD_FOR_DBFIELD_DEFAULTS, **cls.formfield_overrides)
 
     if 'request' in kwargs:
         request = kwargs.pop('request', None)
@@ -58,6 +61,10 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
         })
         print db_field.name
         return fields.AdminSuggestField(db_field, **kwargs)
+
+    if db_field.__class__ in formfield_overrides:
+        kwargs = dict(formfield_overrides[db_field.__class__], **kwargs)
+        return db_field.formfield(**kwargs)
 
     return db_field.formfield(**kwargs)
 
@@ -180,11 +187,9 @@ class NewmanModelAdmin(admin.ModelAdmin):
 
     @require_AJAX
     def suggest_view(self, request, extra_context=None):
-
         SUGGEST_VIEW_LIMIT = getattr(settings, 'SUGGEST_VIEW_LIMIT', 20)
         SUGGEST_VIEW_MIN_LENGTH = getattr(settings, 'SUGGEST_VIEW_MIN_LENGTH', 2)
         SUGGEST_RETURN_ALL_FIELD = getattr(settings, 'SUGGEST_RETURN_ALL_FIELD', True)
-
         if not ('f' in request.GET.keys() and 'q' in request.GET.keys()):
             raise AttributeError, 'Invalid query attributes. Example: ".../?f=field_a&f=field_b&q=search_term&o=offset"'
         elif len(request.GET.get('q')) < SUGGEST_VIEW_MIN_LENGTH:
@@ -194,7 +199,6 @@ class NewmanModelAdmin(admin.ModelAdmin):
         if 'o' in request.GET.keys() and request.GET.get('o'):
             offset = int(request.GET.get('o'))
         limit = offset + SUGGEST_VIEW_LIMIT
-
         lookup_fields = [u'id'] + request.GET.getlist('f')
         lookup_value = request.GET.get('q')
         lookup = None
@@ -202,7 +206,6 @@ class NewmanModelAdmin(admin.ModelAdmin):
         model_fields = [f.name for f in self.model._meta.fields]
 
         for f in lookup_fields:
-
             if not (f in model_fields or f.split('__')[0] in model_fields):
                 raise AttributeError, 'Model "%s" has not field "%s". Possible fields are "%s".' \
                                     % (self.model._meta.object_name, f, ', '.join(model_fields))
@@ -211,13 +214,21 @@ class NewmanModelAdmin(admin.ModelAdmin):
                 lookup = Q(**{lookup_key: lookup_value})
             else:
                 lookup = lookup | Q(**{lookup_key: lookup_value})
+        # user role based category filtering
+        if not is_category_model(self.model):
+            category_field = model_category_fk(self.model)
+            if category_field and request.user:
+                applicable = applicable_categories(request.user)
+                args_lookup = { '%s__in' % category_field.name: applicable}
+                lookup = lookup & Q(**args_lookup)
+        else:
+            applicable = applicable_categories(request.user)
+            lookup = lookup & Q(pk__in=applicable)
 
         if SUGGEST_RETURN_ALL_FIELD:
             data = self.model.objects.filter(lookup).values(*lookup_fields)
         else:
             data = self.model.objects.filter(lookup).values(*lookup_fields[:2])
-
-        cnt = len(data)
 
         # sort the suggested items so that those starting with the sought term come first
         def compare(a,b):
@@ -231,6 +242,7 @@ class NewmanModelAdmin(admin.ModelAdmin):
                 # else compare lexicographically
                 return cmp(a,b)
             return _cmp(a,b,unicode(lookup_value).lower())
+        cnt = len(data)
         data = list(data)
         if offset >= len(data): return HttpResponse('SPECIAL: OFFSET OUT OF RANGE', mimetype='text/plain')
         data.sort(cmp=compare, key=lambda x: x[lookup_fields[1]])
@@ -284,7 +296,7 @@ class NewmanModelAdmin(admin.ModelAdmin):
         If request is GET type, at least view_permission is needed. In case
         of POST request change permission is needed.
         """
-        cfield = models.model_category_fk_value(obj)
+        cfield = model_category_fk_value(obj)
         if obj is None or not cfield:
             if request.method == 'POST':
                 return admin.ModelAdmin.has_change_permission( self, request, obj )
@@ -294,8 +306,8 @@ class NewmanModelAdmin(admin.ModelAdmin):
         opts = self.opts
         change_perm = '%s.%s' % ( opts.app_label, opts.get_change_permission() )
         view_perm = '%s.view_%s' % ( opts.app_label, opts.object_name.lower() )
-        can_view = models.has_category_permission( request.user, cfield, view_perm )
-        can_change = models.has_category_permission( request.user, cfield, change_perm )
+        can_view = has_category_permission( request.user, cfield, view_perm )
+        can_change = has_category_permission( request.user, cfield, change_perm )
 
         if request.method == 'POST' and can_change:
             return True
@@ -422,10 +434,10 @@ class NewmanModelAdmin(admin.ModelAdmin):
         f = db_field
         if hasattr(f.queryset, '_newman_filtered'):
             return
-        view_perm = models.get_permission('view', model)
-        change_perm = models.get_permission('change', model)
+        view_perm = get_permission('view', model)
+        change_perm = get_permission('change', model)
         perms = (view_perm, change_perm,)
-        qs = models.permission_filtered_model_qs(f.queryset, user, perms)
+        qs = permission_filtered_model_qs(f.queryset, user, perms)
         qs._newman_filtered = True #magic variable
         f._set_queryset(qs)
 
@@ -444,7 +456,7 @@ class NewmanModelAdmin(admin.ModelAdmin):
         view_perm = self.opts.app_label + '.' + 'view_' + self.model._meta.module_name.lower()
         change_perm = self.opts.app_label + '.' + 'change_' + self.model._meta.module_name.lower()
         perms = (view_perm, change_perm,)
-        qs = models.permission_filtered_model_qs(q, request.user, perms)
+        qs = permission_filtered_model_qs(q, request.user, perms)
         return qs
 
 class NewmanInlineFormSet(BaseInlineFormSet):
@@ -458,12 +470,12 @@ class NewmanInlineFormSet(BaseInlineFormSet):
             # category base permissions
             if not user.is_superuser:
                 for db_field in self.model._meta.fields:
-                    if not models.is_category_fk(db_field):
+                    if not is_category_fk(db_field):
                         continue
-                    view_perm = models.get_permission('view', self.instance)
-                    change_perm = models.get_permission('change', self.instance)
+                    view_perm = get_permission('view', self.instance)
+                    change_perm = get_permission('change', self.instance)
                     perms = (view_perm, change_perm,)
-                    qs = models.permission_filtered_model_qs(qs, user, perms)
+                    qs = permission_filtered_model_qs(qs, user, perms)
 
             if self.max_num > 0:
                 self._queryset = qs[:self.max_num]
@@ -487,3 +499,5 @@ class NewmanStackedInline(NewmanInlineModelAdmin):
 class NewmanTabularInline(NewmanInlineModelAdmin):
     template = 'admin/edit_inline/tabular.html'
 
+from ella.newman.permission import is_category_model, is_category_fk, model_category_fk, model_category_fk_value, applicable_categories
+from ella.newman.permission import has_category_permission, get_permission, permission_filtered_model_qs
