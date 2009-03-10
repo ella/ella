@@ -35,9 +35,7 @@ def has_model_list_permission(user, model):
     ct = ContentType.objects.get_for_model(model)
     #qs = CategoryUserRole.objects.filter(user=user, group__permissions__content_type=ct)
     qs = DenormalizedCategoryUserRole.objects.filter(user_id=user.id, contenttype_id=ct.pk).distinct()
-    if qs.count():
-        return True
-    return False
+    return qs.count() > 0
 
 #@cache_this(key_has_category_permission, timeout=CACHE_TIMEOUT)
 def has_category_permission(user, category, permission):
@@ -93,14 +91,14 @@ def category_children(cats):
     Returns all nested categories as list.
     @param cats: list of Category objects
     """
-    sub_cats = map(None, cats)
+    sub_cats = set(map(None, cats))
     for c in cats:
         out = Category.objects.filter(tree_parent=c)
-        map(lambda o: sub_cats.append(o), category_children(out))
+        map(lambda o: sub_cats.add(o), category_children(out))
     return sub_cats
 
 #@cache_this(key_applicable_categories, timeout=CACHE_TIMEOUT)
-def compute_applicable_categories(user, permission=None):
+def compute_applicable_categories_objects(user, permission=None):
     """ Return categories accessible by given user """
     if user.is_superuser:
         all = Category.objects.all()
@@ -124,7 +122,11 @@ def compute_applicable_categories(user, permission=None):
         for category in category_user_role.category.all():
             unique_categories.add(category)
     app_cats = category_children(unique_categories)
-    return list(set(d.pk for d in app_cats))
+    return app_cats
+
+def compute_applicable_categories(user, permission=None):
+    categories = compute_applicable_categories_objects(user, permission)
+    return list(d.pk for d in categories)
 
 def applicable_categories(user, permission=None):
     """
@@ -144,15 +146,16 @@ def permission_filtered_model_qs(queryset, user, permissions=[]):
     """ returns Queryset filtered accordingly to given permissions """
     if user.is_superuser:
         return queryset
+    if not model_category_fk(queryset.model):
+        return queryset
     q = queryset
     qs = query.EmptyQuerySet()
-    if model_category_fk(queryset.model):
-        categories = DenormalizedCategoryUserRole.objects.categories_by_user_and_permission(user, permissions)
-        if categories:
-            if queryset.model == Category:
-                qs = q.filter( pk__in=categories )
-            else:
-                qs = q.filter( category__in=categories )
+    categories = DenormalizedCategoryUserRole.objects.categories_by_user_and_permission(user, permissions)
+    if categories:
+        if queryset.model == Category:
+            qs = q.filter( pk__in=categories )
+        else:
+            qs = q.filter( category__in=categories )
     return qs
 
 def is_category_fk(db_field):
