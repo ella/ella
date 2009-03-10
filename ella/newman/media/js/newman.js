@@ -86,7 +86,7 @@ else {
         
         $target.removeClass('loading').html(data);
         var newtitle = $('#doc-title').text();
-        document.title = newtitle || ORIGINAL_TITLE;
+        document.title = ORIGINAL_TITLE + (newtitle ? ' | '+newtitle : '');
         dec_loading();
         if (address != undefined) {
             LOADED_URLS[ $target.attr('id') ] = address;

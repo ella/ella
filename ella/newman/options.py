@@ -11,7 +11,7 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.contrib.admin.views.main import ERROR_FLAG
 from django.shortcuts import render_to_response
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, ForeignKey, ManyToManyField, ImageField
 from django.utils.functional import update_wrapper
 from django.utils.translation import ugettext as _
 from django.utils.encoding import force_unicode
@@ -19,7 +19,6 @@ from django.utils.encoding import force_unicode
 from django.contrib.admin.util import unquote
 from django.forms.formsets import all_valid
 from django.contrib.contenttypes.models import ContentType
-from django.db.models.fields.related import ForeignKey, ManyToManyField
 
 
 from ella.newman.changelist import NewmanChangeList, FilterChangeList
@@ -47,6 +46,10 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
                 rich_text_field.widget.attrs['class'] += ' %s' % css_class
             return rich_text_field
 
+    if isinstance(db_field, ImageField):
+        # we accept only (JPEG) images with RGB color profile.
+        return fields.RGBImageField(db_field, **kwargs)
+
     if db_field.name in cls.raw_id_fields and isinstance(db_field, ForeignKey):
         kwargs['widget'] = widgets.ForeignKeyRawIdWidget(db_field.rel)
         return db_field.formfield(**kwargs)
@@ -59,7 +62,6 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
             'model': cls.model,
             'lookup': cls.suggest_fields[db_field.name]
         })
-        print db_field.name
         return fields.AdminSuggestField(db_field, **kwargs)
 
     if db_field.__class__ in formfield_overrides:
