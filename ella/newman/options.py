@@ -59,7 +59,6 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
             'model': cls.model,
             'lookup': cls.suggest_fields[db_field.name]
         })
-        print db_field.name
         return fields.AdminSuggestField(db_field, **kwargs)
 
     if db_field.__class__ in formfield_overrides:
