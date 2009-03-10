@@ -146,7 +146,7 @@ def permission_filtered_model_qs(queryset, user, permissions=[]):
         return queryset
     q = queryset
     qs = query.EmptyQuerySet()
-    if 'category' in queryset.model._meta.get_all_field_names():
+    if model_category_fk(queryset.model):
         categories = DenormalizedCategoryUserRole.objects.categories_by_user_and_permission(user, permissions)
         if categories:
             if queryset.model == Category:
