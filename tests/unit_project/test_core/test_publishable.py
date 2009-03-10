@@ -44,8 +44,7 @@ class TestPublishable(DatabaseTestCase):
 
     def test_main_placement_with_two_placements_on_one_site(self):
         Placement.objects.create(
-            target_ct=self.publishable_ct,
-            target_id=self.publishable.pk,
+            publishable=self.publishable,
             category=self.category,
             publish_from=datetime(2008,1,10)
         )
@@ -65,8 +64,7 @@ class TestPublishable(DatabaseTestCase):
         )
         
         Placement.objects.create(
-            target_ct=self.publishable_ct,
-            target_id=self.publishable.pk,
+            publishable=self.publishable,
             category=category,
             publish_from=datetime(2008,1,10)
         )

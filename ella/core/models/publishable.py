@@ -9,11 +9,10 @@ from django.contrib.sites.models import Site
 from django.template.defaultfilters import slugify
 from django.core.urlresolvers import reverse
 from django.contrib.redirects.models import Redirect
-from django.utils.safestring import mark_safe
 
 from ella.ellaadmin.utils import admin_url
 from ella.core.managers import ListingManager, HitCountManager, PlacementManager
-from ella.core.cache import get_cached_object, get_cached_list, CachedGenericForeignKey
+from ella.core.cache import get_cached_object, get_cached_list
 from ella.core.models.main import Category, Author, Source
 from ella.photos.models import Photo
 from ella.core.box import Box
@@ -68,8 +67,7 @@ class Publishable(models.Model):
         # TODO: what if have got multiple listings on one site?
         placements = get_cached_list(
                 Placement,
-                target_ct=ContentType.objects.get_for_model(self.__class__),
-                target_id=self.pk,
+                publishable=self.pk,
                 category__site=current_site,
             )
         if placements:
@@ -79,8 +77,7 @@ class Publishable(models.Model):
             # TODO - check and if we don't have category, take the only placement that exists in current site
             self._main_placement = get_cached_object(
                     Placement,
-                    target_ct=ContentType.objects.get_for_model(self.__class__),
-                    target_id=self.pk,
+                    publishable=self.pk,
                     category=self.category_id
                 )
         except Placement.DoesNotExist:
@@ -107,10 +104,7 @@ class Publishable(models.Model):
             old_slug = self.__class__._default_manager.get(pk=self.pk).slug
             # the slug has changed
             if old_slug != self.slug:
-                for plc in Placement.objects.filter(
-                        target_id=self.pk,
-                        target_ct=ContentType.objects.get_for_model(self.__class__)
-                    ):
+                for plc in Placement.objects.filter(publishable=self):
                     if plc.slug == old_slug:
                         plc.slug = self.slug
                         plc.save(force_update=True)
@@ -155,9 +149,7 @@ class Publishable(models.Model):
 
 class Placement(models.Model):
     # listing's target - a Publishable object
-    target_ct = models.ForeignKey(ContentType)
-    target_id = models.IntegerField()
-    target = CachedGenericForeignKey('target_ct', 'target_id')
+    publishable = models.ForeignKey(Publishable)
     category = models.ForeignKey(Category, db_index=True)
     publish_from = models.DateTimeField(_("Start of visibility")) #, default=datetime.now)
     publish_to = models.DateTimeField(_("End of visibility"), null=True, blank=True)
@@ -175,19 +167,9 @@ class Placement(models.Model):
 
     def __unicode__(self):
         try:
-            return u'%s placed in %s' % (self.target, self.category)
+            return u'%s placed in %s' % (self.publishable, self.category)
         except:
             return 'Broken placement'
-
-    def target_admin(self):
-        return self.target
-    target_admin.short_description = _('Target')
-
-    def full_url(self):
-        "Full url to be shown in admin."
-        return mark_safe('<a href="%s">url</a>' % self.get_absolute_url())
-    full_url.allow_tags = True
-
 
     def is_active(self):
         "Return True if the listing's priority is currently active."
@@ -198,7 +180,7 @@ class Placement(models.Model):
         " If Listing is created, we create HitCount object "
 
         if not self.slug:
-            self.slug = getattr(self.target, 'slug', self.target_id)
+            self.slug = self.publishable.slug
 
         if self.pk:
             old_self = Placement.objects.get(pk=self.pk)
@@ -216,13 +198,13 @@ class Placement(models.Model):
         hc, created = HitCount.objects.get_or_create(placement=self)
 
     def get_absolute_url(self, domain=False):
-        obj = self.target
+        obj = self.publishable
         category = get_cached_object(Category, pk=self.category_id)
 
         kwargs = {
-            'content_type' : slugify(obj._meta.verbose_name_plural),
+            'content_type' : slugify(obj.content_type.model_class()._meta.verbose_name_plural),
             'slug' : self.slug,
-}
+        }
 
         if self.static:
             if category.tree_parent_id:
@@ -273,13 +255,13 @@ class Listing(models.Model):
 
     @property
     def target(self):
-        return self.placement.target
+        return self.placement.publishable
 
 
     def Box(self, box_type, nodelist):
         " Delegate the boxing to the target's Box factory method."
         try:
-            obj = self.placement.target
+            obj = self.target
         except:
             return None
         if hasattr(obj, 'Box'):
@@ -295,35 +277,9 @@ class Listing(models.Model):
 
     def __unicode__(self):
         try:
-            return u'%s listed in %s' % (self.placement.target, self.category)
+            return u'%s listed in %s' % (self.placement.publishable, self.category)
         except:
             return 'Broken listing'
-
-    def target_admin(self):
-        return mark_safe('<a href="%s">%s</a>' % (admin_url(self.target), self.target,))
-    target_admin.allow_tags = True
-    target_admin.short_description = _('edit target')
-
-    def target_url(self):
-        "Full url to be shown in admin."
-        return mark_safe('<a href="%s">url</a>' % self.get_absolute_url())
-    target_url.allow_tags = True
-    target_url.short_description = _('target url')
-
-    def target_ct(self):
-        return self.target._meta.verbose_name
-    target_ct.short_description = _('target ct')
-
-    def target_hitcounts(self):
-        hits = HitCount.objects.get(placement=self.placement)
-        return mark_safe('<strong>%d</strong>' % hits.hits)
-    target_hitcounts.allow_tags = True
-    target_hitcounts.short_description = _('hit counts')
-
-    def placement_admin(self):
-        return mark_safe('<a href="%s">%s</a>' % (admin_url(self.placement), '::',))
-    placement_admin.allow_tags = True
-    placement_admin.short_description = ''
 
     class Meta:
         app_label = 'core'
@@ -348,7 +304,7 @@ class HitCount(models.Model):
         super(HitCount, self).save(force_insert, force_update)
 
     def target(self):
-        return self.placement.target
+        return self.placement.publishable
 
     class Meta:
         app_label = 'core'
