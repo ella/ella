@@ -694,16 +694,18 @@ $( function() {
     
     // Submit event
     function ajax_submit($form) {
+        if (!$form.jquery) $form = $($form);
         if ( ! validate($form) ) return false;
+        var action =  $form.attr('action');
+        var method = ($form.attr('method') || 'POST').toUpperCase();
         var $meta = $form.find('.form-metadata:first');
-        var  action  =  $meta.find('input[name=action]').val();
-        var  method  = ($meta.find('input[name=method]').val() || 'POST').toUpperCase();
         var $success =  $meta.find('input[name=success]');
         var $error   =  $meta.find('input[name=error]');
         var success, error;
         if ($success && $success.length) {
             success = function(data) { $success.get(0).onchange(data); };
-        } else {
+        }
+        else {
             success = function(data) { show_message(data, {msgclass: 'okmsg'}); };
         }
         if ($error && $error.length) {
@@ -714,7 +716,7 @@ $( function() {
         }
         var $inputs = get_inputs($form);
         var data = $inputs.serialize();
-        $inputs.val('');
+        $form.get(0).reset();
         $.ajax({
             url: action,
             type: method,
@@ -722,7 +724,9 @@ $( function() {
             success: success,
             error:   error
         });
+        return false;
     }
+    window.ajax_submit = ajax_submit;
     
     // Submit button
     $('.ajax-form a.ok').live('click', function(evt) {
@@ -734,18 +738,7 @@ $( function() {
     
     // Reset button
     $('.ajax-form a.eclear').live('click', function(evt) {
-        $(this).closest('.ajax-form').find(':input').each( function() {
-            if ($(this).parent().is('.form-metadata')) return;
-            $(this).val('');
-        });
-        return false;
-    });
-    
-    // Enter pressed on input
-    $('.ajax-form input').live('keypress', function(evt) {
-        if (evt.keyCode != CR && evt.keyCode != LF) return true;
-        var $form = $(this).closest('.ajax-form');
-        ajax_submit($form);
+        $(this).closest('form').get(0).reset();
         return false;
     });
     //// End of ajax forms
