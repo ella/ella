@@ -110,6 +110,7 @@ else {
             LOAD_BUF = [];
             MIN_LOAD = undefined;
             MAX_LOAD = -1;
+            $(document).trigger('request_finished').removeData('injection_storage');
             return;
         }
         var info = LOAD_BUF[ MIN_LOAD ];
@@ -125,6 +126,16 @@ else {
         }
         
         inject_content($target, info.data, info.address);
+        
+        // Track what elements were loaded
+        function record_injection(target_id) {
+            var injection_storage = $(document).data('injection_storage');
+            if (injection_storage && injection_storage.push)
+                injection_storage.push(target_id);
+            else
+                $(document).data('injection_storage', [target_id]);
+        }
+        record_injection(info.target_id);
         
         // Check next request
         draw_ready();
@@ -783,3 +794,5 @@ function dec_loading() {
         hide_loading();
     }
 }
+
+$(document).bind('request_finished', function(){alert("loaded into:\n"+$(this).data('injection_storage'))})
