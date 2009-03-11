@@ -8,12 +8,13 @@ from ella.core.models import Placement, Category
 
 from unit_project.test_core import create_basic_categories, create_and_place_a_publishable
 
-class TestPublishable(DatabaseTestCase):
-
+class PublishableTestCase(DatabaseTestCase):
     def setUp(self):
-        super(TestPublishable, self).setUp()
+        super(PublishableTestCase, self).setUp()
         create_basic_categories(self)
         create_and_place_a_publishable(self)
+
+class TestPublishableHelpers(PublishableTestCase):
 
     def test_url(self):
         self.assert_equals('/nested-category/2008/1/10/articles/first-article/', self.publishable.get_absolute_url())
@@ -21,10 +22,13 @@ class TestPublishable(DatabaseTestCase):
     def test_domain_url(self):
         self.assert_equals('http://example.com/nested-category/2008/1/10/articles/first-article/', self.publishable.get_domain_url())
 
-    def test_main_placement_with_single_placement(self):
+
+class TestMainPlacement(PublishableTestCase):
+
+    def test_single_placement(self):
         self.assert_equals(self.placement, self.publishable.main_placement)
 
-    def test_main_placement_with_single_placement_on_other_site(self):
+    def test_single_placement_on_other_site(self):
         site = Site.objects.create(
             name='some site',
             domain='not-example.com'
@@ -42,7 +46,7 @@ class TestPublishable(DatabaseTestCase):
         
         self.assert_equals(None, self.publishable.main_placement)
 
-    def test_main_placement_with_two_placements_on_one_site(self):
+    def test_two_placements_on_one_site(self):
         Placement.objects.create(
             target_ct=self.publishable_ct,
             target_id=self.publishable.pk,
@@ -51,7 +55,7 @@ class TestPublishable(DatabaseTestCase):
         )
         self.assert_equals(self.placement, self.publishable.main_placement)
 
-    def test_main_placement_with_two_placements_on_two_sites(self):
+    def test_two_placements_on_two_sites(self):
         site = Site.objects.create(
             name='some site',
             domain='not-example.com'
