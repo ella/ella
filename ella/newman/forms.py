@@ -12,10 +12,13 @@ class SiteFilterForm(forms.Form):
         self.init_form(user)
 
     def init_form(self, user):
-        category_ids = DenormalizedCategoryUserRole.objects.root_categories_by_user(user)
-        cats = Category.objects.filter(pk__in=category_ids)
+        if user.is_superuser:
+            cats = Category.objects.filter(tree_parent__isnull=True)
+        else:
+            category_ids = DenormalizedCategoryUserRole.objects.root_categories_by_user(user)
+            cats = Category.objects.filter(pk__in=category_ids)
         choices = ()
         for c in cats:
             choices += (c.pk, c.__unicode__(),),
-        self.fields['sites'] = forms.MultipleChoiceField(choices, widget=CheckboxSelectMultiple)
+        self.fields['sites'] = forms.MultipleChoiceField(choices, widget=CheckboxSelectMultiple, required=False)
 

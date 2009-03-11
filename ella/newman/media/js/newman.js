@@ -4,9 +4,9 @@
 ;;;     for (var i in obj) s += i + ': ' + obj[i] + "\n";
 ;;;     alert(s);
 ;;; }
-function carp(message) {
+function carp() {
     if (window.console) {
-        console.log(message);
+        console.log.apply(this, arguments);
     }
 }
 
@@ -86,7 +86,7 @@ else {
         
         $target.removeClass('loading').html(data);
         var newtitle = $('#doc-title').text();
-        document.title = ORIGINAL_TITLE + (newtitle ? ' | '+newtitle : '');
+        document.title = (newtitle ? newtitle+' | ' : '') + ORIGINAL_TITLE;
         dec_loading();
         if (address != undefined) {
             LOADED_URLS[ $target.attr('id') ] = address;
@@ -573,6 +573,12 @@ function load_media(url, succ_fn, err_fn) {
         }
         return false;
     }
+    function get_css_rules(stylesheet) {
+        if (stylesheet.cssRules) return stylesheet.cssRules;
+        if (stylesheet.rules   ) return stylesheet.rules;
+        carp('Could not get rules from: ', stylesheet);
+        return;
+    }
     
     if (ext == 'css') {
         if (stylesheet_present(abs_url)) return true;
@@ -586,10 +592,10 @@ function load_media(url, succ_fn, err_fn) {
                 }
                 var ss;
                 if (ss = stylesheet_present(abs_url)) {
-                    
-                    if (ss.cssRules.length) succ_fn(url);
+                    var rules = get_css_rules(ss);
+                    if (rules && rules.length) succ_fn(url);
                     else {
-                        carp('CSS stylesheet empty.');
+                        if (rules) carp('CSS stylesheet empty.');
                         if ($.isFunction(err_fn)) err_fn(url);
                         return;
                     }
@@ -688,16 +694,18 @@ $( function() {
     
     // Submit event
     function ajax_submit($form) {
+        if (!$form.jquery) $form = $($form);
         if ( ! validate($form) ) return false;
+        var action =  $form.attr('action');
+        var method = ($form.attr('method') || 'POST').toUpperCase();
         var $meta = $form.find('.form-metadata:first');
-        var  action  =  $meta.find('input[name=action]').val();
-        var  method  = ($meta.find('input[name=method]').val() || 'POST').toUpperCase();
         var $success =  $meta.find('input[name=success]');
         var $error   =  $meta.find('input[name=error]');
         var success, error;
         if ($success && $success.length) {
             success = function(data) { $success.get(0).onchange(data); };
-        } else {
+        }
+        else {
             success = function(data) { show_message(data, {msgclass: 'okmsg'}); };
         }
         if ($error && $error.length) {
@@ -708,7 +716,7 @@ $( function() {
         }
         var $inputs = get_inputs($form);
         var data = $inputs.serialize();
-        $inputs.val('');
+        $form.get(0).reset();
         $.ajax({
             url: action,
             type: method,
@@ -716,7 +724,9 @@ $( function() {
             success: success,
             error:   error
         });
+        return false;
     }
+    window.ajax_submit = ajax_submit;
     
     // Submit button
     $('.ajax-form a.ok').live('click', function(evt) {
@@ -728,18 +738,7 @@ $( function() {
     
     // Reset button
     $('.ajax-form a.eclear').live('click', function(evt) {
-        $(this).closest('.ajax-form').find(':input').each( function() {
-            if ($(this).parent().is('.form-metadata')) return;
-            $(this).val('');
-        });
-        return false;
-    });
-    
-    // Enter pressed on input
-    $('.ajax-form input').live('keypress', function(evt) {
-        if (evt.keyCode != CR && evt.keyCode != LF) return true;
-        var $form = $(this).closest('.ajax-form');
-        ajax_submit($form);
+        $(this).closest('form').get(0).reset();
         return false;
     });
     //// End of ajax forms
