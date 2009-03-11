@@ -4,9 +4,9 @@
 ;;;     for (var i in obj) s += i + ': ' + obj[i] + "\n";
 ;;;     alert(s);
 ;;; }
-function carp(message) {
+function carp() {
     if (window.console) {
-        console.log(message);
+        console.log.apply(this, arguments);
     }
 }
 
@@ -86,7 +86,7 @@ else {
         
         $target.removeClass('loading').html(data);
         var newtitle = $('#doc-title').text();
-        document.title = ORIGINAL_TITLE + (newtitle ? ' | '+newtitle : '');
+        document.title = (newtitle ? newtitle+' | ' : '') + ORIGINAL_TITLE;
         dec_loading();
         if (address != undefined) {
             LOADED_URLS[ $target.attr('id') ] = address;
@@ -573,6 +573,12 @@ function load_media(url, succ_fn, err_fn) {
         }
         return false;
     }
+    function get_css_rules(stylesheet) {
+        if (stylesheet.cssRules) return stylesheet.cssRules;
+        if (stylesheet.rules   ) return stylesheet.rules;
+        carp('Could not get rules from: ', stylesheet);
+        return;
+    }
     
     if (ext == 'css') {
         if (stylesheet_present(abs_url)) return true;
@@ -586,10 +592,10 @@ function load_media(url, succ_fn, err_fn) {
                 }
                 var ss;
                 if (ss = stylesheet_present(abs_url)) {
-                    
-                    if (ss.cssRules.length) succ_fn(url);
+                    var rules = get_css_rules(ss);
+                    if (rules && rules.length) succ_fn(url);
                     else {
-                        carp('CSS stylesheet empty.');
+                        if (rules) carp('CSS stylesheet empty.');
                         if ($.isFunction(err_fn)) err_fn(url);
                         return;
                     }

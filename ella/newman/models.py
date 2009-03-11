@@ -1,11 +1,10 @@
-from django.db import models, connection
-from django.db.models import Q, query, ForeignKey, ManyToManyField
+from django.db import models
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.auth.models import User, Group, Permission
+from django.contrib.auth.models import User, Group
 from django.conf import settings
 
-from ella.core.cache.utils import CachedForeignKey, cache_this
+from ella.core.cache.utils import CachedForeignKey
 from ella.core.models import Category
 from ella.newman.managers import DenormalizedCategoryUserRoleManager
 
@@ -57,9 +56,9 @@ class AdminUserDraft(models.Model):
 
     ct = CachedForeignKey(ContentType, verbose_name=_('Model'))
     user = CachedForeignKey(User, verbose_name=_('User'))
-    data = models.TextField(_('Data')) # TODO: JSONField
+    data = models.TextField(_('Data'))
 
-    # If it's template, some info about it
+    # Template title
     title = models.CharField(_('Title'), max_length=64, blank=True)
     slug = models.SlugField(_('Slug'), max_length=64, blank=True)
 
@@ -82,7 +81,7 @@ class AdminSetting(models.Model):
     user = CachedForeignKey(User, verbose_name=_('User'), null=True, blank=True)
     group = CachedForeignKey(Group, verbose_name=_('Group'), null=True, blank=True)
     var = models.SlugField(_('Variable'), max_length=64)
-    val = models.TextField(_('Value')) # TODO: JSONField with validation...
+    val = models.TextField(_('Value'))
 
     def __unicode__(self):
         return u"%s: %s for %s" % (self.var, self.val, self.user)
@@ -98,40 +97,6 @@ class AdminSetting(models.Model):
         unique_together = (('user','var',),('group', 'var',), )
         verbose_name = _('Admin user setting')
         verbose_name_plural = _('Admin user settings')
-
-
-class AdminGroupFav(models.Model):
-    """Admin favorite items per group (presets)."""
-
-    ct = CachedForeignKey(ContentType, verbose_name=_('Model'))
-    group = CachedForeignKey(Group, verbose_name=_('Group'))
-    ordering = models.PositiveSmallIntegerField(_('Ordering'))
-
-    def __unicode__(self):
-        return "%s - %s" % (self.group, self.ct)
-
-    class Meta:
-        unique_together = (('ct', 'group',),)
-        ordering = ('ordering',)
-        verbose_name = _('Group fav item')
-        verbose_name_plural = _('Group fav items')
-
-
-class AdminUserFav(models.Model):
-    """Admin favorite items per user."""
-
-    ct = CachedForeignKey(ContentType, verbose_name=_('Model'))
-    user = CachedForeignKey(User, verbose_name=_('User'))
-    ordering = models.PositiveSmallIntegerField(_('Ordering'))
-
-    def __unicode__(self):
-        return "%s - %s" % (self.user, self.ct)
-
-    class Meta:
-        unique_together = (('ct', 'user',),)
-        ordering = ('ordering',)
-        verbose_name = _('User fav item')
-        verbose_name_plural = _('User fav items')
 
 
 # ------------------------------------
@@ -203,13 +168,4 @@ class DenormalizedCategoryUserRole(models.Model):
 
     class Meta:
         unique_together = ('user_id', 'permission_codename', 'permission_id', 'category_id', 'contenttype_id')
-
-
-def generate_test_data(filepath='/home/jonson/src/nc/ella/ella/newman/testbed/service/fixtures/test_data.yaml'):
-    from django.contrib.sites.models import Site
-    from django.core.serializers import serialize
-    FMT = 'yaml'
-    #data = list(ContentType.objects.all()) + list(Category.objects.all()) + list(Site.objects.all())
-    data = list(Permission.objects.all())
-    file(filepath, 'w').write( serialize(FMT, data) )
 
