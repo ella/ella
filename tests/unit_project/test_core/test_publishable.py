@@ -56,6 +56,16 @@ class TestMainPlacement(PublishableTestCase):
 
         self.assert_equals(self.placement, self.publishable.main_placement)
 
+    def test_with_more_placements_one_with_first_publish_from_is_main_even_when_added_as_second(self):
+        placement_old = Placement.objects.create(
+            target_ct=self.publishable_ct,
+            target_id=self.publishable.pk,
+            category=self.category,
+            publish_from=datetime(2007, 1, 10)
+        )
+
+        self.assert_equals(placement_old, self.publishable.main_placement)
+
     def test_two_placements_on_two_sites(self):
         site = Site.objects.create(
             name='some site',
