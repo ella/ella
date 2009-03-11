@@ -26,12 +26,7 @@ class HelpItemAdmin(NewmanModelAdmin):
     list_select_related = False
 
 
-class GroupFavAdmin(NewmanModelAdmin):
-    list_display = ('__unicode__',)
-    list_filter = ('ct', 'group',)
-
-
-class CategoryUserRoleOptions(NewmanModelAdmin):
+class CategoryUserRoleAdmin(NewmanModelAdmin):
     list_filter = ('user', 'group',)
     list_display = ('user', 'group',)
 
@@ -41,7 +36,7 @@ class CategoryUserRoleOptions(NewmanModelAdmin):
                 self.refresh_view,
                 name='categoryuserrole-refresh'),
         )
-        urls += super(CategoryUserRoleOptions, self).get_urls()
+        urls += super(CategoryUserRoleAdmin, self).get_urls()
         return urls
 
     def refresh_view(self, request, extra_context=None):
@@ -52,8 +47,7 @@ class CategoryUserRoleOptions(NewmanModelAdmin):
 
 site.register(m.DevMessage, DevMessageAdmin)
 site.register(m.AdminHelpItem, HelpItemAdmin)
-site.register(m.AdminGroupFav, GroupFavAdmin)
-site.register(m.CategoryUserRole, CategoryUserRoleOptions)
+site.register(m.CategoryUserRole, CategoryUserRoleAdmin)
 
 # testing Options from register.py
 import register
