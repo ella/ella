@@ -35,6 +35,7 @@ def has_model_list_permission(user, model):
     ct = ContentType.objects.get_for_model(model)
     #qs = CategoryUserRole.objects.filter(user=user, group__permissions__content_type=ct)
     qs = DenormalizedCategoryUserRole.objects.filter(user_id=user.id, contenttype_id=ct.pk).distinct()
+    print '%s\t%d' % (model,qs.count())
     return qs.count() > 0
 
 #@cache_this(key_has_category_permission, timeout=CACHE_TIMEOUT)
@@ -65,9 +66,15 @@ def has_object_permission(user, obj, permission):
     either through standard Django permission, or via permission
     to any category that object is placed in.
     """
-    if user.has_perm(permission):
-        return True
     ct = ContentType.objects.get_for_model(obj)
+    if user.has_perm(permission):
+        additional = DenormalizedCategoryUserRole.objects.filter(
+            user_id=user.pk,
+            contenttype_id=ct.pk
+        )
+        # user has permission and hasn't any existing role to obj's content type
+        if additional.count() == 0:
+            return True
     if type(permission) in [list, tuple]:
         qs = DenormalizedCategoryUserRole.objects.filter(
             user_id=user.pk,
