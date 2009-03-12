@@ -126,19 +126,19 @@ def _object_detail(request, category, content_type, slug, year=None, month=None,
                     publish_from__year=year,
                     publish_from__month=month,
                     publish_from__day=day,
-                    target_ct=ct,
+                    publishable__content_type=ct,
                     category=cat,
                     slug=slug,
                     static=False
                 )
     else:
-        placement = get_cached_object_or_404(Placement, category=cat, target_ct=ct, slug=slug, static=True)
+        placement = get_cached_object_or_404(Placement, category=cat, publishable__content_type=ct, slug=slug, static=True)
 
     if not (placement.is_active() or request.user.is_staff):
         # future placement, render if accessed by logged in staff member
         raise Http404
 
-    obj = placement.target
+    obj = placement.publishable.target
 
     context = {
             'placement' : placement,
