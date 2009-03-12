@@ -337,7 +337,7 @@ else {
         }
     }
     
-    // Simulate a hashchange event fired when location.hash changes
+    // Fire hashchange event fired when location.hash changes
     var CURRENT_HASH = '';
     $().bind('hashchange', function() {
 //        carp('hash: ' + location.hash);
@@ -406,6 +406,8 @@ else {
         if (evt.which != 1) return true;
         adr($(this).attr('href'));
         return false;
+    });
+    $(document).bind('request_finished', function() {
     });
 })})(jQuery);
 
@@ -781,5 +783,3 @@ function dec_loading() {
         hide_loading();
     }
 }
-
-$(document).bind('request_finished', function(){alert("loaded into:\n"+$(this).data('injection_storage'))})
