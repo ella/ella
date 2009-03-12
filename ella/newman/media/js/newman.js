@@ -52,19 +52,6 @@ else {
     // abstain from reloading if we have not.
     var PAGE_CHANGED = 0;
     
-    // Custom callbacks to be called before and after normally handling the hashchange pseudo event.
-    var PRE_HASHCHANGE_CALLBACKS = [], POST_HASHCHANGE_CALLBACKS = [];
-    window.add_hashchange_callback = function(fn, is_pre) {
-        var queue = is_pre ? PRE_HASHCHANGE_CALLBACKS : POST_HASHCHANGE_CALLBACKS;
-        var i = queue.length;
-        queue[i] = fn;
-        return i;
-    }
-    window.remove_hashchange_callback = function(id, is_pre) {
-        var queue = is_pre ? PRE_HASHCHANGE_CALLBACKS : POST_HASHCHANGE_CALLBACKS;
-        return delete queue[id];
-    }
-    
     function object_empty(o) {
         for (var k in o) return false;
         return true;
@@ -122,6 +109,8 @@ else {
         var $target = $('#'+info.target_id);
         if ($target && $target.jquery && $target.length) {} else {
             carp('Could not find target element: #'+info.target_id);
+            dec_loading();
+            draw_ready();
             return;
         }
         
@@ -350,21 +339,19 @@ else {
     
     // Simulate a hashchange event fired when location.hash changes
     var CURRENT_HASH = '';
-    function hashchange() {
+    $().bind('hashchange', function() {
 //        carp('hash: ' + location.hash);
         MAX_REQUEST++;
         $('.loading').removeClass('loading');
         hide_loading();
         load_by_hash();
-    }
+    });
     setTimeout( function() {
         var q;  // queue of user-defined callbacks
         try {
             if (location.hash != CURRENT_HASH) {
                 CURRENT_HASH = location.hash;
-                q =  PRE_HASHCHANGE_CALLBACKS; for (var i = 0; i < q.length; i++) if (typeof q[i] == 'function') q[i]();
-                hashchange();
-                q = POST_HASHCHANGE_CALLBACKS; for (var i = 0; i < q.length; i++) if (typeof q[i] == 'function') q[i]();
+                $().trigger('hashchange');
             }
         } catch(e) { carp(e); }
         setTimeout(arguments.callee, 50);
