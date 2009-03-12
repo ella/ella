@@ -10,7 +10,8 @@ from ella.articles.models import Article, ArticleContents
 
 from ella.newman.models import CategoryUserRole
 from ella.newman.permission import has_category_permission, has_object_permission, compute_applicable_categories
-from ella.newman.permission import applicable_categories, permission_filtered_model_qs, is_category_fk, model_category_fk, model_category_fk_value
+from ella.newman.permission import applicable_categories, permission_filtered_model_qs, is_category_fk
+from ella.newman.permission import model_category_fk, model_category_fk_value, has_model_list_permission
 
 class UserWithPermissionTestCase(DatabaseTestCase):
 
@@ -154,8 +155,10 @@ class TestCategoryPermissions(UserWithPermissionTestCase):
 
     def test_applicable_categories_for_user(self):
         categories = applicable_categories(self.user)
+        categories.sort()
         # we expect category from roles + nested ones
         expected_categories = [self.nested_first_level_two.pk, self.nested_second_level_two.pk]
+        expected_categories.sort()
 
         self.assert_equals(expected_categories, categories)
 
@@ -218,4 +221,13 @@ class TestAdminChangelistQuerySet(UserWithPermissionTestCase):
 
         self.assert_equals(accessible_article, available_articles[0])
         self.assert_equals(1, len(available_articles))
+
+
+class TestModelPermission(UserWithPermissionTestCase):
+
+    def test_has_model_list_permission(self):
+        self.assert_false(has_model_list_permission(self.user, Category))
+        self.assert_true(has_model_list_permission(self.user, Article))
+        self.assert_false(has_model_list_permission(self.user, CategoryUserRole))
+
 

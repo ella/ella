@@ -42,7 +42,7 @@ def _get_key(start, model, kwargs):
                 model._meta.app_label,
                 model._meta.object_name,
                 ','.join(':'.join((key, dump_param(kwargs[key]))) for key in sorted(kwargs.keys()))
-)))
+    )))
 
 def get_cached_list(model, *args, **kwargs):
     """

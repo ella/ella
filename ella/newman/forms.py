@@ -2,6 +2,9 @@ from django import forms
 from django.utils.translation import ugettext_lazy as _
 from django.forms.widgets import CheckboxSelectMultiple
 
+from ella.core.models import Category
+from ella.newman.models import DenormalizedCategoryUserRole
+
 class SiteFilterForm(forms.Form):
 
     def __init__(self, data=None, user=None, **kwargs):
@@ -9,18 +12,13 @@ class SiteFilterForm(forms.Form):
         self.init_form(user)
 
     def init_form(self, user):
-
-        from ella.core.models import Category
-
-        cats = Category.objects.filter(tree_parent__isnull=True)
-        if not user.is_superuser:
-            roles = user.categoryuserrole_set.all()
-            cats = []
-            for r in roles:
-                cats.extend(r.category.all())
-
+        if user.is_superuser:
+            cats = Category.objects.filter(tree_parent__isnull=True)
+        else:
+            category_ids = DenormalizedCategoryUserRole.objects.root_categories_by_user(user)
+            cats = Category.objects.filter(pk__in=category_ids)
         choices = ()
         for c in cats:
             choices += (c.pk, c.__unicode__(),),
-        self.fields['sites'] = forms.MultipleChoiceField(choices, widget=CheckboxSelectMultiple)
+        self.fields['sites'] = forms.MultipleChoiceField(choices, widget=CheckboxSelectMultiple, required=False)
 

@@ -22,8 +22,11 @@ from django.contrib.contenttypes.models import ContentType
 
 
 from ella.newman.changelist import NewmanChangeList, FilterChangeList
-from ella.newman import models, fields, widgets
+from ella.newman import models, fields, widgets, utils
 from ella.newman.decorators import require_AJAX
+from ella.newman.permission import is_category_model, is_category_fk, model_category_fk, model_category_fk_value, applicable_categories
+from ella.newman.permission import has_category_permission, get_permission, permission_filtered_model_qs
+from ella.core.models import Category
 
 DEFAULT_LIST_PER_PAGE = getattr(settings, 'NEWMAN_LIST_PER_PAGE', 25)
 
@@ -226,11 +229,13 @@ class NewmanModelAdmin(admin.ModelAdmin):
         else:
             applicable = applicable_categories(request.user)
             lookup = lookup & Q(pk__in=applicable)
+        # user category filter
+        qs = utils.user_category_filter(self.model.objects.filter(lookup), request.user)
 
         if SUGGEST_RETURN_ALL_FIELD:
-            data = self.model.objects.filter(lookup).values(*lookup_fields)
+            data = qs.values(*lookup_fields)
         else:
-            data = self.model.objects.filter(lookup).values(*lookup_fields[:2])
+            data = qs.filter(lookup).values(*lookup_fields[:2])
 
         # sort the suggested items so that those starting with the sought term come first
         def compare(a,b):
@@ -459,7 +464,8 @@ class NewmanModelAdmin(admin.ModelAdmin):
         change_perm = self.opts.app_label + '.' + 'change_' + self.model._meta.module_name.lower()
         perms = (view_perm, change_perm,)
         qs = permission_filtered_model_qs(q, request.user, perms)
-        return qs
+        # user category filter
+        return utils.user_category_filter(qs, request.user)
 
 class NewmanInlineFormSet(BaseInlineFormSet):
     def get_queryset(self):
@@ -500,6 +506,3 @@ class NewmanStackedInline(NewmanInlineModelAdmin):
 
 class NewmanTabularInline(NewmanInlineModelAdmin):
     template = 'admin/edit_inline/tabular.html'
-
-from ella.newman.permission import is_category_model, is_category_fk, model_category_fk, model_category_fk_value, applicable_categories
-from ella.newman.permission import has_category_permission, get_permission, permission_filtered_model_qs

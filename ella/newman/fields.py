@@ -13,7 +13,7 @@ from django.forms.models import ModelChoiceField
 from django.db.models.fields.related import ManyToManyField
 from django.contrib.admin.widgets import AdminFileWidget
 
-from ella.newman import widgets, models
+from ella.newman import widgets, models, utils
 from ella.newman.permission import get_permission, permission_filtered_model_qs, has_category_permission
 
 class RichTextField(fields.Field):
@@ -154,6 +154,8 @@ class CategoryChoiceField(ModelChoiceField):
         change_perm = get_permission('change', self.model)
         perms = (view_perm, change_perm,)
         qs = permission_filtered_model_qs(self._queryset, self.user, perms)
+        # user category filter
+        qs = utils.user_category_filter(qs, self.user)
         qs._newman_filtered = True #magic variable
         self._set_queryset(qs)
         return self._queryset
