@@ -97,7 +97,7 @@ else {
             LOAD_BUF = [];
             MIN_LOAD = undefined;
             MAX_LOAD = -1;
-            $(document).trigger('request_finished').removeData('injection_storage');
+            $(document).trigger('content_added').removeData('injection_storage');
             return;
         }
         var info = LOAD_BUF[ MIN_LOAD ];
@@ -406,8 +406,6 @@ else {
         if (evt.which != 1) return true;
         adr($(this).attr('href'));
         return false;
-    });
-    $(document).bind('request_finished', function() {
     });
 })})(jQuery);
 

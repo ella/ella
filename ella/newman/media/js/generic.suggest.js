@@ -201,7 +201,7 @@
         });
     }
     initialize();
-    $(document).bind('request_finished', initialize);
+    $(document).bind('content_added', initialize);
 
     // Manipulation with the inputs
     function get_hidden($text) {
