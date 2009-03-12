@@ -38,7 +38,6 @@
         '</div>'                                        +"\n"
     );
     $('body').append($SUGGEST_BUBBLE).append($SUGGEST_FIELDS_BUBBLE);
-    var $ins = $('input[rel]').filter(function(){return this.id.substr(this.id.length - '_suggest'.length) == '_suggest'});
 
     // ['foo', 'bar'] => { foo: 1, bar: 1 }
     function arr2map(arr) {
@@ -62,50 +61,147 @@
             $input = $ul.eq(0).find('input').filter(function(){return this.id.indexOf('_suggest') > 0});
         $SUGGEST_BUBBLE.data('cur_input', $input);
     }
-    $(SUGGEST_SELECTOR).click( set_current_input ).focus( set_current_input );
 
-    // Various initializations
-    $('.hidden').hide();
-    $ins.each(function() {
-        // Parse the field names (?f=bla&f=ble)
-        var rel = $(this).attr('rel');
-        rel = rel.substr(rel.indexOf('?') + 1);
-        var fields = $.map(rel.split(URL_VAR_SEPARATOR), function(n) {
-            if (n.substr(0,2) == URL_FIELD_DENOTER+'=') {
-                return n.substr(2);
-            }
-            else return;
-        });
-
-        $(this).data('fields', fields).attr('autocomplete', 'off');
-
-        // Shave off the string representations from the hidden inputs upon form submit
-        $(this).closest('form').submit(function() {
-            $(this).find('input:hidden').each(function() {
-                $(this).val( $(this).val().replace(/#.*/, '') );
+    var $ins;
+    function initialize() {
+        $(SUGGEST_SELECTOR)
+            .unbind('click', set_current_input).bind('click', set_current_input)
+            .unbind('focus', set_current_input).bind('focus', set_current_input);
+        $('.hidden').hide();
+        $ins = $('input[rel]').filter(function(){return this.id.substr(this.id.length - '_suggest'.length) == '_suggest'});
+        $ins.each(function() {
+            // Parse the field names (?f=bla&f=ble)
+            var rel = $(this).attr('rel');
+            rel = rel.substr(rel.indexOf('?') + 1);
+            var fields = $.map(rel.split(URL_VAR_SEPARATOR), function(n) {
+                if (n.substr(0,2) == URL_FIELD_DENOTER+'=') {
+                    return n.substr(2);
+                }
+                else return;
             });
-            return true;
+
+            $(this).data('fields', fields).attr('autocomplete', 'off');
+
+            // Shave off the string representations from the hidden inputs upon form submit
+            $(this).closest('form').submit(function() {
+                $(this).find('input:hidden').each(function() {
+                    $(this).val( $(this).val().replace(/#.*/, '') );
+                });
+                return true;
+            });
+
+            // Make the popup-throwing magnifying glass not raise the default django event but rather ours which cooperates with the <ul> inputs
+            var $lens = $('#lookup_'+this.id.replace('_suggest', ''));
+            $lens.removeAttr('onclick').click(show_lookup_popup);
         });
-
-        // Make the popup-throwing magnifying glass not raise the default django event but rather ours which cooperates with the <ul> inputs
-        var $lens = $('#lookup_'+this.id.replace('_suggest', ''));
-        $lens.removeAttr('onclick').click(show_lookup_popup);
-    });
-
-    // Make the <ul>s behave like text input fields
-    $(SUGGEST_SELECTOR).find('input:text').focus(function() {
-        $(this).closest('ul').css('backgroundColor', '#F4F7FB');
-    }).blur(function() {
-        var $ul = $(this).closest('ul');
-        $ul.css('backgroundColor', $ul.data('bgcolor'));
-    }).each(function() {
-        var $ul = $(this).closest('ul');
-        $ul.data('bgcolor', $ul.css('backgroundColor'));
-    });
-    $('ul').filter(SUGGEST_SELECTOR).click(function() {
-        $(this).find('input:text:visible:first').focus();
-    });
-    $('li.suggest-selected-item > a').click(set_current_input).click(delete_item);
+        
+        // Make the <ul>s behave like text input fields
+        $(SUGGEST_SELECTOR).find('input:text')
+        .unbind('focus.ulbgcol').bind('focus.ulbgcol', function() {
+            $(this).closest('ul').css('backgroundColor', '#F4F7FB');
+        }).unbind('blur.ulbgcol').bind('blur.ulbgcol', function() {
+            var $ul = $(this).closest('ul');
+            $ul.css('backgroundColor', $ul.data('bgcolor'));
+        }).each(function() {
+            var $ul = $(this).closest('ul');
+            $ul.data('bgcolor', $ul.css('backgroundColor'));
+        });
+        $('ul').filter(SUGGEST_SELECTOR)
+        .unbind('click.ulpassfocus').bind('click.ulpassfocus', function() {
+            $(this).find('input:text:visible:first').focus();
+        });
+        $('li.suggest-selected-item > a')
+        .unbind('click.delsetinput')
+        .bind(  'click.delsetinput', set_current_input)
+        .bind(  'click.delsetinput', delete_item);
+        
+        // Enhance textual X's of delete links with graphical crosses used at the "delete this item from database" link
+        $('li.suggest-selected-item a').html('<img src="'+DEL_IMG+'" alt="x" />')
+        
+        // Ensure that the initial values fit
+        $ins.each(function() {
+            var $inputs = get_current_inputs( this );
+            if ( /^(.+)#(.+)$/.test($inputs.hidden.val()) ) {
+                var ids    = RegExp.$1;
+                var repres = RegExp.$2;
+                ids    = ids.match(/\d+/g);
+                repres = repres.match(/[^,]+/g);
+                if (!ids || !repres || ids.length != repres.length) ids = repres = [];
+                $inputs.ul.find('li.suggest-selected-item').remove();
+                while (ids.length > 0) {
+                    var id    = ids.pop();
+                    var repre = repres.pop();
+                    item = new_item(id, repre);
+                    $inputs.ul.prepend(item);
+                }
+            }
+            else if ( /^([\d,]+)$/.test($inputs.hidden.val()) ) {
+                var raw_ids = RegExp.$1;
+                var ids = raw_ids.match(/\d+/g);
+                var $lis = $inputs.ul.find('li.suggest-selected-item');
+                var repres = $.map( $.makeArray($lis), function(n) {
+                    return $.trim( n.firstChild.data );
+                });
+                if (repres && ids && repres.length == ids.length) {
+                    $lis.each(function(i) {
+                        $(this).data('item_id', ids[i]);
+                    });
+                }
+            }
+        });
+        $ins.each(function() {
+            update_values($(this));
+        });
+        $ins.unbind('keyup').bind('keyup', function($event) {
+            var $this = $(this);
+            var key = $event.keyCode;
+            if (  key == CR || key ==    UPARROW || key == PAGEUP
+               || key == LF || key ==  DOWNARROW || key == PAGEDOWN
+                            || key ==  LEFTARROW
+                            || key == RIGHTARROW
+            ) return;
+            else if (key == ESC) {
+                bubble_keyevent(key, $this);
+                return;
+            }
+            else {
+                suggest_update($this);
+                return;
+            }
+        })
+        .unbind('keypress').bind('keypress', function($event) {
+            var key = $event.keyCode;
+            var $this = $(this);
+            if (  key == CR || key ==   UPARROW || key == PAGEUP
+               || key == LF || key == DOWNARROW || key == PAGEDOWN
+            ) {
+                bubble_keyevent(key, $this);
+                return false;
+            }
+            else if (key == BACKSPACE && $this.val().length == 0) {
+                var $prev = $this.parent().prev();
+                if ($prev.length == 0) return;
+                $this.val('');
+                $prev.remove();
+                update_values();
+            }
+            return true;
+        })
+        .unbind('blur.hidebub').bind('blur.hidebub', function() {
+            if (!MOUSE_ON_BUBBLE)
+                hide_bubbles();
+        })
+        .unbind('focus.reshowbub').bind('focus.reshowbub', function() {
+            if ($(this).data('internal_focus')) {
+                $(this).removeData('internal_focus');
+            }
+            else {
+                suggest_update( $(this) );
+            }
+        });
+    }
+    initialize();
+    $(document).bind('content_added', initialize);
 
     // Manipulation with the inputs
     function get_hidden($text) {
@@ -197,44 +293,6 @@
         hide_bubbles();
         MOUSE_ON_BUBBLE = false;
     }
-
-    // Enhance textual X's of delete links with graphical crosses used at the "delete this item from database" link
-    $('li.suggest-selected-item a').html('<img src="'+DEL_IMG+'" alt="x" />')
-
-    // Ensure that the initial values fit
-    $ins.each(function() {
-        var $inputs = get_current_inputs( this );
-        if ( /^(.+)#(.+)$/.test($inputs.hidden.val()) ) {
-            var ids    = RegExp.$1;
-            var repres = RegExp.$2;
-            ids    = ids.match(/\d+/g);
-            repres = repres.match(/[^,]+/g);
-            if (!ids || !repres || ids.length != repres.length) ids = repres = [];
-            $inputs.ul.find('li.suggest-selected-item').remove();
-            while (ids.length > 0) {
-                var id    = ids.pop();
-                var repre = repres.pop();
-                item = new_item(id, repre);
-                $inputs.ul.prepend(item);
-            }
-        }
-        else if ( /^([\d,]+)$/.test($inputs.hidden.val()) ) {
-            var raw_ids = RegExp.$1;
-            var ids = raw_ids.match(/\d+/g);
-            var $lis = $inputs.ul.find('li.suggest-selected-item');
-            var repres = $.map( $.makeArray($lis), function(n) {
-                return $.trim( n.firstChild.data );
-            });
-            if (repres && ids && repres.length == ids.length) {
-                $lis.each(function(i) {
-                    $(this).data('item_id', ids[i]);
-                });
-            }
-        }
-    });
-    $ins.each(function() {
-        update_values($(this));
-    });
 
     function hide_bubbles() {
         $SUGGEST_BUBBLE.hide();
@@ -418,53 +476,6 @@
             break;
         }
     }
-    $ins.keyup( function($event) {
-        var $this = $(this);
-        var key = $event.keyCode;
-        if (  key == CR || key ==    UPARROW || key == PAGEUP
-           || key == LF || key ==  DOWNARROW || key == PAGEDOWN
-                        || key ==  LEFTARROW
-                        || key == RIGHTARROW
-        ) return;
-        else if (key == ESC) {
-            bubble_keyevent(key, $this);
-            return;
-        }
-        else {
-            suggest_update($this);
-            return;
-        }
-    });
-    $ins.keypress( function($event) {
-        var key = $event.keyCode;
-        var $this = $(this);
-        if (  key == CR || key ==   UPARROW || key == PAGEUP
-           || key == LF || key == DOWNARROW || key == PAGEDOWN
-        ) {
-            bubble_keyevent(key, $this);
-            return false;
-        }
-        else if (key == BACKSPACE && $this.val().length == 0) {
-            var $prev = $this.parent().prev();
-            if ($prev.length == 0) return;
-            $this.val('');
-            $prev.remove();
-            update_values();
-        }
-        return true;
-    });
-    $ins.blur( function() {
-        if (!MOUSE_ON_BUBBLE)
-            hide_bubbles();
-    });
-    $ins.focus( function() {
-        if ($(this).data('internal_focus')) {
-            $(this).removeData('internal_focus');
-        }
-        else {
-            suggest_update( $(this) );
-        }
-    });
 
     // Setup the behavior of the next-page widget
     $('div.suggest-next-page a').click(function() {

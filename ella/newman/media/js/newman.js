@@ -52,19 +52,6 @@ else {
     // abstain from reloading if we have not.
     var PAGE_CHANGED = 0;
     
-    // Custom callbacks to be called before and after normally handling the hashchange pseudo event.
-    var PRE_HASHCHANGE_CALLBACKS = [], POST_HASHCHANGE_CALLBACKS = [];
-    window.add_hashchange_callback = function(fn, is_pre) {
-        var queue = is_pre ? PRE_HASHCHANGE_CALLBACKS : POST_HASHCHANGE_CALLBACKS;
-        var i = queue.length;
-        queue[i] = fn;
-        return i;
-    }
-    window.remove_hashchange_callback = function(id, is_pre) {
-        var queue = is_pre ? PRE_HASHCHANGE_CALLBACKS : POST_HASHCHANGE_CALLBACKS;
-        return delete queue[id];
-    }
-    
     function object_empty(o) {
         for (var k in o) return false;
         return true;
@@ -110,6 +97,7 @@ else {
             LOAD_BUF = [];
             MIN_LOAD = undefined;
             MAX_LOAD = -1;
+            $(document).trigger('content_added').removeData('injection_storage');
             return;
         }
         var info = LOAD_BUF[ MIN_LOAD ];
@@ -121,10 +109,22 @@ else {
         var $target = $('#'+info.target_id);
         if ($target && $target.jquery && $target.length) {} else {
             carp('Could not find target element: #'+info.target_id);
+            dec_loading();
+            draw_ready();
             return;
         }
         
         inject_content($target, info.data, info.address);
+        
+        // Track what elements were loaded
+        function record_injection(target_id) {
+            var injection_storage = $(document).data('injection_storage');
+            if (injection_storage && injection_storage.push)
+                injection_storage.push(target_id);
+            else
+                $(document).data('injection_storage', [target_id]);
+        }
+        record_injection(info.target_id);
         
         // Check next request
         draw_ready();
@@ -337,23 +337,21 @@ else {
         }
     }
     
-    // Simulate a hashchange event fired when location.hash changes
+    // Fire hashchange event fired when location.hash changes
     var CURRENT_HASH = '';
-    function hashchange() {
+    $().bind('hashchange', function() {
 //        carp('hash: ' + location.hash);
         MAX_REQUEST++;
         $('.loading').removeClass('loading');
         hide_loading();
         load_by_hash();
-    }
+    });
     setTimeout( function() {
         var q;  // queue of user-defined callbacks
         try {
             if (location.hash != CURRENT_HASH) {
                 CURRENT_HASH = location.hash;
-                q =  PRE_HASHCHANGE_CALLBACKS; for (var i = 0; i < q.length; i++) if (typeof q[i] == 'function') q[i]();
-                hashchange();
-                q = POST_HASHCHANGE_CALLBACKS; for (var i = 0; i < q.length; i++) if (typeof q[i] == 'function') q[i]();
+                $().trigger('hashchange');
             }
         } catch(e) { carp(e); }
         setTimeout(arguments.callee, 50);
@@ -694,16 +692,18 @@ $( function() {
     
     // Submit event
     function ajax_submit($form) {
+        if (!$form.jquery) $form = $($form);
         if ( ! validate($form) ) return false;
+        var action =  $form.attr('action');
+        var method = ($form.attr('method') || 'POST').toUpperCase();
         var $meta = $form.find('.form-metadata:first');
-        var  action  =  $meta.find('input[name=action]').val();
-        var  method  = ($meta.find('input[name=method]').val() || 'POST').toUpperCase();
         var $success =  $meta.find('input[name=success]');
         var $error   =  $meta.find('input[name=error]');
         var success, error;
         if ($success && $success.length) {
             success = function(data) { $success.get(0).onchange(data); };
-        } else {
+        }
+        else {
             success = function(data) { show_message(data, {msgclass: 'okmsg'}); };
         }
         if ($error && $error.length) {
@@ -714,7 +714,7 @@ $( function() {
         }
         var $inputs = get_inputs($form);
         var data = $inputs.serialize();
-        $inputs.val('');
+        $form.get(0).reset();
         $.ajax({
             url: action,
             type: method,
@@ -722,7 +722,9 @@ $( function() {
             success: success,
             error:   error
         });
+        return false;
     }
+    window.ajax_submit = ajax_submit;
     
     // Submit button
     $('.ajax-form a.ok').live('click', function(evt) {
@@ -734,18 +736,7 @@ $( function() {
     
     // Reset button
     $('.ajax-form a.eclear').live('click', function(evt) {
-        $(this).closest('.ajax-form').find(':input').each( function() {
-            if ($(this).parent().is('.form-metadata')) return;
-            $(this).val('');
-        });
-        return false;
-    });
-    
-    // Enter pressed on input
-    $('.ajax-form input').live('keypress', function(evt) {
-        if (evt.keyCode != CR && evt.keyCode != LF) return true;
-        var $form = $(this).closest('.ajax-form');
-        ajax_submit($form);
+        $(this).closest('form').get(0).reset();
         return false;
     });
     //// End of ajax forms
