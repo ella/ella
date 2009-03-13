@@ -746,6 +746,14 @@ $( function() {
         if (evt.which != 1) return true;
         $(this).next(':first').filter('ul').slideToggle('slow');
     });
+    
+    // Re-initialization of third party libraries
+    $(document).bind('content_added', function() {
+        try {
+            DateTimeShortcuts.init();
+            DateTimeShortcuts.admin_media_prefix = MEDIA_URL;
+        } catch(e) { carp(e); }
+    });
 });
 
 function show_message(message, options) {
