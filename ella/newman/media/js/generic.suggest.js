@@ -110,7 +110,7 @@
         .unbind('click.ulpassfocus').bind('click.ulpassfocus', function() {
             $(this).find('input:text:visible:first').focus();
         });
-        $('li.suggest-selected-item > a')
+        $('li.suggest-selected-item > a.suggest-delete-link')
         .unbind('click.delsetinput')
         .bind(  'click.delsetinput', set_current_input)
         .bind(  'click.delsetinput', delete_item);
