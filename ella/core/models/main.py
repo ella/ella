@@ -23,6 +23,7 @@ class Author(models.Model):
     slug = models.SlugField(_('Slug'), max_length=255, unique=True)
     description = models.TextField(_('Description'), blank=True)
     text = models.TextField(_('Text'), blank=True)
+    email = models.EmailField(_('Email'), blank=True)
 
     def __unicode__(self):
         return self.name
