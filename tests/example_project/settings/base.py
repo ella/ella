@@ -85,8 +85,17 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 )
 
 INSTALLED_APPS = (
+    'ella.core',
+    'ella.articles',
+    'ella.photos',
+    'ella.positions',
+    'ella.newman',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
 )
+
+DEFAULT_PAGE_ID = 1
+
+VERSION = 1

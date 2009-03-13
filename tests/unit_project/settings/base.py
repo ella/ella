@@ -41,7 +41,6 @@ INSTALLED_APPS = (
     'ella.articles',
     'ella.photos',
     'ella.positions',
-    'ella.newman',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
