@@ -3,7 +3,7 @@ dynamic comment form for generic commenting system
 it is inspired by django.contrib.comments but based on newforms
 """
 
-from md5 import md5
+from hashlib import md5
 from datetime import datetime, timedelta
 import time
 
