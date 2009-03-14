@@ -43,7 +43,16 @@ def get_content_type(ct_name):
     return ct
 
 def object_detail(request, category, content_type, slug, year=None, month=None, day=None, url_remainder=None):
-    context = _object_detail(request, category, content_type, slug, year, month, day, url_remainder)
+    context = _object_detail(request, category, content_type, slug, year, month, day)
+
+    obj = context['object']
+    # check for custom actions
+    if url_remainder:
+        bits = url_remainder.split('/')
+        return dispatcher.call_view(request, bits, context)
+    elif dispatcher.has_custom_detail(obj):
+        return dispatcher.call_custom_detail(request, context)
+
     return render_to_response(
         get_templates('object.html', slug, context['category'], context['content_type'].app_label, context['content_type'].model),
         context,
@@ -147,18 +156,6 @@ def _object_detail(request, category, content_type, slug, year=None, month=None,
             'content_type_name' : content_type,
             'content_type' : ct,
         }
-
-    # check for custom actions
-    if url_remainder:
-        bits = url_remainder.split('/')
-        return dispatcher.call_view(request, bits, context)
-    elif dispatcher.has_custom_detail(obj):
-        # increment hit counter
-#        HitCount.objects.hit( placement )
-        return dispatcher.call_custom_detail(request, context)
-
-    # increment hit counter
-#    HitCount.objects.hit( placement )
 
     return context
 
