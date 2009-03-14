@@ -110,6 +110,8 @@ class GalleryItem(models.Model):
         return self._slug
 
     def get_absolute_url(self):
+        if self.order == 0:
+            return self.gallery.get_absolute_url()
         return '%s%s/%s/' % (self.gallery.get_absolute_url(), slugify(_('items')), self.get_slug())
 
     class Meta:
