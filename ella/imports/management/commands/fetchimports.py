@@ -2,12 +2,17 @@ import sys
 import locale
 import codecs
 
+from django.db import transaction
 from django.core.management.base import NoArgsCommand
 
 
 # be able to redirect any non-ascii prints
 sys.stdout = codecs.getwriter(locale.getdefaultlocale()[1])(sys.__stdout__)
 
+@transaction.commit_on_success
+def fetch(server):
+    "Wrapped server.fetch() in transaction."
+    server.fetch()
 
 class Command(NoArgsCommand):
     help = 'Fetch all registered imports'
@@ -22,7 +27,7 @@ class Command(NoArgsCommand):
         error_count = 0
         for server in Server.objects.all():
             try:
-                server.fetch()
+                fetch(server)
                 print "OK %s " % (server.title,)
             except Exception, e:
                 error_count += 1

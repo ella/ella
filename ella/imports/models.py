@@ -3,7 +3,7 @@ from datetime import datetime
 import calendar
 import urllib
 
-from django.db import models, transaction, connection
+from django.db import models, connection
 from django.utils.html import strip_tags
 from django.utils.translation import ugettext_lazy as _
 from django.utils.safestring import mark_safe
@@ -92,7 +92,6 @@ class Server(models.Model):
 
         return output
 
-    @transaction.commit_on_success
     def fetch(self):
         "Runs the item fetch from the category or feed (based on self.category) and saves them into ServerItem."
         if self.category:
@@ -109,9 +108,9 @@ class Server(models.Model):
                         'table' : connection.ops.quote_name(ServerItem._meta.db_table),
                         'priority' : connection.ops.quote_name(ServerItem._meta.get_field('priority').column),
                         'server' : connection.ops.quote_name(ServerItem._meta.get_field('server').column),
-},
+                    },
                     (self.id,)
-)
+                )
             for index in range(importlen):
                 e = output['entries'][index]
                 si, created = ServerItem.objects.get_or_create(

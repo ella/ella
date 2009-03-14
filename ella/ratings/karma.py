@@ -1,5 +1,4 @@
 from django.core.exceptions import ImproperlyConfigured
-from django.db import transaction
 from django.db.models.fields import FieldDoesNotExist
 from django.contrib.auth.models import SiteProfileNotAvailable
 
@@ -112,7 +111,7 @@ def update_karma_for_ct(content_type, owner_field, weight):
 
 
 
-@transaction.commit_on_success
+#@transaction.commit_on_success
 def recalculate_karma():
     """
     Function that will recalculate users' karmas start to finish.

@@ -151,7 +151,6 @@ def get_top_objects_key(func, self, count, mods=[]):
 
 class HitCountManager(models.Manager):
 
-    @transaction.commit_on_success
     def hit(self, placement):
         cursor = connection.cursor()
         cursor.execute('UPDATE core_hitcount SET hits=hits+1 WHERE placement_id=%s', (placement.pk,))
