@@ -4,9 +4,13 @@
 ;;;     for (var i in obj) s += i + ': ' + obj[i] + "\n";
 ;;;     alert(s);
 ;;; }
-function carp() {
-    if (window.console) {
+function carp(message) {
+    try {
         console.log.apply(this, arguments);
+    } catch(e) {
+        try {
+            console.log(message);
+        } catch(e) { }
     }
 }
 
@@ -51,19 +55,6 @@ else {
     // so keep information about whether we manipulated the content, so we can
     // abstain from reloading if we have not.
     var PAGE_CHANGED = 0;
-    
-    // Custom callbacks to be called before and after normally handling the hashchange pseudo event.
-    var PRE_HASHCHANGE_CALLBACKS = [], POST_HASHCHANGE_CALLBACKS = [];
-    window.add_hashchange_callback = function(fn, is_pre) {
-        var queue = is_pre ? PRE_HASHCHANGE_CALLBACKS : POST_HASHCHANGE_CALLBACKS;
-        var i = queue.length;
-        queue[i] = fn;
-        return i;
-    }
-    window.remove_hashchange_callback = function(id, is_pre) {
-        var queue = is_pre ? PRE_HASHCHANGE_CALLBACKS : POST_HASHCHANGE_CALLBACKS;
-        return delete queue[id];
-    }
     
     function object_empty(o) {
         for (var k in o) return false;
@@ -110,6 +101,7 @@ else {
             LOAD_BUF = [];
             MIN_LOAD = undefined;
             MAX_LOAD = -1;
+            $(document).trigger('content_added').removeData('injection_storage');
             return;
         }
         var info = LOAD_BUF[ MIN_LOAD ];
@@ -121,10 +113,22 @@ else {
         var $target = $('#'+info.target_id);
         if ($target && $target.jquery && $target.length) {} else {
             carp('Could not find target element: #'+info.target_id);
+            dec_loading();
+            draw_ready();
             return;
         }
         
         inject_content($target, info.data, info.address);
+        
+        // Track what elements were loaded
+        function record_injection(target_id) {
+            var injection_storage = $(document).data('injection_storage');
+            if (injection_storage && injection_storage.push)
+                injection_storage.push(target_id);
+            else
+                $(document).data('injection_storage', [target_id]);
+        }
+        record_injection(info.target_id);
         
         // Check next request
         draw_ready();
@@ -337,23 +341,21 @@ else {
         }
     }
     
-    // Simulate a hashchange event fired when location.hash changes
+    // Fire hashchange event fired when location.hash changes
     var CURRENT_HASH = '';
-    function hashchange() {
+    $().bind('hashchange', function() {
 //        carp('hash: ' + location.hash);
         MAX_REQUEST++;
         $('.loading').removeClass('loading');
         hide_loading();
         load_by_hash();
-    }
+    });
     setTimeout( function() {
         var q;  // queue of user-defined callbacks
         try {
             if (location.hash != CURRENT_HASH) {
                 CURRENT_HASH = location.hash;
-                q =  PRE_HASHCHANGE_CALLBACKS; for (var i = 0; i < q.length; i++) if (typeof q[i] == 'function') q[i]();
-                hashchange();
-                q = POST_HASHCHANGE_CALLBACKS; for (var i = 0; i < q.length; i++) if (typeof q[i] == 'function') q[i]();
+                $().trigger('hashchange');
             }
         } catch(e) { carp(e); }
         setTimeout(arguments.callee, 50);
@@ -574,8 +576,10 @@ function load_media(url, succ_fn, err_fn) {
         return false;
     }
     function get_css_rules(stylesheet) {
-        if (stylesheet.cssRules) return stylesheet.cssRules;
-        if (stylesheet.rules   ) return stylesheet.rules;
+        try {
+            if (stylesheet.cssRules) return stylesheet.cssRules;
+            if (stylesheet.rules   ) return stylesheet.rules;
+        } catch(e) { carp(e); }
         carp('Could not get rules from: ', stylesheet);
         return;
     }
@@ -747,6 +751,14 @@ $( function() {
     $('#filters :header').live('click', function(evt) {
         if (evt.which != 1) return true;
         $(this).next(':first').filter('ul').slideToggle('slow');
+    });
+    
+    // Re-initialization of third party libraries
+    $(document).bind('content_added', function() {
+        try {
+            DateTimeShortcuts.init();
+            DateTimeShortcuts.admin_media_prefix = MEDIA_URL;
+        } catch(e) { carp(e); }
     });
 });
 
