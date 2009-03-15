@@ -20,6 +20,13 @@ def create_and_publish_gallery(case):
         category=case.category_nested,
         content=u'Some\neven\nlonger\ntext',
     )
+    case.publishable2 = Gallery.objects.create(
+        title=u'Second Gallery',
+        slug=u'second-gallery',
+        description=u'Some\nlonger\ntext',
+        category=case.category,
+        content=u'Some\neven\nlonger\ntext',
+    )
 
     case.placement = Placement.objects.create(
         publishable=case.publishable,
@@ -33,7 +40,7 @@ def create_and_publish_gallery(case):
     )
 
     case.galitem2 = case.publishable.galleryitem_set.create(
-        target=case.publishable,
+        target=case.publishable2,
         order=1 
     )
 
@@ -56,7 +63,16 @@ class TestGalleries(DatabaseTestCase):
         self.assert_equals('/nested-category/2008/1/10/galleries/first-gallery/', self.galitem.get_absolute_url())
 
     def test_gallery_custom_url_item(self):
-        self.assert_equals('/nested-category/2008/1/10/galleries/first-gallery/items/first-gallery1/', self.galitem2.get_absolute_url())
+        self.assert_equals('/nested-category/2008/1/10/galleries/first-gallery/items/second-gallery/', self.galitem2.get_absolute_url())
+
+    def test_two_items_with_same_slug(self):
+        galitem3 = self.publishable.galleryitem_set.create(
+                target=self.publishable2,
+                order=2
+            )
+        self.assert_equals('second-gallery', self.galitem2.get_slug())
+        self.assert_equals('second-gallery1', galitem3.get_slug())
+        self.assert_equals('/nested-category/2008/1/10/galleries/first-gallery/items/second-gallery1/', galitem3.get_absolute_url())
 
     def test_gallery_custom_view_first_item(self):
         response = self.client.get('/nested-category/2008/1/10/galleries/first-gallery/')
@@ -80,7 +96,7 @@ class TestGalleries(DatabaseTestCase):
         self.assert_equals(2, response.context['count'])
 
     def test_gallery_custom_view_item(self):
-        response = self.client.get('/nested-category/2008/1/10/galleries/first-gallery/items/first-gallery1/')
+        response = self.client.get('/nested-category/2008/1/10/galleries/first-gallery/items/second-gallery/')
 
         self.assert_true('previous' in response.context)
         self.assert_equals(self.galitem, response.context['previous'])
@@ -99,5 +115,4 @@ class TestGalleries(DatabaseTestCase):
 
         self.assert_true('count' in response.context)
         self.assert_equals(2, response.context['count'])
-
 
