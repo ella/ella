@@ -35,7 +35,6 @@ def has_model_list_permission(user, model):
     ct = ContentType.objects.get_for_model(model)
     #qs = CategoryUserRole.objects.filter(user=user, group__permissions__content_type=ct)
     qs = DenormalizedCategoryUserRole.objects.filter(user_id=user.id, contenttype_id=ct.pk).distinct()
-    print '%s\t%d' % (model,qs.count())
     return qs.count() > 0
 
 #@cache_this(key_has_category_permission, timeout=CACHE_TIMEOUT)
@@ -186,10 +185,17 @@ def model_category_fk(model):
     """ returns model's field related to Category """
     if not model:
         return None
+    fk_list = []
     for f in model._meta.fields:
         if is_category_fk(f):
-            return f
-    return None
+            fk_list.append(f)
+    if not fk_list:
+        return None
+    for fk in fk_list:
+        # fields named 'category' have higher priority
+        if fk.name.lower() == 'category':
+            return fk
+    return fk_list[0]
 
 def is_category_model(model):
     return model == Category
