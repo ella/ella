@@ -9,6 +9,9 @@ from ella.core.custom_urls import DetailDispatcher
 def view(request, bits, context):
     return request, bits, context
 
+def second_view(request, bits, context):
+    return request, bits, context
+
 def custom_view(request, context):
     return request, context
 
@@ -36,6 +39,19 @@ class TestViewRegistrationRegistration(CustomUrlDispatcherTestCase):
     def test_extension_for_model_not_work_for_other_models(self):
         self.dispatcher.register('start', view, model=self.__class__)
         self.assert_raises(Http404, self.dispatcher._get_view, 'start', object())
+
+    def test_cannot_register_same_extension_points_multiple_times(self):
+        self.dispatcher.register('start', view)
+        self.assert_raises(AssertionError, lambda:self.dispatcher.register('start', view))
+
+    def test_cannot_register_same_model_extension_points_multiple_times(self):
+        self.dispatcher.register('start', view, model=self.__class__)
+        self.assert_raises(AssertionError, lambda:self.dispatcher.register('start', view, model=self.__class__))
+
+    def test_model_extension_has_preference_over_generic_one(self):
+        self.dispatcher.register('start', view)
+        self.dispatcher.register('start', second_view, model=self.__class__)
+        self.assert_equals(second_view, self.dispatcher._get_view('start', self.__class__))
 
 
 class TestCustomDetailRegistration(CustomUrlDispatcherTestCase):
