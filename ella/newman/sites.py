@@ -13,7 +13,7 @@ from django.contrib.contenttypes.models import ContentType
 from ella.newman.forms import SiteFilterForm
 from ella.newman.models import AdminSetting
 from ella.newman.decorators import require_AJAX
-from ella.newman.utils import json_decode, json_encode
+from ella.newman.utils import set_user_config_db, set_user_config_session, get_user_config, decode_category_filter_json
 from ella.newman.permission import has_model_list_permission
 from ella.newman.config import CATEGORY_FILTER, USER_CONFIG, NEWMAN_URL_PREFIX
 
@@ -107,10 +107,9 @@ class NewmanSite(AdminSite):
                 login(request, user)
 
                 # load all user's specific settings into session
-                user_config = {}
                 for c in AdminSetting.objects.filter(user=user):
-                    user_config[c.var] = c.val
-                request.session[USER_CONFIG] = user_config
+                    uc = get_user_config(user, c.var)
+                    set_user_config_session(request.session, c.var, uc)
 
                 return HttpResponseRedirect(request.get_full_path())
             else:
@@ -123,7 +122,7 @@ class NewmanSite(AdminSite):
 
         data = {'sites': []}
         try:
-            data['sites'] = json_decode(request.session[USER_CONFIG][CATEGORY_FILTER])
+            data['sites'] = get_user_config(request.user, CATEGORY_FILTER)
         except KeyError:
             data['sites'] = []
 
@@ -168,16 +167,8 @@ class NewmanSite(AdminSite):
 
         site_filter_form = SiteFilterForm(user=request.user, data=request.POST)
         if site_filter_form.is_valid():
-            o, c = AdminSetting.objects.get_or_create(
-                user = request.user,
-                var = CATEGORY_FILTER
-            )
-            o.val = '%s' % json_encode(site_filter_form.cleaned_data['sites'])
-            o.save()
-            conf = request.session[USER_CONFIG]
-            conf[CATEGORY_FILTER] = o.val
-            request.session[USER_CONFIG] = conf
-
+            set_user_config_db(request.user, CATEGORY_FILTER, site_filter_form.cleaned_data['sites'])
+            set_user_config_session(request.session, CATEGORY_FILTER, site_filter_form.cleaned_data['sites'])
             return HttpResponse(content=ugettext('Your settings was saved.'), mimetype='text/plain', status=200)
         else:
             return HttpResponse(content=ugettext('Error in form.'), mimetype='text/plain', status=405)
