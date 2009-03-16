@@ -1,6 +1,5 @@
 from django.utils.translation import ugettext as _
 
-from ella.tagging.managers import ModelTaggedItemManager, TagDescriptor
 
 VERSION = (0, 3, 'pre')
 
@@ -17,6 +16,7 @@ def register(model, tag_descriptor_attr='tags',
     """
     Sets the given model class up for working with tags.
     """
+    from ella.tagging.managers import ModelTaggedItemManager, TagDescriptor
     if model in registry:
         raise AlreadyRegistered(
             _('The model %s has already been registered.') % model.__name__)
