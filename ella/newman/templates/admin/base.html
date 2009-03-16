@@ -53,6 +53,7 @@
 	{% endif %}
 
     {% block favs %}
+        {% if user.is_authenticated %}
         <div class="cb"></div>
         <div class="favs">
             <ul class="items">
@@ -87,6 +88,7 @@
                 <li><a href="" class="icn visible">Skrýt panel</a></li>
             </ul>
         </div>
+        {% endif %}
     {% endblock %}
 
     {% endif %}
