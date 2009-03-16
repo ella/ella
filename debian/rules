@@ -1,0 +1,9 @@
+#!/usr/bin/make -f
+# -*- mode: makefile; coding: utf-8 -*-
+
+DEB_PYTHON_SYSTEM=pysupport
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/class/python-distutils.mk
+
+DEB_AUTO_CLEANUP_RCS        := yes
+#DEB_INSTALL_CHANGELOGS_ALL := CHANGE_LOG.txt
