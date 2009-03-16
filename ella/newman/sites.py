@@ -15,12 +15,8 @@ from ella.newman.models import AdminSetting
 from ella.newman.decorators import require_AJAX
 from ella.newman.utils import json_decode, json_encode
 from ella.newman.permission import has_model_list_permission
+from ella.newman.config import CATEGORY_FILTER, USER_CONFIG, NEWMAN_URL_PREFIX
 
-
-NEWMAN_URL_PREFIX = 'nm'
-
-# user config variables
-CATEGORY_FILTER = 'category_filter'
 
 class NewmanSite(AdminSite):
 
@@ -114,7 +110,7 @@ class NewmanSite(AdminSite):
                 user_config = {}
                 for c in AdminSetting.objects.filter(user=user):
                     user_config[c.var] = c.val
-                request.session['user_config'] = user_config
+                request.session[USER_CONFIG] = user_config
 
                 return HttpResponseRedirect(request.get_full_path())
             else:
@@ -127,7 +123,7 @@ class NewmanSite(AdminSite):
 
         data = {'sites': []}
         try:
-            data['sites'] = json_decode(request.session['user_config'][CATEGORY_FILTER])
+            data['sites'] = json_decode(request.session[USER_CONFIG][CATEGORY_FILTER])
         except KeyError:
             data['sites'] = []
 
@@ -178,9 +174,9 @@ class NewmanSite(AdminSite):
             )
             o.val = '%s' % json_encode(site_filter_form.cleaned_data['sites'])
             o.save()
-            conf = request.session['user_config']
+            conf = request.session[USER_CONFIG]
             conf[CATEGORY_FILTER] = o.val
-            request.session['user_config'] = conf
+            request.session[USER_CONFIG] = conf
 
             return HttpResponse(content=ugettext('Your settings was saved.'), mimetype='text/plain', status=200)
         else:
