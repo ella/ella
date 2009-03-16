@@ -31,6 +31,8 @@ def key_has_model_list_permission(func, user, model):
 #@cache_this(key_has_model_list_permission, timeout=CACHE_TIMEOUT)
 def has_model_list_permission(user, model):
     """ returns True if user has permission to access this model in newman, otherwise False """
+    if user.is_superuser:
+        return True
     # this function takes cca 0.6-7msec both variants (CategoryUserRole or by querying denormalized schema)
     ct = ContentType.objects.get_for_model(model)
     #qs = CategoryUserRole.objects.filter(user=user, group__permissions__content_type=ct)
