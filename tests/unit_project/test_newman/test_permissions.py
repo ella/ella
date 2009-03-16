@@ -164,8 +164,10 @@ class TestCategoryPermissions(UserWithPermissionTestCase):
 
     def test_applicable_categories_for_user_permission_view(self):
         categories = applicable_categories(self.user, 'articles.view_article')
+        categories.sort()
         # we expect category from roles + nested ones
         expected_categories = [self.nested_first_level_two.pk, self.nested_second_level_two.pk]
+        expected_categories.sort()
 
         self.assert_equals(expected_categories, categories)
 

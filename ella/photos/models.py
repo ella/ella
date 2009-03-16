@@ -5,7 +5,7 @@ from os import path
 from imageop import ImageStretch, detect_img_type
 import os
 
-from django.db import models, transaction, IntegrityError
+from django.db import models, IntegrityError
 from django.conf import settings
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.contrib.contenttypes import generic
@@ -112,7 +112,6 @@ class Photo(models.Model):
     def Box(self, box_type, nodelist):
         return PhotoBox(self, box_type, nodelist)
 
-    @transaction.commit_on_success
     def save(self, force_insert=False, force_update=False):
         """Overrides models.Model.save.
 

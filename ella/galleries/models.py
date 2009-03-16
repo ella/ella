@@ -25,19 +25,14 @@ class Gallery(Publishable):
     """
     Definition of objects gallery
     """
-    # Gallery heading
-    title = models.CharField(_('Title'), max_length=255)
-    slug = models.SlugField(_('Slug'), max_length=255)
     # Gallery metadata
-    description = models.CharField(_('Description'), max_length=3000, blank=True)
     content = models.TextField(_('Content'), blank=True)
-    owner = models.ForeignKey(Author, verbose_name=_('Gallery owner'), blank=True, null=True)
-    category = models.ForeignKey(Category, verbose_name=_('Category'), blank=True, null=True)
     created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)
 
 
     def get_text(self):
         return self.content
+
     @property
     @cache_this(get_gallery_key, gallery_cache_invalidator)
     def items(self):
@@ -110,6 +105,8 @@ class GalleryItem(models.Model):
         return self._slug
 
     def get_absolute_url(self):
+        if self.order == 0:
+            return self.gallery.get_absolute_url()
         return '%s%s/%s/' % (self.gallery.get_absolute_url(), slugify(_('items')), self.get_slug())
 
     class Meta:

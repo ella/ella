@@ -1,6 +1,6 @@
 import logging
 from markdown2 import Markdown
-from md5 import md5
+from hashlib import md5
 
 from django.conf import settings
 from django import template
