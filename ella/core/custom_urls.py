@@ -30,7 +30,7 @@ class DetailDispatcher(object):
 
     def _get_custom_detail_view(self, model):
         if model not in self.root_mapping:
-            raise Http404
+            raise Http404()
         return self.root_mapping[model]
 
     def call_custom_detail(self, request, context):
@@ -66,6 +66,10 @@ class DetailDispatcher(object):
             map[ALL] = view
 
     def _get_view(self, start, model):
+        """
+        Return appropriate view for given bit,
+        either from map registered for given model or from __ALL__
+        """
         if start not in self.custom_mapping:
             raise Http404
 
@@ -75,7 +79,7 @@ class DetailDispatcher(object):
         elif ALL in map:
             view = map[ALL]
         else:
-            raise Http404
+            raise Http404()
 
         return view
 
