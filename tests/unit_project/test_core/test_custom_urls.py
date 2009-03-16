@@ -15,6 +15,7 @@ def custom_view(request, context):
 
 class TestCustomUrlsDispatcher(UnitTestCase):
     def setUp(self):
+        super(TestCustomUrlsDispatcher, self).setUp()
         self.dispatcher = DetailDispatcher()
 
         self.context = {'object': self}
