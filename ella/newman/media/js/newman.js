@@ -4,9 +4,13 @@
 ;;;     for (var i in obj) s += i + ': ' + obj[i] + "\n";
 ;;;     alert(s);
 ;;; }
-function carp() {
-    if (window.console) {
+function carp(message) {
+    try {
         console.log.apply(this, arguments);
+    } catch(e) {
+        try {
+            console.log(message);
+        } catch(e) { }
     }
 }
 
@@ -572,8 +576,10 @@ function load_media(url, succ_fn, err_fn) {
         return false;
     }
     function get_css_rules(stylesheet) {
-        if (stylesheet.cssRules) return stylesheet.cssRules;
-        if (stylesheet.rules   ) return stylesheet.rules;
+        try {
+            if (stylesheet.cssRules) return stylesheet.cssRules;
+            if (stylesheet.rules   ) return stylesheet.rules;
+        } catch(e) { carp(e); }
         carp('Could not get rules from: ', stylesheet);
         return;
     }
