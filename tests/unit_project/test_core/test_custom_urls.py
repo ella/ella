@@ -7,7 +7,7 @@ from ella.core.custom_urls import DetailDispatcher
 
 # dummy functions to register as views
 def view(request, bits, context):
-    return request, bits, context
+    return u"OK"
 
 def second_view(request, bits, context):
     return request, bits, context
@@ -61,3 +61,11 @@ class TestCustomDetailRegistration(CustomUrlDispatcherTestCase):
     def test_registration_success(self):
         self.dispatcher.register_custom_detail(self.__class__, custom_view)
         self.assert_equals(custom_view, self.dispatcher._get_custom_detail_view(self.__class__))
+
+class TestViewCalling(CustomUrlDispatcherTestCase):
+    def test_nonexisting_view_raises_404(self):
+        self.assert_raises(Http404, self.dispatcher.call_view, request=object(), bits=['start'], context=self.context)
+
+    def test_call_view_simple_success(self):
+        self.dispatcher.register('start', view)
+        self.assert_equals(u"OK", self.dispatcher.call_view(request=object(), bits=['start'], context=self.context))
