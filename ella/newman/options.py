@@ -2,8 +2,7 @@ from django.core.exceptions import PermissionDenied
 from django.conf import settings
 
 from django.contrib import admin
-from django.contrib.admin.options import InlineModelAdmin, IncorrectLookupParameters,\
-    FORMFIELD_FOR_DBFIELD_DEFAULTS
+from django.contrib.admin.options import InlineModelAdmin, IncorrectLookupParameters, FORMFIELD_FOR_DBFIELD_DEFAULTS
 from django.forms.models import BaseInlineFormSet
 from django.forms.util import ErrorList
 from django import template
@@ -456,16 +455,15 @@ class NewmanModelAdmin(admin.ModelAdmin):
         First semi-working draft of category-based permissions. It will allow permissions to be set per category
         effectively hiding the content the user has no permission to see/change.
         """
-        if request.user.is_superuser:
-            return super(NewmanModelAdmin, self).queryset(request)
         q = admin.ModelAdmin.queryset(self, request)
-
+        # user category filter
+        qs = utils.user_category_filter(q, request.user)
+        if request.user.is_superuser:
+            return qs
         view_perm = self.opts.app_label + '.' + 'view_' + self.model._meta.module_name.lower()
         change_perm = self.opts.app_label + '.' + 'change_' + self.model._meta.module_name.lower()
         perms = (view_perm, change_perm,)
-        qs = permission_filtered_model_qs(q, request.user, perms)
-        # user category filter
-        return utils.user_category_filter(qs, request.user)
+        return permission_filtered_model_qs(qs, request.user, perms)
 
 class NewmanInlineFormSet(BaseInlineFormSet):
     def get_queryset(self):
@@ -475,7 +473,7 @@ class NewmanInlineFormSet(BaseInlineFormSet):
                 qs = self.queryset
             else:
                 qs = self.model._default_manager.get_query_set()
-            # category base permissions
+            # category based permissions
             if not user.is_superuser:
                 for db_field in self.model._meta.fields:
                     if not is_category_fk(db_field):
