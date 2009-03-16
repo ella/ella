@@ -10,7 +10,7 @@ from django.db import connection, models
 from django.db.models.query import QuerySet
 from django.utils.translation import ugettext_lazy as _
 
-from ella.core.models import Category
+from ella.core.models.main import Category
 
 from ella.tagging import settings
 from ella.tagging.utils import calculate_cloud, get_tag_list, get_queryset_and_model, parse_tag_input
