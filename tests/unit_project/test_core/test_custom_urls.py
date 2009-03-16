@@ -12,34 +12,36 @@ def view(request, bits, context):
 def custom_view(request, context):
     return request, context
 
-
-class TestCustomUrlsDispatcher(UnitTestCase):
+class CustomUrlDispatcherTestCase(UnitTestCase):
     def setUp(self):
-        super(TestCustomUrlsDispatcher, self).setUp()
+        super(CustomUrlDispatcherTestCase, self).setUp()
         self.dispatcher = DetailDispatcher()
 
         self.context = {'object': self}
         self.request = object()
 
-    def test_no_extension(self):
+class TestViewRegistrationRegistration(CustomUrlDispatcherTestCase):
+
+    def test_404_raised_when_view_not_regitered(self):
         self.assert_raises(Http404, self.dispatcher._get_view, 'start', self)
 
-    def test_register_global_extension(self):
+    def test_global_extension(self):
         self.dispatcher.register('start', view)
         self.assert_equals(view, self.dispatcher._get_view('start', self))
 
-    def test_register_extension_for_model(self):
-        self.dispatcher.register('another_start', view, model=self.__class__)
-        self.assert_equals(view, self.dispatcher._get_view('another_start', self.__class__))
+    def test_bound_for_model(self):
+        self.dispatcher.register('start', view, model=self.__class__)
+        self.assert_equals(view, self.dispatcher._get_view('start', self.__class__))
 
-    def test_register_extension_for_model_not_work_for_other_models(self):
+    def test_extension_for_model_not_work_for_other_models(self):
         self.dispatcher.register('start', view, model=self.__class__)
         self.assert_raises(Http404, self.dispatcher._get_view, 'start', object())
 
-    def test_no_custom_view(self):
+
+class TestCustomDetailRegistration(CustomUrlDispatcherTestCase):
+    def test_no_view_available_without_registration(self):
         self.assert_raises(Http404, self.dispatcher._get_custom_detail_view, self.__class__)
 
-    def test_register_custom_view(self):
+    def test_registration_success(self):
         self.dispatcher.register_custom_detail(self.__class__, custom_view)
         self.assert_equals(custom_view, self.dispatcher._get_custom_detail_view(self.__class__))
-

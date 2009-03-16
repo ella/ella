@@ -66,6 +66,10 @@ class DetailDispatcher(object):
             map[ALL] = view
 
     def _get_view(self, start, model):
+        """
+        Return appropriate view for given bit,
+        either from map registered for given model or from __ALL__
+        """
         if start not in self.custom_mapping:
             raise Http404
 
