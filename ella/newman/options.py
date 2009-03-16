@@ -2,8 +2,7 @@ from django.core.exceptions import PermissionDenied
 from django.conf import settings
 
 from django.contrib import admin
-from django.contrib.admin.options import InlineModelAdmin, IncorrectLookupParameters,\
-    FORMFIELD_FOR_DBFIELD_DEFAULTS
+from django.contrib.admin.options import InlineModelAdmin, IncorrectLookupParameters, FORMFIELD_FOR_DBFIELD_DEFAULTS
 from django.forms.models import BaseInlineFormSet
 from django.forms.util import ErrorList
 from django import template
