@@ -8,11 +8,13 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.core.mail import EmailMessage
 from django.views.decorators.cache import never_cache
 from django.contrib.auth import authenticate, login
+from django.contrib.contenttypes.models import ContentType
 
 from ella.newman.forms import SiteFilterForm
 from ella.newman.models import AdminSetting
 from ella.newman.decorators import require_AJAX
 from ella.newman.utils import json_decode, json_encode
+from ella.newman.permission import has_model_list_permission
 
 
 NEWMAN_URL_PREFIX = 'nm'
@@ -130,10 +132,15 @@ class NewmanSite(AdminSite):
             data['sites'] = []
 
         site_filter_form = SiteFilterForm(data=data, user=request.user)
+        cts = []
+        for model, model_admin in self._registry.items():
+            if has_model_list_permission(request.user, model):
+                cts.append(ContentType.objects.get_for_model(model))
 
         context = {
             'title': _('Site administration'),
             'site_filter_form': site_filter_form,
+            'searchable_content_types': cts,
         }
         context.update(extra_context or {})
         return render_to_response(self.index_template or 'admin/index.html', context,
