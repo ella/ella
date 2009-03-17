@@ -1,7 +1,7 @@
-from django.core.exceptions import ImproperlyConfigured
 from os.path import dirname, join, abspath, isdir
-from django.db.models import get_app
 
+from django.db.models import get_app
+from django.core.exceptions import ImproperlyConfigured
 from django.template import TemplateDoesNotExist
 from django.template.loaders.filesystem import load_template_source
 
@@ -16,6 +16,11 @@ def _get_template_vars(template_name):
     return template_name, template_dir
 
 def load_template_from_app(template_name, template_dirs=None):
+    """
+    Template loader that only serves templates from specific app's template directory.
+
+    Works for template_names in format app_label:some/template/name.html
+    """
     if ":" not in template_name:
         raise TemplateDoesNotExist()
 
