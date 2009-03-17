@@ -8,17 +8,17 @@ newman.autodiscover()
 import ella
 import django
 
-from os.path import dirname, join
+from os.path import dirname, join, normpath
 
 ADMIN_ROOTS = (
-        join(dirname(ella.__file__), 'newman', 'media'),
-        join(dirname(django.__file__), 'contrib', 'admin', 'media'),
+        normpath(join(dirname(ella.__file__), 'newman', 'media')),
+        normpath(join(dirname(django.__file__), 'contrib', 'admin', 'media')),
 )
 
 urlpatterns = patterns('',
 
     # serve admin media static files
-    ( r'^admin_media/(?P<path>.*)$', 'ella.utils.views.fallback_serve', {'document_roots': ADMIN_ROOTS} ),
+    ( r'^static/admin_media/(?P<path>.*)$', 'ella.utils.views.fallback_serve', {'document_roots': ADMIN_ROOTS} ),
     # serve static files
     ( r'^static/(?P<path>.*)$', 'django.views.static.serve', { 'document_root': settings.MEDIA_ROOT, 'show_indexes': True } ),
 

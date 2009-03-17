@@ -56,6 +56,7 @@ INSTALLED_APPS = (
     'django.contrib.webdesign',
     'example_project.services',
     'ella.core',
+    'ella.db_templates',
     'ella.photos',
     'ella.articles',
     'ella.ellaadmin',
