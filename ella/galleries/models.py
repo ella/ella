@@ -37,7 +37,8 @@ class Gallery(Publishable):
     @cache_this(get_gallery_key, gallery_cache_invalidator)
     def items(self):
         """
-        Returns sorted dict of gallery items. Unique items slugs are used as keys. Values are tuples of items and its targets.
+        Returns sorted dict of gallery items. Unique items slugs are used as keys.
+        Values are tuples of items and their targets.
         """
         slugs_count = {}
         itms = [ (item, item.target) for item in self.galleryitem_set.all() ]
@@ -59,10 +60,14 @@ class Gallery(Publishable):
 
     def get_photo(self):
         """
-        Returns first Photo item in the gallery.
+        Returns first Photo item in the gallery if no photo is set on self.photo.
 
         Overrides Publishable.get_photo.
         """
+        photo = super(Gallery, self).get_photo()
+        if photo is not None:
+            return photo
+
         for item in self.items.itervalues():
             if isinstance(item[1], Photo):
                 return item[1]
