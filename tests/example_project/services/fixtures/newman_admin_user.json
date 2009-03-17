@@ -1,0 +1,15 @@
+[
+  {
+    "model": "auth.user",
+    "pk": 1,
+    "fields": {
+      "password" : "sha1$aaa$b27189d65f3a148a8186753f3f30774182d923d5",
+      "username": "superman",
+      "first_name": "Guinea",
+      "last_name": "Pig",
+      "is_staff": 1,
+      "is_active": 1,
+      "is_superuser": 1
+    }
+  }
+]
