@@ -788,10 +788,16 @@ $( function() {
     
     // The search button should send us to an address according to the thing selected in the select
     function update_search_url() {
+        var option = $(this).find('option[selected]').val();
+        var $search_link = $('#search-form a.search.btn');
+        if (! option) {
+            $search_link.removeAttr('href');
+            return;
+        }
         var href = $(this).find('option[selected]').val()
                  + '?q='
                  + escape( $('#search-form input[name=q]').val() );
-        $('#search-form a.search.btn').attr('href', href);
+        $search_link.attr('href', href);
     }
     $(document).bind('content_added', function() {
         $('#search-form select[name=action]').unbind('change', update_search_url).change(update_search_url);

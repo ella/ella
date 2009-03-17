@@ -49,7 +49,7 @@
         <div class="cnt">
             <input type="text" name="q"/>
             <select name="action" size="1">
-                <option>{% trans 'All' %}...</option>
+                <option value="">{% trans 'All' %}...</option>
                 {% for ct in searchable_content_types %}
                     <option value="/{{ ct.app_label }}/{{ ct.model }}/">{% trans ct.name %}</option>
                 {% endfor %}
