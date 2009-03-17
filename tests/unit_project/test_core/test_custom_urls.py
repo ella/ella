@@ -42,11 +42,11 @@ class TestViewRegistrationRegistration(CustomUrlDispatcherTestCase):
 
     def test_cannot_register_same_extension_points_multiple_times(self):
         self.dispatcher.register('start', view)
-        self.assert_raises(AssertionError, lambda:self.dispatcher.register('start', view))
+        self.assert_raises(AssertionError, self.dispatcher.register, 'start', view)
 
     def test_cannot_register_same_model_extension_points_multiple_times(self):
         self.dispatcher.register('start', view, model=self.__class__)
-        self.assert_raises(AssertionError, lambda:self.dispatcher.register('start', view, model=self.__class__))
+        self.assert_raises(AssertionError, self.dispatcher.register, 'start', view, model=self.__class__)
 
     def test_model_extension_has_preference_over_generic_one(self):
         self.dispatcher.register('start', view)
