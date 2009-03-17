@@ -68,11 +68,12 @@ class AdminUserDraft(models.Model):
     def __unicode__(self):
         if self.is_template:
             return self.title
-        return "Autosaved %s (%s)" % (self.ct, self.ts)
+        return "%s %s (%s)" % (ugettext("Autosaved"), self.ct, self.ts)
 
     class Meta:
         verbose_name = _('Draft item')
         verbose_name_plural = _('Draft items')
+        ordering = ('-is_template','title')
 
 
 class AdminSetting(models.Model):
