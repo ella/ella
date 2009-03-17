@@ -1,8 +1,7 @@
 from tempfile import gettempdir
 from os.path import join, dirname
 
-import django
-import ella
+import example_project
 
 ADMINS = (
 )

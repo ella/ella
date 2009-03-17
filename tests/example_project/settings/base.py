@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-# Django settings for example_project project.
-
 from os.path import dirname, join
 
+import django
+
 import example_project
+import ella
 
 TEMPLATE_LOADERS = (
     'ella.core.cache.template_loader.load_template_source',
