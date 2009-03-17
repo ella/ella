@@ -45,6 +45,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.auth',
     'django.core.context_processors.media',
     'django.core.context_processors.request',
+    'ella.newman.context_processors.newman_media',
 )
 
 INSTALLED_APPS = (
