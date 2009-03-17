@@ -9,13 +9,14 @@ import ella
 
 TEMPLATE_LOADERS = (
     'ella.core.cache.template_loader.load_template_source',
-
+    'ella.utils.template_loaders.load_template_from_app',
     'django.template.loaders.filesystem.load_template_source',
     'django.template.loaders.app_directories.load_template_source',
 )
 
 CACHE_TEMPLATE_LOADERS = (
     'ella.db_templates.loader.load_template_source',
+    'ella.utils.template_loaders.load_template_from_app',
     'django.template.loaders.filesystem.load_template_source',
 )
 
