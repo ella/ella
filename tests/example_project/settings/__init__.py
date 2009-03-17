@@ -20,4 +20,3 @@ try:
     from example_project.settings.local import *
 except ImportError:
     pass
-

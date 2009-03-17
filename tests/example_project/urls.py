@@ -1,19 +1,39 @@
 from django.conf.urls.defaults import *
+from django.conf import settings
 
-# Uncomment the next two lines to enable the admin:
-from django.contrib import admin
-admin.autodiscover()
+from ella import newman
+
+newman.autodiscover()
+
+import ella
+import django
+
+from os.path import dirname, join, normpath
+
+ADMIN_ROOTS = (
+        normpath(join(dirname(ella.__file__), 'newman', 'media')),
+        normpath(join(dirname(django.__file__), 'contrib', 'admin', 'media')),
+)
 
 urlpatterns = patterns('',
-    # Example:
-    # (r'^example_project/', include('example_project.foo.urls')),
 
-    # Uncomment the admin/doc line below and add 'django.contrib.admindocs'
-    # to INSTALLED_APPS to enable admin documentation:
-    # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
+    # serve admin media static files
+    (r'^static/newman_media/(?P<path>.*)$', 'ella.utils.views.fallback_serve', {'document_roots': ADMIN_ROOTS}),
+    (r'^static/admin_media/(?P<path>.*)$', 'ella.utils.views.fallback_serve', {'document_roots': ADMIN_ROOTS}),
 
-    # Uncomment the next line to enable the admin:
-    (r'^admin/', include(admin.site.urls)),
+    # serve static files
+    (r'^static/(?P<path>.*)$', 'django.views.static.serve', { 'document_root': settings.MEDIA_ROOT, 'show_indexes': True }),
 
-    ( r'^', include( 'ella.core.urls' ) ),
+    # main admin urls
+    ('^newman/', include(newman.site.urls)),
+
+    # reverse url lookups
+    (r'^', include('ella.core.urls')),
+
 )
+
+handler404 = 'ella.core.views.page_not_found'
+handler500 = 'ella.core.views.handle_error'
+
+
+
