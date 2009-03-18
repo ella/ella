@@ -10,7 +10,6 @@ from ella.tagging.admin import TaggingInlineOptions
 from ella.core.admin import PlacementInlineOptions
 
 from ella.ellaadmin.options import EllaAdminOptionsMixin
-from ella.ellaadmin import widgets
 
 from ella.core.cache import get_cached_object_or_404
 from ella.polls.models import Poll, Contest, Contestant, Quiz, Result, Choice, Vote, Question

@@ -1,15 +1,8 @@
-from math import floor
-from datetime import datetime, timedelta
-from os import path
+from datetime import datetime
 
 from django.utils.translation import ugettext_lazy as _
 from django.db import models
 
-
-
-
-
-from ella.db import fields
 from ella.core.box import Box
 from ella.photos.models import Photo
 from ella.core.models import Publishable

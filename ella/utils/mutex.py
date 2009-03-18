@@ -4,7 +4,6 @@ mutex.py
 Ella lock manager
 """
 
-from sys import maxint
 from uuid import uuid1
 
 from django.core.cache import cache

@@ -6,6 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from ella.photos.models import Photo
 from ella.core.box import Box
+from ella.core.cache import get_cached_object
 
 
 UPLOAD_TO = getattr(settings, 'ATTACHMENTS_UPLOAD_TO', 'attach/%Y/%m/%d')

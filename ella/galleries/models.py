@@ -1,14 +1,14 @@
 from datetime import datetime
 
 from django.db import models
+from django.http import Http404
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 from django.template.defaultfilters import slugify
 from django.utils.datastructures import SortedDict
 
 from ella.core.models import Publishable
-from ella.core.models import Category, Author
-from ella.core.cache.utils import get_cached_object, cache_this, CachedGenericForeignKey
+from ella.core.cache.utils import cache_this, CachedGenericForeignKey
 from ella.core.cache.invalidate import CACHE_DELETER
 from ella.photos.models import Photo
 

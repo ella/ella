@@ -1,18 +1,14 @@
 from datetime import datetime
 
-from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 from django.db import models
 from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import generic
-from django.conf import settings
 from django.template import Template
-from django.utils.safestring import mark_safe
 
 from ella.core.models import Category
 from ella.core.box import Box
-from ella.core.cache import get_cached_object, CACHE_DELETER, cache_this, CachedGenericForeignKey
+from ella.core.cache import CACHE_DELETER, cache_this, CachedGenericForeignKey
 
 def get_position_key(func, self, category, name, nofallback=False):
     return 'ella.positions.models.PositionManager.get_active_position:%d:%s:%s' % (

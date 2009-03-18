@@ -3,13 +3,11 @@ from datetime import timedelta, datetime
 
 from django.db import models
 from django.utils.translation import ugettext as _
-from django.utils.text import wrap
 from django.contrib.auth.models import User, AnonymousUser
 from django.contrib.sites.models import Site
 
 from ella.ellaadmin.utils import admin_url
-from ella.core.models import Category
-from ella.answers.fields import TimedeltaField, TimedeltaFormField
+from ella.answers.fields import TimedeltaField
 
 DEFAULT_TIMELIMIT = timedelta(14) # 14 days - used only when no QuestionGroup for Question is found
 
@@ -86,7 +84,6 @@ class Answer(models.Model):
 
 class QuestionGroup(models.Model):
     site = models.ForeignKey(Site)
-    #category = models.ForeignKey(Category)
     questions = models.ManyToManyField(Question)
     default_timelimit = TimedeltaField()
 

@@ -71,11 +71,11 @@ class Contact(models.Model):
 
 class CalendarManager(models.Manager):
     def send(self, time):
-        date = time.date()
-        for e in Event.objects.filter(date=date).select_related('calendar'):
+        day = time.date()
+        for e in Event.objects.filter(date=day).select_related('calendar'):
             for c in e.calendar.subscribers.all():
                 # TODO: GROUP BY delivery_method and do batch sending
-                c.delivery_method.send(c, e.calendar, e, date)
+                c.delivery_method.send(c, e.calendar, e, day)
 
 class Calendar(models.Model):
     title = models.CharField(_('Title'), max_length=255)

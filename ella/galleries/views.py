@@ -3,7 +3,6 @@ from django.shortcuts import render_to_response
 from django.http import Http404
 from django.utils.translation import ungettext
 
-from ella.core.custom_urls import dispatcher
 from ella.core.views import get_templates_from_placement
 
 

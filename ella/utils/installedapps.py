@@ -1,5 +1,4 @@
 from os.path import isfile, exists, sep as path_separator
-import sys
 import logging, logging.config
 import traceback
 

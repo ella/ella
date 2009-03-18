@@ -14,7 +14,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist
 from django.forms.util import ValidationError
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate
 
 from ella.core.cache import get_cached_object
 

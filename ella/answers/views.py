@@ -4,26 +4,17 @@
 
 from datetime import datetime
 
-from django.http import Http404, HttpResponse, HttpResponseNotFound, HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect
 from django.core.urlresolvers import reverse
-from django.utils.translation import ugettext as _
-from django.views.generic.list_detail import object_list
-from django.template import RequestContext, loader, Context
+from django.template import RequestContext
 from django.template.defaultfilters import slugify
 from django.shortcuts import render_to_response
-from ella.tagging.fields import SuggestTagField
-from django.db import connection
 from django import forms
 from django.contrib.formtools.preview import FormPreview
 from django.contrib.sites.models import Site
-from django.contrib.auth.models import User, AnonymousUser
 from django.conf import settings
 
-from ella.tagging.models import Tag, TaggedItem
-from ella.tagging.utils import get_tag, get_queryset_and_model
-from ella.core.models import Placement
-from ella.core.models import Publishable
-from ella.utils.paginator import paginate_qset, get_page_no
+from ella.utils.paginator import paginate_qset
 
 from ella.answers.models import Question, Answer, QuestionGroup, get_default_timelimit, is_expert_user
 
