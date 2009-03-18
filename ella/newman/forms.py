@@ -1,5 +1,3 @@
-import re
-
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 from django.forms.widgets import CheckboxSelectMultiple
@@ -20,10 +18,10 @@ class DraftForm(forms.Form):
             ct = ct,
             user = user
         )
-        choices = ()
+        choices = (('', u'-- %s --' % _('Presets')),)
         for d in drafts:
             choices += (d.pk, d.__unicode__(),),
-        self.fields[_('drafts')] = forms.ChoiceField(choices=choices)
+        self.fields['drafts'] = forms.ChoiceField(choices=choices, required=False, label='')
 
 class SiteFilterForm(forms.Form):
 

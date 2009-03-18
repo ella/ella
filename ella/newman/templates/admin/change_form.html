@@ -13,17 +13,6 @@
 {% spaceless %}
 {% block content_toolbar_content %}
     <ul style="float: left;">
-        {% if add %}
-        <li>
-            <select>
-                <option>Apply template</option>
-                <option>Template 1</option>
-                <option>Template 1</option>
-                <option>Template 1</option>
-                <option>Template 1</option>
-            </select>
-        </li>
-        {% endif %}
         <li><a href="#" class="icn btn save" onclick="prompt('Enter a template name:');return false;">{% trans "Save as template" %}</a></li>
         <li>{{ draft_form }}</li>
     </ul>
