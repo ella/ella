@@ -138,7 +138,7 @@ class NewmanModelAdmin(admin.ModelAdmin):
             pk=id
         )
         if not drafts:
-            return HttpResponse(content=_('Any matching draft found.'), mimetype='text/plain', status=404) 
+            return HttpResponse(content=_('Any matching draft found.'), mimetype='text/plain', status=404)
         return HttpResponse(content=drafts[0].data, mimetype='text/plain')
 
     @require_AJAX
@@ -498,13 +498,14 @@ class NewmanInlineFormSet(BaseInlineFormSet):
                 qs = self.model._default_manager.get_query_set()
             # category based permissions
             if not user.is_superuser:
-                for db_field in self.model._meta.fields:
-                    if not is_category_fk(db_field):
-                        continue
+                category_fk = model_category_fk(self.model)
+                if category_fk:
                     view_perm = get_permission('view', self.instance)
                     change_perm = get_permission('change', self.instance)
                     perms = (view_perm, change_perm,)
                     qs = permission_filtered_model_qs(qs, user, perms)
+
+            qs = utils.user_category_filter(qs, user)
 
             if self.max_num > 0:
                 self._queryset = qs[:self.max_num]
