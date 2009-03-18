@@ -779,11 +779,11 @@ $( function() {
     // Initialization of JavaScripts
     $(document).bind('media_loaded', function() {
         var loaded_media = $(document).data('loaded_media');
-        if (loaded_media[ '/admin_media/js/admin/DateTimeShortcuts.js' ]) {
+        if (loaded_media[ MEDIA_URL + 'js/admin/DateTimeShortcuts.js' ]) {
             DateTimeShortcuts.admin_media_prefix = MEDIA_URL;
             DateTimeShortcuts.init();
         }
-        delete loaded_media[ '/admin_media/js/admin/DateTimeShortcuts.js' ];
+        delete loaded_media[ MEDIA_URL + 'js/admin/DateTimeShortcuts.js' ];
     });
     
     // The search button should send us to an address according to the thing selected in the select
