@@ -6,8 +6,6 @@ try:
 except ImportError:
     from django.utils.simplejson import dumps, loads
 
-from django.contrib.sites.models import Site
-
 from ella.newman.permission import model_category_fk
 from ella.newman import models
 from ella.newman.config import CATEGORY_FILTER, USER_CONFIG, JSON_CONVERSIONS
@@ -63,7 +61,7 @@ def _get_decoder(key):
             return getattr(sys.modules[__name__], v)
 
 def get_user_config(user, key):
-    """ 
+    """
     Returns user defined configuration from user.config with fallback to AdminSetting.
 
     If AdminSetting is reached data_decode_callback is used to transform saved data
@@ -78,14 +76,14 @@ def get_user_config(user, key):
         # find appropriate callback to convert JSON data.
         callback = _get_decoder(key)
         if not callback:
-            callback = json_decode 
+            callback = json_decode
         return callback(db_data[0].value)
-    return cfg[key] 
+    return cfg[key]
 
 def user_category_filter(queryset, user):
-    """ 
-    Returns Queryset containing only user's prefered content (filtering based on categories). 
-    If queryset.model has no relation to ella.core.models.Category, original queryset is returned. 
+    """
+    Returns Queryset containing only user's prefered content (filtering based on categories).
+    If queryset.model has no relation to ella.core.models.Category, original queryset is returned.
     """
     qs = queryset
     category_fk = model_category_fk(qs.model)
@@ -96,7 +94,7 @@ def user_category_filter(queryset, user):
         return qs
     if not user.is_superuser:
         helper = models.DenormalizedCategoryUserRole.objects.filter(
-            user_id=user.pk, 
+            user_id=user.pk,
             root_category_id__in=root_category_ids
         )
         user_categories = map(lambda c: c.category_id, helper)

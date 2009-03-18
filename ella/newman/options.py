@@ -4,7 +4,6 @@ from django.conf import settings
 from django.contrib import admin
 from django.contrib.admin.options import InlineModelAdmin, IncorrectLookupParameters, FORMFIELD_FOR_DBFIELD_DEFAULTS
 from django.forms.models import BaseInlineFormSet
-from django.forms.util import ErrorList
 from django.forms.formsets import all_valid
 from django import template
 from django.http import HttpResponse, Http404, HttpResponseRedirect
@@ -23,10 +22,9 @@ from django.contrib.contenttypes.models import ContentType
 from ella.newman.changelist import NewmanChangeList, FilterChangeList
 from ella.newman import models, fields, widgets, utils
 from ella.newman.decorators import require_AJAX
-from ella.newman.permission import is_category_model, is_category_fk, model_category_fk, model_category_fk_value, applicable_categories
+from ella.newman.permission import is_category_model, model_category_fk, model_category_fk_value, applicable_categories
 from ella.newman.permission import has_category_permission, get_permission, permission_filtered_model_qs
 from ella.newman.forms import DraftForm
-from ella.core.models import Category
 
 DEFAULT_LIST_PER_PAGE = getattr(settings, 'NEWMAN_LIST_PER_PAGE', 25)
 

@@ -1,4 +1,3 @@
-
 from django.conf import settings
 
 def newman_media(request):
