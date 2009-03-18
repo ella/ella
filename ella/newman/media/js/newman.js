@@ -823,14 +823,24 @@ $( function() {
     });
     
     // The search button should send us to an address according to the thing selected in the select
-    $('#search-form a.search.btn').live('click', function() {
+    function do_search() {
         var $form = $('#search-form');
         var option = $form.find('select[name=action] option[selected]').val();
+        if (!option) return false;
         var search_terms = $form.find('input[name=q]').val();
         var url = option + '?q=' + escape(search_terms);
         adr(url);
         return false;
-    });
+    }
+    $('#search-form a.search.btn').live('click', do_search);
+    function search_on_enter(evt) {
+        if (evt.keyCode == CR || evt.keyCode == LF) {
+            do_search();
+            return false;
+        }
+    }
+    $('#search-form input[name=q]'      ).live('keypress', search_on_enter);
+    $('#search-form select[name=action]').live('keypress', search_on_enter);
 });
 
 function show_message(message, options) {
