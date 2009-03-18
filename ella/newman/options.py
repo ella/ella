@@ -101,25 +101,45 @@ class NewmanModelAdmin(admin.ModelAdmin):
             url(r'^(.+)/draft/save/$',
                 wrap(self.save_draft_view),
                 name='%sadmin_%s_%s_save_draft' % info),
+            url(r'^(.+)/draft/load/$',
+                wrap(self.load_draft_view),
+                name='%sadmin_%s_%s_load_draft' % info),
         )
         urlpatterns += super(NewmanModelAdmin, self).get_urls()
         return urlpatterns
 
     @require_AJAX
     def save_draft_view(self, request, extra_context=None):
-        " Autosave data (dataloss-prevention) or save as (named) template "
+        """ Autosave data (dataloss-prevention) or save as (named) template """
         # TODO: clean too old autosaved... (keep last 3-5 autosaves)
         # jQuery.post( 'http://localhost:8000/articles/article/1503079/draft/save/', {'data': '{"title": "Jarni style", "slug": "jarni-style" }'} )
         data = request.POST.get('data', None)
         if not data:
             raise AttributeError('No data passed in POST variable "data".')
+        title = request.POST.get('title', '')
 
         models.AdminUserDraft.objects.create(
-            ct = self.model_content_type,
-            user = request.user,
-            data = data
+            ct=self.model_content_type,
+            user=request.user,
+            data=data,
+            title=title
         )
         return HttpResponse(content=_('Model data was saved'), mimetype='text/plain')
+
+    @require_AJAX
+    def load_draft_view(self, request, extra_context=None):
+        """ Returns draft identified by request.GET['title'] variable.  """
+        id = request.GET.get('id', None)
+        if not id:
+            raise AttributeError('No id found in GET variable "id".')
+        drafts = models.AdminUserDraft.objects.filter(
+            ct=self.model_content_type,
+            user=request.user,
+            pk=id
+        )
+        if not drafts:
+            return HttpResponse(content=_('Any matching draft found.'), mimetype='text/plain', status=404) 
+        return HttpResponse(content=drafts[0].data, mimetype='text/plain')
 
     @require_AJAX
     def filters_view(self, request, extra_context=None):
