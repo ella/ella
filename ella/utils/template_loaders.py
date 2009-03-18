@@ -1,4 +1,4 @@
-from os.path import dirname, join, abspath, isdir
+from os.path import dirname, join, abspath, isdir, pardir
 
 from django.db.models import get_app
 from django.core.exceptions import ImproperlyConfigured
@@ -9,9 +9,16 @@ from django.template.loaders.filesystem import load_template_source
 def _get_template_vars(template_name):
     app_name, template_name = template_name.split(":", 1)
     try:
-        template_dir = abspath(join(dirname(get_app(app_name).__file__), 'templates'))
+        models = get_app(app_name)
     except ImproperlyConfigured:
         raise TemplateDoesNotExist()
+
+    dir = dirname(models.__file__)
+    # if models is a package and not a module, add '..'
+    if models.__package__ == models.__name__:
+        dir = join(dir, pardir)
+
+    template_dir = abspath(join(dir, 'templates'))
     
     return template_name, template_dir
 
