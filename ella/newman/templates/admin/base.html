@@ -6,7 +6,10 @@
 	<link rel="stylesheet" type="text/css" href="{{ NEWMAN_MEDIA_URL }}css/base.css?{{ VERSION }}" />
     <link rel="stylesheet" type="text/css" href="{{ NEWMAN_MEDIA_URL }}css/top-navi.css?{{ VERSION }}" />
     <link rel="shortcut icon" href="{{ NEWMAN_MEDIA_URL }}ico/favicon.ico" type="image/x-icon" />
-	<script type="text/javascript">var MEDIA_URL = '{{ NEWMAN_MEDIA_URL }}';</script>
+	<script type="text/javascript">
+        var MEDIA_URL = '{{ NEWMAN_MEDIA_URL }}';
+        var BASE_URL = '{% url admin_index %}';
+    </script>
 	<meta name="robots" content="NONE,NOARCHIVE" />
 </head>
 
