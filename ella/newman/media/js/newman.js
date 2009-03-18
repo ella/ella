@@ -563,6 +563,11 @@ function adr(address, options) {
         location.hash = newhash;
     }
 }
+function get_adr(address, options) {
+    if (!options) options = {};
+    options.just_get = 1;
+    return adr(address, options);
+}
 
 // Get an URL to a CSS or JS file, attempt to load it into the document and call callback on success.
 function load_media(url, succ_fn, err_fn) {
@@ -659,9 +664,40 @@ function request_media(url) {
 }
 
 
-/////// END OF THE LIBRARY
-/////// 
-/////// BEGIN CODE FOR SPECIFIC USE
+/////// END OF THE CONTENT-BY-HASH LIBRARY
+
+
+// Drafts and templates
+function save_preset($form, title) {
+    var form_data = $form.serialize();
+    var things_to_send = {data: form_data};
+    if (title) things_to_send.title = title;
+    var url = get_adr('draft/save/');
+    var $saving_msg = show_message(_('Saving')+'...', {duration: 0});
+    $.ajax({
+        url: url,
+        data: things_to_send,
+        type: 'POST',
+        success: function(response_text) {
+            $saving_msg.remove();
+            show_message(_('Saved')+'.', {msgclass: 'okmsg', duration: 2000});
+            if (/(\d+),(.+)/.exec(response_text)) {
+                var id = RegExp.$1;
+                var actual_title = RegExp.$2;
+                $('#id_drafts').append(
+                    $('<option>').attr({value: id}).html(actual_title)
+                );
+            }
+        },
+        error: function(xhr) {
+            $saving_msg.remove();
+            show_message(xhr.responseText, {msgclass: 'errmsg'});
+        }
+    });
+}
+
+
+/////// CODE FOR CONTENT-SPECIFIC USE
 
 
 $( function() {
