@@ -23,7 +23,7 @@ class DraftForm(forms.Form):
         choices = ()
         for d in drafts:
             choices += (d.pk, d.__unicode__(),),
-        self.fields[_('drafts')] = forms.TypedChoiceField(choices=choices, coerce=lambda x: x, empty_value=_('Nothing'))
+        self.fields[_('drafts')] = forms.ChoiceField(choices=choices)
 
 class SiteFilterForm(forms.Form):
 
