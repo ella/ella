@@ -8,17 +8,15 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.core.mail import EmailMessage
 from django.views.decorators.cache import never_cache
 from django.contrib.auth import authenticate, login
+from django.contrib.contenttypes.models import ContentType
 
 from ella.newman.forms import SiteFilterForm
 from ella.newman.models import AdminSetting
 from ella.newman.decorators import require_AJAX
-from ella.newman.utils import json_decode, json_encode
+from ella.newman.utils import set_user_config_db, set_user_config_session, get_user_config, decode_category_filter_json
+from ella.newman.permission import has_model_list_permission
+from ella.newman.config import CATEGORY_FILTER, USER_CONFIG, NEWMAN_URL_PREFIX
 
-
-NEWMAN_URL_PREFIX = 'nm'
-
-# user config variables
-CATEGORY_FILTER = 'category_filter'
 
 class NewmanSite(AdminSite):
 
@@ -109,10 +107,9 @@ class NewmanSite(AdminSite):
                 login(request, user)
 
                 # load all user's specific settings into session
-                user_config = {}
                 for c in AdminSetting.objects.filter(user=user):
-                    user_config[c.var] = c.val
-                request.session['user_config'] = user_config
+                    uc = get_user_config(user, c.var)
+                    set_user_config_session(request.session, c.var, uc)
 
                 return HttpResponseRedirect(request.get_full_path())
             else:
@@ -125,15 +122,20 @@ class NewmanSite(AdminSite):
 
         data = {'sites': []}
         try:
-            data['sites'] = json_decode(request.session['user_config'][CATEGORY_FILTER])
+            data['sites'] = get_user_config(request.user, CATEGORY_FILTER)
         except KeyError:
             data['sites'] = []
 
         site_filter_form = SiteFilterForm(data=data, user=request.user)
+        cts = []
+        for model, model_admin in self._registry.items():
+            if has_model_list_permission(request.user, model):
+                cts.append(ContentType.objects.get_for_model(model))
 
         context = {
             'title': _('Site administration'),
             'site_filter_form': site_filter_form,
+            'searchable_content_types': cts,
         }
         context.update(extra_context or {})
         return render_to_response(self.index_template or 'admin/index.html', context,
@@ -165,16 +167,8 @@ class NewmanSite(AdminSite):
 
         site_filter_form = SiteFilterForm(user=request.user, data=request.POST)
         if site_filter_form.is_valid():
-            o, c = AdminSetting.objects.get_or_create(
-                user = request.user,
-                var = CATEGORY_FILTER
-            )
-            o.val = '%s' % json_encode(site_filter_form.cleaned_data['sites'])
-            o.save()
-            conf = request.session['user_config']
-            conf[CATEGORY_FILTER] = o.val
-            request.session['user_config'] = conf
-
+            set_user_config_db(request.user, CATEGORY_FILTER, site_filter_form.cleaned_data['sites'])
+            set_user_config_session(request.session, CATEGORY_FILTER, site_filter_form.cleaned_data['sites'])
             return HttpResponse(content=ugettext('Your settings was saved.'), mimetype='text/plain', status=200)
         else:
             return HttpResponse(content=ugettext('Error in form.'), mimetype='text/plain', status=405)

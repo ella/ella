@@ -31,6 +31,8 @@ def key_has_model_list_permission(func, user, model):
 #@cache_this(key_has_model_list_permission, timeout=CACHE_TIMEOUT)
 def has_model_list_permission(user, model):
     """ returns True if user has permission to access this model in newman, otherwise False """
+    if user.is_superuser:
+        return True
     # this function takes cca 0.6-7msec both variants (CategoryUserRole or by querying denormalized schema)
     ct = ContentType.objects.get_for_model(model)
     #qs = CategoryUserRole.objects.filter(user=user, group__permissions__content_type=ct)
@@ -65,9 +67,15 @@ def has_object_permission(user, obj, permission):
     either through standard Django permission, or via permission
     to any category that object is placed in.
     """
-    if user.has_perm(permission):
-        return True
     ct = ContentType.objects.get_for_model(obj)
+    if user.has_perm(permission):
+        additional = DenormalizedCategoryUserRole.objects.filter(
+            user_id=user.pk,
+            contenttype_id=ct.pk
+        )
+        # user has permission and hasn't any existing role to obj's content type
+        if additional.count() == 0:
+            return True
     if type(permission) in [list, tuple]:
         qs = DenormalizedCategoryUserRole.objects.filter(
             user_id=user.pk,
@@ -179,10 +187,17 @@ def model_category_fk(model):
     """ returns model's field related to Category """
     if not model:
         return None
+    fk_list = []
     for f in model._meta.fields:
         if is_category_fk(f):
-            return f
-    return None
+            fk_list.append(f)
+    if not fk_list:
+        return None
+    for fk in fk_list:
+        # fields named 'category' have higher priority
+        if fk.name.lower() == 'category':
+            return fk
+    return fk_list[0]
 
 def is_category_model(model):
     return model == Category

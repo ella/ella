@@ -1,9 +1,29 @@
+import re
+
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 from django.forms.widgets import CheckboxSelectMultiple
 
 from ella.core.models import Category
-from ella.newman.models import DenormalizedCategoryUserRole
+from ella.newman.models import DenormalizedCategoryUserRole, AdminUserDraft
+
+class DraftForm(forms.Form):
+
+    def __init__(self, data=None, **kwargs):
+        user = kwargs.pop('user', None)
+        ct = kwargs.pop('content_type', None)
+        super(DraftForm, self).__init__(data=data, **kwargs)
+        self.init_form(user, ct)
+
+    def init_form(self, user, ct):
+        drafts = AdminUserDraft.objects.filter(
+            ct = ct,
+            user = user
+        )
+        choices = ()
+        for d in drafts:
+            choices += (d.pk, d.__unicode__(),),
+        self.fields[_('drafts')] = forms.ChoiceField(choices=choices)
 
 class SiteFilterForm(forms.Form):
 
@@ -21,4 +41,3 @@ class SiteFilterForm(forms.Form):
         for c in cats:
             choices += (c.pk, c.__unicode__(),),
         self.fields['sites'] = forms.MultipleChoiceField(choices, widget=CheckboxSelectMultiple, required=False)
-

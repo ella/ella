@@ -2,10 +2,10 @@ from django.core.exceptions import PermissionDenied
 from django.conf import settings
 
 from django.contrib import admin
-from django.contrib.admin.options import InlineModelAdmin, IncorrectLookupParameters,\
-    FORMFIELD_FOR_DBFIELD_DEFAULTS
+from django.contrib.admin.options import InlineModelAdmin, IncorrectLookupParameters, FORMFIELD_FOR_DBFIELD_DEFAULTS
 from django.forms.models import BaseInlineFormSet
 from django.forms.util import ErrorList
+from django.forms.formsets import all_valid
 from django import template
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.contrib.admin.views.main import ERROR_FLAG
@@ -17,7 +17,6 @@ from django.utils.translation import ugettext as _
 from django.utils.encoding import force_unicode
 
 from django.contrib.admin.util import unquote
-from django.forms.formsets import all_valid
 from django.contrib.contenttypes.models import ContentType
 
 
@@ -26,6 +25,7 @@ from ella.newman import models, fields, widgets, utils
 from ella.newman.decorators import require_AJAX
 from ella.newman.permission import is_category_model, is_category_fk, model_category_fk, model_category_fk_value, applicable_categories
 from ella.newman.permission import has_category_permission, get_permission, permission_filtered_model_qs
+from ella.newman.forms import DraftForm
 from ella.core.models import Category
 
 DEFAULT_LIST_PER_PAGE = getattr(settings, 'NEWMAN_LIST_PER_PAGE', 25)
@@ -79,6 +79,7 @@ class NewmanModelAdmin(admin.ModelAdmin):
     def __init__(self, *args, **kwargs):
         super(NewmanModelAdmin, self).__init__(*args, **kwargs)
         self.list_per_page = DEFAULT_LIST_PER_PAGE
+        self.model_content_type = ContentType.objects.get_for_model(self.model)
 
     def get_urls(self):
         from django.conf.urls.defaults import patterns, url
@@ -100,26 +101,45 @@ class NewmanModelAdmin(admin.ModelAdmin):
             url(r'^(.+)/draft/save/$',
                 wrap(self.save_draft_view),
                 name='%sadmin_%s_%s_save_draft' % info),
+            url(r'^(.+)/draft/load/$',
+                wrap(self.load_draft_view),
+                name='%sadmin_%s_%s_load_draft' % info),
         )
         urlpatterns += super(NewmanModelAdmin, self).get_urls()
         return urlpatterns
 
     @require_AJAX
     def save_draft_view(self, request, extra_context=None):
-        "Autosave data or save as (named) template"
-        from ella.newman.models import AdminUserDraft
+        """ Autosave data (dataloss-prevention) or save as (named) template """
+        # TODO: clean too old autosaved... (keep last 3-5 autosaves)
+        # jQuery.post( 'http://localhost:8000/articles/article/1503079/draft/save/', {'data': '{"title": "Jarni style", "slug": "jarni-style" }'} )
+        data = request.POST.get('data', None)
+        if not data:
+            raise AttributeError('No data passed in POST variable "data".')
+        title = request.POST.get('title', '')
 
-        ct = ContentType.objects.get_for_model(self.model)
-
-        # TODO: clean old autosaved...
-
-        AdminUserDraft.objects.create(
-            ct = ct,
-            user = request.user,
-            data = request.POST.get('data')
+        models.AdminUserDraft.objects.create(
+            ct=self.model_content_type,
+            user=request.user,
+            data=data,
+            title=title
         )
-
         return HttpResponse(content=_('Model data was saved'), mimetype='text/plain')
+
+    @require_AJAX
+    def load_draft_view(self, request, extra_context=None):
+        """ Returns draft identified by request.GET['title'] variable.  """
+        id = request.GET.get('id', None)
+        if not id:
+            raise AttributeError('No id found in GET variable "id".')
+        drafts = models.AdminUserDraft.objects.filter(
+            ct=self.model_content_type,
+            user=request.user,
+            pk=id
+        )
+        if not drafts:
+            return HttpResponse(content=_('Any matching draft found.'), mimetype='text/plain', status=404) 
+        return HttpResponse(content=drafts[0].data, mimetype='text/plain')
 
     @require_AJAX
     def filters_view(self, request, extra_context=None):
@@ -419,6 +439,7 @@ class NewmanModelAdmin(admin.ModelAdmin):
             'form': form,
             'inlines': raw_inlines
         }
+        draft_form = DraftForm(user=request.user, content_type=self.model_content_type)
 
         context = {
             'title': _('Change %s') % force_unicode(opts.verbose_name),
@@ -432,6 +453,7 @@ class NewmanModelAdmin(admin.ModelAdmin):
             'errors': admin.helpers.AdminErrorList(form, formsets),
             'root_path': self.admin_site.root_path,
             'app_label': opts.app_label,
+            'draft_form': draft_form,
         }
         context.update(extra_context or {})
         return self.render_change_form(request, context, change=True, obj=obj)
@@ -456,16 +478,15 @@ class NewmanModelAdmin(admin.ModelAdmin):
         First semi-working draft of category-based permissions. It will allow permissions to be set per category
         effectively hiding the content the user has no permission to see/change.
         """
-        if request.user.is_superuser:
-            return super(NewmanModelAdmin, self).queryset(request)
         q = admin.ModelAdmin.queryset(self, request)
-
+        # user category filter
+        qs = utils.user_category_filter(q, request.user)
+        if request.user.is_superuser:
+            return qs
         view_perm = self.opts.app_label + '.' + 'view_' + self.model._meta.module_name.lower()
         change_perm = self.opts.app_label + '.' + 'change_' + self.model._meta.module_name.lower()
         perms = (view_perm, change_perm,)
-        qs = permission_filtered_model_qs(q, request.user, perms)
-        # user category filter
-        return utils.user_category_filter(qs, request.user)
+        return permission_filtered_model_qs(qs, request.user, perms)
 
 class NewmanInlineFormSet(BaseInlineFormSet):
     def get_queryset(self):
@@ -475,7 +496,7 @@ class NewmanInlineFormSet(BaseInlineFormSet):
                 qs = self.queryset
             else:
                 qs = self.model._default_manager.get_query_set()
-            # category base permissions
+            # category based permissions
             if not user.is_superuser:
                 for db_field in self.model._meta.fields:
                     if not is_category_fk(db_field):

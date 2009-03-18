@@ -438,6 +438,10 @@ else {
 //   Using this option disables the support of multiple '#'-separated specifiers.
 //   Other than the first one are ignored.
 function adr(address, options) {
+    if (address == undefined) {
+        carp('No address given to adr()');
+        return;
+    }
     
     // '#' chars in the address separate invividual requests for hash modification.
     // First deal with the first one and then recurse on the subsequent ones.
@@ -563,6 +567,10 @@ function adr(address, options) {
 // Get an URL to a CSS or JS file, attempt to load it into the document and call callback on success.
 function load_media(url, succ_fn, err_fn) {
     ;;; carp('loading media '+url);
+    
+    url.match(/(?:.*\/\/[^\/]*)?([^?]+)(?:\?.*)?/);
+    $(document).data('loaded_media')[ RegExp.$1 ] = url;
+    
     if (url.match(/\.(\w+)(?:$|\?)/))
         var ext = RegExp.$1;
     else throw('Unexpected URL format: '+url);
@@ -628,8 +636,15 @@ function load_media(url, succ_fn, err_fn) {
 
 
 var media_queue = [];
+$(document).data('loaded_media', {});
+function init_media() {
+    $(document).trigger('media_loaded').data('loaded_media', {});
+}
 function draw_media() {
-    if (media_queue.length == 0) return true;
+    if (media_queue.length == 0) {
+        init_media();
+        return true;
+    }
     var url = media_queue.shift();
     load_media(url, draw_media, draw_media);
 }
@@ -756,10 +771,38 @@ $( function() {
     // Re-initialization of third party libraries
     $(document).bind('content_added', function() {
         try {
-            DateTimeShortcuts.init();
             DateTimeShortcuts.admin_media_prefix = MEDIA_URL;
-        } catch(e) { carp(e); }
+            DateTimeShortcuts.init();
+        } catch(e) { if (e.name != 'ReferenceError') carp(e); }
     });
+    
+    // Initialization of JavaScripts
+    $(document).bind('media_loaded', function() {
+        var loaded_media = $(document).data('loaded_media');
+        if (loaded_media[ MEDIA_URL + 'js/admin/DateTimeShortcuts.js' ]) {
+            DateTimeShortcuts.admin_media_prefix = MEDIA_URL;
+            DateTimeShortcuts.init();
+        }
+        delete loaded_media[ MEDIA_URL + 'js/admin/DateTimeShortcuts.js' ];
+    });
+    
+    // The search button should send us to an address according to the thing selected in the select
+    function update_search_url() {
+        var option = $(this).find('option[selected]').val();
+        var $search_link = $('#search-form a.search.btn');
+        if (! option) {
+            $search_link.removeAttr('href');
+            return;
+        }
+        var href = $(this).find('option[selected]').val()
+                 + '?q='
+                 + escape( $('#search-form input[name=q]').val() );
+        $search_link.attr('href', href);
+    }
+    $(document).bind('content_added', function() {
+        $('#search-form select[name=action]').unbind('change', update_search_url).change(update_search_url);
+    });
+    $('#search-form select[name=action]').change(update_search_url);
 });
 
 function show_message(message, options) {

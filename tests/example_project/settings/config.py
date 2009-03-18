@@ -4,8 +4,8 @@ from os.path import join, dirname
 import example_project
 
 ADMINS = (
-    # ('Your Name', 'your_email@domain.com'),
 )
+
 
 MANAGERS = ADMINS
 
@@ -31,6 +31,13 @@ USE_I18N = True
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '88b-01f^x4lh$-s5-hdccnicekg07)niir2g6)93!0#k(=mfv$'
 
+EMAIL_SUBJECT_PREFIX = 'Example project admin: '
+
+# templates for this app
+DEBUG = True
+TEMPLATE_DEBUG = DEBUG
+DISABLE_CACHE_TEMPLATE = DEBUG
+
 # TODO: Fix logging
 # init logger
 #LOGGING_CONFIG_FILE = join(dirname(testbed.__file__), 'settings', 'logger.ini')
@@ -53,3 +60,4 @@ MEDIA_URL = '/static/'
 
 ADMIN_MEDIA_PREFIX = '/static/admin_media/'
 NEWMAN_MEDIA_PREFIX = '/static/newman_media/'
+

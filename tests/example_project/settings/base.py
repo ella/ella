@@ -30,13 +30,26 @@ ROOT_URLCONF = 'example_project.urls'
 
 TEMPLATE_DIRS = (
     join(dirname(example_project.__file__), 'templates'),
+    join(dirname(ella.__file__), 'newman', 'templates'),
+    join(dirname(django.__file__), 'contrib', 'admin', 'templates'),
 )
+
+ADMIN_ROOTS = (
+    join(dirname(ella.__file__), 'newman', 'media'),
+    join(dirname(django.__file__), 'contrib', 'admin', 'media'),
+)
+
+#APP_TEMPLATE_DIRS = (
+#    join(dirname(ella.__file__), 'ellaadmin', 'templates'),
+#    join(dirname(django.__file__), 'contrib', 'admin', 'templates'),
+#)
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.auth',
     'django.core.context_processors.media',
     'django.core.context_processors.request',
     'ella.newman.context_processors.newman_media',
+    'ella.core.context_processors.url_info',
 )
 
 INSTALLED_APPS = (
@@ -50,15 +63,15 @@ INSTALLED_APPS = (
     'ella.db_templates',
     'ella.photos',
     'ella.articles',
-    'ella.newman',
     'ella.positions',
 
     'example_project.services',
 
-    'django.contrib.admin',
-    'ella.ellaadmin',
+    'south',
 
-#    'south',
+    'ella.ellaadmin',
+    'ella.newman',
+    'django.contrib.admin',
 )
 
 VERSION = 1

@@ -44,17 +44,17 @@
 
 <div class="hpcol" style="width: 50%;">
 
-    <div class="hpbox search">
+    <div class="hpbox search" id="search-form">
         <h3>Hledat</h3>
         <div class="cnt">
             <input type="text" name="q"/>
             <select name="action" size="1">
-                <option>{% trans 'All' %}...</option>
-                {% for ct in cts %}
-                    <option value="/#/{{ ct.app_label }}/{{ ct.name|lower }}/">{% trans ct.name %}</option>
+                <option value="">{% trans 'All' %}...</option>
+                {% for ct in searchable_content_types %}
+                    <option value="/{{ ct.app_label }}/{{ ct.model }}/">{% trans ct.name %}</option>
                 {% endfor %}
             </select>
-            <a class="icn btn search def">{% trans 'Go' %}</a>
+            <a class="hashadr icn btn search def">{% trans 'Go' %}</a>
         </div>
     </div>
 
