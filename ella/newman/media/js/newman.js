@@ -14,6 +14,8 @@ function carp(message) {
     }
 }
 
+var BASE_PATH = window.BASE_URL ? BASE_URL.substr(0, BASE_URL.length-1) : '';
+
 var LF = 10, CR = 13;
 
 // localization
@@ -537,6 +539,7 @@ function adr(address, options) {
         }
         // absolute address -- replace what's in there.
         else if (address.charAt(0) == '/') {
+            new_address = BASE_PATH + new_address;
         }
         // relative address -- append to the end, but no farther than to a '?'
         else {
