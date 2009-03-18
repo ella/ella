@@ -8,4 +8,5 @@ class Spam(models.Model):
     weight = models.FloatField()
     expires = models.DateTimeField()
     name = models.CharField(max_length=255)
+    count = models.IntegerField()
 
