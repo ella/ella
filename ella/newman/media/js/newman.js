@@ -666,8 +666,10 @@ function request_media(url) {
 
 /////// END OF THE CONTENT-BY-HASH LIBRARY
 
+/////// CODE FOR CONTENT-SPECIFIC USE
 
-// Drafts and templates
+
+//// Drafts and templates
 function save_preset($form, title) {
     var form_data = $form.serialize();
     var things_to_send = {data: form_data};
@@ -696,8 +698,6 @@ function save_preset($form, title) {
     });
 }
 
-
-/////// CODE FOR CONTENT-SPECIFIC USE
 
 
 $( function() {
@@ -823,22 +823,14 @@ $( function() {
     });
     
     // The search button should send us to an address according to the thing selected in the select
-    function update_search_url() {
-        var option = $(this).find('option[selected]').val();
-        var $search_link = $('#search-form a.search.btn');
-        if (! option) {
-            $search_link.removeAttr('href');
-            return;
-        }
-        var href = $(this).find('option[selected]').val()
-                 + '?q='
-                 + escape( $('#search-form input[name=q]').val() );
-        $search_link.attr('href', href);
-    }
-    $(document).bind('content_added', function() {
-        $('#search-form select[name=action]').unbind('change', update_search_url).change(update_search_url);
+    $('#search-form a.search.btn').live('click', function() {
+        var $form = $('#search-form');
+        var option = $form.find('select[name=action] option[selected]').val();
+        var search_terms = $form.find('input[name=q]').val();
+        var url = option + '?q=' + escape(search_terms);
+        adr(url);
+        return false;
     });
-    $('#search-form select[name=action]').change(update_search_url);
 });
 
 function show_message(message, options) {
