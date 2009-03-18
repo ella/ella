@@ -13,7 +13,7 @@ class Migration:
     def forwards(self, orm):
         
         # Adding field 'Spam.count'
-        db.add_column('sample_spam', 'count', models.IntegerField())
+        db.add_column('sample_spam', 'count', models.IntegerField(null=True))
         
     
     
