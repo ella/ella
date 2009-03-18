@@ -31,8 +31,8 @@ class RichTextAreaWidget(forms.Textarea):
     'Widget representing the RichTextEditor.'
     class Media:
         js = (
-            settings.ADMIN_MEDIA_PREFIX + JS_EDITOR,
-            settings.ADMIN_MEDIA_PREFIX + JS_SHOWDOWN,
+            settings.NEWMAN_MEDIA_PREFIX + JS_EDITOR,
+            settings.NEWMAN_MEDIA_PREFIX + JS_SHOWDOWN,
         )
         css = {
             'screen': (settings.ADMIN_MEDIA_PREFIX + CSS_RICHTEXTAREA,),
@@ -46,8 +46,8 @@ class RichTextAreaWidget(forms.Textarea):
 
 class AdminSuggestWidget(forms.TextInput):
     class Media:
-        js = (settings.ADMIN_MEDIA_PREFIX + JS_JQUERY_UI, settings.ADMIN_MEDIA_PREFIX + JS_GENERIC_SUGGEST,)
-        css = {'screen': (settings.ADMIN_MEDIA_PREFIX + CSS_GENERIC_SUGGEST,),}
+        js = (settings.NEWMAN_MEDIA_PREFIX + JS_JQUERY_UI, settings.NEWMAN_MEDIA_PREFIX + JS_GENERIC_SUGGEST,)
+        css = {'screen': (settings.NEWMAN_MEDIA_PREFIX + CSS_GENERIC_SUGGEST,),}
 
     def __init__(self, db_field, attrs={}, **kwargs):
         self.db_field = db_field
