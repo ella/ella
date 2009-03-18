@@ -15,7 +15,7 @@ def _get_template_vars(template_name):
 
     dir = dirname(models.__file__)
     # if models is a package and not a module, add '..'
-    if models.__package__ == models.__name__:
+    if '__init__' in models.__file__:
         dir = join(dir, pardir)
 
     template_dir = abspath(join(dir, 'templates'))
