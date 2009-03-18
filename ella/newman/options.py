@@ -118,13 +118,14 @@ class NewmanModelAdmin(admin.ModelAdmin):
             raise AttributeError('No data passed in POST variable "data".')
         title = request.POST.get('title', '')
 
-        models.AdminUserDraft.objects.create(
+        obj = models.AdminUserDraft.objects.create(
             ct=self.model_content_type,
             user=request.user,
             data=data,
             title=title
         )
-        return HttpResponse(content=_('Model data was saved'), mimetype='text/plain')
+        result = '%d,%s' % (obj.pk, obj.__unicode__())
+        return HttpResponse(content=result, mimetype='text/plain')
 
     @require_AJAX
     def load_draft_view(self, request, extra_context=None):
