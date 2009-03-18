@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.translation import ugettext_lazy as _
 
 
 class Spam(models.Model):
@@ -9,4 +10,9 @@ class Spam(models.Model):
     expires = models.DateTimeField()
     name = models.CharField(max_length=255)
     count = models.IntegerField()
+
+    class Meta:
+        unique_together = (('name', 'expires'),)
+        verbose_name = _('Spam')
+        verbose_name_plural = _('Spam')
 
