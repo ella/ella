@@ -58,12 +58,13 @@ class AdminUserDraft(models.Model):
     user = CachedForeignKey(User, verbose_name=_('User'))
     data = models.TextField(_('Data'))
 
-    # Template title
+    # Preset title
     title = models.CharField(_('Title'), max_length=64, blank=True)
-    slug = models.SlugField(_('Slug'), max_length=64, blank=True)
-
-    is_template = models.BooleanField(_('Is template'), default=False)
     ts = models.DateTimeField(editable=False, auto_now_add=True)
+
+    @property
+    def is_preset(self):
+        return self.title == ''
 
     def __unicode__(self):
         if self.is_template:
@@ -73,7 +74,7 @@ class AdminUserDraft(models.Model):
     class Meta:
         verbose_name = _('Draft item')
         verbose_name_plural = _('Draft items')
-        ordering = ('-is_template','title')
+        ordering = ('title',)
 
 
 class AdminSetting(models.Model):
