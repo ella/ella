@@ -32,7 +32,7 @@ sys.argv.insert(1, '--with-django')
 
 import nose
 
-nose.run(
+nose.run_exit(
     defaultTest=dirname(__file__),
 )
 
