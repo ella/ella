@@ -64,10 +64,10 @@ class AdminUserDraft(models.Model):
 
     @property
     def is_preset(self):
-        return self.title == ''
+        return self.title != ''
 
     def __unicode__(self):
-        if self.is_template:
+        if self.is_preset:
             return self.title
         return "%s %s (%s)" % (ugettext("Autosaved"), self.ct, self.ts)
 
