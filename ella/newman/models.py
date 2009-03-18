@@ -64,7 +64,7 @@ class AdminUserDraft(models.Model):
 
     @property
     def is_preset(self):
-        return self.title == ''
+        return self.title != ''
 
     def __unicode__(self):
         if self.is_preset:
