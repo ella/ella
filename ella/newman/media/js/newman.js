@@ -4,12 +4,12 @@
 ;;;     for (var i in obj) s += i + ': ' + obj[i] + "\n";
 ;;;     alert(s);
 ;;; }
-function carp(message) {
+function carp() {
     try {
         console.log.apply(this, arguments);
     } catch(e) {
         try {
-            console.log(message);
+            console.log(arguments);
         } catch(e) { }
     }
 }
@@ -399,6 +399,10 @@ else {
         show_loading();
         $.get(url, function(data) {
             inject_content($target, data, address);
+            $(document)
+                .data('injection_storage', [$target.attr('id')])
+                .trigger('content_added')
+                .removeData('injection_storage');
         });
     }
     
@@ -671,9 +675,7 @@ function request_media(url) {
 
 /////// CODE FOR CONTENT-SPECIFIC USE
 
-
-$( function() {
-
+(function() {
     //// Drafts and templates
     function save_preset($form, title) {
         var form_data = JSON.stringify( $form.serializeArray() );
@@ -733,9 +735,14 @@ $( function() {
             }
         });
     }
+    $('a#save-form').live('click', function() {
+        save_preset($('.change-form'), prompt(_('Enter template name')));
+        return false;
+    });
+})();
 
 
-
+$( function() {
     //// Ajax forms
     
     function get_inputs($form) {    // all except metadata
