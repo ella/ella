@@ -1,3 +1,5 @@
+import logging
+
 from django.core.exceptions import PermissionDenied
 from django.conf import settings
 
@@ -18,15 +20,18 @@ from django.utils.encoding import force_unicode
 from django.contrib.admin.util import unquote
 from django.contrib.contenttypes.models import ContentType
 
-
+from ella.core.cache.utils import get_cached_list
 from ella.newman.changelist import NewmanChangeList, FilterChangeList
 from ella.newman import models, fields, widgets, utils
 from ella.newman.decorators import require_AJAX
 from ella.newman.permission import is_category_model, model_category_fk, model_category_fk_value, applicable_categories
 from ella.newman.permission import has_category_permission, get_permission, permission_filtered_model_qs, is_category_fk
 from ella.newman.forms import DraftForm
+from ella.newman.models import AdminHelpItem
 
 DEFAULT_LIST_PER_PAGE = getattr(settings, 'NEWMAN_LIST_PER_PAGE', 25)
+
+log = logging.getLogger('ella.newman')
 
 def formfield_for_dbfield_factory(cls, db_field, **kwargs):
     formfield_overrides = dict(FORMFIELD_FOR_DBFIELD_DEFAULTS, **cls.formfield_overrides)
@@ -451,6 +456,15 @@ class NewmanModelAdmin(admin.ModelAdmin):
         if media._css.has_key('screen'):
             raw_media.extend(media._css['screen'])
         raw_media.extend(media._js)
+
+        help_qs = get_cached_list(AdminHelpItem, ct=self.model_content_type, lang=settings.LANGUAGE_CODE)
+
+        for msg in help_qs:
+            try:
+                form.fields[msg.field].hint_text = msg.short
+                form.fields[msg.field].help_text = msg.long
+            except KeyError:
+                pass
 
         raw_frm_all = {
             'form': form,
