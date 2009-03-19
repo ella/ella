@@ -137,7 +137,7 @@ class NewmanModelAdmin(admin.ModelAdmin):
             pk=id
         )
         if not drafts:
-            return HttpResponse(content=_('Any matching draft found.'), mimetype='text/plain', status=404)
+            return HttpResponse(content=_('No matching draft found.'), mimetype='text/plain', status=404)
         return HttpResponse(content=drafts[0].data, mimetype='text/plain')
 
     @require_AJAX

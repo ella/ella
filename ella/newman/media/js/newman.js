@@ -674,7 +674,7 @@ function request_media(url) {
 
 //// Drafts and templates
 function save_preset($form, title) {
-    var form_data = $form.serialize();
+    var form_data = JSON.stringify( $form.serializeArray() );
     var things_to_send = {data: form_data};
     if (title) things_to_send.title = title;
     var url = get_adr('draft/save/');
@@ -696,6 +696,37 @@ function save_preset($form, title) {
         },
         error: function(xhr) {
             $saving_msg.remove();
+            show_message(xhr.responseText, {msgclass: 'errmsg'});
+        }
+    });
+}
+
+function restore_form(raw, $form) {
+    $form.get(0).reset();
+    var form_data = JSON.parse(raw);
+    for (var i = 0; i < form_data.length; i++) {
+        var form_datum = form_data[i];
+        var key = form_datum['name'];
+        var val = form_datum['value'];
+        var $inputs = $form.find(':input[name='+key+']');
+        if (!$inputs || $inputs.length == 0) {
+            carp('restore_form: input #'+key+' not found');
+            continue;
+        }
+        var val_esc = val.replace(/\W/g, '\\$1');
+        $inputs.filter(':checkbox,:radio').find('[value='+val_esc+']').attr({checked: 'checked'});
+        $inputs.filter('option[value='+val_esc+']').attr({selected: 'selected'});
+        $inputs.filter(':text,[type=hidden],textarea').val(val);
+    }
+}
+function load_preset(id, $form) {
+    $.ajax({
+        url: get_adr('draft/load/'),
+        data: {id:id},
+        success: function(form_data) {
+            restore_form(form_data, $form);
+        },
+        error: function(xhr) {
             show_message(xhr.responseText, {msgclass: 'errmsg'});
         }
     });
