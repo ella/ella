@@ -10,8 +10,9 @@ from ella.newman.sites import site
 from ella.newman.options import NewmanModelAdmin
 from ella.newman import models as m
 from ella.newman.filterspecs import filter_spec
-from ella.newman.permission import is_category_fk, applicable_categories
-from ella.newman.utils import user_category_filter
+from ella.newman.permission import is_category_fk, is_site_fk, applicable_categories
+from ella.newman.utils import user_category_filter, get_user_config
+from ella.newman.config import CATEGORY_FILTER
 
 class DevMessageAdmin(NewmanModelAdmin):
     list_display = ('title', 'author', 'version', 'ts',)
@@ -64,6 +65,21 @@ def category_field_filter(fspec):
     for cat in user_category_filter(qs, fspec.user):
         lookup_var = '%s__%s__exact' % (fspec.field_path, fspec.f.rel.to._meta.pk.name)
         link = ( cat, {lookup_var: cat.pk})
+        fspec.links.append(link)
+    return True
+
+@filter_spec(lambda field: is_site_fk(field))
+def site_field_filter(fspec):
+    category_ids = get_user_config(fspec.user, CATEGORY_FILTER)
+    if not category_ids:
+        category_ids = m.DenormalizedCategoryUserRole.objects.root_categories_by_user(fspec.user)
+    qs = Category.objects.filter(pk__in=category_ids)
+    print qs
+    sites = map(lambda c: c.site, qs)
+    for site in sites:
+        #category__site__id__exact=1
+        lookup_var = '%s__%s__exact' % (fspec.field_path, fspec.f.rel.to._meta.pk.name)
+        link = ( site, {lookup_var: site.pk})
         fspec.links.append(link)
     return True
 
