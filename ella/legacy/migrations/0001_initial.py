@@ -39,6 +39,8 @@ class Migration:
         # add a temporary column to remember the old ID
         db.add_column('core_publishable', 'old_id', models.IntegerField(null=True))
 
+        # TODO:
+        # migrate as much as possible to south db api
         db.execute_many('''
 # move the data
 # articles
@@ -192,6 +194,7 @@ ALTER TABLE `core_placement` DROP COLUMN `target_ct_id`;
         db.delete_column('core_publishable', 'old_id')
 
 
+        # TODO: run migrate fake on all apps
 
 
     '''
