@@ -13,7 +13,7 @@
 {% spaceless %}
 {% block content_toolbar_content %}
     <ul style="float: left;">
-        <li><a href="#" class="icn btn save" onclick="prompt('Enter a template name:');return false;">{% trans "Save as template" %}</a></li>
+        <li><a href="#" class="icn btn save" id="save-form">{% trans "Save as template" %}</a></li>
         <li>{{ draft_form }}</li>
     </ul>
     {% if change %}
