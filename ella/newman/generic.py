@@ -5,11 +5,10 @@ from django.contrib.contenttypes.generic import generic_inlineformset_factory, \
 from django.forms.formsets import DELETION_FIELD_NAME
 from django.forms.util import ErrorList
 
-from ella.newman import models, options
-from ella.newman import fields
+from ella.newman import options, utils, fields
 from ella.newman.permission import get_permission, permission_filtered_model_qs, has_category_permission
 from ella.newman.permission import model_category_fk_value, model_category_fk, has_object_permission
-from ella.newman.permission import is_category_fk, is_category_model, applicable_categories
+from ella.newman.permission import is_category_fk
 
 class BaseGenericInlineFormSet(DJBaseGenericInlineFormSet):
     """
@@ -39,10 +38,12 @@ class BaseGenericInlineFormSet(DJBaseGenericInlineFormSet):
         cfield = model_category_fk_value(self.model)
         if not cfield:
             return out
-        view_perm = get_permission('view', self.instance)
-        change_perm = get_permission('change', self.instance)
+        # self.instance .. Article, self.model .. Placement (in GenericInlineFormSet for Placement Inline)
+        view_perm = get_permission('view', self.model)
+        change_perm = get_permission('change', self.model)
         perms = (view_perm, change_perm,)
         qs = permission_filtered_model_qs(out, user, perms)
+        qs = utils.user_category_filter(qs, user)
         return qs
 
     def full_clean(self):
@@ -132,7 +133,8 @@ class GenericInlineModelAdmin(options.NewmanInlineModelAdmin):
         super(GenericInlineModelAdmin, self).__init__(*args, **kwargs)
 
     def get_formset(self, request, obj=None):
-        setattr(self.form, '_magic_user', request.user) # prasarna
+        setattr(self.form, '_magic_user', request.user) # magic variable passing to form
+        setattr(self, '_magic_user', request.user) # magic variable
         if self.declared_fieldsets:
             fields = flatten_fieldsets(self.declared_fieldsets)
         else:
@@ -149,7 +151,6 @@ class GenericInlineModelAdmin(options.NewmanInlineModelAdmin):
             "can_order": False,
             "fields": fields,
         }
-        self.user = request.user
         return generic_inlineformset_factory(self.model, **defaults)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
@@ -157,7 +158,7 @@ class GenericInlineModelAdmin(options.NewmanInlineModelAdmin):
             fld = super(GenericInlineModelAdmin, self).formfield_for_dbfield(db_field, **kwargs)#FIXME get fld.queryset different way
             kwargs.update({
                 'model': self.model,
-                'user': self.user
+                'user': self._magic_user
             })
             return fields.CategoryChoiceField(fld.queryset, **kwargs)
         return options.formfield_for_dbfield_factory(self, db_field, **kwargs)

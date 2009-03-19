@@ -293,6 +293,15 @@ class ListingInlineOptions( NewmanTabularInline ):
             kwargs['widget'] = widgets.ListingCategoryWidget
         return super( ListingInlineOptions, self ).formfield_for_dbfield( db_field, **kwargs )
 
+class PlacementOptions(NewmanModelAdmin):
+    list_display = ('target_admin', 'category', 'publish_from', 'full_url',)
+    list_filter = ('publish_from', 'category', 'target_ct',)
+    inlines = (ListingInlineOptions,)
+    fieldsets = (
+        (_('target'), {'fields': ('target_ct', 'target_id', 'slug', 'category',), 'classes': ('wide',)},),
+        (_('time'), {'fields': ('publish_from','publish_to', 'static',), 'classes': ('wide',)},),
+)
+
 # ------------------------------------
 # Articles
 # ------------------------------------
@@ -377,6 +386,7 @@ site.register(Article, ArticleOptions)
 site.register(Category, CategoryOptions)
 site.register(Author, AuthorOptions)
 site.register(Source, SourceOptions)
+site.register(Placement, PlacementOptions)
 
 
 # ------------------------------------
