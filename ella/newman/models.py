@@ -129,21 +129,14 @@ class CategoryUserRole(models.Model):
         for p in self.group.permissions.all():
             code = '%s.%s' % (p.content_type.app_label, p.codename)
             cats = compute_applicable_categories_objects(self.user, code)
+            # create denormalized roles
             for c in cats:
-                existing = DenormalizedCategoryUserRole.objects.filter(
-                    contenttype_id=p.content_type.pk,
-                    user_id=self.user.pk,
-                    permission_codename=code,
-                    category_id=c.pk
-                )
-                if existing:
-                    continue
                 root_cat = c.main_parent
                 if not root_cat:
                     root_cat = c #c is top category
                 elif root_cat.tree_parent_id:
                     root_cat = root_cat.get_tree_parent()
-                d = DenormalizedCategoryUserRole(
+                obj, created = DenormalizedCategoryUserRole.objects.get_or_create(
                     contenttype_id=p.content_type.pk,
                     user_id=self.user.pk,
                     permission_codename=code,
@@ -151,7 +144,6 @@ class CategoryUserRole(models.Model):
                     category_id=c.pk,
                     root_category_id=root_cat.pk
                 )
-                d.save()
 
     class Meta:
         verbose_name = _("User role in category")

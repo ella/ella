@@ -23,18 +23,24 @@ from ella.newman.changelist import NewmanChangeList, FilterChangeList
 from ella.newman import models, fields, widgets, utils
 from ella.newman.decorators import require_AJAX
 from ella.newman.permission import is_category_model, model_category_fk, model_category_fk_value, applicable_categories
-from ella.newman.permission import has_category_permission, get_permission, permission_filtered_model_qs
+from ella.newman.permission import has_category_permission, get_permission, permission_filtered_model_qs, is_category_fk
 from ella.newman.forms import DraftForm
 
 DEFAULT_LIST_PER_PAGE = getattr(settings, 'NEWMAN_LIST_PER_PAGE', 25)
 
 def formfield_for_dbfield_factory(cls, db_field, **kwargs):
-
     formfield_overrides = dict(FORMFIELD_FOR_DBFIELD_DEFAULTS, **cls.formfield_overrides)
-
-    if 'request' in kwargs:
-        request = kwargs.pop('request', None)
-        user = request.user
+    custom_param_names = ('request', 'user', 'model', 'super_field')
+    custom_params = {}
+    # move custom kwargs from kwargs to custom_params
+    for key in kwargs:
+        if key not in custom_param_names:
+            continue
+        custom_params[key] = kwargs[key]
+        if key == 'request':
+            custom_params['user'] = custom_params[key].user
+    for key in custom_param_names:
+        kwargs.pop(key, None)
 
     for css_class, rich_text_fields in getattr(cls, 'rich_text_fields', {}).iteritems():
         if db_field.name in rich_text_fields:
@@ -64,6 +70,14 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
             'lookup': cls.suggest_fields[db_field.name]
         })
         return fields.AdminSuggestField(db_field, **kwargs)
+    # magic around restricting category choices in all ForeignKey (related to Category) fields
+    if is_category_fk(db_field) and 'model' in custom_params:
+        kwargs.update({
+            'model': custom_params['model'],
+            'user': custom_params['user']
+        })
+        super_qs = custom_params['super_field'].queryset
+        return fields.CategoryChoiceField(super_qs, **kwargs)
 
     if db_field.__class__ in formfield_overrides:
         kwargs = dict(formfield_overrides[db_field.__class__], **kwargs)
@@ -78,6 +92,10 @@ class NewmanModelAdmin(admin.ModelAdmin):
         super(NewmanModelAdmin, self).__init__(*args, **kwargs)
         self.list_per_page = DEFAULT_LIST_PER_PAGE
         self.model_content_type = ContentType.objects.get_for_model(self.model)
+
+    def get_form(self, request, obj):
+        self.user = request.user
+        return super(NewmanModelAdmin, self).get_form(request, obj)
 
     def get_urls(self):
         from django.conf.urls.defaults import patterns, url
@@ -113,7 +131,7 @@ class NewmanModelAdmin(admin.ModelAdmin):
         # jQuery.post( 'http://localhost:8000/articles/article/1503079/draft/save/', {'data': '{"title": "Jarni style", "slug": "jarni-style" }'} )
         data = request.POST.get('data', None)
         if not data:
-            raise AttributeError('No data passed in POST variable "data".')
+            return HttpResponse(content=_('No data passed in POST variable "data".'), mimetype='text/plain', status=405)
         title = request.POST.get('title', '')
 
         obj = models.AdminUserDraft.objects.create(
@@ -130,7 +148,7 @@ class NewmanModelAdmin(admin.ModelAdmin):
         """ Returns draft identified by request.GET['title'] variable.  """
         id = request.GET.get('id', None)
         if not id:
-            raise AttributeError('No id found in GET variable "id".')
+            return HttpResponse(content=_('No id found in GET variable "id".'), mimetype='text/plain', status=405)
         drafts = models.AdminUserDraft.objects.filter(
             ct=self.model_content_type,
             user=request.user,
@@ -470,6 +488,10 @@ class NewmanModelAdmin(admin.ModelAdmin):
         f._set_queryset(qs)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
+        if is_category_fk(db_field):
+            kwargs['super_field'] = super(NewmanModelAdmin, self).formfield_for_dbfield(db_field, **kwargs)
+        kwargs['model'] = self.model
+        kwargs['user'] = self.user
         return formfield_for_dbfield_factory(self, db_field, **kwargs)
 
     def queryset(self, request):
@@ -499,11 +521,12 @@ class NewmanInlineFormSet(BaseInlineFormSet):
             if not user.is_superuser:
                 category_fk = model_category_fk(self.model)
                 if category_fk:
-                    view_perm = get_permission('view', self.instance)
-                    change_perm = get_permission('change', self.instance)
+                    # in ListingInlineOptions: self.instance .. Placement instance, self.model .. Listing
+                    view_perm = get_permission('view', self.model)
+                    change_perm = get_permission('change', self.model)
                     perms = (view_perm, change_perm,)
                     qs = permission_filtered_model_qs(qs, user, perms)
-
+            # user filtered categories
             qs = utils.user_category_filter(qs, user)
 
             if self.max_num > 0:
@@ -515,12 +538,18 @@ class NewmanInlineFormSet(BaseInlineFormSet):
 class NewmanInlineModelAdmin(InlineModelAdmin):
     formset = NewmanInlineFormSet
 
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        return formfield_for_dbfield_factory(self, db_field, **kwargs)
-
     def get_formset(self, request, obj=None):
-        setattr(self.form, '_magic_user', request.user) # prasarna
+        setattr(self.form, '_magic_user', request.user) # magic variable assigned to form
+        setattr(self, '_magic_user', request.user) # magic variable
+        self.user = request.user
         return super(NewmanInlineModelAdmin, self).get_formset(request, obj)
+
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        if is_category_fk(db_field):
+            kwargs['super_field'] = super(NewmanInlineModelAdmin, self).formfield_for_dbfield(db_field, **kwargs)
+        kwargs['model'] = self.model
+        kwargs['user'] = self._magic_user
+        return formfield_for_dbfield_factory(self, db_field, **kwargs)
 
 class NewmanStackedInline(NewmanInlineModelAdmin):
     template = 'admin/edit_inline/stacked.html'
