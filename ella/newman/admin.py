@@ -5,11 +5,13 @@ import datetime
 from django.db import models
 from django.utils.translation import ugettext as _
 
+from ella.core.models import Category
 from ella.newman.sites import site
 from ella.newman.options import NewmanModelAdmin
 from ella.newman import models as m
 from ella.newman.filterspecs import filter_spec
-from ella.newman.permission import is_category_fk
+from ella.newman.permission import is_category_fk, applicable_categories
+from ella.newman.utils import user_category_filter
 
 class DevMessageAdmin(NewmanModelAdmin):
     list_display = ('title', 'author', 'version', 'ts',)
@@ -54,35 +56,14 @@ site.register(m.CategoryUserRole, CategoryUserRoleAdmin)
 import register
 
 
-# Example of custom registered DateField filter. Filter is inserted to the beginning of filter chain.
-@filter_spec(lambda f: isinstance(f, models.DateField))
-def customized_date_field_filter(fspec):
-    params = fspec.params; model = fspec.model; model_admin = fspec.model_admin; field_path = fspec.field_path
-    fspec.field_generic = '%s__' % fspec.field_path
-    fspec.date_params = dict([(k, v) for k, v in params.items() if k.startswith(fspec.field_generic)])
-    today = datetime.date.today()
-    one_week_ago = today - datetime.timedelta(days=7)
-    today_str = isinstance(fspec.field, models.DateTimeField) and today.strftime('%Y-%m-%d 23:59:59') or today.strftime('%Y-%m-%d')
-
-    fspec.links = (
-        (_('Any date'), {}),
-        (_('Today'), {'%s__year' % fspec.field_path: str(today.year),
-                   '%s__month' % fspec.field_path: str(today.month),
-                   '%s__day' % fspec.field_path: str(today.day)}),
-        (_('Past 7 days'), {'%s__gte' % fspec.field_path: one_week_ago.strftime('%Y-%m-%d'),
-                         '%s__lte' % fspec.field_path: today_str}),
-        (_('This month'), {'%s__year' % fspec.field_path: str(today.year),
-                         '%s__month' % fspec.field_path: str(today.month)}),
-        (_('This year'), {'%s__year' % fspec.field_path: str(today.year)})
-)
-    return True
-
-def is_category_field(field):
-    inst = is_category_fk(field)
-    print '%s is_category_field: %s' % (field, inst)
-    return inst
-
-# Category filter -- restricted categories accordingly to CategoryUserRoles and categories filtered via AdminSettings
-@filter_spec(is_category_field)
+# Category filter -- restricted categories accordingly to CategoryUserRoles and categories filtered via AdminSettings.
+# custom registered DateField filter. Filter is inserted to the beginning of filter chain.
+@filter_spec(lambda field: is_category_fk(field))
 def category_field_filter(fspec):
+    qs = Category.objects.filter(pk__in=applicable_categories(fspec.user))
+    for cat in user_category_filter(qs, fspec.user):
+        lookup_var = '%s__%s__exact' % (fspec.field_path, fspec.f.rel.to._meta.pk.name)
+        link = ( cat, {lookup_var: cat.pk})
+        fspec.links.append(link)
     return True
+

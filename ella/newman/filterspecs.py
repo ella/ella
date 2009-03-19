@@ -19,8 +19,14 @@ class CustomFilterSpec(FilterSpec):
         self.state = 0
         self.params = params
         self.model = model
+        self.links = []
         self.model_admin = model_admin
         self.field_path = field_path
+        self.user = request.user
+        #self.lookup_val = request.GET.get(self.lookup_kwarg, None) #selected filter value (not label)
+        self.lookup_val = ''
+        self.f = f
+        self.request = request
         super(CustomFilterSpec, self).__init__(f, request, params, model, model_admin, field_path=field_path)
         self.request_path_info = request.path_info
 
@@ -35,8 +41,8 @@ class CustomFilterSpec(FilterSpec):
             self.state = 1
         if self.state > 0:
             for title, param_dict in self.links:
-                yield {'selected': self.date_params == param_dict,
-                       'query_string': cl.get_query_string(param_dict, [self.field_generic]),
+                yield {'selected': self.lookup_val == param_dict,
+                       'query_string': cl.get_query_string(param_dict, []),
                        'display': title}
 
 
