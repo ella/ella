@@ -13,7 +13,7 @@ from django.forms.models import ModelChoiceField
 from django.db.models.fields.related import ManyToManyField
 from django.contrib.admin.widgets import AdminFileWidget
 
-from ella.newman import widgets, models, utils
+from ella.newman import widgets, utils
 from ella.newman.permission import get_permission, permission_filtered_model_qs, has_category_permission
 
 class RichTextField(fields.Field):

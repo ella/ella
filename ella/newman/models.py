@@ -68,8 +68,8 @@ class AdminUserDraft(models.Model):
 
     def __unicode__(self):
         if self.is_preset:
-            return self.title
-        return "%s %s (%s)" % (ugettext("Autosaved"), self.ct, self.ts)
+            return u"%s (%s)" % (self.title, self.ts)
+        return u"%s %s (%s)" % (ugettext("Autosaved"), self.ct, self.ts)
 
     class Meta:
         verbose_name = _('Draft item')

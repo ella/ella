@@ -5,10 +5,10 @@ from django.contrib.contenttypes.generic import generic_inlineformset_factory, \
 from django.forms.formsets import DELETION_FIELD_NAME
 from django.forms.util import ErrorList
 
-from ella.newman import models, options, utils, fields
+from ella.newman import options, utils, fields
 from ella.newman.permission import get_permission, permission_filtered_model_qs, has_category_permission
 from ella.newman.permission import model_category_fk_value, model_category_fk, has_object_permission
-from ella.newman.permission import is_category_fk, is_category_model, applicable_categories
+from ella.newman.permission import is_category_fk
 
 class BaseGenericInlineFormSet(DJBaseGenericInlineFormSet):
     """

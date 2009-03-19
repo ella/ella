@@ -3,11 +3,10 @@ Category based permission handling functions.
 These should be used by other modules rather than accessing
 CategoryUserRole objects.
 """
-from time import time
 import logging
 
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.auth.models import User, Group, Permission
+from django.contrib.auth.models import Permission
 from django.db.models import query, ForeignKey, ManyToManyField
 
 from ella.core.models import Category

@@ -13,9 +13,9 @@ from django.contrib.contenttypes.models import ContentType
 from ella.newman.forms import SiteFilterForm
 from ella.newman.models import AdminSetting
 from ella.newman.decorators import require_AJAX
-from ella.newman.utils import set_user_config_db, set_user_config_session, get_user_config, decode_category_filter_json
+from ella.newman.utils import set_user_config_db, set_user_config_session, get_user_config
 from ella.newman.permission import has_model_list_permission
-from ella.newman.config import CATEGORY_FILTER, USER_CONFIG, NEWMAN_URL_PREFIX
+from ella.newman.config import CATEGORY_FILTER, NEWMAN_URL_PREFIX
 
 
 class NewmanSite(AdminSite):

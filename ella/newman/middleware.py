@@ -1,10 +1,9 @@
-from django.conf import settings
-from ella.newman.utils import decode_category_filter_json, get_user_config, set_user_config
+from ella.newman.utils import set_user_config
 from ella.newman.config import USER_CONFIG, CATEGORY_FILTER
 
 class AdminSettingsMiddleware(object):
-    """ 
-    Middleware appends to request.user variable his AdminSettings 
+    """
+    Middleware appends to request.user variable his AdminSettings
     due to minimalization of number of database queries.
     """
     def process_request(self, request):
