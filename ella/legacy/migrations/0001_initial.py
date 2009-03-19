@@ -35,10 +35,11 @@ class Migration:
             ('author', models.ForeignKey(Author, null=False))
         ))
 
-        db.execute_many('''
-# add a temporary column to remember the old ID
-ALTER TABLE `core_publishable` ADD COLUMN `old_id` integer NULL;
 
+        # add a temporary column to remember the old ID
+        db.add_column('core_publishable', 'old_id', models.IntegerField(null=True))
+
+        db.execute_many('''
 # move the data
 # articles
 INSERT INTO
@@ -186,6 +187,11 @@ ALTER TABLE `core_placement` DROP FOREIGN KEY `core_placement_ibfk_2`;
 ALTER TABLE `core_placement` DROP COLUMN `target_ct_id`;
 
 ''')
+
+        # delete temporary column to remember the old ID
+        db.delete_column('core_publishable', 'old_id')
+
+
 
 
     '''
