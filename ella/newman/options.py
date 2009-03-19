@@ -23,7 +23,7 @@ from ella.newman.changelist import NewmanChangeList, FilterChangeList
 from ella.newman import models, fields, widgets, utils
 from ella.newman.decorators import require_AJAX
 from ella.newman.permission import is_category_model, model_category_fk, model_category_fk_value, applicable_categories
-from ella.newman.permission import has_category_permission, get_permission, permission_filtered_model_qs
+from ella.newman.permission import has_category_permission, get_permission, permission_filtered_model_qs, is_category_fk
 from ella.newman.forms import DraftForm
 
 DEFAULT_LIST_PER_PAGE = getattr(settings, 'NEWMAN_LIST_PER_PAGE', 25)
