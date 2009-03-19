@@ -21,22 +21,25 @@ class InfoBoxOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     rich_text_fields = {None: ('content',)}
 
 class ArticleOptions(EllaAdminOptionsMixin, EllaModelAdmin):
+    pass
+    '''
     list_display = ('title', 'category', 'photo_thumbnail', 'created', 'article_age', 'get_hits', 'pk', 'full_url',)
     date_hierarchy = 'created'
     ordering = ('-created',)
     fieldsets = (
         (_("Article heading"), {'fields': ('title', 'upper_title', 'updated', 'slug')}),
-        (_("Article contents"), {'fields': ('perex',)}),
+        (_("Article contents"), {'fields': ('description',)}),
         (_("Metadata"), {'fields': ('category', 'authors', 'source', 'photo')}),
 )
     raw_id_fields = ('photo',)
     list_filter = ('category__site', 'created', 'category', 'authors',)
-    search_fields = ('title', 'upper_title', 'perex', 'slug', 'authors__name', 'authors__slug',) # FIXME: 'tags__tag__name',)
+    search_fields = ('title', 'upper_title', 'description', 'slug', 'authors__name', 'authors__slug',) # FIXME: 'tags__tag__name',)
     inlines = [ ArticleContentInlineOptions, PlacementInlineOptions ]
     if 'ella.tagging' in settings.INSTALLED_APPS:
         inlines.append(TaggingInlineOptions)
     prepopulated_fields = {'slug' : ('title',)}
-    rich_text_fields = {None: ('perex',)}
+    rich_text_fields = {None: ('description',)}
+    '''
 
 
 admin.site.register(InfoBox, InfoBoxOptions)
