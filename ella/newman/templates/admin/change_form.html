@@ -13,18 +13,7 @@
 {% spaceless %}
 {% block content_toolbar_content %}
     <ul style="float: left;">
-        {% if add %}
-        <li>
-            <select>
-                <option>Apply template</option>
-                <option>Template 1</option>
-                <option>Template 1</option>
-                <option>Template 1</option>
-                <option>Template 1</option>
-            </select>
-        </li>
-        {% endif %}
-        <li><a href="#" class="icn btn save" onclick="prompt('Enter a template name:');return false;">{% trans "Save as template" %}</a></li>
+        <li><a class="icn btn save" id="save-form">{% trans "Save as template" %}</a></li>
         <li>{{ draft_form }}</li>
     </ul>
     {% if change %}
@@ -44,7 +33,7 @@
 {% endblock %}
 
 {% block content %}
-<form {% if has_file_field %}enctype="multipart/form-data" {% endif %}action="{{ form_url }}" method="post" id="{{ opts.module_name }}_form">{% block form_top %}{% endblock %}
+<form {% if has_file_field %}enctype="multipart/form-data" {% endif %}action="{{ form_url }}" method="post" id="{{ opts.module_name }}_form" class="change-form">{% block form_top %}{% endblock %}
 <div>
 {% if save_on_top %}{% submit_row %}{% endif %}
 {% if errors %}

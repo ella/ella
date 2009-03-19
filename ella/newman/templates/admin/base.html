@@ -6,7 +6,10 @@
 	<link rel="stylesheet" type="text/css" href="{{ NEWMAN_MEDIA_URL }}css/base.css?{{ VERSION }}" />
     <link rel="stylesheet" type="text/css" href="{{ NEWMAN_MEDIA_URL }}css/top-navi.css?{{ VERSION }}" />
     <link rel="shortcut icon" href="{{ NEWMAN_MEDIA_URL }}ico/favicon.ico" type="image/x-icon" />
-	<script type="text/javascript">var MEDIA_URL = '{{ NEWMAN_MEDIA_URL }}';</script>
+	<script type="text/javascript">
+        var MEDIA_URL = '{{ NEWMAN_MEDIA_URL }}';
+        var BASE_URL = '{% url admin_index %}';
+    </script>
 	<meta name="robots" content="NONE,NOARCHIVE" />
 </head>
 
@@ -131,6 +134,7 @@
 <!-- END Container -->
 {% if user.is_staff %}
     <script type="text/javascript" src="{% url admin_index %}jsi18n/"></script>
+    <script type="text/javascript" src="{{ NEWMAN_MEDIA_URL }}js/json2-min.js"></script>
     <script type="text/javascript" src="{{ NEWMAN_MEDIA_URL }}js/jquery-1.3.min.js"></script>
     <script type="text/javascript" src="{{ NEWMAN_MEDIA_URL }}js/urls.js?{{ VERSION }}"></script>
     <script type="text/javascript" src="{{ NEWMAN_MEDIA_URL }}js/newman.js?{{ VERSION }}"></script>
