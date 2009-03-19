@@ -93,9 +93,9 @@ class NewmanModelAdmin(admin.ModelAdmin):
         self.list_per_page = DEFAULT_LIST_PER_PAGE
         self.model_content_type = ContentType.objects.get_for_model(self.model)
 
-    def get_form(self, request, obj):
+    def get_form(self, request, obj=None, **kwargs):
         self.user = request.user
-        return super(NewmanModelAdmin, self).get_form(request, obj)
+        return super(NewmanModelAdmin, self).get_form(request, obj, **kwargs)
 
     def get_urls(self):
         from django.conf.urls.defaults import patterns, url
