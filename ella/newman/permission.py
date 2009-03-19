@@ -154,7 +154,8 @@ def permission_filtered_model_qs(queryset, user, permissions=[]):
     """ returns Queryset filtered accordingly to given permissions """
     if user.is_superuser:
         return queryset
-    if not model_category_fk(queryset.model):
+    category_fk = model_category_fk(queryset.model)
+    if not category_fk:
         return queryset
     q = queryset
     qs = query.EmptyQuerySet()
@@ -163,7 +164,8 @@ def permission_filtered_model_qs(queryset, user, permissions=[]):
         if queryset.model == Category:
             qs = q.filter( pk__in=categories )
         else:
-            qs = q.filter( category__in=categories )
+            lookup = '%s__in' % category_fk.name
+            qs = q.filter(**{lookup: categories})
     return qs
 
 def is_category_fk(db_field):

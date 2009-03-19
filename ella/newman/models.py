@@ -129,15 +129,11 @@ class CategoryUserRole(models.Model):
         for p in self.group.permissions.all():
             code = '%s.%s' % (p.content_type.app_label, p.codename)
             cats = compute_applicable_categories_objects(self.user, code)
+            # delete all user's denormalized roles
+            qs = DenormalizedCategoryUserRole.objects.filter(user_id=self.user.pk)
+            map(lambda r: r.delete(), qs)
+            # create denormalized roles
             for c in cats:
-                existing = DenormalizedCategoryUserRole.objects.filter(
-                    contenttype_id=p.content_type.pk,
-                    user_id=self.user.pk,
-                    permission_codename=code,
-                    category_id=c.pk
-                )
-                if existing:
-                    continue
                 root_cat = c.main_parent
                 if not root_cat:
                     root_cat = c #c is top category
