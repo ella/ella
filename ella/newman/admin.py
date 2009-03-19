@@ -9,6 +9,7 @@ from ella.newman.sites import site
 from ella.newman.options import NewmanModelAdmin
 from ella.newman import models as m
 from ella.newman.filterspecs import filter_spec
+from ella.newman.permission import is_category_fk
 
 class DevMessageAdmin(NewmanModelAdmin):
     list_display = ('title', 'author', 'version', 'ts',)
@@ -74,4 +75,14 @@ def customized_date_field_filter(fspec):
                          '%s__month' % fspec.field_path: str(today.month)}),
         (_('This year'), {'%s__year' % fspec.field_path: str(today.year)})
 )
+    return True
+
+def is_category_field(field):
+    inst = is_category_fk(field)
+    print '%s is_category_field: %s' % (field, inst)
+    return inst
+
+# Category filter -- restricted categories accordingly to CategoryUserRoles and categories filtered via AdminSettings
+@filter_spec(is_category_field)
+def category_field_filter(fspec):
     return True

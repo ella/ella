@@ -14,7 +14,7 @@ log = logging.getLogger('ella.newman.filterspecs')
 
 
 class CustomFilterSpec(FilterSpec):
-    """ stateful FilterSpec """
+    """ custom defined FilterSpec """
     def __init__(self, f, request, params, model, model_admin, field_path=None):
         self.state = 0
         self.params = params
