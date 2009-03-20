@@ -60,7 +60,7 @@ class AdminUserDraft(models.Model):
 
     # Preset title
     title = models.CharField(_('Title'), max_length=64, blank=True)
-    ts = models.DateTimeField(editable=False, auto_now_add=True)
+    ts = models.DateTimeField(editable=False, auto_now=True)
 
     @property
     def is_preset(self):
