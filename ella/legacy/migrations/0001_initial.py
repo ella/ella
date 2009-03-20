@@ -63,11 +63,13 @@ INSERT INTO
     WHERE
         ct.`app_label` = 'events' AND  ct.`model` = 'event';
 
+        ''')
 
-# add link to parent
-ALTER TABLE  `articles_article` ADD COLUMN `publishable_ptr_id` integer;
-ALTER TABLE  `events_event` ADD COLUMN `publishable_ptr_id` integer;
+        # add link to parent
+        db.add_column('articles_article', 'publishable_ptr_id', models.IntegerField(null=True))
+        db.add_column('events_event', 'publishable_ptr_id', models.IntegerField(null=True))
 
+        db.execute_many('''
 # update the link
 UPDATE
     `core_publishable` pub INNER JOIN `articles_article` art ON (art.`id` = pub.`old_id`)
@@ -75,6 +77,7 @@ UPDATE
         art.`publishable_ptr_id` = pub.`id`
   WHERE
     pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = 'articles' AND  ct.`model` = 'article');
+
 UPDATE
     `core_publishable` pub INNER JOIN `events_event` art ON (art.`id` = pub.`old_id`)
     SET
@@ -143,36 +146,26 @@ UPDATE
   WHERE
     pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = 'events' AND  ct.`model` = 'event');
 
-
-# drop duplicate columns
-ALTER TABLE `articles_article` DROP COLUMN `title`;
-ALTER TABLE `articles_article` DROP COLUMN `category_id`;
 ALTER TABLE `articles_article` DROP FOREIGN KEY `photo_id_refs_id_573d4575`;
-ALTER TABLE `articles_article` DROP COLUMN `photo_id`;
-ALTER TABLE `articles_article` DROP COLUMN `source_id`;
-ALTER TABLE `articles_article` DROP COLUMN `slug`;
-ALTER TABLE `articles_article` DROP COLUMN `id`;
-ALTER TABLE `articles_article` DROP COLUMN `perex`;
+        ''')
 
+        # drop duplicate columns
+        for table in ['articles_article', 'events_event']:
+            for column in ['title', 'category_id', 'photo_id', 'source_id', 'slug', 'id', 'perex']:
+                db.delete_column(table, column)
 
-ALTER TABLE `events_event` DROP COLUMN `title`;
-ALTER TABLE `events_event` DROP COLUMN `category_id`;
-ALTER TABLE `events_event` DROP COLUMN `photo_id`;
-ALTER TABLE `events_event` DROP COLUMN `source_id`;
-ALTER TABLE `events_event` DROP COLUMN `slug`;
-ALTER TABLE `events_event` DROP COLUMN `id`;
-ALTER TABLE `events_event` DROP COLUMN `perex`;
+        db.add_column('core_placement', 'publishable_id', models.IntegerField(null=True))
 
+        db.execute_many('''
 
 # MIGRATE PLACEMENTS
-ALTER TABLE `core_placement` ADD COLUMN `publishable_id` integer;
-
 UPDATE
   `core_placement` plac INNER JOIN `core_publishable` pub ON (plac.`target_ct_id` = pub.`content_type_id` AND plac.`target_id` = pub.`old_id`)
 SET
   plac.`publishable_id` = pub.`id`
 WHERE
   pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = 'events' AND  ct.`model` = 'event');
+
 UPDATE
   `core_placement` plac INNER JOIN `core_publishable` pub ON (plac.`target_ct_id` = pub.`content_type_id` AND plac.`target_id` = pub.`old_id`)
 SET
@@ -182,13 +175,13 @@ WHERE
 
 ALTER TABLE  `core_placement` CHANGE COLUMN `publishable_id` `publishable_id` integer NOT NULL;
 ALTER TABLE `core_placement` ADD CONSTRAINT `publishable_id_refs_id_37a3a539` FOREIGN KEY (`publishable_id`) REFERENCES `core_publishable` (`id`);
-CREATE INDEX `core_placement_publishable_id` ON `core_placement` (`publishable_id`);
-
-ALTER TABLE `core_placement` DROP COLUMN `target_id`;
 ALTER TABLE `core_placement` DROP FOREIGN KEY `core_placement_ibfk_2`;
-ALTER TABLE `core_placement` DROP COLUMN `target_ct_id`;
+        ''')
 
-''')
+        db.create_index('core_placement', ['publishable_id'])
+        db.delete_column('core_placement', 'target_ct_id')
+        db.delete_column('core_placement', 'target_id')
+
 
         # delete temporary column to remember the old ID
         db.delete_column('core_publishable', 'old_id')
