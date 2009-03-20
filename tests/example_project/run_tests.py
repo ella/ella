@@ -5,9 +5,11 @@ simple shortcut for running nosetests via python
 replacement for *.bat or *.sh wrappers
 '''
 
-import os, sys
+import os
+import sys
 from os.path import dirname, join, pardir
 
+import nose
 
 # django settings module
 DJANGO_SETTINGS_MODULE = 'example_project.settings'
@@ -27,14 +29,11 @@ for p in PYTHONPATH:
 os.environ['DJANGO_SETTINGS_MODULE'] = DJANGO_SETTINGS_MODULE
 
 # TODO: ugly hack to inject required plugins to nose.run
-sys.argv.insert(1, '--with-selenium')
-sys.argv.insert(1, '--with-cherrypyliveserver')
-sys.argv.insert(1, '--with-django')
+for i in ['--with-selenium', '--with-cherrypyliveserver', '--with-django']:
+    if i not in sys.argv:
+        sys.argv.insert(1, i)
 
 
-import nose
-
-nose.run(
+nose.run_exit(
     defaultTest=dirname(__file__),
 )
-
