@@ -159,8 +159,9 @@ class ListingInlineOptions(admin.TabularInline):
             kwargs['widget'] = widgets.ListingCategoryWidget
         return super(ListingInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
-class PlacementInlineOptions(generic.GenericTabularInline):
+class PlacementInlineOptions(admin.TabularInline):
     model = Placement
+    '''
     extra = 1
     ct_field = 'target_ct'
     ct_fk_field = 'target_id'
@@ -172,6 +173,7 @@ class PlacementInlineOptions(generic.GenericTabularInline):
         if db_field.name == 'category':
             kwargs['widget'] = widgets.ListingCategoryWidget
         return super(PlacementInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
+    '''
 
 
 class HitCountInlineOptions(admin.TabularInline):
@@ -179,20 +181,26 @@ class HitCountInlineOptions(admin.TabularInline):
     extra = 0
 
 class PlacementOptions(EllaAdminOptionsMixin, EllaModelAdmin):
+    pass
+    '''
     list_display = ('target_admin', 'category', 'publish_from', 'full_url',)
     list_filter = ('publish_from', 'category', 'target_ct',)
     inlines = (ListingInlineOptions,)
     fieldsets = (
         (_('target'), {'fields': ('target_ct', 'target_id', 'slug', 'category',), 'classes': ('wide',)},),
         (_('time'), {'fields': ('publish_from','publish_to', 'static',), 'classes': ('wide',)},),
-)
+    )
+    '''
 
 class ListingOptions(EllaAdminOptionsMixin, EllaModelAdmin):
+    pass
+    '''
     list_display = ('target_admin', 'target_ct', 'publish_from', 'category', 'placement_admin', 'target_hitcounts', 'target_url',)
     list_display_links = ()
     list_filter = ('publish_from', 'category__site', 'category', 'placement__target_ct',)
     raw_id_fields = ('placement',)
     date_hierarchy = 'publish_from'
+    '''
 
 class CategoryOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     list_filter = ('site',)

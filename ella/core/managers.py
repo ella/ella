@@ -69,7 +69,7 @@ class ListingManager(RelatedManager):
 
         # filtering based on Model classes
         if mods or content_types:
-            qset = qset.filter(placement__target_ct__in=([ ContentType.objects.get_for_model(m) for m in mods ] + content_types))
+            qset = qset.filter(placement__publishable__content_type__in=([ ContentType.objects.get_for_model(m) for m in mods ] + content_types))
 
         return qset
 
