@@ -12,7 +12,7 @@ class NewmanTestCase(SeleniumTestCase):
         super(NewmanTestCase, self).__init__()
         self.elements = {
             'navigation' : {
-                'logout' : '//a[@href="%slogout/"]' % self.NEWMAN_URI
+                'logout' : "//a[@class='icn logout']"
             },
             'pages' : {
                 'login' : {
