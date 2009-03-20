@@ -678,12 +678,15 @@ function request_media(url) {
 
 /////// CODE FOR CONTENT-SPECIFIC USE
 
+//// Drafts and templates
 (function() {
-    //// Drafts and templates
-    function save_preset($form, title) {
+    var draft_id;
+    function save_preset($form, options) {
         var form_data = JSON.stringify( $form.serializeArray() );
         var things_to_send = {data: form_data};
-        if (title) things_to_send.title = title;
+        if (!options) options = {};
+        if (options.title) things_to_send.title = options.title;
+        if (options.id   ) things_to_send.id    = options.id;
         var url = get_adr('draft/save/');
         var $saving_msg = show_message(_('Saving')+'...', {duration: 0});
         $.ajax({
@@ -696,7 +699,15 @@ function request_media(url) {
                 if (/(\d+),(.+)/.exec(response_text)) {
                     var id = RegExp.$1;
                     var actual_title = RegExp.$2;
-                    $('#id_drafts').append(
+                    if (options.id) {    // We were overwriting -- remove old version
+                        $('#id_drafts option').filter(function() {
+                            return $(this).val() == id;
+                        }).remove();
+                    }
+                    else {
+                        draft_id = id;
+                    }
+                    $('#id_drafts option:first').after(
                         $('<option>').attr({value: id}).html(actual_title)
                     );
                 }
@@ -708,7 +719,12 @@ function request_media(url) {
         });
     }
     $('a#save-form').live('click', function() {
-        save_preset($('.change-form'), prompt(_('Enter template name')));
+        var title = prompt(_('Enter template name'));
+        title = $.trim(title);
+        // retrieve the id of template with this name
+        // TODO: to be rewritten (saving interface needs a lift)
+        var id = $('#id_drafts option').filter(function(){return $(this).text().indexOf(title+' (') == 0}).val();
+        save_preset($('.change-form'), {title:title, id:id});
         return false;
     });
     
@@ -765,7 +781,7 @@ function request_media(url) {
         else if ( target_ids = $(document).data('injection_storage') ) {
             var target_sel = '#' + target_ids.join(',#');
             if ($('.change-form').closest(target_sel).length) {
-                ;;; carp('re-setting interval for new .change-form');
+                ;;; carp('(re)setting interval for new .change-form');
                 proceed = true; // .change-form was just loaded
             }
             else {  // .change-form was there before -- don't touch it
@@ -793,12 +809,13 @@ function request_media(url) {
                 return;
             }
             carp('Saving draft '+new Date());
-            save_preset($('.change-form'));
+            save_preset($('.change-form'), {id: draft_id});
         }, 60 * 1000 );
     }
     set_autosave_interval();
     $(document).bind('content_added', set_autosave_interval);
 })();
+// End of drafts and templates
 
 
 $( function() {
@@ -981,7 +998,7 @@ function dec_loading() {
 function show_ajax_error(xhr) {
     var message;
     if (xhr.responseText.indexOf('<!DOCTYPE') >= 0) {
-        message = 'Request failed ('+xhr.status+': '+xhr.statusText+')';
+        message = _('Request failed')+' ('+xhr.status+': '+_(xhr.statusText)+')';
     }
     else {
         message = xhr.responseText;
