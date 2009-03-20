@@ -138,15 +138,15 @@ class NewmanModelAdmin(admin.ModelAdmin):
         if not data:
             return HttpResponse(content=_('No data passed in POST variable "data".'), mimetype='text/plain', status=405)
         title = request.POST.get('title', '')
-        id = int(request.POST.get('id', None))
+        id = request.POST.get('id', None)
 
         if id:
             try:
                 obj = models.AdminUserDraft.objects.get(pk=id)
                 obj.data = data
                 obj.title = title
-                obj.save(force_update=True)
-            except models.AdminUserDraft.DoesNotExist:
+                obj.save()
+            except:
                 obj = models.AdminUserDraft.objects.create(
                     ct=self.model_content_type,
                     user=request.user,
