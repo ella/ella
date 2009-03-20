@@ -6,6 +6,9 @@
 ;;; }
 function carp() {
     try {
+        $('#debug').append($('<p>').text($.makeArray(arguments).join(' ')));
+    } catch(e) { }
+    try {
         console.log.apply(this, arguments);
     } catch(e) {
         try {
@@ -700,13 +703,19 @@ function request_media(url) {
             },
             error: function(xhr) {
                 $saving_msg.remove();
-                show_message(xhr.responseText, {msgclass: 'errmsg'});
+                show_ajax_error(xhr);
             }
         });
     }
+    $('a#save-form').live('click', function() {
+        save_preset($('.change-form'), prompt(_('Enter template name')));
+        return false;
+    });
     
     function restore_form(raw, $form) {
         $form.get(0).reset();
+        $form.find(':checkbox,:radio').removeAttr('checked');
+        $form.find(':text,textarea,:password').val('');
         var form_data = JSON.parse(raw);
         for (var i = 0; i < form_data.length; i++) {
             var form_datum = form_data[i];
@@ -730,15 +739,65 @@ function request_media(url) {
             success: function(form_data) {
                 restore_form(form_data, $form);
             },
-            error: function(xhr) {
-                show_message(xhr.responseText, {msgclass: 'errmsg'});
-            }
+            error: show_ajax_error
         });
     }
-    $('a#save-form').live('click', function() {
-        save_preset($('.change-form'), prompt(_('Enter template name')));
-        return false;
-    });
+    function load_draft_handler() {
+        var id = $(this).val();
+        if (!id) return;
+        load_preset(id, $('.change-form'));
+    }
+    function set_load_draft_handler() {
+        $('#id_drafts').unbind('change', load_draft_handler).change(load_draft_handler);
+    }
+    set_load_draft_handler();
+    $(document).bind('content_added', set_load_draft_handler);
+    
+    var autosave_interval;
+    function set_autosave_interval() {
+        var proceed, target_ids;
+        
+        if ($('.change-form').length == 0) { // nothing to autosave
+             ;;; carp('.change-form not present -- not setting up interval');
+             clearInterval(autosave_interval);
+             proceed = false;
+        }
+        else if ( target_ids = $(document).data('injection_storage') ) {
+            var target_sel = '#' + target_ids.join(',#');
+            if ($('.change-form').closest(target_sel).length) {
+                ;;; carp('re-setting interval for new .change-form');
+                proceed = true; // .change-form was just loaded
+            }
+            else {  // .change-form was there before -- don't touch it
+                ;;; carp('.change-form not in loaded stuff -- letting it alone');
+                proceed = false;
+            }
+        }
+        else {
+            ;;; carp('no injection storage found -- interval reset forced');
+            proceed = true;
+        }
+        
+        if (!proceed) return;
+        
+        if (autosave_interval != undefined) {
+            ;;; carp('clearing interval prior to setting new one');
+            clearInterval(autosave_interval);
+        }
+        autosave_interval = setInterval( function() {
+            var $change_form = $('.change-form');
+            if ($change_form.length == 0) {
+                ;;; carp('.change-form disappeared -- clearing interval');
+                clearInterval(autosave_interval);
+                autosave_interval = undefined;
+                return;
+            }
+            carp('Saving draft '+new Date());
+            save_preset($('.change-form'));
+        }, 60 * 1000 );
+    }
+    set_autosave_interval();
+    $(document).bind('content_added', set_autosave_interval);
 })();
 
 
@@ -809,7 +868,7 @@ $( function() {
             error = function(xhr, st) { $error.get(0).onchange(xhr, st); };
         }
         else {
-            error = function(xhr) { show_message(xhr.responseText, {msgclass: 'errmsg'}); };
+            error = show_ajax_error;
         }
         var $inputs = get_inputs($form);
         var data = $inputs.serialize();
@@ -917,4 +976,15 @@ function dec_loading() {
         LOADING_CNT = 0;
         hide_loading();
     }
+}
+
+function show_ajax_error(xhr) {
+    var message;
+    if (xhr.responseText.indexOf('<!DOCTYPE') >= 0) {
+        message = 'Request failed ('+xhr.status+': '+xhr.statusText+')';
+    }
+    else {
+        message = xhr.responseText;
+    }
+    show_message(message, {msgclass: 'errmsg'});
 }
