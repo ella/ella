@@ -1,6 +1,5 @@
 from django.conf.urls.defaults import *
 from django.http import HttpResponse
-
 from django.db import models
 from django.utils.translation import ugettext as _
 
@@ -75,7 +74,10 @@ def category_field_filter(fspec):
 def site_field_filter(fspec):
     category_ids = get_user_config(fspec.user, CATEGORY_FILTER)
     if not category_ids:
-        category_ids = m.DenormalizedCategoryUserRole.objects.root_categories_by_user(fspec.user)
+        if not fspec.user.is_superuser:
+            category_ids = m.DenormalizedCategoryUserRole.objects.root_categories_by_user(fspec.user)
+        else:
+            category_ids = Category.objects.filter(tree_parent=None)
     qs = Category.objects.filter(pk__in=category_ids)
     sites = map(lambda c: c.site, qs)
     for site in sites:
