@@ -90,14 +90,14 @@ ALTER TABLE `events_event` DROP PRIMARY KEY;
             table = app + '_' + mod
 
             # replace it with a link to parent
-            db.alter_column(table, 'publishable_ptr_id', models.ForeignKey(orm['core.Publishable'], primary_key=True))
+            db.alter_column(table, 'publishable_ptr_id', models.ForeignKey(Publishable, primary_key=True))
             # update authors
             db.execute(''' 
                     INSERT INTO `core_publishable_authors` (`publishable_id`, `author_id`)
                     SELECT
                         art.`publishable_ptr_id`, art_aut.`author_id`
                     FROM
-                        `%(table)s` art INNER JOIN `%(tab)s_authors` art_aut ON (art.`id` = art_aut.`%(mod)s_id`);
+                        `%(table)s` art INNER JOIN `%(table)s_authors` art_aut ON (art.`id` = art_aut.`%(mod)s_id`);
                 ''' % {'app':app, 'mod': mod, 'table': table}
             )
             db.delete_table(table + '_authors')
@@ -145,7 +145,7 @@ ALTER TABLE `events_event` DROP PRIMARY KEY;
                 ''' % {'app':app, 'mod': mod, 'table': table}
             )
 
-        db.alter_column('core_placement', 'publishable_id', models.ForeignKey(orm['core.Publishable']))
+        db.alter_column('core_placement', 'publishable_id', models.ForeignKey(Publishable))
 
         db.execute('''
             ALTER TABLE `core_placement` DROP FOREIGN KEY `core_placement_ibfk_2`;
