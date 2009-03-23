@@ -185,7 +185,7 @@ class NewmanModelAdmin(admin.ModelAdmin):
         app_label = opts.app_label
         try:
             cl = FilterChangeList(request, self.model, self.list_display, self.list_display_links, self.list_filter,
-                self.date_hierarchy, self.search_fields, self.list_select_related, self.list_per_page, self)
+                self.date_hierarchy, self.search_fields, self.list_select_related, self.list_per_page, self.list_editable, self)
         except IncorrectLookupParameters:
             # Wacky lookup parameters were given, so redirect to the main
             # changelist page, without parameters, and pass an 'invalid=1'
@@ -195,6 +195,7 @@ class NewmanModelAdmin(admin.ModelAdmin):
             if ERROR_FLAG in request.GET.keys():
                 return render_to_response('admin/invalid_setup.html', {'title': _('Database error')})
             return HttpResponseRedirect(request.path + '?' + ERROR_FLAG + '=1')
+        cl.formset = None
 
         context = {
             'title': cl.title,
@@ -221,7 +222,7 @@ class NewmanModelAdmin(admin.ModelAdmin):
             raise PermissionDenied # commented out as user is restricted by category
         try:
             cl = NewmanChangeList(request, self.model, self.list_display, self.list_display_links, self.list_filter,
-                self.date_hierarchy, self.search_fields, self.list_select_related, self.list_per_page, self)
+                self.date_hierarchy, self.search_fields, self.list_select_related, self.list_per_page, self.list_editable, self)
         except IncorrectLookupParameters:
             # Wacky lookup parameters were given, so redirect to the main
             # changelist page, without parameters, and pass an 'invalid=1'
@@ -231,6 +232,51 @@ class NewmanModelAdmin(admin.ModelAdmin):
             if ERROR_FLAG in request.GET.keys():
                 return render_to_response('admin/invalid_setup.html', {'title': _('Database error')})
             return HttpResponseRedirect(request.path + '?' + ERROR_FLAG + '=1')
+
+        # If we're allowing changelist editing, we need to construct a formset
+        # for the changelist given all the fields to be edited. Then we'll
+        # use the formset to validate/process POSTed data.
+        formset = cl.formset = None
+
+        # Handle POSTed bulk-edit data.
+        if request.method == "POST" and self.list_editable:
+            FormSet = self.get_changelist_formset(request)
+            formset = cl.formset = FormSet(request.POST, request.FILES, queryset=cl.result_list)
+            if formset.is_valid():
+                changecount = 0
+                for form in formset.forms:
+                    if form.has_changed():
+                        obj = self.save_form(request, form, change=True)
+                        self.save_model(request, obj, form, change=True)
+                        form.save_m2m()
+                        change_msg = self.construct_change_message(request, form, None)
+                        self.log_change(request, obj, change_msg)
+                        changecount += 1
+
+                if changecount:
+                    if changecount == 1:
+                        name = force_unicode(opts.verbose_name)
+                    else:
+                        name = force_unicode(opts.verbose_name_plural)
+                    msg = ngettext("%(count)s %(name)s was changed successfully.",
+                                   "%(count)s %(name)s were changed successfully.",
+                                   changecount) % {'count': changecount,
+                                                   'name': name,
+                                                   'obj': force_unicode(obj)}
+                    self.message_user(request, msg)
+
+                return HttpResponseRedirect(request.get_full_path())
+
+        # Handle GET -- construct a formset for display.
+        elif self.list_editable:
+            FormSet = self.get_changelist_formset(request)
+            formset = cl.formset = FormSet(queryset=cl.result_list)
+
+        # Build the list of media to be used by the formset.
+        if formset:
+            media = self.media + formset.media
+        else:
+            media = None
 
         context = {
             'title': cl.title,

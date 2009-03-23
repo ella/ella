@@ -60,6 +60,10 @@ import register
 # custom registered DateField filter. Filter is inserted to the beginning of filter chain.
 @filter_spec(lambda field: is_category_fk(field))
 def category_field_filter(fspec):
+    #qs = Category.objects.filter(pk__in=applicable_categories(fspec.user))
+    print 'Categories %d' % fspec.model_admin.queryset(fspec.request).count()
+    #print 'self.params %s' % fspec.params
+    #print 'self.result_list %s' % fspec.result_list
     qs = Category.objects.filter(pk__in=applicable_categories(fspec.user))
     for cat in user_category_filter(qs, fspec.user):
         lookup_var = '%s__%s__exact' % (fspec.field_path, fspec.f.rel.to._meta.pk.name)
