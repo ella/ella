@@ -1,7 +1,5 @@
 from django.conf.urls.defaults import *
 from django.http import HttpResponse
-from datetime import datetime
-import calendar
 
 from django.db import models
 from django.utils.translation import ugettext as _
@@ -85,9 +83,6 @@ def site_field_filter(fspec):
 
 @filter_spec(lambda field: field.name == 'created' and isinstance(field, models.DateTimeField))
 def created_field_filter(fspec):
-    now = datetime.now()
-    cal = calendar.Calendar()
-    year = now.year
     qs = fspec.model_admin.queryset(fspec.request)
     # SELECT created FROM qs._meta.dbtable  GROUP BY created
     dates =  qs.dates(fspec.field_path, 'day', 'DESC')[:365] 
@@ -99,19 +94,5 @@ def created_field_filter(fspec):
         link_text = '%d. %d. %d' % (date.day, date.month, date.year)
         link = ( link_text, lookup_dict)
         fspec.links.append(link)
-    """
-    for month in range(1, 13):
-        for day in cal.itermonthdays(year, month):
-            if not day:
-                continue
-            # created__day=23 created__month=3  created__year=2009
-            lookup_dict = dict()
-            lookup_dict['%s__day' % fspec.field_path] = day
-            lookup_dict['%s__month' % fspec.field_path] = month
-            lookup_dict['%s__year' % fspec.field_path] = year
-            link_text = '%d. %d. %d' % (day, month, year)
-            link = ( link_text, lookup_dict)
-            fspec.links.append(link)
-    """
     return True
 
