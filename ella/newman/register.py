@@ -153,7 +153,7 @@ class PlacementForm( modelforms.ModelForm ):
 class PlacementInlineFormset( ng.BaseGenericInlineFormSet ):
     def __init__(self, data=None, files=None, instance=None, save_as_new=None, prefix=None):
         self.can_delete = True
-        super(PlacementInlineFormset, self).__init__(instance=instance, data=data, files=files, prefix=prefix)
+        super(PlacementInlineFormset, self).__init__(instance=instance, data=data, files=files)
 
     def save_existing(self, form, instance, commit=True):
         instance = super( PlacementInlineFormset, self ).save_existing( form, instance, commit )
