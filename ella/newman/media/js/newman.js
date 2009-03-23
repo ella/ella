@@ -4,6 +4,7 @@
 ;;;     for (var i in obj) s += i + ': ' + obj[i] + "\n";
 ;;;     alert(s);
 ;;; }
+;;; DEBUG = 1;
 function carp() {
     try {
         $('#debug').append($('<p>').text($.makeArray(arguments).join(' ')));
@@ -17,9 +18,14 @@ function carp() {
     }
 }
 
+var LF = 10, CR = 13;
+
 var BASE_PATH = window.BASE_URL ? BASE_URL.substr(0, BASE_URL.length-1) : '';
 
-var LF = 10, CR = 13;
+function prepend_base_path_to(url) {
+    if (url.charAt(0) == '/') url = BASE_PATH + url;
+    return url;
+}
 
 // localization
 var _;
@@ -175,7 +181,8 @@ else {
         $('#'+target_id).addClass('loading');
         show_loading();
         
-        var url = $('<a>').attr('href', address).get(0).href;
+        var url = prepend_base_path_to(address);
+        url = $('<a>').attr('href', url).get(0).href;
         var load_id = ++MAX_LOAD;
         if (MIN_LOAD == undefined || load_id < MIN_LOAD) MIN_LOAD = load_id;
         LOAD_BUF[ load_id ] = {
@@ -391,7 +398,8 @@ else {
         if (LOADED_URLS[target_id] == address) return;
         
         var url = adr(specifier, {just_get:1});
-        var url = $('<a>').attr('href', url).get(0).href;
+        url = prepend_base_path_to(url);
+        url = $('<a>').attr('href', url).get(0).href;
         
         var $target = $('#'+target_id);
         if ($target && $target.length) {} else {
@@ -546,7 +554,6 @@ function adr(address, options) {
         }
         // absolute address -- replace what's in there.
         else if (address.charAt(0) == '/') {
-            new_address = BASE_PATH + new_address;
         }
         // relative address -- append to the end, but no farther than to a '?'
         else {
@@ -573,10 +580,15 @@ function adr(address, options) {
         location.hash = newhash;
     }
 }
-function get_adr(address, options) {
+// returns address for use in hash, i.e. without BASE_PATH
+function get_hashadr(address, options) {
     if (!options) options = {};
     options.just_get = 1;
     return adr(address, options);
+}
+// returns address for use in requests, i.e. with BASE_PATH prepended
+function get_adr(address, options) {
+    return BASE_PATH + get_hashadr(address, options);
 }
 
 // Get an URL to a CSS or JS file, attempt to load it into the document and call callback on success.
