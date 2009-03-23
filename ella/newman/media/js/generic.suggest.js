@@ -119,8 +119,8 @@
         $('li.suggest-selected-item a').html('<img src="'+DEL_IMG+'" alt="x" />')
         
         // Ensure that the initial values fit
-        $ins.each(function() {
-            var $inputs = get_current_inputs( this );
+        function restore_suggest_widget_from_value(el) {
+            var $inputs = get_current_inputs(el);
             if ( /^(.+)#(.+)$/.test($inputs.hidden.val()) ) {
                 var ids    = RegExp.$1;
                 var repres = RegExp.$2;
@@ -134,7 +134,14 @@
                     item = new_item(id, repre);
                     $inputs.ul.prepend(item);
                 }
+                return true;
             }
+            return false;
+        }
+        window.restore_suggest_widget_from_value = restore_suggest_widget_from_value;
+        $ins.each(function() {
+            var $inputs = get_current_inputs( this );
+            if ( restore_suggest_widget_from_value(this) ) { }
             else if ( /^([\d,]+)$/.test($inputs.hidden.val()) ) {
                 var raw_ids = RegExp.$1;
                 var ids = raw_ids.match(/\d+/g);

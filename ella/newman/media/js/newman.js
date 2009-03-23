@@ -758,6 +758,9 @@ function request_media(url) {
             $inputs.filter(':checkbox,:radio').find('[value='+val_esc+']').attr({checked: 'checked'});
             $inputs.filter('option[value='+val_esc+']').attr({selected: 'selected'});
             $inputs.filter(':text,[type=hidden],textarea').val(val);
+            $form.find('.GenericSuggestField,.GenericSuggestFieldMultiple').find('input[rel]').each(function() {
+                restore_suggest_widget_from_value(this);
+            });
         }
     }
     function load_preset(id, $form) {
