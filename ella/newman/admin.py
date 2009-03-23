@@ -1,6 +1,7 @@
 from django.conf.urls.defaults import *
 from django.http import HttpResponse
-import datetime
+from datetime import datetime
+import calendar
 
 from django.db import models
 from django.utils.translation import ugettext as _
@@ -74,12 +75,30 @@ def site_field_filter(fspec):
     if not category_ids:
         category_ids = m.DenormalizedCategoryUserRole.objects.root_categories_by_user(fspec.user)
     qs = Category.objects.filter(pk__in=category_ids)
-    print qs
     sites = map(lambda c: c.site, qs)
     for site in sites:
         #category__site__id__exact=1
         lookup_var = '%s__%s__exact' % (fspec.field_path, fspec.f.rel.to._meta.pk.name)
         link = ( site, {lookup_var: site.pk})
         fspec.links.append(link)
+    return True
+
+@filter_spec(lambda field: field.name == 'created' and isinstance(field, models.DateTimeField))
+def created_field_filter(fspec):
+    now = datetime.now()
+    cal = calendar.Calendar()
+    year = now.year
+    for month in range(1, 13):
+        for day in cal.itermonthdays(year, month):
+            if not day:
+                continue
+            # created__day=23 created__month=3  created__year=2009
+            lookup_dict = dict()
+            lookup_dict['%s__day' % fspec.field_path] = day
+            lookup_dict['%s__month' % fspec.field_path] = month
+            lookup_dict['%s__year' % fspec.field_path] = year
+            link_text = '%d. %d. %d' % (day, month, year)
+            link = ( link_text, lookup_dict)
+            fspec.links.append(link)
     return True
 
