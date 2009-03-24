@@ -1,20 +1,13 @@
-from django import forms, template
+from django import template
 from django.forms.formsets import all_valid
-from django.forms.models import modelform_factory, modelformset_factory, inlineformset_factory
-from django.forms.models import BaseInlineFormSet
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.admin import widgets
 from django.contrib.admin import helpers
-from django.contrib.admin.util import unquote, flatten_fieldsets, get_deleted_objects
+from django.contrib.admin.util import unquote
 from django.core.exceptions import PermissionDenied
-from django.db import models, transaction
+from django.db import transaction
 from django.http import Http404, HttpResponse, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render_to_response
-from django.utils.functional import update_wrapper
+from django.shortcuts import render_to_response
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
-from django.utils.functional import curry
-from django.utils.text import capfirst, get_text_list
 from django.utils.translation import ugettext as _
 from django.utils.translation import ngettext
 from django.utils.encoding import force_unicode
@@ -22,7 +15,7 @@ try:
     set
 except NameError:
     from sets import Set as set     # Python 2.3 fallback
-from django.contrib.admin.options import BaseModelAdmin, ModelAdmin
+from django.contrib.admin.options import ModelAdmin
 from django.contrib.admin.views.main import ChangeList, ERROR_FLAG
 
 class XModelAdmin(ModelAdmin):
@@ -33,7 +26,6 @@ class XModelAdmin(ModelAdmin):
     several methods of XModelAdmin rather than copypasting whole views of original ModelAdmin.
     """
     "Encapsulates all admin options and functionality for a given model."
-    __metaclass__ = forms.MediaDefiningClass
 
     list_display = ('__str__',)
     list_display_links = ()

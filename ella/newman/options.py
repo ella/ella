@@ -1,24 +1,18 @@
 import logging
 
-from django.core.exceptions import PermissionDenied
 from django.conf import settings
-
 from django.contrib import admin
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.admin.options import InlineModelAdmin, IncorrectLookupParameters, FORMFIELD_FOR_DBFIELD_DEFAULTS
 from django.forms.models import BaseInlineFormSet
-from django.forms.formsets import all_valid
 from django import template
-from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.admin.views.main import ERROR_FLAG
 from django.shortcuts import render_to_response
 from django.db import transaction
 from django.db.models import Q, ForeignKey, ManyToManyField, ImageField
 from django.utils.functional import update_wrapper
 from django.utils.translation import ugettext as _
-from django.utils.encoding import force_unicode
-
-from django.contrib.admin.util import unquote
-from django.contrib.contenttypes.models import ContentType
 
 from ella.core.cache.utils import get_cached_list
 from ella.newman.changelist import NewmanChangeList, FilterChangeList
@@ -303,7 +297,6 @@ class NewmanModelAdmin(XModelAdmin):
     def has_model_view_permission(self, request, obj=None):
         """ returns True if user has permission to view this model, otherwise False. """
         # try to find view or change perm. for given user in his permissions or groups permissions
-        #can_change = admin.ModelAdmin.has_change_permission( self, request, obj ) # TODO delete
         can_change = super(NewmanModelAdmin, self).has_change_permission(request, obj)
         can_view = self.has_view_permission(request, obj)
         if can_view or can_change:
@@ -337,7 +330,6 @@ class NewmanModelAdmin(XModelAdmin):
         cfield = model_category_fk_value(obj)
         if obj is None or not cfield:
             if request.method == 'POST':
-                #return admin.ModelAdmin.has_change_permission( self, request, obj ) #TODO delete
                 return super(NewmanModelAdmin, self).has_change_permission(request, obj)
             else:
                 return self.has_model_view_permission(request, obj)
@@ -434,7 +426,6 @@ class NewmanModelAdmin(XModelAdmin):
         First semi-working draft of category-based permissions. It will allow permissions to be set per category
         effectively hiding the content the user has no permission to see/change.
         """
-        #q = admin.ModelAdmin.queryset(self, request) #TODO delete
         q = super(NewmanModelAdmin, self).queryset(request)
         # user category filter
         qs = utils.user_category_filter(q, request.user)
