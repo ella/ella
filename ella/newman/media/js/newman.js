@@ -535,7 +535,7 @@ function adr(address, options) {
             end = (hash+'#').indexOf('#', start);
         }
     }
-    // Now, hash.substr(start,end) is the address we need to modify.
+    // Now, hash.substring(start,end) is the address we need to modify.
     
     // Figure out whether we replace the address, append to it, or what.
     // Move start appropriately to denote where the part to replace starts.
@@ -549,8 +549,11 @@ function adr(address, options) {
         
         // empty address -- remove the specifier
         if (address.length == 0) {
+            // but in case of just_get, return the original address for the container (relative "")
+            if (options.just_get) new_address = hash.substring(start,end);
             start = hash.lastIndexOf('#',start);
             start = Math.max(start,0);
+            addr_start = start;
         }
         // absolute address -- replace what's in there.
         else if (address.charAt(0) == '/') {
