@@ -732,10 +732,14 @@ function request_media(url) {
     }
     $('a#save-form').live('click', function() {
         var title = prompt(_('Enter template name'));
+        if (title == null) return;
         title = $.trim(title);
         // retrieve the id of template with this name
         // TODO: to be rewritten (saving interface needs a lift)
-        var id = $('#id_drafts option').filter(function(){return $(this).text().indexOf(title+' (') == 0}).val();
+        var id = 
+            title
+            ? $('#id_drafts option').filter(function(){return $(this).text().indexOf(title+' (') == 0}).val()
+            : draft_id;
         save_preset($('.change-form'), {title:title, id:id});
         return false;
     });
