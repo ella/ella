@@ -958,6 +958,23 @@ $( function() {
         }
         delete loaded_media[ MEDIA_URL + 'js/admin/DateTimeShortcuts.js' ];
     });
+    // Setting up proper suggers URLs to take the hash address into account
+    $(document).bind('content_added', function() {
+        var target_ids = $(document).data('injection_storage');
+        if (!target_ids) return;
+        target_ids = '#' + target_ids.join(',#');
+        var $new_suggest_inputs = $(target_ids).find('.GenericSuggestField,.GenericSuggestFieldMultiple');
+        if (!$new_suggest_inputs || $new_suggest_inputs.length == 0) return;
+        $new_suggest_inputs.find('input[rel]').each(function() {
+            if ($(this).data('original_rel')) return;
+            var old_rel = $(this).attr('rel');
+            $(this).attr(
+                'rel', get_adr(old_rel)
+            ).data(
+                'original_rel', old_rel
+            );
+        });
+    });
     
     // The search button should send us to an address according to the thing selected in the select
     function do_search() {
