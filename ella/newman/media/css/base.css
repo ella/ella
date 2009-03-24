@@ -119,6 +119,7 @@ div.breadcrumbs {
     position: fixed;
     top: 112px; left: 0; bottom: 28px; right: 0;
     overflow: auto; */
+    padding-bottom: 30px;
 }
 
 /* CONTENT TOOLBAR */

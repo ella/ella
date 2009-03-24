@@ -535,7 +535,7 @@ function adr(address, options) {
             end = (hash+'#').indexOf('#', start);
         }
     }
-    // Now, hash.substr(start,end) is the address we need to modify.
+    // Now, hash.substring(start,end) is the address we need to modify.
     
     // Figure out whether we replace the address, append to it, or what.
     // Move start appropriately to denote where the part to replace starts.
@@ -549,8 +549,11 @@ function adr(address, options) {
         
         // empty address -- remove the specifier
         if (address.length == 0) {
+            // but in case of just_get, return the original address for the container (relative "")
+            if (options.just_get) new_address = hash.substring(start,end);
             start = hash.lastIndexOf('#',start);
             start = Math.max(start,0);
+            addr_start = start;
         }
         // absolute address -- replace what's in there.
         else if (address.charAt(0) == '/') {
@@ -732,10 +735,14 @@ function request_media(url) {
     }
     $('a#save-form').live('click', function() {
         var title = prompt(_('Enter template name'));
+        if (title == null) return;
         title = $.trim(title);
         // retrieve the id of template with this name
         // TODO: to be rewritten (saving interface needs a lift)
-        var id = $('#id_drafts option').filter(function(){return $(this).text().indexOf(title+' (') == 0}).val();
+        var id = 
+            title
+            ? $('#id_drafts option').filter(function(){return $(this).text().indexOf(title+' (') == 0}).val()
+            : draft_id;
         save_preset($('.change-form'), {title:title, id:id});
         return false;
     });
@@ -953,6 +960,23 @@ $( function() {
             DateTimeShortcuts.init();
         }
         delete loaded_media[ MEDIA_URL + 'js/admin/DateTimeShortcuts.js' ];
+    });
+    // Setting up proper suggers URLs to take the hash address into account
+    $(document).bind('content_added', function() {
+        var target_ids = $(document).data('injection_storage');
+        if (!target_ids) return;
+        target_ids = '#' + target_ids.join(',#');
+        var $new_suggest_inputs = $(target_ids).find('.GenericSuggestField,.GenericSuggestFieldMultiple');
+        if (!$new_suggest_inputs || $new_suggest_inputs.length == 0) return;
+        $new_suggest_inputs.find('input[rel]').each(function() {
+            if ($(this).data('original_rel')) return;
+            var old_rel = $(this).attr('rel');
+            $(this).attr(
+                'rel', get_adr(old_rel)
+            ).data(
+                'original_rel', old_rel
+            );
+        });
     });
     
     // The search button should send us to an address according to the thing selected in the select
