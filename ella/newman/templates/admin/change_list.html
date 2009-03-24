@@ -39,3 +39,15 @@
         {% if cl.formset %}</form>{% endif %}
     </div>
 {% endblock %}
+
+{% block content_js %}
+    {{ block.super }}
+    
+    {% if raw_media %}
+    <script type="text/javascript">
+    {% for m in raw_media %}
+        request_media('{{ m }}?{{ VERSION }}');
+    {% endfor %}
+    {% endif %}
+    </script>
+{% endblock %}
