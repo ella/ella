@@ -75,7 +75,7 @@ class AdminUserDraft(models.Model):
     class Meta:
         verbose_name = _('Draft item')
         verbose_name_plural = _('Draft items')
-        ordering = ('title',)
+        ordering = ('-ts',)
 
 
 class AdminSetting(models.Model):
