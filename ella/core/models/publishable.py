@@ -158,6 +158,16 @@ class Publishable(models.Model):
     def get_text(self):
         return self.text
 
+    def Box(self, box_type, nodelist):
+        "add some content type info of self.target"
+        box = Box(self, box_type, nodelist)
+
+        box.app_label = self.content_type.model_class()._meta.app_label
+        box.module_name = self.content_type.model_class()._meta.module_name
+        box.verbose_name = self.content_type.model_class()._meta.verbose_name
+        box.verbose_name_plural = self.content_type.model_class()._meta.verbose_name_plural
+
+        return box
 
 class Placement(models.Model):
     # listing's target - a Publishable object
@@ -269,11 +279,8 @@ class Listing(models.Model):
     def target(self):
         return self.placement.publishable
 
-
     def Box(self, box_type, nodelist):
         " Delegate the boxing to the target's Box factory method."
-        if not hasattr(self, 'target'):
-            return None
         obj = self.target
         if hasattr(obj, 'Box'):
             return obj.Box(box_type, nodelist)
