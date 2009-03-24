@@ -23,7 +23,7 @@ class FilterChangeList(ChangeList):
         self.search_fields = search_fields
         self.list_select_related = list_select_related
         self.list_per_page = list_per_page
-        self.list_editable = list_per_page
+        self.list_editable = list_editable
         self.model_admin = model_admin
         self.is_popup = IS_POPUP_VAR in request.GET
 
