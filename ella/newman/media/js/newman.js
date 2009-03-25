@@ -4,7 +4,11 @@
 ;;;     for (var i in obj) s += i + ': ' + obj[i] + "\n";
 ;;;     alert(s);
 ;;; }
+;;; DEBUG = 1;
 function carp() {
+    try {
+        $('#debug').append($('<p>').text($.makeArray(arguments).join(' ')));
+    } catch(e) { }
     try {
         console.log.apply(this, arguments);
     } catch(e) {
@@ -14,9 +18,14 @@ function carp() {
     }
 }
 
+var LF = 10, CR = 13;
+
 var BASE_PATH = window.BASE_URL ? BASE_URL.substr(0, BASE_URL.length-1) : '';
 
-var LF = 10, CR = 13;
+function prepend_base_path_to(url) {
+    if (url.charAt(0) == '/') url = BASE_PATH + url;
+    return url;
+}
 
 // localization
 var _;
@@ -172,7 +181,8 @@ else {
         $('#'+target_id).addClass('loading');
         show_loading();
         
-        var url = $('<a>').attr('href', address).get(0).href;
+        var url = prepend_base_path_to(address);
+        url = $('<a>').attr('href', url).get(0).href;
         var load_id = ++MAX_LOAD;
         if (MIN_LOAD == undefined || load_id < MIN_LOAD) MIN_LOAD = load_id;
         LOAD_BUF[ load_id ] = {
@@ -388,7 +398,8 @@ else {
         if (LOADED_URLS[target_id] == address) return;
         
         var url = adr(specifier, {just_get:1});
-        var url = $('<a>').attr('href', url).get(0).href;
+        url = prepend_base_path_to(url);
+        url = $('<a>').attr('href', url).get(0).href;
         
         var $target = $('#'+target_id);
         if ($target && $target.length) {} else {
@@ -524,7 +535,7 @@ function adr(address, options) {
             end = (hash+'#').indexOf('#', start);
         }
     }
-    // Now, hash.substr(start,end) is the address we need to modify.
+    // Now, hash.substring(start,end) is the address we need to modify.
     
     // Figure out whether we replace the address, append to it, or what.
     // Move start appropriately to denote where the part to replace starts.
@@ -538,12 +549,14 @@ function adr(address, options) {
         
         // empty address -- remove the specifier
         if (address.length == 0) {
+            // but in case of just_get, return the original address for the container (relative "")
+            if (options.just_get) new_address = hash.substring(start,end);
             start = hash.lastIndexOf('#',start);
             start = Math.max(start,0);
+            addr_start = start;
         }
         // absolute address -- replace what's in there.
         else if (address.charAt(0) == '/') {
-            new_address = BASE_PATH + new_address;
         }
         // relative address -- append to the end, but no farther than to a '?'
         else {
@@ -570,10 +583,15 @@ function adr(address, options) {
         location.hash = newhash;
     }
 }
-function get_adr(address, options) {
+// returns address for use in hash, i.e. without BASE_PATH
+function get_hashadr(address, options) {
     if (!options) options = {};
     options.just_get = 1;
     return adr(address, options);
+}
+// returns address for use in requests, i.e. with BASE_PATH prepended
+function get_adr(address, options) {
+    return BASE_PATH + get_hashadr(address, options);
 }
 
 // Get an URL to a CSS or JS file, attempt to load it into the document and call callback on success.
@@ -675,12 +693,15 @@ function request_media(url) {
 
 /////// CODE FOR CONTENT-SPECIFIC USE
 
+//// Drafts and templates
 (function() {
-    //// Drafts and templates
-    function save_preset($form, title) {
+    var draft_id;
+    function save_preset($form, options) {
         var form_data = JSON.stringify( $form.serializeArray() );
         var things_to_send = {data: form_data};
-        if (title) things_to_send.title = title;
+        if (!options) options = {};
+        if (options.title) things_to_send.title = options.title;
+        if (options.id   ) things_to_send.id    = options.id;
         var url = get_adr('draft/save/');
         var $saving_msg = show_message(_('Saving')+'...', {duration: 0});
         $.ajax({
@@ -693,20 +714,43 @@ function request_media(url) {
                 if (/(\d+),(.+)/.exec(response_text)) {
                     var id = RegExp.$1;
                     var actual_title = RegExp.$2;
-                    $('#id_drafts').append(
+                    if (options.id) {    // We were overwriting -- remove old version
+                        $('#id_drafts option').filter(function() {
+                            return $(this).val() == id;
+                        }).remove();
+                    }
+                    else {
+                        draft_id = id;
+                    }
+                    $('#id_drafts option:first').after(
                         $('<option>').attr({value: id}).html(actual_title)
                     );
                 }
             },
             error: function(xhr) {
                 $saving_msg.remove();
-                show_message(xhr.responseText, {msgclass: 'errmsg'});
+                show_ajax_error(xhr);
             }
         });
     }
+    $('a#save-form').live('click', function() {
+        var title = prompt(_('Enter template name'));
+        if (title == null) return;
+        title = $.trim(title);
+        // retrieve the id of template with this name
+        // TODO: to be rewritten (saving interface needs a lift)
+        var id = 
+            title
+            ? $('#id_drafts option').filter(function(){return $(this).text().indexOf(title+' (') == 0}).val()
+            : draft_id;
+        save_preset($('.change-form'), {title:title, id:id});
+        return false;
+    });
     
     function restore_form(raw, $form) {
         $form.get(0).reset();
+        $form.find(':checkbox,:radio').removeAttr('checked');
+        $form.find(':text,textarea,:password').val('');
         var form_data = JSON.parse(raw);
         for (var i = 0; i < form_data.length; i++) {
             var form_datum = form_data[i];
@@ -721,6 +765,9 @@ function request_media(url) {
             $inputs.filter(':checkbox,:radio').find('[value='+val_esc+']').attr({checked: 'checked'});
             $inputs.filter('option[value='+val_esc+']').attr({selected: 'selected'});
             $inputs.filter(':text,[type=hidden],textarea').val(val);
+            $form.find('.GenericSuggestField,.GenericSuggestFieldMultiple').find('input[rel]').each(function() {
+                restore_suggest_widget_from_value(this);
+            });
         }
     }
     function load_preset(id, $form) {
@@ -730,16 +777,67 @@ function request_media(url) {
             success: function(form_data) {
                 restore_form(form_data, $form);
             },
-            error: function(xhr) {
-                show_message(xhr.responseText, {msgclass: 'errmsg'});
-            }
+            error: show_ajax_error
         });
     }
-    $('a#save-form').live('click', function() {
-        save_preset($('.change-form'), prompt(_('Enter template name')));
-        return false;
-    });
+    function load_draft_handler() {
+        var id = $(this).val();
+        if (!id) return;
+        load_preset(id, $('.change-form'));
+    }
+    function set_load_draft_handler() {
+        $('#id_drafts').unbind('change', load_draft_handler).change(load_draft_handler);
+    }
+    set_load_draft_handler();
+    $(document).bind('content_added', set_load_draft_handler);
+    
+    var autosave_interval;
+    function set_autosave_interval() {
+        var proceed, target_ids;
+        
+        if ($('.change-form').length == 0) { // nothing to autosave
+             ;;; carp('.change-form not present -- not setting up interval');
+             clearInterval(autosave_interval);
+             proceed = false;
+        }
+        else if ( target_ids = $(document).data('injection_storage') ) {
+            var target_sel = '#' + target_ids.join(',#');
+            if ($('.change-form').closest(target_sel).length) {
+                ;;; carp('(re)setting interval for new .change-form');
+                proceed = true; // .change-form was just loaded
+            }
+            else {  // .change-form was there before -- don't touch it
+                ;;; carp('.change-form not in loaded stuff -- letting it alone');
+                proceed = false;
+            }
+        }
+        else {
+            ;;; carp('no injection storage found -- interval reset forced');
+            proceed = true;
+        }
+        
+        if (!proceed) return;
+        
+        if (autosave_interval != undefined) {
+            ;;; carp('clearing interval prior to setting new one');
+            clearInterval(autosave_interval);
+        }
+        autosave_interval = setInterval( function() {
+            var $change_form = $('.change-form');
+            if ($change_form.length == 0) {
+                ;;; carp('.change-form disappeared -- clearing interval');
+                clearInterval(autosave_interval);
+                autosave_interval = undefined;
+                return;
+            }
+            carp('Saving draft '+new Date());
+            save_preset($('.change-form'), {id: draft_id});
+        }, 60 * 1000 );
+    }
+    set_autosave_interval();
+    $(document).bind('content_added', set_autosave_interval);
 })();
+// End of drafts and templates
 
 
 $( function() {
@@ -809,7 +907,7 @@ $( function() {
             error = function(xhr, st) { $error.get(0).onchange(xhr, st); };
         }
         else {
-            error = function(xhr) { show_message(xhr.responseText, {msgclass: 'errmsg'}); };
+            error = show_ajax_error;
         }
         var $inputs = get_inputs($form);
         var data = $inputs.serialize();
@@ -862,6 +960,23 @@ $( function() {
             DateTimeShortcuts.init();
         }
         delete loaded_media[ MEDIA_URL + 'js/admin/DateTimeShortcuts.js' ];
+    });
+    // Setting up proper suggers URLs to take the hash address into account
+    $(document).bind('content_added', function() {
+        var target_ids = $(document).data('injection_storage');
+        if (!target_ids) return;
+        target_ids = '#' + target_ids.join(',#');
+        var $new_suggest_inputs = $(target_ids).find('.GenericSuggestField,.GenericSuggestFieldMultiple');
+        if (!$new_suggest_inputs || $new_suggest_inputs.length == 0) return;
+        $new_suggest_inputs.find('input[rel]').each(function() {
+            if ($(this).data('original_rel')) return;
+            var old_rel = $(this).attr('rel');
+            $(this).attr(
+                'rel', get_adr(old_rel)
+            ).data(
+                'original_rel', old_rel
+            );
+        });
     });
     
     // The search button should send us to an address according to the thing selected in the select
@@ -917,4 +1032,15 @@ function dec_loading() {
         LOADING_CNT = 0;
         hide_loading();
     }
+}
+
+function show_ajax_error(xhr) {
+    var message;
+    if (xhr.responseText.indexOf('<!DOCTYPE') >= 0) {
+        message = _('Request failed')+' ('+xhr.status+': '+_(xhr.statusText)+')';
+    }
+    else {
+        message = xhr.responseText;
+    }
+    show_message(message, {msgclass: 'errmsg'});
 }

@@ -1,3 +1,5 @@
+import logging
+
 from django.core.exceptions import PermissionDenied
 from django.conf import settings
 
@@ -18,15 +20,19 @@ from django.utils.encoding import force_unicode
 from django.contrib.admin.util import unquote
 from django.contrib.contenttypes.models import ContentType
 
-
+from ella.core.cache.utils import get_cached_list
 from ella.newman.changelist import NewmanChangeList, FilterChangeList
 from ella.newman import models, fields, widgets, utils
 from ella.newman.decorators import require_AJAX
 from ella.newman.permission import is_category_model, model_category_fk, model_category_fk_value, applicable_categories
 from ella.newman.permission import has_category_permission, get_permission, permission_filtered_model_qs, is_category_fk
 from ella.newman.forms import DraftForm
+from ella.newman.models import AdminHelpItem
+from ella.newman.xoptions import XModelAdmin
 
 DEFAULT_LIST_PER_PAGE = getattr(settings, 'NEWMAN_LIST_PER_PAGE', 25)
+
+log = logging.getLogger('ella.newman')
 
 def formfield_for_dbfield_factory(cls, db_field, **kwargs):
     formfield_overrides = dict(FORMFIELD_FOR_DBFIELD_DEFAULTS, **cls.formfield_overrides)
@@ -86,16 +92,18 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
     return db_field.formfield(**kwargs)
 
 
-class NewmanModelAdmin(admin.ModelAdmin):
+#class NewmanModelAdmin(admin.ModelAdmin):
+class NewmanModelAdmin(XModelAdmin):
+    changelist_view_cl = NewmanChangeList
 
     def __init__(self, *args, **kwargs):
         super(NewmanModelAdmin, self).__init__(*args, **kwargs)
         self.list_per_page = DEFAULT_LIST_PER_PAGE
         self.model_content_type = ContentType.objects.get_for_model(self.model)
 
-    def get_form(self, request, obj):
+    def get_form(self, request, obj=None, **kwargs):
         self.user = request.user
-        return super(NewmanModelAdmin, self).get_form(request, obj)
+        return super(NewmanModelAdmin, self).get_form(request, obj, **kwargs)
 
     def get_urls(self):
         from django.conf.urls.defaults import patterns, url
@@ -133,13 +141,28 @@ class NewmanModelAdmin(admin.ModelAdmin):
         if not data:
             return HttpResponse(content=_('No data passed in POST variable "data".'), mimetype='text/plain', status=405)
         title = request.POST.get('title', '')
+        id = request.POST.get('id', None)
 
-        obj = models.AdminUserDraft.objects.create(
-            ct=self.model_content_type,
-            user=request.user,
-            data=data,
-            title=title
-        )
+        if id:
+            try:
+                obj = models.AdminUserDraft.objects.get(pk=id)
+                obj.data = data
+                obj.title = title
+                obj.save()
+            except:
+                obj = models.AdminUserDraft.objects.create(
+                    ct=self.model_content_type,
+                    user=request.user,
+                    data=data,
+                    title=title
+                )
+        else:
+            obj = models.AdminUserDraft.objects.create(
+                ct=self.model_content_type,
+                user=request.user,
+                data=data,
+                title=title
+            )
         result = '%d,%s' % (obj.pk, obj.__unicode__())
         return HttpResponse(content=result, mimetype='text/plain')
 
@@ -165,7 +188,7 @@ class NewmanModelAdmin(admin.ModelAdmin):
         app_label = opts.app_label
         try:
             cl = FilterChangeList(request, self.model, self.list_display, self.list_display_links, self.list_filter,
-                self.date_hierarchy, self.search_fields, self.list_select_related, self.list_per_page, self)
+                self.date_hierarchy, self.search_fields, self.list_select_related, self.list_per_page, self.list_editable, self)
         except IncorrectLookupParameters:
             # Wacky lookup parameters were given, so redirect to the main
             # changelist page, without parameters, and pass an 'invalid=1'
@@ -175,6 +198,7 @@ class NewmanModelAdmin(admin.ModelAdmin):
             if ERROR_FLAG in request.GET.keys():
                 return render_to_response('admin/invalid_setup.html', {'title': _('Database error')})
             return HttpResponseRedirect(request.path + '?' + ERROR_FLAG + '=1')
+        cl.formset = None
 
         context = {
             'title': cl.title,
@@ -194,38 +218,7 @@ class NewmanModelAdmin(admin.ModelAdmin):
 
     @require_AJAX
     def changelist_view(self, request, extra_context=None):
-
-        opts = self.model._meta
-        app_label = opts.app_label
-        if not self.has_change_permission(request, None):
-            raise PermissionDenied # commented out as user is restricted by category
-        try:
-            cl = NewmanChangeList(request, self.model, self.list_display, self.list_display_links, self.list_filter,
-                self.date_hierarchy, self.search_fields, self.list_select_related, self.list_per_page, self)
-        except IncorrectLookupParameters:
-            # Wacky lookup parameters were given, so redirect to the main
-            # changelist page, without parameters, and pass an 'invalid=1'
-            # parameter via the query string. If wacky parameters were given and
-            # the 'invalid=1' parameter was already in the query string, something
-            # is screwed up with the database, so display an error page.
-            if ERROR_FLAG in request.GET.keys():
-                return render_to_response('admin/invalid_setup.html', {'title': _('Database error')})
-            return HttpResponseRedirect(request.path + '?' + ERROR_FLAG + '=1')
-
-        context = {
-            'title': cl.title,
-            'is_popup': cl.is_popup,
-            'cl': cl,
-            'has_add_permission': self.has_add_permission(request),
-            'root_path': self.admin_site.root_path,
-            'app_label': app_label,
-        }
-        context.update(extra_context or {})
-        return render_to_response(self.change_list_template or [
-            'admin/%s/%s/change_list.html' % (app_label, opts.object_name.lower()),
-            'admin/%s/change_list.html' % app_label,
-            'admin/change_list.html'
-        ], context, context_instance=template.RequestContext(request))
+        return super(NewmanModelAdmin, self).changelist_view(request)
 
     @require_AJAX
     def suggest_view(self, request, extra_context=None):
@@ -310,7 +303,8 @@ class NewmanModelAdmin(admin.ModelAdmin):
     def has_model_view_permission(self, request, obj=None):
         """ returns True if user has permission to view this model, otherwise False. """
         # try to find view or change perm. for given user in his permissions or groups permissions
-        can_change = admin.ModelAdmin.has_change_permission( self, request, obj )
+        #can_change = admin.ModelAdmin.has_change_permission( self, request, obj ) # TODO delete
+        can_change = super(NewmanModelAdmin, self).has_change_permission(request, obj)
         can_view = self.has_view_permission(request, obj)
         if can_view or can_change:
             return True
@@ -343,7 +337,8 @@ class NewmanModelAdmin(admin.ModelAdmin):
         cfield = model_category_fk_value(obj)
         if obj is None or not cfield:
             if request.method == 'POST':
-                return admin.ModelAdmin.has_change_permission( self, request, obj )
+                #return admin.ModelAdmin.has_change_permission( self, request, obj ) #TODO delete
+                return super(NewmanModelAdmin, self).has_change_permission(request, obj)
             else:
                 return self.has_model_view_permission(request, obj)
 
@@ -378,114 +373,54 @@ class NewmanModelAdmin(admin.ModelAdmin):
         # no permission found
         return False
 
-    @require_AJAX
-    def change_view(self, request, object_id, extra_context=None):
-        "The 'change' admin view for this model."
-        model = self.model
-        opts = model._meta
-
-        try:
-            obj = model._default_manager.get(pk=unquote(object_id))
-        except model.DoesNotExist:
-            # Don't raise Http404 just yet, because we haven't checked
-            # permissions yet. We don't want an unauthenticated user to be able
-            # to determine whether a given object exists.
-            obj = None
-
-        if not self.has_change_permission(request, obj):
-            raise PermissionDenied
-
-        if obj is None:
-            raise Http404(_('%(name)s object with primary key %(key)r does not exist.') % {'name': force_unicode(opts.verbose_name), 'key': escape(object_id)})
-
-        if request.method == 'POST' and request.POST.has_key("_saveasnew"):
-            return self.add_view(request, form_url='../../add/')
-
-        ModelForm = self.get_form(request, obj)
-        formsets = []
-        if request.method == 'POST':
-            form = ModelForm(request.POST, request.FILES, instance=obj)
-            if form.is_valid():
-                form_validated = True
-                new_object = self.save_form(request, form, change=True)
-            else:
-                form_validated = False
-                new_object = obj
-            for FormSet in self.get_formsets(request, new_object):
-                formset = FormSet(request.POST, request.FILES,
-                                  instance=new_object)
-                formsets.append(formset)
-
-            if all_valid(formsets) and form_validated:
-                self.save_model(request, new_object, form, change=True)
-                form.save_m2m()
-                for formset in formsets:
-                    self.save_formset(request, form, formset, change=True)
-
-                change_message = self.construct_change_message(request, form, formsets)
-                self.log_change(request, new_object, change_message)
-                return self.response_change(request, new_object)
-
-        else:
-            form = ModelForm(instance=obj)
-            for FormSet in self.get_formsets(request, obj):
-                formset = FormSet(instance=obj)
-                formsets.append(formset)
-
-        adminForm = admin.helpers.AdminForm(form, self.get_fieldsets(request, obj), self.prepopulated_fields)
-        media = self.media + adminForm.media
-
+    def get_change_view_inline_formsets(self, request, obj, formsets, media):
         inline_admin_formsets = []
-        raw_inlines = {}
+        self._raw_inlines = {}
         for inline, formset in zip(self.inline_instances, formsets):
-            # TODO: has user permission for inline model?
-            #if request.user.has_module_perms(inline.model._meta.app_label):
-            raw_inlines[str(inline.model._meta).replace('.', '__')] = formset
+            self._raw_inlines[str(inline.model._meta).replace('.', '__')] = formset
             fieldsets = list(inline.get_fieldsets(request, obj))
             inline_admin_formset = admin.helpers.InlineAdminFormSet(inline, formset, fieldsets)
             inline_admin_formsets.append(inline_admin_formset)
             media = media + inline_admin_formset.media
+        return inline_admin_formsets, media
 
+    @require_AJAX
+    def change_view(self, request, object_id, extra_context=None):
+        "The 'change' admin view for this model."
+        out = self.get_change_view_context(request, object_id)
+        if type(out) != dict:
+            # context is not a dict probably HttpReponseRedirect, or Http404 etc.
+            return out
+        context = out
+        # === newman specific
         # raw media paths for ajax implementation
+        media = context['raw_media']
         raw_media = []
         if media._css.has_key('screen'):
             raw_media.extend(media._css['screen'])
         raw_media.extend(media._js)
+        help_qs = get_cached_list(AdminHelpItem, ct=self.model_content_type, lang=settings.LANGUAGE_CODE)
+        form  = context['raw_form']
+        for msg in help_qs:
+            try:
+                form.fields[msg.field].hint_text = msg.short
+                form.fields[msg.field].help_text = msg.long
+            except KeyError:
+                pass
 
         raw_frm_all = {
             'form': form,
-            'inlines': raw_inlines
+            'inlines': self._raw_inlines
         }
+        context['raw_form'] = raw_frm_all
+        context['media'] = raw_media
         draft_form = DraftForm(user=request.user, content_type=self.model_content_type)
-
-        context = {
-            'title': _('Change %s') % force_unicode(opts.verbose_name),
-            'adminform': adminForm,
-            'raw_form': raw_frm_all,
-            'object_id': object_id,
-            'original': obj,
-            'is_popup': request.REQUEST.has_key('_popup'),
-            'media': raw_media,
-            'inline_admin_formsets': inline_admin_formsets,
-            'errors': admin.helpers.AdminErrorList(form, formsets),
-            'root_path': self.admin_site.root_path,
-            'app_label': opts.app_label,
-            'draft_form': draft_form,
-        }
+        context['draft_form'] = draft_form
+        # === end of newman specific
         context.update(extra_context or {})
+        obj = self.get_change_view_object(object_id)
         return self.render_change_form(request, context, change=True, obj=obj)
     change_view = transaction.commit_on_success(change_view)
-
-    def restrict_field_categories(self, db_field, user, model):
-        f = db_field
-        if hasattr(f.queryset, '_newman_filtered'):
-            return
-        view_perm = get_permission('view', model)
-        change_perm = get_permission('change', model)
-        perms = (view_perm, change_perm,)
-        qs = permission_filtered_model_qs(f.queryset, user, perms)
-        qs._newman_filtered = True #magic variable
-        f._set_queryset(qs)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if is_category_fk(db_field):
@@ -499,7 +434,8 @@ class NewmanModelAdmin(admin.ModelAdmin):
         First semi-working draft of category-based permissions. It will allow permissions to be set per category
         effectively hiding the content the user has no permission to see/change.
         """
-        q = admin.ModelAdmin.queryset(self, request)
+        #q = admin.ModelAdmin.queryset(self, request) #TODO delete
+        q = super(NewmanModelAdmin, self).queryset(request)
         # user category filter
         qs = utils.user_category_filter(q, request.user)
         if request.user.is_superuser:

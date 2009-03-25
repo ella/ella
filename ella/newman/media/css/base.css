@@ -81,6 +81,7 @@ div.breadcrumbs {
     height: 70px;
     border: 1px solid #ddd;
     -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
 }
 .favs ul.items li a {
     display: block;
@@ -118,6 +119,7 @@ div.breadcrumbs {
     position: fixed;
     top: 112px; left: 0; bottom: 28px; right: 0;
     overflow: auto; */
+    padding-bottom: 30px;
 }
 
 /* CONTENT TOOLBAR */
@@ -145,6 +147,7 @@ div.hpbox {
     background: #fff;
     border: 1px solid #ccc;
     -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
     margin: 10px 5px;
     min-width: 200px;
 }
@@ -181,6 +184,7 @@ a.btn {
     padding-top: 3px; padding-bottom: 3px; padding-right: 4px;
     border: 1px solid #ccc;
     -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
     background-color: #ddd;
     margin: 2px;
     text-decoration: none;
@@ -228,7 +232,7 @@ a.icn.save { background-image: url(../ico/16/filesave.png); }
 }
 
 /* FORMS */
-fieldset, legend { border: 1px solid #ddd; padding: 5px; -moz-border-radius: 5px; background: #fff; }
+fieldset, legend { border: 1px solid #ddd; padding: 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; background: #fff; }
 legend { padding: 2px 5px; }
 label { display: block; clear: both; margin: 5px 0 2px 0; }
 label.required { font-weight: bold; color: darkorange; }
@@ -285,6 +289,8 @@ td, th {
     white-space: nowrap;
     background: lightyellow url(../ico/16/info.png) 2px 50% no-repeat;
     -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+
 }
 #opmsg span.errmsg {
     background-color: orange;

@@ -7,6 +7,7 @@ import logging
 
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Permission
+from django.contrib.sites.models import Site
 from django.db.models import query, ForeignKey, ManyToManyField
 
 from ella.core.models import Category
@@ -174,6 +175,14 @@ def is_category_fk(db_field):
     if not isinstance(db_field, (ForeignKey, ManyToManyField)):
         return False
     return db_field.rel.to == Category
+
+def is_site_fk(db_field):
+    """
+    Return wheter given database field is ForeignKey pointing to Site
+    """
+    if not isinstance(db_field, (ForeignKey, ManyToManyField)):
+        return False
+    return db_field.rel.to == Site
 
 def model_category_fk_value(model):
     """ returns value of field related to Category """

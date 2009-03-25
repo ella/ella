@@ -1,8 +1,9 @@
 from django.db import models
-from django.utils.translation import ugettext_lazy as _, ugettext
+from django.utils.translation import ugettext, ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User, Group
 from django.conf import settings
+from django.template.defaultfilters import date
 
 from ella.core.cache.utils import CachedForeignKey
 from ella.core.models import Category
@@ -60,7 +61,7 @@ class AdminUserDraft(models.Model):
 
     # Preset title
     title = models.CharField(_('Title'), max_length=64, blank=True)
-    ts = models.DateTimeField(editable=False, auto_now_add=True)
+    ts = models.DateTimeField(editable=False, auto_now=True)
 
     @property
     def is_preset(self):
@@ -68,13 +69,13 @@ class AdminUserDraft(models.Model):
 
     def __unicode__(self):
         if self.is_preset:
-            return u"%s (%s)" % (self.title, self.ts)
-        return u"%s %s (%s)" % (ugettext("Autosaved"), self.ct, self.ts)
+            return u"%s (%s)" % (self.title, date(self.ts, 'y-m-d H:i'))
+        return u"%s %s (%s)" % (_("Autosaved"), self.ct, date(self.ts, 'y-m-d H:i'))
 
     class Meta:
         verbose_name = _('Draft item')
         verbose_name_plural = _('Draft items')
-        ordering = ('title',)
+        ordering = ('-ts',)
 
 
 class AdminSetting(models.Model):
