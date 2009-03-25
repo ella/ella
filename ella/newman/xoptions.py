@@ -252,8 +252,6 @@ class XModelAdmin(ModelAdmin):
             'actions_on_top': self.actions_on_top,
             'actions_on_bottom': self.actions_on_bottom,
         }
-        cx['raw_media'] = media
-        cx['raw_formset'] = formset
         return cx
 
     def changelist_view(self, request, extra_context=None):

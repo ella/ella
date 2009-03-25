@@ -43,9 +43,9 @@
 {% block content_js %}
     {{ block.super }}
     
-    {% if raw_media %}
+    {% if media %}
     <script type="text/javascript">
-    {% for m in raw_media %}
+    {% for m in media %}
         request_media('{{ m }}?{{ VERSION }}');
     {% endfor %}
     {% endif %}

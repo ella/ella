@@ -47,6 +47,7 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
             kwargs.update({
                 'required': not db_field.blank,
                 'label': db_field.verbose_name,
+                'model': cls.model,
             })
             rich_text_field = fields.RichTextField(**kwargs)
             if css_class:
@@ -96,7 +97,7 @@ class NewmanModelAdmin(XModelAdmin):
         self.model_content_type = ContentType.objects.get_for_model(self.model)
 
     def get_form(self, request, obj=None, **kwargs):
-        self.user = request.user
+        self.instance = obj # adding edited object to ModelAdmin instance.
         return super(NewmanModelAdmin, self).get_form(request, obj, **kwargs)
 
     def get_urls(self):
@@ -131,6 +132,7 @@ class NewmanModelAdmin(XModelAdmin):
         """ Autosave data (dataloss-prevention) or save as (named) template """
         # TODO: clean too old autosaved... (keep last 3-5 autosaves)
         # jQuery.post( 'http://localhost:8000/articles/article/1503079/draft/save/', {'data': '{"title": "Jarni style", "slug": "jarni-style" }'} )
+        self.register_newman_variables(request)
         data = request.POST.get('data', None)
         if not data:
             return HttpResponse(content=_('No data passed in POST variable "data".'), mimetype='text/plain', status=405)
@@ -163,6 +165,7 @@ class NewmanModelAdmin(XModelAdmin):
     @require_AJAX
     def load_draft_view(self, request, extra_context=None):
         """ Returns draft identified by request.GET['title'] variable.  """
+        self.register_newman_variables(request)
         id = request.GET.get('id', None)
         if not id:
             return HttpResponse(content=_('No id found in GET variable "id".'), mimetype='text/plain', status=405)
@@ -178,6 +181,7 @@ class NewmanModelAdmin(XModelAdmin):
     @require_AJAX
     def filters_view(self, request, extra_context=None):
         "stolen from: The 'change list' admin view for this model."
+        self.register_newman_variables(request)
         opts = self.model._meta
         app_label = opts.app_label
         try:
@@ -212,10 +216,29 @@ class NewmanModelAdmin(XModelAdmin):
 
     @require_AJAX
     def changelist_view(self, request, extra_context=None):
-        return super(NewmanModelAdmin, self).changelist_view(request)
+        self.register_newman_variables(request)
+        opts = self.model._meta
+        app_label = opts.app_label
+        context = super(NewmanModelAdmin, self).get_changelist_context(request)
+        if type(context) != dict:
+            return context
+        media = context['media']
+        if media:
+            raw_media = []
+            if media._css.has_key('screen'):
+                raw_media.extend(media._css['screen'])
+            raw_media.extend(media._js)
+            context['media'] = raw_media
+        context.update(extra_context or {})
+        return render_to_response(self.change_list_template or [
+            'admin/%s/%s/change_list.html' % (app_label, opts.object_name.lower()),
+            'admin/%s/change_list.html' % app_label,
+            'admin/change_list.html'
+        ], context, context_instance=template.RequestContext(request))
 
     @require_AJAX
     def suggest_view(self, request, extra_context=None):
+        self.register_newman_variables(request)
         SUGGEST_VIEW_LIMIT = getattr(settings, 'SUGGEST_VIEW_LIMIT', 20)
         SUGGEST_VIEW_MIN_LENGTH = getattr(settings, 'SUGGEST_VIEW_MIN_LENGTH', 2)
         SUGGEST_RETURN_ALL_FIELD = getattr(settings, 'SUGGEST_RETURN_ALL_FIELD', True)
@@ -288,6 +311,9 @@ class NewmanModelAdmin(XModelAdmin):
                 ft.append( "%s".encode('utf-8') % '|'.join("%s" % item[f] for f in lookup_fields[:2]) )
 
         return HttpResponse( '\n'.join(ft), mimetype='text/plain;charset=utf-8' )
+
+    def register_newman_variables(self, request):
+        self.user = request.user
 
     def has_view_permission(self, request, obj):
         opts = self.opts
@@ -379,6 +405,7 @@ class NewmanModelAdmin(XModelAdmin):
     @require_AJAX
     def change_view(self, request, object_id, extra_context=None):
         "The 'change' admin view for this model."
+        self.register_newman_variables(request)
         out = self.get_change_view_context(request, object_id)
         if type(out) != dict:
             # context is not a dict probably HttpReponseRedirect, or Http404 etc.
