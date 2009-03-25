@@ -160,7 +160,7 @@ class Publishable(models.Model):
 
     def Box(self, box_type, nodelist):
         "add some content type info of self.target"
-        box = Box(self, box_type, nodelist, content_type=self.content_type)
+        box = Box(self, box_type, nodelist, model=self.content_type.model_class())
 
         return box
 

@@ -1,6 +1,5 @@
 
 from django.template import loader
-from django.contrib.contenttypes.models import ContentType
 from django.utils.datastructures import MultiValueDict
 from django.utils.encoding import smart_str
 from django.core.cache import cache
@@ -25,7 +24,7 @@ class Box(object):
     js = []
     css = []
     can_double_render = False
-    def __init__(self, obj, box_type, nodelist, template_name=None, content_type=None):
+    def __init__(self, obj, box_type, nodelist, template_name=None, model=None):
         """
         Params:
 
@@ -40,15 +39,11 @@ class Box(object):
         self.template_name = template_name
 
 
-        if content_type:
-            model = content_type.model_class()
-        else:
-            content_type = ContentType.objects.get_for_model(obj)
+        if not model:
             model = obj.__class__
 
-        self.app_label = content_type.app_label
-        self.module_name = content_type.model
-
+        self.app_label = model._meta.app_label
+        self.module_name = model._meta.module_name
         self.verbose_name = model._meta.verbose_name
         self.verbose_name_plural = model._meta.verbose_name_plural
 
