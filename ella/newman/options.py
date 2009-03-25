@@ -30,7 +30,7 @@ log = logging.getLogger('ella.newman')
 
 def formfield_for_dbfield_factory(cls, db_field, **kwargs):
     formfield_overrides = dict(FORMFIELD_FOR_DBFIELD_DEFAULTS, **cls.formfield_overrides)
-    custom_param_names = ('request', 'user', 'model', 'super_field')
+    custom_param_names = ('request', 'user', 'model', 'super_field', 'instance')
     custom_params = {}
     # move custom kwargs from kwargs to custom_params
     for key in kwargs:
@@ -43,13 +43,16 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
         kwargs.pop(key, None)
 
     for css_class, rich_text_fields in getattr(cls, 'rich_text_fields', {}).iteritems():
-        if db_field.name in rich_text_fields:
+        if db_field.name in rich_text_fields and custom_params['instance']:
             kwargs.update({
                 'required': not db_field.blank,
                 'label': db_field.verbose_name,
-                'model': cls.model,
+                'field_name': db_field.name,
+                'instance': custom_params['instance'],
             })
+            print db_field, db_field.name , custom_params['instance'] , custom_params['model']
             rich_text_field = fields.RichTextField(**kwargs)
+            print '---'
             if css_class:
                 rich_text_field.widget.attrs['class'] += ' %s' % css_class
             return rich_text_field
@@ -97,7 +100,7 @@ class NewmanModelAdmin(XModelAdmin):
         self.model_content_type = ContentType.objects.get_for_model(self.model)
 
     def get_form(self, request, obj=None, **kwargs):
-        self.instance = obj # adding edited object to ModelAdmin instance.
+        self._magic_instance = obj # adding edited object to ModelAdmin instance.
         return super(NewmanModelAdmin, self).get_form(request, obj, **kwargs)
 
     def get_urls(self):
@@ -444,8 +447,11 @@ class NewmanModelAdmin(XModelAdmin):
     def formfield_for_dbfield(self, db_field, **kwargs):
         if is_category_fk(db_field):
             kwargs['super_field'] = super(NewmanModelAdmin, self).formfield_for_dbfield(db_field, **kwargs)
-        kwargs['model'] = self.model
-        kwargs['user'] = self.user
+        kwargs.update({
+            'model': self.model,
+            'user': self.user,
+            'instance': self._magic_instance,
+        })
         return formfield_for_dbfield_factory(self, db_field, **kwargs)
 
     def queryset(self, request):
@@ -495,14 +501,24 @@ class NewmanInlineModelAdmin(InlineModelAdmin):
     def get_formset(self, request, obj=None):
         setattr(self.form, '_magic_user', request.user) # magic variable assigned to form
         setattr(self, '_magic_user', request.user) # magic variable
+        from django.forms.models import _get_foreign_key
+        setattr(self, '_magic_instance', obj)
+        setattr(self, '_magic_fk', _get_foreign_key(self.parent_model, self.model, fk_name=self.fk_name))
         self.user = request.user
         return super(NewmanInlineModelAdmin, self).get_formset(request, obj)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if is_category_fk(db_field):
             kwargs['super_field'] = super(NewmanInlineModelAdmin, self).formfield_for_dbfield(db_field, **kwargs)
-        kwargs['model'] = self.model
-        kwargs['user'] = self._magic_user
+        inst = None
+        # Inlined object is requested by RichTextField (the field needs to lookup SrcText)
+        if hasattr(self, '_magic_instance') and self._magic_instance:
+            inst = self.model.objects.get(**{self._magic_fk.name: self._magic_instance.pk})
+        kwargs.update({
+            'model': self.model,
+            'user': self._magic_user,
+            'instance': inst,
+        })
         return formfield_for_dbfield_factory(self, db_field, **kwargs)
 
 class NewmanStackedInline(NewmanInlineModelAdmin):
