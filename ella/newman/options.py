@@ -453,7 +453,8 @@ class NewmanModelAdmin(XModelAdmin):
         context = self.get_add_view_context(request, form_url)
         context.update(extra_context or {})
         if 'object_added' in context:
-            data = {'id': context['object'].pk}
+            msg = request.user.message_set.all()[0].message
+            data = {'id': context['object'].pk, 'message': msg}
         else:
             return self.render_change_form(request, context, add=True)
         out = utils.json_encode(data)
