@@ -345,7 +345,7 @@ class XModelAdmin(ModelAdmin):
             'adminform': adminForm,
             'is_popup': request.REQUEST.has_key('_popup'),
             'show_delete': False,
-            'media': mark_safe(media),
+            'media': media,
             'inline_admin_formsets': inline_admin_formsets,
             'errors': helpers.AdminErrorList(form, formsets),
             'root_path': self.admin_site.root_path,

@@ -451,6 +451,14 @@ class NewmanModelAdmin(XModelAdmin):
         "The 'add' admin view for this model."
         self.register_newman_variables(request)
         context = self.get_add_view_context(request, form_url)
+
+        # form for autosaved and draft objects
+        draft_form = DraftForm(user=request.user, content_type=self.model_content_type)
+
+        context.update({
+            'media': self.prepare_media(context['media']),
+            'draft_form': draft_form,
+        })
         context.update(extra_context or {})
         if 'object_added' in context:
             msg = request.user.message_set.all()[0].message
