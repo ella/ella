@@ -71,10 +71,12 @@ ul.GenericSuggestFieldMultiple {
     float: left;
     width: 90%;
     vertical-align: middle;
+    min-width: 300px;
+    white-space: nowrap;
 }
 ul.GenericSuggestField li,
 ul.GenericSuggestFieldMultiple li {
-    float: left;
+    display: inline;
     padding: 2px;
     list-style-type: none;
 }
