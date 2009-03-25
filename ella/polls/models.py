@@ -6,7 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.safestring import mark_safe
 from django.conf import settings
 
-from ella.db.models import Publishable
+from ella.core.models import Publishable
 from ella.core.cache import get_cached_object, get_cached_list
 from ella.core.box import Box
 from ella.core.models import Category, Author
@@ -138,6 +138,8 @@ class Quiz(Publishable, FloatingStateModel):
     """
     Quizes with title, descriptions and activation options.
     """
+    box_class = QuizBox
+
     title = models.CharField(_('title'), max_length=200)
     slug = models.SlugField(_('Slug'), max_length=255)
     category = models.ForeignKey(Category)
@@ -153,9 +155,6 @@ class Quiz(Publishable, FloatingStateModel):
     authors = models.ManyToManyField(Author, verbose_name=_('Authors'))
 
     objects = RelatedManager()
-
-    def Box(self, box_type, nodelist):
-        return QuizBox(self, box_type, nodelist)
 
     @property
     def questions(self):
@@ -256,7 +255,6 @@ class PollBox(Box):
         return cont
 
     def get_cache_key(self):
-        from ella.polls import views
         return super(PollBox, self).get_cache_key() + str(self.state)
 
     def get_cache_tests(self):
@@ -267,6 +265,7 @@ class Poll(models.Model, FloatingStateModel):
     """
     Poll model with descriptions and activation times
     """
+    box_class = PollBox
     title = models.CharField(_('Title'), max_length=200)
     text_announcement = models.TextField(_('Text with announcement'), blank=True, null=True)
     text = models.TextField(_('Text'), blank=True, null=True)
@@ -281,9 +280,6 @@ class Poll(models.Model, FloatingStateModel):
     def get_total_votes(self):
         return self.get_question().get_total_votes()
     get_total_votes.short_description = _('Votes in total')
-
-    def Box(self, box_type, nodelist):
-        return PollBox(self, box_type, nodelist)
 
     def __unicode__(self):
         return self.title

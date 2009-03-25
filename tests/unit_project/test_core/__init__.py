@@ -2,7 +2,6 @@
 from datetime import datetime
 
 from django.conf import settings
-from django.contrib.contenttypes.models import ContentType
 
 from ella.core.models import Placement, Category
 # choose Article as an example publishable, we cannot use Publishable directly
@@ -39,15 +38,12 @@ def create_and_place_a_publishable(case):
     case.publishable = Article.objects.create(
         title=u'First Article',
         slug=u'first-article',
-        perex=u'Some\nlonger\ntext',
+        description=u'Some\nlonger\ntext',
         category=case.category_nested
     )
 
-    case.publishable_ct = ContentType.objects.get_for_model(Article)
-
     case.placement = Placement.objects.create(
-        target_ct=case.publishable_ct,
-        target_id=case.publishable.pk,
+        publishable=case.publishable,
         category=case.category_nested,
         publish_from=datetime(2008,1,10)
     )
@@ -56,7 +52,6 @@ def create_and_place_more_publishables(case):
     """
     Create an article in every category
     """
-    case.publishable_ct = ContentType.objects.get_for_model(Article)
     case.publishables = []
     case.placements = []
 
@@ -66,15 +61,14 @@ def create_and_place_more_publishables(case):
             Article.objects.create(
                 title=u'Article number %d.' % i,
                 slug=u'article-' + chr(ord('a')+i),
-                perex=u'Some\nlonger\ntext',
+                description=u'Some\nlonger\ntext',
                 category=c
             )
         )
 
         case.placements.append(
             Placement.objects.create(
-                target_ct=case.publishable_ct,
-                target_id=case.publishable.pk,
+                publishable=case.publishable,
                 category=c,
                 publish_from=datetime(2008,1,10)
             )

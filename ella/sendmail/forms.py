@@ -1,7 +1,7 @@
 from datetime import datetime
 import time
 import logging
-import md5
+from hashlib import md5
 
 from django.conf import settings
 from django.db import models
@@ -27,7 +27,7 @@ def compute_hash(target='', timestamp=''):
 
     """
     timestamp = str(timestamp)
-    return md5.new('-'.join((target, timestamp, settings.SECRET_KEY,))).hexdigest()
+    return md5('-'.join((target, timestamp, settings.SECRET_KEY,))).hexdigest()
 
 class SendMailForm(forms.Form):
 

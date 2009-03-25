@@ -1,4 +1,4 @@
-from os.path import join, pardir, abspath
+from os.path import join, pardir, abspath, dirname
 
 from djangosanetesting import UnitTestCase
 
@@ -12,8 +12,7 @@ class TestAppTemplateLoader(UnitTestCase):
         self.assert_equals("template_name", _get_template_vars("core:template_name")[0])
 
     def test_returning_proper_dir(self):
-        self.assert_equals(abspath(join(pardir, pardir, 'ella', 'core', 'templates')), _get_template_vars("core:template_name")[1])
-
+        self.assert_equals(abspath(join(dirname(__file__), pardir, pardir, pardir, 'ella', 'core', 'templates')), _get_template_vars("core:template_name")[1])
 
     def test_invalid_name_raising_template_exc(self):
         self.assert_raises(TemplateDoesNotExist, _get_template_vars, \

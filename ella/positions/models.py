@@ -1,18 +1,14 @@
 from datetime import datetime
 
-from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 from django.db import models
 from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import generic
-from django.conf import settings
 from django.template import Template
-from django.utils.safestring import mark_safe
 
 from ella.core.models import Category
 from ella.core.box import Box
-from ella.core.cache import get_cached_object, CACHE_DELETER, cache_this, CachedGenericForeignKey
+from ella.core.cache import CACHE_DELETER, cache_this, CachedGenericForeignKey
 
 def get_position_key(func, self, category, name, nofallback=False):
     return 'ella.positions.models.PositionManager.get_active_position:%d:%s:%s' % (
@@ -50,8 +46,16 @@ class PositionManager(models.Manager):
                 if category is None:
                     raise
 
+def PositionBox(position, *args, **kwargs):
+    " Delegate the boxing. "
+    obj = position.target
+    return getattr(position.target, 'box_class', Box)(obj, *args, **kwargs)
+
+
 class Position(models.Model):
     " Represents a position on a page belonging to a certain category. "
+    box_class = staticmethod(PositionBox)
+
     category = models.ForeignKey(Category, verbose_name=_('Category'))
     name = models.CharField(_('Name'), max_length=200)
 
@@ -94,13 +98,6 @@ class Position(models.Model):
         return active_from and active_till
     is_active.short_description = _('Active')
     is_active.boolean = True
-
-    def Box(self, box_type, nodelist):
-        " Delegate the boxing. "
-        obj = self.target
-        if hasattr(obj, 'Box'):
-            return obj.Box(box_type, nodelist)
-        return Box(obj, box_type, nodelist)
 
     def render(self, context, nodelist, box_type):
         " Render the position. "

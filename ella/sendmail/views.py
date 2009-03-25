@@ -1,5 +1,4 @@
 import logging
-from smtplib import SMTP
 from xml.dom.minidom import Document
 
 from django.utils.translation import ugettext as _
@@ -19,7 +18,6 @@ from ella.core.cache.utils import get_cached_object_or_404
 from ella.core.views import get_templates_from_placement
 
 from ella.sendmail.forms import SendMailForm
-from ella.sendmail.models import Mail
 
 
 log = logging.getLogger('ella.sendmail')

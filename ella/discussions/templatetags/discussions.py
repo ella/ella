@@ -1,16 +1,12 @@
 import logging
 
 from django import template
-from django.core.exceptions import ObjectDoesNotExist
-from django.contrib.contenttypes.models import ContentType
-from django.db import models
-from django.utils.encoding import smart_str
 from django.template import TemplateSyntaxError
 from django.core.paginator import Paginator
 from django.conf import settings
 
 from ella.core.models import Listing
-from ella.discussions.models import TopicThread, Topic, BannedUser, BannedString, get_comments_on_thread
+from ella.discussions.models import TopicThread, Topic, get_comments_on_thread
 from ella.utils.templatetags import parse_getforas_triplet
 
 

@@ -1,9 +1,6 @@
-from django.db.models import get_model
-from django.template import Library, Node, TemplateSyntaxError, Variable
-from django.utils.translation import ugettext as _
-from django.utils.safestring import mark_safe
+from django.template import Library, Node, TemplateSyntaxError
 
-from ella.sendmail.forms import SendMailForm, SendBuddyForm
+from ella.sendmail.forms import SendBuddyForm
 
 register = Library()
 

@@ -24,7 +24,7 @@ class Box(object):
     js = []
     css = []
     can_double_render = False
-    def __init__(self, obj, box_type, nodelist, template_name=None):
+    def __init__(self, obj, box_type, nodelist, template_name=None, model=None):
         """
         Params:
 
@@ -37,6 +37,16 @@ class Box(object):
         self.box_type = box_type
         self.nodelist = nodelist
         self.template_name = template_name
+
+
+        if not model:
+            model = obj.__class__
+
+        self.app_label = model._meta.app_label
+        self.module_name = model._meta.module_name
+        self.verbose_name = model._meta.verbose_name
+        self.verbose_name_plural = model._meta.verbose_name_plural
+
 
     def parse_params(self, definition):
         " A helper function to parse the parameters inside the box tag. "
@@ -78,9 +88,9 @@ class Box(object):
             level = 1
 
         return {
-                'content_type_name' : '.'.join((self.obj._meta.app_label, self.obj._meta.module_name)),
-                'content_type_verbose_name' : self.obj._meta.verbose_name,
-                'content_type_verbose_name_plural' : self.obj._meta.verbose_name_plural,
+                'content_type_name' : '.'.join((self.app_label, self.module_name)),
+                'content_type_verbose_name' : self.verbose_name,
+                'content_type_verbose_name_plural' : self.verbose_name_plural,
                 'object' : self.obj,
                 'level' : level,
                 'next_level' : level + 1,
@@ -120,8 +130,8 @@ class Box(object):
 
         return '''{%% box %(box_type)s for %(app_label)s.%(module_name)s with pk %(pk)s %%}template_name: %(template_name)s\n%(params)s{%% endbox %%}''' % {
                 'box_type' : self.box_type,
-                'app_label' : self.obj._meta.app_label,
-                'module_name' : self.obj._meta.module_name,
+                'app_label' : self.app_label,
+                'module_name' : self.module_name,
                 'pk' : self.obj.pk,
                 'params' : '\n'.join(('%s:%s' % item for item in self.params.items())),
                 'template_name' : t_name,
@@ -133,13 +143,13 @@ class Box(object):
         if hasattr(self.obj, 'category_id') and self.obj.category_id:
             from ella.core.models import Category
             cat = get_cached_object(Category, pk=self.obj.category_id)
-            base_path = 'box/category/%s/content_type/%s.%s/' % (cat.path, self.obj._meta.app_label, self.obj._meta.module_name)
+            base_path = 'box/category/%s/content_type/%s.%s/' % (cat.path, self.app_label, self.module_name)
             if hasattr(self.obj, 'slug'):
                 t_list.append(base_path + '%s/%s.html' % (self.obj.slug, self.box_type,))
             t_list.append(base_path + '%s.html' % (self.box_type,))
             t_list.append(base_path + 'box.html')
 
-        base_path = 'box/content_type/%s.%s/' % (self.obj._meta.app_label, self.obj._meta.module_name)
+        base_path = 'box/content_type/%s.%s/' % (self.app_label, self.module_name)
         if hasattr(self.obj, 'slug'):
             t_list.append(base_path + '%s/%s.html' % (self.obj.slug, self.box_type,))
         t_list.append(base_path + '%s.html' % (self.box_type,))

@@ -58,13 +58,20 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.redirects',
-    'django.contrib.webdesign',
-    'example_project.services',
+
     'ella.core',
     'ella.db_templates',
     'ella.photos',
     'ella.articles',
+    'ella.positions',
+
+    'example_project.services',
+
+    'south',
+
     'ella.ellaadmin',
     'ella.newman',
     'django.contrib.admin',
 )
+
+VERSION = 1

@@ -2,7 +2,6 @@ from ella.comments.models import Comment
 from ella.comments.forms import CommentForm
 
 from django import template
-from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils.encoding import smart_str

@@ -38,7 +38,7 @@ class TestPlacement(DatabaseTestCase):
         )
         
         p = Placement.objects.create(
-            target=self.publishable,
+            publishable=self.publishable,
             category=category,
             publish_from=datetime(2008,1,10)
         )

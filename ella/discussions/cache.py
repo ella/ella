@@ -4,9 +4,9 @@ ella.discussions.models.get_comments_on_thread .
 Cache-key functions included.
 """
 
-from ella.core.cache.utils import get_cached_object_or_404, get_cached_list, cache_this, \
-normalize_key, delete_cached_object
-from ella.discussions.models import Topic, TopicThread, get_comments_on_thread
+from ella.core.cache.utils import cache_this
+
+from ella.discussions.models import get_comments_on_thread
 
 
 def get_key_comments_on_thread__by_submit_date(func, thread):

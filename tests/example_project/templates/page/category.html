@@ -1,0 +1,38 @@
+{% extends "page/_base.html" %}
+
+{% block primary_col %}
+
+    {{ block.super }}
+
+    {% block featured %}{% endblock %}
+
+	{% block extra_content %}
+		<div class="container-holder">
+	        {% block poll %}{% endblock %}
+	        {% block tipoftheday %}{% endblock %}
+	    </div>
+	{% endblock %}
+
+    {% block tip %}{% endblock %}
+
+    {% block more_articles %}
+        {% comment %}
+            {% listing 9 from 2 for category as item_listing %}
+            {% for listing in item_listing %}
+                {% box box_item_listing for listing.target %}{% endbox %}
+            {% endfor %}
+        {% endcomment %}
+    {% endblock %}
+
+    {% block featured_small %}{% endblock %}
+
+    {% block adfox_primary %}{% endblock %}
+
+    {% block dalsi_aktualni %}{% endblock %}
+
+    {% block aukro %}{% endblock %}
+
+    {% block sluzby %}services{% endblock %}
+
+
+{% endblock %}

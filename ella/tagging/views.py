@@ -16,7 +16,7 @@ from django import forms
 from ella.tagging.models import Tag, TaggedItem
 from ella.tagging.utils import get_tag, get_queryset_and_model
 from ella.core.models import Placement
-from ella.db.models import Publishable
+from ella.core.models import Publishable
 
 def tagged_object_list(request, queryset_or_model=None, tag=None,
         related_tags=False, related_tag_counts=True, **kwargs):

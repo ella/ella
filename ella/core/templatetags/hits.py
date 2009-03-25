@@ -1,5 +1,5 @@
 from django import template
-from django.db import models
+from django.db import models, transaction
 from django.conf import settings
 from django.template import Variable, VariableDoesNotExist
 
@@ -60,6 +60,7 @@ class HitCountNode(template.Node):
     def __init__(self, place, pk):
         self.place, self.pk = place, pk
 
+    @transaction.commit_on_success
     def render(self, context):
         if self.pk:
             try:

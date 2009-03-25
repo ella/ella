@@ -2,22 +2,20 @@ from django.http import Http404, HttpResponse
 import logging
 from datetime import datetime
 from django import http
-from django.core.urlresolvers import reverse
-from django.template import RequestContext, loader, Context
+from django.template import RequestContext, Context
 from django.shortcuts import render_to_response
 from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth import get_user
 from django.contrib.auth.models import User, AnonymousUser
-from django.views.generic.list_detail import object_list
 from django.core.paginator import QuerySetPaginator
 from django.conf import settings
 
 from ella.discussions.models import BannedString, Topic, TopicThread, \
     PostViewed, DuplicationError, get_comments_on_thread
 from ella.discussions.cache import get_key_comments_on_thread__by_submit_date, get_key_comments_on_thread__spec_filter, comments_on_thread__spec_filter, comments_on_thread__by_submit_date
-from ella.comments.models import Comment, build_tree
+from ella.comments.models import Comment
 from ella.comments.forms import CommentForm
 from ella.core.cache.utils import get_cached_object_or_404, delete_cached_object
 from ella.comments.defaults import FORM_OPTIONS

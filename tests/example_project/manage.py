@@ -1,19 +1,19 @@
 #!/usr/bin/env python
 import os
-from os.path import dirname, join, pardir
+from os.path import join, pardir, abspath, dirname, split
 import sys
 
-from django.core.management import execute_manager
+from django.core.management import execute_from_command_line
+
 
 # fix PYTHONPATH and DJANGO_SETTINGS for us
 # django settings module
-DJANGO_SETTINGS_MODULE = 'unit_project.settings'
+DJANGO_SETTINGS_MODULE = '%s.%s' % (split(abspath(dirname(__file__)))[1], 'settings')
 # pythonpath dirs
 PYTHONPATH = [
-    join( dirname(__file__), pardir, pardir ),
-    join( dirname(__file__), pardir ),
+    join(dirname(__file__), pardir, pardir),
+    join(dirname(__file__), pardir),
 ]
-
 
 # inject few paths to pythonpath
 for p in PYTHONPATH:
@@ -24,12 +24,6 @@ for p in PYTHONPATH:
 os.environ['DJANGO_SETTINGS_MODULE'] = DJANGO_SETTINGS_MODULE
 
 
-try:
-    import settings # Assumed to be in the same directory.
-except ImportError:
-    import sys
-    sys.stderr.write("Error: Can't find the file 'settings.py' in the directory containing %r. It appears you've customized things.\nYou'll have to run       +django-admin.py, passing it your settings module.\n(If the file settings.py does indeed exist, it's causing an ImportError somehow.)\n" % __file__)
-    sys.exit(1)
-
 if __name__ == "__main__":
-    execute_manager(settings)
+    execute_from_command_line()
+

@@ -1,9 +1,6 @@
-from datetime import datetime
-
 from django import template
 
 from ella.series.models import Serie, SeriePart
-from ella.core.cache.utils import get_cached_list
 
 register = template.Library()
 

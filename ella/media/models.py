@@ -1,18 +1,11 @@
-from math import floor
-from datetime import datetime, timedelta
-from os import path
+from datetime import datetime
 
 from django.utils.translation import ugettext_lazy as _
 from django.db import models
 
-
-
-
-
-from ella.db import fields
 from ella.core.box import Box
 from ella.photos.models import Photo
-from ella.db.models import Publishable
+from ella.core.models import Publishable
 from ella.core.models import Author, Source, Category
 
 from nc.cdnclient.models import MediaField
@@ -48,7 +41,7 @@ class MediaBox(Box):
         cont.update({
                 'title' : self.params.get('title', self.obj.title),
                 'alt' : self.params.get('alt', ''),
-})
+            })
         return cont
 
 class Media(Publishable):
@@ -57,6 +50,7 @@ class Media(Publishable):
 
     Build around nc.cdnclient.models.MediaField and adds fields like title, photo,...
     """
+    box_class = MediaBox
     title = models.CharField(_('Title'), max_length=255)
     slug = models.SlugField(_('Slug'), max_length=255)
     photo = models.ForeignKey(Photo, verbose_name=_('Preview image'), null=True, blank=True)
@@ -86,9 +80,6 @@ class Media(Publishable):
         Returns sites where media is used
         """
         return self.usage_set.all().order_by('-priority')
-
-    def Box(self, box_type, nodelist):
-        return MediaBox(self, box_type, nodelist)
 
     def __unicode__(self):
         return self.title

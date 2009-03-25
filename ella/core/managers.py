@@ -69,7 +69,7 @@ class ListingManager(RelatedManager):
 
         # filtering based on Model classes
         if mods or content_types:
-            qset = qset.filter(placement__target_ct__in=([ ContentType.objects.get_for_model(m) for m in mods ] + content_types))
+            qset = qset.filter(placement__publishable__content_type__in=([ ContentType.objects.get_for_model(m) for m in mods ] + content_types))
 
         return qset
 
@@ -151,7 +151,6 @@ def get_top_objects_key(func, self, count, mods=[]):
 
 class HitCountManager(models.Manager):
 
-    @transaction.commit_on_success
     def hit(self, placement):
         cursor = connection.cursor()
         cursor.execute('UPDATE core_hitcount SET hits=hits+1 WHERE placement_id=%s', (placement.pk,))

@@ -5,14 +5,14 @@ from os import path
 from imageop import ImageStretch, detect_img_type
 import os
 
-from django.db import models, transaction, IntegrityError
+from django.db import models, IntegrityError
 from django.conf import settings
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.contrib.contenttypes import generic
 from django.contrib.sites.models import Site
 from django.utils.safestring import mark_safe
 
-from ella.core.models import Author, Source
+from ella.core.models.main import Author, Source
 from ella.core.managers import RelatedManager
 from ella.core.box import Box
 from ella.core.cache.utils import get_cached_object
@@ -56,11 +56,12 @@ class PhotoBox(Box):
                 'show_authors' : self.params.get('show_authors', ''),
                 'show_detail' : self.params.get('show_detail', ''),
                 'link_url': self.params.get('link_url', ''),
-})
+            })
         return cont
 
 class Photo(models.Model):
     "Represents original (unformated) photo."
+    box_class = PhotoBox
     title = models.CharField(_('Title'), max_length=200)
     description = models.TextField(_('Description'), blank=True)
     slug = models.SlugField(_('Slug'), max_length=255)
@@ -109,10 +110,6 @@ class Photo(models.Model):
                 return None
         return storage.url(thumb_name)
 
-    def Box(self, box_type, nodelist):
-        return PhotoBox(self, box_type, nodelist)
-
-    @transaction.commit_on_success
     def save(self, force_insert=False, force_update=False):
         """Overrides models.Model.save.
 

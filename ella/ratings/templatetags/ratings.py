@@ -6,7 +6,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.template.defaultfilters import slugify
 
-from ella.ratings.models import Rating, TotalRate
+from ella.ratings.models import TotalRate
 from ella.ratings.forms import RateForm
 from ella.ratings.views import get_was_rated
 from django.utils.translation import ugettext as _
@@ -323,7 +323,7 @@ def do_if_was_rated(parser, token):
             kwargs.update({"nodelist_false":nodelist_false})
             parser.delete_first_token()
         else:
-            nodelist_false = NodeList()
+            nodelist_false = template.NodeList()
         return IfWasRatedNode(**kwargs)
 
     raise template.TemplateSyntaxError, "{%% %s object %%}" % bits[0]

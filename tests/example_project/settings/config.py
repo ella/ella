@@ -9,11 +9,9 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 DISABLE_CACHE_TEMPLATE = DEBUG
-
 
 DATABASE_ENGINE = 'sqlite3'
 DATABASE_NAME = join(gettempdir(), 'ella_example_project.db')
@@ -22,7 +20,6 @@ DATABASE_USER = ''
 DATABASE_PASSWORD = ''
 DATABASE_HOST = ''
 DATABASE_PORT = ''
-
 
 TIME_ZONE = 'Europe/Prague'
 

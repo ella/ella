@@ -1,0 +1,36 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="cs" lang="cs">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        {% block head %}
+            <title>
+            {% block page_title %}
+                {% block object_title %}{% if object.title %} {{ object.title }} &ndash; {% endif %}{% endblock %}{% if category %}{{ category.title }} &ndash; {% endif %}{% block server_name %}{% endblock %}
+            {% endblock %}
+            </title>
+            <link rel="stylesheet" href="{{ MEDIA_URL }}css/common.css?v={{ VERSION }}" type="text/css" media="screen,projection" />
+            {% block server_specific_css %}
+            <link rel="stylesheet" href="{{ MEDIA_URL }}{{ SITE_NAME }}/css/{{ SITE_NAME }}.css?v={{ VERSION }}" type="text/css" media="screen,projection" />
+            {% endblock %}
+            <link rel="stylesheet" href="{{ MEDIA_URL }}common/css/print.css?v={{ VERSION }}" type="text/css" media="print" />
+            {% block extra_css %}{% endblock %}
+            {% block favicon %}
+            <link rel="shortcut icon" type="image/x-icon" href="{{ MEDIA_URL }}{{ SITE_NAME }}/favicon.ico?v={{ VERSION }}" />
+            {% endblock %}
+            <link rel="alternate" href="{% url feeds "rss" %}{% if category.tree_path %}{{category.tree_path}}/{% endif %}{% if content_type %}{{content_type_name}}/{% endif %}" title="RSS Feed" type="application/rss+xml" />
+        {% endblock %}
+    </head>
+    <body>
+        {% block body %}
+            <div class="{% block class_all %}all {% endblock %}" id="all">
+                {% block all %}{% endblock %}
+            </div>
+        {% endblock %}
+
+        {% spaceless %}
+	        {% block jquery-lightbox %}{% endblock %}
+	        {% block extra_javascript %}{% endblock %}
+	   	{% endspaceless %}
+        {% block google_analytics %}{% endblock %}
+    </body>
+</html>

@@ -1,18 +1,20 @@
+from os.path import dirname, join, normpath
+
+import django
 from django.conf.urls.defaults import *
 from django.conf import settings
+from django.contrib.admin import autodiscover
 
+import ella
 from ella import newman
+
 
 newman.autodiscover()
 
-import ella
-import django
-
-from os.path import dirname, join, normpath
 
 ADMIN_ROOTS = (
-        normpath(join(dirname(ella.__file__), 'newman', 'media')),
-        normpath(join(dirname(django.__file__), 'contrib', 'admin', 'media')),
+    normpath(join(dirname(ella.__file__), 'newman', 'media')),
+    normpath(join(dirname(django.__file__), 'contrib', 'admin', 'media')),
 )
 
 urlpatterns = patterns('',

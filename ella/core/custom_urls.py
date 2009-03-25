@@ -28,11 +28,15 @@ class DetailDispatcher(object):
     def has_custom_detail(self, obj):
         return obj.__class__ in self.root_mapping
 
+    def _get_custom_detail_view(self, model):
+        if model not in self.root_mapping:
+            raise Http404()
+        return self.root_mapping[model]
+
     def call_custom_detail(self, request, context):
         model = context['object'].__class__
-        if model not in self.root_mapping:
-            raise Http404
-        return self.root_mapping[model](request, context)
+        view = self._get_custom_detail_view(model)
+        return view(request, context)
 
     def register_custom_detail(self, model, view):
         assert model not in self.root_mapping, "You can only register one function for model %r" % model.__name__
@@ -61,6 +65,24 @@ class DetailDispatcher(object):
         else:
             map[ALL] = view
 
+    def _get_view(self, start, model):
+        """
+        Return appropriate view for given bit,
+        either from map registered for given model or from __ALL__
+        """
+        if start not in self.custom_mapping:
+            raise Http404
+
+        map = self.custom_mapping[start]
+        if model in map:
+            view = map[model]
+        elif ALL in map:
+            view = map[ALL]
+        else:
+            raise Http404()
+
+        return view
+
     def call_view(self, request, bits, context):
         """
         Call the custom view.
@@ -74,18 +96,8 @@ class DetailDispatcher(object):
         Raises:
             Http404 if no view is associated with bits[0] for content_type of the object
         """
-        if bits[0] not in self.custom_mapping:
-            raise Http404
-
         model = context['object'].__class__
-        map = self.custom_mapping[bits[0]]
-        if model in map:
-            view = map[model]
-        elif ALL in map:
-            view = map[ALL]
-        else:
-            raise Http404
-
+        view = self._get_view(bits[0], model)
         return view(request, bits[1:], context)
 
 dispatcher = DetailDispatcher()

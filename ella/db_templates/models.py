@@ -1,7 +1,7 @@
 from datetime import datetime
 import re
 
-from django.db import models, transaction
+from django.db import models
 from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
@@ -10,7 +10,7 @@ from django.conf import settings
 from django.template import Template
 from django.template.loader_tags import ExtendsNode, BlockNode
 
-from ella.core.cache import get_cached_object, CachedGenericForeignKey
+from ella.core.cache import CachedGenericForeignKey
 from ella.core.templatetags.core import BoxNode
 
 

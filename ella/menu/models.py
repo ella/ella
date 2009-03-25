@@ -10,7 +10,7 @@ from ella.core.cache import CachedForeignKey
 from ella.core.models import Category
 from ella.core.cache import get_cached_list, get_cached_object, cache_this, CachedGenericForeignKey
 from ella.menu.managers import MenuItemManager
-from ella.db.models import Publishable
+from ella.core.models import Publishable
 
 
 class Menu(models.Model):

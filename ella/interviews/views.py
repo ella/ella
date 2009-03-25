@@ -3,7 +3,7 @@ from django import forms
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 from django.contrib.formtools.preview import FormPreview
-from django.core.paginator import QuerySetPaginator, EmptyPage
+from django.core.paginator import QuerySetPaginator
 from django.conf import settings
 
 from ella.core.views import get_templates_from_placement

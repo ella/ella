@@ -48,9 +48,9 @@ def invalidate_cache(key, template_name, template_dirs=None):
 
 @cache_this(get_key, invalidate_cache)
 def get_cache_template(template_name, template_dirs):
-    for loader in template_source_loaders:
+    for l in template_source_loaders:
         try:
-            source, display_name = loader(template_name, template_dirs)
+            source, display_name = l(template_name, template_dirs)
             return (source, display_name)
         except TemplateDoesNotExist:
             pass

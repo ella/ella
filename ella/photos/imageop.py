@@ -1,9 +1,5 @@
 import Image
 
-from ella.utils.filemanipulation import file_rename
-
-
-
 def detect_img_type(imagePath):
     try:
         im = Image.open(imagePath)

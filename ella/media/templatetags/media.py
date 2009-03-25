@@ -1,9 +1,7 @@
 from django import template
-from django.conf import settings
-from django.db import IntegrityError
 
 from ella.media.models import Media
-from nc.cdnclient.models import Source, Format, Target
+from nc.cdnclient.models import Format, Target
 from ella.core.cache.utils import get_cached_object
 
 register = template.Library()

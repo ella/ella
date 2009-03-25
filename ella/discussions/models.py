@@ -5,17 +5,14 @@ import logging
 
 from django.contrib.auth.models import User
 from django.db import models
-from django.utils.translation import ugettext, ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import generic
 from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
 
-from ella.core.models import Listing, Category
-from ella.core.cache.utils import get_cached_list, cache_this, normalize_key, delete_cached_object, CachedGenericForeignKey
-from ella.core.cache.invalidate import CACHE_DELETER
-from ella.core.box import Box
-from ella.db.models import Publishable
+from ella.core.models import Category
+from ella.core.cache.utils import CachedGenericForeignKey
+from ella.core.models import Publishable
 from ella.comments.models import Comment
 from ella.photos.models import Photo
 from ella.discussions.managers import TopicThreadManager

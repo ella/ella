@@ -48,8 +48,7 @@ class TestMainPlacement(PublishableTestCase):
 
     def test_with_more_placements_one_with_first_publish_from_is_main(self):
         Placement.objects.create(
-            target_ct=self.publishable_ct,
-            target_id=self.publishable.pk,
+            publishable=self.publishable,
             category=self.category,
             publish_from=datetime(2008,1,11)
         )
@@ -58,8 +57,7 @@ class TestMainPlacement(PublishableTestCase):
 
     def test_with_more_placements_one_with_first_publish_from_is_main_even_when_added_as_second(self):
         placement_old = Placement.objects.create(
-            target_ct=self.publishable_ct,
-            target_id=self.publishable.pk,
+            publishable=self.publishable,
             category=self.category,
             publish_from=datetime(2007, 1, 10)
         )
@@ -80,8 +78,7 @@ class TestMainPlacement(PublishableTestCase):
         )
         
         Placement.objects.create(
-            target_ct=self.publishable_ct,
-            target_id=self.publishable.pk,
+            publishable=self.publishable,
             category=category,
             publish_from=datetime(2008,1,10)
         )

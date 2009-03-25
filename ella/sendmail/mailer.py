@@ -1,8 +1,5 @@
 # -*- coding: cp1250 -*-
-import sys, smtplib, MimeWriter, base64, StringIO
-import quopri
-import unicodedata
-import string
+import base64
 import os.path
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText

@@ -3,7 +3,6 @@ from django.shortcuts import render_to_response
 from django.http import Http404
 from django.utils.translation import ungettext
 
-from ella.core.custom_urls import dispatcher
 from ella.core.views import get_templates_from_placement
 
 
@@ -18,7 +17,7 @@ def gallery_item_detail(request, context, item_slug=None):
     previous = None
 
     if count == 0:
-        raise Http404
+        raise Http404()
         # TODO: log empty gallery
 
     if item_slug is None:
@@ -29,8 +28,8 @@ def gallery_item_detail(request, context, item_slug=None):
     else:
         try:
             item, target = item_sorted_dict[item_slug]
-        except KeyError:
-            raise Http404
+        except KeyError, e:
+            raise Http404()
         item_index = item_sorted_dict.keyOrder.index(item_slug)
         if item_index > 0:
             previous = item_sorted_dict.value_for_index(item_index-1)[0]
@@ -50,18 +49,18 @@ def gallery_item_detail(request, context, item_slug=None):
             'count' : count,
             'count_str' : count_str,
             'position' : position,
-})
+    })
 
     return render_to_response(
         get_templates_from_placement('item.html', context['placement']),
         context,
         context_instance=RequestContext(request),
-)
+    )
 
 def items(request, bits, context):
     " Wrapper around gallery_item_detail. "
     if len(bits) != 1:
-        raise Http404
+        raise Http404()
 
     return gallery_item_detail(request, context, bits[0])
 

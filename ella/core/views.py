@@ -8,7 +8,7 @@ from django.template.defaultfilters import slugify
 from django.db import models
 from django.http import Http404
 
-from ella.core.models import Listing, Category, HitCount, Placement
+from ella.core.models import Listing, Category, Placement
 from ella.core.cache import get_cached_object_or_404, cache_this
 from ella.core.custom_urls import dispatcher
 from ella.core.cache.template_loader import render_to_response
@@ -135,19 +135,19 @@ def _object_detail(request, category, content_type, slug, year=None, month=None,
                     publish_from__year=year,
                     publish_from__month=month,
                     publish_from__day=day,
-                    target_ct=ct,
+                    publishable__content_type=ct,
                     category=cat,
                     slug=slug,
                     static=False
                 )
     else:
-        placement = get_cached_object_or_404(Placement, category=cat, target_ct=ct, slug=slug, static=True)
+        placement = get_cached_object_or_404(Placement, category=cat, publishable__content_type=ct, slug=slug, static=True)
 
     if not (placement.is_active() or request.user.is_staff):
         # future placement, render if accessed by logged in staff member
         raise Http404
 
-    obj = placement.target
+    obj = placement.publishable.target
 
     context = {
             'placement' : placement,
@@ -191,9 +191,9 @@ def get_templates_from_placement(name, placement, slug=None, category=None, app_
     if category is None:
         category = placement.category
     if app_label is None:
-        app_label = placement.target._meta.app_label
+        app_label = placement.publishable.target._meta.app_label
     if model_label is None:
-        model_label = placement.target._meta.module_name
+        model_label = placement.publishable.target._meta.module_name
     return get_templates(name, slug, category, app_label, model_label)
 
 def _list_content_type(request, category=None, year=None, month=None, day=None, content_type=None, paginate_by=20):

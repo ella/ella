@@ -5,7 +5,6 @@ This file is for aggregation records from Rating,Agg tables to Agg and TotalRate
 import logging
 
 from datetime import datetime, timedelta
-from django.db import transaction
 from ella.ratings.models import Rating, Agg, TotalRate
 
 logger = logging.getLogger('ella.ratings')
@@ -44,7 +43,6 @@ def transfer_agg_to_agg():
     logger.info("transfer_agg_to_agg END")
 
 
-@transaction.commit_on_success
 def transfer_data():
     """
     transfer data from table Rating to table Agg

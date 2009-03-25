@@ -1,0 +1,75 @@
+{% extends "page/_base_secondary_col.html" %}
+
+{% block header %}
+    <div class="logo">
+        <a href="{% url root_homepage %}?logo" accesskey="2">
+            {% block logo_image %}
+                <img src="{{ MEDIA_URL }}{{ SITE_NAME }}/img/top-logo.png?v={{ VERSION }}" width="{% block logo_image_width %}0{% endblock %}" height="{% block logo_image_height %}0{% endblock %}" alt="{% block logo_image_alt %}{% endblock %}" />
+            {% endblock %}
+            {% block motto %}{% endblock %}
+        </a>
+        <p class="hidden"><a href="http://www.ippi.cz/klavesove-zkratky/neni-mapa-stranek" accesskey="1">Klávesové zkratky na tomto webu - není mapa stránek</a></p>
+        <p class="hidden"><a href="#content" accesskey="0">Na obsah stránky</a></p>
+    </div>
+
+    {% block centrum-links-header %}
+	    <div class="info-header">
+	        {% block today_info %}date{% endblock %}
+			{% block name_day_info %}name-day{% endblock %}
+			{% block wheater_info %}wheater{% endblock %}
+			{% block links_info %}links{% endblock %}
+	    </div>
+    {% endblock %}
+
+    {% block search_bar %}search form{% endblock %}
+
+{% endblock %}
+
+{% block top_menu_container %}
+	<div class="top-menu-hide">
+	    <ul>
+	        {% block top_menu %}vertical menu{% endblock %}
+	    </ul>
+    </div>
+{% endblock %}
+
+{% block services %}services{% endblock %}
+
+{% block feeds %}feeds{% endblock %}
+
+{% block primary_col %}
+	{% block sub-menu %}
+		<div class="sub-col">
+            <ul>
+                {% block menu %}horizontal menu{% endblock %}
+                {% block menu_paid %}{% endblock %}
+            </ul>
+            {% block extra-links %}{% endblock %}
+	        {% block tip-left %}{% endblock %}
+	    </div>
+    {% endblock %}
+{% endblock %}
+
+{% block ad-col %}
+
+    {% block advert_block_top-standard %}
+        <div id="top-banner" class="top-banner">&nbsp;</div>
+    {% endblock %}
+
+    {% block advert_block_direkt0-apromo %}
+        <div id="skyscrapertop" class="skyscrapertop">&nbsp;</div>
+    {% endblock %}
+
+    {% block advert_block_skyscraper %}
+        <div id="skyscraper" class="skyscraper">&nbsp;</div>
+    {% endblock %}
+
+{% endblock %}
+
+{% block footer %}
+	<p>
+	    footer
+	</p>
+{% endblock %}
+
+{% block content_bar %}{% endblock %}

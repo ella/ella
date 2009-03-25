@@ -1,12 +1,6 @@
-
 from django.http import Http404
-
-from django.shortcuts import render_to_response, get_object_or_404
-from django.template.defaultfilters import slugify
+from django.shortcuts import render_to_response
 from django.template.context import RequestContext
-from django.utils.translation import ugettext as _
-
-from ella.media.models import Media
 
 class PlayerPlaylist(object):
     """

@@ -1,14 +1,14 @@
 from datetime import datetime
 
 from django.db import models
+from django.http import Http404
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 from django.template.defaultfilters import slugify
 from django.utils.datastructures import SortedDict
 
-from ella.db.models import Publishable
-from ella.core.models import Category, Author
-from ella.core.cache.utils import get_cached_object, cache_this, CachedGenericForeignKey
+from ella.core.models import Publishable
+from ella.core.cache.utils import cache_this, CachedGenericForeignKey
 from ella.core.cache.invalidate import CACHE_DELETER
 from ella.photos.models import Photo
 
@@ -25,24 +25,20 @@ class Gallery(Publishable):
     """
     Definition of objects gallery
     """
-    # Gallery heading
-    title = models.CharField(_('Title'), max_length=255)
-    slug = models.SlugField(_('Slug'), max_length=255)
     # Gallery metadata
-    description = models.CharField(_('Description'), max_length=3000, blank=True)
     content = models.TextField(_('Content'), blank=True)
-    owner = models.ForeignKey(Author, verbose_name=_('Gallery owner'), blank=True, null=True)
-    category = models.ForeignKey(Category, verbose_name=_('Category'), blank=True, null=True)
     created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)
 
 
     def get_text(self):
         return self.content
+
     @property
     @cache_this(get_gallery_key, gallery_cache_invalidator)
     def items(self):
         """
-        Returns sorted dict of gallery items. Unique items slugs are used as keys. Values are tuples of items and its targets.
+        Returns sorted dict of gallery items. Unique items slugs are used as keys.
+        Values are tuples of items and their targets.
         """
         slugs_count = {}
         itms = [ (item, item.target) for item in self.galleryitem_set.all() ]
@@ -64,10 +60,14 @@ class Gallery(Publishable):
 
     def get_photo(self):
         """
-        Returns first Photo item in the gallery.
+        Returns first Photo item in the gallery if no photo is set on self.photo.
 
         Overrides Publishable.get_photo.
         """
+        photo = super(Gallery, self).get_photo()
+        if photo is not None:
+            return photo
+
         for item in self.items.itervalues():
             if isinstance(item[1], Photo):
                 return item[1]
@@ -110,6 +110,8 @@ class GalleryItem(models.Model):
         return self._slug
 
     def get_absolute_url(self):
+        if self.order == 0:
+            return self.gallery.get_absolute_url()
         return '%s%s/%s/' % (self.gallery.get_absolute_url(), slugify(_('items')), self.get_slug())
 
     class Meta:
