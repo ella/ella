@@ -27,7 +27,7 @@
     <div class="hpbox errmsg">
         <h3>Nahlásit chybu!</h3>
         <div class="cnt">
-            <form class="ajax-form" action="{% url newman-err-report %}" method="post" onsubmit="return ajax_submit(this)">
+            <form class="ajax-form reset-on-submit" action="{% url newman-err-report %}" method="post" onsubmit="return ajax_submit(this)">
                 <label for="err_subj" class="required">Předmět <span class="help"></span></label>
                 <input id="err_subj" name="subj" type="text" />
                 <label for="err_text" class="required">Zpráva</label>

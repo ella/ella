@@ -898,7 +898,7 @@ $( function() {
         var $error   = $meta.find('input[name=error]');
         var success, error;
         if ($success && $success.length) {
-            success = function(data) { $success.get(0).onchange(data); };
+            success = function(data) { $success.get(0).onchange(data, this); };
         }
         else {
             success = show_ajax_success;
@@ -922,7 +922,7 @@ $( function() {
             }
         }).remove();
         var data = $inputs.serialize();
-        $form.get(0).reset();
+        if ($form.hasClass('reset-on-submit')) $form.get(0).reset();
         var url = $form.hasClass('dyn-addr')
             ? get_adr(action)
             : action;
@@ -932,7 +932,8 @@ $( function() {
             type: method,
             data: data,
             success: success,
-            error:   error
+            error:   error,
+            _form: $form
         });
         return false;
     }
@@ -1080,3 +1081,74 @@ function show_ajax_success(data) {
     }
     show_message(message, {msgclass: 'okmsg'});
 }
+
+function save_change_form_success(text_data, options) {
+    if (!options || !options._form || !options._form.jquery || !options._form.data('submit_button_used')) {
+        carp('_form not set in the XML HTTP Request for change_form submit');
+        show_ajax_success(text_data);
+        show_message(_('Failed to follow form save with a requested action'), {msgclass: 'errmsg'});
+        return;
+    }
+    var $form = options._form;
+    var action = $form.data('submit_button_used').name;
+    $form.removeData('submit_button_used');
+    var data, object_id, response_msg;
+    try {
+        data = JSON.parse(text_data);
+        object_id = data.id;
+        response_msg = data.message;
+    } catch(e) { carp('invalid data received from form save:', text_data, e); }
+    response_msg = response_msg || _('Form saved');
+    var action_table = {
+        _save_: function() {
+            adr('../');
+        },
+        _addanother_: function() {
+            if ( /add\/$/.test(get_hashadr('')) ) {
+                $form.get(0).reset();
+                scrollTo(0,0);
+            }
+            else {
+                adr('../add/');
+            }
+        },
+        _continue_: function() {
+            if ( /add\/$/.test(get_hashadr('')) ) {
+                if (!object_id) {
+                    var message = 'Cannot continue editing (object ID not received)'
+                    show_message(message, {msgclass: 'errmsg'});
+                    carp(message, 'xhr options:', options);
+                    adr('../');
+                    return;
+                }
+                adr('../'+object_id+'/');
+            }
+            // else do nothing
+        },
+        _saveasnew_: function() {
+            var message = "Save as new not yet implemented.";
+            show_message(message);
+            carp(message);
+        },
+        run: function(action) {
+            var a = action+'_';
+            if (action_table[ a ]) {
+                action_table[ a ]();
+            }
+            else {
+                var message = action
+                    ? 'Unrecognized post-save action: '+action
+                    : 'No post-save action, redirecting to change list';
+                show_message(message);
+                carp(message);
+                adr('../');
+            }
+        }
+    };
+    show_ajax_success(response_msg);
+    action_table.run(action);
+}
+
+$('.change-form .submit-row a[name]').live('click', function() {
+    $(this).closest('form').data('submit_button_used', this);
+});
