@@ -51,7 +51,7 @@ class BaseGenericInlineFormSet(DJBaseGenericInlineFormSet):
         cfield = model_category_fk(self.instance)
         if not cfield:
             return
-        cat = model_category_fk_value(self.instance)
+        #cat = model_category_fk_value(self.instance)
 
         # next part is category-based permissions (only for objects with category field)
         def add_field_error(form, field_name, message):
