@@ -103,7 +103,7 @@ class XModelAdmin(ModelAdmin):
             inline_admin_formsets.append(inline_admin_formset)
             media = media + inline_admin_formset.media
         return inline_admin_formsets, media
-    
+
     def get_change_view_object(self, object_id):
         model = self.model
         opts = model._meta
@@ -115,7 +115,7 @@ class XModelAdmin(ModelAdmin):
             # to determine whether a given object exists.
             obj = None
         return obj
-    
+
     def get_change_view_context(self, request, object_id):
         model = self.model
         opts = model._meta
@@ -142,14 +142,13 @@ class XModelAdmin(ModelAdmin):
             'object_id': object_id,
             'original': obj,
             'is_popup': request.REQUEST.has_key('_popup'),
-            'media': mark_safe(media),
+            'media': media,
             'inline_admin_formsets': inline_admin_formsets,
             'errors': helpers.AdminErrorList(form, formsets),
             'root_path': self.admin_site.root_path,
             'app_label': opts.app_label,
         }
         # raw fields added
-        cx['raw_media'] = media
         cx['raw_form'] = form
         return cx
 

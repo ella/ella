@@ -225,13 +225,11 @@ class NewmanModelAdmin(XModelAdmin):
         context = super(NewmanModelAdmin, self).get_changelist_context(request)
         if type(context) != dict:
             return context
-        media = context['media']
-        if media:
-            raw_media = []
-            if media._css.has_key('screen'):
-                raw_media.extend(media._css['screen'])
-            raw_media.extend(media._js)
+
+        if context['media']:
+            raw_media = self.prepare_media(context['media'])
             context['media'] = raw_media
+
         context.update(extra_context or {})
         return render_to_response(self.change_list_template or [
             'admin/%s/%s/change_list.html' % (app_label, opts.object_name.lower()),
@@ -406,6 +404,7 @@ class NewmanModelAdmin(XModelAdmin):
         return inline_admin_formsets, media
 
     @require_AJAX
+    @transaction.commit_on_success
     def change_view(self, request, object_id, extra_context=None):
         "The 'change' admin view for this model."
         self.register_newman_variables(request)
@@ -414,13 +413,10 @@ class NewmanModelAdmin(XModelAdmin):
             # context is not a dict probably HttpReponseRedirect, or Http404 etc.
             return out
         context = out
+
         # === newman specific
-        # raw media paths for ajax implementation
-        media = context['raw_media']
-        raw_media = []
-        if media._css.has_key('screen'):
-            raw_media.extend(media._css['screen'])
-        raw_media.extend(media._js)
+
+        # dynamic heelp messages
         help_qs = get_cached_list(AdminHelpItem, ct=self.model_content_type, lang=settings.LANGUAGE_CODE)
         form  = context['raw_form']
         for msg in help_qs:
@@ -430,19 +426,25 @@ class NewmanModelAdmin(XModelAdmin):
             except KeyError:
                 pass
 
+        # raw forms for JS manipulations
         raw_frm_all = {
             'form': form,
             'inlines': self._raw_inlines
         }
-        context['raw_form'] = raw_frm_all
-        context['media'] = raw_media
+
+        # form for autosaved and draft objects
         draft_form = DraftForm(user=request.user, content_type=self.model_content_type)
-        context['draft_form'] = draft_form
+
+        context.update({
+            'media': self.prepare_media(context['media']),
+            'raw_form': raw_frm_all,
+            'draft_form': draft_form,
+        })
+
         # === end of newman specific
         context.update(extra_context or {})
         obj = self.get_change_view_object(object_id)
         return self.render_change_form(request, context, change=True, obj=obj)
-    change_view = transaction.commit_on_success(change_view)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if is_category_fk(db_field):
@@ -468,6 +470,15 @@ class NewmanModelAdmin(XModelAdmin):
         change_perm = self.opts.app_label + '.' + 'change_' + self.model._meta.module_name.lower()
         perms = (view_perm, change_perm,)
         return permission_filtered_model_qs(qs, request.user, perms)
+
+    def prepare_media(self, standard_media):
+        """ Returns raw media paths for ajax loading """
+
+        raw_media = []
+        if standard_media._css.has_key('screen'):
+            raw_media.extend(standard_media._css['screen'])
+        raw_media.extend(standard_media._js)
+        return raw_media
 
 class NewmanInlineFormSet(BaseInlineFormSet):
     def get_queryset(self):
