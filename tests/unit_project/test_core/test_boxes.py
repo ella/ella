@@ -41,7 +41,7 @@ class TestPublishableBox(DatabaseTestCase):
         create_and_place_a_publishable(self)
 
     def test_box_template_path_contains_correct_content_type(self):
-        publishable = Publishable.objects.get(pk=1)
+        publishable = Publishable.objects.get(pk=self.publishable.pk)
         article = publishable.target
 
         box_publishable = publishable.box_class(publishable, 'box_type', [])
@@ -62,7 +62,7 @@ class TestPublishableBox(DatabaseTestCase):
         self.assert_equals(template_list, box_article._get_template_list())
 
     def test_box_class_is_specific_to_subclass(self):
-        publishable = Publishable.objects.get(pk=1)
+        publishable = Publishable.objects.get(pk=self.publishable.pk)
         Article.box_class = ArticleBox
         box = publishable.box_class(publishable, 'box_type', [])
         self.assert_equals(ArticleBox, box.__class__)
