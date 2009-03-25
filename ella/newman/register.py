@@ -328,7 +328,6 @@ class ArticleOptions(NewmanModelAdmin):
         ( _( "Metadata" ), { 'fields': ( 'category', 'authors', 'source', 'photo' ) } ),
     )
     raw_id_fields = ('photo',)
-    list_editable = ('category',)
     list_filter = ( 'category__site', 'created', 'category', )
     search_fields = ( 'title', 'upper_title', 'perex', 'slug', 'authors__name', 'authors__slug', ) # FIXME: 'tags__tag__name', )
     inlines = [ ArticleContentInlineOptions, PlacementInlineOptions ]
