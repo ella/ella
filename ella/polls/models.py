@@ -138,6 +138,8 @@ class Quiz(Publishable, FloatingStateModel):
     """
     Quizes with title, descriptions and activation options.
     """
+    box_class = QuizBox
+
     title = models.CharField(_('title'), max_length=200)
     slug = models.SlugField(_('Slug'), max_length=255)
     category = models.ForeignKey(Category)
@@ -153,9 +155,6 @@ class Quiz(Publishable, FloatingStateModel):
     authors = models.ManyToManyField(Author, verbose_name=_('Authors'))
 
     objects = RelatedManager()
-
-    def Box(self, box_type, nodelist):
-        return QuizBox(self, box_type, nodelist)
 
     @property
     def questions(self):

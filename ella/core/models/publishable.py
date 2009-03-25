@@ -21,6 +21,8 @@ class Publishable(models.Model):
     """
     Base class for all object that can be published in ella
     """
+    box_class = Box
+
     content_type = models.ForeignKey(ContentType)
 
     category = models.ForeignKey(Category, verbose_name=_('Category'))
@@ -160,7 +162,9 @@ class Publishable(models.Model):
 
     def Box(self, box_type, nodelist):
         "add some content type info of self.target"
-        box = Box(self, box_type, nodelist, model=self.content_type.model_class())
+        model = self.content_type.model_class()
+        
+        box = model.box_class(self, box_type, nodelist, model=model)
 
         return box
 
