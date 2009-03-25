@@ -419,12 +419,12 @@ else {
     
     // Set up event handlers
     $('.simpleload,.simpleload-container a').live('click', function(evt) {
-        if (evt.which != 1) return true;
+        if (evt.which != 1) return true;    // just interested in left button
         simple_load($(this).attr('href'));
         return false;
     });
     $('.hashadr,.hashadr-container a').live('click', function(evt) {
-        if (evt.which != 1) return true;
+        if (evt.which != 1) return true;    // just interested in left button
         adr($(this).attr('href'));
         return false;
     });
@@ -872,7 +872,7 @@ $( function() {
         get_inputs($form).each( function() {
             var $label = $('label[for='+this.id+']');
             $label.find('span.form-error-msg').remove();
-            var classes = $label.attr('className').split(/\s+/);
+            var classes = ($label.attr('className')||'').split(/\s+/);
             for (var i = 0; i < classes.length; i++) {
                 var cl = classes[i];
                 if ($.isFunction(validations[ cl ])) {
@@ -894,14 +894,14 @@ $( function() {
         var action =  $form.attr('action');
         var method = ($form.attr('method') || 'POST').toUpperCase();
         var $meta = $form.find('.form-metadata:first');
-        var $success =  $meta.find('input[name=success]');
-        var $error   =  $meta.find('input[name=error]');
+        var $success = $meta.find('input[name=success]');
+        var $error   = $meta.find('input[name=error]');
         var success, error;
         if ($success && $success.length) {
             success = function(data) { $success.get(0).onchange(data); };
         }
         else {
-            success = function(data) { show_message(data, {msgclass: 'okmsg'}); };
+            success = show_ajax_success;
         }
         if ($error && $error.length) {
             error = function(xhr, st) { $error.get(0).onchange(xhr, st); };
@@ -909,11 +909,26 @@ $( function() {
         else {
             error = show_ajax_error;
         }
-        var $inputs = get_inputs($form);
+        var $inputs = get_inputs($form).clone();
+        // Shave off the names from suggest-enhanced hidden inputs and don't send the suggest inputs as such.
+        $inputs.filter(function(){
+            if ( /(.*)_suggest$/.test($(this).attr('id')) ) {
+                var $hid = $inputs.filter('#'+RegExp.$1);
+                $hid.val( $hid.val().replace(/#.*/, '') );
+                return true;
+            }
+            else {
+                return false;
+            }
+        }).remove();
         var data = $inputs.serialize();
         $form.get(0).reset();
+        var url = $form.hasClass('dyn-addr')
+            ? get_adr(action)
+            : action;
+        url = $('<a>').attr('href', url).get(0).href;
         $.ajax({
-            url: action,
+            url: url,
             type: method,
             data: data,
             success: success,
@@ -925,7 +940,7 @@ $( function() {
     
     // Submit button
     $('.ajax-form a.ok').live('click', function(evt) {
-        if (evt.which != 1) return true;
+        if (evt.which != 1) return true;    // just interested in left button
         var $form = $(this).closest('.ajax-form');
         ajax_submit($form);
         return false;
@@ -940,7 +955,7 @@ $( function() {
     
     // Packing and unpacking filter list. To be removed when filters are reimplemented.
     $('#filters :header').live('click', function(evt) {
-        if (evt.which != 1) return true;
+        if (evt.which != 1) return true;    // just interested in left button
         $(this).next(':first').filter('ul').slideToggle('slow');
     });
     
@@ -1043,4 +1058,25 @@ function show_ajax_error(xhr) {
         message = xhr.responseText;
     }
     show_message(message, {msgclass: 'errmsg'});
+}
+function show_ajax_success(data) {
+    var message;
+    if (data.indexOf('<!DOCTYPE') >= 0) {
+        message = _('Successfully sent');
+    }
+    else if (data.indexOf('<div') >= 0) {
+        message = _('Successfully sent');
+        $('#debug').append(
+            $('<div>').append(
+                $('<p>').click(function() {
+                    $(this).next().toggle();
+                }).text('Ajax success response+')
+                .add( $('<div>').css({display: 'none', whiteSpace: 'pre'}).text(data.replace(/\n(\s*\n)+/g, "\n")) )
+            )
+        );
+    }
+    else {
+        message = data;
+    }
+    show_message(message, {msgclass: 'okmsg'});
 }

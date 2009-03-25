@@ -33,7 +33,7 @@
 {% endblock %}
 
 {% block content %}
-<form {% if has_file_field %}enctype="multipart/form-data" {% endif %}action="{{ form_url }}" method="post" id="{{ opts.module_name }}_form" class="change-form">{% block form_top %}{% endblock %}
+<form {% if has_file_field %}enctype="multipart/form-data" {% endif %}action="{{ form_url }}" method="post" id="{{ opts.module_name }}_form" class="ajax-form dyn-addr change-form">{% block form_top %}{% endblock %}
 <div>
 {% if save_on_top %}{% submit_row %}{% endif %}
 {% if errors %}
