@@ -446,6 +446,20 @@ class NewmanModelAdmin(XModelAdmin):
         obj = self.get_change_view_object(object_id)
         return self.render_change_form(request, context, change=True, obj=obj)
 
+    @transaction.commit_on_success
+    def add_view(self, request, form_url='', extra_context=None):
+        "The 'add' admin view for this model."
+        self.register_newman_variables(request)
+        context = self.get_add_view_context(request, form_url)
+        context.update(extra_context or {})
+        if 'object_added' in context:
+            msg = request.user.message_set.all()[0].message
+            data = {'id': context['object'].pk, 'message': msg}
+        else:
+            return self.render_change_form(request, context, add=True)
+        out = utils.json_encode(data)
+        return HttpResponse( out, mimetype='text/plain;charset=utf-8' )
+
     def formfield_for_dbfield(self, db_field, **kwargs):
         if is_category_fk(db_field):
             kwargs['super_field'] = super(NewmanModelAdmin, self).formfield_for_dbfield(db_field, **kwargs)
