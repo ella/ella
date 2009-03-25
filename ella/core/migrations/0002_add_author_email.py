@@ -8,8 +8,9 @@ class Migration:
     
     def forwards(self):
         
+        # FIXME: remove null=True, because its in migration only (otherwise it does not run on sqlite)
         # Adding field 'Author.email'
-        db.add_column('core_author', 'email', models.EmailField(_('Email'), blank=True))
+        db.add_column('core_author', 'email', models.EmailField(_('Email'), blank=True, null=True))
         
     
     def backwards(self):
