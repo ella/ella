@@ -294,11 +294,14 @@ class ListingInlineOptions( NewmanTabularInline ):
         return super( ListingInlineOptions, self ).formfield_for_dbfield( db_field, **kwargs )
 
 class PlacementOptions(NewmanModelAdmin):
-    list_display = ('target_admin', 'category', 'publish_from', 'full_url',)
-    list_filter = ('publish_from', 'category', 'target_ct',)
+    #list_display = ('target_admin', 'category', 'publish_from', 'full_url',)
+    list_display = ('category', 'publish_from',)
+    #list_filter = ('publish_from', 'category', 'content_type',)
+    list_filter = ('publish_from', 'category',)
     inlines = (ListingInlineOptions,)
     fieldsets = (
-        (_('target'), {'fields': ('target_ct', 'target_id', 'slug', 'category',), 'classes': ('wide',)},),
+        #(_('target'), {'fields': ('content_type', 'slug', 'category',), 'classes': ('wide',)},),
+        (_('target'), {'fields': ('slug', 'category',), 'classes': ('wide',)},),
         (_('time'), {'fields': ('publish_from','publish_to', 'static',), 'classes': ('wide',)},),
 )
 
@@ -319,21 +322,22 @@ class InfoBoxOptions(NewmanModelAdmin):
     rich_text_fields = { None: ('content',) }
 
 class ArticleOptions(NewmanModelAdmin):
-    list_display = ('title', 'category', 'photo_thumbnail', 'publish_from', 'hitcounts', 'obj_url')
+    #list_display = ('title', 'category', 'photo_thumbnail', 'publish_from', 'hitcounts', 'obj_url')
+    list_display = ('title', 'category', 'publish_from', 'hitcounts', 'obj_url')
     list_display_ext = ('article_age', 'get_hits', 'pk', 'full_url',)
     ordering = ( '-created', )
     fieldsets = (
         ( _( "Article heading" ), { 'fields': ( 'title', 'upper_title', 'updated', 'slug' ) } ),
-        ( _( "Article contents" ), { 'fields': ( 'perex', ) } ),
+        ( _( "Article contents" ), { 'fields': ( 'description', ) } ),
         ( _( "Metadata" ), { 'fields': ( 'category', 'authors', 'source', 'photo' ) } ),
     )
     raw_id_fields = ('photo',)
     list_filter = ( 'category__site', 'created', 'category', )
-    search_fields = ( 'title', 'upper_title', 'perex', 'slug', 'authors__name', 'authors__slug', ) # FIXME: 'tags__tag__name', )
+    search_fields = ( 'title', 'upper_title', 'description', 'slug', 'authors__name', 'authors__slug', ) # FIXME: 'tags__tag__name', )
     inlines = [ ArticleContentInlineOptions, PlacementInlineOptions ]
     suggest_fields = { 'authors': ('name', 'slug',), 'source': ('name', 'url',), 'category': ('title', 'tree_path'), }
     prepopulated_fields = { 'slug' : ( 'title', ) }
-    rich_text_fields = { None: ('perex',) }
+    rich_text_fields = { None: ('description',) }
     list_per_page = 20
 
     def obj_url(self, obj):

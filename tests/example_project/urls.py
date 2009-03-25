@@ -1,31 +1,33 @@
-from django.conf.urls.defaults import *
-from django.conf import settings
-
-from ella import newman
-
-#newman.autodiscover()
-
-import ella
-import django
-
 from os.path import dirname, join, normpath
 
-#ADMIN_ROOTS = (
-#        normpath(join(dirname(ella.__file__), 'newman', 'media')),
-#        normpath(join(dirname(django.__file__), 'contrib', 'admin', 'media')),
-#)
+import django
+from django.conf.urls.defaults import *
+from django.conf import settings
+from django.contrib.admin import autodiscover
+
+import ella
+from ella import newman
+
+
+newman.autodiscover()
+
+
+ADMIN_ROOTS = (
+    normpath(join(dirname(ella.__file__), 'newman', 'media')),
+    normpath(join(dirname(django.__file__), 'contrib', 'admin', 'media')),
+)
 
 urlpatterns = patterns('',
 
     # serve admin media static files
-#    (r'^static/newman_media/(?P<path>.*)$', 'ella.utils.views.fallback_serve', {'document_roots': ADMIN_ROOTS}),
-#    (r'^static/admin_media/(?P<path>.*)$', 'ella.utils.views.fallback_serve', {'document_roots': ADMIN_ROOTS}),
+    (r'^static/newman_media/(?P<path>.*)$', 'ella.utils.views.fallback_serve', {'document_roots': ADMIN_ROOTS}),
+    (r'^static/admin_media/(?P<path>.*)$', 'ella.utils.views.fallback_serve', {'document_roots': ADMIN_ROOTS}),
 
     # serve static files
     (r'^static/(?P<path>.*)$', 'django.views.static.serve', { 'document_root': settings.MEDIA_ROOT, 'show_indexes': True }),
 
     # main admin urls
-#    ('^newman/', include(newman.site.urls)),
+    ('^newman/', include(newman.site.urls)),
 
     # reverse url lookups
     (r'^', include('ella.core.urls')),

@@ -1,4 +1,5 @@
 from django.contrib.admin import autodiscover
+
 from ella.newman.sites import site
 from ella.newman.options import NewmanModelAdmin, NewmanInlineModelAdmin, NewmanStackedInline, NewmanTabularInline
 from ella.newman.generic import BaseGenericInlineFormSet, GenericInlineModelAdmin, GenericStackedInline, GenericTabularInline
