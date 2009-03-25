@@ -12,9 +12,17 @@ from django.utils.translation import ugettext_lazy as _
 from django.forms.models import ModelChoiceField
 from django.db.models.fields.related import ManyToManyField
 from django.contrib.admin.widgets import AdminFileWidget
+from django.contrib.contenttypes.models import ContentType
+from django.conf import settings
 
+from ella.core.templatetags.core import render_str
 from ella.newman import widgets, utils
 from ella.newman.permission import get_permission, permission_filtered_model_qs, has_category_permission
+
+MARKUP_APP_INSTALLED = False   # used by RichTextField
+
+class NotFoundError(Exception):
+    pass
 
 class RichTextField(fields.Field):
     widget = widgets.RichTextAreaWidget
@@ -26,21 +34,27 @@ class RichTextField(fields.Field):
 
     def __init__(self, *args, **kwargs):
         # TODO: inform widget about selected processor (JS editor..)
+        self.field_name = kwargs.pop('field_name')
+        self.instance = kwargs.pop('instance')
+        if self.instance:
+            # find SrcText associated with instance
+            from ella.newman.markup.models import SrcText, Processor
+            ct = ContentType.objects.get_for_model(self.instance)
+            try:
+                src_text = SrcText.objects.get(ct=ct, obj_id=self.instance.pk, field=self.field_name)
+            except SrcText.DoesNotExist:
+                raise NotFoundError(u'No SrcText defined for field [%s] for object [%s]' % (self.field_name, self.instance.__unicode__()))
         super(RichTextField, self).__init__(*args, **kwargs)
 
     def clean(self, value):
-
         super(RichTextField, self).clean(value)
         if value in fields.EMPTY_VALUES:
             return u''
         value = smart_unicode(value)
-
         try:
-            from ella.core.templatetags.core import render_str
             render_str(value)
         except:
             raise ValidationError(self.error_messages['syntax_error'])
-
         return value
 
 class AdminSuggestField(fields.Field):
@@ -185,3 +199,8 @@ class CategoryChoiceField(ModelChoiceField):
             raise ValidationError(_('Category not permitted'))
         return cvalue
 
+
+# Markup app detection:
+for app in settings.INSTALLED_APPS:
+    if app == 'ella.newman.markup':
+        MARKUP_APP_INSTALLED = True
