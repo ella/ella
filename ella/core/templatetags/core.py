@@ -189,10 +189,7 @@ class BoxNode(template.Node):
                 log.error('BoxNode: Template variable does not exist. var_name=%s' % self.var_name)
                 return ''
 
-        if hasattr(obj, 'Box'):
-            box = obj.Box(self.box_type, self.nodelist)
-        else:
-            box = Box(obj, self.box_type, self.nodelist)
+        box = getattr(obj, 'box_class', Box)(obj, self.box_type, self.nodelist)
 
         if not box or not box.obj:
             log.warning('BoxNode: Box does not exists.')

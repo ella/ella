@@ -56,11 +56,12 @@ class PhotoBox(Box):
                 'show_authors' : self.params.get('show_authors', ''),
                 'show_detail' : self.params.get('show_detail', ''),
                 'link_url': self.params.get('link_url', ''),
-})
+            })
         return cont
 
 class Photo(models.Model):
     "Represents original (unformated) photo."
+    box_class = PhotoBox
     title = models.CharField(_('Title'), max_length=200)
     description = models.TextField(_('Description'), blank=True)
     slug = models.SlugField(_('Slug'), max_length=255)
@@ -108,9 +109,6 @@ class Photo(models.Model):
                 # TODO Logging something wrong
                 return None
         return storage.url(thumb_name)
-
-    def Box(self, box_type, nodelist):
-        return PhotoBox(self, box_type, nodelist)
 
     def save(self, force_insert=False, force_update=False):
         """Overrides models.Model.save.

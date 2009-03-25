@@ -62,6 +62,8 @@ class Type(models.Model):
         return self.name
 
 class Attachment(models.Model):
+    box_class = AttachmentBox
+
     name = models.CharField(_('Name'), max_length=255)
     slug = models.SlugField(_('Slug'), max_length=255)
 
@@ -73,10 +75,6 @@ class Attachment(models.Model):
     attachment = models.FileField(_('Attachment'), upload_to=UPLOAD_TO)
 
     type = models.ForeignKey(Type, verbose_name=_('Attachment type'))
-
-    def Box(self, box_type, nodelist):
-        """Return custom Box subclass."""
-        return AttachmentBox(self, box_type, nodelist)
 
     class Meta:
         ordering=('created',)

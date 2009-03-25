@@ -265,6 +265,7 @@ class Poll(models.Model, FloatingStateModel):
     """
     Poll model with descriptions and activation times
     """
+    box_class = PollBox
     title = models.CharField(_('Title'), max_length=200)
     text_announcement = models.TextField(_('Text with announcement'), blank=True, null=True)
     text = models.TextField(_('Text'), blank=True, null=True)
@@ -279,9 +280,6 @@ class Poll(models.Model, FloatingStateModel):
     def get_total_votes(self):
         return self.get_question().get_total_votes()
     get_total_votes.short_description = _('Votes in total')
-
-    def Box(self, box_type, nodelist):
-        return PollBox(self, box_type, nodelist)
 
     def __unicode__(self):
         return self.title

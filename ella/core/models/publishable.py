@@ -17,11 +17,21 @@ from ella.core.models.main import Category, Author, Source
 from ella.photos.models import Photo
 from ella.core.box import Box
 
+def PublishableBox(publishable, box_type, nodelist, model=None):
+    "add some content type info of self.target"
+    if not model:
+        model = publishable.content_type.model_class()
+    box_class = model.box_class
+
+    if box_class == PublishableBox:
+        box_class = Box
+    return box_class(publishable, box_type, nodelist, model=model)
+
 class Publishable(models.Model):
     """
     Base class for all object that can be published in ella
     """
-    box_class = Box
+    box_class = staticmethod(PublishableBox)
 
     content_type = models.ForeignKey(ContentType)
 
@@ -160,13 +170,6 @@ class Publishable(models.Model):
     def get_text(self):
         return self.text
 
-    def Box(self, box_type, nodelist):
-        "add some content type info of self.target"
-        model = self.content_type.model_class()
-        
-        box = model.box_class(self, box_type, nodelist, model=model)
-
-        return box
 
 class Placement(models.Model):
     # listing's target - a Publishable object
@@ -238,7 +241,7 @@ class Placement(models.Model):
                     'year' : self.publish_from.year,
                     'month' : self.publish_from.month,
                     'day' : self.publish_from.day,
-})
+                })
             if category.tree_parent_id:
                 kwargs['category'] = category.tree_path
                 url = reverse('object_detail', kwargs=kwargs)
@@ -251,6 +254,11 @@ class Placement(models.Model):
         return url
 
 
+def ListingBox(listing, *args, **kwargs):
+    " Delegate the boxing to the target's Box class. "
+    obj = listing.placement.publishable
+    return obj.box_class(obj, *args, **kwargs)
+
 class Listing(models.Model):
     """
     Listing of an object in a category. Each and every object that have it's own detail page must have a Listing object
@@ -260,6 +268,7 @@ class Listing(models.Model):
 
     see doc/listing.txt for more details on Listings
     """
+    box_class = staticmethod(ListingBox)
 
     placement = models.ForeignKey(Placement)
     category = models.ForeignKey(Category, db_index=True)
@@ -277,13 +286,6 @@ class Listing(models.Model):
     @property
     def target(self):
         return self.placement.publishable
-
-    def Box(self, box_type, nodelist):
-        " Delegate the boxing to the target's Box factory method."
-        obj = self.target
-        if hasattr(obj, 'Box'):
-            return obj.Box(box_type, nodelist)
-        return Box(obj, box_type, nodelist)
 
     def get_absolute_url(self, domain=False):
         return self.placement.get_absolute_url(domain)

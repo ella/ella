@@ -46,8 +46,16 @@ class PositionManager(models.Manager):
                 if category is None:
                     raise
 
+def PositionBox(position, *args, **kwargs):
+    " Delegate the boxing. "
+    obj = position.target
+    return getattr(position.target, 'box_class', Box)(obj, *args, **kwargs)
+
+
 class Position(models.Model):
     " Represents a position on a page belonging to a certain category. "
+    box_class = staticmethod(PositionBox)
+
     category = models.ForeignKey(Category, verbose_name=_('Category'))
     name = models.CharField(_('Name'), max_length=200)
 
@@ -90,13 +98,6 @@ class Position(models.Model):
         return active_from and active_till
     is_active.short_description = _('Active')
     is_active.boolean = True
-
-    def Box(self, box_type, nodelist):
-        " Delegate the boxing. "
-        obj = self.target
-        if hasattr(obj, 'Box'):
-            return obj.Box(box_type, nodelist)
-        return Box(obj, box_type, nodelist)
 
     def render(self, context, nodelist, box_type):
         " Render the position. "
