@@ -1,16 +1,17 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
-from django import forms
 from django.forms import models as modelforms
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
-from django.conf import settings
 from django.forms.util import ValidationError
 
 from ella.ellaadmin import widgets
-from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin
 from ella.core.models import Author, Source, Category, Listing, HitCount, Placement
+
+from ella import newman
+from ella.core.models.publishable import Publishable
+
 
 class PlacementForm(modelforms.ModelForm):
     # create the field here to pass validation
@@ -149,7 +150,7 @@ class PlacementInlineFormset(generic.BaseGenericInlineFormSet):
 
         return
 
-class ListingInlineOptions(admin.TabularInline):
+class ListingInlineAdmin(newman.NewmanTabularInline):
     model = Listing
     extra = 2
     fieldsets = ((None, {'fields' : ('category','publish_from', 'priority_from', 'priority_to', 'priority_value', 'remove', 'commercial',)}),)
@@ -157,10 +158,11 @@ class ListingInlineOptions(admin.TabularInline):
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'category':
             kwargs['widget'] = widgets.ListingCategoryWidget
-        return super(ListingInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
+        return super(ListingInlineAdmin, self).formfield_for_dbfield(db_field, **kwargs)
 
-class PlacementInlineOptions(admin.TabularInline):
+class PlacementInlineAdmin(newman.NewmanTabularInline):
     model = Placement
+    max_num = 1
     '''
     extra = 1
     ct_field = 'target_ct'
@@ -176,11 +178,11 @@ class PlacementInlineOptions(admin.TabularInline):
     '''
 
 
-class HitCountInlineOptions(admin.TabularInline):
+class HitCountInlineAdmin(newman.NewmanTabularInline):
     model = HitCount
     extra = 0
 
-class PlacementOptions(EllaAdminOptionsMixin, EllaModelAdmin):
+class PlacementAdmin(newman.NewmanModelAdmin):
     pass
     '''
     list_display = ('target_admin', 'category', 'publish_from', 'full_url',)
@@ -192,7 +194,7 @@ class PlacementOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     )
     '''
 
-class ListingOptions(EllaAdminOptionsMixin, EllaModelAdmin):
+class ListingAdmin(newman.NewmanModelAdmin):
     pass
     '''
     list_display = ('target_admin', 'target_ct', 'publish_from', 'category', 'placement_admin', 'target_hitcounts', 'target_url',)
@@ -202,29 +204,58 @@ class ListingOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     date_hierarchy = 'publish_from'
     '''
 
-class CategoryOptions(EllaAdminOptionsMixin, EllaModelAdmin):
+class CategoryAdmin(newman.NewmanModelAdmin):
     list_filter = ('site',)
     list_display = ('draw_title', 'tree_path', '__unicode__')
     search_fields = ('title', 'slug',)
     #ordering = ('site', 'tree_path',)
     prepopulated_fields = {'slug': ('title',)}
 
-class HitCountOptions(admin.ModelAdmin):
+class HitCountAdmin(newman.NewmanModelAdmin):
     list_display = ('target', 'hits',)
     ordering = ('-hits', '-last_seen',)
 
-class AuthorOptions(EllaAdminOptionsMixin, EllaModelAdmin):
+class AuthorAdmin(newman.NewmanModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
     search_fields = ('name',)
 
-class SourceOptions(EllaAdminOptionsMixin, EllaModelAdmin):
+class SourceAdmin(newman.NewmanModelAdmin):
     list_display = ('name', 'url',)
     search_fields = ('name',)
 
-admin.site.register(HitCount, HitCountOptions)
-admin.site.register(Category, CategoryOptions)
-admin.site.register(Source, SourceOptions)
-admin.site.register(Author, AuthorOptions)
-admin.site.register(Placement, PlacementOptions)
-admin.site.register(Listing, ListingOptions)
+class PublishableAdmin(newman.NewmanModelAdmin):
+    """ Default admin options for all publishables """
+
+    list_display = ('title', 'category',)
+    list_filter = ('category__site', 'category', 'authors',)
+    search_fields = ('title', 'description', 'slug', 'authors__name', 'authors__slug',) # FIXME: 'tags__tag__name',)
+    raw_id_fields = ('photo',)
+    prepopulated_fields = {'slug' : ('title',)}
+    rich_text_fields = {None: ('description',)}
+
+    suggest_fields = {
+        'category': ('tree_path', 'title', 'slug',),
+        'authors': ('name', 'slug', 'email',),
+        'source': ('name', 'url',),
+    }
+
+    inlines = [PlacementInlineAdmin]
+
+
+admin.site.register(HitCount, HitCountAdmin)
+admin.site.register(Category, CategoryAdmin)
+admin.site.register(Source, SourceAdmin)
+admin.site.register(Author, AuthorAdmin)
+admin.site.register(Placement, PlacementAdmin)
+admin.site.register(Listing, ListingAdmin)
+
+# register to newman admin
+newman.site.register(HitCount, HitCountAdmin)
+newman.site.register(Category, CategoryAdmin)
+newman.site.register(Source, SourceAdmin)
+newman.site.register(Author, AuthorAdmin)
+newman.site.register(Placement, PlacementAdmin)
+newman.site.register(Listing, ListingAdmin)
+newman.site.register(Publishable, PublishableAdmin)
+
 

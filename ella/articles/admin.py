@@ -4,44 +4,35 @@ from django.conf import settings
 
 from ella.tagging.admin import TaggingInlineOptions
 
-from ella.core.admin import PlacementInlineOptions
+from ella.core.admin import PlacementInlineAdmin, PublishableAdmin
 from ella.articles.models import ArticleContents, Article, InfoBox
-from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin
+from ella import newman
 
-class ArticleContentInlineOptions(EllaAdminOptionsMixin, admin.TabularInline):
+class ArticleContentInlineAdmin(newman.NewmanTabularInline):
     model = ArticleContents
-    extra = 1
+    max_num = 1
     rich_text_fields = {None: ('content',)}
 
-class InfoBoxOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
+class InfoBoxAdmin(newman.NewmanModelAdmin):
     list_display = ('title', 'created',)
     date_hierarchy = 'created'
     list_filter = ('created', 'updated',)
     search_fields = ('title', 'content',)
     rich_text_fields = {None: ('content',)}
 
-class ArticleOptions(EllaAdminOptionsMixin, EllaModelAdmin):
-    pass
-    '''
-    list_display = ('title', 'category', 'photo_thumbnail', 'created', 'article_age', 'get_hits', 'pk', 'full_url',)
-    date_hierarchy = 'created'
+class ArticleAdmin(PublishableAdmin):
     ordering = ('-created',)
     fieldsets = (
         (_("Article heading"), {'fields': ('title', 'upper_title', 'updated', 'slug')}),
         (_("Article contents"), {'fields': ('description',)}),
         (_("Metadata"), {'fields': ('category', 'authors', 'source', 'photo')}),
-)
-    raw_id_fields = ('photo',)
-    list_filter = ('category__site', 'created', 'category', 'authors',)
-    search_fields = ('title', 'upper_title', 'description', 'slug', 'authors__name', 'authors__slug',) # FIXME: 'tags__tag__name',)
-    inlines = [ ArticleContentInlineOptions, PlacementInlineOptions ]
-    if 'ella.tagging' in settings.INSTALLED_APPS:
-        inlines.append(TaggingInlineOptions)
-    prepopulated_fields = {'slug' : ('title',)}
-    rich_text_fields = {None: ('description',)}
-    '''
+    )
+    inlines = [ ArticleContentInlineAdmin, PlacementInlineAdmin ]
 
 
-admin.site.register(InfoBox, InfoBoxOptions)
-admin.site.register(Article, ArticleOptions)
+admin.site.register(InfoBox, InfoBoxAdmin)
+admin.site.register(Article, ArticleAdmin)
+
+newman.site.register(InfoBox, InfoBoxAdmin)
+newman.site.register(Article, ArticleAdmin)
 

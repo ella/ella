@@ -51,10 +51,6 @@ site.register(m.DevMessage, DevMessageAdmin)
 site.register(m.AdminHelpItem, HelpItemAdmin)
 site.register(m.CategoryUserRole, CategoryUserRoleAdmin)
 
-# testing Options from register.py
-import register
-
-
 # Category filter -- restricted categories accordingly to CategoryUserRoles and categories filtered via AdminSettings.
 # custom registered DateField filter. Filter is inserted to the beginning of filter chain.
 @filter_spec(lambda field: is_category_fk(field))
@@ -91,7 +87,7 @@ def site_field_filter(fspec):
 def created_field_filter(fspec):
     qs = fspec.model_admin.queryset(fspec.request)
     # SELECT created FROM qs._meta.dbtable  GROUP BY created
-    dates =  qs.dates(fspec.field_path, 'day', 'DESC')[:365] 
+    dates =  qs.dates(fspec.field_path, 'day', 'DESC')[:365]
     for date in dates:
         lookup_dict = dict()
         lookup_dict['%s__day' % fspec.field_path] = date.day
