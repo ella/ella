@@ -17,9 +17,9 @@ class BaseGenericInlineFormSet(DJBaseGenericInlineFormSet):
     ct_field_name = "content_type"
     ct_fk_field_name = "object_id"
 
-    def __init__(self, data=None, files=None, instance=None, save_as_new=None):
+    def __init__(self, data=None, files=None, instance=None, save_as_new=None, prefix=None):
         super(BaseGenericInlineFormSet, self).__init__(
-            data, files, instance, save_as_new
+            data, files, instance, save_as_new, prefix
         )
 
     def get_queryset(self):
