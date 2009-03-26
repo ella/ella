@@ -4,11 +4,11 @@ from django.utils.translation import ugettext_lazy as _
 
 from ella.core.cache.utils import CachedForeignKey, CachedGenericForeignKey
 
-class Processor(models.Model):
+class TextProcessor(models.Model):
 
     function = models.CharField(max_length=96, unique=True)
     name = models.CharField(max_length=96, blank=True)
-    opts = models.CharField(max_length=255, blank=True)
+    processor_options = models.CharField(max_length=255, blank=True)
 
     def __unicode__(self):
         return self.name
@@ -27,10 +27,10 @@ class Processor(models.Model):
         verbose_name_plural = (_('Text processors'))
 
 
-class SrcText(models.Model):
+class SourceText(models.Model):
     """Model for source texts."""
 
-    processor = CachedForeignKey(Processor)
+    processor = CachedForeignKey(TextProcessor)
 
     ct = CachedForeignKey(ContentType)
     obj_id = models.PositiveIntegerField()
@@ -47,7 +47,7 @@ class SrcText(models.Model):
     def __unicode__(self):
         return u"Source text for %s:%s" % (self.target, self.field)
 
-    def output(self):
+    def render(self):
         return self.processor.convert(self.content)
 
     class Meta:

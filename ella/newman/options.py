@@ -51,9 +51,7 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
                 'field_name': db_field.name,
                 'instance': custom_params['instance'],
             })
-            print db_field, db_field.name , custom_params['instance'] , custom_params['model']
             rich_text_field = fields.RichTextField(**kwargs)
-            print '---'
             if css_class:
                 rich_text_field.widget.attrs['class'] += ' %s' % css_class
             return rich_text_field
@@ -557,7 +555,10 @@ class NewmanInlineModelAdmin(InlineModelAdmin):
         inst = None
         # Inlined object is requested by RichTextField (the field needs to lookup SrcText)
         if hasattr(self, '_magic_instance') and self._magic_instance:
-            inst = self.model.objects.get(**{self._magic_fk.name: self._magic_instance.pk})
+            try:
+                inst = self.model.objects.get(**{self._magic_fk.name: self._magic_instance.pk})
+            except self.model.DoesNotExist:
+                inst = None
         kwargs.update({
             'model': self.model,
             'user': self._magic_user,
