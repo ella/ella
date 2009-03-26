@@ -45,7 +45,7 @@ def create_texts(verbosity):
 
     for article in Article.objects.all():
         # article.perex -> SrcText -> Process -> article.perex
-        #update_source(ct_article, article, 'perex')
+        update_source(ct_article, article, 'description')
         contents = ArticleContents.objects.filter(article=article)
         for c in contents:
             # move text to SourceText, process, save back to c.content and c.save()
