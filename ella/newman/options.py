@@ -162,24 +162,25 @@ class NewmanModelAdmin(XModelAdmin):
                 data=data,
                 title=title
             )
-        result = '%d,%s' % (obj.pk, obj.__unicode__())
-        return HttpResponse(content=result, mimetype='text/plain')
+        data = {'id': obj.pk, 'title': obj.__unicode__()}
+        return utils.JsonResponse(_('Preset %s was saved.' % obj.__unicode__()), data)
 
     @require_AJAX
     def load_draft_view(self, request, extra_context=None):
-        """ Returns draft identified by request.GET['title'] variable.  """
+        """ Returns draft identified by request.GET['id'] variable. """
         self.register_newman_variables(request)
         id = request.GET.get('id', None)
         if not id:
-            return HttpResponse(content=_('No id found in GET variable "id".'), mimetype='text/plain', status=405)
+            return utils.JsonResponse(_('No id found in GET variable "id".'), status=405)
         drafts = models.AdminUserDraft.objects.filter(
             ct=self.model_content_type,
             user=request.user,
             pk=id
         )
         if not drafts:
-            return HttpResponse(content=_('No matching draft found.'), mimetype='text/plain', status=404)
-        return HttpResponse(content=drafts[0].data, mimetype='text/plain')
+            return utils.JsonResponse(_('No matching draft found.'), status=404)
+        draft = drafts[0]
+        return utils.JsonResponse(_('Loading draft "%s"...' % draft.__unicode__()), draft.data)
 
     @require_AJAX
     def filters_view(self, request, extra_context=None):
@@ -462,13 +463,12 @@ class NewmanModelAdmin(XModelAdmin):
         context.update(extra_context or {})
         if 'object_added' in context:
             msg = request.user.message_set.all()[0].message
-            data = {'id': context['object'].pk, 'message': msg}
+            return utils.JsonResponse(msg, {'id': context['object'].pk})
         elif 'error_dict' in context:
-            data = context['error_dict']
+            msg = _('Please correct errors in form')
+            return utils.JsonResponse(msg, {}, context['error_dict'], 406)
         else:
             return self.render_change_form(request, context, add=True)
-        out = utils.json_encode(data)
-        return HttpResponse( out, mimetype='text/plain;charset=utf-8' )
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if is_category_fk(db_field):
