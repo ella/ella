@@ -4,6 +4,12 @@ from django.utils.translation import ugettext_lazy as _
 
 from ella.core.cache.utils import CachedGenericForeignKey
 
+class LicenseManager(models.Manager):
+    def unapplicable_for_model(self, model):
+        ct = ContentType.objects.get_for_model(model)
+        qs = License.objects.filter(ct=ct).extra(where=['applications=max_applications']).only('id')
+        return [u.id for u in qs]
+
 class License(models.Model):
 
     ct = models.ForeignKey(ContentType, verbose_name=_('Content type'))
@@ -12,6 +18,8 @@ class License(models.Model):
 
     max_applications = models.PositiveIntegerField(_('Max applications'))
     applications = models.PositiveIntegerField(editable=False, default=0)
+
+    objects = LicenseManager()
 
     def __unicode__(self):
         return u'License for %s' % self.target

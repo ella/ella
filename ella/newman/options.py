@@ -1,3 +1,4 @@
+from ella.newman.licenses.models import License
 import logging
 
 from django.conf import settings
@@ -488,12 +489,20 @@ class NewmanModelAdmin(XModelAdmin):
         q = super(NewmanModelAdmin, self).queryset(request)
         # user category filter
         qs = utils.user_category_filter(q, request.user)
+
+        # if self.model is licensed filter queryset
+        if 'ella.newman.licenses' in settings.INSTALLED_APPS:
+            exclude_pks = License.objects.unapplicable_for_model(self.model)
+            qs = qs.exclude(id__in=exclude_pks)
+
         if request.user.is_superuser:
             return qs
         view_perm = self.opts.app_label + '.' + 'view_' + self.model._meta.module_name.lower()
         change_perm = self.opts.app_label + '.' + 'change_' + self.model._meta.module_name.lower()
         perms = (view_perm, change_perm,)
+#        return permission_filtered_model_qs(qs, request.user, perms)
         return permission_filtered_model_qs(qs, request.user, perms)
+
 
     def prepare_media(self, standard_media):
         """ Returns raw media paths for ajax loading """
