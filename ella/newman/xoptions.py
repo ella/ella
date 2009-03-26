@@ -279,23 +279,32 @@ class XModelAdmin(ModelAdmin):
         formsets = []
         context = {}
         if request.method == 'POST':
+            error_dict = {}
             form = ModelForm(request.POST, request.FILES)
             if form.is_valid():
                 form_validated = True
                 new_object = self.save_form(request, form, change=False)
             else:
+                error_dict['form'] = {}
+                for e in form.errors:
+                    error_dict['form'][u"%s" % e] = [ u"%s" % ee for ee in form.errors[e] ]
                 form_validated = False
                 new_object = self.model()
             prefixes = {}
             for FormSet in self.get_formsets(request):
                 prefix = FormSet.get_default_prefix()
-                prefixes[prefix] = prefixes.get(prefix, 0) + 1
+                prefix_no = prefixes.get(prefix, 0)
+                prefixes[prefix] = prefix_no + 1
                 if prefixes[prefix] != 1:
                     prefix = "%s-%s" % (prefix, prefixes[prefix])
                 formset = FormSet(data=request.POST, files=request.FILES,
                                   instance=new_object,
                                   save_as_new=request.POST.has_key("_saveasnew"),
                                   prefix=prefix)
+                if not formset.is_valid():
+                    error_dict[prefix] = {}
+                    for e in formset.errors[prefix_no]:
+                        error_dict[prefix][u"%s" % e] = [u"%s" % ee for ee in formset.errors[prefix_no][e]]
                 formsets.append(formset)
             if all_valid(formsets) and form_validated:
                 self.save_model(request, new_object, form, change=False)
@@ -308,6 +317,10 @@ class XModelAdmin(ModelAdmin):
                 context.update({
                     'object': new_object,
                     'object_added': True,
+                })
+            else:
+                context.update({
+                    'error_dict': error_dict,
                 })
         else:
             # Prepare the dict of initial data from the request.

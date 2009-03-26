@@ -463,6 +463,8 @@ class NewmanModelAdmin(XModelAdmin):
         if 'object_added' in context:
             msg = request.user.message_set.all()[0].message
             data = {'id': context['object'].pk, 'message': msg}
+        elif 'error_dict' in context:
+            data = context['error_dict']
         else:
             return self.render_change_form(request, context, add=True)
         out = utils.json_encode(data)
