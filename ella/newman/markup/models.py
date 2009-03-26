@@ -47,7 +47,7 @@ class SourceText(models.Model):
     def __unicode__(self):
         return u"Source text for %s:%s" % (self.target, self.field)
 
-    def output(self):
+    def render(self):
         return self.processor.convert(self.content)
 
     class Meta:
