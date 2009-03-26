@@ -71,6 +71,8 @@ INSTALLED_APPS = (
 
     'ella.ellaadmin',
     'ella.newman',
+    'ella.newman.markup',
+    'ella.newman.licenses',
     'django.contrib.admin',
 )
 
