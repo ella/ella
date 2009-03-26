@@ -50,9 +50,7 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
                 'field_name': db_field.name,
                 'instance': custom_params['instance'],
             })
-            print db_field, db_field.name , custom_params['instance'] , custom_params['model']
             rich_text_field = fields.RichTextField(**kwargs)
-            print '---'
             if css_class:
                 rich_text_field.widget.attrs['class'] += ' %s' % css_class
             return rich_text_field
