@@ -6,11 +6,11 @@ try:
 except ImportError:
     from django.utils.simplejson import dumps, loads
 
+from django.http import HttpResponse
 from ella.newman.permission import model_category_fk
 from ella.newman import models
 from ella.newman.config import CATEGORY_FILTER, USER_CONFIG, JSON_CONVERSIONS
 from ella.core.models import Category
-from ella.core.cache.utils import cache_this
 
 def json_encode(data):
     """ Encode python data into JSON. Try faster cjson first. """
@@ -21,6 +21,20 @@ def json_decode(str):
     """ Decode JSON string into python. """
 
     return loads(str)
+
+def JsonResponse(message, data={}, errors={}, status=200):
+    """ Return JSON response in newman's standard format. """
+
+    out_dict = {
+        'status': status,
+        'message': message,
+    }
+    if data:
+        out_dict['data'] = data
+    if errors:
+        out_dict['errors'] = errors
+    out = json_encode(out_dict)
+    return HttpResponse(out, mimetype='text/plain;charset=utf-8', status=status)
 
 def decode_category_filter_json(data):
     decoded = json_decode(data)

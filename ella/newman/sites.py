@@ -13,7 +13,8 @@ from django.contrib.contenttypes.models import ContentType
 from ella.newman.forms import SiteFilterForm
 from ella.newman.models import AdminSetting
 from ella.newman.decorators import require_AJAX
-from ella.newman.utils import set_user_config_db, set_user_config_session, get_user_config
+from ella.newman.utils import set_user_config_db, set_user_config_session, get_user_config,\
+    JsonResponse
 from ella.newman.permission import has_model_list_permission
 from ella.newman.config import CATEGORY_FILTER, NEWMAN_URL_PREFIX
 
@@ -149,6 +150,7 @@ class NewmanSite(AdminSite):
         """
 
         from django.conf import settings
+        print request.POST
         u, s, m = request.user, request.POST.get('subj'), request.POST.get('msg')
 
         if s and m:
@@ -156,11 +158,11 @@ class NewmanSite(AdminSite):
                 e = EmailMessage('Newman report: %s' % s, m,
                                  from_email=u.email, to=settings.ERR_REPORT_RECIPIENTS)
                 e.send()
-                return HttpResponse(content=ugettext('Your report was sent.'), mimetype='text/plain', status=200)
+                return JsonResponse(ugettext('Your report was sent.'))
             except:
-                return HttpResponse(content=ugettext('SMTP error.'), mimetype='text/plain', status=405)
+                return JsonResponse(ugettext('SMTP error.'), status=405)
 
-        return HttpResponse(content=ugettext('Subject or message is empty.'), mimetype='text/plain', status=405)
+        return JsonResponse(ugettext('Subject or message is empty.'), status=406)
 
     @require_AJAX
     def cat_filters_save(self, request, extra_content=None):
@@ -169,9 +171,9 @@ class NewmanSite(AdminSite):
         if site_filter_form.is_valid():
             set_user_config_db(request.user, CATEGORY_FILTER, site_filter_form.cleaned_data['sites'])
             set_user_config_session(request.session, CATEGORY_FILTER, site_filter_form.cleaned_data['sites'])
-            return HttpResponse(content=ugettext('Your settings was saved.'), mimetype='text/plain', status=200)
+            return JsonResponse(ugettext('Your settings was saved.'))
         else:
-            return HttpResponse(content=ugettext('Error in form.'), mimetype='text/plain', status=405)
+            return JsonResponse(ugettext('Error in form.'), status=406)
 
 
 site = NewmanSite()
