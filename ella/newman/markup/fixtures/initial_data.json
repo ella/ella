@@ -1,0 +1,11 @@
+[
+  {
+    "pk": 1, 
+    "model": "markup.textprocessor", 
+    "fields": {
+      "function": "ella.newman.markup.processor.markdown", 
+      "processor_options": "", 
+      "name": "markdown"
+    }
+  }
+]
