@@ -165,7 +165,7 @@ else {
     function load_content(arg) {
         var target_id = arg.target_id;
         var address = arg.address;
-        ;;; carp('loading '+address+' into '+target_id);
+        ;;; carp('loading '+address+' into #'+target_id);
             
         // An empty address means we should revert to the base state.
         // If one is not set up for the given container, reload the whole page.
@@ -711,9 +711,10 @@ function request_media(url) {
             success: function(response_text) {
                 $saving_msg.remove();
                 show_message(_('Saved')+'.', {msgclass: 'okmsg', duration: 2000});
-                if (/(\d+),(.+)/.exec(response_text)) {
-                    var id = RegExp.$1;
-                    var actual_title = RegExp.$2;
+                try {
+                    var response_data = JSON.parse(response_text);
+                    var id           = response_data.data.id;
+                    var actual_title = response_data.data.title;
                     if (options.id) {    // We were overwriting -- remove old version
                         $('#id_drafts option').filter(function() {
                             return $(this).val() == id;
@@ -725,6 +726,8 @@ function request_media(url) {
                     $('#id_drafts option:first').after(
                         $('<option>').attr({value: id}).html(actual_title)
                     );
+                } catch(e) {
+                    show_message(_('Preset saved but erroneous result received.')+' '+_('Reload to see the preset.'), {msgclass:'errmsg'});
                 }
             },
             error: function(xhr) {
@@ -747,11 +750,19 @@ function request_media(url) {
         return false;
     });
     
-    function restore_form(raw, $form) {
+    function restore_form(response_text, $form) {
+        var response_data;
+        try {
+            response_data  = JSON.parse(response_text);
+        } catch(e) {
+            show_message(_('Failed loading preset'), {msgclass:'errmsg'});
+            return;
+        }
         $form.get(0).reset();
         $form.find(':checkbox,:radio').removeAttr('checked');
         $form.find(':text,textarea,:password').val('');
-        var form_data = JSON.parse(raw);
+        var form_data = response_data.data;
+        show_message( response_data.message );
         for (var i = 0; i < form_data.length; i++) {
             var form_datum = form_data[i];
             var key = form_datum['name'];
@@ -774,8 +785,8 @@ function request_media(url) {
         $.ajax({
             url: get_adr('draft/load/'),
             data: {id:id},
-            success: function(form_data) {
-                restore_form(form_data, $form);
+            success: function(response_text) {
+                restore_form(response_text, $form);
             },
             error: show_ajax_error
         });
@@ -862,7 +873,7 @@ $( function() {
     }
     /**
      * Automatic class-driven validation.
-     * For each :input in the form, find its label and check is some of the label's classes
+     * For each :input in the form, find its label and check if some of the label's classes
      * isn't in the validations object. If so, then run the function passing it the input.
      * If it returns *FALSE*, then this input *VALIDATES*.
      * If it returns a true value, it is used as the error message and passed to show_form_error.
@@ -1097,8 +1108,8 @@ function save_change_form_success(text_data, options) {
     var data, object_id, response_msg;
     try {
         data = JSON.parse(text_data);
-        object_id = data.id;
-        response_msg = data.message;
+        object_id = data.data.id;
+        response_msg = data.data.message;
     } catch(e) { carp('invalid data received from form save:', text_data, e); }
     response_msg = response_msg || _('Form saved');
     var action_table = {
@@ -1143,7 +1154,6 @@ function save_change_form_success(text_data, options) {
                     : 'No post-save action, redirecting to change list';
                 show_message(message);
                 carp(message);
-                adr('../');
             }
         }
     };

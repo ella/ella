@@ -179,7 +179,7 @@ class NewmanModelAdmin(XModelAdmin):
         if not drafts:
             return utils.JsonResponse(_('No matching draft found.'), status=404)
         draft = drafts[0]
-        return utils.JsonResponse(_('Loading draft "%s"...' % draft.__unicode__()), draft.data)
+        return utils.JsonResponse(_('Loaded draft "%s"' % draft.__unicode__()), draft.data)
 
     @require_AJAX
     def filters_view(self, request, extra_context=None):
