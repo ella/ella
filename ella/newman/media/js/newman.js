@@ -1050,34 +1050,36 @@ function dec_loading() {
     }
 }
 
+function paste_code_into_debug(code, description) {
+    $('#debug').append(
+        $('<div>').addClass('debug-codeframe').append(
+            $('<p>').click(function() {
+                $(this).next().toggle();
+            }).text( (description || 'CODE') + '+' )
+            .add( $('<div>').css({ display: 'none', whiteSpace: 'pre' }).text(code) )
+        )
+    );
+}
+
 function show_ajax_error(xhr) {
-    var message;
-    if (xhr.responseText.indexOf('<!DOCTYPE') >= 0) {
+    var message, data;
+    try {
+        data = JSON.parse(xhr.responseText);
+        message = data.message;
+    } catch(e) {
         message = _('Request failed')+' ('+xhr.status+': '+_(xhr.statusText)+')';
-    }
-    else {
-        message = xhr.responseText;
+        paste_code_into_debug( xhr.responseText.replace(/\n(\s*\n)+/g, "\n"), 'Ajax error response' );
     }
     show_message(message, {msgclass: 'errmsg'});
 }
-function show_ajax_success(data) {
-    var message;
-    if (data.indexOf('<!DOCTYPE') >= 0) {
+function show_ajax_success(response_text) {
+    var message, data;
+    try {
+        data = JSON.parse(response_text);
+        message = data.message;
+    } catch (e) {
         message = _('Successfully sent');
-    }
-    else if (data.indexOf('<div') >= 0) {
-        message = _('Successfully sent');
-        $('#debug').append(
-            $('<div>').append(
-                $('<p>').click(function() {
-                    $(this).next().toggle();
-                }).text('Ajax success response+')
-                .add( $('<div>').css({display: 'none', whiteSpace: 'pre'}).text(data.replace(/\n(\s*\n)+/g, "\n")) )
-            )
-        );
-    }
-    else {
-        message = data;
+        paste_code_into_debug( response_text.replace(/\n(\s*\n)+/g, "\n"), 'Ajax success response' );
     }
     show_message(message, {msgclass: 'okmsg'});
 }
