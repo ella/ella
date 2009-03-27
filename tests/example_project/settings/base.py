@@ -67,7 +67,7 @@ INSTALLED_APPS = (
 
     'example_project.services',
 
-    'south',
+#    'south',
 
     'ella.ellaadmin',
     'ella.newman',
