@@ -30,6 +30,9 @@ def JsonResponse(message, data={}, errors={}, status=200):
         'message': message,
     }
     if data:
+        try: data = json_decode(data)
+        except: pass
+        
         out_dict['data'] = data
     if errors:
         out_dict['errors'] = errors
