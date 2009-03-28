@@ -13,6 +13,7 @@ from ella.core.cache import get_cached_object_or_404, cache_this
 from ella.core.custom_urls import dispatcher
 from ella.core.cache.template_loader import render_to_response
 
+__docformat__ = "restructuredtext en"
 
 # local cache for get_content_type()
 CONTENT_TYPE_MAPPING = {}
@@ -24,11 +25,11 @@ def get_content_type(ct_name):
 
     Results of this function is cached to improve performance.
 
-    Params:
-        ct_name - slugified verbose_name_plural of the target model.
+    :Parameters: 
+        - `ct_name`:  Slugified verbose_name_plural of the target model.
 
-    Raises:
-        Http404 if no matching ContentType is found
+    :Exceptions: 
+        - `Http404`: if no matching ContentType is found
     """
     try:
         ct = CONTENT_TYPE_MAPPING[ct_name]
@@ -43,7 +44,20 @@ def get_content_type(ct_name):
     return ct
 
 def object_detail(request, category, content_type, slug, year=None, month=None, day=None, url_remainder=None):
-    context = _object_detail(request, category, content_type, slug, year, month, day)
+    """
+    Renders a page for placement. All the data fetching and context creation is done in `_object_detail`.
+    If `url_remainder` is specified, tries to locate custom view via `dispatcher`. Renders a template 
+    returned by `get_template` with context returned by `_object_detail`.
+
+    :Parameters:
+        - `request`: `HttpRequest` from Django
+        - `category, content_type, slug, year, month, day`: parameters passed on to `_object_detail`
+        - `url_remainder`: url after the object's url, used to locate custom views in `dispatcher`
+
+    :Exceptions: 
+        - `Http404`: if the URL is not valid and/or doesn't correspond to any valid `Placement`
+    """
+    context = _object_detail(request.user, category, content_type, slug, year, month, day)
 
     obj = context['object']
     # check for custom actions
@@ -60,7 +74,7 @@ def object_detail(request, category, content_type, slug, year=None, month=None, 
     )
 
 def category_detail(request, category):
-    context = _category_detail(request, category)
+    context = _category_detail(category)
     return render_to_response(
             (
             'page/category/%s/category.html' % (context["category"].path),
@@ -93,13 +107,13 @@ def home(request):
     """
     Homepage of the actual site.
 
-    Params:
-        request - HttpRequest from Django
+    :Parameters: 
+        - `request`: `HttpRequest` from Django
 
-    Raise:
-        Http404 if there is no base category
+    :Exceptions: 
+        - `Http404`: if there is no base category
     """
-    context = _home(request)
+    context = _category_detail()
     return render_to_response(
             (
             'page/category/%s/category.html' % (context['category'].path),
@@ -109,19 +123,26 @@ def home(request):
             context_instance=RequestContext(request)
         )
 
-def _object_detail(request, category, content_type, slug, year=None, month=None, day=None, url_remainder=None):
+def _object_detail(user, category, content_type, slug, year=None, month=None, day=None):
     """
-    Detail view that displays a single object based on its main placement.
+    Helper function that does all the data fetching for `object_detail` view. It
+    returns a dictionary containing:
 
-    Params:
-        request - HttpRequest supplied by Django
-        category - base Category tree_path (empty if home category)
-        year, month, day - date matching the ``publish_from`` field of the ``Placement`` object
-        content_type - slugified verbose_name_plural of the target model
-        slug - slug of the object itself
+        - `placement`: `Placement` instance representing the URL accessed
+        - `object`: `Publishable` instance bound to the `placement`
+        - `category`: `Category` of the `placement`
+        - `content_type_name`: slugified plural verbose name of the publishable's content type
+        - `content_type`: `ContentType` of the publishable
 
-    Raises:
-        Http404 if object or placement doesn't exist or dates doesn't match
+    :Parameters: 
+        - `user`: django `User` instance
+        - `category`: `Category.tree_path` (empty if home category)
+        - `year`, `month`, `day`: date matching the `publish_from` field of the `Placement` object
+        - `content_type`: slugified `verbose_name_plural` of the target model
+        - `slug`: slug of the `Placement`
+
+    :Exceptions:
+        - `Http404`: if object or placement doesn't exist or dates don't match
     """
     ct = get_content_type(content_type)
 
@@ -143,7 +164,7 @@ def _object_detail(request, category, content_type, slug, year=None, month=None,
     else:
         placement = get_cached_object_or_404(Placement, category=cat, publishable__content_type=ct, slug=slug, static=True)
 
-    if not (placement.is_active() or request.user.is_staff):
+    if not (placement.is_active() or user.is_staff):
         # future placement, render if accessed by logged in staff member
         raise Http404
 
@@ -163,13 +184,12 @@ def _object_detail(request, category, content_type, slug, year=None, month=None,
 def get_templates(name, slug=None, category=None, app_label=None, model_label=None):
     """
     Returns templates in following format and order:
-        'page/category/%s/content_type/%s.%s/%s/%s' % ( category.path, app_label, model_label, slug, name ),
-        'page/category/%s/content_type/%s.%s/%s' % ( category.path, app_label, model_label, name ),
-        'page/category/%s/%s' % ( category.path, name ),
-        'page/content_type/%s.%s/%s' % ( app_label, model_label, name ),
-        'page/%s' % name,
 
-    TODO: Allow Placement() as parameter?
+        - 'page/category/%s/content_type/%s.%s/%s/%s' % ( category.path, app_label, model_label, slug, name ),
+        - 'page/category/%s/content_type/%s.%s/%s' % ( category.path, app_label, model_label, name ),
+        - 'page/category/%s/%s' % ( category.path, name ),
+        - 'page/content_type/%s.%s/%s' % ( app_label, model_label, name ),
+        - 'page/%s' % name,
     """
     templates = []
     if category:
@@ -185,7 +205,9 @@ def get_templates(name, slug=None, category=None, app_label=None, model_label=No
 
 
 def get_templates_from_placement(name, placement, slug=None, category=None, app_label=None, model_label=None):
-    """ Returns template list by placement. """
+    """
+    Returns the same template list as `get_templates` but generates the missing values from `Placement` instance.
+    """
     if slug is None:
         slug = placement.slug
     if category is None:
@@ -200,15 +222,16 @@ def _list_content_type(request, category=None, year=None, month=None, day=None, 
     """
     List objects' listings according to the parameters.
 
-    Params:
-        request - HttpRequest supplied by Django
-        category - base Category tree_path, optional - defaults to all categories
-        year, month, day - date matching the ``publish_from`` field of the ``Listing`` object
-                           All of these parameters are optional, the list will be filtered by the non-empty ones
-        content_type - slugified verbose_name_plural of the target model, if omitted all content_types are listed
+    :Parameters:
+        - `request`: HttpRequest supplied by Django
+        - `category`: base Category tree_path, optional - defaults to all categories
+        - `year, month, day`: date matching the `publish_from` field of the `Placement` object.
+          All of these parameters are optional, the list will be filtered by the non-empty ones
+        - `content_type`: slugified verbose_name_plural of the target model, if omitted all content_types are listed
+        - `paginate_by`: number of records in one page
 
-    Raises:
-        Http404 - if the specified category or content_type does not exist or if the given date is malformed.
+    :Exceptions:
+        - `Http404`: if the specified category or content_type does not exist or if the given date is malformed.
     """
     kwa = {}
     dates_kwa = {}
@@ -321,42 +344,33 @@ def __archive_entry_year(category):
             year = now.year
     return year
 
-def _home(request):
+def _category_detail(tree_path=False):
     """
-    Homepage of the actual site.
+    Helper function that does all the data fetching for `home` and `category_detail` views. Returns
+    a dictionary containing:
 
-    Params:
-        request - HttpRequest from Django
+        - `category`: the root `Category` of the site
+        - `is_homepage`: boolean whether the category is the root category
+        - `archive_entry_year`: year of last `Listing`
 
-    Raise:
-        Http404 if there is no base category
+    :Parameters: 
+        - `tree_path`: `Category.tree_path` (empty if home category)
+
+    :Exceptions: 
+        - `Http404`: if there is no base category
     """
-    cat = get_cached_object_or_404(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
+    if tree_path:
+        cat = get_cached_object_or_404(Category, tree_path=tree_path, site__id=settings.SITE_ID)
+    else:
+        cat = get_cached_object_or_404(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
     context = {
                 'category' : cat,
-                'is_homepage': True,
+                'is_homepage': not bool(tree_path),
                 'archive_entry_year' : __archive_entry_year(cat),
             }
 
     return context
 
-def _category_detail(request, category):
-    """
-    Homepage of a given category.
-
-    Params:
-        request - HttpRequest from Django
-        category - category's ``tree_path``
-
-    Raise:
-        Http404 if the category doesn't exist
-    """
-    cat = get_cached_object_or_404(Category, tree_path=category, site__id=settings.SITE_ID)
-    context = {
-                'category' : cat,
-                'archive_entry_year' : __archive_entry_year(cat)
-            }
-    return context
 
 def get_export_key(func, request, count, name='', content_type=None):
     return 'ella.core.views.export:%d:%d:%s:%s' % (
@@ -368,10 +382,10 @@ def export(request, count, name='', content_type=None):
     """
     Export banners.
 
-    Params:
-        count - number of objects to pass into the template
-        name - name of the template ( page/export/banner.html is default )
-        models - list of Model classes to include
+    :Parameters:
+        - `count`: number of objects to pass into the template
+        - `name`: name of the template ( page/export/banner.html is default )
+        - `models`: list of Model classes to include
     """
     t_list = []
     if name:
