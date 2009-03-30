@@ -814,7 +814,7 @@ function request_media(url) {
         else if ( target_ids = $(document).data('injection_storage') ) {
             var target_sel = '#' + target_ids.join(',#');
             if ($('.change-form').closest(target_sel).length) {
-                ;;; carp('(re)setting interval for new .change-form');
+                ;;; carp('waiting for form to change to set up autosave interval');
                 proceed = true; // .change-form was just loaded
             }
             else {  // .change-form was there before -- don't touch it
@@ -829,21 +829,33 @@ function request_media(url) {
         
         if (!proceed) return;
         
-        if (autosave_interval != undefined) {
-            ;;; carp('clearing interval prior to setting new one');
-            clearInterval(autosave_interval);
-        }
-        autosave_interval = setInterval( function() {
-            var $change_form = $('.change-form');
-            if ($change_form.length == 0) {
-                ;;; carp('.change-form disappeared -- clearing interval');
+        var $inputs = $('.change-form :input');
+        function onchange_autosave_handler() {
+            $('.change-form :input').unbind('change', onchange_autosave_handler).unbind('keypress', onkeypress_autosave_handler);
+            if (autosave_interval != undefined) {
+                ;;; carp('clearing interval prior to setting new one');
                 clearInterval(autosave_interval);
-                autosave_interval = undefined;
-                return;
             }
-            carp('Saving draft '+new Date());
-            save_preset($('.change-form'), {id: draft_id});
-        }, 60 * 1000 );
+            ;;; carp('.change-form changed -- setting up autosave interval');
+            autosave_interval = setInterval( function() {
+                var $change_form = $('.change-form');
+                if ($change_form.length == 0) {
+                    ;;; carp('.change-form disappeared -- clearing interval');
+                    clearInterval(autosave_interval);
+                    autosave_interval = undefined;
+                    return;
+                }
+                carp('Saving draft '+new Date());
+                save_preset($('.change-form'), {id: draft_id});
+            }, 60 * 1000 );
+        }
+        function onkeypress_autosave_handler(evt) {
+            var k = evt.which;
+            if (k >= 32 && k <= 126 || k >= 160) {  // ASCII and Unicode printable chars
+                onchange_autosave_handler();
+            }
+        }
+        $inputs.bind('change', onchange_autosave_handler).filter('textarea,[type=text]').bind('keypress', onkeypress_autosave_handler);
     }
     set_autosave_interval();
     $(document).bind('content_added', set_autosave_interval);
