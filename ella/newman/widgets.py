@@ -37,12 +37,20 @@ class RichTextAreaWidget(forms.Textarea):
         css = {
             'screen': (settings.ADMIN_MEDIA_PREFIX + CSS_RICHTEXTAREA,),
         }
+
     def __init__(self, height=None, attrs={}):
         css_class = CLASS_RICHTEXTAREA
         if height:
             css_class += ' %s' % height
         super(RichTextAreaWidget, self).__init__(attrs={'class': css_class})
 
+    def render(self, name, value, attrs=None):
+        final_attrs = self.build_attrs(attrs, name=name)
+        if value:
+            src_text = self._field.get_source_text()
+        else:
+            src_text = value
+        return super(RichTextAreaWidget, self).render(name, src_text, attrs)
 
 class AdminSuggestWidget(forms.TextInput):
     class Media:
