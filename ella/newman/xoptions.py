@@ -15,7 +15,7 @@ try:
     set
 except NameError:
     from sets import Set as set     # Python 2.3 fallback
-from django.contrib.admin.options import ModelAdmin
+from django.contrib.admin.options import ModelAdmin, IncorrectLookupParameters
 from django.contrib.admin.views.main import ChangeList, ERROR_FLAG
 
 class XModelAdmin(ModelAdmin):
