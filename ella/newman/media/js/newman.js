@@ -829,13 +829,13 @@ function request_media(url) {
         
         if (!proceed) return;
         
+        if (autosave_interval != undefined) {
+            ;;; carp('clearing interval prior to setting new one');
+            clearInterval(autosave_interval);
+        }
         var $inputs = $('.change-form :input');
         function onchange_autosave_handler() {
             $('.change-form :input').unbind('change', onchange_autosave_handler).unbind('keypress', onkeypress_autosave_handler);
-            if (autosave_interval != undefined) {
-                ;;; carp('clearing interval prior to setting new one');
-                clearInterval(autosave_interval);
-            }
             ;;; carp('.change-form changed -- setting up autosave interval');
             autosave_interval = setInterval( function() {
                 var $change_form = $('.change-form');
@@ -942,7 +942,7 @@ $( function() {
                 $inputs = $inputs.add(   $(this).clone().val( $(this).val().replace(/#.*/, '') )   );
                 return;
             }
-            $inputs = $inputs.add(this);
+            $inputs = $inputs.add($(this));
         });
         if (false) $inputs.filter(function(){
             if ( /(.*)_suggest$/.test($(this).attr('id')) ) {
