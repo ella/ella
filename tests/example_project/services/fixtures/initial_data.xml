@@ -40,6 +40,7 @@
         <field type="SlugField" name="slug">barack-obama</field>
         <field type="TextField" name="description"></field>
         <field type="TextField" name="text"></field>
+        <field type="EmailField" name="email"></field>
     </object>
     <object pk="2" model="core.author">
         <field to="auth.user" name="user" rel="ManyToOneRel"><None></None></field>
@@ -47,6 +48,7 @@
         <field type="SlugField" name="slug">cristina-elisabet-fernandez-de-kirchner</field>
         <field type="TextField" name="description"></field>
         <field type="TextField" name="text"></field>
+        <field type="EmailField" name="email"></field>
     </object>
     <object pk="7" model="core.author">
         <field to="auth.user" name="user" rel="ManyToOneRel"><None></None></field>
@@ -54,6 +56,7 @@
         <field type="SlugField" name="slug">fernando-lugo</field>
         <field type="TextField" name="description"></field>
         <field type="TextField" name="text"></field>
+        <field type="EmailField" name="email"></field>
     </object>
     <object pk="8" model="core.author">
         <field to="auth.user" name="user" rel="ManyToOneRel"><None></None></field>
@@ -61,6 +64,7 @@
         <field type="SlugField" name="slug">horst-kohler</field>
         <field type="TextField" name="description"></field>
         <field type="TextField" name="text"></field>
+        <field type="EmailField" name="email"></field>
     </object>
     <object pk="6" model="core.author">
         <field to="auth.user" name="user" rel="ManyToOneRel"><None></None></field>
@@ -68,6 +72,7 @@
         <field type="SlugField" name="slug">king-albert-ii</field>
         <field type="TextField" name="description"></field>
         <field type="TextField" name="text"></field>
+        <field type="EmailField" name="email"></field>
     </object>
     <object pk="1" model="core.author">
         <field to="auth.user" name="user" rel="ManyToOneRel"><None></None></field>
@@ -75,6 +80,7 @@
         <field type="SlugField" name="slug">luiz-inacio-lula-da-silva</field>
         <field type="TextField" name="description"></field>
         <field type="TextField" name="text"></field>
+        <field type="EmailField" name="email"></field>
     </object>
     <object pk="3" model="core.author">
         <field to="auth.user" name="user" rel="ManyToOneRel"><None></None></field>
@@ -82,6 +88,7 @@
         <field type="SlugField" name="slug">michelle-bachelet</field>
         <field type="TextField" name="description"></field>
         <field type="TextField" name="text"></field>
+        <field type="EmailField" name="email"></field>
     </object>
     <object pk="5" model="core.author">
         <field to="auth.user" name="user" rel="ManyToOneRel"><None></None></field>
@@ -89,6 +96,7 @@
         <field type="SlugField" name="slug">queen-elizabeth-ii</field>
         <field type="TextField" name="description"></field>
         <field type="TextField" name="text"></field>
+        <field type="EmailField" name="email"></field>
     </object>
     
     <!-- Category -->

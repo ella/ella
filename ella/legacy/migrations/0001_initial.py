@@ -10,6 +10,9 @@ MODELS = [('articles', 'article'), ('events', 'event')]
 
 class Migration:
 
+    def backwards(self, *args, **kwargs):
+        pass
+
     def forwards(self, orm):
         "Write your forwards migration here"
         # TODO:
