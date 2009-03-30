@@ -7,10 +7,10 @@ import sys
 
 from django.core.management.base import BaseCommand
 from django.db import connection, transaction
-from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 
 from ella.newman.markup.models import SourceText, TextProcessor
+from ella.newman import config
 
 def can_run():
     for app in settings.INSTALLED_APPS:
@@ -37,7 +37,7 @@ def create_texts(verbosity):
     from ella.articles.models import Article, ArticleContents
     ct_article = ContentType.objects.get_for_model(Article)
     ct_article_contents = ContentType.objects.get_for_model(ArticleContents)
-    markup_name = getattr(settings, 'NEWMAN_MARKUP_DEFAULT', None)
+    markup_name = conf.NEWMAN_MARKUP_DEFAULT
     if not markup_name:
         sys.stderr.write('No default markup specified. Please set NEWMAN_MARKUP_DEFAULT setting.\n')
         return 
