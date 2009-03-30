@@ -1,6 +1,6 @@
 # TODO: Where we will define output format? (HTML4/5/XHTML/...)
 
-def markdown(src, **kwa):
+def markdown(src, **kwargs):
     try:
         from markdown2 import markdown as m
     except ImportError:
@@ -8,5 +8,5 @@ def markdown(src, **kwa):
 
     return m(src) #, html4tags, tab_width, safe_mode, extras, link_patterns, use_file_vars)
 
-def czechtile(src, **kwa):
+def czechtile(src, **kwargs):
     pass
