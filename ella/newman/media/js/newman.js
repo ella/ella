@@ -920,9 +920,19 @@ $( function() {
         else {
             error = show_ajax_error;
         }
-        var $inputs = get_inputs($form).clone();
         // Shave off the names from suggest-enhanced hidden inputs and don't send the suggest inputs as such.
-        $inputs.filter(function(){
+        var $inputs = $('#absolutely#_nothing');
+        get_inputs($form).each( function() {
+            if ( /(.*)_suggest$/.test($(this).attr('id')) ) {
+                return;
+            }
+            if ( $(this).is('input:hidden') && $form.find( '#'+$(this).attr('id')+'_suggest' ).length ) {
+                $inputs = $inputs.add(   $(this).clone().val( $(this).val().replace(/#.*/, '') )   );
+                return;
+            }
+            $inputs = $inputs.add(this);
+        });
+        if (false) $inputs.filter(function(){
             if ( /(.*)_suggest$/.test($(this).attr('id')) ) {
                 var $hid = $inputs.filter('#'+RegExp.$1);
                 $hid.val( $hid.val().replace(/#.*/, '') );

@@ -171,7 +171,7 @@ class NewmanSite(AdminSite):
         if site_filter_form.is_valid():
             set_user_config_db(request.user, CATEGORY_FILTER, site_filter_form.cleaned_data['sites'])
             set_user_config_session(request.session, CATEGORY_FILTER, site_filter_form.cleaned_data['sites'])
-            return JsonResponse(ugettext('Your settings was saved.'))
+            return JsonResponse(ugettext('Your settings were saved.'))
         else:
             return JsonResponse(ugettext('Error in form.'), status=406)
 
