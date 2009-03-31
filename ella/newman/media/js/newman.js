@@ -1224,7 +1224,7 @@ $('.help-enhanced input').live('mouseover', function() {
         top: $(this).offset().top,
         left: $(this).offset().left + $(this).outerWidth(),
         minHeight: $(this).outerHeight()
-    }).text('?').data('antecedant_input', $(this));
+    }).html('<img alt="?" src="'+MEDIA_URL+'ico/16/help.png" />').data('antecedant_input', $(this));
     $help_button.appendTo($(this).closest('.help-enhanced'));
     $(this).data('help_button', $help_button);
 }).live('mouseout', function() {
@@ -1234,9 +1234,9 @@ $('.help-enhanced input').live('mouseover', function() {
 });
 $('.help-button').live('mouseover', function() {
     save_help_button_from_fading($(this));
-    $(this).closest('.help-enhanced').find('.help').stop().slideDown('slow');
 }).live('mouseout', function() {
     var $input = $(this).data('antecedant_input');
     set_help_button_to_fade($input, $(this));
-    $(this).closest('.help-enhanced').find('.help').stop().slideUp('slow');
+}).live('click', function() {
+    $(this).closest('.help-enhanced').find('.help').slideToggle();
 });
