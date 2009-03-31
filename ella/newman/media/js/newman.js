@@ -1186,3 +1186,57 @@ function save_change_form_success(text_data, options) {
 $('.change-form .submit-row a[name]').live('click', function() {
     $(this).closest('form').data('submit_button_used', this);
 });
+
+
+// Help and hint rendering
+$('.hint-enhanced input').live('mouseover', function() {
+    if ($(this).attr('title')) return;
+    var hint = $(this).nextAll('.hint').text();
+    if (!hint) {
+        carp('Hint requested but undefined for:', this);
+        return;
+    }
+    $(this).attr({title: hint});
+});
+function save_help_button_from_fading($help_button) {
+    $help_button.stop().css({opacity:1});
+    if ( $help_button.data('fadeout_timeout') ) {
+        clearInterval( $help_button.data('fadeout_timeout') );
+        $help_button.removeData('fadeout_timeout');
+    }
+}
+function set_help_button_to_fade($input, $help_button) {
+    var help_button_fade_timeout = setTimeout( function() {
+        $help_button.fadeOut(3000, function () {
+            $input.removeData('help_button');
+            $help_button.remove();
+        })
+    }, 1000);
+    $help_button.data('fadeout_timeout', help_button_fade_timeout);
+}
+$('.help-enhanced input').live('mouseover', function() {
+    if ($(this).data('help_button')) {
+        save_help_button_from_fading($(this).data('help_button'))
+        return;
+    }
+    var $help_button = $('<div>').addClass('help-button').css({
+        position: 'absolute',
+        top: $(this).offset().top,
+        left: $(this).offset().left + $(this).outerWidth(),
+        minHeight: $(this).outerHeight()
+    }).text('?').data('antecedant_input', $(this));
+    $help_button.appendTo($(this).closest('.help-enhanced'));
+    $(this).data('help_button', $help_button);
+}).live('mouseout', function() {
+    var $help_button = $(this).data('help_button');
+    if (!$help_button) return;
+    set_help_button_to_fade($(this), $help_button);
+});
+$('.help-button').live('mouseover', function() {
+    save_help_button_from_fading($(this));
+    $(this).closest('.help-enhanced').find('.help').stop().slideDown('slow');
+}).live('mouseout', function() {
+    var $input = $(this).data('antecedant_input');
+    set_help_button_to_fade($input, $(this));
+    $(this).closest('.help-enhanced').find('.help').stop().slideUp('slow');
+});
