@@ -50,6 +50,7 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
                 'label': db_field.verbose_name,
                 'field_name': db_field.name,
                 'instance': custom_params.get('instance', None),
+                'model': custom_params.get('model'),
             })
             rich_text_field = fields.RichTextField(**kwargs)
             if css_class:
