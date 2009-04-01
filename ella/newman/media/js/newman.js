@@ -689,6 +689,32 @@ function request_media(url) {
 }
 
 
+// general-prurpose functions
+
+function clone_form($orig_form) {
+    var $new_form = $orig_form.clone();
+    var $orig_textareas = $orig_form.find('textarea');
+    var  $new_textareas =  $new_form.find('textarea');
+    for (var i = 0; i < $orig_textareas.length; i++) {
+        $new_textareas.eq(i).val(
+            $orig_textareas.eq(i).val()
+        );
+    }
+    var $orig_selects = $orig_form.find('select');
+    var  $new_selects =  $new_form.find('select');
+    for (var i = 0; i < $orig_selects.length; i++) {
+        var $orig_options = $orig_selects.eq(i).find('option');
+        var  $new_options =  $new_selects.eq(i).find('option');
+        for (var j = 0; j < $orig_options.length; j++) {
+            if ($orig_options.eq(j).is(':selected')) {
+                $new_options.eq(j).attr({selected:'selected'})
+            }
+        }
+    }
+    return $new_form;
+}
+
+
 /////// END OF THE CONTENT-BY-HASH LIBRARY
 
 /////// CODE FOR CONTENT-SPECIFIC USE
@@ -975,6 +1001,7 @@ $( function() {
     // Submit button
     $('.ajax-form a.ok').live('click', function(evt) {
         if (evt.which != 1) return true;    // just interested in left button
+        if ($(this).hasClass('noautosubmit')) return true;
         var $form = $(this).closest('.ajax-form');
         ajax_submit($form);
         return false;
@@ -1117,9 +1144,31 @@ function show_ajax_success(response_text) {
     show_message(message, {msgclass: 'okmsg'});
 }
 
+
+// submit line (save, save as new, etc)
+
+$('.change-form .submit-row a[name]').live('click', function() {
+    if ($(this).hasClass('noautosubmit')) return;
+    $(this).closest('form').data('submit_button_used', this);
+});
+
+$('.change-form a[name=_saveasnew]').live('click', function() {
+    var $orig_form = $(this).closest('.ajax-form');
+    var $form = clone_form($orig_form);
+    $form.attr({ action: '../add/' });
+    $form.data('submit_button_used', this);
+    ajax_submit($form);
+    return false;
+});
+
 function save_change_form_success(text_data, options) {
     if (!options || !options._form || !options._form.jquery || !options._form.data('submit_button_used')) {
-        carp('_form not set in the XML HTTP Request for change_form submit');
+        var message;
+        if (!options) message = 'No XHR options passed to save_change_form_success';
+        else if (!options._form) message = '_form not set in the XML HTTP Request for change_form submit';
+        else if (!options._form.jquery) message = '_form is not a jquery object';
+        else if (!options._form.data('submit_button_used')) message = "_form doesn't have submit_button_used set";
+        carp(message);
         show_ajax_success(text_data);
         show_message(_('Failed to follow form save with a requested action'), {msgclass: 'errmsg'});
         return;
@@ -1161,9 +1210,8 @@ function save_change_form_success(text_data, options) {
             // else do nothing
         },
         _saveasnew_: function() {
-            var message = "Save as new not yet implemented.";
-            show_message(message);
-            carp(message);
+            if (!object_id) adr('../');
+            adr('../'+object_id+'/');
         },
         run: function(action) {
             var a = action+'_';
@@ -1182,10 +1230,6 @@ function save_change_form_success(text_data, options) {
     show_ajax_success(response_msg);
     action_table.run(action);
 }
-
-$('.change-form .submit-row a[name]').live('click', function() {
-    $(this).closest('form').data('submit_button_used', this);
-});
 
 
 // Help and hint rendering
