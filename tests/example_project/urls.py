@@ -7,9 +7,11 @@ from django.contrib.admin import autodiscover
 
 import ella
 from ella import newman
+from ella.utils import installedapps
 
 
 newman.autodiscover()
+installedapps.init_logger()
 
 
 ADMIN_ROOTS = (
