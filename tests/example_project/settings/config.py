@@ -43,6 +43,7 @@ DISABLE_CACHE_TEMPLATE = DEBUG
 #LOGGING_CONFIG_FILE = join(dirname(testbed.__file__), 'settings', 'logger.ini')
 #if isinstance(LOGGING_CONFIG_FILE, basestring) and isfile(LOGGING_CONFIG_FILE):
 #    logging.config.fileConfig(LOGGING_CONFIG_FILE)
+LOGGING_CONFIG_FILE = join( dirname(__file__), 'logger.conf')
 
 # we want to reset whole cache in test
 # until we do that, don't use cache

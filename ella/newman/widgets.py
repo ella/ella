@@ -46,7 +46,7 @@ class RichTextAreaWidget(forms.Textarea):
 
     def render(self, name, value, attrs=None):
         final_attrs = self.build_attrs(attrs, name=name)
-        if value:
+        if value and self._field.is_markup():
             src_text = self._field.get_source_text()
         else:
             src_text = value

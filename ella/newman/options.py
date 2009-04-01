@@ -44,12 +44,13 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
         kwargs.pop(key, None)
 
     for css_class, rich_text_fields in getattr(cls, 'rich_text_fields', {}).iteritems():
-        if db_field.name in rich_text_fields and custom_params['instance']:
+        if db_field.name in rich_text_fields:
             kwargs.update({
                 'required': not db_field.blank,
                 'label': db_field.verbose_name,
                 'field_name': db_field.name,
-                'instance': custom_params['instance'],
+                'instance': custom_params.get('instance', None),
+                'model': custom_params.get('model'),
             })
             rich_text_field = fields.RichTextField(**kwargs)
             if css_class:
@@ -89,7 +90,6 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
     return db_field.formfield(**kwargs)
 
 
-#class NewmanModelAdmin(admin.ModelAdmin):
 class NewmanModelAdmin(XModelAdmin):
     changelist_view_cl = NewmanChangeList
 
