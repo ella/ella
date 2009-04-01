@@ -814,7 +814,7 @@ function request_media(url) {
         else if ( target_ids = $(document).data('injection_storage') ) {
             var target_sel = '#' + target_ids.join(',#');
             if ($('.change-form').closest(target_sel).length) {
-                ;;; carp('(re)setting interval for new .change-form');
+                ;;; carp('waiting for form to change to set up autosave interval');
                 proceed = true; // .change-form was just loaded
             }
             else {  // .change-form was there before -- don't touch it
@@ -833,17 +833,29 @@ function request_media(url) {
             ;;; carp('clearing interval prior to setting new one');
             clearInterval(autosave_interval);
         }
-        autosave_interval = setInterval( function() {
-            var $change_form = $('.change-form');
-            if ($change_form.length == 0) {
-                ;;; carp('.change-form disappeared -- clearing interval');
-                clearInterval(autosave_interval);
-                autosave_interval = undefined;
-                return;
+        var $inputs = $('.change-form :input');
+        function onchange_autosave_handler() {
+            $('.change-form :input').unbind('change', onchange_autosave_handler).unbind('keypress', onkeypress_autosave_handler);
+            ;;; carp('.change-form changed -- setting up autosave interval');
+            autosave_interval = setInterval( function() {
+                var $change_form = $('.change-form');
+                if ($change_form.length == 0) {
+                    ;;; carp('.change-form disappeared -- clearing interval');
+                    clearInterval(autosave_interval);
+                    autosave_interval = undefined;
+                    return;
+                }
+                carp('Saving draft '+new Date());
+                save_preset($('.change-form'), {id: draft_id});
+            }, 60 * 1000 );
+        }
+        function onkeypress_autosave_handler(evt) {
+            var k = evt.which;
+            if (k >= 32 && k <= 126 || k >= 160) {  // ASCII and Unicode printable chars
+                onchange_autosave_handler();
             }
-            carp('Saving draft '+new Date());
-            save_preset($('.change-form'), {id: draft_id});
-        }, 60 * 1000 );
+        }
+        $inputs.bind('change', onchange_autosave_handler).filter('textarea,[type=text]').bind('keypress', onkeypress_autosave_handler);
     }
     set_autosave_interval();
     $(document).bind('content_added', set_autosave_interval);
@@ -930,7 +942,7 @@ $( function() {
                 $inputs = $inputs.add(   $(this).clone().val( $(this).val().replace(/#.*/, '') )   );
                 return;
             }
-            $inputs = $inputs.add(this);
+            $inputs = $inputs.add($(this));
         });
         if (false) $inputs.filter(function(){
             if ( /(.*)_suggest$/.test($(this).attr('id')) ) {
@@ -1173,4 +1185,58 @@ function save_change_form_success(text_data, options) {
 
 $('.change-form .submit-row a[name]').live('click', function() {
     $(this).closest('form').data('submit_button_used', this);
+});
+
+
+// Help and hint rendering
+$('.hint-enhanced input').live('mouseover', function() {
+    if ($(this).attr('title')) return;
+    var hint = $(this).nextAll('.hint').text();
+    if (!hint) {
+        carp('Hint requested but undefined for:', this);
+        return;
+    }
+    $(this).attr({title: hint});
+});
+function save_help_button_from_fading($help_button) {
+    $help_button.stop().css({opacity:1});
+    if ( $help_button.data('fadeout_timeout') ) {
+        clearInterval( $help_button.data('fadeout_timeout') );
+        $help_button.removeData('fadeout_timeout');
+    }
+}
+function set_help_button_to_fade($input, $help_button) {
+    var help_button_fade_timeout = setTimeout( function() {
+        $help_button.fadeOut(3000, function () {
+            $input.removeData('help_button');
+            $help_button.remove();
+        })
+    }, 1000);
+    $help_button.data('fadeout_timeout', help_button_fade_timeout);
+}
+$('.help-enhanced input').live('mouseover', function() {
+    if ($(this).data('help_button')) {
+        save_help_button_from_fading($(this).data('help_button'))
+        return;
+    }
+    var $help_button = $('<div>').addClass('help-button').css({
+        position: 'absolute',
+        top: $(this).offset().top,
+        left: $(this).offset().left + $(this).outerWidth(),
+        minHeight: $(this).outerHeight()
+    }).html('<img alt="?" src="'+MEDIA_URL+'ico/16/help.png" />').data('antecedant_input', $(this));
+    $help_button.appendTo($(this).closest('.help-enhanced'));
+    $(this).data('help_button', $help_button);
+}).live('mouseout', function() {
+    var $help_button = $(this).data('help_button');
+    if (!$help_button) return;
+    set_help_button_to_fade($(this), $help_button);
+});
+$('.help-button').live('mouseover', function() {
+    save_help_button_from_fading($(this));
+}).live('mouseout', function() {
+    var $input = $(this).data('antecedant_input');
+    set_help_button_to_fade($input, $(this));
+}).live('click', function() {
+    $(this).closest('.help-enhanced').find('.help').slideToggle();
 });
