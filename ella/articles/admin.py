@@ -32,7 +32,3 @@ class ArticleAdmin(PublishableAdmin):
 
 admin.site.register(InfoBox, InfoBoxAdmin)
 admin.site.register(Article, ArticleAdmin)
-
-newman.site.register(InfoBox, InfoBoxAdmin)
-newman.site.register(Article, ArticleAdmin)
-

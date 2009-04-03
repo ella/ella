@@ -248,14 +248,3 @@ admin.site.register(Source, SourceAdmin)
 admin.site.register(Author, AuthorAdmin)
 admin.site.register(Placement, PlacementAdmin)
 admin.site.register(Listing, ListingAdmin)
-
-# register to newman admin
-newman.site.register(HitCount, HitCountAdmin)
-newman.site.register(Category, CategoryAdmin)
-newman.site.register(Source, SourceAdmin)
-newman.site.register(Author, AuthorAdmin)
-newman.site.register(Placement, PlacementAdmin)
-newman.site.register(Listing, ListingAdmin)
-newman.site.register(Publishable, PublishableAdmin)
-
-
