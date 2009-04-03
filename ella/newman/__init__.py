@@ -6,4 +6,4 @@ from ella.newman.options import NewmanModelAdmin, NewmanInlineModelAdmin, Newman
 from ella.newman.generic import BaseGenericInlineFormSet, GenericInlineModelAdmin, GenericStackedInline, GenericTabularInline
 
 def autodiscover():
-    call_modules(auto_discover=('admin',))
+    call_modules(auto_discover=('newman_admin',))
