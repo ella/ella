@@ -170,6 +170,9 @@ class Publishable(models.Model):
     def get_text(self):
         return self.text
 
+    def __unicode__(self):
+        return self.get_title()
+
 
 class Placement(models.Model):
     # listing's target - a Publishable object
