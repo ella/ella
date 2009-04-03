@@ -18,6 +18,10 @@ CSS_GENERIC_SUGGEST = 'css/generic.suggest.css'
 # Fake windows
 JS_JQUERY_UI = 'js/jquery-ui.js'
 
+# Date and DateTime
+JS_DATE_INPUT = 'js/datetime.js'
+CSS_DATE_INPUT = 'css/datetime.css'
+
 
 class ForeignKeyRawIdWidget(widgets.ForeignKeyRawIdWidget):
     def label_for_value(self, value):
@@ -112,3 +116,22 @@ class AdminSuggestWidget(forms.TextInput):
             (related_url, url, name))
         output.append('<img src="%simg/admin/selector-search.gif" width="16" height="16" alt="Lookup" /></a>' % settings.ADMIN_MEDIA_PREFIX)
         return mark_safe(u''.join(output))
+
+class DateWidget(forms.DateInput):
+    class Media:
+        js = (settings.NEWMAN_MEDIA_PREFIX + JS_DATE_INPUT,)
+        css = {'screen': (settings.NEWMAN_MEDIA_PREFIX + CSS_DATE_INPUT,)}
+
+    def render(self, name, value, attrs=None):
+        attrs['class'] = 'vDateInput'
+        return super(DateWidget, self).render(name, value, attrs)
+
+class DateTimeWidget(forms.DateTimeInput):
+    class Media:
+        js = (settings.NEWMAN_MEDIA_PREFIX + JS_DATE_INPUT,)
+        css = {'screen': (settings.NEWMAN_MEDIA_PREFIX + CSS_DATE_INPUT,)}
+
+    def render(self, name, value, attrs=None):
+        attrs['class'] = 'vDateTimeInput'
+        return super(DateTimeWidget, self).render(name, value, attrs)
+

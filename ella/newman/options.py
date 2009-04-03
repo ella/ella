@@ -11,7 +11,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.admin.views.main import ERROR_FLAG
 from django.shortcuts import render_to_response
 from django.db import transaction
-from django.db.models import Q, ForeignKey, ManyToManyField, ImageField
+from django.db.models import Q, ForeignKey, ManyToManyField, ImageField, DateField, DateTimeField
 from django.utils.functional import update_wrapper
 from django.utils.translation import ugettext as _
 
@@ -60,6 +60,15 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
     if isinstance(db_field, ImageField):
         # we accept only (JPEG) images with RGB color profile.
         return fields.RGBImageField(db_field, **kwargs)
+
+    # Date and DateTime fields
+    if isinstance(db_field, DateTimeField):
+        kwargs['widget'] = widgets.DateTimeWidget
+        return db_field.formfield(**kwargs)
+
+    if isinstance(db_field, DateField):
+        kwargs['widget'] = widgets.DateWidget
+        return db_field.formfield(**kwargs)
 
     if db_field.name in cls.raw_id_fields and isinstance(db_field, ForeignKey):
         kwargs['widget'] = widgets.ForeignKeyRawIdWidget(db_field.rel)
@@ -491,7 +500,7 @@ class NewmanModelAdmin(XModelAdmin):
         # if self.model is licensed filter queryset
         if 'ella.newman.licenses' in settings.INSTALLED_APPS:
             exclude_pks = License.objects.unapplicable_for_model(self.model)
-            qs = qs.exclude(id__in=exclude_pks)
+            qs = qs.exclude(pk__in=exclude_pks)
 
         if request.user.is_superuser:
             return qs
