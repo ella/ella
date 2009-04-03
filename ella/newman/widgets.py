@@ -15,8 +15,9 @@ CSS_RICHTEXTAREA = 'css/editor.css'
 JS_GENERIC_SUGGEST = 'js/generic.suggest.js'
 CSS_GENERIC_SUGGEST = 'css/generic.suggest.css'
 
-# Fake windows
+# Other JS libs
 JS_JQUERY_UI = 'js/jquery-ui.js'
+JS_JQUERY_MOUSEWHEEL = 'js/jquery-mousewheel.js'
 
 # Date and DateTime
 JS_DATE_INPUT = 'js/datetime.js'
@@ -119,7 +120,11 @@ class AdminSuggestWidget(forms.TextInput):
 
 class DateWidget(forms.DateInput):
     class Media:
-        js = (settings.NEWMAN_MEDIA_PREFIX + JS_DATE_INPUT,)
+        js = (
+            settings.NEWMAN_MEDIA_PREFIX + JS_DATE_INPUT,
+            settings.NEWMAN_MEDIA_PREFIX + JS_JQUERY_UI,
+            settings.NEWMAN_MEDIA_PREFIX + JS_JQUERY_MOUSEWHEEL,
+        )
         css = {'screen': (settings.NEWMAN_MEDIA_PREFIX + CSS_DATE_INPUT,)}
 
     def render(self, name, value, attrs=None):
@@ -128,7 +133,11 @@ class DateWidget(forms.DateInput):
 
 class DateTimeWidget(forms.DateTimeInput):
     class Media:
-        js = (settings.NEWMAN_MEDIA_PREFIX + JS_DATE_INPUT,)
+        js = (
+            settings.NEWMAN_MEDIA_PREFIX + JS_DATE_INPUT,
+            settings.NEWMAN_MEDIA_PREFIX + JS_JQUERY_UI,
+            settings.NEWMAN_MEDIA_PREFIX + JS_JQUERY_MOUSEWHEEL,
+        )
         css = {'screen': (settings.NEWMAN_MEDIA_PREFIX + CSS_DATE_INPUT,)}
 
     def render(self, name, value, attrs=None):
