@@ -1,5 +1,6 @@
 function DateTimeInput(input) {
     this.input = input;
+    this.x_pos = $(input).offset().left;
     this.cursor_pos = function(evt) {
         var input = this.input;
         var input_style;
@@ -17,7 +18,7 @@ function DateTimeInput(input) {
         if (/^(\d+)(?:px)?$/.test(border )) border  = new Number(RegExp.$1);
         else border = 0;
         
-        var x = evt.clientX - $(input).offset().left - padding - border;
+        var x = evt.clientX - this.x_pos - padding - border;
         
         var $tempspan = $('<span>').css({
             position: 'absolute',
@@ -145,6 +146,7 @@ function DateTimeInput(input) {
 
 function DateInput(input) {
     this.input = input;
+    this.x_pos = $(input).offset().left;
     this.cursor_pos = function(evt) {
         var input = this.input;
         var input_style;
@@ -162,7 +164,7 @@ function DateInput(input) {
         if (/^(\d+)(?:px)?$/.test(border )) border  = new Number(RegExp.$1);
         else border = 0;
         
-        var x = evt.clientX - $(input).offset().left - padding - border;
+        var x = evt.clientX - this.x_pos - padding - border;
         
         var $tempspan = $('<span>').css({
             position: 'absolute',
@@ -278,7 +280,7 @@ function DateInput(input) {
 function datetime_init() {
     $('.vDateInput').each( function() {
         if (! $(this).data('dti')) {
-            $(this).data('dti',new DateInput(this));
+            $(this).data('dti', new DateInput(this));
             
             $(this).bind('mousewheel', function(evt, delta) {
                 var dti = $(this).data('dti');
@@ -297,7 +299,7 @@ function datetime_init() {
     
     $('.vDateTimeInput').each( function() {
         if (! $(this).data('dti')) {
-            $(this).data('dti',new DateTimeInput(this));
+            $(this).data('dti', new DateTimeInput(this));
             
             $(this).bind('mousewheel', function(evt, delta) {
                 var dti = $(this).data('dti');
