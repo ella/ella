@@ -16,8 +16,9 @@ JS_GENERIC_SUGGEST = 'js/generic.suggest.js'
 CSS_GENERIC_SUGGEST = 'css/generic.suggest.css'
 
 # Other JS libs
-JS_JQUERY_UI = 'js/jquery-ui.js'
-JS_JQUERY_MOUSEWHEEL = 'js/jquery-mousewheel.js'
+CSS_JQUERY_UI = 'jquery/jquery-ui-smoothness.css'
+JS_JQUERY_UI = 'jquery/jquery-ui.js'
+JS_JQUERY_MOUSEWHEEL = 'jquery/jquery-mousewheel.js'
 
 # Date and DateTime
 JS_DATE_INPUT = 'js/datetime.js'
@@ -125,7 +126,10 @@ class DateWidget(forms.DateInput):
             settings.NEWMAN_MEDIA_PREFIX + JS_JQUERY_UI,
             settings.NEWMAN_MEDIA_PREFIX + JS_JQUERY_MOUSEWHEEL,
         )
-        css = {'screen': (settings.NEWMAN_MEDIA_PREFIX + CSS_DATE_INPUT,)}
+        css = {'screen': (
+            settings.NEWMAN_MEDIA_PREFIX + CSS_DATE_INPUT,
+            settings.NEWMAN_MEDIA_PREFIX + CSS_JQUERY_UI,
+        )}
 
     def render(self, name, value, attrs=None):
         attrs['class'] = 'vDateInput'
@@ -138,7 +142,10 @@ class DateTimeWidget(forms.DateTimeInput):
             settings.NEWMAN_MEDIA_PREFIX + JS_JQUERY_UI,
             settings.NEWMAN_MEDIA_PREFIX + JS_JQUERY_MOUSEWHEEL,
         )
-        css = {'screen': (settings.NEWMAN_MEDIA_PREFIX + CSS_DATE_INPUT,)}
+        css = {'screen': (
+            settings.NEWMAN_MEDIA_PREFIX + CSS_DATE_INPUT,
+            settings.NEWMAN_MEDIA_PREFIX + CSS_JQUERY_UI,
+        )}
 
     def render(self, name, value, attrs=None):
         attrs['class'] = 'vDateTimeInput'
