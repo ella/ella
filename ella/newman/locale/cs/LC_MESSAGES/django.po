@@ -465,8 +465,8 @@ msgstr ""
 #, python-format
 msgid "1 result"
 msgid_plural "%(counter)s results"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "1 výsledek"
+msgstr[1] "%(counter)s výsledků"
 
 #: templates/admin/search_form.html:10
 #, python-format
@@ -479,17 +479,17 @@ msgstr ""
 
 #: templates/admin/auth/user/add_form.html:13
 msgid "Username"
-msgstr ""
+msgstr "Uživatelské jméno"
 
 #: templates/admin/auth/user/add_form.html:20
 #: templates/admin/auth/user/change_password.html:17
 msgid "Password"
-msgstr ""
+msgstr "Heslo"
 
 #: templates/admin/auth/user/add_form.html:26
 #: templates/admin/auth/user/change_password.html:23
 msgid "Password (again)"
-msgstr ""
+msgstr "Heslo (znovu)"
 
 #: templates/admin/auth/user/add_form.html:27
 #: templates/admin/auth/user/change_password.html:24
@@ -525,3 +525,8 @@ msgstr ""
 msgid "Change my password"
 msgstr ""
 
+msgid "No role defined for user"
+msgstr "Není definována žádná role pro uživatele"
+
+msgid "Ask site administrator to assign proper roles for You."
+msgstr "Zkuste kontaktovat administrátora s prosbou o přidělení práv a rolí."
