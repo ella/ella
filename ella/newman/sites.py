@@ -7,7 +7,7 @@ from django.db import models
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.mail import EmailMessage
 from django.views.decorators.cache import never_cache
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.contenttypes.models import ContentType
 
 from ella.newman.forms import SiteFilterForm
@@ -15,11 +15,12 @@ from ella.newman.models import AdminSetting
 from ella.newman.decorators import require_AJAX
 from ella.newman.utils import set_user_config_db, set_user_config_session, get_user_config,\
     JsonResponse
-from ella.newman.permission import has_model_list_permission
+from ella.newman.permission import has_model_list_permission, applicable_categories
 from ella.newman.config import CATEGORY_FILTER, NEWMAN_URL_PREFIX
 
 
 class NewmanSite(AdminSite):
+    norole_template = None
 
     def append_inline(self, to_models=(), inline=None):
         """
@@ -106,15 +107,28 @@ class NewmanSite(AdminSite):
         else:
             if user.is_active and user.is_staff:
                 login(request, user)
-
+                # user has no applicable categories, probably his role is undefined
+                if not applicable_categories(user):
+                    return self.norole(request, user)
                 # load all user's specific settings into session
                 for c in AdminSetting.objects.filter(user=user):
                     uc = get_user_config(user, c.var)
                     set_user_config_session(request.session, c.var, uc)
-
                 return HttpResponseRedirect(request.get_full_path())
             else:
                 return self.display_login_form(request, ERROR_MESSAGE)
+
+    def norole(self, request, user):
+        context = {
+            'title': _('Site administration'),
+            'user': user,
+        }
+        logout(request)
+        return render_to_response(
+            self.norole_template or 'admin/error_norole.html', 
+            context,
+            context_instance=template.RequestContext(request)
+        )
 
     def index(self, request, extra_context=None):
         """

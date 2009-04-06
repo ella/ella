@@ -49,6 +49,8 @@
         				</li>
                 {% endfor %}
         		</ul></div>
+                {% else %}
+                    <h1>{% trans "No role defined for user"%}&nbsp;{{ user.username }}.</h1>
         		{% endif %}
 
         	{% endblock %}
