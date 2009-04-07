@@ -421,6 +421,26 @@ class NewmanModelAdmin(XModelAdmin):
             media = media + inline_admin_formset.media
         return inline_admin_formsets, media
 
+    def change_view_json_response(self, request, context, object_id):
+        """
+        TODO chyby v polich formulare
+        Chyba v poli formulare napr.: context['adminform'].form['slug'].errors
+        Chyba v poli inline napr.: context['inline_admin_formsets'][0].formset.errors
+                   tj.: [{'content': [u'Toto pole je povinn\xe9.']}]
+
+                id inline v sablone: id_ + context['inline_admin_formsets'][0].formset.prefix + [poradove cislo formsetu tj. 0 + jmeno sloupce
+                priklad id: id_articlecontents_set-0-content
+        """
+        error_dict = {'form': {}}
+        # Form fields
+        frm = context['adminform'].form
+        for field_name in frm.fields:
+            field = frm[field_name]
+            if field.errors:
+                error_dict['form'][field_name] = map(lambda fe: fe.__unicode__(), field.errors) # lazy gettext brakes json encode
+        # Inline Form fields
+        return utils.JsonResponse(_('Problem during saving data you\'ve filled in.'), errors=error_dict, status=405)
+
     @require_AJAX
     @transaction.commit_on_success
     def change_view(self, request, object_id, extra_context=None):
@@ -462,6 +482,9 @@ class NewmanModelAdmin(XModelAdmin):
         # === end of newman specific
         context.update(extra_context or {})
         obj = self.get_change_view_object(object_id)
+        import pdb;pdb.set_trace()
+        if context['errors']:
+            return self.change_view_json_response(request, context, obj)  # Json response
         return self.render_change_form(request, context, change=True, obj=obj)
 
     @transaction.commit_on_success
