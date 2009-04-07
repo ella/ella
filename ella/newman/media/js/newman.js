@@ -906,8 +906,10 @@ $( function() {
         }
     };
     function show_form_error(input, msg) {
+        if (msg.join) { var msgs = msg; msg = msgs.shift(); }
         var $msg = $('<span>').addClass('form-error-msg').text(msg);
         $('label[for='+input.id+']').append($msg);
+        if (msgs && msgs.length) show_form_error(input, msgs);
     }
     /**
      * Automatic class-driven validation.
@@ -956,7 +958,7 @@ $( function() {
             error = function(xhr, st) { $error.get(0).onchange(xhr, st); };
         }
         else {
-            error = show_ajax_error;
+            error = ajax_submit_error;
         }
         // Shave off the names from suggest-enhanced hidden inputs and don't send the suggest inputs as such.
         var $inputs = $('#absolutely#_nothing');
@@ -997,6 +999,20 @@ $( function() {
         return false;
     }
     window.ajax_submit = ajax_submit;
+    
+    function ajax_submit_error(xhr) {
+        var res;
+        try { res = JSON.parse( xhr.responseText ); }
+        catch (e) { }
+        if (res && res.errors) {
+            for (var name in res.errors.form) {
+                var msgs = res.errors.form[ name ];
+                var input = $('#id_'+name).get(0);
+                show_form_error(input, msgs);
+            }
+        }
+        show_ajax_error(xhr);
+    }
     
     // Submit button
     $('.ajax-form a.ok').live('click', function(evt) {
