@@ -423,7 +423,7 @@ class NewmanModelAdmin(XModelAdmin):
 
     def change_view_json_response(self, request, context, object_id):
         """
-        TODO chyby v polich formulare
+        Chyby v polich formulare
         Chyba v poli formulare napr.: context['adminform'].form['slug'].errors
         Chyba v poli inline napr.: context['inline_admin_formsets'][0].formset.errors
                    tj.: [{'content': [u'Toto pole je povinn\xe9.']}]
@@ -439,6 +439,15 @@ class NewmanModelAdmin(XModelAdmin):
             if field.errors:
                 error_dict['form'][field_name] = map(lambda fe: fe.__unicode__(), field.errors) # lazy gettext brakes json encode
         # Inline Form fields
+        counter = -1 
+        for fset in context['inline_admin_formsets']:
+            counter += 1
+            if not fset.formset.errors:
+                continue
+            for err_item in fset.formset.errors:
+                for key in err_item:
+                    inline_id = 'id_%s-%d-%s' % (fset.formset.prefix, counter, key)
+                    error_dict[inline_id] = map(lambda ei: ei.__unicode__(), err_item[key])
         return utils.JsonResponse(_('Problem during saving data you\'ve filled in.'), errors=error_dict, status=405)
 
     @require_AJAX
@@ -482,7 +491,6 @@ class NewmanModelAdmin(XModelAdmin):
         # === end of newman specific
         context.update(extra_context or {})
         obj = self.get_change_view_object(object_id)
-        import pdb;pdb.set_trace()
         if context['errors']:
             return self.change_view_json_response(request, context, obj)  # Json response
         return self.render_change_form(request, context, change=True, obj=obj)
