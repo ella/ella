@@ -239,6 +239,15 @@ class NewmanModelAdmin(XModelAdmin):
             raw_media = self.prepare_media(context['media'])
             context['media'] = raw_media
 
+        # save per user filtered content type.
+        req_path = request.get_full_path()
+        if req_path.find('?') > 0:
+            ct = ContentType.objects.get_for_model(self.model)
+            url_args = req_path.split('?', 1)[1]
+            key = 'filter__%s__%s' % (ct.app_label, ct.model)
+            #utils.set_user_config(request.user, key, url_args)
+            utils.set_user_config_db(request.user, key, url_args)
+
         context.update(extra_context or {})
         return render_to_response(self.change_list_template or [
             'admin/%s/%s/change_list.html' % (app_label, opts.object_name.lower()),
@@ -433,7 +442,7 @@ class NewmanModelAdmin(XModelAdmin):
                 form.fields[msg.field].hint_text = msg.short
                 form.fields[msg.field].help_text = msg.long
             except KeyError:
-                pass
+                log.warning('Cannot assign help message. Form field does not exist: form.fields[%s].' % msg.field)
 
         # raw forms for JS manipulations
         raw_frm_all = {
