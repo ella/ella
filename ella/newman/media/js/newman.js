@@ -876,8 +876,14 @@ function clone_form($orig_form) {
             }, 60 * 1000 );
         }
         function onkeypress_autosave_handler(evt) {
-            var k = evt.which;
-            if (k >= 32 && k <= 126 || k >= 160) {  // ASCII and Unicode printable chars
+            var w = evt.which;
+            var c = evt.keyCode;
+            if (   w >= 32 && w <= 126  // ASCII printable chars
+                || w >= 160             // Unicode
+                || w == 8               // backspace
+                || c == 46              // delete
+                || w == 10 || w == 13   // enter
+            ) {
                 onchange_autosave_handler();
             }
         }
