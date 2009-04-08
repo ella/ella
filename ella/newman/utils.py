@@ -33,10 +33,10 @@ def JsonResponse(message, data={}, errors={}, status=STATUS_OK):
         'status': status,
         'message': message,
     }
+    http_status = 200
     if data:
         try: 
             data = json_decode(data)
-            http_status = 200
         except: 
             http_status = 405
             log.error('Cannot decode json data in JsonResponse(), data=[%s]' % data)
