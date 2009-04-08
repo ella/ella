@@ -49,8 +49,12 @@ class XModelAdmin(ModelAdmin):
     # ChangeList class for view
     changelist_view_cl = ChangeList
 
+    # view has to be redirected to after _saveasnew flag is set in change form
+    saveasnew_add_view = None
+
     def __init__(self, *args):
         super(XModelAdmin, self).__init__(*args)
+        self.saveasnew_add_view = self.add_view
 
     def get_change_view_formsets(self, request, obj):
         formsets = []
@@ -116,7 +120,8 @@ class XModelAdmin(ModelAdmin):
             obj = None
         return obj
 
-    def get_change_view_context(self, request, object_id):
+    def change_view_preprocess(self, request, object_id):
+        " returns HttpResponse if other view is needed, otherwise None "
         model = self.model
         opts = model._meta
         obj = self.get_change_view_object(object_id)
@@ -127,11 +132,18 @@ class XModelAdmin(ModelAdmin):
             raise Http404(_('%(name)s object with primary key %(key)r does not exist.') % {'name': force_unicode(opts.verbose_name), 'key': escape(object_id)})
 
         if request.method == 'POST' and request.POST.has_key("_saveasnew"):
-            return self.add_view(request, form_url='../../add/')
+            return self.saveasnew_add_view(request, form_url='../../add/')
 
         formsets, form = self.get_change_view_formsets(request, obj)
         if type(formsets) != list: #can return HttpResponseRedirect etc.
             return formsets
+        return None
+
+    def get_change_view_context(self, request, object_id):
+        model = self.model
+        opts = model._meta
+        obj = self.get_change_view_object(object_id)
+        formsets, form = self.get_change_view_formsets(request, obj)
         adminForm = helpers.AdminForm(form, self.get_fieldsets(request, obj), self.prepopulated_fields)
         media = self.media + adminForm.media
         inline_admin_formsets, media = self.get_change_view_inline_formsets(request, obj, formsets, media)
@@ -154,11 +166,11 @@ class XModelAdmin(ModelAdmin):
 
     def change_view(self, request, object_id, extra_context=None):
         "The 'change' admin view for this model."
-        out = self.get_change_view_context(request, object_id)
+        out = self.change_view_preprocess(request, object_id)
         if type(out) != dict:
-            # context is not a dict probably HttpReponseRedirect, or Http404 etc.
+            # HttpReponse, or Http404 raised etc.
             return out
-        context = out
+        context = self.get_change_view_context(request, object_id)
         context.update(extra_context or {})
         obj = self.get_change_view_object(object_id)
         return self.render_change_form(request, context, change=True, obj=obj)

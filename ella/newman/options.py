@@ -8,12 +8,14 @@ from django.contrib.admin.options import InlineModelAdmin, IncorrectLookupParame
 from django.forms.models import BaseInlineFormSet
 from django import template
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden
+from django.core.urlresolvers import reverse
 from django.contrib.admin.views.main import ERROR_FLAG
 from django.shortcuts import render_to_response
 from django.db import transaction
 from django.db.models import Q, ForeignKey, ManyToManyField, ImageField, DateField, DateTimeField
 from django.utils.functional import update_wrapper
 from django.utils.translation import ugettext as _
+from django.utils.encoding import force_unicode
 
 from ella.core.cache.utils import get_cached_list
 from ella.newman.changelist import NewmanChangeList, FilterChangeList
@@ -107,6 +109,7 @@ class NewmanModelAdmin(XModelAdmin):
         super(NewmanModelAdmin, self).__init__(*args, **kwargs)
         self.list_per_page = DEFAULT_LIST_PER_PAGE
         self.model_content_type = ContentType.objects.get_for_model(self.model)
+        self.saveasnew_add_view = self.add_json_view
 
     def get_form(self, request, obj=None, **kwargs):
         self._magic_instance = obj # adding edited object to ModelAdmin instance.
@@ -137,21 +140,11 @@ class NewmanModelAdmin(XModelAdmin):
                 name='%sadmin_%s_%s_load_draft' % info),
             url(r'^add/json/$',
                 wrap(self.add_json_view),
-                name='%sadmin_%s_%s_add' % info),
+                name='%sadmin_%s_%s_add_json' % info),
+            url(r'^(.+)/json/$',
+                wrap(self.change_json_view),
+                name='%sadmin_%s_%s_change_json' % info),
         )
-        """ FIXME delete this!
-        urlpatterns = patterns('',
-            url(r'^$',
-                wrap(self.changelist_view),
-                name='%sadmin_%s_%s_changelist' % info),
-            url(r'^add/$',
-                wrap(self.add_view),
-                name='%sadmin_%s_%s_add' % info),
-            url(r'^(.+)/$',
-                wrap(self.change_view),
-                name='%sadmin_%s_%s_change' % info),
-        )
-        """
         urlpatterns += super(NewmanModelAdmin, self).get_urls()
         return urlpatterns
 
@@ -438,7 +431,7 @@ class NewmanModelAdmin(XModelAdmin):
             media = media + inline_admin_formset.media
         return inline_admin_formsets, media
 
-    def change_view_json_response(self, request, context, object_id):
+    def change_view_json_response(self, request, context):
         """
         Chyby v polich formulare
         Chyba v poli formulare napr.: context['adminform'].form['slug'].errors
@@ -467,19 +460,7 @@ class NewmanModelAdmin(XModelAdmin):
                     error_dict[inline_id] = map(lambda ei: ei.__unicode__(), err_item[key])
         return utils.JsonResponse(_('Please correct errors in form'), errors=error_dict, status=STATUS_FORM_ERROR)
 
-    @require_AJAX
-    @transaction.commit_on_success
-    def change_view(self, request, object_id, extra_context=None):
-        "The 'change' admin view for this model."
-        self.register_newman_variables(request)
-        out = self.get_change_view_context(request, object_id)
-        if type(out) != dict:
-            # context is not a dict probably HttpReponseRedirect, or Http404 etc.
-            return out
-        context = out
-
-        # === newman specific
-
+    def change_view_process_context(self, request, context, object_id):
         # dynamic heelp messages
         help_qs = get_cached_list(AdminHelpItem, ct=self.model_content_type, lang=settings.LANGUAGE_CODE)
         form  = context['raw_form']
@@ -499,17 +480,55 @@ class NewmanModelAdmin(XModelAdmin):
         # form for autosaved and draft objects
         draft_form = DraftForm(user=request.user, content_type=self.model_content_type)
 
+        info = self.admin_site.name, self.model._meta.app_label, self.model._meta.module_name
+        rev = '%sadmin_%s_%s_change_json' % info
         context.update({
             'media': self.prepare_media(context['media']),
             'raw_form': raw_frm_all,
             'draft_form': draft_form,
+            'save_url': reverse(rev, args=[object_id])
         })
+        return context
 
-        # === end of newman specific
+    def change_view_prepare_context(self, request, object_id):
+        self.register_newman_variables(request)
+        out = self.change_view_preprocess(request, object_id)
+        if out is not None:
+            # HttpReponse
+            return out
+        context = self.get_change_view_context(request, object_id)
+        # Newman's additions to the context
+        self.change_view_process_context(request, context, object_id)
+        return context
+
+    @require_AJAX
+    @transaction.commit_on_success
+    def change_json_view(self, request, object_id, extra_context=None):
+        "The 'change' admin view for this model."
+        if request.method.upper() != 'POST':
+            msg = _('This view is designed for saving data only, thus POST method is required.')
+            return HttpResponseForbidden(msg)
+
+        context = self.change_view_prepare_context(request, object_id)
+        if type(context) != dict:
+            obj = self.get_change_view_object(object_id)
+            opts = obj._meta
+            return utils.JsonResponse(
+                _('The %(name)s "%(obj)s" was changed successfully.') % {'name': force_unicode(opts.verbose_name), 'obj': force_unicode(obj)},
+                status=STATUS_OK
+            )
+        context.update(extra_context or {})
+        return self.change_view_json_response(request, context)  # Json response
+
+    @require_AJAX
+    def change_view(self, request, object_id, extra_context=None):
+        "The 'change' admin view for this model."
+        if request.method.upper() != 'GET':
+            msg = _('This view is designed for viewing form, thus GET method is required.')
+            return HttpResponseForbidden(msg)
+        context = self.change_view_prepare_context(request, object_id)
         context.update(extra_context or {})
         obj = self.get_change_view_object(object_id)
-        if context['errors']:
-            return self.change_view_json_response(request, context, obj)  # Json response
         return self.render_change_form(request, context, change=True, obj=obj)
 
     def get_add_view_context(self, request, form_url):
@@ -519,12 +538,16 @@ class NewmanModelAdmin(XModelAdmin):
         # form for autosaved and draft objects
         draft_form = DraftForm(user=request.user, content_type=self.model_content_type)
 
+        info = self.admin_site.name, self.model._meta.app_label, self.model._meta.module_name
+        rev = '%sadmin_%s_%s_add_json' % info
         context.update({
             'media': self.prepare_media(context['media']),
             'draft_form': draft_form,
+            'save_url': reverse(rev)
         })
         return context
 
+    @require_AJAX
     @transaction.commit_on_success
     def add_json_view(self, request, form_url='', extra_context=None):
         "The 'add' admin view for this model. Communicating with client in JSON format only."
