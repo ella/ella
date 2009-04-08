@@ -441,19 +441,26 @@ class NewmanModelAdmin(XModelAdmin):
                 id inline v sablone: id_ + context['inline_admin_formsets'][0].formset.prefix + [poradove cislo formsetu tj. 0 + jmeno sloupce
                 priklad id: id_articlecontents_set-0-content
         """
-        error_dict = {'form': {}}
+        fcounter = {}
+        def get_formset_counter(fset):
+            if fset not in fcounter:
+                fcounter[fset] = 0
+            else:
+                fcounter[fset] += 1
+            return fcounter[fset]
+
+        error_dict = {}
         # Form fields
         frm = context['adminform'].form
         for field_name in frm.fields:
             field = frm[field_name]
             if field.errors:
-                error_dict['form'][field_name] = map(lambda fe: fe.__unicode__(), field.errors) # lazy gettext brakes json encode
+                error_dict[field_name] = map(lambda fe: fe.__unicode__(), field.errors) # lazy gettext brakes json encode
         # Inline Form fields
-        counter = -1 
         for fset in context['inline_admin_formsets']:
-            counter += 1
             if not fset.formset.errors:
                 continue
+            counter = get_formset_counter(fset.formset.prefix)
             for err_item in fset.formset.errors:
                 for key in err_item:
                     inline_id = 'id_%s-%d-%s' % (fset.formset.prefix, counter, key)
