@@ -24,6 +24,7 @@ from ella.newman.permission import has_category_permission, get_permission, perm
 from ella.newman.forms import DraftForm
 from ella.newman.models import AdminHelpItem
 from ella.newman.xoptions import XModelAdmin
+from ella.newman.config import STATUS_OK, STATUS_FORM_ERROR, STATUS_VAR_MISSING, STATUS_OBJECT_NOT_FOUND
 
 DEFAULT_LIST_PER_PAGE = getattr(settings, 'NEWMAN_LIST_PER_PAGE', 25)
 
@@ -146,7 +147,7 @@ class NewmanModelAdmin(XModelAdmin):
         self.register_newman_variables(request)
         data = request.POST.get('data', None)
         if not data:
-            return HttpResponse(content=_('No data passed in POST variable "data".'), mimetype='text/plain', status=405)
+            return JsonResponse(_('No data passed in POST variable "data".'), status=STATUS_VAR_MISSING)
         title = request.POST.get('title', '')
         id = request.POST.get('id', None)
 
@@ -179,14 +180,14 @@ class NewmanModelAdmin(XModelAdmin):
         self.register_newman_variables(request)
         id = request.GET.get('id', None)
         if not id:
-            return utils.JsonResponse(_('No id found in GET variable "id".'), status=405)
+            return utils.JsonResponse(_('No id found in GET variable "id".'), status=STATUS_VAR_MISSING)
         drafts = models.AdminUserDraft.objects.filter(
             ct=self.model_content_type,
             user=request.user,
             pk=id
         )
         if not drafts:
-            return utils.JsonResponse(_('No matching draft found.'), status=404)
+            return utils.JsonResponse(_('No matching draft found.'), status=STATUS_OBJECT_NOT_FOUND)
         draft = drafts[0]
         return utils.JsonResponse(_('Loaded draft "%s"' % draft.__unicode__()), draft.data)
 
@@ -448,7 +449,7 @@ class NewmanModelAdmin(XModelAdmin):
                 for key in err_item:
                     inline_id = 'id_%s-%d-%s' % (fset.formset.prefix, counter, key)
                     error_dict[inline_id] = map(lambda ei: ei.__unicode__(), err_item[key])
-        return utils.JsonResponse(_('Problem during saving data you\'ve filled in.'), errors=error_dict, status=405)
+        return utils.JsonResponse(_('Please correct errors in form'), errors=error_dict, status=STATUS_FORM_ERROR)
 
     @require_AJAX
     @transaction.commit_on_success
@@ -514,7 +515,7 @@ class NewmanModelAdmin(XModelAdmin):
             return utils.JsonResponse(msg, {'id': context['object'].pk})
         elif 'error_dict' in context:
             msg = _('Please correct errors in form')
-            return utils.JsonResponse(msg, {}, context['error_dict'], 406)
+            return utils.JsonResponse(msg, errors=context['error_dict'], status=STATUS_FORM_ERROR)
         else:
             return self.render_change_form(request, context, add=True)
 

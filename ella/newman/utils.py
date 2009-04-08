@@ -1,4 +1,5 @@
 import sys
+import logging
 try:
     import cjson
     dumps = cjson.encode
@@ -9,8 +10,11 @@ except ImportError:
 from django.http import HttpResponse
 from ella.newman.permission import model_category_fk
 from ella.newman import models
+from ella.newman.config import STATUS_OK
 from ella.newman.config import CATEGORY_FILTER, USER_CONFIG, JSON_CONVERSIONS
 from ella.core.models import Category
+
+log = logging.getLogger('ella.newman')
 
 def json_encode(data):
     """ Encode python data into JSON. Try faster cjson first. """
@@ -22,7 +26,7 @@ def json_decode(str):
 
     return loads(str)
 
-def JsonResponse(message, data={}, errors={}, status=200):
+def JsonResponse(message, data={}, errors={}, status=STATUS_OK):
     """ Return JSON response in newman's standard format. """
 
     out_dict = {
@@ -30,14 +34,19 @@ def JsonResponse(message, data={}, errors={}, status=200):
         'message': message,
     }
     if data:
-        try: data = json_decode(data)
-        except: pass
+        try: 
+            data = json_decode(data)
+            http_status = 200
+        except: 
+            http_status = 405
+            log.error('Cannot decode json data in JsonResponse(), data=[%s]' % data)
         
         out_dict['data'] = data
     if errors:
+        http_status = 405
         out_dict['errors'] = errors
     out = json_encode(out_dict)
-    return HttpResponse(out, mimetype='text/plain;charset=utf-8', status=status)
+    return HttpResponse(out, mimetype='text/plain;charset=utf-8', status=http_status)
 
 def decode_category_filter_json(data):
     decoded = json_decode(data)

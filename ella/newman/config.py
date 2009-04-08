@@ -16,5 +16,13 @@ JSON_CONVERSIONS = (
     (CATEGORY_FILTER, 'decode_category_filter_json'),
 )
 
+# JsonResponse status "codes" (used instead of HTTP status codes)
+STATUS_OK = "ok"
+STATUS_ADDED = "added" 
+STATUS_MODIFIED = "modified" 
+STATUS_FORM_ERROR = "form_error" 
+STATUS_VAR_MISSING = "variable_missing" 
+STATUS_OBJECT_NOT_FOUND = "object_not_found" 
+
 
 # TODO try to load consts from django.conf.settings
