@@ -7,7 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.admin.options import InlineModelAdmin, IncorrectLookupParameters, FORMFIELD_FOR_DBFIELD_DEFAULTS
 from django.forms.models import BaseInlineFormSet
 from django import template
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden
 from django.contrib.admin.views.main import ERROR_FLAG
 from django.shortcuts import render_to_response
 from django.db import transaction
@@ -135,7 +135,23 @@ class NewmanModelAdmin(XModelAdmin):
             url(r'^(.+)/draft/load/$',
                 wrap(self.load_draft_view),
                 name='%sadmin_%s_%s_load_draft' % info),
+            url(r'^add/json/$',
+                wrap(self.add_json_view),
+                name='%sadmin_%s_%s_add' % info),
         )
+        """ FIXME delete this!
+        urlpatterns = patterns('',
+            url(r'^$',
+                wrap(self.changelist_view),
+                name='%sadmin_%s_%s_changelist' % info),
+            url(r'^add/$',
+                wrap(self.add_view),
+                name='%sadmin_%s_%s_add' % info),
+            url(r'^(.+)/$',
+                wrap(self.change_view),
+                name='%sadmin_%s_%s_change' % info),
+        )
+        """
         urlpatterns += super(NewmanModelAdmin, self).get_urls()
         return urlpatterns
 
@@ -496,11 +512,9 @@ class NewmanModelAdmin(XModelAdmin):
             return self.change_view_json_response(request, context, obj)  # Json response
         return self.render_change_form(request, context, change=True, obj=obj)
 
-    @transaction.commit_on_success
-    def add_view(self, request, form_url='', extra_context=None):
-        "The 'add' admin view for this model."
+    def get_add_view_context(self, request, form_url):
         self.register_newman_variables(request)
-        context = self.get_add_view_context(request, form_url)
+        context = super(NewmanModelAdmin, self).get_add_view_context(request, form_url)
 
         # form for autosaved and draft objects
         draft_form = DraftForm(user=request.user, content_type=self.model_content_type)
@@ -509,6 +523,15 @@ class NewmanModelAdmin(XModelAdmin):
             'media': self.prepare_media(context['media']),
             'draft_form': draft_form,
         })
+        return context
+
+    @transaction.commit_on_success
+    def add_json_view(self, request, form_url='', extra_context=None):
+        "The 'add' admin view for this model. Communicating with client in JSON format only."
+        if request.method.upper() != 'POST':
+            msg = _('This view is designed for saving data only, thus POST method is required.')
+            return HttpResponseForbidden(msg)
+        context = self.get_add_view_context(request, form_url)
         context.update(extra_context or {})
         if 'object_added' in context:
             msg = request.user.message_set.all()[0].message
@@ -516,8 +539,15 @@ class NewmanModelAdmin(XModelAdmin):
         elif 'error_dict' in context:
             msg = _('Please correct errors in form')
             return utils.JsonResponse(msg, errors=context['error_dict'], status=STATUS_FORM_ERROR)
-        else:
-            return self.render_change_form(request, context, add=True)
+
+    def add_view(self, request, form_url='', extra_context=None):
+        "The 'add' admin view for this model."
+        if request.method.upper() != 'GET':
+            msg = _('This view is designed for viewing form, thus GET method is required.')
+            return HttpResponseForbidden(msg)
+        context = self.get_add_view_context(request, form_url)
+        context.update(extra_context or {})
+        return self.render_change_form(request, context, add=True)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if is_category_fk(db_field):
