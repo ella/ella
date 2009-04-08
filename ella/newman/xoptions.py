@@ -285,9 +285,8 @@ class XModelAdmin(ModelAdmin):
                 form_validated = True
                 new_object = self.save_form(request, form, change=False)
             else:
-                error_dict['form'] = {}
                 for e in form.errors:
-                    error_dict['form'][u"%s" % e] = [ u"%s" % ee for ee in form.errors[e] ]
+                    error_dict[u"id_%s" % e] = [ u"%s" % ee for ee in form.errors[e] ]
                 form_validated = False
                 new_object = self.model()
             prefixes = {}
@@ -302,9 +301,8 @@ class XModelAdmin(ModelAdmin):
                                   save_as_new=request.POST.has_key("_saveasnew"),
                                   prefix=prefix)
                 if not formset.is_valid():
-                    error_dict[prefix] = {}
                     for e in formset.errors[prefix_no]:
-                        error_dict[prefix][u"%s" % e] = [u"%s" % ee for ee in formset.errors[prefix_no][e]]
+                        error_dict[u"id_%s-%d-%s" % (prefix, prefix_no, e)] = [u"%s" % ee for ee in formset.errors[prefix_no][e]]
                 formsets.append(formset)
             if all_valid(formsets) and form_validated:
                 self.save_model(request, new_object, form, change=False)
@@ -364,6 +362,8 @@ class XModelAdmin(ModelAdmin):
             'root_path': self.admin_site.root_path,
             'app_label': opts.app_label,
         })
+
+        context['raw_form'] = form
         return context
 
     def add_view(self, request, form_url='', extra_context=None):
