@@ -188,7 +188,7 @@
             else if (key == BACKSPACE && $this.val().length == 0) {
                 var $prev = $this.parent().prev();
                 if ($prev.length == 0) return;
-                $this.val('');
+                $this.val('').change();
                 $prev.remove();
                 update_values();
             }
@@ -295,6 +295,7 @@
             $prev.remove();
         }
         update_values(el);
+        $inputs.hidden.change();
         $inputs.text.focus();
         $SUGGEST_LIST.empty();
         hide_bubbles();
