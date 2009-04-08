@@ -1011,9 +1011,9 @@ $( function() {
         try { res = JSON.parse( xhr.responseText ); }
         catch (e) { }
         if (res && res.errors) {
-            for (var name in res.errors.form) {
-                var msgs = res.errors.form[ name ];
-                var input = $('#id_'+name).get(0);
+            for (var id in res.errors) {
+                var msgs = res.errors[ id ];
+                var input = $('#'+id).get(0);
                 show_form_error(input, msgs);
             }
         }
