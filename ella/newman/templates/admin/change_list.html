@@ -2,9 +2,11 @@
 {% load adminmedia admin_list i18n %}
 
 {% block content_toolbar_content %}
-    <ul class="object-tools">
+    <ul class="fl" style="float: left; width: 600px;">
         <li><a class="icn btn filter simpleload" href="filters::::filters/{{ cl.get_query_string }}">{% trans 'Filters' %}</a></li>
-        {#% block search %}{% search_form cl %}{% endblock %#}
+        <li>{% block search %}{% search_form cl %}{% endblock %}</li>
+    </ul>
+    <ul class="object-tools fr" style="float: right;">
         {% if has_add_permission %}
             <li>
                 <a href="add/" class="hashadr icn btn add">{% blocktrans with cl.opts.verbose_name as name %}Add {{ name }}{% endblocktrans %}</a>
@@ -42,7 +44,7 @@
 
 {% block content_js %}
     {{ block.super }}
-    
+
     {% if media %}
     <script type="text/javascript">
     {% for m in media %}
