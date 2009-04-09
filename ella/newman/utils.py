@@ -26,14 +26,13 @@ def json_decode(str):
 
     return loads(str)
 
-def JsonResponse(message, data={}, errors={}, status=STATUS_OK):
+def JsonResponse(message, data={}, errors={}, status=STATUS_OK, http_status=200):
     """ Return JSON response in newman's standard format. """
 
     out_dict = {
         'status': status,
         'message': message,
     }
-    http_status = 200
     if data:
         try: 
             data = json_encode(data)
@@ -50,8 +49,7 @@ def JsonResponse(message, data={}, errors={}, status=STATUS_OK):
 
 def JsonResponseError(message, status=STATUS_GENERIC_ERROR):
     """ use this function if one message describes error well, so  """
-    err_dict = {'error_description': message}
-    return JsonResponse(message, errors=err_dict, status=status)
+    return JsonResponse(message, status=status, http_status=405)
 
 def decode_category_filter_json(data):
     decoded = json_decode(data)

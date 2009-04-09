@@ -241,7 +241,6 @@ input, textarea { padding: 2px 0; }
 textarea, select { vertical-align: top; }
 .ajax-form .form-metadata { display: none; }
 input.vIntegerField { width: 40px; text-align: right; }
-input.vTextField { width: 90%; }
 input.vDateInput { width: 40px; }
 input.vDateTimeInput { width: 130px; }
 
@@ -249,8 +248,9 @@ input.vDateTimeInput { width: 130px; }
 
 /* FORMS : article change form */
 .article-form-container { padding-left: 10px; }
-.article-form-container .multicol { float: left; }
-.article-form-container .multicol.colX { margin-left: 200px; }
+.article-form-container .multicol { float: left; margin-right: 200px; }
+/*.article-form-container .multicol.colX { margin-left: 200px; }*/
+.article-form-container .multicol input { width: ; }
 .article-form-container label { display: block; float: left; min-width: 100px; }
 .article-form-container .publish-container label { float: none; }
 .change-form .submit-row {

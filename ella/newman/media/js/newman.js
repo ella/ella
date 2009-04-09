@@ -906,10 +906,10 @@ $( function() {
     
     // Validate
     var validations = {
-        required: function(input) {
+/*        required: function(input) {
             if ($(input).val()) return false;
             else return _('Field cannot be blank.');
-        }
+        }*/
     };
     function show_form_error(input, msg) {
         if (msg.join) { var msgs = msg; msg = msgs.shift(); }
