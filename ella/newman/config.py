@@ -18,6 +18,8 @@ JSON_CONVERSIONS = (
 
 # JsonResponse status "codes" (used instead of HTTP status codes)
 STATUS_OK = "ok"
+STATUS_GENERIC_ERROR = "error"
+STATUS_SMTP_ERROR = "smtp_error"
 STATUS_ADDED = "added" 
 STATUS_MODIFIED = "modified" 
 STATUS_FORM_ERROR = "form_error" 

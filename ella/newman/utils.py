@@ -10,7 +10,7 @@ except ImportError:
 from django.http import HttpResponse
 from ella.newman.permission import model_category_fk
 from ella.newman import models
-from ella.newman.config import STATUS_OK
+from ella.newman.config import STATUS_OK, STATUS_GENERIC_ERROR
 from ella.newman.config import CATEGORY_FILTER, USER_CONFIG, JSON_CONVERSIONS
 from ella.core.models import Category
 
@@ -47,6 +47,11 @@ def JsonResponse(message, data={}, errors={}, status=STATUS_OK):
         out_dict['errors'] = errors
     out = json_encode(out_dict)
     return HttpResponse(out, mimetype='text/plain;charset=utf-8', status=http_status)
+
+def JsonResponseError(message, status=STATUS_GENERIC_ERROR):
+    """ use this function if one message describes error well, so  """
+    err_dict = {'error_description': message}
+    return JsonResponse(message, errors=err_dict, status=status)
 
 def decode_category_filter_json(data):
     decoded = json_decode(data)
