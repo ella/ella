@@ -30,7 +30,7 @@ class FormatedPhotoForm(forms.BaseForm):
 
 class FormatOptions(admin.ModelAdmin):
     list_display = ('name', 'max_width', 'max_height', 'stretch', 'resample_quality',)
-    list_filter = ('site', 'stretch', 'nocrop',)
+    list_filter = ('sites', 'stretch', 'nocrop',)
     search_fields = ('name',)
 
 
