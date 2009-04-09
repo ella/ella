@@ -156,7 +156,7 @@ class NewmanModelAdmin(XModelAdmin):
         self.register_newman_variables(request)
         data = request.POST.get('data', None)
         if not data:
-            return JsonResponse(_('No data passed in POST variable "data".'), status=STATUS_VAR_MISSING)
+            return utils.JsonResponseError(_('No data passed in POST variable "data".'), status=STATUS_VAR_MISSING)
         title = request.POST.get('title', '')
         id = request.POST.get('id', None)
 
