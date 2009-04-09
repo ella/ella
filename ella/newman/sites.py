@@ -14,9 +14,9 @@ from ella.newman.forms import SiteFilterForm
 from ella.newman.models import AdminSetting
 from ella.newman.decorators import require_AJAX
 from ella.newman.utils import set_user_config_db, set_user_config_session, get_user_config,\
-    JsonResponse
+    JsonResponse, JsonResponseError
 from ella.newman.permission import has_model_list_permission, applicable_categories
-from ella.newman.config import CATEGORY_FILTER, NEWMAN_URL_PREFIX
+from ella.newman.config import CATEGORY_FILTER, NEWMAN_URL_PREFIX, STATUS_SMTP_ERROR, STATUS_FORM_ERROR
 
 
 class NewmanSite(AdminSite):
@@ -164,7 +164,6 @@ class NewmanSite(AdminSite):
         """
 
         from django.conf import settings
-        print request.POST
         u, s, m = request.user, request.POST.get('subj'), request.POST.get('msg')
 
         if s and m:
@@ -174,9 +173,9 @@ class NewmanSite(AdminSite):
                 e.send()
                 return JsonResponse(ugettext('Your report was sent.'))
             except:
-                return JsonResponse(ugettext('SMTP error.'), status=405)
+                return JsonResponseError(ugettext('SMTP error.'), status=STATUS_SMTP_ERROR)
 
-        return JsonResponse(ugettext('Subject or message is empty.'), status=406)
+        return JsonResponseError(ugettext('Subject or message is empty.'), status=STATUS_FORM_ERROR)
 
     @require_AJAX
     def cat_filters_save(self, request, extra_content=None):
@@ -187,7 +186,7 @@ class NewmanSite(AdminSite):
             set_user_config_session(request.session, CATEGORY_FILTER, site_filter_form.cleaned_data['sites'])
             return JsonResponse(ugettext('Your settings were saved.'))
         else:
-            return JsonResponse(ugettext('Error in form.'), status=406)
+            return JsonResponseError(ugettext('Error in form.'), status=STATUS_FORM_ERROR)
 
 
 site = NewmanSite()
