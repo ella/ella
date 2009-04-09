@@ -26,7 +26,7 @@ from ella.newman.permission import has_category_permission, get_permission, perm
 from ella.newman.forms import DraftForm
 from ella.newman.models import AdminHelpItem
 from ella.newman.xoptions import XModelAdmin
-from ella.newman.config import STATUS_OK, STATUS_FORM_ERROR, STATUS_VAR_MISSING, STATUS_OBJECT_NOT_FOUND
+from ella.newman.config import STATUS_OK, STATUS_FORM_ERROR, STATUS_VAR_MISSING, STATUS_OBJECT_NOT_FOUND, AUTOSAVE_MAX_AMOUNT
 
 DEFAULT_LIST_PER_PAGE = getattr(settings, 'NEWMAN_LIST_PER_PAGE', 25)
 
@@ -154,10 +154,10 @@ class NewmanModelAdmin(XModelAdmin):
         def delete_too_old_drafts():
             " remove autosaves too old to rock'n'roll "
             to_delete = models.AdminUserDraft.objects.filter(title__exact='').order_by('-ts')
-            for draft in to_delete[3:]:
+            for draft in to_delete[AUTOSAVE_MAX_AMOUNT:]:
                 log.debug('Deleting too old user draft (autosave) %s' % draft)
                 draft.delete()
-        # jQuery.post( 'http://localhost:8000/articles/article/1503079/draft/save/', {'data': '{"title": "Jarni style", "slug": "jarni-style" }'} )
+
         self.register_newman_variables(request)
         data = request.POST.get('data', None)
         if not data:
