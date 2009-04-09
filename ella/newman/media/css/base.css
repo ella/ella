@@ -240,6 +240,10 @@ div.submit-row, fieldset.submit-row { border: none; clear:both; margin-top: 5px;
 input, textarea { padding: 2px 0; }
 textarea, select { vertical-align: top; }
 .ajax-form .form-metadata { display: none; }
+input.vIntegerField { width: 40px; text-align: right; }
+input.vTextField { width: 90%; }
+input.vDateInput { width: 40px; }
+input.vDateTimeInput { width: 130px; }
 
 .form-error-msg { padding: 0 5px; color: red; font-weight: bold; }
 
