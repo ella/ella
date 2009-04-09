@@ -96,33 +96,48 @@ class GalleryNavigationNode(template.Node):
         gallery = template.Variable( self.params['for'] ).resolve(context)
         position = template.Variable( self.params['position'] ).resolve(context)
         step = int( self.params['step'] )
-        count = len( gallery.items )
         
+        count = len( gallery.items )
         navigation = []
         
         if count > 0:
             keys = gallery.items.keys()
             
-            stop = count / step
-            if stop * step < count:
-                 stop = stop + 1
+            last_page = count / step
+            if last_page * step < count:
+                 last_page = last_page + 1
             
-            item_page = position / step
-            if item_page * step < position:
-                item_page = item_page + 1
+            current_position_page = position / step
+            if current_position_page * step < position:
+                current_position_page = current_position_page + 1
             
-            for i in range(0, stop):
-                part_stop  = i * step + step
+            previous_page = current_position_page - 1
+            previous_page_url = previous_page > 0 and gallery.items[ keys[previous_page * step - step] ][0].get_absolute_url() or None
+            next_page = current_position_page
+            next_page_url = next_page < last_page and gallery.items[ keys[next_page * step] ][0].get_absolute_url() or None
+
+            for i in range(0, last_page):
                 page = i + 1
-                on_current_page = item_page == page and True or False
+                
+                start_item = i * step + 1
+                stop_item  = i * step + step
+                if stop_item > count:
+                    stop_item = count
+                
+                on_current_page = current_position_page == page and True or False
 
                 navigation.append({
-                                   'url_first': gallery.items[ keys[i * step] ][0].get_absolute_url(),
-                                   'start': i * step + 1,
-                                   'stop': part_stop > count and count or part_stop,
-                                   'page': page,
+                                   'first_item_url': gallery.items[ keys[i * step] ][0].get_absolute_url(),
+                                   'start_item_number': start_item,
+                                   'stop_item_number': stop_item,
+                                   'page_number': page,
                                    'on_current_page': on_current_page
                                   })
 
-        context[ self.params['as'] ] = navigation
+        context[ self.params['as'] ] = {
+                                        'current_page_number': current_position_page,
+                                        'previous_page_url': previous_page_url,
+                                        'next_page_url': next_page_url,
+                                        'pages': navigation 
+                                       }
         return ''
