@@ -1,11 +1,10 @@
 from django import forms
-from django.contrib import admin
 from django.conf import settings
 from django.utils.translation import ugettext
 from django.forms.util import ValidationError
 
+from ella import newman
 from ella.tagging.admin import TaggingInlineOptions
-from ella.ellaadmin.options import EllaAdminOptionsMixin
 
 from ella.photos.models import FormatedPhoto, Format, Photo
 from ella.photos.views import format_photo_json, thumb_url
@@ -22,13 +21,13 @@ class FormatedPhotoForm(forms.BaseForm):
             (data['crop_top'] > photo.height) or
             ((data['crop_left'] + data['crop_width']) > photo.width) or
             ((data['crop_top'] + data['crop_height']) > photo.height)
-):
+        ):
             # raise forms.ValidationError, ugettext("The specified crop coordinates do not fit into the source photo.")
             raise ValidationError, ugettext("The specified crop coordinates do not fit into the source photo.")
         return data
 
 
-class FormatOptions(admin.ModelAdmin):
+class FormatOptions(newman.NewmanModelAdmin):
     list_display = ('name', 'max_width', 'max_height', 'stretch', 'resample_quality',)
     list_filter = ('sites', 'stretch', 'nocrop',)
     search_fields = ('name',)
@@ -42,16 +41,16 @@ class CropAreaWidget(forms.TextInput):
         js = (
             settings.ADMIN_MEDIA_PREFIX + JS_INTERFACE,
             settings.ADMIN_MEDIA_PREFIX + JS_CROP,
-)
+        )
         css = {
             'screen': (settings.ADMIN_MEDIA_PREFIX + CSS_CROP,),
-}
+        }
 
     def __init__(self, attrs={}):
         super(CropAreaWidget, self).__init__(attrs={'class': 'crop'})
 
 
-class FormatedPhotoInlineOptions(admin.TabularInline):
+class FormatedPhotoInlineOptions(newman.NewmanTabularInline):
     model = FormatedPhoto
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name in ['crop_width', 'crop_height', 'crop_left', 'crop_top']:
@@ -59,7 +58,7 @@ class FormatedPhotoInlineOptions(admin.TabularInline):
         return super(FormatedPhotoInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
 
-class PhotoOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
+class PhotoOptions(newman.NewmanModelAdmin):
     inlines = [ FormatedPhotoInlineOptions ]
     if 'ella.tagging' in settings.INSTALLED_APPS:
         inlines.append(TaggingInlineOptions)
@@ -77,7 +76,7 @@ class PhotoOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
         return super(PhotoOptions, self).__call__(request, url)
 
 
-class FormatedPhotoOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
+class FormatedPhotoOptions(newman.NewmanModelAdmin):
     base_form = FormatedPhotoForm
     list_display = ('filename', 'format', 'width', 'height')
     list_filter = ('format',)
@@ -85,7 +84,7 @@ class FormatedPhotoOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     raw_id_fields = ('photo',)
 
 
-admin.site.register(Format, FormatOptions)
-admin.site.register(Photo, PhotoOptions)
-admin.site.register(FormatedPhoto, FormatedPhotoOptions)
+newman.site.register(Format, FormatOptions)
+newman.site.register(Photo, PhotoOptions)
+newman.site.register(FormatedPhoto, FormatedPhotoOptions)
 
