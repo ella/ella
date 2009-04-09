@@ -151,7 +151,12 @@ class NewmanModelAdmin(XModelAdmin):
     @require_AJAX
     def save_draft_view(self, request, extra_context=None):
         """ Autosave data (dataloss-prevention) or save as (named) template """
-        # TODO: clean too old autosaved... (keep last 3-5 autosaves)
+        def delete_too_old_drafts():
+            " remove autosaves too old to rock'n'roll "
+            to_delete = models.AdminUserDraft.objects.filter(title__exact='').order_by('-ts')
+            for draft in to_delete[3:]:
+                log.debug('Deleting too old user draft (autosave) %s' % draft)
+                draft.delete()
         # jQuery.post( 'http://localhost:8000/articles/article/1503079/draft/save/', {'data': '{"title": "Jarni style", "slug": "jarni-style" }'} )
         self.register_newman_variables(request)
         data = request.POST.get('data', None)
@@ -161,12 +166,13 @@ class NewmanModelAdmin(XModelAdmin):
         id = request.POST.get('id', None)
 
         if id:
+            # modifying existing draft/preset
             try:
                 obj = models.AdminUserDraft.objects.get(pk=id)
                 obj.data = data
                 obj.title = title
                 obj.save()
-            except:
+            except models.AdminUserDraft.DoesNotExist:
                 obj = models.AdminUserDraft.objects.create(
                     ct=self.model_content_type,
                     user=request.user,
@@ -180,6 +186,7 @@ class NewmanModelAdmin(XModelAdmin):
                 data=data,
                 title=title
             )
+            delete_too_old_drafts()
         data = {'id': obj.pk, 'title': obj.__unicode__()}
         return utils.JsonResponse(_('Preset %s was saved.' % obj.__unicode__()), data)
 
