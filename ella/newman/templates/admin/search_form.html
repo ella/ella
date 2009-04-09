@@ -2,7 +2,7 @@
 {% if cl.search_fields %}
     <form class="ajax-form" id="changelist-search" action="." method="get" style="display: inline; margin: 0; padding: 0; vertical-align: middle;">
             <input type="text" size="40" name="{{ search_var }}" value="{{ cl.query }}" id="searchbar" />
-            <a class="btn icn search def" href="">{% trans 'Go' %}</a>
+            <a class="btn icn search def" href="">{% trans 'Search' %}</a>
             {# <input type="submit" value="{% trans 'Go' %}" /> #}
             {% if show_result_count %}
                 <span>{% blocktrans count cl.result_count as counter %}1 result{% plural %}{{ counter }} results{% endblocktrans %}

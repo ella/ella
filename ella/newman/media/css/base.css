@@ -223,10 +223,10 @@ a.icn.save { background-image: url(../ico/16/filesave.png); }
 /* FOOTER */
 
 #footer {
-    background: #ffc;
+    background:#eee url(../img/admin/nav-bg-reverse.gif) bottom left repeat-x;
     position: fixed; left: 0; bottom: 0; right: 0;
     clear: both;
-    border-top: 1px dotted darkorange;
+    border-top: 1px dotted #999;
     padding: 5px;
     text-align: right;
 }
@@ -253,6 +253,16 @@ input.vDateTimeInput { width: 130px; }
 .article-form-container .multicol.colX { margin-left: 200px; }
 .article-form-container label { display: block; float: left; min-width: 100px; }
 .article-form-container .publish-container label { float: none; }
+.change-form .submit-row {
+    position: fixed;
+    bottom: 27px;
+    right: 0;
+    border-left: 2px solid red;
+    border-top: 2px solid red;
+    -moz-border-radius-topleft: 10px;
+    padding: 10px;
+    background: #ffc;
+}
 
 /* TABLES */
 table {
