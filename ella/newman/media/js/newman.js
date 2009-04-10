@@ -885,10 +885,16 @@ function clone_form($orig_form) {
                 || w >= 160             // Unicode
                 || w == 8               // backspace
                 || c == 46              // delete
-                || w == 10 || w == 13   // enter
             ) {
                 onchange_autosave_handler();
             }
+            else if (
+                   $(this).is('textarea')
+                && (w == 10 || w == 13) // enter
+            ) {
+                onchange_autosave_handler();
+            }
+            return true;
         }
         $inputs.bind('change', onchange_autosave_handler).filter('textarea,[type=text]').bind('keypress', onkeypress_autosave_handler);
     }
@@ -1034,16 +1040,12 @@ $( function() {
     
     // Reset button
     $('.ajax-form a.eclear').live('click', function(evt) {
-        $(this).closest('form').get(0).reset();
+        try {
+            $(this).closest('form').get(0).reset();
+        } catch(e) { }
         return false;
     });
     //// End of ajax forms
-    
-    // Packing and unpacking filter list. To be removed when filters are reimplemented.
-    $('#filters :header').live('click', function(evt) {
-        if (evt.which != 1) return true;    // just interested in left button
-        $(this).next(':first').filter('ul').slideToggle('slow');
-    });
     
     // Re-initialization of third party libraries
     /*
