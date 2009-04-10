@@ -34,12 +34,11 @@ def JsonResponse(message, data={}, errors={}, status=STATUS_OK, http_status=200)
         'message': message,
     }
     if data:
-        try: 
-            data = json_encode(data)
-        except: 
-            http_status = 405
-            log.error('Cannot decode json data in JsonResponse(), data=[%s]' % data)
-        
+        try:
+            data = json_decode(data)
+        except:
+            log.info('Cannot decode json data in JsonResponse(), data=[%s]' % data)
+
         out_dict['data'] = data
     if errors:
         http_status = 405
