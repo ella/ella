@@ -529,6 +529,7 @@ class NewmanModelAdmin(XModelAdmin):
             opts = obj._meta
             return utils.JsonResponse(
                 _('The %(name)s "%(obj)s" was changed successfully.') % {'name': force_unicode(opts.verbose_name), 'obj': force_unicode(obj)},
+                {'id': obj.pk},
                 status=STATUS_OK
             )
         context.update(extra_context or {})
