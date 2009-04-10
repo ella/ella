@@ -1045,6 +1045,18 @@ $( function() {
         } catch(e) { }
         return false;
     });
+    
+    // Overload default submit event
+    function overload_default_submit() {
+        $('.ajax-form')
+        .unbind('submit.ajax_overload')
+        .bind('submit.ajax_overload', function(evt) {
+            ajax_submit( $(this) );
+            return false;
+        });
+    }
+    $(document).bind('content_added', overload_default_submit);
+    overload_default_submit();
     //// End of ajax forms
     
     // Re-initialization of third party libraries
@@ -1269,6 +1281,15 @@ function save_change_form_success(text_data, options) {
     };
     show_ok(response_msg);
     action_table.run(action);
+}
+
+function changelist_batch_success(response_text) {
+    var $dialog = $('<div id="confirmation-wrapper">');
+    $dialog.html(response_text).find('.cancel').click(function() {
+        $dialog.remove();
+        $('#content').show();
+    });
+    $('#content').hide().before($dialog);
 }
 
 
