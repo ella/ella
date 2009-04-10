@@ -39,3 +39,7 @@ class SiteFilterForm(forms.Form):
         for c in cats:
             choices += (c.pk, c.__unicode__(),),
         self.fields['sites'] = forms.MultipleChoiceField(choices, widget=CheckboxSelectMultiple, required=False)
+
+class ErrorReportForm(forms.Form):
+    err_subject = forms.CharField(label=_('Subject'))
+    err_message = forms.CharField(label=_('Message'), widget=forms.Textarea)
