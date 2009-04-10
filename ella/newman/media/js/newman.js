@@ -395,7 +395,10 @@ else {
             address = address.substr(colon_index + '::'.length);
         }
         
-        if (LOADED_URLS[target_id] == address) return;
+        if (LOADED_URLS[target_id] == address) {
+            $('#'+target_id).slideToggle('fast');
+            return;
+        }
         
         var url = adr(specifier, {just_get:1});
         url = prepend_base_path_to(url);
@@ -736,7 +739,7 @@ function clone_form($orig_form) {
             type: 'POST',
             success: function(response_text) {
                 $saving_msg.remove();
-                show_message(_('Saved')+'.', {msgclass: 'okmsg', duration: 2000});
+                show_ok(_('Saved')+'.', {duration: 2000});
                 try {
                     var response_data = JSON.parse(response_text);
                     var id           = response_data.data.id;
@@ -753,7 +756,7 @@ function clone_form($orig_form) {
                         $('<option>').attr({value: id}).html(actual_title)
                     );
                 } catch(e) {
-                    show_message(_('Preset saved but erroneous result received.')+' '+_('Reload to see the preset.'), {msgclass:'errmsg'});
+                    show_err(_('Preset saved but erroneous result received.')+' '+_('Reload to see the preset.'));
                 }
             },
             error: function(xhr) {
@@ -781,7 +784,7 @@ function clone_form($orig_form) {
         try {
             response_data  = JSON.parse(response_text);
         } catch(e) {
-            show_message(_('Failed loading preset'), {msgclass:'errmsg'});
+            show_err(_('Failed loading preset'));
             return;
         }
         $form.get(0).reset();
@@ -1043,12 +1046,10 @@ $( function() {
     });
     
     // Re-initialization of third party libraries
+    /*
     $(document).bind('content_added', function() {
-        try {
-            DateTimeShortcuts.admin_media_prefix = MEDIA_URL;
-            DateTimeShortcuts.init();
-        } catch(e) { if (e.name != 'ReferenceError') carp(e); }
     });
+    */
     
     // Initialization of JavaScripts
     $(document).bind('media_loaded', function() {
@@ -1110,6 +1111,16 @@ function show_message(message, options) {
     }, duration);
     return $msg;
 }
+function show_ok(message, options) {
+    if (!options) options = {};
+    if (!options.msgclass) options.msgclass = 'okmsg';
+    show_message(message, options);
+}
+function show_err(message, options) {
+    if (!options) options = {};
+    if (!options.msgclass) options.msgclass = 'errmsg';
+    show_message(message, options);
+}
 
 
 // The 'loading...' message
@@ -1152,7 +1163,7 @@ function show_ajax_error(xhr) {
         message = _('Request failed')+' ('+xhr.status+': '+_(xhr.statusText)+')';
         paste_code_into_debug( xhr.responseText.replace(/\n(\s*\n)+/g, "\n"), 'Ajax error response' );
     }
-    show_message(message, {msgclass: 'errmsg'});
+    show_err(message);
 }
 function show_ajax_success(response_text) {
     var message, data;
@@ -1163,7 +1174,7 @@ function show_ajax_success(response_text) {
         message = _('Successfully sent');
         paste_code_into_debug( response_text.replace(/\n(\s*\n)+/g, "\n"), 'Ajax success response' );
     }
-    show_message(message, {msgclass: 'okmsg'});
+    show_ok(message);
 }
 
 
@@ -1177,7 +1188,7 @@ $('.change-form .submit-row a[name]').live('click', function() {
 $('.change-form a[name=_saveasnew]').live('click', function() {
     var $orig_form = $(this).closest('.ajax-form');
     var $form = clone_form($orig_form);
-    $form.attr({ action: '../add/' });
+    $form.attr({ action: '../add/json/' }).addClass('dyn-addr');
     $form.data('submit_button_used', this);
     ajax_submit($form);
     return false;
@@ -1192,7 +1203,7 @@ function save_change_form_success(text_data, options) {
         else if (!options._form.data('submit_button_used')) message = "_form doesn't have submit_button_used set";
         carp(message);
         show_ajax_success(text_data);
-        show_message(_('Failed to follow form save with a requested action'), {msgclass: 'errmsg'});
+        show_err(_('Failed to follow form save with a requested action'));
         return;
     }
     var $form = options._form;
@@ -1202,7 +1213,7 @@ function save_change_form_success(text_data, options) {
     try {
         data = JSON.parse(text_data);
         object_id = data.data.id;
-        response_msg = data.data.message;
+        response_msg = data.message;
     } catch(e) { carp('invalid data received from form save:', text_data, e); }
     response_msg = response_msg || _('Form saved');
     var action_table = {
@@ -1222,7 +1233,7 @@ function save_change_form_success(text_data, options) {
             if ( /add\/$/.test(get_hashadr('')) ) {
                 if (!object_id) {
                     var message = 'Cannot continue editing (object ID not received)'
-                    show_message(message, {msgclass: 'errmsg'});
+                    show_err(message);
                     carp(message, 'xhr options:', options);
                     adr('../');
                     return;
@@ -1232,8 +1243,13 @@ function save_change_form_success(text_data, options) {
             // else do nothing
         },
         _saveasnew_: function() {
-            if (!object_id) adr('../');
-            adr('../'+object_id+'/');
+            if (!object_id) {
+                show_err(_('Failed to redirect to newly added object.'));
+                carp('Cannot redirect to newly added object: ID not received.');
+            }
+            else {
+                adr('../'+object_id+'/');
+            }
         },
         run: function(action) {
             var a = action+'_';
@@ -1249,7 +1265,7 @@ function save_change_form_success(text_data, options) {
             }
         }
     };
-    show_ajax_success(response_msg);
+    show_ok(response_msg);
     action_table.run(action);
 }
 
