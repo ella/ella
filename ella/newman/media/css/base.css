@@ -263,6 +263,9 @@ input.vDateTimeInput { width: 130px; }
     padding: 10px;
     background: #ffc;
 }
+.change-form .submit-row a {
+    white-space: nowrap;
+}
 
 /* TABLES */
 table {
