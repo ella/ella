@@ -1,4 +1,4 @@
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _, ugettext
 from django.forms import models as modelforms
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
@@ -11,6 +11,7 @@ from ella.core.models.publishable import Publishable
 
 from ella import newman
 from django.conf.urls.defaults import patterns, url
+from django.utils.safestring import mark_safe
 
 class PlacementForm(modelforms.ModelForm):
     # create the field here to pass validation
@@ -234,7 +235,7 @@ class SourceAdmin(newman.NewmanModelAdmin):
 class PublishableAdmin(newman.NewmanModelAdmin):
     """ Default admin options for all publishables """
 
-    list_display = ('title', 'category',)
+    list_display = ('title', 'category', 'photo_thumbnail')
     list_filter = ('category__site', 'category', 'authors',)
     search_fields = ('title', 'description', 'slug', 'authors__name', 'authors__slug',) # FIXME: 'tags__tag__name',)
     raw_id_fields = ('photo',)
@@ -242,12 +243,21 @@ class PublishableAdmin(newman.NewmanModelAdmin):
     rich_text_fields = {None: ('description',)}
 
     suggest_fields = {
-        'category': ('tree_path', 'title', 'slug',),
+        'category': ('title', 'slug', 'tree_path'),
         'authors': ('name', 'slug', 'email',),
         'source': ('name', 'url',),
     }
 
     inlines = [PlacementInlineAdmin]
+
+    def photo_thumbnail(self, object):
+        photo = object.get_photo()
+        if photo:
+            return mark_safe(photo.thumb())
+        else:
+            return mark_safe('<div class="errors"><ul class="errorlist"><li>%s</li></ul></div>' % ugettext('No main photo!'))
+    photo_thumbnail.allow_tags = True
+    photo_thumbnail.short_description = _('Photo')
 
 
 newman.site.register(HitCount, HitCountAdmin)
