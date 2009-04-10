@@ -124,18 +124,18 @@ div.breadcrumbs {
 
 /* CONTENT TOOLBAR */
 #content-toolbar * {
-    vertical-align: middle;
+    vertical-align: middle ! important;
 }
 #content-toolbar {
-    padding: 5px 0 10px 0;
     background: #fff;
+    padding: 3px 5px;
 }
 #content-toolbar ul {
     list-style: none;
-    margin: 5px;
+    margin: 0; padding: 0;
 }
 #content-toolbar ul li {
-    float: left;
+    display: inline;
 }
 
 
@@ -186,7 +186,7 @@ a.btn {
     -moz-border-radius: 4px;
     -webkit-border-radius: 4px;
     background-color: #ddd;
-    margin: 2px;
+    margin: 3px 2px;
     text-decoration: none;
 }
 a.btn.def {
@@ -271,7 +271,10 @@ table {
 td, th {
     text-align: left;
     border: 1px solid #ddd;
-    padding: 5px;
+    padding: 3px;
+}
+.inline-group td, .inline-group th {
+    border: none;
 }
 
 #changelist table {
@@ -281,6 +284,10 @@ td, th {
 #changelist table tbody tr.row1 { background: #fff; }
 #changelist table tbody tr.row2 { background: #eee; }
 #changelist table tbody tr:hover { background: #ffc; }
+
+/* CHANGELIST ACTIONS */
+#changelist .actions { padding: 5px; }
+#changelist .actions label { display: inline; }
 
 /* CHANGELIST FILTERS */
 #filters {
