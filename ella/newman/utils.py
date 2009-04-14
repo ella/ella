@@ -34,6 +34,7 @@ def JsonResponse(message, data={}, errors={}, status=STATUS_OK, http_status=200)
         'message': message,
     }
     if data:
+        # if data contains JSON data, first try to decode them
         try:
             data = json_decode(data)
         except:
