@@ -41,6 +41,7 @@ class FlashImageWidget(widgets.AdminFileWidget):
         <param name="bgcolor" value="#869ca7" />
         <param name="allowScriptAccess" value="sameDomain" />
         <param name="FlashVars" value="max_width=&max_height=&value=%s" />
+        <param name="allowFullScreen" value="true" />
             <embed src="%s" quality="high" bgcolor="#869ca7"
             width="100%%" height="60px" name="PhotoUploader" align="middle"
             play="true"
@@ -49,7 +50,8 @@ class FlashImageWidget(widgets.AdminFileWidget):
             allowScriptAccess="sameDomain"
             type="application/x-shockwave-flash"
             pluginspage="http://www.adobe.com/go/getflashplayer"
-            FlashVars="max_width=&max_height=&value=%s">
+            FlashVars="max_width=&max_height=&value=%s"
+            allowFullScreen="true">
             </embed>
         </object>
         """ % (swf_path, value, swf_path, value)
