@@ -1011,7 +1011,8 @@ $( function() {
             data: data,
             success: success,
             error:   error,
-            _form: $form
+            _form: $form,
+            _button_name: button_name
         });
         return false;
     }
@@ -1197,38 +1198,19 @@ function show_ajax_success(response_text) {
 
 // submit line (save, save as new, etc)
 
-$('.change-form .submit-row a[name]').live('click', function() {
-    if ($(this).hasClass('noautosubmit')) return;
-    $(this).closest('form').data('submit_button_used', this);
-});
-
-$('.change-form a[name=_saveasnew]').live('click', function() {
-    var $orig_form = $(this).closest('.ajax-form');
-    var $form = clone_form($orig_form);
-    $form.attr({ action: '../add/json/' }).addClass('dyn-addr');
-    $form.find('input:hidden').filter( function() {
-        return /INITIAL_FORMS$/.test(this.name);
-    }).val(0);
-    $form.data('submit_button_used', this);
-    ajax_submit($form, '_saveasnew');
-    return false;
-});
-
 function save_change_form_success(text_data, options) {
-    if (!options || !options._form || !options._form.jquery || !options._form.data('submit_button_used')) {
+    if (!options || !options._button_name || !options._form) {
         var message;
         if (!options) message = 'No XHR options passed to save_change_form_success';
         else if (!options._form) message = '_form not set in the XML HTTP Request for change_form submit';
-        else if (!options._form.jquery) message = '_form is not a jquery object';
-        else if (!options._form.data('submit_button_used')) message = "_form doesn't have submit_button_used set";
+        else if (!options._button_name) message = '_button_name not set in the XML HTTP Request for change_form submit';
         carp(message);
         show_ajax_success(text_data);
         show_err(_('Failed to follow form save with a requested action'));
         return;
     }
     var $form = options._form;
-    var action = $form.data('submit_button_used').name;
-    $form.removeData('submit_button_used');
+    var action = options._button_name;
     var data, object_id, response_msg;
     try {
         data = JSON.parse(text_data);
