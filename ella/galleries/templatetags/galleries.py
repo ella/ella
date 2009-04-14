@@ -103,14 +103,15 @@ class GalleryNavigationNode(template.Node):
         if count > 0:
             keys = gallery.items.keys()
             
+            # Last page number
             last_page = count / step
             if last_page * step < count:
                  last_page = last_page + 1
-            
+            # Current page number
             current_position_page = position / step
             if current_position_page * step < position:
                 current_position_page = current_position_page + 1
-            
+            # Previous and next page url (first item on page url)
             previous_page = current_position_page - 1
             previous_page_url = previous_page > 0 and gallery.items[ keys[previous_page * step - step] ][0].get_absolute_url() or None
             next_page = current_position_page
@@ -118,12 +119,12 @@ class GalleryNavigationNode(template.Node):
 
             for i in range(0, last_page):
                 page = i + 1
-                
+                # First and last item on page number
                 start_item = i * step + 1
                 stop_item  = i * step + step
                 if stop_item > count:
                     stop_item = count
-                
+                # Is it current page?
                 on_current_page = current_position_page == page and True or False
 
                 navigation.append({
@@ -133,7 +134,11 @@ class GalleryNavigationNode(template.Node):
                                    'page_number': page,
                                    'on_current_page': on_current_page
                                   })
-
+        else:
+            current_position_page = None
+            previous_page_url = None
+            next_page_url = None
+        
         context[ self.params['as'] ] = {
                                         'current_page_number': current_position_page,
                                         'previous_page_url': previous_page_url,
