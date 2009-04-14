@@ -66,15 +66,11 @@ class Contest(Publishable, FloatingStateModel):
     """
     Contests with title, descriptions and activation
     """
-    title = models.CharField(_('Title'), max_length=200)
-    slug = models.SlugField(_('Slug'), max_length=255)
-    category = models.ForeignKey(Category)
     text_announcement = models.TextField(_('Text with announcement'))
     text = models.TextField(_('Text'))
     text_results = models.TextField(_('Text with results'))
     active_from = models.DateTimeField(_('Active from'))
     active_till = models.DateTimeField(_('Active till'))
-    photo = models.ForeignKey(Photo)
 
     objects = RelatedManager()
 
@@ -88,8 +84,8 @@ class Contest(Publishable, FloatingStateModel):
             '%d:%s' % (
                 q.id,
                 ','.join(str(c.id) for c in sorted(q.choices, key=lambda ch: ch.id) if c.points > 0)
-) for q in sorted(self.questions, key=lambda q: q.id)
-)
+            ) for q in sorted(self.questions, key=lambda q: q.id)
+        )
 
     def correct_answers(self):
         """
@@ -140,20 +136,14 @@ class Quiz(Publishable, FloatingStateModel):
     """
     box_class = QuizBox
 
-    title = models.CharField(_('title'), max_length=200)
-    slug = models.SlugField(_('Slug'), max_length=255)
-    category = models.ForeignKey(Category)
     text_announcement = models.TextField(_('text with announcement'))
     text = models.TextField(_('Text'))
     text_results = models.TextField(_('Text with results'))
     active_from = models.DateTimeField(_('Active from'))
     active_till = models.DateTimeField(_('Active till'))
-    photo = models.ForeignKey(Photo)
     has_correct_answers = models.BooleanField(_('Has correct answers'))
 
     # Authors and Sources
-    authors = models.ManyToManyField(Author, verbose_name=_('Authors'))
-
     objects = RelatedManager()
 
     @property

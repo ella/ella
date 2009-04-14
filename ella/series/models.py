@@ -11,18 +11,11 @@ from ella.photos.models import Photo
 
 class Serie(Publishable):
 
-    title = models.CharField(_('Title'), max_length=96)
-    slug = models.SlugField(_('Slug'), unique=True)
     perex = models.TextField(_('Perex'))
-    description = models.TextField(_('Description'), blank=True)
-    category = models.ForeignKey(Category, verbose_name=_('Category'))
 
     hide_newer_parts = models.BooleanField(_('Hide newer parts'), default=False)
     started = models.DateField(_('Started'))
     finished = models.DateField(_('Finished'), null=True, blank=True)
-
-    # Main Photo to Article
-    photo = models.ForeignKey(Photo, blank=True, null=True, verbose_name=_('Photo'))
 
     def get_text(self):
         return self.description

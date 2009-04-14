@@ -34,12 +34,9 @@ class Interviewee(models.Model):
 
 class Interview(Publishable):
     # Titles
-    title = models.CharField(_('Title'), max_length=255)
     upper_title = models.CharField(_('Upper title'), max_length=255, blank=True)
-    slug = models.SlugField(_('Slug'), max_length=255)
 
     # Contents
-    perex = models.TextField(_('Perex'))
     content = models.TextField(_('Text'))
 
     reply_from = models.DateTimeField(_('Reply from'))
@@ -48,15 +45,8 @@ class Interview(Publishable):
     ask_from = models.DateTimeField(_('Ask from'))
     ask_to = models.DateTimeField(_('Ask to'))
 
-    # Authors and Sources
-    authors = models.ManyToManyField(Author, verbose_name=_('Authors'))
-    source = models.ForeignKey(Source, blank=True, null=True, verbose_name=_('Source'))
     interviewees = models.ManyToManyField(Interviewee, verbose_name=_('Interviewees'))
 
-    category = models.ForeignKey(Category, verbose_name=_('Category'))
-
-    # Main Photo
-    photo = models.ForeignKey(Photo, blank=True, null=True, verbose_name=_('Photo'))
 
     objects = RelatedManager()
 
