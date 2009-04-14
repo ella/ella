@@ -35,6 +35,8 @@ else {
     _ = function(s) { return s; };
 }
 
+var ContentByHashLib = {};
+
 ( function($) { $(document).ready( function() {
     
     // We need to remember what URL is loaded in which element,
@@ -209,6 +211,15 @@ else {
             request_no: MAX_REQUEST
         });
     }
+    
+    function reload_content(container_id) {
+        var addr = LOADED_URLS[ container_id ] || '';
+        load_content({
+            target_id: container_id,
+            address: addr
+        });
+    }
+    ContentByHashLib.reload_content = reload_content;
     
     // We want location.hash to exactly describe what's on the page.
     // #url means that the result of $.get(url) be loaded into the #content div.
@@ -395,7 +406,10 @@ else {
             address = address.substr(colon_index + '::'.length);
         }
         
-        if (LOADED_URLS[target_id] == address) return;
+        if (LOADED_URLS[target_id] == address) {
+            $('#'+target_id).slideToggle('fast');
+            return;
+        }
         
         var url = adr(specifier, {just_get:1});
         url = prepend_base_path_to(url);
@@ -736,7 +750,7 @@ function clone_form($orig_form) {
             type: 'POST',
             success: function(response_text) {
                 $saving_msg.remove();
-                show_message(_('Saved')+'.', {msgclass: 'okmsg', duration: 2000});
+                show_ok(_('Saved')+'.', {duration: 2000});
                 try {
                     var response_data = JSON.parse(response_text);
                     var id           = response_data.data.id;
@@ -753,7 +767,7 @@ function clone_form($orig_form) {
                         $('<option>').attr({value: id}).html(actual_title)
                     );
                 } catch(e) {
-                    show_message(_('Preset saved but erroneous result received.')+' '+_('Reload to see the preset.'), {msgclass:'errmsg'});
+                    show_err(_('Preset saved but erroneous result received.')+' '+_('Reload to see the preset.'));
                 }
             },
             error: function(xhr) {
@@ -781,7 +795,7 @@ function clone_form($orig_form) {
         try {
             response_data  = JSON.parse(response_text);
         } catch(e) {
-            show_message(_('Failed loading preset'), {msgclass:'errmsg'});
+            show_err(_('Failed loading preset'));
             return;
         }
         $form.get(0).reset();
@@ -882,10 +896,16 @@ function clone_form($orig_form) {
                 || w >= 160             // Unicode
                 || w == 8               // backspace
                 || c == 46              // delete
-                || w == 10 || w == 13   // enter
             ) {
                 onchange_autosave_handler();
             }
+            else if (
+                   $(this).is('textarea')
+                && (w == 10 || w == 13) // enter
+            ) {
+                onchange_autosave_handler();
+            }
+            return true;
         }
         $inputs.bind('change', onchange_autosave_handler).filter('textarea,[type=text]').bind('keypress', onkeypress_autosave_handler);
     }
@@ -906,10 +926,10 @@ $( function() {
     
     // Validate
     var validations = {
-        required: function(input) {
+/*        required: function(input) {
             if ($(input).val()) return false;
             else return _('Field cannot be blank.');
-        }
+        }*/
     };
     function show_form_error(input, msg) {
         if (msg.join) { var msgs = msg; msg = msgs.shift(); }
@@ -945,7 +965,7 @@ $( function() {
     }
     
     // Submit event
-    function ajax_submit($form) {
+    function ajax_submit($form, button_name) {
         if (!$form.jquery) $form = $($form);
         if ( ! validate($form) ) return false;
         var action =  $form.attr('action');
@@ -978,16 +998,7 @@ $( function() {
             }
             $inputs = $inputs.add($(this));
         });
-        if (false) $inputs.filter(function(){
-            if ( /(.*)_suggest$/.test($(this).attr('id')) ) {
-                var $hid = $inputs.filter('#'+RegExp.$1);
-                $hid.val( $hid.val().replace(/#.*/, '') );
-                return true;
-            }
-            else {
-                return false;
-            }
-        }).remove();
+        if (button_name) $inputs = $inputs.add('<input type="hidden" value="1" name="'+button_name+'" />');
         var data = $inputs.serialize();
         if ($form.hasClass('reset-on-submit')) $form.get(0).reset();
         var url = $form.hasClass('dyn-addr')
@@ -1000,7 +1011,8 @@ $( function() {
             data: data,
             success: success,
             error:   error,
-            _form: $form
+            _form: $form,
+            _button_name: button_name
         });
         return false;
     }
@@ -1025,30 +1037,37 @@ $( function() {
         if (evt.which != 1) return true;    // just interested in left button
         if ($(this).hasClass('noautosubmit')) return true;
         var $form = $(this).closest('.ajax-form');
-        ajax_submit($form);
+        ajax_submit($form, this.name);
         return false;
     });
     
     // Reset button
     $('.ajax-form a.eclear').live('click', function(evt) {
-        $(this).closest('form').get(0).reset();
+        try {
+            $(this).closest('form').get(0).reset();
+        } catch(e) { }
         return false;
     });
+    
+    // Overload default submit event
+    function overload_default_submit() {
+        $('.ajax-form')
+        .unbind('submit.ajax_overload')
+        .bind('submit.ajax_overload', function(evt) {
+            var name = $(this).find('.def:first').attr('name');
+            ajax_submit( $(this), name );
+            return false;
+        });
+    }
+    $(document).bind('content_added', overload_default_submit);
+    overload_default_submit();
     //// End of ajax forms
     
-    // Packing and unpacking filter list. To be removed when filters are reimplemented.
-    $('#filters :header').live('click', function(evt) {
-        if (evt.which != 1) return true;    // just interested in left button
-        $(this).next(':first').filter('ul').slideToggle('slow');
-    });
-    
     // Re-initialization of third party libraries
+    /*
     $(document).bind('content_added', function() {
-        try {
-            DateTimeShortcuts.admin_media_prefix = MEDIA_URL;
-            DateTimeShortcuts.init();
-        } catch(e) { if (e.name != 'ReferenceError') carp(e); }
     });
+    */
     
     // Initialization of JavaScripts
     $(document).bind('media_loaded', function() {
@@ -1110,6 +1129,16 @@ function show_message(message, options) {
     }, duration);
     return $msg;
 }
+function show_ok(message, options) {
+    if (!options) options = {};
+    if (!options.msgclass) options.msgclass = 'okmsg';
+    show_message(message, options);
+}
+function show_err(message, options) {
+    if (!options) options = {};
+    if (!options.msgclass) options.msgclass = 'errmsg';
+    show_message(message, options);
+}
 
 
 // The 'loading...' message
@@ -1152,7 +1181,7 @@ function show_ajax_error(xhr) {
         message = _('Request failed')+' ('+xhr.status+': '+_(xhr.statusText)+')';
         paste_code_into_debug( xhr.responseText.replace(/\n(\s*\n)+/g, "\n"), 'Ajax error response' );
     }
-    show_message(message, {msgclass: 'errmsg'});
+    show_err(message);
 }
 function show_ajax_success(response_text) {
     var message, data;
@@ -1163,46 +1192,30 @@ function show_ajax_success(response_text) {
         message = _('Successfully sent');
         paste_code_into_debug( response_text.replace(/\n(\s*\n)+/g, "\n"), 'Ajax success response' );
     }
-    show_message(message, {msgclass: 'okmsg'});
+    show_ok(message);
 }
 
 
 // submit line (save, save as new, etc)
 
-$('.change-form .submit-row a[name]').live('click', function() {
-    if ($(this).hasClass('noautosubmit')) return;
-    $(this).closest('form').data('submit_button_used', this);
-});
-
-$('.change-form a[name=_saveasnew]').live('click', function() {
-    var $orig_form = $(this).closest('.ajax-form');
-    var $form = clone_form($orig_form);
-    $form.attr({ action: '../add/' });
-    $form.data('submit_button_used', this);
-    ajax_submit($form);
-    return false;
-});
-
 function save_change_form_success(text_data, options) {
-    if (!options || !options._form || !options._form.jquery || !options._form.data('submit_button_used')) {
+    if (!options || !options._button_name || !options._form) {
         var message;
         if (!options) message = 'No XHR options passed to save_change_form_success';
         else if (!options._form) message = '_form not set in the XML HTTP Request for change_form submit';
-        else if (!options._form.jquery) message = '_form is not a jquery object';
-        else if (!options._form.data('submit_button_used')) message = "_form doesn't have submit_button_used set";
+        else if (!options._button_name) message = '_button_name not set in the XML HTTP Request for change_form submit';
         carp(message);
         show_ajax_success(text_data);
-        show_message(_('Failed to follow form save with a requested action'), {msgclass: 'errmsg'});
+        show_err(_('Failed to follow form save with a requested action'));
         return;
     }
     var $form = options._form;
-    var action = $form.data('submit_button_used').name;
-    $form.removeData('submit_button_used');
+    var action = options._button_name;
     var data, object_id, response_msg;
     try {
         data = JSON.parse(text_data);
         object_id = data.data.id;
-        response_msg = data.data.message;
+        response_msg = data.message;
     } catch(e) { carp('invalid data received from form save:', text_data, e); }
     response_msg = response_msg || _('Form saved');
     var action_table = {
@@ -1222,7 +1235,7 @@ function save_change_form_success(text_data, options) {
             if ( /add\/$/.test(get_hashadr('')) ) {
                 if (!object_id) {
                     var message = 'Cannot continue editing (object ID not received)'
-                    show_message(message, {msgclass: 'errmsg'});
+                    show_err(message);
                     carp(message, 'xhr options:', options);
                     adr('../');
                     return;
@@ -1232,8 +1245,13 @@ function save_change_form_success(text_data, options) {
             // else do nothing
         },
         _saveasnew_: function() {
-            if (!object_id) adr('../');
-            adr('../'+object_id+'/');
+            if (!object_id) {
+                show_err(_('Failed to redirect to newly added object.'));
+                carp('Cannot redirect to newly added object: ID not received.');
+            }
+            else {
+                adr('../'+object_id+'/');
+            }
         },
         run: function(action) {
             var a = action+'_';
@@ -1249,8 +1267,22 @@ function save_change_form_success(text_data, options) {
             }
         }
     };
-    show_ajax_success(response_msg);
+    show_ok(response_msg);
     action_table.run(action);
+}
+
+function changelist_batch_success(response_text) {
+    var $dialog = $('<div id="confirmation-wrapper">');
+    $dialog.html(response_text).find('.cancel').click(function() {
+        $dialog.remove();
+        $('#content').show();
+    });
+    $('#content').hide().before($dialog);
+}
+function batch_delete_confirm_complete() {
+    ContentByHashLib.reload_content('content');
+    $('#confirmation-wrapper').remove();
+    $('#content').show();
 }
 
 

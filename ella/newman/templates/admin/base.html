@@ -123,7 +123,7 @@
                     <strong>{{ user.get_full_name }}</strong>
                     | {{ VERSION }}, {{ SERVER_INFO.type }}
                     | <a class="icn visible" onclick="$('#debug').toggle()">debug log</a>
-                    | <a class="icn eclear" href="#{% url admin_password_change %}">{% trans 'Change password' %}</a>
+                    | <a class="icn eclear hashadr" href="/password_change/">{% trans 'Change password' %}</a>
                     | <a class="icn logout" href="{% url %sadmin_logout %}">{% trans 'Log out' %}</a>
                 </div>
             </div>

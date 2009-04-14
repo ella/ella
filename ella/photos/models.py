@@ -176,13 +176,12 @@ class Format(models.Model):
     max_width = models.PositiveIntegerField(_('Max width'))
     max_height = models.PositiveIntegerField(_('Max height'))
     flexible_height = models.BooleanField(_('Flexible height'), help_text=_(('Determines whether max_height is an absolute maximum, '
-                                                                                 'or the formatted photo can vary from max_height for flexible_max_height.'))
-)
+                                                                                 'or the formatted photo can vary from max_height for flexible_max_height.')))
     flexible_max_height = models.PositiveIntegerField(_('Flexible max height'), blank=True, null=True)
     stretch = models.BooleanField(_('Stretch'))
     nocrop = models.BooleanField(_('Do not crop'))
     resample_quality = models.IntegerField(_('Resample quality'), choices=PHOTOS_FORMAT_QUALITY, default=85)
-    site = models.ForeignKey(Site)
+    sites = models.ManyToManyField(Site, verbose_name=_('Sites'))
 
     def get_blank_img(self):
         """
@@ -194,7 +193,7 @@ class Format(models.Model):
             'filename' : 'img/empty/%s.png' % (self.name),
             'format' : self,
             'url' : settings.MEDIA_URL + 'img/empty/%s.png' % (self.name),
-}
+        }
         return out
 
     def ratio(self):

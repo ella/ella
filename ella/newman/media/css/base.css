@@ -124,18 +124,18 @@ div.breadcrumbs {
 
 /* CONTENT TOOLBAR */
 #content-toolbar * {
-    vertical-align: middle;
+    vertical-align: middle ! important;
 }
 #content-toolbar {
-    padding: 5px 0 10px 0;
     background: #fff;
+    padding: 6px 5px;
 }
 #content-toolbar ul {
     list-style: none;
-    margin: 5px;
+    margin: 0; padding: 0;
 }
 #content-toolbar ul li {
-    float: left;
+    display: inline;
 }
 
 
@@ -186,7 +186,7 @@ a.btn {
     -moz-border-radius: 4px;
     -webkit-border-radius: 4px;
     background-color: #ddd;
-    margin: 2px;
+    margin: 3px 2px;
     text-decoration: none;
 }
 a.btn.def {
@@ -223,10 +223,10 @@ a.icn.save { background-image: url(../ico/16/filesave.png); }
 /* FOOTER */
 
 #footer {
-    background: #ffc;
+    background:#eee url(../img/admin/nav-bg-reverse.gif) bottom left repeat-x;
     position: fixed; left: 0; bottom: 0; right: 0;
     clear: both;
-    border-top: 1px dotted darkorange;
+    border-top: 1px dotted #999;
     padding: 5px;
     text-align: right;
 }
@@ -240,15 +240,32 @@ div.submit-row, fieldset.submit-row { border: none; clear:both; margin-top: 5px;
 input, textarea { padding: 2px 0; }
 textarea, select { vertical-align: top; }
 .ajax-form .form-metadata { display: none; }
+input.vIntegerField { width: 40px; text-align: right; }
+input.vDateInput { width: 40px; }
+input.vDateTimeInput { width: 130px; }
 
 .form-error-msg { padding: 0 5px; color: red; font-weight: bold; }
 
 /* FORMS : article change form */
 .article-form-container { padding-left: 10px; }
-.article-form-container .multicol { float: left; }
-.article-form-container .multicol.colX { margin-left: 200px; }
+.article-form-container .multicol { float: left; margin-right: 200px; }
+/*.article-form-container .multicol.colX { margin-left: 200px; }*/
+.article-form-container .multicol input { width: ; }
 .article-form-container label { display: block; float: left; min-width: 100px; }
 .article-form-container .publish-container label { float: none; }
+.change-form .submit-row {
+    position: fixed;
+    bottom: 27px;
+    right: 0;
+    border-left: 2px solid red;
+    border-top: 2px solid red;
+    -moz-border-radius-topleft: 10px;
+    padding: 10px;
+    background: #ffc;
+}
+.change-form .submit-row a {
+    white-space: nowrap;
+}
 
 /* TABLES */
 table {
@@ -257,7 +274,10 @@ table {
 td, th {
     text-align: left;
     border: 1px solid #ddd;
-    padding: 5px;
+    padding: 3px;
+}
+.inline-group td, .inline-group th {
+    border: none;
 }
 
 #changelist table {
@@ -267,6 +287,10 @@ td, th {
 #changelist table tbody tr.row1 { background: #fff; }
 #changelist table tbody tr.row2 { background: #eee; }
 #changelist table tbody tr:hover { background: #ffc; }
+
+/* CHANGELIST ACTIONS */
+#changelist .actions { padding: 5px; }
+#changelist .actions label { display: inline; }
 
 /* CHANGELIST FILTERS */
 #filters {

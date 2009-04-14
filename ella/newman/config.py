@@ -18,11 +18,15 @@ JSON_CONVERSIONS = (
 
 # JsonResponse status "codes" (used instead of HTTP status codes)
 STATUS_OK = "ok"
+STATUS_GENERIC_ERROR = "error"
+STATUS_SMTP_ERROR = "smtp_error"
 STATUS_ADDED = "added" 
 STATUS_MODIFIED = "modified" 
 STATUS_FORM_ERROR = "form_error" 
 STATUS_VAR_MISSING = "variable_missing" 
 STATUS_OBJECT_NOT_FOUND = "object_not_found" 
 
+# Maximum autosave objects hold for bound object:
+AUTOSAVE_MAX_AMOUNT = getattr(settings, 'NEWMAN_AUTOSAVE_MAX_AMOUNT', 3)
 
 # TODO try to load consts from django.conf.settings

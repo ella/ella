@@ -245,7 +245,7 @@ class XModelAdmin(ModelAdmin):
         if formset:
             media = self.media + formset.media
         else:
-            media = None
+            media = self.media
 
         # Build the action form and populate it with available actions.
         action_form = self.action_form(auto_id=None)

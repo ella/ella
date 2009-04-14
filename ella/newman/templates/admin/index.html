@@ -8,7 +8,7 @@
     <div class="hpbox setup">
         <h3>Rychlá nastavení</h3>
         <div class="cnt">
-            <form class="ajax-form" action="{% url newman-save-filters %}" method="post" onsubmit="return ajax_submit(this)">
+            <form class="ajax-form" action="{% url newman-save-filters %}" method="post">
                 <fieldset>
                     <legend>Category-filter</legend>
                     {{ site_filter_form.sites }}
@@ -27,11 +27,11 @@
     <div class="hpbox errmsg">
         <h3>Nahlásit chybu!</h3>
         <div class="cnt">
-            <form class="ajax-form reset-on-submit" action="{% url newman-err-report %}" method="post" onsubmit="return ajax_submit(this)">
-                <label for="err_subj" class="required">Předmět <span class="help"></span></label>
-                <input id="err_subj" name="subj" type="text" />
-                <label for="err_text" class="required">Zpráva</label>
-                <textarea id="err_text" name="msg" rows="4" cols="53"></textarea>
+            <form class="ajax-form reset-on-submit" action="{% url newman-err-report %}" method="post">
+                <label for="id_err_subject" class="required">Předmět <span class="help"></span></label>
+                <input id="id_err_subject" name="err_subject" type="text" />
+                <label for="id_err_message" class="required">Zpráva</label>
+                <textarea id="id_err_message" name="err_message" rows="4" cols="53"></textarea>
                 <div class="submit-row">
                     <a class="icn btn eclear">Vyčistit</a>
                     <a class="icn btn ok def" title="Kliknutím odešlete zprávu o chybě...">Odeslat</a>

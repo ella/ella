@@ -10,7 +10,7 @@ except ImportError:
 from django.http import HttpResponse
 from ella.newman.permission import model_category_fk
 from ella.newman import models
-from ella.newman.config import STATUS_OK
+from ella.newman.config import STATUS_OK, STATUS_GENERIC_ERROR
 from ella.newman.config import CATEGORY_FILTER, USER_CONFIG, JSON_CONVERSIONS
 from ella.core.models import Category
 
@@ -26,27 +26,29 @@ def json_decode(str):
 
     return loads(str)
 
-def JsonResponse(message, data={}, errors={}, status=STATUS_OK):
+def JsonResponse(message, data={}, errors={}, status=STATUS_OK, http_status=200):
     """ Return JSON response in newman's standard format. """
 
     out_dict = {
         'status': status,
         'message': message,
     }
-    http_status = 200
     if data:
-        try: 
+        try:
             data = json_decode(data)
-        except: 
-            http_status = 405
-            log.error('Cannot decode json data in JsonResponse(), data=[%s]' % data)
-        
+        except:
+            log.info('Cannot decode json data in JsonResponse(), data=[%s]' % data)
+
         out_dict['data'] = data
     if errors:
         http_status = 405
         out_dict['errors'] = errors
     out = json_encode(out_dict)
     return HttpResponse(out, mimetype='text/plain;charset=utf-8', status=http_status)
+
+def JsonResponseError(message, status=STATUS_GENERIC_ERROR):
+    """ use this function if one message describes error well, so  """
+    return JsonResponse(message, status=status, http_status=405)
 
 def decode_category_filter_json(data):
     decoded = json_decode(data)

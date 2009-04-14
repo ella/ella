@@ -26,7 +26,7 @@ from ella.newman.permission import has_category_permission, get_permission, perm
 from ella.newman.forms import DraftForm
 from ella.newman.models import AdminHelpItem
 from ella.newman.xoptions import XModelAdmin
-from ella.newman.config import STATUS_OK, STATUS_FORM_ERROR, STATUS_VAR_MISSING, STATUS_OBJECT_NOT_FOUND
+from ella.newman.config import STATUS_OK, STATUS_FORM_ERROR, STATUS_VAR_MISSING, STATUS_OBJECT_NOT_FOUND, AUTOSAVE_MAX_AMOUNT
 
 DEFAULT_LIST_PER_PAGE = getattr(settings, 'NEWMAN_LIST_PER_PAGE', 25)
 
@@ -151,22 +151,28 @@ class NewmanModelAdmin(XModelAdmin):
     @require_AJAX
     def save_draft_view(self, request, extra_context=None):
         """ Autosave data (dataloss-prevention) or save as (named) template """
-        # TODO: clean too old autosaved... (keep last 3-5 autosaves)
-        # jQuery.post( 'http://localhost:8000/articles/article/1503079/draft/save/', {'data': '{"title": "Jarni style", "slug": "jarni-style" }'} )
+        def delete_too_old_drafts():
+            " remove autosaves too old to rock'n'roll "
+            to_delete = models.AdminUserDraft.objects.filter(title__exact='').order_by('-ts')
+            for draft in to_delete[AUTOSAVE_MAX_AMOUNT:]:
+                log.debug('Deleting too old user draft (autosave) %s' % draft)
+                draft.delete()
+
         self.register_newman_variables(request)
         data = request.POST.get('data', None)
         if not data:
-            return JsonResponse(_('No data passed in POST variable "data".'), status=STATUS_VAR_MISSING)
+            return utils.JsonResponseError(_('No data passed in POST variable "data".'), status=STATUS_VAR_MISSING)
         title = request.POST.get('title', '')
         id = request.POST.get('id', None)
 
         if id:
+            # modifying existing draft/preset
             try:
                 obj = models.AdminUserDraft.objects.get(pk=id)
                 obj.data = data
                 obj.title = title
                 obj.save()
-            except:
+            except models.AdminUserDraft.DoesNotExist:
                 obj = models.AdminUserDraft.objects.create(
                     ct=self.model_content_type,
                     user=request.user,
@@ -180,6 +186,7 @@ class NewmanModelAdmin(XModelAdmin):
                 data=data,
                 title=title
             )
+            delete_too_old_drafts()
         data = {'id': obj.pk, 'title': obj.__unicode__()}
         return utils.JsonResponse(_('Preset %s was saved.' % obj.__unicode__()), data)
 
@@ -522,6 +529,7 @@ class NewmanModelAdmin(XModelAdmin):
             opts = obj._meta
             return utils.JsonResponse(
                 _('The %(name)s "%(obj)s" was changed successfully.') % {'name': force_unicode(opts.verbose_name), 'obj': force_unicode(obj)},
+                {'id': obj.pk},
                 status=STATUS_OK
             )
         context.update(extra_context or {})

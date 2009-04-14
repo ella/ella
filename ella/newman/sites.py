@@ -10,13 +10,13 @@ from django.views.decorators.cache import never_cache
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.contenttypes.models import ContentType
 
-from ella.newman.forms import SiteFilterForm
+from ella.newman.forms import SiteFilterForm, ErrorReportForm
 from ella.newman.models import AdminSetting
 from ella.newman.decorators import require_AJAX
 from ella.newman.utils import set_user_config_db, set_user_config_session, get_user_config,\
-    JsonResponse
+    JsonResponse, JsonResponseError
 from ella.newman.permission import has_model_list_permission, applicable_categories
-from ella.newman.config import CATEGORY_FILTER, NEWMAN_URL_PREFIX
+from ella.newman.config import CATEGORY_FILTER, NEWMAN_URL_PREFIX, STATUS_SMTP_ERROR, STATUS_FORM_ERROR
 
 
 class NewmanSite(AdminSite):
@@ -125,7 +125,7 @@ class NewmanSite(AdminSite):
         }
         logout(request)
         return render_to_response(
-            self.norole_template or 'admin/error_norole.html', 
+            self.norole_template or 'admin/error_norole.html',
             context,
             context_instance=template.RequestContext(request)
         )
@@ -164,19 +164,21 @@ class NewmanSite(AdminSite):
         """
 
         from django.conf import settings
-        print request.POST
-        u, s, m = request.user, request.POST.get('subj'), request.POST.get('msg')
 
-        if s and m:
+        form = ErrorReportForm(request.POST)
+        if form.is_valid():
             try:
-                e = EmailMessage('Newman report: %s' % s, m,
-                                 from_email=u.email, to=settings.ERR_REPORT_RECIPIENTS)
+                e = EmailMessage('Newman report: %s' % form.cleaned_data['err_subject'], form.cleaned_data['err_message'],
+                                 from_email=request.user.email, to=settings.ERR_REPORT_RECIPIENTS)
                 e.send()
                 return JsonResponse(ugettext('Your report was sent.'))
             except:
-                return JsonResponse(ugettext('SMTP error.'), status=405)
-
-        return JsonResponse(ugettext('Subject or message is empty.'), status=406)
+                return JsonResponseError(ugettext('SMTP error.'), status=STATUS_SMTP_ERROR)
+        else:
+            error_dict = {}
+            for e in form.errors:
+                error_dict[u"id_%s" % e] = [ u"%s" % ee for ee in form.errors[e] ]
+            return JsonResponse(ugettext('Subject or message is empty.'), errors=error_dict, status=STATUS_FORM_ERROR)
 
     @require_AJAX
     def cat_filters_save(self, request, extra_content=None):
@@ -187,7 +189,7 @@ class NewmanSite(AdminSite):
             set_user_config_session(request.session, CATEGORY_FILTER, site_filter_form.cleaned_data['sites'])
             return JsonResponse(ugettext('Your settings were saved.'))
         else:
-            return JsonResponse(ugettext('Error in form.'), status=406)
+            return JsonResponseError(ugettext('Error in form.'), status=STATUS_FORM_ERROR)
 
 
 site = NewmanSite()
