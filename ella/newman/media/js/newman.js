@@ -35,6 +35,8 @@ else {
     _ = function(s) { return s; };
 }
 
+var ContentByHashLib = {};
+
 ( function($) { $(document).ready( function() {
     
     // We need to remember what URL is loaded in which element,
@@ -209,6 +211,15 @@ else {
             request_no: MAX_REQUEST
         });
     }
+    
+    function reload_content(container_id) {
+        var addr = LOADED_URLS[ container_id ] || '';
+        load_content({
+            target_id: container_id,
+            address: addr
+        });
+    }
+    ContentByHashLib.reload_content = reload_content;
     
     // We want location.hash to exactly describe what's on the page.
     // #url means that the result of $.get(url) be loaded into the #content div.
@@ -1290,6 +1301,11 @@ function changelist_batch_success(response_text) {
         $('#content').show();
     });
     $('#content').hide().before($dialog);
+}
+function batch_delete_confirm_complete() {
+    ContentByHashLib.reload_content('content');
+    $('#confirmation-wrapper').remove();
+    $('#content').show();
 }
 
 

@@ -34,8 +34,8 @@
             <a class="icn btn cancel">{% trans "cancel" %}</a>
         </div>
         <div class="form-metadata">
-            <input type="hidden" name="success" onchange="location.reload()" />
-            <input type="hidden" name="error"   onchange="location.reload()" />
+            <input type="hidden" name="success" onchange="batch_delete_confirm_complete()" />
+            <input type="hidden" name="error"   onchange="batch_delete_confirm_complete()" />
         </div>
     </form>
 {% endif %}
