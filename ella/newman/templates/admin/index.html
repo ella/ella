@@ -8,7 +8,7 @@
     <div class="hpbox setup">
         <h3>Rychlá nastavení</h3>
         <div class="cnt">
-            <form class="ajax-form" action="{% url newman-save-filters %}" method="post" onsubmit="return ajax_submit(this)">
+            <form class="ajax-form" action="{% url newman-save-filters %}" method="post">
                 <fieldset>
                     <legend>Category-filter</legend>
                     {{ site_filter_form.sites }}
@@ -27,7 +27,7 @@
     <div class="hpbox errmsg">
         <h3>Nahlásit chybu!</h3>
         <div class="cnt">
-            <form class="ajax-form reset-on-submit" action="{% url newman-err-report %}" method="post" onsubmit="return ajax_submit(this)">
+            <form class="ajax-form reset-on-submit" action="{% url newman-err-report %}" method="post">
                 <label for="id_err_subject" class="required">Předmět <span class="help"></span></label>
                 <input id="id_err_subject" name="err_subject" type="text" />
                 <label for="id_err_message" class="required">Zpráva</label>

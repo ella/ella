@@ -965,7 +965,7 @@ $( function() {
     }
     
     // Submit event
-    function ajax_submit($form) {
+    function ajax_submit($form, button_name) {
         if (!$form.jquery) $form = $($form);
         if ( ! validate($form) ) return false;
         var action =  $form.attr('action');
@@ -998,16 +998,7 @@ $( function() {
             }
             $inputs = $inputs.add($(this));
         });
-        if (false) $inputs.filter(function(){
-            if ( /(.*)_suggest$/.test($(this).attr('id')) ) {
-                var $hid = $inputs.filter('#'+RegExp.$1);
-                $hid.val( $hid.val().replace(/#.*/, '') );
-                return true;
-            }
-            else {
-                return false;
-            }
-        }).remove();
+        if (button_name) $inputs = $inputs.add('<input type="hidden" value="1" name="'+button_name+'" />');
         var data = $inputs.serialize();
         if ($form.hasClass('reset-on-submit')) $form.get(0).reset();
         var url = $form.hasClass('dyn-addr')
@@ -1045,7 +1036,7 @@ $( function() {
         if (evt.which != 1) return true;    // just interested in left button
         if ($(this).hasClass('noautosubmit')) return true;
         var $form = $(this).closest('.ajax-form');
-        ajax_submit($form);
+        ajax_submit($form, this.name);
         return false;
     });
     
@@ -1062,7 +1053,8 @@ $( function() {
         $('.ajax-form')
         .unbind('submit.ajax_overload')
         .bind('submit.ajax_overload', function(evt) {
-            ajax_submit( $(this) );
+            var name = $(this).find('.def:first').attr('name');
+            ajax_submit( $(this), name );
             return false;
         });
     }
@@ -1214,8 +1206,11 @@ $('.change-form a[name=_saveasnew]').live('click', function() {
     var $orig_form = $(this).closest('.ajax-form');
     var $form = clone_form($orig_form);
     $form.attr({ action: '../add/json/' }).addClass('dyn-addr');
+    $form.find('input:hidden').filter( function() {
+        return /INITIAL_FORMS$/.test(this.name);
+    }).val(0);
     $form.data('submit_button_used', this);
-    ajax_submit($form);
+    ajax_submit($form, '_saveasnew');
     return false;
 });
 
