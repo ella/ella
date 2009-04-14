@@ -4,8 +4,10 @@ from os.path import dirname, join
 
 import django
 
+import djangobaselibrary
+
 import example_project
-import ella
+
 
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.load_template_source',
@@ -32,11 +34,6 @@ TEMPLATE_DIRS = (
 ADMIN_ROOTS = (
     join(dirname(django.__file__), 'contrib', 'admin', 'media'),
 )
-
-#APP_TEMPLATE_DIRS = (
-#    join(dirname(ella.__file__), 'ellaadmin', 'templates'),
-#    join(dirname(django.__file__), 'contrib', 'admin', 'templates'),
-#)
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.auth',
