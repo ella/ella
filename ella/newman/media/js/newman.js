@@ -433,12 +433,12 @@ var ContentByHashLib = {};
     
     // Set up event handlers
     $('.simpleload,.simpleload-container a').live('click', function(evt) {
-        if (evt.which != 1) return true;    // just interested in left button
+        if (evt.button != 0) return true;    // just interested in left button
         simple_load($(this).attr('href'));
         return false;
     });
     $('.hashadr,.hashadr-container a').live('click', function(evt) {
-        if (evt.which != 1) return true;    // just interested in left button
+        if (evt.button != 0) return true;    // just interested in left button
         adr($(this).attr('href'));
         return false;
     });
@@ -1034,7 +1034,7 @@ $( function() {
     
     // Submit button
     $('.ajax-form a.ok').live('click', function(evt) {
-        if (evt.which != 1) return true;    // just interested in left button
+        if (evt.button != 0) return true;    // just interested in left button
         if ($(this).hasClass('noautosubmit')) return true;
         var $form = $(this).closest('.ajax-form');
         ajax_submit($form, this.name);
