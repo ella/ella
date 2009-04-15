@@ -165,7 +165,7 @@ def poll_vote(request, poll_id):
                 path='/',
                 domain=CURRENT_SITE.domain,
                 secure=None
-)
+            )
 
         return response
 
@@ -211,12 +211,12 @@ def contest_vote(request, context):
             'activity_not_yet_active' : ACTIVITY_NOT_YET_ACTIVE,
             'activity_active' : ACTIVITY_ACTIVE,
             'activity_closed' : ACTIVITY_CLOSED
-})
+        })
     return render_to_response(
         get_templates_from_placement('form.html', context['placement']),
         context,
         context_instance=RequestContext(request)
-)
+    )
 
 def get_next_url(request):
     """
@@ -257,14 +257,14 @@ def QuestionForm(question):
                 queryset=question.choices,
                 widget=MyCheckboxSelectMultiple,
                 required = not question.allow_no_choice
-)
+        )
     else:
         choice_field = forms.ModelChoiceField(
                 queryset=question.choices,
                 widget=MyRadioSelect,
                 empty_label=None,
                 required = not question.allow_no_choice
-)
+        )
 
     class _QuestionForm(forms.Form):
         """
@@ -273,6 +273,7 @@ def QuestionForm(question):
         choice = choice_field
         def choices(self):
             field = self['choice']
+            # TODO: move choice percentage to question and use it here!!
             for choice, input in  zip(field.field.queryset, field.as_widget(field.field.widget)):
                 yield (choice, input)
 
@@ -301,24 +302,24 @@ def contest_finish(request, context, qforms, contestant_form):
                 'duplicate' : True,
                 'forms' : qforms,
                 'contestant_form' : contestant_form,
-})
+            })
         return render_to_response(
             get_templates_from_placement('form.html', context['placement']),
             context,
             context_instance=RequestContext(request)
-)
+        )
 
     choices = '|'.join(
             '%d:%s' % (
                     question.id,
                     question.allow_multiple and ','.join(str(c.id) for c in sorted(f.cleaned_data['choice'], key=lambda ch: ch.id)) or f.cleaned_data['choice'].id)
                 for question, f in sorted(qforms,key=lambda q: q[0].id)
-)
+        )
     c = Contestant(
             contest=contest,
             choices=choices,
             **contestant_form.cleaned_data
-)
+        )
     if request.user.is_authenticated():
         c.user = request.user
     c.save()
@@ -332,7 +333,7 @@ def contest_result(request, bits, context):
         get_templates_from_placement('result.html', context['placement']),
         context,
         context_instance=RequestContext(request)
-)
+    )
 
 def contest_conditions(request, bits, context):
     if bits:
@@ -342,7 +343,7 @@ def contest_conditions(request, bits, context):
         get_templates_from_placement('conditions.html', context['placement']),
         context,
         context_instance=RequestContext(request)
-)
+    )
 
 class ContestWizard(Wizard):
     def __init__(self, contest):
@@ -406,13 +407,13 @@ class QuizWizard(Wizard):
                     'results' : results,
                     'result_field': RESULT_FIELD,
                     'result_action' : self.quiz.get_absolute_url() + slugify(_('results')) + '/'
-}
-)
+                }
+            )
         return render_to_response(
                 get_templates_from_placement('result.html', self.extra_context['placement']),
                 self.extra_context,
                 context_instance=RequestContext(request)
-)
+            )
 
 def result_details(request, bits, context):
     quiz = context['object']
@@ -444,7 +445,7 @@ def result_details(request, bits, context):
             get_templates_from_placement('result_detail.html', context['placement']),
             context,
             context_instance=RequestContext(request)
-)
+        )
 
 def contest(request, context):
     return contest_vote(request, context)

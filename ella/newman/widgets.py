@@ -24,6 +24,40 @@ JS_JQUERY_MOUSEWHEEL = 'jquery/jquery-mousewheel.js'
 JS_DATE_INPUT = 'js/datetime.js'
 CSS_DATE_INPUT = 'css/datetime.css'
 
+# Flash image uploader / editor
+#JS_FLASH_IMAGE_INPUT = ''
+SWF_FLASH_IMAGE_INPUT = 'swf/PhotoUploader.swf'
+
+class FlashImageWidget(widgets.AdminFileWidget):
+
+    def render(self, name, value, attrs=None):
+        swf_path = '%s%s' % (settings.NEWMAN_MEDIA_PREFIX, SWF_FLASH_IMAGE_INPUT,)
+        embed_code = u"""
+        <object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"
+        id="PhotoUploader" width="100%%" height="60px"
+        codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">
+        <param name="movie" value="%s" />
+        <param name="quality" value="high" />
+        <param name="bgcolor" value="#869ca7" />
+        <param name="allowScriptAccess" value="sameDomain" />
+        <param name="FlashVars" value="max_width=&max_height=&value=%s" />
+        <param name="allowFullScreen" value="true" />
+            <embed src="%s" quality="high" bgcolor="#869ca7"
+            width="100%%" height="60px" name="PhotoUploader" align="middle"
+            play="true"
+            loop="false"
+            quality="high"
+            allowScriptAccess="sameDomain"
+            type="application/x-shockwave-flash"
+            pluginspage="http://www.adobe.com/go/getflashplayer"
+            FlashVars="max_width=&max_height=&value=%s"
+            allowFullScreen="true">
+            </embed>
+        </object>
+        """ % (swf_path, value, swf_path, value)
+
+        return mark_safe(embed_code)
+
 
 class ForeignKeyRawIdWidget(widgets.ForeignKeyRawIdWidget):
     def label_for_value(self, value):

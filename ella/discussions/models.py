@@ -73,29 +73,16 @@ def remove_diacritical(text):
 
 class Topic(Publishable):
     # ella fields
-    title = models.CharField(_('Title'), max_length=255)
-    description = models.TextField(_('Description'))
-    slug = models.SlugField(_('Slug'), max_length=255)
-    category = models.ForeignKey(Category, verbose_name=_('Category'))
-    photo = models.ForeignKey(Photo, blank=True, null=True, verbose_name=_('Photo'))
     created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)
 
     def __unicode__(self):
         return self.title
-
-    def get_absolute_url(self):
-        place = self.main_placement
-        if place:
-            return place.get_absolute_url()
 
     def photo_thumb(self):
         """ Displays Topic photo thumbnail in admin. """
         out = self.photo.thumb()
         return mark_safe(out)
     photo_thumb.allow_tags = True
-
-    def get_description(self):
-        return self.description
 
     def get_threads(self):
         return TopicThread.objects.filter(topic=self)

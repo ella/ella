@@ -66,7 +66,7 @@ class RichTextField(fields.Field):
 
     def get_source(self):
         if not self.is_markup():
-            return 
+            return
         # find SourceText associated with instance
         from ella.newman.markup.models import SourceText
         try:
@@ -79,12 +79,12 @@ class RichTextField(fields.Field):
 
     def get_source_text(self):
         if not self.is_markup():
-            return 
+            return
         return self.get_source().content
 
     def get_rendered_text(self):
         if not self.is_markup():
-            return 
+            return
         return self.get_source().render()
 
     def clean(self, value):
@@ -110,9 +110,9 @@ class RichTextField(fields.Field):
             # in case of adding new model, instance is not set
             default_proc = TextProcessor.objects.get(name=config.NEWMAN_MARKUP_DEFAULT)
             src_text =  SourceText(
-                ct=self.ct, 
-                field=self.field_name, 
-                content=text, 
+                ct=self.ct,
+                field=self.field_name,
+                content=text,
                 processor=default_proc
             )
             try:
@@ -175,7 +175,8 @@ class AdminSuggestField(fields.Field):
 
 class RGBImageField(fields.ImageField):
     "Check that uploaded image is RGB"
-    widget = AdminFileWidget
+#    widget = AdminFileWidget
+    widget = widgets.FlashImageWidget
 
     def clean(self, data, initial=None):
         f = super(RGBImageField, self).clean(data, initial)

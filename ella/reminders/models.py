@@ -36,15 +36,15 @@ class DeliveryMethod(models.Model):
                     'reminders/method/%s/event.html' % (self.slug,),
                     'reminders/reminder/%s/event.html' % (reminder.slug,),
                     'reminders/event.html',
-),
+                ),
                 {
                     'reminder': reminder,
                     'event': event,
                     'contact': contact,
                     'date': date
-}
-)
-)
+                }
+            )
+        )
 
 class Contact(models.Model):
     user = CachedForeignKey(User, null=True, blank=True)

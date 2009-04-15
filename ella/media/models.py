@@ -51,18 +51,9 @@ class Media(Publishable):
     Build around nc.cdnclient.models.MediaField and adds fields like title, photo,...
     """
     box_class = MediaBox
-    title = models.CharField(_('Title'), max_length=255)
-    slug = models.SlugField(_('Slug'), max_length=255)
-    photo = models.ForeignKey(Photo, verbose_name=_('Preview image'), null=True, blank=True)
     file = MediaField()
 
-    # Authors and Sources
-    authors = models.ManyToManyField(Author, verbose_name=_('Authors'))
-    source = models.ForeignKey(Source, blank=True, null=True, verbose_name=_('Source'))
-    category = models.ForeignKey(Category, verbose_name=_('Category'), null=True)
-
     # content
-    description = models.TextField(_('Description'), blank=True)
     text = models.TextField(_('Content'), blank=True)
 
     # stats
