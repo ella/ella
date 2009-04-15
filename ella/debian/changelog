@@ -1,3 +1,9 @@
+centrum-ella (0.3.4.2) unstable; urgency=low
+
+  * Build from centrum-maintainance 54e205be7a81fd072ade0476e2376cef1ed29e72.
+
+ -- Jan Seifert <jan.seifert@centrumholdings.com>  Wed, 15 Apr 2009 15:53:45 +0200
+
 centrum-ella (0.3.4.1) unstable; urgency=low
 
   * Build from centrum-maintainance 7b95a7d3d1233baae23e9f1269d610dda616cae5
