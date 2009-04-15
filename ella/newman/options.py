@@ -248,6 +248,16 @@ class NewmanModelAdmin(XModelAdmin):
         self.register_newman_variables(request)
         opts = self.model._meta
         app_label = opts.app_label
+
+        # save per user filtered content type.
+        req_path = request.get_full_path()
+        ct = ContentType.objects.get_for_model(self.model)
+        if req_path.find('?') > 0:
+            url_args = req_path.split('?', 1)[1]
+            key = 'filter__%s__%s' % (ct.app_label, ct.model)
+            #utils.set_user_config(request.user, key, url_args)
+            utils.set_user_config_db(request.user, key, url_args)
+
         context = super(NewmanModelAdmin, self).get_changelist_context(request)
         if type(context) != dict:
             return context
@@ -255,15 +265,6 @@ class NewmanModelAdmin(XModelAdmin):
         if context['media']:
             raw_media = self.prepare_media(context['media'])
             context['media'] = raw_media
-
-        # save per user filtered content type.
-        req_path = request.get_full_path()
-        if req_path.find('?') > 0:
-            ct = ContentType.objects.get_for_model(self.model)
-            url_args = req_path.split('?', 1)[1]
-            key = 'filter__%s__%s' % (ct.app_label, ct.model)
-            #utils.set_user_config(request.user, key, url_args)
-            utils.set_user_config_db(request.user, key, url_args)
 
         context.update(extra_context or {})
         return render_to_response(self.change_list_template or [
