@@ -1054,7 +1054,20 @@ $( function() {
         $('.ajax-form')
         .unbind('submit.ajax_overload')
         .bind('submit.ajax_overload', function(evt) {
-            var name = $(this).find('.def:first').attr('name');
+            var name;
+            function get_def(form) { return $(form).find('.def:first').attr('name'); }
+            if (!evt.originalEvent) name = get_def(this);
+            else try {
+                // Try to figure out the submit button used.
+                var initiator = evt.originalEvent.explicitOriginalTarget;
+                if (initiator.type == 'submit')
+                    name = initiator.name;
+                else
+                    name = get_def(this);
+            } catch(e) {
+                // Event is defined but failed to figure out which button clicked
+                // -- leave the name empty.
+            }
             ajax_submit( $(this), name );
             return false;
         });
