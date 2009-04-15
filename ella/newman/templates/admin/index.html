@@ -95,5 +95,14 @@
     </div>
 
 </div>
+<!-- Last changelist filters state -->
+<script language="text/javascript">
+var changelistFilters = new Array();
+{% for fname, qstring in last_filters.items %}
+myFilters["{{ fname }}"] = "{{ qstring }}";
+{% endfor %}
+window.alert(myFilters);
+</script>
+
 {% endblock %}
 

@@ -14,7 +14,7 @@ from ella.newman.forms import SiteFilterForm, ErrorReportForm
 from ella.newman.models import AdminSetting
 from ella.newman.decorators import require_AJAX
 from ella.newman.utils import set_user_config_db, set_user_config_session, get_user_config,\
-    JsonResponse, JsonResponseError
+    JsonResponse, JsonResponseError, json_decode
 from ella.newman.permission import has_model_list_permission, applicable_categories
 from ella.newman.config import CATEGORY_FILTER, NEWMAN_URL_PREFIX, STATUS_SMTP_ERROR, STATUS_FORM_ERROR
 
@@ -134,7 +134,6 @@ class NewmanSite(AdminSite):
         """
         Displays the main Newman index page, without installed apps.
         """
-
         data = {'sites': []}
         try:
             data['sites'] = get_user_config(request.user, CATEGORY_FILTER)
@@ -143,14 +142,22 @@ class NewmanSite(AdminSite):
 
         site_filter_form = SiteFilterForm(data=data, user=request.user)
         cts = []
+        last_filters = {}
         for model, model_admin in self._registry.items():
             if has_model_list_permission(request.user, model):
-                cts.append(ContentType.objects.get_for_model(model))
+                ct = ContentType.objects.get_for_model(model)
+                cts.append(ct)
+                # Load saved filter configurations for changelists
+                key = 'filter__%s__%s' % (ct.app_label, ct.model)
+                last_filter = AdminSetting.objects.filter(var=key, user=request.user)
+                if last_filter:
+                    last_filters[key] = '?%s' % json_decode(last_filter[0].value)
 
         context = {
             'title': _('Site administration'),
             'site_filter_form': site_filter_form,
             'searchable_content_types': cts,
+            'last_filters': last_filters
         }
         context.update(extra_context or {})
         return render_to_response(self.index_template or 'admin/index.html', context,

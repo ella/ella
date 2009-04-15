@@ -292,7 +292,7 @@ class XModelAdmin(ModelAdmin):
         context = {}
         if request.method == 'POST':
             error_dict = {}
-            form = ModelForm(request.POST, request.FILES)
+            form = ModelForm(request.POST.copy(), request.FILES.copy())
             if form.is_valid():
                 form_validated = True
                 new_object = self.save_form(request, form, change=False)
@@ -308,7 +308,7 @@ class XModelAdmin(ModelAdmin):
                 prefixes[prefix] = prefix_no + 1
                 if prefixes[prefix] != 1:
                     prefix = "%s-%s" % (prefix, prefixes[prefix])
-                formset = FormSet(data=request.POST, files=request.FILES,
+                formset = FormSet(data=request.POST.copy(), files=request.FILES.copy(),
                                   instance=new_object,
                                   save_as_new=request.POST.has_key("_saveasnew"),
                                   prefix=prefix)
