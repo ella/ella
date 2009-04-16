@@ -1212,7 +1212,6 @@ function show_ajax_success(response_text) {
 
 
 // submit line (save, save as new, etc)
-
 function save_change_form_success(text_data, options) {
     if (!options || !options._button_name || !options._form) {
         var message;
@@ -1352,4 +1351,11 @@ $('.help-button').live('mouseover', function() {
     set_help_button_to_fade($input, $(this));
 }).live('click', function() {
     $(this).closest('.help-enhanced').find('.help').slideToggle();
+});
+
+$(document).bind('content_added', function() {
+    if ($('.suggest-related-lookup').length) {
+        request_media(MEDIA_URL +  'js/related_lookup.js' );
+        request_media(MEDIA_URL + 'css/related_lookup.css');
+    }
 });

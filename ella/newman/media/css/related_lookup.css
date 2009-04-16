@@ -1,0 +1,9 @@
+#lupicka-overlay {
+    display: none;
+    background-color: white;
+    border: solid 2px blue;
+    -moz-border-radius: 3px;
+    position: fixed;
+    top: 0;
+    left: 0;
+}

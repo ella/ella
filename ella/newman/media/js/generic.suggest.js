@@ -92,7 +92,7 @@
 
             // Make the popup-throwing magnifying glass not raise the default django event but rather ours which cooperates with the <ul> inputs
             var $lens = $('#lookup_'+this.id.replace('_suggest', ''));
-            $lens.removeAttr('onclick').click(show_lookup_popup);
+            $lens.removeAttr('onclick');//.click(show_lookup_popup);
         });
         
         // Make the <ul>s behave like text input fields
