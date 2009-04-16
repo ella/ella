@@ -45,7 +45,7 @@ $(function(){
 				callback(lines, line);
 			});
 			for(var m = 0; m < lines.length; m++){
-				txt += lines[m] + '\n';
+				txt += (m > 0 ? "\n" : '') + lines[m];
 			}
 			this.replaceSelection((before || '') + txt + (after || ''));
 		},
@@ -101,27 +101,20 @@ $(function(){
 					case 'h2':
 						workers.wrapSelection('== ', ' =='); break;
 					case 'ul':
-						workers.injectEachSelectedLine(function(lines, line){*/
-							lines.push((event.shiftKey ? (line.match(/^\*{2,}/) ? line.replace(/^\*/, '') : line.replace(/^\*\s/, '')) : (line.match(/\*+\s/) ? '*' : '* ') + line));
+						workers.injectEachSelectedLine(function(lines, line){
+							lines.push((e.shiftKey ? (line.match(/^\s*-/) ? line.replace(/\s/, '') : line.replace(/-/, '')) : (line.match(/\s*-/) ? ' ' : '-') + line));
 							return lines;
 						});
 						break;
 					case 'ol':
-					var i = 0;
-					workers.injectEachSelectedLine(function(lines, line){
-						if(!line.match(/^\s+$/)){
-							++i;
-							lines.push((event.shiftKey ? line.replace(/^\d+\.\s/, '') : (line.match(/\d+\.\s/) ? '' : i + '. ') + line));
-						}
-						return lines;
-					});
-	break;
+						workers.injectEachSelectedLine(function(lines, line){
+							lines.push((e.shiftKey ? (line.match(/^\s*1\./) ? line.replace(/\s/, '') : line.replace(/1\./, '')) : (line.match(/\s*1\./) ? ' ' : '1\.') + line));
+							return lines;
+						});
+						break;
 					case 'quote':
-					workers.injectEachSelectedLine(function(lines,line){
-						lines.push((event.shiftKey ? line.replace(/^\> /, '') : '> ' + line));
-						return lines;
-					});
-	break;
+						workers.wrapSelection("§§\n", "\n§§"); break;
+						break;
 					case 'box':
 						console.log('build box'); break;
 				}
