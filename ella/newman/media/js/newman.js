@@ -915,6 +915,7 @@ function clone_form($orig_form) {
 // End of drafts and templates
 
 
+AjaxFormLib = {};
 $( function() {
     //// Ajax forms
     
@@ -1016,7 +1017,7 @@ $( function() {
         });
         return false;
     }
-    window.ajax_submit = ajax_submit;
+    AjaxFormLib.ajax_submit = ajax_submit;
     
     function ajax_submit_error(xhr) {
         var res;
@@ -1031,6 +1032,7 @@ $( function() {
         }
         show_ajax_error(xhr);
     }
+    AjaxFormLib.ajax_submit_error = ajax_submit_error;
     
     // Submit button
     $('.ajax-form a.ok').live('click', function(evt) {
@@ -1068,7 +1070,7 @@ $( function() {
                 // Event is defined but failed to figure out which button clicked
                 // -- leave the name empty.
             }
-            ajax_submit( $(this), name );
+            AjaxFormLib.ajax_submit( $(this), name );
             return false;
         });
     }

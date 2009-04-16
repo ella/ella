@@ -25,10 +25,14 @@ JS_DATE_INPUT = 'js/datetime.js'
 CSS_DATE_INPUT = 'css/datetime.css'
 
 # Flash image uploader / editor
-#JS_FLASH_IMAGE_INPUT = ''
+JS_FLASH_IMAGE_INPUT = 'js/flash_image.js'
 SWF_FLASH_IMAGE_INPUT = 'swf/PhotoUploader.swf'
 
 class FlashImageWidget(widgets.AdminFileWidget):
+    class Media:
+        js = (
+            settings.NEWMAN_MEDIA_PREFIX + JS_FLASH_IMAGE_INPUT,
+        )
 
     def render(self, name, value, attrs=None):
         swf_path = '%s%s' % (settings.NEWMAN_MEDIA_PREFIX, SWF_FLASH_IMAGE_INPUT,)
