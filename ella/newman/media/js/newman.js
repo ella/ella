@@ -78,6 +78,17 @@ var ContentByHashLib = {};
         for (var k in o) rv.push(k);
         return rv;
     }
+    function _injection_target(sel) {
+        var $rv = $('#no#thing');
+        var ids = $(document).data('injection_storage');
+        if (!ids || !ids.length) return false;
+        for (var i = 0; i < ids.length; i++) {
+            var $el = $( '#' + ids[i] );
+            if ( $el.is(sel) ) $rv = $rv.add($el);
+        }
+        return $rv.length ? $rv : false;
+    }
+    ContentByHashLib._injection_target = _injection_target;
     
     function inject_content($target, data, address) {
         // whatever was loaded inside, remove it from LOADED_URLS
@@ -430,6 +441,7 @@ var ContentByHashLib = {};
                 .removeData('injection_storage');
         });
     }
+    ContentByHashLib.simple_load = simple_load;
     
     // Set up event handlers
     $('.simpleload,.simpleload-container a').live('click', function(evt) {

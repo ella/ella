@@ -1,10 +1,11 @@
 /* TODO:
  * neukazovat vybrané hodnoty v lupičce,
  */
+GenericSuggestLib = {};
 (function($) { $( function() {
     ;;; DEBUG = true;
     ;;; DBG = 1;
-    var VERSION = '2009.02.26-newman';
+    GenericSuggestLib.VERSION = '2009.04.17-newman';
     var DEL_IMG = MEDIA_URL + 'img/admin/icon_deletelink.gif';
     var MIN_LENGTH = 2;
     var SUGGEST_FIELD_SEPARATOR = '|';
@@ -283,7 +284,7 @@
         return $newli;
     }
     // Adds a value (in case of multiples) or sets the value (in case of singles)
-    function insert_value (id, repre, el) {
+    function insert_value(id, repre, el) {
         var $inputs = get_current_inputs(el);
         var multiple = is_multiple($inputs.ul);
         $inputs.ul.removeData('offset');
@@ -301,6 +302,7 @@
         hide_bubbles();
         MOUSE_ON_BUBBLE = false;
     }
+    GenericSuggestLib.insert_value = insert_value;
 
     function hide_bubbles() {
         $SUGGEST_BUBBLE.hide();
