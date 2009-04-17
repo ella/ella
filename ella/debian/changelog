@@ -1,3 +1,9 @@
+centrum-ella (0.3.4.4) unstable; urgency=low
+
+  * Build from revision fd0ed1649966606506ecd77c80dae49beedf1e40
+
+ -- Jan Seifert <jan.seifert@centrumholdings.com>  Fri, 17 Apr 2009 13:27:03 +0200
+
 centrum-ella (0.3.4.3) unstable; urgency=low
 
   * build from revision [d928e0fa67]
