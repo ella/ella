@@ -78,8 +78,8 @@ def list_content_type(request, category=None, year=None, month=None, day=None, c
         ct = False
     template_list = []
     if ct:
-        template_list.append('page/category/%s/content_type/%s.%s/listing.html' % (context["cat"].path, ct.app_label, ct.model))
-    template_list.append('page/category/%s/listing.html' % (context["cat"].path))
+        template_list.append('page/category/%s/content_type/%s.%s/listing.html' % (context["category"].path, ct.app_label, ct.model))
+    template_list.append('page/category/%s/listing.html' % (context["category"].path))
     if ct:
         template_list.append('page/content_type/%s.%s/listing.html' % (ct.app_label, ct.model))
     template_list.append('page/listing.html')
