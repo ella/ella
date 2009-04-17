@@ -6,10 +6,13 @@ from django.contrib.admin import widgets
 from django.utils.text import truncate_words
 from ella.ellaadmin.utils import admin_url
 
+# Rich text editor
+JS_MARKITUP = 'js/markitup/jquery.markitup.js'
+JS_MARKITUP_SETTINGS = 'js/markitup/sets/default/set.js'
 JS_EDITOR = 'js/editor.js'
-JS_SHOWDOWN = 'js/showdown.js'
+CSS_MARKITUP = 'js/markitup/skins/markitup/style.css'
+CSS_MARKITUP_TOOLBAR = 'js/markitup/sets/default/style.css'
 CLASS_RICHTEXTAREA = 'rich_text_area'
-CSS_RICHTEXTAREA = 'css/editor.css'
 
 # Generic suggester media files
 JS_GENERIC_SUGGEST = 'js/generic.suggest.js'
@@ -75,11 +78,15 @@ class RichTextAreaWidget(forms.Textarea):
     'Widget representing the RichTextEditor.'
     class Media:
         js = (
+            settings.NEWMAN_MEDIA_PREFIX + JS_MARKITUP,
+            settings.NEWMAN_MEDIA_PREFIX + JS_MARKITUP_SETTINGS,
             settings.NEWMAN_MEDIA_PREFIX + JS_EDITOR,
-            settings.NEWMAN_MEDIA_PREFIX + JS_SHOWDOWN,
         )
         css = {
-            'screen': (settings.ADMIN_MEDIA_PREFIX + CSS_RICHTEXTAREA,),
+            'screen': (
+				settings.NEWMAN_MEDIA_PREFIX + CSS_MARKITUP,
+				settings.NEWMAN_MEDIA_PREFIX + CSS_MARKITUP_TOOLBAR,
+			),
         }
 
     def __init__(self, height=None, attrs={}):
