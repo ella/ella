@@ -51,7 +51,7 @@ player_playlist = PlayerPlaylist()
 
 def player_playlist_for_id(request, id):
     try:
-        media = Media.object.get(pk=id)
+        media = Media.objects.get(pk=id)
     except Media.DoesNotExist:
         raise Http404
 
