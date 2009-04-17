@@ -249,15 +249,6 @@ class NewmanModelAdmin(XModelAdmin):
         opts = self.model._meta
         app_label = opts.app_label
 
-        # save per user filtered content type.
-        req_path = request.get_full_path()
-        ct = ContentType.objects.get_for_model(self.model)
-        if req_path.find('?') > 0:
-            url_args = req_path.split('?', 1)[1]
-            key = 'filter__%s__%s' % (ct.app_label, ct.model)
-            #utils.set_user_config(request.user, key, url_args)
-            utils.set_user_config_db(request.user, key, url_args)
-
         context = super(NewmanModelAdmin, self).get_changelist_context(request)
         if type(context) != dict:
             return context
@@ -266,6 +257,17 @@ class NewmanModelAdmin(XModelAdmin):
             raw_media = self.prepare_media(context['media'])
             context['media'] = raw_media
 
+        # save per user filtered content type.
+        req_path = request.get_full_path()
+        ct = ContentType.objects.get_for_model(self.model)
+        if req_path.find('?') > 0:
+            url_args = req_path.split('?', 1)[1]
+            key = 'filter__%s__%s' % (ct.app_label, ct.model)
+            #utils.set_user_config(request.user, key, url_args)
+            utils.set_user_config_db(request.user, key, url_args)
+            context['is_filtered'] = True
+
+        context['is_user_category_filtered'] = utils.is_user_category_filtered( self.queryset(request) )
         context.update(extra_context or {})
         return render_to_response(self.change_list_template or [
             'admin/%s/%s/change_list.html' % (app_label, opts.object_name.lower()),
@@ -610,7 +612,9 @@ class NewmanModelAdmin(XModelAdmin):
         # if self.model is licensed filter queryset
         if 'ella.newman.licenses' in settings.INSTALLED_APPS:
             exclude_pks = License.objects.unapplicable_for_model(self.model)
-            qs = qs.exclude(pk__in=exclude_pks)
+            qs_tmp = qs.exclude(pk__in=exclude_pks)
+            utils.copy_queryset_flags(qs_tmp, qs)
+            qs = qs_tmp
 
         if request.user.is_superuser:
             return qs
@@ -618,7 +622,9 @@ class NewmanModelAdmin(XModelAdmin):
         change_perm = self.opts.app_label + '.' + 'change_' + self.model._meta.module_name.lower()
         perms = (view_perm, change_perm,)
 #        return permission_filtered_model_qs(qs, request.user, perms)
-        return permission_filtered_model_qs(qs, request.user, perms)
+        qs_tmp = permission_filtered_model_qs(qs, request.user, perms)
+        utils.copy_queryset_flags(qs_tmp, qs)
+        return qs_tmp
 
 
     def prepare_media(self, standard_media):

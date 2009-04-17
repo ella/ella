@@ -78,6 +78,17 @@ var ContentByHashLib = {};
         for (var k in o) rv.push(k);
         return rv;
     }
+    function _injection_target(sel) {
+        var $rv = $('#no#thing');
+        var ids = $(document).data('injection_storage');
+        if (!ids || !ids.length) return false;
+        for (var i = 0; i < ids.length; i++) {
+            var $el = $( '#' + ids[i] );
+            if ( $el.is(sel) ) $rv = $rv.add($el);
+        }
+        return $rv.length ? $rv : false;
+    }
+    ContentByHashLib._injection_target = _injection_target;
     
     function inject_content($target, data, address) {
         // whatever was loaded inside, remove it from LOADED_URLS
@@ -430,6 +441,7 @@ var ContentByHashLib = {};
                 .removeData('injection_storage');
         });
     }
+    ContentByHashLib.simple_load = simple_load;
     
     // Set up event handlers
     $('.simpleload,.simpleload-container a').live('click', function(evt) {
@@ -915,6 +927,7 @@ function clone_form($orig_form) {
 // End of drafts and templates
 
 
+AjaxFormLib = {};
 $( function() {
     //// Ajax forms
     
@@ -1016,7 +1029,7 @@ $( function() {
         });
         return false;
     }
-    window.ajax_submit = ajax_submit;
+    AjaxFormLib.ajax_submit = ajax_submit;
     
     function ajax_submit_error(xhr) {
         var res;
@@ -1031,6 +1044,7 @@ $( function() {
         }
         show_ajax_error(xhr);
     }
+    AjaxFormLib.ajax_submit_error = ajax_submit_error;
     
     // Submit button
     $('.ajax-form a.ok').live('click', function(evt) {
@@ -1068,7 +1082,7 @@ $( function() {
                 // Event is defined but failed to figure out which button clicked
                 // -- leave the name empty.
             }
-            ajax_submit( $(this), name );
+            AjaxFormLib.ajax_submit( $(this), name );
             return false;
         });
     }
@@ -1210,7 +1224,6 @@ function show_ajax_success(response_text) {
 
 
 // submit line (save, save as new, etc)
-
 function save_change_form_success(text_data, options) {
     if (!options || !options._button_name || !options._form) {
         var message;
@@ -1350,4 +1363,11 @@ $('.help-button').live('mouseover', function() {
     set_help_button_to_fade($input, $(this));
 }).live('click', function() {
     $(this).closest('.help-enhanced').find('.help').slideToggle();
+});
+
+$(document).bind('content_added', function() {
+    if ($('.suggest-related-lookup').length) {
+        request_media(MEDIA_URL +  'js/related_lookup.js' );
+        request_media(MEDIA_URL + 'css/related_lookup.css');
+    }
 });

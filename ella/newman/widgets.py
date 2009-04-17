@@ -6,10 +6,13 @@ from django.contrib.admin import widgets
 from django.utils.text import truncate_words
 from ella.ellaadmin.utils import admin_url
 
+# Rich text editor
+JS_MARKITUP = 'js/markitup/jquery.markitup.js'
+JS_MARKITUP_SETTINGS = 'js/markitup/sets/default/set.js'
 JS_EDITOR = 'js/editor.js'
-JS_SHOWDOWN = 'js/showdown.js'
+CSS_MARKITUP = 'js/markitup/skins/markitup/style.css'
+CSS_MARKITUP_TOOLBAR = 'js/markitup/sets/default/style.css'
 CLASS_RICHTEXTAREA = 'rich_text_area'
-CSS_RICHTEXTAREA = 'css/editor.css'
 
 # Generic suggester media files
 JS_GENERIC_SUGGEST = 'js/generic.suggest.js'
@@ -25,10 +28,14 @@ JS_DATE_INPUT = 'js/datetime.js'
 CSS_DATE_INPUT = 'css/datetime.css'
 
 # Flash image uploader / editor
-#JS_FLASH_IMAGE_INPUT = ''
+JS_FLASH_IMAGE_INPUT = 'js/flash_image.js'
 SWF_FLASH_IMAGE_INPUT = 'swf/PhotoUploader.swf'
 
 class FlashImageWidget(widgets.AdminFileWidget):
+    class Media:
+        js = (
+            settings.NEWMAN_MEDIA_PREFIX + JS_FLASH_IMAGE_INPUT,
+        )
 
     def render(self, name, value, attrs=None):
         swf_path = '%s%s' % (settings.NEWMAN_MEDIA_PREFIX, SWF_FLASH_IMAGE_INPUT,)
@@ -71,11 +78,15 @@ class RichTextAreaWidget(forms.Textarea):
     'Widget representing the RichTextEditor.'
     class Media:
         js = (
+            settings.NEWMAN_MEDIA_PREFIX + JS_MARKITUP,
+            settings.NEWMAN_MEDIA_PREFIX + JS_MARKITUP_SETTINGS,
             settings.NEWMAN_MEDIA_PREFIX + JS_EDITOR,
-            settings.NEWMAN_MEDIA_PREFIX + JS_SHOWDOWN,
         )
         css = {
-            'screen': (settings.ADMIN_MEDIA_PREFIX + CSS_RICHTEXTAREA,),
+            'screen': (
+				settings.NEWMAN_MEDIA_PREFIX + CSS_MARKITUP,
+				settings.NEWMAN_MEDIA_PREFIX + CSS_MARKITUP_TOOLBAR,
+			),
         }
 
     def __init__(self, height=None, attrs={}):

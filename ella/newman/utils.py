@@ -109,6 +109,22 @@ def get_user_config(user, key):
         return callback(db_data[0].value)
     return cfg[key]
 
+def flag_queryset(queryset, flag, value):
+    if not hasattr(queryset, '_filter_flags'):
+        setattr(queryset, '_filter_flags', dict())
+    queryset._filter_flags[flag] = value
+
+def get_queryset_flag(queryset, flag):
+    if not hasattr(queryset, '_filter_flags'):
+        return False
+    try:
+        return queryset._filter_flags[flag]
+    except KeyError:
+        return False
+
+def copy_queryset_flags(qs_dest, qs_src):
+    setattr(qs_dest, '_filter_flags', getattr(qs_src, '_filter_flags', {}))
+
 def user_category_filter(queryset, user):
     """
     Returns Queryset containing only user's prefered content (filtering based on categories).
@@ -128,9 +144,14 @@ def user_category_filter(queryset, user):
         )
         user_categories = map(lambda c: c.category_id, helper)
         lookup = '%s__in' % category_fk.name
-        return qs.filter(**{lookup: user_categories})
+        out = qs.filter(**{lookup: user_categories})
     else:
         cats = Category.objects.filter(pk__in=root_category_ids)
         user_sites = map(lambda c: c.site.pk, cats)
         lookup = '%s__site__in' % category_fk.name
-        return qs.filter(**{lookup: user_sites})
+        out = qs.filter(**{lookup: user_sites})
+    flag_queryset(out, 'user_category_filtered', True)
+    return out
+
+def is_user_category_filtered(queryset):
+    return get_queryset_flag(queryset, 'user_category_filtered')

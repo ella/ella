@@ -17,6 +17,12 @@
 
 {% block content_services %}
     <div id="filters"></div>
+    {% if is_filtered %}
+    <span style="color: red; font-wight: bold;">Achtung! Filtered.</span>
+    {% endif %}
+    {% if is_user_category_filtered %}
+    <span style="color: red; font-wight: bold;">Achtung! Benutzer Filter eingesetzt!</span>
+    {% endif %}
 {% endblock %}
 
 {% if cl.formset.errors %}
