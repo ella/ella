@@ -11,6 +11,7 @@ POLL
 >>> from django.core.urlresolvers import reverse
 >>> from datetime import datetime, timedelta
 
+
 Sample polls loading with datetimes update
 ------------------------------------------
 >>> p1 = Poll.objects.get(pk=1)
@@ -31,6 +32,7 @@ True
 >>> p2.is_active()
 True
 
+
 Poll as box on sample category page
 -----------------------------------
 >>> from ella.core.models import Category
@@ -41,6 +43,7 @@ Poll as box on sample category page
 >>> response = cl1.get(cat.get_absolute_url())
 >>> response.status_code
 200
+
 
 Votes
 =====
@@ -53,6 +56,7 @@ Votes
 >>> response = cl1.get(vote_url, {'choice':'10'})
 >>> response.status_code
 405
+
 
 -----------------------------------------------
 Success vote of unregistered user on first poll
@@ -268,8 +272,9 @@ Needs placement...
 >>> target_ct = ContentType.objects.get(app_label="polls", model="contest")
 >>> from ella.core.models import Placement
 >>> publish_from = datetime.now() - timedelta(1)
->>> p = Placement(category=c.category, publish_from=publish_from, target_ct=target_ct, target_id=c.pk, slug='')
+>>> p = Placement(category=c.category, publishable=c, publish_from=publish_from, slug='')
 >>> p.save()
+
 
 CONTEST LIFE CYCLE
 ==================
@@ -329,7 +334,7 @@ Contest is now inactive
 >>> response = cl.get(c.get_absolute_url())
 >>> response.status_code
 200
->>> response.context[1]['object'].is_active()
+>>> response.context['object'].is_active()
 False
 
 Contest activation
