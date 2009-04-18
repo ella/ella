@@ -9,7 +9,7 @@ def fallback_serve(request, path, document_roots=()):
     """
     for d in document_roots:
         try:
-            return serve(request, path, d)
+            return serve(request, path, document_root=d, show_indexes=True)
         except Http404:
             continue
     raise Http404('Document "%s" not found in any base directory (%s).' % (path, document_roots))
