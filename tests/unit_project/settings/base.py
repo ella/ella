@@ -20,6 +20,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'ella.catlocks.middleware.CategoryLockMiddleware',
 )
 
 ROOT_URLCONF = 'ella.core.urls'
@@ -43,6 +44,7 @@ INSTALLED_APPS = (
     'ella.positions',
     'ella.newman',
     'ella.galleries',
+    'ella.catlocks',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
