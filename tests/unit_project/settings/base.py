@@ -23,7 +23,7 @@ MIDDLEWARE_CLASSES = (
     'ella.catlocks.middleware.CategoryLockMiddleware',
 )
 
-ROOT_URLCONF = 'ella.core.urls'
+ROOT_URLCONF = 'unit_project.urls'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
@@ -38,6 +38,8 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 )
 
 INSTALLED_APPS = (
+    'unit_project.sampleapp',
+
     'ella.core',
     'ella.articles',
     'ella.photos',
@@ -45,6 +47,8 @@ INSTALLED_APPS = (
     'ella.newman',
     'ella.galleries',
     'ella.catlocks',
+    'ella.polls',
+
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',

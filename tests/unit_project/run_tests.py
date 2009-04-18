@@ -18,6 +18,8 @@ DJANGO_SETTINGS_MODULE = 'unit_project.settings'
 PYTHONPATH = [
     join( dirname(__file__), pardir, pardir ),
     join( dirname(__file__), pardir ),
+    '.',
+    '..',
 ]
 
 
@@ -30,6 +32,8 @@ for p in PYTHONPATH:
 os.environ['DJANGO_SETTINGS_MODULE'] = DJANGO_SETTINGS_MODULE
 
 # TODO: ugly hack to inject django plugin to nose.run
+sys.argv.insert(1, '--doctest-tests')
+sys.argv.insert(1, '--with-doctest')
 sys.argv.insert(1, '--with-django')
 
 
