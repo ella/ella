@@ -266,18 +266,6 @@ def _parse_box(nodelist, bits):
 
         return BoxNode(bits[1], nodelist, model=model, lookup=(smart_str(bits[5]), bits[6]))
 
-@register.inclusion_tag('inclusion_tags/box_media.html', takes_context=True)
-def box_media(context):
-    """
-    Inclusion tag rendering inclusion_tags/box_media.html template with media dictionary in it's context.
-    The dictionary contains js and css media files requested by boxes in the page
-
-    Usage::
-
-        {% box_media %}
-    """
-    return {'media' : context.dicts[-1].get(MEDIA_KEY, None)}
-
 def get_render_key(func, object, content_path):
     if hasattr(object, '_meta'):
         return 'ella.core.templatetags.core.render:%s:%s:%d:%s' % (
@@ -285,12 +273,12 @@ def get_render_key(func, object, content_path):
                 object._meta.object_name,
                 object.pk,
                 content_path
-)
+            )
     else:
         return 'ella.core.templatetags.core.render:%s:%s' % (
                 md5(smart_str(object)).hexdigest(),
                 content_path
-)
+            )
 
 def register_test(key, object, content_path):
     CACHE_DELETER.register_pk(object, key)
