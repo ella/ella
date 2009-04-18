@@ -36,8 +36,6 @@ POLL_USER_JUST_VOTED = 1
 POLL_USER_ALLREADY_VOTED = 2
 POLL_USER_NO_CHOICE = 3
 
-CURRENT_SITE = None
-
 
 def check_vote(request, poll):
     """
@@ -138,10 +136,6 @@ def poll_vote(request, poll_id):
             else:
                 choice.add_vote()
 
-        global CURRENT_SITE
-        if not CURRENT_SITE:
-            CURRENT_SITE = Site.objects.get_current()
-
         # update anti-spam - cook, sess
         sess_jv = request.session.get(POLLS_JUST_VOTED_COOKIE_NAME, [])
         sess_jv.append(poll.id)
@@ -163,7 +157,7 @@ def poll_vote(request, poll_id):
                 max_age=POLLS_MAX_COOKIE_AGE,
                 expires=expires,
                 path='/',
-                domain=CURRENT_SITE.domain,
+                domain=Site.objects.get_current().domain,
                 secure=None
             )
 

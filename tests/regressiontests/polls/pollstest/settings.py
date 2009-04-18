@@ -12,6 +12,7 @@ MANAGERS = ADMINS
 
 DATABASE_ENGINE = 'sqlite3'    # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
 DATABASE_NAME = ':memory:'     # Or path to database file if using sqlite3.
+DATABASE_NAME = 'c:\\grrrr.smazat'     # Or path to database file if using sqlite3.
 #TEST_DATABASE_NAME = DATABASE_NAME
 DATABASE_USER = ''             # Not used with sqlite3.
 DATABASE_PASSWORD = ''         # Not used with sqlite3.
@@ -64,7 +65,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.doc.XViewMiddleware',
-    'ella.core.middleware.ThreadLocalsMiddleware',
+    #'ella.core.middleware.ThreadLocalsMiddleware',
 )
 
 ROOT_URLCONF = 'pollstest.urls'
@@ -84,6 +85,7 @@ INSTALLED_APPS = (
     'django.contrib.redirects',
     'django.contrib.admin',
     'ella.core',
+    'ella.positions',
     'ella.polls',
     'ella.photos',
     'ella.tagging',

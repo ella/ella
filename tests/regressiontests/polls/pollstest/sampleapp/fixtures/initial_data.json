@@ -56,14 +56,21 @@
     "pk": 1,
     "model": "polls.contest",
     "fields": {
-      "category": 2,
-      "title": "Some contest",
       "text": "This is some contest",
       "active_till": "2008-03-19 21:43:24",
       "text_results": "This is some contest results",
       "text_announcement": "This is some contest announcement",
+      "active_from": "2008-03-18 21:43:23"
+    }
+  },
+  {
+    "pk": 1,
+    "model": "core.publishable",
+    "fields": {
+      "category": 2,
+      "content_type": 19,
+      "title": "Some contest",
       "photo": 1,
-      "active_from": "2008-03-18 21:43:23",
       "slug": "some-contest"
     }
   },
