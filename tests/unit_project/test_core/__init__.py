@@ -4,8 +4,7 @@ from datetime import datetime
 from django.conf import settings
 
 from ella.core.models import Placement, Category
-# choose Article as an example publishable, we cannot use Publishable directly
-# because it's abstract
+# choose Article as an example publishable
 from ella.articles.models import Article
 
 def create_basic_categories(case):

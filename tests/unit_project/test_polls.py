@@ -1,9 +1,73 @@
+TEMPLATES = {
+    'box/content_type/polls.poll/poll.html' : '''{% ifequal state state_just_voted %}Thanks for youre vote{% endifequal %}
+{% ifequal state state_no_choice %}Choose at least one choice{% endifequal %}
+<h2>{{ object.question.question }}</h2>
+<form action="{% url polls_vote object.id %}" method="post">
+<ul>
+{% for choice, input in object.question.form.choices %}
+    <li>
+    {% ifequal object.current_activity_state activity_active %}
+        {% ifnotequal state state_not_yet_voted %}
+            {% ifequal state state_no_choice %}
+                <p>{{ input }}</p>
+            {% else %}
+                <p>{{ choice }}</p>
+            {% endifequal %}
+        {% else %}
+            <p>{{ input }}</p>
+        {% endifnotequal %}
+    {% else %}
+        <p>{ choice }}</p>
+    {% endifequal %}
+    {{ choice.get_percentage }}
+    {% ifnotequal state state_not_yet_voted %}
+        <p>{{ choice.votes|default:"0" }}</p>
+    {% endifnotequal %}
+    </li>
+{% endfor %}
+</ul>
+{% ifequal object.current_activity_state activity_active %}
+    {% ifequal state state_not_yet_voted %}
+        <input type="submit" />
+    {% endifequal %}
+    {% ifequal state state_no_choice %}
+        <input type="submit" />
+    {% endifequal %}
+{% endifequal %}
+</form>
+''',
+    'page/category.html': '''{% box poll for polls.poll with id 1 %}{% endbox %}''',
+    'page/content_type/polls.contest/form.html': '''{% ifequal object.current_activity_state activity_active %}
+    {% if not duplicate %}
+        <form action="" method="post">
+        {% for question, form in forms %}
+            {{ question }}
+            {% if form.choice.errors %}
+                {{ form.choice.errors|join:"<br />" }}
+            {% endif %}
+            {% for choice, input in form.choices %}
+                {{ input }}
+            {% endfor %}
+        {% endfor %}
+        {{ contestant_form }}
+        <input type="submit" />
+        </form>
+    {% endif %}
+{% endifequal %}
+'''
+}
+
 poll_test = """
 ====
 POLL
 ====
 
 # TODO - how to test box context???
+
+>>> from django.core.management import call_command
+>>> call_command('loaddata', 'poll_test_data', verbosity=0)
+>>> from unit_project import template_loader
+>>> template_loader.templates = TEMPLATES
 
 >>> from ella.polls.models import Poll, Question, Choice, Vote
 >>> from ella.polls.views import POLLS_COOKIE_NAME, POLLS_JUST_VOTED_COOKIE_NAME, POLLS_NO_CHOICE_COOKIE_NAME
@@ -107,7 +171,7 @@ Redirection after success vote
 >>> response.status_code
 200
 >>> cl1.session.items()
-[]
+[('polls_just_voted_voted', [1])]
 
 Reload
 ------
@@ -115,7 +179,7 @@ Reload
 >>> response.status_code
 200
 >>> cl1.session.items()
-[]
+[('polls_just_voted_voted', [1])]
 >>> cl1.cookies.get(POLLS_COOKIE_NAME).value
 ',1'
 
@@ -254,12 +318,19 @@ u'9.10.11.12'
 >>> v.user
 <User: admin>
 
+>>> call_command('loaddata', 'flush')
+>>> template_loader.templates = {}
 """
 
 contest_test = r"""
 =======
 CONTEST
 =======
+
+>>> from django.core.management import call_command
+>>> call_command('loaddata', 'poll_test_data', verbosity=0)
+>>> from unit_project import template_loader
+>>> template_loader.templates = TEMPLATES
 
 >>> from ella.polls.models import Contest, Question, Choice, Contestant
 >>> from ella.polls.models import ACTIVITY_NOT_YET_ACTIVE, ACTIVITY_ACTIVE, ACTIVITY_CLOSED
@@ -435,6 +506,8 @@ And who is the winner?
 >>> c.get_correct_answers()
 [<Contestant: Buarque Chico>, <Contestant: Reinhardt Django>]
 
+>>> call_command('loaddata', 'flush')
+>>> template_loader.templates = {}
 """
 
 __test__ = {

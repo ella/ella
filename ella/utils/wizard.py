@@ -33,7 +33,7 @@ try:
     import cPickle as pickle
 except ImportError:
     import pickle
-import md5
+from hashlib import md5
 
 from django.conf import settings
 from django.http import Http404
