@@ -1,5 +1,4 @@
 import logging
-from markdown2 import Markdown
 from hashlib import md5
 
 from django.conf import settings
@@ -309,7 +308,7 @@ def _render(object, content_path):
             # TODO: log
             return ''
 
-    t = render_str(content)
+    t = template.Template(content)
     return t.render(template.Context({'object' : object, 'MEDIA_URL' : settings.MEDIA_URL}))
 
 @register.filter
@@ -355,13 +354,6 @@ def ipblur(text): # brutalizer ;-)
 def emailblur(email):
     "Obfuscates e-mail addresses - only @ and dot"
     return mark_safe(email.replace('@', '&#64;').replace('.', '&#46;'))
-
-def render_str(content):
-    "Render string with markdown and/or django template tags and return template."
-
-    md = Markdown(extras=["code-friendly"])
-    result = md.convert(content)
-    return template.Template(result)
 
 @register.filter
 def prefix(string_list, prefix):
