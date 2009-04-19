@@ -56,6 +56,7 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
                 'field_name': db_field.name,
                 'instance': custom_params.get('instance', None),
                 'model': custom_params.get('model'),
+                'widget': widgets.NewmanRichTextAreaWidget
             })
             rich_text_field = RichTextField(**kwargs)
             if css_class:

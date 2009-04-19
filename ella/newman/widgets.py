@@ -5,6 +5,18 @@ from django.db.models.fields.related import ForeignKey
 from django.contrib.admin import widgets
 from django.utils.text import truncate_words
 from ella.ellaadmin.utils import admin_url
+from djangomarkup.widgets import RichTextAreaWidget
+
+MARKITUP_SET = getattr(settings, 'DEFAULT_MARKUP', 'default')
+MEDIA_PREFIX = getattr(settings, 'NEWMAN_MEDIA_PREFIX', settings.ADMIN_MEDIA_PREFIX)
+
+# Rich text editor
+JS_MARKITUP = 'js/markitup/jquery.markitup.js'
+JS_MARKITUP_SET = 'js/markitup/sets/%s/set.js' % MARKITUP_SET
+JS_EDITOR = 'js/editor.js'
+CSS_MARKITUP = 'js/markitup/skins/markitup/style.css'
+CSS_MARKITUP_SET = 'js/markitup/sets/%s/style.css' % MARKITUP_SET
+CLASS_RICHTEXTAREA = 'rich_text_area'
 
 # Generic suggester media files
 JS_GENERIC_SUGGEST = 'js/generic.suggest.js'
@@ -22,6 +34,28 @@ CSS_DATE_INPUT = 'css/datetime.css'
 # Flash image uploader / editor
 JS_FLASH_IMAGE_INPUT = 'js/flash_image.js'
 SWF_FLASH_IMAGE_INPUT = 'swf/PhotoUploader.swf'
+
+class NewmanRichTextAreaWidget(RichTextAreaWidget):
+    """
+    Newman's implementation of markup, based on markitup editor.
+    """
+    class Media:
+        js = (
+            MEDIA_PREFIX + JS_MARKITUP,
+            MEDIA_PREFIX + JS_MARKITUP_SET,
+            MEDIA_PREFIX + JS_EDITOR,
+        )
+        css = {
+            'screen': (
+                MEDIA_PREFIX + CSS_MARKITUP,
+                MEDIA_PREFIX + CSS_MARKITUP_SET,
+            ),
+        }
+
+    def __init__(self, attrs={}):
+        css_class = CLASS_RICHTEXTAREA
+        super(RichTextAreaWidget, self).__init__(attrs={'class': css_class})
+
 
 class FlashImageWidget(widgets.AdminFileWidget):
     class Media:
