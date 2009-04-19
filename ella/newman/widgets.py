@@ -6,14 +6,6 @@ from django.contrib.admin import widgets
 from django.utils.text import truncate_words
 from ella.ellaadmin.utils import admin_url
 
-# Rich text editor
-JS_MARKITUP = 'js/markitup/jquery.markitup.js'
-JS_MARKITUP_SETTINGS = 'js/markitup/sets/default/set.js'
-JS_EDITOR = 'js/editor.js'
-CSS_MARKITUP = 'js/markitup/skins/markitup/style.css'
-CSS_MARKITUP_TOOLBAR = 'js/markitup/sets/default/style.css'
-CLASS_RICHTEXTAREA = 'rich_text_area'
-
 # Generic suggester media files
 JS_GENERIC_SUGGEST = 'js/generic.suggest.js'
 CSS_GENERIC_SUGGEST = 'css/generic.suggest.css'
@@ -73,35 +65,6 @@ class ForeignKeyRawIdWidget(widgets.ForeignKeyRawIdWidget):
         adm = admin_url(obj)
         return '&nbsp;<a href="%s">%s</a>' % (adm, label)
 
-
-class RichTextAreaWidget(forms.Textarea):
-    'Widget representing the RichTextEditor.'
-    class Media:
-        js = (
-            settings.NEWMAN_MEDIA_PREFIX + JS_MARKITUP,
-            settings.NEWMAN_MEDIA_PREFIX + JS_MARKITUP_SETTINGS,
-            settings.NEWMAN_MEDIA_PREFIX + JS_EDITOR,
-        )
-        css = {
-            'screen': (
-				settings.NEWMAN_MEDIA_PREFIX + CSS_MARKITUP,
-				settings.NEWMAN_MEDIA_PREFIX + CSS_MARKITUP_TOOLBAR,
-			),
-        }
-
-    def __init__(self, height=None, attrs={}):
-        css_class = CLASS_RICHTEXTAREA
-        if height:
-            css_class += ' %s' % height
-        super(RichTextAreaWidget, self).__init__(attrs={'class': css_class})
-
-    def render(self, name, value, attrs=None):
-        final_attrs = self.build_attrs(attrs, name=name)
-        if value and self._field.is_markup():
-            src_text = self._field.get_source_text()
-        else:
-            src_text = value
-        return super(RichTextAreaWidget, self).render(name, src_text, attrs)
 
 class AdminSuggestWidget(forms.TextInput):
     class Media:

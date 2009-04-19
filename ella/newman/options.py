@@ -28,6 +28,8 @@ from ella.newman.models import AdminHelpItem
 from ella.newman.xoptions import XModelAdmin
 from ella.newman.config import STATUS_OK, STATUS_FORM_ERROR, STATUS_VAR_MISSING, STATUS_OBJECT_NOT_FOUND, AUTOSAVE_MAX_AMOUNT
 
+from djangomarkup.fields import RichTextField
+
 DEFAULT_LIST_PER_PAGE = getattr(settings, 'NEWMAN_LIST_PER_PAGE', 25)
 
 log = logging.getLogger('ella.newman')
@@ -55,7 +57,7 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
                 'instance': custom_params.get('instance', None),
                 'model': custom_params.get('model'),
             })
-            rich_text_field = fields.RichTextField(**kwargs)
+            rich_text_field = RichTextField(**kwargs)
             if css_class:
                 rich_text_field.widget.attrs['class'] += ' %s' % css_class
             return rich_text_field
