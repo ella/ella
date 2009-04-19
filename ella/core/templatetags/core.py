@@ -316,6 +316,30 @@ def _render(object, content_path):
 def render(object, content_path):
     return mark_safe(_render(object, content_path))
 
+class RenderNode(template.Node):
+    def __init__(self, var):
+        self.var = template.Variable(var)
+
+    def render(self, context):
+        try:
+            text = self.var.resolve(context)
+        except template.VariableDoesNotExist:
+            return ''
+
+        return template.Template(text).render(context)
+
+@register.tag('render')
+def do_render(parser, token):
+    """
+    {% render some_var %}
+    """
+    bits = token.split_contents()
+
+    if len(bits) != 2:
+        raise template.TemplateSyntaxError()
+
+    return RenderNode(bits[1])
+
 @register.filter
 @stringfilter
 def ipblur(text): # brutalizer ;-)
