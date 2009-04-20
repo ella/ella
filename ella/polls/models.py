@@ -173,7 +173,7 @@ class Contest(BasePoll, Publishable):
         return (Contestant.objects
             .filter(contest=self)
             .filter(choices=self.right_choices)
-            .extra(select={'count_guess_difference' : 'ABS(`count_guess` - %d)' % count})
+            .extra(select={'count_guess_difference': 'ABS(%s - %d)' % (connection.ops.quote_name('count_guess'), count)})
             .order_by('count_guess_difference'))
 
     def get_description(self):

@@ -259,8 +259,6 @@ def _parse_box(nodelist, bits):
     else:
         model = models.get_model(*bits[3].split('.'))
         if model is None:
-            if settings.DEBUG:
-                raise template.TemplateSyntaxError, "Model %r does not exist" % bits[3]
             return EmptyNode()
 
         return BoxNode(bits[1], nodelist, model=model, lookup=(smart_str(bits[5]), bits[6]))

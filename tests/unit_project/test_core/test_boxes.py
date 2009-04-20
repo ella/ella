@@ -5,7 +5,7 @@ from django.contrib.sites.models import Site
 from django.template import TemplateSyntaxError
 
 from ella.core.models import Category, Publishable
-from ella.core.templatetags.core import _parse_box, BoxNode
+from ella.core.templatetags.core import _parse_box, BoxNode, EmptyNode
 from ella.core.box import Box
 from ella.articles.models import Article
 
@@ -41,8 +41,9 @@ class TestBoxTagParser(UnitTestCase):
     def test_parse_raises_on_incorrect_arguments(self):
         self.assert_raises(TemplateSyntaxError, _parse_box, [], ['box', 'box_type', 'not a for', 'core.category', 'with', 'pk', '1'])
 
-    def test_parse_raises_on_incorrect_model(self):
-        self.assert_raises(TemplateSyntaxError, _parse_box, [], ['box', 'box_type', 'for', 'not_app.not_model', 'with', 'pk', '1'])
+    def test_parse_return_empty_node_on_incorrect_model(self):
+        node = _parse_box([], ['box', 'box_type', 'for', 'not_app.not_model', 'with', 'pk', '1'])
+        self.assert_true(isinstance(node, EmptyNode))
 
 class ArticleBox(Box):
     pass
