@@ -131,6 +131,17 @@ class Poll(BasePoll):
     def __unicode__(self):
         return self.title
 
+    def vote(self, choice, user=None, ip_address=None):
+        vote = Vote(poll=self, user=user, ip_address=ip_address)
+        vote.save()
+        # increment votes at Choice object
+        if vote.pk and choice != None:
+            if type(choice) == list:
+                for c in choice:
+                    c.add_vote()
+            else:
+                choice.add_vote()
+
     class Meta:
         verbose_name = _('Poll')
         verbose_name_plural = _('Polls')

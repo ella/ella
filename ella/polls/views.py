@@ -108,17 +108,15 @@ def poll_vote(request, poll_id):
     form = QuestionForm(poll.question)(request.POST)
     if form.is_valid():
 
-        # poll must be active
+        # activity check
         if not poll.is_active():
             return HttpResponseRedirect(url)
 
-        # choice data from form
-        choice = form.cleaned_data['choice']
-
+        # vote check
         if check_vote(request, poll) != POLL_USER_NOT_YET_VOTED:
             return HttpResponseRedirect(url)
 
-        # update anti-spam - vote saving
+        # vote save
         kwa = {}
         if request.user.is_authenticated():
             kwa['user'] = request.user
@@ -126,15 +124,7 @@ def poll_vote(request, poll_id):
             kwa['ip_address'] = request.META['HTTP_X_FORWARDED_FOR']
         else:
             kwa['ip_address'] = request.META['REMOTE_ADDR']
-        vote = Vote(poll=poll, **kwa)
-        vote.save()
-        # increment votes at choice object
-        if vote.id and choice != None:
-            if type(choice) == list:
-                for c in choice:
-                    c.add_vote()
-            else:
-                choice.add_vote()
+        poll.vote(form.cleaned_data['choice'], **kwa)
 
         # update anti-spam - cook, sess
         sess_jv = request.session.get(POLLS_JUST_VOTED_COOKIE_NAME, [])
