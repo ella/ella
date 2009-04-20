@@ -57,11 +57,11 @@ TEMPLATES = {
 '''
 }
 
+
 poll_test = """
 ====
 POLL
 ====
-
 # TODO - how to test box context???
 
 >>> from django.core.management import call_command
@@ -510,10 +510,13 @@ And who is the winner?
 >>> template_loader.templates = {}
 """
 
-__test__ = {
-    'poll_test': poll_test,
-    'contest_test': contest_test,
-}
+from django.conf import settings
+
+if 'mysql' not in settings.DATABASE_ENGINE:
+    __test__ = {
+        'poll_test': poll_test,
+        'contest_test': contest_test,
+    }
 
 if __name__ == '__main__':
     import doctest
