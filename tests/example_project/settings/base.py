@@ -73,6 +73,7 @@ INSTALLED_APPS = (
     'ella.newman',
     'ella.newman.licenses',
     'django.contrib.admin',
+    'djangomarkup',
 )
 
 VERSION = 1

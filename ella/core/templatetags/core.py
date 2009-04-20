@@ -1,5 +1,4 @@
 import logging
-from markdown2 import Markdown
 from hashlib import md5
 
 from django.conf import settings
@@ -266,18 +265,6 @@ def _parse_box(nodelist, bits):
 
         return BoxNode(bits[1], nodelist, model=model, lookup=(smart_str(bits[5]), bits[6]))
 
-@register.inclusion_tag('inclusion_tags/box_media.html', takes_context=True)
-def box_media(context):
-    """
-    Inclusion tag rendering inclusion_tags/box_media.html template with media dictionary in it's context.
-    The dictionary contains js and css media files requested by boxes in the page
-
-    Usage::
-
-        {% box_media %}
-    """
-    return {'media' : context.dicts[-1].get(MEDIA_KEY, None)}
-
 def get_render_key(func, object, content_path):
     if hasattr(object, '_meta'):
         return 'ella.core.templatetags.core.render:%s:%s:%d:%s' % (
@@ -285,12 +272,12 @@ def get_render_key(func, object, content_path):
                 object._meta.object_name,
                 object.pk,
                 content_path
-)
+            )
     else:
         return 'ella.core.templatetags.core.render:%s:%s' % (
                 md5(smart_str(object)).hexdigest(),
                 content_path
-)
+            )
 
 def register_test(key, object, content_path):
     CACHE_DELETER.register_pk(object, key)
@@ -321,12 +308,36 @@ def _render(object, content_path):
             # TODO: log
             return ''
 
-    t = render_str(content)
+    t = template.Template(content)
     return t.render(template.Context({'object' : object, 'MEDIA_URL' : settings.MEDIA_URL}))
 
 @register.filter
 def render(object, content_path):
     return mark_safe(_render(object, content_path))
+
+class RenderNode(template.Node):
+    def __init__(self, var):
+        self.var = template.Variable(var)
+
+    def render(self, context):
+        try:
+            text = self.var.resolve(context)
+        except template.VariableDoesNotExist:
+            return ''
+
+        return template.Template(text).render(context)
+
+@register.tag('render')
+def do_render(parser, token):
+    """
+    {% render some_var %}
+    """
+    bits = token.split_contents()
+
+    if len(bits) != 2:
+        raise template.TemplateSyntaxError()
+
+    return RenderNode(bits[1])
 
 @register.filter
 @stringfilter
@@ -343,13 +354,6 @@ def ipblur(text): # brutalizer ;-)
 def emailblur(email):
     "Obfuscates e-mail addresses - only @ and dot"
     return mark_safe(email.replace('@', '&#64;').replace('.', '&#46;'))
-
-def render_str(content):
-    "Render string with markdown and/or django template tags and return template."
-
-    md = Markdown(extras=["code-friendly"])
-    result = md.convert(content)
-    return template.Template(result)
 
 @register.filter
 def prefix(string_list, prefix):

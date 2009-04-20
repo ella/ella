@@ -1,0 +1,16 @@
+Requirements
+============
+
+  * Python 2.5+
+  * Django 1.1 (with patch from #3400)
+  * python-markdown2 (or python-markdown)
+  * PIL
+  * python-cjson (optional)
+  * django-markup (optional)
+
+For testing:
+------------
+
+  * python-nose
+  * djangosanetesting
+
