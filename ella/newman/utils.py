@@ -117,7 +117,7 @@ def flag_queryset(queryset, flag, value):
 def get_queryset_flag(queryset, flag):
     if not hasattr(queryset, '_filter_flags'):
         return False
-    return queryset._filter_flags[flag]
+    return queryset._filter_flags.get(flag, False)
 
 def copy_queryset_flags(qs_dest, qs_src):
     setattr(qs_dest, '_filter_flags', getattr(qs_src, '_filter_flags', {}))

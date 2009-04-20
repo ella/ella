@@ -263,10 +263,9 @@ class NewmanModelAdmin(XModelAdmin):
         if req_path.find('?') > 0:
             url_args = req_path.split('?', 1)[1]
             key = 'filter__%s__%s' % (ct.app_label, ct.model)
-            #utils.set_user_config(request.user, key, url_args)
             utils.set_user_config_db(request.user, key, url_args)
-            context['is_filtered'] = True
 
+        context['is_filtered'] = context['cl'].is_filtered()
         context['is_user_category_filtered'] = utils.is_user_category_filtered( self.queryset(request) )
         context.update(extra_context or {})
         return render_to_response(self.change_list_template or [
