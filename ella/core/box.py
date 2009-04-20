@@ -21,8 +21,6 @@ class Box(object):
     """
     Base Class that handles the boxing mechanism.
     """
-    js = []
-    css = []
     can_double_render = False
     def __init__(self, obj, box_type, nodelist, template_name=None, model=None):
         """
@@ -162,11 +160,6 @@ class Box(object):
 
     def _render(self):
         " The main function that takes care of the rendering. "
-        media = self._context.dicts[-1].setdefault(MEDIA_KEY, {'js' : set([]), 'css' : set([])})
-        my_media = self.get_media()
-        media['js'] = media['js'].union(my_media['js'])
-        media['css'] = media['css'].union(my_media['css'])
-
         if self.template_name:
             t = loader.get_template(self.template_name)
         else:
@@ -178,20 +171,6 @@ class Box(object):
         self._context.pop()
         return resp
 
-    def get_media(self):
-        " Get a list of media files requested by the tag. "
-        if u'js' in self.params:
-            js = set(self.js + self.params.getlist('js'))
-        else:
-            js = set(self.js)
-
-        if u'css' in self.params:
-            css = set(self.css + self.params.getlist('css'))
-        else:
-            css = set(self.css)
-
-        return {'js' : js, 'css' : css,}
-
     def get_cache_key(self):
         " Return a cache key constructed from the box's parameters. "
         if self.params:
@@ -200,5 +179,5 @@ class Box(object):
             pars = ''
         return normalize_key('ella.core.box.Box.render:%d:%s:%s:%d:%s' % (
                     settings.SITE_ID, self.obj.__class__.__name__, str(self.box_type), self.obj.pk, pars
-))
+                ))
 

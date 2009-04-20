@@ -62,3 +62,6 @@ MEDIA_URL = '/static/'
 ADMIN_MEDIA_PREFIX = '/static/admin_media/'
 NEWMAN_MEDIA_PREFIX = '/static/newman_media/'
 
+# markup settings
+DEFAULT_MARKUP = 'markdown'
+

@@ -10,9 +10,6 @@ from ella.photos.models import Photo
 
 
 class Serie(Publishable):
-
-    perex = models.TextField(_('Perex'))
-
     hide_newer_parts = models.BooleanField(_('Hide newer parts'), default=False)
     started = models.DateField(_('Started'))
     finished = models.DateField(_('Finished'), null=True, blank=True)

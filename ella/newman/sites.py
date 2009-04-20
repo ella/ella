@@ -17,6 +17,7 @@ from ella.newman.utils import set_user_config_db, set_user_config_session, get_u
     JsonResponse, JsonResponseError, json_decode
 from ella.newman.permission import has_model_list_permission, applicable_categories
 from ella.newman.config import CATEGORY_FILTER, NEWMAN_URL_PREFIX, STATUS_SMTP_ERROR, STATUS_FORM_ERROR
+from ella.newman.options import NewmanModelAdmin
 
 
 class NewmanSite(AdminSite):
@@ -34,6 +35,16 @@ class NewmanSite(AdminSite):
                 opts_class.inlines.append(inline)
                 self.unregister(model)
                 self.register(model, opts_class)
+
+    def register(self, model_or_iterable, admin_class=None, **options):
+        """
+        If an admin class isn't given, it will use NewmanModelAdmin.
+        """
+        if not admin_class:
+            admin_class = NewmanModelAdmin
+
+        super(NewmanSite, self).register(model_or_iterable, admin_class, **options)
+
 
     def get_urls(self):
         from django.conf.urls.defaults import patterns, url

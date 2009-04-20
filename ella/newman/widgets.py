@@ -5,11 +5,18 @@ from django.db.models.fields.related import ForeignKey
 from django.contrib.admin import widgets
 from django.utils.text import truncate_words
 from ella.ellaadmin.utils import admin_url
+from djangomarkup.widgets import RichTextAreaWidget
 
+MARKITUP_SET = getattr(settings, 'DEFAULT_MARKUP', 'default')
+MEDIA_PREFIX = getattr(settings, 'NEWMAN_MEDIA_PREFIX', settings.ADMIN_MEDIA_PREFIX)
+
+# Rich text editor
+JS_MARKITUP = 'js/markitup/jquery.markitup.js'
+JS_MARKITUP_SET = 'js/markitup/sets/%s/set.js' % MARKITUP_SET
 JS_EDITOR = 'js/editor.js'
-JS_SHOWDOWN = 'js/showdown.js'
+CSS_MARKITUP = 'js/markitup/skins/markitup/style.css'
+CSS_MARKITUP_SET = 'js/markitup/sets/%s/style.css' % MARKITUP_SET
 CLASS_RICHTEXTAREA = 'rich_text_area'
-CSS_RICHTEXTAREA = 'css/editor.css'
 
 # Generic suggester media files
 JS_GENERIC_SUGGEST = 'js/generic.suggest.js'
@@ -25,10 +32,36 @@ JS_DATE_INPUT = 'js/datetime.js'
 CSS_DATE_INPUT = 'css/datetime.css'
 
 # Flash image uploader / editor
-#JS_FLASH_IMAGE_INPUT = ''
+JS_FLASH_IMAGE_INPUT = 'js/flash_image.js'
 SWF_FLASH_IMAGE_INPUT = 'swf/PhotoUploader.swf'
 
+class NewmanRichTextAreaWidget(RichTextAreaWidget):
+    """
+    Newman's implementation of markup, based on markitup editor.
+    """
+    class Media:
+        js = (
+            MEDIA_PREFIX + JS_MARKITUP,
+            MEDIA_PREFIX + JS_MARKITUP_SET,
+            MEDIA_PREFIX + JS_EDITOR,
+        )
+        css = {
+            'screen': (
+                MEDIA_PREFIX + CSS_MARKITUP,
+                MEDIA_PREFIX + CSS_MARKITUP_SET,
+            ),
+        }
+
+    def __init__(self, attrs={}):
+        css_class = CLASS_RICHTEXTAREA
+        super(RichTextAreaWidget, self).__init__(attrs={'class': css_class})
+
+
 class FlashImageWidget(widgets.AdminFileWidget):
+    class Media:
+        js = (
+            settings.NEWMAN_MEDIA_PREFIX + JS_FLASH_IMAGE_INPUT,
+        )
 
     def render(self, name, value, attrs=None):
         swf_path = '%s%s' % (settings.NEWMAN_MEDIA_PREFIX, SWF_FLASH_IMAGE_INPUT,)
@@ -66,31 +99,6 @@ class ForeignKeyRawIdWidget(widgets.ForeignKeyRawIdWidget):
         adm = admin_url(obj)
         return '&nbsp;<a href="%s">%s</a>' % (adm, label)
 
-
-class RichTextAreaWidget(forms.Textarea):
-    'Widget representing the RichTextEditor.'
-    class Media:
-        js = (
-            settings.NEWMAN_MEDIA_PREFIX + JS_EDITOR,
-            settings.NEWMAN_MEDIA_PREFIX + JS_SHOWDOWN,
-        )
-        css = {
-            'screen': (settings.ADMIN_MEDIA_PREFIX + CSS_RICHTEXTAREA,),
-        }
-
-    def __init__(self, height=None, attrs={}):
-        css_class = CLASS_RICHTEXTAREA
-        if height:
-            css_class += ' %s' % height
-        super(RichTextAreaWidget, self).__init__(attrs={'class': css_class})
-
-    def render(self, name, value, attrs=None):
-        final_attrs = self.build_attrs(attrs, name=name)
-        if value and self._field.is_markup():
-            src_text = self._field.get_source_text()
-        else:
-            src_text = value
-        return super(RichTextAreaWidget, self).render(name, src_text, attrs)
 
 class AdminSuggestWidget(forms.TextInput):
     class Media:

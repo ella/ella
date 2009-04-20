@@ -6,16 +6,16 @@
 <div class="hpcol" style="width: 25%;">
 
     <div class="hpbox setup">
-        <h3>Rychlá nastavení</h3>
+        <h3>{% trans "Quick Settings" %}</h3>
         <div class="cnt">
             <form class="ajax-form" action="{% url newman-save-filters %}" method="post">
                 <fieldset>
-                    <legend>Category-filter</legend>
+                    <legend>{% trans "Category-filter" %}</legend>
                     {{ site_filter_form.sites }}
                 </fieldset>
                 <fieldset class="submit-row">
-                    <a class="icn btn eclear">Vyčistit</a>
-                    <a class="icn btn ok def">Uložit</a>
+                    <a class="icn btn eclear">{% trans "Clear" %}</a>
+                    <a class="icn btn ok def">{% trans "Save" %}</a>
                 </fieldset>
                 <div class="form-metadata">
                     <input type="hidden" name="success" onchange="location.reload()" />
@@ -25,16 +25,16 @@
     </div>
 
     <div class="hpbox errmsg">
-        <h3>Nahlásit chybu!</h3>
+        <h3>{% trans "Report Error" %}!</h3>
         <div class="cnt">
             <form class="ajax-form reset-on-submit" action="{% url newman-err-report %}" method="post">
-                <label for="id_err_subject" class="required">Předmět <span class="help"></span></label>
+                <label for="id_err_subject" class="required">{% trans "Subject" %} <span class="help"></span></label>
                 <input id="id_err_subject" name="err_subject" type="text" />
-                <label for="id_err_message" class="required">Zpráva</label>
+                <label for="id_err_message" class="required">{% trans "Message" %}</label>
                 <textarea id="id_err_message" name="err_message" rows="4" cols="53"></textarea>
                 <div class="submit-row">
-                    <a class="icn btn eclear">Vyčistit</a>
-                    <a class="icn btn ok def" title="Kliknutím odešlete zprávu o chybě...">Odeslat</a>
+                    <a class="icn btn eclear">{% trans "Clear" %}</a>
+                    <a class="icn btn ok def" title="{% trans "Click to report a bug" %}">{% trans "Send" %}</a>
                 </div>
             </form>
         </div>
@@ -45,7 +45,7 @@
 <div class="hpcol" style="width: 50%;">
 
     <div class="hpbox search" id="search-form">
-        <h3>Hledat</h3>
+        <h3>{% trans "Search" %}</h3>
         <div class="cnt">
             <input type="text" name="q"/>
             <select name="action" size="1">
@@ -61,7 +61,7 @@
     {% cache 600 devmsgs user.username %}
     {% get_devmsgs as msgs %}
     <div class="hpbox devmsgs">
-        <h3>Zprávy o vývoji...</h3>
+        <h3>{% trans "Development News" %}</h3>
         <div class="cnt">
             {% for msg in msgs %}
                 <div class="item">
@@ -79,7 +79,7 @@
 <div class="hpcol" style="width: 25%;">
 
     <div class="hpbox lastlog">
-        <h3>Vaše poslední akce</h3>
+        <h3>{% trans "Your Recent Actions" %}</h3>
         <div class="cnt">
             {% get_admin_log 15 as admin_log for_user user %}
             {% if not admin_log %}
