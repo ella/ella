@@ -1090,6 +1090,12 @@ $( function() {
     overload_default_submit();
     //// End of ajax forms
     
+    // Packing and unpacking filter list. To be removed when filters are reimplemented.
+    $('#filters :header').live('click', function(evt) {
+        if (evt.which != 1) return true;    // just interested in left button
+        $(this).next(':first').filter('ul').slideToggle('slow');
+    });
+    
     // Re-initialization of third party libraries
     /*
     $(document).bind('content_added', function() {
