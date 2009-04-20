@@ -96,10 +96,10 @@
 
 </div>
 <!-- Last changelist filters state -->
-<script language="text/javascript">
+<script type="text/javascript">
 var changelistFilters = {};
 {% for fname, qstring in last_filters.items %}
-changelistFilter["{{ fname }}"] = "{{ qstring }}";
+changelistFilters["{{ fname }}"] = "{{ qstring }}";
 {% endfor %}
 </script>
 
