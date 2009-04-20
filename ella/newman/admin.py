@@ -53,7 +53,13 @@ site.register(m.CategoryUserRole, CategoryUserRoleAdmin)
 
 # Category filter -- restricted categories accordingly to CategoryUserRoles and categories filtered via AdminSettings.
 # custom registered DateField filter. Filter is inserted to the beginning of filter chain.
-@filter_spec(lambda field: is_category_fk(field))
+def category_field_lookup(fspec):
+    #lambda fspec: '%s__%s__exact' % (fspec.field_path, fspec.f.rel.to._meta.pk.name)
+    lk = '%s__%s__exact' % (fspec.field_path, fspec.f.rel.to._meta.pk.name)
+    print 'Lookup: %s' % lk
+    return lk
+
+@filter_spec(lambda field: is_category_fk(field), category_field_lookup)
 def category_field_filter(fspec):
     #qs = Category.objects.filter(pk__in=applicable_categories(fspec.user))
     print 'Categories %d' % fspec.model_admin.queryset(fspec.request).count()

@@ -18,16 +18,68 @@ ACTIVITY_ACTIVE = 1
 ACTIVITY_CLOSED = 2
 DOUBLE_RENDER = getattr(settings, 'DOUBLE_RENDER', False)
 
-class FloatingStateModel(object):
-    """
-    Objects life-cycles depends on its activity datetimes
+UPDATE_VOTE = '''
+    UPDATE
+        %(table)s
+    SET
+        %(col)s = COALESCE(%(col)s, 0) + 1
+    WHERE
+        id = %%s;
+    '''
 
-                | NOT_YET_ACTIVE
-    active_from +---------------
-                | ACTIVE
-    active_till +---------------
-                | CLOSED
-    """
+
+class PollBox(Box):
+
+    can_double_render = True
+
+    def prepare(self, context):
+        super(PollBox, self).prepare(context)
+        SECOND_RENDER = context.get('SECOND_RENDER', False)
+        self.state = None
+        if DOUBLE_RENDER and SECOND_RENDER or context.has_key('request'):
+            from ella.polls import views
+            self.state = views.check_vote(context['request'], self.obj)
+
+    def get_context(self):
+        from ella.polls import views
+        cont = super(PollBox, self).get_context()
+        # state = views.check_vote(self._context['request'], self.obj)
+        cont.update({
+            'photo_slug' : self.params.get('photo_slug', ''),
+            'state' : self.state,
+            'state_voted' : views.POLL_USER_ALLREADY_VOTED,
+            'state_just_voted' : views.POLL_USER_JUST_VOTED,
+            'state_not_yet_voted' : views.POLL_USER_NOT_YET_VOTED,
+            'state_no_choice' : views.POLL_USER_NO_CHOICE,
+            'activity_not_yet_active' : ACTIVITY_NOT_YET_ACTIVE,
+            'activity_active' : ACTIVITY_ACTIVE,
+            'activity_closed' : ACTIVITY_CLOSED,})
+        return cont
+
+
+class QuizBox(Box):
+
+    def get_context(self):
+        "Updates box context with photo-specific variables."
+        from ella.polls.views import QuestionForm
+        cont = super(QuizBox, self).get_context()
+        questions = self.obj.questions
+        cont['questions'] = questions
+        cont['form'] = QuestionForm(questions[0])(prefix='0')
+        return cont
+
+
+class BasePoll(models.Model):
+
+    text_announcement = models.TextField(_('Text with announcement'))
+    text = models.TextField(_('Text'))
+    text_results = models.TextField(_('Text with results'))
+    active_from = models.DateTimeField(_('Active from'))
+    active_till = models.DateTimeField(_('Active till'))
+
+    class Meta:
+        abstract = True
+
     @property
     def current_text(self):
         """
@@ -62,15 +114,30 @@ class FloatingStateModel(object):
         return False
 
 
-class Contest(Publishable, FloatingStateModel):
-    """
-    Contests with title, descriptions and activation
-    """
-    text_announcement = models.TextField(_('Text with announcement'))
-    text = models.TextField(_('Text'))
-    text_results = models.TextField(_('Text with results'))
-    active_from = models.DateTimeField(_('Active from'))
-    active_till = models.DateTimeField(_('Active till'))
+class Poll(BasePoll):
+
+    title = models.CharField(_('Title'), max_length=200)
+    question = models.ForeignKey('Question', verbose_name=_('Question'), unique=True)
+
+    box_class = PollBox
+
+    def get_question(self):
+        return get_cached_object(Question, pk=self.question_id)
+
+    def get_total_votes(self):
+        return self.get_question().get_total_votes()
+    get_total_votes.short_description = _('Votes in total')
+
+    def __unicode__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = _('Poll')
+        verbose_name_plural = _('Polls')
+        ordering = ('-active_from',)
+
+
+class Contest(BasePoll, Publishable):
 
     objects = RelatedManager()
 
@@ -120,30 +187,13 @@ class Contest(Publishable, FloatingStateModel):
         verbose_name_plural = _('Contests')
         ordering = ('-active_from',)
 
-class QuizBox(Box):
-    def get_context(self):
-        "Updates box context with photo-specific variables."
-        from ella.polls.views import QuestionForm
-        cont = super(QuizBox, self).get_context()
-        questions = self.obj.questions
-        cont['questions'] = questions
-        cont['form'] = QuestionForm(questions[0])(prefix='0')
-        return cont
 
-class Quiz(Publishable, FloatingStateModel):
-    """
-    Quizes with title, descriptions and activation options.
-    """
-    box_class = QuizBox
+class Quiz(BasePoll, Publishable):
 
-    text_announcement = models.TextField(_('text with announcement'))
-    text = models.TextField(_('Text'))
-    text_results = models.TextField(_('Text with results'))
-    active_from = models.DateTimeField(_('Active from'))
-    active_till = models.DateTimeField(_('Active till'))
     has_correct_answers = models.BooleanField(_('Has correct answers'))
 
-    # Authors and Sources
+    box_class = QuizBox
+
     objects = RelatedManager()
 
     @property
@@ -169,11 +219,7 @@ class Quiz(Publishable, FloatingStateModel):
 
 
 class Question(models.Model):
-    """
-    Questions used in
-     * Poll
-     * or Contest or Quiz related via ForeignKey
-    """
+
     question = models.TextField(_('Question text'))
     allow_multiple = models.BooleanField(_('Allow multiple choices'), default=False)
     allow_no_choice = models.BooleanField(_('Allow no choice'), default=False)
@@ -216,77 +262,11 @@ class Question(models.Model):
         verbose_name = _('Question')
         verbose_name_plural = _('Questions')
 
-class PollBox(Box):
-    can_double_render = True
-
-    def prepare(self, context):
-        super(PollBox, self).prepare(context)
-        SECOND_RENDER = context.get('SECOND_RENDER', False)
-        self.state = None
-        if DOUBLE_RENDER and SECOND_RENDER or context.has_key('request'):
-            from ella.polls import views
-            self.state = views.check_vote(context['request'], self.obj)
-
-    def get_context(self):
-        from ella.polls import views
-        cont = super(PollBox, self).get_context()
-        # state = views.check_vote(self._context['request'], self.obj)
-        cont.update({
-            'photo_slug' : self.params.get('photo_slug', ''),
-            'state' : self.state,
-            'state_voted' : views.POLL_USER_ALLREADY_VOTED,
-            'state_just_voted' : views.POLL_USER_JUST_VOTED,
-            'state_not_yet_voted' : views.POLL_USER_NOT_YET_VOTED,
-            'state_no_choice' : views.POLL_USER_NO_CHOICE,
-            'activity_not_yet_active' : ACTIVITY_NOT_YET_ACTIVE,
-            'activity_active' : ACTIVITY_ACTIVE,
-            'activity_closed' : ACTIVITY_CLOSED,
-})
-        return cont
-
-    def get_cache_key(self):
-        return super(PollBox, self).get_cache_key() + str(self.state)
-
-    def get_cache_tests(self):
-        return super(PollBox, self).get_cache_tests() + [ (Choice, 'poll_id:%s' % self.obj.id) ]
-
-
-class Poll(models.Model, FloatingStateModel):
-    """
-    Poll model with descriptions and activation times
-    """
-    box_class = PollBox
-    title = models.CharField(_('Title'), max_length=200)
-    text_announcement = models.TextField(_('Text with announcement'), blank=True, null=True)
-    text = models.TextField(_('Text'), blank=True, null=True)
-    text_results = models.TextField(_('Text with results'), blank=True, null=True)
-    active_from = models.DateTimeField(_('Active from'), default=datetime.now, null=True, blank=True)
-    active_till = models.DateTimeField(_('Active till'), null=True, blank=True)
-    question = models.ForeignKey(Question, verbose_name=_('Question'), unique=True)
-
-    def get_question(self):
-        return get_cached_object(Question, pk=self.question_id)
-
-    def get_total_votes(self):
-        return self.get_question().get_total_votes()
-    get_total_votes.short_description = _('Votes in total')
-
-    def __unicode__(self):
-        return self.title
-
-    class Meta:
-        verbose_name = _('Poll')
-        verbose_name_plural = _('Polls')
-        ordering = ('-active_from',)
-
 
 class Choice(models.Model):
-    """
-    Choices related to Question model ordered with respect to question
-    """
+
     question = models.ForeignKey('Question', verbose_name=_('Question'))
     choice = models.TextField(_('Choice text'))
-##    points = models.IntegerField(_('Points'), blank=True, null=True)
     points = models.IntegerField(_('Points'), blank=False, null=True)
     votes = models.IntegerField(_('Votes'), blank=True, null=True)
 
@@ -294,8 +274,11 @@ class Choice(models.Model):
         """
         Add a vote dirrectly to DB
         """
+        query = UPDATE_VOTE % {
+            'table' : connection.ops.quote_name(self._meta.db_table), 
+            'col' : connection.ops.quote_name(self._meta.get_field('votes').column)}
         cur = connection.cursor()
-        cur.execute(UPDATE_VOTE, (self._get_pk_val(),))
+        cur.execute(query, (self._get_pk_val(),))
         return True
 
     def get_percentage(self):
@@ -314,19 +297,6 @@ class Choice(models.Model):
     class Meta:
         verbose_name = _('Choice')
         verbose_name_plural = _('Choices')
-
-# add_vote SQL query
-UPDATE_VOTE = '''
-    UPDATE
-        %(table)s
-    SET
-        %(col)s = COALESCE(%(col)s, 0) + 1
-    WHERE
-        id = %%s;
-    ''' % {
-        'table' : connection.ops.quote_name(Choice._meta.db_table),
-        'col' : connection.ops.quote_name(Choice._meta.get_field('votes').column)
-}
 
 
 class Vote(models.Model):

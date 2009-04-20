@@ -1,9 +1,12 @@
+import time
+
 from django.conf.urls.defaults import *
 from django.http import HttpResponse
 from django.db import models
 from django.utils.translation import ugettext as _
 
 from ella.core.models.main import Category
+from ella.core.models.publishable import Placement
 from ella.newman import site, NewmanModelAdmin
 from ella.newman import models as m
 from ella.newman.filterspecs import filter_spec
@@ -52,12 +55,10 @@ site.register(m.CategoryUserRole, CategoryUserRoleAdmin)
 
 # Category filter -- restricted categories accordingly to CategoryUserRoles and categories filtered via AdminSettings.
 # custom registered DateField filter. Filter is inserted to the beginning of filter chain.
-@filter_spec(lambda field: is_category_fk(field))
+category_lookup = lambda fspec: '%s__%s__exact' % (fspec.field_path, fspec.f.rel.to._meta.pk.name)
+
+@filter_spec(lambda field: is_category_fk(field), category_lookup)
 def category_field_filter(fspec):
-    #qs = Category.objects.filter(pk__in=applicable_categories(fspec.user))
-    print 'Categories %d' % fspec.model_admin.queryset(fspec.request).count()
-    #print 'self.params %s' % fspec.params
-    #print 'self.result_list %s' % fspec.result_list
     qs = Category.objects.filter(pk__in=applicable_categories(fspec.user))
     for cat in user_category_filter(qs, fspec.user):
         lookup_var = '%s__%s__exact' % (fspec.field_path, fspec.f.rel.to._meta.pk.name)
@@ -65,7 +66,8 @@ def category_field_filter(fspec):
         fspec.links.append(link)
     return True
 
-@filter_spec(lambda field: is_site_fk(field))
+site_lookup = lambda fspec: '%s__%s__exact' % (fspec.field_path, fspec.f.rel.to._meta.pk.name)
+@filter_spec(lambda field: is_site_fk(field), site_lookup)
 def site_field_filter(fspec):
     category_ids = get_user_config(fspec.user, CATEGORY_FILTER)
     if not category_ids:
@@ -82,16 +84,30 @@ def site_field_filter(fspec):
         fspec.links.append(link)
     return True
 
-@filter_spec(lambda field: field.name == 'created' and isinstance(field, models.DateTimeField))
-def created_field_filter(fspec):
-    qs = fspec.model_admin.queryset(fspec.request)
+#@filter_spec(lambda field: field.name.lower() == 'created' and isinstance(field, models.DateTimeField))
+PUBLISHED_FROM_FIELD_PATH = 'placement__listing__publish_from'
+def published_from_lookup(fspec):
+    out = [
+        '%s__day' % PUBLISHED_FROM_FIELD_PATH,
+        '%s__month' % PUBLISHED_FROM_FIELD_PATH,
+        '%s__year' % PUBLISHED_FROM_FIELD_PATH,
+    ]
+    return out
+@filter_spec(lambda field: field.name.lower() == 'created', published_from_lookup, title=_('Publish from'))
+def publish_from_filter(fspec):
     # SELECT created FROM qs._meta.dbtable  GROUP BY created
-    dates =  qs.dates(fspec.field_path, 'day', 'DESC')[:365]
+    #qs = fspec.model_admin.queryset(fspec.request)
+    #dates =  qs.dates(fspec.field_path, 'day', 'DESC')[:365]
+    # Article.objects.filter(placement__listing__publish_from__gte='2012-01-01')
+    ts = time.time() - (365*24*60*60)
+    last_year = time.strftime('%Y-%m-%d %H:%M', time.localtime(ts))
+    qs = Placement.objects.filter(listing__publish_from__gte=last_year)
+    dates = qs.dates('publish_from', 'day', 'DESC')
     for date in dates:
         lookup_dict = dict()
-        lookup_dict['%s__day' % fspec.field_path] = date.day
-        lookup_dict['%s__month' % fspec.field_path] = date.month
-        lookup_dict['%s__year' % fspec.field_path] = date.year
+        lookup_dict['%s__day' % PUBLISHED_FROM_FIELD_PATH] = date.day
+        lookup_dict['%s__month' % PUBLISHED_FROM_FIELD_PATH] = date.month
+        lookup_dict['%s__year' % PUBLISHED_FROM_FIELD_PATH] = date.year
         link_text = '%d. %d. %d' % (date.day, date.month, date.year)
         link = ( link_text, lookup_dict)
         fspec.links.append(link)

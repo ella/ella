@@ -36,7 +36,7 @@ TEMPLATES = {
 {% endifequal %}
 </form>
 ''',
-    'page/category.html': '''{% box poll for polls.poll with id 1 %}{% endbox %}''',
+    'page/category.html': '''{% load core %}{% box poll for polls.poll with id 1 %}{% endbox %}''',
     'page/content_type/polls.contest/form.html': '''{% ifequal object.current_activity_state activity_active %}
     {% if not duplicate %}
         <form action="" method="post">

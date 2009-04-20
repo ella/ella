@@ -97,11 +97,10 @@
 </div>
 <!-- Last changelist filters state -->
 <script language="text/javascript">
-var changelistFilters = new Array();
+var changelistFilters = {};
 {% for fname, qstring in last_filters.items %}
-myFilters["{{ fname }}"] = "{{ qstring }}";
+changelistFilter["{{ fname }}"] = "{{ qstring }}";
 {% endfor %}
-window.alert(myFilters);
 </script>
 
 {% endblock %}
