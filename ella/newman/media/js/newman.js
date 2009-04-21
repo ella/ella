@@ -1010,20 +1010,29 @@ $( function() {
         else {
             error = ajax_submit_error;
         }
-        // Shave off the names from suggest-enhanced hidden inputs and don't send the suggest inputs as such.
+        // Process the inputs prior to sending
         var $inputs = $('#absolutely#_nothing');
         get_inputs($form).each( function() {
+            // Don't send suggest inputs
             if ( /(.*)_suggest$/.test($(this).attr('id')) ) {
                 return;
             }
+            // Shave off the names from suggest-enhanced hidden inputs
             if ( $(this).is('input:hidden') && $form.find( '#'+$(this).attr('id')+'_suggest' ).length ) {
                 $inputs = $inputs.add(   $(this).clone().val( $(this).val().replace(/#.*/, '') )   );
+                return;
+            }
+            // Shave off the days of week from date-time inputs
+            if ( $(this).is('.vDateTimeInput,.vDateInput') ) {
+                $inputs = $inputs.add(   $(this).clone().val( $(this).val().replace(/ \D{2}$/, '') )   );
                 return;
             }
             $inputs = $inputs.add($(this));
         });
         if (button_name) $inputs = $inputs.add('<input type="hidden" value="1" name="'+button_name+'" />');
         var data = $inputs.serialize();
+        ;;; carp(data);
+        return;
         if ($form.hasClass('reset-on-submit')) $form.get(0).reset();
         var url = $form.hasClass('dyn-addr')
             ? get_adr(action)
@@ -1106,7 +1115,11 @@ $( function() {
     // Packing and unpacking filter list. To be removed when filters are reimplemented.
     $('#filters :header').live('click', function(evt) {
         if (evt.which != 1) return true;    // just interested in left button
-        $(this).next(':first').filter('ul').slideToggle('slow');
+        var $affected = $(this).next(':first').filter('ul');
+        if ($affected.is(':hidden')) {
+            $(this).siblings('ul').hide();
+        }
+        $affected.slideToggle('slow');
     });
     
     // Persistent filters -- add the query string if:
@@ -1119,6 +1132,17 @@ $( function() {
             var decoded = $('<span>').html(changelistFilters[a]).text()
             ContentByHashLib.ADDRESS_POSTPROCESS[ adr ] = adr + decoded;
         }
+    });
+    
+    // Update persistent filters when filter clicked
+    $('#filters a').live('click', function(evt) {
+        if (evt.button != 0) return;    // only interested in left click
+        var href = $(this).attr('href');
+        if (   /^\?/.test( href )   ) {} else return;
+        var base = get_hashadr('?').replace(/\?$/,'');
+        ContentByHashLib.ADDRESS_POSTPROCESS[ base ] = base+href;
+        adr(href);
+        return false;
     });
     
     // Re-initialization of third party libraries

@@ -81,6 +81,7 @@ function DateTimeInput(input) {
         dow = ([
             'Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'
         ])[ d.getDay() ];
+        dow = _(dow);   // localize
         
         function pad(str,n) {
             var s = new String(str);
@@ -221,6 +222,7 @@ function DateInput(input) {
         dow = ([
             'Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'
         ])[ d.getDay() ];
+        dow = _(dow);   // localize
         
         function pad(str,n) {
             var s = new String(str);
