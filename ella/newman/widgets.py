@@ -191,5 +191,7 @@ class DateTimeWidget(forms.DateTimeInput):
 
     def render(self, name, value, attrs=None):
         attrs['class'] = 'vDateTimeInput'
+        if value and not value.second:
+            self.format = '%Y-%m-%d %H:%M'
         return super(DateTimeWidget, self).render(name, value, attrs)
 
