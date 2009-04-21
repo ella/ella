@@ -12,7 +12,9 @@ setup(
         'template for other libs',
     )),
     author = 'centrum holdings s.r.o',
+    author_email = 'author_email@example.com',
     license = 'BSD',
+    url = 'http://example.com',
 
     packages = find_packages(
         where = '.',
@@ -34,6 +36,7 @@ setup(
         "Intended Audience :: Developers",
         "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
+        "Framework :: Django",
         "Programming Language :: Python :: 2.5",
         "Programming Language :: Python :: 2.6",
         "Topic :: Software Development :: Libraries :: Python Modules",
