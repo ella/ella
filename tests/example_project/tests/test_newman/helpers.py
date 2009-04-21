@@ -1,7 +1,7 @@
 from djangosanetesting import SeleniumTestCase
 
 class NewmanTestCase(SeleniumTestCase):
-    fixtures = ['newman_admin_user']
+    fixtures = ['newman_admin_user', 'test_data']
 
     SUPERUSER_USERNAME = u"superman"
     SUPERUSER_PASSWORD = u"xxx"
@@ -12,7 +12,9 @@ class NewmanTestCase(SeleniumTestCase):
         super(NewmanTestCase, self).__init__()
         self.elements = {
             'navigation' : {
-                'logout' : "//a[@class='icn logout']"
+                'logout' : "//a[@class='icn logout']",
+                'articles' : "//a[@class='app article']",
+                'article_add' : "//a[@class='app article']/../a[position()=2]"
             },
             'pages' : {
                 'login' : {
@@ -20,6 +22,10 @@ class NewmanTestCase(SeleniumTestCase):
                 }
             }
         }
+
+    def setUp(self):
+        super(NewmanTestCase, self).setUp()
+        self.login_superuser()
 
     def login_superuser(self):
         self.selenium.open(self.NEWMAN_URI)
@@ -32,3 +38,6 @@ class NewmanTestCase(SeleniumTestCase):
         self.selenium.wait_for_page_to_load(30000)
         self.selenium.is_text_present(u"Thanks for spending some quality time with the Web site today.")
 
+    def tearDown(self):
+        self.logout()
+        super(NewmanTestCase, self).tearDown()
