@@ -28,5 +28,15 @@ setup(
     install_requires = [
         'setuptools>=0.6b1',
     ],
+
+    classifiers=[
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: BSD License",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 2.5",
+        "Programming Language :: Python :: 2.6",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+    ],
 )
 
