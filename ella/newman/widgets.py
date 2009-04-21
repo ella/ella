@@ -7,7 +7,7 @@ from django.utils.text import truncate_words
 from ella.ellaadmin.utils import admin_url
 from djangomarkup.widgets import RichTextAreaWidget
 
-MARKITUP_SET = getattr(settings, 'DEFAULT_MARKUP', 'default')
+MARKITUP_SET = getattr(settings, 'CZECHTILE_MARKUP', 'czechtile')
 MEDIA_PREFIX = getattr(settings, 'NEWMAN_MEDIA_PREFIX', settings.ADMIN_MEDIA_PREFIX)
 
 # Rich text editor
