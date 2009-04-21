@@ -1,3 +1,15 @@
+centrum-ella (0.3.4.6) unstable; urgency=low
+
+  * Build from 134184943f180ccba916237c0f15a16f95c5b428.
+
+ -- Jan Seifert <jan.seifert@centrumholdings.com>  Tue, 21 Apr 2009 12:28:59 +0200
+
+centrum-ella (0.3.4.5) unstable; urgency=low
+
+  * Debianisation from centrum-maintainance.
+
+ -- Jan Seifert <jan.seifert@centrumholdings.com>  Tue, 21 Apr 2009 11:50:45 +0200
+
 centrum-ella (0.3.4.4) unstable; urgency=low
 
   * Build from revision fd0ed1649966606506ecd77c80dae49beedf1e40
