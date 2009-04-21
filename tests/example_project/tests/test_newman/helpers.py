@@ -34,7 +34,6 @@ class NewmanTestCase(SeleniumTestCase):
         self.selenium.click(self.elements['pages']['login']['submit'])
 
     def logout(self):
-        self.selenium.wait_for_page_to_load(30000)
         self.selenium.click(self.elements['navigation']['logout'])
         self.selenium.wait_for_page_to_load(30000)
         self.selenium.is_text_present(u"Thanks for spending some quality time with the Web site today.")

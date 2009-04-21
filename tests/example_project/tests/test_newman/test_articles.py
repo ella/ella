@@ -9,6 +9,7 @@ class TestArticleBasics(NewmanTestCase):
 
         # go to article adding
         s.click(self.elements['navigation']['article_add'])
+        self.selenium.wait_for_page_to_load(30000)
 
         # prepare article structure for me
 
