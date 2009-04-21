@@ -17,7 +17,7 @@
         <li>{{ draft_form }}</li>
     </ul>
     {% if change %}
-        <ul style="float: right">
+        <ul style="float: right; margin: 3px;">
             <li><a href="history::::history/" class="icn btn simpleload history">{% trans "History" %}</a></li>
             {% if has_absolute_url %}
                 <li><a href="{% url admin_index %}r/{{ content_type_id }}/{{ object_id }}/" class="icn btn web">{% trans "View on site" %}</a></li>

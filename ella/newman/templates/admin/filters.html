@@ -2,9 +2,14 @@
 {% spaceless %}
 {% block filters %}
     {% if cl.has_filters %}
+        <div class="module">
         {% for spec in cl.filter_specs %}
            {% admin_list_filter cl spec %}
         {% endfor %}
+        </div>
+        <div style="margin: 10px;">
+            <a href="filters::::filters/" class="icn btn simpleload cancel def">{% trans "Close" %}</a>
+        </div>
     {% endif %}
 {% endblock %}
 {% endspaceless %}
