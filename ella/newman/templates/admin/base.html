@@ -2,15 +2,15 @@
 {% load adminmedia cache %}
 <html xmlns="http://www.w3.org/1999/xhtml" lang="{{ LANGUAGE_CODE|default:"cs" }}" xml:lang="{{ LANGUAGE_CODE|default:"cs" }}">
 <head>
-	<title>{% trans 'Ella administration' %}</title>
-	<link rel="stylesheet" type="text/css" href="{{ NEWMAN_MEDIA_URL }}css/base.css?{{ VERSION }}" />
+  <title>{% trans 'Ella administration' %}</title>
+  <link rel="stylesheet" type="text/css" href="{{ NEWMAN_MEDIA_URL }}css/base.css?{{ VERSION }}" />
     <link rel="stylesheet" type="text/css" href="{{ NEWMAN_MEDIA_URL }}css/top-navi.css?{{ VERSION }}" />
     <link rel="shortcut icon" href="{{ NEWMAN_MEDIA_URL }}ico/favicon.ico" type="image/x-icon" />
-	<script type="text/javascript">
+  <script type="text/javascript">
         var MEDIA_URL = '{{ NEWMAN_MEDIA_URL }}';
         var BASE_URL = '{% url admin_index %}';
     </script>
-	<meta name="robots" content="NONE,NOARCHIVE" />
+  <meta name="robots" content="NONE,NOARCHIVE" />
 </head>
 
 <body>
@@ -20,22 +20,22 @@
 
     {% if not is_popup %}
 
-	{% if user.is_staff %}
-    	{% cache 300 topnavi user.username %}
-        	{% load adminapplist %}
-        	{% get_admin_app_list as menu_list %}
+  {% if user.is_staff %}
+      {% cache 300 topnavi user.username %}
+          {% load adminapplist %}
+          {% get_admin_app_list as menu_list %}
 
-        	{% block topnavi %}
-        		<div id="navi-top"><ul id="menu-top">
-        		{% if menu_list %}
+          {% block topnavi %}
+            <div id="navi-top"><ul id="menu-top">
+            {% if menu_list %}
                         <li><a href="{% url admin_index %}" style="padding: 3px 5px 2px 5px;"><img src="{{ NEWMAN_MEDIA_URL }}ico/16/gohome.png" style="border:none" alt="Dom"/></a></li>
-        	    {% for app in menu_list %}
-        				<li><a href="#/{{ app.name|lower }}/">{% trans app.name %}</a>
-        					<ul>
-        			        {% for model in app.models %}
-        			            {% if model.perms.add and model.perms.change %}
-        			                <li><a href="#/{{ model.admin_url }}">{{ model.name }}</a></li>
-        			            {% else %}
+              {% for app in menu_list %}
+                <li><a href="#/{{ app.name|lower }}/">{% trans app.name %}</a>
+                  <ul>
+                      {% for model in app.models %}
+                          {% if model.perms.add and model.perms.change %}
+                              <li><a href="#/{{ model.admin_url }}">{{ model.name }}</a></li>
+                          {% else %}
                                     {% if model.perms.add or model.perms.change %}
                                         {% if model.perms.add %}
                                             <li><a href="#/{{ model.admin_url }}add/">{{ model.name }} (+)</a></li>
@@ -43,19 +43,19 @@
                                             <li><a href="#/{{ model.admin_url }}">{{ model.name }}</a></li>
                                         {% endif %}
                                     {% endif %}
-        			            {% endif %}
-        					{% endfor %}
-        					</ul>
-        				</li>
+                          {% endif %}
+                  {% endfor %}
+                  </ul>
+                </li>
                 {% endfor %}
-        		</ul></div>
+            </ul></div>
                 {% else %}
                     <h1>{% trans "No role defined for user"%}&nbsp;{{ user.username }}.</h1>
-        		{% endif %}
+            {% endif %}
 
-        	{% endblock %}
-    	{% endcache %}
-	{% endif %}
+          {% endblock %}
+      {% endcache %}
+  {% endif %}
 
     {% block favs %}
         {% if user.is_authenticated %}
@@ -98,10 +98,6 @@
 
     {% endif %}
 
-        {% if messages %}
-        <ul class="messagelist">{% for message in messages %}<li>{{ message }}</li>{% endfor %}</ul>
-        {% endif %}
-
     <!-- Content -->
     <div id="content">
         {% block pretitle %}{% endblock %}
@@ -115,8 +111,8 @@
     </div>
     <!-- END Content -->
 
-	{% if user.is_staff %}
-   		{% block footer %}
+  {% if user.is_staff %}
+       {% block footer %}
             {% cache 600 footer user.username %}
             <div id="footer">
                 <div class="user-tools">
@@ -129,9 +125,9 @@
             </div>
             {% endcache %}
         {% endblock %}
-   	{% else %}
-   		<div class="clear"></div>
-   	{% endif %}
+     {% else %}
+       <div class="clear"></div>
+     {% endif %}
 </div>
 <!-- END Container -->
 {% if user.is_staff %}

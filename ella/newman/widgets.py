@@ -75,6 +75,7 @@ class FlashImageWidget(widgets.AdminFileWidget):
         <param name="allowScriptAccess" value="sameDomain" />
         <param name="FlashVars" value="max_width=&max_height=&value=%s" />
         <param name="allowFullScreen" value="true" />
+        <param name="wmode" value="opaque" />
             <embed src="%s" quality="high" bgcolor="#869ca7"
             width="100%%" height="60px" name="PhotoUploader" align="middle"
             play="true"
@@ -84,7 +85,8 @@ class FlashImageWidget(widgets.AdminFileWidget):
             type="application/x-shockwave-flash"
             pluginspage="http://www.adobe.com/go/getflashplayer"
             FlashVars="max_width=&max_height=&value=%s"
-            allowFullScreen="true">
+            allowFullScreen="true"
+            wmode="opaque">
             </embed>
         </object>
         """ % (swf_path, value, swf_path, value)
@@ -191,5 +193,7 @@ class DateTimeWidget(forms.DateTimeInput):
 
     def render(self, name, value, attrs=None):
         attrs['class'] = 'vDateTimeInput'
+        if value and not value.second:
+            self.format = '%Y-%m-%d %H:%M'
         return super(DateTimeWidget, self).render(name, value, attrs)
 
