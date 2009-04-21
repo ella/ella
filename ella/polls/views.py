@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 from itertools import chain
-import time
 
 from django.shortcuts import render_to_response
 from django.utils.translation import ugettext, ugettext_lazy as _
@@ -29,7 +28,6 @@ POLLS_JUST_VOTED_COOKIE_NAME = getattr(settings, 'POLLS_JUST_VOTED_COOKIE_NAME',
 POLLS_NO_CHOICE_COOKIE_NAME = getattr(settings, 'POLLS_NO_CHOICE_COOKIE_NAME', 'polls_no_choice')
 POLLS_MAX_COOKIE_LENGTH = getattr(settings, 'POLLS_MAX_COOKIE_LENGTH', 20)
 POLLS_MAX_COOKIE_AGE = getattr(settings, 'POLLS_MAX_COOKIE_AGE', 604800)
-POLLS_IP_VOTE_TRESHOLD = 10 * 60
 
 POLL_USER_NOT_YET_VOTED = 0
 POLL_USER_JUST_VOTED = 1
@@ -37,7 +35,7 @@ POLL_USER_ALLREADY_VOTED = 2
 POLL_USER_NO_CHOICE = 3
 
 
-def check_vote(request, poll):
+def poll_check_vote(request, poll):
     """
     To avoid multiple poll votes of the same user.
 
@@ -67,7 +65,8 @@ def check_vote(request, poll):
         sess = request.session.get(POLLS_COOKIE_NAME, [])
         if poll.id in sess:
             return POLL_USER_ALLREADY_VOTED
-        if Vote.objects.filter(poll=poll, user=request.user).count() > 0:
+        # otherwise check Vote object - just for sure
+        if poll.check_vote_by_user(request.user):
             return POLL_USER_ALLREADY_VOTED
         return POLL_USER_NOT_YET_VOTED
     # anonymous - check cookie
@@ -75,13 +74,12 @@ def check_vote(request, poll):
         cook = request.COOKIES.get(POLLS_COOKIE_NAME, '').split(',')
         if str(poll.id) in cook:
             return POLL_USER_ALLREADY_VOTED
-        treshold = datetime.fromtimestamp(time.time() - POLLS_IP_VOTE_TRESHOLD)
         if request.META.has_key('HTTP_X_FORWARDED_FOR'):
-            ip_addr = request.META['HTTP_X_FORWARDED_FOR']
+            ip_address = request.META['HTTP_X_FORWARDED_FOR']
         else:
-            ip_addr = request.META['REMOTE_ADDR']
-        voteCount = Vote.objects.filter(poll=poll, ip_address=ip_addr, time__gte=treshold).count()
-        if voteCount > 0:
+            ip_address = request.META['REMOTE_ADDR']
+        # otherwise check Vote object - just for sure
+        if poll.check_vote_by_ip_address(ip_address):
             return POLL_USER_ALLREADY_VOTED
         return POLL_USER_NOT_YET_VOTED
 
@@ -105,16 +103,16 @@ def poll_vote(request, poll_id):
 
     url = get_next_url(request)
 
+    # activity check
+    if not poll.is_active():
+        return HttpResponseRedirect(url)
+
+    # vote check
+    if poll_check_vote(request, poll) != POLL_USER_NOT_YET_VOTED:
+        return HttpResponseRedirect(url)
+
     form = QuestionForm(poll.question)(request.POST)
     if form.is_valid():
-
-        # activity check
-        if not poll.is_active():
-            return HttpResponseRedirect(url)
-
-        # vote check
-        if check_vote(request, poll) != POLL_USER_NOT_YET_VOTED:
-            return HttpResponseRedirect(url)
 
         # vote save
         kwa = {}
@@ -153,7 +151,7 @@ def poll_vote(request, poll_id):
 
         return response
 
-    # no choice
+    # no choice selected error
     # FIXME how to catch specific error? try to catch validationError exc?
     if form['choice'].errors:
         sess_nv = request.session.get(POLLS_NO_CHOICE_COOKIE_NAME, [])
@@ -161,8 +159,6 @@ def poll_vote(request, poll_id):
         request.session[POLLS_NO_CHOICE_COOKIE_NAME] = sess_nv
         return HttpResponseRedirect(url)
 
-    # we are not here never (for now)
-    return response
 
 @transaction.commit_on_success
 def contest_vote(request, context):

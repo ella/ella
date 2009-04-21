@@ -1,4 +1,5 @@
 from datetime import datetime
+import time
 
 from django.db import models, connection
 from django.contrib.auth.models import User
@@ -27,6 +28,8 @@ UPDATE_VOTE = '''
         id = %%s;
     '''
 
+POLLS_IP_VOTE_TRESHOLD = 10 * 60
+
 
 class PollBox(Box):
 
@@ -38,12 +41,12 @@ class PollBox(Box):
         self.state = None
         if DOUBLE_RENDER and SECOND_RENDER or context.has_key('request'):
             from ella.polls import views
-            self.state = views.check_vote(context['request'], self.obj)
+            self.state = views.poll_check_vote(context['request'], self.obj)
 
     def get_context(self):
         from ella.polls import views
         cont = super(PollBox, self).get_context()
-        # state = views.check_vote(self._context['request'], self.obj)
+        # state = views.poll_check_vote(self._context['request'], self.obj)
         cont.update({
             'photo_slug' : self.params.get('photo_slug', ''),
             'state' : self.state,
@@ -141,6 +144,13 @@ class Poll(BasePoll):
                     c.add_vote()
             else:
                 choice.add_vote()
+
+    def check_vote_by_user(self, user):
+        return Vote.objects.filter(poll=self, user=user).count() > 0
+
+    def check_vote_by_ip_address(self, ip_address):
+        treshold = datetime.fromtimestamp(time.time() - POLLS_IP_VOTE_TRESHOLD)
+        return Vote.objects.filter(poll=self, ip_address=ip_address, time__gte=treshold).count() > 0
 
     class Meta:
         verbose_name = _('Poll')
@@ -289,7 +299,7 @@ class Choice(models.Model):
             'table' : connection.ops.quote_name(self._meta.db_table), 
             'col' : connection.ops.quote_name(self._meta.get_field('votes').column)}
         cur = connection.cursor()
-        cur.execute(query, (self._get_pk_val(),))
+        cur.execute(query, (self.pk,))
         return True
 
     def get_percentage(self):
