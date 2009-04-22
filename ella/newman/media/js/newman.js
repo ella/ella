@@ -1161,6 +1161,7 @@ $( function() {
     */
     
     // Initialization of JavaScripts
+    /*
     $(document).bind('media_loaded', function() {
         var loaded_media = $(document).data('loaded_media');
         if (loaded_media[ MEDIA_URL + 'js/admin/DateTimeShortcuts.js' ]) {
@@ -1169,6 +1170,7 @@ $( function() {
         }
         delete loaded_media[ MEDIA_URL + 'js/admin/DateTimeShortcuts.js' ];
     });
+    */
     // Setting up proper suggers URLs to take the hash address into account
     $(document).bind('content_added', function() {
         var target_ids = $(document).data('injection_storage');
