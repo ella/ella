@@ -102,6 +102,7 @@ var ContentByHashLib = {};
         }
         
         $target.removeClass('loading').html(data);
+        if ($target.hasClass('noautoshow')) {} else $target.show();
         var newtitle = $('#doc-title').text();
         document.title = (newtitle ? newtitle+' | ' : '') + ORIGINAL_TITLE;
         dec_loading();
