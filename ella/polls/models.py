@@ -135,15 +135,11 @@ class Poll(BasePoll):
         return self.title
 
     def vote(self, choice, user=None, ip_address=None):
+        # create Vote object
         vote = Vote(poll=self, user=user, ip_address=ip_address)
         vote.save()
         # increment votes at Choice object
-        if vote.pk and choice != None:
-            if type(choice) == list:
-                for c in choice:
-                    c.add_vote()
-            else:
-                choice.add_vote()
+        choice.add_vote()
 
     def check_vote_by_user(self, user):
         return Vote.objects.filter(poll=self, user=user).count() > 0
