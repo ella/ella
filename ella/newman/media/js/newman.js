@@ -235,6 +235,16 @@ var ContentByHashLib = {};
     }
     ContentByHashLib.reload_content = reload_content;
     
+    function unload_content(container_id, options) {
+        if (!options) options = {};
+        delete LOADED_URLS[ container_id ];
+        var $container = $('#'+container_id);
+        if (!options.keep_content) {
+            $container.empty();
+        }
+    }
+    ContentByHashLib.unload_content = unload_content;
+    
     // We want location.hash to exactly describe what's on the page.
     // #url means that the result of $.get(url) be loaded into the #content div.
     // #id::url means that the result of $.get(url) be loaded into the #id element.
@@ -1032,8 +1042,6 @@ $( function() {
         });
         if (button_name) $inputs = $inputs.add('<input type="hidden" value="1" name="'+button_name+'" />');
         var data = $inputs.serialize();
-        ;;; carp(data);
-        return;
         if ($form.hasClass('reset-on-submit')) $form.get(0).reset();
         var url = $form.hasClass('dyn-addr')
             ? get_adr(action)
@@ -1351,6 +1359,7 @@ function save_change_form_success(text_data, options) {
     };
     show_ok(response_msg);
     action_table.run(action);
+    unload_content('history');
 }
 
 function changelist_batch_success(response_text) {
