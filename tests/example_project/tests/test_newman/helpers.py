@@ -1,7 +1,7 @@
 from djangosanetesting import SeleniumTestCase
 
 class NewmanTestCase(SeleniumTestCase):
-    fixtures = ['newman_admin_user', 'test_data']
+    fixtures = ['newman_admin_user', 'example_data']
 
     SUPERUSER_USERNAME = u"superman"
     SUPERUSER_PASSWORD = u"xxx"
