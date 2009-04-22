@@ -35,6 +35,20 @@ POLL_USER_ALLREADY_VOTED = 2
 POLL_USER_NO_CHOICE = 3
 
 
+def get_next_url(request):
+    """
+    Return URL for redirection
+
+    Try to get it from:
+        * POST param 'next'
+        * HTTP_REFERER
+    """
+    if 'next' in request.POST and request.POST['next'].startswith('/'):
+        return request.POST['next']
+    else:
+        return request.META.get('HTTP_REFERER', '/')
+
+
 def poll_check_vote(request, poll):
     """
     To avoid multiple poll votes of the same user.
@@ -112,52 +126,55 @@ def poll_vote(request, poll_id):
         return HttpResponseRedirect(url)
 
     form = QuestionForm(poll.question)(request.POST)
-    if form.is_valid():
 
-        # vote save
-        kwa = {}
-        if request.user.is_authenticated():
-            kwa['user'] = request.user
-        if request.META.has_key('HTTP_X_FORWARDED_FOR'):
-            kwa['ip_address'] = request.META['HTTP_X_FORWARDED_FOR']
-        else:
-            kwa['ip_address'] = request.META['REMOTE_ADDR']
-        poll.vote(form.cleaned_data['choice'], **kwa)
-
-        # update anti-spam - cook, sess
-        sess_jv = request.session.get(POLLS_JUST_VOTED_COOKIE_NAME, [])
-        sess_jv.append(poll.id)
-        request.session[POLLS_JUST_VOTED_COOKIE_NAME] = sess_jv
-        response = HttpResponseRedirect(url)
-        if request.user.is_authenticated():
-            sess = request.session.get(POLLS_COOKIE_NAME, [])
-            sess.append(poll.id)
-            request.session[POLLS_COOKIE_NAME] = sess
-        else:
-            cook = request.COOKIES.get(POLLS_COOKIE_NAME, '').split(',')
-            if len(cook) > POLLS_MAX_COOKIE_LENGTH:
-                cook = cook[1:]
-            cook.append(str(poll.id))
-            expires = datetime.strftime(datetime.utcnow() + timedelta(seconds=POLLS_MAX_COOKIE_AGE), "%a, %d-%b-%Y %H:%M:%S GMT")
-            response.set_cookie(
-                POLLS_COOKIE_NAME,
-                value=','.join(cook),
-                max_age=POLLS_MAX_COOKIE_AGE,
-                expires=expires,
-                path='/',
-                domain=Site.objects.get_current().domain,
-                secure=None
-            )
-
-        return response
-
-    # no choice selected error
-    # FIXME how to catch specific error? try to catch validationError exc?
-    if form['choice'].errors:
+    # invalid input
+    if not form.is_valid():
+        # no choice selected error - via session
         sess_nv = request.session.get(POLLS_NO_CHOICE_COOKIE_NAME, [])
         sess_nv.append(poll.id)
         request.session[POLLS_NO_CHOICE_COOKIE_NAME] = sess_nv
         return HttpResponseRedirect(url)
+
+    # vote save
+    kwa = {}
+    if request.user.is_authenticated():
+        kwa['user'] = request.user
+    if request.META.has_key('HTTP_X_FORWARDED_FOR'):
+        kwa['ip_address'] = request.META['HTTP_X_FORWARDED_FOR']
+    else:
+        kwa['ip_address'] = request.META['REMOTE_ADDR']
+    poll.vote(form.cleaned_data['choice'], **kwa)
+
+    # just voted info session update
+    sess_jv = request.session.get(POLLS_JUST_VOTED_COOKIE_NAME, [])
+    sess_jv.append(poll.id)
+    request.session[POLLS_JUST_VOTED_COOKIE_NAME] = sess_jv
+
+    response = HttpResponseRedirect(url)
+
+    # authenticated user vote - session update
+    if request.user.is_authenticated():
+        sess = request.session.get(POLLS_COOKIE_NAME, [])
+        sess.append(poll.id)
+        request.session[POLLS_COOKIE_NAME] = sess
+    # annonymous user vote - cookies update
+    else:
+        cook = request.COOKIES.get(POLLS_COOKIE_NAME, '').split(',')
+        if len(cook) > POLLS_MAX_COOKIE_LENGTH:
+            cook = cook[1:]
+        cook.append(str(poll.id))
+        expires = datetime.strftime(datetime.utcnow() + timedelta(seconds=POLLS_MAX_COOKIE_AGE), "%a, %d-%b-%Y %H:%M:%S GMT")
+        response.set_cookie(
+            POLLS_COOKIE_NAME,
+            value=','.join(cook),
+            max_age=POLLS_MAX_COOKIE_AGE,
+            expires=expires,
+            path='/',
+            domain=Site.objects.get_current().domain,
+            secure=None
+        )
+
+    return response
 
 
 @transaction.commit_on_success
@@ -198,18 +215,6 @@ def contest_vote(request, context):
         context_instance=RequestContext(request)
     )
 
-def get_next_url(request):
-    """
-    Return URL for redirection on success
-
-    Try to get it from:
-        * POST param 'next'
-        * HTTP_REFERER
-    """
-    if 'next' in request.POST and request.POST['next'].startswith('/'):
-        return request.POST['next']
-    else:
-        return request.META.get('HTTP_REFERER', '/')
 
 class MyCheckboxSelectMultiple(forms.CheckboxSelectMultiple):
     def render(self, name, value, attrs=None, choices=()):
