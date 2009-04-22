@@ -57,11 +57,11 @@ TEMPLATES = {
 '''
 }
 
+
 poll_test = """
 ====
 POLL
 ====
-
 # TODO - how to test box context???
 
 >>> from django.core.management import call_command
@@ -155,8 +155,8 @@ User vote saved in database
 >>> Vote.objects.filter(poll=p1).count()
 1
 >>> v = Vote.objects.filter(poll=p1)[0]
->>> v.ip_address
-u'1.2.3.4'
+>>> v.ip_address == u'1.2.3.4'
+True
 
 User's session & cookies
 ------------------------
@@ -247,8 +247,8 @@ User vote saved in database
 >>> v = Vote.objects.all()[0]
 >>> v.poll
 <Poll: Sample poll>
->>> v.ip_address
-u'5.6.7.8'
+>>> v.ip_address == u'5.6.7.8'
+True
 
 --------------------------------------------
 Success vote of the same user on second poll
@@ -278,8 +278,8 @@ User vote saved in database
 >>> Vote.objects.filter(poll=p2).count()
 1
 >>> v = Vote.objects.filter(poll=p2)[0]
->>> v.ip_address
-u'5.6.7.8'
+>>> v.ip_address == u'5.6.7.8'
+True
 
 ----------------------------------------------
 Success vote of registered user on first poll
@@ -313,8 +313,8 @@ User vote saved in database
 >>> Vote.objects.filter(poll=p1).count()
 3
 >>> v = Vote.objects.filter(poll=p1)[0]
->>> v.ip_address
-u'9.10.11.12'
+>>> v.ip_address == u'9.10.11.12'
+True
 >>> v.user
 <User: admin>
 
@@ -510,10 +510,13 @@ And who is the winner?
 >>> template_loader.templates = {}
 """
 
-__test__ = {
-    'poll_test': poll_test,
-    'contest_test': contest_test,
-}
+from django.conf import settings
+
+if 'mysql' not in settings.DATABASE_ENGINE:
+    __test__ = {
+        'poll_test': poll_test,
+        'contest_test': contest_test,
+    }
 
 if __name__ == '__main__':
     import doctest

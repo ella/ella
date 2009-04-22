@@ -2,7 +2,7 @@
 
 <div class="module">
 {% if action_list %}
-    <table id="change-history">
+    <table>
         <thead>
         <tr>
             <th scope="col">{% trans 'Date/time' %}</th>
@@ -23,4 +23,7 @@
 {% else %}
     <p>{% trans "This object doesn't have a change history. It probably wasn't added via this admin site." %}</p>
 {% endif %}
+</div>
+<div style="margin: 10px; text-align: right;">
+    <a href="history::::history/" class="icn btn simpleload cancel def">{% trans "Close" %}</a>
 </div>

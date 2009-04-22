@@ -341,3 +341,44 @@ td, th {
 .hint-enhanced .hint, .help-enhanced .help {
     display: none;
 }
+
+/* OBJECT HISTORY (in change_form) */
+#history {
+  position: absolute;
+  right: 6px;
+  top: 168px;
+  width: 70%;
+  background: #ddd;
+  display: none;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+}
+#history div.module {
+  margin: 10px;
+  max-height: 300px;
+  overflow: auto;
+  background: #eee;
+}
+
+#filters {
+  position: absolute;
+  left: 0; right: 0;
+  top: 168px;
+  background: #ddd;
+  display: none;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+}
+
+#filters div.module {
+  margin: 5px;
+  max-height: 200px;
+  overflow: auto;
+}
+
+#filters div.filter {
+    background: #eee;
+    float: left;
+    margin: 0 2px;
+    padding: 2px;
+}
