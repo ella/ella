@@ -40,10 +40,9 @@ var IMAGE_OPTIONS = {
             }
             data[ field ] = val;
         }
-        var adr = get_adr('json/');
-        IMAGE_OPTIONS.url = adr;
+        IMAGE_OPTIONS.url = get_adr('json/');
         flash_obj.saveData(data, IMAGE_OPTIONS);
-        carp(adr);
+        ;;; carp('URL passed to flash: ' + IMAGE_OPTIONS.url);
         return false;
     }
     function set_image_form_handlers() {

@@ -20,7 +20,7 @@ function carp() {
 
 var LF = 10, CR = 13;
 
-var BASE_PATH = window.BASE_URL ? BASE_URL.substr(0, BASE_URL.length-1) : '';
+var BASE_PATH = window.BASE_URL ? BASE_URL.replace(/\/$/,'') : '';
 
 function prepend_base_path_to(url) {
     if (url.charAt(0) == '/') url = BASE_PATH + url;
@@ -642,99 +642,105 @@ function get_adr(address, options) {
     return BASE_PATH + get_hashadr(address, options);
 }
 
-// Get an URL to a CSS or JS file, attempt to load it into the document and call callback on success.
-function load_media(url, succ_fn, err_fn) {
-    ;;; carp('loading media '+url);
+// Dynamic media (CSS, JS) loading
+(function() {
     
-    url.match(/(?:.*\/\/[^\/]*)?([^?]+)(?:\?.*)?/);
-    $(document).data('loaded_media')[ RegExp.$1 ] = url;
-    
-    if (url.match(/\.(\w+)(?:$|\?)/))
-        var ext = RegExp.$1;
-    else throw('Unexpected URL format: '+url);
-    
-    var abs_url = $('<a>').attr({href:url}).get(0).href;
-    
-    function stylesheet_present(url) {
-        for (var i = 0; i < document.styleSheets.length; i++) {
-            if (document.styleSheets[i].href == url) return document.styleSheets[i];
+    // Get an URL to a CSS or JS file, attempt to load it into the document and call callback on success.
+    function load_media(url, succ_fn, err_fn) {
+        ;;; carp('loading media '+url);
+        
+        url.match(/(?:.*\/\/[^\/]*)?([^?]+)(?:\?.*)?/);
+        $(document).data('loaded_media')[ RegExp.$1 ] = url;
+        
+        if (url.match(/\.(\w+)(?:$|\?)/))
+            var ext = RegExp.$1;
+        else throw('Unexpected URL format: '+url);
+        
+        var abs_url = $('<a>').attr({href:url}).get(0).href;
+        
+        function stylesheet_present(url) {
+            for (var i = 0; i < document.styleSheets.length; i++) {
+                if (document.styleSheets[i].href == url) return document.styleSheets[i];
+            }
+            return false;
         }
-        return false;
-    }
-    function get_css_rules(stylesheet) {
-        try {
-            if (stylesheet.cssRules) return stylesheet.cssRules;
-            if (stylesheet.rules   ) return stylesheet.rules;
-        } catch(e) { carp(e); }
-        carp('Could not get rules from: ', stylesheet);
-        return;
-    }
-    
-    if (ext == 'css') {
-        if (stylesheet_present(abs_url)) return true;
-        var tries = 100;
-        if ($.isFunction(succ_fn)) {
-            setTimeout(function() {
-                if (--tries < 0) {
-                    carp('Timed out loading CSS: '+url);
-                    if ($.isFunction(err_fn)) err_fn(url);
-                    return;
-                }
-                var ss;
-                if (ss = stylesheet_present(abs_url)) {
-                    var rules = get_css_rules(ss);
-                    if (rules && rules.length) succ_fn(url);
-                    else {
-                        if (rules) carp('CSS stylesheet empty.');
+        function get_css_rules(stylesheet) {
+            try {
+                if (stylesheet.cssRules) return stylesheet.cssRules;
+                if (stylesheet.rules   ) return stylesheet.rules;
+            } catch(e) { carp(e); }
+            carp('Could not get rules from: ', stylesheet);
+            return;
+        }
+        
+        if (ext == 'css') {
+            if (stylesheet_present(abs_url)) return true;
+            var tries = 100;
+            if ($.isFunction(succ_fn)) {
+                setTimeout(function() {
+                    if (--tries < 0) {
+                        carp('Timed out loading CSS: '+url);
                         if ($.isFunction(err_fn)) err_fn(url);
                         return;
                     }
-                }
-                else setTimeout(arguments.callee, 100);
-            }, 100);
+                    var ss;
+                    if (ss = stylesheet_present(abs_url)) {
+                        var rules = get_css_rules(ss);
+                        if (rules && rules.length) succ_fn(url);
+                        else {
+                            if (rules) carp('CSS stylesheet empty.');
+                            if ($.isFunction(err_fn)) err_fn(url);
+                            return;
+                        }
+                    }
+                    else setTimeout(arguments.callee, 100);
+                }, 100);
+            }
+            return $('<link rel="stylesheet" type="text/css" href="'+url+'" />').appendTo($('head'));
         }
-        return $('<link rel="stylesheet" type="text/css" href="'+url+'" />').appendTo($('head'));
-    }
-    else if (ext == 'js') {
-        var $scripts = $('script');
-        for (var i = 0; i < $scripts.length; i++) {
-            if ($scripts.get(i).src == abs_url) return true;
+        else if (ext == 'js') {
+            var $scripts = $('script');
+            for (var i = 0; i < $scripts.length; i++) {
+                if ($scripts.get(i).src == abs_url) return true;
+            }
+            return $.ajax({
+                url:       url,
+                type:     'GET',
+                dataType: 'script',
+                success:   succ_fn,
+                error:     err_fn,
+                cache:     true
+            });
         }
-        return $.ajax({
-            url:       url,
-            type:     'GET',
-            dataType: 'script',
-            success:   succ_fn,
-            error:     err_fn,
-            cache:     true
-        });
+        else throw('Unrecognized media type "'+ext+'" in URL: '+url);
     }
-    else throw('Unrecognized media type "'+ext+'" in URL: '+url);
-}
-
-
-var media_queue = [];
-$(document).data('loaded_media', {});
-function init_media() {
-    $(document).trigger('media_loaded').data('loaded_media', {});
-}
-function draw_media() {
-    if (media_queue.length == 0) {
-        init_media();
-        return true;
+    
+    
+    var media_queue = [];
+    $(document).data('loaded_media', {});
+    function init_media() {
+        $(document).trigger('media_loaded').data('loaded_media', {});
     }
-    var url = media_queue.shift();
-    load_media(url, draw_media, draw_media);
-}
-
-// Load a CSS / JavaScript file (given an URL) after previously requested ones have been loaded / failed loading.
-function request_media(url) {
-    var do_start = media_queue.length == 0;
-    media_queue.push(url);
-    if (do_start) {
-        setTimeout(draw_media,20);
+    function draw_media() {
+        if (media_queue.length == 0) {
+            init_media();
+            return true;
+        }
+        var url = media_queue.shift();
+        load_media(url, draw_media, draw_media);
     }
-}
+    
+    // Load a CSS / JavaScript file (given an URL) after previously requested ones have been loaded / failed loading.
+    function request_media(url) {
+        var do_start = media_queue.length == 0;
+        media_queue.push(url);
+        if (do_start) {
+            setTimeout(draw_media,20);
+        }
+    }
+    window.request_media = request_media;
+    
+})();
 
 
 // general-prurpose functions
