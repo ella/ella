@@ -1246,7 +1246,7 @@ var $LOADING_MSG, LOADING_CNT = 0;
 function show_loading() {
     LOADING_CNT++;
     if ($LOADING_MSG) return;
-    $LOADING_MSG = show_message(_('loading...'), {duration:0});
+    $LOADING_MSG = show_message(_('loading')+'...', {duration:0});
 }
 function hide_loading() {
     if ($LOADING_MSG) $LOADING_MSG.remove();
