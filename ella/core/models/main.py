@@ -30,7 +30,6 @@ class Author(models.Model):
 
     class Meta:
         app_label = 'core'
-        ordering = ('name', 'slug',)
         verbose_name = _('Author')
         verbose_name_plural = _('Authors')
 
@@ -50,7 +49,6 @@ class Source(models.Model):
         app_label = 'core'
         verbose_name = _('Source')
         verbose_name_plural = _('Sources')
-        ordering = ('name',)
 
 class CategoryBox(Box):
     """
@@ -160,8 +158,6 @@ class Category(models.Model):
     class Meta:
         app_label = 'core'
         unique_together = (('site', 'tree_path'),)
-        # TODO: ordering only for admin (admin now use only first item in list)
-        ordering = ('site', 'tree_path',)
         verbose_name = _('Category')
         verbose_name_plural = _('Categories')
 
@@ -188,5 +184,4 @@ class Related(models.Model):
         app_label = 'core'
         verbose_name = _('Related')
         verbose_name_plural = _('Related')
-        ordering = ('source_ct', 'source_id',)
 

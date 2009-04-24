@@ -188,7 +188,6 @@ class Placement(models.Model):
 
     class Meta:
         app_label = 'core'
-        ordering = ('-publish_from',)
         verbose_name = _('Placement')
         verbose_name_plural = _('Placements')
 
