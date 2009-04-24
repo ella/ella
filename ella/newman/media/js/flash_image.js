@@ -40,7 +40,7 @@ var IMAGE_OPTIONS = {
             }
             data[ field ] = val;
         }
-        IMAGE_OPTIONS.url = get_adr('json/');
+        IMAGE_OPTIONS.url = $('<a>').attr('href',get_adr('json/')).get(0).href;
         flash_obj.saveData(data, IMAGE_OPTIONS);
         ;;; carp('URL passed to flash: ' + IMAGE_OPTIONS.url);
         return false;
