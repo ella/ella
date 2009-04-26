@@ -73,7 +73,7 @@ def create_and_place_more_publishables(case):
             )
         )
 
-def list_all_placements_in_category_by_hour(case):
+def list_all_placements_in_category_by_hour(case, category=None):
     case.listings = []
 
     publish_from = case.placements[0].publish_from
@@ -82,7 +82,7 @@ def list_all_placements_in_category_by_hour(case):
         case.listings.append(
             Listing.objects.create(
                 placement=p,
-                category=p.category,
+                category=category or p.category,
                 publish_from=publish_from,
             )    
         )

@@ -5,9 +5,11 @@ from django.http import Http404
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import slugify
 
-from ella.core.views import _category_detail, _object_detail, get_content_type
+from ella.core.views import _category_detail, _object_detail, get_content_type, _list_content_type
+from ella.core.models import Listing
 
-from unit_project.test_core import create_basic_categories, create_and_place_a_publishable, create_and_place_more_publishables
+from unit_project.test_core import create_basic_categories, create_and_place_a_publishable, \
+        create_and_place_more_publishables, list_all_placements_in_category_by_hour
 
 class ViewHelpersTestCase(DatabaseTestCase):
     def setUp(self):
@@ -47,7 +49,7 @@ class TestObjectDetail(ViewHelpersTestCase):
         self.correct_args = [self.user, 'nested-category', 'articles', 'first-article', '2008', '1', '10']
 
     def test_raises_404_on_incorrect_category(self):
-        self.correct_args[1] = 'not an existing category'
+        self.correct_args[1] = 'not-an-existing-category'
         self.assert_raises(Http404, _object_detail, *self.correct_args)
 
     def test_raises_404_on_wrong_category(self):
@@ -55,11 +57,11 @@ class TestObjectDetail(ViewHelpersTestCase):
         self.assert_raises(Http404, _object_detail, *self.correct_args)
 
     def test_raises_404_on_incorrect_content_type(self):
-        self.correct_args[2] = 'not a content type'
+        self.correct_args[2] = 'not-a-content-type'
         self.assert_raises(Http404, _object_detail, *self.correct_args)
 
     def test_raises_404_on_incorrect_slug(self):
-        self.correct_args[3] = 'not an existing slug'
+        self.correct_args[3] = 'not-an-existing-slug'
         self.assert_raises(Http404, _object_detail, *self.correct_args)
 
     def test_raises_404_on_incorrect_date(self):
@@ -103,5 +105,40 @@ class TestListContentType(ViewHelpersTestCase):
     def setUp(self):
         super(TestListContentType, self).setUp()
         create_and_place_more_publishables(self)
+        list_all_placements_in_category_by_hour(self, category=self.category)
+
+    def test_only_category_and_year_returns_all_listings(self):
+        c = _list_content_type('', '2008')
+        self.assert_equals(self.listings, list(c['listings']))
+        
+    def test_only_nested_category_and_year_returns_all_listings(self):
+        Listing.objects.all().update(category=self.category_nested_second)
+        c = _list_content_type('nested-category/second-nested-category', '2008')
+        self.assert_equals(self.listings, list(c['listings']))
+
+    def test_return_first_2_listings_if_paginate_by_2(self):
+        c = _list_content_type('', '2008', paginate_by=2)
+        self.assert_equals(self.listings[:2], list(c['listings']))
+        self.assert_true(c['is_paginated'])
+        
+    def test_return_second_2_listings_if_paginate_by_2_and_page_2(self):
+        c = _list_content_type('', '2008', page_no=2, paginate_by=2)
+        self.assert_equals(self.listings[2:4], list(c['listings']))
+        self.assert_true(c['is_paginated'])
+        
+    def test_raises404_for_incorrect_category(self):
+        self.assert_raises(Http404, _list_content_type, 'XXX', '2008')
+
+    def test_raises404_for_incorrect_month(self):
+        self.assert_raises(Http404, _list_content_type, '', '2008', '13')
+
+    def test_raises404_for_incorrect_day(self):
+        self.assert_raises(Http404, _list_content_type, '', '2008', '1', '42')
+
+    def test_raises404_for_incorrect_date(self):
+        self.assert_raises(Http404, _list_content_type, '', '2008', '2', '30')
+
+    def test_raises404_for_incorrect_content_type(self):
+        self.assert_raises(Http404, _list_content_type, '', '2008', '2', '3', 'not-a-content-type')
 
 
