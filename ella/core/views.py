@@ -85,7 +85,13 @@ def category_detail(request, category):
         )
 
 def list_content_type(request, category=None, year=None, month=None, day=None, content_type=None, paginate_by=20):
-    context = _list_content_type(request, category, year, month, day, content_type, paginate_by)
+    # pagination
+    if 'p' in request.GET and request.GET['p'].isdigit():
+        page_no = int(request.GET['p'])
+    else:
+        page_no = 1
+
+    context = _list_content_type(category, year, month, day, content_type, page_no, paginate_by)
     if content_type:
         ct = get_content_type(content_type)
     else:
@@ -218,16 +224,16 @@ def get_templates_from_placement(name, placement, slug=None, category=None, app_
         model_label = placement.publishable.target._meta.module_name
     return get_templates(name, slug, category, app_label, model_label)
 
-def _list_content_type(request, category=None, year=None, month=None, day=None, content_type=None, paginate_by=20):
+def _list_content_type(category, year, month=None, day=None, content_type=None, page_no=1, paginate_by=20):
     """
     List objects' listings according to the parameters.
 
     :Parameters:
-        - `request`: HttpRequest supplied by Django
         - `category`: base Category tree_path, optional - defaults to all categories
         - `year, month, day`: date matching the `publish_from` field of the `Placement` object.
           All of these parameters are optional, the list will be filtered by the non-empty ones
         - `content_type`: slugified verbose_name_plural of the target model, if omitted all content_types are listed
+        - `page_no`: which page to display
         - `paginate_by`: number of records in one page
 
     :Exceptions:
@@ -235,16 +241,15 @@ def _list_content_type(request, category=None, year=None, month=None, day=None, 
     """
     kwa = {}
     dates_kwa = {}
-    if year:
-        current_date = datetime(int(year), 1, 1)
-        dates_kwa['publish_from__year'] = int(year)
-        date_kind = 'month'
+    current_date = datetime(int(year), 1, 1)
+    dates_kwa['publish_from__year'] = int(year)
+    date_kind = 'month'
 
     if month:
         try:
             current_date = datetime(int(year), int(month), 1)
         except ValueError:
-            raise Http404
+            raise Http404()
         dates_kwa['publish_from__month'] = int(month)
         date_kind = 'day'
 
@@ -252,7 +257,7 @@ def _list_content_type(request, category=None, year=None, month=None, day=None, 
         try:
             current_date = datetime(int(year), int(month), int(day))
         except ValueError:
-            raise Http404
+            raise Http404()
         dates_kwa['publish_from__day'] = int(day)
         date_kind = 'detail'
 
@@ -269,19 +274,14 @@ def _list_content_type(request, category=None, year=None, month=None, day=None, 
     else:
         ct = False
 
-    # pagination
-    if 'p' in request.GET and request.GET['p'].isdigit():
-        page_no = int(request.GET['p'])
-    else:
-        page_no = 1
-
     base_qset = Listing.objects.get_queryset(**kwa)
     kwa.update(dates_kwa)
+    # FIXME: FAIL, this ignores priorities
     qset = Listing.objects.get_queryset(**kwa)
     paginator = QuerySetPaginator(qset.filter(**dates_kwa), paginate_by)
 
     if page_no > paginator.num_pages or page_no < 1:
-        raise Http404
+        raise Http404()
 
     kwa['count'] = paginate_by
     kwa['offset'] = (page_no - 1) * paginate_by + 1
