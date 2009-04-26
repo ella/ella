@@ -104,7 +104,7 @@ class ListingManager(RelatedManager):
                     priority_from__isnull=False,
                     priority_from__lte=now,
                     priority_to__gte=now
-)
+        )
 
         qsets = (
             # modded-up objects
@@ -113,7 +113,7 @@ class ListingManager(RelatedManager):
             qset.exclude(active).order_by('-publish_from'),
             # modded-down priority
             qset.filter(active, priority_value__lt=DEFAULT_LISTING_PRIORITY).order_by('-priority_value', '-publish_from'),
-)
+        )
 
         out = []
 
