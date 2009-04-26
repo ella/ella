@@ -190,3 +190,24 @@ class Related(models.Model):
         verbose_name_plural = _('Related')
         ordering = ('source_ct', 'source_id',)
 
+class Dependency(models.Model):
+    """
+    Object dependency - model for recording dependent items. For example when we use photo in article content.
+    """
+
+    target_ct = models.ForeignKey(ContentType, related_name='dependency_for_set')
+    target_id = models.IntegerField()
+    target = CachedGenericForeignKey('target_ct', 'target_id')
+
+    dependent_ct = models.ForeignKey(ContentType, related_name='depends_on_set')
+    dependent_id = models.IntegerField()
+    dependent = CachedGenericForeignKey('dependent_ct', 'dependent_id')
+
+    def __unicode__(self):
+        return u'%s depends on %s' % (self.dependent, self.target)
+
+    class Meta:
+        app_label = 'core'
+        verbose_name = _('Dependency')
+        verbose_name_plural = _('Dependencies')
+        ordering = ('dependent_ct', 'dependent_id',)
