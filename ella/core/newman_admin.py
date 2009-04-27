@@ -154,7 +154,7 @@ class ListingInlineAdmin(newman.NewmanTabularInline):
     model = Listing
     extra = 2
     suggest_fields = {'category': ('title', 'slug',)}
-    fieldsets = ((None, {'fields' : ('category','publish_from', 'priority_from', 'priority_to', 'priority_value', 'remove', 'commercial',)}),)
+    fieldsets = ((None, {'fields' : ('category','publish_from', 'publish_to', 'priority_from', 'priority_to', 'priority_value', 'commercial',)}),)
 
 class PlacementInlineAdmin(newman.NewmanStackedInline):
     model = Placement

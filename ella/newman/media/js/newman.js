@@ -20,7 +20,7 @@ function carp() {
 
 var LF = 10, CR = 13;
 
-var BASE_PATH = window.BASE_URL ? BASE_URL.substr(0, BASE_URL.length-1) : '';
+var BASE_PATH = window.BASE_URL ? BASE_URL.replace(/\/$/,'') : '';
 
 function prepend_base_path_to(url) {
     if (url.charAt(0) == '/') url = BASE_PATH + url;
@@ -234,6 +234,16 @@ var ContentByHashLib = {};
         });
     }
     ContentByHashLib.reload_content = reload_content;
+    
+    function unload_content(container_id, options) {
+        if (!options) options = {};
+        delete LOADED_URLS[ container_id ];
+        var $container = $('#'+container_id);
+        if (!options.keep_content) {
+            $container.empty();
+        }
+    }
+    ContentByHashLib.unload_content = unload_content;
     
     // We want location.hash to exactly describe what's on the page.
     // #url means that the result of $.get(url) be loaded into the #content div.
@@ -632,99 +642,105 @@ function get_adr(address, options) {
     return BASE_PATH + get_hashadr(address, options);
 }
 
-// Get an URL to a CSS or JS file, attempt to load it into the document and call callback on success.
-function load_media(url, succ_fn, err_fn) {
-    ;;; carp('loading media '+url);
+// Dynamic media (CSS, JS) loading
+(function() {
     
-    url.match(/(?:.*\/\/[^\/]*)?([^?]+)(?:\?.*)?/);
-    $(document).data('loaded_media')[ RegExp.$1 ] = url;
-    
-    if (url.match(/\.(\w+)(?:$|\?)/))
-        var ext = RegExp.$1;
-    else throw('Unexpected URL format: '+url);
-    
-    var abs_url = $('<a>').attr({href:url}).get(0).href;
-    
-    function stylesheet_present(url) {
-        for (var i = 0; i < document.styleSheets.length; i++) {
-            if (document.styleSheets[i].href == url) return document.styleSheets[i];
+    // Get an URL to a CSS or JS file, attempt to load it into the document and call callback on success.
+    function load_media(url, succ_fn, err_fn) {
+        ;;; carp('loading media '+url);
+        
+        url.match(/(?:.*\/\/[^\/]*)?([^?]+)(?:\?.*)?/);
+        $(document).data('loaded_media')[ RegExp.$1 ] = url;
+        
+        if (url.match(/\.(\w+)(?:$|\?)/))
+            var ext = RegExp.$1;
+        else throw('Unexpected URL format: '+url);
+        
+        var abs_url = $('<a>').attr({href:url}).get(0).href;
+        
+        function stylesheet_present(url) {
+            for (var i = 0; i < document.styleSheets.length; i++) {
+                if (document.styleSheets[i].href == url) return document.styleSheets[i];
+            }
+            return false;
         }
-        return false;
-    }
-    function get_css_rules(stylesheet) {
-        try {
-            if (stylesheet.cssRules) return stylesheet.cssRules;
-            if (stylesheet.rules   ) return stylesheet.rules;
-        } catch(e) { carp(e); }
-        carp('Could not get rules from: ', stylesheet);
-        return;
-    }
-    
-    if (ext == 'css') {
-        if (stylesheet_present(abs_url)) return true;
-        var tries = 100;
-        if ($.isFunction(succ_fn)) {
-            setTimeout(function() {
-                if (--tries < 0) {
-                    carp('Timed out loading CSS: '+url);
-                    if ($.isFunction(err_fn)) err_fn(url);
-                    return;
-                }
-                var ss;
-                if (ss = stylesheet_present(abs_url)) {
-                    var rules = get_css_rules(ss);
-                    if (rules && rules.length) succ_fn(url);
-                    else {
-                        if (rules) carp('CSS stylesheet empty.');
+        function get_css_rules(stylesheet) {
+            try {
+                if (stylesheet.cssRules) return stylesheet.cssRules;
+                if (stylesheet.rules   ) return stylesheet.rules;
+            } catch(e) { carp(e); }
+            carp('Could not get rules from: ', stylesheet);
+            return;
+        }
+        
+        if (ext == 'css') {
+            if (stylesheet_present(abs_url)) return true;
+            var tries = 100;
+            if ($.isFunction(succ_fn)) {
+                setTimeout(function() {
+                    if (--tries < 0) {
+                        carp('Timed out loading CSS: '+url);
                         if ($.isFunction(err_fn)) err_fn(url);
                         return;
                     }
-                }
-                else setTimeout(arguments.callee, 100);
-            }, 100);
+                    var ss;
+                    if (ss = stylesheet_present(abs_url)) {
+                        var rules = get_css_rules(ss);
+                        if (rules && rules.length) succ_fn(url);
+                        else {
+                            if (rules) carp('CSS stylesheet empty.');
+                            if ($.isFunction(err_fn)) err_fn(url);
+                            return;
+                        }
+                    }
+                    else setTimeout(arguments.callee, 100);
+                }, 100);
+            }
+            return $('<link rel="stylesheet" type="text/css" href="'+url+'" />').appendTo($('head'));
         }
-        return $('<link rel="stylesheet" type="text/css" href="'+url+'" />').appendTo($('head'));
-    }
-    else if (ext == 'js') {
-        var $scripts = $('script');
-        for (var i = 0; i < $scripts.length; i++) {
-            if ($scripts.get(i).src == abs_url) return true;
+        else if (ext == 'js') {
+            var $scripts = $('script');
+            for (var i = 0; i < $scripts.length; i++) {
+                if ($scripts.get(i).src == abs_url) return true;
+            }
+            return $.ajax({
+                url:       url,
+                type:     'GET',
+                dataType: 'script',
+                success:   succ_fn,
+                error:     err_fn,
+                cache:     true
+            });
         }
-        return $.ajax({
-            url:       url,
-            type:     'GET',
-            dataType: 'script',
-            success:   succ_fn,
-            error:     err_fn,
-            cache:     true
-        });
+        else throw('Unrecognized media type "'+ext+'" in URL: '+url);
     }
-    else throw('Unrecognized media type "'+ext+'" in URL: '+url);
-}
-
-
-var media_queue = [];
-$(document).data('loaded_media', {});
-function init_media() {
-    $(document).trigger('media_loaded').data('loaded_media', {});
-}
-function draw_media() {
-    if (media_queue.length == 0) {
-        init_media();
-        return true;
+    
+    
+    var media_queue = [];
+    $(document).data('loaded_media', {});
+    function init_media() {
+        $(document).trigger('media_loaded').data('loaded_media', {});
     }
-    var url = media_queue.shift();
-    load_media(url, draw_media, draw_media);
-}
-
-// Load a CSS / JavaScript file (given an URL) after previously requested ones have been loaded / failed loading.
-function request_media(url) {
-    var do_start = media_queue.length == 0;
-    media_queue.push(url);
-    if (do_start) {
-        setTimeout(draw_media,20);
+    function draw_media() {
+        if (media_queue.length == 0) {
+            init_media();
+            return true;
+        }
+        var url = media_queue.shift();
+        load_media(url, draw_media, draw_media);
     }
-}
+    
+    // Load a CSS / JavaScript file (given an URL) after previously requested ones have been loaded / failed loading.
+    function request_media(url) {
+        var do_start = media_queue.length == 0;
+        media_queue.push(url);
+        if (do_start) {
+            setTimeout(draw_media,20);
+        }
+    }
+    window.request_media = request_media;
+    
+})();
 
 
 // general-prurpose functions
@@ -957,7 +973,11 @@ $( function() {
         }*/
     };
     function show_form_error(input, msg) {
-        if (msg.join) { var msgs = msg; msg = msgs.shift(); }
+        if (!input) {
+            carp("Attempt to render error for empty input:", msg);
+            return;
+        }
+        if (msg.shift) { var msgs = msg; msg = msgs.shift(); }
         var $msg = $('<span>').addClass('form-error-msg').text(msg);
         $('label[for='+input.id+']').append($msg);
         if (msgs && msgs.length) show_form_error(input, msgs);
@@ -1032,8 +1052,6 @@ $( function() {
         });
         if (button_name) $inputs = $inputs.add('<input type="hidden" value="1" name="'+button_name+'" />');
         var data = $inputs.serialize();
-        ;;; carp(data);
-        return;
         if ($form.hasClass('reset-on-submit')) $form.get(0).reset();
         var url = $form.hasClass('dyn-addr')
             ? get_adr(action)
@@ -1153,6 +1171,7 @@ $( function() {
     */
     
     // Initialization of JavaScripts
+    /*
     $(document).bind('media_loaded', function() {
         var loaded_media = $(document).data('loaded_media');
         if (loaded_media[ MEDIA_URL + 'js/admin/DateTimeShortcuts.js' ]) {
@@ -1161,6 +1180,7 @@ $( function() {
         }
         delete loaded_media[ MEDIA_URL + 'js/admin/DateTimeShortcuts.js' ];
     });
+    */
     // Setting up proper suggers URLs to take the hash address into account
     $(document).bind('content_added', function() {
         var target_ids = $(document).data('injection_storage');
@@ -1230,7 +1250,7 @@ var $LOADING_MSG, LOADING_CNT = 0;
 function show_loading() {
     LOADING_CNT++;
     if ($LOADING_MSG) return;
-    $LOADING_MSG = show_message(_('loading...'), {duration:0});
+    $LOADING_MSG = show_message(_('loading')+'...', {duration:0});
 }
 function hide_loading() {
     if ($LOADING_MSG) $LOADING_MSG.remove();
@@ -1351,6 +1371,7 @@ function save_change_form_success(text_data, options) {
     };
     show_ok(response_msg);
     action_table.run(action);
+    ContentByHashLib.unload_content('history');
 }
 
 function changelist_batch_success(response_text) {
@@ -1369,6 +1390,7 @@ function batch_delete_confirm_complete() {
 
 
 // Help and hint rendering
+var HelpButton = {};
 $('.hint-enhanced input').live('mouseover', function() {
     if ($(this).attr('title')) return;
     var hint = $(this).nextAll('.hint').text();
@@ -1378,14 +1400,14 @@ $('.hint-enhanced input').live('mouseover', function() {
     }
     $(this).attr({title: hint});
 });
-function save_help_button_from_fading($help_button) {
+HelpButton.save_from_fading = function($help_button) {
     $help_button.stop().css({opacity:1});
     if ( $help_button.data('fadeout_timeout') ) {
         clearInterval( $help_button.data('fadeout_timeout') );
         $help_button.removeData('fadeout_timeout');
     }
 }
-function set_help_button_to_fade($input, $help_button) {
+HelpButton.set_to_fade = function($input, $help_button) {
     var help_button_fade_timeout = setTimeout( function() {
         $help_button.fadeOut(3000, function () {
             $input.removeData('help_button');
@@ -1396,7 +1418,7 @@ function set_help_button_to_fade($input, $help_button) {
 }
 $('.help-enhanced input').live('mouseover', function() {
     if ($(this).data('help_button')) {
-        save_help_button_from_fading($(this).data('help_button'))
+        HelpButton.save_from_fading($(this).data('help_button'))
         return;
     }
     var $help_button = $('<div>').addClass('help-button').css({
@@ -1410,13 +1432,13 @@ $('.help-enhanced input').live('mouseover', function() {
 }).live('mouseout', function() {
     var $help_button = $(this).data('help_button');
     if (!$help_button) return;
-    set_help_button_to_fade($(this), $help_button);
+    HelpButton.set_to_fade($(this), $help_button);
 });
 $('.help-button').live('mouseover', function() {
-    save_help_button_from_fading($(this));
+    HelpButton.save_from_fading($(this));
 }).live('mouseout', function() {
     var $input = $(this).data('antecedant_input');
-    set_help_button_to_fade($input, $(this));
+    HelpButton.set_to_fade($input, $(this));
 }).live('click', function() {
     $(this).closest('.help-enhanced').find('.help').slideToggle();
 });

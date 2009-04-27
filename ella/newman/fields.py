@@ -11,13 +11,11 @@ from django.forms.util import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from django.forms.models import ModelChoiceField
 from django.db.models.fields.related import ManyToManyField
-from django.conf import settings
 
 from ella.newman import widgets, utils
 from ella.newman.permission import get_permission, permission_filtered_model_qs, has_category_permission
 
 log = logging.getLogger('ella.newman')
-MARKUP_APP_INSTALLED = False   # used by RichTextField
 
 class AdminSuggestField(fields.Field):
     """
@@ -161,9 +159,3 @@ class CategoryChoiceField(ModelChoiceField):
         if not has_category_permission(self.user, cvalue, change_perm):
             raise ValidationError(_('Category not permitted'))
         return cvalue
-
-
-# Markup app detection:
-for app in settings.INSTALLED_APPS:
-    if app == 'ella.newman.markup':
-        MARKUP_APP_INSTALLED = True

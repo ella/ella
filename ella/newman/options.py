@@ -1,4 +1,5 @@
 from ella.newman.licenses.models import License
+from ella.newman.licenses.listeners import LicenseListenerPostSave
 import logging
 
 from django.conf import settings
@@ -58,6 +59,10 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
                 'model': custom_params.get('model'),
                 'widget': widgets.NewmanRichTextAreaWidget
             })
+            if 'ella.newman.licenses' in settings.INSTALLED_APPS:
+                kwargs.update({
+                    'post_save_listeners': [LicenseListenerPostSave],
+                })
             rich_text_field = RichTextField(**kwargs)
             if css_class:
                 rich_text_field.widget.attrs['class'] += ' %s' % css_class

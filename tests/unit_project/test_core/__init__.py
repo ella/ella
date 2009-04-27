@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.conf import settings
 
-from ella.core.models import Placement, Category
+from ella.core.models import Placement, Category, Listing
 # choose Article as an example publishable
 from ella.articles.models import Article
 
@@ -54,7 +54,7 @@ def create_and_place_more_publishables(case):
     case.publishables = []
     case.placements = []
 
-    for i, c in enumerate(Category.objects.all()):
+    for i, c in enumerate(Category.objects.order_by('pk')):
 
         case.publishables.append(
             Article.objects.create(
@@ -73,3 +73,18 @@ def create_and_place_more_publishables(case):
             )
         )
 
+def list_all_placements_in_category_by_hour(case, category=None):
+    case.listings = []
+
+    publish_from = case.placements[0].publish_from
+
+    for p in case.placements:
+        case.listings.append(
+            Listing.objects.create(
+                placement=p,
+                category=category or p.category,
+                publish_from=publish_from,
+            )    
+        )
+        publish_from += timedelta(seconds=3600)
+    case.listings.reverse()

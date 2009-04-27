@@ -1,3 +1,13 @@
+var IMAGE_OPTIONS = {
+    maxWidth: 2048,
+    maxHeight: 2048,
+    formatConversion: {
+        png:  'png',
+        tiff: 'jpg.90',
+        gif:  'png',
+        jpg:  'jpg.85',
+    }
+};
 ( function($) {
     window.on_upload_success = function(xhr) {
         ;;; carp('success:', xhr);
@@ -30,9 +40,9 @@
             }
             data[ field ] = val;
         }
-        var adr = get_adr('json/');
-        flash_obj.saveData(data, adr);
-        carp(adr);
+        IMAGE_OPTIONS.url = $('<a>').attr('href',get_adr('json/')).get(0).href;
+        flash_obj.saveData(data, IMAGE_OPTIONS);
+        ;;; carp('URL passed to flash: ' + IMAGE_OPTIONS.url);
         return false;
     }
     function set_image_form_handlers() {

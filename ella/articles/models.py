@@ -71,5 +71,5 @@ class ArticleContents(models.Model):
         #order_with_respect_to = 'article'
 
     def __unicode__(self):
-        return self.title
+        return self.title or unicode(self.article)
 

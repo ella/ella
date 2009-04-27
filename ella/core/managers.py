@@ -47,7 +47,7 @@ class ListingManager(RelatedManager):
         Method that cleans the Listing model by deleting all listings that are no longer valid.
         Should be run periodicaly to purge the DB from unneeded data.
         """
-        self.filter(remove=True, priority_to__lte=datetime.now()).delete()
+        self.filter(publish_to__lt=datetime.now()).delete()
 
     def get_queryset(self, category=None, children=NONE, mods=[], content_types=[], **kwargs):
         now = datetime.now()
@@ -71,13 +71,7 @@ class ListingManager(RelatedManager):
         if mods or content_types:
             qset = qset.filter(placement__publishable__content_type__in=([ ContentType.objects.get_for_model(m) for m in mods ] + content_types))
 
-        return qset
-
-    def get_count(self, category=None, children=NONE, mods=[], **kwargs):
-        now = datetime.now()
-        # no longer active listings
-        deleted = models.Q(remove=True, priority_to__isnull=False, priority_to__lte=now)
-        return self.get_queryset(category, children, mods, **kwargs).exclude(deleted).count()
+        return qset.exclude(publish_to__lt=now)
 
     @cache_this(get_listings_key, invalidate_listing)
     def get_listing(self, category=None, children=NONE, count=10, offset=1, mods=[], content_types=[], unique=None, **kwargs):
@@ -93,7 +87,10 @@ class ListingManager(RelatedManager):
         """
         # TODO try to write  SQL (.extra())
         assert offset > 0, "Offset must be a positive integer"
-        assert count > 0, "Count must be a positive integer"
+        assert count >= 0, "Count must be a positive integer"
+
+        if not count:
+            return []
 
         now = datetime.now()
         qset = self.get_queryset(category, children, mods, content_types, **kwargs)
@@ -104,7 +101,7 @@ class ListingManager(RelatedManager):
                     priority_from__isnull=False,
                     priority_from__lte=now,
                     priority_to__gte=now
-)
+        )
 
         qsets = (
             # modded-up objects
@@ -113,7 +110,7 @@ class ListingManager(RelatedManager):
             qset.exclude(active).order_by('-publish_from'),
             # modded-down priority
             qset.filter(active, priority_value__lt=DEFAULT_LISTING_PRIORITY).order_by('-priority_value', '-publish_from'),
-)
+        )
 
         out = []
 
@@ -121,18 +118,15 @@ class ListingManager(RelatedManager):
         offset -= 1
         limit = offset + count
 
-        # no longer active listings UGLY TERRIBLE HACK DUE TO queryset-refactor not handling .exclude properly
-        # FIXME TODO
-        deleted = models.Q(remove=True, priority_to__isnull=False, priority_to__lte=now)
-
         # take out not unwanted objects
         if unique:
             listed_targets = unique.copy()
         else:
             listed_targets = set([])
+
         # iterate through qsets until we have enough objects
         for q in qsets:
-            data = q.exclude(deleted)
+            data = q
             if data:
                 for l in data:
                     tgt = l.placement_id
@@ -143,6 +137,30 @@ class ListingManager(RelatedManager):
                     if len(out) == limit:
                         return out[offset:limit]
         return out[offset:offset + count]
+
+    def get_queryset_wrapper(self, kwargs):
+        return ListingQuerySetWrapper(self, kwargs)
+
+class ListingQuerySetWrapper(object):
+    def __init__(self, manager, kwargs):
+        self.manager = manager
+        self._kwargs = kwargs
+
+    def __getitem__(self, k):
+        if not isinstance(k, slice) or (k.start is None or k.start < 0) or (k.stop is None  or k.stop < k.start):
+            raise TypeError, '%s, %s' % (k.start, k.stop) 
+
+        offset = k.start + 1
+        count = k.stop - k.start
+
+        return self.manager.get_listing(offset=offset, count=count, **self._kwargs)
+    
+    def count(self):
+        if not hasattr(self, '_count'):
+            self._count = self.manager.get_queryset(**self._kwargs).count()
+        return self._count
+    
+
 
 def get_top_objects_key(func, self, count, mods=[]):
     return 'ella.core.managers.HitCountManager.get_top_objects_key:%d:%d:%s' % (
