@@ -255,7 +255,7 @@ class FormatedPhoto(models.Model):
     def generate(self):
         "Generates photo file in current format"
         formatter = Formatter(Image.open(imagePath), self.format)
-        stretched_photo = formatter.format()
+        stretched_photo, crop_box = formatter.format()
         self.width, self.height = stretched_photo.size
         self.filename = self.file(relative=True)
         stretched_photo.save(self.file(), quality=self.format.resample_quality)
