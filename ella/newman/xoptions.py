@@ -292,7 +292,7 @@ class XModelAdmin(ModelAdmin):
         context = {}
         if request.method == 'POST':
             error_dict = {}
-            form = ModelForm(request.POST.copy(), request.FILES.copy())
+            form = ModelForm(request.POST.copy(), request.FILES)
             if form.is_valid():
                 form_validated = True
                 new_object = self.save_form(request, form, change=False)
@@ -308,7 +308,7 @@ class XModelAdmin(ModelAdmin):
                 prefixes[prefix] = prefix_no + 1
                 if prefixes[prefix] != 1:
                     prefix = "%s-%s" % (prefix, prefixes[prefix])
-                formset = FormSet(data=request.POST.copy(), files=request.FILES.copy(),
+                formset = FormSet(data=request.POST.copy(), files=request.FILES,
                                   instance=new_object,
                                   save_as_new=request.POST.has_key("_saveasnew"),
                                   prefix=prefix)
@@ -376,6 +376,7 @@ class XModelAdmin(ModelAdmin):
         })
 
         context['raw_form'] = form
+        #import pdb;pdb.set_trace()
         return context
 
     def add_view(self, request, form_url='', extra_context=None):
