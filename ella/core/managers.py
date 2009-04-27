@@ -47,7 +47,7 @@ class ListingManager(RelatedManager):
         Method that cleans the Listing model by deleting all listings that are no longer valid.
         Should be run periodicaly to purge the DB from unneeded data.
         """
-        self.filter(remove=True, priority_to__lte=datetime.now()).delete()
+        self.filter(publish_to__lt=datetime.now()).delete()
 
     def get_queryset(self, category=None, children=NONE, mods=[], content_types=[], **kwargs):
         now = datetime.now()
@@ -71,13 +71,7 @@ class ListingManager(RelatedManager):
         if mods or content_types:
             qset = qset.filter(placement__publishable__content_type__in=([ ContentType.objects.get_for_model(m) for m in mods ] + content_types))
 
-        return qset
-
-    def get_count(self, category=None, children=NONE, mods=[], **kwargs):
-        now = datetime.now()
-        # no longer active listings
-        deleted = models.Q(remove=True, priority_to__isnull=False, priority_to__lte=now)
-        return self.get_queryset(category, children, mods, **kwargs).exclude(deleted).count()
+        return qset.exclude(publish_to__lt=now)
 
     @cache_this(get_listings_key, invalidate_listing)
     def get_listing(self, category=None, children=NONE, count=10, offset=1, mods=[], content_types=[], unique=None, **kwargs):
@@ -121,18 +115,15 @@ class ListingManager(RelatedManager):
         offset -= 1
         limit = offset + count
 
-        # no longer active listings UGLY TERRIBLE HACK DUE TO queryset-refactor not handling .exclude properly
-        # FIXME TODO
-        deleted = models.Q(remove=True, priority_to__isnull=False, priority_to__lte=now)
-
         # take out not unwanted objects
         if unique:
             listed_targets = unique.copy()
         else:
             listed_targets = set([])
+
         # iterate through qsets until we have enough objects
         for q in qsets:
-            data = q.exclude(deleted)
+            data = q
             if data:
                 for l in data:
                     tgt = l.placement_id
