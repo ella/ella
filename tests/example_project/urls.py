@@ -31,6 +31,9 @@ urlpatterns = patterns('',
     # main admin urls
     ('^newman/', include(newman.site.urls)),
 
+    # polls urls
+    ('^polls/', include('ella.polls.urls')),
+
     # reverse url lookups
     (r'^', include('ella.core.urls')),
 
