@@ -263,7 +263,8 @@ class NewmanModelAdmin(XModelAdmin):
         # save per user filtered content type.
         req_path = request.get_full_path()
         ct = ContentType.objects.get_for_model(self.model)
-        if req_path.find('?') > 0:
+        # persistent filter for non-popupped changelists only
+        if req_path.find('?') > 0 and req_path.find('pop') < 0:
             url_args = req_path.split('?', 1)[1]
             key = 'filter__%s__%s' % (ct.app_label, ct.model)
             utils.set_user_config_db(request.user, key, url_args)
@@ -574,7 +575,10 @@ class NewmanModelAdmin(XModelAdmin):
         if request.method.upper() != 'POST':
             msg = _('This view is designed for saving data only, thus POST method is required.')
             return HttpResponseForbidden(msg)
-        context = self.get_add_view_context(request, form_url)
+        try:
+            context = self.get_add_view_context(request, form_url)
+        except:
+            raise
         context.update(extra_context or {})
         if 'object_added' in context:
             msg = request.user.message_set.all()[0].message
