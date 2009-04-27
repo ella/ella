@@ -69,6 +69,12 @@ class Photo(models.Model):
     width = models.PositiveIntegerField(editable=False)
     height = models.PositiveIntegerField(editable=False)
 
+    # important area
+    important_top = models.PositiveIntegerField(null=True, blank=True)
+    important_left = models.PositiveIntegerField(null=True, blank=True)
+    important_bottom = models.PositiveIntegerField(null=True, blank=True)
+    important_right = models.PositiveIntegerField(null=True, blank=True)
+
     # Authors and Sources
     authors = models.ManyToManyField(Author, verbose_name=_('Authors') , related_name='photo_set')
     source = models.ForeignKey(Source, blank=True, null=True, verbose_name=_('Source'))
