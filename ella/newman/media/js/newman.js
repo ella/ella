@@ -972,6 +972,7 @@ $( function() {
             else return _('Field cannot be blank.');
         }*/
     };
+    AjaxFormLib.validations = validations;
     function show_form_error(input, msg) {
         if (!input) {
             carp("Attempt to render error for empty input:", msg);
