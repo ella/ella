@@ -2,7 +2,6 @@ from django.core.files.images import get_image_dimensions
 import Image
 from datetime import datetime
 from os import path
-from imageop import ImageStretch, detect_img_type
 import os
 
 from django.db import models, IntegrityError
@@ -18,6 +17,8 @@ from ella.core.box import Box
 from ella.core.cache.utils import get_cached_object
 from ella.utils.filemanipulation import file_rename
 from ella.tagging.models import TaggedItem
+
+from formatter import Formatter, detect_img_type
 
 # settings default
 PHOTOS_FORMAT_QUALITY_DEFAULT = (
@@ -253,8 +254,8 @@ class FormatedPhoto(models.Model):
 
     def generate(self):
         "Generates photo file in current format"
-        i = ImageStretch(filename=self.photo.image.path, formated_photo=self)
-        stretched_photo = i.stretch_image()
+        formatter = Formatter(Image.open(imagePath), self.format)
+        stretched_photo = formatter.format()
         self.width, self.height = stretched_photo.size
         self.filename = self.file(relative=True)
         stretched_photo.save(self.file(), quality=self.format.resample_quality)
