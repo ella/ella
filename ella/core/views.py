@@ -1,8 +1,8 @@
-from datetime import datetime
+from datetime import datetime, date
 
 from django.contrib.contenttypes.models import ContentType
 from django.template import RequestContext
-from django.core.paginator import QuerySetPaginator
+from django.core.paginator import Paginator
 from django.conf import settings
 from django.template.defaultfilters import slugify
 from django.db import models
@@ -85,7 +85,13 @@ def category_detail(request, category):
         )
 
 def list_content_type(request, category=None, year=None, month=None, day=None, content_type=None, paginate_by=20):
-    context = _list_content_type(request, category, year, month, day, content_type, paginate_by)
+    # pagination
+    if 'p' in request.GET and request.GET['p'].isdigit():
+        page_no = int(request.GET['p'])
+    else:
+        page_no = 1
+
+    context = _list_content_type(category, year, month, day, content_type, page_no, paginate_by)
     if content_type:
         ct = get_content_type(content_type)
     else:
@@ -218,47 +224,45 @@ def get_templates_from_placement(name, placement, slug=None, category=None, app_
         model_label = placement.publishable.target._meta.module_name
     return get_templates(name, slug, category, app_label, model_label)
 
-def _list_content_type(request, category=None, year=None, month=None, day=None, content_type=None, paginate_by=20):
+def _list_content_type(category, year, month=None, day=None, content_type=None, page_no=1, paginate_by=20):
     """
     List objects' listings according to the parameters.
 
     :Parameters:
-        - `request`: HttpRequest supplied by Django
         - `category`: base Category tree_path, optional - defaults to all categories
         - `year, month, day`: date matching the `publish_from` field of the `Placement` object.
           All of these parameters are optional, the list will be filtered by the non-empty ones
         - `content_type`: slugified verbose_name_plural of the target model, if omitted all content_types are listed
+        - `page_no`: which page to display
         - `paginate_by`: number of records in one page
 
     :Exceptions:
         - `Http404`: if the specified category or content_type does not exist or if the given date is malformed.
     """
     kwa = {}
-    dates_kwa = {}
-    if year:
-        current_date = datetime(int(year), 1, 1)
-        dates_kwa['publish_from__year'] = int(year)
-        date_kind = 'month'
+    year = int(year)
+    kwa['publish_from__year'] = year
 
     if month:
         try:
-            current_date = datetime(int(year), int(month), 1)
-        except ValueError:
-            raise Http404
-        dates_kwa['publish_from__month'] = int(month)
-        date_kind = 'day'
+            month = int(month)
+            date(year, month, 1)
+        except ValueError, e:
+            raise Http404()
+        kwa['publish_from__month'] = month
 
     if day:
         try:
-            current_date = datetime(int(year), int(month), int(day))
-        except ValueError:
-            raise Http404
-        dates_kwa['publish_from__day'] = int(day)
-        date_kind = 'detail'
+            day = int(day)
+            date(year, month, day)
+        except ValueError, e:
+            raise Http404()
+        kwa['publish_from__day'] = day
 
     if category:
         cat = get_cached_object_or_404(Category, tree_path=category, site__id=settings.SITE_ID)
-        kwa['category__tree_path__startswith'] = category
+        kwa['category'] = cat
+        kwa['children'] = Listing.objects.ALL
     else:
         cat = get_cached_object_or_404(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
         kwa['category'] = cat
@@ -269,68 +273,27 @@ def _list_content_type(request, category=None, year=None, month=None, day=None, 
     else:
         ct = False
 
-    # pagination
-    if 'p' in request.GET and request.GET['p'].isdigit():
-        page_no = int(request.GET['p'])
-    else:
-        page_no = 1
-
-    base_qset = Listing.objects.get_queryset(**kwa)
-    kwa.update(dates_kwa)
-    qset = Listing.objects.get_queryset(**kwa)
-    paginator = QuerySetPaginator(qset.filter(**dates_kwa), paginate_by)
+    qset = Listing.objects.get_queryset_wrapper(kwa)
+    paginator = Paginator(qset, paginate_by)
 
     if page_no > paginator.num_pages or page_no < 1:
-        raise Http404
+        raise Http404()
 
-    kwa['count'] = paginate_by
-    kwa['offset'] = (page_no - 1) * paginate_by + 1
     page = paginator.page(page_no)
     listings = page.object_list
-
-    url_prepend = ''
-    url_apend = ''
-    if ct:
-        url_prepend = '../'
-        url_apend = content_type + '/'
-
-    # list of years with published objects
-    year_list = [
-            (d, d.strftime(DATE_REPR["year"]), url_prepend + d.strftime(YEAR_URLS[date_kind]))
-            for d in base_qset.dates('publish_from', "year", order='DESC')
-        ]
-
-    # list of dates with published objects
-    date_list = None
-    if date_kind != 'detail':
-        date_list = [
-                (d, d.strftime(DATE_REPR[date_kind]), url_prepend + d.strftime(DATE_URLS[date_kind]) + url_apend)
-                for d in qset.dates('publish_from', date_kind, order='DESC')
-            ]
 
     context = {
             'page': page,
             'is_paginated': paginator.num_pages > 1,
             'results_per_page': paginate_by,
 
-            'year_list' : year_list,
-            'date_list' : date_list,
-            'current_date' : current_date,
-            'current_date_text' : current_date.strftime(CURRENT_DATE_REPR[date_kind]),
-            'date_kind' : date_kind,
-
-            'content_type' : content_type,
+            'content_type' : ct,
+            'content_type_name' : content_type,
             'listings' : listings,
             'category' : cat,
         }
 
     return context
-
-# format lookups for year_list and date_list
-DATE_URLS = { 'month' : '../%Y/%m/', 'day' : '../../%Y/%m/%d/', }
-YEAR_URLS = { 'month' : '../%Y/', 'day' : '../../%Y/', 'detail' : '../../../%Y/', }
-DATE_REPR = { 'year' : '%Y', 'month' : '%m/%Y', 'day' : '%d/%m/%Y', 'detail' : '%d/%m/%Y', }
-CURRENT_DATE_REPR = { 'month' : '%Y', 'day' : '%m/%Y', 'detail' : '%d/%m/%Y', }
 
 def __archive_entry_year(category):
     " Return ARCHIVE_ENTRY_YEAR from settings (if exists) or year of the newest object in category "

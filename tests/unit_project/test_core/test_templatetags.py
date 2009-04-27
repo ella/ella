@@ -48,6 +48,11 @@ class TestListingTagParser(UnitTestCase):
         self.assert_equals({'count': '1'}, parameters)
         self.assert_equals(['count'], parameters_to_resolve)
 
+    def test_offset(self):
+        var_name, parameters, parameters_to_resolve = listing_parse(['listing', '1', 'from', '10', 'as', 'var'])
+        self.assert_true('offset' in parameters_to_resolve)
+        self.assert_equals('10', parameters['offset'])
+
     def test_limit_by_model(self):
         from ella.articles.models import Article, ArticleContents
         var_name, parameters, parameters_to_resolve = listing_parse(['listing', '1', 'of', 'articles.article', 'as', 'var'])
