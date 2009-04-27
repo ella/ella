@@ -115,12 +115,6 @@ class Formatter(object):
 
         elif self.image_ratio < self.format_ratio:
             # image taller than format
-            if f.flexible_height:
-                flexw, flexh = self.fw, f.flexible_max_height
-                flex_ratio = float(flexw) / flexh
-
-                if abs(flex_ratio - self.image_ratio) < abs(self.format_ratio - self.image_ratio):
-                    return (flexh * iw / ih, flexw)
             return (self.fh * iw / ih, self.fh)
 
         else: # self.image_ratio > self.format_ratio
