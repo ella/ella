@@ -27,7 +27,7 @@ class CustomFilterSpec(FilterSpec):
         #self.lookup_val = request.GET.get(self.lookup_kwarg, None) #selected filter value (not label)
         self.lookup_kwarg = 'NOT SET'
         self.f = f
-        self.request = request
+        self.request_get = request.GET
         super(CustomFilterSpec, self).__init__(f, request, params, model, model_admin, field_path=field_path)
         self.request_path_info = request.path_info
         self.title_text = self.field.verbose_name
@@ -60,21 +60,45 @@ class CustomFilterSpec(FilterSpec):
             found = 0
         for p in request_params:
             if not lookup_multi and p == lookup:
-                return True
+                return [lookup]
             elif lookup_multi:
                 if p in lookup:
                     found += 1
                 if found == lookup_multi:
-                    return True
+                    return lookup
         return False
 
+    def is_selected_item(self):
+        """
+        Returns empty dict if no filter item is selected.
+        Otherwise returns dict containing GET params as keys and corresponding
+        values. 
+        """
+        active = self.is_active(self.request_get)
+        if not active:
+            return dict()
+        out = dict()
+        for par in active:
+            if par in self.request_get:
+                out[par] = self.request_get[par]
+        return out
+
     def choices(self, cl):
+        def make_unicode_params(pdict):
+            " param values converted to unicode are needed to make dict to dict parameter comparison. "
+            out = dict()
+            for key in pdict:
+                out[key] = unicode(pdict[key])
+            return out
+
         if self.filter_func():
             self.state = 1
         if self.state > 0:
             lookup = self.get_lookup_kwarg()
+            selected = self.is_selected_item()
             for title, param_dict in self.links:
-                yield {'selected': lookup == param_dict,
+                params = make_unicode_params(param_dict)
+                yield {'selected': selected == params,
                        'query_string': cl.get_query_string(param_dict, []),
                        'display': title}
 
