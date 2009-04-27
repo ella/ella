@@ -2,7 +2,7 @@ from datetime import datetime
 
 from django.contrib.contenttypes.models import ContentType
 from django.template import RequestContext
-from django.core.paginator import QuerySetPaginator
+from django.core.paginator import Paginator
 from django.conf import settings
 from django.template.defaultfilters import slugify
 from django.db import models
@@ -278,7 +278,7 @@ def _list_content_type(category, year, month=None, day=None, content_type=None, 
     kwa.update(dates_kwa)
     # FIXME: FAIL, this ignores priorities
     qset = Listing.objects.get_queryset(**kwa)
-    paginator = QuerySetPaginator(qset.filter(**dates_kwa), paginate_by)
+    paginator = Paginator(qset.filter(**dates_kwa), paginate_by)
 
     if page_no > paginator.num_pages or page_no < 1:
         raise Http404()
