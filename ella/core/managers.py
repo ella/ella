@@ -87,7 +87,10 @@ class ListingManager(RelatedManager):
         """
         # TODO try to write  SQL (.extra())
         assert offset > 0, "Offset must be a positive integer"
-        assert count > 0, "Count must be a positive integer"
+        assert count >= 0, "Count must be a positive integer"
+
+        if not count:
+            return []
 
         now = datetime.now()
         qset = self.get_queryset(category, children, mods, content_types, **kwargs)
@@ -134,6 +137,30 @@ class ListingManager(RelatedManager):
                     if len(out) == limit:
                         return out[offset:limit]
         return out[offset:offset + count]
+
+    def get_queryset_wrapper(self, kwargs):
+        return ListingQuerySetWrapper(self, kwargs)
+
+class ListingQuerySetWrapper(object):
+    def __init__(self, manager, kwargs):
+        self.manager = manager
+        self._kwargs = kwargs
+
+    def __getitem__(self, k):
+        if not isinstance(k, slice) or (k.start is None or k.start < 0) or (k.stop is None  or k.stop < k.start):
+            raise TypeError, '%s, %s' % (k.start, k.stop) 
+
+        offset = k.start + 1
+        count = k.stop - k.start
+
+        return self.manager.get_listing(offset=offset, count=count, **self._kwargs)
+    
+    def count(self):
+        if not hasattr(self, '_count'):
+            self._count = self.manager.get_queryset(**self._kwargs).count()
+        return self._count
+    
+
 
 def get_top_objects_key(func, self, count, mods=[]):
     return 'ella.core.managers.HitCountManager.get_top_objects_key:%d:%d:%s' % (
