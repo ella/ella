@@ -18,10 +18,10 @@
 {% block content_services %}
     <div id="filters"></div>
     {% if is_filtered %}
-    <span style="color: red; font-wight: bold;">Filter on.</span>
+    <span style="color: red; font-wight: bold;">{% trans "Filter on." %}</span>
     {% endif %}
     {% if is_user_category_filtered %}
-    <span style="color: red; font-wight: bold;">Categories filtered by user.</span>
+    <span style="color: red; font-wight: bold;">{% trans "Categories filtered by user." %}</span>
     {% endif %}
 {% endblock %}
 
