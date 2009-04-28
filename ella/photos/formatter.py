@@ -86,12 +86,47 @@ class Formatter(object):
             # same ratio as format
             return
 
+    def center_important_part(self, crop_box):
+        """
+        If important_box was specified, make sure it lies inside the crop box.
+        """
+        if not self.important_box:
+            return crop_box
+
+        # shortcuts
+        ib = self.important_box
+        cl, ct, cr, cb = crop_box
+        iw, ih = self.image.size
+
+        # compute the move of crop center onto important center
+        move_horiz = (ib[0] + ib[2]) // 2 - (cl + cr) // 2
+        move_verti = (ib[1] + ib[3]) // 2 - (ct + cb) // 2
+
+        # make sure we don't get out of the image
+        # ... horizontaly
+        if move_horiz > 0:
+            move_horiz = min(iw - cr, move_horiz)
+        else:
+            move_horiz = max(-cl, move_horiz)
+
+        # .. and verticaly
+        if move_verti > 0:
+            move_verti = min(ih - cb, move_verti)
+        else:
+            move_verti = max(-ct, move_verti)
+
+        # move the crop_box
+        return (cl + move_horiz, ct + move_verti, cr + move_horiz, cb + move_verti)
+
+
     def crop_to_ratio(self):
         " Get crop coordinates and perform the crop if we get any. "
         crop_box = self.get_crop_box()
 
         if not crop_box:
             return
+
+        crop_box = self.center_important_part(crop_box)
 
         self.image = self.image.crop(crop_box)
         return crop_box
