@@ -6,6 +6,7 @@ import logging
 from django.utils.encoding import smart_unicode, iri_to_uri
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
+from django.utils.translation import ugettext as _
 from django.contrib.admin.filterspecs import FilterSpec
 from django.contrib.admin import filterspecs
 
@@ -31,6 +32,7 @@ class CustomFilterSpec(FilterSpec):
         super(CustomFilterSpec, self).__init__(f, request, params, model, model_admin, field_path=field_path)
         self.request_path_info = request.path_info
         self.title_text = self.field.verbose_name
+        self.active_filter_lookup = None
 
     def filter_func(self):
         raise NotImplementedError('filter_func() method should be overloaded (substituted at run-time).')
@@ -48,11 +50,10 @@ class CustomFilterSpec(FilterSpec):
         """
         return self.lookup_kwarg
 
-    def is_active(self, request_params):
-        """ 
-        Returns True if filter is applied, otherwise returns False.
-        Tries to find its argument(s) in request querystring.
-        """
+    def get_active(self, request_params):
+        if self.active_filter_lookup is not None: # cached result
+            return self.active_filter_lookup
+        self.active_filter_lookup = []
         lookup_multi = 0
         lookup = self.get_lookup_kwarg()
         if type(lookup) == list:
@@ -60,13 +61,22 @@ class CustomFilterSpec(FilterSpec):
             found = 0
         for p in request_params:
             if not lookup_multi and p == lookup:
-                return [lookup]
+                self.active_filter_lookup = [lookup]
+                break
             elif lookup_multi:
                 if p in lookup:
                     found += 1
                 if found == lookup_multi:
-                    return lookup
-        return False
+                    self.active_filter_lookup = lookup
+                    break
+        return self.active_filter_lookup
+
+    def is_active(self, request_params):
+        """ 
+        Returns True if filter is applied, otherwise returns False.
+        Tries to find its argument(s) in request querystring.
+        """
+        return len(self.get_active(request_params)) > 0
 
     def is_selected_item(self):
         """
@@ -74,13 +84,20 @@ class CustomFilterSpec(FilterSpec):
         Otherwise returns dict containing GET params as keys and corresponding
         values. 
         """
-        active = self.is_active(self.request_get)
-        if not active:
-            return dict()
+        active = self.get_active(self.request_get)
         out = dict()
         for par in active:
             if par in self.request_get:
                 out[par] = self.request_get[par]
+        return out
+
+    def get_disabled_params(self):
+        " Returns parameter dict for constructing HREF to disable this filter. "
+        out = dict()
+        for key in self.request_get:
+            if key in self.get_active(self.request_get):
+                continue
+            out[key] = self.request_get[key]
         return out
 
     def choices(self, cl):
@@ -93,14 +110,19 @@ class CustomFilterSpec(FilterSpec):
 
         if self.filter_func():
             self.state = 1
-        if self.state > 0:
-            lookup = self.get_lookup_kwarg()
-            selected = self.is_selected_item()
-            for title, param_dict in self.links:
-                params = make_unicode_params(param_dict)
-                yield {'selected': selected == params,
-                       'query_string': cl.get_query_string(param_dict, []),
-                       'display': title}
+        if self.state <= 0:
+            yield dict()
+        lookup = self.get_lookup_kwarg()
+        selected = self.is_selected_item()
+        # Reset filter button/a href
+        yield {'selected': len(selected.keys()) == 0,
+               'query_string': cl.get_query_string(None, self.get_active(self.request_get) ),
+               'display': _('All')}
+        for title, param_dict in self.links:
+            params = make_unicode_params(param_dict)
+            yield {'selected': selected == params,
+                   'query_string': cl.get_query_string(param_dict, []),
+                   'display': title}
 
 
 def filterspec_preregister(cls, test, factory):
