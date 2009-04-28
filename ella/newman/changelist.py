@@ -10,7 +10,6 @@ class FilterableChangeList(ChangeList):
         """ Iterates over all ChangeList's filters. Returns True if at least one filter is active. """
         if not hasattr(self, '_filters'):
             return False
-        #sql, param_list = self.query_set.query.where.as_sql()
         for f in self._filters:
             act = f.is_active(self.params)
             log.debug('is_active=%s for filter %s:' % (act, f))
