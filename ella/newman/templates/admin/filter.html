@@ -3,8 +3,15 @@
     <h4>{% blocktrans with title as filter_title %} By {{ filter_title }} {% endblocktrans %}</h4>
     <ul>
     {% for choice in choices %}
-        <li{% if choice.selected %} class="selected"{% endif %}>
-        <a href="{{ choice.query_string|iriencode }}">{{ choice.display }}</a></li>
+        {% if forloop.first %}
+            {% if not choice.selected %}
+                <a href="{{ choice.query_string|iriencode }}" title="{{ choice.display }}">(X)</a>
+            {% endif %}
+        {% else %}
+            <li{% if choice.selected %} class="selected"{% endif %}>
+            <a href="{{ choice.query_string|iriencode }}">{{ choice.display }}</a>
+            </li>
+        {% endif %}
     {% endfor %}
     </ul>
 </div>
