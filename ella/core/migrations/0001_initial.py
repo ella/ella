@@ -112,10 +112,10 @@ class Migration:
             ('placement', models.ForeignKey(Placement)),
             ('category', models.ForeignKey(Category, db_index=True)),
             ('publish_from', models.DateTimeField(_("Start of listing"))),
+            ('publish_to', models.DateTimeField(_("End of listing"), null=True, blank=True)),
             ('priority_from', models.DateTimeField(_("Start of prioritized listing"), null=True, blank=True)),
             ('priority_to', models.DateTimeField(_("End of prioritized listing"), null=True, blank=True)),
             ('priority_value', models.IntegerField(_("Priority"), blank=True, null=True)),
-            ('remove', models.BooleanField(_("Remove"), help_text=_("Remove object from listing after the priority wears off?"), default=False)),
             ('commercial', models.BooleanField(_("Commercial"), default=False, help_text=_("Check this if the listing is of a commercial content."))),
         ))
         

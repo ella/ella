@@ -972,8 +972,13 @@ $( function() {
             else return _('Field cannot be blank.');
         }*/
     };
+    AjaxFormLib.validations = validations;
     function show_form_error(input, msg) {
-        if (msg.join) { var msgs = msg; msg = msgs.shift(); }
+        if (!input) {
+            carp("Attempt to render error for empty input:", msg);
+            return;
+        }
+        if (msg.shift) { var msgs = msg; msg = msgs.shift(); }
         var $msg = $('<span>').addClass('form-error-msg').text(msg);
         $('label[for='+input.id+']').append($msg);
         if (msgs && msgs.length) show_form_error(input, msgs);
@@ -1246,7 +1251,7 @@ var $LOADING_MSG, LOADING_CNT = 0;
 function show_loading() {
     LOADING_CNT++;
     if ($LOADING_MSG) return;
-    $LOADING_MSG = show_message(_('loading...'), {duration:0});
+    $LOADING_MSG = show_message(_('loading')+'...', {duration:0});
 }
 function hide_loading() {
     if ($LOADING_MSG) $LOADING_MSG.remove();
@@ -1367,7 +1372,7 @@ function save_change_form_success(text_data, options) {
     };
     show_ok(response_msg);
     action_table.run(action);
-    unload_content('history');
+    ContentByHashLib.unload_content('history');
 }
 
 function changelist_batch_success(response_text) {
@@ -1386,6 +1391,7 @@ function batch_delete_confirm_complete() {
 
 
 // Help and hint rendering
+var HelpButton = {};
 $('.hint-enhanced input').live('mouseover', function() {
     if ($(this).attr('title')) return;
     var hint = $(this).nextAll('.hint').text();
@@ -1395,14 +1401,14 @@ $('.hint-enhanced input').live('mouseover', function() {
     }
     $(this).attr({title: hint});
 });
-function save_help_button_from_fading($help_button) {
+HelpButton.save_from_fading = function($help_button) {
     $help_button.stop().css({opacity:1});
     if ( $help_button.data('fadeout_timeout') ) {
         clearInterval( $help_button.data('fadeout_timeout') );
         $help_button.removeData('fadeout_timeout');
     }
 }
-function set_help_button_to_fade($input, $help_button) {
+HelpButton.set_to_fade = function($input, $help_button) {
     var help_button_fade_timeout = setTimeout( function() {
         $help_button.fadeOut(3000, function () {
             $input.removeData('help_button');
@@ -1413,7 +1419,7 @@ function set_help_button_to_fade($input, $help_button) {
 }
 $('.help-enhanced input').live('mouseover', function() {
     if ($(this).data('help_button')) {
-        save_help_button_from_fading($(this).data('help_button'))
+        HelpButton.save_from_fading($(this).data('help_button'))
         return;
     }
     var $help_button = $('<div>').addClass('help-button').css({
@@ -1427,13 +1433,13 @@ $('.help-enhanced input').live('mouseover', function() {
 }).live('mouseout', function() {
     var $help_button = $(this).data('help_button');
     if (!$help_button) return;
-    set_help_button_to_fade($(this), $help_button);
+    HelpButton.set_to_fade($(this), $help_button);
 });
 $('.help-button').live('mouseover', function() {
-    save_help_button_from_fading($(this));
+    HelpButton.save_from_fading($(this));
 }).live('mouseout', function() {
     var $input = $(this).data('antecedant_input');
-    set_help_button_to_fade($input, $(this));
+    HelpButton.set_to_fade($input, $(this));
 }).live('click', function() {
     $(this).closest('.help-enhanced').find('.help').slideToggle();
 });

@@ -158,7 +158,7 @@ class AdminSuggestWidget(forms.TextInput):
                       % (suggest_css_class, suggest_items, name, suggest_url))
         # TODO: "id_" is hard-coded here. This should instead use the correct
         # API to determine the ID dynamically.
-        output.append('<a href="%s%s" class="suggest-related-lookup" id="lookup_id_%s" onclick="return showRelatedObjectLookupPopup(this);"> ' % \
+        output.append('<a href="%s%s?pop" class="suggest-related-lookup" id="lookup_id_%s" onclick="return showRelatedObjectLookupPopup(this);"> ' % \
             (related_url, url, name))
         output.append('<img src="%simg/admin/selector-search.gif" width="16" height="16" alt="Lookup" /></a>' % settings.ADMIN_MEDIA_PREFIX)
         return mark_safe(u''.join(output))
