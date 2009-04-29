@@ -4,7 +4,7 @@
 
 {% block content_toolbar_content %}
     <ul style="float: left;">
-        <li><a class="icn btn filter simpleload" href="filters::::filters/{{ cl.get_query_string }}">{% trans 'Filters' %}</a></li>
+        <li><a class="icn btn filter{% if is_popup %} popup-filter{% else %} simpleload{% endif %}" href="filters::::filters/{{ cl.get_query_string }}">{% trans 'Filters' %}</a></li>
         <li>{% block search %}{% search_form cl %}{% endblock %}</li>
     </ul>
     {% if not is_popup %}

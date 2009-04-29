@@ -41,7 +41,7 @@ var ContentByHashLib = {};
     
     // We need to remember what URL is loaded in which element,
     // so we can load or not load content appropriately on hash change.
-    var LOADED_URLS = {};
+    var LOADED_URLS = ContentByHashLib.LOADED_URLS = {};
     
     var ORIGINAL_TITLE = document.title;
     
@@ -455,12 +455,19 @@ var ContentByHashLib = {};
         }
         $target.addClass('loading');
         show_loading();
-        $.get(url, function(data) {
-            inject_content($target, data, address);
-            $(document)
-                .data('injection_storage', [$target.attr('id')])
-                .trigger('content_added')
-                .removeData('injection_storage');
+        $.ajax({
+            url: url,
+            success: function(data) {
+                inject_content($target, data, address);
+                $(document)
+                    .data('injection_storage', [$target.attr('id')])
+                    .trigger('content_added')
+                    .removeData('injection_storage');
+            },
+            error: function(xhr) {
+                show_ajax_error(xhr);
+                dec_loading();
+            }
         });
     }
     ContentByHashLib.simple_load = simple_load;
@@ -639,7 +646,10 @@ function get_hashadr(address, options) {
 }
 // returns address for use in requests, i.e. with BASE_PATH prepended
 function get_adr(address, options) {
-    return BASE_PATH + get_hashadr(address, options);
+    var hashadr = get_hashadr(address, options);
+    if (hashadr.charAt(0) != '/') hashadr = get_hashadr(hashadr);
+    return BASE_PATH + hashadr;
+        
 }
 
 // Dynamic media (CSS, JS) loading
