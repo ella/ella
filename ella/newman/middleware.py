@@ -19,3 +19,18 @@ class AdminSettingsMiddleware(object):
 
     def process_response(self, request, response):
         return response
+
+class ErrorOutputMiddleware(object):
+    """
+    Middleware for debug purposes only. Suitable when digging HTTP 500 responses
+    to AJAX/Flash requests. No debilproof, works on unix-like fs only.
+    """
+    def process_request(self, request):
+        pass
+
+    def process_response(self, request, response):
+        if not (response.status_code >= 200 and response.status_code < 302):
+            f = file('/tmp/last_%d.html' % response.status_code, 'w')
+            f.write(response.content)
+            f.close()
+        return response
