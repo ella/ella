@@ -1061,6 +1061,7 @@ $( function() {
             }
             $inputs = $inputs.add($(this));
         });
+        
         if (button_name) $inputs = $inputs.add('<input type="hidden" value="1" name="'+button_name+'" />');
         var data = $inputs.serialize();
         if ($form.hasClass('reset-on-submit')) $form.get(0).reset();
@@ -1068,7 +1069,8 @@ $( function() {
             ? get_adr(action)
             : action;
         url = $('<a>').attr('href', url).get(0).href;
-        $.ajax({
+        
+        var request_options = {
             url: url,
             type: method,
             data: data,
@@ -1076,7 +1078,16 @@ $( function() {
             error:   error,
             _form: $form,
             _button_name: button_name
-        });
+        };
+        if (button_name) request_options._button_name = button_name;
+        var enctype;
+        if (enctype = $form.attr('enctype')) {
+            request_options.beforeSend = function(xhr) {
+                xhr.setRequestHeader('Content-Type', enctype);
+            };
+        }
+        
+        $.ajax( request_options );
         return false;
     }
     AjaxFormLib.ajax_submit = ajax_submit;
