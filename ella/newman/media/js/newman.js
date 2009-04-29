@@ -1080,10 +1080,6 @@ $( function() {
             _button_name: button_name
         };
         if (button_name) request_options._button_name = button_name;
-        var enctype;
-        if (enctype = $form.attr('enctype')) {
-            request_options.contentType = enctype;
-        }
         
         $.ajax( request_options );
         return false;
