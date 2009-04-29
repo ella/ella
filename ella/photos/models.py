@@ -10,6 +10,7 @@ from django.utils.translation import ugettext, ugettext_lazy as _
 from django.contrib.contenttypes import generic
 from django.contrib.sites.models import Site
 from django.utils.safestring import mark_safe
+from django.core.files.uploadedfile import UploadedFile
 
 from ella.core.models.main import Author, Source
 from ella.core.managers import RelatedManager
@@ -127,6 +128,9 @@ class Photo(models.Model):
         # prefill the slug with the ID, it requires double save
         if not self.id:
             self.width, self.height = get_image_dimensions(self.image)
+            if isinstance(self.image, UploadedFile):
+                # due to PIL has read several bytes from image, position in file has to be reset
+                self.image.seek(0)
             super(Photo, self).save(force_insert, force_update)
             self.slug = str(self.id) + '-' + self.slug
             force_insert, force_update = False, True
