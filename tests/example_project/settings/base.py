@@ -24,6 +24,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'ella.newman.middleware.ErrorOutputMiddleware',
 )
 
 ROOT_URLCONF = 'example_project.urls'
