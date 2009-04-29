@@ -18,6 +18,7 @@
             return false;
         });
     }
+    set_lupicka_handlers();
     $(document).bind('content_added', set_lupicka_handlers);
     $(document).bind('content_added', function() {
         var $lo = ContentByHashLib._injection_target('#lupicka-overlay');
@@ -34,8 +35,17 @@
             GenericSuggestLib.insert_value(id, str, inp);
             $lo.hide();
             return false;
+        }).each( function() {
+            this.onclick = undefined;
+        });
+        $('.popup-filter').click( function() {
+            var lupicka_addr = ContentByHashLib.LOADED_URLS[ 'lupicka-overlay' ];
+            var fakehash = '#' + get_hashadr(lupicka_addr);
+            var href = get_hashadr('filters/', {hash:fakehash});
+            ;;; carp('filters:', href);
+            ContentByHashLib.simple_load('filters::'+href);
+            return false;
         });
         $lo.show();
     })
-    set_lupicka_handlers();
 })(jQuery);

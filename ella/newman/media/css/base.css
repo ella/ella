@@ -58,6 +58,7 @@ div.breadcrumbs {
     background: #ffc;
     border-bottom: 1px solid darkorange;
     padding: 3px 5px;
+    overflow: auto;
 }
 
 /* FAVORITE ITEMS */
@@ -287,6 +288,7 @@ td, th {
 #changelist table tbody tr.row1 { background: #fff; }
 #changelist table tbody tr.row2 { background: #eee; }
 #changelist table tbody tr:hover { background: #ffc; }
+#changelist table thead th.sorted { background: #eee; }
 
 /* CHANGELIST ACTIONS */
 #changelist .actions { padding: 5px; }
