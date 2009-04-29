@@ -148,8 +148,10 @@ var ContentByHashLib = {};
         dec_loading();
         
         // Restore the hash so it doesn't look like the request succeeded.
-        url_target_id = ((info.target_id == 'content') ? '' : info.target_id+'::');
-        adr(url_target_id + (LOADED_URLS[info.target_id] ? LOADED_URLS[info.target_id] : ''));
+        if (!DEBUG) {   //FIXME: figure out what to do on request failure
+            url_target_id = ((info.target_id == 'content') ? '' : info.target_id+'::');
+            adr(url_target_id + (LOADED_URLS[info.target_id] ? LOADED_URLS[info.target_id] : ''));
+        }
         
         carp('Failed to load '+info.address+' into '+info.target_id);
     }
