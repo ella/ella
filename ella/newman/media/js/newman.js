@@ -80,17 +80,6 @@ var ContentByHashLib = {};
         for (var k in o) rv.push(k);
         return rv;
     }
-    function _injection_target(sel) {
-        var $rv = $('#no#thing');
-        var ids = $(document).data('injection_storage');
-        if (!ids || !ids.length) return false;
-        for (var i = 0; i < ids.length; i++) {
-            var $el = $( '#' + ids[i] );
-            if ( $el.is(sel) ) $rv = $rv.add($el);
-        }
-        return $rv.length ? $rv : false;
-    }
-    ContentByHashLib._injection_target = _injection_target;
     
     function inject_content($target, data, address) {
         // whatever was loaded inside, remove it from LOADED_URLS
@@ -110,6 +99,7 @@ var ContentByHashLib = {};
             LOADED_URLS[ $target.attr('id') ] = address;
         }
         PAGE_CHANGED++;
+        $target.trigger('content_added');
     }
     
     // Check if the least present request has finished and if so, shift it
@@ -128,7 +118,6 @@ var ContentByHashLib = {};
             LOAD_BUF = [];
             MIN_LOAD = undefined;
             MAX_LOAD = -1;
-            $(document).trigger('content_added').removeData('injection_storage');
             return;
         }
         var info = LOAD_BUF[ MIN_LOAD ];
@@ -146,16 +135,6 @@ var ContentByHashLib = {};
         }
         
         inject_content($target, info.data, info.address);
-        
-        // Track what elements were loaded
-        function record_injection(target_id) {
-            var injection_storage = $(document).data('injection_storage');
-            if (injection_storage && injection_storage.push)
-                injection_storage.push(target_id);
-            else
-                $(document).data('injection_storage', [target_id]);
-        }
-        record_injection(info.target_id);
         
         // Check next request
         draw_ready();
@@ -459,10 +438,6 @@ var ContentByHashLib = {};
             url: url,
             success: function(data) {
                 inject_content($target, data, address);
-                $(document)
-                    .data('injection_storage', [$target.attr('id')])
-                    .trigger('content_added')
-                    .removeData('injection_storage');
             },
             error: function(xhr) {
                 show_ajax_error(xhr);
@@ -893,7 +868,7 @@ function clone_form($orig_form) {
     $(document).bind('content_added', set_load_draft_handler);
     
     var autosave_interval;
-    function set_autosave_interval() {
+    function set_autosave_interval(evt) {
         var proceed, target_ids;
         
         if ($('.change-form').length == 0) { // nothing to autosave
@@ -901,9 +876,8 @@ function clone_form($orig_form) {
              clearInterval(autosave_interval);
              proceed = false;
         }
-        else if ( target_ids = $(document).data('injection_storage') ) {
-            var target_sel = '#' + target_ids.join(',#');
-            if ($('.change-form').closest(target_sel).length) {
+        else if ( evt && evt.type == 'content_added' ) {
+            if ( $(evt.target).find('.change-form').length ) {
                 ;;; carp('waiting for form to change to set up autosave interval');
                 proceed = true; // .change-form was just loaded
             }
@@ -1203,12 +1177,9 @@ $( function() {
         delete loaded_media[ MEDIA_URL + 'js/admin/DateTimeShortcuts.js' ];
     });
     */
-    // Setting up proper suggers URLs to take the hash address into account
-    $(document).bind('content_added', function() {
-        var target_ids = $(document).data('injection_storage');
-        if (!target_ids) return;
-        target_ids = '#' + target_ids.join(',#');
-        var $new_suggest_inputs = $(target_ids).find('.GenericSuggestField,.GenericSuggestFieldMultiple');
+    // Setting up proper suggesters URLs to take the hash address into account
+    $(document).bind('content_added', function(evt) {
+        var $new_suggest_inputs = $(evt.target).find('.GenericSuggestField,.GenericSuggestFieldMultiple');
         if (!$new_suggest_inputs || $new_suggest_inputs.length == 0) return;
         $new_suggest_inputs.find('input[rel]').each(function() {
             if ($(this).data('original_rel')) return;

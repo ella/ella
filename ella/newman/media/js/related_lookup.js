@@ -20,9 +20,9 @@
     }
     set_lupicka_handlers();
     $(document).bind('content_added', set_lupicka_handlers);
-    $(document).bind('content_added', function() {
-        var $lo = ContentByHashLib._injection_target('#lupicka-overlay');
-        if ( ! $lo ) return;
+    $(document).bind('content_added', function(evt) {   // FIXME: reagovat na element.added
+        var $lo = $(evt.target);
+        if ( ! $lo.is('#lupicka-overlay') ) return;
         var inp = $lo.data('related_input');
         if (!inp) {
             carp('No input is set up for lupicka-overlay.');
@@ -47,5 +47,5 @@
             return false;
         });
         $lo.show();
-    })
+    });
 })(jQuery);
