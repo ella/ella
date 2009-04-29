@@ -9,6 +9,7 @@ from django.core.mail import EmailMessage
 from django.views.decorators.cache import never_cache
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.contenttypes.models import ContentType
+from django.conf import settings
 
 from ella.newman.forms import SiteFilterForm, ErrorReportForm
 from ella.newman.models import AdminSetting
@@ -66,6 +67,14 @@ class NewmanSite(AdminSite):
 #                wrap(self.index),
 #                name='%sadmin_index' % self.name),
         )
+
+        if 'djangomarkup' in settings.INSTALLED_APPS:
+            urlpatterns += patterns('',
+                url(r'^%s/editor-preview/$' % NEWMAN_URL_PREFIX,
+                    'djangomarkup.views.preview',
+                    name="djangomarkup-preview"),
+            )
+
         urlpatterns += super(NewmanSite, self).get_urls()
         return urlpatterns
 

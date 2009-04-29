@@ -1174,6 +1174,12 @@ $( function() {
         adr(href);
         return false;
     });
+    $('#filters-handler .eclear').live('click', function() {
+        var base = get_hashadr('?').replace(/\?$/,'');
+        delete ContentByHashLib.ADDRESS_POSTPROCESS[ base ];
+        adr($(this).attr('href'));
+        return false;
+    });
     
     // Re-initialization of third party libraries
     /*

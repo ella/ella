@@ -7,7 +7,7 @@ from django.utils.text import truncate_words
 from ella.ellaadmin.utils import admin_url
 from djangomarkup.widgets import RichTextAreaWidget
 
-MARKITUP_SET = getattr(settings, 'CZECHTILE_MARKUP', 'czechtile')
+MARKITUP_SET = getattr(settings, 'MARKDOWN', 'markdown')
 MEDIA_PREFIX = getattr(settings, 'NEWMAN_MEDIA_PREFIX', settings.ADMIN_MEDIA_PREFIX)
 
 # Rich text editor
@@ -119,7 +119,7 @@ class AdminSuggestWidget(forms.TextInput):
     def render(self, name, value, attrs=None):
 
         # related_url for standard lookup and clreate suggest_url for JS suggest
-        related_url = '../../../%s/%s/?pop' % (self.model._meta.app_label, self.model._meta.object_name.lower())
+        related_url = '../../../%s/%s/' % (self.model._meta.app_label, self.model._meta.object_name.lower())
         suggest_params = '&amp;'.join([ 'f=%s' % l for l in self.lookups ]) + '&amp;q='
         suggest_url = related_url + 'suggest/?' + suggest_params
 
@@ -158,7 +158,7 @@ class AdminSuggestWidget(forms.TextInput):
                       % (suggest_css_class, suggest_items, name, suggest_url))
         # TODO: "id_" is hard-coded here. This should instead use the correct
         # API to determine the ID dynamically.
-        output.append('<a href="%s%s" class="suggest-related-lookup" id="lookup_id_%s" onclick="return showRelatedObjectLookupPopup(this);"> ' % \
+        output.append('<a href="%s%s?pop" class="suggest-related-lookup" id="lookup_id_%s" onclick="return showRelatedObjectLookupPopup(this);"> ' % \
             (related_url, url, name))
         output.append('<img src="%simg/admin/selector-search.gif" width="16" height="16" alt="Lookup" /></a>' % settings.ADMIN_MEDIA_PREFIX)
         return mark_safe(u''.join(output))

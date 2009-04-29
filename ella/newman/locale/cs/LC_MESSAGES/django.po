@@ -530,3 +530,9 @@ msgstr "Není definována žádná role pro uživatele"
 
 msgid "Ask site administrator to assign proper roles for You."
 msgstr "Zkuste kontaktovat administrátora s prosbou o přidělení práv a rolí."
+
+msgid "Filter on."
+msgstr "Jsou zapnuty filtry."
+
+msgid "Categories filtered by user."
+msgstr "Výpis omezen podle uživatelsky nastavených kategorií."

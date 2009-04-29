@@ -1,10 +1,31 @@
 {% extends "admin/ajax_content_base.html" %}
 {% load adminmedia admin_list i18n %}
 
+{% block breadcrumbs %}
+    {% if not is_popup %}
+        <div class="breadcrumbs">
+            <div style="float: left;">
+                <a href="{% url admin_index %}">{% trans "Home" %}</a>
+                {% if app_label %}&rsaquo; <a class="hashadr" href="/{{ app_label }}/">{% trans app_label.title %}</a>{% endif %}
+                {% if title %}&rsaquo; <strong id="doc-title">{{ title }}</strong>{% endif %}
+            </div>
+            {% if is_user_category_filtered %}
+                <div style="float: right;"><a href="{% url admin_index %}">{% trans "Categories filtered by user. Click to change." %}</a></div>
+            {% endif %}
+        </div>
+    {% endif %}
+{% endblock %}
 
 {% block content_toolbar_content %}
-    <ul style="float: left;">
-        <li><a class="icn btn filter{% if is_popup %} popup-filter{% else %} simpleload{% endif %}" href="filters::::filters/{{ cl.get_query_string }}">{% trans 'Filters' %}</a></li>
+    <ul style="float: left;" id="filters-handler">
+        <li>
+            {% if is_filtered %}
+                <a class="icn btn filter {% if is_popup %}popup-filter{% else %}simpleload{% endif %}" href="filters::::filters/{{ cl.get_query_string }}">{% trans 'Filters' %}<span> ({% trans 'on!' %})</span></a>
+                <a class="icn eclear" href="?">{% trans 'reset' %}</a>
+            {% else %}
+                <a class="icn btn filter {% if is_popup %}popup-filter{% else %}simpleload{% endif %}" href="filters::::filters/{{ cl.get_query_string }}">{% trans 'Filters' %}</a>
+            {% endif %}
+        </li>
         <li>{% block search %}{% search_form cl %}{% endblock %}</li>
     </ul>
     {% if not is_popup %}
@@ -20,12 +41,6 @@
 
 {% block content_services %}
     <div id="filters"></div>
-    {% if is_filtered %}
-    <span style="color: red; font-wight: bold;">Achtung! Filtered.</span>
-    {% endif %}
-    {% if is_user_category_filtered %}
-    <span style="color: red; font-wight: bold;">Achtung! Benutzer Filter eingesetzt!</span>
-    {% endif %}
 {% endblock %}
 
 {% if cl.formset.errors %}
