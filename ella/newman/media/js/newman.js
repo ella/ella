@@ -216,6 +216,7 @@ var ContentByHashLib = {};
             request_no: MAX_REQUEST
         });
     }
+    ContentByHashLib.load_content = load_content;
     
     function reload_content(container_id) {
         var addr = LOADED_URLS[ container_id ] || '';
@@ -430,13 +431,14 @@ var ContentByHashLib = {};
             address = address.substr(colon_index + '::'.length);
         }
         
-        if (LOADED_URLS[target_id] == address) {
+        var adr = get_hashadr(specifier);
+        
+        if (LOADED_URLS[target_id] == adr) {
             $('#'+target_id).slideToggle('fast');
             return;
         }
         
-        var url = adr(specifier, {just_get:1});
-        url = prepend_base_path_to(url);
+        var url = prepend_base_path_to(adr);
         url = $('<a>').attr('href', url).get(0).href;
         
         var $target = $('#'+target_id);
@@ -449,7 +451,7 @@ var ContentByHashLib = {};
         $.ajax({
             url: url,
             success: function(data) {
-                inject_content($target, data, address);
+                inject_content($target, data, adr);
             },
             error: function(xhr) {
                 show_ajax_error(xhr);
@@ -1162,7 +1164,19 @@ $( function() {
         if (   /^\?/.test( href )   ) {} else return;
         var base = get_hashadr('?').replace(/\?$/,'');
         ContentByHashLib.ADDRESS_POSTPROCESS[ base ] = base+href;
-        adr(href);
+        var pop_id;
+        if ( pop_id = $(this).closest('.pop').attr('id') ) {
+            ContentByHashLib.simple_load(
+                pop_id
+                + '::' +
+                ContentByHashLib.LOADED_URLS[ pop_id ]
+                + '::' +
+                href
+            );
+        }
+        else {
+            adr(href);
+        }
         return false;
     });
     $('#filters-handler .eclear').live('click', function() {

@@ -4,7 +4,7 @@
             if (evt.button != 0) return;
             $lo = $('#lupicka-overlay');
             if ($lo.length == 0) {
-                $lo = $('<div id="lupicka-overlay">').appendTo('body');
+                $lo = $('<div id="lupicka-overlay" class="pop">').appendTo('body');
             }
             var input_id = this.id.replace(/lookup_/,'') + '_suggest';
             var inp = document.getElementById(input_id);
