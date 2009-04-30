@@ -238,8 +238,7 @@ legend { padding: 2px 5px; }
 label { display: block; clear: both; margin: 5px 0 2px 0; }
 label.required { font-weight: bold; color: darkorange; }
 div.submit-row, fieldset.submit-row { border: none; clear:both; margin-top: 5px; padding: 2px 0; text-align: right; }
-input, textarea { padding: 2px 0; }
-textarea, select { vertical-align: top; }
+input, textarea, select { padding: 2px 0; font: normal 100% Tahoma, Verdana, sans-serif; }
 .ajax-form .form-metadata { display: none; }
 input.vIntegerField { width: 40px; text-align: right; }
 input.vDateInput { width: 40px; }
