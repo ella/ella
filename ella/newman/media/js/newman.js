@@ -81,6 +81,16 @@ var ContentByHashLib = {};
         return rv;
     }
     
+    // Returns the closest parent that is a container for a dynamically loaded piece of content, along with some information about it.
+    function closest_loaded(el) {
+        while ( el && (!el.id || !LOADED_URLS[ el.id ]) ) {
+            el = el.parentNode;
+        }
+        if (!el) return null;
+        return { container: el, id: el.id, url: LOADED_URLS[ el.id ], toString: function(){return this.id} };
+    }
+    ContentByHashLib.closest_loaded = closest_loaded;
+    
     function inject_content($target, data, address) {
         // whatever was loaded inside, remove it from LOADED_URLS
         if (!object_empty(LOADED_URLS)) {
@@ -378,7 +388,7 @@ var ContentByHashLib = {};
         }
     }
     
-    // Fire hashchange event fired when location.hash changes
+    // Fire hashchange event when location.hash changes
     var CURRENT_HASH = '';
     $(document).bind('hashchange', function() {
 //        carp('hash: ' + location.hash);
