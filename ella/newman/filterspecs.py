@@ -3,19 +3,13 @@ Customized FilterSpecs.
 """
 import logging
 
-from django.utils.encoding import smart_unicode, iri_to_uri
-from django.utils.html import escape
-from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
-from django.contrib.admin.filterspecs import FilterSpec
 from django.contrib.admin import filterspecs
-
-from ella.ellaadmin.options import EllaModelAdmin
 
 log = logging.getLogger('ella.newman')
 
 
-class CustomFilterSpec(FilterSpec):
+class CustomFilterSpec(filterspecs.FilterSpec):
     """ custom defined FilterSpec """
     def __init__(self, f, request, params, model, model_admin, field_path=None):
         self.state = 0
@@ -41,11 +35,11 @@ class CustomFilterSpec(FilterSpec):
         return self.title_text
 
     def get_lookup_kwarg(self):
-        """ 
+        """
         this method can be specified as second argument in @filter_spec decorator. (see below)
 
-        If more than one GET parameter is used to filter queryset, 
-        get_lookup_kwarg() should return list containing these parameters 
+        If more than one GET parameter is used to filter queryset,
+        get_lookup_kwarg() should return list containing these parameters
         (suitable esp. for calendar/date filters etc.).
         """
         return self.lookup_kwarg
@@ -72,7 +66,7 @@ class CustomFilterSpec(FilterSpec):
         return self.active_filter_lookup
 
     def is_active(self, request_params):
-        """ 
+        """
         Returns True if filter is applied, otherwise returns False.
         Tries to find its argument(s) in request querystring.
         """
@@ -82,7 +76,7 @@ class CustomFilterSpec(FilterSpec):
         """
         Returns empty dict if no filter item is selected.
         Otherwise returns dict containing GET params as keys and corresponding
-        values. 
+        values.
         """
         active = self.get_active(self.request_get)
         out = dict()
@@ -135,12 +129,12 @@ def filterspec_clean_all(cls):
 
 # Adding class method register_insert() to FilterSpec.
 # important is to run following code before admin.py
-FilterSpec.register_insert = classmethod(filterspec_preregister)
-FilterSpec.clean_registrations = classmethod(filterspec_clean_all)
+filterspecs.FilterSpec.register_insert = classmethod(filterspec_preregister)
+filterspecs.FilterSpec.clean_registrations = classmethod(filterspec_clean_all)
 
 
 def filter_spec(field_test_func, lookup_kwarg_func=None, title=None):
-    """ 
+    """
     Decorator ``filter_spec`` creates custom filter.
 
     Example:
@@ -155,7 +149,7 @@ def filter_spec(field_test_func, lookup_kwarg_func=None, title=None):
             cls.get_lookup_kwarg = lookup_kwarg_func
         if title:
             cls.title = lambda fspec: title
-        FilterSpec.register_insert(field_test_func, cls)
+        filterspecs.FilterSpec.register_insert(field_test_func, cls)
         return filter_func
     return decorate
 
@@ -166,7 +160,7 @@ def filter_spec(field_test_func, lookup_kwarg_func=None, title=None):
 
 class RelatedFilterSpec(filterspecs.RelatedFilterSpec):
     def is_active(self, request_params):
-        """ 
+        """
         Returns True if filter is applied, otherwise returns False.
         Tries to find its argument(s) in request querystring.
         """
@@ -175,4 +169,45 @@ class RelatedFilterSpec(filterspecs.RelatedFilterSpec):
                 return True
         return False
 
-FilterSpec.register_insert(lambda f: bool(f.rel), RelatedFilterSpec)
+filterspecs.FilterSpec.register_insert(lambda f: bool(f.rel), RelatedFilterSpec)
+
+class ChoicesFilterSpec(filterspecs.ChoicesFilterSpec):
+    def is_active(self, request_params):
+        """
+        Returns True if filter is applied, otherwise returns False.
+        Tries to find its argument(s) in request querystring.
+        """
+        for p in request_params:
+            if p == self.lookup_kwarg:
+                return True
+        return False
+
+filterspecs.FilterSpec.register_insert(lambda f: bool(f.choices), ChoicesFilterSpec)
+
+class DateFieldFilterSpec(filterspecs.DateFieldFilterSpec):
+    def is_active(self, request_params):
+        """
+        Returns True if filter is applied, otherwise returns False.
+        Tries to find its argument(s) in request querystring.
+        """
+        for p in request_params:
+            if p == self.lookup_kwarg:
+                return True
+        return False
+
+filterspecs.FilterSpec.register_insert(lambda f: isinstance(f, models.DateField), DateFieldFilterSpec)
+
+
+class BooleanFieldFilterSpec(filterspecs.BooleanFieldFilterSpec):
+    def is_active(self, request_params):
+        """
+        Returns True if filter is applied, otherwise returns False.
+        Tries to find its argument(s) in request querystring.
+        """
+        for p in request_params:
+            if p == self.lookup_kwarg:
+                return True
+        return False
+
+from django.db import models
+filterspecs.FilterSpec.register_insert(lambda f: isinstance(f, models.BooleanField) or isinstance(f, models.NullBooleanField), BooleanFieldFilterSpec)
