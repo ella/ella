@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-05-01 07:27+0200\n"
-"PO-Revision-Date: 2009-05-01 07:27+0100\n"
+"PO-Revision-Date: 2009-05-01 09:32+0100\n"
 "Last-Translator: Vitek Pliska <whit@jizak.cz>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -144,12 +144,12 @@ msgstr "Konec zveřejnění"
 #: migrations/0001_initial.py:114
 #: models/publishable.py:280
 msgid "Start of listing"
-msgstr "Začátek zveřejnění"
+msgstr "Začátek umístění"
 
 #: migrations/0001_initial.py:115
 #: models/publishable.py:281
 msgid "End of listing"
-msgstr "Konec listování"
+msgstr "Konec umístění"
 
 #: migrations/0001_initial.py:116
 #: models/publishable.py:283
@@ -174,7 +174,7 @@ msgstr "Komerční"
 #: migrations/0001_initial.py:119
 #: models/publishable.py:287
 msgid "Check this if the listing is of a commercial content."
-msgstr "Zaškrtni pokud se jedná o komerční výčet."
+msgstr "Zaškrtni pokud se jedná o komerční umístění."
 
 #: migrations/0001_initial.py:128
 #: models/publishable.py:319
@@ -240,19 +240,19 @@ msgstr "Publikovatelné objekty"
 
 #: models/publishable.py:193
 msgid "Placement"
-msgstr "Umístění"
+msgstr "Publikace"
 
 #: models/publishable.py:194
 msgid "Placements"
-msgstr "Umístění"
+msgstr "Publikace"
 
 #: models/publishable.py:309
 msgid "Listing"
-msgstr "Výčet"
+msgstr "Umístění"
 
 #: models/publishable.py:310
 msgid "Listings"
-msgstr "Výčty"
+msgstr "Umístění"
 
 #: models/publishable.py:334
 msgid "Hit Count"
