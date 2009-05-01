@@ -53,6 +53,8 @@ class Publishable(models.Model):
 
     class Meta:
         app_label = 'core'
+        verbose_name = _('Publishable object')
+        verbose_name_plural = _('Publishable objects')
 
     @property
     def target(self):
@@ -329,6 +331,6 @@ class HitCount(models.Model):
 
     class Meta:
         app_label = 'core'
-        verbose_name = 'Hit Count'
-        verbose_name_plural = 'Hit Counts'
+        verbose_name = _('Hit Count')
+        verbose_name_plural = _('Hit Counts')
 
