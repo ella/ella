@@ -208,8 +208,9 @@ var ContentByHashLib = {};
                 }
                 draw_ready();
             },
-            error: function() {
+            error: function(xhr) {
                 cancel_request( this.load_id );
+                show_ajax_error(xhr);
                 draw_ready();
             },
             load_id: load_id,
@@ -416,48 +417,23 @@ var ContentByHashLib = {};
     // - The specifier is interpreted by adr to get the URL from which to ajax.
     //   This results in support of relative addresses and the target_id::rel_base::address syntax.
     function simple_load(specifier) {
-        var target_id, address;
+        var target_id;
         var colon_index = specifier.indexOf('::');
         if (colon_index < 0) {
             target_id = 'content';
-            address = specifier;
         }
         else {
             target_id = specifier.substr(0, colon_index);
-            address = specifier.substr(colon_index + '::'.length);
-        }
-        colon_index = address.indexOf('::');
-        if (colon_index >= 0) {
-            address = address.substr(colon_index + '::'.length);
         }
         
-        var adr = get_hashadr(specifier);
+        var address = get_hashadr(specifier);
         
-        if (LOADED_URLS[target_id] == adr) {
+        if (LOADED_URLS[target_id] == address) {
             $('#'+target_id).slideToggle('fast');
             return;
         }
         
-        var url = prepend_base_path_to(adr);
-        url = $('<a>').attr('href', url).get(0).href;
-        
-        var $target = $('#'+target_id);
-        if ($target && $target.length) {} else {
-            throw("Target '#"+target_id+"' not found.");
-            return;
-        }
-        $target.addClass('loading');
-        show_loading();
-        $.ajax({
-            url: url,
-            success: function(data) {
-                inject_content($target, data, adr);
-            },
-            error: function(xhr) {
-                show_ajax_error(xhr);
-                dec_loading();
-            }
-        });
+        load_content({target_id:target_id, address:address});
     }
     ContentByHashLib.simple_load = simple_load;
     

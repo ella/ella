@@ -309,6 +309,7 @@ td, th {
     top: -10px;
     width: 100%;
     text-align: center;
+    z-index: 10;
 }
 #opmsg span {
     padding: 5px 5px 5px 22px;
