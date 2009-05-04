@@ -32,6 +32,13 @@ body {
 
 .loading { opacity: .3; }
 
+.overlay {
+    position: fixed;
+    background-color: white;
+    border: solid 2px blue;
+    border-top-width: 20px;
+}
+
 /* HEADER */
 
 #header {
@@ -249,6 +256,12 @@ input.vDateTimeInput { width: 130px; }
 .form-row * { vertical-align: middle; margin: 2px 0; }
 
 .form-error-msg { padding: 0 5px; color: red; font-weight: bold; }
+
+#err-overlay {
+    bottom: 65px;
+    right: 0;
+}
+
 
 /* FORMS : article change form */
 .article-form-container { padding-left: 10px; }

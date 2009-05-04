@@ -974,6 +974,7 @@ $( function() {
         get_inputs($form).each( function() {
             var $label = $('label[for='+this.id+']');
             $label.find('span.form-error-msg').remove();
+            $('#err-overlay').empty().hide();
             var classes = ($label.attr('className')||'').split(/\s+/);
             for (var i = 0; i < classes.length; i++) {
                 var cl = classes[i];
@@ -1060,11 +1061,36 @@ $( function() {
         try { res = JSON.parse( xhr.responseText ); }
         catch (e) { }
         if (res && res.errors) {
+            // Show the bubble with scrollto buttons
+            var $err_overlay = $('#err-overlay');
+            if ($err_overlay.length == 0) $err_overlay = $(
+                '<div id="err-overlay" class="overlay">'
+            ).appendTo('body');
+            
+            // Show the individual errors
             for (var id in res.errors) {
                 var msgs = res.errors[ id ];
                 var input = $('#'+id).get(0);
                 show_form_error(input, msgs);
+                
+                $('<p>')
+                .data('rel_input',
+                    $('#'+input.id+'_suggest').length
+                    ? $('#'+input.id+'_suggest').get(0) // take suggest input if available
+                    : input                             // otherwise the input itself
+                )
+                .text(
+                    ($('label[for='+id+']').text() || id).replace(/:$/,'')  // identify the input with its label text or id; no trailing ':' pls
+                )
+                .click( function(evt) { // focus and scroll to the input
+                    if (evt.button != 0) return;
+                    var input = $(this).closest('p').data('rel_input');
+                    input.focus();
+                    return false;
+                })
+                .appendTo($err_overlay);
             }
+            $err_overlay.show();
         }
         show_ajax_error(xhr);
     }
