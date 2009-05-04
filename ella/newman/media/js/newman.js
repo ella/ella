@@ -18,6 +18,12 @@ function carp() {
     }
 }
 
+function arr2map(arr) {
+    var rv = {};
+    for (var i = 0; i < arr.length; i++) rv[ arr[i] ] = 1;
+    return rv;
+}
+
 var LF = 10, CR = 13;
 
 var BASE_PATH = window.BASE_URL ? BASE_URL.replace(/\/$/,'') : '';
@@ -400,7 +406,6 @@ var ContentByHashLib = {};
         load_by_hash();
     });
     setTimeout( function() {
-        var q;  // queue of user-defined callbacks
         try {
             if (location.hash != CURRENT_HASH) {
                 CURRENT_HASH = location.hash;

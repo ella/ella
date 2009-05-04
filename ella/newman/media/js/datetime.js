@@ -50,7 +50,7 @@ function DateTimeInput(input) {
         text = $tempspan.text();
         text = text.substr(0, text.length-1) + last;
         $tempspan.remove();
-        ;;; $('#pos').text( text );
+//        ;;; $('#pos').text( text );
         return text.length;
     };
     this.set_date = function(d, preserve) {
@@ -197,7 +197,7 @@ function DateInput(input) {
         text = $tempspan.text();
         text = text.substr(0, text.length-1) + last;
         $tempspan.remove();
-        ;;; $('#pos').text( text );
+//        ;;; $('#pos').text( text );
         return text.length;
     };
     this.set_date = function(d, preserve) {
@@ -311,39 +311,40 @@ function datetime_init() {
             });
         }
     });
-    
-    $(document).one('media_loaded', function() {
-        if ($('.datepicker').length) { }
-        else {
-            var $datepicker = $('<div class="datepicker">');
-            $datepicker.datepicker({
-                onSelect: function(dtext, dpick) {
-                    $(this).hide();
-                    var dti = $( $(this).data('input') ).data('dti');
-                    var d = new Date();
-                    d.setFullYear(dpick.selectedYear);
-                    d.setMonth(dpick.selectedMonth);
-                    d.setDate(dpick.selectedDay);
-                    dti.set_date(d, {/*preserve*/hour:true,minute:true});
-                },
-                onClose: function() {
-                    $(this).hide();
-                },
-            });
-            $datepicker.appendTo('body');
-        }
-        
-        function mousewheel_handler(evt, delta) {
-            var dti = $(this).data('dti');
-            var pos = dti.cursor_pos(evt);
-            dti.scroll(pos, delta / Math.abs(delta||1));
-        };
-        $('.vDateTimeInput,.vDateInput').focus( function() {
-            $(this)  .bind('mousewheel', mousewheel_handler);
-        }).blur( function() {
-            $(this).unbind('mousewheel', mousewheel_handler);
-        });
-    });
 }
 datetime_init();
 $( document ).bind('content_added', datetime_init);
+
+// create the datepicker div
+$( document ).one('media_loaded', function() {
+    if ($('.datepicker').length) { }
+    else {
+        var $datepicker = $('<div class="datepicker">');
+        $datepicker.datepicker({
+            onSelect: function(dtext, dpick) {
+                $(this).hide();
+                var dti = $( $(this).data('input') ).data('dti');
+                var d = new Date();
+                d.setFullYear(dpick.selectedYear);
+                d.setMonth(dpick.selectedMonth);
+                d.setDate(dpick.selectedDay);
+                dti.set_date(d, {/*preserve*/hour:true,minute:true});
+            },
+            onClose: function() {
+                $(this).hide();
+            },
+        });
+        $datepicker.appendTo('body');
+    }
+    
+    function mousewheel_handler(evt, delta) {
+        var dti = $(this).data('dti');
+        var pos = dti.cursor_pos(evt);
+        dti.scroll(pos, delta / Math.abs(delta||1));
+    };
+    $('.vDateTimeInput,.vDateInput').focus( function() {
+        $(this)  .bind('mousewheel', mousewheel_handler);
+    }).blur( function() {
+        $(this).unbind('mousewheel', mousewheel_handler);
+    });
+});

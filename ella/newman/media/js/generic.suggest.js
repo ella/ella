@@ -65,6 +65,7 @@ GenericSuggestLib = {};
 
     var $ins;
     function initialize() {
+        if ( $(SUGGEST_SELECTOR).length == 0 ) return;
         $(SUGGEST_SELECTOR)
             .unbind('click', set_current_input).bind('click', set_current_input)
             .unbind('focus', set_current_input).bind('focus', set_current_input);
