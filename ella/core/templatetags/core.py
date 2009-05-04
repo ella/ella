@@ -263,24 +263,6 @@ def _parse_box(nodelist, bits):
 
         return BoxNode(bits[1], nodelist, model=model, lookup=(smart_str(bits[5]), bits[6]))
 
-def get_render_key(func, object, content_path):
-    if hasattr(object, '_meta'):
-        return 'ella.core.templatetags.core.render:%s:%s:%d:%s' % (
-                object._meta.app_label,
-                object._meta.object_name,
-                object.pk,
-                content_path
-            )
-    else:
-        return 'ella.core.templatetags.core.render:%s:%s' % (
-                md5(smart_str(object)).hexdigest(),
-                content_path
-            )
-
-def register_test(key, object, content_path):
-    CACHE_DELETER.register_pk(object, key)
-
-@cache_this(get_render_key, register_test)
 def _render(object, content_path):
     """
     A markdown filter that handles the rendering of any text containing markdown markup and/or django template tags.
@@ -352,48 +334,6 @@ def ipblur(text): # brutalizer ;-)
 def emailblur(email):
     "Obfuscates e-mail addresses - only @ and dot"
     return mark_safe(email.replace('@', '&#64;').replace('.', '&#46;'))
-
-@register.filter
-def prefix(string_list, prefix):
-    """
-    Add prefix to string list (string delimited with spaces). Used for css classes.
-
-    Usage::
-
-        {{string_list|prefix:"pre"}}
-
-    Example::
-        {{'a b'|prefix:'x'}}
-
-    Output::
-
-        xa xb
-    """
-    DELIMITER = ' '
-    result = force_unicode(DELIMITER.join([ prefix + i for i in string_list.split(DELIMITER) ]))
-    t = template.Template(result)
-    return t.render(template.Context({'string_list' : string_list,}))
-
-@register.filter
-def suffix(string_list, suffix):
-    """
-    Add suffix to string list (string delimited with spaces).
-
-    Usage::
-
-        {{string_list|suffix:"pre"}}
-
-    Example::
-        {{'a b'|suffix:'x'}}
-
-    Output::
-
-        ax bx
-    """
-    DELIMITER = ' '
-    result = force_unicode(DELIMITER.join([ i + suffix for i in string_list.split(DELIMITER) ]))
-    t = template.Template(result)
-    return t.render(template.Context({'string_list' : string_list,}))
 
 class RelatedNode(template.Node):
     def __init__(self, obj_var, count, var_name, models=[], all_categories=True):
@@ -496,68 +436,6 @@ def do_related(parser, token):
                 raise template.TemplateSyntaxError, "%r doesn't represent any model." % m
     return RelatedNode(bits[-3], int(bits[1]), bits[-1], mods, all_categories)
 
-CONTAINER_VARS = ('level', 'name', 'css_class',)
-
-class ContainerBeginNode(template.Node):
-    def __init__(self, parameters):
-        self.params = parameters
-
-    def render(self, context):
-        context.push()
-
-        for key in CONTAINER_VARS:
-            if key not in self.params:
-                context[key] = ''
-                continue
-            value = self.params[key]
-            try:
-                context[key] = template.Variable(value).resolve(context)
-            except template.VariableDoesNotExist:
-                context[key] = value
-
-        if 'level' in context:
-            try:
-                context['next_level'] = int(context['level']) + 1
-            except ValueError:
-                pass
-
-        t = template.loader.get_template('inclusion_tags/container_begin.html')
-        resp = t.render(context)
-        return resp
-
-class ContainerEndNode(template.Node):
-    def render(self, context):
-        t = template.loader.get_template('inclusion_tags/container_end.html')
-        resp = t.render(context)
-        context.pop()
-        return resp
-
-@register.tag
-def container_begin(parser, token):
-    """
-    Render inclusion_tags/container_begin.html template.
-    Takes parameters 'level', 'name' and  'css_class' and passes them to the context.
-    """
-    bits = token.split_contents()
-    parameters = bits[1:]
-
-    if len(parameters) % 2 != 0:
-        raise template.TemplateSyntaxError, '{%% %s param "value" param2 value2 ... %%}' % bits[0]
-
-    parameters = dict((smart_str(key), value) for key, value in zip(parameters[0::2], parameters[1::2]))
-
-    for name in parameters.keys():
-        if name not in CONTAINER_VARS:
-            raise template.TemplateSyntaxError, "%s tag does not accept %r parameter" % (bits[0], name)
-
-    return ContainerBeginNode(parameters)
-
-@register.tag
-def container_end(parser, token):
-    " Render inclusion_tags/container_end.html. "
-    return ContainerEndNode()
-
-
 class CategoriesTreeNode(template.Node):
     def __init__(self, tree_path=None, varname=None, limit=None):
         self.tree_path, self.varname, self.limit = tree_path, varname, limit
@@ -581,7 +459,6 @@ class CategoriesTreeNode(template.Node):
         except Category.DoesNotExist:
             pass
         return ''
-
 
 @register.tag
 def get_categories_tree(parser, token):
