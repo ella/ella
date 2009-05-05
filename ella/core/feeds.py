@@ -64,6 +64,11 @@ class RSSTopCategoryListings(Feed):
             kwa['category'] = obj
         else:
             kwa['category'] = get_cached_object(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
+        
+        # TODO: In ella based application children attr can be NONE, IMMEDIATE and ALL
+        if kwa['category'].tree_parent != None:
+            kwa['children'] = Listing.objects.ALL
+        
         return Listing.objects.get_listing(count=NUM_IN_FEED, **kwa)
 
     def link(self, obj):
