@@ -39,6 +39,10 @@ body {
     border-top-width: 20px;
 }
 
+.error-code object {
+    border: solid 3px gray;
+}
+
 /* HEADER */
 
 #header {
