@@ -32,6 +32,13 @@ body {
 
 .loading { opacity: .3; }
 
+.overlay {
+    position: fixed;
+    background-color: white;
+    border: solid 2px blue;
+    border-top-width: 20px;
+}
+
 /* HEADER */
 
 #header {
@@ -236,16 +243,25 @@ a.icn.save { background-image: url(../ico/16/filesave.png); }
 fieldset, legend { border: 1px solid #ddd; padding: 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; background: #fff; }
 legend { padding: 2px 5px; }
 label { display: block; clear: both; margin: 5px 0 2px 0; }
+label.vCheckboxLabel { display: inline; margin-left: 10px; }
 label.required { font-weight: bold; color: darkorange; }
 div.submit-row, fieldset.submit-row { border: none; clear:both; margin-top: 5px; padding: 2px 0; text-align: right; }
-input, textarea { padding: 2px 0; }
-textarea, select { vertical-align: top; }
+input, textarea, select { padding: 2px 0; font: normal 100% Tahoma, Verdana, sans-serif; }
 .ajax-form .form-metadata { display: none; }
+input[type=text] { width: 500px; }
 input.vIntegerField { width: 40px; text-align: right; }
-input.vDateInput { width: 40px; }
+input.vDateInput, input.vForeignKeyRawIdAdminField { width: 40px; }
 input.vDateTimeInput { width: 130px; }
 
+.form-row * { vertical-align: middle; margin: 2px 0; }
+
 .form-error-msg { padding: 0 5px; color: red; font-weight: bold; }
+
+#err-overlay {
+    bottom: 65px;
+    right: 0;
+}
+
 
 /* FORMS : article change form */
 .article-form-container { padding-left: 10px; }
@@ -306,6 +322,7 @@ td, th {
     top: -10px;
     width: 100%;
     text-align: center;
+    z-index: 10;
 }
 #opmsg span {
     padding: 5px 5px 5px 22px;

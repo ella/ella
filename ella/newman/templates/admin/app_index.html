@@ -3,7 +3,7 @@
 
 {% block breadcrumbs %}
     <div class="breadcrumbs">
-        <a href="../">{% trans "Home" %}</a>
+        <a href="{% url admin_index %}">{% trans "Home" %}</a>
         &rsaquo;
         {% for app in app_list %}
             {% trans app.name %}

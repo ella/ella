@@ -53,6 +53,8 @@ class Publishable(models.Model):
 
     class Meta:
         app_label = 'core'
+        verbose_name = _('Publishable object')
+        verbose_name_plural = _('Publishable objects')
 
     @property
     def target(self):
@@ -176,13 +178,13 @@ class Publishable(models.Model):
 
 class Placement(models.Model):
     # listing's target - a Publishable object
-    publishable = models.ForeignKey(Publishable)
-    category = models.ForeignKey(Category, db_index=True)
+    publishable = models.ForeignKey(Publishable, verbose_name=_('Publishable object'))
+    category = models.ForeignKey(Category, verbose_name=_('Category'), db_index=True)
     publish_from = models.DateTimeField(_("Start of visibility")) #, default=datetime.now)
     publish_to = models.DateTimeField(_("End of visibility"), null=True, blank=True)
     slug = models.SlugField(_('Slug'), max_length=255, blank=True)
 
-    static = models.BooleanField(default=False)
+    static = models.BooleanField(_('static'), default=False)
 
     objects = PlacementManager()
 
@@ -272,8 +274,8 @@ class Listing(models.Model):
     """
     box_class = staticmethod(ListingBox)
 
-    placement = models.ForeignKey(Placement)
-    category = models.ForeignKey(Category, db_index=True)
+    placement = models.ForeignKey(Placement, verbose_name=_('Placement'))
+    category = models.ForeignKey(Category, verbose_name=_('Category'), db_index=True)
 
     publish_from = models.DateTimeField(_("Start of listing"))
     publish_to = models.DateTimeField(_("End of listing"), null=True, blank=True)
@@ -329,6 +331,6 @@ class HitCount(models.Model):
 
     class Meta:
         app_label = 'core'
-        verbose_name = 'Hit Count'
-        verbose_name_plural = 'Hit Counts'
+        verbose_name = _('Hit Count')
+        verbose_name_plural = _('Hit Counts')
 

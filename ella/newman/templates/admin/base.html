@@ -117,6 +117,7 @@
             <div id="footer">
                 <div class="user-tools">
                     <strong>{{ user.get_full_name }}</strong>
+                    | {% trans "What's new?" %}
                     | {{ VERSION }}, {{ SERVER_INFO.type }}
                     | <a class="icn visible" onclick="$('#debug').toggle()">debug log</a>
                     | <a class="icn eclear hashadr" href="/password_change/">{% trans 'Change password' %}</a>
