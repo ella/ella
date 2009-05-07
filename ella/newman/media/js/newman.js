@@ -793,6 +793,10 @@ function clone_form($orig_form) {
 
 /////// CODE FOR CONTENT-SPECIFIC USE
 
+//// Homepage initialization
+
+$(function(){ContentByHashLib.reload_content('content');});
+
 //// Drafts and templates
 (function() {
     var draft_id;
