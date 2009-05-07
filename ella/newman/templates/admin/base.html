@@ -51,7 +51,7 @@
                 {% endfor %}
             </ul></div>
                 {% else %}
-                    <h1>{% trans "No role defined for user"%}&nbsp;{{ user.username }}.</h1>
+                    <h1>{% trans "No role defined for user" %}&nbsp;{{ user.username }}.</h1>
             {% endif %}
 
           {% endblock %}
@@ -62,6 +62,7 @@
         {% if user.is_authenticated %}
         <div class="cb"></div>
         <div class="favs">
+            {% comment %}
             <ul class="items">
                 <li>
                     <a class="app article" href="#/articles/article/"><span>Články</span></a>
@@ -93,6 +94,7 @@
                 <li><a href="" class="icn config">Nastavit panel</a></li>
                 <li><a href="" class="icn visible">Skrýt panel</a></li>
             </ul>
+            {% endcomment %}
         </div>
         {% endif %}
     {% endblock %}

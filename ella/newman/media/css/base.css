@@ -126,12 +126,7 @@ div.breadcrumbs {
 
 /* CONTENT */
 #content {
-/*    background: #eee;
-    padding: 5px;
-    position: fixed;
-    top: 112px; left: 0; bottom: 28px; right: 0;
-    overflow: auto; */
-    padding-bottom: 30px;
+    padding-bottom: 40px;
 }
 
 /* CONTENT TOOLBAR */
@@ -265,10 +260,21 @@ input.vDateTimeInput { width: 130px; }
 .form-error-msg { padding: 0 5px; color: red; font-weight: bold; }
 
 #err-overlay {
-    bottom: 65px;
-    right: 0;
+    bottom: 70px;
+    right: 5px;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    border: 2px solid #d66;
+    padding: 5px;
+    background: #fee;
 }
 
+#err-overlay p {
+    cursor: pointer;
+}
+#err-overlay p:hover {
+    text-decoration: underline;
+}
 
 /* FORMS : article change form */
 .article-form-container { padding-left: 10px; }
@@ -280,12 +286,14 @@ input.vDateTimeInput { width: 130px; }
 .change-form .submit-row {
     position: fixed;
     bottom: 27px;
-    right: 0;
-    border-left: 2px solid red;
-    border-top: 2px solid red;
+    right: 5px;
+    border-left: 2px solid #d66;
+    border-top: 2px solid #d66;
+    border-right: 2px solid #d66;
     -moz-border-radius-topleft: 10px;
+    -moz-border-radius-topright: 10px;
     padding: 10px;
-    background: #ffc;
+    background: #ffd;
 }
 .change-form .submit-row a {
     white-space: nowrap;
