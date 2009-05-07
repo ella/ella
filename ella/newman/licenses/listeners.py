@@ -14,6 +14,10 @@ class LicenseListenerPostSave(object):
         self.src_text = src_text
 
     def __call__(self, sender, signal, created, **kwargs):
+        """ TODO:
+        Listener na licence je v ella.newman.listeners, je tam mazani deps, pak to chce vzit content 
+        jako sablonu a pres nody zjistit boxy a znovuvytvorit deps.
+        """
         log.debug('LicenseListener activated by %s, sig=%s, created=%s' % (sender, signal, created))
         log.debug('LicenseListener kwargs=%s' % kwargs)
         src_text = self.src_text
