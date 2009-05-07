@@ -140,8 +140,9 @@ var ContentByHashLib = {};
             $obj = $('<object type="text/html" width="'
             + ($target.width() - 6)
             + '" height="'
-            + $target.height()
-            + '"></object>');
+            + Math.max($target.height(), 300)
+            + '">'
+            + '</object>');
             
             function append_error_data() {
                 $obj.attr({ data:
@@ -1195,7 +1196,7 @@ $( function() {
     // - there is none AND
     // - one is there for the specifier's URL in the changelistFilters object
     $(document).bind('ready', function() {
-        if (!changelistFilters || typeof changelistFilters != 'object') return;
+        if (!window.changelistFilters || typeof changelistFilters != 'object') return;
         for (a in changelistFilters) {
             var adr = a.replace(/^filter/, '').replace(/__/g, '/') + '/';
             var decoded = $('<span>').html(changelistFilters[a]).text()
