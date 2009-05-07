@@ -28,7 +28,7 @@
           {% block topnavi %}
             <div id="navi-top"><ul id="menu-top">
             {% if menu_list %}
-                        <li><a href="{% url admin_index %}" style="padding: 3px 5px 2px 5px;"><img src="{{ NEWMAN_MEDIA_URL }}ico/16/gohome.png" style="border:none" alt="Dom"/></a></li>
+                        <li><a href="{% url admin_index %}#/nm/" style="padding: 3px 5px 2px 5px;"><img src="{{ NEWMAN_MEDIA_URL }}ico/16/gohome.png" style="border:none" alt="Dom"/></a></li>
               {% for app in menu_list %}
                 <li><a href="#/{{ app.name|lower }}/">{% trans app.name %}</a>
                   <ul>
