@@ -268,7 +268,7 @@ class FormatedPhoto(models.Model):
             p = self.photo
             important_box = (p.important_left, p.important_top, p.important_right, p.important_bottom)
 
-        formatter = Formatter(Image.open(imagePath), self.format, crop_box=crop_box, important_box=important_box)
+        formatter = Formatter(Image.open(self.filename), self.format, crop_box=crop_box, important_box=important_box)
 
         stretched_photo, crop_box = formatter.format()
         self.width, self.height = stretched_photo.size
