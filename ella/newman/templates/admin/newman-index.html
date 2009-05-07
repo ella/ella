@@ -96,6 +96,27 @@
         </div>
     </div>
 
+    <div class="hpbox listings" id="search-form">
+        <h3>{% trans "Future placements" %}</h3>
+        <div class="cnt">
+            {% for p in future_placements %}
+                <div style="background: #{% cycle 'ff9' 'ffc' %}; margin: 5px 0; padding: 5px;">
+                    <h4>{% trans p.publishable.content_type.name %}: {{ p.publishable.title }}</h4>
+                    <p>
+                        {% trans "Publish from" %}: <strong>{{ p.publish_from|date }}</strong>
+                        | {% trans "Category" %}: {{ p.category }}
+                        | {% trans 'Author' %}: {{ p.publishable.authors.all|join:", " }}
+                    </p>
+                    {{ p.publishable.description|safe|truncatewords:32 }}
+                    <div class="submit-row ar">
+                        <a class="icn btn web" href="{% url admin_index %}r/{{ p.publishable.content_type.pk }}/{{ p.publishable.pk }}/">{% trans 'View on site' %}</a>
+                        <a class="icn btn edit hashadr def" href="{% url admin_index %}#/{{ p.publishable.content_type.app_label }}/{{ p.publishable.content_type.model }}/{{ p.publishable.pk }}/">{% trans 'Edit' %}</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
     {% comment %}
     {% cache 600 devmsgs user.username %}
     {% get_devmsgs as msgs %}

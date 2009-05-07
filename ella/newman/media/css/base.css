@@ -231,6 +231,7 @@ a.icn.novisible { background-image: url(../ico/16/14_layer_novisible.png); }
 a.icn.history { background-image: url(../ico/16/history.png); }
 a.icn.web { background-image: url(../ico/16/web.png); }
 a.icn.save { background-image: url(../ico/16/filesave.png); }
+a.icn.edit { background-image: url(../ico/16/edit.png); }
 
 /* FOOTER */
 
@@ -252,7 +253,7 @@ label.required { font-weight: bold; color: darkorange; }
 div.submit-row, fieldset.submit-row { border: none; clear:both; margin-top: 5px; padding: 2px 0; text-align: right; }
 input, textarea, select { padding: 2px 0; font: normal 100% Tahoma, Verdana, sans-serif; }
 .ajax-form .form-metadata { display: none; }
-input[type=text] { width: 500px; }
+.form-row input[type=text] { width: 500px; }
 input.vIntegerField { width: 40px; text-align: right; }
 input.vDateInput, input.vForeignKeyRawIdAdminField { width: 40px; }
 input.vDateTimeInput { width: 130px; }

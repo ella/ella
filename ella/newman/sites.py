@@ -1,3 +1,5 @@
+import datetime
+
 from django import template
 from django.contrib.admin.sites import AdminSite
 from django.shortcuts import render_to_response
@@ -19,6 +21,7 @@ from ella.newman.utils import set_user_config_db, set_user_config_session, get_u
 from ella.newman.permission import has_model_list_permission, applicable_categories
 from ella.newman.config import CATEGORY_FILTER, NEWMAN_URL_PREFIX, STATUS_SMTP_ERROR, STATUS_FORM_ERROR
 from ella.newman.options import NewmanModelAdmin
+from ella.core.models.publishable import Placement
 
 
 class NewmanSite(AdminSite):
@@ -181,11 +184,14 @@ class NewmanSite(AdminSite):
                 if last_filter:
                     last_filters[key] = '?%s' % json_decode(last_filter[0].value)
 
+        future_placements = Placement.objects.filter(publish_from__gt=datetime.datetime.now())
+
         context = {
             'title': _('Site administration'),
             'site_filter_form': site_filter_form,
             'searchable_content_types': cts,
             'last_filters': last_filters,
+            'future_placements': future_placements,
             'publishable_lookup_fields': publishable_lookup_fields 
         }
         context.update(extra_context or {})
