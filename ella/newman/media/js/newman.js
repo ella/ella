@@ -118,6 +118,50 @@ var ContentByHashLib = {};
         $target.trigger('content_added');
     }
     
+    function inject_error_message(load_id) {
+        var info = LOAD_BUF[ load_id ];
+        if (!info) {
+            carp('bad LOAD_BUF index passed to inject_error_message: '+load_id);
+            return;
+        }
+        var $target = $('#'+info.target_id);
+        var response_text = info.xhr.responseText;
+        var $err_div = $('<div class="error-code"></div>').append(
+            $('<a>reload</a>').css({display:'block'}).click(function(){
+                load_content(info);
+                return false;
+            })
+        );
+        LOADED_URLS[ info.target_id ] = 'ERROR:'+info.address;
+        try {
+            $err_div.append( JSON.parse(response_text).message );
+        } catch(e) {
+            // Render the whole HTML in an <object>
+            $obj = $('<object type="text/html" width="'
+            + ($target.width() - 6)
+            + '" height="'
+            + Math.max($target.height(), 300)
+            + '">'
+            + '</object>');
+            
+            function append_error_data() {
+                $obj.attr({ data:
+                    'data:text/html;base64,'
+                    + Base64.encode(response_text)
+                }).appendTo( $err_div );
+            }
+            
+            if (window.Base64) {
+                append_error_data();
+            }
+            else {
+                request_media(MEDIA_URL + 'js/base64.js');
+                $(document).one('media_loaded', append_error_data);
+            }
+        }
+        $target.empty().append($err_div);
+    }
+    
     // Check if the least present request has finished and if so, shift it
     // from the queue and render the results, and then call itself recursively.
     // This effectively renders all finished requests from the first up to the
@@ -162,12 +206,6 @@ var ContentByHashLib = {};
         delete LOAD_BUF[ load_id ];
         $('#'+info.target_id).removeClass('loading');
         dec_loading();
-        
-        // Restore the hash so it doesn't look like the request succeeded.
-        if (!DEBUG) {   //FIXME: figure out what to do on request failure
-            url_target_id = ((info.target_id == 'content') ? '' : info.target_id+'::');
-            adr(url_target_id + (LOADED_URLS[info.target_id] ? LOADED_URLS[info.target_id] : ''));
-        }
         
         carp('Failed to load '+info.address+' into '+info.target_id);
     }
@@ -215,6 +253,8 @@ var ContentByHashLib = {};
                 draw_ready();
             },
             error: function(xhr) {
+                LOAD_BUF[ this.load_id ].xhr = xhr;
+                inject_error_message( this.load_id );
                 cancel_request( this.load_id );
                 show_ajax_error(xhr);
                 draw_ready();
@@ -1156,7 +1196,7 @@ $( function() {
     // - there is none AND
     // - one is there for the specifier's URL in the changelistFilters object
     $(document).bind('ready', function() {
-        if (!changelistFilters || typeof changelistFilters != 'object') return;
+        if (!window.changelistFilters || typeof changelistFilters != 'object') return;
         for (a in changelistFilters) {
             var adr = a.replace(/^filter/, '').replace(/__/g, '/') + '/';
             var decoded = $('<span>').html(changelistFilters[a]).text()
@@ -1246,6 +1286,7 @@ $( function() {
     $('#search-form select[name=action]').live('keypress', search_on_enter);
 });
 
+// Message bubble
 function show_message(message, options) {
     if (!options) options = {};
     var duration = (options.duration == undefined) ? 5000 : options.duration;

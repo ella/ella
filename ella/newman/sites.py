@@ -63,6 +63,9 @@ class NewmanSite(AdminSite):
             url(r'^%s/save-filters/$' % NEWMAN_URL_PREFIX,
                 wrap(self.cat_filters_save),
                 name="newman-save-filters"),
+            url(r'^%s/$' % NEWMAN_URL_PREFIX,
+                wrap(self.newman_index),
+                name="newman-index"),
 #            url(r'^$',
 #                wrap(self.index),
 #                name='%sadmin_index' % self.name),
@@ -150,7 +153,7 @@ class NewmanSite(AdminSite):
             context_instance=template.RequestContext(request)
         )
 
-    def index(self, request, extra_context=None):
+    def newman_index(self, request, extra_context=None):
         """
         Displays the main Newman index page, without installed apps.
         """
@@ -180,7 +183,7 @@ class NewmanSite(AdminSite):
             'last_filters': last_filters
         }
         context.update(extra_context or {})
-        return render_to_response(self.index_template or 'admin/index.html', context,
+        return render_to_response(self.index_template or 'admin/newman-index.html', context,
             context_instance=template.RequestContext(request)
         )
 

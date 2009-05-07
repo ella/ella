@@ -3,7 +3,7 @@
 
 {% block breadcrumbs %}
 <div class="breadcrumbs">
-    <a href="{% url admin_index %}">{% trans "Home" %}</a>
+    <a class="hashadr" href="{% url admin_index %}#/nm/">{% trans "Home" %}</a>
     &rsaquo; <a class="hashadr" href="{% url admin_index %}{{ app_label }}/">{% trans app_label.title %}</a>
     &rsaquo; <a class="hashadr" href="../">{{ opts.verbose_name_plural|capfirst }}</a>
     &rsaquo; <strong id="doc-title">{{ object|truncatewords:"18" }}</strong>

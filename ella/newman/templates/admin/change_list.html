@@ -5,7 +5,7 @@
     {% if not is_popup %}
         <div class="breadcrumbs">
             <div style="float: left;">
-                <a href="{% url admin_index %}">{% trans "Home" %}</a>
+                <a class="hashadr" href="{% url admin_index %}#/nm/">{% trans "Home" %}</a>
                 {% if app_label %}&rsaquo; <a class="hashadr" href="/{{ app_label }}/">{% trans app_label.title %}</a>{% endif %}
                 {% if title %}&rsaquo; <strong id="doc-title">{{ title }}</strong>{% endif %}
             </div>
