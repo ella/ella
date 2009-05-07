@@ -164,35 +164,18 @@ class RelatedFilterSpec(filterspecs.RelatedFilterSpec):
         Returns True if filter is applied, otherwise returns False.
         Tries to find its argument(s) in request querystring.
         """
-        for p in request_params:
-            if p == self.lookup_kwarg:
-                return True
-        return False
+        return self.lookup_kwarg in request_params
 
 filterspecs.FilterSpec.register_insert(lambda f: bool(f.rel), RelatedFilterSpec)
 
 class ChoicesFilterSpec(filterspecs.ChoicesFilterSpec):
     def is_active(self, request_params):
-        """
-        Returns True if filter is applied, otherwise returns False.
-        Tries to find its argument(s) in request querystring.
-        """
-        for p in request_params:
-            if p == self.lookup_kwarg:
-                return True
-        return False
+        return self.lookup_kwarg in request_params
 
 filterspecs.FilterSpec.register_insert(lambda f: bool(f.choices), ChoicesFilterSpec)
 
 class DateFieldFilterSpec(filterspecs.DateFieldFilterSpec):
     def is_active(self, request_params):
-        """
-        Returns True if filter is applied, otherwise returns False.
-        Tries to find its argument(s) in request querystring.
-        """
-        for p in request_params:
-            if p == self.lookup_kwarg:
-                return True
         return False
 
 filterspecs.FilterSpec.register_insert(lambda f: isinstance(f, models.DateField), DateFieldFilterSpec)
@@ -200,14 +183,9 @@ filterspecs.FilterSpec.register_insert(lambda f: isinstance(f, models.DateField)
 
 class BooleanFieldFilterSpec(filterspecs.BooleanFieldFilterSpec):
     def is_active(self, request_params):
-        """
-        Returns True if filter is applied, otherwise returns False.
-        Tries to find its argument(s) in request querystring.
-        """
-        for p in request_params:
-            if p == self.lookup_kwarg:
-                return True
         return False
+
+filterspecs.FilterSpec.register_insert(lambda f: isinstance(f, models.BooleanField), BooleanFieldFilterSpec)
 
 from django.db import models
 filterspecs.FilterSpec.register_insert(lambda f: isinstance(f, models.BooleanField) or isinstance(f, models.NullBooleanField), BooleanFieldFilterSpec)
