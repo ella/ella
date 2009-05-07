@@ -9,6 +9,7 @@
   <script type="text/javascript">
         var MEDIA_URL = '{{ NEWMAN_MEDIA_URL }}';
         var BASE_URL = '{% url admin_index %}';
+        var LOGGED_IN = '{% if user.is_authenticated %}1{% else %}{% endif %}';
     </script>
   <meta name="robots" content="NONE,NOARCHIVE" />
 </head>
