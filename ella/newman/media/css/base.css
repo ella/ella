@@ -185,6 +185,8 @@ div.hpbox.errmsg label, div.hpbox.errmsg input, div.hpbox.errmsg textarea {
     width: 99%;
 }
 
+div.hpbox.calendar .ui-datepicker { width: 99%; padding: 0; border: none; }
+
 a.bl {
     display: block;
 }

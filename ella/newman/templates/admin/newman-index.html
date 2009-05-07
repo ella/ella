@@ -31,7 +31,6 @@
     <div class="hpbox calendar">
         <h3>{% trans "Calendar" %}</h3>
         <div class="cnt">
-            <span id="crucial-datepicker"></span>
             <script type="text/javascript" src="{{ NEWMAN_MEDIA_URL }}jquery/jquery-ui.js"></script>
             <script type="text/javascript">
             // Oldo, klidne tento JS kus zcenzuruj. Cil byl rozchodit kalendar na HP.
@@ -42,7 +41,7 @@
             var selectedMonth = 0;
             var selectedDay = 0;
             $(function() {
-                $("#crucial-datepicker").datepicker({
+                $(".hpbox.calendar .cnt").datepicker({
                     dateFormat: 'dd',
                     onChangeMonthYear: function(year, month, inst) {
                         selectedMonth = month;
@@ -172,7 +171,6 @@ changelistFilters["{{ fname }}"] = "{{ qstring }}";
 
     <script type="text/javascript">
     request_media('{{ NEWMAN_MEDIA_URL }}jquery/jquery-ui-smoothness.css?{{ VERSION }}');
-    request_media('{{ NEWMAN_MEDIA_URL }}css/datetime.css?{{ VERSION }}');
-    request_media('{{ NEWMAN_MEDIA_URL }}jquery/jquery-ui.js?{{ VERSION }}');
+    //request_media('{{ NEWMAN_MEDIA_URL }}jquery/jquery-ui.js?{{ VERSION }}');
     </script>
 {% endblock %}
