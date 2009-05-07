@@ -61,6 +61,19 @@
         </div>
     </div>
 
+    <div class="hpbox listings" id="search-form">
+        <h3>{% trans "Future placements" %}</h3>
+        <div class="cnt">
+            {% for p in future_placements %}
+                <div style="background: #{% cycle 'eee' 'ddf' %}; margin: 5px 0; padding: 5px;">
+                    <h4>"{{ p.publishable.title }}" {% trans 'in' %} "{{ p.category }}"</h4>
+                    <p>{{ p.publish_from|date }} | {% trans 'Author' %}: {{ p.publishable.authors.all|join:", " }}</p>
+                    {{ p.publishable.description|safe|truncatewords:32 }}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
     {% comment %}
     {% cache 600 devmsgs user.username %}
     {% get_devmsgs as msgs %}
