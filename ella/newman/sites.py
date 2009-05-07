@@ -162,7 +162,12 @@ class NewmanSite(AdminSite):
             data['sites'] = get_user_config(request.user, CATEGORY_FILTER)
         except KeyError:
             data['sites'] = []
-
+        
+        publishable_lookup_fields = {
+            'day': 'placement__listing__publish_from__day',
+            'month': 'placement__listing__publish_from__month',
+            'year': 'placement__listing__publish_from__year'
+        }
         site_filter_form = SiteFilterForm(data=data, user=request.user)
         cts = []
         last_filters = {}
@@ -180,7 +185,8 @@ class NewmanSite(AdminSite):
             'title': _('Site administration'),
             'site_filter_form': site_filter_form,
             'searchable_content_types': cts,
-            'last_filters': last_filters
+            'last_filters': last_filters,
+            'publishable_lookup_fields': publishable_lookup_fields 
         }
         context.update(extra_context or {})
         return render_to_response(self.index_template or 'admin/newman-index.html', context,
