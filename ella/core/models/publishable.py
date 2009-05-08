@@ -200,7 +200,7 @@ class Placement(models.Model):
             return 'Broken placement'
 
     def is_active(self):
-        "Return True if the listing's priority is currently active."
+        "Return True if the Placement is currently active."
         now = datetime.now()
         return now > self.publish_from and (self.publish_to is None or now < self.publish_to)
 
