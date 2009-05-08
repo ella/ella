@@ -202,11 +202,19 @@ class CategoryAdmin(newman.NewmanModelAdmin):
     search_fields = ('title', 'slug',)
     prepopulated_fields = {'slug': ('title',)}
     ordering = ('tree_path',)
+    suggest_fields = {'tree_parent': ('title', 'slug')}
 
 class HitCountAdmin(newman.NewmanModelAdmin):
-    list_display = ('target', 'hits',)
+    list_display = ('target', 'hits', 'target_url')
     list_filter = ('placement__category',)
     ordering = ('-hits', '-last_seen',)
+    actions = None
+
+    def target_url(self, object):
+        target = object.target()
+        return mark_safe('<a class="icn web" href="%s">%s</a>' % (target.get_absolute_url(), target))
+    target_url.short_description = _('View on site')
+    target_url.allow_tags = True
 
     def get_urls(self):
 
@@ -235,8 +243,8 @@ class SourceAdmin(newman.NewmanModelAdmin):
 class PublishableAdmin(newman.NewmanModelAdmin):
     """ Default admin options for all publishables """
 
-    list_display = ('title', 'category', 'photo_thumbnail', 'publish_status', 'placement_link')
-    list_filter = ('category__site', 'category', 'authors',)
+    list_display = ('admin_link', 'title', 'category', 'photo_thumbnail', 'publish_status', 'placement_link')
+    list_filter = ('category__site', 'category', 'authors', 'content_type')
     search_fields = ('title', 'description', 'slug', 'authors__name', 'authors__slug',) # FIXME: 'tags__tag__name',)
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
@@ -249,6 +257,13 @@ class PublishableAdmin(newman.NewmanModelAdmin):
     }
 
     inlines = [PlacementInlineAdmin]
+
+    def admin_link(self, object):
+        ct = object.content_type
+        return mark_safe('<a class="hashadr" href="/%s/%s/%s/">%s: %s</a>' % (ct.app_label, ct.model, object.pk, ct.name, object))
+    admin_link.allow_tags = True
+    admin_link.short_description = _('Publishable object')
+
 
     def photo_thumbnail(self, object):
         photo = object.get_photo()
@@ -266,11 +281,11 @@ class PublishableAdmin(newman.NewmanModelAdmin):
     placement_link.short_description = _('Placement')
 
     def publish_status(self, object):
-        if object.main_placement and object.main_placement.is_active:
-            return ugettext('Published')
-        return ugettext('Unpublished')
-    publish_status.allow_tags = True
-    publish_status.short_description = _('Status')
+        if object.main_placement and object.main_placement.is_active():
+            return True
+        return False
+    publish_status.boolean = True
+    publish_status.short_description = _('Published')
 
 
 newman.site.register(HitCount, HitCountAdmin)
