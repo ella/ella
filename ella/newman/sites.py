@@ -165,7 +165,7 @@ class NewmanSite(AdminSite):
             data['sites'] = get_user_config(request.user, CATEGORY_FILTER)
         except KeyError:
             data['sites'] = []
-        
+
         publishable_lookup_fields = {
             'day': 'placement__listing__publish_from__day',
             'month': 'placement__listing__publish_from__month',
@@ -175,7 +175,7 @@ class NewmanSite(AdminSite):
         cts = []
         last_filters = {}
         for model, model_admin in self._registry.items():
-            if has_model_list_permission(request.user, model):
+            if has_model_list_permission(request.user, model) and model_admin.search_fields:
                 ct = ContentType.objects.get_for_model(model)
                 cts.append(ct)
                 # Load saved filter configurations for changelists
@@ -192,7 +192,7 @@ class NewmanSite(AdminSite):
             'searchable_content_types': cts,
             'last_filters': last_filters,
             'future_placements': future_placements,
-            'publishable_lookup_fields': publishable_lookup_fields 
+            'publishable_lookup_fields': publishable_lookup_fields
         }
         context.update(extra_context or {})
         return render_to_response(self.index_template or 'admin/newman-index.html', context,

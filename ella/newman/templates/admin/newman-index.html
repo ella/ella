@@ -86,7 +86,7 @@
         <div class="cnt">
             <input type="text" name="q"/>
             <select name="action" size="1">
-                <option value="">{% trans 'All' %}...</option>
+                <option value="">{% trans 'Select' %}...</option>
                 {% for ct in searchable_content_types %}
                     <option value="/{{ ct.app_label }}/{{ ct.model }}/">{% trans ct.name %}</option>
                 {% endfor %}
@@ -95,7 +95,7 @@
         </div>
     </div>
 
-    <div class="hpbox listings" id="search-form">
+    <div class="hpbox placements" id="search-form">
         <h3>{% trans "Future placements" %}</h3>
         <div class="cnt">
             {% for p in future_placements %}
