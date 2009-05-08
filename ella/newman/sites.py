@@ -137,7 +137,7 @@ class NewmanSite(AdminSite):
             if user.is_active and user.is_staff:
                 login(request, user)
                 # user has no applicable categories, probably his role is undefined
-                if not applicable_categories(user) and not user.is_superuser():
+                if not applicable_categories(user) and not user.is_superuser:
                     return self.norole(request, user)
                 # load all user's specific settings into session
                 for c in AdminSetting.objects.filter(user=user):
