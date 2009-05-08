@@ -113,6 +113,9 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
 class NewmanModelAdmin(XModelAdmin):
     changelist_view_cl = NewmanChangeList
 
+    delete_confirmation_template = 'newman/delete_confirmation.html'
+    object_history_template = 'newman/object_history.html'
+
     def __init__(self, *args, **kwargs):
         super(NewmanModelAdmin, self).__init__(*args, **kwargs)
         self.list_per_page = DEFAULT_LIST_PER_PAGE
@@ -231,7 +234,7 @@ class NewmanModelAdmin(XModelAdmin):
             # the 'invalid=1' parameter was already in the query string, something
             # is screwed up with the database, so display an error page.
             if ERROR_FLAG in request.GET.keys():
-                return render_to_response('admin/invalid_setup.html', {'title': _('Database error')})
+                return render_to_response('newman/invalid_setup.html', {'title': _('Database error')})
             return HttpResponseRedirect(request.path + '?' + ERROR_FLAG + '=1')
         cl.formset = None
 
@@ -245,7 +248,7 @@ class NewmanModelAdmin(XModelAdmin):
         }
         context.update(extra_context or {})
         out= render_to_response(
-            'admin/filters.html',
+            'newman/filters.html',
             context,
             context_instance=template.RequestContext(request)
         )
@@ -278,9 +281,9 @@ class NewmanModelAdmin(XModelAdmin):
         context['is_user_category_filtered'] = utils.is_user_category_filtered( self.queryset(request) )
         context.update(extra_context or {})
         return render_to_response(self.change_list_template or [
-            'admin/%s/%s/change_list.html' % (app_label, opts.object_name.lower()),
-            'admin/%s/change_list.html' % app_label,
-            'admin/change_list.html'
+            'newman/%s/%s/change_list.html' % (app_label, opts.object_name.lower()),
+            'newman/%s/change_list.html' % app_label,
+            'newman/change_list.html'
         ], context, context_instance=template.RequestContext(request))
 
     @require_AJAX
@@ -703,7 +706,7 @@ class NewmanInlineModelAdmin(InlineModelAdmin):
         return formfield_for_dbfield_factory(self, db_field, **kwargs)
 
 class NewmanStackedInline(NewmanInlineModelAdmin):
-    template = 'admin/edit_inline/stacked.html'
+    template = 'newman/edit_inline/stacked.html'
 
 class NewmanTabularInline(NewmanInlineModelAdmin):
-    template = 'admin/edit_inline/tabular.html'
+    template = 'newman/edit_inline/tabular.html'

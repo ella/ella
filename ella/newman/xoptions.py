@@ -11,6 +11,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 from django.utils.translation import ngettext
 from django.utils.encoding import force_unicode
+from django.contrib.contenttypes.models import ContentType
 try:
     set
 except NameError:
@@ -164,6 +165,32 @@ class XModelAdmin(ModelAdmin):
         cx['raw_form'] = form
         return cx
 
+    def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
+        opts = self.model._meta
+        app_label = opts.app_label
+        ordered_objects = opts.get_ordered_objects()
+        context.update({
+            'add': add,
+            'change': change,
+            'has_add_permission': self.has_add_permission(request),
+            'has_change_permission': self.has_change_permission(request, obj),
+            'has_delete_permission': self.has_delete_permission(request, obj),
+            'has_file_field': True, # FIXME - this should check if form or formsets have a FileField,
+            'has_absolute_url': hasattr(self.model, 'get_absolute_url'),
+            'ordered_objects': ordered_objects,
+            'form_url': mark_safe(form_url),
+            'opts': opts,
+            'content_type_id': ContentType.objects.get_for_model(self.model).id,
+            'save_as': self.save_as,
+            'save_on_top': self.save_on_top,
+            'root_path': self.admin_site.root_path,
+        })
+        return render_to_response(self.change_form_template or [
+            "newman/%s/%s/change_form.html" % (app_label, opts.object_name.lower()),
+            "newman/%s/change_form.html" % app_label,
+            "newman/change_form.html"
+        ], context, context_instance=template.RequestContext(request))
+
     def change_view(self, request, object_id, extra_context=None):
         "The 'change' admin view for this model."
         out = self.change_view_preprocess(request, object_id)
@@ -191,7 +218,7 @@ class XModelAdmin(ModelAdmin):
             # the 'invalid=1' parameter was already in the query string, something
             # is screwed up with the database, so display an error page.
             if ERROR_FLAG in request.GET.keys():
-                return render_to_response('admin/invalid_setup.html', {'title': _('Database error')})
+                return render_to_response('newman/invalid_setup.html', {'title': _('Database error')})
             return HttpResponseRedirect(request.path + '?' + ERROR_FLAG + '=1')
 
         # If the request was POSTed, this might be a bulk action or a bulk edit.
@@ -275,9 +302,9 @@ class XModelAdmin(ModelAdmin):
         context = out
         context.update(extra_context or {})
         return render_to_response(self.change_list_template or [
-            'admin/%s/%s/change_list.html' % (app_label, opts.object_name.lower()),
-            'admin/%s/change_list.html' % app_label,
-            'admin/change_list.html'
+            'newman/%s/%s/change_list.html' % (app_label, opts.object_name.lower()),
+            'newman/%s/change_list.html' % app_label,
+            'newman/change_list.html'
         ], context, context_instance=template.RequestContext(request))
 
     def get_add_view_context(self, request, form_url):

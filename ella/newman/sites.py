@@ -6,7 +6,7 @@ from django.shortcuts import render_to_response
 from django.utils.functional import update_wrapper
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.db import models
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.core.mail import EmailMessage
 from django.views.decorators.cache import never_cache
 from django.contrib.auth import authenticate, login, logout
@@ -26,6 +26,9 @@ from ella.core.models.publishable import Placement
 
 class NewmanSite(AdminSite):
     norole_template = None
+    index_template = 'newman/index.html'
+    login_template = 'newman/login.html'
+    app_index_template = 'newman/app_index.html'
 
     def append_inline(self, to_models=(), inline=None):
         """
@@ -151,7 +154,7 @@ class NewmanSite(AdminSite):
         }
         logout(request)
         return render_to_response(
-            self.norole_template or 'admin/error_norole.html',
+            self.norole_template or 'newman/error_norole.html',
             context,
             context_instance=template.RequestContext(request)
         )
@@ -167,9 +170,9 @@ class NewmanSite(AdminSite):
             data['sites'] = []
 
         publishable_lookup_fields = {
-            'day': 'placement__listing__publish_from__day',
-            'month': 'placement__listing__publish_from__month',
-            'year': 'placement__listing__publish_from__year'
+            'day': 'placement__publish_from__day',
+            'month': 'placement__publish_from__month',
+            'year': 'placement__publish_from__year'
         }
         site_filter_form = SiteFilterForm(data=data, user=request.user)
         cts = []
@@ -195,7 +198,7 @@ class NewmanSite(AdminSite):
             'publishable_lookup_fields': publishable_lookup_fields
         }
         context.update(extra_context or {})
-        return render_to_response(self.index_template or 'admin/newman-index.html', context,
+        return render_to_response('newman/newman-index.html', context,
             context_instance=template.RequestContext(request)
         )
 
@@ -204,8 +207,6 @@ class NewmanSite(AdminSite):
         """
         Sends error report or feature request to administrator.
         """
-
-        from django.conf import settings
 
         form = ErrorReportForm(request.POST)
         if form.is_valid():
@@ -234,4 +235,4 @@ class NewmanSite(AdminSite):
             return JsonResponseError(ugettext('Error in form.'), status=STATUS_FORM_ERROR)
 
 
-site = NewmanSite()
+site = NewmanSite(name="newman")
