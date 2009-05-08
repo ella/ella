@@ -165,32 +165,6 @@ class XModelAdmin(ModelAdmin):
         cx['raw_form'] = form
         return cx
 
-    def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
-        opts = self.model._meta
-        app_label = opts.app_label
-        ordered_objects = opts.get_ordered_objects()
-        context.update({
-            'add': add,
-            'change': change,
-            'has_add_permission': self.has_add_permission(request),
-            'has_change_permission': self.has_change_permission(request, obj),
-            'has_delete_permission': self.has_delete_permission(request, obj),
-            'has_file_field': True, # FIXME - this should check if form or formsets have a FileField,
-            'has_absolute_url': hasattr(self.model, 'get_absolute_url'),
-            'ordered_objects': ordered_objects,
-            'form_url': mark_safe(form_url),
-            'opts': opts,
-            'content_type_id': ContentType.objects.get_for_model(self.model).id,
-            'save_as': self.save_as,
-            'save_on_top': self.save_on_top,
-            'root_path': self.admin_site.root_path,
-        })
-        return render_to_response(self.change_form_template or [
-            "newman/%s/%s/change_form.html" % (app_label, opts.object_name.lower()),
-            "newman/%s/change_form.html" % app_label,
-            "newman/change_form.html"
-        ], context, context_instance=template.RequestContext(request))
-
     def change_view(self, request, object_id, extra_context=None):
         "The 'change' admin view for this model."
         out = self.change_view_preprocess(request, object_id)

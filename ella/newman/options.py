@@ -113,11 +113,27 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
 class NewmanModelAdmin(XModelAdmin):
     changelist_view_cl = NewmanChangeList
 
-    delete_confirmation_template = 'newman/delete_confirmation.html'
-    object_history_template = 'newman/object_history.html'
+    def get_template_list(self, base_template):
+        model = self.model
+        opts = model._meta
+        app_label = opts.app_label
+
+        return [
+            "newman/%s/%s/%s" % (app_label, opts.object_name.lower(), base_template),
+            "newman/%s/%s" % (app_label, base_template),
+            "newman/%s" % base_template
+        ]
 
     def __init__(self, *args, **kwargs):
         super(NewmanModelAdmin, self).__init__(*args, **kwargs)
+
+        # newman's custom templates
+        self.delete_confirmation_template = self.get_template_list('delete_confirmation.html')
+        self.object_history_template = self.get_template_list('object_history.html')
+        self.change_form_template = self.get_template_list('change_form.html')
+        self.change_list_template = self.get_template_list('change_list.html')
+        self.filters_template = self.get_template_list('filters.html')
+
         self.list_per_page = DEFAULT_LIST_PER_PAGE
         self.model_content_type = ContentType.objects.get_for_model(self.model)
         self.saveasnew_add_view = self.add_json_view
@@ -247,8 +263,7 @@ class NewmanModelAdmin(XModelAdmin):
             'app_label': app_label,
         }
         context.update(extra_context or {})
-        out= render_to_response(
-            'newman/filters.html',
+        out= render_to_response(self.filters_template or 'newman/filters.html',
             context,
             context_instance=template.RequestContext(request)
         )
@@ -257,8 +272,6 @@ class NewmanModelAdmin(XModelAdmin):
     @require_AJAX
     def changelist_view(self, request, extra_context=None):
         self.register_newman_variables(request)
-        opts = self.model._meta
-        app_label = opts.app_label
 
         context = super(NewmanModelAdmin, self).get_changelist_context(request)
         if type(context) != dict:
@@ -280,11 +293,7 @@ class NewmanModelAdmin(XModelAdmin):
         context['is_filtered'] = context['cl'].is_filtered()
         context['is_user_category_filtered'] = utils.is_user_category_filtered( self.queryset(request) )
         context.update(extra_context or {})
-        return render_to_response(self.change_list_template or [
-            'newman/%s/%s/change_list.html' % (app_label, opts.object_name.lower()),
-            'newman/%s/change_list.html' % app_label,
-            'newman/change_list.html'
-        ], context, context_instance=template.RequestContext(request))
+        return render_to_response(self.change_list_template, context, context_instance=template.RequestContext(request))
 
     @require_AJAX
     def suggest_view(self, request, extra_context=None):
