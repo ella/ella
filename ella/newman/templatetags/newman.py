@@ -1,29 +1,58 @@
 from django import template
-from ella.core.cache.utils import get_cached_list
+from django.utils.text import capfirst
+from django.utils.safestring import mark_safe
 
-from ella.newman.models import DevMessage
+from ella.newman import site, permission
+
 
 register = template.Library()
 
-class DevMessageNode(template.Node):
-    def __init__(self, var_name):
-        self.var_name = var_name
-
-    def render(self, ctx):
-        qset = get_cached_list(DevMessage)
-        ctx[self.var_name] = qset
-        return ''
-
-@register.tag
-def get_devmsgs(parser, token):
-    """Tag that return development messages to newman interface, cached.
-
-    Usage::
-
-        {% get_devmsgs as <var_name> [limit <limit>] [offset <offset>] %}
+@register.inclusion_tag('newman/tpl_tags/newman_topmenu.html', takes_context=True)
+def newman_topmenu(context):
     """
+    """
+    app_dict = {}
+    req = context['request']
+    user = context['user']
 
-    bits = token.split_contents()
+    for model, model_admin in site._registry.items():
+        app_label = model._meta.app_label
+        has_module_perms = user.has_module_perms(app_label) or permission.has_model_list_permission(user, model)
 
-    return DevMessageNode(bits[2])
+        if has_module_perms:
+            perms = {
+                'add': model_admin.has_add_permission(req),
+                'change': model_admin.has_change_permission(req),
+                'delete': model_admin.has_delete_permission(req),
+            }
 
+            # Check whether user has any perm for this module.
+            # If so, add the module to the model_list.
+            if True in perms.values():
+                model_dict = {
+                    'name': capfirst(model._meta.verbose_name_plural),
+                    'admin_url': mark_safe('%s/%s/' % (app_label, model.__name__.lower())),
+                    'perms': perms,
+                }
+                if app_label in app_dict:
+                    app_dict[app_label]['models'].append(model_dict)
+                else:
+                    app_dict[app_label] = {
+                        'name': app_label.title(),
+                        'has_module_perms': has_module_perms,
+                        'models': [model_dict],
+                    }
+
+    # Sort the apps alphabetically.
+    app_list = app_dict.values()
+    app_list.sort(lambda x, y: cmp(x['name'], y['name']))
+
+    # Sort the models alphabetically within each app.
+    for app in app_list:
+        app['models'].sort(lambda x, y: cmp(x['name'], y['name']))
+
+    return {
+        'NEWMAN_MEDIA_URL': context['NEWMAN_MEDIA_URL'],
+        'app_list': app_list
+    }
+#    return { 'uuuser': context['user'] }

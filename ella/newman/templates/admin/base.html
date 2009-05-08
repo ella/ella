@@ -21,40 +21,9 @@
 
     {% if not is_popup %}
 
-  {% if user.is_staff %}
-      {% load adminapplist %}
-      {% get_admin_app_list as menu_list %}
-
       {% block topnavi %}
-        <div id="navi-top"><ul id="menu-top">
-        {% if menu_list %}
-                    <li><a href="{% url admin_index %}" style="padding: 3px 5px 2px 5px;"><img src="{{ NEWMAN_MEDIA_URL }}ico/16/gohome.png" style="border:none;" alt="{% trans 'Home' %}"/></a></li>
-          {% for app in menu_list %}
-            <li><a href="#/{{ app.name|lower }}/">{% trans app.name %}</a>
-              <ul>
-                  {% for model in app.models %}
-                      {% if model.perms.add and model.perms.change %}
-                          <li><a href="#/{{ model.admin_url }}">{{ model.name }}</a></li>
-                      {% else %}
-                                {% if model.perms.add or model.perms.change %}
-                                    {% if model.perms.add %}
-                                        <li><a href="#/{{ model.admin_url }}add/">{{ model.name }} (+)</a></li>
-                                    {% else %}
-                                        <li><a href="#/{{ model.admin_url }}">{{ model.name }}</a></li>
-                                    {% endif %}
-                                {% endif %}
-                      {% endif %}
-              {% endfor %}
-              </ul>
-            </li>
-            {% endfor %}
-        </ul></div>
-            {% else %}
-                <h1>{% trans "No role defined for user" %}&nbsp;{{ user.username }}.</h1>
-        {% endif %}
-
+        <div id="navi-top">{% load newman %}{% newman_topmenu %}</div>
       {% endblock %}
-  {% endif %}
 
     {% block favs %}
         {% if user.is_authenticated %}
