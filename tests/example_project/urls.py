@@ -3,7 +3,7 @@ from os.path import dirname, join, normpath
 import django
 from django.conf.urls.defaults import *
 from django.conf import settings
-from django.contrib.admin import autodiscover
+from django.contrib import admin
 
 import ella
 from ella import newman
@@ -11,6 +11,7 @@ from ella.utils import installedapps
 
 
 newman.autodiscover()
+admin.autodiscover()
 installedapps.init_logger()
 
 
@@ -30,6 +31,7 @@ urlpatterns = patterns('',
 
     # main admin urls
     ('^newman/', include(newman.site.urls)),
+    ('^admin/', include(admin.site.urls)),
 
     # reverse url lookups
     (r'^', include('ella.core.urls')),
