@@ -1,6 +1,6 @@
 {% block breadcrumbs %}
     <div class="breadcrumbs">
-        <a href="{% url admin_index %}#/nm/">{% trans "Home" %}</a>
+        <a href="{% url newman_admin_index %}#/nm/">{% trans "Home" %}</a>
         {% if app_label %}&rsaquo; <a class="hashadr" href="/{{ app_label }}/">{% trans app_label.title %}</a>{% endif %}
         {% if title %}&rsaquo; <strong id="doc-title">{{ title }}</strong>{% endif %}
     </div>

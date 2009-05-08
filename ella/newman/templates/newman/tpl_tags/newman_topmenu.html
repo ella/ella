@@ -1,5 +1,5 @@
 <ul id="menu-top">
-    <li><a href="{% url admin_index %}" style="padding: 3px 5px 2px 5px;"><img src="{{ NEWMAN_MEDIA_URL }}ico/16/gohome.png" style="border:none;" alt="{% trans 'Home' %}"/></a></li>
+    <li><a href="{% url newman_admin_index %}" style="padding: 3px 5px 2px 5px;"><img src="{{ NEWMAN_MEDIA_URL }}ico/16/gohome.png" style="border:none;" alt="{% trans 'Home' %}"/></a></li>
     {% for app in app_list %}
     <li><a href="#/{{ app.name|lower }}/">{% trans app.name %}</a>
         <ul>

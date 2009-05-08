@@ -9,8 +9,6 @@ register = template.Library()
 
 @register.inclusion_tag('newman/tpl_tags/newman_topmenu.html', takes_context=True)
 def newman_topmenu(context):
-    """
-    """
     app_dict = {}
     req = context['request']
     user = context['user']
@@ -30,6 +28,7 @@ def newman_topmenu(context):
             # If so, add the module to the model_list.
             if True in perms.values():
                 model_dict = {
+                    'model': model.__name__.lower(),
                     'name': capfirst(model._meta.verbose_name_plural),
                     'admin_url': mark_safe('%s/%s/' % (app_label, model.__name__.lower())),
                     'perms': perms,
@@ -55,4 +54,30 @@ def newman_topmenu(context):
         'NEWMAN_MEDIA_URL': context['NEWMAN_MEDIA_URL'],
         'app_list': app_list
     }
-#    return { 'uuuser': context['user'] }
+
+
+FAVS = (
+    'publishable',
+    'article',
+    'placement',
+    'photo',
+    'gallerie',
+    'poll',
+    'position',
+    'category',
+    'author',
+)
+
+@register.inclusion_tag('newman/tpl_tags/newman_favorites.html', takes_context=True)
+def newman_favorites(context):
+    global_favs = []
+    all_apps = newman_topmenu(context)
+    for app in all_apps['app_list']:
+        for m in app['models']:
+            if m['model'] in FAVS:
+                global_favs.append(m)
+
+    return {
+        'NEWMAN_MEDIA_URL': context['NEWMAN_MEDIA_URL'],
+        'favs': global_favs
+    }

@@ -1,16 +1,16 @@
-{% extends "admin/ajax_content_base.html" %}
+{% extends "newman/ajax_content_base.html" %}
 {% load admin_list %}
 
 {% block breadcrumbs %}
     {% if not is_popup %}
         <div class="breadcrumbs">
             <div style="float: left;">
-                <a class="hashadr" href="{% url admin_index %}#/nm/">{% trans "Home" %}</a>
+                <a href="{% url newman_admin_index %}">{% trans "Home" %}</a>
                 {% if app_label %}&rsaquo; <a class="hashadr" href="/{{ app_label }}/">{% trans app_label.title %}</a>{% endif %}
                 {% if title %}&rsaquo; <strong id="doc-title">{{ title }}</strong>{% endif %}
             </div>
             {% if is_user_category_filtered %}
-                <div style="float: right;"><a href="{% url admin_index %}">{% trans "Categories filtered by user. Click to change." %}</a></div>
+                <div style="float: right;"><a href="{% url newman_admin_index %}">{% trans "Categories filtered by user. Click to change." %}</a></div>
             {% endif %}
         </div>
     {% endif %}

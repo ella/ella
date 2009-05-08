@@ -7,7 +7,7 @@
     <link rel="shortcut icon" href="{{ NEWMAN_MEDIA_URL }}ico/favicon.ico" type="image/x-icon" />
   <script type="text/javascript">
         var MEDIA_URL = '{{ NEWMAN_MEDIA_URL }}';
-        var BASE_URL = '{% url admin_index %}';
+        var BASE_URL = '{% url newman_admin_index %}';
         var LOGGED_IN = '{% if user.is_authenticated %}1{% endif %}';
         var DEBUG = '{% if DEBUG %}1{% endif %}';
     </script>
@@ -29,6 +29,8 @@
         {% if user.is_authenticated %}
         <div class="cb"></div>
         <div class="favs">
+            {% newman_favorites %}
+
             {% comment %}
             <ul class="items">
                 <li>
@@ -84,7 +86,7 @@
                         | <a class="icn visible" onclick="$('#debug').toggle()">debug log</a>
                     {% endif %}
                     | <a class="icn eclear hashadr" href="/password_change/">{% trans 'Change password' %}</a>
-                    | <a class="icn logout" href="{% url %sadmin_logout %}?next={% url admin_index %}" onclick="return confirm('Are you sure?');">{% trans 'Log out' %}</a>
+                    | <a class="icn logout" href="{% url %sadmin_logout %}?next={% url newman_admin_index %}" onclick="return confirm('Are you sure?');">{% trans 'Log out' %}</a>
                 </div>
             </div>
         {% endblock %}
@@ -94,7 +96,7 @@
 </div>
 <!-- END Container -->
 {% if user.is_staff %}
-    <script type="text/javascript" src="{% url admin_index %}jsi18n/"></script>
+    <script type="text/javascript" src="{% url newman_admin_index %}jsi18n/"></script>
     <script type="text/javascript" src="{{ NEWMAN_MEDIA_URL }}js/json2-min.js"></script>
     <script type="text/javascript" src="{{ NEWMAN_MEDIA_URL }}jquery/jquery-1.3.2.js"></script>
     <script type="text/javascript" src="{{ NEWMAN_MEDIA_URL }}js/urls.js?{{ VERSION }}"></script>
