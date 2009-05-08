@@ -1,5 +1,4 @@
-{% extends "admin/ajax_content_base.html" %}
-{% load i18n %}
+{% extends "newman/ajax_content_base.html" %}
 
 {% block breadcrumbs %}{% endblock %}
 {% block content_toolbar %}{% endblock %}
@@ -9,7 +8,7 @@
         <p>{% trans "No role defined for user"%}&nbsp;{{ user.username }}.
         {% trans "Ask site administrator to assign proper roles for You." %}
         </p>
-        <p><a href="{% url admin_index %}">{% trans 'Log in again' %}</a></p>
+        <p><a href="{% url newman_admin_index %}">{% trans 'Log in again' %}</a></p>
         <div class="cb"></div>
     </div>
 {% endblock %}

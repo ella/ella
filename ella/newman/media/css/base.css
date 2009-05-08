@@ -28,6 +28,8 @@ body {
     background: #eee;
 }
 
+#container { min-width: 840px; }
+
 /* Dynamic */
 
 .loading { opacity: .3; }
@@ -145,43 +147,6 @@ div.breadcrumbs {
     display: inline;
 }
 
-
-/* HP */
-div.hpcol {
-    float: left;
-}
-div.hpbox {
-    background: #fff;
-    border: 1px solid #ccc;
-    -moz-border-radius: 5px;
-    -webkit-border-radius: 5px;
-    margin: 10px 5px;
-    min-width: 200px;
-}
-div.hpbox h3 {
-    background: #ddd;
-    padding: 3px 5px;
-    border-bottom: 1px solid #ccc;
-    margin: 0;
-}
-div.hpbox div.cnt {
-    margin: 5px;
-}
-div.hpbox.devmsgs .item {
-    margin: 5px 0;
-    padding-bottom: 5px;
-    border-bottom: 1px dotted #ddd;
-}
-
-div.hpbox.lastlog {
-    float: right;
-}
-div.hpbox.errmsg label, div.hpbox.errmsg input, div.hpbox.errmsg textarea {
-    width: 99%;
-}
-
-div.hpbox.calendar .ui-datepicker { width: 99%; padding: 0; border: none; }
-
 a.bl {
     display: block;
 }
@@ -233,10 +198,10 @@ a.icn.edit { background-image: url(../ico/16/edit.png); }
 /* FOOTER */
 
 #footer {
-    background:#eee url(../img/admin/nav-bg-reverse.gif) bottom left repeat-x;
+    background:#eee url(../img/nav-bg-reverse.gif) bottom left repeat-x;
     position: fixed; left: 0; bottom: 0; right: 0;
     clear: both;
-    border-top: 1px dotted #999;
+    border-top: 1px solid #ccc;
     padding: 5px;
     text-align: right;
 }
@@ -250,14 +215,14 @@ label.required { font-weight: bold; color: darkorange; }
 div.submit-row, fieldset.submit-row { border: none; clear:both; margin-top: 5px; padding: 2px 0; text-align: right; }
 input, textarea, select { padding: 2px 0; font: normal 100% Tahoma, Verdana, sans-serif; }
 .ajax-form .form-metadata { display: none; }
-.form-row input[type=text] { width: 500px; }
+input.vTextField { width: 500px; }
 input.vIntegerField { width: 40px; text-align: right; }
 input.vDateInput, input.vForeignKeyRawIdAdminField { width: 40px; }
 input.vDateTimeInput { width: 130px; }
 
 .form-row * { vertical-align: middle; margin: 2px 0; }
 
-.form-error-msg { padding: 0 5px; color: red; font-weight: bold; }
+.form-error-msg { display: block; color: #d66; font-weight: bold; padding: 2px 0 2px 18px; background: url(../ico/16/messagebox_warning.png) 0 50% no-repeat; }
 
 #err-overlay {
     bottom: 70px;
@@ -416,3 +381,6 @@ td, th {
     margin: 0 2px;
     padding: 2px;
 }
+
+/* OTHER */
+#debug { position: absolute; top:0; left:0; right:0; bottom: 25px;background: #333; color: #fff; padding: 10px; z-index: 50; overflow: auto; opacity: .9; display: none; }

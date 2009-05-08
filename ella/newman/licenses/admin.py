@@ -1,19 +1,17 @@
-from ella.newman import site, GenericTabularInline
+from django.contrib import admin
 from ella.newman.licenses.models import License
-from ella.newman.options import NewmanModelAdmin
 
 LICENSED_MODELS = (
     'photos.photo',
 )
 
-class LicenseInlineAdmin(GenericTabularInline):
+class LicenseInlineAdmin(admin.TabularInline):
     model = License
     max_num = 1
     ct_field = 'ct'
     ct_fk_field = 'obj_id'
 
-class LicenseAdmin(NewmanModelAdmin):
+class LicenseAdmin(admin.ModelAdmin):
     pass
 
-site.register(License, LicenseAdmin)
-site.append_inline(LICENSED_MODELS, LicenseInlineAdmin)
+admin.site.register(License, LicenseAdmin)

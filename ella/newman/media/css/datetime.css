@@ -1,4 +1,2 @@
-div.datepicker {
-    display: none;
-    position: absolute;
-}
+div.datepicker { display: none; position: absolute; }
+span.datepicker-trigger { margin-left: 3px; }

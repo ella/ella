@@ -11,6 +11,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 from django.utils.translation import ngettext
 from django.utils.encoding import force_unicode
+from django.contrib.contenttypes.models import ContentType
 try:
     set
 except NameError:
@@ -191,7 +192,7 @@ class XModelAdmin(ModelAdmin):
             # the 'invalid=1' parameter was already in the query string, something
             # is screwed up with the database, so display an error page.
             if ERROR_FLAG in request.GET.keys():
-                return render_to_response('admin/invalid_setup.html', {'title': _('Database error')})
+                return render_to_response('newman/invalid_setup.html', {'title': _('Database error')})
             return HttpResponseRedirect(request.path + '?' + ERROR_FLAG + '=1')
 
         # If the request was POSTed, this might be a bulk action or a bulk edit.
@@ -275,9 +276,9 @@ class XModelAdmin(ModelAdmin):
         context = out
         context.update(extra_context or {})
         return render_to_response(self.change_list_template or [
-            'admin/%s/%s/change_list.html' % (app_label, opts.object_name.lower()),
-            'admin/%s/change_list.html' % app_label,
-            'admin/change_list.html'
+            'newman/%s/%s/change_list.html' % (app_label, opts.object_name.lower()),
+            'newman/%s/change_list.html' % app_label,
+            'newman/change_list.html'
         ], context, context_instance=template.RequestContext(request))
 
     def get_add_view_context(self, request, form_url):

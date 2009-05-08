@@ -1,5 +1,5 @@
-{% extends "admin/ajax_content_base.html" %}
-{% load newman log cache %}
+{% extends "newman/ajax_content_base.html" %}
+{% load newman log %}
 
 {% block breadcrumbs %}{% endblock %}
 {% block content_toolbar %}{% endblock %}
@@ -9,7 +9,7 @@
 <div class="hpcol" style="width: 25%;">
 
     <div class="hpbox setup">
-        <h3>{% trans "Quick Settings" %}</h3>
+        <h3><span>{% trans "Quick Settings" %}</span></h3>
         <div class="cnt">
             <form class="ajax-form" action="{% url newman-save-filters %}" method="post">
                 <fieldset>
@@ -29,7 +29,7 @@
 
     {# ein Kalendar, bitte #}
     <div class="hpbox calendar">
-        <h3>{% trans "Calendar" %}</h3>
+        <h3><span>{% trans "Calendar" %}</span></h3>
         <div class="cnt">
             <script type="text/javascript" src="{{ NEWMAN_MEDIA_URL }}jquery/jquery-ui.js"></script>
             <script type="text/javascript">
@@ -62,7 +62,7 @@
     </div>
 
     <div class="hpbox errmsg">
-        <h3>{% trans "Report Error" %}!</h3>
+        <h3><span>{% trans "Report Error" %}</span></h3>
         <div class="cnt">
             <form class="ajax-form reset-on-submit" action="{% url newman-err-report %}" method="post">
                 <label for="id_err_subject" class="required">{% trans "Subject" %} <span class="help"></span></label>
@@ -82,11 +82,11 @@
 <div class="hpcol" style="width: 50%;">
 
     <div class="hpbox search" id="search-form">
-        <h3>{% trans "Search" %}</h3>
+        <h3><span>{% trans "Search" %}</span></h3>
         <div class="cnt">
             <input type="text" name="q"/>
             <select name="action" size="1">
-                <option value="">{% trans 'All' %}...</option>
+                <option value="">{% trans 'Select' %}...</option>
                 {% for ct in searchable_content_types %}
                     <option value="/{{ ct.app_label }}/{{ ct.model }}/">{% trans ct.name %}</option>
                 {% endfor %}
@@ -95,8 +95,8 @@
         </div>
     </div>
 
-    <div class="hpbox listings" id="search-form">
-        <h3>{% trans "Future placements" %}</h3>
+    <div class="hpbox placements" id="search-form">
+        <h3><span>{% trans "Future placements" %}</span></h3>
         <div class="cnt">
             {% for p in future_placements %}
                 <div style="background: #{% cycle 'ff9' 'ffc' %}; margin: 5px 0; padding: 5px;">
@@ -108,38 +108,19 @@
                     </p>
                     {{ p.publishable.description|safe|truncatewords:32 }}
                     <div class="submit-row ar">
-                        <a class="icn btn web" href="{% url admin_index %}r/{{ p.publishable.content_type.pk }}/{{ p.publishable.pk }}/">{% trans 'View on site' %}</a>
-                        <a class="icn btn edit hashadr def" href="{% url admin_index %}#/{{ p.publishable.content_type.app_label }}/{{ p.publishable.content_type.model }}/{{ p.publishable.pk }}/">{% trans 'Edit' %}</a>
+                        <a class="icn btn web" href="{% url newman_admin_index %}r/{{ p.publishable.content_type.pk }}/{{ p.publishable.pk }}/">{% trans 'View on site' %}</a>
+                        <a class="icn btn edit def" href="{% url newman_admin_index %}#/{{ p.publishable.content_type.app_label }}/{{ p.publishable.content_type.model }}/{{ p.publishable.pk }}/">{% trans 'Edit' %}</a>
                     </div>
                 </div>
             {% endfor %}
         </div>
     </div>
-
-    {% comment %}
-    {% cache 600 devmsgs user.username %}
-    {% get_devmsgs as msgs %}
-    <div class="hpbox devmsgs">
-        <h3>{% trans "Development News" %}</h3>
-        <div class="cnt">
-            {% for msg in msgs %}
-                <div class="item">
-                    <h4><a href="{{ msg.slug }}">{{ msg.title }}</a></h4>
-                    <p>{{ msg.author.get_full_name }} | {{ msg.ts|date:"j.n.'y H:i" }} | {{ msg.version }}</p>
-                    <p>{{ msg|render:"summary" }}</p>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
-    {% endcache %}
-    {% endcomment %}
-
 </div>
 
 <div class="hpcol" style="width: 25%;">
 
     <div class="hpbox lastlog">
-        <h3>{% trans "Your Recent Actions" %}</h3>
+        <h3><span>{% trans "Your Recent Actions" %}</span></h3>
         <div class="cnt">
             {% get_admin_log 15 as admin_log for_user user %}
             {% if not admin_log %}
@@ -170,6 +151,7 @@ changelistFilters["{{ fname }}"] = "{{ qstring }}";
     {{ block.super }}
 
     <script type="text/javascript">
+    request_media('{{ NEWMAN_MEDIA_URL }}css/dashboard.css?{{ VERSION }}');
     request_media('{{ NEWMAN_MEDIA_URL }}jquery/jquery-ui-smoothness.css?{{ VERSION }}');
     //request_media('{{ NEWMAN_MEDIA_URL }}jquery/jquery-ui.js?{{ VERSION }}');
     </script>

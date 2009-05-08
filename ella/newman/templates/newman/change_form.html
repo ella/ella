@@ -1,10 +1,10 @@
-{% extends "admin/ajax_content_base.html" %}
-{% load i18n admin_modify adminmedia %}
+{% extends "newman/ajax_content_base.html" %}
+{% load newman_modify %}
 
 {% block breadcrumbs %}
 <div class="breadcrumbs">
-    <a class="hashadr" href="{% url admin_index %}#/nm/">{% trans "Home" %}</a>
-    &rsaquo; <a class="hashadr" href="{% url admin_index %}{{ app_label }}/">{% trans app_label.title %}</a>
+    <a href="{% url newman_admin_index %}">{% trans "Home" %}</a>
+    &rsaquo; <a class="hashadr" href="../../">{% trans app_label.title %}</a>
     &rsaquo; {% if has_change_permission %}<a class="hashadr" href="../">{{ opts.verbose_name_plural|capfirst }}</a>{% else %}{{ opts.verbose_name_plural|capfirst }}{% endif %}
     {% if title %}&rsaquo; <strong id="doc-title">{{ title }}</strong>{% endif %}
 </div>
@@ -20,7 +20,7 @@
         <ul style="float: right; margin: 3px;">
             <li><a href="history::::history/" class="icn btn simpleload history">{% trans "History" %}</a></li>
             {% if has_absolute_url %}
-                <li><a href="{% url admin_index %}r/{{ content_type_id }}/{{ object_id }}/" class="icn btn web">{% trans "View on site" %}</a></li>
+                <li><a href="{% url newman_admin_index %}r/{{ content_type_id }}/{{ object_id }}/" class="icn btn web">{% trans "View on site" %}</a></li>
             {% endif%}
         </ul>
     {% endif %}
@@ -45,7 +45,7 @@
 
 {% block fieldsets %}
 {% for fieldset in adminform %}
-  {% include "admin/includes/fieldset.html" %}
+  {% include "newman/includes/fieldset.html" %}
 {% endfor %}
 
 {% block after_field_sets %}{% endblock %}
