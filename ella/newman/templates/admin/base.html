@@ -1,5 +1,4 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-{% load adminmedia cache %}
 <html xmlns="http://www.w3.org/1999/xhtml" lang="{{ LANGUAGE_CODE|default:"cs" }}" xml:lang="{{ LANGUAGE_CODE|default:"cs" }}">
 <head>
   <title>{% trans 'Ella administration' %}</title>
@@ -9,7 +8,8 @@
   <script type="text/javascript">
         var MEDIA_URL = '{{ NEWMAN_MEDIA_URL }}';
         var BASE_URL = '{% url admin_index %}';
-        var LOGGED_IN = '{% if user.is_authenticated %}1{% else %}{% endif %}';
+        var LOGGED_IN = '{% if user.is_authenticated %}1{% endif %}';
+        var DEBUG = '{% if DEBUG %}1{% endif %}';
     </script>
   <meta name="robots" content="NONE,NOARCHIVE" />
 </head>
@@ -22,40 +22,38 @@
     {% if not is_popup %}
 
   {% if user.is_staff %}
-      {% cache 300 topnavi user.username %}
-          {% load adminapplist %}
-          {% get_admin_app_list as menu_list %}
+      {% load adminapplist %}
+      {% get_admin_app_list as menu_list %}
 
-          {% block topnavi %}
-            <div id="navi-top"><ul id="menu-top">
-            {% if menu_list %}
-                        <li><a href="{% url admin_index %}#/nm/" style="padding: 3px 5px 2px 5px;"><img src="{{ NEWMAN_MEDIA_URL }}ico/16/gohome.png" style="border:none" alt="Dom"/></a></li>
-              {% for app in menu_list %}
-                <li><a href="#/{{ app.name|lower }}/">{% trans app.name %}</a>
-                  <ul>
-                      {% for model in app.models %}
-                          {% if model.perms.add and model.perms.change %}
-                              <li><a href="#/{{ model.admin_url }}">{{ model.name }}</a></li>
-                          {% else %}
-                                    {% if model.perms.add or model.perms.change %}
-                                        {% if model.perms.add %}
-                                            <li><a href="#/{{ model.admin_url }}add/">{{ model.name }} (+)</a></li>
-                                        {% else %}
-                                            <li><a href="#/{{ model.admin_url }}">{{ model.name }}</a></li>
-                                        {% endif %}
+      {% block topnavi %}
+        <div id="navi-top"><ul id="menu-top">
+        {% if menu_list %}
+                    <li><a href="{% url admin_index %}" style="padding: 3px 5px 2px 5px;"><img src="{{ NEWMAN_MEDIA_URL }}ico/16/gohome.png" style="border:none;" alt="{% trans 'Home' %}"/></a></li>
+          {% for app in menu_list %}
+            <li><a href="#/{{ app.name|lower }}/">{% trans app.name %}</a>
+              <ul>
+                  {% for model in app.models %}
+                      {% if model.perms.add and model.perms.change %}
+                          <li><a href="#/{{ model.admin_url }}">{{ model.name }}</a></li>
+                      {% else %}
+                                {% if model.perms.add or model.perms.change %}
+                                    {% if model.perms.add %}
+                                        <li><a href="#/{{ model.admin_url }}add/">{{ model.name }} (+)</a></li>
+                                    {% else %}
+                                        <li><a href="#/{{ model.admin_url }}">{{ model.name }}</a></li>
                                     {% endif %}
-                          {% endif %}
-                  {% endfor %}
-                  </ul>
-                </li>
-                {% endfor %}
-            </ul></div>
-                {% else %}
-                    <h1>{% trans "No role defined for user" %}&nbsp;{{ user.username }}.</h1>
-            {% endif %}
+                                {% endif %}
+                      {% endif %}
+              {% endfor %}
+              </ul>
+            </li>
+            {% endfor %}
+        </ul></div>
+            {% else %}
+                <h1>{% trans "No role defined for user" %}&nbsp;{{ user.username }}.</h1>
+        {% endif %}
 
-          {% endblock %}
-      {% endcache %}
+      {% endblock %}
   {% endif %}
 
     {% block favs %}
@@ -101,33 +99,25 @@
 
     {% endif %}
 
-    <!-- Content -->
     <div id="content">
-        {% block pretitle %}{% endblock %}
-        {% block content_title %}{% comment %}{% if title %}<h1>{{ title|capfirst }}</h1>{% endif %}{% endcomment %}{% endblock %}
-        {% block content %}
-            {% block object-tools %}{% endblock %}
-            {{ content }}
-        {% endblock %}
-        {% block sidebar %}{% endblock %}
-        <div class="cb"></div>
+        {% block content %}{% endblock %}
     </div>
-    <!-- END Content -->
+    <div class="cb"></div>
 
-  {% if user.is_staff %}
-       {% block footer %}
-            {% cache 600 footer user.username %}
+    {% if user.is_staff %}
+        {% block footer %}
             <div id="footer">
                 <div class="user-tools">
                     <strong>{{ user.get_full_name }}</strong>
                     | {% trans "What's new?" %}
-                    | {{ VERSION }}, {{ SERVER_INFO.type }}
-                    | <a class="icn visible" onclick="$('#debug').toggle()">debug log</a>
+                    {% if DEBUG %}
+                        | {{ VERSION }}, {{ SERVER_INFO.type }}
+                        | <a class="icn visible" onclick="$('#debug').toggle()">debug log</a>
+                    {% endif %}
                     | <a class="icn eclear hashadr" href="/password_change/">{% trans 'Change password' %}</a>
-                    | <a class="icn logout" href="{% url %sadmin_logout %}">{% trans 'Log out' %}</a>
+                    | <a class="icn logout" href="{% url %sadmin_logout %}?next={% url admin_index %}" onclick="return confirm('Are you sure?');">{% trans 'Log out' %}</a>
                 </div>
             </div>
-            {% endcache %}
         {% endblock %}
      {% else %}
        <div class="clear"></div>
@@ -143,7 +133,7 @@
 {% endif %}
 
 {% endspaceless %}
-<div id="debug" style="position: absolute; top:0; left:0; right:0; bottom: 25px;background: #333; color: #fff; padding: 10px; z-index: 50; overflow: auto; opacity: .9; display: none;">aaa</div>
+{% if DEBUG %}<div id="debug"></div>{% endif %}
 <div id="opmsg"></div>
 </body>
 </html>
