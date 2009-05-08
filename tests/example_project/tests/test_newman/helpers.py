@@ -3,8 +3,8 @@ from djangosanetesting import SeleniumTestCase
 class NewmanTestCase(SeleniumTestCase):
     fixtures = ['newman_admin_user', 'example_data']
 
-    SUPERUSER_USERNAME = u"superman"
-    SUPERUSER_PASSWORD = u"xxx"
+    USER_USERNAME = u"superman"
+    USER_PASSWORD = u"xxx"
 
     NEWMAN_URI = "/newman/"
 
@@ -13,8 +13,18 @@ class NewmanTestCase(SeleniumTestCase):
         self.elements = {
             'navigation' : {
                 'logout' : "//a[@class='icn logout']",
-                'articles' : "//a[@class='app article']",
-                'article_add' : "//a[@class='app article']/../a[position()=2]"
+                'articles' : "articles",
+                'article' : "articles-articles",
+                'article_add' : "add-articles-article"
+            },
+            'controls' : {
+                'suggester' : "//div[@class='suggest-bubble']",
+                'suggester_visible' : "//span[@class='hilite']",
+                'message' : {
+                    'ok': "//div[@id='opmsg']/span[@class='okmsg']",
+                },
+                'add' : "//a[@class='hashadr icn btn add']",
+                'save' : "//a[@class='icn btn ok def']",
             },
             'pages' : {
                 'login' : {
@@ -25,12 +35,12 @@ class NewmanTestCase(SeleniumTestCase):
 
     def setUp(self):
         super(NewmanTestCase, self).setUp()
-        self.login_superuser()
+        self.login()
 
-    def login_superuser(self):
+    def login(self):
         self.selenium.open(self.NEWMAN_URI)
-        self.selenium.type("id_username", self.SUPERUSER_USERNAME)
-        self.selenium.type("id_password", self.SUPERUSER_PASSWORD)
+        self.selenium.type("id_username", self.USER_USERNAME)
+        self.selenium.type("id_password", self.USER_PASSWORD)
         self.selenium.click(self.elements['pages']['login']['submit'])
 
     def logout(self):
