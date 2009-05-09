@@ -184,12 +184,29 @@ def filter_spec(field_test_func, lookup_kwarg_func=None, title=None):
 # -------------------------------------
 # Standard django.admin filters
 # -------------------------------------
-# TODO register all of them!
+# TODO make common parent of FilterSpecEnhancement and CustomFilterSpec 
 
-class FilterSpecEnhancement:
+class FilterSpecEnhancement(filterspecs.FilterSpec):
     def filter_active(self):
         " Can be used from template. "
-        return self.is_active(self.params) 
+        return self.is_active(self.params)
+
+    def get_selected(self):
+        " Should be used within a template to get selected item in filter. "
+        if hasattr(self, 'selected_item'):
+            return self.selected_item
+        if not hasattr(self, 'all_choices'):
+            # return the same structure with error key set
+            return {
+                'selected': False, 
+                'query_string':'', 
+                'display': '', 
+                'error': 'TOO EARLY'
+            }
+        for item in self.all_choices:
+            if item['selected']:
+                self.selected_item = item
+                return item
 
 class RelatedFilterSpec(filterspecs.RelatedFilterSpec, FilterSpecEnhancement):
     def is_active(self, request_params):
@@ -198,6 +215,12 @@ class RelatedFilterSpec(filterspecs.RelatedFilterSpec, FilterSpecEnhancement):
         Tries to find its argument(s) in request querystring.
         """
         return self.lookup_kwarg in request_params
+
+    def choices(self, cl):
+        if not hasattr(self, 'all_choices'):
+            c = super(self.__class__, self).choices(cl)
+            self.all_choices = map(None, c)
+        return self.all_choices
 
 filterspecs.FilterSpec.register_insert(lambda f: bool(f.rel), RelatedFilterSpec)
 
