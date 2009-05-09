@@ -65,6 +65,10 @@ class CustomFilterSpec(filterspecs.FilterSpec):
                     break
         return self.active_filter_lookup
 
+    def filter_active(self):
+        " Can be used from template. "
+        return self.is_active(self.request_get) 
+
     def is_active(self, request_params):
         """
         Returns True if filter is applied, otherwise returns False.
