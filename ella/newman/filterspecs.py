@@ -144,7 +144,7 @@ class CustomFilterSpec(filterspecs.FilterSpec):
     def choices(self, cl):
         if not self.all_choices:
             self.all_choices = map(None, self.generate_choices(cl))
-        yield self.all_choices
+        return self.all_choices
 
 
 def filterspec_preregister(cls, test, factory):
