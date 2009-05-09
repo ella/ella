@@ -1,7 +1,7 @@
 <div class="filter" style="">
     <h4><a class="btn combo{% if spec.filter_active %} filter-active{% endif %}">{% blocktrans with title as filter_title %}By {{ filter_title }}{% endblocktrans %}</a></h4>
+    {% if spec.filter_active %}{{ spec.get_selected.display }} {% endif %}
     <ul>
-{{ spec.get_selected.display }}
     {% for choice in choices %}
         {% if forloop.first %}
             {% if not choice.selected %}

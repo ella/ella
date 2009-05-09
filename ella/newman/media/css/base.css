@@ -289,21 +289,16 @@ td, th {
 #changelist table {
     width: 100%;
 }
-#changelist table thead tr { background: #ccc; }
+#changelist table thead tr { background: #ddd url(../img/nav-bg.gif) 0 100% repeat-x; }
 #changelist table tbody tr.row1 { background: #fff; }
-#changelist table tbody tr.row2 { background: #eee; }
+#changelist table tbody tr.row2 { background: #eeeeef; }
 #changelist table tbody tr:hover { background: #ffc; }
-#changelist table thead th.sorted { background: #eee; }
+#changelist table thead th.sorted { background: transparent url(../ico/16/14_layer_raiselayer.png) 98% 50% no-repeat; }
+#changelist table thead th.sorted.descending { background-image: url(../ico/16/14_layer_lowerlayer.png); }
 
 /* CHANGELIST ACTIONS */
 #changelist .actions { padding: 5px; }
 #changelist .actions label { display: inline; }
-
-/* CHANGELIST FILTERS */
-#filters {
-    margin: 0 5px;
-    background: #fff;
-}
 
 /* OPERATION MESSAGES */
 #opmsg {
@@ -332,18 +327,6 @@ td, th {
     background-image: url(../ico/16/ok.png);
 }
 
-/* FILTERS (UN)PACKING - TEMPORARY */
-#filters ul {
-    display: none;
-    position: absolute;
-    background-color: white;
-    border: solid 1px black;
-    list-style-position: inside;
-    padding: 2px;
-}
-#filters .selected {
-    font-weight: bold;
-}
 
 /* HELP & HINT */
 .hint-enhanced .hint, .help-enhanced .help {
@@ -352,30 +335,33 @@ td, th {
 
 /* OBJECT HISTORY (in change_form) */
 #history {
-  position: absolute;
-  right: 6px;
-  top: 168px;
-  width: 70%;
-  background: #ddd;
-  display: none;
-  -moz-border-radius: 5px;
-  -webkit-border-radius: 5px;
+    border: 1px outset #ddd;
+    position: absolute;
+    right: 6px;
+    top: 168px;
+    width: 70%;
+    background: #eeeeec;
+    display: none;
+    -moz-border-radius: 7px;
+    -webkit-border-radius: 7px;
 }
 #history div.module {
-  margin: 10px;
-  max-height: 300px;
-  overflow: auto;
-  background: #eee;
+    margin: 10px;
+    max-height: 300px;
+    overflow: auto;
+    background: #eee;
 }
 
+/* CHANGELIST FILTERS */
 #filters {
-  position: absolute;
-  left: 0; right: 0;
-  top: 168px;
-  background: #ddd;
-  display: none;
-  -moz-border-radius: 5px;
-  -webkit-border-radius: 5px;
+    border: 1px outset #ddd;
+    position: absolute;
+    left: 6px; width: 70%;
+    top: 168px;
+    background: #eeeeec;
+    display: none;
+    -moz-border-radius: 7px;
+    -webkit-border-radius: 7px;
 }
 
 #filters div.module {
@@ -387,6 +373,21 @@ td, th {
 #filters div.filter {
     float: left;
     padding: 2px 0;
+}
+
+/* FILTERS (UN)PACKING - TEMPORARY */
+#filters ul {
+    display: none;
+    position: absolute;
+    background-color: white;
+    border: solid 1px #ddd;
+    list-style: none;
+    margin: 0;
+}
+#filters ul a { display: block; padding: 2px; border-bottom: 1px dotted #eee; }
+#filters ul a:hover { color: #fff; background: #77B150; }
+#filters .selected {
+    font-weight: bold;
 }
 
 /* OTHER */
