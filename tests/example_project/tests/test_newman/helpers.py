@@ -13,9 +13,8 @@ class NewmanTestCase(SeleniumTestCase):
         self.elements = {
             'navigation' : {
                 'logout' : "//a[@class='icn logout']",
-                'articles' : "articles",
-                'article' : "articles-articles",
-                'article_add' : "add-articles-article"
+                'articles' : "//a[@class='app article']",
+                'article_add' : "//a[@class='app article']/../a[position()=2]",
             },
             'controls' : {
                 'suggester' : "//div[@class='suggest-bubble']",

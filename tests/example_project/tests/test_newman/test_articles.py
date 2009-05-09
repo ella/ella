@@ -10,7 +10,7 @@ class TestArticleBasics(NewmanTestCase):
         s = self.selenium
 
         # go to article adding
-        s.click(self.elements['navigation']['article'])
+        s.click(self.elements['navigation']['articles'])
         s.click(self.elements['controls']['add'])
 
         # wait for the page to fully load
@@ -53,7 +53,7 @@ class TestArticleBasics(NewmanTestCase):
         s.click(self.elements['controls']['save'])
         s.wait_for_element_present(self.elements['controls']['message']['ok'])
 
-        
+
         # verify save
         self.assert_equals(1, Article.objects.count())
         a = Article.objects.all()[0]
@@ -62,6 +62,6 @@ class TestArticleBasics(NewmanTestCase):
         self.assert_equals('<p>%s</p>\n' % data['description'], a.description)
         self.assert_equals(2, a.authors.count())
 
-        
 
-        
+
+
