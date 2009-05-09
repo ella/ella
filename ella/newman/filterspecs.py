@@ -27,6 +27,8 @@ class CustomFilterSpec(filterspecs.FilterSpec):
         self.request_path_info = request.path_info
         self.title_text = self.field.verbose_name
         self.active_filter_lookup = None
+        self.all_choices = []
+        self.selected_item = None
 
     def filter_func(self):
         raise NotImplementedError('filter_func() method should be overloaded (substituted at run-time).')
@@ -98,7 +100,7 @@ class CustomFilterSpec(filterspecs.FilterSpec):
             out[key] = self.request_get[key]
         return out
 
-    def choices(self, cl):
+    def generate_choices(self, cl):
         def make_unicode_params(pdict):
             " param values converted to unicode are needed to make dict to dict parameter comparison. "
             out = dict()
@@ -121,6 +123,28 @@ class CustomFilterSpec(filterspecs.FilterSpec):
             yield {'selected': selected == params,
                    'query_string': cl.get_query_string(param_dict, []),
                    'display': title}
+
+    def get_selected(self):
+        " Should be used within a template to get selected item in filter. "
+        if self.selected_item:
+            return self.selected_item
+        if not self.all_choices:
+            # return the same structure with error key set
+            return {
+                'selected': False, 
+                'query_string':'', 
+                'display': '', 
+                'error': 'TOO EARLY'
+            }
+        for item in self.all_choices:
+            if item['selected']:
+                self.selected_item = item
+                return item
+
+    def choices(self, cl):
+        if not self.all_choices:
+            self.all_choices = map(None, self.generate_choices(cl))
+        yield self.all_choices
 
 
 def filterspec_preregister(cls, test, factory):
@@ -162,7 +186,12 @@ def filter_spec(field_test_func, lookup_kwarg_func=None, title=None):
 # -------------------------------------
 # TODO register all of them!
 
-class RelatedFilterSpec(filterspecs.RelatedFilterSpec):
+class FilterSpecEnhancement:
+    def filter_active(self):
+        " Can be used from template. "
+        return self.is_active(self.params) 
+
+class RelatedFilterSpec(filterspecs.RelatedFilterSpec, FilterSpecEnhancement):
     def is_active(self, request_params):
         """
         Returns True if filter is applied, otherwise returns False.
@@ -172,20 +201,20 @@ class RelatedFilterSpec(filterspecs.RelatedFilterSpec):
 
 filterspecs.FilterSpec.register_insert(lambda f: bool(f.rel), RelatedFilterSpec)
 
-class ChoicesFilterSpec(filterspecs.ChoicesFilterSpec):
+class ChoicesFilterSpec(filterspecs.ChoicesFilterSpec, FilterSpecEnhancement):
     def is_active(self, request_params):
         return self.lookup_kwarg in request_params
 
 filterspecs.FilterSpec.register_insert(lambda f: bool(f.choices), ChoicesFilterSpec)
 
-class DateFieldFilterSpec(filterspecs.DateFieldFilterSpec):
+class DateFieldFilterSpec(filterspecs.DateFieldFilterSpec, FilterSpecEnhancement):
     def is_active(self, request_params):
         return False
 
 filterspecs.FilterSpec.register_insert(lambda f: isinstance(f, models.DateField), DateFieldFilterSpec)
 
 
-class BooleanFieldFilterSpec(filterspecs.BooleanFieldFilterSpec):
+class BooleanFieldFilterSpec(filterspecs.BooleanFieldFilterSpec, FilterSpecEnhancement):
     def is_active(self, request_params):
         return False
 
