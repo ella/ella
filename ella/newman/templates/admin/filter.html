@@ -1,5 +1,5 @@
-<div class="filter">
-    <h4>{% blocktrans with title as filter_title %} By {{ filter_title }} {% endblocktrans %}</h4>
+<div class="filter" style="">
+    <h4><a class="btn combo">{% blocktrans with title as filter_title %}By {{ filter_title }}{% endblocktrans %}{% if is_active %}a{% endif %}</a></h4>
     <ul>
     {% for choice in choices %}
         {% if forloop.first %}

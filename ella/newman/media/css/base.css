@@ -4,11 +4,11 @@
 .cb { clear: both; }
 
 a, a:link, a:visited {
-    color: darkblue;
+    color: #005F00;
     cursor: pointer;
 }
 a:hover {
-  color: darkorange;
+  color: #6EA63A;
 }
 a img {
     border: none;
@@ -25,7 +25,7 @@ ul, ol {
 
 body {
     font: normal normal 75%/130% Tahoma, sans-serif;
-    background: #eee;
+    background: #E9E8DD;
 }
 
 #container { min-width: 840px; }
@@ -155,20 +155,23 @@ a.icn {
     background: transparent url(../ico/16/foo.png) 0 50% no-repeat;
 }
 a.btn {
-    padding-top: 3px; padding-bottom: 3px; padding-right: 4px;
-    border: 1px solid #ccc;
-    -moz-border-radius: 4px;
-    -webkit-border-radius: 4px;
-    background-color: #ddd;
+    padding-top: 4px; padding-bottom: 3px; padding-right: 4px;
+    border: 1px solid #ddd;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    background-color: #E9E8DD;
     margin: 3px 2px;
     text-decoration: none;
+    color: #000;
 }
 a.btn.def {
     font-weight: bold;
-    background-color: #eee;
+    border-color: #ccc;
 }
 a:hover.btn {
-    background-color: #666;
+    background-color: #EEEEE7;
+    border-color: #77B150;
+    color: #005F00;
 }
 
 a.btn.icn {
@@ -194,6 +197,11 @@ a.icn.history { background-image: url(../ico/16/history.png); }
 a.icn.web { background-image: url(../ico/16/web.png); }
 a.icn.save { background-image: url(../ico/16/filesave.png); }
 a.icn.edit { background-image: url(../ico/16/edit.png); }
+
+a.btn.combo {
+    padding-right: 18px;
+    background: #E9E8DD url(../ico/16/14_layer_lowerlayer.png) 100% 50% no-repeat;
+}
 
 /* FOOTER */
 
@@ -376,10 +384,8 @@ td, th {
 }
 
 #filters div.filter {
-    background: #eee;
     float: left;
-    margin: 0 2px;
-    padding: 2px;
+    padding: 2px 0;
 }
 
 /* OTHER */

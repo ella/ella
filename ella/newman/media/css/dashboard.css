@@ -2,8 +2,8 @@
 
 div.hpcol { float: left; }
 div.hpbox {
-    background: #fff;
-    border: 1px solid #ccc;
+    background: #eeeeec;
+    border: 1px outset #eee;
     -moz-border-radius: 7px;
     -webkit-border-radius: 7px;
     border-radius: 7px;
