@@ -1,10 +1,10 @@
 <div class="filter" style="">
-    <h4><a class="btn combo">{% blocktrans with title as filter_title %}By {{ filter_title }}{% endblocktrans %}{% if is_active %}a{% endif %}</a></h4>
+    <h4><a class="btn combo{% if spec.filter_active %} filter-active{% endif %}">{% blocktrans with title as filter_title %}By {{ filter_title }}{% endblocktrans %}</a></h4>
     <ul>
     {% for choice in choices %}
         {% if forloop.first %}
             {% if not choice.selected %}
-                <a href="{{ choice.query_string|iriencode }}{% if is_popup %}&pop{% endif %}" title="{{ choice.display }}">(X)</a>
+                <li><a href="{{ choice.query_string|iriencode }}{% if is_popup %}&pop{% endif %}" title="{{ choice.display }}">{% trans 'All' %}</a></li>
             {% endif %}
         {% else %}
             <li{% if choice.selected %} class="selected"{% endif %}>

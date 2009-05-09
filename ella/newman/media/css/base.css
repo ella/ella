@@ -199,9 +199,10 @@ a.icn.save { background-image: url(../ico/16/filesave.png); }
 a.icn.edit { background-image: url(../ico/16/edit.png); }
 
 a.btn.combo {
-    padding-right: 18px;
+    padding-right: 18px; padding-left: 4px;
     background: #E9E8DD url(../ico/16/14_layer_lowerlayer.png) 100% 50% no-repeat;
 }
+a.btn.filter-active { background-color: #FFF8D1; }
 
 /* FOOTER */
 

@@ -4,7 +4,6 @@
     {% if cl.has_filters %}
         <div class="module">
         {% for spec in cl.filter_specs %}
-            {% if spec.filter_active %}ACTIVE!{% endif %}
            {% newman_list_filter cl spec %}
         {% endfor %}
         </div>

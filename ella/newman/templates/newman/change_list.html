@@ -20,7 +20,7 @@
     <ul style="float: left;" id="filters-handler">
         <li>
             {% if is_filtered %}
-                <a class="icn btn filter {% if is_popup %}popup-filter{% else %}simpleload{% endif %}" href="filters::::filters/{{ cl.get_query_string }}">{% trans 'Filters' %}<span> ({% trans 'on!' %})</span></a>
+                <a class="icn btn filter filter-active {% if is_popup %}popup-filter{% else %}simpleload{% endif %}" href="filters::::filters/{{ cl.get_query_string }}">{% trans 'Filters' %}<span> ({% trans 'on!' %})</span></a>
                 <a class="icn eclear" href="?">{% trans 'reset' %}</a>
             {% else %}
                 <a class="icn btn filter {% if is_popup %}popup-filter{% else %}simpleload{% endif %}" href="filters::::filters/{{ cl.get_query_string }}">{% trans 'Filters' %}</a>
