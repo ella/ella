@@ -78,53 +78,51 @@ div.breadcrumbs {
 
 /* FAVORITE ITEMS */
 .favs {
-    background: #ffc;
+    background: #333 url(../img/bg-favs.png) 0 0 repeat-x;
     height: 76px;
-    padding: 5px;
+    padding: 2px 5px;
 }
 
 .favs ul.items {
     float: left;
     list-style: none;
     margin: 0; padding: 0;
+    font: normal 90% "Trebuchet MS", Arial, Helvetica, sans-serif;
+
 }
 .favs ul.items li {
     float: left;
-    margin: 2px;
+    margin: 0 2px;
     padding: 0;
-    width: 70px;
-    height: 70px;
-    border: 1px solid #ddd;
-    -moz-border-radius: 5px;
-    -webkit-border-radius: 5px;
-}
-.favs ul.items li a {
-    display: block;
+    width: 74px;
+    height: 74px;
+    background: transparent url(../ico/ct/64/unknown.png) 50% 0 no-repeat;
+    opacity: .8;
     text-align: center;
+}
+.favs ul.items li:hover { opacity: 1; }
+.favs a {
     text-decoration: none;
+    color: #fff;
 }
 .favs ul.items li a.app {
-    background: transparent url(../ico/favs/gear.png) 50% 18px no-repeat;
-    width: 70px;
-    height: 50px;
-    font-weight: bold;
-    padding-top: 2px;
+    display: block;
+    width: 74px;
+    height: 62px;
 }
-
-.favs ul.items li a.app.article { background-image: url(../ico/favs/article.png) }
-
-.favs ul.items li:hover {
-    background-color: #ffe;
+.favs ul.items li a.add {
+    margin: auto;
+    padding-left: 13px;
+    text-align: left;
+    background: url(../ico/10/icon_addlink.gif) 0 50% no-repeat;
 }
-
+.favs ul.items li a.add:hover {
+    color: darkorange;
+}
 .favs ul.tools {
     float: right;
     list-style: none;
     font: normal 130%/150% "Trebuchet MS", sans-serif;
-}
-
-.favs ul.tools a {
-    text-decoration: none;
 }
 
 /* CONTENT */

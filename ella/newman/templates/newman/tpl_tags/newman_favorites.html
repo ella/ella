@@ -1,9 +1,9 @@
 {% spaceless %}
 <ul class="items">
     {% for fav in favs %}
-        <li>
-            <a class="app {{ fav.model }}" href="#/{{ fav.admin_url }}"><span>{{ fav.name }}</span></a>
-            {% if fav.perms.add %}<a href="#/{{ fav.admin_url }}add/">{% trans 'Add' %}</a>{% endif %}
+        <li style="background-image: url({{ NEWMAN_MEDIA_URL }}ico/ct/64/{{ fav.model }}.png);">
+            <a title="{{ fav.name }}" class="app {{ fav.model }}" href="#/{{ fav.admin_url }}"></a>
+            {% if fav.perms.add %}<a class="add" href="#/{{ fav.admin_url }}add/">{% trans 'Add' %}</a>{% endif %}
         </li>
     {% endfor %}
 </ul>
