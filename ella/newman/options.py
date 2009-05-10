@@ -193,16 +193,19 @@ class NewmanModelAdmin(XModelAdmin):
         help_total = []
 
         for f in model_fields:
-            bhi[f.name] = {'verbose_name': f.verbose_name, 'help_text': f.help_text}
+            if f.editable:
+                bhi[f.name] = {'verbose_name': f.verbose_name, 'help_text': f.help_text}
 
         for h in base_help_items:
             try:
                 bhi[h['field']].update(h)
             except KeyError:
-                log.warning('Field %s is not in model %s' % (h['field'], self.model))
+                pass
+                #log.warning('Field %s is not in model %s' % (h['field'], self.model))
 
         for f in model_fields:
-            help_total.append(bhi[f.name])
+            if f.editable:
+                help_total.append(bhi[f.name])
 
         context = {
             'ct': self.model_content_type,
