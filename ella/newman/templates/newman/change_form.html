@@ -16,19 +16,21 @@
         <li><a class="icn btn save" id="save-form">{% trans "Save as template" %}</a></li>
         <li>{{ draft_form }}</li>
     </ul>
-    {% if change %}
         <ul style="float: right; margin: 3px;">
-            <li><a href="history::::history/" class="icn btn simpleload history">{% trans "History" %}</a></li>
-            {% if has_absolute_url %}
-                <li><a href="{% url newman_admin_index %}r/{{ content_type_id }}/{{ object_id }}/" class="icn btn web">{% trans "View on site" %}</a></li>
-            {% endif%}
+            <li><a class="icn btn help simpleload" href="service-container::::help/">{% trans 'Help' %}</a></li>
+            {% if change %}
+                <li><a href="history::::history/" class="icn btn simpleload history">{% trans "History" %}</a></li>
+                {% if has_absolute_url %}
+                    <li><a href="{% url newman_admin_index %}r/{{ content_type_id }}/{{ object_id }}/" class="icn btn web">{% trans "View on site" %}</a></li>
+                {% endif%}
+            {% endif %}
         </ul>
-    {% endif %}
 {% endblock %}
 {% endspaceless %}
 
 
 {% block content_services %}
+<div id="service-container"></div>
 <div id="history"></div>
 {% endblock %}
 
