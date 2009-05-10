@@ -18,14 +18,18 @@
 
 {% block content_toolbar_content %}
     <ul style="float: left;" id="filters-handler">
-        <li>
-            {% if is_filtered %}
-                <a class="icn btn filter filter-active {% if is_popup %}popup-filter{% else %}simpleload{% endif %}" href="filters::::filters/{{ cl.get_query_string }}">{% trans 'Filters' %}<span> ({% trans 'on!' %})</span></a>
-            {% else %}
-                <a class="icn btn filter {% if is_popup %}popup-filter{% else %}simpleload{% endif %}" href="filters::::filters/{{ cl.get_query_string }}">{% trans 'Filters' %}</a>
-            {% endif %}
-        </li>
-        <li>{% block search %}{% search_form cl %}{% endblock %}</li>
+        {% if cl.list_filter %}
+            <li>
+                {% if is_filtered %}
+                    <a class="icn btn filter filter-active {% if is_popup %}popup-filter{% else %}simpleload{% endif %}" href="filters::::filters/{{ cl.get_query_string }}">{% trans 'Filters' %}<span> ({% trans 'on!' %})</span></a>
+                {% else %}
+                    <a class="icn btn filter {% if is_popup %}popup-filter{% else %}simpleload{% endif %}" href="filters::::filters/{{ cl.get_query_string }}">{% trans 'Filters' %}</a>
+                {% endif %}
+            </li>
+        {% endif %}
+        {% if cl.search_fields %}
+            <li>{% block search %}{% search_form cl %}{% endblock %}</li>
+        {% endif %}
     </ul>
     {% if not is_popup %}
         <ul style="float: right; margin: 3px;">
