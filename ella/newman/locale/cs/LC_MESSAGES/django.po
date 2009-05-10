@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ella.newman (admin-ng)\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-05-10 09:48+0200\n"
-"PO-Revision-Date: 2009-05-10 10:19+0100\n"
+"POT-Creation-Date: 2009-05-10 15:29+0200\n"
+"PO-Revision-Date: 2009-05-10 15:31+0100\n"
 "Last-Translator: Vitek Pliska <whit@jizak.cz>\n"
 "Language-Team: Ella <ella.project@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -55,7 +55,7 @@ msgid "Category not permitted"
 msgstr "Nepovolená kategorie."
 
 #: filterspecs.py:120
-#: templates/newman/filter.html:8
+#: templates/newman/tpl_tags/filter.html:8
 msgid "All"
 msgstr ""
 
@@ -64,12 +64,12 @@ msgid "Presets"
 msgstr "Přednastavené"
 
 #: forms.py:44
-#: templates/newman/newman-index.html:68
+#: templates/newman/newman-index.html:76
 msgid "Subject"
 msgstr "Předmět"
 
 #: forms.py:45
-#: templates/newman/newman-index.html:70
+#: templates/newman/newman-index.html:78
 msgid "Message"
 msgstr "Zpráva"
 
@@ -226,54 +226,54 @@ msgid "All roles is now refreshed."
 msgstr "Všechny role jsou obnoveny."
 
 #: newman_admin.py:98
-#: templates/newman/newman-index.html:105
+#: templates/newman/newman-index.html:113
 msgid "Publish from"
 msgstr "Publikovat od"
 
-#: options.py:191
+#: options.py:229
 msgid "No data passed in POST variable \"data\"."
 msgstr "Žádná data v POST proměnné \"data\"."
 
-#: options.py:218
+#: options.py:256
 #, python-format
 msgid "Preset %s was saved."
 msgstr "Předvolba %s byla uložena."
 
-#: options.py:226
+#: options.py:264
 msgid "No id found in GET variable \"id\"."
 msgstr "Id není v GET proměnné."
 
-#: options.py:233
+#: options.py:271
 msgid "No matching draft found."
 msgstr "Předvolba neexistuje."
 
-#: options.py:235
+#: options.py:273
 #, python-format
 msgid "Loaded draft \"%s\""
 msgstr "Načtena předvolba \"%s\""
 
-#: options.py:253
+#: options.py:291
 #: xoptions.py:195
 msgid "Database error"
 msgstr "Chyba databáze"
 
-#: options.py:498
-#: options.py:604
+#: options.py:536
+#: options.py:642
 msgid "Please correct errors in form"
 msgstr "Prosím opravte chyby ve formuláři"
 
-#: options.py:546
-#: options.py:593
+#: options.py:584
+#: options.py:631
 msgid "This view is designed for saving data only, thus POST method is required."
 msgstr ""
 
-#: options.py:554
+#: options.py:592
 #, python-format
 msgid "The %(name)s \"%(obj)s\" was changed successfully."
 msgstr ""
 
-#: options.py:565
-#: options.py:610
+#: options.py:603
+#: options.py:648
 msgid "This view is designed for viewing form, thus GET method is required."
 msgstr ""
 
@@ -371,7 +371,7 @@ msgid "Run the selected action"
 msgstr ""
 
 #: templates/admin/actions.html:3
-#: templates/newman/newman-index.html:94
+#: templates/newman/newman-index.html:102
 msgid "Go"
 msgstr ""
 
@@ -413,24 +413,6 @@ msgstr ""
 msgid "Show all"
 msgstr ""
 
-#: templates/admin/search_form.html:4
-#: templates/newman/newman-index.html:85
-msgid "Search"
-msgstr "Hledání"
-
-#: templates/admin/search_form.html:7
-#, python-format
-msgid "1 result"
-msgid_plural "%(counter)s results"
-msgstr[0] "1 výsledek"
-msgstr[1] "%(counter)s výsledky"
-msgstr[2] "%(counter)s výsledků"
-
-#: templates/admin/search_form.html:8
-#, python-format
-msgid "%(full_result_count)s total"
-msgstr ""
-
 #: templates/admin/auth/user/add_form.html:5
 #: templates/newman/auth/user/add_form.html:5
 msgid "First, enter a username and password. Then, you'll be able to edit more user options."
@@ -463,8 +445,8 @@ msgid "Enter the same password as above, for verification."
 msgstr ""
 
 #: templates/admin/auth/user/change_password.html:7
-#: templates/newman/change_form.html:41
-#: templates/newman/change_list.html:47
+#: templates/newman/change_form.html:43
+#: templates/newman/change_list.html:51
 #: templates/newman/auth/user/change_password.html:7
 msgid "Please correct the error below."
 msgid_plural "Please correct the errors below."
@@ -489,7 +471,7 @@ msgid "Add"
 msgstr ""
 
 #: templates/newman/app_index.html:27
-#: templates/newman/newman-index.html:112
+#: templates/newman/newman-index.html:120
 msgid "Change"
 msgstr ""
 
@@ -514,11 +496,15 @@ msgid "Save as template"
 msgstr "Ulož jako šablonu"
 
 #: templates/newman/change_form.html:21
+msgid "Help"
+msgstr "Nápověda"
+
+#: templates/newman/change_form.html:22
 msgid "History"
 msgstr ""
 
-#: templates/newman/change_form.html:23
-#: templates/newman/newman-index.html:111
+#: templates/newman/change_form.html:24
+#: templates/newman/newman-index.html:119
 #: templates/newman/edit_inline/stacked.html:12
 #: templates/newman/edit_inline/tabular.html:26
 msgid "View on site"
@@ -528,17 +514,17 @@ msgstr ""
 msgid "Categories filtered by user. Click to change."
 msgstr "Kategorie filtrovány. Klikněte pro změnu."
 
-#: templates/newman/change_list.html:23
-#: templates/newman/change_list.html:25
+#: templates/newman/change_list.html:24
+#: templates/newman/change_list.html:26
 #: templates/newman/newman/categoryuserrole/change_list.html:6
 msgid "Filters"
 msgstr "Filtry"
 
-#: templates/newman/change_list.html:23
+#: templates/newman/change_list.html:24
 msgid "on!"
 msgstr "zap."
 
-#: templates/newman/change_list.html:34
+#: templates/newman/change_list.html:38
 #: templates/newman/newman/categoryuserrole/change_list.html:10
 #, python-format
 msgid "Add %(name)s"
@@ -571,11 +557,6 @@ msgstr "Zkuste kontaktovat administrátora s prosbou o přidělení práv a rol�
 msgid "Log in again"
 msgstr ""
 
-#: templates/newman/filter.html:2
-#, python-format
-msgid "By %(filter_title)s"
-msgstr "Dle %(filter_title)s"
-
 #: templates/newman/filters.html:11
 #: templates/newman/object_history.html:26
 msgid "Close"
@@ -593,6 +574,14 @@ msgstr ""
 msgid "Log in"
 msgstr ""
 
+#: templates/newman/model_help.html:4
+msgid "Help for object"
+msgstr "Nápověda k objektu"
+
+#: templates/newman/model_help.html:11
+msgid "Fields help"
+msgstr "Nápověda k polím"
+
 #: templates/newman/newman-index.html:12
 msgid "Quick Settings"
 msgstr "Rychlá nastavení"
@@ -602,52 +591,65 @@ msgid "Category-filter"
 msgstr "Filtr kategorií"
 
 #: templates/newman/newman-index.html:20
-#: templates/newman/newman-index.html:73
+#: templates/newman/newman-index.html:81
 msgid "Clear"
 msgstr "Původní"
 
 #: templates/newman/newman-index.html:21
 #: templates/newman/tpl_tags/submit_line.html:7
 msgid "Save"
-msgstr ""
+msgstr "Uložit"
 
 #: templates/newman/newman-index.html:32
 msgid "Calendar"
 msgstr "Kalendář"
 
 #: templates/newman/newman-index.html:65
+msgid "This month"
+msgstr ""
+
+#: templates/newman/newman-index.html:66
+msgid "This year"
+msgstr ""
+
+#: templates/newman/newman-index.html:73
 msgid "Report Error"
 msgstr "Hlášení chyb"
 
-#: templates/newman/newman-index.html:74
+#: templates/newman/newman-index.html:82
 msgid "Click to report a bug"
 msgstr ""
 
-#: templates/newman/newman-index.html:74
+#: templates/newman/newman-index.html:82
 msgid "Send"
 msgstr "Odeslat"
 
-#: templates/newman/newman-index.html:89
+#: templates/newman/newman-index.html:93
+#: templates/newman/tpl_tags/search_form.html:4
+msgid "Search"
+msgstr "Hledání"
+
+#: templates/newman/newman-index.html:97
 msgid "Select"
 msgstr ""
 
-#: templates/newman/newman-index.html:99
+#: templates/newman/newman-index.html:107
 msgid "Future placements"
 msgstr "Budoucí publikace"
 
-#: templates/newman/newman-index.html:106
+#: templates/newman/newman-index.html:114
 msgid "Category"
 msgstr ""
 
-#: templates/newman/newman-index.html:107
+#: templates/newman/newman-index.html:115
 msgid "Author"
 msgstr ""
 
-#: templates/newman/newman-index.html:123
+#: templates/newman/newman-index.html:131
 msgid "Your Recent Actions"
 msgstr "Vaše poslední akce"
 
-#: templates/newman/newman-index.html:127
+#: templates/newman/newman-index.html:135
 msgid "None available"
 msgstr ""
 
@@ -657,7 +659,7 @@ msgstr ""
 
 #: templates/newman/object_history.html:8
 msgid "Action"
-msgstr ""
+msgstr "Akce"
 
 #: templates/newman/object_history.html:14
 msgid "DATETIME_FORMAT"
@@ -673,6 +675,24 @@ msgstr ""
 
 #: templates/newman/newman/categoryuserrole/change_list.html:15
 msgid "Refresh"
+msgstr ""
+
+#: templates/newman/tpl_tags/filter.html:2
+#, python-format
+msgid "By %(filter_title)s"
+msgstr "Dle %(filter_title)s"
+
+#: templates/newman/tpl_tags/search_form.html:7
+#, python-format
+msgid "1 result"
+msgid_plural "%(counter)s results"
+msgstr[0] "1 výsledek"
+msgstr[1] "%(counter)s výsledky"
+msgstr[2] "%(counter)s výsledků"
+
+#: templates/newman/tpl_tags/search_form.html:8
+#, python-format
+msgid "%(full_result_count)s total"
 msgstr ""
 
 #: templates/newman/tpl_tags/submit_line.html:4
