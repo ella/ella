@@ -61,7 +61,7 @@ FAVS = (
     'article',
     'placement',
     'photo',
-    'gallerie',
+    'gallery',
     'poll',
     'position',
     'category',
