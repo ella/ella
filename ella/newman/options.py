@@ -444,11 +444,31 @@ class NewmanModelAdmin(XModelAdmin):
         if request.user.has_perm(del_perm):
             return True
         user = request.user
-        for role in user.categoryuserrole_set.all():
-            if del_perm in role.group.permissions.all():
-                return True
+        roles = models.DenormalizedCategoryUserRole.objects.filter(
+            user_id=user.pk, 
+            permission_codename=del_perm
+        )
+        if roles:
+            return True
         # no permission found
         return False
+
+    def has_add_permission(self, request):
+        "Returns True if the given request has permission to add an object."
+        opts = self.opts
+        add_perm = opts.app_label + '.' + opts.get_add_permission()
+        if request.user.has_perm(add_perm):
+            return True
+        user = request.user
+        roles = models.DenormalizedCategoryUserRole.objects.filter(
+            user_id=user.pk, 
+            permission_codename=add_perm
+        )
+        if roles:
+            return True
+        # no permission found
+        return False
+
 
     def get_change_view_inline_formsets(self, request, obj, formsets, media):
         inline_admin_formsets = []
