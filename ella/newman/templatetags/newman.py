@@ -84,8 +84,8 @@ def newman_favorites(context):
 
 def newman_list_filter(cl, spec):
     return {
-        'title': spec.title(), 
+        'title': spec.title(),
         'choices' : list(spec.choices(cl)),
         'spec': spec
     }
-newman_list_filter = register.inclusion_tag('newman/filter.html')(newman_list_filter)
+newman_list_filter = register.inclusion_tag('newman/tpl_tags/filter.html')(newman_list_filter)
