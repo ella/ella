@@ -9,17 +9,17 @@ ul.suggest-list {
     list-style-type: none;
     padding: 1px;
 }
-
 ul.suggest-list li {
     list-style-type: none;
     cursor: pointer;
     padding: 2px;
 }
 ul.suggest-list li.A {
-    background-color: #7CA0C7;
+    background-color: #ADF2A4;
 }
 ul.suggest-list li:hover {
-    background-color: #AFD0E7;
+    background-color: #77B150;
+    color: #fff;
 }
 .suggest-bubble span.hilite {
     color: red;
@@ -65,11 +65,11 @@ form .aligned ul.GenericSuggestFieldMultiple,   /* ditto */
 ul.GenericSuggestField,
 ul.GenericSuggestFieldMultiple {
     margin: 0;
-    padding: 0;
-    border: solid 1px #CCCCCC;
+    padding: 1px;
+    border: solid 1px #ccc;
     background-color: white;
     float: left;
-    width: 90%;
+    width: 70%;
     vertical-align: middle;
     min-width: 300px;
     white-space: nowrap;
@@ -88,7 +88,8 @@ ul.GenericSuggestFieldMultiple input {
 /*    background: url(../img/admin/icon_addlink.gif) 0 50% no-repeat; */
 }
 li.suggest-selected-item {
-    background-color: #AFD0E7;
+    background-color: #77B150;
+    color: #fff;
     margin: 2px;
     -moz-border-radius: 2px;
     -webkit-border-radius: 2px;
@@ -98,7 +99,6 @@ li.suggest-selected-item:hover {
 }
 li.suggest-selected-item a.suggest-delete-link {
     cursor: pointer;
-    cursor: hand;
     margin: 0 2px;
     color: red;
     font-weight: bold;
@@ -107,7 +107,7 @@ li.suggest-selected-item a.suggest-delete-link {
 /* related lookup icon */
 a.suggest-related-lookup {
     float: left;
-    padding: 4px 2px;
+    padding: 1px 2px;
 }
 /* /related lookup icon */
 
