@@ -66,6 +66,7 @@ INSTALLED_APPS = (
     'ella.articles',
     'ella.positions',
     'ella.polls',
+    'ella.galleries',
 
     'example_project.services',
 
