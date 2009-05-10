@@ -23,6 +23,8 @@ div.hpbox div.cnt { margin: 5px; }
 div.hpbox.lastlog { float: right; }
 div.hpbox.errmsg label, div.hpbox.errmsg input, div.hpbox.errmsg textarea { width: 99%; }
 div.hpbox.calendar .ui-datepicker { width: 99%; padding: 0; border: none; }
+div.hpbox.calendar .ui-widget-content { background: transparent; }
+div.hpbox.calendar .ui-widget-content tbody { background: #eee; }
 
 div.hpbox h3 span { padding-left: 22px; background: url(../ico/16/foo.png) 2px 50% no-repeat; }
 div.hpbox.setup h3 span { background-image: url(../ico/16/configure.png); }

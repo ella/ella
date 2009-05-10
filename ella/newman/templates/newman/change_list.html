@@ -1,5 +1,5 @@
 {% extends "newman/ajax_content_base.html" %}
-{% load admin_list %}
+{% load admin_list newman_list %}
 
 {% block breadcrumbs %}
     {% if not is_popup %}
@@ -28,7 +28,7 @@
             </li>
         {% endif %}
         {% if cl.search_fields %}
-            <li>{% block search %}{% search_form cl %}{% endblock %}</li>
+            <li>{% block search %}{% newman_search_form cl %}{% endblock %}</li>
         {% endif %}
     </ul>
     {% if not is_popup %}
@@ -63,7 +63,7 @@
 
             {% block result_list %}
                 {% if actions_on_top and cl.full_result_count and not is_popup %}{% admin_actions %}{% endif %}
-                {% result_list cl %}
+                {% newman_result_list cl %}
                 {% if actions_on_bottom and cl.full_result_count %}{% admin_actions %}{% endif %}
             {% endblock %}
             {% block pagination %}{% pagination cl %}{% endblock %}

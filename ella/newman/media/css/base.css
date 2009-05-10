@@ -68,17 +68,18 @@ body {
 
 /* BREADCRUMBS */
 div.breadcrumbs {
-    background: #ffc;
-    border-bottom: 1px solid darkorange;
+    background: #eee url(../img/nav-bg.gif) 0 0 repeat-x;
+    border-bottom: 1px solid #ddd;
+    border-top: 1px solid #ddd;
     padding: 3px 5px;
     overflow: auto;
+    font-size: 95%;
 }
 
 /* FAVORITE ITEMS */
 .favs {
     background: #ffc;
     height: 76px;
-    border-bottom: 1px solid darkorange;
     padding: 5px;
 }
 
