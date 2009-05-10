@@ -1,5 +1,5 @@
 {% extends "newman/ajax_content_base.html" %}
-{% load admin_list %}
+{% load admin_list newman_list %}
 
 {% block breadcrumbs %}
     {% if not is_popup %}
@@ -18,15 +18,18 @@
 
 {% block content_toolbar_content %}
     <ul style="float: left;" id="filters-handler">
-        <li>
-            {% if is_filtered %}
-                <a class="icn btn filter filter-active {% if is_popup %}popup-filter{% else %}simpleload{% endif %}" href="filters::::filters/{{ cl.get_query_string }}">{% trans 'Filters' %}<span> ({% trans 'on!' %})</span></a>
-                <a class="icn eclear" href="?">{% trans 'reset' %}</a>
-            {% else %}
-                <a class="icn btn filter {% if is_popup %}popup-filter{% else %}simpleload{% endif %}" href="filters::::filters/{{ cl.get_query_string }}">{% trans 'Filters' %}</a>
-            {% endif %}
-        </li>
-        <li>{% block search %}{% search_form cl %}{% endblock %}</li>
+        {% if cl.list_filter %}
+            <li>
+                {% if is_filtered %}
+                    <a class="icn btn filter filter-active {% if is_popup %}popup-filter{% else %}simpleload{% endif %}" href="filters::::filters/{{ cl.get_query_string }}">{% trans 'Filters' %}<span> ({% trans 'on!' %})</span></a>
+                {% else %}
+                    <a class="icn btn filter {% if is_popup %}popup-filter{% else %}simpleload{% endif %}" href="filters::::filters/{{ cl.get_query_string }}">{% trans 'Filters' %}</a>
+                {% endif %}
+            </li>
+        {% endif %}
+        {% if cl.search_fields %}
+            <li>{% block search %}{% newman_search_form cl %}{% endblock %}</li>
+        {% endif %}
     </ul>
     {% if not is_popup %}
         <ul style="float: right; margin: 3px;">
@@ -60,7 +63,7 @@
 
             {% block result_list %}
                 {% if actions_on_top and cl.full_result_count and not is_popup %}{% admin_actions %}{% endif %}
-                {% result_list cl %}
+                {% newman_result_list cl %}
                 {% if actions_on_bottom and cl.full_result_count %}{% admin_actions %}{% endif %}
             {% endblock %}
             {% block pagination %}{% pagination cl %}{% endblock %}

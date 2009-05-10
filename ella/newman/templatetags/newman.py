@@ -61,7 +61,7 @@ FAVS = (
     'article',
     'placement',
     'photo',
-    'gallerie',
+    'gallery',
     'poll',
     'position',
     'category',
@@ -81,11 +81,3 @@ def newman_favorites(context):
         'NEWMAN_MEDIA_URL': context['NEWMAN_MEDIA_URL'],
         'favs': global_favs
     }
-
-def newman_list_filter(cl, spec):
-    return {
-        'title': spec.title(), 
-        'choices' : list(spec.choices(cl)),
-        'spec': spec
-    }
-newman_list_filter = register.inclusion_tag('newman/filter.html')(newman_list_filter)

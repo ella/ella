@@ -1,6 +1,6 @@
 /* TOP NAVIGATION */
 #navi-top {
-    background: #eee url(../img/nav-bg.gif) bottom left repeat-x;
+    background: #E9E8DD url(../img/nav-bg.gif) bottom left repeat-x;
     height: 24px;
     padding:0;
     border-bottom: 1px solid #999;
@@ -29,8 +29,8 @@ ul#menu-top li ul {
     position: absolute;
     width: 170px;
     left: 0; top: 21px;
-    filter: alpha(opacity=92);
-    opacity: .92;
+    filter: alpha(opacity=93);
+    opacity: .93;
 }
 ul#menu-top li:hover ul {
     display: block;
@@ -44,11 +44,11 @@ ul#menu-top a, ul#menu-top a:link, ul#menu-top a:visited {
     display: block;
     color: #666;
     border: none; border-right: 1px solid #999;
-    background: #eee url(../img/nav-bg.gif) bottom left repeat-x;
+    background: #E9E8DD url(../img/nav-bg.gif) bottom left repeat-x;
     cursor: pointer;
 }
 ul#menu-top a:hover {
-    background: #666;
+    background: #77B150;
     color: #fff;
 }
 ul#menu-top ul a, ul#menu-top ul a:link, ul#menu-top ul a:visited {

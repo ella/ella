@@ -1,21 +1,17 @@
-from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _, ugettext
-from django.forms.models import BaseInlineFormSet
 from django import forms
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
-from django.forms.util import ValidationError
 
+from ella import newman
 from ella.tagging.admin import TaggingInlineOptions
 
 from ella.galleries.models import Gallery, GalleryItem
-from ella.ellaadmin import widgets, fields
-from ella.core.admin import PlacementInlineAdmin
+from ella.core.newman_admin import PlacementInlineAdmin, PublishableAdmin
 from ella.core.cache import get_cached_object
-from ella.ellaadmin.options import EllaAdminOptionsMixin
 
-class GalleryItemFormset(BaseInlineFormSet):
+class GalleryItemFormset(newman.options.BaseInlineFormSet):
     " Override default FormSet to allow for custom validation."
 
     def clean(self):
@@ -42,27 +38,23 @@ class GalleryItemFormset(BaseInlineFormSet):
 
         return self.cleaned_data
 
-class GalleryItemTabularOptions(EllaAdminOptionsMixin, admin.TabularInline):
+class GalleryItemInline(newman.NewmanTabularInline):
     model = GalleryItem
     extra = 10
     formset = GalleryItemFormset
 
-class GalleryOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
-    list_display = ('title', 'created', 'category', 'get_hits', 'pk', 'full_url',)
+class GalleryAdmin(PublishableAdmin):
     ordering = ('-created',)
     fieldsets = (
         (_("Gallery heading"), {'fields': ('title', 'slug',)}),
-        (_("Gallery metadata"), {'fields': ('description', 'content', 'owner', 'category')}),
+        (_("Gallery metadata"), {'fields': ('description', 'content', 'authors', 'category')}),
 )
     list_filter = ('created', 'category',)
-    search_fields = ('title', 'description', 'slug',) # FIXME: 'tags__tag__name',)
-    inlines = [ GalleryItemTabularOptions, PlacementInlineAdmin ]
+    search_fields = ('title', 'description', 'slug',)
+    inlines = [GalleryItemInline, PlacementInlineAdmin]
     if 'ella.tagging' in settings.INSTALLED_APPS:
         inlines.append(TaggingInlineOptions)
     prepopulated_fields = {'slug': ('title',)}
-    rich_text_fields = {None: ('description', 'content',)}
-#    suggest_fields = {'category': ('tree_path', 'title', 'slug',), 'owner': ('name', 'slug',),}
-    suggest_fields = {'owner': ('name', 'slug',),}
 
-admin.site.register(Gallery, GalleryOptions)
+newman.site.register(Gallery, GalleryAdmin)
 

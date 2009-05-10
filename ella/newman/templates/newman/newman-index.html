@@ -31,6 +31,7 @@
     <div class="hpbox calendar">
         <h3><span>{% trans "Calendar" %}</span></h3>
         <div class="cnt">
+            <div class="cal">
             <script type="text/javascript" src="{{ NEWMAN_MEDIA_URL }}jquery/jquery-ui.js"></script>
             <script type="text/javascript">
             // Oldo, klidne tento JS kus zcenzuruj. Cil byl rozchodit kalendar na HP.
@@ -41,7 +42,7 @@
             var selectedMonth = 0;
             var selectedDay = 0;
             $(function() {
-                $(".hpbox.calendar .cnt").datepicker({
+                $(".hpbox.calendar .cal").datepicker({
                     dateFormat: 'dd',
                     onChangeMonthYear: function(year, month, inst) {
                         selectedMonth = month;
@@ -58,6 +59,13 @@
                 });
             });
             </script>
+            </div>
+            {% comment %}
+            <div class="shortcuts">
+                <a href="">{% trans 'This month' %}</a>
+                | <a href="">{% trans 'This year' %}</a>
+            </div>
+            {% endcomment %}
         </div>
     </div>
 

@@ -28,8 +28,8 @@ class DevMessageAdmin(newman.NewmanModelAdmin):
 class HelpItemAdmin(newman.NewmanModelAdmin):
     list_display = ('__unicode__',)
     list_filter = ('ct', 'lang',)
+    rich_text_fields = {'': ('long',)}
     list_select_related = False
-
 
 class CategoryUserRoleAdmin(newman.NewmanModelAdmin):
     list_filter = ('user', 'group',)

@@ -68,62 +68,61 @@ body {
 
 /* BREADCRUMBS */
 div.breadcrumbs {
-    background: #ffc;
-    border-bottom: 1px solid darkorange;
+    background: #eee url(../img/nav-bg.gif) 0 0 repeat-x;
+    border-bottom: 1px solid #ddd;
+    border-top: 1px solid #ddd;
     padding: 3px 5px;
     overflow: auto;
+    font-size: 95%;
 }
 
 /* FAVORITE ITEMS */
 .favs {
-    background: #ffc;
+    background: #333 url(../img/bg-favs.png) 0 0 repeat-x;
     height: 76px;
-    border-bottom: 1px solid darkorange;
-    padding: 5px;
+    padding: 2px 5px;
 }
 
 .favs ul.items {
     float: left;
     list-style: none;
     margin: 0; padding: 0;
+    font: normal 90% "Trebuchet MS", Arial, Helvetica, sans-serif;
+
 }
 .favs ul.items li {
     float: left;
-    margin: 2px;
+    margin: 0 2px;
     padding: 0;
-    width: 70px;
-    height: 70px;
-    border: 1px solid #ddd;
-    -moz-border-radius: 5px;
-    -webkit-border-radius: 5px;
-}
-.favs ul.items li a {
-    display: block;
+    width: 74px;
+    height: 74px;
+    background: transparent url(../ico/ct/64/unknown.png) 50% 0 no-repeat;
+    opacity: .8;
     text-align: center;
+}
+.favs ul.items li:hover { opacity: 1; }
+.favs a {
     text-decoration: none;
+    color: #fff;
 }
 .favs ul.items li a.app {
-    background: transparent url(../ico/favs/gear.png) 50% 18px no-repeat;
-    width: 70px;
-    height: 50px;
-    font-weight: bold;
-    padding-top: 2px;
+    display: block;
+    width: 74px;
+    height: 62px;
 }
-
-.favs ul.items li a.app.article { background-image: url(../ico/favs/article.png) }
-
-.favs ul.items li:hover {
-    background-color: #ffe;
+.favs ul.items li a.add {
+    margin: auto;
+    padding-left: 13px;
+    text-align: left;
+    background: url(../ico/10/icon_addlink.gif) 0 50% no-repeat;
 }
-
+.favs ul.items li a.add:hover {
+    color: darkorange;
+}
 .favs ul.tools {
     float: right;
     list-style: none;
     font: normal 130%/150% "Trebuchet MS", sans-serif;
-}
-
-.favs ul.tools a {
-    text-decoration: none;
 }
 
 /* CONTENT */
@@ -197,6 +196,8 @@ a.icn.history { background-image: url(../ico/16/history.png); }
 a.icn.web { background-image: url(../ico/16/web.png); }
 a.icn.save { background-image: url(../ico/16/filesave.png); }
 a.icn.edit { background-image: url(../ico/16/edit.png); }
+a.icn.help { background-image: url(../ico/16/help.png); }
+a.icn.idea { background-image: url(../ico/16/idea.png); }
 
 a.btn.combo {
     padding-right: 18px; padding-left: 4px;
@@ -289,21 +290,16 @@ td, th {
 #changelist table {
     width: 100%;
 }
-#changelist table thead tr { background: #ccc; }
+#changelist table thead tr { background: #ddd url(../img/nav-bg.gif) 0 100% repeat-x; }
 #changelist table tbody tr.row1 { background: #fff; }
-#changelist table tbody tr.row2 { background: #eee; }
+#changelist table tbody tr.row2 { background: #eeeeef; }
 #changelist table tbody tr:hover { background: #ffc; }
-#changelist table thead th.sorted { background: #eee; }
+#changelist table thead th.sorted { background: transparent url(../ico/16/14_layer_raiselayer.png) 98% 50% no-repeat; }
+#changelist table thead th.sorted.descending { background-image: url(../ico/16/14_layer_lowerlayer.png); }
 
 /* CHANGELIST ACTIONS */
 #changelist .actions { padding: 5px; }
 #changelist .actions label { display: inline; }
-
-/* CHANGELIST FILTERS */
-#filters {
-    margin: 0 5px;
-    background: #fff;
-}
 
 /* OPERATION MESSAGES */
 #opmsg {
@@ -332,18 +328,6 @@ td, th {
     background-image: url(../ico/16/ok.png);
 }
 
-/* FILTERS (UN)PACKING - TEMPORARY */
-#filters ul {
-    display: none;
-    position: absolute;
-    background-color: white;
-    border: solid 1px black;
-    list-style-position: inside;
-    padding: 2px;
-}
-#filters .selected {
-    font-weight: bold;
-}
 
 /* HELP & HINT */
 .hint-enhanced .hint, .help-enhanced .help {
@@ -352,30 +336,33 @@ td, th {
 
 /* OBJECT HISTORY (in change_form) */
 #history {
-  position: absolute;
-  right: 6px;
-  top: 168px;
-  width: 70%;
-  background: #ddd;
-  display: none;
-  -moz-border-radius: 5px;
-  -webkit-border-radius: 5px;
+    border: 1px outset #ddd;
+    position: absolute;
+    right: 6px;
+    top: 168px;
+    width: 70%;
+    background: #eeeeec;
+    display: none;
+    -moz-border-radius: 7px;
+    -webkit-border-radius: 7px;
 }
 #history div.module {
-  margin: 10px;
-  max-height: 300px;
-  overflow: auto;
-  background: #eee;
+    margin: 10px;
+    max-height: 300px;
+    overflow: auto;
+    background: #eee;
 }
 
+/* CHANGELIST FILTERS */
 #filters {
-  position: absolute;
-  left: 0; right: 0;
-  top: 168px;
-  background: #ddd;
-  display: none;
-  -moz-border-radius: 5px;
-  -webkit-border-radius: 5px;
+    border: 1px outset #ddd;
+    position: absolute;
+    left: 6px; width: 70%;
+    top: 168px;
+    background: #eeeeec;
+    display: none;
+    -moz-border-radius: 7px;
+    -webkit-border-radius: 7px;
 }
 
 #filters div.module {
@@ -388,6 +375,46 @@ td, th {
     float: left;
     padding: 2px 0;
 }
+
+/* FILTERS (UN)PACKING - TEMPORARY */
+#filters ul {
+    display: none;
+    position: absolute;
+    background-color: white;
+    border: solid 1px #ddd;
+    list-style: none;
+    margin: 0;
+}
+#filters ul a { display: block; padding: 2px; border-bottom: 1px dotted #eee; }
+#filters ul a:hover { color: #fff; background: #77B150; }
+#filters .selected {
+    font-weight: bold;
+}
+
+/* MODEL HELP CONTAINER */
+
+div.model-help {
+    font: normal 95%/130% "Trebuchet MS", Arial, sans-serif;
+    border: 1px outset #ddd;
+    position: fixed;
+    top: 168px; right: 6px; min-width: 400px; width: 70%;
+    opacity: .95;
+    background: #fff url(../img/horst1.jpg) left bottom no-repeat;
+    -moz-border-radius: 7px;
+    -webkit-border-radius: 7px;
+    height: 400px;
+}
+div.model-help div.cnt {
+    margin: 10px 10px 10px 200px;
+    max-height: 380px;
+    overflow: auto;
+}
+div.model-help h1, div.model-help h2, div.model-help h3, div.model-help h4, div.model-help p, div.model-help ul, div.model-help ol {
+    margin: .5em 0 .3em 0;
+}
+div.model-help h2 { font-size: 130% }
+div.model-help h3 { font-size: 120% }
+div.model-help h4 { font-size: 105% }
 
 /* OTHER */
 #debug { position: absolute; top:0; left:0; right:0; bottom: 25px;background: #333; color: #fff; padding: 10px; z-index: 50; overflow: auto; opacity: .9; display: none; }
