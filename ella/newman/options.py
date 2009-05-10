@@ -703,10 +703,10 @@ class NewmanInlineModelAdmin(InlineModelAdmin):
         inst = None
         # Inlined object is requested by RichTextField (the field needs to lookup SrcText)
         if hasattr(self, '_magic_instance') and self._magic_instance:
-            try:
-                inst = self.model.objects.get(**{self._magic_fk.name: self._magic_instance.pk})
-            except self.model.DoesNotExist:
-                inst = None
+            instances = self.model.objects.filter(**{self._magic_fk.name: self._magic_instance.pk})
+            inst = None
+            if instances:
+                inst = instances[0]
         kwargs.update({
             'model': self.model,
             'user': self._magic_user,
