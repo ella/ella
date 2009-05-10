@@ -83,6 +83,10 @@ div.breadcrumbs {
     padding: 2px 5px;
 }
 
+.favs.collapsed {
+    height: 6px;
+    overflow: hidden;
+}
 .favs ul.items {
     float: left;
     list-style: none;

@@ -16,24 +16,11 @@
 
 <body>
 {% spaceless %}
-<!-- Container -->
 <div id="container">
 
     {% if not is_popup %}
-
-      {% block topnavi %}
         <div id="navi-top">{% load newman %}{% newman_topmenu %}</div>
-      {% endblock %}
-
-    {% block favs %}
-        {% if user.is_authenticated %}
-        <div class="cb"></div>
-        <div class="favs">
-            {% newman_favorites %}
-        </div>
-        {% endif %}
-    {% endblock %}
-
+        <div class="favs">{% newman_favorites %}</div>
     {% endif %}
 
     <div id="content">
