@@ -198,6 +198,8 @@ a.icn.history { background-image: url(../ico/16/history.png); }
 a.icn.web { background-image: url(../ico/16/web.png); }
 a.icn.save { background-image: url(../ico/16/filesave.png); }
 a.icn.edit { background-image: url(../ico/16/edit.png); }
+a.icn.help { background-image: url(../ico/16/help.png); }
+a.icn.idea { background-image: url(../ico/16/idea.png); }
 
 a.btn.combo {
     padding-right: 18px; padding-left: 4px;
@@ -390,6 +392,31 @@ td, th {
 #filters .selected {
     font-weight: bold;
 }
+
+/* MODEL HELP CONTAINER */
+
+div.model-help {
+    font: normal 95%/130% "Trebuchet MS", Arial, sans-serif;
+    border: 1px outset #ddd;
+    position: fixed;
+    top: 168px; right: 6px; min-width: 400px; width: 70%;
+    opacity: .95;
+    background: #fff url(../img/horst1.jpg) left bottom no-repeat;
+    -moz-border-radius: 7px;
+    -webkit-border-radius: 7px;
+    height: 400px;
+}
+div.model-help div.cnt {
+    margin: 10px 10px 10px 200px;
+    max-height: 380px;
+    overflow: auto;
+}
+div.model-help h1, div.model-help h2, div.model-help h3, div.model-help h4, div.model-help p, div.model-help ul, div.model-help ol {
+    margin: .5em 0 .3em 0;
+}
+div.model-help h2 { font-size: 130% }
+div.model-help h3 { font-size: 120% }
+div.model-help h4 { font-size: 105% }
 
 /* OTHER */
 #debug { position: absolute; top:0; left:0; right:0; bottom: 25px;background: #333; color: #fff; padding: 10px; z-index: 50; overflow: auto; opacity: .9; display: none; }

@@ -159,6 +159,9 @@ class NewmanModelAdmin(XModelAdmin):
             url(r'^filters/$',
                 wrap(self.filters_view),
                 name='%sadmin_%s_%s_filters' % info),
+            url(r'^(.+)/help/$',
+                wrap(self.model_help_view),
+                name='%sadmin_%s_%s_help' % info),
             url(r'^(.+)/draft/save/$',
                 wrap(self.save_draft_view),
                 name='%sadmin_%s_%s_save_draft' % info),
@@ -174,6 +177,46 @@ class NewmanModelAdmin(XModelAdmin):
         )
         urlpatterns += super(NewmanModelAdmin, self).get_urls()
         return urlpatterns
+
+    @require_AJAX
+    def model_help_view(self, request, extra_context=None):
+        """ Returns help for model and his fields. """
+
+        base_help_items = AdminHelpItem.objects.filter(ct=self.model_content_type, lang=settings.LANGUAGE_CODE).values()
+        model_help = base_help_items.filter(field='')
+        if model_help:
+            model_help = model_help[0]
+
+        model_fields = self.model._meta.fields
+
+        bhi = {}
+        help_total = []
+
+        for f in model_fields:
+            bhi[f.name] = {'verbose_name': f.verbose_name, 'help_text': f.help_text}
+
+        for h in base_help_items:
+            try:
+                bhi[h['field']].update(h)
+            except KeyError:
+                log.warning('Field %s is not in model %s' % (h['field'], self.model))
+
+        for f in model_fields:
+            help_total.append(bhi[f.name])
+
+        context = {
+            'ct': self.model_content_type,
+            'model_help': model_help,
+            'model_doc': self.model.__doc__,
+            'fields_help': help_total,
+            'inline_help_items': None
+        }
+
+        return render_to_response(
+            self.get_template_list('model_help.html'),
+            context,
+            context_instance=template.RequestContext(request)
+        )
 
     @require_AJAX
     def save_draft_view(self, request, extra_context=None):

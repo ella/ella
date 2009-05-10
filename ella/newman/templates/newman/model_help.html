@@ -1,0 +1,23 @@
+{% spaceless %}
+<div class="model-help">
+    <div class="cnt">
+        <h2>{% trans 'Help for object' %}: {% trans ct.name %}</h2>
+        {% if model_help %}
+            <p><strong>{{ model_help.short }}</strong></p>
+            {{ model_help.long|safe }}
+        {% endif %}
+
+        {% if fields_help %}
+            <h3>{% trans 'Fields help' %}</h3>
+            {% for h in fields_help %}
+                <h4>{{ h.verbose_name }} &mdash; {{ h.short }}{% if h.help_text %} &mdash; {{ h.help_text }}{% endif %}</h4>
+                {{ h.long|safe }}
+            {% endfor %}
+        {% endif %}
+
+        <h3>{% trans 'Model doc' %}</h3>
+        <p>{{ model_doc }}</p>
+    </div>
+
+</div>
+{% endspaceless %}
