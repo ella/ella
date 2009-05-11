@@ -12,20 +12,19 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidde
 from django.core.urlresolvers import reverse
 from django.contrib.admin.views.main import ERROR_FLAG
 from django.shortcuts import render_to_response
-from django.db import transaction
+from django.db import transaction, models
 from django.db.models import Q, ForeignKey, ManyToManyField, ImageField, DateField, DateTimeField
 from django.utils.functional import update_wrapper
 from django.utils.translation import ugettext as _
 from django.utils.encoding import force_unicode
 
-from ella.core.cache.utils import get_cached_list
 from ella.newman.changelist import NewmanChangeList, FilterChangeList
-from ella.newman import models, fields, widgets, utils
+from ella.newman import fields, widgets, utils
+from ella.newman.models import DenormalizedCategoryUserRole, AdminUserDraft, AdminHelpItem
 from ella.newman.decorators import require_AJAX
 from ella.newman.permission import is_category_model, model_category_fk, model_category_fk_value, applicable_categories
 from ella.newman.permission import has_category_permission, get_permission, permission_filtered_model_qs, is_category_fk
 from ella.newman.forms import DraftForm
-from ella.newman.models import AdminHelpItem
 from ella.newman.xoptions import XModelAdmin
 from ella.newman.config import STATUS_OK, STATUS_FORM_ERROR, STATUS_VAR_MISSING, STATUS_OBJECT_NOT_FOUND, AUTOSAVE_MAX_AMOUNT
 
@@ -34,6 +33,12 @@ from djangomarkup.fields import RichTextField
 DEFAULT_LIST_PER_PAGE = getattr(settings, 'NEWMAN_LIST_PER_PAGE', 25)
 
 log = logging.getLogger('ella.newman')
+
+# update standard FORMFIELD_FOR_DBFIELD_DEFAULTS
+FORMFIELD_FOR_DBFIELD_DEFAULTS.update({
+    models.DateTimeField: {'widget': widgets.DateTimeWidget},
+    models.DateField:     {'widget': widgets.DateWidget},
+})
 
 def formfield_for_dbfield_factory(cls, db_field, **kwargs):
     formfield_overrides = dict(FORMFIELD_FOR_DBFIELD_DEFAULTS, **cls.formfield_overrides)
@@ -71,15 +76,6 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
     if isinstance(db_field, ImageField):
         # we accept only (JPEG) images with RGB color profile.
         return fields.RGBImageField(db_field, **kwargs)
-
-    # Date and DateTime fields
-    if isinstance(db_field, DateTimeField):
-        kwargs['widget'] = widgets.DateTimeWidget
-        return db_field.formfield(**kwargs)
-
-    if isinstance(db_field, DateField):
-        kwargs['widget'] = widgets.DateWidget
-        return db_field.formfield(**kwargs)
 
     if db_field.name in cls.raw_id_fields and isinstance(db_field, ForeignKey):
         kwargs['widget'] = widgets.ForeignKeyRawIdWidget(db_field.rel)
@@ -226,7 +222,7 @@ class NewmanModelAdmin(XModelAdmin):
         """ Autosave data (dataloss-prevention) or save as (named) template """
         def delete_too_old_drafts():
             " remove autosaves too old to rock'n'roll "
-            to_delete = models.AdminUserDraft.objects.filter(title__exact='').order_by('-ts')
+            to_delete = AdminUserDraft.objects.filter(title__exact='').order_by('-ts')
             for draft in to_delete[AUTOSAVE_MAX_AMOUNT:]:
                 log.debug('Deleting too old user draft (autosave) %s' % draft)
                 draft.delete()
@@ -241,19 +237,19 @@ class NewmanModelAdmin(XModelAdmin):
         if id:
             # modifying existing draft/preset
             try:
-                obj = models.AdminUserDraft.objects.get(pk=id)
+                obj = AdminUserDraft.objects.get(pk=id)
                 obj.data = data
                 obj.title = title
                 obj.save()
-            except models.AdminUserDraft.DoesNotExist:
-                obj = models.AdminUserDraft.objects.create(
+            except AdminUserDraft.DoesNotExist:
+                obj = AdminUserDraft.objects.create(
                     ct=self.model_content_type,
                     user=request.user,
                     data=data,
                     title=title
                 )
         else:
-            obj = models.AdminUserDraft.objects.create(
+            obj = AdminUserDraft.objects.create(
                 ct=self.model_content_type,
                 user=request.user,
                 data=data,
@@ -270,7 +266,7 @@ class NewmanModelAdmin(XModelAdmin):
         id = request.GET.get('id', None)
         if not id:
             return utils.JsonResponse(_('No id found in GET variable "id".'), status=STATUS_VAR_MISSING)
-        drafts = models.AdminUserDraft.objects.filter(
+        drafts = AdminUserDraft.objects.filter(
             ct=self.model_content_type,
             user=request.user,
             pk=id
@@ -490,8 +486,8 @@ class NewmanModelAdmin(XModelAdmin):
         if request.user.has_perm(del_perm):
             return True
         user = request.user
-        roles = models.DenormalizedCategoryUserRole.objects.filter(
-            user_id=user.pk, 
+        roles = DenormalizedCategoryUserRole.objects.filter(
+            user_id=user.pk,
             permission_codename=del_perm
         )
         if roles:
@@ -506,8 +502,8 @@ class NewmanModelAdmin(XModelAdmin):
         if request.user.has_perm(add_perm):
             return True
         user = request.user
-        roles = models.DenormalizedCategoryUserRole.objects.filter(
-            user_id=user.pk, 
+        roles = DenormalizedCategoryUserRole.objects.filter(
+            user_id=user.pk,
             permission_codename=add_perm
         )
         if roles:
