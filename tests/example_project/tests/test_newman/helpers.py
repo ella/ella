@@ -50,3 +50,27 @@ class NewmanTestCase(SeleniumTestCase):
     def tearDown(self):
         self.logout()
         super(NewmanTestCase, self).tearDown()
+
+
+    def fill_fields(self, data):
+        s = self.selenium
+        for key, value in data.items():
+            s.type(key, value)
+
+    def fill_suggest_fiels(self, suggest_data):
+        s = self.selenium
+        for key, values in suggest_data.items():
+            for value in values:
+                id = 'id_%s_suggest' % key
+                s.click(id)
+                s.type(id, value)
+                s.click(id)
+                s.wait_for_element_present(self.elements['controls']['suggester_visible'])
+                s.key_down(id, '\40') # down arrow
+                s.click(self.elements['controls']['suggester_visible'])
+
+    def save_form(self):
+        s = self.selenium
+        s.click(self.elements['controls']['save'])
+        s.wait_for_element_present(self.elements['controls']['message']['ok'])
+
