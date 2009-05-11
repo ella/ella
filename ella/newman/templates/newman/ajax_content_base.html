@@ -7,10 +7,12 @@
 {% endblock %}
 
 {% block content_toolbar %}
-    <div id="content-toolbar">
-        {% block content_toolbar_content %}{% endblock %}
-        <div class="cb"></div>
-    </div>
+    <table id="content-toolbar">
+        <tr>
+            <td>{% block content_toolbar_left %}{% endblock %}</td>
+            <td class="ar">{% block content_toolbar_right %}{% endblock %}</td>
+        </tr>
+    </table>
 {% endblock %}
 
 {% block content_services %}{% endblock %}

@@ -18,9 +18,11 @@
 {% spaceless %}
 <div id="container">
 
-    {% if not is_popup %}
-        <div id="navi-top">{% load newman %}{% newman_topmenu %}</div>
-        <div class="favs">{% newman_favorites %}</div>
+    {% if not is_popup and user.is_authenticated %}
+        <div id="header">
+            <div id="navi-top">{% load newman %}{% newman_topmenu %}</div>
+            <div class="favs">{% newman_favorites %}</div>
+        </div>
     {% endif %}
 
     <div id="content">
@@ -32,7 +34,7 @@
         {% block footer %}
             <div id="footer">
                 <div class="user-tools">
-                    <strong>{{ user.get_full_name }}</strong>
+                    <strong>{% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user|capfirst }}{% endif %} ({{ user.last_login|date:"j.n. H:i" }})</strong>
                     | {% trans "What's new?" %}
                     {% if DEBUG %}
                         | {{ VERSION }}, {{ SERVER_INFO.type }}

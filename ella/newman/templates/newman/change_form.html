@@ -11,20 +11,18 @@
 {% endblock %}
 
 {% spaceless %}
-{% block content_toolbar_content %}
-    <ul style="float: left;">
-        <li><a class="icn btn save" id="save-form">{% trans "Save as template" %}</a></li>
-        <li>{{ draft_form }}</li>
-    </ul>
-        <ul style="float: right; margin: 3px;">
-            <li><a class="icn btn help simpleload" href="service-container::::help/">{% trans 'Help' %}</a></li>
+{% block content_toolbar_left %}
+        <a class="icn btn save" id="save-form">{% trans "Save as template" %}</a>
+        {{ draft_form.drafts }}
+{% endblock %}
+{% block content_toolbar_right %}
+            <a class="icn btn help simpleload" href="service-container::::help/">{% trans 'Help' %}</a>
             {% if change %}
-                <li><a href="history::::history/" class="icn btn simpleload history">{% trans "History" %}</a></li>
+                <a href="history::::history/" class="icn btn simpleload history">{% trans "History" %}</a>
                 {% if has_absolute_url %}
-                    <li><a href="{% url newman_admin_index %}r/{{ content_type_id }}/{{ object_id }}/" class="icn btn web">{% trans "View on site" %}</a></li>
+                    <a href="{% url newman_admin_index %}r/{{ content_type_id }}/{{ object_id }}/" class="icn btn web">{% trans "View on site" %}</a>
                 {% endif%}
             {% endif %}
-        </ul>
 {% endblock %}
 {% endspaceless %}
 

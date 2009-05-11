@@ -2,6 +2,7 @@
 
 /* primitives */
 .cb { clear: both; }
+.ar { text-align: right; }
 
 a, a:link, a:visited {
     color: #005F00;
@@ -26,9 +27,18 @@ ul, ol {
 body {
     font: normal normal 75%/130% Tahoma, sans-serif;
     background: #E9E8DD;
+    margin-top: 105px;
 }
 
 #container { min-width: 840px; }
+
+#header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 0;
+}
 
 /* Dynamic */
 
@@ -43,19 +53,6 @@ body {
 
 .error-code object {
     border: solid 3px gray;
-}
-
-/* HEADER */
-
-#header {
-    background: pink;
-    overflow: auto;
-    padding: 5px;
-    border-bottom: 1px solid #ccc;
-}
-#header a, #header a:visited {
-    color: #333;
-    text-decoration: none;
 }
 
 #branding {
@@ -135,20 +132,12 @@ div.breadcrumbs {
 }
 
 /* CONTENT TOOLBAR */
-#content-toolbar * {
-    vertical-align: middle ! important;
-}
+#content-toolbar * { vertical-align: middle; }
 #content-toolbar {
-    background: #fff;
-    padding: 6px 5px;
+    /* background: #aeaeae; */
+    width: 100%;
 }
-#content-toolbar ul {
-    list-style: none;
-    margin: 0; padding: 0;
-}
-#content-toolbar ul li {
-    display: inline;
-}
+#content-toolbar td { border: none; }
 
 a.bl {
     display: block;
@@ -368,6 +357,7 @@ td, th {
     -moz-border-radius: 7px;
     -webkit-border-radius: 7px;
 }
+div.pop #filters { top: 35px }
 
 #filters div.module {
   margin: 5px;
