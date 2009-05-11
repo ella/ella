@@ -5,12 +5,10 @@ from django import forms
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
-from django.forms.util import ValidationError
 
-from ella.tagging.admin import TaggingInlineOptions
+from tagging.admin import TaggingInlineOptions
 
 from ella.galleries.models import Gallery, GalleryItem
-from ella.ellaadmin import widgets, fields
 from ella.core.admin import PlacementInlineOptions
 from ella.core.cache import get_cached_object
 from ella.ellaadmin.options import EllaAdminOptionsMixin
@@ -57,7 +55,7 @@ class GalleryOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     list_filter = ('created', 'category',)
     search_fields = ('title', 'description', 'slug',) # FIXME: 'tags__tag__name',)
     inlines = [ GalleryItemTabularOptions, PlacementInlineOptions ]
-    if 'ella.tagging' in settings.INSTALLED_APPS:
+    if 'ella.ellatagging' in settings.INSTALLED_APPS:
         inlines.append(TaggingInlineOptions)
     prepopulated_fields = {'slug': ('title',)}
     rich_text_fields = {None: ('description', 'content',)}

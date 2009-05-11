@@ -4,7 +4,8 @@ from django.conf import settings
 from django.utils.translation import ugettext
 from django.forms.util import ValidationError
 
-from ella.tagging.admin import TaggingInlineOptions
+from tagging.admin import TaggingInlineOptions
+
 from ella.ellaadmin.options import EllaAdminOptionsMixin
 
 from ella.photos.models import FormatedPhoto, Format, Photo
@@ -61,7 +62,7 @@ class FormatedPhotoInlineOptions(admin.TabularInline):
 
 class PhotoOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     inlines = [ FormatedPhotoInlineOptions ]
-    if 'ella.tagging' in settings.INSTALLED_APPS:
+    if 'ella.ellatagging' in settings.INSTALLED_APPS:
         inlines.append(TaggingInlineOptions)
     list_display = ('title', 'width', 'height', 'thumb', 'pk',) ## 'authors')
     list_filter = ('created',)
