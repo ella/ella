@@ -8,25 +8,6 @@
 
 <div class="hpcol" style="width: 25%;">
 
-    <div class="hpbox setup">
-        <h3><span>{% trans "Quick Settings" %}</span></h3>
-        <div class="cnt">
-            <form class="ajax-form" action="{% url newman-save-filters %}" method="post">
-                <fieldset>
-                    <legend>{% trans "Category-filter" %}</legend>
-                    {{ site_filter_form.sites }}
-                </fieldset>
-                <div class="submit-row">
-                    <a class="icn btn eclear">{% trans "Clear" %}</a>
-                    <a class="icn btn ok def">{% trans "Save" %}</a>
-                </div>
-                <div class="form-metadata">
-                    <input type="hidden" name="success" onchange="location.reload()" />
-                </div>
-            </form>
-        </div>
-    </div>
-
     {# ein Kalendar, bitte #}
     <div class="hpbox calendar">
         <h3><span>{% trans "Calendar" %}</span></h3>
@@ -66,6 +47,25 @@
                 | <a href="">{% trans 'This year' %}</a>
             </div>
             {% endcomment %}
+        </div>
+    </div>
+
+    <div class="hpbox setup">
+        <h3><span>{% trans "Quick Settings" %}</span></h3>
+        <div class="cnt">
+            <form class="ajax-form" action="{% url newman-save-filters %}" method="post">
+                <fieldset>
+                    <legend>{% trans "Category-filter" %}</legend>
+                    {{ site_filter_form.sites }}
+                </fieldset>
+                <div class="submit-row">
+                    <a class="icn btn eclear">{% trans "Clear" %}</a>
+                    <a class="icn btn ok def">{% trans "Save" %}</a>
+                </div>
+                <div class="form-metadata">
+                    <input type="hidden" name="success" onchange="location.reload()" />
+                </div>
+            </form>
         </div>
     </div>
 
