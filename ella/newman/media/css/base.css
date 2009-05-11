@@ -134,7 +134,7 @@ div.breadcrumbs {
 /* CONTENT TOOLBAR */
 #content-toolbar * { vertical-align: middle; }
 #content-toolbar {
-    /* background: #aeaeae; */
+    background: #eee;
     width: 100%;
 }
 #content-toolbar td { border: none; }

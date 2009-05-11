@@ -206,9 +206,9 @@ class CategoryAdmin(newman.NewmanModelAdmin):
 
 class HitCountAdmin(newman.NewmanModelAdmin):
     list_display = ('target', 'hits', 'target_url')
-    list_filter = ('placement__category',)
+    list_filter = ('placement__category', 'placement__publish_from')
+    search_fields = ('placement__category__title',)
     ordering = ('-hits', '-last_seen',)
-    actions = None
 
     def target_url(self, object):
         target = object.target()

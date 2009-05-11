@@ -4,7 +4,6 @@
 ;;;     for (var i in obj) s += i + ': ' + obj[i] + "\n";
 ;;;     alert(s);
 ;;; }
-;;; DEBUG = 1;
 function carp() {
     try {
         $('#debug').append($('<p>').text($.makeArray(arguments).join(' ')));
@@ -607,6 +606,7 @@ function adr(address, options) {
     
     var newhash;
     var addr_start = start;
+    var old_address = hash.substring(start,end);
     
     // We've not gotten the address from a previous recursive call, thus modify the address as needed.
     if (new_address == undefined) {
@@ -694,7 +694,10 @@ function get_adr(address, options) {
         }
         
         if (ext == 'css') {
-            if (stylesheet_present(abs_url)) return true;
+            if (stylesheet_present(abs_url)) {
+                if ($.isFunction(succ_fn)) succ_fn(url);
+                return true;
+            }
             var tries = 100;
             if ($.isFunction(succ_fn)) {
                 setTimeout(function() {
@@ -706,7 +709,9 @@ function get_adr(address, options) {
                     var ss;
                     if (ss = stylesheet_present(abs_url)) {
                         var rules = get_css_rules(ss);
-                        if (rules && rules.length) succ_fn(url);
+                        if (rules && rules.length) {
+                            if ($.isFunction(succ_fn)) succ_fn(url);
+                        }
                         else {
                             if (rules) carp('CSS stylesheet empty.');
                             if ($.isFunction(err_fn)) err_fn(url);
@@ -721,7 +726,10 @@ function get_adr(address, options) {
         else if (ext == 'js') {
             var $scripts = $('script');
             for (var i = 0; i < $scripts.length; i++) {
-                if ($scripts.get(i).src == abs_url) return true;
+                if ($scripts.get(i).src == abs_url) {
+                    if ($.isFunction(succ_fn)) succ_fn(url);
+                    return true;
+                }
             }
             return $.ajax({
                 url:       url,

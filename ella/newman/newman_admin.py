@@ -17,6 +17,8 @@ from ella.newman.config import CATEGORY_FILTER
 
 class DevMessageAdmin(newman.NewmanModelAdmin):
     list_display = ('title', 'author', 'version', 'ts',)
+    search_fields = ('title', 'summary', 'details',)
+    list_filter = ('author', 'ts',)
     prepopulated_fields = {'slug': ('title',)}
 
     def save_model(self, request, obj, form, change):
