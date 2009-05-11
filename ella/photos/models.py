@@ -17,7 +17,6 @@ from ella.core.managers import RelatedManager
 from ella.core.box import Box
 from ella.core.cache.utils import get_cached_object
 from ella.utils.filemanipulation import file_rename
-from tagging.models import TaggedItem
 
 # settings default
 PHOTOS_FORMAT_QUALITY_DEFAULT = (
@@ -74,9 +73,6 @@ class Photo(models.Model):
     source = models.ForeignKey(Source, blank=True, null=True, verbose_name=_('Source'))
 
     created = models.DateTimeField(default=datetime.now, editable=False)
-
-    if 'ella.ellatagging' in settings.INSTALLED_APPS:
-        tags = generic.GenericRelation(TaggedItem)
 
     def thumb(self):
         """

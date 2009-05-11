@@ -5,7 +5,6 @@ from django.conf import settings
 from ella.series.models import Serie, SeriePart
 from ella.ellaadmin.options import EllaAdminOptionsMixin
 from ella.core.admin import PlacementInlineOptions
-from ella.tagging.admin import TaggingInlineOptions
 
 
 class SeriePartInlineAdmin(EllaAdminOptionsMixin, admin.TabularInline):
@@ -30,8 +29,6 @@ class SerieAdmin(EllaAdminOptionsMixin, admin.ModelAdmin):
     rich_text_fields = {None: ('perex', 'description',)}
 
     inlines = [PlacementInlineOptions, SeriePartInlineAdmin]
-    if 'ella.tagging' in settings.INSTALLED_APPS:
-        inlines.append(TaggingInlineOptions)
 
 
 

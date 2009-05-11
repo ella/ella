@@ -4,7 +4,6 @@ from django.utils.translation import ugettext
 from django.forms.util import ValidationError
 
 from ella import newman
-from ella.tagging.admin import TaggingInlineOptions
 
 from ella.photos.models import FormatedPhoto, Format, Photo
 from ella.photos.views import format_photo_json, thumb_url
@@ -60,8 +59,6 @@ class FormatedPhotoInlineOptions(newman.NewmanTabularInline):
 
 class PhotoOptions(newman.NewmanModelAdmin):
     inlines = [ FormatedPhotoInlineOptions ]
-    if 'ella.tagging' in settings.INSTALLED_APPS:
-        inlines.append(TaggingInlineOptions)
     list_display = ('title', 'width', 'height', 'thumb', 'pk',) ## 'authors')
     list_filter = ('created',)
     prepopulated_fields = {'slug': ('title',)}
