@@ -1162,12 +1162,13 @@ $( function() {
                 var msgs = res.errors[ id ];
                 var input = $('#'+id).get(0);
                 show_form_error(input, msgs);
+                if (!input) carp('Error reported for nonexistant input #'+id);
                 
                 $('<p>')
                 .data('rel_input',
-                    $('#'+input.id+'_suggest').length
-                    ? $('#'+input.id+'_suggest').get(0) // take suggest input if available
-                    : input                             // otherwise the input itself
+                      !input                             ? null
+                    : $('#'+input.id+'_suggest').length  ? $('#'+input.id+'_suggest').get(0) // take suggest input if available
+                    :                                      input                             // otherwise the input itself
                 )
                 .text(
                     ($('label[for='+id+']').text() || id).replace(/:$/,'')  // identify the input with its label text or id; no trailing ':' pls
@@ -1175,7 +1176,7 @@ $( function() {
                 .click( function(evt) { // focus and scroll to the input
                     if (evt.button != 0) return;
                     var input = $(this).closest('p').data('rel_input');
-                    input.focus();
+                    try { input.focus(); } catch(e) {}
                     return false;
                 })
                 .appendTo($err_overlay);
