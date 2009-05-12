@@ -46,7 +46,7 @@ class DependencyPostSaveListener(ListenerPostSave):
             dep = Dependency()
             dep.target = box.get_obj()
             dep.dependent = instance
-            dep.save()
+            dep.save(force_insert=True)
             after.append(dep)
 
         if self.use_licenses:
