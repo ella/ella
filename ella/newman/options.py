@@ -90,6 +90,18 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
             'lookup': cls.suggest_fields[db_field.name]
         })
         return fields.AdminSuggestField(db_field, **kwargs)
+
+    if db_field.name in ('target_ct', 'source_ct', 'content_type',):
+        kwargs['widget'] = widgets.ContentTypeWidget
+        return db_field.formfield(**kwargs)
+    elif db_field.name in ('target_id', 'source_id', 'object_id',):
+        kwargs['widget'] = widgets.ForeignKeyGenericRawIdWidget
+        return db_field.formfield(**kwargs)
+
+    if db_field.name == 'order':
+        kwargs['widget'] = widgets.IncrementWidget
+        return db_field.formfield(**kwargs)
+
     # magic around restricting category choices in all ForeignKey (related to Category) fields
     if is_category_fk(db_field) and 'model' in custom_params:
         kwargs.update({
@@ -547,7 +559,7 @@ class NewmanModelAdmin(XModelAdmin):
         for field_name in frm.fields:
             field = frm[field_name]
             if field.errors:
-                error_dict[field_name] = map(lambda fe: fe.__unicode__(), field.errors) # lazy gettext brakes json encode
+                error_dict["id_%s" % field_name] = map(lambda fe: fe.__unicode__(), field.errors) # lazy gettext brakes json encode
         # Inline Form fields
         for fset in context['inline_admin_formsets']:
             if not fset.formset.errors:
@@ -781,3 +793,6 @@ class NewmanStackedInline(NewmanInlineModelAdmin):
 
 class NewmanTabularInline(NewmanInlineModelAdmin):
     template = 'newman/edit_inline/tabular.html'
+
+class NewmanPrettyInline(NewmanInlineModelAdmin):
+    template = 'newman/edit_inline/pretty.html'
