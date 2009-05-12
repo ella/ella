@@ -2,4 +2,4 @@
 tests/unit_project/settings/local.py
 tests/example_project/settings/local.py
 .*.swp
-
+ella/ellaadmin/templates/admin_orig
