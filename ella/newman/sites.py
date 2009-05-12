@@ -187,7 +187,7 @@ class NewmanSite(AdminSite):
                 if last_filter:
                     last_filters[key] = '?%s' % json_decode(last_filter[0].value)
 
-        future_placements = Placement.objects.filter(publish_from__gt=datetime.datetime.now())
+        future_placements = Placement.objects.select_related().filter(publish_from__gt=datetime.datetime.now())
 
         context = {
             'title': _('Site administration'),
