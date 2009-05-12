@@ -3,12 +3,18 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 
 from ella.core.cache.utils import CachedGenericForeignKey
+from ella.core.models import Dependency
 
 class LicenseManager(models.Manager):
     def unapplicable_for_model(self, model):
         ct = ContentType.objects.get_for_model(model)
         qs = License.objects.filter(ct=ct).extra(where=['applications=max_applications']).only('id')
         return [u.id for u in qs]
+
+    def reflect_changed_dependencies(self, before, after):
+        # TODO
+        pass
+
 
 class License(models.Model):
 

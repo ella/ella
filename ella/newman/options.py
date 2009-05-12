@@ -1,5 +1,4 @@
 from ella.newman.licenses.models import License
-from ella.newman.licenses.listeners import LicenseListenerPostSave
 import logging
 
 from django.conf import settings
@@ -27,8 +26,6 @@ from ella.newman.permission import has_category_permission, get_permission, perm
 from ella.newman.forms import DraftForm
 from ella.newman.xoptions import XModelAdmin
 from ella.newman.config import STATUS_OK, STATUS_FORM_ERROR, STATUS_VAR_MISSING, STATUS_OBJECT_NOT_FOUND, AUTOSAVE_MAX_AMOUNT
-
-from djangomarkup.fields import RichTextField
 
 DEFAULT_LIST_PER_PAGE = getattr(settings, 'NEWMAN_LIST_PER_PAGE', 25)
 
@@ -62,13 +59,8 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
                 'field_name': db_field.name,
                 'instance': custom_params.get('instance', None),
                 'model': custom_params.get('model'),
-                'widget': widgets.NewmanRichTextAreaWidget
             })
-            if 'ella.newman.licenses' in settings.INSTALLED_APPS:
-                kwargs.update({
-                    'post_save_listeners': [LicenseListenerPostSave],
-                })
-            rich_text_field = RichTextField(**kwargs)
+            rich_text_field = fields.NewmanRichTextField(**kwargs)
             if css_class:
                 rich_text_field.widget.attrs['class'] += ' %s' % css_class
             return rich_text_field
