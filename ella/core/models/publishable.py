@@ -64,10 +64,6 @@ class Publishable(models.Model):
         from ella.comments.models import Comment
         comments = generic.GenericRelation(Comment, object_id_field='target_id', content_type_field='target_ct')
 
-    if 'ella.tagging' in settings.INSTALLED_APPS:
-        from ella.tagging.models import TaggedItem
-        tags = generic.GenericRelation(TaggedItem)
-
     @property
     def main_placement(self):
         " Return object's main placement, that is the object's placement in its primary category "
@@ -172,6 +168,11 @@ class Publishable(models.Model):
 
     def __unicode__(self):
         return self.get_title()
+
+# FIXME find another way to register!
+if 'tagging' in settings.INSTALLED_APPS:
+    import tagging
+    tagging.register(Publishable)
 
 
 class Placement(models.Model):
