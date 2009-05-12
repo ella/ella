@@ -15,15 +15,16 @@ from tagging.models import Tag, TaggedItem
 from ella.core.models import Placement
 from ella.core.models import Publishable
 
+def get_tagged_publishables(tag):
+    return TaggedItem.objects.get_by_model(
+        Publishable.objects.filter(placement__publish_from__lt=datetime.now()), 
+        tag)
+
 def tagged_publishables(request, tag):
     tag = get_object_or_404(Tag, name=tag)
-    qs = Publishable.objects.filter(placement__publish_from__lt=datetime.now())
-    object_list = TaggedItem.objects.get_by_model(qs, tag)
+    object_list = get_tagged_publishables(tag)
     context = Context({
-        'objects': object_list,
-        'paginate_by': 10,
         'tag': tag,
-        'extra_context': {'tag': tag},
         'object_list': object_list,
     })
     return render_to_response(
