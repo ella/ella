@@ -6,6 +6,7 @@ from django.contrib.admin import widgets
 from django.utils.text import truncate_words
 from ella.ellaadmin.utils import admin_url
 from djangomarkup.widgets import RichTextAreaWidget
+from _xmlplus.xpath.BuiltInExtFunctions import join
 
 MARKITUP_SET = getattr(settings, 'MARKDOWN', 'markdown')
 MEDIA_PREFIX = getattr(settings, 'NEWMAN_MEDIA_PREFIX', settings.ADMIN_MEDIA_PREFIX)
@@ -34,6 +35,12 @@ CSS_DATE_INPUT = 'css/datetime.css'
 # Flash image uploader / editor
 JS_FLASH_IMAGE_INPUT = 'js/flash_image.js'
 SWF_FLASH_IMAGE_INPUT = 'swf/PhotoUploader.swf'
+
+# Generic lookups
+JS_GENERIC_LOOKUP = 'js/GenericRelatedObjectLookups.js'
+CLASS_TARGECT = 'target_ct'
+CLASS_TARGEID = 'target_id'
+
 
 class NewmanRichTextAreaWidget(RichTextAreaWidget):
     """
@@ -196,4 +203,38 @@ class DateTimeWidget(forms.DateTimeInput):
         if value and not value.second:
             self.format = '%Y-%m-%d %H:%M'
         return super(DateTimeWidget, self).render(name, value, attrs)
+
+# widgets from ellaadmin
+
+class ForeignKeyGenericRawIdWidget(forms.TextInput):
+    " Custom widget adding a class to attrs. "
+
+#    class Media:
+#        js = (
+#            MEDIA_PREFIX + JS_GENERIC_LOOKUP,
+#        )
+    def __init__(self, attrs={}):
+        super(ForeignKeyGenericRawIdWidget, self).__init__(attrs={'class': CLASS_TARGEID})
+
+    def render(self, name, value, attrs=None):
+        output = [super(ForeignKeyGenericRawIdWidget, self).render(name, value, attrs)]
+        output.append('<a href="../../../core/category/?pop" class="suggest-related-lookup">aaa</a>')
+        return mark_safe(''.join(output))
+
+
+
+class ContentTypeWidget(forms.Select):
+    " Custom widget adding a class to attrs. "
+    def __init__(self, attrs={}):
+        super(ContentTypeWidget, self).__init__(attrs={'class': CLASS_TARGECT})
+
+class IncrementWidget(forms.TextInput):
+    'Self incrementing widget.'
+    class Media:
+        js = (
+            MEDIA_PREFIX + 'js/increment.js',
+        )
+    def __init__(self, attrs={}):
+        super(IncrementWidget, self).__init__(attrs={'class': 'increment'})
+
 
