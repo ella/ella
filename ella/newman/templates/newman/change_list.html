@@ -1,5 +1,5 @@
 {% extends "newman/ajax_content_base.html" %}
-{% load admin_list newman_list %}
+{% load admin_list newman_list cache %}
 
 {% block breadcrumbs %}
     {% if not is_popup %}
@@ -77,10 +77,12 @@
     {{ block.super }}
 
     {% if media %}
+        {% cache 300 'nm-cl-js' cl %}
         <script type="text/javascript">
         {% for m in media %}
             request_media('{{ m }}?{{ VERSION }}');
         {% endfor %}
         </script>
+        {% endcache %}
     {% endif %}
 {% endblock %}

@@ -1,5 +1,5 @@
 {% extends "newman/ajax_content_base.html" %}
-{% load newman_modify %}
+{% load newman_modify cache %}
 
 {% block breadcrumbs %}
 <div class="breadcrumbs">
@@ -77,9 +77,11 @@
     {# JavaScript for prepopulated fields #}
     {% prepopulated_fields_js %}
 
+    {% cache 300 'nm-cf-js' adminform %}
     <script type="text/javascript">
     {% for m in media %}
         request_media('{{ m }}?{{ VERSION }}');
     {% endfor %}
     </script>
+    {% endcache %}
 {% endblock %}
