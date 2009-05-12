@@ -14,7 +14,6 @@
         <h3><span>{% trans "Calendar" %}</span></h3>
         <div class="cnt">
             <div class="cal">
-            <script type="text/javascript" src="{{ NEWMAN_MEDIA_URL }}jquery/jquery-ui.js"></script>
             <script type="text/javascript">
             // Oldo, klidne tento JS kus zcenzuruj. Cil byl rozchodit kalendar na HP.
             var pubYear = '{{ publishable_lookup_fields.year }}';
@@ -165,7 +164,7 @@ changelistFilters["{{ fname }}"] = "{{ qstring }}";
     <script type="text/javascript">
     request_media('{{ NEWMAN_MEDIA_URL }}css/dashboard.css?{{ VERSION }}');
     request_media('{{ NEWMAN_MEDIA_URL }}jquery/jquery-ui-smoothness.css?{{ VERSION }}');
-    //request_media('{{ NEWMAN_MEDIA_URL }}jquery/jquery-ui.js?{{ VERSION }}');
+    request_media('{{ NEWMAN_MEDIA_URL }}jquery/jquery-ui.js?{{ VERSION }}');
     </script>
     {% endcache %}
 {% endblock %}
