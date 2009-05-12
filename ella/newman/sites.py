@@ -1,14 +1,17 @@
+import datetime
+
 from django import template
 from django.contrib.admin.sites import AdminSite
 from django.shortcuts import render_to_response
 from django.utils.functional import update_wrapper
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.db import models
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.core.mail import EmailMessage
 from django.views.decorators.cache import never_cache
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.contenttypes.models import ContentType
+from django.conf import settings
 
 from ella.newman.forms import SiteFilterForm, ErrorReportForm
 from ella.newman.models import AdminSetting
@@ -18,10 +21,14 @@ from ella.newman.utils import set_user_config_db, set_user_config_session, get_u
 from ella.newman.permission import has_model_list_permission, applicable_categories
 from ella.newman.config import CATEGORY_FILTER, NEWMAN_URL_PREFIX, STATUS_SMTP_ERROR, STATUS_FORM_ERROR
 from ella.newman.options import NewmanModelAdmin
+from ella.core.models.publishable import Placement
 
 
 class NewmanSite(AdminSite):
     norole_template = None
+    index_template = 'newman/index.html'
+    login_template = 'newman/login.html'
+    app_index_template = 'newman/app_index.html'
 
     def append_inline(self, to_models=(), inline=None):
         """
@@ -62,10 +69,21 @@ class NewmanSite(AdminSite):
             url(r'^%s/save-filters/$' % NEWMAN_URL_PREFIX,
                 wrap(self.cat_filters_save),
                 name="newman-save-filters"),
+            url(r'^%s/$' % NEWMAN_URL_PREFIX,
+                wrap(self.newman_index),
+                name="newman-index"),
 #            url(r'^$',
 #                wrap(self.index),
 #                name='%sadmin_index' % self.name),
         )
+
+        if 'djangomarkup' in settings.INSTALLED_APPS:
+            urlpatterns += patterns('',
+                url(r'^%s/editor-preview/$' % NEWMAN_URL_PREFIX,
+                    'djangomarkup.views.preview',
+                    name="djangomarkup-preview"),
+            )
+
         urlpatterns += super(NewmanSite, self).get_urls()
         return urlpatterns
 
@@ -119,7 +137,7 @@ class NewmanSite(AdminSite):
             if user.is_active and user.is_staff:
                 login(request, user)
                 # user has no applicable categories, probably his role is undefined
-                if not applicable_categories(user):
+                if not applicable_categories(user) and not user.is_superuser:
                     return self.norole(request, user)
                 # load all user's specific settings into session
                 for c in AdminSetting.objects.filter(user=user):
@@ -136,12 +154,12 @@ class NewmanSite(AdminSite):
         }
         logout(request)
         return render_to_response(
-            self.norole_template or 'admin/error_norole.html',
+            self.norole_template or 'newman/error_norole.html',
             context,
             context_instance=template.RequestContext(request)
         )
 
-    def index(self, request, extra_context=None):
+    def newman_index(self, request, extra_context=None):
         """
         Displays the main Newman index page, without installed apps.
         """
@@ -151,11 +169,16 @@ class NewmanSite(AdminSite):
         except KeyError:
             data['sites'] = []
 
+        publishable_lookup_fields = {
+            'day': 'placement__publish_from__day',
+            'month': 'placement__publish_from__month',
+            'year': 'placement__publish_from__year'
+        }
         site_filter_form = SiteFilterForm(data=data, user=request.user)
         cts = []
         last_filters = {}
         for model, model_admin in self._registry.items():
-            if has_model_list_permission(request.user, model):
+            if has_model_list_permission(request.user, model) and model_admin.search_fields:
                 ct = ContentType.objects.get_for_model(model)
                 cts.append(ct)
                 # Load saved filter configurations for changelists
@@ -164,14 +187,18 @@ class NewmanSite(AdminSite):
                 if last_filter:
                     last_filters[key] = '?%s' % json_decode(last_filter[0].value)
 
+        future_placements = Placement.objects.filter(publish_from__gt=datetime.datetime.now())
+
         context = {
             'title': _('Site administration'),
             'site_filter_form': site_filter_form,
             'searchable_content_types': cts,
-            'last_filters': last_filters
+            'last_filters': last_filters,
+            'future_placements': future_placements,
+            'publishable_lookup_fields': publishable_lookup_fields
         }
         context.update(extra_context or {})
-        return render_to_response(self.index_template or 'admin/index.html', context,
+        return render_to_response('newman/newman-index.html', context,
             context_instance=template.RequestContext(request)
         )
 
@@ -180,8 +207,6 @@ class NewmanSite(AdminSite):
         """
         Sends error report or feature request to administrator.
         """
-
-        from django.conf import settings
 
         form = ErrorReportForm(request.POST)
         if form.is_valid():
@@ -210,4 +235,4 @@ class NewmanSite(AdminSite):
             return JsonResponseError(ugettext('Error in form.'), status=STATUS_FORM_ERROR)
 
 
-site = NewmanSite()
+site = NewmanSite(name="newman")

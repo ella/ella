@@ -115,9 +115,8 @@ class BaseGenericInlineFormSet(DJBaseGenericInlineFormSet):
         f._set_queryset(qs)
 
     def _construct_form(self, i, **kwargs):
-        if i < self._initial_form_count:
-            qs = self.get_queryset()[i]
-            kwargs['instance'] = qs
+        if hasattr(self, 'initial_form_count') and i < self.initial_form_count():
+            kwargs['instance'] = self.get_queryset()[i]
         user = self.form._magic_user
         self.restrict_field_categories(self.form, user, self.model)
         return super(BaseModelFormSet, self)._construct_form(i, **kwargs)

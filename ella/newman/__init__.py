@@ -1,4 +1,5 @@
 #from django.contrib.admin import autodiscover
+from django import template
 
 from ella.utils.installedapps import call_modules
 from ella.newman.sites import site
@@ -7,3 +8,7 @@ from ella.newman.generic import BaseGenericInlineFormSet, GenericInlineModelAdmi
 
 def autodiscover():
     call_modules(auto_discover=('newman_admin',))
+
+# add newman templatetags to builtin
+template.add_to_builtins('ella.newman.templatetags.newman')
+

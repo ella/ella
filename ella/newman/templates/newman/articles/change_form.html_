@@ -1,0 +1,50 @@
+{% extends "newman/change_form.html" %}
+{% block fieldsets %}
+<div class="article-form-container">
+    <div class="multicol">
+        <label for="id_title" {% if raw_form.form.fields.title.required %}class="required"{% endif %}>{{ raw_form.form.fields.title.label|capfirst }}:</label>
+        {{ raw_form.form.title }}
+    </div>
+    <div class="multicol colX">
+        <label for="id_upper_title" {% if raw_form.form.fields.upper_title.required %}class="required"{% endif %}>{{ raw_form.form.fields.upper_title.label|capfirst }}:</label>
+        {{ raw_form.form.upper_title }}
+    </div>
+    <div class="cb"></div>
+    <div>
+        <label for="id_description" {% if raw_form.form.fields.description.required %}class="required"{% endif %}>{{ raw_form.form.fields.description.label|capfirst }}:</label>
+        {{ raw_form.form.description }}
+    </div>
+    <div>
+        <label for="id_articlecontents_set-0-content" {% if raw_form.inlines.articles__articlecontents.forms.0.fields.content.required %}class="required"{% endif %}>obsah:</label>
+        {{ raw_form.inlines.articles__articlecontents.forms.0.content }}
+    </div>
+    <div>
+        <label for="id_authors_suggest" {% if raw_form.form.fields.authors.required %}class="required"{% endif %}>{{ raw_form.form.fields.authors.label|capfirst }}:</label>
+        {{ raw_form.form.authors }}
+    </div>
+    <div>
+        <label for="id_source_suggest" {% if raw_form.form.fields.source.required %}class="required"{% endif %}>{{ raw_form.form.fields.source.label|capfirst }}:</label>
+        {{ raw_form.form.source }}
+    </div>
+    <div class="cb"></div>
+    <div>
+        <label for="id_category_suggest" {% if raw_form.form.fields.category.required %}class="required"{% endif %}>{{ raw_form.form.fields.category.label|capfirst }}:</label>
+        {{ raw_form.form.category }}
+    </div>
+    <div class="cb"></div>
+    <div>
+        <label for="id_photo" {% if raw_form.form.fields.photo.required %}class="required"{% endif %}>{{ raw_form.form.fields.photo.label|capfirst }}:</label>
+        {{ raw_form.form.photo }}
+    </div>
+    <div class="publish-container">
+        <h2>Publikovat:</h2>
+        <hr />
+        <label for="id_placement_set-0-category_suggest" {% if raw_form.inlines.core__placement.forms.0.fields.category.required %}class="required"{% endif %}>Kategorie:</label>
+        {{ raw_form.inlines.core__placement.forms.0.category }}
+        <label for="id_placement_set-0-publish_from" {% if raw_form.inlines.core__placement.forms.0.fields.publish_from.required %}class="required"{% endif %}>Od:</label>
+        {{ raw_form.inlines.core__placement.forms.0.publish_from }}
+        <label for="id_placement_set-0-publish_to" {% if raw_form.inlines.core__placement.forms.0.fields.publish_to.required %}class="required"{% endif %}>Do:</label>
+        {{ raw_form.inlines.core__placement.forms.0.publish_to }}
+    </div>
+</div>
+{% endblock %}

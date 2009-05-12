@@ -12,20 +12,19 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidde
 from django.core.urlresolvers import reverse
 from django.contrib.admin.views.main import ERROR_FLAG
 from django.shortcuts import render_to_response
-from django.db import transaction
+from django.db import transaction, models
 from django.db.models import Q, ForeignKey, ManyToManyField, ImageField, DateField, DateTimeField
 from django.utils.functional import update_wrapper
 from django.utils.translation import ugettext as _
 from django.utils.encoding import force_unicode
 
-from ella.core.cache.utils import get_cached_list
 from ella.newman.changelist import NewmanChangeList, FilterChangeList
-from ella.newman import models, fields, widgets, utils
+from ella.newman import fields, widgets, utils
+from ella.newman.models import DenormalizedCategoryUserRole, AdminUserDraft, AdminHelpItem
 from ella.newman.decorators import require_AJAX
 from ella.newman.permission import is_category_model, model_category_fk, model_category_fk_value, applicable_categories
 from ella.newman.permission import has_category_permission, get_permission, permission_filtered_model_qs, is_category_fk
 from ella.newman.forms import DraftForm
-from ella.newman.models import AdminHelpItem
 from ella.newman.xoptions import XModelAdmin
 from ella.newman.config import STATUS_OK, STATUS_FORM_ERROR, STATUS_VAR_MISSING, STATUS_OBJECT_NOT_FOUND, AUTOSAVE_MAX_AMOUNT
 
@@ -34,6 +33,12 @@ from djangomarkup.fields import RichTextField
 DEFAULT_LIST_PER_PAGE = getattr(settings, 'NEWMAN_LIST_PER_PAGE', 25)
 
 log = logging.getLogger('ella.newman')
+
+# update standard FORMFIELD_FOR_DBFIELD_DEFAULTS
+FORMFIELD_FOR_DBFIELD_DEFAULTS.update({
+    models.DateTimeField: {'widget': widgets.DateTimeWidget},
+    models.DateField:     {'widget': widgets.DateWidget},
+})
 
 def formfield_for_dbfield_factory(cls, db_field, **kwargs):
     formfield_overrides = dict(FORMFIELD_FOR_DBFIELD_DEFAULTS, **cls.formfield_overrides)
@@ -72,15 +77,6 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
         # we accept only (JPEG) images with RGB color profile.
         return fields.RGBImageField(db_field, **kwargs)
 
-    # Date and DateTime fields
-    if isinstance(db_field, DateTimeField):
-        kwargs['widget'] = widgets.DateTimeWidget
-        return db_field.formfield(**kwargs)
-
-    if isinstance(db_field, DateField):
-        kwargs['widget'] = widgets.DateWidget
-        return db_field.formfield(**kwargs)
-
     if db_field.name in cls.raw_id_fields and isinstance(db_field, ForeignKey):
         kwargs['widget'] = widgets.ForeignKeyRawIdWidget(db_field.rel)
         return db_field.formfield(**kwargs)
@@ -94,6 +90,18 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
             'lookup': cls.suggest_fields[db_field.name]
         })
         return fields.AdminSuggestField(db_field, **kwargs)
+
+    if db_field.name in ('target_ct', 'source_ct', 'content_type',):
+        kwargs['widget'] = widgets.ContentTypeWidget
+        return db_field.formfield(**kwargs)
+    elif db_field.name in ('target_id', 'source_id', 'object_id',):
+        kwargs['widget'] = widgets.ForeignKeyGenericRawIdWidget
+        return db_field.formfield(**kwargs)
+
+    if db_field.name == 'order':
+        kwargs['widget'] = widgets.IncrementWidget
+        return db_field.formfield(**kwargs)
+
     # magic around restricting category choices in all ForeignKey (related to Category) fields
     if is_category_fk(db_field) and 'model' in custom_params:
         kwargs.update({
@@ -113,8 +121,27 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
 class NewmanModelAdmin(XModelAdmin):
     changelist_view_cl = NewmanChangeList
 
+    def get_template_list(self, base_template):
+        model = self.model
+        opts = model._meta
+        app_label = opts.app_label
+
+        return [
+            "newman/%s/%s/%s" % (app_label, opts.object_name.lower(), base_template),
+            "newman/%s/%s" % (app_label, base_template),
+            "newman/%s" % base_template
+        ]
+
     def __init__(self, *args, **kwargs):
         super(NewmanModelAdmin, self).__init__(*args, **kwargs)
+
+        # newman's custom templates
+        self.delete_confirmation_template = self.get_template_list('delete_confirmation.html')
+        self.object_history_template = self.get_template_list('object_history.html')
+        self.change_form_template = self.get_template_list('change_form.html')
+        self.change_list_template = self.get_template_list('change_list.html')
+        self.filters_template = self.get_template_list('filters.html')
+
         self.list_per_page = DEFAULT_LIST_PER_PAGE
         self.model_content_type = ContentType.objects.get_for_model(self.model)
         self.saveasnew_add_view = self.add_json_view
@@ -140,6 +167,9 @@ class NewmanModelAdmin(XModelAdmin):
             url(r'^filters/$',
                 wrap(self.filters_view),
                 name='%sadmin_%s_%s_filters' % info),
+            url(r'^(.+)/help/$',
+                wrap(self.model_help_view),
+                name='%sadmin_%s_%s_help' % info),
             url(r'^(.+)/draft/save/$',
                 wrap(self.save_draft_view),
                 name='%sadmin_%s_%s_save_draft' % info),
@@ -157,11 +187,54 @@ class NewmanModelAdmin(XModelAdmin):
         return urlpatterns
 
     @require_AJAX
+    def model_help_view(self, request, extra_context=None):
+        """ Returns help for model and his fields. """
+
+        base_help_items = AdminHelpItem.objects.filter(ct=self.model_content_type, lang=settings.LANGUAGE_CODE).values()
+        model_help = base_help_items.filter(field='')
+        if model_help:
+            model_help = model_help[0]
+
+        model_fields = self.model._meta.fields
+
+        bhi = {}
+        help_total = []
+
+        for f in model_fields:
+            if f.editable:
+                bhi[f.name] = {'verbose_name': f.verbose_name, 'help_text': f.help_text}
+
+        for h in base_help_items:
+            try:
+                bhi[h['field']].update(h)
+            except KeyError:
+                pass
+                #log.warning('Field %s is not in model %s' % (h['field'], self.model))
+
+        for f in model_fields:
+            if f.editable:
+                help_total.append(bhi[f.name])
+
+        context = {
+            'ct': self.model_content_type,
+            'model_help': model_help,
+            'model_doc': self.model.__doc__,
+            'fields_help': help_total,
+            'inline_help_items': None
+        }
+
+        return render_to_response(
+            self.get_template_list('model_help.html'),
+            context,
+            context_instance=template.RequestContext(request)
+        )
+
+    @require_AJAX
     def save_draft_view(self, request, extra_context=None):
         """ Autosave data (dataloss-prevention) or save as (named) template """
         def delete_too_old_drafts():
             " remove autosaves too old to rock'n'roll "
-            to_delete = models.AdminUserDraft.objects.filter(title__exact='').order_by('-ts')
+            to_delete = AdminUserDraft.objects.filter(title__exact='').order_by('-ts')
             for draft in to_delete[AUTOSAVE_MAX_AMOUNT:]:
                 log.debug('Deleting too old user draft (autosave) %s' % draft)
                 draft.delete()
@@ -176,19 +249,19 @@ class NewmanModelAdmin(XModelAdmin):
         if id:
             # modifying existing draft/preset
             try:
-                obj = models.AdminUserDraft.objects.get(pk=id)
+                obj = AdminUserDraft.objects.get(pk=id)
                 obj.data = data
                 obj.title = title
                 obj.save()
-            except models.AdminUserDraft.DoesNotExist:
-                obj = models.AdminUserDraft.objects.create(
+            except AdminUserDraft.DoesNotExist:
+                obj = AdminUserDraft.objects.create(
                     ct=self.model_content_type,
                     user=request.user,
                     data=data,
                     title=title
                 )
         else:
-            obj = models.AdminUserDraft.objects.create(
+            obj = AdminUserDraft.objects.create(
                 ct=self.model_content_type,
                 user=request.user,
                 data=data,
@@ -205,7 +278,7 @@ class NewmanModelAdmin(XModelAdmin):
         id = request.GET.get('id', None)
         if not id:
             return utils.JsonResponse(_('No id found in GET variable "id".'), status=STATUS_VAR_MISSING)
-        drafts = models.AdminUserDraft.objects.filter(
+        drafts = AdminUserDraft.objects.filter(
             ct=self.model_content_type,
             user=request.user,
             pk=id
@@ -231,7 +304,7 @@ class NewmanModelAdmin(XModelAdmin):
             # the 'invalid=1' parameter was already in the query string, something
             # is screwed up with the database, so display an error page.
             if ERROR_FLAG in request.GET.keys():
-                return render_to_response('admin/invalid_setup.html', {'title': _('Database error')})
+                return render_to_response('newman/invalid_setup.html', {'title': _('Database error')})
             return HttpResponseRedirect(request.path + '?' + ERROR_FLAG + '=1')
         cl.formset = None
 
@@ -244,8 +317,7 @@ class NewmanModelAdmin(XModelAdmin):
             'app_label': app_label,
         }
         context.update(extra_context or {})
-        out= render_to_response(
-            'admin/filters.html',
+        out= render_to_response(self.filters_template or 'newman/filters.html',
             context,
             context_instance=template.RequestContext(request)
         )
@@ -254,8 +326,6 @@ class NewmanModelAdmin(XModelAdmin):
     @require_AJAX
     def changelist_view(self, request, extra_context=None):
         self.register_newman_variables(request)
-        opts = self.model._meta
-        app_label = opts.app_label
 
         context = super(NewmanModelAdmin, self).get_changelist_context(request)
         if type(context) != dict:
@@ -268,7 +338,8 @@ class NewmanModelAdmin(XModelAdmin):
         # save per user filtered content type.
         req_path = request.get_full_path()
         ct = ContentType.objects.get_for_model(self.model)
-        if req_path.find('?') > 0:
+        # persistent filter for non-popupped changelists only
+        if req_path.find('?') > 0 and req_path.find('pop') < 0:
             url_args = req_path.split('?', 1)[1]
             key = 'filter__%s__%s' % (ct.app_label, ct.model)
             utils.set_user_config_db(request.user, key, url_args)
@@ -276,11 +347,7 @@ class NewmanModelAdmin(XModelAdmin):
         context['is_filtered'] = context['cl'].is_filtered()
         context['is_user_category_filtered'] = utils.is_user_category_filtered( self.queryset(request) )
         context.update(extra_context or {})
-        return render_to_response(self.change_list_template or [
-            'admin/%s/%s/change_list.html' % (app_label, opts.object_name.lower()),
-            'admin/%s/change_list.html' % app_label,
-            'admin/change_list.html'
-        ], context, context_instance=template.RequestContext(request))
+        return render_to_response(self.change_list_template, context, context_instance=template.RequestContext(request))
 
     @require_AJAX
     def suggest_view(self, request, extra_context=None):
@@ -431,11 +498,31 @@ class NewmanModelAdmin(XModelAdmin):
         if request.user.has_perm(del_perm):
             return True
         user = request.user
-        for role in user.categoryuserrole_set.all():
-            if del_perm in role.group.permissions.all():
-                return True
+        roles = DenormalizedCategoryUserRole.objects.filter(
+            user_id=user.pk,
+            permission_codename=del_perm
+        )
+        if roles:
+            return True
         # no permission found
         return False
+
+    def has_add_permission(self, request):
+        "Returns True if the given request has permission to add an object."
+        opts = self.opts
+        add_perm = opts.app_label + '.' + opts.get_add_permission()
+        if request.user.has_perm(add_perm):
+            return True
+        user = request.user
+        roles = DenormalizedCategoryUserRole.objects.filter(
+            user_id=user.pk,
+            permission_codename=add_perm
+        )
+        if roles:
+            return True
+        # no permission found
+        return False
+
 
     def get_change_view_inline_formsets(self, request, obj, formsets, media):
         inline_admin_formsets = []
@@ -472,7 +559,7 @@ class NewmanModelAdmin(XModelAdmin):
         for field_name in frm.fields:
             field = frm[field_name]
             if field.errors:
-                error_dict[field_name] = map(lambda fe: fe.__unicode__(), field.errors) # lazy gettext brakes json encode
+                error_dict["id_%s" % field_name] = map(lambda fe: fe.__unicode__(), field.errors) # lazy gettext brakes json encode
         # Inline Form fields
         for fset in context['inline_admin_formsets']:
             if not fset.formset.errors:
@@ -485,15 +572,15 @@ class NewmanModelAdmin(XModelAdmin):
         return utils.JsonResponse(_('Please correct errors in form'), errors=error_dict, status=STATUS_FORM_ERROR)
 
     def change_view_process_context(self, request, context, object_id):
-        # dynamic heelp messages
-        help_qs = get_cached_list(AdminHelpItem, ct=self.model_content_type, lang=settings.LANGUAGE_CODE)
+#        # dynamic heelp messages
+#        help_qs = get_cached_list(AdminHelpItem, ct=self.model_content_type, lang=settings.LANGUAGE_CODE)
         form  = context['raw_form']
-        for msg in help_qs:
-            try:
-                form.fields[msg.field].hint_text = msg.short
-                form.fields[msg.field].help_text = msg.long
-            except KeyError:
-                log.warning('Cannot assign help message. Form field does not exist: form.fields[%s].' % msg.field)
+#        for msg in help_qs:
+#            try:
+#                form.fields[msg.field].hint_text = msg.short
+#                form.fields[msg.field].help_text = msg.long
+#            except KeyError:
+#                log.warning('Cannot assign help message. Form field does not exist: form.fields[%s].' % msg.field)
 
         # raw forms for JS manipulations
         raw_frm_all = {
@@ -579,7 +666,10 @@ class NewmanModelAdmin(XModelAdmin):
         if request.method.upper() != 'POST':
             msg = _('This view is designed for saving data only, thus POST method is required.')
             return HttpResponseForbidden(msg)
-        context = self.get_add_view_context(request, form_url)
+        try:
+            context = self.get_add_view_context(request, form_url)
+        except:
+            raise
         context.update(extra_context or {})
         if 'object_added' in context:
             msg = request.user.message_set.all()[0].message
@@ -687,10 +777,10 @@ class NewmanInlineModelAdmin(InlineModelAdmin):
         inst = None
         # Inlined object is requested by RichTextField (the field needs to lookup SrcText)
         if hasattr(self, '_magic_instance') and self._magic_instance:
-            try:
-                inst = self.model.objects.get(**{self._magic_fk.name: self._magic_instance.pk})
-            except self.model.DoesNotExist:
-                inst = None
+            instances = self.model.objects.filter(**{self._magic_fk.name: self._magic_instance.pk})
+            inst = None
+            if instances:
+                inst = instances[0]
         kwargs.update({
             'model': self.model,
             'user': self._magic_user,
@@ -699,7 +789,10 @@ class NewmanInlineModelAdmin(InlineModelAdmin):
         return formfield_for_dbfield_factory(self, db_field, **kwargs)
 
 class NewmanStackedInline(NewmanInlineModelAdmin):
-    template = 'admin/edit_inline/stacked.html'
+    template = 'newman/edit_inline/stacked.html'
 
 class NewmanTabularInline(NewmanInlineModelAdmin):
-    template = 'admin/edit_inline/tabular.html'
+    template = 'newman/edit_inline/tabular.html'
+
+class NewmanPrettyInline(NewmanInlineModelAdmin):
+    template = 'newman/edit_inline/pretty.html'

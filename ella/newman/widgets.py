@@ -7,7 +7,7 @@ from django.utils.text import truncate_words
 from ella.ellaadmin.utils import admin_url
 from djangomarkup.widgets import RichTextAreaWidget
 
-MARKITUP_SET = getattr(settings, 'CZECHTILE_MARKUP', 'czechtile')
+MARKITUP_SET = getattr(settings, 'MARKDOWN', 'markdown')
 MEDIA_PREFIX = getattr(settings, 'NEWMAN_MEDIA_PREFIX', settings.ADMIN_MEDIA_PREFIX)
 
 # Rich text editor
@@ -34,6 +34,12 @@ CSS_DATE_INPUT = 'css/datetime.css'
 # Flash image uploader / editor
 JS_FLASH_IMAGE_INPUT = 'js/flash_image.js'
 SWF_FLASH_IMAGE_INPUT = 'swf/PhotoUploader.swf'
+
+# Generic lookups
+JS_GENERIC_LOOKUP = 'js/GenericRelatedObjectLookups.js'
+CLASS_TARGECT = 'target_ct'
+CLASS_TARGEID = 'target_id'
+
 
 class NewmanRichTextAreaWidget(RichTextAreaWidget):
     """
@@ -158,7 +164,7 @@ class AdminSuggestWidget(forms.TextInput):
                       % (suggest_css_class, suggest_items, name, suggest_url))
         # TODO: "id_" is hard-coded here. This should instead use the correct
         # API to determine the ID dynamically.
-        output.append('<a href="%s%s" class="suggest-related-lookup" id="lookup_id_%s" onclick="return showRelatedObjectLookupPopup(this);"> ' % \
+        output.append('<a href="%s%s?pop" class="suggest-related-lookup" id="lookup_id_%s" onclick="return showRelatedObjectLookupPopup(this);"> ' % \
             (related_url, url, name))
         output.append('<img src="%simg/admin/selector-search.gif" width="16" height="16" alt="Lookup" /></a>' % settings.ADMIN_MEDIA_PREFIX)
         return mark_safe(u''.join(output))
@@ -196,4 +202,38 @@ class DateTimeWidget(forms.DateTimeInput):
         if value and not value.second:
             self.format = '%Y-%m-%d %H:%M'
         return super(DateTimeWidget, self).render(name, value, attrs)
+
+# widgets from ellaadmin
+
+class ForeignKeyGenericRawIdWidget(forms.TextInput):
+    " Custom widget adding a class to attrs. "
+
+#    class Media:
+#        js = (
+#            MEDIA_PREFIX + JS_GENERIC_LOOKUP,
+#        )
+    def __init__(self, attrs={}):
+        super(ForeignKeyGenericRawIdWidget, self).__init__(attrs={'class': CLASS_TARGEID})
+
+    def render(self, name, value, attrs=None):
+        output = [super(ForeignKeyGenericRawIdWidget, self).render(name, value, attrs)]
+        output.append('<a href="../../../core/category/?pop" class="suggest-related-lookup">aaa</a>')
+        return mark_safe(''.join(output))
+
+
+
+class ContentTypeWidget(forms.Select):
+    " Custom widget adding a class to attrs. "
+    def __init__(self, attrs={}):
+        super(ContentTypeWidget, self).__init__(attrs={'class': CLASS_TARGECT})
+
+class IncrementWidget(forms.TextInput):
+    'Self incrementing widget.'
+    class Media:
+        js = (
+            MEDIA_PREFIX + 'js/increment.js',
+        )
+    def __init__(self, attrs={}):
+        super(IncrementWidget, self).__init__(attrs={'class': 'increment'})
+
 

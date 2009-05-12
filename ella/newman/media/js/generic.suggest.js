@@ -6,7 +6,7 @@ GenericSuggestLib = {};
     ;;; DEBUG = true;
     ;;; DBG = 1;
     GenericSuggestLib.VERSION = '2009.04.17-newman';
-    var DEL_IMG = MEDIA_URL + 'img/admin/icon_deletelink.gif';
+    var DEL_IMG = MEDIA_URL + 'ico/10/icon_deletelink.gif';
     var MIN_LENGTH = 2;
     var SUGGEST_FIELD_SEPARATOR = '|';
     var SUGGEST_RECORD_SEPARATOR = "\n";
@@ -65,6 +65,7 @@ GenericSuggestLib = {};
 
     var $ins;
     function initialize() {
+        if ( $(SUGGEST_SELECTOR).length == 0 ) return;
         $(SUGGEST_SELECTOR)
             .unbind('click', set_current_input).bind('click', set_current_input)
             .unbind('focus', set_current_input).bind('focus', set_current_input);
@@ -95,7 +96,7 @@ GenericSuggestLib = {};
             var $lens = $('#lookup_'+this.id.replace('_suggest', ''));
             $lens.removeAttr('onclick');//.click(show_lookup_popup);
         });
-        
+
         // Make the <ul>s behave like text input fields
         $(SUGGEST_SELECTOR).find('input:text')
         .unbind('focus.ulbgcol').bind('focus.ulbgcol', function() {
@@ -115,10 +116,10 @@ GenericSuggestLib = {};
         .unbind('click.delsetinput')
         .bind(  'click.delsetinput', set_current_input)
         .bind(  'click.delsetinput', delete_item);
-        
+
         // Enhance textual X's of delete links with graphical crosses used at the "delete this item from database" link
         $('li.suggest-selected-item a').html('<img src="'+DEL_IMG+'" alt="x" />')
-        
+
         // Ensure that the initial values fit
         function restore_suggest_widget_from_value(el) {
             var $inputs = get_current_inputs(el);

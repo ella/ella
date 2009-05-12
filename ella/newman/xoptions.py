@@ -11,6 +11,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 from django.utils.translation import ngettext
 from django.utils.encoding import force_unicode
+from django.contrib.contenttypes.models import ContentType
 try:
     set
 except NameError:
@@ -191,7 +192,7 @@ class XModelAdmin(ModelAdmin):
             # the 'invalid=1' parameter was already in the query string, something
             # is screwed up with the database, so display an error page.
             if ERROR_FLAG in request.GET.keys():
-                return render_to_response('admin/invalid_setup.html', {'title': _('Database error')})
+                return render_to_response('newman/invalid_setup.html', {'title': _('Database error')})
             return HttpResponseRedirect(request.path + '?' + ERROR_FLAG + '=1')
 
         # If the request was POSTed, this might be a bulk action or a bulk edit.
@@ -275,9 +276,9 @@ class XModelAdmin(ModelAdmin):
         context = out
         context.update(extra_context or {})
         return render_to_response(self.change_list_template or [
-            'admin/%s/%s/change_list.html' % (app_label, opts.object_name.lower()),
-            'admin/%s/change_list.html' % app_label,
-            'admin/change_list.html'
+            'newman/%s/%s/change_list.html' % (app_label, opts.object_name.lower()),
+            'newman/%s/change_list.html' % app_label,
+            'newman/change_list.html'
         ], context, context_instance=template.RequestContext(request))
 
     def get_add_view_context(self, request, form_url):
@@ -292,7 +293,7 @@ class XModelAdmin(ModelAdmin):
         context = {}
         if request.method == 'POST':
             error_dict = {}
-            form = ModelForm(request.POST.copy(), request.FILES.copy())
+            form = ModelForm(request.POST.copy(), request.FILES)
             if form.is_valid():
                 form_validated = True
                 new_object = self.save_form(request, form, change=False)
@@ -308,7 +309,7 @@ class XModelAdmin(ModelAdmin):
                 prefixes[prefix] = prefix_no + 1
                 if prefixes[prefix] != 1:
                     prefix = "%s-%s" % (prefix, prefixes[prefix])
-                formset = FormSet(data=request.POST.copy(), files=request.FILES.copy(),
+                formset = FormSet(data=request.POST.copy(), files=request.FILES,
                                   instance=new_object,
                                   save_as_new=request.POST.has_key("_saveasnew"),
                                   prefix=prefix)
@@ -376,6 +377,7 @@ class XModelAdmin(ModelAdmin):
         })
 
         context['raw_form'] = form
+        #import pdb;pdb.set_trace()
         return context
 
     def add_view(self, request, form_url='', extra_context=None):
