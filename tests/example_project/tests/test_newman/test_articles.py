@@ -18,7 +18,7 @@ class TestArticleBasics(NewmanTestCase):
 
         # fill the form
         data = {
-                'title' : u'马 experiment',
+                'title' : u'马 žš experiment',
                 'upper_title' : u'vyšší',
                 'description' : u'Article description',
                 'slug' : 'title',

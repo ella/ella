@@ -101,17 +101,7 @@ def poll_check_vote(request, poll):
 @require_POST
 @transaction.commit_on_success
 def poll_vote(request, poll_id):
-    """
-    Add vote for a poll
 
-    Redirect to object's get_absolute_url() on success.
-
-    Params:
-        poll_id: Poll object identifier
-
-    Raises:
-        Http404 if no content_type or model is associated with the given IDs
-    """
     poll_ct = ContentType.objects.get_for_model(Poll)
     poll = get_cached_object_or_404(poll_ct, pk=poll_id)
 
@@ -184,7 +174,7 @@ def contest_vote(request, context):
 
     forms = []
     forms_are_valid = True
-    # questions forms
+    # question forms
     for question in contest.questions:
         form = QuestionForm(question)(request.POST or None, prefix=str(question.id))
         if not form.is_valid():
