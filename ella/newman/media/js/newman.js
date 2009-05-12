@@ -623,6 +623,40 @@ function adr(address, options) {
         // absolute address -- replace what's in there.
         else if (address.charAt(0) == '/') {
         }
+        // set a get parameter
+        else if (address.charAt(0) == '&') {
+            var qstart = old_address.indexOf('?');
+            if (qstart < 0) qstart = old_address.length;
+            var oldq = old_address.substr(qstart);
+            var newq = oldq;
+            if (oldq.length == 0) {
+                newq = '?' + address.substr(1);
+            }
+            else  {
+                var assignments = address.substr(1).split(/&/);
+                for (var i = 0; i < assignments.length; i++) {
+                    var ass = assignments[i];
+                    var vname = (ass.indexOf('=') < 0) ? ass : ass.substr(0, ass.indexOf('='));
+                    if (vname.length == 0) {
+                        carp('invalid assignment: ' + ass);
+                        continue;
+                    }
+                    var vname_esc = vname.replace(/\W/g, '\\$1');
+                    var vname_re = new RegExp('(^|[?&])' + vname_esc + '(?:=[^?&]*)?(&|$)');
+                    var changedq = newq.replace(vname_re, '\$1' + ass + '\$2');
+                    
+                    // vname was not in oldq -- append
+                    // the second condition is there so that when we have ?v and call &v we won't get ?v&v but still ?v
+                    if (changedq == newq && !vname_re.test(newq)) {
+                        newq = newq + '&' + ass;
+                    }
+                    else {
+                        newq = changedq;
+                    }
+                }
+            }
+            new_address = old_address.substr(0, qstart) + newq;
+        }
         // relative address -- append to the end, but no farther than to a '?'
         else {
             var left_anchor = hash.lastIndexOf('#', start)+1;
