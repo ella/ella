@@ -2,20 +2,23 @@ import time
 
 from django.conf.urls.defaults import *
 from django.http import HttpResponse
-from django.db import models
 from django.utils.translation import ugettext as _
 
+from ella import newman
 from ella.core.models.main import Category
 from ella.core.models.publishable import Placement
-from ella.newman import site, NewmanModelAdmin
+
+
 from ella.newman import models as m
 from ella.newman.filterspecs import filter_spec
 from ella.newman.permission import is_category_fk, is_site_fk, applicable_categories
 from ella.newman.utils import user_category_filter, get_user_config
 from ella.newman.config import CATEGORY_FILTER
 
-class DevMessageAdmin(NewmanModelAdmin):
+class DevMessageAdmin(newman.NewmanModelAdmin):
     list_display = ('title', 'author', 'version', 'ts',)
+    search_fields = ('title', 'summary', 'details',)
+    list_filter = ('author', 'ts',)
     prepopulated_fields = {'slug': ('title',)}
 
     def save_model(self, request, obj, form, change):
@@ -24,15 +27,16 @@ class DevMessageAdmin(NewmanModelAdmin):
         obj.save()
 
 
-class HelpItemAdmin(NewmanModelAdmin):
+class HelpItemAdmin(newman.NewmanModelAdmin):
     list_display = ('__unicode__',)
     list_filter = ('ct', 'lang',)
+    rich_text_fields = {'': ('long',)}
     list_select_related = False
 
-
-class CategoryUserRoleAdmin(NewmanModelAdmin):
+class CategoryUserRoleAdmin(newman.NewmanModelAdmin):
     list_filter = ('user', 'group',)
     list_display = ('user', 'group',)
+    suggest_fields = {'category': ('title', 'tree_path',)}
 
     def get_urls(self):
         urls = patterns('',
@@ -49,9 +53,9 @@ class CategoryUserRoleAdmin(NewmanModelAdmin):
         denormalize()
         return HttpResponse(_('All roles is now refreshed.'))
 
-site.register(m.DevMessage, DevMessageAdmin)
-site.register(m.AdminHelpItem, HelpItemAdmin)
-site.register(m.CategoryUserRole, CategoryUserRoleAdmin)
+newman.site.register(m.DevMessage, DevMessageAdmin)
+newman.site.register(m.AdminHelpItem, HelpItemAdmin)
+newman.site.register(m.CategoryUserRole, CategoryUserRoleAdmin)
 
 # Category filter -- restricted categories accordingly to CategoryUserRoles and categories filtered via AdminSettings.
 # custom registered DateField filter. Filter is inserted to the beginning of filter chain.

@@ -2,7 +2,6 @@ from django.core.files.images import get_image_dimensions
 import Image
 from datetime import datetime
 from os import path
-from imageop import ImageStretch, detect_img_type
 import os
 
 from django.db import models, IntegrityError
@@ -11,12 +10,15 @@ from django.utils.translation import ugettext, ugettext_lazy as _
 from django.contrib.contenttypes import generic
 from django.contrib.sites.models import Site
 from django.utils.safestring import mark_safe
+from django.core.files.uploadedfile import UploadedFile
 
 from ella.core.models.main import Author, Source
 from ella.core.managers import RelatedManager
 from ella.core.box import Box
 from ella.core.cache.utils import get_cached_object
 from ella.utils.filemanipulation import file_rename
+
+from formatter import Formatter, detect_img_type
 
 # settings default
 PHOTOS_FORMAT_QUALITY_DEFAULT = (
@@ -68,6 +70,12 @@ class Photo(models.Model):
     width = models.PositiveIntegerField(editable=False)
     height = models.PositiveIntegerField(editable=False)
 
+    # important area
+    important_top = models.PositiveIntegerField(null=True, blank=True)
+    important_left = models.PositiveIntegerField(null=True, blank=True)
+    important_bottom = models.PositiveIntegerField(null=True, blank=True)
+    important_right = models.PositiveIntegerField(null=True, blank=True)
+
     # Authors and Sources
     authors = models.ManyToManyField(Author, verbose_name=_('Authors') , related_name='photo_set')
     source = models.ForeignKey(Source, blank=True, null=True, verbose_name=_('Source'))
@@ -116,6 +124,9 @@ class Photo(models.Model):
         # prefill the slug with the ID, it requires double save
         if not self.id:
             self.width, self.height = get_image_dimensions(self.image)
+            if isinstance(self.image, UploadedFile):
+                # due to PIL has read several bytes from image, position in file has to be reset
+                self.image.seek(0)
             super(Photo, self).save(force_insert, force_update)
             self.slug = str(self.id) + '-' + self.slug
             force_insert, force_update = False, True
@@ -243,8 +254,19 @@ class FormatedPhoto(models.Model):
 
     def generate(self):
         "Generates photo file in current format"
-        i = ImageStretch(filename=self.photo.image.path, formated_photo=self)
-        stretched_photo = i.stretch_image()
+        crop_box = None
+        if self.crop_left:
+            crop_box = (self.crop_left, self.crop_top, \
+                    self.crop_left + self.crop_width, self.crop_top + self.crop_height)
+
+        important_box = None
+        if self.photo.important_top:
+            p = self.photo
+            important_box = (p.important_left, p.important_top, p.important_right, p.important_bottom)
+
+        formatter = Formatter(Image.open(self.filename), self.format, crop_box=crop_box, important_box=important_box)
+
+        stretched_photo, crop_box = formatter.format()
         self.width, self.height = stretched_photo.size
         self.filename = self.file(relative=True)
         stretched_photo.save(self.file(), quality=self.format.resample_quality)

@@ -8,6 +8,7 @@ class ArticleContentInlineAdmin(newman.NewmanTabularInline):
     model = ArticleContents
     max_num = 1
     rich_text_fields = {None: ('content',)}
+    fieldsets = (('', {'fields': ('content',)}),)
 
 class InfoBoxAdmin(newman.NewmanModelAdmin):
     list_display = ('title', 'created',)
@@ -21,8 +22,8 @@ class ArticleAdmin(PublishableAdmin):
     ordering = ('-created',)
     fieldsets = (
         (_("Article heading"), {'fields': ('title', 'upper_title', 'updated', 'slug')}),
-        (_("Article contents"), {'fields': ('description',)}),
         (_("Metadata"), {'fields': ('category', 'authors', 'source', 'photo')}),
+        (_("Article contents"), {'fields': ('description',)}),
     )
     inlines = [ ArticleContentInlineAdmin, PlacementInlineAdmin ]
 

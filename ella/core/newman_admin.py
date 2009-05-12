@@ -5,7 +5,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 from django.forms.util import ValidationError
 
-from ella.ellaadmin import widgets
 from ella.core.models import Author, Source, Category, Listing, HitCount, Placement
 from ella.core.models.publishable import Publishable
 
@@ -198,15 +197,24 @@ class ListingAdmin(newman.NewmanModelAdmin):
     '''
 
 class CategoryAdmin(newman.NewmanModelAdmin):
-    list_display = ('__unicode__', 'title',)
+    list_display = ('__unicode__', 'title', 'tree_path')
     list_filter = ('site',)
     search_fields = ('title', 'slug',)
     prepopulated_fields = {'slug': ('title',)}
+    ordering = ('tree_path',)
+    suggest_fields = {'tree_parent': ('title', 'slug')}
 
 class HitCountAdmin(newman.NewmanModelAdmin):
-    list_display = ('target', 'hits',)
-    list_filter = ('placement__category',)
+    list_display = ('target', 'hits', 'target_url')
+    list_filter = ('placement__category', 'placement__publish_from')
+    search_fields = ('placement__category__title',)
     ordering = ('-hits', '-last_seen',)
+
+    def target_url(self, object):
+        target = object.target()
+        return mark_safe('<a class="icn web" href="%s">%s</a>' % (target.get_absolute_url(), target))
+    target_url.short_description = _('View on site')
+    target_url.allow_tags = True
 
     def get_urls(self):
 
@@ -235,8 +243,8 @@ class SourceAdmin(newman.NewmanModelAdmin):
 class PublishableAdmin(newman.NewmanModelAdmin):
     """ Default admin options for all publishables """
 
-    list_display = ('title', 'category', 'photo_thumbnail')
-    list_filter = ('category__site', 'category', 'authors',)
+    list_display = ('admin_link', 'title', 'category', 'photo_thumbnail', 'publish_status', 'placement_link')
+    list_filter = ('category__site', 'category', 'authors', 'content_type')
     search_fields = ('title', 'description', 'slug', 'authors__name', 'authors__slug',) # FIXME: 'tags__tag__name',)
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
@@ -250,6 +258,13 @@ class PublishableAdmin(newman.NewmanModelAdmin):
 
     inlines = [PlacementInlineAdmin]
 
+    def admin_link(self, object):
+        ct = object.content_type
+        return mark_safe('<a class="hashadr" href="/%s/%s/%s/">%s: %s</a>' % (ct.app_label, ct.model, object.pk, ct.name, object))
+    admin_link.allow_tags = True
+    admin_link.short_description = _('Publishable object')
+
+
     def photo_thumbnail(self, object):
         photo = object.get_photo()
         if photo:
@@ -259,13 +274,26 @@ class PublishableAdmin(newman.NewmanModelAdmin):
     photo_thumbnail.allow_tags = True
     photo_thumbnail.short_description = _('Photo')
 
+    def placement_link(self, object):
+        if object.main_placement:
+            return mark_safe('<a class="hashadr" href="/core/placement/%d/">%s</a>' % (object.main_placement.pk, object.main_placement.category))
+    placement_link.allow_tags = True
+    placement_link.short_description = _('Placement')
+
+    def publish_status(self, object):
+        if object.main_placement and object.main_placement.is_active():
+            return True
+        return False
+    publish_status.boolean = True
+    publish_status.short_description = _('Published')
+
 
 newman.site.register(HitCount, HitCountAdmin)
 newman.site.register(Category, CategoryAdmin)
 newman.site.register(Source, SourceAdmin)
 newman.site.register(Author, AuthorAdmin)
 newman.site.register(Placement, PlacementAdmin)
-newman.site.register(Listing, ListingAdmin)
+#newman.site.register(Listing, ListingAdmin)
 newman.site.register(Publishable, PublishableAdmin)
 
 

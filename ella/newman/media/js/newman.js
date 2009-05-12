@@ -4,7 +4,6 @@
 ;;;     for (var i in obj) s += i + ': ' + obj[i] + "\n";
 ;;;     alert(s);
 ;;; }
-;;; DEBUG = 1;
 function carp() {
     try {
         $('#debug').append($('<p>').text($.makeArray(arguments).join(' ')));
@@ -16,6 +15,12 @@ function carp() {
             console.log(arguments);
         } catch(e) { }
     }
+}
+
+function arr2map(arr) {
+    var rv = {};
+    for (var i = 0; i < arr.length; i++) rv[ arr[i] ] = 1;
+    return rv;
 }
 
 var LF = 10, CR = 13;
@@ -41,7 +46,8 @@ var ContentByHashLib = {};
     
     // We need to remember what URL is loaded in which element,
     // so we can load or not load content appropriately on hash change.
-    var LOADED_URLS = {};
+    var LOADED_URLS = ContentByHashLib.LOADED_URLS = {};
+    ContentByHashLib.LOADED_MEDIA = {};
     
     var ORIGINAL_TITLE = document.title;
     
@@ -80,17 +86,16 @@ var ContentByHashLib = {};
         for (var k in o) rv.push(k);
         return rv;
     }
-    function _injection_target(sel) {
-        var $rv = $('#no#thing');
-        var ids = $(document).data('injection_storage');
-        if (!ids || !ids.length) return false;
-        for (var i = 0; i < ids.length; i++) {
-            var $el = $( '#' + ids[i] );
-            if ( $el.is(sel) ) $rv = $rv.add($el);
+    
+    // Returns the closest parent that is a container for a dynamically loaded piece of content, along with some information about it.
+    function closest_loaded(el) {
+        while ( el && (!el.id || !LOADED_URLS[ el.id ]) ) {
+            el = el.parentNode;
         }
-        return $rv.length ? $rv : false;
+        if (!el) return null;
+        return { container: el, id: el.id, url: LOADED_URLS[ el.id ], toString: function(){return this.id} };
     }
-    ContentByHashLib._injection_target = _injection_target;
+    ContentByHashLib.closest_loaded = closest_loaded;
     
     function inject_content($target, data, address) {
         // whatever was loaded inside, remove it from LOADED_URLS
@@ -110,6 +115,51 @@ var ContentByHashLib = {};
             LOADED_URLS[ $target.attr('id') ] = address;
         }
         PAGE_CHANGED++;
+        $target.trigger('content_added');
+    }
+    
+    function inject_error_message(load_id) {
+        var info = LOAD_BUF[ load_id ];
+        if (!info) {
+            carp('bad LOAD_BUF index passed to inject_error_message: '+load_id);
+            return;
+        }
+        var $target = $('#'+info.target_id);
+        var response_text = info.xhr.responseText;
+        var $err_div = $('<div class="error-code"></div>').append(
+            $('<a>reload</a>').css({display:'block'}).click(function(){
+                load_content(info);
+                return false;
+            })
+        );
+        LOADED_URLS[ info.target_id ] = 'ERROR:'+info.address;
+        try {
+            $err_div.append( JSON.parse(response_text).message );
+        } catch(e) {
+            // Render the whole HTML in an <object>
+            $obj = $('<object type="text/html" width="'
+            + ($target.width() - 6)
+            + '" height="'
+            + Math.max($target.height(), 300)
+            + '">'
+            + '</object>');
+            
+            function append_error_data() {
+                $obj.attr({ data:
+                    'data:text/html;base64,'
+                    + Base64.encode(response_text)
+                }).appendTo( $err_div );
+            }
+            
+            if (window.Base64) {
+                append_error_data();
+            }
+            else {
+                request_media(MEDIA_URL + 'js/base64.js');
+                $(document).one('media_loaded', append_error_data);
+            }
+        }
+        $target.empty().append($err_div);
     }
     
     // Check if the least present request has finished and if so, shift it
@@ -128,7 +178,6 @@ var ContentByHashLib = {};
             LOAD_BUF = [];
             MIN_LOAD = undefined;
             MAX_LOAD = -1;
-            $(document).trigger('content_added').removeData('injection_storage');
             return;
         }
         var info = LOAD_BUF[ MIN_LOAD ];
@@ -147,16 +196,6 @@ var ContentByHashLib = {};
         
         inject_content($target, info.data, info.address);
         
-        // Track what elements were loaded
-        function record_injection(target_id) {
-            var injection_storage = $(document).data('injection_storage');
-            if (injection_storage && injection_storage.push)
-                injection_storage.push(target_id);
-            else
-                $(document).data('injection_storage', [target_id]);
-        }
-        record_injection(info.target_id);
-        
         // Check next request
         draw_ready();
     }
@@ -167,10 +206,6 @@ var ContentByHashLib = {};
         delete LOAD_BUF[ load_id ];
         $('#'+info.target_id).removeClass('loading');
         dec_loading();
-        
-        // Restore the hash so it doesn't look like the request succeeded.
-        url_target_id = ((info.target_id == 'content') ? '' : info.target_id+'::');
-        adr(url_target_id + (LOADED_URLS[info.target_id] ? LOADED_URLS[info.target_id] : ''));
         
         carp('Failed to load '+info.address+' into '+info.target_id);
     }
@@ -217,14 +252,18 @@ var ContentByHashLib = {};
                 }
                 draw_ready();
             },
-            error: function() {
+            error: function(xhr) {
+                LOAD_BUF[ this.load_id ].xhr = xhr;
+                inject_error_message( this.load_id );
                 cancel_request( this.load_id );
+                show_ajax_error(xhr);
                 draw_ready();
             },
             load_id: load_id,
             request_no: MAX_REQUEST
         });
     }
+    ContentByHashLib.load_content = load_content;
     
     function reload_content(container_id) {
         var addr = LOADED_URLS[ container_id ] || '';
@@ -397,7 +436,7 @@ var ContentByHashLib = {};
         }
     }
     
-    // Fire hashchange event fired when location.hash changes
+    // Fire hashchange event when location.hash changes
     var CURRENT_HASH = '';
     $(document).bind('hashchange', function() {
 //        carp('hash: ' + location.hash);
@@ -407,7 +446,6 @@ var ContentByHashLib = {};
         load_by_hash();
     });
     setTimeout( function() {
-        var q;  // queue of user-defined callbacks
         try {
             if (location.hash != CURRENT_HASH) {
                 CURRENT_HASH = location.hash;
@@ -424,44 +462,23 @@ var ContentByHashLib = {};
     // - The specifier is interpreted by adr to get the URL from which to ajax.
     //   This results in support of relative addresses and the target_id::rel_base::address syntax.
     function simple_load(specifier) {
-        var target_id, address;
+        var target_id;
         var colon_index = specifier.indexOf('::');
         if (colon_index < 0) {
             target_id = 'content';
-            address = specifier;
         }
         else {
             target_id = specifier.substr(0, colon_index);
-            address = specifier.substr(colon_index + '::'.length);
         }
-        colon_index = address.indexOf('::');
-        if (colon_index >= 0) {
-            address = address.substr(colon_index + '::'.length);
-        }
+        
+        var address = get_hashadr(specifier);
         
         if (LOADED_URLS[target_id] == address) {
             $('#'+target_id).slideToggle('fast');
             return;
         }
         
-        var url = adr(specifier, {just_get:1});
-        url = prepend_base_path_to(url);
-        url = $('<a>').attr('href', url).get(0).href;
-        
-        var $target = $('#'+target_id);
-        if ($target && $target.length) {} else {
-            throw("Target '#"+target_id+"' not found.");
-            return;
-        }
-        $target.addClass('loading');
-        show_loading();
-        $.get(url, function(data) {
-            inject_content($target, data, address);
-            $(document)
-                .data('injection_storage', [$target.attr('id')])
-                .trigger('content_added')
-                .removeData('injection_storage');
-        });
+        load_content({target_id:target_id, address:address});
     }
     ContentByHashLib.simple_load = simple_load;
     
@@ -590,6 +607,7 @@ function adr(address, options) {
     
     var newhash;
     var addr_start = start;
+    var old_address = hash.substring(start,end);
     
     // We've not gotten the address from a previous recursive call, thus modify the address as needed.
     if (new_address == undefined) {
@@ -605,6 +623,40 @@ function adr(address, options) {
         }
         // absolute address -- replace what's in there.
         else if (address.charAt(0) == '/') {
+        }
+        // set a get parameter
+        else if (address.charAt(0) == '&') {
+            var qstart = old_address.indexOf('?');
+            if (qstart < 0) qstart = old_address.length;
+            var oldq = old_address.substr(qstart);
+            var newq = oldq;
+            if (oldq.length == 0) {
+                newq = '?' + address.substr(1);
+            }
+            else  {
+                var assignments = address.substr(1).split(/&/);
+                for (var i = 0; i < assignments.length; i++) {
+                    var ass = assignments[i];
+                    var vname = (ass.indexOf('=') < 0) ? ass : ass.substr(0, ass.indexOf('='));
+                    if (vname.length == 0) {
+                        carp('invalid assignment: ' + ass);
+                        continue;
+                    }
+                    var vname_esc = vname.replace(/\W/g, '\\$1');
+                    var vname_re = new RegExp('(^|[?&])' + vname_esc + '(?:=[^?&]*)?(&|$)');
+                    var changedq = newq.replace(vname_re, '\$1' + ass + '\$2');
+                    
+                    // vname was not in oldq -- append
+                    // the second condition is there so that when we have ?v and call &v we won't get ?v&v but still ?v
+                    if (changedq == newq && !vname_re.test(newq)) {
+                        newq = newq + '&' + ass;
+                    }
+                    else {
+                        newq = changedq;
+                    }
+                }
+            }
+            new_address = old_address.substr(0, qstart) + newq;
         }
         // relative address -- append to the end, but no farther than to a '?'
         else {
@@ -639,7 +691,10 @@ function get_hashadr(address, options) {
 }
 // returns address for use in requests, i.e. with BASE_PATH prepended
 function get_adr(address, options) {
-    return BASE_PATH + get_hashadr(address, options);
+    var hashadr = get_hashadr(address, options);
+    if (hashadr.charAt(0) != '/') hashadr = get_hashadr(hashadr);
+    return BASE_PATH + hashadr;
+        
 }
 
 // Dynamic media (CSS, JS) loading
@@ -674,41 +729,58 @@ function get_adr(address, options) {
         }
         
         if (ext == 'css') {
-            if (stylesheet_present(abs_url)) return true;
+            if (ContentByHashLib.LOADED_MEDIA[ url ] || stylesheet_present(abs_url)) {
+                if ($.isFunction(succ_fn)) succ_fn(url);
+                return true;
+            }
             var tries = 100;
-            if ($.isFunction(succ_fn)) {
-                setTimeout(function() {
-                    if (--tries < 0) {
-                        carp('Timed out loading CSS: '+url);
+            
+            setTimeout(function() {
+                if (--tries < 0) {
+                    ContentByHashLib.LOADED_MEDIA[ url ] = false;
+                    carp('Timed out loading CSS: '+url);
+                    if ($.isFunction(err_fn)) err_fn(url);
+                    return;
+                }
+                var ss;
+                if (ss = stylesheet_present(abs_url)) {
+                    var rules = get_css_rules(ss);
+                    if (rules && rules.length) {
+                        ContentByHashLib.LOADED_MEDIA[ url ] = true;
+                        if ($.isFunction(succ_fn)) succ_fn(url);
+                    }
+                    else {
+                        ContentByHashLib.LOADED_MEDIA[ url ] = false;
+                        if (rules) carp('CSS stylesheet empty.');
                         if ($.isFunction(err_fn)) err_fn(url);
                         return;
                     }
-                    var ss;
-                    if (ss = stylesheet_present(abs_url)) {
-                        var rules = get_css_rules(ss);
-                        if (rules && rules.length) succ_fn(url);
-                        else {
-                            if (rules) carp('CSS stylesheet empty.');
-                            if ($.isFunction(err_fn)) err_fn(url);
-                            return;
-                        }
-                    }
-                    else setTimeout(arguments.callee, 100);
-                }, 100);
-            }
+                }
+                else setTimeout(arguments.callee, 100);
+            }, 100);
+            
             return $('<link rel="stylesheet" type="text/css" href="'+url+'" />').appendTo($('head'));
         }
         else if (ext == 'js') {
             var $scripts = $('script');
             for (var i = 0; i < $scripts.length; i++) {
-                if ($scripts.get(i).src == abs_url) return true;
+                if ($scripts.get(i).src == abs_url) {
+                    if ($.isFunction(succ_fn)) succ_fn(url);
+                    return true;
+                }
             }
             return $.ajax({
                 url:       url,
                 type:     'GET',
                 dataType: 'script',
-                success:   succ_fn,
-                error:     err_fn,
+                success:   function() {
+                    ContentByHashLib.LOADED_MEDIA[ this.url ] = true;
+                    succ_fn();
+                },
+                error:     function() {
+                    ContentByHashLib.LOADED_MEDIA[ this.url ] = false;
+                    err_fn();
+                },
                 cache:     true
             });
         }
@@ -772,6 +844,10 @@ function clone_form($orig_form) {
 /////// END OF THE CONTENT-BY-HASH LIBRARY
 
 /////// CODE FOR CONTENT-SPECIFIC USE
+
+//// Homepage initialization
+
+$(function(){ContentByHashLib.reload_content('content');});
 
 //// Drafts and templates
 (function() {
@@ -883,7 +959,7 @@ function clone_form($orig_form) {
     $(document).bind('content_added', set_load_draft_handler);
     
     var autosave_interval;
-    function set_autosave_interval() {
+    function set_autosave_interval(evt) {
         var proceed, target_ids;
         
         if ($('.change-form').length == 0) { // nothing to autosave
@@ -891,9 +967,8 @@ function clone_form($orig_form) {
              clearInterval(autosave_interval);
              proceed = false;
         }
-        else if ( target_ids = $(document).data('injection_storage') ) {
-            var target_sel = '#' + target_ids.join(',#');
-            if ($('.change-form').closest(target_sel).length) {
+        else if ( evt && evt.type == 'content_added' ) {
+            if ( $(evt.target).find('.change-form').length ) {
                 ;;; carp('waiting for form to change to set up autosave interval');
                 proceed = true; // .change-form was just loaded
             }
@@ -972,6 +1047,7 @@ $( function() {
             else return _('Field cannot be blank.');
         }*/
     };
+    AjaxFormLib.validations = validations;
     function show_form_error(input, msg) {
         if (!input) {
             carp("Attempt to render error for empty input:", msg);
@@ -994,6 +1070,7 @@ $( function() {
         get_inputs($form).each( function() {
             var $label = $('label[for='+this.id+']');
             $label.find('span.form-error-msg').remove();
+            $('#err-overlay').empty().hide();
             var classes = ($label.attr('className')||'').split(/\s+/);
             for (var i = 0; i < classes.length; i++) {
                 var cl = classes[i];
@@ -1050,6 +1127,7 @@ $( function() {
             }
             $inputs = $inputs.add($(this));
         });
+        
         if (button_name) $inputs = $inputs.add('<input type="hidden" value="1" name="'+button_name+'" />');
         var data = $inputs.serialize();
         if ($form.hasClass('reset-on-submit')) $form.get(0).reset();
@@ -1057,7 +1135,8 @@ $( function() {
             ? get_adr(action)
             : action;
         url = $('<a>').attr('href', url).get(0).href;
-        $.ajax({
+        
+        var request_options = {
             url: url,
             type: method,
             data: data,
@@ -1065,7 +1144,10 @@ $( function() {
             error:   error,
             _form: $form,
             _button_name: button_name
-        });
+        };
+        if (button_name) request_options._button_name = button_name;
+        
+        $.ajax( request_options );
         return false;
     }
     AjaxFormLib.ajax_submit = ajax_submit;
@@ -1075,11 +1157,41 @@ $( function() {
         try { res = JSON.parse( xhr.responseText ); }
         catch (e) { }
         if (res && res.errors) {
+            // Show the bubble with scrollto buttons
+            var $err_overlay = $('#err-overlay');
+            if ($err_overlay.length == 0) $err_overlay = $(
+                '<div id="err-overlay" class="overlay">'
+            ).appendTo(
+                   $('.change-form').get(0)
+                || $('#content').get(0)
+                || $('body').get(0)
+            );
+            
+            // Show the individual errors
             for (var id in res.errors) {
                 var msgs = res.errors[ id ];
                 var input = $('#'+id).get(0);
                 show_form_error(input, msgs);
+                if (!input) carp('Error reported for nonexistant input #'+id);
+                
+                $('<p>')
+                .data('rel_input',
+                      !input                             ? null
+                    : $('#'+input.id+'_suggest').length  ? $('#'+input.id+'_suggest').get(0) // take suggest input if available
+                    :                                      input                             // otherwise the input itself
+                )
+                .text(
+                    ($('label[for='+id+']').text() || id).replace(/:$/,'')  // identify the input with its label text or id; no trailing ':' pls
+                )
+                .click( function(evt) { // focus and scroll to the input
+                    if (evt.button != 0) return;
+                    var input = $(this).closest('p').data('rel_input');
+                    try { input.focus(); } catch(e) {}
+                    return false;
+                })
+                .appendTo($err_overlay);
             }
+            $err_overlay.show();
         }
         show_ajax_error(xhr);
     }
@@ -1145,7 +1257,7 @@ $( function() {
     // - there is none AND
     // - one is there for the specifier's URL in the changelistFilters object
     $(document).bind('ready', function() {
-        if (!changelistFilters || typeof changelistFilters != 'object') return;
+        if (!window.changelistFilters || typeof changelistFilters != 'object') return;
         for (a in changelistFilters) {
             var adr = a.replace(/^filter/, '').replace(/__/g, '/') + '/';
             var decoded = $('<span>').html(changelistFilters[a]).text()
@@ -1160,7 +1272,25 @@ $( function() {
         if (   /^\?/.test( href )   ) {} else return;
         var base = get_hashadr('?').replace(/\?$/,'');
         ContentByHashLib.ADDRESS_POSTPROCESS[ base ] = base+href;
-        adr(href);
+        var pop_id;
+        if ( pop_id = $(this).closest('.pop').attr('id') ) {
+            ContentByHashLib.simple_load(
+                pop_id
+                + '::' +
+                ContentByHashLib.LOADED_URLS[ pop_id ]
+                + '::' +
+                href
+            );
+        }
+        else {
+            adr(href);
+        }
+        return false;
+    });
+    $('#filters-handler .eclear').live('click', function() {
+        var base = get_hashadr('?').replace(/\?$/,'');
+        delete ContentByHashLib.ADDRESS_POSTPROCESS[ base ];
+        adr($(this).attr('href'));
         return false;
     });
     
@@ -1181,12 +1311,9 @@ $( function() {
         delete loaded_media[ MEDIA_URL + 'js/admin/DateTimeShortcuts.js' ];
     });
     */
-    // Setting up proper suggers URLs to take the hash address into account
-    $(document).bind('content_added', function() {
-        var target_ids = $(document).data('injection_storage');
-        if (!target_ids) return;
-        target_ids = '#' + target_ids.join(',#');
-        var $new_suggest_inputs = $(target_ids).find('.GenericSuggestField,.GenericSuggestFieldMultiple');
+    // Setting up proper suggesters URLs to take the hash address into account
+    $(document).bind('content_added', function(evt) {
+        var $new_suggest_inputs = $(evt.target).find('.GenericSuggestField,.GenericSuggestFieldMultiple');
         if (!$new_suggest_inputs || $new_suggest_inputs.length == 0) return;
         $new_suggest_inputs.find('input[rel]').each(function() {
             if ($(this).data('original_rel')) return;
@@ -1220,6 +1347,7 @@ $( function() {
     $('#search-form select[name=action]').live('keypress', search_on_enter);
 });
 
+// Message bubble
 function show_message(message, options) {
     if (!options) options = {};
     var duration = (options.duration == undefined) ? 5000 : options.duration;

@@ -9,9 +9,6 @@ from django.forms.util import ValidationError
 from ella.ellaadmin import widgets
 from ella.core.models import Author, Source, Category, Listing, HitCount, Placement
 
-from ella import newman
-from ella.core.models.publishable import Publishable
-
 
 class PlacementForm(modelforms.ModelForm):
     # create the field here to pass validation
@@ -150,7 +147,7 @@ class PlacementInlineFormset(generic.BaseGenericInlineFormSet):
 
         return
 
-class ListingInlineAdmin(newman.NewmanTabularInline):
+class ListingInlineAdmin(admin.TabularInline):
     model = Listing
     extra = 2
     fieldsets = ((None, {'fields' : ('category','publish_from', 'priority_from', 'priority_to', 'priority_value', 'remove', 'commercial',)}),)
@@ -160,7 +157,7 @@ class ListingInlineAdmin(newman.NewmanTabularInline):
             kwargs['widget'] = widgets.ListingCategoryWidget
         return super(ListingInlineAdmin, self).formfield_for_dbfield(db_field, **kwargs)
 
-class PlacementInlineAdmin(newman.NewmanTabularInline):
+class PlacementInlineAdmin(admin.TabularInline):
     model = Placement
     max_num = 1
     '''
@@ -178,11 +175,11 @@ class PlacementInlineAdmin(newman.NewmanTabularInline):
     '''
 
 
-class HitCountInlineAdmin(newman.NewmanTabularInline):
+class HitCountInlineAdmin(admin.TabularInline):
     model = HitCount
     extra = 0
 
-class PlacementAdmin(newman.NewmanModelAdmin):
+class PlacementAdmin(admin.ModelAdmin):
     pass
     '''
     list_display = ('target_admin', 'category', 'publish_from', 'full_url',)
@@ -194,7 +191,7 @@ class PlacementAdmin(newman.NewmanModelAdmin):
     )
     '''
 
-class ListingAdmin(newman.NewmanModelAdmin):
+class ListingAdmin(admin.ModelAdmin):
     pass
     '''
     list_display = ('target_admin', 'target_ct', 'publish_from', 'category', 'placement_admin', 'target_hitcounts', 'target_url',)
@@ -204,26 +201,26 @@ class ListingAdmin(newman.NewmanModelAdmin):
     date_hierarchy = 'publish_from'
     '''
 
-class CategoryAdmin(newman.NewmanModelAdmin):
+class CategoryAdmin(admin.ModelAdmin):
     list_filter = ('site',)
     list_display = ('draw_title', 'tree_path', '__unicode__')
     search_fields = ('title', 'slug',)
     #ordering = ('site', 'tree_path',)
     prepopulated_fields = {'slug': ('title',)}
 
-class HitCountAdmin(newman.NewmanModelAdmin):
+class HitCountAdmin(admin.ModelAdmin):
     list_display = ('target', 'hits',)
     ordering = ('-hits', '-last_seen',)
 
-class AuthorAdmin(newman.NewmanModelAdmin):
+class AuthorAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
     search_fields = ('name',)
 
-class SourceAdmin(newman.NewmanModelAdmin):
+class SourceAdmin(admin.ModelAdmin):
     list_display = ('name', 'url',)
     search_fields = ('name',)
 
-class PublishableAdmin(newman.NewmanModelAdmin):
+class PublishableAdmin(admin.ModelAdmin):
     """ Default admin options for all publishables """
 
     list_display = ('title', 'category',)

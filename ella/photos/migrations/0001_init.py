@@ -19,8 +19,12 @@ class Migration:
             ('created', models.DateTimeField(default=datetime.now, editable=False)),
             ('slug', models.SlugField(_('Slug'), max_length=255)),
             ('width', models.PositiveIntegerField(editable=False)),
-            ('source', models.ForeignKey(orm['core.Source'], null=True, verbose_name=_('Source'), blank=True)),
             ('height', models.PositiveIntegerField(editable=False)),
+            ('important_top', models.PositiveIntegerField(null=True, blank=True)),
+            ('important_left', models.PositiveIntegerField(null=True, blank=True)),
+            ('important_bottom', models.PositiveIntegerField(null=True, blank=True)),
+            ('important_right', models.PositiveIntegerField(null=True, blank=True)),
+            ('source', models.ForeignKey(orm['core.Source'], null=True, verbose_name=_('Source'), blank=True)),
             ('id', models.AutoField(primary_key=True)),
         ))
         db.send_create_signal('photos', ['Photo'])
