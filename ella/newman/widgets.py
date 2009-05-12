@@ -6,7 +6,6 @@ from django.contrib.admin import widgets
 from django.utils.text import truncate_words
 from ella.ellaadmin.utils import admin_url
 from djangomarkup.widgets import RichTextAreaWidget
-from _xmlplus.xpath.BuiltInExtFunctions import join
 
 MARKITUP_SET = getattr(settings, 'MARKDOWN', 'markdown')
 MEDIA_PREFIX = getattr(settings, 'NEWMAN_MEDIA_PREFIX', settings.ADMIN_MEDIA_PREFIX)
