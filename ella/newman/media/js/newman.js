@@ -1151,7 +1151,11 @@ $( function() {
             var $err_overlay = $('#err-overlay');
             if ($err_overlay.length == 0) $err_overlay = $(
                 '<div id="err-overlay" class="overlay">'
-            ).appendTo('body');
+            ).appendTo(
+                   $('.change-form').get(0)
+                || $('#content').get(0)
+                || $('body').get(0)
+            );
             
             // Show the individual errors
             for (var id in res.errors) {
