@@ -7,7 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 
 from ella.galleries.models import Gallery, GalleryItem
-from ella.core.admin import PlacementInlineOptions
+from ella.core.admin import PlacementInlineAdmin
 from ella.core.cache import get_cached_object
 from ella.ellaadmin.options import EllaAdminOptionsMixin
 
