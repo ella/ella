@@ -47,6 +47,7 @@ var ContentByHashLib = {};
     // We need to remember what URL is loaded in which element,
     // so we can load or not load content appropriately on hash change.
     var LOADED_URLS = ContentByHashLib.LOADED_URLS = {};
+    ContentByHashLib.LOADED_MEDIA = {};
     
     var ORIGINAL_TITLE = document.title;
     
@@ -728,33 +729,36 @@ function get_adr(address, options) {
         }
         
         if (ext == 'css') {
-            if (stylesheet_present(abs_url)) {
+            if (ContentByHashLib.LOADED_MEDIA[ url ] || stylesheet_present(abs_url)) {
                 if ($.isFunction(succ_fn)) succ_fn(url);
                 return true;
             }
             var tries = 100;
-            if ($.isFunction(succ_fn)) {
-                setTimeout(function() {
-                    if (--tries < 0) {
-                        carp('Timed out loading CSS: '+url);
+            
+            setTimeout(function() {
+                if (--tries < 0) {
+                    ContentByHashLib.LOADED_MEDIA[ url ] = false;
+                    carp('Timed out loading CSS: '+url);
+                    if ($.isFunction(err_fn)) err_fn(url);
+                    return;
+                }
+                var ss;
+                if (ss = stylesheet_present(abs_url)) {
+                    var rules = get_css_rules(ss);
+                    if (rules && rules.length) {
+                        ContentByHashLib.LOADED_MEDIA[ url ] = true;
+                        if ($.isFunction(succ_fn)) succ_fn(url);
+                    }
+                    else {
+                        ContentByHashLib.LOADED_MEDIA[ url ] = false;
+                        if (rules) carp('CSS stylesheet empty.');
                         if ($.isFunction(err_fn)) err_fn(url);
                         return;
                     }
-                    var ss;
-                    if (ss = stylesheet_present(abs_url)) {
-                        var rules = get_css_rules(ss);
-                        if (rules && rules.length) {
-                            if ($.isFunction(succ_fn)) succ_fn(url);
-                        }
-                        else {
-                            if (rules) carp('CSS stylesheet empty.');
-                            if ($.isFunction(err_fn)) err_fn(url);
-                            return;
-                        }
-                    }
-                    else setTimeout(arguments.callee, 100);
-                }, 100);
-            }
+                }
+                else setTimeout(arguments.callee, 100);
+            }, 100);
+            
             return $('<link rel="stylesheet" type="text/css" href="'+url+'" />').appendTo($('head'));
         }
         else if (ext == 'js') {
@@ -769,8 +773,14 @@ function get_adr(address, options) {
                 url:       url,
                 type:     'GET',
                 dataType: 'script',
-                success:   succ_fn,
-                error:     err_fn,
+                success:   function() {
+                    ContentByHashLib.LOADED_MEDIA[ this.url ] = true;
+                    succ_fn();
+                },
+                error:     function() {
+                    ContentByHashLib.LOADED_MEDIA[ this.url ] = false;
+                    err_fn();
+                },
                 cache:     true
             });
         }
