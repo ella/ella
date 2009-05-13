@@ -198,6 +198,9 @@ a.btn.combo {
 }
 a.btn.filter-active { background-color: #FFF8D1; }
 
+/* HOMEPAGE CALENDAR */
+.hpbox.calendar .cal { display: none; }
+
 /* FOOTER */
 
 #footer {
