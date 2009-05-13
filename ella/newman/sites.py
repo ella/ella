@@ -143,7 +143,10 @@ class NewmanSite(AdminSite):
                 for c in AdminSetting.objects.filter(user=user):
                     uc = get_user_config(user, c.var)
                     set_user_config_session(request.session, c.var, uc)
-                return HttpResponseRedirect(request.get_full_path())
+                    next_path = request.get_full_path()
+                    if request.POST.get('next'):
+                        next_path += request.POST.get('next')
+                return HttpResponseRedirect(next_path)
             else:
                 return self.display_login_form(request, ERROR_MESSAGE)
 
