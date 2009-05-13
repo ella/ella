@@ -139,13 +139,16 @@ class NewmanSite(AdminSite):
                 # user has no applicable categories, probably his role is undefined
                 if not applicable_categories(user) and not user.is_superuser:
                     return self.norole(request, user)
+
+                next_path = request.get_full_path()
+
                 # load all user's specific settings into session
                 for c in AdminSetting.objects.filter(user=user):
                     uc = get_user_config(user, c.var)
                     set_user_config_session(request.session, c.var, uc)
-                    next_path = request.get_full_path()
-                    if request.POST.get('next'):
-                        next_path += request.POST.get('next')
+
+                if request.POST.get('next'):
+                    next_path += request.POST.get('next')
                 return HttpResponseRedirect(next_path)
             else:
                 return self.display_login_form(request, ERROR_MESSAGE)
