@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.forms import ValidationError
  
-from djangosanetesting.cases import UnitTestCase, DatabaseTestCase
+from djangosanetesting.cases import DatabaseTestCase
 
 from ella.newman import fields
 from ella.core.models import Dependency
@@ -10,6 +10,7 @@ from unit_project.test_core import create_basic_categories, create_and_place_a_p
 
 class TestNewmanRichTextField(DatabaseTestCase):
     def setUp(self):
+        super(TestNewmanRichTextField, self).setUp()
         create_basic_categories(self)
         create_and_place_a_publishable(self)
 
