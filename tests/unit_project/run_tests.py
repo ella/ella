@@ -7,17 +7,17 @@ replacement for *.bat or *.sh wrappers
 
 import os
 import sys
-from os.path import dirname, join, pardir
+from os.path import join, pardir, abspath, dirname, split
 
 import nose
 
 
 # django settings module
-DJANGO_SETTINGS_MODULE = 'unit_project.settings'
+DJANGO_SETTINGS_MODULE = '%s.%s' % (split(abspath(dirname(__file__)))[1], 'settings')
 # pythonpath dirs
 PYTHONPATH = [
-    join( dirname(__file__), pardir, pardir ),
-    join( dirname(__file__), pardir ),
+    abspath(join( dirname(__file__), pardir, pardir)),
+    abspath(join( dirname(__file__), pardir)),
 ]
 
 
@@ -29,8 +29,13 @@ for p in PYTHONPATH:
 # django needs this env variable
 os.environ['DJANGO_SETTINGS_MODULE'] = DJANGO_SETTINGS_MODULE
 
+
 # TODO: ugly hack to inject django plugin to nose.run
-sys.argv.insert(1, '--with-django')
+#
+#
+for i in ['--with-django',]:
+    if i not in sys.argv:
+        sys.argv.insert(1, i)
 
 
 nose.run_exit(
