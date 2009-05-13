@@ -44,5 +44,3 @@ urlpatterns = patterns('',
 handler404 = 'ella.core.views.page_not_found'
 handler500 = 'ella.core.views.handle_error'
 
-
-
