@@ -7,10 +7,16 @@ from ella.core.models import Dependency
 from ella.newman.licenses import LICENSED_MODELS
 
 class LicenseManager(models.Manager):
-    def unapplicable_for_model(self, model):
+    def _get_queryset_of_unapplicables(self, model):
         ct = ContentType.objects.get_for_model(model)
-        qs = License.objects.filter(ct=ct).extra(where=['applications=max_applications']).only('obj_id')
-        return [u.obj_id for u in qs]
+        return License.objects.filter(ct=ct, applications__gte=models.F('max_applications'))
+
+    def unapplicable_for_model(self, model):
+        return [u['obj_id'] for u in self._get_queryset_of_unapplicables(model).values('obj_id')]
+    
+    def filter_queryset(self, queryset):
+        qset = queryset.exclude(pk__in=self._get_queryset_of_unapplicables(queryset.model))
+        return qset
 
     def reflect_changed_dependencies(self, before, after):
         """ Update current applications if target model is licensed. """

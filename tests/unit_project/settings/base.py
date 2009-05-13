@@ -45,6 +45,7 @@ INSTALLED_APPS = (
     'ella.photos',
     'ella.positions',
     'ella.newman',
+    'ella.newman.licenses',
     'ella.galleries',
     'ella.catlocks',
     'ella.polls',
