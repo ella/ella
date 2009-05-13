@@ -4,7 +4,7 @@ from os.path import dirname, join
 
 import django
 
-import djangobaselibrary
+import ella
 
 import example_project
 

@@ -1,12 +1,12 @@
 from setuptools import setup, find_packages
-import djangobaselibrary
+import ella
 
 # all fields marked with TODO: REPLACE
 # must be filled with some meanigful values
 
 setup(
-    name = 'djangobaselibrary',
-    version = djangobaselibrary.__versionstr__,
+    name = 'ella',
+    version = ella.__versionstr__,
     description = 'Django Base Library', # TODO: REPLACE
     long_description = '\n'.join((
         'Django Base Library',
