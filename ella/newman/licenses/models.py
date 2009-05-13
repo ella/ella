@@ -11,10 +11,10 @@ from ella.newman.licenses import LICENSED_MODELS
 class LicenseManager(models.Manager):
     def _get_queryset_of_unapplicables(self, model):
         ct = ContentType.objects.get_for_model(model)
-        return License.objects.filter(ct=ct, applications__gte=models.F('max_applications'))
+        return License.objects.filter(ct=ct, applications__gte=models.F('max_applications')).values('obj_id')
 
     def unapplicable_for_model(self, model):
-        return [u['obj_id'] for u in self._get_queryset_of_unapplicables(model).values('obj_id')]
+        return [u['obj_id'] for u in self._get_queryset_of_unapplicables(model)]
     
     def filter_queryset(self, queryset):
         qset = queryset.exclude(pk__in=self._get_queryset_of_unapplicables(queryset.model))
