@@ -1,3 +1,5 @@
+import operator
+
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
@@ -20,7 +22,19 @@ class LicenseManager(models.Manager):
 
     def reflect_changed_dependencies(self, before, after):
         """ Update current applications if target model is licensed. """
-        pass
+        get_target = lambda dep: (dep.target_ct, dep.target_id)
+        get_condition = lambda tgt: models.Q(ct=tgt[0], pk=tgt[1])
+
+        b = set(map(get_target, before))
+        a = set(map(get_target, after))
+        add = a - b
+        delete = b - a
+
+        if add:
+            self.filter(reduce(operator.or_, map(get_condition, add))).update(applications=models.F('applications')+1)
+
+        if delete:
+            self.filter(reduce(operator.or_, map(get_condition, delete))).update(applications=models.F('applications')-1)
 
 class License(models.Model):
 
