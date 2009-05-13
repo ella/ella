@@ -1,11 +1,11 @@
 {% extends "newman/ajax_content_base.html" %}
-{% load admin_list newman_list %}
+{% load admin_list newman_list cache %}
 
 {% block breadcrumbs %}
     {% if not is_popup %}
         <div class="breadcrumbs">
             <div style="float: left;">
-                <a href="{% url newman_admin_index %}">{% trans "Home" %}</a>
+                <a href="{% url newman_admin_index %}#/nm/">{% trans "Home" %}</a>
                 {% if app_label %}&rsaquo; <a class="hashadr" href="/{{ app_label }}/">{% trans app_label.title %}</a>{% endif %}
                 {% if title %}&rsaquo; <strong id="doc-title">{{ title }}</strong>{% endif %}
             </div>
@@ -77,10 +77,12 @@
     {{ block.super }}
 
     {% if media %}
+        {% cache 300 'nm-cl-js' cl %}
         <script type="text/javascript">
         {% for m in media %}
             request_media('{{ m }}?{{ VERSION }}');
         {% endfor %}
         </script>
+        {% endcache %}
     {% endif %}
 {% endblock %}

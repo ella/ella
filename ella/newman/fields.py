@@ -8,14 +8,74 @@ except ImportError:
 
 from django.forms import fields
 from django.forms.util import ValidationError
+from django.template import Template, TextNode, TemplateSyntaxError
 from django.utils.translation import ugettext_lazy as _
 from django.forms.models import ModelChoiceField
 from django.db.models.fields.related import ManyToManyField
 
+from djangomarkup.fields import ListenerPostSave, RichTextField
+
+from ella.core.templatetags.core import BoxNode, ObjectNotFoundOrInvalid
+from ella.core.models import Dependency
 from ella.newman import widgets, utils
 from ella.newman.permission import get_permission, permission_filtered_model_qs, has_category_permission
+from ella.newman.licenses.models import License
 
 log = logging.getLogger('ella.newman')
+
+class DependencyPostSaveListener(ListenerPostSave):
+    def __init__(self, src_text):
+        super(DependencyPostSaveListener, self).__init__(src_text)
+        self.use_licenses = License._meta.installed
+
+    def __call__(self, sender, signal, created, instance, **kwargs):
+        super(DependencyPostSaveListener, self).__call__(sender, signal, created, instance=instance, **kwargs)
+
+        # Delete all dependencies for sender instance
+        qset = Dependency.objects.filter(dependent_ct=self.src_text.content_type, dependent_id=instance.pk)
+        if self.use_licenses:
+            before = list(qset)
+        qset.delete()
+
+        # Parse text and recreate dependencies
+        content = getattr(instance, self.src_text.field)
+
+        after = []
+        t = Template(content)
+        for box in t.nodelist.get_nodes_by_type(BoxNode):
+            dep = Dependency()
+            dep.target = box.get_obj()
+            dep.dependent = instance
+            dep.save(force_insert=True)
+            after.append(dep)
+
+        if self.use_licenses:
+            License.objects.reflect_changed_dependencies(before, after)
+
+class NewmanRichTextField(RichTextField):
+    post_save_listener = DependencyPostSaveListener
+    widget = widgets.NewmanRichTextAreaWidget
+
+    def validate_rendered(self, rendered):
+        """
+        Validate that the target text composes only of text and boxes
+        """
+        try:
+            t = Template(rendered)
+        except TemplateSyntaxError, e:
+            raise ValidationError(self.error_messages['syntax_error'])
+
+        for n in t.nodelist:
+            if isinstance(n, TextNode):
+                continue
+            elif isinstance(n, BoxNode):
+                try:
+                    o = n.get_obj()
+                except ObjectNotFoundOrInvalid, e:
+                    raise ValidationError(self.error_messages['syntax_error'])
+            else:
+                raise ValidationError(self.error_messages['syntax_error'])
+
 
 class AdminSuggestField(fields.Field):
     """

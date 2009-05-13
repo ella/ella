@@ -16,42 +16,23 @@ class TestArticleBasics(NewmanTestCase):
         # wait for the page to fully load
         s.wait_for_element_present(self.elements['controls']['suggester'])
 
-        # prepare article structure for me
-
         # fill the form
         data = {
-                'title' : u'马 experiment',
+                'title' : u'马 žš experiment',
                 'upper_title' : u'vyšší',
                 'description' : u'Article description',
                 'slug' : 'title',
             }
-
-        for key, value in data.items():
-            s.type(key, value)
-
-
-        # check slug being created
-
+        self.fill_fields(data)
 
         # fill in the suggesters
         suggest_data = {
                 'category': ('we',),
                 'authors':  ('Bar', 'Kin',),
             }
+        self.fill_suggest_fiels(suggest_data)
 
-        for key, values in suggest_data.items():
-            for value in values:
-                id = 'id_%s_suggest' % key
-                s.click(id)
-                s.type(id, value)
-                s.click(id)
-                s.wait_for_element_present(self.elements['controls']['suggester_visible'])
-                s.key_down(id, '\40') # down arrow
-                s.click(self.elements['controls']['suggester_visible'])
-
-        # save
-        s.click(self.elements['controls']['save'])
-        s.wait_for_element_present(self.elements['controls']['message']['ok'])
+        self.save_form()
 
 
         # verify save

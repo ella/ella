@@ -1,5 +1,3 @@
-from ella.newman.licenses.models import License
-from ella.newman.licenses.listeners import LicenseListenerPostSave
 import logging
 
 from django.conf import settings
@@ -12,28 +10,31 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidde
 from django.core.urlresolvers import reverse
 from django.contrib.admin.views.main import ERROR_FLAG
 from django.shortcuts import render_to_response
-from django.db import transaction
-from django.db.models import Q, ForeignKey, ManyToManyField, ImageField, DateField, DateTimeField
+from django.db import transaction, models
 from django.utils.functional import update_wrapper
 from django.utils.translation import ugettext as _
 from django.utils.encoding import force_unicode
 
-from ella.core.cache.utils import get_cached_list
 from ella.newman.changelist import NewmanChangeList, FilterChangeList
-from ella.newman import models, fields, widgets, utils
+from ella.newman import fields, widgets, utils
+from ella.newman.models import DenormalizedCategoryUserRole, AdminUserDraft, AdminHelpItem
 from ella.newman.decorators import require_AJAX
 from ella.newman.permission import is_category_model, model_category_fk, model_category_fk_value, applicable_categories
 from ella.newman.permission import has_category_permission, get_permission, permission_filtered_model_qs, is_category_fk
 from ella.newman.forms import DraftForm
-from ella.newman.models import AdminHelpItem
 from ella.newman.xoptions import XModelAdmin
+from ella.newman.licenses.models import License
 from ella.newman.config import STATUS_OK, STATUS_FORM_ERROR, STATUS_VAR_MISSING, STATUS_OBJECT_NOT_FOUND, AUTOSAVE_MAX_AMOUNT
-
-from djangomarkup.fields import RichTextField
 
 DEFAULT_LIST_PER_PAGE = getattr(settings, 'NEWMAN_LIST_PER_PAGE', 25)
 
 log = logging.getLogger('ella.newman')
+
+# update standard FORMFIELD_FOR_DBFIELD_DEFAULTS
+FORMFIELD_FOR_DBFIELD_DEFAULTS.update({
+    models.DateTimeField: {'widget': widgets.DateTimeWidget},
+    models.DateField:     {'widget': widgets.DateWidget},
+})
 
 def formfield_for_dbfield_factory(cls, db_field, **kwargs):
     formfield_overrides = dict(FORMFIELD_FOR_DBFIELD_DEFAULTS, **cls.formfield_overrides)
@@ -57,36 +58,22 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
                 'field_name': db_field.name,
                 'instance': custom_params.get('instance', None),
                 'model': custom_params.get('model'),
-                'widget': widgets.NewmanRichTextAreaWidget
             })
-            if 'ella.newman.licenses' in settings.INSTALLED_APPS:
-                kwargs.update({
-                    'post_save_listeners': [LicenseListenerPostSave],
-                })
-            rich_text_field = RichTextField(**kwargs)
+            rich_text_field = fields.NewmanRichTextField(**kwargs)
             if css_class:
                 rich_text_field.widget.attrs['class'] += ' %s' % css_class
             return rich_text_field
 
-    if isinstance(db_field, ImageField):
+    if isinstance(db_field, models.ImageField):
         # we accept only (JPEG) images with RGB color profile.
         return fields.RGBImageField(db_field, **kwargs)
 
-    # Date and DateTime fields
-    if isinstance(db_field, DateTimeField):
-        kwargs['widget'] = widgets.DateTimeWidget
-        return db_field.formfield(**kwargs)
-
-    if isinstance(db_field, DateField):
-        kwargs['widget'] = widgets.DateWidget
-        return db_field.formfield(**kwargs)
-
-    if db_field.name in cls.raw_id_fields and isinstance(db_field, ForeignKey):
+    if db_field.name in cls.raw_id_fields and isinstance(db_field, models.ForeignKey):
         kwargs['widget'] = widgets.ForeignKeyRawIdWidget(db_field.rel)
         return db_field.formfield(**kwargs)
 
     if db_field.name in getattr(cls, 'suggest_fields', {}).keys() \
-                        and isinstance(db_field, (ForeignKey, ManyToManyField)):
+                        and isinstance(db_field, (models.ForeignKey, models.ManyToManyField)):
         kwargs.update({
             'required': not db_field.blank,
             'label': db_field.verbose_name,
@@ -94,6 +81,18 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
             'lookup': cls.suggest_fields[db_field.name]
         })
         return fields.AdminSuggestField(db_field, **kwargs)
+
+    if db_field.name in ('target_ct', 'source_ct', 'content_type',):
+        kwargs['widget'] = widgets.ContentTypeWidget
+        return db_field.formfield(**kwargs)
+    elif db_field.name in ('target_id', 'source_id', 'object_id',):
+        kwargs['widget'] = widgets.ForeignKeyGenericRawIdWidget
+        return db_field.formfield(**kwargs)
+
+    if db_field.name == 'order':
+        kwargs['widget'] = widgets.IncrementWidget
+        return db_field.formfield(**kwargs)
+
     # magic around restricting category choices in all ForeignKey (related to Category) fields
     if is_category_fk(db_field) and 'model' in custom_params:
         kwargs.update({
@@ -226,7 +225,7 @@ class NewmanModelAdmin(XModelAdmin):
         """ Autosave data (dataloss-prevention) or save as (named) template """
         def delete_too_old_drafts():
             " remove autosaves too old to rock'n'roll "
-            to_delete = models.AdminUserDraft.objects.filter(title__exact='').order_by('-ts')
+            to_delete = AdminUserDraft.objects.filter(title__exact='').order_by('-ts')
             for draft in to_delete[AUTOSAVE_MAX_AMOUNT:]:
                 log.debug('Deleting too old user draft (autosave) %s' % draft)
                 draft.delete()
@@ -241,19 +240,19 @@ class NewmanModelAdmin(XModelAdmin):
         if id:
             # modifying existing draft/preset
             try:
-                obj = models.AdminUserDraft.objects.get(pk=id)
+                obj = AdminUserDraft.objects.get(pk=id)
                 obj.data = data
                 obj.title = title
                 obj.save()
-            except models.AdminUserDraft.DoesNotExist:
-                obj = models.AdminUserDraft.objects.create(
+            except AdminUserDraft.DoesNotExist:
+                obj = AdminUserDraft.objects.create(
                     ct=self.model_content_type,
                     user=request.user,
                     data=data,
                     title=title
                 )
         else:
-            obj = models.AdminUserDraft.objects.create(
+            obj = AdminUserDraft.objects.create(
                 ct=self.model_content_type,
                 user=request.user,
                 data=data,
@@ -270,7 +269,7 @@ class NewmanModelAdmin(XModelAdmin):
         id = request.GET.get('id', None)
         if not id:
             return utils.JsonResponse(_('No id found in GET variable "id".'), status=STATUS_VAR_MISSING)
-        drafts = models.AdminUserDraft.objects.filter(
+        drafts = AdminUserDraft.objects.filter(
             ct=self.model_content_type,
             user=request.user,
             pk=id
@@ -368,19 +367,19 @@ class NewmanModelAdmin(XModelAdmin):
                                     % (self.model._meta.object_name, f, ', '.join(model_fields))
             lookup_key = str('%s__icontains' % f)
             if not lookup:
-                lookup = Q(**{lookup_key: lookup_value})
+                lookup = models.Q(**{lookup_key: lookup_value})
             else:
-                lookup = lookup | Q(**{lookup_key: lookup_value})
+                lookup = lookup | models.Q(**{lookup_key: lookup_value})
         # user role based category filtering
         if not is_category_model(self.model):
             category_field = model_category_fk(self.model)
             if category_field and request.user:
                 applicable = applicable_categories(request.user)
                 args_lookup = { '%s__in' % category_field.name: applicable}
-                lookup = lookup & Q(**args_lookup)
+                lookup = lookup & models.Q(**args_lookup)
         else:
             applicable = applicable_categories(request.user)
-            lookup = lookup & Q(pk__in=applicable)
+            lookup = lookup & models.Q(pk__in=applicable)
         # user category filter
         qs = utils.user_category_filter(self.model.objects.filter(lookup), request.user)
 
@@ -490,8 +489,8 @@ class NewmanModelAdmin(XModelAdmin):
         if request.user.has_perm(del_perm):
             return True
         user = request.user
-        roles = models.DenormalizedCategoryUserRole.objects.filter(
-            user_id=user.pk, 
+        roles = DenormalizedCategoryUserRole.objects.filter(
+            user_id=user.pk,
             permission_codename=del_perm
         )
         if roles:
@@ -506,8 +505,8 @@ class NewmanModelAdmin(XModelAdmin):
         if request.user.has_perm(add_perm):
             return True
         user = request.user
-        roles = models.DenormalizedCategoryUserRole.objects.filter(
-            user_id=user.pk, 
+        roles = DenormalizedCategoryUserRole.objects.filter(
+            user_id=user.pk,
             permission_codename=add_perm
         )
         if roles:
@@ -551,7 +550,7 @@ class NewmanModelAdmin(XModelAdmin):
         for field_name in frm.fields:
             field = frm[field_name]
             if field.errors:
-                error_dict[field_name] = map(lambda fe: fe.__unicode__(), field.errors) # lazy gettext brakes json encode
+                error_dict["id_%s" % field_name] = map(lambda fe: fe.__unicode__(), field.errors) # lazy gettext brakes json encode
         # Inline Form fields
         for fset in context['inline_admin_formsets']:
             if not fset.formset.errors:
@@ -699,7 +698,7 @@ class NewmanModelAdmin(XModelAdmin):
         qs = utils.user_category_filter(q, request.user)
 
         # if self.model is licensed filter queryset
-        if 'ella.newman.licenses' in settings.INSTALLED_APPS:
+        if License._meta.installed:
             exclude_pks = License.objects.unapplicable_for_model(self.model)
             qs_tmp = qs.exclude(pk__in=exclude_pks)
             utils.copy_queryset_flags(qs_tmp, qs)
@@ -785,3 +784,6 @@ class NewmanStackedInline(NewmanInlineModelAdmin):
 
 class NewmanTabularInline(NewmanInlineModelAdmin):
     template = 'newman/edit_inline/tabular.html'
+
+class NewmanPrettyInline(NewmanInlineModelAdmin):
+    template = 'newman/edit_inline/pretty.html'

@@ -1,8 +1,10 @@
 {% extends "newman/ajax_content_base.html" %}
+{% load cache %}
 
+{% cache 300 'nm-app-index' app_list %}
 {% block breadcrumbs %}
     <div class="breadcrumbs">
-        <a href="{% url newman_admin_index %}">{% trans "Home" %}</a>
+        <a href="{% url newman_admin_index %}#/nm/">{% trans "Home" %}</a>
         &rsaquo;
         {% for app in app_list %}
             {% trans app.name %}
@@ -41,3 +43,4 @@
     request_media('{{ NEWMAN_MEDIA_URL }}css/dashboard.css?{{ VERSION }}');
     </script>
 {% endblock %}
+{% endcache %}

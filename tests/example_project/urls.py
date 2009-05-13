@@ -33,6 +33,9 @@ urlpatterns = patterns('',
     ('^newman/', include(newman.site.urls)),
     ('^admin/', include(admin.site.urls)),
 
+    # polls urls
+    ('^polls/', include('ella.polls.urls')),
+
     # reverse url lookups
     (r'^', include('ella.core.urls')),
 
@@ -40,6 +43,4 @@ urlpatterns = patterns('',
 
 handler404 = 'ella.core.views.page_not_found'
 handler500 = 'ella.core.views.handle_error'
-
-
 

@@ -160,33 +160,47 @@ class EmptyNode(template.Node):
     def render(self, context):
         return u''
 
+class ObjectNotFoundOrInvalid(Exception): pass
+
 class BoxNode(template.Node):
 
     def __init__(self, box_type, nodelist, model=None, lookup=None, var_name=None):
         self.box_type, self.nodelist, self.var_name, self.lookup, self.model = box_type, nodelist, var_name, lookup, model
 
-
-    def render(self, context):
+    def get_obj(self, context=None):
         if self.model and self.lookup:
-            try:
-                lookup_val = template.Variable(self.lookup[1]).resolve(context)
-            except template.VariableDoesNotExist:
+            if context:
+                try:
+                    lookup_val = template.Variable(self.lookup[1]).resolve(context)
+                except template.VariableDoesNotExist:
+                    lookup_val = self.lookup[1]
+            else:
                 lookup_val = self.lookup[1]
 
             try:
                 obj = get_cached_object(self.model, **{self.lookup[0] : lookup_val})
             except models.ObjectDoesNotExist, e:
                 log.error('BoxNode: %s (%s : %s)' % (str(e), self.lookup[0], lookup_val))
-                return ''
+                raise ObjectNotFoundOrInvalid()
             except AssertionError, e:
                 log.error('BoxNode: %s (%s : %s)' % (str(e), self.lookup[0], lookup_val))
-                return ''
+                raise ObjectNotFoundOrInvalid()
         else:
+            if not context:
+                raise ObjectNotFoundOrInvalid()
             try:
                 obj = template.Variable(self.var_name).resolve(context)
             except template.VariableDoesNotExist, e:
                 log.error('BoxNode: Template variable does not exist. var_name=%s' % self.var_name)
-                return ''
+                raise ObjectNotFoundOrInvalid()
+        return obj
+
+    def render(self, context):
+
+        try:
+            obj = self.get_obj()
+        except ObjectNotFoundOrInvalid, e:
+            return ''
 
         box = getattr(obj, 'box_class', Box)(obj, self.box_type, self.nodelist)
 

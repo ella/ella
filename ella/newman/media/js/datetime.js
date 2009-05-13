@@ -334,7 +334,11 @@ $( document ).one('media_loaded', function() {
                 $(this).hide();
             },
         });
-        $datepicker.appendTo('body');
+        $datepicker.appendTo(
+               $('.change-form').get(0)
+            || $('#content').get(0)
+            || $('body').get(0)
+        );
     }
 
     function mousewheel_handler(evt, delta) {

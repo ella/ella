@@ -1,10 +1,7 @@
 from ella.newman import site, GenericTabularInline
+from ella.newman.licenses import LICENSED_MODELS
 from ella.newman.licenses.models import License
 from ella.newman.options import NewmanModelAdmin
-
-LICENSED_MODELS = (
-    'photos.photo',
-)
 
 class LicenseInlineAdmin(GenericTabularInline):
     model = License

@@ -116,3 +116,6 @@ class Position(models.Model):
     def __unicode__(self):
         return u'%s:%s' % (self.category, self.name)
 
+    class Meta:
+        verbose_name = _('Position')
+        verbose_name_plural = _('Positions')
