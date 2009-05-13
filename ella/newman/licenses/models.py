@@ -23,7 +23,7 @@ class LicenseManager(models.Manager):
     def reflect_changed_dependencies(self, before, after):
         """ Update current applications if target model is licensed. """
         get_target = lambda dep: (dep.target_ct, dep.target_id)
-        get_condition = lambda tgt: models.Q(ct=tgt[0], pk=tgt[1])
+        get_condition = lambda tgt: models.Q(ct=tgt[0], obj_id=tgt[1])
 
         b = set(map(get_target, before))
         a = set(map(get_target, after))
