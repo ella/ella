@@ -41,7 +41,7 @@
                         | <a class="icn visible" onclick="$('#debug').toggle()">debug log</a>
                     {% endif %}
                     | <a class="icn eclear hashadr" href="/password_change/">{% trans 'Change password' %}</a>
-                    | <a class="icn logout" href="{% url %sadmin_logout %}?next={% url newman_admin_index %}" onclick="return confirm('Are you sure?');">{% trans 'Log out' %}</a>
+                    | <a class="icn logout" href="{% url %sadmin_logout %}?next={% url newman_admin_index %}" onclick="return true/*confirm('Are you sure?')*/;">{% trans 'Log out' %}</a>
                 </div>
             </div>
         {% endblock %}
