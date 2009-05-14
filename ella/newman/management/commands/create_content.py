@@ -548,9 +548,9 @@ def create_content(run_transaction, verbosity, **kwargs):
     map_categories()
     map_sources()
     
-    #map_photos() # temporarily commented out
+    map_photos()
     #save_photo_map() 
-    load_photo_map()
+    #load_photo_map()
     map_authors()
 
     # Articles
