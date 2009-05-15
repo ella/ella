@@ -10,8 +10,37 @@
 // -------------------------------------------------------------------
 // Feel free to add more tags
 // -------------------------------------------------------------------\
+
+// Function to delete when the real one will be ready
 var open_overlay = function(a,b){
 	b(1234);
+}
+
+mySettings = {
+	previewParserPath:    BASE_URL + 'nm/editor-preview/',
+	previewParserVar:   "text",
+	onShiftEnter:		{keepDefault:false, openWith:'\n\n'},
+	markupSet: [
+		{ name: 'Zvýrazněně', className: 'italic', key: 'I', openWith: '_', closeWith: '_' },
+		{ name: 'Silně', className: 'bold', key: 'B', openWith: '**', closeWith: '**' },
+		{ separator: '---------------' },
+		{ name: 'Odkaz', className: 'url', key: 'L', openWith:'[', closeWith:']([![Url:!:http://]!] "[![Title]!]")', placeHolder: 'Text odkazu' },
+		{ separator: '---------------' },
+		{ name: 'Nadpis 1', className: 'h1', key:'1', placeHolder: 'Nadpis 1. úrovně', closeWith: function(markItUp) { return miu.markdownTitle(markItUp, '=') } },
+		{ name: 'Nadpis 2', className: 'h2', key:'2', placeHolder: 'Nadpis 2. úrovně', closeWith: function(markItUp) { return miu.markdownTitle(markItUp, '-') } },
+		{ name: 'Nadpis 3', className: 'h3', key:'3', placeHolder: 'Nadpis 3. úrovně', openWith: '### ' },
+		{ separator: '---------------' },
+		{ name: 'Seznam s odrážkami', className: 'list-bullet', openWith: '- ' },
+		{ name: 'Číslovaný seznam', className: 'list-numeric', openWith:function(markItUp) {
+			return markItUp.line+'. ';
+		}},
+		{ separator: '---------------' },
+		{ name: 'Сitát', className: 'quote', openWith: '> ' },
+		{ name: 'Box', className: 'box', call: function(){
+			$('#rich-box').dialog('open');
+		}},
+		{ name: 'Náhled', call: 'preview', className: 'preview'}
+	]
 }
 
 $(function(){
@@ -30,7 +59,7 @@ $(function(){
 				$.each(data, function(i, item){
 					$('#rich-select').append('<option value="'+i+'" class="rich-object-'+i+'">'+item.name+'</option>');
 					if(item.quick){
-						$('#o-quick').append('<li title="'+i+'" style="cursor:pointer;float:left;margin-right:10px;padding:2px;font-size:1.3em;list-style:none;border-bottom:1px dashed #000;">'+item.name+'</li>');
+						$('#o-quick').append('<li title="'+i+'">'+item.name+'</li>');
 					}
 				});
 				// Events
@@ -78,34 +107,8 @@ $(function(){
 			height: 300
 		});
 	}
+	$('.rich_text_area').markItUp(mySettings);
 });
-
-mySettings = {
-	previewParserPath:    BASE_URL + 'nm/editor-preview/',
-	previewParserVar:   "text",
-	onShiftEnter:		{keepDefault:false, openWith:'\n\n'},
-	markupSet: [
-		{ name: 'Zvýrazněně', className: 'italic', key: 'I', openWith: '_', closeWith: '_' },
-		{ name: 'Silně', className: 'bold', key: 'B', openWith: '**', closeWith: '**' },
-		{ separator: '---------------' },
-		{ name: 'Odkaz', className: 'url', key: 'L', openWith:'[', closeWith:']([![Url:!:http://]!] "[![Title]!]")', placeHolder: 'Text odkazu' },
-		{ separator: '---------------' },
-		{ name: 'Nadpis 1', className: 'h1', key:'1', placeHolder: 'Nadpis 1. úrovně', closeWith: function(markItUp) { return miu.markdownTitle(markItUp, '=') } },
-		{ name: 'Nadpis 2', className: 'h2', key:'2', placeHolder: 'Nadpis 2. úrovně', closeWith: function(markItUp) { return miu.markdownTitle(markItUp, '-') } },
-		{ name: 'Nadpis 3', className: 'h3', key:'3', placeHolder: 'Nadpis 3. úrovně', openWith: '### ' },
-		{ separator: '---------------' },
-		{ name: 'Seznam s odrážkami', className: 'list-bullet', openWith: '- ' },
-		{ name: 'Číslovaný seznam', className: 'list-numeric', openWith:function(markItUp) {
-			return markItUp.line+'. ';
-		}},
-		{ separator: '---------------' },
-		{ name: 'Сitát', className: 'quote', openWith: '> ' },
-		{ name: 'Box', className: 'box', call: function(){
-			$('#rich-box').dialog('open');
-		}},
-		{ name: 'Náhled', call: 'preview', className: 'preview'}
-	]
-}
 
 // mIu nameSpace to avoid conflict.
 miu = {

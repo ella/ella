@@ -13,7 +13,6 @@ MEDIA_PREFIX = getattr(settings, 'NEWMAN_MEDIA_PREFIX', settings.ADMIN_MEDIA_PRE
 # Rich text editor
 JS_MARKITUP = 'js/markitup/jquery.markitup.js'
 JS_MARKITUP_SET = 'js/markitup/sets/%s/set.js' % MARKITUP_SET
-JS_EDITOR = 'js/editor.js'
 CSS_MARKITUP = 'js/markitup/skins/markitup/style.css'
 CSS_MARKITUP_SET = 'js/markitup/sets/%s/style.css' % MARKITUP_SET
 CLASS_RICHTEXTAREA = 'rich_text_area'
@@ -49,7 +48,6 @@ class NewmanRichTextAreaWidget(RichTextAreaWidget):
         js = (
             MEDIA_PREFIX + JS_MARKITUP,
             MEDIA_PREFIX + JS_MARKITUP_SET,
-            MEDIA_PREFIX + JS_EDITOR,
         )
         css = {
             'screen': (
