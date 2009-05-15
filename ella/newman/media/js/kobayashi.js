@@ -38,18 +38,21 @@ else {
     _ = function(s) { return s; };
 }
 
+//// URL management
 var URLS = {
+/*
     test: function($target) {
         alert($target.attr('id'));
         location.href = 'http://google.com';
     }
+*/
 };
 
 // mapping for containers to the URLs that give out their base content (what's there when the page loads)
 var BASES = {
-    //content: '/password_change/'
     content: '/nm/'
 };
+//// End of URL management
 
 var ContentByHashLib = {};
 
@@ -485,7 +488,8 @@ var ContentByHashLib = {};
         var address = get_hashadr(specifier);
         
         if (LOADED_URLS[target_id] == address) {
-            $('#'+target_id).slideToggle('fast');
+            $('#'+target_id).slideUp('fast');
+            unload_content(target_id);
             return;
         }
         

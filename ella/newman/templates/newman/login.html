@@ -16,6 +16,7 @@
       <div class="form-row">
         <label for="id_password">{% trans 'Password:' %}</label> <input type="password" name="password" id="id_password" style="width: 98%;" />
         <input type="hidden" name="this_is_the_login_form" value="1" />
+        <input type="hidden" name="next" id="next" value="" />
       </div>
       <div class="submit-row">
         <input type="submit" value="{% trans 'Log in' %}" style="font-size: 150%" />
@@ -24,6 +25,7 @@
 
     <script type="text/javascript">
     document.getElementById('id_username').focus()
+    if (location.hash) { document.getElementById('next').value = location.hash; }
     </script>
     </div>
 </div>

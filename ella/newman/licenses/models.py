@@ -11,10 +11,10 @@ from ella.newman.licenses import LICENSED_MODELS
 class LicenseManager(models.Manager):
     def _get_queryset_of_unapplicables(self, model):
         ct = ContentType.objects.get_for_model(model)
-        return License.objects.filter(ct=ct, applications__gte=models.F('max_applications'))
+        return License.objects.filter(ct=ct, applications__gte=models.F('max_applications')).values('obj_id')
 
     def unapplicable_for_model(self, model):
-        return [u['obj_id'] for u in self._get_queryset_of_unapplicables(model).values('obj_id')]
+        return [u['obj_id'] for u in self._get_queryset_of_unapplicables(model)]
     
     def filter_queryset(self, queryset):
         qset = queryset.exclude(pk__in=self._get_queryset_of_unapplicables(queryset.model))
@@ -23,7 +23,7 @@ class LicenseManager(models.Manager):
     def reflect_changed_dependencies(self, before, after):
         """ Update current applications if target model is licensed. """
         get_target = lambda dep: (dep.target_ct, dep.target_id)
-        get_condition = lambda tgt: models.Q(ct=tgt[0], pk=tgt[1])
+        get_condition = lambda tgt: models.Q(ct=tgt[0], obj_id=tgt[1])
 
         b = set(map(get_target, before))
         a = set(map(get_target, after))
