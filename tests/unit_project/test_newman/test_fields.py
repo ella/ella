@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.forms import ValidationError
+from django.db.models import signals
  
 from djangosanetesting.cases import DatabaseTestCase
 
@@ -9,9 +10,16 @@ from ella.core.models import Dependency
 
 from unit_project.test_core import create_basic_categories, create_and_place_a_publishable
 
+DROP_SIGNALS = [signals.pre_save, signals.post_save]
 class RichTextFieldTestCase(DatabaseTestCase):
     def setUp(self):
         super(RichTextFieldTestCase, self).setUp()
+
+        self.old_signal_receivers = []
+        for s in DROP_SIGNALS:
+            self.old_signal_receivers.append(s.receivers)
+            s.receivers = []
+
         create_basic_categories(self)
         create_and_place_a_publishable(self)
 
@@ -20,6 +28,12 @@ class RichTextFieldTestCase(DatabaseTestCase):
             model=self.publishable.__class__,
             field_name = "description",
         )
+
+    def tearDown(self):
+        for s, rec in zip(DROP_SIGNALS, self.old_signal_receivers):
+            old = s.receivers
+            s.receivers = rec
+            self.assert_equals(rec, old)
 
 
 class TestRichTextFieldValidation(RichTextFieldTestCase):
