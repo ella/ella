@@ -13,6 +13,8 @@ class NewmanTestCase(SeleniumTestCase):
         self.elements = {
             'navigation' : {
                 'logout' : "//a[@class='icn logout']",
+                'categories' : "//a[@class='app category']",
+                'categories_add' : "//a[@class='app category']/../a[position()=2]",
                 'articles' : "//a[@class='app article']",
                 'article_add' : "//a[@class='app article']/../a[position()=2]",
             },
@@ -24,6 +26,7 @@ class NewmanTestCase(SeleniumTestCase):
                 },
                 'add' : "//a[@class='hashadr icn btn add']",
                 'save' : "//a[@class='icn btn ok def']",
+                'show_filters' : "//div[@id='filters-handler']/a",
             },
             'pages' : {
                 'login' : {
