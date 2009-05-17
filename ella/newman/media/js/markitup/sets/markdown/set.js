@@ -9,29 +9,16 @@
 // http://daringfireball.net/projects/markdown/
 // -------------------------------------------------------------------
 // Feel free to add more tags
-// -------------------------------------------------------------------
-$(function(){
-	if(!$('#newman-box').length){
-		$('<div id="newman-box" title="Vložit box"></div>').hide().appendTo('body');
-		$.getJSON('/static/newman_media/js/boxes.js', function(data){
-			alert(data.photo.name)
-			if(data.length){
-				$('#newman-box').append('<ul></ul>');
-				$.each(data, function(i, item){
-					console.log(i)
-					//$('ul', '#newman-box').append('<li></li>');
-				});
-			}
-		});
-		$('#newman-box').dialog({
-			modal: true,
-			autoOpen: false
-		});
-	}
-});
+// -------------------------------------------------------------------\
+
+// Function to delete when the real one will be ready
+var open_overlay = function(a,b){
+	b(1234);
+}
 
 mySettings = {
-	previewParserPath:	'',
+	previewParserPath:    BASE_URL + 'nm/editor-preview/',
+	previewParserVar:   "text",
 	onShiftEnter:		{keepDefault:false, openWith:'\n\n'},
 	markupSet: [
 		{ name: 'Zvýrazněně', className: 'italic', key: 'I', openWith: '_', closeWith: '_' },
@@ -50,12 +37,78 @@ mySettings = {
 		{ separator: '---------------' },
 		{ name: 'Сitát', className: 'quote', openWith: '> ' },
 		{ name: 'Box', className: 'box', call: function(){
-			$('#newman-box').dialog('open');
-			//((box inline photos.photo 209869 show_title=1 show_authors=1 show_detail=1))
+			$('#rich-box').dialog('open');
 		}},
 		{ name: 'Náhled', call: 'preview', className: 'preview'}
 	]
 }
+
+$(function(){
+	if(!$('#rich-box').length){
+		$('<div id="rich-box" title="Vložit box"></div>').hide().appendTo('body');
+		$.getJSON('/static/newman_media/js/boxes.js', function(data){
+			if(!!data){
+				// HTML
+				$('#rich-box').append('<form id="rich-object"></form>');
+				$('#rich-object')
+					.append('<ul id="o-quick"></ul>')
+					.append('<div style="clear:left;"><select id="rich-select"></select></div>')
+					.append('<div><input type="text" id="rich-object-id" autocomplete="off" /> <input type="button" id="rich-object-choose" value="Choose" /></div>')
+					.append('<div><textarea id="rich-object-parameters" cols="30" rows="5"></textarea></div>')
+					.append('<div><input type="submit" value="Add box" /> <input type="reset" value="CLear" /></div>');
+				$.each(data, function(i, item){
+					$('#rich-select').append('<option value="'+i+'" class="rich-object-'+i+'">'+item.name+'</option>');
+					if(item.quick){
+						$('#o-quick').append('<li title="'+i+'">'+item.name+'</li>');
+					}
+				});
+				// Events
+				$('#rich-select').bind('change', function(){
+					if($(this).val() == 'photos.photo' || $(this).val() == 'galleries.gallery'){
+						$('#rich-object-choose').show();
+					} else {
+						$('#rich-object-choose').hide();
+					}
+				});
+				$('#o-quick').bind('click', function(e){
+					if(e.target.tagName.toLowerCase() == 'li'){
+						$('option[value='+$(e.target).attr('title')+']', '#rich-select').attr('selected', 'selected');
+						$('#rich-select').trigger('change');
+					}
+				});
+				$('#rich-object').bind('submit', function(e){
+					e.preventDefault();
+					var type = $('#rich-select').val();
+					if(!!type){
+						var id = $('#rich-object-id').val() || '0';
+						var params = $('#rich-object-parameters').val().replace(/\n+/g, ' ');
+						// Insert code
+						$.markItUp({
+							openWith:'((box inline '+type+' '+$('#rich-object-id').val()+' '+params+'))'
+						});
+						// Reset and close dialog
+						$('#rich-object').trigger('reset');
+						$('#rich-box').dialog('close');
+					}
+				}).bind('reset', function(){
+					$('#rich-object-choose').show();
+				});
+				$('#rich-object-choose').bind('click', function(){
+					open_overlay($('#rich-select').val(), function(id){
+						$('#rich-object-id').val(id);
+					});
+				})
+			}
+		});
+		$('#rich-box').dialog({
+			modal: true,
+			autoOpen: false,
+			width: 400,
+			height: 300
+		});
+	}
+	$('.rich_text_area').markItUp(mySettings);
+});
 
 // mIu nameSpace to avoid conflict.
 miu = {
@@ -68,184 +121,3 @@ miu = {
 		return '\n'+heading;
 	}
 }
-
-/* ------| !Boxes functions |------ */
-function build(box){
-	// If there's edit mode for one of the boxes on the page
-	if(box){
-		edit = box.full;
-	} else {
-		edit = '';
-	}
-	// Wrapper
-	back = $('<div id="boxWrapper"></div>').appendTo('body').css({
-		height: (document.documentElement.scrollHeight || document.body.scrollHeight) + 'px'
-	});
-	// Build "select" from the list of objects
-	var options = '';
-	$.each(adminapps, function(i, item){
-		options += '<option value="' + i + '"' + ((box.type && item.path == box.type) ? ' selected="selected"' : '') + '>' + item.name + '</option>';
-	});
-	// Main div
-	pane = $('<div id="boxPane"></div>').
-	appendTo('body').
-	append(
-		$('<a id="boxPaneClose" href="#close">&times;</a>').bind('click', { key: false }, destroy),
-		$('<form action="" method="post" id="mainForm"></form>').
-		append(
-			$('<h1>Vložit objekt</h1>'),
-			$('<div class="title">Typ objektu</div>'),
-			$('<div class="input"></div>').append(
-				$('<select name="type">' + options + '</select>').change(function(){
-					if($('option', this)[this.selectedIndex].innerHTML == 'Photo'){
-						photo();
-					} else {
-						$('#photo').hide('normal', function(){
-							$(this).remove();
-						});
-					}
-				})
-			),
-			$('<div class="title">Nejčastěji používané typy:</div>'),
-			$('<div class="input" id="quick"></div>').append(
-				$('<a href="#fotka">Fotka</a>&nbsp;').bind('click', function(event){
-					objectSelect(event, 'photos.photo');
-					photo();
-				}),
-				$('<a href="#fotogalerie">Fotogalerie</a>').bind('click', function(event){
-					objectSelect(event, 'galleries.gallery');
-				}),
-				$('<a href="#infobox">Infobox</a>').bind('click', function(event){
-					objectSelect(event, 'articles.infobox');
-				}),
-				/*$('<a href="#video">Video</a>').bind('click', function(event){
-					objectSelect(event, 'videos.video');
-				}),*/
-				$('<a href="#clanek">Článek</a>').bind('click', function(event){
-					objectSelect(event, 'articles.article');
-					link2object();
-				}),
-				$('<a href="#anketa">Anketa</a>').bind('click', function(event){
-					objectSelect(event, 'polls.poll');
-				})
-			),
-			$('<div class="title">Mód</div>'),
-			$('<div class="input"><input type="text" name="method" id="method" value="' + ((box.method) ? box.method : 'inline') + '" /></div>'),
-			$('<div class="title">Identifikátor</div>'),
-			$('<div class="input"><input type="text" name="id" id="id" value="' + ((box.id) ? box.id : '') + '" />&nbsp;</div>').append($('<input type="button" name="search" id="search" />').bind('click', objectSelect)),
-			$('<div class="title">Parametry</div>'),
-			$('<div class="input"><textarea name="parameters" cols="40" rows="5">' + ((box.parameters) ? box.parameters.replace(/^\n*/g, '').replace(/\n*$/g, '') : '') + '</textarea></div>'),
-			$('<div id="submit"><input type="submit" value="Vložit" /></div>')
-		).bind('submit', objectInsert)
-	);
-	// Effects
-	back.animate({ opacity: 0.75 }, 'normal');
-	pane.animate({ opacity: 1 }, 'normal');
-	// Events
-	$('select[name="type"]').bind('change', function(){
-		$('input#id').val('');
-	});
-	$('body').bind('keypress', { key: true }, destroy);
-	// Object "photo"
-	var parseParameters = function(checked, key){
-		var lines = $('textarea[name="parameters"]').val().split('\n');
-		var parameters = {};
-		$.each(lines, function(i, line){
-			var keyVal = line.split(':', 2);
-			parameters[keyVal[0]] = keyVal[1];
-		});
-		if(checked && !parameters[key]){
-			parameters[key] = '1';
-			setParameters(parameters);
-		} else if(!checked && parameters[key]){
-			setParameters(parameters, key);
-		}
-	}
-	var setParameters = function(parameters, exclude){
-		var val = '';
-		$.each(parameters, function(name, param){
-			if(name != exclude && name != '' && param){
-				val += name + ':' + param + '\n';
-			}
-		});
-		$('textarea[name="parameters"]').val(val.replace(/^\n/, '').replace(/\n$/, ''));
-	}
-	var photo = function(){
-		var p = $('textarea[name="parameters"]').val();
-		$('#mainForm').append(
-			$('<div id="photo"><h2>Možnosti</h2></div>').append(
-				$('<div></div>').append(
-					$('<input type="checkbox" id="title"' + ((p.indexOf('show_title') != -1) ? ' checked="checked"' : '') + ' /> <label for="title">Název</label>').change(function(){
-						parseParameters(this.checked, 'show_title');
-					})
-				),
-				$('<div></div>').append(
-					$('<input type="checkbox" id="detail"' + ((p.indexOf('show_detail') != -1) ? ' checked="checked"' : '') + ' /> <label for="detail">Detailní náhled</label>').change(function(){
-						parseParameters(this.checked, 'show_detail');
-					})
-				),
-				$('<div></div>').append(
-					$('<input type="checkbox" id="description"' + ((p.indexOf('show_description') != -1) ? ' checked="checked"' : '') + ' /> <label for="description">Popis</label>').change(function(){
-						parseParameters(this.checked, 'show_description');
-					})
-				),
-				$('<div></div>').append(
-					$('<input type="checkbox" id="authors"' + ((p.indexOf('show_authors') != -1) ? ' checked="checked"' : '') + ' /> <label for="authors">Autoři</label>').change(function(){
-						parseParameters(this.checked, 'show_authors');
-					})
-				)
-			)
-		);
-		$('#photo').css({'display' : 'block', 'opacity' : '0'}).animate({ opacity: 1 }, 'normal');
-	}
-	if(box.type && box.type == 'photos.photo'){photo();}
-	var link2object = function(){
-		myFORM=document.getElementById('mainForm');
-		myFORM.method.value='link';
-		myFORM.parameters.value='text:'+myFORM.parameters.value;
-	}
-	if(box.type && box.type == 'articles.article'){link2object();}
-}
-
-function destroy(event){
-	if(event.keyCode == '27' || !event.data.key){
-		$('#boxWrapper, #boxPane').remove();
-		$('body').unbind('keypress', destroy);
-		event.preventDefault();
-	}
-}
-
-function objectSelect(event, type){
-	if(type){
-		$('select[name="type"] option').each(function(){
-			if(type == adminapps[this.value].path){
-				this.selected = 'selected';
-			}
-		});
-	}
-	var path = ((type) ? type : adminapps[$('select[name="type"]').val()].path).replace('.', '/');
-	var addr = '../../../' + path + '/?pop=1';
-	var win = window.open(addr, 'id', 'height=500,width=800,resizable=yes,scrollbars=yes');
-	win.focus();
-	event.preventDefault();
-}
-
-function objectInsert(event){
-	// Define type and id
-	var type = adminapps[$('select[name="type"]').val()].path;
-	var id = $('input#id').val() || 0;
-	var method = $('input#method').val() || 'inline';
-	// Result
-	var obj = '{% box ' + method + ' for ' + type + ' with pk ' + id + ' %}' + (($('textarea[name="parameters"]').val()) ? '\n' + $('textarea[name="parameters"]').val().replace(/^\n*/g, '').replace(/\n*$/g, '') + '\n' : '') + '{% endbox %}';
-	if(edit){
-		var tv = area.value.replace(edit, obj);
-		area.value = tv;
-		refresh();
-	} else {
-		handlers.wrapSelection('', obj);
-	}
-	$('#boxWrapper, #boxPane').remove();
-	$('body').unbind('keypress', destroy);
-	event.preventDefault();
-}
-/* ------| !Boxes functions |------ */
