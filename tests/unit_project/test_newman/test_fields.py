@@ -37,6 +37,9 @@ class RichTextFieldTestCase(DatabaseTestCase):
 
 
 class TestRichTextFieldValidation(RichTextFieldTestCase):
+    def tearDown(self):
+        for s, rec in zip(DROP_SIGNALS, self.old_signal_receivers):
+            s.receivers = rec
 
     def test_field_doesnt_validate_invalid_template(self):
         self.assert_raises(ValidationError, self.field.clean, '{% not-a-tag %}')
@@ -194,7 +197,7 @@ class TestRichTextFieldLicenseHandling(RichTextFieldTestCase):
             model=self.publishable.__class__,
             field_name = "title",
         )
-        self.publishable.description = field2.clean('no box here')
+        self.publishable.title = field2.clean('no box here')
         self.publishable.save()
 
         self.assert_equals(1, License.objects.get(pk=l.pk).applications)
