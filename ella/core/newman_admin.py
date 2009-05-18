@@ -251,6 +251,7 @@ class RelatedInlineAdmin(newman.GenericTabularInline):
 class PublishableAdmin(newman.NewmanModelAdmin):
     """ Default admin options for all publishables """
 
+    exclude = ('content_type',)
     list_display = ('admin_link', 'category', 'photo_thumbnail', 'publish_status', 'placement_link')
     list_filter = ('category__site', 'category', 'authors', 'content_type')
     search_fields = ('title', 'description', 'slug', 'authors__name', 'authors__slug',) # FIXME: 'tags__tag__name',)
