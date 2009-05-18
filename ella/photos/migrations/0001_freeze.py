@@ -42,7 +42,6 @@ class Migration:
             'image': ('models.ImageField', [], {'height_field': "'height'", 'width_field': "'width'"}),
             'slug': ('models.SlugField', ["_('Slug')"], {'max_length': '255'}),
             'source': ('models.ForeignKey', ["orm['core.Source']"], {'null': 'True', 'verbose_name': "_('Source')", 'blank': 'True'}),
-            'tags': '<< PUT FIELD DEFINITION HERE >>',
             'title': ('models.CharField', ["_('Title')"], {'max_length': '200'}),
             'width': ('models.PositiveIntegerField', [], {'editable': 'False'})
         },
