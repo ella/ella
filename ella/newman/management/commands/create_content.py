@@ -259,6 +259,7 @@ def map_sites():
 def map_article_contents():
     proc = TextProcessor.objects.get(name='markdown')
     ct_ac = ContentType.objects.get_for_model(ArticleContents)
+    ct_a = ContentType.objects.get_for_model(Article)
     cur = conn.cursor()
     cur.execute(SQL_ALL_ARTICLE_CONTENTS)
     num = int(cur.rowcount)
@@ -285,7 +286,7 @@ def map_article_contents():
         # perex
         perex_src_text, perex_src_created = SourceText.objects.get_or_create(
             processor=proc,
-            content_type=ct_ac,
+            content_type=ct_a, #Article content type
             object_id=obj.pk,
             field='description'
         )
