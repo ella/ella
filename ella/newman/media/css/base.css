@@ -46,6 +46,8 @@ body {
 
 .overlay {
     position: fixed;
+    top: 0px;
+    left: 0px;
     background-color: white;
     border: solid 2px blue;
     border-top-width: 20px;
