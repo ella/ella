@@ -13,17 +13,21 @@ from time import sleep
 from django.core.management.base import BaseCommand
 from django.db import connection, transaction
 from django.contrib.sites.models import Site
+from django.contrib.contenttypes.models import ContentType
 
 from ella.core.models import Category, Author, Source, Placement, Listing
 from ella.newman.models import CategoryUserRole, DenormalizedCategoryUserRole
 from ella.articles.models import Article, ArticleContents
 from ella.photos.models import Photo
 
+from djangomarkup.models import SourceText, TextProcessor
+
 NO_VERB = 0
 STD_VERB = 1
 HIGH_VERB = 2
-BEFORE_DOWNLOAD_SLEEP = 0.02
 PHOTO_STATUS_MOD = 500  # photo import status mod.
+DOWNLOAD_SLEEP = 0.5    # sleep between download attempts (per image)
+MAX_DOWNLOAD_ATTEMPTS = 3
 
 SQL_ALL_ARTICLES = """
 SELECT 
@@ -221,6 +225,7 @@ ORDER BY
 conn = None # global variable holds connection to database
 verbosity = None # holds command's verbosity level
 img_url_prefix = None
+category_max_depth = 0 # Max depth of categories to import (set by parameter)
 
 site_map = {}     # key .. old ID, value .. new Site 
 category_map = {} # key .. old ID, value .. new Category
@@ -252,6 +257,8 @@ def map_sites():
     printv('Sites done.', STD_VERB)
 
 def map_article_contents():
+    proc = TextProcessor.objects.get(name='markdown')
+    ct_ac = ContentType.objects.get_for_model(ArticleContents)
     cur = conn.cursor()
     cur.execute(SQL_ALL_ARTICLE_CONTENTS)
     num = int(cur.rowcount)
@@ -268,6 +275,30 @@ def map_article_contents():
             content=row[3],
             article=article_map[old_id]
         )
+        # create source texts
+        src_text, src_created = SourceText.objects.get_or_create(
+            processor=proc,
+            content_type=ct_ac,
+            object_id=obj.pk,
+            field='content'
+        )
+        # perex
+        perex_src_text, perex_src_created = SourceText.objects.get_or_create(
+            processor=proc,
+            content_type=ct_ac,
+            object_id=obj.pk,
+            field='description'
+        )
+        if src_created:
+            src_text.content = row[3]
+            src_text.save()
+            obj.content = src_text.render()
+            obj.save()
+        if perex_src_created:
+            perex_src_text.content = row[3]
+            perex_src_text.save()
+            obj.description = perex_src_text.render()
+            obj.save()
     printv('ArticleContents done.', STD_VERB)
 
 def progress(msg, perc):
@@ -326,19 +357,19 @@ def save_photo(photo_path):
     photo_url = '%s%s' % (img_url_prefix, photo_path)
     target = '%s/static/%s' % (os.getcwd(), photo_path)
     target_dir = os.path.dirname(target)
-    downloaded = False
+    downloaded = 0
     if not os.path.exists(target_dir):
         os.makedirs(target_dir, 0755)
     process_formatted(target) # copies existing photo to original filename (it may lead to wrong-sized photos)
     if not os.path.exists(target):
-        while not downloaded:
+        while downloaded < MAX_DOWNLOAD_ATTEMPTS:
             try:
                 urllib.urlretrieve(photo_url, target)
                 printv('Saved image file %s' % target)
-                downloaded = True
-                sleep(BEFORE_DOWNLOAD_SLEEP)
+                downloaded += 1
             except:
                 printv('Trying to download image... %s' % photo_url)
+                sleep(DOWNLOAD_SLEEP)
 
 def map_photos():
     cur = conn.cursor()
@@ -353,7 +384,6 @@ def map_photos():
         img_path = row[4]
         if idx % PHOTO_STATUS_MOD == 0:
             progress('Photo import', int(idx / (num/100.0)))
-        counter += 1
         existing = Photo.objects.filter(
             title=row[1],
             description=row[2],
@@ -403,7 +433,7 @@ def _map_parent_categories(parent_map):
     cur = conn.cursor()
     tmp = {}
     for old_id in parent_map:
-        obj = parent_map[old_id]
+        parent_obj = parent_map[old_id]
         cur.execute(SQL_CHILDREN_CATEGORIES, (old_id,) )
         num = int(cur.rowcount)
         for idx in xrange(num):
@@ -413,13 +443,13 @@ def _map_parent_categories(parent_map):
             obj, created = Category.objects.get_or_create(
                 title=row[1],
                 slug=row[2],
-                tree_parent=obj,
+                tree_parent=parent_obj,
                 #tree_path=row[4],
                 description=row[5],
                 site=site_obj
             )
             tmp[int(row[0])] = obj
-    parent_map.update(tmp)
+    #parent_map.update(tmp)
     return tmp
 
 def map_categories():
@@ -442,8 +472,11 @@ def map_categories():
         )
         parent_map[int(row[0])] = obj
 
-    _map_parent_categories(parent_map)
-    _map_parent_categories(parent_map)
+    res = parent_map.copy()
+    for i in range(category_max_depth):
+        xres = _map_parent_categories(res)
+        parent_map.update(xres)
+        res = xres
     
     cur.execute(SQL_REMAINING_CATEGORIES)
     num = int(cur.rowcount)
@@ -494,8 +527,9 @@ def map_articles():
             for xrow in cur_sec.fetchall():
                 obj.authors.add( author_map[int(xrow[2])] )
             article_map[int(row[0])] = obj
-        except:
-            printv('! Problem during creation of Article id=%d title=%s' % (row[0], row[1]), NO_VERB)
+        except Exception, e:
+            printv('! Problem during creation of Article id=%d title=%s. Exception: %s' % \
+            (row[0], row[1], str(e)), NO_VERB)
     printv('Articles done. Total articles: %d' % Article.objects.all().count(), STD_VERB)
 
 def create_placements():
@@ -548,9 +582,9 @@ def create_content(run_transaction, verbosity, **kwargs):
     map_categories()
     map_sources()
     
-    map_photos()
-    #save_photo_map() 
-    #load_photo_map()
+    #map_photos()
+    #save_photo_map()   # esp. suitable for debugging purposes. (saves photo map into text file)
+    load_photo_map()  # esp. suitable for debugging purposes (loads photo map faster)
     map_authors()
 
     # Articles
@@ -586,12 +620,14 @@ class Command(BaseCommand):
             help='Source database char fields encoding. (Default utf-8)'),
         make_option('--urlprefix', dest='url_prefix', default='http://img.ella.centrum.cz/',
             help='URL prefix to be used when downloading photos.'),
+        make_option('--maxdepth', dest='max_depth', default=3,
+            help='Max depth of imported categories. (Default is 3)'),
     )
     help = 'Creates content (moves from old database to the actual. For testing purposes only).'
     args = ""
 
     def handle(self, *fixture_labels, **options):
-        global char_encoding, verbosity, img_url_prefix 
+        global char_encoding, verbosity, img_url_prefix , category_max_depth
         verbosity = int(options.get('verbosity', 1))
         run_transaction = not options.get('start_transaction', False)
         kwa = {}
@@ -601,7 +637,8 @@ class Command(BaseCommand):
         kwa['host'] = options.get('dbhost')
         char_encoding = options.get('char_encoding')
         timeout = int(options.pop('sock_timeout'))
-        IMG_URL_PREFIX = options.pop('url_prefix')
+        img_url_prefix = options.pop('url_prefix')
+        category_max_depth = options.pop('max_depth')
         kwa['charset'] = char_encoding
 
         if not (kwa['user'] and kwa['db'] and kwa['host']):
