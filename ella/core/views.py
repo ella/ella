@@ -334,7 +334,6 @@ def _category_detail(tree_path=False):
 
     return context
 
-
 def get_export_key(func, request, count, name='', content_type=None):
     return 'ella.core.views.export:%d:%d:%s:%s' % (
             settings.SITE_ID, count, name, content_type

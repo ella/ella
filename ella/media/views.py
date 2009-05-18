@@ -42,3 +42,18 @@ class PlayerPlaylist(object):
 
 # this instance is registred in ella custom utrs
 player_playlist = PlayerPlaylist()
+
+def player_playlist_for_id(request, id):
+    try:
+        media = Media.objects.get(pk=id)
+    except Media.DoesNotExist:
+        raise Http404
+
+    # TODO: remove this hack for PlayerPlaylist
+    media.media = media
+
+    context = {'object': media,}
+    player_playlist = PlayerPlaylist()
+
+    return player_playlist(request, [], context)
+
