@@ -582,9 +582,9 @@ def create_content(run_transaction, verbosity, **kwargs):
     map_categories()
     map_sources()
     
-    #map_photos()
+    map_photos()
     #save_photo_map()   # esp. suitable for debugging purposes. (saves photo map into text file)
-    load_photo_map()  # esp. suitable for debugging purposes (loads photo map faster)
+    #load_photo_map()  # esp. suitable for debugging purposes (loads photo map faster)
     map_authors()
 
     # Articles
