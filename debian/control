@@ -3,7 +3,7 @@ Section: python
 Priority: optional
 Maintainer: Jan Kral <jan.kral@centrumholdings.com>
 Uploaders: Ondrej Kohout <ondrej.kohout@centrumholdings.com>, Jakub Vysoky <jakub.vysoky@centrumholdings.com>, Lukas Linhart <lukas.linhart@centrumholdings.com>
-Build-Depends: cdbs (>= 0.4.41), debhelper (>= 5.0.37.2), python-dev, python-support (>= 0.3), python-setuptools
+Build-Depends: cdbs (>= 0.4.41), debhelper (>= 5.0.37.2), python-dev, python-support (>= 0.3), python-setuptools, centrum-python-setuptoolsdummy
 Standards-Version: 3.7.2
 
 Package: centrum-python-djangobaselibrary
