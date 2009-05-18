@@ -17,8 +17,8 @@ from ella.newman.forms import SiteFilterForm, ErrorReportForm
 from ella.newman.models import AdminSetting
 from ella.newman.decorators import require_AJAX
 from ella.newman.utils import set_user_config_db, set_user_config_session, get_user_config,\
-    JsonResponse, JsonResponseError, json_decode
-from ella.newman.permission import has_model_list_permission, applicable_categories
+    JsonResponse, JsonResponseError, json_decode, user_category_filter
+from ella.newman.permission import has_model_list_permission, applicable_categories, permission_filtered_model_qs
 from ella.newman.config import CATEGORY_FILTER, NEWMAN_URL_PREFIX, STATUS_SMTP_ERROR, STATUS_FORM_ERROR
 from ella.newman.options import NewmanModelAdmin
 from ella.core.models.publishable import Placement
@@ -193,7 +193,9 @@ class NewmanSite(AdminSite):
                 if last_filter:
                     last_filters[key] = '?%s' % json_decode(last_filter[0].value)
 
-        future_placements = Placement.objects.select_related().filter(publish_from__gt=datetime.datetime.now())
+        future_qs = Placement.objects.select_related().filter(publish_from__gt=datetime.datetime.now())
+        future_qs_perm = permission_filtered_model_qs(future_qs, request.user)
+        future_placements = user_category_filter(future_qs_perm, request.user)
 
         context = {
             'title': _('Site administration'),

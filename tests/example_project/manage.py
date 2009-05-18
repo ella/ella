@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 import os
 from os.path import join, pardir, abspath, dirname, split
 import sys
@@ -11,8 +12,8 @@ from django.core.management import execute_from_command_line
 DJANGO_SETTINGS_MODULE = '%s.%s' % (split(abspath(dirname(__file__)))[1], 'settings')
 # pythonpath dirs
 PYTHONPATH = [
-    join(dirname(__file__), pardir, pardir),
-    join(dirname(__file__), pardir),
+    abspath(join( dirname(__file__), pardir, pardir)),
+    abspath(join( dirname(__file__), pardir)),
 ]
 
 # inject few paths to pythonpath
