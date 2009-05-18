@@ -51,7 +51,7 @@ class MediaBox(Box):
 })
         return cont
 
-class Media(Publishable):
+class Media(models.Model):
     """
     Media object
 
