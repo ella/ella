@@ -6,7 +6,7 @@ from example_project.tests.test_newman.helpers import NewmanTestCase
 
 class TestArticleBasics(NewmanTestCase):
 
-    def test_article_template_saving(self):
+    def test_article_saving(self):
         s = self.selenium
 
         # go to article adding
