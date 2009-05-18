@@ -34,14 +34,11 @@ setup(
         "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
-    entry_points = {
-        'setuptools.file_finders': ['dummy = setuptools_entry:dummylsfiles'],
-    },
     install_requires = [
         'setuptools>=0.6b1',
     ],
     setup_requires = [
-#        'setuptools_git', # TODO: add dummy to pypi?
+        'setuptools_dummy',
     ],
 )
 
