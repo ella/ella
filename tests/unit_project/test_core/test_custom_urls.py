@@ -13,7 +13,7 @@ def second_view(request, bits, context):
     return request, bits, context
 
 def custom_view(request, context):
-    return request, context
+    return u"OK"
 
 class CustomUrlDispatcherTestCase(UnitTestCase):
     def setUp(self):
@@ -65,6 +65,10 @@ class TestCustomDetailRegistration(CustomUrlDispatcherTestCase):
 class TestViewCalling(CustomUrlDispatcherTestCase):
     def test_nonexisting_view_raises_404(self):
         self.assert_raises(Http404, self.dispatcher.call_view, request=object(), bits=['start'], context=self.context)
+
+    def test_call_custom_detail_simple_success(self):
+        self.dispatcher.register_custom_detail(self.__class__, custom_view)
+        self.assert_equals(u"OK", self.dispatcher.call_custom_detail(request=object(), context=self.context))
 
     def test_call_view_simple_success(self):
         self.dispatcher.register('start', view)
