@@ -27,11 +27,9 @@ class LicenseManager(models.Manager):
         self.filter(reduce(operator.or_, map(get_condition, deps))).update(applications=models.F('applications')+delta)
 
     def reflect_added_dependencies(self, deps):
-        print 'adding uses for ', deps
         self._reflect_changed_dependencies(deps, 1)
 
     def reflect_removed_dependencies(self, deps):
-        print 'removing uses for ', deps
         self._reflect_changed_dependencies(deps, -1)
 
 class License(models.Model):
