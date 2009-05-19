@@ -27,7 +27,7 @@ class Migration:
             'slug': ('models.SlugField', [], {}),
             'specification': ('models.TextField', ["_(u'Specification')"], {}),
             'text': ('models.CharField', ["_(u'Question')"], {'max_length': '200'}),
-            'timelimit': ('models.DateTimeField', [], {'default': 'datetime.datetime(2009, 6, 1, 19, 16, 3, 215303)'})
+            'timelimit': ('models.DateTimeField', [], {'default': 'get_default_timelimit'})
         },
         'answers.questiongroup': {
             'default_timelimit': ('TimedeltaField', [], {}),

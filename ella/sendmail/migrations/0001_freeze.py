@@ -24,7 +24,7 @@ class Migration:
             'id': ('models.AutoField', [], {'primary_key': 'True'}),
             'recipient': ('models.EmailField', [], {}),
             'sender': ('models.EmailField', [], {}),
-            'sent': ('models.DateTimeField', [], {'default': 'datetime.datetime(2009, 5, 18, 19, 15, 58, 325193)'}),
+            'sent': ('models.DateTimeField', [], {'default': 'datetime.now'}),
             'target_ct': ('models.ForeignKey', ["orm['contenttypes.ContentType']"], {'verbose_name': "_('content type')"}),
             'target_id': ('models.PositiveIntegerField', ["_('target id')"], {'db_index': 'True'})
         }
