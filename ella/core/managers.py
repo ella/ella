@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from django.db import connection, models, transaction
+from django.db import models, transaction
+from django.db.models import F
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.utils.encoding import smart_str
@@ -159,23 +160,20 @@ class ListingQuerySetWrapper(object):
         if not hasattr(self, '_count'):
             self._count = self.manager.get_queryset(**self._kwargs).count()
         return self._count
-    
 
 
 def get_top_objects_key(func, self, count, mods=[]):
     return 'ella.core.managers.HitCountManager.get_top_objects_key:%d:%d:%s' % (
             settings.SITE_ID, count, ','.join(['.'.join((model._meta.app_label, model._meta.object_name)) for model in mods])
-)
+        )
 
 class HitCountManager(models.Manager):
 
     def hit(self, placement):
-        cursor = connection.cursor()
-        cursor.execute('UPDATE core_hitcount SET hits=hits+1 WHERE placement_id=%s', (placement.pk,))
-        transaction.set_dirty()
+        count = self.update(hits=F('hits')+1)
 
-        if cursor.rowcount < 1:
-            hc = self.create(placement=placement)
+        if count < 1:
+            hc = self.create(placement=placement, hits=1)
 
     @cache_this(get_top_objects_key)
     def get_top_objects(self, count, mods=[]):

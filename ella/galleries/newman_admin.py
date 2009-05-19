@@ -52,6 +52,7 @@ class GalleryAdmin(PublishableAdmin):
     list_filter = ('created', 'category',)
     search_fields = ('title', 'description', 'slug',)
     inlines = [GalleryItemInline, PlacementInlineAdmin]
+    rich_text_fields = {None: ('description', 'content',)}
     if 'ella.tagging' in settings.INSTALLED_APPS:
         inlines.append(TaggingInlineOptions)
     prepopulated_fields = {'slug': ('title',)}

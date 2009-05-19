@@ -12,8 +12,10 @@ from django.template import Template, TextNode, TemplateSyntaxError
 from django.utils.translation import ugettext_lazy as _
 from django.forms.models import ModelChoiceField
 from django.db.models.fields.related import ManyToManyField
+from django.db.models import signals
+from django.contrib.contenttypes.models import ContentType
 
-from djangomarkup.fields import ListenerPostSave, RichTextField
+from djangomarkup.fields import RichTextField, post_save_listener
 
 from ella.core.templatetags.core import BoxNode, ObjectNotFoundOrInvalid
 from ella.core.models import Dependency
@@ -22,38 +24,54 @@ from ella.newman.permission import get_permission, permission_filtered_model_qs,
 from ella.newman.licenses.models import License
 
 log = logging.getLogger('ella.newman')
+DEP_SRC_TEXT_ATTR = '__dep_src_text'
 
-class DependencyPostSaveListener(ListenerPostSave):
-    def __init__(self, src_text):
-        super(DependencyPostSaveListener, self).__init__(src_text)
-        self.use_licenses = License._meta.installed
+def dependency_post_save_listener(sender, instance, **kwargs):
+    src_texts = post_save_listener(sender, instance, src_text_attr=DEP_SRC_TEXT_ATTR)
+    if not src_texts:
+        return
+    print src_texts
 
-    def __call__(self, sender, signal, created, instance, **kwargs):
-        super(DependencyPostSaveListener, self).__call__(sender, signal, created, instance=instance, **kwargs)
+    ct = ContentType.objects.get_for_model(instance)
 
-        # Delete all dependencies for sender instance
-        qset = Dependency.objects.filter(dependent_ct=self.src_text.content_type, dependent_id=instance.pk)
-        if self.use_licenses:
-            before = list(qset)
-        qset.delete()
+    deps = list(Dependency.objects.filter(dependent_ct=ct, dependent_id=instance.pk))
 
-        # Parse text and recreate dependencies
-        content = getattr(instance, self.src_text.field)
+    kw = {
+        'dependent_ct': ct,
+        'dependent_id': instance.pk,
+    }
 
-        after = []
+    # gather objects used id all texts
+    objs = []
+    for st in src_texts:
+        content = getattr(instance, st.field)
         t = Template(content)
-        for box in t.nodelist.get_nodes_by_type(BoxNode):
-            dep = Dependency()
-            dep.target = box.get_obj()
-            dep.dependent = instance
-            dep.save(force_insert=True)
-            after.append(dep)
+        objs.extend(box.get_obj() for box in t.nodelist.get_nodes_by_type(BoxNode))
+    objs = set(objs)
 
-        if self.use_licenses:
-            License.objects.reflect_changed_dependencies(before, after)
+
+    add = []
+    for obj in objs:
+        dep, created = Dependency.objects.get_or_create(
+                target_ct=ContentType.objects.get_for_model(obj),
+                target_id=obj.pk,
+                **kw
+            )
+        if created:
+            add.append(dep)
+        else:
+            deps.remove(dep)
+
+    # delete outdated dependencies
+    Dependency.objects.filter(pk__in=map(lambda d: d.pk, deps)).delete()
+
+    if License._meta.installed:
+        License.objects.reflect_added_dependencies(add)
+        License.objects.reflect_removed_dependencies(deps)
 
 class NewmanRichTextField(RichTextField):
-    post_save_listener = DependencyPostSaveListener
+    post_save_listener = staticmethod(dependency_post_save_listener)
+    src_text_attr = DEP_SRC_TEXT_ATTR
     widget = widgets.NewmanRichTextAreaWidget
 
     def validate_rendered(self, rendered):

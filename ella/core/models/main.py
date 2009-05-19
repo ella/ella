@@ -169,12 +169,12 @@ class Related(models.Model):
     """
     Related objects - model for recording related items. For example related articles.
     """
-    target_ct = models.ForeignKey(ContentType, related_name='relation_for_set')
-    target_id = models.IntegerField()
+    target_ct = models.ForeignKey(ContentType, verbose_name=_('Content type'), related_name='relation_for_set')
+    target_id = models.IntegerField(_('Object ID'))
     target = CachedGenericForeignKey('target_ct', 'target_id')
 
-    source_ct = models.ForeignKey(ContentType, related_name='related_on_set')
-    source_id = models.IntegerField()
+    source_ct = models.ForeignKey(ContentType, verbose_name=_('Content type'), related_name='related_on_set')
+    source_id = models.IntegerField(_('Object ID'))
     source = CachedGenericForeignKey('source_ct', 'source_id')
 
     def __unicode__(self):

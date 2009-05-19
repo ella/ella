@@ -49,7 +49,7 @@ class AdminHelpItem(models.Model):
         verbose_name = _('Help item')
         verbose_name_plural = _('Help items')
         ordering = ('ct', 'field',)
-        unique_together = (('ct', 'field',),)
+        unique_together = (('ct', 'field', 'lang',),)
 
 
 class AdminUserDraft(models.Model):

@@ -755,3 +755,54 @@ $(document).bind('content_added', function() {
         request_media(MEDIA_URL + 'css/related_lookup.css');
     }
 });
+
+// Opens an overlay with a changelist and calls supplied function on click on item.
+$(function(){ open_overlay = function(content_type, selection_callback) {
+    var top_zindex = ( function() {
+        var rv = 1;
+        $('.ui-widget-overlay').each( function() {
+            rv = Math.max(rv, $(this).css('zIndex'));
+        });
+        return rv + 1;
+    })();
+    var $overlay = $('#box-overlay');
+    if ($overlay.length == 0) $overlay = $(
+        '<div id="box-overlay" class="overlay">'
+    )
+    .css({top:0,left:0,zIndex:top_zindex})
+    .appendTo(
+           $('.change-form').get(0)
+        || $('#content').get(0)
+        || $('body').get(0)
+    );
+    var address = '/' + content_type.split('.').join('/') + '/?pop';
+    ContentByHashLib.load_content({
+        address: address,
+        target_id: 'box-overlay',
+        selection_callback: selection_callback,
+        success_callback: function() {
+            var xhr = this;
+            $('#'+xhr.original_options.target_id+' tbody a')
+            .unbind('click')
+            .click( function(evt) {
+                var clicked_id = $(this).attr('href').replace(/\/$/,'');
+                try {
+                    xhr.original_options.selection_callback(clicked_id, {evt: evt});
+                } catch(e) { carp('Failed running overlay callback', e); }
+                ContentByHashLib.unload_content('box-overlay');
+                return false;
+            })
+            .each( function() {
+                this.onclick = undefined;
+            });
+        }
+    });
+/*
+    $overlay.one('content_added', function() {
+        $(this).find('.filter li a').each( function() {
+            ;;; alert(this);
+            $(this).attr('href', $(this).attr('href').replace(/^\?/, 'filters::&')).addClass('simpleload');
+        });
+    });
+*/
+}});
