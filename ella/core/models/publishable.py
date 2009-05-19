@@ -239,7 +239,7 @@ class Placement(models.Model):
         # First, save Placement
         super(Placement, self).save(force_insert, force_update)
         # Then, save HitCount (needs placement_id)
-        hc, created = HitCount.objects.get_or_create(placement=self)
+        hc, created = HitCount.objects.get_or_create(placement=self, defaults={'hits': 0})
 
         # store the publish_from on the publishable for performance in the admin
         if self.publishable.publish_from > self.publish_from:
