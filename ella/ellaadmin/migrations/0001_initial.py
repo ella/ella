@@ -5,6 +5,10 @@ from ella.ellaadmin.models import *
 
 class Migration:
     
+    depends_on = (
+        ("core", "0001_initial"),
+    )
+ 
     def forwards(self, orm):
         "Write your forwards migration here"
     

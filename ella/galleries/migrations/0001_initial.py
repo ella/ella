@@ -5,6 +5,11 @@ from ella.galleries.models import *
 
 class Migration:
     
+    depends_on = (
+        ("core", "0001_initial"),
+        ("photos", "0001_initial"),
+    )
+ 
     def forwards(self, orm):
         
         # Adding model 'GalleryItem'

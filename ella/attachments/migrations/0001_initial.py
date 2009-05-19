@@ -4,7 +4,11 @@ from django.db import models
 from ella.attachments.models import *
 
 class Migration:
-    
+
+    depends_on = (
+        ("photos", "0001_initial"),
+    )
+     
     def forwards(self, orm):
         
         # Adding model 'Type'
