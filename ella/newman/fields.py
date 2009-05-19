@@ -30,7 +30,6 @@ def dependency_post_save_listener(sender, instance, **kwargs):
     src_texts = post_save_listener(sender, instance, src_text_attr=DEP_SRC_TEXT_ATTR)
     if not src_texts:
         return
-    print src_texts
 
     ct = ContentType.objects.get_for_model(instance)
 
