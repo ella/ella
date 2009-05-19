@@ -1,5 +1,3 @@
-from ella.newman.licenses.models import License
-from ella.newman.licenses.listeners import LicenseListenerPostSave
 import logging
 
 from django.conf import settings
@@ -13,7 +11,6 @@ from django.core.urlresolvers import reverse
 from django.contrib.admin.views.main import ERROR_FLAG
 from django.shortcuts import render_to_response
 from django.db import transaction, models
-from django.db.models import Q, ForeignKey, ManyToManyField, ImageField, DateField, DateTimeField
 from django.utils.functional import update_wrapper
 from django.utils.translation import ugettext as _
 from django.utils.encoding import force_unicode
@@ -26,9 +23,8 @@ from ella.newman.permission import is_category_model, model_category_fk, model_c
 from ella.newman.permission import has_category_permission, get_permission, permission_filtered_model_qs, is_category_fk
 from ella.newman.forms import DraftForm
 from ella.newman.xoptions import XModelAdmin
+from ella.newman.licenses.models import License
 from ella.newman.config import STATUS_OK, STATUS_FORM_ERROR, STATUS_VAR_MISSING, STATUS_OBJECT_NOT_FOUND, AUTOSAVE_MAX_AMOUNT
-
-from djangomarkup.fields import RichTextField
 
 DEFAULT_LIST_PER_PAGE = getattr(settings, 'NEWMAN_LIST_PER_PAGE', 25)
 
@@ -62,27 +58,22 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
                 'field_name': db_field.name,
                 'instance': custom_params.get('instance', None),
                 'model': custom_params.get('model'),
-                'widget': widgets.NewmanRichTextAreaWidget
             })
-            if 'ella.newman.licenses' in settings.INSTALLED_APPS:
-                kwargs.update({
-                    'post_save_listeners': [LicenseListenerPostSave],
-                })
-            rich_text_field = RichTextField(**kwargs)
+            rich_text_field = fields.NewmanRichTextField(**kwargs)
             if css_class:
                 rich_text_field.widget.attrs['class'] += ' %s' % css_class
             return rich_text_field
 
-    if isinstance(db_field, ImageField):
+    if isinstance(db_field, models.ImageField):
         # we accept only (JPEG) images with RGB color profile.
         return fields.RGBImageField(db_field, **kwargs)
 
-    if db_field.name in cls.raw_id_fields and isinstance(db_field, ForeignKey):
+    if db_field.name in cls.raw_id_fields and isinstance(db_field, models.ForeignKey):
         kwargs['widget'] = widgets.ForeignKeyRawIdWidget(db_field.rel)
         return db_field.formfield(**kwargs)
 
     if db_field.name in getattr(cls, 'suggest_fields', {}).keys() \
-                        and isinstance(db_field, (ForeignKey, ManyToManyField)):
+                        and isinstance(db_field, (models.ForeignKey, models.ManyToManyField)):
         kwargs.update({
             'required': not db_field.blank,
             'label': db_field.verbose_name,
@@ -376,19 +367,19 @@ class NewmanModelAdmin(XModelAdmin):
                                     % (self.model._meta.object_name, f, ', '.join(model_fields))
             lookup_key = str('%s__icontains' % f)
             if not lookup:
-                lookup = Q(**{lookup_key: lookup_value})
+                lookup = models.Q(**{lookup_key: lookup_value})
             else:
-                lookup = lookup | Q(**{lookup_key: lookup_value})
+                lookup = lookup | models.Q(**{lookup_key: lookup_value})
         # user role based category filtering
         if not is_category_model(self.model):
             category_field = model_category_fk(self.model)
             if category_field and request.user:
                 applicable = applicable_categories(request.user)
                 args_lookup = { '%s__in' % category_field.name: applicable}
-                lookup = lookup & Q(**args_lookup)
+                lookup = lookup & models.Q(**args_lookup)
         else:
             applicable = applicable_categories(request.user)
-            lookup = lookup & Q(pk__in=applicable)
+            lookup = lookup & models.Q(pk__in=applicable)
         # user category filter
         qs = utils.user_category_filter(self.model.objects.filter(lookup), request.user)
 
@@ -707,7 +698,7 @@ class NewmanModelAdmin(XModelAdmin):
         qs = utils.user_category_filter(q, request.user)
 
         # if self.model is licensed filter queryset
-        if 'ella.newman.licenses' in settings.INSTALLED_APPS:
+        if License._meta.installed:
             exclude_pks = License.objects.unapplicable_for_model(self.model)
             qs_tmp = qs.exclude(pk__in=exclude_pks)
             utils.copy_queryset_flags(qs_tmp, qs)

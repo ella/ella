@@ -1,10 +1,6 @@
 from django.contrib import admin
 from ella.newman.licenses.models import License
 
-LICENSED_MODELS = (
-    'photos.photo',
-)
-
 class LicenseInlineAdmin(admin.TabularInline):
     model = License
     max_num = 1

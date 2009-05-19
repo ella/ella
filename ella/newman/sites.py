@@ -17,8 +17,8 @@ from ella.newman.forms import SiteFilterForm, ErrorReportForm
 from ella.newman.models import AdminSetting
 from ella.newman.decorators import require_AJAX
 from ella.newman.utils import set_user_config_db, set_user_config_session, get_user_config,\
-    JsonResponse, JsonResponseError, json_decode
-from ella.newman.permission import has_model_list_permission, applicable_categories
+    JsonResponse, JsonResponseError, json_decode, user_category_filter
+from ella.newman.permission import has_model_list_permission, applicable_categories, permission_filtered_model_qs
 from ella.newman.config import CATEGORY_FILTER, NEWMAN_URL_PREFIX, STATUS_SMTP_ERROR, STATUS_FORM_ERROR
 from ella.newman.options import NewmanModelAdmin
 from ella.core.models.publishable import Placement
@@ -139,11 +139,17 @@ class NewmanSite(AdminSite):
                 # user has no applicable categories, probably his role is undefined
                 if not applicable_categories(user) and not user.is_superuser:
                     return self.norole(request, user)
+
+                next_path = request.get_full_path()
+
                 # load all user's specific settings into session
                 for c in AdminSetting.objects.filter(user=user):
                     uc = get_user_config(user, c.var)
                     set_user_config_session(request.session, c.var, uc)
-                return HttpResponseRedirect(request.get_full_path())
+
+                if request.POST.get('next'):
+                    next_path += request.POST.get('next')
+                return HttpResponseRedirect(next_path)
             else:
                 return self.display_login_form(request, ERROR_MESSAGE)
 
@@ -187,7 +193,9 @@ class NewmanSite(AdminSite):
                 if last_filter:
                     last_filters[key] = '?%s' % json_decode(last_filter[0].value)
 
-        future_placements = Placement.objects.filter(publish_from__gt=datetime.datetime.now())
+        future_qs = Placement.objects.select_related().filter(publish_from__gt=datetime.datetime.now())
+        future_qs_perm = permission_filtered_model_qs(future_qs, request.user)
+        future_placements = user_category_filter(future_qs_perm, request.user)
 
         context = {
             'title': _('Site administration'),

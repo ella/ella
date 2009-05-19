@@ -27,7 +27,7 @@ class IntervieweeOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     prepopulated_fields = {'slug' : ('name',)}
 
 class InterviewOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
-    list_display = ('title', 'category', 'ask_from', 'reply_from', 'get_hits', 'pk', 'full_url',)
+    list_display = ('title', 'category', 'ask_from', 'reply_from', 'pk',)
     list_filter = ('category__site', 'ask_from', 'reply_from', 'category', 'authors',)
     date_hierarchy = 'ask_from'
     raw_id_fields = ('photo', 'interviewees',)

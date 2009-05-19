@@ -46,6 +46,8 @@ body {
 
 .overlay {
     position: fixed;
+    top: 0px;
+    left: 0px;
     background-color: white;
     border: solid 2px blue;
     border-top-width: 20px;
@@ -198,6 +200,9 @@ a.btn.combo {
 }
 a.btn.filter-active { background-color: #FFF8D1; }
 
+/* HOMEPAGE CALENDAR */
+.hpbox.calendar .cal { display: none; }
+
 /* FOOTER */
 
 #footer {
@@ -220,8 +225,9 @@ input, textarea, select { padding: 2px 0; font: normal 100% Tahoma, Verdana, san
 .ajax-form .form-metadata { display: none; }
 input.vTextField { width: 500px; }
 input.vIntegerField { width: 40px; text-align: right; }
-input.vDateInput, input.vForeignKeyRawIdAdminField { width: 40px; }
-input.vDateTimeInput { width: 130px; }
+input.vForeignKeyRawIdAdminField { width: 40px; }
+input.vDateInput { width: 100px; }
+input.vDateTimeInput { width: 150px; }
 
 .form-row * { vertical-align: middle; margin: 2px 0; }
 
@@ -289,6 +295,7 @@ td, th {
 #changelist table tbody tr:hover { background: #ffc; }
 #changelist table thead th.sorted { background: transparent url(../ico/16/14_layer_raiselayer.png) 98% 50% no-repeat; }
 #changelist table thead th.sorted.descending { background-image: url(../ico/16/14_layer_lowerlayer.png); }
+#changelist table tbody th { font-size: 120%; }
 
 /* CHANGELIST ACTIONS */
 #changelist .actions { padding: 5px; }

@@ -1,11 +1,12 @@
 {% extends "newman/ajax_content_base.html" %}
-{% load newman log %}
+{% load newman log cache %}
 
 {% block breadcrumbs %}{% endblock %}
 {% block content_toolbar %}{% endblock %}
 
 {% block content %}
 
+{% cache 300 'nm-hp-cal' user %}
 <div class="hpcol" style="width: 25%;">
 
     {# ein Kalendar, bitte #}
@@ -13,33 +14,6 @@
         <h3><span>{% trans "Calendar" %}</span></h3>
         <div class="cnt">
             <div class="cal">
-            <script type="text/javascript" src="{{ NEWMAN_MEDIA_URL }}jquery/jquery-ui.js"></script>
-            <script type="text/javascript">
-            // Oldo, klidne tento JS kus zcenzuruj. Cil byl rozchodit kalendar na HP.
-            var pubYear = '{{ publishable_lookup_fields.year }}';
-            var pubMonth = '{{ publishable_lookup_fields.month }}';
-            var pubDay = '{{ publishable_lookup_fields.day }}';
-            var selectedYear = 0;
-            var selectedMonth = 0;
-            var selectedDay = 0;
-            $(function() {
-                $(".hpbox.calendar .cal").datepicker({
-                    dateFormat: 'dd',
-                    onChangeMonthYear: function(year, month, inst) {
-                        selectedMonth = month;
-                        selectedYear = year;
-                    },
-                    onSelect: function(dateText, inst) {
-                        //window.alert(selectedYear + '-' + selectedMonth + '-' + dateText);
-                        //window.location = '#/articles/article/' +
-                        window.location = '#/core/publishable/?' +
-                        pubYear +  '=' + selectedYear + '&' +
-                        pubMonth + '=' + selectedMonth + '&' +
-                        pubDay   + '=' + dateText;
-                    },
-                });
-            });
-            </script>
             </div>
             {% comment %}
             <div class="shortcuts">
@@ -49,7 +23,7 @@
             {% endcomment %}
         </div>
     </div>
-
+{% endcache %}
     <div class="hpbox setup">
         <h3><span>{% trans "Quick Settings" %}</span></h3>
         <div class="cnt">
@@ -87,6 +61,7 @@
 
 </div>
 
+{% cache 300 'nm-hp-search' %}
 <div class="hpcol" style="width: 50%;">
 
     <div class="hpbox search" id="search-form">
@@ -102,6 +77,7 @@
             <a class="icn btn search def">{% trans 'Go' %}</a>
         </div>
     </div>
+{% endcache %}
 
     <div class="hpbox placements" id="search-form">
         <h3><span>{% trans "Future placements" %}</span></h3>
@@ -158,9 +134,33 @@ changelistFilters["{{ fname }}"] = "{{ qstring }}";
 {% block content_js %}
     {{ block.super }}
 
+    {% cache 300 'nm-hp-js' %}
     <script type="text/javascript">
     request_media('{{ NEWMAN_MEDIA_URL }}css/dashboard.css?{{ VERSION }}');
     request_media('{{ NEWMAN_MEDIA_URL }}jquery/jquery-ui-smoothness.css?{{ VERSION }}');
-    //request_media('{{ NEWMAN_MEDIA_URL }}jquery/jquery-ui.js?{{ VERSION }}');
+    request_media('{{ NEWMAN_MEDIA_URL }}jquery/jquery-ui.js?{{ VERSION }}');
+
+    var pubYear = '{{ publishable_lookup_fields.year }}';
+    var pubMonth = '{{ publishable_lookup_fields.month }}';
+    var pubDay = '{{ publishable_lookup_fields.day }}';
+    var selectedYear = 0;
+    var selectedMonth = 0;
+    var selectedDay = 0;
+    $( document ).one('media_loaded', function() {
+        $(".hpbox.calendar .cal").datepicker({
+            dateFormat: 'dd',
+            onChangeMonthYear: function(year, month, inst) {
+                selectedMonth = month;
+                selectedYear = year;
+            },
+            onSelect: function(dateText, inst) {
+                window.location = '#/core/publishable/?' +
+                pubYear +  '=' + selectedYear + '&' +
+                pubMonth + '=' + selectedMonth + '&' +
+                pubDay   + '=' + dateText;
+            },
+        }).slideDown('fast');
+    });
     </script>
+    {% endcache %}
 {% endblock %}

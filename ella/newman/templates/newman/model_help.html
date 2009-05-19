@@ -1,3 +1,5 @@
+{% load cache %}
+{% cache 300 'nm-modhelp' ct %}
 {% spaceless %}
 <div class="model-help">
     <div class="cnt">
@@ -21,3 +23,4 @@
 
 </div>
 {% endspaceless %}
+{% endcache %}

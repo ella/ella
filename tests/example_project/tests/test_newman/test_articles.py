@@ -6,7 +6,7 @@ from example_project.tests.test_newman.helpers import NewmanTestCase
 
 class TestArticleBasics(NewmanTestCase):
 
-    def test_article_template_saving(self):
+    def test_article_saving(self):
         s = self.selenium
 
         # go to article adding
@@ -18,7 +18,7 @@ class TestArticleBasics(NewmanTestCase):
 
         # fill the form
         data = {
-                'title' : u'马 experiment',
+                'title' : u'马 žš experiment',
                 'upper_title' : u'vyšší',
                 'description' : u'Article description',
                 'slug' : 'title',
