@@ -38,8 +38,6 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 )
 
 INSTALLED_APPS = (
-    'unit_project.sampleapp',
-
     'ella.core',
     'ella.articles',
     'ella.photos',
