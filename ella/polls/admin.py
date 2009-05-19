@@ -142,4 +142,3 @@
 #admin.site.register(Choice, ChoiceOptions)
 #admin.site.register(Vote, VoteOptions)
 #admin.site.register(Contestant, ContestantOptions)
-

@@ -1,8 +1,6 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
 
-from ella.tagging.admin import TaggingInlineOptions
-
 from ella.core.admin import PlacementInlineAdmin, PublishableAdmin
 from ella.articles.models import ArticleContents, Article, InfoBox
 

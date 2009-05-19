@@ -1,9 +1,7 @@
 from django.contrib import admin
 from django.conf import settings
 
-from ella.tagging.admin import TaggingInlineOptions
-
-from ella.core.admin import PlacementInlineAdmin
+from ella.core.admin import PlacementInlineOptions
 from ella.interviews.models import Interview, Question, Interviewee, Answer
 from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin
 
@@ -35,9 +33,7 @@ class InterviewOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     raw_id_fields = ('photo', 'interviewees',)
     search_fields = ('title', 'perex',) # FIXME: 'tags__tag__name',)
     prepopulated_fields = {'slug' : ('title',)}
-    inlines = [ QuestionInlineOptions, PlacementInlineAdmin ]
-    if 'ella.tagging' in settings.INSTALLED_APPS:
-        inlines.append(TaggingInlineOptions)
+    inlines = [ QuestionInlineOptions, PlacementInlineOptions ]
     rich_text_fields = {None: ('perex', 'content',)}
 #    suggest_fields = {'category': ('tree_path', 'title', 'slug',), 'authors': ('name', 'slug',),
 #        'source': ('name',), 'interviewees': ('name', 'author__name', 'user__first_name', 'user__last_name'),}
