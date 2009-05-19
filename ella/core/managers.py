@@ -170,7 +170,7 @@ def get_top_objects_key(func, self, count, mods=[]):
 class HitCountManager(models.Manager):
 
     def hit(self, placement):
-        count = self.update(hits=F('hits')+1)
+        count = self.filter(placement=placement).update(hits=F('hits')+1)
 
         if count < 1:
             hc = self.create(placement=placement, hits=1)
