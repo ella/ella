@@ -98,7 +98,31 @@ class FlashImageWidget(widgets.AdminFileWidget):
         return mark_safe(embed_code)
 
 
-class ForeignKeyRawIdWidget(widgets.ForeignKeyRawIdWidget):
+class ForeignKeyRawIdWidget(forms.TextInput):
+
+    class Media:
+        js = (settings.NEWMAN_MEDIA_PREFIX + JS_JQUERY_UI, settings.NEWMAN_MEDIA_PREFIX + JS_GENERIC_SUGGEST,)
+        css = {'screen': (settings.NEWMAN_MEDIA_PREFIX + CSS_GENERIC_SUGGEST,),}
+
+    def __init__(self, rel, attrs=None):
+        self.rel = rel
+        super(ForeignKeyRawIdWidget, self).__init__(attrs)
+
+    def render(self, name, value, attrs=None):
+        if attrs is None:
+            attrs = {}
+        related_url = '../../../%s/%s/' % (self.rel.to._meta.app_label, self.rel.to._meta.object_name.lower())
+        url = ''
+        if not attrs.has_key('class'):
+            attrs['class'] = 'vForeignKeyRawIdAdminField' # The JavaScript looks for this hook.
+        output = [super(ForeignKeyRawIdWidget, self).render(name, value, attrs)]
+        output.append('<a href="%s%s?pop" class="rawid-related-lookup" id="lookup_id_%s"> ' % \
+            (related_url, url, name))
+        output.append('<img src="%simg/admin/selector-search.gif" width="16" height="16" /></a>' % settings.ADMIN_MEDIA_PREFIX)
+        if value:
+            output.append(self.label_for_value(value))
+        return mark_safe(u''.join(output))
+
     def label_for_value(self, value):
         obj = self.rel.to.objects.get(pk=value)
         label = truncate_words(obj, 14)
