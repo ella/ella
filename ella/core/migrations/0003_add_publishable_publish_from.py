@@ -12,7 +12,7 @@ class Migration:
     def forwards(self):
         
         # Adding field 'Publishable.publish_from'
-        db.add_column('core_publishable', 'publish_from', models.DateTimeField(editable=False, default=datetime(3000, 1, 1)))
+        db.add_column('core_publishable', 'publish_from', models.DateTimeField(editable=False, default=PUBLISH_FROM_WHEN_EMPTY))
         call_command('update_publishable_publish_from')
         
     
