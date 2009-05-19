@@ -34,8 +34,8 @@ CSS_DATE_INPUT = 'css/datetime.css'
 JS_FLASH_IMAGE_INPUT = 'js/flash_image.js'
 SWF_FLASH_IMAGE_INPUT = 'swf/PhotoUploader.swf'
 
-# Generic lookups
-JS_GENERIC_LOOKUP = 'js/GenericRelatedObjectLookups.js'
+# Related/Generic lookups
+JS_RELATED_LOOKUP = 'js/related_lookup.js'
 CLASS_TARGECT = 'target_ct'
 CLASS_TARGEID = 'target_id'
 
@@ -101,8 +101,7 @@ class FlashImageWidget(widgets.AdminFileWidget):
 class ForeignKeyRawIdWidget(forms.TextInput):
 
     class Media:
-        js = (settings.NEWMAN_MEDIA_PREFIX + JS_JQUERY_UI, settings.NEWMAN_MEDIA_PREFIX + JS_GENERIC_SUGGEST,)
-        css = {'screen': (settings.NEWMAN_MEDIA_PREFIX + CSS_GENERIC_SUGGEST,),}
+        js = (settings.NEWMAN_MEDIA_PREFIX + JS_RELATED_LOOKUP,)
 
     def __init__(self, rel, attrs=None):
         self.rel = rel
@@ -132,7 +131,7 @@ class ForeignKeyRawIdWidget(forms.TextInput):
 
 class AdminSuggestWidget(forms.TextInput):
     class Media:
-        js = (settings.NEWMAN_MEDIA_PREFIX + JS_JQUERY_UI, settings.NEWMAN_MEDIA_PREFIX + JS_GENERIC_SUGGEST,)
+        js = (settings.NEWMAN_MEDIA_PREFIX + JS_RELATED_LOOKUP, settings.NEWMAN_MEDIA_PREFIX + JS_GENERIC_SUGGEST,)
         css = {'screen': (settings.NEWMAN_MEDIA_PREFIX + CSS_GENERIC_SUGGEST,),}
 
     def __init__(self, db_field, attrs={}, **kwargs):
@@ -230,10 +229,6 @@ class DateTimeWidget(forms.DateTimeInput):
 class ForeignKeyGenericRawIdWidget(forms.TextInput):
     " Custom widget adding a class to attrs. "
 
-#    class Media:
-#        js = (
-#            MEDIA_PREFIX + JS_GENERIC_LOOKUP,
-#        )
     def __init__(self, attrs={}):
         super(ForeignKeyGenericRawIdWidget, self).__init__(attrs={'class': CLASS_TARGEID})
 
