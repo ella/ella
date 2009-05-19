@@ -20,21 +20,19 @@ class LicenseManager(models.Manager):
         qset = queryset.exclude(pk__in=self._get_queryset_of_unapplicables(queryset.model))
         return qset
 
-    def reflect_changed_dependencies(self, before, after):
-        """ Update current applications if target model is licensed. """
-        get_target = lambda dep: (dep.target_ct, dep.target_id)
-        get_condition = lambda tgt: models.Q(ct=tgt[0], obj_id=tgt[1])
+    def _reflect_changed_dependencies(self, deps, delta):
+        if not deps:
+            return
+        get_condition = lambda dep: models.Q(ct=dep.target_ct, obj_id=dep.target_id)
+        self.filter(reduce(operator.or_, map(get_condition, deps))).update(applications=models.F('applications')+delta)
 
-        b = set(map(get_target, before))
-        a = set(map(get_target, after))
-        add = a - b
-        delete = b - a
+    def reflect_added_dependencies(self, deps):
+        print 'adding uses for ', deps
+        self._reflect_changed_dependencies(deps, 1)
 
-        if add:
-            self.filter(reduce(operator.or_, map(get_condition, add))).update(applications=models.F('applications')+1)
-
-        if delete:
-            self.filter(reduce(operator.or_, map(get_condition, delete))).update(applications=models.F('applications')-1)
+    def reflect_removed_dependencies(self, deps):
+        print 'removing uses for ', deps
+        self._reflect_changed_dependencies(deps, -1)
 
 class License(models.Model):
 

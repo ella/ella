@@ -46,6 +46,8 @@ body {
 
 .overlay {
     position: fixed;
+    top: 0px;
+    left: 0px;
     background-color: white;
     border: solid 2px blue;
     border-top-width: 20px;
@@ -293,6 +295,7 @@ td, th {
 #changelist table tbody tr:hover { background: #ffc; }
 #changelist table thead th.sorted { background: transparent url(../ico/16/14_layer_raiselayer.png) 98% 50% no-repeat; }
 #changelist table thead th.sorted.descending { background-image: url(../ico/16/14_layer_lowerlayer.png); }
+#changelist table tbody th { font-size: 120%; }
 
 /* CHANGELIST ACTIONS */
 #changelist .actions { padding: 5px; }

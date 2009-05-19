@@ -1,6 +1,6 @@
 // Debugging tools
 ;;; function alert_dump(obj, name) {
-;;;     var s = name ? name + ":\n" : '';
+;;;     var s = name ? name + ":\n" : obj.toString ? obj.toString() + ":\n" : '';
 ;;;     for (var i in obj) s += i + ': ' + obj[i] + "\n";
 ;;;     alert(s);
 ;;; }
@@ -265,6 +265,9 @@ var ContentByHashLib = {};
                     LOAD_BUF[ this.load_id ].data = data;
                 }
                 draw_ready();
+                if (this.custom_success) try {
+                    this.custom_success();
+                } catch(e) { carp('Failed success callback (load_content)', e, this); }
             },
             error: function(xhr) {
                 LOAD_BUF[ this.load_id ].xhr = xhr;
@@ -272,9 +275,15 @@ var ContentByHashLib = {};
                 cancel_request( this.load_id );
                 show_ajax_error(xhr);
                 draw_ready();
+                if (this.custom_error) try {
+                    this.custom_error();
+                } catch(e) { carp('Failed error callback (load_content)', e, this); }
             },
             load_id: load_id,
-            request_no: MAX_REQUEST
+            request_no: MAX_REQUEST,
+            custom_success: arg.success_callback,
+            custom_error: arg.error_callback,
+            original_options: arg
         });
     }
     ContentByHashLib.load_content = load_content;
@@ -555,20 +564,20 @@ function adr(address, options) {
     var target_id = '';
     // But wait, if target_id::rel_base::address was specified,
     // then get the modifier address and insert it then as appropriate.
-    var new_address;
-    if (address.match(/([-\w]*)::([-\w]*)::(.*)/)) {
+    var new_address, reg_res;
+    if (reg_res = address.match(/([-\w]*)::([-\w]*)::(.*)/)) {
         var rel_base;
-        target_id = RegExp.$1;
-        rel_base  = RegExp.$2;
-        address   = RegExp.$3;
+        target_id = reg_res[1];
+        rel_base  = reg_res[2];
+        address   = reg_res[3];
         if (rel_base.length) rel_base  += '::';
         new_address = adr(rel_base+address, {hash:hash, just_get:1})
         if (options.just_get) return new_address;
     }
     // OK, go on figuring out which specifier is concerned.
-    else if (address.match(/([-\w]*)::(.*)/)) {
-        target_id = RegExp.$1;
-        address   = RegExp.$2;
+    else if (reg_res = address.match(/([-\w]*)::(.*)/)) {
+        target_id = reg_res[1];
+        address   = reg_res[2];
     }
     
     // If no hash is present, simply use the address.
@@ -708,8 +717,8 @@ function get_hashadr(address, options) {
 // returns address for use in requests, i.e. with BASE_PATH prepended
 function get_adr(address, options) {
     var hashadr = get_hashadr(address, options);
-    if (hashadr.charAt(0) != '/') hashadr = get_hashadr(hashadr);
-    return BASE_PATH + hashadr;
+//    if (hashadr.charAt(0) != '/') hashadr = get_hashadr(hashadr);
+    return prepend_base_path_to(hashadr);
         
 }
 

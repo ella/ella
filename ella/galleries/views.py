@@ -51,8 +51,13 @@ def gallery_item_detail(request, context, item_slug=None):
             'position' : position,
     })
 
+    if request.is_ajax():
+        template_name = "item-ajax.html"
+    else:
+        template_name = "item.html"
+
     return render_to_response(
-        get_templates_from_placement('item.html', context['placement']),
+        get_templates_from_placement(template_name, context['placement']),
         context,
         context_instance=RequestContext(request),
     )

@@ -23,6 +23,7 @@ def url_info(request):
         'VERSION' : VERSION,
         'SERVER_INFO' : SERVER_INFO,
         'SITE_NAME' : current_site_name,
+        'CURRENT_SITE': current_site,
 }
 
 def cache(request):

@@ -4,7 +4,8 @@ from djangosanetesting import DatabaseTestCase
 
 from django.contrib.sites.models import Site
 
-from ella.core.models import Placement, Category
+from ella.core.models import Placement, Category, Publishable
+from django.core.management import call_command
 
 from unit_project.test_core import create_basic_categories, create_and_place_a_publishable
 
@@ -14,14 +15,56 @@ class PublishableTestCase(DatabaseTestCase):
         create_basic_categories(self)
         create_and_place_a_publishable(self)
 
-class TestPublishableHelpers(PublishableTestCase):
+class TestPublishFrom(PublishableTestCase):
+    def test_publish_from_is_set_to_placements(self):
+        self.assert_equals(self.placement.publish_from, self.publishable.publish_from)
 
+    def test_publish_from_is_reset_when_last_placement_deleted(self):
+        self.placement.delete()
+        self.assert_equals(datetime(3000, 1, 1), self.publishable.publish_from)
+
+    def test_with_more_placements_publish_from_is_tha_earliest(self):
+        Placement.objects.create(
+            publishable=self.publishable,
+            category=self.category,
+            publish_from=datetime(2009,1,1)
+        )
+
+        self.assert_equals(self.placement.publish_from, self.publishable.publish_from)
+
+    def test_publish_from_is_set_to_another_when_placement_deleted(self):
+        Placement.objects.create(
+            publishable=self.publishable,
+            category=self.category,
+            publish_from=datetime(2009,1,1)
+        )
+        self.placement.delete()
+        self.assert_equals(datetime(2009,1,1), self.publishable.publish_from)
+
+    def test_update_publishable_publish_from_sets_publish_from_properly(self):
+        self.publishable.publish_from = datetime(2000, 1, 1)
+        self.publishable.save()
+
+        call_command('update_publishable_publish_from')
+        p = Publishable.objects.get(pk=self.publishable.pk)
+        self.assert_equals(self.placement.publish_from, p.publish_from)
+
+    def test_update_publishable_publish_from_sets_publish_from_properly_with_no_placement(self):
+        self.placement.delete()
+        self.publishable.publish_from = datetime(2000, 1, 1)
+        self.publishable.save()
+
+        call_command('update_publishable_publish_from')
+        p = Publishable.objects.get(pk=self.publishable.pk)
+        self.assert_equals(datetime(3000, 1, 1), p.publish_from)
+
+
+class TestPublishableHelpers(PublishableTestCase):
     def test_url(self):
         self.assert_equals('/nested-category/2008/1/10/articles/first-article/', self.publishable.get_absolute_url())
 
     def test_domain_url(self):
         self.assert_equals('http://example.com/nested-category/2008/1/10/articles/first-article/', self.publishable.get_domain_url())
-
 
 class TestMainPlacement(PublishableTestCase):
 

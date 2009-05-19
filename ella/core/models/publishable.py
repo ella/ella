@@ -51,6 +51,10 @@ class Publishable(models.Model):
     # Description
     description = models.TextField(_('Description'))
 
+    # denormalized fields
+    # the placement's publish_from
+    publish_from = models.DateTimeField(editable=False, default=datetime(3000, 1, 1))
+
     class Meta:
         app_label = 'core'
         verbose_name = _('Publishable object')
@@ -204,6 +208,16 @@ class Placement(models.Model):
         now = datetime.now()
         return now > self.publish_from and (self.publish_to is None or now < self.publish_to)
 
+    def delete(self):
+        super(Placement, self).delete()
+        try:
+            publish_from = Placement.objects.filter(publishable=self.publishable).order_by('publish_from')[0].publish_from
+        except IndexError, e:
+            publish_from = datetime(3000, 1, 1)
+
+        self.publishable.publish_from = publish_from
+        Publishable.objects.filter(pk=self.publishable_id).update(publish_from=publish_from)
+
     def save(self, force_insert=False, force_update=False):
         " If Listing is created, we create HitCount object "
 
@@ -224,6 +238,11 @@ class Placement(models.Model):
         super(Placement, self).save(force_insert, force_update)
         # Then, save HitCount (needs placement_id)
         hc, created = HitCount.objects.get_or_create(placement=self)
+
+        # store the publish_from on the publishable for performance in the admin
+        if self.publishable.publish_from > self.publish_from:
+            self.publishable.publish_from = self.publish_from
+            Publishable.objects.filter(pk=self.publishable_id).update(publish_from=self.publish_from)
 
     def get_absolute_url(self, domain=False):
         obj = self.publishable
