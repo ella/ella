@@ -504,6 +504,7 @@ $( function() {
         });
     });
     
+    // Search on HP
     // The search button should send us to an address according to the thing selected in the select
     function do_search() {
         var $form = $('#search-form');
@@ -523,6 +524,17 @@ $( function() {
     }
     $('#search-form input[name=q]'      ).live('keypress', search_on_enter);
     $('#search-form select[name=action]').live('keypress', search_on_enter);
+    
+    // Search in change lists
+    $('#filters-handler .btn.search').live('click', function(evt) {
+        if (evt.button != 0) return;
+        if ($('#changelist').length == 0) return;   // We're not in changelist
+        var term = $(this).prev('input#searchbar').val();
+        if (!term) return;  // Nothing to search for
+        var adr_term = '&q=' + escape(term);
+        adr(adr_term);
+        return false;
+    });
 });
 
 // Message bubble
