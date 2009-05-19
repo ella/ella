@@ -6,11 +6,29 @@ from ella.positions.models import *
 class Migration:
     
     def forwards(self, orm):
-        "Write your forwards migration here"
+        
+        # Adding model 'Position'
+        db.create_table('positions_position', (
+            ('id', models.AutoField(primary_key=True)),
+            ('category', models.ForeignKey(orm['core.Category'], verbose_name=_('Category'))),
+            ('name', models.CharField(_('Name'), max_length=200)),
+            ('target_ct', models.ForeignKey(orm['contenttypes.ContentType'], null=True, verbose_name=_('Target content type'), blank=True)),
+            ('target_id', models.PositiveIntegerField(_('Target id'), null=True, blank=True)),
+            ('active_from', models.DateTimeField(_('Position active from'), null=True, blank=True)),
+            ('active_till', models.DateTimeField(_('Position active till'), null=True, blank=True)),
+            ('box_type', models.CharField(_('Box type'), max_length=200, blank=True)),
+            ('text', models.TextField(_('Definition'), blank=True)),
+            ('disabled', models.BooleanField(_('Disabled'), default=False)),
+        ))
+        db.send_create_signal('positions', ['Position'])
+        
     
     
     def backwards(self, orm):
-        "Write your backwards migration here"
+        
+        # Deleting model 'Position'
+        db.delete_table('positions_position')
+        
     
     
     models = {

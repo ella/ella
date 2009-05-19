@@ -6,11 +6,26 @@ from ella.sendmail.models import *
 class Migration:
     
     def forwards(self, orm):
-        "Write your forwards migration here"
+        
+        # Adding model 'Mail'
+        db.create_table('sendmail_mail', (
+            ('id', models.AutoField(primary_key=True)),
+            ('sender', models.EmailField()),
+            ('recipient', models.EmailField()),
+            ('sent', models.DateTimeField(default=datetime.now)),
+            ('target_ct', models.ForeignKey(orm['contenttypes.ContentType'], verbose_name=_('content type'))),
+            ('target_id', models.PositiveIntegerField(_('target id'), db_index=True)),
+            ('content', models.TextField(null=True, blank=True)),
+        ))
+        db.send_create_signal('sendmail', ['Mail'])
+        
     
     
     def backwards(self, orm):
-        "Write your backwards migration here"
+        
+        # Deleting model 'Mail'
+        db.delete_table('sendmail_mail')
+        
     
     
     models = {

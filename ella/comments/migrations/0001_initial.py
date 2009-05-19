@@ -6,11 +6,66 @@ from ella.comments.models import *
 class Migration:
     
     def forwards(self, orm):
-        "Write your forwards migration here"
+        
+        # Adding model 'BannedUser'
+        db.create_table('comments_banneduser', (
+            ('id', models.AutoField(primary_key=True)),
+            ('target_ct', models.ForeignKey(orm['contenttypes.ContentType'], verbose_name=_('Target content type'))),
+            ('target_id', models.PositiveIntegerField(_('Target id'))),
+            ('user', models.ForeignKey(orm['auth.User'], verbose_name=_('Banned author'))),
+        ))
+        db.send_create_signal('comments', ['BannedUser'])
+        
+        # Adding model 'Comment'
+        db.create_table('comments_comment', (
+            ('id', models.AutoField(primary_key=True)),
+            ('target_ct', models.ForeignKey(orm['contenttypes.ContentType'], verbose_name=_('Target content type'))),
+            ('target_id', models.PositiveIntegerField(_('Target id'))),
+            ('subject', models.TextField(_('Comment subject'), max_length=defaults.SUBJECT_LENGTH)),
+            ('content', models.TextField(_('Comment content'), max_length=defaults.COMMENT_LENGTH)),
+            ('parent', models.ForeignKey(orm.Comment, null=True, verbose_name=_('Tree structure parent'), blank=True)),
+            ('path', models.CharField(_('Genealogy tree path'), max_length=defaults.PATH_LENGTH, editable=False, blank=True)),
+            ('user', models.ForeignKey(orm['auth.User'], null=True, verbose_name=_('Authorized author'), blank=True)),
+            ('nickname', models.CharField(_("Anonymous author's nickname"), max_length=defaults.NICKNAME_LENGTH, blank=True)),
+            ('email', models.EmailField(_('Authors email (optional)'), blank=True)),
+            ('ip_address', models.IPAddressField(_('IP address'), null=True, blank=True)),
+            ('submit_date', models.DateTimeField(_('Time submitted'), default=datetime.now, editable=True)),
+            ('is_public', models.BooleanField(_('Is public'), default=True)),
+        ))
+        db.send_create_signal('comments', ['Comment'])
+        
+        # Adding model 'CommentOptions'
+        db.create_table('comments_commentoptions', (
+            ('id', models.AutoField(primary_key=True)),
+            ('target_ct', models.ForeignKey(orm['contenttypes.ContentType'], verbose_name=_('Target content type'))),
+            ('target_id', models.PositiveIntegerField(_('Target id'))),
+            ('options', models.CharField(max_length=defaults.OPTS_LENGTH, blank=True)),
+            ('timestamp', models.DateTimeField(default=datetime.now)),
+        ))
+        db.send_create_signal('comments', ['CommentOptions'])
+        
+        # Adding model 'BannedIP'
+        db.create_table('comments_bannedip', (
+            ('id', models.AutoField(primary_key=True)),
+        ))
+        db.send_create_signal('comments', ['BannedIP'])
+        
     
     
     def backwards(self, orm):
-        "Write your backwards migration here"
+        
+        # Deleting model 'BannedUser'
+        db.delete_table('comments_banneduser')
+        
+        # Deleting model 'Comment'
+        db.delete_table('comments_comment')
+        
+        # Deleting model 'CommentOptions'
+        db.delete_table('comments_commentoptions')
+        
+        # Deleting model 'BannedIP'
+        db.delete_table('comments_bannedip')
+        
     
     
     models = {

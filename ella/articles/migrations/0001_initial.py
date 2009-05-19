@@ -5,12 +5,69 @@ from ella.articles.models import *
 
 class Migration:
     
+    depends_on = (
+        ("core", "0001_initial"),
+    )
+ 
     def forwards(self, orm):
-        "Write your forwards migration here"
+        
+        # Adding model 'ArticleContents'
+        db.create_table('articles_articlecontents', (
+            ('id', models.AutoField(primary_key=True)),
+            ('article', models.ForeignKey(orm.Article, verbose_name=_('Article'))),
+            ('title', models.CharField(_('Title'), max_length=200, blank=True)),
+            ('content', models.TextField(_('Content'))),
+        ))
+        db.send_create_signal('articles', ['ArticleContents'])
+        
+        # Adding model 'InfoBox'
+        db.create_table('articles_infobox', (
+            ('id', models.AutoField(primary_key=True)),
+            ('title', models.CharField(_('Title'), max_length=255)),
+            ('created', models.DateTimeField(_('Created'), default=datetime.now, editable=False)),
+            ('updated', models.DateTimeField(_('Updated'), null=True, blank=True)),
+            ('content', models.TextField(_('Content'))),
+        ))
+        db.send_create_signal('articles', ['InfoBox'])
+        
+        # Adding model 'Article'
+        db.create_table('articles_article', (
+            ('id', models.AutoField(primary_key=True)),
+            ('title', models.CharField(_('Title'), max_length=255)),
+            ('upper_title', models.CharField(_('Upper title'), max_length=255, blank=True)),
+            ('slug', models.SlugField(_('Slug'), max_length=255)),
+            ('perex', models.TextField(_('Perex'))),
+            ('created', models.DateTimeField(_('Created'), default=datetime.now, editable=False, db_index=True)),
+            ('updated', models.DateTimeField(_('Updated'), null=True, blank=True)),
+            ('source', models.ForeignKey(orm['core.Source'], null=True, verbose_name=_('Source'), blank=True)),
+            ('category', models.ForeignKey(orm['core.Category'], verbose_name=_('Category'))),
+            ('photo', models.ForeignKey(orm['photos.Photo'], null=True, verbose_name=_('Photo'), blank=True)),
+        ))
+        db.send_create_signal('articles', ['Article'])
+        
+        # Adding ManyToManyField 'Article.authors'
+        db.create_table('articles_article_authors', (
+            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
+            ('article', models.ForeignKey(orm.Article, null=False)),
+            ('author', models.ForeignKey(orm['core.Author'], null=False))
+        ))
+        
     
     
     def backwards(self, orm):
-        "Write your backwards migration here"
+        
+        # Deleting model 'ArticleContents'
+        db.delete_table('articles_articlecontents')
+        
+        # Deleting model 'InfoBox'
+        db.delete_table('articles_infobox')
+        
+        # Deleting model 'Article'
+        db.delete_table('articles_article')
+        
+        # Dropping ManyToManyField 'Article.authors'
+        db.delete_table('articles_article_authors')
+        
     
     
     models = {

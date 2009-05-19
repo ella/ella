@@ -6,11 +6,41 @@ from ella.series.models import *
 class Migration:
     
     def forwards(self, orm):
-        "Write your forwards migration here"
+        
+        # Adding model 'Serie'
+        db.create_table('series_serie', (
+            ('id', models.AutoField(primary_key=True)),
+            ('title', models.CharField(_('Title'), max_length=96)),
+            ('slug', models.SlugField(_('Slug'), unique=True)),
+            ('perex', models.TextField(_('Perex'))),
+            ('description', models.TextField(_('Description'), blank=True)),
+            ('category', models.ForeignKey(orm['core.Category'], verbose_name=_('Category'))),
+            ('hide_newer_parts', models.BooleanField(_('Hide newer parts'), default=False)),
+            ('started', models.DateField(_('Started'))),
+            ('finished', models.DateField(_('Finished'), null=True, blank=True)),
+            ('photo', models.ForeignKey(orm['photos.Photo'], null=True, verbose_name=_('Photo'), blank=True)),
+        ))
+        db.send_create_signal('series', ['Serie'])
+        
+        # Adding model 'SeriePart'
+        db.create_table('series_seriepart', (
+            ('id', models.AutoField(primary_key=True)),
+            ('serie', CachedForeignKey(orm.Serie, verbose_name=_('Serie'))),
+            ('placement', CachedForeignKey(orm['core.Placement'], unique=True)),
+            ('part_no', models.PositiveSmallIntegerField(_('Part no.'), default=1, editable=False)),
+        ))
+        db.send_create_signal('series', ['SeriePart'])
+        
     
     
     def backwards(self, orm):
-        "Write your backwards migration here"
+        
+        # Deleting model 'Serie'
+        db.delete_table('series_serie')
+        
+        # Deleting model 'SeriePart'
+        db.delete_table('series_seriepart')
+        
     
     
     models = {

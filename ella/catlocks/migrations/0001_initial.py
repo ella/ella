@@ -6,11 +6,22 @@ from ella.catlocks.models import *
 class Migration:
     
     def forwards(self, orm):
-        "Write your forwards migration here"
+        
+        # Adding model 'CategoryLock'
+        db.create_table('catlocks_categorylock', (
+            ('id', models.AutoField(primary_key=True)),
+            ('category', CachedForeignKey(orm['core.Category'], unique=True, verbose_name=_('Category'))),
+            ('password', models.CharField(_('Password'), max_length=255)),
+        ))
+        db.send_create_signal('catlocks', ['CategoryLock'])
+        
     
     
     def backwards(self, orm):
-        "Write your backwards migration here"
+        
+        # Deleting model 'CategoryLock'
+        db.delete_table('catlocks_categorylock')
+        
     
     
     models = {

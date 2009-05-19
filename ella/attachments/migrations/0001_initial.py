@@ -6,11 +6,44 @@ from ella.attachments.models import *
 class Migration:
     
     def forwards(self, orm):
-        "Write your forwards migration here"
+        
+        # Adding model 'Type'
+        db.create_table('attachments_type', (
+            ('id', models.AutoField(primary_key=True)),
+            ('name', models.CharField(_('Name'), max_length=100)),
+            ('mimetype', models.CharField(_('Mime type'), max_length=100)),
+        ))
+        db.send_create_signal('attachments', ['Type'])
+        
+        # Adding model 'Attachment'
+        db.create_table('attachments_attachment', (
+            ('id', models.AutoField(primary_key=True)),
+            ('name', models.CharField(_('Name'), max_length=255)),
+            ('slug', models.SlugField(_('Slug'), max_length=255)),
+            ('photo', models.ForeignKey(orm['photos.Photo'], null=True, verbose_name=_('Photo'), blank=True)),
+            ('description', models.TextField(_('Description'))),
+            ('created', models.DateTimeField(_('Created'), default=datetime.now, editable=False)),
+            ('attachment', models.FileField(_('Attachment'))),
+            ('type', models.ForeignKey(orm.Type, verbose_name=_('Attachment type'))),
+        ))
+        db.send_create_signal('attachments', ['Attachment'])
+        
+        # Creating unique_together for [name, mimetype] on Type.
+        db.create_unique('attachments_type', ['name', 'mimetype'])
+        
     
     
     def backwards(self, orm):
-        "Write your backwards migration here"
+        
+        # Deleting model 'Type'
+        db.delete_table('attachments_type')
+        
+        # Deleting model 'Attachment'
+        db.delete_table('attachments_attachment')
+        
+        # Deleting unique_together for [name, mimetype] on Type.
+        db.delete_unique('attachments_type', ['name', 'mimetype'])
+        
     
     
     models = {
