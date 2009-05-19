@@ -9,7 +9,7 @@ from ella.db.models import Publishable
 from ella.photos.models import Photo
 
 
-class Serie(models.Model):
+class Serie(Publishable):
 
     title = models.CharField(_('Title'), max_length=96)
     slug = models.SlugField(_('Slug'), unique=True)

@@ -62,7 +62,7 @@ class FloatingStateModel(object):
         return False
 
 
-class Contest(models.Model, FloatingStateModel):
+class Contest(Publishable, FloatingStateModel):
     """
     Contests with title, descriptions and activation
     """
@@ -134,7 +134,7 @@ class QuizBox(Box):
         cont['form'] = QuestionForm(questions[0])(prefix='0')
         return cont
 
-class Quiz(models.Model, FloatingStateModel):
+class Quiz(Publishable, FloatingStateModel):
     """
     Quizes with title, descriptions and activation options.
     """

@@ -32,7 +32,7 @@ class Interviewee(models.Model):
         return self.name
 
 
-class Interview(models.Model):
+class Interview(Publishable):
     # Titles
     title = models.CharField(_('Title'), max_length=255)
     upper_title = models.CharField(_('Upper title'), max_length=255, blank=True)
