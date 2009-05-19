@@ -121,7 +121,7 @@ CREATE TABLE `answers_question` (
   `nick` varchar(150) COLLATE utf8_czech_ci NOT NULL,
   `created` datetime NOT NULL,
   `slug` varchar(50) COLLATE utf8_czech_ci NOT NULL,
-  `timelimit` datetime NOT NULL DEFAULT '2009-06-02 12:06:42',
+  `timelimit` datetime NOT NULL DEFAULT '2009-06-02 13:54:12',
   PRIMARY KEY (`id`),
   KEY `answers_question_slug` (`slug`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
@@ -203,7 +203,7 @@ CREATE TABLE `articles_article` (
   `upper_title` varchar(255) COLLATE utf8_czech_ci NOT NULL,
   `slug` varchar(255) COLLATE utf8_czech_ci NOT NULL,
   `perex` longtext COLLATE utf8_czech_ci NOT NULL,
-  `created` datetime NOT NULL DEFAULT '2009-05-19 12:05:26',
+  `created` datetime NOT NULL DEFAULT '2009-05-19 13:53:18',
   `updated` datetime DEFAULT NULL,
   `source_id` int(11) DEFAULT NULL,
   `category_id` int(11) NOT NULL,
@@ -294,7 +294,7 @@ DROP TABLE IF EXISTS `articles_infobox`;
 CREATE TABLE `articles_infobox` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `title` varchar(255) COLLATE utf8_czech_ci NOT NULL,
-  `created` datetime NOT NULL DEFAULT '2009-05-19 12:05:26',
+  `created` datetime NOT NULL DEFAULT '2009-05-19 13:53:18',
   `updated` datetime DEFAULT NULL,
   `content` longtext COLLATE utf8_czech_ci NOT NULL,
   PRIMARY KEY (`id`)
@@ -349,7 +349,7 @@ CREATE TABLE `astrology_birthperiod` (
   `start_day` date NOT NULL,
   `end_day` date NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `sign_id_refs_id_79c9a2c7` (`sign_id`),
+  KEY `astrology_birthperiod_sign_id` (`sign_id`),
   CONSTRAINT `sign_id_refs_id_79c9a2c7` FOREIGN KEY (`sign_id`) REFERENCES `astrology_sign` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -377,7 +377,9 @@ CREATE TABLE `astrology_horoscope` (
   `description` longtext COLLATE utf8_czech_ci NOT NULL,
   `logo_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `slug` (`slug`)
+  UNIQUE KEY `slug` (`slug`),
+  KEY `astrology_horoscope_logo_id` (`logo_id`),
+  CONSTRAINT `logo_id_refs_id_1e18a2a7` FOREIGN KEY (`logo_id`) REFERENCES `photos_photo` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -427,7 +429,8 @@ CREATE TABLE `astrology_lunardiary` (
   `content` longtext COLLATE utf8_czech_ci NOT NULL,
   `publish_date` date NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `category_id` (`category_id`,`publish_date`),
+  UNIQUE KEY `astrology_lunardiary_category_id_76a0eb81` (`category_id`,`publish_date`),
+  KEY `astrology_lunardiary_category_id` (`category_id`),
   CONSTRAINT `category_id_refs_id_7b73e5c3` FOREIGN KEY (`category_id`) REFERENCES `astrology_lunardiarycategory` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -452,7 +455,7 @@ CREATE TABLE `astrology_lunardiarycategory` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(50) COLLATE utf8_czech_ci NOT NULL,
   `slug` varchar(50) COLLATE utf8_czech_ci NOT NULL,
-  `ordering` smallint(5) unsigned NOT NULL,
+  `ordering` smallint(5) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `slug` (`slug`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
@@ -536,12 +539,13 @@ CREATE TABLE `astrology_prognosis` (
   `start_day` date NOT NULL,
   `text` longtext COLLATE utf8_czech_ci NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `sign_id` (`sign_id`,`duration_id`,`type_id`,`start_day`),
-  KEY `duration_id_refs_id_523fe7b5` (`duration_id`),
-  KEY `type_id_refs_id_11e5d871` (`type_id`),
-  CONSTRAINT `type_id_refs_id_11e5d871` FOREIGN KEY (`type_id`) REFERENCES `astrology_prognosistype` (`id`),
+  UNIQUE KEY `astrology_prognosis_sign_id_423a042` (`sign_id`,`duration_id`,`type_id`,`start_day`),
+  KEY `astrology_prognosis_sign_id` (`sign_id`),
+  KEY `astrology_prognosis_duration_id` (`duration_id`),
+  KEY `astrology_prognosis_type_id` (`type_id`),
   CONSTRAINT `duration_id_refs_id_523fe7b5` FOREIGN KEY (`duration_id`) REFERENCES `astrology_prognosisduration` (`id`),
-  CONSTRAINT `sign_id_refs_id_63b4f2f5` FOREIGN KEY (`sign_id`) REFERENCES `astrology_sign` (`id`)
+  CONSTRAINT `sign_id_refs_id_63b4f2f5` FOREIGN KEY (`sign_id`) REFERENCES `astrology_sign` (`id`),
+  CONSTRAINT `type_id_refs_id_11e5d871` FOREIGN KEY (`type_id`) REFERENCES `astrology_prognosistype` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -566,7 +570,7 @@ CREATE TABLE `astrology_prognosisduration` (
   `name` varchar(50) COLLATE utf8_czech_ci NOT NULL,
   `duration` smallint(5) unsigned NOT NULL,
   `slug` varchar(50) COLLATE utf8_czech_ci NOT NULL,
-  `ordering` smallint(5) unsigned NOT NULL,
+  `ordering` smallint(5) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `slug` (`slug`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
@@ -592,7 +596,7 @@ CREATE TABLE `astrology_prognosistype` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(50) COLLATE utf8_czech_ci NOT NULL,
   `slug` varchar(50) COLLATE utf8_czech_ci NOT NULL,
-  `ordering` smallint(5) unsigned NOT NULL,
+  `ordering` smallint(5) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `slug` (`slug`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
@@ -622,10 +626,14 @@ CREATE TABLE `astrology_sign` (
   `perex` longtext COLLATE utf8_czech_ci NOT NULL,
   `text` longtext COLLATE utf8_czech_ci NOT NULL,
   `logo_id` int(11) DEFAULT NULL,
-  `ordering` smallint(5) unsigned NOT NULL,
+  `ordering` smallint(5) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `horoscope_id` (`horoscope_id`,`slug`),
-  CONSTRAINT `horoscope_id_refs_id_285d9411` FOREIGN KEY (`horoscope_id`) REFERENCES `astrology_horoscope` (`id`)
+  UNIQUE KEY `astrology_sign_horoscope_id_40f341c9` (`horoscope_id`,`slug`),
+  KEY `astrology_sign_horoscope_id` (`horoscope_id`),
+  KEY `astrology_sign_slug` (`slug`),
+  KEY `astrology_sign_logo_id` (`logo_id`),
+  CONSTRAINT `horoscope_id_refs_id_285d9411` FOREIGN KEY (`horoscope_id`) REFERENCES `astrology_horoscope` (`id`),
+  CONSTRAINT `logo_id_refs_id_1e311c81` FOREIGN KEY (`logo_id`) REFERENCES `photos_photo` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -652,8 +660,9 @@ CREATE TABLE `astrology_signcompatibility` (
   `compat_percent` smallint(5) unsigned NOT NULL,
   `compat_text` longtext COLLATE utf8_czech_ci NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `sign_male_id` (`sign_male_id`,`sign_female_id`),
-  KEY `sign_female_id_refs_id_16240c56` (`sign_female_id`),
+  UNIQUE KEY `astrology_signcompatibility_sign_male_id_490fe2` (`sign_male_id`,`sign_female_id`),
+  KEY `astrology_signcompatibility_sign_male_id` (`sign_male_id`),
+  KEY `astrology_signcompatibility_sign_female_id` (`sign_female_id`),
   CONSTRAINT `sign_female_id_refs_id_16240c56` FOREIGN KEY (`sign_female_id`) REFERENCES `astrology_sign` (`id`),
   CONSTRAINT `sign_male_id_refs_id_16240c56` FOREIGN KEY (`sign_male_id`) REFERENCES `astrology_sign` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
@@ -681,8 +690,9 @@ CREATE TABLE `astrology_signdescription` (
   `type_id` int(11) NOT NULL,
   `text` longtext COLLATE utf8_czech_ci NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `sign_id` (`sign_id`,`type_id`),
-  KEY `type_id_refs_id_2333e57f` (`type_id`),
+  UNIQUE KEY `astrology_signdescription_sign_id_6185feec` (`sign_id`,`type_id`),
+  KEY `astrology_signdescription_sign_id` (`sign_id`),
+  KEY `astrology_signdescription_type_id` (`type_id`),
   CONSTRAINT `sign_id_refs_id_5141f712` FOREIGN KEY (`sign_id`) REFERENCES `astrology_sign` (`id`),
   CONSTRAINT `type_id_refs_id_2333e57f` FOREIGN KEY (`type_id`) REFERENCES `astrology_signdescriptiontype` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
@@ -709,10 +719,12 @@ CREATE TABLE `astrology_signdescriptiontype` (
   `name` varchar(50) COLLATE utf8_czech_ci NOT NULL,
   `slug` varchar(50) COLLATE utf8_czech_ci NOT NULL,
   `logo_id` int(11) DEFAULT NULL,
-  `ordering` smallint(5) unsigned NOT NULL,
-  `visible` tinyint(1) NOT NULL,
+  `ordering` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `visible` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `slug` (`slug`)
+  UNIQUE KEY `slug` (`slug`),
+  KEY `astrology_signdescriptiontype_logo_id` (`logo_id`),
+  CONSTRAINT `logo_id_refs_id_326537ac` FOREIGN KEY (`logo_id`) REFERENCES `photos_photo` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -762,10 +774,11 @@ CREATE TABLE `astrology_stoneforsign` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `sign_id` int(11) NOT NULL,
   `stone_id` int(11) NOT NULL,
-  `ordering` smallint(5) unsigned NOT NULL,
+  `ordering` smallint(5) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `sign_id` (`sign_id`,`stone_id`),
-  KEY `stone_id_refs_id_6d5c1d66` (`stone_id`),
+  UNIQUE KEY `astrology_stoneforsign_sign_id_d707219` (`sign_id`,`stone_id`),
+  KEY `astrology_stoneforsign_sign_id` (`sign_id`),
+  KEY `astrology_stoneforsign_stone_id` (`stone_id`),
   CONSTRAINT `sign_id_refs_id_d24d491` FOREIGN KEY (`sign_id`) REFERENCES `astrology_sign` (`id`),
   CONSTRAINT `stone_id_refs_id_6d5c1d66` FOREIGN KEY (`stone_id`) REFERENCES `astrology_stone` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
@@ -793,7 +806,7 @@ CREATE TABLE `attachments_attachment` (
   `slug` varchar(255) COLLATE utf8_czech_ci NOT NULL,
   `photo_id` int(11) DEFAULT NULL,
   `description` longtext COLLATE utf8_czech_ci NOT NULL,
-  `created` datetime NOT NULL DEFAULT '2009-05-19 12:06:39',
+  `created` datetime NOT NULL DEFAULT '2009-05-19 13:54:10',
   `attachment` varchar(100) COLLATE utf8_czech_ci NOT NULL,
   `type_id` int(11) NOT NULL,
   PRIMARY KEY (`id`),
@@ -903,7 +916,7 @@ CREATE TABLE `auth_message` (
   `user_id` int(11) NOT NULL,
   `message` longtext COLLATE utf8_czech_ci NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `user_id_refs_id_650f49a6` (`user_id`),
+  KEY `auth_message_user_id` (`user_id`),
   CONSTRAINT `user_id_refs_id_650f49a6` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -931,8 +944,9 @@ CREATE TABLE `auth_permission` (
   `codename` varchar(100) COLLATE utf8_czech_ci NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `content_type_id` (`content_type_id`,`codename`),
+  KEY `auth_permission_content_type_id` (`content_type_id`),
   CONSTRAINT `content_type_id_refs_id_728de91f` FOREIGN KEY (`content_type_id`) REFERENCES `django_content_type` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=415 DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=449 DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -941,7 +955,7 @@ CREATE TABLE `auth_permission` (
 
 LOCK TABLES `auth_permission` WRITE;
 /*!40000 ALTER TABLE `auth_permission` DISABLE KEYS */;
-INSERT INTO `auth_permission` VALUES (1,'Can add permission',1,'add_permission'),(2,'Can change permission',1,'change_permission'),(3,'Can delete permission',1,'delete_permission'),(4,'Can add group',2,'add_group'),(5,'Can change group',2,'change_group'),(6,'Can delete group',2,'delete_group'),(7,'Can add user',3,'add_user'),(8,'Can change user',3,'change_user'),(9,'Can delete user',3,'delete_user'),(10,'Can add message',4,'add_message'),(11,'Can change message',4,'change_message'),(12,'Can delete message',4,'delete_message'),(13,'Can add content type',5,'add_contenttype'),(14,'Can change content type',5,'change_contenttype'),(15,'Can delete content type',5,'delete_contenttype'),(16,'Can add session',6,'add_session'),(17,'Can change session',6,'change_session'),(18,'Can delete session',6,'delete_session'),(19,'Can add site',7,'add_site'),(20,'Can change site',7,'change_site'),(21,'Can delete site',7,'delete_site'),(22,'Can add redirect',8,'add_redirect'),(23,'Can change redirect',8,'change_redirect'),(24,'Can delete redirect',8,'delete_redirect'),(25,'Can add log entry',9,'add_logentry'),(26,'Can change log entry',9,'change_logentry'),(27,'Can delete log entry',9,'delete_logentry'),(28,'Can add Instruction',10,'add_instruction'),(29,'Can change Instruction',10,'change_instruction'),(30,'Can delete Instruction',10,'delete_instruction'),(31,'Can add Cooking type',11,'add_cookingtype'),(32,'Can change Cooking type',11,'change_cookingtype'),(33,'Can delete Cooking type',11,'delete_cookingtype'),(34,'Can add Cuisine',12,'add_cuisine'),(35,'Can change Cuisine',12,'change_cuisine'),(36,'Can delete Cuisine',12,'delete_cuisine'),(37,'Can add Nutrient group',13,'add_nutrientgroup'),(38,'Can change Nutrient group',13,'change_nutrientgroup'),(39,'Can delete Nutrient group',13,'delete_nutrientgroup'),(40,'Can add Nutrient',14,'add_nutrient'),(41,'Can change Nutrient',14,'change_nutrient'),(42,'Can delete Nutrient',14,'delete_nutrient'),(43,'Can add Unit',15,'add_unit'),(44,'Can change Unit',15,'change_unit'),(45,'Can delete Unit',15,'delete_unit'),(46,'Can add Unit conversion',16,'add_unitconversion'),(47,'Can change Unit conversion',16,'change_unitconversion'),(48,'Can delete Unit conversion',16,'delete_unitconversion'),(49,'Can add Ingredient group',17,'add_ingredientgroup'),(50,'Can change Ingredient group',17,'change_ingredientgroup'),(51,'Can delete Ingredient group',17,'delete_ingredientgroup'),(52,'Can add Ingredient',18,'add_ingredient'),(53,'Can change Ingredient',18,'change_ingredient'),(54,'Can delete Ingredient',18,'delete_ingredient'),(55,'Can add Nutrient in ingredient',19,'add_nutrientiningredient'),(56,'Can change Nutrient in ingredient',19,'change_nutrientiningredient'),(57,'Can delete Nutrient in ingredient',19,'delete_nutrientiningredient'),(58,'Can add Category photo',20,'add_recipecategoryphoto'),(59,'Can change Category photo',20,'change_recipecategoryphoto'),(60,'Can delete Category photo',20,'delete_recipecategoryphoto'),(61,'Can add Side-dish',21,'add_sidedish'),(62,'Can change Side-dish',21,'change_sidedish'),(63,'Can delete Side-dish',21,'delete_sidedish'),(64,'Can add Recipe',22,'add_recipe'),(65,'Can change Recipe',22,'change_recipe'),(66,'Can delete Recipe',22,'delete_recipe'),(67,'Can add Ingredient in recipe',23,'add_ingredientinrecipe'),(68,'Can change Ingredient in recipe',23,'change_ingredientinrecipe'),(69,'Can delete Ingredient in recipe',23,'delete_ingredientinrecipe'),(70,'Can add Recipe of day',24,'add_recipeofday'),(71,'Can change Recipe of day',24,'change_recipeofday'),(72,'Can delete Recipe of day',24,'delete_recipeofday'),(73,'Can add old recipe article redirect',25,'add_oldrecipearticleredirect'),(74,'Can change old recipe article redirect',25,'change_oldrecipearticleredirect'),(75,'Can delete old recipe article redirect',25,'delete_oldrecipearticleredirect'),(76,'Can add old recipe category redirect',26,'add_oldrecipecategoryredirect'),(77,'Can change old recipe category redirect',26,'change_oldrecipecategoryredirect'),(78,'Can delete old recipe category redirect',26,'delete_oldrecipecategoryredirect'),(79,'Can add Horoscope',27,'add_horoscope'),(80,'Can change Horoscope',27,'change_horoscope'),(81,'Can delete Horoscope',27,'delete_horoscope'),(82,'Can add Sign',28,'add_sign'),(83,'Can change Sign',28,'change_sign'),(84,'Can delete Sign',28,'delete_sign'),(85,'Can add Sign description type',29,'add_signdescriptiontype'),(86,'Can change Sign description type',29,'change_signdescriptiontype'),(87,'Can delete Sign description type',29,'delete_signdescriptiontype'),(88,'Can add Sign description',30,'add_signdescription'),(89,'Can change Sign description',30,'change_signdescription'),(90,'Can delete Sign description',30,'delete_signdescription'),(91,'Can add Birth period',31,'add_birthperiod'),(92,'Can change Birth period',31,'change_birthperiod'),(93,'Can delete Birth period',31,'delete_birthperiod'),(94,'Can add Sign compatibility',32,'add_signcompatibility'),(95,'Can change Sign compatibility',32,'change_signcompatibility'),(96,'Can delete Sign compatibility',32,'delete_signcompatibility'),(97,'Can add Prognosis duration',33,'add_prognosisduration'),(98,'Can change Prognosis duration',33,'change_prognosisduration'),(99,'Can delete Prognosis duration',33,'delete_prognosisduration'),(100,'Can add Prognosis type',34,'add_prognosistype'),(101,'Can change Prognosis type',34,'change_prognosistype'),(102,'Can delete Prognosis type',34,'delete_prognosistype'),(103,'Can add Prognosis',35,'add_prognosis'),(104,'Can change Prognosis',35,'change_prognosis'),(105,'Can delete Prognosis',35,'delete_prognosis'),(106,'Can add Lunar diary category',36,'add_lunardiarycategory'),(107,'Can change Lunar diary category',36,'change_lunardiarycategory'),(108,'Can delete Lunar diary category',36,'delete_lunardiarycategory'),(109,'Can add Lunar diary',37,'add_lunardiary'),(110,'Can change Lunar diary',37,'change_lunardiary'),(111,'Can delete Lunar diary',37,'delete_lunardiary'),(112,'Can add Lexicon term',38,'add_astrolex'),(113,'Can change Lexicon term',38,'change_astrolex'),(114,'Can delete Lexicon term',38,'delete_astrolex'),(115,'Can add Life number',39,'add_lifenumber'),(116,'Can change Life number',39,'change_lifenumber'),(117,'Can delete Life number',39,'delete_lifenumber'),(118,'Can add Stone',40,'add_stone'),(119,'Can change Stone',40,'change_stone'),(120,'Can delete Stone',40,'delete_stone'),(121,'Can add Stone for Sign',41,'add_stoneforsign'),(122,'Can change Stone for Sign',41,'change_stoneforsign'),(123,'Can delete Stone for Sign',41,'delete_stoneforsign'),(124,'Can add Numerology grid number',42,'add_numerologygrid'),(125,'Can change Numerology grid number',42,'change_numerologygrid'),(126,'Can delete Numerology grid number',42,'delete_numerologygrid'),(127,'Can add Moon in Sign',43,'add_moon'),(128,'Can change Moon in Sign',43,'change_moon'),(129,'Can delete Moon in Sign',43,'delete_moon'),(130,'Can add newsletter',44,'add_newsletter'),(131,'Can change newsletter',44,'change_newsletter'),(132,'Can delete newsletter',44,'delete_newsletter'),(133,'Can add recipient',45,'add_recipient'),(134,'Can change recipient',45,'change_recipient'),(135,'Can delete recipient',45,'delete_recipient'),(136,'Can add format',46,'add_format'),(137,'Can change format',46,'change_format'),(138,'Can delete format',46,'delete_format'),(139,'Can add source',47,'add_source'),(140,'Can change source',47,'change_source'),(141,'Can delete source',47,'delete_source'),(142,'Can add target',48,'add_target'),(143,'Can change target',48,'change_target'),(144,'Can delete target',48,'delete_target'),(145,'Can add migration history',49,'add_migrationhistory'),(146,'Can change migration history',49,'change_migrationhistory'),(147,'Can delete migration history',49,'delete_migrationhistory'),(148,'Can add Eshop',50,'add_eshop'),(149,'Can change Eshop',50,'change_eshop'),(150,'Can delete Eshop',50,'delete_eshop'),(151,'Can add Feedset',51,'add_feedset'),(152,'Can change Feedset',51,'change_feedset'),(153,'Can delete Feedset',51,'delete_feedset'),(154,'Can add Category',52,'add_category'),(155,'Can change Category',52,'change_category'),(156,'Can delete Category',52,'delete_category'),(157,'Can add Target group',53,'add_targetgroup'),(158,'Can change Target group',53,'change_targetgroup'),(159,'Can delete Target group',53,'delete_targetgroup'),(160,'Can add Present',54,'add_present'),(161,'Can change Present',54,'change_present'),(162,'Can delete Present',54,'delete_present'),(163,'Can add Inquiry of Santa',55,'add_inquiryofsanta'),(164,'Can change Inquiry of Santa',55,'change_inquiryofsanta'),(165,'Can delete Inquiry of Santa',55,'delete_inquiryofsanta'),(166,'Can add Author',56,'add_author'),(167,'Can change Author',56,'change_author'),(168,'Can delete Author',56,'delete_author'),(169,'Can add Source',57,'add_source'),(170,'Can change Source',57,'change_source'),(171,'Can delete Source',57,'delete_source'),(172,'Can add Category',58,'add_category'),(173,'Can change Category',58,'change_category'),(174,'Can delete Category',58,'delete_category'),(175,'Can add Placement',59,'add_placement'),(176,'Can change Placement',59,'change_placement'),(177,'Can delete Placement',59,'delete_placement'),(178,'Can add Listing',60,'add_listing'),(179,'Can change Listing',60,'change_listing'),(180,'Can delete Listing',60,'delete_listing'),(181,'Can add Hit Count',61,'add_hitcount'),(182,'Can change Hit Count',61,'change_hitcount'),(183,'Can delete Hit Count',61,'delete_hitcount'),(184,'Can add Related',62,'add_related'),(185,'Can change Related',62,'change_related'),(186,'Can delete Related',62,'delete_related'),(187,'Can view Author',56,'view_author'),(188,'Can view Source',57,'view_source'),(189,'Can view Category',58,'view_category'),(190,'Can view Placement',59,'view_placement'),(191,'Can view Listing',60,'view_listing'),(192,'Can view Hit Count',61,'view_hitcount'),(193,'Can view Related',62,'view_related'),(194,'Can add Photo',63,'add_photo'),(195,'Can change Photo',63,'change_photo'),(196,'Can delete Photo',63,'delete_photo'),(197,'Can add Format',64,'add_format'),(198,'Can change Format',64,'change_format'),(199,'Can delete Format',64,'delete_format'),(200,'Can add Formated photo',65,'add_formatedphoto'),(201,'Can change Formated photo',65,'change_formatedphoto'),(202,'Can delete Formated photo',65,'delete_formatedphoto'),(203,'Can view Photo',63,'view_photo'),(204,'Can view Format',64,'view_format'),(205,'Can view Formated photo',65,'view_formatedphoto'),(206,'Can add Info box',66,'add_infobox'),(207,'Can change Info box',66,'change_infobox'),(208,'Can delete Info box',66,'delete_infobox'),(209,'Can add Article',67,'add_article'),(210,'Can change Article',67,'change_article'),(211,'Can delete Article',67,'delete_article'),(212,'Can add Article content',68,'add_articlecontents'),(213,'Can change Article content',68,'change_articlecontents'),(214,'Can delete Article content',68,'delete_articlecontents'),(215,'Can view Info box',66,'view_infobox'),(216,'Can view Article',67,'view_article'),(217,'Can view Article content',68,'view_articlecontents'),(218,'Can add Comment Options',69,'add_commentoptions'),(219,'Can change Comment Options',69,'change_commentoptions'),(220,'Can delete Comment Options',69,'delete_commentoptions'),(221,'Can add Comment',70,'add_comment'),(222,'Can change Comment',70,'change_comment'),(223,'Can delete Comment',70,'delete_comment'),(224,'Can add Banned User',71,'add_banneduser'),(225,'Can change Banned User',71,'change_banneduser'),(226,'Can delete Banned User',71,'delete_banneduser'),(227,'Can add banned ip',72,'add_bannedip'),(228,'Can change banned ip',72,'change_bannedip'),(229,'Can delete banned ip',72,'delete_bannedip'),(230,'Can view Comment Options',69,'view_commentoptions'),(231,'Can view Comment',70,'view_comment'),(232,'Can view Banned User',71,'view_banneduser'),(233,'Can view banned ip',72,'view_bannedip'),(234,'Can add Template',73,'add_dbtemplate'),(235,'Can change Template',73,'change_dbtemplate'),(236,'Can delete Template',73,'delete_dbtemplate'),(237,'Can add Template block',74,'add_templateblock'),(238,'Can change Template block',74,'change_templateblock'),(239,'Can delete Template block',74,'delete_templateblock'),(240,'Can view Template',73,'view_dbtemplate'),(241,'Can view Template block',74,'view_templateblock'),(242,'Can add Gallery',75,'add_gallery'),(243,'Can change Gallery',75,'change_gallery'),(244,'Can delete Gallery',75,'delete_gallery'),(245,'Can add Gallery item',76,'add_galleryitem'),(246,'Can change Gallery item',76,'change_galleryitem'),(247,'Can delete Gallery item',76,'delete_galleryitem'),(248,'Can view Gallery',75,'view_gallery'),(249,'Can view Gallery item',76,'view_galleryitem'),(250,'Can add Contest',77,'add_contest'),(251,'Can change Contest',77,'change_contest'),(252,'Can delete Contest',77,'delete_contest'),(253,'Can add Quiz',78,'add_quiz'),(254,'Can change Quiz',78,'change_quiz'),(255,'Can delete Quiz',78,'delete_quiz'),(256,'Can add Question',79,'add_question'),(257,'Can change Question',79,'change_question'),(258,'Can delete Question',79,'delete_question'),(259,'Can add Poll',80,'add_poll'),(260,'Can change Poll',80,'change_poll'),(261,'Can delete Poll',80,'delete_poll'),(262,'Can add Choice',81,'add_choice'),(263,'Can change Choice',81,'change_choice'),(264,'Can delete Choice',81,'delete_choice'),(265,'Can add Vote',82,'add_vote'),(266,'Can change Vote',82,'change_vote'),(267,'Can delete Vote',82,'delete_vote'),(268,'Can add Contestant',83,'add_contestant'),(269,'Can change Contestant',83,'change_contestant'),(270,'Can delete Contestant',83,'delete_contestant'),(271,'Can add Result',84,'add_result'),(272,'Can change Result',84,'change_result'),(273,'Can delete Result',84,'delete_result'),(274,'Can view Contest',77,'view_contest'),(275,'Can view Quiz',78,'view_quiz'),(276,'Can view Question',79,'view_question'),(277,'Can view Poll',80,'view_poll'),(278,'Can view Choice',81,'view_choice'),(279,'Can view Vote',82,'view_vote'),(280,'Can view Contestant',83,'view_contestant'),(281,'Can view Result',84,'view_result'),(282,'Can add tag',85,'add_tag'),(283,'Can change tag',85,'change_tag'),(284,'Can delete tag',85,'delete_tag'),(285,'Can add tagged item',86,'add_taggeditem'),(286,'Can change tagged item',86,'change_taggeditem'),(287,'Can delete tagged item',86,'delete_taggeditem'),(288,'Can view tag',85,'view_tag'),(289,'Can view tagged item',86,'view_taggeditem'),(290,'Can add Model weight',87,'add_modelweight'),(291,'Can change Model weight',87,'change_modelweight'),(292,'Can delete Model weight',87,'delete_modelweight'),(293,'Can add Total rate',88,'add_totalrate'),(294,'Can change Total rate',88,'change_totalrate'),(295,'Can delete Total rate',88,'delete_totalrate'),(296,'Can add Aggregation',89,'add_agg'),(297,'Can change Aggregation',89,'change_agg'),(298,'Can delete Aggregation',89,'delete_agg'),(299,'Can add Rating',90,'add_rating'),(300,'Can change Rating',90,'change_rating'),(301,'Can delete Rating',90,'delete_rating'),(302,'Can view Model weight',87,'view_modelweight'),(303,'Can view Total rate',88,'view_totalrate'),(304,'Can view Aggregation',89,'view_agg'),(305,'Can view Rating',90,'view_rating'),(306,'Can add atlas export',91,'add_atlasexport'),(307,'Can change atlas export',91,'change_atlasexport'),(308,'Can delete atlas export',91,'delete_atlasexport'),(309,'Can view atlas export',91,'view_atlasexport'),(310,'Can add Server',92,'add_server'),(311,'Can change Server',92,'change_server'),(312,'Can delete Server',92,'delete_server'),(313,'Can add Server item',93,'add_serveritem'),(314,'Can change Server item',93,'change_serveritem'),(315,'Can delete Server item',93,'delete_serveritem'),(316,'Can view Server',92,'view_server'),(317,'Can view Server item',93,'view_serveritem'),(318,'Can add Topic',94,'add_topic'),(319,'Can change Topic',94,'change_topic'),(320,'Can delete Topic',94,'delete_topic'),(321,'Can add post viewed',95,'add_postviewed'),(322,'Can change post viewed',95,'change_postviewed'),(323,'Can delete post viewed',95,'delete_postviewed'),(324,'Can add Thread',96,'add_topicthread'),(325,'Can change Thread',96,'change_topicthread'),(326,'Can delete Thread',96,'delete_topicthread'),(327,'Can add banned string',97,'add_bannedstring'),(328,'Can change banned string',97,'change_bannedstring'),(329,'Can delete banned string',97,'delete_bannedstring'),(330,'Can add banned user',98,'add_banneduser'),(331,'Can change banned user',98,'change_banneduser'),(332,'Can delete banned user',98,'delete_banneduser'),(333,'Can view Topic',94,'view_topic'),(334,'Can view post viewed',95,'view_postviewed'),(335,'Can view Thread',96,'view_topicthread'),(336,'Can view banned string',97,'view_bannedstring'),(337,'Can view banned user',98,'view_banneduser'),(338,'Can add Interviewee',99,'add_interviewee'),(339,'Can change Interviewee',99,'change_interviewee'),(340,'Can delete Interviewee',99,'delete_interviewee'),(341,'Can add Interview',100,'add_interview'),(342,'Can change Interview',100,'change_interview'),(343,'Can delete Interview',100,'delete_interview'),(344,'Can add Question',101,'add_question'),(345,'Can change Question',101,'change_question'),(346,'Can delete Question',101,'delete_question'),(347,'Can add Answer',102,'add_answer'),(348,'Can change Answer',102,'change_answer'),(349,'Can delete Answer',102,'delete_answer'),(350,'Can view Interviewee',99,'view_interviewee'),(351,'Can view Interview',100,'view_interview'),(352,'Can view Question',101,'view_question'),(353,'Can view Answer',102,'view_answer'),(354,'Can add position',103,'add_position'),(355,'Can change position',103,'change_position'),(356,'Can delete position',103,'delete_position'),(357,'Can view position',103,'view_position'),(358,'Can add Category Lock',104,'add_categorylock'),(359,'Can change Category Lock',104,'change_categorylock'),(360,'Can delete Category Lock',104,'delete_categorylock'),(361,'Can view Category Lock',104,'view_categorylock'),(362,'Can add mail',105,'add_mail'),(363,'Can change mail',105,'change_mail'),(364,'Can delete mail',105,'delete_mail'),(365,'Can view mail',105,'view_mail'),(366,'Can add Type',106,'add_type'),(367,'Can change Type',106,'change_type'),(368,'Can delete Type',106,'delete_type'),(369,'Can add Attachment',107,'add_attachment'),(370,'Can change Attachment',107,'change_attachment'),(371,'Can delete Attachment',107,'delete_attachment'),(372,'Can view Type',106,'view_type'),(373,'Can view Attachment',107,'view_attachment'),(374,'Can add question',108,'add_question'),(375,'Can change question',108,'change_question'),(376,'Can delete question',108,'delete_question'),(377,'Can add answer',109,'add_answer'),(378,'Can change answer',109,'change_answer'),(379,'Can delete answer',109,'delete_answer'),(380,'Can answer as an expert',109,'can_answer_as_expert'),(381,'Can add question group',110,'add_questiongroup'),(382,'Can change question group',110,'change_questiongroup'),(383,'Can delete question group',110,'delete_questiongroup'),(384,'Can view question',108,'view_question'),(385,'Can view answer',109,'view_answer'),(386,'Can view question group',110,'view_questiongroup'),(387,'Can add Serie',111,'add_serie'),(388,'Can change Serie',111,'change_serie'),(389,'Can delete Serie',111,'delete_serie'),(390,'Can add Serie part',112,'add_seriepart'),(391,'Can change Serie part',112,'change_seriepart'),(392,'Can delete Serie part',112,'delete_seriepart'),(393,'Can view Serie',111,'view_serie'),(394,'Can view Serie part',112,'view_seriepart'),(395,'Can add Media',113,'add_media'),(396,'Can change Media',113,'change_media'),(397,'Can delete Media',113,'delete_media'),(398,'Can add section',114,'add_section'),(399,'Can change section',114,'change_section'),(400,'Can delete section',114,'delete_section'),(401,'Can add usage',115,'add_usage'),(402,'Can change usage',115,'change_usage'),(403,'Can delete usage',115,'delete_usage'),(404,'Can view Media',113,'view_media'),(405,'Can view section',114,'view_section'),(406,'Can view usage',115,'view_usage'),(407,'Can add Category - section mapping',116,'add_categorysectionmapping'),(408,'Can change Category - section mapping',116,'change_categorysectionmapping'),(409,'Can delete Category - section mapping',116,'delete_categorysectionmapping'),(410,'Can add Site - server mapping',117,'add_siteservermapping'),(411,'Can change Site - server mapping',117,'change_siteservermapping'),(412,'Can delete Site - server mapping',117,'delete_siteservermapping'),(413,'Can view Category - section mapping',116,'view_categorysectionmapping'),(414,'Can view Site - server mapping',117,'view_siteservermapping');
+INSERT INTO `auth_permission` VALUES (1,'Can add permission',1,'add_permission'),(2,'Can change permission',1,'change_permission'),(3,'Can delete permission',1,'delete_permission'),(4,'Can add group',2,'add_group'),(5,'Can change group',2,'change_group'),(6,'Can delete group',2,'delete_group'),(7,'Can add user',3,'add_user'),(8,'Can change user',3,'change_user'),(9,'Can delete user',3,'delete_user'),(10,'Can add message',4,'add_message'),(11,'Can change message',4,'change_message'),(12,'Can delete message',4,'delete_message'),(13,'Can add content type',5,'add_contenttype'),(14,'Can change content type',5,'change_contenttype'),(15,'Can delete content type',5,'delete_contenttype'),(16,'Can add session',6,'add_session'),(17,'Can change session',6,'change_session'),(18,'Can delete session',6,'delete_session'),(19,'Can add site',7,'add_site'),(20,'Can change site',7,'change_site'),(21,'Can delete site',7,'delete_site'),(22,'Can add redirect',8,'add_redirect'),(23,'Can change redirect',8,'change_redirect'),(24,'Can delete redirect',8,'delete_redirect'),(25,'Can add log entry',9,'add_logentry'),(26,'Can change log entry',9,'change_logentry'),(27,'Can delete log entry',9,'delete_logentry'),(28,'Can add newsletter',10,'add_newsletter'),(29,'Can change newsletter',10,'change_newsletter'),(30,'Can delete newsletter',10,'delete_newsletter'),(31,'Can add recipient',11,'add_recipient'),(32,'Can change recipient',11,'change_recipient'),(33,'Can delete recipient',11,'delete_recipient'),(34,'Can add format',12,'add_format'),(35,'Can change format',12,'change_format'),(36,'Can delete format',12,'delete_format'),(37,'Can add source',13,'add_source'),(38,'Can change source',13,'change_source'),(39,'Can delete source',13,'delete_source'),(40,'Can add target',14,'add_target'),(41,'Can change target',14,'change_target'),(42,'Can delete target',14,'delete_target'),(43,'Can add migration history',15,'add_migrationhistory'),(44,'Can change migration history',15,'change_migrationhistory'),(45,'Can delete migration history',15,'delete_migrationhistory'),(46,'Can add Eshop',16,'add_eshop'),(47,'Can change Eshop',16,'change_eshop'),(48,'Can delete Eshop',16,'delete_eshop'),(49,'Can add Feedset',17,'add_feedset'),(50,'Can change Feedset',17,'change_feedset'),(51,'Can delete Feedset',17,'delete_feedset'),(52,'Can add Category',18,'add_category'),(53,'Can change Category',18,'change_category'),(54,'Can delete Category',18,'delete_category'),(55,'Can add Target group',19,'add_targetgroup'),(56,'Can change Target group',19,'change_targetgroup'),(57,'Can delete Target group',19,'delete_targetgroup'),(58,'Can add Present',20,'add_present'),(59,'Can change Present',20,'change_present'),(60,'Can delete Present',20,'delete_present'),(61,'Can add Inquiry of Santa',21,'add_inquiryofsanta'),(62,'Can change Inquiry of Santa',21,'change_inquiryofsanta'),(63,'Can delete Inquiry of Santa',21,'delete_inquiryofsanta'),(64,'Can add Author',22,'add_author'),(65,'Can change Author',22,'change_author'),(66,'Can delete Author',22,'delete_author'),(67,'Can add Source',23,'add_source'),(68,'Can change Source',23,'change_source'),(69,'Can delete Source',23,'delete_source'),(70,'Can add Category',24,'add_category'),(71,'Can change Category',24,'change_category'),(72,'Can delete Category',24,'delete_category'),(73,'Can add Placement',25,'add_placement'),(74,'Can change Placement',25,'change_placement'),(75,'Can delete Placement',25,'delete_placement'),(76,'Can add Listing',26,'add_listing'),(77,'Can change Listing',26,'change_listing'),(78,'Can delete Listing',26,'delete_listing'),(79,'Can add Hit Count',27,'add_hitcount'),(80,'Can change Hit Count',27,'change_hitcount'),(81,'Can delete Hit Count',27,'delete_hitcount'),(82,'Can add Related',28,'add_related'),(83,'Can change Related',28,'change_related'),(84,'Can delete Related',28,'delete_related'),(85,'Can view Author',22,'view_author'),(86,'Can view Source',23,'view_source'),(87,'Can view Category',24,'view_category'),(88,'Can view Placement',25,'view_placement'),(89,'Can view Listing',26,'view_listing'),(90,'Can view Hit Count',27,'view_hitcount'),(91,'Can view Related',28,'view_related'),(92,'Can add Photo',29,'add_photo'),(93,'Can change Photo',29,'change_photo'),(94,'Can delete Photo',29,'delete_photo'),(95,'Can add Format',30,'add_format'),(96,'Can change Format',30,'change_format'),(97,'Can delete Format',30,'delete_format'),(98,'Can add Formated photo',31,'add_formatedphoto'),(99,'Can change Formated photo',31,'change_formatedphoto'),(100,'Can delete Formated photo',31,'delete_formatedphoto'),(101,'Can view Photo',29,'view_photo'),(102,'Can view Format',30,'view_format'),(103,'Can view Formated photo',31,'view_formatedphoto'),(104,'Can add Info box',32,'add_infobox'),(105,'Can change Info box',32,'change_infobox'),(106,'Can delete Info box',32,'delete_infobox'),(107,'Can add Article',33,'add_article'),(108,'Can change Article',33,'change_article'),(109,'Can delete Article',33,'delete_article'),(110,'Can add Article content',34,'add_articlecontents'),(111,'Can change Article content',34,'change_articlecontents'),(112,'Can delete Article content',34,'delete_articlecontents'),(113,'Can view Info box',32,'view_infobox'),(114,'Can view Article',33,'view_article'),(115,'Can view Article content',34,'view_articlecontents'),(116,'Can add Comment Options',35,'add_commentoptions'),(117,'Can change Comment Options',35,'change_commentoptions'),(118,'Can delete Comment Options',35,'delete_commentoptions'),(119,'Can add Comment',36,'add_comment'),(120,'Can change Comment',36,'change_comment'),(121,'Can delete Comment',36,'delete_comment'),(122,'Can add Banned User',37,'add_banneduser'),(123,'Can change Banned User',37,'change_banneduser'),(124,'Can delete Banned User',37,'delete_banneduser'),(125,'Can add banned ip',38,'add_bannedip'),(126,'Can change banned ip',38,'change_bannedip'),(127,'Can delete banned ip',38,'delete_bannedip'),(128,'Can view Comment Options',35,'view_commentoptions'),(129,'Can view Comment',36,'view_comment'),(130,'Can view Banned User',37,'view_banneduser'),(131,'Can view banned ip',38,'view_bannedip'),(132,'Can add Template',39,'add_dbtemplate'),(133,'Can change Template',39,'change_dbtemplate'),(134,'Can delete Template',39,'delete_dbtemplate'),(135,'Can add Template block',40,'add_templateblock'),(136,'Can change Template block',40,'change_templateblock'),(137,'Can delete Template block',40,'delete_templateblock'),(138,'Can view Template',39,'view_dbtemplate'),(139,'Can view Template block',40,'view_templateblock'),(140,'Can add Gallery',41,'add_gallery'),(141,'Can change Gallery',41,'change_gallery'),(142,'Can delete Gallery',41,'delete_gallery'),(143,'Can add Gallery item',42,'add_galleryitem'),(144,'Can change Gallery item',42,'change_galleryitem'),(145,'Can delete Gallery item',42,'delete_galleryitem'),(146,'Can view Gallery',41,'view_gallery'),(147,'Can view Gallery item',42,'view_galleryitem'),(148,'Can add Contest',43,'add_contest'),(149,'Can change Contest',43,'change_contest'),(150,'Can delete Contest',43,'delete_contest'),(151,'Can add Quiz',44,'add_quiz'),(152,'Can change Quiz',44,'change_quiz'),(153,'Can delete Quiz',44,'delete_quiz'),(154,'Can add Question',45,'add_question'),(155,'Can change Question',45,'change_question'),(156,'Can delete Question',45,'delete_question'),(157,'Can add Poll',46,'add_poll'),(158,'Can change Poll',46,'change_poll'),(159,'Can delete Poll',46,'delete_poll'),(160,'Can add Choice',47,'add_choice'),(161,'Can change Choice',47,'change_choice'),(162,'Can delete Choice',47,'delete_choice'),(163,'Can add Vote',48,'add_vote'),(164,'Can change Vote',48,'change_vote'),(165,'Can delete Vote',48,'delete_vote'),(166,'Can add Contestant',49,'add_contestant'),(167,'Can change Contestant',49,'change_contestant'),(168,'Can delete Contestant',49,'delete_contestant'),(169,'Can add Result',50,'add_result'),(170,'Can change Result',50,'change_result'),(171,'Can delete Result',50,'delete_result'),(172,'Can view Contest',43,'view_contest'),(173,'Can view Quiz',44,'view_quiz'),(174,'Can view Question',45,'view_question'),(175,'Can view Poll',46,'view_poll'),(176,'Can view Choice',47,'view_choice'),(177,'Can view Vote',48,'view_vote'),(178,'Can view Contestant',49,'view_contestant'),(179,'Can view Result',50,'view_result'),(180,'Can add tag',51,'add_tag'),(181,'Can change tag',51,'change_tag'),(182,'Can delete tag',51,'delete_tag'),(183,'Can add tagged item',52,'add_taggeditem'),(184,'Can change tagged item',52,'change_taggeditem'),(185,'Can delete tagged item',52,'delete_taggeditem'),(186,'Can view tag',51,'view_tag'),(187,'Can view tagged item',52,'view_taggeditem'),(188,'Can add Model weight',53,'add_modelweight'),(189,'Can change Model weight',53,'change_modelweight'),(190,'Can delete Model weight',53,'delete_modelweight'),(191,'Can add Total rate',54,'add_totalrate'),(192,'Can change Total rate',54,'change_totalrate'),(193,'Can delete Total rate',54,'delete_totalrate'),(194,'Can add Aggregation',55,'add_agg'),(195,'Can change Aggregation',55,'change_agg'),(196,'Can delete Aggregation',55,'delete_agg'),(197,'Can add Rating',56,'add_rating'),(198,'Can change Rating',56,'change_rating'),(199,'Can delete Rating',56,'delete_rating'),(200,'Can view Model weight',53,'view_modelweight'),(201,'Can view Total rate',54,'view_totalrate'),(202,'Can view Aggregation',55,'view_agg'),(203,'Can view Rating',56,'view_rating'),(204,'Can add atlas export',57,'add_atlasexport'),(205,'Can change atlas export',57,'change_atlasexport'),(206,'Can delete atlas export',57,'delete_atlasexport'),(207,'Can view atlas export',57,'view_atlasexport'),(208,'Can add Server',58,'add_server'),(209,'Can change Server',58,'change_server'),(210,'Can delete Server',58,'delete_server'),(211,'Can add Server item',59,'add_serveritem'),(212,'Can change Server item',59,'change_serveritem'),(213,'Can delete Server item',59,'delete_serveritem'),(214,'Can view Server',58,'view_server'),(215,'Can view Server item',59,'view_serveritem'),(216,'Can add Topic',60,'add_topic'),(217,'Can change Topic',60,'change_topic'),(218,'Can delete Topic',60,'delete_topic'),(219,'Can add post viewed',61,'add_postviewed'),(220,'Can change post viewed',61,'change_postviewed'),(221,'Can delete post viewed',61,'delete_postviewed'),(222,'Can add Thread',62,'add_topicthread'),(223,'Can change Thread',62,'change_topicthread'),(224,'Can delete Thread',62,'delete_topicthread'),(225,'Can add banned string',63,'add_bannedstring'),(226,'Can change banned string',63,'change_bannedstring'),(227,'Can delete banned string',63,'delete_bannedstring'),(228,'Can add banned user',64,'add_banneduser'),(229,'Can change banned user',64,'change_banneduser'),(230,'Can delete banned user',64,'delete_banneduser'),(231,'Can view Topic',60,'view_topic'),(232,'Can view post viewed',61,'view_postviewed'),(233,'Can view Thread',62,'view_topicthread'),(234,'Can view banned string',63,'view_bannedstring'),(235,'Can view banned user',64,'view_banneduser'),(236,'Can add Interviewee',65,'add_interviewee'),(237,'Can change Interviewee',65,'change_interviewee'),(238,'Can delete Interviewee',65,'delete_interviewee'),(239,'Can add Interview',66,'add_interview'),(240,'Can change Interview',66,'change_interview'),(241,'Can delete Interview',66,'delete_interview'),(242,'Can add Question',67,'add_question'),(243,'Can change Question',67,'change_question'),(244,'Can delete Question',67,'delete_question'),(245,'Can add Answer',68,'add_answer'),(246,'Can change Answer',68,'change_answer'),(247,'Can delete Answer',68,'delete_answer'),(248,'Can view Interviewee',65,'view_interviewee'),(249,'Can view Interview',66,'view_interview'),(250,'Can view Question',67,'view_question'),(251,'Can view Answer',68,'view_answer'),(252,'Can add position',69,'add_position'),(253,'Can change position',69,'change_position'),(254,'Can delete position',69,'delete_position'),(255,'Can view position',69,'view_position'),(256,'Can add Category Lock',70,'add_categorylock'),(257,'Can change Category Lock',70,'change_categorylock'),(258,'Can delete Category Lock',70,'delete_categorylock'),(259,'Can view Category Lock',70,'view_categorylock'),(260,'Can add mail',71,'add_mail'),(261,'Can change mail',71,'change_mail'),(262,'Can delete mail',71,'delete_mail'),(263,'Can view mail',71,'view_mail'),(264,'Can add Type',72,'add_type'),(265,'Can change Type',72,'change_type'),(266,'Can delete Type',72,'delete_type'),(267,'Can add Attachment',73,'add_attachment'),(268,'Can change Attachment',73,'change_attachment'),(269,'Can delete Attachment',73,'delete_attachment'),(270,'Can view Type',72,'view_type'),(271,'Can view Attachment',73,'view_attachment'),(272,'Can add question',74,'add_question'),(273,'Can change question',74,'change_question'),(274,'Can delete question',74,'delete_question'),(275,'Can add answer',75,'add_answer'),(276,'Can change answer',75,'change_answer'),(277,'Can delete answer',75,'delete_answer'),(278,'Can answer as an expert',75,'can_answer_as_expert'),(279,'Can add question group',76,'add_questiongroup'),(280,'Can change question group',76,'change_questiongroup'),(281,'Can delete question group',76,'delete_questiongroup'),(282,'Can view question',74,'view_question'),(283,'Can view answer',75,'view_answer'),(284,'Can view question group',76,'view_questiongroup'),(285,'Can add Serie',77,'add_serie'),(286,'Can change Serie',77,'change_serie'),(287,'Can delete Serie',77,'delete_serie'),(288,'Can add Serie part',78,'add_seriepart'),(289,'Can change Serie part',78,'change_seriepart'),(290,'Can delete Serie part',78,'delete_seriepart'),(291,'Can view Serie',77,'view_serie'),(292,'Can view Serie part',78,'view_seriepart'),(293,'Can add Media',79,'add_media'),(294,'Can change Media',79,'change_media'),(295,'Can delete Media',79,'delete_media'),(296,'Can add section',80,'add_section'),(297,'Can change section',80,'change_section'),(298,'Can delete section',80,'delete_section'),(299,'Can add usage',81,'add_usage'),(300,'Can change usage',81,'change_usage'),(301,'Can delete usage',81,'delete_usage'),(302,'Can view Media',79,'view_media'),(303,'Can view section',80,'view_section'),(304,'Can view usage',81,'view_usage'),(305,'Can add Instruction',82,'add_instruction'),(306,'Can change Instruction',82,'change_instruction'),(307,'Can delete Instruction',82,'delete_instruction'),(308,'Can view Instruction',82,'view_instruction'),(309,'Can add Cooking type',83,'add_cookingtype'),(310,'Can change Cooking type',83,'change_cookingtype'),(311,'Can delete Cooking type',83,'delete_cookingtype'),(312,'Can add Cuisine',84,'add_cuisine'),(313,'Can change Cuisine',84,'change_cuisine'),(314,'Can delete Cuisine',84,'delete_cuisine'),(315,'Can add Nutrient group',85,'add_nutrientgroup'),(316,'Can change Nutrient group',85,'change_nutrientgroup'),(317,'Can delete Nutrient group',85,'delete_nutrientgroup'),(318,'Can add Nutrient',86,'add_nutrient'),(319,'Can change Nutrient',86,'change_nutrient'),(320,'Can delete Nutrient',86,'delete_nutrient'),(321,'Can add Unit',87,'add_unit'),(322,'Can change Unit',87,'change_unit'),(323,'Can delete Unit',87,'delete_unit'),(324,'Can add Unit conversion',88,'add_unitconversion'),(325,'Can change Unit conversion',88,'change_unitconversion'),(326,'Can delete Unit conversion',88,'delete_unitconversion'),(327,'Can add Ingredient group',89,'add_ingredientgroup'),(328,'Can change Ingredient group',89,'change_ingredientgroup'),(329,'Can delete Ingredient group',89,'delete_ingredientgroup'),(330,'Can add Ingredient',90,'add_ingredient'),(331,'Can change Ingredient',90,'change_ingredient'),(332,'Can delete Ingredient',90,'delete_ingredient'),(333,'Can add Nutrient in ingredient',91,'add_nutrientiningredient'),(334,'Can change Nutrient in ingredient',91,'change_nutrientiningredient'),(335,'Can delete Nutrient in ingredient',91,'delete_nutrientiningredient'),(336,'Can add Category photo',92,'add_recipecategoryphoto'),(337,'Can change Category photo',92,'change_recipecategoryphoto'),(338,'Can delete Category photo',92,'delete_recipecategoryphoto'),(339,'Can add Side-dish',93,'add_sidedish'),(340,'Can change Side-dish',93,'change_sidedish'),(341,'Can delete Side-dish',93,'delete_sidedish'),(342,'Can add Recipe',94,'add_recipe'),(343,'Can change Recipe',94,'change_recipe'),(344,'Can delete Recipe',94,'delete_recipe'),(345,'Can add Ingredient in recipe',95,'add_ingredientinrecipe'),(346,'Can change Ingredient in recipe',95,'change_ingredientinrecipe'),(347,'Can delete Ingredient in recipe',95,'delete_ingredientinrecipe'),(348,'Can add Recipe of day',96,'add_recipeofday'),(349,'Can change Recipe of day',96,'change_recipeofday'),(350,'Can delete Recipe of day',96,'delete_recipeofday'),(351,'Can add old recipe article redirect',97,'add_oldrecipearticleredirect'),(352,'Can change old recipe article redirect',97,'change_oldrecipearticleredirect'),(353,'Can delete old recipe article redirect',97,'delete_oldrecipearticleredirect'),(354,'Can add old recipe category redirect',98,'add_oldrecipecategoryredirect'),(355,'Can change old recipe category redirect',98,'change_oldrecipecategoryredirect'),(356,'Can delete old recipe category redirect',98,'delete_oldrecipecategoryredirect'),(357,'Can view Cooking type',83,'view_cookingtype'),(358,'Can view Cuisine',84,'view_cuisine'),(359,'Can view Nutrient group',85,'view_nutrientgroup'),(360,'Can view Nutrient',86,'view_nutrient'),(361,'Can view Unit',87,'view_unit'),(362,'Can view Unit conversion',88,'view_unitconversion'),(363,'Can view Ingredient group',89,'view_ingredientgroup'),(364,'Can view Ingredient',90,'view_ingredient'),(365,'Can view Nutrient in ingredient',91,'view_nutrientiningredient'),(366,'Can view Category photo',92,'view_recipecategoryphoto'),(367,'Can view Side-dish',93,'view_sidedish'),(368,'Can view Recipe',94,'view_recipe'),(369,'Can view Ingredient in recipe',95,'view_ingredientinrecipe'),(370,'Can view Recipe of day',96,'view_recipeofday'),(371,'Can view old recipe article redirect',97,'view_oldrecipearticleredirect'),(372,'Can view old recipe category redirect',98,'view_oldrecipecategoryredirect'),(373,'Can add Horoscope',99,'add_horoscope'),(374,'Can change Horoscope',99,'change_horoscope'),(375,'Can delete Horoscope',99,'delete_horoscope'),(376,'Can add Sign',100,'add_sign'),(377,'Can change Sign',100,'change_sign'),(378,'Can delete Sign',100,'delete_sign'),(379,'Can add Sign description type',101,'add_signdescriptiontype'),(380,'Can change Sign description type',101,'change_signdescriptiontype'),(381,'Can delete Sign description type',101,'delete_signdescriptiontype'),(382,'Can add Sign description',102,'add_signdescription'),(383,'Can change Sign description',102,'change_signdescription'),(384,'Can delete Sign description',102,'delete_signdescription'),(385,'Can add Birth period',103,'add_birthperiod'),(386,'Can change Birth period',103,'change_birthperiod'),(387,'Can delete Birth period',103,'delete_birthperiod'),(388,'Can add Sign compatibility',104,'add_signcompatibility'),(389,'Can change Sign compatibility',104,'change_signcompatibility'),(390,'Can delete Sign compatibility',104,'delete_signcompatibility'),(391,'Can add Prognosis duration',105,'add_prognosisduration'),(392,'Can change Prognosis duration',105,'change_prognosisduration'),(393,'Can delete Prognosis duration',105,'delete_prognosisduration'),(394,'Can add Prognosis type',106,'add_prognosistype'),(395,'Can change Prognosis type',106,'change_prognosistype'),(396,'Can delete Prognosis type',106,'delete_prognosistype'),(397,'Can add Prognosis',107,'add_prognosis'),(398,'Can change Prognosis',107,'change_prognosis'),(399,'Can delete Prognosis',107,'delete_prognosis'),(400,'Can add Lunar diary category',108,'add_lunardiarycategory'),(401,'Can change Lunar diary category',108,'change_lunardiarycategory'),(402,'Can delete Lunar diary category',108,'delete_lunardiarycategory'),(403,'Can add Lunar diary',109,'add_lunardiary'),(404,'Can change Lunar diary',109,'change_lunardiary'),(405,'Can delete Lunar diary',109,'delete_lunardiary'),(406,'Can add Lexicon term',110,'add_astrolex'),(407,'Can change Lexicon term',110,'change_astrolex'),(408,'Can delete Lexicon term',110,'delete_astrolex'),(409,'Can add Life number',111,'add_lifenumber'),(410,'Can change Life number',111,'change_lifenumber'),(411,'Can delete Life number',111,'delete_lifenumber'),(412,'Can add Stone',112,'add_stone'),(413,'Can change Stone',112,'change_stone'),(414,'Can delete Stone',112,'delete_stone'),(415,'Can add Stone for Sign',113,'add_stoneforsign'),(416,'Can change Stone for Sign',113,'change_stoneforsign'),(417,'Can delete Stone for Sign',113,'delete_stoneforsign'),(418,'Can add Numerology grid number',114,'add_numerologygrid'),(419,'Can change Numerology grid number',114,'change_numerologygrid'),(420,'Can delete Numerology grid number',114,'delete_numerologygrid'),(421,'Can add Moon in Sign',115,'add_moon'),(422,'Can change Moon in Sign',115,'change_moon'),(423,'Can delete Moon in Sign',115,'delete_moon'),(424,'Can view Horoscope',99,'view_horoscope'),(425,'Can view Sign',100,'view_sign'),(426,'Can view Sign description type',101,'view_signdescriptiontype'),(427,'Can view Sign description',102,'view_signdescription'),(428,'Can view Birth period',103,'view_birthperiod'),(429,'Can view Sign compatibility',104,'view_signcompatibility'),(430,'Can view Prognosis duration',105,'view_prognosisduration'),(431,'Can view Prognosis type',106,'view_prognosistype'),(432,'Can view Prognosis',107,'view_prognosis'),(433,'Can view Lunar diary category',108,'view_lunardiarycategory'),(434,'Can view Lunar diary',109,'view_lunardiary'),(435,'Can view Lexicon term',110,'view_astrolex'),(436,'Can view Life number',111,'view_lifenumber'),(437,'Can view Stone',112,'view_stone'),(438,'Can view Stone for Sign',113,'view_stoneforsign'),(439,'Can view Numerology grid number',114,'view_numerologygrid'),(440,'Can view Moon in Sign',115,'view_moon'),(441,'Can add Category - section mapping',116,'add_categorysectionmapping'),(442,'Can change Category - section mapping',116,'change_categorysectionmapping'),(443,'Can delete Category - section mapping',116,'delete_categorysectionmapping'),(444,'Can add Site - server mapping',117,'add_siteservermapping'),(445,'Can change Site - server mapping',117,'change_siteservermapping'),(446,'Can delete Site - server mapping',117,'delete_siteservermapping'),(447,'Can view Category - section mapping',116,'view_categorysectionmapping'),(448,'Can view Site - server mapping',117,'view_siteservermapping');
 /*!40000 ALTER TABLE `auth_permission` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -966,7 +980,7 @@ CREATE TABLE `auth_user` (
   `date_joined` datetime NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -975,6 +989,7 @@ CREATE TABLE `auth_user` (
 
 LOCK TABLES `auth_user` WRITE;
 /*!40000 ALTER TABLE `auth_user` DISABLE KEYS */;
+INSERT INTO `auth_user` VALUES (1,'admin','','','a@a.cz','sha1$11d1c$9fd81fa9afec60aada0b39bbe5a361bbb90d0fad',1,1,1,'2009-05-19 13:53:00','2009-05-19 13:53:00');
 /*!40000 ALTER TABLE `auth_user` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1122,9 +1137,10 @@ CREATE TABLE `cdnclient_target` (
   `url` varchar(200) COLLATE utf8_czech_ci NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `source_id` (`source_id`,`format_id`),
-  KEY `format_id_refs_id_3852e1c9` (`format_id`),
-  CONSTRAINT `source_id_refs_id_5ec2976d` FOREIGN KEY (`source_id`) REFERENCES `cdnclient_source` (`id`),
-  CONSTRAINT `format_id_refs_id_3852e1c9` FOREIGN KEY (`format_id`) REFERENCES `cdnclient_format` (`id`)
+  KEY `cdnclient_target_source_id` (`source_id`),
+  KEY `cdnclient_target_format_id` (`format_id`),
+  CONSTRAINT `format_id_refs_id_3852e1c9` FOREIGN KEY (`format_id`) REFERENCES `cdnclient_format` (`id`),
+  CONSTRAINT `source_id_refs_id_5ec2976d` FOREIGN KEY (`source_id`) REFERENCES `cdnclient_source` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1207,7 +1223,7 @@ CREATE TABLE `comments_comment` (
   `nickname` varchar(50) COLLATE utf8_czech_ci NOT NULL,
   `email` varchar(75) COLLATE utf8_czech_ci NOT NULL,
   `ip_address` char(15) COLLATE utf8_czech_ci DEFAULT NULL,
-  `submit_date` datetime NOT NULL DEFAULT '2009-05-19 12:05:29',
+  `submit_date` datetime NOT NULL DEFAULT '2009-05-19 13:53:26',
   `is_public` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   KEY `comments_comment_target_ct_id` (`target_ct_id`),
@@ -1240,7 +1256,7 @@ CREATE TABLE `comments_commentoptions` (
   `target_ct_id` int(11) NOT NULL,
   `target_id` int(10) unsigned NOT NULL,
   `options` varchar(100) COLLATE utf8_czech_ci NOT NULL,
-  `timestamp` datetime NOT NULL DEFAULT '2009-05-19 12:05:29',
+  `timestamp` datetime NOT NULL DEFAULT '2009-05-19 13:53:26',
   PRIMARY KEY (`id`),
   KEY `comments_commentoptions_target_ct_id` (`target_ct_id`),
   CONSTRAINT `target_ct_id_refs_id_1fd36d3` FOREIGN KEY (`target_ct_id`) REFERENCES `django_content_type` (`id`)
@@ -1626,7 +1642,7 @@ CREATE TABLE `discussions_topic` (
   `slug` varchar(255) COLLATE utf8_czech_ci NOT NULL,
   `category_id` int(11) NOT NULL,
   `photo_id` int(11) DEFAULT NULL,
-  `created` datetime NOT NULL DEFAULT '2009-05-19 12:06:21',
+  `created` datetime NOT NULL DEFAULT '2009-05-19 13:53:53',
   PRIMARY KEY (`id`),
   KEY `discussions_topic_slug` (`slug`),
   KEY `discussions_topic_category_id` (`category_id`),
@@ -1656,7 +1672,7 @@ CREATE TABLE `discussions_topicthread` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `title` varchar(255) COLLATE utf8_czech_ci NOT NULL,
   `slug` varchar(255) COLLATE utf8_czech_ci NOT NULL,
-  `created` datetime NOT NULL DEFAULT '2009-05-19 12:06:21',
+  `created` datetime NOT NULL DEFAULT '2009-05-19 13:53:53',
   `author_id` int(11) DEFAULT NULL,
   `nickname` varchar(50) COLLATE utf8_czech_ci NOT NULL,
   `email` varchar(75) COLLATE utf8_czech_ci NOT NULL,
@@ -1697,10 +1713,10 @@ CREATE TABLE `django_admin_log` (
   `action_flag` smallint(5) unsigned NOT NULL,
   `change_message` longtext COLLATE utf8_czech_ci NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `content_type_id_refs_id_288599e6` (`content_type_id`),
-  KEY `user_id_refs_id_c8665aa` (`user_id`),
-  CONSTRAINT `user_id_refs_id_c8665aa` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`),
-  CONSTRAINT `content_type_id_refs_id_288599e6` FOREIGN KEY (`content_type_id`) REFERENCES `django_content_type` (`id`)
+  KEY `django_admin_log_user_id` (`user_id`),
+  KEY `django_admin_log_content_type_id` (`content_type_id`),
+  CONSTRAINT `content_type_id_refs_id_288599e6` FOREIGN KEY (`content_type_id`) REFERENCES `django_content_type` (`id`),
+  CONSTRAINT `user_id_refs_id_c8665aa` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1736,7 +1752,7 @@ CREATE TABLE `django_content_type` (
 
 LOCK TABLES `django_content_type` WRITE;
 /*!40000 ALTER TABLE `django_content_type` DISABLE KEYS */;
-INSERT INTO `django_content_type` VALUES (1,'permission','auth','permission'),(2,'group','auth','group'),(3,'user','auth','user'),(4,'message','auth','message'),(5,'content type','contenttypes','contenttype'),(6,'session','sessions','session'),(7,'site','sites','site'),(8,'redirect','redirects','redirect'),(9,'log entry','admin','logentry'),(10,'Instruction','instruction','instruction'),(11,'Cooking type','recipes','cookingtype'),(12,'Cuisine','recipes','cuisine'),(13,'Nutrient group','recipes','nutrientgroup'),(14,'Nutrient','recipes','nutrient'),(15,'Unit','recipes','unit'),(16,'Unit conversion','recipes','unitconversion'),(17,'Ingredient group','recipes','ingredientgroup'),(18,'Ingredient','recipes','ingredient'),(19,'Nutrient in ingredient','recipes','nutrientiningredient'),(20,'Category photo','recipes','recipecategoryphoto'),(21,'Side-dish','recipes','sidedish'),(22,'Recipe','recipes','recipe'),(23,'Ingredient in recipe','recipes','ingredientinrecipe'),(24,'Recipe of day','recipes','recipeofday'),(25,'old recipe article redirect','recipes','oldrecipearticleredirect'),(26,'old recipe category redirect','recipes','oldrecipecategoryredirect'),(27,'Horoscope','astrology','horoscope'),(28,'Sign','astrology','sign'),(29,'Sign description type','astrology','signdescriptiontype'),(30,'Sign description','astrology','signdescription'),(31,'Birth period','astrology','birthperiod'),(32,'Sign compatibility','astrology','signcompatibility'),(33,'Prognosis duration','astrology','prognosisduration'),(34,'Prognosis type','astrology','prognosistype'),(35,'Prognosis','astrology','prognosis'),(36,'Lunar diary category','astrology','lunardiarycategory'),(37,'Lunar diary','astrology','lunardiary'),(38,'Lexicon term','astrology','astrolex'),(39,'Life number','astrology','lifenumber'),(40,'Stone','astrology','stone'),(41,'Stone for Sign','astrology','stoneforsign'),(42,'Numerology grid number','astrology','numerologygrid'),(43,'Moon in Sign','astrology','moon'),(44,'newsletter','newsletters','newsletter'),(45,'recipient','newsletters','recipient'),(46,'format','cdnclient','format'),(47,'source','cdnclient','source'),(48,'target','cdnclient','target'),(49,'migration history','south','migrationhistory'),(50,'Eshop','xmastips','eshop'),(51,'Feedset','xmastips','feedset'),(52,'Category','xmastips','category'),(53,'Target group','xmastips','targetgroup'),(54,'Present','xmastips','present'),(55,'Inquiry of Santa','writetosanta','inquiryofsanta'),(56,'Author','core','author'),(57,'Source','core','source'),(58,'Category','core','category'),(59,'Placement','core','placement'),(60,'Listing','core','listing'),(61,'Hit Count','core','hitcount'),(62,'Related','core','related'),(63,'Photo','photos','photo'),(64,'Format','photos','format'),(65,'Formated photo','photos','formatedphoto'),(66,'Info box','articles','infobox'),(67,'Article','articles','article'),(68,'Article content','articles','articlecontents'),(69,'Comment Options','comments','commentoptions'),(70,'Comment','comments','comment'),(71,'Banned User','comments','banneduser'),(72,'banned ip','comments','bannedip'),(73,'Template','db_templates','dbtemplate'),(74,'Template block','db_templates','templateblock'),(75,'Gallery','galleries','gallery'),(76,'Gallery item','galleries','galleryitem'),(77,'Contest','polls','contest'),(78,'Quiz','polls','quiz'),(79,'Question','polls','question'),(80,'Poll','polls','poll'),(81,'Choice','polls','choice'),(82,'Vote','polls','vote'),(83,'Contestant','polls','contestant'),(84,'Result','polls','result'),(85,'tag','tagging','tag'),(86,'tagged item','tagging','taggeditem'),(87,'Model weight','ratings','modelweight'),(88,'Total rate','ratings','totalrate'),(89,'Aggregation','ratings','agg'),(90,'Rating','ratings','rating'),(91,'atlas export','exports','atlasexport'),(92,'Server','imports','server'),(93,'Server item','imports','serveritem'),(94,'Topic','discussions','topic'),(95,'post viewed','discussions','postviewed'),(96,'Thread','discussions','topicthread'),(97,'banned string','discussions','bannedstring'),(98,'banned user','discussions','banneduser'),(99,'Interviewee','interviews','interviewee'),(100,'Interview','interviews','interview'),(101,'Question','interviews','question'),(102,'Answer','interviews','answer'),(103,'position','positions','position'),(104,'Category Lock','catlocks','categorylock'),(105,'mail','sendmail','mail'),(106,'Type','attachments','type'),(107,'Attachment','attachments','attachment'),(108,'question','answers','question'),(109,'answer','answers','answer'),(110,'question group','answers','questiongroup'),(111,'Serie','series','serie'),(112,'Serie part','series','seriepart'),(113,'Media','media','media'),(114,'section','media','section'),(115,'usage','media','usage'),(116,'Category - section mapping','adverts','categorysectionmapping'),(117,'Site - server mapping','adverts','siteservermapping');
+INSERT INTO `django_content_type` VALUES (1,'permission','auth','permission'),(2,'group','auth','group'),(3,'user','auth','user'),(4,'message','auth','message'),(5,'content type','contenttypes','contenttype'),(6,'session','sessions','session'),(7,'site','sites','site'),(8,'redirect','redirects','redirect'),(9,'log entry','admin','logentry'),(10,'newsletter','newsletters','newsletter'),(11,'recipient','newsletters','recipient'),(12,'format','cdnclient','format'),(13,'source','cdnclient','source'),(14,'target','cdnclient','target'),(15,'migration history','south','migrationhistory'),(16,'Eshop','xmastips','eshop'),(17,'Feedset','xmastips','feedset'),(18,'Category','xmastips','category'),(19,'Target group','xmastips','targetgroup'),(20,'Present','xmastips','present'),(21,'Inquiry of Santa','writetosanta','inquiryofsanta'),(22,'Author','core','author'),(23,'Source','core','source'),(24,'Category','core','category'),(25,'Placement','core','placement'),(26,'Listing','core','listing'),(27,'Hit Count','core','hitcount'),(28,'Related','core','related'),(29,'Photo','photos','photo'),(30,'Format','photos','format'),(31,'Formated photo','photos','formatedphoto'),(32,'Info box','articles','infobox'),(33,'Article','articles','article'),(34,'Article content','articles','articlecontents'),(35,'Comment Options','comments','commentoptions'),(36,'Comment','comments','comment'),(37,'Banned User','comments','banneduser'),(38,'banned ip','comments','bannedip'),(39,'Template','db_templates','dbtemplate'),(40,'Template block','db_templates','templateblock'),(41,'Gallery','galleries','gallery'),(42,'Gallery item','galleries','galleryitem'),(43,'Contest','polls','contest'),(44,'Quiz','polls','quiz'),(45,'Question','polls','question'),(46,'Poll','polls','poll'),(47,'Choice','polls','choice'),(48,'Vote','polls','vote'),(49,'Contestant','polls','contestant'),(50,'Result','polls','result'),(51,'tag','tagging','tag'),(52,'tagged item','tagging','taggeditem'),(53,'Model weight','ratings','modelweight'),(54,'Total rate','ratings','totalrate'),(55,'Aggregation','ratings','agg'),(56,'Rating','ratings','rating'),(57,'atlas export','exports','atlasexport'),(58,'Server','imports','server'),(59,'Server item','imports','serveritem'),(60,'Topic','discussions','topic'),(61,'post viewed','discussions','postviewed'),(62,'Thread','discussions','topicthread'),(63,'banned string','discussions','bannedstring'),(64,'banned user','discussions','banneduser'),(65,'Interviewee','interviews','interviewee'),(66,'Interview','interviews','interview'),(67,'Question','interviews','question'),(68,'Answer','interviews','answer'),(69,'position','positions','position'),(70,'Category Lock','catlocks','categorylock'),(71,'mail','sendmail','mail'),(72,'Type','attachments','type'),(73,'Attachment','attachments','attachment'),(74,'question','answers','question'),(75,'answer','answers','answer'),(76,'question group','answers','questiongroup'),(77,'Serie','series','serie'),(78,'Serie part','series','seriepart'),(79,'Media','media','media'),(80,'section','media','section'),(81,'usage','media','usage'),(82,'Instruction','instruction','instruction'),(83,'Cooking type','recipes','cookingtype'),(84,'Cuisine','recipes','cuisine'),(85,'Nutrient group','recipes','nutrientgroup'),(86,'Nutrient','recipes','nutrient'),(87,'Unit','recipes','unit'),(88,'Unit conversion','recipes','unitconversion'),(89,'Ingredient group','recipes','ingredientgroup'),(90,'Ingredient','recipes','ingredient'),(91,'Nutrient in ingredient','recipes','nutrientiningredient'),(92,'Category photo','recipes','recipecategoryphoto'),(93,'Side-dish','recipes','sidedish'),(94,'Recipe','recipes','recipe'),(95,'Ingredient in recipe','recipes','ingredientinrecipe'),(96,'Recipe of day','recipes','recipeofday'),(97,'old recipe article redirect','recipes','oldrecipearticleredirect'),(98,'old recipe category redirect','recipes','oldrecipecategoryredirect'),(99,'Horoscope','astrology','horoscope'),(100,'Sign','astrology','sign'),(101,'Sign description type','astrology','signdescriptiontype'),(102,'Sign description','astrology','signdescription'),(103,'Birth period','astrology','birthperiod'),(104,'Sign compatibility','astrology','signcompatibility'),(105,'Prognosis duration','astrology','prognosisduration'),(106,'Prognosis type','astrology','prognosistype'),(107,'Prognosis','astrology','prognosis'),(108,'Lunar diary category','astrology','lunardiarycategory'),(109,'Lunar diary','astrology','lunardiary'),(110,'Lexicon term','astrology','astrolex'),(111,'Life number','astrology','lifenumber'),(112,'Stone','astrology','stone'),(113,'Stone for Sign','astrology','stoneforsign'),(114,'Numerology grid number','astrology','numerologygrid'),(115,'Moon in Sign','astrology','moon'),(116,'Category - section mapping','adverts','categorysectionmapping'),(117,'Site - server mapping','adverts','siteservermapping');
 /*!40000 ALTER TABLE `django_content_type` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1754,6 +1770,8 @@ CREATE TABLE `django_redirect` (
   `new_path` varchar(200) COLLATE utf8_czech_ci NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `site_id` (`site_id`,`old_path`),
+  KEY `django_redirect_site_id` (`site_id`),
+  KEY `django_redirect_old_path` (`old_path`),
   CONSTRAINT `site_id_refs_id_4aa27aa6` FOREIGN KEY (`site_id`) REFERENCES `django_site` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1803,7 +1821,7 @@ CREATE TABLE `django_site` (
   `domain` varchar(100) COLLATE utf8_czech_ci NOT NULL,
   `name` varchar(50) COLLATE utf8_czech_ci NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1812,6 +1830,7 @@ CREATE TABLE `django_site` (
 
 LOCK TABLES `django_site` WRITE;
 /*!40000 ALTER TABLE `django_site` DISABLE KEYS */;
+INSERT INTO `django_site` VALUES (1,'example.com','example.com');
 /*!40000 ALTER TABLE `django_site` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1861,7 +1880,7 @@ CREATE TABLE `galleries_gallery` (
   `content` longtext COLLATE utf8_czech_ci NOT NULL,
   `owner_id` int(11) DEFAULT NULL,
   `category_id` int(11) DEFAULT NULL,
-  `created` datetime NOT NULL DEFAULT '2009-05-19 12:05:39',
+  `created` datetime NOT NULL DEFAULT '2009-05-19 13:53:32',
   PRIMARY KEY (`id`),
   KEY `galleries_gallery_slug` (`slug`),
   KEY `galleries_gallery_owner_id` (`owner_id`),
@@ -1996,10 +2015,19 @@ CREATE TABLE `instruction_instruction` (
   `category_id` int(11) DEFAULT NULL,
   `description` longtext COLLATE utf8_czech_ci NOT NULL,
   `text` longtext COLLATE utf8_czech_ci NOT NULL,
-  `created` datetime NOT NULL,
+  `created` datetime NOT NULL DEFAULT '2009-05-19 13:54:21',
   `updated` datetime DEFAULT NULL,
-  `embed_invisible` tinyint(1) NOT NULL,
-  PRIMARY KEY (`id`)
+  `embed_invisible` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `instruction_instruction_media_id` (`media_id`),
+  KEY `instruction_instruction_slug` (`slug`),
+  KEY `instruction_instruction_photo_id` (`photo_id`),
+  KEY `instruction_instruction_source_id` (`source_id`),
+  KEY `instruction_instruction_category_id` (`category_id`),
+  CONSTRAINT `category_id_refs_id_2bac5ce2` FOREIGN KEY (`category_id`) REFERENCES `core_category` (`id`),
+  CONSTRAINT `media_id_refs_id_3bcec203` FOREIGN KEY (`media_id`) REFERENCES `media_media` (`id`),
+  CONSTRAINT `photo_id_refs_id_1907e3b3` FOREIGN KEY (`photo_id`) REFERENCES `photos_photo` (`id`),
+  CONSTRAINT `source_id_refs_id_3935b2c3` FOREIGN KEY (`source_id`) REFERENCES `core_source` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -2024,7 +2052,9 @@ CREATE TABLE `instruction_instruction_authors` (
   `instruction_id` int(11) NOT NULL,
   `author_id` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `instruction_id` (`instruction_id`,`author_id`),
+  KEY `instruction_instruction_authors_instruction_id` (`instruction_id`),
+  KEY `instruction_instruction_authors_author_id` (`author_id`),
+  CONSTRAINT `author_id_refs_id_cc614fa` FOREIGN KEY (`author_id`) REFERENCES `core_author` (`id`),
   CONSTRAINT `instruction_id_refs_id_34288ba6` FOREIGN KEY (`instruction_id`) REFERENCES `instruction_instruction` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -2049,7 +2079,7 @@ CREATE TABLE `interviews_answer` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `question_id` int(11) NOT NULL,
   `interviewee_id` int(11) NOT NULL,
-  `submit_date` datetime NOT NULL DEFAULT '2009-05-19 12:06:24',
+  `submit_date` datetime NOT NULL DEFAULT '2009-05-19 13:53:57',
   `content` longtext COLLATE utf8_czech_ci NOT NULL,
   PRIMARY KEY (`id`),
   KEY `interviews_answer_question_id` (`question_id`),
@@ -2212,7 +2242,7 @@ CREATE TABLE `interviews_question` (
   `nickname` varchar(200) COLLATE utf8_czech_ci NOT NULL,
   `email` varchar(75) COLLATE utf8_czech_ci NOT NULL,
   `ip_address` char(15) COLLATE utf8_czech_ci DEFAULT NULL,
-  `submit_date` datetime NOT NULL DEFAULT '2009-05-19 12:06:24',
+  `submit_date` datetime NOT NULL DEFAULT '2009-05-19 13:53:57',
   `is_public` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   KEY `interviews_question_interview_id` (`interview_id`),
@@ -2248,7 +2278,7 @@ CREATE TABLE `media_media` (
   `category_id` int(11) DEFAULT NULL,
   `description` longtext COLLATE utf8_czech_ci NOT NULL,
   `text` longtext COLLATE utf8_czech_ci NOT NULL,
-  `created` datetime NOT NULL DEFAULT '2009-05-19 12:06:47',
+  `created` datetime NOT NULL DEFAULT '2009-05-19 13:54:16',
   `updated` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `media_media_slug` (`slug`),
@@ -2496,7 +2526,7 @@ CREATE TABLE `photos_photo` (
   `width` int(10) unsigned NOT NULL,
   `height` int(10) unsigned NOT NULL,
   `source_id` int(11) DEFAULT NULL,
-  `created` datetime NOT NULL DEFAULT '2009-05-19 12:05:25',
+  `created` datetime NOT NULL DEFAULT '2009-05-19 13:53:17',
   PRIMARY KEY (`id`),
   KEY `photos_photo_slug` (`slug`),
   KEY `photos_photo_source_id` (`source_id`),
@@ -2935,7 +2965,7 @@ CREATE TABLE `ratings_rating` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `target_ct_id` int(11) NOT NULL,
   `target_id` int(10) unsigned NOT NULL,
-  `time` datetime NOT NULL DEFAULT '2009-05-19 12:06:14',
+  `time` datetime NOT NULL DEFAULT '2009-05-19 13:53:45',
   `user_id` int(11) DEFAULT NULL,
   `amount` decimal(10,2) NOT NULL,
   `ip_address` varchar(15) COLLATE utf8_czech_ci NOT NULL,
@@ -3027,7 +3057,7 @@ CREATE TABLE `recipes_cuisine` (
   `description` longtext COLLATE utf8_czech_ci NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `slug` (`slug`),
-  KEY `parent_id_refs_id_365f53fd` (`parent_id`),
+  KEY `recipes_cuisine_parent_id` (`parent_id`),
   CONSTRAINT `parent_id_refs_id_365f53fd` FOREIGN KEY (`parent_id`) REFERENCES `recipes_cuisine` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -3058,10 +3088,10 @@ CREATE TABLE `recipes_ingredient` (
   `ndb_no` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `slug` (`slug`),
-  KEY `default_unit_id_refs_id_60ebe51a` (`default_unit_id`),
-  KEY `group_id_refs_id_2c201c23` (`group_id`),
-  CONSTRAINT `group_id_refs_id_2c201c23` FOREIGN KEY (`group_id`) REFERENCES `recipes_ingredientgroup` (`id`),
-  CONSTRAINT `default_unit_id_refs_id_60ebe51a` FOREIGN KEY (`default_unit_id`) REFERENCES `recipes_unit` (`id`)
+  KEY `recipes_ingredient_group_id` (`group_id`),
+  KEY `recipes_ingredient_default_unit_id` (`default_unit_id`),
+  CONSTRAINT `default_unit_id_refs_id_60ebe51a` FOREIGN KEY (`default_unit_id`) REFERENCES `recipes_unit` (`id`),
+  CONSTRAINT `group_id_refs_id_2c201c23` FOREIGN KEY (`group_id`) REFERENCES `recipes_ingredientgroup` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -3112,14 +3142,15 @@ CREATE TABLE `recipes_ingredientinrecipe` (
   `ingredient_id` int(11) NOT NULL,
   `amount` decimal(5,2) DEFAULT NULL,
   `unit_id` int(11) DEFAULT NULL,
-  `order` smallint(5) unsigned NOT NULL,
+  `order` smallint(5) unsigned NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `recipe_id` (`recipe_id`,`ingredient_id`),
-  KEY `ingredient_id_refs_id_5c444206` (`ingredient_id`),
-  KEY `unit_id_refs_id_3744695d` (`unit_id`),
-  CONSTRAINT `unit_id_refs_id_3744695d` FOREIGN KEY (`unit_id`) REFERENCES `recipes_unit` (`id`),
+  UNIQUE KEY `recipes_ingredientinrecipe_recipe_id_3c0425fb` (`recipe_id`,`ingredient_id`),
+  KEY `recipes_ingredientinrecipe_recipe_id` (`recipe_id`),
+  KEY `recipes_ingredientinrecipe_ingredient_id` (`ingredient_id`),
+  KEY `recipes_ingredientinrecipe_unit_id` (`unit_id`),
   CONSTRAINT `ingredient_id_refs_id_5c444206` FOREIGN KEY (`ingredient_id`) REFERENCES `recipes_ingredient` (`id`),
-  CONSTRAINT `recipe_id_refs_id_44525c1d` FOREIGN KEY (`recipe_id`) REFERENCES `recipes_recipe` (`id`)
+  CONSTRAINT `recipe_id_refs_id_44525c1d` FOREIGN KEY (`recipe_id`) REFERENCES `recipes_recipe` (`id`),
+  CONSTRAINT `unit_id_refs_id_3744695d` FOREIGN KEY (`unit_id`) REFERENCES `recipes_unit` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -3147,7 +3178,7 @@ CREATE TABLE `recipes_nutrient` (
   `ndb_no` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `slug` (`slug`),
-  KEY `group_id_refs_id_1146b305` (`group_id`),
+  KEY `recipes_nutrient_group_id` (`group_id`),
   CONSTRAINT `group_id_refs_id_1146b305` FOREIGN KEY (`group_id`) REFERENCES `recipes_nutrientgroup` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -3200,12 +3231,13 @@ CREATE TABLE `recipes_nutrientiningredient` (
   `unit_id` int(11) NOT NULL,
   `amount` decimal(8,3) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `ingredient_id` (`ingredient_id`,`nutrient_id`),
-  KEY `nutrient_id_refs_id_5c5afc8b` (`nutrient_id`),
-  KEY `unit_id_refs_id_7ab138c4` (`unit_id`),
-  CONSTRAINT `unit_id_refs_id_7ab138c4` FOREIGN KEY (`unit_id`) REFERENCES `recipes_unit` (`id`),
+  UNIQUE KEY `recipes_nutrientiningredient_ingredient_id_42f9cbc9` (`ingredient_id`,`nutrient_id`),
+  KEY `recipes_nutrientiningredient_ingredient_id` (`ingredient_id`),
+  KEY `recipes_nutrientiningredient_nutrient_id` (`nutrient_id`),
+  KEY `recipes_nutrientiningredient_unit_id` (`unit_id`),
   CONSTRAINT `ingredient_id_refs_id_3a5aed61` FOREIGN KEY (`ingredient_id`) REFERENCES `recipes_ingredient` (`id`),
-  CONSTRAINT `nutrient_id_refs_id_5c5afc8b` FOREIGN KEY (`nutrient_id`) REFERENCES `recipes_nutrient` (`id`)
+  CONSTRAINT `nutrient_id_refs_id_5c5afc8b` FOREIGN KEY (`nutrient_id`) REFERENCES `recipes_nutrient` (`id`),
+  CONSTRAINT `unit_id_refs_id_7ab138c4` FOREIGN KEY (`unit_id`) REFERENCES `recipes_unit` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -3228,7 +3260,9 @@ DROP TABLE IF EXISTS `recipes_oldrecipearticleredirect`;
 CREATE TABLE `recipes_oldrecipearticleredirect` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `new_id_id` int(11) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `recipes_oldrecipearticleredirect_new_id_id` (`new_id_id`),
+  CONSTRAINT `new_id_id_refs_id_698c78bc` FOREIGN KEY (`new_id_id`) REFERENCES `articles_article` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -3251,7 +3285,9 @@ DROP TABLE IF EXISTS `recipes_oldrecipecategoryredirect`;
 CREATE TABLE `recipes_oldrecipecategoryredirect` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `new_id_id` int(11) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `recipes_oldrecipecategoryredirect_new_id_id` (`new_id_id`),
+  CONSTRAINT `new_id_id_refs_id_23a1754` FOREIGN KEY (`new_id_id`) REFERENCES `core_category` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -3279,19 +3315,23 @@ CREATE TABLE `recipes_recipe` (
   `cooking_type_id` int(11) DEFAULT NULL,
   `photo_id` int(11) DEFAULT NULL,
   `servings` smallint(5) unsigned DEFAULT NULL,
-  `price` smallint(6) NOT NULL,
-  `difficulty` smallint(5) unsigned NOT NULL,
+  `price` smallint(6) NOT NULL DEFAULT '3',
+  `difficulty` smallint(5) unsigned NOT NULL DEFAULT '3',
   `preparation_time` smallint(5) unsigned NOT NULL,
   `caloric_value` int(10) unsigned DEFAULT NULL,
   `headline` longtext COLLATE utf8_czech_ci NOT NULL,
   `preparation` longtext COLLATE utf8_czech_ci NOT NULL,
-  `approved` tinyint(1) NOT NULL,
+  `approved` tinyint(1) NOT NULL DEFAULT '0',
   `inserted` datetime NOT NULL,
   `modified` datetime NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `slug` (`slug`),
-  KEY `cooking_type_id_refs_id_654c8282` (`cooking_type_id`),
-  CONSTRAINT `cooking_type_id_refs_id_654c8282` FOREIGN KEY (`cooking_type_id`) REFERENCES `recipes_cookingtype` (`id`)
+  KEY `recipes_recipe_category_id` (`category_id`),
+  KEY `recipes_recipe_cooking_type_id` (`cooking_type_id`),
+  KEY `recipes_recipe_photo_id` (`photo_id`),
+  CONSTRAINT `category_id_refs_id_1f280250` FOREIGN KEY (`category_id`) REFERENCES `core_category` (`id`),
+  CONSTRAINT `cooking_type_id_refs_id_654c8282` FOREIGN KEY (`cooking_type_id`) REFERENCES `recipes_cookingtype` (`id`),
+  CONSTRAINT `photo_id_refs_id_2be20725` FOREIGN KEY (`photo_id`) REFERENCES `photos_photo` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -3302,6 +3342,90 @@ CREATE TABLE `recipes_recipe` (
 LOCK TABLES `recipes_recipe` WRITE;
 /*!40000 ALTER TABLE `recipes_recipe` DISABLE KEYS */;
 /*!40000 ALTER TABLE `recipes_recipe` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `recipes_recipe_authors`
+--
+
+DROP TABLE IF EXISTS `recipes_recipe_authors`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `recipes_recipe_authors` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `recipe_id` int(11) NOT NULL,
+  `author_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `recipes_recipe_authors_recipe_id` (`recipe_id`),
+  KEY `recipes_recipe_authors_author_id` (`author_id`),
+  CONSTRAINT `author_id_refs_id_315969b8` FOREIGN KEY (`author_id`) REFERENCES `core_author` (`id`),
+  CONSTRAINT `recipe_id_refs_id_64395126` FOREIGN KEY (`recipe_id`) REFERENCES `recipes_recipe` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `recipes_recipe_authors`
+--
+
+LOCK TABLES `recipes_recipe_authors` WRITE;
+/*!40000 ALTER TABLE `recipes_recipe_authors` DISABLE KEYS */;
+/*!40000 ALTER TABLE `recipes_recipe_authors` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `recipes_recipe_cuisines`
+--
+
+DROP TABLE IF EXISTS `recipes_recipe_cuisines`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `recipes_recipe_cuisines` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `recipe_id` int(11) NOT NULL,
+  `cuisine_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `recipes_recipe_cuisines_recipe_id` (`recipe_id`),
+  KEY `recipes_recipe_cuisines_cuisine_id` (`cuisine_id`),
+  CONSTRAINT `cuisine_id_refs_id_1f3d8bfb` FOREIGN KEY (`cuisine_id`) REFERENCES `recipes_cuisine` (`id`),
+  CONSTRAINT `recipe_id_refs_id_1b9a854c` FOREIGN KEY (`recipe_id`) REFERENCES `recipes_recipe` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `recipes_recipe_cuisines`
+--
+
+LOCK TABLES `recipes_recipe_cuisines` WRITE;
+/*!40000 ALTER TABLE `recipes_recipe_cuisines` DISABLE KEYS */;
+/*!40000 ALTER TABLE `recipes_recipe_cuisines` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `recipes_recipe_side_dishes`
+--
+
+DROP TABLE IF EXISTS `recipes_recipe_side_dishes`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `recipes_recipe_side_dishes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `recipe_id` int(11) NOT NULL,
+  `sidedish_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `recipes_recipe_side_dishes_recipe_id` (`recipe_id`),
+  KEY `recipes_recipe_side_dishes_sidedish_id` (`sidedish_id`),
+  CONSTRAINT `recipe_id_refs_id_859070e` FOREIGN KEY (`recipe_id`) REFERENCES `recipes_recipe` (`id`),
+  CONSTRAINT `sidedish_id_refs_id_3c9c54e1` FOREIGN KEY (`sidedish_id`) REFERENCES `recipes_sidedish` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `recipes_recipe_side_dishes`
+--
+
+LOCK TABLES `recipes_recipe_side_dishes` WRITE;
+/*!40000 ALTER TABLE `recipes_recipe_side_dishes` DISABLE KEYS */;
+/*!40000 ALTER TABLE `recipes_recipe_side_dishes` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -3316,7 +3440,10 @@ CREATE TABLE `recipes_recipecategoryphoto` (
   `category_id` int(11) NOT NULL,
   `photo_id` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `category_id` (`category_id`)
+  UNIQUE KEY `category_id` (`category_id`),
+  KEY `recipes_recipecategoryphoto_photo_id` (`photo_id`),
+  CONSTRAINT `category_id_refs_id_3435f637` FOREIGN KEY (`category_id`) REFERENCES `core_category` (`id`),
+  CONSTRAINT `photo_id_refs_id_4fc9ffac` FOREIGN KEY (`photo_id`) REFERENCES `photos_photo` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -3342,7 +3469,7 @@ CREATE TABLE `recipes_recipeofday` (
   `recipe_id` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `date` (`date`),
-  KEY `recipe_id_refs_id_305d818b` (`recipe_id`),
+  KEY `recipes_recipeofday_recipe_id` (`recipe_id`),
   CONSTRAINT `recipe_id_refs_id_305d818b` FOREIGN KEY (`recipe_id`) REFERENCES `recipes_recipe` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -3422,10 +3549,11 @@ CREATE TABLE `recipes_unitconversion` (
   `to_unit_id` int(11) NOT NULL,
   `ratio` decimal(10,5) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `from_unit_id` (`from_unit_id`,`to_unit_id`),
-  KEY `to_unit_id_refs_id_31fa2bc3` (`to_unit_id`),
-  CONSTRAINT `to_unit_id_refs_id_31fa2bc3` FOREIGN KEY (`to_unit_id`) REFERENCES `recipes_unit` (`id`),
-  CONSTRAINT `from_unit_id_refs_id_31fa2bc3` FOREIGN KEY (`from_unit_id`) REFERENCES `recipes_unit` (`id`)
+  UNIQUE KEY `recipes_unitconversion_from_unit_id_6a402957` (`from_unit_id`,`to_unit_id`),
+  KEY `recipes_unitconversion_from_unit_id` (`from_unit_id`),
+  KEY `recipes_unitconversion_to_unit_id` (`to_unit_id`),
+  CONSTRAINT `from_unit_id_refs_id_31fa2bc3` FOREIGN KEY (`from_unit_id`) REFERENCES `recipes_unit` (`id`),
+  CONSTRAINT `to_unit_id_refs_id_31fa2bc3` FOREIGN KEY (`to_unit_id`) REFERENCES `recipes_unit` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -3449,7 +3577,7 @@ CREATE TABLE `sendmail_mail` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `sender` varchar(75) COLLATE utf8_czech_ci NOT NULL,
   `recipient` varchar(75) COLLATE utf8_czech_ci NOT NULL,
-  `sent` datetime NOT NULL DEFAULT '2009-05-19 12:06:31',
+  `sent` datetime NOT NULL DEFAULT '2009-05-19 13:54:08',
   `target_ct_id` int(11) NOT NULL,
   `target_id` int(10) unsigned NOT NULL,
   `content` longtext COLLATE utf8_czech_ci,
@@ -3547,7 +3675,7 @@ CREATE TABLE `south_migrationhistory` (
   `migration` varchar(255) COLLATE utf8_czech_ci NOT NULL,
   `applied` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3556,7 +3684,7 @@ CREATE TABLE `south_migrationhistory` (
 
 LOCK TABLES `south_migrationhistory` WRITE;
 /*!40000 ALTER TABLE `south_migrationhistory` DISABLE KEYS */;
-INSERT INTO `south_migrationhistory` VALUES (1,'core','0001_initial','2009-05-19 10:05:21'),(2,'photos','0001_initial','2009-05-19 10:05:26'),(3,'articles','0001_initial','2009-05-19 10:05:27'),(4,'comments','0001_initial','2009-05-19 10:05:30'),(5,'db_templates','0001_initial','2009-05-19 10:05:35'),(6,'galleries','0001_initial','2009-05-19 10:05:58'),(7,'polls','0001_initial','2009-05-19 10:06:06'),(8,'tagging','0001_initial','2009-05-19 10:06:13'),(9,'ratings','0001_initial','2009-05-19 10:06:15'),(10,'exports','0001_initial','2009-05-19 10:06:17'),(11,'imports','0001_initial','2009-05-19 10:06:18'),(12,'ellaadmin','0001_initial','2009-05-19 10:06:19'),(13,'discussions','0001_initial','2009-05-19 10:06:22'),(14,'interviews','0001_initial','2009-05-19 10:06:26'),(15,'positions','0001_initial','2009-05-19 10:06:29'),(16,'catlocks','0001_initial','2009-05-19 10:06:30'),(17,'sendmail','0001_initial','2009-05-19 10:06:31'),(18,'attachments','0001_initial','2009-05-19 10:06:41'),(19,'answers','0001_initial','2009-05-19 10:06:43'),(20,'series','0001_initial','2009-05-19 10:06:46'),(21,'media','0001_initial','2009-05-19 10:06:49'),(22,'adverts','0001_initial','2009-05-19 10:06:51');
+INSERT INTO `south_migrationhistory` VALUES (1,'core','0001_initial','2009-05-19 11:53:13'),(2,'photos','0001_initial','2009-05-19 11:53:18'),(3,'articles','0001_initial','2009-05-19 11:53:19'),(4,'comments','0001_initial','2009-05-19 11:53:28'),(5,'db_templates','0001_initial','2009-05-19 11:53:31'),(6,'galleries','0001_initial','2009-05-19 11:53:35'),(7,'polls','0001_initial','2009-05-19 11:53:39'),(8,'tagging','0001_initial','2009-05-19 11:53:43'),(9,'ratings','0001_initial','2009-05-19 11:53:46'),(10,'exports','0001_initial','2009-05-19 11:53:49'),(11,'imports','0001_initial','2009-05-19 11:53:51'),(12,'ellaadmin','0001_initial','2009-05-19 11:53:52'),(13,'discussions','0001_initial','2009-05-19 11:53:54'),(14,'interviews','0001_initial','2009-05-19 11:53:59'),(15,'positions','0001_initial','2009-05-19 11:54:02'),(16,'catlocks','0001_initial','2009-05-19 11:54:07'),(17,'sendmail','0001_initial','2009-05-19 11:54:09'),(18,'attachments','0001_initial','2009-05-19 11:54:10'),(19,'answers','0001_initial','2009-05-19 11:54:12'),(20,'series','0001_initial','2009-05-19 11:54:15'),(21,'media','0001_initial','2009-05-19 11:54:18'),(22,'instruction','0001_initial','2009-05-19 11:54:22'),(23,'recipes','0001_initial','2009-05-19 11:54:31'),(24,'astrology','0001_initial','2009-05-19 11:54:47'),(25,'adverts','0001_initial','2009-05-19 11:55:06');
 /*!40000 ALTER TABLE `south_migrationhistory` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -3634,7 +3762,8 @@ CREATE TABLE `writetosanta_inquiryofsanta` (
   `email_of_inquirer` varchar(75) COLLATE utf8_czech_ci NOT NULL,
   `answer` varchar(3000) COLLATE utf8_czech_ci NOT NULL,
   `private_slug` varchar(40) COLLATE utf8_czech_ci NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `writetosanta_inquiryofsanta_private_slug` (`private_slug`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -3708,7 +3837,7 @@ CREATE TABLE `xmastips_feedset` (
   `eshop_id` int(11) NOT NULL,
   `serial_number` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `eshop_id_refs_id_5eb11346` (`eshop_id`),
+  KEY `xmastips_feedset_eshop_id` (`eshop_id`),
   CONSTRAINT `eshop_id_refs_id_5eb11346` FOREIGN KEY (`eshop_id`) REFERENCES `xmastips_eshop` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -3741,8 +3870,8 @@ CREATE TABLE `xmastips_present` (
   `age` varchar(255) COLLATE utf8_czech_ci NOT NULL,
   `feedset_id` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `feedset_id_refs_id_46bbd222` (`feedset_id`),
-  KEY `category_id_refs_id_33f06f6d` (`category_id`),
+  KEY `xmastips_present_category_id` (`category_id`),
+  KEY `xmastips_present_feedset_id` (`feedset_id`),
   CONSTRAINT `category_id_refs_id_33f06f6d` FOREIGN KEY (`category_id`) REFERENCES `xmastips_category` (`id`),
   CONSTRAINT `feedset_id_refs_id_46bbd222` FOREIGN KEY (`feedset_id`) REFERENCES `xmastips_feedset` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
@@ -3755,6 +3884,34 @@ CREATE TABLE `xmastips_present` (
 LOCK TABLES `xmastips_present` WRITE;
 /*!40000 ALTER TABLE `xmastips_present` DISABLE KEYS */;
 /*!40000 ALTER TABLE `xmastips_present` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `xmastips_present_target_group`
+--
+
+DROP TABLE IF EXISTS `xmastips_present_target_group`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `xmastips_present_target_group` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `present_id` int(11) NOT NULL,
+  `targetgroup_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `present_id` (`present_id`,`targetgroup_id`),
+  KEY `targetgroup_id_refs_id_1b185599` (`targetgroup_id`),
+  CONSTRAINT `targetgroup_id_refs_id_1b185599` FOREIGN KEY (`targetgroup_id`) REFERENCES `xmastips_targetgroup` (`id`),
+  CONSTRAINT `present_id_refs_id_5dfc311a` FOREIGN KEY (`present_id`) REFERENCES `xmastips_present` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `xmastips_present_target_group`
+--
+
+LOCK TABLES `xmastips_present_target_group` WRITE;
+/*!40000 ALTER TABLE `xmastips_present_target_group` DISABLE KEYS */;
+/*!40000 ALTER TABLE `xmastips_present_target_group` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -3789,4 +3946,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2009-05-19 10:07:20
+-- Dump completed on 2009-05-19 12:00:05
