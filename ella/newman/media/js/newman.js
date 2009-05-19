@@ -758,10 +758,19 @@ $(document).bind('content_added', function() {
 
 // Opens an overlay with a changelist and calls supplied function on click on item.
 $(function(){ open_overlay = function(content_type, selection_callback) {
+    var top_zindex = ( function() {
+        var rv = 1;
+        $('.ui-widget-overlay').each( function() {
+            rv = Math.max(rv, $(this).css('zIndex'));
+        });
+        return rv + 1;
+    })();
     var $overlay = $('#box-overlay');
     if ($overlay.length == 0) $overlay = $(
         '<div id="box-overlay" class="overlay">'
-    ).appendTo(
+    )
+    .css({top:0,left:0,zIndex:top_zindex})
+    .appendTo(
            $('.change-form').get(0)
         || $('#content').get(0)
         || $('body').get(0)
