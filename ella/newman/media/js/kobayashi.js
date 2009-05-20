@@ -755,6 +755,12 @@ function get_hash(address, options) {
     function load_media(url, succ_fn, err_fn) {
         ;;; carp('loading media '+url);
         
+        if (ContentByHashLib.LOADED_MEDIA[ url ]) {
+            if ($.isFunction(succ_fn)) succ_fn(url);
+            ;;; carp('Skipping loaded medium: '+url);
+            return true;
+        }
+        
         url.match(/(?:.*\/\/[^\/]*)?([^?]+)(?:\?.*)?/);
         $(document).data('loaded_media')[ RegExp.$1 ] = url;
         
@@ -780,8 +786,9 @@ function get_hash(address, options) {
         }
         
         if (ext == 'css') {
-            if (ContentByHashLib.LOADED_MEDIA[ url ] || stylesheet_present(abs_url)) {
+            if (stylesheet_present(abs_url)) {
                 if ($.isFunction(succ_fn)) succ_fn(url);
+                ;;; carp('Stylesheet already present: '+url);
                 return true;
             }
             var tries = 100;
@@ -799,6 +806,8 @@ function get_hash(address, options) {
                     if (rules && rules.length) {
                         ContentByHashLib.LOADED_MEDIA[ url ] = true;
                         if ($.isFunction(succ_fn)) succ_fn(url);
+                        ;;; carp('CSS Successfully loaded: '+url);
+                        
                     }
                     else {
                         ContentByHashLib.LOADED_MEDIA[ url ] = false;
@@ -817,22 +826,25 @@ function get_hash(address, options) {
             for (var i = 0; i < $scripts.length; i++) {
                 if ($scripts.get(i).src == abs_url) {
                     if ($.isFunction(succ_fn)) succ_fn(url);
+                    ;;; carp('Script already present: '+url);
                     return true;
                 }
             }
             return $.ajax({
-                url:       url,
-                type:     'GET',
+                url: url,
+                type: 'GET',
                 dataType: 'script',
-                success:   function() {
+                success: function() {
                     ContentByHashLib.LOADED_MEDIA[ this.url ] = true;
                     succ_fn();
+                    ;;; carp('JS Successfully loaded: '+this.url);
                 },
-                error:     function() {
+                error: function() {
                     ContentByHashLib.LOADED_MEDIA[ this.url ] = false;
                     err_fn();
+                    carp('Failed to load JS: '+url, this);
                 },
-                cache:     true
+                cache: true
             });
         }
         else throw('Unrecognized media type "'+ext+'" in URL: '+url);

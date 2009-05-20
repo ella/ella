@@ -40,9 +40,7 @@
             this.onclick = undefined;
         });
         $('.popup-filter').click( function() {
-            var lupicka_addr = ContentByHashLib.LOADED_URLS[ 'lupicka-overlay' ];
-            var fakehash = '#' + get_hashadr(lupicka_addr);
-            var href = get_hashadr('filters/', {hash:fakehash});
+            var href = get_hashadr('lupicka-overlay::filters/');
             ;;; carp('filters:', href);
             ContentByHashLib.simple_load('filters::'+href);
             // FIXME: Filters still bogus!

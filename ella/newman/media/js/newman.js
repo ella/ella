@@ -763,8 +763,8 @@ $('.help-button').live('mouseover', function() {
 
 $(document).bind('content_added', function() {
     if ($('.suggest-related-lookup').length) {
-        request_media(MEDIA_URL +  'js/related_lookup.js' );
-        request_media(MEDIA_URL + 'css/related_lookup.css');
+        request_media(MEDIA_URL +  'js/related_lookup.js?' +MEDIA_VERSION);
+        request_media(MEDIA_URL + 'css/related_lookup.css?'+MEDIA_VERSION);
     }
 });
 
@@ -809,12 +809,4 @@ $(function(){ open_overlay = function(content_type, selection_callback) {
             });
         }
     });
-/*
-    $overlay.one('content_added', function() {
-        $(this).find('.filter li a').each( function() {
-            ;;; alert(this);
-            $(this).attr('href', $(this).attr('href').replace(/^\?/, 'filters::&')).addClass('simpleload');
-        });
-    });
-*/
 }});
