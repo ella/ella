@@ -229,6 +229,9 @@ class DateTimeWidget(forms.DateTimeInput):
 class ForeignKeyGenericRawIdWidget(forms.TextInput):
     " Custom widget adding a class to attrs. "
 
+    class Media:
+        js = (settings.NEWMAN_MEDIA_PREFIX + JS_RELATED_LOOKUP,)
+
     def __init__(self, attrs={}):
         super(ForeignKeyGenericRawIdWidget, self).__init__(attrs={'class': CLASS_TARGEID})
 
