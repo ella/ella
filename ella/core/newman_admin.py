@@ -1,6 +1,6 @@
 from django.utils.translation import ugettext_lazy as _, ugettext, gettext
 from django.forms import models as modelforms
-from django.contrib.contenttypes import generic
+#from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 from django.forms.util import ValidationError
@@ -9,6 +9,7 @@ from ella.core.models import Author, Source, Category, Listing, HitCount, Placem
 from ella.core.models.publishable import Publishable
 
 from ella import newman
+from ella.newman import options
 from django.conf.urls.defaults import patterns, url
 from django.utils.safestring import mark_safe
 from ella.core.models.main import Related
@@ -30,11 +31,11 @@ class PlacementForm(modelforms.ModelForm):
         super(PlacementForm, self).__init__(*args, **kwargs)
 
 
-class PlacementInlineFormset(generic.BaseGenericInlineFormSet):
+class PlacementInlineFormset(options.NewmanInlineFormSet):
 
-    def __init__(self, data=None, files=None, instance=None, save_as_new=None):
+    def __init__(self, data=None, files=None, instance=None, save_as_new=None, prefix=None):
         self.can_delete = True
-        super(PlacementInlineFormset, self).__init__(instance=instance, data=data, files=files)
+        super(PlacementInlineFormset, self).__init__(instance=instance, data=data, files=files, prefix=prefix)
 
     def save_existing(self, form, instance, commit=True):
         instance = super(PlacementInlineFormset, self).save_existing(form, instance, commit)
@@ -46,8 +47,8 @@ class PlacementInlineFormset(generic.BaseGenericInlineFormSet):
 
     def save_listings(self, form, instance, commit=True):
         list_cats = form.cleaned_data.pop('listings')
-
-        def save_listings():
+        
+        def save_them():
             listings = dict([ (l.category, l) for l in Listing.objects.filter(placement=instance.pk) ])
 
             for c in list_cats:
@@ -61,12 +62,12 @@ class PlacementInlineFormset(generic.BaseGenericInlineFormSet):
                 l.delete()
 
         if commit:
-            save_listings()
+            save_them()
         else:
             save_m2m = form.save_m2m
             def save_all():
                 save_m2m()
-                save_listings()
+                save_them()
             form.save_m2m = save_all
         return instance
 
@@ -83,30 +84,28 @@ class PlacementInlineFormset(generic.BaseGenericInlineFormSet):
         main = None
         for d in self.cleaned_data:
             # empty form
-            if not d: break
-
-            if cat and cat == cat and cat:
+            if not d: 
+                break
+            #if cat and cat == cat and cat: #if cat:... should be equiv. 
+            if cat:
                 main = d
 
             if d['slug'] and d['slug'] != '':
                 slug = d['slug']
             else:
                 slug = obj_slug
-
             # try and find conflicting placement
             qset = Placement.objects.filter(
                 category=d['category'],
                 slug=slug,
-                target_ct=target_ct.pk,
+                publishable=obj,
                 static=d['static']
             )
-
             if d['static']: # allow placements that do not overlap
                 q = Q(publish_to__lt=d['publish_from'])
                 if d['publish_to']:
                     q |= Q(publish_from__gt=d['publish_to'])
                 qset = qset.exclude(q)
-
             # check for same date in URL
             if not d['static']:
                 qset = qset.filter(
@@ -114,11 +113,9 @@ class PlacementInlineFormset(generic.BaseGenericInlineFormSet):
                     publish_from__month=d['publish_from'].month,
                     publish_from__day=d['publish_from'].day,
             )
-
             # exclude current object from search
             if d['id']:
                 qset = qset.exclude(pk=d['id'])
-
             if qset:
                 plac = qset[0]
                 # raise forms.ValidationError(
@@ -160,11 +157,12 @@ class PlacementInlineAdmin(newman.NewmanTabularInline):
     model = Placement
     max_num = 1
     suggest_fields = {'category': ('title', 'slug',)}
+
+    form = PlacementForm
+    formset = PlacementInlineFormset
     '''
     ct_field = 'target_ct'
     ct_fk_field = 'target_id'
-    formset = PlacementInlineFormset
-    form = PlacementForm
     fieldsets = ((None, {'fields' : ('category', 'publish_from', 'publish_to', 'slug', 'static', 'listings',)}),)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
