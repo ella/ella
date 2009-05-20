@@ -48,6 +48,7 @@ INSTALLED_APPS = (
     'ella.catlocks',
     'ella.polls',
     'djangomarkup',
+    'tagging',
 
     'django.contrib.auth',
     'django.contrib.contenttypes',
