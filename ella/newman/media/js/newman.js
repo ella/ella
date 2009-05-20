@@ -76,14 +76,14 @@ $(function(){ContentByHashLib.reload_content('content');});
         title = $.trim(title);
         // retrieve the id of template with this name
         // TODO: to be rewritten (saving interface needs a lift)
-        var id =
+        var id = 
             title
             ? $('#id_drafts option').filter(function(){return $(this).text().indexOf(title+' (') == 0}).val()
             : draft_id;
         save_preset($('.change-form'), {title:title, id:id});
         return false;
     });
-
+    
     function restore_form(response_text, $form) {
         var response_data;
         try {
@@ -135,11 +135,11 @@ $(function(){ContentByHashLib.reload_content('content');});
     }
     set_load_draft_handler();
     $(document).bind('content_added', set_load_draft_handler);
-
+    
     var autosave_interval;
     function set_autosave_interval(evt) {
         var proceed, target_ids;
-
+        
         if ($('.change-form').length == 0) { // nothing to autosave
              ;;; carp('.change-form not present -- not setting up interval');
              clearInterval(autosave_interval);
@@ -159,9 +159,9 @@ $(function(){ContentByHashLib.reload_content('content');});
             ;;; carp('no injection storage found -- interval reset forced');
             proceed = true;
         }
-
+        
         if (!proceed) return;
-
+        
         if (autosave_interval != undefined) {
             ;;; carp('clearing interval prior to setting new one');
             clearInterval(autosave_interval);
@@ -211,13 +211,13 @@ $(function(){ContentByHashLib.reload_content('content');});
 AjaxFormLib = {};
 $( function() {
     //// Ajax forms
-
+    
     function get_inputs($form) {    // all except metadata
         return $form.find(':input').filter(function() {
             return ! $(this).parent().is('.form-metadata');
         });
     }
-
+    
     // Validate
     var validations = {
 /*        required: function(input) {
@@ -263,7 +263,7 @@ $( function() {
         });
         return ok;
     }
-
+    
     // Submit event
     function ajax_submit($form, button_name) {
         if (!$form.jquery) $form = $($form);
@@ -305,7 +305,7 @@ $( function() {
             }
             $inputs = $inputs.add($(this));
         });
-
+        
         if (button_name) $inputs = $inputs.add('<input type="hidden" value="1" name="'+button_name+'" />');
         var data = $inputs.serialize();
         if ($form.hasClass('reset-on-submit')) $form.get(0).reset();
@@ -313,7 +313,7 @@ $( function() {
             ? get_adr(action)
             : action;
         url = $('<a>').attr('href', url).get(0).href;
-
+        
         var request_options = {
             url: url,
             type: method,
@@ -324,12 +324,12 @@ $( function() {
             _button_name: button_name
         };
         if (button_name) request_options._button_name = button_name;
-
+        
         $.ajax( request_options );
         return false;
     }
     AjaxFormLib.ajax_submit = ajax_submit;
-
+    
     function ajax_submit_error(xhr) {
         var res;
         try { res = JSON.parse( xhr.responseText ); }
@@ -344,14 +344,14 @@ $( function() {
                 || $('#content').get(0)
                 || $('body').get(0)
             );
-
+            
             // Show the individual errors
             for (var id in res.errors) {
                 var msgs = res.errors[ id ];
                 var input = $('#'+id).get(0);
                 show_form_error(input, msgs);
                 if (!input) carp('Error reported for nonexistant input #'+id);
-
+                
                 $('<p>')
                 .data('rel_input',
                       !input                             ? null
@@ -374,7 +374,7 @@ $( function() {
         show_ajax_error(xhr);
     }
     AjaxFormLib.ajax_submit_error = ajax_submit_error;
-
+    
     // Submit button
     $('.ajax-form a.ok').live('click', function(evt) {
         if (evt.button != 0) return true;    // just interested in left button
@@ -383,7 +383,7 @@ $( function() {
         ajax_submit($form, this.name);
         return false;
     });
-
+    
     // Reset button
     $('.ajax-form a.eclear').live('click', function(evt) {
         try {
@@ -391,7 +391,7 @@ $( function() {
         } catch(e) { }
         return false;
     });
-
+    
     // Overload default submit event
     function overload_default_submit() {
         $('.ajax-form')
@@ -418,9 +418,9 @@ $( function() {
     $(document).bind('content_added', overload_default_submit);
     overload_default_submit();
     //// End of ajax forms
-
+    
     //// Filters
-
+    
     // Packing and unpacking filter list. To be removed when filters are reimplemented.
     $('#filters :header').live('click', function(evt) {
         if (evt.which != 1) return true;    // just interested in left button
@@ -430,7 +430,7 @@ $( function() {
         }
         $affected.slideToggle('slow');
     });
-
+    
     // Persistent filters -- add the query string if:
     // - there is none AND
     // - one is there for the specifier's URL in the changelistFilters object
@@ -442,7 +442,7 @@ $( function() {
             ContentByHashLib.ADDRESS_POSTPROCESS[ adr ] = adr + decoded;
         }
     });
-
+    
     // Update persistent filters when filter clicked
     $('#filters a').live('click', function(evt) {
         if (evt.button != 0) return;    // only interested in left click
@@ -471,13 +471,13 @@ $( function() {
         adr($(this).attr('href'));
         return false;
     });
-
+    
     // Re-initialization of third party libraries
     /*
     $(document).bind('content_added', function() {
     });
     */
-
+    
     // Initialization of JavaScripts
     /*
     $(document).bind('media_loaded', function() {
@@ -503,7 +503,7 @@ $( function() {
             );
         });
     });
-
+    
     // Search on HP
     // The search button should send us to an address according to the thing selected in the select
     function do_search() {
@@ -524,14 +524,14 @@ $( function() {
     }
     $('#search-form input[name=q]'      ).live('keypress', search_on_enter);
     $('#search-form select[name=action]').live('keypress', search_on_enter);
-
+    
     // Search in change lists
     $('#filters-handler .btn.search').live('click', function(evt) {
         if (evt.button != 0) return;
         if ($('#changelist').length == 0) return;   // We're not in changelist
-        var term = $(this).prev('input#searchbar').val();
-        if (!term) return;  // Nothing to search for
-        var adr_term = '&q=' + term;
+        var search_terms = $(this).prev('input#searchbar').val();
+        if (!search_terms) return;  // Nothing to search for
+        var adr_term = '&q=' + search_terms;
         adr(adr_term);
         return false;
     });
