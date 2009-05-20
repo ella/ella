@@ -1,12 +1,4 @@
 
-# tohle smazat ze south dumpu, abychom meli cistou databazi
-delete from auth_permission;
-delete from auth_user;
-delete from cdnclient_format;
-delete from django_content_type;
-delete from django_site;
-
-
 # tohle mazat z ostreho dumpu pred vysosanim dat
 
 # pozor na id 2347 (slug misa je tam triplicita)
