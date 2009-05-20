@@ -26,7 +26,7 @@ drop table ellaadmin_categoryuserrole;
 drop table ellaadmin_siteuserrole;
 
 # nepouzivame
-drop table encoder_format;
 drop table encoder_formattedfile;
+drop table encoder_format;
 
 
