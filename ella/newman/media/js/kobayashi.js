@@ -1,3 +1,5 @@
+KOBAYASHI_VERSION = '2009-05-20';
+
 // Debugging tools
 ;;; function alert_dump(obj, name) {
 ;;;     var s = name ? name + ":\n" : obj.toString ? obj.toString() + ":\n" : '';
@@ -541,9 +543,12 @@ var ContentByHashLib = {};
 // 
 // The second argument is an object where these fields are recognized:
 // - hash: a custom hash string to be used instead of location.hash,
-// - just_get: Instructs the function to merely return the modified address (without the target_id).
+// - just_get: 'address' Instructs the function to merely return the modified address (without the target_id).
+// - just_get: 'hash'    Instructs the function to return the modified hash instead of applying it to location.
 //   Using this option disables the support of multiple '#'-separated specifiers.
 //   Other than the first one are ignored.
+// - _hash_preproc: Internal. Set when adr is used to preprocess the hash
+//   to compensate for hash and LOADED_URLS inconsistencies.
 function adr(address, options) {
     if (address == undefined) {
         carp('No address given to adr()');
@@ -571,8 +576,8 @@ function adr(address, options) {
         rel_base  = reg_res[2];
         address   = reg_res[3];
         if (rel_base.length) rel_base  += '::';
-        new_address = adr(rel_base+address, {hash:hash, just_get:1})
-        if (options.just_get) return new_address;
+        new_address = adr(rel_base+address, {hash:hash, just_get:'address'})
+        if (options.just_get == 'address') return new_address;
     }
     // OK, go on figuring out which specifier is concerned.
     else if (reg_res = address.match(/([-\w]*)::(.*)/)) {
@@ -589,10 +594,21 @@ function adr(address, options) {
         else {
             newhash = target_id + '::' + address
         }
-        if (options.just_get) return newhash;
+        if (options.just_get == 'address') return address;
+        if (options.just_get == 'hash')    return newhash;
         else {
             location.hash = newhash;
             return;
+        }
+    }
+    
+    // In case we're modifying a target that has something loaded
+    // in it which is not in the hash, correct it first
+    if (!options._hash_preproc) {
+        var acc2hash   = get_hashadr(target_id+'::', {_hash_preproc:true});
+        var acc2record = ContentByHashLib.LOADED_URLS[ target_id ];
+        if (acc2record && acc2hash != acc2record) {
+            hash = get_hash(target_id+'::'+acc2record, {_hash_preproc:true});
         }
     }
     
@@ -640,8 +656,8 @@ function adr(address, options) {
         
         // empty address -- remove the specifier
         if (address.length == 0) {
-            // but in case of just_get, return the original address for the container (relative "")
-            if (options.just_get) new_address = hash.substring(start,end);
+            // but in case of just_get:address, return the original address for the container (relative "")
+            if (options.just_get == 'address') new_address = hash.substring(start,end);
             start = hash.lastIndexOf('#',start);
             start = Math.max(start,0);
             addr_start = start;
@@ -698,11 +714,14 @@ function adr(address, options) {
     
     newhash = hash.substr(0, start) + specifier_prefix + new_address + hash.substr(end);
     
-    if (options.just_get) {
+    if (options.just_get == 'address') {
         return hash.substring(addr_start, start) + new_address;
     }
     else if (tail) {
-        adr(tail, {hash:newhash});
+        return adr(tail, {hash:newhash});
+    }
+    else if (options.just_get == 'hash') {
+        return newhash;
     }
     else {
         location.hash = newhash;
@@ -711,7 +730,7 @@ function adr(address, options) {
 // returns address for use in hash, i.e. without BASE_PATH
 function get_hashadr(address, options) {
     if (!options) options = {};
-    options.just_get = 1;
+    options.just_get = 'address';
     return adr(address, options);
 }
 // returns address for use in requests, i.e. with BASE_PATH prepended
@@ -721,6 +740,12 @@ function get_adr(address, options) {
     return prepend_base_path_to(hashadr);
         
 }
+// returns the hash instead of assigning it to location
+function get_hash(address, options) {
+    if (!options) options = {};
+    options.just_get = 'hash';
+    return adr(address, options);
+}
 
 
 // Dynamic media (CSS, JS) loading
@@ -729,6 +754,12 @@ function get_adr(address, options) {
     // Get an URL to a CSS or JS file, attempt to load it into the document and call callback on success.
     function load_media(url, succ_fn, err_fn) {
         ;;; carp('loading media '+url);
+        
+        if (ContentByHashLib.LOADED_MEDIA[ url ]) {
+            if ($.isFunction(succ_fn)) succ_fn(url);
+            ;;; carp('Skipping loaded medium: '+url);
+            return true;
+        }
         
         url.match(/(?:.*\/\/[^\/]*)?([^?]+)(?:\?.*)?/);
         $(document).data('loaded_media')[ RegExp.$1 ] = url;
@@ -755,8 +786,9 @@ function get_adr(address, options) {
         }
         
         if (ext == 'css') {
-            if (ContentByHashLib.LOADED_MEDIA[ url ] || stylesheet_present(abs_url)) {
+            if (stylesheet_present(abs_url)) {
                 if ($.isFunction(succ_fn)) succ_fn(url);
+                ;;; carp('Stylesheet already present: '+url);
                 return true;
             }
             var tries = 100;
@@ -774,6 +806,8 @@ function get_adr(address, options) {
                     if (rules && rules.length) {
                         ContentByHashLib.LOADED_MEDIA[ url ] = true;
                         if ($.isFunction(succ_fn)) succ_fn(url);
+                        ;;; carp('CSS Successfully loaded: '+url);
+                        
                     }
                     else {
                         ContentByHashLib.LOADED_MEDIA[ url ] = false;
@@ -792,22 +826,25 @@ function get_adr(address, options) {
             for (var i = 0; i < $scripts.length; i++) {
                 if ($scripts.get(i).src == abs_url) {
                     if ($.isFunction(succ_fn)) succ_fn(url);
+                    ;;; carp('Script already present: '+url);
                     return true;
                 }
             }
             return $.ajax({
-                url:       url,
-                type:     'GET',
+                url: url,
+                type: 'GET',
                 dataType: 'script',
-                success:   function() {
+                success: function() {
                     ContentByHashLib.LOADED_MEDIA[ this.url ] = true;
                     succ_fn();
+                    ;;; carp('JS Successfully loaded: '+this.url);
                 },
-                error:     function() {
+                error: function() {
                     ContentByHashLib.LOADED_MEDIA[ this.url ] = false;
                     err_fn();
+                    carp('Failed to load JS: '+url, this);
                 },
-                cache:     true
+                cache: true
             });
         }
         else throw('Unrecognized media type "'+ext+'" in URL: '+url);

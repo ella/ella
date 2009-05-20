@@ -1,6 +1,9 @@
 from django.utils.translation import ugettext_lazy as _
 
-from ella.core.newman_admin import PlacementInlineAdmin, PublishableAdmin
+from django.conf import settings
+
+from ella.core.newman_admin import PlacementInlineAdmin, PublishableAdmin,\
+    RelatedInlineAdmin
 from ella.articles.models import ArticleContents, Article, InfoBox
 from ella import newman
 
@@ -19,13 +22,13 @@ class InfoBoxAdmin(newman.NewmanModelAdmin):
 
 class ArticleAdmin(PublishableAdmin):
     list_filter = ('category__site', 'category', 'authors', 'created',)
-    ordering = ('-created',)
     fieldsets = (
         (_("Article heading"), {'fields': ('title', 'upper_title', 'updated', 'slug')}),
         (_("Metadata"), {'fields': ('category', 'authors', 'source', 'photo')}),
         (_("Article contents"), {'fields': ('description',)}),
     )
-    inlines = [ ArticleContentInlineAdmin, PlacementInlineAdmin ]
+
+    inlines = [ArticleContentInlineAdmin, PlacementInlineAdmin, RelatedInlineAdmin]
 
 
 newman.site.register(InfoBox, InfoBoxAdmin)

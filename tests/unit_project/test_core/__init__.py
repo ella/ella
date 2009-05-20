@@ -56,22 +56,20 @@ def create_and_place_more_publishables(case):
 
     for i, c in enumerate(Category.objects.order_by('pk')):
 
-        case.publishables.append(
-            Article.objects.create(
+        p = Article.objects.create(
                 title=u'Article number %d.' % i,
                 slug=u'article-' + chr(ord('a')+i),
                 description=u'Some\nlonger\ntext',
                 category=c
             )
-        )
+        case.publishables.append(p)
 
-        case.placements.append(
-            Placement.objects.create(
-                publishable=case.publishable,
+        pl = Placement.objects.create(
+                publishable=p,
                 category=c,
                 publish_from=datetime(2008,1,10)
             )
-        )
+        case.placements.append(pl)
 
 def list_all_placements_in_category_by_hour(case, category=None):
     case.listings = []

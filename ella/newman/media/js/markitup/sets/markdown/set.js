@@ -11,11 +11,6 @@
 // Feel free to add more tags
 // -------------------------------------------------------------------\
 
-// Function to delete when the real one will be ready
-var open_overlay = function(a,b){
-	b(1234);
-}
-
 mySettings = {
 	previewParserPath:    BASE_URL + 'nm/editor-preview/',
 	previewParserVar:   "text",

@@ -31,9 +31,7 @@ class RichTextFieldTestCase(DatabaseTestCase):
 
     def tearDown(self):
         for s, rec in zip(DROP_SIGNALS, self.old_signal_receivers):
-            old = s.receivers
             s.receivers = rec
-            self.assert_equals(rec, old)
 
 
 class TestRichTextFieldValidation(RichTextFieldTestCase):
@@ -85,6 +83,24 @@ class TestRichTextFieldDependencyHandling(RichTextFieldTestCase):
         self.publishable.save()
 
         self.assert_equals(0, Dependency.objects.all().count())
+
+    def test_two_dependencies_in_two_fields_get_picked_up(self):
+        field2 = fields.NewmanRichTextField(
+            instance=self.publishable,
+            model=self.publishable.__class__,
+            field_name = "title",
+        )
+
+        text2 = 'some-text {%% box inline for core.category with pk %s %%}{%% endbox %%}' % self.category_nested.pk
+        self.publishable.title = field2.clean(text2)
+
+        text = 'some-text {%% box inline for core.category with pk %s %%}{%% endbox %%}' % self.category.pk
+        self.publishable.description = self.field.clean(text)
+
+        self.publishable.save()
+
+        self.assert_equals(2, Dependency.objects.all().count())
+        self.assert_equals(sorted([self.category.pk, self.category_nested.pk]), [dep.target_id for dep in Dependency.objects.order_by('target_id')])
 
     def test_object_still_used_in_one_field_doesnt_affect_dependencies(self):
         dep = Dependency()
@@ -174,10 +190,11 @@ class TestRichTextFieldLicenseHandling(RichTextFieldTestCase):
             model=self.publishable.__class__,
             field_name = "title",
         )
-        self.publishable.description = field2.clean(text)
+        self.publishable.title = field2.clean(text)
         self.publishable.save()
 
         self.assert_equals(2, License.objects.get(pk=l.pk).applications)
+
 
     def test_object_still_used_in_one_field_doesnt_affect_applications(self):
         l = License(max_applications=2, applications=1)
