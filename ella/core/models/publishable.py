@@ -17,6 +17,8 @@ from ella.core.models.main import Category, Author, Source
 from ella.photos.models import Photo
 from ella.core.box import Box
 
+PUBLISH_FROM_WHEN_EMPTY = datetime(3000, 1, 1)
+
 def PublishableBox(publishable, box_type, nodelist, model=None):
     "add some content type info of self.target"
     if not model:
@@ -53,7 +55,7 @@ class Publishable(models.Model):
 
     # denormalized fields
     # the placement's publish_from
-    publish_from = models.DateTimeField(editable=False, default=datetime(3000, 1, 1))
+    publish_from = models.DateTimeField(_('Publish from'), editable=False, default=PUBLISH_FROM_WHEN_EMPTY)
 
     class Meta:
         app_label = 'core'
@@ -213,7 +215,7 @@ class Placement(models.Model):
         try:
             publish_from = Placement.objects.filter(publishable=self.publishable).order_by('publish_from')[0].publish_from
         except IndexError, e:
-            publish_from = datetime(3000, 1, 1)
+            publish_from = PUBLISH_FROM_WHEN_EMPTY
 
         self.publishable.publish_from = publish_from
         Publishable.objects.filter(pk=self.publishable_id).update(publish_from=publish_from)
@@ -237,7 +239,7 @@ class Placement(models.Model):
         # First, save Placement
         super(Placement, self).save(force_insert, force_update)
         # Then, save HitCount (needs placement_id)
-        hc, created = HitCount.objects.get_or_create(placement=self)
+        hc, created = HitCount.objects.get_or_create(placement=self, defaults={'hits': 0})
 
         # store the publish_from on the publishable for performance in the admin
         if self.publishable.publish_from > self.publish_from:

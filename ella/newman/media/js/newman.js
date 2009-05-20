@@ -504,13 +504,14 @@ $( function() {
         });
     });
     
+    // Search on HP
     // The search button should send us to an address according to the thing selected in the select
     function do_search() {
         var $form = $('#search-form');
         var option = $form.find('select[name=action] option[selected]').val();
         if (!option) return false;
         var search_terms = $form.find('input[name=q]').val();
-        var url = option + '?q=' + escape(search_terms);
+        var url = option + '?q=' + search_terms;
         adr(url);
         return false;
     }
@@ -523,6 +524,17 @@ $( function() {
     }
     $('#search-form input[name=q]'      ).live('keypress', search_on_enter);
     $('#search-form select[name=action]').live('keypress', search_on_enter);
+    
+    // Search in change lists
+    $('#filters-handler .btn.search').live('click', function(evt) {
+        if (evt.button != 0) return;
+        if ($('#changelist').length == 0) return;   // We're not in changelist
+        var search_terms = $(this).prev('input#searchbar').val();
+        if (!search_terms) return;  // Nothing to search for
+        var adr_term = '&q=' + search_terms;
+        adr(adr_term);
+        return false;
+    });
 });
 
 // Message bubble
@@ -758,10 +770,19 @@ $(document).bind('content_added', function() {
 
 // Opens an overlay with a changelist and calls supplied function on click on item.
 $(function(){ open_overlay = function(content_type, selection_callback) {
+    var top_zindex = ( function() {
+        var rv = 1;
+        $('.ui-widget-overlay').each( function() {
+            rv = Math.max(rv, $(this).css('zIndex'));
+        });
+        return rv + 1;
+    })();
     var $overlay = $('#box-overlay');
     if ($overlay.length == 0) $overlay = $(
         '<div id="box-overlay" class="overlay">'
-    ).appendTo(
+    )
+    .css({top:0,left:0,zIndex:top_zindex})
+    .appendTo(
            $('.change-form').get(0)
         || $('#content').get(0)
         || $('body').get(0)

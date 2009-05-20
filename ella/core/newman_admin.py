@@ -252,12 +252,13 @@ class PublishableAdmin(newman.NewmanModelAdmin):
     """ Default admin options for all publishables """
 
     exclude = ('content_type',)
-    list_display = ('admin_link', 'category', 'photo_thumbnail', 'publish_status', 'placement_link')
+    list_display = ('admin_link', 'category', 'photo_thumbnail', 'publish_from', 'placement_link', 'site_icon')
     list_filter = ('category__site', 'category', 'authors', 'content_type')
     search_fields = ('title', 'description', 'slug', 'authors__name', 'authors__slug',) # FIXME: 'tags__tag__name',)
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
     rich_text_fields = {None: ('description',)}
+    ordering = ('-publish_from',)
 
     suggest_fields = {
         'category': ('title', 'slug', 'tree_path'),
@@ -273,6 +274,10 @@ class PublishableAdmin(newman.NewmanModelAdmin):
     admin_link.allow_tags = True
     admin_link.short_description = _('Publishable object')
 
+    def site_icon(self, object):
+        return mark_safe('%s' % object.category.site.name)
+    site_icon.short_description = _('site')
+    site_icon.allow_tags = True
 
     def photo_thumbnail(self, object):
         photo = object.get_photo()
@@ -289,12 +294,6 @@ class PublishableAdmin(newman.NewmanModelAdmin):
     placement_link.allow_tags = True
     placement_link.short_description = _('Placement')
 
-    def publish_status(self, object):
-        if object.main_placement and object.main_placement.is_active():
-            return True
-        return False
-    publish_status.boolean = True
-    publish_status.short_description = _('Published')
 
 newman.site.register(HitCount, HitCountAdmin)
 newman.site.register(Category, CategoryAdmin)
