@@ -375,16 +375,19 @@ class RelatedNode(template.Node):
                 break
 
         # related objects vie tags
-        #if self.models and count > 0:
-        #    from ella.tagging.models import TaggedItem
-        #    for m in self.models:
-        #        to_add = TaggedItem.objects.get_related(obj, m, count)
-        #        for rel in to_add:
-        #            if rel != obj and rel not in related:
-        #                count -= 1
-        #                related.append(rel)
-        #            if count <= 0:
-        #                break
+        if self.models and count > 0:
+            try:
+                from tagging.models import TaggedItem
+                for m in self.models:
+                    to_add = TaggedItem.objects.get_related(obj, m, count)
+                    for rel in to_add:
+                        if rel != obj and rel not in related:
+                            count -= 1
+                            related.append(rel)
+                        if count <= 0:
+                            break
+            except ImportError, e:
+                pass
 
         # top objects in given category
         if count > 0:

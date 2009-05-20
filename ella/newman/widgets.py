@@ -1,3 +1,4 @@
+from itertools import chain
 from django import forms
 from django.conf import settings
 from django.utils.safestring import mark_safe
@@ -6,6 +7,8 @@ from django.contrib.admin import widgets
 from django.utils.text import truncate_words
 from ella.ellaadmin.utils import admin_url
 from djangomarkup.widgets import RichTextAreaWidget
+from django.utils.encoding import force_unicode
+from django.utils.html import escape
 
 MARKITUP_SET = getattr(settings, 'MARKDOWN', 'markdown')
 MEDIA_PREFIX = getattr(settings, 'NEWMAN_MEDIA_PREFIX', settings.ADMIN_MEDIA_PREFIX)
@@ -246,6 +249,19 @@ class ContentTypeWidget(forms.Select):
     " Custom widget adding a class to attrs. "
     def __init__(self, attrs={}):
         super(ContentTypeWidget, self).__init__(attrs={'class': CLASS_TARGECT})
+
+    def render_options(self, choices, selected_choices):
+        def render_option(option_value, option_label):
+            option_value = force_unicode(option_value)
+            selected_html = (option_value in selected_choices) and u' selected="selected"' or ''
+            return u'<option value="%s"%s>%s</option>' % (
+                escape(option_value), selected_html, _(option_label))
+        # Normalize to strings.
+        selected_choices = set([force_unicode(v) for v in selected_choices])
+        output = []
+        for option_value, option_label in chain(self.choices, choices):
+            output.append(render_option(option_value, option_label))
+        return u'\n'.join(output)
 
 class IncrementWidget(forms.TextInput):
     'Self incrementing widget.'

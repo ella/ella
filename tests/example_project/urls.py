@@ -11,7 +11,7 @@ from ella.utils import installedapps
 
 
 newman.autodiscover()
-admin.autodiscover()
+#admin.autodiscover()
 installedapps.init_logger()
 
 
