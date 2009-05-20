@@ -46,7 +46,7 @@
             // FIXME: Filters still bogus!
             $('#filters').one('content_added', function() {
                 $(this).find('.filter li a').each( function() {
-                    $(this).attr('href', $(this).attr('href').replace(/^\?/, 'filters::&')).addClass('simpleload');
+                    $(this).attr('href', $(this).attr('href').replace(/^\?/, 'lupicka-overlay::&')).addClass('simpleload');
                 });
             });
             return false;
