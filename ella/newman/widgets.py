@@ -117,7 +117,7 @@ class ForeignKeyRawIdWidget(forms.TextInput):
         output = [super(ForeignKeyRawIdWidget, self).render(name, value, attrs)]
         output.append('<a href="%s%s?pop" class="rawid-related-lookup" id="lookup_id_%s"> ' % \
             (related_url, url, name))
-        output.append('<img src="%simg/admin/selector-search.gif" width="16" height="16" /></a>' % settings.ADMIN_MEDIA_PREFIX)
+        output.append('<img src="%sico/16/search.png" width="16" height="16" /></a>' % settings.NEWMAN_MEDIA_PREFIX)
         if value:
             output.append(self.label_for_value(value))
         return mark_safe(u''.join(output))
@@ -185,9 +185,9 @@ class AdminSuggestWidget(forms.TextInput):
                       % (suggest_css_class, suggest_items, name, suggest_url))
         # TODO: "id_" is hard-coded here. This should instead use the correct
         # API to determine the ID dynamically.
-        output.append('<a href="%s%s?pop" class="suggest-related-lookup" id="lookup_id_%s" onclick="return showRelatedObjectLookupPopup(this);"> ' % \
+        output.append('<a href="%s%s?pop" class="suggest-related-lookup" id="lookup_id_%s"> ' % \
             (related_url, url, name))
-        output.append('<img src="%simg/admin/selector-search.gif" width="16" height="16" alt="Lookup" /></a>' % settings.ADMIN_MEDIA_PREFIX)
+        output.append('<img src="%sico/16/search.png" width="16" height="16" /></a>' % settings.NEWMAN_MEDIA_PREFIX)
         return mark_safe(u''.join(output))
 
 class DateWidget(forms.DateInput):
@@ -234,9 +234,9 @@ class ForeignKeyGenericRawIdWidget(forms.TextInput):
 
     def render(self, name, value, attrs=None):
         output = [super(ForeignKeyGenericRawIdWidget, self).render(name, value, attrs)]
-        output.append('<a href="../../../core/category/?pop" class="suggest-related-lookup">aaa</a>')
+        output.append('<a class="generic-related-lookup" id="lookup_id_%s"> ' % name)
+        output.append('<img src="%sico/16/search.png" width="16" height="16" /></a>' % settings.NEWMAN_MEDIA_PREFIX)
         return mark_safe(''.join(output))
-
 
 
 class ContentTypeWidget(forms.Select):
