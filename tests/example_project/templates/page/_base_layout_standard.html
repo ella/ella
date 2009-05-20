@@ -1,0 +1,46 @@
+{% extends "page/_base_html.html" %}
+
+{% block all %}
+    <div class="main-col">
+        {% block main-col %}
+
+            <div class="header">
+                {% block header %}{% endblock %}
+            </div>
+
+            <div class="top-menu">
+                {% block top_menu_container %}{% endblock %}
+            </div>
+            
+            {% block news_box %}{% endblock %}
+
+            {% block content %}
+                <div class="content" id="content">
+                    <div class="primary-col {% block primary-col_class %}{% endblock %}">
+                        <!-- ppc:start -->
+                        {% block primary_col %}{% endblock %}
+                        <!-- ppc:end -->
+                    </div>
+                    <div class="secondary-col">
+                        {% block secondary_col %}{% endblock %}
+                    </div>
+                </div>
+                {% block carousel %}
+					<div class="carousel">&nbsp;</div>
+				{% endblock %}
+            {% endblock %}
+
+        {% endblock %}
+    </div>
+
+    <div class="ad-col" id="ad-col">
+        <div class="ad-colP">
+            {% block ad-col %}{% endblock %}
+        </div>
+    </div>
+
+    <div class="footer">
+        {% block footer %}{% endblock %}
+    </div>
+
+{% endblock %}
