@@ -29,4 +29,10 @@ drop table ellaadmin_siteuserrole;
 drop table encoder_formattedfile;
 drop table encoder_format;
 
+# neni
+drop table media_format;
+drop table menu_menu;
+drop table menu_menuitem;
+
+drop table uploader_upload;
 
