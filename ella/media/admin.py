@@ -30,7 +30,6 @@ class MediaOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     list_filter = ('created', 'updated',)
     search_fields = ('title', 'slug', 'description', 'text',)
 
-#    inlines = (PlacementInlineOptions, TaggingInlineOptions, SectionInline)
     inlines = (SectionInline, UsageInline)
 
     rich_text_fields = {None: ('description', 'text',)}

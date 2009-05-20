@@ -348,7 +348,7 @@ GenericSuggestLib = {};
         var sug_url = $input.attr('rel');
         // The rel attribute is a relative address.
         // If we're using the content-by-hash library, we want it to be relative to what's in the hash.
-        if (window.adr && $.isFunction(adr)) sug_url = adr(sug_url, { just_get: 1 });
+        if (window.adr && $.isFunction(adr)) sug_url = adr(sug_url, { just_get: 'address' });
 
         if (offset == null || offset < 0)
             offset = 0;

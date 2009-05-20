@@ -11,7 +11,7 @@ from ella.utils import installedapps
 
 
 newman.autodiscover()
-admin.autodiscover()
+#admin.autodiscover()
 installedapps.init_logger()
 
 
@@ -35,6 +35,9 @@ urlpatterns = patterns('',
 
     # polls urls
     ('^polls/', include('ella.polls.urls')),
+
+    # tagging
+    url(r'^tagging/', include('ella.ellatagging.urls')),
 
     # reverse url lookups
     (r'^', include('ella.core.urls')),
