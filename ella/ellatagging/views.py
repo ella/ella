@@ -1,7 +1,6 @@
 """
 Tagging related views.
 """
-import urllib
 from datetime import datetime
 
 from django.template import RequestContext
