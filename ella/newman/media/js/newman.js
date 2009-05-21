@@ -275,7 +275,6 @@ $( function() {
             if ( ($this).val() ) has_files = true;
         });
         if (has_files) {
-            ;;; alert('file present');
             // Shave off the names from suggest-enhanced hidden inputs
             $form.find('input:hidden').each( function() {
                 if ($form.find( '#'+$(this).attr('id')+'_suggest' ).length == 0) return;
@@ -819,7 +818,7 @@ $(function(){ open_overlay = function(content_type, selection_callback) {
             $('#'+xhr.original_options.target_id+' tbody a')
             .unbind('click')
             .click( function(evt) {
-                var clicked_id = $(this).attr('href').replace(/\/$/,'');
+                var clicked_id = /\d+(?=\/$)/.exec( $(this).attr('href') )[0];
                 try {
                     xhr.original_options.selection_callback(clicked_id, {evt: evt});
                 } catch(e) { carp('Failed running overlay callback', e); }
