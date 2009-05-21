@@ -33,12 +33,12 @@ def get_listings_key(func, self, category=None, count=10, offset=1, mods=[], con
             ','.join(':'.join((k, smart_str(v))) for k, v in kwargs.items()),
 )
 
-class PlacementManager(RelatedManager):
+class PlacementManager(models.Manager):
     def get_static_placements(self, category):
         now = datetime.now()
         return self.filter(models.Q(publish_to__gt=now) | models.Q(publish_to__isnull=True),  publish_from__lt=now, category=category, static=True)
 
-class ListingManager(RelatedManager):
+class ListingManager(models.Manager):
     NONE = 0
     IMMEDIATE = 1
     ALL = 2

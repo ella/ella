@@ -11,7 +11,6 @@ from ella.core.models import Publishable
 from ella.core.cache import get_cached_object, get_cached_list
 from ella.core.box import Box
 from ella.core.models import Category, Author
-from ella.core.managers import RelatedManager
 from ella.photos.models import Photo
 
 ACTIVITY_NOT_YET_ACTIVE = 0
@@ -156,8 +155,6 @@ class Poll(BasePoll):
 
 class Contest(BasePoll, Publishable):
 
-    objects = RelatedManager()
-
     @property
     def questions(self):
         return get_cached_list(Question, contest=self)
@@ -210,8 +207,6 @@ class Quiz(BasePoll, Publishable):
     has_correct_answers = models.BooleanField(_('Has correct answers'))
 
     box_class = QuizBox
-
-    objects = RelatedManager()
 
     @property
     def questions(self):

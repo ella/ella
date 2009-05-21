@@ -13,7 +13,6 @@ from django.utils.safestring import mark_safe
 from django.core.files.uploadedfile import UploadedFile
 
 from ella.core.models.main import Author, Source
-from ella.core.managers import RelatedManager
 from ella.core.box import Box
 from ella.core.cache.utils import get_cached_object
 from ella.utils.filemanipulation import file_rename
@@ -227,8 +226,6 @@ class FormatedPhoto(models.Model):
     crop_height = models.PositiveIntegerField()
     width = models.PositiveIntegerField(editable=False)
     height = models.PositiveIntegerField(editable=False)
-
-    objects = RelatedManager()
 
     @property
     def url(self):

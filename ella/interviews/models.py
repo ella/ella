@@ -6,7 +6,6 @@ from django.utils.translation import ugettext_lazy as _
 
 from ella.core.models import Publishable
 from ella.photos.models import Photo
-from ella.core.managers import RelatedManager
 from ella.core.cache import get_cached_object, get_cached_list
 from ella.core.models import Category, Author, Source
 
@@ -46,9 +45,6 @@ class Interview(Publishable):
     ask_to = models.DateTimeField(_('Ask to'))
 
     interviewees = models.ManyToManyField(Interviewee, verbose_name=_('Interviewees'))
-
-
-    objects = RelatedManager()
 
     def get_text(self):
         return self.content

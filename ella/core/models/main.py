@@ -8,7 +8,6 @@ from django.utils.safestring import mark_safe
 from django.contrib.auth.models import User
 
 from ella.core.box import Box
-from ella.core.managers import RelatedManager
 from ella.core.cache import get_cached_object, cache_this, CachedGenericForeignKey
 
 LISTING_UNIQUE_DEFAULT_SET = 'unique_set_default'
@@ -83,8 +82,6 @@ class Category(models.Model):
     tree_path = models.CharField(verbose_name=_("Path from root category"), max_length=255, editable=False)
     description = models.TextField(_("Category Description"), blank=True)
     site = models.ForeignKey(Site)
-
-    objects = RelatedManager()
 
     def save(self, force_insert=False, force_update=False):
         "Override save() to construct tree_path based on the category's parent."
