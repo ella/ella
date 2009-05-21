@@ -40,7 +40,7 @@ class GalleryItemFormset(newman.options.BaseInlineFormSet):
 class GalleryItemInline(newman.NewmanTabularInline):
     model = GalleryItem
     extra = 10
-    formset = GalleryItemFormset
+#    formset = GalleryItemFormset
 
 class GalleryAdmin(PublishableAdmin):
     ordering = ('-created',)

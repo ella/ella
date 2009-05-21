@@ -91,6 +91,9 @@ class GalleryItem(models.Model):
 
     target = CachedGenericForeignKey(ct_field="target_ct", fk_field="target_id")
 
+    def __unicode__(self):
+        return u"%s %s %s %s" % (_(self.target_ct.name), self.target, _('in gallery'), self.gallery.title)
+
     def _get_slug(self):
         if not hasattr(self, '_item_list'):
             self._item_list = self.gallery.items
