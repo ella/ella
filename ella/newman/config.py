@@ -1,5 +1,5 @@
 """
-This module is intended to hold default constants. 
+This module is intended to hold default constants.
 Constants may be modified via project settings.py.
 """
 from django.conf import settings
@@ -20,13 +20,20 @@ JSON_CONVERSIONS = (
 STATUS_OK = "ok"
 STATUS_GENERIC_ERROR = "error"
 STATUS_SMTP_ERROR = "smtp_error"
-STATUS_ADDED = "added" 
-STATUS_MODIFIED = "modified" 
-STATUS_FORM_ERROR = "form_error" 
-STATUS_VAR_MISSING = "variable_missing" 
-STATUS_OBJECT_NOT_FOUND = "object_not_found" 
+STATUS_ADDED = "added"
+STATUS_MODIFIED = "modified"
+STATUS_FORM_ERROR = "form_error"
+STATUS_VAR_MISSING = "variable_missing"
+STATUS_OBJECT_NOT_FOUND = "object_not_found"
 
 # Maximum autosave objects hold for bound object:
 AUTOSAVE_MAX_AMOUNT = getattr(settings, 'NEWMAN_AUTOSAVE_MAX_AMOUNT', 3)
+
+# List of applicable ContentTypes
+
+NON_PUBLISHABLE_CTS = (
+    'core.author',
+    'photos.photo',
+)
 
 # TODO try to load consts from django.conf.settings
