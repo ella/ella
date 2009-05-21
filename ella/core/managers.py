@@ -1,12 +1,12 @@
 from datetime import datetime
 
-from django.db import models, transaction
+from django.db import models
 from django.db.models import F
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.utils.encoding import smart_str
 
-from ella.core.cache import cache_this
+from ella.core.cache import cache_this, get_cached_object
 from ella.core.cache.invalidate import CACHE_DELETER
 
 
@@ -14,11 +14,51 @@ DEFAULT_LISTING_PRIORITY = getattr(settings, 'DEFAULT_LISTING_PRIORITY', 0)
 
 
 class RelatedManager(models.Manager):
-    """
-    A shortcut to enable using select_related by default on models.
-    """
-    def get_query_set(self):
-        return super(RelatedManager, self).get_query_set().select_related()
+    def get_related_for_object(self, obj, count, mods=[]):
+        from ella.core.models import Publishable
+        # manually entered dependencies
+        related = list(Publishable.objects.filter(
+                related__related_ct=ContentType.objects.get_for_model(obj),
+                related__related_id=obj.pk
+            )[:count])
+
+        if len(related) >= count:
+            return related
+
+        count -= len(related)
+
+        # related objects via tags
+        if mods:
+            try:
+                from tagging.models import TaggedItem
+                if TaggedItem._meta.installed:
+                    for m in mods:
+                        to_add = TaggedItem.objects.get_related(obj, m, count+len(related))
+                        for rel in to_add:
+                            if rel != obj and rel not in related:
+                                count -= 1
+                                related.append(rel)
+                            if count <= 0:
+                                return related
+            except ImportError, e:
+                pass
+
+        # top objects in given category
+        if count > 0:
+            from ella.core.models import Listing, Category
+            cat = obj.category
+            listings = Listing.objects.get_listing(category=cat, count=count+len(related), mods=mods)
+            for l in listings:
+                t = l.target
+                if t != obj and t not in related:
+                    related.append(t)
+                    count -= 1
+
+                if count <= 0:
+                    return related
+
+        return related
+
 
 def invalidate_listing(key, self, *args, **kwargs):
     CACHE_DELETER.register_test(self.model, '', key)

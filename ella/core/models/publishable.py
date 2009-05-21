@@ -11,7 +11,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.redirects.models import Redirect
 
 from ella.ellaadmin.utils import admin_url
-from ella.core.managers import ListingManager, HitCountManager, PlacementManager
+from ella.core.managers import ListingManager, HitCountManager, PlacementManager, RelatedManager
 from ella.core.cache import get_cached_object, get_cached_list, CachedGenericForeignKey
 from ella.core.models.main import Category, Author, Source
 from ella.photos.models import Photo
@@ -364,8 +364,9 @@ class Related(models.Model):
 
     related_ct = models.ForeignKey(ContentType, verbose_name=_('Content type'))
     related_id = models.IntegerField(_('Object ID'))
-    related = CachedGenericForeignKey('target_ct', 'target_id')
+    related = CachedGenericForeignKey('related_ct', 'related_id')
 
+    objects = RelatedManager()
 
     def __unicode__(self):
         return u'%s relates to %s' % (self.publishable, self.related)
