@@ -10,7 +10,7 @@ from django.http import Http404
 
 from ella.core.models import Listing, Category, Placement
 from ella.core.cache import get_cached_object_or_404, cache_this
-from ella.core.custom_urls import dispatcher
+from ella.core import custom_urls
 from ella.core.cache.template_loader import render_to_response
 
 __docformat__ = "restructuredtext en"
@@ -46,13 +46,13 @@ def get_content_type(ct_name):
 def object_detail(request, category, content_type, slug, year=None, month=None, day=None, url_remainder=None):
     """
     Renders a page for placement. All the data fetching and context creation is done in `_object_detail`.
-    If `url_remainder` is specified, tries to locate custom view via `dispatcher`. Renders a template 
+    If `url_remainder` is specified, tries to locate custom view via `custom_urls.dispatcher`. Renders a template 
     returned by `get_template` with context returned by `_object_detail`.
 
     :Parameters:
         - `request`: `HttpRequest` from Django
         - `category, content_type, slug, year, month, day`: parameters passed on to `_object_detail`
-        - `url_remainder`: url after the object's url, used to locate custom views in `dispatcher`
+        - `url_remainder`: url after the object's url, used to locate custom views in `custom_urls.dispatcher`
 
     :Exceptions: 
         - `Http404`: if the URL is not valid and/or doesn't correspond to any valid `Placement`
@@ -63,9 +63,9 @@ def object_detail(request, category, content_type, slug, year=None, month=None, 
     # check for custom actions
     if url_remainder:
         bits = url_remainder.split('/')
-        return dispatcher.call_view(request, bits, context)
-    elif dispatcher.has_custom_detail(obj):
-        return dispatcher.call_custom_detail(request, context)
+        return custom_urls.dispatcher.call_view(request, bits, context)
+    elif custom_urls.dispatcher.has_custom_detail(obj):
+        return custom_urls.dispatcher.call_custom_detail(request, context)
 
     return render_to_response(
         get_templates('object.html', slug, context['category'], context['content_type'].app_label, context['content_type'].model),
