@@ -1,6 +1,5 @@
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.forms import models as modelforms
-from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 from django.forms.util import ValidationError
@@ -28,7 +27,7 @@ class PlacementForm(modelforms.ModelForm):
         super(PlacementForm, self).__init__(*args, **kwargs)
 
 
-class PlacementInlineFormset(generic.BaseGenericInlineFormSet):
+class PlacementInlineFormset(newman.NewmanTabularInline):
 
     def __init__(self, data=None, files=None, instance=None, save_as_new=None):
         self.can_delete = True
@@ -239,12 +238,9 @@ class SourceAdmin(newman.NewmanModelAdmin):
     list_display = ('name', 'url',)
     search_fields = ('name',)
 
-class RelatedInlineAdmin(newman.GenericTabularInline):
+class RelatedInlineAdmin(newman.NewmanTabularInline):
     extra = 3
     model = Related
-    ct_field = 'target_ct'
-    ct_fk_field = 'target_id'
-
 
 class PublishableAdmin(newman.NewmanModelAdmin):
     """ Default admin options for all publishables """
