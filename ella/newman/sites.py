@@ -145,9 +145,9 @@ class NewmanSite(AdminSite):
                 next_path = request.get_full_path()
 
                 # load all user's specific settings into session
-                for c in AdminSetting.objects.filter(user=user):
-                    uc = get_user_config(user, c.var)
-                    set_user_config_session(request.session, c.var, uc)
+                for c in AdminSetting.objects.filter(user=user).values('var'):
+                    uc = get_user_config(user, c['var'])
+                    set_user_config_session(request.session, c['var'], uc)
 
                 if request.POST.get('next'):
                     next_path += request.POST.get('next')
