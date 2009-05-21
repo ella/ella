@@ -12,7 +12,7 @@ from django.contrib.redirects.models import Redirect
 
 from ella.ellaadmin.utils import admin_url
 from ella.core.managers import ListingManager, HitCountManager, PlacementManager
-from ella.core.cache import get_cached_object, get_cached_list
+from ella.core.cache import get_cached_object, get_cached_list, CachedGenericForeignKey
 from ella.core.models.main import Category, Author, Source
 from ella.photos.models import Photo
 from ella.core.box import Box
@@ -355,4 +355,24 @@ class HitCount(models.Model):
         app_label = 'core'
         verbose_name = _('Hit Count')
         verbose_name_plural = _('Hit Counts')
+
+class Related(models.Model):
+    """
+    Related objects - model for recording related items. For example related articles.
+    """
+    target_ct = models.ForeignKey(ContentType, verbose_name=_('Content type'), related_name='relation_for_set')
+    target_id = models.IntegerField(_('Object ID'))
+    target = CachedGenericForeignKey('target_ct', 'target_id')
+
+    source_ct = models.ForeignKey(ContentType, verbose_name=_('Content type'), related_name='related_on_set')
+    source_id = models.IntegerField(_('Object ID'))
+    source = CachedGenericForeignKey('source_ct', 'source_id')
+
+    def __unicode__(self):
+        return u'%s relates to %s' % (self.source, self.target)
+
+    class Meta:
+        app_label = 'core'
+        verbose_name = _('Related')
+        verbose_name_plural = _('Related')
 

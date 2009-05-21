@@ -162,26 +162,6 @@ class Category(models.Model):
     def __unicode__(self):
         return '%s/%s' % (self.site.name, self.tree_path)
 
-class Related(models.Model):
-    """
-    Related objects - model for recording related items. For example related articles.
-    """
-    target_ct = models.ForeignKey(ContentType, verbose_name=_('Content type'), related_name='relation_for_set')
-    target_id = models.IntegerField(_('Object ID'))
-    target = CachedGenericForeignKey('target_ct', 'target_id')
-
-    source_ct = models.ForeignKey(ContentType, verbose_name=_('Content type'), related_name='related_on_set')
-    source_id = models.IntegerField(_('Object ID'))
-    source = CachedGenericForeignKey('source_ct', 'source_id')
-
-    def __unicode__(self):
-        return u'%s relates to %s' % (self.source, self.target)
-
-    class Meta:
-        app_label = 'core'
-        verbose_name = _('Related')
-        verbose_name_plural = _('Related')
-
 class Dependency(models.Model):
     """
     Object dependency - model for recording dependent items. For example when we use photo in article content.

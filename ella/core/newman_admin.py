@@ -1,17 +1,15 @@
-from django.utils.translation import ugettext_lazy as _, ugettext, gettext
+from django.utils.translation import ugettext_lazy as _, ugettext
 from django.forms import models as modelforms
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 from django.forms.util import ValidationError
-
-from ella.core.models import Author, Source, Category, Listing, HitCount, Placement
-from ella.core.models.publishable import Publishable
-
-from ella import newman
 from django.conf.urls.defaults import patterns, url
 from django.utils.safestring import mark_safe
-from ella.core.models.main import Related
+
+from ella.core.models import Author, Source, Category, Listing, HitCount, Placement, Related
+from ella.core.models.publishable import Publishable
+from ella import newman
 
 class PlacementForm(modelforms.ModelForm):
     # create the field here to pass validation
