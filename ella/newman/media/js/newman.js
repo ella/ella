@@ -268,6 +268,28 @@ $( function() {
     function ajax_submit($form, button_name) {
         if (!$form.jquery) $form = $($form);
         if ( ! validate($form) ) return false;
+        
+        // Hack for file inputs
+/*        var has_files = false;
+        $form.find(':file').each( function() {
+            if ( ($this).val() ) has_files = true;
+        });
+        if (has_files) {
+            ;;; alert('file present');
+            // Shave off the names from suggest-enhanced hidden inputs
+            $form.find('input:hidden').each( function() {
+                if ($form.find( '#'+$(this).attr('id')+'_suggest' ).length == 0) return;
+*///                $(this).val( $(this).val().replace(/#.*/, '') );
+/*            });
+            // Shave off the days of week from date-time inputs
+            $form.find('.vDateTimeInput,.vDateInput').each( function() {
+                $(this).val( $(this).val().replace(/ \D{2}$/, '') );
+            }
+            $form.submit();
+            return false;
+        }
+*/        // End of hash for file inputs
+        
         var action =  $form.attr('action');
         var method = ($form.attr('method') || 'POST').toUpperCase();
         var $meta = $form.find('.form-metadata:first');
