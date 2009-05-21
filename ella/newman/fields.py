@@ -12,7 +12,6 @@ from django.template import Template, TextNode, TemplateSyntaxError
 from django.utils.translation import ugettext_lazy as _
 from django.forms.models import ModelChoiceField
 from django.db.models.fields.related import ManyToManyField
-from django.db.models import signals
 from django.contrib.contenttypes.models import ContentType
 
 from djangomarkup.fields import RichTextField, post_save_listener
@@ -147,7 +146,7 @@ class AdminSuggestField(fields.Field):
 class RGBImageField(fields.ImageField):
     "Check that uploaded image is RGB"
 #    widget = AdminFileWidget
-    widget = widgets.FlashImageWidget
+#    widget = widgets.FlashImageWidget
 
     def clean(self, data, initial=None):
         f = super(RGBImageField, self).clean(data, initial)
