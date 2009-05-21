@@ -1,0 +1,135 @@
+
+zavisle na elle:
+recepty/recipes/models.py
+jaknato/instruction/models.py
+horoskopy/astrology/models.py
+
+
+
+admin/zenaadmin/settings_base.py
+APP_INSTALLED_APPS = (
+    'admin.zenaadmin',
+    'horoskopy.astrology',
+   
+    'recepty.recipes',
+    'recepty.newsletters',
+   
+    # Video
+    'nc.cdnclient',
+    'ella.media',
+    'ella.contact_form',
+    'jaknato.instruction',
+)
+
+
+admin/newman/settings_base.py
+APP_INSTALLED_APPS = (
+    'ella.newman',
+    'ella.newman.markup',
+    'ella.newman.licenses',
+    'horoskopy.astrology',
+
+    'recepty.recipes',
+    'recepty.newsletters',
+
+    # Video
+    'nc.cdnclient',
+    'ella.media',
+    'ella.contact_form',
+    'jaknato.instruction',
+)
+
+
+admin/settings_base.py
+APP_INSTALLED_APPS = (
+#    'admin.zenaadmin',
+    'horoskopy.astrology',
+    'vanoce.writetosanta',
+    'vanoce.xmastips',
+    'recepty.newsletters',
+)
+
+bydleni/settings_base.py
+APP_INSTALLED_APPS = (
+    'bydleni.rwe_interviews',
+)
+
+horoskopy/settings_base.py
+APP_INSTALLED_APPS = (
+    'horoskopy.astrology',
+#    'debug_toolbar',
+)
+
+
+jaknato/settings_devel.py
+INSTALLED_APPS += (
+    'nc.cdnclient',
+    'ella.ratings',
+    'ella.contact_form',
+    'jaknato.search',
+)
+
+
+recepty/settings_base.py
+APP_INSTALLED_APPS = (
+    'recepty.newsletters',
+)
+
+
+
+vanoce/settings_base.py
+APP_INSTALLED_APPS = (
+    'vanoce.xmastips',
+    'vanoce.writetosanta',
+)
+
+
+
+
+
+common/settings.py
+INSTALLED_APPS = (
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.sites',
+    'django.contrib.sitemaps',
+    'django.contrib.redirects',
+    'django.contrib.webdesign',
+    'ella.core',
+    'ella.articles',
+    'ella.comments',
+    'ella.photos',
+    'ella.db_templates',
+    'ella.galleries',
+    'ella.polls',
+    'ella.tagging',
+    'ella.ratings',
+    'nc.icq',
+    'nc.sherlock',
+    'nc.adverts',
+    'nc.exports',
+    'ella.imports',
+    'ella.ellaadmin',
+    'ella.discussions',
+    'ella.interviews',
+    'ella.positions',                                                                                                                                   
+    'ella.catlocks',                                                                                                                                    
+    'ella.sendmail',
+    'django.contrib.admin',
+    'ella.attachments',
+    'ella.answers',
+    'ella.series',
+    'nc.ellasherlock_export',
+    'common.aukro',
+    'common.mail_logout',
+    'common.sitemaps',
+
+    'ella.media',
+    'jaknato.instruction',
+    'jaknato.howto',
+
+    # for sherlock we need recipe model
+    'recepty.recipes',
+)
+

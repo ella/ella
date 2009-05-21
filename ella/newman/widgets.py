@@ -1,10 +1,12 @@
 from itertools import chain
+
 from django import forms
 from django.conf import settings
 from django.utils.safestring import mark_safe
 from django.db.models.fields.related import ForeignKey
 from django.contrib.admin import widgets
 from django.utils.text import truncate_words
+from django.utils.translation import ugettext_lazy as _
 from ella.ellaadmin.utils import admin_url
 from djangomarkup.widgets import RichTextAreaWidget
 from django.utils.encoding import force_unicode

@@ -1,4 +1,3 @@
-from django.utils.translation import ugettext_lazy as _
 
 from south.db import db
 from django.db import models
@@ -6,139 +5,195 @@ from ella.core.models import *
 
 class Migration:
     
-    def forwards(self):
+    def forwards(self, orm):
         
-        
-        # Mock Models
-        User = db.mock_model(model_name='User', db_table='auth_user', db_tablespace='', pk_field_name='id', pk_field_type=models.AutoField, pk_field_args=[], pk_field_kwargs={})
-        
-        # Model 'Author'
-        db.create_table('core_author', (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('user', models.ForeignKey(User, blank=True, null=True)),
-            ('name', models.CharField(_('Name'), max_length=200, blank=True)),
-            ('slug', models.SlugField(_('Slug'), max_length=255, unique=True)),
-            ('description', models.TextField(_('Description'), blank=True)),
-            ('text', models.TextField(_('Text'), blank=True)),
-        ))
-        # Model 'Source'
-        db.create_table('core_source', (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('name', models.CharField(_('Name'), max_length=200)),
-            ('url', models.URLField(_('URL'), blank=True)),
-            ('description', models.TextField(_('Description'), blank=True)),
-        ))
-        
-        # Mock Models
-        Category = db.mock_model(model_name='Category', db_table='core_category', db_tablespace='', pk_field_name='id', pk_field_type=models.AutoField, pk_field_args=[], pk_field_kwargs={})
-        Site = db.mock_model(model_name='Site', db_table='django_site', db_tablespace='', pk_field_name='id', pk_field_type=models.AutoField, pk_field_args=[], pk_field_kwargs={})
-        
-        # Model 'Category'
+        # Adding model 'Category'
         db.create_table('core_category', (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
+            ('id', models.AutoField(primary_key=True)),
             ('title', models.CharField(_("Category Title"), max_length=200)),
             ('slug', models.SlugField(_('Slug'), max_length=255)),
-            ('tree_parent', models.ForeignKey(Category, null=True, blank=True, verbose_name=_("Parent Category"))),
-            ('tree_path', models.CharField(verbose_name=_("Path from root category"), max_length=255, editable=False)),
+            ('tree_parent', models.ForeignKey(orm.Category, null=True, verbose_name=_("Parent Category"), blank=True)),
+            ('tree_path', models.CharField(editable=False, max_length=255, verbose_name=_("Path from root category"))),
             ('description', models.TextField(_("Category Description"), blank=True)),
-            ('site', models.ForeignKey(Site)),
+            ('site', models.ForeignKey(orm['sites.Site'])),
         ))
-        db.create_index('core_category', ['site_id','tree_path'], unique=True, db_tablespace='')
+        db.send_create_signal('core', ['Category'])
         
-        
-        # Mock Models
-        ContentType = db.mock_model(model_name='ContentType', db_table='django_content_type', db_tablespace='', pk_field_name='id', pk_field_type=models.AutoField, pk_field_args=[], pk_field_kwargs={})
-        ContentType = db.mock_model(model_name='ContentType', db_table='django_content_type', db_tablespace='', pk_field_name='id', pk_field_type=models.AutoField, pk_field_args=[], pk_field_kwargs={})
-        
-        # Model 'Related'
-        db.create_table('core_related', (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('target_ct', models.ForeignKey(ContentType, related_name='relation_for_set')),
-            ('target_id', models.IntegerField()),
-            ('source_ct', models.ForeignKey(ContentType, related_name='related_on_set')),
-            ('source_id', models.IntegerField()),
-        ))
-        
-        # Mock Models
-        ContentType = db.mock_model(model_name='ContentType', db_table='django_content_type', db_tablespace='', pk_field_name='id', pk_field_type=models.AutoField, pk_field_args=[], pk_field_kwargs={})
-        Category = db.mock_model(model_name='Category', db_table='core_category', db_tablespace='', pk_field_name='id', pk_field_type=models.AutoField, pk_field_args=[], pk_field_kwargs={})
-        Source = db.mock_model(model_name='Source', db_table='core_source', db_tablespace='', pk_field_name='id', pk_field_type=models.AutoField, pk_field_args=[], pk_field_kwargs={})
-        Photo = db.mock_model(model_name='Photo', db_table='photos_photo', db_tablespace='', pk_field_name='id', pk_field_type=models.AutoField, pk_field_args=[], pk_field_kwargs={})
-        
-        # Model 'Publishable'
-        db.create_table('core_publishable', (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('content_type', models.ForeignKey(ContentType)),
-            ('category', models.ForeignKey(Category, verbose_name=_(Category))),
-            ('title', models.CharField(_('Title'), max_length=255)),
-            ('slug', models.SlugField(_('Slug'), max_length=255)),
-            ('source', models.ForeignKey(Source, blank=True, null=True, verbose_name=_(Source))),
-            ('photo', models.ForeignKey(Photo, blank=True, null=True, verbose_name=_(Photo))),
-            ('description', models.TextField(_('Description'))),
-        ))
-        # Mock Models
-        Publishable = db.mock_model(model_name='Publishable', db_table='core_publishable', db_tablespace='', pk_field_name='id', pk_field_type=models.AutoField, pk_field_args=[], pk_field_kwargs={})
-        Author = db.mock_model(model_name='Author', db_table='core_author', db_tablespace='', pk_field_name='id', pk_field_type=models.AutoField, pk_field_args=[], pk_field_kwargs={})
-        
-        # M2M field 'Publishable.authors'
-        db.create_table('core_publishable_authors', (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('publishable', models.ForeignKey(Publishable, null=False)),
-            ('author', models.ForeignKey(Author, null=False))
-        )) 
-        
-        # Mock Models
-        Publishable = db.mock_model(model_name='Publishable', db_table='core_publishable', db_tablespace='', pk_field_name='id', pk_field_type=models.AutoField, pk_field_args=[], pk_field_kwargs={})
-        Category = db.mock_model(model_name='Category', db_table='core_category', db_tablespace='', pk_field_name='id', pk_field_type=models.AutoField, pk_field_args=[], pk_field_kwargs={})
-        
-        # Model 'Placement'
+        # Adding model 'Placement'
         db.create_table('core_placement', (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('publishable', models.ForeignKey(Publishable)),
-            ('category', models.ForeignKey(Category, db_index=True)),
+            ('id', models.AutoField(primary_key=True)),
+            ('target_ct', models.ForeignKey(orm['contenttypes.ContentType'])),
+            ('target_id', models.IntegerField()),
+            ('category', models.ForeignKey(orm.Category, db_index=True)),
             ('publish_from', models.DateTimeField(_("Start of visibility"))),
             ('publish_to', models.DateTimeField(_("End of visibility"), null=True, blank=True)),
             ('slug', models.SlugField(_('Slug'), max_length=255, blank=True)),
             ('static', models.BooleanField(default=False)),
         ))
+        db.send_create_signal('core', ['Placement'])
         
-        # Mock Models
-        Placement = db.mock_model(model_name='Placement', db_table='core_placement', db_tablespace='', pk_field_name='id', pk_field_type=models.AutoField, pk_field_args=[], pk_field_kwargs={})
-        Category = db.mock_model(model_name='Category', db_table='core_category', db_tablespace='', pk_field_name='id', pk_field_type=models.AutoField, pk_field_args=[], pk_field_kwargs={})
-        
-        # Model 'Listing'
+        # Adding model 'Listing'
         db.create_table('core_listing', (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('placement', models.ForeignKey(Placement)),
-            ('category', models.ForeignKey(Category, db_index=True)),
+            ('id', models.AutoField(primary_key=True)),
+            ('placement', models.ForeignKey(orm.Placement)),
+            ('category', models.ForeignKey(orm.Category, db_index=True)),
             ('publish_from', models.DateTimeField(_("Start of listing"))),
-            ('publish_to', models.DateTimeField(_("End of listing"), null=True, blank=True)),
             ('priority_from', models.DateTimeField(_("Start of prioritized listing"), null=True, blank=True)),
             ('priority_to', models.DateTimeField(_("End of prioritized listing"), null=True, blank=True)),
-            ('priority_value', models.IntegerField(_("Priority"), blank=True, null=True)),
-            ('commercial', models.BooleanField(_("Commercial"), default=False, help_text=_("Check this if the listing is of a commercial content."))),
+            ('priority_value', models.IntegerField(_("Priority"), null=True, blank=True)),
+            ('remove', models.BooleanField(_("Remove"), default=False)),
+            ('commercial', models.BooleanField(_("Commercial"), default=False)),
         ))
+        db.send_create_signal('core', ['Listing'])
         
-        # Mock Models
-        Placement = db.mock_model(model_name='Placement', db_table='core_placement', db_tablespace='', pk_field_name='id', pk_field_type=models.AutoField, pk_field_args=[], pk_field_kwargs={})
-        
-        # Model 'HitCount'
+        # Adding model 'HitCount'
         db.create_table('core_hitcount', (
-            ('placement', models.ForeignKey(Placement, primary_key=True)),
+            ('placement', models.ForeignKey(orm.Placement, primary_key=True)),
             ('last_seen', models.DateTimeField(_('Last seen'), editable=False)),
             ('hits', models.PositiveIntegerField(_('Hits'), default=1)),
         ))
+        db.send_create_signal('core', ['HitCount'])
         
-        db.send_create_signal('core', ['Author','Source','Category','Related','Publishable','Placement','Listing','HitCount'])
+        # Adding model 'Related'
+        db.create_table('core_related', (
+            ('id', models.AutoField(primary_key=True)),
+            ('target_ct', models.ForeignKey(orm['contenttypes.ContentType'], related_name='relation_for_set')),
+            ('target_id', models.IntegerField()),
+            ('source_ct', models.ForeignKey(orm['contenttypes.ContentType'], related_name='related_on_set')),
+            ('source_id', models.IntegerField()),
+        ))
+        db.send_create_signal('core', ['Related'])
+        
+        # Adding model 'Source'
+        db.create_table('core_source', (
+            ('id', models.AutoField(primary_key=True)),
+            ('name', models.CharField(_('Name'), max_length=200)),
+            ('url', models.URLField(_('URL'), blank=True)),
+            ('description', models.TextField(_('Description'), blank=True)),
+        ))
+        db.send_create_signal('core', ['Source'])
+        
+        # Adding model 'Author'
+        db.create_table('core_author', (
+            ('id', models.AutoField(primary_key=True)),
+            ('user', models.ForeignKey(orm['auth.User'], null=True, blank=True)),
+            ('name', models.CharField(_('Name'), max_length=200, blank=True)),
+            ('slug', models.SlugField(_('Slug'), unique=True, max_length=255)),
+            ('description', models.TextField(_('Description'), blank=True)),
+            ('text', models.TextField(_('Text'), blank=True)),
+        ))
+        db.send_create_signal('core', ['Author'])
+        
+        # Creating unique_together for [site, tree_path] on Category.
+        db.create_unique('core_category', ['site_id', 'tree_path'])
+        
     
-    def backwards(self):
-        db.delete_table('core_hitcount')
-        db.delete_table('core_listing')
-        db.delete_table('core_placement')
-        db.delete_table('core_publishable_authors')
-        db.delete_table('core_publishable')
-        db.delete_table('core_related')
+    
+    def backwards(self, orm):
+        
+        # Deleting model 'Category'
         db.delete_table('core_category')
+        
+        # Deleting model 'Placement'
+        db.delete_table('core_placement')
+        
+        # Deleting model 'Listing'
+        db.delete_table('core_listing')
+        
+        # Deleting model 'HitCount'
+        db.delete_table('core_hitcount')
+        
+        # Deleting model 'Related'
+        db.delete_table('core_related')
+        
+        # Deleting model 'Source'
         db.delete_table('core_source')
+        
+        # Deleting model 'Author'
         db.delete_table('core_author')
         
+        # Deleting unique_together for [site, tree_path] on Category.
+        db.delete_unique('core_category', ['site_id', 'tree_path'])
+        
+    
+    
+    models = {
+        'core.category': {
+            'Meta': {'ordering': "('site','tree_path',)", 'unique_together': "(('site','tree_path'),)"},
+            'description': ('models.TextField', ['_("Category Description")'], {'blank': 'True'}),
+            'id': ('models.AutoField', [], {'primary_key': 'True'}),
+            'site': ('models.ForeignKey', ["orm['sites.Site']"], {}),
+            'slug': ('models.SlugField', ["_('Slug')"], {'max_length': '255'}),
+            'title': ('models.CharField', ['_("Category Title")'], {'max_length': '200'}),
+            'tree_parent': ('models.ForeignKey', ["orm['core.Category']"], {'null': 'True', 'verbose_name': '_("Parent Category")', 'blank': 'True'}),
+            'tree_path': ('models.CharField', [], {'editable': 'False', 'max_length': '255', 'verbose_name': '_("Path from root category")'})
+        },
+        'core.placement': {
+            'Meta': {'ordering': "('-publish_from',)"},
+            'category': ('models.ForeignKey', ["orm['core.Category']"], {'db_index': 'True'}),
+            'id': ('models.AutoField', [], {'primary_key': 'True'}),
+            'publish_from': ('models.DateTimeField', ['_("Start of visibility")'], {}),
+            'publish_to': ('models.DateTimeField', ['_("End of visibility")'], {'null': 'True', 'blank': 'True'}),
+            'slug': ('models.SlugField', ["_('Slug')"], {'max_length': '255', 'blank': 'True'}),
+            'static': ('models.BooleanField', [], {'default': 'False'}),
+            'target_ct': ('models.ForeignKey', ["orm['contenttypes.ContentType']"], {}),
+            'target_id': ('models.IntegerField', [], {})
+        },
+        'core.listing': {
+            'Meta': {'ordering': "('-publish_from',)"},
+            'category': ('models.ForeignKey', ["orm['core.Category']"], {'db_index': 'True'}),
+            'commercial': ('models.BooleanField', ['_("Commercial")'], {'default': 'False'}),
+            'id': ('models.AutoField', [], {'primary_key': 'True'}),
+            'placement': ('models.ForeignKey', ["orm['core.Placement']"], {}),
+            'priority_from': ('models.DateTimeField', ['_("Start of prioritized listing")'], {'null': 'True', 'blank': 'True'}),
+            'priority_to': ('models.DateTimeField', ['_("End of prioritized listing")'], {'null': 'True', 'blank': 'True'}),
+            'priority_value': ('models.IntegerField', ['_("Priority")'], {'null': 'True', 'blank': 'True'}),
+            'publish_from': ('models.DateTimeField', ['_("Start of listing")'], {}),
+            'remove': ('models.BooleanField', ['_("Remove")'], {'default': 'False'})
+        },
+        'core.hitcount': {
+            'hits': ('models.PositiveIntegerField', ["_('Hits')"], {'default': '1'}),
+            'last_seen': ('models.DateTimeField', ["_('Last seen')"], {'editable': 'False'}),
+            'placement': ('models.ForeignKey', ["orm['core.Placement']"], {'primary_key': 'True'})
+        },
+        'core.related': {
+            'Meta': {'ordering': "('source_ct','source_id',)"},
+            'id': ('models.AutoField', [], {'primary_key': 'True'}),
+            'source_ct': ('models.ForeignKey', ["orm['contenttypes.ContentType']"], {'related_name': "'related_on_set'"}),
+            'source_id': ('models.IntegerField', [], {}),
+            'target_ct': ('models.ForeignKey', ["orm['contenttypes.ContentType']"], {'related_name': "'relation_for_set'"}),
+            'target_id': ('models.IntegerField', [], {})
+        },
+        'sites.site': {
+            'Meta': {'ordering': "('domain',)", 'db_table': "'django_site'"},
+            '_stub': True,
+            'id': ('models.AutoField', [], {'primary_key': 'True'})
+        },
+        'auth.user': {
+            '_stub': True,
+            'id': ('models.AutoField', [], {'primary_key': 'True'})
+        },
+        'contenttypes.contenttype': {
+            'Meta': {'ordering': "('name',)", 'unique_together': "(('app_label','model'),)", 'db_table': "'django_content_type'"},
+            '_stub': True,
+            'id': ('models.AutoField', [], {'primary_key': 'True'})
+        },
+        'core.source': {
+            'Meta': {'ordering': "('name',)"},
+            'description': ('models.TextField', ["_('Description')"], {'blank': 'True'}),
+            'id': ('models.AutoField', [], {'primary_key': 'True'}),
+            'name': ('models.CharField', ["_('Name')"], {'max_length': '200'}),
+            'url': ('models.URLField', ["_('URL')"], {'blank': 'True'})
+        },
+        'core.author': {
+            'Meta': {'ordering': "('name','slug',)"},
+            'description': ('models.TextField', ["_('Description')"], {'blank': 'True'}),
+            'id': ('models.AutoField', [], {'primary_key': 'True'}),
+            'name': ('models.CharField', ["_('Name')"], {'max_length': '200', 'blank': 'True'}),
+            'slug': ('models.SlugField', ["_('Slug')"], {'unique': 'True', 'max_length': '255'}),
+            'text': ('models.TextField', ["_('Text')"], {'blank': 'True'}),
+            'user': ('models.ForeignKey', ["orm['auth.User']"], {'null': 'True', 'blank': 'True'})
+        }
+    }
+    
+    complete_apps = ['core']
