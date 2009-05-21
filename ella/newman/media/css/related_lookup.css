@@ -8,3 +8,6 @@
     top: 0;
     left: 0;
 }
+select.highlighted {
+    border: solid 2px red;
+}

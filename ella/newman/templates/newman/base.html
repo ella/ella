@@ -11,6 +11,7 @@
         var LOGGED_IN = '{% if user.is_authenticated %}1{% endif %}';
         var DEBUG = '{% if DEBUG %}1{% endif %}';
         var MEDIA_VERSION = '{{ VERSION }}';
+        {% newman_contenttypes %}
     </script>
   <meta name="robots" content="NONE,NOARCHIVE" />
 </head>
