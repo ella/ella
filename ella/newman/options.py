@@ -82,10 +82,10 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
         })
         return fields.AdminSuggestField(db_field, **kwargs)
 
-    if db_field.name in ('target_ct', 'source_ct', 'content_type',):
+    if isinstance(db_field, models.ForeignKey) and issubclass(db_field.rel.to, ContentType):
         kwargs['widget'] = widgets.ContentTypeWidget
         return db_field.formfield(**kwargs)
-    elif db_field.name in ('target_id', 'source_id', 'object_id',):
+    elif db_field.name in ('target_id', 'source_id', 'object_id', 'related_id'):
         kwargs['widget'] = widgets.ForeignKeyGenericRawIdWidget
         return db_field.formfield(**kwargs)
 

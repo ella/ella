@@ -99,14 +99,15 @@ def get_user_config(user, key):
     """
     cfg = getattr(user, USER_CONFIG, {})
     if key not in cfg:
-        db_data = models.AdminSetting.objects.filter(user=user, var=key)
-        if not db_data:
+        try:
+            db_data = models.AdminSetting.objects.get(user=user, var=key)
+        except models.AdminSetting.DoesNotExist:
             return None
         # find appropriate callback to convert JSON data.
         callback = _get_decoder(key)
         if not callback:
             callback = json_decode
-        return callback(db_data[0].value)
+        return callback(db_data.value)
     return cfg[key]
 
 def flag_queryset(queryset, flag, value):
