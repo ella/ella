@@ -39,6 +39,9 @@
         }).each( function() {
             this.onclick = undefined;
         });
+        $lo.find('.paginator a').each( function() {
+            $(this).attr('href', $(this).attr('href').replace(/^\?/, 'lupicka-overlay::&')).addClass('simpleload')
+        });
         $('.popup-filter').click( function() {
             var href = get_hashadr('lupicka-overlay::filters/');
             ;;; carp('filters:', href);
