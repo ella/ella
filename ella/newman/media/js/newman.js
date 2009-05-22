@@ -553,7 +553,13 @@ $( function() {
         var search_terms = $(this).prev('input#searchbar').val();
         if (!search_terms) return;  // Nothing to search for
         var adr_term = '&q=' + search_terms;
-        adr(adr_term);
+        var loaded = ContentByHashLib.closest_loaded(this);
+        if (loaded.id == 'content') {
+            adr(adr_term);
+        }
+        else {
+            ContentByHashLib.simple_load( loaded.id + '::' + adr_term );
+        }
         return false;
     });
 });
