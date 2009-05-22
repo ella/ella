@@ -1,49 +1,12 @@
 # -*- coding: utf-8 -*-
-from djangosanetesting import UnitTestCase, DatabaseTestCase
+from djangosanetesting import DatabaseTestCase
 
-from django.contrib.sites.models import Site
-from django.template import TemplateSyntaxError
-
-from ella.core.models import Category, Publishable
-from ella.core.templatetags.core import _parse_box, BoxNode, EmptyNode
+from ella.core.models import Publishable
 from ella.core.box import Box
 from ella.articles.models import Article
 
 from unit_project.test_core import create_basic_categories, create_and_place_a_publishable
 
-class TestBoxTagParser(UnitTestCase):
-    def test_parse_box_with_pk(self):
-        node = _parse_box([], ['box', 'box_type', 'for', 'core.category', 'with', 'pk', '1'])
-        self.assert_true(isinstance(node, BoxNode))
-        self.assert_equals('box_type', node.box_type)
-        self.assert_equals(Category, node.model)
-        self.assert_equals(('pk', '1'), node.lookup)
-
-    def test_parse_box_for_varname(self):
-        node = _parse_box([], ['box', 'other_box_type', 'for', 'var_name'])
-        self.assert_true(isinstance(node, BoxNode))
-        self.assert_equals('other_box_type', node.box_type)
-        self.assert_equals('var_name', node.var_name)
-
-    def test_parse_box_with_slug(self):
-        node = _parse_box([], ['box', 'box_type', 'for', 'sites.site', 'with', 'slug', '"home"'])
-        self.assert_true(isinstance(node, BoxNode))
-        self.assert_equals('box_type', node.box_type)
-        self.assert_equals(Site, node.model)
-        self.assert_equals(('slug', '"home"'), node.lookup)
-
-    def test_parse_raises_on_too_many_arguments(self):
-        self.assert_raises(TemplateSyntaxError, _parse_box, [], ['box', 'box_type', 'for', 'core.category', 'with', 'pk', '1', '2', 'extra'])
-
-    def test_parse_raises_on_too_few_arguments(self):
-        self.assert_raises(TemplateSyntaxError, _parse_box, [], ['box', 'box_type', 'for'])
-
-    def test_parse_raises_on_incorrect_arguments(self):
-        self.assert_raises(TemplateSyntaxError, _parse_box, [], ['box', 'box_type', 'not a for', 'core.category', 'with', 'pk', '1'])
-
-    def test_parse_return_empty_node_on_incorrect_model(self):
-        node = _parse_box([], ['box', 'box_type', 'for', 'not_app.not_model', 'with', 'pk', '1'])
-        self.assert_true(isinstance(node, EmptyNode))
 
 class ArticleBox(Box):
     pass
