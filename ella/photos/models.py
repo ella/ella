@@ -122,11 +122,11 @@ class Photo(models.Model):
 
         # prefill the slug with the ID, it requires double save
         if not self.id:
-            self.width, self.height = get_image_dimensions(self.image)
             if isinstance(self.image, UploadedFile):
                 # due to PIL has read several bytes from image, position in file has to be reset
                 self.image.seek(0)
             super(Photo, self).save(force_insert, force_update)
+            self.width, self.height = get_image_dimensions(self.image)
             self.slug = str(self.id) + '-' + self.slug
             force_insert, force_update = False, True
             image_changed = False

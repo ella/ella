@@ -10,13 +10,13 @@ var IMAGE_OPTIONS = {
 };
 ( function($) {
     window.on_upload_success = function(xhr) {
-        ;;; carp('success:', xhr);
-        show_ok('successfully uploaded photo');
+        ;;; carp('success uploading photo:', xhr);
+        show_ok(_('successfully uploaded photo'));
 //        AjaxFormLib.show_ajax_success(xhr.responseText);
     }
     window.on_upload_error = function(xhr) {
-        ;;; carp('error:', xhr);
-        show_err('failed uploading photo');
+        ;;; carp('error uploading photo:', xhr);
+        show_err(_('failed uploading photo'));
 //        AjaxFormLib.ajax_submit_error(xhr)
     }
     window.on_upload_progress = function(progress) {
