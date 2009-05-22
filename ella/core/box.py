@@ -96,7 +96,7 @@ class Box(object):
                 'name' : self.params.get('name', ''),
                 'text' : self.params.get('text', ''),
                 'box' : self,
-}
+        }
 
     def get_cache_tests(self):
         " Return tests for ella.core.cache.invalidate "

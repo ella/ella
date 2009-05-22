@@ -2,13 +2,16 @@
 from djangosanetesting import UnitTestCase, DatabaseTestCase
 
 from django import template
+from django.template import TemplateSyntaxError
+from django.contrib.sites.models import Site
 
-from ella.core.templatetags.core import listing_parse, ListingNode
-from ella.core.models import Listing
+from ella.core.templatetags.core import listing_parse, ListingNode, _parse_box, BoxNode, EmptyNode
+from ella.core.models import Listing, Category
 from ella.core import register
 
 from unit_project.test_core import create_basic_categories, create_and_place_a_publishable, \
         create_and_place_more_publishables, list_all_placements_in_category_by_hour
+from unit_project import template_loader
 
 class TestRenderTag(UnitTestCase):
     def test_raises_error_on_no_args(self):
@@ -123,3 +126,55 @@ class TestListingTagParser(UnitTestCase):
         self.assert_equals(['count', 'category'], parameters_to_resolve)
         self.assert_equals(Listing.objects.IMMEDIATE, parameters['children'])
 
+class TestBoxTag(UnitTestCase):
+
+    def tearDown(self):
+        super(TestBoxTag, self).tearDown()
+        template_loader.templates = {}
+
+    def test_renders_correct_template(self):
+        template_loader.templates['box/box.html'] = '{{ object }}'
+        t = template.Template('{% box name for sites.site with pk 1 %}{% endbox %}')
+        self.assert_equals('example.com', t.render(template.Context()))
+
+    def test_params_are_parsed(self):
+        template_loader.templates['box/box.html'] = '{% for k,v in box.params.items %}{{k}}:{{v}}|{% endfor %}'
+        t = template.Template('''{% box name for sites.site with pk 1 %}
+                level: 2
+                some_other_param: xxx
+            {% endbox %}''')
+        self.assert_equals('some_other_param:xxx|level:2|', t.render(template.Context()))
+
+class TestBoxTagParser(UnitTestCase):
+    def test_parse_box_with_pk(self):
+        node = _parse_box([], ['box', 'box_type', 'for', 'core.category', 'with', 'pk', '1'])
+        self.assert_true(isinstance(node, BoxNode))
+        self.assert_equals('box_type', node.box_type)
+        self.assert_equals(Category, node.model)
+        self.assert_equals(('pk', '1'), node.lookup)
+
+    def test_parse_box_for_varname(self):
+        node = _parse_box([], ['box', 'other_box_type', 'for', 'var_name'])
+        self.assert_true(isinstance(node, BoxNode))
+        self.assert_equals('other_box_type', node.box_type)
+        self.assert_equals('var_name', node.var_name)
+
+    def test_parse_box_with_slug(self):
+        node = _parse_box([], ['box', 'box_type', 'for', 'sites.site', 'with', 'slug', '"home"'])
+        self.assert_true(isinstance(node, BoxNode))
+        self.assert_equals('box_type', node.box_type)
+        self.assert_equals(Site, node.model)
+        self.assert_equals(('slug', '"home"'), node.lookup)
+
+    def test_parse_raises_on_too_many_arguments(self):
+        self.assert_raises(TemplateSyntaxError, _parse_box, [], ['box', 'box_type', 'for', 'core.category', 'with', 'pk', '1', '2', 'extra'])
+
+    def test_parse_raises_on_too_few_arguments(self):
+        self.assert_raises(TemplateSyntaxError, _parse_box, [], ['box', 'box_type', 'for'])
+
+    def test_parse_raises_on_incorrect_arguments(self):
+        self.assert_raises(TemplateSyntaxError, _parse_box, [], ['box', 'box_type', 'not a for', 'core.category', 'with', 'pk', '1'])
+
+    def test_parse_return_empty_node_on_incorrect_model(self):
+        node = _parse_box([], ['box', 'box_type', 'for', 'not_app.not_model', 'with', 'pk', '1'])
+        self.assert_true(isinstance(node, EmptyNode))
