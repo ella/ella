@@ -7,7 +7,6 @@ import os
 from django.db import models, IntegrityError
 from django.conf import settings
 from django.utils.translation import ugettext, ugettext_lazy as _
-from django.contrib.contenttypes import generic
 from django.contrib.sites.models import Site
 from django.utils.safestring import mark_safe
 from django.core.files.uploadedfile import UploadedFile
@@ -134,12 +133,14 @@ class Photo(models.Model):
             old = Photo.objects.get(pk = self.pk)
             image_changed = old.image != self.image
         # rename image by slug
-        imageType = detect_img_type(path.join(settings.MEDIA_ROOT, self.image.name))
+        imageType = detect_img_type(self.image.path)
         if imageType is not None:
             self.image = file_rename(self.image.name, self.slug, PHOTOS_TYPE_EXTENSION[ imageType ])
         # delete formatedphotos if new image was uploaded
         if image_changed:
-            self.width, self.height = get_image_dimensions(self.image)
+            super(Photo, self).save(force_insert, force_update)
+            self.width, self.height = get_image_dimensions(self.image.path)
+            force_insert, force_update = False, True
             for f_photo in self.formatedphoto_set.all():
                 f_photo.delete()
         super(Photo, self).save(force_insert, force_update)
