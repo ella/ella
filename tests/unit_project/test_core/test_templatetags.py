@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
-from djangosanetesting import UnitTestCase
+from djangosanetesting import UnitTestCase, DatabaseTestCase
 
 from django import template
 
 from ella.core.templatetags.core import listing_parse, ListingNode
 from ella.core.models import Listing
 from ella.core import register
+
+from unit_project.test_core import create_basic_categories, create_and_place_a_publishable, \
+        create_and_place_more_publishables, list_all_placements_in_category_by_hour
 
 class TestRenderTag(UnitTestCase):
     def test_raises_error_on_no_args(self):
@@ -36,6 +39,34 @@ class TestRenderTag(UnitTestCase):
     def test_does_not_escape_output(self):
         t = template.Template('{% render var %}')
         self.assert_equals('<html> ""', t.render(template.Context({'var': '<html> ""'})))
+
+class TestListingTag(DatabaseTestCase):
+    def setUp(self):
+        super(TestListingTag, self).setUp()
+        create_basic_categories(self)
+        create_and_place_a_publishable(self)
+        create_and_place_more_publishables(self)
+        list_all_placements_in_category_by_hour(self)
+
+    def test_get_listing(self):
+        t = template.Template('{% listing 10 for category as var %}{{ var|join:":" }}')
+        expected = ':'.join([str(listing) for listing in self.listings if listing.category == self.category])
+        self.assert_equals(expected, t.render(template.Context({'category': self.category})))
+
+    def test_get_listing_with_immediate_children(self):
+        t = template.Template('{% listing 10 for category with children as var %}{{ var|join:":" }}')
+        expected = ':'.join([str(listing) for listing in self.listings if listing.category in (self.category, self.category_nested)])
+        self.assert_equals(expected, t.render(template.Context({'category': self.category})))
+
+    def test_get_listing_with_immediate_children_and_offset(self):
+        t = template.Template('{% listing 10 from 2 for category with children as var %}{{ var|join:":" }}')
+        expected = ':'.join([str(listing) for listing in self.listings if listing.category in (self.category, self.category_nested)][1:])
+        self.assert_equals(expected, t.render(template.Context({'category': self.category})))
+
+    def test_get_listing_with_immediate_children_offset_and_count(self):
+        t = template.Template('{% listing 1 from 2 for category with children as var %}{{ var|join:":" }}')
+        expected = [str(listing) for listing in self.listings if listing.category in (self.category, self.category_nested)][1]
+        self.assert_equals(expected, t.render(template.Context({'category': self.category})))
 
 class TestListingTagParser(UnitTestCase):
     '''
