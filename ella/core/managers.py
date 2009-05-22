@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.utils.encoding import smart_str
 
-from ella.core.cache import cache_this, get_cached_object
+from ella.core.cache import cache_this
 from ella.core.cache.invalidate import CACHE_DELETER
 
 
@@ -45,7 +45,7 @@ class RelatedManager(models.Manager):
 
         # top objects in given category
         if count > 0:
-            from ella.core.models import Listing, Category
+            from ella.core.models import Listing
             cat = obj.category
             listings = Listing.objects.get_listing(category=cat, count=count+len(related), mods=mods)
             for l in listings:
