@@ -814,7 +814,14 @@ $(function(){ open_overlay = function(content_type, selection_callback) {
         || $('#content').get(0)
         || $('body').get(0)
     );
-    var address = '/' + content_type.split('.').join('/') + '/?pop';
+    
+    var ct_arr = /(\w+)\W(\w+)/.exec( content_type );
+    if ( ! ct_arr ) {
+        carp('open_overlay: Unexpected content type: '+content_type);
+        return false;
+    }
+    var address = '/' + ct_arr[1] + '/' + ct_arr[2] + '/?pop';
+    
     ContentByHashLib.load_content({
         address: address,
         target_id: 'box-overlay',
