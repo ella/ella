@@ -275,38 +275,6 @@ def _parse_box(nodelist, bits):
 
         return BoxNode(bits[1], nodelist, model=model, lookup=(smart_str(bits[5]), bits[6]))
 
-def _render(object, content_path):
-    """
-    A markdown filter that handles the rendering of any text containing markdown markup and/or django template tags.
-    Only ``{{object}}`` and ``{{MEDIA_URL}}`` are available in the context.
-
-    Usage::
-
-        {{object|render:"property.to.render"}}
-
-    Examples::
-
-        {{article|render:"perex"}}
-        {{article|render:"content.content"}}
-    """
-    path = content_path.split('.')
-    content = object
-    for step in path:
-        try:
-            content = getattr(content, step)
-            if callable(content):
-                content = content()
-        except:
-            # TODO: log
-            return ''
-
-    t = template.Template(content)
-    return t.render(template.Context({'object' : object, 'MEDIA_URL' : settings.MEDIA_URL}))
-
-@register.filter
-def render(object, content_path):
-    return mark_safe(_render(object, content_path))
-
 class RenderNode(template.Node):
     def __init__(self, var):
         self.var = template.Variable(var)
