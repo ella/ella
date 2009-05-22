@@ -42,8 +42,9 @@ var IMAGE_OPTIONS = {
             data[ this.name ] = val;
         });
         IMAGE_OPTIONS.url = $('<a>').attr('href',get_adr('json/')).get(0).href;
-        flash_obj.saveData(data, IMAGE_OPTIONS);
         ;;; carp('URL passed to flash: ' + IMAGE_OPTIONS.url);
+        var saved_data = flash_obj.saveData(data, IMAGE_OPTIONS);
+        ;;; carp('flash returned: ', saved_data);
         return false;
     }
     function set_image_form_handlers() {
