@@ -146,7 +146,7 @@ class AdminSuggestField(fields.Field):
 class RGBImageField(fields.ImageField):
     "Check that uploaded image is RGB"
 #    widget = AdminFileWidget
-#    widget = widgets.FlashImageWidget
+    widget = widgets.FlashImageWidget
 
     def clean(self, data, initial=None):
         f = super(RGBImageField, self).clean(data, initial)
