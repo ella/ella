@@ -88,10 +88,7 @@ def poll_check_vote(request, poll):
         cook = request.COOKIES.get(POLLS_COOKIE_NAME, '').split(',')
         if str(poll.id) in cook:
             return POLL_USER_ALLREADY_VOTED
-        if request.META.has_key('HTTP_X_FORWARDED_FOR'):
-            ip_address = request.META['HTTP_X_FORWARDED_FOR']
-        else:
-            ip_address = request.META['REMOTE_ADDR']
+        ip_address = request.META['REMOTE_ADDR']
         # otherwise check Vote object - just for sure
         if poll.check_vote_by_ip_address(ip_address):
             return POLL_USER_ALLREADY_VOTED
@@ -129,10 +126,7 @@ def poll_vote(request, poll_id):
     kwa = {}
     if request.user.is_authenticated():
         kwa['user'] = request.user
-    if request.META.has_key('HTTP_X_FORWARDED_FOR'):
-        kwa['ip_address'] = request.META['HTTP_X_FORWARDED_FOR']
-    else:
-        kwa['ip_address'] = request.META['REMOTE_ADDR']
+    kwa['ip_address'] = request.META['REMOTE_ADDR']
     poll.vote(form.cleaned_data['choice'], **kwa)
 
     # just voted info session update

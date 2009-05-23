@@ -32,14 +32,11 @@ class CommentFormPreview(FormPreview):
         self.state.update(context)
 
     def done(self, request, cleaned_data):
-        if 'HTTP_X_FORWARDED_FOR' in request.META:
-            ip = request.META['HTTP_X_FORWARDED_FOR']
-        else:
-            ip = request.META['REMOTE_ADDR']
+        ip = request.META['REMOTE_ADDR']
 
         CommentForm(request.POST).save(
                 other_values={'ip_address': ip}
-)
+            )
 
         ct = get_cached_object_or_404(ContentType, pk=cleaned_data['target_ct'].id)
         target = get_cached_object_or_404(ct, pk=cleaned_data['target_id'])
@@ -57,13 +54,18 @@ def new_comment(request, context, reply=None):
     init_props = {
         'target': '%d:%d' % (context['content_type'].id, context['object']._get_pk_val()),
         'options' : FORM_OPTIONS['UNAUTHORIZED_ONLY'],
-}
+    }
     if reply:
         init_props['parent'] = reply
         context.update({
                 'reply' : True,
-                'parent' : get_cached_object_or_404(Comment, pk=reply, target_ct=context['content_type'], target_id=context['object']._get_pk_val()),
-})
+                'parent' : get_cached_object_or_404(
+                        Comment,
+                        pk=reply,
+                        target_ct=context['content_type'],
+                        target_id=context['object']._get_pk_val()
+                    ),
+            })
     form = CommentForm(init_props=init_props)
     context['form'] = form
     templates = get_templates_from_placement('comments/form.html', context['placement'])
@@ -85,7 +87,7 @@ def list_comments(request, context):
     context.update({
             'comment_count' : Comment.objects.get_count_for_object(context['object']),
             'comment_list' : comment_list,
-})
+        })
     templates = get_templates_from_placement('comments/list.html', context['placement'])
     return render_to_response(templates, context, context_instance=RequestContext(request))
 
