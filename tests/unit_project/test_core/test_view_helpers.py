@@ -3,11 +3,12 @@ from datetime import datetime, timedelta
 from djangosanetesting import DatabaseTestCase, UnitTestCase
 
 from django.http import Http404
+from django.db.models import get_models
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import slugify
 
 from ella.core.views import _category_detail, _object_detail, get_content_type, _list_content_type
-from ella.core.models import Listing
+from ella.core.models import Listing, Publishable
 
 from unit_project.test_core import create_basic_categories, create_and_place_a_publishable, \
         create_and_place_more_publishables, list_all_placements_in_category_by_hour
@@ -22,8 +23,10 @@ class ViewHelpersTestCase(DatabaseTestCase):
 
 class TestGetContentType(UnitTestCase):
     def test_by_brute_force(self):
-        for ct in ContentType.objects.all():
-            self.assert_equals(ct, get_content_type(slugify(ct.model_class()._meta.verbose_name_plural)))
+        for m in get_models():
+            if issubclass(m, Publishable):
+                ct = ContentType.objects.get_for_model(m)
+                self.assert_equals(ct, get_content_type(slugify(m._meta.verbose_name_plural)))
 
     def test_raises_404_on_non_existing_model(self):
         self.assert_raises(Http404, get_content_type, '')
