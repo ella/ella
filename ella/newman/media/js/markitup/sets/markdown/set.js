@@ -16,31 +16,35 @@ mySettings = {
     previewParserVar:   "text",
     onShiftEnter:		{keepDefault:false, openWith:'\n\n'},
     markupSet: [
-        { name: 'Zvýrazněně', className: 'italic', key: 'I', openWith: '_', closeWith: '_' },
-        { name: 'Silně', className: 'bold', key: 'B', openWith: '**', closeWith: '**' },
+        { name: _('Italic'), className: 'italic', key: 'I', openWith: '_', closeWith: '_' },
+        { name: _('Bold'), className: 'bold', key: 'B', openWith: '**', closeWith: '**' },
         { separator: '---------------' },
-        { name: 'Odkaz', className: 'url', key: 'L', openWith:'[', closeWith:']([![Url:!:http://]!] "[![Title]!]")', placeHolder: 'Text odkazu' },
+        { name: _('Link'), className: 'url', key: 'L', openWith:'[', closeWith:']([![Url:!:http://]!] "[![Title]!]")', placeHolder: 'Text odkazu' },
         { separator: '---------------' },
-        { name: 'Nadpis 1', className: 'h1', key:'1', placeHolder: 'Nadpis 1. úrovně', closeWith: function(markItUp) { return miu.markdownTitle(markItUp, '=') } },
-        { name: 'Nadpis 2', className: 'h2', key:'2', placeHolder: 'Nadpis 2. úrovně', closeWith: function(markItUp) { return miu.markdownTitle(markItUp, '-') } },
-        { name: 'Nadpis 3', className: 'h3', key:'3', placeHolder: 'Nadpis 3. úrovně', openWith: '### ' },
+        { name: _('Head 1'), className: 'h1', key:'1', placeHolder: 'Nadpis 1. úrovně', closeWith: function(markItUp) { return miu.markdownTitle(markItUp, '=') } },
+        { name: _('Head 2'), className: 'h2', key:'2', placeHolder: 'Nadpis 2. úrovně', closeWith: function(markItUp) { return miu.markdownTitle(markItUp, '-') } },
+        { name: _('Head 3'), className: 'h3', key:'3', placeHolder: 'Nadpis 3. úrovně', openWith: '### ' },
         { separator: '---------------' },
-        { name: 'Seznam s odrážkami', className: 'list-bullet', openWith: '- ' },
-        { name: 'Číslovaný seznam', className: 'list-numeric', openWith:function(markItUp) {
+        { name: _('List unordered'), className: 'list-bullet', openWith: '- ' },
+        { name: _('List ordered'), className: 'list-numeric', openWith:function(markItUp) {
             return markItUp.line+'. ';
         }},
         { separator: '---------------' },
-        { name: 'Сitát', className: 'quote', openWith: '> ' },
-        { name: 'Box', className: 'box', call: function(){
+        { name: _('Quote'), className: 'quote', openWith: '> ' },
+        { separator: '---------------' },
+        { name: _('Photo'), className: 'photo', openWith: '> ' },
+        { name: _('Gallery'), className: 'gallery', openWith: '> ' },
+        { name: _('Box'), className: 'box', call: function(){
             $('#rich-box').dialog('open');
         }},
-        { name: 'Náhled', call: 'preview', className: 'preview'}
+        { separator: '---------------' },
+        { name: _('Preview'), call: 'preview', className: 'preview'}
     ]
 }
 
 $(function(){
     if(!$('#rich-box').length){
-        $('<div id="rich-box" title="Vložit box"></div>').hide().appendTo('body');
+        $('<div id="rich-box" title="Box"></div>').hide().appendTo('body');
         $.getJSON('/static/newman_media/js/boxes.js', function(data){
             if(!!data){
                 // HTML
