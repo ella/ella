@@ -1,0 +1,15 @@
+{% extends "box/box.html" %}
+
+{% block container_content %}
+    {{ object.thumb }}
+{% endblock %}
+
+
+{% comment right way, but doesn't work yet: %}
+    {% load photos %}
+
+    {% block container_content %}
+        {% img standard_admin_preview for object as image %}
+        <img src="{{ image.url }}" alt="{{ description }}"  width="{{ image.width }}" height="{{ image.height }}" />
+    {% endblock %}
+{% endcomment %}
