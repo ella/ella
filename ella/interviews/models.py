@@ -109,7 +109,7 @@ class Interview(Publishable):
 
     def unanswered_questions(self):
         # TODO: caching
-        q = self.question_set.all().order_by('submit_date').exclude(pk__in=[ q['id'] for q in self.question_set.filter(answer__pk__isnull=False).values('id') ])
+        q = self.question_set.all().order_by('submit_date').filter(answer__id__isnull=True)
         return q
 
     def get_interviewees(self, user):
@@ -150,7 +150,7 @@ class Question(models.Model):
     ip_address = models.IPAddressField(_('ip address'), blank=True, null=True)
 
     # comment metadata
-    submit_date = models.DateTimeField(_('date/time submitted'), default=datetime.now, editable=True)
+    submit_date = models.DateTimeField(_('date/time submitted'), default=datetime.now, editable=False)
     is_public = models.BooleanField(_('is public'), default=True)
 
     @property
@@ -186,7 +186,6 @@ class Answer(models.Model):
     content = models.TextField(_('Answer text'))
 
     class Meta:
-        ordering = ('-submit_date',)
         verbose_name = _('Answer')
         verbose_name_plural = _('Answer')
 

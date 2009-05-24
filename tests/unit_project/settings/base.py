@@ -47,6 +47,7 @@ INSTALLED_APPS = (
     'ella.galleries',
     'ella.catlocks',
     'ella.polls',
+    'ella.interviews',
     'djangomarkup',
     'tagging',
 
