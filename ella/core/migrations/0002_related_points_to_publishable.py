@@ -9,7 +9,7 @@ class Migration:
         db.add_column('core_related', 'publishable', models.ForeignKey(orm.Publishable, verbose_name=_('Publishable')))
 
         orm.Related.objects.extra(
-                tables=['core_publishable']
+                tables=['core_publishable'],
                 where=[
                     'core_publishable.content_type_id = core_related.source_ct_id',
                     'core_publishable.id = core_related.source_id',
