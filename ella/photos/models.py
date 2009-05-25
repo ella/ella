@@ -92,6 +92,15 @@ class Photo(models.Model):
         return mark_safe("""<a href="%s"><img src="%s" alt="Thumbnail %s" /></a>""" % (self.image.url, thumbUrl, self.title))
     thumb.allow_tags = True
 
+    def get_thumbnail_path(self, image_name=None):
+        """
+        Return relative path for thumbnail file for storage
+        photos/2008/12/31/foo.jpg => photos/2008/12/31/thumb-foo.jpg
+        """
+        if not image_name:
+            image_name = self.image.name
+        return path.dirname(image_name) + "/" + 'thumb-%s' % path.basename(image_name)
+
     def thumb_url(self):
         """
         Generates thumbnail for admin site and returns its url
@@ -100,8 +109,8 @@ class Photo(models.Model):
         if not type:
             return None
 
-        # photos/2008/12/31/foo.jpg => photos/2008/12/31/thumb-foo.jpg
-        thumb_name = path.dirname(self.image.name) + "/" + 'thumb-%s' % path.basename(self.image.name)
+        
+        thumb_name = self.get_thumbnail_path()
 
         storage = self.image.storage
         if not storage.exists(thumb_name):
