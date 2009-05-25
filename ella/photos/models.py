@@ -10,6 +10,7 @@ from django.utils.translation import ugettext, ugettext_lazy as _
 from django.contrib.sites.models import Site
 from django.utils.safestring import mark_safe
 from django.core.files.uploadedfile import UploadedFile
+from django.core.files.base import ContentFile
 
 from ella.core.models.main import Author, Source
 from ella.core.box import Box
@@ -185,7 +186,7 @@ class Photo(models.Model):
 
     def get_formated_photo(self, format):
         "Return formated photo"
-        format_object = Format.objects.get(name=format, site=settings.SITE_ID)
+        format_object = Format.objects.get(name=format, sites=settings.SITE_ID)
         try:
             formated_photo = get_cached_object(FormatedPhoto, photo=self, format=format_object)
         except FormatedPhoto.DoesNotExist:
@@ -251,7 +252,7 @@ class FormatedPhoto(models.Model):
     "Specific photo of specific format."
     photo = models.ForeignKey(Photo)
     format = models.ForeignKey(Format)
-    filename = models.CharField(max_length=300, editable=False) # derive local filename and url
+    image = models.ImageField(upload_to=UPLOAD_TO, height_field='height', width_field='width') # save it to YYYY/MM/DD structure
     crop_left = models.PositiveIntegerField()
     crop_top = models.PositiveIntegerField()
     crop_width = models.PositiveIntegerField()
@@ -281,7 +282,7 @@ class FormatedPhoto(models.Model):
             return self.format.get_blank_img()['url']
 
 
-    def generate(self):
+    def generate(self, save=True):
         "Generates photo file in current format"
         crop_box = None
         if self.crop_left:
@@ -293,12 +294,22 @@ class FormatedPhoto(models.Model):
             p = self.photo
             important_box = (p.important_left, p.important_top, p.important_right, p.important_bottom)
 
-        formatter = Formatter(Image.open(self.filename), self.format, crop_box=crop_box, important_box=important_box)
+        formatter = Formatter(Image.open(self.photo.image.path), self.format, crop_box=crop_box, important_box=important_box)
 
         stretched_photo, crop_box = formatter.format()
+
+        self.crop_left, self.crop_top, right, bottom = crop_box
+        self.crop_width = right - self.crop_left
+        self.crop_height = bottom - self.crop_top
+
         self.width, self.height = stretched_photo.size
-        self.filename = self.file(relative=True)
         stretched_photo.save(self.file(), quality=self.format.resample_quality)
+
+        f = open(self.file())
+        file = ContentFile(f.read())
+        f.close()
+
+        self.image.save(self.file(relative=True), file, save)
 
     def save(self, force_insert=False, force_update=False):
         """Overrides models.Model.save
@@ -307,7 +318,7 @@ class FormatedPhoto(models.Model):
         - Generates new file.
         """
         self.remove_file()
-        self.generate()
+        self.generate(save=False)
         super(FormatedPhoto, self).save(force_insert, force_update)
 
     def delete(self):

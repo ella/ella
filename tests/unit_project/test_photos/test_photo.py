@@ -5,15 +5,23 @@ from tempfile import mkstemp
 
 from django.conf import settings
 from django.core.files.base import ContentFile
+from django.utils.translation import ugettext
 from djangosanetesting import DatabaseTestCase
 from PIL import Image
 
 from ella.photos.models import Photo
 
+from unit_project.test_photos.fixtures import create_photo_formats
+
 class TestPhoto(DatabaseTestCase):
 
     def setUp(self):
         super(TestPhoto, self).setUp()
+
+        # fixtures
+        create_photo_formats(self)
+
+        # "fixtures" aka example photo
 
         # prepare image in temporary directory
         self.image_file_name = mkstemp(suffix=".jpg", prefix="ella-photo-tests-")[1]
@@ -24,8 +32,6 @@ class TestPhoto(DatabaseTestCase):
         file = ContentFile(f.read())
         f.close()
         
-        os.remove(self.image_file_name)
-
         self.photo = Photo(
             title = u"Example 中文 photo",
             slug = u"example-photo",
@@ -38,7 +44,7 @@ class TestPhoto(DatabaseTestCase):
 
         self.thumbnail_path = self.photo.get_thumbnail_path()
 
-    def test_thumbnail_html_retrieval(self):
+    def test_thumbnail_html_retrieval_success(self):
         expected_html = u'<a href="%(full)s"><img src="%(thumb)s" alt="%(name)s" /></a>' % {
             'full' : "%(media)sphotos/%(date)s/%(name)s.jpg" % {
                 "name" : u'%s-example-photo' % self.photo.pk,
@@ -71,7 +77,46 @@ class TestPhoto(DatabaseTestCase):
         
         self.assert_equals(False, self.photo.image.storage.exists(self.thumbnail_path))
 
+    def test_thumbnail_html_for_invalid_image(self):
+        # be sneaky and delete image
+        self.photo.image.storage.delete(self.photo.image.path)
+
+        # now we are not able to detect it's format, BWAHAHA
+        expected_html = """<strong>%s</strong>""" % ugettext('Thumbnail not available')
+        self.assert_equals(expected_html, self.photo.thumb())
+
+    def test_thumbnail_thumburl_for_nonexisting_image(self):
+        self.photo.image.storage.delete(self.photo.image.path)
+        self.assert_equals(None, self.photo.thumb_url())
+
+    def test_retrieving_formatted_photos_on_fly(self):
+        formatted = self.photo.get_formated_photo("basic")
+        self.assert_equals(self.photo, formatted.photo)
+
+    def test_formattedphoto_cleared_when_image_changed(self):
+        formatted = self.photo.get_formated_photo("basic")
+        self.assert_equals(1, len(self.photo.formatedphoto_set.all()))
+
+        # let us create image again
+        f = open(self.image_file_name)
+        file = ContentFile(f.read())
+        f.close()
+
+        self.photo.image.save("newzaaah", file)
+        self.photo.save()
+
+        self.assert_equals(0, len(self.photo.formatedphoto_set.all()))
+
+    def test_formattedphoto_is_none_when_image_destroyed(self):
+        # be sneaky and delete image
+        self.photo.image.storage.delete(self.photo.image.path)
+        self.assert_equals(None, self.photo.get_formated_photo("basic"))
+
+    def test_retrieving_ratio(self):
+        self.assert_equals(2, self.photo.ratio())
+
     def tearDown(self):
+        os.remove(self.image_file_name)
         if self.photo.pk:
             self.photo.delete()
         super(TestPhoto, self).tearDown()
