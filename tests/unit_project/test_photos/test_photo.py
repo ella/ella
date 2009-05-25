@@ -65,7 +65,11 @@ class TestPhoto(DatabaseTestCase):
     def test_thumbnail_path_creation(self):
         self.assert_equals("photos/2008/12/31/thumb-foo.jpg", self.photo.get_thumbnail_path("photos/2008/12/31/foo.jpg"))
 
-    
+    def test_thumbnail_deleted(self):
+        url = self.photo.thumb_url()
+        self.photo.delete()
+        
+        self.assert_equals(False, self.photo.image.storage.exists(self.thumbnail_path))
 
     def tearDown(self):
         if self.photo.pk:

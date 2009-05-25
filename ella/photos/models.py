@@ -82,6 +82,12 @@ class Photo(models.Model):
 
     created = models.DateTimeField(default=datetime.now, editable=False)
 
+    def __init__(self, *args, **kwargs):
+        super(Photo, self).__init__(*args, **kwargs)
+
+        # path to thumbnail, cached when thumbnail is generated for the first time
+        self.thumbnail_path = None
+
     def thumb(self):
         """
         Generates html and thumbnails for admin site.
@@ -109,19 +115,21 @@ class Photo(models.Model):
         if not type:
             return None
 
-        
-        thumb_name = self.get_thumbnail_path()
+        # cache thumbnail for future use to avoid hitting storage.exists() every time
+        # and to allow thumbnail detection after instance has been deleted
+        self.thumbnail_path = self.get_thumbnail_path()
 
         storage = self.image.storage
-        if not storage.exists(thumb_name):
+
+        if not self.thumbnail_path:
             try:
                 im = Image.open(self.image.path)
                 im.thumbnail(PHOTOS_THUMB_DIMENSION, Image.ANTIALIAS)
-                im.save(storage.path(thumb_name), type)
+                im.save(storage.path(self.thumbnail_path), type)
             except IOError:
                 # TODO Logging something wrong
                 return None
-        return storage.url(thumb_name)
+        return storage.url(self.thumbnail_path)
 
     def save(self, force_insert=False, force_update=False):
         """Overrides models.Model.save.
@@ -155,6 +163,18 @@ class Photo(models.Model):
             for f_photo in self.formatedphoto_set.all():
                 f_photo.delete()
         super(Photo, self).save(force_insert, force_update)
+
+    def delete_thumbnail(self):
+        """
+        If thumbnail was generated for this photo, delete it
+        """
+        if self.image.storage.exists(self.thumbnail_path):
+            self.image.storage.delete(self.thumbnail_path)
+        self.thumbnail_path = None
+
+    def delete(self, *args, **kwargs):
+        super(Photo, self).delete(*args, **kwargs)
+        self.delete_thumbnail()
 
     def ratio(self):
         "Return photo's width to height ratio"
