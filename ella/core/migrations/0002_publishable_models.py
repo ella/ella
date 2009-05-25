@@ -4,9 +4,9 @@ from django.db import models
 from ella.core.models import *
 
 class Migration:
-    
+
     def forwards(self, orm):
-        
+
         # Adding model 'Publishable'
         db.create_table('core_publishable', (
             ('id', models.AutoField(primary_key=True)),
@@ -20,7 +20,7 @@ class Migration:
             ('publish_from', models.DateTimeField(_('Publish from'), default=datetime.datetime(3000, 1, 1, 0, 0), editable=False)),
         ))
         db.send_create_signal('core', ['Publishable'])
-        
+
         # Adding model 'Dependency'
         db.create_table('core_dependency', (
             ('id', models.AutoField(primary_key=True)),
@@ -30,137 +30,111 @@ class Migration:
             ('dependent_id', models.IntegerField()),
         ))
         db.send_create_signal('core', ['Dependency'])
-        
-        # Adding field 'Related.related_ct'
-        db.add_column('core_related', 'related_ct', models.ForeignKey(orm['contenttypes.ContentType'], verbose_name=_('Content type')))
-        
-        # Adding field 'Placement.publishable'
-        db.add_column('core_placement', 'publishable', models.ForeignKey(orm.Publishable, verbose_name=_('Publishable object')))
-        
-        # Adding field 'Author.email'
-        db.add_column('core_author', 'email', models.EmailField(_('Email'), blank=True))
-        
+
         # Adding ManyToManyField 'Publishable.authors'
         db.create_table('core_publishable_authors', (
             ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
             ('publishable', models.ForeignKey(orm.Publishable, null=False)),
             ('author', models.ForeignKey(orm.Author, null=False))
         ))
-        
-        # Adding field 'Listing.publish_to'
-        db.add_column('core_listing', 'publish_to', models.DateTimeField(_("End of listing"), null=True, blank=True))
-        
+
+    def ___forwards(self, orm):
+
+        # Adding field 'Related.related_ct'
+        db.add_column('core_related', 'related_ct', models.ForeignKey(orm['contenttypes.ContentType'], verbose_name=_('Content type')))
         # Adding field 'Related.related_id'
         db.add_column('core_related', 'related_id', models.IntegerField(_('Object ID')))
-        
         # Adding field 'Related.publishable'
         db.add_column('core_related', 'publishable', models.ForeignKey(orm.Publishable, verbose_name=_('Publishable')))
-        
         # Deleting field 'Related.target_ct'
         db.delete_column('core_related', 'target_ct_id')
-        
-        # Deleting field 'Placement.target_id'
-        db.delete_column('core_placement', 'target_id')
-        
         # Deleting field 'Related.source_id'
         db.delete_column('core_related', 'source_id')
-        
         # Deleting field 'Related.target_id'
         db.delete_column('core_related', 'target_id')
-        
-        # Deleting field 'Placement.target_ct'
-        db.delete_column('core_placement', 'target_ct_id')
-        
         # Deleting field 'Related.source_ct'
         db.delete_column('core_related', 'source_ct_id')
-        
-        # Deleting field 'Listing.remove'
-        db.delete_column('core_listing', 'remove')
-        
+
+        # Adding field 'Placement.publishable'
+        db.add_column('core_placement', 'publishable', models.ForeignKey(orm.Publishable, verbose_name=_('Publishable object')))
+        # Deleting field 'Placement.target_id'
+        db.delete_column('core_placement', 'target_id')
+        # Deleting field 'Placement.target_ct'
+        db.delete_column('core_placement', 'target_ct_id')
         # Changing field 'Placement.category'
         db.alter_column('core_placement', 'category_id', models.ForeignKey(orm['core.Category'], verbose_name=_('Category'), db_index=True))
-        
         # Changing field 'Placement.static'
         db.alter_column('core_placement', 'static', models.BooleanField(_('static'), default=False))
-        
+
+        # Adding field 'Listing.publish_to'
+        db.add_column('core_listing', 'publish_to', models.DateTimeField(_("End of listing"), null=True, blank=True))
+        # Deleting field 'Listing.remove'
+        db.delete_column('core_listing', 'remove')
         # Changing field 'Listing.category'
         db.alter_column('core_listing', 'category_id', models.ForeignKey(orm['core.Category'], verbose_name=_('Category'), db_index=True))
-        
         # Changing field 'Listing.placement'
         db.alter_column('core_listing', 'placement_id', models.ForeignKey(orm['core.Placement'], verbose_name=_('Placement')))
-        
+
+        # Adding field 'Author.email'
+        db.add_column('core_author', 'email', models.EmailField(_('Email'), blank=True))
         # Changing field 'Author.user'
         db.alter_column('core_author', 'user_id', models.ForeignKey(orm['auth.User'], null=True, verbose_name=_('User'), blank=True))
-        
-    
-    
-    def backwards(self, orm):
-        
-        # Deleting model 'Publishable'
-        db.delete_table('core_publishable')
-        
-        # Deleting model 'Dependency'
-        db.delete_table('core_dependency')
-        
-        # Deleting field 'Related.related_ct'
-        db.delete_column('core_related', 'related_ct_id')
-        
-        # Deleting field 'Placement.publishable'
-        db.delete_column('core_placement', 'publishable_id')
-        
+
+
+    def ___backwards(self, orm):
+
         # Deleting field 'Author.email'
         db.delete_column('core_author', 'email')
-        
-        # Dropping ManyToManyField 'Publishable.authors'
-        db.delete_table('core_publishable_authors')
-        
-        # Deleting field 'Listing.publish_to'
-        db.delete_column('core_listing', 'publish_to')
-        
-        # Deleting field 'Related.related_id'
-        db.delete_column('core_related', 'related_id')
-        
-        # Deleting field 'Related.publishable'
-        db.delete_column('core_related', 'publishable_id')
-        
-        # Adding field 'Related.target_ct'
-        db.add_column('core_related', 'target_ct', models.ForeignKey(orm['contenttypes.ContentType'], related_name='relation_for_set'))
-        
-        # Adding field 'Placement.target_id'
-        db.add_column('core_placement', 'target_id', models.IntegerField())
-        
-        # Adding field 'Related.source_id'
-        db.add_column('core_related', 'source_id', models.IntegerField())
-        
-        # Adding field 'Related.target_id'
-        db.add_column('core_related', 'target_id', models.IntegerField())
-        
-        # Adding field 'Placement.target_ct'
-        db.add_column('core_placement', 'target_ct', models.ForeignKey(orm['contenttypes.ContentType']))
-        
-        # Adding field 'Related.source_ct'
-        db.add_column('core_related', 'source_ct', models.ForeignKey(orm['contenttypes.ContentType'], related_name='related_on_set'))
-        
-        # Adding field 'Listing.remove'
-        db.add_column('core_listing', 'remove', models.BooleanField(_("Remove"), default=False))
-        
-        # Changing field 'Placement.category'
-        db.alter_column('core_placement', 'category_id', models.ForeignKey(orm['core.Category'], db_index=True))
-        
-        # Changing field 'Placement.static'
-        db.alter_column('core_placement', 'static', models.BooleanField(default=False))
-        
-        # Changing field 'Listing.category'
-        db.alter_column('core_listing', 'category_id', models.ForeignKey(orm['core.Category'], db_index=True))
-        
-        # Changing field 'Listing.placement'
-        db.alter_column('core_listing', 'placement_id', models.ForeignKey(orm['core.Placement']))
-        
         # Changing field 'Author.user'
         db.alter_column('core_author', 'user_id', models.ForeignKey(orm['auth.User'], null=True, blank=True))
-        
-    
-    
+
+        # Deleting field 'Listing.publish_to'
+        db.delete_column('core_listing', 'publish_to')
+        # Adding field 'Listing.remove'
+        db.add_column('core_listing', 'remove', models.BooleanField(_("Remove"), default=False))
+        # Changing field 'Listing.category'
+        db.alter_column('core_listing', 'category_id', models.ForeignKey(orm['core.Category'], db_index=True))
+        # Changing field 'Listing.placement'
+        db.alter_column('core_listing', 'placement_id', models.ForeignKey(orm['core.Placement']))
+
+        # Deleting field 'Placement.publishable'
+        db.delete_column('core_placement', 'publishable_id')
+        # Adding field 'Placement.target_id'
+        db.add_column('core_placement', 'target_id', models.IntegerField())
+        # Adding field 'Placement.target_ct'
+        db.add_column('core_placement', 'target_ct', models.ForeignKey(orm['contenttypes.ContentType']))
+        # Changing field 'Placement.category'
+        db.alter_column('core_placement', 'category_id', models.ForeignKey(orm['core.Category'], db_index=True))
+        # Changing field 'Placement.static'
+        db.alter_column('core_placement', 'static', models.BooleanField(default=False))
+
+        # Deleting field 'Related.related_ct'
+        db.delete_column('core_related', 'related_ct_id')
+        # Deleting field 'Related.related_id'
+        db.delete_column('core_related', 'related_id')
+        # Deleting field 'Related.publishable'
+        db.delete_column('core_related', 'publishable_id')
+        # Adding field 'Related.target_ct'
+        db.add_column('core_related', 'target_ct', models.ForeignKey(orm['contenttypes.ContentType'], related_name='relation_for_set'))
+        # Adding field 'Related.source_id'
+        db.add_column('core_related', 'source_id', models.IntegerField())
+        # Adding field 'Related.target_id'
+        db.add_column('core_related', 'target_id', models.IntegerField())
+        # Adding field 'Related.source_ct'
+        db.add_column('core_related', 'source_ct', models.ForeignKey(orm['contenttypes.ContentType'], related_name='related_on_set'))
+
+    def backwards(self, orm):
+
+        # Dropping ManyToManyField 'Publishable.authors'
+        db.delete_table('core_publishable_authors')
+
+        # Deleting model 'Dependency'
+        db.delete_table('core_dependency')
+
+        # Deleting model 'Publishable'
+        db.delete_table('core_publishable')
+
+
     models = {
         'core.category': {
             'Meta': {'unique_together': "(('site','tree_path'),)", 'app_label': "'core'"},
@@ -266,5 +240,5 @@ class Migration:
             'user': ('models.ForeignKey', ["orm['auth.User']"], {'null': 'True', 'verbose_name': "_('User')", 'blank': 'True'})
         }
     }
-    
+
     complete_apps = ['core']
