@@ -36,6 +36,8 @@ class TestPhoto(DatabaseTestCase):
         self.photo.image.save("bazaaah", file)
         self.photo.save()
 
+        self.thumbnail_path = self.photo.get_thumbnail_path()
+
     def test_thumbnail_html_retrieval(self):
         expected_html = u'<a href="%(full)s"><img src="%(thumb)s" alt="%(name)s" /></a>' % {
             'full' : "%(media)sphotos/%(date)s/%(name)s.jpg" % {
@@ -54,11 +56,11 @@ class TestPhoto(DatabaseTestCase):
 
     def test_retrieving_thumbnail_url_creates_image(self):
         url = self.photo.thumb_url()
-        self.assert_equals(True, self.photo.image.storage.exists(self.photo.get_thumbnail_path()))
+        self.assert_equals(True, self.photo.image.storage.exists(self.thumbnail_path))
 
     def test_thumbnail_not_retrieved_prematurely(self):
         # aka thumbnail not created because thumb_url was not called
-        self.assert_equals(False, self.photo.image.storage.exists(self.photo.get_thumbnail_path()))
+        self.assert_equals(False, self.photo.image.storage.exists(self.thumbnail_path))
 
     def test_thumbnail_path_creation(self):
         self.assert_equals("photos/2008/12/31/thumb-foo.jpg", self.photo.get_thumbnail_path("photos/2008/12/31/foo.jpg"))
@@ -66,5 +68,6 @@ class TestPhoto(DatabaseTestCase):
     
 
     def tearDown(self):
-        self.photo.delete()
+        if self.photo.pk:
+            self.photo.delete()
         super(TestPhoto, self).tearDown()
