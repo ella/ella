@@ -857,10 +857,10 @@ $( function() {
         ContentByHashLib.unload_content('overlay-content');
     });
     function init_overlay_content(evt, extras) {
-        var $target = $(this);
+        var $target = $(evt.target);
         
         // selection
-        $target.find('tbody a')
+        $target.find('#changelist tbody a')
         .unbind('click')
         .click( function(evt) {
             var clicked_id = /\d+(?=\/$)/.exec( $(this).attr('href') )[0];
@@ -875,20 +875,38 @@ $( function() {
             this.onclick = undefined;
         });
         
+        function modify_getpar_href(el) {
+            $(el).attr('href', $(el).attr('href').replace(/^\?/, 'overlay-content::&')).addClass('simpleload');
+        }
+        
         // pagination
         $target.find('.paginator a').each( function() {
-            $(this).attr('href', $(this).attr('href').replace(/^\?/, 'overlay-content::&')).addClass('simpleload');
+            modify_getpar_href(this);
+        });
+        
+        // sorting
+        $target.find('#changelist thead a').each( function() {
+            modify_getpar_href(this);
         });
         
         // filters
         var $filt = $('#filters-handler .popup-filter');
-        $filt.addClass('simpleload').attr( 'href', $filt.attr('href').replace(/::::/, '::'+$target.attr('id')+'::') );
-        function init_filters() {
-             $(this).find('.filter li a').each( function() {
-                 $(this).attr('href', $(this).attr('href').replace(/^\?/, 'overlay-content::&')).addClass('simpleload');
-             });
-         }
-         $('#filters').unbind('content_added', init_filters).one('content_added', init_filters);
+        if ($filt.length) {
+            
+            var $cancel = $('#filters-handler span:last a');
+            $cancel
+            .attr( 'href', $target.attr('id')+'::'+$cancel.attr('href') )
+            .removeClass('hashadr')
+            .addClass('simpleload');
+            
+            $filt.addClass('simpleload').attr( 'href', $filt.attr('href').replace(/::::/, '::'+$target.attr('id')+'::') );
+            function init_filters() {
+                $(this).find('.filter li a').each( function() {
+                    $(this).attr('href', $(this).attr('href').replace(/^\?/, 'overlay-content::&')).addClass('simpleload');
+                });
+            }
+            $('#filters').unbind('content_added', init_filters).one('content_added', init_filters);
+        }
         
         $('#box-overlay').show();
     };
