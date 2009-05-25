@@ -823,7 +823,7 @@ $( function() {
         var $overlay = $('#box-overlay');
         if ($overlay.length == 0) {
             $overlay = $( overlay_html )
-            .css({top:0,left:0,zIndex:top_zindex})
+            .css({top:0,left:0})
             .appendTo(
                    $('.change-form').get(0)
                 || $('#content').get(0)
@@ -831,6 +831,7 @@ $( function() {
             );
             $('#overlay-content').bind('content_added', init_overlay_content);
         }
+        $overlay.css({zIndex:top_zindex});
         
         $('#overlay-content').data('selection_callback', selection_callback);
         
@@ -853,7 +854,8 @@ $( function() {
         });
     };
     $('.overlay-closebutton').live('click', function() {
-        $(this).closest('.overlay').hide();
+        $(this).closest('.overlay').css({zIndex:5}).hide()
+        .find('.overlay-content').removeData('selection_callback');
         ContentByHashLib.unload_content('overlay-content');
     });
     function init_overlay_content(evt, extras) {
@@ -868,7 +870,8 @@ $( function() {
                 ($target.data('selection_callback'))(clicked_id, {evt: evt});
             } catch(e) { carp('Failed running overlay callback', e); }
             ContentByHashLib.unload_content('overlay-content');
-            $('#box-overlay').hide();
+            $('#box-overlay').css({zIndex:5}).hide();
+            $target.removeData('selection_callback');
             return false;
         })
         .each( function() {
