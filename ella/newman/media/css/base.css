@@ -52,8 +52,22 @@ body {
     overflow: auto;
     background-color: white;
     border: solid 2px blue;
-    border-top-width: 20px;
     display: none;
+}
+.overlay .overlay-upbar {
+    height: 30px;
+    width: 100%;
+    background-color: blue;
+}
+.overlay .overlay-title {
+    float: left;
+    padding-top:6px;
+    color:white;
+    font-size:16px;
+    font-weight:bold;
+}
+.overlay .overlay-closebutton {
+    float: right;
 }
 
 .error-code object {

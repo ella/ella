@@ -113,7 +113,7 @@ var ContentByHashLib = {};
     }
     ContentByHashLib.closest_loaded = closest_loaded;
     
-    function inject_content($target, data, address) {
+    function inject_content($target, data, address, extras) {
         // whatever was loaded inside, remove it from LOADED_URLS
         if (!object_empty(LOADED_URLS)) {
             var sel = '#'+keys(LOADED_URLS).join(',#');
@@ -131,7 +131,7 @@ var ContentByHashLib = {};
             LOADED_URLS[ $target.attr('id') ] = address;
         }
         PAGE_CHANGED++;
-        $target.trigger('content_added');
+        $target.trigger('content_added', extras);
     }
     
     function inject_error_message(load_id) {
@@ -210,7 +210,7 @@ var ContentByHashLib = {};
             return;
         }
         
-        inject_content($target, info.data, info.address);
+        inject_content($target, info.data, info.address, {xhr: info.xhr});
         
         // Check next request
         draw_ready();
@@ -260,6 +260,7 @@ var ContentByHashLib = {};
             url: url,
             type: 'GET',
             success: function(data) {
+                LOAD_BUF[ this.load_id ].xhr = this;
                 if (this.request_no < MAX_REQUEST) {
                     cancel_request( this.load_id );
                 }
