@@ -155,7 +155,6 @@ class Migration:
             'Meta': {'app_label': "'core'"},
             'authors': ('models.ManyToManyField', ["orm['core.Author']"], {'verbose_name': "_('Authors')"}),
             'category': ('models.ForeignKey', ["orm['core.Category']"], {'verbose_name': "_('Category')"}),
-            'comments': '<< PUT FIELD DEFINITION HERE >>',
             'content_type': ('models.ForeignKey', ["orm['contenttypes.ContentType']"], {}),
             'description': ('models.TextField', ["_('Description')"], {}),
             'id': ('models.AutoField', [], {'primary_key': 'True'}),
