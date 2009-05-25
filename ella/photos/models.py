@@ -121,7 +121,7 @@ class Photo(models.Model):
 
         storage = self.image.storage
 
-        if not self.thumbnail_path:
+        if not storage.exists(self.thumbnail_path):
             try:
                 im = Image.open(self.image.path)
                 im.thumbnail(PHOTOS_THUMB_DIMENSION, Image.ANTIALIAS)
