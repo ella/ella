@@ -97,8 +97,10 @@ class Server(models.Model):
         "Runs the item fetch from the category or feed (based on self.category) and saves them into ServerItem."
         if self.category:
             output = self.get_from_category()
-        else:
+        elif self.url:
             output = self.get_from_feed()
+        else:
+            return
 
         importlen =  len(output['entries'])
         if output['status'] == 200 and importlen > 0:
