@@ -1,0 +1,99 @@
+    <input type="hidden" name="placement_listing_widget" value="{{ id_prefix}}" />
+    {% for listing in listings %}
+        <tr>
+            
+            <td class="listing-categories">
+                <!-- category suggester -->
+                <div class="form-row listing-category">
+                    <input 
+                        id="id_category" 
+                        class="vForeignKeyRawIdAdminField hidden" 
+                        type="text" 
+                        value="{{ listing.category.pk }}" 
+                        name="{{ id_prefix}}"
+                    />
+                    <ul class="GenericSuggestField">
+                        <li class="suggest-selected-item">
+                            {{ listing.category.title }}
+                            <a class="suggest-delete-link">x</a>
+                        </li>
+                        <li>
+                            <input 
+                                id="id_category_suggest"
+                                rel="../../../core/category/suggest/?f=title&f=slug&f=tree_path&q="
+                            />
+                        </li>
+                        <a>
+                            <img src="{{ NEWMAN_MEDIA_PREFIX }}ico/16/search.png" width="16" height="16" />
+                        </a>
+                    </ul>
+                </div>
+
+                {% comment %}
+                <select name="{{ id_prefix}}">
+                {% for choice in choices %}
+                    <option
+                    {% ifequal choice.0 listing.category.pk %}
+                        selected="selected"
+                    {% endifequal %}
+                    value="{{ choice.0 }}">{{ choice.1 }}</option>
+                {% endfor %}
+                {% endcomment %}
+                </select>
+            </td>
+
+            <td class="listing-dates">
+                {#<input type="hidden" name="{{ id_prefix}}-{{ forloop.counter0 }}-listing_id" value="{{ listing.pk }}" />#}
+                <!-- Publish from -->
+                <div class="publish_from">
+                    <label for="{{ id_prefix}}-{{ listing.pk }}-publish_from">
+                        <span>
+                            {% trans listing.fields_verbose_names.publish_from %}
+                            ({{ listing.category }})
+                        </span>
+                    </label>
+                    <input type="text" 
+                    id="{{ id_prefix}}-{{ listing.category.pk }}-publish_from" 
+                    name="{{ id_prefix}}-{{ listing.category.pk }}-publish_from" 
+                    value="{% if listing.publish_from %}{{ listing.publish_from }}{% endif %}" />
+                </div>
+            </td>
+
+        </tr>
+    {% endfor %}
+
+{# GARBAGE follows: === #}
+
+        {% comment %} {# Listings as multiselect box #}
+    <li>
+        <select multiple="multiple">
+        {% for c in choices %}
+            <option 
+            {% for s in selected %} {# this is uneffective, but.. #}
+                {% ifequal c.0 s  %}
+                    selected="selected"
+                {% endifequal %}
+            {% endfor %}
+            value="{{ c.0 }}">{{ c.1 }}</option>
+        {% endfor %}
+        </select>
+    </li>
+        {% endcomment %}
+    {% comment %}
+    <li>
+        {# id="{{ id_prefix}}-{{ forloop.counter0 }}-" #}
+        <div class="listing-category">
+            <select name="{{ id_prefix}}" multiple="multiple">
+            {% for c in choices %}
+                <option
+                {% for s in selected %}
+                    {% ifequal c.0 s.pk %}
+                        selected="selected"
+                    {% endifequal %}
+                {% endfor %}
+                value="{{ c.0 }}">{{ c.1 }}</option>
+            {% endfor %}
+            </select>
+        </div>
+    </li>
+    {% endcomment %}

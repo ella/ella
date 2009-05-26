@@ -10,7 +10,7 @@ from django.forms import fields
 from django.forms.util import ValidationError
 from django.template import Template, TextNode, TemplateSyntaxError
 from django.utils.translation import ugettext_lazy as _
-from django.forms.models import ModelChoiceField
+from django.forms.models import ModelChoiceField, ModelMultipleChoiceField
 from django.db.models.fields.related import ManyToManyField
 from django.db.models import signals
 from django.contrib.contenttypes.models import ContentType
@@ -236,3 +236,10 @@ class CategoryChoiceField(ModelChoiceField):
         if not has_category_permission(self.user, cvalue, change_perm):
             raise ValidationError(_('Category not permitted'))
         return cvalue
+
+class ListingCustomField(ModelMultipleChoiceField):
+    widget = widgets.ListingCustomWidget
+    is_listing_custom_field = True
+
+    def __init__(self, *args, **kwargs):
+        super(ListingCustomField, self).__init__(*args, **kwargs)
