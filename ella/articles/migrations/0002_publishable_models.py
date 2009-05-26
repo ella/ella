@@ -34,7 +34,7 @@ class Migration:
         '''
         app = self.app_name
         mod = self.module_name
-        table = '%s_%s' (app, mod)
+        table = '%s_%s' % (app, mod)
 
         # move the data
         db.execute('''
@@ -90,7 +90,7 @@ class Migration:
 
         app = self.app_name
         mod = self.module_name
-        table = '%s_%s' (app, mod)
+        table = '%s_%s' % (app, mod)
 
         # UPDATE generic relations
         db.execute_many('''
@@ -114,7 +114,7 @@ class Migration:
 
         app = self.app_name
         mod = self.module_name
-        table = '%s_%s' (app, mod)
+        table = '%s_%s' % (app, mod)
 
         db.add_column('core_placement', 'publishable_id', models.IntegerField(null=True))
 
