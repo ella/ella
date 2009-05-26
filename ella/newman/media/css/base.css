@@ -161,8 +161,7 @@ a.icn {
 a.btn {
     padding-top: 4px; padding-bottom: 3px; padding-right: 4px;
     border: 1px solid #ddd;
-    -moz-border-radius: 5px;
-    -webkit-border-radius: 5px;
+    border-radius: 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px;
     background-color: #E9E8DD;
     margin: 3px 2px;
     text-decoration: none;
@@ -253,8 +252,8 @@ input.vDateTimeInput { width: 120px; }
     display: none;
 }
 #err-overlay {
-    bottom: 70px;
-    right: 5px;
+    bottom: 80px;
+    right: 10px;
     -moz-border-radius: 10px;
     -webkit-border-radius: 10px;
     border: 2px solid #d66;
@@ -278,15 +277,13 @@ input.vDateTimeInput { width: 120px; }
 .article-form-container .publish-container label { float: none; }
 .change-form .submit-row {
     position: fixed;
-    bottom: 27px;
-    right: 5px;
-    border-left: 2px solid #d66;
-    border-top: 2px solid #d66;
-    border-right: 2px solid #d66;
-    -moz-border-radius-topleft: 10px;
-    -moz-border-radius-topright: 10px;
+    bottom: 35px;
+    right: 10px;
+    border: 2px solid #d66;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
     padding: 10px;
-    background: #ffd;
+    background: #fff url(../img/nav-bg-reverse.gif) left top repeat-x;
 }
 .change-form .submit-row a {
     white-space: nowrap;
