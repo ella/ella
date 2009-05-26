@@ -1,4 +1,6 @@
 from datetime import datetime
+from django.template.defaultfilters import striptags
+from django.utils.text import truncate_words
 import time
 
 from django.db import models, connection
@@ -268,7 +270,7 @@ class Question(models.Model):
         return self._is_test
 
     def __unicode__(self):
-        return self.question
+        return truncate_words(striptags(self.question), 5)
 
     class Meta:
         verbose_name = _('Question')
@@ -287,7 +289,7 @@ class Choice(models.Model):
         Add a vote dirrectly to DB
         """
         query = UPDATE_VOTE % {
-            'table' : connection.ops.quote_name(self._meta.db_table), 
+            'table' : connection.ops.quote_name(self._meta.db_table),
             'col' : connection.ops.quote_name(self._meta.get_field('votes').column)}
         cur = connection.cursor()
         cur.execute(query, (self.pk,))

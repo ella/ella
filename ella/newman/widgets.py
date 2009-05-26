@@ -5,14 +5,16 @@ from django.conf import settings
 from django.utils.safestring import mark_safe
 from django.db.models.fields.related import ForeignKey
 from django.contrib.admin import widgets
-from django.utils.text import truncate_words
+from django.template import Template, Context
+from django.template.loader import get_template
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_unicode
 from django.utils.html import escape
-
-from djangomarkup.widgets import RichTextAreaWidget
+from django.utils.text import truncate_words
 
 from ella.ellaadmin.utils import admin_url
+from ella.core.models import Category
+from djangomarkup.widgets import RichTextAreaWidget
 
 
 MARKITUP_SET = getattr(settings, 'MARKDOWN', 'markdown')
@@ -284,3 +286,40 @@ class IncrementWidget(forms.TextInput):
         super(IncrementWidget, self).__init__(attrs={'class': 'increment'})
 
 
+class ListingCustomWidget(forms.SelectMultiple):
+    def __init__(self, attrs=None, choices=(), *args, **kwargs):
+        #attrs['class'] = 'listings'
+        # TODO bug? Ask Honza, if selected choices should be provided in args, kwargs, somewhere..
+        if not attrs or 'class' not in attrs:
+            my_attrs = {'class': 'listings'}
+        else:
+            my_attrs = attrs
+        super(ListingCustomWidget, self).__init__(attrs=my_attrs, choices=choices)
+
+    def render(self, name, value, attrs=None, choices=()):
+        def append_verbose_name(lst):
+            out =dict()
+            for field_name in map(lambda f: f.name, lst._meta.fields):
+                verb = lst._meta.get_field(field_name).verbose_name
+                if hasattr(verb, '__unicode__'):
+                    verb = verb.__unicode__()
+                else:
+                    verb = verb.__str__()
+                out[field_name] = verb
+            lst.fields_verbose_names = out
+            return lst
+
+        print 'name:', name
+        print 'value:' , value #selected categories
+        print 'attrs:', attrs
+        print 'choices:', choices
+        cx = Context()
+        cx['NEWMAN_MEDIA_PREFIX'] = settings.NEWMAN_MEDIA_PREFIX
+        cx['id_prefix'] = name
+        cx['choices'] = choices or self.choices
+        if type(value) == dict: 
+            # modifying existing object, so value is dict containing Listings and selected category IDs
+            cx['selected'] = Category.objects.filter(pk__in=value['selected_categories']) or []
+            cx['listings'] = map(append_verbose_name, value['listings']) or []
+        tpl = get_template('newman/widget/listing_custom.html')
+        return mark_safe(tpl.render(cx))
