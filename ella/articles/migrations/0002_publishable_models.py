@@ -25,6 +25,11 @@ class Migration:
         db.delete_column('core_publishable', 'old_id')
 
     def forwards_publishable(self, orm):
+        '''
+        creation of publishable objects
+
+        TODO: sync publish_from
+        '''
         app = self.app_name
         mod = self.module_name
         table = '%s_%s' (app, mod)
@@ -33,46 +38,47 @@ class Migration:
         db.execute('''
             INSERT INTO
                 `core_publishable` (old_id, title, slug, category_id, source_id, photo_id, description, content_type_id)
-                SELECT
-                    a.id, title, slug, category_id, source_id, photo_id, perex, ct.id
-                FROM
-                    `%(table)s` a, `django_content_type` ct
-                WHERE
-                    ct.`app_label` = '%(app)s' AND  ct.`model` = '%(mod)s';
-            ''' % {'app': app, 'mod': mod, 'table': table}
+            SELECT
+                a.id, title, slug, category_id, source_id, photo_id, perex, ct.id
+            FROM
+                `%(table)s` a, `django_content_type` ct
+            WHERE
+                ct.`app_label` = '%(app)s' AND ct.`model` = '%(mod)s';
+            ''' % {'app': app, 'mod': mod, 'table': table,}
         )
 
         # add link to parent
-        db.add_column('articles_article', 'publishable_ptr', models.OneToOneField(orm['core.Publishable']))
+        db.add_column(table, 'publishable_ptr', models.IntegerField(null=True, blank=True))
 
         # update the link
         db.execute('''
             UPDATE
                 `core_publishable` pub INNER JOIN `%(table)s` art ON (art.`id` = pub.`old_id`)
-                SET
-                    art.`publishable_ptr_id` = pub.`id`
+            SET
+                art.`publishable_ptr_id` = pub.`id`
             WHERE
-                pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = '%(app)s' AND  ct.`model` = '%(mod)s');
-            ''' % {'app':app, 'mod': mod, 'table': table}
+                pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = '%(app)s' AND ct.`model` = '%(mod)s');
+            ''' % {'app': app, 'mod': mod, 'table': table,}
         )
 
         # drop foreign key constraint from intermediate table
         db.alter_column('%s_authors' % table, 'article', models.IntegerField())
         # drop primary key
         db.alter_column(table, 'id', models.IntegerField(null=True, blank=True))
-
         # replace it with a link to parent
-        db.alter_column(table, 'publishable_ptr_id', models.ForeignKey(Publishable, primary_key=True))
+        db.alter_column(table, 'publishable_ptr', models.OneToOneField(orm['core.Publishable']), null=False, blank=False)
+
         # update authors
         db.execute('''
-                INSERT INTO `core_publishable_authors` (`publishable_id`, `author_id`)
-                SELECT
-                    art.`publishable_ptr_id`, art_aut.`author_id`
-                FROM
-                    `%(table)s` art INNER JOIN `%(table)s_authors` art_aut ON (art.`id` = art_aut.`%(mod)s`);
-            ''' % {'app': app, 'mod': mod, 'table': table}
+            INSERT INTO
+                `core_publishable_authors` (`publishable_id`, `author_id`)
+            SELECT
+                art.`publishable_ptr_id`, art_aut.`author_id`
+            FROM
+                `%(table)s` art INNER JOIN `%(table)s_authors` art_aut ON (art.`id` = art_aut.`%(mod)s`);
+            ''' % {'app': app, 'mod': mod, 'table': table,}
         )
-        db.delete_table(table + '_authors')
+        db.delete_table('%s_authors' % table)
 
         # UPDATE generic relations
         db.execute_many('''
