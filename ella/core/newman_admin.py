@@ -11,7 +11,6 @@ from ella.core.models import Author, Source, Category, Listing, HitCount, Placem
 from ella.core.models.publishable import Publishable
 from ella import newman
 from ella.newman import options, fields
-from ella.core.models.main import Related
 
 class ListingForm(modelforms.ModelForm):
     class Meta:
