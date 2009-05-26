@@ -16,29 +16,29 @@ mySettings = {
     previewParserVar:   "text",
     onShiftEnter:		{keepDefault:false, openWith:'\n\n'},
     markupSet: [
-        { name: _('Italic'), className: 'italic', key: 'I', openWith: '_', closeWith: '_' },
-        { name: _('Bold'), className: 'bold', key: 'B', openWith: '**', closeWith: '**' },
+        { name: gettext('Italic'), className: 'italic', key: 'I', openWith: '_', closeWith: '_' },
+        { name: gettext('Bold'), className: 'bold', key: 'B', openWith: '**', closeWith: '**' },
         { separator: '---------------' },
-        { name: _('Link'), className: 'url', key: 'L', openWith:'[', closeWith:']([![Url:!:http://]!] "[![Title]!]")', placeHolder: 'Text odkazu' },
+        { name: gettext('Link'), className: 'url', key: 'L', openWith:'[', closeWith:']([![Url:!:http://]!] "[![Title]!]")', placeHolder: 'Text odkazu' },
         { separator: '---------------' },
-        { name: _('Head 1'), className: 'h1', key:'1', placeHolder: 'Nadpis 1. úrovně', closeWith: function(markItUp) { return miu.markdownTitle(markItUp, '=') } },
-        { name: _('Head 2'), className: 'h2', key:'2', placeHolder: 'Nadpis 2. úrovně', closeWith: function(markItUp) { return miu.markdownTitle(markItUp, '-') } },
-        { name: _('Head 3'), className: 'h3', key:'3', placeHolder: 'Nadpis 3. úrovně', openWith: '### ' },
+        { name: gettext('Head 1'), className: 'h1', key:'1', placeHolder: 'Nadpis 1. úrovně', closeWith: function(markItUp) { return miu.markdownTitle(markItUp, '=') } },
+        { name: gettext('Head 2'), className: 'h2', key:'2', placeHolder: 'Nadpis 2. úrovně', closeWith: function(markItUp) { return miu.markdownTitle(markItUp, '-') } },
+        { name: gettext('Head 3'), className: 'h3', key:'3', placeHolder: 'Nadpis 3. úrovně', openWith: '### ' },
         { separator: '---------------' },
-        { name: _('List unordered'), className: 'list-bullet', openWith: '- ' },
-        { name: _('List ordered'), className: 'list-numeric', openWith:function(markItUp) {
+        { name: gettext('List unordered'), className: 'list-bullet', openWith: '- ' },
+        { name: gettext('List ordered'), className: 'list-numeric', openWith:function(markItUp) {
             return markItUp.line+'. ';
         }},
         { separator: '---------------' },
-        { name: _('Quote'), className: 'quote', openWith: '> ' },
+        { name: gettext('Quote'), className: 'quote', openWith: '> ' },
         { separator: '---------------' },
-        { name: _('Photo'), className: 'photo', openWith: '> ' },
-        { name: _('Gallery'), className: 'gallery', openWith: '> ' },
-        { name: _('Box'), className: 'box', call: function(){
+        { name: gettext('Photo'), className: 'photo', openWith: '> ' },
+        { name: gettext('Gallery'), className: 'gallery', openWith: '> ' },
+        { name: gettext('Box'), className: 'box', call: function(){
             $('#rich-box').dialog('open');
         }},
         { separator: '---------------' },
-        { name: _('Preview'), call: 'preview', className: 'preview'}
+        { name: gettext('Preview'), call: 'preview', className: 'preview'}
     ]
 }
 

@@ -37,14 +37,14 @@ $(function(){ContentByHashLib.reload_content('content');});
         if (options.title) things_to_send.title = options.title;
         if (options.id   ) things_to_send.id    = options.id;
         var url = get_adr('draft/save/');
-        var $saving_msg = show_message(_('Saving')+'...', {duration: 0});
+        var $saving_msg = show_message(gettext('Saving')+'...', {duration: 0});
         $.ajax({
             url: url,
             data: things_to_send,
             type: 'POST',
             success: function(response_text) {
                 $saving_msg.remove();
-                show_ok(_('Saved')+'.', {duration: 2000});
+                show_ok(gettext('Saved')+'.', {duration: 2000});
                 try {
                     var response_data = JSON.parse(response_text);
                     var id           = response_data.data.id;
@@ -61,7 +61,7 @@ $(function(){ContentByHashLib.reload_content('content');});
                         $('<option>').attr({value: id}).html(actual_title)
                     );
                 } catch(e) {
-                    show_err(_('Preset saved but erroneous result received.')+' '+_('Reload to see the preset.'));
+                    show_err(gettext('Preset saved but erroneous result received.')+' '+gettext('Reload to see the preset.'));
                 }
             },
             error: function(xhr) {
@@ -71,7 +71,7 @@ $(function(){ContentByHashLib.reload_content('content');});
         });
     }
     $('a#save-form').live('click', function() {
-        var title = prompt(_('Enter template name'));
+        var title = prompt(gettext('Enter template name'));
         if (title == null) return;
         title = $.trim(title);
         // retrieve the id of template with this name
@@ -89,7 +89,7 @@ $(function(){ContentByHashLib.reload_content('content');});
         try {
             response_data  = JSON.parse(response_text);
         } catch(e) {
-            show_err(_('Failed loading preset'));
+            show_err(gettext('Failed loading preset'));
             return;
         }
         $form.get(0).reset();
@@ -595,7 +595,7 @@ var $LOADING_MSG, LOADING_CNT = 0;
 function show_loading() {
     LOADING_CNT++;
     if ($LOADING_MSG) return;
-    $LOADING_MSG = show_message(_('loading')+'...', {duration:0});
+    $LOADING_MSG = show_message(gettext('Loading')+'...', {duration:0});
 }
 function hide_loading() {
     if ($LOADING_MSG) $LOADING_MSG.remove();
@@ -626,7 +626,7 @@ function show_ajax_error(xhr) {
         data = JSON.parse(xhr.responseText);
         message = data.message;
     } catch(e) {
-        message = _('Request failed')+' ('+xhr.status+': '+_(xhr.statusText)+')';
+        message = gettext('Request failed')+' ('+xhr.status+': '+_(xhr.statusText)+')';
         paste_code_into_debug( xhr.responseText.replace(/\n(\s*\n)+/g, "\n"), 'Ajax error response' );
     }
     show_err(message);
@@ -637,7 +637,7 @@ function show_ajax_success(response_text) {
         data = JSON.parse(response_text);
         message = data.message;
     } catch (e) {
-        message = _('Successfully sent');
+        message = gettext('Successfully sent');
         paste_code_into_debug( response_text.replace(/\n(\s*\n)+/g, "\n"), 'Ajax success response' );
     }
     show_ok(message);
