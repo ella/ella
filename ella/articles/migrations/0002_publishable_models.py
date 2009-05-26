@@ -92,11 +92,6 @@ class Migration:
             ''' % {'app': app, 'mod': mod, 'table': table}
         )
 
-        # TODO: move it via south
-        db.execute('''
-                ALTER TABLE `articles_article` DROP FOREIGN KEY `photo_id_refs_id_573d4575`;
-        ''')
-
         # drop duplicate columns
         for column in ['title', 'category_id', 'photo_id', 'source_id', 'slug', 'id', 'perex']:
             db.delete_column(table, column)
