@@ -5,7 +5,126 @@ from ella.articles.models import *
 
 class Migration:
 
+    app_name = 'articles'
+    module_name = 'article'
+
+    depends_on = (
+        ("core", "0002_publishable_models"),
+    )
+
     def forwards(self, orm):
+
+        # add a temporary column to remember the old ID
+        db.add_column('core_publishable', 'old_id', models.IntegerField(null=True))
+
+        app = self.app_name
+        mod = self.module_name
+        table = '%s_%s' (app, mod)
+
+        # move the data
+        db.execute('''
+            INSERT INTO
+                `core_publishable` (old_id, title, slug, category_id, source_id, photo_id, description, content_type_id)
+                SELECT
+                    a.id, title, slug, category_id, source_id, photo_id, perex, ct.id
+                FROM
+                    `%(table)s` a, `django_content_type` ct
+                WHERE
+                    ct.`app_label` = '%(app)s' AND  ct.`model` = '%(mod)s';
+            ''' % {'app': app, 'mod': mod, 'table': table}
+        )
+
+        # add link to parent
+        db.add_column(table, 'publishable_ptr_id', models.IntegerField(null=True))
+
+        # update the link
+        db.execute('''
+            UPDATE
+                `core_publishable` pub INNER JOIN `%(table)s` art ON (art.`id` = pub.`old_id`)
+                SET
+                    art.`publishable_ptr_id` = pub.`id`
+            WHERE
+                pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = '%(app)s' AND  ct.`model` = '%(mod)s');
+            ''' % {'app':app, 'mod': mod, 'table': table}
+        )
+
+        # TODO:
+        # we could use introspection to get the FK name in order to drop it, then we could also move this into the loop
+        # or we can move it via SOUTH
+        db.execute_many('''
+                ALTER TABLE `articles_article_authors` DROP FOREIGN KEY `article_id_refs_id_2bb2108a`;
+                ALTER TABLE `articles_article` CHANGE `id` `id` integer NULL;
+                ALTER TABLE `articles_article` DROP PRIMARY KEY;
+        ''')
+
+        # replace it with a link to parent
+        db.alter_column(table, 'publishable_ptr_id', models.ForeignKey(Publishable, primary_key=True))
+        # update authors
+        db.execute('''
+                INSERT INTO `core_publishable_authors` (`publishable_id`, `author_id`)
+                SELECT
+                    art.`publishable_ptr_id`, art_aut.`author_id`
+                FROM
+                    `%(table)s` art INNER JOIN `%(table)s_authors` art_aut ON (art.`id` = art_aut.`%(mod)s_id`);
+            ''' % {'app':app, 'mod': mod, 'table': table}
+        )
+        db.delete_table(table + '_authors')
+
+        # UPDATE generic relations
+        db.execute_many('''
+                UPDATE
+                    `tagging_taggeditem` gen INNER JOIN `core_publishable` pub ON (gen.`content_type_id` = pub.`content_type_id` AND gen.`object_id` = pub.`old_id`)
+                SET
+                    gen.`object_id` = pub.`id`
+                WHERE
+                    pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = '%(app)s' AND  ct.`model` = '%(mod)s');
+
+                UPDATE
+                    `comments_comment` gen INNER JOIN `core_publishable` pub ON (gen.`target_ct_id` = pub.`content_type_id` AND gen.`target_id` = pub.`old_id`)
+                SET
+                    gen.`target_id` = pub.`id`
+                WHERE
+                    pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = '%(app)s' AND  ct.`model` = '%(mod)s');
+            ''' % {'app': app, 'mod': mod, 'table': table}
+        )
+
+        # TODO: move it via south
+        db.execute('''
+                ALTER TABLE `articles_article` DROP FOREIGN KEY `photo_id_refs_id_573d4575`;
+        ''')
+
+        # drop duplicate columns
+        for column in ['title', 'category_id', 'photo_id', 'source_id', 'slug', 'id', 'perex']:
+            db.delete_column(table, column)
+
+        db.add_column('core_placement', 'publishable_id', models.IntegerField(null=True))
+
+        # MIGRATE PLACEMENTS
+        db.execute('''
+                UPDATE
+                    `core_placement` plac INNER JOIN `core_publishable` pub ON (plac.`target_ct_id` = pub.`content_type_id` AND plac.`target_id` = pub.`old_id`)
+                SET
+                    plac.`publishable_id` = pub.`id`
+                WHERE
+                    pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = '%(app)s' AND  ct.`model` = '%(mod)s');
+            ''' % {'app': app, 'mod': mod, 'table': table}
+        )
+
+        db.alter_column('core_placement', 'publishable_id', models.ForeignKey(Publishable))
+
+        # TODO: move it via south
+        db.execute('''
+                ALTER TABLE `core_placement` DROP FOREIGN KEY `core_placement_ibfk_2`;
+        ''')
+
+        db.create_index('core_placement', ['publishable_id'])
+        db.delete_column('core_placement', 'target_ct_id')
+        db.delete_column('core_placement', 'target_id')
+
+        # delete temporary column to remember the old ID
+        db.delete_column('core_publishable', 'old_id')
+
+    def ___forwards(self, orm):
 
         # Adding field 'Article.publishable_ptr'
         db.add_column('articles_article', 'publishable_ptr', models.OneToOneField(orm['core.Publishable']))
@@ -35,8 +154,11 @@ class Migration:
         db.delete_column('articles_article', 'title')
 
 
-
     def backwards(self, orm):
+        "Write your backwards migration here"
+        print 'there is no way back'
+
+    def ___backwards(self, orm):
 
         # Deleting field 'Article.publishable_ptr'
         db.delete_column('articles_article', 'publishable_ptr_id')
