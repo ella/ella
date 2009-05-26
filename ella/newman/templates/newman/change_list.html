@@ -59,6 +59,7 @@
                 {{ cl.formset.management_form }}
             {% endif %}
 
+            {% block pagination_top %}{% pagination cl %}{% endblock %}
             {% block result_list %}
                 {# % if actions_on_top and cl.full_result_count and not is_popup %}{% admin_actions %}{% endif % #}
                 {% newman_result_list cl %}
