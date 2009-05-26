@@ -33,9 +33,9 @@ class PhotoOptions(newman.NewmanModelAdmin):
 
 
 class FormatedPhotoOptions(newman.NewmanModelAdmin):
-    list_display = ('filename', 'format', 'width', 'height')
+    list_display = ('image', 'format', 'width', 'height')
     list_filter = ('format',)
-    search_fields = ('filename',)
+    search_fields = ('image',)
     raw_id_fields = ('photo',)
 
 
