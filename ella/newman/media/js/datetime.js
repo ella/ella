@@ -79,9 +79,8 @@ function DateTimeInput(input) {
         hour = d.getHours();
         minute = d.getMinutes();
         dow = ([
-            'Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'
+            gettext('Su'), gettext('Mo'), gettext('Tu'), gettext('We'), gettext('Th'), gettext('Fr'), gettext('Sa')
         ])[ d.getDay() ];
-        dow = _(dow);   // localize
 
         function pad(str,n) {
             var s = new String(str);
@@ -220,9 +219,8 @@ function DateInput(input) {
         month = new Number(d.getMonth()) + 1;
         day = d.getDate();
         dow = ([
-            'Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'
+            gettext('Su'), gettext('Mo'), gettext('Tu'), gettext('We'), gettext('Th'), gettext('Fr'), gettext('Sa')
         ])[ d.getDay() ];
-        dow = _(dow);   // localize
 
         function pad(str,n) {
             var s = new String(str);
