@@ -11,6 +11,7 @@ import MySQLdb as mysql
 from time import sleep
 
 from django.core.management.base import BaseCommand
+from django.core.management import call_command
 from django.db import connection, transaction
 from django.contrib.sites.models import Site
 from django.contrib.contenttypes.models import ContentType
@@ -259,6 +260,7 @@ def map_sites():
 def map_article_contents():
     proc = TextProcessor.objects.get(name='markdown')
     ct_ac = ContentType.objects.get_for_model(ArticleContents)
+    ct_a = ContentType.objects.get_for_model(Article)
     cur = conn.cursor()
     cur.execute(SQL_ALL_ARTICLE_CONTENTS)
     num = int(cur.rowcount)
@@ -285,20 +287,18 @@ def map_article_contents():
         # perex
         perex_src_text, perex_src_created = SourceText.objects.get_or_create(
             processor=proc,
-            content_type=ct_ac,
+            content_type=ct_a, #Article content type
             object_id=obj.pk,
             field='description'
         )
-        if src_created:
-            src_text.content = row[3]
-            src_text.save()
-            obj.content = src_text.render()
-            obj.save()
-        if perex_src_created:
-            perex_src_text.content = row[3]
-            perex_src_text.save()
-            obj.description = perex_src_text.render()
-            obj.save()
+        src_text.content = row[3]
+        src_text.save()
+        obj.content = src_text.render()
+        obj.save()
+        perex_src_text.content = row[3]
+        perex_src_text.save()
+        obj.description = perex_src_text.render()
+        obj.save()
     printv('ArticleContents done.', STD_VERB)
 
 def progress(msg, perc):
@@ -647,3 +647,6 @@ class Command(BaseCommand):
 
         set_default_socket_timeout(timeout)
         create_content(run_transaction, verbosity, **kwa)
+        printv('Synchronizing denormalized Publishable.publish_from fields...', STD_VERB)
+        # Update publish from
+        call_command('update_publishable_publish_from', *args, **kwa)
