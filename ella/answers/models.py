@@ -33,7 +33,7 @@ class Question(models.Model):
     nick = models.CharField(_('Nickname'), max_length=150)
     created = models.DateTimeField(auto_now_add=True)
     slug = models.SlugField()
-    timelimit = models.DateTimeField(default=get_default_timelimit())
+    timelimit = models.DateTimeField(default=get_default_timelimit)
 
     def __unicode__(self):
         return self.text
