@@ -13,10 +13,18 @@ class Migration:
     )
 
     def forwards(self, orm):
-
         # add a temporary column to remember the old ID
         db.add_column('core_publishable', 'old_id', models.IntegerField(null=True))
 
+        # migrate publishables
+        self.forwards_publishable(orm)
+        # migrate placements
+        #self.forwards_placements(orm)
+
+        # delete temporary column to remember the old ID
+        db.delete_column('core_publishable', 'old_id')
+
+    def forwards_publishable(self, orm):
         app = self.app_name
         mod = self.module_name
         table = '%s_%s' (app, mod)
@@ -35,7 +43,7 @@ class Migration:
         )
 
         # add link to parent
-        db.add_column(table, 'publishable_ptr_id', models.IntegerField(null=True))
+        db.add_column('articles_article', 'publishable_ptr', models.OneToOneField(orm['core.Publishable']))
 
         # update the link
         db.execute('''
@@ -48,14 +56,10 @@ class Migration:
             ''' % {'app':app, 'mod': mod, 'table': table}
         )
 
-        # TODO:
-        # we could use introspection to get the FK name in order to drop it, then we could also move this into the loop
-        # or we can move it via SOUTH
-        db.execute_many('''
-                ALTER TABLE `articles_article_authors` DROP FOREIGN KEY `article_id_refs_id_2bb2108a`;
-                ALTER TABLE `articles_article` CHANGE `id` `id` integer NULL;
-                ALTER TABLE `articles_article` DROP PRIMARY KEY;
-        ''')
+        # drop foreign key constraint from intermediate table
+        db.alter_column('%s_authors' % table, 'article', models.IntegerField())
+        # drop primary key
+        db.alter_column(table, 'id', models.IntegerField(null=True, blank=True))
 
         # replace it with a link to parent
         db.alter_column(table, 'publishable_ptr_id', models.ForeignKey(Publishable, primary_key=True))
@@ -65,8 +69,8 @@ class Migration:
                 SELECT
                     art.`publishable_ptr_id`, art_aut.`author_id`
                 FROM
-                    `%(table)s` art INNER JOIN `%(table)s_authors` art_aut ON (art.`id` = art_aut.`%(mod)s_id`);
-            ''' % {'app':app, 'mod': mod, 'table': table}
+                    `%(table)s` art INNER JOIN `%(table)s_authors` art_aut ON (art.`id` = art_aut.`%(mod)s`);
+            ''' % {'app': app, 'mod': mod, 'table': table}
         )
         db.delete_table(table + '_authors')
 
@@ -97,6 +101,12 @@ class Migration:
         for column in ['title', 'category_id', 'photo_id', 'source_id', 'slug', 'id', 'perex']:
             db.delete_column(table, column)
 
+    def forwards_placements(self, orm):
+
+        app = self.app_name
+        mod = self.module_name
+        table = '%s_%s' (app, mod)
+
         db.add_column('core_placement', 'publishable_id', models.IntegerField(null=True))
 
         # MIGRATE PLACEMENTS
@@ -121,10 +131,7 @@ class Migration:
         db.delete_column('core_placement', 'target_ct_id')
         db.delete_column('core_placement', 'target_id')
 
-        # delete temporary column to remember the old ID
-        db.delete_column('core_publishable', 'old_id')
-
-    def ___forwards(self, orm):
+    def ___forwards_original(self, orm):
 
         # Adding field 'Article.publishable_ptr'
         db.add_column('articles_article', 'publishable_ptr', models.OneToOneField(orm['core.Publishable']))
@@ -158,7 +165,7 @@ class Migration:
         "Write your backwards migration here"
         print 'there is no way back'
 
-    def ___backwards(self, orm):
+    def ___backwards_original(self, orm):
 
         # Deleting field 'Article.publishable_ptr'
         db.delete_column('articles_article', 'publishable_ptr_id')
