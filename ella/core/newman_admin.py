@@ -1,3 +1,5 @@
+import time
+
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.forms import models as modelforms
 from django.forms.fields import DateTimeField
@@ -7,10 +9,11 @@ from django.forms.util import ValidationError
 from django.conf.urls.defaults import patterns, url
 from django.utils.safestring import mark_safe
 
-from ella.core.models import Author, Source, Category, Listing, HitCount, Placement, Related
-from ella.core.models.publishable import Publishable
+from ella.core.models import Author, Source, Category, Listing, HitCount, Placement, Related, Publishable
+from ella.core.models.publishable import PUBLISH_FROM_WHEN_EMPTY
 from ella import newman
 from ella.newman import options, fields
+from ella.newman.filterspecs import CustomFilterSpec
 
 class ListingForm(modelforms.ModelForm):
     class Meta:
@@ -282,12 +285,40 @@ class RelatedInlineAdmin(newman.NewmanTabularInline):
     extra = 3
     model = Related
 
+class IsPublishedFilter(CustomFilterSpec):
+    " Published/Nonpublished objects filter"
+    #lookup_var = 'placement__publish_from'
+    lookup_var = 'publish_from'
+
+    def title(self):
+        return _('Cucurucucu Paloma')
+
+    def get_lookup_kwarg(self):
+        for param in self.request_get:
+            if param.startswith(self.lookup_var):
+                return param
+        return ''
+
+    def filter_func(fspec):
+        # nepublikovany = nemaji placement (datum 3000) ci maji placement v budoucnu
+        # ?placement__publish_from__exact=2008-10-10
+        lookup_var_not_published = '%s__exact' % fspec.lookup_var
+        lookup_var_published = '%s__lt' % fspec.lookup_var
+        when = time.strftime('%Y-%m-%d', PUBLISH_FROM_WHEN_EMPTY.timetuple())
+        link = ( _('Not published'), {lookup_var_not_published: when})
+        fspec.links.append(link)
+        link = ( _('Published'), {lookup_var_published: when})
+        fspec.links.append(link)
+        fspec.remove_from_querystring = [lookup_var_published, lookup_var_not_published]
+        return True
+
 class PublishableAdmin(newman.NewmanModelAdmin):
     """ Default admin options for all publishables """
 
     exclude = ('content_type',)
     list_display = ('admin_link', 'category', 'photo_thumbnail', 'publish_from', 'placement_link', 'site_icon')
-    list_filter = ('category__site', 'category', 'authors', 'content_type')
+    list_filter = ('category__site', 'category', 'authors', 'content_type', 'publish_from')
+    unbound_list_filter = (IsPublishedFilter,)
     search_fields = ('title', 'description', 'slug', 'authors__name', 'authors__slug',) # FIXME: 'tags__tag__name',)
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
