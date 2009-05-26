@@ -1,0 +1,35 @@
+{% extends "newman/edit_inline/tabular.html" %}
+
+{% block header_fields %}
+    {% if not field.is_listing_custom_field %}
+    {{ block.super }}
+    {% endif %}
+{% endblock %}
+
+{% block fieldset %}
+    {% for fieldset in inline_admin_form %}
+      {% for line in fieldset %}
+        {% for field in line %}
+
+          {% ifnotequal field.field.name "listings" %}
+              <td class="{{ field.field.name }}">
+              {{ field.field.errors.as_ul }}
+              {{ field.field }}
+              </td>
+          {% else %} 
+
+            {% if inline_admin_formset.formset.can_delete %}
+              <td class="delete">{% if inline_admin_form.original %}{{ inline_admin_form.deletion_field.field }}{% endif %}</td>
+            {% endif %}
+              {# customized listing widget, should be the last one#}
+              </tr>
+              {# custom row for ListingCustomWidget #}
+              {{ field.field.errors.as_ul }}
+              {{ field.field }}
+              <tr> {# open new row due to tabular.html will close row after fieldset block #}
+          {% endifnotequal %}
+
+        {% endfor %}
+      {% endfor %}
+    {% endfor %}
+{% endblock %}
