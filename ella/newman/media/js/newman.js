@@ -799,7 +799,7 @@ $(document).bind('content_added', function() {
 $( function() {
     open_overlay = function(content_type, selection_callback) {
         var overlay_html
-            = '<div id="box-overlay" class="overlay">\n'
+            = '<div id="changelist-overlay" class="overlay">\n'
             + '    <div class="overlay-upbar">\n'
             + '        <div class="overlay-title"></div>\n'
             + '        <div class="overlay-closebutton">\n'
@@ -820,7 +820,7 @@ $( function() {
             });
             return rv + 1;
         })();
-        var $overlay = $('#box-overlay');
+        var $overlay = $('#changelist-overlay');
         if ($overlay.length == 0) {
             $overlay = $( overlay_html )
             .css({top:0,left:0})
@@ -870,7 +870,7 @@ $( function() {
                 ($target.data('selection_callback'))(clicked_id, {evt: evt});
             } catch(e) { carp('Failed running overlay callback', e); }
             ContentByHashLib.unload_content('overlay-content');
-            $('#box-overlay').css({zIndex:5}).hide();
+            $('#changelist-overlay').css({zIndex:5}).hide();
             $target.removeData('selection_callback');
             return false;
         })
@@ -911,6 +911,6 @@ $( function() {
             $('#filters').unbind('content_added', init_filters).one('content_added', init_filters);
         }
         
-        $('#box-overlay').show();
+        $('#changelist-overlay').show();
     };
 });

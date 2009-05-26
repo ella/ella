@@ -46,13 +46,6 @@ body {
 
 .overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    overflow: auto;
-    background-color: white;
-    border: solid 2px blue;
-    display: none;
 }
 .overlay .overlay-upbar {
     height: 30px;
@@ -250,6 +243,15 @@ input.vDateTimeInput { width: 120px; }
 
 .form-error-msg { display: block; color: #d66; font-weight: bold; padding: 2px 0 2px 18px; background: url(../ico/16/messagebox_warning.png) 0 50% no-repeat; }
 
+#changelist-overlay {
+    top: 0;
+    left: 0;
+    bottom: 0;
+    overflow: auto;
+    background-color: white;
+    border: solid 2px blue;
+    display: none;
+}
 #err-overlay {
     bottom: 70px;
     right: 5px;
