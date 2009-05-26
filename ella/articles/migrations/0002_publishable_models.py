@@ -18,6 +18,8 @@ class Migration:
 
         # migrate publishables
         self.forwards_publishable(orm)
+        # migrate generic relations
+        #self.forwards_generic_relations(orm)
         # migrate placements
         #self.forwards_placements(orm)
 
@@ -80,6 +82,16 @@ class Migration:
         )
         db.delete_table('%s_authors' % table)
 
+        # drop duplicate columns
+        for column in ['title', 'category_id', 'photo_id', 'source_id', 'slug', 'id', 'perex']:
+            db.delete_column(table, column)
+
+    def forwards_generic_relations(self, orm):
+
+        app = self.app_name
+        mod = self.module_name
+        table = '%s_%s' (app, mod)
+
         # UPDATE generic relations
         db.execute_many('''
                 UPDATE
@@ -97,10 +109,6 @@ class Migration:
                     pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = '%(app)s' AND  ct.`model` = '%(mod)s');
             ''' % {'app': app, 'mod': mod, 'table': table}
         )
-
-        # drop duplicate columns
-        for column in ['title', 'category_id', 'photo_id', 'source_id', 'slug', 'id', 'perex']:
-            db.delete_column(table, column)
 
     def forwards_placements(self, orm):
 
