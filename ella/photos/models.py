@@ -7,19 +7,19 @@ import os
 from django.db import models, IntegrityError
 from django.conf import settings
 from django.utils.translation import ugettext, ugettext_lazy as _
-from django.contrib.contenttypes import generic
 from django.contrib.sites.models import Site
 from django.utils.safestring import mark_safe
 from django.core.files.uploadedfile import UploadedFile
+from django.core.files.base import ContentFile
 
 from ella.core.models.main import Author, Source
-from ella.core.managers import RelatedManager
 from ella.core.box import Box
 from ella.core.cache.utils import get_cached_object
 from ella.utils.filemanipulation import file_rename
-from ella.tagging.models import TaggedItem
 
 from formatter import Formatter, detect_img_type
+
+__all__ = ("Format", "FormatedPhoto", "Photo")
 
 # settings default
 PHOTOS_FORMAT_QUALITY_DEFAULT = (
@@ -83,8 +83,11 @@ class Photo(models.Model):
 
     created = models.DateTimeField(default=datetime.now, editable=False)
 
-    if 'ella.tagging' in settings.INSTALLED_APPS:
-        tags = generic.GenericRelation(TaggedItem)
+    def __init__(self, *args, **kwargs):
+        super(Photo, self).__init__(*args, **kwargs)
+
+        # path to thumbnail, cached when thumbnail is generated for the first time
+        self.thumbnail_path = None
 
     def thumb(self):
         """
@@ -96,6 +99,15 @@ class Photo(models.Model):
         return mark_safe("""<a href="%s"><img src="%s" alt="Thumbnail %s" /></a>""" % (self.image.url, thumbUrl, self.title))
     thumb.allow_tags = True
 
+    def get_thumbnail_path(self, image_name=None):
+        """
+        Return relative path for thumbnail file for storage
+        photos/2008/12/31/foo.jpg => photos/2008/12/31/thumb-foo.jpg
+        """
+        if not image_name:
+            image_name = self.image.name
+        return path.dirname(image_name) + "/" + 'thumb-%s' % path.basename(image_name)
+
     def thumb_url(self):
         """
         Generates thumbnail for admin site and returns its url
@@ -104,19 +116,21 @@ class Photo(models.Model):
         if not type:
             return None
 
-        # photos/2008/12/31/foo.jpg => photos/2008/12/31/thumb-foo.jpg
-        thumb_name = path.dirname(self.image.name) + "/" + 'thumb-%s' % path.basename(self.image.name)
+        # cache thumbnail for future use to avoid hitting storage.exists() every time
+        # and to allow thumbnail detection after instance has been deleted
+        self.thumbnail_path = self.get_thumbnail_path()
 
         storage = self.image.storage
-        if not storage.exists(thumb_name):
+
+        if not storage.exists(self.thumbnail_path):
             try:
                 im = Image.open(self.image.path)
                 im.thumbnail(PHOTOS_THUMB_DIMENSION, Image.ANTIALIAS)
-                im.save(storage.path(thumb_name), type)
+                im.save(storage.path(self.thumbnail_path), type)
             except IOError:
                 # TODO Logging something wrong
                 return None
-        return storage.url(thumb_name)
+        return storage.url(self.thumbnail_path)
 
     def save(self, force_insert=False, force_update=False):
         """Overrides models.Model.save.
@@ -127,11 +141,11 @@ class Photo(models.Model):
 
         # prefill the slug with the ID, it requires double save
         if not self.id:
-            self.width, self.height = get_image_dimensions(self.image)
             if isinstance(self.image, UploadedFile):
                 # due to PIL has read several bytes from image, position in file has to be reset
                 self.image.seek(0)
             super(Photo, self).save(force_insert, force_update)
+            self.width, self.height = get_image_dimensions(self.image.path)
             self.slug = str(self.id) + '-' + self.slug
             force_insert, force_update = False, True
             image_changed = False
@@ -139,15 +153,29 @@ class Photo(models.Model):
             old = Photo.objects.get(pk = self.pk)
             image_changed = old.image != self.image
         # rename image by slug
-        imageType = detect_img_type(path.join(settings.MEDIA_ROOT, self.image.name))
+        imageType = detect_img_type(self.image.path)
         if imageType is not None:
             self.image = file_rename(self.image.name, self.slug, PHOTOS_TYPE_EXTENSION[ imageType ])
         # delete formatedphotos if new image was uploaded
         if image_changed:
-            self.width, self.height = get_image_dimensions(self.image)
+            super(Photo, self).save(force_insert, force_update)
+            self.width, self.height = get_image_dimensions(self.image.path)
+            force_insert, force_update = False, True
             for f_photo in self.formatedphoto_set.all():
                 f_photo.delete()
         super(Photo, self).save(force_insert, force_update)
+
+    def delete_thumbnail(self):
+        """
+        If thumbnail was generated for this photo, delete it
+        """
+        if self.image.storage.exists(self.thumbnail_path):
+            self.image.storage.delete(self.thumbnail_path)
+        self.thumbnail_path = None
+
+    def delete(self, *args, **kwargs):
+        super(Photo, self).delete(*args, **kwargs)
+        self.delete_thumbnail()
 
     def ratio(self):
         "Return photo's width to height ratio"
@@ -158,7 +186,7 @@ class Photo(models.Model):
 
     def get_formated_photo(self, format):
         "Return formated photo"
-        format_object = Format.objects.get(name=format, site=settings.SITE_ID)
+        format_object = Format.objects.get(name=format, sites=settings.SITE_ID)
         try:
             formated_photo = get_cached_object(FormatedPhoto, photo=self, format=format_object)
         except FormatedPhoto.DoesNotExist:
@@ -224,15 +252,13 @@ class FormatedPhoto(models.Model):
     "Specific photo of specific format."
     photo = models.ForeignKey(Photo)
     format = models.ForeignKey(Format)
-    filename = models.CharField(max_length=300, editable=False) # derive local filename and url
+    image = models.ImageField(upload_to=UPLOAD_TO, height_field='height', width_field='width') # save it to YYYY/MM/DD structure
     crop_left = models.PositiveIntegerField()
     crop_top = models.PositiveIntegerField()
     crop_width = models.PositiveIntegerField()
     crop_height = models.PositiveIntegerField()
     width = models.PositiveIntegerField(editable=False)
     height = models.PositiveIntegerField(editable=False)
-
-    objects = RelatedManager()
 
     @property
     def url(self):
@@ -256,7 +282,7 @@ class FormatedPhoto(models.Model):
             return self.format.get_blank_img()['url']
 
 
-    def generate(self):
+    def generate(self, save=True):
         "Generates photo file in current format"
         crop_box = None
         if self.crop_left:
@@ -268,12 +294,22 @@ class FormatedPhoto(models.Model):
             p = self.photo
             important_box = (p.important_left, p.important_top, p.important_right, p.important_bottom)
 
-        formatter = Formatter(Image.open(self.filename), self.format, crop_box=crop_box, important_box=important_box)
+        formatter = Formatter(Image.open(self.photo.image.path), self.format, crop_box=crop_box, important_box=important_box)
 
         stretched_photo, crop_box = formatter.format()
+
+        self.crop_left, self.crop_top, right, bottom = crop_box
+        self.crop_width = right - self.crop_left
+        self.crop_height = bottom - self.crop_top
+
         self.width, self.height = stretched_photo.size
-        self.filename = self.file(relative=True)
         stretched_photo.save(self.file(), quality=self.format.resample_quality)
+
+        f = open(self.file())
+        file = ContentFile(f.read())
+        f.close()
+
+        self.image.save(self.file(relative=True), file, save)
 
     def save(self, force_insert=False, force_update=False):
         """Overrides models.Model.save
@@ -282,7 +318,7 @@ class FormatedPhoto(models.Model):
         - Generates new file.
         """
         self.remove_file()
-        self.generate()
+        self.generate(save=False)
         super(FormatedPhoto, self).save(force_insert, force_update)
 
     def delete(self):

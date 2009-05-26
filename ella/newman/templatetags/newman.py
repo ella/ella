@@ -3,6 +3,7 @@ from django.utils.text import capfirst
 from django.utils.safestring import mark_safe
 
 from ella.newman import site, permission
+from django.utils.translation import ugettext_lazy
 
 
 register = template.Library()
@@ -81,3 +82,10 @@ def newman_favorites(context):
         'NEWMAN_MEDIA_URL': context['NEWMAN_MEDIA_URL'],
         'favs': global_favs
     }
+
+@register.simple_tag
+def newman_contenttypes():
+    out = []
+    for ct in site.applicable_content_types:
+        out.append('"%d": {"path": "/%s/%s/", "title": "%s"}' % (ct.pk, ct.app_label, ct.model, ugettext_lazy(ct.name)))
+    return 'var AVAILABLE_CONTENT_TYPES = {%s};' % ", ".join(out)

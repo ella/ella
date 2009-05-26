@@ -11,8 +11,8 @@ from django.core.urlresolvers import reverse
 from django.contrib.redirects.models import Redirect
 
 from ella.ellaadmin.utils import admin_url
-from ella.core.managers import ListingManager, HitCountManager, PlacementManager
-from ella.core.cache import get_cached_object, get_cached_list
+from ella.core.managers import ListingManager, HitCountManager, PlacementManager, RelatedManager
+from ella.core.cache import get_cached_object, get_cached_list, CachedGenericForeignKey
 from ella.core.models.main import Category, Author, Source
 from ella.photos.models import Photo
 from ella.core.box import Box
@@ -71,10 +71,6 @@ class Publishable(models.Model):
     if 'ella.comments' in settings.INSTALLED_APPS:
         from ella.comments.models import Comment
         comments = generic.GenericRelation(Comment, object_id_field='target_id', content_type_field='target_ct')
-
-    if 'ella.tagging' in settings.INSTALLED_APPS:
-        from ella.tagging.models import TaggedItem
-        tags = generic.GenericRelation(TaggedItem)
 
     @property
     def main_placement(self):
@@ -180,6 +176,11 @@ class Publishable(models.Model):
 
     def __unicode__(self):
         return self.get_title()
+
+# FIXME find another way to register!
+if 'tagging' in settings.INSTALLED_APPS:
+    import tagging
+    tagging.register(Publishable)
 
 
 class Placement(models.Model):
@@ -354,4 +355,24 @@ class HitCount(models.Model):
         app_label = 'core'
         verbose_name = _('Hit Count')
         verbose_name_plural = _('Hit Counts')
+
+class Related(models.Model):
+    """
+    Related objects - model for recording related items. For example related articles.
+    """
+    publishable = models.ForeignKey(Publishable, verbose_name=_('Publishable'))
+
+    related_ct = models.ForeignKey(ContentType, verbose_name=_('Content type'))
+    related_id = models.IntegerField(_('Object ID'))
+    related = CachedGenericForeignKey('related_ct', 'related_id')
+
+    objects = RelatedManager()
+
+    def __unicode__(self):
+        return u'%s relates to %s' % (self.publishable, self.related)
+
+    class Meta:
+        app_label = 'core'
+        verbose_name = _('Related')
+        verbose_name_plural = _('Related')
 

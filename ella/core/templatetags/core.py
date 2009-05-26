@@ -1,18 +1,16 @@
 import logging
-from hashlib import md5
 
 from django.conf import settings
 from django import template
 from django.db import models
-from django.contrib.contenttypes.models import ContentType
-from django.utils.encoding import smart_str, force_unicode
+from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
 from django.template.defaultfilters import stringfilter
 
-from ella.core.models import Listing, Related, Category, LISTING_UNIQUE_DEFAULT_SET
-from ella.core.cache.utils import get_cached_object, cache_this
+from ella.core.models import Listing, Category, LISTING_UNIQUE_DEFAULT_SET
+from ella.core.cache.utils import get_cached_object
 from ella.core.cache.invalidate import CACHE_DELETER
-from ella.core.box import BOX_INFO, MEDIA_KEY, Box
+from ella.core.box import BOX_INFO, Box
 from ella.core.middleware import ECACHE_INFO
 
 
@@ -277,38 +275,6 @@ def _parse_box(nodelist, bits):
 
         return BoxNode(bits[1], nodelist, model=model, lookup=(smart_str(bits[5]), bits[6]))
 
-def _render(object, content_path):
-    """
-    A markdown filter that handles the rendering of any text containing markdown markup and/or django template tags.
-    Only ``{{object}}`` and ``{{MEDIA_URL}}`` are available in the context.
-
-    Usage::
-
-        {{object|render:"property.to.render"}}
-
-    Examples::
-
-        {{article|render:"perex"}}
-        {{article|render:"content.content"}}
-    """
-    path = content_path.split('.')
-    content = object
-    for step in path:
-        try:
-            content = getattr(content, step)
-            if callable(content):
-                content = content()
-        except:
-            # TODO: log
-            return ''
-
-    t = template.Template(content)
-    return t.render(template.Context({'object' : object, 'MEDIA_URL' : settings.MEDIA_URL}))
-
-@register.filter
-def render(object, content_path):
-    return mark_safe(_render(object, content_path))
-
 class RenderNode(template.Node):
     def __init__(self, var):
         self.var = template.Variable(var)
@@ -349,157 +315,3 @@ def emailblur(email):
     "Obfuscates e-mail addresses - only @ and dot"
     return mark_safe(email.replace('@', '&#64;').replace('.', '&#46;'))
 
-class RelatedNode(template.Node):
-    def __init__(self, obj_var, count, var_name, models=[], all_categories=True):
-        """
-        Parameters::
-        all_categories ... fetches listings even from different categories than obj_var's category
-        """
-        self.obj_var, self.count, self.var_name, self.models = obj_var, count, var_name, models
-        self.all_categories = all_categories
-
-    def render(self, context):
-        try:
-            obj = template.Variable(self.obj_var).resolve(context)
-        except template.VariableDoesNotExist:
-            return ''
-
-        related = []
-        count = self.count
-
-        # manually entered dependencies
-        for rel in Related.objects.filter(source_ct=ContentType.objects.get_for_model(obj), source_id=obj._get_pk_val()):
-            related.append(rel)
-            count -= 1
-            if count <= 0:
-                break
-
-        # related objects vie tags
-        if self.models and count > 0:
-            from ella.tagging.models import TaggedItem
-            for m in self.models:
-                to_add = TaggedItem.objects.get_related(obj, m, count)
-                for rel in to_add:
-                    if rel != obj and rel not in related:
-                        count -= 1
-                        related.append(rel)
-                    if count <= 0:
-                        break
-
-        # top objects in given category
-        if count > 0:
-            cat = get_cached_object(Category, pk=obj.category_id)
-            listings = Listing.objects.get_listing(category=cat, count=count, mods=self.models)
-            ext = [ listing.target for listing in listings if listing.target != obj ]
-            related.extend(ext)
-            count -= len(ext)
-        if self.all_categories and count > 0:
-            listings = Listing.objects.get_listing(count=count, mods=self.models)
-            related.extend(listing.target for listing in listings if listing.target != obj)
-
-        context[self.var_name] = related
-        return ''
-
-@register.tag('related')
-def do_related(parser, token):
-    """
-    Get N related models into a context variable.
-
-    Usage::
-        {% related N [app_label.Model, ...] [ALLCATEGORIES] for object as var_name %}
-
-    Example::
-        {% related 10 for object as related_list %}
-        {% related 10 articles.article, galleries.gallery for object as related_list %}
-        {% related 10 articles.article, galleries.gallery ALLCATEGORIES for object as related_list %}
-    """
-    bits = token.split_contents()
-
-    if len(bits) < 6:
-        raise template.TemplateSyntaxError, "{% related N [app_label.Model, ...] for object as var_name %}"
-
-    if not bits[1].isdigit():
-        raise template.TemplateSyntaxError, "Count must be an integer."
-
-    if bits[-2] != 'as':
-        raise template.TemplateSyntaxError, "Tag must end with as var_name "
-    if bits[-4] != 'for':
-        raise template.TemplateSyntaxError, "Tag must end with for object as var_name "
-
-    mods_to_slice = -4
-    all_categories = False
-    if bits[-5] == 'ALLCATEGORIES':
-        all_categories = True
-        mods_to_slice = -5
-
-    mods = []
-    for m in bits[2:mods_to_slice]:
-        if m == ',':
-            continue
-        if ',' in m:
-            ms = m.split()
-            for msm in ms:
-                try:
-                    mods.append(models.get_model(*msm.split('.')))
-                except:
-                    raise template.TemplateSyntaxError, "%r doesn't represent any model." % msm
-        else:
-            try:
-                mods.append(models.get_model(*m.split('.')))
-            except:
-                raise template.TemplateSyntaxError, "%r doesn't represent any model." % m
-    return RelatedNode(bits[-3], int(bits[1]), bits[-1], mods, all_categories)
-
-class CategoriesTreeNode(template.Node):
-    def __init__(self, tree_path=None, varname=None, limit=None):
-        self.tree_path, self.varname, self.limit = tree_path, varname, limit
-
-    def render(self, ctx):
-        if self.tree_path == self.tree_path.strip('"'):
-            try:
-                root_cat = template.Variable(self.tree_path).resolve(ctx)
-            except template.TemplateSyntaxError:
-                return ''
-        else:
-            try:
-                root_cat = get_cached_object(Category, tree_path=self.tree_path.strip('"'), site = settings.SITE_ID)
-            except Category.DoesNotExist:
-                return ''
-        try:
-            cats = Category.objects.filter(tree_parent=root_cat).order_by('title')
-            if self.limit:
-                cats = cats[:self.limit]
-            ctx.update({self.varname: cats})
-        except Category.DoesNotExist:
-            pass
-        return ''
-
-@register.tag
-def get_categories_tree(parser, token):
-    """
-    Returns sorted categories tree from defined path
-
-    Usage::
-
-        {% get_categories_tree from "<path_tree>" as <varname> limit <limit> %}
-        {% get_categories_tree from <category> as <varname> limit <limit> %}
-    """
-
-    bits = token.split_contents()
-    input_valid = True
-    len_bits = len(bits)
-    if len_bits not in (5, 7):
-        input_valid = False
-    if bits[1]!='from' or bits[3]!='as':
-        input_valid = False
-    if len_bits==7:
-        if bits[5]!='limit':
-            input_valid = False
-
-    if input_valid:
-        if len_bits == 5:
-            return CategoriesTreeNode(bits[2], bits[4])
-        else:
-            return CategoriesTreeNode(bits[2], bits[4], bits[6])
-    else:
-        raise template.TemplateSyntaxError('Usage of the tag %s: {%% %s from ["<path_tree>"|<category>] as <varname> limit <limit> %%}, where limit is optional (infinite by default).' % (bits[0], bits[0]))

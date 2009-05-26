@@ -268,6 +268,27 @@ $( function() {
     function ajax_submit($form, button_name) {
         if (!$form.jquery) $form = $($form);
         if ( ! validate($form) ) return false;
+        
+        // Hack for file inputs
+/*        var has_files = false;
+        $form.find(':file').each( function() {
+            if ( ($this).val() ) has_files = true;
+        });
+        if (has_files) {
+            // Shave off the names from suggest-enhanced hidden inputs
+            $form.find('input:hidden').each( function() {
+                if ($form.find( '#'+$(this).attr('id')+'_suggest' ).length == 0) return;
+*///                $(this).val( $(this).val().replace(/#.*/, '') );
+/*            });
+            // Shave off the days of week from date-time inputs
+            $form.find('.vDateTimeInput,.vDateInput').each( function() {
+                $(this).val( $(this).val().replace(/ \D{2}$/, '') );
+            }
+            $form.submit();
+            return false;
+        }
+*/        // End of hash for file inputs
+        
         var action =  $form.attr('action');
         var method = ($form.attr('method') || 'POST').toUpperCase();
         var $meta = $form.find('.form-metadata:first');
@@ -532,7 +553,13 @@ $( function() {
         var search_terms = $(this).prev('input#searchbar').val();
         if (!search_terms) return;  // Nothing to search for
         var adr_term = '&q=' + search_terms;
-        adr(adr_term);
+        var loaded = ContentByHashLib.closest_loaded(this);
+        if (loaded.id == 'content') {
+            adr(adr_term);
+        }
+        else {
+            ContentByHashLib.simple_load( loaded.id + '::' + adr_term );
+        }
         return false;
     });
 });
@@ -763,58 +790,127 @@ $('.help-button').live('mouseover', function() {
 
 $(document).bind('content_added', function() {
     if ($('.suggest-related-lookup').length) {
-        request_media(MEDIA_URL +  'js/related_lookup.js' );
-        request_media(MEDIA_URL + 'css/related_lookup.css');
+        request_media(MEDIA_URL +  'js/related_lookup.js?' +MEDIA_VERSION);
+        request_media(MEDIA_URL + 'css/related_lookup.css?'+MEDIA_VERSION);
     }
 });
 
 // Opens an overlay with a changelist and calls supplied function on click on item.
-$(function(){ open_overlay = function(content_type, selection_callback) {
-    var top_zindex = ( function() {
-        var rv = 1;
-        $('.ui-widget-overlay').each( function() {
-            rv = Math.max(rv, $(this).css('zIndex'));
-        });
-        return rv + 1;
-    })();
-    var $overlay = $('#box-overlay');
-    if ($overlay.length == 0) $overlay = $(
-        '<div id="box-overlay" class="overlay">'
-    )
-    .css({top:0,left:0,zIndex:top_zindex})
-    .appendTo(
-           $('.change-form').get(0)
-        || $('#content').get(0)
-        || $('body').get(0)
-    );
-    var address = '/' + content_type.split('.').join('/') + '/?pop';
-    ContentByHashLib.load_content({
-        address: address,
-        target_id: 'box-overlay',
-        selection_callback: selection_callback,
-        success_callback: function() {
-            var xhr = this;
-            $('#'+xhr.original_options.target_id+' tbody a')
-            .unbind('click')
-            .click( function(evt) {
-                var clicked_id = $(this).attr('href').replace(/\/$/,'');
-                try {
-                    xhr.original_options.selection_callback(clicked_id, {evt: evt});
-                } catch(e) { carp('Failed running overlay callback', e); }
-                ContentByHashLib.unload_content('box-overlay');
-                return false;
-            })
-            .each( function() {
-                this.onclick = undefined;
+$( function() {
+    open_overlay = function(content_type, selection_callback) {
+        var overlay_html
+            = '<div id="changelist-overlay" class="overlay">\n'
+            + '    <div class="overlay-upbar">\n'
+            + '        <div class="overlay-title"></div>\n'
+            + '        <div class="overlay-closebutton">\n'
+            + '            <button type="button">\n'
+            + '                <img src="'+MEDIA_URL+'ico/16/cancel.png" alt="X" height="16" width="16" />\n'
+            + '            </button>\n'
+            + '        </div>\n'
+            + '        <div class="cb"></div>\n'
+            + '    </div>\n'
+            + '    <div id="overlay-content"></div>\n'
+            + '</div>\n'
+        ;
+        
+        var top_zindex = ( function() {
+            var rv = 1;
+            $('.ui-widget-overlay').each( function() {
+                rv = Math.max(rv, $(this).css('zIndex'));
             });
+            return rv + 1;
+        })();
+        var $overlay = $('#changelist-overlay');
+        if ($overlay.length == 0) {
+            $overlay = $( overlay_html )
+            .css({top:0,left:0})
+            .appendTo(
+                   $('.change-form').get(0)
+                || $('#content').get(0)
+                || $('body').get(0)
+            );
+            $('#overlay-content').bind('content_added', init_overlay_content);
         }
-    });
-/*
-    $overlay.one('content_added', function() {
-        $(this).find('.filter li a').each( function() {
-            ;;; alert(this);
-            $(this).attr('href', $(this).attr('href').replace(/^\?/, 'filters::&')).addClass('simpleload');
+        $overlay.css({zIndex:top_zindex});
+        
+        $('#overlay-content').data('selection_callback', selection_callback);
+        
+        var ct_arr = /(\w+)\W(\w+)/.exec( content_type );
+        if ( ! ct_arr ) {
+            carp('open_overlay: Unexpected content type: '+content_type);
+            return false;
+        }
+        var address = '/' + ct_arr[1] + '/' + ct_arr[2] + '/?pop';
+        
+        ContentByHashLib.load_content({
+            address: address,
+            target_id: 'overlay-content',
+            selection_callback: selection_callback/*,
+            success_callback: function() {
+                var xhr = this;
+                var $target = $('#'+xhr.original_options.target_id);
+                
+            }*/
         });
+    };
+    $('.overlay-closebutton').live('click', function() {
+        $(this).closest('.overlay').css({zIndex:5}).hide()
+        .find('.overlay-content').removeData('selection_callback');
+        ContentByHashLib.unload_content('overlay-content');
     });
-*/
-}});
+    function init_overlay_content(evt, extras) {
+        var $target = $(evt.target);
+        
+        // selection
+        $target.find('#changelist tbody a')
+        .unbind('click')
+        .click( function(evt) {
+            var clicked_id = /\d+(?=\/$)/.exec( $(this).attr('href') )[0];
+            try {
+                ($target.data('selection_callback'))(clicked_id, {evt: evt});
+            } catch(e) { carp('Failed running overlay callback', e); }
+            ContentByHashLib.unload_content('overlay-content');
+            $('#changelist-overlay').css({zIndex:5}).hide();
+            $target.removeData('selection_callback');
+            return false;
+        })
+        .each( function() {
+            this.onclick = undefined;
+        });
+        
+        function modify_getpar_href(el) {
+            $(el).attr('href', $(el).attr('href').replace(/^\?/, 'overlay-content::&')).addClass('simpleload');
+        }
+        
+        // pagination
+        $target.find('.paginator a').each( function() {
+            modify_getpar_href(this);
+        });
+        
+        // sorting
+        $target.find('#changelist thead a').each( function() {
+            modify_getpar_href(this);
+        });
+        
+        // filters
+        var $filt = $('#filters-handler .popup-filter');
+        if ($filt.length) {
+            
+            var $cancel = $('#filters-handler span:last a');
+            $cancel
+            .attr( 'href', $target.attr('id')+'::'+$cancel.attr('href') )
+            .removeClass('hashadr')
+            .addClass('simpleload');
+            
+            $filt.addClass('simpleload').attr( 'href', $filt.attr('href').replace(/::::/, '::'+$target.attr('id')+'::') );
+            function init_filters() {
+                $(this).find('.filter li a').each( function() {
+                    $(this).attr('href', $(this).attr('href').replace(/^\?/, 'overlay-content::&')).addClass('simpleload');
+                });
+            }
+            $('#filters').unbind('content_added', init_filters).one('content_added', init_filters);
+        }
+        
+        $('#changelist-overlay').show();
+    };
+});

@@ -132,7 +132,7 @@ class ReplyForm(forms.Form):
             self.fields['interviewee'] = forms.ChoiceField(
                     choices=[ (u'', u'--------') ] + [ (i.pk, unicode(i)) for i in interviewees ],
                     label=ugettext('Interviewee')
-)
+                )
 
     def save(self):
         if not self.is_valid():
@@ -143,16 +143,13 @@ class ReplyForm(forms.Form):
         else:
             interviewee = self.cleaned_data['interviewee']
 
-        if 'HTTP_X_FORWARDED_FOR' in self.request.META:
-            ip = self.request.META['HTTP_X_FORWARDED_FOR']
-        else:
-            ip = self.request.META['REMOTE_ADDR']
+        ip = self.request.META['REMOTE_ADDR']
 
         a = Answer(
                 question=self.question,
                 interviewee_id=interviewee,
                 content=self.cleaned_data['content'],
-)
+            )
         a.save()
         return a
 
@@ -205,10 +202,7 @@ class QuestionFormPreview(FormPreview):
     def done(self, request, cleaned_data):
         """ Save the question itself. """
 
-        if 'HTTP_X_FORWARDED_FOR' in request.META:
-            ip = request.META['HTTP_X_FORWARDED_FOR']
-        else:
-            ip = request.META['REMOTE_ADDR']
+        ip = request.META['REMOTE_ADDR']
 
         question = Question(interview=self.state['object'], ip_address=ip, **cleaned_data)
 

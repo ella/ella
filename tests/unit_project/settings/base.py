@@ -6,7 +6,7 @@ USE_I18N = True
 
 MEDIA_ROOT = join(FILE_ROOT, 'static')
 
-MEDIA_URL = '/static/testbed'
+MEDIA_URL = '/static/'
 
 ADMIN_MEDIA_PREFIX = '/admin_media/'
 
@@ -47,7 +47,9 @@ INSTALLED_APPS = (
     'ella.galleries',
     'ella.catlocks',
     'ella.polls',
+    'ella.interviews',
     'djangomarkup',
+    'tagging',
 
     'django.contrib.auth',
     'django.contrib.contenttypes',

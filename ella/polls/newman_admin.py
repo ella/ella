@@ -6,7 +6,6 @@ from django.forms.util import ValidationError
 
 from ella import newman
 
-from ella.tagging.admin import TaggingInlineOptions
 from ella.core.newman_admin import PlacementInlineAdmin, PublishableAdmin
 from ella.core.cache import get_cached_object_or_404
 from ella.polls.models import Poll, Contest, Contestant, Quiz, Result, Choice, Vote, Question
@@ -103,8 +102,6 @@ class ContestAdmin(PublishableAdmin):
     list_filter = ('category', 'active_from',)
     search_fields = ('title', 'text_announcement', 'text', 'text_results',)
     inlines = [ QuestionInlineAdmin, PlacementInlineAdmin ]
-    if 'ella.tagging' in settings.INSTALLED_APPS:
-        inlines.append(TaggingInlineOptions)
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
     rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}
@@ -114,8 +111,6 @@ class QuizAdmin(PublishableAdmin):
     list_filter = ('category', 'active_from',)
     search_fields = ('title', 'text_announcement', 'text', 'text_results',)
     inlines = [QuestionInlineAdmin, ResultTabularAdmin, PlacementInlineAdmin]
-    if 'ella.tagging' in settings.INSTALLED_APPS:
-        inlines.append(TaggingInlineOptions)
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
     rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}

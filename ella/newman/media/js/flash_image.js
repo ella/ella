@@ -10,13 +10,13 @@ var IMAGE_OPTIONS = {
 };
 ( function($) {
     window.on_upload_success = function(xhr) {
-        ;;; carp('success:', xhr);
-        show_ok('successfully uploaded photo');
+        ;;; carp('success uploading photo:', xhr);
+        show_ok(_('successfully uploaded photo'));
 //        AjaxFormLib.show_ajax_success(xhr.responseText);
     }
     window.on_upload_error = function(xhr) {
-        ;;; carp('error:', xhr);
-        show_err('failed uploading photo');
+        ;;; carp('error uploading photo:', xhr);
+        show_err(_('failed uploading photo'));
 //        AjaxFormLib.ajax_submit_error(xhr)
     }
     window.on_upload_progress = function(progress) {
@@ -33,16 +33,18 @@ var IMAGE_OPTIONS = {
             return false;
         }
         var data = {};
-        for (field in {title:1,description:1,slug:1,source:1,authors:1}) {
-            var val = $('#id_'+field).val();
-            if ($('#id_'+field+'_suggest').length) {
+        $('#photo_form :input').each( function() {
+            if (/_suggest/.test( this.id )) return;
+            var val = $(this).val();
+            if ($('#'+this.id+'_suggest').length) {
                 val = val.replace(/#.*/, '');
             }
-            data[ field ] = val;
-        }
+            data[ this.name ] = val;
+        });
         IMAGE_OPTIONS.url = $('<a>').attr('href',get_adr('json/')).get(0).href;
-        flash_obj.saveData(data, IMAGE_OPTIONS);
         ;;; carp('URL passed to flash: ' + IMAGE_OPTIONS.url);
+        var saved_data = flash_obj.saveData(data, IMAGE_OPTIONS);
+        ;;; carp('flash returned: ', saved_data);
         return false;
     }
     function set_image_form_handlers() {

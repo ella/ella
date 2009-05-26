@@ -12,7 +12,6 @@ from django.template import Template, TextNode, TemplateSyntaxError
 from django.utils.translation import ugettext_lazy as _
 from django.forms.models import ModelChoiceField, ModelMultipleChoiceField
 from django.db.models.fields.related import ManyToManyField
-from django.db.models import signals
 from django.contrib.contenttypes.models import ContentType
 
 from djangomarkup.fields import RichTextField, post_save_listener

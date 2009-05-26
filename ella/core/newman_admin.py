@@ -1,18 +1,16 @@
-from django.utils.translation import ugettext_lazy as _, ugettext, gettext
+from django.utils.translation import ugettext_lazy as _, ugettext
 from django.forms import models as modelforms
 from django.forms.fields import DateTimeField
-#from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 from django.forms.util import ValidationError
 from django.conf.urls.defaults import patterns, url
 from django.utils.safestring import mark_safe
 
-from ella.core.models import Author, Source, Category, Listing, HitCount, Placement
+from ella.core.models import Author, Source, Category, Listing, HitCount, Placement, Related
 from ella.core.models.publishable import Publishable
-
 from ella import newman
-from ella.newman import options, fields, widgets
+from ella.newman import options, fields
 from ella.core.models.main import Related
 
 class ListingForm(modelforms.ModelForm):
@@ -281,12 +279,9 @@ class SourceAdmin(newman.NewmanModelAdmin):
     list_display = ('name', 'url',)
     search_fields = ('name',)
 
-class RelatedInlineAdmin(newman.GenericTabularInline):
+class RelatedInlineAdmin(newman.NewmanTabularInline):
     extra = 3
     model = Related
-    ct_field = 'target_ct'
-    ct_fk_field = 'target_id'
-
 
 class PublishableAdmin(newman.NewmanModelAdmin):
     """ Default admin options for all publishables """

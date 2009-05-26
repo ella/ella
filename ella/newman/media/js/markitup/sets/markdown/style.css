@@ -3,44 +3,52 @@
 // By Jay Salvat - http://markitup.jaysalvat.com/
 // ------------------------------------------------------------------*/
 .markItUp .italic a {
-	background-image:url(images/italic.png);
+    background-image:url(images/italic.png);
 }
 .markItUp .bold a {
-	background-image:url(images/bold.png);
+    background-image:url(images/bold.png);
 }
 .markItUp .url a {
-	background-image:url(images/link.png);
+    background-image:url(images/link.png);
 }
 
 .markItUp .h1 a {
-	background-image:url(images/h1.png);
+    background-image:url(images/h1.png);
 }
 .markItUp .h2 a {
-	background-image:url(images/h2.png);
+    background-image:url(images/h2.png);
 }
 .markItUp .h3 a {
-	background-image:url(images/h3.png);
+    background-image:url(images/h3.png);
 }
 
 .markItUp .list-bullet a {
-	background-image:url(images/list-bullet.png);
+    background-image:url(images/list-bullet.png);
 }
 .markItUp .list-numeric a {
-	background-image:url(images/list-numeric.png);
+    background-image:url(images/list-numeric.png);
 }
 
 .markItUp .quote a {
-	background-image:url(images/quotes.png);
+    background-image:url(images/quotes.png);
+}
+
+/* ella specific */
+.markItUp .photo a {
+    background-image:url(../../../../ico/ct/16/image.png);
+}
+.markItUp .gallery a {
+    background-image:url(../../../../ico/ct/16/folder_image.png);
 }
 .markItUp .box a {
-	background-image:url(images/box.png);
+    background-image:url(images/box.png);
 }
 .markItUp .preview a {
-	background-image:url(images/preview.png);
+    background-image:url(images/preview.png);
 }
 
 #o-quick li {
-	cursor:pointer;float:left;margin-right:10px;padding:2px;font-size:1.3em;list-style:none;border-bottom:1px dashed #000;
+    cursor:pointer;float:left;margin-right:10px;padding:2px;font-size:1.3em;list-style:none;border-bottom:1px dashed #000;
 }
 
 

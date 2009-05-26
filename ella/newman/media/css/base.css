@@ -46,9 +46,21 @@ body {
 
 .overlay {
     position: fixed;
-    background-color: white;
-    border: solid 2px blue;
-    border-top-width: 20px;
+}
+.overlay .overlay-upbar {
+    height: 30px;
+    width: 100%;
+    background-color: blue;
+}
+.overlay .overlay-title {
+    float: left;
+    padding-top:6px;
+    color:white;
+    font-size:16px;
+    font-weight:bold;
+}
+.overlay .overlay-closebutton {
+    float: right;
 }
 
 .error-code object {
@@ -223,14 +235,23 @@ input, textarea, select { padding: 2px 0; font: normal 100% Tahoma, Verdana, san
 .ajax-form .form-metadata { display: none; }
 input.vTextField { width: 500px; }
 input.vIntegerField { width: 40px; text-align: right; }
-input.vForeignKeyRawIdAdminField { width: 40px; }
+input.vForeignKeyRawIdAdminField, input.target_id { width: 50px; }
 input.vDateInput { width: 100px; }
-input.vDateTimeInput { width: 150px; }
+input.vDateTimeInput { width: 120px; }
 
 .form-row * { vertical-align: middle; margin: 2px 0; }
 
 .form-error-msg { display: block; color: #d66; font-weight: bold; padding: 2px 0 2px 18px; background: url(../ico/16/messagebox_warning.png) 0 50% no-repeat; }
 
+#changelist-overlay {
+    top: 0;
+    left: 0;
+    bottom: 0;
+    overflow: auto;
+    background-color: white;
+    border: solid 2px blue;
+    display: none;
+}
 #err-overlay {
     bottom: 70px;
     right: 5px;

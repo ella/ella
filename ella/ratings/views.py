@@ -79,7 +79,7 @@ def do_rate(request, ct, target, plusminus):
 
     kwa['amount'] *= plusminus
 
-    kwa['ip_address'] = request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', None))
+    kwa['ip_address'] = request.META.get('REMOTE_ADDR', None)
 
     # Do the rating
     # Rating will not be neccessary added but fail silently

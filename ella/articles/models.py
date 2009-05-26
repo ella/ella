@@ -5,7 +5,6 @@ from django.utils.timesince import timesince
 from django.utils.translation import ugettext_lazy as _
 
 from ella.core.models import Publishable
-from ella.core.managers import RelatedManager
 from ella.core.cache import get_cached_list
 
 
@@ -26,8 +25,6 @@ class Article(Publishable):
     upper_title = models.CharField(_('Upper title'), max_length=255, blank=True)
     created = models.DateTimeField(_('Created'), default=datetime.now, editable=False, db_index=True)
     updated = models.DateTimeField(_('Updated'), blank=True, null=True)
-
-    objects = RelatedManager()
 
     @property
     def content(self):

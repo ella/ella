@@ -13,15 +13,17 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 
+from ella.core.cache.utils import get_cached_list
 from ella.newman.forms import SiteFilterForm, ErrorReportForm
 from ella.newman.models import AdminSetting
 from ella.newman.decorators import require_AJAX
 from ella.newman.utils import set_user_config_db, set_user_config_session, get_user_config,\
     JsonResponse, JsonResponseError, json_decode, user_category_filter
 from ella.newman.permission import has_model_list_permission, applicable_categories, permission_filtered_model_qs
-from ella.newman.config import CATEGORY_FILTER, NEWMAN_URL_PREFIX, STATUS_SMTP_ERROR, STATUS_FORM_ERROR
+from ella.newman.config import CATEGORY_FILTER, NEWMAN_URL_PREFIX, STATUS_SMTP_ERROR, STATUS_FORM_ERROR,\
+    NON_PUBLISHABLE_CTS
 from ella.newman.options import NewmanModelAdmin
-from ella.core.models.publishable import Placement
+from ella.core.models.publishable import Placement, Publishable
 
 
 class NewmanSite(AdminSite):
@@ -143,9 +145,9 @@ class NewmanSite(AdminSite):
                 next_path = request.get_full_path()
 
                 # load all user's specific settings into session
-                for c in AdminSetting.objects.filter(user=user):
-                    uc = get_user_config(user, c.var)
-                    set_user_config_session(request.session, c.var, uc)
+                for c in AdminSetting.objects.filter(user=user).values('var'):
+                    uc = get_user_config(user, c['var'])
+                    set_user_config_session(request.session, c['var'], uc)
 
                 if request.POST.get('next'):
                     next_path += request.POST.get('next')
@@ -242,5 +244,15 @@ class NewmanSite(AdminSite):
         else:
             return JsonResponseError(ugettext('Error in form.'), status=STATUS_FORM_ERROR)
 
+    @property
+    def applicable_content_types(self):
+
+        acts = []
+        cts = get_cached_list(ContentType)
+        for ct in cts:
+            if issubclass(ct.model_class(), Publishable) or '%s.%s' % (ct.app_label, ct.model) in NON_PUBLISHABLE_CTS:
+                acts.append(ct)
+
+        return acts
 
 site = NewmanSite(name="newman")

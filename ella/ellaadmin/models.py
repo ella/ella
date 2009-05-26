@@ -11,7 +11,6 @@ from django.utils.translation import ugettext_lazy as _, ugettext
 from ella.core.models import Category
 from ella.core.cache import get_cached_object
 
-''' # commented out due to this functionality was moved to ella.newman application.
 #TODO @cache_this
 def has_category_permission(user, model, category, permission):
     if user.has_perm(permission):
@@ -72,16 +71,16 @@ class CategoryUserRole(models.Model):
     """
     Apply all group's permission for the given user to this category.
     """
-    user = models.ForeignKey(User)
-    group = models.ForeignKey(Group)
-    category = models.ForeignKey(Category)
+    user = models.ForeignKey(User, related_name="categoryuserrole_ellaadmin_set")
+    group = models.ForeignKey(Group, related_name="categoryuserrole_ellaadmin_set")
+    category = models.ForeignKey(Category, related_name="categoryuserrole_ellaadmin_set")
 
     def __unicode__(self):
         return ugettext(u'User %(user)s is a %(group)s for %(category)s.') % {
                 'user' : self.user,
                 'group' : self.group,
                 'category' : self.category,
-}
+    }
 
     class Meta:
         verbose_name = _("User role in category")
@@ -100,7 +99,7 @@ class SiteUserRole(models.Model):
                 'user' : self.user,
                 'group' : self.group,
                 'site' : self.site,
-}
+    }
 
     class Meta:
         verbose_name = _("User role in site")
@@ -114,6 +113,3 @@ class CategoryUserRoleOptions(admin.ModelAdmin):
     list_filter = ('user', 'group', 'category',)
     list_display = ('user', 'group', 'category',)
 
-admin.site.register(CategoryUserRole, CategoryUserRoleOptions)
-admin.site.register(SiteUserRole, SiteUserRoleOptions)
-'''

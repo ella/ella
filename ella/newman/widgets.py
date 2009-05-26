@@ -1,15 +1,21 @@
+from itertools import chain
+
 from django import forms
 from django.conf import settings
 from django.utils.safestring import mark_safe
 from django.db.models.fields.related import ForeignKey
 from django.contrib.admin import widgets
-from django.utils.text import truncate_words
 from django.template import Template, Context
 from django.template.loader import get_template
+from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import force_unicode
+from django.utils.html import escape
+from django.utils.text import truncate_words
 
 from ella.ellaadmin.utils import admin_url
-from ella.core.models import Placement, Listing, Category
+from ella.core.models import Category
 from djangomarkup.widgets import RichTextAreaWidget
+
 
 MARKITUP_SET = getattr(settings, 'MARKDOWN', 'markdown')
 MEDIA_PREFIX = getattr(settings, 'NEWMAN_MEDIA_PREFIX', settings.ADMIN_MEDIA_PREFIX)
@@ -250,6 +256,25 @@ class ContentTypeWidget(forms.Select):
     " Custom widget adding a class to attrs. "
     def __init__(self, attrs={}):
         super(ContentTypeWidget, self).__init__(attrs={'class': CLASS_TARGECT})
+
+    @property
+    def applicable_ct_pks(self):
+        from ella.newman import site
+        return [ct.pk for ct in site.applicable_content_types]
+
+    def render_options(self, choices, selected_choices):
+        def render_option(option_value, option_label):
+            option_value = force_unicode(option_value)
+            selected_html = (option_value in selected_choices) and u' selected="selected"' or ''
+            return u'<option value="%s"%s>%s</option>' % (
+                escape(option_value), selected_html, _(option_label))
+        # Normalize to strings.
+        selected_choices = set([force_unicode(v) for v in selected_choices])
+        output = []
+        for option_value, option_label in chain(self.choices, choices):
+            if option_value in self.applicable_ct_pks or not option_value:
+                output.append(render_option(option_value, option_label))
+        return u'\n'.join(output)
 
 class IncrementWidget(forms.TextInput):
     'Self incrementing widget.'

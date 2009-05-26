@@ -39,7 +39,7 @@ def create_poll(case):
     case.choiceC = Choice.objects.create(question=case.question, choice='C')
 
 
-def build_request(user=None, session={}, cookies={}, ip_address=None, proxied_ip_address=None):
+def build_request(user=None, session={}, cookies={}, ip_address=None):
     """
     Returns request object with useful attributes
     """
@@ -53,8 +53,6 @@ def build_request(user=None, session={}, cookies={}, ip_address=None, proxied_ip
     request.__class__.user = user or LazyUser()
     # Meta
     request.META['REMOTE_ADDR'] = ip_address or '0.0.0.0'
-    if proxied_ip_address:
-        request.META['HTTP_X_FORWARDED_FOR'] = proxied_ip_address
     return request
 
 

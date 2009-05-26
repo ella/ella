@@ -5,7 +5,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 
 from ella import newman
-from ella.tagging.admin import TaggingInlineOptions
 
 from ella.galleries.models import Gallery, GalleryItem
 from ella.core.newman_admin import PlacementInlineAdmin, PublishableAdmin
@@ -41,7 +40,7 @@ class GalleryItemFormset(newman.options.BaseInlineFormSet):
 class GalleryItemInline(newman.NewmanTabularInline):
     model = GalleryItem
     extra = 10
-    formset = GalleryItemFormset
+#    formset = GalleryItemFormset
 
 class GalleryAdmin(PublishableAdmin):
     ordering = ('-created',)
@@ -53,8 +52,6 @@ class GalleryAdmin(PublishableAdmin):
     search_fields = ('title', 'description', 'slug',)
     inlines = [GalleryItemInline, PlacementInlineAdmin]
     rich_text_fields = {None: ('description', 'content',)}
-    if 'ella.tagging' in settings.INSTALLED_APPS:
-        inlines.append(TaggingInlineOptions)
     prepopulated_fields = {'slug': ('title',)}
 
 newman.site.register(Gallery, GalleryAdmin)

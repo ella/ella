@@ -5,8 +5,6 @@
 #from django.conf import settings
 #from django.forms.util import ValidationError
 #
-#from ella.tagging.admin import TaggingInlineOptions
-#
 #from ella.core.admin import PlacementInlineOptions
 #
 #from ella.ellaadmin.options import EllaAdminOptionsMixin
@@ -106,8 +104,6 @@
 #    list_filter = ('category', 'active_from',)
 #    search_fields = ('title', 'text_announcement', 'text', 'text_results',)
 #    inlines = [ QuestionInlineOptions, PlacementInlineOptions ]
-#    if 'ella.tagging' in settings.INSTALLED_APPS:
-#        inlines.append(TaggingInlineOptions)
 #    raw_id_fields = ('photo',)
 #    prepopulated_fields = {'slug' : ('title',)}
 #    rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}
@@ -117,8 +113,6 @@
 #    list_filter = ('category', 'active_from',)
 #    search_fields = ('title', 'text_announcement', 'text', 'text_results',)
 #    inlines = [ QuestionInlineOptions, ResultTabularOptions, PlacementInlineOptions ]
-#    if 'ella.tagging' in settings.INSTALLED_APPS:
-#        inlines.append(TaggingInlineOptions)
 #    raw_id_fields = ('photo',)
 #    prepopulated_fields = {'slug' : ('title',)}
 #    rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}
@@ -142,4 +136,3 @@
 #admin.site.register(Choice, ChoiceOptions)
 #admin.site.register(Vote, VoteOptions)
 #admin.site.register(Contestant, ContestantOptions)
-
