@@ -31,9 +31,9 @@ class PlacementForm(modelforms.ModelForm):
             initial = [ c.pk for c in Category.objects.distinct().filter(listing__placement=kwargs['initial']['id']) ]
         elif 'instance' in kwargs:
             initial = {
-                'selected_categories': [ 
-                    c.pk for c in Category.objects.distinct().filter(listing__placement=kwargs['instance'].pk) 
-                ], 
+                'selected_categories': [
+                    c.pk for c in Category.objects.distinct().filter(listing__placement=kwargs['instance'].pk)
+                ],
                 'listings': list(kwargs['instance'].listing_set.all())
             }
 
@@ -54,7 +54,7 @@ class PlacementForm(modelforms.ModelForm):
         instance = self.instance
         if not list_cats:
             return instance
-        
+
         def save_them():
             listings = dict([ (l.category, l) for l in Listing.objects.filter(placement=instance.pk) ])
 
@@ -127,9 +127,9 @@ class PlacementForm(modelforms.ModelForm):
         main = None
         d = self.cleaned_data
         # empty form
-        if not d: 
+        if not d:
             return self.cleaned_data
-        #if cat and cat == cat and cat: # should be equiv. if cat:...  
+        #if cat and cat == cat and cat: # should be equiv. if cat:...
         if cat:
             main = d
 
@@ -173,7 +173,7 @@ class PlacementForm(modelforms.ModelForm):
         if cat and not main:
             # raise forms.ValidationError(_('If object has a category, it must have a main placement.'))
             raise (_('If object has a category, it must have a main placement.'))
-        
+
         self.listings_clean(self.data)
         return self.cleaned_data
 
@@ -287,7 +287,7 @@ class PublishableAdmin(newman.NewmanModelAdmin):
 
     exclude = ('content_type',)
     list_display = ('admin_link', 'category', 'photo_thumbnail', 'publish_from', 'placement_link', 'site_icon')
-    list_filter = ('category__site', 'category', 'authors', 'content_type')
+    list_filter = ('category__site', 'category', 'authors', 'content_type', 'publish_from')
     search_fields = ('title', 'description', 'slug', 'authors__name', 'authors__slug',) # FIXME: 'tags__tag__name',)
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
