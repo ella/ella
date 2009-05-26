@@ -83,7 +83,7 @@ class Migration:
         db.delete_table('%s_authors' % table)
 
         # drop duplicate columns
-        for column in ['title', 'category_id', 'photo_id', 'source_id', 'slug', 'id', 'perex']:
+        for column in ('category_id', 'perex', 'id', 'slug', 'photo_id', 'source_id', 'title'):
             db.delete_column(table, column)
 
     def forwards_generic_relations(self, orm):
@@ -264,3 +264,4 @@ class Migration:
     }
 
     complete_apps = ['articles']
+
