@@ -6,7 +6,7 @@ from ella.core.models import *
 class Migration:
 
     depends_on = (
-        #("*", "0001_initial"), # TODO: south cannot do this, but it is necessary for empty db
+        ('photos', '0001_initial'),
     )
  
     def forwards(self, orm):
