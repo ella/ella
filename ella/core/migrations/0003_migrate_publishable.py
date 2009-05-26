@@ -23,7 +23,8 @@ class Migration:
         db.delete_column('core_related', 'source_ct_id')
 
         # Adding field 'Placement.publishable'
-        db.add_column('core_placement', 'publishable', models.ForeignKey(orm.Publishable, verbose_name=_('Publishable object')))
+        # TODO: after data migration null=True, blank=True must be removed
+        db.add_column('core_placement', 'publishable', models.ForeignKey(orm.Publishable, verbose_name=_('Publishable object'), null=True, blank=True))
         # Deleting field 'Placement.target_id'
         db.delete_column('core_placement', 'target_id')
         # Deleting field 'Placement.target_ct'
