@@ -68,7 +68,7 @@ class Migration:
         # drop primary key
         db.alter_column(table, 'id', models.IntegerField(null=True, blank=True))
         # replace it with a link to parent
-        db.alter_column(table, 'publishable_ptr', models.OneToOneField(orm['core.Publishable']), null=False, blank=False)
+        db.alter_column(table, 'publishable_ptr', models.OneToOneField(orm['core.Publishable'], null=False, blank=False))
 
         # update authors
         db.execute('''
