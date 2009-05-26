@@ -178,9 +178,9 @@ class NewmanSite(AdminSite):
             data['sites'] = []
 
         publishable_lookup_fields = {
-            'day': 'placement__publish_from__day',
-            'month': 'placement__publish_from__month',
-            'year': 'placement__publish_from__year'
+            'day': 'publish_from__day',
+            'month': 'publish_from__month',
+            'year': 'publish_from__year'
         }
         site_filter_form = SiteFilterForm(data=data, user=request.user)
         cts = []
