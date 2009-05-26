@@ -49,3 +49,29 @@ class FilterChangeList(FilterableChangeList):
         self.title = (ugettext('Select %s') % force_unicode(self.opts.verbose_name) or ugettext('Select %s to change') % force_unicode(self.opts.verbose_name))
         self.params = dict(request.GET.items())
         self.filter_specs, self.has_filters = self.get_filters(request)
+
+    def get_filters(self, request):
+        filter_specs = []
+        if self.list_filter:
+            lookup_opts = self.lookup_opts
+            for filter_name in self.list_filter:
+                if '__' in filter_name:
+                    f = None
+                    model = self.model
+                    path = filter_name.split('__')
+                    for field_name in path[:-1]:
+                        f = model._meta.get_field(field_name)
+                        model = f.rel.to
+                        f = model._meta.get_field(path[-1])
+                        spec = FilterSpec.create(f, request, self.params, model, self.model_admin, field_path=filter_name)
+                else:
+                    f = lookup_opts.get_field(filter_name)
+                    spec = FilterSpec.create(f, request, self.params, self.model, self.model_admin)
+                if spec and spec.has_output():
+                    filter_specs.append(spec)
+        if hasattr(self.model_admin, 'unbound_list_filter'):
+            for klass in self.model_admin.unbound_list_filter:
+                spec = klass(None, request, self.params, self.model, self.model_admin)
+                if spec and spec.has_output():
+                    filter_specs.append(spec)
+        return filter_specs, bool(filter_specs)

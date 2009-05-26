@@ -23,12 +23,17 @@ class CustomFilterSpec(filterspecs.FilterSpec):
         self.lookup_kwarg = 'NOT SET'
         self.f = f
         self.request_get = request.GET
-        super(CustomFilterSpec, self).__init__(f, request, params, model, model_admin, field_path=field_path)
+        if self.f:
+            # funny conditional parent constructor call
+            super(CustomFilterSpec, self).__init__(f, request, params, model, model_admin, field_path=field_path)
         self.request_path_info = request.path_info
-        self.title_text = self.field.verbose_name
+        self.title_text = ''
+        if self.f:
+            self.title_text = self.f.verbose_name
         self.active_filter_lookup = None
         self.all_choices = []
         self.selected_item = None
+        self.remove_from_querystring = []  # may be used as list of keys to be removed from querystring when outputting links 
 
     def filter_func(self):
         raise NotImplementedError('filter_func() method should be overloaded (substituted at run-time).')
@@ -121,7 +126,7 @@ class CustomFilterSpec(filterspecs.FilterSpec):
         for title, param_dict in self.links:
             params = make_unicode_params(param_dict)
             yield {'selected': selected == params,
-                   'query_string': cl.get_query_string(param_dict, []),
+                   'query_string': cl.get_query_string(param_dict, self.remove_from_querystring),
                    'display': title}
 
     def get_selected(self):
