@@ -253,6 +253,10 @@ input.vDateTimeInput { width: 120px; }
     border: solid 2px blue;
     display: none;
 }
+
+#changelist-overlay #filters {
+    top: 65px;
+}
 #err-overlay {
     bottom: 80px;
     right: 10px;
