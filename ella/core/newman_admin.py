@@ -312,13 +312,48 @@ class IsPublishedFilter(CustomFilterSpec):
         fspec.remove_from_querystring = [lookup_var_published, lookup_var_not_published]
         return True
 
+class PublishFromFilter(CustomFilterSpec):
+    " Publish from customized filter. "
+    published_from_field_path = 'placement__listing__publish_from'
+
+    def title(self):
+        return _('Publish from')
+
+    def get_lookup_kwarg(self):
+        out = [
+            '%s__day' % self.published_from_field_path,
+            '%s__month' % self.published_from_field_path,
+            '%s__year' % self.published_from_field_path,
+        ]
+        return out
+
+    def filter_func(fspec):
+        # SELECT created FROM qs._meta.dbtable  GROUP BY created
+        #qs = fspec.model_admin.queryset(fspec.request)
+        #dates =  qs.dates(fspec.field_path, 'day', 'DESC')[:365]
+        # Article.objects.filter(placement__listing__publish_from__gte='2012-01-01')
+        YEAR = 365*24*60*60
+        ts = time.time() - YEAR
+        last_year = time.strftime('%Y-%m-%d %H:%M', time.localtime(ts))
+        qs = Placement.objects.filter(listing__publish_from__gte=last_year)
+        dates = qs.dates('publish_from', 'day', 'DESC')
+        for date in dates:
+            lookup_dict = dict()
+            lookup_dict['%s__day' % fspec.published_from_field_path] = date.day
+            lookup_dict['%s__month' % fspec.published_from_field_path] = date.month
+            lookup_dict['%s__year' % fspec.published_from_field_path] = date.year
+            link_text = '%d. %d. %d' % (date.day, date.month, date.year)
+            link = ( link_text, lookup_dict)
+            fspec.links.append(link)
+        return True
+
 class PublishableAdmin(newman.NewmanModelAdmin):
     """ Default admin options for all publishables """
 
     exclude = ('content_type',)
     list_display = ('admin_link', 'category', 'photo_thumbnail', 'publish_from', 'placement_link', 'site_icon')
-    list_filter = ('category__site', 'category', 'authors', 'content_type', 'publish_from')
-    unbound_list_filter = (IsPublishedFilter,)
+    list_filter = ('category__site', 'category', 'authors', 'content_type')
+    unbound_list_filter = (PublishFromFilter, IsPublishedFilter,)
     search_fields = ('title', 'description', 'slug', 'authors__name', 'authors__slug',) # FIXME: 'tags__tag__name',)
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
