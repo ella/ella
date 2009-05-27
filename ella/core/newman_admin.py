@@ -1,4 +1,4 @@
-import time
+import datetime, time
 
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.forms import models as modelforms
@@ -8,6 +8,8 @@ from django.db.models import Q
 from django.forms.util import ValidationError
 from django.conf.urls.defaults import patterns, url
 from django.utils.safestring import mark_safe
+from django.template.defaultfilters import date
+from django.conf import settings
 
 from ella.core.models import Author, Source, Category, Listing, HitCount, Placement, Related, Publishable
 from ella.core.models.publishable import PUBLISH_FROM_WHEN_EMPTY
@@ -351,7 +353,7 @@ class PublishableAdmin(newman.NewmanModelAdmin):
     """ Default admin options for all publishables """
 
     exclude = ('content_type',)
-    list_display = ('admin_link', 'category', 'photo_thumbnail', 'publish_from', 'placement_link', 'site_icon')
+    list_display = ('admin_link', 'category', 'photo_thumbnail', 'publish_from_nice', 'placement_link', 'site_icon')
     list_filter = ('category__site', 'category', 'authors', 'content_type')
     unbound_list_filter = (PublishFromFilter, IsPublishedFilter,)
     search_fields = ('title', 'description', 'slug', 'authors__name', 'authors__slug',) # FIXME: 'tags__tag__name',)
@@ -379,18 +381,32 @@ class PublishableAdmin(newman.NewmanModelAdmin):
     site_icon.short_description = _('site')
     site_icon.allow_tags = True
 
+    def publish_from_nice(self, obj):
+        span_str = '<span class="%s">%s</span>'
+        date_str = date(obj.publish_from, settings.DATETIME_FORMAT)
+
+        if obj.publish_from.year >= 3000:
+            return mark_safe(span_str % ('unpublished', ugettext('No placement')))
+        elif obj.publish_from > datetime.datetime.now():
+            return span_str % ('unpublished', date_str)
+        return span_str % ('published', date_str)
+    publish_from_nice.short_description = _('Publish from')
+    publish_from_nice.admin_order_field = 'publish_from'
+    publish_from_nice.allow_tags = True
+
     def photo_thumbnail(self, object):
         photo = object.get_photo()
         if photo:
             return mark_safe(photo.thumb())
         else:
-            return mark_safe('<div class="errors"><ul class="errorlist"><li>%s</li></ul></div>' % ugettext('No main photo!'))
+            return mark_safe('<span class="form-error-msg">%s</span>' % ugettext('No main photo!'))
     photo_thumbnail.allow_tags = True
     photo_thumbnail.short_description = _('Photo')
 
     def placement_link(self, object):
         if object.main_placement:
-            return mark_safe('<a class="hashadr" href="/core/placement/%d/">%s</a>' % (object.main_placement.pk, object.main_placement.category))
+            return mark_safe('<span class="published"><a class="hashadr" href="/core/placement/%d/">%s</a></span>' % (object.main_placement.pk, object.main_placement.category))
+        return mark_safe('<span class="unpublished">%s</span>' % ugettext('No placement'))
     placement_link.allow_tags = True
     placement_link.short_description = _('Placement')
 

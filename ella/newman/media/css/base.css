@@ -399,6 +399,15 @@ div.pop #filters { top: 35px }
     padding: 2px 0;
 }
 
+/* CHANGELIST CUSTOM TDs */
+#changelist td span.unpublished, #changelist td span.published {
+    background: transparent url(../ico/10/icon-yes.gif) 0 50% no-repeat;
+    padding-left: 17px;
+}
+#changelist td span.unpublished {
+    background-image: url(../ico/10/icon-no.gif);
+}
+
 /* FILTERS (UN)PACKING - TEMPORARY */
 #filters ul {
     display: none;
