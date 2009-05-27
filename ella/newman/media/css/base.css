@@ -30,7 +30,7 @@ body {
     margin-top: 105px;
 }
 
-#container { min-width: 840px; }
+#container, .favs, #menu-top { min-width: 940px; }
 
 #header {
     position: fixed;
