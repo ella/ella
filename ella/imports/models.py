@@ -8,6 +8,7 @@ from django.utils.html import strip_tags
 from django.utils.translation import ugettext_lazy as _
 from django.utils.safestring import mark_safe
 from django.template.defaultfilters import slugify
+from django.core.files.base import ContentFile
 
 from ella.photos.models import Photo
 from ella.articles.models import Article
@@ -199,7 +200,7 @@ class ServerItem(models.Model):
             imported_photo.slug = self.slug
             imported_photo.description = self.photo_url
             # Saves "imported.jpg" file, which has been created when importing item with picture
-            imported_photo.save_image_file('imported.jpg', image_raw)
+            imported_photo.image.save( 'imported.jpg', ContentFile( image_raw ) )
             imported_photo.save()
             self.photo = imported_photo
 
