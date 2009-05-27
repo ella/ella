@@ -54,10 +54,10 @@ class PlacementForm(modelforms.ModelForm):
     def save(self, commit=True):
         list_cats = self.cleaned_data.pop('listings')
         instance = self.instance
-        if not list_cats:
-            return instance
 
         def save_them():
+            if not list_cats:
+                return
             listings = dict([ (l.category, l) for l in Listing.objects.filter(placement=instance.pk) ])
 
             for c in list_cats:
