@@ -11,7 +11,7 @@
 // Feel free to add more tags
 // -------------------------------------------------------------------\
 
-mySettings = {
+MARKITUP_SETTINGS = {
     previewParserPath:    BASE_URL + 'nm/editor-preview/',
     previewParserVar:   "text",
     onShiftEnter:		{keepDefault:false, openWith:'\n\n'},
@@ -106,7 +106,7 @@ $(function(){
             height: 300
         });
     }
-    $('.rich_text_area').markItUp(mySettings);
+    $('.rich_text_area').markItUp(MARKITUP_SETTINGS);
 });
 
 // mIu nameSpace to avoid conflict.

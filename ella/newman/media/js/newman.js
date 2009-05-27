@@ -397,7 +397,7 @@ $( function() {
     AjaxFormLib.ajax_submit_error = ajax_submit_error;
     
     // Submit button
-    $('.ajax-form a.ok').live('click', function(evt) {
+    $('.ajax-form a.submit').live('click', function(evt) {
         if (evt.button != 0) return true;    // just interested in left button
         if ($(this).hasClass('noautosubmit')) return true;
         var $form = $(this).closest('.ajax-form');
@@ -689,7 +689,9 @@ function save_change_form_success(text_data, options) {
                 }
                 adr('../'+object_id+'/');
             }
-            // else do nothing
+            else {
+                ContentByHashLib.reload_content('content');
+            }
         },
         _saveasnew_: function() {
             if (!object_id) {
@@ -788,6 +790,17 @@ $('.help-button').live('mouseover', function() {
     $(this).closest('.help-enhanced').find('.help').slideToggle();
 });
 
+// RichText editor -- re-initialize markitup on newly added rich text areas.
+$(document).bind('content_added', function(evt) {
+    if ( ! window.MARKITUP_SETTINGS ) return;  // let them initialize themselves on document load -- avoid action here
+    var $target = $( evt.target );
+    // let those rich text areas alone that are in .markItUpContainer -- they are already initialized
+    $target.find('.rich_text_area').not('.markItUpContainer .rich_text_area').each( function() {
+        $(this).markItUp(MARKITUP_SETTINGS);
+    });
+});
+
+// Related lookup
 $(document).bind('content_added', function() {
     if ($('.suggest-related-lookup').length) {
         request_media(MEDIA_URL +  'js/related_lookup.js?' +MEDIA_VERSION);
