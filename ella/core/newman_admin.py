@@ -29,7 +29,6 @@ class PlacementForm(modelforms.ModelForm):
     def __init__(self, *args, **kwargs):
         initial = []
         # args[data] -> instance
-        print '__init__ args:', str(args) , kwargs
         if 'initial' in kwargs:
             initial = [ c.pk for c in Category.objects.distinct().filter(listing__placement=kwargs['initial']['id']) ]
         elif 'instance' in kwargs:
@@ -287,7 +286,6 @@ class RelatedInlineAdmin(newman.NewmanTabularInline):
 
 class IsPublishedFilter(CustomFilterSpec):
     " Published/Nonpublished objects filter"
-    #lookup_var = 'placement__publish_from'
     lookup_var = 'publish_from'
 
     def title(self):
@@ -296,18 +294,20 @@ class IsPublishedFilter(CustomFilterSpec):
     def get_lookup_kwarg(self):
         for param in self.request_get:
             if param.startswith(self.lookup_var):
+                self.selected_lookup = param
                 return param
         return ''
 
     def filter_func(fspec):
         # nepublikovany = nemaji placement (datum 3000) ci maji placement v budoucnu
         # ?placement__publish_from__exact=2008-10-10
-        lookup_var_not_published = '%s__exact' % fspec.lookup_var
-        lookup_var_published = '%s__lt' % fspec.lookup_var
+        lookup_var_not_published = '%s__gt' % fspec.lookup_var
+        lookup_var_published = '%s__lte' % fspec.lookup_var
         when = time.strftime('%Y-%m-%d', PUBLISH_FROM_WHEN_EMPTY.timetuple())
-        link = ( _('Not published'), {lookup_var_not_published: when})
+        now = time.strftime('%Y-%m-%d')
+        link = ( _('Not published'), {lookup_var_not_published: now})
         fspec.links.append(link)
-        link = ( _('Published'), {lookup_var_published: when})
+        link = ( _('Published'), {lookup_var_published: now})
         fspec.links.append(link)
         fspec.remove_from_querystring = [lookup_var_published, lookup_var_not_published]
         return True
