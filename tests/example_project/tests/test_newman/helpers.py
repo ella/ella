@@ -25,7 +25,7 @@ class NewmanTestCase(SeleniumTestCase):
                     'ok': "//div[@id='opmsg']/span[@class='okmsg']",
                 },
                 'add' : "//a[@class='hashadr icn btn add']",
-                'save' : "//a[@class='icn btn ok def']",
+                'save' : "//a[@class='submit icn btn save def']",
                 'show_filters' : "//div[@id='filters-handler']/a",
             },
             'pages' : {
