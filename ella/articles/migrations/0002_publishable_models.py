@@ -57,7 +57,7 @@ class Migration:
             UPDATE
                 `core_publishable` pub INNER JOIN `%(table)s` art ON (art.`id` = pub.`old_id`)
             SET
-                art.`publishable_ptr_id` = pub.`id`
+                art.`publishable_ptr` = pub.`id`
             WHERE
                 pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = '%(app)s' AND ct.`model` = '%(mod)s');
             ''' % {'app': app, 'mod': mod, 'table': table,}
