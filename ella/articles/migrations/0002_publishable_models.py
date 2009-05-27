@@ -64,7 +64,7 @@ class Migration:
         )
 
         # drop foreign key constraint from intermediate table
-        db.alter_column('%s_authors' % table, 'article', models.IntegerField())
+        db.alter_column('%s_authors' % table, mod, models.IntegerField())
         # drop primary key
         db.alter_column(table, 'id', models.IntegerField(null=True, blank=True))
         # replace it with a link to parent
@@ -75,7 +75,7 @@ class Migration:
             INSERT INTO
                 `core_publishable_authors` (`publishable_id`, `author_id`)
             SELECT
-                art.`publishable_ptr_id`, art_aut.`author_id`
+                art.`publishable_ptr_id`, art_aut.`author`
             FROM
                 `%(table)s` art INNER JOIN `%(table)s_authors` art_aut ON (art.`id` = art_aut.`%(mod)s`);
             ''' % {'app': app, 'mod': mod, 'table': table,}
