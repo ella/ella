@@ -323,6 +323,12 @@ td, th {
 #changelist .actions { padding: 5px; }
 #changelist .actions label { display: inline; }
 
+#changelist p.paginator {
+    text-align: right;
+    background: #ddd url(../img/nav-bg-reverse.gif) 0 0 repeat-x;
+    padding: 3px 5px;
+}
+
 /* OPERATION MESSAGES */
 #opmsg {
     position: fixed;
