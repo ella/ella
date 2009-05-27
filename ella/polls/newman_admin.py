@@ -9,6 +9,7 @@ from ella import newman
 from ella.core.newman_admin import PlacementInlineAdmin, PublishableAdmin
 from ella.core.cache import get_cached_object_or_404
 from ella.polls.models import Poll, Contest, Contestant, Quiz, Result, Choice, Vote, Question
+from django.template.defaultfilters import striptags
 
 
 class ResultFormset(BaseInlineFormSet):
@@ -50,10 +51,13 @@ class QuestionAdmin(newman.NewmanModelAdmin):
     Admin options for Question model:
         * edit inline choices
     """
+    list_display = ('__unicode__', 'quiz', 'contest',)
     inlines = (ChoiceTabularAdmin,)
     ordering = ('question',)
     search_fields = ('question',)
-    rich_text_fields = {'small': ('question',)}
+
+    rich_text_fields = {None: ('question',)}
+
 
 class ChoiceAdmin(newman.NewmanModelAdmin):
     """
