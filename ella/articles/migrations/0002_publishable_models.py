@@ -64,11 +64,13 @@ class Migration:
         )
 
         # drop foreign key constraint from intermediate table
-        db.alter_column('%s_authors' % table, mod, models.IntegerField())
+        db.alter_column('%s_authors' % table, '%s_id' % mod, models.IntegerField())
+        db.rename_column('%s_authors' % table, '%s_id' % mod, mod)
         # drop primary key
         db.alter_column(table, 'id', models.IntegerField(null=True, blank=True))
         # replace it with a link to parent
-        db.alter_column(table, 'publishable_ptr', models.OneToOneField(orm['core.Publishable'], null=False, blank=False))
+        db.rename_column(table, 'publishable_ptr', 'publishable_ptr_id')
+        db.alter_column(table, 'publishable_ptr_id', models.OneToOneField(orm['core.Publishable'], null=False, blank=False))
 
         # update authors
         db.execute('''
@@ -87,6 +89,9 @@ class Migration:
             db.delete_column(table, column)
 
     def forwards_generic_relations(self, orm):
+        '''
+        TODO: dodelat
+        '''
 
         app = self.app_name
         mod = self.module_name
@@ -111,6 +116,9 @@ class Migration:
         )
 
     def forwards_placements(self, orm):
+        '''
+        TODO: dodelat
+        '''
 
         app = self.app_name
         mod = self.module_name
