@@ -37,7 +37,7 @@
             <div id="footer">
                 <div class="user-tools">
                     <strong>{% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user|capfirst }}{% endif %} ({{ user.last_login|date:"j.n. H:i" }})</strong>
-                    | {% trans "What's new?" %}
+                    {# | {% trans "What's new?" %} #}
                     {% if DEBUG %}
                         | {{ VERSION }}, {{ SERVER_INFO.type }}
                         | <a class="icn visible" onclick="$('#debug').toggle()">debug log</a>

@@ -323,6 +323,12 @@ td, th {
 #changelist .actions { padding: 5px; }
 #changelist .actions label { display: inline; }
 
+#changelist p.paginator {
+    text-align: right;
+    background: #ddd url(../img/nav-bg-reverse.gif) 0 0 repeat-x;
+    padding: 3px 5px;
+}
+
 /* OPERATION MESSAGES */
 #opmsg {
     position: fixed;
@@ -397,6 +403,15 @@ div.pop #filters { top: 35px }
 #filters div.filter {
     float: left;
     padding: 2px 0;
+}
+
+/* CHANGELIST CUSTOM TDs */
+#changelist td span.unpublished, #changelist td span.published {
+    background: transparent url(../ico/10/icon-yes.gif) 0 50% no-repeat;
+    padding-left: 17px;
+}
+#changelist td span.unpublished {
+    background-image: url(../ico/10/icon-no.gif);
 }
 
 /* FILTERS (UN)PACKING - TEMPORARY */

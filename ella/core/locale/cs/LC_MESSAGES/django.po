@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-05-01 07:27+0200\n"
-"PO-Revision-Date: 2009-05-01 09:32+0100\n"
+"POT-Creation-Date: 2009-05-27 16:49+0200\n"
+"PO-Revision-Date: 2009-05-27 16:50+0100\n"
 "Last-Translator: Vitek Pliska <whit@jizak.cz>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -19,17 +19,21 @@ msgstr ""
 msgid "Core"
 msgstr "Základní"
 
-#: admin.py:18
-#: admin.py:29
-#: newman_admin.py:18
-#: newman_admin.py:29
-#: models/main.py:161
-#: models/publishable.py:38
+#: admin.py:15
+#: admin.py:26
+#: newman_admin.py:26
+#: newman_admin.py:45
+#: migrations/0002_publishable_models.py:18
+#: migrations/0003_migrate_publishable.py:33
+#: migrations/0003_migrate_publishable.py:42
+#: models/main.py:158
+#: models/publishable.py:40
+#: models/publishable.py:189
+#: models/publishable.py:300
 msgid "Category"
 msgstr "Kategorie"
 
-#: admin.py:126
-#: newman_admin.py:126
+#: admin.py:123
 #, python-format
 msgid ""
 "There is already a Placement object published in\n"
@@ -37,8 +41,8 @@ msgid ""
 "                        Please change the slug or publish date."
 msgstr ""
 
-#: admin.py:149
-#: newman_admin.py:149
+#: admin.py:146
+#: newman_admin.py:179
 msgid "If object has a category, it must have a main placement."
 msgstr "Pokud má objekt kategorii, musí mít i hlavní umístění."
 
@@ -53,221 +57,319 @@ msgstr "Prvních %(count)d objektů typu %(ctype)s z kategorie %(cat)s."
 msgid "Top %(count)d objects in category %(cat)s."
 msgstr "Prvních %(count)d objektů z kategorie %(cat)s."
 
+#: newman_admin.py:170
+#, python-format
+msgid ""
+"There is already a Placement object published in\n"
+"                    category %(category)s with the same URL referring to %(target)s.\n"
+"                    Please change the slug or publish date."
+msgstr ""
+
 #: newman_admin.py:258
+msgid "View on site"
+msgstr "Zobrazit na webu"
+
+#: newman_admin.py:294
+msgid "Is published?"
+msgstr "Publikováno?"
+
+#: newman_admin.py:310
+msgid "No"
+msgstr "Ne"
+
+#: newman_admin.py:312
+msgid "Yes"
+msgstr "Ano"
+
+#: newman_admin.py:322
+#: newman_admin.py:393
+#: migrations/0002_publishable_models.py:24
+#: models/publishable.py:58
+msgid "Publish from"
+msgstr "Publikovat od"
+
+#: newman_admin.py:377
+#: migrations/0003_migrate_publishable.py:27
+#: models/publishable.py:62
+#: models/publishable.py:188
+msgid "Publishable object"
+msgstr "Publikovatelný objekt"
+
+#: newman_admin.py:381
+msgid "site"
+msgstr "web"
+
+#: newman_admin.py:389
+msgid "No placement"
+msgstr "Bez publikace"
+
+#: newman_admin.py:402
 msgid "No main photo!"
 msgstr "Není výchozí foto!"
 
-#: newman_admin.py:260
-#: models/publishable.py:49
+#: newman_admin.py:404
+#: migrations/0002_publishable_models.py:22
+#: models/publishable.py:51
 msgid "Photo"
 msgstr "Foto"
+
+#: newman_admin.py:411
+#: migrations/0003_migrate_publishable.py:44
+#: models/publishable.py:200
+#: models/publishable.py:299
+msgid "Placement"
+msgstr "Publikace"
 
 #: urls.py:52
 #: urls.py:53
 #: urls.py:56
 #: urls.py:58
+#: migrations/0003_migrate_publishable.py:35
+#: models/publishable.py:194
 msgid "static"
 msgstr "statický"
 
-#: migrations/0001_initial.py:19
-#: migrations/0001_initial.py:27
-#: models/main.py:22
-#: models/main.py:41
-msgid "Name"
-msgstr "Jméno"
-
-#: migrations/0001_initial.py:20
-#: migrations/0001_initial.py:40
-#: migrations/0001_initial.py:74
-#: migrations/0001_initial.py:101
-#: models/main.py:23
-#: models/main.py:81
-#: models/publishable.py:42
-#: models/publishable.py:185
-msgid "Slug"
-msgstr ""
-
-#: migrations/0001_initial.py:21
-#: migrations/0001_initial.py:29
-#: migrations/0001_initial.py:77
-#: models/main.py:24
-#: models/main.py:43
-#: models/publishable.py:52
-msgid "Description"
-msgstr "Popisek"
-
-#: migrations/0001_initial.py:22
-#: models/main.py:25
-msgid "Text"
-msgstr "Text"
-
-#: migrations/0001_initial.py:28
-#: models/main.py:42
-msgid "URL"
-msgstr "URL"
-
-#: migrations/0001_initial.py:39
-#: models/main.py:80
+#: migrations/0001_initial.py:13
+#: migrations/old/0001_initial.py:39
+#: models/main.py:79
 msgid "Category Title"
 msgstr "Název kategorie"
 
-#: migrations/0001_initial.py:41
-#: models/main.py:82
+#: migrations/0001_initial.py:14
+#: migrations/0001_initial.py:30
+#: migrations/0001_initial.py:81
+#: migrations/0002_publishable_models.py:20
+#: migrations/old/0001_initial.py:20
+#: migrations/old/0001_initial.py:40
+#: migrations/old/0001_initial.py:74
+#: migrations/old/0001_initial.py:101
+#: models/main.py:22
+#: models/main.py:80
+#: models/publishable.py:44
+#: models/publishable.py:192
+msgid "Slug"
+msgstr ""
+
+#: migrations/0001_initial.py:15
+#: migrations/old/0001_initial.py:41
+#: models/main.py:81
 msgid "Parent Category"
 msgstr "Rodičovská kategorie"
 
-#: migrations/0001_initial.py:42
-#: models/main.py:83
+#: migrations/0001_initial.py:16
+#: migrations/old/0001_initial.py:42
+#: models/main.py:82
 msgid "Path from root category"
 msgstr "Cesta ke kořenové kategorii"
 
-#: migrations/0001_initial.py:43
-#: models/main.py:84
+#: migrations/0001_initial.py:17
+#: migrations/old/0001_initial.py:43
+#: models/main.py:83
 msgid "Category Description"
 msgstr "Popis kategorie"
 
-#: migrations/0001_initial.py:73
-#: models/publishable.py:41
-msgid "Title"
-msgstr "Titulek"
-
-#: migrations/0001_initial.py:99
-#: models/publishable.py:183
+#: migrations/0001_initial.py:28
+#: migrations/old/0001_initial.py:99
+#: models/publishable.py:190
 msgid "Start of visibility"
 msgstr "Začátek zveřejnění"
 
-#: migrations/0001_initial.py:100
-#: models/publishable.py:184
+#: migrations/0001_initial.py:29
+#: migrations/old/0001_initial.py:100
+#: models/publishable.py:191
 msgid "End of visibility"
 msgstr "Konec zveřejnění"
 
-#: migrations/0001_initial.py:114
-#: models/publishable.py:280
+#: migrations/0001_initial.py:40
+#: migrations/old/0001_initial.py:114
+#: models/publishable.py:302
 msgid "Start of listing"
 msgstr "Začátek umístění"
 
-#: migrations/0001_initial.py:115
-#: models/publishable.py:281
-msgid "End of listing"
-msgstr "Konec umístění"
-
-#: migrations/0001_initial.py:116
-#: models/publishable.py:283
+#: migrations/0001_initial.py:41
+#: migrations/old/0001_initial.py:116
+#: models/publishable.py:305
 msgid "Start of prioritized listing"
 msgstr "Začátek prioritizace"
 
-#: migrations/0001_initial.py:117
-#: models/publishable.py:284
+#: migrations/0001_initial.py:42
+#: migrations/old/0001_initial.py:117
+#: models/publishable.py:306
 msgid "End of prioritized listing"
 msgstr "Konec prioritizace"
 
-#: migrations/0001_initial.py:118
-#: models/publishable.py:285
+#: migrations/0001_initial.py:43
+#: migrations/old/0001_initial.py:118
+#: models/publishable.py:307
 msgid "Priority"
 msgstr "Priorita"
 
-#: migrations/0001_initial.py:119
-#: models/publishable.py:287
+#: migrations/0001_initial.py:44
+#: migrations/0003_migrate_publishable.py:62
+msgid "Remove"
+msgstr "Odstranit"
+
+#: migrations/0001_initial.py:45
+#: migrations/old/0001_initial.py:119
+#: models/publishable.py:309
 msgid "Commercial"
 msgstr "Komerční"
 
-#: migrations/0001_initial.py:119
-#: models/publishable.py:287
-msgid "Check this if the listing is of a commercial content."
-msgstr "Zaškrtni pokud se jedná o komerční umístění."
-
-#: migrations/0001_initial.py:128
-#: models/publishable.py:319
+#: migrations/0001_initial.py:52
+#: migrations/old/0001_initial.py:128
+#: models/publishable.py:341
 msgid "Last seen"
 msgstr "Poslední návštěva"
 
-#: migrations/0001_initial.py:129
-#: models/publishable.py:320
+#: migrations/0001_initial.py:53
+#: migrations/old/0001_initial.py:129
+#: models/publishable.py:342
 msgid "Hits"
 msgstr "Návštěvy"
 
-#: migrations/0002_add_author_email.py:13
-#: models/main.py:26
+#: migrations/0001_initial.py:70
+#: migrations/0001_initial.py:80
+#: migrations/old/0001_initial.py:19
+#: migrations/old/0001_initial.py:27
+#: models/main.py:21
+#: models/main.py:40
+msgid "Name"
+msgstr "Jméno"
+
+#: migrations/0001_initial.py:71
+#: migrations/old/0001_initial.py:28
+#: models/main.py:41
+msgid "URL"
+msgstr "URL"
+
+#: migrations/0001_initial.py:72
+#: migrations/0001_initial.py:82
+#: migrations/0002_publishable_models.py:23
+#: migrations/old/0001_initial.py:21
+#: migrations/old/0001_initial.py:29
+#: migrations/old/0001_initial.py:77
+#: models/main.py:23
+#: models/main.py:42
+#: models/publishable.py:54
+msgid "Description"
+msgstr "Popisek"
+
+#: migrations/0001_initial.py:83
+#: migrations/old/0001_initial.py:22
+#: models/main.py:24
+msgid "Text"
+msgstr "Text"
+
+#: migrations/0002_publishable_models.py:19
+#: migrations/old/0001_initial.py:73
+#: models/publishable.py:43
+msgid "Title"
+msgstr "Titulek"
+
+#: migrations/0002_publishable_models.py:21
+#: models/main.py:49
+#: models/publishable.py:48
+msgid "Source"
+msgstr "Zdroj"
+
+#: migrations/0003_migrate_publishable.py:11
+#: migrations/new/0002_related_points_to_publishable.py:27
+#: models/publishable.py:365
+msgid "Content type"
+msgstr "Typ objektu"
+
+#: migrations/0003_migrate_publishable.py:13
+#: migrations/new/0002_related_points_to_publishable.py:28
+#: models/publishable.py:366
+msgid "Object ID"
+msgstr "ID objektu"
+
+#: migrations/0003_migrate_publishable.py:15
+#: migrations/new/0002_related_points_to_publishable.py:9
+#: models/publishable.py:363
+msgid "Publishable"
+msgstr "Publikovatelný objekt"
+
+#: migrations/0003_migrate_publishable.py:38
+#: migrations/old/0001_initial.py:115
+#: models/publishable.py:303
+msgid "End of listing"
+msgstr "Konec umístění"
+
+#: migrations/0003_migrate_publishable.py:47
+#: migrations/old/0002_add_author_email.py:13
+#: models/main.py:25
 msgid "Email"
 msgstr ""
 
-#: models/main.py:21
+#: migrations/0003_migrate_publishable.py:49
+#: models/main.py:20
 msgid "User"
 msgstr "Uživatel"
 
-#: models/main.py:33
+#: migrations/old/0001_initial.py:119
+#: models/publishable.py:309
+msgid "Check this if the listing is of a commercial content."
+msgstr "Zaškrtni pokud se jedná o komerční umístění."
+
+#: models/main.py:32
 msgid "Author"
 msgstr "Autor"
 
-#: models/main.py:34
-#: models/publishable.py:45
+#: models/main.py:33
+#: models/publishable.py:47
 msgid "Authors"
 msgstr "Autoři"
 
 #: models/main.py:50
-#: models/publishable.py:46
-msgid "Source"
-msgstr "Zdroj"
-
-#: models/main.py:51
 msgid "Sources"
 msgstr "Zdroje"
 
-#: models/main.py:162
+#: models/main.py:159
 msgid "Categories"
 msgstr "Kategorie"
 
-#: models/main.py:185
-#: models/main.py:186
-msgid "Related"
-msgstr "Související"
-
-#: models/main.py:206
+#: models/main.py:183
 msgid "Dependency"
 msgstr "Závislost"
 
-#: models/main.py:207
+#: models/main.py:184
 msgid "Dependencies"
 msgstr "Závislosti"
 
-#: models/publishable.py:56
-msgid "Publishable object"
-msgstr "Publikovatelný objekt"
-
-#: models/publishable.py:57
+#: models/publishable.py:63
 msgid "Publishable objects"
 msgstr "Publikovatelné objekty"
 
-#: models/publishable.py:193
-msgid "Placement"
-msgstr "Publikace"
-
-#: models/publishable.py:194
+#: models/publishable.py:201
 msgid "Placements"
 msgstr "Publikace"
 
-#: models/publishable.py:309
+#: models/publishable.py:331
 msgid "Listing"
 msgstr "Umístění"
 
-#: models/publishable.py:310
+#: models/publishable.py:332
 msgid "Listings"
 msgstr "Umístění"
 
-#: models/publishable.py:334
+#: models/publishable.py:356
 msgid "Hit Count"
 msgstr "Počet přístupů"
 
-#: models/publishable.py:335
+#: models/publishable.py:357
 msgid "Hit Counts"
 msgstr "Počty přístupů"
+
+#: models/publishable.py:376
+#: models/publishable.py:377
+msgid "Related"
+msgstr "Související"
 
 #~ msgid "Only main listing can be hidden."
 #~ msgstr "Pouze hlavní výčet může být skrytý."
 #~ msgid "No listing can start sooner than main listing"
 #~ msgstr "Žádný výčet nemůže začínat dříve než hlavní výčet."
-#~ msgid "Remove"
-#~ msgstr "Odstranit"
 #~ msgid "Remove object from listing after the priority wears off?"
 #~ msgstr "Vyřadit objekt z publikace po vypršení priority?"
 #~ msgid "Hidden"
