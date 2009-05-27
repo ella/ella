@@ -23,7 +23,7 @@ class Spam(models.Model):
     expires = models.DateTimeField()
     name = models.CharField(max_length=255)
     count = models.IntegerField(null=True, blank=True)
-    type = models.ForeignKey(Type)
+    type = models.IntegerField()
 
     class Meta:
         unique_together = (('name', 'expires'),)
