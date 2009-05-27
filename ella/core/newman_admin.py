@@ -289,7 +289,7 @@ class IsPublishedFilter(CustomFilterSpec):
     lookup_var = 'publish_from'
 
     def title(self):
-        return _('Cucurucucu Paloma')
+        return _('Is published?')
 
     def get_lookup_kwarg(self):
         for param in self.request_get:
@@ -305,9 +305,9 @@ class IsPublishedFilter(CustomFilterSpec):
         lookup_var_published = '%s__lte' % fspec.lookup_var
         when = time.strftime('%Y-%m-%d', PUBLISH_FROM_WHEN_EMPTY.timetuple())
         now = time.strftime('%Y-%m-%d')
-        link = ( _('Not published'), {lookup_var_not_published: now})
+        link = ( _('No'), {lookup_var_not_published: now})
         fspec.links.append(link)
-        link = ( _('Published'), {lookup_var_published: now})
+        link = ( _('Yes'), {lookup_var_published: now})
         fspec.links.append(link)
         fspec.remove_from_querystring = [lookup_var_published, lookup_var_not_published]
         return True
