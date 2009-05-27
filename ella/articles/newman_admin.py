@@ -21,7 +21,6 @@ class InfoBoxAdmin(newman.NewmanModelAdmin):
     rich_text_fields = {None: ('content',)}
 
 class ArticleAdmin(PublishableAdmin):
-    list_filter = ('category__site', 'category', 'authors', 'created',)
     fieldsets = (
         (_("Article heading"), {'fields': ('title', 'upper_title', 'updated', 'slug')}),
         (_("Metadata"), {'fields': ('category', 'authors', 'source', 'photo')}),

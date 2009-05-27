@@ -161,8 +161,7 @@ a.icn {
 a.btn {
     padding-top: 4px; padding-bottom: 3px; padding-right: 4px;
     border: 1px solid #ddd;
-    -moz-border-radius: 5px;
-    -webkit-border-radius: 5px;
+    border-radius: 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px;
     background-color: #E9E8DD;
     margin: 3px 2px;
     text-decoration: none;
@@ -200,6 +199,8 @@ a.icn.novisible { background-image: url(../ico/16/14_layer_novisible.png); }
 a.icn.history { background-image: url(../ico/16/history.png); }
 a.icn.web { background-image: url(../ico/16/web.png); }
 a.icn.save { background-image: url(../ico/16/filesave.png); }
+a.icn.saveas { background-image: url(../ico/16/filesaveas.png); }
+a.icn.saveall { background-image: url(../ico/16/save_all.png); }
 a.icn.edit { background-image: url(../ico/16/edit.png); }
 a.icn.help { background-image: url(../ico/16/help.png); }
 a.icn.idea { background-image: url(../ico/16/idea.png); }
@@ -252,9 +253,13 @@ input.vDateTimeInput { width: 120px; }
     border: solid 2px blue;
     display: none;
 }
+
+#changelist-overlay #filters {
+    top: 65px;
+}
 #err-overlay {
-    bottom: 70px;
-    right: 5px;
+    bottom: 80px;
+    right: 10px;
     -moz-border-radius: 10px;
     -webkit-border-radius: 10px;
     border: 2px solid #d66;
@@ -278,15 +283,13 @@ input.vDateTimeInput { width: 120px; }
 .article-form-container .publish-container label { float: none; }
 .change-form .submit-row {
     position: fixed;
-    bottom: 27px;
-    right: 5px;
-    border-left: 2px solid #d66;
-    border-top: 2px solid #d66;
-    border-right: 2px solid #d66;
-    -moz-border-radius-topleft: 10px;
-    -moz-border-radius-topright: 10px;
+    bottom: 35px;
+    right: 10px;
+    border: 2px solid #d66;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
     padding: 10px;
-    background: #ffd;
+    background: #fff url(../img/nav-bg-reverse.gif) left top repeat-x;
 }
 .change-form .submit-row a {
     white-space: nowrap;
@@ -416,18 +419,22 @@ div.pop #filters { top: 35px }
 div.model-help {
     font: normal 95%/130% "Trebuchet MS", Arial, sans-serif;
     border: 1px outset #ddd;
-    position: fixed;
+    position: absolute;
     top: 168px; right: 6px; min-width: 400px; width: 70%;
     opacity: .95;
     background: #fff url(../img/horst1.jpg) left bottom no-repeat;
     -moz-border-radius: 7px;
     -webkit-border-radius: 7px;
-    height: 400px;
+    border-radius: 7px;
+    height: 410px;
 }
 div.model-help div.cnt {
-    margin: 10px 10px 10px 200px;
-    max-height: 380px;
+    margin: 10px 10px 5px 200px;
+    max-height: 360px;
     overflow: auto;
+}
+div.model-help .submit-row {
+    margin: 10px 10px 10px 200px;
 }
 div.model-help h1, div.model-help h2, div.model-help h3, div.model-help h4, div.model-help p, div.model-help ul, div.model-help ol {
     margin: .5em 0 .3em 0;

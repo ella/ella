@@ -21,6 +21,10 @@ ADMIN_ROOTS = (
     normpath(join(dirname(django.__file__), 'contrib', 'admin', 'media')),
 )
 
+js_info_dict = {
+    'packages': ('ella.newman',),
+}
+
 urlpatterns = patterns('',
 
     # serve admin media static files
@@ -29,6 +33,9 @@ urlpatterns = patterns('',
 
     # serve static files
     (r'^static/(?P<path>.*)$', 'django.views.static.serve', { 'document_root': settings.MEDIA_ROOT, 'show_indexes': True }),
+
+    # newman JS translations
+    (r'^newman/jsi18n/$', 'django.views.i18n.javascript_catalog', js_info_dict),
 
     # main admin urls
     ('^newman/', include(newman.site.urls)),

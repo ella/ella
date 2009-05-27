@@ -1,3 +1,5 @@
+import time
+
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.forms import models as modelforms
 from django.forms.fields import DateTimeField
@@ -7,10 +9,11 @@ from django.forms.util import ValidationError
 from django.conf.urls.defaults import patterns, url
 from django.utils.safestring import mark_safe
 
-from ella.core.models import Author, Source, Category, Listing, HitCount, Placement, Related
-from ella.core.models.publishable import Publishable
+from ella.core.models import Author, Source, Category, Listing, HitCount, Placement, Related, Publishable
+from ella.core.models.publishable import PUBLISH_FROM_WHEN_EMPTY
 from ella import newman
 from ella.newman import options, fields
+from ella.newman.filterspecs import CustomFilterSpec
 
 class ListingForm(modelforms.ModelForm):
     class Meta:
@@ -26,14 +29,13 @@ class PlacementForm(modelforms.ModelForm):
     def __init__(self, *args, **kwargs):
         initial = []
         # args[data] -> instance
-        print '__init__ args:', str(args) , kwargs
         if 'initial' in kwargs:
             initial = [ c.pk for c in Category.objects.distinct().filter(listing__placement=kwargs['initial']['id']) ]
         elif 'instance' in kwargs:
             initial = {
-                'selected_categories': [ 
-                    c.pk for c in Category.objects.distinct().filter(listing__placement=kwargs['instance'].pk) 
-                ], 
+                'selected_categories': [
+                    c.pk for c in Category.objects.distinct().filter(listing__placement=kwargs['instance'].pk)
+                ],
                 'listings': list(kwargs['instance'].listing_set.all())
             }
 
@@ -54,7 +56,7 @@ class PlacementForm(modelforms.ModelForm):
         instance = self.instance
         if not list_cats:
             return instance
-        
+
         def save_them():
             listings = dict([ (l.category, l) for l in Listing.objects.filter(placement=instance.pk) ])
 
@@ -127,9 +129,9 @@ class PlacementForm(modelforms.ModelForm):
         main = None
         d = self.cleaned_data
         # empty form
-        if not d: 
+        if not d:
             return self.cleaned_data
-        #if cat and cat == cat and cat: # should be equiv. if cat:...  
+        #if cat and cat == cat and cat: # should be equiv. if cat:...
         if cat:
             main = d
 
@@ -173,7 +175,7 @@ class PlacementForm(modelforms.ModelForm):
         if cat and not main:
             # raise forms.ValidationError(_('If object has a category, it must have a main placement.'))
             raise (_('If object has a category, it must have a main placement.'))
-        
+
         self.listings_clean(self.data)
         return self.cleaned_data
 
@@ -282,12 +284,76 @@ class RelatedInlineAdmin(newman.NewmanTabularInline):
     extra = 3
     model = Related
 
+class IsPublishedFilter(CustomFilterSpec):
+    " Published/Nonpublished objects filter"
+    lookup_var = 'publish_from'
+
+    def title(self):
+        return _('Is published?')
+
+    def get_lookup_kwarg(self):
+        for param in self.request_get:
+            if param.startswith(self.lookup_var):
+                self.selected_lookup = param
+                return param
+        return ''
+
+    def filter_func(fspec):
+        # nepublikovany = nemaji placement (datum 3000) ci maji placement v budoucnu
+        # ?placement__publish_from__exact=2008-10-10
+        lookup_var_not_published = '%s__gt' % fspec.lookup_var
+        lookup_var_published = '%s__lte' % fspec.lookup_var
+        when = time.strftime('%Y-%m-%d', PUBLISH_FROM_WHEN_EMPTY.timetuple())
+        now = time.strftime('%Y-%m-%d')
+        link = ( _('No'), {lookup_var_not_published: now})
+        fspec.links.append(link)
+        link = ( _('Yes'), {lookup_var_published: now})
+        fspec.links.append(link)
+        fspec.remove_from_querystring = [lookup_var_published, lookup_var_not_published]
+        return True
+
+class PublishFromFilter(CustomFilterSpec):
+    " Publish from customized filter. "
+    published_from_field_path = 'placement__listing__publish_from'
+
+    def title(self):
+        return _('Publish from')
+
+    def get_lookup_kwarg(self):
+        out = [
+            '%s__day' % self.published_from_field_path,
+            '%s__month' % self.published_from_field_path,
+            '%s__year' % self.published_from_field_path,
+        ]
+        return out
+
+    def filter_func(fspec):
+        # SELECT created FROM qs._meta.dbtable  GROUP BY created
+        #qs = fspec.model_admin.queryset(fspec.request)
+        #dates =  qs.dates(fspec.field_path, 'day', 'DESC')[:365]
+        # Article.objects.filter(placement__listing__publish_from__gte='2012-01-01')
+        YEAR = 365*24*60*60
+        ts = time.time() - YEAR
+        last_year = time.strftime('%Y-%m-%d %H:%M', time.localtime(ts))
+        qs = Placement.objects.filter(listing__publish_from__gte=last_year)
+        dates = qs.dates('publish_from', 'day', 'DESC')
+        for date in dates:
+            lookup_dict = dict()
+            lookup_dict['%s__day' % fspec.published_from_field_path] = date.day
+            lookup_dict['%s__month' % fspec.published_from_field_path] = date.month
+            lookup_dict['%s__year' % fspec.published_from_field_path] = date.year
+            link_text = '%d. %d. %d' % (date.day, date.month, date.year)
+            link = ( link_text, lookup_dict)
+            fspec.links.append(link)
+        return True
+
 class PublishableAdmin(newman.NewmanModelAdmin):
     """ Default admin options for all publishables """
 
     exclude = ('content_type',)
     list_display = ('admin_link', 'category', 'photo_thumbnail', 'publish_from', 'placement_link', 'site_icon')
     list_filter = ('category__site', 'category', 'authors', 'content_type')
+    unbound_list_filter = (PublishFromFilter, IsPublishedFilter,)
     search_fields = ('title', 'description', 'slug', 'authors__name', 'authors__slug',) # FIXME: 'tags__tag__name',)
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}

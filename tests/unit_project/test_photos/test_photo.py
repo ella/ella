@@ -45,7 +45,9 @@ class TestPhoto(DatabaseTestCase):
         self.thumbnail_path = self.photo.get_thumbnail_path()
 
     def test_thumbnail_html_retrieval_success(self):
-        expected_html = u'<a href="%(full)s"><img src="%(thumb)s" alt="%(name)s" /></a>' % {
+        #TODO: This should be in adimn, not models
+        #TODO: There should be a hyperlink working with jquery thickbox
+        expected_html = u'<img src="%(thumb)s" alt="%(name)s" />' % {
             'full' : "%(media)sphotos/%(date)s/%(name)s.jpg" % {
                 "name" : u'%s-example-photo' % self.photo.pk,
                 "media" : settings.MEDIA_URL,
