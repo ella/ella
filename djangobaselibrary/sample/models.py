@@ -5,8 +5,15 @@ class Type(models.Model):
     '''
     just some model that will be refferenced by Spam
     '''
-    name = models.CharField(max_length=255)
-    description = models.TextField()
+    name = models.CharField(max_length=255, unique=True)
+    description = models.TextField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = _('Type')
+        verbose_name_plural = _('Types')
+
+    def __unicode__(self):
+        return self.name
 
 class Spam(models.Model):
     '''
@@ -15,11 +22,14 @@ class Spam(models.Model):
     weight = models.FloatField()
     expires = models.DateTimeField()
     name = models.CharField(max_length=255)
-    count = models.IntegerField(null=True)
+    count = models.IntegerField(null=True, blank=True)
     type = models.ForeignKey(Type)
 
     class Meta:
         unique_together = (('name', 'expires'),)
         verbose_name = _('Spam')
         verbose_name_plural = _('Spam')
+
+    def __unicode__(self):
+        return self.name
 
