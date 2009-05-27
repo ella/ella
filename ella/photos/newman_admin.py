@@ -1,12 +1,8 @@
-from django import forms
-from django.conf import settings
-from django.utils.translation import ugettext
-from django.forms.util import ValidationError
+from django.utils.translation import ugettext_lazy as _
 
 from ella import newman
 
 from ella.photos.models import FormatedPhoto, Format, Photo
-from ella.photos.views import format_photo_json, thumb_url
 
 class FormatOptions(newman.NewmanModelAdmin):
     list_display = ('name', 'max_width', 'max_height', 'stretch', 'resample_quality',)
@@ -18,19 +14,15 @@ class FormatedPhotoInlineOptions(newman.NewmanTabularInline):
 
 class PhotoOptions(newman.NewmanModelAdmin):
     inlines = []
-    list_display = ('title', 'width', 'height', 'thumb', 'pk',)
+    list_display = ('title', 'size', 'thumb', 'pk',)
     list_filter = ('created',)
     prepopulated_fields = {'slug': ('title',)}
     search_fields = ('title', 'image', 'description', 'id',)
     suggest_fields = {'authors': ('name', 'slug',), 'source': ('name', 'url',)}
 
-    def __call__(self, request, url):
-        if url and url.endswith('json'):
-            return format_photo_json(request, *url.split('/')[-3:-1])
-        if url and url.endswith('thumburl'):
-            return thumb_url(request, *url.split('/')[-3:-1])
-        return super(PhotoOptions, self).__call__(request, url)
-
+    def size(self, obj):
+        return "%dx%d px" % (obj.width, obj.height)
+    size.short_description = _('Size')
 
 class FormatedPhotoOptions(newman.NewmanModelAdmin):
     list_display = ('image', 'format', 'width', 'height')
