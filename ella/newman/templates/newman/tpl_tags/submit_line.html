@@ -1,8 +1,8 @@
 <div class="submit-row" {% if is_popup %}style="overflow: auto;"{% endif %}>
     {% if show_delete_link %}<a href="delete/" class="icn cancel hashadr">{% trans "Delete" %}</a>{% endif %}
 
-    {% if show_save_as_new %}<a class="icn btn saveas" name="_saveasnew">{% trans 'Save as new' %}</a>{%endif%}
-    {% if show_save_and_add_another %}<a class="icn btn saveall" name="_addanother">{% trans 'Save and add another' %}</a>{% endif %}
-    {% if show_save_and_continue %}<a class="icn btn saveas" name="_continue">{% trans 'Save and continue editing' %}</a>{% endif %}
-    {% if show_save %}<a class="icn btn save def" name="_save">{% trans "Save" %}</a>{% endif %}
+    {% if show_save_as_new %}<a class="submit icn btn saveas" name="_saveasnew">{% trans 'Save as new' %}</a>{%endif%}
+    {% if show_save_and_add_another %}<a class="submit icn btn saveall" name="_addanother">{% trans 'Save and add another' %}</a>{% endif %}
+    {% if show_save_and_continue %}<a class="submit icn btn saveas" name="_continue">{% trans 'Save and continue editing' %}</a>{% endif %}
+    {% if show_save %}<a class="submit icn btn save def" name="_save">{% trans "Save" %}</a>{% endif %}
 </div>
