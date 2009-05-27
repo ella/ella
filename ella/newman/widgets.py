@@ -309,10 +309,6 @@ class ListingCustomWidget(forms.SelectMultiple):
             lst.fields_verbose_names = out
             return lst
 
-        print 'name:', name
-        print 'value:' , value #selected categories
-        print 'attrs:', attrs
-        print 'choices:', choices
         cx = Context()
         cx['NEWMAN_MEDIA_PREFIX'] = settings.NEWMAN_MEDIA_PREFIX
         cx['id_prefix'] = name
