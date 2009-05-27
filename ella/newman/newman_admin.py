@@ -88,32 +88,3 @@ def site_field_filter(fspec):
         fspec.links.append(link)
     return True
 
-#@filter_spec(lambda field: field.name.lower() == 'created' and isinstance(field, models.DateTimeField))
-PUBLISHED_FROM_FIELD_PATH = 'placement__listing__publish_from'
-def published_from_lookup(fspec):
-    out = [
-        '%s__day' % PUBLISHED_FROM_FIELD_PATH,
-        '%s__month' % PUBLISHED_FROM_FIELD_PATH,
-        '%s__year' % PUBLISHED_FROM_FIELD_PATH,
-    ]
-    return out
-@filter_spec(lambda field: field.name.lower() == 'created', published_from_lookup, title=_('Publish from'))
-def publish_from_filter(fspec):
-    # SELECT created FROM qs._meta.dbtable  GROUP BY created
-    #qs = fspec.model_admin.queryset(fspec.request)
-    #dates =  qs.dates(fspec.field_path, 'day', 'DESC')[:365]
-    # Article.objects.filter(placement__listing__publish_from__gte='2012-01-01')
-    ts = time.time() - (365*24*60*60)
-    last_year = time.strftime('%Y-%m-%d %H:%M', time.localtime(ts))
-    qs = Placement.objects.filter(listing__publish_from__gte=last_year)
-    dates = qs.dates('publish_from', 'day', 'DESC')
-    for date in dates:
-        lookup_dict = dict()
-        lookup_dict['%s__day' % PUBLISHED_FROM_FIELD_PATH] = date.day
-        lookup_dict['%s__month' % PUBLISHED_FROM_FIELD_PATH] = date.month
-        lookup_dict['%s__year' % PUBLISHED_FROM_FIELD_PATH] = date.year
-        link_text = '%d. %d. %d' % (date.day, date.month, date.year)
-        link = ( link_text, lookup_dict)
-        fspec.links.append(link)
-    return True
-
