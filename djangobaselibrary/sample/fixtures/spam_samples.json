@@ -1,0 +1,32 @@
+[
+  {
+    "pk": 1, 
+    "model": "sample.type", 
+    "fields": {
+      "name": "prase", 
+      "description": "blah"
+    }
+  }, 
+  {
+    "pk": 1, 
+    "model": "sample.spam", 
+    "fields": {
+      "count": 5, 
+      "expires": "2009-05-27 11:41:41", 
+      "type": 1, 
+      "name": "koko", 
+      "weight": 10.0
+    }
+  }, 
+  {
+    "pk": 2, 
+    "model": "sample.spam", 
+    "fields": {
+      "count": null, 
+      "expires": "2009-05-27 11:51:17", 
+      "type": 1, 
+      "name": "keke", 
+      "weight": 5.0
+    }
+  }
+]
