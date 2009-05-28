@@ -33,3 +33,28 @@ class Spam(models.Model):
     def __unicode__(self):
         return self.name
 
+
+# custom primary key testing
+# http://www.djangoproject.com/documentation/models/custom_pk/
+
+class Employee(models.Model):
+    employee_code = models.CharField(max_length=10, primary_key=True, db_column='code')
+    first_name = models.CharField(max_length=20)
+    last_name = models.CharField(max_length=20)
+
+    class Meta:
+        ordering = ('last_name', 'first_name')
+
+    def __unicode__(self):
+        return u"%s %s" % (self.first_name, self.last_name)
+
+class Business(models.Model):
+    name = models.CharField(max_length=20, primary_key=True)
+    employees = models.ManyToManyField(Employee)
+
+    class Meta:
+        verbose_name_plural = 'businesses'
+
+    def __unicode__(self):
+        return self.name
+
