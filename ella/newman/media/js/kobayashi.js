@@ -763,13 +763,13 @@ function get_hash(address, options) {
     
     // Get an URL to a CSS or JS file, attempt to load it into the document and call callback on success.
     function load_media(url, succ_fn, err_fn) {
-        ;;; carp('loading media '+url);
-        
         if (ContentByHashLib.LOADED_MEDIA[ url ]) {
             if ($.isFunction(succ_fn)) succ_fn(url);
             ;;; carp('Skipping loaded medium: '+url);
             return true;
         }
+        
+        ;;; carp('loading medium '+url);
         
         url.match(/(?:.*\/\/[^\/]*)?([^?]+)(?:\?.*)?/);
         $(document).data('loaded_media')[ RegExp.$1 ] = url;
