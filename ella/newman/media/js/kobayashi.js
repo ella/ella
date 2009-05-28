@@ -152,27 +152,34 @@ var ContentByHashLib = {};
         try {
             $err_div.append( JSON.parse(response_text).message );
         } catch(e) {
-            // Render the whole HTML in an <object>
-            $obj = $('<object type="text/html" width="'
-            + ($target.width() - 6)
-            + '" height="'
-            + Math.max($target.height(), 300)
-            + '">'
-            + '</object>');
-            
-            function append_error_data() {
-                $obj.attr({ data:
-                    'data:text/html;base64,'
-                    + Base64.encode(response_text)
-                }).appendTo( $err_div );
-            }
-            
-            if (window.Base64) {
-                append_error_data();
+            // Render the income HTML
+            if (response_text.indexOf('<html')) {
+                // Render the HTML document in an <object>
+                $obj = $(
+                    '<object type="text/html" width="'
+                    + ($target.width() - 6)
+                    + '" height="'
+                    + Math.max($target.height(), 300)
+                    + '"></object>'
+                );
+                
+                function append_error_data() {
+                    $obj.attr({ data:
+                        'data:text/html;base64,'
+                        + Base64.encode(response_text)
+                    }).appendTo( $err_div );
+                }
+                
+                if (window.Base64) {
+                    append_error_data();
+                }
+                else {
+                    request_media(MEDIA_URL + 'js/base64.js');
+                    $(document).one('media_loaded', append_error_data);
+                }
             }
             else {
-                request_media(MEDIA_URL + 'js/base64.js');
-                $(document).one('media_loaded', append_error_data);
+                $err_div.append( response_text );
             }
         }
         $target.empty().append($err_div);
@@ -233,6 +240,8 @@ var ContentByHashLib = {};
         var target_id = arg.target_id;
         var address = arg.address;
         ;;; carp('loading '+address+' into #'+target_id);
+        
+        delete arg.xhr; // just in case there was one
             
         // An empty address means we should revert to the base state.
         // If one is not set up for the given container, reload the whole page.
@@ -276,7 +285,7 @@ var ContentByHashLib = {};
                 LOAD_BUF[ this.load_id ].xhr = xhr;
                 inject_error_message( this.load_id );
                 cancel_request( this.load_id );
-                show_ajax_error(xhr);
+                try { show_ajax_error(xhr); } catch(e) { }
                 draw_ready();
                 if (this.custom_error) try {
                     this.custom_error();
