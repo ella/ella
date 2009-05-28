@@ -7,6 +7,7 @@
 {% endblock %}
 
 {% block fieldset %}
+    <script type="text/javascript">request_media('{{ NEWMAN_MEDIA_URL }}js/inlines.js');</script>
     {% for fieldset in inline_admin_form %}
       {% for line in fieldset %}
         {% for field in line %}
@@ -27,6 +28,7 @@
               {{ field.field.errors.as_ul }}
               {{ field.field }}
               <tr> {# open new row due to tabular.html will close row after fieldset block #}
+                <td colspan="3"><a class="add-inline-button">{% trans "Add listing" %}</a></td>
           {% endifnotequal %}
 
         {% endfor %}

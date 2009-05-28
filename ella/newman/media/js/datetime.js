@@ -10,16 +10,16 @@ function DateTimeInput(input) {
             input_style = input.currentStyle;
         }
         if (input_style == undefined) input_style = {};
-
+        
         var padding = input_style.paddingLeft;
         if (/^(\d+)(?:px)?$/.test(padding)) padding = new Number(RegExp.$1);
         else padding = 0;
         var border = input_style.borderLeftWidth;
         if (/^(\d+)(?:px)?$/.test(border )) border  = new Number(RegExp.$1);
         else border = 0;
-
+        
         var x = evt.clientX - this.x_pos - padding - border;
-
+        
         var $tempspan = $('<span>').css({
             position: 'absolute',
             top: '-100px'
@@ -30,13 +30,13 @@ function DateTimeInput(input) {
             }
         }
         $tempspan.insertAfter($(input));
-
+        
         $tempspan.text('m');
         var dotwidth = -$tempspan.width();
         $tempspan.text('m.');
         dotwidth += $tempspan.width();
         $tempspan.text( $(input).val() + '.' );
-
+        
         var text, last = '';
         while ($tempspan.width() - dotwidth >= x) {
             text = $tempspan.text();
@@ -66,13 +66,13 @@ function DateTimeInput(input) {
             month = new Number(month) - 1;
         }
         if (!preserve) preserve = { };
-
+        
         if (preserve.year  ) d.setFullYear(year  );
         if (preserve.month ) d.setMonth   (month );
         if (preserve.day   ) d.setDate    (day   );
         if (preserve.hour  ) d.setHours   (hour  );
         if (preserve.minute) d.setMinutes (minute);
-
+        
         year = d.getFullYear();
         month = new Number(d.getMonth()) + 1;
         day = d.getDate();
@@ -81,13 +81,13 @@ function DateTimeInput(input) {
         dow = ([
             gettext('Su'), gettext('Mo'), gettext('Tu'), gettext('We'), gettext('Th'), gettext('Fr'), gettext('Sa')
         ])[ d.getDay() ];
-
+        
         function pad(str,n) {
             var s = new String(str);
             while (s.length < n) s = '0'+s;
             return s;
         }
-
+        
         var nval = ''
         + pad(  year,4) + '-'
         + pad( month,2) + '-'
@@ -104,7 +104,7 @@ function DateTimeInput(input) {
             carp('Invalid date:', $(input).val());
             return;
         }
-
+        
         var i = ([
             undefined,
             1,1,1,1,
@@ -121,14 +121,14 @@ function DateTimeInput(input) {
         ])[pos];
         if (i == undefined) return;
         fields[i] = new Number(fields[i]) + delta;
-
+        
         var year   = fields[1];
         var month  = fields[2];
         var day    = fields[3];
         var hour   = fields[4];
         var minute = fields[5];
         month = new Number(month) - 1;
-
+        
         var d = new Date();
         d.setFullYear(year);
         d.setMonth(month);
@@ -137,9 +137,9 @@ function DateTimeInput(input) {
         d.setMinutes(minute);
         d.setSeconds(0);
         d.setMilliseconds(0);
-
+        
         this.set_date(d);
-
+        
         input.selectionStart = input.selectionEnd = pos;
     };
 }
@@ -156,16 +156,16 @@ function DateInput(input) {
             input_style = input.currentStyle;
         }
         if (input_style == undefined) input_style = {};
-
+        
         var padding = input_style.paddingLeft;
         if (/^(\d+)(?:px)?$/.test(padding)) padding = new Number(RegExp.$1);
         else padding = 0;
         var border = input_style.borderLeftWidth;
         if (/^(\d+)(?:px)?$/.test(border )) border  = new Number(RegExp.$1);
         else border = 0;
-
+        
         var x = evt.clientX - this.x_pos - padding - border;
-
+        
         var $tempspan = $('<span>').css({
             position: 'absolute',
             top: '-100px'
@@ -176,13 +176,13 @@ function DateInput(input) {
             }
         }
         $tempspan.insertAfter($(input));
-
+        
         $tempspan.text('m');
         var dotwidth = -$tempspan.width();
         $tempspan.text('m.');
         dotwidth += $tempspan.width();
         $tempspan.text( $(input).val() + '.' );
-
+        
         var text, last = '';
         while ($tempspan.width() - dotwidth >= x) {
             text = $tempspan.text();
@@ -210,24 +210,24 @@ function DateInput(input) {
             month = new Number(month) - 1;
         }
         if (!preserve) preserve = { };
-
+        
         if (preserve.year ) d.setFullYear(year );
         if (preserve.month) d.setMonth   (month);
         if (preserve.day  ) d.setDate    (day  );
-
+        
         year = d.getFullYear();
         month = new Number(d.getMonth()) + 1;
         day = d.getDate();
         dow = ([
             gettext('Su'), gettext('Mo'), gettext('Tu'), gettext('We'), gettext('Th'), gettext('Fr'), gettext('Sa')
         ])[ d.getDay() ];
-
+        
         function pad(str,n) {
             var s = new String(str);
             while (s.length < n) s = '0'+s;
             return s;
         }
-
+        
         var nval = ''
         + pad(  year,4) + '-'
         + pad( month,2) + '-'
@@ -242,7 +242,7 @@ function DateInput(input) {
             carp('Invalid date:', $(input).val());
             return;
         }
-
+        
         var i = ([
             undefined,
             1,1,1,1,
@@ -255,12 +255,12 @@ function DateInput(input) {
         ])[pos];
         if (i == undefined) return;
         fields[i] = new Number(fields[i]) + delta;
-
+        
         var year   = fields[1];
         var month  = fields[2];
         var day    = fields[3];
         month = new Number(month) - 1;
-
+        
         var d = new Date();
         d.setFullYear(year);
         d.setMonth(month);
@@ -269,84 +269,95 @@ function DateInput(input) {
         d.setMinutes(0);
         d.setSeconds(0);
         d.setMilliseconds(0);
-
+        
         this.set_date(d);
-
+        
         input.selectionStart = input.selectionEnd = pos;
     };
 }
 
-
-function datetime_init() {
-    $('.vDateTimeInput,.vDateInput').each( function() {
-        var $input = $(this);
-        var is_datetime = $input.hasClass('vDateTimeInput');
-        if (! $input.data('dti')) {
-            if (is_datetime) {
-                $input.data('dti', new DateTimeInput(this));
+(function($) {
+    function datetime_init() {
+        $('.vDateTimeInput,.vDateInput').each( function() {
+            var $input = $(this);
+            var is_datetime = $input.hasClass('vDateTimeInput');
+            if (! $input.data('dti')) {
+                if (is_datetime) {
+                    $input.data('dti', new DateTimeInput(this));
+                }
+                else {
+                    $input.data('dti', new DateInput(this));
+                }
+                
+                $(  '<span class="datepicker-trigger"><img src="'
+                    +MEDIA_URL
+                    +'ico/16/vcalendar.png" alt="cal" /></span>'
+                ).click( function() {
+                    $('.datepicker').css({
+                        top: $(this).offset().top + 'px',
+                        left: ( $(this).offset().left + $(this).width() ) + 'px'
+                    }).toggle().data( 'input', $input );
+                }).insertAfter(this);
+                
+                $input.keypress(function(evt) {
+                    var delta = 0;
+                    if (evt.keyCode == 38) delta =  1;
+                    if (evt.keyCode == 40) delta = -1;
+                    if (!delta) return true;
+                    var pos = this.selectionEnd;
+                    $input.data('dti').scroll(pos, delta);
+                });
             }
-            else {
-                $input.data('dti', new DateInput(this));
-            }
-
-            $(  '<span class="datepicker-trigger"><img src="'
-                +MEDIA_URL
-                +'ico/16/vcalendar.png" alt="cal" /></span>'
-            ).click( function() {
-                $('.datepicker').css({
-                    top: $(this).offset().top + 'px',
-                    left: ( $(this).offset().left + $(this).width() ) + 'px'
-                }).toggle().data( 'input', $input );
-            }).insertAfter(this);
-
-            $input.keypress(function(evt) {
-                var delta = 0;
-                if (evt.keyCode == 38) delta =  1;
-                if (evt.keyCode == 40) delta = -1;
-                if (!delta) return true;
-                var pos = this.selectionEnd;
-                $input.data('dti').scroll(pos, delta);
-            });
-        }
-    });
-}
-datetime_init();
-$( document ).bind('content_added', datetime_init);
-
-// create the datepicker div
-$( document ).one('media_loaded', function() {
-    if ($('.datepicker').length) { }
-    else {
-        var $datepicker = $('<div class="datepicker">');
-        $datepicker.datepicker({
-            onSelect: function(dtext, dpick) {
-                $(this).hide();
-                var dti = $( $(this).data('input') ).data('dti');
-                var d = new Date();
-                d.setFullYear(dpick.selectedYear);
-                d.setMonth(dpick.selectedMonth);
-                d.setDate(dpick.selectedDay);
-                dti.set_date(d, {/*preserve*/hour:true,minute:true});
-            },
-            onClose: function() {
-                $(this).hide();
-            },
         });
-        $datepicker.appendTo(
-               $('.change-form').get(0)
-            || $('#content').get(0)
-            || $('body').get(0)
-        );
+    }
+    datetime_init();
+
+    function media_dependent_datetime_init(evt) {
+        // create the datepicker div
+        if ($('.datepicker').length) { }    // but only if there is none yet
+        else if (
+               evt.type == 'content_added'  // and we added something that uses a datepicker
+            && $(evt.target).find('.datepicker-trigger').length == 0    // if anything
+        ) { }
+        else {
+            var $datepicker = $('<div class="datepicker">');
+            $datepicker.datepicker({
+                onSelect: function(dtext, dpick) {
+                    $(this).hide();
+                    var dti = $( $(this).data('input') ).data('dti');
+                    var d = new Date();
+                    d.setFullYear(dpick.selectedYear);
+                    d.setMonth(dpick.selectedMonth);
+                    d.setDate(dpick.selectedDay);
+                    dti.set_date(d, {/*preserve*/hour:true,minute:true});
+                },
+                onClose: function() {
+                    $(this).hide();
+                },
+            });
+            $datepicker.appendTo(
+                   $('.change-form').get(0)
+                || $('#content').get(0)
+                || $('body').get(0)
+            );
+        }
+        
+        // mousewheel datetime scrolling
+        function mousewheel_handler(evt, delta) {
+            var dti = $(this).data('dti');
+            var pos = dti.cursor_pos(evt);
+            dti.scroll(pos, delta / Math.abs(delta||1));
+        };
+        if (DEBUG)  // FIXME: mousewheel scrolling broken!
+        $('.vDateTimeInput,.vDateInput').not('.mwheel-enhanced').focus( function() {
+            $(this)  .bind('mousewheel', mousewheel_handler);
+        }).blur( function() {
+            $(this).unbind('mousewheel', mousewheel_handler);
+        }).addClass('mwheel-enhanced');
     }
 
-    function mousewheel_handler(evt, delta) {
-        var dti = $(this).data('dti');
-        var pos = dti.cursor_pos(evt);
-        dti.scroll(pos, delta / Math.abs(delta||1));
-    };
-    $('.vDateTimeInput,.vDateInput').focus( function() {
-        $(this)  .bind('mousewheel', mousewheel_handler);
-    }).blur( function() {
-        $(this).unbind('mousewheel', mousewheel_handler);
-    });
-});
+    $( document ).bind('content_added', datetime_init);
+    $( document ).bind('content_added', media_dependent_datetime_init);
+    $( document ).one ('media_loaded' , media_dependent_datetime_init);
+
+})(jQuery);

@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-05-11 21:34+0200\n"
-"PO-Revision-Date: 2009-05-11 21:34+0100\n"
+"POT-Creation-Date: 2009-05-27 19:32+0200\n"
+"PO-Revision-Date: 2009-05-27 19:33+0100\n"
 "Last-Translator: Vitek Pliska <whit@jizak.cz>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -16,40 +16,53 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: models.py:59
+#: migrations/0001_initial.py:17
 msgid "Category"
 msgstr "Kategorie"
 
 #: models.py:60
+#: migrations/0001_initial.py:18
 msgid "Name"
 msgstr "Jméno"
 
 #: models.py:62
+#: migrations/0001_initial.py:19
 msgid "Target content type"
 msgstr "Typ cílového objektu"
 
 #: models.py:63
+#: migrations/0001_initial.py:20
 msgid "Target id"
 msgstr "ID cílového objektu"
 
 #: models.py:67
+#: migrations/0001_initial.py:21
 msgid "Position active from"
 msgstr "Pozice aktivní od"
 
 #: models.py:68
+#: migrations/0001_initial.py:22
 msgid "Position active till"
 msgstr "Pozice aktivní do"
 
 #: models.py:70
+#: migrations/0001_initial.py:23
 msgid "Box type"
 msgstr "Typ boxu"
 
 #: models.py:71
+#: migrations/0001_initial.py:24
 msgid "Definition"
 msgstr "definice"
 
 #: models.py:72
+#: migrations/0001_initial.py:25
 msgid "Disabled"
 msgstr "Vypnuto"
+
+#: models.py:79
+msgid "empty position"
+msgstr "prázdná pozice"
 
 #: models.py:82
 msgid "Title"

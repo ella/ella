@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _, ugettext
 from django.db import models
 from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
@@ -76,9 +76,9 @@ class Position(models.Model):
 #############
     def show_title(self):
         if not self.target:
-            return '-- empty position --'
+            return '-- %s --' % ugettext('empty position')
         else:
-            return u'%s [%s]' % (self.target.title, self.target_ct,)
+            return u'%s [%s]' % (self.target.title, ugettext(self.target_ct.name),)
     show_title.short_description = _('Title')
 
     def is_filled(self):
