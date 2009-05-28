@@ -14,6 +14,7 @@ from django.utils.text import truncate_words
 
 from ella.ellaadmin.utils import admin_url
 from ella.core.models import Category, Listing
+from ella.photos.models import Photo
 from djangomarkup.widgets import RichTextAreaWidget
 
 
@@ -106,37 +107,6 @@ class FlashImageWidget(widgets.AdminFileWidget):
         """ % (swf_path, value, swf_path, value)
 
         return mark_safe(embed_code)
-
-
-class ForeignKeyRawIdWidget(forms.TextInput):
-
-    class Media:
-        js = (settings.NEWMAN_MEDIA_PREFIX + JS_RELATED_LOOKUP,)
-
-    def __init__(self, rel, attrs=None):
-        self.rel = rel
-        super(ForeignKeyRawIdWidget, self).__init__(attrs)
-
-    def render(self, name, value, attrs=None):
-        if attrs is None:
-            attrs = {}
-        related_url = '../../../%s/%s/' % (self.rel.to._meta.app_label, self.rel.to._meta.object_name.lower())
-        url = ''
-        if not attrs.has_key('class'):
-            attrs['class'] = 'vForeignKeyRawIdAdminField' # The JavaScript looks for this hook.
-        output = [super(ForeignKeyRawIdWidget, self).render(name, value, attrs)]
-        output.append('<a href="%s%s?pop" class="rawid-related-lookup" id="lookup_id_%s"> ' % \
-            (related_url, url, name))
-        output.append('<img src="%sico/16/search.png" width="16" height="16" /></a>' % settings.NEWMAN_MEDIA_PREFIX)
-        if value:
-            output.append(self.label_for_value(value))
-        return mark_safe(u''.join(output))
-
-    def label_for_value(self, value):
-        obj = self.rel.to.objects.get(pk=value)
-        label = truncate_words(obj, 14)
-        adm = admin_url(obj)
-        return '&nbsp;<a href="%s">%s</a>' % (adm, label)
 
 
 class AdminSuggestWidget(forms.TextInput):
@@ -234,7 +204,47 @@ class DateTimeWidget(forms.DateTimeInput):
             self.format = '%Y-%m-%d %H:%M'
         return super(DateTimeWidget, self).render(name, value, attrs)
 
-# widgets from ellaadmin
+class ForeignKeyRawIdWidget(forms.TextInput):
+
+    class Media:
+        js = (settings.NEWMAN_MEDIA_PREFIX + JS_RELATED_LOOKUP,)
+
+    def __init__(self, rel, attrs=None):
+        self.rel = rel
+        super(ForeignKeyRawIdWidget, self).__init__(attrs)
+
+    def _get_obj(self, value):
+        if hasattr(self, '_object'):
+            return self._object
+        self._object = self.rel.to.objects.get(pk=value)
+        return self._object
+
+    def render(self, name, value, attrs=None):
+        if attrs is None:
+            attrs = {}
+        related_url = '../../../%s/%s/' % (self.rel.to._meta.app_label, self.rel.to._meta.object_name.lower())
+        url = ''
+        if not attrs.has_key('class'):
+            attrs['class'] = 'vForeignKeyRawIdAdminField' # The JavaScript looks for this hook.
+
+        output = []
+        if issubclass(self.rel.to, Photo):
+            obj = self._get_obj(value)
+            output.append('<a href="%s" class="widget-thumb thickbox">%s</a>' % (obj.image.url, obj.thumb()))
+        output.append(super(ForeignKeyRawIdWidget, self).render(name, value, attrs))
+        output.append('<a href="%s%s?pop" class="rawid-related-lookup" id="lookup_id_%s"> ' % \
+            (related_url, url, name))
+        output.append('<img src="%sico/16/search.png" width="16" height="16" /></a>' % settings.NEWMAN_MEDIA_PREFIX)
+        if value:
+            output.append(self.label_for_value(value))
+        return mark_safe(u''.join(output))
+
+    def label_for_value(self, value):
+        obj = self._get_obj(value)
+        label = truncate_words(obj, 14)
+        adm = admin_url(obj)
+        return '&nbsp;<a href="%s">%s</a>' % (adm, label)
+
 
 class ForeignKeyGenericRawIdWidget(forms.TextInput):
     " Custom widget adding a class to attrs. "
@@ -302,7 +312,7 @@ class ListingCustomWidget(forms.SelectMultiple):
         cx['id_prefix'] = name
         cx['verbose_name_publish_from'] = Listing._meta.get_field('publish_from').verbose_name.__unicode__()
         cx['choices'] = choices or self.choices
-        if type(value) == dict: 
+        if type(value) == dict:
             # modifying existing object, so value is dict containing Listings and selected category IDs
             cx['selected'] = Category.objects.filter(pk__in=value['selected_categories']) or []
             cx['listings'] = list(value['listings']) or []
