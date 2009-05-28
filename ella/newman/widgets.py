@@ -13,7 +13,7 @@ from django.utils.html import escape
 from django.utils.text import truncate_words
 
 from ella.ellaadmin.utils import admin_url
-from ella.core.models import Category
+from ella.core.models import Category, Listing
 from djangomarkup.widgets import RichTextAreaWidget
 
 
@@ -297,25 +297,14 @@ class ListingCustomWidget(forms.SelectMultiple):
         super(ListingCustomWidget, self).__init__(attrs=my_attrs, choices=choices)
 
     def render(self, name, value, attrs=None, choices=()):
-        def append_verbose_name(lst):
-            out =dict()
-            for field_name in map(lambda f: f.name, lst._meta.fields):
-                verb = lst._meta.get_field(field_name).verbose_name
-                if hasattr(verb, '__unicode__'):
-                    verb = verb.__unicode__()
-                else:
-                    verb = verb.__str__()
-                out[field_name] = verb
-            lst.fields_verbose_names = out
-            return lst
-
         cx = Context()
         cx['NEWMAN_MEDIA_PREFIX'] = settings.NEWMAN_MEDIA_PREFIX
         cx['id_prefix'] = name
+        cx['verbose_name_publish_from'] = Listing._meta.get_field('publish_from').verbose_name.__unicode__()
         cx['choices'] = choices or self.choices
         if type(value) == dict: 
             # modifying existing object, so value is dict containing Listings and selected category IDs
             cx['selected'] = Category.objects.filter(pk__in=value['selected_categories']) or []
-            cx['listings'] = map(append_verbose_name, value['listings']) or []
+            cx['listings'] = list(value['listings']) or []
         tpl = get_template('newman/widget/listing_custom.html')
         return mark_safe(tpl.render(cx))
