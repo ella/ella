@@ -12,6 +12,24 @@ class Migration:
         ("core", "0002_publishable_models"),
     )
 
+    def alter_foreignkey_to_int(self, table, field):
+        fk_field = '%s_id' % field
+
+        db.alter_column(table, fk_field, models.IntegerField())
+        db.rename_column(table, fk_field, field)
+        db.add_column(table, fk_field, models.IntegerField())
+        db.delete_column(table, fk_field)
+        db.delete_index(table, [fk_field])
+
+    def alter_self_foreignkeys(self, orm):
+        '''
+        alter and migrate all tables that has foreign keys to this model
+        '''
+        self.alter_foreignkey_to_int('articles_articlecontents', 'article')
+        # TODO: migrate new article IDs to articlecontents
+        self.alter_foreignkey_to_int('recipes_oldrecipearticleredirect', 'new_id')
+        # TODO: migrate new article IDs to oldrecipearticleredirect
+
     def forwards(self, orm):
         # add a temporary column to remember the old ID
         db.add_column('core_publishable', 'old_id', models.IntegerField(null=True))
@@ -66,13 +84,15 @@ class Migration:
         )
 
         # drop foreign key constraint from intermediate table
-        db.alter_column('%s_authors' % table, '%s_id' % mod, models.IntegerField())
-        db.rename_column('%s_authors' % table, '%s_id' % mod, mod)
-        db.add_column('%s_authors' % table, '%s_id' % mod, models.IntegerField())
-        db.delete_column('%s_authors' % table, '%s_id' % mod)
+        self.alter_foreignkey_to_int('%s_authors' % table, mod)
+
+        # remove constraints from all models reffering to us
+        self.alter_self_foreignkeys(orm)
+
         # drop primary key
         db.alter_column(table, 'id', models.IntegerField())
         db.drop_primary_key(table)
+
         # replace it with a link to parent
         db.rename_column(table, 'publishable_ptr', 'publishable_ptr_id')
         db.alter_column(table, 'publishable_ptr_id', models.OneToOneField(orm['core.Publishable'], null=False, blank=False))
