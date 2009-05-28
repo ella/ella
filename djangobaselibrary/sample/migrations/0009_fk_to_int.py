@@ -14,6 +14,8 @@ class Migration:
         # don't know any other way how to destroy FOREIGN KEY CONSTRAINT
         db.add_column('sample_spam', 'type_id', models.IntegerField())
         db.delete_column('sample_spam', 'type_id')
+        # and finally drop index
+        db.delete_index('sample_spam', ['type_id'])
 
 
     def backwards(self, orm):
