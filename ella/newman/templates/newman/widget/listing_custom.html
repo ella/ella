@@ -1,4 +1,4 @@
-    <input type="hidden" name="placement_listing_widget" value="{{ id_prefix}}" />
+    <input type="hidden" name="placement_listing_widget" value="{{ id_prefix }}" />
     {% for listing in listings %}
         <tr class="listing-row">
             
@@ -36,7 +36,7 @@
                 <div class="publish_from">
                     <label for="{{ id_prefix }}-{{ forloop.counter }}-publish_from">
                         <span>
-                            {% trans listing.fields_verbose_names.publish_from %}
+                            {% trans verbose_name_publish_from %}
                         </span>
                     </label>
                     <input
@@ -81,12 +81,12 @@
             </td>
 
             <td class="listing-dates">
-                {#<input type="hidden" name="{{ id_prefix}}-{{ forloop.counter0 }}-listing_id" value="{{ listing.pk }}" />#}
+                {#<input type="hidden" name="{{ id_prefix }}-{{ forloop.counter0 }}-listing_id" value="{{ listing.pk }}" />#}
                 <!-#- Publish from -#->
                 <div class="publish_from">
                     <label for="{{ id_prefix }}-__NO__-publish_from">
                         <span>
-                            {% trans listings.0.fields_verbose_names.publish_from %}
+                            {% trans verbose_name_publish_from %}
                         </span>
                     </label>
                     <input
