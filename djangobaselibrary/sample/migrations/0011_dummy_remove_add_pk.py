@@ -12,6 +12,9 @@ class Migration:
         db.drop_primary_key('sample_spam')
 
         # Deleting field 'Spam.id'
+        # TODO:
+        # but we need to find any of our children
+        # because they contain constraint to us
         db.delete_column('sample_spam', 'id')
         # Adding field 'Spam.id'
         db.add_column('sample_spam', 'id', models.AutoField(primary_key=True))
