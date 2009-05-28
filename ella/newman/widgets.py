@@ -17,7 +17,6 @@ from ella.core.models import Category, Listing
 from ella.photos.models import Photo
 from djangomarkup.widgets import RichTextAreaWidget
 
-
 MARKITUP_SET = getattr(settings, 'MARKDOWN', 'markdown')
 MEDIA_PREFIX = getattr(settings, 'NEWMAN_MEDIA_PREFIX', settings.ADMIN_MEDIA_PREFIX)
 
@@ -148,7 +147,9 @@ class AdminSuggestWidget(forms.TextInput):
         else:
             try:
                 if isinstance(self.db_field, ForeignKey):
-                    suggest_items = '<li class="suggest-selected-item">%s <a class="suggest-delete-link">x</a></li>' % getattr(self.model.objects.get(pk=value), self.lookups[0])
+                    sv = getattr(self.model.objects.get(pk=value), self.lookups[0])
+                    if callable(sv): sv = sv()
+                    suggest_items = '<li class="suggest-selected-item">%s <a class="suggest-delete-link">x</a></li>' % sv
                 else:
                     if not isinstance(value, (list, tuple)):
                         value = [int(v) for v in value.split(',')]
