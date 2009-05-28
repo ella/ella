@@ -38,6 +38,7 @@ class TestViews(InterviewViewTestCase):
         self.assert_equals([], r.context['interviewees'])
 
     def test_reply_raises_404_for_unauthorized_users(self):
+        self.templates['404.html'] = ''
         u = User(username='my_user')
         u.set_password('secret')
         u.save()
@@ -47,6 +48,7 @@ class TestViews(InterviewViewTestCase):
         self.assert_equals(404, r.status_code)
 
     def test_reply_raises_404_for_anonymous(self):
+        self.templates['404.html'] = ''
         url = self.interview.get_absolute_url() + 'reply/'
         r = self.client.get(url)
         self.assert_equals(404, r.status_code)
