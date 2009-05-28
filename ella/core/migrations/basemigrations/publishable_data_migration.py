@@ -12,25 +12,23 @@ class BasePublishableDataMigration:
         ("core", "0001_initial"), # TODO publishable mig
     )
 
-    APP = ''
-    MODEL = ''
-    TABLE = '%s_%s' % (APP, MODEL)
+    app_label = ''
+    model = ''
+    table = '%s_%s' % (app_label, model)
 
-    _PUBLISHABLE_DEFAULT_COLS = {
+    _publishable_default_cols = {
         'title': 'title',
         'slug': 'slug',
         'category_id': 'category_id', 
-        'source_id': 'source_id', 
         'photo_id': 'photo_id', 
-        'description': 'description',
     }
 
-    PUBLISHABLE_UNCOMMON_COLS = {}
+    publishable_uncommon_cols = {}
 
     @property
-    def publishanle_cols(self):
-        c = self._PUBLISHABLE_DEFAULT_COLS.copy()
-        c.update(**self.PUBLISHABLE_UNCOMMON_COLS)
+    def publishable_cols(self):
+        c = self._publishable_default_cols.copy()
+        c.update(**self.publishable_uncommon_cols)
         return SortedDict(c)
 
 
@@ -48,15 +46,15 @@ class BasePublishableDataMigration:
                 FROM
                     `%(table)s` a, `django_content_type` ct
                 WHERE
-                    ct.`app_label` = '%(app)s' AND  ct.`model` = '%(model)s';
+                    ct.`app_label` = '%(app_label)s' AND  ct.`model` = '%(model)s';
             ''' % {
-                    'app':self.APP, 'model': self.MODEL, 'table': self.TABLE, 
-                    'cols_to': ', '.join(self.publishanle_cols.keys()), 
-                    'cols_from': ', '.join(self.publishanle_cols.values())}
+                    'app_label':self.app_label, 'model': self.model, 'table': self.table, 
+                    'cols_to': ', '.join(self.publishable_cols.keys()), 
+                    'cols_from': ', '.join(self.publishable_cols.values())}
         )
 
         # add link to parent
-        db.add_column(self.TABLE, 'publishable_ptr_id', models.IntegerField(null=True))
+        db.add_column(self.table, 'publishable_ptr_id', models.IntegerField(null=True))
 
         # update the link
         db.execute('''
@@ -65,15 +63,15 @@ class BasePublishableDataMigration:
                 SET
                     art.`publishable_ptr_id` = pub.`id`
             WHERE
-                pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = '%(app)s' AND  ct.`model` = '%(model)s');
-            ''' % {'app':self.APP, 'model': self.MODEL, 'table': self.TABLE}
+                pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = '%(app_label)s' AND  ct.`model` = '%(model)s');
+            ''' % {'app_label':self.app_label, 'model': self.model, 'table': self.table}
         )
 
         # TODO: we could use introspection to get the FK name in order to drop it
         # KUBA doda
 
         # replace it with a link to parent
-        db.alter_column(self.TABLE, 'publishable_ptr_id', models.ForeignKey(Publishable, primary_key=True))
+        db.alter_column(self.table, 'publishable_ptr_id', models.ForeignKey(Publishable, primary_key=True))
 
 
     def backwards(self, orm):
