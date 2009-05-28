@@ -32,15 +32,15 @@ def detail(request, context):
         'is_paginated': paginator.num_pages > 1,
         'results_per_page': INTERVIEW_PAGINATION_PER_PAGE,
         'page': page,
-        'form' : QuestionForm(request=request),
+        'form' : QuestionForm(request),
         'questions' : page.object_list,
-})
+    })
 
     return render_to_response(
         get_templates_from_placement('object.html', context['placement']),
         context,
         context_instance=RequestContext(request)
-)
+    )
 
 def unanswered(request, bits, context):
     """ Display unanswered questions via rendering page/content_type/interviews.interview/unanswered.html template. """
@@ -51,7 +51,7 @@ def unanswered(request, bits, context):
     interview = context['object']
     interviewees = interview.get_interviewees(request.user)
     context['interviewees'] = interviewees
-    context['form'] = QuestionForm(request=request)
+    context['form'] = QuestionForm(request)
     # result pagination
     qset = interview.unanswered_questions()
     context.update(paginate_qset(request, qset))
@@ -59,7 +59,7 @@ def unanswered(request, bits, context):
         get_templates_from_placement('unanswered.html', context['placement']),
         context,
         context_instance=RequestContext(request)
-)
+    )
 
 def reply(request, bits, context):
     """
@@ -79,26 +79,27 @@ def reply(request, bits, context):
         # no permission
         raise Http404
 
-    qset = interview.question_set.all()
-    context.update(paginate_qset(request, qset))
     if not bits:
         # list of all questions
+        qset = interview.question_set.all()
+        context.update(paginate_qset(request, qset))
         return render_to_response(
             get_templates_from_placement('reply.html', context['placement']),
             context,
             context_instance=RequestContext(request)
-)
+        )
     elif len(bits) != 1:
         # some bogus URL
-        raise Http404
+        raise Http404()
 
     # no point in caching individual questions
     question = get_object_or_404(
             Question,
             pk=bits[0],
             interview=interview
-)
+        )
 
+    data = None
     form = ReplyForm(interview, interviewees, question, request, request.POST or None)
     if form.is_valid():
         form.save()
@@ -112,7 +113,7 @@ def reply(request, bits, context):
         get_templates_from_placement('answer_form.html', context['placement']),
         context,
         context_instance=RequestContext(request)
-)
+    )
 
 class ReplyForm(forms.Form):
     """ A form representing the reply, it also contains the mechanism needed to actually save the reply. """
@@ -159,9 +160,8 @@ class QuestionForm(forms.Form):
     email = Question._meta.get_field('email').formfield()
     content = Question._meta.get_field('content').formfield()
 
-    def __init__(self, *args, **kwargs):
-        if 'request' in kwargs:
-            self.request = kwargs.pop('request')
+    def __init__(self, request, *args, **kwargs):
+        self.request = request
         super(QuestionForm, self).__init__(*args, **kwargs)
 
         # if a user is logged in, do not ask for nick and/or email
@@ -169,10 +169,19 @@ class QuestionForm(forms.Form):
             del self.fields['nickname']
             del self.fields['email']
 
+class QuestionFormFactory(object):
+    def __init__(self, request):
+        self.request = request
+
+    def __call__(self, *args, **kwargs):
+        return QuestionForm(self.request, *args, **kwargs)
+
+    def __getattr__(self, attname):
+        return getattr(QuestionForm, attname)
+
 class QuestionDescriptor(object):
     def __get__(self, qfp, obj_type=None):
-        qfp.form_class.request = qfp.request
-        return qfp.form_class
+        return QuestionFormFactory(qfp.request)
 
 class QuestionFormPreview(FormPreview):
     """ FormPreview subclass that handles the question asking mechanism. """
