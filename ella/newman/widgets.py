@@ -228,7 +228,7 @@ class ForeignKeyRawIdWidget(forms.TextInput):
             attrs['class'] = 'vForeignKeyRawIdAdminField' # The JavaScript looks for this hook.
 
         output = []
-        if issubclass(self.rel.to, Photo):
+        if value and issubclass(self.rel.to, Photo):
             obj = self._get_obj(value)
             output.append('<a href="%s" class="widget-thumb thickbox">%s</a>' % (obj.image.url, obj.thumb()))
         output.append(super(ForeignKeyRawIdWidget, self).render(name, value, attrs))
