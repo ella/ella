@@ -228,15 +228,6 @@ GenericSuggestLib = {};
         var $ul = $text.closest('ul');
         return {text: $text, hidden: $hidden, ul: $ul};
     }
-    // Make the <li>s clickable
-    function goto_edit_item() {
-        var $inputs = get_current_inputs(this);
-        var id = $(this).data('item_id');
-        var href = $inputs.text.attr('rel').replace(/suggest\/.*/, id+'/');
-        if (id) location.href = href;
-        return true;
-    }
-    $('li.suggest-selected-item').click(goto_edit_item);
     // Updates values of the hidden input based on the <li>s present
     function update_values(el) {
         var $inputs = get_current_inputs(el);
