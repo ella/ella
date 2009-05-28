@@ -13,7 +13,7 @@ from django.utils.html import escape
 from django.utils.text import truncate_words
 
 from ella.ellaadmin.utils import admin_url
-from ella.core.models import Category
+from ella.core.models import Category, Listing
 from djangomarkup.widgets import RichTextAreaWidget
 
 
