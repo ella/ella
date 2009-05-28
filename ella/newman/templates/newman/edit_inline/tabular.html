@@ -9,7 +9,11 @@
      {% for field in inline_admin_formset.fields %}
         {% block header_fields %}
             {% if not field.is_hidden %}
-             <th {% if forloop.first %}colspan="2"{% endif %}>{{ field.label|capfirst }}</th>
+             <th {% if forloop.first %}colspan="2"{% endif %}>
+                <label for="id_{{ inline_admin_formset.formset.get_default_prefix }}-0-{{ field.field_name }}">
+                    {{ field.label|capfirst }}
+                </label>
+             </th>
             {% endif %}
         {% endblock %}
      {% endfor %}
