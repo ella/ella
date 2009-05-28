@@ -205,14 +205,14 @@ class PlacementInlineFormset(options.NewmanInlineFormSet):
 class ListingInlineAdmin(newman.NewmanTabularInline):
     model = Listing
     extra = 2
-    suggest_fields = {'category': ('title', 'slug',)}
+    suggest_fields = {'category': ('__unicode__', 'title', 'slug',)}
     fieldsets = ((None, {'fields' : ('category','publish_from', 'publish_to', 'priority_from', 'priority_to', 'priority_value', 'commercial',)}),)
 
 class PlacementInlineAdmin(newman.NewmanTabularInline):
     template = 'newman/edit_inline/placement.html'
     model = Placement
     max_num = 1
-    suggest_fields = {'category': ('title', 'slug',)}
+    suggest_fields = {'category': ('__unicode__', 'title', 'slug',)}
 
     form = PlacementForm
     formset = PlacementInlineFormset
@@ -236,7 +236,7 @@ class PlacementAdmin(newman.NewmanModelAdmin):
     list_display = ('publishable', 'category', 'publish_from',)
     list_filter = ('publish_from', 'category__site',)
     search_fields = ('publishable__title', 'category__title',)
-    suggest_fields = {'category': ('title', 'slug',), 'publishable': ('title',)}
+    suggest_fields = {'category': ('__unicode__', 'title', 'slug',), 'publishable': ('title',)}
 
     inlines = [ListingInlineAdmin]
 
@@ -376,7 +376,7 @@ class PublishableAdmin(newman.NewmanModelAdmin):
     ordering = ('-publish_from',)
 
     suggest_fields = {
-        'category': ('title', 'slug', 'tree_path'),
+        'category': ('__unicode__', 'title', 'slug', 'tree_path'),
         'authors': ('name', 'slug', 'email',),
         'source': ('name', 'url',),
     }

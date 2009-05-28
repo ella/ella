@@ -30,7 +30,7 @@ body {
     margin-top: 105px;
 }
 
-#container { min-width: 840px; }
+#container, .favs, #menu-top { min-width: 940px; }
 
 #header {
     position: fixed;
@@ -457,6 +457,9 @@ div.model-help h1, div.model-help h2, div.model-help h3, div.model-help h4, div.
 div.model-help h2 { font-size: 130% }
 div.model-help h3 { font-size: 120% }
 div.model-help h4 { font-size: 105% }
+
+/* WIDGETS etc. */
+a.widget-thumb { border: 1px solid #ccc; margin-right: 5px; }
 
 /* OTHER */
 #debug { position: absolute; top:0; left:0; right:0; bottom: 25px;background: #333; color: #fff; padding: 10px; z-index: 50; overflow: auto; opacity: .9; display: none; }

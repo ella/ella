@@ -343,9 +343,11 @@ class NewmanModelAdmin(XModelAdmin):
     @require_AJAX
     def suggest_view(self, request, extra_context=None):
         self.register_newman_variables(request)
+
         SUGGEST_VIEW_LIMIT = getattr(settings, 'SUGGEST_VIEW_LIMIT', 20)
         SUGGEST_VIEW_MIN_LENGTH = getattr(settings, 'SUGGEST_VIEW_MIN_LENGTH', 2)
         SUGGEST_RETURN_ALL_FIELD = getattr(settings, 'SUGGEST_RETURN_ALL_FIELD', True)
+
         if not ('f' in request.GET.keys() and 'q' in request.GET.keys()):
             raise AttributeError, 'Invalid query attributes. Example: ".../?f=field_a&f=field_b&q=search_term&o=offset"'
         elif len(request.GET.get('q')) < SUGGEST_VIEW_MIN_LENGTH:
@@ -355,16 +357,24 @@ class NewmanModelAdmin(XModelAdmin):
         if 'o' in request.GET.keys() and request.GET.get('o'):
             offset = int(request.GET.get('o'))
         limit = offset + SUGGEST_VIEW_LIMIT
-        lookup_fields = [u'id'] + request.GET.getlist('f')
+
+        model_fields = [mf.name for mf in self.model._meta.fields]
+        lookup_fields = []
         lookup_value = request.GET.get('q')
         lookup = None
+        has_non_lookup_attr = False
+        all_fields = [u'id'] + request.GET.getlist('f')
 
-        model_fields = [f.name for f in self.model._meta.fields]
+        for lf in all_fields:
+            if lf in model_fields or lf.split('__')[0] in model_fields:
+                lookup_fields.append(lf)
+            elif hasattr(self.model, lf):
+                has_non_lookup_attr = True
+            else:
+                raise AttributeError, 'Model "%s" has not field "%s". Possible fields are "%s".' \
+                                    % (self.model._meta.object_name, lf, ', '.join(model_fields))
 
         for f in lookup_fields:
-            if not (f in model_fields or f.split('__')[0] in model_fields):
-                raise AttributeError, 'Model "%s" has not field "%s". Possible fields are "%s".' \
-                                    % (self.model._meta.object_name, f, ', '.join(model_fields))
             lookup_key = str('%s__icontains' % f)
             if not lookup:
                 lookup = models.Q(**{lookup_key: lookup_value})
@@ -383,10 +393,32 @@ class NewmanModelAdmin(XModelAdmin):
         # user category filter
         qs = utils.user_category_filter(self.model.objects.filter(lookup), request.user)
 
-        if SUGGEST_RETURN_ALL_FIELD:
-            data = qs.values(*lookup_fields)
+        if not has_non_lookup_attr:
+            if SUGGEST_RETURN_ALL_FIELD:
+                data = qs.values(*lookup_fields)
+            else:
+                data = qs.values(*lookup_fields[:2])
         else:
-            data = qs.filter(lookup).values(*lookup_fields[:2])
+            if SUGGEST_RETURN_ALL_FIELD:
+                data = qs.only(*lookup_fields)
+            else:
+                data = qs.only(*lookup_fields[:2])
+
+        def construct_row(inst, fields):
+            row = {}
+            for f in fields:
+                attr = getattr(inst, f)
+                if callable(attr):
+                    row[f] = attr()
+                else:
+                    row[f] = attr
+            return row
+
+        if has_non_lookup_attr:
+            outdata = []
+            for i in data:
+                outdata.append(construct_row(i, all_fields))
+            data = outdata
 
         # sort the suggested items so that those starting with the sought term come first
         def compare(a,b):
@@ -410,9 +442,9 @@ class NewmanModelAdmin(XModelAdmin):
         ft.append('{cnt:%d}' % cnt)
         for item in data:
             if SUGGEST_RETURN_ALL_FIELD:
-                ft.append( "%s".encode('utf-8') % '|'.join("%s" % item[f] for f in lookup_fields) )
+                ft.append( "%s".encode('utf-8') % '|'.join("%s" % item[f] for f in all_fields) )
             else:
-                ft.append( "%s".encode('utf-8') % '|'.join("%s" % item[f] for f in lookup_fields[:2]) )
+                ft.append( "%s".encode('utf-8') % '|'.join("%s" % item[f] for f in all_fields[:2]) )
 
         return HttpResponse( '\n'.join(ft), mimetype='text/plain;charset=utf-8' )
 
