@@ -37,17 +37,56 @@ class TestViews(InterviewViewTestCase):
         self.assert_true('interviewees' in r.context)
         self.assert_equals([], r.context['interviewees'])
 
+    def test_reply_raises_404_for_unauthorized_users(self):
+        u = User(username='my_user')
+        u.set_password('secret')
+        u.save()
+        self.assert_true(self.client.login(username='my_user', password='secret'))
+        url = self.interview.get_absolute_url() + 'reply/'
+        r = self.client.get(url)
+        self.assert_equals(404, r.status_code)
+
+    def test_reply_raises_404_for_anonymous(self):
+        url = self.interview.get_absolute_url() + 'reply/'
+        r = self.client.get(url)
+        self.assert_equals(404, r.status_code)
+
+    def test_post_to_reply_works(self):
+        u = User(username='my_user')
+        u.set_password('secret')
+        u.save()
+        self.interviewee.user = u
+        self.interviewee.save()
+        q = Question.objects.create(interview=self.interview, content='What ?')
+
+        url = self.interview.get_absolute_url() + 'reply/' + str(q.pk) + '/'
+        self.assert_true(self.client.login(username='my_user', password='secret'))
+        data = {'content': 'That !'}
+        r = self.client.post(url, data)
+        self.assert_equals(302, r.status_code)
+
+        self.assert_equals(1, Answer.objects.all().count())
+        a = Answer.objects.all()[0]
+        self.assert_equals(q, a.question)
+        self.assert_equals(data['content'], a.content)
+        self.assert_equals(self.interviewee, a.interviewee)
+
+
     def test_reply_lists_questions(self):
-        u = User.objects.create(username='my_user')
+        self.templates['page/reply.html'] = ''
+        u = User(username='my_user')
+        u.set_password('secret')
+        u.save()
         self.interviewee.user = u
         self.interviewee.save()
         q = Question.objects.create(interview=self.interview, content='What ?')
 
         url = self.interview.get_absolute_url() + 'reply/'
+        self.assert_true(self.client.login(username='my_user', password='secret'))
         r = self.client.get(url)
 
         self.assert_equals(200, r.status_code)
-
+        self.assert_equals([q], list(r.context['page'].object_list))
 
     def test_ask_works(self):
         self.templates['page/ask_preview.html'] = ''
