@@ -7,10 +7,11 @@ from ella.core.migrations.basemigrations.publishable_data_migration import BaseP
 
 class Migration(BasePublishableDataMigration):
 
-    APP = 'articles'
-    MODEL = 'article'
-    TABLE = '%s_%s' % (APP, MODEL)
+    app_label = 'articles'
+    model = 'article'
+    table = '%s_%s' % (app_label, model)
 
-    PUBLISHABLE_UNCOMMON_COLS = {
+    publishable_uncommon_cols = {
+        'source_id': 'source_id', 
         'description': 'perex',
     }

@@ -6,6 +6,7 @@ from django.forms.fields import DateTimeField
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 from django.forms.util import ValidationError
+from django.forms.models import save_instance
 from django.conf.urls.defaults import patterns, url
 from django.utils.safestring import mark_safe
 from django.template.defaultfilters import date
@@ -45,25 +46,28 @@ class PlacementForm(modelforms.ModelForm):
                 Category.objects.all(), label=_('Category'), cache_choices=True, required=False, initial=initial)
         super(PlacementForm, self).__init__(*args, **kwargs)
 
-    def get_publish_date(self, elem_id):
+    def get_publish_date(self, pub_from):
         " Tries to save publish_from field specified either by POST parameter or by Placement (self.instance). "
-        pub_from = self.data.get(self.get_part_id('%d-publish_from' % elem_id))
         if pub_from:
             dt_field = DateTimeField()
             return dt_field.clean(pub_from)
         return self.instance.publish_from
 
     def save(self, commit=True):
-        list_cats = self.cleaned_data.pop('listings')
+        cleaned_list_cats = self.cleaned_data.pop('listings')
+        list_cats = []
+        # Order of items should be preserved (in cleaned_data is order not preserved)
+        for pk in self.data.getlist( self.get_part_id('') ):
+            list_cats.append(Category.objects.get(pk=int(pk)))
+        publish_from_fields = self.data.getlist(self.get_part_id('publish_from'))
         instance = self.instance
 
         def save_them():
             if not list_cats:
                 return
             listings = dict([ (l.category, l) for l in Listing.objects.filter(placement=instance.pk) ])
-
-            for c in list_cats:
-                publish_from = self.get_publish_date(c.pk)
+            for c, pub in zip(list_cats, publish_from_fields):
+                publish_from = self.get_publish_date(pub)
                 if not c in listings:
                     # create listing
                     l = Listing(
@@ -94,27 +98,36 @@ class PlacementForm(modelforms.ModelForm):
                     save_m2m()
                 save_them()
             self.save_m2m = save_all
-            instance.category = self.cleaned_data['category']
-            instance.publish_from = self.cleaned_data['publish_from']
-            instance.publish_to = self.cleaned_data['publish_to']
-            instance.slug = self.cleaned_data['slug']
-            instance.static = self.cleaned_data['static']
-        return instance
+        instance.category = self.cleaned_data['category']
+        instance.publish_from = self.cleaned_data['publish_from']
+        instance.publish_to = self.cleaned_data['publish_to']
+        instance.slug = self.cleaned_data['slug']
+        instance.static = self.cleaned_data['static']
+        if self.instance.pk is None:
+            fail_message = 'created'
+        else:
+            fail_message = 'changed'
+        return save_instance(self, instance, self._meta.fields,
+                             fail_message, commit, exclude=self._meta.exclude)
 
     def get_part_id(self, suffix):
         id_part = self.data.get('placement_listing_widget')
+        if not suffix:
+            return id_part
         return '%s-%s' % (id_part, suffix)
 
     def listings_clean(self, data):
         # get listing category, publish_from and publish_to
-        for d in self.cleaned_data['listings']:
-            pub_from = data.get(self.get_part_id('%d-publish_from' % d.pk), None)
-            dt_field = DateTimeField()
-            if not pub_from:
+        pub_from = data.getlist(self.get_part_id('publish_from'))
+        listings = self.cleaned_data['listings']
+        if len(pub_from) and (len(pub_from) != len(listings)):
+            raise ValidationError(_('Amount of publish_from input fields should be the same as category fields. With kind regards Your PlacementInline and his ListingCustomWidget.'))
+        for lst, pub in zip(listings, pub_from):
+            if not pub:
                 #raise ValidationError(_('This field is required'))
                 continue
             dt_field = DateTimeField()
-            publish_from = dt_field.clean(pub_from)
+            publish_from = dt_field.clean(pub)
 
     def clean(self):
         # no data - nothing to validate
