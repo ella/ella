@@ -88,9 +88,10 @@ def reply(request, bits, context):
             context,
             context_instance=RequestContext(request)
         )
-    elif len(bits) != 1:
+    elif len(bits) != 1 or request.method != 'POST':
         # some bogus URL
         raise Http404()
+
 
     # no point in caching individual questions
     question = get_object_or_404(
@@ -99,8 +100,7 @@ def reply(request, bits, context):
             interview=interview
         )
 
-    data = None
-    form = ReplyForm(interview, interviewees, question, request, request.POST or None)
+    form = ReplyForm(interview, interviewees, question, request, request.POST)
     if form.is_valid():
         form.save()
         # go back to the question list
