@@ -452,6 +452,12 @@ $( function() {
         $affected.slideToggle('slow');
     });
     
+    // Close filters button
+    $('#filters a.cancel').live('click', function(evt) {
+        if (evt.button != 0) return;
+        ContentByHashLib.unload_content('filters');
+    });
+    
     // Persistent filters -- add the query string if:
     // - there is none AND
     // - one is there for the specifier's URL in the changelistFilters object
@@ -909,11 +915,11 @@ $( function() {
         var $filt = $('#filters-handler .popup-filter');
         if ($filt.length) {
             
-            var $cancel = $('#filters-handler span:last a');
+            var $cancel = $('#filters-handler span:last a').not('.overlay-adapted');
             $cancel
             .attr( 'href', $target.attr('id')+'::'+$cancel.attr('href') )
             .removeClass('hashadr')
-            .addClass('simpleload');
+            .addClass('simpleload overlay-adapted');
             
             $filt.addClass('simpleload').attr( 'href', $filt.attr('href').replace(/::::/, '::'+$target.attr('id')+'::') );
             function init_filters() {

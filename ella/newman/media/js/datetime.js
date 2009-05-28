@@ -276,86 +276,88 @@ function DateInput(input) {
     };
 }
 
-
-function datetime_init() {
-    $('.vDateTimeInput,.vDateInput').each( function() {
-        var $input = $(this);
-        var is_datetime = $input.hasClass('vDateTimeInput');
-        if (! $input.data('dti')) {
-            if (is_datetime) {
-                $input.data('dti', new DateTimeInput(this));
+(function($) {
+    function datetime_init() {
+        $('.vDateTimeInput,.vDateInput').each( function() {
+            var $input = $(this);
+            var is_datetime = $input.hasClass('vDateTimeInput');
+            if (! $input.data('dti')) {
+                if (is_datetime) {
+                    $input.data('dti', new DateTimeInput(this));
+                }
+                else {
+                    $input.data('dti', new DateInput(this));
+                }
+                
+                $(  '<span class="datepicker-trigger"><img src="'
+                    +MEDIA_URL
+                    +'ico/16/vcalendar.png" alt="cal" /></span>'
+                ).click( function() {
+                    $('.datepicker').css({
+                        top: $(this).offset().top + 'px',
+                        left: ( $(this).offset().left + $(this).width() ) + 'px'
+                    }).toggle().data( 'input', $input );
+                }).insertAfter(this);
+                
+                $input.keypress(function(evt) {
+                    var delta = 0;
+                    if (evt.keyCode == 38) delta =  1;
+                    if (evt.keyCode == 40) delta = -1;
+                    if (!delta) return true;
+                    var pos = this.selectionEnd;
+                    $input.data('dti').scroll(pos, delta);
+                });
             }
-            else {
-                $input.data('dti', new DateInput(this));
-            }
-            
-            $(  '<span class="datepicker-trigger"><img src="'
-                +MEDIA_URL
-                +'ico/16/vcalendar.png" alt="cal" /></span>'
-            ).click( function() {
-                $('.datepicker').css({
-                    top: $(this).offset().top + 'px',
-                    left: ( $(this).offset().left + $(this).width() ) + 'px'
-                }).toggle().data( 'input', $input );
-            }).insertAfter(this);
-            
-            $input.keypress(function(evt) {
-                var delta = 0;
-                if (evt.keyCode == 38) delta =  1;
-                if (evt.keyCode == 40) delta = -1;
-                if (!delta) return true;
-                var pos = this.selectionEnd;
-                $input.data('dti').scroll(pos, delta);
-            });
-        }
-    });
-}
-datetime_init();
-
-function media_dependent_datetime_init(evt) {
-    // create the datepicker div
-    if ($('.datepicker').length) { }    // but only if there is none yet
-    else if (
-           evt.type == 'content_added'  // and we added something that uses a datepicker
-        && $(evt.target).find('.datepicker-trigger').length == 0    // if anything
-    ) { }
-    else {
-        var $datepicker = $('<div class="datepicker">');
-        $datepicker.datepicker({
-            onSelect: function(dtext, dpick) {
-                $(this).hide();
-                var dti = $( $(this).data('input') ).data('dti');
-                var d = new Date();
-                d.setFullYear(dpick.selectedYear);
-                d.setMonth(dpick.selectedMonth);
-                d.setDate(dpick.selectedDay);
-                dti.set_date(d, {/*preserve*/hour:true,minute:true});
-            },
-            onClose: function() {
-                $(this).hide();
-            },
         });
-        $datepicker.appendTo(
-               $('.change-form').get(0)
-            || $('#content').get(0)
-            || $('body').get(0)
-        );
     }
-    
-    // mousewheel datetime scrolling
-    function mousewheel_handler(evt, delta) {
-        var dti = $(this).data('dti');
-        var pos = dti.cursor_pos(evt);
-        dti.scroll(pos, delta / Math.abs(delta||1));
-    };
-    if (DEBUG)  // FIXME: mousewheel scrolling broken!
-    $('.vDateTimeInput,.vDateInput').not('.mwheel-enhanced').focus( function() {
-        $(this)  .bind('mousewheel', mousewheel_handler);
-    }).blur( function() {
-        $(this).unbind('mousewheel', mousewheel_handler);
-    }).addClass('mwheel-enhanced');
-}
+    datetime_init();
 
-$( document ).bind('content_added', datetime_init);
-$( document ).bind('content_added', media_dependent_datetime_init);
-$( document ).one ('media_loaded' , media_dependent_datetime_init);
+    function media_dependent_datetime_init(evt) {
+        // create the datepicker div
+        if ($('.datepicker').length) { }    // but only if there is none yet
+        else if (
+               evt.type == 'content_added'  // and we added something that uses a datepicker
+            && $(evt.target).find('.datepicker-trigger').length == 0    // if anything
+        ) { }
+        else {
+            var $datepicker = $('<div class="datepicker">');
+            $datepicker.datepicker({
+                onSelect: function(dtext, dpick) {
+                    $(this).hide();
+                    var dti = $( $(this).data('input') ).data('dti');
+                    var d = new Date();
+                    d.setFullYear(dpick.selectedYear);
+                    d.setMonth(dpick.selectedMonth);
+                    d.setDate(dpick.selectedDay);
+                    dti.set_date(d, {/*preserve*/hour:true,minute:true});
+                },
+                onClose: function() {
+                    $(this).hide();
+                },
+            });
+            $datepicker.appendTo(
+                   $('.change-form').get(0)
+                || $('#content').get(0)
+                || $('body').get(0)
+            );
+        }
+        
+        // mousewheel datetime scrolling
+        function mousewheel_handler(evt, delta) {
+            var dti = $(this).data('dti');
+            var pos = dti.cursor_pos(evt);
+            dti.scroll(pos, delta / Math.abs(delta||1));
+        };
+        if (DEBUG)  // FIXME: mousewheel scrolling broken!
+        $('.vDateTimeInput,.vDateInput').not('.mwheel-enhanced').focus( function() {
+            $(this)  .bind('mousewheel', mousewheel_handler);
+        }).blur( function() {
+            $(this).unbind('mousewheel', mousewheel_handler);
+        }).addClass('mwheel-enhanced');
+    }
+
+    $( document ).bind('content_added', datetime_init);
+    $( document ).bind('content_added', media_dependent_datetime_init);
+    $( document ).one ('media_loaded' , media_dependent_datetime_init);
+
+})(jQuery);
