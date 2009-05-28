@@ -30,7 +30,7 @@ body {
     margin-top: 105px;
 }
 
-#container { min-width: 840px; }
+#container, .favs, #menu-top { min-width: 940px; }
 
 #header {
     position: fixed;
@@ -107,7 +107,7 @@ div.breadcrumbs {
     float: left;
     margin: 0 2px;
     padding: 0;
-    width: 74px;
+    width: 80px;
     height: 74px;
     background: transparent url(../ico/ct/64/unknown.png) 50% 0 no-repeat;
     opacity: .8;
@@ -120,17 +120,33 @@ div.breadcrumbs {
 }
 .favs ul.items li a.app {
     display: block;
-    width: 74px;
+    width: 80px;
     height: 62px;
+    position: relative;
+}
+.favs ul.items li a.app span {
+    background: #000;
+    font-weight: bold;
+    opacity: .6;
+    position: absolute; bottom: 0; left: 0; width: 80px;
+}
+.favs ul.items li a.app:hover span {
+    opacity: .9
 }
 .favs ul.items li a.add {
+    background: #000;
+    display: block;
+    opacity: .6;
+}
+.favs ul.items li a.add span {
     margin: auto;
     padding-left: 13px;
     text-align: left;
-    background: url(../ico/10/icon_addlink.gif) 0 50% no-repeat;
+    background: #000 url(../ico/10/icon_addlink.gif) 0 50% no-repeat;
 }
 .favs ul.items li a.add:hover {
     color: darkorange;
+    opacity: .9;
 }
 .favs ul.tools {
     float: right;
@@ -161,8 +177,7 @@ a.icn {
 a.btn {
     padding-top: 4px; padding-bottom: 3px; padding-right: 4px;
     border: 1px solid #ddd;
-    -moz-border-radius: 5px;
-    -webkit-border-radius: 5px;
+    border-radius: 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px;
     background-color: #E9E8DD;
     margin: 3px 2px;
     text-decoration: none;
@@ -200,6 +215,8 @@ a.icn.novisible { background-image: url(../ico/16/14_layer_novisible.png); }
 a.icn.history { background-image: url(../ico/16/history.png); }
 a.icn.web { background-image: url(../ico/16/web.png); }
 a.icn.save { background-image: url(../ico/16/filesave.png); }
+a.icn.saveas { background-image: url(../ico/16/filesaveas.png); }
+a.icn.saveall { background-image: url(../ico/16/save_all.png); }
 a.icn.edit { background-image: url(../ico/16/edit.png); }
 a.icn.help { background-image: url(../ico/16/help.png); }
 a.icn.idea { background-image: url(../ico/16/idea.png); }
@@ -252,9 +269,13 @@ input.vDateTimeInput { width: 120px; }
     border: solid 2px blue;
     display: none;
 }
+
+#changelist-overlay #filters {
+    top: 65px;
+}
 #err-overlay {
-    bottom: 70px;
-    right: 5px;
+    bottom: 80px;
+    right: 10px;
     -moz-border-radius: 10px;
     -webkit-border-radius: 10px;
     border: 2px solid #d66;
@@ -278,15 +299,13 @@ input.vDateTimeInput { width: 120px; }
 .article-form-container .publish-container label { float: none; }
 .change-form .submit-row {
     position: fixed;
-    bottom: 27px;
-    right: 5px;
-    border-left: 2px solid #d66;
-    border-top: 2px solid #d66;
-    border-right: 2px solid #d66;
-    -moz-border-radius-topleft: 10px;
-    -moz-border-radius-topright: 10px;
+    bottom: 35px;
+    right: 10px;
+    border: 2px solid #d66;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
     padding: 10px;
-    background: #ffd;
+    background: #fff url(../img/nav-bg-reverse.gif) left top repeat-x;
 }
 .change-form .submit-row a {
     white-space: nowrap;
@@ -319,6 +338,12 @@ td, th {
 /* CHANGELIST ACTIONS */
 #changelist .actions { padding: 5px; }
 #changelist .actions label { display: inline; }
+
+#changelist p.paginator {
+    text-align: right;
+    background: #ddd url(../img/nav-bg-reverse.gif) 0 0 repeat-x;
+    padding: 3px 5px;
+}
 
 /* OPERATION MESSAGES */
 #opmsg {
@@ -396,6 +421,15 @@ div.pop #filters { top: 35px }
     padding: 2px 0;
 }
 
+/* CHANGELIST CUSTOM TDs */
+#changelist td span.unpublished, #changelist td span.published {
+    background: transparent url(../ico/10/icon-yes.gif) 0 50% no-repeat;
+    padding-left: 17px;
+}
+#changelist td span.unpublished {
+    background-image: url(../ico/10/icon-no.gif);
+}
+
 /* FILTERS (UN)PACKING - TEMPORARY */
 #filters ul {
     display: none;
@@ -439,6 +473,9 @@ div.model-help h1, div.model-help h2, div.model-help h3, div.model-help h4, div.
 div.model-help h2 { font-size: 130% }
 div.model-help h3 { font-size: 120% }
 div.model-help h4 { font-size: 105% }
+
+/* WIDGETS etc. */
+a.widget-thumb { border: 1px solid #ccc; margin-right: 5px; }
 
 /* OTHER */
 #debug { position: absolute; top:0; left:0; right:0; bottom: 25px;background: #333; color: #fff; padding: 10px; z-index: 50; overflow: auto; opacity: .9; display: none; }

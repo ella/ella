@@ -1,16 +1,22 @@
+import datetime, time
+
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.forms import models as modelforms
 from django.forms.fields import DateTimeField
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 from django.forms.util import ValidationError
+from django.forms.models import save_instance
 from django.conf.urls.defaults import patterns, url
 from django.utils.safestring import mark_safe
+from django.template.defaultfilters import date
+from django.conf import settings
 
-from ella.core.models import Author, Source, Category, Listing, HitCount, Placement, Related
-from ella.core.models.publishable import Publishable
+from ella.core.models import Author, Source, Category, Listing, HitCount, Placement, Related, Publishable
+from ella.core.models.publishable import PUBLISH_FROM_WHEN_EMPTY
 from ella import newman
 from ella.newman import options, fields
+from ella.newman.filterspecs import CustomFilterSpec
 
 class ListingForm(modelforms.ModelForm):
     class Meta:
@@ -26,14 +32,13 @@ class PlacementForm(modelforms.ModelForm):
     def __init__(self, *args, **kwargs):
         initial = []
         # args[data] -> instance
-        print '__init__ args:', str(args) , kwargs
         if 'initial' in kwargs:
             initial = [ c.pk for c in Category.objects.distinct().filter(listing__placement=kwargs['initial']['id']) ]
         elif 'instance' in kwargs:
             initial = {
-                'selected_categories': [ 
-                    c.pk for c in Category.objects.distinct().filter(listing__placement=kwargs['instance'].pk) 
-                ], 
+                'selected_categories': [
+                    c.pk for c in Category.objects.distinct().filter(listing__placement=kwargs['instance'].pk)
+                ],
                 'listings': list(kwargs['instance'].listing_set.all())
             }
 
@@ -41,25 +46,28 @@ class PlacementForm(modelforms.ModelForm):
                 Category.objects.all(), label=_('Category'), cache_choices=True, required=False, initial=initial)
         super(PlacementForm, self).__init__(*args, **kwargs)
 
-    def get_publish_date(self, elem_id):
+    def get_publish_date(self, pub_from):
         " Tries to save publish_from field specified either by POST parameter or by Placement (self.instance). "
-        pub_from = self.data.get(self.get_part_id('%d-publish_from' % elem_id))
         if pub_from:
             dt_field = DateTimeField()
             return dt_field.clean(pub_from)
         return self.instance.publish_from
 
     def save(self, commit=True):
-        list_cats = self.cleaned_data.pop('listings')
+        cleaned_list_cats = self.cleaned_data.pop('listings')
+        list_cats = []
+        # Order of items should be preserved (in cleaned_data is order not preserved)
+        for pk in self.data.getlist( self.get_part_id('') ):
+            list_cats.append(Category.objects.get(pk=int(pk)))
+        publish_from_fields = self.data.getlist(self.get_part_id('publish_from'))
         instance = self.instance
-        if not list_cats:
-            return instance
-        
-        def save_them():
-            listings = dict([ (l.category, l) for l in Listing.objects.filter(placement=instance.pk) ])
 
-            for c in list_cats:
-                publish_from = self.get_publish_date(c.pk)
+        def save_them():
+            if not list_cats:
+                return
+            listings = dict([ (l.category, l) for l in Listing.objects.filter(placement=instance.pk) ])
+            for c, pub in zip(list_cats, publish_from_fields):
+                publish_from = self.get_publish_date(pub)
                 if not c in listings:
                     # create listing
                     l = Listing(
@@ -90,27 +98,36 @@ class PlacementForm(modelforms.ModelForm):
                     save_m2m()
                 save_them()
             self.save_m2m = save_all
-            instance.category = self.cleaned_data['category']
-            instance.publish_from = self.cleaned_data['publish_from']
-            instance.publish_to = self.cleaned_data['publish_to']
-            instance.slug = self.cleaned_data['slug']
-            instance.static = self.cleaned_data['static']
-        return instance
+        instance.category = self.cleaned_data['category']
+        instance.publish_from = self.cleaned_data['publish_from']
+        instance.publish_to = self.cleaned_data['publish_to']
+        instance.slug = self.cleaned_data['slug']
+        instance.static = self.cleaned_data['static']
+        if self.instance.pk is None:
+            fail_message = 'created'
+        else:
+            fail_message = 'changed'
+        return save_instance(self, instance, self._meta.fields,
+                             fail_message, commit, exclude=self._meta.exclude)
 
     def get_part_id(self, suffix):
         id_part = self.data.get('placement_listing_widget')
+        if not suffix:
+            return id_part
         return '%s-%s' % (id_part, suffix)
 
     def listings_clean(self, data):
         # get listing category, publish_from and publish_to
-        for d in self.cleaned_data['listings']:
-            pub_from = data.get(self.get_part_id('%d-publish_from' % d.pk), None)
-            dt_field = DateTimeField()
-            if not pub_from:
+        pub_from = data.getlist(self.get_part_id('publish_from'))
+        listings = self.cleaned_data['listings']
+        if len(pub_from) and (len(pub_from) != len(listings)):
+            raise ValidationError(_('Amount of publish_from input fields should be the same as category fields. With kind regards Your PlacementInline and his ListingCustomWidget.'))
+        for lst, pub in zip(listings, pub_from):
+            if not pub:
                 #raise ValidationError(_('This field is required'))
                 continue
             dt_field = DateTimeField()
-            publish_from = dt_field.clean(pub_from)
+            publish_from = dt_field.clean(pub)
 
     def clean(self):
         # no data - nothing to validate
@@ -127,9 +144,9 @@ class PlacementForm(modelforms.ModelForm):
         main = None
         d = self.cleaned_data
         # empty form
-        if not d: 
+        if not d:
             return self.cleaned_data
-        #if cat and cat == cat and cat: # should be equiv. if cat:...  
+        #if cat and cat == cat and cat: # should be equiv. if cat:...
         if cat:
             main = d
 
@@ -173,7 +190,7 @@ class PlacementForm(modelforms.ModelForm):
         if cat and not main:
             # raise forms.ValidationError(_('If object has a category, it must have a main placement.'))
             raise (_('If object has a category, it must have a main placement.'))
-        
+
         self.listings_clean(self.data)
         return self.cleaned_data
 
@@ -188,14 +205,14 @@ class PlacementInlineFormset(options.NewmanInlineFormSet):
 class ListingInlineAdmin(newman.NewmanTabularInline):
     model = Listing
     extra = 2
-    suggest_fields = {'category': ('title', 'slug',)}
+    suggest_fields = {'category': ('__unicode__', 'title', 'slug',)}
     fieldsets = ((None, {'fields' : ('category','publish_from', 'publish_to', 'priority_from', 'priority_to', 'priority_value', 'commercial',)}),)
 
 class PlacementInlineAdmin(newman.NewmanTabularInline):
     template = 'newman/edit_inline/placement.html'
     model = Placement
     max_num = 1
-    suggest_fields = {'category': ('title', 'slug',)}
+    suggest_fields = {'category': ('__unicode__', 'title', 'slug',)}
 
     form = PlacementForm
     formset = PlacementInlineFormset
@@ -219,7 +236,7 @@ class PlacementAdmin(newman.NewmanModelAdmin):
     list_display = ('publishable', 'category', 'publish_from',)
     list_filter = ('publish_from', 'category__site',)
     search_fields = ('publishable__title', 'category__title',)
-    suggest_fields = {'category': ('title', 'slug',), 'publishable': ('title',)}
+    suggest_fields = {'category': ('__unicode__', 'title', 'slug',), 'publishable': ('title',)}
 
     inlines = [ListingInlineAdmin]
 
@@ -282,12 +299,76 @@ class RelatedInlineAdmin(newman.NewmanTabularInline):
     extra = 3
     model = Related
 
+class IsPublishedFilter(CustomFilterSpec):
+    " Published/Nonpublished objects filter"
+    lookup_var = 'publish_from'
+
+    def title(self):
+        return _('Is published?')
+
+    def get_lookup_kwarg(self):
+        for param in self.request_get:
+            if param.startswith(self.lookup_var):
+                self.selected_lookup = param
+                return param
+        return ''
+
+    def filter_func(fspec):
+        # nepublikovany = nemaji placement (datum 3000) ci maji placement v budoucnu
+        # ?placement__publish_from__exact=2008-10-10
+        lookup_var_not_published = '%s__gt' % fspec.lookup_var
+        lookup_var_published = '%s__lte' % fspec.lookup_var
+        when = time.strftime('%Y-%m-%d', PUBLISH_FROM_WHEN_EMPTY.timetuple())
+        now = time.strftime('%Y-%m-%d')
+        link = ( _('No'), {lookup_var_not_published: now})
+        fspec.links.append(link)
+        link = ( _('Yes'), {lookup_var_published: now})
+        fspec.links.append(link)
+        fspec.remove_from_querystring = [lookup_var_published, lookup_var_not_published]
+        return True
+
+class PublishFromFilter(CustomFilterSpec):
+    " Publish from customized filter. "
+    published_from_field_path = 'placement__listing__publish_from'
+
+    def title(self):
+        return _('Publish from')
+
+    def get_lookup_kwarg(self):
+        out = [
+            '%s__day' % self.published_from_field_path,
+            '%s__month' % self.published_from_field_path,
+            '%s__year' % self.published_from_field_path,
+        ]
+        return out
+
+    def filter_func(fspec):
+        # SELECT created FROM qs._meta.dbtable  GROUP BY created
+        #qs = fspec.model_admin.queryset(fspec.request)
+        #dates =  qs.dates(fspec.field_path, 'day', 'DESC')[:365]
+        # Article.objects.filter(placement__listing__publish_from__gte='2012-01-01')
+        YEAR = 365*24*60*60
+        ts = time.time() - YEAR
+        last_year = time.strftime('%Y-%m-%d %H:%M', time.localtime(ts))
+        qs = Placement.objects.filter(listing__publish_from__gte=last_year)
+        dates = qs.dates('publish_from', 'day', 'DESC')
+        for date in dates:
+            lookup_dict = dict()
+            lookup_dict['%s__day' % fspec.published_from_field_path] = date.day
+            lookup_dict['%s__month' % fspec.published_from_field_path] = date.month
+            lookup_dict['%s__year' % fspec.published_from_field_path] = date.year
+            link_text = '%d. %d. %d' % (date.day, date.month, date.year)
+            link = ( link_text, lookup_dict)
+            fspec.links.append(link)
+        return True
+
 class PublishableAdmin(newman.NewmanModelAdmin):
     """ Default admin options for all publishables """
 
     exclude = ('content_type',)
-    list_display = ('admin_link', 'category', 'photo_thumbnail', 'publish_from', 'placement_link', 'site_icon')
+    list_display = ('admin_link', 'category', 'photo_thumbnail', 'publish_from_nice', 'placement_link', 'site_icon')
     list_filter = ('category__site', 'category', 'authors', 'content_type')
+    unbound_list_filter = (PublishFromFilter, IsPublishedFilter,)
     search_fields = ('title', 'description', 'slug', 'authors__name', 'authors__slug',) # FIXME: 'tags__tag__name',)
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
@@ -295,7 +376,7 @@ class PublishableAdmin(newman.NewmanModelAdmin):
     ordering = ('-publish_from',)
 
     suggest_fields = {
-        'category': ('title', 'slug', 'tree_path'),
+        'category': ('__unicode__', 'title', 'slug', 'tree_path'),
         'authors': ('name', 'slug', 'email',),
         'source': ('name', 'url',),
     }
@@ -313,18 +394,32 @@ class PublishableAdmin(newman.NewmanModelAdmin):
     site_icon.short_description = _('site')
     site_icon.allow_tags = True
 
+    def publish_from_nice(self, obj):
+        span_str = '<span class="%s">%s</span>'
+        date_str = date(obj.publish_from, settings.DATETIME_FORMAT)
+
+        if obj.publish_from.year >= 3000:
+            return mark_safe(span_str % ('unpublished', ugettext('No placement')))
+        elif obj.publish_from > datetime.datetime.now():
+            return span_str % ('unpublished', date_str)
+        return span_str % ('published', date_str)
+    publish_from_nice.short_description = _('Publish from')
+    publish_from_nice.admin_order_field = 'publish_from'
+    publish_from_nice.allow_tags = True
+
     def photo_thumbnail(self, object):
         photo = object.get_photo()
         if photo:
             return mark_safe(photo.thumb())
         else:
-            return mark_safe('<div class="errors"><ul class="errorlist"><li>%s</li></ul></div>' % ugettext('No main photo!'))
+            return mark_safe('<span class="form-error-msg">%s</span>' % ugettext('No main photo!'))
     photo_thumbnail.allow_tags = True
     photo_thumbnail.short_description = _('Photo')
 
     def placement_link(self, object):
         if object.main_placement:
-            return mark_safe('<a class="hashadr" href="/core/placement/%d/">%s</a>' % (object.main_placement.pk, object.main_placement.category))
+            return mark_safe('<span class="published"><a class="hashadr" href="/core/placement/%d/">%s</a></span>' % (object.main_placement.pk, object.main_placement.category))
+        return mark_safe('<span class="unpublished">%s</span>' % ugettext('No placement'))
     placement_link.allow_tags = True
     placement_link.short_description = _('Placement')
 

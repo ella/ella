@@ -37,14 +37,14 @@ $(function(){ContentByHashLib.reload_content('content');});
         if (options.title) things_to_send.title = options.title;
         if (options.id   ) things_to_send.id    = options.id;
         var url = get_adr('draft/save/');
-        var $saving_msg = show_message(_('Saving')+'...', {duration: 0});
+        var $saving_msg = show_message(gettext('Saving')+'...', {duration: 0});
         $.ajax({
             url: url,
             data: things_to_send,
             type: 'POST',
             success: function(response_text) {
                 $saving_msg.remove();
-                show_ok(_('Saved')+'.', {duration: 2000});
+                show_ok(gettext('Saved')+'.', {duration: 2000});
                 try {
                     var response_data = JSON.parse(response_text);
                     var id           = response_data.data.id;
@@ -61,7 +61,7 @@ $(function(){ContentByHashLib.reload_content('content');});
                         $('<option>').attr({value: id}).html(actual_title)
                     );
                 } catch(e) {
-                    show_err(_('Preset saved but erroneous result received.')+' '+_('Reload to see the preset.'));
+                    show_err(gettext('Preset saved but erroneous result received.')+' '+gettext('Reload to see the preset.'));
                 }
             },
             error: function(xhr) {
@@ -71,7 +71,7 @@ $(function(){ContentByHashLib.reload_content('content');});
         });
     }
     $('a#save-form').live('click', function() {
-        var title = prompt(_('Enter template name'));
+        var title = prompt(gettext('Enter template name'));
         if (title == null) return;
         title = $.trim(title);
         // retrieve the id of template with this name
@@ -89,7 +89,7 @@ $(function(){ContentByHashLib.reload_content('content');});
         try {
             response_data  = JSON.parse(response_text);
         } catch(e) {
-            show_err(_('Failed loading preset'));
+            show_err(gettext('Failed loading preset'));
             return;
         }
         $form.get(0).reset();
@@ -397,7 +397,7 @@ $( function() {
     AjaxFormLib.ajax_submit_error = ajax_submit_error;
     
     // Submit button
-    $('.ajax-form a.ok').live('click', function(evt) {
+    $('.ajax-form a.submit').live('click', function(evt) {
         if (evt.button != 0) return true;    // just interested in left button
         if ($(this).hasClass('noautosubmit')) return true;
         var $form = $(this).closest('.ajax-form');
@@ -450,6 +450,12 @@ $( function() {
             $(this).siblings('ul').hide();
         }
         $affected.slideToggle('slow');
+    });
+    
+    // Close filters button
+    $('#filters a.cancel').live('click', function(evt) {
+        if (evt.button != 0) return;
+        ContentByHashLib.unload_content('filters');
     });
     
     // Persistent filters -- add the query string if:
@@ -595,7 +601,7 @@ var $LOADING_MSG, LOADING_CNT = 0;
 function show_loading() {
     LOADING_CNT++;
     if ($LOADING_MSG) return;
-    $LOADING_MSG = show_message(_('loading')+'...', {duration:0});
+    $LOADING_MSG = show_message(gettext('Loading')+'...', {duration:0});
 }
 function hide_loading() {
     if ($LOADING_MSG) $LOADING_MSG.remove();
@@ -626,7 +632,7 @@ function show_ajax_error(xhr) {
         data = JSON.parse(xhr.responseText);
         message = data.message;
     } catch(e) {
-        message = _('Request failed')+' ('+xhr.status+': '+_(xhr.statusText)+')';
+        message = gettext('Request failed')+' ('+xhr.status+': '+_(xhr.statusText)+')';
         paste_code_into_debug( xhr.responseText.replace(/\n(\s*\n)+/g, "\n"), 'Ajax error response' );
     }
     show_err(message);
@@ -637,7 +643,7 @@ function show_ajax_success(response_text) {
         data = JSON.parse(response_text);
         message = data.message;
     } catch (e) {
-        message = _('Successfully sent');
+        message = gettext('Successfully sent');
         paste_code_into_debug( response_text.replace(/\n(\s*\n)+/g, "\n"), 'Ajax success response' );
     }
     show_ok(message);
@@ -689,7 +695,9 @@ function save_change_form_success(text_data, options) {
                 }
                 adr('../'+object_id+'/');
             }
-            // else do nothing
+            else {
+                ContentByHashLib.reload_content('content');
+            }
         },
         _saveasnew_: function() {
             if (!object_id) {
@@ -788,6 +796,17 @@ $('.help-button').live('mouseover', function() {
     $(this).closest('.help-enhanced').find('.help').slideToggle();
 });
 
+// RichText editor -- re-initialize markitup on newly added rich text areas.
+$(document).bind('content_added', function(evt) {
+    if ( ! window.MARKITUP_SETTINGS ) return;  // let them initialize themselves on document load -- avoid action here
+    var $target = $( evt.target );
+    // let those rich text areas alone that are in .markItUpContainer -- they are already initialized
+    $target.find('.rich_text_area').not('.markItUpContainer .rich_text_area').each( function() {
+        $(this).markItUp(MARKITUP_SETTINGS);
+    });
+});
+
+// Related lookup
 $(document).bind('content_added', function() {
     if ($('.suggest-related-lookup').length) {
         request_media(MEDIA_URL +  'js/related_lookup.js?' +MEDIA_VERSION);
@@ -896,11 +915,11 @@ $( function() {
         var $filt = $('#filters-handler .popup-filter');
         if ($filt.length) {
             
-            var $cancel = $('#filters-handler span:last a');
+            var $cancel = $('#filters-handler span:last a').not('.overlay-adapted');
             $cancel
             .attr( 'href', $target.attr('id')+'::'+$cancel.attr('href') )
             .removeClass('hashadr')
-            .addClass('simpleload');
+            .addClass('simpleload overlay-adapted');
             
             $filt.addClass('simpleload').attr( 'href', $filt.attr('href').replace(/::::/, '::'+$target.attr('id')+'::') );
             function init_filters() {

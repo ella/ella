@@ -1,0 +1,283 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-05-26 20:57+0200\n"
+"PO-Revision-Date: 2009-05-26 20:58+0100\n"
+"Last-Translator: Vitek Pliska <whit@jizak.cz>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: media/jquery/jquery-ui.js:60
+msgid "Done"
+msgstr ""
+
+#: media/jquery/jquery-ui.js:60
+msgid "Prev"
+msgstr "Předchozí"
+
+#: media/jquery/jquery-ui.js:60
+msgid "Next"
+msgstr "Následující"
+
+#: media/jquery/jquery-ui.js:60
+msgid "Today"
+msgstr "Dnes"
+
+#: media/jquery/jquery-ui.js:60
+msgid "January"
+msgstr "Leden"
+
+#: media/jquery/jquery-ui.js:60
+msgid "February"
+msgstr "Únor"
+
+#: media/jquery/jquery-ui.js:60
+msgid "March"
+msgstr "Březen"
+
+#: media/jquery/jquery-ui.js:60
+msgid "April"
+msgstr "Duben"
+
+#: media/jquery/jquery-ui.js:60
+msgid "May"
+msgstr "Květen"
+
+#: media/jquery/jquery-ui.js:60
+msgid "June"
+msgstr "Červen"
+
+#: media/jquery/jquery-ui.js:60
+msgid "July"
+msgstr "Červenec"
+
+#: media/jquery/jquery-ui.js:60
+msgid "August"
+msgstr "Srpen"
+
+#: media/jquery/jquery-ui.js:60
+msgid "September"
+msgstr "Září"
+
+#: media/jquery/jquery-ui.js:60
+msgid "October"
+msgstr "Říjen"
+
+#: media/jquery/jquery-ui.js:60
+msgid "November"
+msgstr "Listopad"
+
+#: media/jquery/jquery-ui.js:60
+msgid "December"
+msgstr "Prosinec"
+
+#: media/jquery/jquery-ui.js:60
+msgid "Jan"
+msgstr ""
+
+#: media/jquery/jquery-ui.js:60
+msgid "Feb"
+msgstr ""
+
+#: media/jquery/jquery-ui.js:60
+msgid "Mar"
+msgstr ""
+
+#: media/jquery/jquery-ui.js:60
+msgid "Apr"
+msgstr ""
+
+#: media/jquery/jquery-ui.js:60
+msgid "Jun"
+msgstr ""
+
+#: media/jquery/jquery-ui.js:60
+msgid "Jul"
+msgstr ""
+
+#: media/jquery/jquery-ui.js:60
+msgid "Aug"
+msgstr ""
+
+#: media/jquery/jquery-ui.js:60
+msgid "Sep"
+msgstr ""
+
+#: media/jquery/jquery-ui.js:60
+msgid "Oct"
+msgstr ""
+
+#: media/jquery/jquery-ui.js:60
+msgid "Nov"
+msgstr ""
+
+#: media/jquery/jquery-ui.js:60
+msgid "Dec"
+msgstr ""
+
+#: media/jquery/jquery-ui.js:60
+msgid "Sunday"
+msgstr ""
+
+#: media/jquery/jquery-ui.js:60
+msgid "Monday"
+msgstr ""
+
+#: media/jquery/jquery-ui.js:60
+msgid "Tuesday"
+msgstr ""
+
+#: media/jquery/jquery-ui.js:60
+msgid "Wednesday"
+msgstr ""
+
+#: media/jquery/jquery-ui.js:60
+msgid "Thursday"
+msgstr ""
+
+#: media/jquery/jquery-ui.js:60
+msgid "Friday"
+msgstr ""
+
+#: media/jquery/jquery-ui.js:60
+msgid "Saturday"
+msgstr ""
+
+#: media/jquery/jquery-ui.js:60
+#: media/js/datetime.js:82
+#: media/js/datetime.js.py:222
+msgid "Su"
+msgstr "Ne"
+
+#: media/jquery/jquery-ui.js:60
+#: media/js/datetime.js:82
+#: media/js/datetime.js.py:222
+msgid "Mo"
+msgstr "Po"
+
+#: media/jquery/jquery-ui.js:60
+#: media/js/datetime.js:82
+#: media/js/datetime.js.py:222
+msgid "Tu"
+msgstr "Út"
+
+#: media/jquery/jquery-ui.js:60
+#: media/js/datetime.js:82
+#: media/js/datetime.js.py:222
+msgid "We"
+msgstr "St"
+
+#: media/jquery/jquery-ui.js:60
+#: media/js/datetime.js:82
+#: media/js/datetime.js.py:222
+msgid "Th"
+msgstr "Čt"
+
+#: media/jquery/jquery-ui.js:60
+#: media/js/datetime.js:82
+#: media/js/datetime.js.py:222
+msgid "Fr"
+msgstr "Pá"
+
+#: media/jquery/jquery-ui.js:60
+#: media/js/datetime.js:82
+#: media/js/datetime.js.py:222
+msgid "Sa"
+msgstr "So"
+
+#: media/js/newman.js:38
+msgid "Saving"
+msgstr "Ukládám"
+
+#: media/js/newman.js:45
+msgid "Saved"
+msgstr "Uloženo"
+
+#: media/js/newman.js:62
+msgid "Preset saved but erroneous result received."
+msgstr ""
+
+#: media/js/newman.js:62
+msgid "Reload to see the preset."
+msgstr ""
+
+#: media/js/newman.js:72
+msgid "Enter template name"
+msgstr "Vložte jméno šablony"
+
+#: media/js/newman.js:90
+msgid "Failed loading preset"
+msgstr "Chyba při načítání šablony"
+
+#: media/js/newman.js:578
+msgid "Loading"
+msgstr "Načítám"
+
+#: media/js/newman.js:609
+msgid "Request failed"
+msgstr "Chyba serveru"
+
+#: media/js/newman.js:620
+msgid "Successfully sent"
+msgstr "Úspěšně odesláno"
+
+#: media/js/markitup/sets/markdown/set.js:19
+msgid "Italic"
+msgstr "Kurzíva"
+
+#: media/js/markitup/sets/markdown/set.js:20
+msgid "Bold"
+msgstr "Tučně"
+
+#: media/js/markitup/sets/markdown/set.js:22
+msgid "Link"
+msgstr "Odkaz"
+
+#: media/js/markitup/sets/markdown/set.js:24
+msgid "Head 1"
+msgstr "Nadpis 1"
+
+#: media/js/markitup/sets/markdown/set.js:25
+msgid "Head 2"
+msgstr "Nadpis 2"
+
+#: media/js/markitup/sets/markdown/set.js:26
+msgid "Head 3"
+msgstr "Nadpis 3"
+
+#: media/js/markitup/sets/markdown/set.js:28
+msgid "List unordered"
+msgstr "Nečíslovaný seznam"
+
+#: media/js/markitup/sets/markdown/set.js:29
+msgid "List ordered"
+msgstr "Číslovaný seznam"
+
+#: media/js/markitup/sets/markdown/set.js:33
+msgid "Quote"
+msgstr "Citace"
+
+#: media/js/markitup/sets/markdown/set.js:35
+msgid "Photo"
+msgstr "Foto"
+
+#: media/js/markitup/sets/markdown/set.js:36
+msgid "Gallery"
+msgstr "Galerie"
+
+#: media/js/markitup/sets/markdown/set.js:37
+msgid "Box"
+msgstr ""
+
+#: media/js/markitup/sets/markdown/set.js:41
+msgid "Preview"
+msgstr "Náhled"
+

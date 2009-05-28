@@ -2,8 +2,8 @@
 <ul class="items">
     {% for fav in favs %}
         <li style="background-image: url({{ NEWMAN_MEDIA_URL }}ico/ct/64/{{ fav.model }}.png);">
-            <a title="{{ fav.name }} (Ctrl+{{ forloop.counter }})" class="app {{ fav.model }}" href="#/{{ fav.admin_url }}" accesskey="{{ forloop.counter }}"></a>
-            {% if fav.perms.add %}<a class="add" href="#/{{ fav.admin_url }}add/">{% trans 'Add' %}</a>{% endif %}
+            <a title="{{ fav.name }} (Ctrl+{{ forloop.counter }})" class="app {{ fav.model }}" href="#/{{ fav.admin_url }}" accesskey="{{ forloop.counter }}"><span>{{ fav.name }}</span></a>
+            {% if fav.perms.add %}<a class="add" href="#/{{ fav.admin_url }}add/"><span>{% trans 'Add' %}</span></a>{% endif %}
         </li>
     {% endfor %}
 </ul>
