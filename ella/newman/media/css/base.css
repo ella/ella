@@ -107,7 +107,7 @@ div.breadcrumbs {
     float: left;
     margin: 0 2px;
     padding: 0;
-    width: 74px;
+    width: 80px;
     height: 74px;
     background: transparent url(../ico/ct/64/unknown.png) 50% 0 no-repeat;
     opacity: .8;
@@ -120,17 +120,33 @@ div.breadcrumbs {
 }
 .favs ul.items li a.app {
     display: block;
-    width: 74px;
+    width: 80px;
     height: 62px;
+    position: relative;
+}
+.favs ul.items li a.app span {
+    background: #000;
+    font-weight: bold;
+    opacity: .6;
+    position: absolute; bottom: 0; left: 0; width: 80px;
+}
+.favs ul.items li a.app:hover span {
+    opacity: .9
 }
 .favs ul.items li a.add {
+    background: #000;
+    display: block;
+    opacity: .6;
+}
+.favs ul.items li a.add span {
     margin: auto;
     padding-left: 13px;
     text-align: left;
-    background: url(../ico/10/icon_addlink.gif) 0 50% no-repeat;
+    background: #000 url(../ico/10/icon_addlink.gif) 0 50% no-repeat;
 }
 .favs ul.items li a.add:hover {
     color: darkorange;
+    opacity: .9;
 }
 .favs ul.tools {
     float: right;
