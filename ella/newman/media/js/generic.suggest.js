@@ -269,7 +269,7 @@ GenericSuggestLib = {};
     }
     function new_item(item_id, item_str) {
         var $newli = $('<li class="suggest-selected-item">');
-        $newli.click(set_current_input).click(goto_edit_item);
+        $newli.click(set_current_input);
         var $newdel = $('<a class="suggest-delete-link"><img src="'+DEL_IMG+'" alt="x" /></a>');
         $newdel.click(set_current_input).click(delete_item);
         $newli.html( item_str ).append( $newdel ).data( 'item_id', item_id );
