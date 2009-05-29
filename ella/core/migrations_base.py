@@ -19,7 +19,7 @@ def alter_foreignkey_to_int(table, field):
     db.delete_index(table, [fk_field])
 
 
-class BasePublishableDataMigration:
+class BasePublishableDataMigration(object):
 
     app_label = ''
     model = ''
@@ -31,7 +31,20 @@ class BasePublishableDataMigration:
         '''
         alter and migrate all tables that has foreign keys to this model
         '''
-        pass
+        # drop foreign key constraint from intermediate table
+        alter_foreignkey_to_int('%s_authors' % self.table, self.model)
+
+        # update authors
+        db.execute('''
+            INSERT INTO
+                `core_publishable_authors` (`publishable_id`, `author_id`)
+            SELECT
+                art.`publishable_ptr_id`, art_aut.`author_id`
+            FROM
+                `%(table)s` art INNER JOIN `%(table)s_authors` art_aut ON (art.`id` = art_aut.`%(models)s`);
+            ''' % self.substitute
+        )
+        db.delete_table('%s_authors' % self.table)
 
 
     depends_on = (
@@ -73,7 +86,7 @@ class BasePublishableDataMigration:
         TODO: sync publish_from
         '''
 
-        substitute = {
+        self.substitute = {
             'app_label': self.app_label,
             'model': self.model,
             'table': self.table,
@@ -91,11 +104,11 @@ class BasePublishableDataMigration:
                 `%(table)s` a, `django_content_type` ct
             WHERE
                 ct.`app_label` = '%(app_label)s' AND  ct.`model` = '%(model)s';
-            ''' % substitute
+            ''' % self.substitute
         )
 
         # add link to parent
-        db.add_column(table, 'publishable_ptr', models.IntegerField(null=True, blank=True))
+        db.add_column(self.table, 'publishable_ptr', models.IntegerField(null=True, blank=True))
 
         # update the link
         db.execute('''
@@ -104,39 +117,24 @@ class BasePublishableDataMigration:
             SET
                 art.`publishable_ptr` = pub.`id`
             WHERE
-                pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = '%(app)s' AND ct.`model` = '%(mod)s');
-            ''' % substitute
+                pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = '%(app_label)s' AND ct.`model` = '%(model)s');
+            ''' % self.substitute
         )
-
-        # drop foreign key constraint from intermediate table
-        alter_foreignkey_to_int('%s_authors' % table, mod)
 
         # remove constraints from all models reffering to us
         self.alter_self_foreignkeys(orm)
 
         # drop primary key
-        db.alter_column(table, 'id', models.IntegerField())
-        db.drop_primary_key(table)
+        db.alter_column(self.table, 'id', models.IntegerField())
+        db.drop_primary_key(self.table)
 
         # replace it with a link to parent
-        db.rename_column(table, 'publishable_ptr', 'publishable_ptr_id')
-        db.alter_column(table, 'publishable_ptr_id', models.OneToOneField(orm['core.Publishable'], null=False, blank=False))
-
-        # update authors
-        db.execute('''
-            INSERT INTO
-                `core_publishable_authors` (`publishable_id`, `author_id`)
-            SELECT
-                art.`publishable_ptr_id`, art_aut.`author_id`
-            FROM
-                `%(table)s` art INNER JOIN `%(table)s_authors` art_aut ON (art.`id` = art_aut.`%(mod)s`);
-            ''' % substitute
-        )
-        db.delete_table('%s_authors' % table)
+        db.rename_column(self.table, 'publishable_ptr', 'publishable_ptr_id')
+        db.alter_column(self.table, 'publishable_ptr_id', models.OneToOneField(orm['core.Publishable'], null=False, blank=False))
 
         # drop duplicate columns
         for column in ('category_id', 'perex', 'id', 'slug', 'photo_id', 'source_id', 'title'):
-            db.delete_column(table, column)
+            db.delete_column(self.table, column)
 
     def forwards_generic_relations(self, orm):
         '''
