@@ -110,6 +110,9 @@ class BasePublishableDataMigration(object):
         # migrate placements
         #self.forwards_placements(orm)
 
+        # migrate related
+        #self.forwards_related(orm)
+
         # delete temporary column to remember the old ID
         db.delete_column('core_publishable', 'old_id')
 
@@ -225,6 +228,8 @@ class BasePublishableDataMigration(object):
         db.delete_column('core_placement', 'target_ct_id')
         db.delete_column('core_placement', 'target_id')
 
+    def forwards_related(self, orm):
+        pass
 
     def backwards(self, orm):
         "Write your backwards migration here"
