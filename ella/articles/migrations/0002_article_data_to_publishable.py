@@ -25,6 +25,35 @@ class Migration(BasePublishableDataMigration):
     def move_self_foreignkeys(self, orm):
         # migrate authors as in base
         super(Migration, self).move_self_foreignkeys(orm)
-        # TODO: migrate new article IDs to articlecontents
+
+        # migrate new article IDs to articlecontents
+        substitute = {}
+        substitute.update(self.substitute)
+        substitute.update({
+            'table': 'articles_articlecontents',
+            'fk_field': 'article_id',
+        })
+        db.execute('''
+            UPDATE
+                `%(table)s` tbl INNER JOIN `core_publishable` pub ON (tbl.`id` = pub.`old_id`)
+            SET
+                tbl.`%(fk_field)s` = pub.`id`
+            WHERE
+                pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = '%(app_label)s' AND ct.`model` = '%(model)s');
+            ''' % substitute
+        )
+        db.alter_column(substitute['table'], substitute['fk_field'], models.ForeignKey(orm['%(app_label)s.%(model)s' % substitute]))
+
         # TODO: migrate new article IDs to oldrecipearticleredirect
+        # ...
+
+    freezed_models = {
+        'articles.article': {
+            'Meta': {'ordering': "('-created',)", '_bases': ['ella.core.models.publishable.Publishable']},
+            'created': ('models.DateTimeField', ["_('Created')"], {'default': 'datetime.now', 'editable': 'False', 'db_index': 'True'}),
+            'publishable_ptr': ('models.OneToOneField', ["orm['core.Publishable']"], {}),
+            'updated': ('models.DateTimeField', ["_('Updated')"], {'null': 'True', 'blank': 'True'}),
+            'upper_title': ('models.CharField', ["_('Upper title')"], {'max_length': '255', 'blank': 'True'})
+        },
+    }
 

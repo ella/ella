@@ -27,6 +27,8 @@ class BasePublishableDataMigration(object):
 
     publishable_uncommon_cols = {}
 
+    freezed_models = {}
+
     def alter_self_foreignkeys(self, orm):
         '''
         alter and migrate all tables that has foreign keys to this model
@@ -66,6 +68,16 @@ class BasePublishableDataMigration(object):
         c.update(self.publishable_uncommon_cols)
         return SortedDict(c)
 
+    @property
+    def substitute(self):
+        return {
+            'app_label': self.app_label,
+            'model': self.model,
+            'table': self.table,
+            'cols_to': ', '.join(self.publishable_cols.keys()),
+            'cols_from': ', '.join(self.publishable_cols.values()),
+        }
+
 
     def forwards(self, orm):
         # add a temporary column on core_publishable to remember the old ID
@@ -89,14 +101,6 @@ class BasePublishableDataMigration(object):
 
         TODO: sync publish_from
         '''
-
-        self.substitute = {
-            'app_label': self.app_label,
-            'model': self.model,
-            'table': self.table,
-            'cols_to': ', '.join(self.publishable_cols.keys()),
-            'cols_from': ', '.join(self.publishable_cols.values()),
-        }
 
         # move the data
         db.execute('''
@@ -209,13 +213,17 @@ class BasePublishableDataMigration(object):
         print 'there is no way back'
 
 
-    models = {
-        'core.publishable': {
-            'Meta': {'app_label': "'core'"},
-            '_stub': True,
-            'id': ('models.AutoField', [], {'primary_key': 'True'})
-        },
-    }
+    @property
+    def models(self):
+        models = {
+            'core.publishable': {
+                'Meta': {'app_label': "'core'"},
+                '_stub': True,
+                'id': ('models.AutoField', [], {'primary_key': 'True'})
+            },
+        }
+        models.update(self.freezed_models)
+        return models
 
 
     complete_apps = []
