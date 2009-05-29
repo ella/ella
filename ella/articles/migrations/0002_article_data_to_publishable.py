@@ -19,8 +19,12 @@ class Migration(BasePublishableDataMigration):
     def alter_self_foreignkeys(self, orm):
         # migrate authors as in base
         super(Migration, self).alter_self_foreignkeys(orm)
-        # TODO: migrate new article IDs to articlecontents
         alter_foreignkey_to_int('articles_articlecontents', 'article')
-        # TODO: migrate new article IDs to oldrecipearticleredirect
         alter_foreignkey_to_int('recipes_oldrecipearticleredirect', 'new_id')
+
+    def move_self_foreignkeys(self, orm):
+        # migrate authors as in base
+        super(Migration, self).move_self_foreignkeys(orm)
+        # TODO: migrate new article IDs to articlecontents
+        # TODO: migrate new article IDs to oldrecipearticleredirect
 

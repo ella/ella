@@ -34,6 +34,10 @@ class BasePublishableDataMigration(object):
         # drop foreign key constraint from intermediate table
         alter_foreignkey_to_int('%s_authors' % self.table, self.model)
 
+    def move_self_foreignkeys(self, orm):
+        '''
+        alter all data from tables that has foreign keys to this model
+        '''
         # update authors
         db.execute('''
             INSERT INTO
@@ -41,7 +45,7 @@ class BasePublishableDataMigration(object):
             SELECT
                 art.`publishable_ptr_id`, art_aut.`author_id`
             FROM
-                `%(table)s` art INNER JOIN `%(table)s_authors` art_aut ON (art.`id` = art_aut.`%(models)s`);
+                `%(table)s` art INNER JOIN `%(table)s_authors` art_aut ON (art.`id` = art_aut.`%(model)s`);
             ''' % self.substitute
         )
         db.delete_table('%s_authors' % self.table)
@@ -132,6 +136,9 @@ class BasePublishableDataMigration(object):
         db.rename_column(self.table, 'publishable_ptr', 'publishable_ptr_id')
         db.alter_column(self.table, 'publishable_ptr_id', models.OneToOneField(orm['core.Publishable'], null=False, blank=False))
 
+        # move data, that were pointing to us
+        self.move_self_foreignkeys(orm)
+
         # drop duplicate columns
         for column in ('category_id', 'perex', 'id', 'slug', 'photo_id', 'source_id', 'title'):
             db.delete_column(self.table, column)
@@ -202,7 +209,13 @@ class BasePublishableDataMigration(object):
         print 'there is no way back'
 
 
-    models = {}
+    models = {
+        'core.publishable': {
+            'Meta': {'app_label': "'core'"},
+            '_stub': True,
+            'id': ('models.AutoField', [], {'primary_key': 'True'})
+        },
+    }
 
 
     complete_apps = []
