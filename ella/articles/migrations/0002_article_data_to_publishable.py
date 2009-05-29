@@ -3,7 +3,9 @@ from south.db import db
 from django.db import models
 from ella.articles.models import *
 
-from ella.core.migrations_base import BasePublishableDataMigration, alter_foreignkey_to_int
+from ella.core.migrations_base import BasePublishableDataMigration
+from ella.core.migrations_base import alter_foreignkey_to_int, migrate_foreignkey
+
 
 class Migration(BasePublishableDataMigration):
 
@@ -19,35 +21,26 @@ class Migration(BasePublishableDataMigration):
     def alter_self_foreignkeys(self, orm):
         # migrate authors as in base
         super(Migration, self).alter_self_foreignkeys(orm)
+        # migrate new article IDs to articlecontents
         alter_foreignkey_to_int('articles_articlecontents', 'article')
+        # migrate new article IDs to oldrecipearticleredirect
         alter_foreignkey_to_int('recipes_oldrecipearticleredirect', 'new_id')
+        # TODO: maybe foreginkyes should be taken from freeze orm
 
     def move_self_foreignkeys(self, orm):
         # migrate authors as in base
         super(Migration, self).move_self_foreignkeys(orm)
-
         # migrate new article IDs to articlecontents
-        substitute = {}
-        substitute.update(self.substitute)
-        substitute.update({
-            'table': 'articles_articlecontents',
-            'fk_field': 'article_id',
-        })
-        db.execute('''
-            UPDATE
-                `%(table)s` tbl INNER JOIN `core_publishable` pub ON (tbl.`id` = pub.`old_id`)
-            SET
-                tbl.`%(fk_field)s` = pub.`id`
-            WHERE
-                pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = '%(app_label)s' AND ct.`model` = '%(model)s');
-            ''' % substitute
-        )
-        db.alter_column(substitute['table'], substitute['fk_field'], models.ForeignKey(orm['%(app_label)s.%(model)s' % substitute]))
+        migrate_foreignkey(self.app_label, self.model, 'articles_articlecontents', self.model, orm)
+        # migrate new article IDs to oldrecipearticleredirect
+        migrate_foreignkey(self.app_label, self.model, 'recipes_oldrecipearticleredirect', 'new_id', orm)
 
-        # TODO: migrate new article IDs to oldrecipearticleredirect
-        # ...
-
-    freezed_models = {
+    models = {
+        'core.publishable': {
+            'Meta': {'app_label': "'core'"},
+            '_stub': True,
+            'id': ('models.AutoField', [], {'primary_key': 'True'})
+        },
         'articles.article': {
             'Meta': {'ordering': "('-created',)", '_bases': ['ella.core.models.publishable.Publishable']},
             'created': ('models.DateTimeField', ["_('Created')"], {'default': 'datetime.now', 'editable': 'False', 'db_index': 'True'}),

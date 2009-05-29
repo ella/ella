@@ -18,6 +18,26 @@ def alter_foreignkey_to_int(table, field):
     db.delete_column(table, fk_field)
     db.delete_index(table, [fk_field])
 
+def migrate_foreignkey(app_label, model, table, field, orm):
+    s = {
+        'app_label': app_label,
+        'model': model,
+        'table': table,
+        'field': field,
+        'fk_field': '%s_id' % field,
+    }
+    db.execute('''
+        UPDATE
+            `%(table)s` tbl INNER JOIN `core_publishable` pub ON (tbl.`id` = pub.`old_id`)
+        SET
+            tbl.`%(field)s` = pub.`id`
+        WHERE
+            pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = '%(app_label)s' AND ct.`model` = '%(model)s');
+        ''' % s
+    )
+    db.rename_column(s['table'], s['field'], s['fk_field'])
+    db.alter_column(s['table'], s['fk_field'], models.ForeignKey(orm['%(app_label)s.%(model)s' % s]))
+
 
 class BasePublishableDataMigration(object):
 
@@ -26,8 +46,6 @@ class BasePublishableDataMigration(object):
     table = '%s_%s' % (app_label, model)
 
     publishable_uncommon_cols = {}
-
-    freezed_models = {}
 
     def alter_self_foreignkeys(self, orm):
         '''
@@ -213,17 +231,15 @@ class BasePublishableDataMigration(object):
         print 'there is no way back'
 
 
-    @property
-    def models(self):
-        models = {
-            'core.publishable': {
-                'Meta': {'app_label': "'core'"},
-                '_stub': True,
-                'id': ('models.AutoField', [], {'primary_key': 'True'})
-            },
-        }
-        models.update(self.freezed_models)
-        return models
+    # this is taken directly from the class by south, so it must be simple property,
+    # but there will be added some more freezes in children of this class
+    models = {
+        'core.publishable': {
+            'Meta': {'app_label': "'core'"},
+            '_stub': True,
+            'id': ('models.AutoField', [], {'primary_key': 'True'})
+        },
+    }
 
 
     complete_apps = []
