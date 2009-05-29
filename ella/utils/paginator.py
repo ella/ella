@@ -22,4 +22,4 @@ def paginate_qset(request, qset, items_per_page=25, exception_instance=Http404()
         'page': page,
         'is_paginated': paginator.num_pages > 1,
         'results_per_page': items_per_page
-}
+    }

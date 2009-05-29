@@ -3,7 +3,7 @@ from south.db import db
 from django.db import models
 from ella.articles.models import *
 
-from ella.core.migrations.basemigrations.publishable_data_migration import BasePublishableDataMigration
+from ella.core.migrations_base import BasePublishableDataMigration
 
 class Migration(BasePublishableDataMigration):
 
@@ -15,3 +15,4 @@ class Migration(BasePublishableDataMigration):
         'source_id': 'source_id', 
         'description': 'perex',
     }
+
