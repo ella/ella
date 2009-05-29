@@ -14,13 +14,13 @@
                     />
                     <ul class="GenericSuggestField">
                         <li class="suggest-selected-item">
-                            {{ listing.category.title }}
+                            {{ listing.category }}
                             <a class="suggest-delete-link">x</a>
                         </li>
                         <li>
                             <input
                                 id="id_category_{{ forloop.counter }}_suggest"
-                                rel="../../../core/category/suggest/?f=title&f=slug&f=tree_path&q="
+                                rel="../../../core/category/suggest/?f=__unicode__&title&f=slug&f=tree_path&q="
                             />
                         </li>
                     </ul>
@@ -66,7 +66,7 @@
                         <li>
                             <input
                                 id="id_category___NO___suggest"
-                                rel="../../../core/category/suggest/?f=title&f=slug&f=tree_path&q="
+                                rel="../../../core/category/suggest/?f=__unicode__&title&f=slug&f=tree_path&q="
                             />
                         </li>
                     </ul>
