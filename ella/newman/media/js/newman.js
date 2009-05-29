@@ -553,13 +553,12 @@ $( function() {
     $('#search-form select[name=action]').live('keypress', search_on_enter);
     
     // Search in change lists
-    $('#filters-handler .btn.search').live('click', function(evt) {
-        if (evt.button != 0) return;
+    function changelist_search($input) {
         if ($('#changelist').length == 0) return;   // We're not in changelist
-        var search_terms = $(this).prev('input#searchbar').val();
+        var search_terms = $input.val();
         if (!search_terms) return;  // Nothing to search for
         var adr_term = '&q=' + search_terms;
-        var loaded = ContentByHashLib.closest_loaded(this);
+        var loaded = ContentByHashLib.closest_loaded( $input.get(0) );
         if (loaded.id == 'content') {
             adr(adr_term);
         }
@@ -567,6 +566,15 @@ $( function() {
             ContentByHashLib.simple_load( loaded.id + '::' + adr_term );
         }
         return false;
+    }
+    $('#filters-handler .btn.search').live('click', function(evt) {
+        if (evt.button != 0) return;
+        var $input = $(this).prev('input#searchbar');
+        return changelist_search( $input );
+    });
+    $('#filters-handler #searchbar').live('keyup', function(evt) {
+        if (evt.keyCode == CR || evt.keyCode == LF) { } else return;
+        return changelist_search( $(this) );
     });
 });
 
