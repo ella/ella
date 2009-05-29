@@ -35,12 +35,8 @@ class Migration(BasePublishableDataMigration):
         # migrate new article IDs to oldrecipearticleredirect
         migrate_foreignkey(self.app_label, self.model, 'recipes_oldrecipearticleredirect', 'new_id', orm)
 
-    models = {
-        'core.publishable': {
-            'Meta': {'app_label': "'core'"},
-            '_stub': True,
-            'id': ('models.AutoField', [], {'primary_key': 'True'})
-        },
+    models = dict.copy(BasePublishableDataMigration.models)
+    models.update({
         'articles.article': {
             'Meta': {'ordering': "('-created',)", '_bases': ['ella.core.models.publishable.Publishable']},
             'created': ('models.DateTimeField', ["_('Created')"], {'default': 'datetime.now', 'editable': 'False', 'db_index': 'True'}),
@@ -48,5 +44,5 @@ class Migration(BasePublishableDataMigration):
             'updated': ('models.DateTimeField', ["_('Updated')"], {'null': 'True', 'blank': 'True'}),
             'upper_title': ('models.CharField', ["_('Upper title')"], {'max_length': '255', 'blank': 'True'})
         },
-    }
+    })
 
