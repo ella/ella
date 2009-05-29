@@ -1,26 +1,26 @@
     <input type="hidden" name="placement_listing_widget" value="{{ id_prefix }}" />
     {% for listing in listings %}
         <tr class="listing-row">
-            
+            <td><span style="display:none;">&nbsp;</span></td>{# vertical align with placement's first (empty) td #}
             <td class="listing-categories">
                 <!-- category suggester -->
                 <div class="form-row listing-category">
-                    <input 
-                        id="id_category_{{ forloop.counter }}" 
-                        class="vForeignKeyRawIdAdminField hidden" 
-                        type="text" 
-                        value="{{ listing.category.pk }}" 
+                    <input
+                        id="id_category_{{ forloop.counter }}"
+                        class="vForeignKeyRawIdAdminField hidden"
+                        type="text"
+                        value="{{ listing.category.pk }}"
                         name="{{ id_prefix }}"
                     />
                     <ul class="GenericSuggestField">
                         <li class="suggest-selected-item">
-                            {{ listing.category.title }}
+                            {{ listing.category }}
                             <a class="suggest-delete-link">x</a>
                         </li>
                         <li>
-                            <input 
+                            <input
                                 id="id_category_{{ forloop.counter }}_suggest"
-                                rel="../../../core/category/suggest/?f=title&f=slug&f=tree_path&q="
+                                rel="../../../core/category/suggest/?f=__unicode__&title&f=slug&f=tree_path&q="
                             />
                         </li>
                     </ul>
@@ -34,21 +34,17 @@
             <td class="listing-dates">
                 <!-- Publish from -->
                 <div class="publish_from">
-                    <label for="{{ id_prefix }}-{{ forloop.counter }}-publish_from">
-                        <span>
-                            {% trans verbose_name_publish_from %}
-                        </span>
-                    </label>
                     <input
-                        type="text" 
-                        id="{{ id_prefix }}-{{ forloop.counter }}-publish_from" 
-                        name="{{ id_prefix }}-publish_from" 
+                        type="text"
+                        id="{{ id_prefix }}-{{ forloop.counter }}-publish_from"
+                        name="{{ id_prefix }}-publish_from"
                         value="{% if listing.publish_from %}{{ listing.publish_from }}{% endif %}"
+                        class="vDateTimeInput"
                     />
                 </div>
             </td>
-            
-            <td colspan="4">&nbsp;</td>
+
+            <td colspan="3">&nbsp;</td>
 
         </tr>
     {% endfor %}
@@ -56,20 +52,21 @@
 {# Template for creating listings #}
     <tr class="listing-row-template" style="display:none;"><!--
         <tr class="listing-row">
+            <td><span style="display:none;">&nbsp;</span></td>
             <td class="listing-categories">
                 <!-#- category suggester -#->
                 <div class="form-row listing-category">
-                    <input 
-                        id="id_category___NO__" 
-                        class="vForeignKeyRawIdAdminField hidden" 
-                        type="text" 
+                    <input
+                        id="id_category___NO__"
+                        class="vForeignKeyRawIdAdminField hidden"
+                        type="text"
                         name="{{ id_prefix }}"
                     />
                     <ul class="GenericSuggestField">
                         <li>
-                            <input 
+                            <input
                                 id="id_category___NO___suggest"
-                                rel="../../../core/category/suggest/?f=title&f=slug&f=tree_path&q="
+                                rel="../../../core/category/suggest/?f=__unicode__&title&f=slug&f=tree_path&q="
                             />
                         </li>
                     </ul>
@@ -84,22 +81,18 @@
                 {#<input type="hidden" name="{{ id_prefix }}-{{ forloop.counter0 }}-listing_id" value="{{ listing.pk }}" />#}
                 <!-#- Publish from -#->
                 <div class="publish_from">
-                    <label for="{{ id_prefix }}-__NO__-publish_from">
-                        <span>
-                            {% trans verbose_name_publish_from %}
-                        </span>
-                    </label>
                     <input
-                        type="text" 
-                        id="{{ id_prefix }}-__NO__-publish_from" 
-                        name="{{ id_prefix }}-publish_from" 
+                        type="text"
+                        id="{{ id_prefix }}-__NO__-publish_from"
+                        name="{{ id_prefix }}-publish_from"
+                        class="vDateTimeInput"
                     />
                 </div>
             </td>
-            
-            <td><a class="remove-inline-button">
-                <img src="{{ MEDIA_URL }}ico/16/cancel.png" alt="{% trans "delete" %}" width="16" height="16" />
-            </a></td>
+
+            <td><a class="icn btn cancel remove-inline-button">{% trans 'Remove' %}</a></td>
+
+            <td colspan="2">&nbsp;</td>
 
         </tr>
     --></tr>

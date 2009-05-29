@@ -17,7 +17,7 @@
               {{ field.field.errors.as_ul }}
               {{ field.field }}
               </td>
-          {% else %} 
+          {% else %}
 
             {% if inline_admin_formset.formset.can_delete %}
               <td class="delete">{% if inline_admin_form.original %}{{ inline_admin_form.deletion_field.field }}{% endif %}</td>
@@ -25,10 +25,21 @@
               {# customized listing widget, should be the last one#}
               </tr>
               {# custom row for ListingCustomWidget #}
-              {{ field.field.errors.as_ul }}
-              {{ field.field }}
+              <tr class="listing-head">
+                <td colspan="{{ inline_admin_form.field_count }}">
+                  <h3>{% trans 'Listings' %}</h3>
+                </td>
+              </tr>
+              <tr class="listing-head">
+                <th></th>
+                <th>{% trans 'Category' %}</th>
+                <th>{% trans 'Publish from' %}</th>
+                <th colspan="3"></th>
+              </tr>
+                  {{ field.field.errors.as_ul }}
+                  {{ field.field }}
               <tr> {# open new row due to tabular.html will close row after fieldset block #}
-                <td colspan="3"><a class="add-inline-button">{% trans "Add listing" %}</a></td>
+                <td colspan="3"><a class="icn btn add add-inline-button">{% trans "Add" %}</a></td>
           {% endifnotequal %}
 
         {% endfor %}
