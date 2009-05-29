@@ -1,7 +1,7 @@
     <input type="hidden" name="placement_listing_widget" value="{{ id_prefix }}" />
     {% for listing in listings %}
         <tr class="listing-row">
-            
+            <td><span style="display:none;">&nbsp;</span></td>{# vertical align with placement's first (empty) td #}
             <td class="listing-categories">
                 <!-- category suggester -->
                 <div class="form-row listing-category">
@@ -44,11 +44,12 @@
                         id="{{ id_prefix }}-{{ forloop.counter }}-publish_from" 
                         name="{{ id_prefix }}-publish_from" 
                         value="{% if listing.publish_from %}{{ listing.publish_from }}{% endif %}"
+                        class="vDateTimeInput"
                     />
                 </div>
             </td>
             
-            <td colspan="4">&nbsp;</td>
+            <td colspan="3">&nbsp;</td>
 
         </tr>
     {% endfor %}
@@ -56,6 +57,7 @@
 {# Template for creating listings #}
     <tr class="listing-row-template" style="display:none;"><!--
         <tr class="listing-row">
+            <td><span style="display:none;">&nbsp;</span></td>
             <td class="listing-categories">
                 <!-#- category suggester -#->
                 <div class="form-row listing-category">
@@ -93,6 +95,7 @@
                         type="text" 
                         id="{{ id_prefix }}-__NO__-publish_from" 
                         name="{{ id_prefix }}-publish_from" 
+                        class="vDateTimeInput"
                     />
                 </div>
             </td>
@@ -100,6 +103,8 @@
             <td><a class="remove-inline-button">
                 <img src="{{ MEDIA_URL }}ico/16/cancel.png" alt="{% trans "delete" %}" width="16" height="16" />
             </a></td>
+            
+            <td colspan="2">&nbsp;</td>
 
         </tr>
     --></tr>
