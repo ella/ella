@@ -15,7 +15,7 @@
                         <a class="icn web" href="{% url newman_admin_index %}r/{{ inline_admin_form.original_content_type_id }}/{{ inline_admin_form.original.id }}/">{% trans "View on site" %}</a>
                     {% endif %}
                 </legend>
-            <img src="{{ inline_admin_form.original.target.thumb_url }}" alt="{{ inline_admin_form.original.target }}" style="float: left"/>
+            <img src="{{ inline_admin_form.original.target.thumb_url }}" alt="{{ inline_admin_form.original.target }}" style="float: left; width: 60px; height: 60px;"/>
             {% for line in fieldset %}
                 {{ line.errors }}
                 {% for field in line %}
