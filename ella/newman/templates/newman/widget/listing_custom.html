@@ -1,6 +1,6 @@
     <input type="hidden" name="placement_listing_widget" value="{{ id_prefix }}" />
     {% for listing in listings %}
-        <tr class="listing-row">
+        <tr class="listing-row inline-item">
             <td><span style="display:none;">&nbsp;</span></td>{# vertical align with placement's first (empty) td #}
             <td class="listing-categories">
                 <!-- category suggester -->
@@ -51,7 +51,7 @@
 
 {# Template for creating listings #}
     <tr class="listing-row-template" style="display:none;"><!--
-        <tr class="listing-row">
+        <tr class="listing-row inline-item">
             <td><span style="display:none;">&nbsp;</span></td>
             <td class="listing-categories">
                 <!-#- category suggester -#->

@@ -261,6 +261,11 @@ $( function() {
                 }
             }
         });
+        
+        if (ok && $form.data('validation')) {
+            ok = $form.data('validation')( $form );
+        }
+
         return ok;
     }
     
