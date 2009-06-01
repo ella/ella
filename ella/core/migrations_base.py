@@ -219,7 +219,7 @@ class BasePublishableDataMigration(object):
                 plac.`publishable_id` = pub.`id`
             WHERE
                 pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = '%(app_label)s' AND  ct.`model` = '%(model)s');
-            ''' self.substitute
+            ''' % self.substitute
         )
 
         db.alter_column('core_placement', 'publishable_id', models.ForeignKey(orm['core.Publishable'], null=False))
