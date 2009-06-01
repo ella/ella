@@ -5,7 +5,7 @@ from django.conf import settings
 from django.utils.safestring import mark_safe
 from django.db.models.fields.related import ForeignKey
 from django.contrib.admin import widgets
-from django.template import Template, Context
+from django.template import Context
 from django.template.loader import get_template
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_unicode
@@ -13,9 +13,12 @@ from django.utils.html import escape
 from django.utils.text import truncate_words
 
 from ella.ellaadmin.utils import admin_url
-from ella.core.models import Category, Listing
+from ella.core.models import Listing
 from ella.photos.models import Photo
 from djangomarkup.widgets import RichTextAreaWidget
+from django.contrib.contenttypes.models import ContentType
+from django.forms.widgets import HiddenInput
+
 
 MARKITUP_SET = getattr(settings, 'MARKDOWN', 'markdown')
 MEDIA_PREFIX = getattr(settings, 'NEWMAN_MEDIA_PREFIX', settings.ADMIN_MEDIA_PREFIX)
@@ -287,6 +290,7 @@ class ContentTypeWidget(forms.Select):
                 output.append(render_option(option_value, option_label))
         return u'\n'.join(output)
 
+
 class IncrementWidget(forms.TextInput):
     'Self incrementing widget.'
     class Media:
@@ -315,7 +319,16 @@ class ListingCustomWidget(forms.SelectMultiple):
         cx['choices'] = choices or self.choices
         if type(value) == dict:
             # modifying existing object, so value is dict containing Listings and selected category IDs
-            cx['selected'] = Category.objects.filter(pk__in=value['selected_categories']) or []
+            # cx['selected'] = Category.objects.filter(pk__in=value['selected_categories']).values('id') or []
             cx['listings'] = list(value['listings']) or []
         tpl = get_template('newman/widget/listing_custom.html')
         return mark_safe(tpl.render(cx))
+
+
+class GalleryItemContentTypeWidget(HiddenInput):
+    " Custom hidden widget for gallery items. "
+
+    def __init__(self, attrs={}):
+        ct = ContentType.objects.get_for_model(Photo)
+        super(GalleryItemContentTypeWidget, self).__init__(attrs={'class': CLASS_TARGECT, 'value': ct.pk})
+

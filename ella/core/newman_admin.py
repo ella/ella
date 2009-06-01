@@ -295,9 +295,12 @@ class SourceAdmin(newman.NewmanModelAdmin):
     list_display = ('name', 'url',)
     search_fields = ('name',)
 
-class RelatedInlineAdmin(newman.NewmanTabularInline):
+class RelatedInlineAdmin(newman.GenericTabularInline):
     extra = 3
     model = Related
+    ct_field = 'related_ct'
+    ct_fk_field = 'related_id'
+    suggest_fields = {'publishable': ('__unicode__', 'title', 'slug')}
 
 class IsPublishedFilter(CustomFilterSpec):
     " Published/Nonpublished objects filter"

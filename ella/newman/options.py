@@ -14,6 +14,7 @@ from django.db import transaction, models
 from django.utils.functional import update_wrapper
 from django.utils.translation import ugettext as _
 from django.utils.encoding import force_unicode
+from django.template.defaultfilters import striptags, truncatewords
 
 from ella.newman.changelist import NewmanChangeList, FilterChangeList
 from ella.newman import fields, widgets, utils
@@ -412,6 +413,7 @@ class NewmanModelAdmin(XModelAdmin):
                     row[f] = attr()
                 else:
                     row[f] = attr
+                row[f] = truncatewords(striptags(unicode(row[f])), 5)
             return row
 
         if has_non_lookup_attr:

@@ -18,6 +18,26 @@ def alter_foreignkey_to_int(table, field):
     db.delete_column(table, fk_field)
     db.delete_index(table, [fk_field])
 
+def migrate_foreignkey(app_label, model, table, field, orm):
+    s = {
+        'app_label': app_label,
+        'model': model,
+        'table': table,
+        'field': field,
+        'fk_field': '%s_id' % field,
+    }
+    db.execute('''
+        UPDATE
+            `%(table)s` tbl INNER JOIN `core_publishable` pub ON (tbl.`id` = pub.`old_id`)
+        SET
+            tbl.`%(field)s` = pub.`id`
+        WHERE
+            pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = '%(app_label)s' AND ct.`model` = '%(model)s');
+        ''' % s
+    )
+    db.rename_column(s['table'], s['field'], s['fk_field'])
+    db.alter_column(s['table'], s['fk_field'], models.ForeignKey(orm['%(app_label)s.%(model)s' % s]))
+
 
 class BasePublishableDataMigration(object):
 
@@ -66,6 +86,16 @@ class BasePublishableDataMigration(object):
         c.update(self.publishable_uncommon_cols)
         return SortedDict(c)
 
+    @property
+    def substitute(self):
+        return {
+            'app_label': self.app_label,
+            'model': self.model,
+            'table': self.table,
+            'cols_to': ', '.join(self.publishable_cols.keys()),
+            'cols_from': ', '.join(self.publishable_cols.values()),
+        }
+
 
     def forwards(self, orm):
         # add a temporary column on core_publishable to remember the old ID
@@ -80,6 +110,9 @@ class BasePublishableDataMigration(object):
         # migrate placements
         #self.forwards_placements(orm)
 
+        # migrate related
+        #self.forwards_related(orm)
+
         # delete temporary column to remember the old ID
         db.delete_column('core_publishable', 'old_id')
 
@@ -89,14 +122,6 @@ class BasePublishableDataMigration(object):
 
         TODO: sync publish_from
         '''
-
-        self.substitute = {
-            'app_label': self.app_label,
-            'model': self.model,
-            'table': self.table,
-            'cols_to': ', '.join(self.publishable_cols.keys()),
-            'cols_from': ', '.join(self.publishable_cols.values()),
-        }
 
         # move the data
         db.execute('''
@@ -203,12 +228,16 @@ class BasePublishableDataMigration(object):
         db.delete_column('core_placement', 'target_ct_id')
         db.delete_column('core_placement', 'target_id')
 
+    def forwards_related(self, orm):
+        pass
 
     def backwards(self, orm):
         "Write your backwards migration here"
         print 'there is no way back'
 
 
+    # this is taken directly from the class by south, so it must be simple property,
+    # but there will be added some more freezes in children of this class
     models = {
         'core.publishable': {
             'Meta': {'app_label': "'core'"},
