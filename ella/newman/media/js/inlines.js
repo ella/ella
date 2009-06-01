@@ -22,11 +22,20 @@
     });
 
     //// gallery items
+    function max_order() {
+        return Math.max.apply(this, $.map( $.makeArray( $('.gallery-items-sortable input.item-order') ), function(e) {
+            var n = new Number( $(e).val() );
+            if (n > 0) return n;
+            else return 0;
+        }));
+    }
+    
     $('.add-gallery-item-button').live('click', function(evt) {
         if (evt.button != 0) return;
         var $last_item = $('.gallery-items-sortable .inline-related.last-related');
         var $new_item = $last_item.clone(true);
         $last_item.removeClass('last-related');
+        
         $new_item.find('*').each( function() {
             var no_re = /galleryitem_set-(\d+)-/g;
             var oldno, newno;
@@ -41,9 +50,9 @@
                 $(this).attr({id: newid});
             }
             
-            // Unset values
-            if ($(this).is('.target_id')) $(this).val('');
-            if (/galleryitem_set-\d+-order/.test( this.name )) $(this).val('');
+            // init values
+            if ($(this).is('.target_id' )) $(this).val('');
+            if ($(this).is('.item-order')) $(this).val( max_order() + 1 );
         });
         $new_item.insertAfter( $last_item );
         var $no_items = $('#id_galleryitem_set-TOTAL_FORMS');
@@ -88,15 +97,19 @@
                 }).each( function(i) {
                     $(this).val( i+1 );
                 });
-                $target
-                .children(':last')     
-                .filter(':last').addClass('last-related');
+                $target.children().removeClass('last-related');
+                $target.children(':last').addClass('last-related');
             }
         });
         
         // make sure only the inputs with a selected photo are sortable
         $(root).find('input.target_id').change( function() {
             if ($(this).val()) $(this).closest('.inline-related').addClass('sortable-item');
+        });
+        
+        // initialize order for empty listing
+        $sortables.find('.item-order').each( function() {
+            if ( ! $(this).val() ) $(this).val( max_order() + 1 );
         });
     }
     make_gallery_sortable();
