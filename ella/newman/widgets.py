@@ -61,11 +61,13 @@ class NewmanRichTextAreaWidget(RichTextAreaWidget):
         js = (
             MEDIA_PREFIX + JS_MARKITUP,
             MEDIA_PREFIX + JS_MARKITUP_SET,
+            MEDIA_PREFIX + JS_JQUERY_UI,
         )
         css = {
             'screen': (
                 MEDIA_PREFIX + CSS_MARKITUP,
                 MEDIA_PREFIX + CSS_MARKITUP_SET,
+                MEDIA_PREFIX + CSS_JQUERY_UI,
             ),
         }
 
@@ -247,7 +249,7 @@ class ForeignKeyRawIdWidget(forms.TextInput):
         obj = self._get_obj(value)
         label = truncate_words(obj, 14)
         adm = admin_url(obj)
-        return '&nbsp;<a href="%s">%s</a>' % (adm, label)
+        return '&nbsp;<a class="hashadr" href="%s">%s</a>' % (adm, label)
 
 
 class ForeignKeyGenericRawIdWidget(forms.TextInput):
@@ -290,6 +292,10 @@ class ContentTypeWidget(forms.Select):
                 output.append(render_option(option_value, option_label))
         return u'\n'.join(output)
 
+
+class OrderFieldWidget(forms.HiddenInput):
+    def __init__(self, attrs={}):
+        super(OrderFieldWidget, self).__init__(attrs={'class': 'item-order'})
 
 class IncrementWidget(forms.TextInput):
     'Self incrementing widget.'

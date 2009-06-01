@@ -104,9 +104,17 @@ class BasePublishableDataMigration(object):
             'app_label': self.app_label,
             'model': self.model,
             'table': self.table,
-            'cols_to': ', '.join(self.publishable_cols.keys()),
-            'cols_from': ', '.join(self.publishable_cols.values()),
+            'cols_to': ', '.join(self.cols_to),
+            'cols_from': ', '.join(self.cols_from),
         }
+
+    @property
+    def cols_to(self):
+        return self.publishable_cols.keys()
+
+    @property
+    def cols_from(self):
+        return self.publishable_cols.values()
 
 
     def forwards(self, orm):
@@ -136,6 +144,7 @@ class BasePublishableDataMigration(object):
         '''
 
         # move the data
+        # TODO: maybe there should be prefix 'a.' in cols_from
         db.execute('''
             INSERT INTO
                 `core_publishable` (old_id, content_type_id, %(cols_to)s)
@@ -177,7 +186,8 @@ class BasePublishableDataMigration(object):
         self.move_self_foreignkeys(orm)
 
         # drop duplicate columns
-        for column in self.publishable_cols.values():
+        db.delete_column(self.table, 'id')
+        for column in self.cols_from:
             db.delete_column(self.table, column)
 
     def forwards_generic_relations(self, orm):
@@ -198,34 +208,24 @@ class BasePublishableDataMigration(object):
 
     def forwards_placements(self, orm):
         '''
-        TODO: dodelat
+        migrate placements
         '''
-
-        app = self.app_name
-        mod = self.module_name
-        table = '%s_%s' % (app, mod)
 
         db.add_column('core_placement', 'publishable_id', models.IntegerField(null=True))
 
-        # MIGRATE PLACEMENTS
         db.execute('''
-                UPDATE
-                    `core_placement` plac INNER JOIN `core_publishable` pub ON (plac.`target_ct_id` = pub.`content_type_id` AND plac.`target_id` = pub.`old_id`)
-                SET
-                    plac.`publishable_id` = pub.`id`
-                WHERE
-                    pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = '%(app)s' AND  ct.`model` = '%(mod)s');
-            ''' % {'app': app, 'mod': mod, 'table': table}
+            UPDATE
+                `core_placement` plac INNER JOIN `core_publishable` pub ON (plac.`target_ct_id` = pub.`content_type_id` AND plac.`target_id` = pub.`old_id`)
+            SET
+                plac.`publishable_id` = pub.`id`
+            WHERE
+                pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = '%(app_label)s' AND  ct.`model` = '%(model)s');
+            ''' % self.substitute
         )
 
-        db.alter_column('core_placement', 'publishable_id', models.ForeignKey(Publishable))
-
-        # TODO: move it via south
-        db.execute('''
-                ALTER TABLE `core_placement` DROP FOREIGN KEY `core_placement_ibfk_2`;
-        ''')
-
+        db.alter_column('core_placement', 'publishable_id', models.ForeignKey(orm['core.Publishable'], null=False))
         db.create_index('core_placement', ['publishable_id'])
+
         db.delete_column('core_placement', 'target_ct_id')
         db.delete_column('core_placement', 'target_id')
 
