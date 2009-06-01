@@ -20,7 +20,7 @@ class Migration:
             ('slug', models.SlugField(_('Slug'), max_length=255)),
             ('source', models.ForeignKey(orm.Source, null=True, verbose_name=_('Source'), blank=True)),
             ('photo', models.ForeignKey(orm['photos.Photo'], null=True, verbose_name=_('Photo'), blank=True)),
-            ('description', models.TextField(_('Description'))),
+            ('description', models.TextField(_('Description'), null=True, blank=True)),
             ('publish_from', models.DateTimeField(_('Publish from'), default=datetime(3000, 1, 1, 0, 0), editable=False)),
         ))
         db.send_create_signal('core', ['Publishable'])
@@ -84,7 +84,7 @@ class Migration:
             'authors': ('models.ManyToManyField', ["orm['core.Author']"], {'verbose_name': "_('Authors')"}),
             'category': ('models.ForeignKey', ["orm['core.Category']"], {'verbose_name': "_('Category')"}),
             'content_type': ('models.ForeignKey', ["orm['contenttypes.ContentType']"], {}),
-            'description': ('models.TextField', ["_('Description')"], {}),
+            'description': ('models.TextField', ["_('Description')"], {'null': 'True', 'blank': 'True'}),
             'id': ('models.AutoField', [], {'primary_key': 'True'}),
             'photo': ('models.ForeignKey', ["orm['photos.Photo']"], {'null': 'True', 'verbose_name': "_('Photo')", 'blank': 'True'}),
             'publish_from': ('models.DateTimeField', ["_('Publish from')"], {'default': 'datetime(3000, 1, 1, 0, 0)', 'editable': 'False'}),

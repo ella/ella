@@ -2,6 +2,7 @@
 from south.db import db
 from django.db import models
 from django.utils.datastructures import SortedDict
+from django.conf import settings
 
 from ella.core.models import *
 
@@ -87,14 +88,33 @@ class BasePublishableDataMigration(object):
         return SortedDict(c)
 
     @property
+    def generic_relations(self):
+        # TODO find better way then this hardcoded...
+        keys = ('table', 'ct_id', 'obj_id')
+        gens = []
+        if 'tagging' in settings.INSTALLED_APPS:
+            gens.append(('tagging_taggeditem', 'content_type_id', 'object_id'))
+        if 'ella.comments' in settings.INSTALLED_APPS:
+            gens.append(('comments_comment', 'target_ct_id', 'target_id'))
+        return [dict(zip(keys, v)) for v in gens]
+
+    @property
     def substitute(self):
         return {
             'app_label': self.app_label,
             'model': self.model,
             'table': self.table,
-            'cols_to': ', '.join(self.publishable_cols.keys()),
-            'cols_from': ', '.join(self.publishable_cols.values()),
+            'cols_to': ', '.join(self.cols_to),
+            'cols_from': ', '.join(self.cols_from),
         }
+
+    @property
+    def cols_to(self):
+        return self.publishable_cols.keys()
+
+    @property
+    def cols_from(self):
+        return self.publishable_cols.values()
 
 
     def forwards(self, orm):
@@ -105,7 +125,7 @@ class BasePublishableDataMigration(object):
         self.forwards_publishable(orm)
 
         # migrate generic relations
-        #self.forwards_generic_relations(orm)
+        self.forwards_generic_relations(orm)
 
         # migrate placements
         #self.forwards_placements(orm)
@@ -124,6 +144,7 @@ class BasePublishableDataMigration(object):
         '''
 
         # move the data
+        # TODO: maybe there should be prefix 'a.' in cols_from
         db.execute('''
             INSERT INTO
                 `core_publishable` (old_id, content_type_id, %(cols_to)s)
@@ -165,66 +186,46 @@ class BasePublishableDataMigration(object):
         self.move_self_foreignkeys(orm)
 
         # drop duplicate columns
-        for column in ('category_id', 'perex', 'id', 'slug', 'photo_id', 'source_id', 'title'):
+        db.delete_column(self.table, 'id')
+        for column in self.cols_from:
             db.delete_column(self.table, column)
 
     def forwards_generic_relations(self, orm):
         '''
-        TODO: dodelat
+        Updates all generic relations
         '''
-
-        app = self.app_name
-        mod = self.module_name
-        table = '%s_%s' % (app, mod)
-
-        # UPDATE generic relations
-        db.execute_many('''
+        for gen in self.generic_relations:
+            sub = dict.copy(self.substitute)
+            sub.update(gen)
+            db.execute('''
                 UPDATE
-                    `tagging_taggeditem` gen INNER JOIN `core_publishable` pub ON (gen.`content_type_id` = pub.`content_type_id` AND gen.`object_id` = pub.`old_id`)
+                    `%(table)s` gen INNER JOIN `core_publishable` pub ON (gen.`%(ct_id)s` = pub.`content_type_id` AND gen.`%(obj_id)s` = pub.`old_id`)
                 SET
-                    gen.`object_id` = pub.`id`
+                    gen.`%(obj_id)s` = pub.`id`
                 WHERE
-                    pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = '%(app)s' AND  ct.`model` = '%(mod)s');
-
-                UPDATE
-                    `comments_comment` gen INNER JOIN `core_publishable` pub ON (gen.`target_ct_id` = pub.`content_type_id` AND gen.`target_id` = pub.`old_id`)
-                SET
-                    gen.`target_id` = pub.`id`
-                WHERE
-                    pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = '%(app)s' AND  ct.`model` = '%(mod)s');
-            ''' % {'app': app, 'mod': mod, 'table': table}
-        )
+                    pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = '%(app_label)s' AND  ct.`model` = '%(model)s');
+            ''' % sub)
 
     def forwards_placements(self, orm):
         '''
-        TODO: dodelat
+        migrate placements
         '''
-
-        app = self.app_name
-        mod = self.module_name
-        table = '%s_%s' % (app, mod)
 
         db.add_column('core_placement', 'publishable_id', models.IntegerField(null=True))
 
-        # MIGRATE PLACEMENTS
         db.execute('''
-                UPDATE
-                    `core_placement` plac INNER JOIN `core_publishable` pub ON (plac.`target_ct_id` = pub.`content_type_id` AND plac.`target_id` = pub.`old_id`)
-                SET
-                    plac.`publishable_id` = pub.`id`
-                WHERE
-                    pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = '%(app)s' AND  ct.`model` = '%(mod)s');
-            ''' % {'app': app, 'mod': mod, 'table': table}
+            UPDATE
+                `core_placement` plac INNER JOIN `core_publishable` pub ON (plac.`target_ct_id` = pub.`content_type_id` AND plac.`target_id` = pub.`old_id`)
+            SET
+                plac.`publishable_id` = pub.`id`
+            WHERE
+                pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = '%(app_label)s' AND  ct.`model` = '%(model)s');
+            ''' % self.substitute
         )
 
-        db.alter_column('core_placement', 'publishable_id', models.ForeignKey(Publishable))
-
-        # TODO: move it via south
-        db.execute('''
-                ALTER TABLE `core_placement` DROP FOREIGN KEY `core_placement_ibfk_2`;
-        ''')
-
+        db.alter_column('core_placement', 'publishable_id', models.ForeignKey(orm['core.Publishable'], null=False))
         db.create_index('core_placement', ['publishable_id'])
+
         db.delete_column('core_placement', 'target_ct_id')
         db.delete_column('core_placement', 'target_id')
 
