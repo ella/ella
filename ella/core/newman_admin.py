@@ -430,9 +430,9 @@ class PublishableAdmin(newman.NewmanModelAdmin):
     def placement_link(self, object):
         if object.main_placement:
             return mark_safe('<span class="published"><a class="hashadr" href="/core/placement/%d/">%s</a></span>' % (object.main_placement.pk, object.main_placement.category))
-        return mark_safe('<span class="unpublished">%s</span>' % ugettext('No placement'))
+        return mark_safe('<span class="unpublished"><a class="hashadr" href="/core/placement/?publishable__exact=%d">%s</a></span>' % (object.id, ugettext('No main placement')))
     placement_link.allow_tags = True
-    placement_link.short_description = _('Placement')
+    placement_link.short_description = _('Main placement')
 
 
 newman.site.register(HitCount, HitCountAdmin)
