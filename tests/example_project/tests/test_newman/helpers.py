@@ -60,7 +60,7 @@ class NewmanTestCase(SeleniumTestCase):
         for key, value in data.items():
             s.type(key, value)
 
-    def fill_suggest_fiels(self, suggest_data):
+    def fill_suggest_fields(self, suggest_data):
         s = self.selenium
         for key, values in suggest_data.items():
             for value in values:

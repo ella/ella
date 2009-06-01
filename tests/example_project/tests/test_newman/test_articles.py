@@ -30,7 +30,7 @@ class TestArticleBasics(NewmanTestCase):
                 'category': ('we',),
                 'authors':  ('Bar', 'Kin',),
             }
-        self.fill_suggest_fiels(suggest_data)
+        self.fill_suggest_fields(suggest_data)
 
         self.save_form()
 
