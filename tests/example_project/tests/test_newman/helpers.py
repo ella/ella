@@ -31,6 +31,10 @@ class NewmanTestCase(SeleniumTestCase):
             'pages' : {
                 'login' : {
                     'submit' : "//input[@type='submit']"
+                },
+                'listing' : {
+                    'first_object' : "//div[@id='changelist']/form/table/tbody/tr[@class='row1']",
+                    'object' : "//div[@id='changelist']/form/table/tbody/tr[@class='row%(position)s']",
                 }
             }
         }
@@ -55,6 +59,11 @@ class NewmanTestCase(SeleniumTestCase):
         super(NewmanTestCase, self).tearDown()
 
 
+    def get_listing_object(self, position=1):
+        return self.elements['pages']['listing']['object'] % {
+            'position' : position
+        }
+
     def fill_fields(self, data):
         s = self.selenium
         for key, value in data.items():
@@ -71,6 +80,30 @@ class NewmanTestCase(SeleniumTestCase):
                 s.wait_for_element_present(self.elements['controls']['suggester_visible'])
                 s.key_down(id, '\40') # down arrow
                 s.click(self.elements['controls']['suggester_visible'])
+
+    def fill_calendar_fields(self, calendar_data):
+        """
+        Select date from calendars. Calendar_data is dict in form of {
+            "field" : {
+                "day" : int,
+            }
+        }, where day of the current month is selected.
+        (support for other fields is TODO)
+        """
+        s = self.selenium
+        for field in calendar_data:
+            # click on calendar button
+            xpath = "//td[@class='%(field)s']/span[@class='datepicker-trigger']" % {
+                "field" : field
+            }
+            s.click(xpath)
+
+            # chose the current date
+            xpath = "//table[@class='ui-datepicker-calendar']/tbody/tr/td/a[text()='%(day)s']" % {
+                "day" : calendar_data[field]['day']
+            }
+            s.click(xpath)
+
 
     def save_form(self):
         s = self.selenium

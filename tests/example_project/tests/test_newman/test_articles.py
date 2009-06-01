@@ -29,11 +29,26 @@ class TestArticleBasics(NewmanTestCase):
         suggest_data = {
                 'category': ('we',),
                 'authors':  ('Bar', 'Kin',),
+                'placement_set-0-category' : ('we',)
             }
+        
         self.fill_suggest_fields(suggest_data)
+
+        calendar_data = {
+            "publish_from" : {
+                "day" : "1",
+            },
+            "publish_to" : {
+                "day" : "3",
+            }
+
+        }
+
+        self.fill_calendar_fields(calendar_data)
 
         self.save_form()
 
+        self.assert_equals(u"Article: "+data['title'], s.get_text(self.get_listing_object()+"/th/a[@class='hashadr']"))
 
         # verify save
         self.assert_equals(1, Article.objects.count())
@@ -42,7 +57,4 @@ class TestArticleBasics(NewmanTestCase):
         # FIXME: hack, use django-markup
         self.assert_equals('<p>%s</p>\n' % data['description'], a.description)
         self.assert_equals(2, a.authors.count())
-
-
-
 
