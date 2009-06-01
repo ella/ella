@@ -51,6 +51,7 @@
         
         open_overlay(content_type, function(id) {
             $target_input.val(id);
+            $target_input.change();
         });
         
         return false;
@@ -84,7 +85,10 @@
             return false;
         }
         var content_type = id2ct(ct_id);
-        open_overlay(content_type, function(id) { $id_input.val(id); });
+        open_overlay(content_type, function(id) {
+            $id_input.val(id);
+            $id_input.change();
+        });
         return false;
     });
     
