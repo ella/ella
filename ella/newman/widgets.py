@@ -61,11 +61,13 @@ class NewmanRichTextAreaWidget(RichTextAreaWidget):
         js = (
             MEDIA_PREFIX + JS_MARKITUP,
             MEDIA_PREFIX + JS_MARKITUP_SET,
+            MEDIA_PREFIX + JS_JQUERY_UI,
         )
         css = {
             'screen': (
                 MEDIA_PREFIX + CSS_MARKITUP,
                 MEDIA_PREFIX + CSS_MARKITUP_SET,
+                MEDIA_PREFIX + CSS_JQUERY_UI,
             ),
         }
 
