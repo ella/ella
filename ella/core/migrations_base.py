@@ -92,9 +92,17 @@ class BasePublishableDataMigration(object):
             'app_label': self.app_label,
             'model': self.model,
             'table': self.table,
-            'cols_to': ', '.join(self.publishable_cols.keys()),
-            'cols_from': ', '.join(self.publishable_cols.values()),
+            'cols_to': ', '.join(self.cols_to),
+            'cols_from': ', '.join(self.cols_from),
         }
+
+    @property
+    def cols_to(self):
+        return self.publishable_cols.keys()
+
+    @property
+    def cols_from(self):
+        return self.publishable_cols.values()
 
 
     def forwards(self, orm):
@@ -124,6 +132,7 @@ class BasePublishableDataMigration(object):
         '''
 
         # move the data
+        # TODO: maybe there should be prefix 'a.' in cols_from
         db.execute('''
             INSERT INTO
                 `core_publishable` (old_id, content_type_id, %(cols_to)s)
@@ -165,7 +174,8 @@ class BasePublishableDataMigration(object):
         self.move_self_foreignkeys(orm)
 
         # drop duplicate columns
-        for column in ('category_id', 'perex', 'id', 'slug', 'photo_id', 'source_id', 'title'):
+        db.delete_column(self.table, 'id')
+        for column in self.cols_from:
             db.delete_column(self.table, column)
 
     def forwards_generic_relations(self, orm):
