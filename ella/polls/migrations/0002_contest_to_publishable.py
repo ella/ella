@@ -18,5 +18,6 @@ class Migration(BasePublishableDataMigration):
         alter_foreignkey_to_int('polls_contestant', 'contest')
 
     def move_self_foreignkeys(self, orm):
+        pass
         # TODO: migrate new contest IDs to question
         # TODO: migrate new contest IDs to contestant
