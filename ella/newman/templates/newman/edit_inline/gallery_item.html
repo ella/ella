@@ -1,17 +1,18 @@
+{% spaceless %}
 <div class="inline-group" style="margin: 5px 10px">
-    <h3>{{ inline_admin_formset.opts.verbose_name_plural|title }}</h3>
     {{ inline_admin_formset.formset.management_form }}
-    {{ inline_admin_formset.formset.non_form_errors }}
 
-    <fieldset class="gallery-items-sortable" style="background: #fff; border: 1px solid #ddd; -moz-border-radius: 10px;">
+    <fieldset class="gallery-items-sortable">
+        <legend style="font-size: 120%; font-weight: bold;">{{ inline_admin_formset.opts.verbose_name_plural|title }}</legend>
+    {{ inline_admin_formset.formset.non_form_errors }}
 
     {% for inline_admin_form in inline_admin_formset %}
         <div class="inline-related {% if forloop.last %}last-related{% endif %}">
             {% if inline_admin_form.form.non_field_errors %}{{ inline_admin_form.form.non_field_errors }}{% endif %}
 
             {% for fieldset in inline_admin_form %}
-                <div class="gallery-item" style="margin: 5px; padding: 5px; border: 1px solid #ddd;">
-                <img src="{{ inline_admin_form.original.target.thumb_url }}" alt="{{ inline_admin_form.original.target }}" style="float: left; width: 60px; margin-right: 10px;"/>
+                <div class="gallery-item">
+                <img class="thumb" src="{{ inline_admin_form.original.target.thumb_url }}" alt="{{ inline_admin_form.original.target }}"/>
                 {% if inline_admin_form.original %}
                     <h4>
                         #{{ inline_admin_form.original.order }} &mdash; {{ inline_admin_form.original.target }}
@@ -36,7 +37,6 @@
             {% endfor %}
             {{ inline_admin_form.pk_field.field }}
             {{ inline_admin_form.fk_field.field }}
-            <div class="cb"></div>
         </div>
     {% endfor %}
 
@@ -46,3 +46,4 @@
 </div>
 <script type="text/javascript">request_media('{{ NEWMAN_MEDIA_URL }}jquery/jquery-ui.js');</script>
 <script type="text/javascript">request_media('{{ NEWMAN_MEDIA_URL }}js/inlines.js');</script>
+{% endspaceless %}

@@ -478,8 +478,11 @@ div.model-help h4 { font-size: 105% }
 a.widget-thumb { border: 1px solid #ccc; margin-right: 5px; }
 
 /* SORTABLE GALLERY ITEMS */
+.gallery-items-sortable { background: #fff; border: 1px solid #ddd; -moz-border-radius: 5px; -webkit-border-radius: 5px; }
+.gallery-item { margin: 5px; padding: 5px; border: 1px solid #ddd; }
+.gallery-item img.thumb { float: left; width: 80px; margin-right: 10px; }
 .sortable-item { cursor: move; }
-.sortable-item:hover { background: #77B150; }
+.gallery-item:hover { background: #77B150; }
 
 /* OTHER */
 #debug { position: absolute; top:0; left:0; right:0; bottom: 25px;background: #333; color: #fff; padding: 10px; z-index: 50; overflow: auto; opacity: .9; display: none; }
