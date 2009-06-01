@@ -293,6 +293,10 @@ class ContentTypeWidget(forms.Select):
         return u'\n'.join(output)
 
 
+class OrderFieldWidget(forms.HiddenInput):
+    def __init__(self, attrs={}):
+        super(OrderFieldWidget, self).__init__(attrs={'class': 'item-order'})
+
 class IncrementWidget(forms.TextInput):
     'Self incrementing widget.'
     class Media:

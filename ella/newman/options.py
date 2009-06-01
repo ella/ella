@@ -90,9 +90,9 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
         kwargs['widget'] = widgets.ForeignKeyGenericRawIdWidget
         return db_field.formfield(**kwargs)
 
-#    if db_field.name == 'order':
-#        kwargs['widget'] = widgets.IncrementWidget
-#        return db_field.formfield(**kwargs)
+    if db_field.name == 'order':
+        kwargs['widget'] = widgets.OrderFieldWidget
+        return db_field.formfield(**kwargs)
 
     # magic around restricting category choices in all ForeignKey (related to Category) fields
     if is_category_fk(db_field) and 'model' in custom_params:
