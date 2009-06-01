@@ -1,7 +1,7 @@
 
 from south.db import db
 from django.db import models
-from ella.articles.models import *
+from ella.media.models import *
 
 from ella.core.migrations_base import BasePublishableDataMigration, alter_foreignkey_to_int
 
