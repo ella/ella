@@ -116,7 +116,7 @@ class BasePublishableDataMigration(object):
         #self.forwards_generic_relations(orm)
 
         # migrate placements
-        #self.forwards_placements(orm)
+        self.forwards_placements(orm)
 
         # migrate related
         #self.forwards_related(orm)
@@ -207,34 +207,24 @@ class BasePublishableDataMigration(object):
 
     def forwards_placements(self, orm):
         '''
-        TODO: dodelat
+        migrate placements
         '''
-
-        app = self.app_name
-        mod = self.module_name
-        table = '%s_%s' % (app, mod)
 
         db.add_column('core_placement', 'publishable_id', models.IntegerField(null=True))
 
-        # MIGRATE PLACEMENTS
         db.execute('''
-                UPDATE
-                    `core_placement` plac INNER JOIN `core_publishable` pub ON (plac.`target_ct_id` = pub.`content_type_id` AND plac.`target_id` = pub.`old_id`)
-                SET
-                    plac.`publishable_id` = pub.`id`
-                WHERE
-                    pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = '%(app)s' AND  ct.`model` = '%(mod)s');
-            ''' % {'app': app, 'mod': mod, 'table': table}
+            UPDATE
+                `core_placement` plac INNER JOIN `core_publishable` pub ON (plac.`target_ct_id` = pub.`content_type_id` AND plac.`target_id` = pub.`old_id`)
+            SET
+                plac.`publishable_id` = pub.`id`
+            WHERE
+                pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = '%(app_label)s' AND  ct.`model` = '%(model)s');
+            ''' self.substitute
         )
 
-        db.alter_column('core_placement', 'publishable_id', models.ForeignKey(Publishable))
-
-        # TODO: move it via south
-        db.execute('''
-                ALTER TABLE `core_placement` DROP FOREIGN KEY `core_placement_ibfk_2`;
-        ''')
-
+        db.alter_column('core_placement', 'publishable_id', models.ForeignKey(orm['core.Publishable'], null=False))
         db.create_index('core_placement', ['publishable_id'])
+
         db.delete_column('core_placement', 'target_ct_id')
         db.delete_column('core_placement', 'target_id')
 
