@@ -116,7 +116,7 @@ class BasePublishableDataMigration(object):
         #self.forwards_generic_relations(orm)
 
         # migrate placements
-        self.forwards_placements(orm)
+        #self.forwards_placements(orm)
 
         # migrate related
         #self.forwards_related(orm)
