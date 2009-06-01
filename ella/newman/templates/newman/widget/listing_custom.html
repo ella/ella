@@ -43,8 +43,15 @@
                     />
                 </div>
             </td>
+            <td class="listing-delete">
+                <input 
+                    type="checkbox"
+                    id="{{ id_prefix }}-{{ forloop.counter }}-delete"
+                    name="{{ id_prefix }}-{{ forloop.counter }}-DELETE"
+                />
+            </td>
 
-            <td colspan="3">&nbsp;</td>
+            <td colspan="2">&nbsp;</td>
 
         </tr>
     {% endfor %}
