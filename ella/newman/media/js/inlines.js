@@ -32,7 +32,7 @@
     
     $('.add-gallery-item-button').live('click', function(evt) {
         if (evt.button != 0) return;
-        var $last_item = $('.gallery-items-sortable .inline-related.last-related');
+        var $last_item = $('.gallery-items-sortable .inline-related:last');
         var $new_item = $last_item.clone(true);
         $last_item.removeClass('last-related');
         
@@ -53,7 +53,9 @@
             // init values
             if ($(this).is('.target_id' )) $(this).val('');
             if ($(this).is('.item-order')) $(this).val( max_order() + 1 );
+            if ($(this).is('img.thumb'  )) $(this).attr({src:'', alt:''});
         });
+        $new_item.find('h4').remove();
         $new_item.insertAfter( $last_item );
         var $no_items = $('#id_galleryitem_set-TOTAL_FORMS');
         $no_items.val(
@@ -92,9 +94,7 @@
             items: '.sortable-item',
             update: function(evt, ui) {
                 var $target = $( evt.target );
-                $target.find('input').filter( function() {
-                    return /galleryitem_set-\d+-order/.test( this.name );
-                }).each( function(i) {
+                $target.find('input.item-order').each( function(i) {
                     $(this).val( i+1 );
                 });
                 $target.children().removeClass('last-related');
