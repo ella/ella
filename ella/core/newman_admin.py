@@ -109,6 +109,8 @@ class PlacementForm(modelforms.ModelForm):
         instance.publish_to = self.cleaned_data['publish_to']
         instance.slug = self.cleaned_data['slug']
         instance.static = self.cleaned_data['static']
+        if not commit:
+            return instance
         if self.instance.pk is None:
             fail_message = 'created'
         else:
