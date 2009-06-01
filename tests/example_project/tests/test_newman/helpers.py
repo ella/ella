@@ -78,7 +78,6 @@ class NewmanTestCase(SeleniumTestCase):
                 s.type(id, value)
                 s.click(id)
                 s.wait_for_element_present(self.elements['controls']['suggester_visible'])
-                s.key_down(id, '\40') # down arrow
                 s.click(self.elements['controls']['suggester_visible'])
 
     def fill_calendar_fields(self, calendar_data):

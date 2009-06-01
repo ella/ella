@@ -23,7 +23,7 @@ DATABASE_PORT = ''
 
 TIME_ZONE = 'Europe/Prague'
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'cs'
 
 SITE_ID = 1
 USE_I18N = True
