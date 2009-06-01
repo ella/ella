@@ -66,7 +66,13 @@ class PlacementForm(modelforms.ModelForm):
             if not list_cats:
                 return
             listings = dict([ (l.category, l) for l in Listing.objects.filter(placement=instance.pk) ])
+            forloop_counter = 0 # used for counting delete checkboxes
             for c, pub in zip(list_cats, publish_from_fields):
+                forloop_counter += 1
+                delete_listing = self.data.get(self.get_part_id('%d-DELETE' % forloop_counter), 'off')
+                if delete_listing == 'on':
+                    # skip following for-cycle body, so the listing will be deleted
+                    continue
                 publish_from = self.get_publish_date(pub)
                 if not c in listings:
                     # create listing
