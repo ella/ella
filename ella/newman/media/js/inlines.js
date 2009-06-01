@@ -86,6 +86,7 @@
     function make_gallery_sortable(root) {
         if ( ! root ) root = document;
         var $sortables = $(root).find('.gallery-items-sortable').not('ui-sortable');
+        if ($sortables.length == 0) return;
         $sortables.children().filter( function() {
             return $(this).find('input.target_id').val();
         }).addClass('sortable-item');
