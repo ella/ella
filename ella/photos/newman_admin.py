@@ -1,9 +1,9 @@
 from django.utils.translation import ugettext_lazy as _
+from django.conf.urls.defaults import patterns, url
 
 from ella import newman
 
 from ella.photos.models import FormatedPhoto, Format, Photo
-from django.conf.urls.defaults import patterns, url
 from ella.newman.utils import JsonResponse, JsonResponseError
 from ella.newman.config import STATUS_OBJECT_NOT_FOUND
 
@@ -29,7 +29,7 @@ class PhotoAdmin(newman.NewmanModelAdmin):
 
     def get_urls(self):
         urlpatterns = patterns('',
-            url(r'^(.+)/thumb/$',
+            url(r'^(\d+)/thumb/$',
                 self.json_photo_info,
                 name='photo-json-info'),
         )
