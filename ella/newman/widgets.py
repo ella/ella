@@ -238,7 +238,7 @@ class ForeignKeyRawIdWidget(forms.TextInput):
             obj = self._get_obj(value)
             output.append('<a href="%s" class="widget-thumb thickbox">%s</a>' % (obj.image.url, obj.thumb()))
         output.append(super(ForeignKeyRawIdWidget, self).render(name, value, attrs))
-        output.append('<a href="%s%s?pop" class="rawid-related-lookup" id="lookup_id_%s"> ' % \
+        output.append(' <a href="%s%s?pop" class="rawid-related-lookup" id="lookup_id_%s">' % \
             (related_url, url, name))
         output.append('<img src="%sico/16/search.png" width="16" height="16" /></a>' % settings.NEWMAN_MEDIA_PREFIX)
         if value:
