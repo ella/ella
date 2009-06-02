@@ -30,23 +30,22 @@
         }));
     }
     
-    $('.add-gallery-item-button').live('click', function(evt) {
+    function add_gallery_item(evt) {
         if (evt.button != 0) return;
         var $last_item = $('.gallery-items-sortable .inline-related:last');
         var $new_item = $last_item.clone(true);
+        var no_items = $('.gallery-items-sortable input.target_id').length;
         $last_item.removeClass('last-related');
         
         $new_item.find('*').each( function() {
             var no_re = /galleryitem_set-(\d+)-/g;
-            var oldno, newno;
+            var oldno;
             if (oldno = no_re.exec( this.name )) {
-                newno = new Number(oldno[1]) + 1;
-                var newname = this.name.replace(no_re, 'galleryitem_set-'+newno+'-');
+                var newname = this.name.replace(no_re, 'galleryitem_set-'+no_items+'-');
                 $(this).attr({name: newname});
             }
             if (oldno = no_re.exec( this.id )) {
-                newno = new Number(oldno[1]) + 1;
-                var newid = this.id.replace(no_re, 'galleryitem_set-'+newno+'-');
+                var newid = this.id.replace(no_re, 'galleryitem_set-'+no_items+'-');
                 $(this).attr({id: newid});
             }
             
@@ -58,13 +57,12 @@
         $new_item.find('h4').remove();
         $new_item.insertAfter( $last_item );
         var $no_items = $('#id_galleryitem_set-TOTAL_FORMS');
-        $no_items.val(
-            new Number($no_items.val()) + 1
-        );
-    });
+        $no_items.val( no_items+1 );
+    }
+    $('.add-gallery-item-button').live('click', add_gallery_item);
 
-    // check for unique photo ID
-    function check_unique_photo( $form ) {
+    // check for unique photo ID and strip all unused input rows
+    function check_gallery_changeform( $form ) {
         var used_ids = {};
         var rv = true;
         $form.find('.gallery-item .target_id').each( function() {
@@ -79,11 +77,19 @@
             }
             used_ids[ val ] = 1;
         });
+        
+        // If the form validates, strip off all gallery-item's that contain a valueless input.target_id
+        if (rv) {
+            $('.gallery-items-sortable .inline-related').filter( function() {
+                return $(this).find('input.target_id').val() == ''
+            }).remove();
+        }
+        
         return rv;
     }
-    $('#gallery_form').data('validation', check_unique_photo);
+    $('#gallery_form').data('validation', check_gallery_changeform);
     
-    function make_gallery_sortable(root) {
+    function init_gallery(root) {
         if ( ! root ) root = document;
         var $sortables = $(root).find('.gallery-items-sortable').not('ui-sortable');
         if ($sortables.length == 0) return;
@@ -96,7 +102,9 @@
             update: function(evt, ui) {
                 var $target = $( evt.target );
                 $target.find('input.item-order').each( function(i) {
-                    $(this).val( i+1 );
+                    var ord = i+1;
+                    $(this).val( ord ).change();
+                    $(this).siblings('h4:first').find('span:first').text( ord );
                 });
                 $target.children().removeClass('last-related');
                 $target.children(':last').addClass('last-related');
@@ -112,12 +120,86 @@
         $sortables.find('.item-order').each( function() {
             if ( ! $(this).val() ) $(this).val( max_order() + 1 );
         });
+        
+        // update the preview thumbs and headings
+        function update_gallery_item_thumbnail() {
+            var $input = $(this);
+            var id = $input.val();
+            
+            var $img     = $input.siblings('img:first');
+            var $heading = $input.siblings('h4:first');
+            if ($heading.length == 0) {
+                $heading = $('<h4>#<span></span> &mdash; <span></span></h4>').insertAfter($img);
+            }
+            $img.attr({
+                src: '',
+                alt: ''
+            });
+            $heading.find('span').empty();
+            
+            if (!id) {
+                $heading.remove();
+                return;
+            }
+            
+            $.ajax({
+                url: BASE_PATH + '/photos/photo/' + id + '/thumb/',
+                success: function(response_text) {
+                    var res;
+                    try { res = JSON.parse(response_text); }
+                    catch(e) {
+                        carp('thumb update error: successful response container unexpected text: ' + response_text);
+                    }
+                    
+                    // thumbnail
+                    var thumb_url = res.data.thumb_url;
+                    var title     = res.data.title;
+                    $img.attr({
+                        src: thumb_url,
+                        alt: title
+                    });
+                    
+                    // heading
+                    var order = $( '#' + $input.attr('id').replace(/-target_id$/, '-order') ).val();
+                    $heading.find('span:first').text( order );
+                    $heading.find('span:eq(1)').text( title );
+                },
+            });
+        }
+        $(root).find('input.target_id').not('.js-updates-thumb').addClass('js-updates-thumb').change( update_gallery_item_thumbnail );
+        
+        // create desired input rows for loaded preset
+        $('#gallery_form').bind('preset_load_initiated', function(evt, preset) {
+            var desired_no;
+            for (var i = 0; i < preset.data.length; i++) {
+                var o = preset.data[i];
+                if (o.name == 'galleryitem_set-TOTAL_FORMS') {
+                    desired_no = new Number( o.value );
+                }
+            }
+            var no_items = $('.gallery-items-sortable input.target_id').length;
+            while (no_items < desired_no) {
+                add_gallery_item({button:0});
+                var old_no = no_items;
+                no_items = $('.gallery-items-sortable input.target_id').length;
+                if (old_no == no_items) {
+                    ;;; carp('inlines.js: preset_load_initiated handler: failed adding gallery item for preset values');
+                    show_err(gettext('Error restoring inlines'));
+                    break;
+                }
+            }
+        })
+        // and get their thumbnails
+        .bind('preset_load_completed', function(evt) {
+            $('.gallery-items-sortable input.target_id').each( update_gallery_item_thumbnail );
+            init_gallery( evt.target );
+        });
     }
-    make_gallery_sortable();
+    init_gallery();
     
     $(document).bind('content_added', function(evt) {
-        $('#gallery_form').removeData('validation').data('validation', check_unique_photo);
-        make_gallery_sortable( evt.target );
+        $('#gallery_form').removeData('validation').data('validation', check_gallery_changeform);
+        init_gallery( evt.target );
     });
     
 })(jQuery);
