@@ -40,7 +40,7 @@ class PhotoAdmin(newman.NewmanModelAdmin):
         obj = self.get_change_view_object(object_id)
 
         if obj is None:
-            return JsonResponseError('Photo does not exist', status=STATUS_OBJECT_NOT_FOUND)
+            return JsonResponseError(_('Photo id %s does not exists.') % object_id, status=STATUS_OBJECT_NOT_FOUND)
 
         out = {
             'title': obj.title,
