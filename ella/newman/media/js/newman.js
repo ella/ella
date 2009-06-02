@@ -92,6 +92,9 @@ $(function(){ContentByHashLib.reload_content('content');});
             show_err(gettext('Failed loading preset'));
             return;
         }
+        
+        $form.trigger('preset_load_initiated', [response_data]);
+        
         $form.get(0).reset();
         $form.find(':checkbox,:radio').removeAttr('checked');
         $form.find(':text,textarea,:password').val('');
@@ -114,6 +117,8 @@ $(function(){ContentByHashLib.reload_content('content');});
                 restore_suggest_widget_from_value(this);
             });
         }
+        
+        $form.trigger('preset_load_completed');
     }
     function load_preset(id, $form) {
         $.ajax({

@@ -30,7 +30,7 @@
         }));
     }
     
-    $('.add-gallery-item-button').live('click', function(evt) {
+    function add_gallery_item(evt) {
         if (evt.button != 0) return;
         var $last_item = $('.gallery-items-sortable .inline-related:last');
         var $new_item = $last_item.clone(true);
@@ -58,7 +58,8 @@
         $new_item.insertAfter( $last_item );
         var $no_items = $('#id_galleryitem_set-TOTAL_FORMS');
         $no_items.val( no_items+1 );
-    });
+    }
+    $('.add-gallery-item-button').live('click', add_gallery_item);
 
     // check for unique photo ID and strip all unused input rows
     function check_gallery_changeform( $form ) {
@@ -121,7 +122,7 @@
         });
         
         // update the preview thumbs and headings
-        $(root).find('input.target_id').not('.js-updates-thumb').addClass('js-updates-thumb').change( function() {
+        function update_gallery_item_thumbnail() {
             var $input = $(this);
             var id = $input.val();
             
@@ -164,6 +165,34 @@
                     $heading.find('span:eq(1)').text( title );
                 },
             });
+        }
+        $(root).find('input.target_id').not('.js-updates-thumb').addClass('js-updates-thumb').change( update_gallery_item_thumbnail );
+        
+        // create desired input rows for loaded preset
+        $('#gallery_form').bind('preset_load_initiated', function(evt, preset) {
+            var desired_no;
+            for (var i = 0; i < preset.data.length; i++) {
+                var o = preset.data[i];
+                if (o.name == 'galleryitem_set-TOTAL_FORMS') {
+                    desired_no = new Number( o.value );
+                }
+            }
+            var no_items = $('.gallery-items-sortable input.target_id').length;
+            while (no_items < desired_no) {
+                add_gallery_item({button:0});
+                var old_no = no_items;
+                no_items = $('.gallery-items-sortable input.target_id').length;
+                if (old_no == no_items) {
+                    ;;; carp('inlines.js: preset_load_initiated handler: failed adding gallery item for preset values');
+                    show_err(gettext('Error restoring inlines'));
+                    break;
+                }
+            }
+        })
+        // and get their thumbnails
+        .bind('preset_load_completed', function(evt) {
+            $('.gallery-items-sortable input.target_id').each( update_gallery_item_thumbnail );
+            init_gallery( evt.target );
         });
     }
     init_gallery();
