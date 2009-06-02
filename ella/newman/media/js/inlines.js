@@ -169,7 +169,7 @@
     init_gallery();
     
     $(document).bind('content_added', function(evt) {
-        $('#gallery_form').removeData('validation').data('validation', check_unique_photo);
+        $('#gallery_form').removeData('validation').data('validation', check_gallery_changeform);
         init_gallery( evt.target );
     });
     
