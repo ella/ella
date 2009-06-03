@@ -33,10 +33,8 @@ class Migration(object):
     }
 
 
-class Plugin(object):
-    @property
-    def orm(self):
-        return Migration.orm
+class Plugin(south.SouthPlugin):
+    migration = Migration
 
     def forwards(self, orm):
         print 'articles', '0003_bbb', 'plugin', 'up'
@@ -46,5 +44,5 @@ class Plugin(object):
         print 'articles', '0003_bbb', 'plugin', 'down'
         print self.orm.article
 
-south.plugin.register("core", "0003_bbb", Plugin())
+south.plugins.register("core", "0003_bbb", Plugin())
 

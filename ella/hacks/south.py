@@ -1,7 +1,8 @@
 
 from south import *
 
-class Plugin(object):
+
+class Plugins(object):
     def __init__(self):
         self.plugins = {}
 
@@ -14,5 +15,12 @@ class Plugin(object):
     def get(self, app, migration):
         return self.plugins.get((app, migration), set())
 
-plugin = Plugin()
+
+class SouthPlugin(object):
+    @property
+    def orm(self):
+        return self.migration.orm
+
+
+plugins = Plugins()
 

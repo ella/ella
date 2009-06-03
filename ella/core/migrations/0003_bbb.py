@@ -10,13 +10,13 @@ class Migration(object):
     def forwards(self, orm):
         print 'core', '0003_bbb', 'up'
         print orm.publishable
-        for p in south.plugin.get("core", "0003_bbb"):
+        for p in south.plugins.get("core", "0003_bbb"):
             p.forwards(orm)
 
     def backwards(self, orm):
         print 'core', '0003_bbb', 'down'
         print orm.publishable
-        for p in south.plugin.get("core", "0003_bbb"):
+        for p in south.plugins.get("core", "0003_bbb"):
             p.backwards(orm)
 
     models = {
