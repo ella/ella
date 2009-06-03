@@ -1,7 +1,6 @@
 
 from south.db import db
 from django.db import models
-from ella.core.models import *
 
 class Migration:
 
@@ -9,9 +8,17 @@ class Migration:
         # add a temporary column on core_publishable to remember the old ID
         db.add_column('core_publishable', 'old_id', models.IntegerField(null=True))
 
+        # column for new foreign keys to publishable
+        db.add_column('core_placement', 'publishable_id', models.IntegerField(null=True))
+
+
     def backwards(self, orm):
         # drop temporary column
         db.delete_column('core_publishable', 'old_id')
+
+        # drop publishable foreign key
+        db.delete_column('core_placement', 'publishable_id')
+        
 
     models = {
         'core.publishable': {
