@@ -118,23 +118,19 @@ class BasePublishableDataMigration(object):
 
 
     def forwards(self, orm):
-        # add a temporary column on core_publishable to remember the old ID
-        db.add_column('core_publishable', 'old_id', models.IntegerField(null=True))
+        pass
 
         # migrate publishables
-        self.forwards_publishable(orm)
+        #self.forwards_publishable(orm)
 
         # migrate generic relations
-        self.forwards_generic_relations(orm)
+        #self.forwards_generic_relations(orm)
 
         # migrate placements
         #self.forwards_placements(orm)
 
         # migrate related
         #self.forwards_related(orm)
-
-        # delete temporary column to remember the old ID
-        db.delete_column('core_publishable', 'old_id')
 
     def forwards_publishable(self, orm):
         '''
