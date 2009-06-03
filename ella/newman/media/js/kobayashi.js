@@ -863,8 +863,11 @@ function get_hash(address, options) {
     
     var media_queue = [];
     $(document).data('loaded_media', {});
+    var $LOADING_MEDIA_MSG;
     function init_media() {
         $(document).trigger('media_loaded').data('loaded_media', {});
+        $('body').removeClass('loading');
+        $LOADING_MEDIA_MSG.remove();
     }
     function draw_media() {
         if (media_queue.length == 0) {
@@ -881,6 +884,8 @@ function get_hash(address, options) {
         media_queue.push(url);
         if (do_start) {
             setTimeout(draw_media,20);
+            $('body').addClass('loading');
+            $LOADING_MEDIA_MSG = show_message(gettext('Loading media'), {duration:0});
         }
     }
     window.request_media = request_media;

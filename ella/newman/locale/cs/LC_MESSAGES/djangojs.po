@@ -7,191 +7,56 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-05-26 20:57+0200\n"
-"PO-Revision-Date: 2009-05-26 20:58+0100\n"
-"Last-Translator: Vitek Pliska <whit@jizak.cz>\n"
+"POT-Creation-Date: 2009-06-03 16:34+0200\n"
+"PO-Revision-Date: 2009-06-03 16:40+0100\n"
+"Last-Translator: Oldrich Kruza <oldrich.kruza@centrumholdings.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: media/jquery/jquery-ui.js:60
-msgid "Done"
-msgstr ""
-
-#: media/jquery/jquery-ui.js:60
-msgid "Prev"
-msgstr "Předchozí"
-
-#: media/jquery/jquery-ui.js:60
-msgid "Next"
-msgstr "Následující"
-
-#: media/jquery/jquery-ui.js:60
-msgid "Today"
-msgstr "Dnes"
-
-#: media/jquery/jquery-ui.js:60
-msgid "January"
-msgstr "Leden"
-
-#: media/jquery/jquery-ui.js:60
-msgid "February"
-msgstr "Únor"
-
-#: media/jquery/jquery-ui.js:60
-msgid "March"
-msgstr "Březen"
-
-#: media/jquery/jquery-ui.js:60
-msgid "April"
-msgstr "Duben"
-
-#: media/jquery/jquery-ui.js:60
-msgid "May"
-msgstr "Květen"
-
-#: media/jquery/jquery-ui.js:60
-msgid "June"
-msgstr "Červen"
-
-#: media/jquery/jquery-ui.js:60
-msgid "July"
-msgstr "Červenec"
-
-#: media/jquery/jquery-ui.js:60
-msgid "August"
-msgstr "Srpen"
-
-#: media/jquery/jquery-ui.js:60
-msgid "September"
-msgstr "Září"
-
-#: media/jquery/jquery-ui.js:60
-msgid "October"
-msgstr "Říjen"
-
-#: media/jquery/jquery-ui.js:60
-msgid "November"
-msgstr "Listopad"
-
-#: media/jquery/jquery-ui.js:60
-msgid "December"
-msgstr "Prosinec"
-
-#: media/jquery/jquery-ui.js:60
-msgid "Jan"
-msgstr ""
-
-#: media/jquery/jquery-ui.js:60
-msgid "Feb"
-msgstr ""
-
-#: media/jquery/jquery-ui.js:60
-msgid "Mar"
-msgstr ""
-
-#: media/jquery/jquery-ui.js:60
-msgid "Apr"
-msgstr ""
-
-#: media/jquery/jquery-ui.js:60
-msgid "Jun"
-msgstr ""
-
-#: media/jquery/jquery-ui.js:60
-msgid "Jul"
-msgstr ""
-
-#: media/jquery/jquery-ui.js:60
-msgid "Aug"
-msgstr ""
-
-#: media/jquery/jquery-ui.js:60
-msgid "Sep"
-msgstr ""
-
-#: media/jquery/jquery-ui.js:60
-msgid "Oct"
-msgstr ""
-
-#: media/jquery/jquery-ui.js:60
-msgid "Nov"
-msgstr ""
-
-#: media/jquery/jquery-ui.js:60
-msgid "Dec"
-msgstr ""
-
-#: media/jquery/jquery-ui.js:60
-msgid "Sunday"
-msgstr ""
-
-#: media/jquery/jquery-ui.js:60
-msgid "Monday"
-msgstr ""
-
-#: media/jquery/jquery-ui.js:60
-msgid "Tuesday"
-msgstr ""
-
-#: media/jquery/jquery-ui.js:60
-msgid "Wednesday"
-msgstr ""
-
-#: media/jquery/jquery-ui.js:60
-msgid "Thursday"
-msgstr ""
-
-#: media/jquery/jquery-ui.js:60
-msgid "Friday"
-msgstr ""
-
-#: media/jquery/jquery-ui.js:60
-msgid "Saturday"
-msgstr ""
-
-#: media/jquery/jquery-ui.js:60
 #: media/js/datetime.js:82
 #: media/js/datetime.js.py:222
 msgid "Su"
 msgstr "Ne"
 
-#: media/jquery/jquery-ui.js:60
 #: media/js/datetime.js:82
 #: media/js/datetime.js.py:222
 msgid "Mo"
 msgstr "Po"
 
-#: media/jquery/jquery-ui.js:60
 #: media/js/datetime.js:82
 #: media/js/datetime.js.py:222
 msgid "Tu"
 msgstr "Út"
 
-#: media/jquery/jquery-ui.js:60
 #: media/js/datetime.js:82
 #: media/js/datetime.js.py:222
 msgid "We"
 msgstr "St"
 
-#: media/jquery/jquery-ui.js:60
 #: media/js/datetime.js:82
 #: media/js/datetime.js.py:222
 msgid "Th"
 msgstr "Čt"
 
-#: media/jquery/jquery-ui.js:60
 #: media/js/datetime.js:82
 #: media/js/datetime.js.py:222
 msgid "Fr"
 msgstr "Pá"
 
-#: media/jquery/jquery-ui.js:60
 #: media/js/datetime.js:82
 #: media/js/datetime.js.py:222
 msgid "Sa"
 msgstr "So"
+
+#: media/js/inlines.js:98
+msgid "Duplicate photo"
+msgstr "Duplikátní foto"
+
+#: media/js/kobayashi.js:846
+msgid "Loading media"
+msgstr "Načítám média"
 
 #: media/js/newman.js:38
 msgid "Saving"
@@ -203,11 +68,11 @@ msgstr "Uloženo"
 
 #: media/js/newman.js:62
 msgid "Preset saved but erroneous result received."
-msgstr ""
+msgstr "Záloha uložena, avšak odpověď serveru chybná"
 
 #: media/js/newman.js:62
 msgid "Reload to see the preset."
-msgstr ""
+msgstr "Obnovte stránku pro pohled na zálohu"
 
 #: media/js/newman.js:72
 msgid "Enter template name"
@@ -217,15 +82,15 @@ msgstr "Vložte jméno šablony"
 msgid "Failed loading preset"
 msgstr "Chyba při načítání šablony"
 
-#: media/js/newman.js:578
+#: media/js/newman.js:608
 msgid "Loading"
 msgstr "Načítám"
 
-#: media/js/newman.js:609
+#: media/js/newman.js:639
 msgid "Request failed"
 msgstr "Chyba serveru"
 
-#: media/js/newman.js:620
+#: media/js/newman.js:650
 msgid "Successfully sent"
 msgstr "Úspěšně odesláno"
 
@@ -275,9 +140,40 @@ msgstr "Galerie"
 
 #: media/js/markitup/sets/markdown/set.js:37
 msgid "Box"
-msgstr ""
+msgstr "Box"
 
 #: media/js/markitup/sets/markdown/set.js:41
 msgid "Preview"
 msgstr "Náhled"
+
+#~ msgid "Prev"
+#~ msgstr "Předchozí"
+#~ msgid "Next"
+#~ msgstr "Následující"
+#~ msgid "Today"
+#~ msgstr "Dnes"
+#~ msgid "January"
+#~ msgstr "Leden"
+#~ msgid "February"
+#~ msgstr "Únor"
+#~ msgid "March"
+#~ msgstr "Březen"
+#~ msgid "April"
+#~ msgstr "Duben"
+#~ msgid "May"
+#~ msgstr "Květen"
+#~ msgid "June"
+#~ msgstr "Červen"
+#~ msgid "July"
+#~ msgstr "Červenec"
+#~ msgid "August"
+#~ msgstr "Srpen"
+#~ msgid "September"
+#~ msgstr "Září"
+#~ msgid "October"
+#~ msgstr "Říjen"
+#~ msgid "November"
+#~ msgstr "Listopad"
+#~ msgid "December"
+#~ msgstr "Prosinec"
 
