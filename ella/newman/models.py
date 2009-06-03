@@ -121,15 +121,20 @@ class CategoryUserRole(models.Model):
                 'category' : [ x['slug'] for x in self.category.values() ],
             }
 
-    def save(self):
-        super(CategoryUserRole, self).save()
-        self.sync_denormalized()
+    def save(self, *args, **kwargs):
+        sync = kwargs.pop('sync_role', True)
+        super(CategoryUserRole, self).save(*args, **kwargs)
+        if sync:
+            self.sync_denormalized()
 
     def sync_denormalized(self):
         from ella.newman.permission import compute_applicable_categories_objects
+        cats = []
         for p in self.group.permissions.all():
             code = '%s.%s' % (p.content_type.app_label, p.codename)
-            cats = compute_applicable_categories_objects(self.user, code)
+            if not cats:
+                # categories should be the same for all permission
+                cats = compute_applicable_categories_objects(self.user, code)
             # create denormalized roles
             for c in cats:
                 root_cat = c.main_parent
