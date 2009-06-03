@@ -142,12 +142,12 @@ var ContentByHashLib = {};
         }
         var $target = $('#'+info.target_id);
         var response_text = info.xhr.responseText;
-        var $err_div = $('<div class="error-code"></div>').append(
+        var $err_div = $('<div class="error-code"></div>')/*.append(
             $('<a>reload</a>').css({display:'block'}).click(function(){
                 load_content(info);
                 return false;
             })
-        );
+        )*/;
         LOADED_URLS[ info.target_id ] = 'ERROR:'+info.address;
         try {
             $err_div.append( JSON.parse(response_text).message );
