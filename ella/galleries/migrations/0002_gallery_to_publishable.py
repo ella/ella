@@ -21,6 +21,7 @@ class Migration(BasePublishableDataMigration):
         alter_foreignkey_to_int('galleries_galleryitem', 'gallery')
 
     def move_self_foreignkeys(self, orm):
+        pass
         # there is foreign key to authors called owner instead of ella's classic m2m rel
         # TODO: migrate new gallery IDs to core_publishable_authors
         # TODO: migrate new gallery IDs to galleryitem

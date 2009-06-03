@@ -92,15 +92,23 @@ $(function(){ContentByHashLib.reload_content('content');});
             show_err(gettext('Failed loading preset'));
             return;
         }
+        
+        $form.trigger('preset_load_initiated', [response_data]);
+        
         $form.get(0).reset();
         $form.find(':checkbox,:radio').removeAttr('checked');
         $form.find(':text,textarea,:password').val('');
         var form_data = response_data.data;
         show_message( response_data.message );
+        var used_times = {};    // how many times which key was used
+        
         for (var i = 0; i < form_data.length; i++) {
             var form_datum = form_data[i];
             var key = form_datum['name'];
             var val = form_datum['value'];
+            
+            var occ_no = used_times[ key ] || 0;
+            
             var $inputs = $form.find(':input[name='+key+']');
             if (!$inputs || $inputs.length == 0) {
                 carp('restore_form: input #'+key+' not found');
@@ -109,11 +117,15 @@ $(function(){ContentByHashLib.reload_content('content');});
             var val_esc = val.replace(/\W/g, '\\$1');
             $inputs.filter(':checkbox,:radio').find('[value='+val_esc+']').attr({checked: 'checked'});
             $inputs.filter('option[value='+val_esc+']').attr({selected: 'selected'});
-            $inputs.filter(':text,[type=hidden],textarea').val(val);
-            $form.find('.GenericSuggestField,.GenericSuggestFieldMultiple').find('input[rel]').each(function() {
-                restore_suggest_widget_from_value(this);
-            });
+            $inputs.filter(':text,[type=hidden],textarea').eq(occ_no).val(val);
+            
+            used_times[ key ] = occ_no + 1;
         }
+        $form.find('.GenericSuggestField,.GenericSuggestFieldMultiple').find('input[rel]').each(function() {
+            restore_suggest_widget_from_value(this);
+        });
+        
+        $form.trigger('preset_load_completed');
     }
     function load_preset(id, $form) {
         $.ajax({

@@ -177,7 +177,7 @@ a.icn {
 a.btn {
     padding-top: 4px; padding-bottom: 3px; padding-right: 4px;
     border: 1px solid #ddd;
-    border-radius: 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px;
+    border-radius: 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; -khtml-border-radius: 5px;
     background-color: #E9E8DD;
     margin: 3px 2px;
     text-decoration: none;
@@ -242,7 +242,7 @@ a.btn.filter-active { background-color: #FFF8D1; }
 }
 
 /* FORMS */
-fieldset, legend { border: 1px solid #ddd; padding: 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; background: #fff; }
+fieldset, legend { border: 1px solid #ddd; padding: 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; -khtml-border-radius: 5px; background: #fff; }
 legend { padding: 2px 5px; }
 label { display: block; clear: both; margin: 5px 0 2px 0; }
 label.vCheckboxLabel { display: inline; margin-left: 10px; }
@@ -278,6 +278,7 @@ input.vDateTimeInput { width: 120px; }
     right: 10px;
     -moz-border-radius: 10px;
     -webkit-border-radius: 10px;
+    -khtml-border-radius: 10px;
     border: 2px solid #d66;
     padding: 5px;
     background: #fee;
@@ -304,6 +305,7 @@ input.vDateTimeInput { width: 120px; }
     border: 2px solid #d66;
     -moz-border-radius: 10px;
     -webkit-border-radius: 10px;
+    -khtml-border-radius: 10px;
     padding: 10px;
     background: #fff url(../img/nav-bg-reverse.gif) left top repeat-x;
 }
@@ -362,6 +364,7 @@ td, th {
     background: lightyellow url(../ico/16/info.png) 2px 50% no-repeat;
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
+    -khtml-border-radius: 5px;
 
 }
 #opmsg span.errmsg {
@@ -389,6 +392,7 @@ td, th {
     display: none;
     -moz-border-radius: 7px;
     -webkit-border-radius: 7px;
+    -khtml-border-radius: 7px;
 }
 #history div.module {
     margin: 10px;
@@ -407,6 +411,7 @@ td, th {
     display: none;
     -moz-border-radius: 7px;
     -webkit-border-radius: 7px;
+    -khtml-border-radius: 7px;
 }
 div.pop #filters { top: 35px }
 
@@ -456,6 +461,7 @@ div.model-help {
     background: #fff url(../img/horst1.jpg) left bottom no-repeat;
     -moz-border-radius: 7px;
     -webkit-border-radius: 7px;
+    -khtml-border-radius: 7px;
     border-radius: 7px;
     height: 410px;
 }
@@ -478,8 +484,11 @@ div.model-help h4 { font-size: 105% }
 a.widget-thumb { border: 1px solid #ccc; margin-right: 5px; }
 
 /* SORTABLE GALLERY ITEMS */
+.gallery-items-sortable { background: #fff; border: 1px solid #ddd; -moz-border-radius: 5px; -webkit-border-radius: 5px; -khtml-border-radius: 5px; }
+.gallery-item { margin: 5px; padding: 5px; border: 1px solid #ddd; }
+.gallery-item img.thumb { float: left; width: 80px; margin-right: 10px; }
 .sortable-item { cursor: move; }
-.sortable-item:hover { background: #77B150; }
+.sortable-item .gallery-item:hover { background: #77B150; }
 
 /* OTHER */
 #debug { position: absolute; top:0; left:0; right:0; bottom: 25px;background: #333; color: #fff; padding: 10px; z-index: 50; overflow: auto; opacity: .9; display: none; }

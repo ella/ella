@@ -21,5 +21,6 @@ class Migration(BasePublishableDataMigration):
         alter_foreignkey_to_int('interviews_interview_interviewees', 'interview')
 
     def move_self_foreignkeys(self, orm):
+        pass
         # TODO: migrate new article IDs to question
         # TODO: migrate new article IDs to interview_interviewees

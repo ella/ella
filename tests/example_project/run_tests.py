@@ -33,7 +33,7 @@ os.environ['DJANGO_SETTINGS_MODULE'] = DJANGO_SETTINGS_MODULE
 # TODO: ugly hack to inject required plugins to nose.run
 # Use --with-cherrypyliveserver instead of Django's as it will handle AJAX and stuff much better
 #for i in ['--with-selenium', '--with-cherrypyliveserver', '--with-django']:
-for i in ['--with-selenium', '--with-djangoliveserver', '--with-django',]:
+for i in ['--with-selenium', '--with-djangoliveserver', '--with-django', '--with-djangotranslations']:
     if i not in sys.argv:
         sys.argv.insert(1, i)
 

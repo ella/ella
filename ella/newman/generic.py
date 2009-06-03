@@ -163,8 +163,8 @@ class GenericInlineModelAdmin(options.NewmanInlineModelAdmin):
         return options.formfield_for_dbfield_factory(self, db_field, **kwargs)
 
 class GenericStackedInline(GenericInlineModelAdmin):
-    template = 'admin/edit_inline/stacked.html'
+    template = 'newman/edit_inline/stacked.html'
 
 class GenericTabularInline(GenericInlineModelAdmin):
-    template = 'admin/edit_inline/tabular.html'
+    template = 'newman/edit_inline/tabular.html'
 

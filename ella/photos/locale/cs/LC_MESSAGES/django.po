@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-05-27 11:14+0200\n"
-"PO-Revision-Date: 2009-05-27 11:14+0100\n"
+"POT-Creation-Date: 2009-06-02 11:10+0200\n"
+"PO-Revision-Date: 2009-06-02 11:10+0100\n"
 "Last-Translator: Vitek Pliska <whit@jizak.cz>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -147,9 +147,14 @@ msgstr "Foto ve formátu"
 msgid "Formated photos"
 msgstr "Fotky ve formátu"
 
-#: newman_admin.py:25
+#: newman_admin.py:28
 msgid "Size"
 msgstr "Velikost"
+
+#: newman_admin.py:43
+#, python-format
+msgid "Photo id %s does not exists."
+msgstr "Foto id %s neexistuje."
 
 #~ msgid "Category"
 #~ msgstr "Kategorie"

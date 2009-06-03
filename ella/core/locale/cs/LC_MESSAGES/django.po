@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-05-27 16:49+0200\n"
-"PO-Revision-Date: 2009-05-27 16:50+0100\n"
+"POT-Creation-Date: 2009-06-01 19:02+0200\n"
+"PO-Revision-Date: 2009-06-01 19:03+0100\n"
 "Last-Translator: Vitek Pliska <whit@jizak.cz>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -21,11 +21,9 @@ msgstr "Základní"
 
 #: admin.py:15
 #: admin.py:26
-#: newman_admin.py:26
-#: newman_admin.py:45
+#: newman_admin.py:27
+#: newman_admin.py:46
 #: migrations/0002_publishable_models.py:18
-#: migrations/0003_migrate_publishable.py:33
-#: migrations/0003_migrate_publishable.py:42
 #: models/main.py:158
 #: models/publishable.py:40
 #: models/publishable.py:189
@@ -42,7 +40,7 @@ msgid ""
 msgstr ""
 
 #: admin.py:146
-#: newman_admin.py:179
+#: newman_admin.py:200
 msgid "If object has a category, it must have a main placement."
 msgstr "Pokud má objekt kategorii, musí mít i hlavní umístění."
 
@@ -57,7 +55,11 @@ msgstr "Prvních %(count)d objektů typu %(ctype)s z kategorie %(cat)s."
 msgid "Top %(count)d objects in category %(cat)s."
 msgstr "Prvních %(count)d objektů z kategorie %(cat)s."
 
-#: newman_admin.py:170
+#: newman_admin.py:132
+msgid "Amount of publish_from input fields should be the same as category fields. With kind regards Your PlacementInline and his ListingCustomWidget."
+msgstr ""
+
+#: newman_admin.py:191
 #, python-format
 msgid ""
 "There is already a Placement object published in\n"
@@ -65,66 +67,65 @@ msgid ""
 "                    Please change the slug or publish date."
 msgstr ""
 
-#: newman_admin.py:258
+#: newman_admin.py:279
 msgid "View on site"
 msgstr "Zobrazit na webu"
 
-#: newman_admin.py:294
+#: newman_admin.py:318
 msgid "Is published?"
 msgstr "Publikováno?"
 
-#: newman_admin.py:310
+#: newman_admin.py:334
 msgid "No"
 msgstr "Ne"
 
-#: newman_admin.py:312
+#: newman_admin.py:336
 msgid "Yes"
 msgstr "Ano"
 
-#: newman_admin.py:322
-#: newman_admin.py:393
+#: newman_admin.py:346
+#: newman_admin.py:417
 #: migrations/0002_publishable_models.py:24
 #: models/publishable.py:58
 msgid "Publish from"
 msgstr "Publikovat od"
 
-#: newman_admin.py:377
-#: migrations/0003_migrate_publishable.py:27
+#: newman_admin.py:401
 #: models/publishable.py:62
 #: models/publishable.py:188
 msgid "Publishable object"
 msgstr "Publikovatelný objekt"
 
-#: newman_admin.py:381
+#: newman_admin.py:405
 msgid "site"
 msgstr "web"
 
-#: newman_admin.py:389
+#: newman_admin.py:413
 msgid "No placement"
 msgstr "Bez publikace"
 
-#: newman_admin.py:402
+#: newman_admin.py:426
 msgid "No main photo!"
 msgstr "Není výchozí foto!"
 
-#: newman_admin.py:404
+#: newman_admin.py:428
 #: migrations/0002_publishable_models.py:22
 #: models/publishable.py:51
 msgid "Photo"
 msgstr "Foto"
 
-#: newman_admin.py:411
-#: migrations/0003_migrate_publishable.py:44
-#: models/publishable.py:200
-#: models/publishable.py:299
-msgid "Placement"
-msgstr "Publikace"
+#: newman_admin.py:433
+msgid "No main placement"
+msgstr "Bez hlavní publikace"
+
+#: newman_admin.py:435
+msgid "Main placement"
+msgstr "Hlavní publikace"
 
 #: urls.py:52
 #: urls.py:53
 #: urls.py:56
 #: urls.py:58
-#: migrations/0003_migrate_publishable.py:35
 #: models/publishable.py:194
 msgid "static"
 msgstr "statický"
@@ -205,7 +206,6 @@ msgid "Priority"
 msgstr "Priorita"
 
 #: migrations/0001_initial.py:44
-#: migrations/0003_migrate_publishable.py:62
 msgid "Remove"
 msgstr "Odstranit"
 
@@ -272,45 +272,39 @@ msgstr "Titulek"
 msgid "Source"
 msgstr "Zdroj"
 
-#: migrations/0003_migrate_publishable.py:11
-#: migrations/new/0002_related_points_to_publishable.py:27
-#: models/publishable.py:365
-msgid "Content type"
-msgstr "Typ objektu"
-
-#: migrations/0003_migrate_publishable.py:13
-#: migrations/new/0002_related_points_to_publishable.py:28
-#: models/publishable.py:366
-msgid "Object ID"
-msgstr "ID objektu"
-
-#: migrations/0003_migrate_publishable.py:15
 #: migrations/new/0002_related_points_to_publishable.py:9
 #: models/publishable.py:363
 msgid "Publishable"
 msgstr "Publikovatelný objekt"
 
-#: migrations/0003_migrate_publishable.py:38
+#: migrations/new/0002_related_points_to_publishable.py:27
+#: models/publishable.py:365
+msgid "Content type"
+msgstr "Typ objektu"
+
+#: migrations/new/0002_related_points_to_publishable.py:28
+#: models/publishable.py:366
+msgid "Object ID"
+msgstr "ID objektu"
+
 #: migrations/old/0001_initial.py:115
 #: models/publishable.py:303
 msgid "End of listing"
 msgstr "Konec umístění"
 
-#: migrations/0003_migrate_publishable.py:47
+#: migrations/old/0001_initial.py:119
+#: models/publishable.py:309
+msgid "Check this if the listing is of a commercial content."
+msgstr "Zaškrtni pokud se jedná o komerční umístění."
+
 #: migrations/old/0002_add_author_email.py:13
 #: models/main.py:25
 msgid "Email"
 msgstr ""
 
-#: migrations/0003_migrate_publishable.py:49
 #: models/main.py:20
 msgid "User"
 msgstr "Uživatel"
-
-#: migrations/old/0001_initial.py:119
-#: models/publishable.py:309
-msgid "Check this if the listing is of a commercial content."
-msgstr "Zaškrtni pokud se jedná o komerční umístění."
 
 #: models/main.py:32
 msgid "Author"
@@ -340,6 +334,11 @@ msgstr "Závislosti"
 #: models/publishable.py:63
 msgid "Publishable objects"
 msgstr "Publikovatelné objekty"
+
+#: models/publishable.py:200
+#: models/publishable.py:299
+msgid "Placement"
+msgstr "Publikace"
 
 #: models/publishable.py:201
 msgid "Placements"

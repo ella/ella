@@ -49,9 +49,9 @@
             return false;
         }
         
-        open_overlay(content_type, function(id) {
+        open_overlay(content_type, function(id, extras) {
             $target_input.val(id);
-            $target_input.change();
+            $target_input.trigger('change', [extras]);
         });
         
         return false;
@@ -85,9 +85,9 @@
             return false;
         }
         var content_type = id2ct(ct_id);
-        open_overlay(content_type, function(id) {
+        open_overlay(content_type, function(id, extras) {
             $id_input.val(id);
-            $id_input.change();
+            $id_input.trigger('change', [extras]);
         });
         return false;
     });
@@ -107,7 +107,10 @@
             carp('Error attempting to attach open_overlay to select.target_ct onchange: Failed to get ID input #'+id_input_id);
             return;
         }
-        open_overlay(content_type, function(id) { $id_input.val(id); });
+        open_overlay(content_type, function(id, extras) {
+            $id_input.val(id);
+            $in_input.trigger('change', [extras]);
+        });
     }
     $('select.target_ct').unbind('change', open_overlay_on_ct_selection).bind('change', open_overlay_on_ct_selection);
     $(document).bind('content_added', function(evt) {

@@ -238,7 +238,7 @@ class ForeignKeyRawIdWidget(forms.TextInput):
             obj = self._get_obj(value)
             output.append('<a href="%s" class="widget-thumb thickbox">%s</a>' % (obj.image.url, obj.thumb()))
         output.append(super(ForeignKeyRawIdWidget, self).render(name, value, attrs))
-        output.append('<a href="%s%s?pop" class="rawid-related-lookup" id="lookup_id_%s"> ' % \
+        output.append(' <a href="%s%s?pop" class="rawid-related-lookup" id="lookup_id_%s">' % \
             (related_url, url, name))
         output.append('<img src="%sico/16/search.png" width="16" height="16" /></a>' % settings.NEWMAN_MEDIA_PREFIX)
         if value:
@@ -249,7 +249,7 @@ class ForeignKeyRawIdWidget(forms.TextInput):
         obj = self._get_obj(value)
         label = truncate_words(obj, 14)
         adm = admin_url(obj)
-        return '&nbsp;<a href="%s">%s</a>' % (adm, label)
+        return '&nbsp;<a class="hashadr" href="%s">%s</a>' % (adm, label)
 
 
 class ForeignKeyGenericRawIdWidget(forms.TextInput):
@@ -292,6 +292,10 @@ class ContentTypeWidget(forms.Select):
                 output.append(render_option(option_value, option_label))
         return u'\n'.join(output)
 
+
+class OrderFieldWidget(forms.HiddenInput):
+    def __init__(self, attrs={}):
+        super(OrderFieldWidget, self).__init__(attrs={'class': 'item-order'})
 
 class IncrementWidget(forms.TextInput):
     'Self incrementing widget.'

@@ -2,6 +2,7 @@
 from south.db import db
 from django.db import models
 from django.utils.datastructures import SortedDict
+from django.conf import settings
 
 from ella.core.models import *
 
@@ -87,6 +88,17 @@ class BasePublishableDataMigration(object):
         return SortedDict(c)
 
     @property
+    def generic_relations(self):
+        # TODO find better way then this hardcoded...
+        keys = ('table', 'ct_id', 'obj_id')
+        gens = []
+        if 'tagging' in settings.INSTALLED_APPS:
+            gens.append(('tagging_taggeditem', 'content_type_id', 'object_id'))
+        if 'ella.comments' in settings.INSTALLED_APPS:
+            gens.append(('comments_comment', 'target_ct_id', 'target_id'))
+        return [dict(zip(keys, v)) for v in gens]
+
+    @property
     def substitute(self):
         return {
             'app_label': self.app_label,
@@ -113,7 +125,7 @@ class BasePublishableDataMigration(object):
         self.forwards_publishable(orm)
 
         # migrate generic relations
-        #self.forwards_generic_relations(orm)
+        self.forwards_generic_relations(orm)
 
         # migrate placements
         #self.forwards_placements(orm)
@@ -180,30 +192,19 @@ class BasePublishableDataMigration(object):
 
     def forwards_generic_relations(self, orm):
         '''
-        TODO: dodelat
+        Updates all generic relations
         '''
-
-        app = self.app_name
-        mod = self.module_name
-        table = '%s_%s' % (app, mod)
-
-        # UPDATE generic relations
-        db.execute_many('''
+        for gen in self.generic_relations:
+            sub = dict.copy(self.substitute)
+            sub.update(gen)
+            db.execute('''
                 UPDATE
-                    `tagging_taggeditem` gen INNER JOIN `core_publishable` pub ON (gen.`content_type_id` = pub.`content_type_id` AND gen.`object_id` = pub.`old_id`)
+                    `%(table)s` gen INNER JOIN `core_publishable` pub ON (gen.`%(ct_id)s` = pub.`content_type_id` AND gen.`%(obj_id)s` = pub.`old_id`)
                 SET
-                    gen.`object_id` = pub.`id`
+                    gen.`%(obj_id)s` = pub.`id`
                 WHERE
-                    pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = '%(app)s' AND  ct.`model` = '%(mod)s');
-
-                UPDATE
-                    `comments_comment` gen INNER JOIN `core_publishable` pub ON (gen.`target_ct_id` = pub.`content_type_id` AND gen.`target_id` = pub.`old_id`)
-                SET
-                    gen.`target_id` = pub.`id`
-                WHERE
-                    pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = '%(app)s' AND  ct.`model` = '%(mod)s');
-            ''' % {'app': app, 'mod': mod, 'table': table}
-        )
+                    pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = '%(app_label)s' AND  ct.`model` = '%(model)s');
+            ''' % sub)
 
     def forwards_placements(self, orm):
         '''

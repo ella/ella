@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
+from django.utils.translation import ugettext_lazy as _
 
 from ella.articles.models import Article
 
 from example_project.tests.test_newman.helpers import NewmanTestCase
 
 class TestArticleBasics(NewmanTestCase):
+    translation_language_code = 'cs'
+    make_translation = True
 
     def test_article_saving(self):
         s = self.selenium
@@ -47,8 +50,7 @@ class TestArticleBasics(NewmanTestCase):
         self.fill_calendar_fields(calendar_data)
 
         self.save_form()
-
-        self.assert_equals(u"Article: "+data['title'], s.get_text(self.get_listing_object()+"/th/a[@class='hashadr']"))
+        self.assert_equals(u"%s: %s" % (unicode(_(u"Article")), data['title']), s.get_text(self.get_listing_object()+"/th/a[@class='hashadr']"))
 
         # verify save
         self.assert_equals(1, Article.objects.count())
