@@ -20,6 +20,31 @@
         var $template = $('.listing-row-template:first');
         add_inline($template, no);
     });
+    
+    // create desired inputs for loaded preset
+    function add_listings_for_preset(evt, preset) {
+        var $form = $( evt.target );
+        var no_items = $form.find('.listing-row.inline-item').length;
+        var desired_no = 0;
+        var $template = $form.find('.listing-row-template:first');
+        if ($template.length == 0) {
+            carp('add_listings_for_preset: template not found');
+            return;
+        }
+        for (var i = 0; i < preset.data.length; i++) {
+            var o = preset.data[i];
+            if (o.name == 'placement_set-0-listings') desired_no++;
+        }
+        for (var i = no_items; i < desired_no; i++) {
+            add_inline($template, i+1);
+        }
+    }
+    $('.change-form:has(.add-listing-button)').bind('preset_load_initiated.listing', add_listings_for_preset);
+    $(document).bind('content_added', function(evt) {
+        $( evt.target ).find('.change-form:has(.add-listing-button)')
+        .unbind('preset_load_initiated.listing')
+        .bind('preset_load_initiated.listing', add_listings_for_preset);
+    });
 
     //// gallery items
     function max_order() {
