@@ -686,9 +686,10 @@ def create_users(run_transaction, verbosity, **kwargs):
         printv('User created %s' % row[1])
         u.password = row[5]
         u.is_staff = row[6]
-        #u.is_superuser = row[7]
+        u.is_active = row[7]
+        u.is_superuser = row[8]
         u.save()
-        if not u.is_staff:
+        if not (u.is_staff and u.is_active) or u.is_superuser:
             printv('User is superuser [%d] or is not staff [%d], role won\'t be created.' % (u.is_superuser, u.is_staff))
             continue
         # Create roles
