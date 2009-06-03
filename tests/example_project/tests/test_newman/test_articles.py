@@ -4,6 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from ella.articles.models import Article
 
+from time import strftime
 from example_project.tests.test_newman.helpers import NewmanTestCase
 
 class TestArticleBasics(NewmanTestCase):
@@ -25,7 +26,7 @@ class TestArticleBasics(NewmanTestCase):
             'title' : u'马 žš experiment',
             'upper_title' : u'vyšší',
             'description' : u'Article description',
-            'slug' : 'title',
+            'slug' : u'title',
         }
         self.fill_fields(data)
 
@@ -40,13 +41,13 @@ class TestArticleBasics(NewmanTestCase):
         self.fill_suggest_fields(suggest_data)
 
         self.fill_using_lookup({
-            "authors" : "King Albert II",
+            "authors" : u"King Albert II",
         })
 
         expected_data.update({
-            'category' : "Africa/west-africa",
-            'authors' : ["Barack Obama", "King Albert II"],
-            'placement_set-0-category' : "Africa/west-africa",
+            'category' : u"Africa/west-africa",
+            'authors' : [u"Barack Obama", u"King Albert II"],
+            'placement_set-0-category' : u"Africa/west-africa",
         })
         
 
@@ -62,10 +63,23 @@ class TestArticleBasics(NewmanTestCase):
 
         self.fill_calendar_fields(calendar_data)
 
+        expected_data.update({
+            "placement_set-0-publish_from" : u"%(year)s-%(month)s-%(day)s" % {
+                "year" : strftime("%Y"),
+                "month" : strftime("%m"),
+                "day" : calendar_data['publish_from']['day'],
+            },
+            "placement_set-0-publish_from" : u"%(year)s-%(month)s-%(day)s" % {
+                "year" : strftime("%Y"),
+                "month" : strftime("%m"),
+                "day" : calendar_data['publish_to']['day'],
+            },
+        })
+
         self.save_form()
         self.assert_equals(u"%s: %s" % (unicode(_(u"Article")), data['title']), s.get_text(self.get_listing_object()+"/th/a[@class='hashadr']"))
 
-        # verify save
+        # verify save on list
         self.assert_equals(1, Article.objects.count())
         a = Article.objects.all()[0]
         self.assert_equals(data['title'], a.title)
@@ -73,4 +87,9 @@ class TestArticleBasics(NewmanTestCase):
         # FIXME: hack, use django-markup
         self.assert_equals('<p>%s</p>\n' % data['description'], a.description)
         self.assert_equals(2, a.authors.count())
+
+        # verify all fields
+        s.click(self.get_listing_object()+"/th/a[@class='hashadr']")
+        
+        self.verify_form(expected_data)
 
