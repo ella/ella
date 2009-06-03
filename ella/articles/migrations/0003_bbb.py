@@ -3,6 +3,9 @@ import south
 from south.db import db
 from django.db import models
 
+from ella.hacks import south
+
+
 class Migration(object):
     depends_on = (
         ("core", "0003_bbb"),
@@ -43,13 +46,5 @@ class Plugin(object):
         print 'articles', '0003_bbb', 'plugin', 'down'
         print self.orm.article
 
-p = Plugin()
-k = ("core", "0003_bbb")
-
-if not hasattr(south, 'plugins'):
-    south.plugins = {}
-if not south.plugins.has_key(k):
-    south.plugins[k] = set()
-
-south.plugins[k].add(p)
+south.plugin.register("core", "0003_bbb", Plugin())
 
