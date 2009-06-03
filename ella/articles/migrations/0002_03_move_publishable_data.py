@@ -14,8 +14,8 @@ class Migration:
     models = {}
 
 
-from ella.core.migrations_base import BasePublishableDataMigration
-from ella.core.migrations_base import alter_foreignkey_to_int, migrate_foreignkey
+from ella.core.migrations.base.base_0002 import BasePublishableDataMigration
+from ella.core.migrations.base.base_0002 import alter_foreignkey_to_int, migrate_foreignkey
 
 
 class Plugin(BasePublishableDataMigration):
