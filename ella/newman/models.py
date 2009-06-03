@@ -130,6 +130,7 @@ class CategoryUserRole(models.Model):
     def sync_denormalized(self):
         from ella.newman.permission import compute_applicable_categories_objects
         cats = []
+        denormalized = []
         for p in self.group.permissions.all():
             code = '%s.%s' % (p.content_type.app_label, p.codename)
             if not cats:
@@ -150,6 +151,8 @@ class CategoryUserRole(models.Model):
                     category_id=c.pk,
                     root_category_id=root_cat.pk
                 )
+                denormalized.append(obj)
+        return denormalized
 
     class Meta:
         verbose_name = _("User role in category")
