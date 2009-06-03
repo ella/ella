@@ -158,8 +158,12 @@ class AdminSuggestWidget(forms.TextInput):
                 else:
                     if not isinstance(value, (list, tuple)):
                         value = [int(v) for v in value.split(',')]
-                    suggest_items = ''.join('<li class="suggest-selected-item">%s <a class="suggest-delete-link">x</a></li>' % \
-                                             getattr(i, self.lookups[0]) for i in self.model.objects.filter(pk__in=value))
+                    suggest_items = []
+                    for i in self.model.objects.filter(pk__in=value):
+                        sv = getattr(i, self.lookups[0])
+                        if callable(sv): sv = sv()
+                        suggest_items.append('<li class="suggest-selected-item">%s <a class="suggest-delete-link">x</a></li>' % sv)
+                    suggest_items = "".join(suggest_items)
                     value = ','.join(["%s" % v for v in value])
             except self.model.DoesNotExist:
                 suggest_items = ''
