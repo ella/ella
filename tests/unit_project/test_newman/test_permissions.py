@@ -122,7 +122,8 @@ class TestCategoryPermissions(UserWithPermissionTestCase):
 
     def test_applicable_categories_for_user_permission_delete(self):
         categories = applicable_categories(self.user, 'articles.delete_article')
-        self.assert_equals(self.nested_second_level_two.pk, categories[0])
+        #self.assert_equals(self.nested_second_level_two.pk, categories[0])
+        self.assert_true(self.nested_second_level_two.pk in categories)
 
     def test_has_category_permission_success(self):
         self.assert_true(has_category_permission(self.user, self.nested_second_level_two, 'articles.view_article'))
