@@ -35,8 +35,13 @@
             var o = preset.data[i];
             if (o.name == 'placement_set-0-listings') desired_no++;
         }
+        // add listings if necessary
         for (var i = no_items; i < desired_no; i++) {
             add_inline($template, i+1);
+        }
+        // remove listings if necessary
+        for (var i = no_items; i > desired_no; i--) {
+            $('.listing-row.inline-item:last').remove();
         }
     }
     $('.change-form:has(.add-listing-button)').bind('preset_load_initiated.listing', add_listings_for_preset);
@@ -203,16 +208,19 @@
                 }
             }
             var no_items = $('.gallery-items-sortable input.target_id').length;
-            while (no_items < desired_no) {
+            // add gallery items if necessary
+            for (var i = no_items; i < desired_no; i++) {
                 add_gallery_item({button:0});
-                var old_no = no_items;
-                no_items = $('.gallery-items-sortable input.target_id').length;
-                if (old_no == no_items) {
-                    ;;; carp('inlines.js: preset_load_initiated handler: failed adding gallery item for preset values');
-                    show_err(gettext('Error restoring inlines'));
-                    break;
-                }
             }
+            // remove gallery items if necessary
+            for (var i = no_items; i > desired_no; i--) {
+                $('.gallery-items-sortable .inline-related:last').remove();
+            }
+            // reset the fields
+            var $rows = $('.gallery-items-sortable .inline-related');
+            $rows.find('input.target_id,input.item-order').val('');
+            $rows.find('img.thumb').attr({src:'', alt:''});
+            $rows.find('h4').remove();
         })
         // and get their thumbnails
         .bind('preset_load_completed', function(evt) {
