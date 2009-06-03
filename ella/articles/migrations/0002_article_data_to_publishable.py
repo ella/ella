@@ -8,6 +8,9 @@ from ella.core.migrations_base import alter_foreignkey_to_int, migrate_foreignke
 
 
 class Migration(BasePublishableDataMigration):
+    pass
+
+class _Migration(BasePublishableDataMigration):
 
     app_label = 'articles'
     model = 'article'
