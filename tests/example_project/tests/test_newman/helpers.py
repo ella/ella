@@ -27,6 +27,7 @@ class NewmanTestCase(SeleniumTestCase):
                 'add' : "//a[@class='hashadr icn btn add']",
                 'save' : "//a[@class='submit icn btn save def']",
                 'show_filters' : "//div[@id='filters-handler']/a",
+                'lookup_content' : "//div[@id='changelist']/form/table/tbody/tr/th/a[text()='%(text)s']"
             },
             'pages' : {
                 'login' : {
@@ -103,6 +104,21 @@ class NewmanTestCase(SeleniumTestCase):
             }
             s.click(xpath)
 
+
+    def fill_using_lookup(self, data):
+        """
+        Fill data using "magnifier".
+        @param data is dictionary of fields and values, in form:
+        {
+            "field" : "value",
+        }
+        where field is name of field magnifier is bound to and value is a content of the element from the list
+        """
+        s = self.selenium
+        for field in data:
+            xpath = "lookup_id_%s" % field
+            s.click(xpath)
+            s.click(self.elements['controls']['lookup_content'] % {'text' : data[field]})
 
     def save_form(self):
         s = self.selenium

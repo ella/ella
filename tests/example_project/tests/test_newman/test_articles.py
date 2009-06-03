@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from copy import copy
 from django.utils.translation import ugettext_lazy as _
 
 from ella.articles.models import Article
@@ -21,21 +22,33 @@ class TestArticleBasics(NewmanTestCase):
 
         # fill the form
         data = {
-                'title' : u'马 žš experiment',
-                'upper_title' : u'vyšší',
-                'description' : u'Article description',
-                'slug' : 'title',
-            }
+            'title' : u'马 žš experiment',
+            'upper_title' : u'vyšší',
+            'description' : u'Article description',
+            'slug' : 'title',
+        }
         self.fill_fields(data)
+
+        expected_data = copy(data)
 
         # fill in the suggesters
         suggest_data = {
-                'category': ('we',),
-                'authors':  ('Bar', 'Kin',),
-                'placement_set-0-category' : ('we',)
-            }
-        
+            'category': ('we',),
+            'authors':  ('Bar', 'Kin',),
+            'placement_set-0-category' : ('we',)
+        }
         self.fill_suggest_fields(suggest_data)
+
+        self.fill_using_lookup({
+            "authors" : "King Albert II",
+        })
+
+        expected_data.update({
+            'category' : "Africa/west-africa",
+            'authors' : ["Barack Obama", "King Albert II"],
+            'placement_set-0-category' : "Africa/west-africa",
+        })
+        
 
         calendar_data = {
             "publish_from" : {
@@ -56,6 +69,7 @@ class TestArticleBasics(NewmanTestCase):
         self.assert_equals(1, Article.objects.count())
         a = Article.objects.all()[0]
         self.assert_equals(data['title'], a.title)
+
         # FIXME: hack, use django-markup
         self.assert_equals('<p>%s</p>\n' % data['description'], a.description)
         self.assert_equals(2, a.authors.count())
