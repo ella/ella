@@ -54,6 +54,9 @@ class DenormalizedCategoryUserRoleManager(models.Manager):
     def categories_by_user_and_permission(self, user, permission_code):
         if not isinstance(user, User):
             raise AttributeError('user parameter should be an instance of django.contrib.auth.models.User')
+        if not permission_code:
+            raise AttributeError('permission_code should be an integer or list.')
+
         user_id = user.pk
         cur = connection.cursor()
         params = {
@@ -81,12 +84,11 @@ class DenormalizedCategoryUserRoleManager(models.Manager):
             #permissions = '(%s)' % str(permission_code)[1:-1]
             params['operator'] = 'IN'
             msql = sql % params
-            in_list = '(%s)' % str(map(lambda x: '%s', permission_code))[1:-1]
             in_list = '('
             for item in permission_code:
                 in_list += '%s, '
-            in_list = '%s)' % in_list[:-2]
-            msql = msql % in_list
+            in_list_str = '%s)' % in_list[:-2]
+            msql = msql % in_list_str
             cur.execute(msql, permission_code)
         else:
             cur.execute(sql % params, [permission_code,])

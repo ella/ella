@@ -142,18 +142,18 @@ var ContentByHashLib = {};
         }
         var $target = $('#'+info.target_id);
         var response_text = info.xhr.responseText;
-        var $err_div = $('<div class="error-code"></div>').append(
+        var $err_div = $('<div class="error-code"></div>')/*.append(
             $('<a>reload</a>').css({display:'block'}).click(function(){
                 load_content(info);
                 return false;
             })
-        );
+        )*/;
         LOADED_URLS[ info.target_id ] = 'ERROR:'+info.address;
         try {
             $err_div.append( JSON.parse(response_text).message );
         } catch(e) {
             // Render the income HTML
-            if (response_text.indexOf('<html')) {
+            if (response_text.indexOf('<html') >= 0) {
                 // Render the HTML document in an <object>
                 $obj = $(
                     '<object type="text/html" width="'
@@ -863,8 +863,11 @@ function get_hash(address, options) {
     
     var media_queue = [];
     $(document).data('loaded_media', {});
+    var $LOADING_MEDIA_MSG;
     function init_media() {
         $(document).trigger('media_loaded').data('loaded_media', {});
+        $('body').removeClass('loading');
+        $LOADING_MEDIA_MSG.remove();
     }
     function draw_media() {
         if (media_queue.length == 0) {
@@ -881,6 +884,8 @@ function get_hash(address, options) {
         media_queue.push(url);
         if (do_start) {
             setTimeout(draw_media,20);
+            $('body').addClass('loading');
+            $LOADING_MEDIA_MSG = show_message(gettext('Loading media'), {duration:0});
         }
     }
     window.request_media = request_media;

@@ -3,28 +3,56 @@ from django.core.management.base import BaseCommand
 from django.db import connection, transaction
 from ella.newman.models import CategoryUserRole, DenormalizedCategoryUserRole
 
+NO_VERB = 0
+STD_VERB = 1
+HIGH_VERB = 2
+verbosity = None
+
+def printv(text, verb=HIGH_VERB):
+    if verb <= verbosity:
+        print text
+
 def denormalize(run_transaction=True, verbosity=0):
     if run_transaction:
         transaction.commit_unless_managed()
         transaction.enter_transaction_management()
         transaction.managed(True)
-        if verbosity > 1:
-            print 'Transaction started'
+        printv('Transaction started')
 
     cur = connection.cursor()
     cur.execute('DELETE FROM %s' % DenormalizedCategoryUserRole._meta.db_table)
+    group_category = dict()
+    denormalized = None
     for role in CategoryUserRole.objects.all():
-        if verbosity > 0:
-            print 'Saving denormalized %s' % role
-        role.sync_denormalized()
-    if verbosity > 0:
-        print 'Denormalized object count: %d' % DenormalizedCategoryUserRole.objects.all().count()
+        # Optimalization -- create dict for set of categories and certain group. Then copy this denorm. data and change only user field.
+        key = u'%s_' % role.group
+        for cat in role.category.all():
+            key += u'%s-' % cat.title
+        if key in group_category:
+            printv('Saving denormalized %s (fast)' % role, STD_VERB)
+            user_id = role.user.pk
+            for d in group_category[key]:
+                #copy denorm. data
+                nd = DenormalizedCategoryUserRole(
+                    contenttype_id=d.contenttype_id,
+                    user_id=user_id,
+                    permission_codename=d.permission_codename,
+                    permission_id=d.permission_id,
+                    category_id=d.category_id,
+                    root_category_id=d.root_category_id
+                )
+                nd.save()
+        else:
+            printv('Saving denormalized %s' % role, STD_VERB)
+            denormalized = role.sync_denormalized()
+            group_category[key] = denormalized
+
+    printv('Denormalized object count: %d' % DenormalizedCategoryUserRole.objects.all().count(), STD_VERB)
     # commit changes to database
     if run_transaction:
         transaction.commit()
         transaction.leave_transaction_management()
-        if verbosity > 1:
-            print 'Transaction committed'
+        printv('Transaction committed')
 
 
 class Command(BaseCommand):
@@ -36,6 +64,7 @@ class Command(BaseCommand):
     args = ""
 
     def handle(self, *fixture_labels, **options):
+        global verbosity
         verbosity = int(options.get('verbosity', 1))
         run_transaction = not options.get('start_transaction', False)
 
