@@ -153,7 +153,7 @@ var ContentByHashLib = {};
             $err_div.append( JSON.parse(response_text).message );
         } catch(e) {
             // Render the income HTML
-            if (response_text.indexOf('<html')) {
+            if (response_text.indexOf('<html') >= 0) {
                 // Render the HTML document in an <object>
                 $obj = $(
                     '<object type="text/html" width="'
