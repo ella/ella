@@ -1,21 +1,29 @@
 {% extends "newman/ajax_content_base.html" %}
-{% load admin_list %}
+{% load newman_list admin_list %}
 
-{% block content_toolbar_content %}
-    <ul class="object-tools">
-        <li><a class="icn btn filter simpleload" href="filters::::filters/{{ cl.get_query_string }}">{% trans 'Filters' %}</a></li>
-        {#% block search %}{% search_form cl %}{% endblock %#}
-        {% if has_add_permission %}
-            <li>
-                <a href="add/" class="hashadr icn btn add">{% blocktrans with cl.opts.verbose_name as name %}Add {{ name }}{% endblocktrans %}</a>
-            </li>
+{% block content_toolbar_left %}
+    <div id="filters-handler">
+        {% if cl.list_filter %}
+                {% if is_filtered %}
+                    <a class="icn btn filter filter-active {% if is_popup %}popup-filter{% else %}simpleload{% endif %}" href="filters::::filters/{{ cl.get_query_string }}">{% trans 'Filters' %}<span> ({% trans 'on!' %})</span></a>
+                {% else %}
+                    <a class="icn btn filter {% if is_popup %}popup-filter{% else %}simpleload{% endif %}" href="filters::::filters/{{ cl.get_query_string }}">{% trans 'Filters' %}</a>
+                {% endif %}
+        {% endif %}
+        {% if cl.search_fields %}
+            {% block search %}{% newman_search_form cl %}{% endblock %}
         {% endif %}
         {% if user.is_superuser %}
-            <li>
-                <a href="refresh/" class="hashadr icn btn recur">{% trans 'Refresh' %}</a>
-            </li>
+            <a href="refresh/" class="hashadr icn btn recur">{% trans 'Refresh' %}</a>
         {% endif %}
-    </ul>
+    </div>
+{% endblock %}
+{% block content_toolbar_right %}
+    {% if not is_popup %}
+            {% if has_add_permission %}
+                    <a href="add/" class="hashadr icn btn add">{% blocktrans with cl.opts.verbose_name as name %}Add {{ name }}{% endblocktrans %}</a>
+            {% endif %}
+    {% endif %}
 {% endblock %}
 
 {% block content_services %}
