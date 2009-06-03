@@ -4,9 +4,13 @@ import djangobaselibrary
 # all fields marked with TODO: REPLACE
 # must be filled with some meanigful values
 
+VERSION = (0, 0, 0)
+__version__ = VERSION
+__versionstr__ = '.'.join(map(str, VERSION))
+
 setup(
     name = 'djangobaselibrary',
-    version = djangobaselibrary.__versionstr__,
+    version = __versionstr__,
     description = 'Django Base Library', # TODO: REPLACE
     long_description = '\n'.join((
         'Django Base Library',
