@@ -15,6 +15,7 @@ from django.core.management import call_command
 from django.db import connection, transaction
 from django.contrib.sites.models import Site
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import Permission, Group, User
 
 from ella.core.models import Category, Author, Source, Placement, Listing
 from ella.newman.models import CategoryUserRole, DenormalizedCategoryUserRole
@@ -223,6 +224,50 @@ ORDER BY
     photo_id DESC
 """
 
+SQL_ALL_PERMISSIONS = """
+SELECT
+    id,
+    name,
+    content_type_id,
+    codename
+FROM
+    auth_permission
+"""
+
+SQL_ALL_GROUPS = """
+SELECT
+    id,
+    name
+FROM
+    auth_group
+"""
+
+SQL_GROUP_PERMISSIONS = """
+SELECT
+    permission_id
+FROM
+    auth_group_permissions
+WHERE
+    group_id = %s
+"""
+
+SQL_ALL_USERS = """
+SELECT
+    id,
+    username,
+    first_name,
+    last_name,
+    email,
+    password,
+    is_staff,
+    is_active,
+    is_superuser,
+    last_login,
+    date_joined
+FROM
+    auth_user
+"""
+
 conn = None # global variable holds connection to database
 verbosity = None # holds command's verbosity level
 img_url_prefix = None
@@ -235,6 +280,9 @@ source_map = {}
 photo_map = {}
 article_map = {}
 author_map = {}
+permission_map = {}
+group_map = {}
+user_map = {}
 
 def printv(text, verb=HIGH_VERB):
     if verb <= verbosity:
@@ -569,14 +617,97 @@ def create_placements():
                     commercial=lst[8]
                 )
 
+def map_permissions():
+    cur = conn.cursor()
+    cur.execute(SQL_ALL_PERMISSIONS)
+    num = int(cur.rowcount)
+    for idx in xrange(num):
+        row = cur.fetchone()
+        name = row[1]
+        codename = row[3]
+        perm = Permission.objects.filter(name=name, codename=codename)
+        if not perm:
+            printv('! Permission [%s] not found.' % name)
+            continue
+            #raise Exception('Permission [%s] not found' % name)
+        p = perm[0]
+        permission_map[row[0]] = p
+
+def map_groups():
+    cur = conn.cursor()
+    cur_rel = conn.cursor()
+    cur.execute(SQL_ALL_GROUPS)
+    num = int(cur.rowcount)
+    for idx in xrange(num):
+        row = cur.fetchone()
+        name = row[1]
+        old_group_id = row[0]
+        group, created = Group.objects.get_or_create(name=name)
+        if created:
+            printv('Group [%s] created.' % group)
+            # add permissions to group
+            cur_rel.execute(SQL_GROUP_PERMISSIONS, (old_group_id,))
+            for rel in cur_rel.fetchall():
+                old_perm_id = rel[0]
+                perm = permission_map.get(old_perm_id, None)
+                if not perm:
+                    printv('Couldn\'t find permission mapping for old_perm_id=%d' % old_perm_id)
+                    continue
+                printv('Adding to group [%s] permission [%s]', (group, perm))
+                group.permissions.add(perm)
+            group.save()
+        group_map[old_group_id] = group
+
+def create_users(run_transaction, verbosity, **kwargs):
+    map_permissions()  # map permissions (and create them in actual database)
+    map_groups()  # creates and maps all groups
+    # Basic categories for roles
+    basic_cat = []
+    basic_cat.append(Category.objects.get(slug='zena', tree_parent__isnull=True))
+    basic_cat.append(Category.objects.get(slug='bydleni', tree_parent__isnull=True))
+    basic_cat.append(Category.objects.get(slug=u'zdravi', tree_parent__isnull=True))
+    basic_cat.append(Category.objects.get(slug=u'recepty-hp', tree_parent__isnull=True))
+    gr_redaktor = Group.objects.get(name='redaktor')
+    gr_sefredaktor = Group.objects.get(name='sefredaktor')
+    # create users and assign default roles
+    cur = conn.cursor()
+    cur.execute(SQL_ALL_USERS)
+    num = int(cur.rowcount)
+    for idx in xrange(num):
+        row = cur.fetchone()
+        u, created = User.objects.get_or_create(
+            username=row[1],
+            first_name=row[2],
+            last_name=row[3],
+            email=row[4]
+        )
+        if not created:
+            continue
+        printv('User created %s' % row[1])
+        u.password = row[5]
+        u.is_staff = row[6]
+        #u.is_superuser = row[7]
+        u.save()
+        if not u.is_staff:
+            printv('User is superuser [%d] or is not staff [%d], role won\'t be created.' % (u.is_superuser, u.is_staff))
+            continue
+        # Create roles
+        if u.username.startswith('admin_'):
+            group = gr_sefredaktor
+        else:
+            group = gr_redaktor
+        roles = CategoryUserRole.objects.filter(user=u, group=group)
+        if roles:
+            printv('Role already exists for user [%s].' % u)
+            continue
+        printv('Creating role...')
+        role = CategoryUserRole(user=u, group=group)
+        role.save(sync_role=False)
+        map(lambda cat: role.category.add(cat), basic_cat)
+        role.save(sync_role=False)
+        printv('Role created for user [%s], in group [%s].' % (u, group))
+
 def create_content(run_transaction, verbosity, **kwargs):
-    global conn
-    if run_transaction:
-        transaction.commit_unless_managed()
-        transaction.enter_transaction_management()
-        transaction.managed(True)
-        printv('Transaction started')
-    conn = mysql.connect(**kwargs)
     # Category, site map tables
     map_sites()
     map_categories()
@@ -595,13 +726,6 @@ def create_content(run_transaction, verbosity, **kwargs):
     # Article Contents
     map_article_contents()
 
-    # commit changes to database
-    if run_transaction:
-        transaction.commit()
-        #transaction.rollback()
-        transaction.leave_transaction_management()
-        printv('Transaction committed')
-
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
         make_option('--notransaction', action='store_true', dest='start_transaction',
@@ -616,6 +740,8 @@ class Command(BaseCommand):
             help='Source database name.'),
         make_option('--timeout', dest='sock_timeout', default='10',
             help='Default socket timeout. Affects timeouts when downloading Photos.'),
+        make_option('--users', dest='users', action='store_true', default=False,
+            help='Create only user accounts, groups (and permissions within groups).'),
         make_option('--charencoding', dest='char_encoding', default='utf8',
             help='Source database char fields encoding. (Default utf-8)'),
         make_option('--urlprefix', dest='url_prefix', default='http://img.ella.centrum.cz/',
@@ -627,7 +753,7 @@ class Command(BaseCommand):
     args = ""
 
     def handle(self, *fixture_labels, **options):
-        global char_encoding, verbosity, img_url_prefix , category_max_depth
+        global char_encoding, verbosity, img_url_prefix , category_max_depth, conn
         verbosity = int(options.get('verbosity', 1))
         run_transaction = not options.get('start_transaction', False)
         kwa = {}
@@ -639,14 +765,32 @@ class Command(BaseCommand):
         timeout = int(options.pop('sock_timeout'))
         img_url_prefix = options.pop('url_prefix')
         category_max_depth = options.pop('max_depth')
+        sync_users = options.pop('users')
         kwa['charset'] = char_encoding
 
         if not (kwa['user'] and kwa['db'] and kwa['host']):
             print 'Please specify at least command parameters --dbuser, --dbname and --dbhost.'
             sys.exit(1)
+        if run_transaction:
+            transaction.commit_unless_managed()
+            transaction.enter_transaction_management()
+            transaction.managed(True)
+            printv('Transaction started')
+        conn = mysql.connect(**kwa)
 
         set_default_socket_timeout(timeout)
-        create_content(run_transaction, verbosity, **kwa)
+        if sync_users:
+            create_users(run_transaction, verbosity, **kwa)
+        else:
+            create_content(run_transaction, verbosity, **kwa)
+        # commit changes to database
+        if run_transaction:
+            transaction.commit()
+            #transaction.rollback()
+            transaction.leave_transaction_management()
+            printv('Transaction committed')
+
         printv('Synchronizing denormalized Publishable.publish_from fields...', STD_VERB)
         # Update publish from
-        call_command('update_publishable_publish_from', *args, **kwa)
+        call_command('update_publishable_publish_from', **kwa)
+        printv('Please run manually "./manage.py syncroles" to synchronize denormalized roles.', STD_VERB)
