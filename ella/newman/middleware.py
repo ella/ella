@@ -1,3 +1,7 @@
+from time import strftime
+
+from django.conf import settings
+
 from ella.newman.utils import set_user_config
 from ella.newman.config import USER_CONFIG, CATEGORY_FILTER
 
@@ -29,8 +33,12 @@ class ErrorOutputMiddleware(object):
         pass
 
     def process_response(self, request, response):
-        if not (response.status_code >= 200 and response.status_code < 302):
-            f = file('/tmp/last_%d.html' % response.status_code, 'w')
+        if not hasattr(settings, 'ERROR_OUTPUT_DIRECTORY'):
+            return response
+        if response.status_code >= 500 or response.status_code == 404:
+            stamp = strftime('%Y%m%d,%H-%M-%S')
+            fname = '%s/%s_%d.html' % (settings.ERROR_OUTPUT_DIRECTORY, stamp, response.status_code)
+            f = file(fname, 'w')
             f.write(response.content)
             f.close()
         return response
