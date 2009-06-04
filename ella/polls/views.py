@@ -314,27 +314,6 @@ def contest_conditions(request, bits, context):
         context_instance=RequestContext(request)
     )
 
-class ContestWizard(Wizard):
-    def __init__(self, contest):
-        self.contest = contest
-        form_list = [ QuestionForm(q) for q in contest.questions ]
-        form_list.append(ContestantForm)
-        self.extra_context = {'object' : contest, 'question' : contest.questions[0], 'category' : contest.category,}
-        super(ContestWizard, self).__init__(form_list)
-
-    def get_template(self):
-        if (self.step + 1) < len(self.form_list):
-            return get_templates_from_placement('step.html', self.extra_context['placement'])
-        return get_templates_from_placement('contest_form', self.extra_context['placement'])
-
-    def process_step(self, request, form, step):
-        if (step + 1) < len(self.form_list):
-            self.extra_context['question'] = self.contest.questions[step]
-
-    def done(self, request, form_list):
-        # TODO get context somehow
-        return contest_finish(request, {'object' : self.contest, 'category' : self.contest.category}, zip(self.contest.questions, form_list[:-1]), form_list[-1])
-
 RESULT_FIELD = 'results'
 class QuizWizard(Wizard):
     def __init__(self, quiz):
