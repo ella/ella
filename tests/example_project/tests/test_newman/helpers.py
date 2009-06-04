@@ -21,12 +21,14 @@ class NewmanTestCase(SeleniumTestCase):
             'controls' : {
                 'suggester' : "//div[@class='suggest-bubble']",
                 'suggester_visible' : "//span[@class='hilite']",
+                'suggester_selected' : "//input[@id='id_%(field)s']/../ul/li[@class='suggest-selected-item']/text()",
                 'message' : {
                     'ok': "//div[@id='opmsg']/span[@class='okmsg']",
                 },
                 'add' : "//a[@class='hashadr icn btn add']",
                 'save' : "//a[@class='submit icn btn save def']",
                 'show_filters' : "//div[@id='filters-handler']/a",
+                'lookup_content' : "//div[@id='changelist']/form/table/tbody/tr/th/a[text()='%(text)s']",
             },
             'pages' : {
                 'login' : {
@@ -104,8 +106,66 @@ class NewmanTestCase(SeleniumTestCase):
             s.click(xpath)
 
 
+    def fill_using_lookup(self, data):
+        """
+        Fill data using "magnifier".
+        @param data is dictionary of fields and values, in form:
+        {
+            "field" : "value",
+        }
+        where field is name of field magnifier is bound to and value is a content of the element from the list
+        """
+        s = self.selenium
+        for field in data:
+            xpath = "lookup_id_%s" % field
+            s.click(xpath)
+            s.click(self.elements['controls']['lookup_content'] % {'text' : data[field]})
+
     def save_form(self):
         s = self.selenium
         s.click(self.elements['controls']['save'])
         s.wait_for_element_present(self.elements['controls']['message']['ok'])
+
+    def get_formatted_form_errors(self, errors):
+        messages = []
+        for field in errors:
+            expected = errors[field]['expected']
+            retrieved = errors[field]['retrieved']
+
+            if isinstance(expected, list):
+                expected = u"".join(expected).encode('utf-8')
+
+            if isinstance(retrieved, list):
+                retrieved = u"".join(retrieved).encode('utf-8')
+
+            messages.append("Form validation for field %(field)s was expecting %(expected)s, but got %(retrieved)s" % {
+                'field' : field,
+                'expected' : expected,
+                'retrieved' : retrieved,
+            })
+            
+        return '\n'.join(messages)
+
+    def verify_form(self, data):
+        errors = {}
+        for field in data:
+            if isinstance(data[field], list):
+                text = self.selenium.get_text(self.elements['controls']['suggester_selected'] % {
+                    'field' : field,
+                })
+                if text != data[field]:
+                    errors[field] = {
+                        'expected' : data[field],
+                        'retrieved' : text,
+                    }
+            else:
+                text = self.selenium.get_value('id_%s' % field)
+                if text != data[field]:
+                    errors[field] = {
+                        'expected' : data[field],
+                        'retrieved' : text,
+                    }
+
+        if len(errors) > 0:
+            raise AssertionError(self.get_formatted_form_errors(errors))
 
