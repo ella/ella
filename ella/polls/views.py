@@ -18,7 +18,7 @@ from django.utils.html import escape
 
 from ella.core.cache import get_cached_object_or_404
 from ella.core.views import get_templates_from_placement
-from ella.utils.wizard import Wizard
+from django.contrib.formtools.wizard import FormWizard
 from ella.polls.models import Poll, Contestant, Vote, ACTIVITY_NOT_YET_ACTIVE, ACTIVITY_ACTIVE, ACTIVITY_CLOSED
 
 
@@ -314,36 +314,15 @@ def contest_conditions(request, bits, context):
         context_instance=RequestContext(request)
     )
 
-class ContestWizard(Wizard):
-    def __init__(self, contest):
-        self.contest = contest
-        form_list = [ QuestionForm(q) for q in contest.questions ]
-        form_list.append(ContestantForm)
-        self.extra_context = {'object' : contest, 'question' : contest.questions[0], 'category' : contest.category,}
-        super(ContestWizard, self).__init__(form_list)
-
-    def get_template(self):
-        if (self.step + 1) < len(self.form_list):
-            return get_templates_from_placement('step.html', self.extra_context['placement'])
-        return get_templates_from_placement('contest_form', self.extra_context['placement'])
-
-    def process_step(self, request, form, step):
-        if (step + 1) < len(self.form_list):
-            self.extra_context['question'] = self.contest.questions[step]
-
-    def done(self, request, form_list):
-        # TODO get context somehow
-        return contest_finish(request, {'object' : self.contest, 'category' : self.contest.category}, zip(self.contest.questions, form_list[:-1]), form_list[-1])
-
 RESULT_FIELD = 'results'
-class QuizWizard(Wizard):
+class QuizWizard(FormWizard):
     def __init__(self, quiz):
         form_list = [ QuestionForm(q) for q in quiz.questions ]
         self.quiz = quiz
         self.extra_context = {'object' : quiz, 'question' : quiz.questions[0], 'category' : quiz.category,}
         super(QuizWizard, self).__init__(form_list)
 
-    def get_template(self):
+    def get_template(self, step):
         return get_templates_from_placement('step.html', self.extra_context['placement'])
 
     def process_step(self, request, form, step):
