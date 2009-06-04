@@ -438,9 +438,6 @@ class NewmanModelAdmin(XModelAdmin):
         for item in data:
             ft.append( "%s".encode('utf-8') % '|'.join("%s" % item[f] for f in all_fields) )
 
-        from django.db import connection
-        for q in connection.queries:
-            print q
         return HttpResponse( '\n'.join(ft), mimetype='text/plain;charset=utf-8' )
 
     def register_newman_variables(self, request):
