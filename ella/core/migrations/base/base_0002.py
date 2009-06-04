@@ -4,7 +4,7 @@ from django.db import models
 from django.utils.datastructures import SortedDict
 from django.conf import settings
 
-from ella.core.models import *
+from ella.hacks import south
 
 
 def alter_foreignkey_to_int(table, field):
@@ -41,11 +41,30 @@ def migrate_foreignkey(app_label, model, table, field, orm):
 
 
 class BasePublishableDataMigration(object):
+    depends_on = (
+        ('core', '0002_03_move_publishable_data'),
+    )
+
+    def forwards(self, orm):
+        pass
+
+    def backwards(self, orm):
+        pass
+
+    models = {
+        'core.publishable': {
+            'Meta': {'app_label': "'core'"},
+            '_stub': True,
+            'id': ('models.AutoField', [], {'primary_key': 'True'})
+        },
+    }
+
+class BasePublishableDataPlugin(south.SouthPlugin):
+    migration = BasePublishableDataMigration
 
     app_label = ''
     model = ''
     table = '%s_%s' % (app_label, model)
-
     publishable_uncommon_cols = {}
 
     def alter_self_foreignkeys(self, orm):
@@ -71,11 +90,6 @@ class BasePublishableDataMigration(object):
         )
         db.delete_table('%s_authors' % self.table)
 
-
-    depends_on = (
-        ("core", "0002_publishable_models"),
-    )
-
     @property
     def publishable_cols(self):
         c = {
@@ -86,17 +100,6 @@ class BasePublishableDataMigration(object):
         }
         c.update(self.publishable_uncommon_cols)
         return SortedDict(c)
-
-    @property
-    def generic_relations(self):
-        # TODO find better way then this hardcoded...
-        keys = ('table', 'ct_id', 'obj_id')
-        gens = []
-        if 'tagging' in settings.INSTALLED_APPS:
-            gens.append(('tagging_taggeditem', 'content_type_id', 'object_id'))
-        if 'ella.comments' in settings.INSTALLED_APPS:
-            gens.append(('comments_comment', 'target_ct_id', 'target_id'))
-        return [dict(zip(keys, v)) for v in gens]
 
     @property
     def substitute(self):
@@ -116,25 +119,17 @@ class BasePublishableDataMigration(object):
     def cols_from(self):
         return self.publishable_cols.values()
 
-
-    def forwards(self, orm):
-        # add a temporary column on core_publishable to remember the old ID
-        db.add_column('core_publishable', 'old_id', models.IntegerField(null=True))
-
-        # migrate publishables
-        self.forwards_publishable(orm)
-
-        # migrate generic relations
-        self.forwards_generic_relations(orm)
-
-        # migrate placements
-        #self.forwards_placements(orm)
-
-        # migrate related
-        #self.forwards_related(orm)
-
-        # delete temporary column to remember the old ID
-        db.delete_column('core_publishable', 'old_id')
+    @property
+    def generic_relations(self):
+        # TODO find better way then this hardcoded...
+        # TODO: this should be solved via plugins
+        keys = ('table', 'ct_id', 'obj_id')
+        gens = []
+        if 'tagging' in settings.INSTALLED_APPS:
+            gens.append(('tagging_taggeditem', 'content_type_id', 'object_id'))
+        if 'ella.comments' in settings.INSTALLED_APPS:
+            gens.append(('comments_comment', 'target_ct_id', 'target_id'))
+        return [dict(zip(keys, v)) for v in gens]
 
     def forwards_publishable(self, orm):
         '''
@@ -142,7 +137,6 @@ class BasePublishableDataMigration(object):
 
         TODO: sync publish_from
         '''
-
         # move the data
         # TODO: maybe there should be prefix 'a.' in cols_from
         db.execute('''
@@ -210,9 +204,6 @@ class BasePublishableDataMigration(object):
         '''
         migrate placements
         '''
-
-        db.add_column('core_placement', 'publishable_id', models.IntegerField(null=True))
-
         db.execute('''
             UPDATE
                 `core_placement` plac INNER JOIN `core_publishable` pub ON (plac.`target_ct_id` = pub.`content_type_id` AND plac.`target_id` = pub.`old_id`)
@@ -223,30 +214,7 @@ class BasePublishableDataMigration(object):
             ''' % self.substitute
         )
 
-        db.alter_column('core_placement', 'publishable_id', models.ForeignKey(orm['core.Publishable'], null=False))
-        db.create_index('core_placement', ['publishable_id'])
-
-        db.delete_column('core_placement', 'target_ct_id')
-        db.delete_column('core_placement', 'target_id')
-
     def forwards_related(self, orm):
         pass
 
-    def backwards(self, orm):
-        "Write your backwards migration here"
-        print 'there is no way back'
-
-
-    # this is taken directly from the class by south, so it must be simple property,
-    # but there will be added some more freezes in children of this class
-    models = {
-        'core.publishable': {
-            'Meta': {'app_label': "'core'"},
-            '_stub': True,
-            'id': ('models.AutoField', [], {'primary_key': 'True'})
-        },
-    }
-
-
-    complete_apps = []
 

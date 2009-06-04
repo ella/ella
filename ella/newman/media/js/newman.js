@@ -286,6 +286,28 @@ $( function() {
         if (!$form.jquery) $form = $($form);
         if ( ! validate($form) ) return false;
         
+        var $modal = $('#window-lock');
+        if ($modal.length == 0) $modal = $(
+                '<div id="window-lock"></div>'
+        ).html(
+              '<p>'
+            + gettext('Sending')
+            + '...<img src="'
+            + MEDIA_URL + 'ico/15/loading.gif'
+            + '" alt="" /></p>'
+        ).appendTo('body').dialog({
+            autoOpen: false,
+            modal: true,
+            resizable: false,
+            draggable: false,
+            closeOnEscape:false,
+            beforeclose: function() {
+                return !!$(this).data('close_ok');
+            }
+        });
+        $modal.data('close_ok', false)
+        $modal.dialog('open');
+        
         // Hack for file inputs
 /*        var has_files = false;
         $form.find(':file').each( function() {
@@ -356,8 +378,11 @@ $( function() {
             url: url,
             type: method,
             data: data,
-            success: success,
-            error:   error,
+            success:  success,
+            error:    error,
+            complete: function() {
+                $('#window-lock').data('close_ok', true).dialog('close');
+            },
             _form: $form,
             _button_name: button_name
         };

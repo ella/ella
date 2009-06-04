@@ -26,12 +26,9 @@ class IntervieweeAdmin(newman.NewmanModelAdmin):
 
 class InterviewAdmin(PublishableAdmin):
 
-    suggest_fields = {
-        'category': ('title', 'slug', 'tree_path'),
-        'authors': ('name', 'slug', 'email',),
-        'source': ('name', 'url',),
-        'interviewees': ('name', 'slug',),
-    }
+    suggest_fields = PublishableAdmin.suggest_fields
+    suggest_fields.update({'interviewees': ('name', 'slug',)})
+
 
 newman.site.register(Interviewee, IntervieweeAdmin)
 newman.site.register(Interview, InterviewAdmin)

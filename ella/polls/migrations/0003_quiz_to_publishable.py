@@ -3,7 +3,7 @@ from south.db import db
 from django.db import models
 from ella.polls.models import *
 
-from ella.core.migrations_base import BasePublishableDataMigration, alter_foreignkey_to_int
+from ella.core.migrations.base.base_0002 import BasePublishableDataMigration, alter_foreignkey_to_int
 
 class Migration(BasePublishableDataMigration):
 

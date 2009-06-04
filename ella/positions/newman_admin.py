@@ -7,7 +7,7 @@ class PositionOptions(newman.NewmanModelAdmin):
     list_filter = ('category', 'disabled', 'active_from', 'active_till',)
     search_fields = ('name', 'box_type', 'text', 'category__title',)
 
-    suggest_fields = {'category': ('title', 'slug', 'tree_path',),}
+    suggest_fields = {'category': ('__unicode__', 'title', 'slug', 'tree_path',),}
 
 newman.site.register(Position, PositionOptions)
 

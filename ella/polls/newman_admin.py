@@ -119,9 +119,6 @@ class QuizAdmin(PublishableAdmin):
     prepopulated_fields = {'slug' : ('title',)}
     rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}
 
-#    suggest_fields = {'category': ('tree_path', 'title', 'slug',), 'authors': ('name', 'slug',),}
-    suggest_fields = {'authors': ('name', 'slug',),}
-
 
 class PollAdmin(newman.NewmanModelAdmin):
     list_display = ('title', 'question', 'get_total_votes', 'pk',)

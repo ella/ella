@@ -254,7 +254,7 @@ input.vTextField { width: 500px; }
 input.vIntegerField { width: 40px; text-align: right; }
 input.vForeignKeyRawIdAdminField, input.target_id { width: 50px; }
 input.vDateInput { width: 100px; }
-input.vDateTimeInput { width: 120px; }
+input.vDateTimeInput { width: 130px; }
 
 .form-row * { vertical-align: middle; margin: 2px 0; }
 
