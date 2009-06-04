@@ -42,3 +42,27 @@ class ErrorOutputMiddleware(object):
             f.write(response.content)
             f.close()
         return response
+
+class SQLDebugMiddleware(object):
+
+    def format_qstr(self, q):
+        q = q.replace('"', '')
+        # TODO: some formatting here
+        return q
+
+
+    def process_response(self, request, response):
+        if response.status_code != 200 or not response['Content-Type'].startswith('text'):
+            return response
+
+        from django.db import connection
+        queries = connection.queries
+        cnt = len(queries)
+        print "SQL ====="
+        print "%d queries for %s" % (cnt, request.META['PATH_INFO'])
+
+        for q in connection.queries:
+            print "%s\t%s" % (q['time'], self.format_qstr(q['sql']))
+        print "===== %d SQL Queries" % cnt
+
+        return response
