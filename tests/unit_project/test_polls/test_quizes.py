@@ -90,5 +90,7 @@ class TestWizard(QuizTestCase):
 
         self.assert_equals(200, response.status_code)
         self.assert_equals('page/result.html', response.template.name)
+        result = Result.objects.get(pk=self.results[0].pk)
+        self.assert_equals(1, result.count)
 
 
