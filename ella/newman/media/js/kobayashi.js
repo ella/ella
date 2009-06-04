@@ -762,9 +762,14 @@ function get_hash(address, options) {
 (function() {
     
     // Get an URL to a CSS or JS file, attempt to load it into the document and call callback on success.
-    function load_media(url, succ_fn, err_fn) {
+    function load_media(url, callbacks) {
+        var succ_fn = callbacks.succ_fn;
+        var err_fn  = callbacks.err_fn;
+        var next_fn = callbacks.next_fn;
+        
         if (ContentByHashLib.LOADED_MEDIA[ url ]) {
             if ($.isFunction(succ_fn)) succ_fn(url);
+            if ($.isFunction(next_fn)) next_fn(url);
             ;;; carp('Skipping loaded medium: '+url);
             return true;
         }
@@ -798,6 +803,7 @@ function get_hash(address, options) {
         if (ext == 'css') {
             if (stylesheet_present(abs_url)) {
                 if ($.isFunction(succ_fn)) succ_fn(url);
+                if ($.isFunction(next_fn)) next_fn(url);
                 ;;; carp('Stylesheet already present: '+url);
                 return true;
             }
@@ -829,13 +835,16 @@ function get_hash(address, options) {
                 else setTimeout(arguments.callee, 100);
             }, 100);
             
-            return $('<link rel="stylesheet" type="text/css" href="'+url+'" />').appendTo($('head'));
+            var $csslink = $('<link rel="stylesheet" type="text/css" href="'+url+'" />').appendTo($('head'));
+            if ($.isFunction(next_fn)) next_fn(url);
+            return $csslink;
         }
         else if (ext == 'js') {
             var $scripts = $('script');
             for (var i = 0; i < $scripts.length; i++) {
                 if ($scripts.get(i).src == abs_url) {
                     if ($.isFunction(succ_fn)) succ_fn(url);
+                    if ($.isFunction(next_fn)) next_fn(url);
                     ;;; carp('Script already present: '+url);
                     return true;
                 }
@@ -846,12 +855,14 @@ function get_hash(address, options) {
                 dataType: 'script',
                 success: function() {
                     ContentByHashLib.LOADED_MEDIA[ this.url ] = true;
-                    succ_fn();
+                    if ($.isFunction(succ_fn)) succ_fn(url);
+                    if ($.isFunction(next_fn)) next_fn(url);
                     ;;; carp('JS Successfully loaded: '+this.url);
                 },
                 error: function() {
                     ContentByHashLib.LOADED_MEDIA[ this.url ] = false;
-                    err_fn();
+                    if ($.isFunction( err_fn))  err_fn(url);
+                    if ($.isFunction(next_fn)) next_fn(url);
                     carp('Failed to load JS: '+url, this);
                 },
                 cache: true
@@ -859,6 +870,7 @@ function get_hash(address, options) {
         }
         else throw('Unrecognized media type "'+ext+'" in URL: '+url);
     }
+    ContentByHashLib.load_media = load_media;
     
     
     var media_queue = [];
@@ -875,7 +887,7 @@ function get_hash(address, options) {
             return true;
         }
         var url = media_queue.shift();
-        load_media(url, draw_media, draw_media);
+        load_media(url, {next_fn: draw_media});
     }
     
     // Load a CSS / JavaScript file (given an URL) after previously requested ones have been loaded / failed loading.
