@@ -153,7 +153,7 @@ class Wizard(object):
         # Use HIGHEST_PROTOCOL because it's the most efficient. It requires
         # Python 2.3, but Django requires 2.3 anyway, so that's OK.
         pickled = pickle.dumps(data, protocol=pickle.HIGHEST_PROTOCOL)
-        return md5.new(pickled).hexdigest()
+        return md5(pickled).hexdigest()
 
     def parse_params(self, request, *args, **kwargs):
         """
