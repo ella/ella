@@ -218,7 +218,11 @@ class Quiz(BasePoll, Publishable):
         """
         Returns cached quiz result by the reached points
         """
-        return get_cached_object(Result, quiz=self, points_from__lte=points, points_to__gte=points)
+        return Result.objects.get(
+                models.Q(points_from__lte=points) | models.Q(points_from__isnull=True),
+                models.Q(points_to__gte=points) | models.Q(points_to__isnull=True),
+                quiz=self
+            )
 
     def get_description(self):
         return self.text_announcement
