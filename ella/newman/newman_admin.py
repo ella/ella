@@ -37,7 +37,7 @@ class CategoryUserRoleAdmin(newman.NewmanModelAdmin):
     list_filter = ('user', 'group',)
     list_display = ('user', 'group',)
     search_fields = ('user', 'category')
-    suggest_fields = {'category': ('__unicode__', 'title', 'tree_path',)}
+    suggest_fields = {'category': ('__unicode__', 'title', 'slug',)}
 
     def get_urls(self):
         urls = patterns('',
