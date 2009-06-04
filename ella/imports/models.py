@@ -193,14 +193,16 @@ class ServerItem(models.Model):
 
         if self.photo_url and not self.photo and not self.server.category:
             image = urllib.urlopen(self.photo_url)
-            image_raw = image.read()
-            image.close()
+            try:
+                content_file = ContentFile( image.read() )
+            finally:
+                image.close()
             imported_photo = Photo()
             imported_photo.title = self.title
             imported_photo.slug = self.slug
             imported_photo.description = self.photo_url
             # Saves "imported.jpg" file, which has been created when importing item with picture
-            imported_photo.image.save( 'imported.jpg', ContentFile( image_raw ) )
+            imported_photo.image.save( 'imported.jpg', content_file )
             imported_photo.save()
             self.photo = imported_photo
 
