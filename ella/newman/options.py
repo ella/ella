@@ -568,13 +568,18 @@ class NewmanModelAdmin(XModelAdmin):
                 fcounter[fset] += 1
             return fcounter[fset]
 
+        def give_me_unicode(ei):
+            if not hasattr(ei, '__unicode__'):
+                return str(ei)
+            return ei.__unicode__()
+
         error_dict = {}
         # Form fields
         frm = context['adminform'].form
         for field_name in frm.fields:
             field = frm[field_name]
             if field.errors:
-                error_dict["id_%s" % field_name] = map(lambda fe: fe.__unicode__(), field.errors) # lazy gettext brakes json encode
+                error_dict["id_%s" % field_name] = map(give_me_unicode, field.errors) # lazy gettext brakes json encode
         # Inline Form fields
         for fset in context['inline_admin_formsets']:
             if not fset.formset.errors:
@@ -583,7 +588,7 @@ class NewmanModelAdmin(XModelAdmin):
             for err_item in fset.formset.errors:
                 for key in err_item:
                     inline_id = 'id_%s-%d-%s' % (fset.formset.prefix, counter, key)
-                    error_dict[inline_id] = map(lambda ei: ei.__unicode__(), err_item[key])
+                    error_dict[inline_id] = map(give_me_unicode, err_item[key])
         return utils.JsonResponse(_('Please correct errors in form'), errors=error_dict, status=STATUS_FORM_ERROR)
 
     def change_view_process_context(self, request, context, object_id):
