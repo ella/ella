@@ -579,7 +579,9 @@ class NewmanModelAdmin(XModelAdmin):
         for field_name in frm.fields:
             field = frm[field_name]
             if field.errors:
-                error_dict["id_%s" % field_name] = map(give_me_unicode, field.errors) # lazy gettext brakes json encode
+                field_vname = u'%s: ' % field.label
+                # lazy gettext brakes json encode
+                error_dict["id_%s" % field_name] = map( lambda item: u'%s%s' % (field_vname, item), map(give_me_unicode, field.errors) )
         # Inline Form fields
         for fset in context['inline_admin_formsets']:
             if not fset.formset.errors:
@@ -587,8 +589,13 @@ class NewmanModelAdmin(XModelAdmin):
             counter = get_formset_counter(fset.formset.prefix)
             for err_item in fset.formset.errors:
                 for key in err_item:
+                    field_name = ''
                     inline_id = 'id_%s-%d-%s' % (fset.formset.prefix, counter, key)
-                    error_dict[inline_id] = map(give_me_unicode, err_item[key])
+                    for mfield in fset.formset.model._meta.fields:
+                        if mfield.name == key:
+                            field_name = u'%s: ' % mfield.verbose_name
+                            break
+                    error_dict[inline_id] = map( lambda item: u'%s%s' % (field_name, item), map(give_me_unicode, err_item[key]) )
         return utils.JsonResponse(_('Please correct errors in form'), errors=error_dict, status=STATUS_FORM_ERROR)
 
     def change_view_process_context(self, request, context, object_id):
