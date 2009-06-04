@@ -79,20 +79,16 @@ class TestWizard(QuizTestCase):
             self.assert_equals('page/step.html', response.template.name)
 
             data = {
-                response.context['step_field']: response.context['step'],
+                response.context['step_field']: response.context['step0'],
             }
             for name, value in input_re.findall( response.context['previous_fields']):
                 data[name] = value
             
             form = response.context['form']
-            data[form.add_prefix('choice')] = self.choices[int(response.context['step'])][0].pk
+            data[form.add_prefix('choice')] = self.choices[int(response.context['step0'])][0].pk
             response = c.post(self.url, data)
 
         self.assert_equals(200, response.status_code)
         self.assert_equals('page/result.html', response.template.name)
-
-
-        
-
 
 

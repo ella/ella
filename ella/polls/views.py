@@ -18,7 +18,7 @@ from django.utils.html import escape
 
 from ella.core.cache import get_cached_object_or_404
 from ella.core.views import get_templates_from_placement
-from ella.utils.wizard import Wizard
+from django.contrib.formtools.wizard import FormWizard
 from ella.polls.models import Poll, Contestant, Vote, ACTIVITY_NOT_YET_ACTIVE, ACTIVITY_ACTIVE, ACTIVITY_CLOSED
 
 
@@ -315,14 +315,14 @@ def contest_conditions(request, bits, context):
     )
 
 RESULT_FIELD = 'results'
-class QuizWizard(Wizard):
+class QuizWizard(FormWizard):
     def __init__(self, quiz):
         form_list = [ QuestionForm(q) for q in quiz.questions ]
         self.quiz = quiz
         self.extra_context = {'object' : quiz, 'question' : quiz.questions[0], 'category' : quiz.category,}
         super(QuizWizard, self).__init__(form_list)
 
-    def get_template(self):
+    def get_template(self, step):
         return get_templates_from_placement('step.html', self.extra_context['placement'])
 
     def process_step(self, request, form, step):
