@@ -347,7 +347,6 @@ class NewmanModelAdmin(XModelAdmin):
 
         SUGGEST_VIEW_LIMIT = getattr(settings, 'SUGGEST_VIEW_LIMIT', 20)
         SUGGEST_VIEW_MIN_LENGTH = getattr(settings, 'SUGGEST_VIEW_MIN_LENGTH', 2)
-        SUGGEST_RETURN_ALL_FIELD = getattr(settings, 'SUGGEST_RETURN_ALL_FIELD', True)
 
         if not ('f' in request.GET.keys() and 'q' in request.GET.keys()):
             raise AttributeError, 'Invalid query attributes. Example: ".../?f=field_a&f=field_b&q=search_term&o=offset"'
@@ -395,15 +394,9 @@ class NewmanModelAdmin(XModelAdmin):
         qs = utils.user_category_filter(self.model.objects.filter(lookup), request.user)
 
         if not has_non_lookup_attr:
-            if SUGGEST_RETURN_ALL_FIELD:
-                data = qs.values(*lookup_fields)
-            else:
-                data = qs.values(*lookup_fields[:2])
+            data = qs.values(*lookup_fields)
         else:
-            if SUGGEST_RETURN_ALL_FIELD:
-                data = qs.only(*lookup_fields)
-            else:
-                data = qs.only(*lookup_fields[:2])
+            data = qs.only(*lookup_fields)
 
         def construct_row(inst, fields):
             row = {}
@@ -443,10 +436,7 @@ class NewmanModelAdmin(XModelAdmin):
         ft = []
         ft.append('{cnt:%d}' % cnt)
         for item in data:
-            if SUGGEST_RETURN_ALL_FIELD:
-                ft.append( "%s".encode('utf-8') % '|'.join("%s" % item[f] for f in all_fields) )
-            else:
-                ft.append( "%s".encode('utf-8') % '|'.join("%s" % item[f] for f in all_fields[:2]) )
+            ft.append( "%s".encode('utf-8') % '|'.join("%s" % item[f] for f in all_fields) )
 
         return HttpResponse( '\n'.join(ft), mimetype='text/plain;charset=utf-8' )
 

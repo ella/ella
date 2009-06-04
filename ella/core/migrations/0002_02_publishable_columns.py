@@ -11,6 +11,11 @@ class Migration:
         # column for new foreign keys to publishable
         db.add_column('core_placement', 'publishable_id', models.IntegerField(null=True))
 
+        # Adding field 'Author.email'
+        db.add_column('core_author', 'email', models.EmailField(_('Email'), blank=True))
+
+        # Adding field 'Listing.publish_to'
+        db.add_column('core_listing', 'publish_to', models.DateTimeField(_("End of listing"), null=True, blank=True))
 
     def backwards(self, orm):
         # drop temporary column
@@ -18,7 +23,12 @@ class Migration:
 
         # drop publishable foreign key
         db.delete_column('core_placement', 'publishable_id')
-        
+
+        # Deleting field 'Author.email'
+        db.delete_column('core_author', 'email')
+
+        # Deleting field 'Listing.publish_to'
+        db.delete_column('core_listing', 'publish_to')
 
     models = {
         'core.publishable': {
