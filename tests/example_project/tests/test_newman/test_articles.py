@@ -45,9 +45,9 @@ class TestArticleBasics(NewmanTestCase):
         })
 
         expected_data.update({
-            'category' : u"Africa/west-africa",
+            'category' : [u"Africa/west-africa"],
             'authors' : [u"Barack Obama", u"King Albert II"],
-            'placement_set-0-category' : u"Africa/west-africa",
+            'placement_set-0-category' : [u"Africa/west-africa"],
         })
         
 
@@ -64,15 +64,19 @@ class TestArticleBasics(NewmanTestCase):
         self.fill_calendar_fields(calendar_data)
 
         expected_data.update({
-            "placement_set-0-publish_from" : u"%(year)s-%(month)s-%(day)s" % {
+            "placement_set-0-publish_from" : u"%(year)s-%(month)s-%(day)s %(hour)s:%(minute)s" % {
                 "year" : strftime("%Y"),
                 "month" : strftime("%m"),
-                "day" : calendar_data['publish_from']['day'],
+                "day" : "%02d" % int(calendar_data['publish_from']['day']),
+                "hour" : strftime("%H"),
+                "minute" : strftime("%M"),
             },
-            "placement_set-0-publish_from" : u"%(year)s-%(month)s-%(day)s" % {
+            "placement_set-0-publish_to" : u"%(year)s-%(month)s-%(day)s %(hour)s:%(minute)s" % {
                 "year" : strftime("%Y"),
                 "month" : strftime("%m"),
-                "day" : calendar_data['publish_to']['day'],
+                "day" : "%02d" % int(calendar_data['publish_to']['day']),
+                "hour" : strftime("%H"),
+                "minute" : strftime("%M"),
             },
         })
 

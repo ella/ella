@@ -21,7 +21,7 @@ class NewmanTestCase(SeleniumTestCase):
             'controls' : {
                 'suggester' : "//div[@class='suggest-bubble']",
                 'suggester_visible' : "//span[@class='hilite']",
-                'suggester_selected' : "//input[@id='id_%(field)s']/../ul/li[@class='suggest-selected-item']/text()",
+                'suggester_selected' : "//input[@id='id_%(field)s']/../ul/li[@class='suggest-selected-item']",
                 'message' : {
                     'ok': "//div[@id='opmsg']/span[@class='okmsg']",
                 },
@@ -150,14 +150,17 @@ class NewmanTestCase(SeleniumTestCase):
         errors = {}
         for field in data:
             if isinstance(data[field], list):
-                text = self.selenium.get_text(self.elements['controls']['suggester_selected'] % {
-                    'field' : field,
-                })
-                if text != data[field]:
-                    errors[field] = {
-                        'expected' : data[field],
-                        'retrieved' : text,
+                for i in xrange(0, len(data[field])):
+                    xpath = (self.elements['controls']['suggester_selected']+"[%(number)s]") % {
+                        'field' : field,
+                        'number' : i+1, # xpath indexes from 1 :]
                     }
+                    text = self.selenium.get_text(xpath)
+                    if text != data[field][i]:
+                        errors[field] = {
+                            'expected' : data[field],
+                            'retrieved' : text,
+                        }
             else:
                 text = self.selenium.get_value('id_%s' % field)
                 if text != data[field]:
