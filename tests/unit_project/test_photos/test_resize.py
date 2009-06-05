@@ -92,7 +92,7 @@ class TestPhotoResize(UnitTestCase):
         self.assert_equals((100, 200), i.size)
 
     def test_custom_crop_box_is_used(self):
-        i = Image.new('RGB', (200, 200), "black")
+        i = Image.new('RGB', (200, 200), "red")
         f = Formatter(i, self.format, crop_box=(0,0,100,100))
         i.putpixel((99, 99), 0)
 
@@ -102,7 +102,7 @@ class TestPhotoResize(UnitTestCase):
         self.assert_equals((0,0,0), i.getpixel((99,99)))
 
     def test_important_box_is_used(self):
-        i = Image.new('RGB', (200, 100), "black")
+        i = Image.new('RGB', (200, 100), "red")
         f = Formatter(i, self.format, important_box=(0,0,100,100))
         i.putpixel((99, 99), 0)
 
@@ -110,4 +110,24 @@ class TestPhotoResize(UnitTestCase):
         self.assert_equals((0,0,100,100), crop_box)
         self.assert_equals((100, 100), i.size)
         self.assert_equals((0,0,0), i.getpixel((99,99)))
+
+    def test_important_box_is_used_for_other_positive_x_motion_as_well(self):
+        i = Image.new('RGB', (200, 100), "red")
+        f = Formatter(i, self.format, important_box=(100,0,200,100))
+        i.putpixel((100, 0), 0)
+
+        i, crop_box = f.format()
+        self.assert_equals((100,0,200,100), crop_box)
+        self.assert_equals((100, 100), i.size)
+        self.assert_equals((0,0,0), i.getpixel((0,0)))
+
+    def test_important_box_is_used_for_positive_y_motion_as_well(self):
+        i = Image.new('RGB', (100, 200), "red")
+        f = Formatter(i, self.format, important_box=(0,100,100,200))
+        i.putpixel((0, 100), 0)
+
+        i, crop_box = f.format()
+        self.assert_equals((0,100,100,200), crop_box)
+        self.assert_equals((100, 100), i.size)
+        self.assert_equals((0,0,0), i.getpixel((0,0)))
 
