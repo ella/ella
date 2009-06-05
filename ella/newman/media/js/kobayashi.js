@@ -134,10 +134,10 @@ var ContentByHashLib = {};
         $target.trigger('content_added', extras);
     }
     
-    function inject_error_message(load_id) {
-        var info = LOAD_BUF[ load_id ];
+    // argument is a LOAD_BUF item
+    function inject_error_message(info) {
         if (!info) {
-            carp('bad LOAD_BUF index passed to inject_error_message: '+load_id);
+            carp('inject_error_message expect an object with target_id, xhr and address. Received:', info);
             return;
         }
         var $target = $('#'+info.target_id);
@@ -184,6 +184,7 @@ var ContentByHashLib = {};
         }
         $target.empty().append($err_div);
     }
+    ContentByHashLib.inject_error_message = inject_error_message;
     
     // Check if the least present request has finished and if so, shift it
     // from the queue and render the results, and then call itself recursively.
@@ -283,7 +284,7 @@ var ContentByHashLib = {};
             },
             error: function(xhr) {
                 LOAD_BUF[ this.load_id ].xhr = xhr;
-                inject_error_message( this.load_id );
+                inject_error_message( LOAD_BUF[ this.load_id ] );
                 cancel_request( this.load_id );
                 try { show_ajax_error(xhr); } catch(e) { }
                 draw_ready();
