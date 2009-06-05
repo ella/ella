@@ -369,10 +369,10 @@ $( function() {
         if (button_name) $inputs = $inputs.add('<input type="hidden" value="1" name="'+button_name+'" />');
         var data = $inputs.serialize();
         if ($form.hasClass('reset-on-submit')) $form.get(0).reset();
-        var url = $form.hasClass('dyn-addr')
+        var address = $form.hasClass('dyn-addr')
             ? get_adr(action)
-            : action;
-        url = $('<a>').attr('href', url).get(0).href;
+            :         action;
+        var url = $('<a>').attr('href', address).get(0).href;
         
         var request_options = {
             url: url,
@@ -395,6 +395,7 @@ $( function() {
     
     function ajax_submit_error(xhr) {
         var res;
+        var $form = this._form;
         try { res = JSON.parse( xhr.responseText ); }
         catch (e) { }
         if (res && res.errors) {
@@ -403,7 +404,8 @@ $( function() {
             if ($err_overlay.length == 0) $err_overlay = $(
                 '<div id="err-overlay" class="overlay">'
             ).appendTo(
-                   $('.change-form').get(0)
+                   $form
+                || $('.change-form').get(0)
                 || $('#content').get(0)
                 || $('body').get(0)
             );
@@ -433,6 +435,25 @@ $( function() {
                 .appendTo($err_overlay);
             }
             $err_overlay.show();
+        }
+        else {
+            if (!$form) {
+                alert(
+                    gettext('Error sending form.')+' '+
+                    gettext('Moreover, failed to handle the error gracefully.')+"\n"+
+                    gettext('Reloading page')+'...'
+                );
+                location.reload();
+            }
+            var id = ContentByHashLib.closest_loaded( $form.get(0) ).id;
+            var address = $form.hasClass('dyn-addr')
+                ? get_adr($form.attr('action'))
+                :         $form.attr('action');
+            ContentByHashLib.inject_error_message({
+                target_id: id,
+                xhr: xhr,
+                address: address
+            });
         }
         show_ajax_error(xhr);
     }

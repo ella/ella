@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime, timedelta
 
+from django.core.urlresolvers import reverse
+
 from djangosanetesting import DatabaseTestCase
 
-from unit_project.test_core import create_basic_categories, create_and_place_a_publishable
-
 from ella.ellatagging import views
+
+from unit_project.test_core import create_basic_categories, create_and_place_a_publishable
+from unit_project import template_loader
 
 class TestTaggingViews(DatabaseTestCase):
     def setUp(self):
@@ -21,6 +24,10 @@ class TestTaggingViews(DatabaseTestCase):
         super(TestTaggingViews, self).setUp()
         create_basic_categories(self)
         create_and_place_a_publishable(self)
+
+    def tearDown(self):
+        super(TestTaggingViews, self).tearDown()
+        template_loader.templates = {}
 
     def test_get_tagged_publishables_returns_tagged_publishable(self):
         from tagging.models import Tag, TaggedItem
@@ -48,8 +55,17 @@ class TestTaggingViews(DatabaseTestCase):
         t = Tag.objects.create(name='tag1')
         self.assert_equals([], list(views.get_tagged_publishables(t)))
 
+    def test_tagged_publishables_view(self):
+        from tagging.models import Tag, TaggedItem
 
+        Tag.objects.update_tags(self.publishable, 'tag1 tag2')
+        self.assert_equals(2, TaggedItem.objects.count())
 
+        t = Tag.objects.get(name='tag1')
+        url = reverse('tag_list', kwargs={'tag':'tag1'})
+        template_loader.templates['page/tagging/listing.html'] = ''
+        response = self.client.get(url)
 
-
+        self.assert_equals([self.publishable], [p.target for p in response.context['object_list']])
+        self.assert_equals(t, response.context['tag'])
 

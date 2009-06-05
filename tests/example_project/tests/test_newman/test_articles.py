@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
+from copy import copy
 from django.utils.translation import ugettext_lazy as _
 
 from ella.articles.models import Article
 
+from time import strftime
 from example_project.tests.test_newman.helpers import NewmanTestCase
 
 class TestArticleBasics(NewmanTestCase):
@@ -21,21 +23,33 @@ class TestArticleBasics(NewmanTestCase):
 
         # fill the form
         data = {
-                'title' : u'马 žš experiment',
-                'upper_title' : u'vyšší',
-                'description' : u'Article description',
-                'slug' : 'title',
-            }
+            'title' : u'马 žš experiment',
+            'upper_title' : u'vyšší',
+            'description' : u'Article description',
+            'slug' : u'title',
+        }
         self.fill_fields(data)
+
+        expected_data = copy(data)
 
         # fill in the suggesters
         suggest_data = {
-                'category': ('we',),
-                'authors':  ('Bar', 'Kin',),
-                'placement_set-0-category' : ('we',)
-            }
-        
+            'category': ('we',),
+            'authors':  ('Bar', 'Kin',),
+            'placement_set-0-category' : ('we',)
+        }
         self.fill_suggest_fields(suggest_data)
+
+        self.fill_using_lookup({
+            "authors" : u"King Albert II",
+        })
+
+        expected_data.update({
+            'category' : [u"Africa/west-africa"],
+            'authors' : [u"Barack Obama", u"King Albert II"],
+            'placement_set-0-category' : [u"Africa/west-africa"],
+        })
+        
 
         calendar_data = {
             "publish_from" : {
@@ -49,14 +63,37 @@ class TestArticleBasics(NewmanTestCase):
 
         self.fill_calendar_fields(calendar_data)
 
+        expected_data.update({
+            "placement_set-0-publish_from" : u"%(year)s-%(month)s-%(day)s %(hour)s:%(minute)s" % {
+                "year" : strftime("%Y"),
+                "month" : strftime("%m"),
+                "day" : "%02d" % int(calendar_data['publish_from']['day']),
+                "hour" : strftime("%H"),
+                "minute" : strftime("%M"),
+            },
+            "placement_set-0-publish_to" : u"%(year)s-%(month)s-%(day)s %(hour)s:%(minute)s" % {
+                "year" : strftime("%Y"),
+                "month" : strftime("%m"),
+                "day" : "%02d" % int(calendar_data['publish_to']['day']),
+                "hour" : strftime("%H"),
+                "minute" : strftime("%M"),
+            },
+        })
+
         self.save_form()
         self.assert_equals(u"%s: %s" % (unicode(_(u"Article")), data['title']), s.get_text(self.get_listing_object()+"/th/a[@class='hashadr']"))
 
-        # verify save
+        # verify save on list
         self.assert_equals(1, Article.objects.count())
         a = Article.objects.all()[0]
         self.assert_equals(data['title'], a.title)
+
         # FIXME: hack, use django-markup
         self.assert_equals('<p>%s</p>\n' % data['description'], a.description)
         self.assert_equals(2, a.authors.count())
+
+        # verify all fields
+        s.click(self.get_listing_object()+"/th/a[@class='hashadr']")
+        
+        self.verify_form(expected_data)
 

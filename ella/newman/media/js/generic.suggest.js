@@ -3,7 +3,6 @@
  */
 GenericSuggestLib = {};
 (function($) { $( function() {
-    ;;; DEBUG = true;
     ;;; DBG = 1;
     GenericSuggestLib.VERSION = '2009.04.17-newman';
     var DEL_IMG = MEDIA_URL + 'ico/10/icon_deletelink.gif';
