@@ -11,12 +11,12 @@ var IMAGE_OPTIONS = {
 ( function($) {
     window.on_upload_success = function(xhr) {
         ;;; carp('success uploading photo:', xhr);
-        show_ok(_('successfully uploaded photo'));
+        show_ok(gettext('successfully uploaded photo'));
 //        AjaxFormLib.show_ajax_success(xhr.responseText);
     }
     window.on_upload_error = function(xhr) {
         ;;; carp('error uploading photo:', xhr);
-        show_err(_('failed uploading photo'));
+        show_err(gettext('failed uploading photo'));
 //        AjaxFormLib.ajax_submit_error(xhr)
     }
     window.on_upload_progress = function(progress) {
@@ -28,7 +28,7 @@ var IMAGE_OPTIONS = {
         if (evt.button > 0) return true;
         var flash_obj = ($.browser.msie ? window : document).PhotoUploader;
         if (!flash_obj) {
-            show_err(_('Failed to get Flash movie') + ' PhotoUploader.');
+            show_err(gettext('Failed to get Flash movie') + ' PhotoUploader.');
             carp('Failed to get Flash movie PhotoUploader.');
             return false;
         }
@@ -49,7 +49,7 @@ var IMAGE_OPTIONS = {
     }
     function set_image_form_handlers() {
         if ($('#photo_form').length == 0) return;
-        $('#photo_form .submit-row a.ok')
+        $('#photo_form .submit-row a.submit')
         .addClass('noautosubmit')
         .unbind('click', save_photo_handler)
         .bind(  'click', save_photo_handler);
