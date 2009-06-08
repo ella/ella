@@ -1,4 +1,5 @@
 var LF = 10, CR = 13;
+AjaxFormLib = {};
 
 function clone_form($orig_form) {
     var $new_form = $orig_form.clone();
@@ -36,6 +37,7 @@ $(function(){ContentByHashLib.reload_content('content');});
         if (!options) options = {};
         if (options.title) things_to_send.title = options.title;
         if (options.id   ) things_to_send.id    = options.id;
+        var message = options.msg || gettext('Saved');
         var url = get_adr('draft/save/');
         var $saving_msg = show_message(gettext('Saving')+'...', {duration: 0});
         $.ajax({
@@ -44,7 +46,7 @@ $(function(){ContentByHashLib.reload_content('content');});
             type: 'POST',
             success: function(response_text) {
                 $saving_msg.remove();
-                show_ok(gettext('Saved')+'.', {duration: 2000});
+                show_ok(message, {duration: 2000});
                 try {
                     var response_data = JSON.parse(response_text);
                     var id           = response_data.data.id;
@@ -70,6 +72,7 @@ $(function(){ContentByHashLib.reload_content('content');});
             }
         });
     }
+    AjaxFormLib.save_preset = save_preset;
     $('a#save-form').live('click', function() {
         var title = prompt(gettext('Enter template name'));
         if (title == null) return;
@@ -191,7 +194,7 @@ $(function(){ContentByHashLib.reload_content('content');});
                     return;
                 }
                 carp('Saving draft '+new Date());
-                save_preset($('.change-form'), {id: draft_id});
+                save_preset($change_form, {id: draft_id});
             }, 60 * 1000 );
         }
         function onkeypress_autosave_handler(evt) {
@@ -220,7 +223,6 @@ $(function(){ContentByHashLib.reload_content('content');});
 // End of drafts and templates
 
 
-AjaxFormLib = {};
 $( function() {
     //// Ajax forms
     
@@ -446,6 +448,7 @@ $( function() {
                 );
                 location.reload();
             }
+            AjaxFormLib.save_preset($form, {title: '* '+gettext('crash save'), msg: gettext('Form content backed up')});
             var id = ContentByHashLib.closest_loaded( $form.get(0) ).id;
             var address = $form.hasClass('dyn-addr')
                 ? get_adr($form.attr('action'))
