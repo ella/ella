@@ -79,7 +79,7 @@ class ModelWeight(models.Model):
 
     objects = ModelWeightManager()
 
-    def save(self, **kwargs)
+    def save(self, **kwargs):
         """
         Clear the cache and do the save()
         """
