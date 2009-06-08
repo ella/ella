@@ -95,6 +95,11 @@ class TestGalleries(DatabaseTestCase):
         self.assert_true('count' in response.context)
         self.assert_equals(2, response.context['count'])
 
+    def test_gallery_custom_view_item_raises_404_on_non_existent_slug(self):
+        template_loader.templates['404.html'] = ''
+        response = self.client.get('/nested-category/2008/1/10/galleries/first-gallery/items/non-existent-slug/')
+        self.assert_equals(404, response.status_code)
+
     def test_gallery_custom_view_item(self):
         response = self.client.get('/nested-category/2008/1/10/galleries/first-gallery/items/second-gallery/')
 

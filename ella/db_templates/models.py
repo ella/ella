@@ -37,7 +37,7 @@ def get_blocks(block_list):
                 'name': node.name,
                 'node': node,
                 'source': block_source
-})
+            })
 
     return blocks
 
@@ -89,7 +89,7 @@ class DbTemplate(models.Model):
         filter = (
                 Q(active_from__isnull=True) | Q(active_from__lte=now),
                 Q(active_till__isnull=True) | Q(active_till__gt=now),
-)
+            )
         for block in self.templateblock_set.filter(*filter):
             text.append('{%% block %s %%}\n%s\n{%% endblock %%}\n' % (block.name, block.get_text()))
 
@@ -105,7 +105,7 @@ class DbTemplate(models.Model):
                 u'description: %s' % self.description,
                 u'{% endcomment %}',
                 '',
-)
+            )
 
         return '\n'.join(meta)
 
@@ -141,7 +141,7 @@ class TemplateBlockManager(models.Manager):
                         name=name, template=parent_template,
                         target_ct=target_ct, target_id=target_id,
                         box_type=box_type, text=params
-)
+                    )
 
         template_block.save()
         return template_block
@@ -170,7 +170,7 @@ class TemplateBlock(models.Model):
                     self.target_ct.app_label,
                     self.target_ct.model,
                     self.target_id
-))
+                ))
 
         text.append(self.text.strip())
 

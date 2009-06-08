@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-03 16:34+0200\n"
-"PO-Revision-Date: 2009-06-03 16:40+0100\n"
+"POT-Creation-Date: 2009-06-05 12:46+0200\n"
+"PO-Revision-Date: 2009-06-05 12:53+0100\n"
 "Last-Translator: Oldrich Kruza <oldrich.kruza@centrumholdings.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -50,11 +50,23 @@ msgstr "Pá"
 msgid "Sa"
 msgstr "So"
 
+#: media/js/flash_image.js:14
+msgid "successfully uploaded photo"
+msgstr "Foto úspěšně nahráno"
+
+#: media/js/flash_image.js:19
+msgid "failed uploading photo"
+msgstr "Nahrání fota selhalo"
+
+#: media/js/flash_image.js:31
+msgid "Failed to get Flash movie"
+msgstr "Načtení flashe selhalo"
+
 #: media/js/inlines.js:98
 msgid "Duplicate photo"
 msgstr "Duplikátní foto"
 
-#: media/js/kobayashi.js:846
+#: media/js/kobayashi.js:860
 msgid "Loading media"
 msgstr "Načítám média"
 
@@ -82,15 +94,19 @@ msgstr "Vložte jméno šablony"
 msgid "Failed loading preset"
 msgstr "Chyba při načítání šablony"
 
-#: media/js/newman.js:608
+#: media/js/newman.js:290
+msgid "Sending"
+msgstr "Posílám"
+
+#: media/js/newman.js:633
 msgid "Loading"
 msgstr "Načítám"
 
-#: media/js/newman.js:639
+#: media/js/newman.js:664
 msgid "Request failed"
 msgstr "Chyba serveru"
 
-#: media/js/newman.js:650
+#: media/js/newman.js:675
 msgid "Successfully sent"
 msgstr "Úspěšně odesláno"
 
