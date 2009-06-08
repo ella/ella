@@ -8,7 +8,7 @@ except ImportError:
     from django.utils.simplejson import dumps, loads
 
 from django.http import HttpResponse
-from ella.newman.permission import model_category_fk
+from ella.newman.permission import model_category_fk, is_category_model
 from ella.newman import models
 from ella.newman.config import STATUS_OK, STATUS_GENERIC_ERROR
 from ella.newman.config import CATEGORY_FILTER, USER_CONFIG, JSON_CONVERSIONS
@@ -139,14 +139,20 @@ def user_category_filter(queryset, user):
         helper = models.DenormalizedCategoryUserRole.objects.filter(
             user_id=user.pk,
             root_category_id__in=root_category_ids
-        )
-        user_categories = map(lambda c: c.category_id, helper)
-        lookup = '%s__in' % category_fk.name
+        ).values('category_id')
+        user_categories = [c['category_id'] for c in helper]
+        if is_category_model(qs.model):
+            lookup = 'id__in'
+        else:
+            lookup = '%s__in' % category_fk.name
         out = qs.filter(**{lookup: user_categories})
     else:
-        cats = Category.objects.filter(pk__in=root_category_ids)
-        user_sites = map(lambda c: c.site.pk, cats)
-        lookup = '%s__site__in' % category_fk.name
+        cats = Category.objects.filter(pk__in=root_category_ids).values('site__pk')
+        user_sites = [c['site__pk'] for c in cats]
+        if is_category_model(qs.model):
+            lookup = 'site__id__in'
+        else:
+            lookup = '%s__site__id__in' % category_fk.name
         out = qs.filter(**{lookup: user_sites})
     flag_queryset(out, 'user_category_filtered', True)
     return out
