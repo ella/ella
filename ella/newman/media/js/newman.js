@@ -245,7 +245,8 @@ $( function() {
         }
         if (msg.shift) { var msgs = msg; msg = msgs.shift(); }
         var $msg = $('<span>').addClass('form-error-msg').text(msg);
-        $('label[for='+input.id+']').append($msg);
+        var $antecedant = $(input).closest('.markItUp').add(input).eq(0);
+        $antecedant.before($msg);
         if (msgs && msgs.length) show_form_error(input, msgs);
     }
     /**
@@ -257,9 +258,9 @@ $( function() {
      */
     function validate($form) {
         var ok = true;
+        $('.form-error-msg').remove();
         get_inputs($form).each( function() {
             var $label = $('label[for='+this.id+']');
-            $label.find('span.form-error-msg').remove();
             $('#err-overlay').empty().hide();
             var classes = ($label.attr('className')||'').split(/\s+/);
             for (var i = 0; i < classes.length; i++) {
