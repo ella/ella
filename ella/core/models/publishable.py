@@ -51,7 +51,7 @@ class Publishable(models.Model):
     photo = models.ForeignKey(Photo, blank=True, null=True, verbose_name=_('Photo'))
 
     # Description
-    description = models.TextField(_('Description'), blank=True, null=True)
+    description = models.TextField(_('Description'))
 
     # denormalized fields
     # the placement's publish_from
