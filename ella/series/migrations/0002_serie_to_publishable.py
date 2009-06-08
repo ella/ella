@@ -19,4 +19,5 @@ class Migration(BasePublishableDataMigration):
         alter_foreignkey_to_int('series_seriepart', 'serie')
 
     def move_self_foreignkeys(self, orm):
+        pass
         # TODO: migrate new serie IDs to seriepart

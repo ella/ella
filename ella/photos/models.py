@@ -132,7 +132,7 @@ class Photo(models.Model):
                 return None
         return storage.url(self.thumbnail_path)
 
-    def save(self, force_insert=False, force_update=False):
+    def save(self, force_insert=False, force_update=False, **kwargs):
         """Overrides models.Model.save.
 
         - Generates slug.
@@ -158,12 +158,12 @@ class Photo(models.Model):
             self.image = file_rename(self.image.name, self.slug, PHOTOS_TYPE_EXTENSION[ imageType ])
         # delete formatedphotos if new image was uploaded
         if image_changed:
-            super(Photo, self).save(force_insert, force_update)
+            super(Photo, self).save(force_insert=force_insert, force_update=force_update, **kwargs)
             self.width, self.height = get_image_dimensions(self.image.path)
             force_insert, force_update = False, True
             for f_photo in self.formatedphoto_set.all():
                 f_photo.delete()
-        super(Photo, self).save(force_insert, force_update)
+        super(Photo, self).save(force_insert=force_insert, force_update=force_update, **kwargs)
 
     def delete_thumbnail(self):
         """
@@ -311,7 +311,7 @@ class FormatedPhoto(models.Model):
 
         self.image.save(self.file(relative=True), file, save)
 
-    def save(self, force_insert=False, force_update=False):
+    def save(self, **kwargs):
         """Overrides models.Model.save
 
         - Removes old file from the FS
@@ -319,7 +319,7 @@ class FormatedPhoto(models.Model):
         """
         self.remove_file()
         self.generate(save=False)
-        super(FormatedPhoto, self).save(force_insert, force_update)
+        super(FormatedPhoto, self).save(**kwargs)
 
     def delete(self):
         self.remove_file()

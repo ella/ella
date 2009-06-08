@@ -83,7 +83,7 @@ class Category(models.Model):
     description = models.TextField(_("Category Description"), blank=True)
     site = models.ForeignKey(Site)
 
-    def save(self, force_insert=False, force_update=False):
+    def save(self, **kwargs):
         "Override save() to construct tree_path based on the category's parent."
         old_tree_path = self.tree_path
         if self.tree_parent:
@@ -93,7 +93,7 @@ class Category(models.Model):
                 self.tree_path = self.slug
         else:
             self.tree_path = ''
-        super(Category, self).save(force_insert, force_update)
+        super(Category, self).save(**kwargs)
         if old_tree_path != self.tree_path:
             # the tree_path has changed, update children
             children = Category.objects.filter(tree_path__startswith=old_tree_path+'/').order_by('tree_path')

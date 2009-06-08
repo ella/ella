@@ -51,7 +51,7 @@ class Publishable(models.Model):
     photo = models.ForeignKey(Photo, blank=True, null=True, verbose_name=_('Photo'))
 
     # Description
-    description = models.TextField(_('Description'), blank=True, null=True)
+    description = models.TextField(_('Description'))
 
     # denormalized fields
     # the placement's publish_from
@@ -125,7 +125,7 @@ class Publishable(models.Model):
     def get_admin_url(self):
         return admin_url(self)
 
-    def save(self, force_insert=False, force_update=False):
+    def save(self, **kwargs):
         self.content_type = ContentType.objects.get_for_model(self)
         if self.pk and hasattr(self, 'slug'): # only run on update
             # get old self
@@ -136,7 +136,7 @@ class Publishable(models.Model):
                     if plc.slug == old_slug:
                         plc.slug = self.slug
                         plc.save(force_update=True)
-        return super(Publishable, self).save(force_insert, force_update)
+        return super(Publishable, self).save(**kwargs)
 
     def delete(self):
         url = self.get_absolute_url()
@@ -221,7 +221,7 @@ class Placement(models.Model):
         self.publishable.publish_from = publish_from
         Publishable.objects.filter(pk=self.publishable_id).update(publish_from=publish_from)
 
-    def save(self, force_insert=False, force_update=False):
+    def save(self, **kwargs):
         " If Listing is created, we create HitCount object "
 
         if not self.slug:
@@ -238,7 +238,7 @@ class Placement(models.Model):
                 Redirect.objects.filter(new_path=old_path).exclude(pk=redirect.pk).update(new_path=new_path)
 
         # First, save Placement
-        super(Placement, self).save(force_insert, force_update)
+        super(Placement, self).save(**kwargs)
         # Then, save HitCount (needs placement_id)
         hc, created = HitCount.objects.get_or_create(placement=self, defaults={'hits': 0})
 
@@ -343,10 +343,10 @@ class HitCount(models.Model):
 
     objects = HitCountManager()
 
-    def save(self, force_insert=False, force_update=False):
+    def save(self, **kwargs):
         "update last seen automaticaly"
         self.last_seen = datetime.now()
-        super(HitCount, self).save(force_insert, force_update)
+        super(HitCount, self).save(**kwargs)
 
     def target(self):
         return self.placement.publishable

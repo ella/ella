@@ -1,20 +1,16 @@
 
 from south import *
 
-
-class Plugins(object):
-    def __init__(self):
-        self.plugins = {}
-
+class Plugins(dict):
+    
     def register(self, app, migration, plugin):
         key = (app, migration)
-        if not self.plugins.has_key(key):
-            self.plugins[key] = set()
-        self.plugins[(app, migration)].add(plugin) 
+        if not key in self:
+            self[key] = set()
+        self[key].add(plugin)
 
     def get(self, app, migration):
-        return self.plugins.get((app, migration), set())
-
+        return super(Plugins, self).get((app, migration), set())
 
 class SouthPlugin(object):
     @property

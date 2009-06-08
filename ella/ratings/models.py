@@ -79,12 +79,12 @@ class ModelWeight(models.Model):
 
     objects = ModelWeightManager()
 
-    def save(self, force_insert=False, force_update=False):
+    def save(self, **kwargs):
         """
         Clear the cache and do the save()
         """
         ModelWeight.objects.clear_cache()
-        return super(ModelWeight, self).save(force_insert, force_update)
+        return super(ModelWeight, self).save(**kwargs)
 
     class Meta:
         verbose_name = _('Model weight')
