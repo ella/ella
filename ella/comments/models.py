@@ -137,10 +137,10 @@ class Comment(models.Model):
     def get_admin_url(self):
         return admin_url(self)
 
-    def save(self, force_insert=False, force_update=False):
+    def save(self, **kwargs):
         # TODO: maybe create models.GenealogyField for this
         # first save to obtain primary key
-        super(Comment, self).save(force_insert, force_update)
+        super(Comment, self).save(**kwargs)
         # This can raise "Forced update did not affect any rows" exception
 #        force_insert, force_update = False, True
         # do not store too long path
@@ -150,7 +150,7 @@ class Comment(models.Model):
         else:
             self.path = self.parent.path
         # save it all
-        super(Comment, self).save(force_insert, force_update)
+        super(Comment, self).save(**kwargs)
 
     def __unicode__(self):
         if self.id:

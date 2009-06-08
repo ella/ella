@@ -156,7 +156,7 @@ class ServerItem(models.Model):
         ordering = ('-updated',)
         unique_together = (('server', 'slug',),)
 
-    def save(self, force_insert=False, force_update=False):
+    def save(self, **kwargs):
         """Overrides models.Model.save.
 
         - Assigns unique slugs to the items.
@@ -202,5 +202,5 @@ class ServerItem(models.Model):
 
         self.summary = strip_tags(self.summary)
 
-        super(ServerItem, self).save(force_insert, force_update)
+        super(ServerItem, self).save(**kwargs)
 
