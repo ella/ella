@@ -7,9 +7,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ella.newman (admin-ng)\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-09 16:34+0200\n"
-"PO-Revision-Date: 2009-06-09 16:35+0100\n"
-"Last-Translator: Vitek pliska <whit@jizak.cz>\n"
+"POT-Creation-Date: 2009-06-09 18:36+0200\n"
+"PO-Revision-Date: 2009-06-09 18:36+0100\n"
+"Last-Translator: Vitek Pliska <whit@jizak.cz>\n"
 "Language-Team: Ella <ella.project@gmail.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -254,9 +254,9 @@ msgid "Loaded draft \"%s\""
 msgstr "Načtena předvolba \"%s\""
 
 #: options.py:300
-#, fuzzy, python-format
+#, python-format
 msgid "Draft %s was deleted."
-msgstr "Předvolba %s byla uložena."
+msgstr "Předvolba %s byla smazána."
 
 #: options.py:320
 #: xoptions.py:195
@@ -356,17 +356,26 @@ msgstr[1] ""
 msgid "Add %s"
 msgstr ""
 
-#: licenses/models.py:37
+#: licenses/models.py:35
 msgid "Content type"
 msgstr "Typ objektu"
 
-#: licenses/models.py:38
+#: licenses/models.py:36
 msgid "Object ID"
 msgstr "ID objektu"
 
-#: licenses/models.py:41
+#: licenses/models.py:39
 msgid "Max applications"
 msgstr "Max použití"
+
+#: licenses/models.py:42
+msgid "Note"
+msgstr "Poznámka"
+
+#: licenses/models.py:47
+#, python-format
+msgid "License for %s"
+msgstr "Licence pro %s"
 
 #: licenses/models.py:55
 msgid "License"
@@ -525,7 +534,7 @@ msgstr ""
 #: templates/newman/newman-index.html:95
 #: templates/newman/edit_inline/gallery_item.html:20
 #: templates/newman/edit_inline/stacked.html:12
-#: templates/newman/edit_inline/tabular.html:31
+#: templates/newman/edit_inline/tabular.html:32
 msgid "View on site"
 msgstr ""
 
@@ -600,9 +609,8 @@ msgid "Fields help"
 msgstr "Nápověda k polím"
 
 #: templates/newman/model_help.html:20
-#, fuzzy
 msgid "Model doc"
-msgstr "Model"
+msgstr "Dokumentace modelu"
 
 #: templates/newman/newman-index.html:14
 msgid "Calendar"
@@ -701,7 +709,11 @@ msgstr ""
 msgid "Listings"
 msgstr ""
 
-#: templates/newman/edit_inline/tabular.html:20
+#: templates/newman/edit_inline/placement.html:53
+msgid "Main category"
+msgstr "Výchozí kategorie"
+
+#: templates/newman/edit_inline/tabular.html:21
 msgid "Delete?"
 msgstr ""
 
@@ -745,12 +757,11 @@ msgstr ""
 
 #: templates/newman/widget/editor_box.html:12
 msgid "Insert box"
-msgstr ""
+msgstr "Vložit box"
 
 #: templates/newman/widget/editor_box.html:13
-#, fuzzy
 msgid "Reset"
-msgstr "Přednastavené"
+msgstr "Původní"
 
 #: templates/newman/widget/listing_custom.html:100
 msgid "Remove"
