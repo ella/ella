@@ -78,7 +78,7 @@
     }
     
     function add_gallery_item(evt) {
-        if (evt.button != 0) return;
+        if (evt && evt.button != 0) return;
         var $last_item = $('.gallery-items-sortable .inline-related:last');
         var $new_item = $last_item.clone(true);
         var no_items = $('.gallery-items-sortable input.target_id').length;
@@ -215,6 +215,13 @@
         }
         $(root).find('input.target_id').not('.js-updates-thumb').addClass('js-updates-thumb').change( update_gallery_item_thumbnail );
         
+        // add a new empty gallery item
+        $(root).find('input.target_id').not('.js-adds-empty').addClass('js-adds-empty').change( function() {
+            if ($('.gallery-item input.target_id').filter( function() { return ! $(this).val(); } ).length == 0) {
+                add_gallery_item();
+            }
+        });
+        
         // create desired input rows for loaded preset
         $('#gallery_form').bind('preset_load_initiated', function(evt, preset) {
             var desired_no;
@@ -227,7 +234,7 @@
             var no_items = $('.gallery-items-sortable input.target_id').length;
             // add gallery items if necessary
             for (var i = no_items; i < desired_no; i++) {
-                add_gallery_item({button:0});
+                add_gallery_item();
             }
             // remove gallery items if necessary
             for (var i = no_items; i > desired_no; i--) {
