@@ -588,7 +588,16 @@ GenericSuggestLib = {};
         $w.data('input').removeClass('pod-lupickou');
         $w.remove();
     }
-
+    
+    GenericSuggestLib.copy = function(from, to) {
+        var $from = get_current_inputs(from);
+        var $to   = get_current_inputs(to);
+        $to.hidden.val(
+            $from.hidden.val()
+        );
+        restore_suggest_widget_from_value(to);
+    }
+    
     function equidistant_array_coverage(count, characters) {
         if (characters == null)
             characters = 'abcčdefghijklmnoprřsštuvzž'.split('');

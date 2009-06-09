@@ -14,12 +14,13 @@
     });
 
     //// listings
-    $('.add-listing-button').live('click', function(evt) {
-        if (evt.button != 0) return;
+    function add_listing(evt) {
+        if (evt && evt.button != 0) return;
         var no = $('.listing-row').length + 1;
         var $template = $('.listing-row-template:first');
         add_inline($template, no);
-    });
+    }
+    $('.add-listing-button').live('click', add_listing);
     
     // create desired inputs for loaded preset
     function add_listings_for_preset(evt, preset) {
@@ -49,6 +50,22 @@
         $( evt.target ).find('.change-form:has(.add-listing-button)')
         .unbind('preset_load_initiated.listing')
         .bind('preset_load_initiated.listing', add_listings_for_preset);
+    });
+    
+    // main category button
+    $('.js-placement-main-category').live('click', function(evt) {
+        if ($('#id_category').val().length <= 1) return;
+        
+        var      main_category_input = $('#id_category_suggest'                ).get(0);
+        var placement_category_input = $('#id_placement_set-0-category_suggest').get(0);
+        
+        GenericSuggestLib.copy(main_category_input, placement_category_input);
+        
+        if ($('.listing-row').length == 0) {
+            add_listing();
+            var listing_category_input = $('#id_category_1_suggest').get(0);
+            GenericSuggestLib.copy(main_category_input, listing_category_input);
+        }
     });
 
     //// gallery items
