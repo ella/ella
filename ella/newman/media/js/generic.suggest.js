@@ -122,7 +122,7 @@ GenericSuggestLib = {};
         // Ensure that the initial values fit
         function restore_suggest_widget_from_value(el) {
             var $inputs = get_current_inputs(el);
-            if ( /^(.+)#(.+)$/.test($inputs.hidden.val()) ) {
+            if ( /^(.*)#(.*)$/.test($inputs.hidden.val()) ) {
                 var ids    = RegExp.$1;
                 var repres = RegExp.$2;
                 ids    = ids.match(/\d+/g);
