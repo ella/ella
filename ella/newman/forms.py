@@ -4,6 +4,8 @@ from django.forms.widgets import CheckboxSelectMultiple
 
 from ella.core.models import Category
 from ella.newman.models import DenormalizedCategoryUserRole, AdminUserDraft
+from django.contrib.contenttypes.models import ContentType
+from ella.newman import widgets
 
 class DraftForm(forms.Form):
 
@@ -43,3 +45,9 @@ class SiteFilterForm(forms.Form):
 class ErrorReportForm(forms.Form):
     err_subject = forms.CharField(label=_('Subject'))
     err_message = forms.CharField(label=_('Message'), widget=forms.Textarea)
+
+class EditorBoxForm(forms.Form):
+    box_obj_ct = forms.ModelChoiceField(ContentType.objects.all(), '----', cache_choices=True, required=True, widget=widgets.ContentTypeWidget, label='')
+    box_obj_id = forms.IntegerField(label='', min_value=0, widget=widgets.ForeignKeyGenericRawIdWidget)
+    box_obj_params = forms.CharField(label=_('Extra parameters'), max_length=300, required=False, widget=forms.Textarea)
+

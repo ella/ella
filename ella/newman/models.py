@@ -157,7 +157,7 @@ class CategoryUserRole(models.Model):
 
 class DenormalizedCategoryUserRole(models.Model):
     """ for better performance """
-    user_id = models.IntegerField()
+    user_id = models.IntegerField(db_index=True)
     permission_id = models.IntegerField()
     permission_codename = models.CharField(max_length=100)
     category_id = models.IntegerField()
