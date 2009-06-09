@@ -10,7 +10,7 @@
                 {% if title %}&rsaquo; <strong id="doc-title">{{ title }}</strong>{% endif %}
             </div>
             {% if is_user_category_filtered %}
-                <div style="float: right;"><a class="icn visible" href="{% url newman_admin_index %}">{% trans "Categories filtered by user. Click to change." %}</a></div>
+                <div style="float: right;"><a class="icn visible" href="{% url newman_admin_index %}#/nm/">{% trans "Categories filtered by user. Click to change." %}</a></div>
             {% endif %}
         </div>
     {% endif %}
