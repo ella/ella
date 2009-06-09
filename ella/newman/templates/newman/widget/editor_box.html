@@ -1,0 +1,15 @@
+{% load cache %}
+
+{% cache 600 boxform user %}
+<div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix" unselectable="on" style="-moz-user-select: none;">
+<span id="ui-dialog-title-rich-box" class="ui-dialog-title" unselectable="on" style="-moz-user-select: none;">{% trans'Box' %}</span>
+<a class="ui-dialog-titlebar-close ui-corner-all" href="#" role="button" unselectable="on" style="-moz-user-select: none;">
+<span class="ui-icon ui-icon-closethick" unselectable="on" style="-moz-user-select: none;">{% trans 'Close' %}</span>
+</a>
+</div>
+<form id="rich-object">
+{{ boxform }}
+<a class="icn btn ok def">{% trans 'Insert box' %}</a>
+<a class="icn btn cancel">{% trans 'Reset' %}</a>
+</form>
+{% endcache %}
