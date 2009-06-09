@@ -7,7 +7,7 @@ from django.db.models.fields.related import ForeignKey
 from django.contrib.admin import widgets
 from django.template import Context
 from django.template.loader import get_template
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _, ugettext
 from django.utils.encoding import force_unicode
 from django.utils.html import escape
 from django.utils.text import truncate_words
@@ -110,7 +110,15 @@ class FlashImageWidget(widgets.AdminFileWidget):
         </object>
         """ % (swf_path, value, swf_path, value)
 
-        return mark_safe(embed_code)
+        if not value:
+            return mark_safe(embed_code)
+
+        from os.path import basename
+        file_name = basename(value.url)
+        thumb_name = 'thumb-%s' % file_name
+        path = value.url.replace(file_name, thumb_name)
+        edit_msg = ugettext('You cannot edit uploaded photo.')
+        return mark_safe('<span class="form-error-msg">%s</span><a class="widget-thumb thickbox" href="%s"><img src="%s" alt="%s"/></a>' % (edit_msg, value.url, path, file_name))
 
 
 class AdminSuggestWidget(forms.TextInput):
