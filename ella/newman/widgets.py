@@ -19,6 +19,14 @@ from djangomarkup.widgets import RichTextAreaWidget
 from django.contrib.contenttypes.models import ContentType
 from django.forms.widgets import HiddenInput
 
+__all__ = [
+    'NewmanRichTextAreaWidget', 'FlashImageWidget',
+    'AdminSuggestWidget', 'DateWidget', 'DateTimeWidget',
+    'ForeignKeyRawIdWidget', 'ForeignKeyGenericRawIdWidget',
+    'ContentTypeWidget', 'OrderFieldWidget',
+    'IncrementWidget', 'ListingCustomWidget',
+    'GalleryItemContentTypeWidget',
+]
 
 MARKITUP_SET = getattr(settings, 'MARKDOWN', 'markdown')
 MEDIA_PREFIX = getattr(settings, 'NEWMAN_MEDIA_PREFIX', settings.ADMIN_MEDIA_PREFIX)

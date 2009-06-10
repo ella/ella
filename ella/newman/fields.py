@@ -22,6 +22,14 @@ from ella.newman import widgets, utils
 from ella.newman.permission import get_permission, permission_filtered_model_qs, has_category_permission
 from ella.newman.licenses.models import License
 
+__all__ = [
+    'NewmanRichTextField',
+    'AdminSuggestField',
+    'RGBImageField',
+    'CategoryChoiceField',
+    'ListingCustomField'
+]
+
 log = logging.getLogger('ella.newman')
 DEP_SRC_TEXT_ATTR = '__dep_src_text'
 
