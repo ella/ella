@@ -448,7 +448,9 @@ $( function() {
                 );
                 location.reload();
             }
-            AjaxFormLib.save_preset($form, {title: '* '+gettext('crash save'), msg: gettext('Form content backed up')});
+            if ($form.is('.change-form')) {
+                AjaxFormLib.save_preset($form, {title: '* '+gettext('crash save'), msg: gettext('Form content backed up')});
+            }
             var id = ContentByHashLib.closest_loaded( $form.get(0) ).id;
             var address = $form.hasClass('dyn-addr')
                 ? get_adr($form.attr('action'))
