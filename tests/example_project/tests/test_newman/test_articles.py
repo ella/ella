@@ -103,3 +103,50 @@ class TestArticleBasics(NewmanTestCase):
         
         self.verify_form(expected_data)
 
+    def test_resume_ability_after_500(self):
+        s = self.selenium
+
+        # go to article adding
+        s.click(self.elements['navigation']['articles'])
+        s.click(self.elements['controls']['add'])
+
+        # wait for the page to fully load
+        s.wait_for_element_present(self.elements['controls']['suggester'])
+
+        # fill the form that will produce 500 (because of non-numeric photo)
+        data = {
+            'photo' : u'马 žš experiment',
+            'upper_title' : u'vyšší',
+            'description' : u'Article description',
+            'slug' : u'title',
+        }
+        expected_data = copy(data)
+        self.fill_fields(data)
+
+        data = {
+            "authors" : u"King Albert II",
+            'category' : u"Africa/central-africa",
+        }
+        expected_data.update(dict([(key, [data[key]])for key in data]))
+        self.fill_using_lookup(data)
+        self.save_form()
+
+        # now to to add article again
+        s.click(self.elements['navigation']['articles'])
+        s.click(self.elements['controls']['add'])
+
+        s.wait_for_element_present("id_drafts")
+
+        # load template
+        s.select("id_drafts", "index=1")
+
+        s.wait_for_condition("selenium.page().findElement('id_slug').innerText != ''", 30000);
+
+        # and check we have data we've stored
+        self.verify_form(expected_data)
+
+        # let selenium grab window again...
+        #FIXME: This is hacky and some wait_for_condition should be found; however,
+        # selenium.page().getCurrentWindow != null is not working...:]
+        from time import sleep
+        sleep(5)
