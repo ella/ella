@@ -63,6 +63,7 @@ class NewmanTestCase(SeleniumTestCase):
                 'categories_add' : "//a[@class='app category']/../a[position()=2]",
                 'articles' : "//a[@class='app article']",
                 'article_add' : "//a[@class='app article']/../a[position()=2]",
+                'galleries' : "//a[@class='app gallery']",
             },
             'controls' : {
                 'suggester' : "//div[@class='suggest-bubble']",
@@ -115,7 +116,7 @@ class NewmanTestCase(SeleniumTestCase):
     def fill_fields(self, data):
         s = self.selenium
         for key, value in data.items():
-            s.type(key, value)
+            s.type('id_%s' % key, value)
 
     def fill_suggest_fields(self, suggest_data):
         s = self.selenium
@@ -179,10 +180,10 @@ class NewmanTestCase(SeleniumTestCase):
             retrieved = errors[field]['retrieved']
 
             if isinstance(expected, list):
-                expected = u"".join(expected).encode('utf-8')
+                expected = u"".join(expected)
 
             if isinstance(retrieved, list):
-                retrieved = u"".join(retrieved).encode('utf-8')
+                retrieved = u"".join(retrieved)
 
             messages.append("Form validation for field %(field)s was expecting %(expected)s, but got %(retrieved)s" % {
                 'field' : field,
@@ -190,7 +191,7 @@ class NewmanTestCase(SeleniumTestCase):
                 'retrieved' : retrieved,
             })
             
-        return '\n'.join(messages)
+        return u'\n'.join(messages).encode('utf-8')
 
     def add_error(self, errors, field, expected, retrieved):
         errors[field] = {
