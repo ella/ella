@@ -147,7 +147,7 @@ class PlacementForm(modelforms.ModelForm):
         if obj.pk:
             cat = getattr(obj, 'category', None)
         obj_slug = getattr(obj, 'slug', obj.pk)
-        target_ct=ContentType.objects.get_for_model(obj)
+#        target_ct=ContentType.objects.get_for_model(obj)
 
         main = None
         d = self.cleaned_data
