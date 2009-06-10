@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
 from copy import copy
+from datetime import datetime
+from time import strftime
+
 from django.utils.translation import ugettext_lazy as _
 
 from ella.articles.models import Article
 
-from time import strftime
-from example_project.tests.test_newman.helpers import NewmanTestCase
+from example_project.tests.test_newman.helpers import (
+    NewmanTestCase,
+    DateTimeAssert,
+)
 
 class TestArticleBasics(NewmanTestCase):
     translation_language_code = 'cs'
@@ -63,21 +68,23 @@ class TestArticleBasics(NewmanTestCase):
 
         self.fill_calendar_fields(calendar_data)
 
+        # TODO: Replace fuzzy matching when it will be decided how to insert time
         expected_data.update({
-            "placement_set-0-publish_from" : u"%(year)s-%(month)s-%(day)s %(hour)s:%(minute)s" % {
-                "year" : strftime("%Y"),
-                "month" : strftime("%m"),
-                "day" : "%02d" % int(calendar_data['publish_from']['day']),
-                "hour" : strftime("%H"),
-                "minute" : strftime("%M"),
-            },
-            "placement_set-0-publish_to" : u"%(year)s-%(month)s-%(day)s %(hour)s:%(minute)s" % {
-                "year" : strftime("%Y"),
-                "month" : strftime("%m"),
-                "day" : "%02d" % int(calendar_data['publish_to']['day']),
-                "hour" : strftime("%H"),
-                "minute" : strftime("%M"),
-            },
+            "placement_set-0-publish_from" : DateTimeAssert(datetime(
+                year = int(strftime("%Y")),
+                month = int(strftime("%m")),
+                day = int(calendar_data['publish_from']['day']),
+                hour = int(strftime("%H")),
+                minute = int(strftime("%M")),
+            )),
+
+            "placement_set-0-publish_to" : DateTimeAssert(datetime(
+                year = int(strftime("%Y")),
+                month = int(strftime("%m")),
+                day = int(calendar_data['publish_to']['day']),
+                hour = int(strftime("%H")),
+                minute = int(strftime("%M")),
+            )),
         })
 
         self.save_form()
@@ -88,7 +95,6 @@ class TestArticleBasics(NewmanTestCase):
         a = Article.objects.all()[0]
         self.assert_equals(data['title'], a.title)
 
-        # FIXME: hack, use django-markup
         self.assert_equals('<p>%s</p>\n' % data['description'], a.description)
         self.assert_equals(2, a.authors.count())
 
