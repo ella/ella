@@ -140,7 +140,7 @@ class TestArticleBasics(NewmanTestCase):
         # load template
         s.select("id_drafts", "index=1")
 
-        s.wait_for_condition("selenium.page().findElement('id_slug').innerText != ''", 30000);
+        s.wait_for_condition("selenium.page().findElement('id_slug').value != ''", 30000);
 
         # and check we have data we've stored
         self.verify_form(expected_data)

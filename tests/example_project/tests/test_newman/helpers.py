@@ -97,11 +97,12 @@ class NewmanTestCase(SeleniumTestCase):
         self.selenium.type("id_username", self.USER_USERNAME)
         self.selenium.type("id_password", self.USER_PASSWORD)
         self.selenium.click(self.elements['pages']['login']['submit'])
+        self.selenium.wait_for_page_to_load(30000)
 
     def logout(self):
         self.selenium.click(self.elements['navigation']['logout'])
-        self.selenium.wait_for_page_to_load(30000)
-        self.selenium.is_text_present(u"Thanks for spending some quality time with the Web site today.")
+        # we should be on login page
+        self.selenium.wait_for_element_present('id_username')
 
     def tearDown(self):
         self.logout()

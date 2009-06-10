@@ -27,8 +27,6 @@ class TestCategoryCount(UnitTestCase):
 
 class TestCategoryAdmin(NewmanTestCase):
 
-    
-
     def test_category_list(self):
         s = self.selenium
         s.click(self.elements['navigation']['categories'])
