@@ -5,8 +5,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 
 from ella.core.cache.utils import CachedGenericForeignKey
-from ella.core.models import Dependency
-from ella.newman.licenses import LICENSED_MODELS
 
 class LicenseManager(models.Manager):
     def _get_queryset_of_unapplicables(self, model):
@@ -15,7 +13,7 @@ class LicenseManager(models.Manager):
 
     def unapplicable_for_model(self, model):
         return [u['obj_id'] for u in self._get_queryset_of_unapplicables(model)]
-    
+
     def filter_queryset(self, queryset):
         qset = queryset.exclude(pk__in=self._get_queryset_of_unapplicables(queryset.model))
         return qset
@@ -41,10 +39,12 @@ class License(models.Model):
     max_applications = models.PositiveIntegerField(_('Max applications'))
     applications = models.PositiveIntegerField(editable=False, default=0)
 
+    note = models.CharField(_('Note'), max_length=255, blank=True)
+
     objects = LicenseManager()
 
     def __unicode__(self):
-        return u'License for %s' % self.target
+        return _('License for %s') % self.target
 
     @property
     def applicable(self):

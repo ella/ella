@@ -4,6 +4,7 @@
 <fieldset class="module" style="margin: 10px;">
    <legend style="font-size: 120%; font-weight: bold;">{{ inline_admin_formset.opts.verbose_name_plural|capfirst }}</legend>
    {{ inline_admin_formset.formset.non_form_errors }}
+    {% block tabular_quick_sel %}{% endblock %}
    <table>
      <thead><tr>
      {% for field in inline_admin_formset.fields %}

@@ -168,6 +168,9 @@ class NewmanModelAdmin(XModelAdmin):
             url(r'^(.+)/draft/load/$',
                 wrap(self.load_draft_view),
                 name='%sadmin_%s_%s_load_draft' % info),
+            url(r'^(.+)/draft/delete/$',
+                wrap(self.delete_draft_view),
+                name='%sadmin_%s_%s_delete_draft' % info),
             url(r'^add/json/$',
                 wrap(self.add_json_view),
                 name='%sadmin_%s_%s_add_json' % info),
@@ -279,6 +282,24 @@ class NewmanModelAdmin(XModelAdmin):
             return utils.JsonResponse(_('No matching draft found.'), status=STATUS_OBJECT_NOT_FOUND)
         draft = drafts[0]
         return utils.JsonResponse(_('Loaded draft "%s"' % draft.__unicode__()), draft.data)
+
+    @require_AJAX
+    def delete_draft_view(self, request, extra_context=None):
+        self.register_newman_variables(request)
+        id = request.GET.get('id', None)
+        if not id:
+            return utils.JsonResponse(_('No id found in GET variable "id".'), status=STATUS_VAR_MISSING)
+        try:
+            draft = AdminUserDraft.objects.get(
+                ct=self.model_content_type,
+                user=request.user,
+                pk=id
+            )
+        except AdminUserDraft.DoesNotExist:
+            return utils.JsonResponse(_('No matching draft found.'), status=STATUS_OBJECT_NOT_FOUND)
+        msg = _('Draft %s was deleted.' % draft.__unicode__())
+        draft.delete()
+        return utils.JsonResponse(msg)
 
     @require_AJAX
     def filters_view(self, request, extra_context=None):
@@ -685,6 +706,14 @@ class NewmanModelAdmin(XModelAdmin):
             'save_url': reverse(rev)
         })
         return context
+
+    @require_AJAX
+    def delete_view(self, request, object_id, extra_context=None):
+        result = super(NewmanModelAdmin, self).delete_view(request, object_id, extra_context)
+        if not isinstance(result, HttpResponseRedirect):
+            return result
+        # create JsonResponse containing success message
+        return utils.JsonResponse(_('Object was deleted.'))
 
     @require_AJAX
     @transaction.commit_on_success

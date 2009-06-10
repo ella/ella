@@ -122,7 +122,7 @@ GenericSuggestLib = {};
         // Ensure that the initial values fit
         function restore_suggest_widget_from_value(el) {
             var $inputs = get_current_inputs(el);
-            if ( /^(.+)#(.+)$/.test($inputs.hidden.val()) ) {
+            if ( /^(.*)#(.*)$/.test($inputs.hidden.val()) ) {
                 var ids    = RegExp.$1;
                 var repres = RegExp.$2;
                 ids    = ids.match(/\d+/g);
@@ -588,7 +588,16 @@ GenericSuggestLib = {};
         $w.data('input').removeClass('pod-lupickou');
         $w.remove();
     }
-
+    
+    GenericSuggestLib.copy = function(from, to) {
+        var $from = get_current_inputs(from);
+        var $to   = get_current_inputs(to);
+        $to.hidden.val(
+            $from.hidden.val()
+        );
+        restore_suggest_widget_from_value(to);
+    }
+    
     function equidistant_array_coverage(count, characters) {
         if (characters == null)
             characters = 'abcčdefghijklmnoprřsštuvzž'.split('');

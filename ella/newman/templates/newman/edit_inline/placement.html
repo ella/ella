@@ -47,3 +47,9 @@
       {% endfor %}
     {% endfor %}
 {% endblock %}
+
+{% block tabular_quick_sel %}
+{% if add %}
+<p><a class="btn js-placement-main-category">{% trans "Main category" %}</a></p>
+{% endif %}
+{% endblock %}

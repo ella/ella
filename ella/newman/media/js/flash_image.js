@@ -49,6 +49,9 @@ var IMAGE_OPTIONS = {
     }
     function set_image_form_handlers() {
         if ($('#photo_form').length == 0) return;
+        var flash_obj = ($.browser.msie ? window : document).PhotoUploader;
+        if (!flash_obj) return;
+        
         $('#photo_form .submit-row a.submit')
         .addClass('noautosubmit')
         .unbind('click', save_photo_handler)

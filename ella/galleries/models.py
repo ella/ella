@@ -76,9 +76,6 @@ class Gallery(Publishable):
         verbose_name = _('Gallery')
         verbose_name_plural = _('Galleries')
 
-    def __unicode__(self):
-        return u'%s gallery' % self.title
-
 
 class GalleryItem(models.Model):
     """

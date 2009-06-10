@@ -14,7 +14,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 
 from ella.core.cache.utils import get_cached_list
-from ella.newman.forms import SiteFilterForm, ErrorReportForm
+from ella.newman.forms import SiteFilterForm, ErrorReportForm, EditorBoxForm
 from ella.newman.models import AdminSetting
 from ella.newman.decorators import require_AJAX
 from ella.newman.utils import set_user_config_db, set_user_config_session, get_user_config,\
@@ -74,9 +74,9 @@ class NewmanSite(AdminSite):
             url(r'^%s/$' % NEWMAN_URL_PREFIX,
                 wrap(self.newman_index),
                 name="newman-index"),
-#            url(r'^$',
-#                wrap(self.index),
-#                name='%sadmin_index' % self.name),
+            url(r'^%s/editor-box/$' % NEWMAN_URL_PREFIX,
+                wrap(self.editor_box_view),
+                name="newman-editor-box"),
         )
 
         if 'djangomarkup' in settings.INSTALLED_APPS:
@@ -88,6 +88,18 @@ class NewmanSite(AdminSite):
 
         urlpatterns += super(NewmanSite, self).get_urls()
         return urlpatterns
+
+#    @require_AJAX
+    def editor_box_view(self, request, extra_context=None):
+        """
+        Render template with editor box form
+        """
+        context = {
+            'boxform': EditorBoxForm()
+        }
+        return render_to_response('newman/widget/editor_box.html', context,
+            context_instance=template.RequestContext(request)
+        )
 
     @never_cache
     def login(self, request):
