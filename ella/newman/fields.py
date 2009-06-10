@@ -72,6 +72,12 @@ class NewmanRichTextField(RichTextField):
     src_text_attr = DEP_SRC_TEXT_ATTR
     widget = widgets.NewmanRichTextAreaWidget
 
+    default_error_messages = {
+        'syntax_error': _('Bad syntax in syntax formatting or template tags.'),
+        'invalid_object': _('Object does not exist or is not right inserted.'),
+        'invalid_tag': _('You can use only box template tag.'),
+    }
+
     def validate_rendered(self, rendered):
         """
         Validate that the target text composes only of text and boxes
@@ -88,9 +94,16 @@ class NewmanRichTextField(RichTextField):
                 try:
                     o = n.get_obj()
                 except ObjectNotFoundOrInvalid, e:
-                    raise ValidationError(self.error_messages['syntax_error'])
+                    # TODO: pass lookup into error message
+                    # this raises UnicodeEncodeError
+                    # error_msg = self.error_messages['invalid_object'] % {
+                    #    'model': n.model._meta.verbose_name,
+                    #    'field': n.lookup[0],
+                    #    'value': n.lookup[1]
+                    #}
+                    raise ValidationError(self.error_messages['invalid_object'])
             else:
-                raise ValidationError(self.error_messages['syntax_error'])
+                raise ValidationError(self.error_messages['invalid_tag'])
 
 
 class AdminSuggestField(fields.Field):
