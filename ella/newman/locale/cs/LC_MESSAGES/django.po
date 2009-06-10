@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ella.newman (admin-ng)\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-09 18:36+0200\n"
-"PO-Revision-Date: 2009-06-09 18:36+0100\n"
+"POT-Creation-Date: 2009-06-10 11:28+0200\n"
+"PO-Revision-Date: 2009-06-10 11:28+0100\n"
 "Last-Translator: Vitek Pliska <whit@jizak.cz>\n"
 "Language-Team: Ella <ella.project@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -30,25 +30,37 @@ msgstr ""
 msgid "Select %s to change"
 msgstr ""
 
-#: fields.py:103
+#: fields.py:76
+msgid "Bad syntax in syntax formatting or template tags."
+msgstr "Špatná syntaxe v textu či šabloně."
+
+#: fields.py:77
+msgid "Object does not exist or is not right inserted."
+msgstr "Objekt neexistuje nebo není správně vložen."
+
+#: fields.py:78
+msgid "You can use only box template tag."
+msgstr "Můžete použít pouze tag box."
+
+#: fields.py:116
 msgid "This field is required."
 msgstr ""
 
-#: fields.py:104
+#: fields.py:117
 #, python-format
 msgid "Select a valid choice. %(value)s is not one of the available choices."
 msgstr ""
 
-#: fields.py:105
+#: fields.py:118
 msgid "Enter a list of values."
 msgstr ""
 
-#: fields.py:170
+#: fields.py:183
 msgid "This image has a CMYK color profile. We can't work with CMYK. Please convert it to RGB."
 msgstr ""
 
-#: fields.py:232
-#: fields.py:236
+#: fields.py:245
+#: fields.py:249
 #: generic.py:75
 #: generic.py:95
 msgid "Category not permitted"

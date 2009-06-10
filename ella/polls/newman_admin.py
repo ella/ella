@@ -125,7 +125,7 @@ class PollAdmin(newman.NewmanModelAdmin):
     list_filter = ('active_from', 'active_till',)
     search_fields = ('title', 'text_announcement', 'text', 'text_results', 'question__question',)
     rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}
-    suggest_fields = {'question': ('question',)}
+    suggest_fields = {'question': ('__unicode__', 'question',)}
 
     fieldsets = (
         (_('Basic'), {'fields' : ('title', 'question', 'active_from', 'active_till')}),
