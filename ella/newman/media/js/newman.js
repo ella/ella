@@ -24,9 +24,43 @@ function clone_form($orig_form) {
     return $new_form;
 }
 
+function lock_window(msg) {
+    if ( ! msg ) msg = gettext('Wait')+'...';
+    
+    var $modal = $('#window-lock');
+    if ($modal.length == 0) $modal = $(
+            '<div id="window-lock"></div>'
+    ).html(
+          '<p><img src="'
+        + MEDIA_URL + 'ico/15/loading.gif'
+        + '" alt="" /> '
+        + msg
+        + '</p>'
+    ).appendTo('body').dialog({
+        autoOpen: false,
+        modal: true,
+        resizable: false,
+        draggable: false,
+        closeOnEscape:false,
+        beforeclose: function() {
+            return !!$(this).data('close_ok');
+        }
+    });
+    $modal.data('close_ok', false)
+    $modal.dialog('open');
+}
+function unlock_window() {
+    $('#window-lock').data('close_ok', true).dialog('close');
+}
+
 //// Homepage initialization
 
 $(function(){ContentByHashLib.reload_content('content');});
+
+//// Lock window when media are being loaded
+
+$(document).bind('media_loading_start', function() { lock_window(gettext('Loading media')+'...'); });
+$(document).bind('media_loaded', unlock_window);
 
 //// Drafts and templates
 (function() {
@@ -289,27 +323,7 @@ $( function() {
         if (!$form.jquery) $form = $($form);
         if ( ! validate($form) ) return false;
         
-        var $modal = $('#window-lock');
-        if ($modal.length == 0) $modal = $(
-                '<div id="window-lock"></div>'
-        ).html(
-              '<p>'
-            + gettext('Sending')
-            + '...<img src="'
-            + MEDIA_URL + 'ico/15/loading.gif'
-            + '" alt="" /></p>'
-        ).appendTo('body').dialog({
-            autoOpen: false,
-            modal: true,
-            resizable: false,
-            draggable: false,
-            closeOnEscape:false,
-            beforeclose: function() {
-                return !!$(this).data('close_ok');
-            }
-        });
-        $modal.data('close_ok', false)
-        $modal.dialog('open');
+        lock_window(gettext('Sending'));
         
         // Hack for file inputs
 /*        var has_files = false;
@@ -384,7 +398,7 @@ $( function() {
             success:  success,
             error:    error,
             complete: function() {
-                $('#window-lock').data('close_ok', true).dialog('close');
+                unlock_window();
             },
             _form: $form,
             _button_name: button_name
@@ -448,7 +462,9 @@ $( function() {
                 );
                 location.reload();
             }
-            AjaxFormLib.save_preset($form, {title: '* '+gettext('crash save'), msg: gettext('Form content backed up')});
+            if ($form.is('.change-form')) {
+                AjaxFormLib.save_preset($form, {title: '* '+gettext('crash save'), msg: gettext('Form content backed up')});
+            }
             var id = ContentByHashLib.closest_loaded( $form.get(0) ).id;
             var address = $form.hasClass('dyn-addr')
                 ? get_adr($form.attr('action'))
@@ -678,17 +694,20 @@ function show_loading() {
     if ($LOADING_MSG) return;
     $LOADING_MSG = show_message(gettext('Loading')+'...', {duration:0});
 }
+$(document).bind('show_loading', show_loading);
 function hide_loading() {
     if ($LOADING_MSG) $LOADING_MSG.remove();
     LOADING_CNT = 0;
     $LOADING_MSG = undefined;
 }
+$(document).bind('hide_loading', hide_loading);
 function dec_loading() {
     if (--LOADING_CNT <= 0) {
         LOADING_CNT = 0;
         hide_loading();
     }
 }
+$(document).bind('dec_loading', dec_loading);
 
 function paste_code_into_debug(code, description) {
     $('#debug').append(
@@ -712,6 +731,9 @@ function show_ajax_error(xhr) {
     }
     show_err(message);
 }
+$(document).bind('load_content_failed', function(evt, xhr) {
+    show_ajax_error(xhr);
+});
 function show_ajax_success(response_text) {
     var message, data;
     try {
