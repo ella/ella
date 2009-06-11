@@ -5,23 +5,23 @@
     <div id="filters-handler">
         {% if cl.list_filter %}
                 {% if is_filtered %}
-                    <a class="icn btn filter filter-active {% if is_popup %}popup-filter{% else %}simpleload{% endif %}" href="filters::::filters/{{ cl.get_query_string }}">{% trans 'Filters' %}<span> ({% trans 'on!' %})</span></a>
+                    <a class="icn btn filter filter-active {% if is_popup %}popup-filter{% else %}js-simpleload{% endif %}" href="filters::::filters/{{ cl.get_query_string }}">{% trans 'Filters' %}<span> ({% trans 'on!' %})</span></a>
                 {% else %}
-                    <a class="icn btn filter {% if is_popup %}popup-filter{% else %}simpleload{% endif %}" href="filters::::filters/{{ cl.get_query_string }}">{% trans 'Filters' %}</a>
+                    <a class="icn btn filter {% if is_popup %}popup-filter{% else %}js-simpleload{% endif %}" href="filters::::filters/{{ cl.get_query_string }}">{% trans 'Filters' %}</a>
                 {% endif %}
         {% endif %}
         {% if cl.search_fields %}
             {% block search %}{% newman_search_form cl %}{% endblock %}
         {% endif %}
         {% if user.is_superuser %}
-            <a href="refresh/" class="hashadr icn btn recur">{% trans 'Refresh' %}</a>
+            <a href="refresh/" class="js-hashadr icn btn recur">{% trans 'Refresh' %}</a>
         {% endif %}
     </div>
 {% endblock %}
 {% block content_toolbar_right %}
     {% if not is_popup %}
             {% if has_add_permission %}
-                    <a href="add/" class="hashadr icn btn add">{% blocktrans with cl.opts.verbose_name as name %}Add {{ name }}{% endblocktrans %}</a>
+                    <a href="add/" class="js-hashadr icn btn add">{% blocktrans with cl.opts.verbose_name as name %}Add {{ name }}{% endblocktrans %}</a>
             {% endif %}
     {% endif %}
 {% endblock %}
@@ -31,7 +31,7 @@
 {% endblock %}
 
 {% block content %}
-    <div class="hashadr-container" id="changelist">
+    <div class="js-hashadr-container" id="changelist">
         {% block result_list %}{% result_list cl %}{% endblock %}
         {% block pagination %}{% pagination cl %}{% endblock %}
     </div>

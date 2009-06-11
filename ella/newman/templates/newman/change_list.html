@@ -6,7 +6,7 @@
         <div class="breadcrumbs">
             <div style="float: left;">
                 <a href="{% url newman_admin_index %}#/nm/">{% trans "Home" %}</a>
-                {% if app_label %}&rsaquo; <a class="hashadr" href="/{{ app_label }}/">{% trans app_label.title %}</a>{% endif %}
+                {% if app_label %}&rsaquo; <a class="js-hashadr" href="/{{ app_label }}/">{% trans app_label.title %}</a>{% endif %}
                 {% if title %}&rsaquo; <strong id="doc-title">{{ title }}</strong>{% endif %}
             </div>
             {% if is_user_category_filtered %}
@@ -21,9 +21,9 @@
     <div id="filters-handler">
         {% if cl.list_filter %}
                 {% if is_filtered %}
-                    <a class="icn btn filter filter-active {% if is_popup %}popup-filter{% else %}simpleload{% endif %}" href="filters::::filters/{{ cl.get_query_string }}">{% trans 'Filters' %}<span> ({% trans 'on!' %})</span></a>
+                    <a class="icn btn filter filter-active {% if is_popup %}popup-filter{% else %}js-simpleload{% endif %}" href="filters::::filters/{{ cl.get_query_string }}">{% trans 'Filters' %}<span> ({% trans 'on!' %})</span></a>
                 {% else %}
-                    <a class="icn btn filter {% if is_popup %}popup-filter{% else %}simpleload{% endif %}" href="filters::::filters/{{ cl.get_query_string }}">{% trans 'Filters' %}</a>
+                    <a class="icn btn filter {% if is_popup %}popup-filter{% else %}js-simpleload{% endif %}" href="filters::::filters/{{ cl.get_query_string }}">{% trans 'Filters' %}</a>
                 {% endif %}
         {% endif %}
         {% if cl.search_fields %}
@@ -34,7 +34,7 @@
 {% block content_toolbar_right %}
     {% if not is_popup %}
             {% if has_add_permission %}
-                    <a href="add/" class="hashadr icn btn add">{% blocktrans with cl.opts.verbose_name as name %}Add {{ name }}{% endblocktrans %}</a>
+                    <a href="add/" class="js-hashadr icn btn add">{% blocktrans with cl.opts.verbose_name as name %}Add {{ name }}{% endblocktrans %}</a>
             {% endif %}
     {% endif %}
 {% endblock %}
@@ -52,9 +52,9 @@
 {% endif %}
 
 {% block content %}
-    <div class="hashadr-container" id="changelist">
+    <div class="js-hashadr-container" id="changelist">
 
-        <form class="ajax-form dyn-addr" action="." method="post"{% if cl.formset.is_multipart %} enctype="multipart/form-data"{% endif %}>
+        <form class="js-form js-dyn-adr" action="." method="post"{% if cl.formset.is_multipart %} enctype="multipart/form-data"{% endif %}>
             {% if cl.formset %}
                 {{ cl.formset.management_form }}
             {% endif %}
@@ -66,7 +66,7 @@
                 {% if actions_on_bottom and cl.full_result_count %}{% admin_actions %}{% endif %}
             {% endblock %}
             {% block pagination %}{% pagination cl %}{% endblock %}
-            <div class="form-metadata">
+            <div class="js-form-metadata">
                 <input type="hidden" name="success" onchange="changelist_batch_success.apply(this, arguments);" />
             </div>
         </form>

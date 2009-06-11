@@ -123,10 +123,10 @@ var ContentByHashLib = {};
         }
         
         $target.removeClass('loading').html(data);
-        if ($target.hasClass('noautoshow')) {} else $target.show();
+        if ($target.hasClass('js-noautoshow')) {} else $target.show();
         var newtitle = $('#doc-title').text();
         document.title = (newtitle ? newtitle+' | ' : '') + ORIGINAL_TITLE;
-        try { dec_loading(); } catch(e) { }
+        $(document).trigger('dec_loading');
         if (address != undefined) {
             LOADED_URLS[ $target.attr('id') ] = address;
         }
@@ -213,7 +213,7 @@ var ContentByHashLib = {};
         var $target = $('#'+info.target_id);
         if ($target && $target.jquery && $target.length) {} else {
             carp('Could not find target element: #'+info.target_id);
-            try { dec_loading(); } catch(e) { }
+            $(document).trigger('dec_loading');
             draw_ready();
             return;
         }
@@ -229,7 +229,7 @@ var ContentByHashLib = {};
         var info = LOAD_BUF[ load_id ];
         delete LOAD_BUF[ load_id ];
         $('#'+info.target_id).removeClass('loading');
-        try { dec_loading(); } catch(e) { }
+        $(document).trigger('dec_loading');
         
         carp('Failed to load '+info.address+' into '+info.target_id);
     }
@@ -256,7 +256,7 @@ var ContentByHashLib = {};
         }
         
         $('#'+target_id).addClass('loading');
-        try { show_loading(); } catch(e) { }
+        $(document).trigger('show_loading');
         
         var url = prepend_base_path_to(address);
         url = $('<a>').attr('href', url).get(0).href;
@@ -286,7 +286,7 @@ var ContentByHashLib = {};
                 LOAD_BUF[ this.load_id ].xhr = xhr;
                 inject_error_message( LOAD_BUF[ this.load_id ] );
                 cancel_request( this.load_id );
-                try { show_ajax_error(xhr); } catch(e) { }
+                $(document).trigger('load_content_failed', [xhr]);
                 draw_ready();
                 if (this.custom_error) try {
                     this.custom_error();
@@ -478,7 +478,7 @@ var ContentByHashLib = {};
 //        carp('hash: ' + location.hash);
         MAX_REQUEST++;
         $('.loading').removeClass('loading');
-        try { hide_loading(); } catch(e) { }
+        $(document).trigger('hide_loading');
         load_by_hash();
     });
     setTimeout( function() {
@@ -520,13 +520,14 @@ var ContentByHashLib = {};
     ContentByHashLib.simple_load = simple_load;
     
     // Set up event handlers
-    $('.simpleload,.simpleload-container a').live('click', function(evt) {
+    $('.js-simpleload,.js-simpleload-container a').live('click', function(evt) {
         if (evt.button != 0) return true;    // just interested in left button
         simple_load($(this).attr('href'));
         return false;
     });
-    $('.hashadr,.hashadr-container a').live('click', function(evt) {
+    $('.js-hashadr,.js-hashadr-container a').live('click', function(evt) {
         if (evt.button != 0) return true;    // just interested in left button
+        if ($(this).is('.js-nohashadr')) return true;   // override hashadr-container
         adr($(this).attr('href'));
         return false;
     });
@@ -543,9 +544,9 @@ var ContentByHashLib = {};
 // adr('bar/#id::baz/') is the same as adr('bar/'); adr('id::baz/').
 // Absolute paths and ?var=val strings work too.
 // 
-// Alternatively, you can use <a href="bar/" class="hashadr">.
-// The hashadr class says clicks should be captured and delegated to function adr.
-// A third way is to encapsulate a link (<a>) into a .hashadr-container element.
+// Alternatively, you can use <a href="bar/" class="js-hashadr">.
+// The js-hashadr class says clicks should be captured and delegated to function adr.
+// A third way is to encapsulate a link (<a>) into a .js-hashadr-container element.
 // 
 // The target_id::rel_base::address syntax in a specifier means that address is taken as relative
 // to the one loaded to rel_base and the result is loaded into target_id.
@@ -876,11 +877,8 @@ function get_hash(address, options) {
     
     var media_queue = [];
     $(document).data('loaded_media', {});
-    var $LOADING_MEDIA_MSG;
     function init_media() {
         $(document).trigger('media_loaded').data('loaded_media', {});
-        $('body').removeClass('loading');
-        $LOADING_MEDIA_MSG.remove();
     }
     function draw_media() {
         if (media_queue.length == 0) {
@@ -897,8 +895,7 @@ function get_hash(address, options) {
         media_queue.push(url);
         if (do_start) {
             setTimeout(draw_media,20);
-            $('body').addClass('loading');
-            $LOADING_MEDIA_MSG = show_message(gettext('Loading media'), {duration:0});
+            $(document).trigger('media_loading_start');
         }
     }
     window.request_media = request_media;

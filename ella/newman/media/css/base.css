@@ -249,7 +249,7 @@ label.vCheckboxLabel { display: inline; margin-left: 10px; }
 label.required { font-weight: bold; color: darkorange; }
 div.submit-row, fieldset.submit-row { border: none; clear:both; margin-top: 5px; padding: 2px 0; text-align: right; }
 input, textarea, select { padding: 2px 0; font: normal 100% Tahoma, Verdana, sans-serif; }
-.ajax-form .form-metadata { display: none; }
+.js-form .js-form-metadata { display: none; }
 input.vTextField { width: 500px; }
 input.vIntegerField { width: 40px; text-align: right; }
 input.vForeignKeyRawIdAdminField, input.target_id { width: 50px; }

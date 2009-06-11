@@ -708,6 +708,14 @@ class NewmanModelAdmin(XModelAdmin):
         return context
 
     @require_AJAX
+    def delete_view(self, request, object_id, extra_context=None):
+        result = super(NewmanModelAdmin, self).delete_view(request, object_id, extra_context)
+        if not isinstance(result, HttpResponseRedirect):
+            return result
+        # create JsonResponse containing success message
+        return utils.JsonResponse(_('Object was deleted.'))
+
+    @require_AJAX
     @transaction.commit_on_success
     def add_json_view(self, request, form_url='', extra_context=None):
         "The 'add' admin view for this model. Communicating with client in JSON format only."

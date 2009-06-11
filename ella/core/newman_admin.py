@@ -1,3 +1,4 @@
+from django.core.urlresolvers import reverse
 import datetime, time
 
 from django.utils.translation import ugettext_lazy as _, ugettext
@@ -147,7 +148,6 @@ class PlacementForm(modelforms.ModelForm):
         if obj.pk:
             cat = getattr(obj, 'category', None)
         obj_slug = getattr(obj, 'slug', obj.pk)
-        target_ct=ContentType.objects.get_for_model(obj)
 
         main = None
         d = self.cleaned_data
@@ -158,14 +158,11 @@ class PlacementForm(modelforms.ModelForm):
         if cat:
             main = d
 
-        if d['slug'] and d['slug'] != '':
-            slug = d['slug']
-        else:
-            slug = obj_slug
+        d['slug'] = obj_slug
         # try and find conflicting placement
         qset = Placement.objects.filter(
             category=d['category'],
-            slug=slug,
+            slug=d['slug'],
             publishable=obj,
             static=d['static']
         )
@@ -217,6 +214,7 @@ class ListingInlineAdmin(newman.NewmanTabularInline):
     fieldsets = ((None, {'fields' : ('category','publish_from', 'publish_to', 'priority_from', 'priority_to', 'priority_value', 'commercial',)}),)
 
 class PlacementInlineAdmin(newman.NewmanTabularInline):
+    exclude = ('slug',)
     template = 'newman/edit_inline/placement.html'
     model = Placement
     max_num = 1
@@ -377,8 +375,8 @@ class PublishableAdmin(newman.NewmanModelAdmin):
     """ Default admin options for all publishables """
 
     exclude = ('content_type',)
-    list_display = ('admin_link', 'category', 'photo_thumbnail', 'publish_from_nice', 'placement_link', 'site_icon')
-    list_filter = ('category__site', 'category', 'authors', 'content_type')
+    list_display = ('admin_link', 'category', 'photo_thumbnail', 'publish_from_nice', 'placement_link', 'site_icon', 'fe_link')
+    list_filter = ('category__site', 'category', 'content_type')
     unbound_list_filter = (PublishFromFilter, IsPublishedFilter,)
     search_fields = ('title', 'description', 'slug', 'authors__name', 'authors__slug',) # FIXME: 'tags__tag__name',)
     raw_id_fields = ('photo',)
@@ -404,6 +402,14 @@ class PublishableAdmin(newman.NewmanModelAdmin):
         return mark_safe('%s' % object.category.site.name)
     site_icon.short_description = _('site')
     site_icon.allow_tags = True
+
+    def fe_link(self, obj):
+        if obj.get_absolute_url():
+            return mark_safe('<a href="%s" class="icn web js-nohashadr">www</a>' % obj.get_absolute_url())
+        else:
+            return '---'
+    fe_link.short_description = _('WWW')
+    fe_link.allow_tags = True
 
     def publish_from_nice(self, obj):
         span_str = '<span class="%s">%s</span>'

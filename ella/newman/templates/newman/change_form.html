@@ -4,8 +4,8 @@
 {% block breadcrumbs %}
 <div class="breadcrumbs">
     <a href="{% url newman_admin_index %}#/nm/">{% trans "Home" %}</a>
-    &rsaquo; <a class="hashadr" href="../../">{% trans app_label.title %}</a>
-    &rsaquo; {% if has_change_permission %}<a class="hashadr" href="../">{{ opts.verbose_name_plural|capfirst }}</a>{% else %}{{ opts.verbose_name_plural|capfirst }}{% endif %}
+    &rsaquo; <a class="js-hashadr" href="../../">{% trans app_label.title %}</a>
+    &rsaquo; {% if has_change_permission %}<a class="js-hashadr" href="../">{{ opts.verbose_name_plural|capfirst }}</a>{% else %}{{ opts.verbose_name_plural|capfirst }}{% endif %}
     {% if title %}&rsaquo; <strong id="doc-title">{{ title }}</strong>{% endif %}
 </div>
 {% endblock %}
@@ -16,9 +16,9 @@
         {{ draft_form.drafts }}
 {% endblock %}
 {% block content_toolbar_right %}
-            <a class="icn btn help simpleload" href="service-container::::help/">{% trans 'Help' %}</a>
+            <a class="icn btn help js-simpleload" href="service-container::::help/">{% trans 'Help' %}</a>
             {% if change %}
-                <a href="history::::history/" class="icn btn simpleload history">{% trans "History" %}</a>
+                <a href="history::::history/" class="icn btn js-simpleload history">{% trans "History" %}</a>
                 {% if has_absolute_url %}
                     <a href="{% url newman_admin_index %}r/{{ content_type_id }}/{{ object_id }}/" class="icn btn web">{% trans "View on site" %}</a>
                 {% endif%}
@@ -33,7 +33,7 @@
 {% endblock %}
 
 {% block content %}
-<form {% if has_file_field %}enctype="multipart/form-data" {% endif %}action="{{ save_url }}" method="post" id="{{ opts.module_name }}_form" class="ajax-form change-form">{% block form_top %}{% endblock %}
+<form {% if has_file_field %}enctype="multipart/form-data" {% endif %}action="{{ save_url }}" method="post" id="{{ opts.module_name }}_form" class="js-form change-form">{% block form_top %}{% endblock %}
 <div>
 {% if save_on_top %}{% submit_row %}{% endif %}
 {% if errors %}
@@ -65,7 +65,7 @@
 
 </div>
 
-<div class="form-metadata">
+<div class="js-form-metadata">
     <input type="hidden" name="success" onchange="save_change_form_success.apply(this, arguments);" />
 </div>
 

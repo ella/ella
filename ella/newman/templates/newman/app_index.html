@@ -23,10 +23,10 @@
                     <div class="cnt">
                         <ul style="list-style: none; margin: 15px 5px;">
                             {% if model.perms.add %}
-                                <li><a style="display: block;" class="icn btn add hashadr" href="{{ model.admin_url }}add/">{% trans 'Add' %}</a></li>
+                                <li><a style="display: block;" class="icn btn add js-hashadr" href="{{ model.admin_url }}add/">{% trans 'Add' %}</a></li>
                             {% endif %}
                             {% if model.perms.change %}
-                                <li><a style="display: block;" class="icn btn edit hashadr" href="{{ model.admin_url }}">{% trans 'Change' %}</a></li>
+                                <li><a style="display: block;" class="icn btn edit js-hashadr" href="{{ model.admin_url }}">{% trans 'Change' %}</a></li>
                             {% endif %}
                         </ul>
                     </div>

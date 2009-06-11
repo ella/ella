@@ -1,5 +1,8 @@
 {% spaceless %}
 <ul class="items">
+    <li style="background-image: url({{ NEWMAN_MEDIA_URL }}ico/64/kfm_home.png);">
+        <a title="{% trans 'Home' %} (Ctrl+0)" class="app home" href="#/nm/" accesskey="0"><span>{% trans 'Home' %}</span></a>
+    </li>
     {% for fav in favs %}
         <li style="background-image: url({{ NEWMAN_MEDIA_URL }}ico/ct/64/{{ fav.model }}.png);">
             <a title="{{ fav.name }} (Ctrl+{{ forloop.counter }})" class="app {{ fav.model }}" href="#/{{ fav.admin_url }}" accesskey="{{ forloop.counter }}"><span>{{ fav.name }}</span></a>

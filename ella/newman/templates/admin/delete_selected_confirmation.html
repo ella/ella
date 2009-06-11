@@ -22,17 +22,17 @@
     {% for deleteable_object in deletable_objects %}
         <ul>{{ deleteable_object|unordered_list }}</ul>
     {% endfor %}
-    <form action="" class="ajax-form dyn-addr" method="post">
+    <form action="" class="js-form js-dyn-adr" method="post">
         <div>
             {% for obj in queryset %}
             <input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk }}" />
             {% endfor %}
             <input type="hidden" name="action" value="delete_selected" />
             <input type="hidden" name="post" value="yes" />
-            <a class="icn btn ok">{% trans "Yes, I'm sure" %}</a>
+            <a class="icn btn ok js-submit">{% trans "Yes, I'm sure" %}</a>
             <a class="icn btn cancel">{% trans "cancel" %}</a>
         </div>
-        <div class="form-metadata">
+        <div class="js-form-metadata">
             <input type="hidden" name="success" onchange="batch_delete_confirm_complete()" />
             <input type="hidden" name="error"   onchange="batch_delete_confirm_complete()" />
         </div>

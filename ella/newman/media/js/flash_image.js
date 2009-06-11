@@ -52,8 +52,8 @@ var IMAGE_OPTIONS = {
         var flash_obj = ($.browser.msie ? window : document).PhotoUploader;
         if (!flash_obj) return;
         
-        $('#photo_form .submit-row a.submit')
-        .addClass('noautosubmit')
+        $('#photo_form .submit-row a.js-submit')
+        .addClass('js-noautosubmit')
         .unbind('click', save_photo_handler)
         .bind(  'click', save_photo_handler);
         $('#photo_form')

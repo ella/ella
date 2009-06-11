@@ -36,4 +36,14 @@ NON_PUBLISHABLE_CTS = (
     'photos.photo',
 )
 
+# Models that have TaggingInlineAdmin in inlines
+TAGGED_MODELS = getattr(settings, 'TAGGED_MODELS', (
+    'photos.photo',
+    'core.publishable',
+    'articles.article',
+    'galleries.gallery',
+    'interviews.interview',
+    'polls.quiz',
+))
+
 # TODO try to load consts from django.conf.settings
