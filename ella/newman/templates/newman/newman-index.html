@@ -27,16 +27,16 @@
     <div class="hpbox setup">
         <h3><span>{% trans "Quick Settings" %}</span></h3>
         <div class="cnt">
-            <form class="ajax-form" action="{% url newman-save-filters %}" method="post">
+            <form class="js-form" action="{% url newman-save-filters %}" method="post">
                 <fieldset>
                     <legend>{% trans "Category-filter" %}</legend>
                     {{ site_filter_form.sites }}
                 </fieldset>
                 <div class="submit-row">
-                    <a class="icn btn eclear">{% trans "Clear" %}</a>
-                    <a class="icn btn ok def submit">{% trans "Save" %}</a>
+                    <a class="icn btn eclear js-reset">{% trans "Clear" %}</a>
+                    <a class="icn btn ok def js-submit">{% trans "Save" %}</a>
                 </div>
-                <div class="form-metadata">
+                <div class="js-form-metadata">
                     <input type="hidden" name="success" onchange="location.reload()" />
                 </div>
             </form>
@@ -46,14 +46,14 @@
     <div class="hpbox errmsg">
         <h3><span>{% trans "Report Error" %}</span></h3>
         <div class="cnt">
-            <form class="ajax-form reset-on-submit" action="{% url newman-err-report %}" method="post">
+            <form class="ajax-form js-reset-on-submit" action="{% url newman-err-report %}" method="post">
                 <label for="id_err_subject" class="required">{% trans "Subject" %} <span class="help"></span></label>
                 <input id="id_err_subject" name="err_subject" type="text" />
                 <label for="id_err_message" class="required">{% trans "Message" %}</label>
                 <textarea id="id_err_message" name="err_message" rows="4" cols="53"></textarea>
                 <div class="submit-row">
-                    <a class="icn btn eclear">{% trans "Clear" %}</a>
-                    <a class="icn btn ok def submit" title="{% trans "Click to report a bug" %}">{% trans "Send" %}</a>
+                    <a class="icn btn eclear js-reset">{% trans "Clear" %}</a>
+                    <a class="icn btn ok def js-submit" title="{% trans "Click to report a bug" %}">{% trans "Send" %}</a>
                 </div>
             </form>
         </div>
@@ -112,7 +112,7 @@
             {% else %}
             <ul class="actionlist">
             {% for entry in admin_log %}
-            <li class="{% if entry.is_addition %}addlink{% endif %}{% if entry.is_change %}changelink{% endif %}{% if entry.is_deletion %}deletelink{% endif %}">{% if not entry.is_deletion %}<a class="hashadr" href="/{{ entry.get_admin_url }}">{% endif %}{{ entry.object_repr }}{% if not entry.is_deletion %}</a>{% endif %}<br /><span class="mini quiet">{% filter capfirst %}{% trans entry.content_type.name %}{% endfilter %}</span></li>
+            <li class="{% if entry.is_addition %}addlink{% endif %}{% if entry.is_change %}changelink{% endif %}{% if entry.is_deletion %}deletelink{% endif %}">{% if not entry.is_deletion %}<a class="js-hashadr" href="/{{ entry.get_admin_url }}">{% endif %}{{ entry.object_repr }}{% if not entry.is_deletion %}</a>{% endif %}<br /><span class="mini quiet">{% filter capfirst %}{% trans entry.content_type.name %}{% endfilter %}</span></li>
             {% endfor %}
             </ul>
             {% endif %}

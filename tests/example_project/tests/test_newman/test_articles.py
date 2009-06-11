@@ -88,7 +88,7 @@ class TestArticleBasics(NewmanTestCase):
         })
 
         self.save_form()
-        self.assert_equals(u"%s: %s" % (unicode(_(u"Article")), data['title']), s.get_text(self.get_listing_object()+"/th/a[@class='hashadr']"))
+        self.assert_equals(u"%s: %s" % (unicode(_(u"Article")), data['title']), s.get_text(self.get_listing_object()+"/th/a[@class='js-hashadr']"))
 
         # verify save on list
         self.assert_equals(1, Article.objects.count())
@@ -99,7 +99,7 @@ class TestArticleBasics(NewmanTestCase):
         self.assert_equals(2, a.authors.count())
 
         # verify all fields
-        s.click(self.get_listing_object()+"/th/a[@class='hashadr']")
+        s.click(self.get_listing_object()+"/th/a[@class='js-hashadr']")
         
         self.verify_form(expected_data)
 

@@ -72,8 +72,8 @@ class NewmanTestCase(SeleniumTestCase):
                 'message' : {
                     'ok': "//div[@id='opmsg']/span[@class='okmsg']",
                 },
-                'add' : "//a[@class='hashadr icn btn add']",
-                'save' : "//a[@class='submit icn btn save def']",
+                'add' : "//a[@class='js-hashadr icn btn add']",
+                'save' : "//a[@class='js-submit icn btn save def']",
                 'show_filters' : "//div[@id='filters-handler']/a",
                 'lookup_content' : "//div[@id='changelist']/form/table/tbody/tr/th/a[text()='%(text)s']",
             },

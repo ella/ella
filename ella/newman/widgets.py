@@ -269,7 +269,7 @@ class ForeignKeyRawIdWidget(forms.TextInput):
         obj = self._get_obj(value)
         label = truncate_words(obj, 14)
         adm = admin_url(obj)
-        return '&nbsp;<a class="hashadr" href="%s">%s</a>' % (adm, label)
+        return '&nbsp;<a class="js-hashadr" href="%s">%s</a>' % (adm, label)
 
 
 class ForeignKeyGenericRawIdWidget(forms.TextInput):

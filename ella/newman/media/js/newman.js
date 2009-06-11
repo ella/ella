@@ -262,7 +262,7 @@ $( function() {
     
     function get_inputs($form) {    // all except metadata
         return $form.find(':input').filter(function() {
-            return ! $(this).parent().is('.form-metadata');
+            return ! $(this).parent().is('.js-form-metadata');
         });
     }
     
@@ -347,7 +347,7 @@ $( function() {
         
         var action =  $form.attr('action');
         var method = ($form.attr('method') || 'POST').toUpperCase();
-        var $meta = $form.find('.form-metadata:first');
+        var $meta = $form.find('.js-form-metadata:first');
         var $success = $meta.find('input[name=success]');
         var $error   = $meta.find('input[name=error]');
         var success, error;
@@ -385,8 +385,8 @@ $( function() {
         
         if (button_name) $inputs = $inputs.add('<input type="hidden" value="1" name="'+button_name+'" />');
         var data = $inputs.serialize();
-        if ($form.hasClass('reset-on-submit')) $form.get(0).reset();
-        var address = $form.hasClass('dyn-addr')
+        if ($form.hasClass('js-reset-on-submit')) $form.get(0).reset();
+        var address = $form.hasClass('js-dyn-adr')
             ? get_adr(action)
             :         action;
         var url = $('<a>').attr('href', address).get(0).href;
@@ -466,7 +466,7 @@ $( function() {
                 AjaxFormLib.save_preset($form, {title: '* '+gettext('crash save'), msg: gettext('Form content backed up')});
             }
             var id = ContentByHashLib.closest_loaded( $form.get(0) ).id;
-            var address = $form.hasClass('dyn-addr')
+            var address = $form.hasClass('js-dyn-adr')
                 ? get_adr($form.attr('action'))
                 :         $form.attr('action');
             ContentByHashLib.inject_error_message({
@@ -480,16 +480,16 @@ $( function() {
     AjaxFormLib.ajax_submit_error = ajax_submit_error;
     
     // Submit button
-    $('.ajax-form a.submit').live('click', function(evt) {
+    $('.js-form a.js-submit').live('click', function(evt) {
         if (evt.button != 0) return true;    // just interested in left button
-        if ($(this).hasClass('noautosubmit')) return true;
-        var $form = $(this).closest('.ajax-form');
+        if ($(this).hasClass('js-noautosubmit')) return true;
+        var $form = $(this).closest('.js-form');
         ajax_submit($form, this.name);
         return false;
     });
     
     // Reset button
-    $('.ajax-form a.eclear').live('click', function(evt) {
+    $('.js-form a.js-reset').live('click', function(evt) {
         try {
             $(this).closest('form').get(0).reset();
         } catch(e) { }
@@ -498,7 +498,7 @@ $( function() {
     
     // Overload default submit event
     function overload_default_submit() {
-        $('.ajax-form')
+        $('.js-form')
         .unbind('submit.ajax_overload')
         .bind('submit.ajax_overload', function(evt) {
             var name;
@@ -556,26 +556,16 @@ $( function() {
     // Update persistent filters when filter clicked
     $('#filters a').live('click', function(evt) {
         if (evt.button != 0) return;    // only interested in left click
+        if ( pop_id = $(this).closest('.pop').length ) return;  // no filter persistence in pop-up
         var href = $(this).attr('href');
         if (   /^\?/.test( href )   ) {} else return;
         var base = get_hashadr('?').replace(/\?$/,'');
         ContentByHashLib.ADDRESS_POSTPROCESS[ base ] = base+href;
-        var pop_id;
-        if ( pop_id = $(this).closest('.pop').attr('id') ) {
-            ContentByHashLib.simple_load(
-                pop_id
-                + '::' +
-                ContentByHashLib.LOADED_URLS[ pop_id ]
-                + '::' +
-                href
-            );
-        }
-        else {
-            adr(href);
-        }
+        adr(href);
         return false;
     });
-    $('#filters-handler .eclear').live('click', function() {
+    // 2459 výsledků (7350 celkem) -- make parenthesised link reset persistent filters
+    $('#filters-handler .js-clear').live('click', function() {
         var base = get_hashadr('?').replace(/\?$/,'');
         delete ContentByHashLib.ADDRESS_POSTPROCESS[ base ];
         adr($(this).attr('href'));
@@ -995,7 +985,7 @@ $( function() {
         });
         
         function modify_getpar_href(el) {
-            $(el).attr('href', $(el).attr('href').replace(/^\?/, 'overlay-content::&')).addClass('simpleload');
+            $(el).attr('href', $(el).attr('href').replace(/^\?/, 'overlay-content::&')).addClass('js-simpleload');
         }
         
         // pagination
@@ -1012,16 +1002,16 @@ $( function() {
         var $filt = $('#filters-handler .popup-filter');
         if ($filt.length) {
             
-            var $cancel = $('#filters-handler span:last a').not('.overlay-adapted');
+            var $cancel = $('#filters-handler a.js-clear').not('.overlay-adapted');
             $cancel
             .attr( 'href', $target.attr('id')+'::'+$cancel.attr('href') )
-            .removeClass('hashadr')
-            .addClass('simpleload overlay-adapted');
+            .removeClass('js-clear')
+            .addClass('js-simpleload overlay-adapted');
             
-            $filt.addClass('simpleload').attr( 'href', $filt.attr('href').replace(/::::/, '::'+$target.attr('id')+'::') );
+            $filt.addClass('js-simpleload').attr( 'href', $filt.attr('href').replace(/::::/, '::'+$target.attr('id')+'::') );
             function init_filters() {
                 $(this).find('.filter li a').each( function() {
-                    $(this).attr('href', $(this).attr('href').replace(/^\?/, 'overlay-content::&')).addClass('simpleload');
+                    $(this).attr('href', $(this).attr('href').replace(/^\?/, 'overlay-content::&')).addClass('js-simpleload');
                 });
             }
             $('#filters').unbind('content_added', init_filters).one('content_added', init_filters);
