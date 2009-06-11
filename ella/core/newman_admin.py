@@ -376,7 +376,7 @@ class PublishableAdmin(newman.NewmanModelAdmin):
 
     exclude = ('content_type',)
     list_display = ('admin_link', 'category', 'photo_thumbnail', 'publish_from_nice', 'placement_link', 'site_icon', 'fe_link')
-    list_filter = ('category__site', 'category', 'authors', 'content_type')
+    list_filter = ('category__site', 'category', 'content_type')
     unbound_list_filter = (PublishFromFilter, IsPublishedFilter,)
     search_fields = ('title', 'description', 'slug', 'authors__name', 'authors__slug',) # FIXME: 'tags__tag__name',)
     raw_id_fields = ('photo',)
