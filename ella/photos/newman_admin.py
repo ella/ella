@@ -20,7 +20,7 @@ class PhotoAdmin(newman.NewmanModelAdmin):
     list_display = ('title', 'size', 'thumb', 'pk',)
     list_filter = ('created',)
     prepopulated_fields = {'slug': ('title',)}
-    search_fields = ('title', 'image', 'description', 'id',)
+    search_fields = ('title', 'slug', 'description', 'id',)
     suggest_fields = {'authors': ('name', 'slug',), 'source': ('name', 'url',)}
 
     def size(self, obj):
