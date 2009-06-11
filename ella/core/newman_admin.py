@@ -1,3 +1,4 @@
+from django.core.urlresolvers import reverse
 import datetime, time
 
 from django.utils.translation import ugettext_lazy as _, ugettext
@@ -374,7 +375,7 @@ class PublishableAdmin(newman.NewmanModelAdmin):
     """ Default admin options for all publishables """
 
     exclude = ('content_type',)
-    list_display = ('admin_link', 'category', 'photo_thumbnail', 'publish_from_nice', 'placement_link', 'site_icon')
+    list_display = ('admin_link', 'category', 'photo_thumbnail', 'publish_from_nice', 'placement_link', 'site_icon', 'fe_link')
     list_filter = ('category__site', 'category', 'authors', 'content_type')
     unbound_list_filter = (PublishFromFilter, IsPublishedFilter,)
     search_fields = ('title', 'description', 'slug', 'authors__name', 'authors__slug',) # FIXME: 'tags__tag__name',)
@@ -401,6 +402,14 @@ class PublishableAdmin(newman.NewmanModelAdmin):
         return mark_safe('%s' % object.category.site.name)
     site_icon.short_description = _('site')
     site_icon.allow_tags = True
+
+    def fe_link(self, obj):
+        if obj.get_absolute_url():
+            return mark_safe('<a href="%s" class="icn web js-nohashadr">www</a>' % obj.get_absolute_url())
+        else:
+            return '---'
+    fe_link.short_description = _('WWW')
+    fe_link.allow_tags = True
 
     def publish_from_nice(self, obj):
         span_str = '<span class="%s">%s</span>'
