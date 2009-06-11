@@ -147,7 +147,6 @@ class PlacementForm(modelforms.ModelForm):
         if obj.pk:
             cat = getattr(obj, 'category', None)
         obj_slug = getattr(obj, 'slug', obj.pk)
-#        target_ct=ContentType.objects.get_for_model(obj)
 
         main = None
         d = self.cleaned_data
@@ -158,14 +157,11 @@ class PlacementForm(modelforms.ModelForm):
         if cat:
             main = d
 
-        if d['slug'] and d['slug'] != '':
-            slug = d['slug']
-        else:
-            slug = obj_slug
+        d['slug'] = obj_slug
         # try and find conflicting placement
         qset = Placement.objects.filter(
             category=d['category'],
-            slug=slug,
+            slug=d['slug'],
             publishable=obj,
             static=d['static']
         )
@@ -217,6 +213,7 @@ class ListingInlineAdmin(newman.NewmanTabularInline):
     fieldsets = ((None, {'fields' : ('category','publish_from', 'publish_to', 'priority_from', 'priority_to', 'priority_value', 'commercial',)}),)
 
 class PlacementInlineAdmin(newman.NewmanTabularInline):
+    exclude = ('slug',)
     template = 'newman/edit_inline/placement.html'
     model = Placement
     max_num = 1
