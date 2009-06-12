@@ -13,7 +13,7 @@ lookup = None
 def create_id_lookup():
     global lookup
     if lookup is None:
-        lookup = dict( ((p.content_type_id, p.old_id), p.pk) for p in Publishable.objects.order_by().only('pk', 'old_id') )
+        lookup = dict( ((p.content_type_id, p.old_id), p.pk) for p in Publishable.objects.order_by().only('pk', 'old_id', 'content_type_id') )
 
 BOX_RE = re.compile(r'''
         {% \s* box \s*      # {%_box_
