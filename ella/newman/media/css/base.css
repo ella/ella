@@ -108,46 +108,31 @@ div.breadcrumbs {
     margin: 0 2px;
     padding: 0;
     width: 80px;
-    height: 74px;
+    height: 78px;
     background: transparent url(../ico/ct/64/unknown.png) 50% 0 no-repeat;
     opacity: .8;
     text-align: center;
-}
-.favs ul.items li:hover { opacity: 1; }
-.favs a {
-    text-decoration: none;
-    color: #fff;
-}
-.favs ul.items li a.app {
-    display: block;
-    width: 80px;
-    height: 62px;
     position: relative;
 }
+.favs ul.items li:hover { opacity: 1; }
+.favs a { text-decoration: none; color: #fff; }
+.favs ul.items li a.app { display: block; width: 80px; height: 78px; position: relative; }
 .favs ul.items li a.app span {
     background: #000;
     font-weight: bold;
-    opacity: .6;
+    opacity: .5;
     position: absolute; bottom: 0; left: 0; width: 80px;
 }
-.favs ul.items li a.app:hover span {
-    opacity: .9
-}
+.favs ul.items li a.app:hover span { opacity: .9 }
 .favs ul.items li a.add {
-    background: #000;
+    position: absolute;
+    top: 0; right: 0;
     display: block;
+    width: 20px; height: 20px;
+    background: url(../ico/16/edit_add.png) 100% 50% no-repeat;
     opacity: .6;
 }
-.favs ul.items li a.add span {
-    margin: auto;
-    padding-left: 13px;
-    text-align: left;
-    background: #000 url(../ico/10/icon_addlink.gif) 0 50% no-repeat;
-}
-.favs ul.items li a.add:hover {
-    color: darkorange;
-    opacity: .9;
-}
+.favs ul.items li a.add:hover { opacity: 1; }
 .favs ul.tools {
     float: right;
     list-style: none;
@@ -155,9 +140,7 @@ div.breadcrumbs {
 }
 
 /* CONTENT */
-#content {
-    padding-bottom: 40px;
-}
+#content { padding-bottom: 40px; }
 
 /* CONTENT TOOLBAR */
 #content-toolbar * { vertical-align: middle; }

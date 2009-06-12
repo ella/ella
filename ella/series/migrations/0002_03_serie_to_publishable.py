@@ -1,0 +1,44 @@
+
+from south.db import db
+from django.db import models
+
+from ella.hacks import south
+
+from ella.core.migrations.base.base_0002 import BasePublishableDataMigration, BasePublishableDataPlugin
+from ella.core.migrations.base.base_0002 import alter_foreignkey_to_int, migrate_foreignkey
+
+
+class Migration(BasePublishableDataMigration):
+    models = dict.copy(BasePublishableDataMigration.models)
+    models.update(
+        {
+            'series.serie': {
+                'Meta': {'_bases': ['ella.core.models.publishable.Publishable']},
+                'finished': ('models.DateField', ["_('Finished')"], {'null': 'True', 'blank': 'True'}),
+                'hide_newer_parts': ('models.BooleanField', ["_('Hide newer parts')"], {'default': 'False'}),
+                'publishable_ptr': ('models.OneToOneField', ["orm['core.Publishable']"], {}),
+                'started': ('models.DateField', ["_('Started')"], {})
+            },
+        }
+    )
+
+
+class Plugin(BasePublishableDataPlugin):
+    migration = Migration
+
+    app_label = 'series'
+    model = 'serie'
+    table = '%s_%s' % (app_label, model)
+
+    publishable_uncommon_cols = {
+        'description': 'description', # What about perex field??? there was description and perex fields together
+    }
+    
+    def alter_self_foreignkeys(self, orm):
+        alter_foreignkey_to_int('series_seriepart', 'serie')
+
+    def move_self_foreignkeys(self, orm):
+        # migrate new serie IDs to seriepart
+        migrate_foreignkey(self.app_label, self.model, 'series_seriepart', self.model, self.orm)
+
+south.plugins.register("core", "0002_03_move_publishable_data", Plugin())
