@@ -29,11 +29,11 @@ def migrate_foreignkey(app_label, model, table, field, orm):
     }
     db.execute('''
         UPDATE
-            `%(table)s` tbl INNER JOIN `core_publishable` pub ON (tbl.`id` = pub.`old_id`)
+            `%(table)s` tbl 
+            JOIN `core_publishable` pub ON (tbl.`id` = pub.`old_id`)
+            JOIN `django_content_type` ct ON (pub.`content_type_id` = ct.`id` AND ct.`app_label` = '%(app_label)s' AND ct.`model` = '%(model)s')
         SET
-            tbl.`%(field)s` = pub.`id`
-        WHERE
-            pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = '%(app_label)s' AND ct.`model` = '%(model)s');
+            tbl.`%(field)s` = pub.`id`;
         ''' % s
     )
     db.rename_column(s['table'], s['field'], s['fk_field'])
@@ -137,6 +137,7 @@ class BasePublishableDataPlugin(south.SouthPlugin):
 
         TODO: sync publish_from
         '''
+
         # move the data
         # TODO: maybe there should be prefix 'a.' in cols_from
         db.execute('''
@@ -157,11 +158,11 @@ class BasePublishableDataPlugin(south.SouthPlugin):
         # update the link
         db.execute('''
             UPDATE
-                `core_publishable` pub INNER JOIN `%(table)s` art ON (art.`id` = pub.`old_id`)
+                `core_publishable` pub
+                JOIN `%(table)s` art ON (art.`id` = pub.`old_id`)
+                JOIN `django_content_type` ct ON (pub.`content_type_id` = ct.`id` AND ct.`app_label` = '%(app_label)s' AND ct.`model` = '%(model)s')
             SET
-                art.`publishable_ptr` = pub.`id`
-            WHERE
-                pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = '%(app_label)s' AND ct.`model` = '%(model)s');
+                art.`publishable_ptr` = pub.`id`;
             ''' % self.substitute
         )
 
@@ -193,11 +194,11 @@ class BasePublishableDataPlugin(south.SouthPlugin):
             sub.update(gen)
             db.execute('''
                 UPDATE
-                    `%(table)s` gen INNER JOIN `core_publishable` pub ON (gen.`%(ct_id)s` = pub.`content_type_id` AND gen.`%(obj_id)s` = pub.`old_id`)
+                    `%(table)s` gen
+                    JOIN `core_publishable` pub ON (gen.`%(ct_id)s` = pub.`content_type_id` AND gen.`%(obj_id)s` = pub.`old_id`)
+                    JOIN `django_content_type` ct ON (pub.`content_type_id` = ct.`id` AND ct.`app_label` = '%(app_label)s' AND  ct.`model` = '%(model)s')
                 SET
-                    gen.`%(obj_id)s` = pub.`id`
-                WHERE
-                    pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = '%(app_label)s' AND  ct.`model` = '%(model)s');
+                    gen.`%(obj_id)s` = pub.`id`;
             ''' % sub)
 
     def forwards_placements(self, orm):
@@ -206,11 +207,11 @@ class BasePublishableDataPlugin(south.SouthPlugin):
         '''
         db.execute('''
             UPDATE
-                `core_placement` plac INNER JOIN `core_publishable` pub ON (plac.`target_ct_id` = pub.`content_type_id` AND plac.`target_id` = pub.`old_id`)
+                `core_placement` plac 
+                JOIN `core_publishable` pub ON (plac.`target_ct_id` = pub.`content_type_id` AND plac.`target_id` = pub.`old_id`)
+                JOIN `django_content_type` ct ON (pub.`content_type_id` = ct.`id` AND ct.`app_label` = '%(app_label)s' AND  ct.`model` = '%(model)s')
             SET
-                plac.`publishable_id` = pub.`id`
-            WHERE
-                pub.`content_type_id` = (SELECT ct.`id` FROM `django_content_type` ct WHERE ct.`app_label` = '%(app_label)s' AND  ct.`model` = '%(model)s');
+                plac.`publishable_id` = pub.`id`;
             ''' % self.substitute
         )
 
