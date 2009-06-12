@@ -1,7 +1,7 @@
 import re
 
 from django.contrib.contenttypes.models import ContentType
-from django.core.management.base import BaseCommand
+from django.core.management.base import NoArgsCommand
 from django.conf import settings
 from django.db.models import get_model
 
@@ -12,8 +12,8 @@ from ella.core.models import Publishable, Dependency
 lookup = None
 def create_id_lookup():
     global lookup
-    if not lookup:
-        lookup = dict( ((p.content_type_id, p.old_id), p.pk) for p in Publishable,objects..order_by().only('pk', 'old_id') )
+    if lookup is None:
+        lookup = dict( ((p.content_type_id, p.old_id), p.pk) for p in Publishable.objects.order_by().only('pk', 'old_id') )
 
 BOX_RE = re.compile(r'''
         {% \s* box \s*      # {%_box_
@@ -25,7 +25,7 @@ BOX_RE = re.compile(r'''
         \s*%}               # _%}
     ''', re.VERBOSE)
 
-def update_model(instance, content_type):
+def update_field(instance, content_type):
     def update_one_box(match):
         name, app, model, pk = match.groups()
 
@@ -33,7 +33,7 @@ def update_model(instance, content_type):
         ct = ContentType.objects.get_for_model(get_model(app, model))
 
         # update the pk value
-        pk = lookup.get((ct.pk, pk), pk)
+        pk = lookup.get((ct.pk, int(pk)), pk)
 
         # report this box use as a dependency
         Dependency.objects.get_or_create(
@@ -59,7 +59,7 @@ def migrate_markup(processor, modelfields):
             dirty = False
             for f in fields:
                 val = getattr(m, f)
-                val, cnt = BOX_RE.subn(update_model(m, ct), val)
+                val, cnt = BOX_RE.subn(update_field(m, ct), val)
                 if cnt > 0:
                     setattr(m, f, val)
                     dirty = True
