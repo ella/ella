@@ -38,7 +38,7 @@ class TestGallery(NewmanTestCase):
         })
 
         self.save_form()
-        self.assert_equals(u"%s: %s" % (unicode(_(u"Gallery")), data['title']), s.get_text(self.get_listing_object()+"/th/a[@class='js-hashadr']"))
+        self.assert_equals(u"%s: %s" % (unicode(_(u"Gallery")), data['title']), s.get_text(self.get_listing_object_href()))
 
         # verify all fields
         s.click(self.get_listing_object()+"/th/a[@class='hashadr']")
