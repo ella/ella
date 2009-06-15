@@ -8,10 +8,12 @@
                 <a href="{% url newman_admin_index %}#/nm/">{% trans "Home" %}</a>
                 {% if app_label %}&rsaquo; <a class="js-hashadr" href="/{{ app_label }}/">{% trans app_label.title %}</a>{% endif %}
                 {% if title %}&rsaquo; <strong id="doc-title">{{ title }}</strong>{% endif %}
+                {% comment %}
+                {% if is_user_category_filtered %}
+                    | <a style="background-color: darkorange; font-weight: bold; padding: 3px 5px 3px 20px; -moz-border-radius: 3px;" class="icn visible cl-filtered" href="{% url newman_admin_index %}#/nm/">{% trans "Categories filtered by user. Click to change." %}</a>
+                {% endif %}
+                {% endcomment %}
             </div>
-            {% if is_user_category_filtered %}
-                <div style="float: right;"><a class="icn visible" href="{% url newman_admin_index %}#/nm/">{% trans "Categories filtered by user. Click to change." %}</a></div>
-            {% endif %}
         </div>
     {% endif %}
 {% endblock %}
@@ -25,6 +27,9 @@
                 {% else %}
                     <a class="icn btn filter {% if is_popup %}popup-filter{% else %}js-simpleload{% endif %}" href="filters::::filters/{{ cl.get_query_string }}">{% trans 'Filters' %}</a>
                 {% endif %}
+        {% endif %}
+        {% if is_user_category_filtered %}
+            <a style="background-color: orange;" class="icn btn visible def" href="{% url newman_admin_index %}#/nm/">{% trans "Categories filtered by user. Click to change." %}</a>
         {% endif %}
         {% if cl.search_fields %}
             {% block search %}{% newman_search_form cl %}{% endblock %}
