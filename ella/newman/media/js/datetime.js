@@ -321,7 +321,7 @@ function DateInput(input) {
         ) { }
         else {
             var $datepicker = $('<div class="datepicker">');
-            $datepicker.datepicker({
+            $datepicker.datepicker(new DATEPICKER_OPTIONS({
                 onSelect: function(dtext, dpick) {
                     $(this).hide();
                     var dti = $( $(this).data('input') ).data('dti');
@@ -333,8 +333,8 @@ function DateInput(input) {
                 },
                 onClose: function() {
                     $(this).hide();
-                },
-            });
+                }
+            }));
             $datepicker.appendTo(
                    $('.change-form').get(0)
                 || $('#content').get(0)
@@ -359,5 +359,19 @@ function DateInput(input) {
     $( document ).bind('content_added', datetime_init);
     $( document ).bind('content_added', media_dependent_datetime_init);
     $( document ).one ('media_loaded' , media_dependent_datetime_init);
+    
+    // Close the datepicker when something else is clicked
+    $('body').live('click', function(evt) {
+        // ignore clicking on the datepicker triggering icon
+        if ($(evt.target).closest('.datepicker-trigger').length) return true;
+        // ignore clicking on the datepicker itself
+        if ($(evt.target).closest('.datepicker').length)         return true;
+        // if there's no datepicker shown, don't attempt to hide it
+        if ($('.datepicker').not(':hidden').length == 0)         return true;
+        // all else failed, hide all present datepickers
+        $('.datepicker').hide();
+        // and let the click be processed as usual
+        return true;
+    });
 
 })(jQuery);
