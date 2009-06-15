@@ -47,7 +47,7 @@ class ErrorReportForm(forms.Form):
     err_message = forms.CharField(label=_('Message'), widget=forms.Textarea)
 
 class EditorBoxForm(forms.Form):
-    box_obj_ct = forms.ModelChoiceField(ContentType.objects.all(), '----', cache_choices=True, required=True, widget=widgets.ContentTypeWidget, label='')
+    box_obj_ct = forms.ModelChoiceField(ContentType.objects.all(), None, cache_choices=True, required=True, widget=widgets.ContentTypeWidget, label='')
     box_obj_id = forms.IntegerField(label='', min_value=0, widget=widgets.ForeignKeyGenericRawIdWidget)
     box_obj_params = forms.CharField(label=_('Extra parameters'), max_length=300, required=False, widget=forms.Textarea)
 
