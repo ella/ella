@@ -14,7 +14,7 @@ alter table core_hitcount drop column id;
 # tohle delal honza, neni pro to model
 drop table discussions_question;
 
-# tahle appka se nepouziva
+# tahle appka se pry nepouziva - haha! chyba lavky ;)
 drop table `discussions_bannedstring`;
 drop table `discussions_banneduser`;
 drop table `discussions_postviewed`;
@@ -38,5 +38,5 @@ drop table uploader_upload;
 
 # zase duplicity
 # select id from polls_contestant group by contest_id, email having count(*) > 1;
-update polls_contestant set email = concat('_', email) where id in (2004, 23045,62003, 72669, 78587, 75993, 78391, 67271);
+update polls_contestant set email = concat('_', email) where id in (2004, 23045, 62003, 72669, 78587, 75993, 78391, 67271);
 
