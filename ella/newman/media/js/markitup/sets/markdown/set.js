@@ -11,6 +11,17 @@
 // Feel free to add more tags
 // -------------------------------------------------------------------\
 
+var getIdFromPath = function(path){
+	var id;
+	$.each(AVAILABLE_CONTENT_TYPES, function(i){
+		if(this.path == '/'+path.replace('.','/')+'/'){
+			id = i;
+			return;
+		}
+	});
+	return id;
+}
+
 MARKITUP_SETTINGS = {
     previewParserPath:    BASE_URL + 'nm/editor-preview/',
     previewParserVar:   "text",
@@ -34,11 +45,12 @@ MARKITUP_SETTINGS = {
         { separator: '---------------' },
         { name: gettext('Photo'), className: 'photo', call: function(){
             $('#rich-box').dialog('open');
-			$('#id_box_obj_ct').val(20).trigger('change');// 20 is value for photos.photo is the select box
+			$('#id_box_obj_ct').val(getIdFromPath('photos.photo')).trigger('change');// 20 is value for photos.photo is the select box
+			$('#lookup_id_box_obj_id').trigger('click');
         }},
         { name: gettext('Gallery'), className: 'gallery', call: function(){
             $('#rich-box').dialog('open');
-			$('#id_box_obj_ct').val(37).trigger('change');// 37 is value for galleries.gallery
+			$('#id_box_obj_ct').val(getIdFromPath('galleries.gallery')).trigger('change');// 37 is value for galleries.gallery
         }},
         { name: gettext('Box'), className: 'box', call: function(){
             $('#rich-box').dialog('open');
@@ -56,6 +68,29 @@ $(function(){
 	if(!$('#rich-box').length){
 		$('<div id="rich-box" title="Box"></div>').hide().appendTo('body');
 		$('#rich-box').load(BASE_URL+'nm/editor-box/', function(){
+			$('#id_box_obj_ct option:first').remove();
+			$('<div id="rich-photo-format" style="margin: 3px 0;">\n\
+			<label for="id_box_photo_size" style="display:inline;">Velikost</label>\n\
+			<select name="box_photo_size" id="id_box_photo_size">\n\
+				<option value="velka">velká</option>\n\
+				<option value="standard" selected="selected">standard</option>\n\
+				<option value="mala">malá</option>\n\
+			</select>\n\
+			<label for="id_box_photo_format" style="display:inline;">Poměr stran</label>\n\
+			<select name="box_photo_format" id="id_box_photo_format">\n\
+				<option value="ctverec">čtverec</option>\n\
+				<option value="obdelnik_na_sirku">obdélník na šířku</option>\n\
+				<option value="obdelnik_na_vysku">obdélník na výšku</option>\n\
+				<option value="nudle_na_sirku">nudle na šířku</option>\n\
+				<option value="nudle_na_vysku">nudle na výšku</option>\n\
+			</select></div>').hide().insertAfter('#lookup_id_box_obj_id');
+			$('#id_box_obj_ct').bind('change', function(){
+				if(getTypeFromPath($('#id_box_obj_ct').val()) == 'photos.photo'){
+					$('#rich-photo-format').show();
+				} else {
+					$('#rich-photo-format').hide();
+				}
+			});
 			$('#lookup_id_box_obj_id').bind('click', function(e){
 				e.preventDefault();
 				open_overlay(getTypeFromPath($('#id_box_obj_ct').val()), function(id){
@@ -64,33 +99,28 @@ $(function(){
 			});
 			$('#rich-object').bind('submit', function(e){
 				e.preventDefault();
-				var type = getTypeFromPath($('#id_box_obj_ct').val());
-				if(!!type){
-					var id = $('#id_box_obj_id').val() || '0';
-					var params = $('#id_box_obj_params').val().replace(/\n+/g, ' ');
-					// Insert code
-					$.markItUp({
-						openWith:'{% box inline for '+type+' with pk '+$('#id_box_obj_id').val()+' %}\n'+params+'\n{% endbox %}'
-					});
-					// Reset and close dialog
-					$('#rich-object').trigger('reset');
-					$('#rich-box').dialog('close');
-				}
-			});
-			$('<label for="id_box_photo_size">Velikost:</label><select id="id_box_photo_size" name="box_photo_size"><option>malá</option><option>malá, velká, střední</option><option>malá, velká, střední</option></select>')
-			$('#id_box_obj_ct').bind('change', function(){
-				if(getTypeFromPath($('#id_box_obj_ct').val()) == 'photos.photo'){
-					
-				} else {
-					
+				if($('#id_box_obj_ct').val()){
+					var type = getTypeFromPath($('#id_box_obj_ct').val());
+					if(!!type){
+						var id = $('#id_box_obj_id').val() || '0';
+						var params = $('#id_box_obj_params').val().replace(/\n+/g, ' ');
+						// Insert code
+						$.markItUp({
+							openWith:'{% box inline_'+$('#id_box_photo_size').val()+'_'+$('#id_box_photo_format').val()+' for '+type+' with pk '+$('#id_box_obj_id').val()+' %}'+((params) ? '\n'+params+'\n' : '')+'{% endbox %}'
+						});
+						// Reset and close dialog
+						$('#rich-object').trigger('reset');
+						$('#rich-box').dialog('close');
+						$('#id_box_obj_ct').trigger('change');
+					}
 				}
 			});
 		});
 		$('#rich-box').dialog({
 			modal: true,
 			autoOpen: false,
-			width: 400,
-			height: 300
+			width: 420,
+			height: 350
 		});
 	}
 	$('.rich_text_area').markItUp(MARKITUP_SETTINGS);
