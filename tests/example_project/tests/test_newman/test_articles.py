@@ -88,18 +88,13 @@ class TestArticleBasics(NewmanTestCase):
         })
 
         self.save_form()
-        self.assert_equals(u"%s: %s" % (unicode(_(u"Article")), data['title']), s.get_text(self.get_listing_object()+"/th/a[@class='js-hashadr']"))
 
-        # verify save on list
-        self.assert_equals(1, Article.objects.count())
-        a = Article.objects.all()[0]
-        self.assert_equals(data['title'], a.title)
+        s.wait_for_element_present(self.get_listing_object()+"/th")
 
-        self.assert_equals('<p>%s</p>\n' % data['description'], a.description)
-        self.assert_equals(2, a.authors.count())
+        self.assert_equals(u"%s: %s" % (unicode(_(u"Article")), data['title']), s.get_text(self.get_listing_object_href()))
 
         # verify all fields
-        s.click(self.get_listing_object()+"/th/a[@class='js-hashadr']")
+        s.click(self.get_listing_object_href())
         
         self.verify_form(expected_data)
 
