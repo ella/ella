@@ -147,19 +147,20 @@ changelistFilters["{{ fname }}"] = "{{ qstring }}";
     var selectedMonth = 0;
     var selectedDay = 0;
     $( document ).one('media_loaded', function() {
-        $(".hpbox.calendar .cal").datepicker({
-            dateFormat: 'dd',
+        var options = new DATEPICKER_OPTIONS({
             onChangeMonthYear: function(year, month, inst) {
                 selectedMonth = month;
                 selectedYear = year;
             },
             onSelect: function(dateText, inst) {
-                window.location = '#/core/publishable/?' +
-                pubYear +  '=' + selectedYear + '&' +
-                pubMonth + '=' + selectedMonth + '&' +
-                pubDay   + '=' + dateText;
-            },
-        }).slideDown('fast');
+                adr('/core/publishable/?' +
+                    pubYear  + '=' + selectedYear  + '&' +
+                    pubMonth + '=' + selectedMonth + '&' +
+                    pubDay   + '=' + dateText
+                );
+            }
+        });
+        $(".hpbox.calendar .cal").datepicker(options).slideDown('fast');
     });
     </script>
     {% endcache %}
