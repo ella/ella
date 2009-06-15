@@ -40,3 +40,8 @@ drop table uploader_upload;
 # select id from polls_contestant group by contest_id, email having count(*) > 1;
 update polls_contestant set email = concat('_', email) where id in (2004, 23045, 62003, 72669, 78587, 75993, 78391, 67271);
 
+
+# a pak uz jenom
+# $ mysqldump -t -c jmeno_databaze
+# coz udela dump pouze dat a v definovanem poradi
+
