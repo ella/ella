@@ -68,7 +68,6 @@ $(function(){
 	if(!$('#rich-box').length){
 		$('<div id="rich-box" title="Box"></div>').hide().appendTo('body');
 		$('#rich-box').load(BASE_URL+'nm/editor-box/', function(){
-			$('#id_box_obj_ct option:first').remove();
 			$('<div id="rich-photo-format" style="margin: 3px 0;">\n\
 			<label for="id_box_photo_size" style="display:inline;">Velikost</label>\n\
 			<select name="box_photo_size" id="id_box_photo_size">\n\
@@ -104,9 +103,14 @@ $(function(){
 					if(!!type){
 						var id = $('#id_box_obj_id').val() || '0';
 						var params = $('#id_box_obj_params').val().replace(/\n+/g, ' ');
+						// Add format and size info for photo
+						var addon = '';
+						if(getTypeFromPath($('#id_box_obj_ct').val()) == 'photos.photo'){
+							addon = '_'+$('#id_box_photo_size').val()+'_'+$('#id_box_photo_format').val();
+						}
 						// Insert code
 						$.markItUp({
-							openWith:'{% box inline_'+$('#id_box_photo_size').val()+'_'+$('#id_box_photo_format').val()+' for '+type+' with pk '+$('#id_box_obj_id').val()+' %}'+((params) ? '\n'+params+'\n' : '')+'{% endbox %}'
+							openWith:'{% box inline'+addon+' for '+type+' with pk '+$('#id_box_obj_id').val()+' %}'+((params) ? '\n'+params+'\n' : '')+'{% endbox %}'
 						});
 						// Reset and close dialog
 						$('#rich-object').trigger('reset');
@@ -117,7 +121,7 @@ $(function(){
 			});
 		});
 		$('#rich-box').dialog({
-			modal: true,
+			modal: false,
 			autoOpen: false,
 			width: 420,
 			height: 350
