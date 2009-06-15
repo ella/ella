@@ -82,8 +82,8 @@ class NewmanTestCase(SeleniumTestCase):
                     'submit' : "//input[@type='submit']"
                 },
                 'listing' : {
-                    'first_object' : "//div[@id='changelist']/form/table/tbody/tr[@class='row1']",
-                    'object' : "//div[@id='changelist']/form/table/tbody/tr[@class='row%(position)s']",
+                    'first_object' : "//div[@id='changelist']/form/table/tbody/tr[position()='1']",
+                    'object' : "//div[@id='changelist']/form/table/tbody/tr[position()='%(position)s']",
                 }
             }
         }
