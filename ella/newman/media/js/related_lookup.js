@@ -72,8 +72,12 @@
         var id_stem = this.id.replace(/^lookup_/, '').replace(/_id$/, '');
         var $id_input = $('#'+id_stem+'_id');
         var $ct_input = $('#'+id_stem+'_ct');
-        if ($id_input.length == 0 || $ct_input.length == 0) {
-            carp('Could not find id input and/or content-type input for lupicka #'+this.id, this);
+        if ($id_input.length == 0) {
+            carp('Could not find id input for lupicka (#'+id_stem+'_id); this:', this);
+            return false;
+        }
+        if ($ct_input.length == 0) {
+            carp('Could not find content-type input for lupicka (#'+id_stem+'_ct); this:', this);
             return false;
         }
         var ct_id = $ct_input.val();

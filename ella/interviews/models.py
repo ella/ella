@@ -4,10 +4,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
 
-from ella.core.models import Publishable
-from ella.photos.models import Photo
+from ella.core.models import Publishable, Author
 from ella.core.cache import get_cached_object, get_cached_list
-from ella.core.models import Category, Author, Source
 
 
 class Interviewee(models.Model):
@@ -147,7 +145,7 @@ class Question(models.Model):
     email = models.EmailField(_('authors email (optional)'), blank=True)
 
     # authors ip address
-    ip_address = models.IPAddressField(_('ip address'), blank=True, null=True)
+    ip_address = models.CharField(_('ip address'), max_length=20, blank=True, null=True)
 
     # comment metadata
     submit_date = models.DateTimeField(_('date/time submitted'), default=datetime.now, editable=False)
