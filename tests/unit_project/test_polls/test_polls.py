@@ -4,6 +4,8 @@ from djangosanetesting import DatabaseTestCase
 
 from django.core.urlresolvers import reverse
 from django import http
+from django.conf import settings
+from django.template import NodeList, Context
 from django.contrib.auth.models import User
 
 from ella.core.models import Placement
@@ -54,6 +56,45 @@ def build_request(user=None, session={}, cookies={}, ip_address=None):
     # Meta
     request.META['REMOTE_ADDR'] = ip_address or '0.0.0.0'
     return request
+
+class TestPollBox(DatabaseTestCase):
+    def setUp(self):
+        super(TestPollBox, self).setUp()
+        create_poll(self)
+        self.orgig_double_render = getattr(settings, 'DOUBLE_RENDER', False)
+
+    def tearDown(self):
+        super(TestPollBox, self).tearDown()
+        settings.DOUBLE_RENDER = self.orgig_double_render
+
+    def test_state_is_set_for_poll_box(self):
+        user = User.objects.create(username='stickyfingaz')
+        Vote.objects.create(poll=self.poll, user=user)
+        box = Poll.box_class(self.poll, 'name', NodeList())
+        box.prepare(Context({'request': build_request(user=user)}))
+        self.assert_equals(
+            views.POLL_USER_ALLREADY_VOTED, 
+            box.state)
+
+    def test_state_is_not_set_for_poll_box_in_first_of_double_renders(self):
+        settings.DOUBLE_RENDER = True
+        user = User.objects.create(username='stickyfingaz')
+        Vote.objects.create(poll=self.poll, user=user)
+        box = Poll.box_class(self.poll, 'name', NodeList())
+        box.prepare(Context({'request': build_request(user=user)}))
+        self.assert_equals(
+            None,
+            box.state)
+
+    def test_state_is_set_for_poll_box_in_second_of_double_renders(self):
+        settings.DOUBLE_RENDER = True
+        user = User.objects.create(username='stickyfingaz')
+        Vote.objects.create(poll=self.poll, user=user)
+        box = Poll.box_class(self.poll, 'name', NodeList())
+        box.prepare(Context({'request': build_request(user=user), 'SECOND_RENDER': True}))
+        self.assert_equals(
+            views.POLL_USER_ALLREADY_VOTED,
+            box.state)
 
 
 class TestPolls(DatabaseTestCase):

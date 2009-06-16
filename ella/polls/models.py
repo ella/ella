@@ -18,7 +18,6 @@ from ella.photos.models import Photo
 ACTIVITY_NOT_YET_ACTIVE = 0
 ACTIVITY_ACTIVE = 1
 ACTIVITY_CLOSED = 2
-DOUBLE_RENDER = getattr(settings, 'DOUBLE_RENDER', False)
 
 UPDATE_VOTE = '''
     UPDATE
@@ -40,9 +39,11 @@ class PollBox(Box):
         super(PollBox, self).prepare(context)
         SECOND_RENDER = context.get('SECOND_RENDER', False)
         self.state = None
-        if DOUBLE_RENDER and SECOND_RENDER or context.has_key('request'):
-            from ella.polls import views
-            self.state = views.poll_check_vote(context['request'], self.obj)
+        if getattr(settings, 'DOUBLE_RENDER', False) and not SECOND_RENDER or 'request' not in context:
+            return
+
+        from ella.polls import views
+        self.state = views.poll_check_vote(context['request'], self.obj)
 
     def get_context(self):
         from ella.polls import views
