@@ -329,6 +329,10 @@ function DateInput(input) {
                     d.setFullYear(dpick.selectedYear);
                     d.setMonth(dpick.selectedMonth);
                     d.setDate(dpick.selectedDay);
+                    d.setHours(0);
+                    d.setMinutes(0);
+                    d.setSeconds(0);
+                    d.setMilliseconds(0);
                     dti.set_date(d, {/*preserve*/hour:true,minute:true});
                 },
                 onClose: function() {
