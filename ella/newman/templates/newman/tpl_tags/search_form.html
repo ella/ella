@@ -1,7 +1,7 @@
 {% spaceless %}
 {% if cl.search_fields %}
     {# <form class="js-form" id="changelist-search" action="." method="get" style="display: inline; margin: 0; padding: 0; vertical-align: middle;"> #}
-            <input type="text" size="40" name="{{ search_var }}" value="{{ cl.query }}" id="searchbar" />
+            <input type="text" size="32" name="{{ search_var }}" value="{{ cl.query }}" id="searchbar" />
             <a class="btn icn search def" href="">{% trans 'Search' %}</a>
             {% if show_result_count %}
                 <span>{% blocktrans count cl.result_count as counter %}1 result{% plural %}{{ counter }} results{% endblocktrans %}

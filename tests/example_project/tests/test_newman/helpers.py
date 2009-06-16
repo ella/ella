@@ -74,7 +74,7 @@ class NewmanTestCase(SeleniumTestCase):
                 },
                 'add' : "//a[@class='js-hashadr icn btn add']",
                 'save' : "//a[@class='js-submit icn btn save def']",
-                'show_filters' : "//div[@id='filters-handler']/a",
+                'show_filters' : "//div[@id='filters-handler']/a[position()=1]",
                 'lookup_content' : "//div[@id='changelist']/form/table/tbody/tr/th/a[text()='%(text)s']",
             },
             'pages' : {
@@ -82,8 +82,9 @@ class NewmanTestCase(SeleniumTestCase):
                     'submit' : "//input[@type='submit']"
                 },
                 'listing' : {
-                    'first_object' : "//div[@id='changelist']/form/table/tbody/tr[@class='row1']",
-                    'object' : "//div[@id='changelist']/form/table/tbody/tr[@class='row%(position)s']",
+                    'first_object' : "//div[@id='changelist']/form/table/tbody/tr[position()='1']",
+                    'object' : "//div[@id='changelist']/form/table/tbody/tr[position()='%(position)s']",
+                    'object_href' : "//div[@id='changelist']/form/table/tbody/tr[position()='%(position)s']/th/a[position()=2]",
                 }
             }
         }
@@ -111,6 +112,11 @@ class NewmanTestCase(SeleniumTestCase):
 
     def get_listing_object(self, position=1):
         return self.elements['pages']['listing']['object'] % {
+            'position' : position
+        }
+
+    def get_listing_object_href(self, position=1):
+        return self.elements['pages']['listing']['object_href'] % {
             'position' : position
         }
 

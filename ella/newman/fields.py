@@ -263,3 +263,10 @@ class ListingCustomField(ModelMultipleChoiceField):
 
     def __init__(self, *args, **kwargs):
         super(ListingCustomField, self).__init__(*args, **kwargs)
+
+class ChoiceCustomField(fields.CharField):
+    widget = widgets.ChoiceCustomWidget
+    is_choice_custom_field = True
+
+    def __init__(self, *args, **kwargs):
+        super(ChoiceCustomField, self).__init__(*args, **kwargs)

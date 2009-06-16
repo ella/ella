@@ -1,0 +1,98 @@
+    <input type="hidden" name="choices_widget" value="{{ id_prefix }}" />
+    {% for choice in choices %}
+        <tr class="choice-row inline-item">
+            <td><span style="display:none;">&nbsp;</span></td>{# vertical align with placement's first (empty) td #}
+            <td class="choices-text">
+                <input 
+                    type="hidden"
+                    value="{{ choice.pk }}"
+                    name="{{ id_prefix }}-id"
+                />
+                <div class="form-row choice-text">
+                    <input
+                        id="{{ id_prefix }}-choice-{{ forloop.counter }}"
+                        type="text"
+                        value="{{ choice.choice }}"
+                        name="{{ id_prefix }}"
+                    />
+                </div>
+            </td>
+
+            <td class="choice-points">
+                <input
+                    type="text"
+                    id="{{ id_prefix }}-{{ forloop.counter }}-points"
+                    name="{{ id_prefix }}-points"
+                    value="{{ choice.points }}"
+                />
+            </td>
+            <td class="choice-votes">
+                <input 
+                    type="input"
+                    disabled="disabled"
+                    id="{{ id_prefix }}-{{ forloop.counter }}-votes"
+                    value="{% if not choice.votes %}0{% else %}{{ choice.votes }}{% endif %}"
+                />
+            </td>
+            <td class="choice-delete">
+                <input 
+                    type="checkbox"
+                    id="{{ id_prefix }}-{{ forloop.counter }}-delete"
+                    name="{{ id_prefix }}-{{ forloop.counter }}-DELETE"
+                />
+            </td>
+
+            <td colspan="1">&nbsp;</td>
+
+        </tr>
+    {% endfor %}
+
+{# Template for creating listings #}
+    <tr class="listing-row-template" style="display:none;"><!--
+        <tr class="listing-row inline-item">
+            <td><span style="display:none;">&nbsp;</span></td>
+            <td class="listing-categories">
+                <!-#- category suggester -#->
+                <div class="form-row listing-category">
+                    <input
+                        id="id_category___NO__"
+                        class="vForeignKeyRawIdAdminField hidden"
+                        type="text"
+                        name="{{ id_prefix }}"
+                    />
+                    <ul class="GenericSuggestField">
+                        <li>
+                            <input
+                                id="id_category___NO___suggest"
+                                rel="../../../core/category/suggest/?f=__unicode__&title&f=slug&f=tree_path&q="
+                            />
+                        </li>
+                    </ul>
+                    <a href="/core/category/" class="suggest-related-lookup" id="lookup_id_category___NO__">
+                        <img src="{{ NEWMAN_MEDIA_PREFIX }}ico/16/search.png" width="16" height="16" />
+                    </a>
+                </div>
+
+            </td>
+
+            <td class="listing-dates">
+                {#<input type="hidden" name="{{ id_prefix }}-{{ forloop.counter0 }}-listing_id" value="{{ listing.pk }}" />#}
+                <!-#- Publish from -#->
+                <div class="publish_from">
+                    <input
+                        type="text"
+                        id="{{ id_prefix }}-__NO__-publish_from"
+                        name="{{ id_prefix }}-publish_from"
+                        class="vDateTimeInput"
+                    />
+                </div>
+            </td>
+
+            <td><a class="icn btn cancel remove-inline-button">{% trans 'Remove' %}</a></td>
+
+            <td colspan="2">&nbsp;</td>
+
+        </tr>
+    --></tr>
+
+{# End of template #}

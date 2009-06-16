@@ -1020,3 +1020,66 @@ $( function() {
         $('#changelist-overlay').show();
     };
 });
+
+function DATEPICKER_OPTIONS(opts) {
+    this.firstDay = 1;
+    this.dateFormat = 'dd';
+    this.dayNames = [
+        gettext('Sunday'),
+        gettext('Monday'),
+        gettext('Tuesday'),
+        gettext('Wednesday'),
+        gettext('Thursday'),
+        gettext('Friday'),
+        gettext('Saturday')
+    ];
+    this.dayNamesMin = [
+        gettext('Su'),
+        gettext('Mo'),
+        gettext('Tu'),
+        gettext('We'),
+        gettext('Th'),
+        gettext('Fr'),
+        gettext('Sa')
+    ];
+    this.dayNamesShort = [
+        gettext('Sun'),
+        gettext('Mon'),
+        gettext('Tue'),
+        gettext('Wed'),
+        gettext('Thu'),
+        gettext('Fri'),
+        gettext('Sat')
+    ];
+    this.monthNames = [
+        gettext('January'),
+        gettext('February'),
+        gettext('March'),
+        gettext('April'),
+        gettext('May'),
+        gettext('June'),
+        gettext('July'),
+        gettext('August'),
+        gettext('September'),
+        gettext('October'),
+        gettext('November'),
+        gettext('December')
+    ];
+    this.monthNamesShort = [
+        gettext('Jan'),
+        gettext('Feb'),
+        gettext('Mar'),
+        gettext('Apr'),
+        gettext('May'),
+        gettext('Jun'),
+        gettext('Jul'),
+        gettext('Aug'),
+        gettext('Sep'),
+        gettext('Oct'),
+        gettext('Nov'),
+        gettext('Dec')
+    ];
+    for (var o in opts) {
+        this[o] = opts[o];
+    }
+}

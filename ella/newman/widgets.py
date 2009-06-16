@@ -17,7 +17,6 @@ from ella.core.models import Listing
 from ella.photos.models import Photo
 from djangomarkup.widgets import RichTextAreaWidget
 from django.contrib.contenttypes.models import ContentType
-from django.forms.widgets import HiddenInput
 
 __all__ = [
     'NewmanRichTextAreaWidget', 'FlashImageWidget',
@@ -350,8 +349,24 @@ class ListingCustomWidget(forms.SelectMultiple):
         tpl = get_template('newman/widget/listing_custom.html')
         return mark_safe(tpl.render(cx))
 
+class ChoiceCustomWidget(forms.TextInput):
+    def __init__(self, attrs=None, *args, **kwargs):
+        if not attrs or 'class' not in attrs:
+            my_attrs = {'class': 'choices'}
+        else:
+            my_attrs = attrs
+        super(ChoiceCustomWidget, self).__init__(attrs=my_attrs)
 
-class GalleryItemContentTypeWidget(HiddenInput):
+    def render(self, name, value, attrs=None):
+        cx = Context()
+        cx['NEWMAN_MEDIA_PREFIX'] = settings.NEWMAN_MEDIA_PREFIX
+        cx['id_prefix'] = name
+        cx['choices'] = value
+        tpl = get_template('newman/widget/poll_choices_custom.html')
+        return mark_safe(tpl.render(cx))
+
+
+class GalleryItemContentTypeWidget(forms.HiddenInput):
     " Custom hidden widget for gallery items. "
 
     def __init__(self, attrs={}):
