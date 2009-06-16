@@ -293,9 +293,18 @@ function DateInput(input) {
                     +MEDIA_URL
                     +'ico/16/vcalendar.png" alt="cal" /></span>'
                 ).click( function() {
+                    var $dtp = $('.datetimepicker');
+                    var x = $(this).offset().left + $(this).width();
+                    var y = $(this).offset().top;
+                    
+                    // check if Y doesn't reach below the current screen height
+                    var d = y + $dtp.outerHeight()  -  $('body').outerHeight();
+                    if (d > 0) y -= d;
+                    if (y < 0) y = 0;   // But rather reach below bottom than above top
+                    
                     $('.datetimepicker').css({
-                        top: $(this).offset().top + 'px',
-                        left: ( $(this).offset().left + $(this).width() ) + 'px'
+                        top : y + 'px',
+                        left: x + 'px'
                     }).toggle().data( 'input', $input );
                 }).insertAfter(this);
                 
@@ -408,9 +417,9 @@ function DateInput(input) {
         // ignore clicking on the datepicker triggering icon
         if ($(evt.target).closest('.dtpicker-trigger').length) return true;
         // ignore clicking on the datepicker itself
-        if ($(evt.target).closest('.datetimepicker').length)     return true;
+        if ($(evt.target).closest('.datetimepicker').length)   return true;
         // if there's no datepicker shown, don't attempt to hide it
-        if ($('.datetimepicker').not(':hidden').length == 0)     return true;
+        if ($('.datetimepicker').not(':hidden').length == 0)   return true;
         // all else failed, hide all present datepickers
         $('.datetimepicker').hide();
         // and let the click be processed as usual
