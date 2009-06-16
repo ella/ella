@@ -289,11 +289,11 @@ function DateInput(input) {
                     $input.data('dti', new DateInput(this));
                 }
                 
-                $(  '<span class="datepicker-trigger"><img src="'
+                $(  '<span class="dtpicker-trigger"><img src="'
                     +MEDIA_URL
                     +'ico/16/vcalendar.png" alt="cal" /></span>'
                 ).click( function() {
-                    $('.datepicker').css({
+                    $('.datetimepicker').css({
                         top: $(this).offset().top + 'px',
                         left: ( $(this).offset().left + $(this).width() ) + 'px'
                     }).toggle().data( 'input', $input );
@@ -313,33 +313,49 @@ function DateInput(input) {
     datetime_init();
 
     function media_dependent_datetime_init(evt) {
-        // create the datepicker div
-        if ($('.datepicker').length) { }    // but only if there is none yet
+        // create the datetimepicker div
+        if ($('.datetimepicker').length) { }    // but only if there is none yet
         else if (
                evt.type == 'content_added'  // and we added something that uses a datepicker
-            && $(evt.target).find('.datepicker-trigger').length == 0    // if anything
+            && $(evt.target).find('.dtpicker-trigger').length == 0    // if anything
         ) { }
         else {
+            // Container creation
+            var $dtpicker = $('<div class="datetimepicker">');
+            
+            // Date picker
             var $datepicker = $('<div class="datepicker">');
             $datepicker.datepicker(new DATEPICKER_OPTIONS({
                 onSelect: function(dtext, dpick) {
-                    $(this).hide();
-                    var dti = $( $(this).data('input') ).data('dti');
+                    var $dtpicker = $(this).closest('.datetimepicker');
+                    var dti = $( $dtpicker.data('input') ).data('dti');
                     var d = new Date();
                     d.setFullYear(dpick.selectedYear);
                     d.setMonth(dpick.selectedMonth);
                     d.setDate(dpick.selectedDay);
                     d.setHours(0);
-                    d.setMinutes(0);
+                    d.setMinutes(2);
                     d.setSeconds(0);
                     d.setMilliseconds(0);
                     dti.set_date(d, {/*preserve*/hour:true,minute:true});
                 },
                 onClose: function() {
-                    $(this).hide();
+                    $(this).closest('.datetimepicker').hide();
                 }
             }));
-            $datepicker.appendTo(
+            $datepicker.appendTo($dtpicker);
+            
+            // Time picker
+            var $timepicker = $('<div class="timepicker">')
+            .html(
+                '<button type="button" class="js-dtpicker-close"><img src="'+MEDIA_URL+'ico/16/cancel.png" alt="X" /></button>' +
+                '<button type="button" class="js-timepick js-time-0000">'+gettext('Midnight')+'</button>' +
+                '<button type="button" class="js-timepick js-time-0600">'+gettext('6am'     )+'</button>' +
+                '<button type="button" class="js-timepick js-time-1200">'+gettext('Noon'    )+'</button>'
+            ).appendTo($dtpicker);
+            
+            // Container placement
+            $dtpicker.appendTo(
                    $('.change-form').get(0)
                 || $('#content').get(0)
                 || $('body').get(0)
@@ -359,21 +375,44 @@ function DateInput(input) {
             $(this).unbind('mousewheel', mousewheel_handler);
         }).addClass('mwheel-enhanced');
     }
-
+    
+    $('.js-dtpicker-close').live('click', function(evt) {
+        if (evt.button != 0) return;
+        $(this).closest('.datetimepicker').hide();
+    });
+    $('.js-timepick').live('click', function(evt) {
+        if (evt.button != 0) return;
+        var dti = $( $(this).closest('.datetimepicker').data('input') ).data('dti');
+        var selected_time = /js-time-(\d\d)(\d\d)/.exec(this.className);
+        if ( ! selected_time ) return;
+        var selected_hours   = selected_time[1];
+        var selected_minutes = selected_time[2];
+        var d = new Date();
+        d.setHours  (selected_hours  );
+        d.setMinutes(selected_minutes);
+        d.setSeconds(0);
+        d.setMilliseconds(0);
+        // let default date be the following 24 hours
+        if (d.getTime() < new Date().getTime()) {
+            d.setDate( d.getDate() + 1 );
+        }
+        dti.set_date(d, {/*preserve*/year:true,month:true,day:true});
+    });
+    
     $( document ).bind('content_added', datetime_init);
     $( document ).bind('content_added', media_dependent_datetime_init);
     $( document ).one ('media_loaded' , media_dependent_datetime_init);
     
-    // Close the datepicker when something else is clicked
+    // Close the datetimepicker when something else is clicked
     $('body').live('click', function(evt) {
         // ignore clicking on the datepicker triggering icon
-        if ($(evt.target).closest('.datepicker-trigger').length) return true;
+        if ($(evt.target).closest('.dtpicker-trigger').length) return true;
         // ignore clicking on the datepicker itself
-        if ($(evt.target).closest('.datepicker').length)         return true;
+        if ($(evt.target).closest('.datetimepicker').length)     return true;
         // if there's no datepicker shown, don't attempt to hide it
-        if ($('.datepicker').not(':hidden').length == 0)         return true;
+        if ($('.datetimepicker').not(':hidden').length == 0)     return true;
         // all else failed, hide all present datepickers
-        $('.datepicker').hide();
+        $('.datetimepicker').hide();
         // and let the click be processed as usual
         return true;
     });
