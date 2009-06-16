@@ -16,7 +16,6 @@ class FormatedPhotoInlineAdmin(newman.NewmanTabularInline):
     model = FormatedPhoto
 
 class PhotoAdmin(newman.NewmanModelAdmin):
-    inlines = []
     list_display = ('title', 'size', 'thumb', 'pk',)
     list_filter = ('created',)
     prepopulated_fields = {'slug': ('title',)}

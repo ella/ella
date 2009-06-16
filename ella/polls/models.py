@@ -285,8 +285,8 @@ class Choice(models.Model):
 
     question = models.ForeignKey('Question', verbose_name=_('Question'))
     choice = models.TextField(_('Choice text'))
-    points = models.IntegerField(_('Points'), blank=False, null=True)
-    votes = models.IntegerField(_('Votes'), blank=True, null=True)
+    points = models.IntegerField(_('Points'), default=1, blank=True, null=True)
+    votes = models.IntegerField(_('Votes'), default=0, blank=True, null=True)
 
     def add_vote(self):
         """
@@ -315,6 +315,35 @@ class Choice(models.Model):
     class Meta:
         verbose_name = _('Choice')
         verbose_name_plural = _('Choices')
+
+class Survey(Question):
+    """
+    New, simplified polls.
+    """
+
+    box_class = PollBox
+
+    active_from = models.DateTimeField(_('Active from'))
+    active_till = models.DateTimeField(_('Active till'))
+
+    def vote(self, choice, user=None, ip_address=None):
+        # create Vote object
+        vote = Vote(poll=self, user=user, ip_address=ip_address)
+        vote.save()
+        # increment votes at Choice object
+        choice.add_vote()
+
+    def check_vote_by_user(self, user):
+        return Vote.objects.filter(poll=self, user=user).count() > 0
+
+    def check_vote_by_ip_address(self, ip_address):
+        treshold = datetime.fromtimestamp(time.time() - POLLS_IP_VOTE_TRESHOLD)
+        return Vote.objects.filter(poll=self, ip_address=ip_address, time__gte=treshold).count() > 0
+
+    class Meta:
+        verbose_name = _('Survey')
+        verbose_name_plural = _('Surveys')
+        ordering = ('-active_from',)
 
 
 class Vote(models.Model):
