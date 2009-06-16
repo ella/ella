@@ -74,16 +74,16 @@ class TestArticleBasics(NewmanTestCase):
                 year = int(strftime("%Y")),
                 month = int(strftime("%m")),
                 day = int(calendar_data['publish_from']['day']),
-                hour = int(strftime("%H")),
-                minute = int(strftime("%M")),
+                hour = 0,
+                minute = 0,
             )),
 
             "placement_set-0-publish_to" : DateTimeAssert(datetime(
                 year = int(strftime("%Y")),
                 month = int(strftime("%m")),
                 day = int(calendar_data['publish_to']['day']),
-                hour = int(strftime("%H")),
-                minute = int(strftime("%M")),
+                hour = 0,
+                minute = 0,
             )),
         })
 
