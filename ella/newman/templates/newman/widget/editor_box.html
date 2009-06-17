@@ -2,9 +2,26 @@
 
 {% cache 600 boxform user %}
 <form id="rich-object">
-{{ boxform }}
-<input type="submit" value="{% trans 'Insert box' %}" />
-<input type="reset" value="{% trans 'Reset' %}" />
+<fieldset style="margin-bottom: 3px">
+    <legend>{% trans 'Object type' %}</legend>
+    {{ boxform.box_obj_ct }} {{ boxform.box_obj_id }}
+</fieldset>
+
+<fieldset id="rich-photo-format" style="margin-bottom: 3px; display: none;">
+    <legend>{% trans 'Photo attributes' %}</legend>
+    {{ boxform.box_photo_size.label }}: {{ boxform.box_photo_size }}
+    {{ boxform.box_photo_format.label }}: {{ boxform.box_photo_format }}
+</fieldset>
+
+<fieldset>
+    <legend>{{ boxform.box_obj_params.label }}</legend>
+    {{ boxform.box_obj_params }}
+</fieldset>
+
+<fieldset class="submit-row">
+    <input type="submit" value="{% trans 'Insert box' %}" />
+    <input type="reset" value="{% trans 'Reset' %}" />
+</fieldset>
 {% comment %}
 <a class="icn btn ok def">{% trans 'Insert box' %}</a>
 <a class="icn btn cancel">{% trans 'Reset' %}</a>

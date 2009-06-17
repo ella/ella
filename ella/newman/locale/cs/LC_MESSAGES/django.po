@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ella.newman (admin-ng)\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-10 11:28+0200\n"
-"PO-Revision-Date: 2009-06-10 11:28+0100\n"
+"POT-Creation-Date: 2009-06-17 09:12+0200\n"
+"PO-Revision-Date: 2009-06-17 09:14+0100\n"
 "Last-Translator: Vitek Pliska <whit@jizak.cz>\n"
 "Language-Team: Ella <ella.project@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -30,37 +30,37 @@ msgstr ""
 msgid "Select %s to change"
 msgstr ""
 
-#: fields.py:76
+#: fields.py:84
 msgid "Bad syntax in syntax formatting or template tags."
 msgstr "Špatná syntaxe v textu či šabloně."
 
-#: fields.py:77
+#: fields.py:85
 msgid "Object does not exist or is not right inserted."
 msgstr "Objekt neexistuje nebo není správně vložen."
 
-#: fields.py:78
+#: fields.py:86
 msgid "You can use only box template tag."
 msgstr "Můžete použít pouze tag box."
 
-#: fields.py:116
+#: fields.py:124
 msgid "This field is required."
 msgstr ""
 
-#: fields.py:117
+#: fields.py:125
 #, python-format
 msgid "Select a valid choice. %(value)s is not one of the available choices."
 msgstr ""
 
-#: fields.py:118
+#: fields.py:126
 msgid "Enter a list of values."
 msgstr ""
 
-#: fields.py:183
+#: fields.py:191
 msgid "This image has a CMYK color profile. We can't work with CMYK. Please convert it to RGB."
 msgstr ""
 
-#: fields.py:245
-#: fields.py:249
+#: fields.py:253
+#: fields.py:257
 #: generic.py:75
 #: generic.py:95
 msgid "Category not permitted"
@@ -85,7 +85,47 @@ msgstr "Předmět"
 msgid "Message"
 msgstr "Zpráva"
 
+#: forms.py:50
+msgid "Big"
+msgstr "Velká"
+
+#: forms.py:51
+msgid "Standard"
+msgstr "Standardní"
+
 #: forms.py:52
+msgid "Small"
+msgstr "Malá"
+
+#: forms.py:56
+msgid "Square"
+msgstr "Čtverec"
+
+#: forms.py:57
+msgid "Rectangle to width"
+msgstr "Obdélník na šířku"
+
+#: forms.py:58
+msgid "Rectangle to height"
+msgstr "Obdélník na výšku"
+
+#: forms.py:59
+msgid "Noodle to width"
+msgstr "Nudle na šířku"
+
+#: forms.py:60
+msgid "Noodle to height"
+msgstr "Nudle na výšku"
+
+#: forms.py:66
+msgid "Size"
+msgstr "Velikost"
+
+#: forms.py:67
+msgid "Format"
+msgstr "Formát"
+
+#: forms.py:68
 msgid "Extra parameters"
 msgstr "Extra parametry"
 
@@ -276,12 +316,12 @@ msgid "Database error"
 msgstr "Chyba databáze"
 
 #: options.py:620
-#: options.py:726
+#: options.py:734
 msgid "Please correct errors in form"
 msgstr "Prosím opravte chyby ve formuláři"
 
 #: options.py:668
-#: options.py:715
+#: options.py:723
 msgid "This view is designed for saving data only, thus POST method is required."
 msgstr ""
 
@@ -291,9 +331,13 @@ msgid "The %(name)s \"%(obj)s\" was changed successfully."
 msgstr ""
 
 #: options.py:687
-#: options.py:732
+#: options.py:740
 msgid "This view is designed for viewing form, thus GET method is required."
 msgstr ""
+
+#: options.py:716
+msgid "Object was deleted."
+msgstr "Objekt byl smazán."
 
 #: sites.py:111
 msgid "Please enter a correct username and password. Note that both fields are case-sensitive."
@@ -342,7 +386,7 @@ msgstr "Vaše nastavení byla uložena."
 msgid "Error in form."
 msgstr "Chyba ve formuláři."
 
-#: widgets.py:120
+#: widgets.py:127
 msgid "You cannot edit uploaded photo."
 msgstr "Není možné upravovat uložené foto."
 
@@ -403,6 +447,7 @@ msgstr ""
 
 #: templates/admin/actions.html:3
 #: templates/newman/newman-index.html:77
+#: templates/newman/positions/change_list.html:22
 msgid "Go"
 msgstr ""
 
@@ -412,7 +457,8 @@ msgstr ""
 #: templates/newman/change_form.html:6
 #: templates/newman/change_list.html:8
 #: templates/newman/delete_confirmation.html:5
-#: templates/newman/tpl_tags/newman_topmenu.html:2
+#: templates/newman/positions/multi_change_form.html:72
+#: templates/newman/tpl_tags/newman_favorites.html:4
 #: templates/page/404.html:5
 #: templates/page/500.html:5
 #: templates/registration/password_change_form.html:6
@@ -479,7 +525,7 @@ msgstr ""
 
 #: templates/admin/auth/user/change_password.html:7
 #: templates/newman/change_form.html:41
-#: templates/newman/change_list.html:49
+#: templates/newman/change_list.html:54
 #: templates/newman/auth/user/change_password.html:7
 msgid "Please correct the error below."
 msgid_plural "Please correct the errors below."
@@ -502,14 +548,13 @@ msgstr ""
 #: templates/newman/filters.html:11
 #: templates/newman/model_help.html:24
 #: templates/newman/object_history.html:26
-#: templates/newman/widget/editor_box.html:7
 msgid "Close"
 msgstr "Zavřít"
 
 #: templates/newman/app_index.html:26
 #: templates/newman/edit_inline/gallery_item.html:43
 #: templates/newman/edit_inline/placement.html:43
-#: templates/newman/tpl_tags/newman_favorites.html:6
+#: templates/newman/tpl_tags/newman_favorites.html:9
 msgid "Add"
 msgstr ""
 
@@ -551,22 +596,23 @@ msgid "View on site"
 msgstr ""
 
 #: templates/newman/change_list.html:13
+#: templates/newman/change_list.html:32
 msgid "Categories filtered by user. Click to change."
 msgstr "Kategorie filtrovány. Klikněte pro změnu."
 
-#: templates/newman/change_list.html:24
 #: templates/newman/change_list.html:26
+#: templates/newman/change_list.html:28
 #: templates/newman/newman/categoryuserrole/change_list.html:8
 #: templates/newman/newman/categoryuserrole/change_list.html:10
 msgid "Filters"
 msgstr "Filtry"
 
-#: templates/newman/change_list.html:24
+#: templates/newman/change_list.html:26
 #: templates/newman/newman/categoryuserrole/change_list.html:8
 msgid "on!"
 msgstr "zap."
 
-#: templates/newman/change_list.html:37
+#: templates/newman/change_list.html:42
 #: templates/newman/newman/categoryuserrole/change_list.html:24
 #, python-format
 msgid "Add %(name)s"
@@ -686,6 +732,7 @@ msgstr "Publikovat od"
 
 #: templates/newman/newman-index.html:90
 #: templates/newman/edit_inline/placement.html:35
+#: templates/newman/positions/change_list.html:12
 msgid "Category"
 msgstr ""
 
@@ -725,12 +772,33 @@ msgstr ""
 msgid "Main category"
 msgstr "Výchozí kategorie"
 
+#: templates/newman/edit_inline/related.html:6
+msgid "Get by keywords"
+msgstr ""
+
 #: templates/newman/edit_inline/tabular.html:21
 msgid "Delete?"
 msgstr ""
 
 #: templates/newman/newman/categoryuserrole/change_list.html:17
 msgid "Refresh"
+msgstr "Obnovit"
+
+#: templates/newman/positions/category_list.html:5
+msgid "Filter"
+msgstr "Filtr"
+
+#: templates/newman/positions/category_list.html:24
+msgid "Show categories"
+msgstr "Zobrazit kategorie"
+
+#: templates/newman/positions/multi_change_form.html:74
+#, fuzzy
+msgid "Categories"
+msgstr "Filtr kategorií"
+
+#: templates/newman/positions/multi_change_form.html:97
+msgid "This category doesn't have any positions, or they aren't registered for multiple editation"
 msgstr ""
 
 #: templates/newman/tpl_tags/filter.html:2
@@ -763,19 +831,26 @@ msgstr ""
 msgid "Save and continue editing"
 msgstr ""
 
-#: templates/newman/widget/editor_box.html:5
-msgid "Box"
+#: templates/newman/widget/editor_box.html:6
+msgid "Object type"
+msgstr "Typ objektu"
+
+#: templates/newman/widget/editor_box.html:11
+msgid "Photo attributes"
 msgstr ""
 
-#: templates/newman/widget/editor_box.html:12
+#: templates/newman/widget/editor_box.html:22
+#: templates/newman/widget/editor_box.html:26
 msgid "Insert box"
 msgstr "Vložit box"
 
-#: templates/newman/widget/editor_box.html:13
+#: templates/newman/widget/editor_box.html:23
+#: templates/newman/widget/editor_box.html:27
 msgid "Reset"
 msgstr "Původní"
 
 #: templates/newman/widget/listing_custom.html:100
+#: templates/newman/widget/poll_choices_custom.html:91
 msgid "Remove"
 msgstr ""
 

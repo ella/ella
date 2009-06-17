@@ -68,21 +68,7 @@ $(function(){
     if(!$('#rich-box').length){
         $('<div id="rich-box" title="Box"></div>').hide().appendTo('body');
         $('#rich-box').load(BASE_URL+'nm/editor-box/', function(){
-            $('<div id="rich-photo-format" style="margin: 3px 0;">\n\
-            <label for="id_box_photo_size" style="display:inline;">Velikost</label>\n\
-            <select name="box_photo_size" id="id_box_photo_size">\n\
-                <option value="velka">velká</option>\n\
-                <option value="standard" selected="selected">standard</option>\n\
-                <option value="mala">malá</option>\n\
-            </select>\n\
-            <label for="id_box_photo_format" style="display:inline;">Poměr stran</label>\n\
-            <select name="box_photo_format" id="id_box_photo_format">\n\
-                <option value="ctverec">čtverec</option>\n\
-                <option value="obdelnik_na_sirku">obdélník na šířku</option>\n\
-                <option value="obdelnik_na_vysku">obdélník na výšku</option>\n\
-                <option value="nudle_na_sirku">nudle na šířku</option>\n\
-                <option value="nudle_na_vysku">nudle na výšku</option>\n\
-            </select></div>').hide().insertAfter('#lookup_id_box_obj_id');
+
             $('#id_box_obj_ct').bind('change', function(){
                 if(getTypeFromPath($('#id_box_obj_ct').val()) == 'photos.photo'){
                     $('#rich-photo-format').show();
