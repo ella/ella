@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ella.newman (admin-ng)\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-17 09:12+0200\n"
-"PO-Revision-Date: 2009-06-17 09:14+0100\n"
+"POT-Creation-Date: 2009-06-17 10:27+0200\n"
+"PO-Revision-Date: 2009-06-17 10:28+0100\n"
 "Last-Translator: Vitek Pliska <whit@jizak.cz>\n"
 "Language-Team: Ella <ella.project@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -126,6 +126,29 @@ msgid "Format"
 msgstr "Formát"
 
 #: forms.py:68
+#: models.py:15
+#: models.py:63
+#: migrations/old/0001_init.py:16
+#: migrations/old/0001_init.py:39
+msgid "Title"
+msgstr "Nadpis"
+
+#: forms.py:69
+#: templates/newman/newman-index.html:91
+msgid "Author"
+msgstr ""
+
+#: forms.py:70
+msgid "Description"
+msgstr ""
+
+#: forms.py:71
+#: models.py:18
+#: migrations/old/0001_init.py:21
+msgid "Detail"
+msgstr "Detailní popis"
+
+#: forms.py:72
 msgid "Extra parameters"
 msgstr "Extra parametry"
 
@@ -142,13 +165,6 @@ msgstr "Smazání objektu není povoleno."
 msgid "Object change is not permitted."
 msgstr "Změna objektu není povoleno."
 
-#: models.py:15
-#: models.py:63
-#: migrations/old/0001_init.py:16
-#: migrations/old/0001_init.py:39
-msgid "Title"
-msgstr "Nadpis"
-
 #: models.py:16
 #: migrations/old/0001_init.py:23
 msgid "Slug"
@@ -158,11 +174,6 @@ msgstr ""
 #: migrations/old/0001_init.py:19
 msgid "Summary"
 msgstr "Souhrn"
-
-#: models.py:18
-#: migrations/old/0001_init.py:21
-msgid "Detail"
-msgstr "Detailní popis"
 
 #: models.py:19
 #: migrations/old/0001_init.py:20
@@ -736,10 +747,6 @@ msgstr "Publikovat od"
 msgid "Category"
 msgstr ""
 
-#: templates/newman/newman-index.html:91
-msgid "Author"
-msgstr ""
-
 #: templates/newman/newman-index.html:107
 msgid "Your Recent Actions"
 msgstr "Vaše poslední akce"
@@ -831,21 +838,21 @@ msgstr ""
 msgid "Save and continue editing"
 msgstr ""
 
-#: templates/newman/widget/editor_box.html:6
+#: templates/newman/widget/editor_box.html:7
 msgid "Object type"
 msgstr "Typ objektu"
 
-#: templates/newman/widget/editor_box.html:11
+#: templates/newman/widget/editor_box.html:12
 msgid "Photo attributes"
-msgstr ""
+msgstr "Atributy fotky"
 
-#: templates/newman/widget/editor_box.html:22
-#: templates/newman/widget/editor_box.html:26
+#: templates/newman/widget/editor_box.html:33
+#: templates/newman/widget/editor_box.html:37
 msgid "Insert box"
 msgstr "Vložit box"
 
-#: templates/newman/widget/editor_box.html:23
-#: templates/newman/widget/editor_box.html:27
+#: templates/newman/widget/editor_box.html:34
+#: templates/newman/widget/editor_box.html:38
 msgid "Reset"
 msgstr "Původní"
 

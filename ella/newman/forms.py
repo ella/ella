@@ -65,5 +65,9 @@ class EditorBoxForm(forms.Form):
     box_obj_id = forms.IntegerField(label='', min_value=0, widget=widgets.ForeignKeyGenericRawIdWidget)
     box_photo_size = forms.ChoiceField(choices=BOX_PHOTO_SIZES, required=False, label=_('Size'), initial='standard')
     box_photo_format = forms.ChoiceField(choices=BOX_PHOTO_FORMATS, required=False, label=_('Format'), initial='obdelnik_sirka')
-    box_obj_params = forms.CharField(label=_('Extra parameters'), max_length=300, required=False, widget=forms.Textarea(attrs={'rows': 3}))
+    box_photo_meta_show_title = forms.BooleanField(required=False, label=_('Title'))
+    box_photo_meta_show_author = forms.BooleanField(required=False, label=_('Author'))
+    box_photo_meta_show_description = forms.BooleanField(required=False, label=_('Description'))
+    box_photo_meta_show_detail = forms.BooleanField(required=False, label=_('Detail'))
+    box_obj_params = forms.CharField(label=_('Extra parameters'), max_length=300, required=False, widget=forms.Textarea(attrs={'rows': 3, 'style': 'width:98%'}))
 

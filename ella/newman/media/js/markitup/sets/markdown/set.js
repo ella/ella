@@ -110,7 +110,7 @@ $(function(){
             modal: false,
             autoOpen: false,
             width: 420,
-            height: 350
+            height: 360
         });
     }
     $('.rich_text_area').markItUp(MARKITUP_SETTINGS);

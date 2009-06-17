@@ -1,5 +1,6 @@
 {% load cache %}
 
+{% spaceless %}
 {% cache 600 boxform user %}
 <form id="rich-object">
 <fieldset style="margin-bottom: 3px">
@@ -9,8 +10,18 @@
 
 <fieldset id="rich-photo-format" style="margin-bottom: 3px; display: none;">
     <legend>{% trans 'Photo attributes' %}</legend>
-    {{ boxform.box_photo_size.label }}: {{ boxform.box_photo_size }}
-    {{ boxform.box_photo_format.label }}: {{ boxform.box_photo_format }}
+        {{ boxform.box_photo_size.label }}: {{ boxform.box_photo_size }}
+        {{ boxform.box_photo_format.label }}: {{ boxform.box_photo_format }}
+    <div>
+        <div style="width: 50%; float: left">
+            <label>{{ boxform.box_photo_meta_show_title }} {{ boxform.box_photo_meta_show_title.label }}</label>
+            <label>{{ boxform.box_photo_meta_show_author }} {{ boxform.box_photo_meta_show_author.label }}</label>
+        </div>
+        <div style="width: 45%; float: left">
+            <label>{{ boxform.box_photo_meta_show_description }} {{ boxform.box_photo_meta_show_description.label }}</label>
+            <label>{{ boxform.box_photo_meta_show_detail }} {{ boxform.box_photo_meta_show_detail.label }}</label>
+        </div>
+    </div>
 </fieldset>
 
 <fieldset>
@@ -28,3 +39,4 @@
 {% endcomment %}
 </form>
 {% endcache %}
+{% endspaceless %}
