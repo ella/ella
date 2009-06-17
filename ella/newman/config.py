@@ -32,7 +32,6 @@ AUTOSAVE_MAX_AMOUNT = getattr(settings, 'NEWMAN_AUTOSAVE_MAX_AMOUNT', 3)
 # List of applicable ContentTypes
 
 NON_PUBLISHABLE_CTS = (
-    'core.author',
     'photos.photo',
     'polls.survey',
 )
