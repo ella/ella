@@ -1,10 +1,14 @@
 from setuptools import setup, find_packages
 
-import ella
+# must be in sync with stdout.VERSION
+VERSION = (1, 0, 0, 0)
+__version__ = VERSION
+__versionstr__ = '.'.join(map(str, VERSION))
+
 
 setup(
     name = 'ella',
-    version = ella.__versionstr__,
+    version = __versionstr__,
     description = 'ella',
     long_description = '\n'.join((
         'Ella Project',
