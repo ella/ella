@@ -262,7 +262,7 @@ class NewmanSite(AdminSite):
         acts = []
         cts = get_cached_list(ContentType)
         for ct in cts:
-            if issubclass(ct.model_class(), Publishable) or '%s.%s' % (ct.app_label, ct.model) in NON_PUBLISHABLE_CTS:
+            if ct.model_class() and (issubclass(ct.model_class(), Publishable) or '%s.%s' % (ct.app_label, ct.model) in NON_PUBLISHABLE_CTS):
                 acts.append(ct)
 
         return acts
