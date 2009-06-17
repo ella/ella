@@ -312,6 +312,9 @@ class Listing(models.Model):
     def get_domain_url(self):
         return self.get_absolute_url(domain=True)
 
+    def get_publish_from(self):
+        return self.publish_from
+
 
     def __unicode__(self):
         try:
