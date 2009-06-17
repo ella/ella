@@ -197,7 +197,7 @@ class SurveyChoiceInlineAdmin(newman.NewmanTabularInline):
     model = Choice
     extra = 5
     # FIXME: rich text problem with inlines :(
-#    rich_text_fields = {'small': ('choice',)}
+    rich_text_fields = {'small': ('choice',)}
 
 
 class SurveyAdmin(newman.NewmanModelAdmin):

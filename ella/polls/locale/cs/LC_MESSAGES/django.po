@@ -3,262 +3,356 @@
 # This file is distributed under the same license as the Ella package.
 # Ondrej Kohout <ondrej.kohout@netcentrum.cz>, 2007.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-02-27 22:42+0100\n"
-"PO-Revision-Date: 2007-08-15 13:55+0200\n"
-"Last-Translator: Ondrej Kohout <ondrej.kohout@netcentrum.cz>\n"
+"POT-Creation-Date: 2009-06-17 09:40+0200\n"
+"PO-Revision-Date: 2009-06-17 09:41+0100\n"
+"Last-Translator: Vitek Pliska <whit@jizak.cz>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: admin.py:27
-#, python-format
-msgid ""
-"Invalid score interval %(points_from)s - %(points_to)s. Points dimension "
-"from can not be greater than point dimension to."
-msgstr ""
-"Neplatný rozsah bodů %(points_from)s - %(points_to)s. Rozsah bodů od musí "
-"být větší než rozsah bodů do."
+#: models.py:70
+#: migrations/0001_initial.py:31
+#: migrations/0001_initial.py:77
+#: migrations/0004_inheritance_from_basepoll_abstract_model.py:25
+#: migrations/0004_inheritance_from_basepoll_abstract_model.py:62
+#: migrations/0004_inheritance_from_basepoll_abstract_model.py:104
+msgid "Text with announcement"
+msgstr "Text s oznámením"
 
-#: admin.py:30
+#: models.py:71
+#: migrations/0001_initial.py:32
+#: migrations/0001_initial.py:78
+#: migrations/0001_initial.py:93
+#: migrations/0004_inheritance_from_basepoll_abstract_model.py:16
+#: migrations/0004_inheritance_from_basepoll_abstract_model.py:95
+msgid "Text"
+msgstr "Text"
+
+#: models.py:72
+#: migrations/0001_initial.py:33
+#: migrations/0001_initial.py:79
+#: migrations/0001_initial.py:94
+#: migrations/0004_inheritance_from_basepoll_abstract_model.py:22
+#: migrations/0004_inheritance_from_basepoll_abstract_model.py:101
+msgid "Text with results"
+msgstr "Text s výsledky"
+
+#: models.py:73
+#: models.py:313
+#: migrations/0001_initial.py:34
+#: migrations/0001_initial.py:80
+#: migrations/0001_initial.py:95
+#: migrations/0004_inheritance_from_basepoll_abstract_model.py:28
+#: migrations/0004_inheritance_from_basepoll_abstract_model.py:107
+msgid "Active from"
+msgstr "Aktivní od"
+
+#: models.py:74
+#: models.py:314
+#: migrations/0001_initial.py:35
+#: migrations/0001_initial.py:81
+#: migrations/0001_initial.py:96
+#: migrations/0004_inheritance_from_basepoll_abstract_model.py:19
+#: migrations/0004_inheritance_from_basepoll_abstract_model.py:98
+msgid "Active till"
+msgstr "Aktivní do"
+
+#: models.py:115
+#: models.py:397
+#: migrations/0001_initial.py:28
+#: migrations/0001_initial.py:54
+#: migrations/0001_initial.py:76
+msgid "Title"
+msgstr "Titulek"
+
+#: models.py:116
+#: models.py:272
+#: models.py:278
+#: migrations/0001_initial.py:18
+#: migrations/0001_initial.py:82
+msgid "Question"
+msgstr "Otázka"
+
+#: models.py:125
+msgid "Votes in total"
+msgstr ""
+
+#: models.py:145
+#: models.py:340
+#: migrations/0001_initial.py:43
+msgid "Poll"
+msgstr "Anketa"
+
+#: models.py:146
+msgid "Polls"
+msgstr "Ankety"
+
+#: models.py:169
+#: newman_admin.py:159
+msgid "Correct Answers"
+msgstr "Soutěžící se správnými odpověďmi"
+
+#: models.py:174
+msgid "Participants in total"
+msgstr ""
+
+#: models.py:194
+#: models.py:237
+#: models.py:358
+#: migrations/0001_initial.py:69
+#: migrations/0001_initial.py:105
+msgid "Contest"
+msgstr "Soutěž"
+
+#: models.py:195
+msgid "Contests"
+msgstr "Soutěže"
+
+#: models.py:201
+#: migrations/0001_initial.py:98
+msgid "Has correct answers"
+msgstr "Má správné odpovědi"
+
+#: models.py:226
+#: models.py:236
+#: models.py:396
+#: migrations/0001_initial.py:53
+#: migrations/0001_initial.py:68
+msgid "Quiz"
+msgstr "Test"
+
+#: models.py:227
+msgid "Quizes"
+msgstr "Testy"
+
+#: models.py:233
+#: migrations/0001_initial.py:65
+msgid "Question text"
+msgstr "Text otázky"
+
+#: models.py:234
+#: migrations/0001_initial.py:66
+msgid "Allow multiple choices"
+msgstr "Povolit více voleb/odpovědí"
+
+#: models.py:235
+#: migrations/0001_initial.py:67
+msgid "Allow no choice"
+msgstr "Povolit žádnou voleb/odpovědí"
+
+#: models.py:273
+msgid "Questions"
+msgstr "Otázky"
+
+#: models.py:279
+#: migrations/0001_initial.py:19
+msgid "Choice text"
+msgstr "Text volby/odpovědi"
+
+#: models.py:280
+#: migrations/0001_initial.py:20
+msgid "Points"
+msgstr "Body"
+
+#: models.py:281
+#: models.py:350
+#: migrations/0001_initial.py:21
+msgid "Votes"
+msgstr "Hlasy"
+
+#: models.py:303
+msgid "Choice"
+msgstr "Volba/odpověď"
+
+#: models.py:304
+#: models.py:366
+#: newman_admin.py:89
+#: newman_admin.py:103
+#: migrations/0001_initial.py:113
+msgid "Choices"
+msgstr "Volby/odpovědi"
+
+#: models.py:331
+msgid "Survey"
+msgstr "Anketa"
+
+#: models.py:332
+msgid "Surveys"
+msgstr "Ankety"
+
+#: models.py:341
+#: models.py:360
+#: migrations/0001_initial.py:44
+#: migrations/0001_initial.py:107
+msgid "User"
+msgstr "Uživatel"
+
+#: models.py:342
+#: migrations/0001_initial.py:45
+msgid "Time"
+msgstr "Čas"
+
+#: models.py:343
+#: migrations/0001_initial.py:46
+msgid "IP Address"
+msgstr "IP adresa"
+
+#: models.py:349
+msgid "Vote"
+msgstr "Hlas"
+
+#: models.py:359
+#: migrations/0001_initial.py:106
+msgid "Date and time"
+msgstr "Datum a čas"
+
+#: models.py:361
+#: migrations/0001_initial.py:108
+msgid "First name"
+msgstr "Jméno"
+
+#: models.py:362
+#: migrations/0001_initial.py:109
+msgid "Last name"
+msgstr "Příjmení"
+
+#: models.py:363
+#: migrations/0001_initial.py:110
+msgid "email"
+msgstr "E-mail"
+
+#: models.py:364
+#: migrations/0001_initial.py:111
+msgid "Phone number"
+msgstr "Telefoní číslo"
+
+#: models.py:365
+#: migrations/0001_initial.py:112
+msgid "Address"
+msgstr "Adresa"
+
+#: models.py:367
+#: migrations/0001_initial.py:114
+msgid "Count guess"
+msgstr "Kolik soutěžících tipujete že se zúčastní?"
+
+#: models.py:368
+#: migrations/0001_initial.py:115
+msgid "Winner"
+msgstr "Vítěz"
+
+#: models.py:386
+msgid "Contestant"
+msgstr "Soutěžící"
+
+#: models.py:387
+msgid "Contestants"
+msgstr "Soutěžící"
+
+#: models.py:398
+#: migrations/0001_initial.py:55
+msgid "Quiz results text"
+msgstr "Text s výsledkem testu"
+
+#: models.py:399
+#: migrations/0001_initial.py:56
+msgid "Points dimension from"
+msgstr "Rozsah bodů od"
+
+#: models.py:400
+#: migrations/0001_initial.py:57
+msgid "Points dimension to"
+msgstr "Rozsah bodů do"
+
+#: models.py:401
+#: migrations/0001_initial.py:58
+msgid "Count"
+msgstr "Počet"
+
+#: models.py:422
+msgid "Result"
+msgstr "Výsledek"
+
+#: models.py:423
+#: urls.py:24
+#: views.py:357
+msgid "results"
+msgstr "Výsledky"
+
+#: newman_admin.py:26
+#, fuzzy, python-format
+msgid "Invalid score interval %(points_from)s - %(points_to)s.Points dimension from can not be greater than point dimension to."
+msgstr "Neplatný rozsah bodů %(points_from)s - %(points_to)s. Rozsah bodů od musí být větší než rozsah bodů do."
+
+#: newman_admin.py:31
 msgid "Invalid score intervals"
 msgstr "Neplatné rozsahy bodů"
 
-#: admin.py:36
+#: newman_admin.py:37
 #, python-format
 msgid "Score %s is covered by two answers."
 msgstr "Výsledeku %s odpovídají dvě odpovědi."
 
-#: admin.py:38
+#: newman_admin.py:39
 #, python-format
 msgid "Score %s is not covered by any answer."
 msgstr "Pro výsledek %s neexistuje žádná odpověď."
 
-#: admin.py:100 models.py:79
-msgid "Correct Answers"
-msgstr "Soutěžící se správnými odpověďmi"
+#: newman_admin.py:121
+#: newman_admin.py:131
+msgid "Enter a whole number."
+msgstr "Vložte celé číslo."
 
-#: models.py:53 models.py:223 models.py:348
-msgid "Title"
-msgstr "Titulek"
+#: newman_admin.py:191
+msgid "Basic"
+msgstr ""
 
-#: models.py:56 models.py:224
-msgid "Text with announcement"
-msgstr "Text s oznámením"
+#: newman_admin.py:192
+msgid "Texts"
+msgstr "Texty"
 
-#: models.py:57 models.py:107 models.py:225
-msgid "Text"
-msgstr "Text"
-
-#: models.py:58 models.py:108 models.py:226
-msgid "Text with results"
-msgstr "Text s výsledky"
-
-#: models.py:59 models.py:109 models.py:227
-msgid "Active from"
-msgstr "Aktivní od"
-
-#: models.py:60 models.py:110 models.py:228
-msgid "Active till"
-msgstr "Aktivní do"
-
-#: models.py:94 models.py:144 models.py:312
-msgid "Contest"
-msgstr "Soutěž"
-
-#: models.py:95
-msgid "Contests"
-msgstr "Soutěže"
-
-#: models.py:103
-msgid "title"
-msgstr "Titulek"
-
-#: models.py:106
-msgid "text with announcement"
-msgstr "Text s ohlášením"
-
-#: models.py:114
-msgid "Authors"
-msgstr "Autoři"
-
-#: models.py:129 models.py:143 models.py:347
-msgid "Quiz"
-msgstr "Test"
-
-#: models.py:130
-msgid "Quizes"
-msgstr "Testy"
-
-#: models.py:140
-msgid "Question text"
-msgstr "Text otázky"
-
-#: models.py:141
-msgid "Allow multiple choices"
-msgstr "Povolit více voleb/odpovědí"
-
-#: models.py:142
-msgid "Allow no choice"
-msgstr "Povolit žádnou voleb/odpovědí"
-
-#: models.py:181 models.py:229 models.py:253
-msgid "Question"
-msgstr "Otázka"
-
-#: models.py:182
-msgid "Questions"
-msgstr "Otázky"
-
-#: models.py:244 models.py:294
-msgid "Poll"
-msgstr "Anketa"
-
-#: models.py:245
-msgid "Polls"
-msgstr "Ankety"
-
-#: models.py:254
-msgid "Choice text"
-msgstr "Text volby/odpovědi"
-
-#: models.py:255
-msgid "Points"
-msgstr "Body"
-
-#: models.py:256 models.py:304
-msgid "Votes"
-msgstr "Hlasy"
-
-#: models.py:274
-msgid "Choice"
-msgstr "Volba/odpověď"
-
-#: models.py:275 models.py:320
-msgid "Choices"
-msgstr "Volby/odpovědi"
-
-#: models.py:295 models.py:314 templates/admin/correct_answers.html:12
-msgid "User"
-msgstr "Uživatel"
-
-#: models.py:296
-msgid "Time"
-msgstr "Čas"
-
-#: models.py:297
-msgid "IP Address"
-msgstr "IP adresa"
-
-#: models.py:303
-msgid "Vote"
-msgstr "Hlas"
-
-#: models.py:313
-msgid "Date and time"
-msgstr "Datum a čas"
-
-#: models.py:315
-msgid "First name"
-msgstr "Jméno"
-
-#: models.py:316
-msgid "Last name"
-msgstr "Příjmení"
-
-#: models.py:317
-msgid "email"
-msgstr "E-mail"
-
-#: models.py:318
-msgid "Phone number"
-msgstr "Telefoní číslo"
-
-#: models.py:319 templates/admin/correct_answers.html:15
-msgid "Address"
-msgstr "Adresa"
-
-#: models.py:321
-msgid "Count guess"
-msgstr "Kolik soutěžících tipujete že se zúčastní?"
-
-#: models.py:322 templates/admin/correct_answers.html:16
-msgid "Winner"
-msgstr "Vítěz"
-
-#: models.py:337
-msgid "Contestant"
-msgstr "Soutěžící"
-
-#: models.py:338
-msgid "Contestants"
-msgstr "Soutěžící"
-
-#: models.py:349
-msgid "Quiz results text"
-msgstr "Text s výsledkem testu"
-
-#: models.py:350
-msgid "Points dimension from"
-msgstr "Rozsah bodů od"
-
-#: models.py:351
-msgid "Points dimension to"
-msgstr "Rozsah bodů do"
-
-#: models.py:352
-msgid "Count"
-msgstr "Počet"
-
-#: models.py:367
-msgid "Result"
-msgstr "Výsledek"
-
-#: models.py:368 urls.py:22 views.py:384
-msgid "results"
-msgstr "Výsledky"
-
-#: urls.py:23 views.py:301
+#: urls.py:25
+#: views.py:295
 msgid "result"
 msgstr "Výsledek"
 
-#: urls.py:24
+#: urls.py:26
 msgid "conditions"
 msgstr "podmínky"
 
-#: templates/admin/correct_answers.html:9
-msgid "Count Guess Difference"
-msgstr "Rozdíl tipopvací otázky"
+#: migrations/0001_initial.py:29
+#: migrations/0001_initial.py:90
+msgid "Slug"
+msgstr ""
 
-#: templates/admin/correct_answers.html:10
-msgid "Name"
-msgstr "Jméno"
+#: migrations/0001_initial.py:89
+msgid "title"
+msgstr "Titulek"
 
-#: templates/admin/correct_answers.html:11
-msgid "Surname"
-msgstr "Příjmení"
+#: migrations/0001_initial.py:92
+#: migrations/0004_inheritance_from_basepoll_abstract_model.py:141
+msgid "text with announcement"
+msgstr "Text s ohlášením"
 
-#: templates/admin/correct_answers.html:13
-msgid "Email"
-msgstr "E-mail"
+#~ msgid "Authors"
+#~ msgstr "Autoři"
+#~ msgid "Count Guess Difference"
+#~ msgstr "Rozdíl tipopvací otázky"
+#~ msgid "Name"
+#~ msgstr "Jméno"
+#~ msgid "Email"
+#~ msgstr "E-mail"
+#~ msgid "Phonenumber"
+#~ msgstr "Telefoní číslo"
+#~ msgid "Yes"
+#~ msgstr "Ano"
+#~ msgid "No"
+#~ msgstr "Ne"
+#~ msgid "Delete"
+#~ msgstr "Smazat"
 
-#: templates/admin/correct_answers.html:14
-msgid "Phonenumber"
-msgstr "Telefoní číslo"
-
-#: templates/admin/correct_answers.html:29
-msgid "Yes"
-msgstr "Ano"
-
-#: templates/admin/correct_answers.html:29
-msgid "No"
-msgstr "Ne"
-
-#: templates/admin/edit_inline/question_tabular.html:14
-msgid "Delete"
-msgstr "Smazat"

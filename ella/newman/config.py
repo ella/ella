@@ -34,6 +34,7 @@ AUTOSAVE_MAX_AMOUNT = getattr(settings, 'NEWMAN_AUTOSAVE_MAX_AMOUNT', 3)
 NON_PUBLISHABLE_CTS = (
     'core.author',
     'photos.photo',
+    'polls.survey',
 )
 
 # Models that have TaggingInlineAdmin in inlines
