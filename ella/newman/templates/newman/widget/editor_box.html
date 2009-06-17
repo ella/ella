@@ -29,13 +29,20 @@
     {{ boxform.box_obj_params }}
 </fieldset>
 
-<fieldset class="submit-row">
-    <input type="submit" value="{% trans 'Insert box' %}" />
-    <input type="reset" value="{% trans 'Reset' %}" />
+<fieldset class="submit-row" style="padding-top: 5px;">
+    <div style="float: left">
+        <a class="icn btn ok def" onclick="$('#rich-object').submit()">{% trans 'Insert box' %}</a>
+    </div>
+    <div style="float: right">
+        <a class="icn btn eclear" onclick="$('#rich-object').trigger('reset')">{% trans 'Reset' %}</a>
+        <a class="icn btn cancel" onclick="$('#rich-box').dialog('close')">{% trans 'Close' %}</a>
+    </div>
 </fieldset>
 {% comment %}
-<a class="icn btn ok def">{% trans 'Insert box' %}</a>
-<a class="icn btn cancel">{% trans 'Reset' %}</a>
+    <input type="submit" value="{% trans 'Insert box' %}" />
+    <input type="reset" value="{% trans 'Reset' %}" />
+    <a class="icn btn ok def">{% trans 'Insert box' %}</a>
+    <a class="icn btn cancel">{% trans 'Reset' %}</a>
 {% endcomment %}
 </form>
 {% endcache %}
