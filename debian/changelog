@@ -1,3 +1,9 @@
+centrum-ella-stdout (1.0.0.0) unstable; urgency=low
+
+  * stdout compatible with ella1
+
+ -- Jakub Vysoky <jakub@borka.cz>  Wed, 17 Jun 2009 14:11:20 +0200
+
 centrum-ella (0.3.4.8) unstable; urgency=low
 
   * build from [9408755ae57d5e68f141d044c01b97e5d119ca27] 
