@@ -14,7 +14,6 @@ BOX_INFO = 'ella.core.box.BOX_INFO'
 MEDIA_KEY = 'ella.core.box.MEDIA_KEY'
 
 CACHE_TIMEOUT = getattr(settings, 'CACHE_TIMEOUT', 10*60)
-DOUBLE_RENDER = getattr(settings, 'DOUBLE_RENDER', False)
 
 
 class Box(object):
@@ -107,7 +106,7 @@ class Box(object):
 
     def render(self):
         " Cached wrapper around self._render(). "
-        if DOUBLE_RENDER and self.can_double_render:
+        if getattr(settings, 'DOUBLE_RENDER', False) and self.can_double_render:
             if 'SECOND_RENDER' not in self._context:
                 return self.double_render()
         key = self.get_cache_key()

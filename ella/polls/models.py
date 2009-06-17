@@ -18,16 +18,6 @@ from ella.photos.models import Photo
 ACTIVITY_NOT_YET_ACTIVE = 0
 ACTIVITY_ACTIVE = 1
 ACTIVITY_CLOSED = 2
-DOUBLE_RENDER = getattr(settings, 'DOUBLE_RENDER', False)
-
-UPDATE_VOTE = '''
-    UPDATE
-        %(table)s
-    SET
-        %(col)s = COALESCE(%(col)s, 0) + 1
-    WHERE
-        id = %%s;
-    '''
 
 POLLS_IP_VOTE_TRESHOLD = 10 * 60
 
@@ -40,9 +30,11 @@ class PollBox(Box):
         super(PollBox, self).prepare(context)
         SECOND_RENDER = context.get('SECOND_RENDER', False)
         self.state = None
-        if DOUBLE_RENDER and SECOND_RENDER or context.has_key('request'):
-            from ella.polls import views
-            self.state = views.poll_check_vote(context['request'], self.obj)
+        if getattr(settings, 'DOUBLE_RENDER', False) and not SECOND_RENDER or 'request' not in context:
+            return
+
+        from ella.polls import views
+        self.state = views.poll_check_vote(context['request'], self.obj)
 
     def get_context(self):
         from ella.polls import views
@@ -286,18 +278,13 @@ class Choice(models.Model):
     question = models.ForeignKey('Question', verbose_name=_('Question'))
     choice = models.TextField(_('Choice text'))
     points = models.IntegerField(_('Points'), default=1, blank=True, null=True)
-    votes = models.IntegerField(_('Votes'), default=0, blank=True, null=True)
+    votes = models.IntegerField(_('Votes'), default=0, blank=True)
 
     def add_vote(self):
         """
         Add a vote dirrectly to DB
         """
-        query = UPDATE_VOTE % {
-            'table' : connection.ops.quote_name(self._meta.db_table),
-            'col' : connection.ops.quote_name(self._meta.get_field('votes').column)}
-        cur = connection.cursor()
-        cur.execute(query, (self.pk,))
-        return True
+        Choice.objects.filter(pk=self.pk).update(votes=models.F('votes') + 1)
 
     def get_percentage(self):
         """
