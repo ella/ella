@@ -12,22 +12,10 @@ from django.conf import settings
 from ella.core.models import Publishable
 from ella.core.cache import get_cached_object, get_cached_list
 from ella.core.box import Box
-from ella.core.models import Category, Author
-from ella.photos.models import Photo
 
 ACTIVITY_NOT_YET_ACTIVE = 0
 ACTIVITY_ACTIVE = 1
 ACTIVITY_CLOSED = 2
-DOUBLE_RENDER = getattr(settings, 'DOUBLE_RENDER', False)
-
-UPDATE_VOTE = '''
-    UPDATE
-        %(table)s
-    SET
-        %(col)s = COALESCE(%(col)s, 0) + 1
-    WHERE
-        id = %%s;
-    '''
 
 POLLS_IP_VOTE_TRESHOLD = 10 * 60
 
@@ -40,9 +28,11 @@ class PollBox(Box):
         super(PollBox, self).prepare(context)
         SECOND_RENDER = context.get('SECOND_RENDER', False)
         self.state = None
-        if DOUBLE_RENDER and SECOND_RENDER or context.has_key('request'):
-            from ella.polls import views
-            self.state = views.poll_check_vote(context['request'], self.obj)
+        if getattr(settings, 'DOUBLE_RENDER', False) and not SECOND_RENDER or 'request' not in context:
+            return
+
+        from ella.polls import views
+        self.state = views.poll_check_vote(context['request'], self.obj)
 
     def get_context(self):
         from ella.polls import views
@@ -285,19 +275,14 @@ class Choice(models.Model):
 
     question = models.ForeignKey('Question', verbose_name=_('Question'))
     choice = models.TextField(_('Choice text'))
-    points = models.IntegerField(_('Points'), blank=False, null=True)
-    votes = models.IntegerField(_('Votes'), blank=True, null=True)
+    points = models.IntegerField(_('Points'), default=1, blank=True, null=True)
+    votes = models.IntegerField(_('Votes'), default=0, blank=True)
 
     def add_vote(self):
         """
         Add a vote dirrectly to DB
         """
-        query = UPDATE_VOTE % {
-            'table' : connection.ops.quote_name(self._meta.db_table),
-            'col' : connection.ops.quote_name(self._meta.get_field('votes').column)}
-        cur = connection.cursor()
-        cur.execute(query, (self.pk,))
-        return True
+        Choice.objects.filter(pk=self.pk).update(votes=models.F('votes') + 1)
 
     def get_percentage(self):
         """
@@ -315,6 +300,52 @@ class Choice(models.Model):
     class Meta:
         verbose_name = _('Choice')
         verbose_name_plural = _('Choices')
+
+class Survey(Question):
+    """
+    New, simplified polls.
+    """
+
+    box_class = PollBox
+
+    active_from = models.DateTimeField(_('Active from'))
+    active_till = models.DateTimeField(_('Active till'))
+
+    def vote(self, choice, user=None, ip_address=None):
+        # create Vote object
+        vote = SurveyVote(survey=self, user=user, ip_address=ip_address)
+        vote.save()
+        # increment votes at Choice object
+        choice.add_vote()
+
+    def check_vote_by_user(self, user):
+        return SurveyVote.objects.filter(survey=self, user=user).count() > 0
+
+    def check_vote_by_ip_address(self, ip_address):
+        treshold = datetime.fromtimestamp(time.time() - POLLS_IP_VOTE_TRESHOLD)
+        return SurveyVote.objects.filter(survey=self, ip_address=ip_address, time__gte=treshold).count() > 0
+
+    class Meta:
+        verbose_name = _('Survey')
+        verbose_name_plural = _('Surveys')
+        ordering = ('-active_from',)
+
+class SurveyVote(models.Model):
+    """
+    User votes records to ensure unique votes. For Polls only.
+    """
+    survey = models.ForeignKey(Survey, verbose_name=_('Survey'))
+    user = models.ForeignKey(User, blank=True, null=True, verbose_name=_('User'))
+    time = models.DateTimeField(_('Time'), auto_now=True)
+    ip_address = models.IPAddressField(_('IP Address'), null=True)
+
+    def __unicode__(self):
+        return u'%s' % self.time
+
+    class Meta:
+        verbose_name = _('Vote')
+        verbose_name_plural = _('Votes')
+        ordering = ('-time',)
 
 
 class Vote(models.Model):

@@ -11,7 +11,7 @@ from ella.newman import fields
 
 from ella.core.newman_admin import PlacementInlineAdmin, PublishableAdmin
 from ella.core.cache import get_cached_object_or_404
-from ella.polls.models import Poll, Contest, Contestant, Quiz, Result, Choice, Vote, Question
+from ella.polls.models import Contest, Contestant, Quiz, Result, Choice, Vote, Question, Survey
 
 
 class ResultFormset(BaseInlineFormSet):
@@ -190,8 +190,26 @@ class PollAdmin(newman.NewmanModelAdmin):
         (_('Texts'), {'fields' : ('text_announcement', 'text', 'text_results',)}),
     )
 
+class SurveyChoiceInlineAdmin(newman.NewmanTabularInline):
+    exclude = ('points', 'votes',)
+    model = Choice
+    extra = 5
+    # FIXME: rich text problem with inlines :(
+    rich_text_fields = {'small': ('choice',)}
 
-newman.site.register(Poll, PollAdmin)
+
+class SurveyAdmin(newman.NewmanModelAdmin):
+    exclude = ('quiz', 'contest', 'allow_no_choice', 'allow_multiple')
+    list_display = ('__unicode__', 'get_total_votes',)
+    list_filter = ('active_from', 'active_till',)
+    search_fields = ('question',)
+    rich_text_fields = {'small': ('question',)}
+
+    inlines = [SurveyChoiceInlineAdmin]
+
+
+#newman.site.register(Poll, PollAdmin)
+newman.site.register(Survey, SurveyAdmin)
 newman.site.register(Contest, ContestAdmin)
 newman.site.register(Quiz, QuizAdmin)
 newman.site.register(Question, QuestionAdmin)
