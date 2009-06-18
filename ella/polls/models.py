@@ -12,8 +12,6 @@ from django.conf import settings
 from ella.core.models import Publishable
 from ella.core.cache import get_cached_object, get_cached_list
 from ella.core.box import Box
-from ella.core.models import Category, Author
-from ella.photos.models import Photo
 
 ACTIVITY_NOT_YET_ACTIVE = 0
 ACTIVITY_ACTIVE = 1
@@ -315,22 +313,39 @@ class Survey(Question):
 
     def vote(self, choice, user=None, ip_address=None):
         # create Vote object
-        vote = Vote(poll=self, user=user, ip_address=ip_address)
+        vote = SurveyVote(survey=self, user=user, ip_address=ip_address)
         vote.save()
         # increment votes at Choice object
         choice.add_vote()
 
     def check_vote_by_user(self, user):
-        return Vote.objects.filter(poll=self, user=user).count() > 0
+        return SurveyVote.objects.filter(survey=self, user=user).count() > 0
 
     def check_vote_by_ip_address(self, ip_address):
         treshold = datetime.fromtimestamp(time.time() - POLLS_IP_VOTE_TRESHOLD)
-        return Vote.objects.filter(poll=self, ip_address=ip_address, time__gte=treshold).count() > 0
+        return SurveyVote.objects.filter(survey=self, ip_address=ip_address, time__gte=treshold).count() > 0
 
     class Meta:
         verbose_name = _('Survey')
         verbose_name_plural = _('Surveys')
         ordering = ('-active_from',)
+
+class SurveyVote(models.Model):
+    """
+    User votes records to ensure unique votes. For Polls only.
+    """
+    survey = models.ForeignKey(Survey, verbose_name=_('Survey'))
+    user = models.ForeignKey(User, blank=True, null=True, verbose_name=_('User'))
+    time = models.DateTimeField(_('Time'), auto_now=True)
+    ip_address = models.IPAddressField(_('IP Address'), null=True)
+
+    def __unicode__(self):
+        return u'%s' % self.time
+
+    class Meta:
+        verbose_name = _('Vote')
+        verbose_name_plural = _('Votes')
+        ordering = ('-time',)
 
 
 class Vote(models.Model):
