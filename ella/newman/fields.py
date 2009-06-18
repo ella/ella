@@ -270,3 +270,6 @@ class ChoiceCustomField(fields.CharField):
 
     def __init__(self, *args, **kwargs):
         super(ChoiceCustomField, self).__init__(*args, **kwargs)
+
+    def clean(self, value):
+        return value
