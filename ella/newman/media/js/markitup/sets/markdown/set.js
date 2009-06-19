@@ -90,9 +90,13 @@ $(function(){
                         var id = $('#id_box_obj_id').val() || '0';
                         var params = $('#id_box_obj_params').val().replace(/\n+/g, ' ');
                         // Add format and size info for photo
-                        var addon = '';
+						var addon = '';
                         if(getTypeFromPath($('#id_box_obj_ct').val()) == 'photos.photo'){
                             addon = '_'+$('#id_box_photo_size').val()+'_'+$('#id_box_photo_format').val();
+							// Add extra parameters
+							$('.photo-meta input[type=checkbox]:checked','#rich-photo-format').each(function(){
+								params += ((params) ? '\n' : '') + $(this).attr('name').replace('box_photo_meta_','') + ':1';
+							});
                         }
                         // Insert code
                         $.markItUp({
