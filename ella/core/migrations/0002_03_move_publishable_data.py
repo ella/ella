@@ -8,17 +8,7 @@ class Migration:
 
     def forwards(self, orm):
         for p in south.plugins.get("core", "0002_03_move_publishable_data"):
-            # migrate publishables
-            p.forwards_publishable(orm)
-
-            # migrate generic relations
-            p.forwards_generic_relations(orm)
-
-            # migrate placements
-            p.forwards_placements(orm)
-
-            # migrate related
-            p.forwards_related(orm)
+            p.forwards(orm)
 
     def backwards(self, orm):
         print 'there is no way back'

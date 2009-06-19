@@ -33,6 +33,17 @@ class Plugin(BasePublishableDataPlugin):
     publishable_uncommon_cols = {
         'description': 'description',
     }
+
+    @property
+    def publishable_cols(self):
+        c = {
+            'title': 'title',
+            'slug': 'slug',
+            'category_id': 'category_id',
+        }
+        c.update(self.publishable_uncommon_cols)
+        return SortedDict(c)
+
     
     def alter_self_foreignkeys(self, orm):
         # there is foreign key to authors called owner instead of ella's classic m2m rel
@@ -44,6 +55,8 @@ class Plugin(BasePublishableDataPlugin):
         # TODO migrate new gallery IDs to core_publishable_authors
         #migrate_foreignkey(self.app_label, self.model, 'core_publishable_authors', 'publishable_id', self.orm)
         # migrate new gallery IDs to galleryitem
+        db.delete_unique('galleries_galleryitem', ('gallery','order'))
         migrate_foreignkey(self.app_label, self.model, 'galleries_galleryitem', self.model, self.orm)
+        db.create_unique('galleries_galleryitem', ('gallery_id','order'))
 
 south.plugins.register("core", "0002_03_move_publishable_data", Plugin())

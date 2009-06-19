@@ -7,19 +7,23 @@ from django.conf import settings
 from ella.hacks import south
 
 
-def alter_foreignkey_to_int(table, field):
+def alter_foreignkey_to_int(table, field, null=True):
     '''
     real alter foreignkeyField to integerField
     with all constraint deletion
     '''
+    if null:
+        int_field = models.IntegerField(null=True, blank=True)
+    else:
+        int_field = models.IntegerField()
     fk_field = '%s_id' % field
-    db.alter_column(table, fk_field, models.IntegerField())
+    db.alter_column(table, fk_field, int_field)
     db.rename_column(table, fk_field, field)
-    db.add_column(table, fk_field, models.IntegerField())
+    db.add_column(table, fk_field, int_field)
     db.delete_column(table, fk_field)
     db.delete_index(table, [fk_field])
 
-def migrate_foreignkey(app_label, model, table, field, orm):
+def migrate_foreignkey(app_label, model, table, field, orm, null=False):
     s = {
         'app_label': app_label,
         'model': model,
@@ -30,14 +34,18 @@ def migrate_foreignkey(app_label, model, table, field, orm):
     db.execute('''
         UPDATE
             `%(table)s` tbl 
-            JOIN `core_publishable` pub ON (tbl.`id` = pub.`old_id`)
+            JOIN `core_publishable` pub ON (tbl.`%(field)s` = pub.`old_id`)
             JOIN `django_content_type` ct ON (pub.`content_type_id` = ct.`id` AND ct.`app_label` = '%(app_label)s' AND ct.`model` = '%(model)s')
         SET
             tbl.`%(field)s` = pub.`id`;
         ''' % s
     )
     db.rename_column(s['table'], s['field'], s['fk_field'])
-    db.alter_column(s['table'], s['fk_field'], models.ForeignKey(orm['%(app_label)s.%(model)s' % s]))
+    if null:
+        fk = models.ForeignKey(orm['%(app_label)s.%(model)s' % s], null=True, blank=True)
+    else:
+        fk = models.ForeignKey(orm['%(app_label)s.%(model)s' % s])
+    db.alter_column(s['table'], s['fk_field'], fk)
 
 
 class BasePublishableDataMigration(object):
@@ -123,13 +131,25 @@ class BasePublishableDataPlugin(south.SouthPlugin):
     def generic_relations(self):
         # TODO find better way then this hardcoded...
         # TODO: this should be solved via plugins
-        keys = ('table', 'ct_id', 'obj_id')
+        keys = ('table', 'ct_id', 'obj_id', 'unique_keys')
         gens = []
         if 'tagging' in settings.INSTALLED_APPS:
-            gens.append(('tagging_taggeditem', 'content_type_id', 'object_id'))
+            gens.append(('tagging_taggeditem', 'content_type_id', 'object_id', ('tag_id','content_type_id','object_id','priority')))
         if 'ella.comments' in settings.INSTALLED_APPS:
-            gens.append(('comments_comment', 'target_ct_id', 'target_id'))
+            gens.append(('comments_comment', 'target_ct_id', 'target_id', None))
         return [dict(zip(keys, v)) for v in gens]
+
+    def forwards(self, orm):
+        if not db.dry_run:
+            print "  > Running plugin %s" % self
+        # migrate publishables
+        self.forwards_publishable(orm)
+        # migrate generic relations
+        self.forwards_generic_relations(orm)
+        # migrate placements
+        self.forwards_placements(orm)
+        # migrate related
+        self.forwards_related(orm)
 
     def forwards_publishable(self, orm):
         '''
@@ -192,6 +212,8 @@ class BasePublishableDataPlugin(south.SouthPlugin):
         for gen in self.generic_relations:
             sub = dict.copy(self.substitute)
             sub.update(gen)
+            if gen['unique_keys']:
+                db.delete_unique('galleries_galleryitem', gen['unique_keys'])
             db.execute('''
                 UPDATE
                     `%(table)s` gen
@@ -200,6 +222,8 @@ class BasePublishableDataPlugin(south.SouthPlugin):
                 SET
                     gen.`%(obj_id)s` = pub.`id`;
             ''' % sub)
+            if gen['unique_keys']:
+                db.create_unique('galleries_galleryitem', gen['unique_keys'])
 
     def forwards_placements(self, orm):
         '''
