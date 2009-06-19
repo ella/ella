@@ -234,7 +234,9 @@ class Placement(models.Model):
             new_path = self.get_absolute_url()
 
             if old_path != new_path and new_path:
-                redirect, created = Redirect.objects.get_or_create(old_path=old_path, new_path=new_path, defaults={'site_id' : self.category.site_id})
+                redirect, created = Redirect.objects.get_or_create(old_path=old_path, site=self.category.site)
+                redirect.new_path=new_path
+                redirect.save(force_update=True)
                 Redirect.objects.filter(new_path=old_path).exclude(pk=redirect.pk).update(new_path=new_path)
 
         # First, save Placement

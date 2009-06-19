@@ -86,69 +86,67 @@ class ContestantAdmin(newman.NewmanModelAdmin):
 
 class QuestionForm(modelforms.ModelForm):
     # create the field here to pass validation
-    choices =  fields.ChoiceCustomField(label=_('Choices'))
+    choices =  fields.ChoiceCustomField([], label=_('Choices'), required=False)
 
     class Meta:
         model = Question
 
     def __init__(self, *args, **kwargs):
         initial = []
-        if 'initial' in kwargs:
-            pass
-        elif 'instance' in kwargs:
+        if 'instance' in kwargs:
             inst = kwargs['instance']
             for choice in Choice.objects.filter(question=inst):
                 initial.append(choice)
-
-        self.base_fields['choices'] = fields.ChoiceCustomField(label=_('Choices'), initial=initial)
+        
+        self.base_fields['choices'] = fields.ChoiceCustomField(label=_('Choices'), initial=initial, required=False)
         super(QuestionForm, self).__init__(*args, **kwargs)
 
-    def get_part_id(self, suffix):
+    def get_part_id(self, suffix=None):
         id_part = self.data.get('choices_widget')
         if not suffix:
             return id_part
         return '%s-%s' % (id_part, suffix)
 
     def clean(self):
-        import pdb;pdb.set_trace()
         # no data - nothing to validate
-        if not self.is_valid() or not self.cleaned_data or not self.instance or not self.cleaned_data['choices']:
+        if not self.is_valid() or not self.cleaned_data or not self.instance:
             return self.cleaned_data
+        self.cleaned_data = super(QuestionForm, self).clean()
         try:
-            choice_ids = map(lambda v: int(v), self.data.getlist('question_set-0-choices-id'))
-            choice_points = map(lambda v: int(v), self.data.getlist('question_set-0-choices-points'))
+            self.cleaned_data['choice_ids'] = map(lambda v: int(v), self.data.getlist(self.get_part_id('id')))
+            self.cleaned_data['choice_points'] = map(lambda v: int(v), self.data.getlist(self.get_part_id('points')))
         except:
             raise ValidationError(_(u'Enter a whole number.'))
-        choice_texts = self.data.getlist('question_set-0-choices') # choices text
-        super(QuestionForm, self).clean()
+        self.cleaned_data['choice_texts'] = self.data.getlist(self.get_part_id()) # choices text
+        for tx in self.cleaned_data['choice_texts']:
+            if not tx:
+                raise ValidationError(_(u'This field cannot be null.'))
+        return self.cleaned_data
 
     def save(self, commit=True):
-        import pdb;pdb.set_trace()
-        try:
-            choice_ids = map(lambda v: int(v), self.data.getlist('question_set-0-choices-id'))
-            choice_points = map(lambda v: int(v), self.data.getlist('question_set-0-choices-points'))
-        except:
-            raise ValidationError(_(u'Enter a whole number.'))
-        choice_texts = self.data.getlist('question_set-0-choices') # choices text
+        out = super(modelforms.ModelForm, self).save(commit=commit)
+        choice_ids = self.cleaned_data['choice_ids']
+        choice_points = self.cleaned_data['choice_points']
+        choice_texts = self.cleaned_data['choice_texts'] # choices text
         for chid, text, points in zip(choice_ids, choice_texts, choice_points):
             if chid <= 0:
-                new_ch = Choice(points=points, choice=text, votes=0, question=self.cleaned_data)
+                new_ch = Choice(points=points, choice=text, votes=0, question=self.cleaned_data['id'])
+                new_ch.save()
                 continue
             ch = Choice.objects.get(pk=chid)
             if ch.choice != text or ch.points != points:
                 ch.choice = text
                 ch.points = points
                 ch.save()
+        return out
 
 class QuestionInlineAdmin(newman.NewmanTabularInline):
     model = Question
     form = QuestionForm
-    #inlines = [ChoiceTabularAdmin]
-#    template = 'admin/polls/question/edit_inline/tabular.html'
-    #template = 'newman/edit_inline/poll_question.html'
-    extra = 1
-    #rich_text_fields = {'small': ('question',)}
-    fieldsets = ((None, {'fields' : ('question', 'allow_multiple', 'allow_no_choice', 'choices',)}),)
+    template = 'newman/edit_inline/poll_question.html'
+    rich_text_fields = {'small': ('question',)}
+    extra = 0
+    fieldsets = ((None, {'fields' : ('question', 'allow_multiple', 'allow_no_choice', 'choices')}),)
 
 class ContestAdmin(PublishableAdmin):
     def __call__(self, request, url):
@@ -197,7 +195,7 @@ class SurveyChoiceInlineAdmin(newman.NewmanTabularInline):
     model = Choice
     extra = 5
     # FIXME: rich text problem with inlines :(
-#    rich_text_fields = {'small': ('choice',)}
+    rich_text_fields = {'small': ('choice',)}
 
 
 class SurveyAdmin(newman.NewmanModelAdmin):

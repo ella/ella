@@ -46,8 +46,28 @@ class ErrorReportForm(forms.Form):
     err_subject = forms.CharField(label=_('Subject'))
     err_message = forms.CharField(label=_('Message'), widget=forms.Textarea)
 
+BOX_PHOTO_SIZES = (
+    ('velka', _('Big')),
+    ('standard', _('Standard')),
+    ('mala', _('Small')),
+)
+
+BOX_PHOTO_FORMATS = (
+    ('ctverec', _('Square')),
+    ('obdelnik_sirka', _('Rectangle to width')),
+    ('obdelnik_vyska', _('Rectangle to height')),
+    ('nudle_sirka', _('Noodle to width')),
+    ('nudle_vyska', _('Noodle to height')),
+)
+
 class EditorBoxForm(forms.Form):
     box_obj_ct = forms.ModelChoiceField(ContentType.objects.all(), None, cache_choices=True, required=True, widget=widgets.ContentTypeWidget, label='')
     box_obj_id = forms.IntegerField(label='', min_value=0, widget=widgets.ForeignKeyGenericRawIdWidget)
-    box_obj_params = forms.CharField(label=_('Extra parameters'), max_length=300, required=False, widget=forms.Textarea)
+    box_photo_size = forms.ChoiceField(choices=BOX_PHOTO_SIZES, required=False, label=_('Size'), initial='standard')
+    box_photo_format = forms.ChoiceField(choices=BOX_PHOTO_FORMATS, required=False, label=_('Format'), initial='obdelnik_sirka')
+    box_photo_meta_show_title = forms.BooleanField(required=False, label=_('Title'))
+    box_photo_meta_show_author = forms.BooleanField(required=False, label=_('Author'))
+    box_photo_meta_show_description = forms.BooleanField(required=False, label=_('Description'))
+    box_photo_meta_show_detail = forms.BooleanField(required=False, label=_('Detail'))
+    box_obj_params = forms.CharField(label=_('Extra parameters'), max_length=300, required=False, widget=forms.Textarea(attrs={'rows': 3, 'style': 'width:98%'}))
 

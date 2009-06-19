@@ -1,7 +1,8 @@
     <input type="hidden" name="choices_widget" value="{{ id_prefix }}" />
     {% for choice in choices %}
         <tr class="choice-row inline-item">
-            <td><span style="display:none;">&nbsp;</span></td>{# vertical align with placement's first (empty) td #}
+            <td>
+            </td>{# vertical align with choice's first (empty) td #}
             <td class="choices-text">
                 <input 
                     type="hidden"
@@ -9,18 +10,20 @@
                     name="{{ id_prefix }}-id"
                 />
                 <div class="form-row choice-text">
-                    <input
+                <span style="display: visible;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    <textarea
                         id="{{ id_prefix }}-choice-{{ forloop.counter }}"
-                        type="text"
-                        value="{{ choice.choice }}"
                         name="{{ id_prefix }}"
-                    />
+                        rows="5"
+                        cols="35"
+                    >{{ choice.choice }}</textarea>
                 </div>
             </td>
 
             <td class="choice-points">
                 <input
                     type="text"
+                    size="4"
                     id="{{ id_prefix }}-{{ forloop.counter }}-points"
                     name="{{ id_prefix }}-points"
                     value="{{ choice.points }}"
@@ -30,6 +33,7 @@
                 <input 
                     type="input"
                     disabled="disabled"
+                    size="4"
                     id="{{ id_prefix }}-{{ forloop.counter }}-votes"
                     value="{% if not choice.votes %}0{% else %}{{ choice.votes }}{% endif %}"
                 />
@@ -42,57 +46,58 @@
                 />
             </td>
 
-            <td colspan="1">&nbsp;</td>
-
         </tr>
     {% endfor %}
 
-{# Template for creating listings #}
-    <tr class="listing-row-template" style="display:none;"><!--
-        <tr class="listing-row inline-item">
-            <td><span style="display:none;">&nbsp;</span></td>
-            <td class="listing-categories">
-                <!-#- category suggester -#->
-                <div class="form-row listing-category">
-                    <input
-                        id="id_category___NO__"
-                        class="vForeignKeyRawIdAdminField hidden"
-                        type="text"
+{# Template for creating choices #}
+    <tr class="choice-row-template" style="display:none;"><!--
+        <tr class="choice-row inline-item">
+            <td>
+            </td>
+            <td class="choices-text">
+                {# value of hidden input should be negative whole number or zero #}
+                <input 
+                    type="hidden"
+                    value="-__NO__"
+                    name="{{ id_prefix }}-id"
+                />
+                <div class="form-row choice-text">
+                <span style="display: visible;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    <textarea
+                        id="{{ id_prefix }}-choice-__NO__"
                         name="{{ id_prefix }}"
-                    />
-                    <ul class="GenericSuggestField">
-                        <li>
-                            <input
-                                id="id_category___NO___suggest"
-                                rel="../../../core/category/suggest/?f=__unicode__&title&f=slug&f=tree_path&q="
-                            />
-                        </li>
-                    </ul>
-                    <a href="/core/category/" class="suggest-related-lookup" id="lookup_id_category___NO__">
-                        <img src="{{ NEWMAN_MEDIA_PREFIX }}ico/16/search.png" width="16" height="16" />
-                    </a>
-                </div>
-
-            </td>
-
-            <td class="listing-dates">
-                {#<input type="hidden" name="{{ id_prefix }}-{{ forloop.counter0 }}-listing_id" value="{{ listing.pk }}" />#}
-                <!-#- Publish from -#->
-                <div class="publish_from">
-                    <input
-                        type="text"
-                        id="{{ id_prefix }}-__NO__-publish_from"
-                        name="{{ id_prefix }}-publish_from"
-                        class="vDateTimeInput"
-                    />
+                        rows="5"
+                        cols="35"
+                    ></textarea>
                 </div>
             </td>
 
-            <td><a class="icn btn cancel remove-inline-button">{% trans 'Remove' %}</a></td>
-
-            <td colspan="2">&nbsp;</td>
+            <td class="choice-points">
+                <input
+                    type="text"
+                    size="4"
+                    id="{{ id_prefix }}-__NO__-points"
+                    name="{{ id_prefix }}-points"
+                    value="0"
+                />
+            </td>
+            <td class="choice-votes">
+                <input 
+                    type="input"
+                    disabled="disabled"
+                    size="4"
+                    id="{{ id_prefix }}-__NO__-votes"
+                    value="0"
+                />
+            </td>
+            <td class="choice-delete">
+                <input 
+                    type="checkbox"
+                    id="{{ id_prefix }}-__NO__-delete"
+                    name="{{ id_prefix }}-__NO__-DELETE"
+                />
+            </td>
 
         </tr>
     --></tr>
-
 {# End of template #}

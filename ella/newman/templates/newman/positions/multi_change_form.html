@@ -1,0 +1,93 @@
+{% extends "newman/change_form.html" %}
+{% load newman_modify cache %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url newman_admin_index %}#/nm/">{% trans "Home" %}</a>
+    &rsaquo; <a class="js-hashadr" href="../../../">{% trans app_label.title %}</a>
+    &rsaquo; {% if has_change_permission %}<a class="js-hashadr" href="../../">{{ opts.verbose_name_plural|capfirst }}</a>{% else %}{{ opts.verbose_name_plural|capfirst }}{% endif %}
+    &rsaquo; {% trans "Categories" %}
+    {% if title %}&rsaquo; <strong id="doc-title">{{ title }}</strong>{% endif %}
+</div>
+{% endblock %}
+
+{% block content_toolbar %}{% endblock %}
+{% block content_services %}{% endblock %}
+
+{% block fieldsets %}
+    {% if adminforms %}
+        {% for adminform in adminforms %}
+            {% for fieldset in adminform %}
+                <div class="position-small" style="width: 32%; float: left; overflow: auto;">
+                    {% include "newman/includes/fieldset.html" %}
+                </div>
+            {% endfor %}
+        {% endfor %}
+    {% else %}
+        <p>{% trans "This category doesn't have any positions, or they aren't registered for multiple editation" %}</p>
+    {% endif %}
+{% endblock %}
+
+{% block content_js %}
+    {% cache 300 'nm-cf-pos-js' adminforms %}
+    {% if media %}
+        <script type="text/javascript">
+        {% for m in media %}
+        request_media('{{ m }}?{{ VERSION }}');
+        {% endfor %}
+        </script>
+    {% endif %}
+    <script type="text/javascript">
+        function dismissRelatedLookupPopup(win, chosenId) {
+            // overrides function in 'relatedObjectsLookup'
+            var name = win.name.replace(/___/g, '.');
+            var elem = document.getElementById(name);
+            if (elem.className.indexOf('vManyToManyRawIdAdminField') != -1 && elem.value) {
+                elem.value += ',' + chosenId;
+            } else {
+                document.getElementById(name).value = chosenId;
+                $(("#" + name)).change();   // need to trigger change event for dupicity checking script
+            }
+            win.close();
+        }
+
+        function getTitle(ct, id, element) {
+            var infoUrl = admin_url + 'ella/' + ct + '/' + id + '/info/';
+            $.getJSON(infoUrl, function(data) {
+                element.html('<a href="' + admin_url + adminapps[ct].path.replace('.', '/') + '/' + id + '/">' + data.title + '</a>')
+            })
+        }
+
+        function switchActive(div) {
+            checked = div.find('input[type="checkbox"][name$="disabled"]').attr('checked');
+            if (checked) div.addClass('disabled')
+            else div.removeClass('disabled')
+        }
+
+        $(document).ready(function(){
+            jQuery('input[id$="name"]').attr('readonly', 'readonly');
+
+            $('input.target_id').change(function() {
+                var ct = $('select#' + $(this).attr('id').replace(/id$/, 'ct') ).val();
+                var id = $(this).val();
+                var elem = $(this).siblings('.related-title');
+                if (elem.length == 0) {
+                    elem = $('<span class="related-title"></span>');
+                    $(this).after(elem);
+                } else {
+                    elem.html('');
+                }
+                getTitle(ct, id, elem);
+            })
+
+            $('input.target_id').change();
+
+            $('input[type="checkbox"][name$="disabled"]').change(function() {
+                switchActive($(this).parents().filter('.position-small'));
+            });
+
+            $('.position-small').each(function(){ switchActive($(this)) });
+        });
+    </script>
+    {% endcache %}
+{% endblock %}
