@@ -144,8 +144,8 @@ class QuestionInlineAdmin(newman.NewmanTabularInline):
     model = Question
     form = QuestionForm
     template = 'newman/edit_inline/poll_question.html'
-    rich_text_fields = {'small': ('question',)}
-    extra = 0
+    #rich_text_fields = {'small': ('question',)}
+    extra = 1
     fieldsets = ((None, {'fields' : ('question', 'allow_multiple', 'allow_no_choice', 'choices')}),)
 
 class ContestAdmin(PublishableAdmin):

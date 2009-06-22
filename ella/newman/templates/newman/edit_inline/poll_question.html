@@ -1,0 +1,61 @@
+{% extends "newman/edit_inline/tabular.html" %}
+
+{% block header_fields %}
+    {% if not field.is_listing_custom_field %}
+    {{ block.super }}
+    {% endif %}
+{% endblock %}
+
+{% block fieldset %}
+    <script type="text/javascript">request_media('{{ NEWMAN_MEDIA_URL }}js/inlines.js');</script>
+    {% for fieldset in inline_admin_form %}
+      {% for line in fieldset %}
+        {% for field in line %}
+
+          {% ifnotequal field.field.name "choices" %}
+              <td class="{{ field.field.name }}">
+              {{ field.field.errors.as_ul }}
+              {{ field.field }}
+              </td>
+          {% else %}
+
+              {% if inline_admin_formset.formset.can_delete %}
+                <td class="delete">
+                  {% if inline_admin_form.original %}{{ inline_admin_form.deletion_field.field }}{% endif %}
+                </td>
+              {% endif %}
+              {# customized choice(s) widget, should be the last one#}
+              </tr>
+              {# custom row for ChoiceCustomWidget #}
+              <tr class="choices-head">
+                <td colspan="{{ inline_admin_form.field_count }}" id="id_{{ inline_admin_formset.formset.get_default_prefix }}-0-__all__">
+                  <h3>{% trans 'Choices' %}</h3>
+                </td>
+              </tr>
+              <tr class="choices-head">
+                <th></th>
+                <th>{% trans 'Choice text' %}</th>
+                <th>{% trans 'Points' %}</th>
+                <th>{% trans 'Votes' %}?</th>
+                <th>{% trans 'Delete' %}</th>
+              </tr>
+                  {{ field.field.errors.as_ul }}
+                  {{ field.field }}
+              <tr> {# open new row due to tabular.html will close row after fieldset block #}
+                <td colspan="{{ inline_admin_form.field_count }}">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <a class="icn btn add add-choice-button">{% trans "Add" %} {% trans "Choice text" %}</a>
+                </td>
+          {% endifnotequal %}
+
+        {% endfor %}
+      {% endfor %}
+    {% endfor %}
+{% endblock %}
+
+{% block tabular_quick_sel %}
+{% if add %}
+<p><a class="icn btn addfav js-placement-main-category">{% trans "Main category" %}</a></p>
+{% endif %}
+{% endblock %}
+
