@@ -44,3 +44,20 @@ update polls_contestant set email = concat('_', email) where id in (2004, 23045,
 -- select id from galleries_gallery where category_id is null;
 -- select id, slug from core_category where slug like '%archiv%';
 update galleries_gallery set category_id = 38 where category_id is null;
+
+-- nektere listingy maji referenci na neexistujici objekt
+-- pro upravu je treba pridat kaskadni mazani kvuli konstrejnam na listingu a hitkauntech
+alter table core_listing drop foreign key placement_id_refs_id_7c52840e;
+alter table core_listing add CONSTRAINT placement_id_refs_id_7c52840e FOREIGN KEY (`placement_id`) REFERENCES `core_placement` (`id`) on delete cascade on update cascade;
+alter table core_hitcount drop foreign key placement_id_refs_id_7d42d973;
+alter table core_hitcount add constraint `placement_id_refs_id_7d42d973` FOREIGN KEY (`placement_id`) REFERENCES `core_placement` (`id`) on delete cascade on update cascade;
+-- nalezeni a odstraneni spatnych placementu
+-- articles:
+-- select p.id, p.target_id from core_placement p where p.target_ct_id = 16 and not exists (select id from articles_article where id = p.target_id);
+delete from core_placement where target_id in (750519, 750521) and target_ct_id = 16;
+-- quizes:
+-- select p.id, p.target_id from core_placement p where p.target_ct_id = 32 and not exists (select id from polls_quiz where id = p.target_id);
+delete from core_placement where target_id in (7974) and target_ct_id = 32;
+-- interviews:
+-- select p.id, p.target_id from core_placement p where p.target_ct_id = 55 and not exists (select id from interviews_interview where id = p.target_id);
+delete from core_placement where target_id in (68) and target_ct_id = 55;
