@@ -34,6 +34,7 @@ class Profiler:
         return t
 
     def log_summary(self, logger_callback):
+        total = 0.0
         for t in self.timers:
             logger_callback(
                 '%05.03f msec elapsed in %s' % 
@@ -42,6 +43,8 @@ class Profiler:
                     t.name, 
                 )
             )
+            total += t.get_msec()
+        logger_callback('TOTAL: %05.03f msec.' % total)
 
     @property
     def has_data(self):
