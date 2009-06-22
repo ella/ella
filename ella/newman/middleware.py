@@ -43,6 +43,23 @@ class ErrorOutputMiddleware(object):
             f.close()
         return response
 
+class ProfilerMiddleware(object):
+    "Parody to profiler."
+    def process_request(self, request):
+        pass
+
+    def process_response(self, request, response):
+        from ella.newman.utils import PROFILER
+        import logging
+        log = logging.getLogger('ella.newman')
+        if PROFILER.has_data:
+            log.debug('******** PROFILER SUMMARY:')
+            PROFILER.log_summary(log.debug)
+            PROFILER.reset()
+            log.debug('******** END')
+        return response
+
+
 class SQLDebugMiddleware(object):
 
     def format_qstr(self, q):

@@ -1,5 +1,7 @@
 import sys
 import logging
+from time import time, strftime
+import traceback
 try:
     import cjson
     dumps = cjson.encode
@@ -8,13 +10,83 @@ except ImportError:
     from django.utils.simplejson import dumps, loads
 
 from django.http import HttpResponse
-from ella.newman.permission import model_category_fk, is_category_model
 from ella.newman import models
 from ella.newman.config import STATUS_OK, STATUS_GENERIC_ERROR
 from ella.newman.config import CATEGORY_FILTER, USER_CONFIG, JSON_CONVERSIONS
 from ella.core.models import Category
 
 log = logging.getLogger('ella.newman')
+
+
+class Profiler:
+    "Provides measurement of time spent in named blocks of code."
+    def __init__(self):
+        self.timers = []
+
+    def create_timer(self, name):
+        t = ProfilerTimer(name)
+        self.timers.append(t)
+        return t
+
+    def create_started_timer(self, name):
+        t = self.create_timer(name)
+        t.start()
+        return t
+
+    def log_summary(self, logger_callback):
+        for t in self.timers:
+            logger_callback(
+                '%05.03f msec elapsed in %s' % 
+                (
+                    t.get_msec(),
+                    t.name, 
+                )
+            )
+
+    @property
+    def has_data(self):
+        return len(self.timers) > 0
+
+    def reset(self):
+        for i in range(len(self.timers)):
+            self.timers.pop()
+
+# this instance should be used for creating timers and profiling blocks of code
+PROFILER = Profiler()
+
+class ProfilerTimer:
+    "Measures one named block of code."
+    def __init__(self, name):
+        self.name = name
+        self.elapsed_time = 0.0
+        self.begin = 0.0
+
+    def get_sec(self):
+        return self.elapsed_time
+
+    def get_msec(self):
+        return self.elapsed_time * 1000
+
+    def start(self):
+        if self.begin:
+            raise AttributeError('Timer already started!')
+        self.begin = time()
+
+    def stop(self):
+        if not self.begin:
+            raise AttributeError('Timer not started!')
+        self.elapsed_time = time() - self.begin
+
+def profiled_section(func):
+    def decorated(*args, **kwargs):
+        trac = traceback.extract_stack()[-2]
+        caller = '[%s] (%s:%d)' % (trac[2], trac[0], trac[1])
+        name = '[%s] called from %s' % (func.__name__, caller)
+        prof = PROFILER.create_started_timer(name)
+        out = func(*args, **kwargs)
+        prof.stop()
+        return out
+    return decorated
 
 def json_encode(data):
     """ Encode python data into JSON. Try faster cjson first. """
@@ -128,6 +200,7 @@ def user_category_filter(queryset, user):
     Returns Queryset containing only user's prefered content (filtering based on categories).
     If queryset.model has no relation to ella.core.models.Category, original queryset is returned.
     """
+    from ella.newman.permission import model_category_fk, is_category_model
     qs = queryset
     category_fk = model_category_fk(qs.model)
     if not category_fk:
