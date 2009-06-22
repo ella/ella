@@ -213,7 +213,7 @@ class BasePublishableDataPlugin(south.SouthPlugin):
             sub = dict.copy(self.substitute)
             sub.update(gen)
             if gen['unique_keys']:
-                db.delete_unique('galleries_galleryitem', gen['unique_keys'])
+                db.delete_unique(gen['table'], gen['unique_keys'])
             db.execute('''
                 UPDATE
                     `%(table)s` gen
@@ -223,7 +223,7 @@ class BasePublishableDataPlugin(south.SouthPlugin):
                     gen.`%(obj_id)s` = pub.`id`;
             ''' % sub)
             if gen['unique_keys']:
-                db.create_unique('galleries_galleryitem', gen['unique_keys'])
+                db.create_unique(gen['table'], gen['unique_keys'])
 
     def forwards_placements(self, orm):
         '''
