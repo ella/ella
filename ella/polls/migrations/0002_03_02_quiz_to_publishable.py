@@ -37,15 +37,15 @@ class Plugin(BasePublishableDataPlugin):
     def alter_self_foreignkeys(self, orm):
         # migrate authors as in base
         super(Plugin, self).alter_self_foreignkeys(orm)
-        alter_foreignkey_to_int('polls_question', 'quiz')
-        alter_foreignkey_to_int('polls_results', 'quiz')
+        alter_foreignkey_to_int('polls_question', 'quiz', null=True)
+        alter_foreignkey_to_int('polls_result', 'quiz')
 
     def move_self_foreignkeys(self, orm):
         # migrate authors as in base
         super(Plugin, self).move_self_foreignkeys(orm)
         # migrate new quiz IDs to question
-        migrate_foreignkey(self.app_label, self.model, 'polls_question', self.model, self.orm)
+        migrate_foreignkey(self.app_label, self.model, 'polls_question', self.model, self.orm, null=True)
         # migrate new quiz IDs to results
-        migrate_foreignkey(self.app_label, self.model, 'polls_results', self.model, self.orm)
+        migrate_foreignkey(self.app_label, self.model, 'polls_result', self.model, self.orm)
 
 south.plugins.register("core", "0002_03_move_publishable_data", Plugin())
