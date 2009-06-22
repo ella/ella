@@ -277,6 +277,22 @@ function DateInput(input) {
 }
 
 (function($) {
+    $('span.dtpicker-trigger').live('click', function() {
+        var $dtp = $('.datetimepicker');
+        var x = $(this).offset().left + $(this).width();
+        var y = $(this).offset().top;
+        
+        // check if Y doesn't reach below the current screen height
+        var d = y + $dtp.outerHeight()  -  $('body').outerHeight();
+        if (d > 0) y -= d;
+        if (y < 0) y = 0;   // But rather reach below bottom than above top
+        
+        $('.datetimepicker').css({
+            top : y + 'px',
+            left: x + 'px'
+        }).toggle().data( 'input', $input );
+    });
+    
     function datetime_init() {
         $('.vDateTimeInput,.vDateInput').each( function() {
             var $input = $(this);
@@ -292,21 +308,7 @@ function DateInput(input) {
                 $(  '<span class="dtpicker-trigger"><img src="'
                     +MEDIA_URL
                     +'ico/16/vcalendar.png" alt="cal" /></span>'
-                ).click( function() {
-                    var $dtp = $('.datetimepicker');
-                    var x = $(this).offset().left + $(this).width();
-                    var y = $(this).offset().top;
-                    
-                    // check if Y doesn't reach below the current screen height
-                    var d = y + $dtp.outerHeight()  -  $('body').outerHeight();
-                    if (d > 0) y -= d;
-                    if (y < 0) y = 0;   // But rather reach below bottom than above top
-                    
-                    $('.datetimepicker').css({
-                        top : y + 'px',
-                        left: x + 'px'
-                    }).toggle().data( 'input', $input );
-                }).insertAfter(this);
+                ).insertAfter(this);
                 
                 $input.keypress(function(evt) {
                     var delta = 0;
