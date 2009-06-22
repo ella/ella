@@ -8,6 +8,9 @@ class Migration:
         # add a temporary column on core_publishable to remember the old ID
         db.add_column('core_publishable', 'old_id', models.IntegerField(null=True))
 
+        #FIXME: add helper index needed at least during migration (tonda)
+        db.create_index('core_publishable', ['content_type_id', 'old_id'])
+
         # column for new foreign keys to publishable
         db.add_column('core_placement', 'publishable_id', models.IntegerField(null=True))
 
@@ -18,6 +21,7 @@ class Migration:
         db.add_column('core_listing', 'publish_to', models.DateTimeField(_("End of listing"), null=True, blank=True))
 
     def backwards(self, orm):
+
         # drop temporary column
         db.delete_column('core_publishable', 'old_id')
 
