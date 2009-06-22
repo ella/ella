@@ -43,6 +43,8 @@ class Plugin(BasePublishableDataPlugin):
         super(Plugin, self).alter_self_foreignkeys(orm)
         alter_foreignkey_to_int('media_section', 'media')
         alter_foreignkey_to_int('media_usage', 'media')
+        # TODO: this should be solved via plugins
+        alter_foreignkey_to_int('instruction_instruction', 'media')
 
     def move_self_foreignkeys(self, orm):
         # migrate authors as in base
@@ -51,5 +53,7 @@ class Plugin(BasePublishableDataPlugin):
         migrate_foreignkey(self.app_label, self.model, 'media_section', self.model, self.orm)
         # migrate new media IDs to usage
         migrate_foreignkey(self.app_label, self.model, 'media_usage', self.model, self.orm)
+        # TODO: this should be solved via plugins
+        migrate_foreignkey(self.app_label, self.model, 'instruction_instruction', self.model, self.orm)
 
 south.plugins.register("core", "0002_03_move_publishable_data", Plugin())

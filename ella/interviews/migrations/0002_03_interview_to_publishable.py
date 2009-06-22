@@ -58,10 +58,14 @@ class Plugin(BasePublishableDataPlugin):
     }
     
     def alter_self_foreignkeys(self, orm):
+        # migrate authors as in base
+        super(Plugin, self).alter_self_foreignkeys(orm)
         alter_foreignkey_to_int('interviews_question', 'interview')
         alter_foreignkey_to_int('interviews_interview_interviewees', 'interview')
 
     def move_self_foreignkeys(self, orm):
+        # migrate authors as in base
+        super(Plugin, self).move_self_foreignkeys(orm)
         # migrate new article IDs to question
         migrate_foreignkey(self.app_label, self.model, 'interviews_question', self.model, self.orm)
         # migrate new article IDs to interview_interviewees

@@ -34,12 +34,12 @@ class Plugin(BasePublishableDataPlugin):
     publishable_uncommon_cols = {}
     
     def alter_self_foreignkeys(self, orm):
-        alter_foreignkey_to_int('polls_question', 'contest')
-        alter_foreignkey_to_int('polls_contestant', 'contest')
+        alter_foreignkey_to_int('polls_question', 'contest', models.IntegerField(blank=True, null=True))
+        alter_foreignkey_to_int('polls_contestant', 'contest', models.IntegerField(blank=True))
 
     def move_self_foreignkeys(self, orm):
         # migrate new contest IDs to question
-        migrate_foreignkey(self.app_label, self.model, 'polls_question', self.model, self.orm)
+        migrate_foreignkey(self.app_label, self.model, 'polls_question', self.model, self.orm, null=True)
         # migrate new contest IDs to contestant
         migrate_foreignkey(self.app_label, self.model, 'polls_contestant', self.model, self.orm)
 
