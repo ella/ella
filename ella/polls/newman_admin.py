@@ -99,19 +99,23 @@ class QuestionForm(modelforms.ModelForm):
                 initial.append(choice)
         
         self.base_fields['choices'] = fields.ChoiceCustomField(label=_('Choices'), initial=initial, required=False)
+        self.id_part = None
         super(QuestionForm, self).__init__(*args, **kwargs)
 
     def get_part_id(self, suffix=None):
-        id_part = self.data.get('choices_widget')
+        if not self.id_part:
+            self.id_part = self.data.getlist('choices_widget').pop(0)
         if not suffix:
-            return id_part
-        return '%s-%s' % (id_part, suffix)
+            return self.id_part
+        return '%s-%s' % (self.id_part, suffix)
 
     def clean(self):
         # no data - nothing to validate
         if not self.is_valid() or not self.cleaned_data or not self.instance:
             return self.cleaned_data
         self.cleaned_data = super(QuestionForm, self).clean()
+        if not self.cleaned_data['id'] and not self.cleaned_data['question']:
+            return self.cleaned_data
         try:
             self.cleaned_data['choice_ids'] = map(lambda v: int(v), self.data.getlist(self.get_part_id('id')))
             self.cleaned_data['choice_points'] = map(lambda v: int(v), self.data.getlist(self.get_part_id('points')))
