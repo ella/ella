@@ -12,6 +12,8 @@ from django.db.models import query, ForeignKey, ManyToManyField
 
 from ella.core.models import Category
 from ella.newman.models import CategoryUserRole, DenormalizedCategoryUserRole
+from ella.newman import utils
+
 
 CACHE_TIMEOUT = 10 * 60
 log = logging.getLogger('ella.newman.models')
@@ -29,6 +31,7 @@ def key_has_model_list_permission(func, user, model):
     return 'ella.newman.permission.has_model_list_permission_%d__model_%s' % (user.pk, str(model))
 
 #@cache_this(key_has_model_list_permission, timeout=CACHE_TIMEOUT)
+@utils.profiled_section
 def has_model_list_permission(user, model):
     """ returns True if user has permission to access this model in newman, otherwise False """
     if user.is_superuser:
@@ -40,10 +43,11 @@ def has_model_list_permission(user, model):
     return qs.count() > 0
 
 #@cache_this(key_has_category_permission, timeout=CACHE_TIMEOUT)
+@utils.profiled_section
 def has_category_permission(user, category, permission):
     if user.has_perm(permission):
         return True
-
+    
     #takes 0.5..2 msec
     if type(permission) in [list, tuple]:
         qs = DenormalizedCategoryUserRole.objects.filter(
@@ -61,6 +65,7 @@ def has_category_permission(user, category, permission):
         return True
     return False
 
+@utils.profiled_section
 def has_object_permission(user, obj, permission):
     """
     Return whether user has given permission for given object,
@@ -94,6 +99,7 @@ def has_object_permission(user, obj, permission):
         return True
     return False
 
+@utils.profiled_section
 def category_children(cats):
     """
     Returns all nested categories as list.
@@ -106,6 +112,7 @@ def category_children(cats):
     return sub_cats
 
 #@cache_this(key_applicable_categories, timeout=CACHE_TIMEOUT)
+@utils.profiled_section
 def compute_applicable_categories_objects(user, permission=None):
     """ Return categories accessible by given user """
     if user.is_superuser:
@@ -132,10 +139,12 @@ def compute_applicable_categories_objects(user, permission=None):
     app_cats = category_children(unique_categories)
     return app_cats
 
+@utils.profiled_section
 def compute_applicable_categories(user, permission=None):
     categories = compute_applicable_categories_objects(user, permission)
     return list(d.pk for d in categories)
 
+@utils.profiled_section
 def applicable_categories(user, permission=None):
     """
     Return list of categories accessible for given permission.
@@ -150,6 +159,7 @@ def applicable_categories(user, permission=None):
     else:
         return DenormalizedCategoryUserRole.objects.categories_by_user(user)
 
+@utils.profiled_section
 def permission_filtered_model_qs(queryset, user, permissions=[]):
     """ returns Queryset filtered accordingly to given permissions """
     if user.is_superuser:
