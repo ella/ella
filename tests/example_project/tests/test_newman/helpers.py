@@ -76,6 +76,7 @@ class NewmanTestCase(SeleniumTestCase):
                 'save' : "//a[@class='js-submit icn btn save def']",
                 'show_filters' : "//div[@id='filters-handler']/a[position()=1]",
                 'lookup_content' : "//div[@id='changelist']/form/table/tbody/tr/th/a[text()='%(text)s']",
+                'search_button' : "//a[@class='btn icn search def']",
             },
             'pages' : {
                 'login' : {
@@ -197,7 +198,7 @@ class NewmanTestCase(SeleniumTestCase):
                 'expected' : expected,
                 'retrieved' : retrieved,
             })
-            
+
         return u'\n'.join(messages).encode('utf-8')
 
     def add_error(self, errors, field, expected, retrieved):
@@ -216,7 +217,7 @@ class NewmanTestCase(SeleniumTestCase):
                 text = getattr(self.selenium, spec.value_function_name)('id_%s' % field)
                 if not spec.is_equal(text):
                     self.add_error(errors, field, spec.expected_value, text)
-                
+
             elif isinstance(spec, list):
                 for i in xrange(0, len(spec)):
                     xpath = (self.elements['controls']['suggester_selected']+"[%(number)s]") % {
@@ -226,7 +227,7 @@ class NewmanTestCase(SeleniumTestCase):
                     text = self.selenium.get_text(xpath)
                     if text != spec[i]:
                         self.add_error(errors, field, spec, text)
-                        
+
             else:
                 text = self.selenium.get_value('id_%s' % field)
                 if text != spec:
