@@ -11,8 +11,27 @@ from ella import newman
 
 from ella.positions.models import Position
 from ella.core.models import Category
+from ella.newman.utils import JsonResponse
+from django.forms.models import ModelForm
+from django.forms.util import ValidationError
+
+class PositionForm(ModelForm):
+
+    def clean(self):
+        cleaned_data = super(PositionForm, self).clean()
+
+        if cleaned_data['active_from'] and cleaned_data['active_till']:
+            if cleaned_data['active_from'] > cleaned_data['active_till']:
+                raise ValidationError(_('Active till must be greather than active from.'))
+
+        return cleaned_data
+
+    class Meta:
+        model = Position
 
 class PositionAdmin(newman.NewmanModelAdmin):
+    form = PositionForm
+
     list_display = ('name', 'category', 'box_type', 'is_active', 'is_filled', 'show_title', 'disabled',)
     list_filter = ('category', 'disabled', 'active_from', 'active_till',)
     search_fields = ('name', 'box_type', 'text', 'category__title',)
@@ -62,15 +81,7 @@ class PositionAdmin(newman.NewmanModelAdmin):
 
                 msg = unicode(_('Positions were changed successfully.'))
 
-                if request.POST.has_key("_continue"):
-                    self.message_user(request, msg + ' ' + unicode(_("You may edit them again below.")))
-                    return HttpResponseRedirect(request.path)
-                else:
-                    self.message_user(request, msg)
-                    return HttpResponseRedirect("../")
-
-                return self.response_change(request, new_object)
-
+                return JsonResponse(msg, data={'category_id': category_id})
         else:
             forms = [PositionForm(prefix=str(positions[x].id),
                                   instance=positions[x]) for x in range(count)]
@@ -118,6 +129,7 @@ class PositionAdmin(newman.NewmanModelAdmin):
             'content_type_id': ContentType.objects.get_for_model(self.model).id,
             'save_as': self.save_as,
             'save_on_top': self.save_on_top,
+            'save_url': reverse('newman-positions-by-category', args=[category_id]),
         })
         self.exclude = []
         return render_to_response("newman/%s/multi_change_form.html" % app_label,
