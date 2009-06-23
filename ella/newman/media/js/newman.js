@@ -347,7 +347,7 @@ $( function() {
         
         var action =  $form.attr('action');
         var method = ($form.attr('method') || 'POST').toUpperCase();
-        var $meta = $form.find('.js-form-metadata:first');
+        var $meta = $form.find('.js-form-metadata');
         var $success = $meta.find('input[name=success]');
         var $error   = $meta.find('input[name=error]');
         var success, error;
@@ -809,6 +809,14 @@ function save_change_form_success(text_data, options) {
             }
         }
     };
+    
+    // load form-specific post-save actions
+    var $meta = $form.find('.js-form-metadata');
+    var post_save = $meta.find('input[name=post_save]').get(0).onchange($form);
+    for (var act in post_save) {
+        action_table[ act ] = post_save[ act ];
+    }
+    
     show_ok(response_msg);
     action_table.run(action);
     ContentByHashLib.unload_content('history');
