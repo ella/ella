@@ -66,11 +66,20 @@ class TestPlacement(DatabaseTestCase):
         self.publishable.save()
         self.assert_equals('/nested-category/2008/1/10/articles/old-article-new-slug/', self.placement.get_absolute_url())
 
+    
+class TestRedirects(DatabaseTestCase):
+
+    def setUp(self):
+        super(TestRedirects, self).setUp()
+        create_basic_categories(self)
+        create_and_place_a_publishable(self)
+
     def test_url_change_creates_redirect(self):
         self.placement.slug = 'old-article-new-slug'
         self.placement.save()
         self.assert_equals(1, Redirect.objects.count())
         r = Redirect.objects.all()[0]
+        
         self.assert_equals('/nested-category/2008/1/10/articles/first-article/', r.old_path)
         self.assert_equals('/nested-category/2008/1/10/articles/old-article-new-slug/', r.new_path)
         self.assert_equals(self.site_id, r.site_id)
@@ -81,7 +90,17 @@ class TestPlacement(DatabaseTestCase):
         self.placement.save()
         self.assert_equals(2, Redirect.objects.count())
         r = Redirect.objects.get(pk=r.pk)
+        
         self.assert_equals('some-path', r.old_path)
         self.assert_equals('/nested-category/2008/1/10/articles/old-article-new-slug/', r.new_path)
         self.assert_equals(self.site_id, r.site_id)
-    
+
+    def test_ability_to_place_back_and_forth(self):
+        self.placement.slug = 'old-article-new-slug'
+        self.placement.save()
+        self.placement.slug = 'first-article'
+        self.placement.save()
+        self.placement.slug = 'old-article-new-slug'
+        self.placement.save()
+
+

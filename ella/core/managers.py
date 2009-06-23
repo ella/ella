@@ -16,11 +16,17 @@ DEFAULT_LISTING_PRIORITY = getattr(settings, 'DEFAULT_LISTING_PRIORITY', 0)
 class RelatedManager(models.Manager):
     def get_related_for_object(self, obj, count, mods=[]):
         from ella.core.models import Publishable
+
         # manually entered dependencies
-        related = list(Publishable.objects.filter(
+
+        qset = Publishable.objects.filter(
                 related__related_ct=ContentType.objects.get_for_model(obj),
                 related__related_id=obj.pk
-            )[:count])
+            )
+        if mods:
+            ct_ids = [ContentType.objects.get_for_model(m).pk for m in mods]
+            qset = qset.filter(content_type__in=ct_ids)
+        related = list(qset[:count])
 
         if len(related) >= count:
             return related
@@ -28,20 +34,31 @@ class RelatedManager(models.Manager):
         count -= len(related)
 
         # related objects via tags
-        if mods:
-            try:
-                from tagging.models import TaggedItem
-                if TaggedItem._meta.installed:
-                    for m in mods:
-                        to_add = TaggedItem.objects.get_related(obj, m, count+len(related))
-                        for rel in to_add:
-                            if rel != obj and rel not in related:
-                                count -= 1
-                                related.append(rel)
-                            if count <= 0:
-                                return related
-            except ImportError, e:
-                pass
+        try:
+            from tagging.models import TaggedItem
+            if TaggedItem._meta.installed:
+                # we are only tagging Publishables, not individual content types
+                if isinstance(obj, Publishable):
+                    obj = obj.publishable_ptr
+
+                qset = Publishable.objects.filter(
+                        placement__publish_from__lte=datetime.now(),
+                    ).distinct()
+                if mods:
+                    qset = qset.filter(content_type__in=ct_ids)
+
+                print qset
+                print TaggedItem.objects.all()
+                to_add = TaggedItem.objects.get_related(obj, qset, num=count+len(related))
+                print to_add
+                for rel in to_add:
+                    if rel != obj and rel not in related:
+                        count -= 1
+                        related.append(rel)
+                    if count <= 0:
+                        return related
+        except ImportError, e:
+            pass
 
         # top objects in given category
         if count > 0:
