@@ -812,7 +812,9 @@ function save_change_form_success(text_data, options) {
     
     // load form-specific post-save actions
     var $meta = $form.find('.js-form-metadata');
-    var post_save = $meta.find('input[name=post_save]').get(0).onchange($form);
+    var post_save_input = $meta.find('input[name=post_save]').get(0);
+    var post_save = {};
+    if (post_save_input) post_save = post_save_input.onchange($form);
     for (var act in post_save) {
         action_table[ act ] = post_save[ act ];
     }
