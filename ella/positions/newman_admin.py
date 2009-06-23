@@ -12,8 +12,26 @@ from ella import newman
 from ella.positions.models import Position
 from ella.core.models import Category
 from ella.newman.utils import JsonResponse
+from django.forms.models import ModelForm
+from django.forms.util import ValidationError
+
+class PositionForm(ModelForm):
+
+    def clean(self):
+        cleaned_data = super(PositionForm, self).clean()
+
+        if cleaned_data['active_from'] and cleaned_data['active_till']:
+            if cleaned_data['active_from'] > cleaned_data['active_till']:
+                raise ValidationError(_('Active till must be greather than active from.'))
+
+        return cleaned_data
+
+    class Meta:
+        model = Position
 
 class PositionAdmin(newman.NewmanModelAdmin):
+    form = PositionForm
+
     list_display = ('name', 'category', 'box_type', 'is_active', 'is_filled', 'show_title', 'disabled',)
     list_filter = ('category', 'disabled', 'active_from', 'active_till',)
     search_fields = ('name', 'box_type', 'text', 'category__title',)
