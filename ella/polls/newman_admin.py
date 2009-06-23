@@ -134,13 +134,17 @@ class QuestionForm(modelforms.ModelForm):
         choice_ids = self.cleaned_data['choice_ids']
         choice_points = self.cleaned_data['choice_points']
         choice_texts = self.cleaned_data['choice_texts'] # choices text
-        for chid, text, points in zip(choice_ids, choice_texts, choice_points):
+        irange = range(1, len(choice_texts) + 1)
+        for chid, text, points, i in zip(choice_ids, choice_texts, choice_points, irange):
             if chid <= 0:
                 new_ch = Choice(points=points, choice=text, votes=0, question=self.cleaned_data['id'])
                 new_ch.save()
                 continue
+            remove = self.data.get(self.get_part_id('%d-DELETE' % i), 'off')
             ch = Choice.objects.get(pk=chid)
-            if ch.choice != text or ch.points != points:
+            if remove == 'on':
+                ch.delete()
+            elif ch.choice != text or ch.points != points:
                 ch.choice = text
                 ch.points = points
                 ch.save()
