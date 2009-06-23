@@ -272,4 +272,5 @@ class ChoiceCustomField(fields.CharField):
         super(ChoiceCustomField, self).__init__(*args, **kwargs)
 
     def clean(self, value):
-        return value
+        cvalue = super(ChoiceCustomField, self).clean(value)
+        return cvalue

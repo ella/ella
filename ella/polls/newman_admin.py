@@ -93,18 +93,20 @@ class QuestionForm(modelforms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         initial = []
-        if 'instance' in kwargs:
+        super(QuestionForm, self).__init__(*args, **kwargs)
+        if 'instance' in kwargs and 'data' not in kwargs: # when form is generated, custom field is added.
             inst = kwargs['instance']
             for choice in Choice.objects.filter(question=inst):
                 initial.append(choice)
-        
-        self.base_fields['choices'] = fields.ChoiceCustomField(label=_('Choices'), initial=initial, required=False)
+            self.fields['choices'] = fields.ChoiceCustomField(label=_('Choices'), initial=initial, required=False)
         self.id_part = None
-        super(QuestionForm, self).__init__(*args, **kwargs)
+        self.widget_index = 0
 
     def get_part_id(self, suffix=None):
         if not self.id_part:
-            self.id_part = self.data.getlist('choices_widget').pop(0)
+            dlist = self.data.getlist('choices_widget')
+            self.id_part = dlist[self.widget_index % len(dlist)]
+            self.widget_index += 1
         if not suffix:
             return self.id_part
         return '%s-%s' % (self.id_part, suffix)
