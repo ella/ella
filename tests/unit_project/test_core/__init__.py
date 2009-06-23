@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 from django.conf import settings
 
-from ella.core.models import Placement, Category, Listing
+from ella.core.models import Placement, Category, Listing, Publishable
 # choose Article as an example publishable
 from ella.articles.models import Article
 
@@ -40,6 +40,8 @@ def create_and_place_a_publishable(case):
         description=u'Some\nlonger\ntext',
         category=case.category_nested
     )
+
+    case.only_publishable = Publishable.objects.get(pk=case.publishable.pk)
 
     case.placement = Placement.objects.create(
         publishable=case.publishable,

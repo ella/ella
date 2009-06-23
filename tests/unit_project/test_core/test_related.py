@@ -81,13 +81,11 @@ class TestGetRelatedWithtagging(GetRelatedTestCase):
         self.TaggedItem = TaggedItem
 
     def test_returns_object_with_similar_tags(self):
-        self.Tag.objects.update_tags(self.publishable, 'tag1 tag2')
-        self.Tag.objects.update_tags(self.publishables[0], 'tag1 tag2')
+        self.Tag.objects.update_tags(self.only_publishable, 'tag1 tag2')
+        p = Publishable.objects.get(pk=self.publishables[0].pk)
+        self.Tag.objects.update_tags(p, 'tag1 tag2')
 
-        self.assert_equals(
-                [self.publishables[0].pk],
-                [p.pk for p in Related.objects.get_related_for_object(self.publishable, 1, mods=[self.publishable.__class__])]
-            )
+        self.assert_equals([p], Related.objects.get_related_for_object(self.publishable, 1))
 
 class TestRelatedTagParser(UnitTestCase):
     '''

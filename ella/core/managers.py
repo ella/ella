@@ -16,6 +16,7 @@ DEFAULT_LISTING_PRIORITY = getattr(settings, 'DEFAULT_LISTING_PRIORITY', 0)
 class RelatedManager(models.Manager):
     def get_related_for_object(self, obj, count, mods=[]):
         from ella.core.models import Publishable
+
         # manually entered dependencies
 
         qset = Publishable.objects.filter(
@@ -36,13 +37,20 @@ class RelatedManager(models.Manager):
         try:
             from tagging.models import TaggedItem
             if TaggedItem._meta.installed:
+                # we are only tagging Publishables, not individual content types
+                if isinstance(obj, Publishable):
+                    obj = obj.publishable_ptr
+
                 qset = Publishable.objects.filter(
                         placement__publish_from__lte=datetime.now(),
                     ).distinct()
                 if mods:
                     qset = qset.filter(content_type__in=ct_ids)
 
+                print qset
+                print TaggedItem.objects.all()
                 to_add = TaggedItem.objects.get_related(obj, qset, num=count+len(related))
+                print to_add
                 for rel in to_add:
                     if rel != obj and rel not in related:
                         count -= 1
