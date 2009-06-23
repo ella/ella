@@ -93,25 +93,31 @@ class QuestionForm(modelforms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         initial = []
-        if 'instance' in kwargs:
+        super(QuestionForm, self).__init__(*args, **kwargs)
+        if 'instance' in kwargs and 'data' not in kwargs: # when form is generated, custom field is added.
             inst = kwargs['instance']
             for choice in Choice.objects.filter(question=inst):
                 initial.append(choice)
-        
-        self.base_fields['choices'] = fields.ChoiceCustomField(label=_('Choices'), initial=initial, required=False)
-        super(QuestionForm, self).__init__(*args, **kwargs)
+            self.fields['choices'] = fields.ChoiceCustomField(label=_('Choices'), initial=initial, required=False)
+        self.id_part = None
+        self.widget_index = 0
 
     def get_part_id(self, suffix=None):
-        id_part = self.data.get('choices_widget')
+        if not self.id_part:
+            dlist = self.data.getlist('choices_widget')
+            self.id_part = dlist[self.widget_index % len(dlist)]
+            self.widget_index += 1
         if not suffix:
-            return id_part
-        return '%s-%s' % (id_part, suffix)
+            return self.id_part
+        return '%s-%s' % (self.id_part, suffix)
 
     def clean(self):
         # no data - nothing to validate
         if not self.is_valid() or not self.cleaned_data or not self.instance:
             return self.cleaned_data
         self.cleaned_data = super(QuestionForm, self).clean()
+        if not self.cleaned_data['id'] and not self.cleaned_data['question']:
+            return self.cleaned_data
         try:
             self.cleaned_data['choice_ids'] = map(lambda v: int(v), self.data.getlist(self.get_part_id('id')))
             self.cleaned_data['choice_points'] = map(lambda v: int(v), self.data.getlist(self.get_part_id('points')))
@@ -128,13 +134,17 @@ class QuestionForm(modelforms.ModelForm):
         choice_ids = self.cleaned_data['choice_ids']
         choice_points = self.cleaned_data['choice_points']
         choice_texts = self.cleaned_data['choice_texts'] # choices text
-        for chid, text, points in zip(choice_ids, choice_texts, choice_points):
+        irange = range(1, len(choice_texts) + 1)
+        for chid, text, points, i in zip(choice_ids, choice_texts, choice_points, irange):
             if chid <= 0:
                 new_ch = Choice(points=points, choice=text, votes=0, question=self.cleaned_data['id'])
                 new_ch.save()
                 continue
+            remove = self.data.get(self.get_part_id('%d-DELETE' % i), 'off')
             ch = Choice.objects.get(pk=chid)
-            if ch.choice != text or ch.points != points:
+            if remove == 'on':
+                ch.delete()
+            elif ch.choice != text or ch.points != points:
                 ch.choice = text
                 ch.points = points
                 ch.save()

@@ -301,6 +301,7 @@ class NewmanModelAdmin(XModelAdmin):
         draft.delete()
         return utils.JsonResponse(msg)
 
+    @utils.profiled_section
     @require_AJAX
     def filters_view(self, request, extra_context=None):
         "stolen from: The 'change list' admin view for this model."
@@ -336,6 +337,7 @@ class NewmanModelAdmin(XModelAdmin):
         )
         return HttpResponse(out, mimetype='text/plain;charset=utf-8')
 
+    @utils.profiled_section
     @require_AJAX
     def changelist_view(self, request, extra_context=None):
         self.register_newman_variables(request)

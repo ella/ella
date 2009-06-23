@@ -86,6 +86,8 @@ class NewmanTestCase(SeleniumTestCase):
                     'first_object' : "//div[@id='changelist']/form/table/tbody/tr[position()='1']",
                     'object' : "//div[@id='changelist']/form/table/tbody/tr[position()='%(position)s']",
                     'object_href' : "//div[@id='changelist']/form/table/tbody/tr[position()='%(position)s']/th/a[position()=2]",
+                    'datepicker' : "//td[@class='%(field)s']/span[@class='dtpicker-trigger']",
+                    'calendar_day' : "//table[@class='ui-datepicker-calendar']/tbody/tr/td/a[text()='%(day)s']",
                 }
             }
         }
@@ -149,13 +151,13 @@ class NewmanTestCase(SeleniumTestCase):
         s = self.selenium
         for field in calendar_data:
             # click on calendar button
-            xpath = "//td[@class='%(field)s']/span[@class='datepicker-trigger']" % {
+            xpath = self.elements['pages']['listing']['datepicker'] % {
                 "field" : field
             }
             s.click(xpath)
 
             # chose the current date
-            xpath = "//table[@class='ui-datepicker-calendar']/tbody/tr/td/a[text()='%(day)s']" % {
+            xpath = self.elements['pages']['listing']['calendar_day'] % {
                 "day" : calendar_data[field]['day']
             }
             s.click(xpath)
