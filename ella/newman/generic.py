@@ -82,7 +82,7 @@ class BaseGenericInlineFormSet(DJBaseGenericInlineFormSet):
                 if not has_object_permission(user, form.instance, delete_perm):
                     self._non_form_errors = _('Object deletion is not permitted.')
                     continue
-                if not has_category_permission(user, form.instance.category, delete_perm):
+                if model_category_fk(form.instance) is not None and not has_category_permission(user, form.instance.category, delete_perm):
                     self._non_form_errors = _('Object deletion is not permitted.')
                     continue
             if cfield.name not in form.changed_data:
