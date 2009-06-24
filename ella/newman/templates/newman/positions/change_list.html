@@ -40,9 +40,9 @@
     {{ block.super }}
 
     <script type="text/javascript">
-        request_media('{{ NEWMAN_MEDIA_URL }}js/positions.js');
-        request_media('{{ NEWMAN_MEDIA_URL }}js/generic.suggest.js');
-        request_media('{{ NEWMAN_MEDIA_URL }}css/generic.suggest.css');
+        request_media('{{ NEWMAN_MEDIA_URL }}js/positions.js?{{ VERSION }}');
+        request_media('{{ NEWMAN_MEDIA_URL }}js/generic.suggest.js?{{ VERSION }}');
+        request_media('{{ NEWMAN_MEDIA_URL }}css/generic.suggest.css?{{ VERSION }}');
     </script>
 
     {% if media %}

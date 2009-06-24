@@ -23,13 +23,13 @@
     $('.add-listing-button').live('click', add_listing);
 
     //// choices (Polls application)
-    function add_listing(evt) {
+    function add_choice(evt) {
         if (evt && evt.button != 0) return;
         var no = $('.choice-row').length + 1;
         var $template = $('.choice-row-template:first');
         add_inline($template, no);
     }
-    $('.add-choice-button').live('click', add_listing);
+    $('.add-choice-button').live('click', add_choice);
     
     // create desired inputs for loaded preset
     function add_listings_for_preset(evt, preset) {

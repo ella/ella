@@ -7,6 +7,9 @@ Build-Depends: cdbs (>= 0.4.41), debhelper (>= 5.0.37.2), python-dev, python-sup
 Standards-Version: 3.7.2
 
 Package: centrum-python-ella
+Provides: centrum-ella
+Conflicts: centrum-ella
+Replaces: centrum-ella
 Architecture: all
 Depends: ${python:Depends}, ${misc:Depends}, python-django, python-docutils, python-pysqlite2, python-markdown2, python-feedparser, python-imaging
 Description: ella - django cms
