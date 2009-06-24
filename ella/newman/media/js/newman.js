@@ -294,7 +294,7 @@ $( function() {
      */
     function validate($form) {
         var ok = true;
-        $('.form-error-msg').remove();
+        $('.form-error-msg,.non-field-errors').remove();
         get_inputs($form).each( function() {
             var $label = $('label[for='+this.id+']');
             $('#err-overlay').empty().hide();
@@ -430,9 +430,29 @@ $( function() {
             // Show the individual errors
             for (var id in res.errors) {
                 var msgs = res.errors[ id ];
-                var input = $('#'+id).get(0);
-                show_form_error(input, msgs);
-                if (!input) carp('Error reported for nonexistant input #'+id);
+                var input;
+                
+                // non-field errors
+                if (id == 'id___all__') {
+                    var $nfe = $('#non-field-errors');
+                    if ($nfe.length == 0) {
+                        $nfe = $('<p class="non-field-errors">').insertBefore($form);
+                        $nfe.prepend(
+                              '<input type="text" id="id_non_form_errors" style="position: absolute; left: -500px;" />'+ "\n"
+                            + '<label for="id_non_form_errors" style="display: none;">'
+                            +     gettext('Form errors')
+                            + '</label>'
+                        );
+                    }
+                    input = document.getElementById('id_non_form_errors');
+                    
+                    show_form_error(input, msgs);
+                }
+                else {
+                    input = document.getElementById(id);
+                    show_form_error(input, msgs);
+                    if (!input) carp('Error reported for nonexistant input #'+id);
+                }
                 
                 $('<p>')
                 .data('rel_input',
@@ -441,7 +461,7 @@ $( function() {
                     :                                      input                             // otherwise the input itself
                 )
                 .text(
-                    ($('label[for='+id+']').text() || id).replace(/:$/,'')  // identify the input with its label text or id; no trailing ':' pls
+                    ($('label[for='+input.id+']').text() || id).replace(/:$/,'')  // identify the input with its label text or id; no trailing ':' pls
                 )
                 .click( function(evt) { // focus and scroll to the input
                     if (evt.button != 0) return;
