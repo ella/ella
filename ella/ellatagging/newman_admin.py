@@ -22,8 +22,14 @@ class TaggingInlineFormset(BaseGenericInlineFormSet):
     def get_queryset(self):
         if self.instance is None:
             return self.model._default_manager.none()
+        elif isinstance(self.instance, Publishable):
+            # use Publishable CT for anything publishable
+            ct = CT_PUBLISHABLE
+        else:
+            ct = ContentType.objects.get_for_model(self.instance)
+
         return self.model._default_manager.filter(**{
-            self.ct_field.name: CT_PUBLISHABLE,
+            self.ct_field.name: ct,
             self.ct_fk_field.name: self.instance.pk,
         })
 
