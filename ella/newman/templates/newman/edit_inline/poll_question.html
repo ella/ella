@@ -1,3 +1,4 @@
+{% comment %}
 {% extends "newman/edit_inline/tabular.html" %}
 
 {% block header_fields %}
@@ -12,6 +13,7 @@
       {% for line in fieldset %}
         {% for field in line %}
 
+          {# options for question -- to actions (allow_multiple, ...) #}
           {% ifnotequal field.field.name "choices" %}
               <td class="{{ field.field.name }}">
               {{ field.field.errors.as_ul }}
@@ -58,4 +60,50 @@
 <p><a class="icn btn addfav js-placement-main-category">{% trans "Main category" %}</a></p>
 {% endif %}
 {% endblock %}
+{% endcomment %}
 
+<div class="inline-group poll-questions-inline">
+    <script type="text/javascript">
+        request_media('{{ NEWMAN_MEDIA_URL }}js/inlines.js');
+        request_media('{{ NEWMAN_MEDIA_URL }}js/polls.js');
+    </script>
+    <fieldset class="module">
+        
+        <legend>{{ inline_admin_formset.opts.verbose_name_plural|capfirst }}</legend>
+        
+        {% for inline_admin_form in inline_admin_formset %}{# traverse questions #}
+            
+            {# form errors #}
+            {% if inline_admin_form.form.non_field_errors %}
+                <div class="form-errors">{{ inline_admin_form.form.non_field_errors }}</div>
+            {% endif %}
+            
+            {# question text #}
+            <p class="poll-question-text">
+            {% if inline_admin_form.original %}
+                {{ inline_admin_form.original }}
+            {% else %}
+                <span class="empty-poll-question-text">
+                    {% trans 'Click to edit question.' %}
+                </span>
+            {% endif %}
+            {% if inline_admin_form.show_url %}
+                <a class="icn web" href="{% url newman_admin_index %}r/{{ inline_admin_form.original_content_type_id }}/{{ inline_admin_form.original.id }}/">{% trans "View on site" %}</a>
+            {% endif %}
+            </p>
+            
+            {# answer options #}
+            <div class="poll-answers">
+                {% for fieldset in inline_admin_form %}{% for line in fieldset %}{% for field in line %}
+                    {% ifequal field.field.name "choices" %}
+                        <div style="margin: 2px;">
+                            {{ field.field }}
+                        </div>
+                    {% endifequal %}
+                {% endfor %}{% endfor %}{% endfor %}
+            </div>
+            
+        {% endfor %}{# end traverse questions #}
+        
+    </fieldset>
+</div>

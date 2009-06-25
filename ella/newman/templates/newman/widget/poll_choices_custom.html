@@ -1,52 +1,53 @@
     <input type="hidden" name="choices_widget" value="{{ id_prefix }}" />
     {% for choice in choices %}
-        <tr class="choice-row inline-item">
-            <td>
-            </td>{# vertical align with choice's first (empty) td #}
-            <td class="choices-text">
-                <input 
-                    type="hidden"
-                    value="{{ choice.pk }}"
-                    name="{{ id_prefix }}-id"
-                />
-                <div class="form-row choice-text">
-                <span style="display: visible;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+        <div class="poll-choice-container">
+            <div class="poll-choice-text-container">
+                <p class="poll-choice-text">
+                    <input 
+                        type="hidden"
+                        value="{{ choice.pk }}"
+                        name="{{ id_prefix }}-id"
+                    />
+                    
                     <textarea
                         id="{{ id_prefix }}-choice-{{ forloop.counter }}"
                         name="{{ id_prefix }}"
                         rows="5"
                         cols="35"
                     >{{ choice.choice }}</textarea>
-                </div>
-            </td>
-
-            <td class="choice-points">
-                <input
-                    type="text"
-                    size="4"
-                    id="{{ id_prefix }}-{{ forloop.counter }}-points"
-                    name="{{ id_prefix }}-points"
-                    value="{{ choice.points }}"
-                />
-            </td>
-            <td class="choice-votes">
-                <input 
-                    type="input"
-                    disabled="disabled"
-                    size="4"
-                    id="{{ id_prefix }}-{{ forloop.counter }}-votes"
-                    value="{% if not choice.votes %}0{% else %}{{ choice.votes }}{% endif %}"
-                />
-            </td>
-            <td class="choice-delete">
-                <input 
-                    type="checkbox"
-                    id="{{ id_prefix }}-{{ forloop.counter }}-delete"
-                    name="{{ id_prefix }}-{{ forloop.counter }}-DELETE"
-                />
-            </td>
-
-        </tr>
+                    <span title="{% if not choice.votes %}0{% else %}{{ choice.votes }}{% endif %} {% trans 'Votes' %}">{{ choice.choice }}</span>
+                    
+                    <a class="js-delete-poll-choice">{% trans "Delete" %}</a>
+                </p>
+                
+                <p class="poll-choice-text-extras">
+                    <input
+                        class="poll-choice-points"
+                        type="text"
+                        size="4"
+                        id="{{ id_prefix }}-{{ forloop.counter }}-points"
+                        name="{{ id_prefix }}-points"
+                        value="{{ choice.points }}"
+                    />
+                    <span><a class="poll-choice-points">{{ choice.points }}</a></span>
+                    <span>{% trans "Points" %}</span>
+                </p>
+                <div class="cb"></div>
+            </div>
+            <input 
+                type="hidden"
+                size="4"
+                id="{{ id_prefix }}-{{ forloop.counter }}-votes"
+                value="{% if not choice.votes %}0{% else %}{{ choice.votes }}{% endif %}"
+            />
+            <input 
+                type="hidden"
+                id="{{ id_prefix }}-{{ forloop.counter }}-delete"
+                name="{{ id_prefix }}-{{ forloop.counter }}-DELETE"
+                value="off"
+                class="poll-choice-delete-input"
+            />
+        </div>
     {% endfor %}
 
 {# Template for creating choices #}
@@ -55,7 +56,7 @@
             <td>
             </td>
             <td class="choices-text">
-                {# value of hidden input should be negative whole number or zero #}
+                {# value of hidden input should be negative integer number or zero #}
                 <input 
                     type="hidden"
                     value="-__NO__"
