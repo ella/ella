@@ -190,6 +190,7 @@ class ContestAdmin(PublishableAdmin):
     inlines = [ QuestionInlineAdmin, PlacementInlineAdmin ]
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
+    exclude = ('text_announcement', 'text_results', 'content_type',)
     rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}
 
 class QuizAdmin(PublishableAdmin):
@@ -199,6 +200,7 @@ class QuizAdmin(PublishableAdmin):
     inlines = [QuestionInlineAdmin, ResultTabularAdmin, PlacementInlineAdmin]
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
+    exclude = ('text_announcement', 'text_results', 'content_type',)
     rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}
 
 
@@ -206,12 +208,12 @@ class PollAdmin(newman.NewmanModelAdmin):
     list_display = ('title', 'question', 'get_total_votes', 'pk',)
     list_filter = ('active_from', 'active_till',)
     search_fields = ('title', 'text_announcement', 'text', 'text_results', 'question__question',)
-    rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}
+    rich_text_fields = {'small': ('text', )}
     suggest_fields = {'question': ('__unicode__', 'question',)}
 
     fieldsets = (
         (_('Basic'), {'fields' : ('title', 'question', 'active_from', 'active_till')}),
-        (_('Texts'), {'fields' : ('text_announcement', 'text', 'text_results',)}),
+        (_('Texts'), {'fields' : ('text',)}),
     )
 
 class SurveyChoiceInlineAdmin(newman.NewmanTabularInline):
