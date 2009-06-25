@@ -5,7 +5,7 @@
     {% if not is_popup %}
         <div class="breadcrumbs">
             <div style="float: left;">
-                <a href="{% url newman_admin_index %}#/nm/">{% trans "Home" %}</a>
+                <a href="{% url newman_admin_index %}#">{% trans "Home" %}</a>
                 {% if app_label %}&rsaquo; <a class="js-hashadr" href="/{{ app_label }}/">{% trans app_label.title %}</a>{% endif %}
                 {% if title %}&rsaquo; <strong id="doc-title">{{ title }}</strong>{% endif %}
                 {% comment %}
@@ -57,7 +57,7 @@
 {% endif %}
 
 {% block content %}
-    <div class="js-hashadr-container" id="changelist">
+    <div class="js-hashadr-container js-app-{{ cl.opts }}" id="changelist">
 
         <form class="js-form js-dyn-adr" action="." method="post"{% if cl.formset.is_multipart %} enctype="multipart/form-data"{% endif %}>
             {% if cl.formset %}

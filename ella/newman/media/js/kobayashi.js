@@ -523,13 +523,13 @@ var ContentByHashLib = {};
     $('.js-simpleload,.js-simpleload-container a').live('click', function(evt) {
         if (evt.button != 0) return true;    // just interested in left button
         simple_load($(this).attr('href'));
-        return false;
+        evt.preventDefault();
     });
     $('.js-hashadr,.js-hashadr-container a').live('click', function(evt) {
         if (evt.button != 0) return true;    // just interested in left button
         if ($(this).is('.js-nohashadr')) return true;   // override hashadr-container
         adr($(this).attr('href'));
-        return false;
+        evt.preventDefault();
     });
 })})(jQuery);
 
