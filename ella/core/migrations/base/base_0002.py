@@ -116,7 +116,7 @@ class BasePublishableDataPlugin(south.SouthPlugin):
             'model': self.model,
             'table': self.table,
             'cols_to': ', '.join(self.cols_to),
-            'cols_from': ', '.join(self.cols_from),
+            'cols_from': ', '.join(['a.`%s`' % c for c in self.cols_from]),
         }
 
     @property
@@ -159,7 +159,6 @@ class BasePublishableDataPlugin(south.SouthPlugin):
         '''
 
         # move the data
-        # TODO: maybe there should be prefix 'a.' in cols_from
         db.execute('''
             INSERT INTO
                 `core_publishable` (old_id, content_type_id, %(cols_to)s)

@@ -60,13 +60,16 @@ def newman_topmenu(context):
 FAVS = (
     'publishable',
     'article',
-    'placement',
+#    'placement',
     'photo',
     'gallery',
-    'poll',
+    'survey',
+    'quiz',
+    'contest',
+    'interview',
     'position',
-    'category',
-    'author',
+#    'category',
+#    'author',
 )
 
 @register.inclusion_tag('newman/tpl_tags/newman_favorites.html', takes_context=True)
