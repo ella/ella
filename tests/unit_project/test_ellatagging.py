@@ -6,6 +6,7 @@ from django.core.urlresolvers import reverse
 from djangosanetesting import DatabaseTestCase
 
 from ella.ellatagging import views
+from ella.core.models import Publishable
 
 from unit_project.test_core import create_basic_categories, create_and_place_a_publishable
 from unit_project import template_loader
@@ -32,7 +33,7 @@ class TestTaggingViews(DatabaseTestCase):
     def test_get_tagged_publishables_returns_tagged_publishable(self):
         from tagging.models import Tag, TaggedItem
 
-        Tag.objects.update_tags(self.publishable, 'tag1 tag2')
+        Tag.objects.update_tags(self.only_publishable, 'tag1 tag2')
         self.assert_equals(2, TaggedItem.objects.count())
 
         t = Tag.objects.get(name='tag1')
@@ -41,7 +42,7 @@ class TestTaggingViews(DatabaseTestCase):
     def test_get_tagged_publishables_doesnt_return_tagged_publishable_with_future_placement(self):
         from tagging.models import Tag, TaggedItem
 
-        Tag.objects.update_tags(self.publishable, 'tag1 tag2')
+        Tag.objects.update_tags(self.only_publishable, 'tag1 tag2')
         self.assert_equals(2, TaggedItem.objects.count())
 
         self.placement.publish_from = datetime.now() + timedelta(days=2)
@@ -58,7 +59,7 @@ class TestTaggingViews(DatabaseTestCase):
     def test_tagged_publishables_view(self):
         from tagging.models import Tag, TaggedItem
 
-        Tag.objects.update_tags(self.publishable, 'tag1 tag2')
+        Tag.objects.update_tags(self.only_publishable, 'tag1 tag2')
         self.assert_equals(2, TaggedItem.objects.count())
 
         t = Tag.objects.get(name='tag1')

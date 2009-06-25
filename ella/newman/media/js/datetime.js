@@ -281,6 +281,7 @@ function DateInput(input) {
         var $dtp = $('.datetimepicker');
         var x = $(this).offset().left + $(this).width();
         var y = $(this).offset().top;
+        var $input = $(this).data('input');
         
         // check if Y doesn't reach below the current screen height
         var d = y + $dtp.outerHeight()  -  $('body').outerHeight();
@@ -308,7 +309,9 @@ function DateInput(input) {
                 $(  '<span class="dtpicker-trigger"><img src="'
                     +MEDIA_URL
                     +'ico/16/vcalendar.png" alt="cal" /></span>'
-                ).insertAfter(this);
+                )
+                .data('input', $input)
+                .insertAfter(this);
                 
                 $input.keypress(function(evt) {
                     var delta = 0;

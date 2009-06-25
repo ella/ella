@@ -596,7 +596,14 @@ GenericSuggestLib = {};
             $from.hidden.val()
         );
         restore_suggest_widget_from_value(to);
-    }
+    };
+    
+    GenericSuggestLib.get_value = function(el) {
+        var $inputs = get_current_inputs(el);
+        var val = $inputs.hidden.val().replace(/#.*/, '');
+        if ($inputs.ul.is('.GenericSuggestField')) return val;
+        else return val.split(/,/);
+    };
     
     function equidistant_array_coverage(count, characters) {
         if (characters == null)

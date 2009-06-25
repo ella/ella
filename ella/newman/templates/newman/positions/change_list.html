@@ -19,7 +19,7 @@
                 </ul>
                 <a id="lookup_id_category" class="suggest-related-lookup" href="/core/category/?pop"></a>
             </div>
-            <a class="icn btn ok def">{% trans 'Go' %}</a>
+            <a class="icn btn ok def js-category-redir js-nohashadr">{% trans 'Go' %}</a>
             <div class="cb"></div>
             {% ifnotequal cl.paginator.num_pages 1 %}{% pagination cl %}{% endifnotequal %}
             {% block result_list %}
@@ -40,8 +40,9 @@
     {{ block.super }}
 
     <script type="text/javascript">
-        request_media('{{ NEWMAN_MEDIA_URL }}js/generic.suggest.js');
-        request_media('{{ NEWMAN_MEDIA_URL }}css/generic.suggest.css');
+        request_media('{{ NEWMAN_MEDIA_URL }}js/positions.js?{{ VERSION }}');
+        request_media('{{ NEWMAN_MEDIA_URL }}js/generic.suggest.js?{{ VERSION }}');
+        request_media('{{ NEWMAN_MEDIA_URL }}css/generic.suggest.css?{{ VERSION }}');
     </script>
 
     {% if media %}

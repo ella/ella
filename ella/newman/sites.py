@@ -6,7 +6,7 @@ from django.shortcuts import render_to_response
 from django.utils.functional import update_wrapper
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.db import models
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.core.mail import EmailMessage
 from django.views.decorators.cache import never_cache
 from django.contrib.auth import authenticate, login, logout
@@ -77,6 +77,9 @@ class NewmanSite(AdminSite):
             url(r'^%s/editor-box/$' % NEWMAN_URL_PREFIX,
                 wrap(self.editor_box_view),
                 name="newman-editor-box"),
+            url(r'^%s/render-chunk/$' % NEWMAN_URL_PREFIX,
+                wrap(self.render_chunk_template_view),
+                name="newman-render-chunk"),
         )
 
         if 'djangomarkup' in settings.INSTALLED_APPS:
@@ -88,6 +91,25 @@ class NewmanSite(AdminSite):
 
         urlpatterns += super(NewmanSite, self).get_urls()
         return urlpatterns
+
+    @require_AJAX
+    def render_chunk_template_view(self, request, extra_context=None):
+        """
+        Render template snippet defined in GET parameter 'chunk'
+        """
+
+        context = template.RequestContext(request)
+
+        tpl = request.GET.get('chunk', None)
+
+        if not tpl:
+            raise Http404
+
+        template_path = "newman/chunks/%s.html" % tpl
+
+        return render_to_response(template_path, context,
+            context_instance=template.RequestContext(request)
+        )
 
 #    @require_AJAX
     def editor_box_view(self, request, extra_context=None):

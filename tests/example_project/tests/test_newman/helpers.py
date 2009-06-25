@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from types import ClassType
+from time import sleep
 
 from djangosanetesting import SeleniumTestCase
 
@@ -76,6 +76,7 @@ class NewmanTestCase(SeleniumTestCase):
                 'save' : "//a[@class='js-submit icn btn save def']",
                 'show_filters' : "//div[@id='filters-handler']/a[position()=1]",
                 'lookup_content' : "//div[@id='changelist']/form/table/tbody/tr/th/a[text()='%(text)s']",
+                'search_button' : "//a[@class='btn icn search def']",
             },
             'pages' : {
                 'login' : {
@@ -85,6 +86,8 @@ class NewmanTestCase(SeleniumTestCase):
                     'first_object' : "//div[@id='changelist']/form/table/tbody/tr[position()='1']",
                     'object' : "//div[@id='changelist']/form/table/tbody/tr[position()='%(position)s']",
                     'object_href' : "//div[@id='changelist']/form/table/tbody/tr[position()='%(position)s']/th/a[position()=2]",
+                    'datepicker' : "//td[@class='%(field)s']/span[@class='dtpicker-trigger']",
+                    'calendar_day' : "//table[@class='ui-datepicker-calendar']/tbody/tr/td/a[text()='%(day)s']",
                 }
             }
         }
@@ -99,6 +102,8 @@ class NewmanTestCase(SeleniumTestCase):
         self.selenium.type("id_password", self.USER_PASSWORD)
         self.selenium.click(self.elements['pages']['login']['submit'])
         self.selenium.wait_for_page_to_load(30000)
+        # give javascript time to settle
+        sleep(0.2)
 
     def logout(self):
         self.selenium.click(self.elements['navigation']['logout'])
@@ -148,13 +153,13 @@ class NewmanTestCase(SeleniumTestCase):
         s = self.selenium
         for field in calendar_data:
             # click on calendar button
-            xpath = "//td[@class='%(field)s']/span[@class='datepicker-trigger']" % {
+            xpath = self.elements['pages']['listing']['datepicker'] % {
                 "field" : field
             }
             s.click(xpath)
 
             # chose the current date
-            xpath = "//table[@class='ui-datepicker-calendar']/tbody/tr/td/a[text()='%(day)s']" % {
+            xpath = self.elements['pages']['listing']['calendar_day'] % {
                 "day" : calendar_data[field]['day']
             }
             s.click(xpath)
@@ -197,7 +202,7 @@ class NewmanTestCase(SeleniumTestCase):
                 'expected' : expected,
                 'retrieved' : retrieved,
             })
-            
+
         return u'\n'.join(messages).encode('utf-8')
 
     def add_error(self, errors, field, expected, retrieved):
@@ -216,7 +221,7 @@ class NewmanTestCase(SeleniumTestCase):
                 text = getattr(self.selenium, spec.value_function_name)('id_%s' % field)
                 if not spec.is_equal(text):
                     self.add_error(errors, field, spec.expected_value, text)
-                
+
             elif isinstance(spec, list):
                 for i in xrange(0, len(spec)):
                     xpath = (self.elements['controls']['suggester_selected']+"[%(number)s]") % {
@@ -226,7 +231,7 @@ class NewmanTestCase(SeleniumTestCase):
                     text = self.selenium.get_text(xpath)
                     if text != spec[i]:
                         self.add_error(errors, field, spec, text)
-                        
+
             else:
                 text = self.selenium.get_value('id_%s' % field)
                 if text != spec:
