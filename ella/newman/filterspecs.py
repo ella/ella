@@ -6,6 +6,9 @@ import logging
 from django.utils.translation import ugettext as _
 from django.contrib.admin import filterspecs
 
+from ella.core.models import Category
+from ella.newman.permission import permission_filtered_model_qs
+
 log = logging.getLogger('ella.newman')
 
 
@@ -185,6 +188,32 @@ def filter_spec(field_test_func, lookup_kwarg_func=None, title=None):
         filterspecs.FilterSpec.register_insert(field_test_func, cls)
         return filter_func
     return decorate
+
+class NewmanSiteFilter(CustomFilterSpec):
+    " Site customized filter. Filtering is done via Site.category_set()... "
+    site_field_path = 'category__site__id__exact'
+
+    def title(self):
+        return _('Site')
+
+    def get_lookup_kwarg(self):
+        # FIXME lookup_var doesn't exist
+        for param in self.request_get:
+            if param.startswith(self.lookup_var):
+                self.selected_lookup = param
+                return param
+        return ''
+
+    def filter_func(fspec):
+        root_cats = Category.objects.filter(tree_parent__isnull=True)
+        qs = permission_filtered_model_qs(root_cats, fspec.user)
+        for cat in qs:
+            lookup_dict = dict()
+            lookup_dict[fspec.site_field_path] = cat.site.pk
+            link_text = '%s (%s)' % (cat.site.name, cat.site.domain)
+            link = (link_text, lookup_dict)
+            fspec.links.append(link)
+        return True
 
 # -------------------------------------
 # Standard django.admin filters
