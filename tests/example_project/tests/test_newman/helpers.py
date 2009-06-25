@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from types import ClassType
+from time import sleep
 
 from djangosanetesting import SeleniumTestCase
 
@@ -101,6 +101,8 @@ class NewmanTestCase(SeleniumTestCase):
         self.selenium.type("id_password", self.USER_PASSWORD)
         self.selenium.click(self.elements['pages']['login']['submit'])
         self.selenium.wait_for_page_to_load(30000)
+        # give javascript time to settle
+        sleep(0.2)
 
     def logout(self):
         self.selenium.click(self.elements['navigation']['logout'])
