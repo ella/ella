@@ -68,8 +68,8 @@ class BasePoll(models.Model):
     text_announcement = models.TextField(_('Text with announcement'))
     text = models.TextField(_('Text'))
     text_results = models.TextField(_('Text with results'))
-    active_from = models.DateTimeField(_('Active from'))
-    active_till = models.DateTimeField(_('Active till'))
+    active_from = models.DateTimeField(_('Active from'), blank=True, null=True)
+    active_till = models.DateTimeField(_('Active till'), blank=True, null=True)
 
     class Meta:
         abstract = True

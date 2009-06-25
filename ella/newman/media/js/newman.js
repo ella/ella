@@ -541,6 +541,11 @@ $( function() {
     }
     $(document).bind('content_added', overload_default_submit);
     overload_default_submit();
+    
+    // Set up returning to publishable changelist when coming to change form from it
+    $('#changelist.js-app-core\\.publishable tbody th a').live('click', function() {
+        FORM_SAVE_RETURN_TO = '/core/publishable/';
+    });
     //// End of ajax forms
     
     //// Filters
@@ -780,7 +785,15 @@ function save_change_form_success(text_data, options) {
     response_msg = response_msg || _('Form saved');
     var action_table = {
         _save_: function() {
-            adr('../');
+            var return_to;
+            if (window.FORM_SAVE_RETURN_TO) {
+                return_to = FORM_SAVE_RETURN_TO;
+                delete FORM_SAVE_RETURN_TO;
+            }
+            else {
+                return_to = '../';
+            }
+            adr(return_to);
         },
         _addanother_: function() {
             if ( /add\/$/.test(get_hashadr('')) ) {
@@ -823,9 +836,10 @@ function save_change_form_success(text_data, options) {
             else {
                 var message = action
                     ? 'Unrecognized post-save action: '+action
-                    : 'No post-save action, redirecting to change list';
+                    : 'No post-save action, redirecting to homepage';
                 show_message(message);
                 carp(message);
+                location.hash = '#';
             }
         }
     };
