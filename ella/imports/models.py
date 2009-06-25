@@ -8,6 +8,7 @@ from django.utils.html import strip_tags
 from django.utils.translation import ugettext_lazy as _
 from django.utils.safestring import mark_safe
 from django.template.defaultfilters import slugify
+from django.core.files.base import ContentFile
 
 from ella.photos.models import Photo
 from ella.articles.models import Article
@@ -96,8 +97,10 @@ class Server(models.Model):
         "Runs the item fetch from the category or feed (based on self.category) and saves them into ServerItem."
         if self.category:
             output = self.get_from_category()
-        else:
+        elif self.url:
             output = self.get_from_feed()
+        else:
+            return
 
         importlen =  len(output['entries'])
         if output['status'] == 200 and importlen > 0:
@@ -189,14 +192,16 @@ class ServerItem(models.Model):
 
         if self.photo_url and not self.photo and not self.server.category:
             image = urllib.urlopen(self.photo_url)
-            image_raw = image.read()
-            image.close()
+            try:
+                content_file = ContentFile( image.read() )
+            finally:
+                image.close()
             imported_photo = Photo()
             imported_photo.title = self.title
             imported_photo.slug = self.slug
             imported_photo.description = self.photo_url
             # Saves "imported.jpg" file, which has been created when importing item with picture
-            imported_photo.save_image_file('imported.jpg', image_raw)
+            imported_photo.image.save( 'imported.jpg', content_file )
             imported_photo.save()
             self.photo = imported_photo
 

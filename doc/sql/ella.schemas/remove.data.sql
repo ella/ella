@@ -14,7 +14,7 @@ alter table core_hitcount drop column id;
 -- tohle delal honza, neni pro to model
 drop table discussions_question;
 
--- tahle appka se nepouziva
+-- tahle appka se nepouziva - haha! chyba lavky ;)
 drop table `discussions_bannedstring`;
 drop table `discussions_banneduser`;
 drop table `discussions_postviewed`;
@@ -61,3 +61,8 @@ delete from core_placement where target_id in (7974) and target_ct_id = 32;
 -- interviews:
 -- select p.id, p.target_id from core_placement p where p.target_ct_id = 55 and not exists (select id from interviews_interview where id = p.target_id);
 delete from core_placement where target_id in (68) and target_ct_id = 55;
+
+-- a pak uz jenom
+-- $ mysqldump -t -c jmeno_databaze
+-- coz udela dump pouze dat a v definovanem poradi
+
