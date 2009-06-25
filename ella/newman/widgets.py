@@ -145,7 +145,7 @@ class AdminSuggestWidget(forms.TextInput):
     def render(self, name, value, attrs=None):
 
         # related_url for standard lookup and clreate suggest_url for JS suggest
-        related_url = '../../../%s/%s/' % (self.model._meta.app_label, self.model._meta.object_name.lower())
+        related_url = '/%s/%s/' % (self.model._meta.app_label, self.model._meta.object_name.lower())
         suggest_params = '&amp;'.join([ 'f=%s' % l for l in self.lookups ]) + '&amp;q='
         suggest_url = related_url + 'suggest/?' + suggest_params
 

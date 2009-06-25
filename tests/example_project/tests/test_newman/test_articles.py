@@ -54,7 +54,7 @@ class TestArticleBasics(NewmanTestCase):
             'authors' : [u"Barack Obama", u"King Albert II"],
             'placement_set-0-category' : [u"Africa/west-africa"],
         })
-        
+
 
         calendar_data = {
             "publish_from" : {
@@ -95,7 +95,7 @@ class TestArticleBasics(NewmanTestCase):
 
         # verify all fields
         s.click(self.get_listing_object_href())
-        
+
         self.verify_form(expected_data)
 
     def test_resume_ability_after_500(self):
@@ -135,7 +135,7 @@ class TestArticleBasics(NewmanTestCase):
         # load template
         s.select("id_drafts", "index=1")
 
-        s.wait_for_condition("selenium.page().findElement('id_slug').value != ''", 30000);
+        s.wait_for_condition("selenium.page().findElement('id_slug').value != ''", 30000)
 
         # and check we have data we've stored
         self.verify_form(expected_data)
@@ -145,3 +145,21 @@ class TestArticleBasics(NewmanTestCase):
         # selenium.page().getCurrentWindow != null is not working...:]
         from time import sleep
         sleep(5)
+
+    def test_article_search_from_articles(self):
+        s = self.selenium
+        search_term = 'experiment'
+        search_input = "//input[@id='searchbar']"
+
+        # go to articles
+        s.click(self.elements['navigation']['articles'])
+        s.wait_for_element_present(search_input)
+
+        # write search term
+        s.type('searchbar', search_term)
+        s.click(self.elements['controls']['search_button'])
+
+        # check that search input contains search term and we have 1 article
+        s.wait_for_element_present(search_input)
+        self.assert_equals(s.get_value("searchbar"), search_term)
+

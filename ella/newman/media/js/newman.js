@@ -294,7 +294,7 @@ $( function() {
      */
     function validate($form) {
         var ok = true;
-        $('.form-error-msg').remove();
+        $('.form-error-msg,.non-field-errors').remove();
         get_inputs($form).each( function() {
             var $label = $('label[for='+this.id+']');
             $('#err-overlay').empty().hide();
@@ -347,7 +347,7 @@ $( function() {
         
         var action =  $form.attr('action');
         var method = ($form.attr('method') || 'POST').toUpperCase();
-        var $meta = $form.find('.js-form-metadata:first');
+        var $meta = $form.find('.js-form-metadata');
         var $success = $meta.find('input[name=success]');
         var $error   = $meta.find('input[name=error]');
         var success, error;
@@ -430,9 +430,29 @@ $( function() {
             // Show the individual errors
             for (var id in res.errors) {
                 var msgs = res.errors[ id ];
-                var input = $('#'+id).get(0);
-                show_form_error(input, msgs);
-                if (!input) carp('Error reported for nonexistant input #'+id);
+                var input;
+                
+                // non-field errors
+                if (id == 'id___all__') {
+                    var $nfe = $('#non-field-errors');
+                    if ($nfe.length == 0) {
+                        $nfe = $('<p class="non-field-errors">').insertBefore($form);
+                        $nfe.prepend(
+                              '<input type="text" id="id_non_form_errors" style="position: absolute; left: -500px;" />'+ "\n"
+                            + '<label for="id_non_form_errors" style="display: none;">'
+                            +     gettext('Form errors')
+                            + '</label>'
+                        );
+                    }
+                    input = document.getElementById('id_non_form_errors');
+                    
+                    show_form_error(input, msgs);
+                }
+                else {
+                    input = document.getElementById(id);
+                    show_form_error(input, msgs);
+                    if (!input) carp('Error reported for nonexistant input #'+id);
+                }
                 
                 $('<p>')
                 .data('rel_input',
@@ -441,7 +461,7 @@ $( function() {
                     :                                      input                             // otherwise the input itself
                 )
                 .text(
-                    ($('label[for='+id+']').text() || id).replace(/:$/,'')  // identify the input with its label text or id; no trailing ':' pls
+                    ($('label[for='+input.id+']').text() || id).replace(/:$/,'')  // identify the input with its label text or id; no trailing ':' pls
                 )
                 .click( function(evt) { // focus and scroll to the input
                     if (evt.button != 0) return;
@@ -521,6 +541,11 @@ $( function() {
     }
     $(document).bind('content_added', overload_default_submit);
     overload_default_submit();
+    
+    // Set up returning to publishable changelist when coming to change form from it
+    $('#changelist.js-app-core\\.publishable tbody th a').live('click', function() {
+        FORM_SAVE_RETURN_TO = '/core/publishable/';
+    });
     //// End of ajax forms
     
     //// Filters
@@ -760,7 +785,15 @@ function save_change_form_success(text_data, options) {
     response_msg = response_msg || _('Form saved');
     var action_table = {
         _save_: function() {
-            adr('../');
+            var return_to;
+            if (window.FORM_SAVE_RETURN_TO) {
+                return_to = FORM_SAVE_RETURN_TO;
+                delete FORM_SAVE_RETURN_TO;
+            }
+            else {
+                return_to = '../';
+            }
+            adr(return_to);
         },
         _addanother_: function() {
             if ( /add\/$/.test(get_hashadr('')) ) {
@@ -803,12 +836,23 @@ function save_change_form_success(text_data, options) {
             else {
                 var message = action
                     ? 'Unrecognized post-save action: '+action
-                    : 'No post-save action, redirecting to change list';
+                    : 'No post-save action, redirecting to homepage';
                 show_message(message);
                 carp(message);
+                location.hash = '#';
             }
         }
     };
+    
+    // load form-specific post-save actions
+    var $meta = $form.find('.js-form-metadata');
+    var post_save_input = $meta.find('input[name=post_save]').get(0);
+    var post_save = {};
+    if (post_save_input) post_save = post_save_input.onchange($form);
+    for (var act in post_save) {
+        action_table[ act ] = post_save[ act ];
+    }
+    
     show_ok(response_msg);
     action_table.run(action);
     ContentByHashLib.unload_content('history');

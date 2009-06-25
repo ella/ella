@@ -76,6 +76,7 @@ class NewmanTestCase(SeleniumTestCase):
                 'save' : "//a[@class='js-submit icn btn save def']",
                 'show_filters' : "//div[@id='filters-handler']/a[position()=1]",
                 'lookup_content' : "//div[@id='changelist']/form/table/tbody/tr/th/a[text()='%(text)s']",
+                'search_button' : "//a[@class='btn icn search def']",
             },
             'pages' : {
                 'login' : {

@@ -838,7 +838,7 @@ class NewmanInlineModelAdmin(InlineModelAdmin):
             instances = self.model.objects.filter(**{self._magic_fk.name: self._magic_instance.pk})
             inst = None
             if instances:
-                inst = instances[0]
+                inst = list(instances)
         kwargs.update({
             'model': self.model,
             'user': self._magic_user,
