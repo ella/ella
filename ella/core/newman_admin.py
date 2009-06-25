@@ -17,7 +17,7 @@ from ella.core.models import Author, Source, Category, Listing, HitCount, Placem
 from ella.core.models.publishable import PUBLISH_FROM_WHEN_EMPTY
 from ella import newman
 from ella.newman import options, fields
-from ella.newman.filterspecs import CustomFilterSpec
+from ella.newman.filterspecs import CustomFilterSpec, NewmanSiteFilter
 
 class ListingForm(modelforms.ModelForm):
     class Meta:
@@ -376,8 +376,8 @@ class PublishableAdmin(newman.NewmanModelAdmin):
 
     exclude = ('content_type',)
     list_display = ('admin_link', 'category', 'photo_thumbnail', 'publish_from_nice', 'placement_link', 'site_icon', 'fe_link')
-    list_filter = ('category__site', 'category', 'content_type')
-    unbound_list_filter = (PublishFromFilter, IsPublishedFilter,)
+    list_filter = ('category', 'content_type')
+    unbound_list_filter = (NewmanSiteFilter, PublishFromFilter, IsPublishedFilter,)
     search_fields = ('title', 'description', 'slug', 'authors__name', 'authors__slug',) # FIXME: 'tags__tag__name',)
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
