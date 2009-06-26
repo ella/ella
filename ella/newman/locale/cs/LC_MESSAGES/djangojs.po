@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-16 15:09+0200\n"
-"PO-Revision-Date: 2009-06-16 15:10+0100\n"
+"POT-Creation-Date: 2009-06-26 09:58+0200\n"
+"PO-Revision-Date: 2009-06-26 10:00+0100\n"
 "Last-Translator: Oldrich Kruza <oldrich.kruza@centrumholdings.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -17,55 +17,55 @@ msgstr ""
 
 #: media/js/datetime.js:82
 #: media/js/datetime.js.py:222
-#: media/js/newman.js:1004
+#: media/js/newman.js:1045
 msgid "Su"
 msgstr "Ne"
 
 #: media/js/datetime.js:82
 #: media/js/datetime.js.py:222
-#: media/js/newman.js:1005
+#: media/js/newman.js:1046
 msgid "Mo"
 msgstr "Po"
 
 #: media/js/datetime.js:82
 #: media/js/datetime.js.py:222
-#: media/js/newman.js:1006
+#: media/js/newman.js:1047
 msgid "Tu"
 msgstr "Út"
 
 #: media/js/datetime.js:82
 #: media/js/datetime.js.py:222
-#: media/js/newman.js:1007
+#: media/js/newman.js:1048
 msgid "We"
 msgstr "St"
 
 #: media/js/datetime.js:82
 #: media/js/datetime.js.py:222
-#: media/js/newman.js:1008
+#: media/js/newman.js:1049
 msgid "Th"
 msgstr "Čt"
 
 #: media/js/datetime.js:82
 #: media/js/datetime.js.py:222
-#: media/js/newman.js:1009
+#: media/js/newman.js:1050
 msgid "Fr"
 msgstr "Pá"
 
 #: media/js/datetime.js:82
 #: media/js/datetime.js.py:222
-#: media/js/newman.js:1010
+#: media/js/newman.js:1051
 msgid "Sa"
 msgstr "So"
 
-#: media/js/datetime.js:350
-msgid "Midnight"
-msgstr "Půlnoc"
+#: media/js/datetime.js:363
+msgid "Now"
+msgstr "Nyní"
 
-#: media/js/datetime.js:351
+#: media/js/datetime.js:364
 msgid "6am"
 msgstr "6 ráno"
 
-#: media/js/datetime.js:352
+#: media/js/datetime.js:365
 msgid "Noon"
 msgstr "Poledne"
 
@@ -81,7 +81,7 @@ msgstr "Nahrání fota selhalo"
 msgid "Failed to get Flash movie"
 msgstr "Načtení flashe selhalo"
 
-#: media/js/inlines.js:114
+#: media/js/inlines.js:122
 msgid "Duplicate photo"
 msgstr "Duplikátní foto"
 
@@ -121,184 +121,188 @@ msgstr "Chyba při načítání šablony"
 msgid "Sending"
 msgstr "Posílám"
 
-#: media/js/newman.js:452
+#: media/js/newman.js:435
+msgid "Form errors"
+msgstr "Formulářové chyby"
+
+#: media/js/newman.js:471
 msgid "Error sending form."
 msgstr "Nastala chyba při odesílání formuláře."
 
-#: media/js/newman.js:453
+#: media/js/newman.js:472
 msgid "Moreover, failed to handle the error gracefully."
 msgstr "Navíc se nepodařilo chybu ošetřit."
 
-#: media/js/newman.js:454
+#: media/js/newman.js:473
 msgid "Reloading page"
 msgstr "Stránka se obnovuje"
 
-#: media/js/newman.js:459
+#: media/js/newman.js:478
 msgid "crash save"
 msgstr "záloha po pádu"
 
-#: media/js/newman.js:459
+#: media/js/newman.js:478
 msgid "Form content backed up"
 msgstr "Obsah formuláře zazálohován"
 
-#: media/js/newman.js:663
+#: media/js/newman.js:686
 msgid "Loading"
 msgstr "Načítám"
 
-#: media/js/newman.js:697
+#: media/js/newman.js:720
 msgid "Request failed"
 msgstr "Chyba serveru"
 
-#: media/js/newman.js:711
+#: media/js/newman.js:734
 msgid "Successfully sent"
 msgstr "Úspěšně odesláno"
 
-#: media/js/newman.js:995
+#: media/js/newman.js:1036
 msgid "Sunday"
 msgstr "Neděle"
 
-#: media/js/newman.js:996
+#: media/js/newman.js:1037
 msgid "Monday"
 msgstr "Pondělí"
 
-#: media/js/newman.js:997
+#: media/js/newman.js:1038
 msgid "Tuesday"
 msgstr "Úterý"
 
-#: media/js/newman.js:998
+#: media/js/newman.js:1039
 msgid "Wednesday"
 msgstr "Středa"
 
-#: media/js/newman.js:999
+#: media/js/newman.js:1040
 msgid "Thursday"
 msgstr "Čtvrtek"
 
-#: media/js/newman.js:1000
+#: media/js/newman.js:1041
 msgid "Friday"
 msgstr "Pátek"
 
-#: media/js/newman.js:1001
+#: media/js/newman.js:1042
 msgid "Saturday"
 msgstr "Sobota"
 
-#: media/js/newman.js:1013
+#: media/js/newman.js:1054
 msgid "Sun"
 msgstr "Ne"
 
-#: media/js/newman.js:1014
+#: media/js/newman.js:1055
 msgid "Mon"
 msgstr "Po"
 
-#: media/js/newman.js:1015
+#: media/js/newman.js:1056
 msgid "Tue"
 msgstr "Út"
 
-#: media/js/newman.js:1016
+#: media/js/newman.js:1057
 msgid "Wed"
 msgstr "St"
 
-#: media/js/newman.js:1017
+#: media/js/newman.js:1058
 msgid "Thu"
 msgstr "Čt"
 
-#: media/js/newman.js:1018
+#: media/js/newman.js:1059
 msgid "Fri"
 msgstr "Pá"
 
-#: media/js/newman.js:1019
+#: media/js/newman.js:1060
 msgid "Sat"
 msgstr "So"
 
-#: media/js/newman.js:1022
+#: media/js/newman.js:1063
 msgid "January"
 msgstr "Leden"
 
-#: media/js/newman.js:1023
+#: media/js/newman.js:1064
 msgid "February"
 msgstr "Únor"
 
-#: media/js/newman.js:1024
+#: media/js/newman.js:1065
 msgid "March"
 msgstr "Březen"
 
-#: media/js/newman.js:1025
+#: media/js/newman.js:1066
 msgid "April"
 msgstr "Duben"
 
-#: media/js/newman.js:1026
-#: media/js/newman.js.py:1040
+#: media/js/newman.js:1067
+#: media/js/newman.js.py:1081
 msgid "May"
 msgstr "Květen"
 
-#: media/js/newman.js:1027
+#: media/js/newman.js:1068
 msgid "June"
 msgstr "Červen"
 
-#: media/js/newman.js:1028
+#: media/js/newman.js:1069
 msgid "July"
 msgstr "Červenec"
 
-#: media/js/newman.js:1029
+#: media/js/newman.js:1070
 msgid "August"
 msgstr "Srpen"
 
-#: media/js/newman.js:1030
+#: media/js/newman.js:1071
 msgid "September"
 msgstr "Září"
 
-#: media/js/newman.js:1031
+#: media/js/newman.js:1072
 msgid "October"
 msgstr "Říjen"
 
-#: media/js/newman.js:1032
+#: media/js/newman.js:1073
 msgid "November"
 msgstr "Listopad"
 
-#: media/js/newman.js:1033
+#: media/js/newman.js:1074
 msgid "December"
 msgstr "Prosinec"
 
-#: media/js/newman.js:1036
+#: media/js/newman.js:1077
 msgid "Jan"
 msgstr "Led"
 
-#: media/js/newman.js:1037
+#: media/js/newman.js:1078
 msgid "Feb"
 msgstr "Úno"
 
-#: media/js/newman.js:1038
+#: media/js/newman.js:1079
 msgid "Mar"
 msgstr "Bře"
 
-#: media/js/newman.js:1039
+#: media/js/newman.js:1080
 msgid "Apr"
 msgstr "Dub"
 
-#: media/js/newman.js:1041
+#: media/js/newman.js:1082
 msgid "Jun"
 msgstr "Čvn"
 
-#: media/js/newman.js:1042
+#: media/js/newman.js:1083
 msgid "Jul"
 msgstr "Čvc"
 
-#: media/js/newman.js:1043
+#: media/js/newman.js:1084
 msgid "Aug"
 msgstr "Srp"
 
-#: media/js/newman.js:1044
+#: media/js/newman.js:1085
 msgid "Sep"
 msgstr "Zář"
 
-#: media/js/newman.js:1045
+#: media/js/newman.js:1086
 msgid "Oct"
 msgstr "Říj"
 
-#: media/js/newman.js:1046
+#: media/js/newman.js:1087
 msgid "Nov"
 msgstr "Lis"
 
-#: media/js/newman.js:1047
+#: media/js/newman.js:1088
 msgid "Dec"
 msgstr "Pro"
 
@@ -354,6 +358,8 @@ msgstr "Box"
 msgid "Preview"
 msgstr "Náhled"
 
+#~ msgid "Midnight"
+#~ msgstr "Půlnoc"
 #~ msgid "Prev"
 #~ msgstr "Předchozí"
 #~ msgid "Next"

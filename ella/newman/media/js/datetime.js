@@ -95,7 +95,7 @@ function DateTimeInput(input) {
         + pad(  hour,2) + ':'
         + pad(minute,2) + ' '
         + dow;
-        $(this.input).val( nval );
+        $(this.input).val( nval ).change();
     };
     this.scroll = function(pos, delta) {
         var input = this.input;
@@ -233,7 +233,7 @@ function DateInput(input) {
         + pad( month,2) + '-'
         + pad(   day,2) + ' '
         + dow;
-        $(this.input).val( nval );
+        $(this.input).val( nval ).change();
     };
     this.scroll = function(pos, delta) {
         var input = this.input;
@@ -348,7 +348,7 @@ function DateInput(input) {
                     d.setMonth(dpick.selectedMonth);
                     d.setDate(dpick.selectedDay);
                     d.setHours(0);
-                    d.setMinutes(2);
+                    d.setMinutes(0);
                     d.setSeconds(0);
                     d.setMilliseconds(0);
                     dti.set_date(d, {/*preserve*/hour:true,minute:true});
@@ -363,9 +363,9 @@ function DateInput(input) {
             var $timepicker = $('<div class="timepicker">')
             .html(
                 '<button type="button" class="js-dtpicker-close"><img src="'+MEDIA_URL+'ico/16/cancel.png" alt="X" /></button>' +
-                '<button type="button" class="js-timepick js-time-0000">'+gettext('Midnight')+'</button>' +
-                '<button type="button" class="js-timepick js-time-0600">'+gettext('6am'     )+'</button>' +
-                '<button type="button" class="js-timepick js-time-1200">'+gettext('Noon'    )+'</button>'
+                '<button type="button" class="js-timepick js-time-now">' +gettext('Now' )+'</button>' +
+                '<button type="button" class="js-timepick js-time-0600">'+gettext('6am' )+'</button>' +
+                '<button type="button" class="js-timepick js-time-1200">'+gettext('Noon')+'</button>'
             ).appendTo($dtpicker);
             
             // Container placement
@@ -398,17 +398,21 @@ function DateInput(input) {
         if (evt.button != 0) return;
         var dti = $( $(this).closest('.datetimepicker').data('input') ).data('dti');
         var selected_time = /js-time-(\d\d)(\d\d)/.exec(this.className);
-        if ( ! selected_time ) return;
-        var selected_hours   = selected_time[1];
-        var selected_minutes = selected_time[2];
         var d = new Date();
-        d.setHours  (selected_hours  );
-        d.setMinutes(selected_minutes);
         d.setSeconds(0);
         d.setMilliseconds(0);
-        // let default date be the following 24 hours
-        if (d.getTime() < new Date().getTime()) {
-            d.setDate( d.getDate() + 1 );
+        if ( ! selected_time ) {
+            if ( ! $(this).hasClass('js-time-now') ) return;
+        }
+        else {
+            var selected_hours   = selected_time[1];
+            var selected_minutes = selected_time[2];
+            d.setHours  (selected_hours  );
+            d.setMinutes(selected_minutes);
+            // let default date be the following 24 hours
+            if (d.getTime() < new Date().getTime()) {
+                d.setDate( d.getDate() + 1 );
+            }
         }
         dti.set_date(d, {/*preserve*/year:true,month:true,day:true});
     });
