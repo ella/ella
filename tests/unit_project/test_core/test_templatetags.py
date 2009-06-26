@@ -145,6 +145,12 @@ class TestBoxTag(UnitTestCase):
             {% endbox %}''')
         self.assert_equals('some_other_param:xxx|level:2|', t.render(template.Context()))
 
+    def test_box_wirks_with_variable_instead_of_lookup(self):
+        site = Site.objects.get(pk=1)
+        template_loader.templates['box/box.html'] = '{{ object }}'
+        t = template.Template('{% box name for var %}{% endbox %}')
+        self.assert_equals('example.com', t.render(template.Context({'var': site})))
+
 class TestBoxTagParser(UnitTestCase):
     def test_parse_box_with_pk(self):
         node = _parse_box([], ['box', 'box_type', 'for', 'core.category', 'with', 'pk', '1'])

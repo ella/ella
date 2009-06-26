@@ -196,7 +196,7 @@ class BoxNode(template.Node):
     def render(self, context):
 
         try:
-            obj = self.get_obj()
+            obj = self.get_obj(context)
         except ObjectNotFoundOrInvalid, e:
             return ''
 
