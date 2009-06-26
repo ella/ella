@@ -483,6 +483,10 @@ a.widget-thumb { border: 1px solid #ccc; margin-right: 5px; }
 .sortable-item .gallery-item:hover { background: #77B150; }
 
 /* POLLS QUESTIONS & ANSWERS */
+.poll-question-container {
+    margin: 5px;
+    border-bottom: solid 1px gray;
+}
 .poll-question-text {
     font-size: 120%;
     font-weight: bold;

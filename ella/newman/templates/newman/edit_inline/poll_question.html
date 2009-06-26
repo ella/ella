@@ -72,37 +72,37 @@
         <legend>{{ inline_admin_formset.opts.verbose_name_plural|capfirst }}</legend>
         
         {% for inline_admin_form in inline_admin_formset %}{# traverse questions #}
-            
-            {# form errors #}
-            {% if inline_admin_form.form.non_field_errors %}
-                <div class="form-errors">{{ inline_admin_form.form.non_field_errors }}</div>
-            {% endif %}
-            
-            {# question text #}
-            <p class="poll-question-text">
-            {% if inline_admin_form.original %}
-                {{ inline_admin_form.original }}
-            {% else %}
-                <span class="empty-poll-question-text">
-                    {% trans 'Click to edit question.' %}
-                </span>
-            {% endif %}
-            {% if inline_admin_form.show_url %}
-                <a class="icn web" href="{% url newman_admin_index %}r/{{ inline_admin_form.original_content_type_id }}/{{ inline_admin_form.original.id }}/">{% trans "View on site" %}</a>
-            {% endif %}
-            </p>
-            
-            {# answer options #}
-            <div class="poll-answers">
-                {% for fieldset in inline_admin_form %}{% for line in fieldset %}{% for field in line %}
-                    {% ifequal field.field.name "choices" %}
-                        <div style="margin: 2px;">
-                            {{ field.field }}
-                        </div>
-                    {% endifequal %}
-                {% endfor %}{% endfor %}{% endfor %}
+            <div class="poll-question-container">
+                {# form errors #}
+                {% if inline_admin_form.form.non_field_errors %}
+                    <div class="form-errors">{{ inline_admin_form.form.non_field_errors }}</div>
+                {% endif %}
+                
+                {# question text #}
+                <p class="poll-question-text">
+                {% if inline_admin_form.original %}
+                    {{ inline_admin_form.original }}
+                {% else %}
+                    <span class="empty-poll-question-text">
+                        {% trans 'Click to edit question.' %}
+                    </span>
+                {% endif %}
+                {% if inline_admin_form.show_url %}
+                    <a class="icn web" href="{% url newman_admin_index %}r/{{ inline_admin_form.original_content_type_id }}/{{ inline_admin_form.original.id }}/">{% trans "View on site" %}</a>
+                {% endif %}
+                </p>
+                
+                {# answer options #}
+                <div class="poll-answers">
+                    {% for fieldset in inline_admin_form %}{% for line in fieldset %}{% for field in line %}
+                        {% ifequal field.field.name "choices" %}
+                            <div style="margin: 2px;">
+                                {{ field.field }}
+                            </div>
+                        {% endifequal %}
+                    {% endfor %}{% endfor %}{% endfor %}
+                </div>
             </div>
-            
         {% endfor %}{# end traverse questions #}
         
     </fieldset>

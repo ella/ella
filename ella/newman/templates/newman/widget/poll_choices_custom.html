@@ -3,6 +3,8 @@
         <div class="poll-choice-container">
             <div class="poll-choice-text-container">
                 <p class="poll-choice-text">
+                    <a class="js-delete-poll-choice">{% trans "Delete" %}</a>
+                    
                     <input 
                         type="hidden"
                         value="{{ choice.pk }}"
@@ -14,10 +16,11 @@
                         name="{{ id_prefix }}"
                         rows="5"
                         cols="35"
+                        class="js-edit-poll-choice-text"
                     >{{ choice.choice }}</textarea>
-                    <span title="{% if not choice.votes %}0{% else %}{{ choice.votes }}{% endif %} {% trans 'Votes' %}">{{ choice.choice }}</span>
-                    
-                    <a class="js-delete-poll-choice">{% trans "Delete" %}</a>
+                    <a class="js-edit-poll-choice-text">
+                        <span title="{% if not choice.votes %}0{% else %}{{ choice.votes }}{% endif %} {% trans 'Votes' %}">{{ choice.choice }}</span>
+                    </a>
                 </p>
                 
                 <p class="poll-choice-text-extras">
