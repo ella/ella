@@ -42,6 +42,21 @@
         .filter('input').focus();
     });
     
+    function add_question() {
+        var $last_question = $('.poll-question-container:last');
+        var $new_question = $last_question.clone(true);
+        var $new_options = $new_question.find('.poll-choice-container');
+        $new_options.remove();
+        add_option( $new_question );
+        $new_question.find('span:first').addClass('empty-poll-question-text').find('a').text(gettext('Click to edit question'));
+        $new_question.insertAfter( $last_question );
+    }
+    function add_option($question) {
+        var $last_option = $('.poll-choice-container:last');
+        var $new_option = $last_option.clone(true);
+        $question.find('.poll-answers:first').append( $new_option );
+    }
+    
     function non_live_handlers() {
         
         // Done editing question text
@@ -54,6 +69,11 @@
             
             if ( $(this).val() == '' ) $label.addClass('empty-poll-question-text');
             else $label.removeClass('empty-poll-question-text');
+            
+            // Add an empty question when there's none more
+            if ( $cont.closest('fieldset').find('.empty-poll-question-text').length == 0 ) {
+                add_question();
+            }
         });
         
         // Done editing answer option text

@@ -504,6 +504,7 @@ a.widget-thumb { border: 1px solid #ccc; margin-right: 5px; }
 p.poll-choice-text {
     float: left;
     min-width: 200px;
+    padding-right: 10px;
 }
 .empty-poll-choice {
     font-style: italic;
