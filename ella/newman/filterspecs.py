@@ -36,7 +36,7 @@ class CustomFilterSpec(filterspecs.FilterSpec):
         self.active_filter_lookup = None
         self.all_choices = []
         self.selected_item = None
-        self.remove_from_querystring = []  # may be used as list of keys to be removed from querystring when outputting links 
+        self.remove_from_querystring = []  # may be used as list of keys to be removed from querystring when outputting links
 
     def filter_func(self):
         raise NotImplementedError('filter_func() method should be overloaded (substituted at run-time).')
@@ -77,7 +77,7 @@ class CustomFilterSpec(filterspecs.FilterSpec):
 
     def filter_active(self):
         " Can be used from template. "
-        return self.is_active(self.request_get) 
+        return self.is_active(self.request_get)
 
     def is_active(self, request_params):
         """
@@ -139,9 +139,9 @@ class CustomFilterSpec(filterspecs.FilterSpec):
         if not self.all_choices:
             # return the same structure with error key set
             return {
-                'selected': False, 
-                'query_string':'', 
-                'display': '', 
+                'selected': False,
+                'query_string':'',
+                'display': '',
                 'error': 'TOO EARLY'
             }
         for item in self.all_choices:
@@ -199,7 +199,7 @@ class NewmanSiteFilter(CustomFilterSpec):
     def get_lookup_kwarg(self):
         # FIXME lookup_var doesn't exist
         for param in self.request_get:
-            if param.startswith(self.lookup_var):
+            if param.startswith(self.site_field_path):
                 self.selected_lookup = param
                 return param
         return ''
@@ -218,7 +218,7 @@ class NewmanSiteFilter(CustomFilterSpec):
 # -------------------------------------
 # Standard django.admin filters
 # -------------------------------------
-# TODO make common parent of FilterSpecEnhancement and CustomFilterSpec 
+# TODO make common parent of FilterSpecEnhancement and CustomFilterSpec
 
 class FilterSpecEnhancement(filterspecs.FilterSpec):
     def filter_active(self):
@@ -232,9 +232,9 @@ class FilterSpecEnhancement(filterspecs.FilterSpec):
         if not hasattr(self, 'all_choices'):
             # return the same structure with error key set
             return {
-                'selected': False, 
-                'query_string':'', 
-                'display': '', 
+                'selected': False,
+                'query_string':'',
+                'display': '',
                 'error': 'TOO EARLY'
             }
         for item in self.all_choices:
