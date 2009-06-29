@@ -487,10 +487,16 @@ a.widget-thumb { border: 1px solid #ccc; margin-right: 5px; }
     margin: 5px;
     border-bottom: solid 1px gray;
 }
-.poll-question-text {
+.poll-question-text-container {
     font-size: 120%;
     font-weight: bold;
     margin: 5px 0;
+}
+.empty-poll-question-text {
+    font-style: italic;
+}
+.poll-question-input {
+    display: none;
 }
 .poll-choice-text textarea {
     display: none;
@@ -498,6 +504,12 @@ a.widget-thumb { border: 1px solid #ccc; margin-right: 5px; }
 p.poll-choice-text {
     float: left;
     min-width: 200px;
+}
+.empty-poll-choice {
+    font-style: italic;
+}
+.poll-choice-deleted .empty-poll-choice {
+    display: none;
 }
 p.poll-choice-text-extras {
     float: left;

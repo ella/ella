@@ -79,14 +79,23 @@
                 {% endif %}
                 
                 {# question text #}
-                <p class="poll-question-text">
+                <p class="poll-question-text-container">
                 {% if inline_admin_form.original %}
-                    {{ inline_admin_form.original }}
+                    <span>
+                        <a class="js-edit-poll-question-text">{{ inline_admin_form.original }}</a>
+                    </span>
                 {% else %}
                     <span class="empty-poll-question-text">
-                        {% trans 'Click to edit question.' %}
+                        <a class="js-edit-poll-question-text">{% trans 'Click to edit question.' %}</a>
                     </span>
                 {% endif %}
+                    <span class="poll-question-input">
+                    {% for fieldset in inline_admin_form %}{% for line in fieldset %}{% for field in line %}
+                        {% ifequal field.field.name "question" %}
+                            {{ field.field }}
+                        {% endifequal %}
+                    {% endfor %}{% endfor %}{% endfor %}
+                    </span>
                 {% if inline_admin_form.show_url %}
                     <a class="icn web" href="{% url newman_admin_index %}r/{{ inline_admin_form.original_content_type_id }}/{{ inline_admin_form.original.id }}/">{% trans "View on site" %}</a>
                 {% endif %}
