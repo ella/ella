@@ -238,15 +238,6 @@ class HitCountInlineAdmin(newman.NewmanTabularInline):
     model = HitCount
     extra = 0
 
-class PlacementAdmin(newman.NewmanModelAdmin):
-    list_display = ('publishable', 'category', 'publish_from',)
-    list_filter = ('publish_from', 'category__site',)
-    search_fields = ('publishable__title', 'category__title',)
-    suggest_fields = {'category': ('__unicode__', 'title', 'slug',), 'publishable': ('title',)}
-
-    inlines = [ListingInlineAdmin]
-
-
 class ListingAdmin(newman.NewmanModelAdmin):
     pass
     '''
@@ -267,7 +258,7 @@ class CategoryAdmin(newman.NewmanModelAdmin):
 
 class HitCountAdmin(newman.NewmanModelAdmin):
     list_display = ('target', 'hits', 'target_url')
-    list_filter = ('placement__category', 'placement__publish_from')
+#    list_filter = ('placement__category', 'placement__publish_from')
     search_fields = ('placement__category__title',)
     ordering = ('-hits', '-last_seen',)
 
@@ -370,6 +361,16 @@ class PublishFromFilter(CustomFilterSpec):
             link = ( link_text, lookup_dict)
             fspec.links.append(link)
         return True
+
+class PlacementAdmin(newman.NewmanModelAdmin):
+    list_display = ('publishable', 'category', 'publish_from',)
+    list_filter = ('category',)
+    unbound_list_filter = (NewmanSiteFilter, PublishFromFilter,)
+    search_fields = ('publishable__title', 'category__title',)
+    suggest_fields = {'category': ('__unicode__', 'title', 'slug',), 'publishable': ('title',)}
+
+    inlines = [ListingInlineAdmin]
+
 
 class PublishableAdmin(newman.NewmanModelAdmin):
     """ Default admin options for all publishables """

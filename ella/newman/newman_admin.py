@@ -60,18 +60,18 @@ newman.site.register(m.CategoryUserRole, CategoryUserRoleAdmin)
 
 # Category filter -- restricted categories accordingly to CategoryUserRoles and categories filtered via AdminSettings.
 # custom registered DateField filter. Filter is inserted to the beginning of filter chain.
-category_lookup = lambda fspec: '%s__%s__exact' % (fspec.field_path, fspec.f.rel.to._meta.pk.name)
+category_lookup = lambda fspec: '%s__%s__exact' % (fspec.f.name, fspec.f.rel.get_related_field().name)
 
 @filter_spec(lambda field: is_category_fk(field), category_lookup)
 def category_field_filter(fspec):
     qs = Category.objects.filter(pk__in=applicable_categories(fspec.user))
     for cat in user_category_filter(qs, fspec.user):
-        lookup_var = '%s__%s__exact' % (fspec.field_path, fspec.f.rel.to._meta.pk.name)
+        lookup_var = '%s__%s__exact' % (fspec.f.name, fspec.f.rel.to._meta.pk.name)
         link = ( cat, {lookup_var: cat.pk})
         fspec.links.append(link)
     return True
 
-site_lookup = lambda fspec: '%s__%s__exact' % (fspec.field_path, fspec.f.rel.to._meta.pk.name)
+site_lookup = lambda fspec: '%s__%s__exact' % (fspec.f.name, fspec.f.rel.get_related_field().name)
 @filter_spec(lambda field: is_site_fk(field), site_lookup)
 def site_field_filter(fspec):
     category_ids = get_user_config(fspec.user, CATEGORY_FILTER)
@@ -84,7 +84,7 @@ def site_field_filter(fspec):
     sites = map(lambda c: c.site, qs)
     for site in sites:
         #category__site__id__exact=1
-        lookup_var = '%s__%s__exact' % (fspec.field_path, fspec.f.rel.to._meta.pk.name)
+        lookup_var = '%s__%s__exact' % (fspec.f.name, fspec.f.rel.get_related_field().name)
         link = ( site, {lookup_var: site.pk})
         fspec.links.append(link)
     return True

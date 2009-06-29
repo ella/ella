@@ -224,7 +224,7 @@ class PublishableAdmin(admin.ModelAdmin):
     """ Default admin options for all publishables """
 
     list_display = ('title', 'category',)
-    list_filter = ('category__site', 'category', 'authors',)
+    list_filter = ('category', 'authors',)
     search_fields = ('title', 'description', 'slug', 'authors__name', 'authors__slug',) # FIXME: 'tags__tag__name',)
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}

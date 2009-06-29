@@ -14,13 +14,12 @@ log = logging.getLogger('ella.newman')
 
 class CustomFilterSpec(filterspecs.FilterSpec):
     """ custom defined FilterSpec """
-    def __init__(self, f, request, params, model, model_admin, field_path=None):
+    def __init__(self, f, request, params, model, model_admin):
         self.state = 0
         self.params = params
         self.model = model
         self.links = []
         self.model_admin = model_admin
-        self.field_path = field_path
         self.user = request.user
         #self.lookup_val = request.GET.get(self.lookup_kwarg, None) #selected filter value (not label)
         self.lookup_kwarg = 'NOT SET'
@@ -28,7 +27,7 @@ class CustomFilterSpec(filterspecs.FilterSpec):
         self.request_get = request.GET
         if self.f:
             # funny conditional parent constructor call
-            super(CustomFilterSpec, self).__init__(f, request, params, model, model_admin, field_path=field_path)
+            super(CustomFilterSpec, self).__init__(f, request, params, model, model_admin)
         self.request_path_info = request.path_info
         self.title_text = ''
         if self.f:
@@ -36,7 +35,7 @@ class CustomFilterSpec(filterspecs.FilterSpec):
         self.active_filter_lookup = None
         self.all_choices = []
         self.selected_item = None
-        self.remove_from_querystring = []  # may be used as list of keys to be removed from querystring when outputting links 
+        self.remove_from_querystring = []  # may be used as list of keys to be removed from querystring when outputting links
 
     def filter_func(self):
         raise NotImplementedError('filter_func() method should be overloaded (substituted at run-time).')
@@ -77,7 +76,7 @@ class CustomFilterSpec(filterspecs.FilterSpec):
 
     def filter_active(self):
         " Can be used from template. "
-        return self.is_active(self.request_get) 
+        return self.is_active(self.request_get)
 
     def is_active(self, request_params):
         """
@@ -139,9 +138,9 @@ class CustomFilterSpec(filterspecs.FilterSpec):
         if not self.all_choices:
             # return the same structure with error key set
             return {
-                'selected': False, 
-                'query_string':'', 
-                'display': '', 
+                'selected': False,
+                'query_string':'',
+                'display': '',
                 'error': 'TOO EARLY'
             }
         for item in self.all_choices:
@@ -197,9 +196,8 @@ class NewmanSiteFilter(CustomFilterSpec):
         return _('Site')
 
     def get_lookup_kwarg(self):
-        # FIXME lookup_var doesn't exist
         for param in self.request_get:
-            if param.startswith(self.lookup_var):
+            if param.startswith(self.site_field_path):
                 self.selected_lookup = param
                 return param
         return ''
@@ -218,7 +216,7 @@ class NewmanSiteFilter(CustomFilterSpec):
 # -------------------------------------
 # Standard django.admin filters
 # -------------------------------------
-# TODO make common parent of FilterSpecEnhancement and CustomFilterSpec 
+# TODO make common parent of FilterSpecEnhancement and CustomFilterSpec
 
 class FilterSpecEnhancement(filterspecs.FilterSpec):
     def filter_active(self):
@@ -232,9 +230,9 @@ class FilterSpecEnhancement(filterspecs.FilterSpec):
         if not hasattr(self, 'all_choices'):
             # return the same structure with error key set
             return {
-                'selected': False, 
-                'query_string':'', 
-                'display': '', 
+                'selected': False,
+                'query_string':'',
+                'display': '',
                 'error': 'TOO EARLY'
             }
         for item in self.all_choices:
