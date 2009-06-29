@@ -317,7 +317,7 @@ class IsPublishedFilter(CustomFilterSpec):
 
     def get_lookup_kwarg(self):
         for param in self.request_get:
-            if param.startswith(self.lookup_var):
+            if param.startswith("%s__gt" % self.lookup_var) or param.startswith("%s__lte" % self.lookup_var):
                 self.selected_lookup = param
                 return param
         return ''
