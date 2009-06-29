@@ -338,7 +338,7 @@ class IsPublishedFilter(CustomFilterSpec):
 
 class PublishFromFilter(CustomFilterSpec):
     " Publish from customized filter. "
-    published_from_field_path = 'placement__listing__publish_from'
+    published_from_field_path = 'publish_from'
 
     def title(self):
         return _('Publish from')
