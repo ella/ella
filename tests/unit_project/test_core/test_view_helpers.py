@@ -88,13 +88,13 @@ class TestObjectDetail(ViewHelpersTestCase):
         self.assert_raises(Http404, _object_detail, *self.correct_args)
 
     def test_doesnt_match_placement_if_date_is_not_supplied(self):
-        self.correct_args = self.correct_args[:4]
+        self.correct_args = self.correct_args[:4] + [None, None, None]
         self.assert_raises(Http404, _object_detail, *self.correct_args)
 
     def test_matches_static_placement_if_date_is_not_supplied(self):
         self.placement.static = True
         self.placement.save()
-        self.correct_args = self.correct_args[:4]
+        self.correct_args = self.correct_args[:4] + [None, None, None]
 
         c = _object_detail(*self.correct_args)
 
