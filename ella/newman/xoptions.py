@@ -182,6 +182,18 @@ class XModelAdmin(ModelAdmin):
         app_label = opts.app_label
         if not self.has_change_permission(request, None):
             raise PermissionDenied
+
+        # Check actions to see if any are available on this changelist
+        actions = self.get_actions(request)
+
+        # Remove action checkboxes if there aren't any actions available.
+        list_display = list(self.list_display)
+        if not actions:
+            try:
+                list_display.remove('action_checkbox')
+            except ValueError:
+                pass
+
         try:
             cl = self.changelist_view_cl(request, self.model, self.list_display, self.list_display_links, self.list_filter,
                 self.date_hierarchy, self.search_fields, self.list_select_related, self.list_per_page, self.list_editable, self)
@@ -198,7 +210,7 @@ class XModelAdmin(ModelAdmin):
         # If the request was POSTed, this might be a bulk action or a bulk edit.
         # Try to look up an action first, but if this isn't an action the POST
         # will fall through to the bulk edit check, below.
-        if request.method == 'POST':
+        if actions and request.method == 'POST':
             response = self.response_action(request, queryset=cl.get_query_set())
             if response:
                 return response
@@ -249,8 +261,11 @@ class XModelAdmin(ModelAdmin):
             media = self.media
 
         # Build the action form and populate it with available actions.
-        action_form = self.action_form(auto_id=None)
-        action_form.fields['action'].choices = self.get_action_choices(request)
+        if actions:
+            action_form = self.action_form(auto_id=None)
+            action_form.fields['action'].choices = self.get_action_choices(request)
+        else:
+            action_form = None
 
         cx = {
             'title': cl.title,
