@@ -219,9 +219,9 @@ def get_templates_from_placement(name, placement, slug=None, category=None, app_
     if category is None:
         category = placement.category
     if app_label is None:
-        app_label = placement.publishable.target._meta.app_label
+        app_label = placement.publishable.content_type.app_label
     if model_label is None:
-        model_label = placement.publishable.target._meta.module_name
+        model_label = placement.publishable.content_type.model
     return get_templates(name, slug, category, app_label, model_label)
 
 def _list_content_type(category, year, month=None, day=None, content_type=None, page_no=1, paginate_by=20):
