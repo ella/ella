@@ -46,14 +46,51 @@
         var $last_question = $('.poll-question-container:last');
         var $new_question = $last_question.clone(true);
         var $new_options = $new_question.find('.poll-choice-container');
+        
+        // reset the question text
+        $new_question.find('span:first').addClass('empty-poll-question-text').find('a').text(gettext('Click to edit question'));
+        $new_question.find(':input.js-edit-poll-choice-text').val('');
+        
+        // set the question's inputs' names
+        var last_qid = $last_question.find('input[name=choices_widget]').val();
+        var last_no = /\d+/.exec( last_qid )[0];
+        var new_no = new Number(last_no) + 1;
+        // choices_widget
+        var new_qid = last_qid.replace(/\d+/, new_no);
+        $new_question.find('input[name=choices_widget]').val( new_qid );
+        // question text
+        var last_qt = $last_question.find('.poll-question-input :input').attr('name');
+        var new_qt = last_qt.replace(/\d+/, new_no);
+        $new_question.find('.poll-question-input :input').attr('name', new_qt);
+        
+        // let new question have one empty option
         $new_options.remove();
         add_option( $new_question );
-        $new_question.find('span:first').addClass('empty-poll-question-text').find('a').text(gettext('Click to edit question'));
+        
         $new_question.insertAfter( $last_question );
     }
     function add_option($question) {
         var $last_option = $('.poll-choice-container:last');
         var $new_option = $last_option.clone(true);
+        
+        // clear text
+        $new_option.find('.js-edit-poll-choice-text span').addClass('empty-poll-choice').text(gettext('Click to edit option'));
+        $new_option.find('.js-edit-poll-choice-text').val('');
+        
+        // set votes to zero and don't show them
+        $new_option.find('input.poll-option-votecount').val(0);
+        $new_option.find('.js-edit-poll-choice-text span').removeAttr('title');
+        
+        // new question is not deleted
+        $new_option.removeClass('poll-choice-deleted').find('input.poll-choice-delete-input').val('off');
+        
+        // default to zero points
+        $new_option.find('input.poll-choice-points').val ( 0 );
+        $new_option.find(    'a.poll-choice-points').text('0');
+        
+        // set names
+        
+        
         $question.find('.poll-answers:first').append( $new_option );
     }
     
@@ -68,7 +105,12 @@
             $label.find('a').text( $(this).val() || gettext('Click to edit question') );
             
             if ( $(this).val() == '' ) $label.addClass('empty-poll-question-text');
-            else $label.removeClass('empty-poll-question-text');
+            else  {
+                $label.removeClass('empty-poll-question-text');
+                if ( $cont.find('.poll-choice-container').length == 0 ) {
+                    add_option($cont.closest('.poll-question-container'));
+                }
+            }
             
             // Add an empty question when there's none more
             if ( $cont.closest('fieldset').find('.empty-poll-question-text').length == 0 ) {
