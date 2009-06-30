@@ -19,6 +19,109 @@ __docformat__ = "restructuredtext en"
 CONTENT_TYPE_MAPPING = {}
 CACHE_TIMEOUT_LONG = getattr(settings, 'CACHE_TIMEOUT_LONG', 60 * 60)
 
+class EllaCoreView(object):
+    ' Base class for class-based views used in ella.core.views. '
+
+    # name of the template to be passed into get_templates
+    template_name = 'TEMPLATE'
+
+    def get_context(self, request, **kwargs):
+        """
+        Return a dictionary that will be then passed into the template as context.
+
+        :Parameters:
+            - `request`: current request
+
+        :Returns:
+            Dictionary with all the data
+        """
+        raise NotImplementedError()
+
+    def get_templates(self, context):
+        " Extract parameters for `get_templates` from the context. "
+        kw = {}
+        if 'object' in context:
+            o = context['object']
+            kw['slug'] = o.slug
+
+        if 'content_type' in context:
+            ct = context['content_type']
+            kw['app_label'] = ct.app_label
+            kw['model_label'] = ct.model
+
+        return get_templates(self.template_name, category=context['category'], **kw)
+
+    def render(self, request, context, template):
+        return render_to_response(template, context,
+            context_instance=RequestContext(request))
+
+    def __call__(self, request, **kwargs):
+        context = self.get_context(request, **kwargs)
+        return self.render(request, context, self.get_templates(context))
+
+class CategoryDetail(EllaCoreView):
+    """
+    Homepage of a category the actual site.
+
+    :Parameters: 
+        - `request`: `HttpRequest` from Django
+        - `category`: optional - `tree_path` of the `Category` to render
+          home page is used if this parameter is omitted
+
+    :Exceptions: 
+        - `Http404`: if there is no category
+    """
+    template_name = 'category.html'
+    def get_context(self, request, category=None):
+        return _category_detail(category)
+
+class ObjectDetail(EllaCoreView):
+    """
+    Renders a page for placement. All the data fetching and context creation is done in `_object_detail`.
+    If `url_remainder` is specified, tries to locate custom view via `custom_urls.dispatcher`. Renders a template 
+    returned by `get_template` with context returned by `_object_detail`.
+
+    :Parameters:
+        - `request`: `HttpRequest` from Django
+        - `category, content_type, slug, year, month, day`: parameters passed on to `_object_detail`
+        - `url_remainder`: url after the object's url, used to locate custom views in `custom_urls.dispatcher`
+
+    :Exceptions: 
+        - `Http404`: if the URL is not valid and/or doesn't correspond to any valid `Placement`
+    """
+    template_name = 'object.html'
+    def __call__(self, request, category, content_type, slug, year=None, month=None, day=None, url_remainder=None):
+        context = self.get_context(request, category, content_type, slug, year, month, day)
+
+        obj = context['object']
+        # check for custom actions
+        if url_remainder:
+            bits = url_remainder.split('/')
+            return custom_urls.dispatcher.call_view(request, bits, context)
+        elif custom_urls.dispatcher.has_custom_detail(obj):
+            return custom_urls.dispatcher.call_custom_detail(request, context)
+
+        return self.render(request, context, self.get_templates(context))
+
+    def get_context(self, request, category, content_type, slug, year, month, day):
+        return _object_detail(request.user, category, content_type, slug, year, month, day)
+
+class ListContentType(EllaCoreView):
+    template_name = 'listing.html'
+    def get_context(self, request, category=None, year=None, month=None, day=None, content_type=None, paginate_by=20):
+        # pagination
+        if 'p' in request.GET and request.GET['p'].isdigit():
+            page_no = int(request.GET['p'])
+        else:
+            page_no = 1
+
+        return  _list_content_type(category, year, month, day, content_type, page_no, paginate_by)
+
+# backwards compatibility
+object_detail = ObjectDetail()
+home = category_detail = CategoryDetail()
+list_content_type = ListContentType()
+
 def get_content_type(ct_name):
     """
     A helper function that returns ContentType object based on its slugified verbose_name_plural.
@@ -43,93 +146,8 @@ def get_content_type(ct_name):
             raise Http404
     return ct
 
-def object_detail(request, category, content_type, slug, year=None, month=None, day=None, url_remainder=None):
-    """
-    Renders a page for placement. All the data fetching and context creation is done in `_object_detail`.
-    If `url_remainder` is specified, tries to locate custom view via `custom_urls.dispatcher`. Renders a template 
-    returned by `get_template` with context returned by `_object_detail`.
 
-    :Parameters:
-        - `request`: `HttpRequest` from Django
-        - `category, content_type, slug, year, month, day`: parameters passed on to `_object_detail`
-        - `url_remainder`: url after the object's url, used to locate custom views in `custom_urls.dispatcher`
-
-    :Exceptions: 
-        - `Http404`: if the URL is not valid and/or doesn't correspond to any valid `Placement`
-    """
-    context = _object_detail(request.user, category, content_type, slug, year, month, day)
-
-    obj = context['object']
-    # check for custom actions
-    if url_remainder:
-        bits = url_remainder.split('/')
-        return custom_urls.dispatcher.call_view(request, bits, context)
-    elif custom_urls.dispatcher.has_custom_detail(obj):
-        return custom_urls.dispatcher.call_custom_detail(request, context)
-
-    return render_to_response(
-        get_templates('object.html', slug, context['category'], context['content_type'].app_label, context['content_type'].model),
-        context,
-        context_instance=RequestContext(request)
-    )
-
-def category_detail(request, category):
-    context = _category_detail(category)
-    return render_to_response(
-            (
-            'page/category/%s/category.html' % (context["category"].path),
-            'page/category.html',
-            ),
-            context,
-            context_instance=RequestContext(request)
-        )
-
-def list_content_type(request, category=None, year=None, month=None, day=None, content_type=None, paginate_by=20):
-    # pagination
-    if 'p' in request.GET and request.GET['p'].isdigit():
-        page_no = int(request.GET['p'])
-    else:
-        page_no = 1
-
-    context = _list_content_type(category, year, month, day, content_type, page_no, paginate_by)
-    if content_type:
-        ct = get_content_type(content_type)
-    else:
-        ct = False
-    template_list = []
-    if ct:
-        template_list.append('page/category/%s/content_type/%s.%s/listing.html' % (context["cat"].path, ct.app_label, ct.model))
-    template_list.append('page/category/%s/listing.html' % (context["cat"].path))
-    if ct:
-        template_list.append('page/content_type/%s.%s/listing.html' % (ct.app_label, ct.model))
-    template_list.append('page/listing.html')
-    return render_to_response(
-            template_list,
-            context,
-            context_instance=RequestContext(request)
-        )
-
-def home(request):
-    """
-    Homepage of the actual site.
-
-    :Parameters: 
-        - `request`: `HttpRequest` from Django
-
-    :Exceptions: 
-        - `Http404`: if there is no base category
-    """
-    context = _category_detail()
-    return render_to_response(
-            (
-            'page/category/%s/category.html' % (context['category'].path),
-            'page/category.html',
-            ),
-            context,
-            context_instance=RequestContext(request)
-        )
-
-def _object_detail(user, category, content_type, slug, year=None, month=None, day=None):
+def _object_detail(user, category, content_type, slug, year, month, day):
     """
     Helper function that does all the data fetching for `object_detail` view. It
     returns a dictionary containing:
@@ -169,6 +187,7 @@ def _object_detail(user, category, content_type, slug, year=None, month=None, da
                 )
     else:
         placement = get_cached_object_or_404(Placement, category=cat, publishable__content_type=ct, slug=slug, static=True)
+
 
     if not (placement.is_active() or user.is_staff):
         # future placement, render if accessed by logged in staff member
