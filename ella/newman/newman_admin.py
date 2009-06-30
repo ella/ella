@@ -6,7 +6,6 @@ from django.utils.translation import ugettext as _
 
 from ella import newman
 from ella.core.models.main import Category
-from ella.core.models.publishable import Placement
 
 
 from ella.newman import models as m
@@ -54,6 +53,11 @@ class CategoryUserRoleAdmin(newman.NewmanModelAdmin):
         denormalize()
         return HttpResponse(_('All roles is now refreshed.'))
 
+class CategoryUserRoleInline(newman.NewmanTabularInline):
+    model = m.CategoryUserRole
+    max_num = 3
+    suggest_fields = {'category': ('__unicode__', 'title', 'tree_path') }
+
 newman.site.register(m.DevMessage, DevMessageAdmin)
 newman.site.register(m.AdminHelpItem, HelpItemAdmin)
 newman.site.register(m.CategoryUserRole, CategoryUserRoleAdmin)
@@ -89,3 +93,19 @@ def site_field_filter(fspec):
         fspec.links.append(link)
     return True
 
+# TODO: register some non-ella apps, fix it
+
+class SiteAdmin(newman.NewmanModelAdmin):
+    list_display = ('domain', 'name',)
+
+from django.contrib.sites.models import Site
+newman.site.register(Site, SiteAdmin)
+
+class UserAdmin(newman.NewmanModelAdmin):
+    list_display = ('username', 'is_active', 'is_superuser')
+    inlines = [CategoryUserRoleInline]
+    suggest_fields = {'groups': ('name',)}
+
+from django.contrib.auth.models import User, Group
+newman.site.register(User, UserAdmin)
+newman.site.register(Group)
