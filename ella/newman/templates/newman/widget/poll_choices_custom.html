@@ -12,7 +12,6 @@
                     />
                     
                     <textarea
-                        id="{{ id_prefix }}-choice-{{ forloop.counter }}"
                         name="{{ id_prefix }}"
                         rows="5"
                         cols="35"
@@ -28,7 +27,6 @@
                         class="poll-choice-points"
                         type="text"
                         size="4"
-                        id="{{ id_prefix }}-{{ forloop.counter }}-points"
                         name="{{ id_prefix }}-points"
                         value="{{ choice.points }}"
                     />
@@ -40,69 +38,14 @@
             <input 
                 type="hidden"
                 size="4"
-                id="{{ id_prefix }}-{{ forloop.counter }}-votes"
                 value="{% if not choice.votes %}0{% else %}{{ choice.votes }}{% endif %}"
                 class="poll-option-votecount"
             />
             <input 
                 type="hidden"
-                id="{{ id_prefix }}-{{ forloop.counter }}-delete"
                 name="{{ id_prefix }}-{{ forloop.counter }}-DELETE"
                 value="off"
                 class="poll-choice-delete-input"
             />
         </div>
     {% endfor %}
-
-{# Template for creating choices #}
-    <tr class="choice-row-template" style="display:none;"><!--
-        <tr class="choice-row inline-item">
-            <td>
-            </td>
-            <td class="choices-text">
-                {# value of hidden input should be negative integer number or zero #}
-                <input 
-                    type="hidden"
-                    value="-__NO__"
-                    name="{{ id_prefix }}-id"
-                />
-                <div class="form-row choice-text">
-                <span style="display: visible;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-                    <textarea
-                        id="{{ id_prefix }}-choice-__NO__"
-                        name="{{ id_prefix }}"
-                        rows="5"
-                        cols="35"
-                    ></textarea>
-                </div>
-            </td>
-
-            <td class="choice-points">
-                <input
-                    type="text"
-                    size="4"
-                    id="{{ id_prefix }}-__NO__-points"
-                    name="{{ id_prefix }}-points"
-                    value="0"
-                />
-            </td>
-            <td class="choice-votes">
-                <input 
-                    type="input"
-                    disabled="disabled"
-                    size="4"
-                    id="{{ id_prefix }}-__NO__-votes"
-                    value="0"
-                />
-            </td>
-            <td class="choice-delete">
-                <input 
-                    type="checkbox"
-                    id="{{ id_prefix }}-__NO__-delete"
-                    name="{{ id_prefix }}-__NO__-DELETE"
-                />
-            </td>
-
-        </tr>
-    --></tr>
-{# End of template #}

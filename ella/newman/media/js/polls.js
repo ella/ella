@@ -15,6 +15,10 @@
         if ($cont.is('.poll-choice-deleted')) {
             $cont.removeClass('poll-choice-deleted').find('.poll-choice-delete-input').val('off');
             $del.text(gettext('Delete'));
+            var $opt_text = $cont.find(':input.js-edit-poll-choice-text');
+            if ($opt_text.val() == '') {
+                $opt_text.each(edit_answer_option);
+            }
         }
         else {
             $cont.addClass('poll-choice-deleted').find('.poll-choice-delete-input').val('on');
@@ -27,13 +31,14 @@
     });
     
     // Edit answer option
-    $('a.js-edit-poll-choice-text').live('click', function(evt) {
-        if (evt.button != 0) return;
+    function edit_answer_option(evt) {
+        if (evt && evt.button != 0) return;
         var $cont = $(this).closest('.poll-choice-container');
         if ($cont.is('.poll-choice-deleted')) return;
         $cont.find('.js-edit-poll-choice-text').toggle()
         .filter(':input').focus();
-    });
+    }
+    $('a.js-edit-poll-choice-text').live('click', edit_answer_option);
     
     // Edit points for answer option
     $('a.poll-choice-points').live('click', function(evt) {
@@ -44,7 +49,7 @@
     
     function add_question() {
         var $last_question = $('.poll-question-container:last');
-        var $new_question = $last_question.clone(true);
+        var $new_question = $last_question.clone();
         var $new_options = $new_question.find('.poll-choice-container');
         
         // reset the question text
@@ -63,6 +68,13 @@
         var new_qt = last_qt.replace(/\d+/, new_no);
         $new_question.find('.poll-question-input :input').attr('name', new_qt);
         
+        // reset rich text field
+        var $rich_text = $new_question.find('.rich_text_area');
+        $rich_text
+        .markItUpRemove()
+        .attr({ id: 'id_'+$rich_text.attr('name') })
+        .markItUp(MARKITUP_SETTINGS);
+        
         // let new question have one empty option
         $new_options.remove();
         add_option( $new_question );
@@ -73,10 +85,12 @@
         $('#id_question_set-TOTAL_FORMS').val(
             $('.poll-question-container').length
         );
+        
+        non_live_handlers();
     }
     function add_option($question) {
         var $last_option = $('.poll-choice-container:last');
-        var $new_option = $last_option.clone(true);
+        var $new_option = $last_option.clone();
         
         // clear text
         $new_option.find('.js-edit-poll-choice-text span').addClass('empty-poll-choice').text(gettext('Click to edit option'));
@@ -87,7 +101,10 @@
         $new_option.find('.js-edit-poll-choice-text span').removeAttr('title');
         
         // new question is not deleted
-        $new_option.removeClass('poll-choice-deleted').find('input.poll-choice-delete-input').val('off');
+        $new_option
+        .removeClass('poll-choice-deleted')
+        .find('input.poll-choice-delete-input').val('off')
+        .end().find('.js-delete-poll-choice').text(gettext('Delete'));
         
         // default to zero points
         $new_option.find('input.poll-choice-points').val ( 0 );
@@ -108,6 +125,8 @@
         });
         
         $question.find('.poll-answers:first').append( $new_option );
+        
+        non_live_handlers();
     }
     
     function non_live_handlers() {
@@ -147,6 +166,16 @@
             }
             else {
                 $('a.js-edit-poll-choice-text span').removeClass('empty-poll-choice');
+            }
+            
+            // Add an empty option when there's none more for this question
+            if ( $cont
+                .closest('.poll-question-container')
+                .find(':input.js-edit-poll-choice-text')
+                .filter( function() { return $(this).val() == ''; } )
+                .length == 0
+            ) {
+                add_option( $cont.closest('.poll-question-container') );
             }
         });
         
