@@ -1,6 +1,12 @@
 var LF = 10, CR = 13;
 AjaxFormLib = {};
 
+// Set the default target for Kobayashi to #content
+ContentByHashLib.DEFAULT_TARGET = 'content';
+
+// Set the base URL for #content
+BASES.content = '/nm/';
+
 function clone_form($orig_form) {
     var $new_form = $orig_form.clone();
     var $orig_textareas = $orig_form.find('textarea');
