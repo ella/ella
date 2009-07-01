@@ -482,5 +482,54 @@ a.widget-thumb { border: 1px solid #ccc; margin-right: 5px; }
 .sortable-item { cursor: move; }
 .sortable-item .gallery-item:hover { background: #77B150; }
 
+/* POLLS QUESTIONS & ANSWERS */
+.js-poll-question-container {
+    margin: 5px;
+    border-bottom: solid 1px gray;
+}
+.js-poll-question-text-container {
+    font-size: 120%;
+    font-weight: bold;
+    margin: 5px 0;
+}
+.js-empty-poll-question-text {
+    font-style: italic;
+}
+.js-poll-question-input {
+    display: none;
+}
+.js-poll-choice-text textarea {
+    display: none;
+}
+p.js-poll-choice-text {
+    float: left;
+    min-width: 200px;
+    padding-right: 10px;
+}
+.empty-poll-choice {
+    font-style: italic;
+}
+.poll-choice-deleted .empty-poll-choice {
+    display: none;
+}
+p.js-poll-choice-text-extras {
+    float: left;
+}
+.poll-choice-deleted span {
+    text-decoration: line-through;
+}
+.poll-choice-deleted .js-delete-poll-choice {
+    text-decoration: none;
+    font-weight: bold;
+    background-color: yellow;
+}
+input.js-poll-choice-points {
+    display: none;
+}
+.remaining-poll-question-inputs {
+    border: solid 1px orange;
+    display: none;
+}
+
 /* OTHER */
 #debug { position: absolute; top:0; left:0; right:0; bottom: 25px;background: #333; color: #fff; padding: 10px; z-index: 50; overflow: auto; opacity: .9; display: none; }

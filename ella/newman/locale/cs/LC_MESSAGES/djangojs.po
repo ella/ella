@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-26 09:58+0200\n"
-"PO-Revision-Date: 2009-06-26 10:00+0100\n"
+"POT-Creation-Date: 2009-06-29 10:39+0200\n"
+"PO-Revision-Date: 2009-07-01 15:00+0100\n"
 "Last-Translator: Oldrich Kruza <oldrich.kruza@centrumholdings.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -58,8 +58,8 @@ msgid "Sa"
 msgstr "So"
 
 #: media/js/datetime.js:363
-msgid "Now"
-msgstr "Nyní"
+msgid "Midnight"
+msgstr "Půlnoc"
 
 #: media/js/datetime.js:364
 msgid "6am"
@@ -306,6 +306,22 @@ msgstr "Lis"
 msgid "Dec"
 msgstr "Pro"
 
+#: media/js/polls.js:12
+msgid "Delete"
+msgstr "Smazat"
+
+#: media/js/polls.js:16
+msgid "Undelete"
+msgstr "Zrušit smazání"
+
+#: media/js/polls.js:44
+msgid "Click to edit question"
+msgstr "Kliknutím změňte otázku"
+
+#: media/js/polls.js:52
+msgid "Click to edit option"
+msgstr "Změnit odpověď"
+
 #: media/js/markitup/sets/markdown/set.js:30
 msgid "Italic"
 msgstr "Kurzíva"
@@ -358,8 +374,6 @@ msgstr "Box"
 msgid "Preview"
 msgstr "Náhled"
 
-#~ msgid "Midnight"
-#~ msgstr "Půlnoc"
 #~ msgid "Prev"
 #~ msgstr "Předchozí"
 #~ msgid "Next"
