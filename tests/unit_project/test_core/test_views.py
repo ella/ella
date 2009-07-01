@@ -5,7 +5,10 @@ from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import slugify
 from django.template import TemplateDoesNotExist
 
-from unit_project.test_core import create_basic_categories, create_and_place_a_publishable
+from ella.core.models import Listing
+
+from unit_project.test_core import create_basic_categories, create_and_place_a_publishable, \
+        create_and_place_more_publishables, list_all_placements_in_category_by_hour
 from unit_project import template_loader
 
 class ViewsTestCase(DatabaseTestCase):
@@ -46,6 +49,25 @@ class TestCategoryDetail(ViewsTestCase):
         response = self.client.get('/nested-category/second-nested-category/')
         self.assert_true('category' in response.context)
         self.assert_equals(self.category_nested_second, response.context['category'])
+
+
+class TestListContentType(ViewsTestCase):
+    def setUp(self):
+        super(TestListContentType, self).setUp()
+        create_and_place_more_publishables(self)
+        list_all_placements_in_category_by_hour(self, category=self.category)
+
+    def test_only_nested_category_and_year_returns_all_listings(self):
+        template_loader.templates['page/listing.html'] = ''
+        Listing.objects.all().update(category=self.category_nested_second)
+        response = self.client.get('/nested-category/second-nested-category/2008/')
+        self.assert_true('listings' in response.context)
+        self.assert_equals(self.listings, response.context['listings'])
+
+    def test_incorrect_page_number_raises_404(self):
+        template_loader.templates['404.html'] = ''
+        response = self.client.get('/2008/', {'p': 200})
+        self.assert_equals(404, response.status_code)
 
 class TestObjectDetailTemplateOverride(ViewsTestCase):
     def setUp(self):

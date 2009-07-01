@@ -44,7 +44,7 @@ class EllaCoreView(object):
             o = context['object']
             kw['slug'] = o.slug
 
-        if 'content_type' in context:
+        if context.get('content_type', False):
             ct = context['content_type']
             kw['app_label'] = ct.app_label
             kw['model_label'] = ct.model

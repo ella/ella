@@ -34,7 +34,7 @@ class TestObjectDetail(DatabaseTestCase):
         template_loader.templates = {}
         custom_urls.dispatcher = self.old_dispatcher
 
-    def test_custom_view_called_when_registered(self):
+    def test_custom_detail_view_called_when_registered(self):
         def my_custom_view(request, context):
             return HttpResponse('OK')
 

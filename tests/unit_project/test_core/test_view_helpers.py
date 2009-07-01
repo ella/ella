@@ -144,6 +144,9 @@ class TestListContentType(ViewHelpersTestCase):
     def test_returns_empty_list_if_no_listing_found(self):
         c = _list_content_type('', '2007')
         self.assert_equals([], c['listings'])
+
+    def test_raises404_for_incorrect_page(self):
+        self.assert_raises(Http404, _list_content_type, '', '2008', page_no=200, paginate_by=2)
         
     def test_raises404_for_incorrect_category(self):
         self.assert_raises(Http404, _list_content_type, 'XXX', '2008')
