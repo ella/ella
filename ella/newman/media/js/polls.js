@@ -94,12 +94,12 @@
         var choice_no = $question.find('.poll-choice-container').length;
         ++choice_no;
         $new_option.find(':input').each( function() {
-            var name_parts = /.*?\d+(.*?)(\d*)(.*)/.exec( $(this).attr('name') );
-            if ( ! name_parts ) { carp('weird name:', $(this).attr('name')); return; }
+            var name_parts = /\d+(\D*)(\d*)(.*)/.exec( $(this).attr('name') );
+            if ( ! name_parts ) return;
             var post_q_no = name_parts[1];
             var opt_no = name_parts[2];
             var tail = name_parts[3];
-            $(this).attr('name', q_prefix + post_q_no + (opt_no.length ? choice_no : '') + tail);
+            $(this).attr( 'name', q_prefix + post_q_no + (opt_no.length ? choice_no : '') + tail );
         });
         
         $question.find('.poll-answers:first').append( $new_option );
