@@ -106,11 +106,20 @@ class ObjectDetail(EllaCoreView):
     """
     Renders a page for placement. All the data fetching and context creation is done in `_object_detail`.
     If `url_remainder` is specified, tries to locate custom view via `custom_urls.dispatcher`. Renders a template 
-    returned by `get_template` with context returned by `_object_detail`.
+    returned by `get_template` with context containing:
+
+        - `placement`: `Placement` instance representing the URL accessed
+        - `object`: `Publishable` instance bound to the `placement`
+        - `category`: `Category` of the `placement`
+        - `content_type_name`: slugified plural verbose name of the publishable's content type
+        - `content_type`: `ContentType` of the publishable
 
     :Parameters:
         - `request`: `HttpRequest` from Django
-        - `category, content_type, slug, year, month, day`: parameters passed on to `_object_detail`
+        - `category`: `Category.tree_path` (empty if home category)
+        - `content_type`: slugified `verbose_name_plural` of the target model
+        - `year`, `month`, `day`: date matching the `publish_from` field of the `Placement` object
+        - `slug`: slug of the `Placement`
         - `url_remainder`: url after the object's url, used to locate custom views in `custom_urls.dispatcher`
 
     :Exceptions: 
@@ -131,7 +140,42 @@ class ObjectDetail(EllaCoreView):
         return self.render(request, context, self.get_templates(context))
 
     def get_context(self, request, category, content_type, slug, year, month, day):
-        return _object_detail(request.user, category, content_type, slug, year, month, day)
+        ct = get_content_type(content_type)
+
+        if category:
+            cat = get_cached_object_or_404(Category, tree_path=category, site__id=settings.SITE_ID)
+        else:
+            cat = get_cached_object_or_404(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
+
+        if year:
+            placement = get_cached_object_or_404(Placement,
+                        publish_from__year=year,
+                        publish_from__month=month,
+                        publish_from__day=day,
+                        publishable__content_type=ct,
+                        category=cat,
+                        slug=slug,
+                        static=False
+                    )
+        else:
+            placement = get_cached_object_or_404(Placement, category=cat, publishable__content_type=ct, slug=slug, static=True)
+
+
+        if not (placement.is_active() or request.user.is_staff):
+            # future placement, render if accessed by logged in staff member
+            raise Http404
+
+        obj = placement.publishable.target
+
+        context = {
+                'placement' : placement,
+                'object' : obj,
+                'category' : cat,
+                'content_type_name' : content_type,
+                'content_type' : ct,
+            }
+
+        return context
 
 class ListContentType(EllaCoreView):
     """
@@ -241,64 +285,6 @@ def get_content_type(ct_name):
             raise Http404
     return ct
 
-
-def _object_detail(user, category, content_type, slug, year, month, day):
-    """
-    Helper function that does all the data fetching for `object_detail` view. It
-    returns a dictionary containing:
-
-        - `placement`: `Placement` instance representing the URL accessed
-        - `object`: `Publishable` instance bound to the `placement`
-        - `category`: `Category` of the `placement`
-        - `content_type_name`: slugified plural verbose name of the publishable's content type
-        - `content_type`: `ContentType` of the publishable
-
-    :Parameters: 
-        - `user`: django `User` instance
-        - `category`: `Category.tree_path` (empty if home category)
-        - `year`, `month`, `day`: date matching the `publish_from` field of the `Placement` object
-        - `content_type`: slugified `verbose_name_plural` of the target model
-        - `slug`: slug of the `Placement`
-
-    :Exceptions:
-        - `Http404`: if object or placement doesn't exist or dates don't match
-    """
-    ct = get_content_type(content_type)
-
-    if category:
-        cat = get_cached_object_or_404(Category, tree_path=category, site__id=settings.SITE_ID)
-    else:
-        cat = get_cached_object_or_404(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
-
-    if year:
-        placement = get_cached_object_or_404(Placement,
-                    publish_from__year=year,
-                    publish_from__month=month,
-                    publish_from__day=day,
-                    publishable__content_type=ct,
-                    category=cat,
-                    slug=slug,
-                    static=False
-                )
-    else:
-        placement = get_cached_object_or_404(Placement, category=cat, publishable__content_type=ct, slug=slug, static=True)
-
-
-    if not (placement.is_active() or user.is_staff):
-        # future placement, render if accessed by logged in staff member
-        raise Http404
-
-    obj = placement.publishable.target
-
-    context = {
-            'placement' : placement,
-            'object' : obj,
-            'category' : cat,
-            'content_type_name' : content_type,
-            'content_type' : ct,
-        }
-
-    return context
 
 
 def get_templates(name, slug=None, category=None, app_label=None, model_label=None):
