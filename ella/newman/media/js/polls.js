@@ -70,7 +70,7 @@
         $new_question.insertAfter( $last_question );
         
         // update question count
-        $(':input[name=question_set-TOTAL_FORMS]').val(
+        $('#id_question_set-TOTAL_FORMS').val(
             $('.poll-question-container').length
         );
     }
