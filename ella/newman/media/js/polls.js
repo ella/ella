@@ -68,6 +68,11 @@
         add_option( $new_question );
         
         $new_question.insertAfter( $last_question );
+        
+        // update question count
+        $(':input[name=question_set-TOTAL_FORMS]').val(
+            $('.poll-question-container').length
+        );
     }
     function add_option($question) {
         var $last_option = $('.poll-choice-container:last');
