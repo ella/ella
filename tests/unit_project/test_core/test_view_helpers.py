@@ -7,7 +7,7 @@ from django.db.models import get_models
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import slugify
 
-from ella.core.views import _category_detail, _object_detail, get_content_type, ListContentType
+from ella.core.views import CategoryDetail, _object_detail, get_content_type, ListContentType
 from ella.core.models import Listing, Publishable
 
 from unit_project.test_core import create_basic_categories, create_and_place_a_publishable, \
@@ -18,8 +18,14 @@ class ViewHelpersTestCase(DatabaseTestCase):
         super(ViewHelpersTestCase, self).setUp()
         create_basic_categories(self)
         create_and_place_a_publishable(self)
+
+        # mock user
         self.user = self
         setattr(self.user, 'is_staff', False)
+
+        # mock request
+        self.request = self
+        setattr(self.user, 'GET', {})
 
 class TestGetContentType(UnitTestCase):
     def test_by_brute_force(self):
@@ -32,18 +38,22 @@ class TestGetContentType(UnitTestCase):
         self.assert_raises(Http404, get_content_type, '')
 
 class TestCategoryDetail(ViewHelpersTestCase):
+    def setUp(self):
+        super(TestCategoryDetail, self).setUp()
+        self.category_detail = CategoryDetail()
+
     def test_returns_category_by_tree_path(self):
-        c = _category_detail('nested-category')
+        c = self.category_detail.get_context(self.request, 'nested-category')
         self.assert_equals(self.category_nested, c['category'])
         self.assert_false(c['is_homepage'])
         
     def test_returns_home_page_with_no_args(self):
-        c = _category_detail()
+        c = self.category_detail.get_context(self.request)
         self.assert_equals(self.category, c['category'])
         self.assert_true(c['is_homepage'])
         
     def test_returns_nested_category_by_tree_path(self):
-        c = _category_detail('nested-category/second-nested-category')
+        c = self.category_detail.get_context(self.request, 'nested-category/second-nested-category')
         self.assert_equals(self.category_nested_second, c['category'])
         self.assert_false(c['is_homepage'])
 
@@ -111,10 +121,6 @@ class TestListContentType(ViewHelpersTestCase):
         create_and_place_more_publishables(self)
         list_all_placements_in_category_by_hour(self, category=self.category)
         self.list_content_type = ListContentType()
-        class MockRequest(object):
-            def __init__(self):
-                self.GET = {}
-        self.request = MockRequest()
 
     def test_only_category_and_year_returns_all_listings(self):
         c = self.list_content_type.get_context(self.request, '', '2008')

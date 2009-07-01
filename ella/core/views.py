@@ -61,7 +61,10 @@ class EllaCoreView(object):
 
 class CategoryDetail(EllaCoreView):
     """
-    Homepage of a category the actual site.
+    Homepage of a category. Renders a templates using context containing:
+        - `category`: the root `Category` of the site
+        - `is_homepage`: boolean whether the category is the root category
+        - `archive_entry_year`: year of last `Listing`
 
     :Parameters: 
         - `request`: `HttpRequest` from Django
@@ -69,11 +72,35 @@ class CategoryDetail(EllaCoreView):
           home page is used if this parameter is omitted
 
     :Exceptions: 
-        - `Http404`: if there is no category
+        - `Http404`: if there is no matching category
     """
     template_name = 'category.html'
+
+    def _archive_entry_year(self, category):
+        " Return ARCHIVE_ENTRY_YEAR from settings (if exists) or year of the newest object in category "
+        year = getattr(settings, 'ARCHIVE_ENTRY_YEAR', None)
+        if not year:
+            now = datetime.now()
+            try:
+                categories = Category.objects.filter(site__id=settings.SITE_ID, tree_path__startswith=category.tree_path)
+                year = Listing.objects.filter(category__in=categories, publish_from__lte=now)[0].publish_from.year
+            except:
+                year = now.year
+        return year
+
+
     def get_context(self, request, category=None):
-        return _category_detail(category)
+        if category:
+            cat = get_cached_object_or_404(Category, tree_path=category, site__id=settings.SITE_ID)
+        else:
+            cat = get_cached_object_or_404(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
+        context = {
+                    'category' : cat,
+                    'is_homepage': not bool(category),
+                    'archive_entry_year' : self._archive_entry_year(cat),
+                }
+
+        return context
 
 class ObjectDetail(EllaCoreView):
     """
@@ -311,45 +338,6 @@ def get_templates_from_placement(name, placement, slug=None, category=None, app_
         model_label = placement.publishable.content_type.model
     return get_templates(name, slug, category, app_label, model_label)
 
-
-def __archive_entry_year(category):
-    " Return ARCHIVE_ENTRY_YEAR from settings (if exists) or year of the newest object in category "
-    year = getattr(settings, 'ARCHIVE_ENTRY_YEAR', None)
-    if not year:
-        now = datetime.now()
-        try:
-            categories = Category.objects.filter(site__id=settings.SITE_ID, tree_path__startswith=category.tree_path)
-            year = Listing.objects.filter(category__in=categories, publish_from__lte=now)[0].publish_from.year
-        except:
-            year = now.year
-    return year
-
-def _category_detail(tree_path=False):
-    """
-    Helper function that does all the data fetching for `home` and `category_detail` views. Returns
-    a dictionary containing:
-
-        - `category`: the root `Category` of the site
-        - `is_homepage`: boolean whether the category is the root category
-        - `archive_entry_year`: year of last `Listing`
-
-    :Parameters: 
-        - `tree_path`: `Category.tree_path` (empty if home category)
-
-    :Exceptions: 
-        - `Http404`: if there is no base category
-    """
-    if tree_path:
-        cat = get_cached_object_or_404(Category, tree_path=tree_path, site__id=settings.SITE_ID)
-    else:
-        cat = get_cached_object_or_404(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
-    context = {
-                'category' : cat,
-                'is_homepage': not bool(tree_path),
-                'archive_entry_year' : __archive_entry_year(cat),
-            }
-
-    return context
 
 def get_export_key(func, request, count, name='', content_type=None):
     return 'ella.core.views.export:%d:%d:%s:%s' % (
