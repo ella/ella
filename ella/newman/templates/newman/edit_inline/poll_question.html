@@ -119,6 +119,7 @@
                             <span class="input-field" title="{{ field.field.name }}">{{ field.field }}</span>
                         {% endifnotequal %}{% endifnotequal %}
                     {% endfor %}{% endfor %}{% endfor %}
+                    <span class="input-field" title="delete question">{% if inline_admin_form.original %}{{ inline_admin_form.deletion_field.field }}{% endif %}</span>
                 </div>
             </div>
         {% endfor %}{# end traverse questions #}

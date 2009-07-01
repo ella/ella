@@ -527,6 +527,7 @@ input.poll-choice-points {
     display: none;
 }
 .remaining-poll-question-inputs {
+    border: solid 1px orange;
     display: none;
 }
 
