@@ -73,24 +73,24 @@
         <legend>{{ inline_admin_formset.opts.verbose_name_plural|capfirst }}</legend>
         
         {% for inline_admin_form in inline_admin_formset %}{# traverse questions #}
-            <div class="poll-question-container">
+            <div class="js-poll-question-container">
                 {# form errors #}
                 {% if inline_admin_form.form.non_field_errors %}
                     <div class="form-errors">{{ inline_admin_form.form.non_field_errors }}</div>
                 {% endif %}
                 
                 {# question text #}
-                <p class="poll-question-text-container">
+                <p class="js-poll-question-text-container">
                 {% if inline_admin_form.original %}
                     <span>
                         <a class="js-edit-poll-question-text">{{ inline_admin_form.original }}</a>
                     </span>
                 {% else %}
-                    <span class="empty-poll-question-text">
+                    <span class="js-empty-poll-question-text">
                         <a class="js-edit-poll-question-text">{% trans 'Click to edit question.' %}</a>
                     </span>
                 {% endif %}
-                    <span class="poll-question-input">
+                    <span class="js-poll-question-input">
                     {% for fieldset in inline_admin_form %}{% for line in fieldset %}{% for field in line %}
                         {% ifequal field.field.name "question" %}
                             {{ field.field }}
@@ -103,7 +103,7 @@
                 </p>
                 
                 {# answer options #}
-                <div class="poll-answers">
+                <div class="js-poll-choices">
                     {% for fieldset in inline_admin_form %}{% for line in fieldset %}{% for field in line %}
                         {% ifequal field.field.name "choices" %}
                             <div style="margin: 2px;">
@@ -116,10 +116,10 @@
                 <div class="remaining-poll-question-inputs">
                     {% for fieldset in inline_admin_form %}{% for line in fieldset %}{% for field in line %}
                         {% ifnotequal field.field.name "choices" %}{% ifnotequal field.field.name "question" %}
-                            <span class="input-field" title="{{ field.field.name }}">{{ field.field }}</span>
+                            <span title="{{ field.field.name }}">{{ field.field }}</span>
                         {% endifnotequal %}{% endifnotequal %}
                     {% endfor %}{% endfor %}{% endfor %}
-                    <span class="input-field" title="delete question">{% if inline_admin_form.original %}{{ inline_admin_form.deletion_field.field }}{% endif %}</span>
+                    <span title="delete question">{% if inline_admin_form.original %}{{ inline_admin_form.deletion_field.field }}{% endif %}</span>
                 </div>
             </div>
         {% endfor %}{# end traverse questions #}

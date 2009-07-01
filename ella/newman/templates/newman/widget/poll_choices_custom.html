@@ -1,8 +1,8 @@
     <input type="hidden" name="choices_widget" value="{{ id_prefix }}" />
     {% for choice in choices %}
-        <div class="poll-choice-container">
-            <div class="poll-choice-text-container">
-                <p class="poll-choice-text">
+        <div class="js-poll-choice-container">
+            <div class="js-poll-choice-text-container">
+                <p class="js-poll-choice-text">
                     <a class="js-delete-poll-choice">{% trans "Delete" %}</a>
                     
                     <input 
@@ -22,15 +22,15 @@
                     </a>
                 </p>
                 
-                <p class="poll-choice-text-extras">
+                <p class="js-poll-choice-text-extras">
                     <input
-                        class="poll-choice-points"
+                        class="js-poll-choice-points"
                         type="text"
                         size="4"
                         name="{{ id_prefix }}-points"
                         value="{{ choice.points }}"
                     />
-                    <span><a class="poll-choice-points">{{ choice.points }}</a></span>
+                    <span><a class="js-poll-choice-points">{{ choice.points }}</a></span>
                     <span>{% trans "Points" %}</span>
                 </p>
                 <div class="cb"></div>
@@ -39,13 +39,13 @@
                 type="hidden"
                 size="4"
                 value="{% if not choice.votes %}0{% else %}{{ choice.votes }}{% endif %}"
-                class="poll-option-votecount"
+                class="js-poll-choice-votecount"
             />
             <input 
                 type="hidden"
                 name="{{ id_prefix }}-{{ forloop.counter }}-DELETE"
                 value="off"
-                class="poll-choice-delete-input"
+                class="js-poll-choice-delete-input"
             />
         </div>
     {% endfor %}

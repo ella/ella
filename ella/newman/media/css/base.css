@@ -483,25 +483,25 @@ a.widget-thumb { border: 1px solid #ccc; margin-right: 5px; }
 .sortable-item .gallery-item:hover { background: #77B150; }
 
 /* POLLS QUESTIONS & ANSWERS */
-.poll-question-container {
+.js-poll-question-container {
     margin: 5px;
     border-bottom: solid 1px gray;
 }
-.poll-question-text-container {
+.js-poll-question-text-container {
     font-size: 120%;
     font-weight: bold;
     margin: 5px 0;
 }
-.empty-poll-question-text {
+.js-empty-poll-question-text {
     font-style: italic;
 }
-.poll-question-input {
+.js-poll-question-input {
     display: none;
 }
-.poll-choice-text textarea {
+.js-poll-choice-text textarea {
     display: none;
 }
-p.poll-choice-text {
+p.js-poll-choice-text {
     float: left;
     min-width: 200px;
     padding-right: 10px;
@@ -512,7 +512,7 @@ p.poll-choice-text {
 .poll-choice-deleted .empty-poll-choice {
     display: none;
 }
-p.poll-choice-text-extras {
+p.js-poll-choice-text-extras {
     float: left;
 }
 .poll-choice-deleted span {
@@ -523,7 +523,7 @@ p.poll-choice-text-extras {
     font-weight: bold;
     background-color: yellow;
 }
-input.poll-choice-points {
+input.js-poll-choice-points {
     display: none;
 }
 .remaining-poll-question-inputs {
