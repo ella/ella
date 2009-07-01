@@ -526,6 +526,9 @@ p.poll-choice-text-extras {
 input.poll-choice-points {
     display: none;
 }
+.remaining-poll-question-inputs {
+    display: none;
+}
 
 /* OTHER */
 #debug { position: absolute; top:0; left:0; right:0; bottom: 25px;background: #333; color: #fff; padding: 10px; z-index: 50; overflow: auto; opacity: .9; display: none; }

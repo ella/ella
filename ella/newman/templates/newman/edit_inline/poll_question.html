@@ -112,6 +112,14 @@
                         {% endifequal %}
                     {% endfor %}{% endfor %}{% endfor %}
                 </div>
+                
+                <div class="remaining-poll-question-inputs">
+                    {% for fieldset in inline_admin_form %}{% for line in fieldset %}{% for field in line %}
+                        {% ifnotequal field.field.name "choices" %}{% ifnotequal field.field.name "question" %}
+                            <span class="input-field" title="{{ field.field.name }}">{{ field.field }}</span>
+                        {% endifnotequal %}{% endifnotequal %}
+                    {% endfor %}{% endfor %}{% endfor %}
+                </div>
             </div>
         {% endfor %}{# end traverse questions #}
         
