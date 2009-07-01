@@ -7,7 +7,7 @@ from django.db.models import get_models
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import slugify
 
-from ella.core.views import _category_detail, _object_detail, get_content_type, _list_content_type
+from ella.core.views import _category_detail, _object_detail, get_content_type, ListContentType
 from ella.core.models import Listing, Publishable
 
 from unit_project.test_core import create_basic_categories, create_and_place_a_publishable, \
@@ -110,23 +110,29 @@ class TestListContentType(ViewHelpersTestCase):
         super(TestListContentType, self).setUp()
         create_and_place_more_publishables(self)
         list_all_placements_in_category_by_hour(self, category=self.category)
+        self.list_content_type = ListContentType()
+        class MockRequest(object):
+            def __init__(self):
+                self.GET = {}
+        self.request = MockRequest()
 
     def test_only_category_and_year_returns_all_listings(self):
-        c = _list_content_type('', '2008')
+        c = self.list_content_type.get_context(self.request, '', '2008')
         self.assert_equals(self.listings, c['listings'])
         
     def test_only_nested_category_and_year_returns_all_listings(self):
         Listing.objects.all().update(category=self.category_nested_second)
-        c = _list_content_type('nested-category/second-nested-category', '2008')
+        c = self.list_content_type.get_context(self.request, 'nested-category/second-nested-category', '2008')
         self.assert_equals(self.listings, c['listings'])
 
     def test_return_first_2_listings_if_paginate_by_2(self):
-        c = _list_content_type('', '2008', paginate_by=2)
+        c = self.list_content_type.get_context(self.request, '', '2008', paginate_by=2)
         self.assert_equals(self.listings[:2], c['listings'])
         self.assert_true(c['is_paginated'])
         
     def test_return_second_2_listings_if_paginate_by_2_and_page_2(self):
-        c = _list_content_type('', '2008', page_no=2, paginate_by=2)
+        self.request.GET['p'] = '2'
+        c = self.list_content_type.get_context(self.request, '', '2008', paginate_by=2)
         self.assert_equals(self.listings[2:4], c['listings'])
         self.assert_true(c['is_paginated'])
 
@@ -137,30 +143,31 @@ class TestListContentType(ViewHelpersTestCase):
         l.priority_to = datetime.now() + timedelta(days=1)
         l.save()
 
-        c = _list_content_type('', '2008')
+        c = self.list_content_type.get_context(self.request, '', '2008')
         expected = [l] + self.listings[:-1]
         self.assert_equals(expected, c['listings'])
 
     def test_returns_empty_list_if_no_listing_found(self):
-        c = _list_content_type('', '2007')
+        c = self.list_content_type.get_context(self.request, '', '2007')
         self.assert_equals([], c['listings'])
 
     def test_raises404_for_incorrect_page(self):
-        self.assert_raises(Http404, _list_content_type, '', '2008', page_no=200, paginate_by=2)
+        self.request.GET['p'] = '200'
+        self.assert_raises(Http404, self.list_content_type.get_context, self.request, '', '2008', paginate_by=2)
         
     def test_raises404_for_incorrect_category(self):
-        self.assert_raises(Http404, _list_content_type, 'XXX', '2008')
+        self.assert_raises(Http404, self.list_content_type.get_context, self.request, 'XXX', '2008')
 
     def test_raises404_for_incorrect_month(self):
-        self.assert_raises(Http404, _list_content_type, '', '2008', '13')
+        self.assert_raises(Http404, self.list_content_type.get_context, self.request, '', '2008', '13')
 
     def test_raises404_for_incorrect_day(self):
-        self.assert_raises(Http404, _list_content_type, '', '2008', '1', '42')
+        self.assert_raises(Http404, self.list_content_type.get_context, self.request, '', '2008', '1', '42')
 
     def test_raises404_for_incorrect_date(self):
-        self.assert_raises(Http404, _list_content_type, '', '2008', '2', '30')
+        self.assert_raises(Http404, self.list_content_type.get_context, self.request, '', '2008', '2', '30')
 
     def test_raises404_for_incorrect_content_type(self):
-        self.assert_raises(Http404, _list_content_type, '', '2008', '2', '3', 'not-a-content-type')
+        self.assert_raises(Http404, self.list_content_type.get_context, self.request, '', '2008', '2', '3', 'not-a-content-type')
 
 

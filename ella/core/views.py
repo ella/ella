@@ -107,6 +107,20 @@ class ObjectDetail(EllaCoreView):
         return _object_detail(request.user, category, content_type, slug, year, month, day)
 
 class ListContentType(EllaCoreView):
+    """
+    List objects' listings according to the parameters.
+
+    :Parameters:
+        - `category`: base Category tree_path, optional - defaults to all categories
+        - `year, month, day`: date matching the `publish_from` field of the `Placement` object.
+          All of these parameters are optional, the list will be filtered by the non-empty ones
+        - `content_type`: slugified verbose_name_plural of the target model, if omitted all content_types are listed
+        - `page_no`: which page to display
+        - `paginate_by`: number of records in one page
+
+    :Exceptions:
+        - `Http404`: if the specified category or content_type does not exist or if the given date is malformed.
+    """
     template_name = 'listing.html'
     def get_context(self, request, category=None, year=None, month=None, day=None, content_type=None, paginate_by=20):
         # pagination
@@ -115,7 +129,61 @@ class ListContentType(EllaCoreView):
         else:
             page_no = 1
 
-        return  _list_content_type(category, year, month, day, content_type, page_no, paginate_by)
+        kwa = {}
+        year = int(year)
+        kwa['publish_from__year'] = year
+
+        if month:
+            try:
+                month = int(month)
+                date(year, month, 1)
+            except ValueError, e:
+                raise Http404()
+            kwa['publish_from__month'] = month
+
+        if day:
+            try:
+                day = int(day)
+                date(year, month, day)
+            except ValueError, e:
+                raise Http404()
+            kwa['publish_from__day'] = day
+
+        if category:
+            cat = get_cached_object_or_404(Category, tree_path=category, site__id=settings.SITE_ID)
+            kwa['category'] = cat
+            kwa['children'] = Listing.objects.ALL
+        else:
+            cat = get_cached_object_or_404(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
+            kwa['category'] = cat
+
+        if content_type:
+            ct = get_content_type(content_type)
+            kwa['content_types'] = [ ct ]
+        else:
+            ct = False
+
+        qset = Listing.objects.get_queryset_wrapper(kwa)
+        paginator = Paginator(qset, paginate_by)
+
+        if page_no > paginator.num_pages or page_no < 1:
+            raise Http404()
+
+        page = paginator.page(page_no)
+        listings = page.object_list
+
+        context = {
+                'page': page,
+                'is_paginated': paginator.num_pages > 1,
+                'results_per_page': paginate_by,
+
+                'content_type' : ct,
+                'content_type_name' : content_type,
+                'listings' : listings,
+                'category' : cat,
+            }
+
+        return context
 
 # backwards compatibility
 object_detail = ObjectDetail()
@@ -243,76 +311,6 @@ def get_templates_from_placement(name, placement, slug=None, category=None, app_
         model_label = placement.publishable.content_type.model
     return get_templates(name, slug, category, app_label, model_label)
 
-def _list_content_type(category, year, month=None, day=None, content_type=None, page_no=1, paginate_by=20):
-    """
-    List objects' listings according to the parameters.
-
-    :Parameters:
-        - `category`: base Category tree_path, optional - defaults to all categories
-        - `year, month, day`: date matching the `publish_from` field of the `Placement` object.
-          All of these parameters are optional, the list will be filtered by the non-empty ones
-        - `content_type`: slugified verbose_name_plural of the target model, if omitted all content_types are listed
-        - `page_no`: which page to display
-        - `paginate_by`: number of records in one page
-
-    :Exceptions:
-        - `Http404`: if the specified category or content_type does not exist or if the given date is malformed.
-    """
-    kwa = {}
-    year = int(year)
-    kwa['publish_from__year'] = year
-
-    if month:
-        try:
-            month = int(month)
-            date(year, month, 1)
-        except ValueError, e:
-            raise Http404()
-        kwa['publish_from__month'] = month
-
-    if day:
-        try:
-            day = int(day)
-            date(year, month, day)
-        except ValueError, e:
-            raise Http404()
-        kwa['publish_from__day'] = day
-
-    if category:
-        cat = get_cached_object_or_404(Category, tree_path=category, site__id=settings.SITE_ID)
-        kwa['category'] = cat
-        kwa['children'] = Listing.objects.ALL
-    else:
-        cat = get_cached_object_or_404(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
-        kwa['category'] = cat
-
-    if content_type:
-        ct = get_content_type(content_type)
-        kwa['content_types'] = [ ct ]
-    else:
-        ct = False
-
-    qset = Listing.objects.get_queryset_wrapper(kwa)
-    paginator = Paginator(qset, paginate_by)
-
-    if page_no > paginator.num_pages or page_no < 1:
-        raise Http404()
-
-    page = paginator.page(page_no)
-    listings = page.object_list
-
-    context = {
-            'page': page,
-            'is_paginated': paginator.num_pages > 1,
-            'results_per_page': paginate_by,
-
-            'content_type' : ct,
-            'content_type_name' : content_type,
-            'listings' : listings,
-            'category' : cat,
-        }
-
-    return context
 
 def __archive_entry_year(category):
     " Return ARCHIVE_ENTRY_YEAR from settings (if exists) or year of the newest object in category "
