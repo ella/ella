@@ -76,6 +76,20 @@
             GenericSuggestLib.copy(main_category_input, listing_category_input);
         }
     });
+    function init_main_category_button() {
+        function _() {
+            if ($('#id_category').val().length <= 1) {
+                $('.js-placement-main-category').closest('p').hide();
+            }
+            else {
+                $('.js-placement-main-category').closest('p').show();
+            }
+        }
+        _();
+        $('#id_category').unbind('change', _).bind('change', _);
+    }
+    init_main_category_button();
+    $(document).bind('content_added', init_main_category_button);
 
     //// gallery items
     function max_order() {
