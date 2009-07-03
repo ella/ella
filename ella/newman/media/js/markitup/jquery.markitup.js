@@ -111,7 +111,10 @@
 						.bind("mousedown", function(e) {
 							var h = $$.height(), y = e.clientY, mouseMove, mouseUp;
 							mouseMove = function(e) {
-								$$.css("height", Math.max(20, e.clientY+h-y)+"px");
+								$$.css("height", Math.max(50, e.clientY+h-y)+"px");
+								if(iFrame){
+									iFrame.css("height", Math.max(50, e.clientY+h-y+10)+"px");
+								}
 								return false;
 							};
 							mouseUp = function(e) {
@@ -418,6 +421,8 @@
 						iFrame = $('<iframe class="markItUpPreviewFrame"></iframe>');
 						if (options.previewPosition == 'after') {
 							iFrame.insertAfter(footer);
+						} else if(options.previewPosition == 'afterArea'){
+							iFrame.insertAfter(textarea);
 						} else {
 							iFrame.insertBefore(header);
 						}	
