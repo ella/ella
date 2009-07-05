@@ -189,7 +189,7 @@ GenericSuggestLib = {};
             else if (key == BACKSPACE && $this.val().length == 0) {
                 var $prev = $this.parent().prev();
                 if ($prev.length == 0) return;
-                $this.val('').change();
+                $this.val('');
                 $prev.remove();
                 update_values();
             }
@@ -239,7 +239,7 @@ GenericSuggestLib = {};
         if (!is_multiple($inputs.ul) && ids.length > 1) {
             //TODO: warning
         }
-        $inputs.hidden.val(ids.join(',') + '#' + repres.join(','));
+        $inputs.hidden.val(ids.join(',') + '#' + repres.join(',')).change();
         $inputs.text.data('values', arr2map(ids));
     }
     function parse_suggest_result(result, fields) {
@@ -287,7 +287,6 @@ GenericSuggestLib = {};
             $prev.remove();
         }
         update_values(el);
-        $inputs.hidden.change();
         $inputs.text.focus();
         $SUGGEST_LIST.empty();
         hide_bubbles();
