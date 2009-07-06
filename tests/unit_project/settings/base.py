@@ -6,7 +6,7 @@ USE_I18N = True
 
 MEDIA_ROOT = join(FILE_ROOT, 'static')
 
-MEDIA_URL = '/static/'
+MEDIA_URL = '/static'
 
 ADMIN_MEDIA_PREFIX = '/admin_media/'
 
