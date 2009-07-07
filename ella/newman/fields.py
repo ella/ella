@@ -274,3 +274,14 @@ class ChoiceCustomField(fields.CharField):
     def clean(self, value):
         cvalue = super(ChoiceCustomField, self).clean(value)
         return cvalue
+
+class RawIdField(ModelChoiceField):
+
+    def clean(self, value):
+
+        try:
+            value = int(value)
+        except ValueError, e:
+            raise ValidationError(self.error_messages['invalid_choice'])
+
+        return super(RawIdField, self).clean(value)

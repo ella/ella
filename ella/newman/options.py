@@ -71,7 +71,7 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
 
     if db_field.name in cls.raw_id_fields and isinstance(db_field, models.ForeignKey):
         kwargs['widget'] = widgets.ForeignKeyRawIdWidget(db_field.rel)
-        return db_field.formfield(**kwargs)
+        return fields.RawIdField(db_field, **kwargs)
 
     if db_field.name in getattr(cls, 'suggest_fields', {}).keys() \
                         and isinstance(db_field, (models.ForeignKey, models.ManyToManyField)):
@@ -266,6 +266,7 @@ class NewmanModelAdmin(XModelAdmin):
         data = {'id': obj.pk, 'title': obj.__unicode__()}
         return utils.JsonResponse(_('Preset %s was saved.' % obj.__unicode__()), data)
 
+    @utils.profiled_section
     @require_AJAX
     def load_draft_view(self, request, extra_context=None):
         """ Returns draft identified by request.GET['id'] variable. """
@@ -338,7 +339,7 @@ class NewmanModelAdmin(XModelAdmin):
         return HttpResponse(out, mimetype='text/plain;charset=utf-8')
 
     @utils.profiled_section
-    @require_AJAX
+    #@require_AJAX
     def changelist_view(self, request, extra_context=None):
         self.register_newman_variables(request)
 
@@ -364,6 +365,7 @@ class NewmanModelAdmin(XModelAdmin):
         context.update(extra_context or {})
         return render_to_response(self.change_list_template, context, context_instance=template.RequestContext(request))
 
+    @utils.profiled_section
     @require_AJAX
     def suggest_view(self, request, extra_context=None):
         self.register_newman_variables(request)
@@ -466,11 +468,13 @@ class NewmanModelAdmin(XModelAdmin):
     def register_newman_variables(self, request):
         self.user = request.user
 
+    @utils.profiled_section
     def has_view_permission(self, request, obj):
         opts = self.opts
         view_perm = '%s.view_%s' % ( opts.app_label, opts.object_name.lower() )
         return request.user.has_perm(view_perm)
 
+    @utils.profiled_section
     def has_model_view_permission(self, request, obj=None):
         """ returns True if user has permission to view this model, otherwise False. """
         # try to find view or change perm. for given user in his permissions or groups permissions
@@ -493,6 +497,7 @@ class NewmanModelAdmin(XModelAdmin):
         # no permission found
         return False
 
+    @utils.profiled_section
     def has_change_permission(self, request, obj=None):
         """
         Returns True if the given request has permission to change the given
@@ -573,6 +578,7 @@ class NewmanModelAdmin(XModelAdmin):
             media = media + inline_admin_formset.media
         return inline_admin_formsets, media
 
+    @utils.profiled_section
     def change_view_json_response(self, request, context):
         """
         Chyby v polich formulare
@@ -662,6 +668,7 @@ class NewmanModelAdmin(XModelAdmin):
         self.change_view_process_context(request, context, object_id)
         return context
 
+    @utils.profiled_section
     @require_AJAX
     @transaction.commit_on_success
     def change_json_view(self, request, object_id, extra_context=None):
@@ -682,6 +689,7 @@ class NewmanModelAdmin(XModelAdmin):
         context.update(extra_context or {})
         return self.change_view_json_response(request, context)  # Json response
 
+    @utils.profiled_section
     @require_AJAX
     def change_view(self, request, object_id, extra_context=None):
         "The 'change' admin view for this model."
@@ -751,7 +759,7 @@ class NewmanModelAdmin(XModelAdmin):
         kwargs.update({
             'model': self.model,
             'user': self.user,
-            'instance': self._magic_instance,
+            'instance': self.__dict__.get('_magic_instance', None),
         })
         return formfield_for_dbfield_factory(self, db_field, **kwargs)
 
