@@ -36,7 +36,7 @@ class InterviewAdmin(PublishableAdmin):
         (_("Heading"), {'fields': ('title', 'upper_title', 'slug',)}),
         (_("Content"), {'fields': ('description', 'content',)}),
         (_("Metadata"), {'fields': ('photo', 'interviewees', 'category', 'authors', 'source')}),
-        (_("Dates"), {'fields': ('reply_from', 'reply_to', 'ask_from', 'ask_to',)}),
+        (_("Dates"), {'fields': (('reply_from', 'reply_to',), ('ask_from', 'ask_to',),)}),
     )
 
 
