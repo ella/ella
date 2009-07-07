@@ -1,3 +1,5 @@
+from django.utils.translation import ugettext_lazy as _
+
 from ella import newman
 
 from ella.core.newman_admin import PublishableAdmin
@@ -28,6 +30,14 @@ class InterviewAdmin(PublishableAdmin):
 
     suggest_fields = PublishableAdmin.suggest_fields
     suggest_fields.update({'interviewees': ('name', 'slug',)})
+    rich_text_fields = {'small': ('description',), None: ('content',)}
+
+    fieldsets = (
+        (_("Heading"), {'fields': ('title', 'upper_title', 'slug',)}),
+        (_("Content"), {'fields': ('description', 'content',)}),
+        (_("Metadata"), {'fields': ('photo', 'interviewees', 'category', 'authors', 'source')}),
+        (_("Dates"), {'fields': (('reply_from', 'reply_to',), ('ask_from', 'ask_to',),)}),
+    )
 
 
 newman.site.register(Interviewee, IntervieweeAdmin)
