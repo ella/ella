@@ -7,9 +7,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ella.newman (admin-ng)\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-29 17:09+0200\n"
-"PO-Revision-Date: 2009-06-29 17:10+0100\n"
-"Last-Translator: Oldrich Kruza <oldrich.kruza@centrumholdings.com>\n"
+"POT-Creation-Date: 2009-07-07 13:31+0200\n"
+"PO-Revision-Date: 2009-07-07 13:33+0100\n"
+"Last-Translator: Vitek pliska <whit@jizak.cz>\n"
 "Language-Team: Ella <ella.project@gmail.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -66,10 +66,14 @@ msgstr ""
 msgid "Category not permitted"
 msgstr "Nepovolená kategorie."
 
-#: filterspecs.py:125
+#: filterspecs.py:127
 #: templates/newman/tpl_tags/filter.html:8
 msgid "All"
 msgstr ""
+
+#: filterspecs.py:196
+msgid "Site"
+msgstr "Web"
 
 #: forms.py:23
 msgid "Presets"
@@ -288,7 +292,7 @@ msgstr "Uživatelská role v kategorii"
 msgid "User roles in categories"
 msgstr "Uživatelské role v kategoriích"
 
-#: newman_admin.py:55
+#: newman_admin.py:54
 msgid "All roles is now refreshed."
 msgstr "Všechny role jsou obnoveny."
 
@@ -301,99 +305,99 @@ msgstr "Žádná data v POST proměnné \"data\"."
 msgid "Preset %s was saved."
 msgstr "Předvolba %s byla uložena."
 
-#: options.py:275
-#: options.py:291
+#: options.py:276
+#: options.py:292
 msgid "No id found in GET variable \"id\"."
 msgstr "Id není v GET proměnné."
 
-#: options.py:282
-#: options.py:299
+#: options.py:283
+#: options.py:300
 msgid "No matching draft found."
 msgstr "Předvolba neexistuje."
 
-#: options.py:284
+#: options.py:285
 #, python-format
 msgid "Loaded draft \"%s\""
 msgstr "Načtena předvolba \"%s\""
 
-#: options.py:300
+#: options.py:301
 #, python-format
 msgid "Draft %s was deleted."
 msgstr "Předvolba %s byla smazána."
 
-#: options.py:321
-#: xoptions.py:195
+#: options.py:322
+#: xoptions.py:207
 msgid "Database error"
 msgstr "Chyba databáze"
 
-#: options.py:622
-#: options.py:736
+#: options.py:628
+#: options.py:744
 msgid "Please correct errors in form"
 msgstr "Prosím opravte chyby ve formuláři"
 
-#: options.py:670
-#: options.py:725
+#: options.py:677
+#: options.py:733
 msgid "This view is designed for saving data only, thus POST method is required."
 msgstr ""
 
-#: options.py:678
+#: options.py:685
 #, python-format
 msgid "The %(name)s \"%(obj)s\" was changed successfully."
 msgstr ""
 
-#: options.py:689
-#: options.py:742
+#: options.py:697
+#: options.py:750
 msgid "This view is designed for viewing form, thus GET method is required."
 msgstr ""
 
-#: options.py:718
+#: options.py:726
 msgid "Object was deleted."
 msgstr "Objekt byl smazán."
 
-#: sites.py:111
+#: sites.py:133
 msgid "Please enter a correct username and password. Note that both fields are case-sensitive."
 msgstr ""
 
-#: sites.py:117
+#: sites.py:139
 msgid "Please log in again, because your session has expired."
 msgstr ""
 
-#: sites.py:124
+#: sites.py:146
 msgid "Looks like your browser isn't configured to accept cookies. Please enable cookies, reload this page, and try again."
 msgstr ""
 
-#: sites.py:140
-#: sites.py:146
+#: sites.py:162
+#: sites.py:168
 msgid "Usernames cannot contain the '@' character."
 msgstr ""
 
-#: sites.py:143
+#: sites.py:165
 #, python-format
 msgid "Your e-mail address is not your username. Try '%s' instead."
 msgstr ""
 
-#: sites.py:172
-#: sites.py:215
+#: sites.py:194
+#: sites.py:237
 msgid "Site administration"
 msgstr "Ella správa"
 
-#: sites.py:239
+#: sites.py:261
 msgid "Your report was sent."
 msgstr "Vaše zpráva byla odeslána."
 
-#: sites.py:241
+#: sites.py:263
 msgid "SMTP error."
 msgstr "Chyba SMTP serveru."
 
-#: sites.py:246
+#: sites.py:268
 msgid "Subject or message is empty."
 msgstr "Pole předmět či zpráva je prázdné."
 
-#: sites.py:255
+#: sites.py:277
 msgid "Your settings were saved."
 msgstr "Vaše nastavení byla uložena."
 
-#: sites.py:257
+#: sites.py:279
 msgid "Error in form."
 msgstr "Chyba ve formuláři."
 
@@ -411,14 +415,14 @@ msgstr ""
 msgid "Change %s"
 msgstr ""
 
-#: xoptions.py:231
+#: xoptions.py:243
 #, python-format
 msgid "%(count)s %(name)s was changed successfully."
 msgid_plural "%(count)s %(name)s were changed successfully."
 msgstr[0] ""
 msgstr[1] ""
 
-#: xoptions.py:368
+#: xoptions.py:383
 #, python-format
 msgid "Add %s"
 msgstr ""
@@ -567,7 +571,6 @@ msgstr "Zavřít"
 #: templates/newman/edit_inline/gallery_item.html:43
 #: templates/newman/edit_inline/placement.html:43
 #: templates/newman/edit_inline/poll_question.html:49
-#: templates/newman/edit_inline/poll_question_tabular.html:47
 #: templates/newman/tpl_tags/newman_favorites.html:9
 msgid "Add"
 msgstr ""
@@ -604,7 +607,7 @@ msgstr ""
 #: templates/newman/change_form.html:23
 #: templates/newman/newman-index.html:95
 #: templates/newman/edit_inline/gallery_item.html:20
-#: templates/newman/edit_inline/poll_question.html:100
+#: templates/newman/edit_inline/poll_question.html:101
 #: templates/newman/edit_inline/stacked.html:12
 #: templates/newman/edit_inline/tabular.html:32
 msgid "View on site"
@@ -636,7 +639,6 @@ msgstr ""
 #: templates/newman/delete_confirmation.html:9
 #: templates/newman/edit_inline/placement.html:37
 #: templates/newman/edit_inline/poll_question.html:42
-#: templates/newman/edit_inline/poll_question_tabular.html:40
 #: templates/newman/tpl_tags/submit_line.html:2
 #: templates/newman/widget/poll_choices_custom.html:6
 msgid "Delete"
@@ -782,38 +784,31 @@ msgstr ""
 msgid "Listings"
 msgstr ""
 
-#: templates/newman/edit_inline/placement.html:53
+#: templates/newman/edit_inline/placement.html:52
 #: templates/newman/edit_inline/poll_question.html:60
-#: templates/newman/edit_inline/poll_question_tabular.html:58
 msgid "Main category"
 msgstr "Výchozí kategorie"
 
 #: templates/newman/edit_inline/poll_question.html:34
-#: templates/newman/edit_inline/poll_question_tabular.html:32
 msgid "Choices"
 msgstr ""
 
 #: templates/newman/edit_inline/poll_question.html:39
 #: templates/newman/edit_inline/poll_question.html:49
-#: templates/newman/edit_inline/poll_question_tabular.html:37
-#: templates/newman/edit_inline/poll_question_tabular.html:47
 msgid "Choice text"
 msgstr ""
 
 #: templates/newman/edit_inline/poll_question.html:40
-#: templates/newman/edit_inline/poll_question_tabular.html:38
-#: templates/newman/widget/poll_choices_custom.html:36
+#: templates/newman/widget/poll_choices_custom.html:34
 msgid "Points"
 msgstr ""
 
 #: templates/newman/edit_inline/poll_question.html:41
-#: templates/newman/edit_inline/poll_question_tabular.html:39
-#: templates/newman/widget/poll_choices_custom.html:22
-#, fuzzy
+#: templates/newman/widget/poll_choices_custom.html:21
 msgid "Votes"
-msgstr "Poznámka"
+msgstr "Hlasy"
 
-#: templates/newman/edit_inline/poll_question.html:89
+#: templates/newman/edit_inline/poll_question.html:90
 msgid "Click to edit question."
 msgstr "Kliknutím změňte otázku"
 
@@ -826,13 +821,12 @@ msgid "Refresh"
 msgstr "Obnovit"
 
 #: templates/newman/positions/multi_change_form.html:9
-#, fuzzy
 msgid "Categories"
-msgstr "Filtr kategorií"
+msgstr "kategorie"
 
 #: templates/newman/positions/multi_change_form.html:27
 msgid "This category doesn't have any positions, or they aren't registered for multiple editation"
-msgstr ""
+msgstr "Tato kategorie nemá žádné pozice, nebo nejsou registrovány pro multi editaci"
 
 #: templates/newman/tpl_tags/filter.html:2
 #, python-format
