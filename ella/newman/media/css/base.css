@@ -531,5 +531,16 @@ input.js-poll-choice-points {
     display: none;
 }
 
+/* CUSTOM FORM IMPROVEMENTS */
+#id_title { font: normal 140% "Trebuchet MS", arial, sans-serif; width: 70%; }
+#id_upper_title, #id_slug { font-size: 90%; width: 70%; color: #666; }
+
+fieldset.collapsed * { display: none; }
+fieldset.collapse legend, fieldset.collapsed legend { display: block; padding-right: 20px; background: #fff url(../ico/16/14_layer_lowerlayer.png) 100% 50% no-repeat; cursor: pointer; }
+fieldset.collapse legend { background-image: url(../ico/16/14_layer_raiselayer.png); }
+
+.form-row { clear: both; }
+.form-row-field.field-box { float: left; margin-right: 10px; }
+
 /* OTHER */
 #debug { position: absolute; top:0; left:0; right:0; bottom: 25px;background: #333; color: #fff; padding: 10px; z-index: 50; overflow: auto; opacity: .9; display: none; }

@@ -22,8 +22,9 @@ class InfoBoxAdmin(newman.NewmanModelAdmin):
 
 class ArticleAdmin(PublishableAdmin):
     fieldsets = (
-        (_("Article heading"), {'fields': ('title', 'upper_title', 'updated', 'slug')}),
-        (_("Metadata"), {'fields': ('category', 'authors', 'source', 'photo')}),
+        (_("Article heading"), {'fields': ('title', 'upper_title',)}),
+        (_("Updated, slug"), {'fields': ('updated', 'slug',), 'classes': ('collapsed',)}),
+        (_("Metadata"), {'fields': ('photo', 'category', 'authors', 'source')}),
         (_("Article contents"), {'fields': ('description',)}),
     )
 

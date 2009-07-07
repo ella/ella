@@ -526,6 +526,16 @@ $( function() {
     }
     AjaxFormLib.ajax_submit_error = ajax_submit_error;
     
+    // Collapsible fieldsets
+    $('.collapse legend').live('click', function(evt) {
+        if (evt.button != 0) return;
+        $(this).closest('fieldset').removeClass('collapse').addClass('collapsed');
+    });
+    $('.collapsed legend').live('click', function(evt) {
+        if (evt.button != 0) return;
+        $(this).closest('fieldset').removeClass('collapsed').addClass('collapse');
+    });
+    
     // Submit button
     $('.js-form a.js-submit').live('click', function(evt) {
         if (evt.button != 0) return true;    // just interested in left button

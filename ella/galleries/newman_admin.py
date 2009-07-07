@@ -25,13 +25,14 @@ class GalleryItemInline(newman.options.NewmanInlineModelAdmin):
 class GalleryAdmin(PublishableAdmin):
     ordering = ('-created',)
     fieldsets = (
-        (_("Gallery heading"), {'fields': ('title', 'slug',)}),
-        (_("Gallery metadata"), {'fields': ('description', 'content', 'authors', 'category')}),
+        (_("Heading"), {'fields': ('title', 'slug',)}),
+        (_("Content"), {'fields': ('description', 'content',)}),
+        (_("Metadata"), {'fields': ('authors', 'category')}),
 )
     list_filter = ('created', 'category',)
     search_fields = ('title', 'description', 'slug',)
     inlines = [GalleryItemInline, PlacementInlineAdmin]
-    rich_text_fields = {None: ('description', 'content',)}
+    rich_text_fields = {'small': ('description',), None: ('content',)}
     prepopulated_fields = {'slug': ('title',)}
 
 newman.site.register(Gallery, GalleryAdmin)
