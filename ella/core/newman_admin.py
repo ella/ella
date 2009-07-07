@@ -382,7 +382,7 @@ class PublishableAdmin(newman.NewmanModelAdmin):
     search_fields = ('title', 'description', 'slug', 'authors__name', 'authors__slug',) # FIXME: 'tags__tag__name',)
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
-    rich_text_fields = {None: ('description',)}
+    rich_text_fields = {'small': ('description',)}
     ordering = ('-publish_from',)
 
     suggest_fields = {
