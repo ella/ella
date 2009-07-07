@@ -47,6 +47,7 @@ class ResultTabularAdmin(newman.NewmanTabularInline):
 class ChoiceTabularAdmin(newman.NewmanTabularInline):
     model = Choice
     extra = 1
+    rich_text_fields = {'small': ('choice',)}
 
 class QuestionAdmin(newman.NewmanModelAdmin):
     """
@@ -58,7 +59,7 @@ class QuestionAdmin(newman.NewmanModelAdmin):
     ordering = ('question',)
     search_fields = ('question',)
 
-    rich_text_fields = {None: ('question',)}
+    rich_text_fields = {'small': ('question',)}
 
 
 class ChoiceAdmin(newman.NewmanModelAdmin):
@@ -191,7 +192,7 @@ class ContestAdmin(PublishableAdmin):
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
     exclude = ('text_announcement', 'text_results', 'content_type',)
-    rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}
+    rich_text_fields = {'small': ('description',), None: ('text',)}
 
 class QuizAdmin(PublishableAdmin):
     list_display = ('title', 'category', 'active_from')
@@ -201,7 +202,7 @@ class QuizAdmin(PublishableAdmin):
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
     exclude = ('text_announcement', 'text_results', 'content_type',)
-    rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}
+    rich_text_fields = {'small': ('description',), None: ('text',)}
 
 
 class PollAdmin(newman.NewmanModelAdmin):
