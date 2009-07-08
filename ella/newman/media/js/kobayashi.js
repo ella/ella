@@ -1,4 +1,4 @@
-KOBAYASHI_VERSION = '2009-05-20';
+KOBAYASHI_VERSION = '2009-07-07';
 
 // Debugging tools
 ;;; function alert_dump(obj, name) {
@@ -50,13 +50,13 @@ var ContentByHashLib = {};
 
 // ID of the element where AJAX'ed stuff is placed if no target specified
 ContentByHashLib.DEFAULT_TARGET = 'kobayashi-default-target';
+ContentByHashLib.LOADED_MEDIA = {};
 
 ( function($) { $(document).ready( function() {
     
     // We need to remember what URL is loaded in which element,
     // so we can load or not load content appropriately on hash change.
     var LOADED_URLS = ContentByHashLib.LOADED_URLS = {};
-    ContentByHashLib.LOADED_MEDIA = {};
     
     var ORIGINAL_TITLE = document.title;
     

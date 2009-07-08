@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-02 11:10+0200\n"
-"PO-Revision-Date: 2009-06-02 11:10+0100\n"
+"POT-Creation-Date: 2009-07-08 08:04+0200\n"
+"PO-Revision-Date: 2009-07-08 08:13+0100\n"
 "Last-Translator: Vitek Pliska <whit@jizak.cz>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -46,6 +46,7 @@ msgid "Title"
 msgstr "Nadpis"
 
 #: models.py:68
+#: newman_admin.py:28
 #: migrations/0001_initial.py:18
 #: migrations/old/0001_init.py:16
 msgid "Description"
@@ -56,6 +57,10 @@ msgstr "Popis"
 #: migrations/old/0001_init.py:20
 msgid "Slug"
 msgstr ""
+
+#: models.py:70
+msgid "Image"
+msgstr "Obrázek"
 
 #: models.py:81
 msgid "Authors"
@@ -147,11 +152,23 @@ msgstr "Foto ve formátu"
 msgid "Formated photos"
 msgstr "Fotky ve formátu"
 
-#: newman_admin.py:28
+#: newman_admin.py:27
+msgid "Heading"
+msgstr "Hlavička"
+
+#: newman_admin.py:29
+msgid "Metadata"
+msgstr "Metadata"
+
+#: newman_admin.py:30
+msgid "Important area"
+msgstr "Důležitá oblast"
+
+#: newman_admin.py:35
 msgid "Size"
 msgstr "Velikost"
 
-#: newman_admin.py:43
+#: newman_admin.py:50
 #, python-format
 msgid "Photo id %s does not exists."
 msgstr "Foto id %s neexistuje."
