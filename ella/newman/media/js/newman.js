@@ -59,6 +59,10 @@ function unlock_window() {
     $('#window-lock').data('close_ok', true).dialog('close');
 }
 
+function get_html_chunk(tmpl, success) {
+    $.get(get_adr('/nm/render-chunk/'), {chunk: tmpl}, success);
+}
+
 //// Homepage initialization
 
 $(function(){ContentByHashLib.reload_content('content');});
@@ -995,21 +999,17 @@ $(document).bind('content_added', function() {
 
 // Opens an overlay with a changelist and calls supplied function on click on item.
 $( function() {
+    var overlay_html;
+    
     open_overlay = function(content_type, selection_callback) {
-        var overlay_html
-            = '<div id="changelist-overlay" class="overlay">\n'
-            + '    <div class="overlay-upbar">\n'
-            + '        <div class="overlay-title"></div>\n'
-            + '        <div class="overlay-closebutton">\n'
-            + '            <button type="button">\n'
-            + '                <img src="'+MEDIA_URL+'ico/16/cancel.png" alt="X" height="16" width="16" />\n'
-            + '            </button>\n'
-            + '        </div>\n'
-            + '        <div class="cb"></div>\n'
-            + '    </div>\n'
-            + '    <div id="overlay-content"></div>\n'
-            + '</div>\n'
-        ;
+        var ooargs = arguments;
+        if ( ! overlay_html ) {
+            get_html_chunk('overlay', function(data) {
+                overlay_html = data;
+                ooargs.callee.apply(this, ooargs);
+            });
+            return;
+        }
         
         var top_zindex = ( function() {
             var rv = 1;
