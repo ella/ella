@@ -927,6 +927,9 @@ msgstr ""
 msgid "Change my password"
 msgstr ""
 
+msgid "Click to edit option"
+msgstr "Změnit odpověď"
+
 #~ msgid "Filter"
 #~ msgstr "Filtr"
 #~ msgid "Show categories"
