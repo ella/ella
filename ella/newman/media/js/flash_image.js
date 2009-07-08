@@ -12,6 +12,13 @@ var IMAGE_OPTIONS = {
     window.on_upload_success = function(xhr) {
         ;;; carp('success uploading photo:', xhr);
         show_ok(gettext('successfully uploaded photo'));
+        var button_clicked = $('#photo_form').data('button_clicked');
+        if (button_clicked) {
+            new PostsaveActionTable({
+                options: xhr
+            }).run( button_clicked );
+        }
+        $('#photo_form').removeData('button_clicked');
 //        AjaxFormLib.show_ajax_success(xhr.responseText);
     }
     window.on_upload_error = function(xhr) {
@@ -26,6 +33,14 @@ var IMAGE_OPTIONS = {
     function save_photo_handler(evt) {
         var $form = $(this).closest('#photo_form');
         if (evt.button > 0) return true;
+        
+        if ( $(this).is('.js-submit[name]') ) {
+            $form.data( 'button_clicked', $(this).attr('name') );
+        }
+        else {
+            $form.removeData('button_clicked');
+        }
+        
         var flash_obj = ($.browser.msie ? window : document).PhotoUploader;
         if (!flash_obj) {
             show_err(gettext('Failed to get Flash movie') + ' PhotoUploader.');
