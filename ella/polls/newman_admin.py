@@ -47,6 +47,7 @@ class ResultTabularAdmin(newman.NewmanTabularInline):
 class ChoiceTabularAdmin(newman.NewmanTabularInline):
     model = Choice
     extra = 1
+    rich_text_fields = {'small': ('choice',)}
 
 class QuestionAdmin(newman.NewmanModelAdmin):
     """
@@ -58,7 +59,7 @@ class QuestionAdmin(newman.NewmanModelAdmin):
     ordering = ('question',)
     search_fields = ('question',)
 
-    rich_text_fields = {None: ('question',)}
+    rich_text_fields = {'small': ('question',)}
 
 
 class ChoiceAdmin(newman.NewmanModelAdmin):
@@ -186,23 +187,34 @@ class ContestAdmin(PublishableAdmin):
 
     list_display = ('title', 'category', 'active_from', 'correct_answers', 'get_all_answers_count', 'pk',)
     list_filter = ('category', 'active_from',)
-    search_fields = ('title', 'text_announcement', 'text', 'text_results',)
-    inlines = [ QuestionInlineAdmin, PlacementInlineAdmin ]
+    search_fields = ('title', 'text',)
+    inlines = [PlacementInlineAdmin, QuestionInlineAdmin]
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
-    exclude = ('text_announcement', 'text_results', 'content_type',)
-    rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}
+    rich_text_fields = {'small': ('description',), None: ('text',)}
+
+    fieldsets = (
+        (_("Heading"), {'fields': ('title', 'slug',)}),
+        (_("Content"), {'fields': ('description', 'text',)}),
+        (_("Metadata"), {'fields': ('photo', 'category', 'authors', 'source')}),
+        (_("Dates"), {'fields': (('active_from', 'active_till',),)}),
+    )
 
 class QuizAdmin(PublishableAdmin):
     list_display = ('title', 'category', 'active_from')
     list_filter = ('category', 'active_from',)
-    search_fields = ('title', 'text_announcement', 'text', 'text_results',)
+    search_fields = ('title', 'text',)
     inlines = [QuestionInlineAdmin, ResultTabularAdmin, PlacementInlineAdmin]
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
-    exclude = ('text_announcement', 'text_results', 'content_type',)
-    rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}
+    rich_text_fields = {'small': ('description',), None: ('text',)}
 
+    fieldsets = (
+        (_("Heading"), {'fields': ('title', 'slug',)}),
+        (_("Content"), {'fields': ('description', 'text',)}),
+        (_("Metadata"), {'fields': ('photo', 'category', 'authors', 'source')}),
+        (_("Dates"), {'fields': (('active_from', 'active_till',),)}),
+    )
 
 class PollAdmin(newman.NewmanModelAdmin):
     list_display = ('title', 'question', 'get_total_votes', 'pk',)

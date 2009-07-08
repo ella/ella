@@ -1,4 +1,4 @@
-KOBAYASHI_VERSION = '2009-05-20';
+KOBAYASHI_VERSION = '2009-07-07';
 
 // Debugging tools
 ;;; function alert_dump(obj, name) {
@@ -32,14 +32,6 @@ function prepend_base_path_to(url) {
     return url;
 }
 
-// localization
-var _;
-if (window.gettext) _ = gettext;
-else {
-    carp('i18n broken -- gettext is not defined');
-    _ = function(s) { return s; };
-}
-
 //// URL management
 var URLS = {
 /*
@@ -51,19 +43,20 @@ var URLS = {
 };
 
 // mapping for containers to the URLs that give out their base content (what's there when the page loads)
-var BASES = {
-    content: '/nm/'
-};
+var BASES = {};
 //// End of URL management
 
 var ContentByHashLib = {};
+
+// ID of the element where AJAX'ed stuff is placed if no target specified
+ContentByHashLib.DEFAULT_TARGET = 'kobayashi-default-target';
+ContentByHashLib.LOADED_MEDIA = {};
 
 ( function($) { $(document).ready( function() {
     
     // We need to remember what URL is loaded in which element,
     // so we can load or not load content appropriately on hash change.
     var LOADED_URLS = ContentByHashLib.LOADED_URLS = {};
-    ContentByHashLib.LOADED_MEDIA = {};
     
     var ORIGINAL_TITLE = document.title;
     
@@ -321,7 +314,7 @@ var ContentByHashLib = {};
     ContentByHashLib.unload_content = unload_content;
     
     // We want location.hash to exactly describe what's on the page.
-    // #url means that the result of $.get(url) be loaded into the #content div.
+    // #url means that the result of $.get(url) be loaded into the default target div.
     // #id::url means that the result of $.get(url) be loaded into the #id element.
     // Any number of such specifiers can be concatenated, e.g. #/some/page/#header::/my/header/
     // If URLS[ foo ] is set (in urls.js), and #foo is present,
@@ -339,7 +332,7 @@ var ContentByHashLib = {};
         for (var i = 0; i < specifiers.length; i++) {
             var spec = specifiers[ i ];
             var address = spec;
-            var target_id = 'content';
+            var target_id = ContentByHashLib.DEFAULT_TARGET;
             if (spec.match(/^([-\w]+)::(.*)/)) {
                 target_id  = RegExp.$1;
                 address = RegExp.$2;
@@ -501,7 +494,7 @@ var ContentByHashLib = {};
         var target_id;
         var colon_index = specifier.indexOf('::');
         if (colon_index < 0) {
-            target_id = 'content';
+            target_id = ContentByHashLib.DEFAULT_TARGET;
         }
         else {
             target_id = specifier.substr(0, colon_index);

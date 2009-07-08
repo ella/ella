@@ -1,6 +1,12 @@
 var LF = 10, CR = 13;
 AjaxFormLib = {};
 
+// Set the default target for Kobayashi to #content
+ContentByHashLib.DEFAULT_TARGET = 'content';
+
+// Set the base URL for #content
+BASES.content = '/nm/';
+
 function clone_form($orig_form) {
     var $new_form = $orig_form.clone();
     var $orig_textareas = $orig_form.find('textarea');
@@ -121,7 +127,7 @@ $(document).bind('media_loaded', unlock_window);
         return false;
     });
     
-    function restore_form(response_text, $form) {
+    function restore_form(response_text, $form, args) {
         var response_data;
         try {
             response_data  = JSON.parse(response_text);
@@ -162,14 +168,14 @@ $(document).bind('media_loaded', unlock_window);
             restore_suggest_widget_from_value(this);
         });
         
-        $form.trigger('preset_load_completed');
+        $form.trigger('preset_load_completed', [response_data, args]);
     }
     function load_preset(id, $form) {
         $.ajax({
             url: get_adr('draft/load/'),
             data: {id:id},
             success: function(response_text) {
-                restore_form(response_text, $form);
+                restore_form(response_text, $form, {preset_id:id});
             },
             error: show_ajax_error
         });
@@ -184,6 +190,27 @@ $(document).bind('media_loaded', unlock_window);
     }
     set_load_draft_handler();
     $(document).bind('content_added', set_load_draft_handler);
+    
+    function delete_preset(id) {
+        $.ajax({
+            url: get_adr('draft/delete/'),
+            data: {id:id},
+            success: function(response_text) {
+                show_ajax_success(response_text);
+                $('#id_drafts option[value='+id+']').remove();
+            },
+            error: show_ajax_error
+        });
+    }
+    
+    // Delete crash save on restoration
+    $(document).bind('preset_load_completed', function(evt, response_data, args) {
+        var id = args.preset_id;
+        var name = $('#id_drafts option[value='+id+']').text();
+        if (/^\* /.test( name )) {
+            delete_preset(id);
+        }
+    });
     
     var autosave_interval;
     function set_autosave_interval(evt) {
@@ -270,7 +297,7 @@ $( function() {
     var validations = {
 /*        required: function(input) {
             if ($(input).val()) return false;
-            else return _('Field cannot be blank.');
+            else return gettext('Field cannot be blank.');
         }*/
     };
     AjaxFormLib.validations = validations;
@@ -498,6 +525,16 @@ $( function() {
         show_ajax_error(xhr);
     }
     AjaxFormLib.ajax_submit_error = ajax_submit_error;
+    
+    // Collapsible fieldsets
+    $('.collapse legend').live('click', function(evt) {
+        if (evt.button != 0) return;
+        $(this).closest('fieldset').removeClass('collapse').addClass('collapsed');
+    });
+    $('.collapsed legend').live('click', function(evt) {
+        if (evt.button != 0) return;
+        $(this).closest('fieldset').removeClass('collapsed').addClass('collapse');
+    });
     
     // Submit button
     $('.js-form a.js-submit').live('click', function(evt) {
@@ -741,7 +778,7 @@ function show_ajax_error(xhr) {
         data = JSON.parse(xhr.responseText);
         message = data.message;
     } catch(e) {
-        message = gettext('Request failed')+' ('+xhr.status+': '+_(xhr.statusText)+')';
+        message = gettext('Request failed')+' ('+xhr.status+': '+gettext(xhr.statusText)+')';
         paste_code_into_debug( xhr.responseText.replace(/\n(\s*\n)+/g, "\n"), 'Ajax error response' );
     }
     show_err(message);
@@ -771,7 +808,7 @@ function save_change_form_success(text_data, options) {
         else if (!options._button_name) message = '_button_name not set in the XML HTTP Request for change_form submit';
         carp(message);
         show_ajax_success(text_data);
-        show_err(_('Failed to follow form save with a requested action'));
+        show_err(gettext('Failed to follow form save with a requested action'));
         return;
     }
     var $form = options._form;
@@ -782,7 +819,7 @@ function save_change_form_success(text_data, options) {
         object_id = data.data.id;
         response_msg = data.message;
     } catch(e) { carp('invalid data received from form save:', text_data, e); }
-    response_msg = response_msg || _('Form saved');
+    response_msg = response_msg || gettext('Form saved');
     var action_table = {
         _save_: function() {
             var return_to;
@@ -821,7 +858,7 @@ function save_change_form_success(text_data, options) {
         },
         _saveasnew_: function() {
             if (!object_id) {
-                show_err(_('Failed to redirect to newly added object.'));
+                show_err(gettext('Failed to redirect to newly added object.'));
                 carp('Cannot redirect to newly added object: ID not received.');
             }
             else {

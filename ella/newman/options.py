@@ -67,11 +67,18 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
 
     if isinstance(db_field, models.ImageField):
         # we accept only (JPEG) images with RGB color profile.
+        kwargs.update({
+            'label': db_field.verbose_name,
+        })
         return fields.RGBImageField(db_field, **kwargs)
 
     if db_field.name in cls.raw_id_fields and isinstance(db_field, models.ForeignKey):
-        kwargs['widget'] = widgets.ForeignKeyRawIdWidget(db_field.rel)
-        return db_field.formfield(**kwargs)
+        kwargs.update({
+            'label': db_field.verbose_name,
+            'widget': widgets.ForeignKeyRawIdWidget(db_field.rel),
+            'required': not db_field.blank,
+        })
+        return fields.RawIdField(db_field.rel.to.objects.all(), **kwargs)
 
     if db_field.name in getattr(cls, 'suggest_fields', {}).keys() \
                         and isinstance(db_field, (models.ForeignKey, models.ManyToManyField)):

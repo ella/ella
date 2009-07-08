@@ -91,7 +91,7 @@ class NewmanSite(AdminSite):
         if 'djangomarkup' in settings.INSTALLED_APPS:
             urlpatterns += patterns('',
                 url(r'^%s/editor-preview/$' % NEWMAN_URL_PREFIX,
-                    'djangomarkup.views.preview',
+                    'djangomarkup.views.transform',
                     name="djangomarkup-preview"),
             )
 
