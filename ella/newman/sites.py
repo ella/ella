@@ -14,6 +14,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 
 from ella.core.cache.utils import get_cached_list
+from ella.core.models.publishable import Placement, Publishable
 from ella.newman.forms import SiteFilterForm, ErrorReportForm, EditorBoxForm
 from ella.newman.models import AdminSetting
 from ella.newman.decorators import require_AJAX
@@ -23,7 +24,7 @@ from ella.newman.permission import has_model_list_permission, applicable_categor
 from ella.newman.config import CATEGORY_FILTER, NEWMAN_URL_PREFIX, STATUS_SMTP_ERROR, STATUS_FORM_ERROR,\
     NON_PUBLISHABLE_CTS
 from ella.newman.options import NewmanModelAdmin
-from ella.core.models.publishable import Placement, Publishable
+from ella.newman import actions
 
 
 class NewmanSite(AdminSite):
@@ -31,6 +32,11 @@ class NewmanSite(AdminSite):
     index_template = 'newman/index.html'
     login_template = 'newman/login.html'
     app_index_template = 'newman/app_index.html'
+
+    def __init__(self, name=None):
+        super(NewmanSite, self).__init__(name=name)
+        self._actions = {'delete_selected': actions.delete_selected}
+        self._global_actions = self._actions.copy()
 
     def append_inline(self, to_models=(), inline=None):
         """
