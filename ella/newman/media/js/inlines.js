@@ -78,7 +78,8 @@
     });
     function init_main_category_button() {
         function _() {
-            if ($('#id_category').val().length <= 1) {
+            var cat = $('#id_category').val() + '';
+            if (cat.length <= 1) {
                 $('.js-placement-main-category').closest('p').hide();
             }
             else {

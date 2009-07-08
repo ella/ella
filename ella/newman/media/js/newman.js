@@ -798,6 +798,72 @@ function show_ajax_success(response_text) {
     show_ok(message);
 }
 
+function PostsaveActionTable(vars) {
+    this.vars = vars;
+}
+PostsaveActionTable.prototype = {
+    _save_: function() {
+        var return_to;
+        if (window.FORM_SAVE_RETURN_TO) {
+            return_to = FORM_SAVE_RETURN_TO;
+            delete FORM_SAVE_RETURN_TO;
+        }
+        else {
+            return_to = '../';
+        }
+        adr(return_to);
+    },
+    _addanother_: function() {
+        if ( /add\/$/.test(get_hashadr('')) ) {
+            ContentByHashLib.reload_content('content');
+            scrollTo(0,0);
+        }
+        else {
+            adr('../add/');
+        }
+    },
+    _continue_: function() {
+        if ( /add\/$/.test(get_hashadr('')) ) {
+            var oid = this.vars.object_id;
+            if (!oid) {
+                var message = gettext('Cannot continue editing') + ' (' + gettext('object ID not received') + ')';
+                show_err(message);
+                carp(message, 'xhr options:', this.vars.options);
+                adr('../');
+                return;
+            }
+            adr('../'+oid+'/');
+        }
+        else {
+            ContentByHashLib.reload_content('content');
+        }
+    },
+    _saveasnew_: function() {
+        var oid = this.vars.object_id;
+        if (!oid) {
+            show_err(gettext('Failed to redirect to newly added object.'));
+            carp('Cannot redirect to newly added object: ID not received.');
+        }
+        else {
+            adr('../'+oid+'/');
+        }
+    },
+    run: function(action) {
+        var a = action+'_';
+        if (this[ a ]) {
+            this[ a ]();
+        }
+        else {
+            var message = action
+                ? gettext('Unrecognized post-save action: ')+action
+                : gettext('No post-save action, redirecting to homepage');
+            show_message(message);
+            carp(message);
+            location.hash = '#';
+        }
+    }
+};
+
 
 // submit line (save, save as new, etc)
 function save_change_form_success(text_data, options) {
@@ -820,66 +886,11 @@ function save_change_form_success(text_data, options) {
         response_msg = data.message;
     } catch(e) { carp('invalid data received from form save:', text_data, e); }
     response_msg = response_msg || gettext('Form saved');
-    var action_table = {
-        _save_: function() {
-            var return_to;
-            if (window.FORM_SAVE_RETURN_TO) {
-                return_to = FORM_SAVE_RETURN_TO;
-                delete FORM_SAVE_RETURN_TO;
-            }
-            else {
-                return_to = '../';
-            }
-            adr(return_to);
-        },
-        _addanother_: function() {
-            if ( /add\/$/.test(get_hashadr('')) ) {
-                $form.get(0).reset();
-                scrollTo(0,0);
-            }
-            else {
-                adr('../add/');
-            }
-        },
-        _continue_: function() {
-            if ( /add\/$/.test(get_hashadr('')) ) {
-                if (!object_id) {
-                    var message = 'Cannot continue editing (object ID not received)'
-                    show_err(message);
-                    carp(message, 'xhr options:', options);
-                    adr('../');
-                    return;
-                }
-                adr('../'+object_id+'/');
-            }
-            else {
-                ContentByHashLib.reload_content('content');
-            }
-        },
-        _saveasnew_: function() {
-            if (!object_id) {
-                show_err(gettext('Failed to redirect to newly added object.'));
-                carp('Cannot redirect to newly added object: ID not received.');
-            }
-            else {
-                adr('../'+object_id+'/');
-            }
-        },
-        run: function(action) {
-            var a = action+'_';
-            if (action_table[ a ]) {
-                action_table[ a ]();
-            }
-            else {
-                var message = action
-                    ? 'Unrecognized post-save action: '+action
-                    : 'No post-save action, redirecting to homepage';
-                show_message(message);
-                carp(message);
-                location.hash = '#';
-            }
-        }
-    };
+    
+    var action_table = new PostsaveActionTable({
+        object_id: object_id,
+        options: options
+    });
     
     // load form-specific post-save actions
     var $meta = $form.find('.js-form-metadata');
