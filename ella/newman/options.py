@@ -67,6 +67,9 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
 
     if isinstance(db_field, models.ImageField):
         # we accept only (JPEG) images with RGB color profile.
+        kwargs.update({
+            'label': db_field.verbose_name,
+        })
         return fields.RGBImageField(db_field, **kwargs)
 
     if db_field.name in cls.raw_id_fields and isinstance(db_field, models.ForeignKey):
