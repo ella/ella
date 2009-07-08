@@ -11,12 +11,12 @@ from django.utils.translation import ugettext_lazy as _, ugettext
 from django.utils.encoding import force_unicode
 from django.utils.html import escape
 from django.utils.text import truncate_words
+from django.contrib.contenttypes.models import ContentType
 
 from ella.ellaadmin.utils import admin_url
 from ella.core.models import Listing
 from ella.photos.models import Photo
 from djangomarkup.widgets import RichTextAreaWidget
-from django.contrib.contenttypes.models import ContentType
 
 __all__ = [
     'NewmanRichTextAreaWidget', 'FlashImageWidget',
@@ -365,6 +365,10 @@ class ChoiceCustomWidget(forms.TextInput):
         tpl = get_template('newman/widget/poll_choices_custom.html')
         return mark_safe(tpl.render(cx))
 
+    def _has_changed(self, initial, data):
+        from ella.newman import fields
+        initial_value = fields.ChoiceCustomField.default_text
+        return super(ChoiceCustomWidget, self)._has_changed(initial_value, data)
 
 class GalleryItemContentTypeWidget(forms.HiddenInput):
     " Custom hidden widget for gallery items. "

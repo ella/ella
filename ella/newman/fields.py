@@ -267,6 +267,8 @@ class ListingCustomField(ModelMultipleChoiceField):
 class ChoiceCustomField(fields.CharField):
     widget = widgets.ChoiceCustomWidget
     is_choice_custom_field = True
+    default_text = u'%s' % (_('Click to edit option'))
+    #default_text = u''
 
     def __init__(self, *args, **kwargs):
         super(ChoiceCustomField, self).__init__(*args, **kwargs)

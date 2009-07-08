@@ -92,21 +92,33 @@ class QuestionForm(modelforms.ModelForm):
         model = Question
 
     def __init__(self, *args, **kwargs):
-        initial = []
         super(QuestionForm, self).__init__(*args, **kwargs)
-        if 'instance' in kwargs and 'data' not in kwargs: # when form is generated, custom field is added.
+        existing_object = False
+        new_object = False
+        if 'instance' in kwargs and 'data' not in kwargs:
+            existing_object = True
+        elif 'data' not in kwargs:
+            new_object = True
+
+        default_text = fields.ChoiceCustomField.default_text
+        initial = (Choice(id=0, choice=default_text, points=0),)
+        self.fields['choices'] = fields.ChoiceCustomField(label=_('Choices'), initial=initial, required=False)
+        if existing_object:
+            # custom field is added when existing-question-form is generated
             inst = kwargs['instance']
-            for choice in Choice.objects.filter(question=inst):
-                initial.append(choice)
-            self.fields['choices'] = fields.ChoiceCustomField(label=_('Choices'), initial=initial, required=False)
+            ex_initial = tuple(Choice.objects.filter(question=inst))
+            if not ex_initial:
+                ex_initial = initial
+            self.fields['choices'] = fields.ChoiceCustomField(label=_('Choices'), initial=ex_initial, required=False)
+        elif new_object:
+            #self.initial['choices'] = initial
+            pass
+
         self.id_part = None
         self.widget_index = 0
 
     def get_part_id(self, suffix=None):
-        if not self.id_part:
-            dlist = self.data.getlist('choices_widget')
-            self.id_part = dlist[self.widget_index % len(dlist)]
-            self.widget_index += 1
+        self.id_part = '%s-choices' % self.prefix
         if not suffix:
             return self.id_part
         return '%s-%s' % (self.id_part, suffix)
@@ -124,9 +136,11 @@ class QuestionForm(modelforms.ModelForm):
         except:
             raise ValidationError(_(u'Enter a whole number.'))
         self.cleaned_data['choice_texts'] = self.data.getlist(self.get_part_id()) # choices text
+        """
         for tx in self.cleaned_data['choice_texts']:
             if not tx:
                 raise ValidationError(_(u'This field cannot be null.'))
+        """
         return self.cleaned_data
 
     def save(self, commit=True):
@@ -140,6 +154,9 @@ class QuestionForm(modelforms.ModelForm):
             irange = range(1, len(choice_texts) + 1)
             for chid, text, points, i in zip(choice_ids, choice_texts, choice_points, irange):
                 if chid <= 0:
+                    #import ipdb;ipdb.set_trace()
+                    if text == fields.ChoiceCustomField.default_text or not text:
+                        continue
                     new_ch = Choice(points=points, choice=text, votes=0, question=instance)
                     new_ch.save()
                     continue
