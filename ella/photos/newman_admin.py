@@ -27,7 +27,7 @@ class PhotoAdmin(newman.NewmanModelAdmin):
         (_("Heading"), {'fields': ('title', 'slug',)}),
         (_("Description"), {'fields': ('description',)}),
         (_("Metadata"), {'fields': ('authors', 'source', 'image',)}),
-        (_("Important area"), {'fields': ('important_top', 'important_right', 'important_bottom', 'important_left',)})
+        (_("Important area"), {'fields': (('important_top', 'important_right'), ('important_bottom', 'important_left'),), 'classes': ('collapsed',)})
     )
 
     def size(self, obj):
