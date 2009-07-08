@@ -144,6 +144,10 @@ class QuestionForm(modelforms.ModelForm):
         """
         return self.cleaned_data
 
+    def full_clean(self):
+        super(QuestionForm, self).full_clean()
+        return self.cleaned_data
+
     def save(self, commit=True):
         out = super(modelforms.ModelForm, self).save(commit=commit)
         instance = self.cleaned_data['id']
@@ -155,7 +159,6 @@ class QuestionForm(modelforms.ModelForm):
             irange = range(1, len(choice_texts) + 1)
             for chid, text, points, i in zip(choice_ids, choice_texts, choice_points, irange):
                 if chid <= 0:
-                    #import ipdb;ipdb.set_trace()
                     if text == fields.ChoiceCustomField.default_text or not text:
                         continue
                     new_ch = Choice(points=points, choice=text, votes=0, question=instance)
@@ -187,8 +190,8 @@ class QuestionInlineAdmin(newman.NewmanTabularInline):
     form = QuestionForm
     template = 'newman/edit_inline/poll_question.html'
     rich_text_fields = {'small': ('question',)}
-    extra = 1
     fieldsets = ((None, {'fields' : ('question', 'allow_multiple', 'allow_no_choice', 'choices')}),)
+    extra = 1
 
 class ContestAdmin(PublishableAdmin):
     def __call__(self, request, url):
