@@ -121,16 +121,16 @@ MARKITUP_SETTINGS = {
 			if(focused){
 				var range = focused.getSelection();
 				var content = focused.val();
-				if(content.match(/\{% box(.|\r|\n|\r\n)+\{% endbox %\}/g) && range.start != -1){
+				if(content.match(/\{% box(.|\n)+\{% endbox %\}/g) && range.start != -1){
 					var start = content.substring(0,range.start).lastIndexOf('{% box');
 					var end = content.indexOf('{% endbox %}',range.end);
 					if(start != -1 && end != -1 && content.substring(start,range.start).indexOf('{% endbox %}') == -1){
 						var box = content.substring(start-6,end+12);
 						edit_content = box;
-						var id = box.replace(/^.+pk (\d+) (.|\r|\n|\r\n)+$/,'$1');
-						var mode = box.replace(/^.+box (\w+) for(.|\r|\n|\r\n)+$/,'$1');
-						var type = box.replace(/^.+for (\w+\.\w+) (.|\r|\n|\r\n)+$/,'$1');
-						var params = box.replace(/^.+%\}(\r|\n|\r\n)?((.|\r|\n|\r\n)+)\{% endbox %\}$/,'$2');
+						var id = box.replace(/^.+pk (\d+) (.|\n)+$/,'$1');
+						var mode = box.replace(/^.+box (\w+) for(.|\n)+$/,'$1');
+						var type = box.replace(/^.+for (\w+\.\w+) (.|\n)+$/,'$1');
+						var params = box.replace(/^.+%\}\n?((.|\n)*)\{% endbox %\}$/,'$1');
 						$('#id_box_obj_ct').val(getIdFromPath(type)).trigger('change');
 						$('#id_box_obj_id').val(id);
 						if(type == 'photos.photo'){
@@ -146,7 +146,7 @@ MARKITUP_SETTINGS = {
 							if(box.indexOf('show_detail:1') != -1){
 								$('#id_box_photo_meta_show_detail').attr('checked','checked');
 							} else $('#id_box_photo_meta_show_detail').removeAttr('checked');
-							params = params.replace(/show_title:\d/,'').replace(/show_author:\d/,'').replace(/show_description:\d/,'').replace(/show_detail:\d/,'').replace(/(\n|\s)+/g,'');
+							params = params.replace(/show_title:\d/,'').replace(/show_author:\d/,'').replace(/show_description:\d/,'').replace(/show_detail:\d/,'').replace(/\n{2,}/g,'\n').replace(/\s{2,}/g,' ');
 							if(mode.indexOf('inline_velka') != -1){
 								$('#id_box_photo_size').val('velka')
 							} else if(mode.indexOf('inline_standard') != -1){
