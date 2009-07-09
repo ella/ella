@@ -4,85 +4,59 @@
  */
 
 (function() {
-
 	var fieldSelection = {
-
 		getSelection: function() {
-
 			var e = this.jquery ? this[0] : this;
-
 			return (
-
 				/* mozilla / dom 3.0 */
 				('selectionStart' in e && function() {
 					var l = e.selectionEnd - e.selectionStart;
 					return { start: e.selectionStart, end: e.selectionEnd, length: l, text: e.value.substr(e.selectionStart, l) };
 				}) ||
-
 				/* exploder */
 				(document.selection && function() {
-
 					e.focus();
-
 					var r = document.selection.createRange();
 					if (r == null) {
 						return { start: 0, end: e.value.length, length: 0 }
 					}
-
 					var re = e.createTextRange();
 					var rc = re.duplicate();
 					re.moveToBookmark(r.getBookmark());
 					rc.setEndPoint('EndToStart', re);
-
 					return { start: rc.text.length, end: rc.text.length + r.text.length, length: r.text.length, text: r.text };
 				}) ||
-
 				/* browser not supported */
 				function() {
 					return { start: 0, end: e.value.length, length: 0 };
 				}
-
 			)();
-
 		},
-
 		replaceSelection: function() {
-
 			var e = this.jquery ? this[0] : this;
 			var text = arguments[0] || '';
-
 			return (
-
 				/* mozilla / dom 3.0 */
 				('selectionStart' in e && function() {
 					e.value = e.value.substr(0, e.selectionStart) + text + e.value.substr(e.selectionEnd, e.value.length);
 					return this;
 				}) ||
-
 				/* exploder */
 				(document.selection && function() {
 					e.focus();
 					document.selection.createRange().text = text;
 					return this;
 				}) ||
-
 				/* browser not supported */
 				function() {
 					e.value += text;
 					return this;
 				}
-
 			)();
-
 		}
-
 	};
-
 	jQuery.each(fieldSelection, function(i) { jQuery.fn[i] = this; });
-
 })();
-
-
 
 // -------------------------------------------------------------------
 // markItUp!
@@ -97,6 +71,8 @@
 // Feel free to add more tags
 // -------------------------------------------------------------------\
 
+var focused;
+var edit_content;
 var getIdFromPath = function(path){
     var id;
     $.each(AVAILABLE_CONTENT_TYPES, function(i){
@@ -132,7 +108,7 @@ MARKITUP_SETTINGS = {
         { separator: '---------------' },
         { name: gettext('Photo'), className: 'photo', call: function(){
             $('#rich-box').dialog('open');
-            $('#id_box_obj_ct').val(getIdFromPath('photos.photo')).trigger('change');// 20 is value for photos.photo is the select box
+            $('#id_box_obj_ct').val(getIdFromPath('photos.photo')).trigger('change');// 20 is value for photos.photo in the select box
             $('#lookup_id_box_obj_id').trigger('click');
         }},
         { name: gettext('Gallery'), className: 'gallery', call: function(){
@@ -141,9 +117,59 @@ MARKITUP_SETTINGS = {
         }},
         { name: gettext('Box'), className: 'box', call: function(){
             $('#rich-box').dialog('open');
-			// Edit box - from jQuery fieldSelection plugin
-			var range = $(this).getSelection();
-			alert(range.start)
+			// Edit box
+			if(focused){
+				var range = focused.getSelection();
+				var content = focused.val();
+				if(content.match(/\{% box(.|\r|\n|\r\n)+\{% endbox %\}/g) && range.start != -1){
+					var start = content.substring(0,range.start).lastIndexOf('{% box');
+					var end = content.indexOf('{% endbox %}',range.end);
+					if(start != -1 && end != -1 && content.substring(start,range.start).indexOf('{% endbox %}') == -1){
+						var box = content.substring(start-6,end+12);
+						edit_content = box;
+						var id = box.replace(/^.+pk (\d+) (.|\r|\n|\r\n)+$/,'$1');
+						var mode = box.replace(/^.+box (\w+) for(.|\r|\n|\r\n)+$/,'$1');
+						var type = box.replace(/^.+for (\w+\.\w+) (.|\r|\n|\r\n)+$/,'$1');
+						var params = box.replace(/^.+%\}(\r|\n|\r\n)?((.|\r|\n|\r\n)+)\{% endbox %\}$/,'$2');
+						$('#id_box_obj_ct').val(getIdFromPath(type)).trigger('change');
+						$('#id_box_obj_id').val(id);
+						if(type == 'photos.photo'){
+							if(box.indexOf('show_title:1') != -1){
+								$('#id_box_photo_meta_show_title').attr('checked','checked');
+							} else $('#id_box_photo_meta_show_title').removeAttr('checked');
+							if(box.indexOf('show_author:1') != -1){
+								$('#id_box_photo_meta_show_author').attr('checked','checked');
+							} else $('#id_box_photo_meta_show_author').removeAttr('checked');
+							if(box.indexOf('show_description:1') != -1){
+								$('#id_box_photo_meta_show_description').attr('checked','checked');
+							} else $('#id_box_photo_meta_show_description').removeAttr('checked');
+							if(box.indexOf('show_detail:1') != -1){
+								$('#id_box_photo_meta_show_detail').attr('checked','checked');
+							} else $('#id_box_photo_meta_show_detail').removeAttr('checked');
+							params = params.replace(/show_title:\d/,'').replace(/show_author:\d/,'').replace(/show_description:\d/,'').replace(/show_detail:\d/,'').replace(/(\n|\s)+/g,'');
+							if(mode.indexOf('inline_velka') != -1){
+								$('#id_box_photo_size').val('velka')
+							} else if(mode.indexOf('inline_standard') != -1){
+								$('#id_box_photo_size').val('standard')
+							} else if(mode.indexOf('inline_mala') != -1){
+								$('#id_box_photo_size').val('mala')
+							}
+							if(mode.indexOf('ctverec') != -1){
+								$('#id_box_photo_format').val('ctverec')
+							} else if(mode.indexOf('obdelnik_sirka') != -1){
+								$('#id_box_photo_format').val('obdelnik_sirka')
+							} else if(mode.indexOf('obdelnik_vyska') != -1){
+								$('#id_box_photo_format').val('obdelnik_vyska')
+							} else if(mode.indexOf('nudle_sirka') != -1){
+								$('#id_box_photo_format').val('nudle_sirka')
+							} else if(mode.indexOf('nudle_vyska') != -1){
+								$('#id_box_photo_format').val('nudle_vyska')
+							}
+						}
+						$('#id_box_obj_params').val(params);
+					}
+				}
+			}
         }},
         { separator: '---------------' },
         { name: gettext('Preview'), call: 'preview', className: 'preview'}
@@ -158,7 +184,6 @@ $(function(){
     if(!$('#rich-box').length){
         $('<div id="rich-box" title="Box"></div>').hide().appendTo('body');
         $('#rich-box').load(BASE_URL+'nm/editor-box/', function(){
-
             $('#id_box_obj_ct').bind('change', function(){
                 if(getTypeFromPath($('#id_box_obj_ct').val()) == 'photos.photo'){
                     $('#rich-photo-format').show();
@@ -189,9 +214,15 @@ $(function(){
 							});
                         }
                         // Insert code
-                        $.markItUp({
-                            openWith:'{% box inline'+addon+' for '+type+' with pk '+$('#id_box_obj_id').val()+' %}'+((params) ? '\n'+params+'\n' : '')+'{% endbox %}'
-                        });
+						if(!edit_content){
+	                        $.markItUp({
+	                            openWith:'{% box inline'+addon+' for '+type+' with pk '+$('#id_box_obj_id').val()+' %}'+((params) ? '\n'+params+'\n' : '')+'{% endbox %}'
+	                        });
+						} else if(focused){
+							var old = focused.val();
+							focused.val(old.replace(edit_content,'{% box inline'+addon+' for '+type+' with pk '+$('#id_box_obj_id').val()+' %}'+((params) ? '\n'+params+'\n' : '')+'{% endbox %}'))
+							edit_content = '';
+						}
                         // Reset and close dialog
                         $('#rich-object').trigger('reset');
                         $('#rich-box').dialog('close');
@@ -207,7 +238,9 @@ $(function(){
             height: 360
         });
     }
-    $('.rich_text_area').markItUp(MARKITUP_SETTINGS);
+    $('.rich_text_area').markItUp(MARKITUP_SETTINGS).focus(function(){
+		focused = $(this);
+	});
 });
 
 // mIu nameSpace to avoid conflict.
