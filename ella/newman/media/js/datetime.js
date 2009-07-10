@@ -326,7 +326,18 @@ function DateInput(input) {
     }
     datetime_init();
 
+    var timepicker_html;
     function media_dependent_datetime_init(evt) {
+        
+        if ( ! timepicker_html ) {
+            var args = arguments; args.this = this;
+            get_html_chunk('timepicker', function(data) {
+                timepicker_html = data;
+                args.callee.apply( args.this, args );
+            });
+            return;
+        }
+        
         // create the datetimepicker div
         if ($('.datetimepicker').length) { }    // but only if there is none yet
         else if (
@@ -361,12 +372,8 @@ function DateInput(input) {
             
             // Time picker
             var $timepicker = $('<div class="timepicker">')
-            .html(
-                '<button type="button" class="js-dtpicker-close"><img src="'+MEDIA_URL+'ico/16/cancel.png" alt="X" /></button>' +
-                '<button type="button" class="js-timepick js-time-now">' +gettext('Now' )+'</button>' +
-                '<button type="button" class="js-timepick js-time-0600">'+gettext('6am' )+'</button>' +
-                '<button type="button" class="js-timepick js-time-1200">'+gettext('Noon')+'</button>'
-            ).appendTo($dtpicker);
+            .html(timepicker_html).appendTo($dtpicker);
+            
             
             // Container placement
             $dtpicker.appendTo(
