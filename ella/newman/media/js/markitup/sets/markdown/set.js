@@ -125,7 +125,7 @@ MARKITUP_SETTINGS = {
 					var start = content.substring(0,range.start).lastIndexOf('{% box');
 					var end = content.indexOf('{% endbox %}',range.end);
 					if(start != -1 && end != -1 && content.substring(start,range.start).indexOf('{% endbox %}') == -1){
-						var box = content.substring(start-6,end+12);
+						var box = content.substring(start,end+12);
 						edit_content = box;
 						var id = box.replace(/^.+pk (\d+) (.|\n)+$/,'$1');
 						var mode = box.replace(/^.+box (\w+) for(.|\n)+$/,'$1');
