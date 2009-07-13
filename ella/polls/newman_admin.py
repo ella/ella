@@ -87,7 +87,7 @@ class ContestantAdmin(newman.NewmanModelAdmin):
 
 class QuestionForm(modelforms.ModelForm):
     # create the field here to pass validation
-    choices =  fields.ChoiceCustomField([], label=_('Choices'), required=False)
+    choices =  fields.ChoiceCustomField([], label=_('Choices'), required=False, initial=(Choice(id=0, choice=fields.ChoiceCustomField.default_text, points=0),))
 
     class Meta:
         model = Question
@@ -103,7 +103,7 @@ class QuestionForm(modelforms.ModelForm):
 
         default_text = fields.ChoiceCustomField.default_text
         initial = (Choice(id=0, choice=default_text, points=0),)
-        self.fields['choices'] = fields.ChoiceCustomField(label=_('Choices'), initial=initial, required=False)
+        #self.fields['choices'] = fields.ChoiceCustomField(label=_('Choices'), initial=initial, required=False)
         if existing_object:
             # custom field is added when existing-question-form is generated
             inst = kwargs['instance']
@@ -146,7 +146,14 @@ class QuestionForm(modelforms.ModelForm):
 
     def full_clean(self):
         super(QuestionForm, self).full_clean()
-        return self.cleaned_data
+
+    def _get_changed_data(self):
+        out = super(QuestionForm, self)._get_changed_data()
+        if 'choices' in out and 'question' not in out:
+            if len( self.data.getlist(self.get_part_id()) ) > 0:
+                return ['question', 'choices']
+        return out
+    changed_data = property(_get_changed_data)
 
     def save(self, commit=True):
         out = super(modelforms.ModelForm, self).save(commit=commit)
