@@ -100,6 +100,15 @@
                             <span class="original">
                               {% if inline_admin_form.has_auto_field %}{{ inline_admin_form.pk_field.field }}{% endif %}
                               {{ inline_admin_form.fk_field.field }}
+                              {% spaceless %}
+                              {% for fieldset in inline_admin_form %}
+                                {% for line in fieldset %}
+                                  {% for field in line %}
+                                    {% if field.is_hidden %} {{ field.field }} {% endif %}
+                                  {% endfor %}
+                                {% endfor %}
+                              {% endfor %}
+                              {% endspaceless %}
                             </span>
                     </span>
                 {% if inline_admin_form.show_url %}
