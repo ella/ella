@@ -58,6 +58,11 @@ ContentByHashLib.LOADED_MEDIA = {};
     // so we can load or not load content appropriately on hash change.
     var LOADED_URLS = ContentByHashLib.LOADED_URLS = {};
     
+    // We also need to keep track of what's been loaded from a hashchange
+    // to be able to distinguish what's affected by
+    // no longer being mentioned in the hash.
+    var URL_LOADED_BY_HASH = ContentByHashLib.URL_LOADED_BY_HASH = {};
+    
     var ORIGINAL_TITLE = document.title;
     
     // If the hash changes before all ajax requests complete,
@@ -122,6 +127,7 @@ ContentByHashLib.LOADED_MEDIA = {};
         $(document).trigger('dec_loading');
         if (address != undefined) {
             LOADED_URLS[ $target.attr('id') ] = address;
+            if (extras && extras.by_hash) URL_LOADED_BY_HASH[ $target.attr('id') ] = true;
         }
         PAGE_CHANGED++;
         $target.trigger('content_added', extras);
@@ -211,7 +217,7 @@ ContentByHashLib.LOADED_MEDIA = {};
             return;
         }
         
-        inject_content($target, info.data, info.address, {xhr: info.xhr});
+        inject_content($target, info.data, info.address, {xhr: info.xhr, by_hash: info.by_hash});
         
         // Check next request
         draw_ready();
@@ -259,6 +265,7 @@ ContentByHashLib.LOADED_MEDIA = {};
             target_id: target_id,
             address: address
         };
+        if (arg.by_hash) LOAD_BUF[ load_id ].by_hash = arg.by_hash;
         $.ajax({
             url: url,
             type: 'GET',
@@ -306,6 +313,7 @@ ContentByHashLib.LOADED_MEDIA = {};
     function unload_content(container_id, options) {
         if (!options) options = {};
         delete LOADED_URLS[ container_id ];
+        delete URL_LOADED_BY_HASH[ container_id ];
         var $container = $('#'+container_id);
         if (!options.keep_content) {
             $container.empty();
@@ -334,7 +342,7 @@ ContentByHashLib.LOADED_MEDIA = {};
             var address = spec;
             var target_id = ContentByHashLib.DEFAULT_TARGET;
             if (spec.match(/^([-\w]+)::(.*)/)) {
-                target_id  = RegExp.$1;
+                target_id = RegExp.$1;
                 address = RegExp.$2;
             }
             
@@ -423,8 +431,15 @@ ContentByHashLib.LOADED_MEDIA = {};
             if (result.to_reload == undefined) {
                 // and the thing is no longer requested and we don't have the base loaded,
                 if (!requested[ indep ] && LOADED_URLS[ indep ] != '') {
-                    // then reload the base
-                    result.to_reload = 1;
+                    // and it's been loaded via URL hash change
+                    if (URL_LOADED_BY_HASH[ indep ]) {
+                        // then reload the base
+                        result.to_reload = 1;
+                    }
+                    else {
+                        // else prevent it from being reloaded
+                        result.to_reload = false;
+                    }
                 }
             }
             
@@ -443,7 +458,8 @@ ContentByHashLib.LOADED_MEDIA = {};
             
             processed[ indep ] = result;
         }
-        // Now we figured out what to reload.
+        // Now we figured out what to reload:
+        // The things that are in requested AND that have processed[ $_ ].to_reload set to a true value
         
         for (var target_id in requested) {
             if (!processed[ target_id ].to_reload) {
@@ -460,7 +476,8 @@ ContentByHashLib.LOADED_MEDIA = {};
             
             load_content({
                 target_id: target_id,
-                address: address
+                address: address,
+                by_hash: true
             });
         }
     }
