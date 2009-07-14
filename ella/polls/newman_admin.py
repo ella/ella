@@ -39,8 +39,26 @@ class ResultFormset(BaseInlineFormSet):
                 raise ValidationError, ugettext('Score %s is not covered by any answer.') % (intervals[i][1] + 1)
         return self.cleaned_data
 
+class ResultForm(modelforms.ModelForm):
+
+    class Meta:
+        model = Result
+
+    def __init__(self, *args, **kwargs):
+        super(ResultForm, self).__init__(*args, **kwargs)
+        self.fields['count'].required = False
+
+    def clean(self):
+        self.cleaned_data = super(ResultForm, self).clean()
+        if not self.cleaned_data['count']:
+            self.cleaned_data['count'] = u'0'
+        if not self.is_valid():
+            return
+        return self.cleaned_data
+
 class ResultTabularAdmin(newman.NewmanTabularInline):
     model = Result
+    form = ResultForm
     extra = 1
     formset = ResultFormset
 

@@ -285,7 +285,6 @@ msgid "results"
 msgstr "Výsledky"
 
 #: newman_admin.py:26
-#, fuzzy, python-format
 msgid "Invalid score interval %(points_from)s - %(points_to)s.Points dimension from can not be greater than point dimension to."
 msgstr "Neplatný rozsah bodů %(points_from)s - %(points_to)s. Rozsah bodů od musí být větší než rozsah bodů do."
 
@@ -294,12 +293,10 @@ msgid "Invalid score intervals"
 msgstr "Neplatné rozsahy bodů"
 
 #: newman_admin.py:37
-#, python-format
 msgid "Score %s is covered by two answers."
 msgstr "Výsledeku %s odpovídají dvě odpovědi."
 
 #: newman_admin.py:39
-#, python-format
 msgid "Score %s is not covered by any answer."
 msgstr "Pro výsledek %s neexistuje žádná odpověď."
 
