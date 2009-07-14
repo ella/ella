@@ -56,6 +56,9 @@
         $new_question.find('span:first').addClass('js-empty-poll-question-text').find('a').text(gettext('Click to edit question'));
         $new_question.find(':input.js-edit-poll-choice-text').val('');
         
+        // get rid of silly ID's
+        $new_question.find('[id]').removeAttr('id');
+        
         // set the question's inputs' names
         var last_qid = $last_question.find('input[name=choices_widget]').val();
         var last_no = /\d+/.exec( last_qid )[0];
@@ -67,6 +70,11 @@
         var last_qt = $last_question.find('.js-poll-question-input :input').attr('name');
         var new_qt = last_qt.replace(/\d+/, new_no);
         $new_question.find('.js-poll-question-input :input').attr('name', new_qt);
+        $new_question.find('.js-question-foreign-key-fields :input').each( function() {
+            // question_set-0-id   => question_set-1-id
+            // question_set-0-quiz => question_set-1-quiz
+            this.name = this.name.replace(/set-\d+-/, 'set-'+new_no+'-');
+        });
         
         // reset rich text field
         var $rich_text = $new_question.find('.rich_text_area');
