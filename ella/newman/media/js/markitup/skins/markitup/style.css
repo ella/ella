@@ -169,9 +169,9 @@
     margin:0 0 0 10px;
 }
 /* small */
-.small.markItUpEditor {
+.small .markItUpEditor {
     height:120px;
 }
-.small.markItUpPreviewFrame {
-    height:120px;
+.small .markItUpPreviewFrame {
+    height:130px;
 }
