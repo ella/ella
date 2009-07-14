@@ -18,7 +18,9 @@
                         class="js-edit-poll-choice-text"
                     >{{ choice.choice }}</textarea>
                     <a class="js-edit-poll-choice-text">
-                        <span title="{% if not choice.votes %}0{% else %}{{ choice.votes }}{% endif %} {% trans 'Votes' %}">{{ choice.choice }}</span>
+                        <span title="{% if not choice.votes %}0{% else %}{{ choice.votes }}{% endif %} {% trans 'Votes' %}"{% if choice.choice %}{% else %} class="empty-poll-choice"{% endif %}>
+                            {% if choice.choice %}{{ choice.choice }}{% else %}{% trans "Click to edit option" %}{% endif %}
+                        </span>
                     </a>
                 </p>
                 
