@@ -621,9 +621,16 @@ class NewmanModelAdmin(XModelAdmin):
                 error_dict["id_%s" % field_name] = map( lambda item: u'%s%s' % (field_vname, item), map(give_me_unicode, field.errors) )
         # Inline Form fields
         for fset in context['inline_admin_formsets']:
-            if not fset.formset.errors:
-                continue
             counter = get_formset_counter(fset.formset.prefix)
+            for frm in fset.formset.forms:
+                for key in frm.errors:
+                    inline_id = 'id_%s-%d-%s' % (fset.formset.prefix, counter, key)
+                    error_dict[inline_id] = frm.errors[key]
+            """
+            for err_item in fset.formset.non_form_errors():
+                inline_id = 'id_%s-%d' % (fset.formset.prefix, counter)
+                error_dict[inline_id] = err_item
+            """
             for err_item in fset.formset.errors:
                 for key in err_item:
                     field_name = ''
