@@ -740,6 +740,11 @@ function show_err(message, options) {
     if (!options.msgclass) options.msgclass = 'errmsg';
     show_message(message, options);
 }
+$('#opmsg').live('click', function(evt) {
+    if (evt.button != 0) return;
+    hide_loading();
+    $('#opmsg *').remove();
+});
 
 
 // The 'loading...' message

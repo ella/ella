@@ -45,6 +45,7 @@ CSS_GENERIC_SUGGEST = 'css/generic.suggest.css'
 CSS_JQUERY_UI = 'jquery/jquery-ui-smoothness.css'
 JS_JQUERY_UI = 'jquery/jquery-ui.js'
 JS_JQUERY_MOUSEWHEEL = 'jquery/jquery-mousewheel.js'
+JS_JQUERY_FIELDSELECTION = 'jquery/jquery-fieldselection.js'
 
 # Date and DateTime
 JS_DATE_INPUT = 'js/datetime.js'
@@ -69,6 +70,7 @@ class NewmanRichTextAreaWidget(RichTextAreaWidget):
             MEDIA_PREFIX + JS_MARKITUP,
             MEDIA_PREFIX + JS_MARKITUP_SET,
             MEDIA_PREFIX + JS_JQUERY_UI,
+            MEDIA_PREFIX + JS_JQUERY_FIELDSELECTION,
         )
         css = {
             'screen': (
