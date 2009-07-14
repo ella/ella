@@ -163,14 +163,21 @@ GenericSuggestLib = {};
         $ins.unbind('keyup').bind('keyup', function($event) {
             var $this = $(this);
             var key = $event.keyCode;
-            if (  key == CR || key ==    UPARROW || key == PAGEUP
-               || key == LF || key ==  DOWNARROW || key == PAGEDOWN
-                            || key ==  LEFTARROW
-                            || key == RIGHTARROW
-            ) return;
-            else if (key == ESC) {
+            if (  key == CR || key == LF ) return;
+            else if (key == ESC || key ==    UPARROW || key == PAGEUP
+                                || key ==  DOWNARROW || key == PAGEDOWN
+                                || key ==  LEFTARROW
+                                || key == RIGHTARROW
+            ) {
                 bubble_keyevent(key, $this);
                 return;
+            }
+            else if (key == BACKSPACE && $this.val().length == 0) {
+                var $prev = $this.parent().prev();
+                if ($prev.length == 0) return;
+                $this.val('');
+                $prev.remove();
+                update_values();
             }
             else {
                 suggest_update($this);
@@ -180,18 +187,9 @@ GenericSuggestLib = {};
         .unbind('keypress').bind('keypress', function($event) {
             var key = $event.keyCode;
             var $this = $(this);
-            if (  key == CR || key ==   UPARROW || key == PAGEUP
-               || key == LF || key == DOWNARROW || key == PAGEDOWN
-            ) {
+            if (  key == CR || key == LF ) {
                 bubble_keyevent(key, $this);
                 return false;
-            }
-            else if (key == BACKSPACE && $this.val().length == 0) {
-                var $prev = $this.parent().prev();
-                if ($prev.length == 0) return;
-                $this.val('');
-                $prev.remove();
-                update_values();
             }
             return true;
         })
