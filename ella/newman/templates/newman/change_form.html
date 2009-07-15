@@ -66,7 +66,10 @@
 </div>
 
 <div class="js-form-metadata">
-    <input type="hidden" name="success" onchange="save_change_form_success.apply(this, arguments);" />
+    <input type="hidden" name="success" id="save-change-form-success" />
+    <script type="text/javascript">
+        $('#save-change-form-success').data('callback', save_change_form_success);
+    </script>
 </div>
 
 </form>

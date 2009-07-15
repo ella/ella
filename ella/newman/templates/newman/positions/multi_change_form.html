@@ -28,7 +28,12 @@
     {% endif %}
 
     <div class="js-form-metadata">
-        <input type="hidden" name="post_save" onchange="return { _save_: function() { adr('../../'); } }" />
+        <input type="hidden" name="post_save" id="swim-2-levels-up" />
+        <script type="text/javascript">
+            $('#swim-2-levels-up').data('callback', function() {
+                return { _save_: function() { adr('../../'); } };
+            });
+        </script>
     </div>
 
     <script type="text/javascript">

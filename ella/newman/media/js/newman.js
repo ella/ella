@@ -374,7 +374,7 @@ $( function() {
             $form.submit();
             return false;
         }
-*/        // End of hash for file inputs
+*/        // End of hack for file inputs
         
         var action =  $form.attr('action');
         var method = ($form.attr('method') || 'POST').toUpperCase();
@@ -383,13 +383,13 @@ $( function() {
         var $error   = $meta.find('input[name=error]');
         var success, error;
         if ($success && $success.length) {
-            success = function(data) { $success.get(0).onchange(data, this); };
+            success = $success.data('callback');
         }
         else {
             success = show_ajax_success;
         }
         if ($error && $error.length) {
-            error = function(xhr, st) { $error.get(0).onchange(xhr, st); };
+            error = $error.data('callback');
         }
         else {
             error = ajax_submit_error;
@@ -802,7 +802,7 @@ function show_ajax_success(response_text) {
         message = data.message;
     } catch (e) {
         message = gettext('Successfully sent');
-        paste_code_into_debug( response_text.replace(/\n(\s*\n)+/g, "\n"), 'Ajax success response' );
+        paste_code_into_debug( (response_text||'').replace(/\n(\s*\n)+/g, "\n"), 'Ajax success response' );
     }
     show_ok(message);
 }
@@ -875,7 +875,8 @@ PostsaveActionTable.prototype = {
 
 
 // submit line (save, save as new, etc)
-function save_change_form_success(text_data, options) {
+function save_change_form_success(text_data) {
+    var options = this;
     if (!options || !options._button_name || !options._form) {
         var message;
         if (!options) message = 'No XHR options passed to save_change_form_success';
@@ -903,9 +904,9 @@ function save_change_form_success(text_data, options) {
     
     // load form-specific post-save actions
     var $meta = $form.find('.js-form-metadata');
-    var post_save_input = $meta.find('input[name=post_save]').get(0);
+    var post_save_callback = $meta.find('input[name=post_save]').data('callback');
     var post_save = {};
-    if (post_save_input) post_save = post_save_input.onchange($form);
+    if (post_save_callback) post_save = post_save_callback($form);
     for (var act in post_save) {
         action_table[ act ] = post_save[ act ];
     }

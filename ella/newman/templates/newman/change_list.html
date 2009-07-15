@@ -73,7 +73,10 @@
             {% endblock %}
             {% block pagination %}{% pagination cl %}{% endblock %}
             <div class="js-form-metadata">
-                <input type="hidden" name="success" onchange="changelist_batch_success.apply(this, arguments);" />
+                <input type="hidden" name="success" id="changelist-batch-success" />
+                <script type="text/javascript">
+                    $('changelist-batch-success').data('callback', changelist_batch_success);
+                </script>
             </div>
         </form>
 
