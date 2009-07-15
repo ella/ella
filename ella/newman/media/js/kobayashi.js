@@ -350,7 +350,7 @@ ContentByHashLib.LOADED_MEDIA = {};
             if (ADDRESS_POSTPROCESS[ address ]) {
                 address = ADDRESS_POSTPROCESS[ address ];
                 specifiers[i] = (spec.indexOf('::')>=0 ? spec.substr(0, spec.indexOf('::') + '::'.length) : '') + address;
-                location.hash = specifiers.join('#');
+                location.replace( '#' + specifiers.join('#') );
                 return;
             }
             
