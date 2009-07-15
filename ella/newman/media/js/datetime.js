@@ -330,10 +330,10 @@ function DateInput(input) {
     function media_dependent_datetime_init(evt) {
         
         if ( ! timepicker_html ) {
-            var args = arguments; args.this = this;
+            var args = arguments; args._this = this;
             get_html_chunk('timepicker', function(data) {
                 timepicker_html = data;
-                args.callee.apply( args.this, args );
+                args.callee.apply( args._this, args );
             });
             return;
         }
