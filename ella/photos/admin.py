@@ -76,8 +76,8 @@ class PhotoOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
             return thumb_url(request, *url.split('/')[-3:-1])
         return super(PhotoOptions, self).__call__(request, url)
 
-    def queryset(self):
-        return self.queryset(PhotoOptions, self).filter(width_gt=100, height_gt=100)
+    def queryset(self, request):
+        return super(PhotoOptions, self).queryset(request).filter(width__gt=100, height__gt=100)
 
 
 class FormatedPhotoOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
