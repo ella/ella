@@ -1,8 +1,8 @@
 function DateTimeInput(input) {
     this.input = input;
-    this.x_pos = $(input).offset().left;
     this.cursor_pos = function(evt) {
         var input = this.input;
+        if (!this.x_pos) this.x_pos = $(input).offset().left;
         var input_style;
         try {
             input_style = getComputedStyle(input, '');
@@ -20,7 +20,8 @@ function DateTimeInput(input) {
         
         var x = evt.clientX - this.x_pos - padding - border;
         
-        var $tempspan = $('<span>').css({
+        var $tempspan = $('#datetime-temp');
+        if ($tempspan.length == 0) $tempspan = $('<span id="datetime-temp">').css({
             position: 'absolute',
             top: '-100px'
         });
@@ -49,8 +50,6 @@ function DateTimeInput(input) {
         }
         text = $tempspan.text();
         text = text.substr(0, text.length-1) + last;
-        $tempspan.remove();
-//        ;;; $('#pos').text( text );
         return text.length;
     };
     this.set_date = function(d, preserve) {
