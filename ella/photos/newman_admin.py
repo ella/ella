@@ -57,6 +57,11 @@ class PhotoAdmin(newman.NewmanModelAdmin):
         return JsonResponse('', out)
 
 
+    def queryset(self, request):
+        return super(PhotoAdmin, self).queryset(request).filter(width__gt=100, height__gt=100)
+
+
+
 class FormatedPhotoAdmin(newman.NewmanModelAdmin):
     list_display = ('image', 'format', 'width', 'height')
     list_filter = ('format',)
