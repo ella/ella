@@ -11,10 +11,10 @@ function DateTimeInput(input) {
         }
         if (input_style == undefined) input_style = {};
         
-        var padding = input_style.paddingLeft;
+        var padding = input_style.paddingLeft || input_style['padding-left'];
         if (/^(\d+)(?:px)?$/.test(padding)) padding = new Number(RegExp.$1);
         else padding = 0;
-        var border = input_style.borderLeftWidth;
+        var border = input_style.borderLeftWidth || input_style['border-left-width'];
         if (/^(\d+)(?:px)?$/.test(border )) border  = new Number(RegExp.$1);
         else border = 0;
         
@@ -26,6 +26,9 @@ function DateTimeInput(input) {
             top: '-100px'
         });
         for (var property in input_style) {
+            
+            if (property >= 0) property = input_style[ property ];  // XXX nasty Chrome hack
+            
             if (property.substr(0, 4) == 'font') {
                 $tempspan.css(property, input_style[property]);
             }
@@ -156,10 +159,10 @@ function DateInput(input) {
         }
         if (input_style == undefined) input_style = {};
         
-        var padding = input_style.paddingLeft;
+        var padding = input_style.paddingLeft || input_style['padding-left'];
         if (/^(\d+)(?:px)?$/.test(padding)) padding = new Number(RegExp.$1);
         else padding = 0;
-        var border = input_style.borderLeftWidth;
+        var border = input_style.borderLeftWidth || input_style['border-left-width'];
         if (/^(\d+)(?:px)?$/.test(border )) border  = new Number(RegExp.$1);
         else border = 0;
         
@@ -171,6 +174,9 @@ function DateInput(input) {
             top: '-100px'
         });
         for (var property in input_style) {
+            
+            if (property >= 0) property = input_style[ property ];  // XXX nasty Chrome hack
+            
             if (property.substr(0, 4) == 'font') {
                 $tempspan.css(property, input_style[property]);
             }
