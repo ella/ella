@@ -313,13 +313,14 @@ function DateInput(input) {
                 .data('input', $input)
                 .insertAfter(this);
                 
-                $input.keypress(function(evt) {
+                $input.keydown(function(evt) {
                     var delta = 0;
                     if (evt.keyCode == 38) delta =  1;
                     if (evt.keyCode == 40) delta = -1;
                     if (!delta) return true;
                     var pos = this.selectionEnd;
                     $input.data('dti').scroll(pos, delta);
+                    evt.preventDefault();
                 });
             }
         });
@@ -388,6 +389,7 @@ function DateInput(input) {
             var dti = $(this).data('dti');
             var pos = dti.cursor_pos(evt);
             dti.scroll(pos, delta / Math.abs(delta||1));
+            evt.preventDefault();
         };
         if (DEBUG)  // FIXME: mousewheel scrolling broken!
         $('.vDateTimeInput,.vDateInput').not('.mwheel-enhanced').focus( function() {
