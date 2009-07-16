@@ -7,6 +7,7 @@ from django.forms.util import ValidationError
 from ella.ellaadmin.options import EllaAdminOptionsMixin
 
 from ella.photos.models import FormatedPhoto, Format, Photo
+from ella.photos.models import PHOTO_MIN_WIDTH, PHOTO_MIN_HEIGHT
 from ella.photos.views import format_photo_json, thumb_url
 
 class FormatedPhotoForm(forms.BaseForm):
@@ -73,12 +74,8 @@ class PhotoOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
             return thumb_url(request, *url.split('/')[-3:-1])
         return super(PhotoOptions, self).__call__(request, url)
 
-
-
     def queryset(self, request):
-        return super(PhotoOptions, self).queryset(request).filter(width__gt=100, height__gt=100)
-
-
+        return super(PhotoOptions, self).queryset(request).filter(width__gt=PHOTO_MIN_WIDTH, height__gt=PHOTO_MIN_HEIGHT)
 
 
 class FormatedPhotoOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
