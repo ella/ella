@@ -8,10 +8,8 @@ from ella.tagging.admin import TaggingInlineOptions
 from ella.ellaadmin.options import EllaAdminOptionsMixin
 
 from ella.photos.models import FormatedPhoto, Format, Photo
+from ella.photos.models import PHOTO_MIN_WIDTH, PHOTO_MIN_HEIGHT
 from ella.photos.views import format_photo_json, thumb_url
-
-PHOTO_MIN_WIDTH=150
-PHOTO_MIN_HEIGHT=150
 
 class FormatedPhotoForm(forms.BaseForm):
     def clean(self):
