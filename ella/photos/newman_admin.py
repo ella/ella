@@ -4,6 +4,7 @@ from django.conf.urls.defaults import patterns, url
 from ella import newman
 
 from ella.photos.models import FormatedPhoto, Format, Photo
+from ella.photos.models import PHOTO_MIN_WIDTH, PHOTO_MIN_HEIGHT
 from ella.newman.utils import JsonResponse, JsonResponseError
 from ella.newman.config import STATUS_OBJECT_NOT_FOUND
 
@@ -55,6 +56,11 @@ class PhotoAdmin(newman.NewmanModelAdmin):
         }
 
         return JsonResponse('', out)
+
+
+    def queryset(self, request):
+        return super(PhotoAdmin, self).queryset(request).filter(width__gt=PHOTO_MIN_WIDTH, height__gt=PHOTO_MIN_HEIGHT)
+
 
 
 class FormatedPhotoAdmin(newman.NewmanModelAdmin):
