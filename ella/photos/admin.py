@@ -74,6 +74,13 @@ class PhotoOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
         return super(PhotoOptions, self).__call__(request, url)
 
 
+
+    def queryset(self, request):
+        return super(PhotoOptions, self).queryset(request).filter(width__gt=100, height__gt=100)
+
+
+
+
 class FormatedPhotoOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     base_form = FormatedPhotoForm
     list_display = ('image', 'format', 'width', 'height')
