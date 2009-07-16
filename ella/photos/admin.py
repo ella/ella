@@ -10,6 +10,9 @@ from ella.ellaadmin.options import EllaAdminOptionsMixin
 from ella.photos.models import FormatedPhoto, Format, Photo
 from ella.photos.views import format_photo_json, thumb_url
 
+PHOTO_MIN_WIDTH=150
+PHOTO_MIN_HEIGHT=150
+
 class FormatedPhotoForm(forms.BaseForm):
     def clean(self):
         """
@@ -77,7 +80,7 @@ class PhotoOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
         return super(PhotoOptions, self).__call__(request, url)
 
     def queryset(self, request):
-        return super(PhotoOptions, self).queryset(request).filter(width__gt=100, height__gt=100)
+        return super(PhotoOptions, self).queryset(request).filter(width__gt=PHOTO_MIN_WIDTH, height__gt=PHOTO_MIN_HEIGHT)
 
 
 class FormatedPhotoOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
