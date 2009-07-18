@@ -4,7 +4,7 @@
 GenericSuggestLib = {};
 (function($) { $( function() {
     ;;; DBG = 1;
-    GenericSuggestLib.VERSION = '2009.04.17-newman';
+    GenericSuggestLib.VERSION = '2009.07.18-newman';
     var DEL_IMG = MEDIA_URL + 'ico/10/icon_deletelink.gif';
     var MIN_LENGTH = 2;
     var SUGGEST_FIELD_SEPARATOR = '|';
@@ -173,13 +173,6 @@ GenericSuggestLib = {};
                 bubble_keyevent(key, $this);
                 return;
             }
-            else if (key == BACKSPACE && $this.val().length == 0) {
-                var $prev = $this.parent().prev();
-                if ($prev.length == 0) return;
-                $this.val('');
-                $prev.remove();
-                update_values();
-            }
             else {
                 schedule_suggest_update($this);
                 return;
@@ -191,6 +184,13 @@ GenericSuggestLib = {};
             if (  key == CR || key == LF ) {
                 bubble_keyevent(key, $this);
                 return false;
+            }
+            else if (key == BACKSPACE && $this.val().length == 0) {
+                var $prev = $this.parent().prev();
+                if ($prev.length == 0) return;
+                $this.val('');
+                $prev.remove();
+                update_values();
             }
             return true;
         })
