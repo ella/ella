@@ -12,6 +12,7 @@ GenericSuggestLib = {};
     var URL_VAR_SEPARATOR = '&';
     var URL_FIELD_DENOTER = 'f';
     var SUGGEST_SELECTOR = '.GenericSuggestField,.GenericSuggestFieldMultiple';
+    var SUGGEST_DELAY = 300;    // ideally, just a touch more than the delay between keypresses
 
     var CR = 13;
     var LF = 10;
@@ -180,7 +181,7 @@ GenericSuggestLib = {};
                 update_values();
             }
             else {
-                suggest_update($this);
+                schedule_suggest_update($this);
                 return;
             }
         })
@@ -323,6 +324,13 @@ GenericSuggestLib = {};
         $SUGGEST_FIELDS_BUBBLE.hide();
     });
 
+    var suggest_update_timer;
+    function schedule_suggest_update($input) {
+        clearTimeout(suggest_update_timer);
+        suggest_update_timer = setTimeout(function() {
+            suggest_update($input);
+        }, SUGGEST_DELAY);
+    }
     function suggest_update($input, offset) {
         var val = $input.val();
         if (val.length < MIN_LENGTH) {
