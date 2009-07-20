@@ -17,7 +17,7 @@
                     <h4>
                         #<span>{{ inline_admin_form.original.order }}</span> &mdash; <span>{{ inline_admin_form.original.target }}</span>
                         {% if inline_admin_form.show_url %}
-                            &nbsp;<a class="icn web" href="{% url newman_admin_index %}r/{{ inline_admin_form.original_content_type_id }}/{{ inline_admin_form.original.id }}/">{% trans "View on site" %}</a>
+                            &nbsp;<a class="icn web" href="{% url newman:obj-redirect inline_admin_form.original_content_type_id inline_admin_form.original.id %}">{% trans "View on site" %}</a>
                         {% endif %}
                     </h4>
                 {% endif %}

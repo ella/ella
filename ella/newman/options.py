@@ -158,33 +158,33 @@ class NewmanModelAdmin(XModelAdmin):
                 return self.admin_site.admin_view(view)(*args, **kwargs)
             return update_wrapper(wrapper, view)
 
-        info = self.admin_site.name, self.model._meta.app_label, self.model._meta.module_name
+        info = self.model._meta.app_label, self.model._meta.module_name
 
         urlpatterns = patterns('',
             url(r'^suggest/$',
                 wrap(self.suggest_view),
-                name='%sadmin_%s_%s_suggest' % info),
+                name='%s_%s_suggest' % info),
             url(r'^filters/$',
                 wrap(self.filters_view),
-                name='%sadmin_%s_%s_filters' % info),
+                name='%s_%s_filters' % info),
             url(r'^(.+)/help/$',
                 wrap(self.model_help_view),
-                name='%sadmin_%s_%s_help' % info),
+                name='%s_%s_help' % info),
             url(r'^(.+)/draft/save/$',
                 wrap(self.save_draft_view),
-                name='%sadmin_%s_%s_save_draft' % info),
+                name='%s_%s_save_draft' % info),
             url(r'^(.+)/draft/load/$',
                 wrap(self.load_draft_view),
-                name='%sadmin_%s_%s_load_draft' % info),
+                name='%s_%s_load_draft' % info),
             url(r'^(.+)/draft/delete/$',
                 wrap(self.delete_draft_view),
-                name='%sadmin_%s_%s_delete_draft' % info),
+                name='%s_%s_delete_draft' % info),
             url(r'^add/json/$',
                 wrap(self.add_json_view),
-                name='%sadmin_%s_%s_add_json' % info),
+                name='%s_%s_add_json' % info),
             url(r'^(.+)/json/$',
                 wrap(self.change_json_view),
-                name='%sadmin_%s_%s_change_json' % info),
+                name='%s_%s_change_json' % info),
         )
         urlpatterns += super(NewmanModelAdmin, self).get_urls()
         return urlpatterns
@@ -662,8 +662,8 @@ class NewmanModelAdmin(XModelAdmin):
         # form for autosaved and draft objects
         draft_form = DraftForm(user=request.user, content_type=self.model_content_type)
 
-        info = self.admin_site.name, self.model._meta.app_label, self.model._meta.module_name
-        rev = '%sadmin_%s_%s_change_json' % info
+        info = self.admin_site.app_name, self.model._meta.app_label, self.model._meta.module_name
+        rev = '%s:%s_%s_change_json' % info
         context.update({
             'media': self.prepare_media(context['media']),
             'raw_form': raw_frm_all,
@@ -723,8 +723,8 @@ class NewmanModelAdmin(XModelAdmin):
         # form for autosaved and draft objects
         draft_form = DraftForm(user=request.user, content_type=self.model_content_type)
 
-        info = self.admin_site.name, self.model._meta.app_label, self.model._meta.module_name
-        rev = '%sadmin_%s_%s_add_json' % info
+        info = self.admin_site.app_name, self.model._meta.app_label, self.model._meta.module_name
+        rev = '%s:%s_%s_add_json' % info
         context.update({
             'media': self.prepare_media(context['media']),
             'draft_form': draft_form,
