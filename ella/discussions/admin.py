@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.http import HttpResponseRedirect
-from ella.core.admin import PlacementInlineOptions
+from ella.core.admin import PlacementInlineAdmin
 from ella.core.cache.utils import delete_cached_object
 from ella.discussions.models import TopicThread, Topic, BannedUser, BannedString
 from ella.discussions.cache import get_key_comments_on_thread__spec_filter, get_key_comments_on_thread__by_submit_date
@@ -62,7 +62,7 @@ class TopicOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
     list_display = ('title', 'photo_thumb', 'created', 'pk',)
     list_filter = ('category', 'created',)
-    inlines = (PlacementInlineOptions,)
+    inlines = (PlacementInlineAdmin,)
     rich_text_fields = {None: ('perex',)}
 
 admin.site.register(Topic, TopicOptions)
