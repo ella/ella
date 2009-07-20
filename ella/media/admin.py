@@ -1,5 +1,7 @@
 from os import path, makedirs
 
+import Image
+
 from django.conf import settings
 from django.contrib import admin
 from django.template.defaultfilters import slugify
@@ -7,9 +9,15 @@ from django.template.defaultfilters import slugify
 from ella.ellaadmin.options import EllaAdminOptionsMixin
 from ella.media.models import Media, Section, Usage
 from ella.media.forms import MediaForm
-from ella.photos.imageop import get_img_size
 from ella.photos.models import Photo
 
+
+def get_img_size(filename):
+    im = Image.open(filename)
+    return {
+        'width': im.size[0], 
+        'height': im.size[1]
+    }
 
 class SectionInline(admin.TabularInline):
     model = Section
