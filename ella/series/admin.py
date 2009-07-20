@@ -3,8 +3,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 
 from ella.series.models import Serie, SeriePart
-from ella.ellaadmin.options import EllaAdminOptionsMixin
-from ella.core.admin import PlacementInlineOptions
+from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin
+from ella.core.admin import PlacementInlineAdmin
 
 
 class SeriePartInlineAdmin(EllaAdminOptionsMixin, admin.TabularInline):
@@ -13,22 +13,22 @@ class SeriePartInlineAdmin(EllaAdminOptionsMixin, admin.TabularInline):
     raw_id_fields = ('placement',)
 
 
-class SerieAdmin(EllaAdminOptionsMixin, admin.ModelAdmin):
-    list_display = ('title', 'photo_thumbnail', 'started', 'is_active', 'parts_count', 'get_hits',)
+class SerieAdmin(EllaAdminOptionsMixin, EllaModelAdmin):
+    list_display = ('title', 'photo_thumbnail', 'started', 'is_active', 'parts_count',)
     list_filter = ('started', 'finished',)
     prepopulated_fields = {'slug': ('title',)}
-    search_fields = ('title', 'perex',)
+    search_fields = ('title', 'description',)
 
     fieldsets = (
         (None, {'fields': ('title',)}),
         (_("Slug, metadata"), {'fields': ('slug', 'started', 'finished', 'hide_newer_parts',), 'classes': ['collapse'],}),
-        (_("Contents"), {'fields': ('perex', 'description', 'category', 'photo',)}),
+        (_("Contents"), {'fields': ('description', 'category', 'photo',)}),
 )
 
     raw_id_fields = ('photo',)
-    rich_text_fields = {None: ('perex', 'description',)}
+    rich_text_fields = {None: ('description',)}
 
-    inlines = [PlacementInlineOptions, SeriePartInlineAdmin]
+    inlines = [PlacementInlineAdmin, SeriePartInlineAdmin]
 
 
 
