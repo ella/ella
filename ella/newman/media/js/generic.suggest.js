@@ -185,14 +185,18 @@ GenericSuggestLib = {};
                 bubble_keyevent(key, $this);
                 return false;
             }
-            else if (key == BACKSPACE && $this.val().length == 0) {
+            return true;
+        })
+        .unbind('keydown').bind('keydown', function($event) {
+            var key = $event.keyCode;
+            var $this = $(this);
+            if (key == BACKSPACE && $this.val().length == 0) {
                 var $prev = $this.parent().prev();
                 if ($prev.length == 0) return;
                 $this.val('');
                 $prev.remove();
                 update_values();
             }
-            return true;
         })
         .unbind('blur.hidebub').bind('blur.hidebub', function() {
             if (!MOUSE_ON_BUBBLE)

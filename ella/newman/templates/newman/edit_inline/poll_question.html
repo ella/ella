@@ -69,16 +69,16 @@
         request_media('{{ NEWMAN_MEDIA_URL }}js/polls.js');
     </script>
     <fieldset class="module">
-        
+
         <legend>{{ inline_admin_formset.opts.verbose_name_plural|capfirst }}</legend>
-        
+
         {% for inline_admin_form in inline_admin_formset %}{# traverse questions #}
             <div class="js-poll-question-container">
                 {# form errors #}
                 {% if inline_admin_form.form.non_field_errors %}
                     <div class="form-errors">{{ inline_admin_form.form.non_field_errors }}</div>
                 {% endif %}
-                
+
                 {# question text #}
                 <p class="js-poll-question-text-container">
                 {% if inline_admin_form.original %}
@@ -103,10 +103,10 @@
                         {{ inline_admin_form.fk_field.field }}
                     </span>
                 {% if inline_admin_form.show_url %}
-                    <a class="icn web" href="{% url newman_admin_index %}r/{{ inline_admin_form.original_content_type_id }}/{{ inline_admin_form.original.id }}/">{% trans "View on site" %}</a>
+                    <a class="icn web" href="{% url newman:obj-redirect inline_admin_form.original_content_type_id inline_admin_form.original.id %}">{% trans "View on site" %}</a>
                 {% endif %}
                 </p>
-                
+
                 {# answer options #}
                 <div class="js-poll-choices">
                     {% for fieldset in inline_admin_form %}{% for line in fieldset %}{% for field in line %}
@@ -117,7 +117,7 @@
                         {% endifequal %}
                     {% endfor %}{% endfor %}{% endfor %}
                 </div>
-                
+
                 <div class="remaining-poll-question-inputs">
                     {% for fieldset in inline_admin_form %}{% for line in fieldset %}{% for field in line %}
                         {% ifnotequal field.field.name "choices" %}{% ifnotequal field.field.name "question" %}
@@ -128,6 +128,6 @@
                 </div>
             </div>
         {% endfor %}{# end traverse questions #}
-        
+
     </fieldset>
 </div>

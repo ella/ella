@@ -33,8 +33,8 @@ class NewmanSite(AdminSite):
     login_template = 'newman/login.html'
     app_index_template = 'newman/app_index.html'
 
-    def __init__(self, name=None):
-        super(NewmanSite, self).__init__(name=name)
+    def __init__(self, name=None, app_name='newman'):
+        super(NewmanSite, self).__init__(name=name, app_name=app_name)
         self._actions = {'delete_selected': actions.delete_selected}
         self._global_actions = self._actions.copy()
 
@@ -73,19 +73,22 @@ class NewmanSite(AdminSite):
         urlpatterns = patterns('',
             url(r'^%s/err-report/$' % NEWMAN_URL_PREFIX,
                 wrap(self.err_report),
-                name="newman-err-report"),
+                name="err-report"),
             url(r'^%s/save-filters/$' % NEWMAN_URL_PREFIX,
                 wrap(self.cat_filters_save),
-                name="newman-save-filters"),
+                name="save-filters"),
             url(r'^%s/$' % NEWMAN_URL_PREFIX,
                 wrap(self.newman_index),
                 name="newman-index"),
             url(r'^%s/editor-box/$' % NEWMAN_URL_PREFIX,
                 wrap(self.editor_box_view),
-                name="newman-editor-box"),
+                name="editor-box"),
             url(r'^%s/render-chunk/$' % NEWMAN_URL_PREFIX,
                 wrap(self.render_chunk_template_view),
-                name="newman-render-chunk"),
+                name="render-chunk"),
+            url(r'^r/(?P<content_type_id>\d+)/(?P<object_id>.+)/$',
+                'django.views.defaults.shortcut',
+                name='obj-redirect'),
         )
 
         if 'djangomarkup' in settings.INSTALLED_APPS:

@@ -3,7 +3,7 @@
 
 {% block breadcrumbs %}
 <div class="breadcrumbs">
-    <a href="{% url newman_admin_index %}#/nm/">{% trans "Home" %}</a>
+    <a href="{% url newman:index %}#/nm/">{% trans "Home" %}</a>
     &rsaquo; <a class="js-hashadr" href="../../">{% trans app_label.title %}</a>
     &rsaquo; {% if has_change_permission %}<a class="js-hashadr" href="../">{{ opts.verbose_name_plural|capfirst }}</a>{% else %}{{ opts.verbose_name_plural|capfirst }}{% endif %}
     {% if title %}&rsaquo; <strong id="doc-title">{{ title }}</strong>{% endif %}
@@ -20,7 +20,7 @@
             {% if change %}
                 <a href="history::::history/" class="icn btn js-simpleload history">{% trans "History" %}</a>
                 {% if has_absolute_url %}
-                    <a href="{% url newman_admin_index %}r/{{ content_type_id }}/{{ object_id }}/" class="icn btn web">{% trans "View on site" %}</a>
+                    <a href="{% url newman:index %}r/{{ content_type_id }}/{{ object_id }}/" class="icn btn web">{% trans "View on site" %}</a>
                 {% endif%}
             {% endif %}
 {% endblock %}

@@ -5,12 +5,12 @@
     {% if not is_popup %}
         <div class="breadcrumbs">
             <div style="float: left;">
-                <a href="{% url newman_admin_index %}#">{% trans "Home" %}</a>
+                <a href="{% url newman:index %}#">{% trans "Home" %}</a>
                 {% if app_label %}&rsaquo; <a class="js-hashadr" href="/{{ app_label }}/">{% trans app_label.title %}</a>{% endif %}
                 {% if title %}&rsaquo; <strong id="doc-title">{{ title }}</strong>{% endif %}
                 {% comment %}
                 {% if is_user_category_filtered %}
-                    | <a style="background-color: darkorange; font-weight: bold; padding: 3px 5px 3px 20px; -moz-border-radius: 3px;" class="icn visible cl-filtered" href="{% url newman_admin_index %}#/nm/">{% trans "Categories filtered by user. Click to change." %}</a>
+                    | <a style="background-color: darkorange; font-weight: bold; padding: 3px 5px 3px 20px; -moz-border-radius: 3px;" class="icn visible cl-filtered" href="{% url newman:index %}#/nm/">{% trans "Categories filtered by user. Click to change." %}</a>
                 {% endif %}
                 {% endcomment %}
             </div>
@@ -29,7 +29,7 @@
                 {% endif %}
         {% endif %}
         {% if is_user_category_filtered %}
-            <a style="background-color: orange;" class="icn btn visible def" href="{% url newman_admin_index %}#/nm/">{% trans "Categories filtered by user. Click to change." %}</a>
+            <a style="background-color: orange;" class="icn btn visible def" href="{% url newman:index %}#/nm/">{% trans "Categories filtered by user. Click to change." %}</a>
         {% endif %}
         {% if cl.search_fields %}
             {% block search %}{% newman_search_form cl %}{% endblock %}

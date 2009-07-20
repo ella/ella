@@ -42,7 +42,7 @@ class PositionAdmin(newman.NewmanModelAdmin):
         urlpatterns = patterns('',
             url(r'^category/(\d+)/$',
                 self.positions_by_category_view,
-                name='newman-positions-by-category'),
+                name='positions-by-category'),
         )
         urlpatterns += super(PositionAdmin, self).get_urls()
         return urlpatterns
@@ -56,7 +56,7 @@ class PositionAdmin(newman.NewmanModelAdmin):
             category = Category.objects.get(id=category_id)
         except Category.DoesNotExist:
             # FIXME: redirect
-            return HttpResponseRedirect(reverse('newman_admin_index'))
+            return HttpResponseRedirect(reverse('newman:index'))
 
         names = ['featured_secondary_1', 'featured_secondary_2', 'poll', 'tipoftheday',
                  'special', 'recipeoftheday', 'featured_small_1', 'featured_small_2',
@@ -129,7 +129,7 @@ class PositionAdmin(newman.NewmanModelAdmin):
             'content_type_id': ContentType.objects.get_for_model(self.model).id,
             'save_as': self.save_as,
             'save_on_top': self.save_on_top,
-            'save_url': reverse('newman-positions-by-category', args=[category_id]),
+            'save_url': reverse('newman:positions-by-category', args=[category_id]),
         })
         self.exclude = []
         return render_to_response("newman/%s/multi_change_form.html" % app_label,
