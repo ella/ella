@@ -182,12 +182,16 @@ $(function(){
 		focused = $(this);
 	});
 	// Small rich area
-	$('.rich_text_area').each(function(){
-		if($(this).hasClass('small')){
-			$(this).removeClass('small');
-			$(this).parents('.markItUp').addClass('small');
-		}
-	});
+    function set_textarea_height() {
+    	$('.rich_text_area').each(function(){
+	    	if($(this).hasClass('small')){
+		    	$(this).removeClass('small');
+			    $(this).parents('.markItUp').addClass('small');
+    		}
+	    });
+    }
+    set_textarea_height();
+    $(document).bind('content_added', set_textarea_height);
 });
 
 // mIu nameSpace to avoid conflict.
