@@ -1,0 +1,118 @@
+# Translation file for Discussion application (Ella).
+# Copyright (C) 2007 NetCentrum s.r.o.
+# This file is distributed under the same license as the Ella package.
+# Jonas Fiala <jonas.fiala@netcentrum.cz>, 2008.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Discussions 0.1 - draft\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2008-05-05 16:54+0200\n"
+"PO-Revision-Date: 2008-03-19 17:00+0100\n"
+"Last-Translator: Jonas Fiala <jonas.fiala@netcentrum.cz>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: admin.py:20
+msgid "Deletion"
+msgstr "Smazání"
+
+#: admin.py:21
+msgid "Data"
+msgstr "Data"
+
+#: models.py:89 models.py:173
+msgid "Title"
+msgstr "Titulek"
+
+#: models.py:90
+msgid "Description"
+msgstr "Popis"
+
+#: models.py:91 models.py:174
+msgid "Slug"
+msgstr "Slug"
+
+#: models.py:92
+msgid "Category"
+msgstr "Kategorie"
+
+#: models.py:93
+msgid "Photo"
+msgstr "Fotka"
+
+#: models.py:94 models.py:175
+msgid "Created"
+msgstr "Vytvořeno"
+
+#: models.py:150
+msgid "Topic"
+msgstr "Téma"
+
+#: models.py:151
+msgid "Topics"
+msgstr "Témata"
+
+#: models.py:157
+msgid "Target content type"
+msgstr ""
+
+#: models.py:158
+msgid "Target id"
+msgstr ""
+
+#: models.py:176
+msgid "authorized author"
+msgstr "Autor - uživatel"
+
+#: models.py:202 urls.py:10
+msgid "posts"
+msgstr "příspěvky"
+
+#: models.py:231
+msgid "Thread"
+msgstr "Vlákno"
+
+#: models.py:232
+msgid "Threads"
+msgstr "Vlákna"
+
+#: models.py:237
+msgid "Expression"
+msgstr "Výraz"
+
+#: urls.py:11 views.py:293
+msgid "create thread"
+msgstr "vytvořit vlákno"
+
+#: views.py:61
+msgid "Username already exists. Please choose another one."
+msgstr "Uživatelské jméno již existuje, prosím, zadejte jiné."
+
+#: views.py:159
+msgid "topics"
+msgstr "témata"
+
+#: views.py:337
+msgid "comments"
+msgstr "komentáře"
+
+#~ msgid "ip address"
+#~ msgstr "IP adresa"
+
+#~ msgid "question"
+#~ msgstr "otázka"
+
+#~ msgid "Post"
+#~ msgstr "Příspěvek"
+
+#~ msgid "ask"
+#~ msgstr "dotaz"
+
+#~ msgid "Question"
+#~ msgstr "Otázka"
+
+#~ msgid "Questions"
+#~ msgstr "Otázky"

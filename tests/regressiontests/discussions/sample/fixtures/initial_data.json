@@ -1,0 +1,220 @@
+[
+  {
+    "pk": 1,
+    "model": "auth.user",
+    "fields": {
+      "username": "admin",
+      "first_name": "",
+      "last_name": "",
+      "is_active": true,
+      "is_superuser": true,
+      "is_staff": true,
+      "last_login": "2008-01-22 14:35:12",
+      "groups": [],
+      "user_permissions": [],
+      "password": "sha1$cef52$f619aaf4e9ba9f171cdac20445066bdaf47347b4",
+      "email": "a@a.cz",
+      "date_joined": "2008-01-22 14:35:12"
+    }
+  },
+  {
+    "pk": 2,
+    "model": "auth.user",
+    "fields": {
+      "username": "normal_user",
+      "first_name": "",
+      "last_name": "",
+      "is_active": true,
+      "is_superuser": false,
+      "is_staff": false,
+      "last_login": "2008-01-22 14:35:12",
+      "groups": [],
+      "user_permissions": [],
+      "password": "sha1$cef52$f619aaf4e9ba9f171cdac20445066bdaf47347b4",
+      "email": "a@a.cz",
+      "date_joined": "2008-01-22 14:35:12"
+    }
+  },
+
+  {
+    "pk": 2,
+    "model": "core.category",
+    "fields": {
+      "tree_parent": 1,
+      "description": "",
+      "title": "first category",
+      "site": 1,
+      "tree_path": "first-category",
+      "slug": "first-category"
+    }
+  },
+  {
+    "pk": 1,
+    "model": "core.category",
+    "fields": {
+      "tree_parent": null,
+      "description": "",
+      "title": "homepage",
+      "site": 1,
+      "tree_path": "",
+      "slug": "homepage"
+    }
+  },
+
+  {
+    "pk": 1,
+    "model": "discussions.bannedstring",
+    "fields": {
+      "isregexp": false,
+      "expression": "prdel"
+    }
+  },
+  {
+    "pk": 2,
+    "model": "discussions.bannedstring",
+    "fields": {
+      "isregexp": false,
+      "expression": "kurva"
+    }
+  },
+
+  {
+    "pk": 1,
+    "model": "discussions.topic",
+    "fields": {
+      "title": "Prvni tema",
+      "description": "doctestik",
+      "slug": "prvni-tema",
+      "category": 2,
+      "photo": null,
+      "created": "2008-04-16 12:00:00"
+    }
+  },
+     {
+        "pk": "3",
+        "model": "core.placement",
+        "fields": {
+            "category": 2,
+            "publish_from": "2007-07-01 00:00:00",
+            "target_id": 1,
+            "publish_to": null,
+            "slug": "prvni-tema",
+            "target_ct": 15
+        }
+    },
+     {
+        "pk": "3",
+        "model": "core.listing",
+        "fields": {
+            "placement": 3,
+            "category": 2,
+            "publish_from": "2007-07-01 00:00:00",
+            "priority_value": 0,
+            "remove": false,
+            "commercial": false,
+            "priority_to": null,
+            "priority_from": null
+        }
+    },
+
+  {
+    "pk": 2,
+    "model": "discussions.topic",
+    "fields": {
+      "title": "Druhe tema",
+      "description": "doctestik",
+      "slug": "druhe-tema",
+      "category": 2,
+      "photo": null,
+      "created": "2008-04-16 12:05:00"
+    }
+  },
+     {
+        "pk": 4,
+        "model": "core.placement",
+        "fields": {
+            "category": 2,
+            "publish_from": "2007-06-01 00:00:10",
+            "target_id": 2,
+            "publish_to": null,
+            "slug": "druhe-tema",
+            "target_ct": 15
+        }
+    },
+     {
+        "pk": 5,
+        "model": "core.listing",
+        "fields": {
+            "placement": 4,
+            "category": 2,
+            "publish_from": "2007-06-01 00:00:10",
+            "priority_value": 0,
+            "remove": false,
+            "commercial": false,
+            "priority_to": null,
+            "priority_from": null
+        }
+    },
+
+
+  {
+    "pk": 1,
+    "model": "discussions.topicthread",
+    "fields": {
+        "title": "Vlakno One",
+        "slug": "vlakno-one",
+        "created": "2008-04-16 12:00:00",
+        "hit_counts": 10,
+        "author": 1,
+        "topic": 1
+    }
+  },
+  {
+    "pk": 2,
+    "model": "discussions.topicthread",
+    "fields": {
+        "title": "Vlakno Two",
+        "slug": "vlakno-two",
+        "created": "2008-04-17 12:00:12",
+        "hit_counts": 20,
+        "author": 1,
+        "topic": 1
+    }
+  },
+  {
+    "pk": 3,
+    "model": "discussions.topicthread",
+    "fields": {
+        "title": "Vlakno Three",
+        "slug": "vlakno-three",
+        "created": "2008-04-20 12:00:00",
+        "hit_counts": 30,
+        "author": 1,
+        "topic": 1
+    }
+  },
+  {
+    "pk": 4,
+    "model": "discussions.topicthread",
+    "fields": {
+        "title": "Vlakno Four",
+        "slug": "vlakno-four",
+        "created": "2008-04-19 12:01:12",
+        "hit_counts": 40,
+        "author": 1,
+        "topic": 2
+    }
+  },
+  {
+    "pk": 5,
+    "model": "discussions.topicthread",
+    "fields": {
+        "title": "Vlakno Wife ;-)",
+        "slug": "vlakno-wife",
+        "created": "2008-04-20 12:01:12",
+        "hit_counts": 50,
+        "author": 1,
+        "topic": 2
+    }
+  }
+]
