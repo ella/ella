@@ -3,7 +3,8 @@ from django.conf import settings
 from django.db.models.query_utils import Q
 from django.db.models import ForeignKey, SlugField, ManyToManyField, ImageField
 from django.http import HttpResponse, Http404, HttpResponseRedirect
-from django.utils.translation import ugettext_lazy as _
+from django.utils.safestring import mark_safe
+from django.utils.translation import ugettext, ugettext_lazy as _
 from django.contrib import admin
 
 from ella.ellaadmin import widgets, fields
