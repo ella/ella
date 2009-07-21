@@ -58,7 +58,7 @@
     });
 })(jQuery);
 
-// Lupicka for listings
+// Lupicka for generic relations (content type & object id)
 ( function($) {
     function id2ct(id) {
         var ct = AVAILABLE_CONTENT_TYPES[ id ];
@@ -68,16 +68,38 @@
         }
         return ct.path;
     }
-    $('.generic-related-lookup').live('click', function() {
-        var id_stem = this.id.replace(/^lookup_/, '').replace(/_id$/, '');
-        var $id_input = $('#'+id_stem+'_id');
-        var $ct_input = $('#'+id_stem+'_ct');
-        if ($id_input.length == 0) {
-            carp('Could not find id input for lupicka (#'+id_stem+'_id); this:', this);
-            return false;
+    function get_corresponding_input($i) {
+        var $ct, $id, $givens, $soughts;
+        var $ct_inputs = $('.target_ct');
+        var $id_inputs = $('.target_id');
+        if ($i.is('.target_id')) {
+            $id = $i;
+            $givens = $id_inputs;
+            $soughts = $ct_inputs;
         }
+        else if ($i.is('.target_ct')) {
+            $ct = $i;
+            $givens = $ct_inputs;
+            $soughts = $id_inputs;
+        }
+        else {
+            throw('Invalid input fed to get_corresponding_input.');
+        }
+        if ($ct_inputs.length != $id_inputs.length) {
+            throw('Different number of content type inputs and object id inputs in document.');
+        }
+        for (var i = 0; i < $ct_inputs.length; i++) {
+            if ($i.get(0) == $givens.get(i)) {
+                return $soughts.eq(i);
+            }
+        }
+        throw("Couldn't find the corresponding input to " + $i.attr('id'));
+    }
+    $('.generic-related-lookup').live('click', function() {
+        // Look for the corresponding content type input and target id input
+        var $id_input = $( '#' + this.id.replace(/^lookup_/, '') );
+        var $ct_input = get_corresponding_input($id_input);
         if ($ct_input.length == 0) {
-            carp('Could not find content-type input for lupicka (#'+id_stem+'_ct); this:', this);
             return false;
         }
         var ct_id = $ct_input.val();
@@ -101,16 +123,7 @@
         var ct_id = $(this).val();
         if ( ! ct_id ) return;
         var content_type = id2ct(ct_id);
-        var id_input_id = this.id.replace(/ct$/, 'id');
-        if (id_input_id == this.id) {
-            carp('Error attempting to attach open_overlay to select.target_ct onchange: Unexpected ID: '+this.id, this);
-            return;
-        }
-        var $id_input = $('#'+id_input_id);
-        if ($id_input.length == 0) {
-            carp('Error attempting to attach open_overlay to select.target_ct onchange: Failed to get ID input #'+id_input_id);
-            return;
-        }
+        var $id_input = get_corresponding_input($(this));
         open_overlay(content_type, function(id, extras) {
             $id_input.val(id);
             $in_input.trigger('change', [extras]);

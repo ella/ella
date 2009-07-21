@@ -1,4 +1,4 @@
-KOBAYASHI_VERSION = '2009-07-07';
+KOBAYASHI_VERSION = '2009-07-20';
 
 // Debugging tools
 ;;; function alert_dump(obj, name) {
@@ -143,6 +143,7 @@ ContentByHashLib.LOADED_MEDIA = {};
             return;
         }
         var $target = $('#'+info.target_id);
+        $target.text(gettext('Rendering error...'));
         var response_text = info.xhr.responseText;
         var $err_div = $('<div class="error-code"></div>')/*.append(
             $('<a>reload</a>').css({display:'block'}).click(function(){
