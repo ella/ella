@@ -1,7 +1,7 @@
 {% load cache %}
 {% cache 300 'nm-modhelp' ct %}
 {% spaceless %}
-<div class="model-help">
+<div class="service-module model-help">
     <div class="cnt">
         <h2>{% trans 'Help for object' %}: {% trans ct.name %}</h2>
         {% if model_help %}

@@ -1,3 +1,5 @@
+from django.contrib.admin.models import LogEntry
+from ella.core.models.publishable import Publishable
 import logging
 
 from django.conf import settings
@@ -167,6 +169,9 @@ class NewmanModelAdmin(XModelAdmin):
             url(r'^filters/$',
                 wrap(self.filters_view),
                 name='%s_%s_filters' % info),
+            url(r'^log/$',
+                wrap(self.log_view),
+                name='%s_%s_log' % info),
             url(r'^(.+)/help/$',
                 wrap(self.model_help_view),
                 name='%s_%s_help' % info),
@@ -345,6 +350,31 @@ class NewmanModelAdmin(XModelAdmin):
             context_instance=template.RequestContext(request)
         )
         return HttpResponse(out, mimetype='text/plain;charset=utf-8')
+
+    @require_AJAX
+    def log_view(self, request, extra_context=None):
+        self.register_newman_variables(request)
+
+        ct = ContentType.objects.get_for_model(self.model)
+        if ct.model_class() == Publishable:
+            publishable_cts = []
+            cts = ContentType.objects.all()
+            for ctc in cts:
+                if ctc.model_class() and issubclass(ctc.model_class(), Publishable):
+                    publishable_cts.append(ctc.id)
+            params= {'content_type__in': publishable_cts}
+        else:
+            params = {'content_type': ct}
+
+        if not request.user.is_superuser:
+            params.update({'user': request.user})
+
+        # TODO: GROUP BY object_id
+        entries = LogEntry.objects.filter(**params)[:15]
+        context = {'entry_list': entries, 'ct': ct}
+
+        return render_to_response(self.get_template_list('action_log.html'), context, context_instance=template.RequestContext(request))
+
 
     @utils.profiled_section
     #@require_AJAX

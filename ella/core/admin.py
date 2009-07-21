@@ -27,11 +27,11 @@ class PlacementForm(modelforms.ModelForm):
         super(PlacementForm, self).__init__(*args, **kwargs)
 
 
-class PlacementInlineFormset(generic.BaseGenericInlineFormSet):
+class PlacementInlineFormset(modelforms.BaseModelFormSet):
 
-    def __init__(self, data=None, files=None, instance=None, save_as_new=None):
+    def __init__(self, *args, **kwargs):
         self.can_delete = True
-        super(PlacementInlineFormset, self).__init__(instance=instance, data=data, files=files)
+        super(PlacementInlineFormset, self).__init__(*args, **kwargs)
 
     def save_existing(self, form, instance, commit=True):
         instance = super(PlacementInlineFormset, self).save_existing(form, instance, commit)

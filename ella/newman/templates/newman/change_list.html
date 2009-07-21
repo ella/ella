@@ -41,11 +41,13 @@
             {% if has_add_permission %}
                     <a href="add/" class="js-hashadr icn btn add">{% blocktrans with cl.opts.verbose_name as name %}Add {{ name }}{% endblocktrans %}</a>
             {% endif %}
+                    <a href="service-container::::log/" class="icn btn history js-simpleload">{% trans "Last edited" %}</a>
     {% endif %}
 {% endblock %}
 {% endspaceless %}
 
 {% block content_services %}
+    <div id="service-container"></div>
     <div id="filters"></div>
 {% endblock %}
 
