@@ -4,7 +4,7 @@
 {% cache 300 'nm-app-index' app_list %}
 {% block breadcrumbs %}
     <div class="breadcrumbs">
-        <a href="{% url newman_admin_index %}#/nm/">{% trans "Home" %}</a>
+        <a href="{% url newman:index %}#/nm/">{% trans "Home" %}</a>
         &rsaquo;
         {% for app in app_list %}
             {% trans app.name %}
