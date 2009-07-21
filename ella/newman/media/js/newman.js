@@ -1003,6 +1003,22 @@ $(document).bind('content_added', function() {
     }
 });
 
+// Thickbox
+$(document).ready( function() {
+    request_media(MEDIA_URL + 'jquery/thickbox/thickbox.css');
+    request_media(MEDIA_URL + 'jquery/thickbox/thickbox.js');
+    $(document).one('media_loaded', function() {
+        tb_pathToImage = MEDIA_URL + 'jquery/thickbox/loadingAnimation.gif';
+    });
+    $(document).bind('content_added', function() {
+        try {
+            tb_init('a.thickbox, area.thickbox, input.thickbox');
+        } catch(e) {
+            carp('Failed to re-initialize thickbox:', e);
+        }
+    });
+});
+
 // Opens an overlay with a changelist and calls supplied function on click on item.
 $( function() {
     var overlay_html;

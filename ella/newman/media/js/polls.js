@@ -46,6 +46,19 @@
         $(this).closest('p').find('.js-poll-choice-points').toggle()
         .filter('input').focus();
     });
+
+	$('.js-poll-choice-points').live('keypress',function(e){
+		return ( e.which!=8 && e.which!=0 && (e.which<48 || e.which>57)) ? false : true;
+	}).live('keyup',function(e){
+		var number = $(this).val() - 0 || 0;
+		var code = (e.keyCode ? e.keyCode : e.which);
+		if (code == 38) {
+			$(this).val(++number);
+		} else if (code == 40) {
+			var dec = ((number >= 1) ? --number : 0);
+			$(this).val(dec);
+		}
+	});
     
     function add_question() {
         var $last_question = $('.js-poll-question-container:last');
@@ -138,28 +151,44 @@
     }
     
     function non_live_handlers() {
+		var cancelTimer;
         
         // Done editing question text
-        $('.js-poll-question-text-container textarea').unbind('blur.hide').bind('blur.hide', function() {
-            var $cont = $(this).closest('.js-poll-question-text-container');
-            var $label = $cont.find('span:first');
-            $cont.children('span').toggle();
+        $('.js-poll-question-text-container textarea').unbind('blur.hide').bind('blur.hide', function(){
+			var $area = $(this);
+			
+			console.log('blur')
+			
+			cancelTimer = setTimeout(function(){
+	
+	            var $cont = $area.closest('.js-poll-question-text-container');
+	            var $label = $cont.find('span:first');
+	            $cont.children('span').toggle();
             
-            $label.find('a').text( $(this).val() || gettext('Click to edit question') );
+	            $label.find('a').text( $area.val() || gettext('Click to edit question') );
             
-            if ( $(this).val() == '' ) $label.addClass('js-empty-poll-question-text');
-            else  {
-                $label.removeClass('js-empty-poll-question-text');
-                if ( $cont.closest('.js-poll-question-container').find('.js-poll-choice-container').length == 0 ) {
-                    add_option($cont.closest('.js-poll-question-container'));
-                }
-            }
+	            if ( $area.val() == '' ) $label.addClass('js-empty-poll-question-text');
+	            else  {
+	                $label.removeClass('js-empty-poll-question-text');
+	                if ( $cont.closest('.js-poll-question-container').find('.js-poll-choice-container').length == 0 ) {
+	                    add_option($cont.closest('.js-poll-question-container'));
+	                }
+	            }
             
-            // Add an empty question when there's none more
-            if ( $cont.closest('fieldset').find('.js-empty-poll-question-text').length == 0 ) {
-                add_question();
-            }
+	            // Add an empty question when there's none more
+	            if ( $cont.closest('fieldset').find('.js-empty-poll-question-text').length == 0 ) {
+	                add_question();
+	            }
+
+			}, 200);
+			
         });
+
+		// Cancel editing quiestion text if focus returned to area in 200ms (i.e. button in rich area header is clicked)
+		$('.js-poll-question-text-container textarea').bind('focus', function(){
+			clearTimeout(cancelTimer);
+			console.log('focus')
+		});
         
         // Done editing answer option text
         $(':input.js-edit-poll-choice-text').unbind('blur.hide').bind('blur.hide', function() {
