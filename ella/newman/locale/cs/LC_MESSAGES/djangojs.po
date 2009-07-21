@@ -7,319 +7,335 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-07-02 16:11+0200\n"
-"PO-Revision-Date: 2009-07-02 16:13+0100\n"
+"POT-Creation-Date: 2009-07-21 11:57+0200\n"
+"PO-Revision-Date: 2009-07-21 12:01+0100\n"
 "Last-Translator: Oldrich Kruza <oldrich.kruza@centrumholdings.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: media/js/datetime.js:82
-#: media/js/datetime.js.py:222
-#: media/js/newman.js:1069
+#: media/js/datetime.js:84
+#: media/js/datetime.js.py:226
+#: media/js/newman.js:1095
 msgid "Su"
 msgstr "Ne"
 
-#: media/js/datetime.js:82
-#: media/js/datetime.js.py:222
-#: media/js/newman.js:1070
+#: media/js/datetime.js:84
+#: media/js/datetime.js.py:226
+#: media/js/newman.js:1096
 msgid "Mo"
 msgstr "Po"
 
-#: media/js/datetime.js:82
-#: media/js/datetime.js.py:222
-#: media/js/newman.js:1071
+#: media/js/datetime.js:84
+#: media/js/datetime.js.py:226
+#: media/js/newman.js:1097
 msgid "Tu"
 msgstr "Út"
 
-#: media/js/datetime.js:82
-#: media/js/datetime.js.py:222
-#: media/js/newman.js:1072
+#: media/js/datetime.js:84
+#: media/js/datetime.js.py:226
+#: media/js/newman.js:1098
 msgid "We"
 msgstr "St"
 
-#: media/js/datetime.js:82
-#: media/js/datetime.js.py:222
-#: media/js/newman.js:1073
+#: media/js/datetime.js:84
+#: media/js/datetime.js.py:226
+#: media/js/newman.js:1099
 msgid "Th"
 msgstr "Čt"
 
-#: media/js/datetime.js:82
-#: media/js/datetime.js.py:222
-#: media/js/newman.js:1074
+#: media/js/datetime.js:84
+#: media/js/datetime.js.py:226
+#: media/js/newman.js:1100
 msgid "Fr"
 msgstr "Pá"
 
-#: media/js/datetime.js:82
-#: media/js/datetime.js.py:222
-#: media/js/newman.js:1075
+#: media/js/datetime.js:84
+#: media/js/datetime.js.py:226
+#: media/js/newman.js:1101
 msgid "Sa"
 msgstr "So"
-
-#: media/js/datetime.js:363
-msgid "Now"
-msgstr "Nyní"
-
-#: media/js/datetime.js:364
-msgid "6am"
-msgstr "6 ráno"
-
-#: media/js/datetime.js:365
-msgid "Noon"
-msgstr "Poledne"
 
 #: media/js/flash_image.js:14
 msgid "successfully uploaded photo"
 msgstr "Foto úspěšně nahráno"
 
-#: media/js/flash_image.js:19
+#: media/js/flash_image.js:26
 msgid "failed uploading photo"
 msgstr "Nahrání fota selhalo"
 
-#: media/js/flash_image.js:31
+#: media/js/flash_image.js:46
 msgid "Failed to get Flash movie"
 msgstr "Načtení flashe selhalo"
 
-#: media/js/inlines.js:122
+#: media/js/flash_image.js:63
+msgid "No photo selected"
+msgstr "Nebyla vybrána fotografie"
+
+#: media/js/flash_image.js:66
+msgid "Error processing photo"
+msgstr "Chyba při zpracování fotky"
+
+#: media/js/inlines.js:137
 msgid "Duplicate photo"
 msgstr "Duplikátní foto"
+
+#: media/js/kobayashi.js:135
+msgid "Rendering error..."
+msgstr "Zobrazuji chybu..."
 
 #: media/js/newman.js:32
 msgid "Wait"
 msgstr "Čekejte"
 
-#: media/js/newman.js:64
+#: media/js/newman.js:68
 msgid "Loading media"
 msgstr "Načítám média"
 
-#: media/js/newman.js:75
+#: media/js/newman.js:79
 msgid "Saved"
 msgstr "Uloženo"
 
-#: media/js/newman.js:77
+#: media/js/newman.js:81
 msgid "Saving"
 msgstr "Ukládám"
 
-#: media/js/newman.js:101
+#: media/js/newman.js:105
 msgid "Preset saved but erroneous result received."
 msgstr "Záloha uložena, avšak odpověď serveru chybná"
 
-#: media/js/newman.js:101
+#: media/js/newman.js:105
 msgid "Reload to see the preset."
 msgstr "Obnovte stránku pro pohled na zálohu"
 
-#: media/js/newman.js:112
+#: media/js/newman.js:116
 msgid "Enter template name"
 msgstr "Vložte jméno šablony"
 
-#: media/js/newman.js:130
+#: media/js/newman.js:134
 msgid "Failed loading preset"
 msgstr "Chyba při načítání šablony"
 
-#: media/js/newman.js:345
+#: media/js/newman.js:349
 msgid "Sending"
 msgstr "Posílám"
 
-#: media/js/newman.js:459
+#: media/js/newman.js:463
 msgid "Form errors"
 msgstr "Formulářové chyby"
 
-#: media/js/newman.js:495
+#: media/js/newman.js:499
 msgid "Error sending form."
 msgstr "Nastala chyba při odesílání formuláře."
 
-#: media/js/newman.js:496
+#: media/js/newman.js:500
 msgid "Moreover, failed to handle the error gracefully."
 msgstr "Navíc se nepodařilo chybu ošetřit."
 
-#: media/js/newman.js:497
+#: media/js/newman.js:501
 msgid "Reloading page"
 msgstr "Stránka se obnovuje"
 
-#: media/js/newman.js:502
+#: media/js/newman.js:506
 msgid "crash save"
 msgstr "záloha po pádu"
 
-#: media/js/newman.js:502
+#: media/js/newman.js:506
 msgid "Form content backed up"
 msgstr "Obsah formuláře zazálohován"
 
-#: media/js/newman.js:710
+#: media/js/newman.js:728
 msgid "Loading"
 msgstr "Načítám"
 
-#: media/js/newman.js:744
+#: media/js/newman.js:762
 msgid "Request failed"
 msgstr "Chyba serveru"
 
-#: media/js/newman.js:758
+#: media/js/newman.js:776
 msgid "Successfully sent"
 msgstr "Úspěšně odesláno"
 
-#: media/js/newman.js:772
-msgid "Failed to follow form save with a requested action"
-msgstr "Nezdařilo se provést požadovanou akci po uložení formuláře"
+#: media/js/newman.js:810
+msgid "Cannot continue editing"
+msgstr "Nelze pokračovat v editaci"
 
-#: media/js/newman.js:783
-msgid "Form saved"
-msgstr "Formulář uložen"
+#: media/js/newman.js:810
+msgid "object ID not received"
+msgstr "Nebylo přijato ID objektu"
 
-#: media/js/newman.js:822
+#: media/js/newman.js:825
 msgid "Failed to redirect to newly added object."
 msgstr "Nezdařilo se přesměrování na nově přidaný objekt."
 
-#: media/js/newman.js:1060
+#: media/js/newman.js:839
+msgid "Unrecognized post-save action: "
+msgstr "Neznámá akce po uložení"
+
+#: media/js/newman.js:840
+msgid "No post-save action, redirecting to homepage"
+msgstr "Žádná akce po uložení, přesměrovávám na domovskou stránku"
+
+#: media/js/newman.js:857
+msgid "Failed to follow form save with a requested action"
+msgstr "Nezdařilo se provést požadovanou akci po uložení formuláře"
+
+#: media/js/newman.js:868
+msgid "Form saved"
+msgstr "Formulář uložen"
+
+#: media/js/newman.js:1086
 msgid "Sunday"
 msgstr "Neděle"
 
-#: media/js/newman.js:1061
+#: media/js/newman.js:1087
 msgid "Monday"
 msgstr "Pondělí"
 
-#: media/js/newman.js:1062
+#: media/js/newman.js:1088
 msgid "Tuesday"
 msgstr "Úterý"
 
-#: media/js/newman.js:1063
+#: media/js/newman.js:1089
 msgid "Wednesday"
 msgstr "Středa"
 
-#: media/js/newman.js:1064
+#: media/js/newman.js:1090
 msgid "Thursday"
 msgstr "Čtvrtek"
 
-#: media/js/newman.js:1065
+#: media/js/newman.js:1091
 msgid "Friday"
 msgstr "Pátek"
 
-#: media/js/newman.js:1066
+#: media/js/newman.js:1092
 msgid "Saturday"
 msgstr "Sobota"
 
-#: media/js/newman.js:1078
+#: media/js/newman.js:1104
 msgid "Sun"
 msgstr "Ne"
 
-#: media/js/newman.js:1079
+#: media/js/newman.js:1105
 msgid "Mon"
 msgstr "Po"
 
-#: media/js/newman.js:1080
+#: media/js/newman.js:1106
 msgid "Tue"
 msgstr "Út"
 
-#: media/js/newman.js:1081
+#: media/js/newman.js:1107
 msgid "Wed"
 msgstr "St"
 
-#: media/js/newman.js:1082
+#: media/js/newman.js:1108
 msgid "Thu"
 msgstr "Čt"
 
-#: media/js/newman.js:1083
+#: media/js/newman.js:1109
 msgid "Fri"
 msgstr "Pá"
 
-#: media/js/newman.js:1084
+#: media/js/newman.js:1110
 msgid "Sat"
 msgstr "So"
 
-#: media/js/newman.js:1087
+#: media/js/newman.js:1113
 msgid "January"
 msgstr "Leden"
 
-#: media/js/newman.js:1088
+#: media/js/newman.js:1114
 msgid "February"
 msgstr "Únor"
 
-#: media/js/newman.js:1089
+#: media/js/newman.js:1115
 msgid "March"
 msgstr "Březen"
 
-#: media/js/newman.js:1090
+#: media/js/newman.js:1116
 msgid "April"
 msgstr "Duben"
 
-#: media/js/newman.js:1091
-#: media/js/newman.js.py:1105
+#: media/js/newman.js:1117
+#: media/js/newman.js.py:1131
 msgid "May"
 msgstr "Květen"
 
-#: media/js/newman.js:1092
+#: media/js/newman.js:1118
 msgid "June"
 msgstr "Červen"
 
-#: media/js/newman.js:1093
+#: media/js/newman.js:1119
 msgid "July"
 msgstr "Červenec"
 
-#: media/js/newman.js:1094
+#: media/js/newman.js:1120
 msgid "August"
 msgstr "Srpen"
 
-#: media/js/newman.js:1095
+#: media/js/newman.js:1121
 msgid "September"
 msgstr "Září"
 
-#: media/js/newman.js:1096
+#: media/js/newman.js:1122
 msgid "October"
 msgstr "Říjen"
 
-#: media/js/newman.js:1097
+#: media/js/newman.js:1123
 msgid "November"
 msgstr "Listopad"
 
-#: media/js/newman.js:1098
+#: media/js/newman.js:1124
 msgid "December"
 msgstr "Prosinec"
 
-#: media/js/newman.js:1101
+#: media/js/newman.js:1127
 msgid "Jan"
 msgstr "Led"
 
-#: media/js/newman.js:1102
+#: media/js/newman.js:1128
 msgid "Feb"
 msgstr "Úno"
 
-#: media/js/newman.js:1103
+#: media/js/newman.js:1129
 msgid "Mar"
 msgstr "Bře"
 
-#: media/js/newman.js:1104
+#: media/js/newman.js:1130
 msgid "Apr"
 msgstr "Dub"
 
-#: media/js/newman.js:1106
+#: media/js/newman.js:1132
 msgid "Jun"
 msgstr "Čvn"
 
-#: media/js/newman.js:1107
+#: media/js/newman.js:1133
 msgid "Jul"
 msgstr "Čvc"
 
-#: media/js/newman.js:1108
+#: media/js/newman.js:1134
 msgid "Aug"
 msgstr "Srp"
 
-#: media/js/newman.js:1109
+#: media/js/newman.js:1135
 msgid "Sep"
 msgstr "Zář"
 
-#: media/js/newman.js:1110
+#: media/js/newman.js:1136
 msgid "Oct"
 msgstr "Říj"
 
-#: media/js/newman.js:1111
+#: media/js/newman.js:1137
 msgid "Nov"
 msgstr "Lis"
 
-#: media/js/newman.js:1112
+#: media/js/newman.js:1138
 msgid "Dec"
 msgstr "Pro"
 
 #: media/js/polls.js:15
-#: media/js/polls.js.py:95
+#: media/js/polls.js.py:102
 msgid "Delete"
 msgstr "Smazat"
 
@@ -328,67 +344,73 @@ msgid "Undelete"
 msgstr "Zrušit smazání"
 
 #: media/js/polls.js:51
-#: media/js/polls.js.py:125
+#: media/js/polls.js.py:132
 msgid "Click to edit question"
 msgstr "Kliknutím změňte otázku"
 
-#: media/js/polls.js:86
-#: media/js/polls.js.py:143
+#: media/js/polls.js:93
+#: media/js/polls.js.py:150
 msgid "Click to edit option"
 msgstr "Změnit odpověď"
 
-#: media/js/markitup/sets/markdown/set.js:30
+#: media/js/markitup/sets/markdown/set.js:33
 msgid "Italic"
 msgstr "Kurzíva"
 
-#: media/js/markitup/sets/markdown/set.js:31
+#: media/js/markitup/sets/markdown/set.js:34
 msgid "Bold"
 msgstr "Tučně"
 
-#: media/js/markitup/sets/markdown/set.js:33
+#: media/js/markitup/sets/markdown/set.js:36
 msgid "Link"
 msgstr "Odkaz"
 
-#: media/js/markitup/sets/markdown/set.js:35
+#: media/js/markitup/sets/markdown/set.js:38
 msgid "Head 1"
 msgstr "Nadpis 1"
 
-#: media/js/markitup/sets/markdown/set.js:36
+#: media/js/markitup/sets/markdown/set.js:39
 msgid "Head 2"
 msgstr "Nadpis 2"
 
-#: media/js/markitup/sets/markdown/set.js:37
+#: media/js/markitup/sets/markdown/set.js:40
 msgid "Head 3"
 msgstr "Nadpis 3"
 
-#: media/js/markitup/sets/markdown/set.js:39
+#: media/js/markitup/sets/markdown/set.js:42
 msgid "List unordered"
 msgstr "Nečíslovaný seznam"
 
-#: media/js/markitup/sets/markdown/set.js:40
+#: media/js/markitup/sets/markdown/set.js:43
 msgid "List ordered"
 msgstr "Číslovaný seznam"
 
-#: media/js/markitup/sets/markdown/set.js:44
+#: media/js/markitup/sets/markdown/set.js:47
 msgid "Quote"
 msgstr "Citace"
 
-#: media/js/markitup/sets/markdown/set.js:46
+#: media/js/markitup/sets/markdown/set.js:49
 msgid "Photo"
 msgstr "Foto"
 
-#: media/js/markitup/sets/markdown/set.js:51
+#: media/js/markitup/sets/markdown/set.js:54
 msgid "Gallery"
 msgstr "Galerie"
 
-#: media/js/markitup/sets/markdown/set.js:55
+#: media/js/markitup/sets/markdown/set.js:58
 msgid "Box"
 msgstr "Box"
 
-#: media/js/markitup/sets/markdown/set.js:59
+#: media/js/markitup/sets/markdown/set.js:115
 msgid "Preview"
 msgstr "Náhled"
 
+#~ msgid "Now"
+#~ msgstr "Nyní"
+#~ msgid "6am"
+#~ msgstr "6 ráno"
+#~ msgid "Noon"
+#~ msgstr "Poledne"
 #~ msgid "Midnight"
 #~ msgstr "Půlnoc"
 #~ msgid "Prev"
