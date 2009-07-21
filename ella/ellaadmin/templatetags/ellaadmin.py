@@ -20,11 +20,11 @@ def insert_admin_apps(parser, token):
 @register.tag
 def get_hits_link(parser, token):
     try:
-        tag_name, ct_id, o_id = token.split_contents()
+        tag_name, o_id = token.split_contents()
     except ValueError:
         raise template.TemplateSyntaxError, \
             '"%s" tag requires exactly two arguments - content_type_id and object_id.' % token.contents.split()[0]
-    return FormatHitsLink(ct_id, o_id)
+    return FormatHitsLink(o_id)
 
 
 class TagSuggesterUrl(template.Node):
@@ -38,8 +38,7 @@ def tag_suggester_url(parser, token):
 
 
 class FormatHitsLink(template.Node):
-    def __init__(self, target_ct, target_id):
-        self.target_ct = target_ct
+    def __init__(self, target_id):
         self.target_id = target_id
 
     def render(self, context):
@@ -47,16 +46,14 @@ class FormatHitsLink(template.Node):
         from ella.core.cache import get_cached_list
         from ella.core.models import HitCount, Placement
         try:
-            tct = template.Variable(self.target_ct).resolve(context)
             oid = template.Variable(self.target_id).resolve(context)
             # TODO: this improve speed but it's dirty
             #if not tct in [16,28,29,55,32]:
             #    return ''
             hl = get_cached_list(
                     Placement,
-                    target_ct=tct,
-                    target_id=oid
-)
+                    publishable=oid
+            )
             l = ''
             for h in hl:
                 hit_count = HitCount.objects.get(placement=h)
