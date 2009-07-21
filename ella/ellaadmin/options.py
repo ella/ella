@@ -15,6 +15,7 @@ SUGGEST_RETURN_ALL_FIELD = getattr(settings, 'SUGGEST_RETURN_ALL_FIELD', True)
 
 class EllaModelAdmin(admin.ModelAdmin):
     registered_views = []
+    actions = None
 
     def register(cls, test_callback, view_callback):
         cls.registered_views.append({'test': test_callback, 'view': view_callback})
