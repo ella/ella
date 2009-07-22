@@ -232,9 +232,16 @@ class DateTimeWidget(forms.DateTimeInput):
         )}
 
     def detect_format(self, value):
+        "detecting datetime format when value is string (when widget is used by zenaadmin type(value) == unicode)"
+        if not value:
+            return None
+        if type(value) == datetime:
+            val = value.__str__()
+        else:
+            val = value
         for fmt in [self.FORMAT_WITH_SEC, self.FORMAT_WITHOUT_SEC]:
             try:
-                datetime.strptime(value, fmt)
+                datetime.strptime(val, fmt)
                 return fmt
             except ValueError:
                 pass
