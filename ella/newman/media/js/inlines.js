@@ -149,6 +149,15 @@
             used_ids[ val ] = 1;
         });
         
+        // If the form validates, delete values from empty inputs
+        if (rv) {
+            $('.gallery-items-sortable .inline-related').filter( function() {
+                return $(this).find('input.target_id').val() == ''
+            }).each( function() {
+                $(this).find(':input.target_ct,:input.item-order').val('');
+            });
+        }
+        
         return rv;
     }
     $('#gallery_form').data('validation', check_gallery_changeform);
