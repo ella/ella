@@ -1,4 +1,5 @@
 from itertools import chain
+from datetime import datetime
 
 from django import forms
 from django.conf import settings
@@ -215,6 +216,10 @@ class DateWidget(forms.DateInput):
         return super(DateWidget, self).render(name, value, attrs)
 
 class DateTimeWidget(forms.DateTimeInput):
+
+    FORMAT_WITHOUT_SEC = '%Y-%m-%d %H:%M'
+    FORMAT_WITH_SEC = '%Y-%m-%d %H:%M:%S'
+
     class Media:
         js = (
             settings.NEWMAN_MEDIA_PREFIX + JS_DATE_INPUT,
@@ -226,10 +231,27 @@ class DateTimeWidget(forms.DateTimeInput):
             settings.NEWMAN_MEDIA_PREFIX + CSS_JQUERY_UI,
         )}
 
+    def detect_format(self, value):
+        "detecting datetime format when value is string (when widget is used by zenaadmin type(value) == unicode)"
+        if not value:
+            return None
+        if type(value) == datetime:
+            val = value.__str__()
+        else:
+            val = value
+        for fmt in [self.FORMAT_WITH_SEC, self.FORMAT_WITHOUT_SEC]:
+            try:
+                datetime.strptime(val, fmt)
+                return fmt
+            except ValueError:
+                pass
+        return None
+
     def render(self, name, value, attrs=None):
         attrs['class'] = 'vDateTimeInput'
-        if value and not value.second:
-            self.format = '%Y-%m-%d %H:%M'
+        fmt = self.detect_format(value)
+        if fmt and value:
+            self.format = fmt
         return super(DateTimeWidget, self).render(name, value, attrs)
 
 class ForeignKeyRawIdWidget(forms.TextInput):
