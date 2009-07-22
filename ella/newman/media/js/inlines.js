@@ -132,7 +132,7 @@
     }
     $('.add-gallery-item-button').live('click', add_gallery_item);
 
-    // check for unique photo ID and strip all unused input rows
+    // check for unique photo ID
     function check_gallery_changeform( $form ) {
         var used_ids = {};
         var rv = true;
@@ -148,13 +148,6 @@
             }
             used_ids[ val ] = 1;
         });
-        
-        // If the form validates, strip off all gallery-item's that contain a valueless input.target_id
-        if (rv) {
-            $('.gallery-items-sortable .inline-related').filter( function() {
-                return $(this).find('input.target_id').val() == ''
-            }).remove();
-        }
         
         return rv;
     }
