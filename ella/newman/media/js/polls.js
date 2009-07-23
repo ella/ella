@@ -1,5 +1,12 @@
 // Poll change forms
 (function() {
+	// remaining-poll-question-inputs
+	$('input', '.remaining-poll-question-inputs').each(function(){
+		var $poll_options = $(this).parents('.js-poll-question-container').find('.js-poll-options');
+		$(this).appendTo($poll_options);
+		$('<label for="'+$(this).attr('id')+'" style="clear:none;display:inline;"> '+gettext($(this).attr('id').replace('id_question_set-0-',''))+' </label>').appendTo($poll_options);
+	});
+	$('.remaining-poll-question-inputs').remove(); 
     
     // Edit the question text by clicking on it
     $('.js-edit-poll-question-text').live('click', function(evt) {
@@ -52,9 +59,9 @@
 	}).live('keyup',function(e){
 		var number = $(this).val() - 0 || 0;
 		var code = (e.keyCode ? e.keyCode : e.which);
-		if (code == 38) {
+		if (code == 38 || code == 39) {
 			$(this).val(++number);
-		} else if (code == 40) {
+		} else if (code == 40 || code == 37) {
 			var dec = ((number >= 1) ? --number : 0);
 			$(this).val(dec);
 		}
@@ -129,7 +136,7 @@
         
         // default to zero points
         $new_option.find('input.js-poll-choice-points').val ( 0 );
-        $new_option.find(    'a.js-poll-choice-points').text('0');
+        $new_option.find('a.js-poll-choice-points').text('0');
         
         // set names of inputs related to this answer option
         var q_meta = /\D*\d+/.exec( $question.find('[name=choices_widget]').val() );
@@ -143,6 +150,17 @@
             var opt_no = name_parts[2];
             var tail = name_parts[3];
             $(this).attr( 'name', q_prefix + post_q_no + (opt_no.length ? choice_no : '') + tail );
+			if($(this).attr( 'type' ) == 'checkbox'){
+				$(this).attr( 'id', 'id_' + q_prefix + post_q_no + (opt_no.length ? choice_no : '') + tail );
+			}
+        });
+        $new_option.find('label').each( function() {
+            var name_parts = /\d+(\D*)(\d*)(.*)/.exec( $(this).attr('for') );
+            if ( ! name_parts ) return;
+            var post_q_no = name_parts[1];
+            var opt_no = name_parts[2];
+            var tail = name_parts[3];
+            $(this).attr( 'for', 'id_' + q_prefix + post_q_no + (opt_no.length ? choice_no : '') + tail );
         });
         
         $question.find('.js-poll-choices:first').append( $new_option );
@@ -156,8 +174,6 @@
         // Done editing question text
         $('.js-poll-question-text-container textarea').unbind('blur.hide').bind('blur.hide', function(){
 			var $area = $(this);
-			
-			console.log('blur')
 			
 			cancelTimer = setTimeout(function(){
 	
@@ -187,7 +203,6 @@
 		// Cancel editing quiestion text if focus returned to area in 200ms (i.e. button in rich area header is clicked)
 		$('.js-poll-question-text-container textarea').bind('focus', function(){
 			clearTimeout(cancelTimer);
-			console.log('focus')
 		});
         
         // Done editing answer option text
