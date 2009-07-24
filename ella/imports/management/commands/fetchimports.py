@@ -2,6 +2,8 @@ import sys
 import locale
 import codecs
 
+from django.conf import settings
+from django.utils import translation
 from django.core.management.base import NoArgsCommand
 
 
@@ -13,6 +15,8 @@ class Command(NoArgsCommand):
     help = 'Fetch all registered imports'
 
     def handle(self, *test_labels, **options):
+        translation.activate(settings.LANGUAGE_CODE)
+
         errors = self.fetch_all()
         sys.exit(errors)
 
