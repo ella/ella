@@ -59,6 +59,12 @@ var IMAGE_OPTIONS = {
         IMAGE_OPTIONS.url = $('<a>').attr('href',get_adr('json/')).get(0).href;
         ;;; carp('URL passed to flash: ' + IMAGE_OPTIONS.url);
         var saved_data = flash_obj.saveData(data, IMAGE_OPTIONS);
+        if (saved_data == 2) {
+            show_err(gettext('No photo selected'));
+        }
+        else if (saved_data > 0) {
+            show_err(gettext('Error processing photo'));
+        }
         ;;; carp('flash returned: ', saved_data);
         return false;
     }

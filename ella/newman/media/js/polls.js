@@ -1,5 +1,12 @@
 // Poll change forms
 (function() {
+	// remaining-poll-question-inputs
+	$('input', '.remaining-poll-question-inputs').each(function(){
+		var $poll_options = $(this).parents('.js-poll-question-container').find('.js-poll-options');
+		$(this).appendTo($poll_options);
+		$('<label for="'+$(this).attr('id')+'" style="clear:none;display:inline;"> '+gettext($(this).attr('id').replace('id_question_set-0-',''))+' </label>').appendTo($poll_options);
+	});
+	$('.remaining-poll-question-inputs').remove(); 
     
     // Edit the question text by clicking on it
     $('.js-edit-poll-question-text').live('click', function(evt) {
@@ -46,6 +53,19 @@
         $(this).closest('p').find('.js-poll-choice-points').toggle()
         .filter('input').focus();
     });
+
+	$('.js-poll-choice-points').live('keypress',function(e){
+		return ( e.which!=8 && e.which!=0 && (e.which<48 || e.which>57)) ? false : true;
+	}).live('keyup',function(e){
+		var number = $(this).val() - 0 || 0;
+		var code = (e.keyCode ? e.keyCode : e.which);
+		if (code == 38 || code == 39) {
+			$(this).val(++number);
+		} else if (code == 40 || code == 37) {
+			var dec = ((number >= 1) ? --number : 0);
+			$(this).val(dec);
+		}
+	});
     
     function add_question() {
         var $last_question = $('.js-poll-question-container:last');
@@ -116,7 +136,7 @@
         
         // default to zero points
         $new_option.find('input.js-poll-choice-points').val ( 0 );
-        $new_option.find(    'a.js-poll-choice-points').text('0');
+        $new_option.find('a.js-poll-choice-points').text('0');
         
         // set names of inputs related to this answer option
         var q_meta = /\D*\d+/.exec( $question.find('[name=choices_widget]').val() );
@@ -130,6 +150,17 @@
             var opt_no = name_parts[2];
             var tail = name_parts[3];
             $(this).attr( 'name', q_prefix + post_q_no + (opt_no.length ? choice_no : '') + tail );
+			if($(this).attr( 'type' ) == 'checkbox'){
+				$(this).attr( 'id', 'id_' + q_prefix + post_q_no + (opt_no.length ? choice_no : '') + tail );
+			}
+        });
+        $new_option.find('label').each( function() {
+            var name_parts = /\d+(\D*)(\d*)(.*)/.exec( $(this).attr('for') );
+            if ( ! name_parts ) return;
+            var post_q_no = name_parts[1];
+            var opt_no = name_parts[2];
+            var tail = name_parts[3];
+            $(this).attr( 'for', 'id_' + q_prefix + post_q_no + (opt_no.length ? choice_no : '') + tail );
         });
         
         $question.find('.js-poll-choices:first').append( $new_option );
@@ -138,28 +169,41 @@
     }
     
     function non_live_handlers() {
+		var cancelTimer;
         
         // Done editing question text
-        $('.js-poll-question-text-container textarea').unbind('blur.hide').bind('blur.hide', function() {
-            var $cont = $(this).closest('.js-poll-question-text-container');
-            var $label = $cont.find('span:first');
-            $cont.children('span').toggle();
+        $('.js-poll-question-text-container textarea').unbind('blur.hide').bind('blur.hide', function(){
+			var $area = $(this);
+			
+			cancelTimer = setTimeout(function(){
+	
+	            var $cont = $area.closest('.js-poll-question-text-container');
+	            var $label = $cont.find('span:first');
+	            $cont.children('span').toggle();
             
-            $label.find('a').text( $(this).val() || gettext('Click to edit question') );
+	            $label.find('a').text( $area.val() || gettext('Click to edit question') );
             
-            if ( $(this).val() == '' ) $label.addClass('js-empty-poll-question-text');
-            else  {
-                $label.removeClass('js-empty-poll-question-text');
-                if ( $cont.closest('.js-poll-question-container').find('.js-poll-choice-container').length == 0 ) {
-                    add_option($cont.closest('.js-poll-question-container'));
-                }
-            }
+	            if ( $area.val() == '' ) $label.addClass('js-empty-poll-question-text');
+	            else  {
+	                $label.removeClass('js-empty-poll-question-text');
+	                if ( $cont.closest('.js-poll-question-container').find('.js-poll-choice-container').length == 0 ) {
+	                    add_option($cont.closest('.js-poll-question-container'));
+	                }
+	            }
             
-            // Add an empty question when there's none more
-            if ( $cont.closest('fieldset').find('.js-empty-poll-question-text').length == 0 ) {
-                add_question();
-            }
+	            // Add an empty question when there's none more
+	            if ( $cont.closest('fieldset').find('.js-empty-poll-question-text').length == 0 ) {
+	                add_question();
+	            }
+
+			}, 200);
+			
         });
+
+		// Cancel editing quiestion text if focus returned to area in 200ms (i.e. button in rich area header is clicked)
+		$('.js-poll-question-text-container textarea').bind('focus', function(){
+			clearTimeout(cancelTimer);
+		});
         
         // Done editing answer option text
         $(':input.js-edit-poll-choice-text').unbind('blur.hide').bind('blur.hide', function() {

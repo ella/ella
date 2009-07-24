@@ -1,0 +1,27 @@
+{% spaceless %}
+<div class="service-module model-log model-help">
+    <div class="cnt">
+        <h2>{% trans 'Last edited objects' %}: {% trans ct.name %}</h2>
+        {% if entry_list %}
+            <ul>
+                {% for entry in entry_list %}
+                    <li>
+                        <h3><a class="js-hashadr" href="/{{ entry.content_type.app_label }}/{{ entry.content_type.model }}/{{ entry.object_id }}/">{{ entry.object_repr }}</a></h3>
+                        <span>
+                            {{ entry.action_time|date:"Y-m-d H:i" }} | {{ entry.action_flag }}
+                            {% if user.is_superuser %}
+                            | {{ entry.user }}
+                            {% endif %}
+                        </span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>{% trans "No entries." %}</p>
+        {% endif %}
+    </div>
+    <div class="submit-row">
+    <a href="service-container::::log/" class="icn btn js-simpleload cancel def">{% trans "Close" %}</a>
+    </div>
+</div>
+{% endspaceless %}
