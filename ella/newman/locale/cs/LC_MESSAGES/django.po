@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ella.newman (admin-ng)\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-07-17 10:20+0200\n"
-"PO-Revision-Date: 2009-07-17 10:20+0100\n"
+"POT-Creation-Date: 2009-07-25 10:13+0200\n"
+"PO-Revision-Date: 2009-07-25 10:14+0100\n"
 "Last-Translator: Vitek Pliska <whit@jizak.cz>\n"
 "Language-Team: Ella <ella.project@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -313,112 +313,112 @@ msgstr "Uživatelské role v kategoriích"
 msgid "All roles is now refreshed."
 msgstr "Všechny role jsou obnoveny."
 
-#: options.py:248
+#: options.py:254
 msgid "No data passed in POST variable \"data\"."
 msgstr "Žádná data v POST proměnné \"data\"."
 
-#: options.py:275
+#: options.py:281
 #, python-format
 msgid "Preset %s was saved."
 msgstr "Předvolba %s byla uložena."
 
-#: options.py:284
-#: options.py:300
+#: options.py:290
+#: options.py:306
 msgid "No id found in GET variable \"id\"."
 msgstr "Id není v GET proměnné."
 
-#: options.py:291
-#: options.py:308
+#: options.py:297
+#: options.py:314
 msgid "No matching draft found."
 msgstr "Předvolba neexistuje."
 
-#: options.py:293
+#: options.py:299
 #, python-format
 msgid "Loaded draft \"%s\""
 msgstr "Načtena předvolba \"%s\""
 
-#: options.py:309
+#: options.py:315
 #, python-format
 msgid "Draft %s was deleted."
 msgstr "Předvolba %s byla smazána."
 
-#: options.py:330
+#: options.py:336
 #: xoptions.py:207
 msgid "Database error"
 msgstr "Chyba databáze"
 
-#: options.py:643
-#: options.py:759
+#: options.py:675
+#: options.py:791
 msgid "Please correct errors in form"
 msgstr "Prosím opravte chyby ve formuláři"
 
-#: options.py:692
-#: options.py:748
+#: options.py:724
+#: options.py:780
 msgid "This view is designed for saving data only, thus POST method is required."
 msgstr ""
 
-#: options.py:700
+#: options.py:732
 #, python-format
 msgid "The %(name)s \"%(obj)s\" was changed successfully."
 msgstr ""
 
-#: options.py:712
-#: options.py:765
+#: options.py:744
+#: options.py:797
 msgid "This view is designed for viewing form, thus GET method is required."
 msgstr ""
 
-#: options.py:741
+#: options.py:773
 msgid "Object was deleted."
 msgstr "Objekt byl smazán."
 
-#: sites.py:139
+#: sites.py:142
 msgid "Please enter a correct username and password. Note that both fields are case-sensitive."
 msgstr ""
 
-#: sites.py:145
+#: sites.py:148
 msgid "Please log in again, because your session has expired."
 msgstr ""
 
-#: sites.py:152
+#: sites.py:155
 msgid "Looks like your browser isn't configured to accept cookies. Please enable cookies, reload this page, and try again."
 msgstr ""
 
-#: sites.py:168
-#: sites.py:174
+#: sites.py:171
+#: sites.py:177
 msgid "Usernames cannot contain the '@' character."
 msgstr ""
 
-#: sites.py:171
+#: sites.py:174
 #, python-format
 msgid "Your e-mail address is not your username. Try '%s' instead."
 msgstr ""
 
-#: sites.py:200
-#: sites.py:243
+#: sites.py:203
+#: sites.py:246
 msgid "Site administration"
 msgstr "Ella správa"
 
-#: sites.py:267
+#: sites.py:270
 msgid "Your report was sent."
 msgstr "Vaše zpráva byla odeslána."
 
-#: sites.py:269
+#: sites.py:272
 msgid "SMTP error."
 msgstr "Chyba SMTP serveru."
 
-#: sites.py:274
+#: sites.py:277
 msgid "Subject or message is empty."
 msgstr "Pole předmět či zpráva je prázdné."
 
-#: sites.py:283
+#: sites.py:286
 msgid "Your settings were saved."
 msgstr "Vaše nastavení byla uložena."
 
-#: sites.py:285
+#: sites.py:288
 msgid "Error in form."
 msgstr "Chyba ve formuláři."
 
-#: widgets.py:129
+#: widgets.py:131
 msgid "You cannot edit uploaded photo."
 msgstr "Není možné upravovat uložené foto."
 
@@ -489,7 +489,7 @@ msgstr ""
 #: templates/newman/change_form.html:6
 #: templates/newman/change_list.html:8
 #: templates/newman/delete_confirmation.html:5
-#: templates/newman/delete_selected_confirmation.html:6
+#: templates/newman/delete_selected_confirmation.html:5
 #: templates/newman/positions/multi_change_form.html:6
 #: templates/newman/tpl_tags/newman_favorites.html:4
 #: templates/page/404.html:5
@@ -499,25 +499,25 @@ msgid "Home"
 msgstr ""
 
 #: templates/admin/delete_selected_confirmation.html:8
-#: templates/newman/delete_selected_confirmation.html:9
+#: templates/newman/delete_selected_confirmation.html:8
 msgid "Delete multiple objects"
 msgstr ""
 
 #: templates/admin/delete_selected_confirmation.html:14
-#: templates/newman/delete_selected_confirmation.html:16
+#: templates/newman/delete_selected_confirmation.html:15
 #, python-format
 msgid "Deleting the %(object_name)s would result in deleting related objects, but your account doesn't have permission to delete the following types of objects:"
 msgstr ""
 
 #: templates/admin/delete_selected_confirmation.html:21
-#: templates/newman/delete_selected_confirmation.html:23
+#: templates/newman/delete_selected_confirmation.html:22
 #, python-format
 msgid "Are you sure you want to delete the selected %(object_name)s objects? All of the following objects and it's related items will be deleted:"
 msgstr ""
 
 #: templates/admin/delete_selected_confirmation.html:32
 #: templates/newman/delete_confirmation.html:29
-#: templates/newman/delete_selected_confirmation.html:34
+#: templates/newman/delete_selected_confirmation.html:33
 msgid "Yes, I'm sure"
 msgstr ""
 
@@ -562,7 +562,7 @@ msgstr ""
 
 #: templates/admin/auth/user/change_password.html:7
 #: templates/newman/change_form.html:41
-#: templates/newman/change_list.html:54
+#: templates/newman/change_list.html:56
 #: templates/newman/auth/user/change_password.html:7
 msgid "Please correct the error below."
 msgid_plural "Please correct the errors below."
@@ -581,6 +581,15 @@ msgstr ""
 msgid "Change password"
 msgstr ""
 
+#: templates/newman/action_log.html:4
+msgid "Last edited objects"
+msgstr "Poslední editované objekty"
+
+#: templates/newman/action_log.html:26
+msgid "No entries."
+msgstr ""
+
+#: templates/newman/action_log.html:30
 #: templates/newman/ajax_content_base.html:15
 #: templates/newman/filters.html:11
 #: templates/newman/model_help.html:24
@@ -657,6 +666,10 @@ msgstr "zap."
 #, python-format
 msgid "Add %(name)s"
 msgstr ""
+
+#: templates/newman/change_list.html:44
+msgid "Last edited"
+msgstr "Poslední editace"
 
 #: templates/newman/delete_confirmation.html:9
 #: templates/newman/edit_inline/placement.html:37
