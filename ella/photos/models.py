@@ -99,7 +99,7 @@ class Photo(models.Model):
         thumbUrl = self.thumb_url()
         if not thumbUrl:
             return mark_safe("""<strong>%s</strong>""" % ugettext('Thumbnail not available'))
-        return mark_safe("""<img src="%s" alt="Thumbnail %s" />""" % (thumbUrl, self.title))
+        return mark_safe("""<a href="%s" class="thickbox"><img src="%s" alt="Thumbnail %s" /></a>""" % (self.image.url, thumbUrl, self.title))
     thumb.allow_tags = True
 
     def get_thumbnail_path(self, image_name=None):
