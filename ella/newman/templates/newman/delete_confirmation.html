@@ -2,7 +2,7 @@
 
 {% block breadcrumbs %}
 <div class="breadcrumbs">
-    <a href="{% url newman_admin_index %}#/nm/">{% trans "Home" %}</a>
+    <a href="{% url newman:index %}#/nm/">{% trans "Home" %}</a>
     &rsaquo; <a class="js-hashadr" href="../../">{% trans app_label.title %}</a>
     &rsaquo; <a class="js-hashadr" href="../">{{ opts.verbose_name_plural|capfirst }}</a>
     &rsaquo; <strong id="doc-title">{{ object|truncatewords:"18" }}</strong>
