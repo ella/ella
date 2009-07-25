@@ -3,12 +3,18 @@
     <div class="cnt">
         <h2>{% trans 'Last edited objects' %}: {% trans ct.name %}</h2>
         {% if entry_list %}
-            <ul>
+            <ul class="actionlist">
                 {% for entry in entry_list %}
-                    <li>
-                        <h3><a class="js-hashadr" href="/{{ entry.content_type.app_label }}/{{ entry.content_type.model }}/{{ entry.object_id }}/">{{ entry.object_repr }}</a></h3>
+                    <li class="{% if entry.is_addition %}addlink{% endif %}{% if entry.is_change %}changelink{% endif %}{% if entry.is_deletion %}deletelink{% endif %}">
+                        <h3>
+                        {% if not entry.is_deletion %}
+                            <a class="js-hashadr" href="/{{ entry.content_type.app_label }}/{{ entry.content_type.model }}/{{ entry.object_id }}/">{{ entry.object_repr }}</a>
+                        {% else %}
+                            {{ entry.object_repr }}
+                        {% endif %}
+                        </h3>
                         <span>
-                            {{ entry.action_time|date:"Y-m-d H:i" }} | {{ entry.action_flag }}
+                            {{ entry.action_time|date:"Y-m-d H:i" }}
                             {% if user.is_superuser %}
                             | {{ entry.user }}
                             {% endif %}
