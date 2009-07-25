@@ -321,6 +321,12 @@ td, th {
     padding: 3px 5px;
 }
 
+/* publishable changelist */
+a.cl-publishable-link { padding-left: 20px; background: transparent url(../ico/ct/16/publishable.png) 0 50% no-repeat; }
+a.cl-publishable-link.quiz { background-image: url(../ico/ct/16/quiz.png); }
+a.cl-publishable-link.gallery { background-image: url(../ico/ct/16/gallery.png); }
+a.cl-publishable-link.article { background-image: url(../ico/ct/16/article.png); }
+
 /* OPERATION MESSAGES */
 #opmsg {
     position: fixed;
