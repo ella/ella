@@ -5,12 +5,12 @@
         {% if entry_list %}
             <ul class="actionlist">
                 {% for entry in entry_list %}
-                    <li class="{% if entry.is_addition %}addlink{% endif %}{% if entry.is_change %}changelink{% endif %}{% if entry.is_deletion %}deletelink{% endif %}">
+                    <li>
                         <h3>
                         {% if not entry.is_deletion %}
-                            <a class="js-hashadr" href="/{{ entry.content_type.app_label }}/{{ entry.content_type.model }}/{{ entry.object_id }}/">{{ entry.object_repr }}</a>
+                            <a class="js-hashadr icn {% if entry.is_addition %}add{% endif %}{% if entry.is_change %}eclear{% endif %}" href="/{{ entry.content_type.app_label }}/{{ entry.content_type.model }}/{{ entry.object_id }}/">{{ entry.object_repr }}</a>
                         {% else %}
-                            {{ entry.object_repr }}
+                            <a class="icn cancel">{{ entry.object_repr }}</a>
                         {% endif %}
                         </h3>
                         <span>
