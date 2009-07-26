@@ -14,7 +14,8 @@
                         {% endif %}
                         </h3>
                         <span>
-                            {{ entry.action_time|date:"Y-m-d H:i" }}
+                            {% trans entry.content_type.name %}
+                            | {{ entry.action_time|date:"Y-m-d H:i" }}
                             {% if user.is_superuser %}
                             | {{ entry.user }}
                             {% endif %}
