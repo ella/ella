@@ -230,7 +230,8 @@ class ContestAdmin(PublishableAdmin):
                 {'contestants' : contestants, 'title' : title, 'module_name' : module_name})
         return super(ContestAdmin, self).__call__(request, url)
 
-    list_display = ('title', 'category', 'active_from', 'correct_answers', 'get_all_answers_count', 'pk',)
+# FIXME: correct_answers does not work
+    list_display = ('admin_link', 'category', 'active_from', 'correct_answers', 'get_all_answers_count', 'pk',)
     list_filter = ('category', 'active_from',)
     search_fields = ('title', 'text',)
     inlines = [PlacementInlineAdmin, QuestionInlineAdmin]
@@ -246,7 +247,7 @@ class ContestAdmin(PublishableAdmin):
     )
 
 class QuizAdmin(PublishableAdmin):
-    list_display = ('title', 'category', 'active_from')
+#    list_display = ('admin_link', 'category', 'active_from')
     list_filter = ('category', 'active_from',)
     search_fields = ('title', 'text',)
     inlines = [QuestionInlineAdmin, ResultTabularAdmin, PlacementInlineAdmin]
