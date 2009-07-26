@@ -31,6 +31,10 @@ class EllaModelAdmin(admin.ModelAdmin):
 
         return super(EllaModelAdmin, self).__call__(request, url)
 
+    def get_form(self, request, obj=None, **kwargs):
+        self._magic_instance = obj # adding edited object to ModelAdmin instance.
+        return super(EllaModelAdmin, self).get_form(request, obj, **kwargs)
+
     def suggest_view(self, request, extra_context=None):
 
         # accepts only ajax calls if not DEBUG
@@ -110,6 +114,21 @@ class EllaModelAdmin(admin.ModelAdmin):
 
 class EllaAdminOptionsMixin(object):
     def formfield_for_dbfield(self, db_field, **kwargs):
+        custom_param_names = ('request', 'user', 'model', 'super_field', 'instance')
+        custom_params = {}
+        custom_params.update({
+            'instance': self.__dict__.get('_magic_instance', None),
+            'model': self.model
+        })
+        # move custom kwargs from kwargs to custom_params
+        for key in kwargs:
+            if key not in custom_param_names:
+                continue
+            custom_params[key] = kwargs[key]
+            if key == 'request':
+                custom_params['user'] = custom_params[key].user
+        for key in custom_param_names:
+            kwargs.pop(key, None)
 
         # TODO: Only hotfix for django 9791+
         if 'request' in kwargs:
@@ -129,6 +148,9 @@ class EllaAdminOptionsMixin(object):
                 kwargs.update({
                     'required': not db_field.blank,
                     'label': db_field.verbose_name,
+                    'field_name': db_field.name,
+                    'instance': custom_params.get('instance', None),
+                    'model': custom_params.get('model'),
 })
                 rich_text_field = fields.RichTextAreaField(**kwargs)
                 if css_class:
@@ -165,6 +187,33 @@ class EllaAdminOptionsMixin(object):
 
 
         return super(EllaAdminOptionsMixin, self).formfield_for_dbfield(db_field, **kwargs)
+
+
+class EllaAdminInline(EllaAdminOptionsMixin):
+
+    def get_formset(self, request, obj=None):
+        setattr(self.form, '_magic_user', request.user) # magic variable assigned to form
+        setattr(self, '_magic_user', request.user) # magic variable
+        from django.forms.models import _get_foreign_key
+        setattr(self, '_magic_instance', obj)
+        setattr(self, '_magic_fk', _get_foreign_key(self.parent_model, self.model, fk_name=self.fk_name))
+        self.user = request.user
+        return super(EllaAdminInline, self).get_formset(request, obj)
+
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        inst = None
+        # Inlined object is requested by RichTextField (the field needs to lookup SrcText)
+        if hasattr(self, '_magic_instance') and self._magic_instance:
+            instances = self.model.objects.filter(**{self._magic_fk.name: self._magic_instance.pk})
+            inst = None
+            if instances:
+                inst = list(instances)
+        kwargs.update({
+            'model': self.model,
+            'user': self._magic_user,
+            'instance': inst,
+        })
+        return super(EllaAdminInline, self).formfield_for_dbfield(db_field, **kwargs)
 
 
 class RefererAdminMixin(object):

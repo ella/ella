@@ -6,9 +6,14 @@ from django.forms.util import ValidationError
 from django.utils.encoding import smart_unicode
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.admin.widgets import AdminFileWidget
+from django.template import Template, TextNode, TemplateSyntaxError
+from ella.core.templatetags.core import BoxNode, ObjectNotFoundOrInvalid
+
+from djangomarkup.fields import RichTextField, post_save_listener
 
 from ella.ellaadmin import widgets
 
+DEP_SRC_TEXT_ATTR = '__dep_src_text'
 
 class OnlyRGBImageField(fields.ImageField):
     "Check that uploaded image is RGB"
@@ -39,16 +44,44 @@ class OnlyRGBImageField(fields.ImageField):
             f.seek(0)
         return f
 
-class RichTextAreaField(fields.Field):
+class RichTextAreaField(RichTextField):
+    #post_save_listener = staticmethod(dependency_post_save_listener)
+    src_text_attr = DEP_SRC_TEXT_ATTR
     widget = widgets.RichTextAreaWidget
     default_error_messages = {
         'syntax_error': _('Bad syntax in markdown formatting or template tags.'),
+        'invalid_object': _('Object does not exist or is not right inserted.'),
+        'invalid_tag': _('You can use only box template tag.'),
         'url_error':  _('Some links are invalid: %s.'),
         'link_error':  _('Some links are broken: %s.'),
-}
+    }
 
-    def __init__(self, *args, **kwargs):
-        super(RichTextAreaField, self).__init__(*args, **kwargs)
+    def validate_rendered(self, rendered):
+        """
+        Validate that the target text composes only of text and boxes
+        """
+        try:
+            t = Template(rendered)
+        except TemplateSyntaxError, e:
+            raise ValidationError(self.error_messages['syntax_error'])
+
+        for n in t.nodelist:
+            if isinstance(n, TextNode):
+                continue
+            elif isinstance(n, BoxNode):
+                try:
+                    o = n.get_obj()
+                except ObjectNotFoundOrInvalid, e:
+                    # TODO: pass lookup into error message
+                    # this raises UnicodeEncodeError
+                    # error_msg = self.error_messages['invalid_object'] % {
+                    #    'model': n.model._meta.verbose_name,
+                    #    'field': n.lookup[0],
+                    #    'value': n.lookup[1]
+                    #}
+                    raise ValidationError(self.error_messages['invalid_object'])
+            else:
+                raise ValidationError(self.error_messages['invalid_tag'])
 
     def _check_url(self, match):
 
@@ -63,7 +96,7 @@ class RichTextAreaField(fields.Field):
             "Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
             "Connection": "close",
             "User-Agent": fields.URL_VALIDATOR_USER_AGENT,
-}
+        }
 
         try:
             req = urllib2.Request(link, None, headers)
