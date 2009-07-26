@@ -68,9 +68,9 @@
         request_media('{{ NEWMAN_MEDIA_URL }}js/inlines.js');
         request_media('{{ NEWMAN_MEDIA_URL }}js/polls.js');
     </script>
-    <fieldset class="module">
+    <fieldset class="module" style="margin: 10px;">
 
-        <legend>{{ inline_admin_formset.opts.verbose_name_plural|capfirst }}</legend>
+        <legend style="font-size: 120%; font-weight: bold;">{{ inline_admin_formset.opts.verbose_name_plural|capfirst }}</legend>
 
         {% for inline_admin_form in inline_admin_formset %}{# traverse questions #}
             <div class="js-poll-question-container">
@@ -87,7 +87,7 @@
                     </span>
                 {% else %}
                     <span class="js-empty-poll-question-text">
-                        <a class="js-edit-poll-question-text">{% trans 'Click to edit question.' %}</a>
+                        <a class="js-edit-poll-question-text icn btn eclear">{% trans 'Click to edit question.' %}</a>
                     </span>
                 {% endif %}
                     <span class="js-poll-question-input">
