@@ -60,7 +60,6 @@ class RichTextAreaField(RichTextField):
         """
         Validate that the target text composes only of text and boxes
         """
-        import ipdb;ipdb.set_trace()
         try:
             t = Template(rendered)
         except TemplateSyntaxError, e:
