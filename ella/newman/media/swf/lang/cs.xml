@@ -4,7 +4,11 @@
 		<choosePhoto>vybrat fotografii</choosePhoto>
 		<editPhoto>editovat</editPhoto>
 	</selectingPhoto>
-
+	
+	<serverPhoto>
+		<loadingServerPhoto>Nahrávám fotografii</loadingServerPhoto>
+	</serverPhoto>
+	
 	<editting>
 		<photoEditTitle>úpravy obrazu</photoEditTitle>
 		<mirror>zrcadlení</mirror>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lang>
+	<selectingPhoto>
+		<choosePhoto>select photo</choosePhoto>
+		<editPhoto>edit</editPhoto>
+	</selectingPhoto>
+
+	<serverPhoto>
+		<loadingServerPhoto>Loading photo</loadingServerPhoto>
+	</serverPhoto>
+	
+	<editting>
+		<photoEditTitle>photo editing</photoEditTitle>
+		<mirror>mirroring</mirror>
+		<mirrorVertical>mirror vertical</mirrorVertical>
+		<mirrorHorizontal>mirror horizontal</mirrorHorizontal>
+		
+		<rotate>rotate</rotate>
+		<rotateRight>rotate right</rotateRight>
+		<rotateLeft>rotate left</rotateLeft>
+		
+		<imageCropTitle>photo crop</imageCropTitle>
+		<imageCropping>cropping</imageCropping>
+		<imageCrop>crop</imageCrop>
+		<imageCropConfirm>confirm crop</imageCropConfirm>
+		<imageCropCancel>cancel crop</imageCropCancel>
+		
+		<faceSelectionTitle>face selection</faceSelectionTitle>
+		<faceSelection>select</faceSelection>
+		<faceSelect>select face</faceSelect>
+		<faceSelectConfirm>confirm selection</faceSelectConfirm>
+		<faceSelectCancel>cancel selection</faceSelectCancel>
+		
+		
+		<photoAdjusting>photo adjusting</photoAdjusting>
+		<photoColor>color</photoColor>
+		<photoResetColor>reset color</photoResetColor>
+		<photoContrast>contrast</photoContrast>
+		<photoResetContrast>reset contrast</photoResetContrast>
+		<photoBrightness>brightness</photoBrightness>
+		<photoResetBrightness>reset brightness</photoResetBrightness>
+		
+		<photoCompareBefore>BEFORE</photoCompareBefore>
+		<photoCompareAfter>AFTER</photoCompareAfter>
+		
+		<chooseAnotherPhoto>choose another photo</chooseAnotherPhoto>
+		<stepBack>back</stepBack>
+		<stepAgain>again</stepAgain>
+		
+		<done>done</done>
+	</editting>
+	
+	<sendingData>
+		<saveDataQuestion>DO YOU REALLY WANT SAVE DATA?</saveDataQuestion>
+		<saveDataYesAnswer>YES</saveDataYesAnswer>
+		<saveDataNoAnswer>NO</saveDataNoAnswer>
+		<processingPhoto>STATUS: CONVERTING PHOOT</processingPhoto>
+		<sendingToServer>STATUS: UPLOADING TO SERVER</sendingToServer>
+		<sended>STATUS: SENT TO SERVER</sended>
+		<sendedFailed>STATUS: ERROR OCCURED DURING UPLOADING</sendedFailed>
+		
+	</sendingData>
+	
+	
+	<applicationErrors>
+		<fullscreenError>Error occured during oppening fullscreen.</fullscreenError>
+	</applicationErrors>
+	
+</lang>

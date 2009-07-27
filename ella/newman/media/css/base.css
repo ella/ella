@@ -321,6 +321,14 @@ td, th {
     padding: 3px 5px;
 }
 
+/* publishable changelist */
+a.cl-publishable-link { padding-left: 20px; background: transparent url(../ico/ct/16/publishable.png) 0 50% no-repeat; }
+a.cl-publishable-link.quiz { background-image: url(../ico/ct/16/quiz.png); }
+a.cl-publishable-link.gallery { background-image: url(../ico/ct/16/gallery.png); }
+a.cl-publishable-link.article { background-image: url(../ico/ct/16/article.png); }
+a.cl-publishable-link.interview { background-image: url(../ico/ct/16/interview.png); }
+a.cl-publishable-link.contest { background-image: url(../ico/ct/16/contest.png); }
+
 /* OPERATION MESSAGES */
 #opmsg {
     position: fixed;
@@ -466,16 +474,13 @@ a.widget-thumb { border: 1px solid #ccc; margin-right: 5px; }
 
 /* POLLS QUESTIONS & ANSWERS */
 .js-poll-question-container {
-    margin: 5px;
+    margin: 5px; padding: 5px 0;
     border-bottom: solid 1px gray;
 }
 .js-poll-question-text-container {
     font-size: 120%;
     font-weight: bold;
     margin: 5px 0;
-}
-.js-empty-poll-question-text {
-    font-style: italic;
 }
 .js-poll-question-input {
     display: none;

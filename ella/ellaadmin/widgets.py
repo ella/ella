@@ -4,6 +4,8 @@ from django.contrib.admin import widgets
 from django.utils.safestring import mark_safe
 from django.utils.text import truncate_words
 
+from djangomarkup.widgets import RichTextAreaWidget
+
 from ella.ellaadmin.utils import admin_url
 
 
@@ -53,7 +55,7 @@ class ExtendedRelatedFieldWidgetWrapper(widgets.RelatedFieldWidgetWrapper):
             output.append(u'<a href="%s">%s</a>' % (related_url, rel_to.objects.get(pk=value)))
         return mark_safe(u''.join(output))
 
-class RichTextAreaWidget(forms.Textarea):
+class RichTextAreaWidget(RichTextAreaWidget):
     'Widget representing the RichTextEditor. '
     class Media:
         js = (

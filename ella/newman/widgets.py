@@ -95,6 +95,11 @@ class FlashImageWidget(widgets.AdminFileWidget):
     def render(self, name, value, attrs=None):
         swf_path = '%s%s' % (settings.NEWMAN_MEDIA_PREFIX, SWF_FLASH_IMAGE_INPUT,)
         lang_url = "%sswf/lang/%s.xml" % (settings.NEWMAN_MEDIA_PREFIX, settings.LANGUAGE_CODE,)
+        if value:
+            photo_flash_var = "&photoURL=%s" % value.url
+        else:
+            photo_flash_var = ""
+
         embed_code = u"""
         <object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"
         id="PhotoUploader" width="100%%" height="60px"
@@ -114,22 +119,14 @@ class FlashImageWidget(widgets.AdminFileWidget):
             allowScriptAccess="sameDomain"
             type="application/x-shockwave-flash"
             pluginspage="http://www.adobe.com/go/getflashplayer"
-            FlashVars="max_width=&max_height=&value=%s&languageURL=%s"
+            FlashVars="max_width=&max_height=&value=%s&languageURL=%s%s"
             allowFullScreen="true"
             wmode="opaque">
             </embed>
         </object>
-        """ % (swf_path, value, lang_url, swf_path, value, lang_url)
+        """ % (swf_path, value, lang_url, swf_path, value, lang_url, photo_flash_var)
 
-        if not value:
-            return mark_safe(embed_code)
-
-        from os.path import basename
-        file_name = basename(value.url)
-        thumb_name = 'thumb-%s' % file_name
-        path = value.url.replace(file_name, thumb_name)
-        edit_msg = ugettext('You cannot edit uploaded photo.')
-        return mark_safe('<span class="form-error-msg">%s</span><a class="widget-thumb thickbox" href="%s"><img src="%s" alt="%s"/></a>' % (edit_msg, value.url, path, file_name))
+        return mark_safe(embed_code)
 
 
 class AdminSuggestWidget(forms.TextInput):

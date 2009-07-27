@@ -395,7 +395,7 @@ class PublishableAdmin(newman.NewmanModelAdmin):
 
     def admin_link(self, object):
         ct = object.content_type
-        return mark_safe('<a class="hashadr" href="/%s/%s/%s/">%s: %s</a>' % (ct.app_label, ct.model, object.pk, _(ct.name), object))
+        return mark_safe('<a class="js-hashadr cl-publishable-link %s" href="/%s/%s/%s/">%s</a>' % (ct.model, ct.app_label, ct.model, object.pk, object))
     admin_link.allow_tags = True
     admin_link.short_description = _('Publishable object')
 

@@ -3,12 +3,19 @@
     <div class="cnt">
         <h2>{% trans 'Last edited objects' %}: {% trans ct.name %}</h2>
         {% if entry_list %}
-            <ul>
+            <ul class="actionlist">
                 {% for entry in entry_list %}
                     <li>
-                        <h3><a class="js-hashadr" href="/{{ entry.content_type.app_label }}/{{ entry.content_type.model }}/{{ entry.object_id }}/">{{ entry.object_repr }}</a></h3>
+                        <h3>
+                        {% if not entry.is_deletion %}
+                            <a class="js-hashadr icn {% if entry.is_addition %}add{% endif %}{% if entry.is_change %}eclear{% endif %}" href="/{{ entry.content_type.app_label }}/{{ entry.content_type.model }}/{{ entry.object_id }}/">{{ entry.object_repr }}</a>
+                        {% else %}
+                            <a class="icn cancel">{{ entry.object_repr }}</a>
+                        {% endif %}
+                        </h3>
                         <span>
-                            {{ entry.action_time|date:"Y-m-d H:i" }} | {{ entry.action_flag }}
+                            {% trans entry.content_type.name %}
+                            | {{ entry.action_time|date:"Y-m-d H:i" }}
                             {% if user.is_superuser %}
                             | {{ entry.user }}
                             {% endif %}

@@ -35,10 +35,10 @@
 
 /* ella specific */
 .markItUp .photo a {
-    background-image:url(../../../../ico/ct/16/image.png);
+    background-image:url(../../../../ico/ct/16/photo.png);
 }
 .markItUp .gallery a {
-    background-image:url(../../../../ico/ct/16/folder_image.png);
+    background-image:url(../../../../ico/ct/16/gallery.png);
 }
 .markItUp .box a {
     background-image:url(images/box.png);
