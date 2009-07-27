@@ -536,13 +536,17 @@ ContentByHashLib.LOADED_MEDIA = {};
     // Set up event handlers
     $('.js-simpleload,.js-simpleload-container a').live('click', function(evt) {
         if (evt.button != 0) return true;    // just interested in left button
+        if ( $(this).data('hashadred') ) return true;
         simple_load($(this).attr('href'));
+        $(this).data('simpleloaded', true);
         evt.preventDefault();
     });
     $('.js-hashadr,.js-hashadr-container a').live('click', function(evt) {
         if (evt.button != 0) return true;    // just interested in left button
+        if ( $(this).data('simpleloaded') ) return true;
         if ($(this).is('.js-nohashadr')) return true;   // override hashadr-container
         adr($(this).attr('href'));
+        $(this).data('hashadred', true);
         evt.preventDefault();
     });
 })})(jQuery);
