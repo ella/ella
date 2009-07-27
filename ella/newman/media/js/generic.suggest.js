@@ -133,7 +133,7 @@ GenericSuggestLib = {};
                 while (ids.length > 0) {
                     var id    = ids.pop();
                     var repre = repres.pop();
-                    item = new_item(id, repre);
+                    var item = new_item(id, repre);
                     $inputs.ul.prepend(item);
                 }
                 return true;
