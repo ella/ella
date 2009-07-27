@@ -60,6 +60,7 @@ class RichTextAreaField(RichTextField):
         """
         Validate that the target text composes only of text and boxes
         """
+        import ipdb;ipdb.set_trace()
         try:
             t = Template(rendered)
         except TemplateSyntaxError, e:
@@ -116,40 +117,6 @@ class RichTextAreaField(RichTextField):
                 urllib2.urlopen(req)
             except:
                 self.broken_links.append(link)
-
-    def clean(self, value):
-        "Validates markdown and temlate (box) syntax, validates links and check if exists."
-
-        super(RichTextAreaField, self).clean(value)
-        if value in fields.EMPTY_VALUES:
-            return u''
-        value = smart_unicode(value)
-
-        # validate markdown links
-        # commented out due to incomplete specs, will probably be replaced by JS validation
-
-        #l = re.compile('\[.+\]\((.+)\)')
-        #self.invalid_links = []
-        #self.broken_links  = []
-        #l.sub(self._check_url, value)
-
-        #i = self.error_messages['url_error'] % ', '.join(self.invalid_links)
-        #b = self.error_messages['link_error'] % ', '.join(self.broken_links)
-        #if self.invalid_links and self.broken_links:
-        #    raise ValidationError("%s %s" % (i, b))
-        #elif self.invalid_links:
-        #    raise ValidationError(i)
-        #elif self.broken_links:
-        #    raise ValidationError(b)
-
-        # test render template
-        try:
-            from ella.core.templatetags.core import render_str
-            render_str(value)
-        except:
-            raise ValidationError(self.error_messages['syntax_error'])
-
-        return value
 
 class GenericSuggestField(fields.ChoiceField):
 
