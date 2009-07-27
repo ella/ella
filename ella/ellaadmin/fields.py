@@ -3,13 +3,11 @@ from StringIO import StringIO
 
 from django.forms import fields
 from django.forms.util import ValidationError
-from django.utils.encoding import smart_unicode
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.admin.widgets import AdminFileWidget
 from django.template import Template, TextNode, TemplateSyntaxError
-from ella.core.templatetags.core import BoxNode, ObjectNotFoundOrInvalid
 
-from djangomarkup.fields import RichTextField, post_save_listener
+from djangomarkup.fields import RichTextField
 
 from ella.ellaadmin import widgets
 
@@ -60,6 +58,9 @@ class RichTextAreaField(RichTextField):
         """
         Validate that the target text composes only of text and boxes
         """
+
+        from ella.core.templatetags.core import BoxNode, ObjectNotFoundOrInvalid
+
         try:
             t = Template(rendered)
         except TemplateSyntaxError, e:
