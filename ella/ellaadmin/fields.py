@@ -5,13 +5,17 @@ from django.forms import fields
 from django.forms.util import ValidationError
 from django.utils.encoding import smart_unicode
 from django.utils.translation import ugettext_lazy as _
-from django.contrib.admin.widgets import AdminFileWidget
 from django.template import Template, TextNode, TemplateSyntaxError
+from django.contrib.admin.widgets import AdminFileWidget
+from django.contrib.contenttypes.models import ContentType
+
 from ella.core.templatetags.core import BoxNode, ObjectNotFoundOrInvalid
+from ella.core.models import Dependency
+from ella.ellaadmin import widgets
+from ella.newman.licenses.models import License
 
 from djangomarkup.fields import RichTextField, post_save_listener
 
-from ella.ellaadmin import widgets
 
 DEP_SRC_TEXT_ATTR = '__dep_src_text'
 
@@ -44,9 +48,52 @@ class OnlyRGBImageField(fields.ImageField):
             f.seek(0)
         return f
 
+def dependency_post_save_listener(sender, instance, **kwargs):
+    src_texts = post_save_listener(sender, instance, src_text_attr=DEP_SRC_TEXT_ATTR)
+    if not src_texts:
+        return
+
+    ct = ContentType.objects.get_for_model(instance)
+
+    deps = list(Dependency.objects.filter(dependent_ct=ct, dependent_id=instance.pk))
+
+    kw = {
+        'dependent_ct': ct,
+        'dependent_id': instance.pk,
+    }
+
+    # gather objects used id all texts
+    objs = []
+    for st in src_texts:
+        content = getattr(instance, st.field)
+        t = Template(content)
+        objs.extend(box.get_obj() for box in t.nodelist.get_nodes_by_type(BoxNode))
+    objs = set(objs)
+
+
+    add = []
+    for obj in objs:
+        dep, created = Dependency.objects.get_or_create(
+                target_ct=ContentType.objects.get_for_model(obj),
+                target_id=obj.pk,
+                **kw
+            )
+        if created:
+            add.append(dep)
+        else:
+            deps.remove(dep)
+
+    # delete outdated dependencies
+    Dependency.objects.filter(pk__in=map(lambda d: d.pk, deps)).delete()
+
+    if License._meta.installed:
+        License.objects.reflect_added_dependencies(add)
+        License.objects.reflect_removed_dependencies(deps)
+
 class RichTextAreaField(RichTextField):
-    #post_save_listener = staticmethod(dependency_post_save_listener)
+    post_save_listener = staticmethod(dependency_post_save_listener)
     src_text_attr = DEP_SRC_TEXT_ATTR
+    #post_save_listener = staticmethod(post_save_listener)
     widget = widgets.RichTextAreaWidget
     default_error_messages = {
         'syntax_error': _('Bad syntax in markdown formatting or template tags.'),
