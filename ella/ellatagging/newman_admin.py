@@ -52,6 +52,6 @@ class TaggedItemAdmin(newman.NewmanModelAdmin):
     suggest_fields = {'tag': ('name',)}
 
 newman.site.register(Tag, TagAdmin)
-newman.site.register(TaggedItem, TaggedItemAdmin)
+#newman.site.register(TaggedItem, TaggedItemAdmin)
 newman.site.append_inline(newman.config.TAGGED_MODELS, TaggingInlineAdmin)
 
