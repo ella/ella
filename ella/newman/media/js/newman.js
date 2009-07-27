@@ -1082,7 +1082,11 @@ $( function() {
         var $target = $(evt.target);
         
         // selection
-        $target.find('#changelist tbody a')
+        var $target_links = $target.find('#changelist tbody a');
+        $target_links.each( function() {
+            this.onclick = null;
+        });
+        $target_links
         .unbind('click')
         .click( function(evt) {
             var clicked_id = /\d+(?=\/$)/.exec( $(this).attr('href') )[0];
@@ -1093,9 +1097,6 @@ $( function() {
             $('#changelist-overlay').css({zIndex:5}).hide();
             $target.removeData('selection_callback');
             return false;
-        })
-        .each( function() {
-            this.onclick = undefined;
         });
         
         function modify_getpar_href(el) {
