@@ -41,6 +41,6 @@ class TestGallery(NewmanTestCase):
         self.assert_equals(data['title'], s.get_text(self.get_listing_object_href()))
 
         # verify all fields
-        s.click(self.get_listing_object()+"/th/a[@class='hashadr']")
+        s.click(self.get_listing_object_href())
         self.verify_form(expected_data)
 
