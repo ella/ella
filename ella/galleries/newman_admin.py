@@ -44,8 +44,8 @@ class GalleryAdmin(PublishableAdmin):
     ordering = ('-created',)
     fieldsets = (
         (_("Heading"), {'fields': ('title', 'slug',)}),
+        (_("Metadata"), {'fields': ('photo', 'category', 'authors', 'source')}),
         (_("Content"), {'fields': ('description', 'content',)}),
-        (_("Metadata"), {'fields': ('authors', 'category')}),
 )
     list_filter = ('created', 'category',)
     search_fields = ('title', 'description', 'slug',)
