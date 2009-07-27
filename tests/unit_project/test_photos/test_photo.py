@@ -31,7 +31,7 @@ class TestPhoto(DatabaseTestCase):
         f = open(self.image_file_name)
         file = ContentFile(f.read())
         f.close()
-        
+
         self.photo = Photo(
             title = u"Example 中文 photo",
             slug = u"example-photo",
@@ -46,8 +46,7 @@ class TestPhoto(DatabaseTestCase):
 
     def test_thumbnail_html_retrieval_success(self):
         #TODO: This should be in adimn, not models
-        #TODO: There should be a hyperlink working with jquery thickbox
-        expected_html = u'<img src="%(thumb)s" alt="%(name)s" />' % {
+        expected_html = u'<a href="%(full)s" class="thickbox" title="%(title)s"><img src="%(thumb)s" alt="%(name)s" /></a>' % {
             'full' : "%(media)sphotos/%(date)s/%(name)s.jpg" % {
                 "name" : u'%s-example-photo' % self.photo.pk,
                 "media" : settings.MEDIA_URL,
@@ -58,6 +57,7 @@ class TestPhoto(DatabaseTestCase):
                 "media" : settings.MEDIA_URL,
                 "date" : strftime("%Y/%m/%d"),
             },
+            "title" : u"Example 中文 photo",
             'name' : u"Thumbnail Example 中文 photo",
         }
         self.assert_equals(expected_html, self.photo.thumb())
@@ -76,7 +76,7 @@ class TestPhoto(DatabaseTestCase):
     def test_thumbnail_deleted(self):
         url = self.photo.thumb_url()
         self.photo.delete()
-        
+
         self.assert_equals(False, self.photo.image.storage.exists(self.thumbnail_path))
 
     def test_thumbnail_html_for_invalid_image(self):
