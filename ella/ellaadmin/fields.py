@@ -9,7 +9,6 @@ from django.template import Template, TextNode, TemplateSyntaxError
 from django.contrib.admin.widgets import AdminFileWidget
 from django.contrib.contenttypes.models import ContentType
 
-from ella.core.templatetags.core import BoxNode, ObjectNotFoundOrInvalid
 from ella.core.models import Dependency
 from ella.ellaadmin import widgets
 from ella.newman.licenses.models import License
@@ -49,6 +48,7 @@ class OnlyRGBImageField(fields.ImageField):
         return f
 
 def dependency_post_save_listener(sender, instance, **kwargs):
+    from ella.core.templatetags.core import BoxNode
     src_texts = post_save_listener(sender, instance, src_text_attr=DEP_SRC_TEXT_ATTR)
     if not src_texts:
         return
@@ -107,6 +107,7 @@ class RichTextAreaField(RichTextField):
         """
         Validate that the target text composes only of text and boxes
         """
+        from ella.core.templatetags.core import BoxNode, ObjectNotFoundOrInvalid
         try:
             t = Template(rendered)
         except TemplateSyntaxError, e:
