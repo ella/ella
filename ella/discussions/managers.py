@@ -18,13 +18,13 @@ class TopicThreadManager(models.Manager):
             target_ct_id = %d
         GROUP BY
         target_id
-) AS _rate""" % ct_thread._get_pk_val()
+        ) AS _rate""" % ct_thread._get_pk_val()
         cond = 'discussions_topicthread.id = _rate.target_id'
         return self.model.objects.extra(
             select={'cnt': '_rate.comment_count'},
             tables=[subquery],
             where=[cond]
-).order_by('-cnt')
+        ).order_by('-cnt')
 
     def get_most_viewed(self):
         """ returns queryset of most viewed TopicThread instances. """
@@ -44,13 +44,13 @@ class TopicThreadManager(models.Manager):
             target_id
         ORDER BY
             submit_date DESC
-) AS _rslt
+        ) AS _rslt
         """ % ct_thread._get_pk_val()
         cond = 'discussions_topicthread.id = _rslt.target_id'
         return self.model.objects.extra(
             tables=[subquery],
             where=[cond]
-)
+        )
 
     def get_unread_posts(self, user):
         CT = ContentType.objects.get_for_model(self.model)
@@ -65,12 +65,12 @@ class TopicThreadManager(models.Manager):
                             discussions_postviewed
                         WHERE
                             user_id = %d
-) AS dpv
+                    ) AS dpv
                 ON
                     dpv.target_id = cmt.id
             ''' % user._get_pk_val() ],
             where=['dpv.id IS NULL', 'comments_comment.id = cmt.id']
-)
+        )
         return qset
 
     def get_unread_topicthreads(self, user):
@@ -90,7 +90,7 @@ class TopicThreadManager(models.Manager):
                         discussions_postviewed
                     WHERE
                         user_id = %d
-) AS pw
+                ) AS pw
               ON
                 pw.target_id = comments_comment.id
             WHERE

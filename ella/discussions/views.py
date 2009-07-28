@@ -58,7 +58,7 @@ def add_post(content, thread, user = False, nickname = False, email = '', ip='0.
             target_id=thread.id,
             parent=parent,
             user=user,
-)
+        )
 
         cmt.save()
 
@@ -75,7 +75,7 @@ def add_post(content, thread, user = False, nickname = False, email = '', ip='0.
             parent=parent,
             nickname=nickname,
             email=email,
-)
+        )
 
         cmt.save()
 
@@ -106,7 +106,7 @@ def paginate_queryset_for_request(request, qset, paginate_by):
         'results_per_page': paginate_by,
         'page': page,
         'item_number_mapping': item_number_mapping,
-})
+    })
     return context
 
 def make_objects_viewed(user, object_list):
@@ -150,7 +150,7 @@ def view_unread(request):
         ('page/content_type/discussions.question/unread_threads.html',),
         context,
         context_instance=RequestContext(request)
-)
+    )
 
 def user_posts(request, username):
     """
@@ -169,7 +169,7 @@ def user_posts(request, username):
         ('page/content_type/discussions.question/user_posts.html',),
         context,
         context_instance=RequestContext(request)
-)
+    )
 
 def topicthread(request, bits, context):
     """ Posts view (list of posts associated to given topic) """
@@ -216,9 +216,9 @@ def topicthread(request, bits, context):
                 {
                     'form': frm,
                     'form_action': thr.get_absolute_url(),
-},
+                },
                 context_instance=RequestContext(request)
-)
+            )
 
     else:
         thr.hit() # increment view counter
@@ -242,12 +242,12 @@ def topicthread(request, bits, context):
         'page/category/%s/content_type/discussions.topicthread/%s/object.html' % (category.path, topic.slug,),
         'page/category/%s/content_type/discussions.topicthread/object.html' % (category.path,),
         'page/content_type/discussions.topicthread/object.html',
-)
+    )
     return render_to_response(
         tplList,
         context,
         context_instance=RequestContext(request)
-)
+    )
 
 
 def post_reply(request, context, reply, thread):
@@ -274,7 +274,7 @@ def post_reply(request, context, reply, thread):
         context.update ({
                 'reply' : True,
                'parent' : parent,
-})
+        })
         form = CommentForm(init_props=init_props)
     else:
         ct = ContentType.objects.get_for_model(TopicThread)
@@ -288,7 +288,7 @@ def post_reply(request, context, reply, thread):
         ('common/page/discussions/form.html',),
         context,
         context_instance=RequestContext(request)
-)
+    )
 
 
 def create_thread(request, bits, context):
@@ -310,7 +310,7 @@ def create_thread(request, bits, context):
                     created=datetime.now(),
                     author=get_user(request),
                     topic=topic
-)
+                )
                 thr.save()
                 add_post(data['content'], thr, user=user, ip=get_ip(request))
             else:
@@ -321,7 +321,7 @@ def create_thread(request, bits, context):
                     nickname=data['nickname'],
                     email=data['email'],
                     topic=topic
-)
+                )
                 thr.save()
                 add_post(data['content'], thr, nickname=data['nickname'], email=data['email'], ip=get_ip(request))
 
@@ -342,10 +342,10 @@ def create_thread(request, bits, context):
                 'page/category/%s/content_type/%s.%s/%s/create-thread.html' % (category.path, ct.app_label, ct.model, topic.slug,),
                 'page/category/%s/content_type/%s.%s/create-thread.html' % (category.path, ct.app_label, ct.model,),
                 'page/content_type/%s.%s/create-thread.html' % (ct.app_label, ct.model,),
-),
+            ),
             context,
             context_instance=RequestContext(request)
-)
+    )
 
 #def question(request, bits, context):
 #    log.debug('question() view')
@@ -395,6 +395,6 @@ def topic(request, context):
             t_list,
             context,
             context_instance=RequestContext(request)
-)
+    )
 
 log = logging.getLogger('ella.discussions')

@@ -22,7 +22,7 @@ class FormatedPhotoForm(forms.BaseForm):
             (data['crop_top'] > photo.height) or
             ((data['crop_left'] + data['crop_width']) > photo.width) or
             ((data['crop_top'] + data['crop_height']) > photo.height)
-):
+        ):
             # raise forms.ValidationError, ugettext("The specified crop coordinates do not fit into the source photo.")
             raise ValidationError, ugettext("The specified crop coordinates do not fit into the source photo.")
         return data
@@ -42,10 +42,10 @@ class CropAreaWidget(forms.TextInput):
         js = (
             settings.ADMIN_MEDIA_PREFIX + JS_INTERFACE,
             settings.ADMIN_MEDIA_PREFIX + JS_CROP,
-)
+        )
         css = {
             'screen': (settings.ADMIN_MEDIA_PREFIX + CSS_CROP,),
-}
+        }
 
     def __init__(self, attrs={}):
         super(CropAreaWidget, self).__init__(attrs={'class': 'crop'})

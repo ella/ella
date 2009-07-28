@@ -79,7 +79,7 @@ def update_karma_for_ct(content_type, owner_field, weight):
         karma_coeficient = '%s.%s' % (
                     connection.ops.quote_name(profile_model._meta.db_table),
                     connection.ops.quote_name(profile_model._meta.get_field('karma_coeficient').column)
-)
+        )
     except FieldDoesNotExist:
         karma_coeficient = Decimal("1.0")
 
@@ -91,7 +91,7 @@ def update_karma_for_ct(content_type, owner_field, weight):
         'aggreg_table' : connection.ops.quote_name(TotalRate._meta.db_table),
         'obj_table' : connection.ops.quote_name(content_type.model_class()._meta.db_table),
         'obj_pk' : connection.ops.quote_name(content_type.model_class()._meta.pk.column),
-}
+    }
 
     cursor = connection.cursor()
     cursor.execute(sql, {'ct_type' : content_type.id,})
@@ -105,7 +105,7 @@ def update_karma_for_ct(content_type, owner_field, weight):
         'rating_table' : connection.ops.quote_name(Rating._meta.db_table),
         'obj_table' : connection.ops.quote_name(content_type.model_class()._meta.db_table),
         'obj_pk' : connection.ops.quote_name(content_type.model_class()._meta.pk.column),
-}
+    }
 
     cursor.execute(sql, {'ct_type' : content_type.id,})
 

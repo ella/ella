@@ -306,7 +306,7 @@ def get_thread_pagination(context, thread):
         raise TemplateSyntaxError(
             'get_thread_pagination_per_topic - parameter should be valid TopicThread object! Passed arg. type is %s' \
             % str(type(thread))
-)
+        )
     qset = get_comments_on_thread(thread)
     p = Paginator(qset, DISCUSSIONS_PAGINATE_BY)
     return {
@@ -314,7 +314,7 @@ def get_thread_pagination(context, thread):
         'has_more_pages': p.pages > 1,
         'page_range': p.page_range,
         'thread_url': thread.get_absolute_url(),
-}
+    }
 
 @register.inclusion_tag('inclusion_tags/print_comment_discussions.html', takes_context=True)
 def print_comment_discussions(context, comment):

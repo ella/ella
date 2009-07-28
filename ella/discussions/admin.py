@@ -23,9 +23,10 @@ class PostOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
                     'parent',
                     'user',
                     'ip_address',
-)
-}),
-)
+                    )
+            }
+        ),
+    )
 
     def __call__(self, request, url):
         if 'memorize_referer' in request.GET and 'HTTP_REFERER' in request.META:

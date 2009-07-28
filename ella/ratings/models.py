@@ -167,7 +167,7 @@ class TotalRateManager(models.Manager):
                  FROM %s
                  WHERE target_id = %%s AND target_ct_id = %%s''' % (
             connection.ops.quote_name(TotalRate._meta.db_table),
-)
+        )
         cursor = connection.cursor()
         cursor.execute(sql, (obj.id, content_type.id))
         result = cursor.fetchone()
@@ -226,7 +226,7 @@ class TotalRateManager(models.Manager):
                 'coef' : RATINGS_COEFICIENT,
                 'ct_tab' : connection.ops.quote_name(ContentType._meta.db_table),
                 'rate_tab' : connection.ops.quote_name(Rating._meta.db_table),
-}
+        }
         cursor = connection.cursor()
         cursor.execute(sql, (count,))
 
@@ -272,7 +272,7 @@ class AggManager(models.Manager):
                  GROUP BY target_ct_id, target_id, DATE_FORMAT(time, %%(format)s)''' % {
             'tab' : connection.ops.quote_name(Agg._meta.db_table),
             'pe' : time_period
-}
+        }
 
         cursor = connection.cursor()
         cursor.execute(sql, {'li' : time_limit,'format' : time_format})
@@ -283,7 +283,7 @@ class AggManager(models.Manager):
         """
         sql = 'UPDATE %s SET detract = 0' % (
             connection.ops.quote_name(Agg._meta.db_table),
-)
+        )
         cursor = connection.cursor()
         cursor.execute(sql, ())
 
@@ -298,7 +298,7 @@ class AggManager(models.Manager):
                  GROUP BY target_ct_id, target_id''' % {
             'tab_agg' : connection.ops.quote_name(Agg._meta.db_table),
             'tab_tr' : connection.ops.quote_name(TotalRate._meta.db_table)
-}
+        }
 
         cursor = connection.cursor()
         cursor.execute(sql, ())
@@ -344,7 +344,7 @@ class RatingManager(models.Manager):
             connection.ops.quote_name(Rating._meta.db_table),
             obj.id,
             content_type.id,
-)
+        )
         cursor = connection.cursor()
         cursor.execute(sql, ())
         result = cursor.fetchone()
@@ -369,7 +369,7 @@ class RatingManager(models.Manager):
             'tab' : connection.ops.quote_name(Rating._meta.db_table),
             'tb' : connection.ops.quote_name(Agg._meta.db_table),
             'pe' : time_period,
-}
+        }
 
         cursor = connection.cursor()
         cursor.execute(sql, {'li' : time_limit,'format' : time_format})
@@ -416,7 +416,7 @@ class Rating(models.Model):
                         user__isnull=True,
                         ip_address=self.ip_address ,
                         time__gte=(self.time or datetime.now()) - timedelta(seconds=MINIMAL_ANONYMOUS_IP_DELAY)
-).count() > 0):
+                ).count() > 0):
                 return
 
         super(Rating, self).save(force_insert, force_update)
