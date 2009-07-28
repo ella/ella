@@ -60,7 +60,7 @@ class NewmanTestCase(SeleniumTestCase):
             'navigation' : {
                 'logout' : "//a[@class='icn logout']",
                 #'categories' : "//a[@class='app category']",
-                'categories' : "//ul[@id='menu-top']/li[2]/ul/li[2]/a",
+                'categories' : "//ul[@id='menu-top']/li[3]/ul/li[2]/a",
                 #'categories_add' : "//a[@class='app category']/../a[position()=2]",
                 'articles' : "//a[@class='app article']",
                 'article_add' : "//a[@class='app article']/../a[position()=2]",
