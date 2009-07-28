@@ -619,7 +619,7 @@ class NewmanModelAdmin(XModelAdmin):
         return inline_admin_formsets, media
 
     @utils.profiled_section
-    def change_view_json_response(self, request, context):
+    def json_error_response(self, request, context):
         """
         Chyby v polich formulare
         Chyba v poli formulare napr.: context['adminform'].form['slug'].errors
@@ -734,7 +734,7 @@ class NewmanModelAdmin(XModelAdmin):
                 status=STATUS_OK
             )
         context.update(extra_context or {})
-        return self.change_view_json_response(request, context)  # Json response
+        return self.json_error_response(request, context)  # Json response
 
     @utils.profiled_section
     @require_AJAX
@@ -785,8 +785,7 @@ class NewmanModelAdmin(XModelAdmin):
             msg = request.user.message_set.all()[0].message
             return utils.JsonResponse(msg, {'id': context['object'].pk})
         elif 'error_dict' in context:
-            msg = _('Please correct errors in form')
-            return utils.JsonResponse(msg, errors=context['error_dict'], status=STATUS_FORM_ERROR)
+            return self.json_error_response(request, context)
 
     def add_view(self, request, form_url='', extra_context=None):
         "The 'add' admin view for this model."
