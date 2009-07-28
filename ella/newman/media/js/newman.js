@@ -451,6 +451,8 @@ $( function() {
             var $err_overlay = $('#err-overlay');
             if ($err_overlay.length == 0) $err_overlay = $(
                 '<div id="err-overlay" class="overlay">'
+            ).html(
+                '<h6></h6>'
             ).appendTo(
                    $form
                 || $('.change-form').get(0)
@@ -458,9 +460,14 @@ $( function() {
                 || $('body').get(0)
             );
             
+            $err_overlay.find('h6').text(res.message);
+            
             // Show the individual errors
-            for (var id in res.errors) {
-                var msgs = res.errors[ id ];
+            for (var i = 0; i < res.errors.length; i++) {
+                var err = res.errors[i];
+                var id = err.id;
+                var msgs = err.messages;
+                var label = err.label;
                 var input;
                 
                 // non-field errors
@@ -492,12 +499,16 @@ $( function() {
                     :                                      input                             // otherwise the input itself
                 )
                 .text(
-                    ($('label[for='+input.id+']').text() || id).replace(/:$/,'')  // identify the input with its label text or id; no trailing ':' pls
+                       label
+                    || ($('label[for='+input.id+']').text() || id).replace(/:$/,'') // identify the input with its label text or id; no trailing ':' pls
                 )
                 .click( function(evt) { // focus and scroll to the input
                     if (evt.button != 0) return;
                     var input = $(this).closest('p').data('rel_input');
                     try { input.focus(); } catch(e) {}
+                    $(input).addClass('blink')
+                    .closest('.collapsed').removeClass('collapsed').addClass('collapse');
+                    setTimeout( function() { $(input).removeClass('blink'); }, 1500 );
                     return false;
                 })
                 .appendTo($err_overlay);
