@@ -109,13 +109,12 @@
     <div class="hpbox lastlog">
         <h3><span>{% trans "Last edited objects" %}</span></h3>
         <div class="cnt">
-            {# % get_admin_log 15 as admin_log for_user user % #}
-            {% newman_log 50 as admin_log %}
-            {% if not admin_log %}
+            {% newman_log 20 as log_entries %}
+            {% if not log_entries %}
             <p>{% trans 'None available' %}</p>
             {% else %}
             <ul class="actionlist">
-            {% for entry in admin_log %}
+            {% for entry in log_entries %}
                 <li>
                     <h4>
                     {% if not entry.is_deletion %}
