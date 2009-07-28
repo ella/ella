@@ -123,7 +123,7 @@ class Interview(Publishable):
 
     def get_description(self):
         " Override Publishable.get_description. "
-        return self.perex
+        return self.description
 
     class Meta:
         verbose_name = _('Interview')
