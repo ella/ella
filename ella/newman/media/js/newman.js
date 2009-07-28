@@ -39,9 +39,7 @@ function lock_window(msg) {
     ).html(
           '<p><img src="'
         + MEDIA_URL + 'ico/15/loading.gif'
-        + '" alt="" /> '
-        + msg
-        + '</p>'
+        + '" alt="" /> <span id="lock-message"></span></p>'
     ).appendTo('body').dialog({
         autoOpen: false,
         modal: true,
@@ -52,6 +50,7 @@ function lock_window(msg) {
             return !!$(this).data('close_ok');
         }
     });
+    $('#lock-message').html(msg);
     $modal.data('close_ok', false)
     $modal.dialog('open');
 }
@@ -354,7 +353,7 @@ $( function() {
         if (!$form.jquery) $form = $($form);
         if ( ! validate($form) ) return false;
         
-        lock_window(gettext('Sending'));
+        lock_window(gettext('Sending')+'...');
         
         // Hack for file inputs
 /*        var has_files = false;
@@ -426,8 +425,20 @@ $( function() {
             url: url,
             type: method,
             data: data,
-            success:  success,
-            error:    error,
+            success:  function() {
+                try {
+                    success.apply(this, arguments);
+                } catch(e) {
+                    carp('Error processing form-send success:', e);
+                }
+            },
+            error:    function() {
+                try {
+                    error.apply(this, arguments);
+                } catch(e) {
+                    carp('Error processing form-send error:', e);
+                }
+            },
             complete: function() {
                 unlock_window();
             },
