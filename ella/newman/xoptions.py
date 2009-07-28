@@ -392,7 +392,6 @@ class XModelAdmin(ModelAdmin):
         })
 
         context['raw_form'] = form
-        #import pdb;pdb.set_trace()
         return context
 
     def add_view(self, request, form_url='', extra_context=None):
