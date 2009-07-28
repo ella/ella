@@ -779,10 +779,7 @@ class NewmanModelAdmin(XModelAdmin):
         if request.method.upper() != 'POST':
             msg = _('This view is designed for saving data only, thus POST method is required.')
             return HttpResponseForbidden(msg)
-        try:
-            context = self.get_add_view_context(request, form_url)
-        except:
-            raise
+        context = self.get_add_view_context(request, form_url)
         context.update(extra_context or {})
         if 'object_added' in context:
             msg = request.user.message_set.all()[0].message
