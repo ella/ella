@@ -4,6 +4,8 @@ from django.utils.safestring import mark_safe
 
 from ella.newman import site, permission
 from django.utils.translation import ugettext_lazy
+from django.contrib.admin.models import LogEntry
+from django.db.models.aggregates import Max
 
 
 register = template.Library()
@@ -92,3 +94,33 @@ def newman_contenttypes():
     for ct in site.applicable_content_types:
         out.append('"%d": {"path": "/%s/%s/", "title": "%s"}' % (ct.pk, ct.app_label, ct.model, ugettext_lazy(ct.name)))
     return 'var AVAILABLE_CONTENT_TYPES = {%s};' % ", ".join(out)
+
+class NewmanLogNode(template.Node):
+    def __init__(self, limit, varname):
+        self.limit, self.varname = limit, varname
+
+    def render(self, context):
+        user = context['user']
+        params = {}
+        if not user.is_superuser:
+            params.update({'user': user})
+        entry_ids = LogEntry.objects.values('object_id').annotate(last_edit=Max('action_time'), id=Max('id')).filter(**params).order_by('-last_edit')[:self.limit]
+        entries = LogEntry.objects.filter(pk__in=[i['id'] for i in entry_ids])
+        context[self.varname] = entries
+        return ''
+
+class NewmanLog():
+    def __init__(self, tag_name):
+        self.tag_name = tag_name
+
+    def __call__(self, parser, token):
+        tokens = token.contents.split()
+        if len(tokens) < 4:
+            raise template.TemplateSyntaxError, "'%s' statements require two arguments" % self.tag_name
+        if not tokens[1].isdigit():
+            raise template.TemplateSyntaxError, "First argument in '%s' must be an integer" % self.tag_name
+        if tokens[2] != 'as':
+            raise template.TemplateSyntaxError, "Second argument in '%s' must be 'as'" % self.tag_name
+        return NewmanLogNode(limit=tokens[1], varname=tokens[3])
+
+register.tag('newman_log', NewmanLog('newman_log'))
