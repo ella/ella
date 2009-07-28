@@ -29,11 +29,11 @@ def parse_object_definition(tagname, od_tokens):
         except models.ObjectDoesNotExist:
             raise template.TemplateSyntaxError, "%r tag: Model %r with field %r equal to %r does not exist." % (
                     tagname, od_tokens[0], od_tokens[2], od_tokens[3]
-)
+            )
         except AssertionError:
             raise template.TemplateSyntaxError, "%r tag: Model %r with field %r equal to %r does not refer to a single object." % (
                     tagname, od_tokens[0], od_tokens[2], od_tokens[3]
-)
+    )
     else:
         raise template.TemplateSyntaxError, "%r tag: Object must be specified by 'APP_LABEL.MODEL_NAME with FIELD VALUE' or given directly" % tagname
 
@@ -171,7 +171,7 @@ class CommentFormNode(template.Node):
         init_props = {
             'target': '%d:%d' % (target_ct.id, target_id),
             'options': self.form_options[1:-1], # TODO: beautify this
-}
+        }
         context[self.varname] = CommentForm(init_props=init_props)
         return ''
 
@@ -204,7 +204,7 @@ class CommentCountNode(template.Node):
                     'app_label' : object._meta.app_label,
                     'module_name' : object._meta.module_name,
                     'pk' : object.pk,
-}
+                }
             return str(comment_count)
         context[self.varname] = comment_count
         return ''

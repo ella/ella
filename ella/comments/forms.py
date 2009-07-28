@@ -180,7 +180,7 @@ class CommentForm(forms.Form):
                     target_ct=self.init_props['target_ct'],
                     target_id=self.init_props['target_id'],
                     user=user
-).count():
+                ).count():
                 raise ValidationError, _("Banned user.")
             else:
                 self.cleaned_data['user'] = user

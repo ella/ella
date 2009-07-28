@@ -96,7 +96,7 @@ class PlacementInlineFormset(modelforms.BaseModelFormSet):
                 slug=slug,
                 target_ct=target_ct.pk,
                 static=d['static']
-)
+            )
 
             if d['static']: # allow placements that do not overlap
                 q = Q(publish_to__lt=d['publish_from'])
@@ -110,7 +110,7 @@ class PlacementInlineFormset(modelforms.BaseModelFormSet):
                     publish_from__year=d['publish_from'].year,
                     publish_from__month=d['publish_from'].month,
                     publish_from__day=d['publish_from'].day,
-)
+                )
 
             # exclude current object from search
             if d['id']:
@@ -125,13 +125,14 @@ class PlacementInlineFormset(modelforms.BaseModelFormSet):
                         Please change the slug or publish date.''') % {
                             'category' : plac.category,
                             'target' : plac.target,
-})
+                        }
+                )
 
             '''
             qset = Placement.objects.filter(
                         target_id=obj.pk,
                         target_ct=target_ct,
-)
+            )
 
             if 'id' in d:
                 qset = qset.exclude(id=d['id'])

@@ -41,7 +41,7 @@ class ForeignKeyGenericRawIdWidget(forms.TextInput):
     class Media:
         js = (
             settings.ADMIN_MEDIA_PREFIX + JS_GENERIC_LOOKUP,
-)
+        )
     def __init__(self, attrs={}):
         super(ForeignKeyGenericRawIdWidget, self).__init__(attrs={'class': CLASS_TARGEID})
 
@@ -64,10 +64,10 @@ class RichTextAreaWidget(RichTextAreaWidget):
             # FIXME: i don't know why js is not loaded in ListingCategoryWidget
             settings.ADMIN_MEDIA_PREFIX + JS_PLACEMENT_CATEGORY,
             settings.ADMIN_MEDIA_PREFIX + JS_LISTING_CATEGORY,
-)
+        )
         css = {
             'screen': (settings.ADMIN_MEDIA_PREFIX + CSS_RICHTEXTAREA,),
-}
+        }
     def __init__(self, height=None, attrs={}):
         css_class = CLASS_RICHTEXTAREA
         if height:
@@ -176,7 +176,7 @@ class ListingCategoryWidget(forms.Select):
     class Media:
         js = (
             settings.ADMIN_MEDIA_PREFIX + JS_LISTING_CATEGORY,
-)
+        )
     def __init__(self, attrs={}):
         super(ListingCategoryWidget, self).__init__(attrs={'class': CLASS_LISTING_CATEGORY})
 
@@ -185,7 +185,7 @@ class IncrementWidget(forms.TextInput):
     class Media:
         js = (
             settings.ADMIN_MEDIA_PREFIX + 'js/increment.js',
-)
+    )
     def __init__(self, attrs={}):
         super(IncrementWidget, self).__init__(attrs={'class': 'increment'})
 

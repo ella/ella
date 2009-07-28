@@ -9,7 +9,7 @@ from django.conf import settings
 from ella.galleries.models import Gallery, GalleryItem
 from ella.core.admin import PlacementInlineAdmin
 from ella.core.cache import get_cached_object
-from ella.ellaadmin.options import EllaAdminOptionsMixin
+from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin, EllaAdminInline
 
 class GalleryItemFormset(BaseInlineFormSet):
     " Override default FormSet to allow for custom validation."
@@ -43,13 +43,13 @@ class GalleryItemTabularOptions(EllaAdminOptionsMixin, admin.TabularInline):
     extra = 10
     formset = GalleryItemFormset
 
-class GalleryOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
+class GalleryOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     list_display = ('title', 'created', 'category',)
     ordering = ('-created',)
     fieldsets = (
         (_("Gallery heading"), {'fields': ('title', 'slug',)}),
         (_("Gallery metadata"), {'fields': ('description', 'content', 'authors', 'category')}),
-)
+    )
     list_filter = ('created', 'category',)
     search_fields = ('title', 'description', 'slug',) # FIXME: 'tags__tag__name',)
     inlines = [ GalleryItemTabularOptions, PlacementInlineAdmin ]

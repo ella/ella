@@ -140,7 +140,7 @@ class EllaAdminOptionsMixin(object):
                 'max_length': db_field.max_length,
                 'label': db_field.verbose_name,
                 'error_message': _('Enter a valid slug.'),
-})
+            })
             return forms.RegexField('^[0-9a-z-]+$', **kwargs)
 
         for css_class, rich_text_fields in getattr(self, 'rich_text_fields', {}).iteritems():
@@ -151,7 +151,7 @@ class EllaAdminOptionsMixin(object):
                     'field_name': db_field.name,
                     'instance': custom_params.get('instance', None),
                     'model': custom_params.get('model'),
-})
+                })
                 rich_text_field = fields.RichTextAreaField(**kwargs)
                 if css_class:
                     rich_text_field.widget.attrs['class'] += ' %s' % css_class
@@ -169,7 +169,7 @@ class EllaAdminOptionsMixin(object):
             kwargs.update({
                 'required': not db_field.blank,
                 'label': db_field.verbose_name,
-})
+            })
             if isinstance(db_field, ForeignKey):
                 return fields.GenericSuggestField([db_field, self.model, self.suggest_fields[db_field.name]], **kwargs)
             return fields.GenericSuggestFieldMultiple([db_field, self.model, self.suggest_fields[db_field.name]], **kwargs)

@@ -18,7 +18,7 @@ def format_photo_json(request, photo, format):
             'height': photo.height,
             'format_width':format.max_width,
             'format_height':format.max_height
-}
+        }
     except (Photo.DoesNotExist, Format.DoesNotExist):
         content = {'error':True}
     return HttpResponse(simplejson.dumps(content))

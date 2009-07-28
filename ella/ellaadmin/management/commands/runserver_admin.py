@@ -11,7 +11,7 @@ class Command(BaseCommand):
             help='Specifies the directory from which to serve admin media.'),
         make_option('--noadminmedia', action='store_true', dest='disable_admin_media', default=False,
             help='Do not serve admin media files directly.'),
-)
+    )
     help = "Starts a lightweight Web server for development."
     args = '[optional port number, or ipaddr:port]'
 
@@ -68,7 +68,7 @@ class Command(BaseCommand):
                     13: "You don't have permission to access that port.",
                     98: "That port is already in use.",
                     99: "That IP address can't be assigned-to.",
-}
+                }
                 try:
                     error_text = ERRORS[e.args[0].args[0]]
                 except (AttributeError, KeyError):

@@ -32,5 +32,5 @@ def paginator(context, adjacent_pages=2):
         'page_numbers': page_numbers,
         'show_first': 1 not in page_numbers,
         'show_last': page.paginator.num_pages not in page_numbers,
-}
+    }
 
