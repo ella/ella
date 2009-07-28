@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.template.defaultfilters import slugify
 
-from ella.ellaadmin.options import EllaAdminOptionsMixin
+from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin
 from ella.media.models import Media, Section, Usage
 from ella.media.forms import MediaForm
 from ella.photos.models import Photo
@@ -26,7 +26,7 @@ class SectionInline(admin.TabularInline):
 class UsageInline(admin.TabularInline):
     model = Usage
 
-class MediaOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
+class MediaOptions(EllaAdminOptionsMixin, EllaModelAdmin):
 
     def __init__(self, *args, **kwargs):
         super(MediaOptions, self).__init__(*args, **kwargs)
