@@ -1,11 +1,11 @@
 from django.contrib import admin
 
-from ella.ellaadmin.options import EllaAdminOptionsMixin
+from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin
 
 from ella.attachments.models import Attachment, Type
 
 
-class AttachmentOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
+class AttachmentOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     list_display = ('name', 'type', 'created',)
     list_filter = ('type',)
     prepopulated_fields = {'slug' : ('name',)}

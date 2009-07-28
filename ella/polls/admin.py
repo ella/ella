@@ -7,7 +7,7 @@ from django.forms.util import ValidationError
 
 from ella.core.admin import PlacementInlineAdmin
 
-from ella.ellaadmin.options import EllaAdminOptionsMixin
+from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin, EllaAdminInline
 
 from ella.core.cache import get_cached_object_or_404
 from ella.polls.models import Poll, Contest, Contestant, Quiz, Result, Choice, Vote, Question
@@ -47,7 +47,7 @@ class ChoiceTabularOptions(admin.TabularInline):
     model = Choice
     extra = 5
 
-class QuestionOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
+class QuestionOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     """
     Admin options for Question model:
         * edit inline choices
@@ -72,7 +72,7 @@ class VoteOptions(admin.ModelAdmin):
     ordering = ('time',)
     list_display = ('time', 'poll', 'user', 'ip_address')
 
-class ContestantOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
+class ContestantOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     """
     Admin options for Contestant
     """
@@ -80,7 +80,7 @@ class ContestantOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     list_display = ('name', 'surname', 'user', 'datetime', 'contest', 'points', 'winner')
     rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}
 
-class QuestionInlineOptions(EllaAdminOptionsMixin, admin.TabularInline):
+class QuestionInlineOptions(EllaAdminInline, admin.TabularInline):
     model = Question
     inlines = (ChoiceTabularOptions,)
     template = 'admin/polls/question/edit_inline/tabular.html'
@@ -88,7 +88,7 @@ class QuestionInlineOptions(EllaAdminOptionsMixin, admin.TabularInline):
     rich_text_fields = {'small': ('question',)}
     fieldsets = ((None, {'fields' : ('question', 'allow_multiple', 'allow_no_choice',)}),)
 
-class ContestOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
+class ContestOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     def __call__(self, request, url):
         if url and url.endswith('correct_answers'):
             pk = url.split('/')[-2]
@@ -108,7 +108,7 @@ class ContestOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     prepopulated_fields = {'slug' : ('title',)}
     rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}
 
-class QuizOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
+class QuizOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     list_display = ('title', 'category', 'active_from', 'pk', 'get_domain_url',)
     list_filter = ('category', 'active_from',)
     search_fields = ('title', 'text_announcement', 'text', 'text_results',)
@@ -121,7 +121,7 @@ class QuizOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     suggest_fields = {'authors': ('name', 'slug',),}
 
 
-class PollOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
+class PollOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}
     list_display = ('title', 'question', 'get_total_votes', 'pk',)
     list_filter = ('active_from',)

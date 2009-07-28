@@ -5,7 +5,7 @@ from ella.core.cache.utils import delete_cached_object
 from ella.discussions.models import TopicThread, Topic, BannedUser, BannedString
 from ella.discussions.cache import get_key_comments_on_thread__spec_filter, get_key_comments_on_thread__by_submit_date
 from django.utils.translation import ugettext_lazy as _
-from ella.ellaadmin.options import EllaAdminOptionsMixin
+from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin
 
 class PostOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     ordering = ('-submit_date',)
@@ -57,7 +57,7 @@ class TopicThreadOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     search_fields = ('title', 'author', 'id',)
     prepopulated_fields = {'slug': ('title',)}
 
-class TopicOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
+class TopicOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug': ('title',)}
     list_display = ('title', 'photo_thumb', 'created', 'pk',)
