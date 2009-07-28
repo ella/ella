@@ -26,6 +26,11 @@ body {
 
 /* Dynamic */
 
+.blink {
+    background-color: #FFEEEE;
+    outline: solid 1px red;
+}
+
 .loading { opacity: .3; }
 
 .overlay { position: fixed; }
