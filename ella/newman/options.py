@@ -1,4 +1,3 @@
-from django.db.models.aggregates import Max
 import logging
 
 from django.conf import settings
@@ -16,7 +15,6 @@ from django.utils.functional import update_wrapper
 from django.utils.translation import ugettext as _
 from django.utils.encoding import force_unicode
 from django.template.defaultfilters import striptags, truncatewords
-from django.contrib.admin.models import LogEntry
 
 from ella.core.models.publishable import Publishable
 from ella.newman.changelist import NewmanChangeList, FilterChangeList
@@ -370,9 +368,7 @@ class NewmanModelAdmin(XModelAdmin):
         if not request.user.is_superuser:
             params.update({'user': request.user})
 
-        # TODO: GROUP BY object_id
-        entry_ids = LogEntry.objects.values('object_id').annotate(last_edit=Max('action_time'), id=Max('id')).filter(**params).order_by('-last_edit')[:15]
-        entries = LogEntry.objects.filter(pk__in=[i['id'] for i in entry_ids])
+        entries = utils.get_log_entries(limit=15, filters=params)
         context = {'entry_list': entries, 'ct': ct}
 
         return render_to_response(self.get_template_list('action_log.html'), context, context_instance=template.RequestContext(request))

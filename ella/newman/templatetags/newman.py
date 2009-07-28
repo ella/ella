@@ -4,8 +4,7 @@ from django.utils.safestring import mark_safe
 
 from ella.newman import site, permission
 from django.utils.translation import ugettext_lazy
-from django.contrib.admin.models import LogEntry
-from django.db.models.aggregates import Max
+from ella.newman.utils import get_log_entries
 
 
 register = template.Library()
@@ -104,9 +103,7 @@ class NewmanLogNode(template.Node):
         params = {}
         if not user.is_superuser:
             params.update({'user': user})
-        entry_ids = LogEntry.objects.values('object_id').annotate(last_edit=Max('action_time'), id=Max('id')).filter(**params).order_by('-last_edit')[:self.limit]
-        entries = LogEntry.objects.filter(pk__in=[i['id'] for i in entry_ids])
-        context[self.varname] = entries
+        context[self.varname] = get_log_entries(limit=self.limit, filters=params)
         return ''
 
 class NewmanLog():
