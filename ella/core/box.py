@@ -132,7 +132,7 @@ class Box(object):
                 'pk' : self.obj.pk,
                 'params' : '\n'.join(('%s:%s' % item for item in self.params.items())),
                 'template_name' : t_name,
-}
+        }
 
     def _get_template_list(self):
         " Get the hierarchy of templates belonging to the object/box_type given. "

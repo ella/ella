@@ -69,4 +69,4 @@ def cache_status(request):
         'ellaadmin/memcached_status.html', dict(
             all_stats=all_stats,
             time=datetime.datetime.now(), # server time
-))
+    ))

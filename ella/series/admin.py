@@ -23,7 +23,7 @@ class SerieAdmin(EllaAdminOptionsMixin, EllaModelAdmin):
         (None, {'fields': ('title',)}),
         (_("Slug, metadata"), {'fields': ('slug', 'started', 'finished', 'hide_newer_parts',), 'classes': ['collapse'],}),
         (_("Contents"), {'fields': ('description', 'category', 'photo',)}),
-)
+    )
 
     raw_id_fields = ('photo',)
     rich_text_fields = {None: ('description',)}

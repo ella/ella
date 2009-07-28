@@ -1,5 +1,5 @@
 {% extends "newman/ajax_content_base.html" %}
-{% load newman log cache %}
+{% load newman cache %}
 
 {% block breadcrumbs %}{% endblock %}
 {% block content_toolbar %}{% endblock %}
@@ -107,15 +107,31 @@
 <div class="hpcol" style="width: 25%;">
 
     <div class="hpbox lastlog">
-        <h3><span>{% trans "Your Recent Actions" %}</span></h3>
+        <h3><span>{% trans "Last edited objects" %}</span></h3>
         <div class="cnt">
-            {% get_admin_log 15 as admin_log for_user user %}
+            {# % get_admin_log 15 as admin_log for_user user % #}
+            {% newman_log 50 as admin_log %}
             {% if not admin_log %}
             <p>{% trans 'None available' %}</p>
             {% else %}
             <ul class="actionlist">
             {% for entry in admin_log %}
-            <li class="{% if entry.is_addition %}addlink{% endif %}{% if entry.is_change %}changelink{% endif %}{% if entry.is_deletion %}deletelink{% endif %}">{% if not entry.is_deletion %}<a class="js-hashadr" href="/{{ entry.get_admin_url }}">{% endif %}{{ entry.object_repr }}{% if not entry.is_deletion %}</a>{% endif %}<br /><span class="mini quiet">{% filter capfirst %}{% trans entry.content_type.name %}{% endfilter %}</span></li>
+                <li>
+                    <h4>
+                    {% if not entry.is_deletion %}
+                        <a class="js-hashadr icn {% if entry.is_addition %}add{% endif %}{% if entry.is_change %}eclear{% endif %}" href="/{{ entry.content_type.app_label }}/{{ entry.content_type.model }}/{{ entry.object_id }}/">{{ entry.object_repr }}</a>
+                    {% else %}
+                        <a class="icn cancel">{{ entry.object_repr }}</a>
+                    {% endif %}
+                    </h4>
+                    <span class="mini quiet">
+                        {% trans entry.content_type.name %}
+                        | {{ entry.action_time|date:"Y-m-d H:i" }}
+                        {% if user.is_superuser %}
+                        | {{ entry.user }}
+                        {% endif %}
+                    </span>
+                </li>
             {% endfor %}
             </ul>
             {% endif %}

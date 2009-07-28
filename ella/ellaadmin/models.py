@@ -23,7 +23,7 @@ def has_category_permission(user, model, category, permission):
             category=category,
             user=user,
             group__permissions=perm
-).count():
+        ).count():
         return True
 
     # fallback to site permissions

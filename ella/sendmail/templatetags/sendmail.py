@@ -11,7 +11,7 @@ class SendToBuddyNode(Node):
     def render(self, context):
         init_props = {
             'target': '%d:%d' % (context['content_type'].id, context['object']._get_pk_val()),
-}
+        }
         form = SendBuddyForm(init_props=init_props)
         context[self.varname] = form
         return ''

@@ -1,4 +1,3 @@
-from django.db.models.aggregates import Max
 import logging
 
 from django.conf import settings
@@ -16,7 +15,6 @@ from django.utils.functional import update_wrapper
 from django.utils.translation import ugettext as _
 from django.utils.encoding import force_unicode
 from django.template.defaultfilters import striptags, truncatewords
-from django.contrib.admin.models import LogEntry
 
 from ella.core.models.publishable import Publishable
 from ella.newman.changelist import NewmanChangeList, FilterChangeList
@@ -370,9 +368,7 @@ class NewmanModelAdmin(XModelAdmin):
         if not request.user.is_superuser:
             params.update({'user': request.user})
 
-        # TODO: GROUP BY object_id
-        entry_ids = LogEntry.objects.values('object_id').annotate(last_edit=Max('action_time'), id=Max('id')).filter(**params).order_by('-last_edit')[:15]
-        entries = LogEntry.objects.filter(pk__in=[i['id'] for i in entry_ids])
+        entries = utils.get_log_entries(limit=15, filters=params)
         context = {'entry_list': entries, 'ct': ct}
 
         return render_to_response(self.get_template_list('action_log.html'), context, context_instance=template.RequestContext(request))
@@ -619,7 +615,7 @@ class NewmanModelAdmin(XModelAdmin):
         return inline_admin_formsets, media
 
     @utils.profiled_section
-    def change_view_json_response(self, request, context):
+    def json_error_response(self, request, context):
         """
         Chyby v polich formulare
         Chyba v poli formulare napr.: context['adminform'].form['slug'].errors
@@ -734,7 +730,7 @@ class NewmanModelAdmin(XModelAdmin):
                 status=STATUS_OK
             )
         context.update(extra_context or {})
-        return self.change_view_json_response(request, context)  # Json response
+        return self.json_error_response(request, context)  # Json response
 
     @utils.profiled_section
     @require_AJAX
@@ -779,17 +775,13 @@ class NewmanModelAdmin(XModelAdmin):
         if request.method.upper() != 'POST':
             msg = _('This view is designed for saving data only, thus POST method is required.')
             return HttpResponseForbidden(msg)
-        try:
-            context = self.get_add_view_context(request, form_url)
-        except:
-            raise
+        context = self.get_add_view_context(request, form_url)
         context.update(extra_context or {})
         if 'object_added' in context:
             msg = request.user.message_set.all()[0].message
             return utils.JsonResponse(msg, {'id': context['object'].pk})
         elif 'error_dict' in context:
-            msg = _('Please correct errors in form')
-            return utils.JsonResponse(msg, errors=context['error_dict'], status=STATUS_FORM_ERROR)
+            return self.json_error_response(request, context)
 
     def add_view(self, request, form_url='', extra_context=None):
         "The 'add' admin view for this model."

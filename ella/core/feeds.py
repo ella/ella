@@ -37,18 +37,18 @@ class RSSTopCategoryListings(Feed):
                     'count' : NUM_IN_FEED,
                     'ctype' : content_type.model_class()._meta.verbose_name_plural,
                     'cat' : category.title
-}
+            }
         elif obj:
             return _('Top %(count)d objects in category %(cat)s.') % {
                     'count' : NUM_IN_FEED,
                     'cat' : obj.title
-}
+            }
         else:
             obj = get_cached_object(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
             return _('Top %(count)d objects in category %(cat)s.') % {
                     'count' : NUM_IN_FEED,
                     'cat' : obj.title
-}
+            }
 
     def item_guid(self, obj):
         ct = ContentType.objects.get_for_model(obj)

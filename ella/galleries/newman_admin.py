@@ -46,7 +46,7 @@ class GalleryAdmin(PublishableAdmin):
         (_("Heading"), {'fields': ('title', 'slug',)}),
         (_("Metadata"), {'fields': ('photo', 'category', 'authors', 'source')}),
         (_("Content"), {'fields': ('description', 'content',)}),
-)
+    )
     list_filter = ('created', 'category',)
     search_fields = ('title', 'description', 'slug',)
     inlines = [GalleryItemInline, PlacementInlineAdmin]
