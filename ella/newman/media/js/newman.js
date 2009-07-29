@@ -62,6 +62,25 @@ function get_html_chunk(tmpl, success) {
     $.get(get_adr('/nm/render-chunk/'), {chunk: tmpl}, success);
 }
 
+//// Layout adjustment
+
+$( function() {
+    CONTAINER_TOP_OFFSET = 105;
+    CONTAINER_BOT_OFFSET = 135;
+    $('#container').css({
+        position: 'fixed',
+        top: CONTAINER_TOP_OFFSET+'px',
+        width: '100%',
+        height: ($(window).height()-CONTAINER_BOT_OFFSET)+'px',
+        overflow: 'auto'
+    });
+    $(window).bind('resize', function() {
+        $('#container').css({
+            height: ($(window).height()-CONTAINER_BOT_OFFSET)+'px',
+        })
+    });
+});
+
 //// Homepage initialization
 
 $(function(){ContentByHashLib.reload_content('content');});
