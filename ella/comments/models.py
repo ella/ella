@@ -47,7 +47,7 @@ def get_key(object, type, **kwargs):
             object._meta.object_name,
             object.pk,
             kw
-)
+    )
 
 def get_count_key(func, self, object, **kwargs):
     return get_key(object, 'count', **kwargs)

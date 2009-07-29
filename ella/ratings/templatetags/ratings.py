@@ -289,7 +289,7 @@ class IfWasRatedNode(template.Node):
                             'pk' : pk,
                             'nodelist_true' : self.nodelist_true.render(context),
                             'nodelist_false' : self.nodelist_false.render(context),
-})
+                    })
 
         if get_was_rated(context['request'], ct, pk):
             return self.nodelist_true.render(context)

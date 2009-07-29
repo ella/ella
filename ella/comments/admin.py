@@ -16,9 +16,9 @@ class CommentsOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
                     'submit_date',
                     'target_ct', 'target_id', 'subject', 'content',
                     'parent', 'user', 'nickname', 'email', 'ip_address',
-)
-}),
-)
+                    )
+        }),
+    )
 
 admin.site.register(Comment, CommentsOptions)
 admin.site.register(BannedUser)

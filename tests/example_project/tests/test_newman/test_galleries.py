@@ -14,7 +14,7 @@ class TestGallery(NewmanTestCase):
 
         s.click(self.elements['navigation']['galleries'])
         s.click(self.elements['controls']['add'])
-        
+
         s.wait_for_element_present('id_content')
         data = {
             'title' : u'马 žš experiment',
@@ -25,22 +25,22 @@ class TestGallery(NewmanTestCase):
         self.fill_fields(data)
 
         expected_data = copy(data)
-        
+
         suggest_data = {
             'category': ('we',),
             'authors':  ('Bar', 'Kin',),
         }
         self.fill_suggest_fields(suggest_data)
-        
+
         expected_data.update({
             'category' : [u"Africa/west-africa"],
             'authors' : [u"Barack Obama", u"King Albert II"],
         })
 
         self.save_form()
-        self.assert_equals(u"%s: %s" % (unicode(_(u"Gallery")), data['title']), s.get_text(self.get_listing_object_href()))
+        self.assert_equals(data['title'], s.get_text(self.get_listing_object_href()))
 
         # verify all fields
-        s.click(self.get_listing_object()+"/th/a[@class='hashadr']")
+        s.click(self.get_listing_object_href())
         self.verify_form(expected_data)
 

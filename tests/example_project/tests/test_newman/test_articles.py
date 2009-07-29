@@ -91,7 +91,7 @@ class TestArticleBasics(NewmanTestCase):
 
         s.wait_for_element_present(self.get_listing_object()+"/th")
 
-        self.assert_equals(u"%s: %s" % (unicode(_(u"Article")), data['title']), s.get_text(self.get_listing_object_href()))
+        self.assert_equals(data['title'], s.get_text(self.get_listing_object_href()))
 
         # verify all fields
         s.click(self.get_listing_object_href())

@@ -108,7 +108,7 @@ def rate(request, bits, context):
         context['content_type'],
         context['object'],
         plusminus
-)
+    )
 
 
 # This method is not used in the moment and untested so commented out...

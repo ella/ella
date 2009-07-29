@@ -1,9 +1,9 @@
 from django.contrib import admin
 
 from ella.interviews.models import Interview, Question, Interviewee, Answer
-from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin
+from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin, EllaAdminInline
 
-class AnswerInlineOptions(EllaAdminOptionsMixin, admin.TabularInline):
+class AnswerInlineOptions(EllaAdminInline, admin.TabularInline):
     model = Answer
     extra = 1
     rich_text_fields = {'small': ('content',)}
@@ -24,15 +24,15 @@ class IntervieweeOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     search_fields = ('user__first_name', 'user__last_name', 'name', 'description', 'slug', 'author__name',)
     prepopulated_fields = {'slug' : ('name',)}
 
-class InterviewOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
+class InterviewOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     list_display = ('title', 'category', 'ask_from', 'reply_from', 'pk',)
     list_filter = ('ask_from', 'reply_from', 'category', 'authors',)
     date_hierarchy = 'ask_from'
     raw_id_fields = ('photo', 'interviewees',)
-    search_fields = ('title', 'perex',) # FIXME: 'tags__tag__name',)
+    search_fields = ('title', 'description',) # FIXME: 'tags__tag__name',)
     prepopulated_fields = {'slug' : ('title',)}
     inlines = [ QuestionInlineOptions ]
-    rich_text_fields = {None: ('perex', 'content',)}
+    rich_text_fields = {None: ('description', 'content',)}
 #    suggest_fields = {'category': ('tree_path', 'title', 'slug',), 'authors': ('name', 'slug',),
 #        'source': ('name',), 'interviewees': ('name', 'author__name', 'user__first_name', 'user__last_name'),}
     suggest_fields = {'authors': ('name', 'slug',), 'source': ('name',),}

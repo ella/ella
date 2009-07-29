@@ -10,7 +10,6 @@ from django.template.defaultfilters import slugify
 from django.core.urlresolvers import reverse
 from django.contrib.redirects.models import Redirect
 
-from ella.ellaadmin.utils import admin_url
 from ella.core.managers import ListingManager, HitCountManager, PlacementManager, RelatedManager
 from ella.core.cache import get_cached_object, get_cached_list, CachedGenericForeignKey
 from ella.core.models.main import Category, Author, Source
@@ -123,6 +122,7 @@ class Publishable(models.Model):
         return self.get_absolute_url(domain=True)
 
     def get_admin_url(self):
+        from ella.ellaadmin.utils import admin_url
         return admin_url(self)
 
     def save(self, **kwargs):

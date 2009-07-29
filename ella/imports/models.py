@@ -45,7 +45,7 @@ class Server(models.Model):
         output = {
             'status':200,
             'entries':[]
-}
+        }
         # Get structure like a feed
         for entry in articles:
             photo_url = ''
@@ -62,8 +62,8 @@ class Server(models.Model):
                     'summary': entry.target.get_description(),
                     'photo_url': photo_url,
                     'photo': photo,
-}
-)
+                }
+            )
         return output
 
     def __unicode__(self):
@@ -126,8 +126,8 @@ class Server(models.Model):
                         'summary' : e['summary'],
                         'photo_url': e['photo_url'],
                         'photo': e['photo']
-}
-)
+                    }
+                )
                 # repair priority if needed
                 if not created and si.priority >= 0:
                     # unwanted import item has negative priority - never more update priority

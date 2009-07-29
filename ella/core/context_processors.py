@@ -24,7 +24,7 @@ def url_info(request):
         'SERVER_INFO' : SERVER_INFO,
         'SITE_NAME' : current_site_name,
         'CURRENT_SITE': current_site,
-}
+    }
 
 def cache(request):
 
@@ -33,4 +33,4 @@ def cache(request):
 
     return {
         ECACHE_INFO: getattr(request, '_cache_middleware_key'),
-}
+    }

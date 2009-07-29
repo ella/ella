@@ -26,6 +26,11 @@ body {
 
 /* Dynamic */
 
+.blink {
+    background-color: #FFEEEE;
+    outline: solid 1px red;
+}
+
 .loading { opacity: .3; }
 
 .overlay { position: fixed; }
@@ -530,4 +535,9 @@ fieldset.collapse legend { background-image: url(../ico/16/14_layer_raiselayer.p
 .form-row-field.field-box { float: left; margin-right: 10px; }
 
 /* OTHER */
-#debug { position: absolute; top:0; left:0; right:0; bottom: 25px;background: #333; color: #fff; padding: 10px; z-index: 50; overflow: auto; opacity: .9; display: none; }
+#debug {
+    position: fixed; top:0; left:0; right:0; bottom: 25px;
+    background: #333; color: #fff;
+    padding: 10px;
+    z-index: 50; overflow: auto; opacity: .9; display: none;
+}

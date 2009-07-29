@@ -76,7 +76,7 @@ class HitCountNode(template.Node):
         if DOUBLE_RENDER and 'SECOND_RENDER' not in context:
             return '{%% load hits %%}{%% hitcount for pk %(place_pk)s %%}' % {
                 'place_pk' : place.pk,
-}
+            }
         HitCount.objects.hit(place)
         return ''
 

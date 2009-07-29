@@ -99,7 +99,7 @@ class SendMailFormPreview(FormPreview):
 def new_mail(request, context):
     init_props = {
         'target': '%d:%d' % (context['content_type'].id, context['object']._get_pk_val()),
-}
+    }
     form = SendMailForm(init_props=init_props)
     context['form'] = form
 
@@ -169,7 +169,7 @@ def xml_sendmail_view(request, context):
         'recipient_mail': request.POST['recipient_mail'],
         'target_object': context['object'],
         'custom_message': request.POST.get('custom_message', ''),
-}
+    }
     try:
         send_it(**params)
         res = xml_response(RESPONSE_OK, _('E-Mail successfully sent.'))

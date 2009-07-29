@@ -1,6 +1,6 @@
 import sys
 import logging
-from time import time, strftime
+from time import time
 import traceback
 try:
     import cjson
@@ -10,6 +10,9 @@ except ImportError:
     from django.utils.simplejson import dumps, loads
 
 from django.http import HttpResponse
+from django.contrib.admin.models import LogEntry
+from django.db.models.aggregates import Max
+
 from ella.newman import models
 from ella.newman.config import STATUS_OK, STATUS_GENERIC_ERROR
 from ella.newman.config import CATEGORY_FILTER, USER_CONFIG, JSON_CONVERSIONS
@@ -37,10 +40,10 @@ class Profiler:
         total = 0.0
         for t in self.timers:
             logger_callback(
-                '%05.03f msec elapsed in %s' % 
+                '%05.03f msec elapsed in %s' %
                 (
                     t.get_msec(),
-                    t.name, 
+                    t.name,
                 )
             )
             total += t.get_msec()
@@ -235,3 +238,7 @@ def user_category_filter(queryset, user):
 
 def is_user_category_filtered(queryset):
     return get_queryset_flag(queryset, 'user_category_filtered')
+
+def get_log_entries(limit=15, filters={}):
+    entry_ids = LogEntry.objects.values('object_id', 'content_type_id').annotate(last_edit=Max('action_time'), id=Max('id')).filter(**filters).order_by('-last_edit')[:limit]
+    return LogEntry.objects.filter(pk__in=[i['id'] for i in entry_ids])

@@ -39,9 +39,7 @@ function lock_window(msg) {
     ).html(
           '<p><img src="'
         + MEDIA_URL + 'ico/15/loading.gif'
-        + '" alt="" /> '
-        + msg
-        + '</p>'
+        + '" alt="" /> <span id="lock-message"></span></p>'
     ).appendTo('body').dialog({
         autoOpen: false,
         modal: true,
@@ -52,6 +50,7 @@ function lock_window(msg) {
             return !!$(this).data('close_ok');
         }
     });
+    $('#lock-message').html(msg);
     $modal.data('close_ok', false)
     $modal.dialog('open');
 }
@@ -62,6 +61,25 @@ function unlock_window() {
 function get_html_chunk(tmpl, success) {
     $.get(get_adr('/nm/render-chunk/'), {chunk: tmpl}, success);
 }
+
+//// Layout adjustment
+
+$( function() {
+    CONTAINER_TOP_OFFSET = 105;
+    CONTAINER_BOT_OFFSET = 135;
+    $('#container').css({
+        position: 'fixed',
+        top: CONTAINER_TOP_OFFSET+'px',
+        width: '100%',
+        height: ($(window).height()-CONTAINER_BOT_OFFSET)+'px',
+        overflow: 'auto'
+    });
+    $(window).bind('resize', function() {
+        $('#container').css({
+            height: ($(window).height()-CONTAINER_BOT_OFFSET)+'px',
+        })
+    });
+});
 
 //// Homepage initialization
 
@@ -354,7 +372,7 @@ $( function() {
         if (!$form.jquery) $form = $($form);
         if ( ! validate($form) ) return false;
         
-        lock_window(gettext('Sending'));
+        lock_window(gettext('Sending')+'...');
         
         // Hack for file inputs
 /*        var has_files = false;
@@ -426,8 +444,20 @@ $( function() {
             url: url,
             type: method,
             data: data,
-            success:  success,
-            error:    error,
+            success:  function() {
+                try {
+                    success.apply(this, arguments);
+                } catch(e) {
+                    carp('Error processing form-send success:', e);
+                }
+            },
+            error:    function() {
+                try {
+                    error.apply(this, arguments);
+                } catch(e) {
+                    carp('Error processing form-send error:', e);
+                }
+            },
             complete: function() {
                 unlock_window();
             },
@@ -451,6 +481,8 @@ $( function() {
             var $err_overlay = $('#err-overlay');
             if ($err_overlay.length == 0) $err_overlay = $(
                 '<div id="err-overlay" class="overlay">'
+            ).html(
+                '<h6></h6>'
             ).appendTo(
                    $form
                 || $('.change-form').get(0)
@@ -458,9 +490,14 @@ $( function() {
                 || $('body').get(0)
             );
             
+            $err_overlay.find('h6').text(res.message);
+            
             // Show the individual errors
-            for (var id in res.errors) {
-                var msgs = res.errors[ id ];
+            for (var i = 0; i < res.errors.length; i++) {
+                var err = res.errors[i];
+                var id = err.id;
+                var msgs = err.messages;
+                var label = err.label;
                 var input;
                 
                 // non-field errors
@@ -492,12 +529,16 @@ $( function() {
                     :                                      input                             // otherwise the input itself
                 )
                 .text(
-                    ($('label[for='+input.id+']').text() || id).replace(/:$/,'')  // identify the input with its label text or id; no trailing ':' pls
+                       label
+                    || ($('label[for='+input.id+']').text() || id).replace(/:$/,'') // identify the input with its label text or id; no trailing ':' pls
                 )
                 .click( function(evt) { // focus and scroll to the input
                     if (evt.button != 0) return;
                     var input = $(this).closest('p').data('rel_input');
                     try { input.focus(); } catch(e) {}
+                    $(input).addClass('blink')
+                    .closest('.collapsed').removeClass('collapsed').addClass('collapse');
+                    setTimeout( function() { $(input).removeClass('blink'); }, 1500 );
                     return false;
                 })
                 .appendTo($err_overlay);
@@ -584,7 +625,13 @@ $( function() {
     overload_default_submit();
     
     // Set up returning to publishable changelist when coming to change form from it
-    $('#changelist.js-app-core\\.publishable tbody th a').live('click', function() {
+    $('#changelist.js-app-core\\.publishable tbody th a').live('click', function(evt) {
+        if (evt.button != 0) return;
+        FORM_SAVE_RETURN_TO = '/core/publishable/';
+    });
+    $('.actionlist a').live('click', function(evt) {
+        if (evt.button != 0) return;
+        if ($('#changelist.js-app-core\\.publishable').length == 0) return;
         FORM_SAVE_RETURN_TO = '/core/publishable/';
     });
     //// End of ajax forms
@@ -1082,7 +1129,11 @@ $( function() {
         var $target = $(evt.target);
         
         // selection
-        $target.find('#changelist tbody a')
+        var $target_links = $target.find('#changelist tbody a');
+        $target_links.each( function() {
+            this.onclick = null;
+        });
+        $target_links
         .unbind('click')
         .click( function(evt) {
             var clicked_id = /\d+(?=\/$)/.exec( $(this).attr('href') )[0];
@@ -1093,9 +1144,6 @@ $( function() {
             $('#changelist-overlay').css({zIndex:5}).hide();
             $target.removeData('selection_callback');
             return false;
-        })
-        .each( function() {
-            this.onclick = undefined;
         });
         
         function modify_getpar_href(el) {

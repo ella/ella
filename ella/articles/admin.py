@@ -3,13 +3,14 @@ from django.utils.translation import ugettext_lazy as _
 
 from ella.core.admin import PlacementInlineAdmin, PublishableAdmin
 from ella.articles.models import ArticleContents, Article, InfoBox
+from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin, EllaAdminInline
 
-class ArticleContentInlineAdmin(admin.TabularInline):
+class ArticleContentInlineAdmin(EllaAdminInline, admin.TabularInline):
     model = ArticleContents
     max_num = 1
     rich_text_fields = {None: ('content',)}
 
-class InfoBoxAdmin(admin.ModelAdmin):
+class InfoBoxAdmin(EllaAdminOptionsMixin, EllaModelAdmin):
     list_display = ('title', 'created',)
     date_hierarchy = 'created'
     list_filter = ('created', 'updated',)
