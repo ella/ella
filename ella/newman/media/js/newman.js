@@ -625,7 +625,13 @@ $( function() {
     overload_default_submit();
     
     // Set up returning to publishable changelist when coming to change form from it
-    $('#changelist.js-app-core\\.publishable tbody th a').live('click', function() {
+    $('#changelist.js-app-core\\.publishable tbody th a').live('click', function(evt) {
+        if (evt.button != 0) return;
+        FORM_SAVE_RETURN_TO = '/core/publishable/';
+    });
+    $('.actionlist a').live('click', function(evt) {
+        if (evt.button != 0) return;
+        if ($('#changelist.js-app-core\\.publishable').length == 0) return;
         FORM_SAVE_RETURN_TO = '/core/publishable/';
     });
     //// End of ajax forms
