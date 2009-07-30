@@ -10,6 +10,8 @@ class Export(models.Model):
 
     class Meta:
         unique_together = ('category',)
+        verbose_name = _('Export')
+        verbose_name_plural = _('Exports')
 
 
 class ExportMeta(models.Model):
@@ -39,3 +41,7 @@ class ExportPosition(models.Model):
     visible_from = models.DateTimeField()
     visible_to = models.DateTimeField()
     object = models.ForeignKey(ExportMeta, verbose_name=_('Export meta'))
+
+    class Meta:
+        verbose_name = _('Export Position')
+        verbose_name_plural = _('Export Positions')

@@ -1,0 +1,64 @@
+# Translations for ella.exports application.
+# Copyrycht (C) 2009, Centrumholdings s.r.o. 
+# This file is distributed under the same license as the ella project.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ella-exports\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-07-30 11:12+0200\n"
+"PO-Revision-Date: 2009-07-30 10:46+0200\n"
+"Last-Translator: Zwei Kasselbuntes <jonas.fiala@centrumholdings.com>\n"
+"Language-Team: Ellagruppe <ella.project@gmail.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+
+#: models.py:9
+msgid "Category"
+msgstr "Kategorie"
+
+#: models.py:13
+msgid "Export"
+msgstr "Export"
+
+#: models.py:14
+msgid "Exports"
+msgstr "Exporty"
+
+#: models.py:22
+msgid "Publishable object"
+msgstr "Publikovatelný objekt"
+
+#: models.py:23
+msgid "Title"
+msgstr "Název"
+
+#: models.py:24
+msgid "Photo"
+msgstr "Fotka"
+
+#: models.py:25
+msgid "Description"
+msgstr "Popis"
+
+#: models.py:28
+msgid "Redefined export"
+msgstr "Předefinovaný export"
+
+#: models.py:36 models.py:43
+msgid "Export meta"
+msgstr "Položka exportu"
+
+#: models.py:37
+msgid "Export metas"
+msgstr "Položky exportu"
+
+#: models.py:46
+msgid "Export Position"
+msgstr "Exportní pozice"
+
+#: models.py:47
+msgid "Export Positions"
+msgstr "Exportní pozice"
