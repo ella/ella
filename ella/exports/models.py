@@ -1,8 +1,16 @@
 from django.db import models, IntegrityError
 from django.utils.translation import ugettext_lazy as _
 
-from ella.core.models import Publishable
+from ella.core.models import Publishable, Category
 from ella.photos.models import Photo
+
+
+class Export(models.Model):
+    category = models.ForeignKey(Category, verbose_name=_('Category'))
+
+    class Meta:
+        unique_together = ('category',)
+
 
 class ExportMeta(models.Model):
     """
@@ -26,3 +34,8 @@ class ExportMeta(models.Model):
         verbose_name = _('Export meta')
         verbose_name_plural = _('Export metas')
 
+
+class ExportPosition(models.Model):
+    visible_from = models.DateTimeField()
+    visible_to = models.DateTimeField()
+    object = models.ForeignKey(ExportMeta, verbose_name=_('Export meta'))
