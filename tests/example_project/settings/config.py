@@ -6,7 +6,6 @@ import example_project
 ADMINS = (
 )
 
-
 MANAGERS = ADMINS
 
 DEBUG = True
@@ -32,11 +31,6 @@ USE_I18N = True
 SECRET_KEY = '88b-01f^x4lh$-s5-hdccnicekg07)niir2g6)93!0#k(=mfv$'
 
 EMAIL_SUBJECT_PREFIX = 'Example project admin: '
-
-# templates for this app
-DEBUG = True
-TEMPLATE_DEBUG = DEBUG
-DISABLE_CACHE_TEMPLATE = DEBUG
 
 # TODO: Fix logging
 # init logger
