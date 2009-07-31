@@ -38,13 +38,13 @@
                         type="text"
                         id="{{ id_prefix }}-{{ forloop.counter }}-publish_from"
                         name="{{ id_prefix }}-publish_from"
-                        value="{% if listing.publish_from %}{{ listing.publish_from }}{% endif %}"
+                        value="{% if listing.publish_from %}{{ listing.publish_from|date:"Y-m-d H:i" }}{% endif %}"
                         class="vDateTimeInput"
                     />
                 </div>
             </td>
             <td class="listing-delete">
-                <input 
+                <input
                     type="checkbox"
                     id="{{ id_prefix }}-{{ forloop.counter }}-delete"
                     name="{{ id_prefix }}-{{ forloop.counter }}-DELETE"
