@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ella.newman (admin-ng)\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-07-25 10:13+0200\n"
-"PO-Revision-Date: 2009-07-25 10:14+0100\n"
+"POT-Creation-Date: 2009-08-01 09:56+0200\n"
+"PO-Revision-Date: 2009-08-01 09:57+0100\n"
 "Last-Translator: Vitek Pliska <whit@jizak.cz>\n"
 "Language-Team: Ella <ella.project@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -313,61 +313,60 @@ msgstr "Uživatelské role v kategoriích"
 msgid "All roles is now refreshed."
 msgstr "Všechny role jsou obnoveny."
 
-#: options.py:254
+#: options.py:252
 msgid "No data passed in POST variable \"data\"."
 msgstr "Žádná data v POST proměnné \"data\"."
 
-#: options.py:281
+#: options.py:279
 #, python-format
 msgid "Preset %s was saved."
 msgstr "Předvolba %s byla uložena."
 
-#: options.py:290
-#: options.py:306
+#: options.py:288
+#: options.py:304
 msgid "No id found in GET variable \"id\"."
 msgstr "Id není v GET proměnné."
 
-#: options.py:297
-#: options.py:314
+#: options.py:295
+#: options.py:312
 msgid "No matching draft found."
 msgstr "Předvolba neexistuje."
 
-#: options.py:299
+#: options.py:297
 #, python-format
 msgid "Loaded draft \"%s\""
 msgstr "Načtena předvolba \"%s\""
 
-#: options.py:315
+#: options.py:313
 #, python-format
 msgid "Draft %s was deleted."
 msgstr "Předvolba %s byla smazána."
 
-#: options.py:336
+#: options.py:334
 #: xoptions.py:207
 msgid "Database error"
 msgstr "Chyba databáze"
 
-#: options.py:675
-#: options.py:791
+#: options.py:671
 msgid "Please correct errors in form"
 msgstr "Prosím opravte chyby ve formuláři"
 
-#: options.py:724
-#: options.py:780
+#: options.py:720
+#: options.py:776
 msgid "This view is designed for saving data only, thus POST method is required."
 msgstr ""
 
-#: options.py:732
+#: options.py:728
 #, python-format
 msgid "The %(name)s \"%(obj)s\" was changed successfully."
 msgstr ""
 
-#: options.py:744
-#: options.py:797
+#: options.py:740
+#: options.py:789
 msgid "This view is designed for viewing form, thus GET method is required."
 msgstr ""
 
-#: options.py:773
+#: options.py:769
 msgid "Object was deleted."
 msgstr "Objekt byl smazán."
 
@@ -417,10 +416,6 @@ msgstr "Vaše nastavení byla uložena."
 #: sites.py:288
 msgid "Error in form."
 msgstr "Chyba ve formuláři."
-
-#: widgets.py:131
-msgid "You cannot edit uploaded photo."
-msgstr "Není možné upravovat uložené foto."
 
 #: xoptions.py:133
 #, python-format
@@ -582,18 +577,20 @@ msgid "Change password"
 msgstr ""
 
 #: templates/newman/action_log.html:4
+#: templates/newman/newman-index.html:110
 msgid "Last edited objects"
 msgstr "Poslední editované objekty"
 
-#: templates/newman/action_log.html:26
+#: templates/newman/action_log.html:27
 msgid "No entries."
 msgstr ""
 
-#: templates/newman/action_log.html:30
+#: templates/newman/action_log.html:31
 #: templates/newman/ajax_content_base.html:15
 #: templates/newman/filters.html:11
 #: templates/newman/model_help.html:24
 #: templates/newman/object_history.html:26
+#: templates/newman/chunks/timepicker.html:1
 #: templates/newman/widget/editor_box.html:38
 msgid "Close"
 msgstr "Zavřít"
@@ -791,10 +788,6 @@ msgstr "Publikovat od"
 msgid "Category"
 msgstr ""
 
-#: templates/newman/newman-index.html:110
-msgid "Your Recent Actions"
-msgstr "Vaše poslední akce"
-
 #: templates/newman/newman-index.html:114
 msgid "None available"
 msgstr ""
@@ -817,15 +810,15 @@ msgstr ""
 
 #: templates/newman/chunks/timepicker.html:2
 msgid "Now"
-msgstr ""
+msgstr "Nyní"
 
 #: templates/newman/chunks/timepicker.html:3
 msgid "6am"
-msgstr ""
+msgstr "6:00"
 
 #: templates/newman/chunks/timepicker.html:4
 msgid "Noon"
-msgstr ""
+msgstr "Poledne"
 
 #: templates/newman/edit_inline/placement.html:30
 msgid "Listings"
@@ -978,6 +971,10 @@ msgstr ""
 msgid "Change my password"
 msgstr ""
 
+#~ msgid "You cannot edit uploaded photo."
+#~ msgstr "Není možné upravovat uložené foto."
+#~ msgid "Your Recent Actions"
+#~ msgstr "Vaše poslední akce"
 #~ msgid "Filter"
 #~ msgstr "Filtr"
 #~ msgid "Show categories"
