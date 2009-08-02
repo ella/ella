@@ -18,6 +18,37 @@ language is paramount.
 .. _Django documentation: http://docs.djangoproject.com/en/dev/
 
 
+Features
+========
+
+The system currently consists of:
+
+Core application handling URLs, publication logic and provides all the tools for building content sites:
+
+    * URL patterns and according views defining templates
+    * mechanism for other application to inject themselves in the URL resolution
+    * box templatetag that can display object of any type via a common interface
+    * mechanism for publishing objects (defining URLs, listing objects in categories according to date and priorities)
+    * various caching tools
+
+Several content providing apps:
+
+    * photos app with automatic format generation
+    * articles
+    * galleries containing arbitrary number of objects of any type
+    * polls application that provides polls, quizes and contest models
+    * etc..
+
+Some tools to work with that content:
+
+    * admin interface with advanced UI (newman)
+    * comments (soon to be based on `django-threadedcomments`_) with threading and basic moderation
+    * rating app (being extracted into `django-ratings`_)
+    * positions - a tool for editors to define what object should be visible in positions pre-defined by template designer
+
+.. _django-threadedcomments: http://github.com/ericflo/django-threadedcomments
+.. _django-ratings: http://github.com/ella/django-ratings
+
 Dependencies
 ============
 
@@ -28,26 +59,29 @@ Ella currently works with Django 1.1
 Additional modules and applications
 -----------------------------------
 
- * python-docutils
- * python-imaging
- * python-feedparser
- * python-markdown
+    * python-docutils
+    * python-imaging
+    * python-feedparser
+    * python-markdown
 
 
 Recommended packages
 
- * django-markup
+    * django-markup
+    * django-versionedcache
+ 
 
 
-Instalation
-===========
+License
+=======
 
-Install Ella as you would any python package using setuptools. The source codes
-can be downloaded from out `GitHub project`_
+Ella is licensed under the BSD licence. It utilizes many conceps and examples
+from django itself, `djangosnippets`_ and several other open-source project. We
+would like to thank the community around Django for the huge amount of great
+quality code they share with other Djangonauts. We are proud to be part of that
+community and hope that somebody will find this project helpfull.
 
-.. _GitHub project: http://github.com/ella/ella
-
-
+.. _djangosnippets: http://www.djangosnippets.org
 
 
 .. toctree::
