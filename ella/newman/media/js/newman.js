@@ -1053,8 +1053,8 @@ $(document).bind('content_added', function(evt) {
 });
 
 // Related lookup
-$(document).bind('content_added', function() {
-    if ($('.suggest-related-lookup').length) {
+$(document).bind('content_added', function(evt) {
+    if ($(evt.target).find('.suggest-related-lookup').length) {
         request_media(MEDIA_URL +  'js/related_lookup.js?' +MEDIA_VERSION);
         request_media(MEDIA_URL + 'css/related_lookup.css?'+MEDIA_VERSION);
     }
