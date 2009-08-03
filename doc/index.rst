@@ -44,7 +44,7 @@ Some tools to work with that content:
     * admin interface with advanced UI (newman)
     * comments (soon to be based on `django-threadedcomments`_) with threading and basic moderation
     * rating app (being extracted into `django-ratings`_)
-    * positions - a tool for editors to define what object should be visible in positions pre-defined by template designer
+    * :ref:`positions` - a tool for editors to define what object should be visible in positions pre-defined by template designer
 
 .. _django-threadedcomments: http://github.com/ericflo/django-threadedcomments
 .. _django-ratings: http://github.com/ella/django-ratings
@@ -86,4 +86,6 @@ community and hope that somebody will find this project helpfull.
 
 .. toctree::
    :maxdepth: 2
+
+   positions
 
