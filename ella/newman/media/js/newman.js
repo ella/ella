@@ -7,6 +7,19 @@ ContentByHashLib.DEFAULT_TARGET = 'content';
 // Set the base URL for #content
 BASES.content = '/nm/';
 
+// A less smart alternative to jQuery's offset method.
+function simple_offset(el) {
+    var l, t;
+    l = t = 0;
+    if (el.offsetParent) {
+        do {
+            l += el.offsetLeft;
+            t += el.offsetTop;
+        } while (el = el.offsetParent);
+    }
+    return { left: l, top: t };
+}
+
 function clone_form($orig_form) {
     var $new_form = $orig_form.clone();
     var $orig_textareas = $orig_form.find('textarea');
