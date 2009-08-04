@@ -4,8 +4,6 @@ from os.path import dirname, join
 
 import django
 
-import djangobaselibrary
-
 import example_project
 
 

@@ -59,5 +59,5 @@ MEDIA_ROOT = join(dirname(example_project.__file__), 'static')
 
 MEDIA_URL = '/static/'
 
-ADMIN_MEDIA_PREFIX = '/static/admin_media/'/'
+ADMIN_MEDIA_PREFIX = '/static/admin_media/'
 
