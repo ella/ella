@@ -86,7 +86,12 @@
                         <a class="js-edit-poll-question-text">{{ inline_admin_form.original }}</a>
                     </span>
 					<span class="js-poll-options" style="display:block;font-size:.5em;">
-						Options
+						{% trans 'Options' %}
+	                    {% for fieldset in inline_admin_form %}{% for line in fieldset %}{% for field in line %}
+	                        {% ifnotequal field.field.name "choices" %}{% ifnotequal field.field.name "question" %}
+	                            <span title="{{ field.field.name }}">{{ field.field }} {{ field.field.label }}</span>
+	                        {% endifnotequal %}{% endifnotequal %}
+	                    {% endfor %}{% endfor %}{% endfor %}
 					</span>
 				{% else %}
                     <span class="js-empty-poll-question-text">
