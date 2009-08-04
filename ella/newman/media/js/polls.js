@@ -1,16 +1,13 @@
 // Poll change forms
 (function() {
 	// remaining-poll-question-inputs
-	$('span', '.remaining-poll-question-inputs').each(function(){
-		$(this).parents('.js-poll-question-container').find('.js-poll-options').append($(this).html());
-	});
 	$('.remaining-poll-question-inputs').remove(); 
     
     // Edit the question text by clicking on it
     $('.js-edit-poll-question-text').live('click', function(evt) {
         if (evt.button != 0) return;
         $(this).closest('.js-poll-question-text-container').children('span').toggle()
-        .find(':input').focus();
+        .find('textarea').focus();
     });
     
     // Delete / Undelete answer option
@@ -100,6 +97,8 @@
         .markItUpRemove()
         .attr({ id: 'id_'+$rich_text.attr('name') })
         .markItUp(MARKITUP_SETTINGS);
+
+		$new_question.find('.js-poll-question-input .markItUp').addClass('small');
         
         // let new question have one empty option
         $new_options.remove();
