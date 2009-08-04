@@ -652,13 +652,19 @@ class NewmanModelAdmin(XModelAdmin):
                 error_list.append(err_dict)
         # Inline Form fields
         for fset in context['inline_admin_formsets']:
-            counter = get_formset_counter(fset.formset.prefix)
             for err_item in fset.formset.errors:
+                counter = get_formset_counter(fset.formset.prefix)
                 for key in err_item:
-
+                    label = u''
+                    """
                     for mfield in fset.formset.model._meta.fields:
                         if mfield.name == key:
                             label = mfield.verbose_name
+                            break
+                    """
+                    for fkey, mfield in fset.formset.form.base_fields.items():
+                        if fkey == key:
+                            label = mfield.label.__unicode__()
                             break
 
                     err_dict = {
