@@ -1,10 +1,8 @@
 // Poll change forms
 (function() {
 	// remaining-poll-question-inputs
-	$('input', '.remaining-poll-question-inputs').each(function(){
-		var $poll_options = $(this).parents('.js-poll-question-container').find('.js-poll-options');
-		$(this).appendTo($poll_options);
-		$('<label for="'+$(this).attr('id')+'" style="clear:none;display:inline;"> '+gettext($(this).attr('id').replace('id_question_set-0-',''))+' </label>').appendTo($poll_options);
+	$('span', '.remaining-poll-question-inputs').each(function(){
+		$(this).parents('.js-poll-question-container').find('.js-poll-options').append($(this).html());
 	});
 	$('.remaining-poll-question-inputs').remove(); 
     
@@ -143,24 +141,27 @@
         var q_prefix = q_meta[0];
         var choice_no = $question.find('.js-poll-choice-container').length;
         ++choice_no;
-        $new_option.find(':input').each( function() {
-            var name_parts = /\d+(\D*)(\d*)(.*)/.exec( $(this).attr('name') );
-            if ( ! name_parts ) return;
-            var post_q_no = name_parts[1];
-            var opt_no = name_parts[2];
-            var tail = name_parts[3];
-            $(this).attr( 'name', q_prefix + post_q_no + (opt_no.length ? choice_no : '') + tail );
-			if($(this).attr( 'type' ) == 'checkbox'){
-				$(this).attr( 'id', 'id_' + q_prefix + post_q_no + (opt_no.length ? choice_no : '') + tail );
+
+		var n_replacer = function(element, atts){
+			var attributes = atts.split(',');
+			for (i in attributes){
+	            var attr_parts = /\d+(\D*)(\d*)(.*)/.exec( element.attr(attributes[i]) );
+	            if ( ! attr_parts ) return;
+	            var post_q_no = attr_parts[1];
+	            var opt_no = attr_parts[2];
+	            var tail = attr_parts[3];
+	            element.attr( attributes[i], q_prefix + post_q_no + (opt_no.length ? choice_no : '') + tail );
 			}
+		}
+
+        $new_option.find(':input').each( function() {
+			n_replacer($(this), 'name');
         });
-        $new_option.find('label').each( function() {
-            var name_parts = /\d+(\D*)(\d*)(.*)/.exec( $(this).attr('for') );
-            if ( ! name_parts ) return;
-            var post_q_no = name_parts[1];
-            var opt_no = name_parts[2];
-            var tail = name_parts[3];
-            $(this).attr( 'for', 'id_' + q_prefix + post_q_no + (opt_no.length ? choice_no : '') + tail );
+		$question.find('.js-poll-options').find('label').each( function() {
+			n_replacer($(this), 'for');
+        });
+		$question.find('.js-poll-options').find('input').each( function() {
+			n_replacer($(this), 'name,id');
         });
         
         $question.find('.js-poll-choices:first').append( $new_option );

@@ -638,14 +638,11 @@ $( function() {
     overload_default_submit();
     
     // Set up returning to publishable changelist when coming to change form from it
-    $('#changelist.js-app-core\\.publishable tbody th a').live('click', function(evt) {
+    $('#changelist tbody th a,.actionlist a').live('click', function(evt) {
         if (evt.button != 0) return;
-        FORM_SAVE_RETURN_TO = '/core/publishable/';
-    });
-    $('.actionlist a').live('click', function(evt) {
-        if (evt.button != 0) return;
-        if ($('#changelist.js-app-core\\.publishable').length == 0) return;
-        FORM_SAVE_RETURN_TO = '/core/publishable/';
+        var appname = /js-app-(\w+)\.(\w+)/.exec( $('#changelist').attr('className') );
+        if ( ! appname ) FORM_SAVE_RETURN_TO = '';
+        else FORM_SAVE_RETURN_TO = '/' + appname[1] + '/' + appname[2] + '/';
     });
     //// End of ajax forms
     
@@ -1056,8 +1053,8 @@ $(document).bind('content_added', function(evt) {
 });
 
 // Related lookup
-$(document).bind('content_added', function() {
-    if ($('.suggest-related-lookup').length) {
+$(document).bind('content_added', function(evt) {
+    if ($(evt.target).find('.suggest-related-lookup').length) {
         request_media(MEDIA_URL +  'js/related_lookup.js?' +MEDIA_VERSION);
         request_media(MEDIA_URL + 'css/related_lookup.css?'+MEDIA_VERSION);
     }

@@ -85,10 +85,16 @@
                     <span>
                         <a class="js-edit-poll-question-text">{{ inline_admin_form.original }}</a>
                     </span>
-                {% else %}
+					<span class="js-poll-options" style="display:block;font-size:.5em;">
+						Options
+					</span>
+				{% else %}
                     <span class="js-empty-poll-question-text">
                         <a class="js-edit-poll-question-text icn btn eclear">{% trans 'Click to edit question.' %}</a>
                     </span>
+					<span class="js-poll-options" style="display:block;font-size:.5em;">
+						Options
+					</span>
                 {% endif %}
                     <span class="js-poll-question-input">
                     {% for fieldset in inline_admin_form %}{% for line in fieldset %}{% for field in line %}
@@ -121,7 +127,7 @@
                 <div class="remaining-poll-question-inputs">
                     {% for fieldset in inline_admin_form %}{% for line in fieldset %}{% for field in line %}
                         {% ifnotequal field.field.name "choices" %}{% ifnotequal field.field.name "question" %}
-                            <span title="{{ field.field.name }}">{{ field.field }}</span>
+                            <span title="{{ field.field.name }}">{{ field.field }} {{ field.field.label }}</span>
                         {% endifnotequal %}{% endifnotequal %}
                     {% endfor %}{% endfor %}{% endfor %}
                     <span title="delete question">{% if inline_admin_form.original %}{{ inline_admin_form.deletion_field.field }}{% endif %}</span>

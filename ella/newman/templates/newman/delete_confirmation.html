@@ -33,7 +33,7 @@
             <script type="text/javascript">
                 $('#delete-confirmation-success').data('callback', function() {
                     show_ajax_success.apply(this, arguments);
-                    adr('../../');
+                    adr(window.FORM_SAVE_RETURN_TO || '../../');
                 });
             </script>
         </div>
