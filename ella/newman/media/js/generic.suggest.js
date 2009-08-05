@@ -3,8 +3,7 @@
  */
 GenericSuggestLib = {};
 (function($) { $( function() {
-    ;;; DBG = 1;
-    GenericSuggestLib.VERSION = '2009.07.18-newman';
+    GenericSuggestLib.VERSION = '2009.08.05-newman';
     var DEL_IMG = MEDIA_URL + 'ico/10/icon_deletelink.gif';
     var MIN_LENGTH = 2;
     var SUGGEST_FIELD_SEPARATOR = '|';
@@ -65,6 +64,9 @@ GenericSuggestLib = {};
 
     var $ins;
     function initialize() {
+        
+        GenericSuggestLib.NO_TRIGGER_CHANGE = true;
+        
         if ( $(SUGGEST_SELECTOR).length == 0 ) return;
         $(SUGGEST_SELECTOR)
             .unbind('click', set_current_input).bind('click', set_current_input)
@@ -210,6 +212,8 @@ GenericSuggestLib = {};
                 suggest_update( $(this) );
             }
         });
+        
+        delete GenericSuggestLib.NO_TRIGGER_CHANGE;
     }
     initialize();
     $(document).bind('content_added', initialize);
@@ -242,8 +246,9 @@ GenericSuggestLib = {};
         if (!is_multiple($inputs.ul) && ids.length > 1) {
             //TODO: warning
         }
-        $inputs.hidden.val(ids.join(',') + '#' + repres.join(',')).change();
+        $inputs.hidden.val(ids.join(',') + '#' + repres.join(','));
         $inputs.text.data('values', arr2map(ids));
+        if ( ! GenericSuggestLib.NO_TRIGGER_CHANGE ) $inputs.hidden.trigger('change');
     }
     function parse_suggest_result(result, fields) {
         if (result == null || result.length == 0) return [];
@@ -881,6 +886,15 @@ argument (expects uparrow or downarrow). If scrolling beyond the last element or
 before the first one is attempted, L<suggest_scroll_page> is executed.
 
 =back
+
+=head2 Unexpectednesses
+
+=head3 Triggering change event
+
+Modifying a suggest-enhanced input (inserting or deleting a value) triggers the
+C<change> event on the hidden input. However, this is suppressed during the
+C<initialize> function. The suppression can be achieved by setting
+C<GenericSuggestLib.NO_TRIGGER_CHANGE> to a true value.
 
 =head1 AUTHOR
 
