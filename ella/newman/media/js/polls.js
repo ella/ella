@@ -69,8 +69,8 @@
         if (evt && evt.button != 0) return;
         var $cont = $(this).closest('.js-poll-choice-container');
         if ($cont.is('.poll-choice-deleted')) return;
-        $cont.find('.js-edit-poll-choice-text').toggle()
-        .filter(':input').focus();
+        $cont.find('a.js-edit-poll-choice-text').hide();
+        $cont.find(':input.js-edit-poll-choice-text').show().focus();
     }
     $('a.js-edit-poll-choice-text').live('click', edit_answer_option);
     
