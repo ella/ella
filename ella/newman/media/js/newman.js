@@ -701,17 +701,13 @@ $( function() {
     });
     */
     
-    // Initialization of JavaScripts
-    /*
-    $(document).bind('media_loaded', function() {
-        var loaded_media = $(document).data('loaded_media');
-        if (loaded_media[ MEDIA_URL + 'js/admin/DateTimeShortcuts.js' ]) {
-            DateTimeShortcuts.admin_media_prefix = MEDIA_URL;
-            DateTimeShortcuts.init();
-        }
-        delete loaded_media[ MEDIA_URL + 'js/admin/DateTimeShortcuts.js' ];
+    // Update document title
+    var ORIGINAL_TITLE = document.title;
+    $(document).bind('content_added', function(evt) {
+        var newtitle = $(evt.target).find('#doc-title').text();
+        document.title = (newtitle ? newtitle+' | ' : '') + ORIGINAL_TITLE;
     });
-    */
+    
     // Setting up proper suggesters URLs to take the hash address into account
     $(document).bind('content_added', function(evt) {
         var $new_suggest_inputs = $(evt.target).find('.GenericSuggestField,.GenericSuggestFieldMultiple');

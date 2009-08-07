@@ -63,8 +63,6 @@ ContentByHashLib.LOADED_MEDIA = {};
     // no longer being mentioned in the hash.
     var URL_LOADED_BY_HASH = ContentByHashLib.URL_LOADED_BY_HASH = {};
     
-    var ORIGINAL_TITLE = document.title;
-    
     // If the hash changes before all ajax requests complete,
     // we want to cancel the pending requests. MAX_REQUEST is actually the number
     // of the last hashchange event. Each ajax request then remembers the state
@@ -122,8 +120,6 @@ ContentByHashLib.LOADED_MEDIA = {};
         
         $target.removeClass('loading').html(data);
         if ($target.hasClass('js-noautoshow')) {} else $target.show();
-        var newtitle = $('#doc-title').text();
-        document.title = (newtitle ? newtitle+' | ' : '') + ORIGINAL_TITLE;
         $(document).trigger('dec_loading');
         if (address != undefined) {
             LOADED_URLS[ $target.attr('id') ] = address;
