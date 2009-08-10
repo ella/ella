@@ -12,10 +12,19 @@ class ExportPositionInlineAdmin(newman.NewmanTabularInline):
     model = models.ExportPosition
     extra = 1
 
+class ExportAdmin(newman.NewmanModelAdmin):
+    prepopulated_fields = {'slug': ('title',)}
+    suggest_fields = {
+        'category': ('__unicode__', 'title', 'slug',),
+    }
 
 class ExportMetaAdmin(newman.NewmanModelAdmin):
     inlines = (ExportPositionInlineAdmin,)
-    suggest_fields = {'publishable': ('__unicode__', 'title', 'slug',)}
+    #raw_id_fields = ('photo',)
+    suggest_fields = {
+        'publishable': ('__unicode__', 'title', 'slug',),
+        'photo': ('__unicode__', 'title', 'slug',)
+    }
 
 class HiddenIntegerField(IntegerField):
     widget = HiddenInput
@@ -139,7 +148,7 @@ class ExportMetaInline(newman.NewmanTabularInline):
     extra = 1
 
 
-newman.site.register(models.Export)
+newman.site.register(models.Export, ExportAdmin)
 newman.site.register(models.ExportPosition)
 newman.site.register(models.ExportMeta, ExportMetaAdmin)
 
