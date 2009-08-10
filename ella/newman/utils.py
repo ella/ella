@@ -131,10 +131,11 @@ def JsonResponseError(message, status=STATUS_GENERIC_ERROR):
 
 def JsonResponseRedirect(location):
     " Returns HTTP 200 response containing JSON dict with redirect_to field. "
-    out = {
+    out_dict = {
         'status': STATUS_JSON_REDIRECT,
         'redirect_to': location
     }
+    out = json_encode(out_dict)
     return HttpResponse(out, mimetype='text/plain;charset=utf-8', status=HTTP_OK)
 
 def decode_category_filter_json(data):
