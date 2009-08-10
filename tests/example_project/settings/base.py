@@ -71,7 +71,6 @@ INSTALLED_APPS = (
     'ella.ellatagging',
     'ella.galleries',
     'ella.interviews',
-    'ella.exports',
 
     'example_project.services',
 
