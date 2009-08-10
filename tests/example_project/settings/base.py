@@ -82,7 +82,6 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'djangomarkup',
 
-    'horoskopy.astrology',
 
     # 3rd party apps
     #'dbpersistconn',
