@@ -127,7 +127,7 @@
                 <div class="js-poll-choices">
                     {% for fieldset in inline_admin_form %}{% for line in fieldset %}{% for field in line %}
                         {% ifequal field.field.name "choices" %}
-                            <div style="margin: 2px;">
+                            <div>
                                 {{ field.field }}
                             </div>
                         {% endifequal %}
