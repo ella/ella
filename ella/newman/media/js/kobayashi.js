@@ -239,6 +239,10 @@ ContentByHashLib.LOADED_MEDIA = {};
     function load_content(arg) {
         var target_id = arg.target_id;
         var address = arg.address;
+        if (target_id == undefined) {
+            carp('ERROR: ContentByHashLib.load_content must get target_id field in its argument.');
+            return;
+        }
         ;;; carp('loading '+address+' into #'+target_id);
         
         delete arg.xhr; // just in case there was one
