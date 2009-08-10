@@ -332,7 +332,8 @@ class NewmanModelAdmin(XModelAdmin):
             # is screwed up with the database, so display an error page.
             if ERROR_FLAG in request.GET.keys():
                 return render_to_response('newman/invalid_setup.html', {'title': _('Database error')})
-            return HttpResponseRedirect(request.path + '?' + ERROR_FLAG + '=1')
+            #return HttpResponseRedirect(request.path + '?' + ERROR_FLAG + '=1')
+            return utils.JsonResponseRedirect(request.path + '?' + ERROR_FLAG + '=1')
         cl.formset = None
 
         context = {
@@ -772,7 +773,8 @@ class NewmanModelAdmin(XModelAdmin):
         if not isinstance(result, HttpResponseRedirect):
             return result
         # create JsonResponse containing success message
-        return utils.JsonResponse(_('Object was deleted.'))
+        #return utils.JsonResponse(_('Object was deleted.'))
+        return utils.JsonResponseRedirect(result['Location'])
 
     @require_AJAX
     @transaction.commit_on_success
