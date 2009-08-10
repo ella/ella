@@ -45,27 +45,29 @@ class ExportManager(models.Manager):
             export = exports[0]
             # Find fitting ExportPositions
             positions = ExportPosition.objects.filter(
-                Q(visible_to__lte=datetime.now()) | Q(visible_to__isnull=True),
+                Q(visible_to__gte=datetime.now()) | Q(visible_to__isnull=True),
                 export=export, 
                 position__exact=POSITION_IS_NOT_OVERLOADED,
-                visible_from__gte=datetime.now(),
+                visible_from__lte=datetime.now(),
             )
             fix_positions = ExportPosition.objects.filter(
-                Q(visible_to__lte=datetime.now()) | Q(visible_to__isnull=True),
+                Q(visible_to__gte=datetime.now()) | Q(visible_to__isnull=True),
                 export=export, 
                 position__gt=POSITION_IS_NOT_OVERLOADED,
-                visible_from__gte=datetime.now(),
+                visible_from__lte=datetime.now(),
             )
             objects = list(Listing.objects.get_listing(
                 category, 
                 count=export.max_visible_items * 2
             ))
+            """
+            print 'SQL:', connection.queries[-2:]
             print 'category=', category
             print 'objects=', objects
             print 'positions=', positions
             print 'fix_positions=', fix_positions
             print 'position count:', ExportPosition.objects.all().count()
-            print 'SQL:', connection.queries[-2:]
+            """
             map(lambda i: objects.append(i), positions)
             objects.sort(cmp=cmp_listing_or_meta)
             if fix_positions:
