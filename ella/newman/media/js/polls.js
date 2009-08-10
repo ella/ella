@@ -59,6 +59,16 @@
         if (evt.button != 0) return;
         toggle_choice_deletion(this)
     });
+
+	// Right answer radios
+	$('.js-reset-poll-right-answer').live('click', function(){
+		var $all = $(this).parents('.js-poll-choices');
+		$all.find('input.js-poll-choice-points').val('0');
+		$all.find('a.js-poll-choice-points').html('0');
+		var $clicked = $(this).parents('.js-poll-choice-text-container');
+		$clicked.find('input.js-poll-choice-points').val('1');
+		$clicked.find('a.js-poll-choice-points').html('1');
+	});
     
     // Edit answer option
     function edit_answer_option(evt) {
