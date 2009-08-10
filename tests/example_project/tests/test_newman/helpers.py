@@ -78,6 +78,7 @@ class NewmanTestCase(SeleniumTestCase):
                 'show_filters' : "//div[@id='filters-handler']/a[position()=1]",
                 'lookup_content' : "//div[@id='changelist']/form/table/tbody/tr/th/a[text()='%(text)s']",
                 'search_button' : "//a[@class='btn icn search def']",
+                'paginator_top' : "//div[@id='changelist']/form/p[1]",
             },
             'pages' : {
                 'login' : {

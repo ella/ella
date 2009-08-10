@@ -30,7 +30,7 @@ class TestCategoryAdmin(NewmanTestCase):
     def test_category_list(self):
         s = self.selenium
         s.click(self.elements['navigation']['categories'])
-        self.assert_equals(41, get_category_count_from_paginator_text(s.get_text('//p[@class="paginator"]'),
+        self.assert_equals(41, get_category_count_from_paginator_text(s.get_text(self.elements['controls']['paginator_top']),
             placement_name=unicode(_(u"Categories"))))
 
     def test_filter_categories_by_site(self):
@@ -42,7 +42,7 @@ class TestCategoryAdmin(NewmanTestCase):
         s.wait_for_element_present("//input[@name='site__id__exact' and @type='hidden' and @value='1']")
 
         # check the correct object count
-        self.assert_equals(6, get_category_count_from_paginator_text(s.get_text('//p[@class="paginator"]'),
+        self.assert_equals(6, get_category_count_from_paginator_text(s.get_text(self.elements['controls']['paginator_top']),
             placement_name=unicode(_(u"Categories"))))
         # check the filter on light is on
         self.assert_equals(u"%s (%s)" % (unicode(_(u'Filters')), unicode(_(u'on!'))),

@@ -7,6 +7,19 @@ ContentByHashLib.DEFAULT_TARGET = 'content';
 // Set the base URL for #content
 BASES.content = '/nm/';
 
+// A less smart alternative to jQuery's offset method.
+function simple_offset(el) {
+    var l, t;
+    l = t = 0;
+    if (el.offsetParent) {
+        do {
+            l += el.offsetLeft;
+            t += el.offsetTop;
+        } while (el = el.offsetParent);
+    }
+    return { left: l, top: t };
+}
+
 function clone_form($orig_form) {
     var $new_form = $orig_form.clone();
     var $orig_textareas = $orig_form.find('textarea');
@@ -625,14 +638,11 @@ $( function() {
     overload_default_submit();
     
     // Set up returning to publishable changelist when coming to change form from it
-    $('#changelist.js-app-core\\.publishable tbody th a').live('click', function(evt) {
+    $('#changelist tbody th a,.actionlist a').live('click', function(evt) {
         if (evt.button != 0) return;
-        FORM_SAVE_RETURN_TO = '/core/publishable/';
-    });
-    $('.actionlist a').live('click', function(evt) {
-        if (evt.button != 0) return;
-        if ($('#changelist.js-app-core\\.publishable').length == 0) return;
-        FORM_SAVE_RETURN_TO = '/core/publishable/';
+        var appname = /js-app-(\w+)\.(\w+)/.exec( $('#changelist').attr('className') );
+        if ( ! appname ) FORM_SAVE_RETURN_TO = '';
+        else FORM_SAVE_RETURN_TO = '/' + appname[1] + '/' + appname[2] + '/';
     });
     //// End of ajax forms
     
@@ -691,17 +701,13 @@ $( function() {
     });
     */
     
-    // Initialization of JavaScripts
-    /*
-    $(document).bind('media_loaded', function() {
-        var loaded_media = $(document).data('loaded_media');
-        if (loaded_media[ MEDIA_URL + 'js/admin/DateTimeShortcuts.js' ]) {
-            DateTimeShortcuts.admin_media_prefix = MEDIA_URL;
-            DateTimeShortcuts.init();
-        }
-        delete loaded_media[ MEDIA_URL + 'js/admin/DateTimeShortcuts.js' ];
+    // Update document title
+    var ORIGINAL_TITLE = document.title;
+    $(document).bind('content_added', function(evt) {
+        var newtitle = $(evt.target).find('#doc-title').text();
+        document.title = (newtitle ? newtitle+' | ' : '') + ORIGINAL_TITLE;
     });
-    */
+    
     // Setting up proper suggesters URLs to take the hash address into account
     $(document).bind('content_added', function(evt) {
         var $new_suggest_inputs = $(evt.target).find('.GenericSuggestField,.GenericSuggestFieldMultiple');
@@ -1043,8 +1049,8 @@ $(document).bind('content_added', function(evt) {
 });
 
 // Related lookup
-$(document).bind('content_added', function() {
-    if ($('.suggest-related-lookup').length) {
+$(document).bind('content_added', function(evt) {
+    if ($(evt.target).find('.suggest-related-lookup').length) {
         request_media(MEDIA_URL +  'js/related_lookup.js?' +MEDIA_VERSION);
         request_media(MEDIA_URL + 'css/related_lookup.css?'+MEDIA_VERSION);
     }
