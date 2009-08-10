@@ -19,10 +19,6 @@
         if ($input.val() == 'off') {
             $cont.removeClass('poll-choice-deleted');
             $del.show().text(gettext('Delete'));
-            var $opt_text = $cont.find(':input.js-edit-poll-choice-text');
-            if ($opt_text.val() == '') {
-                $opt_text.each(edit_answer_option);
-            }
         }
         else if ($cont.find(':input.js-edit-poll-choice-text').val() == '') {
             $cont.removeClass('poll-choice-deleted');
