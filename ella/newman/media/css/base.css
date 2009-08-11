@@ -506,6 +506,8 @@ p.js-poll-choice-text {
 }
 p.js-poll-choice-text-extras {
     float: left;
+    min-width: 100px;
+    padding-right: 10px;
 }
 .poll-choice-deleted span {
     text-decoration: line-through;

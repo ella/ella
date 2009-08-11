@@ -1,0 +1,23 @@
+{% extends "exports/base.html" %}
+
+{% block items %}
+{% for item in exported_items%}
+    <item>
+        <title><![CDATA[{{ item.title }}]]></title>
+        <link>{{ item.link }}</link>
+        <pubDate>{{ item.created }}</pubDate>
+        <description><![CDATA[{{ item.description }}]]></description>
+        <media:content
+            url="{{ attr.imgbig }}" 
+            type="text/html" 
+            >
+            <media:thumbnail 
+                url="{{ item.thumbnail }}" 
+                type="image/jpeg" 
+                height="67" 
+                width="90" />
+            <media:title type="html"><![CDATA[{{ item.title }}]]></media:title>
+        </media:content>
+    </item>
+{% endfor %}
+{% endblock %} {# block items #}

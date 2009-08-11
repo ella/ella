@@ -1,49 +1,82 @@
 // Poll change forms
 (function() {
 	// remaining-poll-question-inputs
-	$('input', '.remaining-poll-question-inputs').each(function(){
-		var $poll_options = $(this).parents('.js-poll-question-container').find('.js-poll-options');
-		$(this).appendTo($poll_options);
-		$('<label for="'+$(this).attr('id')+'" style="clear:none;display:inline;"> '+gettext($(this).attr('id').replace('id_question_set-0-',''))+' </label>').appendTo($poll_options);
-	});
 	$('.remaining-poll-question-inputs').remove(); 
     
     // Edit the question text by clicking on it
     $('.js-edit-poll-question-text').live('click', function(evt) {
         if (evt.button != 0) return;
         $(this).closest('.js-poll-question-text-container').children('span').toggle()
-        .find(':input').focus();
+        .find('textarea').focus();
     });
     
     // Delete / Undelete answer option
-    function toggle_choice_deletion(el) {
+    function reflect_choice_deletion(el) {
         var $cont = $(el).closest('.js-poll-choice-container');
         var $del = $cont.find('.js-delete-poll-choice');
-        if ($cont.is('.poll-choice-deleted')) {
-            $cont.removeClass('poll-choice-deleted').find('.js-poll-choice-delete-input').val('off');
-            $del.text(gettext('Delete'));
-            var $opt_text = $cont.find(':input.js-edit-poll-choice-text');
-            if ($opt_text.val() == '') {
-                $opt_text.each(edit_answer_option);
-            }
+        var $input = $cont.find('.js-poll-choice-delete-input');
+        
+        if ($input.val() == 'off') {
+            $cont.removeClass('poll-choice-deleted');
+            $del.show().text(gettext('Delete'));
+        }
+        else if ($cont.find(':input.js-edit-poll-choice-text').val() == '') {
+            $cont.removeClass('poll-choice-deleted');
+            $del.hide();
         }
         else {
-            $cont.addClass('poll-choice-deleted').find('.js-poll-choice-delete-input').val('on');
-            $del.text(gettext('Undelete'));
+            $cont.addClass('poll-choice-deleted');
+            $del.show().text(gettext('Undelete'));
+        }
+    }
+    function delete_choice(el) {
+        var $input = $(el).is('.js-poll-choice-delete-input')
+        ? $(el)
+        : $(el).closest('.js-poll-choice-container').find('.js-poll-choice-delete-input');
+        $input.val('on');
+        reflect_choice_deletion(el);
+    }
+    function undelete_choice(el) {
+        var $input = $(el).is('.js-poll-choice-delete-input')
+        ? $(el)
+        : $(el).closest('.js-poll-choice-container').find('.js-poll-choice-delete-input');
+        $input.val('off');
+        reflect_choice_deletion(el);
+    }
+    function toggle_choice_deletion(el) {
+        var $input = $(el).is('.js-poll-choice-delete-input')
+        ? $(el)
+        : $(el).closest('.js-poll-choice-container').find('.js-poll-choice-delete-input');
+        
+        if ($input.val() == 'on') {
+            undelete_choice($input);
+        }
+        else {
+            delete_choice($input);
         }
     }
     $('.js-delete-poll-choice').live('click', function(evt) {
         if (evt.button != 0) return;
         toggle_choice_deletion(this)
     });
+
+	// Right answer radios
+	$('.js-reset-poll-right-answer').live('click', function(){
+		var $all = $(this).parents('.js-poll-choices');
+		$all.find('input.js-poll-choice-points').val('0');
+		$all.find('a.js-poll-choice-points').html('0');
+		var $clicked = $(this).parents('.js-poll-choice-text-container');
+		$clicked.find('input.js-poll-choice-points').val('1');
+		$clicked.find('a.js-poll-choice-points').html('1');
+	});
     
     // Edit answer option
     function edit_answer_option(evt) {
         if (evt && evt.button != 0) return;
         var $cont = $(this).closest('.js-poll-choice-container');
         if ($cont.is('.poll-choice-deleted')) return;
-        $cont.find('.js-edit-poll-choice-text').toggle()
-        .filter(':input').focus();
+        $cont.find('a.js-edit-poll-choice-text').hide();
+        $cont.find(':input.js-edit-poll-choice-text').show().focus();
     }
     $('a.js-edit-poll-choice-text').live('click', edit_answer_option);
     
@@ -102,6 +135,8 @@
         .markItUpRemove()
         .attr({ id: 'id_'+$rich_text.attr('name') })
         .markItUp(MARKITUP_SETTINGS);
+
+		$new_question.find('.js-poll-question-input .markItUp').addClass('small');
         
         // let new question have one empty option
         $new_options.remove();
@@ -143,24 +178,27 @@
         var q_prefix = q_meta[0];
         var choice_no = $question.find('.js-poll-choice-container').length;
         ++choice_no;
-        $new_option.find(':input').each( function() {
-            var name_parts = /\d+(\D*)(\d*)(.*)/.exec( $(this).attr('name') );
-            if ( ! name_parts ) return;
-            var post_q_no = name_parts[1];
-            var opt_no = name_parts[2];
-            var tail = name_parts[3];
-            $(this).attr( 'name', q_prefix + post_q_no + (opt_no.length ? choice_no : '') + tail );
-			if($(this).attr( 'type' ) == 'checkbox'){
-				$(this).attr( 'id', 'id_' + q_prefix + post_q_no + (opt_no.length ? choice_no : '') + tail );
+
+		var n_replacer = function(element, atts){
+			var attributes = atts.split(',');
+			for (i in attributes){
+	            var attr_parts = /\d+(\D*)(\d*)(.*)/.exec( element.attr(attributes[i]) );
+	            if ( ! attr_parts ) return;
+	            var post_q_no = attr_parts[1];
+	            var opt_no = attr_parts[2];
+	            var tail = attr_parts[3];
+	            element.attr( attributes[i], q_prefix + post_q_no + (opt_no.length ? choice_no : '') + tail );
 			}
+		}
+
+        $new_option.find(':input').each( function() {
+			n_replacer($(this), 'name');
         });
-        $new_option.find('label').each( function() {
-            var name_parts = /\d+(\D*)(\d*)(.*)/.exec( $(this).attr('for') );
-            if ( ! name_parts ) return;
-            var post_q_no = name_parts[1];
-            var opt_no = name_parts[2];
-            var tail = name_parts[3];
-            $(this).attr( 'for', 'id_' + q_prefix + post_q_no + (opt_no.length ? choice_no : '') + tail );
+		$question.find('.js-poll-options').find('label').each( function() {
+			n_replacer($(this), 'for');
+        });
+		$question.find('.js-poll-options').find('input').each( function() {
+			n_replacer($(this), 'name,id');
         });
         
         $question.find('.js-poll-choices:first').append( $new_option );
@@ -172,24 +210,35 @@
 		var cancelTimer;
         
         // Done editing question text
-        $('.js-poll-question-text-container textarea').unbind('blur.hide').bind('blur.hide', function(){
-			var $area = $(this);
+        function reflect_question_input_change(area) {
+            var $area = $(area);
+            var $cont = $area.closest('.js-poll-question-text-container');
+            var $label = $cont.find('span:first');
+            
+            $label.find('a').text( $area.val() || gettext('Click to edit question') );
+            
+            ;;; carp('>>> label:',$label.get(0));
+            if ( $area.val() == '' ) {
+                $label.addClass('js-empty-poll-question-text');
+                $label.find('a').addClass('icn btn eclear');
+            }
+            else  {
+                $label.removeClass('js-empty-poll-question-text');
+                $label.find('a').removeClass('icn btn eclear');
+                if ( $cont.closest('.js-poll-question-container').find('.js-poll-choice-container').length == 0 ) {
+                    add_option($cont.closest('.js-poll-question-container'));
+                }
+            }
+        }
+        $('.js-poll-question-text-container textarea').unbind('blur.hide').bind('blur.hide', function() {
+			var area = this;
 			
 			cancelTimer = setTimeout(function(){
 	
-	            var $cont = $area.closest('.js-poll-question-text-container');
-	            var $label = $cont.find('span:first');
+	            var $cont = $(area).closest('.js-poll-question-text-container');
 	            $cont.children('span').toggle();
             
-	            $label.find('a').text( $area.val() || gettext('Click to edit question') );
-            
-	            if ( $area.val() == '' ) $label.addClass('js-empty-poll-question-text');
-	            else  {
-	                $label.removeClass('js-empty-poll-question-text');
-	                if ( $cont.closest('.js-poll-question-container').find('.js-poll-choice-container').length == 0 ) {
-	                    add_option($cont.closest('.js-poll-question-container'));
-	                }
-	            }
+                reflect_question_input_change(area);
             
 	            // Add an empty question when there's none more
 	            if ( $cont.closest('fieldset').find('.js-empty-poll-question-text').length == 0 ) {
@@ -200,24 +249,37 @@
 			
         });
 
-		// Cancel editing quiestion text if focus returned to area in 200ms (i.e. button in rich area header is clicked)
+		// Cancel editing question text if focus returned to area in 200ms (i.e. button in rich area header is clicked)
 		$('.js-poll-question-text-container textarea').bind('focus', function(){
 			clearTimeout(cancelTimer);
 		});
         
         // Done editing answer option text
-        $(':input.js-edit-poll-choice-text').unbind('blur.hide').bind('blur.hide', function() {
-            var $cont = $(this).closest('.js-poll-choice-container');
-            $cont.find('.js-edit-poll-choice-text').toggle()
-            .filter('a').children('span').text( $(this).val() || gettext('Click to edit option') );
-            if ( $(this).val() == '' ) {
-                $('a.js-edit-poll-choice-text span').addClass('empty-poll-choice');
-                if ( ! $cont.is('.poll-choice-deleted') ) {
-                    toggle_choice_deletion(this);
-                }
+        function reflect_answer_input_change(input) {
+            var $cont = $(input).closest('.js-poll-choice-container');
+            
+            $cont
+            .find('a.js-edit-poll-choice-text span')
+            .text( $(input).val() || gettext('Click to edit option') );
+            
+            if ( $(input).val() == '' ) {
+                $cont.find('a.js-edit-poll-choice-text span').addClass('empty-poll-choice');
             }
             else {
-                $('a.js-edit-poll-choice-text span').removeClass('empty-poll-choice');
+                $cont.find('a.js-edit-poll-choice-text span').removeClass('empty-poll-choice');
+            }
+        }
+        $(':input.js-edit-poll-choice-text').unbind('blur.hide').bind('blur.hide', function() {
+            var $cont = $(this).closest('.js-poll-choice-container');
+            $cont.find('.js-edit-poll-choice-text').toggle();
+            
+            reflect_answer_input_change(this);
+            
+            if ( $(this).val() == '' ) {
+                delete_choice(this);
+            }
+            else {
+                undelete_choice(this);
             }
             
             // Add an empty option when there's none more for this question
@@ -232,12 +294,61 @@
         });
         
         // Done editing points for answer option
+        function reflect_points_input_change(input) {
+            $(input).closest('p').find('a.js-poll-choice-points').text( $(input).val() );
+        }
         $('input.js-poll-choice-points').unbind('blur.hide').bind('blur.hide', function() {
             if ( $(this).val() == '' ) $(this).val('0');
-            $(this).closest('p').find('.js-poll-choice-points').toggle()
-            .filter('a').text( $(this).val() );
+            $(this).closest('p').find('.js-poll-choice-points').toggle();
+            reflect_points_input_change(this);
         });
         
+        
+        //// Preset loading
+        
+        // Adjust the number of inputs (questions and their answer options) to fit the preset
+        $('#quiz_form,#contest_form')
+        .unbind('preset_load_initiated.poll')
+        .bind('preset_load_initiated.poll', function(evt, preset) {
+            $('.js-poll-question-container:gt(0)').remove();
+            $('.js-poll-choice-container:gt(0)'  ).remove();
+            var last_q_no = 0;
+            var option_counts = [0];
+            for (var i = 0; i < preset.data.length; i++) {
+                var name = preset.data[i].name;
+                var q_no_match = /question_set-(\d+)/.exec( name );
+                if ( ! q_no_match ) continue;
+                var q_no = q_no_match[1] - 0;
+                if (q_no > last_q_no) {
+                    add_question();
+                    option_counts.push(0);
+                    last_q_no = q_no;
+                }
+                if ( /question_set-\d+-choices$/.test(name) ) {
+                    var opt_count = ++option_counts[ q_no ];
+                    var $last_question = $('.js-poll-question-container:last');
+                    if ( opt_count > $last_question.find('.js-poll-choice-container').length ) {
+                        add_option( $last_question );
+                    }
+                }
+            }
+        });
+        
+        // Display the loaded values
+        $('#quiz_form,#contest_form')
+        .unbind('preset_load_completed.poll')
+        .bind('preset_load_completed.poll', function() {
+            $(':input.js-poll-choice-points').each( function() {
+                reflect_points_input_change(this);
+            });
+            $(':input.js-edit-poll-choice-text').each( function() {
+                reflect_answer_input_change(this);
+                reflect_choice_deletion(this);
+            });
+            $('.js-poll-question-text-container textarea').each( function() {
+                reflect_question_input_change(this);
+            });
+        });
     }
     non_live_handlers();
     $(document).bind('content_added', non_live_handlers);

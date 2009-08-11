@@ -81,6 +81,10 @@ INSTALLED_APPS = (
     'ella.newman.licenses',
     'django.contrib.admin',
     'djangomarkup',
+
+
+    # 3rd party apps
+    #'dbpersistconn',
 )
 
 VERSION = 1

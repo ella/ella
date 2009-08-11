@@ -54,6 +54,7 @@ def call_modules(auto_discover=()):
                 else:
                     # ImportError inside autodiscovered file
                     log.error(msg)
+                    logging.error(msg)
 
 def init_logger():
     """init logger with LOGGING_CONFIG_FILE settings option"""

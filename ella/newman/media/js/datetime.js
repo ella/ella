@@ -284,11 +284,11 @@ function DateInput(input) {
     $('span.dtpicker-trigger').live('click', function() {
         var $dtp = $('.datetimepicker');
         var x = $(this).offset().left + $(this).width();
-        var y = $(this).offset().top;
+        var y = simple_offset(this).top - $('#container').offset().top; // not $(this).offset().top because of scrolling fixed #container, in which the dtpicker also is
         var $input = $(this).data('input');
         
         // check if Y doesn't reach below the current screen height
-        var d = y + $dtp.outerHeight()  -  $('body').outerHeight();
+        var d = y + $dtp.outerHeight()  -  $(window).outerHeight();
         if (d > 0) y -= d;
         if (y < 0) y = 0;   // But rather reach below bottom than above top
         

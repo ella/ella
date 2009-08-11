@@ -14,7 +14,7 @@ from django.contrib.admin.models import LogEntry
 from django.db.models.aggregates import Max
 
 from ella.newman import models
-from ella.newman.config import STATUS_OK, STATUS_GENERIC_ERROR
+from ella.newman.config import STATUS_OK, STATUS_GENERIC_ERROR, HTTP_ERROR, HTTP_OK, STATUS_JSON_REDIRECT
 from ella.newman.config import CATEGORY_FILTER, USER_CONFIG, JSON_CONVERSIONS
 from ella.core.models import Category
 
@@ -104,7 +104,7 @@ def json_decode(str):
 
     return loads(str)
 
-def JsonResponse(message, data={}, errors={}, status=STATUS_OK, http_status=200):
+def JsonResponse(message, data={}, errors={}, status=STATUS_OK, http_status=HTTP_OK):
     """ Return JSON response in newman's standard format. """
 
     out_dict = {
@@ -127,7 +127,18 @@ def JsonResponse(message, data={}, errors={}, status=STATUS_OK, http_status=200)
 
 def JsonResponseError(message, status=STATUS_GENERIC_ERROR):
     """ use this function if one message describes error well, so  """
-    return JsonResponse(message, status=status, http_status=405)
+    return JsonResponse(message, status=status, http_status=HTTP_ERROR)
+
+def JsonResponseRedirect(location):
+    " Returns HTTP 200 response containing JSON dict with redirect_to field. "
+    out_dict = {
+        'status': STATUS_JSON_REDIRECT,
+        'redirect_to': location
+    }
+    out = json_encode(out_dict)
+    response = HttpResponse(out, mimetype='text/plain;charset=utf-8', status=HTTP_OK)
+    response['Redirect-To'] = location
+    return response
 
 def decode_category_filter_json(data):
     decoded = json_decode(data)

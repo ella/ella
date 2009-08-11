@@ -23,7 +23,6 @@
                         </span>
                     </a>
                 </p>
-
                 <p class="js-poll-choice-text-extras">
                     <input
                         class="js-poll-choice-points"
@@ -35,9 +34,10 @@
                     <span><a class="js-poll-choice-points icn eclear">{{ choice.points }}</a></span>
                     <span>{% trans "Points" %}</span>
                 </p>
-                <p class="js-poll-options" style="float: left; margin-left: 80px;">
-                    Options
+                <p class="js-poll-choice-right-answer">
+                    <a class="js-reset-poll-right-answer">{% trans "Mark as correct" %}</a>
                 </p>
+
                 <div class="cb"></div>
             </div>
             <input

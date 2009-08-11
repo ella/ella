@@ -332,7 +332,8 @@ class NewmanModelAdmin(XModelAdmin):
             # is screwed up with the database, so display an error page.
             if ERROR_FLAG in request.GET.keys():
                 return render_to_response('newman/invalid_setup.html', {'title': _('Database error')})
-            return HttpResponseRedirect(request.path + '?' + ERROR_FLAG + '=1')
+            #return HttpResponseRedirect(request.path + '?' + ERROR_FLAG + '=1')
+            return utils.JsonResponseRedirect(request.path + '?' + ERROR_FLAG + '=1')
         cl.formset = None
 
         context = {
@@ -391,10 +392,14 @@ class NewmanModelAdmin(XModelAdmin):
         req_path = request.get_full_path()
         ct = ContentType.objects.get_for_model(self.model)
         # persistent filter for non-popupped changelists only
+        key = 'filter__%s__%s' % (ct.app_label, ct.model)
         if req_path.find('?') > 0 and req_path.find('pop') < 0:
             url_args = req_path.split('?', 1)[1]
-            key = 'filter__%s__%s' % (ct.app_label, ct.model)
             utils.set_user_config_db(request.user, key, url_args)
+        else:
+            user_filter = utils.get_user_config(request.user, key)
+            redirect_to = '%s?%s' % (request.path, user_filter)
+            return utils.JsonResponseRedirect(redirect_to)
 
         context['is_filtered'] = context['cl'].is_filtered()
         context['is_user_category_filtered'] = utils.is_user_category_filtered( self.queryset(request) )
@@ -652,13 +657,19 @@ class NewmanModelAdmin(XModelAdmin):
                 error_list.append(err_dict)
         # Inline Form fields
         for fset in context['inline_admin_formsets']:
-            counter = get_formset_counter(fset.formset.prefix)
             for err_item in fset.formset.errors:
+                counter = get_formset_counter(fset.formset.prefix)
                 for key in err_item:
-
+                    label = u''
+                    """
                     for mfield in fset.formset.model._meta.fields:
                         if mfield.name == key:
                             label = mfield.verbose_name
+                            break
+                    """
+                    for fkey, mfield in fset.formset.form.base_fields.items():
+                        if fkey == key:
+                            label = mfield.label.__unicode__()
                             break
 
                     err_dict = {
@@ -766,7 +777,8 @@ class NewmanModelAdmin(XModelAdmin):
         if not isinstance(result, HttpResponseRedirect):
             return result
         # create JsonResponse containing success message
-        return utils.JsonResponse(_('Object was deleted.'))
+        #return utils.JsonResponse(_('Object was deleted.'))
+        return utils.JsonResponseRedirect(result['Location'])
 
     @require_AJAX
     @transaction.commit_on_success
