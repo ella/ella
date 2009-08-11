@@ -398,8 +398,9 @@ class NewmanModelAdmin(XModelAdmin):
             utils.set_user_config_db(request.user, key, url_args)
         else:
             user_filter = utils.get_user_config(request.user, key)
-            redirect_to = '%s?%s' % (request.path, user_filter)
-            return utils.JsonResponseRedirect(redirect_to)
+            if user_filter:
+                redirect_to = '%s?%s' % (request.path, user_filter)
+                return utils.JsonResponseRedirect(redirect_to)
 
         context['is_filtered'] = context['cl'].is_filtered()
         context['is_user_category_filtered'] = utils.is_user_category_filtered( self.queryset(request) )
