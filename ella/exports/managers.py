@@ -66,7 +66,7 @@ class ExportManager(models.Manager):
             print 'objects=', objects
             print 'positions=', positions
             print 'fix_positions=', fix_positions
-            print 'position count:', ExportPosition.objects.all().count()
+            print 'all position count:', ExportPosition.objects.all().count()
             """
             map(lambda i: objects.append(i), positions)
             objects.sort(cmp=cmp_listing_or_meta)
@@ -92,9 +92,31 @@ class ExportManager(models.Manager):
         """ 
         Insert elements in fix_positions queryset to specified position
         in list specified by parameter out.
+
+        Fixed-positioned items have higher priority than existing items in list 
+        given in parameter out.
+
+        This method changes "out" parameter.
         """
-        for fx in fix_positions:
-            out.insert(fx.position - 1, fx)
+        tmp = list()
+        positions = fix_positions.order_by('position')
+        last_position = positions[0].position
+        for i in range(len(positions)):
+            item = positions[i]
+            diff = item.position - last_position
+            if diff > 1:
+                # gap found
+                # append items from out up to diff, then append item
+                for x in range(diff - 1):
+                    tmp.append(out.pop())
+            tmp.append(item)
+            last_position = item.position
+
+        for remaining in range(len(out)):
+            tmp.append(out.pop())
+
+        for t in tmp:
+            out.append(t)
 
     def __get_publishable(self, obj):
         from ella.exports.models import ExportPosition
