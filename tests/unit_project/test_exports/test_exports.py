@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from time import time, gmtime, strftime
+from time import time, gmtime, localtime, strftime
 from datetime import datetime
 
 from djangosanetesting import DatabaseTestCase
@@ -116,37 +116,39 @@ class TestExport(DatabaseTestCase):
         self.setup_placements_listings()
 
     def setup_placements_listings(self):
-        now = time() + MINUTE
-        str_now = strftime(DATE_FORMAT, gmtime(now))
-        str_future = strftime(DATE_FORMAT, gmtime(now + HOUR))
+        now = time()
+        self.str_now = strftime(DATE_FORMAT, localtime(now))
+        self.str_future = strftime(DATE_FORMAT, localtime(now + HOUR))
 
         # publishable A
         self.placementA = placement_for_publishable_builder(
             publishable=self.publishableA,
-            publish_from=str_now,
-            publish_to=str_future
+            publish_from=self.str_now,
+            publish_to=self.str_future
         )
 
-        str_listingA_from = strftime(DATE_FORMAT, gmtime(now))
-        str_listingA_to = strftime(DATE_FORMAT, gmtime(now + HOUR * 3))
+        self.str_listingA_from = strftime(DATE_FORMAT, localtime(now))
+        self.str_listingA_to = strftime(DATE_FORMAT, localtime(now + HOUR * 3))
+        self.str_listingB_from = strftime(DATE_FORMAT, localtime(now - HOUR))
+        self.str_listingB_to = strftime(DATE_FORMAT, localtime(now + HOUR))
         self.listA = listing_for_placement(
             placement=self.placementA,
-            publish_from=str_listingA_from,
-            publish_to=str_listingA_to,
+            publish_from=self.str_listingA_from,
+            publish_to=self.str_listingA_to,
             category=self.categoryH
         )
         
         # publishable B
         self.placementB = placement_for_publishable_builder(
             publishable=self.publishableB,
-            publish_from=str_now,
-            publish_to=str_future
+            publish_from=self.str_now,
+            publish_to=self.str_future
         )
 
         self.listB = listing_for_placement(
             placement=self.placementB,
-            publish_from=str_listingA_from,
-            publish_to=str_listingA_to,
+            publish_from=self.str_listingA_from,
+            publish_to=self.str_listingA_to,
             category=self.categoryH
         )
 
@@ -157,7 +159,7 @@ class TestExport(DatabaseTestCase):
             slug='hotentot',
             max_visible_items=2,
         )
-        self.exportB = Export.objects.create(
+        self.export_position_overrides = Export.objects.create(
             category=self.categoryI,
             title='export for testing position overrides',
             slug='export-for-testing-position-overrides',
@@ -168,14 +170,27 @@ class TestExport(DatabaseTestCase):
             title=u'ahoy!',
             description=u'Enjoy polka!',
         )
+        self.export_metaB = ExportMeta.objects.create(
+            publishable=self.publishableD,
+            title=u'',
+            description=u'',
+        )
         ExportPosition.objects.create(
             object=self.export_metaA,
-            export=self.exportB,
-            visible_from=datetime.strptime(str_listingA_from, DATE_FORMAT),
-            #visible_to=datetime.strptime(str_listingA_to, DATE_FORMAT),
+            export=self.export_position_overrides,
+            visible_from=datetime.strptime(self.str_listingA_from, DATE_FORMAT),
+            visible_to=datetime.strptime(self.str_listingA_to, DATE_FORMAT),
+            position=2
+        )
+        ExportPosition.objects.create(
+            object=self.export_metaB,
+            export=self.export_position_overrides,
+            visible_from=datetime.strptime(self.str_listingB_from, DATE_FORMAT),
+            visible_to=datetime.strptime(self.str_listingB_to, DATE_FORMAT),
             position=1
         )
 #TODO create test data with only publish_from defined (usual way of creating Listings)
+#TODO test uniqness of items returned from get_items_for_category() method.
 
     def test_get_items_for_category(self):
         degen = Export.objects.get_items_for_category(self.categoryH)
@@ -184,15 +199,36 @@ class TestExport(DatabaseTestCase):
         self.assert_true(self.publishableA in out)
         self.assert_true(self.publishableB in out)
 
-#TODO test get_items_for_category() method to overloaded item position
-    def test_get_items_for_category__overloaded_position(self):
+    def test_get_items_for_category__placed_by_position(self):
+        " test get_items_for_category() method to overloaded item position "
         degen = Export.objects.get_items_for_category(self.categoryI)
         out = map(None, degen)
-        self.assert_equals(len(out), 1)
+        self.assert_equals(len(out), 2)
         self.assert_true(self.publishableC in out)
-        #self.assert_true(self.publishableD in out)
+        self.assert_true(self.publishableD in out)
 
-#TODO extend test mentioned above to test whether position overloading works right if some of ExportPosition objects have .position == 0.
+    def test_get_items_for_category__placed_by_position_and_by_listings(self):
+        """
+        test whether position overloading works right if some of ExportPosition 
+        objects have .position == 0. 
+        """
+        self.listB = listing_for_placement(
+            placement=self.placementB,
+            publish_from=self.str_listingA_from,
+            publish_to=self.str_listingA_to,
+            category=self.categoryI
+        )
+        degen = Export.objects.get_items_for_category(self.categoryI)
+        out = map(None, degen)
+        self.assert_equals(len(out), 3)
+        self.assert_true(self.publishableC in out)
+        self.assert_true(self.publishableD in out)
+        self.assert_true(self.publishableB in out)
+        # ordering test
+        self.assert_equals(
+            out, 
+            [self.publishableD, self.publishableC, self.publishableB]
+        )
 
     def test_get_export_data(self):
         out = Export.objects.get_export_data(

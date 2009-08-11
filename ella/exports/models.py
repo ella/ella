@@ -41,8 +41,8 @@ class ExportMeta(models.Model):
         return u"%s: %s" % (_('Redefined export'), self.publishable)
 
     def save(self, force_insert=False, force_update=False):
-        if not self.title and not self.photo and not self.description:
-            raise IntegrityError
+        #if not self.title and not self.photo and not self.description:
+        #    raise IntegrityError
         super(ExportMeta, self).save(force_insert, force_update)
 
     def get_overloaded_attribute(self, attribute):
