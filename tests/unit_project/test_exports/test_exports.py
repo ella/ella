@@ -147,8 +147,8 @@ class TestExport(DatabaseTestCase):
 
         self.listB = listing_for_placement(
             placement=self.placementB,
-            publish_from=self.str_listingA_from,
-            publish_to=self.str_listingA_to,
+            publish_from=self.str_listingB_from,
+            publish_to=self.str_listingB_to,
             category=self.categoryH
         )
 
@@ -198,6 +198,11 @@ class TestExport(DatabaseTestCase):
         self.assert_equals(len(out), 2)
         self.assert_true(self.publishableA in out)
         self.assert_true(self.publishableB in out)
+        # ordering test
+        self.assert_equals(
+            out,
+            [self.publishableB, self.publishableA]
+        )
 
     def test_get_items_for_category__placed_by_position(self):
         " test get_items_for_category() method to overloaded item position "
@@ -212,8 +217,14 @@ class TestExport(DatabaseTestCase):
         test whether position overloading works right if some of ExportPosition 
         objects have .position == 0. 
         """
-        self.listB = listing_for_placement(
+        listing_for_placement(
             placement=self.placementB,
+            publish_from=self.str_listingB_from,
+            publish_to=self.str_listingB_to,
+            category=self.categoryI
+        )
+        listing_for_placement(
+            placement=self.placementA,
             publish_from=self.str_listingA_from,
             publish_to=self.str_listingA_to,
             category=self.categoryI
