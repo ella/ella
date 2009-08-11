@@ -136,7 +136,9 @@ def JsonResponseRedirect(location):
         'redirect_to': location
     }
     out = json_encode(out_dict)
-    return HttpResponse(out, mimetype='text/plain;charset=utf-8', status=HTTP_OK)
+    response = HttpResponse(out, mimetype='text/plain;charset=utf-8', status=HTTP_OK)
+    response['Redirect-To'] = location
+    return response
 
 def decode_category_filter_json(data):
     decoded = json_decode(data)
