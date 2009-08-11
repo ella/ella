@@ -131,6 +131,8 @@ class TestExport(DatabaseTestCase):
         self.str_listingA_to = strftime(DATE_FORMAT, localtime(now + HOUR * 3))
         self.str_listingB_from = strftime(DATE_FORMAT, localtime(now - HOUR))
         self.str_listingB_to = strftime(DATE_FORMAT, localtime(now + HOUR))
+        self.str_listingC_from = strftime(DATE_FORMAT, localtime(now - HOUR))
+        self.str_listingC_to = strftime(DATE_FORMAT, localtime(now + HOUR * 2))
         self.listA = listing_for_placement(
             placement=self.placementA,
             publish_from=self.str_listingA_from,
@@ -190,9 +192,9 @@ class TestExport(DatabaseTestCase):
             position=1
         )
 #TODO create test data with only publish_from defined (usual way of creating Listings)
-#TODO test uniqness of items returned from get_items_for_category() method.
 
     def test_get_items_for_category(self):
+        " basic test getting items for certain export category. "
         degen = Export.objects.get_items_for_category(self.categoryH)
         out = map(None, degen)
         self.assert_equals(len(out), 2)
@@ -271,7 +273,41 @@ class TestExport(DatabaseTestCase):
         }
         self.assert_equals(out, right_out)
 
+    def test_unique(self):
+        "test uniqness of items returned from get_items_for_category() method."
+        listing_for_placement(
+            placement=self.placementA,
+            publish_from=self.str_listingC_from,
+            publish_to=self.str_listingC_to,
+            category=self.categoryH
+        )
+        self.exportA.max_visible_items = 5
+        self.exportA.save()
+        degen = Export.objects.get_items_for_category(self.categoryH)
+        out = map(None, degen)
+        self.assert_equals(len(out), 2)
+
+    def test_unique_positions(self):
+        self.export_metaC = ExportMeta.objects.create(
+            publishable=self.publishableA,
+            title=u'',
+            description=u'',
+        )
+        ExportPosition.objects.create(
+            object=self.export_metaC,
+            export=self.exportA,
+            visible_from=datetime.strptime(self.str_listingB_from, DATE_FORMAT),
+            visible_to=datetime.strptime(self.str_listingB_to, DATE_FORMAT),
+            position=1
+        )
+        self.exportA.max_visible_items = 5
+        self.exportA.save()
+        degen = Export.objects.get_items_for_category(self.categoryH)
+        out = map(None, degen)
+        self.assert_equals(len(out), 3)
+
     def test_(self):
+        " copy/paste template "
         pass
 
 # EOF
