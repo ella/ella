@@ -108,12 +108,12 @@ class ExportManager(models.Manager):
                 # gap found
                 # append items from out up to diff, then append item
                 for x in range(diff - 1):
-                    tmp.append(out.pop())
+                    tmp.append(out.pop(0))
             tmp.append(item)
             last_position = item.position
 
         for remaining in range(len(out)):
-            tmp.append(out.pop())
+            tmp.append(out.pop(0))
 
         for t in tmp:
             out.append(t)
