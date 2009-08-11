@@ -197,6 +197,8 @@ class Placement(models.Model):
 
     class Meta:
         app_label = 'core'
+        # FIXME: after model-validation, allow more placements in different time
+        unique_together = (('publishable', 'category',),)
         verbose_name = _('Placement')
         verbose_name_plural = _('Placements')
 
