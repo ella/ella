@@ -118,17 +118,43 @@ ContentByHashLib.LOADED_MEDIA = {};
             });
         }
         
-        $target.removeClass('loading').html(data);
-        if ($target.hasClass('js-noautoshow')) {} else $target.show();
-        $(document).trigger('dec_loading');
-        if (address != undefined) {
-            LOADED_URLS[ $target.attr('id') ] = address;
-            if (extras && extras.by_hash) URL_LOADED_BY_HASH[ $target.attr('id') ] = true;
+        var redirect_to;
+        if (redirect_to = extras.xhr.getResponseHeader('Redirect-To')) {
+            var arg = {};
+            for (k in extras) { arg[k] = extras[k]; }
+            delete arg.xhr;
+            var literal_address;
+            if (redirect_to.substr(0, BASE_PATH.length) == BASE_PATH) {
+                literal_address = redirect_to.substr(BASE_PATH.length);
+            }
+            else {
+                literal_address = redirect_to;
+            }
+            arg.address = literal_address;
+            load_content(arg);
+            if ( extras.by_hash ) {
+                var literal_target_id = extras.target_id + '::';
+                if (extras.target_id == ContentByHashLib.DEFAULT_TARGET) {
+                    if (location.hash.indexOf('#'+extras.target_id+'::') < 0) {
+                        literal_target_id = '';
+                    }
+                }
+                adr(literal_target_id + literal_address, {just_set: true, nohistory: true});
+            }
         }
+        else {
+            $target.removeClass('loading').html(data);
+            if ( ! $target.hasClass('js-noautoshow') ) $target.show();
+            if (address != undefined) {
+                LOADED_URLS[ $target.attr('id') ] = address;
+                if (extras && extras.by_hash) URL_LOADED_BY_HASH[ $target.attr('id') ] = true;
+            }
+            $target.trigger('content_added', extras);
+        }
+        $(document).trigger('dec_loading');
         PAGE_CHANGED++;
-        $target.trigger('content_added', extras);
         if ($.isFunction( extras.custom_success )) try {
-            extras.custom_success(extras.xhr);
+            extras.custom_success(extras);
         } catch(e) { carp('Failed success callback (load_content)', e, extras) };
     }
     
@@ -273,21 +299,30 @@ ContentByHashLib.LOADED_MEDIA = {};
         $.ajax({
             url: url,
             type: 'GET',
-            success: function(data) {
-                LOAD_BUF[ this.load_id ].xhr = this;
+            complete: function(xhr) {
+                LOAD_BUF[ this.load_id ].xhr = xhr;
+                if ($.httpSuccess(xhr)) {
+                    this._success(xhr);
+                }
+                else {
+                    this._error(xhr);
+                }
+            },
+            success: function() { this.succeeded = true;  },
+            error:   function() { this.succeeded = false; },
+            _success: function(xhr) {
                 if (this.request_no < MAX_REQUEST) {
                     cancel_request( this.load_id );
                 }
                 else {
-                    LOAD_BUF[ this.load_id ].data = data;
+                    LOAD_BUF[ this.load_id ].data = xhr.responseText;
                 }
                 if (this.custom_success) {
                     LOAD_BUF[ this.load_id ].custom_success = this.custom_success;
                 }
                 draw_ready();
             },
-            error: function(xhr) {
-                LOAD_BUF[ this.load_id ].xhr = xhr;
+            _error: function(xhr) {
                 inject_error_message( LOAD_BUF[ this.load_id ] );
                 cancel_request( this.load_id );
                 $(document).trigger('load_content_failed', [xhr]);
@@ -487,7 +522,7 @@ ContentByHashLib.LOADED_MEDIA = {};
     }
     
     // Fire hashchange event when location.hash changes
-    var CURRENT_HASH = '';
+    window.CURRENT_HASH = '';
     $(document).bind('hashchange', function() {
 //        carp('hash: ' + location.hash);
         MAX_REQUEST++;
@@ -585,6 +620,19 @@ function adr(address, options) {
         return;
     }
     
+    function set_location_hash(newhash, options) {
+        if (newhash.charAt(0) != '#') newhash = '#' + newhash;
+        if (options.just_set) {
+            CURRENT_HASH = newhash;
+        }
+        if (options.nohistory) {
+            location.replace( newhash );
+        }
+        else {
+            location.hash = newhash;
+        }
+    }
+    
     // '#' chars in the address separate invividual requests for hash modification.
     // First deal with the first one and then recurse on the subsequent ones.
     if (address.charAt(0) == '#') address = address.substr(1);
@@ -627,7 +675,7 @@ function adr(address, options) {
         if (options.just_get == 'address') return address;
         if (options.just_get == 'hash')    return newhash;
         else {
-            location.hash = newhash;
+            set_location_hash(newhash, options);
             return;
         }
     }
@@ -754,7 +802,7 @@ function adr(address, options) {
         return newhash;
     }
     else {
-        location.hash = newhash;
+        set_location_hash(newhash, options);
     }
 }
 // returns address for use in hash, i.e. without BASE_PATH
