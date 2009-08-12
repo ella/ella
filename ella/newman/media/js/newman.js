@@ -1134,6 +1134,8 @@ $( function() {
     function init_overlay_content(evt, extras) {
         var $target = $(evt.target);
         
+        var target_selector = $target.attr('id') ? '#'+$target.attr('id')+' ' : '';
+        
         // selection
         var $target_links = $target.find('#changelist tbody a');
         $target_links.each( function() {
@@ -1169,13 +1171,6 @@ $( function() {
         // filters
         var $filt = $('#filters-handler .popup-filter');
         if ($filt.length) {
-            
-            var $cancel = $('#filters-handler a.js-clear').not('.overlay-adapted');
-            $cancel
-            .attr( 'href', $target.attr('id')+'::'+$cancel.attr('href') )
-            .removeClass('js-clear')
-            .addClass('js-simpleload overlay-adapted');
-            
             $filt.addClass('js-simpleload').attr( 'href', $filt.attr('href').replace(/::::/, '::'+$target.attr('id')+'::') );
             function init_filters() {
                 $(this).find('.filter li a').each( function() {
@@ -1184,6 +1179,12 @@ $( function() {
             }
             $('#filters').unbind('content_added', init_filters).one('content_added', init_filters);
         }
+        
+        var $cancel = $('#filters-handler a.js-clear').not('.overlay-adapted');
+        if ($cancel.length) $cancel
+        .attr( 'href', $target.attr('id')+'::'+$cancel.attr('href') )
+        .removeClass('js-clear')
+        .addClass('js-simpleload overlay-adapted');
         
         $('#changelist-overlay').show();
     };
