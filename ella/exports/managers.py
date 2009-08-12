@@ -29,10 +29,22 @@ class ExportManager(models.Manager):
     error_messages = {
         'cannot': 'This Publishable object cannot be exported'
     }
+
+    def get_items_for_slug(self, slug):
+        from ella.exports.models import Export
+        exports = Export.objects.filter(slug=slug)
+        if not exports:
+            return list()
+        return self.get_items_for_category(use_export=exports[0])
     
-    def get_items_for_category(self, category):
-        " generates export items for certain category "
+    def get_items_for_category(self, category=None, export=None):
         """
+        generates export items for certain category or specific Export.
+
+        @param   category   category asociated with Export
+        @param   export     use Export object rather than category.
+
+        Functionality:
         1. URL format is /category/path/to/any/depth/[content_type/]
         2. Sort export items by its main placement and listings.
         3. Override item's title, photo, description if ExportMeta for item and Export is present.
@@ -40,29 +52,35 @@ class ExportManager(models.Manager):
         """
         from ella.exports.models import Export, ExportPosition, ExportMeta,\
         POSITION_IS_NOT_OVERLOADED
-        exports = Export.objects.filter(category=category)
+        use_export = None
+        use_category = category
+        if not use_export:
+            exports = Export.objects.filter(category=use_category)
+        else:
+            exports = (export,)
+            use_category = use_export.category
         if exports:
-            export = exports[0]
+            use_export = exports[0]
             # Find fitting ExportPositions
             positions = ExportPosition.objects.filter(
                 Q(visible_to__gte=datetime.now()) | Q(visible_to__isnull=True),
-                export=export, 
+                export=use_export, 
                 position__exact=POSITION_IS_NOT_OVERLOADED,
                 visible_from__lte=datetime.now(),
             )
             fix_positions = ExportPosition.objects.filter(
                 Q(visible_to__gte=datetime.now()) | Q(visible_to__isnull=True),
-                export=export, 
+                export=use_export, 
                 position__gt=POSITION_IS_NOT_OVERLOADED,
                 visible_from__lte=datetime.now(),
             )
             objects = list(Listing.objects.get_listing(
-                category, 
-                count=export.max_visible_items * 2
+                use_category, 
+                count=use_export.max_visible_items * 2
             ))
             """
             print 'SQL:', connection.queries[-2:]
-            print 'category=', category
+            print 'category=', use_category
             print 'objects=', objects
             print 'positions=', positions
             print 'fix_positions=', fix_positions
@@ -74,17 +92,18 @@ class ExportManager(models.Manager):
                 # Assign positions of items (if position is overloaded via ExportPosition)
                 self.__insert_to_position(fix_positions, objects)
 
-            pre_out = objects[:export.max_visible_items]
+            pre_out = objects[:use_export.max_visible_items]
         else:
             # Get listed objects for category
-            objects = list(Listing.objects.get_listing(category))
+            objects = list(Listing.objects.get_listing(use_category))
             objects.sort(cmp=cmp_listing_or_meta)
             pre_out = objects
         # extract Publishable objects from Listing/ExportPosition objects
         out = list()
         for i in pre_out:
-            out.append(self.__get_publishable(i))
-        # override title, photo, etc. via get_export_data
+            pub = self.__get_overloaded_publishable(i, export=use_export)
+            out.append(pub)
+        # override title, photo, etc. via get_export_data?
         for o in out:
             yield o
 
@@ -126,6 +145,18 @@ class ExportManager(models.Manager):
             return obj.object.publishable
         else:
             raise NotImplementedError
+
+    def __get_overloaded_publishable(self, obj, export=None):
+        """ 
+        @return publishable object with overloaded attributes 
+        title, photo, description. 
+        """
+        pub = self.__get_publishable(obj)
+        field_dict = self.get_export_data(pub, export=export)
+        pub.title = field_dict['title']
+        pub.photo = field_dict['photo']
+        pub.description = field_dict['description']
+        return pub
 
     def get_export_data(self, publishable, export=None, export_category=None):
         """ 
