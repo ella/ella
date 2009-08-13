@@ -2,6 +2,7 @@ from datetime import datetime
 
 from django.db import models, connection
 from django.db.models import F, Q
+from django.conf import settings
 
 from ella.core.models import Listing, Publishable, Category
 
@@ -78,14 +79,6 @@ class ExportManager(models.Manager):
                 use_category, 
                 count=use_export.max_visible_items * 2
             ))
-            """
-            print 'SQL:', connection.queries[-2:]
-            print 'category=', use_category
-            print 'objects=', objects
-            print 'positions=', positions
-            print 'fix_positions=', fix_positions
-            print 'all position count:', ExportPosition.objects.all().count()
-            """
             map(lambda i: objects.append(i), positions)
             objects.sort(cmp=cmp_listing_or_meta)
             if fix_positions:
@@ -146,7 +139,7 @@ class ExportManager(models.Manager):
         else:
             raise NotImplementedError
 
-    def __get_overloaded_publishable(self, obj, export=None):
+    def __get_overloaded_publishable(self, obj, export):
         """ 
         @return publishable object with overloaded attributes 
         title, photo, description. 
@@ -156,6 +149,12 @@ class ExportManager(models.Manager):
         pub.title = field_dict['title']
         pub.photo = field_dict['photo']
         pub.description = field_dict['description']
+        if pub.photo:
+            formated = pub.photo.get_formated_photo(export.photo_format.name)
+            #pub.export_thumbnail_url = u'%s%s' % (settings.MEDIA_URL, formated.url)
+            pub.export_thumbnail_url = formated.url
+        else:
+            pub.export_thumbnail_url = None
         return pub
 
     def get_export_data(self, publishable, export=None, export_category=None):

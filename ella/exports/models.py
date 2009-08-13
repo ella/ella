@@ -1,8 +1,12 @@
 from django.db import models, IntegrityError
 from django.utils.translation import ugettext_lazy as _
+from django.core.urlresolvers import reverse
+from django.contrib.sites.models import Site
+from django.conf import settings
 
 from ella.core.models import Publishable, Category
-from ella.photos.models import Photo
+from ella.core.cache import get_cached_object
+from ella.photos.models import Photo, Format
 from ella.exports.managers import ExportManager
 
 POSITION_IS_NOT_OVERLOADED = 0
@@ -16,10 +20,20 @@ class Export(models.Model):
     title = models.CharField(_('Title'), max_length=255)
     slug = models.SlugField(_('Slug'), max_length=255)
     max_visible_items = models.IntegerField(_('Maximum Visible Fields'))
+    photo_format = models.ForeignKey(Format, verbose_name=_('Format'))
     objects = ExportManager()
 
     def __unicode__(self):
         return u'%s: %s (%s)' % (unicode(self._meta.verbose_name), self.title, self.category)
+
+    @property
+    def url(self):
+        if not self.slug:
+            return ''
+        url = reverse('ella_exports_by_slug', args={'slug': self.slug,})
+        # prepend the domain if it doesn't match current Site
+        site = get_cached_object(Site, pk=self.category.site_id)
+        return 'http://' + site.domain + url
 
     class Meta:
         unique_together = ( ('title',), ('slug',) )
