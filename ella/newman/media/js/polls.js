@@ -106,7 +106,7 @@
         var $new_options = $new_question.find('.js-poll-choice-container');
         
         // reset the question text
-        $new_question.find('span:first').addClass('js-empty-poll-question-text').find('a').text(gettext('Click to edit question'));
+        $new_question.find('span:first').addClass('js-empty-poll-question-text').find('a').addClass('icn btn eclear').text(gettext('Click to edit question'));
         $new_question.find(':input.js-edit-poll-choice-text').val('');
         
         // get rid of silly ID's
