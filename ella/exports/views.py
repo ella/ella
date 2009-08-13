@@ -42,34 +42,40 @@ class MrssExports(EllaCoreView):
 
         return get_templates(self.template_name, category=context['category'], **kw)
 
-    def get_exported_items(self, export):
-        pass
-
     def get_context(self, request, **kwargs):
         category = kwargs.get('category', None)
         slug = kwargs.get('slug', None)
         export = None
+        cat = None
+        title = u''
+        link = ''
         items = tuple()
         context = dict()
 
         if slug:
-            pass #FIXME add variant with exporting via slug.  ?Separate views to two classes with common parent?
+            items = Export.objects.get_items_for_slug(slug=slug)
+            try:
+                export_object = Export.objects.get(slug=slug)
+                title = export_object.title
+                link = export_object.url
+            except Export.DoesNotExist:
+                raise Http404
         else:
             if category:
                 cat = get_cached_object_or_404(Category, tree_path=category, site__id=settings.SITE_ID)
             else:
                 cat = get_cached_object_or_404(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
-            exports = Export.objects.filter(category=cat)
-            context['category'] = cat
-            if exports:
-                export = exports[0]
-
-        if export:
-            items = self.get_exported_items(export)
+            items = Export.objects.get_items_for_category(category=cat)
+            export_object = Export.objects.get(category=cat)
+            title = export_object.title
+            link = export_object.url
 
         context.update({
-            'items': items,
+            'exported_items': items,
+            'category': cat,
             'is_homepage': not bool(category),
+            'title': title,
+            'link': link
         })
         return context
 
