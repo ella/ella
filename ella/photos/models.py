@@ -341,7 +341,7 @@ class FormatedPhoto(models.Model):
         return path.join(source_file[0],  str (self.format.id) + '-' + source_file[1])
 
     def __unicode__(self):
-        return u"%s - %s" % (self.filename, self.format)
+        return u"%s - %s" % (self.photo, self.format)
 
     class Meta:
         verbose_name = _('Formated photo')
