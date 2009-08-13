@@ -640,9 +640,15 @@ $( function() {
     // Set up returning to publishable changelist when coming to change form from it
     $('#changelist tbody th a,.actionlist a').live('click', function(evt) {
         if (evt.button != 0) return;
+        FORM_SAVE_RETURN_TO = '';
         var appname = /js-app-(\w+)\.(\w+)/.exec( $('#changelist').attr('className') );
-        if ( ! appname ) FORM_SAVE_RETURN_TO = '';
-        else FORM_SAVE_RETURN_TO = '/' + appname[1] + '/' + appname[2] + '/';
+        if ( ! appname ) {
+            return;
+        }
+        var appname_path = '/' + appname[1] + '/' + appname[2] + '/';
+        if (appname_path == '/core/publishable/') {
+            FORM_SAVE_RETURN_TO = '/core/publishable/';
+        }
     });
     //// End of ajax forms
     
