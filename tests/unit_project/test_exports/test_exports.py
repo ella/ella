@@ -160,12 +160,14 @@ class TestExport(DatabaseTestCase):
             title='hotentot',
             slug='hotentot',
             max_visible_items=2,
+            photo_format_id=0
         )
         self.export_position_overrides = Export.objects.create(
             category=self.categoryI,
             title='export for testing position overrides',
             slug='export-for-testing-position-overrides',
             max_visible_items=3,
+            photo_format_id=0
         )
         self.export_metaA = ExportMeta.objects.create(
             publishable=self.publishableC,
