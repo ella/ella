@@ -1,4 +1,4 @@
-KOBAYASHI_VERSION = '2009-07-20';
+KOBAYASHI_VERSION = '2009-08-13';
 
 // Debugging tools
 ;;; function alert_dump(obj, name) {
@@ -636,6 +636,9 @@ ContentByHashLib.LOADED_MEDIA = {};
 // - just_get: 'hash'    Instructs the function to return the modified hash instead of applying it to location.
 //   Using this option disables the support of multiple '#'-separated specifiers.
 //   Other than the first one are ignored.
+// - just_set: Instructs the function to change the URL without triggering the hashchange event.
+// - nohistory: When true, the change of the location will not create a record in the browser history
+//   (location.replace will be used).
 // - _hash_preproc: Internal. Set when adr is used to preprocess the hash
 //   to compensate for hash and LOADED_URLS inconsistencies.
 function adr(address, options) {
