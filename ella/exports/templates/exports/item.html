@@ -1,21 +1,19 @@
 {% extends "exports/base.html" %}
+{% load exports %}
 
 {% block items %}
-{% for item in exported_items%}
+{% for item in exported_items %}
     <item>
-        <title><![CDATA[{{ item.title }}]]></title>
-        <link>{{ item.link }}</link>
+        <title><![CDATA[{{ item.get_title }}]]></title>
+        <link>{% publishable_full_url item %}</link>
         <pubDate>{{ item.created }}</pubDate>
         <description><![CDATA[{{ item.description }}]]></description>
         <media:content
-            url="{{ attr.imgbig }}" 
-            type="text/html" 
+            url="{% publishable_full_url item %}"
+            type="text/html"
             >
-            <media:thumbnail 
-                url="{{ item.thumbnail }}" 
-                type="image/jpeg" 
-                height="67" 
-                width="90" />
+            <media:thumbnail  url="{{ item.export_thumbnail_url }}" 
+                type="image/jpeg" />
             <media:title type="html"><![CDATA[{{ item.title }}]]></media:title>
         </media:content>
     </item>

@@ -1,0 +1,11 @@
+{% extends "exports/item.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+{% block link %}{{ link }}{% endblock %}
+{% block description %}Media RSS {% trans "Export" %} {{ title }}{% endblock %}
+
+{% block items %}
+    {{ block.super }}
+    {# listing 6 from 1 for category as items #}
+    {# {{ category }} Is homepaz: {{ is_homepage }} #}
+{% endblock %}
