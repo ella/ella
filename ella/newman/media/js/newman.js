@@ -640,9 +640,15 @@ $( function() {
     // Set up returning to publishable changelist when coming to change form from it
     $('#changelist tbody th a,.actionlist a').live('click', function(evt) {
         if (evt.button != 0) return;
+        FORM_SAVE_RETURN_TO = '';
         var appname = /js-app-(\w+)\.(\w+)/.exec( $('#changelist').attr('className') );
-        if ( ! appname ) FORM_SAVE_RETURN_TO = '';
-        else FORM_SAVE_RETURN_TO = '/' + appname[1] + '/' + appname[2] + '/';
+        if ( ! appname ) {
+            return;
+        }
+        var appname_path = '/' + appname[1] + '/' + appname[2] + '/';
+        if (appname_path == '/core/publishable/') {
+            FORM_SAVE_RETURN_TO = '/core/publishable/';
+        }
     });
     //// End of ajax forms
     
@@ -1134,6 +1140,8 @@ $( function() {
     function init_overlay_content(evt, extras) {
         var $target = $(evt.target);
         
+        var target_selector = $target.attr('id') ? '#'+$target.attr('id')+' ' : '';
+        
         // selection
         var $target_links = $target.find('#changelist tbody a');
         $target_links.each( function() {
@@ -1169,13 +1177,6 @@ $( function() {
         // filters
         var $filt = $('#filters-handler .popup-filter');
         if ($filt.length) {
-            
-            var $cancel = $('#filters-handler a.js-clear').not('.overlay-adapted');
-            $cancel
-            .attr( 'href', $target.attr('id')+'::'+$cancel.attr('href') )
-            .removeClass('js-clear')
-            .addClass('js-simpleload overlay-adapted');
-            
             $filt.addClass('js-simpleload').attr( 'href', $filt.attr('href').replace(/::::/, '::'+$target.attr('id')+'::') );
             function init_filters() {
                 $(this).find('.filter li a').each( function() {
@@ -1184,6 +1185,12 @@ $( function() {
             }
             $('#filters').unbind('content_added', init_filters).one('content_added', init_filters);
         }
+        
+        var $cancel = $('#filters-handler a.js-clear').not('.overlay-adapted');
+        if ($cancel.length) $cancel
+        .attr( 'href', $target.attr('id')+'::'+$cancel.attr('href') )
+        .removeClass('js-clear')
+        .addClass('js-simpleload overlay-adapted');
         
         $('#changelist-overlay').show();
     };
