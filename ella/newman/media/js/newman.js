@@ -670,37 +670,6 @@ $( function() {
         ContentByHashLib.unload_content('filters');
     });
     
-    // Persistent filters -- add the query string if:
-    // - there is none AND
-    // - one is there for the specifier's URL in the changelistFilters object
-    $(document).bind('ready', function() {
-        if (!window.changelistFilters || typeof changelistFilters != 'object') return;
-        for (a in changelistFilters) {
-            var adr = a.replace(/^filter/, '').replace(/__/g, '/') + '/';
-            var decoded = $('<span>').html(changelistFilters[a]).text()
-            ContentByHashLib.ADDRESS_POSTPROCESS[ adr ] = adr + decoded;
-        }
-    });
-    
-    // Update persistent filters when filter clicked
-    $('#filters a').live('click', function(evt) {
-        if (evt.button != 0) return;    // only interested in left click
-        if ( pop_id = $(this).closest('.pop').length ) return;  // no filter persistence in pop-up
-        var href = $(this).attr('href');
-        if (   /^\?/.test( href )   ) {} else return;
-        var base = get_hashadr('?').replace(/\?$/,'');
-        ContentByHashLib.ADDRESS_POSTPROCESS[ base ] = base+href;
-        adr(href);
-        return false;
-    });
-    // 2459 výsledků (7350 celkem) -- make parenthesised link reset persistent filters
-    $('#filters-handler .js-clear').live('click', function() {
-        var base = get_hashadr('?').replace(/\?$/,'');
-        delete ContentByHashLib.ADDRESS_POSTPROCESS[ base ];
-        adr($(this).attr('href'));
-        return false;
-    });
-    
     // Re-initialization of third party libraries
     /*
     $(document).bind('content_added', function() {

@@ -87,8 +87,6 @@ ContentByHashLib.LOADED_MEDIA = {};
     // abstain from reloading if we have not.
     var PAGE_CHANGED = 0;
     
-    var ADDRESS_POSTPROCESS = ContentByHashLib.ADDRESS_POSTPROCESS = {};
-    
     function object_empty(o) {
         for (var k in o) return false;
         return true;
@@ -407,14 +405,6 @@ ContentByHashLib.LOADED_MEDIA = {};
             if (spec.match(/^([-\w]+)::(.*)/)) {
                 target_id = RegExp.$1;
                 address = RegExp.$2;
-            }
-            
-            // check if the address is not to be automagically modified
-            if (ADDRESS_POSTPROCESS[ address ]) {
-                address = ADDRESS_POSTPROCESS[ address ];
-                specifiers[i] = (spec.indexOf('::')>=0 ? spec.substr(0, spec.indexOf('::') + '::'.length) : '') + address;
-                location.replace( '#' + specifiers.join('#') );
-                return;
             }
             
             requested[ target_id ] = address;
