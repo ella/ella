@@ -1,11 +1,16 @@
 var LF = 10, CR = 13;
-AjaxFormLib = {};
 
 // Set the default target for Kobayashi to #content
 ContentByHashLib.DEFAULT_TARGET = 'content';
 
 // Set the base URL for #content
 BASES.content = '/nm/';
+
+// Containers for things we need to export
+NewmanLib = {};
+AjaxFormLib = {};
+
+NewmanLib.ADR_STACK = [];
 
 // A less smart alternative to jQuery's offset method.
 function simple_offset(el) {
@@ -177,7 +182,7 @@ $(document).bind('media_loaded', unlock_window);
         $form.find(':checkbox,:radio').removeAttr('checked');
         $form.find(':text,textarea,:password').val('');
         var form_data = response_data.data;
-        show_message( response_data.message );
+        if (response_data.message) show_message( response_data.message );
         var used_times = {};    // how many times which key was used
         
         for (var i = 0; i < form_data.length; i++) {
@@ -205,6 +210,7 @@ $(document).bind('media_loaded', unlock_window);
         
         $form.trigger('preset_load_completed', [response_data, args]);
     }
+    NewmanLib.restore_form = restore_form;
     function load_preset(id, $form) {
         $.ajax({
             url: get_adr('draft/load/'),
@@ -636,21 +642,47 @@ $( function() {
     }
     $(document).bind('content_added', overload_default_submit);
     overload_default_submit();
+    //// End of ajax forms
+    
+    // Adding objects with Lupička
+    $('.js-adrstack-push').live('click', function(evt) {
+        if (evt.button != 0) return;
+        evt.preventDefault();
+        NewmanLib.ADR_STACK.push( {
+            from: get_hashadr(''),
+            to: get_hashadr($(this).attr('href')),
+            selection_callback: $(ContentByHashLib.closest_loaded(this).container).data('selection_callback'),
+            form_data: JSON.stringify({ data: $('.change-form').serializeArray() }),
+            onsave: function(popped, action_table_obj) {
+                if (!action_table_obj.vars.object_id) {
+                    ADR_STACK = [];
+                    carp('Did not get ID of newly added object -- breaking ADR_STACK');
+                    return;
+                }
+                popped.oid = action_table_obj.vars.object_id;
+                popped.str = action_table_obj.vars.object_title;
+            },
+            onreturn: function(popped, action_table_obj) {
+                NewmanLib.restore_form(popped.form_data, $('.change-form'), {});
+                $(document).one('media_loaded', function(){popped.selection_callback(popped.oid,{str: popped.str});});
+            }
+        } );
+        adr( $(this).attr('href') );
+    });
     
     // Set up returning to publishable changelist when coming to change form from it
     $('#changelist tbody th a,.actionlist a').live('click', function(evt) {
         if (evt.button != 0) return;
-        FORM_SAVE_RETURN_TO = '';
+        NewmanLib.ADR_STACK = [];
         var appname = /js-app-(\w+)\.(\w+)/.exec( $('#changelist').attr('className') );
         if ( ! appname ) {
             return;
         }
         var appname_path = '/' + appname[1] + '/' + appname[2] + '/';
         if (appname_path == '/core/publishable/') {
-            FORM_SAVE_RETURN_TO = '/core/publishable/';
+            NewmanLib.ADR_STACK = [ { from: '/core/publishable/', to: get_hashadr($(this).attr('href')) } ];
         }
     });
-    //// End of ajax forms
     
     //// Filters
     
@@ -841,9 +873,23 @@ function PostsaveActionTable(vars) {
 PostsaveActionTable.prototype = {
     _save_: function() {
         var return_to;
-        if (window.FORM_SAVE_RETURN_TO) {
-            return_to = FORM_SAVE_RETURN_TO;
-            delete FORM_SAVE_RETURN_TO;
+        if (NewmanLib.ADR_STACK.length) {
+            var popped = NewmanLib.ADR_STACK.pop();
+            if (get_hashadr('') == popped.to) {
+                return_to = popped.from;
+                if ($.isFunction(popped.onsave))
+                    popped.onsave(popped,this);
+                if ($.isFunction(popped.onreturn)) {
+                    var action_table_obj = this;
+                    $('#'+ContentByHashLib.DEFAULT_TARGET).one('content_added', function(evt) {
+                        popped.onreturn(popped,action_table_obj);
+                    });
+                }
+            }
+            else {
+                return_to = '../';
+                NewmanLib.ADR_STACK = [];
+            }
         }
         else {
             return_to = '../';
@@ -921,12 +967,14 @@ function save_change_form_success(text_data) {
     try {
         data = JSON.parse(text_data);
         object_id = data.data.id;
+        object_title = data.data.title;
         response_msg = data.message;
     } catch(e) { carp('invalid data received from form save:', text_data, e); }
     response_msg = response_msg || gettext('Form saved');
     
     var action_table = new PostsaveActionTable({
         object_id: object_id,
+        object_title: object_title,
         options: options
     });
     
@@ -1121,7 +1169,7 @@ $( function() {
         .click( function(evt) {
             var clicked_id = /\d+(?=\/$)/.exec( $(this).attr('href') )[0];
             try {
-                ($target.data('selection_callback'))(clicked_id, {evt: evt});
+                ($target.data('selection_callback'))(clicked_id, {str: $(evt.target).text()});
             } catch(e) { carp('Failed running overlay callback', e); }
             ContentByHashLib.unload_content('overlay-content');
             $('#changelist-overlay').css({zIndex:5}).hide();

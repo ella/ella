@@ -738,7 +738,7 @@ class NewmanModelAdmin(XModelAdmin):
             opts = obj._meta
             return utils.JsonResponse(
                 _('The %(name)s "%(obj)s" was changed successfully.') % {'name': force_unicode(opts.verbose_name), 'obj': force_unicode(obj)},
-                {'id': obj.pk},
+                {'id': obj.pk, 'title': obj.__unicode__(),},
                 status=STATUS_OK
             )
         context.update(extra_context or {})
@@ -792,7 +792,7 @@ class NewmanModelAdmin(XModelAdmin):
         context.update(extra_context or {})
         if 'object_added' in context:
             msg = request.user.message_set.all()[0].message
-            return utils.JsonResponse(msg, {'id': context['object'].pk})
+            return utils.JsonResponse(msg, {'id': context['object'].pk, 'title': context['object'].__unicode__(),})
         elif 'error_dict' in context:
             return self.json_error_response(request, context)
 

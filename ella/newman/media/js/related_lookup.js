@@ -17,12 +17,12 @@
         }
         
         open_overlay(content_type, function(id, arg) {
-            var $link = $(arg.evt.target);
-            if ( $link.length == 0 ) {
-                carp('Cannot determine which link was clicked');
+            var str = arg.str;
+            if (!str) {
+                ;;; carp('No string representation of selected object received.');
                 return false;
             }
-            var str = $link.text();
+            if ($(inp).closest('body').length == 0) inp = document.getElementById(inp.id);
             
             GenericSuggestLib.insert_value(id, str, inp);
         });
