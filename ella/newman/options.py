@@ -683,15 +683,7 @@ class NewmanModelAdmin(XModelAdmin):
         return utils.JsonResponse(_('Please correct errors in form'), errors=error_list, status=STATUS_FORM_ERROR)
 
     def change_view_process_context(self, request, context, object_id):
-#        # dynamic heelp messages
-#        help_qs = get_cached_list(AdminHelpItem, ct=self.model_content_type, lang=settings.LANGUAGE_CODE)
         form  = context['raw_form']
-#        for msg in help_qs:
-#            try:
-#                form.fields[msg.field].hint_text = msg.short
-#                form.fields[msg.field].help_text = msg.long
-#            except KeyError:
-#                log.warning('Cannot assign help message. Form field does not exist: form.fields[%s].' % msg.field)
 
         # raw forms for JS manipulations
         raw_frm_all = {
