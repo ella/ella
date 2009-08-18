@@ -1,0 +1,7 @@
+{% extends "newman/change_list.html" %}
+{% load newman_list admin_list %}
+
+{% block content_toolbar_right %}
+    <a href="timeline/" class="js-hashadr icn btn history">{% trans "Timeline view" %}</a>
+    {{ block.super }}
+{% endblock %}
