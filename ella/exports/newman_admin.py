@@ -15,6 +15,8 @@ class ExportPositionInlineAdmin(newman.NewmanTabularInline):
 
 class ExportAdmin(newman.NewmanModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
+    list_filter = ('category',)
+    search_fields = ('title', 'slug',)
     suggest_fields = {
         'category': ('__unicode__', 'title', 'slug',),
     }
