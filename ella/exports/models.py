@@ -19,8 +19,8 @@ class Export(models.Model):
     category = models.ForeignKey(Category, verbose_name=_('Category'))
     title = models.CharField(_('Title'), max_length=255)
     slug = models.SlugField(_('Slug'), max_length=255)
-    max_visible_items = models.IntegerField(_('Maximum Visible Fields'))
-    photo_format = models.ForeignKey(Format, verbose_name=_('Format'))
+    max_visible_items = models.IntegerField(_('Maximum Visible Items'))
+    photo_format = models.ForeignKey(Format, verbose_name=_('Photo format'))
     objects = ExportManager()
 
     def __unicode__(self):
@@ -83,7 +83,7 @@ class ExportMeta(models.Model):
 class ExportPosition(models.Model):
     " Defines visibility of ExportMeta object. "
     visible_from = models.DateTimeField()
-    visible_to = models.DateTimeField(null=True)
+    visible_to = models.DateTimeField(blank=True, null=True)
     position = models.IntegerField(blank=True, default=POSITION_IS_NOT_OVERLOADED)
     object = models.ForeignKey(ExportMeta, verbose_name=_('Export meta'))
     export = models.ForeignKey(Export, verbose_name=_('Export'))
