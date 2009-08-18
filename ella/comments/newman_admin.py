@@ -51,11 +51,11 @@ class CommentoptionsAdmin(newman.NewmanModelAdmin):
 
     def block_comments_view(self, request, ct, id):
         data = {
-            'target_ct_id': ct,
+            'target_ct': ct,
             'target_id': id,
             'options': 'OL'
         }
-        CommentOptions.objects.create(**data)
+        CommentOptions.objects.get_or_create(**data)
         return JsonResponse('OK', {})
 
 newman.site.register(Comment, CommentAdmin)
