@@ -14,25 +14,32 @@ class ExportPositionInlineAdmin(newman.NewmanTabularInline):
 
 class ExportAdmin(newman.NewmanModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
+    raw_id_fields = ('photo_format',)
     suggest_fields = {
         'category': ('__unicode__', 'title', 'slug',),
     }
 
 class ExportMetaAdmin(newman.NewmanModelAdmin):
     inlines = (ExportPositionInlineAdmin,)
-    #raw_id_fields = ('photo',)
+    raw_id_fields = ('photo',)
     suggest_fields = {
         'publishable': ('__unicode__', 'title', 'slug',),
-        'photo': ('__unicode__', 'title', 'slug',)
     }
+    fieldsets = (
+        (None, {'fields': ('publishable', )}) ,
+        (_('Export meta options'), {
+            'fields': ('title', 'photo', 'description'),
+            'classes': ('collapsed',)
+        })
+    )
 
 class HiddenIntegerField(IntegerField):
     widget = HiddenInput
 
 class MetaInlineForm(modelforms.ModelForm):
     position_id = HiddenIntegerField(required=False)
-    position_from =  DateTimeField(label=_('Valid From'), widget=widgets.DateTimeWidget)
-    position_to =  DateTimeField(label=_('Valid To'), widget=widgets.DateTimeWidget)
+    position_from =  DateTimeField(label=_('Visible From'), widget=widgets.DateTimeWidget)
+    position_to =  DateTimeField(label=_('Visible To'), widget=widgets.DateTimeWidget, required=False)
     export =  modelforms.ModelChoiceField(models.Export.objects.all(), label=_('Export'))
     _export_stack = dict()
 
@@ -59,11 +66,11 @@ class MetaInlineForm(modelforms.ModelForm):
         )
         self.assign_init_field(
             'position_from', 
-            DateTimeField(initial=from_initial, label=_('Valid From'), widget=widgets.DateTimeWidget)
+            DateTimeField(initial=from_initial, label=_('Visible From'), widget=widgets.DateTimeWidget)
         )
         self.assign_init_field(
             'position_to', 
-            DateTimeField(initial=to_initial, label=_('Valid To'), widget=widgets.DateTimeWidget)
+            DateTimeField(initial=to_initial, label=_('Visible To'), widget=widgets.DateTimeWidget, required=False)
         )
         self.assign_init_field(
             'export', 
@@ -144,8 +151,18 @@ class MetaInlineForm(modelforms.ModelForm):
 class ExportMetaInline(newman.NewmanStackedInline):
     form = MetaInlineForm
     model = models.ExportMeta
-    suggest_fields = {'photo': ('__unicode__', 'title', 'slug',)}
+    #suggest_fields = {'photo': ('__unicode__', 'title', 'slug',)}
+    raw_id_fields = ('photo',)
     extra = 1
+    """
+    fieldsets = (
+        (None, {'fields': ('position_from', 'position_to' )}) ,
+        (_('Export meta options'), {
+            'fields': ('title', 'photo', 'description'),
+            'classes': ('collapsed',)
+        })
+    ) #FIXME add title, photo, description fields to MetaInlineForm, then fieldsets will work
+    """
 
 
 newman.site.register(models.Export, ExportAdmin)
@@ -153,4 +170,4 @@ newman.site.register(models.ExportPosition)
 newman.site.register(models.ExportMeta, ExportMetaAdmin)
 
 # Register ExportMetaInline in standard PublishableAdmin
-newman.site.append_inline(config.TAGGED_MODELS, ExportMetaInline)
+# newman.site.append_inline(config.TAGGED_MODELS, ExportMetaInline) # removed due to user interface is too dificult for an user
