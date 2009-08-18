@@ -141,7 +141,7 @@ class MetaInlineForm(modelforms.ModelForm):
             self.save_m2m = save_all
         return out
 
-class ExportMetaInline(newman.NewmanTabularInline):
+class ExportMetaInline(newman.NewmanStackedInline):
     form = MetaInlineForm
     model = models.ExportMeta
     suggest_fields = {'photo': ('__unicode__', 'title', 'slug',)}
