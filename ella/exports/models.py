@@ -24,7 +24,7 @@ class Export(models.Model):
     objects = ExportManager()
 
     def __unicode__(self):
-        return u'%s: %s (%s)' % (unicode(self._meta.verbose_name), self.title, self.category)
+        return u'%s (%s)' % (self.title, self.category)
 
     @property
     def url(self):
