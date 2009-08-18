@@ -1,10 +1,11 @@
+from django.conf.urls.defaults import patterns, url
 from django.utils.translation import ugettext_lazy as _
 from django.forms import models as modelforms
-from django.forms.fields import DateTimeField, ChoiceField, IntegerField, HiddenInput
+from django.forms.fields import DateTimeField, IntegerField, HiddenInput
 from django.core import signals as core_signals
 
 from ella import newman
-from ella.newman import options, fields, widgets, config
+from ella.newman import widgets, config
 from ella.exports import models
 
 
@@ -18,6 +19,22 @@ class ExportAdmin(newman.NewmanModelAdmin):
     suggest_fields = {
         'category': ('__unicode__', 'title', 'slug',),
     }
+
+    def get_urls(self):
+
+        info = self.model._meta.app_label, self.model._meta.module_name
+
+        urlpatterns = patterns('',
+            url(r'^timeline/$',
+                self.timeline_changelist_view,
+                name='%s_%s_suggest' % info),
+        )
+        urlpatterns += super(ExportAdmin, self).get_urls()
+        return urlpatterns
+
+    def timeline_changelist_view(self, request, extra_context=None):
+        # TODO: continue here
+        pass
 
 class ExportMetaAdmin(newman.NewmanModelAdmin):
     inlines = (ExportPositionInlineAdmin,)
@@ -61,7 +78,7 @@ class MetaInlineForm(modelforms.ModelForm):
             new_object = True
 
         self.assign_init_field(
-            'position_id', 
+            'position_id',
             HiddenIntegerField(initial=id_initial, label=u'', required=False)
         )
         self.assign_init_field(
@@ -73,7 +90,7 @@ class MetaInlineForm(modelforms.ModelForm):
             DateTimeField(initial=to_initial, label=_('Visible To'), widget=widgets.DateTimeWidget, required=False)
         )
         self.assign_init_field(
-            'export', 
+            'export',
             modelforms.ModelChoiceField(export_qs, initial=export_initial, label=_('Export'), show_hidden_initial=True)
         )
 
@@ -122,12 +139,12 @@ class MetaInlineForm(modelforms.ModelForm):
         def save_them():
             export = models.Export.objects.get(pk=int(self.cleaned_data['export']))
             positions = models.ExportPosition.objects.filter(
-                object=self.instance, 
+                object=self.instance,
                 export=export
             )
             if not self.cleaned_data['position_id']:
                 position = models.ExportPosition(
-                    object=self.instance, 
+                    object=self.instance,
                 )
             else:
                 pos_id = int(self.cleaned_data['position_id'])
