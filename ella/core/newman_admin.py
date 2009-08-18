@@ -15,6 +15,7 @@ from django.conf import settings
 from ella.core.models import Author, Source, Category, Listing, HitCount, Placement, Related, Publishable
 from ella.core.models.publishable import PUBLISH_FROM_WHEN_EMPTY
 from ella import newman
+from ella.comments.models import Comment
 from ella.newman import options, fields
 from ella.newman.filterspecs import CustomFilterSpec, NewmanSiteFilter
 
@@ -412,16 +413,14 @@ class PublishableAdmin(newman.NewmanModelAdmin):
     fe_link.allow_tags = True
 
     def comment_links(self, obj):
-        block = '<a href="%s">%s</a>' % (reverse('newman:block_comment', args=(obj.content_type_id, obj.id)), ugettext('block'))
-        delete = '<a href="%s">%s</a>' % (reverse('newman:delete_related_comments', args=(obj.content_type_id, obj.id)), ugettext('delete'))
-        return mark_safe('<ul><li>%s</li><li>%s</li></ul>' % (block, delete))
+        if Comment._meta.installed:
+            block = '<a href="%s">%s</a>' % (reverse('newman:block_comment', args=(obj.content_type_id, obj.id)), ugettext('block'))
+            delete = '<a href="%s">%s</a>' % (reverse('newman:delete_related_comments', args=(obj.content_type_id, obj.id)), ugettext('delete'))
+            return mark_safe('<ul><li>%s</li><li>%s</li></ul>' % (block, delete))
+        else:
+            return 'comments not installed'
     comment_links.short_description = _('Comment options')
     comment_links.allow_tags = True
-
-    def deletecomment_link(self, obj):
-        return mark_safe('<a href="%s">%s</a>' % (reverse('newman:block_comment', args=(obj.content_type_id, obj.id)), ugettext('Delete comments')))
-    deletecomment_link.short_description = _('Delete comments')
-    deletecomment_link.allow_tags = True
 
     def publish_from_nice(self, obj):
         span_str = '<span class="%s">%s</span>'
