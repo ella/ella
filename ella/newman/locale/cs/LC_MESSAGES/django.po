@@ -7,9 +7,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ella.newman (admin-ng)\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-01 09:56+0200\n"
-"PO-Revision-Date: 2009-08-01 09:57+0100\n"
-"Last-Translator: Vitek Pliska <whit@jizak.cz>\n"
+"POT-Creation-Date: 2009-08-18 14:38+0200\n"
+"PO-Revision-Date: 2009-08-18 14:40+0100\n"
+"Last-Translator: Vitek pliska <whit@jizak.cz>\n"
 "Language-Team: Ella <ella.project@gmail.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -27,7 +27,7 @@ msgstr ""
 
 #: actions.py:67
 msgid "Are you sure?"
-msgstr ""
+msgstr "Jsi si jist/á?"
 
 #: actions.py:92
 #, python-format
@@ -347,28 +347,24 @@ msgstr "Předvolba %s byla smazána."
 msgid "Database error"
 msgstr "Chyba databáze"
 
-#: options.py:671
+#: options.py:683
 msgid "Please correct errors in form"
 msgstr "Prosím opravte chyby ve formuláři"
 
-#: options.py:720
-#: options.py:776
+#: options.py:724
+#: options.py:781
 msgid "This view is designed for saving data only, thus POST method is required."
 msgstr ""
 
-#: options.py:728
+#: options.py:732
 #, python-format
 msgid "The %(name)s \"%(obj)s\" was changed successfully."
 msgstr ""
 
-#: options.py:740
-#: options.py:789
+#: options.py:744
+#: options.py:794
 msgid "This view is designed for viewing form, thus GET method is required."
 msgstr ""
-
-#: options.py:769
-msgid "Object was deleted."
-msgstr "Objekt byl smazán."
 
 #: sites.py:142
 msgid "Please enter a correct username and password. Note that both fields are case-sensitive."
@@ -635,7 +631,7 @@ msgstr ""
 #: templates/newman/change_form.html:23
 #: templates/newman/newman-index.html:98
 #: templates/newman/edit_inline/gallery_item.html:20
-#: templates/newman/edit_inline/poll_question.html:106
+#: templates/newman/edit_inline/poll_question.html:122
 #: templates/newman/edit_inline/stacked.html:12
 #: templates/newman/edit_inline/tabular.html:32
 msgid "View on site"
@@ -648,17 +644,21 @@ msgstr "Kategorie filtrovány. Klikněte pro změnu."
 
 #: templates/newman/change_list.html:26
 #: templates/newman/change_list.html:28
+#: templates/newman/astrology/prognosis/change_list.html:8
+#: templates/newman/astrology/prognosis/change_list.html:10
 #: templates/newman/newman/categoryuserrole/change_list.html:8
 #: templates/newman/newman/categoryuserrole/change_list.html:10
 msgid "Filters"
 msgstr "Filtry"
 
 #: templates/newman/change_list.html:26
+#: templates/newman/astrology/prognosis/change_list.html:8
 #: templates/newman/newman/categoryuserrole/change_list.html:8
 msgid "on!"
 msgstr "zap."
 
 #: templates/newman/change_list.html:42
+#: templates/newman/astrology/prognosis/change_list.html:25
 #: templates/newman/newman/categoryuserrole/change_list.html:24
 #, python-format
 msgid "Add %(name)s"
@@ -728,11 +728,11 @@ msgstr "Kalendář"
 
 #: templates/newman/newman-index.html:20
 msgid "This month"
-msgstr ""
+msgstr "Tento měsíc"
 
 #: templates/newman/newman-index.html:21
 msgid "This year"
-msgstr ""
+msgstr "Tento rok"
 
 #: templates/newman/newman-index.html:28
 msgid "Quick Settings"
@@ -786,7 +786,7 @@ msgstr "Publikovat od"
 #: templates/newman/edit_inline/placement.html:35
 #: templates/newman/positions/change_list.html:12
 msgid "Category"
-msgstr ""
+msgstr "Kategorie"
 
 #: templates/newman/newman-index.html:114
 msgid "None available"
@@ -794,7 +794,7 @@ msgstr ""
 
 #: templates/newman/object_history.html:6
 msgid "Date/time"
-msgstr ""
+msgstr "Datum/čas"
 
 #: templates/newman/object_history.html:8
 msgid "Action"
@@ -807,6 +807,11 @@ msgstr ""
 #: templates/newman/object_history.html:22
 msgid "This object doesn't have a change history. It probably wasn't added via this admin site."
 msgstr ""
+
+#: templates/newman/astrology/prognosis/change_list.html:17
+#: templates/newman/newman/categoryuserrole/change_list.html:17
+msgid "Refresh"
+msgstr "Obnovit"
 
 #: templates/newman/chunks/timepicker.html:2
 msgid "Now"
@@ -839,7 +844,7 @@ msgid "Choice text"
 msgstr ""
 
 #: templates/newman/edit_inline/poll_question.html:40
-#: templates/newman/widget/poll_choices_custom.html:36
+#: templates/newman/widget/poll_choices_custom.html:35
 msgid "Points"
 msgstr ""
 
@@ -848,17 +853,23 @@ msgstr ""
 msgid "Votes"
 msgstr "Hlasy"
 
-#: templates/newman/edit_inline/poll_question.html:90
+#: templates/newman/edit_inline/poll_question.html:89
+#: templates/newman/edit_inline/poll_question.html:101
+msgid "Options"
+msgstr "Volby"
+
+#: templates/newman/edit_inline/poll_question.html:98
 msgid "Click to edit question."
 msgstr "Kliknutím změňte otázku"
 
 #: templates/newman/edit_inline/tabular.html:21
 msgid "Delete?"
-msgstr ""
+msgstr "Smazat?"
 
-#: templates/newman/newman/categoryuserrole/change_list.html:17
-msgid "Refresh"
-msgstr "Obnovit"
+#: templates/newman/exports/timeline.html:5
+#: templates/newman/exports/export/change_list.html:4
+msgid "Timeline view"
+msgstr "Časová osa"
 
 #: templates/newman/positions/multi_change_form.html:9
 msgid "Categories"
@@ -926,6 +937,10 @@ msgstr ""
 msgid "Click to edit option"
 msgstr "Změnit odpověď"
 
+#: templates/newman/widget/poll_choices_custom.html:38
+msgid "Mark as correct"
+msgstr ""
+
 #: templates/page/404.html:6
 #: templates/page/404.html.py:12
 msgid "Page not found"
@@ -971,6 +986,8 @@ msgstr ""
 msgid "Change my password"
 msgstr ""
 
+#~ msgid "Object was deleted."
+#~ msgstr "Objekt byl smazán."
 #~ msgid "You cannot edit uploaded photo."
 #~ msgstr "Není možné upravovat uložené foto."
 #~ msgid "Your Recent Actions"
