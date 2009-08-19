@@ -8,6 +8,7 @@ from django.template.defaultfilters import slugify
 
 from ella.core.models import Category, Listing, Placement, Author, Publishable
 from ella.articles.models import Article
+from ella.photos.models import Format
 from ella.exports.models import Export, ExportMeta, ExportPosition
 from ella.exports.models import UnexportableException
 
@@ -155,19 +156,29 @@ class TestExport(DatabaseTestCase):
         )
 
         # Exports
+        self.photo_format = Format.objects.create(
+            name='cucorietka',
+            max_width=80,
+            max_height=66,
+            flexible_height=False,
+            stretch=False,
+            nocrop=True,
+        )
+        self.photo_format.sites.add(self.site)
+        self.photo_format.save()
         self.exportA = Export.objects.create(
             category=self.categoryH,
             title='hotentot',
             slug='hotentot',
             max_visible_items=2,
-            photo_format_id=0
+            photo_format=self.photo_format
         )
         self.export_position_overrides = Export.objects.create(
             category=self.categoryI,
             title='export for testing position overrides',
             slug='export-for-testing-position-overrides',
             max_visible_items=3,
-            photo_format_id=0
+            photo_format=self.photo_format
         )
         self.export_metaA = ExportMeta.objects.create(
             publishable=self.publishableC,
