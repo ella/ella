@@ -22,9 +22,12 @@
                 ;;; carp('No string representation of selected object received.');
                 return false;
             }
+            
+            // The form could have been removed and re-loaded
             if ($(inp).closest('body').length == 0) inp = document.getElementById(inp.id);
             
             GenericSuggestLib.insert_value(id, str, inp);
+            delete input;
         });
         return false;
     });
