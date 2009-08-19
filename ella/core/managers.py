@@ -141,6 +141,7 @@ class ListingManager(models.Manager):
             count - number of objects to output, defaults to 10
             offset - starting with object number... 1-based
             mods - list of Models, if empty, object from all models are included
+            [now] - datetime used instead of default datetime.now() value
             **kwargs - rest of the parameter are passed to the queryset unchanged
         """
         # TODO try to write  SQL (.extra())
@@ -151,6 +152,8 @@ class ListingManager(models.Manager):
             return []
 
         now = datetime.now()
+        if 'now' in kwargs:
+            now = kwargs.pop('now')
         qset = self.get_queryset(category, children, mods, content_types, **kwargs)
 
         # listings with active priority override
