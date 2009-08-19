@@ -36,7 +36,7 @@ class ExportManager(models.Manager):
         exports = Export.objects.filter(slug=slug)
         if not exports:
             return list()
-        return self.get_items_for_category(use_export=exports[0])
+        return self.get_items_for_category(export=exports[0])
     
     def get_items_for_category(self, category=None, export=None):
         """
@@ -55,11 +55,11 @@ class ExportManager(models.Manager):
         POSITION_IS_NOT_OVERLOADED
         use_export = None
         use_category = category
-        if not use_export:
+        if not export:
             exports = Export.objects.filter(category=use_category)
         else:
             exports = (export,)
-            use_category = use_export.category
+            use_category = export.category
         if exports:
             use_export = exports[0]
             # Find fitting ExportPositions
