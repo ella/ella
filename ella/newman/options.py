@@ -393,14 +393,15 @@ class NewmanModelAdmin(XModelAdmin):
         ct = ContentType.objects.get_for_model(self.model)
         # persistent filter for non-popupped changelists only
         key = 'filter__%s__%s' % (ct.app_label, ct.model)
-        if req_path.find('?') > 0 and req_path.find('pop') < 0:
-            url_args = req_path.split('?', 1)[1]
-            utils.set_user_config_db(request.user, key, url_args)
-        else:
-            user_filter = utils.get_user_config(request.user, key)
-            if user_filter:
-                redirect_to = '%s?%s' % (request.path, user_filter)
-                return utils.JsonResponseRedirect(redirect_to)
+        if req_path.find('pop') < 0:
+            if req_path.find('?') > 0:
+                url_args = req_path.split('?', 1)[1]
+                utils.set_user_config_db(request.user, key, url_args)
+            else:
+                user_filter = utils.get_user_config(request.user, key)
+                if user_filter:
+                    redirect_to = '%s?%s' % (request.path, user_filter)
+                    return utils.JsonResponseRedirect(redirect_to)
 
         context['is_filtered'] = context['cl'].is_filtered()
         context['is_user_category_filtered'] = utils.is_user_category_filtered( self.queryset(request) )
@@ -683,15 +684,7 @@ class NewmanModelAdmin(XModelAdmin):
         return utils.JsonResponse(_('Please correct errors in form'), errors=error_list, status=STATUS_FORM_ERROR)
 
     def change_view_process_context(self, request, context, object_id):
-#        # dynamic heelp messages
-#        help_qs = get_cached_list(AdminHelpItem, ct=self.model_content_type, lang=settings.LANGUAGE_CODE)
         form  = context['raw_form']
-#        for msg in help_qs:
-#            try:
-#                form.fields[msg.field].hint_text = msg.short
-#                form.fields[msg.field].help_text = msg.long
-#            except KeyError:
-#                log.warning('Cannot assign help message. Form field does not exist: form.fields[%s].' % msg.field)
 
         # raw forms for JS manipulations
         raw_frm_all = {

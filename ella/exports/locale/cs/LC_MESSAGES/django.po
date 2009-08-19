@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ella-exports\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-07-30 11:12+0200\n"
+"POT-Creation-Date: 2009-08-18 13:04+0200\n"
 "PO-Revision-Date: 2009-07-30 10:46+0200\n"
 "Last-Translator: Zwei Kasselbuntes <jonas.fiala@centrumholdings.com>\n"
 "Language-Team: Ellagruppe <ella.project@gmail.com>\n"
@@ -15,50 +15,74 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 
-#: models.py:9
+#: models.py:19
 msgid "Category"
 msgstr "Kategorie"
 
-#: models.py:13
-msgid "Export"
-msgstr "Export"
-
-#: models.py:14
-msgid "Exports"
-msgstr "Exporty"
-
-#: models.py:22
-msgid "Publishable object"
-msgstr "Publikovatelný objekt"
-
-#: models.py:23
+#: models.py:20 models.py:50
 msgid "Title"
 msgstr "Název"
 
-#: models.py:24
+#: models.py:21
+msgid "Slug"
+msgstr ""
+
+#: models.py:22
+msgid "Maximum Visible Items"
+msgstr "Počet viditelných pozic"
+
+#: models.py:23
+msgid "Photo format"
+msgstr "Formát fotky"
+
+#: models.py:40 models.py:89 newman_admin.py:44 newman_admin.py:78
+msgid "Export"
+msgstr "Export"
+
+#: models.py:41
+msgid "Exports"
+msgstr "Exporty"
+
+#: models.py:49
+msgid "Publishable object"
+msgstr "Publikovatelný objekt"
+
+#: models.py:51
 msgid "Photo"
 msgstr "Fotka"
 
-#: models.py:25
+#: models.py:52
 msgid "Description"
 msgstr "Popis"
 
-#: models.py:28
+#: models.py:55
 msgid "Redefined export"
 msgstr "Předefinovaný export"
 
-#: models.py:36 models.py:43
+#: models.py:79 models.py:88
 msgid "Export meta"
-msgstr "Položka exportu"
+msgstr "Předefinice exportu"
 
-#: models.py:37
+#: models.py:80
 msgid "Export metas"
-msgstr "Položky exportu"
+msgstr "Předefinice exportů"
 
-#: models.py:46
+#: models.py:101
 msgid "Export Position"
 msgstr "Exportní pozice"
 
-#: models.py:47
+#: models.py:102
 msgid "Export Positions"
 msgstr "Exportní pozice"
+
+#: newman_admin.py:30
+msgid "Export meta options"
+msgstr "Nepovinné předefinování titulku, popisu, fotky"
+
+#: newman_admin.py:42 newman_admin.py:70
+msgid "Visible From"
+msgstr "Viditelné od"
+
+#: newman_admin.py:43 newman_admin.py:74
+msgid "Visible To"
+msgstr "Viditelné do"

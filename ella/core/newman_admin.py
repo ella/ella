@@ -4,7 +4,6 @@ import datetime, time
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.forms import models as modelforms
 from django.forms.fields import DateTimeField
-from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 from django.forms.util import ValidationError
 from django.forms.models import save_instance
@@ -16,6 +15,7 @@ from django.conf import settings
 from ella.core.models import Author, Source, Category, Listing, HitCount, Placement, Related, Publishable
 from ella.core.models.publishable import PUBLISH_FROM_WHEN_EMPTY
 from ella import newman
+from ella.comments.models import Comment
 from ella.newman import options, fields
 from ella.newman.filterspecs import CustomFilterSpec, NewmanSiteFilter
 
@@ -376,7 +376,9 @@ class PublishableAdmin(newman.NewmanModelAdmin):
     """ Default admin options for all publishables """
 
     exclude = ('content_type',)
-    list_display = ('admin_link', 'category', 'photo_thumbnail', 'publish_from_nice', 'placement_link', 'site_icon', 'fe_link')
+    list_display = ('admin_link', 'category', 'photo_thumbnail', 'publish_from_nice', 'placement_link', 'site_icon', 'fe_link',)
+    if Comment._meta.installed:
+        list_display += ('comment_links',)
     list_filter = ('category', 'content_type')
     unbound_list_filter = (NewmanSiteFilter, PublishFromFilter, IsPublishedFilter,)
     search_fields = ('title', 'description', 'slug', 'authors__name', 'authors__slug',) # FIXME: 'tags__tag__name',)
@@ -411,6 +413,16 @@ class PublishableAdmin(newman.NewmanModelAdmin):
             return '---'
     fe_link.short_description = _('WWW')
     fe_link.allow_tags = True
+
+    def comment_links(self, obj):
+        if Comment._meta.installed:
+            block = '<a href="%s">%s</a>' % (reverse('newman:block_comment', args=(obj.content_type_id, obj.id)), ugettext('block'))
+            delete = '<a href="%s">%s</a>' % (reverse('newman:delete_related_comments', args=(obj.content_type_id, obj.id)), ugettext('delete'))
+            return mark_safe('<ul><li>%s</li><li>%s</li></ul>' % (block, delete))
+        else:
+            return 'comments not installed'
+    comment_links.short_description = _('Comment options')
+    comment_links.allow_tags = True
 
     def publish_from_nice(self, obj):
         span_str = '<span class="%s">%s</span>'

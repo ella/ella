@@ -190,6 +190,7 @@ a.icn.saveall { background-image: url(../ico/16/save_all.png); }
 a.icn.edit { background-image: url(../ico/16/edit.png); }
 a.icn.help { background-image: url(../ico/16/help.png); }
 a.icn.idea { background-image: url(../ico/16/idea.png); }
+a.icn.timeline { background-image: url(../ico/16/7days.png); }
 
 a.btn.combo {
     padding-right: 18px; padding-left: 4px;
