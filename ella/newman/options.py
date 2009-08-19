@@ -393,14 +393,15 @@ class NewmanModelAdmin(XModelAdmin):
         ct = ContentType.objects.get_for_model(self.model)
         # persistent filter for non-popupped changelists only
         key = 'filter__%s__%s' % (ct.app_label, ct.model)
-        if req_path.find('?') > 0 and req_path.find('pop') < 0:
-            url_args = req_path.split('?', 1)[1]
-            utils.set_user_config_db(request.user, key, url_args)
-        else:
-            user_filter = utils.get_user_config(request.user, key)
-            if user_filter:
-                redirect_to = '%s?%s' % (request.path, user_filter)
-                return utils.JsonResponseRedirect(redirect_to)
+        if req_path.find('pop') < 0:
+            if req_path.find('?') > 0:
+                url_args = req_path.split('?', 1)[1]
+                utils.set_user_config_db(request.user, key, url_args)
+            else:
+                user_filter = utils.get_user_config(request.user, key)
+                if user_filter:
+                    redirect_to = '%s?%s' % (request.path, user_filter)
+                    return utils.JsonResponseRedirect(redirect_to)
 
         context['is_filtered'] = context['cl'].is_filtered()
         context['is_user_category_filtered'] = utils.is_user_category_filtered( self.queryset(request) )
