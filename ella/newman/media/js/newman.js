@@ -1,7 +1,7 @@
 var LF = 10, CR = 13;
 
 // Set the default target for Kobayashi to #content
-ContentByHashLib.DEFAULT_TARGET = 'content';
+Kobayashi.DEFAULT_TARGET = 'content';
 
 // Set the base URL for #content
 BASES.content = '/nm/';
@@ -101,7 +101,7 @@ $( function() {
 
 //// Homepage initialization
 
-$(function(){ContentByHashLib.reload_content('content');});
+$(function(){Kobayashi.reload_content('content');});
 
 //// Lock window when media are being loaded
 
@@ -576,11 +576,11 @@ $( function() {
             if ($form.is('.change-form')) {
                 AjaxFormLib.save_preset($form, {title: '* '+gettext('crash save'), msg: gettext('Form content backed up')});
             }
-            var id = ContentByHashLib.closest_loaded( $form.get(0) ).id;
+            var id = Kobayashi.closest_loaded( $form.get(0) ).id;
             var address = $form.hasClass('js-dyn-adr')
                 ? get_adr($form.attr('action'))
                 :         $form.attr('action');
-            ContentByHashLib.inject_error_message({
+            Kobayashi.inject_error_message({
                 target_id: id,
                 xhr: xhr,
                 address: address
@@ -673,7 +673,7 @@ $( function() {
     // Close filters button
     $('#filters a.cancel').live('click', function(evt) {
         if (evt.button != 0) return;
-        ContentByHashLib.unload_content('filters');
+        Kobayashi.unload_content('filters');
     });
     
     // Re-initialization of third party libraries
@@ -731,12 +731,12 @@ $( function() {
         var search_terms = $input.val();
         if (!search_terms) return;  // Nothing to search for
         var adr_term = '&q=' + search_terms;
-        var loaded = ContentByHashLib.closest_loaded( $input.get(0) );
+        var loaded = Kobayashi.closest_loaded( $input.get(0) );
         if (loaded.id == 'content') {
             adr(adr_term);
         }
         else {
-            ContentByHashLib.simple_load( loaded.id + '::' + adr_term );
+            Kobayashi.simple_load( loaded.id + '::' + adr_term );
         }
         return false;
     }
@@ -855,7 +855,7 @@ PostsaveActionTable.prototype = {
                     popped.onsave(popped,this);
                 if ($.isFunction(popped.onreturn)) {
                     var action_table_obj = this;
-                    $('#'+ContentByHashLib.DEFAULT_TARGET).one('content_added', function(evt) {
+                    $('#'+Kobayashi.DEFAULT_TARGET).one('content_added', function(evt) {
                         popped.onreturn(popped,action_table_obj);
                     });
                 }
@@ -869,7 +869,7 @@ PostsaveActionTable.prototype = {
             return_to = '../';
         }
         if (adr(return_to, {just_get: 'hash'}) == location.hash) {
-            ContentByHashLib.reload_content(ContentByHashLib.DEFAULT_TARGET);
+            Kobayashi.reload_content(Kobayashi.DEFAULT_TARGET);
         }
         else {
             adr(return_to);
@@ -877,7 +877,7 @@ PostsaveActionTable.prototype = {
     },
     _addanother_: function() {
         if ( /add\/$/.test(get_hashadr('')) ) {
-            ContentByHashLib.reload_content('content');
+            Kobayashi.reload_content('content');
             scrollTo(0,0);
         }
         else {
@@ -897,7 +897,7 @@ PostsaveActionTable.prototype = {
             adr('../'+oid+'/');
         }
         else {
-            ContentByHashLib.reload_content('content');
+            Kobayashi.reload_content('content');
         }
     },
     _saveasnew_: function() {
@@ -968,7 +968,7 @@ function save_change_form_success(text_data) {
     
     show_ok(response_msg);
     action_table.run(action);
-    ContentByHashLib.unload_content('history');
+    Kobayashi.unload_content('history');
 }
 
 function changelist_batch_success(response_text) {
@@ -980,7 +980,7 @@ function changelist_batch_success(response_text) {
     $('#content').hide().before($dialog);
 }
 function batch_delete_confirm_complete() {
-    ContentByHashLib.reload_content('content');
+    Kobayashi.reload_content('content');
     $('#confirmation-wrapper').remove();
     $('#content').show();
 }
@@ -1117,7 +1117,7 @@ $( function() {
         }
         var address = '/' + ct_arr[1] + '/' + ct_arr[2] + '/?pop';
         
-        ContentByHashLib.load_content({
+        Kobayashi.load_content({
             address: address,
             target_id: 'overlay-content',
             selection_callback: selection_callback/*,
@@ -1131,7 +1131,7 @@ $( function() {
     $('.overlay-closebutton').live('click', function() {
         $(this).closest('.overlay').css({zIndex:5}).hide()
         .find('.overlay-content').removeData('selection_callback');
-        ContentByHashLib.unload_content('overlay-content');
+        Kobayashi.unload_content('overlay-content');
     });
     function init_overlay_content(evt, extras) {
         var $target = $(evt.target);
@@ -1150,7 +1150,7 @@ $( function() {
             try {
                 ($target.data('selection_callback'))(clicked_id, {str: $(evt.target).text()});
             } catch(e) { carp('Failed running overlay callback', e); }
-            ContentByHashLib.unload_content('overlay-content');
+            Kobayashi.unload_content('overlay-content');
             $('#changelist-overlay').css({zIndex:5}).hide();
             $target.removeData('selection_callback');
             return false;

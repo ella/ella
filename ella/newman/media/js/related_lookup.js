@@ -149,7 +149,7 @@
         NewmanLib.ADR_STACK.push( {
             from: get_hashadr(''),
             to: get_hashadr($(this).attr('href')),
-            selection_callback: $(ContentByHashLib.closest_loaded(this).container).data('selection_callback'),
+            selection_callback: $(Kobayashi.closest_loaded(this).container).data('selection_callback'),
             form_data: JSON.stringify({ data: $('.change-form').serializeArray() }),
             onsave: function(popped, action_table_obj) {
                 if (!action_table_obj.vars.object_id) {
@@ -166,7 +166,7 @@
             }
         } );
         if (adr( $(this).attr('href'), {just_get: 'hash'} ) == location.hash) {
-            ContentByHashLib.reload_content(ContentByHashLib.DEFAULT_TARGET);
+            Kobayashi.reload_content(Kobayashi.DEFAULT_TARGET);
         }
         else {
             adr( $(this).attr('href') );
