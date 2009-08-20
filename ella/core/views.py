@@ -82,18 +82,18 @@ class CategoryDetail(EllaCoreView):
         if not year:
             now = datetime.now()
             try:
-                categories = Category.objects.filter(site__id=settings.SITE_ID, tree_path__startswith=category.tree_path)
-                year = Listing.objects.filter(category__in=categories, publish_from__lte=now)[0].publish_from.year
+                year = Listing.objects.filter(
+                        category__site__id=settings.SITE_ID,
+                        category__tree_path__startswith=category.tree_path,
+                        publish_from__lte=now
+                    ).values('publish_from')[0]['publish_from'].year
             except:
                 year = now.year
         return year
 
 
-    def get_context(self, request, category=None):
-        if category:
-            cat = get_cached_object_or_404(Category, tree_path=category, site__id=settings.SITE_ID)
-        else:
-            cat = get_cached_object_or_404(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
+    def get_context(self, request, category=''):
+        cat = get_cached_object_or_404(Category, tree_path=category, site__id=settings.SITE_ID)
         context = {
                     'category' : cat,
                     'is_homepage': not bool(category),
@@ -142,10 +142,7 @@ class ObjectDetail(EllaCoreView):
     def get_context(self, request, category, content_type, slug, year, month, day):
         ct = get_content_type(content_type)
 
-        if category:
-            cat = get_cached_object_or_404(Category, tree_path=category, site__id=settings.SITE_ID)
-        else:
-            cat = get_cached_object_or_404(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
+        cat = get_cached_object_or_404(Category, tree_path=category, site__id=settings.SITE_ID)
 
         if year:
             placement = get_cached_object_or_404(Placement,
@@ -197,7 +194,7 @@ class ListContentType(EllaCoreView):
         - `Http404`: if the specified category or content_type does not exist or if the given date is malformed.
     """
     template_name = 'listing.html'
-    def get_context(self, request, category=None, year=None, month=None, day=None, content_type=None, paginate_by=20):
+    def get_context(self, request, category='', year=None, month=None, day=None, content_type=None, paginate_by=20):
         # pagination
         if 'p' in request.GET and request.GET['p'].isdigit():
             page_no = int(request.GET['p'])
@@ -224,13 +221,10 @@ class ListContentType(EllaCoreView):
                 raise Http404()
             kwa['publish_from__day'] = day
 
+        cat = get_cached_object_or_404(Category, tree_path=category, site__id=settings.SITE_ID)
+        kwa['category'] = cat
         if category:
-            cat = get_cached_object_or_404(Category, tree_path=category, site__id=settings.SITE_ID)
-            kwa['category'] = cat
             kwa['children'] = Listing.objects.ALL
-        else:
-            cat = get_cached_object_or_404(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
-            kwa['category'] = cat
 
         if content_type:
             ct = get_content_type(content_type)
@@ -349,7 +343,7 @@ def export(request, count, name='', content_type=None):
         t_list.append('page/export/%s.html' % name)
     t_list.append('page/export/banner.html')
 
-    cat = get_cached_object_or_404(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
+    cat = get_cached_object_or_404(Category, tree_path='', site__id=settings.SITE_ID)
     listing = Listing.objects.get_listing(count=count, category=cat)
     return render_to_response(
             t_list,
