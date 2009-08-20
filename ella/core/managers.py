@@ -111,7 +111,22 @@ class ListingManager(models.Manager):
         """
         self.filter(publish_to__lt=datetime.now()).delete()
 
+    def get_query_set(self, *args, **kwargs):
+        # get all the fields you typically need to render listing
+        qset = super(ListingManager, self).get_query_set(*args, **kwargs).select_related(
+                #'category', 
+                'placement',
+                'placement__category',
+                'placement__publishable',
+                'placement__publishable__category',
+                'placement__publishable__content_type'
+            )
+        return qset
+
     def get_queryset(self, category=None, children=NONE, mods=[], content_types=[], **kwargs):
+        """
+        FIXME - name this better!
+        """
         now = datetime.now()
         qset = self.filter(publish_from__lte=now, **kwargs)
 
