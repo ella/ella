@@ -313,18 +313,17 @@ class IsPublishedFilter(CustomFilterSpec):
                 return param
         return ''
 
-    def filter_func(fspec):
+    def filter_func(self):
         # nepublikovany = nemaji placement (datum 3000) ci maji placement v budoucnu
-        # ?placement__publish_from__exact=2008-10-10
-        lookup_var_not_published = '%s__gt' % fspec.lookup_var
-        lookup_var_published = '%s__lte' % fspec.lookup_var
-        when = time.strftime('%Y-%m-%d', PUBLISH_FROM_WHEN_EMPTY.timetuple())
+        # ?publish_from__exact=2008-10-10
+        lookup_var_not_published = '%s__gt' % self.lookup_var
+        lookup_var_published = '%s__lte' % self.lookup_var
         now = time.strftime('%Y-%m-%d')
         link = ( _('No'), {lookup_var_not_published: now})
-        fspec.links.append(link)
+        self.links.append(link)
         link = ( _('Yes'), {lookup_var_published: now})
-        fspec.links.append(link)
-        fspec.remove_from_querystring = [lookup_var_published, lookup_var_not_published]
+        self.links.append(link)
+        self.remove_from_querystring = [lookup_var_published, lookup_var_not_published]
         return True
 
 class PublishFromFilter(CustomFilterSpec):
@@ -342,7 +341,7 @@ class PublishFromFilter(CustomFilterSpec):
         ]
         return out
 
-    def filter_func(fspec):
+    def filter_func(self):
         # SELECT created FROM qs._meta.dbtable  GROUP BY created
         #qs = fspec.model_admin.queryset(fspec.request)
         #dates =  qs.dates(fspec.field_path, 'day', 'DESC')[:365]
@@ -354,12 +353,12 @@ class PublishFromFilter(CustomFilterSpec):
         dates = qs.dates('publish_from', 'day', 'DESC')
         for date in dates:
             lookup_dict = dict()
-            lookup_dict['%s__day' % fspec.published_from_field_path] = date.day
-            lookup_dict['%s__month' % fspec.published_from_field_path] = date.month
-            lookup_dict['%s__year' % fspec.published_from_field_path] = date.year
+            lookup_dict['%s__day' % self.published_from_field_path] = date.day
+            lookup_dict['%s__month' % self.published_from_field_path] = date.month
+            lookup_dict['%s__year' % self.published_from_field_path] = date.year
             link_text = '%d. %d. %d' % (date.day, date.month, date.year)
             link = ( link_text, lookup_dict)
-            fspec.links.append(link)
+            self.links.append(link)
         return True
 
 class PlacementAdmin(newman.NewmanModelAdmin):
