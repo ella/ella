@@ -4,7 +4,6 @@ from django.conf.urls.defaults import patterns, url
 from ella import newman
 
 from ella.photos.models import FormatedPhoto, Format, Photo
-from ella.photos.models import PHOTO_MIN_WIDTH, PHOTO_MIN_HEIGHT
 from ella.newman.utils import JsonResponse, JsonResponseError
 from ella.newman.config import STATUS_OBJECT_NOT_FOUND
 from ella.newman.filterspecs import CustomFilterSpec
