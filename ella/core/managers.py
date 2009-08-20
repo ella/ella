@@ -114,7 +114,6 @@ class ListingManager(models.Manager):
     def get_query_set(self, *args, **kwargs):
         # get all the fields you typically need to render listing
         qset = super(ListingManager, self).get_query_set(*args, **kwargs).select_related(
-                #'category', 
                 'placement',
                 'placement__category',
                 'placement__publishable',
@@ -175,6 +174,15 @@ class ListingManager(models.Manager):
             now = kwargs.pop('now')
         qset = self.get_queryset(category, children, mods, content_types, **kwargs)
 
+        # templates are 1-based, compensate
+        offset -= 1
+        limit = offset + count
+
+        # only use priorities if somebody wants them
+        if not getattr(settings, 'USE_PRIORITIES', False):
+            return qset[offset:limit]
+
+
         # listings with active priority override
         active = models.Q(
                     priority_value__isnull=False,
@@ -194,10 +202,6 @@ class ListingManager(models.Manager):
 
         out = []
 
-        # templates are 1-based, compensate
-        offset -= 1
-        limit = offset + count
-
         # take out not unwanted objects
         if unique:
             listed_targets = unique.copy()
@@ -206,7 +210,7 @@ class ListingManager(models.Manager):
 
         # iterate through qsets until we have enough objects
         for q in qsets:
-            data = q
+            data = q[:limit]
             if data:
                 for l in data:
                     tgt = l.placement_id
