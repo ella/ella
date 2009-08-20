@@ -667,7 +667,12 @@ $( function() {
                 $(document).one('media_loaded', function(){popped.selection_callback(popped.oid,{str: popped.str});});
             }
         } );
-        adr( $(this).attr('href') );
+        if (adr( $(this).attr('href'), {just_get: 'hash'} ) == location.hash) {
+            ContentByHashLib.reload_content(ContentByHashLib.DEFAULT_TARGET);
+        }
+        else {
+            adr( $(this).attr('href') );
+        }
     });
     
     // Set up returning to publishable changelist when coming to change form from it
@@ -894,7 +899,12 @@ PostsaveActionTable.prototype = {
         else {
             return_to = '../';
         }
-        adr(return_to);
+        if (adr(return_to, {just_get: 'hash'}) == location.hash) {
+            ContentByHashLib.reload_content(ContentByHashLib.DEFAULT_TARGET);
+        }
+        else {
+            adr(return_to);
+        }
     },
     _addanother_: function() {
         if ( /add\/$/.test(get_hashadr('')) ) {
