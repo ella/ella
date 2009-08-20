@@ -91,6 +91,10 @@ def get_listings_key(func, self, category=None, count=10, offset=1, mods=[], con
     )
 
 class PlacementManager(models.Manager):
+    def get_query_set(self, *args, **kwargs):
+        qset = super(PlacementManager, self).get_query_set(*args, **kwargs).select_related('publishable')
+        return qset
+
     def get_static_placements(self, category):
         now = datetime.now()
         return self.filter(models.Q(publish_to__gt=now) | models.Q(publish_to__isnull=True),  publish_from__lt=now, category=category, static=True)

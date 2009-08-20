@@ -160,6 +160,10 @@ class ObjectDetail(EllaCoreView):
         else:
             placement = get_cached_object_or_404(Placement, category=cat, publishable__content_type=ct, slug=slug, static=True)
 
+        # save existing object to preserve memory and SQL
+        placement.category = cat
+        placement.publishable.content_type = ct
+
 
         if not (placement.is_active() or request.user.is_staff):
             # future placement, render if accessed by logged in staff member
