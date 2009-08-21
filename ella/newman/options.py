@@ -793,8 +793,18 @@ class NewmanModelAdmin(XModelAdmin):
         context = self.get_add_view_context(request, form_url)
         context.update(extra_context or {})
         if 'object_added' in context:
+            obj = context['object']
             msg = request.user.message_set.all()[0].message
-            return utils.JsonResponse(msg, {'id': context['object'].pk, 'title': context['object'].__unicode__(),})
+
+            if request.FILES and not request.is_ajax():
+                return_url = '%s#/%s/%s/' % (reverse('newman:index'), obj._meta.app_label, obj._meta.module_name)
+                if request.POST.get('_continue'):
+                    return_url += '%s/' % obj.pk
+                if request.POST.get('_addanother'):
+                    return_url += 'add/'
+                return HttpResponseRedirect(return_url)
+
+            return utils.JsonResponse(msg, {'id': obj.pk, 'title': obj.__unicode__(),})
         elif 'error_dict' in context:
             return self.json_error_response(request, context)
 
