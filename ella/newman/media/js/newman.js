@@ -407,6 +407,9 @@ $( function() {
                 $(this).val( $(this).val().replace(/ \D{2}$/, '') );
             } );
             $form.data('standard_submit', true);
+            if (button_name) {
+                $form.append('<input type="hidden" value="1" name="'+button_name+'" />');
+            }
             $form.submit();
             return true;
         }
