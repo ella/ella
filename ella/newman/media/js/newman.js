@@ -391,27 +391,28 @@ $( function() {
         if (!$form.jquery) $form = $($form);
         if ( ! validate($form) ) return false;
         
-        lock_window(gettext('Sending')+'...');
-        
         // Hack for file inputs
-/*        var has_files = false;
+        var has_files = false;
         $form.find(':file').each( function() {
-            if ( ($this).val() ) has_files = true;
+            if ( $(this).val() ) has_files = true;
         });
         if (has_files) {
             // Shave off the names from suggest-enhanced hidden inputs
             $form.find('input:hidden').each( function() {
                 if ($form.find( '#'+$(this).attr('id')+'_suggest' ).length == 0) return;
-*///                $(this).val( $(this).val().replace(/#.*/, '') );
-/*            });
+                $(this).val( $(this).val().replace(/#.*/, '') );
+            });
             // Shave off the days of week from date-time inputs
             $form.find('.vDateTimeInput,.vDateInput').each( function() {
                 $(this).val( $(this).val().replace(/ \D{2}$/, '') );
-            }
+            } );
+            $form.data('standard_submit', true);
             $form.submit();
-            return false;
+            return true;
         }
-*/        // End of hack for file inputs
+        // End of hack for file inputs
+        
+        lock_window(gettext('Sending')+'...');
         
         var action =  $form.attr('action');
         var method = ($form.attr('method') || 'POST').toUpperCase();
@@ -605,8 +606,7 @@ $( function() {
         if (evt.button != 0) return true;    // just interested in left button
         if ($(this).hasClass('js-noautosubmit')) return true;
         var $form = $(this).closest('.js-form');
-        ajax_submit($form, this.name);
-        return false;
+        return ajax_submit($form, this.name);
     });
     
     // Reset button
@@ -622,6 +622,7 @@ $( function() {
         $('.js-form')
         .unbind('submit.ajax_overload')
         .bind('submit.ajax_overload', function(evt) {
+            if ($(this).data('standard_submit')) return true;
             var name;
             function get_def(form) { return $(form).find('.def:first').attr('name'); }
             if (!evt.originalEvent) name = get_def(this);
@@ -636,8 +637,7 @@ $( function() {
                 // Event is defined but failed to figure out which button clicked
                 // -- leave the name empty.
             }
-            AjaxFormLib.ajax_submit( $(this), name );
-            return false;
+            return AjaxFormLib.ajax_submit( $(this), name );
         });
     }
     $(document).bind('content_added', overload_default_submit);

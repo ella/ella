@@ -1,4 +1,4 @@
-KOBAYASHI_VERSION = '2009-08-13';
+KOBAYASHI_VERSION = '2009-08-20';
 
 // Debugging tools
 ;;; function alert_dump(obj, name) {
