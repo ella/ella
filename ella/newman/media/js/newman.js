@@ -197,9 +197,9 @@ $(document).bind('media_loaded', unlock_window);
                 carp('restore_form: input #'+key+' not found');
                 continue;
             }
-            var val_esc = val.replace(/\W/g, '\\$1');
-            $inputs.filter(':checkbox,:radio').find('[value='+val_esc+']').attr({checked: 'checked'});
-            $inputs.filter('option[value='+val_esc+']').attr({selected: 'selected'});
+            var val_esc = val.replace(/(\W)/g, '\\$1');
+            $inputs.filter(':checkbox,:radio').filter('[value='+val_esc+']').attr({checked: 'checked'});
+            $inputs.find('option[value='+val_esc+']').attr({selected: 'selected'});
             $inputs.filter(':text,[type=hidden],textarea').eq(occ_no).val(val);
             
             used_times[ key ] = occ_no + 1;
