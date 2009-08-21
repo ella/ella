@@ -729,6 +729,10 @@ class NewmanModelAdmin(XModelAdmin):
         if type(context) != dict:
             obj = self.get_change_view_object(object_id)
             opts = obj._meta
+
+            if request.FILES and not request.is_ajax():
+                return HttpResponseRedirect('%s#/%s/%s/' % (reverse('newman:index'), opts.app_label, opts.module_name))
+
             return utils.JsonResponse(
                 _('The %(name)s "%(obj)s" was changed successfully.') % {'name': force_unicode(opts.verbose_name), 'obj': force_unicode(obj)},
                 {'id': obj.pk, 'title': obj.__unicode__(),},
