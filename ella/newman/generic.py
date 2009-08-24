@@ -78,7 +78,7 @@ class BaseGenericInlineFormSet(DJBaseGenericInlineFormSet):
         for form in self.initial_forms:
             change_perm = get_permission('change', form.instance)
             delete_perm = get_permission('delete', form.instance)
-            if self.can_delete and form.cleaned_data[DELETION_FIELD_NAME]:
+            if self.can_delete and hasattr(form, 'cleaned_data') and form.cleaned_data[DELETION_FIELD_NAME]:
                 if not has_object_permission(user, form.instance, delete_perm):
                     self._non_form_errors = _('Object deletion is not permitted.')
                     continue
