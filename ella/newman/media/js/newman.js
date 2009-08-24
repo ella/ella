@@ -25,6 +25,8 @@ function simple_offset(el) {
     return { left: l, top: t };
 }
 
+// workaround for jQuery's incomplete cloning of forms
+// (it doesn't copy textareas' contents and selected options)
 function clone_form($orig_form) {
     var $new_form = $orig_form.clone();
     var $orig_textareas = $orig_form.find('textarea');
@@ -48,6 +50,7 @@ function clone_form($orig_form) {
     return $new_form;
 }
 
+// Shows a modal window and disables its close button.
 function lock_window(msg) {
     if ( ! msg ) msg = gettext('Wait')+'...';
     
@@ -81,6 +84,7 @@ function get_html_chunk(tmpl, success) {
 }
 
 //// Layout adjustment
+// this is here to make the content scroll but not beneath the favicons
 
 $( function() {
     CONTAINER_TOP_OFFSET = 105;
@@ -284,6 +288,7 @@ $(document).bind('media_loaded', unlock_window);
             clearInterval(autosave_interval);
         }
         var $inputs = $('.change-form :input');
+        // start auto-saving when an input's value changes
         function onchange_autosave_handler() {
             $('.change-form :input').unbind('change', onchange_autosave_handler).unbind('keypress', onkeypress_autosave_handler);
             ;;; carp('.change-form changed -- setting up autosave interval');
@@ -299,6 +304,7 @@ $(document).bind('media_loaded', unlock_window);
                 save_preset($change_form, {id: draft_id});
             }, 60 * 1000 );
         }
+        // start auto-saving when typing occurs on the changeform
         function onkeypress_autosave_handler(evt) {
             var w = evt.which;
             var c = evt.keyCode;
@@ -501,6 +507,8 @@ $( function() {
     }
     AjaxFormLib.ajax_submit = ajax_submit;
     
+    // Handle error response from the server from a form submit event.
+    // In case of changeform and expected JSON response, renders the error messages.
     function ajax_submit_error(xhr) {
         var res;
         var $form = this._form;
@@ -1140,12 +1148,7 @@ $( function() {
         Kobayashi.load_content({
             address: address,
             target_id: 'overlay-content',
-            selection_callback: selection_callback/*,
-            success_callback: function() {
-                var xhr = this;
-                var $target = $('#'+xhr.original_options.target_id);
-                
-            }*/
+            selection_callback: selection_callback
         });
     };
     $('.overlay-closebutton').live('click', function() {
