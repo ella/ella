@@ -467,21 +467,28 @@ $( function() {
             url: url,
             type: method,
             data: data,
-            success:  function() {
-                try {
-                    success.apply(this, arguments);
-                } catch(e) {
-                    carp('Error processing form-send success:', e);
+            success:  function() { this.succeeded = true;  },
+            error:    function() { this.succeeded = false; },
+            complete: function(xhr) {
+                var redirect_to;
+                if (redirect_to = xhr.getResponseHeader('Redirect-To')) {
+                    var new_req = {};
+                    for (k in this) new_req[k] = this[k];
+                    new_req.url = redirect_to;
+                    new_req.redirect_to = redirect_to;
+                    $.ajax( new_req );
+                    return;
                 }
-            },
-            error:    function() {
-                try {
+                if (this.succeeded) { try {
+                    success.call(this, xhr.responseText, xhr);
+                } catch (e) {
+                    carp('Error processing form-send success:', e);
+                }}
+                else { try {
                     error.apply(this, arguments);
                 } catch(e) {
                     carp('Error processing form-send error:', e);
-                }
-            },
-            complete: function() {
+                }}
                 unlock_window();
             },
             _form: $form,
@@ -840,6 +847,16 @@ function show_ajax_success(response_text) {
     } catch (e) {
         message = gettext('Successfully sent');
         paste_code_into_debug( (response_text||'').replace(/\n(\s*\n)+/g, "\n"), 'Ajax success response' );
+    }
+    if (this.redirect_to) {
+        var literal_address;
+        if (this.redirect_to.substr(0, BASE_PATH.length) == BASE_PATH) {
+            literal_address = this.redirect_to.substr(BASE_PATH.length);
+        }
+        else {
+            literal_address = this.redirect_to;
+        }
+        adr(literal_address);
     }
     show_ok(message);
 }

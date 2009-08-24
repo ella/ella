@@ -28,15 +28,6 @@
             <input type="hidden" name="post" value="yes" />
             <a class="icn btn ok js-submit">{% trans "Yes, I'm sure" %}</a>
         </div>
-        <div class="js-form-metadata">
-            <input type="hidden" name="success" id="delete-confirmation-success" />
-            <script type="text/javascript">
-                $('#delete-confirmation-success').data('callback', function() {
-                    show_ajax_success.apply(this, arguments);
-                    adr(window.FORM_SAVE_RETURN_TO || '../../');
-                });
-            </script>
-        </div>
     </form>
 {% endif %}
 {% endblock %}
