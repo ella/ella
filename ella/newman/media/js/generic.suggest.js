@@ -151,7 +151,7 @@ GenericSuggestLib = {};
                 var ids = raw_ids.match(/\d+/g);
                 var $lis = $inputs.ul.find('li.suggest-selected-item');
                 var repres = $.map( $.makeArray($lis), function(n) {
-                    return $.trim( n.firstChild.data );
+                    return $.trim( n.firstChild.data ).replace(/,/g, '&#44;');
                 });
                 if (repres && ids && repres.length == ids.length) {
                     $lis.each(function(i) {
@@ -241,7 +241,7 @@ GenericSuggestLib = {};
         var repres = [];
         $inputs.ul.find('li.suggest-selected-item').each(function() {
             ids.push( $(this).data('item_id') );
-            repres.push( $.trim(this.firstChild.data) );
+            repres.push( $.trim(this.firstChild.data).replace(/,/g, '&#44;') );
         });
         if (!is_multiple($inputs.ul) && ids.length > 1) {
             //TODO: warning
