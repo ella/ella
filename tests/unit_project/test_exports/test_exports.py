@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from time import time, gmtime, localtime, strftime
+from time import time, gmtime, localtime, strftime, sleep
 from datetime import datetime
 
 from djangosanetesting import DatabaseTestCase
@@ -12,7 +12,7 @@ from ella.photos.models import Format
 from ella.exports.models import Export, ExportMeta, ExportPosition
 from ella.exports.models import UnexportableException
 
-DATE_FORMAT = '%Y-%m-%d %H:%M'
+DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
 HOUR = 3600
 MINUTE = 60
 
@@ -61,6 +61,7 @@ class TestExport(DatabaseTestCase):
 
     def setUp(self):
         super(TestExport, self).setUp()
+
         self.site = Site.objects.get(name='example.com')
         self.site_second = Site.objects.create(
             domain='test.net', 
@@ -117,7 +118,7 @@ class TestExport(DatabaseTestCase):
         self.setup_placements_listings()
 
     def setup_placements_listings(self):
-        now = time()
+        now = time() - 10
         self.str_now = strftime(DATE_FORMAT, localtime(now))
         self.str_future = strftime(DATE_FORMAT, localtime(now + HOUR))
 
@@ -210,7 +211,9 @@ class TestExport(DatabaseTestCase):
         " basic test getting items for certain export category. "
         degen = Export.objects.get_items_for_category(self.categoryH)
         out = map(None, degen)
-        self.assert_equals(len(out), 2)
+        print 'Output:', out
+        print 'degen=', degen
+        self.assert_equals(2 , len(out))
         self.assert_true(self.publishableA in out)
         self.assert_true(self.publishableB in out)
         # ordering test
@@ -223,7 +226,7 @@ class TestExport(DatabaseTestCase):
         " test get_items_for_category() method to overloaded item position "
         degen = Export.objects.get_items_for_category(self.categoryI)
         out = map(None, degen)
-        self.assert_equals(len(out), 2)
+        self.assert_equals(2, len(out))
         self.assert_true(self.publishableC in out)
         self.assert_true(self.publishableD in out)
 
@@ -246,7 +249,7 @@ class TestExport(DatabaseTestCase):
         )
         degen = Export.objects.get_items_for_category(self.categoryI)
         out = map(None, degen)
-        self.assert_equals(len(out), 3)
+        self.assert_equals(3, len(out))
         self.assert_true(self.publishableC in out)
         self.assert_true(self.publishableD in out)
         self.assert_true(self.publishableA in out)
@@ -299,7 +302,7 @@ class TestExport(DatabaseTestCase):
         self.exportA.save()
         degen = Export.objects.get_items_for_category(self.categoryH)
         out = map(None, degen)
-        self.assert_equals(len(out), 2)
+        self.assert_equals(2, len(out))
 
     def test_unique_positions(self):
         self.export_metaC = ExportMeta.objects.create(
