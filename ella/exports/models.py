@@ -10,6 +10,8 @@ from ella.photos.models import Photo, Format
 from ella.exports.managers import ExportManager
 
 POSITION_IS_NOT_OVERLOADED = 0
+DATETIME_FORMAT = '%Y-%m-%d %H:%M'
+TIME_FORMAT = '%H:%M'
 
 class UnexportableException(Exception):
     pass
