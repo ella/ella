@@ -35,6 +35,7 @@ PHOTOS_THUMB_DIMENSION_DEFAULT = (80,80)
 PHOTOS_FORMAT_QUALITY = getattr(settings, 'PHOTOS_FORMAT_QUALITY', PHOTOS_FORMAT_QUALITY_DEFAULT)
 PHOTOS_THUMB_DIMENSION = getattr(settings, 'PHOTOS_THUMB_DIMENSION', PHOTOS_THUMB_DIMENSION_DEFAULT)
 PHOTOS_DO_URL_CHECK = getattr(settings, 'PHOTOS_DO_URL_CHECK', False)
+IMAGE_URL_PREFIX = getattr(settings, 'IMAGE_URL_PREFIX', '')
 CUSTOM_SUBDIR = getattr(settings, 'PHOTOS_CUSTOM_SUBDIR', '')
 UPLOAD_TO = CUSTOM_SUBDIR and 'photos/%s/%%Y/%%m/%%d' % CUSTOM_SUBDIR or 'photos/%Y/%m/%d'
 
@@ -122,6 +123,9 @@ class Photo(models.Model):
         # cache thumbnail for future use to avoid hitting storage.exists() every time
         # and to allow thumbnail detection after instance has been deleted
         self.thumbnail_path = self.get_thumbnail_path()
+        if IMAGE_URL_PREFIX:    
+            # custom URL prefix (debugging purposes)
+            return IMAGE_URL_PREFIX.rstrip('/') + '/' + self.thumbnail_path
 
         storage = self.image.storage
 
@@ -266,6 +270,10 @@ class FormatedPhoto(models.Model):
     @property
     def url(self):
         "Returns url of the photo file."
+        if IMAGE_URL_PREFIX:    
+            # custom URL prefix (debugging purposes)
+            return IMAGE_URL_PREFIX.rstrip('/') + '/' + self.image.url
+
         if not PHOTOS_DO_URL_CHECK:
             return self.image.url
 
