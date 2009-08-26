@@ -231,7 +231,6 @@ class ExportItemizer(object):
                 # Assign positions of items (if position is overloaded via ExportPosition)
                 self.__insert_to_position(fix_positions, objects)
             #log.debug(remove_diacritical('Export items (overloaded positions): %s' % objects))
-
             pre_out = objects[:max_items]
         else:
             # Get listed objects for category
@@ -239,12 +238,10 @@ class ExportItemizer(object):
             objects.sort(cmp=cmp_listing_or_meta)
             pre_out = objects
         # extract Publishable objects from Listing/ExportPosition objects
-        out = list()
+        self.__items = list()
         for i in pre_out:
             pub = self.__get_overloaded_publishable(i, export=use_export)
-            out.append(pub)
-        # override title, photo, etc. via get_export_data?
-        self.__items = out
+            self.__items.append(pub)
 
 class ExportManager(models.Manager):
 
