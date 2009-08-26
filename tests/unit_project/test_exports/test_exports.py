@@ -216,7 +216,7 @@ class TestExport(DatabaseTestCase):
         # ordering test
         self.assert_equals(
             out,
-            [self.publishableB, self.publishableA]
+            [self.publishableA, self.publishableB]
         )
 
     def test_get_items_for_category__placed_by_position(self):
@@ -249,11 +249,12 @@ class TestExport(DatabaseTestCase):
         self.assert_equals(len(out), 3)
         self.assert_true(self.publishableC in out)
         self.assert_true(self.publishableD in out)
-        self.assert_true(self.publishableB in out)
+        self.assert_true(self.publishableA in out)
+        self.assert_true(self.publishableB not in out)
         # ordering test
         self.assert_equals(
             out, 
-            [self.publishableD, self.publishableC, self.publishableB]
+            [self.publishableD, self.publishableC, self.publishableA]
         )
 
     def test_get_export_data(self):
