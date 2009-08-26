@@ -107,8 +107,7 @@ class ListingManager(models.Manager):
         """
         self.filter(publish_to__lt=datetime.now()).delete()
 
-    def get_queryset(self, category=None, children=NONE, mods=[], content_types=[], **kwargs):
-        now = datetime.now()
+    def get_queryset(self, category=None, children=NONE, mods=[], content_types=[], now=datetime.now(), **kwargs):
         qset = self.filter(publish_from__lte=now, **kwargs)
 
         if category:
@@ -154,7 +153,7 @@ class ListingManager(models.Manager):
         now = datetime.now()
         if 'now' in kwargs:
             now = kwargs.pop('now')
-        qset = self.get_queryset(category, children, mods, content_types, **kwargs)
+        qset = self.get_queryset(category, children, mods, content_types, now, **kwargs)
 
         # listings with active priority override
         active = models.Q(
