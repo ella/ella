@@ -28,6 +28,10 @@ js_info_dict = {
 urlpatterns = patterns('',
 
     # serve admin media static files
+    url(r'^feeds/mrss/slug/(?P<slug>[a-z0-9-/]+)/$', 'ella.exports.views.mrss_exports', name='ella_exports_by_slug'),
+    #(r'^feeds/mrss/(?P<category>[a-z0-9-/]+)/(?P<content_type>[a-z0-9-]+)/$', 'ella.exports.views.mrss_exports'),
+    url(r'^feeds/mrss/(?P<category>[a-z0-9-/]*)/$', 'ella.exports.views.mrss_exports', name='ella_exports_by_category'),
+    #(r'^feeds/mrss/(?P<category>.*)$', 'ella.exports.views.mrss_exports'),
     (r'^static/newman_media/(?P<path>.*)$', 'ella.utils.views.fallback_serve', {'document_roots': ADMIN_ROOTS}),
     (r'^static/admin_media/(?P<path>.*)$', 'ella.utils.views.fallback_serve', {'document_roots': ADMIN_ROOTS}),
 
