@@ -5,3 +5,25 @@
     <a href="timeline/" class="js-hashadr icn btn history">{% trans "Timeline view" %}</a>
     {{ block.super }}
 {% endblock %}
+
+{% block content %}
+    <form action="" method="get">
+        <ul>
+        {{ export_form.as_ul }}
+            <li><input type="submit" /></li>
+        <ul>
+    </form>
+    <table id="id-exported-items">
+    {% for row in timeline_table %}
+        <tr>
+            {% for column in row %}
+                {% if forloop.parentloop.first %}
+                    <th>{{ column }}</th>
+                {% else %}
+                    <td>{{ column }}</td>
+                {% endif %}
+            {% endfor %}
+        </tr>
+    {% endfor %}
+    </table>
+{% endblock %}
