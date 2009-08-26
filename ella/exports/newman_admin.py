@@ -1,12 +1,15 @@
 from django.conf.urls.defaults import patterns, url
 from django.utils.translation import ugettext_lazy as _
 from django.forms import models as modelforms
+from django import forms
 from django.forms.fields import DateTimeField, IntegerField, HiddenInput
 from django.core import signals as core_signals
+from django.http import HttpResponse
+from django.shortcuts import render_to_response
 
 from ella import newman
 from ella.newman import widgets, config
-from ella.exports import models
+from ella.exports import models, timeline
 
 
 class ExportPositionInlineAdmin(newman.NewmanTabularInline):
@@ -29,14 +32,16 @@ class ExportAdmin(newman.NewmanModelAdmin):
         urlpatterns = patterns('',
             url(r'^timeline/$',
                 self.timeline_changelist_view,
-                name='%s_%s_suggest' % info),
+                name='%s_%s_timeline' % info),
         )
         urlpatterns += super(ExportAdmin, self).get_urls()
         return urlpatterns
 
     def timeline_changelist_view(self, request, extra_context=None):
-        # TODO: continue here
-        pass
+        """
+        Returns timeline view (more powerful interface to maintain export positions).
+        """
+        return timeline.timeline_view(request, extra_context)
 
 class ExportMetaAdmin(newman.NewmanModelAdmin):
     inlines = (ExportPositionInlineAdmin,)
