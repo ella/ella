@@ -237,7 +237,7 @@ class ListingQuerySetWrapper(object):
     
     def count(self):
         if not hasattr(self, '_count'):
-            self._count = self.manager.get_queryset(**self._kwargs).count()
+            self._count = self.manager.get_listing_queryset(**self._kwargs).count()
         return self._count
 
 
