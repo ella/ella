@@ -1,12 +1,20 @@
 from datetime import datetime
+import logging
 
 from django.db import models, connection
 from django.db.models import F, Q
 from django.conf import settings
 
 from ella.core.models import Listing, Publishable, Category
+from ella.utils import remove_diacritical
+
+ERROR_MESSAGES = {
+    'cannot': 'This Publishable object cannot be exported'
+}
+log = logging.getLogger('ella.exports')
 
 def cmp_listing_or_meta(x, y):
+    " Sorts items in descending order. "
     from ella.exports.models import ExportPosition
     def return_from_datetime(obj):
         if type(obj) == Listing:
@@ -21,84 +29,94 @@ def cmp_listing_or_meta(x, y):
     date_x = return_from_datetime(x)
     date_y = return_from_datetime(y)
     if date_x > date_y:
-        return 1
-    elif date_x < date_y:
         return -1
+    elif date_x < date_y:
+        return 1
     return 0
 
-class ExportManager(models.Manager):
-    error_messages = {
-        'cannot': 'This Publishable object cannot be exported'
-    }
+class ExportItemizer(object):
+    """
+    Class encapsulates process of querying Export models, 
+    setting query parameters and iterating over result items.
 
-    def get_items_for_slug(self, slug):
+    One can iterate over an ExportItemizer instance.
+    """
+
+    def __init__(self, slug=None, category=None, data_formatter=None):
+        """
+        Creates ExportItemizer instance. Export items can be queried by slug
+        or by category parameters.
+
+        If data_formatter parameter is present, it should contain object with callable
+        member(self, publishable, export=None, export_category=None) .
+        """
         from ella.exports.models import Export
-        exports = Export.objects.filter(slug=slug)
-        if not exports:
-            return list()
-        return self.get_items_for_category(export=exports[0])
-    
-    def get_items_for_category(self, category=None, export=None):
-        """
-        generates export items for certain category or specific Export.
+        # object members init
+        self.__items = tuple()
+        self.__counter = 0
+        self._datetime_from = datetime.now()
+        self._max_visible_items = None
+        self.category = None
+        self.export = None
+        self.exports = tuple()
+        self.data_formatter = data_formatter
+        if not data_formatter:
+            self.data_formatter = Export.objects.get_export_data #default data formatter
 
-        @param   category   category asociated with Export
-        @param   export     use Export object rather than category.
+        if slug:
+            self.exports = Export.objects.filter(slug=slug)
+            self.export = self.exports[0]
+        elif category:
+            self.category = category
 
-        Functionality:
-        1. URL format is /category/path/to/any/depth/[content_type/]
-        2. Sort export items by its main placement and listings.
-        3. Override item's title, photo, description if ExportMeta for item and Export is present.
-        4. Override item's position and visibility timerange if defined.
-        """
-        from ella.exports.models import Export, ExportPosition, ExportMeta,\
-        POSITION_IS_NOT_OVERLOADED
-        use_export = None
-        use_category = category
-        if not export:
-            exports = Export.objects.filter(category=use_category)
+    def set_max_visible_items(self, value):
+        " Accepts value as string, unicode, int or long. "
+        if not value:
+            return
+        if type(value) in (str, unicode,):
+            ivalue = int(value)
+            self._max_visible_items = ivalue
+        elif type(value) in (int, long,):
+            self._max_visible_items = value
+
+    def get_max_visible_items(self):
+        return self._max_visible_items
+
+    max_visible_items = property(get_max_visible_items, set_max_visible_items)
+
+    def set_datetime_from(self, value):
+        " Accepts value as string, unicode or datetime. "
+        from ella.exports.models import DATETIME_FORMAT
+        if not value:
+            return
+        if type(value) in (str, unicode,):
+            self._datetime_from = datetime.strptime(value, DATETIME_FORMAT)
         else:
-            exports = (export,)
-            use_category = export.category
-        if exports:
-            use_export = exports[0]
-            # Find fitting ExportPositions
-            positions = ExportPosition.objects.filter(
-                Q(visible_to__gte=datetime.now()) | Q(visible_to__isnull=True),
-                export=use_export, 
-                position__exact=POSITION_IS_NOT_OVERLOADED,
-                visible_from__lte=datetime.now(),
-            )
-            fix_positions = ExportPosition.objects.filter(
-                Q(visible_to__gte=datetime.now()) | Q(visible_to__isnull=True),
-                export=use_export, 
-                position__gt=POSITION_IS_NOT_OVERLOADED,
-                visible_from__lte=datetime.now(),
-            )
-            objects = list(Listing.objects.get_listing(
-                use_category, 
-                count=use_export.max_visible_items * 2
-            ))
-            map(lambda i: objects.append(i), positions)
-            objects.sort(cmp=cmp_listing_or_meta)
-            if fix_positions:
-                # Assign positions of items (if position is overloaded via ExportPosition)
-                self.__insert_to_position(fix_positions, objects)
+            self._datetime_from = value
 
-            pre_out = objects[:use_export.max_visible_items]
+    def get_datetime_from(self):
+        return self._datetime_from
+
+    datetime_from = property(get_datetime_from, set_datetime_from)
+
+    def next(self):
+        if not self.__items:
+            self.__execute_query()
+        if self.__counter >= len(self.__items):
+            self.__counter = 0
+            raise StopIteration
         else:
-            # Get listed objects for category
-            objects = list(Listing.objects.get_listing(use_category))
-            objects.sort(cmp=cmp_listing_or_meta)
-            pre_out = objects
-        # extract Publishable objects from Listing/ExportPosition objects
-        out = list()
-        for i in pre_out:
-            pub = self.__get_overloaded_publishable(i, export=use_export)
-            out.append(pub)
-        # override title, photo, etc. via get_export_data?
-        for o in out:
-            yield o
+            c = self.__counter
+            self.__counter += 1
+            return self.__items[c]
+
+    def __getitem__(self, key):
+        if not self.__items:
+            self.__execute_query()
+        return self.__items[key]
+
+    def __iter__(self):
+        return self
 
     def __insert_to_position(self, fix_positions, out):
         """ 
@@ -145,17 +163,122 @@ class ExportManager(models.Manager):
         title, photo, description. 
         """
         pub = self.__get_publishable(obj)
-        field_dict = self.get_export_data(pub, export=export)
+        field_dict = self.data_formatter(pub, export=export)
         pub.title = field_dict['title']
         pub.photo = field_dict['photo']
         pub.description = field_dict['description']
+        pub.export_thumbnail_url = None
         if pub.photo:
             formated = pub.photo.get_formated_photo(export.photo_format.name)
             #pub.export_thumbnail_url = u'%s%s' % (settings.MEDIA_URL, formated.url)
-            pub.export_thumbnail_url = formated.url
-        else:
-            pub.export_thumbnail_url = None
+            if formated:
+                pub.export_thumbnail_url = formated.url
         return pub
+
+    def __execute_query(self):
+        """
+        generates export items for certain category or specific Export.
+
+        @param   category   category asociated with Export
+        @param   export     use Export object rather than category.
+        @param   datetime_from  optional parameter 
+
+        Functionality:
+        1. URL format is /category/path/to/any/depth/[content_type/]
+        2. Sort export items by its main placement and listings.
+        3. Override item's title, photo, description if ExportMeta for item and Export is present.
+        4. Override item's position and visibility timerange if defined.
+        """
+        from ella.exports.models import Export, ExportPosition, ExportMeta,\
+        POSITION_IS_NOT_OVERLOADED
+        use_export = None
+        use_category = self.category
+        if not self.export:
+            exports = Export.objects.filter(category=use_category)
+        else:
+            exports = (self.export,)
+            use_category = self.export.category
+        if exports:
+            use_export = exports[0]
+            if not self._max_visible_items:
+                max_items = use_export.max_visible_items
+            else:
+                max_items = self._max_visible_items
+            # Find fitting ExportPositions
+            positions = ExportPosition.objects.filter(
+                Q(visible_to__gte=self._datetime_from) | Q(visible_to__isnull=True),
+                export=use_export, 
+                position__exact=POSITION_IS_NOT_OVERLOADED,
+                visible_from__lte=self._datetime_from,
+            )
+            fix_positions = ExportPosition.objects.filter(
+                Q(visible_to__gte=self._datetime_from) | Q(visible_to__isnull=True),
+                export=use_export, 
+                position__gt=POSITION_IS_NOT_OVERLOADED,
+                visible_from__lte=self._datetime_from,
+            )
+            objects = list(Listing.objects.get_listing(
+                use_category, 
+                count=max_items * 2,
+                now=self._datetime_from
+            ))
+            #log.debug(remove_diacritical('Items via Listing: %s' % objects))
+            map(lambda i: objects.append(i), positions)
+            #log.debug(remove_diacritical('Items via ExportPosition: %s' % positions))
+            objects.sort(cmp=cmp_listing_or_meta)
+            #log.debug(remove_diacritical('Export items sorted: %s' % objects))
+            if fix_positions:
+                # Assign positions of items (if position is overloaded via ExportPosition)
+                self.__insert_to_position(fix_positions, objects)
+            #log.debug(remove_diacritical('Export items (overloaded positions): %s' % objects))
+
+            pre_out = objects[:max_items]
+        else:
+            # Get listed objects for category
+            objects = list(Listing.objects.get_listing(use_category))
+            objects.sort(cmp=cmp_listing_or_meta)
+            pre_out = objects
+        # extract Publishable objects from Listing/ExportPosition objects
+        out = list()
+        for i in pre_out:
+            pub = self.__get_overloaded_publishable(i, export=use_export)
+            out.append(pub)
+        # override title, photo, etc. via get_export_data?
+        self.__items = out
+
+class ExportManager(models.Manager):
+
+    def get_items_for_slug(self, slug, datetime_from=datetime.now(), max_visible_items=None):
+        from ella.exports.models import Export
+        exports = Export.objects.filter(slug=slug)
+        if not exports:
+            return list()
+        e = ExportItemizer(slug=slug)
+        e.datetime_from = datetime_from
+        e.max_visible_items = max_visible_items
+        e.export = exports[0]
+        return e
+        """
+        return self.get_items_for_category(
+            export=exports[0], 
+            datetime_from=datetime_from, 
+            max_visible_items=max_visible_items
+        )
+        """
+    
+    def get_items_for_category(
+            self, 
+            category=None, 
+            export=None, 
+            datetime_from=datetime.now(),
+            max_visible_items=None
+        ):
+        e = ExportItemizer(category=category)
+        e.datetime_from = datetime_from
+        e.max_visible_items = max_visible_items
+        if export:
+            e.export = export
+        return e
 
     def get_export_data(self, publishable, export=None, export_category=None):
         """ 
@@ -173,7 +296,7 @@ class ExportManager(models.Manager):
                 category = export_category
             pub_export = Export.objects.filter(category=category)
             if not pub_export:
-                raise UnexportableException(self.error_messages['cannot'])
+                raise UnexportableException(ERROR_MESSAGES['cannot'])
             pub_export = pub_export[0]
         
         # Try to find ExportMeta and ExportPosition for given publishable
