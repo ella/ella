@@ -87,7 +87,7 @@ class Publishable(models.Model):
             )
         if placements:
             if len(placements) == 1:
-                return placements[0]
+                self._main_placement = placements[0]
             else:
                 # with multiple listings, one with first publish_from
                 # primary
@@ -97,18 +97,22 @@ class Publishable(models.Model):
                         first_published = placement
 
                 assert first_published is not None
-                return first_published
+                self._main_placement = first_published
 
+        else:
+            try:
+                # TODO - check and if we don't have category, take the only placement that exists in current site
+                self._main_placement = get_cached_object(
+                        Placement,
+                        publishable=self.pk,
+                        category=self.category_id
+                    )
+            except Placement.DoesNotExist:
+                self._main_placement = None
 
-        try:
-            # TODO - check and if we don't have category, take the only placement that exists in current site
-            self._main_placement = get_cached_object(
-                    Placement,
-                    publishable=self.pk,
-                    category=self.category_id
-                )
-        except Placement.DoesNotExist:
-            self._main_placement = None
+        if self._main_placement:
+            # preserve memory and SQL queries by using the same object
+            self._main_placement.publishable = self
 
         return self._main_placement
 
@@ -253,7 +257,7 @@ class Placement(models.Model):
 
     def get_absolute_url(self, domain=False):
         obj = self.publishable
-        category = get_cached_object(Category, pk=self.category_id)
+        category = self.category
 
         kwargs = {
             'content_type' : slugify(obj.content_type.model_class()._meta.verbose_name_plural),
@@ -287,6 +291,8 @@ class Placement(models.Model):
 def ListingBox(listing, *args, **kwargs):
     " Delegate the boxing to the target's Box class. "
     obj = listing.placement.publishable
+    # little hack display proper URL for the object
+    obj._main_placement = listing.placement
     return obj.box_class(obj, *args, **kwargs)
 
 class Listing(models.Model):

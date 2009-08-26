@@ -729,9 +729,18 @@ class NewmanModelAdmin(XModelAdmin):
         if type(context) != dict:
             obj = self.get_change_view_object(object_id)
             opts = obj._meta
+
+            if request.FILES and not request.is_ajax():
+                return_url = '%s#/%s/%s/' % (reverse('newman:index'), opts.app_label, opts.module_name)
+                if request.POST.get('_continue'):
+                    return_url += '%s/' % object_id
+                if request.POST.get('_addanother'):
+                    return_url += 'add/'
+                return HttpResponseRedirect(return_url)
+
             return utils.JsonResponse(
                 _('The %(name)s "%(obj)s" was changed successfully.') % {'name': force_unicode(opts.verbose_name), 'obj': force_unicode(obj)},
-                {'id': obj.pk},
+                {'id': obj.pk, 'title': obj.__unicode__(),},
                 status=STATUS_OK
             )
         context.update(extra_context or {})
@@ -784,8 +793,18 @@ class NewmanModelAdmin(XModelAdmin):
         context = self.get_add_view_context(request, form_url)
         context.update(extra_context or {})
         if 'object_added' in context:
+            obj = context['object']
             msg = request.user.message_set.all()[0].message
-            return utils.JsonResponse(msg, {'id': context['object'].pk})
+
+            if request.FILES and not request.is_ajax():
+                return_url = '%s#/%s/%s/' % (reverse('newman:index'), obj._meta.app_label, obj._meta.module_name)
+                if request.POST.get('_continue'):
+                    return_url += '%s/' % obj.pk
+                if request.POST.get('_addanother'):
+                    return_url += 'add/'
+                return HttpResponseRedirect(return_url)
+
+            return utils.JsonResponse(msg, {'id': obj.pk, 'title': obj.__unicode__(),})
         elif 'error_dict' in context:
             return self.json_error_response(request, context)
 

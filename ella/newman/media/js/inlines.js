@@ -108,14 +108,13 @@
         var no_items = $('.gallery-items-sortable input.target_id').length;
         $last_item.removeClass('last-related');
         
+        var no_re = /galleryitem_set-\d+-/;
         $new_item.find('*').each( function() {
-            var no_re = /galleryitem_set-(\d+)-/g;
-            var oldno;
-            if (oldno = no_re.exec( this.name )) {
+            if (no_re.test( this.name )) {
                 var newname = this.name.replace(no_re, 'galleryitem_set-'+no_items+'-');
                 $(this).attr({name: newname});
             }
-            if (oldno = no_re.exec( this.id )) {
+            if (no_re.test( this.id )) {
                 var newid = this.id.replace(no_re, 'galleryitem_set-'+no_items+'-');
                 $(this).attr({id: newid});
             }

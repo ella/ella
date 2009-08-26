@@ -4,9 +4,35 @@ from django.conf.urls.defaults import patterns, url
 from ella import newman
 
 from ella.photos.models import FormatedPhoto, Format, Photo
-from ella.photos.models import PHOTO_MIN_WIDTH, PHOTO_MIN_HEIGHT
 from ella.newman.utils import JsonResponse, JsonResponseError
 from ella.newman.config import STATUS_OBJECT_NOT_FOUND
+from ella.newman.filterspecs import CustomFilterSpec
+
+class PhotoSizeFilter(CustomFilterSpec):
+
+    lookup_w = 'width'
+    lookup_h = 'height'
+
+    def title(self):
+        return _('Size')
+
+    def get_lookup_kwarg(self):
+        return [
+            '%s__gt' % self.lookup_w,
+            '%s__gt' % self.lookup_h
+        ]
+
+    def filter_func(self):
+        for size in (100, 150, 200, 300, 500, 600, 700, 800):
+            lookup_dict = {
+                '%s__gt' % self.lookup_w : size,
+                '%s__gt' % self.lookup_h : size
+            }
+            link_txt = "> %s" % size
+            link = (link_txt, lookup_dict)
+            self.links.append(link)
+        return True
+
 
 class FormatAdmin(newman.NewmanModelAdmin):
     list_display = ('name', 'max_width', 'max_height', 'stretch', 'resample_quality',)
@@ -19,6 +45,7 @@ class FormatedPhotoInlineAdmin(newman.NewmanTabularInline):
 class PhotoAdmin(newman.NewmanModelAdmin):
     list_display = ('title', 'size', 'thumb', 'pk',)
     list_filter = ('created',)
+    unbound_list_filter = (PhotoSizeFilter,)
     prepopulated_fields = {'slug': ('title',)}
     search_fields = ('title', 'slug', 'description', 'id',)
     suggest_fields = {'authors': ('name', 'slug',), 'source': ('name', 'url',)}
@@ -56,11 +83,6 @@ class PhotoAdmin(newman.NewmanModelAdmin):
         }
 
         return JsonResponse('', out)
-
-
-    def queryset(self, request):
-        return super(PhotoAdmin, self).queryset(request).filter(width__gt=PHOTO_MIN_WIDTH, height__gt=PHOTO_MIN_HEIGHT)
-
 
 
 class FormatedPhotoAdmin(newman.NewmanModelAdmin):

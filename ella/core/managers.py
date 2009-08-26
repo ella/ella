@@ -91,6 +91,10 @@ def get_listings_key(func, self, category=None, count=10, offset=1, mods=[], con
     )
 
 class PlacementManager(models.Manager):
+    def get_query_set(self, *args, **kwargs):
+        qset = super(PlacementManager, self).get_query_set(*args, **kwargs).select_related('publishable')
+        return qset
+
     def get_static_placements(self, category):
         now = datetime.now()
         return self.filter(models.Q(publish_to__gt=now) | models.Q(publish_to__isnull=True),  publish_from__lt=now, category=category, static=True)
@@ -107,7 +111,21 @@ class ListingManager(models.Manager):
         """
         self.filter(publish_to__lt=datetime.now()).delete()
 
+    def get_query_set(self, *args, **kwargs):
+        # get all the fields you typically need to render listing
+        qset = super(ListingManager, self).get_query_set(*args, **kwargs).select_related(
+                'placement',
+                'placement__category',
+                'placement__publishable',
+                'placement__publishable__category',
+                'placement__publishable__content_type'
+            )
+        return qset
+
     def get_queryset(self, category=None, children=NONE, mods=[], content_types=[], now=datetime.now(), **kwargs):
+        """
+        FIXME - name this better!
+        """
         qset = self.filter(publish_from__lte=now, **kwargs)
 
         if category:
@@ -155,6 +173,15 @@ class ListingManager(models.Manager):
             now = kwargs.pop('now')
         qset = self.get_queryset(category, children, mods, content_types, now, **kwargs)
 
+        # templates are 1-based, compensate
+        offset -= 1
+        limit = offset + count
+
+        # only use priorities if somebody wants them
+        if not getattr(settings, 'USE_PRIORITIES', False):
+            return qset[offset:limit]
+
+
         # listings with active priority override
         active = models.Q(
                     priority_value__isnull=False,
@@ -174,10 +201,6 @@ class ListingManager(models.Manager):
 
         out = []
 
-        # templates are 1-based, compensate
-        offset -= 1
-        limit = offset + count
-
         # take out not unwanted objects
         if unique:
             listed_targets = unique.copy()
@@ -186,7 +209,7 @@ class ListingManager(models.Manager):
 
         # iterate through qsets until we have enough objects
         for q in qsets:
-            data = q
+            data = q[:limit]
             if data:
                 for l in data:
                     tgt = l.placement_id

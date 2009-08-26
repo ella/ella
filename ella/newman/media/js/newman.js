@@ -1,11 +1,16 @@
 var LF = 10, CR = 13;
-AjaxFormLib = {};
 
 // Set the default target for Kobayashi to #content
-ContentByHashLib.DEFAULT_TARGET = 'content';
+Kobayashi.DEFAULT_TARGET = 'content';
 
 // Set the base URL for #content
 BASES.content = '/nm/';
+
+// Containers for things we need to export
+NewmanLib = {};
+AjaxFormLib = {};
+
+NewmanLib.ADR_STACK = [];
 
 // A less smart alternative to jQuery's offset method.
 function simple_offset(el) {
@@ -20,6 +25,8 @@ function simple_offset(el) {
     return { left: l, top: t };
 }
 
+// workaround for jQuery's incomplete cloning of forms
+// (it doesn't copy textareas' contents and selected options)
 function clone_form($orig_form) {
     var $new_form = $orig_form.clone();
     var $orig_textareas = $orig_form.find('textarea');
@@ -43,6 +50,7 @@ function clone_form($orig_form) {
     return $new_form;
 }
 
+// Shows a modal window and disables its close button.
 function lock_window(msg) {
     if ( ! msg ) msg = gettext('Wait')+'...';
     
@@ -76,6 +84,7 @@ function get_html_chunk(tmpl, success) {
 }
 
 //// Layout adjustment
+// this is here to make the content scroll but not beneath the favicons
 
 $( function() {
     CONTAINER_TOP_OFFSET = 105;
@@ -96,7 +105,7 @@ $( function() {
 
 //// Homepage initialization
 
-$(function(){ContentByHashLib.reload_content('content');});
+$(function(){Kobayashi.reload_content('content');});
 
 //// Lock window when media are being loaded
 
@@ -177,7 +186,7 @@ $(document).bind('media_loaded', unlock_window);
         $form.find(':checkbox,:radio').removeAttr('checked');
         $form.find(':text,textarea,:password').val('');
         var form_data = response_data.data;
-        show_message( response_data.message );
+        if (response_data.message) show_message( response_data.message );
         var used_times = {};    // how many times which key was used
         
         for (var i = 0; i < form_data.length; i++) {
@@ -192,9 +201,9 @@ $(document).bind('media_loaded', unlock_window);
                 carp('restore_form: input #'+key+' not found');
                 continue;
             }
-            var val_esc = val.replace(/\W/g, '\\$1');
-            $inputs.filter(':checkbox,:radio').find('[value='+val_esc+']').attr({checked: 'checked'});
-            $inputs.filter('option[value='+val_esc+']').attr({selected: 'selected'});
+            var val_esc = val.replace(/(\W)/g, '\\$1');
+            $inputs.filter(':checkbox,:radio').filter('[value='+val_esc+']').attr({checked: 'checked'});
+            $inputs.find('option[value='+val_esc+']').attr({selected: 'selected'});
             $inputs.filter(':text,[type=hidden],textarea').eq(occ_no).val(val);
             
             used_times[ key ] = occ_no + 1;
@@ -205,6 +214,7 @@ $(document).bind('media_loaded', unlock_window);
         
         $form.trigger('preset_load_completed', [response_data, args]);
     }
+    NewmanLib.restore_form = restore_form;
     function load_preset(id, $form) {
         $.ajax({
             url: get_adr('draft/load/'),
@@ -278,6 +288,7 @@ $(document).bind('media_loaded', unlock_window);
             clearInterval(autosave_interval);
         }
         var $inputs = $('.change-form :input');
+        // start auto-saving when an input's value changes
         function onchange_autosave_handler() {
             $('.change-form :input').unbind('change', onchange_autosave_handler).unbind('keypress', onkeypress_autosave_handler);
             ;;; carp('.change-form changed -- setting up autosave interval');
@@ -293,6 +304,7 @@ $(document).bind('media_loaded', unlock_window);
                 save_preset($change_form, {id: draft_id});
             }, 60 * 1000 );
         }
+        // start auto-saving when typing occurs on the changeform
         function onkeypress_autosave_handler(evt) {
             var w = evt.which;
             var c = evt.keyCode;
@@ -385,27 +397,31 @@ $( function() {
         if (!$form.jquery) $form = $($form);
         if ( ! validate($form) ) return false;
         
-        lock_window(gettext('Sending')+'...');
-        
         // Hack for file inputs
-/*        var has_files = false;
+        var has_files = false;
         $form.find(':file').each( function() {
-            if ( ($this).val() ) has_files = true;
+            if ( $(this).val() ) has_files = true;
         });
         if (has_files) {
             // Shave off the names from suggest-enhanced hidden inputs
             $form.find('input:hidden').each( function() {
                 if ($form.find( '#'+$(this).attr('id')+'_suggest' ).length == 0) return;
-*///                $(this).val( $(this).val().replace(/#.*/, '') );
-/*            });
+                $(this).val( $(this).val().replace(/#.*/, '') );
+            });
             // Shave off the days of week from date-time inputs
             $form.find('.vDateTimeInput,.vDateInput').each( function() {
                 $(this).val( $(this).val().replace(/ \D{2}$/, '') );
+            } );
+            $form.data('standard_submit', true);
+            if (button_name) {
+                $form.append('<input type="hidden" value="1" name="'+button_name+'" />');
             }
             $form.submit();
-            return false;
+            return true;
         }
-*/        // End of hack for file inputs
+        // End of hack for file inputs
+        
+        lock_window(gettext('Sending')+'...');
         
         var action =  $form.attr('action');
         var method = ($form.attr('method') || 'POST').toUpperCase();
@@ -457,21 +473,28 @@ $( function() {
             url: url,
             type: method,
             data: data,
-            success:  function() {
-                try {
-                    success.apply(this, arguments);
-                } catch(e) {
-                    carp('Error processing form-send success:', e);
+            success:  function() { this.succeeded = true;  },
+            error:    function() { this.succeeded = false; },
+            complete: function(xhr) {
+                var redirect_to;
+                if (redirect_to = xhr.getResponseHeader('Redirect-To')) {
+                    var new_req = {};
+                    for (k in this) new_req[k] = this[k];
+                    new_req.url = redirect_to;
+                    new_req.redirect_to = redirect_to;
+                    $.ajax( new_req );
+                    return;
                 }
-            },
-            error:    function() {
-                try {
+                if (this.succeeded) { try {
+                    success.call(this, xhr.responseText, xhr);
+                } catch (e) {
+                    carp('Error processing form-send success:', e);
+                }}
+                else { try {
                     error.apply(this, arguments);
                 } catch(e) {
                     carp('Error processing form-send error:', e);
-                }
-            },
-            complete: function() {
+                }}
                 unlock_window();
             },
             _form: $form,
@@ -484,6 +507,8 @@ $( function() {
     }
     AjaxFormLib.ajax_submit = ajax_submit;
     
+    // Handle error response from the server from a form submit event.
+    // In case of changeform and expected JSON response, renders the error messages.
     function ajax_submit_error(xhr) {
         var res;
         var $form = this._form;
@@ -570,11 +595,11 @@ $( function() {
             if ($form.is('.change-form')) {
                 AjaxFormLib.save_preset($form, {title: '* '+gettext('crash save'), msg: gettext('Form content backed up')});
             }
-            var id = ContentByHashLib.closest_loaded( $form.get(0) ).id;
+            var id = Kobayashi.closest_loaded( $form.get(0) ).id;
             var address = $form.hasClass('js-dyn-adr')
                 ? get_adr($form.attr('action'))
                 :         $form.attr('action');
-            ContentByHashLib.inject_error_message({
+            Kobayashi.inject_error_message({
                 target_id: id,
                 xhr: xhr,
                 address: address
@@ -599,8 +624,7 @@ $( function() {
         if (evt.button != 0) return true;    // just interested in left button
         if ($(this).hasClass('js-noautosubmit')) return true;
         var $form = $(this).closest('.js-form');
-        ajax_submit($form, this.name);
-        return false;
+        return ajax_submit($form, this.name);
     });
     
     // Reset button
@@ -616,6 +640,7 @@ $( function() {
         $('.js-form')
         .unbind('submit.ajax_overload')
         .bind('submit.ajax_overload', function(evt) {
+            if ($(this).data('standard_submit')) return true;
             var name;
             function get_def(form) { return $(form).find('.def:first').attr('name'); }
             if (!evt.originalEvent) name = get_def(this);
@@ -630,27 +655,26 @@ $( function() {
                 // Event is defined but failed to figure out which button clicked
                 // -- leave the name empty.
             }
-            AjaxFormLib.ajax_submit( $(this), name );
-            return false;
+            return AjaxFormLib.ajax_submit( $(this), name );
         });
     }
     $(document).bind('content_added', overload_default_submit);
     overload_default_submit();
+    //// End of ajax forms
     
     // Set up returning to publishable changelist when coming to change form from it
     $('#changelist tbody th a,.actionlist a').live('click', function(evt) {
         if (evt.button != 0) return;
-        FORM_SAVE_RETURN_TO = '';
+        NewmanLib.ADR_STACK = [];
         var appname = /js-app-(\w+)\.(\w+)/.exec( $('#changelist').attr('className') );
         if ( ! appname ) {
             return;
         }
         var appname_path = '/' + appname[1] + '/' + appname[2] + '/';
         if (appname_path == '/core/publishable/') {
-            FORM_SAVE_RETURN_TO = '/core/publishable/';
+            NewmanLib.ADR_STACK = [ { from: '/core/publishable/', to: get_hashadr($(this).attr('href')) } ];
         }
     });
-    //// End of ajax forms
     
     //// Filters
     
@@ -667,38 +691,7 @@ $( function() {
     // Close filters button
     $('#filters a.cancel').live('click', function(evt) {
         if (evt.button != 0) return;
-        ContentByHashLib.unload_content('filters');
-    });
-    
-    // Persistent filters -- add the query string if:
-    // - there is none AND
-    // - one is there for the specifier's URL in the changelistFilters object
-    $(document).bind('ready', function() {
-        if (!window.changelistFilters || typeof changelistFilters != 'object') return;
-        for (a in changelistFilters) {
-            var adr = a.replace(/^filter/, '').replace(/__/g, '/') + '/';
-            var decoded = $('<span>').html(changelistFilters[a]).text()
-            ContentByHashLib.ADDRESS_POSTPROCESS[ adr ] = adr + decoded;
-        }
-    });
-    
-    // Update persistent filters when filter clicked
-    $('#filters a').live('click', function(evt) {
-        if (evt.button != 0) return;    // only interested in left click
-        if ( pop_id = $(this).closest('.pop').length ) return;  // no filter persistence in pop-up
-        var href = $(this).attr('href');
-        if (   /^\?/.test( href )   ) {} else return;
-        var base = get_hashadr('?').replace(/\?$/,'');
-        ContentByHashLib.ADDRESS_POSTPROCESS[ base ] = base+href;
-        adr(href);
-        return false;
-    });
-    // 2459 výsledků (7350 celkem) -- make parenthesised link reset persistent filters
-    $('#filters-handler .js-clear').live('click', function() {
-        var base = get_hashadr('?').replace(/\?$/,'');
-        delete ContentByHashLib.ADDRESS_POSTPROCESS[ base ];
-        adr($(this).attr('href'));
-        return false;
+        Kobayashi.unload_content('filters');
     });
     
     // Re-initialization of third party libraries
@@ -756,12 +749,12 @@ $( function() {
         var search_terms = $input.val();
         if (!search_terms) return;  // Nothing to search for
         var adr_term = '&q=' + search_terms;
-        var loaded = ContentByHashLib.closest_loaded( $input.get(0) );
+        var loaded = Kobayashi.closest_loaded( $input.get(0) );
         if (loaded.id == 'content') {
             adr(adr_term);
         }
         else {
-            ContentByHashLib.simple_load( loaded.id + '::' + adr_term );
+            Kobayashi.simple_load( loaded.id + '::' + adr_term );
         }
         return false;
     }
@@ -863,6 +856,16 @@ function show_ajax_success(response_text) {
         message = gettext('Successfully sent');
         paste_code_into_debug( (response_text||'').replace(/\n(\s*\n)+/g, "\n"), 'Ajax success response' );
     }
+    if (this.redirect_to) {
+        var literal_address;
+        if (this.redirect_to.substr(0, BASE_PATH.length) == BASE_PATH) {
+            literal_address = this.redirect_to.substr(BASE_PATH.length);
+        }
+        else {
+            literal_address = this.redirect_to;
+        }
+        adr(literal_address);
+    }
     show_ok(message);
 }
 
@@ -872,18 +875,37 @@ function PostsaveActionTable(vars) {
 PostsaveActionTable.prototype = {
     _save_: function() {
         var return_to;
-        if (window.FORM_SAVE_RETURN_TO) {
-            return_to = FORM_SAVE_RETURN_TO;
-            delete FORM_SAVE_RETURN_TO;
+        if (NewmanLib.ADR_STACK.length) {
+            var popped = NewmanLib.ADR_STACK.pop();
+            if (get_hashadr('') == popped.to) {
+                return_to = popped.from;
+                if ($.isFunction(popped.onsave))
+                    popped.onsave(popped,this);
+                if ($.isFunction(popped.onreturn)) {
+                    var action_table_obj = this;
+                    $('#'+Kobayashi.DEFAULT_TARGET).one('content_added', function(evt) {
+                        popped.onreturn(popped,action_table_obj);
+                    });
+                }
+            }
+            else {
+                return_to = '../';
+                NewmanLib.ADR_STACK = [];
+            }
         }
         else {
             return_to = '../';
         }
-        adr(return_to);
+        if (adr(return_to, {just_get: 'hash'}) == location.hash) {
+            Kobayashi.reload_content(Kobayashi.DEFAULT_TARGET);
+        }
+        else {
+            adr(return_to);
+        }
     },
     _addanother_: function() {
         if ( /add\/$/.test(get_hashadr('')) ) {
-            ContentByHashLib.reload_content('content');
+            Kobayashi.reload_content('content');
             scrollTo(0,0);
         }
         else {
@@ -903,7 +925,7 @@ PostsaveActionTable.prototype = {
             adr('../'+oid+'/');
         }
         else {
-            ContentByHashLib.reload_content('content');
+            Kobayashi.reload_content('content');
         }
     },
     _saveasnew_: function() {
@@ -952,12 +974,14 @@ function save_change_form_success(text_data) {
     try {
         data = JSON.parse(text_data);
         object_id = data.data.id;
+        object_title = data.data.title;
         response_msg = data.message;
     } catch(e) { carp('invalid data received from form save:', text_data, e); }
     response_msg = response_msg || gettext('Form saved');
     
     var action_table = new PostsaveActionTable({
         object_id: object_id,
+        object_title: object_title,
         options: options
     });
     
@@ -972,7 +996,7 @@ function save_change_form_success(text_data) {
     
     show_ok(response_msg);
     action_table.run(action);
-    ContentByHashLib.unload_content('history');
+    Kobayashi.unload_content('history');
 }
 
 function changelist_batch_success(response_text) {
@@ -984,7 +1008,7 @@ function changelist_batch_success(response_text) {
     $('#content').hide().before($dialog);
 }
 function batch_delete_confirm_complete() {
-    ContentByHashLib.reload_content('content');
+    Kobayashi.reload_content('content');
     $('#confirmation-wrapper').remove();
     $('#content').show();
 }
@@ -1121,21 +1145,16 @@ $( function() {
         }
         var address = '/' + ct_arr[1] + '/' + ct_arr[2] + '/?pop';
         
-        ContentByHashLib.load_content({
+        Kobayashi.load_content({
             address: address,
             target_id: 'overlay-content',
-            selection_callback: selection_callback/*,
-            success_callback: function() {
-                var xhr = this;
-                var $target = $('#'+xhr.original_options.target_id);
-                
-            }*/
+            selection_callback: selection_callback
         });
     };
     $('.overlay-closebutton').live('click', function() {
         $(this).closest('.overlay').css({zIndex:5}).hide()
         .find('.overlay-content').removeData('selection_callback');
-        ContentByHashLib.unload_content('overlay-content');
+        Kobayashi.unload_content('overlay-content');
     });
     function init_overlay_content(evt, extras) {
         var $target = $(evt.target);
@@ -1152,9 +1171,9 @@ $( function() {
         .click( function(evt) {
             var clicked_id = /\d+(?=\/$)/.exec( $(this).attr('href') )[0];
             try {
-                ($target.data('selection_callback'))(clicked_id, {evt: evt});
+                ($target.data('selection_callback'))(clicked_id, {str: $(evt.target).text()});
             } catch(e) { carp('Failed running overlay callback', e); }
-            ContentByHashLib.unload_content('overlay-content');
+            Kobayashi.unload_content('overlay-content');
             $('#changelist-overlay').css({zIndex:5}).hide();
             $target.removeData('selection_callback');
             return false;

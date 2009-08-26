@@ -139,7 +139,7 @@ class Box(object):
         t_list = []
         if hasattr(self.obj, 'category_id') and self.obj.category_id:
             from ella.core.models import Category
-            cat = get_cached_object(Category, pk=self.obj.category_id)
+            cat = self.obj.category
             base_path = 'box/category/%s/content_type/%s.%s/' % (cat.path, self.app_label, self.module_name)
             if hasattr(self.obj, 'slug'):
                 t_list.append(base_path + '%s/%s.html' % (self.obj.slug, self.box_type,))

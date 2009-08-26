@@ -1,4 +1,4 @@
-KOBAYASHI_VERSION = '2009-08-13';
+KOBAYASHI_VERSION = '2009-08-20';
 
 // Debugging tools
 ;;; function alert_dump(obj, name) {
@@ -46,22 +46,22 @@ var URLS = {
 var BASES = {};
 //// End of URL management
 
-var ContentByHashLib = {};
+var Kobayashi = {};
 
 // ID of the element where AJAX'ed stuff is placed if no target specified
-ContentByHashLib.DEFAULT_TARGET = 'kobayashi-default-target';
-ContentByHashLib.LOADED_MEDIA = {};
+Kobayashi.DEFAULT_TARGET = 'kobayashi-default-target';
+Kobayashi.LOADED_MEDIA = {};
 
 ( function($) { $(document).ready( function() {
     
     // We need to remember what URL is loaded in which element,
     // so we can load or not load content appropriately on hash change.
-    var LOADED_URLS = ContentByHashLib.LOADED_URLS = {};
+    var LOADED_URLS = Kobayashi.LOADED_URLS = {};
     
     // We also need to keep track of what's been loaded from a hashchange
     // to be able to distinguish what's affected by
     // no longer being mentioned in the hash.
-    var URL_LOADED_BY_HASH = ContentByHashLib.URL_LOADED_BY_HASH = {};
+    var URL_LOADED_BY_HASH = Kobayashi.URL_LOADED_BY_HASH = {};
     
     // If the hash changes before all ajax requests complete,
     // we want to cancel the pending requests. MAX_REQUEST is actually the number
@@ -87,8 +87,6 @@ ContentByHashLib.LOADED_MEDIA = {};
     // abstain from reloading if we have not.
     var PAGE_CHANGED = 0;
     
-    var ADDRESS_POSTPROCESS = ContentByHashLib.ADDRESS_POSTPROCESS = {};
-    
     function object_empty(o) {
         for (var k in o) return false;
         return true;
@@ -107,7 +105,7 @@ ContentByHashLib.LOADED_MEDIA = {};
         if (!el) return null;
         return { container: el, id: el.id, url: LOADED_URLS[ el.id ], toString: function(){return this.id} };
     }
-    ContentByHashLib.closest_loaded = closest_loaded;
+    Kobayashi.closest_loaded = closest_loaded;
     
     function inject_content($target, data, address, extras) {
         // whatever was loaded inside, remove it from LOADED_URLS
@@ -135,7 +133,7 @@ ContentByHashLib.LOADED_MEDIA = {};
             load_content(arg);
             if ( extras.by_hash ) {
                 var literal_target_id = extras.target_id + '::';
-                if (extras.target_id == ContentByHashLib.DEFAULT_TARGET) {
+                if (extras.target_id == Kobayashi.DEFAULT_TARGET) {
                     if (location.hash.indexOf('#'+extras.target_id+'::') < 0) {
                         literal_target_id = '';
                     }
@@ -210,7 +208,7 @@ ContentByHashLib.LOADED_MEDIA = {};
         }
         $target.empty().append($err_div);
     }
-    ContentByHashLib.inject_error_message = inject_error_message;
+    Kobayashi.inject_error_message = inject_error_message;
     
     // get new index to LOAD_BUF (the request queue), either on its end (normal) or at the beginning (is_priority == true)
     function alloc_loadbuf(is_priority) {
@@ -288,7 +286,7 @@ ContentByHashLib.LOADED_MEDIA = {};
         var target_id = arg.target_id;
         var address = arg.address;
         if (target_id == undefined) {
-            carp('ERROR: ContentByHashLib.load_content must get target_id field in its argument.');
+            carp('ERROR: Kobayashi.load_content must get target_id field in its argument.');
             return;
         }
         ;;; carp('loading '+address+' into #'+target_id);
@@ -362,7 +360,7 @@ ContentByHashLib.LOADED_MEDIA = {};
             original_options: arg
         });
     }
-    ContentByHashLib.load_content = load_content;
+    Kobayashi.load_content = load_content;
     
     function reload_content(container_id) {
         var addr = LOADED_URLS[ container_id ] || '';
@@ -371,7 +369,7 @@ ContentByHashLib.LOADED_MEDIA = {};
             address: addr
         });
     }
-    ContentByHashLib.reload_content = reload_content;
+    Kobayashi.reload_content = reload_content;
     
     function unload_content(container_id, options) {
         if (!options) options = {};
@@ -382,7 +380,7 @@ ContentByHashLib.LOADED_MEDIA = {};
             $container.empty();
         }
     }
-    ContentByHashLib.unload_content = unload_content;
+    Kobayashi.unload_content = unload_content;
     
     // We want location.hash to exactly describe what's on the page.
     // #url means that the result of $.get(url) be loaded into the default target div.
@@ -403,18 +401,10 @@ ContentByHashLib.LOADED_MEDIA = {};
         for (var i = 0; i < specifiers.length; i++) {
             var spec = specifiers[ i ];
             var address = spec;
-            var target_id = ContentByHashLib.DEFAULT_TARGET;
+            var target_id = Kobayashi.DEFAULT_TARGET;
             if (spec.match(/^([-\w]+)::(.*)/)) {
                 target_id = RegExp.$1;
                 address = RegExp.$2;
-            }
-            
-            // check if the address is not to be automagically modified
-            if (ADDRESS_POSTPROCESS[ address ]) {
-                address = ADDRESS_POSTPROCESS[ address ];
-                specifiers[i] = (spec.indexOf('::')>=0 ? spec.substr(0, spec.indexOf('::') + '::'.length) : '') + address;
-                location.replace( '#' + specifiers.join('#') );
-                return;
             }
             
             requested[ target_id ] = address;
@@ -574,7 +564,7 @@ ContentByHashLib.LOADED_MEDIA = {};
         var target_id;
         var colon_index = specifier.indexOf('::');
         if (colon_index < 0) {
-            target_id = ContentByHashLib.DEFAULT_TARGET;
+            target_id = Kobayashi.DEFAULT_TARGET;
         }
         else {
             target_id = specifier.substr(0, colon_index);
@@ -590,7 +580,7 @@ ContentByHashLib.LOADED_MEDIA = {};
         
         load_content({target_id:target_id, address:address});
     }
-    ContentByHashLib.simple_load = simple_load;
+    Kobayashi.simple_load = simple_load;
     
     // Set up event handlers
     $('.js-simpleload,.js-simpleload-container a').live('click', function(evt) {
@@ -711,7 +701,7 @@ function adr(address, options) {
     // in it which is not in the hash, correct it first
     if (!options._hash_preproc) {
         var acc2hash   = get_hashadr(target_id+'::', {_hash_preproc:true});
-        var acc2record = ContentByHashLib.LOADED_URLS[ target_id ];
+        var acc2record = Kobayashi.LOADED_URLS[ target_id ];
         if (acc2record && acc2hash != acc2record) {
             hash = get_hash(target_id+'::'+acc2record, {_hash_preproc:true});
         }
@@ -862,7 +852,7 @@ function get_hash(address, options) {
         var err_fn  = callbacks.err_fn;
         var next_fn = callbacks.next_fn;
         
-        if (ContentByHashLib.LOADED_MEDIA[ url ]) {
+        if (Kobayashi.LOADED_MEDIA[ url ]) {
             if ($.isFunction(succ_fn)) succ_fn(url);
             if ($.isFunction(next_fn)) next_fn(url);
             ;;; carp('Skipping loaded medium: '+url);
@@ -906,7 +896,7 @@ function get_hash(address, options) {
             
             setTimeout(function() {
                 if (--tries < 0) {
-                    ContentByHashLib.LOADED_MEDIA[ url ] = false;
+                    Kobayashi.LOADED_MEDIA[ url ] = false;
                     carp('Timed out loading CSS: '+url);
                     if ($.isFunction(err_fn)) err_fn(url);
                     return;
@@ -915,13 +905,13 @@ function get_hash(address, options) {
                 if (ss = stylesheet_present(abs_url)) {
                     var rules = get_css_rules(ss);
                     if (rules && rules.length) {
-                        ContentByHashLib.LOADED_MEDIA[ url ] = true;
+                        Kobayashi.LOADED_MEDIA[ url ] = true;
                         if ($.isFunction(succ_fn)) succ_fn(url);
                         ;;; carp('CSS Successfully loaded: '+url);
                         
                     }
                     else {
-                        ContentByHashLib.LOADED_MEDIA[ url ] = false;
+                        Kobayashi.LOADED_MEDIA[ url ] = false;
                         if (rules) carp('CSS stylesheet empty.');
                         if ($.isFunction(err_fn)) err_fn(url);
                         return;
@@ -949,13 +939,13 @@ function get_hash(address, options) {
                 type: 'GET',
                 dataType: 'script',
                 success: function() {
-                    ContentByHashLib.LOADED_MEDIA[ this.url ] = true;
+                    Kobayashi.LOADED_MEDIA[ this.url ] = true;
                     if ($.isFunction(succ_fn)) succ_fn(url);
                     if ($.isFunction(next_fn)) next_fn(url);
                     ;;; carp('JS Successfully loaded: '+this.url);
                 },
                 error: function() {
-                    ContentByHashLib.LOADED_MEDIA[ this.url ] = false;
+                    Kobayashi.LOADED_MEDIA[ this.url ] = false;
                     if ($.isFunction( err_fn))  err_fn(url);
                     if ($.isFunction(next_fn)) next_fn(url);
                     carp('Failed to load JS: '+url, this);
@@ -965,7 +955,7 @@ function get_hash(address, options) {
         }
         else throw('Unrecognized media type "'+ext+'" in URL: '+url);
     }
-    ContentByHashLib.load_media = load_media;
+    Kobayashi.load_media = load_media;
     
     
     var media_queue = [];
