@@ -122,10 +122,7 @@ class ListingManager(models.Manager):
             )
         return qset
 
-    def get_queryset(self, category=None, children=NONE, mods=[], content_types=[], now=datetime.now(), **kwargs):
-        """
-        FIXME - name this better!
-        """
+    def get_listing_queryset(self, category=None, children=NONE, mods=[], content_types=[], now=datetime.now(), **kwargs):
         qset = self.filter(publish_from__lte=now, **kwargs)
 
         if category:
@@ -171,7 +168,7 @@ class ListingManager(models.Manager):
         now = datetime.now()
         if 'now' in kwargs:
             now = kwargs.pop('now')
-        qset = self.get_queryset(category, children, mods, content_types, now, **kwargs)
+        qset = self.get_listing_queryset(category, children, mods, content_types, now, **kwargs)
 
         # templates are 1-based, compensate
         offset -= 1
