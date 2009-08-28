@@ -1,5 +1,4 @@
 from itertools import chain
-from datetime import datetime
 
 from django import forms
 from django.conf import settings
@@ -8,7 +7,7 @@ from django.db.models.fields.related import ForeignKey
 from django.contrib.admin import widgets
 from django.template import Context
 from django.template.loader import get_template
-from django.utils.translation import ugettext_lazy as _, ugettext
+from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_unicode
 from django.utils.html import escape
 from django.utils.text import truncate_words
