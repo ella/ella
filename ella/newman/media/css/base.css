@@ -469,7 +469,7 @@ div.model-help h3 { font-size: 120% }
 div.model-help h4 { font-size: 105% }
 
 /* WIDGETS etc. */
-a.widget-thumb { border: 1px solid #ccc; margin-right: 5px; }
+span.widget-thumb img { border: 1px solid #ccc; margin-right: 5px; }
 
 /* SORTABLE GALLERY ITEMS */
 .gallery-items-sortable { background: #fff; border: 1px solid #ddd; -moz-border-radius: 5px; -webkit-border-radius: 5px; -khtml-border-radius: 5px; }

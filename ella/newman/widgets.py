@@ -257,7 +257,7 @@ class ForeignKeyRawIdWidget(forms.TextInput):
         output = []
         if value and issubclass(self.rel.to, Photo):
             obj = self._get_obj(value)
-            output.append('<a href="%s" class="widget-thumb thickbox">%s</a>' % (obj.image.url, obj.thumb()))
+            output.append('<span class="widget-thumb">%s</span>' % obj.thumb())
         output.append(super(ForeignKeyRawIdWidget, self).render(name, value, attrs))
         output.append(' <a href="%s%s?pop" class="rawid-related-lookup" id="lookup_id_%s">' % \
             (related_url, url, name))
