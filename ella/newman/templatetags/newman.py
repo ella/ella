@@ -5,6 +5,7 @@ from django.utils.safestring import mark_safe
 from ella.newman import site, permission
 from django.utils.translation import ugettext_lazy
 from ella.newman.utils import get_log_entries
+from ella.newman.config import NEWMAN_FAVORITE_ITEMS
 
 
 register = template.Library()
@@ -58,28 +59,13 @@ def newman_topmenu(context):
     }
 
 
-FAVS = (
-    'publishable',
-    'article',
-#    'placement',
-    'photo',
-    'gallery',
-    'survey',
-    'quiz',
-    'contest',
-    'interview',
-    'position',
-#    'category',
-#    'author',
-)
-
 @register.inclusion_tag('newman/tpl_tags/newman_favorites.html', takes_context=True)
 def newman_favorites(context):
     global_favs = []
     all_apps = newman_topmenu(context)
     for app in all_apps['app_list']:
         for m in app['models']:
-            if m['model'] in FAVS:
+            if m['model'] in NEWMAN_FAVORITE_ITEMS:
                 global_favs.append(m)
 
     return {

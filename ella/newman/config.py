@@ -49,4 +49,16 @@ TAGGED_MODELS = getattr(settings, 'TAGGED_MODELS', (
     # 'photos.photo',
 ))
 
+NEWMAN_FAVORITE_ITEMS = getattr(settings, 'NEWMAN_FAVORITE_ITEMS', (
+    'publishable',
+    'article',
+    'photo',
+    'gallery',
+    'survey',
+    'quiz',
+    'contest',
+    'interview',
+    'position',
+))
+
 # TODO try to load consts from django.conf.settings
