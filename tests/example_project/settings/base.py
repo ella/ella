@@ -25,7 +25,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'ella.newman.middleware.AdminSettingsMiddleware',
-#    'ella.newman.middleware.ErrorOutputMiddleware',
+    'ella.newman.middleware.ErrorOutputMiddleware',
 )
 
 ROOT_URLCONF = 'example_project.urls'
@@ -72,6 +72,9 @@ INSTALLED_APPS = (
     'ella.galleries',
     'ella.interviews',
     'ella.exports',
+    'ella.media',
+    'ella.attachments',
+    'nc.cdnclient',
 
     'example_project.services',
 
