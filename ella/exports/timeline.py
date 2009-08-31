@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import logging
+from urllib import urlencode
 
 from django.conf.urls.defaults import patterns, url
 from django.utils.translation import ugettext_lazy as _
@@ -14,6 +15,7 @@ from django.shortcuts import render_to_response
 from ella.exports import models
 from ella.exports.managers import ExportItemizer
 from ella.utils import remove_diacritical
+from ella.newman import utils
 
 DATETIME_FORMAT = models.DATETIME_FORMAT
 TIME_FORMAT = models.TIME_FORMAT
@@ -23,7 +25,7 @@ log = logging.getLogger('ella.exports')
 def get_timerange(year=datetime.now().year, month=datetime.now().month, day=datetime.now().day):
     now = datetime.now()
     out = list()
-    for d in range(-2, 14):
+    for d in range(-14, 14):
         dt = timedelta(days=d)
         for h in [h for h in range(23) if h % 2 == 0]:
             t = datetime(year, month, day, h, 0) + dt
@@ -112,15 +114,24 @@ def timeline_view(request, extra_context=None):
     export = None
     cx = dict()
     FormClass = get_export_choice_form()
-    if 'export_slug' in request.GET:
-        cx['export_form'] = FormClass(request.GET)
+    request_data = request.GET
+    if 'show' not in request_data and 'export_slug' in request_data:
+        new_path = (
+            request.path,
+            '?',
+            'show=1&',
+            urlencode(request_data)
+        )
+        return utils.JsonResponseRedirect(''.join(new_path))
+    elif 'show' in request_data and 'export_slug' in request_data:
+        cx['export_form'] = FormClass(request_data)
     else:
         cx['export_form'] = FormClass()
     if cx['export_form'].is_valid():
         log.debug('GENERATING EXPORT ITEMS')
-        slug = request.GET['export_slug']
-        range_from = request.GET['range_from']
-        range_to = request.GET['range_to']
+        slug = request_data['export_slug']
+        range_from = request_data['range_from']
+        range_to = request_data['range_to']
         items = get_timelined_items(slug, range_from, range_to)
         export = models.Export.objects.get(slug=slug)
         cx.update({
