@@ -209,13 +209,13 @@ class ExportItemizer(object):
                 Q(visible_to__gte=self._datetime_from) | Q(visible_to__isnull=True),
                 export=use_export, 
                 position__exact=POSITION_IS_NOT_OVERLOADED,
-                visible_from__lt=self._datetime_from,
+                visible_from__lte=self._datetime_from,
             )
             fix_positions = ExportPosition.objects.filter(
                 Q(visible_to__gte=self._datetime_from) | Q(visible_to__isnull=True),
                 export=use_export, 
                 position__gt=POSITION_IS_NOT_OVERLOADED,
-                visible_from__lt=self._datetime_from,
+                visible_from__lte=self._datetime_from,
             )
             objects = list(Listing.objects.get_listing(
                 use_category, 
