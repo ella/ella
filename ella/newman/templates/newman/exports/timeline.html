@@ -7,10 +7,10 @@
 {% endblock %}
 
 {% block content %}
-    <form action="" method="get">
+    <form action="/newman/exports/export/timeline/" method="get" class="js-form">
         <ul>
         {{ export_form.as_ul }}
-            <li><input type="submit" /></li>
+            <li><a id="id-send-timeline" class="js-submit icn btn ok">{% trans "Send" %}</a></li>
         <ul>
     </form>
     <table id="id-exported-items">
@@ -20,7 +20,7 @@
                 {% if forloop.parentloop.first %}
                     <th>{{ column }}</th>
                 {% else %}
-                    <td>{{ column }}</td>
+                    <td><p class="id-item">{{ column }}</p></td>
                 {% endif %}
             {% endfor %}
         </tr>
