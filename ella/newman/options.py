@@ -717,7 +717,6 @@ class NewmanModelAdmin(XModelAdmin):
         return context
 
     @utils.profiled_section
-    @require_AJAX
     @transaction.commit_on_success
     def change_json_view(self, request, object_id, extra_context=None):
         "The 'change' admin view for this model."
@@ -747,7 +746,6 @@ class NewmanModelAdmin(XModelAdmin):
         return self.json_error_response(request, context)  # Json response
 
     @utils.profiled_section
-    @require_AJAX
     def change_view(self, request, object_id, extra_context=None):
         "The 'change' admin view for this model."
         if request.method.upper() != 'GET':
@@ -783,7 +781,6 @@ class NewmanModelAdmin(XModelAdmin):
         #return utils.JsonResponse(_('Object was deleted.'))
         return utils.JsonResponseRedirect(result['Location'])
 
-    @require_AJAX
     @transaction.commit_on_success
     def add_json_view(self, request, form_url='', extra_context=None):
         "The 'add' admin view for this model. Communicating with client in JSON format only."
