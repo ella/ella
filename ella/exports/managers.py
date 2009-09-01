@@ -200,6 +200,7 @@ class ExportItemizer(object):
             use_category = self.export.category
         if exports:
             use_export = exports[0]
+            self.export = exports[0]
             if not self._max_visible_items:
                 max_items = use_export.max_visible_items
             else:
