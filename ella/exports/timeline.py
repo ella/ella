@@ -20,6 +20,7 @@ from ella.newman import utils
 DATETIME_FORMAT = models.DATETIME_FORMAT
 TIME_FORMAT = models.TIME_FORMAT
 TIMELINE_STEP = timedelta(hours=2)  # two hours
+EMPTY_TIMELINE_CELL = None
 log = logging.getLogger('ella.exports')
 
 def get_timerange(year=datetime.now().year, month=datetime.now().month, day=datetime.now().day):
@@ -58,6 +59,8 @@ def get_timelined_items(slug, range_from, range_to, step=TIMELINE_STEP):
         column.append(itemizer.datetime_from.strftime(DATETIME_FORMAT))
         map(lambda x: column.append(x), itemizer)
         if not out or (out and out[-1] != column):
+            while (len(column) - 1) < itemizer.export.max_visible_items:
+                column.append(EMPTY_TIMELINE_CELL)
             log.debug(remove_diacritical('COLUMN: %s' % column))
             out.append(column)
 
@@ -80,7 +83,7 @@ def reformat_list_for_table(list_data):
             if len(column) > row_index:
                 cell = column[row_index]
             else:
-                cell = None
+                cell = EMPTY_TIMELINE_CELL
             table_row.append(cell)
         table.append(table_row)
     return table
