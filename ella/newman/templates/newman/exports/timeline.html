@@ -1,10 +1,6 @@
 {% extends "newman/change_list.html" %}
 {% load newman_list admin_list %}
 
-{% block content_toolbar_right %}
-    <a href="timeline/" class="js-hashadr icn btn history">{% trans "Timeline view" %}</a>
-    {{ block.super }}
-{% endblock %}
 
 {% block content %}
     <form action="/newman/exports/export/timeline/" method="get" class="js-form">
@@ -13,6 +9,53 @@
             <li><a id="id-send-timeline" class="js-submit icn btn ok">{% trans "Send" %}</a></li>
         <ul>
     </form>
+   
+    <div id="id-modal-dialog" class="noscreen service-module">
+        <div id="id-publishable-dialog" class="service-module-in" style="height: 400px; overflow: auto; position: fixed; top:200px;">
+            <label for="id_publishable_suggest" style="float: left;">{% trans 'Publishable object' %}: </label>
+            <div style="width: 300px; float: left;">
+                <input id="id_publishable" class="vForeignKeyRawIdAdminField hidden" type="text" name="publishable" style="display: none;"/>
+                <ul class="GenericSuggestField">
+                <li>
+                <input id="id_publishable_suggest" type="text" rel="/core/publishable/suggest/?f=__unicode__&f=title&f=slug&q=" autocomplete="off"/>
+                </li>
+                </ul>
+                <!-- a id="lookup_id_publishable" class="suggest-related-lookup" href="/core/publishable/?pop"></a -->
+            </div>
+            <a href="">{% trans "Continue" %}</a>
+        </div>
+    </div>
+
+    <div class="timeline-table">
+    {% for column in timeline_data %}
+        <div class="timeline-column">
+        <p class="descriotion">
+            {{ column.0 }}
+        </p>
+        <div class="timeline-ul">
+            {% for cell in column %}
+                {% if not forloop.first %}
+                    <div class="timeline-item">
+                        <p>{{ cell }}</p>
+                        {% if cell.pk %}
+                        <div class="timeline-item-navigation noscreen">
+                            <a href="">{% trans "Edit" %}</a>
+                            <a href="">{% trans "Delete" %}</a>
+                            <a href="">{% trans "Append" %}</a>
+                            <span class="insert">{% trans "Insert" %}</span>
+                            <!-- {% newmanurl newman:exports_export_timeline_insert id_item=cell.pk,id_export=export.pk,position=forloop.counter %} -->
+                        </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div> {# timeline-ul #}
+        </div> {# timeline-column #}
+    {% endfor %}
+    <h1> {{ NEWMAN_MEDIA_URL }} </h1>
+    </div> {# timeline-table #}
+
+    {% comment %}{# TIMELINE AS TABLE #}
     <table id="id-exported-items">
     {% for row in timeline_table %}
         <tr>
@@ -20,10 +63,27 @@
                 {% if forloop.parentloop.first %}
                     <th>{{ column }}</th>
                 {% else %}
-                    <td><p class="id-item">{{ column }}</p></td>
+                    <td><p class="timeline-item">{{ column }}</p></td>
                 {% endif %}
             {% endfor %}
         </tr>
     {% endfor %}
     </table>
+    {% endcomment %}
+{% endblock %}
+
+
+{% block content_js %}
+    {{ block.super }}
+    <script type="text/javascript">
+        request_media(MEDIA_URL + 'jquery/jquery-ui.js');
+        request_media(MEDIA_URL + 'jquery/jquery-ui-smoothness.css');
+        request_media(MEDIA_URL + 'js/generic.suggest.js?{{ VERSION }}');
+        request_media(MEDIA_URL + 'css/generic.suggest.css?{{ VERSION }}');
+    </script>
+
+    <!-- timeline scripting -->
+    <script type="text/javascript">
+        timeline_init();
+    </script>
 {% endblock %}

@@ -11,6 +11,8 @@ a img { border: none; }
 p, ul, ol, h1, h2, h3, h4, h5 { margin: .2em 0; }
 ul, ol { margin-left: 2em; }
 
+.noscreen { display: none; }
+
 /* base default layout */
 * { margin: 0; padding: 0; }
 
@@ -494,6 +496,31 @@ fieldset.collapse legend { background-image: url(../ico/16/14_layer_raiselayer.p
     padding: 10px;
     z-index: 50; overflow: auto; opacity: .9; display: none;
 }
+
+/* TIMELINE */
+
+.timeline-column {
+    width: 110px;
+    float: left;
+}
+
+.timeline-table {
+    min-width: 940px;
+}
+
+.timeline-item {
+    border: 1px solid gray;
+    min-height: 80px;
+    overflow: auto;
+}
+.timeline-ul { }
+
+.timeline-table .timeline-ul .timeline-item:hover {
+    background: white;
+    border: 1px solid #77B150;
+}
+
+/* /TIMELINE */
 
 /* SERVICE DIALOGS (model help, history, delete confirmation, filters...) */
 .service-module { position: fixed; top: 0; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,.8); z-index: 5; }

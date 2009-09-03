@@ -1277,3 +1277,62 @@ function DATEPICKER_OPTIONS(opts) {
         this[o] = opts[o];
     }
 }
+
+
+// TIMELINE (ella.exports application)
+
+function timeline_changed(event, ui) {
+    console.log("Timeline changed:", event);
+}
+
+function timeline_item_clicked(event, ui) {
+    console.log("Item hit:", event);
+}
+
+function timeline_item_mouse_over(event, ui) {
+    $(this).find('.timeline-item-navigation').show()
+}
+
+function timeline_item_mouse_out(event, ui) {
+    $(this).find('.timeline-item-navigation').hide()
+}
+
+function timeline_drag_update(event, ui) {
+    /*var $target = $( evt.target );
+    $target.find('input.item-order').each( function(i) {
+        var ord = i+1;
+        $(this).val( ord ).change();
+        $(this).siblings('h4:first').find('span:first').text( ord );
+    });
+    $target.children().removeClass('last-related');
+    $target.children(':last').addClass('last-related');*/
+}
+
+function timeline_sortable() {
+    var sortable_params = {
+        axis: 'y',
+        items: '.timeline-item',
+        containment: 'parent',
+        cursor: 'move',
+        delay: 100,
+        // callback when timeline is changed
+        stop: timeline_changed,
+        update: timeline_drag_update,
+    }
+    $('.timeline-ul').sortable(sortable_params);
+    $('.timeline-ul').disableSelection();
+    $('.timeline-item').click(timeline_item_clicked);
+    $('.timeline-item').hover(timeline_item_mouse_over, timeline_item_mouse_out);
+    $('.timeline-item-navigation .insert').live(
+        'click', 
+        function() {
+            $('#id-modal-dialog').show();
+        }
+    );
+}
+
+function timeline_init() {
+    $(document).ready(timeline_sortable);
+}
+
+// EOF
