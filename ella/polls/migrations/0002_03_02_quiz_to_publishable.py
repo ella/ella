@@ -2,9 +2,7 @@
 from south.db import db
 from django.db import models
 
-from ella.hacks import south
-
-from ella.core.migrations.base.base_0002 import BasePublishableDataMigration, BasePublishableDataPlugin
+from ella.core.migrations.base.base_0002 import BasePublishableDataMigration
 from ella.core.migrations.base.base_0002 import alter_foreignkey_to_int, migrate_foreignkey
 
 
@@ -24,9 +22,6 @@ class Migration(BasePublishableDataMigration):
             },
         }
     )
-
-class Plugin(BasePublishableDataPlugin):
-    migration = Migration
 
     app_label = 'polls'
     model = 'quiz'
@@ -48,4 +43,3 @@ class Plugin(BasePublishableDataPlugin):
         # migrate new quiz IDs to results
         migrate_foreignkey(self.app_label, self.model, 'polls_result', self.model, self.orm)
 
-south.plugins.register("core", "0002_03_move_publishable_data", Plugin())

@@ -2,7 +2,7 @@
 from south.db import db
 from django.db import models
 
-from ella.core.migrations.base.base_0002 import BasePublishableDataMigration, BasePublishableDataPlugin
+from ella.core.migrations.base.base_0002 import BasePublishableDataMigration
 from ella.core.migrations.base.base_0002 import alter_foreignkey_to_int, migrate_foreignkey
 
 

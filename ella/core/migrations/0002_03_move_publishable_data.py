@@ -9,6 +9,12 @@ class Migration:
     # from each migration in installed_apps, that contains run_before
     depends_on = (
         ('articles', '0002_03_move_article_data'),
+        ('galleries', '0002_03_gallery_to_publishable'),
+        ('interviews'), ('0002_03_interview_to_publishable'),
+        ('media'), ('0002_03_media_to_publishable'),
+        ('polls'), ('0002_03_01_contest_to_publishable'),
+        ('polls'), ('0002_03_02_quiz_to_publishable'),
+        ('series'), ('0002_03_serie_to_publishable'),
     )
 
     def forwards(self, orm):
