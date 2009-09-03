@@ -8,21 +8,22 @@
 
 {% cache 300 'nm-hp-cal' user %}
 <div class="hpcol" style="width: 25%;">
-
-    {# ein Kalendar, bitte #}
-    <div class="hpbox calendar">
-        <h3><span>{% trans "Calendar" %}</span></h3>
-        <div class="cnt">
-            <div class="cal">
+    {% if show_calendar %}
+        {# ein Kalendar, bitte #}
+        <div class="hpbox calendar">
+            <h3><span>{% trans "Calendar" %}</span></h3>
+            <div class="cnt">
+                <div class="cal">
+                </div>
+                {% comment %}
+                <div class="shortcuts">
+                    <a href="">{% trans 'This month' %}</a>
+                    | <a href="">{% trans 'This year' %}</a>
+                </div>
+                {% endcomment %}
             </div>
-            {% comment %}
-            <div class="shortcuts">
-                <a href="">{% trans 'This month' %}</a>
-                | <a href="">{% trans 'This year' %}</a>
-            </div>
-            {% endcomment %}
         </div>
-    </div>
+    {% endif %}
 {% endcache %}
     <div class="hpbox setup">
         <h3><span>{% trans "Quick Settings" %}</span></h3>
@@ -64,7 +65,7 @@
 
 </div>
 
-{% cache 300 'nm-hp-search' %}
+{% cache 300 'nm-hp-search' user %}
 <div class="hpcol" style="width: 50%;">
 
     <div class="hpbox search" id="search-form">

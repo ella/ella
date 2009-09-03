@@ -2,11 +2,7 @@
 from south.db import db
 from django.db import models
 
-from ella.hacks import south
-
-from ella.galleries.models import *
-
-from ella.core.migrations.base.base_0002 import BasePublishableDataMigration, BasePublishableDataPlugin
+from ella.core.migrations.base.base_0002 import BasePublishableDataMigration
 from ella.core.migrations.base.base_0002 import alter_foreignkey_to_int, migrate_foreignkey
 
 
@@ -17,14 +13,11 @@ class Migration(BasePublishableDataMigration):
             'galleries.gallery': {
                 'Meta': {'_bases': ['ella.core.models.publishable.Publishable']},
                 'content': ('models.TextField', ["_('Content')"], {'blank': 'True'}),
-                'created': ('models.DateTimeField', ["_('Created')"], {'default': 'datetime.now', 'editable': 'False'}),
+                'created': ('models.DateTimeField', ["_('Created')"], {'default': 'datetime.datetime.now', 'editable': 'False'}),
                 'publishable_ptr': ('models.OneToOneField', ["orm['core.Publishable']"], {})
             },
         }
     )
-
-class Plugin(BasePublishableDataPlugin):
-    migration = Migration
 
     app_label = 'galleries'
     model = 'gallery'
@@ -59,4 +52,3 @@ class Plugin(BasePublishableDataPlugin):
         migrate_foreignkey(self.app_label, self.model, 'galleries_galleryitem', self.model, self.orm)
         db.create_unique('galleries_galleryitem', ('gallery_id','order'))
 
-south.plugins.register("core", "0002_03_move_publishable_data", Plugin())

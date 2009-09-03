@@ -248,7 +248,8 @@ class NewmanSite(AdminSite):
             'searchable_content_types': cts,
             'last_filters': last_filters,
             'future_placements': future_placements,
-            'publishable_lookup_fields': publishable_lookup_fields
+            'publishable_lookup_fields': publishable_lookup_fields,
+            'show_calendar': has_model_list_permission(request.user, Publishable),
         }
         context.update(extra_context or {})
         return render_to_response('newman/newman-index.html', context,

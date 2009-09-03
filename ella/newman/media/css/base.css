@@ -371,26 +371,6 @@ a.cl-publishable-link.contest { background-image: url(../ico/ct/16/contest.png);
     display: none;
 }
 
-/* OBJECT HISTORY (in change_form) */
-#history {
-    border: 1px outset #ddd;
-    position: absolute;
-    right: 6px;
-    top: 55px;
-    width: 70%;
-    background: #eeeeec;
-    display: none;
-    -moz-border-radius: 7px;
-    -webkit-border-radius: 7px;
-    -khtml-border-radius: 7px;
-}
-#history div.module {
-    margin: 10px;
-    max-height: 300px;
-    overflow: auto;
-    background: #eee;
-}
-
 /* CHANGELIST FILTERS */
 #filters {
     border: 1px outset #ddd;
@@ -439,36 +419,6 @@ div.pop #filters { top: 35px }
 #filters .selected {
     font-weight: bold;
 }
-
-/* MODEL HELP CONTAINER */
-
-div.model-help {
-    font: normal 95%/130% "Trebuchet MS", Arial, sans-serif;
-    border: 1px outset #ddd;
-    position: absolute;
-    top: 55px; right: 6px; min-width: 400px; width: 70%;
-    opacity: .95;
-    background: #fff url(../img/horst1.jpg) left bottom no-repeat;
-    -moz-border-radius: 7px;
-    -webkit-border-radius: 7px;
-    -khtml-border-radius: 7px;
-    border-radius: 7px;
-    height: 410px;
-}
-div.model-help div.cnt {
-    margin: 10px 10px 5px 200px;
-    max-height: 360px;
-    overflow: auto;
-}
-div.model-help .submit-row {
-    margin: 10px 10px 10px 200px;
-}
-div.model-help h1, div.model-help h2, div.model-help h3, div.model-help h4, div.model-help p, div.model-help ul, div.model-help ol {
-    margin: .5em 0 .3em 0;
-}
-div.model-help h2 { font-size: 130% }
-div.model-help h3 { font-size: 120% }
-div.model-help h4 { font-size: 105% }
 
 /* WIDGETS etc. */
 span.widget-thumb img { border: 1px solid #ccc; margin-right: 5px; }
@@ -547,7 +497,6 @@ fieldset.collapse legend { background-image: url(../ico/16/14_layer_raiselayer.p
     z-index: 50; overflow: auto; opacity: .9; display: none;
 }
 
-
 /* TIMELINE */
 
 .timeline-column {
@@ -572,3 +521,59 @@ fieldset.collapse legend { background-image: url(../ico/16/14_layer_raiselayer.p
 }
 
 /* /TIMELINE */
+
+/* SERVICE DIALOGS (model help, history, delete confirmation, filters...) */
+.service-module {
+    position: fixed; top: 0; bottom: 0; left: 0; right: 0; background: #000; z-index: 10; opacity: .8;
+}
+.service-module .service-module-in {
+    -moz-border-radius: 7px;
+    -webkit-border-radius: 7px;
+    -khtml-border-radius: 7px;
+    border-radius: 7px;
+}
+
+/* MODEL HELP CONTAINER */
+
+.service-module.model-help .service-module-in {
+    font: normal 95%/130% "Trebuchet MS", Arial, sans-serif;
+    border: 1px outset #ddd;
+    position: absolute;
+    top: 160px; right: 10px; min-width: 400px; width: 70%;
+    background: #fff url(../img/horst1.jpg) left bottom no-repeat;
+    height: 410px;
+}
+.model-help .cnt {
+    margin: 10px 10px 5px 200px;
+    max-height: 360px;
+    overflow: auto;
+}
+.model-help .submit-row {
+    margin: 10px 10px 10px 200px;
+}
+div.model-help h1, div.model-help h2, div.model-help h3, div.model-help h4, div.model-help p, div.model-help ul, div.model-help ol {
+    margin: .5em 0 .3em 0;
+}
+div.model-help h2 { font-size: 130% }
+div.model-help h3 { font-size: 120% }
+div.model-help h4 { font-size: 105% }
+
+/* OBJECT HISTORY (in change_form) */
+#history {
+    border: 1px outset #ddd;
+    position: absolute;
+    right: 6px;
+    top: 55px;
+    width: 70%;
+    background: #eeeeec;
+    display: none;
+    -moz-border-radius: 7px;
+    -webkit-border-radius: 7px;
+    -khtml-border-radius: 7px;
+}
+#history div.module {
+    margin: 10px;
+    max-height: 300px;
+    overflow: auto;
+    background: #eee;
+}
