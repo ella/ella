@@ -135,8 +135,6 @@ class BasePublishableDataMigration(object):
         pass
 
     def forwards(self, orm):
-        if not db.dry_run:
-            print "  > Running plugin %s" % self
         # migrate publishables
         self.forwards_publishable(orm)
         # migrate generic relations
