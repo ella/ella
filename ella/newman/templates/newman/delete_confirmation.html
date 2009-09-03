@@ -1,8 +1,7 @@
 {% spaceless %}
 <div class="service-module delete-confirmation">
-    <div class="service-module-in" style="margin: 5px;">
-        <div class="cnt" style="position: fixed; top: 200px; bottom: 85px; right: 10px; width: 600px; overflow: auto; background: #fff; border: 2px solid #d66; -moz-border-radius: 10px; -webkit-border-radius: 10px;">
-            {% block content %}
+    <div class="service-module-in">
+        <div class="cnt">
             {% if perms_lacking %}
                 <p>{% blocktrans with object as escaped_object %}Deleting the {{ object_name }} '{{ escaped_object }}' would result in deleting related objects, but your account doesn't have permission to delete the following types of objects:{% endblocktrans %}</p>
                 <ul>
@@ -13,15 +12,16 @@
             {% else %}
                 <p>{% blocktrans with object as escaped_object %}Are you sure you want to delete the {{ object_name }} "{{ escaped_object }}"? All of the following related items will be deleted:{% endblocktrans %}</p>
                 <ul class="js-hashadr-container">{{ deleted_objects|unordered_list }}</ul>
-                <form action="delete/" class="js-form js-dyn-adr" method="post">
-                    <div>
-                        <input type="hidden" name="post" value="yes" />
-                        <a class="icn btn cancel js-simpleload" href="service-container::::delete/">{% trans "Cancel" %}</a>
-                        <a class="icn btn ok def js-submit">{% trans "Yes, I'm sure" %}</a>
-                    </div>
-                </form>
             {% endif %}
-            {% endblock %}
+            <div class="submit-row">
+                <form action="delete/" class="js-form js-dyn-adr" method="post">
+                    <a class="icn btn cancel js-simpleload" href="service-container::::delete/">{% trans "Cancel" %}</a>
+                    {% if not perms_lacking %}
+                        <input type="hidden" name="post" value="yes" />
+                        <a class="icn btn ok def js-submit">{% trans "Yes, I'm sure" %}!</a>
+                    {% endif %}
+                </form>
+            </div>
         </div>
     </div>
 </div>
