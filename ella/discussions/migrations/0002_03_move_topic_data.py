@@ -27,14 +27,10 @@ class Migration(BasePublishableDataMigration):
     }
 
     def alter_self_foreignkeys(self, orm):
-        # there are no authors !
-        super(Migration, self).alter_self_foreignkeys(orm)
         # migrate new topic IDs to topicthread
         alter_foreignkey_to_int('discussions_topicthread', 'topic')
 
     def move_self_foreignkeys(self, orm):
-        # there are no authors !
-        super(Migration, self).move_self_foreignkeys(orm)
         # migrate new topic IDs to topicthread
         migrate_foreignkey(self.app_label, self.model, 'discussions_topicthread', self.model, self.orm)
 
