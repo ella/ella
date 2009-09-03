@@ -142,7 +142,8 @@ def timeline_view(request, extra_context=None):
         export = models.Export.objects.get(slug=slug)
         cx.update({
             'export': export,
-            'timeline_table': reformat_list_for_table(items),
+            #'timeline_table': reformat_list_for_table(items),
+            'timeline_data': items,
         })
     template_paths = [
         'newman/exports/timeline.html',
@@ -155,3 +156,20 @@ def timeline_view(request, extra_context=None):
         template_paths,
         cx
     )
+
+
+def timeline_insert_view(request, id_item=None, id_export=None, position=None):
+    """
+    Inserts export element before an item (via ExportPosition and ExportMeta).
+    @param   id_item     Existing Publishable object placed after new inserted item. 
+    @param   position    Existing Publishable object's position after new inserted item.
+    @param   id_export   Export object id.
+
+    1. get Export object associated with item.
+    2. create ExportMeta for item.
+    3. create ExportPosition for ExportMeta. Preset datetime visible_from and visible_to.
+    """
+    if not (id_item and id_export and position):
+        raise AttributeError
+    e = Export.objects.get(id_export)
+    #meta = ExportMeta.objects.create()
