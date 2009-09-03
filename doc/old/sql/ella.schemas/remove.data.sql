@@ -72,6 +72,9 @@ update articles_article set photo_id = null where id in (485283);
 -- autori
 -- select distinct author_id from articles_article_authors where author_id not in (select id from core_author);
 update articles_article_authors set author_id = 1 where author_id in (313, 375, 347);
+-- autori recepty
+-- select distinct author_id from recipes_recipe_authors where author_id not in (select id from core_author);
+update recipes_recipe_authors set author_id = 1 where author_id in (313, 319, 323, 325, 327, 333, 341, 345, 349, 353, 355, 359, 365, 371, 375, 379, 381, 383, 385, 393, 395, 399);
 
 
 -- a pak uz jenom
