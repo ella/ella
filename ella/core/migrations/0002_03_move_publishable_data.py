@@ -2,13 +2,17 @@
 from south.db import db
 from django.db import models
 
-from ella.hacks import south
-
 class Migration:
 
+    # TODO:
+    # this is only temporary, it should be constructed dynamically
+    # from each migration in installed_apps, that contains run_before
+    depends_on = (
+        ('articles', '0002_03_move_article_data'),
+    )
+
     def forwards(self, orm):
-        for p in south.plugins.get("core", "0002_03_move_publishable_data"):
-            p.forwards(orm)
+        print 'running all dependencies'
 
     def backwards(self, orm):
         print 'there is no way back'
