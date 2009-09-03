@@ -1,6 +1,7 @@
 
 from south.db import db
 from django.db import models
+from django.utils.datastructures import SortedDict
 
 from ella.core.migrations.base.base_0002 import BasePublishableDataMigration
 from ella.core.migrations.base.base_0002 import alter_foreignkey_to_int, migrate_foreignkey
