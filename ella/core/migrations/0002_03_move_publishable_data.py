@@ -15,6 +15,7 @@ class Migration:
         ('polls'), ('0002_03_01_contest_to_publishable'),
         ('polls'), ('0002_03_02_quiz_to_publishable'),
         ('series'), ('0002_03_serie_to_publishable'),
+        ('discussions'), '0002_03_move_topic_data'),
     )
 
     def forwards(self, orm):
