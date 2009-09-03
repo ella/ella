@@ -4,8 +4,6 @@ from django.db import models
 from django.utils.datastructures import SortedDict
 from django.conf import settings
 
-from ella.hacks import south
-
 
 def alter_foreignkey_to_int(table, field, null=True):
     '''
@@ -50,14 +48,11 @@ def migrate_foreignkey(app_label, model, table, field, orm, null=False):
 
 class BasePublishableDataMigration(object):
     depends_on = (
+        ('core', '0002_02_publishable_columns'),
+    )
+    run_before = (
         ('core', '0002_03_move_publishable_data'),
     )
-
-    def forwards(self, orm):
-        pass
-
-    def backwards(self, orm):
-        pass
 
     models = {
         'core.publishable': {
@@ -66,9 +61,6 @@ class BasePublishableDataMigration(object):
             'id': ('models.AutoField', [], {'primary_key': 'True'})
         },
     }
-
-class BasePublishableDataPlugin(south.SouthPlugin):
-    migration = BasePublishableDataMigration
 
     app_label = ''
     model = ''
@@ -139,9 +131,10 @@ class BasePublishableDataPlugin(south.SouthPlugin):
             gens.append(('comments_comment', 'target_ct_id', 'target_id', None))
         return [dict(zip(keys, v)) for v in gens]
 
+    def backwards(self, orm):
+        pass
+
     def forwards(self, orm):
-        if not db.dry_run:
-            print "  > Running plugin %s" % self
         # migrate publishables
         self.forwards_publishable(orm)
         # migrate generic relations
@@ -240,5 +233,4 @@ class BasePublishableDataPlugin(south.SouthPlugin):
 
     def forwards_related(self, orm):
         pass
-
 
