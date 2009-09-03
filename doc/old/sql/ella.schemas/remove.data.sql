@@ -69,6 +69,9 @@ delete from core_placement where target_id in (68) and target_ct_id = 55;
 -- fotky
 -- select photo_id from articles_article where photo_id not in (select id from photos_photo);
 update articles_article set photo_id = null where id in (485283);
+-- autori
+-- select distinct author_id from articles_article_authors where author_id not in (select id from core_author);
+update articles_article_authors set author_id = 1 where id in (313, 375, 347);
 
 
 -- a pak uz jenom

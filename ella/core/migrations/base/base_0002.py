@@ -17,9 +17,10 @@ def alter_foreignkey_to_int(table, field, null=True):
     fk_field = '%s_id' % field
     db.alter_column(table, fk_field, int_field)
     db.rename_column(table, fk_field, field)
+    # i think it is because of constraint deletion
     db.add_column(table, fk_field, int_field)
     db.delete_column(table, fk_field)
-    db.delete_index(table, [fk_field])
+    #db.delete_index(table, [fk_field])
 
 def migrate_foreignkey(app_label, model, table, field, orm, null=False):
     s = {
