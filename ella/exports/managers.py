@@ -161,6 +161,8 @@ class ExportItemizer(object):
         """ 
         @return publishable object with overloaded attributes 
         title, photo, description. 
+
+        Adds property obj.export_thumbnail_url.
         """
         pub = self.__get_publishable(obj)
         field_dict = self.data_formatter(pub, export=export)
@@ -200,6 +202,7 @@ class ExportItemizer(object):
             use_category = self.export.category
         if exports:
             use_export = exports[0]
+            self.export = exports[0]
             if not self._max_visible_items:
                 max_items = use_export.max_visible_items
             else:

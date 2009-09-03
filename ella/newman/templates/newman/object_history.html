@@ -1,27 +1,19 @@
-<div class="module">
-{% if action_list %}
-    <table>
-        <thead>
-        <tr>
-            <th scope="col">{% trans 'Date/time' %}</th>
-            <th scope="col">{% trans 'User' %}</th>
-            <th scope="col">{% trans 'Action' %}</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for action in action_list %}
-        <tr>
-            <th scope="row">{{ action.action_time|date:_("DATETIME_FORMAT") }}</th>
-            <td>{{ action.user.username }}{% if action.user.get_full_name %} ({{ action.user.get_full_name }}){% endif %}</td>
-            <td>{{ action.change_message }}</td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-{% else %}
-    <p>{% trans "This object doesn't have a change history. It probably wasn't added via this admin site." %}</p>
-{% endif %}
+{% spaceless %}
+<div class="service-module object-history">
+    <div class="service-module-in">
+        <div class="cnt">
+        {% if action_list %}
+            {% for action in action_list %}
+                <h4>{{ action.action_time|date:_("DATETIME_FORMAT") }} | {{ action.user.username }}{% if action.user.get_full_name %} ({{ action.user.get_full_name }}){% endif %}</h4>
+                <p>{{ action.change_message }}{% if not action.change_message %}---{% endif %}</p>
+            {% endfor %}
+        {% else %}
+            <p>{% trans "This object doesn't have a change history. It probably wasn't added via this admin site." %}</p>
+        {% endif %}
+        </div>
+        <div class="submit-row">
+            <a href="service-container::::history/" class="icn btn js-simpleload cancel def">{% trans "Close" %}</a>
+        </div>
+    </div>
 </div>
-<div style="margin: 10px; text-align: right;">
-    <a href="history::::history/" class="icn btn js-simpleload cancel def">{% trans "Close" %}</a>
-</div>
+{% endspaceless %}

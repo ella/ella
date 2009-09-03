@@ -11,6 +11,8 @@ a img { border: none; }
 p, ul, ol, h1, h2, h3, h4, h5 { margin: .2em 0; }
 ul, ol { margin-left: 2em; }
 
+.noscreen { display: none; }
+
 /* base default layout */
 * { margin: 0; padding: 0; }
 
@@ -495,59 +497,66 @@ fieldset.collapse legend { background-image: url(../ico/16/14_layer_raiselayer.p
     z-index: 50; overflow: auto; opacity: .9; display: none;
 }
 
-/* SERVICE DIALOGS (model help, history, delete confirmation, filters...) */
-.service-module {
-    position: fixed; top: 0; bottom: 0; left: 0; right: 0; background: #000; z-index: 10; opacity: .8;
+/* TIMELINE */
+
+.timeline-column {
+    width: 110px;
+    float: left;
 }
+
+.timeline-table {
+    min-width: 940px;
+}
+
+.timeline-item {
+    border: 1px solid gray;
+    min-height: 80px;
+    overflow: auto;
+}
+.timeline-ul { }
+
+.timeline-table .timeline-ul .timeline-item:hover {
+    background: white;
+    border: 1px solid #77B150;
+}
+
+/* /TIMELINE */
+
+/* SERVICE DIALOGS (model help, history, delete confirmation, filters...) */
+.service-module { position: fixed; top: 0; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,.8); z-index: 5; }
 .service-module .service-module-in {
     -moz-border-radius: 7px;
     -webkit-border-radius: 7px;
     -khtml-border-radius: 7px;
     border-radius: 7px;
+    background: #fff;
+    font-size: 95%;
 }
 
-/* MODEL HELP CONTAINER */
+.service-module .cnt { margin: 5px 5px 30px 5px; overflow: auto; }
+.service-module .submit-row { position: absolute; bottom: 10px; right: 5px; text-align: right; }
 
-.service-module.model-help .service-module-in {
-    font: normal 95%/130% "Trebuchet MS", Arial, sans-serif;
+.service-module.model-help .service-module-in, .service-module.object-history .service-module-in {
     border: 1px outset #ddd;
     position: absolute;
     top: 160px; right: 10px; min-width: 400px; width: 70%;
     background: #fff url(../img/horst1.jpg) left bottom no-repeat;
     height: 410px;
 }
-.model-help .cnt {
+.model-help .cnt, .object-history .cnt {
     margin: 10px 10px 5px 200px;
     max-height: 360px;
-    overflow: auto;
 }
-.model-help .submit-row {
-    margin: 10px 10px 10px 200px;
-}
-div.model-help h1, div.model-help h2, div.model-help h3, div.model-help h4, div.model-help p, div.model-help ul, div.model-help ol {
-    margin: .5em 0 .3em 0;
-}
-div.model-help h2 { font-size: 130% }
-div.model-help h3 { font-size: 120% }
-div.model-help h4 { font-size: 105% }
-
-/* OBJECT HISTORY (in change_form) */
-#history {
-    border: 1px outset #ddd;
+.service-module.model-log .service-module-in {
     position: absolute;
-    right: 6px;
-    top: 55px;
-    width: 70%;
-    background: #eeeeec;
-    display: none;
-    -moz-border-radius: 7px;
-    -webkit-border-radius: 7px;
-    -khtml-border-radius: 7px;
+    top: 160px; right: 10px; width: 400px; height: 500px;
 }
-#history div.module {
-    margin: 10px;
-    max-height: 300px;
-    overflow: auto;
-    background: #eee;
+.model-log .cnt {
+    max-height: 455px;
 }
 
+/* delete confirmation */
+.delete-confirmation .service-module-in {
+    position: absolute; bottom: 85px; right: 10px; width: 600px; height: 400px; background: #fff; border: 2px solid #d66;
+}
+.delete-confirmation .cnt { max-height: 355px; }

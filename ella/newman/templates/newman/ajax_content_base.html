@@ -29,7 +29,9 @@
     </table>
 {% endblock %}
 
-{% block content_services %}{% endblock %}
+{% block content_services %}
+    <div id="service-container"></div>
+{% endblock %}
 
 <div id="{% if is_popup %}overlay-{% endif %}content-main">
 {% block content %}{% endblock %}

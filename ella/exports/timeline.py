@@ -20,14 +20,18 @@ from ella.newman import utils
 DATETIME_FORMAT = models.DATETIME_FORMAT
 TIME_FORMAT = models.TIME_FORMAT
 TIMELINE_STEP = timedelta(hours=2)  # two hours
+EMPTY_TIMELINE_CELL = None
+DAY_MAX_HOUR = 23
+RANGE_DAYS = 14
+RANGE_WIDTH_HOURS = 2
 log = logging.getLogger('ella.exports')
 
 def get_timerange(year=datetime.now().year, month=datetime.now().month, day=datetime.now().day):
     now = datetime.now()
     out = list()
-    for d in range(-14, 14):
+    for d in range(-RANGE_DAYS, RANGE_DAYS):
         dt = timedelta(days=d)
-        for h in [h for h in range(23) if h % 2 == 0]:
+        for h in [h for h in range(DAY_MAX_HOUR) if h % RANGE_WIDTH_HOURS == 0]:
             t = datetime(year, month, day, h, 0) + dt
             str_t = t.strftime(DATETIME_FORMAT)
             out.append( (str_t, str_t) )
@@ -58,6 +62,8 @@ def get_timelined_items(slug, range_from, range_to, step=TIMELINE_STEP):
         column.append(itemizer.datetime_from.strftime(DATETIME_FORMAT))
         map(lambda x: column.append(x), itemizer)
         if not out or (out and out[-1] != column):
+            while (len(column) - 1) < itemizer.export.max_visible_items:
+                column.append(EMPTY_TIMELINE_CELL)
             log.debug(remove_diacritical('COLUMN: %s' % column))
             out.append(column)
 
@@ -80,7 +86,7 @@ def reformat_list_for_table(list_data):
             if len(column) > row_index:
                 cell = column[row_index]
             else:
-                cell = None
+                cell = EMPTY_TIMELINE_CELL
             table_row.append(cell)
         table.append(table_row)
     return table
@@ -136,7 +142,8 @@ def timeline_view(request, extra_context=None):
         export = models.Export.objects.get(slug=slug)
         cx.update({
             'export': export,
-            'timeline_table': reformat_list_for_table(items),
+            #'timeline_table': reformat_list_for_table(items),
+            'timeline_data': items,
         })
     template_paths = [
         'newman/exports/timeline.html',
@@ -149,3 +156,20 @@ def timeline_view(request, extra_context=None):
         template_paths,
         cx
     )
+
+
+def timeline_insert_view(request, id_item=None, id_export=None, position=None):
+    """
+    Inserts export element before an item (via ExportPosition and ExportMeta).
+    @param   id_item     Existing Publishable object placed after new inserted item. 
+    @param   position    Existing Publishable object's position after new inserted item.
+    @param   id_export   Export object id.
+
+    1. get Export object associated with item.
+    2. create ExportMeta for item.
+    3. create ExportPosition for ExportMeta. Preset datetime visible_from and visible_to.
+    """
+    if not (id_item and id_export and position):
+        raise AttributeError
+    e = Export.objects.get(id_export)
+    #meta = ExportMeta.objects.create()
