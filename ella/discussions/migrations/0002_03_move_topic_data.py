@@ -12,7 +12,7 @@ class Migration(BasePublishableDataMigration):
         {
             'discussions.topic': {
                 'Meta': {'ordering': "('-created',)"},
-                'created': ('models.DateTimeField', ["_('Created')"], {'default': 'datetime.now', 'editable': 'False'}),
+                'created': ('models.DateTimeField', ["_('Created')"], {'default': 'datetime.datetime.now', 'editable': 'False'}),
                 'publishable_ptr': ('models.OneToOneField', ["orm['core.Publishable']"], {}),
             },
         }
@@ -23,7 +23,7 @@ class Migration(BasePublishableDataMigration):
     table = '%s_%s' % (app_label, model)
 
     publishable_uncommon_cols = {
-        'description': 'perex',
+        'description': 'description',
     }
 
     def alter_self_foreignkeys(self, orm):
