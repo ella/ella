@@ -34,7 +34,7 @@ class Migration(BasePublishableDataMigration):
 
     def alter_self_foreignkeys(self, orm):
         # migrate authors as in base
-        super(Plugin, self).alter_self_foreignkeys(orm)
+        super(Migration, self).alter_self_foreignkeys(orm)
         alter_foreignkey_to_int('media_section', 'media')
         alter_foreignkey_to_int('media_usage', 'media')
         # TODO: this should be solved via plugins
@@ -42,7 +42,7 @@ class Migration(BasePublishableDataMigration):
 
     def move_self_foreignkeys(self, orm):
         # migrate authors as in base
-        super(Plugin, self).move_self_foreignkeys(orm)
+        super(Migration, self).move_self_foreignkeys(orm)
         # migrate new media IDs to section
         migrate_foreignkey(self.app_label, self.model, 'media_section', self.model, self.orm)
         # migrate new media IDs to usage

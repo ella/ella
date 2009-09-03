@@ -2,7 +2,7 @@
 from south.db import db
 from django.db import models
 
-from ella.core.migrations.base.base_0002 import BasePublishableDataMigration, BasePublishableDataPlugin
+from ella.core.migrations.base.base_0002 import BasePublishableDataMigration
 from ella.core.migrations.base.base_0002 import alter_foreignkey_to_int, migrate_foreignkey
 
 
@@ -28,13 +28,13 @@ class Migration(BasePublishableDataMigration):
 
     def alter_self_foreignkeys(self, orm):
         # there are no authors !
-        #super(Plugin, self).alter_self_foreignkeys(orm)
+        super(Migration, self).alter_self_foreignkeys(orm)
         # migrate new topic IDs to topicthread
         alter_foreignkey_to_int('discussions_topicthread', 'topic')
 
     def move_self_foreignkeys(self, orm):
         # there are no authors !
-        #super(Plugin, self).move_self_foreignkeys(orm)
+        super(Migration, self).move_self_foreignkeys(orm)
         # migrate new topic IDs to topicthread
         migrate_foreignkey(self.app_label, self.model, 'discussions_topicthread', self.model, self.orm)
 

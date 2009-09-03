@@ -31,7 +31,7 @@ class Migration(BasePublishableDataMigration):
 
     def alter_self_foreignkeys(self, orm):
         # migrate authors as in base
-        super(Plugin, self).alter_self_foreignkeys(orm)
+        super(Migration, self).alter_self_foreignkeys(orm)
         # migrate new article IDs to articlecontents
         alter_foreignkey_to_int('articles_articlecontents', 'article')
         # migrate new article IDs to oldrecipearticleredirect
@@ -40,7 +40,7 @@ class Migration(BasePublishableDataMigration):
 
     def move_self_foreignkeys(self, orm):
         # migrate authors as in base
-        super(Plugin, self).move_self_foreignkeys(orm)
+        super(Migration, self).move_self_foreignkeys(orm)
         # migrate new article IDs to articlecontents
         migrate_foreignkey(self.app_label, self.model, 'articles_articlecontents', self.model, self.orm)
         # migrate new article IDs to oldrecipearticleredirect

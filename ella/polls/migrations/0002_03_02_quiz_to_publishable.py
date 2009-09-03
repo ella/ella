@@ -31,13 +31,13 @@ class Migration(BasePublishableDataMigration):
     
     def alter_self_foreignkeys(self, orm):
         # migrate authors as in base
-        super(Plugin, self).alter_self_foreignkeys(orm)
+        super(Migration, self).alter_self_foreignkeys(orm)
         alter_foreignkey_to_int('polls_question', 'quiz', null=True)
         alter_foreignkey_to_int('polls_result', 'quiz')
 
     def move_self_foreignkeys(self, orm):
         # migrate authors as in base
-        super(Plugin, self).move_self_foreignkeys(orm)
+        super(Migration, self).move_self_foreignkeys(orm)
         # migrate new quiz IDs to question
         migrate_foreignkey(self.app_label, self.model, 'polls_question', self.model, self.orm, null=True)
         # migrate new quiz IDs to results
