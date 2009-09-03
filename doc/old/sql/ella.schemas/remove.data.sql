@@ -51,9 +51,9 @@ update galleries_gallery set category_id = 38 where category_id is null;
 
 -- nektere listingy maji referenci na neexistujici objekt
 -- pro upravu je treba pridat kaskadni mazani kvuli konstrejnam na listingu a hitkauntech
-alter table core_listing drop foreign key placement_id_refs_id_7c52840e;
+-- alter table core_listing drop foreign key placement_id_refs_id_7c52840e;
 alter table core_listing add CONSTRAINT placement_id_refs_id_7c52840e FOREIGN KEY (`placement_id`) REFERENCES `core_placement` (`id`) on delete cascade on update cascade;
-alter table core_hitcount drop foreign key placement_id_refs_id_7d42d973;
+-- alter table core_hitcount drop foreign key placement_id_refs_id_7d42d973;
 alter table core_hitcount add constraint `placement_id_refs_id_7d42d973` FOREIGN KEY (`placement_id`) REFERENCES `core_placement` (`id`) on delete cascade on update cascade;
 
 -- nalezeni a odstraneni spatnych placementu
