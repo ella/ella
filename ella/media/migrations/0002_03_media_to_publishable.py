@@ -2,6 +2,8 @@
 from south.db import db
 from django.db import models
 
+from ella.media.models import MediaField
+
 from ella.core.migrations.base.base_0002 import BasePublishableDataMigration
 from ella.core.migrations.base.base_0002 import alter_foreignkey_to_int, migrate_foreignkey
 
@@ -12,7 +14,7 @@ class Migration(BasePublishableDataMigration):
         {
             'media.media': {
                 'Meta': {'_bases': ['ella.core.models.publishable.Publishable']},
-                'created': ('models.DateTimeField', ["_('Created')"], {'default': 'datetime.now', 'editable': 'False'}),
+                'created': ('models.DateTimeField', ["_('Created')"], {'default': 'datetime.datetime.now', 'editable': 'False'}),
                 'file': ('MediaField', [], {}),
                 'publishable_ptr': ('models.OneToOneField', ["orm['core.Publishable']"], {}),
                 'text': ('models.TextField', ["_('Content')"], {'blank': 'True'}),

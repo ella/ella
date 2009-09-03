@@ -13,7 +13,7 @@ class Migration(BasePublishableDataMigration):
             'galleries.gallery': {
                 'Meta': {'_bases': ['ella.core.models.publishable.Publishable']},
                 'content': ('models.TextField', ["_('Content')"], {'blank': 'True'}),
-                'created': ('models.DateTimeField', ["_('Created')"], {'default': 'datetime.now', 'editable': 'False'}),
+                'created': ('models.DateTimeField', ["_('Created')"], {'default': 'datetime.datetime.now', 'editable': 'False'}),
                 'publishable_ptr': ('models.OneToOneField', ["orm['core.Publishable']"], {})
             },
         }
