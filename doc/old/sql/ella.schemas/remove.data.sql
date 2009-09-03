@@ -31,11 +31,11 @@ drop table menu_menu;
 -- tohle delal honza, neni pro to model
 drop table discussions_question;
 -- tahle appka se nepouziva - haha! chyba lavky ;)
-drop table `discussions_bannedstring`;
-drop table `discussions_banneduser`;
-drop table `discussions_postviewed`;
-drop table `discussions_topicthread`;
-drop table `discussions_topic`;
+-- drop table `discussions_bannedstring`;
+-- drop table `discussions_banneduser`;
+-- drop table `discussions_postviewed`;
+-- drop table `discussions_topicthread`;
+-- drop table `discussions_topic`;
 
 
 -- zase duplicity
