@@ -106,7 +106,7 @@ class FlashImageWidget(widgets.AdminFileWidget):
         <param name="movie" value="%s" />
         <param name="quality" value="high" />
         <param name="bgcolor" value="#869ca7" />
-        <param name="allowScriptAccess" value="sameDomain" />
+        <param name="allowScriptAccess" value="always" />
         <param name="FlashVars" value="max_width=&max_height=&value=%s&languageURL=%s" />
         <param name="allowFullScreen" value="true" />
         <param name="wmode" value="opaque" />
@@ -115,7 +115,7 @@ class FlashImageWidget(widgets.AdminFileWidget):
             play="true"
             loop="false"
             quality="high"
-            allowScriptAccess="sameDomain"
+            allowScriptAccess="always"
             type="application/x-shockwave-flash"
             pluginspage="http://www.adobe.com/go/getflashplayer"
             FlashVars="max_width=&max_height=&value=%s&languageURL=%s%s"
