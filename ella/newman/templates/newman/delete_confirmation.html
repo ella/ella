@@ -11,7 +11,7 @@
                 </ul>
             {% else %}
                 <p>{% blocktrans with object as escaped_object %}Are you sure you want to delete the {{ object_name }} "{{ escaped_object }}"? All of the following related items will be deleted:{% endblocktrans %}</p>
-                <ul class="js-hashadr-container">{{ deleted_objects|unordered_list }}</ul>
+                <ul class="js-hashadr-container">{{ deleted_objects|unordered_list|removetags:"a" }}</ul>
             {% endif %}
             <div class="submit-row">
                 <form action="delete/" class="js-form js-dyn-adr" method="post">
