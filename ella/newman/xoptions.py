@@ -1,11 +1,12 @@
 from django import template
 from django.forms.formsets import all_valid
 from django.contrib.admin import helpers
-from django.contrib.admin.util import unquote
+from django.contrib.admin.util import unquote, get_deleted_objects
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response
+from django.utils.text import capfirst, get_text_list
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
@@ -400,3 +401,66 @@ class XModelAdmin(ModelAdmin):
         context.update(extra_context or {})
         return self.render_change_form(request, context, add=True)
     add_view = transaction.commit_on_success(add_view)
+
+    def get_delete_view_context(self, request, object_id):
+        opts = self.model._meta
+        app_label = opts.app_label
+
+        try:
+            obj = self.queryset(request).get(pk=unquote(object_id))
+        except self.model.DoesNotExist:
+            # Don't raise Http404 just yet, because we haven't checked
+            # permissions yet. We don't want an unauthenticated user to be able
+            # to determine whether a given object exists.
+            obj = None
+
+        if not self.has_delete_permission(request, obj):
+            raise PermissionDenied
+
+        if obj is None:
+            raise Http404(_('%(name)s object with primary key %(key)r does not exist.') % {'name': force_unicode(opts.verbose_name), 'key': escape(object_id)})
+
+        # Populate deleted_objects, a data structure of all related objects that
+        # will also be deleted.
+        # FIXME <a href=""> tags hardcoded into get_deleted_objects() handled in template via template tag.
+        deleted_objects = [mark_safe(u'%s: <a href="../../%s/">%s</a>' % (escape(force_unicode(capfirst(opts.verbose_name))), object_id, escape(obj))), []]
+        perms_needed = set()
+        get_deleted_objects(deleted_objects, perms_needed, request.user, obj, opts, 1, self.admin_site)
+
+        if request.POST: # The user has already confirmed the deletion.
+            if perms_needed:
+                raise PermissionDenied
+            obj_display = force_unicode(obj)
+            self.log_deletion(request, obj, obj_display)
+            obj.delete()
+
+            self.message_user(request, _('The %(name)s "%(obj)s" was deleted successfully.') % {'name': force_unicode(opts.verbose_name), 'obj': force_unicode(obj_display)})
+
+            if not self.has_change_permission(request, None):
+                return HttpResponseRedirect("../../../../")
+            return HttpResponseRedirect("../../")
+
+        context = {
+            "title": _("Are you sure?"),
+            "object_name": force_unicode(opts.verbose_name),
+            "object": obj,
+            "deleted_objects": deleted_objects,
+            "perms_lacking": perms_needed,
+            "opts": opts,
+            "root_path": self.admin_site.root_path,
+            "app_label": app_label,
+        }
+        return context
+
+    def delete_view(self, request, object_id, extra_context=None):
+        "The 'delete' admin view for this model."
+        context = self.get_delete_view_context(request, object_id)
+        if type(context) != dict:
+            return context
+        context.update(extra_context or {})
+        context_instance = template.RequestContext(request, current_app=self.admin_site.name)
+        return render_to_response(self.delete_confirmation_template or [
+            "newman/%s/%s/delete_confirmation.html" % (app_label, opts.object_name.lower()),
+            "newman/%s/delete_confirmation.html" % app_label,
+            "newman/delete_confirmation.html"
+        ], context, context_instance=context_instance)
