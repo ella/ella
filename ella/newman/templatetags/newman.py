@@ -1,3 +1,6 @@
+# -*- coding: UTF-8 -*-
+import re
+
 from django import template
 from django.utils.encoding import smart_str, smart_unicode
 from django.utils.text import capfirst
@@ -138,7 +141,7 @@ class NewmanUrlNode(template.Node):
             final_url = ''.join(fragments)
 
         if self.as_var:
-            context[self.as_Var] = final_url
+            context[self.as_var] = final_url
             return ''
         return final_url
 
@@ -147,8 +150,6 @@ def newmanurl(parser, token):
     """
     Returns an absolute URL matching given Newman's view with its parameters.
     """
-    tokens = token.contents.split()
-    pass
     bits = token.split_contents()
     if len(bits) < 2:
         raise TemplateSyntaxError("'%s' takes at least one argument"
@@ -174,3 +175,67 @@ def newmanurl(parser, token):
                         args.append(parser.compile_filter(arg))
     return NewmanUrlNode(viewname, args, kwargs, asvar)
 
+class NewmanizerNode(template.Node):
+    """
+    Tries to find <a href="/newman/foo/bar/"> HTML tags and replace href value by
+    "/newman/#/foo/bar/". Node was written due to using hardcoded <a> tags in 
+    django.contrib.admin.util.get_deleted_objects -- ugly function used by 
+    django-admin delete_view and its template.
+    
+            Schöne Grüße aus Chýně!
+    """
+    newman_base_url = None
+    # FIXME make /newman/ constants in 
+    href_re = None
+
+    def __init__(self, tag_name, var_name):
+        self.var_name = template.Variable(var_name)
+        self.tag_name = tag_name
+        if not NewmanizerNode.newman_base_url:
+            NewmanizerNode.newman_base_url = reverse('newman:index')
+        if not NewmanizerNode.href_re:
+            NewmanizerNode.href_re = re.compile(r'href=\"(?P<href>.*%s\w.*)\"' % self.newman_base_url)
+
+    def replace_url(self, value):
+        search = self.href_re.search(value)
+        if not search:
+            return value
+        return value.replace(self.newman_base_url, '%s#/' % self.newman_base_url)
+
+    def render(self, context):
+        template_var = self.var_name.resolve(context)
+        print type(template_var)
+        if type(template_var) == list:
+            for var in template_var:
+                new_var = self.replace_url(var)
+                print u'Old: %s, New: %s' % (var, new_var)
+        elif type(template_var) in (str, unicode,):
+            new_var = self.replace_url(template_var)
+            print u'Old: %s, New: %s' % (template_var, new_var)
+        else:
+            raise AttributeError(u'%s tag first argument (template variable) must be str,unicode or list type.' % self.tag_name)
+        #context[self.var_name] = final_url
+        return ''
+
+@register.tag
+def newmanurl_replace(parser, token):
+    """
+    URL Newmanization.
+    If url beginning with /newman/ (i.e. /newman/foo/bar/) is found in variable specified by template tag,
+    string is enhanced by # (hash char) to achieve URL /newman/#/foo/bar/.
+    Newmanized variable should be string (unicode) instance or list.
+
+    Usage::
+
+        {% newmanurl_replace variable_name %}
+    """
+    tokens = token.contents.split()
+    if len(tokens) < 2:
+        raise TemplateSyntaxError("'%s' takes at least one argument"
+                                  " (template variable to inspect)" % tokens[0])
+    return NewmanizerNode(tokens[0], tokens[1])
+
+@register.filter
+def newmanurl_replace(value):
+    n = NewmanizerNode('<undefined>', '<undefined>')
+    return n.replace_url(value)
