@@ -10,6 +10,10 @@
                 {% endfor %}
                 </ul>
             {% else %}
+                {% comment %}
+                {% newmanurl_replace object_name %}
+                {% newmanurl_replace deleted_objects %}
+                {% endcomment %}
                 <p>{% blocktrans with object as escaped_object %}Are you sure you want to delete the {{ object_name }} "{{ escaped_object }}"? All of the following related items will be deleted:{% endblocktrans %}</p>
                 <ul class="js-hashadr-container">{{ deleted_objects|unordered_list }}</ul>
             {% endif %}
