@@ -92,6 +92,7 @@ class FlashImageWidget(widgets.AdminFileWidget):
         )
 
     def render(self, name, value, attrs=None):
+        max_size = {'w': 1024, 'h': 768}
         swf_path = '%s%s' % (settings.NEWMAN_MEDIA_PREFIX, SWF_FLASH_IMAGE_INPUT,)
         lang_url = "%sswf/lang/%s.xml" % (settings.NEWMAN_MEDIA_PREFIX, settings.LANGUAGE_CODE,)
         if value:
@@ -103,27 +104,34 @@ class FlashImageWidget(widgets.AdminFileWidget):
         <object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"
         id="PhotoUploader" width="100%%" height="60px"
         codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">
-        <param name="movie" value="%s" />
+        <param name="movie" value="%(swf_path)s" />
         <param name="quality" value="high" />
         <param name="bgcolor" value="#869ca7" />
-        <param name="allowScriptAccess" value="sameDomain" />
-        <param name="FlashVars" value="max_width=&max_height=&value=%s&languageURL=%s" />
+        <param name="allowScriptAccess" value="always" />
+        <param name="FlashVars" value="max_width=%(max_width)s&max_height=%(max_height)s&value=%(value)s&languageURL=%(lang_url)s%(photo_flash_var)s" />
         <param name="allowFullScreen" value="true" />
         <param name="wmode" value="opaque" />
-            <embed src="%s" quality="high" bgcolor="#869ca7"
+            <embed src="%(swf_path)s" quality="high" bgcolor="#869ca7"
             width="100%%" height="60px" name="PhotoUploader" align="middle"
             play="true"
             loop="false"
             quality="high"
-            allowScriptAccess="sameDomain"
+            allowScriptAccess="always"
             type="application/x-shockwave-flash"
             pluginspage="http://www.adobe.com/go/getflashplayer"
-            FlashVars="max_width=&max_height=&value=%s&languageURL=%s%s"
+            FlashVars="max_width=%(max_width)s&max_height=%(max_height)s&value=%(value)s&languageURL=%(lang_url)s%(photo_flash_var)s"
             allowFullScreen="true"
             wmode="opaque">
             </embed>
         </object>
-        """ % (swf_path, value, lang_url, swf_path, value, lang_url, photo_flash_var)
+        """ % {
+            'swf_path': swf_path,
+            'value': value,
+            'lang_url': lang_url,
+            'photo_flash_var': photo_flash_var,
+            'max_width': max_size['w'],
+            'max_height': max_size['h'],
+        }
 
         return mark_safe(embed_code)
 
