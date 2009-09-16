@@ -4,15 +4,14 @@ from django.contrib.admin import helpers
 from django.contrib.admin.util import unquote, get_deleted_objects
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
-from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render_to_response
-from django.utils.text import capfirst, get_text_list
+from django.utils.text import capfirst
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 from django.utils.translation import ngettext
 from django.utils.encoding import force_unicode
-from django.contrib.contenttypes.models import ContentType
 try:
     set
 except NameError:
@@ -434,11 +433,12 @@ class XModelAdmin(ModelAdmin):
             self.log_deletion(request, obj, obj_display)
             obj.delete()
 
-            self.message_user(request, _('The %(name)s "%(obj)s" was deleted successfully.') % {'name': force_unicode(opts.verbose_name), 'obj': force_unicode(obj_display)})
+            msg = _('The %(name)s "%(obj)s" was deleted successfully.') % {'name': force_unicode(opts.verbose_name), 'obj': force_unicode(obj_display)}
+            self.message_user(request, msg)
 
             if not self.has_change_permission(request, None):
-                return HttpResponseRedirect("../../../../")
-            return HttpResponseRedirect("../../")
+                return HttpResponseRedirect("../../../")
+            return HttpResponseRedirect("../")
 
         context = {
             "title": _("Are you sure?"),
@@ -459,6 +459,8 @@ class XModelAdmin(ModelAdmin):
             return context
         context.update(extra_context or {})
         context_instance = template.RequestContext(request, current_app=self.admin_site.name)
+        app_label = context['app_label']
+        opts = context['opts']
         return render_to_response(self.delete_confirmation_template or [
             "newman/%s/%s/delete_confirmation.html" % (app_label, opts.object_name.lower()),
             "newman/%s/delete_confirmation.html" % app_label,
