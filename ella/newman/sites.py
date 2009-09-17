@@ -1,3 +1,4 @@
+from django.utils.safestring import mark_safe
 import datetime
 
 from django import template
@@ -94,12 +95,31 @@ class NewmanSite(AdminSite):
         if 'djangomarkup' in settings.INSTALLED_APPS:
             urlpatterns += patterns('',
                 url(r'^%s/editor-preview/$' % NEWMAN_URL_PREFIX,
-                    'djangomarkup.views.transform',
+                    wrap(self.editor_preview),
+#                    'djangomarkup.views.transform',
                     name="djangomarkup-preview"),
             )
 
         urlpatterns += super(NewmanSite, self).get_urls()
         return urlpatterns
+
+    @require_AJAX
+    def editor_preview(self, request, extra_context=None):
+        """
+        Returns rendered HTML for source text with styles
+        """
+
+        context = template.RequestContext(request)
+        from djangomarkup.views import transform
+        rendered_response = transform(request)
+        rendered_html = mark_safe(rendered_response.content)
+        context.update({'rendered_html': rendered_html})
+        if extra_context:
+            context.update(extra_context)
+
+        return render_to_response('newman/editor-preview.html', context,
+            context_instance=template.RequestContext(request)
+        )
 
     @require_AJAX
     def render_chunk_template_view(self, request, extra_context=None):
