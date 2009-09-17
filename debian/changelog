@@ -4,11 +4,45 @@ centrum-python-ella (1.0.0.0) unstable; urgency=low
 
  -- Jakub Vysoky <jakub@borka.cz>  Wed, 17 Jun 2009 14:11:20 +0200
 
+centrum-ella (0.3.4.16) unstable; urgency=low
+
+  * Build from 861840c21
+
+ -- Vitek Pliska <whit@jizak.cz>  Fri, 28 Aug 2009 10:34:43 +0200
+
+centrum-ella (0.3.4.15) unstable; urgency=low
+
+  * Build from revision f28fc75
+
+ -- Jan Seifert <jan.seifert@centrumholdings.com>  Fri, 24 Jul 2009 15:13:45 +0200
+
+centrum-ella (0.3.4.14) unstable; urgency=low
+
+  * Build from revision 1895083
+
+ -- Vitek Pliska <whit@jizak.cz>  Mon, 20 Jul 2009 16:37:45 +0200
+
+centrum-ella (0.3.4.13) unstable; urgency=low
+
+  * Build from revision cd11ac on debian etch :)
+
+ -- Vitezslav Pliska <whit@cnt-ella-dev.dev.chservices.cz>  Thu, 16 Jul 2009 16:33:52 +0200
+
+
+
+centrum-ella (0.3.4.12) unstable; urgency=low
+
+  * Buid from revision 1de37d90
+
+ -- Vitek Pliska <whit@jizak.cz>  Thu, 16 Jul 2009 15:15:46 +0200
+
+
 centrum-ella (0.3.4.11) unstable; urgency=low
 
   * Build from revision 6da5d61
 
  -- Jan Seifert <jan.seifert@centrumholdings.com>  Tue, 23 Jun 2009 13:27:22 +0200
+
 
 centrum-ella (0.3.4.10) unstable; urgency=low
 

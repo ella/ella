@@ -8,21 +8,22 @@
 
 {% cache 300 'nm-hp-cal' user %}
 <div class="hpcol" style="width: 25%;">
-
-    {# ein Kalendar, bitte #}
-    <div class="hpbox calendar">
-        <h3><span>{% trans "Calendar" %}</span></h3>
-        <div class="cnt">
-            <div class="cal">
+    {% if show_calendar %}
+        {# ein Kalendar, bitte #}
+        <div class="hpbox calendar">
+            <h3><span>{% trans "Calendar" %}</span></h3>
+            <div class="cnt">
+                <div class="cal">
+                </div>
+                {% comment %}
+                <div class="shortcuts">
+                    <a href="">{% trans 'This month' %}</a>
+                    | <a href="">{% trans 'This year' %}</a>
+                </div>
+                {% endcomment %}
             </div>
-            {% comment %}
-            <div class="shortcuts">
-                <a href="">{% trans 'This month' %}</a>
-                | <a href="">{% trans 'This year' %}</a>
-            </div>
-            {% endcomment %}
         </div>
-    </div>
+    {% endif %}
 {% endcache %}
     <div class="hpbox setup">
         <h3><span>{% trans "Quick Settings" %}</span></h3>
@@ -49,7 +50,7 @@
     <div class="hpbox errmsg">
         <h3><span>{% trans "Report Error" %}</span></h3>
         <div class="cnt">
-            <form class="ajax-form js-reset-on-submit" action="{% url newman:err-report %}" method="post">
+            <form class="js-form js-reset-on-submit" action="{% url newman:err-report %}" method="post">
                 <label for="id_err_subject" class="required">{% trans "Subject" %} <span class="help"></span></label>
                 <input id="id_err_subject" name="err_subject" type="text" />
                 <label for="id_err_message" class="required">{% trans "Message" %}</label>
@@ -64,7 +65,7 @@
 
 </div>
 
-{% cache 300 'nm-hp-search' %}
+{% cache 300 'nm-hp-search' user %}
 <div class="hpcol" style="width: 50%;">
 
     <div class="hpbox search" id="search-form">

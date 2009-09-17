@@ -1,9 +1,14 @@
+# -*- coding: UTF-8 -*-
+import re
+
 from django import template
+from django.utils.encoding import smart_str, smart_unicode
 from django.utils.text import capfirst
 from django.utils.safestring import mark_safe
+from django.utils.translation import ugettext_lazy
+from django.core.urlresolvers import reverse
 
 from ella.newman import site, permission
-from django.utils.translation import ugettext_lazy
 from ella.newman.utils import get_log_entries
 from ella.newman.config import NEWMAN_FAVORITE_ITEMS
 
@@ -107,3 +112,66 @@ class NewmanLog():
         return NewmanLogNode(limit=tokens[1], varname=tokens[3])
 
 register.tag('newman_log', NewmanLog('newman_log'))
+
+class NewmanUrlNode(template.Node):
+    " Resolves URL to kobayashi's url notation containing # char "
+    newman_base_url = None
+
+    def __init__(self, view_name, args, kwargs, as_var):
+        self.view_name = view_name
+        self.args = args
+        self.kwargs = kwargs
+        self.as_var = as_var
+        if not NewmanUrlNode.newman_base_url:
+            NewmanUrlNode.newman_base_url = reverse('newman:index')
+
+    def render(self, context):
+        kwargs = dict([(smart_str(k,'ascii'), v.resolve(context))
+                       for k, v in self.kwargs.items()])
+        url = reverse(self.view_name, args=self.args, kwargs=kwargs)
+        final_url = url
+        found = url.find(self.newman_base_url)
+        if found > -1:
+            position = found + len(self.newman_base_url)
+            fragments = (
+                self.newman_base_url,
+                '#/',
+                url[position:]
+            )
+            final_url = ''.join(fragments)
+
+        if self.as_var:
+            context[self.as_var] = final_url
+            return ''
+        return final_url
+
+@register.tag
+def newmanurl(parser, token):
+    """
+    Returns an absolute URL matching given Newman's view with its parameters.
+    """
+    bits = token.split_contents()
+    if len(bits) < 2:
+        raise TemplateSyntaxError("'%s' takes at least one argument"
+                                  " (path to a view)" % bits[0])
+    viewname = bits[1]
+    args = []
+    kwargs = {}
+    asvar = None
+
+    if len(bits) > 2:
+        bits = iter(bits[2:])
+        for bit in bits:
+            if bit == 'as':
+                asvar = bits.next()
+                break
+            else:
+                for arg in bit.split(","):
+                    if '=' in arg:
+                        k, v = arg.split('=', 1)
+                        k = k.strip()
+                        kwargs[k] = parser.compile_filter(v)
+                    elif arg:
+                        args.append(parser.compile_filter(arg))
+    return NewmanUrlNode(viewname, args, kwargs, asvar)
+

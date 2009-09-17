@@ -49,6 +49,10 @@ PHOTO_MIN_WIDTH=150
 PHOTO_MIN_HEIGHT=150
 
 
+PHOTO_MIN_WIDTH=150
+PHOTO_MIN_HEIGHT=150
+
+
 class PhotoBox(Box):
     def get_context(self):
         "Updates box context with photo-specific variables."

@@ -2,9 +2,7 @@
 from south.db import db
 from django.db import models
 
-from ella.hacks import south
-
-from ella.core.migrations.base.base_0002 import BasePublishableDataMigration, BasePublishableDataPlugin
+from ella.core.migrations.base.base_0002 import BasePublishableDataMigration
 from ella.core.migrations.base.base_0002 import alter_foreignkey_to_int, migrate_foreignkey
 
 
@@ -44,10 +42,6 @@ class Migration(BasePublishableDataMigration):
         }
     )
 
-
-class Plugin(BasePublishableDataPlugin):
-    migration = Migration
-
     app_label = 'interviews'
     model = 'interview'
     table = '%s_%s' % (app_label, model)
@@ -59,16 +53,15 @@ class Plugin(BasePublishableDataPlugin):
     
     def alter_self_foreignkeys(self, orm):
         # migrate authors as in base
-        super(Plugin, self).alter_self_foreignkeys(orm)
+        super(Migration, self).alter_self_foreignkeys(orm)
         alter_foreignkey_to_int('interviews_question', 'interview')
         alter_foreignkey_to_int('interviews_interview_interviewees', 'interview')
 
     def move_self_foreignkeys(self, orm):
         # migrate authors as in base
-        super(Plugin, self).move_self_foreignkeys(orm)
+        super(Migration, self).move_self_foreignkeys(orm)
         # migrate new article IDs to question
         migrate_foreignkey(self.app_label, self.model, 'interviews_question', self.model, self.orm)
         # migrate new article IDs to interview_interviewees
         migrate_foreignkey(self.app_label, self.model, 'interviews_interview_interviewees', self.model, self.orm)
 
-south.plugins.register("core", "0002_03_move_publishable_data", Plugin())
