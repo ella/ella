@@ -222,3 +222,4 @@ function preview_on_site() {
     return;
 
 }
+$(document).bind('media_loaded', function(){ $('textarea.rich_text_area').autogrow() });
