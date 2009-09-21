@@ -2,7 +2,7 @@ from datetime import datetime
 import logging
 
 from django.db import models, connection
-from django.db.models import F, Q
+from django.db.models import Q
 from django.conf import settings
 
 from ella.core.models import Listing, Publishable, Category
