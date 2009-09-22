@@ -11,7 +11,7 @@
     </form>
    
     <div id="id-modal-dialog" class="noscreen service-module">
-        <div id="id-publishable-dialog" class="service-module-in" style="height: 400px; overflow: auto; position: fixed; top:200px;">
+        <div id="id-publishable-dialog" class="service-module-in" style="height: 40px; overflow: auto; position: fixed; top:200px; left: 100px;">
             <label for="id_publishable_suggest" style="float: left;">{% trans 'Publishable object' %}: </label>
             <div style="width: 300px; float: left;">
                 <input id="id_publishable" class="vForeignKeyRawIdAdminField hidden" type="text" name="publishable" style="display: none;"/>
@@ -22,7 +22,8 @@
                 </ul>
                 <!-- a id="lookup_id_publishable" class="suggest-related-lookup" href="/core/publishable/?pop"></a -->
             </div>
-            <a href="">{% trans "Continue" %}</a>
+            <a id="id-continue-dialog" class="icn btn ok">{% trans "Continue" %}</a>
+            <a id="id-close-dialog" class="icn btn cancel">{% trans "Close" %}</a>
         </div>
     </div>
 
@@ -42,8 +43,11 @@
                             <a href="">{% trans "Edit" %}</a>
                             <a href="">{% trans "Delete" %}</a>
                             <a href="">{% trans "Append" %}</a>
-                            <span class="insert">{% trans "Insert" %}</span>
-                            <!-- {% newmanurl newman:exports_export_timeline_insert id_item=cell.pk,id_export=export.pk,position=forloop.counter %} -->
+                            <span 
+                                id="{{ forloop.counter }};{{ cell.pk }};{{ export.pk }}" 
+                                class="insert"
+                            >{% trans "Insert" %}</span>
+                            {# newmanurl newman:exports_export_timeline_insert id_item=cell.pk,id_export=export.pk,position=forloop.counter #}
                         </div>
                         {% endif %}
                     </div>
