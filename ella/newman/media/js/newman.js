@@ -1279,7 +1279,7 @@ function DATEPICKER_OPTIONS(opts) {
 }
 
 
-// TIMELINE (ella.exports application)
+// Timeline (ella.exports application)
 
 function timeline_changed(event, ui) {
     console.log("Timeline changed:", event);
@@ -1308,7 +1308,47 @@ function timeline_drag_update(event, ui) {
     $target.children(':last').addClass('last-related');*/
 }
 
-function timeline_sortable() {
+function timeline_hide_dialog() {
+    // remove suggester -- hide
+    // TODO cleaning of suggester should be implemented in generic.suggest.js library!
+    $('#id-modal-dialog').hide();
+    $('#id_publishable').value = '#';
+    $('.suggest-selected-item').remove();
+    $('.suggest-bubble,.suggest-list,.suggest-fields-bubble').css('z-index', '0');
+}
+
+function timeline_show_dialog(evt) {
+    // Position, id_item, id_export contained in tartget element id.
+    var export_params = evt.target.id;
+
+    $('#id-modal-dialog').show();
+    $('.suggest-bubble,.suggest-list,.suggest-fields-bubble').css('z-index', '90');
+    $('#id_publishable_suggest').focus();
+
+    $('#id-continue-dialog').live(
+        'click',
+        function() {
+            var url_parts = export_params.replace(/;/g, '/');
+            var id_publishable_value = $('#id_publishable').val();
+            console.log('Id publishable:' + id_publishable_value);
+            var id_publishable = id_publishable_value.split('#')[0];
+            parts = [
+                BASE_URL,
+                '#',
+                '/exports/export/timeline/insert/',
+                url_parts,
+                '/',
+                id_publishable,
+                '/'
+            ]
+            //console.log(parts.join(''));
+            // Final URL example: '/newman/#/exports/export/timeline/insert/position/id_item/id_export/'
+            document.location = parts.join('');
+        }
+    );
+}
+
+function timeline_register() {
     var sortable_params = {
         axis: 'y',
         items: '.timeline-item',
@@ -1325,14 +1365,53 @@ function timeline_sortable() {
     $('.timeline-item').hover(timeline_item_mouse_over, timeline_item_mouse_out);
     $('.timeline-item-navigation .insert').live(
         'click', 
-        function() {
-            $('#id-modal-dialog').show();
-        }
+        timeline_show_dialog
+    );
+
+    // TODO change z-index to NULL when URL is changed before the dialog is closed.
+    $('#id-modal-dialog #id-close-dialog').live(
+        'click',
+        timeline_hide_dialog
     );
 }
 
 function timeline_init() {
-    $(document).ready(timeline_sortable);
+    $(document).ready(timeline_register);
+}
+
+
+// Prefilled values into the change-forms
+
+function get_prefilled_values(splitted) {
+    // URLDecode jQuery method should be installed via change_form.html template (request_media).
+    var data = $.URLDecode(splitted[1]);
+    var idata = data.split('&');
+    var params = new Object();
+    for (var i in idata) {
+        var element = idata[i];
+        var x = element.split('=');
+        params[x[0]] = x[1];
+    }
+    return params;
+}
+
+function prefill_change_form() {
+    if (!$('.change-form')) return;    // procedure works only with change-forms
+    if (!window.location.hash) return; // URL doesn't contain hash char
+    var splitted = window.location.hash.split('?');
+    if (splitted.length != 2) return;  // no GET parameters found
+
+    var params = get_prefilled_values(splitted);
+    var input_elements = $('.change-form input');
+    var i, element;
+    for (i = 0; i < input_elements.length; i++) {
+        element = input_elements[i];
+        if (element.name in params) {
+            element.setAttribute('value', params[element.name]);
+            console.log('Prefilling element name=' + element.name +' , to value:' + params[element.name]);
+        }
+    }
+    return input_elements;
 }
 
 // EOF
