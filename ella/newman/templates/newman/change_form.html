@@ -27,6 +27,7 @@
 {% endspaceless %}
 
 {% block content %}
+
 <form {% if has_file_field %}enctype="multipart/form-data" {% endif %}action="{{ save_url }}" method="post" id="{{ opts.module_name }}_form" class="js-form change-form">{% block form_top %}{% endblock %}
 <div>
 {% if save_on_top %}{% submit_row %}{% endif %}
@@ -79,6 +80,7 @@
     {% for m in media %}
         request_media('{{ m }}?{{ VERSION }}');
     {% endfor %}
+    request_media(MEDIA_URL + 'jquery/jquery-urldecode-encode.js?{{ VERSION }}');
     </script>
     {% endcache %}
 {% endblock %}
