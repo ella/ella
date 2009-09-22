@@ -1,8 +1,8 @@
 # -*- coding: UTF-8 -*-
-import re
+from django.contrib.contenttypes.models import ContentType
 
 from django import template
-from django.utils.encoding import smart_str, smart_unicode
+from django.utils.encoding import smart_str
 from django.utils.text import capfirst
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy
@@ -152,7 +152,7 @@ def newmanurl(parser, token):
     """
     bits = token.split_contents()
     if len(bits) < 2:
-        raise TemplateSyntaxError("'%s' takes at least one argument"
+        raise template.TemplateSyntaxError("'%s' takes at least one argument"
                                   " (path to a view)" % bits[0])
     viewname = bits[1]
     args = []
@@ -175,3 +175,25 @@ def newmanurl(parser, token):
                         args.append(parser.compile_filter(arg))
     return NewmanUrlNode(viewname, args, kwargs, asvar)
 
+
+class GetNewmanUrlNode(template.Node):
+    def __init__(self, object):
+        self.object = object
+
+    def render(self, context):
+        obj = template.Variable(self.object).resolve(context)
+        ct = ContentType.objects.get_for_model(obj.__class__)
+        return "%s#/%s/%s/%s/" % (reverse('newman:index'), ct.app_label, ct.model, obj.pk)
+
+@register.tag
+def get_newman_url(parser, token):
+    """
+    Returns absolute newman admin url for object
+    """
+
+    bits = token.split_contents()
+
+    if len(bits) != 3 or bits[1] != 'for':
+        raise template.TemplateSyntaxError("{% get_newman_url for <object> %}")
+
+    return GetNewmanUrlNode(bits[2])
