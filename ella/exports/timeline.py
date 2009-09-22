@@ -8,6 +8,7 @@ from django.forms import models as modelforms
 from django import forms
 from django.forms.fields import DateTimeField, IntegerField, HiddenInput
 from django.core import signals as core_signals
+from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
@@ -47,8 +48,10 @@ def get_export_choice_form():
 
     class ExportChoiceForm(forms.Form):
         export_slug = forms.ChoiceField(choices=exports)
-        range_from = forms.ChoiceField(choices=timerange)
-        range_to = forms.ChoiceField(choices=timerange)
+        #range_from = forms.ChoiceField(choices=timerange)
+        #range_to = forms.ChoiceField(choices=timerange)
+        range_from = forms.DateTimeField()
+        range_to = forms.DateTimeField()
     log.debug('Form generated')
     return ExportChoiceForm
 
@@ -158,18 +161,23 @@ def timeline_view(request, extra_context=None):
     )
 
 
-def timeline_insert_view(request, id_item=None, id_export=None, position=None):
+def timeline_insert_view(request, id_item=None, id_export=None, id_publishable=None, position=None):
     """
     Inserts export element before an item (via ExportPosition and ExportMeta).
     @param   id_item     Existing Publishable object placed after new inserted item. 
-    @param   position    Existing Publishable object's position after new inserted item.
+    @param   position    Existing Publishable object's position.
     @param   id_export   Export object id.
+    @param   id_publishable  Chosen Publishable object to be associated with new ExportMeta object.
 
     1. get Export object associated with item.
     2. create ExportMeta for item.
     3. create ExportPosition for ExportMeta. Preset datetime visible_from and visible_to.
     """
-    if not (id_item and id_export and position):
+    if not (id_item and id_export and id_publishable and position):
         raise AttributeError
-    e = Export.objects.get(id_export)
-    #meta = ExportMeta.objects.create()
+    e = models.Export.objects.get(pk=id_export)
+    meta = models.ExportMeta.objects.create(
+        #publishable=Publishable.objects.get(pk=id_publishable),
+        publishable_id=id_publishable
+    )
+    return utils.JsonResponseRedirect(reverse('newman:exports_exportmeta_change', args=[meta.pk]))

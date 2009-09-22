@@ -33,7 +33,7 @@ class ExportAdmin(newman.NewmanModelAdmin):
             url(r'^timeline/$',
                 self.timeline_changelist_view,
                 name='%s_%s_timeline' % info),
-            url(r'^timeline/insert/(?P<position>\d+)/(?P<id_item>\d+)/(?P<id_export>\d+)/$',
+            url(r'^timeline/insert/(?P<position>\d+)/(?P<id_item>\d+)/(?P<id_export>\d+)/(?P<id_publishable>\d+)/$',
                 self.timeline_insert_view,
                 name='%s_%s_timeline_insert' % info),
         )
