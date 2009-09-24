@@ -88,6 +88,7 @@ INSTALLED_APPS = (
 
     'nc.adverts',
     'ella.catlocks',
+    'ella.contact_form',
 
     # 3rd party apps
     #'dbpersistconn',
