@@ -87,6 +87,7 @@ INSTALLED_APPS = (
     'djangomarkup',
 
     'nc.adverts',
+    'ella.catlocks',
 
     # 3rd party apps
     #'dbpersistconn',
