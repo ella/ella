@@ -90,6 +90,7 @@ INSTALLED_APPS = (
     'ella.catlocks',
     'ella.contact_form',
     'ella.discussions',
+    'ella.imports',
 
     # 3rd party apps
     #'dbpersistconn',
