@@ -86,6 +86,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'djangomarkup',
 
+    'nc.adverts',
 
     # 3rd party apps
     #'dbpersistconn',
