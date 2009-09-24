@@ -92,6 +92,7 @@ INSTALLED_APPS = (
     'ella.discussions',
     'ella.imports',
     'jaknato.instruction',
+    'ella.series',
 
     # 3rd party apps
     #'dbpersistconn',
