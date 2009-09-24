@@ -93,6 +93,7 @@ INSTALLED_APPS = (
     'ella.imports',
     'jaknato.instruction',
     'ella.series',
+    'ella.ratings',
 
     # 3rd party apps
     #'dbpersistconn',
