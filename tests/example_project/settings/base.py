@@ -94,6 +94,8 @@ INSTALLED_APPS = (
     'jaknato.instruction',
     'ella.series',
     'ella.ratings',
+    'vanoce.writetosanta',
+    # 'vanoce.xmastip',
 
     # 3rd party apps
     #'dbpersistconn',
