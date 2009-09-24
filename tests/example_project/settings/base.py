@@ -91,6 +91,7 @@ INSTALLED_APPS = (
     'ella.contact_form',
     'ella.discussions',
     'ella.imports',
+    'jaknato.instruction',
 
     # 3rd party apps
     #'dbpersistconn',
