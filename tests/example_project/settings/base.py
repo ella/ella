@@ -95,7 +95,7 @@ INSTALLED_APPS = (
     'ella.series',
     'ella.ratings',
     'vanoce.writetosanta',
-    # 'vanoce.xmastip',
+    'vanoce.xmastips',
 
     # 3rd party apps
     #'dbpersistconn',
