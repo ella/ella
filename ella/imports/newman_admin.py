@@ -1,13 +1,13 @@
-from django.conf.urls.defaults import patterns, url
 import logging
-logger = logging.getLogger("ella.imports")
+
+from django import http
+from django.conf.urls.defaults import patterns, url
+from django.shortcuts import get_object_or_404
 
 from ella import newman
-from django import http
-
-from ella.core.cache.utils import get_cached_object_or_404
-
 from ella.imports.models import Server, ServerItem
+
+logger = logging.getLogger("ella.imports")
 
 class ServerAdmin(newman.NewmanModelAdmin):
     list_display = ('title', 'domain', 'url', 'regenerate')
@@ -24,7 +24,7 @@ class ServerAdmin(newman.NewmanModelAdmin):
         return urls
 
     def fetch_view(self, request, pk, extra_context=None):
-        server = get_cached_object_or_404(Server, pk=pk)
+        server = get_object_or_404(Server, pk=pk)
         try:
             server.fetch()
             return http.HttpResponse('OK')
