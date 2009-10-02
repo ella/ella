@@ -13,7 +13,7 @@ lookup = None
 def create_id_lookup():
     global lookup
     if lookup is None:
-        lookup = dict( ((p.content_type_id, p.old_id), p.pk) for p in Publishable.objects.order_by().only('pk', 'old_id', 'content_type_id') )
+        lookup = dict( ((p.content_type_id, p.old_id), p.pk) for p in Publishable.objects.order_by().only('id', 'old_id', 'content_type') )
 
 BOX_RE = re.compile(r'''
         {% \s* box \s*      # {%_box_
@@ -69,7 +69,19 @@ def migrate_markup(processor, modelfields):
 
 class Command(NoArgsCommand):
     args = 'migrate_markup'
-    help = 'migrate_markup'
+    help = '''migrate_markup:
+
+    settings:
+
+        MIGRATE_MARKUP_PROCESSOR = 'markdown'
+        
+        MIGRATE_MARKUP_FIELDS = [ 
+            ('core.publishable', ['description','title']),
+            ('article.articles', ['XXX',]),
+        ]
+    
+    
+    '''
     def handle(self, *args, **options):
         if not hasattr(settings, 'MIGRATE_MARKUP_FIELDS') or not hasattr(settings, 'MIGRATE_MARKUP_PROCESSOR'):
             print self.help
