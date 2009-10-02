@@ -25,7 +25,7 @@ class Migration:
             FROM
                 photos_format
             ''' % ', '.join(FORMAT_FIELDS) )
-        rows = result.fetchall()
+        rows = result
         formats = {}
 
         # collect all formats in dictionary:
@@ -43,25 +43,26 @@ class Migration:
             formats.setdefault(row[0], {}).setdefault(tuple(row[3:]), []).append((row[1], row[2]))
 
         for name, details in formats.items():
-            id = None
-            for fields, id_site in details.items():
-                if id == None:
-                    id = id_site[0]
+            for fields, ids in details.items():
+                id = None
+                for id_site in ids:
+                    if id == None:
+                        id = id_site[0]
 
-                db.execute('INSERT INTO photos_format_sites (format_id, site_id) VALUES (%s, %s)', (id, id_site[1]))
+                    db.execute('INSERT INTO photos_format_sites (format_id, site_id) VALUES (%s, %s)', (id, id_site[1]))
 
-                if id != id_site[0]:
-                    db.execute('DELETE FROM photos_formatedphoto WHERE format_id = %s', (id_site[0],))
-                    db.execute('DELETE FROM photos_format WHERE id = %s', (id_site[0],))
+                    if id != id_site[0]:
+                        db.execute('DELETE FROM photos_formatedphoto WHERE format_id = %s', (id_site[0],))
+                        db.execute('DELETE FROM photos_format WHERE id = %s', (id_site[0],))
     
     def backwards(self, orm):
         "Write your backwards migration here"
 
         result = db.execute('SELECT id FROM photos_format')
-        for row in result.fetchall():
+        for row in result:
             id = row[0]
             # take the first site for every format...
-            min_site = db.execute('SELECT MIN(site_id) FROM photos_format_sites WHERE format_id = %s', (id, )).fetchone()[0]
+            min_site = db.execute('SELECT MIN(site_id) FROM photos_format_sites WHERE format_id = %s', (id, ))[0]
 
             # ... put it onto the format ...
             db.execute('UPDATE photos_format SET site_id = %s WHERE id = %s', (min_site, id, ))

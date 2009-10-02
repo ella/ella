@@ -8,7 +8,7 @@ class Migration:
     def forwards(self, orm):
         
         # Adding field 'FormatedPhoto.image'
-        db.add_column('photos_formatedphoto', 'image', models.ImageField(height_field='height', width_field='width'))
+        db.add_column('photos_formatedphoto', 'image', models.ImageField(height_field='height', width_field='width', max_length=300))
         
     
     

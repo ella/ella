@@ -263,7 +263,7 @@ class FormatedPhoto(models.Model):
     "Specific photo of specific format."
     photo = models.ForeignKey(Photo)
     format = models.ForeignKey(Format)
-    image = models.ImageField(upload_to=UPLOAD_TO, height_field='height', width_field='width') # save it to YYYY/MM/DD structure
+    image = models.ImageField(upload_to=UPLOAD_TO, height_field='height', width_field='width', max_length=300) # save it to YYYY/MM/DD structure
     crop_left = models.PositiveIntegerField()
     crop_top = models.PositiveIntegerField()
     crop_width = models.PositiveIntegerField()
