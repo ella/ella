@@ -36,6 +36,7 @@ JS_MARKITUP_SET = 'js/markitup/sets/%s/set.js' % MARKITUP_SET
 CSS_MARKITUP = 'js/markitup/skins/markitup/style.css'
 CSS_MARKITUP_SET = 'js/markitup/sets/%s/style.css' % MARKITUP_SET
 CLASS_RICHTEXTAREA = 'rich_text_area'
+JS_AUTOGROW = 'jquery/jquery.autogrow.js'
 
 # Generic suggester media files
 JS_GENERIC_SUGGEST = 'js/generic.suggest.js'
@@ -71,6 +72,7 @@ class NewmanRichTextAreaWidget(RichTextAreaWidget):
             MEDIA_PREFIX + JS_MARKITUP_SET,
             MEDIA_PREFIX + JS_JQUERY_UI,
             MEDIA_PREFIX + JS_JQUERY_FIELDSELECTION,
+            MEDIA_PREFIX + JS_AUTOGROW,
         )
         css = {
             'screen': (

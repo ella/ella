@@ -44,7 +44,10 @@
     background-image:url(images/box.png);
 }
 .markItUp .preview a {
-    background-image:url(images/preview.png);
+    background-image:url(../../../../ico/16/search.png);
+}
+.markItUp .preview_on_site a {
+    background-image:url(../../../../ico/16/web.png);
 }
 
 #o-quick li {

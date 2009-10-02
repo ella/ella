@@ -90,6 +90,9 @@ class ModelWeight(models.Model):
         verbose_name = _('Model weight')
         verbose_name_plural = _('Model weights')
         ordering = ('-weight',)
+    
+    def __unicode__(self):
+        return u'%s %d %s' % (self.content_type, self.weight, self.owner_field)
 
 def normalized_rating_key(func, self, obj, max, step=None):
     return 'ella.ratings.models.normalized_rating:%s.%s:%s:%s:%s' % (
