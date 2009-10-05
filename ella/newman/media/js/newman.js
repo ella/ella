@@ -477,14 +477,15 @@ $( function() {
             error:    function() { this.succeeded = false; },
             complete: function(xhr) {
                 var redirect_to;
-                if (redirect_to = xhr.getResponseHeader('Redirect-To')) {
+                // JSON redirects temporarily commented out.
+                /*if (redirect_to = xhr.getResponseHeader('Redirect-To')) {
                     var new_req = {};
                     for (k in this) new_req[k] = this[k];
                     new_req.url = redirect_to;
                     new_req.redirect_to = redirect_to;
                     $.ajax( new_req );
                     return;
-                }
+                }*/
                 if (this.succeeded) { try {
                     success.call(this, xhr.responseText, xhr);
                 } catch (e) {
@@ -956,6 +957,15 @@ PostsaveActionTable.prototype = {
 
 
 // submit line (save, save as new, etc)
+function __save_change_form_success(text_data, xhr, request_url) {
+    console.log('Text data: ' + text_data);
+    console.log('xhr: ' + xhr);
+    var response_msg =  gettext('Form saved');
+    show_ok(response_msg);
+    //Kobayashi.load_content({target_id: 'content', address: request_url}); // loads into content url
+    adr(request_url, {just_set: true, nohistory: true});
+}
+
 function save_change_form_success(text_data) {
     var options = this;
     if (!options || !options._button_name || !options._form) {
@@ -971,31 +981,42 @@ function save_change_form_success(text_data) {
     var $form = options._form;
     var action = options._button_name;
     var data, object_id, response_msg;
+    var redirect_to;
     try {
         data = JSON.parse(text_data);
-        object_id = data.data.id;
-        object_title = data.data.title;
-        response_msg = data.message;
+        if (data.status == 'redirect') {
+            redirect_to = data.redirect_to;
+        } else {
+            object_id = data.data.id;
+            object_title = data.data.title;
+            response_msg = data.message;
+        }
     } catch(e) { carp('invalid data received from form save:', text_data, e); }
     response_msg = response_msg || gettext('Form saved');
-    
-    var action_table = new PostsaveActionTable({
-        object_id: object_id,
-        object_title: object_title,
-        options: options
-    });
-    
-    // load form-specific post-save actions
-    var $meta = $form.find('.js-form-metadata');
-    var post_save_callback = $meta.find('input[name=post_save]').data('callback');
-    var post_save = {};
-    if (post_save_callback) post_save = post_save_callback($form);
-    for (var act in post_save) {
-        action_table[ act ] = post_save[ act ];
+  
+    if (!redirect_to) {
+        var action_table = new PostsaveActionTable({
+            object_id: object_id,
+            object_title: object_title,
+            options: options
+        });
+        
+        // load form-specific post-save actions
+        var $meta = $form.find('.js-form-metadata');
+        var post_save_callback = $meta.find('input[name=post_save]').data('callback');
+        var post_save = {};
+        if (post_save_callback) post_save = post_save_callback($form);
+        for (var act in post_save) {
+            action_table[ act ] = post_save[ act ];
+        }
+
+        show_ok(response_msg);
+        action_table.run(action);
+    } else {
+        show_ok(response_msg);
+        adr(redirect_to, {just_set: true, nohistory: true});
     }
     
-    show_ok(response_msg);
-    action_table.run(action);
     Kobayashi.unload_content('history');
 }
 
@@ -1281,137 +1302,257 @@ function DATEPICKER_OPTIONS(opts) {
 
 // Timeline (ella.exports application)
 
-function timeline_changed(event, ui) {
-    console.log("Timeline changed:", event);
-}
-
-function timeline_item_clicked(event, ui) {
-    console.log("Item hit:", event);
-}
-
-function timeline_item_mouse_over(event, ui) {
-    $(this).find('.timeline-item-navigation').show()
-}
-
-function timeline_item_mouse_out(event, ui) {
-    $(this).find('.timeline-item-navigation').hide()
-}
-
-function timeline_drag_update(event, ui) {
-    /*var $target = $( evt.target );
-    $target.find('input.item-order').each( function(i) {
-        var ord = i+1;
-        $(this).val( ord ).change();
-        $(this).siblings('h4:first').find('span:first').text( ord );
-    });
-    $target.children().removeClass('last-related');
-    $target.children(':last').addClass('last-related');*/
-}
-
-function timeline_hide_dialog() {
-    // remove suggester -- hide
-    // TODO cleaning of suggester should be implemented in generic.suggest.js library!
-    $('#id-modal-dialog').hide();
-    $('#id_publishable').value = '#';
-    $('.suggest-selected-item').remove();
-    $('.suggest-bubble,.suggest-list,.suggest-fields-bubble').css('z-index', '0');
-}
-
-function timeline_show_dialog(evt) {
-    // Position, id_item, id_export contained in tartget element id.
-    var export_params = evt.target.id;
-
-    $('#id-modal-dialog').show();
-    $('.suggest-bubble,.suggest-list,.suggest-fields-bubble').css('z-index', '90');
-    $('#id_publishable_suggest').focus();
-
-    $('#id-continue-dialog').live(
-        'click',
-        function() {
-            var url_parts = export_params.replace(/;/g, '/');
-            var id_publishable_value = $('#id_publishable').val();
-            console.log('Id publishable:' + id_publishable_value);
-            var id_publishable = id_publishable_value.split('#')[0];
-            parts = [
-                BASE_URL,
-                '#',
-                '/exports/export/timeline/insert/',
-                url_parts,
-                '/',
-                id_publishable,
-                '/'
-            ]
-            //console.log(parts.join(''));
-            // Final URL example: '/newman/#/exports/export/timeline/insert/position/id_item/id_export/'
-            document.location = parts.join('');
-        }
-    );
-}
-
-function timeline_register() {
-    var sortable_params = {
-        axis: 'y',
-        items: '.timeline-item',
-        containment: 'parent',
-        cursor: 'move',
-        delay: 100,
-        // callback when timeline is changed
-        stop: timeline_changed,
-        update: timeline_drag_update,
-    }
-    $('.timeline-ul').sortable(sortable_params);
-    $('.timeline-ul').disableSelection();
-    $('.timeline-item').click(timeline_item_clicked);
-    $('.timeline-item').hover(timeline_item_mouse_over, timeline_item_mouse_out);
-    $('.timeline-item-navigation .insert').live(
-        'click', 
-        timeline_show_dialog
-    );
-
-    // TODO change z-index to NULL when URL is changed before the dialog is closed.
-    $('#id-modal-dialog #id-close-dialog').live(
-        'click',
-        timeline_hide_dialog
-    );
-}
-
 function timeline_init() {
-    $(document).ready(timeline_register);
+    $(document).bind('media_loaded', Timeline.timeline_register);
 }
+
+Timeline = new Object();
+( function() {
+    function changed(event, ui) {
+        console.log("Timeline changed:", event);
+    }
+
+    function item_clicked(event, ui) {
+        console.log("Item hit:", event);
+    }
+
+    function item_mouse_over(event, ui) {
+        $(this).find('.timeline-item-navigation').show()
+    }
+
+    function item_mouse_out(event, ui) {
+        $(this).find('.timeline-item-navigation').hide()
+    }
+
+    function drag_update(event, ui) {
+        /*var $target = $( evt.target );
+        $target.find('input.item-order').each( function(i) {
+            var ord = i+1;
+            $(this).val( ord ).change();
+            $(this).siblings('h4:first').find('span:first').text( ord );
+        });
+        $target.children().removeClass('last-related');
+        $target.children(':last').addClass('last-related');*/
+    }
+
+    // dialog -- Publishable suggester
+
+    function click_continue_dialog(export_params) {
+        console.log('Click continue dialog!');
+        var url_parts = export_params.replace(/;/g, '/');
+        var id_publishable_value = $('#id_publishable').val();
+        var id_publishable = id_publishable_value.split('#')[0];
+            //'service-container::::',
+        var parts = [
+            BASE_URL,
+            'exports/export/timeline/insert/',
+            url_parts,
+            '/',
+            id_publishable,
+            '/'
+        ];
+        //console.log('Final URL: ' + parts.join(''));
+        // Final URL example: '/newman/#/exports/export/timeline/insert/position/id_item/id_export/'
+        //document.location = parts.join('');
+        //$('#id-continue-dialog').attr('href', parts.join(''));
+        var ajax_params = {
+            url: parts.join(''),
+            type: 'GET',
+            dataType: 'script',
+            success: click_continue_dialog_ajax_success,
+            error: click_continue_dialog_ajax_error
+        };
+        console.log('AJAX!');
+        $.ajax(ajax_params);
+        return false;
+    }
+
+    function modified_simple_load(specifier, success_callback) {
+        var args = Kobayashi.get_simple_load_arguments(specifier);
+        if (args == null) return;
+        args.success_callback = success_callback;
+        Kobayashi.load_content(args);
+    }
+
+    function omit_newman(url) {
+        return url.replace(BASE_URL, '/');
+    }
+
+    function exportmeta_postsave_callback() {
+        console.log('POSTSAVE called (custom)');
+    }
+    Timeline.exportmeta_postsave_callback = exportmeta_postsave_callback;
+
+    function click_continue_dialog_ajax_success(response_text) {
+        var success_callback = function() {
+            // keep Save button only
+            $('#id-exportmeta div.submit-row').children().each( 
+                function() {
+                     if ($(this).attr('name') != '_save') {
+                        $(this).remove();
+                     }
+                }
+            );
+            // remove breadcrumbs (die Broesel)
+            $('.breadcrumbs').each(
+                function() {
+                    $(this).remove();
+                }
+            );
+            $('.breadcrumbs').remove();
+            // bind custom _save callback (post save action)
+            $('.change-form .js-form-metadata #save-change-form-success').data(
+                'callback',
+                Timeline.exportmeta_postsave_callback
+            );
+        };
+
+        try {
+            var json_redir = JSON.parse(response_text);
+            // simple-load(tm) content
+            var selector = [
+                'id-exportmeta',
+                '::::',
+                omit_newman(json_redir.redirect_to)
+            ];
+            hide_dialog();
+            $('#id-exportmeta-modal-dialog').show();
+            modified_simple_load(selector.join(''), success_callback);
+        } catch(e) {
+            show_err(gettext('Wrong response received from timeline-insert view.'));
+        }
+    }
+
+    function click_continue_dialog_ajax_error() {
+        show_err(gettext('Error processing timeline-insert reponse (JSON redirect).'));
+    }
+
+    function show_dialog(evt) {
+        // Position, id_item, id_export contained in tartget element id.
+        var export_params = evt.target.id;
+
+        $('#id-modal-dialog').show();
+        $('.suggest-bubble,.suggest-list,.suggest-fields-bubble').css('z-index', '90');
+        $('#id_publishable_suggest').focus();
+
+        $('#id-continue-dialog').bind(
+            'click',
+            function() {
+                hide_dialog();
+            }
+        );
+
+        $('#id-continue-dialog').bind(
+            'click', 
+            function() {
+                return click_continue_dialog(export_params); 
+            }
+        );
+    }
+
+    function hide_dialog() {
+        // remove suggester -- hide
+        // TODO cleaning of suggester should be implemented in generic.suggest.js library!
+        $('#id-modal-dialog').hide();
+        $('#id_publishable').value = '#';
+        $('.suggest-selected-item').remove();
+        $('.suggest-bubble,.suggest-list,.suggest-fields-bubble').css('z-index', '0');
+    }
+
+    // register timeline events, etc. (entry point)
+
+    function timeline_register() {
+        var sortable_params = {
+            axis: 'y',
+            items: '.timeline-item',
+            containment: 'parent',
+            cursor: 'move',
+            delay: 100,
+            // callback when timeline is changed
+            stop: changed,
+            update: drag_update,
+        }
+        $('.timeline-ul').sortable(sortable_params);
+        $('.timeline-ul').disableSelection();
+        $('.timeline-item').click(item_clicked);
+        $('.timeline-item').hover(item_mouse_over, item_mouse_out);
+        $('.timeline-item-navigation .insert').live(
+            'click', 
+            show_dialog
+        );
+
+        // TODO change z-index to NULL when URL is changed before the dialog is closed.
+        $('#id-modal-dialog #id-close-dialog').live(
+            'click',
+            hide_dialog
+        );
+    }
+    Timeline.timeline_register = timeline_register;
+
+})(); // end of Timeline
 
 
 // Prefilled values into the change-forms
-
-function get_prefilled_values(splitted) {
-    // URLDecode jQuery method should be installed via change_form.html template (request_media).
-    var data = $.URLDecode(splitted[1]);
-    var idata = data.split('&');
-    var params = new Object();
-    for (var i in idata) {
-        var element = idata[i];
-        var x = element.split('=');
-        params[x[0]] = x[1];
-    }
-    return params;
-}
+// Prefilling forms handles text input elements and select boxes
+// (including creating special hidden field used to redirect browser after change-form is saved)
 
 function prefill_change_form() {
-    if (!$('.change-form')) return;    // procedure works only with change-forms
-    if (!window.location.hash) return; // URL doesn't contain hash char
-    var splitted = window.location.hash.split('?');
-    if (splitted.length != 2) return;  // no GET parameters found
+    $(document).bind('media_loaded', PrefilledChangeForm.fill_form);
+}
 
-    var params = get_prefilled_values(splitted);
-    var input_elements = $('.change-form input');
-    var i, element;
-    for (i = 0; i < input_elements.length; i++) {
-        element = input_elements[i];
-        if (element.name in params) {
-            element.setAttribute('value', params[element.name]);
-            console.log('Prefilling element name=' + element.name +' , to value:' + params[element.name]);
+PrefilledChangeForm = new Object();
+(function() {
+    function get_prefilled_values(splitted) {
+        // URLDecode jQuery method should be installed via change_form.html template (request_media).
+        var data = $.URLDecode(splitted[1]);
+        var idata = data.split('&');
+        var params = new Object();
+        for (var i in idata) {
+            var element = idata[i];
+            var x = element.split('=');
+            params[x[0]] = x[1];
+        }
+        return params;
+    }
+
+    function fill_form() {
+        if (!$('.change-form')) return;    // procedure works only with change-forms
+        if (!window.location.hash) return; // URL doesn't contain hash char
+        var splitted = window.location.hash.split('?');
+        if (splitted.length != 2) return;  // no GET parameters found
+
+        // params contains elements ids
+        var params = get_prefilled_values(splitted);
+        //var input_elements = $('.change-form input,select');
+        var i, element, options, paramValue;
+        //for (i = 0; i < input_elements.length; i++) 
+        $('.change-form input,select').each(function() {
+            //element = input_elements[i];
+            element = $(this)[0];
+            if (element.id in params) {
+                paramValue = params[element.id];
+                if (element.tagName == 'SELECT') {
+                    options = $('#' + element.id + ' option');
+                    for ( i = 0; i < options.length; i++ ) {
+                        if (options[i].value == paramValue) {
+                            element.value = i;
+                        }
+                    }
+                } else {
+                    element.setAttribute('value', params[element.id]);
+                }
+            }
+        });
+        // pass redirect_To addres used after change-form is saved
+        if ('http_redirect_to' in params) {
+            var parts = [
+                '<input type="hidden" name="http_redirect_to" value="',
+                params['http_redirect_to'],
+                '" />'
+            ];
+            $('.change-form input:hidden:first').after(parts.join(''));
         }
     }
-    return input_elements;
-}
+})(); // end of PrefilledChangeForm
 
 // EOF
