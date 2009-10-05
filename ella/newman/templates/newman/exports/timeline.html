@@ -22,8 +22,12 @@
                 </ul>
                 <!-- a id="lookup_id_publishable" class="suggest-related-lookup" href="/core/publishable/?pop"></a -->
             </div>
-            <a id="id-continue-dialog" class="icn btn ok">{% trans "Continue" %}</a>
+            <a id="id-continue-dialog" class="icn btn ok js-simpleload" href="">{% trans "Continue" %}</a>
             <a id="id-close-dialog" class="icn btn cancel">{% trans "Close" %}</a>
+        </div>
+    </div>
+    <div id="id-exportmeta-modal-dialog" class="noscreen service-module">
+        <div id="id-exportmeta" class="service-module-in" style="height: 440px; overflow: auto; position: fixed; top:100px; left: 100px;">
         </div>
     </div>
 
@@ -40,11 +44,20 @@
                         <p>{{ cell }}</p>
                         {% if cell.pk %}
                         <div class="timeline-item-navigation noscreen">
-                            <a href="">{% trans "Edit" %}</a>
-                            <a href="">{% trans "Delete" %}</a>
-                            <a href="">{% trans "Append" %}</a>
                             <span 
-                                id="{{ forloop.counter }};{{ cell.pk }};{{ export.pk }}" 
+                                id="{{ forloop.counter }};{{ cell.pk }};{{ export.pk }};{{ cell.column_date_from }}" 
+                                class="edit"
+                            >{% trans "Edit" %}</span>
+                            <span 
+                                id="{{ forloop.counter }};{{ cell.pk }};{{ export.pk }};{{ cell.column_date_from }}" 
+                                class="delete"
+                            >{% trans "Delete" %}</span>
+                            <span 
+                                id="{{ forloop.counter }};{{ cell.pk }};{{ export.pk }};{{ cell.column_date_from }}" 
+                                class="append"
+                            >{% trans "Append" %}</span>
+                            <span 
+                                id="{{ forloop.counter }};{{ cell.pk }};{{ export.pk }};{{ cell.column_date_from }}" 
                                 class="insert"
                             >{% trans "Insert" %}</span>
                             {# newmanurl newman:exports_export_timeline_insert id_item=cell.pk,id_export=export.pk,position=forloop.counter #}
@@ -73,7 +86,7 @@
         </tr>
     {% endfor %}
     </table>
-    {% endcomment %}
+    {% endcomment %}{# TIMELINE AS TABLE #}
 {% endblock %}
 
 

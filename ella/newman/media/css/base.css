@@ -513,7 +513,14 @@ fieldset.collapse legend { background-image: url(../ico/16/14_layer_raiselayer.p
     min-height: 80px;
     overflow: auto;
 }
+
 .timeline-ul { }
+
+.timeline-ul .timeline-item span {
+    text-decoration: underline;
+    color: #005F00; 
+    cursor: pointer;
+}
 
 .timeline-table .timeline-ul .timeline-item:hover {
     background: white;
