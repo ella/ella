@@ -94,6 +94,7 @@
     {{ block.super }}
     <script type="text/javascript">
         request_media(MEDIA_URL + 'jquery/jquery-ui.js');
+        request_media(MEDIA_URL + 'jquery/jquery-urldecode-encode.js?{{ VERSION }}');
         request_media(MEDIA_URL + 'jquery/jquery-ui-smoothness.css');
         request_media(MEDIA_URL + 'js/generic.suggest.js?{{ VERSION }}');
         request_media(MEDIA_URL + 'css/generic.suggest.css?{{ VERSION }}');
