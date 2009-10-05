@@ -63,7 +63,9 @@ def get_timelined_items(slug, range_from, range_to, step=TIMELINE_STEP):
     while itemizer.datetime_from <= datetime_to:
         column = list()
         column.append(itemizer.datetime_from.strftime(DATETIME_FORMAT))
-        map(lambda x: column.append(x), itemizer)
+        for i in itemizer:
+            i.column_date_from = itemizer.datetime_from.strftime(DATETIME_FORMAT)
+            column.append(i)
         if not out or (out and out[-1] != column):
             while (len(column) - 1) < itemizer.export.max_visible_items:
                 column.append(EMPTY_TIMELINE_CELL)
@@ -161,9 +163,11 @@ def timeline_view(request, extra_context=None):
     )
 
 
-def timeline_insert_view(request, id_item=None, id_export=None, id_publishable=None, position=None):
+def timeline_insert_view(request, **kwargs):
     """
     Inserts export element before an item (via ExportPosition and ExportMeta).
+
+    Keyword arguments:
     @param   id_item     Existing Publishable object placed after new inserted item. 
     @param   position    Existing Publishable object's position.
     @param   id_export   Export object id.
@@ -173,11 +177,33 @@ def timeline_insert_view(request, id_item=None, id_export=None, id_publishable=N
     2. create ExportMeta for item.
     3. create ExportPosition for ExportMeta. Preset datetime visible_from and visible_to.
     """
-    if not (id_item and id_export and id_publishable and position):
+    position = kwargs.get('position', None)
+    id_item = kwargs.get('id_item', None)
+    id_export = kwargs.get('id_export', None)
+    visible_from = kwargs.get('visible_from', None)
+    id_publishable = kwargs.get('id_publishable', None)
+
+    if not (id_item and id_export and id_publishable and position and visible_from):
         raise AttributeError
     e = models.Export.objects.get(pk=id_export)
     meta = models.ExportMeta.objects.create(
         #publishable=Publishable.objects.get(pk=id_publishable),
         publishable_id=id_publishable
     )
-    return utils.JsonResponseRedirect(reverse('newman:exports_exportmeta_change', args=[meta.pk]))
+    date_from = datetime.strptime(visible_from, DATETIME_FORMAT)
+    visible_to = (date_from + TIMELINE_STEP - timedelta(seconds=-1)).strftime(DATETIME_FORMAT)
+#?exportposition_set-0-position=2&exportposition_set-0-visible_to=2009-08-01 20:00&exportposition_set-0-visible_from=2008-08-01 18:00
+    url_parts = {
+        'id_exportposition_set-0-position': int(position),
+        'id_exportposition_set-0-visible_from': visible_from,
+        'id_exportposition_set-0-visible_to': visible_to,
+        'id_exportposition_set-1-export': int(id_export),
+        'http_redirect_to': request.GET.get('http_redirect_to', '')
+    }
+    address = '%s?%s' % (
+        reverse('newman:exports_exportmeta_change', args=[meta.pk]),
+        urlencode(url_parts)
+    )
+    return utils.JsonResponseRedirect(address)
+
+
