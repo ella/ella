@@ -77,10 +77,15 @@
 
     {% cache 300 'nm-cf-js' adminform %}
     <script type="text/javascript">
+    request_media(MEDIA_URL + 'jquery/jquery-urldecode-encode.js?{{ VERSION }}');
     {% for m in media %}
         request_media('{{ m }}?{{ VERSION }}');
     {% endfor %}
-    request_media(MEDIA_URL + 'jquery/jquery-urldecode-encode.js?{{ VERSION }}');
     </script>
     {% endcache %}
+
+    <!-- prefilling values into change-forms -->
+    <script type="text/javascript">
+        prefill_change_form();
+    </script>
 {% endblock %}
