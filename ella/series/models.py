@@ -67,7 +67,8 @@ class SeriePart(models.Model):
 
     @property
     def target(self):
-        return self.placement.target
+        # return self.placement.target
+        return self.placement.publishable.target
 
     def published(self):
         return self.placement.publish_from

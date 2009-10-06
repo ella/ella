@@ -74,18 +74,28 @@ INSTALLED_APPS = (
     'ella.exports',
     'ella.media',
     'ella.attachments',
-    'nc.cdnclient',
+#    'nc.cdnclient',
 
     'example_project.services',
 
 #    'south',
 
-    'ella.ellaadmin',
+#    'ella.ellaadmin',
     'ella.newman',
     'ella.newman.licenses',
     'django.contrib.admin',
     'djangomarkup',
 
+#    'nc.adverts',
+    'ella.catlocks',
+    'ella.contact_form',
+    'ella.discussions',
+    'ella.imports',
+#    'jaknato.instruction',
+    'ella.series',
+    'ella.ratings',
+#    'vanoce.writetosanta',
+#    'vanoce.xmastips',
 
     # 3rd party apps
     #'dbpersistconn',

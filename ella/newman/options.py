@@ -120,7 +120,6 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
 
 class NewmanModelAdmin(XModelAdmin):
     changelist_view_cl = NewmanChangeList
-    actions = None
 
     def get_template_list(self, base_template):
         model = self.model

@@ -219,7 +219,7 @@ class BannedUser(models.Model):
     user = models.ForeignKey(User, related_name='banned_user')
 
     def __unicode__(self):
-        return self.user
+        return u'%s' % self.user
 
 log = logging.getLogger('ella.discussions')
 
