@@ -641,7 +641,7 @@ class NewmanModelAdmin(XModelAdmin):
 
         def give_me_unicode(ei):
             if not hasattr(ei, '__unicode__'):
-                return str(ei)
+                return u'%s' % ei
             return ei.__unicode__()
 
         error_list = []
