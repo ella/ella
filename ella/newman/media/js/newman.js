@@ -113,6 +113,7 @@ $(document).bind('media_loading_start', function() { lock_window(gettext('Loadin
 $(document).bind('media_loaded', unlock_window);
 
 //// Drafts and templates
+Drafts = new Object;
 (function() {
     var draft_id;
     function save_preset($form, options) {
@@ -233,8 +234,9 @@ $(document).bind('media_loaded', unlock_window);
     function set_load_draft_handler() {
         $('#id_drafts').unbind('change', load_draft_handler).change(load_draft_handler);
     }
-    set_load_draft_handler();
-    $(document).bind('content_added', set_load_draft_handler);
+    Drafts.set_load_draft_handler = set_load_draft_handler;
+    Drafts.set_load_draft_handler();
+    $(document).bind('content_added', Drafts.set_load_draft_handler);
     
     function delete_preset(id) {
         $.ajax({
@@ -957,15 +959,6 @@ PostsaveActionTable.prototype = {
 
 
 // submit line (save, save as new, etc)
-function __save_change_form_success(text_data, xhr, request_url) {
-    console.log('Text data: ' + text_data);
-    console.log('xhr: ' + xhr);
-    var response_msg =  gettext('Form saved');
-    show_ok(response_msg);
-    //Kobayashi.load_content({target_id: 'content', address: request_url}); // loads into content url
-    adr(request_url, {just_set: true, nohistory: true});
-}
-
 function save_change_form_success(text_data) {
     var options = this;
     if (!options || !options._button_name || !options._form) {
@@ -1309,11 +1302,11 @@ function timeline_init() {
 Timeline = new Object();
 ( function() {
     function changed(event, ui) {
-        console.log("Timeline changed:", event);
+        carp("Timeline changed:", event);
     }
 
     function item_clicked(event, ui) {
-        console.log("Item hit:", event);
+        carp("Item hit:", event);
     }
 
     function item_mouse_over(event, ui) {
@@ -1338,23 +1331,20 @@ Timeline = new Object();
     // dialog -- Publishable suggester
 
     function click_continue_dialog(export_params) {
-        console.log('Click continue dialog!');
-        var url_parts = export_params.replace(/;/g, '/');
+        var url_parts = export_params.id.replace(/;/g, '/');
         var id_publishable_value = $('#id_publishable').val();
         var id_publishable = id_publishable_value.split('#')[0];
             //'service-container::::',
         var parts = [
             BASE_URL,
-            'exports/export/timeline/insert/',
+            export_params.url,
             url_parts,
             '/',
             id_publishable,
             '/'
         ];
-        //console.log('Final URL: ' + parts.join(''));
+        //carp('Final URL: ' + parts.join(''));
         // Final URL example: '/newman/#/exports/export/timeline/insert/position/id_item/id_export/'
-        //document.location = parts.join('');
-        //$('#id-continue-dialog').attr('href', parts.join(''));
         var ajax_params = {
             url: parts.join(''),
             type: 'GET',
@@ -1362,7 +1352,6 @@ Timeline = new Object();
             success: click_continue_dialog_ajax_success,
             error: click_continue_dialog_ajax_error
         };
-        console.log('AJAX!');
         $.ajax(ajax_params);
         return false;
     }
@@ -1379,7 +1368,8 @@ Timeline = new Object();
     }
 
     function exportmeta_postsave_callback() {
-        console.log('POSTSAVE called (custom)');
+        $('#id-exportmeta-modal-dialog').hide();
+        window.location.reload();
     }
     Timeline.exportmeta_postsave_callback = exportmeta_postsave_callback;
 
@@ -1400,16 +1390,29 @@ Timeline = new Object();
                 }
             );
             $('.breadcrumbs').remove();
+            // remove content-toolbar table (presets, help, etc.)
+            $('#content-toolbar').each(
+                function() {
+                    $(this).remove();
+                }
+            );
+            $('#content-toolbar').remove();
             // bind custom _save callback (post save action)
             $('.change-form .js-form-metadata #save-change-form-success').data(
                 'callback',
                 Timeline.exportmeta_postsave_callback
             );
+            // prefill form
+            var form_selector = '#id-exportmeta .change-form';
+            PrefilledChangeForm.fill_form(form_selector, Timeline._continue_dialog_redirect_to);
+            // disable auto-save!
+            $(document).unbind('content_added', Drafts.set_autosave_interval);
         };
 
         try {
             var json_redir = JSON.parse(response_text);
             // simple-load(tm) content
+            Timeline._continue_dialog_redirect_to = json_redir.redirect_to; // temporary "static" variable
             var selector = [
                 'id-exportmeta',
                 '::::',
@@ -1427,27 +1430,41 @@ Timeline = new Object();
         show_err(gettext('Error processing timeline-insert reponse (JSON redirect).'));
     }
 
-    function show_dialog(evt) {
-        // Position, id_item, id_export contained in tartget element id.
-        var export_params = evt.target.id;
-
+    // shows publishable choice dialog
+    function show_publishable_choice_dialog(export_params) {
         $('#id-modal-dialog').show();
         $('.suggest-bubble,.suggest-list,.suggest-fields-bubble').css('z-index', '90');
         $('#id_publishable_suggest').focus();
 
         $('#id-continue-dialog').bind(
-            'click',
-            function() {
-                hide_dialog();
-            }
-        );
-
-        $('#id-continue-dialog').bind(
             'click', 
             function() {
-                return click_continue_dialog(export_params); 
+                hide_dialog();
+                return export_params.continue_click_callback(export_params); 
             }
         );
+    }
+
+    // insert an export position
+    function show_insert_dialog(evt) {
+        // Position, id_item, id_export contained in tartget element id.
+        var export_params = new Object();
+        export_params.id = evt.target.id;
+        export_params.event_data = evt;
+        export_params.url = 'exports/export/timeline/insert/';
+        export_params.continue_click_callback = click_continue_dialog;
+        show_publishable_choice_dialog(export_params);
+    }
+
+    // append an export position
+    function show_append_dialog(evt) {
+        // Position, id_item, id_export contained in tartget element id.
+        var export_params = new Object();
+        export_params.id = evt.target.id;
+        export_params.event_data = evt;
+        export_params.url = 'exports/export/timeline/append/';
+        export_params.continue_click_callback = click_continue_dialog;
+        show_publishable_choice_dialog(export_params);
     }
 
     function hide_dialog() {
@@ -1478,7 +1495,11 @@ Timeline = new Object();
         $('.timeline-item').hover(item_mouse_over, item_mouse_out);
         $('.timeline-item-navigation .insert').live(
             'click', 
-            show_dialog
+            show_insert_dialog
+        );
+        $('.timeline-item-navigation .append').live(
+            'click', 
+            show_append_dialog
         );
 
         // TODO change z-index to NULL when URL is changed before the dialog is closed.
@@ -1514,19 +1535,20 @@ PrefilledChangeForm = new Object();
         }
         return params;
     }
+    PrefilledChangeForm.get_prefilled_values = get_prefilled_values;
 
-    function fill_form() {
-        if (!$('.change-form')) return;    // procedure works only with change-forms
-        if (!window.location.hash) return; // URL doesn't contain hash char
-        var splitted = window.location.hash.split('?');
-        if (splitted.length != 2) return;  // no GET parameters found
+    function get_parameters(address) {
+        if (!address) return null; // URL doesn't contain hash char
+        var splitted = address.split('?');
+        if (splitted.length != 2) return null;  // no GET parameters found
+        return splitted;
+    }
+    PrefilledChangeForm.get_parameters = get_parameters;
 
-        // params contains elements ids
-        var params = get_prefilled_values(splitted);
-        //var input_elements = $('.change-form input,select');
+    function fill_form_located_by_selector(selector, params) {
         var i, element, options, paramValue;
         //for (i = 0; i < input_elements.length; i++) 
-        $('.change-form input,select').each(function() {
+        $(selector).each(function() {
             //element = input_elements[i];
             element = $(this)[0];
             if (element.id in params) {
@@ -1553,6 +1575,26 @@ PrefilledChangeForm = new Object();
             $('.change-form input:hidden:first').after(parts.join(''));
         }
     }
+    PrefilledChangeForm.fill_form_located_by_selector = fill_form_located_by_selector;
+
+    function fill_form(base_selector, address) {
+        var param_base_selector = base_selector;
+        var param_address = address;
+        if (!param_base_selector) {
+            param_base_selector = '.change-form';
+        }
+        if (!param_address) {
+            param_address = window.location.hash;
+        }
+        if (!$(param_base_selector)) return;    // procedure works only with change-forms
+        var splitted = PrefilledChangeForm.get_parameters(param_address);
+        if (!splitted) return;
+        // params contains elements ids
+        var params = get_prefilled_values(splitted);
+        PrefilledChangeForm.fill_form_located_by_selector(param_base_selector + ' input,select', params);
+    }
+    PrefilledChangeForm.fill_form = fill_form;
+
 })(); // end of PrefilledChangeForm
 
 // EOF
