@@ -162,14 +162,29 @@ def timeline_view(request, extra_context=None):
         cx
     )
 
+def append_view(request, **kwargs):
+    " Wrapper to timeline_insert_append_view(). "
+    position = kwargs.get('position', None)
+    if position and type(position) in [str, unicode] and position.isdigit():
+        position = int(position) + 1
+        kwargs['position'] = position
+    return timeline_insert_append_view(request, **kwargs)
 
-def timeline_insert_view(request, **kwargs):
+def insert_view(request, **kwargs):
+    " Wrapper to timeline_insert_append_view(). "
+    position = kwargs.get('position', None)
+    if position and type(position) in [str, unicode] and position.isdigit():
+        position = int(position) - 1
+        kwargs['position'] = position
+    return timeline_insert_append_view(request, **kwargs)
+
+def timeline_insert_append_view(request, **kwargs):
     """
-    Inserts export element before an item (via ExportPosition and ExportMeta).
+    Inserts/appends export element before/after an item (via ExportPosition and ExportMeta).
 
     Keyword arguments:
     @param   id_item     Existing Publishable object placed after new inserted item. 
-    @param   position    Existing Publishable object's position.
+    @param   position    ExportPosition object's position.
     @param   id_export   Export object id.
     @param   id_publishable  Chosen Publishable object to be associated with new ExportMeta object.
 
@@ -197,7 +212,7 @@ def timeline_insert_view(request, **kwargs):
         'id_exportposition_set-0-position': int(position),
         'id_exportposition_set-0-visible_from': visible_from,
         'id_exportposition_set-0-visible_to': visible_to,
-        'id_exportposition_set-1-export': int(id_export),
+        'id_exportposition_set-0-export': int(id_export),
         'http_redirect_to': request.GET.get('http_redirect_to', '')
     }
     address = '%s?%s' % (
