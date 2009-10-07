@@ -9,66 +9,66 @@ class Migration:
         
         # Adding model 'DevMessage'
         db.create_table('newman_devmessage', (
-            ('id', orm['newman.DevMessage:id']),
-            ('title', orm['newman.DevMessage:title']),
-            ('slug', orm['newman.DevMessage:slug']),
-            ('summary', orm['newman.DevMessage:summary']),
-            ('details', orm['newman.DevMessage:details']),
-            ('version', orm['newman.DevMessage:version']),
-            ('author', orm['newman.DevMessage:author']),
-            ('ts', orm['newman.DevMessage:ts']),
+            ('id', models.AutoField(primary_key=True)),
+            ('title', models.CharField(_('Title'), max_length=255)),
+            ('slug', models.SlugField(_('Slug'), max_length=32)),
+            ('summary', models.TextField(_('Summary'))),
+            ('details', models.TextField(_('Detail'), blank=True)),
+            ('version', models.CharField(_('Version'), max_length=32)),
+            ('author', models.ForeignKey(orm['auth.User'], editable=False)),
+            ('ts', models.DateTimeField(auto_now_add=True, editable=False)),
         ))
         db.send_create_signal('newman', ['DevMessage'])
         
         # Adding model 'AdminSetting'
         db.create_table('newman_adminsetting', (
-            ('id', orm['newman.AdminSetting:id']),
-            ('user', orm['newman.AdminSetting:user']),
-            ('group', orm['newman.AdminSetting:group']),
-            ('var', orm['newman.AdminSetting:var']),
-            ('val', orm['newman.AdminSetting:val']),
+            ('id', models.AutoField(primary_key=True)),
+            ('user', CachedForeignKey(orm['auth.User'], null=True, verbose_name=_('User'), blank=True)),
+            ('group', CachedForeignKey(orm['auth.Group'], null=True, verbose_name=_('Group'), blank=True)),
+            ('var', models.SlugField(_('Variable'), max_length=64)),
+            ('val', models.TextField(_('Value'))),
         ))
         db.send_create_signal('newman', ['AdminSetting'])
         
         # Adding model 'AdminUserDraft'
         db.create_table('newman_adminuserdraft', (
-            ('id', orm['newman.AdminUserDraft:id']),
-            ('ct', orm['newman.AdminUserDraft:ct']),
-            ('user', orm['newman.AdminUserDraft:user']),
-            ('data', orm['newman.AdminUserDraft:data']),
-            ('title', orm['newman.AdminUserDraft:title']),
-            ('ts', orm['newman.AdminUserDraft:ts']),
+            ('id', models.AutoField(primary_key=True)),
+            ('ct', CachedForeignKey(orm['contenttypes.ContentType'], verbose_name=_('Model'))),
+            ('user', CachedForeignKey(orm['auth.User'], verbose_name=_('User'))),
+            ('data', models.TextField(_('Data'))),
+            ('title', models.CharField(_('Title'), max_length=64, blank=True)),
+            ('ts', models.DateTimeField(auto_now=True, editable=False)),
         ))
         db.send_create_signal('newman', ['AdminUserDraft'])
         
         # Adding model 'DenormalizedCategoryUserRole'
         db.create_table('newman_denormalizedcategoryuserrole', (
-            ('id', orm['newman.DenormalizedCategoryUserRole:id']),
-            ('user_id', orm['newman.DenormalizedCategoryUserRole:user_id']),
-            ('permission_id', orm['newman.DenormalizedCategoryUserRole:permission_id']),
-            ('permission_codename', orm['newman.DenormalizedCategoryUserRole:permission_codename']),
-            ('category_id', orm['newman.DenormalizedCategoryUserRole:category_id']),
-            ('root_category_id', orm['newman.DenormalizedCategoryUserRole:root_category_id']),
-            ('contenttype_id', orm['newman.DenormalizedCategoryUserRole:contenttype_id']),
+            ('id', models.AutoField(primary_key=True)),
+            ('user_id', models.IntegerField(db_index=True)),
+            ('permission_id', models.IntegerField()),
+            ('permission_codename', models.CharField(max_length=100)),
+            ('category_id', models.IntegerField()),
+            ('root_category_id', models.IntegerField()),
+            ('contenttype_id', models.IntegerField()),
         ))
         db.send_create_signal('newman', ['DenormalizedCategoryUserRole'])
         
         # Adding model 'AdminHelpItem'
         db.create_table('newman_adminhelpitem', (
-            ('id', orm['newman.AdminHelpItem:id']),
-            ('ct', orm['newman.AdminHelpItem:ct']),
-            ('field', orm['newman.AdminHelpItem:field']),
-            ('lang', orm['newman.AdminHelpItem:lang']),
-            ('short', orm['newman.AdminHelpItem:short']),
-            ('long', orm['newman.AdminHelpItem:long']),
+            ('id', models.AutoField(primary_key=True)),
+            ('ct', CachedForeignKey(orm['contenttypes.ContentType'], verbose_name=_('Model'))),
+            ('field', models.CharField(_('Field'), max_length=64, blank=True)),
+            ('lang', models.CharField(_('Language'), max_length=5)),
+            ('short', models.CharField(_('Short help'), max_length=255)),
+            ('long', models.TextField(_('Full message'), blank=True)),
         ))
         db.send_create_signal('newman', ['AdminHelpItem'])
         
         # Adding model 'CategoryUserRole'
         db.create_table('newman_categoryuserrole', (
-            ('id', orm['newman.CategoryUserRole:id']),
-            ('user', orm['newman.CategoryUserRole:user']),
-            ('group', orm['newman.CategoryUserRole:group']),
+            ('id', models.AutoField(primary_key=True)),
+            ('user', models.ForeignKey(orm['auth.User'])),
+            ('group', models.ForeignKey(orm['auth.Group'])),
         ))
         db.send_create_signal('newman', ['CategoryUserRole'])
         
@@ -98,21 +98,6 @@ class Migration:
     
     def backwards(self, orm):
         
-        # Deleting unique_together for [ct, field, lang] on AdminHelpItem.
-        db.delete_unique('newman_adminhelpitem', ['ct_id', 'field', 'lang'])
-        
-        # Deleting unique_together for [group, var] on AdminSetting.
-        db.delete_unique('newman_adminsetting', ['group_id', 'var'])
-        
-        # Deleting unique_together for [user_id, permission_codename, permission_id, category_id, contenttype_id] on DenormalizedCategoryUserRole.
-        db.delete_unique('newman_denormalizedcategoryuserrole', ['user_id', 'permission_codename', 'permission_id', 'category_id', 'contenttype_id'])
-        
-        # Deleting unique_together for [slug, ts] on DevMessage.
-        db.delete_unique('newman_devmessage', ['slug', 'ts'])
-        
-        # Deleting unique_together for [user, var] on AdminSetting.
-        db.delete_unique('newman_adminsetting', ['user_id', 'var'])
-        
         # Deleting model 'DevMessage'
         db.delete_table('newman_devmessage')
         
@@ -134,110 +119,94 @@ class Migration:
         # Dropping ManyToManyField 'CategoryUserRole.category'
         db.delete_table('newman_categoryuserrole_category')
         
+        # Deleting unique_together for [user, var] on AdminSetting.
+        db.delete_unique('newman_adminsetting', ['user_id', 'var'])
+        
+        # Deleting unique_together for [slug, ts] on DevMessage.
+        db.delete_unique('newman_devmessage', ['slug', 'ts'])
+        
+        # Deleting unique_together for [user_id, permission_codename, permission_id, category_id, contenttype_id] on DenormalizedCategoryUserRole.
+        db.delete_unique('newman_denormalizedcategoryuserrole', ['user_id', 'permission_codename', 'permission_id', 'category_id', 'contenttype_id'])
+        
+        # Deleting unique_together for [group, var] on AdminSetting.
+        db.delete_unique('newman_adminsetting', ['group_id', 'var'])
+        
+        # Deleting unique_together for [ct, field, lang] on AdminHelpItem.
+        db.delete_unique('newman_adminhelpitem', ['ct_id', 'field', 'lang'])
+        
     
     
     models = {
-        'auth.group': {
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '80'}),
-            'permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Permission']", 'blank': 'True'})
-        },
-        'auth.permission': {
-            'Meta': {'unique_together': "(('content_type', 'codename'),)"},
-            'codename': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '50'})
-        },
-        'auth.user': {
-            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
-            'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
-            'first_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
-            'groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Group']", 'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True', 'blank': 'True'}),
-            'is_staff': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
-            'is_superuser': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
-            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
-            'last_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
-            'password': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
-            'user_permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Permission']", 'blank': 'True'}),
-            'username': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '30'})
-        },
-        'contenttypes.contenttype': {
-            'Meta': {'unique_together': "(('app_label', 'model'),)", 'db_table': "'django_content_type'"},
-            'app_label': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
-        },
         'core.category': {
-            'Meta': {'unique_together': "(('site', 'tree_path'),)"},
-            'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'site': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['sites.Site']"}),
-            'slug': ('django.db.models.fields.SlugField', [], {'max_length': '255', 'db_index': 'True'}),
-            'title': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
-            'tree_parent': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['core.Category']", 'null': 'True', 'blank': 'True'}),
-            'tree_path': ('django.db.models.fields.CharField', [], {'max_length': '255'})
-        },
-        'newman.adminhelpitem': {
-            'Meta': {'unique_together': "(('ct', 'field', 'lang'),)"},
-            'ct': ('CachedForeignKey', ["orm['contenttypes.ContentType']"], {}),
-            'field': ('django.db.models.fields.CharField', [], {'max_length': '64', 'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'lang': ('django.db.models.fields.CharField', [], {'max_length': '5'}),
-            'long': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'short': ('django.db.models.fields.CharField', [], {'max_length': '255'})
-        },
-        'newman.adminsetting': {
-            'Meta': {'unique_together': "(('user', 'var'), ('group', 'var'))"},
-            'group': ('CachedForeignKey', ["orm['auth.Group']"], {'null': 'True', 'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'user': ('CachedForeignKey', ["orm['auth.User']"], {'null': 'True', 'blank': 'True'}),
-            'val': ('django.db.models.fields.TextField', [], {}),
-            'var': ('django.db.models.fields.SlugField', [], {'max_length': '64', 'db_index': 'True'})
-        },
-        'newman.adminuserdraft': {
-            'ct': ('CachedForeignKey', ["orm['contenttypes.ContentType']"], {}),
-            'data': ('django.db.models.fields.TextField', [], {}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'title': ('django.db.models.fields.CharField', [], {'max_length': '64', 'blank': 'True'}),
-            'ts': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
-            'user': ('CachedForeignKey', ["orm['auth.User']"], {})
-        },
-        'newman.categoryuserrole': {
-            'category': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['core.Category']"}),
-            'group': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.Group']"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
-        },
-        'newman.denormalizedcategoryuserrole': {
-            'Meta': {'unique_together': "(('user_id', 'permission_codename', 'permission_id', 'category_id', 'contenttype_id'),)"},
-            'category_id': ('django.db.models.fields.IntegerField', [], {}),
-            'contenttype_id': ('django.db.models.fields.IntegerField', [], {}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'permission_codename': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'permission_id': ('django.db.models.fields.IntegerField', [], {}),
-            'root_category_id': ('django.db.models.fields.IntegerField', [], {}),
-            'user_id': ('django.db.models.fields.IntegerField', [], {'db_index': 'True'})
+            'Meta': {'unique_together': "(('site','tree_path'),)", 'app_label': "'core'"},
+            '_stub': True,
+            'id': ('models.AutoField', [], {'primary_key': 'True'})
         },
         'newman.devmessage': {
-            'Meta': {'unique_together': "(('slug', 'ts'),)"},
-            'author': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"}),
-            'details': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'slug': ('django.db.models.fields.SlugField', [], {'max_length': '32', 'db_index': 'True'}),
-            'summary': ('django.db.models.fields.TextField', [], {}),
-            'title': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'ts': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'version': ('django.db.models.fields.CharField', [], {'max_length': '32'})
+            'Meta': {'ordering': "('-ts',)", 'unique_together': "(('slug','ts',),)"},
+            'author': ('models.ForeignKey', ["orm['auth.User']"], {'editable': 'False'}),
+            'details': ('models.TextField', ["_('Detail')"], {'blank': 'True'}),
+            'id': ('models.AutoField', [], {'primary_key': 'True'}),
+            'slug': ('models.SlugField', ["_('Slug')"], {'max_length': '32'}),
+            'summary': ('models.TextField', ["_('Summary')"], {}),
+            'title': ('models.CharField', ["_('Title')"], {'max_length': '255'}),
+            'ts': ('models.DateTimeField', [], {'auto_now_add': 'True', 'editable': 'False'}),
+            'version': ('models.CharField', ["_('Version')"], {'max_length': '32'})
         },
-        'sites.site': {
-            'Meta': {'db_table': "'django_site'"},
-            'domain': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '50'})
+        'newman.adminsetting': {
+            'Meta': {'unique_together': "(('user','var',),('group','var',),)"},
+            'group': ('CachedForeignKey', ["orm['auth.Group']"], {'null': 'True', 'verbose_name': "_('Group')", 'blank': 'True'}),
+            'id': ('models.AutoField', [], {'primary_key': 'True'}),
+            'user': ('CachedForeignKey', ["orm['auth.User']"], {'null': 'True', 'verbose_name': "_('User')", 'blank': 'True'}),
+            'val': ('models.TextField', ["_('Value')"], {}),
+            'var': ('models.SlugField', ["_('Variable')"], {'max_length': '64'})
+        },
+        'newman.adminuserdraft': {
+            'Meta': {'ordering': "('-ts',)"},
+            'ct': ('CachedForeignKey', ["orm['contenttypes.ContentType']"], {'verbose_name': "_('Model')"}),
+            'data': ('models.TextField', ["_('Data')"], {}),
+            'id': ('models.AutoField', [], {'primary_key': 'True'}),
+            'title': ('models.CharField', ["_('Title')"], {'max_length': '64', 'blank': 'True'}),
+            'ts': ('models.DateTimeField', [], {'auto_now': 'True', 'editable': 'False'}),
+            'user': ('CachedForeignKey', ["orm['auth.User']"], {'verbose_name': "_('User')"})
+        },
+        'newman.denormalizedcategoryuserrole': {
+            'Meta': {'unique_together': "('user_id','permission_codename','permission_id','category_id','contenttype_id')"},
+            'category_id': ('models.IntegerField', [], {}),
+            'contenttype_id': ('models.IntegerField', [], {}),
+            'id': ('models.AutoField', [], {'primary_key': 'True'}),
+            'permission_codename': ('models.CharField', [], {'max_length': '100'}),
+            'permission_id': ('models.IntegerField', [], {}),
+            'root_category_id': ('models.IntegerField', [], {}),
+            'user_id': ('models.IntegerField', [], {'db_index': 'True'})
+        },
+        'auth.user': {
+            '_stub': True,
+            'id': ('models.AutoField', [], {'primary_key': 'True'})
+        },
+        'contenttypes.contenttype': {
+            'Meta': {'ordering': "('name',)", 'unique_together': "(('app_label','model'),)", 'db_table': "'django_content_type'"},
+            '_stub': True,
+            'id': ('models.AutoField', [], {'primary_key': 'True'})
+        },
+        'newman.adminhelpitem': {
+            'Meta': {'ordering': "('ct','field',)", 'unique_together': "(('ct','field','lang',),)"},
+            'ct': ('CachedForeignKey', ["orm['contenttypes.ContentType']"], {'verbose_name': "_('Model')"}),
+            'field': ('models.CharField', ["_('Field')"], {'max_length': '64', 'blank': 'True'}),
+            'id': ('models.AutoField', [], {'primary_key': 'True'}),
+            'lang': ('models.CharField', ["_('Language')"], {'max_length': '5'}),
+            'long': ('models.TextField', ["_('Full message')"], {'blank': 'True'}),
+            'short': ('models.CharField', ["_('Short help')"], {'max_length': '255'})
+        },
+        'auth.group': {
+            '_stub': True,
+            'id': ('models.AutoField', [], {'primary_key': 'True'})
+        },
+        'newman.categoryuserrole': {
+            'category': ('models.ManyToManyField', ["orm['core.Category']"], {}),
+            'group': ('models.ForeignKey', ["orm['auth.Group']"], {}),
+            'id': ('models.AutoField', [], {'primary_key': 'True'}),
+            'user': ('models.ForeignKey', ["orm['auth.User']"], {})
         }
     }
     
