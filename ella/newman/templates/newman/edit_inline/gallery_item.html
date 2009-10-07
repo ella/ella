@@ -24,11 +24,7 @@
                 {% for line in fieldset %}
                     {{ line.errors }}
                     {% for field in line %}
-                        {% if field.is_hidden %}
                             {{ field.field }}
-                        {% else %}
-                            {{ field.field }}
-                        {% endif %}
                     {% endfor %}
                 {% endfor %}
                 {% if inline_admin_formset.formset.can_delete and inline_admin_form.original %}<span class="delete">{{ inline_admin_form.deletion_field.field }} {{ inline_admin_form.deletion_field.label_tag }}</span>{% endif %}

@@ -1,3 +1,6 @@
+// encapsulate functionality into NewmanInline object
+NewmanInline = new Object();
+
 (function($) {
     
     function add_inline($template, no) {
@@ -160,6 +163,41 @@
         return rv;
     }
     $('#gallery_form').data('validation', check_gallery_changeform);
+    NewmanInline.check_gallery_changeform = check_gallery_changeform;
+    NewmanInline.gallery_ordering_modified = false;
+
+    function gallery_ordering_recount() {
+        // ordering-number magic to avoid problems with saving GalleryItems with changed ordering (unique key collision)
+        var $form = $('#gallery_form');
+        if (NewmanInline.gallery_ordering_modified) return;
+        $form.find('.gallery-item .item-order').each( function() {
+            if (!this.value) return;
+            var value = parseInt(this.value);
+            var multiplier = 1;
+            if (value >= 1 && value <= 99) {
+                multiplier = 1000;
+            } else if (value >= 1000 && value <= 99000) {
+                multiplier = 0.001;
+            }
+            var res = value * multiplier;
+            this.value = res.toString();
+            NewmanInline.gallery_ordering_modified = true;
+        });
+    }
+
+    function gallery_sortable_update_callback(evt, ui) {
+        var $target = $( evt.target );
+        $target.find('input.item-order').each( function(i) {
+            var ord = i+1;
+            $(this).val( ord ).change();
+            $(this).siblings('h4:first').find('span:first').text( ord );
+        });
+        $target.children().removeClass('last-related');
+        $target.children(':last').addClass('last-related');
+
+        // recount ordering
+        gallery_ordering_recount();
+    }
     
     function init_gallery(root) {
         if ( ! root ) root = document;
@@ -171,16 +209,7 @@
         $sortables.sortable({
             distance: 20,
             items: '.sortable-item',
-            update: function(evt, ui) {
-                var $target = $( evt.target );
-                $target.find('input.item-order').each( function(i) {
-                    var ord = i+1;
-                    $(this).val( ord ).change();
-                    $(this).siblings('h4:first').find('span:first').text( ord );
-                });
-                $target.children().removeClass('last-related');
-                $target.children(':last').addClass('last-related');
-            }
+            update: gallery_sortable_update_callback
         });
         
         // make sure only the inputs with a selected photo are sortable
