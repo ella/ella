@@ -7,8 +7,68 @@ Kobayashi.DEFAULT_TARGET = 'content';
 BASES.content = '/nm/';
 
 // Containers for things we need to export
-NewmanLib = {};
 AjaxFormLib = {};
+NewmanLib = {};
+(function() {
+    NewmanLib.post_save_callbacks = [];
+    NewmanLib.pre_submit_callbacks = [];
+    NewmanLib.post_save_once_callbacks = [];
+
+    function register_post_submit_callback(callback) {
+        if (!(callback in NewmanLib.post_save_callbacks)) {
+            NewmanLib.post_save_callbacks.push(callback);
+        }
+    }
+    NewmanLib.register_post_submit_callback = register_post_submit_callback;
+
+    function register_post_submit_callback_once(callback) {
+        if (!(callback in NewmanLib.post_save_once_callbacks)) {
+            NewmanLib.post_save_once_callbacks.push(callback);
+        }
+    }
+    NewmanLib.register_post_submit_callback_once = register_post_submit_callback_once;
+    
+    function register_pre_submit_callback(callback) {
+        if (!(callback in NewmanLib.pre_submit_callbacks)) {
+            NewmanLib.pre_submit_callbacks.push(callback)
+        }
+    }
+    NewmanLib.register_pre_submit_callback = register_pre_submit_callback;
+
+    function call_callbacks_in_array(carray, destructive_call_once) {
+        var i, item;
+        for(i = 0; i < carray.length; i++) {
+            if (destructive_call_once) {
+                item = carray.pop();
+            } else {
+                item = carray[i];
+            }
+            item();
+        }
+    }
+
+    function call_post_submit_callbacks() {
+        try {
+            call_callbacks_in_array(NewmanLib.post_save_once_callbacks, true);
+        } catch(e) {
+            carp('Error occured when calling post submit callback (once).' + e.toString());
+            carp('item=' + item);
+        }
+        try {
+            call_callbacks_in_array(NewmanLib.post_save_callbacks);
+        } catch(e) {
+            carp('Error occured when calling post submit callback.' + e.toString());
+            carp('item=' + item);
+        }
+    }
+    NewmanLib.call_post_submit_callbacks = call_post_submit_callbacks;
+
+    function call_pre_submit_callbacks() {
+        call_callbacks_in_array(NewmanLib.pre_submit_callbacks);
+    }
+    NewmanLib.call_pre_submit_callbacks = call_pre_submit_callbacks;
+})();
+
 
 NewmanLib.ADR_STACK = [];
 
@@ -488,6 +548,7 @@ $( function() {
                     $.ajax( new_req );
                     return;
                 }*/
+                NewmanLib.call_post_submit_callbacks();
                 if (this.succeeded) { try {
                     success.call(this, xhr.responseText, xhr);
                 } catch (e) {
@@ -504,7 +565,7 @@ $( function() {
             _button_name: button_name
         };
         if (button_name) request_options._button_name = button_name;
-        
+
         $.ajax( request_options );
         return false;
     }
@@ -627,6 +688,7 @@ $( function() {
         if (evt.button != 0) return true;    // just interested in left button
         if ($(this).hasClass('js-noautosubmit')) return true;
         var $form = $(this).closest('.js-form');
+        NewmanLib.call_pre_submit_callbacks();
         return ajax_submit($form, this.name);
     });
     
