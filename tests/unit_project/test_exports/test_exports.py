@@ -61,7 +61,7 @@ class TestExport(DatabaseTestCase):
 
     def setUp(self):
         super(TestExport, self).setUp()
-        raise self.SkipTest
+        #raise self.SkipTest
 
         self.site = Site.objects.get(name='example.com')
         self.site_second = Site.objects.create(
@@ -119,7 +119,7 @@ class TestExport(DatabaseTestCase):
         self.setup_placements_listings()
 
     def setup_placements_listings(self):
-        now = datetime.now()
+        now = datetime.now() - timedelta(seconds=1)
         self.str_now = now.strftime(DATE_FORMAT)
         future = now + timedelta(hours=1)
         self.str_future = future.strftime(DATE_FORMAT)
@@ -134,7 +134,7 @@ class TestExport(DatabaseTestCase):
         self.str_listingA_from = now.strftime(DATE_FORMAT)
         next_three_hours = now + timedelta(hours=3)
         self.str_listingA_to = next_three_hours.strftime(DATE_FORMAT)
-        no_future = now - timedelta(hours=-1)
+        no_future = now - timedelta(hours=2)
         self.str_listingB_from = no_future.strftime(DATE_FORMAT)
         next_hour = now + timedelta(hours=1)
         self.str_listingB_to = next_hour.strftime(DATE_FORMAT)
@@ -218,8 +218,6 @@ class TestExport(DatabaseTestCase):
         " basic test getting items for certain export category. "
         degen = Export.objects.get_items_for_category(self.categoryH)
         out = map(None, degen)
-        print 'Output:', out
-        print 'degen=', degen
         self.assert_equals(2 , len(out))
         self.assert_true(self.publishableA in out)
         self.assert_true(self.publishableB in out)
