@@ -1,3 +1,5 @@
+var NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER = 1000;
+
 // encapsulate functionality into NewmanInline object
 NewmanInline = new Object();
 
@@ -138,6 +140,7 @@ NewmanInline = new Object();
     function check_gallery_changeform( $form ) {
         var used_ids = {};
         var rv = true;
+
         $form.find('.gallery-item .target_id').each( function() {
             if (rv == false) return;
             var val = $(this).val();
@@ -174,29 +177,44 @@ NewmanInline = new Object();
             if (!this.value) return;
             var value = parseInt(this.value);
             var multiplier = 1;
+            carp('parsed value=' + value);
             if (value >= 1 && value <= 99) {
-                multiplier = 1000;
-            } else if (value >= 1000 && value <= 99000) {
-                multiplier = 0.001;
+                multiplier = NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER;
+            } else if (value >= NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER && value <= (99 * NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER)) {
+                multiplier = 1.0 / NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER;
             }
             var res = value * multiplier;
+            carp([
+                'Multiplying ordering values by ',
+                multiplier,
+                ' from ',
+                this.value,
+                ' to ',
+                res.toString()
+            ].join(''));
             this.value = res.toString();
             NewmanInline.gallery_ordering_modified = true;
+        });
+        NewmanLib.register_post_submit_callback_once(function() {
+            NewmanInline.gallery_ordering_modified = false;
         });
     }
 
     function gallery_sortable_update_callback(evt, ui) {
         var $target = $( evt.target );
+        var degree = 1;
+        var ord;
         $target.find('input.item-order').each( function(i) {
-            var ord = i+1;
+            // get actual order degree
+            if (i == 0 && (parseInt(this.value) / NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER >= 1.0)) {
+                degree = NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER;
+            }
+            ord = (i + 1) * degree;
             $(this).val( ord ).change();
             $(this).siblings('h4:first').find('span:first').text( ord );
         });
         $target.children().removeClass('last-related');
         $target.children(':last').addClass('last-related');
-
-        // recount ordering
-        gallery_ordering_recount();
     }
     
     function init_gallery(root) {
@@ -211,6 +229,8 @@ NewmanInline = new Object();
             items: '.sortable-item',
             update: gallery_sortable_update_callback
         });
+        // recount before save
+        NewmanLib.register_pre_submit_callback(gallery_ordering_recount);
         
         // make sure only the inputs with a selected photo are sortable
         $(root).find('input.target_id').change( function() {
