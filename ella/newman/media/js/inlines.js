@@ -177,21 +177,12 @@ NewmanInline = new Object();
             if (!this.value) return;
             var value = parseInt(this.value);
             var multiplier = 1;
-            carp('parsed value=' + value);
             if (value >= 1 && value <= 99) {
                 multiplier = NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER;
             } else if (value >= NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER && value <= (99 * NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER)) {
                 multiplier = 1.0 / NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER;
             }
             var res = value * multiplier;
-            carp([
-                'Multiplying ordering values by ',
-                multiplier,
-                ' from ',
-                this.value,
-                ' to ',
-                res.toString()
-            ].join(''));
             this.value = res.toString();
             NewmanInline.gallery_ordering_modified = true;
         });
