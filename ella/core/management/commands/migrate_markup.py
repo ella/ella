@@ -54,7 +54,7 @@ def update_field(instance, content_type):
             sys.stdout.write('-')
 
         # put everything together
-        return '{%% box %s for %s.%s with pk %s %%}' % (name, app, model, pk)
+        return '{%% box %s for %s.%s with pk %s %%}' % (name, app, model, new_pk)
     return update_one_box
 
 @transaction.commit_on_success

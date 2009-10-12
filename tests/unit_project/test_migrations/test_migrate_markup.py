@@ -49,8 +49,8 @@ class TestUpdateField(DatabaseTestCase):
         val = base % self.category.pk
         new_val, cnt = BOX_RE.subn(update_field(self.publishable, self.publishable.content_type), val)
 
-        self.assert_equals(base % 123, new_val)
         self.assert_equals(1, cnt)
+        self.assert_equals(base % 123, new_val)
         self.assert_equals(1, Dependency.objects.count())
         dep = Dependency.objects.all()[0]
         self.assert_equals(self.publishable, dep.dependent)
