@@ -5,6 +5,10 @@
 update core_author a, core_author b set a.slug = concat(a.slug, '_') where a.slug = b.slug and a.id < b.id;
 update core_author a, core_author b set a.slug = concat(a.slug, '_') where a.slug = b.slug and a.id < b.id;
 
+-- spatne fotky
+update photos_photo set width = 178, height=382 where id = 128600;
+delete from photos_photo where id in (48119,48119,110218,110219,110220,110221,110222,110223,129659,129706);
+
 -- uz neni
 drop table core_dependency;
 
