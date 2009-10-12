@@ -7,8 +7,68 @@ Kobayashi.DEFAULT_TARGET = 'content';
 BASES.content = '/nm/';
 
 // Containers for things we need to export
-NewmanLib = {};
 AjaxFormLib = {};
+NewmanLib = {};
+(function() {
+    NewmanLib.post_save_callbacks = [];
+    NewmanLib.pre_submit_callbacks = [];
+    NewmanLib.post_save_once_callbacks = [];
+
+    function register_post_submit_callback(callback) {
+        if (!(callback in NewmanLib.post_save_callbacks)) {
+            NewmanLib.post_save_callbacks.push(callback);
+        }
+    }
+    NewmanLib.register_post_submit_callback = register_post_submit_callback;
+
+    function register_post_submit_callback_once(callback) {
+        if (!(callback in NewmanLib.post_save_once_callbacks)) {
+            NewmanLib.post_save_once_callbacks.push(callback);
+        }
+    }
+    NewmanLib.register_post_submit_callback_once = register_post_submit_callback_once;
+    
+    function register_pre_submit_callback(callback) {
+        if (!(callback in NewmanLib.pre_submit_callbacks)) {
+            NewmanLib.pre_submit_callbacks.push(callback)
+        }
+    }
+    NewmanLib.register_pre_submit_callback = register_pre_submit_callback;
+
+    function call_callbacks_in_array(carray, destructive_call_once) {
+        var i, item;
+        for(i = 0; i < carray.length; i++) {
+            if (destructive_call_once) {
+                item = carray.pop();
+            } else {
+                item = carray[i];
+            }
+            item();
+        }
+    }
+
+    function call_post_submit_callbacks() {
+        try {
+            call_callbacks_in_array(NewmanLib.post_save_once_callbacks, true);
+        } catch(e) {
+            carp('Error occured when calling post submit callback (once).' + e.toString());
+            carp('item=' + item);
+        }
+        try {
+            call_callbacks_in_array(NewmanLib.post_save_callbacks);
+        } catch(e) {
+            carp('Error occured when calling post submit callback.' + e.toString());
+            carp('item=' + item);
+        }
+    }
+    NewmanLib.call_post_submit_callbacks = call_post_submit_callbacks;
+
+    function call_pre_submit_callbacks() {
+        call_callbacks_in_array(NewmanLib.pre_submit_callbacks);
+    }
+    NewmanLib.call_pre_submit_callbacks = call_pre_submit_callbacks;
+})();
+
 
 NewmanLib.ADR_STACK = [];
 
@@ -113,6 +173,7 @@ $(document).bind('media_loading_start', function() { lock_window(gettext('Loadin
 $(document).bind('media_loaded', unlock_window);
 
 //// Drafts and templates
+Drafts = new Object;
 (function() {
     var draft_id;
     function save_preset($form, options) {
@@ -233,8 +294,9 @@ $(document).bind('media_loaded', unlock_window);
     function set_load_draft_handler() {
         $('#id_drafts').unbind('change', load_draft_handler).change(load_draft_handler);
     }
-    set_load_draft_handler();
-    $(document).bind('content_added', set_load_draft_handler);
+    Drafts.set_load_draft_handler = set_load_draft_handler;
+    Drafts.set_load_draft_handler();
+    $(document).bind('content_added', Drafts.set_load_draft_handler);
     
     function delete_preset(id) {
         $.ajax({
@@ -477,14 +539,16 @@ $( function() {
             error:    function() { this.succeeded = false; },
             complete: function(xhr) {
                 var redirect_to;
-                if (redirect_to = xhr.getResponseHeader('Redirect-To')) {
+                // JSON redirects temporarily commented out.
+                /*if (redirect_to = xhr.getResponseHeader('Redirect-To')) {
                     var new_req = {};
                     for (k in this) new_req[k] = this[k];
                     new_req.url = redirect_to;
                     new_req.redirect_to = redirect_to;
                     $.ajax( new_req );
                     return;
-                }
+                }*/
+                NewmanLib.call_post_submit_callbacks();
                 if (this.succeeded) { try {
                     success.call(this, xhr.responseText, xhr);
                 } catch (e) {
@@ -501,7 +565,7 @@ $( function() {
             _button_name: button_name
         };
         if (button_name) request_options._button_name = button_name;
-        
+
         $.ajax( request_options );
         return false;
     }
@@ -624,6 +688,7 @@ $( function() {
         if (evt.button != 0) return true;    // just interested in left button
         if ($(this).hasClass('js-noautosubmit')) return true;
         var $form = $(this).closest('.js-form');
+        NewmanLib.call_pre_submit_callbacks();
         return ajax_submit($form, this.name);
     });
     
@@ -971,31 +1036,42 @@ function save_change_form_success(text_data) {
     var $form = options._form;
     var action = options._button_name;
     var data, object_id, response_msg;
+    var redirect_to;
     try {
         data = JSON.parse(text_data);
-        object_id = data.data.id;
-        object_title = data.data.title;
-        response_msg = data.message;
+        if (data.status == 'redirect') {
+            redirect_to = data.redirect_to;
+        } else {
+            object_id = data.data.id;
+            object_title = data.data.title;
+            response_msg = data.message;
+        }
     } catch(e) { carp('invalid data received from form save:', text_data, e); }
     response_msg = response_msg || gettext('Form saved');
-    
-    var action_table = new PostsaveActionTable({
-        object_id: object_id,
-        object_title: object_title,
-        options: options
-    });
-    
-    // load form-specific post-save actions
-    var $meta = $form.find('.js-form-metadata');
-    var post_save_callback = $meta.find('input[name=post_save]').data('callback');
-    var post_save = {};
-    if (post_save_callback) post_save = post_save_callback($form);
-    for (var act in post_save) {
-        action_table[ act ] = post_save[ act ];
+  
+    if (!redirect_to) {
+        var action_table = new PostsaveActionTable({
+            object_id: object_id,
+            object_title: object_title,
+            options: options
+        });
+        
+        // load form-specific post-save actions
+        var $meta = $form.find('.js-form-metadata');
+        var post_save_callback = $meta.find('input[name=post_save]').data('callback');
+        var post_save = {};
+        if (post_save_callback) post_save = post_save_callback($form);
+        for (var act in post_save) {
+            action_table[ act ] = post_save[ act ];
+        }
+
+        show_ok(response_msg);
+        action_table.run(action);
+    } else {
+        show_ok(response_msg);
+        adr(redirect_to, {just_set: true, nohistory: true});
     }
     
-    show_ok(response_msg);
-    action_table.run(action);
     Kobayashi.unload_content('history');
 }
 
@@ -1279,60 +1355,308 @@ function DATEPICKER_OPTIONS(opts) {
 }
 
 
-// TIMELINE (ella.exports application)
-
-function timeline_changed(event, ui) {
-    console.log("Timeline changed:", event);
-}
-
-function timeline_item_clicked(event, ui) {
-    console.log("Item hit:", event);
-}
-
-function timeline_item_mouse_over(event, ui) {
-    $(this).find('.timeline-item-navigation').show()
-}
-
-function timeline_item_mouse_out(event, ui) {
-    $(this).find('.timeline-item-navigation').hide()
-}
-
-function timeline_drag_update(event, ui) {
-    /*var $target = $( evt.target );
-    $target.find('input.item-order').each( function(i) {
-        var ord = i+1;
-        $(this).val( ord ).change();
-        $(this).siblings('h4:first').find('span:first').text( ord );
-    });
-    $target.children().removeClass('last-related');
-    $target.children(':last').addClass('last-related');*/
-}
-
-function timeline_sortable() {
-    var sortable_params = {
-        axis: 'y',
-        items: '.timeline-item',
-        containment: 'parent',
-        cursor: 'move',
-        delay: 100,
-        // callback when timeline is changed
-        stop: timeline_changed,
-        update: timeline_drag_update,
-    }
-    $('.timeline-ul').sortable(sortable_params);
-    $('.timeline-ul').disableSelection();
-    $('.timeline-item').click(timeline_item_clicked);
-    $('.timeline-item').hover(timeline_item_mouse_over, timeline_item_mouse_out);
-    $('.timeline-item-navigation .insert').live(
-        'click', 
-        function() {
-            $('#id-modal-dialog').show();
-        }
-    );
-}
+// Timeline (ella.exports application)
 
 function timeline_init() {
-    $(document).ready(timeline_sortable);
+    $(document).bind('media_loaded', Timeline.timeline_register);
 }
+
+Timeline = new Object();
+( function() {
+    function changed(event, ui) {
+        carp("Timeline changed:", event);
+    }
+
+    function item_clicked(event, ui) {
+        carp("Item hit:", event);
+    }
+
+    function item_mouse_over(event, ui) {
+        $(this).find('.timeline-item-navigation').show()
+    }
+
+    function item_mouse_out(event, ui) {
+        $(this).find('.timeline-item-navigation').hide()
+    }
+
+    function drag_update(event, ui) {
+        /*var $target = $( evt.target );
+        $target.find('input.item-order').each( function(i) {
+            var ord = i+1;
+            $(this).val( ord ).change();
+            $(this).siblings('h4:first').find('span:first').text( ord );
+        });
+        $target.children().removeClass('last-related');
+        $target.children(':last').addClass('last-related');*/
+    }
+
+    // dialog -- Publishable suggester
+
+    function click_continue_dialog(export_params) {
+        var url_parts = export_params.id.replace(/;/g, '/');
+        var id_publishable_value = $('#id_publishable').val();
+        var id_publishable = id_publishable_value.split('#')[0];
+            //'service-container::::',
+        var parts = [
+            BASE_URL,
+            export_params.url,
+            url_parts,
+            '/',
+            id_publishable,
+            '/'
+        ];
+        //carp('Final URL: ' + parts.join(''));
+        // Final URL example: '/newman/#/exports/export/timeline/insert/position/id_item/id_export/'
+        var ajax_params = {
+            url: parts.join(''),
+            type: 'GET',
+            dataType: 'script',
+            success: click_continue_dialog_ajax_success,
+            error: click_continue_dialog_ajax_error
+        };
+        $.ajax(ajax_params);
+        return false;
+    }
+
+    function modified_simple_load(specifier, success_callback) {
+        var args = Kobayashi.get_simple_load_arguments(specifier);
+        if (args == null) return;
+        args.success_callback = success_callback;
+        Kobayashi.load_content(args);
+    }
+
+    function omit_newman(url) {
+        return url.replace(BASE_URL, '/');
+    }
+
+    function exportmeta_postsave_callback() {
+        $('#id-exportmeta-modal-dialog').hide();
+        window.location.reload();
+    }
+    Timeline.exportmeta_postsave_callback = exportmeta_postsave_callback;
+
+    function click_continue_dialog_ajax_success(response_text) {
+        var success_callback = function() {
+            // keep Save button only
+            $('#id-exportmeta div.submit-row').children().each( 
+                function() {
+                     if ($(this).attr('name') != '_save') {
+                        $(this).remove();
+                     }
+                }
+            );
+            // remove breadcrumbs (die Broesel)
+            $('.breadcrumbs').each(
+                function() {
+                    $(this).remove();
+                }
+            );
+            $('.breadcrumbs').remove();
+            // remove content-toolbar table (presets, help, etc.)
+            $('#content-toolbar').each(
+                function() {
+                    $(this).remove();
+                }
+            );
+            $('#content-toolbar').remove();
+            // bind custom _save callback (post save action)
+            $('.change-form .js-form-metadata #save-change-form-success').data(
+                'callback',
+                Timeline.exportmeta_postsave_callback
+            );
+            // prefill form
+            var form_selector = '#id-exportmeta .change-form';
+            PrefilledChangeForm.fill_form(form_selector, Timeline._continue_dialog_redirect_to);
+            // disable auto-save!
+            $(document).unbind('content_added', Drafts.set_autosave_interval);
+        };
+
+        try {
+            var json_redir = JSON.parse(response_text);
+            // simple-load(tm) content
+            Timeline._continue_dialog_redirect_to = json_redir.redirect_to; // temporary "static" variable
+            var selector = [
+                'id-exportmeta',
+                '::::',
+                omit_newman(json_redir.redirect_to)
+            ];
+            hide_dialog();
+            $('#id-exportmeta-modal-dialog').show();
+            modified_simple_load(selector.join(''), success_callback);
+        } catch(e) {
+            show_err(gettext('Wrong response received from timeline-insert view.'));
+        }
+    }
+
+    function click_continue_dialog_ajax_error() {
+        show_err(gettext('Error processing timeline-insert reponse (JSON redirect).'));
+    }
+
+    // shows publishable choice dialog
+    function show_publishable_choice_dialog(export_params) {
+        $('#id-modal-dialog').show();
+        $('.suggest-bubble,.suggest-list,.suggest-fields-bubble').css('z-index', '90');
+        $('#id_publishable_suggest').focus();
+
+        $('#id-continue-dialog').bind(
+            'click', 
+            function() {
+                hide_dialog();
+                return export_params.continue_click_callback(export_params); 
+            }
+        );
+    }
+
+    // insert an export position
+    function show_insert_dialog(evt) {
+        // Position, id_item, id_export contained in tartget element id.
+        var export_params = new Object();
+        export_params.id = evt.target.id;
+        export_params.event_data = evt;
+        export_params.url = 'exports/export/timeline/insert/';
+        export_params.continue_click_callback = click_continue_dialog;
+        show_publishable_choice_dialog(export_params);
+    }
+
+    // append an export position
+    function show_append_dialog(evt) {
+        // Position, id_item, id_export contained in tartget element id.
+        var export_params = new Object();
+        export_params.id = evt.target.id;
+        export_params.event_data = evt;
+        export_params.url = 'exports/export/timeline/append/';
+        export_params.continue_click_callback = click_continue_dialog;
+        show_publishable_choice_dialog(export_params);
+    }
+
+    function hide_dialog() {
+        // remove suggester -- hide
+        // TODO cleaning of suggester should be implemented in generic.suggest.js library!
+        $('#id-modal-dialog').hide();
+        $('#id_publishable').value = '#';
+        $('.suggest-selected-item').remove();
+        $('.suggest-bubble,.suggest-list,.suggest-fields-bubble').css('z-index', '0');
+    }
+
+    // register timeline events, etc. (entry point)
+
+    function timeline_register() {
+        var sortable_params = {
+            axis: 'y',
+            items: '.timeline-item',
+            containment: 'parent',
+            cursor: 'move',
+            delay: 100,
+            // callback when timeline is changed
+            stop: changed,
+            update: drag_update,
+        }
+        $('.timeline-ul').sortable(sortable_params);
+        $('.timeline-ul').disableSelection();
+        $('.timeline-item').click(item_clicked);
+        $('.timeline-item').hover(item_mouse_over, item_mouse_out);
+        $('.timeline-item-navigation .insert').live(
+            'click', 
+            show_insert_dialog
+        );
+        $('.timeline-item-navigation .append').live(
+            'click', 
+            show_append_dialog
+        );
+
+        // TODO change z-index to NULL when URL is changed before the dialog is closed.
+        $('#id-modal-dialog #id-close-dialog').live(
+            'click',
+            hide_dialog
+        );
+    }
+    Timeline.timeline_register = timeline_register;
+
+})(); // end of Timeline
+
+
+// Prefilled values into the change-forms
+// Prefilling forms handles text input elements and select boxes
+// (including creating special hidden field used to redirect browser after change-form is saved)
+
+function prefill_change_form() {
+    $(document).bind('media_loaded', PrefilledChangeForm.fill_form);
+}
+
+PrefilledChangeForm = new Object();
+(function() {
+    function get_prefilled_values(splitted) {
+        // URLDecode jQuery method should be installed via change_form.html template (request_media).
+        var data = $.URLDecode(splitted[1]);
+        var idata = data.split('&');
+        var params = new Object();
+        for (var i in idata) {
+            var element = idata[i];
+            var x = element.split('=');
+            params[x[0]] = x[1];
+        }
+        return params;
+    }
+    PrefilledChangeForm.get_prefilled_values = get_prefilled_values;
+
+    function get_parameters(address) {
+        if (!address) return null; // URL doesn't contain hash char
+        var splitted = address.split('?');
+        if (splitted.length != 2) return null;  // no GET parameters found
+        return splitted;
+    }
+    PrefilledChangeForm.get_parameters = get_parameters;
+
+    function fill_form_located_by_selector(selector, params) {
+        var i, element, options, paramValue;
+        //for (i = 0; i < input_elements.length; i++) 
+        $(selector).each(function() {
+            //element = input_elements[i];
+            element = $(this)[0];
+            if (element.id in params) {
+                paramValue = params[element.id];
+                if (element.tagName == 'SELECT') {
+                    options = $('#' + element.id + ' option');
+                    for ( i = 0; i < options.length; i++ ) {
+                        if (options[i].value == paramValue) {
+                            element.value = i;
+                        }
+                    }
+                } else {
+                    element.setAttribute('value', params[element.id]);
+                }
+            }
+        });
+        // pass redirect_To addres used after change-form is saved
+        if ('http_redirect_to' in params) {
+            var parts = [
+                '<input type="hidden" name="http_redirect_to" value="',
+                params['http_redirect_to'],
+                '" />'
+            ];
+            $('.change-form input:hidden:first').after(parts.join(''));
+        }
+    }
+    PrefilledChangeForm.fill_form_located_by_selector = fill_form_located_by_selector;
+
+    function fill_form(base_selector, address) {
+        var param_base_selector = base_selector;
+        var param_address = address;
+        if (!param_base_selector) {
+            param_base_selector = '.change-form';
+        }
+        if (!param_address) {
+            param_address = window.location.hash;
+        }
+        if (!$(param_base_selector)) return;    // procedure works only with change-forms
+        var splitted = PrefilledChangeForm.get_parameters(param_address);
+        if (!splitted) return;
+        // params contains elements ids
+        var params = get_prefilled_values(splitted);
+        PrefilledChangeForm.fill_form_located_by_selector(param_base_selector + ' input,select', params);
+    }
+    PrefilledChangeForm.fill_form = fill_form;
+
+})(); // end of PrefilledChangeForm
 
 // EOF

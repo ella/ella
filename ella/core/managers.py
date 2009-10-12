@@ -122,7 +122,9 @@ class ListingManager(models.Manager):
             )
         return qset
 
-    def get_listing_queryset(self, category=None, children=NONE, mods=[], content_types=[], now=datetime.now(), **kwargs):
+    def get_listing_queryset(self, category=None, children=NONE, mods=[], content_types=[], now=None, **kwargs):
+        if not now:
+            now = datetime.now()
         qset = self.filter(publish_from__lte=now, **kwargs)
 
         if category:

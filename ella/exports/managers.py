@@ -2,7 +2,7 @@ from datetime import datetime
 import logging
 
 from django.db import models, connection
-from django.db.models import F, Q
+from django.db.models import Q
 from django.conf import settings
 
 from ella.core.models import Listing, Publishable, Category
@@ -270,11 +270,15 @@ class ExportManager(models.Manager):
             self, 
             category=None, 
             export=None, 
-            datetime_from=datetime.now(),
+            datetime_from=None,
             max_visible_items=None
         ):
         e = ExportItemizer(category=category)
-        e.datetime_from = datetime_from
+        if not datetime_from:
+            e.datetime_from = datetime.now()
+        else:
+            e.datetime_from = datetime_from
+        print 'Get Items for Category: datetime_from', e.datetime_from
         e.max_visible_items = max_visible_items
         if export:
             e.export = export

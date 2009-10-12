@@ -11,7 +11,7 @@
     </form>
    
     <div id="id-modal-dialog" class="noscreen service-module">
-        <div id="id-publishable-dialog" class="service-module-in" style="height: 400px; overflow: auto; position: fixed; top:200px;">
+        <div id="id-publishable-dialog" class="service-module-in" style="height: 40px; overflow: auto; position: fixed; top:200px; left: 100px;">
             <label for="id_publishable_suggest" style="float: left;">{% trans 'Publishable object' %}: </label>
             <div style="width: 300px; float: left;">
                 <input id="id_publishable" class="vForeignKeyRawIdAdminField hidden" type="text" name="publishable" style="display: none;"/>
@@ -22,7 +22,12 @@
                 </ul>
                 <!-- a id="lookup_id_publishable" class="suggest-related-lookup" href="/core/publishable/?pop"></a -->
             </div>
-            <a href="">{% trans "Continue" %}</a>
+            <a id="id-continue-dialog" class="icn btn ok">{% trans "Continue" %}</a>
+            <a id="id-close-dialog" class="icn btn cancel">{% trans "Close" %}</a>
+        </div>
+    </div>
+    <div id="id-exportmeta-modal-dialog" class="noscreen service-module">
+        <div id="id-exportmeta" class="service-module-in" style="height: 440px; overflow: auto; position: fixed; top:100px; left: 100px;">
         </div>
     </div>
 
@@ -39,11 +44,23 @@
                         <p>{{ cell }}</p>
                         {% if cell.pk %}
                         <div class="timeline-item-navigation noscreen">
-                            <a href="">{% trans "Edit" %}</a>
-                            <a href="">{% trans "Delete" %}</a>
-                            <a href="">{% trans "Append" %}</a>
-                            <span class="insert">{% trans "Insert" %}</span>
-                            <!-- {% newmanurl newman:exports_export_timeline_insert id_item=cell.pk,id_export=export.pk,position=forloop.counter %} -->
+                            {% comment %}<span 
+                                id="{{ forloop.counter0 }};{{ cell.pk }};{{ export.pk }};{{ cell.column_date_from }}" 
+                                class="edit"
+                            >{% trans "Edit" %}</span> 
+                            <span 
+                                id="" 
+                                class="delete"
+                            >{% trans "Delete" %}</span>{% endcomment %}
+                            <span 
+                                id="{{ forloop.counter0 }};{{ cell.pk }};{{ export.pk }};{{ cell.column_date_from }}" 
+                                class="append"
+                            >{% trans "Append" %}</span>
+                            <span 
+                                id="{{ forloop.counter0 }};{{ cell.pk }};{{ export.pk }};{{ cell.column_date_from }}" 
+                                class="insert"
+                            >{% trans "Insert" %}</span>
+                            {# newmanurl newman:exports_export_timeline_insert id_item=cell.pk,id_export=export.pk,position=forloop.counter #}
                         </div>
                         {% endif %}
                     </div>
@@ -69,7 +86,7 @@
         </tr>
     {% endfor %}
     </table>
-    {% endcomment %}
+    {% endcomment %}{# TIMELINE AS TABLE #}
 {% endblock %}
 
 
@@ -77,6 +94,7 @@
     {{ block.super }}
     <script type="text/javascript">
         request_media(MEDIA_URL + 'jquery/jquery-ui.js');
+        request_media(MEDIA_URL + 'jquery/jquery-urldecode-encode.js?{{ VERSION }}');
         request_media(MEDIA_URL + 'jquery/jquery-ui-smoothness.css');
         request_media(MEDIA_URL + 'js/generic.suggest.js?{{ VERSION }}');
         request_media(MEDIA_URL + 'css/generic.suggest.css?{{ VERSION }}');

@@ -1,4 +1,4 @@
-KOBAYASHI_VERSION = '2009-08-20';
+KOBAYASHI_VERSION = '2009-10-05';
 
 // Debugging tools
 ;;; function alert_dump(obj, name) {
@@ -156,6 +156,7 @@ Kobayashi.LOADED_MEDIA = {};
         $(document).trigger('dec_loading');
         PAGE_CHANGED++;
     }
+    Kobayashi.inject_content = inject_content;
     
     // argument is a LOAD_BUF item
     function inject_error_message(info) {
@@ -561,6 +562,13 @@ Kobayashi.LOADED_MEDIA = {};
     // - The specifier is interpreted by adr to get the URL from which to ajax.
     //   This results in support of relative addresses and the target_id::rel_base::address syntax.
     function simple_load(specifier) {
+        var args = Kobayashi.get_simple_load_arguments(specifier);
+        if (args == null) return;
+        load_content(args);
+    }
+    Kobayashi.simple_load = simple_load;
+
+    function get_simple_load_arguments(specifier) {
         var target_id;
         var colon_index = specifier.indexOf('::');
         if (colon_index < 0) {
@@ -575,12 +583,12 @@ Kobayashi.LOADED_MEDIA = {};
         if (LOADED_URLS[target_id] == address) {
             $('#'+target_id).slideUp('fast');
             unload_content(target_id);
-            return;
+            return null;
         }
         
-        load_content({target_id:target_id, address:address});
+        return {target_id:target_id, address:address};
     }
-    Kobayashi.simple_load = simple_load;
+    Kobayashi.get_simple_load_arguments = get_simple_load_arguments;
     
     // Set up event handlers
     $('.js-simpleload,.js-simpleload-container a').live('click', function(evt) {

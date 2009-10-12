@@ -33,9 +33,12 @@ class ExportAdmin(newman.NewmanModelAdmin):
             url(r'^timeline/$',
                 self.timeline_changelist_view,
                 name='%s_%s_timeline' % info),
-            url(r'^timeline/insert/(?P<position>\d+)/(?P<id_item>\d+)/(?P<id_export>\d+)/$',
-                self.timeline_insert_view,
+            url(r'^timeline/insert/(?P<position>\d+)/(?P<id_item>\d+)/(?P<id_export>\d+)/(?P<visible_from>.*)/(?P<id_publishable>\d+)/$',
+                timeline.insert_view,
                 name='%s_%s_timeline_insert' % info),
+            url(r'^timeline/append/(?P<position>\d+)/(?P<id_item>\d+)/(?P<id_export>\d+)/(?P<visible_from>.*)/(?P<id_publishable>\d+)/$',
+                timeline.append_view,
+                name='%s_%s_timeline_append' % info),
         )
         urlpatterns += super(ExportAdmin, self).get_urls()
         return urlpatterns
@@ -45,9 +48,6 @@ class ExportAdmin(newman.NewmanModelAdmin):
         Returns timeline view (more powerful interface to maintain export positions).
         """
         return timeline.timeline_view(request, extra_context)
-
-    def timeline_insert_view(self, request, extra_context=None, **kwargs):
-        return timeline.timeline_insert_view(request, **kwargs)
 
 class ExportMetaAdmin(newman.NewmanModelAdmin):
     inlines = (ExportPositionInlineAdmin,)

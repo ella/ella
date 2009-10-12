@@ -641,7 +641,7 @@ class NewmanModelAdmin(XModelAdmin):
 
         def give_me_unicode(ei):
             if not hasattr(ei, '__unicode__'):
-                return str(ei)
+                return u'%s' % ei
             return ei.__unicode__()
 
         error_list = []
@@ -735,6 +735,10 @@ class NewmanModelAdmin(XModelAdmin):
                 if request.POST.get('_addanother'):
                     return_url += 'add/'
                 return HttpResponseRedirect(return_url)
+
+            redir = request.POST.get('http_redirect_to', None)
+            if redir:
+                return utils.JsonResponseRedirect(redir)
 
             return utils.JsonResponse(
                 _('The %(name)s "%(obj)s" was changed successfully.') % {'name': force_unicode(opts.verbose_name), 'obj': force_unicode(obj)},
