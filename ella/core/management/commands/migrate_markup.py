@@ -1,12 +1,13 @@
 import re
+import sys
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import NoArgsCommand
 from django.conf import settings
+from django.db import transaction
 from django.db.models import get_model
 
 from djangomarkup.models import SourceText, TextProcessor
-
 
 lookup = None
 def create_id_lookup():
@@ -48,36 +49,45 @@ def update_field(instance, content_type):
                 target_id=new_pk
             )
         if new_pk != pk:
-            print '-',
+            sys.stdout.write('#')
         else:
-            print '#',
+            sys.stdout.write('-')
 
         # put everything together
         return '{%% box %s for %s.%s with pk %s %%}' % (name, app, model, pk)
     return update_one_box
 
+@transaction.commit_on_success
+def migrate_model(processor, model, fields):
+    model = get_model(*model.split('.'))
+    ct = ContentType.objects.get_for_model(model)
+    print 'processing', model._meta, ':', 
+
+    converted = 0
+    deps = 0
+
+    for m in model.objects.all().iterator():
+        sys.stdout.write('.')
+        converted += 1
+        dirty = False
+        for f in fields:
+            val = getattr(m, f)
+            if val:
+                val, cnt = BOX_RE.subn(update_field(m, ct), val)
+                if cnt > 0:
+                    deps += cnt
+                    setattr(m, f, val)
+                    dirty = True
+
+        SourceText.objects.extract_from_instance(m, processor, fields, content_type=ct, force_save=dirty)
+    print
+    print 'DONE converted %d (%d reported dependencies)' % (converted, deps,)
+
 def migrate_markup(processor, modelfields):
     create_id_lookup()
 
     for model, fields in modelfields:
-        model = get_model(*model.split('.'))
-        ct = ContentType.objects.get_for_model(model)
-        print 'processing', model._meta, ':', 
-
-        for m in model.objects.all():
-            print '.',
-            dirty = False
-            for f in fields:
-                val = getattr(m, f)
-                if val:
-                    val, cnt = BOX_RE.subn(update_field(m, ct), val)
-                    if cnt > 0:
-                        setattr(m, f, val)
-                        dirty = True
-
-            SourceText.objects.extract_from_instance(m, processor, fields, content_type=ct, force_save=dirty)
-        print
-        print 'DONE'
+        migrate_model(processor, model, fields)
 
 
 class Command(NoArgsCommand):
