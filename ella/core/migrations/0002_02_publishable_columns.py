@@ -19,6 +19,7 @@ class Migration:
 
         # Adding field 'Listing.publish_to'
         db.add_column('core_listing', 'publish_to', models.DateTimeField(_("End of listing"), null=True, blank=True))
+        db.delete_column('core_listing', 'remove')
 
     def backwards(self, orm):
 
