@@ -312,23 +312,23 @@ class ExportManager(models.Manager):
             positions = ExportPosition.objects.filter(object=meta, export=pub_export)
             if not positions:
                 return {
-                    'title': meta.get_title(),
-                    'photo': meta.get_photo(),
-                    'description': meta.get_description()
+                    'title': meta.title,
+                    'photo': meta.photo,
+                    'description': meta.description
                 }
 
             pos = positions[0]
             return {
-                'title': pos.object.get_title(),
-                'photo': pos.object.get_photo(),
-                'description': pos.object.get_description()
+                'title': pos.object.title,
+                'photo': pos.object.photo,
+                'description': pos.object.description
             }
 
         if not pos:
             return {
-                'title': publishable.get_title(),
-                'photo': publishable.get_photo(),
-                'description': publishable.get_description()
+                'title': publishable.title,
+                'photo': publishable.photo,
+                'description': publishable.description
             }
 
 # EOF
