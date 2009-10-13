@@ -147,39 +147,8 @@ class Publishable(models.Model):
         Redirect.objects.filter(new_path=url).delete()
         return super(Publishable, self).delete()
 
-
-    ##
-    # various metadata
-    ##
-    def get_category(self):
-        " Get object's primary Category."
-        return get_cached_object(Category, pk=self.category_id)
-
-
-    def get_photo(self):
-        " Get object's Photo. "
-        if not hasattr(self, '_photo'):
-            try:
-                self._photo = get_cached_object(Photo, pk=self.photo_id)
-            except Photo.DoesNotExist:
-                self._photo = None
-        return self._photo
-
-    def get_description(self):
-        return self.description
-
-    def get_title(self):
-        myTitle=self.title
-        if myTitle:
-            return '%s' % (self.title,)
-        else:
-            return '%s' % (self.draw_title(),)
-
-    def get_text(self):
-        return self.text
-
     def __unicode__(self):
-        return self.get_title()
+        return self.title
 
 # FIXME find another way to register!
 if 'tagging' in settings.INSTALLED_APPS:
