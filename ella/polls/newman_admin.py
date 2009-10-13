@@ -101,7 +101,6 @@ class ContestantAdmin(newman.NewmanModelAdmin):
     """
     ordering = ('datetime',)
     list_display = ('name', 'surname', 'user', 'datetime', 'contest', 'points', 'winner')
-    rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}
 
 class QuestionForm(modelforms.ModelForm):
     # create the field here to pass validation

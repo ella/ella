@@ -8,6 +8,7 @@ class Migration:
         db.alter_column('core_placement', 'publishable_id', models.ForeignKey(orm['core.Publishable'], null=False))
         db.create_index('core_placement', ['publishable_id'])
 
+        db.delete_unique('core_placement', ('target_ct_id', 'target_id', 'category_id'))
         db.delete_column('core_placement', 'target_ct_id')
         db.delete_column('core_placement', 'target_id')
 

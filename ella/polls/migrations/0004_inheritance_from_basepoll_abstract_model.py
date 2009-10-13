@@ -16,7 +16,7 @@ class Migration:
         db.alter_column('polls_poll', 'text', models.TextField(_('Text')))
         
         # Changing field 'Poll.active_till'
-        db.alter_column('polls_poll', 'active_till', models.DateTimeField(_('Active till')))
+        db.alter_column('polls_poll', 'active_till', models.DateTimeField(_('Active till'), blank=True, null=True))
         
         # Changing field 'Poll.text_results'
         db.alter_column('polls_poll', 'text_results', models.TextField(_('Text with results')))

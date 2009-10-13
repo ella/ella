@@ -65,7 +65,7 @@ class TopicOptions(newman.NewmanModelAdmin):
     list_filter = ('category', 'created',)
     # inlines = (PlacementInlineAdmin,)
     inlines = [PlacementInlineAdmin]
-    rich_text_fields = {None: ('perex',)}
+    rich_text_fields = {None: ('description',)}
 
 newman.site.register(Topic, TopicOptions)
 newman.site.register(TopicThread, TopicThreadOptions)

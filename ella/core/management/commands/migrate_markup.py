@@ -1,19 +1,23 @@
 import re
+import sys
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import NoArgsCommand
 from django.conf import settings
+from django.db import transaction
 from django.db.models import get_model
 
 from djangomarkup.models import SourceText, TextProcessor
 
-from ella.core.models import Publishable, Dependency
-
 lookup = None
 def create_id_lookup():
+    from ella.core.models import Publishable
     global lookup
     if lookup is None:
-        lookup = dict( ((p.content_type_id, p.old_id), p.pk) for p in Publishable.objects.order_by().only('id', 'old_id', 'content_type') )
+        lookup = dict(
+            ((p['content_type'], p['old_id']), p['id'])
+                for p in Publishable.objects.order_by().extra(select={'old_id': 'old_id'}).values('id', 'old_id', 'content_type') 
+        )
 
 BOX_RE = re.compile(r'''
         {% \s* box \s*      # {%_box_
@@ -26,6 +30,7 @@ BOX_RE = re.compile(r'''
     ''', re.VERBOSE)
 
 def update_field(instance, content_type):
+    from ella.core.models import Dependency
     def update_one_box(match):
         name, app, model, pk = match.groups()
 
@@ -33,7 +38,7 @@ def update_field(instance, content_type):
         ct = ContentType.objects.get_for_model(get_model(app, model))
 
         # update the pk value
-        pk = lookup.get((ct.pk, int(pk)), pk)
+        new_pk = lookup.get((ct.pk, int(pk)), pk)
 
         # report this box use as a dependency
         Dependency.objects.get_or_create(
@@ -41,30 +46,48 @@ def update_field(instance, content_type):
                 dependent_id=instance.pk,
 
                 target_ct=ct,
-                target_id=pk
+                target_id=new_pk
             )
+        if new_pk != pk:
+            sys.stdout.write('#')
+        else:
+            sys.stdout.write('-')
 
         # put everything together
-        return '{%% box %s for %s.%s with pk %s %%}' % (name, app, model, pk)
+        return '{%% box %s for %s.%s with pk %s %%}' % (name, app, model, new_pk)
     return update_one_box
+
+@transaction.commit_on_success
+def migrate_model(processor, model, fields):
+    model = get_model(*model.split('.'))
+    ct = ContentType.objects.get_for_model(model)
+    print 'processing', model._meta, ':', 
+
+    converted = 0
+    deps = 0
+
+    for m in model.objects.all().iterator():
+        sys.stdout.write('.')
+        converted += 1
+        dirty = False
+        for f in fields:
+            val = getattr(m, f)
+            if val:
+                val, cnt = BOX_RE.subn(update_field(m, ct), val)
+                if cnt > 0:
+                    deps += cnt
+                    setattr(m, f, val)
+                    dirty = True
+
+        SourceText.objects.extract_from_instance(m, processor, fields, content_type=ct, force_save=dirty)
+    print
+    print 'DONE converted %d (%d reported dependencies)' % (converted, deps,)
 
 def migrate_markup(processor, modelfields):
     create_id_lookup()
 
     for model, fields in modelfields:
-        model = get_model(*model.split('.'))
-        ct = ContentType.objects.get_for_model(model)
-
-        for m in model.objects.all():
-            dirty = False
-            for f in fields:
-                val = getattr(m, f)
-                val, cnt = BOX_RE.subn(update_field(m, ct), val)
-                if cnt > 0:
-                    setattr(m, f, val)
-                    dirty = True
-
-            SourceText.objects.extract_from_instance(m, processor, fields, content_type=ct, force_save=dirty)
+        migrate_model(processor, model, fields)
 
 
 class Command(NoArgsCommand):
