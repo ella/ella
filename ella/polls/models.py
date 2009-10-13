@@ -57,9 +57,8 @@ class QuizBox(Box):
         "Updates box context with photo-specific variables."
         from ella.polls.views import QuestionForm
         cont = super(QuizBox, self).get_context()
-        questions = self.obj.questions
-        cont['questions'] = questions
-        cont['form'] = QuestionForm(questions[0])(prefix='0')
+        cont['questions'] = lambda: self.obj.target.questions
+        cont['form'] = lambda: QuestionForm(self.obj.target.questions[0])(prefix='0')
         return cont
 
 
