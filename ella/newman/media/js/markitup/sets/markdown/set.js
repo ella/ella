@@ -11,6 +11,7 @@
 // Feel free to add more tags
 // -------------------------------------------------------------------\
 
+var MARKITUP_PREVIEW_SIZE_ADDITION = 10; //px
 var focused;
 var edit_content;
 var getIdFromPath = function(path){
@@ -28,7 +29,7 @@ MARKITUP_SETTINGS = {
     previewParserPath:    BASE_URL + 'nm/editor-preview/',
     previewParserVar:   "text",
     previewPosition: 'afterArea',
-    onShiftEnter:		{keepDefault:false, openWith:'\n\n'},
+    onShiftEnter:              {keepDefault:false, openWith:'\n\n'},
     markupSet: [
         { name: gettext('Italic'), className: 'italic', key: 'I', openWith: '*', closeWith: '*' },
         { name: gettext('Bold'), className: 'bold', key: 'B', openWith: '**', closeWith: '**' },
@@ -222,4 +223,51 @@ function preview_on_site() {
     return;
 
 }
+
+
+function preview_iframe_height($iFrame, $txArea) {
+    if ($iFrame) {
+        $iFrame.css("height", Math.max(50, $txArea.height() + MARKITUP_PREVIEW_SIZE_ADDITION)+"px");
+    }
+}
+
+function preview_height_correct(evt) {
+    var $container = $(evt.currentTarget).parents('.markItUpContainer');
+    var $editor = $container.find('.markItUpEditor');
+    var $iFrame = $container.find('iframe');
+    preview_iframe_height($iFrame, $editor);
+}
+
+// resize appropriately after enter key is pressed inside markItUp <textarea> element.
+function enter_pressed_callback(evt) {
+
+    var $txArea = $(evt.currentTarget);
+    var $container = $txArea.parents('.markItUpContainer');
+    var $iFrame = $container.find('iframe');
+    preview_iframe_height($iFrame, $txArea);
+}
+
+function register_markitup_editor_enter_callback(args) {
+    var RESIZE_DELAY_MSEC = 1250;
+    $(this).bind(
+        'keyup',
+        function(evt) {
+            var key_code = evt.keyCode || evt.which;
+            key_code = parseInt(key_code);
+            var ENTER = 13;
+            if (key_code != ENTER) return;
+            setTimeout(function() {enter_pressed_callback(evt); }, RESIZE_DELAY_MSEC);
+        }
+    );
+}
+
+$(document).bind(
+    'media_loaded',
+    function () {
+        $('.markItUpEditor').each(register_markitup_editor_enter_callback);
+        $('li.preview').bind('click', preview_height_correct);
+    }
+);
+
+
 $(document).bind('media_loaded', function(){ $('textarea.rich_text_area').autogrow() });
