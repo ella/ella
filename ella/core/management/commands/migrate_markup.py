@@ -4,7 +4,8 @@ import sys
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import NoArgsCommand
 from django.conf import settings
-from django.db import transaction
+from django.db.transaction import is_dirty, commit, rollback, \
+    enter_transaction_management, leave_transaction_management, managed
 from django.db.models import get_model
 
 from djangomarkup.models import SourceText, TextProcessor
@@ -57,31 +58,56 @@ def update_field(instance, content_type):
         return '{%% box %s for %s.%s with pk %s %%}' % (name, app, model, new_pk)
     return update_one_box
 
-@transaction.commit_on_success
 def migrate_model(processor, model, fields):
     model = get_model(*model.split('.'))
     ct = ContentType.objects.get_for_model(model)
     print 'processing', model._meta, ':', 
+    sys.stdout.flush()
 
     converted = 0
     deps = 0
 
-    for m in model.objects.all().iterator():
-        sys.stdout.write('.')
-        converted += 1
-        dirty = False
-        for f in fields:
-            val = getattr(m, f)
-            if val:
-                val, cnt = BOX_RE.subn(update_field(m, ct), val)
-                if cnt > 0:
-                    deps += cnt
-                    setattr(m, f, val)
-                    dirty = True
+    try:
+        enter_transaction_management()
+        managed(True)
 
-        SourceText.objects.extract_from_instance(m, processor, fields, content_type=ct, force_save=dirty)
+        try:
+            for m in model.objects.all().iterator():
+                sys.stdout.write('.')
+                converted += 1
+
+                # commit every 1000 iterations
+                if (converted % 1000) == 0 and is_dirty():
+                    commit()
+                    sys.stdout.write('C')
+                    sys.stdout.flush()
+
+                dirty = False
+                for f in fields:
+                    val = getattr(m, f)
+                    if val:
+                        val, cnt = BOX_RE.subn(update_field(m, ct), val)
+                        if cnt > 0:
+                            deps += cnt
+                            setattr(m, f, val)
+                            dirty = True
+
+                SourceText.objects.extract_from_instance(m, processor, fields, content_type=ct, force_save=dirty)
+        except:
+            # rollback and propagate if something goes wrong
+            if is_dirty():
+                rollback()
+            raise
+        else:
+            # commit at the end
+            if is_dirty():
+                commit()
+    finally:
+        leave_transaction_management()
+
     print
     print 'DONE converted %d (%d reported dependencies)' % (converted, deps,)
+    sys.stdout.flush()
 
 def migrate_markup(processor, modelfields):
     create_id_lookup()
