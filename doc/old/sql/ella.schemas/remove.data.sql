@@ -11,6 +11,7 @@ delete from photos_photo where id in (48119,48119,110218,110219,110220,110221,11
 
 -- uz neni
 drop table core_dependency;
+drop table core_related;
 
 -- pk je neco jineho
 alter table core_hitcount drop column id;
