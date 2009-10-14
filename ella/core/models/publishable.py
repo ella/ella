@@ -54,7 +54,7 @@ class Publishable(models.Model):
 
     # denormalized fields
     # the placement's publish_from
-    publish_from = models.DateTimeField(_('Publish from'), editable=False, default=PUBLISH_FROM_WHEN_EMPTY)
+    publish_from = models.DateTimeField(_('Publish from'), editable=False, default=PUBLISH_FROM_WHEN_EMPTY, db_index=True)
 
     class Meta:
         app_label = 'core'
