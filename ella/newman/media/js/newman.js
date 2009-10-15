@@ -255,7 +255,6 @@ Drafts = new Object;
             var key = form_datum['name'];
             var val = form_datum['value'];
             
-            // var occ_no = used_times[ key ] || 0; //rewritten due to unreadibility
             var occ_no = 0;
             if (key in used_times) {
                 occ_no = used_times[key];
