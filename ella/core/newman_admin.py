@@ -456,6 +456,10 @@ class PublishableAdmin(newman.NewmanModelAdmin):
     placement_link.allow_tags = True
     placement_link.short_description = _('Main placement')
 
+    # TODO: check speed with select_related()
+#    def queryset(self, request):
+#        qs = super(PublishableAdmin, self).queryset(request)
+#        return qs.select_related()
 
 newman.site.register(HitCount, HitCountAdmin)
 newman.site.register(Category, CategoryAdmin)
