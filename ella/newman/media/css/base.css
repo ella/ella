@@ -329,6 +329,8 @@ td, th {
     padding: 3px 5px;
 }
 
+p.paginator .this-page { font-weight: bold; font-size: 115%; }
+
 /* publishable changelist */
 a.cl-publishable-link { padding-left: 20px; background: transparent url(../ico/ct/16/publishable.png) 0 50% no-repeat; }
 a.cl-publishable-link.quiz { background-image: url(../ico/ct/16/quiz.png); }
@@ -518,7 +520,7 @@ fieldset.collapse legend { background-image: url(../ico/16/14_layer_raiselayer.p
 
 .timeline-ul .timeline-item span {
     text-decoration: underline;
-    color: #005F00; 
+    color: #005F00;
     cursor: pointer;
 }
 
