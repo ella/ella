@@ -66,6 +66,7 @@ class PhotoOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
     search_fields = ('title', 'image', 'description', 'id',) # FIXME: 'tags__tag__name',)
     suggest_fields = {'authors': ('name', 'slug',), 'source': ('name', 'url',)}
+    rich_text_fields = {'small': ('description',)}
 
     def __call__(self, request, url):
         if url and url.endswith('json'):
