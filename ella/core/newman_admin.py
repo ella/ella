@@ -441,9 +441,8 @@ class PublishableAdmin(newman.NewmanModelAdmin):
     publish_from_nice.allow_tags = True
 
     def photo_thumbnail(self, object):
-        photo = object.get_photo()
-        if photo:
-            return mark_safe(photo.thumb())
+        if object.photo:
+            return mark_safe(object.photo.thumb())
         else:
             return mark_safe('<span class="form-error-msg">%s</span>' % ugettext('No main photo!'))
     photo_thumbnail.allow_tags = True
