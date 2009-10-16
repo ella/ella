@@ -220,8 +220,8 @@ class Placement(models.Model):
         hc, created = HitCount.objects.get_or_create(placement=self, defaults={'hits': 0})
 
         # store the publish_from on the publishable for performance in the admin
-        if self.publishable.publish_from > self.publish_from:
-            self.publishable.publish_from = self.publish_from
+        if self.publishable.publish_from != self.publish_from:
+            # self.publishable.publish_from = self.publish_from
             Publishable.objects.filter(pk=self.publishable_id).update(publish_from=self.publish_from)
 
     def get_absolute_url(self, domain=False):
