@@ -17,20 +17,23 @@ class PublishableTestCase(DatabaseTestCase):
 
 class TestPublishFrom(PublishableTestCase):
     def test_publish_from_is_set_to_placements(self):
-        self.assert_equals(self.placement.publish_from, self.publishable.publish_from)
+        p = Publishable.objects.get(pk=self.publishable.pk)
+        self.assert_equals(self.placement.publish_from, p.publish_from)
 
     def test_publish_from_is_reset_when_last_placement_deleted(self):
         self.placement.delete()
         self.assert_equals(PUBLISH_FROM_WHEN_EMPTY, self.publishable.publish_from)
 
-    def test_with_more_placements_publish_from_is_tha_earliest(self):
+    def test_with_more_placements_publish_from_is_the_earliest(self):
+        p = Publishable.objects.get(pk=self.publishable.pk)
         Placement.objects.create(
-            publishable=self.publishable,
+            publishable=p,
             category=self.category,
             publish_from=datetime(2009,1,1)
         )
 
-        self.assert_equals(self.placement.publish_from, self.publishable.publish_from)
+        p = Publishable.objects.get(pk=self.publishable.pk)
+        self.assert_equals(self.placement.publish_from, p.publish_from)
 
     def test_publish_from_is_set_to_another_when_placement_deleted(self):
         Placement.objects.create(
