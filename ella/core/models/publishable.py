@@ -54,7 +54,7 @@ class Publishable(models.Model):
 
     # denormalized fields
     # the placement's publish_from
-    publish_from = models.DateTimeField(_('Publish from'), editable=False, default=PUBLISH_FROM_WHEN_EMPTY)
+    publish_from = models.DateTimeField(_('Publish from'), editable=False, default=PUBLISH_FROM_WHEN_EMPTY, db_index=True)
 
     class Meta:
         app_label = 'core'
@@ -221,7 +221,7 @@ class Placement(models.Model):
 
         # store the publish_from on the publishable for performance in the admin
         if self.publishable.publish_from > self.publish_from:
-            self.publishable.publish_from = self.publish_from
+            # self.publishable.publish_from = self.publish_from
             Publishable.objects.filter(pk=self.publishable_id).update(publish_from=self.publish_from)
 
     def get_absolute_url(self, domain=False):

@@ -64,7 +64,8 @@ class TopicOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     list_display = ('title', 'photo_thumb', 'created', 'pk',)
     list_filter = ('category', 'created',)
     inlines = (PlacementInlineAdmin,)
-    rich_text_fields = {None: ('perex',)}
+    # rich_text_fields = {None: ('perex',)}
+    rich_text_fields = {None: ('description',)}
 
 admin.site.register(Topic, TopicOptions)
 admin.site.register(TopicThread, TopicThreadOptions)

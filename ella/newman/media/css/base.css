@@ -220,6 +220,7 @@ legend { padding: 2px 5px; }
 label { display: block; clear: both; margin: 5px 0 2px 0; }
 label.vCheckboxLabel { display: inline; margin-left: 10px; }
 label.required { font-weight: bold; color: darkorange; }
+label:hover { text-decoration: underline; }
 div.submit-row, fieldset.submit-row { border: none; clear:both; margin-top: 5px; padding: 2px 0; text-align: right; }
 input, textarea, select { padding: 2px 0; font: normal 100% Tahoma, Verdana, sans-serif; }
 .js-form .js-form-metadata { display: none; }
@@ -328,6 +329,8 @@ td, th {
     background: #ddd url(../img/nav-bg-reverse.gif) 0 0 repeat-x;
     padding: 3px 5px;
 }
+
+p.paginator .this-page { font-weight: bold; font-size: 115%; }
 
 /* publishable changelist */
 a.cl-publishable-link { padding-left: 20px; background: transparent url(../ico/ct/16/publishable.png) 0 50% no-repeat; }
@@ -518,7 +521,7 @@ fieldset.collapse legend { background-image: url(../ico/16/14_layer_raiselayer.p
 
 .timeline-ul .timeline-item span {
     text-decoration: underline;
-    color: #005F00; 
+    color: #005F00;
     cursor: pointer;
 }
 

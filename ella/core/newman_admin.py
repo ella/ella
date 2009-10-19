@@ -406,8 +406,12 @@ class PublishableAdmin(newman.NewmanModelAdmin):
     site_icon.allow_tags = True
 
     def fe_link(self, obj):
-        if obj.get_absolute_url():
-            return mark_safe('<a href="%s" class="icn web js-nohashadr">www</a>' % obj.get_absolute_url())
+        if obj.publish_from.year < 3000:
+            kwargs = {'content_type_id': obj.content_type.id, 'object_id': obj.pk}
+            return mark_safe(
+                '<a href="%s" class="icn web js-nohashadr">www</a>' %
+                reverse('newman:obj-redirect', kwargs=kwargs)
+            )
         else:
             return '---'
     fe_link.short_description = _('WWW')
@@ -437,9 +441,8 @@ class PublishableAdmin(newman.NewmanModelAdmin):
     publish_from_nice.allow_tags = True
 
     def photo_thumbnail(self, object):
-        photo = object.get_photo()
-        if photo:
-            return mark_safe(photo.thumb())
+        if object.photo:
+            return mark_safe(object.photo.thumb())
         else:
             return mark_safe('<span class="form-error-msg">%s</span>' % ugettext('No main photo!'))
     photo_thumbnail.allow_tags = True
@@ -452,6 +455,10 @@ class PublishableAdmin(newman.NewmanModelAdmin):
     placement_link.allow_tags = True
     placement_link.short_description = _('Main placement')
 
+    # TODO: check speed with select_related()
+#    def queryset(self, request):
+#        qs = super(PublishableAdmin, self).queryset(request)
+#        return qs.select_related()
 
 newman.site.register(HitCount, HitCountAdmin)
 newman.site.register(Category, CategoryAdmin)

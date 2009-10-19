@@ -16,6 +16,7 @@ class HelpItemAdmin(admin.ModelAdmin):
     list_display = ('__unicode__',)
     list_filter = ('ct', 'lang',)
     list_select_related = False
+    rich_text_fields = {'': ('long',)}
 
 
 class CategoryUserRoleAdmin(admin.ModelAdmin):

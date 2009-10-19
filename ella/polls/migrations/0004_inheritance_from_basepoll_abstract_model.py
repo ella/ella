@@ -14,6 +14,9 @@ class Migration:
         
         # Changing field 'Poll.text'
         db.alter_column('polls_poll', 'text', models.TextField(_('Text')))
+
+        # Adding field 'Poll.active_from'
+        db.alter_column('polls_poll', 'active_from', models.DateTimeField(_('Active from'), blank=True, null=True))
         
         # Changing field 'Poll.active_till'
         db.alter_column('polls_poll', 'active_till', models.DateTimeField(_('Active till'), blank=True, null=True))
@@ -32,24 +35,12 @@ class Migration:
         Contest
           * inheritance from Publishable - will be done by other migration
         """
+        # Adding field 'Contest.active_from'
+        db.alter_column('polls_contest', 'active_from', models.DateTimeField(_('Active from'), blank=True, null=True))
         
-        # Adding field 'Contest.publishable_ptr'
-        #db.add_column('polls_contest', 'publishable_ptr', models.OneToOneField(orm['core.Publishable']))
+        # Adding field 'Contest.active_till'
+        db.alter_column('polls_contest', 'active_till', models.DateTimeField(_('Active till'), blank=True, null=True))
         
-        # Deleting field 'Contest.category'
-        #db.delete_column('polls_contest', 'category_id')
-        
-        # Deleting field 'Contest.id'
-        #db.delete_column('polls_contest', 'id')
-        
-        # Deleting field 'Contest.photo'
-        #db.delete_column('polls_contest', 'photo_id')
-        
-        # Deleting field 'Contest.slug'
-        #db.delete_column('polls_contest', 'slug')
-        
-        # Deleting field 'Contest.title'
-        #db.delete_column('polls_contest', 'title')
 
         
         """
@@ -61,26 +52,11 @@ class Migration:
         # Changing field 'Quiz.text_announcement'
         db.alter_column('polls_quiz', 'text_announcement', models.TextField(_('Text with announcement')))
 
-        # Adding field 'Quiz.publishable_ptr'
-        #db.add_column('polls_quiz', 'publishable_ptr', models.OneToOneField(orm['core.Publishable']))
-        
-        # Deleting field 'Quiz.title'
-        #db.delete_column('polls_quiz', 'title')
-        
-        # Deleting field 'Quiz.slug'
-        #db.delete_column('polls_quiz', 'slug')
-        
-        # Deleting field 'Quiz.photo'
-        #db.delete_column('polls_quiz', 'photo_id')
-        
-        # Deleting field 'Quiz.category'
-        #db.delete_column('polls_quiz', 'category_id')
-        
-        # Deleting field 'Quiz.id'
-        #db.delete_column('polls_quiz', 'id')
-        
-        # Dropping ManyToManyField 'Quiz.authors'
-        #db.delete_table('polls_quiz_authors')        
+        # Adding field 'Quiz.active_from'
+        db.alter_column('polls_contest', 'active_from', models.DateTimeField(_('Active from'), blank=True, null=True))
+
+        # Adding field 'Quiz.active_till'
+        db.alter_column('polls_contest', 'active_till', models.DateTimeField(_('Active till'), blank=True, null=True))
         
     
     
