@@ -18,8 +18,8 @@ from django.contrib.auth import authenticate
 
 from ella.core.cache import get_cached_object
 
-from ella.comments import defaults
-from ella.comments.models import Comment, CommentOptions, BannedUser
+from ella.oldcomments import defaults
+from ella.oldcomments.models import Comment, CommentOptions, BannedUser
 
 
 class CommentForm(forms.Form):

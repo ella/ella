@@ -1,7 +1,7 @@
 from django.utils.translation import ugettext_lazy as _
 from django.contrib import admin
 
-from ella.comments.models import Comment, BannedUser, CommentOptions
+from ella.oldcomments.models import Comment, BannedUser, CommentOptions
 from ella.ellaadmin.options import EllaAdminOptionsMixin
 
 class CommentsOptions(EllaAdminOptionsMixin, admin.ModelAdmin):

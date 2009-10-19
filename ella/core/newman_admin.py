@@ -15,7 +15,7 @@ from django.conf import settings
 from ella.core.models import Author, Source, Category, Listing, HitCount, Placement, Related, Publishable
 from ella.core.models.publishable import PUBLISH_FROM_WHEN_EMPTY
 from ella import newman
-from ella.comments.models import Comment
+from ella.oldcomments.models import Comment
 from ella.newman import options, fields
 from ella.newman.filterspecs import CustomFilterSpec, NewmanSiteFilter
 

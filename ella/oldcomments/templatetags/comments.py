@@ -1,5 +1,5 @@
-from ella.comments.models import Comment
-from ella.comments.forms import CommentForm
+from ella.oldcomments.models import Comment
+from ella.oldcomments.forms import CommentForm
 
 from django import template
 from django.contrib.contenttypes.models import ContentType

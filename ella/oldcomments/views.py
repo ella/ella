@@ -12,9 +12,9 @@ from django.utils.translation import ugettext as _
 from ella.core.cache import get_cached_object_or_404
 from ella.core.views import get_templates_from_placement
 
-from ella.comments.models import Comment
-from ella.comments.forms import CommentForm
-from ella.comments.defaults import FORM_OPTIONS
+from ella.oldcomments.models import Comment
+from ella.oldcomments.forms import CommentForm
+from ella.oldcomments.defaults import FORM_OPTIONS
 
 log = logging.getLogger('ella.comments')
 
