@@ -2,26 +2,12 @@ from datetime import datetime
 from south.db import db
 from django.db import models
 from ella.core.models import *
+from django.core.management import call_command
 
 class Migration:
     
     def forwards(self, orm):
-        db.execute('''
-            UPDATE core_publishable INNER JOIN (
-                SELECT
-                    pub.id AS id, 
-                    MIN(plac.publish_from) AS pf
-                FROM
-                    core_publishable AS pub INNER JOIN core_placement plac
-                        ON plac.publishable_id = pub.id
-                GROUP BY
-                    pub.id
-            ) AS a
-                ON core_publishable.id = a.id
-            SET
-                core_publishable.publish_from = a.pf
-        ''')
-    
+        call_command('update_publishable_publish_from')
     
     def backwards(self, orm):
         pass
