@@ -189,7 +189,7 @@ class Placement(models.Model):
     def delete(self):
         super(Placement, self).delete()
         try:
-            publish_from = Placement.objects.filter(publishable=self.publishable).order_by('publish_from')[0].publish_from
+            publish_from = Placement.objects.filter(publishable=self.publishable_id).order_by('publish_from').values('publish_from')[0]['publish_from']
         except IndexError, e:
             publish_from = PUBLISH_FROM_WHEN_EMPTY
 
@@ -220,9 +220,12 @@ class Placement(models.Model):
         hc, created = HitCount.objects.get_or_create(placement=self, defaults={'hits': 0})
 
         # store the publish_from on the publishable for performance in the admin
-        if self.publishable.publish_from > self.publish_from:
-            # self.publishable.publish_from = self.publish_from
-            Publishable.objects.filter(pk=self.publishable_id).update(publish_from=self.publish_from)
+        try:
+            publish_from = Placement.objects.filter(publishable=self.publishable_id).order_by('publish_from').values('publish_from')[0]['publish_from']
+        except IndexError, e:
+            publish_from = PUBLISH_FROM_WHEN_EMPTY
+        Publishable.objects.filter(pk=self.publishable_id).update(publish_from=publish_from)
+        self.publishable.publish_from = publish_from
 
     def get_absolute_url(self, domain=False):
         obj = self.publishable

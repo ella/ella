@@ -24,6 +24,18 @@ class TestPublishFrom(PublishableTestCase):
         self.placement.delete()
         self.assert_equals(PUBLISH_FROM_WHEN_EMPTY, self.publishable.publish_from)
 
+    def test_publish_from_is_updated_when_placement_moved_to_earlier(self):
+        self.placement.publish_from = datetime(2000, 1, 1)
+        self.placement.save()
+        p = Publishable.objects.get(pk=self.publishable.pk)
+        self.assert_equals(self.placement.publish_from, p.publish_from)
+
+    def test_publish_from_is_updated_when_placement_postponed(self):
+        self.placement.publish_from = datetime(2100, 1, 1)
+        self.placement.save()
+        p = Publishable.objects.get(pk=self.publishable.pk)
+        self.assert_equals(self.placement.publish_from, p.publish_from)
+
     def test_with_more_placements_publish_from_is_the_earliest(self):
         p = Publishable.objects.get(pk=self.publishable.pk)
         Placement.objects.create(
