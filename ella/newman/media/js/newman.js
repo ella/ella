@@ -231,6 +231,28 @@ Drafts = new Object;
         save_preset($('.change-form'), {title:title, id:id});
         return false;
     });
+
+    function restore_initial_forms() {
+        this.value = 0;
+    }
+
+    function restore_add_form_values($form) {
+        var str_location = new String(window.location);
+        var form_is_addform = str_location.search('/add/') > -1;
+
+        // in case of add-form change back INITIAL_FORMS value to 0,
+        if (!form_is_addform) {
+            return;
+        }
+        $form.find('input[name$=INITIAL_FORMS]').each(restore_initial_forms);
+        // and remove IDs of inlined items
+        $id_elements = $form.find('.original input').filter(function () {
+            return this.name.match(/^(\w|_)+set-\d+-\w+$/);
+        });
+        $id_elements.each(function () {
+            this.value = '';
+        });
+    }
     
     function restore_form(response_text, $form, args) {
         var response_data;
@@ -276,7 +298,9 @@ Drafts = new Object;
         $form.find('.GenericSuggestField,.GenericSuggestFieldMultiple').find('input[rel]').each(function() {
             restore_suggest_widget_from_value(this);
         });
-        
+
+        restore_add_form_values($form);
+
         $form.trigger('preset_load_completed', [response_data, args]);
     }
     NewmanLib.restore_form = restore_form;
