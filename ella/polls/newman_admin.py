@@ -65,7 +65,7 @@ class ResultTabularAdmin(newman.NewmanTabularInline):
 class ChoiceTabularAdmin(newman.NewmanTabularInline):
     model = Choice
     extra = 1
-    rich_text_fields = {'small': ('choice',)}
+    #rich_text_fields = {'small': ('choice',)}
 
 class QuestionAdmin(newman.NewmanModelAdmin):
     """
@@ -102,6 +102,36 @@ class ContestantAdmin(newman.NewmanModelAdmin):
     ordering = ('datetime',)
     list_display = ('name', 'surname', 'user', 'datetime', 'contest', 'points', 'winner')
 
+
+def get_source_text(model_field, instance):
+    from djangomarkup.models import SourceText, TextProcessor
+    from django.contrib.contenttypes.models import ContentType
+    tp = TextProcessor.objects.get(name=getattr(settings, "DEFAULT_MARKUP", "markdown"))
+    ct = ContentType.objects.get_for_model(instance)
+    src = SourceText.objects.get(
+        content_type=ct,
+        processor=tp,
+        object_id=instance.pk,
+        field=model_field
+    )
+    return src.content
+
+def save_source_text(model_field, instance, text):
+    from djangomarkup.models import SourceText, TextProcessor
+    from django.contrib.contenttypes.models import ContentType
+    tp = TextProcessor.objects.get(name=getattr(settings, "DEFAULT_MARKUP", "markdown"))
+    ct = ContentType.objects.get_for_model(instance)
+    if instance.pk:
+        src, created = SourceText.objects.get_or_create(
+            content_type=ct,
+            processor=tp,
+            object_id=instance.pk,
+            field=model_field
+        )
+        src.content = text
+        src.save()
+        return tp.convert(text)
+
 class QuestionForm(modelforms.ModelForm):
     # create the field here to pass validation
     choices =  fields.ChoiceCustomField([], label=_('Choices'), required=False, initial=(Choice(id=0, choice=fields.ChoiceCustomField.default_text, points=0),))
@@ -127,6 +157,9 @@ class QuestionForm(modelforms.ModelForm):
             ex_initial = tuple(Choice.objects.filter(question=inst))
             if not ex_initial:
                 ex_initial = initial
+            #FIXME loading SourceText manualy
+            for choice in ex_initial:
+                choice.choice = get_source_text('choice', choice)
             self.fields['choices'] = fields.ChoiceCustomField(label=_('Choices'), initial=ex_initial, required=False)
         elif new_object:
             #self.initial['choices'] = initial
@@ -187,13 +220,17 @@ class QuestionForm(modelforms.ModelForm):
                         continue
                     new_ch = Choice(points=points, choice=text, votes=0, question=instance)
                     new_ch.save()
+                    # FIXME saving SourceText manualy
+                    new_ch.choice = save_source_text('choice', new_ch, text)
+                    new_ch.save()
                     continue
                 remove = self.data.get(self.get_part_id('%d-DELETE' % i), 'off')
                 ch = Choice.objects.get(pk=chid)
                 if remove == 'on':
                     ch.delete()
-                elif ch.choice != text or ch.points != points:
-                    ch.choice = text
+                elif get_source_text('choice', ch) != text or ch.points != points:
+                    # FIXME saving SourceText manualy
+                    ch.choice = save_source_text('choice', ch, text)
                     ch.points = points
                     ch.save()
 
