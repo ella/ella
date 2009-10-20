@@ -4,6 +4,8 @@ from django.contrib.admin import helpers
 from django.contrib.admin.util import unquote, get_deleted_objects
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
+from django.db.models.fields import FieldDoesNotExist
+from django.db.models.fields.related import ManyToManyField
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.utils.text import capfirst
@@ -355,9 +357,9 @@ class XModelAdmin(ModelAdmin):
             for k in initial:
                 try:
                     f = opts.get_field(k)
-                except models.FieldDoesNotExist:
+                except FieldDoesNotExist:
                     continue
-                if isinstance(f, models.ManyToManyField):
+                if isinstance(f, ManyToManyField):
                     initial[k] = initial[k].split(",")
             form = ModelForm(initial=initial)
             prefixes = {}
