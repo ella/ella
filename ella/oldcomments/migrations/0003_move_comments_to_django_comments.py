@@ -25,6 +25,7 @@ class Migration:
                 content,
                 id
             FROM comments_comment
+            ORDER BY id
         ''')
     
     
