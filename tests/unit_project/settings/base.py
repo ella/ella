@@ -51,6 +51,8 @@ INSTALLED_APPS = (
     'ella.exports',
     'djangomarkup',
     'tagging',
+    'threadedcomments',
+    'ella.ellacomments',
 
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -58,6 +60,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.redirects',
     'django.contrib.admin',
+    'django.contrib.comments',
 )
 
 DEFAULT_PAGE_ID = 1
