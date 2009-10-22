@@ -48,6 +48,7 @@ class NewmanSite(AdminSite):
             model = models.get_model(app_name, model_name)
             if model in self._registry.keys():
                 opts_class = self._registry[model].__class__
+                opts_class.inlines = list(opts_class.inlines)
                 opts_class.inlines.append(inline)
                 self.unregister(model)
                 self.register(model, opts_class)
