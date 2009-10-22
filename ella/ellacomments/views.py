@@ -1,3 +1,5 @@
+import operator
+
 from django.contrib import comments
 from django.contrib.comments import signals
 from django.contrib.comments.views.comments import CommentPostBadRequest
@@ -7,6 +9,7 @@ from django.template.defaultfilters import slugify
 from django.template import RequestContext
 from django.shortcuts import get_object_or_404, render_to_response
 from django.http import HttpResponseRedirect, Http404
+from django.db.models import Q
 
 from ella.core.views import get_templates_from_placement
 
@@ -93,8 +96,18 @@ def post_comment(request, context, parent):
 
 
 def list_comments(request, context):
-    'OBJECT_URL/comments/[?ids=1,2,3]'
+    qs = comments.get_model().objects.for_model(context['object']).order_by('tree_path')
+    if 'ids' in request.GET:
+        ids = request.GET.getlist('ids')
+        qs = qs.filter(reduce(operator.or_, map(lambda x: Q(tree_path__startswith=x.zfill(10)), ids)))
 
+    context['comment_list'] = qs
+
+    return render_to_response(
+        get_templates_from_placement('comment_list.html', context['placement']),
+        context,
+        RequestContext(request)
+    )
 
 def custom_urls(request, bits, context):
     if not bits:

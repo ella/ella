@@ -5,6 +5,8 @@ from django.contrib import comments
 from django.utils.translation import ugettext as _
 from django.template.defaultfilters import slugify
 
+from ella.ellacomments import views
+
 from unit_project import template_loader
 from unit_project.test_core import create_basic_categories, create_and_place_a_publishable
 from unit_project.test_ellacomments import create_comment
@@ -85,7 +87,51 @@ class TestCommentViews(DatabaseTestCase):
         self.assert_equals(404, response.status_code)
 
     def test_post_returns_bad_request_with_POST_and_no_data(self):
-        template_loader.templates['page/comment_form.html'] = '{{parent.pk}}'
+        template_loader.templates['page/comment_form.html'] = ''
         response = self.client.post(self.get_url('new'))
         self.assert_equals(400, response.status_code)
+
+    def test_get_list_renders_correct_comments(self):
+        template_loader.templates['page/comment_list.html'] = ''
+        c = create_comment(self.publishable, self.publishable.content_type)
+        c2 = create_comment(self.publishable, self.publishable.content_type)
+        response = self.client.get(self.get_url())
+        self.assert_equals(200, response.status_code)
+        self.assert_equals([c, c2], list(response.context['comment_list']))
+
+    def test_get_list_renders_correct_comments_including_tree_order(self):
+        template_loader.templates['page/comment_list.html'] = ''
+        a = create_comment(self.publishable, self.publishable.content_type)
+        d = create_comment(self.publishable, self.publishable.content_type)
+        ab = create_comment(self.publishable, self.publishable.content_type, parent_id=a.pk)
+        de = create_comment(self.publishable, self.publishable.content_type, parent_id=d.pk)
+        def_ = create_comment(self.publishable, self.publishable.content_type, parent_id=de.pk)
+        ac = create_comment(self.publishable, self.publishable.content_type, parent_id=a.pk)
+        response = self.client.get(self.get_url())
+        self.assert_equals(200, response.status_code)
+        self.assert_equals([a, ab, ac, d, de, def_], list(response.context['comment_list']))
+
+    def test_get_list_renders_only_given_branche_if_asked_to(self):
+        template_loader.templates['page/comment_list.html'] = ''
+        a = create_comment(self.publishable, self.publishable.content_type)
+        d = create_comment(self.publishable, self.publishable.content_type)
+        ab = create_comment(self.publishable, self.publishable.content_type, parent_id=a.pk)
+        de = create_comment(self.publishable, self.publishable.content_type, parent_id=d.pk)
+        def_ = create_comment(self.publishable, self.publishable.content_type, parent_id=de.pk)
+        ac = create_comment(self.publishable, self.publishable.content_type, parent_id=a.pk)
+        response = self.client.get(self.get_url()+ '?ids=%s' % a.pk)
+        self.assert_equals(200, response.status_code)
+        self.assert_equals([a, ab, ac], list(response.context['comment_list']))
+
+    def test_get_list_renders_only_given_branches_if_asked_to(self):
+        template_loader.templates['page/comment_list.html'] = ''
+        a = create_comment(self.publishable, self.publishable.content_type)
+        d = create_comment(self.publishable, self.publishable.content_type)
+        ab = create_comment(self.publishable, self.publishable.content_type, parent_id=a.pk)
+        de = create_comment(self.publishable, self.publishable.content_type, parent_id=d.pk)
+        def_ = create_comment(self.publishable, self.publishable.content_type, parent_id=de.pk)
+        ac = create_comment(self.publishable, self.publishable.content_type, parent_id=a.pk)
+        response = self.client.get(self.get_url()+ '?ids=%s&ids=%s' % (a.pk, d.pk))
+        self.assert_equals(200, response.status_code)
+        self.assert_equals([a, ab, ac, d, de, def_], list(response.context['comment_list']))
 
