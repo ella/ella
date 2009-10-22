@@ -281,7 +281,6 @@ Drafts = new Object;
             if (key in used_times) {
                 occ_no = used_times[key];
             }
-            console.log('occ_no=' + occ_no + ' , used_times[' + key + ']=' + used_times[key]);
             
             var $inputs = $form.find(':input[name='+key+']');
             if (!$inputs || $inputs.length == 0) {
