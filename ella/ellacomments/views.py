@@ -12,9 +12,10 @@ from ella.core.views import get_templates_from_placement
 
 def post_comment(request, context, parent):
     'Mostly copy-pasted from django.contrib.comments.views.comments'
+    parent_id = parent and parent.pk or None
 
     if request.method != 'POST':
-        form = comments.get_form()(context['object'], parent=parent)
+        form = comments.get_form()(context['object'], parent=parent_id)
         context.update({
                 'parent': parent,
                 'form': form,
@@ -35,7 +36,7 @@ def post_comment(request, context, parent):
             data["email"] = request.user.email
 
     # construct the form
-    form = comments.get_form()(context['object'], data=data, parent=parent)
+    form = comments.get_form()(context['object'], data=data, parent=parent_id)
 
     # Check security information
     if form.security_errors():
@@ -46,6 +47,9 @@ def post_comment(request, context, parent):
     # Do we want to preview the comment?
     preview = "preview" in data
 
+    # Check to see if the POST data overrides the view's next argument.
+    next = data.get("next", context['placement'].get_absolute_url())
+
     # If there are errors or if we requested a preview show the comment
     if form.errors or preview:
         context.update({
@@ -54,7 +58,7 @@ def post_comment(request, context, parent):
                 "next": next,
             })
         return render_to_response(
-            get_templates_from_placement(preview and 'comment_preview.html' or 'comment_form.html', context['placement']),
+            get_templates_from_placement(form.errors and 'comment_form.html' or 'comment_preview.html', context['placement']),
             context,
             RequestContext(request)
         )
@@ -85,10 +89,7 @@ def post_comment(request, context, parent):
         request = request
     )
 
-    # Check to see if the POST data overrides the view's next argument.
-    next = data.get("next")
-
-    return HttpResponseRedirect(next and next or context['placement'].get_absolute_url())
+    return HttpResponseRedirect(next)
 
 
 def list_comments(request, context):
@@ -111,3 +112,6 @@ def custom_urls(request, bits, context):
     raise Http404()
 
 
+from ella.core.custom_urls import dispatcher
+
+dispatcher.register(slugify(_('comments')), custom_urls)
