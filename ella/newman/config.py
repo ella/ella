@@ -11,6 +11,9 @@ USER_CONFIG = 'newman_user_config'            # session key for AdminSettings JS
 CATEGORY_FILTER = 'newman_category_filter'    # user defined category filtering on newman HP
 NEWMAN_MARKUP_DEFAULT = getattr(settings, 'NEWMAN_MARKUP_DEFAULT', 'markdown')
 
+# list of recipients for error reporting
+ERR_REPORT_RECIPIENTS = getattr(settings, 'NEWMAN_ERR_REPORT_RECIPIENTS', ['ella.errors@gmail.com'])
+
 # conversion functions mapping - from JSON to python (i.e. changing item datatypes etc.)
 JSON_CONVERSIONS = (
     (CATEGORY_FILTER, 'decode_category_filter_json'),

@@ -22,8 +22,7 @@ from ella.newman.decorators import require_AJAX
 from ella.newman.utils import set_user_config_db, set_user_config_session, get_user_config,\
     JsonResponse, JsonResponseError, json_decode, user_category_filter
 from ella.newman.permission import has_model_list_permission, applicable_categories, permission_filtered_model_qs
-from ella.newman.config import CATEGORY_FILTER, NEWMAN_URL_PREFIX, STATUS_SMTP_ERROR, STATUS_FORM_ERROR,\
-    NON_PUBLISHABLE_CTS
+from ella.newman import config
 from ella.newman.options import NewmanModelAdmin
 from ella.newman import actions
 
@@ -73,19 +72,19 @@ class NewmanSite(AdminSite):
 
         # Newman specific URLs
         urlpatterns = patterns('',
-            url(r'^%s/err-report/$' % NEWMAN_URL_PREFIX,
+            url(r'^%s/err-report/$' % config.NEWMAN_URL_PREFIX,
                 wrap(self.err_report),
                 name="err-report"),
-            url(r'^%s/save-filters/$' % NEWMAN_URL_PREFIX,
+            url(r'^%s/save-filters/$' % config.NEWMAN_URL_PREFIX,
                 wrap(self.cat_filters_save),
                 name="save-filters"),
-            url(r'^%s/$' % NEWMAN_URL_PREFIX,
+            url(r'^%s/$' % config.NEWMAN_URL_PREFIX,
                 wrap(self.newman_index),
                 name="newman-index"),
-            url(r'^%s/editor-box/$' % NEWMAN_URL_PREFIX,
+            url(r'^%s/editor-box/$' % config.NEWMAN_URL_PREFIX,
                 wrap(self.editor_box_view),
                 name="editor-box"),
-            url(r'^%s/render-chunk/$' % NEWMAN_URL_PREFIX,
+            url(r'^%s/render-chunk/$' % config.NEWMAN_URL_PREFIX,
                 wrap(self.render_chunk_template_view),
                 name="render-chunk"),
             url(r'^r/(?P<content_type_id>\d+)/(?P<object_id>.+)/$',
@@ -95,7 +94,7 @@ class NewmanSite(AdminSite):
 
         if 'djangomarkup' in settings.INSTALLED_APPS:
             urlpatterns += patterns('',
-                url(r'^%s/editor-preview/$' % NEWMAN_URL_PREFIX,
+                url(r'^%s/editor-preview/$' % config.NEWMAN_URL_PREFIX,
                     wrap(self.editor_preview),
 #                    'djangomarkup.views.transform',
                     name="djangomarkup-preview"),
@@ -237,7 +236,7 @@ class NewmanSite(AdminSite):
         """
         data = {'sites': []}
         try:
-            data['sites'] = get_user_config(request.user, CATEGORY_FILTER)
+            data['sites'] = get_user_config(request.user, config.CATEGORY_FILTER)
         except KeyError:
             data['sites'] = []
 
@@ -287,27 +286,27 @@ class NewmanSite(AdminSite):
         if form.is_valid():
             try:
                 e = EmailMessage('Newman report: %s' % form.cleaned_data['err_subject'], form.cleaned_data['err_message'],
-                                 from_email=request.user.email, to=settings.ERR_REPORT_RECIPIENTS)
+                                 from_email=request.user.email, to=config.ERR_REPORT_RECIPIENTS)
                 e.send()
                 return JsonResponse(ugettext('Your report was sent.'))
             except:
-                return JsonResponseError(ugettext('SMTP error.'), status=STATUS_SMTP_ERROR)
+                return JsonResponseError(ugettext('SMTP error.'), status=config.STATUS_SMTP_ERROR)
         else:
             error_dict = {}
             for e in form.errors:
                 error_dict[u"id_%s" % e] = [ u"%s" % ee for ee in form.errors[e] ]
-            return JsonResponse(ugettext('Subject or message is empty.'), errors=error_dict, status=STATUS_FORM_ERROR)
+            return JsonResponse(ugettext('Subject or message is empty.'), errors=error_dict, status=config.STATUS_FORM_ERROR)
 
     @require_AJAX
     def cat_filters_save(self, request, extra_content=None):
 
         site_filter_form = SiteFilterForm(user=request.user, data=request.POST)
         if site_filter_form.is_valid():
-            set_user_config_db(request.user, CATEGORY_FILTER, site_filter_form.cleaned_data['sites'])
-            set_user_config_session(request.session, CATEGORY_FILTER, site_filter_form.cleaned_data['sites'])
+            set_user_config_db(request.user, config.CATEGORY_FILTER, site_filter_form.cleaned_data['sites'])
+            set_user_config_session(request.session, config.CATEGORY_FILTER, site_filter_form.cleaned_data['sites'])
             return JsonResponse(ugettext('Your settings were saved.'))
         else:
-            return JsonResponseError(ugettext('Error in form.'), status=STATUS_FORM_ERROR)
+            return JsonResponseError(ugettext('Error in form.'), status=config.STATUS_FORM_ERROR)
 
     @property
     def applicable_content_types(self):
@@ -315,7 +314,7 @@ class NewmanSite(AdminSite):
         acts = []
         cts = get_cached_list(ContentType)
         for ct in cts:
-            if ct.model_class() and (issubclass(ct.model_class(), Publishable) or '%s.%s' % (ct.app_label, ct.model) in NON_PUBLISHABLE_CTS):
+            if ct.model_class() and (issubclass(ct.model_class(), Publishable) or '%s.%s' % (ct.app_label, ct.model) in config.NON_PUBLISHABLE_CTS):
                 acts.append(ct)
 
         return acts
