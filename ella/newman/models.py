@@ -115,11 +115,18 @@ class CategoryUserRole(models.Model):
     category = models.ManyToManyField(Category)
 
     def __unicode__(self):
-        return ugettext(u'User %(user)s is a "%(group)s" for %(category)s.') % {
-                'user' : self.user,
-                'group' : self.group,
-                'category' : [ x['slug'] for x in self.category.values() ],
-            }
+        try:
+            return ugettext(u'User %(user)s is a "%(group)s" for %(category)s.') % {
+                    'user' : self.user,
+                    'group' : self.group,
+                    'category' : [ x['slug'] for x in self.category.values() ],
+                }
+        except ValueError, ve:
+            return ugettext(u'User %(user)s is a "%(group)s" for %(category)s.') % {
+                    'user' : self.user,
+                    'group' : self.group,
+                    'category' : 'unknown'
+                }
 
     def save(self, *args, **kwargs):
         sync = kwargs.pop('sync_role', False)
