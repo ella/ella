@@ -12,5 +12,5 @@ def autodiscover():
 # add newman templatetags to builtin
 template.add_to_builtins('ella.newman.templatetags.newman')
 
-site.disable_action('delete_selected')
+#site.disable_action('delete_selected')
 

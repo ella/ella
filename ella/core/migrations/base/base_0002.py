@@ -128,8 +128,9 @@ class BasePublishableDataMigration(object):
         gens = []
         if 'tagging' in settings.INSTALLED_APPS:
             gens.append(('tagging_taggeditem', 'content_type_id', 'object_id', ('tag_id','content_type_id','object_id','priority')))
-        if 'ella.comments' in settings.INSTALLED_APPS:
+        if 'ella.oldcomments' in settings.INSTALLED_APPS:
             gens.append(('comments_comment', 'target_ct_id', 'target_id', None))
+        # FIXME: positions
         return [dict(zip(keys, v)) for v in gens]
 
     def backwards(self, orm):

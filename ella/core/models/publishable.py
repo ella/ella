@@ -67,8 +67,8 @@ class Publishable(models.Model):
             self._target = self.content_type.get_object_for_this_type(pk=self.pk)
         return self._target
 
-    if 'ella.comments' in settings.INSTALLED_APPS:
-        from ella.comments.models import Comment
+    if 'ella.oldcomments' in settings.INSTALLED_APPS:
+        from ella.oldcomments.models import Comment
         comments = generic.GenericRelation(Comment, object_id_field='target_id', content_type_field='target_ct')
 
     @property

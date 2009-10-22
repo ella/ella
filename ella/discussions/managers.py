@@ -1,6 +1,6 @@
 from django.db import models, connection
 from django.contrib.contenttypes.models import ContentType
-from ella.comments.models import Comment
+from ella.oldcomments.models import Comment
 
 
 class TopicThreadManager(models.Manager):

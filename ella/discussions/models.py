@@ -13,7 +13,7 @@ from django.utils.safestring import mark_safe
 from ella.core.models import Category
 from ella.core.cache.utils import CachedGenericForeignKey
 from ella.core.models import Publishable
-from ella.comments.models import Comment
+from ella.oldcomments.models import Comment
 from ella.photos.models import Photo
 from ella.discussions.managers import TopicThreadManager
 

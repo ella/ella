@@ -3,8 +3,8 @@ from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext as _
 from ella.discussions.models import Topic
 from ella.discussions.views import topic, topicthread, create_thread, post_reply
-from ella.comments.views import CommentFormPreview
-from ella.comments.forms import CommentForm
+from ella.oldcomments.views import CommentFormPreview
+from ella.oldcomments.forms import CommentForm
 
 def discussion_custom_urls(request, bits, context):
     if len(bits) == 3:

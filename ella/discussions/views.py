@@ -15,10 +15,10 @@ from django.conf import settings
 from ella.discussions.models import BannedString, Topic, TopicThread, \
     PostViewed, DuplicationError, get_comments_on_thread
 from ella.discussions.cache import get_key_comments_on_thread__by_submit_date, get_key_comments_on_thread__spec_filter, comments_on_thread__spec_filter, comments_on_thread__by_submit_date
-from ella.comments.models import Comment
-from ella.comments.forms import CommentForm
+from ella.oldcomments.models import Comment
+from ella.oldcomments.forms import CommentForm
 from ella.core.cache.utils import get_cached_object_or_404, delete_cached_object
-from ella.comments.defaults import FORM_OPTIONS
+from ella.oldcomments.defaults import FORM_OPTIONS
 from forms import *
 
 DISCUSSIONS_PAGINATE_BY = getattr(settings, 'DISCUSSIONS_PAGINATE_BY', 5)
@@ -363,7 +363,7 @@ def create_thread(request, bits, context):
 #        new_bits = bits[2:]
 #    else:
 #        new_bits = bits[1:]
-#    from ella.comments.urls import comments_custom_urls
+#    from ella.oldcomments.urls import comments_custom_urls
 #    return comments_custom_urls(request, new_bits, context)
 
 def topic(request, context):

@@ -10,7 +10,7 @@ from ella.core.cache.invalidate import CACHE_DELETER
 from ella.core.cache.utils import get_cached_object, CachedGenericForeignKey
 from ella.ellaadmin.utils import admin_url
 
-from ella.comments import defaults
+from ella.oldcomments import defaults
 
 
 class CommentOptions(models.Model):
@@ -23,6 +23,7 @@ class CommentOptions(models.Model):
     timestamp = models.DateTimeField(default=datetime.now)
 
     class Meta:
+        db_table = 'comments_commentoptions'
         verbose_name = _('Comment Options')
         verbose_name_plural = _('Comment Options')
 
@@ -159,6 +160,7 @@ class Comment(models.Model):
         return u"unsaved comment"
 
     class Meta:
+        db_table = 'comments_comment'
         ordering = ('-path',)
         verbose_name = _('Comment')
         verbose_name_plural = _('Comments')
@@ -177,10 +179,13 @@ class BannedUser(models.Model):
     target = CachedGenericForeignKey(ct_field="target_ct", fk_field="target_id")
 
     class Meta:
+        db_table = 'comments_banneduser'
         verbose_name = _('Banned User')
         verbose_name_plural = _('Banned Users')
 
 
 class BannedIP(models.Model):
     pass
+    class Meta:
+        db_table = 'comments_bannedip'
 

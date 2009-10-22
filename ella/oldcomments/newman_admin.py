@@ -1,7 +1,7 @@
 from django.utils.translation import ugettext_lazy as _
 from ella import newman
 
-from ella.comments.models import Comment, BannedUser, CommentOptions
+from ella.oldcomments.models import Comment, BannedUser, CommentOptions
 from django.conf.urls.defaults import patterns, url
 from ella.newman.utils import JsonResponse
 
