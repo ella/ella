@@ -6,6 +6,12 @@ Kobayashi.DEFAULT_TARGET = 'content';
 // Set the base URL for #content
 BASES.content = '/nm/';
 
+// Prevent JS fail when calling console.log() in nonFireBugged browser.
+if (typeof console != 'object') {
+    console = {};
+    console.log = function(){ return; };
+}
+
 // Containers for things we need to export
 AjaxFormLib = {};
 NewmanLib = {};
