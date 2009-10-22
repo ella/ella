@@ -2,21 +2,9 @@
 from djangosanetesting import DatabaseTestCase
 
 from django import template
-from django.contrib.sites.models import Site
-
-from threadedcomments.models import ThreadedComment
 
 from unit_project.test_core import create_basic_categories, create_and_place_a_publishable
-from unit_project import template_loader
-
-def create_comment(obj, ct):
-        c = ThreadedComment.objects.create(
-            comment='',
-            content_type=ct,
-            object_pk=obj.pk,
-            site=Site.objects.get_current(),
-        )
-        return c
+from unit_project.test_ellacomments import create_comment
 
 class TestTemplateTags(DatabaseTestCase):
     def setUp(self):
