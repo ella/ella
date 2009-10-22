@@ -63,6 +63,8 @@ INSTALLED_APPS = (
     'django.contrib.comments',
 )
 
+COMMENTS_APP = 'ella.ellacomments'
+
 DEFAULT_PAGE_ID = 1
 
 VERSION = 1
