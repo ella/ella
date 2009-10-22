@@ -40,15 +40,15 @@ class UserWithPermissionTestCase(NewmanTestCase):
     def create_roles(self):
         self.role_vca = CategoryUserRole(user=self.user)
         self.role_vca.group = self.group_vca
-        self.role_vca.save()
+        self.role_vca.save(sync_role=True)
         self.role_vca.category.add(self.nested_first_level_two)
-        self.role_vca.save()
+        self.role_vca.save(sync_role=True)
 
         self.role_all = CategoryUserRole(user=self.user)
         self.role_all.group = self.group_all
-        self.role_all.save()
+        self.role_all.save(sync_role=True)
         self.role_all.category.add(self.nested_second_level_two)
-        self.role_all.save()
+        self.role_all.save(sync_role=True)
 
     def _create_author_and_article(self):
         article = Article.objects.create(title=u'Testable rabbit', description=u'Perex', category=self.nested_first_level_two)
