@@ -11,6 +11,9 @@ USER_CONFIG = 'newman_user_config'            # session key for AdminSettings JS
 CATEGORY_FILTER = 'newman_category_filter'    # user defined category filtering on newman HP
 NEWMAN_MARKUP_DEFAULT = getattr(settings, 'NEWMAN_MARKUP_DEFAULT', 'markdown')
 
+# list of recipients for error reporting
+ERR_REPORT_RECIPIENTS = getattr(settings, 'NEWMAN_ERR_REPORT_RECIPIENTS', ['ella.errors@gmail.com'])
+
 # conversion functions mapping - from JSON to python (i.e. changing item datatypes etc.)
 JSON_CONVERSIONS = (
     (CATEGORY_FILTER, 'decode_category_filter_json'),
@@ -33,20 +36,20 @@ HTTP_ERROR = 405
 AUTOSAVE_MAX_AMOUNT = getattr(settings, 'NEWMAN_AUTOSAVE_MAX_AMOUNT', 3)
 
 # List of applicable ContentTypes
-
 NON_PUBLISHABLE_CTS = (
     'photos.photo',
+    'polls.poll',
     'polls.survey',
 )
 
 # Models that have TaggingInlineAdmin in inlines
-TAGGED_MODELS = getattr(settings, 'TAGGED_MODELS', (
+TAGGED_MODELS = getattr(settings, 'NEWMAN_TAGGED_MODELS', (
     'core.publishable',
     'articles.article',
     'galleries.gallery',
     'interviews.interview',
     'polls.quiz',
-    # 'photos.photo',
+    'polls.contest',
 ))
 
 NEWMAN_FAVORITE_ITEMS = getattr(settings, 'NEWMAN_FAVORITE_ITEMS', (

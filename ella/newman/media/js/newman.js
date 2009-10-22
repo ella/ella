@@ -6,6 +6,12 @@ Kobayashi.DEFAULT_TARGET = 'content';
 // Set the base URL for #content
 BASES.content = '/nm/';
 
+// Prevent JS fail when calling console.log() in nonFireBugged browser.
+if (typeof console != 'object') {
+    console = {};
+    console.log = function(){ return; };
+}
+
 // Containers for things we need to export
 AjaxFormLib = {};
 NewmanLib = {};
@@ -281,7 +287,6 @@ Drafts = new Object;
             if (key in used_times) {
                 occ_no = used_times[key];
             }
-            console.log('occ_no=' + occ_no + ' , used_times[' + key + ']=' + used_times[key]);
             
             var $inputs = $form.find(':input[name='+key+']');
             if (!$inputs || $inputs.length == 0) {
