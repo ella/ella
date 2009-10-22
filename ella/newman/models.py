@@ -122,7 +122,7 @@ class CategoryUserRole(models.Model):
             }
 
     def save(self, *args, **kwargs):
-        sync = kwargs.pop('sync_role', True)
+        sync = kwargs.pop('sync_role', False)
         super(CategoryUserRole, self).save(*args, **kwargs)
         if sync:
             self.sync_denormalized()
