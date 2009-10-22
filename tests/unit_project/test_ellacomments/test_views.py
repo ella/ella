@@ -1,31 +1,13 @@
 # -*- coding: utf-8 -*-
-import time
-
 from djangosanetesting import DatabaseTestCase
 
-from django.contrib.auth.models import AnonymousUser
 from django.contrib import comments
-from django.http import QueryDict
 from django.utils.translation import ugettext as _
 from django.template.defaultfilters import slugify
-
-
-from ella.ellacomments.views import post_comment
 
 from unit_project import template_loader
 from unit_project.test_core import create_basic_categories, create_and_place_a_publishable
 from unit_project.test_ellacomments import create_comment
-
-class FakeRequest(object):
-    def __init__(self, **kwargs):
-        self.user = AnonymousUser()
-        self.META = {}
-        self.method = 'GET'
-        self.GET = QueryDict('')
-        self.POST = QueryDict('')
-
-        for (k, v) in kwargs.items():
-            setattr(self, k, v)
 
 class TestCommentViews(DatabaseTestCase):
     def setUp(self):
