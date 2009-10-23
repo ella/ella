@@ -328,7 +328,7 @@ class SurveyAdmin(newman.NewmanModelAdmin):
     inlines = [SurveyChoiceInlineAdmin]
 
 
-#newman.site.register(Poll, PollAdmin)
+newman.site.register(Poll, PollAdmin)
 newman.site.register(Survey, SurveyAdmin)
 newman.site.register(Contest, ContestAdmin)
 newman.site.register(Quiz, QuizAdmin)
