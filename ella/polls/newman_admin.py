@@ -11,7 +11,7 @@ from ella.newman import fields
 
 from ella.core.newman_admin import PlacementInlineAdmin, PublishableAdmin
 from ella.core.cache import get_cached_object_or_404
-from ella.polls.models import Contest, Contestant, Quiz, Result, Choice, Vote, Question, Survey
+from ella.polls.models import Contest, Contestant, Quiz, Result, Choice, Vote, Question, Survey, Poll
 
 
 class ResultFormset(BaseInlineFormSet):
