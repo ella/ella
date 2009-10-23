@@ -96,9 +96,13 @@ def post_comment(request, context, parent):
 
 
 def list_comments(request, context):
+    # basic queryset
     qs = comments.get_model().objects.for_model(context['object']).order_by('tree_path')
+
+    # only individual branches requested
     if 'ids' in request.GET:
         ids = request.GET.getlist('ids')
+        # branch is everything whose tree_path begins with the same prefix
         qs = qs.filter(reduce(operator.or_, map(lambda x: Q(tree_path__startswith=x.zfill(10)), ids)))
 
     context['comment_list'] = qs
@@ -110,14 +114,20 @@ def list_comments(request, context):
     )
 
 def custom_urls(request, bits, context):
+    # /object/comments/
     if not bits:
         return list_comments(request, context)
+
+    # /object/comments/new/
     elif bits[0] == slugify(_('new')):
         parent = None
 
         if len(bits) > 2:
             raise Http404()
+
+        # /object/comments/new/ID/
         elif len(bits) == 2:
+            # reply
             parent = get_object_or_404(comments.get_model(), pk=bits[1])
 
         return post_comment(request, context, parent)
