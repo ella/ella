@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ella.newman (admin-ng)\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-09-17 16:13+0200\n"
-"PO-Revision-Date: 2009-09-17 16:15+0100\n"
+"POT-Creation-Date: 2009-10-29 10:27+0100\n"
+"PO-Revision-Date: 2009-10-29 10:27+0100\n"
 "Last-Translator: Vitek pliska <whit@jizak.cz>\n"
 "Language-Team: Ella <ella.project@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -26,7 +26,7 @@ msgid "Successfully deleted %(count)d %(items)s."
 msgstr ""
 
 #: actions.py:67
-#: xoptions.py:444
+#: xoptions.py:446
 msgid "Are you sure?"
 msgstr "Jsi si jist/á?"
 
@@ -147,6 +147,8 @@ msgstr "Formát"
 #: forms.py:68
 #: models.py:15
 #: models.py:63
+#: migrations/0001_initial.py:13
+#: migrations/0001_initial.py:39
 #: migrations/old/0001_init.py:16
 #: migrations/old/0001_init.py:39
 msgid "Title"
@@ -183,21 +185,25 @@ msgid "Object change is not permitted."
 msgstr "Změna objektu není povoleno."
 
 #: models.py:16
+#: migrations/0001_initial.py:14
 #: migrations/old/0001_init.py:23
 msgid "Slug"
 msgstr ""
 
 #: models.py:17
+#: migrations/0001_initial.py:15
 #: migrations/old/0001_init.py:19
 msgid "Summary"
 msgstr "Souhrn"
 
 #: models.py:18
+#: migrations/0001_initial.py:16
 #: migrations/old/0001_init.py:21
 msgid "Detail"
 msgstr "Detailní popis"
 
 #: models.py:19
+#: migrations/0001_initial.py:17
 #: migrations/old/0001_init.py:20
 msgid "Version"
 msgstr "Verze"
@@ -212,27 +218,33 @@ msgstr "Zprávy o vývoji"
 
 #: models.py:37
 #: models.py:58
+#: migrations/0001_initial.py:36
+#: migrations/0001_initial.py:59
 #: migrations/old/0001_init.py:44
 #: migrations/old/0001_init.py:67
 msgid "Model"
 msgstr "Model"
 
 #: models.py:38
+#: migrations/0001_initial.py:60
 #: migrations/old/0001_init.py:65
 msgid "Field"
 msgstr "Pole"
 
 #: models.py:39
+#: migrations/0001_initial.py:61
 #: migrations/old/0001_init.py:62
 msgid "Language"
 msgstr "Jazyk"
 
 #: models.py:40
+#: migrations/0001_initial.py:62
 #: migrations/old/0001_init.py:63
 msgid "Short help"
 msgstr "Stručná nápověda"
 
 #: models.py:41
+#: migrations/0001_initial.py:63
 #: migrations/old/0001_init.py:64
 msgid "Full message"
 msgstr "Celá zpráva"
@@ -251,12 +263,15 @@ msgstr "Položky nápovědy"
 
 #: models.py:59
 #: models.py:84
+#: migrations/0001_initial.py:26
+#: migrations/0001_initial.py:37
 #: migrations/old/0001_init.py:33
 #: migrations/old/0001_init.py:41
 msgid "User"
 msgstr "Uživatel"
 
 #: models.py:60
+#: migrations/0001_initial.py:38
 #: migrations/old/0001_init.py:42
 msgid "Data"
 msgstr "Data"
@@ -274,16 +289,19 @@ msgid "Draft items"
 msgstr ""
 
 #: models.py:85
+#: migrations/0001_initial.py:27
 #: migrations/old/0001_init.py:30
 msgid "Group"
 msgstr "Skupina"
 
 #: models.py:86
+#: migrations/0001_initial.py:28
 #: migrations/old/0001_init.py:29
 msgid "Variable"
 msgstr "Proměnná"
 
 #: models.py:87
+#: migrations/0001_initial.py:29
 #: migrations/old/0001_init.py:32
 msgid "Value"
 msgstr "Hodnota"
@@ -296,16 +314,17 @@ msgstr "Nastavení administrátora"
 msgid "Admin user settings"
 msgstr "Nastavení administrátorů"
 
-#: models.py:118
+#: models.py:119
+#: models.py:125
 #, python-format
 msgid "User %(user)s is a \"%(group)s\" for %(category)s."
 msgstr "Uživatel %(user)s ve skupině \"%(group)s\" pro %(category)s."
 
-#: models.py:155
+#: models.py:162
 msgid "User role in category"
 msgstr "Uživatelská role v kategorii"
 
-#: models.py:156
+#: models.py:163
 msgid "User roles in categories"
 msgstr "Uživatelské role v kategoriích"
 
@@ -343,7 +362,7 @@ msgid "Draft %s was deleted."
 msgstr "Předvolba %s byla smazána."
 
 #: options.py:334
-#: xoptions.py:207
+#: xoptions.py:209
 msgid "Database error"
 msgstr "Chyba databáze"
 
@@ -352,17 +371,17 @@ msgid "Please correct errors in form"
 msgstr "Prosím opravte chyby ve formuláři"
 
 #: options.py:724
-#: options.py:788
+#: options.py:792
 msgid "This view is designed for saving data only, thus POST method is required."
 msgstr ""
 
-#: options.py:741
+#: options.py:745
 #, python-format
 msgid "The %(name)s \"%(obj)s\" was changed successfully."
 msgstr ""
 
-#: options.py:752
-#: options.py:811
+#: options.py:756
+#: options.py:815
 msgid "This view is designed for viewing form, thus GET method is required."
 msgstr ""
 
@@ -413,30 +432,30 @@ msgstr "Vaše nastavení byla uložena."
 msgid "Error in form."
 msgstr "Chyba ve formuláři."
 
-#: xoptions.py:133
-#: xoptions.py:420
+#: xoptions.py:135
+#: xoptions.py:422
 #, python-format
 msgid "%(name)s object with primary key %(key)r does not exist."
 msgstr ""
 
-#: xoptions.py:153
+#: xoptions.py:155
 #, python-format
 msgid "Change %s"
 msgstr ""
 
-#: xoptions.py:243
+#: xoptions.py:245
 #, python-format
 msgid "%(count)s %(name)s was changed successfully."
 msgid_plural "%(count)s %(name)s were changed successfully."
 msgstr[0] ""
 msgstr[1] ""
 
-#: xoptions.py:383
+#: xoptions.py:385
 #, python-format
 msgid "Add %s"
 msgstr ""
 
-#: xoptions.py:436
+#: xoptions.py:438
 #, python-format
 msgid "The %(name)s \"%(obj)s\" was deleted successfully."
 msgstr ""
@@ -560,8 +579,8 @@ msgid "Enter the same password as above, for verification."
 msgstr ""
 
 #: templates/admin/auth/user/change_password.html:7
-#: templates/newman/change_form.html:35
-#: templates/newman/change_list.html:56
+#: templates/newman/change_form.html:41
+#: templates/newman/change_list.html:51
 #: templates/newman/auth/user/change_password.html:7
 msgid "Please correct the error below."
 msgid_plural "Please correct the errors below."
@@ -595,12 +614,13 @@ msgstr "Žádné záznamy."
 #: templates/newman/model_help.html:25
 #: templates/newman/object_history.html:15
 #: templates/newman/chunks/timepicker.html:1
+#: templates/newman/exports/timeline.html:26
 #: templates/newman/widget/editor_box.html:38
 msgid "Close"
 msgstr "Zavřít"
 
 #: templates/newman/app_index.html:26
-#: templates/newman/edit_inline/gallery_item.html:43
+#: templates/newman/edit_inline/gallery_item.html:39
 #: templates/newman/edit_inline/placement.html:43
 #: templates/newman/edit_inline/poll_question.html:49
 #: templates/newman/tpl_tags/newman_favorites.html:9
@@ -624,19 +644,24 @@ msgstr "Ella správa"
 msgid "Log out"
 msgstr ""
 
-#: templates/newman/change_form.html:15
+#: templates/newman/change_form.html:10
+#: templates/newman/change_form.html:12
+msgid "list"
+msgstr "seznam"
+
+#: templates/newman/change_form.html:20
 msgid "Save as template"
 msgstr "Ulož jako šablonu"
 
-#: templates/newman/change_form.html:19
+#: templates/newman/change_form.html:24
 msgid "Help"
 msgstr "Nápověda"
 
-#: templates/newman/change_form.html:21
+#: templates/newman/change_form.html:26
 msgid "History"
 msgstr ""
 
-#: templates/newman/change_form.html:23
+#: templates/newman/change_form.html:28
 #: templates/newman/newman-index.html:99
 #: templates/newman/edit_inline/gallery_item.html:20
 #: templates/newman/edit_inline/poll_question.html:122
@@ -645,13 +670,8 @@ msgstr ""
 msgid "View on site"
 msgstr "Zobrazit na webu"
 
-#: templates/newman/change_list.html:13
-#: templates/newman/change_list.html:32
-msgid "Categories filtered by user. Click to change."
-msgstr "Kategorie filtrovány. Klikněte pro změnu."
-
-#: templates/newman/change_list.html:26
-#: templates/newman/change_list.html:28
+#: templates/newman/change_list.html:21
+#: templates/newman/change_list.html:23
 #: templates/newman/astrology/prognosis/change_list.html:8
 #: templates/newman/astrology/prognosis/change_list.html:10
 #: templates/newman/newman/categoryuserrole/change_list.html:8
@@ -659,20 +679,24 @@ msgstr "Kategorie filtrovány. Klikněte pro změnu."
 msgid "Filters"
 msgstr "Filtry"
 
-#: templates/newman/change_list.html:26
+#: templates/newman/change_list.html:21
 #: templates/newman/astrology/prognosis/change_list.html:8
 #: templates/newman/newman/categoryuserrole/change_list.html:8
 msgid "on!"
 msgstr "zap."
 
-#: templates/newman/change_list.html:41
+#: templates/newman/change_list.html:27
+msgid "Categories filtered by user. Click to change."
+msgstr "Kategorie filtrovány. Klikněte pro změnu."
+
+#: templates/newman/change_list.html:36
 #: templates/newman/astrology/prognosis/change_list.html:25
 #: templates/newman/newman/categoryuserrole/change_list.html:24
 #, python-format
 msgid "Add %(name)s"
 msgstr ""
 
-#: templates/newman/change_list.html:44
+#: templates/newman/change_list.html:39
 msgid "Last edited"
 msgstr "Poslední editace"
 
@@ -828,7 +852,7 @@ msgstr "Výčty"
 
 #: templates/newman/edit_inline/placement.html:37
 #: templates/newman/edit_inline/poll_question.html:42
-#: templates/newman/exports/timeline.html:43
+#: templates/newman/exports/timeline.html:54
 #: templates/newman/tpl_tags/submit_line.html:2
 #: templates/newman/widget/poll_choices_custom.html:6
 msgid "Delete"
@@ -879,15 +903,15 @@ msgstr "Publikovatelný objekt"
 msgid "Continue"
 msgstr "Pokračovat"
 
-#: templates/newman/exports/timeline.html:42
+#: templates/newman/exports/timeline.html:50
 msgid "Edit"
 msgstr ""
 
-#: templates/newman/exports/timeline.html:44
+#: templates/newman/exports/timeline.html:58
 msgid "Append"
 msgstr "Přidat"
 
-#: templates/newman/exports/timeline.html:45
+#: templates/newman/exports/timeline.html:62
 msgid "Insert"
 msgstr "Vložit"
 

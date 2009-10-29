@@ -4,8 +4,13 @@
 {% block breadcrumbs %}
 <div class="breadcrumbs">
     <a href="{% url newman:index %}#">{% trans "Home" %}</a>
-    &rsaquo; <a class="js-hashadr" href="../../">{% trans app_label.title %}</a>
-    &rsaquo; {% if has_change_permission %}<a class="js-hashadr" href="../">{{ opts.verbose_name_plural|capfirst }}</a>{% else %}{{ opts.verbose_name_plural|capfirst }}{% endif %}
+    {# &rsaquo; <a class="js-hashadr" href="../../">{% trans app_label.title %}</a> #}
+    &rsaquo;
+    {% if has_change_permission %}
+        <a class="js-hashadr" href="../">{{ opts.verbose_name_plural|capfirst }}: {% trans 'list' %}</a>
+    {% else %}
+        {{ opts.verbose_name_plural|capfirst }}: {% trans 'list' %}
+    {% endif %}
     {% if title %}&rsaquo; <strong id="doc-title">{{ title }}</strong>{% endif %}
 </div>
 {% endblock %}
