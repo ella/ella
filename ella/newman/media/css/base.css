@@ -231,6 +231,7 @@ input.vDateInput { width: 100px; }
 input.vDateTimeInput { width: 130px; }
 
 .form-row * { vertical-align: middle; margin: 2px 0; }
+.form-row-tooltip { font-size: 95%; background: transparent url(../ico/16/idea.png) 0 50% no-repeat; clear: both; padding-left: 18px; color: #666; }
 
 .form-error-msg { display: block; color: #d66; font-weight: bold; padding: 2px 0 2px 18px; background: url(../ico/16/messagebox_warning.png) 0 50% no-repeat; }
 .non-field-errors {

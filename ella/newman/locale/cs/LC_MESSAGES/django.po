@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ella.newman (admin-ng)\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-10-29 10:27+0100\n"
-"PO-Revision-Date: 2009-10-29 10:27+0100\n"
+"POT-Creation-Date: 2009-10-29 12:24+0100\n"
+"PO-Revision-Date: 2009-10-29 12:27+0100\n"
 "Last-Translator: Vitek pliska <whit@jizak.cz>\n"
 "Language-Team: Ella <ella.project@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -431,6 +431,10 @@ msgstr "Vaše nastavení byla uložena."
 #: sites.py:309
 msgid "Error in form."
 msgstr "Chyba ve formuláři."
+
+#: widgets.py:206
+msgid "Type the first few letters for suggestions, then use the UP and DOWN arrows to select and hit ENTER to add or replace item."
+msgstr "Napište několik prvních písmen do našeptávače, použijte šipky NAHORU a DOLŮ pro výběr a stiskněte ENTER pro vložení či náhradu položky."
 
 #: xoptions.py:135
 #: xoptions.py:422

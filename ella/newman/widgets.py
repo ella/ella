@@ -7,7 +7,7 @@ from django.db.models.fields.related import ForeignKey
 from django.contrib.admin import widgets
 from django.template import Context
 from django.template.loader import get_template
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _, ugettext
 from django.utils.encoding import force_unicode
 from django.utils.html import escape
 from django.utils.text import truncate_words
@@ -203,6 +203,7 @@ class AdminSuggestWidget(forms.TextInput):
         output.append('<a href="%s%s?pop" class="suggest-related-lookup" id="lookup_id_%s"> ' % \
             (related_url, url, name))
         output.append('<img src="%sico/16/search.png" width="16" height="16" /></a>' % settings.NEWMAN_MEDIA_PREFIX)
+        output.append('<div class="form-row-tooltip">%s</div>' % ugettext('Type the first few letters for suggestions, then use the UP and DOWN arrows to select and hit ENTER to add or replace item.'))
         return mark_safe(u''.join(output))
 
 class DateWidget(forms.DateInput):
