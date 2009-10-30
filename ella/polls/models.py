@@ -294,7 +294,7 @@ class Choice(models.Model):
         return p
 
     def __unicode__(self):
-        return self.choice
+        return mark_safe(u'%s' % self.choice)
 
     class Meta:
         verbose_name = _('Choice')
