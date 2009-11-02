@@ -5,7 +5,7 @@ from south.db import db
 from django.db import models, transaction
 from ella.oldcomments.models import *
 
-from threadedcomments.models import ThreadedComment, PATH_DIGITS, PATH_SEPARATOR, MAX_PATH_LENGTH
+from threadedcomments.models import ThreadedComment, PATH_DIGITS, PATH_SEPARATOR
 
 class Migration:
     
@@ -23,11 +23,6 @@ class Migration:
             if tc.parent_id:
                 parent_path = map[tc.parent_id]
                 tree_path = PATH_SEPARATOR.join((parent_path, path_leaf))
-
-                # XXX if tree_path is longer than fits into the DB field, make it reply
-                # to it's grandparent. A hack for improbable situation
-                while len(tree_path) > MAX_PATH_LENGTH:
-                    tree_path = tree_path.rsplit(PATH_SEPARATOR, 1)[0]
 
                 lc[tc.parent_id] = tc.pk
             else:
