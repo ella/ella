@@ -285,7 +285,8 @@ class RenderNode(template.Node):
         except template.VariableDoesNotExist:
             return ''
 
-        return template.Template(text).render(context)
+        template_name = 'render-%s' % self.var
+        return template.Template(text, name=template_name).render(context)
 
 @register.tag('render')
 def do_render(parser, token):
