@@ -10,6 +10,8 @@ from django.template import RequestContext
 from django.shortcuts import get_object_or_404, render_to_response
 from django.http import HttpResponseRedirect, Http404
 from django.db.models import Q
+from django.core.paginator import Paginator
+from django.conf import settings
 
 from ella.core.views import get_templates_from_placement
 
@@ -105,7 +107,25 @@ def list_comments(request, context):
         # branch is everything whose tree_path begins with the same prefix
         qs = qs.filter(reduce(operator.or_, map(lambda x: Q(tree_path__startswith=x.zfill(10)), ids)))
 
-    context['comment_list'] = qs
+    # pagination
+    if 'p' in request.GET and request.GET['p'].isdigit():
+        page_no = int(request.GET['p'])
+    else:
+        page_no = 1
+
+    paginate_by = getattr(settings, 'COMMENTS_PAGINATE_BY', 50)
+    paginator = Paginator(qs, paginate_by)
+
+    if page_no > paginator.num_pages or page_no < 1:
+        raise Http404()
+
+    page = paginator.page(page_no)
+    context.update({
+        'comment_list': page.object_list,
+        'page': page,
+        'is_paginated': paginator.num_pages > 1,
+        'results_per_page': paginate_by,
+    })
 
     return render_to_response(
         get_templates_from_placement('comment_list.html', context['placement']),

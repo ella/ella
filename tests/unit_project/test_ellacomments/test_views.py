@@ -4,6 +4,7 @@ from djangosanetesting import DatabaseTestCase
 from django.contrib import comments
 from django.utils.translation import ugettext as _
 from django.template.defaultfilters import slugify
+from django.conf import settings
 
 from ella.ellacomments import views
 
@@ -11,18 +12,11 @@ from unit_project import template_loader
 from unit_project.test_core import create_basic_categories, create_and_place_a_publishable
 from unit_project.test_ellacomments import create_comment
 
-class TestCommentViews(DatabaseTestCase):
+class CommentViewTestCase(DatabaseTestCase):
     def setUp(self):
-        super(TestCommentViews, self).setUp()
+        super(CommentViewTestCase, self).setUp()
         create_basic_categories(self)
         create_and_place_a_publishable(self)
-        self.context = {
-                'placement' : self.placement,
-                'object' : self.publishable,
-                'category' : self.placement.category,
-                'content_type_name' : unicode(self.publishable._meta.verbose_name_plural),
-                'content_type' : self.publishable.content_type 
-            }
 
     def get_url(self, *bits):
         url = [self.placement.get_absolute_url(), slugify(_('comments')), '/']
@@ -45,8 +39,49 @@ class TestCommentViews(DatabaseTestCase):
         return out
 
     def tearDown(self):
-        super(TestCommentViews, self).tearDown()
+        super(CommentViewTestCase, self).tearDown()
         template_loader.templates = {}
+
+class TestCommentViewPagination(CommentViewTestCase):
+    def setUp(self):
+        super(TestCommentViewPagination, self).setUp()
+        settings.COMMENTS_PAGINATE_BY = 3
+
+    def tearDown(self):
+        super(TestCommentViewPagination, self).tearDown()
+        del settings._wrapped.COMMENTS_PAGINATE_BY
+
+    def test_get_list_raises_404_on_incorrect_page_param(self):
+        template_loader.templates['404.html'] = ''
+        response = self.client.get(self.get_url(), {'p': 2})
+        self.assert_equals(404, response.status_code)
+
+    def test_get_list_returns_second_page_if_asked_to(self):
+        template_loader.templates['page/comment_list.html'] = ''
+        a = create_comment(self.publishable, self.publishable.content_type)
+        d = create_comment(self.publishable, self.publishable.content_type)
+        ab = create_comment(self.publishable, self.publishable.content_type, parent_id=a.pk)
+        de = create_comment(self.publishable, self.publishable.content_type, parent_id=d.pk)
+        def_ = create_comment(self.publishable, self.publishable.content_type, parent_id=de.pk)
+        ac = create_comment(self.publishable, self.publishable.content_type, parent_id=a.pk)
+        response = self.client.get(self.get_url(), {'p': 2})
+        self.assert_equals(200, response.status_code)
+        self.assert_equals([d, de, def_], list(response.context['comment_list']))
+
+    def test_get_list_returns_first_page_with_no_params(self):
+        template_loader.templates['page/comment_list.html'] = ''
+        a = create_comment(self.publishable, self.publishable.content_type)
+        d = create_comment(self.publishable, self.publishable.content_type)
+        ab = create_comment(self.publishable, self.publishable.content_type, parent_id=a.pk)
+        de = create_comment(self.publishable, self.publishable.content_type, parent_id=d.pk)
+        def_ = create_comment(self.publishable, self.publishable.content_type, parent_id=de.pk)
+        ac = create_comment(self.publishable, self.publishable.content_type, parent_id=a.pk)
+        response = self.client.get(self.get_url())
+        self.assert_equals(200, response.status_code)
+        self.assert_equals([a, ab, ac], list(response.context['comment_list']))
+
+
+class TestCommentViews(CommentViewTestCase):
 
     def test_post_works_for_correct_data(self):
         form = comments.get_form()(target_object=self.publishable)
@@ -111,7 +146,7 @@ class TestCommentViews(DatabaseTestCase):
         self.assert_equals(200, response.status_code)
         self.assert_equals([a, ab, ac, d, de, def_], list(response.context['comment_list']))
 
-    def test_get_list_renders_only_given_branche_if_asked_to(self):
+    def test_get_list_renders_only_given_branch_if_asked_to(self):
         template_loader.templates['page/comment_list.html'] = ''
         a = create_comment(self.publishable, self.publishable.content_type)
         d = create_comment(self.publishable, self.publishable.content_type)
@@ -119,7 +154,7 @@ class TestCommentViews(DatabaseTestCase):
         de = create_comment(self.publishable, self.publishable.content_type, parent_id=d.pk)
         def_ = create_comment(self.publishable, self.publishable.content_type, parent_id=de.pk)
         ac = create_comment(self.publishable, self.publishable.content_type, parent_id=a.pk)
-        response = self.client.get(self.get_url()+ '?ids=%s' % a.pk)
+        response = self.client.get(self.get_url(), {'ids': a.pk})
         self.assert_equals(200, response.status_code)
         self.assert_equals([a, ab, ac], list(response.context['comment_list']))
 
