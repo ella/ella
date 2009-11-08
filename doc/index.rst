@@ -87,5 +87,7 @@ community and hope that somebody will find this project helpfull.
 .. toctree::
    :maxdepth: 2
 
+   setup
+   core/views
    positions
 
