@@ -54,5 +54,5 @@ class TestCatlock(DatabaseTestCase):
         resp = self.client.post(self.category_nested.get_absolute_url(), data)
         self.assert_equals(302, resp.status_code)
         self.assert_true(CATEGORY_LOCK_ERR_CAT in self.client.session)
-        self.assert_equals(self.category_nested, self.client.session[CATEGORY_LOCK_ERR_CAT])
+        self.assert_equals(self.category_nested.pk, self.client.session[CATEGORY_LOCK_ERR_CAT].pk)
 
