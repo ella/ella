@@ -102,12 +102,12 @@ class Position(models.Model):
     def render(self, context, nodelist, box_type):
         " Render the position. "
         if not self.target:
-            return Template(self.text).render(context)
+            return Template(self.text, name="position-%s" % self.name).render(context)
 
         if self.box_type:
             box_type = self.box_type
         if self.text:
-            nodelist = Template('%s\n%s' % (nodelist.render({}), self.text)).nodelist
+            nodelist = Template('%s\n%s' % (nodelist.render({}), self.text), name="position-%s" % self.name).nodelist
 
         b = self.box_class(self, box_type, nodelist)
         b.prepare(context)
