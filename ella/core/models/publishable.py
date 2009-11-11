@@ -281,7 +281,7 @@ class Listing(models.Model):
     placement = models.ForeignKey(Placement, verbose_name=_('Placement'))
     category = models.ForeignKey(Category, verbose_name=_('Category'), db_index=True)
 
-    publish_from = models.DateTimeField(_("Start of listing"))
+    publish_from = models.DateTimeField(_("Start of listing"), db_index=True)
     publish_to = models.DateTimeField(_("End of listing"), null=True, blank=True)
 
     priority_from = models.DateTimeField(_("Start of prioritized listing"), null=True, blank=True)
