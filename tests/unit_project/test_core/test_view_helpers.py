@@ -7,7 +7,7 @@ from django.db.models import get_models
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import slugify
 
-from ella.core.views import CategoryDetail, ObjectDetail, get_content_type, ListContentType
+from ella.core.views import ObjectDetail, get_content_type, ListContentType
 from ella.core.models import Listing, Publishable
 
 from unit_project.test_core import create_basic_categories, create_and_place_a_publishable, \
@@ -40,7 +40,7 @@ class TestGetContentType(UnitTestCase):
 class TestCategoryDetail(ViewHelpersTestCase):
     def setUp(self):
         super(TestCategoryDetail, self).setUp()
-        self.category_detail = CategoryDetail()
+        self.category_detail = ListContentType()
 
     def test_returns_category_by_tree_path(self):
         c = self.category_detail.get_context(self.request, 'nested-category')
