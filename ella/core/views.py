@@ -97,7 +97,7 @@ class CategoryDetail(EllaCoreView):
         context = {
                     'category' : cat,
                     'is_homepage': not bool(category),
-                    'archive_entry_year' : self._archive_entry_year(cat),
+                    'archive_entry_year' : lambda: self._archive_entry_year(cat),
                 }
 
         return context
