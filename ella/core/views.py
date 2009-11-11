@@ -59,6 +59,10 @@ class EllaCoreView(object):
         context = self.get_context(request, **kwargs)
         return self.render(request, context, self.get_templates(context))
 
+
+def archive_year_cache_key(func, self, category):
+    return 'archive_year:%d' % category.pk
+
 class CategoryDetail(EllaCoreView):
     """
     Homepage of a category. Renders a templates using context containing:
@@ -76,6 +80,7 @@ class CategoryDetail(EllaCoreView):
     """
     template_name = 'category.html'
 
+    @cache_this(archive_year_cache_key, timeout=60*60*24)
     def _archive_entry_year(self, category):
         " Return ARCHIVE_ENTRY_YEAR from settings (if exists) or year of the newest object in category "
         year = getattr(settings, 'ARCHIVE_ENTRY_YEAR', None)
