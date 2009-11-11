@@ -50,7 +50,7 @@ class DbTemplateManager(models.Manager):
         site = settings.SITE_ID
         description = 'some db template'
 
-        compiled_template = Template(template_string)
+        compiled_template = Template(template_string, name=name)
 
         if not len(compiled_template.nodelist):
             raise InvalidTemplate, 'template without nodes'
@@ -123,7 +123,7 @@ class TemplateBlockManager(models.Manager):
     def create_from_string(self, parent_template, template_string, name):
         template_block = TemplateBlock(template=parent_template, name=name, text=template_string)
 
-        node = Template(template_string.strip())
+        node = Template(template_string.strip(), name=name, origin=parent_template.name)
         if len(node.nodelist) and isinstance(node.nodelist[0], BoxNode):
             box = node.nodelist[0]
             if box.lookup[0] in ('id', 'pk'):
