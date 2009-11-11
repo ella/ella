@@ -4,31 +4,19 @@
 Ella views
 ==========
 
-
-CategoryDetail
-==============
-
-Renders category, also used for site's root (top level category).
-
-**Template names:**
-
-    * ``page/category/<path>/category.html``
-    * ``page/category.html``
-
-where:
-
-    * ``<path>`` is the value of category's ``path`` property.
-
-**Template context:**
-
-    * ``category``
-
 ListContentType
 ===============
 
 Renders archive
 
-**Template names:**
+**Template names**
+
+If no filtering is applied (including pagination), the category's title page is rendered:
+
+    * ``page/category/<path>/category.html``
+    * ``page/category.html``
+
+Otherwise an archive template gets rendered:
     
     * ``page/category/<path>/content_type/<app>.<model>/listing.html``
     * ``page/category/<path>/listing.html``

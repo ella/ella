@@ -37,8 +37,10 @@ class EllaCoreView(object):
         """
         raise NotImplementedError()
 
-    def get_templates(self, context):
+    def get_templates(self, context, template_name=None):
         " Extract parameters for `get_templates` from the context. "
+        if not template_name:
+            template_name = self.template_name
         kw = {}
         if 'object' in context:
             o = context['object']
@@ -49,7 +51,7 @@ class EllaCoreView(object):
             kw['app_label'] = ct.app_label
             kw['model_label'] = ct.model
 
-        return get_templates(self.template_name, category=context['category'], **kw)
+        return get_templates(template_name, category=context['category'], **kw)
 
     def render(self, request, context, template):
         return render_to_response(template, context,
@@ -58,54 +60,6 @@ class EllaCoreView(object):
     def __call__(self, request, **kwargs):
         context = self.get_context(request, **kwargs)
         return self.render(request, context, self.get_templates(context))
-
-
-def archive_year_cache_key(func, self, category):
-    return 'archive_year:%d' % category.pk
-
-class CategoryDetail(EllaCoreView):
-    """
-    Homepage of a category. Renders a templates using context containing:
-        - `category`: the root `Category` of the site
-        - `is_homepage`: boolean whether the category is the root category
-        - `archive_entry_year`: year of last `Listing`
-
-    :Parameters: 
-        - `request`: `HttpRequest` from Django
-        - `category`: optional - `tree_path` of the `Category` to render
-          home page is used if this parameter is omitted
-
-    :Exceptions: 
-        - `Http404`: if there is no matching category
-    """
-    template_name = 'category.html'
-
-    @cache_this(archive_year_cache_key, timeout=60*60*24)
-    def _archive_entry_year(self, category):
-        " Return ARCHIVE_ENTRY_YEAR from settings (if exists) or year of the newest object in category "
-        year = getattr(settings, 'ARCHIVE_ENTRY_YEAR', None)
-        if not year:
-            now = datetime.now()
-            try:
-                year = Listing.objects.filter(
-                        category__site__id=settings.SITE_ID,
-                        category__tree_path__startswith=category.tree_path,
-                        publish_from__lte=now
-                    ).values('publish_from')[0]['publish_from'].year
-            except:
-                year = now.year
-        return year
-
-
-    def get_context(self, request, category=''):
-        cat = get_cached_object_or_404(Category, tree_path=category, site__id=settings.SITE_ID)
-        context = {
-                    'category' : cat,
-                    'is_homepage': not bool(category),
-                    'archive_entry_year' : lambda: self._archive_entry_year(cat),
-                }
-
-        return context
 
 class ObjectDetail(EllaCoreView):
     """
@@ -183,9 +137,14 @@ class ObjectDetail(EllaCoreView):
 
         return context
 
+def archive_year_cache_key(func, self, category):
+    return 'archive_year:%d' % category.pk
+
 class ListContentType(EllaCoreView):
     """
-    List objects' listings according to the parameters.
+    List objects' listings according to the parameters. If no filtering is
+    applied, different template ('category.html') is filtered. This is used for
+    rendering the category's title page.
 
     :Parameters:
         - `category`: base Category tree_path, optional - defaults to all categories
@@ -199,16 +158,46 @@ class ListContentType(EllaCoreView):
         - `Http404`: if the specified category or content_type does not exist or if the given date is malformed.
     """
     template_name = 'listing.html'
+    title_template_name = 'category.html'
+
+    def __call__(self, request, **kwargs):
+        context = self.get_context(request, **kwargs)
+        template_name = self.template_name
+        if context.get('is_title_page'):
+            template_name = self.title_template_name
+        return self.render(request, context, self.get_templates(context, template_name))
+
+    @cache_this(archive_year_cache_key, timeout=60*60*24)
+    def _archive_entry_year(self, category):
+        " Return ARCHIVE_ENTRY_YEAR from settings (if exists) or year of the newest object in category "
+        year = getattr(settings, 'ARCHIVE_ENTRY_YEAR', None)
+        if not year:
+            now = datetime.now()
+            try:
+                year = Listing.objects.filter(
+                        category__site__id=settings.SITE_ID,
+                        category__tree_path__startswith=category.tree_path,
+                        publish_from__lte=now
+                    ).values('publish_from')[0]['publish_from'].year
+            except:
+                year = now.year
+        return year
+
     def get_context(self, request, category='', year=None, month=None, day=None, content_type=None, paginate_by=20):
         # pagination
         if 'p' in request.GET and request.GET['p'].isdigit():
             page_no = int(request.GET['p'])
         else:
             page_no = 1
+        
+        # if we are not on the first page, display a different template
+        category_title_page = page_no == 1
 
         kwa = {}
-        year = int(year)
-        kwa['publish_from__year'] = year
+        if year:
+            category_title_page = False
+            year = int(year)
+            kwa['publish_from__year'] = year
 
         if month:
             try:
@@ -255,14 +244,16 @@ class ListContentType(EllaCoreView):
                 'content_type_name' : content_type,
                 'listings' : listings,
                 'category' : cat,
+                'is_homepage': not bool(category),
+                'is_title_page': category_title_page,
+                'archive_entry_year' : lambda: self._archive_entry_year(cat),
             }
 
         return context
 
 # backwards compatibility
 object_detail = ObjectDetail()
-home = category_detail = CategoryDetail()
-list_content_type = ListContentType()
+home = category_detail = list_content_type = ListContentType()
 
 def get_content_type(ct_name):
     """
