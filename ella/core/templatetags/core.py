@@ -51,7 +51,7 @@ def listing(parser, token):
 
     Usage::
 
-        {% listing <limit>[ from <offset>][of <app.model>[, <app.model>[, ...]]][ for <category> ] [with children|descendents] as <result> %}
+        {% listing <limit>[ from <offset>][of <app.model>[, <app.model>[, ...]]][ for <category> ] [with children|descendents] as <result> [unique [unique_set_name]] %}
 
     Parameters:
 
@@ -59,18 +59,18 @@ def listing(parser, token):
         Option                              Description
         ==================================  ================================================
         ``limit``                           Number of objects to retrieve.
-        ``from offset``                     Starting with number (1-based), starts from first
+        ``offset``                          Starting with number (1-based), starts from first
                                             if no offset specified.
-        ``of app.model, ...``               List of allowed models, all if omitted.
-        ``for category``                    Category of the listing, all categories if not
+        ``app.model``, ...                  List of allowed models, all if omitted.
+        ``category``                        Category of the listing, all categories if not
                                             specified. Can be either string (tree path),
                                             or variable containing a Category object.
-        ``with children``                   Include items from direct subcategories.
-        ``with descendents``                Include items from all descend subcategories.
-        ``as result``                       Store the resulting list in context under given
+        ``children``                        Include items from direct subcategories.
+        ``descendents``                     Include items from all descend subcategories.
+        ``result``                          Store the resulting list in context under given
                                             name.
-        ``unique [unique_set_name]``        Unique items across multiple listings.
-                                            Name of context variable used to hold the data is optional.
+        ``unique``                          Unique items across multiple listings.
+        ``unique_set_name``                 Name of context variable used to hold the data is optional.
         ==================================  ================================================
 
     Examples::
@@ -241,8 +241,20 @@ def do_box(parser, token):
 
     Usage::
 
-        {% box BOXTYPE for APP_LABEL.MODEL_NAME with FIELD VALUE %}
-        {% box BOXTYPE for var_name %}
+        {% box <boxtype> for <app.model> with <field> <value> %}
+        {% box <boxtype> for <var_name> %}
+
+    Parameters:
+
+        ==================================  ================================================
+        Option                              Description
+        ==================================  ================================================
+        ``boxtype``                         Name of the box to use
+        ``app.model``                       Model class to use
+        ``field``                           Field on which to do DB lookup
+        ``value``                           Value for DB lookup
+        ``var_name``                        Template variable to get the instance from
+        ==================================  ================================================
 
     Examples::
 

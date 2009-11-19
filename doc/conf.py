@@ -6,9 +6,11 @@ templates_path = ['.templates']
 source_suffix = '.rst'
 master_doc = 'index'
 
+glob = True
+
 # General information about the project.
-project = u'Ella'
-copyright = u'2009, Centrum Holdings'
+project = 'Ella'
+copyright = '2009, Centrum Holdings'
 
 import ella as project
 

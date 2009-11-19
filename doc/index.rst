@@ -10,7 +10,7 @@ It is a set of Django applications designed to work together. Thus, for details
 on deployment and configuration please refer to `Django documentation`_.
 
 For creating site using Ella, working knowledge of Django and its templating
-language is paramount.
+language is paramount. Rest is described in our :ref:`tutorial <tutorial-0>`.
 
 .. _Ella: http://www.ellaproject.cz
 .. _Python: http://www.python.org/
@@ -42,32 +42,20 @@ Several content providing apps:
 Some tools to work with that content:
 
     * admin interface with advanced UI (newman)
-    * comments (soon to be based on `django-threadedcomments`_) with threading and basic moderation
+    * comments (based on `django-threadedcomments`_) with threading and basic moderation
     * rating app (being extracted into `django-ratings`_)
     * :ref:`positions` - a tool for editors to define what object should be visible in positions pre-defined by template designer
 
 .. _django-threadedcomments: http://github.com/ericflo/django-threadedcomments
 .. _django-ratings: http://github.com/ella/django-ratings
 
-Dependencies
-============
 
-Django
-------
-Ella currently works with Django 1.1
+Documentation
+=============
 
-Additional modules and applications
------------------------------------
+Tutorial: :ref:`tutorial-0` | :ref:`tutorial-1` | :ref:`tutorial-2`
 
-    * python-imaging
-    * python-markdown
-    * django-markup
-
-
-Recommended packages
-
-    * django-versionedcache
- 
+Reference: :ref:`core-views` | :ref:`core-templatetags`
 
 
 License
@@ -83,9 +71,10 @@ community and hope that somebody will find this project helpfull.
 
 
 .. toctree::
-   :maxdepth: 2
+   :glob: 
+   :hidden:
 
-   setup
-   core/views
+   tutorial/*  
+   core/*
    positions
 

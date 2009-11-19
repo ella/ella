@@ -63,26 +63,34 @@ class EllaCoreView(object):
 
 class ObjectDetail(EllaCoreView):
     """
-    Renders a page for placement. All the data fetching and context creation is done in `_object_detail`.
-    If `url_remainder` is specified, tries to locate custom view via `custom_urls.dispatcher`. Renders a template 
-    returned by `get_template` with context containing:
+    Renders a page for placement.  If ``url_remainder`` is specified, tries to
+    locate custom view via :meth:`DetailDispatcher.call_view`. If
+    :meth:`DetailDispatcher.has_custom_detail` returns ``True``, calls
+    :meth:`DetailDispatcher.call_custom_detail`. Otherwise renders a template
+    with context containing:
 
-        - `placement`: `Placement` instance representing the URL accessed
-        - `object`: `Publishable` instance bound to the `placement`
-        - `category`: `Category` of the `placement`
-        - `content_type_name`: slugified plural verbose name of the publishable's content type
-        - `content_type`: `ContentType` of the publishable
+    * placement: ``Placement`` instance representing the URL accessed
+    * object: ``Publishable`` instance bound to the ``placement``
+    * category: ``Category`` of the ``placement``
+    * content_type_name: slugified plural verbose name of the publishable's content type
+    * content_type: ``ContentType`` of the publishable
 
-    :Parameters:
-        - `request`: `HttpRequest` from Django
-        - `category`: `Category.tree_path` (empty if home category)
-        - `content_type`: slugified `verbose_name_plural` of the target model
-        - `year`, `month`, `day`: date matching the `publish_from` field of the `Placement` object
-        - `slug`: slug of the `Placement`
-        - `url_remainder`: url after the object's url, used to locate custom views in `custom_urls.dispatcher`
+    The template is chosen based on the object in question (the first one that matches is used):
 
-    :Exceptions: 
-        - `Http404`: if the URL is not valid and/or doesn't correspond to any valid `Placement`
+    * ``page/category/<tree_path>/content_type/<app>.<model>/<slug>/object.html``
+    * ``page/category/<tree_path>/content_type/<app>.<model>/object.html``
+    * ``page/category/<tree_path>/object.html``
+    * ``page/content_type/<app>.<model>/object.html``
+    * ``page/object.html``
+
+    :param request: ``HttpRequest`` from Django
+    :param category: ``Category.tree_path`` (empty if home category)
+    :param content_type: slugified ``verbose_name_plural`` of the target model
+    :param year month day: date matching the `publish_from` field of the `Placement` object
+    :param slug: slug of the `Placement`
+    :param url_remainder: url after the object's url, used to locate custom views in `custom_urls.dispatcher`
+
+    :raises Http404: if the URL is not valid and/or doesn't correspond to any valid `Placement`
     """
     template_name = 'object.html'
     def __call__(self, request, category, content_type, slug, year=None, month=None, day=None, url_remainder=None):
@@ -143,19 +151,40 @@ def archive_year_cache_key(func, self, category):
 class ListContentType(EllaCoreView):
     """
     List objects' listings according to the parameters. If no filtering is
-    applied, different template ('category.html') is filtered. This is used for
-    rendering the category's title page.
+    applied (including pagination), the category's title page is rendered:
 
-    :Parameters:
-        - `category`: base Category tree_path, optional - defaults to all categories
-        - `year, month, day`: date matching the `publish_from` field of the `Placement` object.
-          All of these parameters are optional, the list will be filtered by the non-empty ones
-        - `content_type`: slugified verbose_name_plural of the target model, if omitted all content_types are listed
-        - `page_no`: which page to display
-        - `paginate_by`: number of records in one page
+    * ``page/category/<tree_path>/category.html``
+    * ``page/category.html``
 
-    :Exceptions:
-        - `Http404`: if the specified category or content_type does not exist or if the given date is malformed.
+    Otherwise an archive template gets rendered:
+        
+    * ``page/category/<tree_path>/content_type/<app>.<model>/listing.html``
+    * ``page/category/<tree_path>/listing.html``
+    * ``page/content_type/<app>.<model>/listing.html``
+    * ``page/listing.html``
+
+    The context contains:
+
+    * ``category``
+    * ``listings``: list of ``Listing`` objects ordered by date and priority
+
+    * ``page``: ``django.core.paginator.Page`` instance
+    * ``is_paginated``: ``True`` if there are more pages
+    * ``results_per_page``: number of objects on one page
+
+    * ``content_type``: ``ContentType`` of the objects, if filtered on content type
+    * ``content_type_name``: name of the objects' type, if filtered on content type
+
+
+    :param category: ``tree_path`` of the ``Category``, root category is used if empty
+    :param year, month, day: date matching the ``publish_from`` field of the ``Listing`` object.
+    :param content_type: slugified verbose_name_plural of the target model, if omitted all content_types are listed
+    :param page_no: which page to display
+    :keyword paginate_by: number of records in one page
+
+    All parameters are optional, filtering is done on those supplied
+
+    :raises Http404: if the specified category or content_type does not exist or if the given date is malformed.
     """
     template_name = 'listing.html'
     title_template_name = 'category.html'
