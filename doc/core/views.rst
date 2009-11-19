@@ -1,8 +1,8 @@
 .. _core-views:
 
-==========
-Ella views
-==========
+=====
+views
+=====
 
 .. automodule:: ella.core.views
     :members: ListContentType, ObjectDetail
