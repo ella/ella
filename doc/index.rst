@@ -59,15 +59,13 @@ Ella currently works with Django 1.1
 Additional modules and applications
 -----------------------------------
 
-    * python-docutils
     * python-imaging
-    * python-feedparser
     * python-markdown
+    * django-markup
 
 
 Recommended packages
 
-    * django-markup
     * django-versionedcache
  
 
