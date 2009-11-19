@@ -4,7 +4,7 @@
 Deploying your Ella application
 ===============================
 
-Note::
+.. note::
     This is another part of Ella tutorial, but the techniques and actions
     described here should work for any Django project/application out there.
 
