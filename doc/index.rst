@@ -43,7 +43,7 @@ Some tools to work with that content:
 
     * admin interface with advanced UI (newman)
     * comments (based on `django-threadedcomments`_) with threading and basic moderation
-    * rating app (being extracted into `django-ratings`_)
+    * ratings app (being extracted into `django-ratings`_)
     * :ref:`positions` - a tool for editors to define what object should be visible in positions pre-defined by template designer
 
 .. _django-threadedcomments: http://github.com/ericflo/django-threadedcomments
@@ -53,9 +53,11 @@ Some tools to work with that content:
 Documentation
 =============
 
-Tutorial: :ref:`tutorial-0` | :ref:`tutorial-1` | :ref:`tutorial-2`
+Tutorial: :ref:`tutorial-0` | :ref:`tutorial-1` | :ref:`tutorial-2` | :ref:`tutorial-3` | :ref:`tutorial-4`
 
 Reference: :ref:`core-views` | :ref:`core-templatetags`
+
+Applications: :ref:`positions`
 
 
 License

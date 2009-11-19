@@ -1,3 +1,6 @@
+.. _tutorial-4:
+
+===============================
 Deploying your Ella application
 ===============================
 
@@ -20,7 +23,7 @@ possibly, multiple projects using the same database.
 .. _tutorial: http://TODO
 
 ``settings.py``
----------------
+===============
 
 So far we have everything in a single ``settings.py`` file, all the
 configuration options - those that we need to run our project as well as those
@@ -90,13 +93,13 @@ config files ask for it. So the final ``__init__.py`` will look::
 
 
 Fixtures and custom commands
-----------------------------
+============================
 
 service app
 
 
 Static files
-------------
+============
 
 project
 
@@ -104,6 +107,6 @@ admin
 
 
 Migrations
-----------
+==========
 
 south, on deploy
