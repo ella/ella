@@ -11,7 +11,7 @@ Deploying your Ella application
     Most of what is used here can be found in our `django-base-project`_
     template.
 
-So far in our `tutorial`_ we got to a state where we have a fully working
+So far in our tutorial we got to a state where we have a fully working
 application, on localhost that is. Since you probably won't be running it from
 there, you need to move it to another server. The moving itself isn't the
 problem, but managing different configurations (``settings.py``) and keeping
@@ -20,7 +20,6 @@ some of the techniques we use to help us manage multiple environments and,
 possibly, multiple projects using the same database.
 
 .. _django-base-project: http://github.com/ella/django-base-project
-.. _tutorial: http://TODO
 
 ``settings.py``
 ===============
@@ -60,7 +59,7 @@ Just to provide some more extensibility, we will also add a simple mechanism
 that will allow us to store ``config.py`` in a separate location
 (``/etc/ella``) on our server (that way it won't get overwritten during every
 install). Also it will initiate python's ``logging`` module, if any of the
-config files ask for it. So the final ``__init__.py`` will look::
+configuration files ask for it. So the final ``__init__.py`` will look::
 
     # logging init - this options should be overriden somewhere
     LOGGING_CONFIG_FILE = None

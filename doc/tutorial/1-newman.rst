@@ -128,25 +128,25 @@ listed.
 
 ``ella.core.models.Listing`` instances carry the information on which
 ``Placements`` (since an object can have multiple ``Placements`` in multiple
-categories on multiplu sites, ``Listing`` binds to the ``Placement`` and not to
+categories on multiple sites, ``Listing`` binds to the ``Placement`` and not to
 the object directly) should be listed in which ``Category`` and when - it
 enables users to list the object in as many categories as they wish at
 arbitrary times (but not sooner that the ``Placement.publish_from``).
 
 By default listings in the root category only contain ``Listings`` specifically
 targeted there whereas listings for any subcategory also contains all the
-listings of it's subcategories. This is a model we found most usefull when
+listings of it's subcategories. This is a model we found most useful when
 working with large sites where the site's homepage needs to be controlled
-closely by editors and the interrim categories only serve as aggregators of all
+closely by editors and the interim categories only serve as aggregators of all
 the content published in them either directly or via a subcategory.
 
 
 Creating a site
 ===============
 
-Now you should have anough information to be able to start exploring Ella's
+Now you should have enough information to be able to start exploring Ella's
 admin (found on ``/newman/``) and create your own site and it's first post. You
-will know that you were succesfull if you manage to create and publish an
+will know that you were succesful if you manage to create and publish an
 article whose URL gives you a ``TemplateDoesNotExist`` exception upon accessing
 - that means we are ready to :ref:`create some templates <tutorial-2>` which is the last thing we
 need to get our site running.
