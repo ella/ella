@@ -30,10 +30,9 @@ configuration options - those that we need to run our project as well as those
 that cope with our current environment specifically. To help with this we will
 split our ``ellablog.settings`` module into a package::
 
-    # cd ellablog
-    # mkdir ellablog/settings
-    # touch ellablog/settings/__init__.py
-    # mv ellablog/settings.py ellablog/settings/base.py
+    mkdir ellablog/settings
+    touch ellablog/settings/__init__.py
+    mv ellablog/settings.py ellablog/settings/base.py
 
 with ``__init__.py`` containing::
 
