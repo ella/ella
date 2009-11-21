@@ -15,6 +15,8 @@ the templates we need to get the site running.
 ``page/category.html``
 ======================
 
+.. highlightlang:: html+django
+
 First we will create a template rendering a category: ``page/category.html``.
 This is a default template that will be used for all categories if their
 specific template (one with their ``path``) isn't found. The two most important
