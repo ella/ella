@@ -91,7 +91,7 @@ additional templates: ``page/404.html``::
 
 and ``page/500.html``::
 
-    <h1>If you see this, let us pleaso know how you did it, thanks!</h1>
+    <h1>If you see this, let us please know how you did it, thanks!</h1>
 
 Now that we have a set of rudimentary templates, we can try :ref:`doing something
 useful <tutorial-3>` with them.
