@@ -108,3 +108,8 @@ look of your boxes for individual objects as well.
     <core-templatetags>` documentation.
 
 
+Now you have a working site and all necessary tools to built a fancy
+ella-powered website, in :ref:`next step <tutorial-4>` we will show you how we
+think it's best to layout your newly created application for easy deployment
+and maintenance.
+
