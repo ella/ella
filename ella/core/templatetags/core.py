@@ -233,16 +233,52 @@ class BoxNode(template.Node):
 @register.tag('box')
 def do_box(parser, token):
     """
-    Tag Node representing our idea of a reusable box. It can handle multiple paramters in its body, that can
-    contain other django template. The boxing facility keeps track of box dependencies which allows it to invalidate
-    the cache of a parent box when the box itself is being invalidated.
+    Tag Node representing our idea of a reusable box. It can handle multiple
+    parameters in its body which will then be accessible via ``{{ box.params
+    }}`` in the template being rendered.
 
-    The object is passed in context as ``object`` when rendering the box parameters.
+    .. note::
+        The inside of the box will be rendered only when redering the box in
+        current context and the ``object`` template variable will be present
+        and set to the target of the box.
+
+    Author of any ``Model`` can specify it's own ``box_class`` which enables
+    custom handling of some content types (boxes for polls for example need
+    some extra information to render properly).
+
+    Boxes, same as :ref:`core-views`, look for most specific template for a given
+    object an only fall back to more generic template if the more specific one
+    doesn't exist. The list of templates it looks for:
+
+    * ``box/category/<tree_path>/content_type/<app>.<model>/<slug>/<box_name>.html``
+    * ``box/category/<tree_path>/content_type/<app>.<model>/<box_name>.html``
+    * ``box/category/<tree_path>/content_type/<app>.<model>/box.html``
+    * ``box/content_type/<app>.<model>/<slug>/<box_name>.html``
+    * ``box/content_type/<app>.<model>/<box_name>.html``
+    * ``box/content_type/<app>.<model>/box.html``
+    * ``box/<box_name>.html``
+    * ``box/box.html``
+
+    .. note::
+        Since boxes work for all models (and not just ``Publishable`` subclasses),
+        some template names don't exist for some model classes, for example
+        ``Photo`` model doesn't have a link to ``Category`` so that cannot be used.
+
+    Boxes are always rendered in current context with added variables:
+
+    * ``object`` - object being represented
+    * ``box`` - instance of ``ella.core.box.Box``
 
     Usage::
 
         {% box <boxtype> for <app.model> with <field> <value> %}
+            param_name: value
+            param_name_2: {{ some_var }}
+        {% endbox %}
+
         {% box <boxtype> for <var_name> %}
+            ...
+        {% endbox %}
 
     Parameters:
 
