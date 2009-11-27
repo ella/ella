@@ -9,6 +9,7 @@ from threadedcomments.templatetags import threadedcomments_tags as tt
 
 from ella.core.models import Publishable
 from ella.ellacomments.models import CommentOptionsObject, DefaultCommentOptions
+from ella.core.cache.utils import get_cached_object
 
 register = template.Library()
 
@@ -131,13 +132,12 @@ def get_comment_count(parser, token):
     return CommentCountNode.handle_token(parser, token)
 
 
-from django.contrib.comments.templatetags.comments import BaseCommentNode
-class CommentOptionsNode(EllaMixin, BaseCommentNode):
+class CommentOptionsNode(EllaMixin, tt.BaseThreadedCommentNode):
 
     def render(self, context):
         ctype, object_pk = self.get_target_ctype_pk(context)
         try:
-            opts = CommentOptionsObject.objects.get(target_ct=ctype, target_id=object_pk)
+            opts = get_cached_object(CommentOptionsObject, target_ct=ctype, target_id=object_pk)
         except CommentOptionsObject.DoesNotExist:
             opts = DefaultCommentOptions()
         context.update({
