@@ -93,7 +93,28 @@ configuration files ask for it. So the final ``__init__.py`` will look::
 Fixtures and custom commands
 ============================
 
-service app
+When you deploy your new blog site, if you want to start fresh after playing
+around with the admin or if you decide to switch database backends, you don't
+want to recreate all your objects again in the database. That's why we will
+create a `fixture`_ with all the basic data and have it automatically loaded
+into the database every time it gets created. Django will automatically load
+any fixture called ``initial_data`` in any application's ``fixtures``
+subdirectory so we need to create an application to store our fixture, let's
+call it ``service`` and create our fixture there::
+
+    python manage.py startapp service
+    mkdir service/fixtures
+    python manage.py auth.User core articles --indent 4 > service/fixtures/inital_data.json
+
+Next we just need to add it to our ``INSTALLED_APPS``::
+
+    INSTALLED_APPS = [
+        ...
+        'ellablog.service',
+    ]
+
+Our newly created application can also be useful if you wanted to add some
+`custom management commands`_.
 
 
 Static files
