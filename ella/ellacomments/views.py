@@ -153,8 +153,3 @@ def custom_urls(request, bits, context):
         return post_comment(request, context, parent)
 
     raise Http404()
-
-
-from ella.core.custom_urls import dispatcher
-
-dispatcher.register(slugify(_('comments')), custom_urls)

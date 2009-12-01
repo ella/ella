@@ -8,6 +8,7 @@ from threadedcomments.util import annotate_tree_properties, fill_tree
 from threadedcomments.templatetags import threadedcomments_tags as tt
 
 from ella.core.models import Publishable
+from ella.ellacomments.models import CommentOptionsObject, DefaultCommentOptions
 
 register = template.Library()
 
@@ -19,15 +20,15 @@ class EllaMixin(object):
         ctype, object_pk = self.get_target_ctype_pk(context)
         if not object_pk:
             return self.comment_model.objects.none()
-    
+
         qs = self.comment_model.objects.filter(
             content_type = ctype,
             object_pk    = smart_unicode(object_pk),
-        )   
-        
+        )
+
         if getattr(settings, 'COMMENTS_HIDE_REMOVED', False):
             qs = qs.filter(is_removed=False)
-    
+
         return qs
 
     def get_target_ctype_pk(self, context):
@@ -110,28 +111,55 @@ def annotate_tree(comments):
 
 # copied from django.comments
 def get_comment_count(parser, token):
-    """ 
+    """
     Gets the comment count for the given params and populates the template
     context with a variable containing that value, whose name is defined by the
     'as' clause.
-        
+
     Syntax::
-        
+
         {% get_comment_count for [object] as [varname]  %}
         {% get_comment_count for [app].[model] [object_id] as [varname]  %}
-        
+
     Example usage::
-        
+
         {% get_comment_count for event as comment_count %}
         {% get_comment_count for calendar.event event.id as comment_count %}
         {% get_comment_count for calendar.event 17 as comment_count %}
-        
-    """ 
+
+    """
     return CommentCountNode.handle_token(parser, token)
 
-register.filter(fill_tree)
+
+class CommentOptionsNode(EllaMixin, dt.BaseCommentNode):
+
+    def render(self, context):
+        ctype, object_pk = self.get_target_ctype_pk(context)
+        try:
+            opts = CommentOptionsObject.objects.get(target_ct=ctype, target_id=object_pk)
+        except CommentOptionsObject.DoesNotExist:
+            opts = DefaultCommentOptions()
+        context.update({
+            self.as_varname : opts
+        })
+        return ''
+
+def get_comment_options(parser, token):
+    """
+    Gets the comment options for the given object.__class__
+
+    Syntax::
+
+        {% get_comment_options for [object] as [varname] %}
+        {% get_comment_count for [app].[model] [object_id] as [varname]  %}
+    """
+    return CommentOptionsNode.handle_token(parser, token)
+
+
 register.filter(annotate_tree)
+register.filter(fill_tree)
 register.tag(get_comment_list)
 register.tag(get_comment_form)
 register.tag(render_comment_form)
 register.tag(get_comment_count)
+register.tag(get_comment_options)
