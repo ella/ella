@@ -8,6 +8,7 @@ from django.conf import settings
 
 # register must be imported for custom urls
 from ella.ellacomments import register
+from ella.ellacomments.models import CommentOptionsObject
 
 from unit_project import template_loader
 from unit_project.test_core import create_basic_categories, create_and_place_a_publishable
@@ -83,6 +84,11 @@ class TestCommentViewPagination(CommentViewTestCase):
 
 
 class TestCommentViews(CommentViewTestCase):
+
+    def test_comments_urls_is_blocked(self):
+        opts = CommentOptionsObject.objects.create(target_ct=self.publishable.content_type, target_id=self.publishable.pk, blocked=True)
+        response = self.client.get(self.get_url())
+        self.assert_equals(404, response.status_code)
 
     def test_post_works_for_correct_data(self):
         form = comments.get_form()(target_object=self.publishable)
