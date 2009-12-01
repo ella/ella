@@ -4,7 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 from django.utils.encoding import smart_unicode
 
-from threadedcomments.util import annotate_tree_properties
+from threadedcomments.util import annotate_tree_properties, fill_tree
 from threadedcomments.templatetags import threadedcomments_tags as tt
 
 from ella.core.models import Publishable
@@ -129,6 +129,7 @@ def get_comment_count(parser, token):
     """ 
     return CommentCountNode.handle_token(parser, token)
 
+register.filter(fill_tree)
 register.filter(annotate_tree)
 register.tag(get_comment_list)
 register.tag(get_comment_form)
