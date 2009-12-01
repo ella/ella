@@ -43,8 +43,8 @@ Next let's install all the dependencies we will need using ``pip``::
     pip install -e git://github.com/ella/django-markup.git#egg=django-markup
     pip install -e git://github.com/ella/ella.git#egg=ella
 
-This should leave us with virtualenv containg everything necessary to develop
-and run our project, so let's create it using the standard django way::
+This should leave us with virtualenv containing everything necessary to develop
+and run our project, so let's create it using the standard Django way::
 
     mkdir ellablog
     cd ellablog
@@ -92,7 +92,7 @@ Our first step in actual code will be adding Ella to your project's
 
 Static files and templates need to be taken care of, so let's create
 directories in our project called ``static`` and ``templates`` that will hold
-our media and temapltes and alter ``settings.py`` accordingly::
+our media and templates and alter ``settings.py`` accordingly::
 
     from os.path import join, dirname
     
@@ -160,7 +160,7 @@ we don't want to be using this setup in production.::
 Database
 ========
 
-Now just configure which database you wish to use (Ella supports all django DB
+Now just configure which database you wish to use (Ella supports all Django DB
 backends) you can proceed with creating the database (don't forget to define
 your admin user)::
 

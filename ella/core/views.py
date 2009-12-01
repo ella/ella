@@ -83,6 +83,11 @@ class ObjectDetail(EllaCoreView):
     * ``page/content_type/<app>.<model>/object.html``
     * ``page/object.html``
 
+    .. note::
+        The category being used in selecting a template is taken from the object's
+        ``Placement``, thus one object published in many categories (even sites)
+        can have a different template every time.
+
     :param request: ``HttpRequest`` from Django
     :param category: ``Category.tree_path`` (empty if home category)
     :param content_type: slugified ``verbose_name_plural`` of the target model

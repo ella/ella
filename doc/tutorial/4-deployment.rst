@@ -4,14 +4,14 @@
 Deploying your Ella application
 ===============================
 
-Note::
+.. note::
     This is another part of Ella tutorial, but the techniques and actions
     described here should work for any Django project/application out there.
 
     Most of what is used here can be found in our `django-base-project`_
     template.
 
-So far in our `tutorial`_ we got to a state where we have a fully working
+So far in our tutorial we got to a state where we have a fully working
 application, on localhost that is. Since you probably won't be running it from
 there, you need to move it to another server. The moving itself isn't the
 problem, but managing different configurations (``settings.py``) and keeping
@@ -20,7 +20,6 @@ some of the techniques we use to help us manage multiple environments and,
 possibly, multiple projects using the same database.
 
 .. _django-base-project: http://github.com/ella/django-base-project
-.. _tutorial: http://TODO
 
 ``settings.py``
 ===============
@@ -30,10 +29,9 @@ configuration options - those that we need to run our project as well as those
 that cope with our current environment specifically. To help with this we will
 split our ``ellablog.settings`` module into a package::
 
-    # cd ellablog
-    # mkdir ellablog/settings
-    # touch ellablog/settings/__init__.py
-    # mv ellablog/settings.py ellablog/settings/base.py
+    mkdir ellablog/settings
+    touch ellablog/settings/__init__.py
+    mv ellablog/settings.py ellablog/settings/base.py
 
 with ``__init__.py`` containing::
 
@@ -61,7 +59,7 @@ Just to provide some more extensibility, we will also add a simple mechanism
 that will allow us to store ``config.py`` in a separate location
 (``/etc/ella``) on our server (that way it won't get overwritten during every
 install). Also it will initiate python's ``logging`` module, if any of the
-config files ask for it. So the final ``__init__.py`` will look::
+configuration files ask for it. So the final ``__init__.py`` will look::
 
     # logging init - this options should be overriden somewhere
     LOGGING_CONFIG_FILE = None
@@ -95,11 +93,34 @@ config files ask for it. So the final ``__init__.py`` will look::
 Fixtures and custom commands
 ============================
 
-service app
+When you deploy your new blog site, if you want to start fresh after playing
+around with the admin or if you decide to switch database backends, you don't
+want to recreate all your objects again in the database. That's why we will
+create a `fixture`_ with all the basic data and have it automatically loaded
+into the database every time it gets created. Django will automatically load
+any fixture called ``initial_data`` in any application's ``fixtures``
+subdirectory so we need to create an application to store our fixture, let's
+call it ``service`` and create our fixture there::
+
+    python manage.py startapp service
+    mkdir service/fixtures
+    python manage.py auth.User core articles --indent 4 > service/fixtures/inital_data.json
+
+Next we just need to add it to our ``INSTALLED_APPS``::
+
+    INSTALLED_APPS = [
+        ...
+        'ellablog.service',
+    ]
+
+Our newly created application can also be useful if you wanted to add some
+`custom management commands`_.
 
 
 Static files
 ============
+
+using
 
 project
 

@@ -132,7 +132,7 @@ def get_comment_count(parser, token):
     return CommentCountNode.handle_token(parser, token)
 
 
-class CommentOptionsNode(EllaMixin, tt.BaseThreadedCommentNode):
+class CommentOptionsNode(EllaMixin, dt.BaseCommentNode):
 
     def render(self, context):
         ctype, object_pk = self.get_target_ctype_pk(context)
