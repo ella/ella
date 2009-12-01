@@ -1,3 +1,4 @@
+from ella.ellacomments.models import CommentOptionsObject
 import operator
 
 from django.contrib import comments
@@ -135,6 +136,11 @@ def list_comments(request, context):
 
 def custom_urls(request, bits, context):
     # /object/comments/
+
+    opts = CommentOptionsObject.objects.get_for_object(context['object'])
+    if opts.blocked:
+        raise Http404('Comments is blocked for this object.')
+
     if not bits:
         return list_comments(request, context)
 

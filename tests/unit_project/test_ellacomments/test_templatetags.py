@@ -21,7 +21,7 @@ class TestTemplateTags(DatabaseTestCase):
         create_comment(self.publishable, self.publishable.content_type)
         t = template.Template('''{% load ellacomments_tags %}{% get_comment_count for obj as var_name%}{{ var_name }}''')
         self.assert_equals('1', t.render(template.Context({'obj': self.only_publishable})))
-        
+
     def test_comment_list_for_article_is_picked_up_through_article(self):
         create_comment(self.publishable, self.publishable.content_type)
         t = template.Template('''{% load ellacomments_tags %}{% get_comment_list for obj as var_name%}{{ var_name|length }}''')
@@ -31,4 +31,14 @@ class TestTemplateTags(DatabaseTestCase):
         create_comment(self.publishable, self.publishable.content_type)
         t = template.Template('''{% load ellacomments_tags %}{% get_comment_list for obj as var_name%}{{ var_name|length }}''')
         self.assert_equals('1', t.render(template.Context({'obj': self.only_publishable})))
-        
+
+    def test_default_comment_options_for_article(self):
+        create_comment(self.publishable, self.publishable.content_type)
+        t = template.Template('''{% load ellacomments_tags %}{% get_comment_options for obj as opts %}{{ opts.blocked }}''')
+        self.assert_equals(u'False', t.render(template.Context({'obj': self.only_publishable})))
+
+    def test_block_comments_for_article(self):
+        from ella.ellacomments.models import CommentOptionsObject
+        opts = CommentOptionsObject.objects.create(target_ct=self.publishable.content_type, target_id=self.publishable.pk, blocked=True)
+        t = template.Template('''{% load ellacomments_tags %}{% get_comment_options for obj as opts %}{{ opts.blocked }}''')
+        self.assert_equals(u"%s" % opts.blocked, t.render(template.Context({'obj': self.publishable})))

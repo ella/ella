@@ -6,7 +6,8 @@ from django.utils.translation import ugettext as _
 from django.template.defaultfilters import slugify
 from django.conf import settings
 
-from ella.ellacomments import views
+# register must be imported for custom urls
+from ella.ellacomments import register
 
 from unit_project import template_loader
 from unit_project.test_core import create_basic_categories, create_and_place_a_publishable
