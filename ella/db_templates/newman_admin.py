@@ -73,6 +73,7 @@ class DbTemplateOptions(newman.NewmanModelAdmin):
     inlines = (TemplateBlockInlineOptions,)
     list_display = ('name', 'site', 'extends', 'description',)
     list_filter = ('site',)
+    search_fields = ('name', 'extends',)
 
     # TODO: DB templates export HP
     def queryset(self, request):
