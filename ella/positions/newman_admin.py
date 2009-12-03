@@ -58,7 +58,7 @@ class PositionAdmin(newman.NewmanModelAdmin):
             # FIXME: redirect
             return HttpResponseRedirect(reverse('newman:index'))
 
-        names = ['featured_secondary_1', 'featured_secondary_2', 'poll', 'tipoftheday',
+        names = ['featured_secondary_1', 'featured_secondary_2', 'featured_secondary_3', 'poll', 'tipoftheday',
                  'special', 'recipeoftheday', 'featured_small_1', 'featured_small_2',
                  'featured_small_3', ]
 
