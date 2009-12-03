@@ -2,6 +2,7 @@
 from djangosanetesting import DatabaseTestCase
 
 from ella.core.models import HitCount
+from ella.articles.models import Article
 
 from unit_project.test_core import create_basic_categories, create_and_place_a_publishable, create_and_place_more_publishables
 
@@ -46,4 +47,4 @@ class TestTopObjects(DatabaseTestCase):
         HitCount.objects.hit(self.placement)
         HitCount.objects.hit(self.placement)
         HitCount.objects.hit(self.placements[0])
-        self.assert_equals([self.placement, self.placements[0]], [hc.placement for hc in HitCount.objects.get_top_objects(2, mods=['articles.article'])])
+        self.assert_equals([self.placement, self.placements[0]], [hc.placement for hc in HitCount.objects.get_top_objects(2, mods=[Article])])
