@@ -40,6 +40,10 @@ class TestTopObjects(DatabaseTestCase):
         HitCount.objects.hit(self.placement)
         HitCount.objects.hit(self.placement)
         HitCount.objects.hit(self.placements[0])
-        
         self.assert_equals([self.placement, self.placements[0]], [hc.placement for hc in HitCount.objects.get_top_objects(2)])
 
+    def test_top_objects_for_specific_model(self):
+        HitCount.objects.hit(self.placement)
+        HitCount.objects.hit(self.placement)
+        HitCount.objects.hit(self.placements[0])
+        self.assert_equals([self.placement, self.placements[0]], [hc.placement for hc in HitCount.objects.get_top_objects(2, mods=['articles.article'])])

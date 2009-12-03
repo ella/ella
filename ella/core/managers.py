@@ -245,7 +245,7 @@ class ListingQuerySetWrapper(object):
 
 def get_top_objects_key(func, self, count, mods=[]):
     return 'ella.core.managers.HitCountManager.get_top_objects_key:%d:%d:%s' % (
-            settings.SITE_ID, count, ','.join(['.'.join((model._meta.app_label, model._meta.object_name)) for model in mods])
+            settings.SITE_ID, count, ','.join(mods)
         )
 
 class HitCountManager(models.Manager):
@@ -263,5 +263,7 @@ class HitCountManager(models.Manager):
         """
         kwa = {}
         if mods:
-            kwa['placement__publishable__content_type__in'] = [ ContentType.objects.get_for_model(m) for m in mods ]
+            kwa['placement__publishable__content_type__in'] = [
+                ContentType.objects.get_for_model(models.get_model(*m.split('.'))) for m in mods
+            ]
         return list(self.filter(placement__category__site=settings.SITE_ID, **kwa).order_by('-hits')[:count])
