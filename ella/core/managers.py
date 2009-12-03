@@ -230,13 +230,13 @@ class ListingQuerySetWrapper(object):
 
     def __getitem__(self, k):
         if not isinstance(k, slice) or (k.start is None or k.start < 0) or (k.stop is None  or k.stop < k.start):
-            raise TypeError, '%s, %s' % (k.start, k.stop) 
+            raise TypeError, '%s, %s' % (k.start, k.stop)
 
         offset = k.start + 1
         count = k.stop - k.start
 
         return self.manager.get_listing(offset=offset, count=count, **self._kwargs)
-    
+
     def count(self):
         if not hasattr(self, '_count'):
             self._count = self.manager.get_listing_queryset(**self._kwargs).count()
@@ -263,5 +263,5 @@ class HitCountManager(models.Manager):
         """
         kwa = {}
         if mods:
-            kwa['placement__target_ct__in'] = [ ContentType.objects.get_for_model(m) for m in mods ]
+            kwa['placement__publishable__content_type__in'] = [ ContentType.objects.get_for_model(m) for m in mods ]
         return list(self.filter(placement__category__site=settings.SITE_ID, **kwa).order_by('-hits')[:count])
