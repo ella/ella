@@ -34,11 +34,11 @@ class TestTemplateTags(DatabaseTestCase):
 
     def test_default_comment_options_for_article(self):
         create_comment(self.publishable, self.publishable.content_type)
-        t = template.Template('''{% load ellacomments_tags %}{% get_comment_options for obj as opts %}{{ opts.blocked }}''')
-        self.assert_equals(u'False', t.render(template.Context({'obj': self.only_publishable})))
+        t = template.Template('''{% load ellacomments_tags %}{% get_comment_options for obj as opts %}{% if not opts.blocked %}XX{% endif %}''')
+        self.assert_equals(u'XX', t.render(template.Context({'obj': self.only_publishable})))
 
     def test_block_comments_for_article(self):
         from ella.ellacomments.models import CommentOptionsObject
         opts = CommentOptionsObject.objects.create(target_ct=self.publishable.content_type, target_id=self.publishable.pk, blocked=True)
-        t = template.Template('''{% load ellacomments_tags %}{% get_comment_options for obj as opts %}{{ opts.blocked }}''')
-        self.assert_equals(u"%s" % opts.blocked, t.render(template.Context({'obj': self.publishable})))
+        t = template.Template('''{% load ellacomments_tags %}{% get_comment_options for obj as opts %}{% if opts.blocked %}XX{% endif %}''')
+        self.assert_equals(u"XX", t.render(template.Context({'obj': self.publishable})))

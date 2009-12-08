@@ -86,6 +86,7 @@ class TestCommentViewPagination(CommentViewTestCase):
 class TestCommentViews(CommentViewTestCase):
 
     def test_comments_urls_is_blocked(self):
+        template_loader.templates['404.html'] = ''
         opts = CommentOptionsObject.objects.create(target_ct=self.publishable.content_type, target_id=self.publishable.pk, blocked=True)
         response = self.client.get(self.get_url())
         self.assert_equals(404, response.status_code)
