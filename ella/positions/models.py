@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 from django.utils.translation import ugettext_lazy as _, ugettext
@@ -9,6 +10,9 @@ from django.template import Template
 from ella.core.models import Category
 from ella.core.box import Box
 from ella.core.cache import CACHE_DELETER, cache_this, CachedGenericForeignKey
+
+
+log = logging.getLogger('ella.positions.models')
 
 def get_position_key(func, self, category, name, nofallback=False):
     return 'ella.positions.models.PositionManager.get_active_position:%d:%s:%s' % (
@@ -78,6 +82,7 @@ class Position(models.Model):
         if not self.target:
             if self.target_ct:
                 # broken Generic FK:
+                log.warning('Broken target for position with pk %r', self.pk)
                 return ''
             return Template(self.text, name="position-%s" % self.name).render(context)
 
