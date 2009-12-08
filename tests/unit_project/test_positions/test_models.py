@@ -2,6 +2,10 @@
 from datetime import datetime, timedelta
 from djangosanetesting import DatabaseTestCase
 
+from django.template import Context, NodeList
+from django.contrib.contenttypes.models import ContentType
+from django.db.models import Max
+
 from unit_project.test_core import create_basic_categories
 
 from ella.positions.models import Position
@@ -11,6 +15,17 @@ class TestPosition(DatabaseTestCase):
     def setUp(self):
         super(TestPosition, self).setUp()
         create_basic_categories(self)
+
+    def test_render_position_without_target_renders_txt(self):
+        p = Position.objects.create(category=self.category, name='position-name', text='some text')
+        self.assert_equals('some text', p.render(Context({}), NodeList(), ''))
+
+    def test_render_position_with_invalid_target_returns_empty(self):
+        target_ct = ContentType.objects.get_for_model(ContentType)
+        invalid_id = ContentType.objects.aggregate(Max('id'))['id__max'] + 1
+
+        p = Position.objects.create(category=self.category, name='position-name', text='some text', target_ct=target_ct, target_id=invalid_id)
+        self.assert_equals('', p.render(Context({}), NodeList(), ''))
 
     def test_get_active_position(self):
         p = Position.objects.create(category=self.category, name='position-name', text='some text')

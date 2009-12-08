@@ -76,6 +76,9 @@ class Position(models.Model):
     def render(self, context, nodelist, box_type):
         " Render the position. "
         if not self.target:
+            if self.target_ct:
+                # broken Generic FK:
+                return ''
             return Template(self.text, name="position-%s" % self.name).render(context)
 
         if self.box_type:

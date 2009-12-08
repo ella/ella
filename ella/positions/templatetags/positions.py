@@ -28,6 +28,9 @@ def position(parser, token):
     """
     bits = token.split_contents()
     nodelist = parser.parse(('end' + bits[0],))
+    return _parse_position_tag(bits, nodelist)
+
+def _parse_position_tag(bits, nodelist):
     parser.delete_first_token()
 
     nofallback = False
