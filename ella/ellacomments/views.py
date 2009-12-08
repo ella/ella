@@ -21,7 +21,17 @@ def post_comment(request, context, parent):
     parent_id = parent and parent.pk or None
 
     if request.method != 'POST':
-        form = comments.get_form()(context['object'], parent=parent_id)
+        initial = {}
+        if parent:
+            if parent.title.startswith('Re:'):
+                initial['title'] = parent.title
+            else:
+                initial['title'] = u'Re: %s' % parent.title
+        if request.user.is_authenticated:
+            u = request.user
+            initial['email'] = u.email
+            initial['name'] = u.username
+        form = comments.get_form()(context['object'], parent=parent_id, initial=initial)
         context.update({
                 'parent': parent,
                 'form': form,
@@ -54,7 +64,7 @@ def post_comment(request, context, parent):
     preview = "preview" in data
 
     # Check to see if the POST data overrides the view's next argument.
-    next = data.get("next", context['placement'].get_absolute_url())
+    next = data.get("next", "%s%s/" % (context['placement'].get_absolute_url(), slugify(_('comments'))))
 
     # If there are errors or if we requested a preview show the comment
     if form.errors or preview:
