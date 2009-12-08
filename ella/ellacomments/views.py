@@ -27,10 +27,6 @@ def post_comment(request, context, parent):
                 initial['title'] = parent.title
             else:
                 initial['title'] = u'Re: %s' % parent.title
-        if request.user.is_authenticated:
-            u = request.user
-            initial['email'] = u.email
-            initial['name'] = u.username
         form = comments.get_form()(context['object'], parent=parent_id, initial=initial)
         context.update({
                 'parent': parent,
