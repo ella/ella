@@ -1,4 +1,6 @@
+from datetime import datetime
 from django.contrib import admin
+from django.utils.translation import ugettext, ugettext_lazy as _
 
 from ella.ellaadmin.options import EllaAdminOptionsMixin
 from ella.positions.models import Position
