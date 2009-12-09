@@ -4,7 +4,7 @@ import djangobaselibrary
 # all fields marked with TODO: REPLACE
 # must be filled with some meanigful values
 
-VERSION = (0, 0, 0)
+VERSION = (0, 0, 0, 0)
 __version__ = VERSION
 __versionstr__ = '.'.join(map(str, VERSION))
 
