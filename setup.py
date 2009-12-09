@@ -1,5 +1,5 @@
 from setuptools import setup, find_packages
-import djangobaselibrary
+import ella
 
 # all fields marked with TODO: REPLACE
 # must be filled with some meanigful values
@@ -9,11 +9,11 @@ __version__ = VERSION
 __versionstr__ = '.'.join(map(str, VERSION))
 
 setup(
-    name = 'djangobaselibrary',
+    name = 'ella',
     version = __versionstr__,
-    description = 'Django Base Library', # TODO: REPLACE
+    description = 'Ella Django CMS Project', # TODO: REPLACE
     long_description = '\n'.join((
-        'Django Base Library',
+        'Ella Django CMS Project',
         '',
         'this project (python module) is meant as a template',
         'for any centrumholdings django based',
@@ -22,7 +22,7 @@ setup(
     author = 'centrum holdings s.r.o', # TODO: REPLACE
     author_email='devel@centrumholdings.com', # TODO: REPLACE
     license = 'BSD', # TODO: REPLACE
-    url='http://git.netcentrum.cz/projects/django/GIT/django-base-library.git/', # TODO: REPLACE
+    url='http://git.netcentrum.cz/projects/django/GIT/ella.git/', # TODO: REPLACE
 
     packages = find_packages(
         where = '.',

@@ -1,11 +1,11 @@
 
 from south.db import db
 from django.db import models
-from djangobaselibrary.sample.models import *
+from ella.sample.models import *
 
 '''
 created via:
-./djangobaseproject/manage.py startmigration djangobaselibrary.sample initial
+./djangobaseproject/manage.py startmigration ella.sample initial
 '''
 
 class Migration:

@@ -5,7 +5,7 @@ urlpatterns = patterns('',
     (r'^static/(?P<path>.*)$', 'django.views.static.serve', { 'document_root': settings.MEDIA_ROOT, 'show_indexes': True }),
 
     # reverse url lookups
-#    (r'^', include('djangobaselibrary.sample.urls')),
+#    (r'^', include('ella.sample.urls')),
 
 )
 
