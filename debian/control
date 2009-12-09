@@ -12,5 +12,5 @@ Conflicts: centrum-python-djangobaselibrary
 Replaces: centrum-python-djangobaselibrary
 Architecture: all
 Depends: ${python:Depends}, ${misc:Depends}, python-django, python-docutils
-Description: django base library
+Description: Django Base Library
 
