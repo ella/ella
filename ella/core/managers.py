@@ -85,7 +85,7 @@ def get_listings_key(func, self, category=None, count=10, offset=1, mods=[], con
 
     return 'ella.core.managers.ListingManager.get_listing:%s:%d:%d:%s:%s:%s' % (
             c, count, offset,
-            ','.join('.'.join((model._meta.app_label, model._meta.object_name)) for model in mods),
+            ','.join(str(model._meta) for model in mods),
             ','.join(map(str, content_types)),
             ','.join(':'.join((k, smart_str(v))) for k, v in kwargs.items()),
     )
@@ -245,7 +245,7 @@ class ListingQuerySetWrapper(object):
 
 def get_top_objects_key(func, self, count, mods=[]):
     return 'ella.core.managers.HitCountManager.get_top_objects_key:%d:%d:%s' % (
-            settings.SITE_ID, count, ','.join(['.'.join((model._meta.app_label, model._meta.object_name)) for model in mods])
+            settings.SITE_ID, count, ','.join('.'.join(str(model._meta) for model in mods))
         )
 
 class HitCountManager(models.Manager):
