@@ -125,7 +125,7 @@ class PlacementForm(modelforms.ModelForm):
             return id_part
         return '%s-%s' % (id_part, suffix)
 
-    def listings_clean(self, data):
+    def listings_clean(self, placement_publish_from, data):
         # get listing category, publish_from and publish_to
         pub_from = data.getlist(self.get_part_id('publish_from'))
         listings = self.cleaned_data['listings']
@@ -137,6 +137,8 @@ class PlacementForm(modelforms.ModelForm):
                 continue
             dt_field = DateTimeField()
             publish_from = dt_field.clean(pub)
+            if publish_from < placement_publish_from:
+                raise ValidationError(_('No listing can start sooner than main listing'))
 
     def clean(self):
         # no data - nothing to validate
@@ -177,7 +179,7 @@ class PlacementForm(modelforms.ModelForm):
                 publish_from__year=d['publish_from'].year,
                 publish_from__month=d['publish_from'].month,
                 publish_from__day=d['publish_from'].day,
-        )
+            )
         # exclude current object from search
         if d['id']:
             qset = qset.exclude(pk=d['id'].pk)
@@ -196,7 +198,7 @@ class PlacementForm(modelforms.ModelForm):
             # raise forms.ValidationError(_('If object has a category, it must have a main placement.'))
             raise (_('If object has a category, it must have a main placement.'))
 
-        self.listings_clean(self.data)
+        self.listings_clean(d['publish_from'], self.data)
         return self.cleaned_data
 
 
