@@ -5,6 +5,9 @@ from django.contrib.admin.views.main import *
 log = logging.getLogger('ella.newman')
 
 class FilterableChangeList(ChangeList):
+    def __init__(self, *args, **kwargs):
+        super(FilterableChangeList, self).__init__(*args, **kwargs)
+        del self.has_filters
 
     def is_filtered(self):
         """ Iterates over all ChangeList's filters. Returns True if at least one filter is active. """
@@ -15,6 +18,12 @@ class FilterableChangeList(ChangeList):
             log.debug('is_active=%s for filter %s:' % (act, f))
             if act:
                 return True
+        return False
+
+    def has_filters(self):
+        """ Returns whether changelist has defined list_filters, unbound_list_filters. """
+        if self.list_filter or hasattr(self.model_admin, 'unbound_list_filter'):
+            return True
         return False
 
     def get_filters(self, request):

@@ -16,7 +16,7 @@
 {% spaceless %}
 {% block content_toolbar_left %}
     <div id="filters-handler">
-        {% if cl.list_filter %}
+        {% if cl.has_filters %}
                 {% if is_filtered %}
                     <a class="icn btn filter filter-active {% if is_popup %}popup-filter{% else %}js-simpleload{% endif %}" href="filters::::filters/{{ cl.get_query_string }}">{% trans 'Filters' %}<span> ({% trans 'on!' %})</span></a>
                 {% else %}
