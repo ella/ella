@@ -39,8 +39,7 @@ class Box(object):
         if not model:
             model = obj.__class__
 
-        self.app_label = model._meta.app_label
-        self.module_name = model._meta.module_name
+        self.opts = model._meta
         self.verbose_name = model._meta.verbose_name
         self.verbose_name_plural = model._meta.verbose_name_plural
 
@@ -85,7 +84,7 @@ class Box(object):
             level = 1
 
         return {
-                'content_type_name' : '.'.join((self.app_label, self.module_name)),
+                'content_type_name' : str(self.opts),
                 'content_type_verbose_name' : self.verbose_name,
                 'content_type_verbose_name_plural' : self.verbose_name_plural,
                 'object' : self.obj,
@@ -125,10 +124,9 @@ class Box(object):
         else:
             t_name = select_template(self._get_template_list()).name
 
-        return '''{%% box %(box_type)s for %(app_label)s.%(module_name)s with pk %(pk)s %%}template_name: %(template_name)s\n%(params)s{%% endbox %%}''' % {
+        return '''{%% box %(box_type)s for %(opts)s with pk %(pk)s %%}template_name: %(template_name)s\n%(params)s{%% endbox %%}''' % {
                 'box_type' : self.box_type,
-                'app_label' : self.app_label,
-                'module_name' : self.module_name,
+                'opts' : self.opts,
                 'pk' : self.obj.pk,
                 'params' : '\n'.join(('%s:%s' % item for item in self.params.items())),
                 'template_name' : t_name,
@@ -140,13 +138,13 @@ class Box(object):
         if hasattr(self.obj, 'category_id') and self.obj.category_id:
             from ella.core.models import Category
             cat = self.obj.category
-            base_path = 'box/category/%s/content_type/%s.%s/' % (cat.path, self.app_label, self.module_name)
+            base_path = 'box/category/%s/content_type/%s/' % (cat.path, self.opts)
             if hasattr(self.obj, 'slug'):
                 t_list.append(base_path + '%s/%s.html' % (self.obj.slug, self.box_type,))
             t_list.append(base_path + '%s.html' % (self.box_type,))
             t_list.append(base_path + 'box.html')
 
-        base_path = 'box/content_type/%s.%s/' % (self.app_label, self.module_name)
+        base_path = 'box/content_type/%s/' % self.opts
         if hasattr(self.obj, 'slug'):
             t_list.append(base_path + '%s/%s.html' % (self.obj.slug, self.box_type,))
         t_list.append(base_path + '%s.html' % (self.box_type,))
