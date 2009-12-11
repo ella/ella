@@ -603,27 +603,41 @@ $( function() {
         return false;
     }
     AjaxFormLib.ajax_submit = ajax_submit;
+
+    function is_error_overlay_empty() {
+        var $err_overlay = $('#err-overlay');
+        if ($err_overlay.length == 0 || $err_overlay.find('h6') != "") {
+            return true;
+        }
+        return false;
+    }
     
     // Handle error response from the server from a form submit event.
     // In case of changeform and expected JSON response, renders the error messages.
     function ajax_submit_error(xhr) {
         var res;
         var $form = this._form;
-        try { res = JSON.parse( xhr.responseText ); }
-        catch (e) { }
+        try { 
+            res = JSON.parse( xhr.responseText ); 
+        }
+        catch (e) {
+            carp('Error parsing JSON error response text.' + e);
+        }
         if (res && res.errors) {
             // Show the bubble with scrollto buttons
             var $err_overlay = $('#err-overlay');
-            if ($err_overlay.length == 0) $err_overlay = $(
-                '<div id="err-overlay" class="overlay">'
-            ).html(
-                '<h6></h6>'
-            ).appendTo(
-                   $form
-                || $('.change-form').get(0)
-                || $('#content').get(0)
-                || $('body').get(0)
-            );
+            if (is_error_overlay_empty()) {
+                $err_overlay = $(
+                    '<div id="err-overlay" class="overlay">'
+                ).html(
+                    '<h6></h6>'
+                ).appendTo(
+                       $form
+                    || $('.change-form').get(0)
+                    || $('#content').get(0)
+                    || $('body').get(0)
+                );
+            }
             
             $err_overlay.find('h6').text(res.message);
             
