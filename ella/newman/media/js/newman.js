@@ -619,6 +619,10 @@ $( function() {
     // Handle error response from the server from a form submit event.
     // In case of changeform and expected JSON response, renders the error messages.
     function ajax_submit_error(xhr) {
+        function error_blinking_input() { 
+            $(input).removeClass('blink'); 
+        }
+
         var res;
         var $form = this._form;
         try { 
@@ -696,7 +700,7 @@ $( function() {
                     try { input.focus(); } catch(e) {}
                     $(input).addClass('blink')
                     .closest('.collapsed').removeClass('collapsed').addClass('collapse');
-                    setTimeout( function() { $(input).removeClass('blink'); }, 1500 );
+                    setTimeout( error_blinking_input, 1500 );
                     return false;
                 });
                 $p_element.appendTo($err_overlay);
