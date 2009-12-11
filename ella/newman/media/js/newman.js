@@ -680,6 +680,7 @@ $( function() {
                 }
                 
                 var $p_element = $('<p>');
+                // FIXME (what following 3 lines do?):
                 $p_element.data('rel_input',
                       !input                             ? null
                     : $('#'+input.id+'_suggest').length  ? $('#'+input.id+'_suggest').get(0) // take suggest input if available
