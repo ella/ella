@@ -443,12 +443,16 @@ $( function() {
         }*/
     };
     AjaxFormLib.validations = validations;
+
     function show_form_error(input, msg) {
         if (!input) {
             carp("Attempt to render error for empty input:", msg);
             return;
         }
-        if (msg.shift) { var msgs = msg; msg = msgs.shift(); }
+        if (msg.shift) { 
+            var msgs = msg; 
+            msg = msgs.shift(); 
+        }
         var $msg = $('<span>').addClass('form-error-msg').text(msg);
         var $antecedant = $(input).closest('.markItUp').add(input).eq(0);
         $antecedant.before($msg);
@@ -671,17 +675,22 @@ $( function() {
                     if (!input) carp('Error reported for nonexistant input #'+id);
                 }
                 
-                $('<p>')
-                .data('rel_input',
+                var $p_element = $('<p>');
+                $p_element.data('rel_input',
                       !input                             ? null
                     : $('#'+input.id+'_suggest').length  ? $('#'+input.id+'_suggest').get(0) // take suggest input if available
                     :                                      input                             // otherwise the input itself
-                )
-                .text(
-                       label
-                    || ($('label[for='+input.id+']').text() || id).replace(/:$/,'') // identify the input with its label text or id; no trailing ':' pls
-                )
-                .click( function(evt) { // focus and scroll to the input
+                );
+                try {
+                    $p_element.text(
+                           label
+                        || ($('label[for='+input.id+']').text() || id).replace(/:$/,'') // identify the input with its label text or id; no trailing ':' pls
+                    );
+                } catch (e) {
+                    // problem occurred
+                    $p_element.text(msgs.shift());
+                }
+                $p_element.click( function(evt) { // focus and scroll to the input
                     if (evt.button != 0) return;
                     var input = $(this).closest('p').data('rel_input');
                     try { input.focus(); } catch(e) {}
@@ -689,8 +698,8 @@ $( function() {
                     .closest('.collapsed').removeClass('collapsed').addClass('collapse');
                     setTimeout( function() { $(input).removeClass('blink'); }, 1500 );
                     return false;
-                })
-                .appendTo($err_overlay);
+                });
+                $p_element.appendTo($err_overlay);
             }
             $err_overlay.show();
         }
