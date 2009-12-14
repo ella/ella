@@ -2,12 +2,7 @@ import sys
 import logging
 from time import time
 import traceback
-try:
-    import cjson
-    dumps = cjson.encode
-    loads = cjson.decode
-except ImportError:
-    from django.utils.simplejson import dumps, loads
+import anyjson
 
 from django.http import HttpResponse
 from django.contrib.admin.models import LogEntry
@@ -97,12 +92,12 @@ def profiled_section(func):
 def json_encode(data):
     """ Encode python data into JSON. Try faster cjson first. """
 
-    return dumps(data)
+    return anyjson.serialize(data)
 
 def json_decode(str):
     """ Decode JSON string into python. """
 
-    return loads(str)
+    return anyjson.deserialize(str)
 
 def JsonResponse(message, data={}, errors={}, status=STATUS_OK, http_status=HTTP_OK):
     """ Return JSON response in newman's standard format. """
@@ -113,10 +108,11 @@ def JsonResponse(message, data={}, errors={}, status=STATUS_OK, http_status=HTTP
     }
     if data:
         # if data contains JSON data, first try to decode them
-        try:
-            data = json_decode(data)
-        except:
-            log.info('Cannot decode json data in JsonResponse(), data=[%s]' % data)
+        if isinstance(data, (str, unicode)):
+            try:
+                data = json_decode(data)
+            except ValueError, e:
+                log.info('%s, data=[%s]' % (e, data))
 
         out_dict['data'] = data
     if errors:
