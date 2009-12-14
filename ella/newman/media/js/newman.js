@@ -443,12 +443,16 @@ $( function() {
         }*/
     };
     AjaxFormLib.validations = validations;
+
     function show_form_error(input, msg) {
         if (!input) {
             carp("Attempt to render error for empty input:", msg);
             return;
         }
-        if (msg.shift) { var msgs = msg; msg = msgs.shift(); }
+        if (msg.shift) { 
+            var msgs = msg; 
+            msg = msgs.shift(); 
+        }
         var $msg = $('<span>').addClass('form-error-msg').text(msg);
         var $antecedant = $(input).closest('.markItUp').add(input).eq(0);
         $antecedant.before($msg);
@@ -603,27 +607,45 @@ $( function() {
         return false;
     }
     AjaxFormLib.ajax_submit = ajax_submit;
+
+    function is_error_overlay_empty() {
+        var $err_overlay = $('#err-overlay');
+        if ($err_overlay.length == 0 || $err_overlay.find('h6') != "") {
+            return true;
+        }
+        return false;
+    }
     
     // Handle error response from the server from a form submit event.
     // In case of changeform and expected JSON response, renders the error messages.
     function ajax_submit_error(xhr) {
+        function error_blinking_input() { 
+            $(input).removeClass('blink'); 
+        }
+
         var res;
         var $form = this._form;
-        try { res = JSON.parse( xhr.responseText ); }
-        catch (e) { }
+        try { 
+            res = JSON.parse( xhr.responseText ); 
+        }
+        catch (e) {
+            carp('Error parsing JSON error response text.' + e);
+        }
         if (res && res.errors) {
             // Show the bubble with scrollto buttons
             var $err_overlay = $('#err-overlay');
-            if ($err_overlay.length == 0) $err_overlay = $(
-                '<div id="err-overlay" class="overlay">'
-            ).html(
-                '<h6></h6>'
-            ).appendTo(
-                   $form
-                || $('.change-form').get(0)
-                || $('#content').get(0)
-                || $('body').get(0)
-            );
+            if (is_error_overlay_empty()) {
+                $err_overlay = $(
+                    '<div id="err-overlay" class="overlay">'
+                ).html(
+                    '<h6></h6>'
+                ).appendTo(
+                       $form
+                    || $('.change-form').get(0)
+                    || $('#content').get(0)
+                    || $('body').get(0)
+                );
+            }
             
             $err_overlay.find('h6').text(res.message);
             
@@ -657,26 +679,32 @@ $( function() {
                     if (!input) carp('Error reported for nonexistant input #'+id);
                 }
                 
-                $('<p>')
-                .data('rel_input',
+                var $p_element = $('<p>');
+                // FIXME (what following 3 lines do?):
+                $p_element.data('rel_input',
                       !input                             ? null
                     : $('#'+input.id+'_suggest').length  ? $('#'+input.id+'_suggest').get(0) // take suggest input if available
                     :                                      input                             // otherwise the input itself
-                )
-                .text(
-                       label
-                    || ($('label[for='+input.id+']').text() || id).replace(/:$/,'') // identify the input with its label text or id; no trailing ':' pls
-                )
-                .click( function(evt) { // focus and scroll to the input
+                );
+                try {
+                    $p_element.text(
+                           label
+                        || ($('label[for='+input.id+']').text() || id).replace(/:$/,'') // identify the input with its label text or id; no trailing ':' pls
+                    );
+                } catch (e) {
+                    // problem occurred
+                    $p_element.text(msgs.shift());
+                }
+                $p_element.click( function(evt) { // focus and scroll to the input
                     if (evt.button != 0) return;
                     var input = $(this).closest('p').data('rel_input');
                     try { input.focus(); } catch(e) {}
                     $(input).addClass('blink')
                     .closest('.collapsed').removeClass('collapsed').addClass('collapse');
-                    setTimeout( function() { $(input).removeClass('blink'); }, 1500 );
+                    setTimeout( error_blinking_input, 1500 );
                     return false;
-                })
-                .appendTo($err_overlay);
+                });
+                $p_element.appendTo($err_overlay);
             }
             $err_overlay.show();
         }
