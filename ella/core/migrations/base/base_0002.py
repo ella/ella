@@ -132,6 +132,11 @@ class BasePublishableDataMigration(object):
             gens.append(('comments_comment', 'target_ct_id', 'target_id', None))
         if 'ella.positions' in settings.INSTALLED_APPS:
             gens.append(('positions_position', 'target_ct_id', 'target_id', None))
+        if 'ella.ratings' in settings.INSTALLED_APPS:
+            gens.append(('ratings_totalrate', 'target_ct_id', 'target_id', None))
+            gens.append(('ratings_agg', 'target_ct_id', 'target_id', None))
+            gens.append(('ratings_rating', 'target_ct_id', 'target_id', None))
+
         return [dict(zip(keys, v)) for v in gens]
 
     def backwards(self, orm):
