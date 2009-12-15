@@ -12,7 +12,7 @@ class Migration:
     
     def backwards(self, orm):
         "Write your backwards migration here"
-        db.delete_column('django_comments', 'old_id'))
+        db.delete_column('django_comments', 'old_id')
     
     
     models = {
