@@ -162,7 +162,7 @@ class ListContentType(EllaCoreView):
     * ``page/category.html``
 
     Otherwise an archive template gets rendered:
-        
+
     * ``page/category/<tree_path>/content_type/<app>.<model>/listing.html``
     * ``page/category/<tree_path>/listing.html``
     * ``page/content_type/<app>.<model>/listing.html``
@@ -223,7 +223,7 @@ class ListContentType(EllaCoreView):
             page_no = int(request.GET['p'])
         else:
             page_no = 1
-        
+
         # if we are not on the first page, display a different template
         category_title_page = page_no == 1
 
@@ -295,10 +295,10 @@ def get_content_type(ct_name):
 
     Results of this function is cached to improve performance.
 
-    :Parameters: 
+    :Parameters:
         - `ct_name`:  Slugified verbose_name_plural of the target model.
 
-    :Exceptions: 
+    :Exceptions:
         - `Http404`: if no matching ContentType is found
     """
     try:
@@ -332,6 +332,8 @@ def get_templates(name, slug=None, category=None, app_label=None, model_label=No
                 templates.append('page/category/%s/content_type/%s.%s/%s/%s' % (category.path, app_label, model_label, slug, name))
             templates.append('page/category/%s/content_type/%s.%s/%s' % (category.path, app_label, model_label, name))
         templates.append('page/category/%s/%s' % (category.path, name))
+        if category.tree_parent:
+            templates.append('page/category/%s/%s' % (category.tree_parent.path, name))
     if app_label and model_label:
         templates.append('page/content_type/%s.%s/%s' % (app_label, model_label, name))
     templates.append('page/%s' % name)

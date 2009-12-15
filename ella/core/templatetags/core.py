@@ -191,6 +191,8 @@ class BoxNode(template.Node):
             except template.VariableDoesNotExist, e:
                 log.error('BoxNode: Template variable does not exist. var_name=%s' % self.var_name)
                 raise ObjectNotFoundOrInvalid()
+            if not obj:
+                raise ObjectNotFoundOrInvalid()
         return obj
 
     def render(self, context):

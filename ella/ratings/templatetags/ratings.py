@@ -221,7 +221,11 @@ class TopRatedNode(template.Node):
         self.count, self.name, self.mods = count, name, mods
 
     def render(self, context):
-        context[self.name] = TotalRate.objects.get_top_objects(self.count, self.mods)
+        # FIXME: remove try-except after rating migration
+        try:
+            context[self.name] = TotalRate.objects.get_top_objects(self.count, self.mods)
+        except:
+            pass
         return ''
 
 @register.tag('top_rated')

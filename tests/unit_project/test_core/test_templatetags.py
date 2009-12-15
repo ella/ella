@@ -151,6 +151,11 @@ class TestBoxTag(UnitTestCase):
         t = template.Template('{% box name for var %}{% endbox %}')
         self.assert_equals('example.com', t.render(template.Context({'var': site})))
 
+    def test_box_for_empty_object_renders_empty(self):
+        template_loader.templates['box/box.html'] = 'XXX'
+        t = template.Template('{% box name for var %}{% endbox %}')
+        self.assert_equals('', t.render(template.Context({'var': None})))
+
 class TestBoxTagParser(UnitTestCase):
     def test_parse_box_with_pk(self):
         node = _parse_box([], ['box', 'box_type', 'for', 'core.category', 'with', 'pk', '1'])

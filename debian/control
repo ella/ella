@@ -11,6 +11,6 @@ Provides: centrum-ella
 Conflicts: centrum-ella
 Replaces: centrum-ella
 Architecture: all
-Depends: ${python:Depends}, ${misc:Depends}, python-django, python-docutils, python-pysqlite2, python-markdown2, python-feedparser, python-imaging
+Depends: ${python:Depends}, ${misc:Depends}, python-django, python-docutils, python-pysqlite2, python-markdown2, python-feedparser, python-imaging, python-anyjson
 Description: ella - django cms
 
