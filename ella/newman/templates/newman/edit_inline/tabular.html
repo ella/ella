@@ -1,5 +1,6 @@
 <div class="inline-group">
   <div class="tabular inline-related {% if forloop.last %}last-related{% endif %}">
+  
 {{ inline_admin_formset.formset.management_form }}
 <fieldset class="module" style="margin: 10px;">
    <legend style="font-size: 120%; font-weight: bold;">{{ inline_admin_formset.opts.verbose_name_plural|capfirst }}</legend>
@@ -27,7 +28,7 @@
         {% endif %}
         {% if inline_admin_form.original or inline_admin_form.show_url %}
             <tr>
-                <td colspan="{{ inline_admin_form.field_count }}">
+                <td colspan="{{ inline_admin_form.field_count }}" id="id_{{ inline_admin_form.form.prefix }}-__all__">
                     {% if inline_admin_form.original %} {{ inline_admin_form.original }} {% endif %}
                     {% if inline_admin_form.show_url %}<a class="icn web" href="{% url newman:obj-redirect inline_admin_form.original_content_type_id inline_admin_form.original.id %}">{% trans "View on site" %}</a>{% endif %}
                 </td>
