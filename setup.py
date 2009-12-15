@@ -48,6 +48,12 @@ setup(
     setup_requires = [
         'setuptools_dummy',
     ],
-)
 
+    buildbot_meta_master = {
+        'host' : 'rlyeh.cnt-cthulhubot.dev.chservices.cz',
+        'port' : 12018,
+        'branch' : 'automation',
+    },
+
+)
 
