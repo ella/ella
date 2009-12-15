@@ -197,3 +197,17 @@ def get_newman_url(parser, token):
         raise template.TemplateSyntaxError("{% get_newman_url for <object> %}")
 
     return GetNewmanUrlNode(bits[2])
+
+class NewmanPdbNode(template.Node):
+    def render(self, context):
+        from django.conf import settings
+        if settings.DEBUG:
+            try:
+                import ipdb;ipdb.set_trace()
+            except ImportError:
+                import pdb;pdb.set_trace()
+        return ''
+
+@register.tag
+def newman_pdb(parser, token):
+    return NewmanPdbNode()
