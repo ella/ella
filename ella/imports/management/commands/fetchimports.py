@@ -2,6 +2,7 @@ import sys
 import locale
 import codecs
 
+from django.db import transaction
 from django.conf import settings
 from django.utils import translation
 from django.core.management.base import NoArgsCommand
