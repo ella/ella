@@ -692,9 +692,14 @@ $( function() {
                 var err = res.errors[i];
                 var id = err.id;
                 var msgs = err.messages;
+                var first_message = '';
                 var label = err.label;
                 var input;
-                
+               
+                // assign first message
+                if (msgs.length > 0) {
+                    first_message = msgs[0];
+                }
                 // non-field errors
                 if (id == 'id___all__') {
                     var $nfe = $('#non-field-errors');
@@ -725,13 +730,21 @@ $( function() {
                     :                                      input                             // otherwise the input itself
                 );
                 try {
-                    $p_element.text(
-                           label
-                        || ($('label[for='+input.id+']').text() || id).replace(/:$/,'') // identify the input with its label text or id; no trailing ':' pls
-                    );
+                    var $error_label = $('label[for='+input.id+']');
+                    var parts = [
+                        '__FILL_THIS__',
+                        ': ' ,
+                        first_message
+                    ];
+                    if ($error_label) {
+                            parts[0] = $error_label.text();
+                    } else {
+                            parts[0] = id;
+                    }
+                    $p_element.text(parts.join('').replace(/:$/,''));
                 } catch (e) {
                     // problem occurred
-                    $p_element.text(msgs.shift());
+                    $p_element.text(first_message);
                 }
                 $p_element.click( function(evt) { // focus and scroll to the input
                     if (evt.button != 0) return;
