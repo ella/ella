@@ -6,27 +6,27 @@ from ella.ellaadmin.options import EllaAdminOptionsMixin
 from ella.positions.models import Position
 
 class PositionOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
-    def show_title(self):
-        if not self.target:
+    def show_title(self, obj):
+        if not obj.target:
             return '-- %s --' % ugettext('empty position')
         else:
-            return u'%s [%s]' % (self.target.title, ugettext(self.target_ct.name),)
+            return u'%s [%s]' % (obj.target.title, ugettext(obj.target_ct.name),)
     show_title.short_description = _('Title')
 
-    def is_filled(self):
-        if self.target:
+    def is_filled(self, obj):
+        if obj.target:
             return True
         else:
             return False
     is_filled.short_description = _('Filled')
     is_filled.boolean = True
 
-    def is_active(self):
-        if self.disabled:
+    def is_active(self, obj):
+        if obj.disabled:
             return False
         now = datetime.now()
-        active_from = not self.active_from or self.active_from <= now
-        active_till = not self.active_till or self.active_till > now
+        active_from = not obj.active_from or obj.active_from <= now
+        active_till = not obj.active_till or obj.active_till > now
         return active_from and active_till
     is_active.short_description = _('Active')
     is_active.boolean = True
