@@ -73,10 +73,6 @@ class SeriePart(models.Model):
     def published(self):
         return self.placement.publish_from
 
-    def target_admin(self):
-        return self.target
-    target_admin.short_description = _('Target')
-
     def __unicode__(self):
         return u"%s %s: %s" % (self.target,_('in serie'),self.serie)
 

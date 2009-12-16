@@ -38,6 +38,11 @@ class SeriePartAdmin(newman.NewmanModelAdmin):
     raw_id_fields = ('placement',)
     list_filter = ('serie',)
 
+    def target_admin(self, obj):
+        return obj.target
+    target_admin.short_description = _('Target')
+
+
 newman.site.register(Serie, SerieAdmin)
 newman.site.register(SeriePart, SeriePartAdmin)
 
