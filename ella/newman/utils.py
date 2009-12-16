@@ -7,6 +7,7 @@ import anyjson
 from django.http import HttpResponse
 from django.contrib.admin.models import LogEntry
 from django.db.models.aggregates import Max
+from django.core.urlresolvers import reverse
 
 from ella.newman import models
 from ella.newman.config import STATUS_OK, STATUS_GENERIC_ERROR, HTTP_ERROR, HTTP_OK, STATUS_JSON_REDIRECT
@@ -249,3 +250,10 @@ def is_user_category_filtered(queryset):
 def get_log_entries(limit=15, filters={}):
     entry_ids = LogEntry.objects.values('object_id', 'content_type_id').annotate(last_edit=Max('action_time'), id=Max('id')).filter(**filters).order_by('-last_edit')[:limit]
     return LogEntry.objects.filter(pk__in=[i['id'] for i in entry_ids])
+
+# newman url for object for other apps, FEs...
+def get_newman_url(obj):
+    """return valid admin edit page url"""
+    model = obj.__class__
+    info = model._meta.app_label, model._meta.module_name
+    return reverse('newman:%s_%s_change' % info, args=(obj._get_pk_val(),))
