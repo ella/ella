@@ -9,6 +9,10 @@
     {% for inline_admin_form in inline_admin_formset %}
         <div class="inline-related {% if forloop.last %}last-related{% endif %}">
             {% if inline_admin_form.form.non_field_errors %}{{ inline_admin_form.form.non_field_errors }}{% endif %}
+            <label for="id_{{ inline_admin_form.form.prefix }}-__all__" class="noscreen">
+                {{ inline_admin_formset.opts.verbose_name_plural|capfirst }}
+            </label>
+            <span id="id_{{ inline_admin_form.form.prefix }}-__all__" class="noscreen"></span>
 
             {% for fieldset in inline_admin_form %}
                 <div class="gallery-item">
