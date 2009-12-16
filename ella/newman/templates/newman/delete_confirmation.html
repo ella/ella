@@ -25,4 +25,11 @@
         </div>
     </div>
 </div>
+<script type="text/javascript">
+    NewmanLib.register_pre_submit_callback_once(
+        function() {
+            Kobayashi.unload_content('service-container');
+        }
+    );
+</script>
 {% endspaceless %}

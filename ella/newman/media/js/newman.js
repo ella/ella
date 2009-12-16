@@ -1,4 +1,10 @@
-var LF = 10, CR = 13;
+var LF = 10;
+var CR = 13;
+var ASCII_PRINTABLE_BEGIN = 32;
+var ASCII_PRINTABLE_END = 126;
+var ASCII_BACKSPACE = 8;
+var ASCII_DELETE = 46;
+var UNICODE = 160;
 
 // Set the default target for Kobayashi to #content
 Kobayashi.DEFAULT_TARGET = 'content';
@@ -18,6 +24,7 @@ NewmanLib = {};
 (function() {
     NewmanLib.post_save_callbacks = [];
     NewmanLib.pre_submit_callbacks = [];
+    NewmanLib.pre_submit_once_callbacks = [];
     NewmanLib.post_save_once_callbacks = [];
 
     function register_post_submit_callback(callback) {
@@ -40,6 +47,13 @@ NewmanLib = {};
         }
     }
     NewmanLib.register_pre_submit_callback = register_pre_submit_callback;
+    
+    function register_pre_submit_callback_once(callback) {
+        if (!(callback in NewmanLib.pre_submit_once_callbacks)) {
+            NewmanLib.pre_submit_once_callbacks.push(callback)
+        }
+    }
+    NewmanLib.register_pre_submit_callback_once = register_pre_submit_callback_once;
 
     function call_callbacks_in_array(carray, destructive_call_once) {
         var i, item;
@@ -54,23 +68,36 @@ NewmanLib = {};
     }
 
     function call_post_submit_callbacks() {
+        var once = true;
         try {
             call_callbacks_in_array(NewmanLib.post_save_once_callbacks, true);
-        } catch(e) {
-            carp('Error occured when calling post submit callback (once).' + e.toString());
-            carp('item=' + item);
-        }
-        try {
+            once = false;
             call_callbacks_in_array(NewmanLib.post_save_callbacks);
         } catch(e) {
-            carp('Error occured when calling post submit callback.' + e.toString());
+            if (once) {
+                carp('Error occured when calling post submit callback (once).' + e.toString());
+            } else {
+                carp('Error occured when calling post submit callback.' + e.toString());
+            }
             carp('item=' + item);
         }
     }
     NewmanLib.call_post_submit_callbacks = call_post_submit_callbacks;
 
     function call_pre_submit_callbacks() {
-        call_callbacks_in_array(NewmanLib.pre_submit_callbacks);
+        var once = true;
+        try {
+            call_callbacks_in_array(NewmanLib.pre_submit_once_callbacks, true);
+            once = false;
+            call_callbacks_in_array(NewmanLib.pre_submit_callbacks);
+        } catch(e) {
+            if (once) {
+                carp('Error occured when calling post submit callback (once).' + e.toString());
+            } else {
+                carp('Error occured when calling post submit callback.' + e.toString());
+            }
+            carp('item=' + item);
+        }
     }
     NewmanLib.call_pre_submit_callbacks = call_pre_submit_callbacks;
 })();
@@ -141,8 +168,16 @@ function lock_window(msg) {
     $modal.data('close_ok', false)
     $modal.dialog('open');
 }
+
 function unlock_window() {
     $('#window-lock').data('close_ok', true).dialog('close');
+}
+
+function is_window_locked() {
+    if ($('#window-lock:hidden').length > 0) {
+        return false;
+    }
+    return true;
 }
 
 function get_html_chunk(tmpl, success) {
@@ -403,16 +438,16 @@ Drafts = new Object;
         function onkeypress_autosave_handler(evt) {
             var w = evt.which;
             var c = evt.keyCode;
-            if (   w >= 32 && w <= 126  // ASCII printable chars
-                || w >= 160             // Unicode
-                || w == 8               // backspace
-                || c == 46              // delete
+            if (   w >= ASCII_PRINTABLE_BEGIN && w <= ASCII_PRINTABLE_END  // ASCII printable chars
+                || w >= UNICODE
+                || w == ASCII_BACKSPACE
+                || c == ASCII_DELETE
             ) {
                 onchange_autosave_handler();
             }
             else if (
                    $(this).is('textarea')
-                && (w == 10 || w == 13) // enter
+                && (w == CR || w == LF) // enter
             ) {
                 onchange_autosave_handler();
             }
@@ -492,7 +527,7 @@ $( function() {
     }
     
     // Submit event
-    function ajax_submit($form, button_name) {
+    function ajax_submit($form, button_name, process_redirect) {
         if (!$form.jquery) $form = $($form);
         if ( ! validate($form) ) return false;
         
@@ -577,14 +612,16 @@ $( function() {
             complete: function(xhr) {
                 var redirect_to;
                 // JSON redirects temporarily commented out.
-                /*if (redirect_to = xhr.getResponseHeader('Redirect-To')) {
-                    var new_req = {};
-                    for (k in this) new_req[k] = this[k];
-                    new_req.url = redirect_to;
-                    new_req.redirect_to = redirect_to;
-                    $.ajax( new_req );
-                    return;
-                }*/
+                if (process_redirect) {
+                    if (redirect_to = xhr.getResponseHeader('Redirect-To')) {
+                        var new_req = {};
+                        for (k in this) new_req[k] = this[k];
+                        new_req.url = redirect_to;
+                        new_req.redirect_to = redirect_to;
+                        $.ajax( new_req );
+                        return;
+                    }
+                }
                 NewmanLib.call_post_submit_callbacks();
                 if (this.succeeded) { try {
                     success.call(this, xhr.responseText, xhr);
@@ -602,6 +639,7 @@ $( function() {
             _button_name: button_name
         };
         if (button_name) request_options._button_name = button_name;
+        NewmanLib.call_pre_submit_callbacks();
 
         $.ajax( request_options );
         return false;
@@ -749,8 +787,7 @@ $( function() {
         if (evt.button != 0) return true;    // just interested in left button
         if ($(this).hasClass('js-noautosubmit')) return true;
         var $form = $(this).closest('.js-form');
-        NewmanLib.call_pre_submit_callbacks();
-        return ajax_submit($form, this.name);
+        return ajax_submit($form, this.name, true);
     });
     
     // Reset button
@@ -981,6 +1018,10 @@ function show_ajax_success(response_text) {
     } catch (e) {
         message = gettext('Successfully sent');
         paste_code_into_debug( (response_text||'').replace(/\n(\s*\n)+/g, "\n"), 'Ajax success response' );
+    }
+    // unlock window if neccessary
+    if (is_window_locked()) {
+        unlock_window();
     }
     if (this.redirect_to) {
         var literal_address;
