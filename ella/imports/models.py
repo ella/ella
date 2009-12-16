@@ -10,7 +10,6 @@ from django.utils.safestring import mark_safe
 from django.template.defaultfilters import slugify
 from django.core.files.base import ContentFile
 
-from ella.photos.models import Photo
 from ella.articles.models import Article
 from ella.core.models import Category, Listing
 
@@ -49,17 +48,17 @@ class Server(models.Model):
         # Get structure like a feed
         for entry in articles:
             photo_url = ''
-            if entry.target.get_photo():
-                photo = entry.target.get_photo()
+            if entry.target.photo:
+                photo = entry.target.photo
             else:
                 photo = None
 
             output['entries'].append(
                 {
-                    'title': entry.target.get_title(),
+                    'title': entry.target.title,
                     'link': entry.get_domain_url(),
                     'updated': entry.publish_from,
-                    'summary': entry.target.get_description(),
+                    'summary': entry.target.description,
                     'photo_url': photo_url,
                     'photo': photo,
                 }
@@ -138,8 +137,13 @@ class Server(models.Model):
             from django.core.exceptions import ImproperlyConfigured
             raise ImproperlyConfigured('Import Failed')
 
+def _photo_model():
+    from ella.photos.models import Photo
+    return Photo
+
 class ServerItem(models.Model):
     "Specific item to be imported."
+
     server = models.ForeignKey(Server)
     title = models.CharField(_('Title'), max_length=100)
     summary = models.TextField(_('Summary'))
@@ -148,7 +152,7 @@ class ServerItem(models.Model):
     slug = models.SlugField(_('Slug'), max_length=255)
     link = models.URLField(_('Link'), verify_exists=True, max_length=400)
     photo_url = models.URLField(_('Image URL'), verify_exists=False, max_length=400, blank=True)
-    photo = models.ForeignKey(Photo, blank=True, null=True, verbose_name=_('Photo'))
+    photo = models.ForeignKey(_photo_model(), blank=True, null=True, verbose_name=_('Photo'))
 
     def __unicode__(self):
         return self.title
@@ -196,7 +200,7 @@ class ServerItem(models.Model):
                 content_file = ContentFile( image.read() )
             finally:
                 image.close()
-            imported_photo = Photo()
+            imported_photo = _photo_model()()
             imported_photo.title = self.title
             imported_photo.slug = self.slug
             imported_photo.description = self.photo_url

@@ -1,6 +1,6 @@
 # register admin options
-from ella.oldcomments import admin
+#from ella.oldcomments import admin
 
 # register custom urls
-from ella.oldcomments import urls
+#from ella.oldcomments import urls
 
