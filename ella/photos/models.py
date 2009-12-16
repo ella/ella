@@ -313,6 +313,10 @@ class FormatedPhoto(models.Model):
 
         stretched_photo, crop_box = formatter.format()
 
+        # set crop_box to (0,0,0,0) if photo not cropped
+        if not crop_box:
+            crop_box = 0,0,0,0
+
         self.crop_left, self.crop_top, right, bottom = crop_box
         self.crop_width = right - self.crop_left
         self.crop_height = bottom - self.crop_top

@@ -7,9 +7,10 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from django.utils.translation import ugettext
 from djangosanetesting import DatabaseTestCase
+from django.contrib.sites.models import Site
 from PIL import Image
 
-from ella.photos.models import Photo
+from ella.photos.models import Photo, Format, FormatedPhoto
 
 from unit_project.test_photos.fixtures import create_photo_formats
 
@@ -43,6 +44,23 @@ class TestPhoto(DatabaseTestCase):
         self.photo.save()
 
         self.thumbnail_path = self.photo.get_thumbnail_path()
+
+    def test_formatted_photo_has_zero_crop_box_if_smaller_than_format(self):
+        format = Format.objects.create(
+            name='sample',
+            max_width=300,
+            max_height=300,
+            flexible_height=False,
+            stretch=False,
+            nocrop=False
+        )
+        format.sites.add(Site.objects.get_current())
+
+        fp = FormatedPhoto(photo=self.photo, format=format)
+        fp.generate(False)
+        self.assert_equals((0,0,0,0), (fp.crop_left, fp.crop_top, fp.crop_width, fp.crop_height))
+
+
 
     def test_thumbnail_html_retrieval_success(self):
         #TODO: This should be in adimn, not models
