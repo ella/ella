@@ -23,7 +23,7 @@ class ArticleAdmin(PublishableAdmin):
         (_("Article heading"), {'fields': ('title', 'upper_title',)}),
         (_("Updated, slug"), {'fields': ('updated', 'slug',), 'classes': ('collapsed',)}),
         (_("Metadata"), {'fields': ('photo', 'category', 'authors', 'source')}),
-        (_("Article contents"), {'fields': ('description',)}),
+        (_("Perex"), {'fields': ('description',)}),
     )
 
     inlines = [ArticleContentInlineAdmin, PlacementInlineAdmin, RelatedInlineAdmin]
