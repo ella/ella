@@ -62,6 +62,13 @@ class TopicThreadAdmin(newman.NewmanModelAdmin):
 class TopicAdmin(PublishableAdmin):
     list_display = ('title', 'photo_thumb', 'created', 'pk',)
 
+    fieldsets = (
+        (_("Heading"), {'fields': ('title', 'slug')}),
+        (_("Metadata"), {'fields': ('photo', 'category', 'authors', 'source')}),
+        (_("Description"), {'fields': ('description',)}),
+    )
+
+
 newman.site.register(Topic, TopicAdmin)
 newman.site.register(TopicThread, TopicThreadAdmin)
 newman.site.register([BannedString, BannedUser])
