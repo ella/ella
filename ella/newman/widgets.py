@@ -13,7 +13,7 @@ from django.utils.html import escape
 from django.utils.text import truncate_words
 from django.contrib.contenttypes.models import ContentType
 
-from ella.ellaadmin.utils import admin_url
+from ella.newman.utils import get_newman_url
 from ella.core.models import Listing
 from ella.photos.models import Photo
 from djangomarkup.widgets import RichTextAreaWidget
@@ -279,8 +279,7 @@ class ForeignKeyRawIdWidget(forms.TextInput):
     def label_for_value(self, value):
         obj = self._get_obj(value)
         label = truncate_words(obj, 14)
-        adm = admin_url(obj)
-        return '&nbsp;<a class="js-hashadr" href="%s">%s</a>' % (adm, label)
+        return '&nbsp;<a class="js-hashadr" href="%s">%s</a>' % (get_newman_url(obj), label)
 
 
 class ForeignKeyGenericRawIdWidget(forms.TextInput):

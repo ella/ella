@@ -427,6 +427,9 @@ class Result(models.Model):
         """
         return self.count*100/self.total()
 
+    def get_text(self):
+        return mark_safe( u'%s' % self.text )
+
     def __unicode__(self):
         if self.title:
             return self.title

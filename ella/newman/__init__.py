@@ -14,3 +14,5 @@ template.add_to_builtins('ella.newman.templatetags.newman')
 
 #site.disable_action('delete_selected')
 
+# newman url for object for other apps, FEs...
+from ella.newman.utils import get_newman_url
