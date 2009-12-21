@@ -10,6 +10,7 @@ from django.db.models import get_model
 
 from djangomarkup.models import SourceText, TextProcessor
 
+
 lookup = None
 def create_id_lookup():
     from ella.core.models import Publishable
@@ -42,7 +43,7 @@ def update_field(instance, content_type):
         new_pk = lookup.get((ct.pk, int(pk)), pk)
 
         # report this box use as a dependency
-        Dependency.objects.get_or_create(
+        Dependency.objects.create(
                 dependent_ct=content_type,
                 dependent_id=instance.pk,
 
@@ -59,8 +60,11 @@ def update_field(instance, content_type):
     return update_one_box
 
 def migrate_model(processor, model, fields):
+    from ella.core.models import Publishable
     model = get_model(*model.split('.'))
     ct = ContentType.objects.get_for_model(model)
+    if model == Publishable:
+        ct = None
     print 'processing', model._meta, ':', 
     sys.stdout.flush()
 
@@ -72,7 +76,9 @@ def migrate_model(processor, model, fields):
         managed(True)
 
         try:
-            for m in model.objects.all().iterator():
+            for m in model.objects.order_by().iterator():
+                if not ct: # publishable
+                    ct = ContentType.objects.get_for_id(m.content_type_id)
                 sys.stdout.write('.')
                 converted += 1
 
@@ -92,7 +98,7 @@ def migrate_model(processor, model, fields):
                             setattr(m, f, val)
                             dirty = True
 
-                SourceText.objects.extract_from_instance(m, processor, fields, content_type=ct, force_save=dirty)
+                SourceText.objects.extract_from_instance(m, processor, fields, content_type=ct, force_save=dirty, force_create=True)
         except:
             # rollback and propagate if something goes wrong
             if is_dirty():
