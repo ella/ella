@@ -3,19 +3,15 @@ from datetime import datetime
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from ella.core.models import Category, Placement
+from ella.core.models import Placement
 from ella.core.cache.utils import CachedForeignKey, get_cached_list, get_cached_object
 from ella.core.models import Publishable
-from ella.photos.models import Photo
 
 
 class Serie(Publishable):
     hide_newer_parts = models.BooleanField(_('Hide newer parts'), default=False)
     started = models.DateField(_('Started'))
     finished = models.DateField(_('Finished'), null=True, blank=True)
-
-    def get_text(self):
-        return self.description
 
     def parts_count(self):
         return len(self.parts)
@@ -32,7 +28,7 @@ class Serie(Publishable):
     is_active.boolean = True
 
     def __unicode__(self):
-        return self.title
+        return u"%s" % self.title
 
     class Meta:
         verbose_name = _('Serie')
@@ -74,7 +70,7 @@ class SeriePart(models.Model):
         return self.placement.publish_from
 
     def __unicode__(self):
-        return u"%s %s: %s" % (self.target,_('in serie'),self.serie)
+        return u"%s %s: %s" % (self.placement.publishable.target, _('in serie'), self.serie)
 
     class Meta:
         ordering = ('serie','placement__publish_from',)
