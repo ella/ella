@@ -24,6 +24,9 @@ class Migration(BasePublishableDataMigration):
     app_label = 'series'
     model = 'serie'
     table = '%s_%s' % (app_label, model)
+    publishable_uncommon_cols = {
+        'description': 'perex',
+    }
     
     def alter_self_foreignkeys(self, orm):
         alter_foreignkey_to_int('series_seriepart', 'serie')
