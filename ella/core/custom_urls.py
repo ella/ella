@@ -102,3 +102,25 @@ class DetailDispatcher(object):
 
 dispatcher = DetailDispatcher()
 
+import re
+
+from django.conf.urls.defaults import patterns, url, include
+from django.core.urlresolvers import RegexURLResolver
+
+class CustomURLResolver(object):
+    def __init__(self):
+        self._patterns = {}
+
+    def register(self, start, urlpatterns, model=None):
+        key = str(model._meta) if model else ALL
+        self._patterns[key] = self._patterns.setdefault(key, patterns('')) + patterns('',
+                ('^%s/' % re.escape(start), include((urlpatterns, '', ''))),
+            )
+
+    def _get_resolver(self, obj):
+        return RegexURLResolver(r'^', self._patterns.get(str(obj._meta), []) + self._patterns.get(ALL, []))
+
+    def resolve(self, obj, url_remainder):
+        return self._get_resolver(obj).resolve(url_remainder)
+
+resolver = CustomURLResolver()
