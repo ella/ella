@@ -4,8 +4,10 @@ from copy import deepcopy
 from djangosanetesting import UnitTestCase, DatabaseTestCase
 
 from django.http import Http404, HttpResponse
+from django.conf.urls.defaults import patterns, url
+from django.core.urlresolvers import NoReverseMatch
 
-from ella.core.custom_urls import DetailDispatcher
+from ella.core.custom_urls import DetailDispatcher, CustomURLResolver
 from ella.core import custom_urls
 
 from unit_project.test_core import create_basic_categories, create_and_place_a_publishable
@@ -21,19 +23,35 @@ def second_view(request, bits, context):
 def custom_view(request, context):
     return u"OK"
 
-class TestObjectDetail(DatabaseTestCase):
+def dummy_view(request, *args, **kwargs):
+    return HttpResponse('dummy_view:%r,%r' % (args, kwargs))
+
+
+class CustomObjectDetailTestCase(DatabaseTestCase):
+    urlpatterns = patterns('',
+        url(r'^$', dummy_view, {'kwarg_from_patterns': 42}, name='start'),
+        url(r'^new/(\d+)/$', dummy_view, name='start-new'),
+        url(r'^add/(?P<kwarg_from_url>\d+)/$', dummy_view, name='start-add'),
+    )
+
     def setUp(self):
-        super(TestObjectDetail, self).setUp()
+        super(CustomObjectDetailTestCase, self).setUp()
         create_basic_categories(self)
         create_and_place_a_publishable(self)
+
         self.url = self.publishable.get_absolute_url()
-        self.old_dispatcher = deepcopy(custom_urls.dispatcher)
+        self.old_resolver = custom_urls.resolver
+        self.old_dispatcher = custom_urls.dispatcher
+        custom_urls.resolver = CustomURLResolver()
+        custom_urls.dispatcher = DetailDispatcher()
 
     def tearDown(self):
-        super(TestObjectDetail, self).tearDown()
+        super(CustomObjectDetailTestCase, self).tearDown()
         template_loader.templates = {}
+        custom_urls.resolver = self.old_resolver
         custom_urls.dispatcher = self.old_dispatcher
 
+class TestObjectDetail(CustomObjectDetailTestCase):
     def test_custom_detail_view_called_when_registered(self):
         def my_custom_view(request, context):
             return HttpResponse('OK')
@@ -50,20 +68,16 @@ class TestObjectDetail(DatabaseTestCase):
         self.assert_equals(404, response.status_code)
 
     def test_custom_view_called_when_registered(self):
-        def my_view(request, bits, context):
-            return HttpResponse('OK' + ':'.join(bits))
-        custom_urls.dispatcher.register('start', my_view)
+        custom_urls.resolver.register('start', self.urlpatterns)
+
         response = self.client.get(self.url + 'start/')
         self.assert_equals(200, response.status_code)
-        self.assert_equals('OK', response.content)
 
-    def test_custom_view_called_when_registered_and_bits_are_passed_in(self):
-        def my_view(request, bits, context):
-            return HttpResponse('OK' + ':'.join(bits))
-        custom_urls.dispatcher.register('start', my_view)
-        response = self.client.get(self.url + 'start/some/more/bits/')
+    def test_custom_view_called_when_registered_witth_args(self):
+        custom_urls.resolver.register('start', self.urlpatterns)
+
+        response = self.client.get(self.url + 'start/add/41/')
         self.assert_equals(200, response.status_code)
-        self.assert_equals('OKsome:more:bits', response.content)
 
 
 class CustomUrlDispatcherTestCase(UnitTestCase):
@@ -126,38 +140,6 @@ class TestViewCalling(CustomUrlDispatcherTestCase):
         self.assert_equals(u"OK", self.dispatcher.call_view(request=object(), bits=['start'], context=self.context))
 
 
-from django.conf.urls.defaults import patterns, url
-
-from ella.core.custom_urls import CustomURLResolver
-from django.core.urlresolvers import NoReverseMatch
-
-# test views
-def dummy_view(request, *args, **kwargs):
-    return HttpResponse('dummy_view:%r,%r' % (args, kwargs))
-
-def dummy_view(request, *args, **kwargs):
-    return HttpResponse('dummy_view:%r,%r' % (args, kwargs))
-
-class CustomObjectDetailTestCase(DatabaseTestCase):
-    urlpatterns = patterns('',
-        url(r'^$', dummy_view, {'kwarg_from_patterns': 42}, name='start'),
-        url(r'^new/(\d+)/$', dummy_view, name='start-new'),
-        url(r'^add/(?P<kwarg_from_url>\d+)/$', dummy_view, name='start-add'),
-    )
-
-    def setUp(self):
-        super(CustomObjectDetailTestCase, self).setUp()
-        create_basic_categories(self)
-        create_and_place_a_publishable(self)
-
-        self.url = self.publishable.get_absolute_url()
-        self.old_resolver = custom_urls.resolver
-        custom_urls.resolver = CustomURLResolver()
-
-    def tearDown(self):
-        super(CustomObjectDetailTestCase, self).tearDown()
-        template_loader.templates = {}
-        custom_urls.resolver = self.old_resolver
 
 class TestCustomObjectDetailCallView(CustomObjectDetailTestCase):
     def test_view_with_args_called_correctly(self):

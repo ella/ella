@@ -104,8 +104,7 @@ class ObjectDetail(EllaCoreView):
         obj = context['object']
         # check for custom actions
         if url_remainder:
-            bits = url_remainder.split('/')
-            return custom_urls.dispatcher.call_view(request, bits, context)
+            return custom_urls.resolver.call_custom_view(request, obj, url_remainder, context)
         elif custom_urls.dispatcher.has_custom_detail(obj):
             return custom_urls.dispatcher.call_custom_detail(request, context)
 
