@@ -131,9 +131,22 @@ from django.conf.urls.defaults import patterns, url
 from ella.core.custom_urls import CustomURLResolver
 from django.core.urlresolvers import NoReverseMatch
 
-class TestCustomObjectDetail(DatabaseTestCase):
+# test views
+def dummy_view(request, *args, **kwargs):
+    return HttpResponse('dummy_view:%r,%r' % (args, kwargs))
+
+def dummy_view(request, *args, **kwargs):
+    return HttpResponse('dummy_view:%r,%r' % (args, kwargs))
+
+class CustomObjectDetailTestCase(DatabaseTestCase):
+    urlpatterns = patterns('',
+        url(r'^$', dummy_view, {'kwarg_from_patterns': 42}, name='start'),
+        url(r'^new/(\d+)/$', dummy_view, name='start-new'),
+        url(r'^add/(?P<kwarg_from_url>\d+)/$', dummy_view, name='start-add'),
+    )
+
     def setUp(self):
-        super(TestCustomObjectDetail, self).setUp()
+        super(CustomObjectDetailTestCase, self).setUp()
         create_basic_categories(self)
         create_and_place_a_publishable(self)
 
@@ -141,91 +154,81 @@ class TestCustomObjectDetail(DatabaseTestCase):
         self.old_resolver = custom_urls.resolver
         custom_urls.resolver = CustomURLResolver()
 
-        def my_view(request, *args, **kwargs):
-            return HttpResponse('my_view:%r,%r' % (args, kwargs))
-        self.my_view = my_view
-        def my_view2(request, *args, **kwargs):
-            return HttpResponse('my_view2:%r,%r' % (args, kwargs))
-        self.my_view2 = my_view2
-
-
-        self.urlpatterns = patterns('',
-            url(r'^$', my_view, {'kwarg_from_patterns': 42}, name='start'),
-            url(r'^new/(\d+)/$', my_view, name='start-new'),
-            url(r'^add/(?P<kwarg_from_url>\d+)/$', my_view, name='start-add'),
-        )
-
     def tearDown(self):
-        super(TestCustomObjectDetail, self).tearDown()
+        super(CustomObjectDetailTestCase, self).tearDown()
         template_loader.templates = {}
         custom_urls.resolver = self.old_resolver
 
-    def test_resolver_resolves_empty_url(self):
+
+class TestCustomObjectDetailResolver(CustomObjectDetailTestCase):
+    def test_resolves_empty_url(self):
         custom_urls.resolver.register('start', self.urlpatterns)
 
         view, args, kwargs = custom_urls.resolver.resolve(self.publishable, 'start/')
-        self.assert_equals(self.my_view, view)
+        self.assert_equals(dummy_view, view)
         self.assert_equals((), args)
         self.assert_equals({'kwarg_from_patterns': 42}, kwargs)
 
 
-    def test_resolver_resolves_url_with_arg(self):
+    def test_resolves_url_with_arg(self):
         custom_urls.resolver.register('start', self.urlpatterns)
 
         view, args, kwargs = custom_urls.resolver.resolve(self.publishable, 'start/new/43/')
-        self.assert_equals(self.my_view, view)
+        self.assert_equals(dummy_view, view)
         self.assert_equals(('43',), args)
         self.assert_equals({}, kwargs)
 
 
-    def test_resolver_resolves_url_with_kwarg(self):
+    def test_resolves_url_with_kwarg(self):
         custom_urls.resolver.register('start', self.urlpatterns)
 
         view, args, kwargs = custom_urls.resolver.resolve(self.publishable, 'start/add/44/')
-        self.assert_equals(self.my_view, view)
+        self.assert_equals(dummy_view, view)
         self.assert_equals((), args)
         self.assert_equals({'kwarg_from_url': '44'}, kwargs)
 
 
-    def test_resolver_raises_404_for_incorrect_url(self):
+    def test_raises_404_for_incorrect_url(self):
         custom_urls.resolver.register('start', self.urlpatterns)
 
         self.assert_raises(Http404, custom_urls.resolver.resolve, self.publishable, 'not-start/')
 
-    def test_resolver_resolves_url_registered_for_one_model(self):
+    def test_resolves_url_registered_for_one_model(self):
         custom_urls.resolver.register('start', self.urlpatterns, self.publishable.__class__)
 
         view, args, kwargs = custom_urls.resolver.resolve(self.publishable, 'start/')
-        self.assert_equals(self.my_view, view)
+        self.assert_equals(dummy_view, view)
         self.assert_equals((), args)
         self.assert_equals({'kwarg_from_patterns': 42}, kwargs)
 
-    def test_resolver_raises_404_for_url_registered_for_different_model_only(self):
+    def test_raises_404_for_url_registered_for_different_model_only(self):
         custom_urls.resolver.register('start', self.urlpatterns, self.category.__class__)
 
         self.assert_raises(Http404, custom_urls.resolver.resolve, self.publishable, 'start/')
 
-    def test_reverse_works_without_args(self):
+
+class TestCustomObjectDetailReverse(CustomObjectDetailTestCase):
+    def test_works_without_args(self):
         custom_urls.resolver.register('start', self.urlpatterns)
 
         self.assert_equals(self.url + 'start/', custom_urls.resolver.reverse(self.publishable, 'start'))
 
-    def test_reverse_works_with_args(self):
+    def test_works_with_args(self):
         custom_urls.resolver.register('start', self.urlpatterns)
 
         self.assert_equals(self.url + 'start/new/41/', custom_urls.resolver.reverse(self.publishable, 'start-new', 41))
 
-    def test_reverse_works_with_kwargs(self):
+    def test_works_with_kwargs(self):
         custom_urls.resolver.register('start', self.urlpatterns)
 
         self.assert_equals(self.url + 'start/add/42/', custom_urls.resolver.reverse(self.publishable, 'start-add', kwarg_from_url=42))
 
-    def test_reverse_works_if_registered_for_one_model(self):
+    def test_works_if_registered_for_one_model(self):
         custom_urls.resolver.register('start', self.urlpatterns, self.publishable.__class__)
 
         self.assert_equals(self.url + 'start/', custom_urls.resolver.reverse(self.publishable, 'start'))
 
-    def test_reverse_doesnt_find_url_if_registered_for_different_model_only(self):
+    def test_doesnt_find_url_if_registered_for_different_model_only(self):
         custom_urls.resolver.register('start', self.urlpatterns, self.category.__class__)
 
         self.assert_raises(NoReverseMatch,  custom_urls.resolver.reverse, self.publishable, 'start')
