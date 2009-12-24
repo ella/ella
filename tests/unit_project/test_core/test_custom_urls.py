@@ -159,6 +159,31 @@ class CustomObjectDetailTestCase(DatabaseTestCase):
         template_loader.templates = {}
         custom_urls.resolver = self.old_resolver
 
+class TestCustomObjectDetailCallView(CustomObjectDetailTestCase):
+    def test_view_with_args_called_correctly(self):
+        custom_urls.resolver.register('start', self.urlpatterns)
+
+        response = custom_urls.resolver.call_custom_view(object(), self.publishable, 'start/new/42/', {'context': 1})
+        self.assert_equals(200, response.status_code)
+        self.assert_equals("dummy_view:({'context': 1}, '42'),{}", response.content)
+
+    def test_view_with_kwargs_called_correctly(self):
+        custom_urls.resolver.register('start', self.urlpatterns)
+
+        response = custom_urls.resolver.call_custom_view(object, self.publishable, 'start/add/52/', {'context': 1})
+        self.assert_equals(200, response.status_code)
+        self.assert_equals("dummy_view:({'context': 1},),{'kwarg_from_url': '52'}", response.content)
+
+    def test_view_with_no_args_called_correctly(self):
+        custom_urls.resolver.register('start', self.urlpatterns)
+
+        response = custom_urls.resolver.call_custom_view(object, self.publishable, 'start/', {'context': 1})
+        self.assert_equals(200, response.status_code)
+        self.assert_equals("dummy_view:({'context': 1},),{'kwarg_from_patterns': 42}", response.content)
+
+    def test_404_raised_for_nonexitant_url(self):
+        self.assert_raises(Http404, custom_urls.resolver.call_custom_view, object(), self.publishable, 'start/', {})
+
 
 class TestCustomObjectDetailResolver(CustomObjectDetailTestCase):
     def test_resolves_empty_url(self):

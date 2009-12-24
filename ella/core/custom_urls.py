@@ -126,4 +126,8 @@ class CustomURLResolver(object):
     def reverse(self, obj, view_name, *args, **kwargs):
         return obj.get_absolute_url() + self._get_resolver(obj).reverse(view_name, *args, **kwargs)
 
+    def call_custom_view(self, request, obj, url_remainder, context):
+        view, args, kwargs = self.resolve(obj, url_remainder)
+        return view(request, context, *args, **kwargs)
+
 resolver = CustomURLResolver()
