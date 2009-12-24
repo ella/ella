@@ -129,6 +129,7 @@ class TestViewCalling(CustomUrlDispatcherTestCase):
 from django.conf.urls.defaults import patterns, url
 
 from ella.core.custom_urls import CustomURLResolver
+from django.core.urlresolvers import NoReverseMatch
 
 class TestCustomObjectDetail(DatabaseTestCase):
     def setUp(self):
