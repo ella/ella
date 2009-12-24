@@ -111,11 +111,11 @@ class CustomURLResolver(object):
     def __init__(self):
         self._patterns = {}
 
-    def register(self, urlpatterns, start=None, model=None):
+    def register(self, urlpatterns, prefix=None, model=None):
         key = str(model._meta) if model else ALL
-        if start:
+        if prefix:
             urlpatterns = patterns('',
-                    url('^%s/' % re.escape(start), include((urlpatterns, '', ''))),
+                    url('^%s/' % re.escape(prefix), include((urlpatterns, '', ''))),
                 )
         self._patterns.setdefault(key, []).extend(urlpatterns)
 
