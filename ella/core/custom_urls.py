@@ -113,9 +113,9 @@ class CustomURLResolver(object):
 
     def register(self, start, urlpatterns, model=None):
         key = str(model._meta) if model else ALL
-        self._patterns[key] = self._patterns.setdefault(key, patterns('')) + patterns('',
-                ('^%s/' % re.escape(start), include((urlpatterns, '', ''))),
-            )
+        self._patterns.setdefault(key, []).extend(patterns('',
+                url('^%s/' % re.escape(start), include((urlpatterns, '', ''))),
+            ))
 
     def _get_resolver(self, obj):
         return RegexURLResolver(r'^', self._patterns.get(str(obj._meta), []) + self._patterns.get(ALL, []))
