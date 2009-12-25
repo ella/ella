@@ -6,6 +6,7 @@ from djangosanetesting import UnitTestCase, DatabaseTestCase
 from django.http import Http404, HttpResponse
 from django.conf.urls.defaults import patterns, url
 from django.core.urlresolvers import NoReverseMatch
+from django.template import Template, Context
 
 from ella.core.custom_urls import DetailDispatcher, CustomURLResolver
 from ella.core import custom_urls
@@ -50,6 +51,26 @@ class CustomObjectDetailTestCase(DatabaseTestCase):
         template_loader.templates = {}
         custom_urls.resolver = self.old_resolver
         custom_urls.dispatcher = self.old_dispatcher
+
+class TestCustomURLTemplateTag(CustomObjectDetailTestCase):
+    def test_view_with_no_args_resolves(self):
+        custom_urls.resolver.register(self.urlpatterns, prefix='prefix')
+        t = Template('{% load custom_urls_tags %}{% custom_url object prefix %}')
+
+        self.assert_equals(self.url + 'prefix/', t.render(Context({'object': self.publishable})))
+
+    def test_view_with_args_resolves(self):
+        custom_urls.resolver.register(self.urlpatterns, prefix='prefix')
+        t = Template('{% load custom_urls_tags %}{% custom_url object prefix-new some_id %}')
+
+        self.assert_equals(self.url + 'prefix/new/44/', t.render(Context({'object': self.publishable, 'some_id': 44})))
+
+    def test_view_with_kwargs_resolves(self):
+        custom_urls.resolver.register(self.urlpatterns, prefix='prefix')
+        t = Template('{% load custom_urls_tags %}{% custom_url object prefix-add kwarg_from_url=12 %}')
+
+        self.assert_equals(self.url + 'prefix/add/12/', t.render(Context({'object': self.publishable})))
+
 
 class TestObjectDetail(CustomObjectDetailTestCase):
     def test_custom_detail_view_called_when_registered(self):
