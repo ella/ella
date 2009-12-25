@@ -122,7 +122,7 @@ class TestCommentViews(CommentViewTestCase):
         self.assert_true('parent' in response.context)
         self.assert_equals(c, response.context['parent'])
         form =  response.context['form']
-        self.assert_equals(c.pk, form.parent)
+        self.assert_equals(str(c.pk), form.parent)
 
     def test_post_raises_404_for_non_existent_parent(self):
         template_loader.templates['404.html'] = ''
