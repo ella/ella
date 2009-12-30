@@ -106,6 +106,10 @@ class BasePoll(models.Model):
             return True
         return False
 
+    def description(self):
+        return self.text_announcement
+
+
 
 class Poll(BasePoll):
 
@@ -181,9 +185,6 @@ class Contest(BasePoll, Publishable):
             .extra(select={'count_guess_difference': 'ABS(%s - %d)' % (connection.ops.quote_name('count_guess'), count)})
             .order_by('count_guess_difference'))
 
-    def description(self):
-        return self.text_announcement
-
     def __unicode__(self):
         return self.title
 
@@ -212,9 +213,6 @@ class Quiz(BasePoll, Publishable):
                 models.Q(points_to__gte=points) | models.Q(points_to__isnull=True),
                 quiz=self
             )
-
-    def description(self):
-        return self.text_announcement
 
     def __unicode__(self):
         return self.title
