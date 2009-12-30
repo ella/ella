@@ -181,7 +181,7 @@ class Contest(BasePoll, Publishable):
             .extra(select={'count_guess_difference': 'ABS(%s - %d)' % (connection.ops.quote_name('count_guess'), count)})
             .order_by('count_guess_difference'))
 
-    def get_description(self):
+    def description(self):
         return self.text_announcement
 
     def __unicode__(self):
@@ -213,7 +213,7 @@ class Quiz(BasePoll, Publishable):
                 quiz=self
             )
 
-    def get_description(self):
+    def description(self):
         return self.text_announcement
 
     def __unicode__(self):
