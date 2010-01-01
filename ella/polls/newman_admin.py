@@ -5,6 +5,8 @@ from django.conf import settings
 from django.forms.util import ValidationError
 from django.template.defaultfilters import striptags
 from django.forms import models as modelforms
+from django.utils.safestring import mark_safe
+from django.conf.urls.defaults import patterns, url
 
 from ella import newman
 from ella.newman import fields
@@ -255,18 +257,17 @@ class QuestionInlineAdmin(newman.NewmanTabularInline):
     extra = 1
 
 class ContestAdmin(PublishableAdmin):
-    def __call__(self, request, url):
-        if url and url.endswith('correct_answers'):
-            pk = url.split('/')[-2]
-            contest = get_cached_object_or_404(Contest, pk=pk)
-            contestants = contest.get_correct_answers()
-            title = u"%s '%s': %s" % (Contest._meta.verbose_name, contest.title, _('Correct Answers'))
-            module_name = Contestant._meta.module_name
-            return render_to_response('admin/polls/answer/correct.html',
-                {'contestants' : contestants, 'title' : title, 'module_name' : module_name})
-        return super(ContestAdmin, self).__call__(request, url)
+#    def __call__(self, request, url):
+#        if url and url.endswith('correct_answers'):
+#            pk = url.split('/')[-2]
+#            contest = get_cached_object_or_404(Contest, pk=pk)
+#            contestants = contest.get_correct_answers()
+#            title = u"%s '%s': %s" % (Contest._meta.verbose_name, contest.title, _('Correct Answers'))
+#            module_name = Contestant._meta.module_name
+#            return render_to_response('admin/polls/answer/correct.html',
+#                {'contestants' : contestants, 'title' : title, 'module_name' : module_name})
+#        return super(ContestAdmin, self).__call__(request, url)
 
-# FIXME: correct_answers does not work
     list_display = ('admin_link', 'category', 'active_from', 'correct_answers', 'get_all_answers_count', 'pk',)
     list_filter = ('category', 'active_from',)
     search_fields = ('title', 'text',)
@@ -274,6 +275,35 @@ class ContestAdmin(PublishableAdmin):
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
     rich_text_fields = {'small': ('description',), None: ('text',)}
+
+    def get_urls(self):
+        urlpatterns = patterns('',
+            url(r'^(\d+)/correct-answers/$',
+                self.correct_answer_view,
+                name='contest-correct-answers'),
+        )
+        urlpatterns += super(ContestAdmin, self).get_urls()
+        return urlpatterns
+
+    def correct_answer_view(self, request, contest_pk, extra_context=None):
+        contest = get_cached_object_or_404(Contest, pk=contest_pk)
+        contestants = contest.get_correct_answers()
+        title = u"%s '%s': %s" % (Contest._meta.verbose_name, contest.title, _('Correct Answers'))
+        module_name = Contestant._meta.module_name
+
+        return render_to_response('newman/polls/correct-answers.html',
+            {'contestants' : contestants, 'title' : title, 'module_name' : module_name})
+
+    def correct_answers(self, obj):
+        """
+        Admin's list column with a link to the list of contestants with correct answers on the current contest
+        """
+        return mark_safe(u'<a href="%s/correct-answers/">%s - %s</a>' % (obj.id, _('Correct Answers'), obj.title))
+    correct_answers.allow_tags = True
+
+    def get_all_answers_count(self, obj):
+        return obj.contestant_set.count()
+    get_all_answers_count.short_description = _('Participants in total')
 
     fieldsets = (
         (_("Heading"), {'fields': ('title', 'slug',)}),
