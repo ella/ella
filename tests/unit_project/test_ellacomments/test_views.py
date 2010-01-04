@@ -23,7 +23,7 @@ class CommentViewTestCase(DatabaseTestCase):
     def get_url(self, *bits):
         url = [self.placement.get_absolute_url(), slugify(_('comments')), '/']
         if bits:
-            url.append('/'.join(map(lambda x: slugify(_(x)), bits)))
+            url.append('/'.join(map(lambda x: slugify(_(str(x))), bits)))
             url.append('/')
 
         return ''.join(url)
