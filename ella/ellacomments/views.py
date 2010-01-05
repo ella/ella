@@ -16,9 +16,15 @@ from django.conf import settings
 
 from ella.core.views import get_templates_from_placement
 
-def post_comment(request, context, parent):
+def post_comment(request, context, parent_id=None):
     'Mostly copy-pasted from django.contrib.comments.views.comments'
-    parent_id = parent and parent.pk or None
+    opts = CommentOptionsObject.objects.get_for_object(context['object'])
+    if opts.blocked:
+        raise Http404('Comments is blocked for this object.')
+
+    parent = None
+    if parent_id:
+        parent = get_object_or_404(comments.get_model(), pk=parent_id)
 
     if request.method != 'POST':
         initial = {}
@@ -105,6 +111,10 @@ def post_comment(request, context, parent):
 
 
 def list_comments(request, context):
+    opts = CommentOptionsObject.objects.get_for_object(context['object'])
+    if opts.blocked:
+        raise Http404('Comments is blocked for this object.')
+
     # basic queryset
     qs = comments.get_model().objects.for_model(context['object']).order_by('tree_path')
 
@@ -140,28 +150,3 @@ def list_comments(request, context):
         RequestContext(request)
     )
 
-def custom_urls(request, bits, context):
-    # /object/comments/
-
-    opts = CommentOptionsObject.objects.get_for_object(context['object'])
-    if opts.blocked:
-        raise Http404('Comments is blocked for this object.')
-
-    if not bits:
-        return list_comments(request, context)
-
-    # /object/comments/new/
-    elif bits[0] == slugify(_('new')):
-        parent = None
-
-        if len(bits) > 2:
-            raise Http404()
-
-        # /object/comments/new/ID/
-        elif len(bits) == 2:
-            # reply
-            parent = get_object_or_404(comments.get_model(), pk=bits[1])
-
-        return post_comment(request, context, parent)
-
-    raise Http404()

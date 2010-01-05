@@ -15,7 +15,8 @@ class Migration(BasePublishableDataMigration):
                 'finished': ('models.DateField', ["_('Finished')"], {'null': 'True', 'blank': 'True'}),
                 'hide_newer_parts': ('models.BooleanField', ["_('Hide newer parts')"], {'default': 'False'}),
                 'publishable_ptr': ('models.OneToOneField', ["orm['core.Publishable']"], {}),
-                'started': ('models.DateField', ["_('Started')"], {})
+                'started': ('models.DateField', ["_('Started')"], {}),
+                'text': ('models.TextField', ["_('Text')"], {})
             },
         }
     )
@@ -23,9 +24,8 @@ class Migration(BasePublishableDataMigration):
     app_label = 'series'
     model = 'serie'
     table = '%s_%s' % (app_label, model)
-
     publishable_uncommon_cols = {
-        'description': 'description', # What about perex field??? there was description and perex fields together
+        'description': 'perex',
     }
     
     def alter_self_foreignkeys(self, orm):
@@ -34,4 +34,8 @@ class Migration(BasePublishableDataMigration):
     def move_self_foreignkeys(self, orm):
         # migrate new serie IDs to seriepart
         migrate_foreignkey(self.app_label, self.model, 'series_seriepart', self.model, self.orm)
+
+    def forwards(self, orm):
+        db.rename_column('series_serie', 'description', 'text')
+        super(Migration, self).forwards(orm)
 

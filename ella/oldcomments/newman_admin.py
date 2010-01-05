@@ -58,7 +58,7 @@ class CommentoptionsAdmin(newman.NewmanModelAdmin):
         CommentOptions.objects.get_or_create(**data)
         return JsonResponse('OK', {})
 
-newman.site.register(Comment, CommentAdmin)
-newman.site.register(BannedUser)
-newman.site.register(CommentOptions, CommentoptionsAdmin)
+#newman.site.register(Comment, CommentAdmin)
+#newman.site.register(BannedUser)
+#newman.site.register(CommentOptions, CommentoptionsAdmin)
 

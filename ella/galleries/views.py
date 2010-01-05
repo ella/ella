@@ -66,11 +66,3 @@ def gallery_item_detail(request, context, item_slug=None):
     patch_vary_headers( response, ('X-Requested-With',) )
     return response
 
-def items(request, bits, context):
-    " Wrapper around gallery_item_detail. "
-    if len(bits) != 1:
-        raise Http404()
-
-    return gallery_item_detail(request, context, bits[0])
-
-

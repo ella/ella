@@ -106,6 +106,10 @@ class BasePoll(models.Model):
             return True
         return False
 
+    def description(self):
+        return self.text_announcement
+
+
 
 class Poll(BasePoll):
 
@@ -159,17 +163,6 @@ class Contest(BasePoll, Publishable):
             ) for q in sorted(self.questions, key=lambda q: q.id)
         )
 
-    def correct_answers(self):
-        """
-        Admin's list column with a link to the list of contestants with correct answers on the current contest
-        """
-        return mark_safe(u'<a href="%s/correct_answers/">%s - %s</a>' % (self.id, _('Correct Answers'), self.title))
-    correct_answers.allow_tags = True
-
-    def get_all_answers_count(self):
-        return Contestant.objects.filter(contest=self).count()
-    get_all_answers_count.short_description = _('Participants in total')
-
     def get_correct_answers(self):
         """
         Returns queryset of contestants with correct answers on the current contest
@@ -180,9 +173,6 @@ class Contest(BasePoll, Publishable):
             .filter(choices=self.right_choices)
             .extra(select={'count_guess_difference': 'ABS(%s - %d)' % (connection.ops.quote_name('count_guess'), count)})
             .order_by('count_guess_difference'))
-
-    def get_description(self):
-        return self.text_announcement
 
     def __unicode__(self):
         return self.title
@@ -212,9 +202,6 @@ class Quiz(BasePoll, Publishable):
                 models.Q(points_to__gte=points) | models.Q(points_to__isnull=True),
                 quiz=self
             )
-
-    def get_description(self):
-        return self.text_announcement
 
     def __unicode__(self):
         return self.title
@@ -426,6 +413,9 @@ class Result(models.Model):
         Returns percentage ratio of current Result views
         """
         return self.count*100/self.total()
+
+    def get_text(self):
+        return mark_safe( u'%s' % self.text )
 
     def __unicode__(self):
         if self.title:

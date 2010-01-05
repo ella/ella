@@ -42,12 +42,8 @@ def detail(request, context):
         context_instance=RequestContext(request)
     )
 
-def unanswered(request, bits, context):
+def unanswered(request, context):
     """ Display unanswered questions via rendering page/content_type/interviews.interview/unanswered.html template. """
-    if bits:
-        # invalid URL
-        raise Http404
-
     interview = context['object']
     interviewees = interview.get_interviewees(request.user)
     context['interviewees'] = interviewees
@@ -61,14 +57,10 @@ def unanswered(request, bits, context):
         context_instance=RequestContext(request)
     )
 
-def reply(request, bits, context):
+def list_questions(request, context):
     """
-    If called without parameters will display a list of questions
-    (via rendering page/content_type/interviews.interview/reply.html template).
-
-    Can be also called as reply/PK/ which will then display a ReplyForm for the given question.
-
-    Raises Http404 on any error or missing permissions.
+    Displays a list of questions (via rendering
+    page/content_type/interviews.interview/reply.html template).
     """
     interview = context['object']
 
@@ -79,24 +71,35 @@ def reply(request, bits, context):
         # no permission
         raise Http404
 
-    if not bits:
-        # list of all questions
-        qset = interview.question_set.all()
-        context.update(paginate_qset(request, qset))
-        return render_to_response(
-            get_templates_from_placement('reply.html', context['placement']),
-            context,
-            context_instance=RequestContext(request)
-        )
-    elif len(bits) != 1 or request.method != 'POST':
-        # some bogus URL
-        raise Http404()
+    # list of all questions
+    qset = interview.question_set.all()
+    context.update(paginate_qset(request, qset))
+    return render_to_response(
+        get_templates_from_placement('reply.html', context['placement']),
+        context,
+        context_instance=RequestContext(request)
+    )
 
+def reply(request, context, question_id):
+    """
+
+    Can be also called as reply/PK/ which will then display a ReplyForm for the given question.
+
+    Raises Http404 on any error or missing permissions.
+    """
+    interview = context['object']
+
+    interviewees = interview.get_interviewees(request.user)
+    context['interviewees'] = interviewees
+
+    if not interviewees or request.method != 'POST':
+        # no permission or no POST
+        raise Http404
 
     # no point in caching individual questions
     question = get_object_or_404(
             Question,
-            pk=bits[0],
+            pk=question_id,
             interview=interview
         )
 
@@ -202,9 +205,9 @@ class QuestionFormPreview(FormPreview):
     def form_template(self):
         return get_templates_from_placement('ask_form.html', self.state['placement'])
 
-    def parse_params(self, bits, context):
+    def parse_params(self, context):
         """ Store the context provided by ella to self.state. """
-        if not context['object'].can_ask() or bits:
+        if not context['object'].can_ask():
             raise Http404
         self.state.update(context)
 

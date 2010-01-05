@@ -64,7 +64,7 @@ class TestPhoto(DatabaseTestCase):
 
     def test_thumbnail_html_retrieval_success(self):
         #TODO: This should be in adimn, not models
-        expected_html = u'<a href="%(full)s" class="thickbox" title="%(title)s"><img src="%(thumb)s" alt="%(name)s" /></a>' % {
+        expected_html = u'<a href="%(full)s" class="js-nohashadr thickbox" title="%(title)s" target="_blank"><img src="%(thumb)s" alt="%(name)s" /></a>' % {
             'full' : "%(media)sphotos/%(date)s/%(name)s.jpg" % {
                 "name" : u'%s-example-photo' % self.photo.pk,
                 "media" : settings.MEDIA_URL,

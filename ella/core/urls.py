@@ -53,9 +53,9 @@ urlpatterns = patterns( '',
     url( r'^%s/(?P<content_type>[a-z0-9-]+)/(?P<slug>[a-z0-9-]+)/$' % slugify(_('static')), object_detail, { 'category' : '' }, name='home_static_detail' ),
 
     # static detail with custom action
-    url( r'^(?P<category>[a-z0-9-/]+)/%s/(?P<content_type>[a-z0-9-]+)/(?P<slug>[a-z0-9-]+)/(?P<url_remainder>.*)/$' % slugify(_('static')),
+    url( r'^(?P<category>[a-z0-9-/]+)/%s/(?P<content_type>[a-z0-9-]+)/(?P<slug>[a-z0-9-]+)/(?P<url_remainder>.*)$' % slugify(_('static')),
         object_detail, name='static_detail_action' ),
-    url( r'^%s/(?P<content_type>[a-z0-9-]+)/(?P<slug>[a-z0-9-]+)/(?P<url_remainder>.*)/$' % slugify(_('static')),
+    url( r'^%s/(?P<content_type>[a-z0-9-]+)/(?P<slug>[a-z0-9-]+)/(?P<url_remainder>.*)$' % slugify(_('static')),
         object_detail, { 'category' : '' }, name='home_static_detail_action' ),
 
     # object detail
@@ -65,9 +65,9 @@ urlpatterns = patterns( '',
         object_detail, { 'category' : '' }, name="home_object_detail" ),
 
     # object detail with custom action
-    url( r'^(?P<category>[a-z0-9-/]+)/(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<content_type>[a-z0-9-]+)/(?P<slug>[a-z0-9-]+)/(?P<url_remainder>.*)/$',
+    url( r'^(?P<category>[a-z0-9-/]+)/(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<content_type>[a-z0-9-]+)/(?P<slug>[a-z0-9-]+)/(?P<url_remainder>.*)$',
         object_detail, name="object_detail_action" ),
-    url( r'^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<content_type>[a-z0-9-]+)/(?P<slug>[a-z0-9-]+)/(?P<url_remainder>.*)/$',
+    url( r'^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<content_type>[a-z0-9-]+)/(?P<slug>[a-z0-9-]+)/(?P<url_remainder>.*)$',
         object_detail, { 'category' : '' }, name="home_object_detail_action" ),
 
     # category listings

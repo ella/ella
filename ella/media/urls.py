@@ -1,11 +1,11 @@
-from django.conf.urls.defaults import *
+from django.conf.urls.defaults import patterns, url
 
-from ella.core.custom_urls import dispatcher
-from ella.media import views
+from ella.core.custom_urls import resolver
+from ella.media.views import player_playlist_for_id
 
 urlpatterns = patterns('',
-    url(r'^playlist/(\d+)/$', views.player_playlist_for_id, name='ella-media-playlist'),
+    url(r'^playlist/(\d+)/$', player_playlist_for_id, name='ella-media-playlist'),
 )
 
-dispatcher.register('playlist', views.player_playlist)
+resolver.register(urlpatterns, prefix='playlist')
 

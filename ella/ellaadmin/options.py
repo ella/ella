@@ -7,8 +7,6 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.contrib import admin
 
-from ella.ellaadmin import widgets, fields
-
 SUGGEST_VIEW_LIMIT = getattr(settings, 'SUGGEST_VIEW_LIMIT', 20)
 SUGGEST_VIEW_MIN_LENGTH = getattr(settings, 'SUGGEST_VIEW_MIN_LENGTH', 2)
 SUGGEST_RETURN_ALL_FIELD = getattr(settings, 'SUGGEST_RETURN_ALL_FIELD', True)
@@ -114,6 +112,7 @@ class EllaModelAdmin(admin.ModelAdmin):
 
 class EllaAdminOptionsMixin(object):
     def formfield_for_dbfield(self, db_field, **kwargs):
+        from ella.ellaadmin import widgets, fields
         custom_param_names = ('request', 'user', 'model', 'super_field', 'instance')
         custom_params = {}
         custom_params.update({

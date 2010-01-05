@@ -1,6 +1,5 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
-from django.conf import settings
 
 from ella.series.models import Serie, SeriePart
 from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin
@@ -37,6 +36,10 @@ class SeriePartAdmin(EllaAdminOptionsMixin, admin.ModelAdmin):
     list_display = ('target_admin', 'serie', 'published',)
     raw_id_fields = ('placement',)
     list_filter = ('serie',)
+
+    def target_admin(self, obj):
+        return obj.target
+    target_admin.short_description = _('Target')
 
 admin.site.register(Serie, SerieAdmin)
 admin.site.register(SeriePart, SeriePartAdmin)

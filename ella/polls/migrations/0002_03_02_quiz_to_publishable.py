@@ -27,7 +27,9 @@ class Migration(BasePublishableDataMigration):
     model = 'quiz'
     table = '%s_%s' % (app_label, model)
 
-    publishable_uncommon_cols = {}
+    publishable_uncommon_cols = {
+        'description': 'text_announcement'
+    }
     
     def alter_self_foreignkeys(self, orm):
         # migrate authors as in base

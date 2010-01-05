@@ -39,7 +39,6 @@ class Article(Publishable):
     class Meta:
         verbose_name = _('Article')
         verbose_name_plural = _('Articles')
-        ordering = ('-created',)
 
     def __unicode__(self):
         return self.title

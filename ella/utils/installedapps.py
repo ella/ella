@@ -4,6 +4,7 @@ import traceback
 
 from django.utils.itercompat import is_iterable
 from django.conf import settings
+from django.utils.importlib import import_module
 
 
 INSTALLED_APPS_REGISTER = {}
@@ -38,7 +39,7 @@ def call_modules(auto_discover=()):
         for module in modules:
             try:
                 imp = '%s.%s' % (app, module)
-                mod = __import__(imp, {}, {}, [''])
+                mod = import_module(imp)
                 inst = getattr(mod, '__install__', lambda:None)
                 inst()
             except ImportError, e:

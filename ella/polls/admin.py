@@ -11,6 +11,7 @@ from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin, EllaAd
 
 from ella.core.cache import get_cached_object_or_404
 from ella.polls.models import Poll, Contest, Contestant, Quiz, Result, Choice, Vote, Question
+from django.utils.safestring import mark_safe
 
 
 class ResultFormset(BaseInlineFormSet):
@@ -108,6 +109,18 @@ class ContestOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     prepopulated_fields = {'slug' : ('title',)}
     # rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}
     rich_text_fields = {'small': ('description',), None: ('text',)}
+
+    def correct_answers(self, obj):
+        """
+        Admin's list column with a link to the list of contestants with correct answers on the current contest
+        """
+        return mark_safe(u'<a href="%s/correct_answers/">%s - %s</a>' % (obj.id, _('Correct Answers'), obj.title))
+    correct_answers.allow_tags = True
+
+    def get_all_answers_count(self, obj):
+        return Contestant.objects.filter(contest=obj).count()
+    get_all_answers_count.short_description = _('Participants in total')
+
 
 class QuizOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     list_display = ('title', 'category', 'active_from', 'pk', 'get_domain_url',)

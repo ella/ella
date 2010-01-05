@@ -1,11 +1,14 @@
+import re
+
 from django.http import Http404
-from django.template.defaultfilters import slugify
+from django.conf.urls.defaults import patterns, url, include
+from django.core.urlresolvers import RegexURLResolver
 
 
 ALL = '__ALL__'
 
 
-class DetailDispatcher(object):
+class CustomURLResolver(object):
     """
     Our custom url dispatcher that allows for custom actions on objects.
 
@@ -15,14 +18,11 @@ class DetailDispatcher(object):
         it's placement, category, content_type and content_type_name will be passed to the view.
 
     Example:
-        dispatcher.register('rate', rate_object)
-        will make the rate_object view available under /rate/...
-
-        dispatcher.register('vote', poll_vote, polls.Poll)
-        will enable you to vote for polls under their own url
+        dispatcher.register(urlpatterns, prefix='rate')
+        will make the urlpatterns available under /rate/ after any object's URL...
     """
     def __init__(self):
-        self.custom_mapping = {}
+        self._patterns = {}
         self.root_mapping = {}
 
     def has_custom_detail(self, obj):
@@ -42,63 +42,25 @@ class DetailDispatcher(object):
         assert model not in self.root_mapping, "You can only register one function for model %r" % model.__name__
         self.root_mapping[model] = view
 
-    def register(self, start, view, model=None):
-        """
-        Registers a new custom_mapping to view.
+    def register(self, urlpatterns, prefix=None, model=None):
+        key = str(model._meta) if model else ALL
+        if prefix:
+            urlpatterns = patterns('',
+                    url('^%s/' % re.escape(prefix), include((urlpatterns, '', ''))),
+                )
+        self._patterns.setdefault(key, []).extend(urlpatterns)
 
-        Params:
-            start - first word of the url remainder - the key for the view
-            view - the view that acts on this signal
-            model - optional, only bind to objects of this model
+    def _get_resolver(self, obj):
+        return RegexURLResolver(r'^', self._patterns.get(str(obj._meta), []) + self._patterns.get(ALL, []))
 
-        Raises:
-            AssertionError if the key is already used
-        """
-        start = slugify(start)
-        if start in self.custom_mapping:
-            assert not model or model not in self.custom_mapping[start], "You can only register one function for key %r and model %r" % (start, model.__name__)
-            assert model is not None or ALL not in self.custom_mapping[start], "You can only register one function for key %r" % start
+    def resolve(self, obj, url_remainder):
+        return self._get_resolver(obj).resolve(url_remainder)
 
-        map = self.custom_mapping.setdefault(start, {})
-        if model:
-            map[model] = view
-        else:
-            map[ALL] = view
+    def reverse(self, obj, view_name, *args, **kwargs):
+        return obj.get_absolute_url() + self._get_resolver(obj).reverse(view_name, *args, **kwargs)
 
-    def _get_view(self, start, model):
-        """
-        Return appropriate view for given bit,
-        either from map registered for given model or from __ALL__
-        """
-        if start not in self.custom_mapping:
-            raise Http404
+    def call_custom_view(self, request, obj, url_remainder, context):
+        view, args, kwargs = self.resolve(obj, url_remainder)
+        return view(request, context, *args, **kwargs)
 
-        map = self.custom_mapping[start]
-        if model in map:
-            view = map[model]
-        elif ALL in map:
-            view = map[ALL]
-        else:
-            raise Http404()
-
-        return view
-
-    def call_view(self, request, bits, context):
-        """
-        Call the custom view.
-
-        Params:
-            request - Django's HttpRequest
-            bits - url remainder splitted by '/'
-            context - a dictionary containing the object,
-                      it's placement, category and content_type name
-
-        Raises:
-            Http404 if no view is associated with bits[0] for content_type of the object
-        """
-        model = context['object'].__class__
-        view = self._get_view(bits[0], model)
-        return view(request, bits[1:], context)
-
-dispatcher = DetailDispatcher()
-
+resolver = CustomURLResolver()

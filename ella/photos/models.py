@@ -104,7 +104,7 @@ class Photo(models.Model):
         thumbUrl = self.thumb_url()
         if not thumbUrl:
             return mark_safe("""<strong>%s</strong>""" % ugettext('Thumbnail not available'))
-        return mark_safe("""<a href="%s" class="thickbox" title="%s"><img src="%s" alt="Thumbnail %s" /></a>""" % (self.image.url, self.title, thumbUrl, self.title))
+        return mark_safe("""<a href="%s" class="js-nohashadr thickbox" title="%s" target="_blank"><img src="%s" alt="Thumbnail %s" /></a>""" % (self.image.url, self.title, thumbUrl, self.title))
     thumb.allow_tags = True
 
     def get_thumbnail_path(self, image_name=None):
@@ -127,7 +127,7 @@ class Photo(models.Model):
         # cache thumbnail for future use to avoid hitting storage.exists() every time
         # and to allow thumbnail detection after instance has been deleted
         self.thumbnail_path = self.get_thumbnail_path()
-        if IMAGE_URL_PREFIX:    
+        if IMAGE_URL_PREFIX:
             # custom URL prefix (debugging purposes)
             return IMAGE_URL_PREFIX.rstrip('/') + '/' + self.thumbnail_path
 
@@ -274,7 +274,7 @@ class FormatedPhoto(models.Model):
     @property
     def url(self):
         "Returns url of the photo file."
-        if IMAGE_URL_PREFIX:    
+        if IMAGE_URL_PREFIX:
             # custom URL prefix (debugging purposes)
             return IMAGE_URL_PREFIX.rstrip('/') + '/' + self.image.url
 

@@ -91,23 +91,3 @@ def list_comments(request, context):
     templates = get_templates_from_placement('comments/list.html', context['placement'])
     return render_to_response(templates, context, context_instance=RequestContext(request))
 
-def comments_custom_urls(request, bits, context):
-    if len(bits) == 2:
-        if bits[0] == slugify(_('reply')) and bits[1].isdigit():
-            return new_comment(request, context, reply=int(bits[1]))
-
-    if len(bits) == 1:
-        if bits[0] == slugify(_('preview')):
-            if request.method == 'GET':
-                log.warning('Preview should be used only with POST.')
-                raise Http404('Preview should be used only with POST.')
-            comment_preview = CommentFormPreview(CommentForm)
-            return comment_preview(request, context)
-        elif bits[0] == slugify(_('new')):
-            return new_comment(request, context)
-
-    if len(bits) == 0:
-        return list_comments(request, context)
-
-    raise Http404
-

@@ -90,7 +90,7 @@ def do_rate(request, ct, target, plusminus):
     set_was_rated(request, response, ct, target)
     return response
 
-def rate(request, bits, context):
+def rate(request, context):
     """
     View for ella custom urls
 

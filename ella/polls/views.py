@@ -294,20 +294,14 @@ def contest_finish(request, context, qforms, contestant_form):
     c.save()
     return HttpResponseRedirect(contest.get_absolute_url() +slugify(ugettext('result')) + u'/')
 
-def contest_result(request, bits, context):
-    if bits:
-        raise Http404
-
+def contest_result(request, context):
     return render_to_response(
         get_templates_from_placement('result.html', context['placement']),
         context,
         context_instance=RequestContext(request)
     )
 
-def contest_conditions(request, bits, context):
-    if bits:
-        raise Http404
-
+def contest_conditions(request, context):
     return render_to_response(
         get_templates_from_placement('conditions.html', context['placement']),
         context,
@@ -363,7 +357,7 @@ class QuizWizard(FormWizard):
                 context_instance=RequestContext(request)
             )
 
-def result_details(request, bits, context):
+def result_details(request, context):
     quiz = context['object']
     if not quiz.has_correct_answers:
         raise Http404
@@ -398,16 +392,8 @@ def result_details(request, bits, context):
 def contest(request, context):
     return contest_vote(request, context)
 
-def conditions(request, bits, context):
-    return contest_conditions(request, bits, context)
-
 def quiz(request, context):
     quiz = context['object']
     return QuizWizard(quiz)(request, extra_context=context)
 
-def custom_result_details(request, bits, context):
-    return result_details(request, bits, context)
-
-def cont_result(request, bits, context):
-    return contest_result(request, bits, context)
 

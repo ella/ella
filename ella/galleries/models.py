@@ -10,6 +10,7 @@ from django.utils.datastructures import SortedDict
 from ella.core.models import Publishable
 from ella.core.cache.utils import cache_this, CachedGenericForeignKey
 from ella.core.cache.invalidate import CACHE_DELETER
+from ella.core.custom_urls import resolver
 from ella.photos.models import Photo
 
 
@@ -112,7 +113,7 @@ class GalleryItem(models.Model):
     def get_absolute_url(self):
         if self.order == 0:
             return self.gallery.get_absolute_url()
-        return '%s%s/%s/' % (self.gallery.get_absolute_url(), slugify(_('items')), self.get_slug())
+        return resolver.reverse(self.gallery, 'gallery-item-detail', self.get_slug())
 
     class Meta:
         ordering = ('order',)
