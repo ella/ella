@@ -109,36 +109,6 @@ class CustomUrlDispatcherTestCase(UnitTestCase):
         self.context = {'object': self}
         self.request = object()
 
-class TestViewRegistrationRegistration(CustomUrlDispatcherTestCase):
-
-    def test_404_raised_when_view_not_registered(self):
-        self.assert_raises(Http404, self.dispatcher._get_view, 'prefix', self)
-
-    def test_global_extension(self):
-        self.dispatcher.register('prefix', view)
-        self.assert_equals(view, self.dispatcher._get_view('prefix', self))
-
-    def test_bound_for_model(self):
-        self.dispatcher.register('prefix', view, model=self.__class__)
-        self.assert_equals(view, self.dispatcher._get_view('prefix', self.__class__))
-
-    def test_extension_for_model_not_work_for_other_models(self):
-        self.dispatcher.register('prefix', view, model=self.__class__)
-        self.assert_raises(Http404, self.dispatcher._get_view, 'prefix', object())
-
-    def test_cannot_register_same_extension_points_multiple_times(self):
-        self.dispatcher.register('prefix', view)
-        self.assert_raises(AssertionError, self.dispatcher.register, 'prefix', view)
-
-    def test_cannot_register_same_model_extension_points_multiple_times(self):
-        self.dispatcher.register('prefix', view, model=self.__class__)
-        self.assert_raises(AssertionError, self.dispatcher.register, 'prefix', view, model=self.__class__)
-
-    def test_model_extension_has_preference_over_generic_one(self):
-        self.dispatcher.register('prefix', view)
-        self.dispatcher.register('prefix', second_view, model=self.__class__)
-        self.assert_equals(second_view, self.dispatcher._get_view('prefix', self.__class__))
-
 
 class TestCustomDetailRegistration(CustomUrlDispatcherTestCase):
     def test_no_view_available_without_registration(self):
@@ -149,16 +119,9 @@ class TestCustomDetailRegistration(CustomUrlDispatcherTestCase):
         self.assert_equals(custom_view, self.dispatcher._get_custom_detail_view(self.__class__))
 
 class TestViewCalling(CustomUrlDispatcherTestCase):
-    def test_nonexisting_view_raises_404(self):
-        self.assert_raises(Http404, self.dispatcher.call_view, request=object(), bits=['prefix'], context=self.context)
-
     def test_call_custom_detail_simple_success(self):
         self.dispatcher.register_custom_detail(self.__class__, custom_view)
         self.assert_equals(u"OK", self.dispatcher.call_custom_detail(request=object(), context=self.context))
-
-    def test_call_view_simple_success(self):
-        self.dispatcher.register('prefix', view)
-        self.assert_equals(u"OK", self.dispatcher.call_view(request=object(), bits=['prefix'], context=self.context))
 
 
 
