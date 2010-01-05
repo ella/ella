@@ -1,11 +1,14 @@
+import re
+
 from django.http import Http404
-from django.template.defaultfilters import slugify
+from django.conf.urls.defaults import patterns, url, include
+from django.core.urlresolvers import RegexURLResolver
 
 
 ALL = '__ALL__'
 
 
-class DetailDispatcher(object):
+class CustomURLResolver(object):
     """
     Our custom url dispatcher that allows for custom actions on objects.
 
@@ -22,6 +25,7 @@ class DetailDispatcher(object):
         will enable you to vote for polls under their own url
     """
     def __init__(self):
+        self._patterns = {}
         self.root_mapping = {}
 
     def has_custom_detail(self, obj):
@@ -40,17 +44,6 @@ class DetailDispatcher(object):
     def register_custom_detail(self, model, view):
         assert model not in self.root_mapping, "You can only register one function for model %r" % model.__name__
         self.root_mapping[model] = view
-
-dispatcher = DetailDispatcher()
-
-import re
-
-from django.conf.urls.defaults import patterns, url, include
-from django.core.urlresolvers import RegexURLResolver
-
-class CustomURLResolver(object):
-    def __init__(self):
-        self._patterns = {}
 
     def register(self, urlpatterns, prefix=None, model=None):
         key = str(model._meta) if model else ALL

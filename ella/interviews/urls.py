@@ -2,7 +2,7 @@ from django.utils.translation import ugettext
 from django.template.defaultfilters import slugify
 from django.conf.urls.defaults import patterns, url
 
-from ella.core.custom_urls import dispatcher, resolver
+from ella.core.custom_urls import resolver
 from ella.interviews.views import unanswered, reply, detail, QuestionForm, QuestionFormPreview, list_questions
 from ella.interviews.models import Interview
 
@@ -16,4 +16,4 @@ urlpatterns = patterns('',
 resolver.register(urlpatterns, model=Interview)
 
 # override Interview's detail view
-dispatcher.register_custom_detail(Interview, detail)
+resolver.register_custom_detail(Interview, detail)

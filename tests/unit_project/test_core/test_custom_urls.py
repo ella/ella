@@ -8,7 +8,7 @@ from django.conf.urls.defaults import patterns, url
 from django.core.urlresolvers import NoReverseMatch
 from django.template import Template, Context
 
-from ella.core.custom_urls import DetailDispatcher, CustomURLResolver
+from ella.core.custom_urls import CustomURLResolver
 from ella.core import custom_urls
 
 from unit_project.test_core import create_basic_categories, create_and_place_a_publishable
@@ -42,15 +42,12 @@ class CustomObjectDetailTestCase(DatabaseTestCase):
 
         self.url = self.publishable.get_absolute_url()
         self.old_resolver = custom_urls.resolver
-        self.old_dispatcher = custom_urls.dispatcher
         custom_urls.resolver = CustomURLResolver()
-        custom_urls.dispatcher = DetailDispatcher()
 
     def tearDown(self):
         super(CustomObjectDetailTestCase, self).tearDown()
         template_loader.templates = {}
         custom_urls.resolver = self.old_resolver
-        custom_urls.dispatcher = self.old_dispatcher
 
 class TestCustomURLTemplateTag(CustomObjectDetailTestCase):
     def test_view_with_no_args_resolves(self):
@@ -77,7 +74,7 @@ class TestObjectDetail(CustomObjectDetailTestCase):
         def my_custom_view(request, context):
             return HttpResponse('OK')
 
-        custom_urls.dispatcher.register_custom_detail(self.publishable.__class__, my_custom_view)
+        custom_urls.resolver.register_custom_detail(self.publishable.__class__, my_custom_view)
 
         response = self.client.get(self.url)
         self.assert_equals(200, response.status_code)
@@ -101,27 +98,24 @@ class TestObjectDetail(CustomObjectDetailTestCase):
         self.assert_equals(200, response.status_code)
 
 
-class CustomUrlDispatcherTestCase(UnitTestCase):
+class TestCustomDetailRegistration(UnitTestCase):
     def setUp(self):
-        super(CustomUrlDispatcherTestCase, self).setUp()
-        self.dispatcher = DetailDispatcher()
+        super(TestCustomDetailRegistration, self).setUp()
 
         self.context = {'object': self}
         self.request = object()
+        self.resolver = CustomURLResolver()
 
-
-class TestCustomDetailRegistration(CustomUrlDispatcherTestCase):
     def test_no_view_available_without_registration(self):
-        self.assert_raises(Http404, self.dispatcher._get_custom_detail_view, self.__class__)
+        self.assert_raises(Http404, self.resolver._get_custom_detail_view, self.__class__)
 
     def test_registration_success(self):
-        self.dispatcher.register_custom_detail(self.__class__, custom_view)
-        self.assert_equals(custom_view, self.dispatcher._get_custom_detail_view(self.__class__))
+        self.resolver.register_custom_detail(self.__class__, custom_view)
+        self.assert_equals(custom_view, self.resolver._get_custom_detail_view(self.__class__))
 
-class TestViewCalling(CustomUrlDispatcherTestCase):
     def test_call_custom_detail_simple_success(self):
-        self.dispatcher.register_custom_detail(self.__class__, custom_view)
-        self.assert_equals(u"OK", self.dispatcher.call_custom_detail(request=object(), context=self.context))
+        self.resolver.register_custom_detail(self.__class__, custom_view)
+        self.assert_equals(u"OK", self.resolver.call_custom_detail(request=object(), context=self.context))
 
 
 

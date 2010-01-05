@@ -4,7 +4,7 @@ from django.template.defaultfilters import slugify
 
 from ella.polls.models import Contest, Quiz
 from ella.polls.views import poll_vote, quiz, contest, result_details, contest_conditions, contest_result
-from ella.core.custom_urls import dispatcher, resolver
+from ella.core.custom_urls import resolver
 
 
 urlpatterns = patterns('',
@@ -20,8 +20,8 @@ urlpatterns = patterns('',
 )
 
 
-dispatcher.register_custom_detail(Quiz, quiz)
-dispatcher.register_custom_detail(Contest, contest)
+resolver.register_custom_detail(Quiz, quiz)
+resolver.register_custom_detail(Contest, contest)
 
 resolver.register(
     patterns('',

@@ -93,7 +93,7 @@ class ObjectDetail(EllaCoreView):
     :param content_type: slugified ``verbose_name_plural`` of the target model
     :param year month day: date matching the `publish_from` field of the `Placement` object
     :param slug: slug of the `Placement`
-    :param url_remainder: url after the object's url, used to locate custom views in `custom_urls.dispatcher`
+    :param url_remainder: url after the object's url, used to locate custom views in `custom_urls.resolver`
 
     :raises Http404: if the URL is not valid and/or doesn't correspond to any valid `Placement`
     """
@@ -105,8 +105,8 @@ class ObjectDetail(EllaCoreView):
         # check for custom actions
         if url_remainder:
             return custom_urls.resolver.call_custom_view(request, obj, url_remainder, context)
-        elif custom_urls.dispatcher.has_custom_detail(obj):
-            return custom_urls.dispatcher.call_custom_detail(request, context)
+        elif custom_urls.resolver.has_custom_detail(obj):
+            return custom_urls.resolver.call_custom_detail(request, context)
 
         return self.render(request, context, self.get_templates(context))
 

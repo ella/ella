@@ -2,7 +2,7 @@ from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext as _
 from django.conf.urls.defaults import patterns, url
 
-from ella.core.custom_urls import dispatcher
+from ella.core.custom_urls import resolver
 from ella.oldcomments.views import new_comment, CommentFormPreview, list_comments
 from ella.oldcomments.forms import CommentForm
 
@@ -14,5 +14,5 @@ urlpatterns = patterns('',
 
 )
 
-dispatcher.register(slugify(_('comments')), comments_custom_urls)
+resolver.register(urlpatterns, prefix=slugify(_('comments')))
 
