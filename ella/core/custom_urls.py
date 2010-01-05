@@ -18,11 +18,8 @@ class CustomURLResolver(object):
         it's placement, category, content_type and content_type_name will be passed to the view.
 
     Example:
-        dispatcher.register('rate', rate_object)
-        will make the rate_object view available under /rate/...
-
-        dispatcher.register('vote', poll_vote, polls.Poll)
-        will enable you to vote for polls under their own url
+        dispatcher.register(urlpatterns, prefix='rate')
+        will make the urlpatterns available under /rate/ after any object's URL...
     """
     def __init__(self):
         self._patterns = {}
