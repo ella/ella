@@ -12,6 +12,7 @@ NewmanInline = new Object();
             .replace(/-#-/g, '--')
             .replace(/__NO__/g, no)
         ).parent().trigger('content_added');
+        carp('add_inline: content_added triggered');
     }
     $('.remove-inline-button').live('click', function(evt) {
         if (evt.button != 0) return;

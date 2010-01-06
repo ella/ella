@@ -230,6 +230,7 @@
                 }
             }
         }
+
         $('.js-poll-question-text-container textarea').unbind('blur.hide').bind('blur.hide', function() {
 			var area = this;
 			
@@ -269,6 +270,7 @@
                 $cont.find('a.js-edit-poll-choice-text span').removeClass('empty-poll-choice');
             }
         }
+
         $(':input.js-edit-poll-choice-text').unbind('blur.hide').bind('blur.hide', function() {
             var $cont = $(this).closest('.js-poll-choice-container');
             $cont.find('.js-edit-poll-choice-text').toggle();
@@ -307,48 +309,52 @@
         //// Preset loading
         
         // Adjust the number of inputs (questions and their answer options) to fit the preset
-        $('#quiz_form,#contest_form')
-        .unbind('preset_load_initiated.poll')
-        .bind('preset_load_initiated.poll', function(evt, preset) {
-            $('.js-poll-question-container:gt(0)').remove();
-            $('.js-poll-choice-container:gt(0)'  ).remove();
-            var last_q_no = 0;
-            var option_counts = [0];
-            for (var i = 0; i < preset.data.length; i++) {
-                var name = preset.data[i].name;
-                var q_no_match = /question_set-(\d+)/.exec( name );
-                if ( ! q_no_match ) continue;
-                var q_no = q_no_match[1] - 0;
-                if (q_no > last_q_no) {
-                    add_question();
-                    option_counts.push(0);
-                    last_q_no = q_no;
-                }
-                if ( /question_set-\d+-choices$/.test(name) ) {
-                    var opt_count = ++option_counts[ q_no ];
-                    var $last_question = $('.js-poll-question-container:last');
-                    if ( opt_count > $last_question.find('.js-poll-choice-container').length ) {
-                        add_option( $last_question );
+        $('#quiz_form,#contest_form').unbind('preset_load_process.poll');
+        $('#quiz_form,#contest_form').bind('preset_load_process.poll', 
+            function(evt, preset) {
+                carp('preset load initiated (poll). evt=' + evt + ' , preset=' + preset);
+                $('.js-poll-question-container:gt(0)').remove();
+                $('.js-poll-choice-container:gt(0)'  ).remove();
+                var last_q_no = 0;
+                var option_counts = [0];
+                for (var i = 0; i < preset.data.length; i++) {
+                    var name = preset.data[i].name;
+                    var q_no_match = /question_set-(\d+)/.exec( name );
+                    if ( ! q_no_match ) continue;
+                    var q_no = q_no_match[1] - 0;
+                    if (q_no > last_q_no) {
+                        add_question();
+                        option_counts.push(0);
+                        last_q_no = q_no;
+                    }
+                    if ( /question_set-\d+-choices$/.test(name) ) {
+                        var opt_count = ++option_counts[ q_no ];
+                        var $last_question = $('.js-poll-question-container:last');
+                        if ( opt_count > $last_question.find('.js-poll-choice-container').length ) {
+                            add_option( $last_question );
+                        }
                     }
                 }
             }
-        });
+        );
         
         // Display the loaded values
-        $('#quiz_form,#contest_form')
-        .unbind('preset_load_completed.poll')
-        .bind('preset_load_completed.poll', function() {
-            $(':input.js-poll-choice-points').each( function() {
-                reflect_points_input_change(this);
-            });
-            $(':input.js-edit-poll-choice-text').each( function() {
-                reflect_answer_input_change(this);
-                reflect_choice_deletion(this);
-            });
-            $('.js-poll-question-text-container textarea').each( function() {
-                reflect_question_input_change(this);
-            });
-        });
+        $('#quiz_form,#contest_form').unbind('preset_load_completed.poll');
+        $('#quiz_form,#contest_form').bind('preset_load_completed.poll', 
+            function() {
+                carp('displaying loaded values (poll)');
+                $(':input.js-poll-choice-points').each( function() {
+                    reflect_points_input_change(this);
+                });
+                $(':input.js-edit-poll-choice-text').each( function() {
+                    reflect_answer_input_change(this);
+                    reflect_choice_deletion(this);
+                });
+                $('.js-poll-question-text-container textarea').each( function() {
+                    reflect_question_input_change(this);
+                });
+            }
+        );
     }
     non_live_handlers();
     $(document).bind('content_added', non_live_handlers);

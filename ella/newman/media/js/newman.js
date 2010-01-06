@@ -145,6 +145,9 @@ function clone_form($orig_form) {
 
 // Shows a modal window and disables its close button.
 function lock_window(msg) {
+    if (is_window_locked()) {
+        return;
+    }
     if ( ! msg ) msg = gettext('Wait')+'...';
     
     var $modal = $('#window-lock');
@@ -303,8 +306,14 @@ Drafts = new Object;
             show_err(gettext('Failed loading preset'));
             return;
         }
-        
+       
+        carp('Triggering preset_load_initiated event on ' + $form.selector);
+        NewmanLib.debug_response_data = response_data;
         $form.trigger('preset_load_initiated', [response_data]);
+        carp('Trigger preset_load_inititated done.');
+        carp('Triggering preset_load_process event on ' + $form.selector);
+        $form.trigger('preset_load_process', [response_data]);
+        carp('Trigger preset_load_process done.');
         
         $form.get(0).reset();
         $form.find(':checkbox,:radio').removeAttr('checked');
@@ -312,7 +321,7 @@ Drafts = new Object;
         var form_data = response_data.data;
         if (response_data.message) show_message( response_data.message );
         var used_times = {};    // how many times which key was used
-        
+       
         for (var i = 0; i < form_data.length; i++) {
             var form_datum = form_data[i];
             var key = form_datum['name'];
@@ -325,7 +334,7 @@ Drafts = new Object;
             
             var $inputs = $form.find(':input[name='+key+']');
             if (!$inputs || $inputs.length == 0) {
-                carp('restore_form: input #'+key+' not found');
+                //carp('restore_form: input #' + key + ' not found');
                 continue;
             }
             var val_esc = val.replace(/(\W)/g, '\\$1');
@@ -344,6 +353,7 @@ Drafts = new Object;
         $form.trigger('preset_load_completed', [response_data, args]);
     }
     NewmanLib.restore_form = restore_form;
+
     function load_preset(id, $form) {
         $.ajax({
             url: get_adr('draft/load/'),
@@ -354,11 +364,15 @@ Drafts = new Object;
             error: show_ajax_error
         });
     }
+
     function load_draft_handler() {
         var id = $(this).val();
         if (!id) return;
+        lock_window();
         load_preset(id, $('.change-form'));
+        unlock_window();
     }
+
     function set_load_draft_handler() {
         $('#id_drafts').unbind('change', load_draft_handler).change(load_draft_handler);
     }
