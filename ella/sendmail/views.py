@@ -5,11 +5,10 @@ from django.utils.translation import ugettext as _
 from django.template.defaultfilters import slugify
 from django.contrib.formtools.preview import FormPreview
 from django.contrib.sites.models import Site
-from django.contrib.contenttypes.models import ContentType
 from django.core import mail
 from django.conf import settings
 
-from django.http import HttpResponseRedirect, Http404, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
 from django.template.loader import render_to_string
 from django.template import RequestContext
@@ -95,6 +94,7 @@ class SendMailFormPreview(FormPreview):
 
         return HttpResponseRedirect(url)
 
+mail_preview = SendMailFormPreview(SendMailForm)
 
 def new_mail(request, context):
     init_props = {
@@ -162,7 +162,6 @@ def xml_sendmail_view(request, context):
         if fld not in request.POST:
             res = xml_response(RESPONSE_ERROR, _('Mail not sent because of mandatory parameters were not passed. Please specify all of them.'))
             return HttpResponse(res, mimetype='text/xml;charset=utf-8') # nothing to respond
-    Ct = ContentType.objects.get_for_id(context['content_type'].id)
     params = {
         'sender_name': request.POST['sender_name'],
         'sender_mail': request.POST['sender_mail'],
@@ -176,22 +175,3 @@ def xml_sendmail_view(request, context):
     except Exception, e:
         res = xml_response(RESPONSE_ERROR, _('Error sending mail. ') + str(e))
     return HttpResponse(res, mimetype='text/xml;charset=utf-8')
-
-def sendmail_custom_urls(request, bits, context):
-    if len(bits) == 1:
-        if bits[0] == slugify(_('preview')):
-            if SENDMAIL_AJAX_ONLY and not request.is_ajax():
-                raise Http404, 'Sendmail is now configured to accept only AJAX calls'
-            mail_preview = SendMailFormPreview(SendMailForm)
-            return mail_preview(request, context)
-        elif bits[0] == slugify(_('success')):
-            return mail_success(request, context)
-        elif bits[0] == slugify(_('error')):
-            return mail_error(request, context)
-        elif bits[0] == slugify('xml'):
-            return xml_sendmail_view(request, context)
-
-    if len(bits) == 0:
-        return new_mail(request, context)
-
-    raise Http404
