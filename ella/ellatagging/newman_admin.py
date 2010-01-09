@@ -1,6 +1,7 @@
 from django.forms import models as modelforms
 from django.contrib.contenttypes.models import ContentType
 from django.forms.models import save_instance
+from django.utils.translation import ugettext_lazy as _
 
 from ella import newman
 from ella.newman.generic import BaseGenericInlineFormSet
@@ -54,4 +55,9 @@ class TaggedItemAdmin(newman.NewmanModelAdmin):
 newman.site.register(Tag, TagAdmin)
 #newman.site.register(TaggedItem, TaggedItemAdmin)
 newman.site.append_inline(newman.config.TAGGED_MODELS, TaggingInlineAdmin)
+
+# some translations for newman:
+
+app = _('Tagging')
+sg, pl = _('tag'), _('tags')
 
