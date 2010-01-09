@@ -101,11 +101,14 @@ class SiteAdmin(newman.NewmanModelAdmin):
 from django.contrib.sites.models import Site
 newman.site.register(Site, SiteAdmin)
 
-class UserAdmin(newman.NewmanModelAdmin):
-    list_display = ('username', 'is_active', 'is_superuser')
+from django.contrib.auth.admin import UserAdmin, GroupAdmin
+class UserAdmin(UserAdmin, newman.NewmanModelAdmin):
     inlines = [CategoryUserRoleInline]
     suggest_fields = {'groups': ('name',)}
 
+class GroupAdmin(GroupAdmin, newman.NewmanModelAdmin):
+    pass
+
 from django.contrib.auth.models import User, Group
 newman.site.register(User, UserAdmin)
-newman.site.register(Group)
+newman.site.register(Group, GroupAdmin)

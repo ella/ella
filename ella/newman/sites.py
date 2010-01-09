@@ -65,9 +65,9 @@ class NewmanSite(AdminSite):
     def get_urls(self):
         from django.conf.urls.defaults import patterns, url
 
-        def wrap(view):
+        def wrap(view, cacheable=False):
             def wrapper(*args, **kwargs):
-                return self.admin_view(view)(*args, **kwargs)
+                return self.admin_view(view, cacheable)(*args, **kwargs)
             return update_wrapper(wrapper, view)
 
         # Newman specific URLs
@@ -82,7 +82,7 @@ class NewmanSite(AdminSite):
                 wrap(self.newman_index),
                 name="newman-index"),
             url(r'^%s/editor-box/$' % config.NEWMAN_URL_PREFIX,
-                wrap(self.editor_box_view),
+                wrap(self.editor_box_view, cacheable=True),
                 name="editor-box"),
             url(r'^%s/render-chunk/$' % config.NEWMAN_URL_PREFIX,
                 wrap(self.render_chunk_template_view),
@@ -90,6 +90,9 @@ class NewmanSite(AdminSite):
             url(r'^r/(?P<content_type_id>\d+)/(?P<object_id>.+)/$',
                 'django.views.defaults.shortcut',
                 name='obj-redirect'),
+            url(r'^jsi18n/$',
+                wrap(self.i18n_javascript, cacheable=True),
+                name='jsi18n'),
         )
 
         if 'djangomarkup' in settings.INSTALLED_APPS:
@@ -102,6 +105,19 @@ class NewmanSite(AdminSite):
 
         urlpatterns += super(NewmanSite, self).get_urls()
         return urlpatterns
+
+    def i18n_javascript(self, request):
+        """
+        Displays the i18n JavaScript that the Django admin requires.
+
+        This takes into account the USE_I18N setting. If it's set to False, the
+        generated JavaScript will be leaner and faster.
+        """
+        if settings.USE_I18N:
+            from django.views.i18n import javascript_catalog
+        else:
+            from django.views.i18n import null_javascript_catalog as javascript_catalog
+        return javascript_catalog(request, packages=('ella.newman', 'django.conf',))
 
     @require_AJAX
     def editor_preview(self, request, extra_context=None):
