@@ -340,6 +340,7 @@ a.cl-publishable-link.gallery { background-image: url(../ico/ct/16/gallery.png);
 a.cl-publishable-link.article { background-image: url(../ico/ct/16/article.png); }
 a.cl-publishable-link.interview { background-image: url(../ico/ct/16/interview.png); }
 a.cl-publishable-link.contest { background-image: url(../ico/ct/16/contest.png); }
+a.cl-publishable-link.media, a.cl-publishable-link.video { background-image: url(../ico/ct/16/video.png); }
 
 /* OPERATION MESSAGES */
 #opmsg {
