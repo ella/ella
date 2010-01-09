@@ -40,6 +40,7 @@ class SiteFilterForm(forms.Form):
         choices = ()
         for c in cats:
             choices += (c.pk, c.__unicode__(),),
+        self.sites_count = len(choices)
         self.fields['sites'] = forms.MultipleChoiceField(choices, widget=CheckboxSelectMultiple, required=False)
 
 class ErrorReportForm(forms.Form):

@@ -264,6 +264,8 @@ class NewmanSite(AdminSite):
             'year': 'publish_from__year'
         }
         site_filter_form = SiteFilterForm(data=data, user=request.user)
+        if site_filter_form.sites_count == 1:
+            site_filter_form = None
         cts = []
         last_filters = {}
         for model, model_admin in self._registry.items():

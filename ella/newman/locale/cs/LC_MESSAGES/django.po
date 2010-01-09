@@ -7,9 +7,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ella.newman (admin-ng)\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-10-29 12:24+0100\n"
-"PO-Revision-Date: 2009-10-29 12:27+0100\n"
-"Last-Translator: Vitek pliska <whit@jizak.cz>\n"
+"POT-Creation-Date: 2010-01-09 21:16+0100\n"
+"PO-Revision-Date: 2010-01-09 21:18+0100\n"
+"Last-Translator: Vitek Pliska <whit@jizak.cz>\n"
 "Language-Team: Ella <ella.project@gmail.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -35,12 +35,12 @@ msgstr "Jsi si jist/á?"
 msgid "Delete selected %(verbose_name_plural)s"
 msgstr ""
 
-#: changelist.py:76
+#: changelist.py:85
 #, python-format
 msgid "Select %s"
 msgstr ""
 
-#: changelist.py:76
+#: changelist.py:85
 #, python-format
 msgid "Select %s to change"
 msgstr ""
@@ -94,57 +94,57 @@ msgstr "Web"
 msgid "Presets"
 msgstr "Přednastavené"
 
-#: forms.py:46
-#: templates/newman/newman-index.html:54
+#: forms.py:47
+#: templates/newman/newman-index.html:56
 msgid "Subject"
 msgstr "Předmět"
 
-#: forms.py:47
-#: templates/newman/newman-index.html:56
+#: forms.py:48
+#: templates/newman/newman-index.html:58
 msgid "Message"
 msgstr "Zpráva"
 
-#: forms.py:50
+#: forms.py:51
 msgid "Big"
 msgstr "Velká"
 
-#: forms.py:51
+#: forms.py:52
 msgid "Standard"
 msgstr "Standardní"
 
-#: forms.py:52
+#: forms.py:53
 msgid "Small"
 msgstr "Malá"
 
-#: forms.py:56
+#: forms.py:57
 msgid "Square"
 msgstr "Čtverec"
 
-#: forms.py:57
+#: forms.py:58
 msgid "Rectangle to width"
 msgstr "Obdélník na šířku"
 
-#: forms.py:58
+#: forms.py:59
 msgid "Rectangle to height"
 msgstr "Obdélník na výšku"
 
-#: forms.py:59
+#: forms.py:60
 msgid "Noodle to width"
 msgstr "Nudle na šířku"
 
-#: forms.py:60
+#: forms.py:61
 msgid "Noodle to height"
 msgstr "Nudle na výšku"
 
-#: forms.py:66
+#: forms.py:67
 msgid "Size"
 msgstr "Velikost"
 
-#: forms.py:67
+#: forms.py:68
 msgid "Format"
 msgstr "Formát"
 
-#: forms.py:68
+#: forms.py:69
 #: models.py:15
 #: models.py:63
 #: migrations/0001_initial.py:13
@@ -154,20 +154,20 @@ msgstr "Formát"
 msgid "Title"
 msgstr "Nadpis"
 
-#: forms.py:69
-#: templates/newman/newman-index.html:95
+#: forms.py:70
+#: templates/newman/newman-index.html:100
 msgid "Author"
 msgstr ""
 
-#: forms.py:70
+#: forms.py:71
 msgid "Description"
 msgstr ""
 
-#: forms.py:71
+#: forms.py:72
 msgid "Magnifying"
 msgstr "Zvětšovací"
 
-#: forms.py:72
+#: forms.py:73
 msgid "Extra parameters"
 msgstr "Extra parametry"
 
@@ -267,6 +267,7 @@ msgstr "Položky nápovědy"
 #: migrations/0001_initial.py:37
 #: migrations/old/0001_init.py:33
 #: migrations/old/0001_init.py:41
+#: templates/newman/polls/correct-answers.html:11
 msgid "User"
 msgstr "Uživatel"
 
@@ -385,50 +386,50 @@ msgstr ""
 msgid "This view is designed for viewing form, thus GET method is required."
 msgstr ""
 
-#: sites.py:162
+#: sites.py:180
 msgid "Please enter a correct username and password. Note that both fields are case-sensitive."
 msgstr ""
 
-#: sites.py:168
+#: sites.py:186
 msgid "Please log in again, because your session has expired."
 msgstr ""
 
-#: sites.py:175
+#: sites.py:193
 msgid "Looks like your browser isn't configured to accept cookies. Please enable cookies, reload this page, and try again."
 msgstr ""
 
-#: sites.py:191
-#: sites.py:197
+#: sites.py:209
+#: sites.py:215
 msgid "Usernames cannot contain the '@' character."
 msgstr ""
 
-#: sites.py:194
+#: sites.py:212
 #, python-format
 msgid "Your e-mail address is not your username. Try '%s' instead."
 msgstr ""
 
-#: sites.py:223
-#: sites.py:266
+#: sites.py:241
+#: sites.py:286
 msgid "Site administration"
 msgstr "Ella správa"
 
-#: sites.py:291
+#: sites.py:311
 msgid "Your report was sent."
 msgstr "Vaše zpráva byla odeslána."
 
-#: sites.py:293
+#: sites.py:313
 msgid "SMTP error."
 msgstr "Chyba SMTP serveru."
 
-#: sites.py:298
+#: sites.py:318
 msgid "Subject or message is empty."
 msgstr "Pole předmět či zpráva je prázdné."
 
-#: sites.py:307
+#: sites.py:327
 msgid "Your settings were saved."
 msgstr "Vaše nastavení byla uložena."
 
-#: sites.py:309
+#: sites.py:329
 msgid "Error in form."
 msgstr "Chyba ve formuláři."
 
@@ -501,10 +502,16 @@ msgid "Run the selected action"
 msgstr ""
 
 #: templates/admin/actions.html:3
-#: templates/newman/newman-index.html:81
+#: templates/newman/newman-index.html:83
 #: templates/newman/positions/change_list.html:22
 msgid "Go"
 msgstr ""
+
+#: templates/admin/base_site.html:4
+#: templates/admin/base_site.html.py:7
+#: templates/newman/base.html:4
+msgid "Ella administration"
+msgstr "Ella správa"
 
 #: templates/admin/delete_selected_confirmation.html:5
 #: templates/newman/ajax_content_base.html:3
@@ -598,13 +605,13 @@ msgid "Enter a new password for the user <strong>%(username)s</strong>."
 msgstr ""
 
 #: templates/admin/auth/user/change_password.html:31
-#: templates/newman/base.html:45
+#: templates/newman/base.html:48
 #: templates/newman/auth/user/change_password.html:31
 msgid "Change password"
 msgstr ""
 
 #: templates/newman/action_log.html:5
-#: templates/newman/newman-index.html:111
+#: templates/newman/newman-index.html:116
 msgid "Last edited objects"
 msgstr "Poslední editované objekty"
 
@@ -624,7 +631,7 @@ msgid "Close"
 msgstr "Zavřít"
 
 #: templates/newman/app_index.html:26
-#: templates/newman/edit_inline/gallery_item.html:39
+#: templates/newman/edit_inline/gallery_item.html:43
 #: templates/newman/edit_inline/placement.html:43
 #: templates/newman/edit_inline/poll_question.html:49
 #: templates/newman/tpl_tags/newman_favorites.html:9
@@ -632,7 +639,7 @@ msgid "Add"
 msgstr ""
 
 #: templates/newman/app_index.html:29
-#: templates/newman/newman-index.html:100
+#: templates/newman/newman-index.html:105
 msgid "Change"
 msgstr ""
 
@@ -640,11 +647,7 @@ msgstr ""
 msgid "You don't have permission to edit anything."
 msgstr ""
 
-#: templates/newman/base.html:4
-msgid "Ella administration"
-msgstr "Ella správa"
-
-#: templates/newman/base.html:46
+#: templates/newman/base.html:49
 msgid "Log out"
 msgstr ""
 
@@ -666,11 +669,11 @@ msgid "History"
 msgstr ""
 
 #: templates/newman/change_form.html:28
-#: templates/newman/newman-index.html:99
-#: templates/newman/edit_inline/gallery_item.html:20
+#: templates/newman/newman-index.html:104
+#: templates/newman/edit_inline/gallery_item.html:24
 #: templates/newman/edit_inline/poll_question.html:122
-#: templates/newman/edit_inline/stacked.html:12
-#: templates/newman/edit_inline/tabular.html:32
+#: templates/newman/edit_inline/stacked.html:14
+#: templates/newman/edit_inline/tabular.html:39
 msgid "View on site"
 msgstr "Zobrazit na webu"
 
@@ -766,62 +769,66 @@ msgstr "Tento měsíc"
 msgid "This year"
 msgstr "Tento rok"
 
-#: templates/newman/newman-index.html:29
+#: templates/newman/newman-index.html:30
 msgid "Quick Settings"
 msgstr "Rychlá nastavení"
 
-#: templates/newman/newman-index.html:33
+#: templates/newman/newman-index.html:34
 msgid "Category-filter"
 msgstr "Filtr kategorií"
 
-#: templates/newman/newman-index.html:37
-#: templates/newman/newman-index.html:59
+#: templates/newman/newman-index.html:38
+#: templates/newman/newman-index.html:61
 msgid "Clear"
 msgstr "Původní"
 
-#: templates/newman/newman-index.html:38
+#: templates/newman/newman-index.html:39
 #: templates/newman/tpl_tags/submit_line.html:7
 msgid "Save"
 msgstr "Uložit"
 
-#: templates/newman/newman-index.html:51
+#: templates/newman/newman-index.html:53
 msgid "Report Error"
 msgstr "Hlášení chyb"
 
-#: templates/newman/newman-index.html:60
+#: templates/newman/newman-index.html:62
 msgid "Click to report a bug"
 msgstr "Klikni pro nahlášení chyby"
 
-#: templates/newman/newman-index.html:60
+#: templates/newman/newman-index.html:62
 #: templates/newman/exports/timeline.html:9
 msgid "Send"
 msgstr "Odeslat"
 
-#: templates/newman/newman-index.html:72
+#: templates/newman/newman-index.html:74
 #: templates/newman/tpl_tags/search_form.html:5
 msgid "Search"
 msgstr "Hledání"
 
-#: templates/newman/newman-index.html:76
+#: templates/newman/newman-index.html:78
 msgid "Select"
 msgstr ""
 
-#: templates/newman/newman-index.html:87
+#: templates/newman/newman-index.html:89
 msgid "Future placements"
 msgstr "Budoucí publikace"
 
-#: templates/newman/newman-index.html:93
+#: templates/newman/newman-index.html:92
+msgid "No future placements available."
+msgstr "Žádné budoucí publikace nejsou dostupné."
+
+#: templates/newman/newman-index.html:98
 #: templates/newman/edit_inline/placement.html:36
 msgid "Publish from"
 msgstr "Publikovat od"
 
-#: templates/newman/newman-index.html:94
+#: templates/newman/newman-index.html:99
 #: templates/newman/edit_inline/placement.html:35
 #: templates/newman/positions/change_list.html:12
 msgid "Category"
 msgstr "Kategorie"
 
-#: templates/newman/newman-index.html:115
+#: templates/newman/newman-index.html:120
 msgid "None available"
 msgstr ""
 
@@ -895,7 +902,7 @@ msgstr "Volby"
 msgid "Click to edit question."
 msgstr "Kliknutím změňte otázku"
 
-#: templates/newman/edit_inline/tabular.html:21
+#: templates/newman/edit_inline/tabular.html:23
 msgid "Delete?"
 msgstr "Smazat?"
 
@@ -922,6 +929,42 @@ msgstr "Vložit"
 #: templates/newman/exports/export/change_list.html:4
 msgid "Timeline view"
 msgstr "Časová osa"
+
+#: templates/newman/polls/correct-answers.html:8
+msgid "Count Guess Difference"
+msgstr ""
+
+#: templates/newman/polls/correct-answers.html:9
+msgid "Name"
+msgstr ""
+
+#: templates/newman/polls/correct-answers.html:10
+msgid "Surname"
+msgstr "Příjmení"
+
+#: templates/newman/polls/correct-answers.html:12
+msgid "Email"
+msgstr "E-mail"
+
+#: templates/newman/polls/correct-answers.html:13
+msgid "Phonenumber"
+msgstr ""
+
+#: templates/newman/polls/correct-answers.html:14
+msgid "Address"
+msgstr ""
+
+#: templates/newman/polls/correct-answers.html:15
+msgid "Winner"
+msgstr ""
+
+#: templates/newman/polls/correct-answers.html:28
+msgid "Yes"
+msgstr ""
+
+#: templates/newman/polls/correct-answers.html:28
+msgid "No"
+msgstr "Ne"
 
 #: templates/newman/positions/multi_change_form.html:9
 msgid "Categories"
