@@ -215,8 +215,11 @@ a.btn.filter-active { background-color: #FFF8D1; }
 }
 
 /* FORMS */
-fieldset, legend { border: 1px solid #ddd; padding: 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; -khtml-border-radius: 5px; background: #fff; }
+fieldset, legend { border: 1px solid #ddd; padding: 5px; -moz-border-radius: 5px; border-radius: 5px; -khtml-border-radius: 5px; background: #fff; }
 legend { padding: 2px 5px; }
+.inline-group fieldset { margin: 10px; }
+.inline-group legend { font-weight: bold; font-size: 120%; }
+.inline-group fieldset fieldset { -moz-border-radius: 5px; border-radius: 5px; border:none; border-bottom: 1px dotted #ddd; margin: 5px; }
 label { display: block; clear: both; margin: 5px 0 2px 0; }
 label.vCheckboxLabel { display: inline; margin-left: 10px; }
 label.required { font-weight: bold; color: darkorange; }

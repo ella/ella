@@ -1,20 +1,22 @@
 <div class="inline-group">
-  <h2>{{ inline_admin_formset.opts.verbose_name_plural|title }}</h2>
+<fieldset>
+  <legend>{{ inline_admin_formset.opts.verbose_name_plural|title }}</legend>
 {{ inline_admin_formset.formset.management_form }}
 {{ inline_admin_formset.formset.non_form_errors }}
 
 {% for inline_admin_form in inline_admin_formset %}
 <div class="inline-related {% if forloop.last %}last-related{% endif %}">
-  <h3><b>{{ inline_admin_formset.opts.verbose_name|title }}:</b>&nbsp;{% if inline_admin_form.original %}{{ inline_admin_form.original }}{% else %} #{{ forloop.counter }}{% endif %}
+  {% if inline_admin_formset|length %}
+    <b>{{ inline_admin_formset.opts.verbose_name|title }}:</b>&nbsp;{% if inline_admin_form.original %}{{ inline_admin_form.original }}{% else %} #{{ forloop.counter }}{% endif %}
+  {% endif %}
     {% if inline_admin_formset.formset.can_delete and inline_admin_form.original %}<span class="delete">{{ inline_admin_form.deletion_field.field }} {{ inline_admin_form.deletion_field.label_tag }}</span>{% endif %}
-  </h3>
   {% if inline_admin_form.show_url %}
   <p><a href="{% url newman:obj-redirect inline_admin_form.original_content_type_id inline_admin_form.original.id %}">{% trans "View on site" %}</a></p>
   {% endif %}
   {% if inline_admin_form.form.non_field_errors %}{{ inline_admin_form.form.non_field_errors }}{% endif %}
 
   {% for fieldset in inline_admin_form %}
-    {% include "admin/includes/fieldset.html" %}
+    {% include "newman/includes/fieldset.html" %}
   {% endfor %}
   {{ inline_admin_form.pk_field.field }}
   {{ inline_admin_form.fk_field.field }}
@@ -24,4 +26,5 @@
 {# <ul class="tools"> #}
 {#   <li><a class="add" href="">Add another {{ inline_admin_formset.opts.verbose_name|title }}</a></li> #}
 {# </ul> #}
+</fieldset>
 </div>
