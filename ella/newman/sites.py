@@ -2,6 +2,7 @@ from django.utils.safestring import mark_safe
 import datetime
 
 from django import template
+from django.contrib import admin as djangoadmin
 from django.contrib.admin.sites import AdminSite
 from django.shortcuts import render_to_response
 from django.utils.functional import update_wrapper
@@ -63,7 +64,7 @@ class NewmanSite(AdminSite):
 
 
     def get_urls(self):
-        from django.conf.urls.defaults import patterns, url
+        from django.conf.urls.defaults import patterns, url, include
 
         def wrap(view, cacheable=False):
             def wrapper(*args, **kwargs):
@@ -72,6 +73,7 @@ class NewmanSite(AdminSite):
 
         # Newman specific URLs
         urlpatterns = patterns('',
+            (r'^django-admin/', include(djangoadmin.site.urls)),
             url(r'^%s/err-report/$' % config.NEWMAN_URL_PREFIX,
                 wrap(self.err_report),
                 name="err-report"),

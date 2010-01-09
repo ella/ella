@@ -75,7 +75,7 @@
             <select name="action" size="1">
                 <option value="">{% trans 'Select' %}...</option>
                 {% for ct in searchable_content_types %}
-                    <option value="/{{ ct.app_label }}/{{ ct.model }}/">{% trans ct.name %}</option>
+                    <option value="/{{ ct.app_label }}/{{ ct.model }}/">{% filter capfirst %}{% trans ct.name %}{% endfilter %}</option>
                 {% endfor %}
             </select>
             <a class="icn btn search def">{% trans 'Go' %}</a>

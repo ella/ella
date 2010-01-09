@@ -7,7 +7,7 @@ from ella.newman.options import NewmanModelAdmin, NewmanInlineModelAdmin, Newman
 from ella.newman.generic import BaseGenericInlineFormSet, GenericInlineModelAdmin, GenericStackedInline, GenericTabularInline
 
 def autodiscover():
-    call_modules(auto_discover=('newman_admin',))
+    call_modules(auto_discover=('newman_admin', 'admin',))
 
 # add newman templatetags to builtin
 template.add_to_builtins('ella.newman.templatetags.newman')

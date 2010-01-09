@@ -1,0 +1,10 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+
+{% block title %}{{ title }} | {% trans 'Ella administration' %}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">{% trans 'Ella administration' %} (django-admin)</h1>
+{% endblock %}
+
+{% block userlinks %}<a href="{% url newman:index %}">Newman admin</a> / {{ block.super }}{% endblock %}
