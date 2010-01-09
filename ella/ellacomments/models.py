@@ -30,9 +30,9 @@ class CommentOptionsObject(models.Model):
     target_id = models.PositiveIntegerField(_('Target id'))
     target = CachedGenericForeignKey(ct_field="target_ct", fk_field="target_id")
 
-    blocked = models.BooleanField(default=False)
-    premoderated = models.BooleanField(default=False)
-    check_profanities = models.BooleanField(default=False)
+    blocked = models.BooleanField(_('Disable comments'), default=False)
+    premoderated = models.BooleanField(_('Show comments only after approval'), default=False)
+    check_profanities = models.BooleanField(_('Check profanities in comments'), default=False, editable=False)
 
     def __unicode__(self):
         return u"%s: %s" % (_("Comment Options"), self.target)
