@@ -19,7 +19,8 @@ from django.utils.html import escape
 from ella.core.cache import get_cached_object_or_404
 from ella.core.views import get_templates_from_placement
 from django.contrib.formtools.wizard import FormWizard
-from ella.polls.models import Poll, Contestant, Vote, ACTIVITY_NOT_YET_ACTIVE, ACTIVITY_ACTIVE, ACTIVITY_CLOSED
+from ella.polls.models import Poll, Contestant, Vote, ACTIVITY_NOT_YET_ACTIVE, ACTIVITY_ACTIVE, ACTIVITY_CLOSED,\
+    Survey
 
 
 # POLLS specific settings
@@ -28,6 +29,12 @@ POLLS_JUST_VOTED_COOKIE_NAME = getattr(settings, 'POLLS_JUST_VOTED_COOKIE_NAME',
 POLLS_NO_CHOICE_COOKIE_NAME = getattr(settings, 'POLLS_NO_CHOICE_COOKIE_NAME', 'polls_no_choice')
 POLLS_MAX_COOKIE_LENGTH = getattr(settings, 'POLLS_MAX_COOKIE_LENGTH', 20)
 POLLS_MAX_COOKIE_AGE = getattr(settings, 'POLLS_MAX_COOKIE_AGE', 604800)
+
+SURVEY_COOKIE_NAME = getattr(settings, 'SURVEY_COOKIE_NAME', 'surveys_voted')
+SURVEY_JUST_VOTED_COOKIE_NAME = getattr(settings, 'SURVEY_JUST_VOTED_COOKIE_NAME', 'surveys_just_voted_voted')
+SURVEY_NO_CHOICE_COOKIE_NAME = getattr(settings, 'SURVEY_NO_CHOICE_COOKIE_NAME', 'surveys_no_choice')
+SURVEY_MAX_COOKIE_LENGTH = getattr(settings, 'SURVEY_MAX_COOKIE_LENGTH', 20)
+SURVEY_MAX_COOKIE_AGE = getattr(settings, 'SURVEY_MAX_COOKIE_AGE', 604800)
 
 POLL_USER_NOT_YET_VOTED = 0
 POLL_USER_JUST_VOTED = 1
@@ -94,6 +101,38 @@ def poll_check_vote(request, poll):
             return POLL_USER_ALLREADY_VOTED
         return POLL_USER_NOT_YET_VOTED
 
+def survey_check_vote(request, survey):
+    sess_jv = request.session.get(SURVEY_JUST_VOTED_COOKIE_NAME, [])
+    # removing just voted info from session
+    if survey.id in sess_jv:
+        del request.session[SURVEY_JUST_VOTED_COOKIE_NAME]
+        # TODO - del just my poll, not the entire list !
+        return POLL_USER_JUST_VOTED
+    # removing no vote info from session
+    sess_nv = request.session.get(SURVEY_NO_CHOICE_COOKIE_NAME, [])
+    if survey.id in sess_nv:
+        del request.session[SURVEY_NO_CHOICE_COOKIE_NAME]
+        # TODO - del just my poll, not the entire list !
+        return POLL_USER_NO_CHOICE
+    # authenticated user - check session
+    if request.user.is_authenticated():
+        sess = request.session.get(SURVEY_COOKIE_NAME, [])
+        if survey.id in sess:
+            return POLL_USER_ALLREADY_VOTED
+        # otherwise check Vote object - just for sure
+        if survey.check_vote_by_user(request.user):
+            return POLL_USER_ALLREADY_VOTED
+        return POLL_USER_NOT_YET_VOTED
+    # anonymous - check cookie
+    else:
+        cook = request.COOKIES.get(SURVEY_COOKIE_NAME, '').split(',')
+        if str(survey.id) in cook:
+            return POLL_USER_ALLREADY_VOTED
+        ip_address = request.META['REMOTE_ADDR']
+        # otherwise check Vote object - just for sure
+        if survey.check_vote_by_ip_address(ip_address):
+            return POLL_USER_ALLREADY_VOTED
+        return POLL_USER_NOT_YET_VOTED
 
 @require_POST
 @transaction.commit_on_success
@@ -160,6 +199,71 @@ def poll_vote(request, poll_id):
 
     return response
 
+
+@require_POST
+@transaction.commit_on_success
+def survey_vote(request, survey_id):
+
+    survey_ct = ContentType.objects.get_for_model(Survey)
+    survey = get_cached_object_or_404(survey_ct, pk=survey_id)
+
+    url = get_next_url(request)
+
+    # activity check
+    if not survey.current_activity_state == ACTIVITY_ACTIVE:
+        return HttpResponseRedirect(url)
+
+    # vote check
+    if survey_check_vote(request, survey) != POLL_USER_NOT_YET_VOTED:
+        return HttpResponseRedirect(url)
+
+    form = QuestionForm(survey)(request.POST)
+
+    # invalid input
+    if not form.is_valid():
+        # no choice selected error - via session
+        sess_nv = request.session.get(SURVEY_NO_CHOICE_COOKIE_NAME, [])
+        sess_nv.append(survey.id)
+        request.session[SURVEY_NO_CHOICE_COOKIE_NAME] = sess_nv
+        return HttpResponseRedirect(url)
+
+    # vote save
+    kwa = {}
+    if request.user.is_authenticated():
+        kwa['user'] = request.user
+    kwa['ip_address'] = request.META['REMOTE_ADDR']
+    survey.vote(form.cleaned_data['choice'], **kwa)
+
+    # just voted info session update
+    sess_jv = request.session.get(SURVEY_JUST_VOTED_COOKIE_NAME, [])
+    sess_jv.append(survey.id)
+    request.session[SURVEY_JUST_VOTED_COOKIE_NAME] = sess_jv
+
+    response = HttpResponseRedirect(url)
+
+    # authenticated user vote - session update
+    if request.user.is_authenticated():
+        sess = request.session.get(SURVEY_COOKIE_NAME, [])
+        sess.append(survey.id)
+        request.session[SURVEY_COOKIE_NAME] = sess
+    # annonymous user vote - cookies update
+    else:
+        cook = request.COOKIES.get(SURVEY_COOKIE_NAME, '').split(',')
+        if len(cook) > SURVEY_MAX_COOKIE_LENGTH:
+            cook = cook[1:]
+        cook.append(str(survey.id))
+        expires = datetime.strftime(datetime.utcnow() + timedelta(seconds=SURVEY_MAX_COOKIE_AGE), "%a, %d-%b-%Y %H:%M:%S GMT")
+        response.set_cookie(
+            SURVEY_COOKIE_NAME,
+            value=','.join(cook),
+            max_age=SURVEY_MAX_COOKIE_AGE,
+            expires=expires,
+            path='/',
+            domain=Site.objects.get_current().domain,
+            secure=None
+        )
+
+    return response
 
 @transaction.commit_on_success
 def contest_vote(request, context):

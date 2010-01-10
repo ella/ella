@@ -3,7 +3,7 @@ from django.utils.translation import ugettext as _
 from django.template.defaultfilters import slugify
 
 from ella.polls.models import Contest, Quiz
-from ella.polls.views import poll_vote, quiz, contest, result_details, contest_conditions, contest_result
+from ella.polls.views import poll_vote, survey_vote, quiz, contest, result_details, contest_conditions, contest_result
 from ella.core.custom_urls import resolver
 
 
@@ -12,6 +12,9 @@ urlpatterns = patterns('',
     url(r'^(?P<poll_id>\d+)/vote/$', poll_vote, name="polls_vote"),
     # POLL - vote to poll alt2
     url(r'^poll/(?P<poll_id>\d+)/vote/$', poll_vote, name="polls_poll_vote"),
+
+    # SURVEY - vote to survey
+    url(r'^survey/(?P<survey_id>\d+)/vote/$', survey_vote, name="polls_survey_vote"),
 
     # CONTEST - vote to contest
     #url(r'^contest/(?P<contest_id>\d+)/vote/$', contest_vote, name="polls_contest_vote"),

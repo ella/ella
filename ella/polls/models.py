@@ -250,7 +250,7 @@ class Question(models.Model):
         return self._is_test
 
     def __unicode__(self):
-        return truncate_words(striptags(self.question), 5)
+        return truncate_words(striptags(self.question), 10)
 
     class Meta:
         verbose_name = _('Question')
@@ -287,12 +287,43 @@ class Choice(models.Model):
         verbose_name = _('Choice')
         verbose_name_plural = _('Choices')
 
+class SurveyBox(Box):
+
+    can_double_render = True
+
+    def prepare(self, context):
+        super(SurveyBox, self).prepare(context)
+        SECOND_RENDER = context.get('SECOND_RENDER', False)
+        self.state = None
+        if getattr(settings, 'DOUBLE_RENDER', False) and not SECOND_RENDER or 'request' not in context:
+            return
+
+        from ella.polls import views
+        self.state = views.survey_check_vote(context['request'], self.obj)
+
+    def get_context(self):
+        from ella.polls import views
+        cont = super(SurveyBox, self).get_context()
+        # state = views.poll_check_vote(self._context['request'], self.obj)
+        cont.update({
+            'photo_slug' : self.params.get('photo_slug', ''),
+            'state' : self.state,
+            'state_voted' : views.POLL_USER_ALLREADY_VOTED,
+            'state_just_voted' : views.POLL_USER_JUST_VOTED,
+            'state_not_yet_voted' : views.POLL_USER_NOT_YET_VOTED,
+            'state_no_choice' : views.POLL_USER_NO_CHOICE,
+            'activity_not_yet_active' : ACTIVITY_NOT_YET_ACTIVE,
+            'activity_active' : ACTIVITY_ACTIVE,
+            'activity_closed' : ACTIVITY_CLOSED,})
+        return cont
+
+
 class Survey(Question):
     """
     New, simplified polls.
     """
 
-    box_class = PollBox
+    box_class = SurveyBox
 
     active_from = models.DateTimeField(_('Active from'))
     active_till = models.DateTimeField(_('Active till'))
@@ -303,6 +334,18 @@ class Survey(Question):
         vote.save()
         # increment votes at Choice object
         choice.add_vote()
+
+    @property
+    def current_activity_state(self):
+        """
+        Objects current life-cycle stage
+        """
+        if self.active_till and self.active_till < datetime.now():
+            return ACTIVITY_CLOSED
+        elif self.active_from and self.active_from > datetime.now():
+            return ACTIVITY_NOT_YET_ACTIVE
+        else:
+            return ACTIVITY_ACTIVE
 
     def check_vote_by_user(self, user):
         return SurveyVote.objects.filter(survey=self, user=user).count() > 0
