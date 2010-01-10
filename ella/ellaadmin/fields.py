@@ -7,6 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.template import Template, TextNode, TemplateSyntaxError
 from django.contrib.admin.widgets import AdminFileWidget
 from django.contrib.contenttypes.models import ContentType
+from djangomarkup.fields import post_save_listener
 
 from ella.core.models import Dependency
 from ella.ellaadmin import widgets
