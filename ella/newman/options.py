@@ -805,7 +805,11 @@ class NewmanModelAdmin(XModelAdmin):
                     return_url += 'add/'
                 return HttpResponseRedirect(return_url)
 
-            return utils.JsonResponse(msg, {'id': obj.pk, 'title': obj.__unicode__(),})
+            return utils.JsonResponse(msg, {
+                    'id': obj.pk,
+                    'title': getattr(obj, '__unicode__', obj.__str__)(),
+                })
+
         elif 'error_dict' in context:
             return self.json_error_response(request, context)
 

@@ -15,6 +15,9 @@ class InfoBox(models.Model):
     updated = models.DateTimeField(_('Updated'), blank=True, null=True)
     content = models.TextField(_('Content'))
 
+    def __unicode__(self):
+        return u"%s" % self.title
+
     class Meta:
         ordering = ('-created',)
         verbose_name = _('Info box')
