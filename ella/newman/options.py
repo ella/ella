@@ -62,15 +62,14 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
             return rich_text_field
 
     # date and datetime fields
-    if isinstance(db_field, models.DateField):
-        kwargs.update({
-            'widget': widgets.DateWidget,
-        })
-        return db_field.formfield(**kwargs)
-
     if isinstance(db_field, models.DateTimeField):
         kwargs.update({
             'widget': widgets.DateTimeWidget,
+        })
+        return db_field.formfield(**kwargs)
+    elif isinstance(db_field, models.DateField):
+        kwargs.update({
+            'widget': widgets.DateWidget,
         })
         return db_field.formfield(**kwargs)
 
