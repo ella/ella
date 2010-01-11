@@ -12,8 +12,10 @@
             url="{% publishable_full_url item %}"
             type="text/html"
             >
+            {% if item.export_thumbnail_url %}
             <media:thumbnail  url="{{ item.export_thumbnail_url }}" 
                 type="image/jpeg" />
+            {% endif %}
             <media:title type="html"><![CDATA[{{ item.title }}]]></media:title>
         </media:content>
     </item>
