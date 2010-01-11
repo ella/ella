@@ -1,4 +1,4 @@
-{% extends "exports/base.html" %}
+{% extends "exports/base.xml" %}
 {% load exports %}
 
 {% block items %}
