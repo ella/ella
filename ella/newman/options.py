@@ -1,3 +1,4 @@
+from copy import copy
 import logging
 
 from django.conf import settings
@@ -33,13 +34,14 @@ DEFAULT_LIST_PER_PAGE = getattr(settings, 'NEWMAN_LIST_PER_PAGE', 25)
 log = logging.getLogger('ella.newman')
 
 # update standard FORMFIELD_FOR_DBFIELD_DEFAULTS
-FORMFIELD_FOR_DBFIELD_DEFAULTS.update({
+NEWMAN_FORMFIELD_FOR_DBFIELD_DEFAULTS = copy(FORMFIELD_FOR_DBFIELD_DEFAULTS)
+NEWMAN_FORMFIELD_FOR_DBFIELD_DEFAULTS.update({
     models.DateTimeField: {'widget': widgets.DateTimeWidget},
     models.DateField:     {'widget': widgets.DateWidget},
 })
 
 def formfield_for_dbfield_factory(cls, db_field, **kwargs):
-    formfield_overrides = dict(FORMFIELD_FOR_DBFIELD_DEFAULTS, **cls.formfield_overrides)
+    formfield_overrides = dict(NEWMAN_FORMFIELD_FOR_DBFIELD_DEFAULTS, **cls.formfield_overrides)
     custom_param_names = ('request', 'user', 'model', 'super_field', 'instance')
     custom_params = {}
     # move custom kwargs from kwargs to custom_params
