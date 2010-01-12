@@ -1,16 +1,46 @@
+from datetime import datetime
+
 from django.http import Http404
 from django.conf import settings
 from django.template.defaultfilters import slugify
+from django.utils.translation import ugettext as _
 
 from ella.core.models import Listing, Category, Placement
 from ella.core.cache import get_cached_object_or_404, cache_this
 from ella.core.cache.template_loader import render_to_response
-from ella.core.views import get_templates, EllaCoreView
+from ella.core.views import EllaCoreView
 from ella.exports.models import Export, ExportMeta, ExportPosition
 from ella.exports.models import UnexportableException
 
 
-class MrssExports(EllaCoreView):
+def get_templates(name, slug=None, category=None, app_label=None, model_label=None):
+    """
+    Returns templates in following format and order:
+
+        - 'page/category/%s/content_type/%s.%s/%s/%s' % ( category.path, app_label, model_label, slug, name ),
+        - 'page/category/%s/content_type/%s.%s/%s' % ( category.path, app_label, model_label, name ),
+        - 'page/category/%s/%s' % ( category.path, name ),
+        - 'page/content_type/%s.%s/%s/%s' % ( app_label, model_label, slug, name ),
+        - 'page/content_type/%s.%s/%s' % ( app_label, model_label, name ),
+        - 'page/%s' % name,
+    """
+    templates = []
+    if category:
+        if app_label and model_label:
+            if slug:
+                templates.append('page/category/%s/content_type/%s.%s/%s/%s' % (category.path, app_label, model_label, slug, name))
+            templates.append('page/category/%s/content_type/%s.%s/%s' % (category.path, app_label, model_label, name))
+        templates.append('page/category/%s/%s' % (category.path, name))
+        if category.tree_parent:
+            templates.append('page/category/%s/%s' % (category.tree_parent.path, name))
+    if app_label and model_label:
+        if slug:
+            templates.append('page/content_type/%s.%s/%s/%s' % (app_label, model_label, slug, name))
+        templates.append('page/content_type/%s.%s/%s' % (app_label, model_label, name))
+    templates.append('page/%s' % name)
+    return templates
+
+class MrssExport(EllaCoreView):
     """
     1. URL format is /category/path/to/any/depth/[content_type/]
     2. Sort export items by its main placement and listings.
@@ -23,29 +53,33 @@ class MrssExports(EllaCoreView):
         'page/category/%s/%s' % ( category.path, name ),
         'page/content_type/%s.%s/%s' % ( app_label, model_label, name ),
         'page/%s' % name,
-        .. name = mrss_export.html
+        .. name = export.xml
     """
 
-    template_name = 'mrss_export.html'
+    template_name = 'export.xml'
 
-    def __get_templates(self, context):
+    def get_templates(self, context, template_name=None):
         " Extract parameters for `get_templates` from the context. "
         kw = {}
-        if 'object' in context:
-            o = context['object']
-            kw['slug'] = o.slug
+        if 'export_slug' in context:
+            kw['slug'] = context['export_slug']
 
         if context.get('content_type', False):
             ct = context['content_type']
             kw['app_label'] = ct.app_label
             kw['model_label'] = ct.model
+        else:
+            kw['app_label'] = Export._meta.app_label
+            kw['model_label'] = Export._meta.module_name
 
         return get_templates(self.template_name, category=context['category'], **kw)
 
     def get_context(self, request, **kwargs):
+        now = datetime.now()
         category = kwargs.get('category', None)
         slug = kwargs.get('slug', None)
         export = None
+        export_object = None
         cat = None
         title = u''
         link = ''
@@ -59,7 +93,7 @@ class MrssExports(EllaCoreView):
                 title = export_object.title
                 link = export_object.url
             except Export.DoesNotExist:
-                raise Http404
+                raise Http404(_('Export with given slug does not exist.'))
         else:
             if category:
                 cat = get_cached_object_or_404(Category, tree_path=category, site__id=settings.SITE_ID)
@@ -71,7 +105,10 @@ class MrssExports(EllaCoreView):
             link = export_object.url
 
         context.update({
+            'updated': now.strftime('%Y-%m-%dT%H:%M:%S+02:00'),
             'exported_items': items,
+            'export_slug': slug,
+            'export_object': export_object,
             'category': cat,
             'is_homepage': not bool(category),
             'title': title,
@@ -79,6 +116,9 @@ class MrssExports(EllaCoreView):
         })
         return context
 
-mrss_exports = MrssExports()
+    #def __call__(self, *args, **kwargs):
+    #    super(MrssExport, self).__call__(*args, **kwargs)
+
+mrss_export = MrssExport()
 
 # EOF
