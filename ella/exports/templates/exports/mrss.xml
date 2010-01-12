@@ -1,6 +1,5 @@
 {% extends "exports/base.xml" %}
 {% load exports %}
-
 {% block items %}
 {% for item in exported_items %}
     <item>

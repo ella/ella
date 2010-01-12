@@ -1,8 +1,6 @@
-{% block header %}
-<?xml version="1.0" encoding="UTF-8"?>
+{% block header %}<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/">
 {% endblock %}
-
     {% block channel-definition %}
     <channel>
         <title>{% block title %}{% endblock %}</title>
@@ -11,7 +9,6 @@
             {% block items %}{% endblock %}
     </channel>
     {% endblock %}
-
 {% block footer %}
 </rss>
 </xml>
