@@ -1,3 +1,5 @@
+import hashlib
+
 from django.db import models, IntegrityError
 from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
@@ -32,10 +34,20 @@ class Export(models.Model):
     def url(self):
         if not self.slug:
             return ''
-        url = reverse('ella_exports_by_slug', args={'slug': self.slug,})
+        url = reverse('ella_exports_by_slug', args=(self.slug,))
         # prepend the domain if it doesn't match current Site
         site = get_cached_object(Site, pk=self.category.site_id)
         return 'http://' + site.domain + url
+
+    @property
+    def get_atom_id(self):
+        token = '%s.%s.%s' % (
+            self.slug,
+            self.max_visible_items,
+            self.photo_format,
+        )
+        hash = hashlib.sha1(token)
+        return 'tag:%s' % hash.hexdigest()
 
     class Meta:
         unique_together = ( ('title',), ('slug',) )
