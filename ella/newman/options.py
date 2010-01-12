@@ -1,3 +1,4 @@
+from copy import copy, deepcopy
 import logging
 
 from django.conf import settings
@@ -32,12 +33,6 @@ DEFAULT_LIST_PER_PAGE = getattr(settings, 'NEWMAN_LIST_PER_PAGE', 25)
 
 log = logging.getLogger('ella.newman')
 
-# update standard FORMFIELD_FOR_DBFIELD_DEFAULTS
-FORMFIELD_FOR_DBFIELD_DEFAULTS.update({
-    models.DateTimeField: {'widget': widgets.DateTimeWidget},
-    models.DateField:     {'widget': widgets.DateWidget},
-})
-
 def formfield_for_dbfield_factory(cls, db_field, **kwargs):
     formfield_overrides = dict(FORMFIELD_FOR_DBFIELD_DEFAULTS, **cls.formfield_overrides)
     custom_param_names = ('request', 'user', 'model', 'super_field', 'instance')
@@ -65,6 +60,18 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
             if css_class:
                 rich_text_field.widget.attrs['class'] += ' %s' % css_class
             return rich_text_field
+
+    # date and datetime fields
+    if isinstance(db_field, models.DateTimeField):
+        kwargs.update({
+            'widget': widgets.DateTimeWidget,
+        })
+        return db_field.formfield(**kwargs)
+    elif isinstance(db_field, models.DateField):
+        kwargs.update({
+            'widget': widgets.DateWidget,
+        })
+        return db_field.formfield(**kwargs)
 
     if isinstance(db_field, models.ImageField):
         # we accept only (JPEG) images with RGB color profile.
