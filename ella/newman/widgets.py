@@ -278,8 +278,9 @@ class ForeignKeyRawIdWidget(forms.TextInput):
 
     def label_for_value(self, value):
         obj = self._get_obj(value)
+        obj_url = '/%s/%s/%s/' % (self.rel.to._meta.app_label, self.rel.to._meta.object_name.lower(), obj.pk)
         label = truncate_words(obj, 14)
-        return '&nbsp;<a class="js-hashadr" href="%s">%s</a>' % (get_newman_url(obj), label)
+        return '&nbsp;<a class="js-hashadr" href="%s">%s</a>' % (obj_url, label)
 
 
 class ForeignKeyGenericRawIdWidget(forms.TextInput):
