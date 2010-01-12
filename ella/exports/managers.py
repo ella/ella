@@ -162,14 +162,18 @@ class ExportItemizer(object):
         @return publishable object with overloaded attributes 
         title, photo, description. 
 
-        Adds property obj.export_thumbnail_url.
+        Adds property obj.export_thumbnail_url, feed_updated.
         """
         pub = self.__get_publishable(obj)
+        published = pub.publish_from
+        if 'updated' in pub.__dict__:
+            published = updated
         field_dict = self.data_formatter(pub, export=export)
         pub.title = field_dict['title']
         pub.photo = field_dict['photo']
         pub.description = field_dict['description']
         pub.export_thumbnail_url = None
+        pub.feed_updated = published.strftime('%Y-%m-%dT%H:%M:%S+02:00')
         if pub.photo:
             formated = pub.photo.get_formated_photo(export.photo_format.name)
             #pub.export_thumbnail_url = u'%s%s' % (settings.MEDIA_URL, formated.url)
@@ -248,13 +252,16 @@ class ExportItemizer(object):
 
 class ExportManager(models.Manager):
 
-    def get_items_for_slug(self, slug, datetime_from=datetime.now(), max_visible_items=None):
+    def get_items_for_slug(self, slug, datetime_from=None, max_visible_items=None):
         from ella.exports.models import Export
         exports = Export.objects.filter(slug=slug)
         if not exports:
             return list()
         e = ExportItemizer(slug=slug)
-        e.datetime_from = datetime_from
+        if datetime_from:
+            e.datetime_from = datetime_from
+        else:
+            e.datetime_from = datetime.now()
         e.max_visible_items = max_visible_items
         e.export = exports[0]
         return e
