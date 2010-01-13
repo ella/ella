@@ -8,7 +8,7 @@
     {% block channel-definition %}
 
         <title>{% block title %}{{ title|safe }}{% endblock %}</title>
-        {% spaceless %}<subtitle>{% block description %}Subtitle.{% endblock %}</subtitle>{% endspaceless %}
+        {% spaceless %}<subtitle>{% block description %}{{ description }}{% endblock %}</subtitle>{% endspaceless %}
         <link rel="self" href="{% block link%}{{ link }}{% endblock %}" />
         {% if export_object %}
             <id>{%block feed-id %}{{ export_object.get_atom_id }}{% endblock %}</id>
