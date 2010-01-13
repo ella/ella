@@ -1,5 +1,5 @@
-{% extends "exports/base.xml" %}
-{% load exports %}
+{% extends "ellaexports/base.xml" %}
+{% load ellaexports %}
 {% block items %}
 {% for item in exported_items %}
     <item>

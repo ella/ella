@@ -3,7 +3,7 @@
 {% block header %}
 <feed xmlns="http://www.w3.org/2005/Atom">
 {% endblock %}
-{% load exports %}
+{% load ellaexports %}
 {# For additional <entry> elements please see Atom 1.0 RFC: http://tools.ietf.org/html/rfc4287 #}
     {% block channel-definition %}
 
