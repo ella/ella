@@ -3,9 +3,9 @@
 {% endblock %}
     {% block channel-definition %}
     <channel>
-        <title>{% block title %}{% endblock %}</title>
-        <link>{% block link%}{% endblock %}</link>
-        <description>{% block description %}{% endblock %}</description>
+        <title>{% block title %}{{ title }}{% endblock %}</title>
+        <link>{% block link%}{{ link }}{% endblock %}</link>
+        <description>{% block description %}{{ description }}{% endblock %}</description>
             {% block items %}{% endblock %}
     </channel>
     {% endblock %}
