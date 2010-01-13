@@ -90,8 +90,6 @@ class MrssExport(EllaCoreView):
             items = Export.objects.get_items_for_slug(slug=slug)
             try:
                 export_object = Export.objects.get(slug=slug)
-                title = export_object.title
-                link = export_object.url
             except Export.DoesNotExist:
                 raise Http404(_('Export with given slug does not exist.'))
         else:
@@ -101,14 +99,17 @@ class MrssExport(EllaCoreView):
                 cat = get_cached_object_or_404(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
             items = Export.objects.get_items_for_category(category=cat)
             export_object = Export.objects.get(category=cat)
-            title = export_object.title
-            link = export_object.url
+
+        title = export_object.title
+        link = export_object.url
+        description = export_object.description
 
         context.update({
             'updated': now.strftime('%Y-%m-%dT%H:%M:%S+02:00'),
             'exported_items': items,
             'export_slug': slug,
             'export_object': export_object,
+            'description': description,
             'category': cat,
             'is_homepage': not bool(category),
             'title': title,
