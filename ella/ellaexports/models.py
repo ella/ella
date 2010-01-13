@@ -20,7 +20,8 @@ class UnexportableException(Exception):
 
 class Export(models.Model):
     " Export group. "
-    category = models.ForeignKey(Category, verbose_name=_('Category'), null=True, blank=True)
+    category = models.ForeignKey(Category, verbose_name=_('Category'))
+    use_objects_in_category = models.BooleanField(_('Use object listed in category'))
     title = models.CharField(_('Title'), max_length=255)
     description = models.TextField(_('Description'), blank=True)
     slug = models.SlugField(_('Slug'), max_length=255)
