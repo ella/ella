@@ -226,7 +226,7 @@ class ExportItemizer(object):
                 visible_from__lte=self._datetime_from,
             )
             objects = list()
-            if use_category:
+            if use_export.use_objects_in_category:
                 objects = list(Listing.objects.get_listing(
                     use_category, 
                     count=max_items * 2,
@@ -244,7 +244,7 @@ class ExportItemizer(object):
             pre_out = objects[:max_items]
         else:
             # Get listed objects for category
-            if use_category:
+            if use_export.use_objects_in_category:
                 objects = list(Listing.objects.get_listing(use_category))
                 objects.sort(cmp=cmp_listing_or_meta)
                 pre_out = objects
