@@ -199,6 +199,7 @@ class ExportItemizer(object):
         POSITION_IS_NOT_OVERLOADED
         use_export = None
         use_category = self.category
+        pre_out = list()
         if not self.export:
             exports = Export.objects.filter(category=use_category)
         else:
@@ -224,11 +225,13 @@ class ExportItemizer(object):
                 position__gt=POSITION_IS_NOT_OVERLOADED,
                 visible_from__lte=self._datetime_from,
             )
-            objects = list(Listing.objects.get_listing(
-                use_category, 
-                count=max_items * 2,
-                now=self._datetime_from
-            ))
+            objects = list()
+            if use_category:
+                objects = list(Listing.objects.get_listing(
+                    use_category, 
+                    count=max_items * 2,
+                    now=self._datetime_from
+                ))
             #log.debug(remove_diacritical('Items via Listing: %s' % objects))
             map(lambda i: objects.append(i), positions)
             #log.debug(remove_diacritical('Items via ExportPosition: %s' % positions))
@@ -241,9 +244,10 @@ class ExportItemizer(object):
             pre_out = objects[:max_items]
         else:
             # Get listed objects for category
-            objects = list(Listing.objects.get_listing(use_category))
-            objects.sort(cmp=cmp_listing_or_meta)
-            pre_out = objects
+            if use_category:
+                objects = list(Listing.objects.get_listing(use_category))
+                objects.sort(cmp=cmp_listing_or_meta)
+                pre_out = objects
         # extract Publishable objects from Listing/ExportPosition objects
         self.__items = list()
         for i in pre_out:
