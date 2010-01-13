@@ -15,7 +15,7 @@ log = logging.getLogger('ella.exports')
 
 def cmp_listing_or_meta(x, y):
     " Sorts items in descending order. "
-    from ella.exports.models import ExportPosition
+    from ella.ellaexports.models import ExportPosition
     def return_from_datetime(obj):
         if type(obj) == Listing:
             return obj.publish_from
@@ -50,7 +50,7 @@ class ExportItemizer(object):
         If data_formatter parameter is present, it should contain object with callable
         member(self, publishable, export=None, export_category=None) .
         """
-        from ella.exports.models import Export
+        from ella.ellaexports.models import Export
         # object members init
         self.__items = tuple()
         self.__counter = 0
@@ -86,7 +86,7 @@ class ExportItemizer(object):
 
     def set_datetime_from(self, value):
         " Accepts value as string, unicode or datetime. "
-        from ella.exports.models import DATETIME_FORMAT
+        from ella.ellaexports.models import DATETIME_FORMAT
         if not value:
             return
         if type(value) in (str, unicode,):
@@ -149,7 +149,7 @@ class ExportItemizer(object):
             out.append(t)
 
     def __get_publishable(self, obj):
-        from ella.exports.models import ExportPosition
+        from ella.ellaexports.models import ExportPosition
         if type(obj) == Listing:
             return obj.placement.publishable
         elif type(obj) == ExportPosition:
@@ -195,7 +195,7 @@ class ExportItemizer(object):
         3. Override item's title, photo, description if ExportMeta for item and Export is present.
         4. Override item's position and visibility timerange if defined.
         """
-        from ella.exports.models import Export, ExportPosition, ExportMeta,\
+        from ella.ellaexports.models import Export, ExportPosition, ExportMeta,\
         POSITION_IS_NOT_OVERLOADED
         use_export = None
         use_category = self.category
@@ -257,7 +257,7 @@ class ExportItemizer(object):
 class ExportManager(models.Manager):
 
     def get_items_for_slug(self, slug, datetime_from=None, max_visible_items=None):
-        from ella.exports.models import Export
+        from ella.ellaexports.models import Export
         exports = Export.objects.filter(slug=slug)
         if not exports:
             return list()
@@ -301,8 +301,8 @@ class ExportManager(models.Manager):
         If export parameter is None, first export fitting publishable's category
         is used.
         """
-        from ella.exports.models import Export, ExportPosition, ExportMeta
-        from ella.exports.models import UnexportableException
+        from ella.ellaexports.models import Export, ExportPosition, ExportMeta
+        from ella.ellaexports.models import UnexportableException
         if export:
             pub_export = export
         else:

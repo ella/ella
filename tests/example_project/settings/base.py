@@ -71,7 +71,7 @@ INSTALLED_APPS = (
     'ella.ellatagging',
     'ella.galleries',
     'ella.interviews',
-    'ella.exports',
+    'ella.ellaexports',
     'ella.media',
     'ella.attachments',
 #    'nc.cdnclient',

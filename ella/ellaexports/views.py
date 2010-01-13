@@ -9,8 +9,8 @@ from ella.core.models import Listing, Category, Placement
 from ella.core.cache import get_cached_object_or_404, cache_this
 from ella.core.cache.template_loader import render_to_response
 from ella.core.views import EllaCoreView
-from ella.exports.models import Export, ExportMeta, ExportPosition
-from ella.exports.models import UnexportableException
+from ella.ellaexports.models import Export, ExportMeta, ExportPosition
+from ella.ellaexports.models import UnexportableException
 
 
 def get_templates(name, slug=None, category=None, app_label=None, model_label=None):

@@ -13,8 +13,8 @@ from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 
-from ella.exports import models
-from ella.exports.managers import ExportItemizer
+from ella.ellaexports import models
+from ella.ellaexports.managers import ExportItemizer
 from ella.utils import remove_diacritical
 from ella.newman import utils
 

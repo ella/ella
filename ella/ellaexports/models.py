@@ -9,7 +9,7 @@ from django.conf import settings
 from ella.core.models import Publishable, Category
 from ella.core.cache import get_cached_object
 from ella.photos.models import Photo, Format
-from ella.exports.managers import ExportManager
+from ella.ellaexports.managers import ExportManager
 
 POSITION_IS_NOT_OVERLOADED = 0
 DATETIME_FORMAT = '%Y-%m-%d %H:%M'

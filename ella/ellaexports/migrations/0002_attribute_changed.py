@@ -1,7 +1,7 @@
 
 from south.db import db
 from django.db import models
-from ella.exports.models import *
+from ella.ellaexports.models import *
 
 class Migration:
     

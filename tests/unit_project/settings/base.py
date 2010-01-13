@@ -48,7 +48,7 @@ INSTALLED_APPS = (
     'ella.catlocks',
     'ella.polls',
     'ella.interviews',
-    'ella.exports',
+    'ella.ellaexports',
     'djangomarkup',
     'tagging',
     'threadedcomments',
