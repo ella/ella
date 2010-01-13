@@ -3,10 +3,10 @@
 {% block items %}
 {% for item in exported_items %}
     <item>
-        <title><![CDATA[{{ item.get_title }}]]></title>
+        <title><![CDATA[{{ item.title }}]]></title>
         <link>{% publishable_full_url item %}</link>
         <pubDate>{{ item.created }}</pubDate>
-        <description><![CDATA[{{ item.description }}]]></description>
+        <description><![CDATA[{{ item.description|striptags|linebreaksbr|striptags }}]]></description>
         <media:content
             url="{% publishable_full_url item %}"
             type="text/html"
