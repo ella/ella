@@ -7,77 +7,63 @@ class Migration:
     
     def forwards(self, orm):
         
-        # Adding model 'AtlasExport'
-        db.create_table('exports_atlasexport', (
-            ('id', orm['exports.AtlasExport:id']),
-            ('target_ct', orm['exports.AtlasExport:target_ct']),
-            ('target_id', orm['exports.AtlasExport:target_id']),
-            ('title', orm['exports.AtlasExport:title']),
-            ('description', orm['exports.AtlasExport:description']),
-            ('photo', orm['exports.AtlasExport:photo']),
-        ))
-        db.send_create_signal('exports', ['AtlasExport'])
-        
         # Adding model 'ExportPosition'
-        db.create_table('exports_exportposition', (
-            ('id', orm['exports.ExportPosition:id']),
-            ('visible_from', orm['exports.ExportPosition:visible_from']),
-            ('visible_to', orm['exports.ExportPosition:visible_to']),
-            ('position', orm['exports.ExportPosition:position']),
-            ('object', orm['exports.ExportPosition:object']),
-            ('export', orm['exports.ExportPosition:export']),
+        db.create_table('ellaexports_exportposition', (
+            ('id', orm['ellaexports.ExportPosition:id']),
+            ('visible_from', orm['ellaexports.ExportPosition:visible_from']),
+            ('visible_to', orm['ellaexports.ExportPosition:visible_to']),
+            ('position', orm['ellaexports.ExportPosition:position']),
+            ('object', orm['ellaexports.ExportPosition:object']),
+            ('export', orm['ellaexports.ExportPosition:export']),
         ))
-        db.send_create_signal('exports', ['ExportPosition'])
+        db.send_create_signal('ellaexports', ['ExportPosition'])
         
         # Adding model 'Export'
-        db.create_table('exports_export', (
-            ('id', orm['exports.Export:id']),
-            ('category', orm['exports.Export:category']),
-            ('title', orm['exports.Export:title']),
-            ('description', orm['exports.Export:description']),
-            ('slug', orm['exports.Export:slug']),
-            ('max_visible_items', orm['exports.Export:max_visible_items']),
-            ('photo_format', orm['exports.Export:photo_format']),
+        db.create_table('ellaexports_export', (
+            ('id', orm['ellaexports.Export:id']),
+            ('category', orm['ellaexports.Export:category']),
+            ('title', orm['ellaexports.Export:title']),
+            ('description', orm['ellaexports.Export:description']),
+            ('slug', orm['ellaexports.Export:slug']),
+            ('max_visible_items', orm['ellaexports.Export:max_visible_items']),
+            ('photo_format', orm['ellaexports.Export:photo_format']),
         ))
-        db.send_create_signal('exports', ['Export'])
+        db.send_create_signal('ellaexports', ['Export'])
         
         # Adding model 'ExportMeta'
-        db.create_table('exports_exportmeta', (
-            ('id', orm['exports.ExportMeta:id']),
-            ('publishable', orm['exports.ExportMeta:publishable']),
-            ('title', orm['exports.ExportMeta:title']),
-            ('photo', orm['exports.ExportMeta:photo']),
-            ('description', orm['exports.ExportMeta:description']),
+        db.create_table('ellaexports_exportmeta', (
+            ('id', orm['ellaexports.ExportMeta:id']),
+            ('publishable', orm['ellaexports.ExportMeta:publishable']),
+            ('title', orm['ellaexports.ExportMeta:title']),
+            ('photo', orm['ellaexports.ExportMeta:photo']),
+            ('description', orm['ellaexports.ExportMeta:description']),
         ))
-        db.send_create_signal('exports', ['ExportMeta'])
+        db.send_create_signal('ellaexports', ['ExportMeta'])
         
         # Creating unique_together for [slug] on Export.
-        db.create_unique('exports_export', ['slug'])
+        db.create_unique('ellaexports_export', ['slug'])
         
         # Creating unique_together for [title] on Export.
-        db.create_unique('exports_export', ['title'])
+        db.create_unique('ellaexports_export', ['title'])
         
     
     
     def backwards(self, orm):
         
         # Deleting unique_together for [title] on Export.
-        db.delete_unique('exports_export', ['title'])
+        db.delete_unique('ellaexports_export', ['title'])
         
         # Deleting unique_together for [slug] on Export.
-        db.delete_unique('exports_export', ['slug'])
-        
-        # Deleting model 'AtlasExport'
-        db.delete_table('exports_atlasexport')
+        db.delete_unique('ellaexports_export', ['slug'])
         
         # Deleting model 'ExportPosition'
-        db.delete_table('exports_exportposition')
+        db.delete_table('ellaexports_exportposition')
         
         # Deleting model 'Export'
-        db.delete_table('exports_export')
+        db.delete_table('ellaexports_export')
         
         # Deleting model 'ExportMeta'
-        db.delete_table('exports_exportmeta')
+        db.delete_table('ellaexports_exportmeta')
         
     
     
@@ -154,15 +140,7 @@ class Migration:
             'name': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
             'url': ('django.db.models.fields.URLField', [], {'max_length': '200', 'blank': 'True'})
         },
-        'exports.atlasexport': {
-            'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'photo': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['photos.Photo']", 'null': 'True', 'blank': 'True'}),
-            'target_ct': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']"}),
-            'target_id': ('django.db.models.fields.IntegerField', [], {}),
-            'title': ('django.db.models.fields.CharField', [], {'max_length': '100', 'blank': 'True'})
-        },
-        'exports.export': {
+        'ellaexports.export': {
             'Meta': {'unique_together': "(('title',), ('slug',))"},
             'category': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['core.Category']"}),
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
@@ -172,17 +150,17 @@ class Migration:
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '255', 'db_index': 'True'}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '255'})
         },
-        'exports.exportmeta': {
+        'ellaexports.exportmeta': {
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'photo': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['photos.Photo']", 'null': 'True', 'blank': 'True'}),
             'publishable': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['core.Publishable']"}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '64', 'blank': 'True'})
         },
-        'exports.exportposition': {
-            'export': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['exports.Export']"}),
+        'ellaexports.exportposition': {
+            'export': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ellaexports.Export']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'object': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['exports.ExportMeta']"}),
+            'object': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ellaexports.ExportMeta']"}),
             'position': ('django.db.models.fields.IntegerField', [], {'default': '0', 'blank': 'True'}),
             'visible_from': ('django.db.models.fields.DateTimeField', [], {}),
             'visible_to': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'})
@@ -239,4 +217,4 @@ class Migration:
         }
     }
     
-    complete_apps = ['exports']
+    complete_apps = ['ellaexports']

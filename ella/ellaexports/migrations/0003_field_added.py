@@ -8,22 +8,22 @@ class Migration:
     def forwards(self, orm):
         
         # Adding field 'Export.use_objects_in_category'
-        db.add_column('exports_export', 'use_objects_in_category', orm['exports.export:use_objects_in_category'])
+        db.add_column('ellaexports_export', 'use_objects_in_category', orm['ellaexports.export:use_objects_in_category'])
         
         # Changing field 'Export.category'
         # (to signature: django.db.models.fields.related.ForeignKey(to=orm['core.Category']))
-        db.alter_column('exports_export', 'category_id', orm['exports.export:category'])
+        db.alter_column('ellaexports_export', 'category_id', orm['ellaexports.export:category'])
         
     
     
     def backwards(self, orm):
         
         # Deleting field 'Export.use_objects_in_category'
-        db.delete_column('exports_export', 'use_objects_in_category')
+        db.delete_column('ellaexports_export', 'use_objects_in_category')
         
         # Changing field 'Export.category'
         # (to signature: django.db.models.fields.related.ForeignKey(to=orm['core.Category'], null=True, blank=True))
-        db.alter_column('exports_export', 'category_id', orm['exports.export:category'])
+        db.alter_column('ellaexports_export', 'category_id', orm['ellaexports.export:category'])
         
     
     
@@ -100,15 +100,7 @@ class Migration:
             'name': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
             'url': ('django.db.models.fields.URLField', [], {'max_length': '200', 'blank': 'True'})
         },
-        'exports.atlasexport': {
-            'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'photo': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['photos.Photo']", 'null': 'True', 'blank': 'True'}),
-            'target_ct': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']"}),
-            'target_id': ('django.db.models.fields.IntegerField', [], {}),
-            'title': ('django.db.models.fields.CharField', [], {'max_length': '100', 'blank': 'True'})
-        },
-        'exports.export': {
+        'ellaexports.export': {
             'Meta': {'unique_together': "(('title',), ('slug',))"},
             'category': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['core.Category']"}),
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
@@ -119,17 +111,17 @@ class Migration:
             'title': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'use_objects_in_category': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'})
         },
-        'exports.exportmeta': {
+        'ellaexports.exportmeta': {
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'photo': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['photos.Photo']", 'null': 'True', 'blank': 'True'}),
             'publishable': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['core.Publishable']"}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '64', 'blank': 'True'})
         },
-        'exports.exportposition': {
-            'export': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['exports.Export']"}),
+        'ellaexports.exportposition': {
+            'export': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ellaexports.Export']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'object': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['exports.ExportMeta']"}),
+            'object': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['ellaexports.ExportMeta']"}),
             'position': ('django.db.models.fields.IntegerField', [], {'default': '0', 'blank': 'True'}),
             'visible_from': ('django.db.models.fields.DateTimeField', [], {}),
             'visible_to': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'})
@@ -186,4 +178,4 @@ class Migration:
         }
     }
     
-    complete_apps = ['exports']
+    complete_apps = ['ellaexports']
