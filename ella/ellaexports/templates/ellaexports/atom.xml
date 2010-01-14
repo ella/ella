@@ -33,6 +33,9 @@
 
                 {% spaceless %}<summary>{{ item.description|striptags|linebreaksbr|striptags }}</summary>{% endspaceless %}
                 <id>{% get_atom_id item %}</id>
+                {% if item.export_thumbnail_url %}
+                <image>{{ item.export_thumbnail_url }}</image>
+                {% endif %}
             </entry>
         {% endfor %}
         {% endblock %} {# block items #}
