@@ -61,6 +61,7 @@ class FormatHitsLink(template.Node):
                     continue
                 l += '<li><a href="../../../core/hitcount/%d/" class="viewsitelink">Hits: %d</a></li>' \
                 % (hit_count._get_pk_val(), hit_count.hits)
-            return mark_safe(l)
+            # return mark_safe(l)
+            return mark_safe(u'<!--  here is hidden hitcount button:  %s -->' % l )
         except (HitCount.DoesNotExist, template.VariableDoesNotExist):
             return ''
