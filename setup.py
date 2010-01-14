@@ -13,6 +13,7 @@ setup(
         'Ella Django CMS Project',
         '',
         'content management system written in django',
+        '',
     )),
     author = 'centrum holdings s.r.o',
     author_email='devel@centrumholdings.com',
