@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 # must be in sync with ella.VERSION
-VERSION = (1, 1, 0, 0)
+VERSION = (1, 2, 0, 0)
 __version__ = VERSION
 __versionstr__ = '.'.join(map(str, VERSION))
 
