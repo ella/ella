@@ -14,6 +14,7 @@ from ella.ellaexports.managers import ExportManager
 POSITION_IS_NOT_OVERLOADED = 0
 DATETIME_FORMAT = '%Y-%m-%d %H:%M'
 TIME_FORMAT = '%H:%M'
+FEED_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S+02:00' #TODO settings.py
 
 class UnexportableException(Exception):
     pass

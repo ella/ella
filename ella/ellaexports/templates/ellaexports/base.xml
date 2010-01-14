@@ -1,4 +1,6 @@
-{% block header %}<?xml version="1.0" encoding="UTF-8"?>
+{% spaceless %}
+{%block xmlheader %}<?xml version="1.0" encoding="utf-8"?>{% endblock %}{% endspaceless %}
+{% block header %}
 <rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/">
 {% endblock %}
     {% block channel-definition %}
