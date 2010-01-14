@@ -164,16 +164,21 @@ class ExportItemizer(object):
 
         Adds property obj.export_thumbnail_url, feed_updated.
         """
+        from ella.ellaexports.models import FEED_DATETIME_FORMAT
         pub = self.__get_publishable(obj)
         published = pub.publish_from
         if 'updated' in pub.__dict__:
             published = updated
         field_dict = self.data_formatter(pub, export=export)
-        pub.title = field_dict['title']
-        pub.photo = field_dict['photo']
-        pub.description = field_dict['description']
+        if field_dict['title'].strip():
+            pub.title = field_dict['title']
+        if field_dict['photo']:
+            pub.photo = field_dict['photo']
+        if field_dict['description'].strip():
+            pub.description = field_dict['description']
         pub.export_thumbnail_url = None
-        pub.feed_updated = published.strftime('%Y-%m-%dT%H:%M:%S+02:00')
+        pub.feed_updated_raw_datetime = published
+        pub.feed_updated = published.strftime(FEED_DATETIME_FORMAT)
         if pub.photo:
             formated = pub.photo.get_formated_photo(export.photo_format.name)
             #pub.export_thumbnail_url = u'%s%s' % (settings.MEDIA_URL, formated.url)
