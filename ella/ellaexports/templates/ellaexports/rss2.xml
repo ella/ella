@@ -1,0 +1,21 @@
+{% extends "ellaexports/base.xml" %}
+{% spaceless %}
+{%block xmlheader %}<?xml version="1.0" encoding="utf-8"?>{% endblock %}{% endspaceless %}
+{% block header %}
+<rss version="2.0">
+{% endblock %}
+
+{% load ellaexports %}
+
+{% block items %}
+    {% for item in exported_items %}
+        <item>
+            <title>{{ item.title }}</title>
+            <link>{% publishable_full_url item %}</link>
+            <pubDate>{{ item.feed_updated|safe }}</pubDate>
+            <description>{{ item.description|striptags|linebreaksbr|striptags }}</description>
+            <guid>{% publishable_full_url item %}</guid>
+            {# {{ item.export_thumbnail_url }} #}
+        </item>
+    {% endfor %}
+{% endblock %} {# block items #}

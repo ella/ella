@@ -15,7 +15,7 @@ log = logging.getLogger('ella.exports')
 
 def cmp_listing_or_meta(x, y):
     " Sorts items in descending order. "
-    from ella.exports.models import ExportPosition
+    from ella.ellaexports.models import ExportPosition
     def return_from_datetime(obj):
         if type(obj) == Listing:
             return obj.publish_from
@@ -50,7 +50,7 @@ class ExportItemizer(object):
         If data_formatter parameter is present, it should contain object with callable
         member(self, publishable, export=None, export_category=None) .
         """
-        from ella.exports.models import Export
+        from ella.ellaexports.models import Export
         # object members init
         self.__items = tuple()
         self.__counter = 0
@@ -86,7 +86,7 @@ class ExportItemizer(object):
 
     def set_datetime_from(self, value):
         " Accepts value as string, unicode or datetime. "
-        from ella.exports.models import DATETIME_FORMAT
+        from ella.ellaexports.models import DATETIME_FORMAT
         if not value:
             return
         if type(value) in (str, unicode,):
@@ -149,7 +149,7 @@ class ExportItemizer(object):
             out.append(t)
 
     def __get_publishable(self, obj):
-        from ella.exports.models import ExportPosition
+        from ella.ellaexports.models import ExportPosition
         if type(obj) == Listing:
             return obj.placement.publishable
         elif type(obj) == ExportPosition:
@@ -162,14 +162,23 @@ class ExportItemizer(object):
         @return publishable object with overloaded attributes 
         title, photo, description. 
 
-        Adds property obj.export_thumbnail_url.
+        Adds property obj.export_thumbnail_url, feed_updated.
         """
+        from ella.ellaexports.models import FEED_DATETIME_FORMAT
         pub = self.__get_publishable(obj)
+        published = pub.publish_from
+        if 'updated' in pub.__dict__:
+            published = updated
         field_dict = self.data_formatter(pub, export=export)
-        pub.title = field_dict['title']
-        pub.photo = field_dict['photo']
-        pub.description = field_dict['description']
+        if field_dict['title'].strip():
+            pub.title = field_dict['title']
+        if field_dict['photo']:
+            pub.photo = field_dict['photo']
+        if field_dict['description'].strip():
+            pub.description = field_dict['description']
         pub.export_thumbnail_url = None
+        pub.feed_updated_raw_datetime = published
+        pub.feed_updated = published.strftime(FEED_DATETIME_FORMAT)
         if pub.photo:
             formated = pub.photo.get_formated_photo(export.photo_format.name)
             #pub.export_thumbnail_url = u'%s%s' % (settings.MEDIA_URL, formated.url)
@@ -191,10 +200,11 @@ class ExportItemizer(object):
         3. Override item's title, photo, description if ExportMeta for item and Export is present.
         4. Override item's position and visibility timerange if defined.
         """
-        from ella.exports.models import Export, ExportPosition, ExportMeta,\
+        from ella.ellaexports.models import Export, ExportPosition, ExportMeta,\
         POSITION_IS_NOT_OVERLOADED
         use_export = None
         use_category = self.category
+        pre_out = list()
         if not self.export:
             exports = Export.objects.filter(category=use_category)
         else:
@@ -220,11 +230,13 @@ class ExportItemizer(object):
                 position__gt=POSITION_IS_NOT_OVERLOADED,
                 visible_from__lte=self._datetime_from,
             )
-            objects = list(Listing.objects.get_listing(
-                use_category, 
-                count=max_items * 2,
-                now=self._datetime_from
-            ))
+            objects = list()
+            if use_export.use_objects_in_category:
+                objects = list(Listing.objects.get_listing(
+                    use_category, 
+                    count=max_items * 2,
+                    now=self._datetime_from
+                ))
             #log.debug(remove_diacritical('Items via Listing: %s' % objects))
             map(lambda i: objects.append(i), positions)
             #log.debug(remove_diacritical('Items via ExportPosition: %s' % positions))
@@ -237,9 +249,10 @@ class ExportItemizer(object):
             pre_out = objects[:max_items]
         else:
             # Get listed objects for category
-            objects = list(Listing.objects.get_listing(use_category))
-            objects.sort(cmp=cmp_listing_or_meta)
-            pre_out = objects
+            if use_export.use_objects_in_category:
+                objects = list(Listing.objects.get_listing(use_category))
+                objects.sort(cmp=cmp_listing_or_meta)
+                pre_out = objects
         # extract Publishable objects from Listing/ExportPosition objects
         self.__items = list()
         for i in pre_out:
@@ -248,13 +261,16 @@ class ExportItemizer(object):
 
 class ExportManager(models.Manager):
 
-    def get_items_for_slug(self, slug, datetime_from=datetime.now(), max_visible_items=None):
-        from ella.exports.models import Export
+    def get_items_for_slug(self, slug, datetime_from=None, max_visible_items=None):
+        from ella.ellaexports.models import Export
         exports = Export.objects.filter(slug=slug)
         if not exports:
             return list()
         e = ExportItemizer(slug=slug)
-        e.datetime_from = datetime_from
+        if datetime_from:
+            e.datetime_from = datetime_from
+        else:
+            e.datetime_from = datetime.now()
         e.max_visible_items = max_visible_items
         e.export = exports[0]
         return e
@@ -290,8 +306,8 @@ class ExportManager(models.Manager):
         If export parameter is None, first export fitting publishable's category
         is used.
         """
-        from ella.exports.models import Export, ExportPosition, ExportMeta
-        from ella.exports.models import UnexportableException
+        from ella.ellaexports.models import Export, ExportPosition, ExportMeta
+        from ella.ellaexports.models import UnexportableException
         if export:
             pub_export = export
         else:

@@ -1,5 +1,6 @@
 from django.conf.urls.defaults import patterns, url
 from django.utils.translation import ugettext_lazy as _
+from django.utils.datastructures import SortedDict
 from django.forms import models as modelforms
 from django import forms
 from django.forms.fields import DateTimeField, IntegerField, HiddenInput
@@ -9,7 +10,7 @@ from django.shortcuts import render_to_response
 
 from ella import newman
 from ella.newman import widgets, config
-from ella.exports import models, timeline
+from ella.ellaexports import models, timeline
 
 
 class ExportPositionInlineAdmin(newman.NewmanTabularInline):
@@ -72,6 +73,16 @@ class MetaInlineForm(modelforms.ModelForm):
     position_to =  DateTimeField(label=_('Visible To'), widget=widgets.DateTimeWidget, required=False)
     export =  modelforms.ModelChoiceField(models.Export.objects.all(), label=_('Export'))
     _export_stack = dict()
+    # override base_fields and include all the other declared fields
+    declared_fields = SortedDict(
+        (
+            ('title', HiddenIntegerField(label=u'', required=False)),
+            ('position_id', HiddenIntegerField(label=u'', required=False)),
+            ('position_from', DateTimeField(label=_('Visible From'), widget=widgets.DateTimeWidget)),
+            ('position_to', DateTimeField(label=_('Visible To'), widget=widgets.DateTimeWidget, required=False)),
+            ('export', modelforms.ModelChoiceField(models.Export.objects.all(), initial=None, label=_('Export'), show_hidden_initial=True))
+        )
+    )
 
     def __init__(self, *args, **kwargs):
         super(MetaInlineForm, self).__init__(*args, **kwargs)
@@ -186,9 +197,9 @@ class ExportMetaInline(newman.NewmanStackedInline):
     extra = 1
     """
     fieldsets = (
-        (None, {'fields': ('position_from', 'position_to' )}) ,
+        (None, {'fields': tuple()}) ,
         (_('Export meta options'), {
-            'fields': ('title', 'photo', 'description'),
+            'fields': ('position_from', 'position_to', 'title', 'photo', 'description'),
             'classes': ('collapsed',)
         })
     ) #FIXME add title, photo, description fields to MetaInlineForm, then fieldsets will work
@@ -200,4 +211,4 @@ newman.site.register(models.ExportPosition)
 newman.site.register(models.ExportMeta, ExportMetaAdmin)
 
 # Register ExportMetaInline in standard PublishableAdmin
-# newman.site.append_inline(config.TAGGED_MODELS, ExportMetaInline) # removed due to user interface is too dificult for an user
+newman.site.append_inline(config.TAGGED_MODELS, ExportMetaInline) # removed due to user interface is too dificult for an user

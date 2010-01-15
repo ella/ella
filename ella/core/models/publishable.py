@@ -3,6 +3,7 @@ from datetime import datetime
 from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
+from django.utils.safestring import mark_safe, mark_for_escaping
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.contrib.sites.models import Site
@@ -124,6 +125,15 @@ class Publishable(models.Model):
 
     def get_domain_url(self):
         return self.get_absolute_url(domain=True)
+
+    def get_domain_url_admin_tag(self):
+        if self.get_domain_url() is not None:
+            #return mark_safe(u'<a href="%s">url</a>' % ( self.get_domain_url() ) )
+            return mark_safe(u'<a href="%s">url</a>' % ( self.get_domain_url() ) )
+        else:
+            return self.get_domain_url()
+    get_domain_url_admin_tag.short_description = _('URL')
+    get_domain_url_admin_tag.allow_tags = True
 
     def get_admin_url(self):
         from ella.ellaadmin.utils import admin_url

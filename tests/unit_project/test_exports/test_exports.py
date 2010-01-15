@@ -9,8 +9,8 @@ from django.template.defaultfilters import slugify
 from ella.core.models import Category, Listing, Placement, Author, Publishable
 from ella.articles.models import Article
 from ella.photos.models import Format
-from ella.exports.models import Export, ExportMeta, ExportPosition
-from ella.exports.models import UnexportableException
+from ella.ellaexports.models import Export, ExportMeta, ExportPosition
+from ella.ellaexports.models import UnexportableException
 
 DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
 HOUR = 3600
