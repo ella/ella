@@ -56,7 +56,7 @@ class CategoryUserRoleAdmin(newman.NewmanModelAdmin):
 class CategoryUserRoleInline(newman.NewmanTabularInline):
     model = m.CategoryUserRole
     max_num = 3
-    suggest_fields = {'category': ('__unicode__', 'title', 'tree_path') }
+    suggest_fields = {'category': ('__unicode__', 'title', 'tree_path', 'slug', ) }
 
 newman.site.register(m.DevMessage, DevMessageAdmin)
 newman.site.register(m.AdminHelpItem, HelpItemAdmin)

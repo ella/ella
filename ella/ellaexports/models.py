@@ -1,3 +1,5 @@
+import hashlib
+
 from django.db import models, IntegrityError
 from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
@@ -7,11 +9,12 @@ from django.conf import settings
 from ella.core.models import Publishable, Category
 from ella.core.cache import get_cached_object
 from ella.photos.models import Photo, Format
-from ella.exports.managers import ExportManager
+from ella.ellaexports.managers import ExportManager
 
 POSITION_IS_NOT_OVERLOADED = 0
 DATETIME_FORMAT = '%Y-%m-%d %H:%M'
 TIME_FORMAT = '%H:%M'
+FEED_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S+02:00' #TODO settings.py
 
 class UnexportableException(Exception):
     pass
@@ -19,7 +22,9 @@ class UnexportableException(Exception):
 class Export(models.Model):
     " Export group. "
     category = models.ForeignKey(Category, verbose_name=_('Category'))
+    use_objects_in_category = models.BooleanField(_('Use objects listed in category'))
     title = models.CharField(_('Title'), max_length=255)
+    description = models.TextField(_('Description'), blank=True)
     slug = models.SlugField(_('Slug'), max_length=255)
     max_visible_items = models.IntegerField(_('Maximum Visible Items'))
     photo_format = models.ForeignKey(Format, verbose_name=_('Photo format'))
@@ -32,10 +37,20 @@ class Export(models.Model):
     def url(self):
         if not self.slug:
             return ''
-        url = reverse('ella_exports_by_slug', args={'slug': self.slug,})
+        url = reverse('ella_exports_by_slug', args=(self.slug,))
         # prepend the domain if it doesn't match current Site
         site = get_cached_object(Site, pk=self.category.site_id)
         return 'http://' + site.domain + url
+
+    @property
+    def get_atom_id(self):
+        token = '%s.%s.%s' % (
+            self.slug,
+            self.max_visible_items,
+            self.photo_format,
+        )
+        hash = hashlib.sha1(token)
+        return 'tag:%s' % hash.hexdigest()
 
     class Meta:
         unique_together = ( ('title',), ('slug',) )

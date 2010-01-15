@@ -63,6 +63,8 @@ class CategoryBox(Box):
 
 def get_category_key(func, category):
     "Get key for caching category's __unicode__ method."
+    if category.id is None:
+        return None
     return 'ella.core.models.Category:%d' % category.id
 
 class Category(models.Model):

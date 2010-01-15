@@ -61,11 +61,11 @@ msgstr "Předefinovaný export"
 
 #: models.py:79 models.py:88
 msgid "Export meta"
-msgstr "Předefinice exportu"
+msgstr "Úprava exportu"
 
 #: models.py:80
 msgid "Export metas"
-msgstr "Předefinice exportů"
+msgstr "Úpravy exportů"
 
 #: models.py:101
 msgid "Export Position"
