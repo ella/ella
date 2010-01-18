@@ -166,9 +166,6 @@ class ExportItemizer(object):
         """
         from ella.ellaexports.models import FEED_DATETIME_FORMAT
         pub = self.__get_publishable(obj)
-        published = pub.publish_from
-        if 'updated' in pub.__dict__:
-            published = updated
         field_dict = self.data_formatter(pub, export=export)
         if field_dict['title'].strip():
             pub.title = field_dict['title']
@@ -176,9 +173,16 @@ class ExportItemizer(object):
             pub.photo = field_dict['photo']
         if field_dict['description'].strip():
             pub.description = field_dict['description']
+
+        feed_updated = pub.publish_from
+        if 'visible_from' in field_dict:
+            feed_updated = field_dict['visible_from']
+        elif 'updated' in pub.__dict__:
+            feed_updated = updated
+
         pub.export_thumbnail_url = None
-        pub.feed_updated_raw_datetime = published
-        pub.feed_updated = published.strftime(FEED_DATETIME_FORMAT)
+        pub.feed_updated_raw_datetime = feed_updated
+        pub.feed_updated = feed_updated.strftime(FEED_DATETIME_FORMAT)
         if pub.photo:
             formated = pub.photo.get_formated_photo(export.photo_format.name)
             #pub.export_thumbnail_url = u'%s%s' % (settings.MEDIA_URL, formated.url)
@@ -302,7 +306,7 @@ class ExportManager(models.Manager):
 
     def get_export_data(self, publishable, export=None, export_category=None):
         """ 
-        @return dict containing keys: title, photo, description. 
+        @return dict containing keys: title, photo, description, [visible_from]. 
         If export parameter is None, first export fitting publishable's category
         is used.
         """
@@ -337,7 +341,8 @@ class ExportManager(models.Manager):
             return {
                 'title': pos.object.title,
                 'photo': pos.object.photo,
-                'description': pos.object.description
+                'description': pos.object.description,
+                'visible_from': pos.visible_from
             }
 
         if not pos:

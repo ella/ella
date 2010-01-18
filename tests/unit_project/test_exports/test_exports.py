@@ -89,7 +89,7 @@ class TestExport(DatabaseTestCase):
              slug='category-h',
              tree_parent=self.categoryA,
              description='Export category one.',
-             site=self.site 
+             site=self.site
         )
         self.categoryI = Category.objects.create( 
             title='Category I',
@@ -176,6 +176,7 @@ class TestExport(DatabaseTestCase):
         self.photo_format.save()
         self.exportA = Export.objects.create(
             category=self.categoryH,
+            use_objects_in_category=True,
             title='hotentot',
             slug='hotentot',
             max_visible_items=2,
@@ -183,6 +184,7 @@ class TestExport(DatabaseTestCase):
         )
         self.export_position_overrides = Export.objects.create(
             category=self.categoryI,
+            use_objects_in_category=True,
             title='export for testing position overrides',
             slug='export-for-testing-position-overrides',
             max_visible_items=3,
@@ -291,8 +293,10 @@ class TestExport(DatabaseTestCase):
         right_out = {
             'title': u'ahoy!',
             'description': u'Enjoy polka!',
-            'photo': None
+            'photo': None,
+            #'visible_from': datetime(2010, 1, 18, 14, 59)
         }
+        del out['visible_from']
         self.assert_equals(out, right_out)
 
     def test_unique(self):
