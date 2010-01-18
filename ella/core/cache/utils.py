@@ -103,8 +103,12 @@ def get_cached_object_or_404(model, **kwargs):
 def cache_this(key_getter, invalidator=None, timeout=CACHE_TIMEOUT):
     def wrapped_decorator(func):
         def wrapped_func(*args, **kwargs):
-            key = normalize_key(key_getter(func, *args, **kwargs))
-            result = cache.get(key)
+            key = key_getter(func, *args, **kwargs)
+            if key is not None:
+                key = normalize_key(key)
+                result = cache.get(key)
+            else:
+                result = None
             if result is None:
                 log.debug('cache_this(key=%s), object not cached.' % key)
                 result = func(*args, **kwargs)
