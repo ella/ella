@@ -19,6 +19,25 @@ NewmanInline = new Object();
         $(this).closest('.inline-item').remove();
     });
 
+    function remove_inlineadmin_element_value(element_selector, name_tail) {
+        // removes IDs created when preset is loaded
+        function remove_element_value() {
+            var parts = this.name.split('-');
+            if ( parts.length == 0 ) {
+                return;
+            }
+            var last_part = parts[ parts.length - 1 ];
+            if (last_part == name_tail) {
+                $(this).val('');
+                carp('Blanking value for input with name: ' + this.name);
+            }
+        }
+
+        $(element_selector).each(
+            remove_element_value
+        );
+    }
+
     //// listings
     function add_listing(evt) {
         if (evt && evt.button != 0) return;
@@ -208,6 +227,19 @@ NewmanInline = new Object();
         $target.children().removeClass('last-related');
         $target.children(':last').addClass('last-related');
     }
+
+    function remove_gallery_item_ids() {
+        // remove target_ids (input with name="galleryitem_set-0-id")
+        // remove gallery (input with name="galleryitem_set-0-gallery")
+        remove_inlineadmin_element_value(
+            '.gallery-items-sortable input[name^=galleryitem_set-]',
+            'id'
+        );
+        remove_inlineadmin_element_value(
+            '.gallery-items-sortable input[name^=galleryitem_set-]',
+            'gallery'
+        );
+    }
     
     function init_gallery(root) {
         if ( ! root ) root = document;
@@ -289,7 +321,7 @@ NewmanInline = new Object();
         });
         
         // create desired input rows for loaded preset
-        $('#gallery_form').bind('preset_load_initiated', function(evt, preset) {
+        $('#gallery_form').bind('preset_load_initiated.gallery', function(evt, preset) {
             var desired_no;
             for (var i = 0; i < preset.data.length; i++) {
                 var o = preset.data[i];
@@ -316,6 +348,7 @@ NewmanInline = new Object();
         .bind('preset_load_completed', function(evt) {
             $('.gallery-items-sortable input.target_id').each( update_gallery_item_thumbnail );
             init_gallery( evt.target );
+            remove_gallery_item_ids();
         });
     }
     init_gallery();
@@ -324,5 +357,15 @@ NewmanInline = new Object();
         $('#gallery_form').removeData('validation').data('validation', check_gallery_changeform);
         init_gallery( evt.target );
     });
+
+    // Comments (ellacomments)
+    function remove_ellacomments_ids() {
+        remove_inlineadmin_element_value(
+            'input[name^=ellacomments-commentoptionsobject-target_ct-target_id-0-]',
+            'id'
+        );
+    }
+    $('.change-form').bind('preset_load_completed', remove_ellacomments_ids);
+
     
 })(jQuery);
