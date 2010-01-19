@@ -1,12 +1,24 @@
 
 from south.db import db
 from django.db import models
+from django.conf import settings
 
 from ella.core.migrations.base.base_0002 import BasePublishableDataMigration
 from ella.core.migrations.base.base_0002 import alter_foreignkey_to_int, migrate_foreignkey
 
 
 class Migration(BasePublishableDataMigration):
+    # TODO:
+    # this is only temporary, it should be constructed dynamically
+    # from each migration in installed_apps, that contains run_before
+    _depends_on = (
+        ('recepty.recipes', 'recipes', '0001_initial'),
+    )
+    depends_on = []
+    for app, label, migration in _depends_on:
+        if app in settings.INSTALLED_APPS:
+            depends_on.append((label, migration))
+
     models = dict.copy(BasePublishableDataMigration.models)
     models.update(
         {
@@ -35,14 +47,16 @@ class Migration(BasePublishableDataMigration):
         # migrate new article IDs to articlecontents
         alter_foreignkey_to_int('articles_articlecontents', 'article')
         # migrate new article IDs to oldrecipearticleredirect
-        # TODO: this should be solved via plugins
-        alter_foreignkey_to_int('recipes_oldrecipearticleredirect', 'new_id')
+        if 'recepty.recipes' in settings.INSTALLED_APPS:
+            # TODO: this should be solved via plugins
+            alter_foreignkey_to_int('recipes_oldrecipearticleredirect', 'new_id')
 
     def move_self_foreignkeys(self, orm):
         # migrate authors as in base
         super(Migration, self).move_self_foreignkeys(orm)
         # migrate new article IDs to articlecontents
         migrate_foreignkey(self.app_label, self.model, 'articles_articlecontents', self.model, self.orm)
-        # migrate new article IDs to oldrecipearticleredirect
-        migrate_foreignkey(self.app_label, self.model, 'recipes_oldrecipearticleredirect', 'new_id', self.orm)
+        if 'recepty.recipes' in settings.INSTALLED_APPS:
+            # migrate new article IDs to oldrecipearticleredirect
+            migrate_foreignkey(self.app_label, self.model, 'recipes_oldrecipearticleredirect', 'new_id', self.orm)
 
