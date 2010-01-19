@@ -40,7 +40,7 @@ msgid "Export"
 msgstr "Export"
 
 #: models.py:41
-msgid "Exports"
+msgid "Ellaexports"
 msgstr "Exporty"
 
 #: models.py:49

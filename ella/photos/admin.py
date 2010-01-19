@@ -4,7 +4,7 @@ from django.conf import settings
 from django.utils.translation import ugettext
 from django.forms.util import ValidationError
 
-from ella.ellaadmin.options import EllaAdminOptionsMixin
+from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin
 
 from ella.photos.models import FormatedPhoto, Format, Photo
 from ella.photos.models import PHOTO_MIN_WIDTH, PHOTO_MIN_HEIGHT
@@ -59,7 +59,7 @@ class FormatedPhotoInlineOptions(admin.TabularInline):
         return super(FormatedPhotoInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
 
-class PhotoOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
+class PhotoOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     inlines = [ FormatedPhotoInlineOptions ]
     list_display = ('title', 'width', 'height', 'thumb', 'pk',) ## 'authors')
     list_filter = ('created',)
