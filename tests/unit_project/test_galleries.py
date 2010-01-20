@@ -63,7 +63,7 @@ class TestGalleries(DatabaseTestCase):
         self.assert_equals('/nested-category/2008/1/10/galleries/first-gallery/', self.galitem.get_absolute_url())
 
     def test_gallery_custom_url_item(self):
-        self.assert_equals('/nested-category/2008/1/10/galleries/first-gallery/second-gallery/', self.galitem2.get_absolute_url())
+        self.assert_equals('/nested-category/2008/1/10/galleries/first-gallery/item/second-gallery/', self.galitem2.get_absolute_url())
 
     def test_two_items_with_same_slug(self):
         galitem3 = self.publishable.galleryitem_set.create(
@@ -72,7 +72,7 @@ class TestGalleries(DatabaseTestCase):
             )
         self.assert_equals('second-gallery', self.galitem2.get_slug())
         self.assert_equals('second-gallery1', galitem3.get_slug())
-        self.assert_equals('/nested-category/2008/1/10/galleries/first-gallery/second-gallery1/', galitem3.get_absolute_url())
+        self.assert_equals('/nested-category/2008/1/10/galleries/first-gallery/item/second-gallery1/', galitem3.get_absolute_url())
 
     def test_gallery_custom_view_first_item(self):
         response = self.client.get('/nested-category/2008/1/10/galleries/first-gallery/')
@@ -101,7 +101,7 @@ class TestGalleries(DatabaseTestCase):
         self.assert_equals(404, response.status_code)
 
     def test_gallery_custom_view_item(self):
-        response = self.client.get('/nested-category/2008/1/10/galleries/first-gallery/second-gallery/')
+        response = self.client.get('/nested-category/2008/1/10/galleries/first-gallery/item/second-gallery/')
 
         self.assert_true('previous' in response.context)
         self.assert_equals(self.galitem, response.context['previous'])
