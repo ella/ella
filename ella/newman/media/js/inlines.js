@@ -176,11 +176,18 @@ NewmanInline = new Object();
         
         // If the form validates, delete values from empty inputs
         if (rv) {
-            $('.gallery-items-sortable .inline-related').filter( function() {
-                return $(this).find('input.target_id').val() == ''
-            }).each( function() {
-                $(this).find(':input.target_ct,:input.item-order').val('');
-            });
+            var $filter = $('.gallery-items-sortable .inline-related').filter( 
+                function() {
+                    var $res = $(this).find('input.target_id');
+                    var res = $res.val();
+                    return res == '';
+                }
+            );
+            $filter.each( 
+                function() {
+                    $(this).find(':input.target_ct,:input.item-order').val('');
+                }
+            );
         }
         
         return rv;
