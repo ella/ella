@@ -156,6 +156,20 @@ NewmanInline = new Object();
     }
     $('.add-gallery-item-button').live('click', add_gallery_item);
 
+    // make target_id fields not editable
+    function disable_gallery_target_id() {
+        function disable_field() {
+            var $target_field = $(this).find('input.target_id');
+            //$target_field.attr('disabled', true); // doesn't worked out
+            $target_field.hide();
+        }
+
+        var $filter = $('.gallery-items-sortable .inline-related').each(
+            disable_field
+        );
+    }
+    NewmanInline.disable_gallery_target_id = disable_gallery_target_id;
+
     // check for unique photo ID
     function check_gallery_changeform( $form ) {
         var used_ids = {};
@@ -173,22 +187,23 @@ NewmanInline = new Object();
             }
             used_ids[ val ] = 1;
         });
-        
-        // If the form validates, delete values from empty inputs
+
         if (rv) {
-            var $filter = $('.gallery-items-sortable .inline-related').filter( 
+            var $filter = $('.gallery-items-sortable .inline-related').filter(
                 function() {
                     var $res = $(this).find('input.target_id');
                     var res = $res.val();
                     return res == '';
                 }
             );
-            $filter.each( 
+            $filter.each(
                 function() {
                     $(this).find(':input.target_ct,:input.item-order').val('');
                 }
             );
         }
+
+        disable_gallery_target_id();
         
         return rv;
     }
@@ -229,7 +244,7 @@ NewmanInline = new Object();
             }
             ord = (i + 1) * degree;
             $(this).val( ord ).change();
-            $(this).siblings('h4:first').find('span:first').text( ord );
+            // $(this).siblings('h4:first').find('span:first').text( ord ); // hide ordering
         });
         $target.children().removeClass('last-related');
         $target.children(':last').addClass('last-related');
