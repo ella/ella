@@ -307,6 +307,12 @@ class SurveyBox(Box):
         from ella.polls import views
         self.state = views.survey_check_vote(context['request'], self.obj)
 
+    def get_cache_key(self):
+        key = super(SurveyBox, self).get_cache_key()
+        if self.state:
+            key += str(self.state)
+        return key
+
     def get_context(self):
         from ella.polls import views
         cont = super(SurveyBox, self).get_context()
