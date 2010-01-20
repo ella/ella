@@ -116,8 +116,10 @@ def category_children(cats):
 def compute_applicable_categories_objects(user, permission=None):
     """ Return categories accessible by given user """
     if user.is_superuser:
-        all = Category.objects.all().values('id')
-        return [ d['id'] for d in all ]
+        #all = Category.objects.all().values('id')
+        #return [ d['id'] for d in all ]
+        all = Category.objects.all()
+        return [ d for d in all ]
 
     category_user_roles = CategoryUserRole.objects.filter(user=user).distinct()
     if permission:
