@@ -34,6 +34,12 @@ class PollBox(Box):
         from ella.polls import views
         self.state = views.poll_check_vote(context['request'], self.obj)
 
+    def get_cache_key(self):
+        key = super(PollBox, self).get_cache_key()
+        if self.state:
+            key += str(self.state)
+        return key
+
     def get_context(self):
         from ella.polls import views
         cont = super(PollBox, self).get_context()
