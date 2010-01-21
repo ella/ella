@@ -1,10 +1,10 @@
 import sys
 import time
-import datetime
 
 from south.db import db
 from django.db import models, transaction
 from ella.oldcomments.models import *
+import datetime
 
 from threadedcomments.models import ThreadedComment, PATH_DIGITS, PATH_SEPARATOR
 
