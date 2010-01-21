@@ -137,7 +137,8 @@ class CategoryUserRole(models.Model):
     def sync_denormalized(self):
         from ella.newman.permission import compute_applicable_categories_objects
         denormalized = []
-        for p in self.group.permissions.all():
+        #for p in self.group.permissions.all():
+        for p in self.group.permissions.all().iterator():
             code = '%s.%s' % (p.content_type.app_label, p.codename)
             cats = compute_applicable_categories_objects(self.user, code)
             # create denormalized roles
