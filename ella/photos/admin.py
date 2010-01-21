@@ -68,6 +68,7 @@ class PhotoOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     search_fields = ('title', 'image', 'description', 'id',) # FIXME: 'tags__tag__name',)
     suggest_fields = {'authors': ('name', 'slug',), 'source': ('name', 'url',)}
     rich_text_fields = {'small': ('description',)}
+    ordering = ('-id',)
 
     fieldsets = (
         (_("Photo core"), {'fields': (('title', 'slug'), 'image', 'authors')}),
