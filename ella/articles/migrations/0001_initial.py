@@ -2,6 +2,7 @@
 from south.db import db
 from django.db import models
 from ella.articles.models import *
+import datetime
 
 class Migration:
     
@@ -25,7 +26,7 @@ class Migration:
         db.create_table('articles_infobox', (
             ('id', models.AutoField(primary_key=True)),
             ('title', models.CharField(_('Title'), max_length=255)),
-            ('created', models.DateTimeField(_('Created'), default=datetime.now, editable=False)),
+            ('created', models.DateTimeField(_('Created'), default=datetime.datetime.now, editable=False)),
             ('updated', models.DateTimeField(_('Updated'), null=True, blank=True)),
             ('content', models.TextField(_('Content'))),
         ))
@@ -38,7 +39,7 @@ class Migration:
             ('upper_title', models.CharField(_('Upper title'), max_length=255, blank=True)),
             ('slug', models.SlugField(_('Slug'), max_length=255)),
             ('perex', models.TextField(_('Perex'))),
-            ('created', models.DateTimeField(_('Created'), default=datetime.now, editable=False, db_index=True)),
+            ('created', models.DateTimeField(_('Created'), default=datetime.datetime.now, editable=False, db_index=True)),
             ('updated', models.DateTimeField(_('Updated'), null=True, blank=True)),
             ('source', models.ForeignKey(orm['core.Source'], null=True, verbose_name=_('Source'), blank=True)),
             ('category', models.ForeignKey(orm['core.Category'], verbose_name=_('Category'))),
@@ -86,7 +87,7 @@ class Migration:
         'articles.infobox': {
             'Meta': {'ordering': "('-created',)"},
             'content': ('models.TextField', ["_('Content')"], {}),
-            'created': ('models.DateTimeField', ["_('Created')"], {'default': 'datetime.now', 'editable': 'False'}),
+            'created': ('models.DateTimeField', ["_('Created')"], {'default': 'datetime.datetime.now', 'editable': 'False'}),
             'id': ('models.AutoField', [], {'primary_key': 'True'}),
             'title': ('models.CharField', ["_('Title')"], {'max_length': '255'}),
             'updated': ('models.DateTimeField', ["_('Updated')"], {'null': 'True', 'blank': 'True'})
@@ -100,7 +101,7 @@ class Migration:
             'Meta': {'ordering': "('-created',)"},
             'authors': ('models.ManyToManyField', ["orm['core.Author']"], {'verbose_name': "_('Authors')"}),
             'category': ('models.ForeignKey', ["orm['core.Category']"], {'verbose_name': "_('Category')"}),
-            'created': ('models.DateTimeField', ["_('Created')"], {'default': 'datetime.now', 'editable': 'False', 'db_index': 'True'}),
+            'created': ('models.DateTimeField', ["_('Created')"], {'default': 'datetime.datetime.now', 'editable': 'False', 'db_index': 'True'}),
             'id': ('models.AutoField', [], {'primary_key': 'True'}),
             'perex': ('models.TextField', ["_('Perex')"], {}),
             'photo': ('models.ForeignKey', ["orm['photos.Photo']"], {'null': 'True', 'verbose_name': "_('Photo')", 'blank': 'True'}),

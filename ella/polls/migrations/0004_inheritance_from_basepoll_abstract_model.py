@@ -2,6 +2,7 @@
 from south.db import db
 from django.db import models
 from ella.polls.models import *
+import datetime
 
 class Migration:
     
@@ -80,7 +81,7 @@ class Migration:
         db.alter_column('polls_poll', 'text_announcement', models.TextField(_('Text with announcement'), null=True, blank=True))
         
         # Changing field 'Poll.active_from'
-        db.alter_column('polls_poll', 'active_from', models.DateTimeField(_('Active from'), default=datetime.now, null=True, blank=True))
+        db.alter_column('polls_poll', 'active_from', models.DateTimeField(_('Active from'), default=datetime.datetime.now, null=True, blank=True))
 
         
         """

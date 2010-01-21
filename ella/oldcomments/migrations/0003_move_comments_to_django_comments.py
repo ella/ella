@@ -2,6 +2,7 @@
 from south.db import db
 from django.db import models
 from ella.oldcomments.models import *
+import datetime
 
 class Migration:
     
@@ -45,7 +46,7 @@ class Migration:
             'parent': ('models.ForeignKey', ["orm['oldcomments.Comment']"], {'null': 'True', 'verbose_name': "_('Tree structure parent')", 'blank': 'True'}),
             'path': ('models.CharField', ["_('Genealogy tree path')"], {'max_length': 'defaults.PATH_LENGTH', 'editable': 'False', 'blank': 'True'}),
             'subject': ('models.TextField', ["_('Comment subject')"], {'max_length': 'defaults.SUBJECT_LENGTH'}),
-            'submit_date': ('models.DateTimeField', ["_('Time submitted')"], {'default': 'datetime.now', 'editable': 'True'}),
+            'submit_date': ('models.DateTimeField', ["_('Time submitted')"], {'default': 'datetime.datetime.now', 'editable': 'True'}),
             'target_ct': ('models.ForeignKey', ["orm['contenttypes.ContentType']"], {'verbose_name': "_('Target content type')"}),
             'target_id': ('models.PositiveIntegerField', ["_('Target id')"], {}),
             'user': ('models.ForeignKey', ["orm['auth.User']"], {'null': 'True', 'verbose_name': "_('Authorized author')", 'blank': 'True'})
@@ -76,7 +77,7 @@ class Migration:
             'options': ('models.CharField', [], {'max_length': 'defaults.OPTS_LENGTH', 'blank': 'True'}),
             'target_ct': ('models.ForeignKey', ["orm['contenttypes.ContentType']"], {'verbose_name': "_('Target content type')"}),
             'target_id': ('models.PositiveIntegerField', ["_('Target id')"], {}),
-            'timestamp': ('models.DateTimeField', [], {'default': 'datetime.now'})
+            'timestamp': ('models.DateTimeField', [], {'default': 'datetime.datetime.now'})
         }
     }
     

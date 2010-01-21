@@ -2,6 +2,7 @@
 from south.db import db
 from django.db import models
 from ella.discussions.models import *
+import datetime
 
 class Migration:
     
@@ -25,7 +26,7 @@ class Migration:
             ('id', models.AutoField(primary_key=True)),
             ('title', models.CharField(_('Title'), max_length=255)),
             ('slug', models.SlugField(_('Slug'), max_length=255)),
-            ('created', models.DateTimeField(_('Created'), default=datetime.now, editable=False)),
+            ('created', models.DateTimeField(_('Created'), default=datetime.datetime.now, editable=False)),
             ('author', models.ForeignKey(orm['auth.User'], null=True, verbose_name=_('authorized author'), blank=True)),
             ('nickname', models.CharField(_("Anonymous author's nickname"), max_length=50, blank=True)),
             ('email', models.EmailField(_('Authors email (optional)'), blank=True)),
@@ -50,7 +51,7 @@ class Migration:
             ('slug', models.SlugField(_('Slug'), max_length=255)),
             ('category', models.ForeignKey(orm['core.Category'], verbose_name=_('Category'))),
             ('photo', models.ForeignKey(orm['photos.Photo'], null=True, verbose_name=_('Photo'), blank=True)),
-            ('created', models.DateTimeField(_('Created'), default=datetime.now, editable=False)),
+            ('created', models.DateTimeField(_('Created'), default=datetime.datetime.now, editable=False)),
         ))
         db.send_create_signal('discussions', ['Topic'])
         
@@ -92,7 +93,7 @@ class Migration:
         },
         'discussions.topicthread': {
             'author': ('models.ForeignKey', ["orm['auth.User']"], {'null': 'True', 'verbose_name': "_('authorized author')", 'blank': 'True'}),
-            'created': ('models.DateTimeField', ["_('Created')"], {'default': 'datetime.now', 'editable': 'False'}),
+            'created': ('models.DateTimeField', ["_('Created')"], {'default': 'datetime.datetime.now', 'editable': 'False'}),
             'email': ('models.EmailField', ["_('Authors email (optional)')"], {'blank': 'True'}),
             'hit_counts': ('models.PositiveIntegerField', [], {'default': '0'}),
             'id': ('models.AutoField', [], {'primary_key': 'True'}),
@@ -133,7 +134,7 @@ class Migration:
         'discussions.topic': {
             'Meta': {'ordering': "('-created',)"},
             'category': ('models.ForeignKey', ["orm['core.Category']"], {'verbose_name': "_('Category')"}),
-            'created': ('models.DateTimeField', ["_('Created')"], {'default': 'datetime.now', 'editable': 'False'}),
+            'created': ('models.DateTimeField', ["_('Created')"], {'default': 'datetime.datetime.now', 'editable': 'False'}),
             'description': ('models.TextField', ["_('Description')"], {}),
             'id': ('models.AutoField', [], {'primary_key': 'True'}),
             'photo': ('models.ForeignKey', ["orm['photos.Photo']"], {'null': 'True', 'verbose_name': "_('Photo')", 'blank': 'True'}),

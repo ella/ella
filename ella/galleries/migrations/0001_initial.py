@@ -2,6 +2,7 @@
 from south.db import db
 from django.db import models
 from ella.galleries.models import *
+import datetime
 
 class Migration:
     
@@ -31,7 +32,7 @@ class Migration:
             ('content', models.TextField(_('Content'), blank=True)),
             ('owner', models.ForeignKey(orm['core.Author'], null=True, verbose_name=_('Gallery owner'), blank=True)),
             ('category', models.ForeignKey(orm['core.Category'], null=True, verbose_name=_('Category'), blank=True)),
-            ('created', models.DateTimeField(_('Created'), default=datetime.now, editable=False)),
+            ('created', models.DateTimeField(_('Created'), default=datetime.datetime.now, editable=False)),
         ))
         db.send_create_signal('galleries', ['Gallery'])
         
@@ -75,7 +76,7 @@ class Migration:
         'galleries.gallery': {
             'category': ('models.ForeignKey', ["orm['core.Category']"], {'null': 'True', 'verbose_name': "_('Category')", 'blank': 'True'}),
             'content': ('models.TextField', ["_('Content')"], {'blank': 'True'}),
-            'created': ('models.DateTimeField', ["_('Created')"], {'default': 'datetime.now', 'editable': 'False'}),
+            'created': ('models.DateTimeField', ["_('Created')"], {'default': 'datetime.datetime.now', 'editable': 'False'}),
             'description': ('models.CharField', ["_('Description')"], {'max_length': '3000', 'blank': 'True'}),
             'id': ('models.AutoField', [], {'primary_key': 'True'}),
             'owner': ('models.ForeignKey', ["orm['core.Author']"], {'null': 'True', 'verbose_name': "_('Gallery owner')", 'blank': 'True'}),

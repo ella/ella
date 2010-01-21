@@ -1,7 +1,7 @@
-from datetime import datetime
 from south.db import db
 from django.db import models
 from ella.core.models import *
+import datetime
 
 class Migration:
     
@@ -93,7 +93,7 @@ class Migration:
             'description': ('models.TextField', ["_('Description')"], {'blank': 'True'}),
             'id': ('models.AutoField', [], {'primary_key': 'True'}),
             'photo': ('models.ForeignKey', ["orm['photos.Photo']"], {'null': 'True', 'verbose_name': "_('Photo')", 'blank': 'True'}),
-            'publish_from': ('models.DateTimeField', ["_('Publish from')"], {'default': 'datetime(3000, 1, 1, 0, 0)', 'editable': 'False'}),
+            'publish_from': ('models.DateTimeField', ["_('Publish from')"], {'default': 'datetima.datetime(3000, 1, 1, 0, 0)', 'editable': 'False'}),
             'slug': ('models.SlugField', ["_('Slug')"], {'max_length': '255'}),
             'source': ('models.ForeignKey', ["orm['core.Source']"], {'null': 'True', 'verbose_name': "_('Source')", 'blank': 'True'}),
             'title': ('models.CharField', ["_('Title')"], {'max_length': '255'})
