@@ -388,6 +388,7 @@ NewmanInline = new Object();
         );
     }
     $('.change-form').bind('preset_load_completed', remove_ellacomments_ids);
+    carp('remove_ellacomments_ids bind');
 
     
 })(jQuery);
