@@ -127,7 +127,7 @@ class BasePublishableDataMigration(object):
         keys = ('table', 'ct_id', 'obj_id', 'unique_keys')
         gens = []
         if 'tagging' in settings.INSTALLED_APPS:
-            gens.append(('tagging_taggeditem', 'content_type_id', 'object_id', ('tag_id','content_type_id','object_id','priority')))
+            gens.append(('tagging_taggeditem', 'content_type_id', 'object_id', ('tag_id','content_type_id','object_id')))
         if 'ella.oldcomments' in settings.INSTALLED_APPS:
             gens.append(('comments_comment', 'target_ct_id', 'target_id', None))
         if 'ella.positions' in settings.INSTALLED_APPS:
