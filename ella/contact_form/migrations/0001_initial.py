@@ -2,6 +2,7 @@
 from south.db import db
 from django.db import models
 from ella.contact_form.models import *
+import datetime
 
 class Migration:
     
@@ -20,7 +21,7 @@ class Migration:
             ('sender', models.EmailField(_("Sender email"), blank=True)),
             ('subject', models.CharField(_("Subject"), max_length=255, blank=True)),
             ('content', models.TextField(_("Message content"))),
-            ('created', models.DateTimeField(_('Created'), default=datetime.now, editable=False)),
+            ('created', models.DateTimeField(_('Created'), default=datetime.datetime.now, editable=False)),
         ))
         db.send_create_signal('contact_form', ['Message'])
         
@@ -59,7 +60,7 @@ class Migration:
         },
         'contact_form.message': {
             'content': ('models.TextField', ['_("Message content")'], {}),
-            'created': ('models.DateTimeField', ["_('Created')"], {'default': 'datetime.now', 'editable': 'False'}),
+            'created': ('models.DateTimeField', ["_('Created')"], {'default': 'datetime.datetime.now', 'editable': 'False'}),
             'id': ('models.AutoField', [], {'primary_key': 'True'}),
             'sender': ('models.EmailField', ['_("Sender email")'], {'blank': 'True'}),
             'subject': ('models.CharField', ['_("Subject")'], {'max_length': '255', 'blank': 'True'})

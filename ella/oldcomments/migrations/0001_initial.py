@@ -2,6 +2,7 @@
 from south.db import db
 from django.db import models
 from ella.oldcomments.models import *
+import datetime
 
 class Migration:
     
@@ -29,7 +30,7 @@ class Migration:
             ('nickname', models.CharField(_("Anonymous author's nickname"), max_length=defaults.NICKNAME_LENGTH, blank=True)),
             ('email', models.EmailField(_('Authors email (optional)'), blank=True)),
             ('ip_address', models.IPAddressField(_('IP address'), null=True, blank=True)),
-            ('submit_date', models.DateTimeField(_('Time submitted'), default=datetime.now, editable=True)),
+            ('submit_date', models.DateTimeField(_('Time submitted'), default=datetime.datetime.now, editable=True)),
             ('is_public', models.BooleanField(_('Is public'), default=True)),
         ))
         db.send_create_signal('comments', ['Comment'])
@@ -40,7 +41,7 @@ class Migration:
             ('target_ct', models.ForeignKey(orm['contenttypes.ContentType'], verbose_name=_('Target content type'))),
             ('target_id', models.PositiveIntegerField(_('Target id'))),
             ('options', models.CharField(max_length=defaults.OPTS_LENGTH, blank=True)),
-            ('timestamp', models.DateTimeField(default=datetime.now)),
+            ('timestamp', models.DateTimeField(default=datetime.datetime.now)),
         ))
         db.send_create_signal('comments', ['CommentOptions'])
         
@@ -87,7 +88,7 @@ class Migration:
             'parent': ('models.ForeignKey', ["orm['comments.Comment']"], {'null': 'True', 'verbose_name': "_('Tree structure parent')", 'blank': 'True'}),
             'path': ('models.CharField', ["_('Genealogy tree path')"], {'max_length': 'defaults.PATH_LENGTH', 'editable': 'False', 'blank': 'True'}),
             'subject': ('models.TextField', ["_('Comment subject')"], {'max_length': 'defaults.SUBJECT_LENGTH'}),
-            'submit_date': ('models.DateTimeField', ["_('Time submitted')"], {'default': 'datetime.now', 'editable': 'True'}),
+            'submit_date': ('models.DateTimeField', ["_('Time submitted')"], {'default': 'datetime.datetime.now', 'editable': 'True'}),
             'target_ct': ('models.ForeignKey', ["orm['contenttypes.ContentType']"], {'verbose_name': "_('Target content type')"}),
             'target_id': ('models.PositiveIntegerField', ["_('Target id')"], {}),
             'user': ('models.ForeignKey', ["orm['auth.User']"], {'null': 'True', 'verbose_name': "_('Authorized author')", 'blank': 'True'})
@@ -102,7 +103,7 @@ class Migration:
             'options': ('models.CharField', [], {'max_length': 'defaults.OPTS_LENGTH', 'blank': 'True'}),
             'target_ct': ('models.ForeignKey', ["orm['contenttypes.ContentType']"], {'verbose_name': "_('Target content type')"}),
             'target_id': ('models.PositiveIntegerField', ["_('Target id')"], {}),
-            'timestamp': ('models.DateTimeField', [], {'default': 'datetime.now'})
+            'timestamp': ('models.DateTimeField', [], {'default': 'datetime.datetime.now'})
         },
         'comments.banneduser': {
             'id': ('models.AutoField', [], {'primary_key': 'True'}),

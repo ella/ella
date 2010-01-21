@@ -2,6 +2,7 @@
 from south.db import db
 from django.db import models
 from ella.media.models import *
+import datetime
 
 class Migration:
     
@@ -33,7 +34,7 @@ class Migration:
             ('category', models.ForeignKey(orm['core.Category'], null=True, verbose_name=_('Category'))),
             ('description', models.TextField(_('Description'), blank=True)),
             ('text', models.TextField(_('Content'), blank=True)),
-            ('created', models.DateTimeField(_('Created'), default=datetime.now, editable=False)),
+            ('created', models.DateTimeField(_('Created'), default=datetime.datetime.now, editable=False)),
             ('updated', models.DateTimeField(_('Updated'), null=True, blank=True)),
         ))
         db.send_create_signal('media', ['Media'])
@@ -83,7 +84,7 @@ class Migration:
         'media.media': {
             'authors': ('models.ManyToManyField', ["orm['core.Author']"], {'verbose_name': "_('Authors')"}),
             'category': ('models.ForeignKey', ["orm['core.Category']"], {'null': 'True', 'verbose_name': "_('Category')"}),
-            'created': ('models.DateTimeField', ["_('Created')"], {'default': 'datetime.now', 'editable': 'False'}),
+            'created': ('models.DateTimeField', ["_('Created')"], {'default': 'datetime.datetime.now', 'editable': 'False'}),
             'description': ('models.TextField', ["_('Description')"], {'blank': 'True'}),
             'file': ('MediaField', [], {}),
             'id': ('models.AutoField', [], {'primary_key': 'True'}),

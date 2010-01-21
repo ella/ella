@@ -2,6 +2,7 @@
 from south.db import db
 from django.db import models
 from ella.attachments.models import *
+import datetime
 
 class Migration:
 
@@ -26,7 +27,7 @@ class Migration:
             ('slug', models.SlugField(_('Slug'), max_length=255)),
             ('photo', models.ForeignKey(orm['photos.Photo'], null=True, verbose_name=_('Photo'), blank=True)),
             ('description', models.TextField(_('Description'))),
-            ('created', models.DateTimeField(_('Created'), default=datetime.now, editable=False)),
+            ('created', models.DateTimeField(_('Created'), default=datetime.datetime.now, editable=False)),
             ('attachment', models.FileField(_('Attachment'))),
             ('type', models.ForeignKey(orm.Type, verbose_name=_('Attachment type'))),
         ))
@@ -65,7 +66,7 @@ class Migration:
         'attachments.attachment': {
             'Meta': {'ordering': "('created',)"},
             'attachment': ('models.FileField', ["_('Attachment')"], {}),
-            'created': ('models.DateTimeField', ["_('Created')"], {'default': 'datetime.now', 'editable': 'False'}),
+            'created': ('models.DateTimeField', ["_('Created')"], {'default': 'datetime.datetime.now', 'editable': 'False'}),
             'description': ('models.TextField', ["_('Description')"], {}),
             'id': ('models.AutoField', [], {'primary_key': 'True'}),
             'name': ('models.CharField', ["_('Name')"], {'max_length': '255'}),

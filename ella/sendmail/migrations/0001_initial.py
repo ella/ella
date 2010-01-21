@@ -2,6 +2,7 @@
 from south.db import db
 from django.db import models
 from ella.sendmail.models import *
+import datetime
 
 class Migration:
     
@@ -12,7 +13,7 @@ class Migration:
             ('id', models.AutoField(primary_key=True)),
             ('sender', models.EmailField()),
             ('recipient', models.EmailField()),
-            ('sent', models.DateTimeField(default=datetime.now)),
+            ('sent', models.DateTimeField(default=datetime.datetime.now)),
             ('target_ct', models.ForeignKey(orm['contenttypes.ContentType'], verbose_name=_('content type'))),
             ('target_id', models.PositiveIntegerField(_('target id'), db_index=True)),
             ('content', models.TextField(null=True, blank=True)),
@@ -39,7 +40,7 @@ class Migration:
             'id': ('models.AutoField', [], {'primary_key': 'True'}),
             'recipient': ('models.EmailField', [], {}),
             'sender': ('models.EmailField', [], {}),
-            'sent': ('models.DateTimeField', [], {'default': 'datetime.now'}),
+            'sent': ('models.DateTimeField', [], {'default': 'datetime.datetime.now'}),
             'target_ct': ('models.ForeignKey', ["orm['contenttypes.ContentType']"], {'verbose_name': "_('content type')"}),
             'target_id': ('models.PositiveIntegerField', ["_('target id')"], {'db_index': 'True'})
         }

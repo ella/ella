@@ -1,7 +1,7 @@
 
 from south.db import db
 from django.db import models
-from datetime import datetime
+import datetime
 
 class Migration:
     
@@ -21,7 +21,7 @@ class Migration:
             ('width', models.PositiveIntegerField(editable=False)),
             ('height', models.PositiveIntegerField(editable=False)),
             ('source', models.ForeignKey(orm['core.Source'], null=True, verbose_name=_('Source'), blank=True)),
-            ('created', models.DateTimeField(default=datetime.now, editable=False)),
+            ('created', models.DateTimeField(default=datetime.datetime.now, editable=False)),
         ))
         db.send_create_signal('photos', ['Photo'])
         
@@ -108,7 +108,7 @@ class Migration:
         'photos.photo': {
             'Meta': {'ordering': "('-created',)"},
             'authors': ('models.ManyToManyField', ["orm['core.Author']"], {'related_name': "'photo_set'", 'verbose_name': "_('Authors')"}),
-            'created': ('models.DateTimeField', [], {'default': 'datetime.now', 'editable': 'False'}),
+            'created': ('models.DateTimeField', [], {'default': 'datetime.datetime.now', 'editable': 'False'}),
             'description': ('models.TextField', ["_('Description')"], {'blank': 'True'}),
             'height': ('models.PositiveIntegerField', [], {'editable': 'False'}),
             'id': ('models.AutoField', [], {'primary_key': 'True'}),
