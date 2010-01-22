@@ -2,20 +2,21 @@
 from south.db import db
 from django.db import models
 from ella.interviews.models import *
+import datetime
 
 class Migration:
     
     def forwards(self, orm):
         
         # Changing field 'Question.submit_date'
-        db.alter_column('interviews_question', 'submit_date', models.DateTimeField(_('date/time submitted'), default=datetime.now, editable=False))
+        db.alter_column('interviews_question', 'submit_date', models.DateTimeField(_('date/time submitted'), default=datetime.datetime.now, editable=False))
         
     
     
     def backwards(self, orm):
         
         # Changing field 'Question.submit_date'
-        db.alter_column('interviews_question', 'submit_date', models.DateTimeField(_('date/time submitted'), default=datetime.now, editable=True))
+        db.alter_column('interviews_question', 'submit_date', models.DateTimeField(_('date/time submitted'), default=datetime.datetime.now, editable=True))
         
     
     
@@ -30,7 +31,7 @@ class Migration:
             'id': ('models.AutoField', [], {'primary_key': 'True'}),
             'interviewee': ('models.ForeignKey', ["orm['interviews.Interviewee']"], {}),
             'question': ('models.ForeignKey', ["orm['interviews.Question']"], {}),
-            'submit_date': ('models.DateTimeField', ["_('date/time submitted')"], {'default': 'datetime.now'})
+            'submit_date': ('models.DateTimeField', ["_('date/time submitted')"], {'default': 'datetime.datetime.now'})
         },
         'auth.user': {
             '_stub': True,
@@ -90,7 +91,7 @@ class Migration:
             'ip_address': ('models.IPAddressField', ["_('ip address')"], {'null': 'True', 'blank': 'True'}),
             'is_public': ('models.BooleanField', ["_('is public')"], {'default': 'True'}),
             'nickname': ('models.CharField', ['_("anonymous author\'s nickname")'], {'max_length': '200', 'blank': 'True'}),
-            'submit_date': ('models.DateTimeField', ["_('date/time submitted')"], {'default': 'datetime.now', 'editable': 'False'}),
+            'submit_date': ('models.DateTimeField', ["_('date/time submitted')"], {'default': 'datetime.datetime.now', 'editable': 'False'}),
             'user': ('models.ForeignKey', ["orm['auth.User']"], {'related_name': "'interview_question_set'", 'null': 'True', 'verbose_name': "_('authorized author')", 'blank': 'True'})
         }
     }
