@@ -2,6 +2,7 @@
 from south.db import db
 from django.db import models
 from ella.polls.models import *
+import datetime
 
 class Migration:
     
@@ -77,7 +78,7 @@ class Migration:
             ('text_announcement', models.TextField(_('Text with announcement'), null=True, blank=True)),
             ('text', models.TextField(_('Text'), null=True, blank=True)),
             ('text_results', models.TextField(_('Text with results'), null=True, blank=True)),
-            ('active_from', models.DateTimeField(_('Active from'), default=datetime.now, null=True, blank=True)),
+            ('active_from', models.DateTimeField(_('Active from'), default=datetime.datetime.now, null=True, blank=True)),
             ('active_till', models.DateTimeField(_('Active till'), null=True, blank=True)),
             ('question', models.ForeignKey(orm.Question, unique=True, verbose_name=_('Question'))),
         ))
@@ -219,7 +220,7 @@ class Migration:
         },
         'polls.poll': {
             'Meta': {'ordering': "('-active_from',)"},
-            'active_from': ('models.DateTimeField', ["_('Active from')"], {'default': 'datetime.now', 'null': 'True', 'blank': 'True'}),
+            'active_from': ('models.DateTimeField', ["_('Active from')"], {'default': 'datetime.datetime.now', 'null': 'True', 'blank': 'True'}),
             'active_till': ('models.DateTimeField', ["_('Active till')"], {'null': 'True', 'blank': 'True'}),
             'id': ('models.AutoField', [], {'primary_key': 'True'}),
             'question': ('models.ForeignKey', ["orm['polls.Question']"], {'unique': 'True', 'verbose_name': "_('Question')"}),

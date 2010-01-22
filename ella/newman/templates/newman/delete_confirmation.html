@@ -14,22 +14,36 @@
                 <ul class="js-hashadr-container">{{ deleted_objects|unordered_list|removetags:"a" }}</ul>
             {% endif %}
             <div class="submit-row">
-                <form action="delete/" class="js-form js-dyn-adr" method="post">
+                <form id="id-object-delete-form" action="delete/" class="js-form js-dyn-adr" method="post">
                     <a class="icn btn cancel js-simpleload" href="service-container::::delete/">{% trans "Cancel" %}</a>
                     {% if not perms_lacking %}
                         <input type="hidden" name="post" value="yes" />
                         <a class="icn btn ok def js-submit">{% trans "Yes, I'm sure" %}!</a>
                     {% endif %}
+
+                    <div class="js-form-metadata">
+                        <input type="hidden" name="success" />
+                        <input type="hidden" name="error" />
+                    </div>
+
                 </form>
             </div>
         </div>
     </div>
 </div>
 <script type="text/javascript">
-    NewmanLib.register_pre_submit_callback_once(
+    NewmanLib.register_post_submit_callback_once(
         function() {
             Kobayashi.unload_content('service-container');
         }
+    );
+    $('#id-object-delete-form .js-form-metadata input[name="error"]').data(
+        'callback',
+        batch_delete_confirm_error
+    );
+    $('#id-object-delete-form .js-form-metadata input[name="success"]').data(
+        'callback',
+        batch_delete_confirm_complete
     );
 </script>
 {% endspaceless %}

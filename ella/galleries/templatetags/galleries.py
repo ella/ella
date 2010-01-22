@@ -1,7 +1,8 @@
 import math
+import anyjson
 
 from django import template
-from django.utils import simplejson
+from django.template.defaultfilters import striptags
 
 register = template.Library()
 
@@ -39,16 +40,16 @@ def gallery_content_json(gallery, thumb_format):
 
     for item_key in gallery.items:
         gallery_item, target_object = gallery.items[item_key]
-        photos.append({
-                       'src': target_object.get_formated_photo(thumb_format).url,
-                       'link': gallery_item.get_absolute_url(),
-                       'ajaxLink': gallery_item.get_absolute_url(),
-                       'alt': target_object.description
-                      })
+        formated_photo = target_object.get_formated_photo(thumb_format)
+        if formated_photo is not None:
+            photos.append({
+                           'src': formated_photo.url,
+                           'link': gallery_item.get_absolute_url(),
+                           'ajaxLink': gallery_item.get_absolute_url(),
+                           'alt': striptags(target_object.description)
+                          })
 
-    content = { 'thumbnails': photos }
-
-    return simplejson.dumps( photos, ensure_ascii=False, indent=4 )
+    return anyjson.serialize(photos)
 
 @register.tag
 def gallery_navigation(parser, token):
@@ -66,9 +67,9 @@ def gallery_navigation(parser, token):
         tag_name, for_arg, gallery, step_arg, step, position_arg, position, as_arg, result = token.split_contents()
     except ValueError:
         raise template.TemplateSyntaxError, "Four arguments are expected in %r tag" % token.split_contents()[0]
-    
+
     params = {}
-    
+
     if for_arg == 'for':
         params['for'] = gallery
     else:
@@ -96,13 +97,13 @@ class GalleryNavigationNode(template.Node):
         gallery = template.Variable( self.params['for'] ).resolve(context)
         position = template.Variable( self.params['position'] ).resolve(context)
         step = int( self.params['step'] )
-        
+
         count = len( gallery.items )
         navigation = []
-        
+
         if count > 0:
             keys = gallery.items.keys()
-            
+
             # Last page number
             last_page = count / step
             if last_page * step < count:
@@ -138,11 +139,11 @@ class GalleryNavigationNode(template.Node):
             current_position_page = None
             previous_page_url = None
             next_page_url = None
-        
+
         context[ self.params['as'] ] = {
                                         'current_page_number': current_position_page,
                                         'previous_page_url': previous_page_url,
                                         'next_page_url': next_page_url,
-                                        'pages': navigation 
+                                        'pages': navigation
                                        }
         return ''

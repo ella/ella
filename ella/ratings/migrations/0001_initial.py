@@ -2,6 +2,7 @@
 from south.db import db
 from django.db import models
 from ella.ratings.models import *
+import datetime
 
 class Migration:
     
@@ -43,7 +44,7 @@ class Migration:
             ('id', models.AutoField(primary_key=True)),
             ('target_ct', models.ForeignKey(orm['contenttypes.ContentType'], db_index=True)),
             ('target_id', models.PositiveIntegerField(_('Object ID'), db_index=True)),
-            ('time', models.DateTimeField(_('Time'), default=datetime.now, editable=False)),
+            ('time', models.DateTimeField(_('Time'), default=datetime.datetime.now, editable=False)),
             ('user', models.ForeignKey(orm['auth.User'], null=True, blank=True)),
             ('amount', models.DecimalField(_('Amount'), max_digits=10, decimal_places=2)),
             ('ip_address', models.CharField(_('IP Address'), max_length="15", blank=True)),
@@ -87,7 +88,7 @@ class Migration:
             'ip_address': ('models.CharField', ["_('IP Address')"], {'max_length': '"15"', 'blank': 'True'}),
             'target_ct': ('models.ForeignKey', ["orm['contenttypes.ContentType']"], {'db_index': 'True'}),
             'target_id': ('models.PositiveIntegerField', ["_('Object ID')"], {'db_index': 'True'}),
-            'time': ('models.DateTimeField', ["_('Time')"], {'default': 'datetime.now', 'editable': 'False'}),
+            'time': ('models.DateTimeField', ["_('Time')"], {'default': 'datetime.datetime.now', 'editable': 'False'}),
             'user': ('models.ForeignKey', ["orm['auth.User']"], {'null': 'True', 'blank': 'True'})
         },
         'auth.user': {

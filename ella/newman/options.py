@@ -785,9 +785,13 @@ class NewmanModelAdmin(XModelAdmin):
 
     @require_AJAX
     def delete_view(self, request, object_id, extra_context=None):
-        result = super(NewmanModelAdmin, self).delete_view(request, object_id, extra_context)
-        if not isinstance(result, HttpResponseRedirect):
-            return result
+        try:
+            result = super(NewmanModelAdmin, self).delete_view(request, object_id, extra_context)
+            if not isinstance(result, HttpResponseRedirect):
+                return result
+        except Exception, e:
+            # in case of exception return JSON error dict instead of 500.html
+            return utils.JsonResponseError(str(e))
         # create JsonResponse containing success message
         #return utils.JsonResponse(_('Object was deleted.'))
         return utils.JsonResponseRedirect(result['Location'])

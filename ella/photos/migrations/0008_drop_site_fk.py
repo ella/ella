@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 from south.db import db
 from django.db import models
 from django.contrib.sites.models import Site
@@ -39,7 +39,7 @@ class Migration:
         'photos.photo': {
             'Meta': {'ordering': "('-created',)"},
             'authors': ('models.ManyToManyField', ["orm['core.Author']"], {'related_name': "'photo_set'", 'verbose_name': "_('Authors')"}),
-            'created': ('models.DateTimeField', [], {'default': 'datetime.now', 'editable': 'False'}),
+            'created': ('models.DateTimeField', [], {'default': 'datetime.datetime.now', 'editable': 'False'}),
             'description': ('models.TextField', ["_('Description')"], {'blank': 'True'}),
             'height': ('models.PositiveIntegerField', [], {'editable': 'False'}),
             'id': ('models.AutoField', [], {'primary_key': 'True'}),

@@ -3,6 +3,7 @@ from django.contrib import admin
 from django.conf import settings
 from django.utils.translation import ugettext
 from django.forms.util import ValidationError
+from django.utils.translation import ugettext_lazy as _
 
 from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin
 
@@ -67,6 +68,13 @@ class PhotoOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     search_fields = ('title', 'image', 'description', 'id',) # FIXME: 'tags__tag__name',)
     suggest_fields = {'authors': ('name', 'slug',), 'source': ('name', 'url',)}
     rich_text_fields = {'small': ('description',)}
+    ordering = ('-id',)
+
+    fieldsets = (
+        (_("Photo core"), {'fields': (('title', 'slug'), 'image', 'authors')}),
+        (_("Photo extra"), {'fields': ('description', 'source')}),
+        (_("Metadata"), {'fields': (('important_top', 'important_left', 'important_bottom', 'important_right'),)}),
+    )
 
     def __call__(self, request, url):
         if url and url.endswith('json'):

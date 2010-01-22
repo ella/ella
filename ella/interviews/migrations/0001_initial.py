@@ -2,6 +2,7 @@
 from south.db import db
 from django.db import models
 from ella.interviews.models import *
+import datetime
 
 class Migration:
     
@@ -39,7 +40,7 @@ class Migration:
             ('nickname', models.CharField(_("anonymous author's nickname"), max_length=200, blank=True)),
             ('email', models.EmailField(_('authors email (optional)'), blank=True)),
             ('ip_address', models.IPAddressField(_('ip address'), null=True, blank=True)),
-            ('submit_date', models.DateTimeField(_('date/time submitted'), default=datetime.now, editable=True)),
+            ('submit_date', models.DateTimeField(_('date/time submitted'), default=datetime.datetime.now, editable=True)),
             ('is_public', models.BooleanField(_('is public'), default=True)),
         ))
         db.send_create_signal('interviews', ['Question'])
@@ -49,7 +50,7 @@ class Migration:
             ('id', models.AutoField(primary_key=True)),
             ('question', models.ForeignKey(orm.Question)),
             ('interviewee', models.ForeignKey(orm.Interviewee)),
-            ('submit_date', models.DateTimeField(_('date/time submitted'), default=datetime.now)),
+            ('submit_date', models.DateTimeField(_('date/time submitted'), default=datetime.datetime.now)),
             ('content', models.TextField(_('Answer text'))),
         ))
         db.send_create_signal('interviews', ['Answer'])
@@ -115,7 +116,7 @@ class Migration:
             'id': ('models.AutoField', [], {'primary_key': 'True'}),
             'interviewee': ('models.ForeignKey', ["orm['interviews.Interviewee']"], {}),
             'question': ('models.ForeignKey', ["orm['interviews.Question']"], {}),
-            'submit_date': ('models.DateTimeField', ["_('date/time submitted')"], {'default': 'datetime.now'})
+            'submit_date': ('models.DateTimeField', ["_('date/time submitted')"], {'default': 'datetime.datetime.now'})
         },
         'auth.user': {
             '_stub': True,
@@ -144,7 +145,7 @@ class Migration:
             'ip_address': ('models.IPAddressField', ["_('ip address')"], {'null': 'True', 'blank': 'True'}),
             'is_public': ('models.BooleanField', ["_('is public')"], {'default': 'True'}),
             'nickname': ('models.CharField', ['_("anonymous author\'s nickname")'], {'max_length': '200', 'blank': 'True'}),
-            'submit_date': ('models.DateTimeField', ["_('date/time submitted')"], {'default': 'datetime.now', 'editable': 'True'}),
+            'submit_date': ('models.DateTimeField', ["_('date/time submitted')"], {'default': 'datetime.datetime.now', 'editable': 'True'}),
             'user': ('models.ForeignKey', ["orm['auth.User']"], {'related_name': "'interview_question_set'", 'null': 'True', 'verbose_name': "_('authorized author')", 'blank': 'True'})
         },
         'core.source': {

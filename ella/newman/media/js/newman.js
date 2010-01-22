@@ -177,10 +177,7 @@ function unlock_window() {
 }
 
 function is_window_locked() {
-    if ($('#window-lock:hidden').length > 0) {
-        return false;
-    }
-    return true;
+    return $('#window-lock').is(':visible');
 }
 
 function get_html_chunk(tmpl, success) {
@@ -544,6 +541,7 @@ $( function() {
     function ajax_submit($form, button_name, process_redirect) {
         if (!$form.jquery) $form = $($form);
         if ( ! validate($form) ) return false;
+        carp(['ajax_submit: submitting... selector="', $form.selector, '"'].join(''));
         
         // Hack for file inputs
         var has_files = false;
@@ -637,16 +635,20 @@ $( function() {
                     }
                 }
                 NewmanLib.call_post_submit_callbacks();
-                if (this.succeeded) { try {
-                    success.call(this, xhr.responseText, xhr);
-                } catch (e) {
-                    carp('Error processing form-send success:', e);
-                }}
-                else { try {
-                    error.apply(this, arguments);
-                } catch(e) {
-                    carp('Error processing form-send error:', e);
-                }}
+                if (this.succeeded) { 
+                    try {
+                        success.call(this, xhr.responseText, xhr);
+                    } catch (e) {
+                        carp('Error processing form-send success:', e);
+                    }
+                }
+                else { 
+                    try {
+                        error.apply(this, arguments);
+                    } catch(e) {
+                        carp('Error processing form-send error:', e);
+                    }
+                }
                 unlock_window();
             },
             _form: $form,
@@ -1216,6 +1218,10 @@ function batch_delete_confirm_complete() {
     Kobayashi.reload_content('content');
     $('#confirmation-wrapper').remove();
     $('#content').show();
+}
+function batch_delete_confirm_error(xhr) {
+    carp('Error occured.');
+    show_ajax_error(xhr);
 }
 
 
