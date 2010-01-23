@@ -6,6 +6,8 @@ from django.conf import settings
 from ella.core.migrations.base.base_0002 import BasePublishableDataMigration
 from ella.core.migrations.base.base_0002 import alter_foreignkey_to_int, migrate_foreignkey
 
+import datetime
+
 
 class Migration(BasePublishableDataMigration):
     # TODO:
