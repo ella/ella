@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
+from django.conf import settings
 from optparse import make_option
 import os
 import sys
@@ -41,6 +42,7 @@ class Command(BaseCommand):
         use_reloader = options.get('use_reloader', True)
         admin_media_path = options.get('admin_media_path', '')
         disable_admin_media = options.get('disable_admin_media', False)
+        disable_admin_media = disable_admin_media or getattr(settings, 'DISABLE_ADMIN_MEDIA', False)
         shutdown_message = options.get('shutdown_message', '')
         quit_command = (sys.platform == 'win32') and 'CTRL-BREAK' or 'CONTROL-C'
 

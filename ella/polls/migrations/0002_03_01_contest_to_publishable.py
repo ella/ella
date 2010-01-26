@@ -26,8 +26,10 @@ class Migration(BasePublishableDataMigration):
     model = 'contest'
     table = '%s_%s' % (app_label, model)
 
-    publishable_uncommon_cols = {}
-    
+    publishable_uncommon_cols = {
+        'description': 'text_announcement'
+    }
+
     def alter_self_foreignkeys(self, orm):
         alter_foreignkey_to_int('polls_question', 'contest', models.IntegerField(blank=True, null=True))
         alter_foreignkey_to_int('polls_contestant', 'contest', models.IntegerField(blank=True))

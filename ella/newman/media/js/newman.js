@@ -1214,10 +1214,10 @@ function changelist_batch_success(response_text) {
     });
     $('#content').hide().before($dialog);
 }
-function batch_delete_confirm_complete() {
-    Kobayashi.reload_content('content');
+function batch_delete_confirm_complete(data, xhr) {
     $('#confirmation-wrapper').remove();
     $('#content').show();
+    adr('../');
 }
 function batch_delete_confirm_error(xhr) {
     carp('Error occured.');
