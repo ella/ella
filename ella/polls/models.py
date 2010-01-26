@@ -112,10 +112,6 @@ class BasePoll(models.Model):
             return True
         return False
 
-    def description(self):
-        return self.text_announcement
-
-
 
 class Poll(BasePoll):
 

@@ -5,7 +5,7 @@ from ella.oldcomments.models import *
 import datetime
 
 class Migration:
-    
+
     def forwards(self, orm):
         "Write your forwards migration here"
         db.execute('''
@@ -16,7 +16,8 @@ class Migration:
                 is_public, is_removed,
                 site_id,
                 comment,
-                old_id
+                old_id,
+                ip_address
             ) SELECT
                 target_ct_id, target_id,
                 user_id, nickname, email, '',
@@ -24,16 +25,17 @@ class Migration:
                 is_public, not is_public,
                 1,
                 content,
-                id
+                id,
+                ip_address
             FROM comments_comment
             ORDER BY id
         ''')
-    
-    
+
+
     def backwards(self, orm):
         "Write your backwards migration here"
-    
-    
+
+
     models = {
         'oldcomments.comment': {
             'Meta': {'ordering': "('-path',)", 'db_table': "'comments_comment'"},
@@ -80,5 +82,5 @@ class Migration:
             'timestamp': ('models.DateTimeField', [], {'default': 'datetime.datetime.now'})
         }
     }
-    
+
     complete_apps = ['oldcomments']
