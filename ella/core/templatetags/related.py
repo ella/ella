@@ -6,7 +6,7 @@ from ella.core.models import Related
 register = template.Library()
 
 class RelatedNode(template.Node):
-    def __init__(self, obj_var, count, var_name, mods):
+    def __init__(self, obj_var, count, var_name, models):
         self.obj_var, self.count, self.var_name, self.models = obj_var, count, var_name, models
 
     def render(self, context):
@@ -16,7 +16,7 @@ class RelatedNode(template.Node):
             return ''
 
         count = self.count
-        related = Related.objects.get_related_for_object(obj, self.count, self.mods)
+        related = Related.objects.get_related_for_object(obj, self.count, self.models)
         context[self.var_name] = related
         return ''
 
