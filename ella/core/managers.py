@@ -47,10 +47,10 @@ class RelatedManager(models.Manager):
                 if mods:
                     qset = qset.filter(content_type__in=ct_ids)
 
-                print qset
-                print TaggedItem.objects.all()
+                #print qset
+                #print TaggedItem.objects.all()
                 to_add = TaggedItem.objects.get_related(obj, qset, num=count+len(related))
-                print to_add
+                #print to_add
                 for rel in to_add:
                     if rel != obj and rel not in related:
                         count -= 1

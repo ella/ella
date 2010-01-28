@@ -177,7 +177,12 @@ function unlock_window() {
 }
 
 function is_window_locked() {
-    return $('#window-lock').is(':visible');
+    //return $('#window-lock').is(':visible'); // FIXME Buggy buggy buggy st. tropez, tada da da...
+    var $res = $('#window-lock').data('close_ok');
+    if (typeof($res) == 'undefined') {
+        return false;
+    }
+    return $res == true;
 }
 
 function get_html_chunk(tmpl, success) {
@@ -1048,10 +1053,7 @@ function show_ajax_success(response_text) {
         message = gettext('Successfully sent');
         paste_code_into_debug( (response_text||'').replace(/\n(\s*\n)+/g, "\n"), 'Ajax success response' );
     }
-    // unlock window if neccessary
-    if (is_window_locked()) {
-        unlock_window();
-    }
+    unlock_window();
     if (this.redirect_to) {
         var literal_address;
         if (this.redirect_to.substr(0, BASE_PATH.length) == BASE_PATH) {
