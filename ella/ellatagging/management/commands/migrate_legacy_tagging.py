@@ -13,16 +13,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        confirm = raw_input('\n'.join((
-            'This will alter a db table tagging_taggeditem dropping category_id and priority columns',
-            'Are you sure you want to do this?',
-            '',
-            "Type 'yes' to continue, or 'no' to cancel: ")))
-        
-        if confirm != 'yes':
-            print "Migration cancelled."
-            return
-
         try:
             db.delete_column('tagging_taggeditem', 'category_id')
             print "Column category_id deleted."
