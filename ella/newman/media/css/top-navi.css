@@ -18,6 +18,7 @@ ul#menu-top {
 ul#menu-top li {
     float: left;
     position: relative;
+    line-height:24px;
 }
 ul#menu-top ul li {
     float: none;
@@ -28,7 +29,7 @@ ul#menu-top li ul {
     display: none;
     position: absolute;
     width: 170px;
-    left: 0; top: 22px;
+    left: 0; top: 24px;
     filter: alpha(opacity=93);
     opacity: .93;
 }
@@ -39,7 +40,7 @@ ul#menu-top li:hover ul {
     border-color: #ccc #666 #666 #ccc;
 }
 ul#menu-top a, ul#menu-top a:link, ul#menu-top a:visited {
-    padding: 4px 5px;
+    padding: 0px 5px;
     _padding-bottom: 2px;
     display: block;
     color: #666;
@@ -53,9 +54,9 @@ ul#menu-top a:hover {
 }
 ul#menu-top ul a, ul#menu-top ul a:link, ul#menu-top ul a:visited {
     background-image: none;
-    display: block;
+
     width: 100%;
-    padding: 4px 5px;
+    padding: 0 5px;
     border:none;
     border-bottom: 1px solid #999;
 }
