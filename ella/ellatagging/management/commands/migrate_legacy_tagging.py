@@ -5,7 +5,6 @@ from _mysql_exceptions import OperationalError
 from django.core.management.base import CommandError, BaseCommand
 
 from south.db import db
-from south.models import MigrationHistory
 
 class Command(BaseCommand):
 
@@ -20,7 +19,4 @@ class Command(BaseCommand):
             print "Column priority deleted."
         except OperationalError:
             print "Can't drop columns (already gone?)"
-
-        MigrationHistory.objects.filter(app_name='tagging').delete()
-        print 'Tagging migrations deleted from South migration hystory.'
 
