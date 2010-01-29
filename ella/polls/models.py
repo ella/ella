@@ -44,9 +44,11 @@ class PollBox(Box):
         from ella.polls import views
         cont = super(PollBox, self).get_context()
         # state = views.poll_check_vote(self._context['request'], self.obj)
+        poll = self.obj
         cont.update({
             'photo_slug' : self.params.get('photo_slug', ''),
             'state' : self.state,
+            'activity': poll.current_activity_state,
             'state_voted' : views.POLL_USER_ALLREADY_VOTED,
             'state_just_voted' : views.POLL_USER_JUST_VOTED,
             'state_not_yet_voted' : views.POLL_USER_NOT_YET_VOTED,
