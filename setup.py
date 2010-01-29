@@ -1,18 +1,19 @@
 from setuptools import setup, find_packages
 
-# must be in sync with stdout.VERSION
-VERSION = (1, 0, 0, 0)
+# must be in sync with ella.VERSION
+VERSION = (1, 2, 0, 0)
 __version__ = VERSION
 __versionstr__ = '.'.join(map(str, VERSION))
 
 setup(
     name = 'ella',
     version = __versionstr__,
-    description = 'ella',
+    description = 'Ella Django CMS Project',
     long_description = '\n'.join((
-        'Ella Project',
+        'Ella Django CMS Project',
         '',
         'content management system written in django',
+        '',
     )),
     author = 'centrum holdings s.r.o',
     author_email='devel@centrumholdings.com',
@@ -43,5 +44,12 @@ setup(
     setup_requires = [
         'setuptools_dummy',
     ],
+
+    buildbot_meta_master = {
+        'host' : 'rlyeh.cnt-cthulhubot.dev.chservices.cz',
+        'port' : 12018,
+        'branch' : 'automation',
+    },
+
 )
 
