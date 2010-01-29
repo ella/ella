@@ -79,7 +79,6 @@ class ContestantOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     """
     ordering = ('datetime',)
     list_display = ('name', 'surname', 'user', 'datetime', 'contest', 'points', 'winner')
-    # rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}
 
 class QuestionInlineOptions(EllaAdminInline, admin.TabularInline):
     model = Question
@@ -103,7 +102,7 @@ class ContestOptions(EllaAdminOptionsMixin, EllaModelAdmin):
 
     list_display = ('title', 'category', 'active_from', 'correct_answers', 'get_all_answers_count', 'pk', 'get_domain_url',)
     list_filter = ('category', 'active_from',)
-    search_fields = ('title', 'text_announcement', 'text', 'text_results',)
+    search_fields = ('title', 'text', 'text_results',)
     inlines = [ QuestionInlineOptions, PlacementInlineAdmin ]
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
@@ -125,11 +124,11 @@ class ContestOptions(EllaAdminOptionsMixin, EllaModelAdmin):
 class QuizOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     list_display = ('title', 'category', 'active_from', 'pk', 'get_domain_url',)
     list_filter = ('category', 'active_from',)
-    search_fields = ('title', 'text_announcement', 'text', 'text_results',)
+    search_fields = ('title', 'desc', 'text', 'text_results',)
     inlines = [ QuestionInlineOptions, ResultTabularOptions, PlacementInlineAdmin ]
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
-    # rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}
+    # rich_text_fields = {'small': ('text', 'text_results',)}
     rich_text_fields = {'small': ('description',), None: ('text',)}
 
 #    suggest_fields = {'category': ('tree_path', 'title', 'slug',), 'authors': ('name', 'slug',),}
@@ -137,11 +136,11 @@ class QuizOptions(EllaAdminOptionsMixin, EllaModelAdmin):
 
 
 class PollOptions(EllaAdminOptionsMixin, EllaModelAdmin):
-    # rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}
+    # rich_text_fields = {'small': ('text', 'text_results',)}
     rich_text_fields = {'small': ('text', )}
     list_display = ('title', 'question', 'get_total_votes', 'pk',)
     list_filter = ('active_from',)
-    search_fields = ('title', 'text_announcement', 'text', 'text_results', 'question__question',)
+    search_fields = ('title', 'text', 'text_results', 'question__question',)
     raw_id_fields = ('question',)
 
 

@@ -103,6 +103,7 @@ class ContestantAdmin(newman.NewmanModelAdmin):
     """
     ordering = ('datetime',)
     list_display = ('name', 'surname', 'user', 'datetime', 'contest', 'points', 'winner')
+    list_filter = ('contest',)
 
 
 def get_source_text(model_field, instance):
@@ -331,7 +332,7 @@ class QuizAdmin(PublishableAdmin):
 class PollAdmin(newman.NewmanModelAdmin):
     list_display = ('title', 'question', 'get_total_votes', 'pk',)
     list_filter = ('active_from', 'active_till',)
-    search_fields = ('title', 'text_announcement', 'text', 'text_results', 'question__question',)
+    search_fields = ('title', 'text', 'text_results', 'question__question',)
     rich_text_fields = {'small': ('text', )}
     suggest_fields = {'question': ('__unicode__', 'question',)}
 
