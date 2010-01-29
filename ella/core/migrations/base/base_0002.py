@@ -195,7 +195,16 @@ class BasePublishableDataMigration(object):
 
         # replace it with a link to parent
         db.rename_column(self.table, 'publishable_ptr', 'publishable_ptr_id')
-        db.alter_column(self.table, 'publishable_ptr_id', models.OneToOneField(orm['core.Publishable'], null=False, blank=False))
+        db.alter_column(self.table, 'publishable_ptr_id', models.ForeignKey(orm['core.Publishable'], null=False, blank=False, unique=True))
+        db.create_primary_key(self.table, 'publishable_ptr_id')
+
+        #  make it a FK
+        db.execute(
+            'ALTER TABLE `%s` ADD CONSTRAINT `publishable_ptr_id_refs_id_%s` FOREIGN KEY (`publishable_ptr_id`) REFERENCES `core_publishable` (`id`);' % (
+                self.table,
+                abs(hash((self.table, 'core_publishable'))),
+            )
+        )
 
         # move data, that were pointing to us
         self.move_self_foreignkeys(orm)
