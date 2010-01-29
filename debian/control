@@ -1,4 +1,4 @@
-Source: centrum-python-ella
+Source: centrum-python-ella-auto
 Section: python
 Priority: optional
 Maintainer: Jan Kral <jan.kral@centrumholdings.com>
@@ -6,11 +6,12 @@ Uploaders: Ondrej Kohout <ondrej.kohout@centrumholdings.com>, Jakub Vysoky <jaku
 Build-Depends: cdbs (>= 0.4.41), debhelper (>= 5.0.37.2), python-dev, python-support (>= 0.3), python-setuptools, centrum-python-setuptoolsdummy
 Standards-Version: 3.7.2
 
-Package: centrum-python-ella
-Provides: centrum-ella
-Conflicts: centrum-ella
-Replaces: centrum-ella
+# add Provides, Conflicts, Replaces for centrum-ella, python-ella
+Package: centrum-python-ella-auto
+Provides: centrum-python-ella
+Conflicts: centrum-python-ella
+Replaces: centrum-python-ella
 Architecture: all
-Depends: ${python:Depends}, ${misc:Depends}, python-django, python-docutils, python-pysqlite2, python-markdown2, python-feedparser, python-imaging, python-anyjson, python-django-threadedcomments
-Description: ella - django cms
+Depends: ${python:Depends}, ${misc:Depends}, python-django, python-docutils
+Description: Ella Django CMS Project
 
