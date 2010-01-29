@@ -37,7 +37,7 @@ class Migration:
           * inheritance from Publishable - will be done by other migration
         """
         # Changing field 'Quiz.text_announcement'
-        db.alter_column('polls_contest', 'text_announcement', models.TextField(_('Text with announcement')), blank=True)
+        db.add_column('polls_contest', 'text_announcement', models.TextField(_('Text with announcement')))
 
         # Adding field 'Contest.active_from'
         db.alter_column('polls_contest', 'active_from', models.DateTimeField(_('Active from'), blank=True, null=True))
@@ -54,13 +54,13 @@ class Migration:
         """
 
         # Changing field 'Quiz.text_announcement'
-        db.alter_column('polls_quiz', 'text_announcement', models.TextField(_('Text with announcement')), blank=True)
+        db.add_column('polls_quiz', 'text_announcement', models.TextField(_('Text with announcement')))
 
         # Adding field 'Quiz.active_from'
-        db.alter_column('polls_contest', 'active_from', models.DateTimeField(_('Active from'), blank=True, null=True))
+        db.alter_column('polls_quiz', 'active_from', models.DateTimeField(_('Active from'), blank=True, null=True))
 
         # Adding field 'Quiz.active_till'
-        db.alter_column('polls_contest', 'active_till', models.DateTimeField(_('Active till'), blank=True, null=True))
+        db.alter_column('polls_quiz', 'active_till', models.DateTimeField(_('Active till'), blank=True, null=True))
 
 
 
