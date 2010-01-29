@@ -72,7 +72,7 @@ class QuizBox(Box):
 
 class BasePoll(models.Model):
 
-    text_announcement = models.TextField(_('Text with announcement'))
+    text_announcement = models.TextField(_('Text with announcement'), blank=True, default='')
     text = models.TextField(_('Text'))
     text_results = models.TextField(_('Text with results'))
     active_from = models.DateTimeField(_('Active from'), blank=True, null=True)
@@ -88,7 +88,7 @@ class BasePoll(models.Model):
         """
         a = self.current_activity_state
         if a is ACTIVITY_NOT_YET_ACTIVE:
-            return self.text_announcement
+            return self.description
         elif a is ACTIVITY_CLOSED:
             return self.text_results
         else:

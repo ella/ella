@@ -5,147 +5,153 @@ from ella.polls.models import *
 import datetime
 
 class Migration:
-    
+
     def forwards(self, orm):
-        
+
         """
         Poll
           * changing fields defined by BasePoll abstract model
         """
-        
+
         # Changing field 'Poll.text'
         db.alter_column('polls_poll', 'text', models.TextField(_('Text')))
 
         # Adding field 'Poll.active_from'
         db.alter_column('polls_poll', 'active_from', models.DateTimeField(_('Active from'), blank=True, null=True))
-        
+
         # Changing field 'Poll.active_till'
         db.alter_column('polls_poll', 'active_till', models.DateTimeField(_('Active till'), blank=True, null=True))
-        
+
         # Changing field 'Poll.text_results'
         db.alter_column('polls_poll', 'text_results', models.TextField(_('Text with results')))
-        
+
         # Changing field 'Poll.text_announcement'
         db.alter_column('polls_poll', 'text_announcement', models.TextField(_('Text with announcement')))
-        
+
         # Changing field 'Poll.active_from'
         db.alter_column('polls_poll', 'active_from', models.DateTimeField(_('Active from')))
-        
-        
+
+
         """
         Contest
           * inheritance from Publishable - will be done by other migration
         """
+        # Changing field 'Quiz.text_announcement'
+        db.alter_column('polls_contest', 'text_announcement', models.TextField(_('Text with announcement')), blank=True)
+
         # Adding field 'Contest.active_from'
         db.alter_column('polls_contest', 'active_from', models.DateTimeField(_('Active from'), blank=True, null=True))
-        
+
         # Adding field 'Contest.active_till'
         db.alter_column('polls_contest', 'active_till', models.DateTimeField(_('Active till'), blank=True, null=True))
-        
 
-        
+
+
         """
         Quiz
           * changing fields defined by BasePoll abstract model
           * inheritance from Publishable - will be done by other migration
         """
-        
+
         # Changing field 'Quiz.text_announcement'
-        db.alter_column('polls_quiz', 'text_announcement', models.TextField(_('Text with announcement')))
+        db.alter_column('polls_quiz', 'text_announcement', models.TextField(_('Text with announcement')), blank=True)
 
         # Adding field 'Quiz.active_from'
         db.alter_column('polls_contest', 'active_from', models.DateTimeField(_('Active from'), blank=True, null=True))
 
         # Adding field 'Quiz.active_till'
         db.alter_column('polls_contest', 'active_till', models.DateTimeField(_('Active till'), blank=True, null=True))
-        
-    
-    
+
+
+
     def backwards(self, orm):
-        
+
         """
         Poll
           * fields defined by BasePoll abstract model
         """
-        
+
         # Changing field 'Poll.text'
         db.alter_column('polls_poll', 'text', models.TextField(_('Text'), null=True, blank=True))
-        
+
         # Changing field 'Poll.active_till'
         db.alter_column('polls_poll', 'active_till', models.DateTimeField(_('Active till'), null=True, blank=True))
-        
+
         # Changing field 'Poll.text_results'
         db.alter_column('polls_poll', 'text_results', models.TextField(_('Text with results'), null=True, blank=True))
-        
+
         # Changing field 'Poll.text_announcement'
         db.alter_column('polls_poll', 'text_announcement', models.TextField(_('Text with announcement'), null=True, blank=True))
-        
+
         # Changing field 'Poll.active_from'
         db.alter_column('polls_poll', 'active_from', models.DateTimeField(_('Active from'), default=datetime.datetime.now, null=True, blank=True))
 
-        
+
         """
         Contest
           * inheritance from Publishable - will be done by other migration
         """
-        
+
+        # Changing field 'Contest.text_announcement'
+        db.alter_column('polls_contest', 'text_announcement', models.TextField(_('text with announcement')))
+
         # Deleting field 'Contest.publishable_ptr'
         #db.delete_column('polls_contest', 'publishable_ptr_id')
-        
+
         # Adding field 'Contest.category'
         #db.add_column('polls_contest', 'category', models.ForeignKey(orm['core.Category']))
-        
+
         # Adding field 'Contest.id'
         #db.add_column('polls_contest', 'id', models.AutoField(primary_key=True))
-        
+
         # Adding field 'Contest.photo'
         #db.add_column('polls_contest', 'photo', models.ForeignKey(orm['photos.Photo']))
-        
+
         # Adding field 'Contest.slug'
         #db.add_column('polls_contest', 'slug', models.SlugField(_('Slug'), max_length=255))
-        
+
         # Adding field 'Contest.title'
         #db.add_column('polls_contest', 'title', models.CharField(_('Title'), max_length=200))
 
-        
+
         """
         Quiz
           * changing fields defined by BasePoll abstract model
           * inheritance from Publishable - will be done by other migration
         """
-        
+
         # Changing field 'Quiz.text_announcement'
         db.alter_column('polls_quiz', 'text_announcement', models.TextField(_('text with announcement')))
-        
+
         # Deleting field 'Quiz.publishable_ptr'
         #db.delete_column('polls_quiz', 'publishable_ptr_id')
-        
+
         # Adding field 'Quiz.title'
         #db.add_column('polls_quiz', 'title', models.CharField(_('title'), max_length=200))
-        
+
         # Adding field 'Quiz.slug'
         #db.add_column('polls_quiz', 'slug', models.SlugField(_('Slug'), max_length=255))
-        
+
         # Adding field 'Quiz.photo'
         #db.add_column('polls_quiz', 'photo', models.ForeignKey(orm['photos.Photo']))
-        
+
         # Adding field 'Quiz.category'
         #db.add_column('polls_quiz', 'category', models.ForeignKey(orm['core.Category']))
-        
+
         # Adding field 'Quiz.id'
         #db.add_column('polls_quiz', 'id', models.AutoField(primary_key=True))
-        
+
         # Adding ManyToManyField 'Quiz.authors'
         #db.create_table('polls_quiz_authors', (
         #    ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
         #    ('quiz', models.ForeignKey(orm.Quiz, null=False)),
         #    ('author', models.ForeignKey(orm['core.author'], null=False))
         #))
-        
-    
-    
+
+
+
     models = {}
-    
+
     """
     models = {
         'core.category': {
@@ -261,5 +267,5 @@ class Migration:
         }
     }
     """
-    
+
     complete_apps = ['polls']
