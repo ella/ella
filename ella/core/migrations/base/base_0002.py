@@ -46,6 +46,19 @@ def migrate_foreignkey(app_label, model, table, field, orm, null=False):
         fk = models.ForeignKey(orm['%(app_label)s.%(model)s' % s])
     db.alter_column(s['table'], s['fk_field'], fk)
 
+    target_table = ('%s_%s' % (app_label, model)).lower()
+
+    #  make it a FK
+    db.execute(
+        'ALTER TABLE `%s` ADD CONSTRAINT `%s_refs_publishable_ptr_id_%s` FOREIGN KEY (`%s`) REFERENCES `%s` (`publishable_ptr_id`);' % (
+            table,
+            s['fk_field'],
+            abs(hash((table, target_table))),
+            s['fk_field'],
+            target_table
+        )
+    )
+
 
 class BasePublishableDataMigration(object):
     depends_on = (
