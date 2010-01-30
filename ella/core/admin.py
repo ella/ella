@@ -151,7 +151,7 @@ class PlacementInlineFormset(modelforms.BaseModelFormSet):
 class ListingInlineAdmin(admin.TabularInline):
     model = Listing
     extra = 2
-    fieldsets = ((None, {'fields' : ('category','publish_from', 'priority_from', 'priority_to', 'priority_value', 'remove', 'commercial',)}),)
+    fieldsets = ((None, {'fields' : ('category','publish_from', 'priority_from', 'priority_to', 'priority_value', 'commercial',)}),)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'category':
@@ -161,6 +161,9 @@ class ListingInlineAdmin(admin.TabularInline):
 class PlacementInlineAdmin(admin.TabularInline):
     model = Placement
     max_num = 1
+    formset = PlacementInlineFormset
+    form = PlacementForm
+    extra = 1
     '''
     extra = 1
     ct_field = 'target_ct'
