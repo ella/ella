@@ -101,13 +101,13 @@ class EllaModelAdmin(admin.ModelAdmin):
         return HttpResponse('\n'.join(ft), mimetype='text/plain;charset=utf-8')
 
     def photo_thumbnail(self, object):
-        photo = object.get_photo()
-        if photo:
-            return mark_safe(photo.thumb())
+        if object.photo:
+            return object.photo.thumb()
         else:
             return mark_safe('<span class="form-error-msg">%s</span>' % ugettext('No main photo!'))
     photo_thumbnail.allow_tags = True
-    photo_thumbnail.short_description = _('Photo')
+    photo_thumbnail.short_description = _('Photo AB')
+
 
 
 class EllaAdminOptionsMixin(object):
