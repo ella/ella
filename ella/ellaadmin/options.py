@@ -104,9 +104,9 @@ class EllaModelAdmin(admin.ModelAdmin):
         if object.photo:
             return object.photo.thumb()
         else:
-            return mark_safe('<span class="form-error-msg">%s</span>' % ugettext('No main photo!'))
+            return mark_safe('<strong>%s</strong>' % ugettext('No main photo!'))
     photo_thumbnail.allow_tags = True
-    photo_thumbnail.short_description = _('Photo AB')
+    photo_thumbnail.short_description = _('Photo')
 
 
 
