@@ -65,13 +65,20 @@ class Gallery(Publishable):
 
         Overrides Publishable.get_photo.
         """
-        photo = super(Gallery, self).get_photo()
+        photo = self.photo
         if photo is not None:
             return photo
 
         for item in self.items.itervalues():
             if isinstance(item[1], Photo):
                 return item[1]
+
+    def save(self, **kwargs):
+        if self.photo is None:
+            first_photo = self.get_photo()
+            if first_photo:
+                self.photo = first_photo
+        return super(Gallery, super).save(**kwargs)
 
     class Meta:
         verbose_name = _('Gallery')
