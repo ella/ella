@@ -3,10 +3,13 @@ from django.conf import settings
 from django.contrib.admin import widgets
 from django.utils.safestring import mark_safe
 from django.utils.text import truncate_words
+from django.template import Context
+from django.template.loader import get_template
 
 from djangomarkup.widgets import RichTextAreaWidget
 
 from ella.ellaadmin.utils import admin_url
+from ella.core.models import Listing
 
 
 JS_EDITOR = 'js/editor.js'
@@ -177,6 +180,9 @@ class ListingCategoryWidget(forms.Select):
         js = (
             settings.ADMIN_MEDIA_PREFIX + JS_LISTING_CATEGORY,
         )
+        import sys
+        print u'DEBUG ella.ellaadmin.widgets ListingCategoryWidget.Media() js=', js; sys.stdout.flush()
+
     def __init__(self, attrs={}):
         super(ListingCategoryWidget, self).__init__(attrs={'class': CLASS_LISTING_CATEGORY})
 
@@ -201,3 +207,38 @@ class ForeignKeyRawIdWidget(widgets.ForeignKeyRawIdWidget):
         adm = admin_url(obj)
         return '&nbsp;<a href="%s">%s</a>' % (adm, label)
 
+
+""" """
+class ListingCustomWidget(forms.SelectMultiple):
+    def __init__(self, attrs=None, choices=(), *args, **kwargs):
+        #attrs['class'] = 'listings'
+        # TODO bug? Ask Honza, if selected choices should be provided in args, kwargs, somewhere..
+        if not attrs or 'class' not in attrs:
+            my_attrs = {'class': 'listings'}
+        else:
+            my_attrs = attrs
+        super(ListingCustomWidget, self).__init__(attrs=my_attrs, choices=choices)
+
+    def render(self, name, value, attrs=None, choices=()):
+        cx = Context()
+        cx['ADMIN_MEDIA_PREFIX'] = settings.ADMIN_MEDIA_PREFIX
+        cx['id_prefix'] = name
+        cx['verbose_name_publish_from'] = Listing._meta.get_field('publish_from').verbose_name.__unicode__()
+        cx['choices'] = choices or self.choices
+        
+        import sys
+        print u'DEBUG: ella.ellaadmin.widgets ListingCustomWidget render(): choices= ', cx['choices']; sys.stdout.flush()
+        
+        if type(value) == dict:
+            # modifying existing object, so value is dict containing Listings and selected category IDs
+            # cx['selected'] = Category.objects.filter(pk__in=value['selected_categories']).values('id') or []
+            cx['listings'] = list(value['listings']) or []
+            #cx['instance'] = list(value['instance']) or []
+            #print u'DEBUG: ella.ellaadmin.widgets ListingCustomWidget render(): value[''instance'']', cx['instance']; sys.stdout.flush()
+        cx['ahoj']='ahojcaunazdar'
+        print u'DEBUG: ella.ellaadmin.widgets ListingCustomWidget render(): self', self; sys.stdout.flush()
+        print u'DEBUG: ella.ellaadmin.widgets ListingCustomWidget render(): cx=', cx; sys.stdout.flush()
+        
+        tpl = get_template('admin/widget/listing_custom.html')
+        return mark_safe(tpl.render(cx))
+""" """

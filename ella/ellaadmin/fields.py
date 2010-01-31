@@ -2,6 +2,7 @@ import Image
 from StringIO import StringIO
 
 from django.forms import fields
+from django.forms.models import ModelMultipleChoiceField
 from django.forms.util import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from django.template import Template, TextNode, TemplateSyntaxError
@@ -217,3 +218,12 @@ class GenericSuggestFieldMultiple(fields.MultipleChoiceField):
             raise ValidationError(self.error_messages['invalid_choice'] % {'value': val})
 
         return values
+
+class ListingCustomField(ModelMultipleChoiceField):
+    widget = widgets.ListingCustomWidget
+    #widget = widgets.ListingCategoryWidget
+    is_listing_custom_field = True
+
+    def __init__(self, *args, **kwargs):
+        super(ListingCustomField, self).__init__(*args, **kwargs)
+
