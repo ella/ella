@@ -20,22 +20,18 @@ class PlacementForm(modelforms.ModelForm):
         model = Placement
 
     def __init__(self, *args, **kwargs):
-        import sys
         initial = []
         # args[data] -> instance
         if 'initial' in kwargs:
             initial = [ c.pk for c in Category.objects.distinct().filter(listing__placement=kwargs['initial']['id']) ]
         elif 'instance' in kwargs:
             
-            print u'DEBUG: ella.core.admin  list(kwargs[''instance''])', kwargs; sys.stdout.flush()
             initial = {
                 'selected_categories': [
                     c.pk for c in Category.objects.distinct().filter(listing__placement=kwargs['instance'].pk)
                 ],
                 'listings': list(kwargs['instance'].listing_set.all()),
             }
-
-        print u'DEBUG: ella.core.admin  initial=', initial; sys.stdout.flush()
 
         self.base_fields['listings'] = fields.ListingCustomField(
                 Category.objects.all(), label=_('Category'), cache_choices=True, required=False, initial=initial)

@@ -268,9 +268,6 @@ class Placement(models.Model):
             site = get_cached_object(Site, pk=category.site_id)
             return 'http://' + site.domain + url
         return url
-    
-    def edit_placement_link(self):
-        return mark_safe(u'/core/placement/%d/' % self.id)
 
 
 def ListingBox(listing, *args, **kwargs):

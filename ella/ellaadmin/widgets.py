@@ -180,8 +180,6 @@ class ListingCategoryWidget(forms.Select):
         js = (
             settings.ADMIN_MEDIA_PREFIX + JS_LISTING_CATEGORY,
         )
-        import sys
-        print u'DEBUG ella.ellaadmin.widgets ListingCategoryWidget.Media() js=', js; sys.stdout.flush()
 
     def __init__(self, attrs={}):
         super(ListingCategoryWidget, self).__init__(attrs={'class': CLASS_LISTING_CATEGORY})
@@ -226,18 +224,10 @@ class ListingCustomWidget(forms.SelectMultiple):
         cx['verbose_name_publish_from'] = Listing._meta.get_field('publish_from').verbose_name.__unicode__()
         cx['choices'] = choices or self.choices
         
-        import sys
-        print u'DEBUG: ella.ellaadmin.widgets ListingCustomWidget render(): choices= ', cx['choices']; sys.stdout.flush()
-        
         if type(value) == dict:
             # modifying existing object, so value is dict containing Listings and selected category IDs
             # cx['selected'] = Category.objects.filter(pk__in=value['selected_categories']).values('id') or []
             cx['listings'] = list(value['listings']) or []
-            #cx['instance'] = list(value['instance']) or []
-            #print u'DEBUG: ella.ellaadmin.widgets ListingCustomWidget render(): value[''instance'']', cx['instance']; sys.stdout.flush()
-        cx['ahoj']='ahojcaunazdar'
-        print u'DEBUG: ella.ellaadmin.widgets ListingCustomWidget render(): self', self; sys.stdout.flush()
-        print u'DEBUG: ella.ellaadmin.widgets ListingCustomWidget render(): cx=', cx; sys.stdout.flush()
         
         tpl = get_template('admin/widget/listing_custom.html')
         return mark_safe(tpl.render(cx))
