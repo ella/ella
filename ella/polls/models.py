@@ -201,6 +201,7 @@ class Quiz(BasePoll, Publishable):
         """
         Returns cached quiz result by the reached points
         """
+        # FIXME if there is not found Result, return first possible Result as fallback or empty Result.
         return Result.objects.get(
                 models.Q(points_from__lte=points) | models.Q(points_from__isnull=True),
                 models.Q(points_to__gte=points) | models.Q(points_to__isnull=True),
