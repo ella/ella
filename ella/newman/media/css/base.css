@@ -232,6 +232,7 @@ input.vIntegerField { width: 40px; text-align: right; }
 input.vForeignKeyRawIdAdminField, input.target_id { width: 50px; }
 input.vDateInput { width: 100px; }
 input.vDateTimeInput { width: 130px; }
+textarea.vLargeTextField { min-width: 400px; }
 
 .form-row * { vertical-align: middle; margin: 2px 0; }
 .form-row-tooltip { font-size: 95%; background: transparent url(../ico/16/idea.png) 0 50% no-repeat; clear: both; padding-left: 18px; color: #666; }
