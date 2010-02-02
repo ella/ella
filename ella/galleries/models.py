@@ -105,9 +105,11 @@ class Gallery(Publishable):
 
     @staticmethod
     def _request_finished_signal_receiver(**kwargs):
-        affected_gallery = Gallery._request_finished_signal_receiver.affected_gallery
-        affected_gallery.save() # save it again to make Gallery.photo saved (if necessary)
-        Gallery._request_finished_signal_receiver.affected_gallery = None
+        if hasattr(Gallery._request_finished_signal_receiver, 'affected_gallery'):
+            affected_gallery = Gallery._request_finished_signal_receiver.affected_gallery
+            affected_gallery.save() # save it again to make Gallery.photo saved (if necessary)
+            Gallery._request_finished_signal_receiver.affected_gallery = None
+
         request_finished.disconnect( Gallery._request_finished_signal_receiver )
 
     def save(self, **kwargs):
