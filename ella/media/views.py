@@ -18,7 +18,7 @@ class PlayerPlaylist(object):
         """
         self.listeners.append(callback)
 
-    def __call__(self, request, context):
+    def __call__(self, request, context, **kwargs):
         """
         This function is called by ella custom urls
         """
@@ -33,8 +33,7 @@ class PlayerPlaylist(object):
         context['media'] = media
 
         for listener in self.listeners:
-            print listener
-            new_template = listener(request, context, template)
+            new_template = listener(request, context, template, **kwargs)
             if new_template:
                 template = new_template
         response = render_to_response(template, RequestContext(request, context))
