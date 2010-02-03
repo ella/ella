@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from djangosanetesting import DatabaseTestCase
+from djangosanetesting import DestructiveDatabaseTestCase as DatabaseTestCase
 
 from django.contrib import comments
 from django.utils.translation import ugettext as _
@@ -130,6 +130,7 @@ class TestCommentViews(CommentViewTestCase):
         self.assert_equals(404, response.status_code)
 
     def test_post_returns_bad_request_with_POST_and_no_data(self):
+        template_loader.templates['comments/400-debug.html'] = ''
         template_loader.templates['page/comment_form.html'] = ''
         response = self.client.post(self.get_url('new'))
         self.assert_equals(400, response.status_code)
