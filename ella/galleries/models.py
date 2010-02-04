@@ -95,8 +95,8 @@ class Gallery(Publishable):
             return
 
         setattr(
-            Gallery._request_finished_signal_receiver, 
-            'affected_gallery',  
+            Gallery._request_finished_signal_receiver,
+            'affected_gallery',
             Gallery.objects.get(pk=Gallery._post_save_signal_receiver.gallery_pk)
         )
         # disconnect post_save signal handler, remove temporary data
@@ -112,6 +112,8 @@ class Gallery(Publishable):
             Gallery._request_finished_signal_receiver.affected_gallery = None
 
     def save(self, **kwargs):
+        # TODO: double save - we need saved placement first
+        super(Gallery, self).save(**kwargs)
         if self.photo is None:
             if not self.pk:
                 # FIXME if Gallery is not saved yet, call get_photo procedure via post-save signal, then save gallery's photo
@@ -122,7 +124,7 @@ class Gallery(Publishable):
                 if first_photo:
                     self.photo = first_photo
         return super(Gallery, self).save(**kwargs)
-    
+
     """
     def delete(self, *args, **kwargs):
         import ipdb;ipdb.set_trace()
