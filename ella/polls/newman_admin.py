@@ -269,7 +269,8 @@ class ContestAdmin(PublishableAdmin):
 #                {'contestants' : contestants, 'title' : title, 'module_name' : module_name})
 #        return super(ContestAdmin, self).__call__(request, url)
 
-    list_display = ('admin_link', 'category', 'active_from', 'correct_answers', 'get_all_answers_count', 'pk',)
+    list_display = ('admin_link', 'category', 'active_from', 'correct_answers', 'get_all_answers_count', 'pk', \
+                    'publish_from_nice', 'placement_link', 'site_icon', 'fe_link',)
     list_filter = ('category', 'active_from',)
     search_fields = ('title', 'text',)
     inlines = [PlacementInlineAdmin, QuestionInlineAdmin]
