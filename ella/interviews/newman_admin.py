@@ -5,9 +5,10 @@ from ella import newman
 from ella.core.newman_admin import PublishableAdmin
 from ella.interviews.models import Interview, Question, Interviewee, Answer
 
-class AnswerInlineAdmin(newman.NewmanTabularInline):
+class AnswerInlineAdmin(newman.NewmanStackedInline):
     model = Answer
     extra = 1
+    suggest_fields = {'interviewee': ('__unicode__', 'slug', 'name')}
     rich_text_fields = {'small': ('content',)}
 
 class QuestionInlineAdmin(newman.NewmanTabularInline):
@@ -19,6 +20,7 @@ class QuestionAdmin(newman.NewmanModelAdmin):
     list_display = ('interview', 'author', 'submit_date', 'answered',)
     list_filter = ('submit_date', 'interview',)
     search_fields = ('content', 'nickname', 'email',)
+    suggest_fields = {'interview': ('__unicode__', 'title', 'slug')}
     inlines = [AnswerInlineAdmin]
 
 class IntervieweeAdmin(newman.NewmanModelAdmin):

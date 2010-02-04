@@ -180,7 +180,7 @@ class Answer(models.Model):
     question = models.ForeignKey(Question)
     interviewee = models.ForeignKey(Interviewee)
 
-    submit_date = models.DateTimeField(_('date/time submitted'), default=datetime.now)
+    submit_date = models.DateTimeField(_('date/time submitted'), auto_now_add=True, editable=False)
     content = models.TextField(_('Answer text'))
 
     class Meta:

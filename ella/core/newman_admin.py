@@ -253,7 +253,7 @@ class CategoryAdmin(newman.NewmanModelAdmin):
     list_filter = ('site',)
     search_fields = ('title', 'slug',)
     prepopulated_fields = {'slug': ('title',)}
-    ordering = ('tree_path',)
+    ordering = ('site', 'tree_path',)
     suggest_fields = {'tree_parent': ('__unicode__', 'title', 'slug')}
 
 class HitCountAdmin(newman.NewmanModelAdmin):

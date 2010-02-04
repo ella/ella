@@ -1,4 +1,3 @@
-from copy import copy, deepcopy
 import logging
 
 from django.conf import settings
@@ -678,7 +677,10 @@ class NewmanModelAdmin(XModelAdmin):
                     """
                     for fkey, mfield in fset.formset.form.base_fields.items():
                         if fkey == key:
-                            label = mfield.label.__unicode__()
+                            if hasattr(mfield.label, '__unicode__'):
+                                label = mfield.label.__unicode__()
+                            else:
+                                label = mfield.label.__str__()
                             break
 
                     err_dict = {

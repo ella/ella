@@ -11,11 +11,13 @@ from django.template import RequestContext
 from django.shortcuts import get_object_or_404, render_to_response
 from django.http import HttpResponseRedirect, Http404
 from django.db.models import Q
+from django.db import transaction
 from django.core.paginator import Paginator
 from django.conf import settings
 
 from ella.core.views import get_templates_from_placement
 
+@transaction.commit_on_success
 def post_comment(request, context, parent_id=None):
     'Mostly copy-pasted from django.contrib.comments.views.comments'
     opts = CommentOptionsObject.objects.get_for_object(context['object'])

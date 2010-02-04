@@ -92,8 +92,8 @@ def reply(request, context, question_id):
     interviewees = interview.get_interviewees(request.user)
     context['interviewees'] = interviewees
 
-    if not interviewees or request.method != 'POST':
-        # no permission or no POST
+    if not interviewees:
+        # no permission
         raise Http404
 
     # no point in caching individual questions
@@ -103,11 +103,17 @@ def reply(request, context, question_id):
             interview=interview
         )
 
-    form = ReplyForm(interview, interviewees, question, request, request.POST)
-    if form.is_valid():
-        form.save()
-        # go back to the question list
-        return HttpResponseRedirect('..')
+    if request.method.upper() == 'POST':
+        form = ReplyForm(interview, interviewees, question, request, request.POST)
+        if form.is_valid():
+            form.save()
+            # go back to the question list
+            return HttpResponseRedirect('..')
+        else:
+            # stay on form
+            pass
+    else:
+        form = ReplyForm(interview, interviewees, question, request)
 
     context['form'] = form
     context['question'] = question

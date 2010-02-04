@@ -278,7 +278,7 @@ class NewmanSite(AdminSite):
                 if last_filter:
                     last_filters[key] = '?%s' % json_decode(last_filter[0].value)
 
-        future_qs = Placement.objects.select_related().filter(publish_from__gt=datetime.datetime.now())
+        future_qs = Placement.objects.select_related().filter(publish_from__gt=datetime.datetime.now()).order_by('publish_from', 'category__tree_path')
         future_qs_perm = permission_filtered_model_qs(future_qs, request.user)
         future_placements = user_category_filter(future_qs_perm, request.user)
 
