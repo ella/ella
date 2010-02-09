@@ -123,6 +123,8 @@ class Gallery(Publishable):
                 first_photo = self.get_photo()
                 if first_photo:
                     self.photo = first_photo
+        kwargs['force_insert'] = False
+        kwargs['force_update'] = True
         return super(Gallery, self).save(**kwargs)
 
     """
