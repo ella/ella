@@ -1,4 +1,6 @@
 from optparse import make_option
+import sys
+
 from django.core.management.base import BaseCommand
 from django.db import connection, transaction
 from ella.newman.models import CategoryUserRole, DenormalizedCategoryUserRole
@@ -12,7 +14,13 @@ def printv(text, verb=HIGH_VERB):
     if verb <= verbosity:
         print text
 
-def denormalize(run_transaction=True, verbosity=0):
+def check_settings():
+    from django.conf import settings
+    if settings.DEBUG:
+        print 'settings.DEBUG was set to True. This causes huge performance penalty. Aborting.'
+        sys.exit(1)
+
+def demoralize(run_transaction=True, verbosity=0):
     if run_transaction:
         transaction.commit_unless_managed()
         transaction.enter_transaction_management()
@@ -23,6 +31,7 @@ def denormalize(run_transaction=True, verbosity=0):
     cur.execute('DELETE FROM %s' % DenormalizedCategoryUserRole._meta.db_table)
     group_category = dict()
     denormalized = None
+    '''5181183-core.delete_placement-223-1-63'''
     for role in CategoryUserRole.objects.all():
         # Optimalization -- create dict for set of categories and certain group. Then copy this denorm. data and change only user field.
         key = u'%s_' % role.group
@@ -41,7 +50,10 @@ def denormalize(run_transaction=True, verbosity=0):
                     category_id=d.category_id,
                     root_category_id=d.root_category_id
                 )
-                nd.save()
+                try:
+                    nd.save()
+                except Exception, e:
+                    printv(str(e))
         else:
             printv('Saving denormalized %s' % role, STD_VERB)
             denormalized = role.sync_denormalized()
@@ -67,5 +79,6 @@ class Command(BaseCommand):
         global verbosity
         verbosity = int(options.get('verbosity', 1))
         run_transaction = not options.get('start_transaction', False)
+        printv('Run in transaction: %s' % run_transaction)
 
         denormalize(run_transaction, verbosity)
