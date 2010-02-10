@@ -1,9 +1,11 @@
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _, ugettext
 
 from ella import newman
 
 from ella.core.newman_admin import PublishableAdmin
 from ella.interviews.models import Interview, Question, Interviewee, Answer
+from django.utils.safestring import mark_safe
+from django.core.urlresolvers import reverse
 
 class AnswerInlineAdmin(newman.NewmanStackedInline):
     model = Answer
@@ -30,9 +32,19 @@ class IntervieweeAdmin(newman.NewmanModelAdmin):
 
 class InterviewAdmin(PublishableAdmin):
 
+    list_display = list(PublishableAdmin.list_display[:])
+    list_display.insert(-2, 'interview_questions_link')
+
     suggest_fields = PublishableAdmin.suggest_fields
     suggest_fields.update({'interviewees': ('name', 'slug',)})
     rich_text_fields = {'small': ('description',), None: ('content',)}
+
+    def interview_questions_link(self, obj):
+        q_total = obj.get_questions().count()
+        q_unanswered = obj.unanswered_questions().count()
+        return mark_safe('<a href="%sinterviews/question/?interview__publishable_ptr__exact=%d">%d/%d</a>' % (reverse('newman:index'), obj.pk, q_total, q_unanswered))
+    interview_questions_link.short_description = ugettext('Questions')
+    interview_questions_link.allow_tags = True
 
     fieldsets = (
         (_("Heading"), {'fields': ('title', 'upper_title', 'slug',)}),
