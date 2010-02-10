@@ -118,7 +118,7 @@ def compute_applicable_categories_objects(user, permission=None):
     if user.is_superuser:
         #all = Category.objects.all().values('id')
         #return [ d['id'] for d in all ]
-        all = Category.objects.all()
+        all = Category.objects.select_related().all()
         return [ d for d in all ]
 
     category_user_roles = CategoryUserRole.objects.filter(user=user).distinct()
@@ -136,7 +136,7 @@ def compute_applicable_categories_objects(user, permission=None):
 
     unique_categories = set()
     for category_user_role in category_user_roles:
-        for category in category_user_role.category.all():
+        for category in category_user_role.category.select_related().all():
             unique_categories.add(category)
     app_cats = category_children(unique_categories)
     return app_cats
