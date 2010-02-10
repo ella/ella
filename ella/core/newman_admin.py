@@ -318,12 +318,15 @@ class IsPublishedFilter(CustomFilterSpec):
         # ?publish_from__exact=2008-10-10
         lookup_var_not_published = '%s__gt' % self.lookup_var
         lookup_var_published = '%s__lte' % self.lookup_var
+        lookup_var_has_placement = '%s__lt' % self.lookup_var
         now = time.strftime('%Y-%m-%d')
         link = ( _('No'), {lookup_var_not_published: now})
         self.links.append(link)
         link = ( _('Yes'), {lookup_var_published: now})
         self.links.append(link)
-        self.remove_from_querystring = [lookup_var_published, lookup_var_not_published]
+        link = ( _('All with placement'), {lookup_var_has_placement: '3000-1-1'})
+        self.links.append(link)
+        self.remove_from_querystring = [lookup_var_published, lookup_var_not_published, lookup_var_has_placement]
         return True
 
 class PublishFromFilter(CustomFilterSpec):

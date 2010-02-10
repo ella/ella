@@ -95,7 +95,7 @@
                 <div style="background: #{% cycle 'ffe' 'fff' %}; margin: 5px 0; padding: 5px;">
                     <h4>{% trans p.publishable.content_type.name %}: {{ p.publishable.title }}</h4>
                     <p>
-                        {% trans "Publish from" %}: <strong>{{ p.publish_from|date }}</strong>
+                        {% trans "Publish from" %}: <strong>{{ p.publish_from|date }} {{ p.publish_from|time }}</strong>
                         | {% trans "Category" %}: {{ p.category }}
                         | {% trans 'Author' %}: {{ p.publishable.authors.all|join:", " }}
                     </p>

@@ -331,8 +331,6 @@ def get_templates(name, slug=None, category=None, app_label=None, model_label=No
                 templates.append('page/category/%s/content_type/%s.%s/%s/%s' % (category.path, app_label, model_label, slug, name))
             templates.append('page/category/%s/content_type/%s.%s/%s' % (category.path, app_label, model_label, name))
         templates.append('page/category/%s/%s' % (category.path, name))
-        if category.tree_parent:
-            templates.append('page/category/%s/%s' % (category.tree_parent.path, name))
     if app_label and model_label:
         templates.append('page/content_type/%s.%s/%s' % (app_label, model_label, name))
     templates.append('page/%s' % name)

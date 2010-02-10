@@ -17,7 +17,7 @@ class CommentOptionsGenericInline(newman.GenericStackedInline):
 class ThreadedCommentsNewmanAdmin(ThreadedCommentsAdmin, newman.NewmanModelAdmin):
     pass
 
-MODELS_WITH_COMMENTS = getattr(settings, 'MODELS_WITH_COMMENTS', ('articles.article', 'galleries.gallery',))
+MODELS_WITH_COMMENTS = getattr(settings, 'MODELS_WITH_COMMENTS', ('articles.article', 'galleries.gallery', 'interviews.interview', ))
 
 newman.site.register(ThreadedComment, ThreadedCommentsNewmanAdmin)
 newman.site.append_inline(MODELS_WITH_COMMENTS, CommentOptionsGenericInline)

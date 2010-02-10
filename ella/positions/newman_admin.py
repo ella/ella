@@ -90,11 +90,10 @@ class PositionAdmin(newman.NewmanModelAdmin):
                  'special', 'recipeoftheday', 'featured_small_1', 'featured_small_2',
                  'featured_small_3', ]
 
-        positions = model._default_manager.filter(category=category_id).filter(name__in=names)
+        positions = model.objects.filter(category=category_id, name__in=names)
 
-        count = len(positions)
+        count = positions.count()
 
-        self.exclude = ['box_type', 'text',]
         PositionForm = self.get_form(request)
 
         if request.method == 'POST':
@@ -159,9 +158,7 @@ class PositionAdmin(newman.NewmanModelAdmin):
             'save_on_top': self.save_on_top,
             'save_url': reverse('newman:positions-by-category', args=[category_id]),
         })
-        self.exclude = []
         return render_to_response("newman/%s/multi_change_form.html" % app_label,
                             context, context_instance=template.RequestContext(request))
 
 newman.site.register(Position, PositionAdmin)
-

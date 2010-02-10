@@ -276,7 +276,7 @@ class ContestAdmin(PublishableAdmin):
     inlines = [PlacementInlineAdmin, QuestionInlineAdmin]
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
-    rich_text_fields = {'small': ('description',), None: ('text',)}
+    rich_text_fields = {'small': ('description',), None: ('text', 'text_results', )}
 
     def get_urls(self):
         urlpatterns = patterns('',
@@ -309,7 +309,7 @@ class ContestAdmin(PublishableAdmin):
 
     fieldsets = (
         (_("Heading"), {'fields': ('title', 'slug',)}),
-        (_("Content"), {'fields': ('description', 'text',)}),
+        (_("Content"), {'fields': ('description', 'text', 'text_results')}),
         (_("Metadata"), {'fields': ('photo', 'category', 'authors', 'source')}),
         (_("Dates"), {'fields': (('active_from', 'active_till',),)}),
     )
