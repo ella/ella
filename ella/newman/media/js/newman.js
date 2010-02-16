@@ -55,7 +55,7 @@ NewmanLib = {};
     }
     NewmanLib.register_pre_submit_callback_once = register_pre_submit_callback_once;
 
-    function call_callbacks_in_array(carray, destructive_call_once) {
+    function call_callbacks_in_array(carray, destructive_call_once, arg1) {
         var i, item;
         for(i = 0; i < carray.length; i++) {
             if (destructive_call_once) {
@@ -63,16 +63,16 @@ NewmanLib = {};
             } else {
                 item = carray[i];
             }
-            item();
+            item(arg1);
         }
     }
 
-    function call_post_submit_callbacks() {
+    function call_post_submit_callbacks(submit_succeeded) {
         var once = true;
         try {
-            call_callbacks_in_array(NewmanLib.post_save_once_callbacks, true);
+            call_callbacks_in_array(NewmanLib.post_save_once_callbacks, true, submit_succeeded);
             once = false;
-            call_callbacks_in_array(NewmanLib.post_save_callbacks);
+            call_callbacks_in_array(NewmanLib.post_save_callbacks, false, submit_succeeded);
         } catch(e) {
             if (once) {
                 carp('Error occured when calling post submit callback (once).' + e.toString());
@@ -546,6 +546,7 @@ $( function() {
     function ajax_submit($form, button_name, process_redirect) {
         if (!$form.jquery) $form = $($form);
         if ( ! validate($form) ) return false;
+        NewmanLib.call_pre_submit_callbacks();
         carp(['ajax_submit: submitting... selector="', $form.selector, '"'].join(''));
         
         // Hack for file inputs
@@ -639,7 +640,7 @@ $( function() {
                         return;
                     }
                 }
-                NewmanLib.call_post_submit_callbacks();
+                NewmanLib.call_post_submit_callbacks(this.succeeded);
                 if (this.succeeded) { 
                     try {
                         success.call(this, xhr.responseText, xhr);
@@ -660,9 +661,10 @@ $( function() {
             _button_name: button_name
         };
         if (button_name) request_options._button_name = button_name;
-        NewmanLib.call_pre_submit_callbacks();
+        //NewmanLib.call_pre_submit_callbacks();
 
         $.ajax( request_options );
+        carp('ajax_submit: request sent (async)');
         return false;
     }
     AjaxFormLib.ajax_submit = ajax_submit;

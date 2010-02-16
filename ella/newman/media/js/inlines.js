@@ -212,6 +212,15 @@ NewmanInline = new Object();
     NewmanInline.gallery_ordering_modified = false;
 
     function gallery_ordering_recount() {
+        NewmanLib.register_post_submit_callback_once(function(submit_succeeded) {
+            if (!submit_succeeded) {
+                carp('NewmanInline.gallery_ordering_modified not changed');
+                return;
+            }
+            NewmanInline.gallery_ordering_modified = false;
+            carp('NewmanInline.gallery_ordering_modified = false;');
+        });
+
         // ordering-number magic to avoid problems with saving GalleryItems with changed ordering (unique key collision)
         var $form = $('#gallery_form');
         if (NewmanInline.gallery_ordering_modified) return;
@@ -225,11 +234,10 @@ NewmanInline = new Object();
                 multiplier = 1.0 / NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER;
             }
             var res = value * multiplier;
+            carp('Recounting ' + value + ' to ' + res + ' for element ' + this);
             this.value = res.toString();
             NewmanInline.gallery_ordering_modified = true;
-        });
-        NewmanLib.register_post_submit_callback_once(function() {
-            NewmanInline.gallery_ordering_modified = false;
+            carp('GalleryItems recounted');
         });
     }
 
