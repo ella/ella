@@ -79,7 +79,6 @@ NewmanLib = {};
             } else {
                 carp('Error occured when calling post submit callback.' + e.toString());
             }
-            carp('item=' + item);
         }
     }
     NewmanLib.call_post_submit_callbacks = call_post_submit_callbacks;
@@ -96,7 +95,6 @@ NewmanLib = {};
             } else {
                 carp('Error occured when calling post submit callback.' + e.toString());
             }
-            carp('item=' + item);
         }
     }
     NewmanLib.call_pre_submit_callbacks = call_pre_submit_callbacks;

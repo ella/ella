@@ -174,18 +174,33 @@ NewmanInline = new Object();
     function check_gallery_changeform( $form ) {
         var used_ids = {};
         var rv = true;
+        var ITEM_ERROR_CLASS = 'gallery-item-error';
 
         $form.find('.gallery-item .target_id').each( function() {
             if (rv == false) return;
             var val = $(this).val();
             if (val == '') return;
-            if (used_ids[ val ]) {
-                alert(gettext('Duplicate photo')+' #'+val);
+            var $gallery_item = $(this).closest('.gallery-item');
+            if ($gallery_item.hasClass(ITEM_ERROR_CLASS)) {
+                $gallery_item.removeClass(ITEM_ERROR_CLASS);
+            }
+            if (val in used_ids) {
+
+                // if item is marked for delete, ommit this item
+                var $delete_input = $gallery_item.children('.delete').find('input');
+                var $previous_delete_input = $('#' + used_ids[ val ]).closest('.gallery-item').children('.delete').find('input');
+                if ($delete_input.attr('checked') || $previous_delete_input.attr('checked')) {
+                    return;
+                }
+                // highlight red
+                $gallery_item.addClass(ITEM_ERROR_CLASS);
+                $('#' + used_ids[ val ]).closest('.gallery-item').addClass(ITEM_ERROR_CLASS);
+                alert(gettext('Duplicate photo'));
                 $(this).focus();
                 rv = false;
                 return;
             }
-            used_ids[ val ] = 1;
+            used_ids[ val ] = this.id;
         });
 
         if (rv) {
@@ -233,7 +248,7 @@ NewmanInline = new Object();
             } else if (value >= NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER && value <= (99 * NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER)) {
                 multiplier = 1.0 / NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER;
             }
-            var res = value * multiplier;
+            var res = (value * multiplier).toInteger();
             carp('Recounting ' + value + ' to ' + res + ' for element ' + this);
             this.value = res.toString();
             NewmanInline.gallery_ordering_modified = true;
