@@ -143,9 +143,6 @@ function clone_form($orig_form) {
 
 // Shows a modal window and disables its close button.
 function lock_window(msg) {
-    if (is_window_locked()) {
-        return;
-    }
     if ( ! msg ) msg = gettext('Wait')+'...';
     
     var $modal = $('#window-lock');
@@ -1688,9 +1685,9 @@ Timeline = new Object();
             stop: changed,
             update: drag_update,
         }
-        $('.timeline-ul').sortable(sortable_params);
-        $('.timeline-ul').disableSelection();
-        $('.timeline-item').click(item_clicked);
+        //$('.timeline-ul').sortable(sortable_params);
+        //$('.timeline-ul').disableSelection();
+        //$('.timeline-item').click(item_clicked);
         $('.timeline-item').hover(item_mouse_over, item_mouse_out);
         $('.timeline-item-navigation .insert').live(
             'click', 

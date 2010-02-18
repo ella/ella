@@ -184,7 +184,10 @@ class ExportItemizer(object):
         pub.feed_updated_raw_datetime = feed_updated
         pub.feed_updated = feed_updated.strftime(FEED_DATETIME_FORMAT)
         if pub.photo:
-            formated = pub.photo.get_formated_photo(export.photo_format.name)
+            try:
+                formated = pub.photo.get_formated_photo(export.photo_format.name)
+            except Format.DoesNotExist:
+                pass
             #pub.export_thumbnail_url = u'%s%s' % (settings.MEDIA_URL, formated.url)
             if formated:
                 pub.export_thumbnail_url = formated.url

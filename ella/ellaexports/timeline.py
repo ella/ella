@@ -44,7 +44,7 @@ def get_export_choice_form():
     for e in export_qs:
         exports.append((e.slug, u'%s' % e,))
 
-    timerange = get_timerange()
+    #timerange = get_timerange()
 
     class ExportChoiceForm(forms.Form):
         export_slug = forms.ChoiceField(label=_('Export'), choices=exports)
