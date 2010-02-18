@@ -68,6 +68,8 @@
                                 id=""
                                 class="delete"
                             >{% trans "Delete" %}</span>{% endcomment %}
+
+                            {% comment %}
                             <span
                                 id="{{ forloop.counter0 }};{{ cell.pk }};{{ export.pk }};{{ cell.column_date_from }}"
                                 class="append"
@@ -76,6 +78,8 @@
                                 id="{{ forloop.counter0 }};{{ cell.pk }};{{ export.pk }};{{ cell.column_date_from }}"
                                 class="insert"
                             >{% trans "Insert" %}</span>
+                            {% endcomment %}
+
                             {# newmanurl newman:exports_export_timeline_insert id_item=cell.pk,id_export=export.pk,position=forloop.counter #}
                         </div>
                         {% endif %}

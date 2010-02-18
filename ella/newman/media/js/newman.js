@@ -1685,9 +1685,9 @@ Timeline = new Object();
             stop: changed,
             update: drag_update,
         }
-        $('.timeline-ul').sortable(sortable_params);
-        $('.timeline-ul').disableSelection();
-        $('.timeline-item').click(item_clicked);
+        //$('.timeline-ul').sortable(sortable_params);
+        //$('.timeline-ul').disableSelection();
+        //$('.timeline-item').click(item_clicked);
         $('.timeline-item').hover(item_mouse_over, item_mouse_out);
         $('.timeline-item-navigation .insert').live(
             'click', 
