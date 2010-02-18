@@ -234,9 +234,9 @@ class DateTimeWidget(forms.DateTimeInput):
             settings.NEWMAN_MEDIA_PREFIX + CSS_JQUERY_UI,
         )}
 
-    def render(self, name, value, attrs=None):
+    def render(self, name, value, attrs={}):
         attrs['class'] = 'vDateTimeInput'
-        if value and not value.second:
+        if value and hasattr(value, 'second') and not value.second:
             self.format = '%Y-%m-%d %H:%M'
         return super(DateTimeWidget, self).render(name, value, attrs)
 

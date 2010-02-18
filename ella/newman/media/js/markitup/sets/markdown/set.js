@@ -238,6 +238,34 @@ function preview_height_correct(evt) {
     preview_iframe_height($iFrame, $editor);
 }
 
+function markitdown_get_editor(evt) {
+    var $container = $(evt.currentTarget).parents('.markItUpContainer');
+    var $editor = $container.find('.markItUpEditor');
+    return $editor;
+}
+
+function markitdown_get_preview_element(evt) {
+    var $container = $(evt.currentTarget).parents('.markItUpContainer');
+    var $iFrame = $container.find('iframe');
+    var $doc = $( $iFrame.attr('contentWindow').document );
+    var $preview_a_element = $container.find('.preview').find('a');
+    return $preview_a_element;
+}
+
+function markitdown_trigger_preview(evt) {
+    // click into preview iframe causes reload of the iframe
+    var $preview_a_element = markitdown_get_preview_element(evt);
+    $preview_a_element.trigger('mouseup'); 
+}
+
+function register_preview_action_click_on_iframe(evt) {
+    var $preview_a_element = markitdown_get_preview_element(evt);
+    $doc.bind('click', function(evt) {
+        // click into preview iframe causes reload of the iframe
+        $preview_a_element.trigger('mouseup'); 
+    });
+}
+
 // resize appropriately after enter key is pressed inside markItUp <textarea> element.
 function enter_pressed_callback(evt) {
 
@@ -245,6 +273,31 @@ function enter_pressed_callback(evt) {
     var $container = $txArea.parents('.markItUpContainer');
     var $iFrame = $container.find('iframe');
     preview_iframe_height($iFrame, $txArea);
+}
+
+function markitdown_auto_preview(evt) {
+    var AGE = 2500;
+    var $editor = markitdown_get_editor(evt);
+    var last_auto_updated = Number($editor.data('last_auto_preview'));
+    var existing_tm = $editor.data('auto_preview_timer');
+    var now = new Date().getTime();
+
+    if ( ((last_auto_updated + AGE) < now) || (!last_auto_updated) ) {
+        carp('Auto preview triggering preview');
+        if (existing_tm) {
+            clearTimeout(existing_tm);
+            existing_tm = null;
+        }
+        $editor.data('last_auto_preview', now);
+        markitdown_trigger_preview(evt);
+    } else {
+        carp('Autopreview not triggered');
+        if (!existing_tm) {
+            var tm = setTimeout(function() {markitdown_auto_preview(evt); }, AGE);
+            $editor.data('auto_preview_timer', tm);
+            carp('Update timer set.');
+        }
+    }
 }
 
 function register_markitup_editor_enter_callback(args) {
@@ -255,6 +308,16 @@ function register_markitup_editor_enter_callback(args) {
             var key_code = evt.keyCode || evt.which;
             key_code = parseInt(key_code);
             var ENTER = 13;
+            var KEY_A = 65;
+            var KEY_Z = 90;
+            var KEY_0 = 48;
+            var KEY_9 = 57;
+            // auto refresh preview
+            /*if ((key_code >= KEY_A && key_code <= KEY_Z) || (key_code >= KEY_0 && key_code <= KEY_9)) {
+                // FIXME auto update sucks and causes letter-loss when typing text into the textarea!
+                markitdown_auto_preview(evt);
+            }*/
+            // if not return pressed, textarea resize won't be done.
             if (key_code != ENTER) return;
             setTimeout(function() {enter_pressed_callback(evt); }, RESIZE_DELAY_MSEC);
         }
@@ -266,6 +329,7 @@ $(document).bind(
     function () {
         $('.markItUpEditor').each(register_markitup_editor_enter_callback);
         $('li.preview').bind('click', preview_height_correct);
+        //$('li.preview').one('click', register_preview_action_click_on_iframe); //does not work properly after first click
     }
 );
 
