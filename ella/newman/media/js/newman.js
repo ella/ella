@@ -143,9 +143,6 @@ function clone_form($orig_form) {
 
 // Shows a modal window and disables its close button.
 function lock_window(msg) {
-    if (is_window_locked()) {
-        return;
-    }
     if ( ! msg ) msg = gettext('Wait')+'...';
     
     var $modal = $('#window-lock');
