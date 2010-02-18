@@ -151,12 +151,12 @@ def timeline_view(request, extra_context=None):
             'timeline_data': items,
         })
     template_paths = [
-        'newman/exports/timeline.html',
+        'newman/ellaexports/timeline.html',
     ]
     if export:
-        template_paths.append('exports/%s/timeline.html' % export.category.path)
-        template_paths.append('newman/exports/%s/timeline.html' % export.category.path)
-    template_paths.append('exports/timeline.html')
+        template_paths.append('ellaexports/%s/timeline.html' % export.category.path)
+        template_paths.append('newman/ellaexports/%s/timeline.html' % export.category.path)
+    template_paths.append('ellaexports/timeline.html')
     return render_to_response(
         template_paths,
         cx
@@ -183,7 +183,7 @@ def timeline_insert_append_view(request, **kwargs):
     Inserts/appends export element before/after an item (via ExportPosition and ExportMeta).
 
     Keyword arguments:
-    @param   id_item     Existing Publishable object placed after new inserted item. 
+    @param   id_item     Existing Publishable object placed after new inserted item.
     @param   position    ExportPosition object's position.
     @param   id_export   Export object id.
     @param   id_publishable  Chosen Publishable object to be associated with new ExportMeta object.
