@@ -69,6 +69,7 @@ class EditorBoxForm(forms.Form):
     box_photo_format = forms.ChoiceField(choices=BOX_PHOTO_FORMATS, required=False, label=_('Format'), initial='obdelnik_sirka')
     box_photo_meta_show_title = forms.BooleanField(required=False, label=_('Title'))
     box_photo_meta_show_author = forms.BooleanField(required=False, label=_('Author'))
+    box_photo_meta_show_source = forms.BooleanField(required=False, label=_('Source'))
     box_photo_meta_show_description = forms.BooleanField(required=False, label=_('Description'))
     box_photo_meta_show_detail = forms.BooleanField(required=False, label=_('Magnifying'))
     box_obj_params = forms.CharField(label=_('Extra parameters'), max_length=300, required=False, widget=forms.Textarea(attrs={'rows': 3, 'style': 'width:98%'}))
