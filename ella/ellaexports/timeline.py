@@ -16,7 +16,7 @@ from django.shortcuts import render_to_response
 from ella.ellaexports import models
 from ella.ellaexports.managers import ExportItemizer
 from ella.utils import remove_diacritical
-from ella.newman import utils
+from ella.newman import utils, widgets
 
 DATETIME_FORMAT = models.DATETIME_FORMAT
 TIME_FORMAT = models.TIME_FORMAT
@@ -47,11 +47,11 @@ def get_export_choice_form():
     timerange = get_timerange()
 
     class ExportChoiceForm(forms.Form):
-        export_slug = forms.ChoiceField(choices=exports)
+        export_slug = forms.ChoiceField(label=_('Export'), choices=exports)
         #range_from = forms.ChoiceField(choices=timerange)
         #range_to = forms.ChoiceField(choices=timerange)
-        range_from = forms.DateTimeField()
-        range_to = forms.DateTimeField()
+        range_from = forms.DateTimeField(label=_('From'), widget=widgets.DateTimeWidget)
+        range_to = forms.DateTimeField(label=_('To'), widget=widgets.DateTimeWidget)
     log.debug('Form generated')
     return ExportChoiceForm
 
@@ -149,6 +149,7 @@ def timeline_view(request, extra_context=None):
             'export': export,
             #'timeline_table': reformat_list_for_table(items),
             'timeline_data': items,
+            'title': 'Timeline for "%s" (%s-%s)' % (slug, range_from, range_to)
         })
     template_paths = [
         'newman/ellaexports/timeline.html',
