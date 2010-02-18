@@ -112,6 +112,7 @@
 
 <div class="hpcol" style="width: 25%;">
 
+  {% cache 30 'nm-hp-lastlog' user %}
     <div class="hpbox lastlog">
         <h3><span>{% trans "Last edited objects" %}</span></h3>
         <div class="cnt">
@@ -142,6 +143,7 @@
             {% endif %}
         </div>
     </div>
+  {% endcache %}
 
 </div>
 <!-- Last changelist filters state -->
@@ -160,9 +162,8 @@ changelistFilters["{{ fname }}"] = "{{ qstring }}";
 
     {% cache 300 'nm-hp-js' %}
     <script type="text/javascript">
-    request_media('{{ NEWMAN_MEDIA_URL }}css/dashboard.css?{{ VERSION }}');
-    request_media('{{ NEWMAN_MEDIA_URL }}jquery/jquery-ui-smoothness.css?{{ VERSION }}');
-    request_media('{{ NEWMAN_MEDIA_URL }}jquery/jquery-ui.js?{{ VERSION }}');
+    request_media('{{ NEWMAN_MEDIA_URL }}css/dashboard.css');
+    request_media('{{ NEWMAN_MEDIA_URL }}jquery/jquery-ui-smoothness.css');
 
     var pubYear = '{{ publishable_lookup_fields.year }}';
     var pubMonth = '{{ publishable_lookup_fields.month }}';

@@ -13,7 +13,6 @@ from django.utils.html import escape
 from django.utils.text import truncate_words
 from django.contrib.contenttypes.models import ContentType
 
-from ella.newman.utils import get_newman_url
 from ella.core.models import Listing
 from ella.photos.models import Photo
 from djangomarkup.widgets import RichTextAreaWidget
