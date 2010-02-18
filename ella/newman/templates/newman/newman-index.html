@@ -112,6 +112,7 @@
 
 <div class="hpcol" style="width: 25%;">
 
+  {% cache 30 'nm-hp-lastlog' user %}
     <div class="hpbox lastlog">
         <h3><span>{% trans "Last edited objects" %}</span></h3>
         <div class="cnt">
@@ -142,6 +143,7 @@
             {% endif %}
         </div>
     </div>
+  {% endcache %}
 
 </div>
 <!-- Last changelist filters state -->
