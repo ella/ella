@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, IntegrityError
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User, Group
@@ -137,10 +137,14 @@ class CategoryUserRole(models.Model):
     def sync_denormalized(self):
         from ella.newman.permission import compute_applicable_categories_objects
         denormalized = []
+        cats = []
         #for p in self.group.permissions.all():
         for p in self.group.permissions.all().iterator():
             code = '%s.%s' % (p.content_type.app_label, p.codename)
-            cats = compute_applicable_categories_objects(self.user, code)
+            # Category list is identical for every permission code in CUR's group
+            if not cats:
+                cats = compute_applicable_categories_objects(self.user, code)
+            #print 'Denormalizing %s for %d categories' % (code, len(cats))
             # create denormalized roles
             for c in cats:
                 root_cat = c.main_parent
@@ -148,15 +152,18 @@ class CategoryUserRole(models.Model):
                     root_cat = c #c is top category
                 elif root_cat.tree_parent_id:
                     root_cat = root_cat.get_tree_parent()
-                obj, created = DenormalizedCategoryUserRole.objects.get_or_create(
-                    contenttype_id=p.content_type.pk,
-                    user_id=self.user.pk,
-                    permission_codename=code,
-                    permission_id=p.pk,
-                    category_id=c.pk,
-                    root_category_id=root_cat.pk
-                )
-                denormalized.append(obj)
+                try:
+                    obj = DenormalizedCategoryUserRole.objects.create(
+                        contenttype_id=p.content_type.pk,
+                        user_id=self.user.pk,
+                        permission_codename=code,
+                        permission_id=p.pk,
+                        category_id=c.pk,
+                        root_category_id=root_cat.pk
+                    )
+                    denormalized.append(obj)
+                except IntegrityError:
+                    pass
         return denormalized
 
     class Meta:

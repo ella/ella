@@ -16,7 +16,7 @@ from django.shortcuts import render_to_response
 from ella.ellaexports import models
 from ella.ellaexports.managers import ExportItemizer
 from ella.utils import remove_diacritical
-from ella.newman import utils
+from ella.newman import utils, widgets
 
 DATETIME_FORMAT = models.DATETIME_FORMAT
 TIME_FORMAT = models.TIME_FORMAT
@@ -44,14 +44,14 @@ def get_export_choice_form():
     for e in export_qs:
         exports.append((e.slug, u'%s' % e,))
 
-    timerange = get_timerange()
+    #timerange = get_timerange()
 
     class ExportChoiceForm(forms.Form):
-        export_slug = forms.ChoiceField(choices=exports)
+        export_slug = forms.ChoiceField(label=_('Export'), choices=exports)
         #range_from = forms.ChoiceField(choices=timerange)
         #range_to = forms.ChoiceField(choices=timerange)
-        range_from = forms.DateTimeField()
-        range_to = forms.DateTimeField()
+        range_from = forms.DateTimeField(label=_('From'), widget=widgets.DateTimeWidget)
+        range_to = forms.DateTimeField(label=_('To'), widget=widgets.DateTimeWidget)
     log.debug('Form generated')
     return ExportChoiceForm
 
@@ -149,14 +149,15 @@ def timeline_view(request, extra_context=None):
             'export': export,
             #'timeline_table': reformat_list_for_table(items),
             'timeline_data': items,
+            'title': 'Timeline for "%s" (%s-%s)' % (slug, range_from, range_to)
         })
     template_paths = [
-        'newman/exports/timeline.html',
+        'newman/ellaexports/timeline.html',
     ]
     if export:
-        template_paths.append('exports/%s/timeline.html' % export.category.path)
-        template_paths.append('newman/exports/%s/timeline.html' % export.category.path)
-    template_paths.append('exports/timeline.html')
+        template_paths.append('ellaexports/%s/timeline.html' % export.category.path)
+        template_paths.append('newman/ellaexports/%s/timeline.html' % export.category.path)
+    template_paths.append('ellaexports/timeline.html')
     return render_to_response(
         template_paths,
         cx
@@ -183,7 +184,7 @@ def timeline_insert_append_view(request, **kwargs):
     Inserts/appends export element before/after an item (via ExportPosition and ExportMeta).
 
     Keyword arguments:
-    @param   id_item     Existing Publishable object placed after new inserted item. 
+    @param   id_item     Existing Publishable object placed after new inserted item.
     @param   position    ExportPosition object's position.
     @param   id_export   Export object id.
     @param   id_publishable  Chosen Publishable object to be associated with new ExportMeta object.

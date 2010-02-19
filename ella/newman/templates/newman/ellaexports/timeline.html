@@ -1,15 +1,31 @@
 {% extends "newman/change_list.html" %}
 {% load newman_list admin_list %}
 
-
-{% block content %}
-    <form action="/newman/exports/export/timeline/" method="get" class="js-form">
-        <ul>
-        {{ export_form.as_ul }}
-            <li><a id="id-send-timeline" class="js-submit icn btn ok">{% trans "Send" %}</a></li>
+{% block breadcrumbs %}
+    {% if not is_popup %}
+        <div class="breadcrumbs">
+            <div style="float: left;">
+                <a href="{% url newman:index %}#">{% trans "Home" %}</a>
+                &rsaquo; TODO: view has not app_label in context</a>
+                &rsaquo; TODO: view has not title (eg. Timeline for 'blabla' export range X-Y)
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+{% block content_toolbar_left %}
+    <form action="/ellaexports/export/timeline/" method="get" class="js-form">
+          {{ export_form.export_slug.label }}: {{ export_form.export_slug }}
+          {{ export_form.range_from.label }}: {{ export_form.range_from }}
+          {{ export_form.range_to.label }}: {{ export_form.range_to }}
+          <a id="id-send-timeline" class="js-submit icn btn ok">{% trans "Send" %}</a>
         <ul>
     </form>
-   
+{% endblock %}
+{% block content_toolbar_right %}{% endblock %}
+
+
+{% block content %}
+
     <div id="id-modal-dialog" class="noscreen service-module">
         <div id="id-publishable-dialog" class="service-module-in" style="height: 40px; overflow: auto; position: fixed; top:200px; left: 100px;">
             <label for="id_publishable_suggest" style="float: left;">{% trans 'Publishable object' %}: </label>
@@ -44,22 +60,26 @@
                         <p>{{ cell }}</p>
                         {% if cell.pk %}
                         <div class="timeline-item-navigation noscreen">
-                            {% comment %}<span 
-                                id="{{ forloop.counter0 }};{{ cell.pk }};{{ export.pk }};{{ cell.column_date_from }}" 
+                            {% comment %}<span
+                                id="{{ forloop.counter0 }};{{ cell.pk }};{{ export.pk }};{{ cell.column_date_from }}"
                                 class="edit"
-                            >{% trans "Edit" %}</span> 
-                            <span 
-                                id="" 
+                            >{% trans "Edit" %}</span>
+                            <span
+                                id=""
                                 class="delete"
                             >{% trans "Delete" %}</span>{% endcomment %}
-                            <span 
-                                id="{{ forloop.counter0 }};{{ cell.pk }};{{ export.pk }};{{ cell.column_date_from }}" 
+
+                            {% comment %}
+                            <span
+                                id="{{ forloop.counter0 }};{{ cell.pk }};{{ export.pk }};{{ cell.column_date_from }}"
                                 class="append"
                             >{% trans "Append" %}</span>
-                            <span 
-                                id="{{ forloop.counter0 }};{{ cell.pk }};{{ export.pk }};{{ cell.column_date_from }}" 
+                            <span
+                                id="{{ forloop.counter0 }};{{ cell.pk }};{{ export.pk }};{{ cell.column_date_from }}"
                                 class="insert"
                             >{% trans "Insert" %}</span>
+                            {% endcomment %}
+
                             {# newmanurl newman:exports_export_timeline_insert id_item=cell.pk,id_export=export.pk,position=forloop.counter #}
                         </div>
                         {% endif %}
@@ -94,10 +114,12 @@
     {{ block.super }}
     <script type="text/javascript">
         request_media(MEDIA_URL + 'jquery/jquery-ui.js');
-        request_media(MEDIA_URL + 'jquery/jquery-urldecode-encode.js?{{ VERSION }}');
+        request_media(MEDIA_URL + 'jquery/jquery-urldecode-encode.js');
         request_media(MEDIA_URL + 'jquery/jquery-ui-smoothness.css');
-        request_media(MEDIA_URL + 'js/generic.suggest.js?{{ VERSION }}');
-        request_media(MEDIA_URL + 'css/generic.suggest.css?{{ VERSION }}');
+        request_media(MEDIA_URL + 'css/datetime.css');
+        request_media(MEDIA_URL + 'js/datetime.js');
+        request_media(MEDIA_URL + 'js/generic.suggest.js');
+        request_media(MEDIA_URL + 'css/generic.suggest.css');
     </script>
 
     <!-- timeline scripting -->

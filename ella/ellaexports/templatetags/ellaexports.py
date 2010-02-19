@@ -99,7 +99,7 @@ class FeedStrftimeNode(template.Node):
         formatstring = FEED_DATETIME_FORMAT
         if self.formatstring:
             formatstring = self.formatstring
-        return variable.strftime(formatstring)
+        return variable.strftime(str(formatstring))
 
 @register.tag
 def feed_strftime(parser, token):

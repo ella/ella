@@ -317,7 +317,7 @@ class MyCheckboxSelectMultiple(forms.CheckboxSelectMultiple):
                 final_attrs = dict(final_attrs, id='%s_%s' % (attrs['id'], i))
             cb = forms.CheckboxInput(final_attrs, check_test=lambda value: value in str_values)
             option_value = force_unicode(option_value)
-            yield mark_safe(u'<label>%s %s</label>' % (cb.render(name, option_value), escape(force_unicode(option_label))))
+            yield mark_safe(u'<label>%s %s</label>' % (cb.render(name, option_value), force_unicode(option_label)))
 
 
 class MyRadioSelect(forms.RadioSelect):

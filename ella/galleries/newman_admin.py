@@ -53,5 +53,12 @@ class GalleryAdmin(PublishableAdmin):
     rich_text_fields = {'small': ('description',), None: ('content',)}
     prepopulated_fields = {'slug': ('title',)}
 
+    def photo_thumbnail(self, object):
+        " Assign first of GalleryItems as Gallery.photo if not set. "
+        object.assign_photo()
+        return super(GalleryAdmin, self).photo_thumbnail(object)
+    photo_thumbnail.allow_tags = True
+    photo_thumbnail.short_description = _('Photo')
+
 newman.site.register(Gallery, GalleryAdmin)
 

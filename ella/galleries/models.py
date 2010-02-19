@@ -84,52 +84,14 @@ class Gallery(Publishable):
             if isinstance(item[1], Photo):
                 return item[1]
 
-    @staticmethod
-    def _post_save_signal_receiver(**kwargs):
-        inst = kwargs.get('instance', None)
-        sender = kwargs.get('sender', None)
-        if sender == Gallery and inst.pk:
-            setattr(Gallery._post_save_signal_receiver, 'gallery_pk', inst.pk)
+    def assign_photo(self):
+        if not self.pk:
             return
-        if sender != GalleryItem or not inst.pk:
-            return
-
-        setattr(
-            Gallery._request_finished_signal_receiver,
-            'affected_gallery',
-            Gallery.objects.get(pk=Gallery._post_save_signal_receiver.gallery_pk)
-        )
-        # disconnect post_save signal handler, remove temporary data
-        setattr(Gallery._post_save_signal_receiver, 'gallery_pk', None)
-        post_save.disconnect( Gallery._post_save_signal_receiver )
-
-    @staticmethod
-    def _request_finished_signal_receiver(**kwargs):
-        request_finished.disconnect( Gallery._request_finished_signal_receiver )
-        if hasattr(Gallery._request_finished_signal_receiver, 'affected_gallery'):
-            affected_gallery = Gallery._request_finished_signal_receiver.affected_gallery
-            affected_gallery.save() # save it again to make Gallery.photo saved (if necessary)
-            Gallery._request_finished_signal_receiver.affected_gallery = None
-
-    def save(self, **kwargs):
-        # TODO: double save - we need saved placement first
-        super(Gallery, self).save(**kwargs)
         if self.photo is None:
-            if not self.pk:
-                # FIXME if Gallery is not saved yet, call get_photo procedure via post-save signal, then save gallery's photo
-                post_save.connect(receiver=Gallery._post_save_signal_receiver)
-                request_finished.connect(receiver=Gallery._request_finished_signal_receiver)
-            else:
-                first_photo = self.get_photo()
-                if first_photo:
-                    self.photo = first_photo
-        return super(Gallery, self).save(**kwargs)
-
-    """
-    def delete(self, *args, **kwargs):
-        import ipdb;ipdb.set_trace()
-        super(Gallery, self).delete(*args, **kwargs)
-    """
+            first_photo = self.get_photo()
+            if first_photo:
+                self.photo = first_photo
+                self.save()
 
     class Meta:
         verbose_name = _('Gallery')
