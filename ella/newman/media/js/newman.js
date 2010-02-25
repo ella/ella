@@ -165,10 +165,17 @@ function lock_window(msg) {
     $('#lock-message').html(msg);
     $modal.data('close_ok', false)
     $modal.dialog('open');
+
+    carp('Window Locked');
+}
+
+function raw_unlock_window() {
+    $('#window-lock').data('close_ok', true).dialog('close');
+    carp('Window Unlocked');
 }
 
 function unlock_window() {
-    $('#window-lock').data('close_ok', true).dialog('close');
+    setTimeout(raw_unlock_window, 50);
 }
 
 function is_window_locked() {
@@ -304,13 +311,22 @@ Drafts = new Object;
             return;
         }
        
-        carp('Triggering preset_load_initiated event on ' + $form.selector);
         NewmanLib.debug_response_data = response_data;
-        $form.trigger('preset_load_initiated', [response_data]);
-        carp('Trigger preset_load_inititated done.');
-        carp('Triggering preset_load_process event on ' + $form.selector);
-        $form.trigger('preset_load_process', [response_data]);
-        carp('Trigger preset_load_process done.');
+        try {
+            //carp('Triggering preset_load_initiated event on ' + $form.selector);
+            $form.trigger('preset_load_initiated', [response_data]);
+        } catch (e) {
+            show_err('ERROR occured while triggering preset_load_initiated. id=' + id + ' Exception: ' + e.toString());
+        }
+        //carp('Trigger preset_load_inititated done.');
+
+        try {
+            //carp('Triggering preset_load_process event on ' + $form.selector);
+            $form.trigger('preset_load_process', [response_data]);
+        } catch (e) {
+            show_err('ERROR occured while triggering preset_load_process. id=' + id + ' Exception: ' + e.toString());
+        }
+        //carp('Trigger preset_load_process done.');
         
         $form.get(0).reset();
         $form.find(':checkbox,:radio').removeAttr('checked');
@@ -323,6 +339,7 @@ Drafts = new Object;
             var form_datum = form_data[i];
             var key = form_datum['name'];
             var val = form_datum['value'];
+            var is_text_area = false;
             
             var occ_no = 0;
             if (key in used_times) {
@@ -334,9 +351,18 @@ Drafts = new Object;
                 //carp('restore_form: input #' + key + ' not found');
                 continue;
             }
+            // test whether large data (textarea) is processed
+            $inputs.each(
+                function () {
+                    if (is_text_area) return;
+                    if (this.tagName.toLowerCase() == 'textarea') is_text_area = true;
+                }
+            );
             var val_esc = val.replace(/(\W)/g, '\\$1');
-            $inputs.filter(':checkbox,:radio').filter('[value='+val_esc+']').attr({checked: 'checked'});
-            $inputs.find('option[value='+val_esc+']').attr({selected: 'selected'});
+            if (!is_text_area) {
+                $inputs.filter(':checkbox,:radio').filter('[value='+val_esc+']').attr({checked: 'checked'});
+                $inputs.find('option[value='+val_esc+']').attr({selected: 'selected'});
+            }
             $inputs.filter(':text,[type=hidden],textarea').eq(occ_no).val(val);
             
             used_times[ key ] = occ_no + 1;
@@ -347,12 +373,17 @@ Drafts = new Object;
 
         restore_add_form_values($form);
 
-        $form.trigger('preset_load_completed', [response_data, args]);
+        try {
+            $form.trigger('preset_load_completed', [response_data, args]);
+        } catch (e) {
+            show_err('ERROR occured while triggering preset_load_completed. id=' + id + ' Exception: ' + e.toString());
+        }
     }
     NewmanLib.restore_form = restore_form;
 
     function load_preset(id, $form) {
         $.ajax({
+            async: false,
             url: get_adr('draft/load/'),
             data: {id:id},
             success: function(response_text) {
