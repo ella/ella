@@ -99,7 +99,7 @@
                         | {% trans "Category" %}: {{ p.category }}
                         | {% trans 'Author' %}: {{ p.publishable.authors.all|join:", " }}
                     </p>
-                    {{ p.publishable.description|safe|truncatewords:32 }}
+                    {{ p.publishable.description|striptags|truncatewords:32 }}
                     <div class="submit-row ar">
                         <a class="icn btn web" href="{% url newman:index %}r/{{ p.publishable.content_type.pk }}/{{ p.publishable.pk }}/">{% trans 'View on site' %}</a>
                         <a class="icn btn edit def" href="{% url newman:index %}#/{{ p.publishable.content_type.app_label }}/{{ p.publishable.content_type.model }}/{{ p.publishable.pk }}/">{% trans 'Change' %}</a>
