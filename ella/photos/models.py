@@ -166,7 +166,7 @@ class Photo(models.Model):
         # rename image by slug
         imageType = detect_img_type(self.image.path)
         if imageType is not None:
-            self.image = file_rename(self.image.name, self.slug, PHOTOS_TYPE_EXTENSION[ imageType ])
+            self.image = file_rename(self.image.name.encode('utf-8'), self.slug, PHOTOS_TYPE_EXTENSION[ imageType ])
         # delete formatedphotos if new image was uploaded
         if image_changed:
             super(Photo, self).save(force_insert=force_insert, force_update=force_update, **kwargs)
