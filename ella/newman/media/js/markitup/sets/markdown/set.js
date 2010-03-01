@@ -345,12 +345,40 @@ function register_markitup_editor_enter_callback(args) {
     );
 }
 
+function markitdown_register_preview_shortcut() {
+    // Register and perform Ctrl+J preview shortcut (Escape key works too, muheheheheeeh)
+    var isCtrl = false;
+    var KEY_CTRL = 17;
+    var KEY_ESC = 27;
+    var KEY_SHORTCUT = KEY_J = 74;
+    var ed = $('.rich_text_area.markItUpEditor');
+    ed.keyup(
+        function (e) { 
+            if (e.which == KEY_CTRL) {
+                isCtrl = false; 
+            }
+        });
+    ed.keydown(
+        function (e) {
+            if (e.which == KEY_CTRL) {
+                isCtrl = true; 
+            }
+            if ( (e.which == KEY_SHORTCUT && isCtrl == true) || (e.which == KEY_ESC) ) { //run code for ALT+A
+                markitdown_trigger_preview(e);
+                isCtrl = false;
+                return false; 
+            }
+        }
+    ); 
+}
+
 $(document).bind(
     'media_loaded',
     function () {
         $('.markItUpEditor').each(register_markitup_editor_enter_callback);
         $('li.preview').bind('mouseup', preview_height_correct);
-        $('.rich_text_area.markItUpEditor').bind('focusout', discard_auto_preview);
+        //$('.rich_text_area.markItUpEditor').bind('focusout', discard_auto_preview);
+        markitdown_register_preview_shortcut();
     }
 );
 
