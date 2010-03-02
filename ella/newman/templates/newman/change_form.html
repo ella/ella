@@ -82,9 +82,9 @@
 
     {% cache 300 'nm-cf-js' adminform %}
     <script type="text/javascript">
-    request_media(MEDIA_URL + 'jquery/jquery-urldecode-encode.js?{{ VERSION }}');
+    request_media(MEDIA_URL + 'jquery/jquery-urldecode-encode.js');
     {% for m in media %}
-        request_media('{{ m }}?{{ VERSION }}');
+        request_media('{{ m }}');
     {% endfor %}
     </script>
     {% endcache %}

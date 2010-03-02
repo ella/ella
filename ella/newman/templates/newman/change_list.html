@@ -87,7 +87,7 @@
         {% cache 300 'nm-cl-js' cl %}
         <script type="text/javascript">
         {% for m in media %}
-            request_media('{{ m }}?{{ VERSION }}');
+            request_media('{{ m }}');
         {% endfor %}
         </script>
         {% endcache %}
