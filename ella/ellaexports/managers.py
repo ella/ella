@@ -128,19 +128,10 @@ class ExportItemizer(object):
 
         This method changes "out" parameter.
         """
-        def get_publishable_obj(item):
-            if item is None:
-                return None
-            if type(item) == ExportPosition:
-                return item.object.publishable
-            else:
-                #Listing
-                return item.placement.publishable
-
         from ella.ellaexports.models import ExportPosition
         tmp = list()
         positions = fix_positions.order_by('position')
-        positions_publishables = map( get_publishable_obj, positions )
+        positions_publishables = map( self.__get_publishable, positions )
 
         # 1. get collision publishables
         # 2. remove them from tmp
