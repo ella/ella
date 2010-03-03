@@ -40,14 +40,14 @@ NewmanLib = {};
         }
     }
     NewmanLib.register_post_submit_callback_once = register_post_submit_callback_once;
-    
+
     function register_pre_submit_callback(callback) {
         if (!(callback in NewmanLib.pre_submit_callbacks)) {
             NewmanLib.pre_submit_callbacks.push(callback)
         }
     }
     NewmanLib.register_pre_submit_callback = register_pre_submit_callback;
-    
+
     function register_pre_submit_callback_once(callback) {
         if (!(callback in NewmanLib.pre_submit_once_callbacks)) {
             NewmanLib.pre_submit_once_callbacks.push(callback)
@@ -144,7 +144,7 @@ function clone_form($orig_form) {
 // Shows a modal window and disables its close button.
 function lock_window(msg) {
     if ( ! msg ) msg = gettext('Wait')+'...';
-    
+
     var $modal = $('#window-lock');
     if ($modal.length == 0) $modal = $(
             '<div id="window-lock"></div>'
@@ -272,7 +272,7 @@ Drafts = new Object;
         title = $.trim(title);
         // retrieve the id of template with this name
         // TODO: to be rewritten (saving interface needs a lift)
-        var id = 
+        var id =
             title
             ? $('#id_drafts option').filter(function(){return $(this).text().indexOf(title+' (') == 0}).val()
             : draft_id;
@@ -301,7 +301,7 @@ Drafts = new Object;
             this.value = '';
         });
     }
-    
+
     function restore_form(response_text, $form, args) {
         var response_data;
         try {
@@ -310,7 +310,7 @@ Drafts = new Object;
             show_err(gettext('Failed loading preset'));
             return;
         }
-       
+
         NewmanLib.debug_response_data = response_data;
         try {
             //carp('Triggering preset_load_initiated event on ' + $form.selector);
@@ -327,25 +327,25 @@ Drafts = new Object;
             show_err('ERROR occured while triggering preset_load_process. id=' + id + ' Exception: ' + e.toString());
         }
         //carp('Trigger preset_load_process done.');
-        
+
         $form.get(0).reset();
         $form.find(':checkbox,:radio').removeAttr('checked');
         $form.find(':text,textarea,:password').val('');
         var form_data = response_data.data;
         if (response_data.message) show_message( response_data.message );
         var used_times = {};    // how many times which key was used
-       
+
         for (var i = 0; i < form_data.length; i++) {
             var form_datum = form_data[i];
             var key = form_datum['name'];
             var val = form_datum['value'];
             var is_text_area = false;
-            
+
             var occ_no = 0;
             if (key in used_times) {
                 occ_no = used_times[key];
             }
-            
+
             var $inputs = $form.find(':input[name='+key+']');
             if (!$inputs || $inputs.length == 0) {
                 //carp('restore_form: input #' + key + ' not found');
@@ -364,7 +364,7 @@ Drafts = new Object;
                 $inputs.find('option[value='+val_esc+']').attr({selected: 'selected'});
             }
             $inputs.filter(':text,[type=hidden],textarea').eq(occ_no).val(val);
-            
+
             used_times[ key ] = occ_no + 1;
         }
         $form.find('.GenericSuggestField,.GenericSuggestFieldMultiple').find('input[rel]').each(function() {
@@ -407,7 +407,7 @@ Drafts = new Object;
     Drafts.set_load_draft_handler = set_load_draft_handler;
     Drafts.set_load_draft_handler();
     $(document).bind('content_added', Drafts.set_load_draft_handler);
-    
+
     function delete_preset(id) {
         $.ajax({
             url: get_adr('draft/delete/'),
@@ -419,7 +419,7 @@ Drafts = new Object;
             error: show_ajax_error
         });
     }
-    
+
     // Delete crash save on restoration
     $(document).bind('preset_load_completed', function(evt, response_data, args) {
         var id = args.preset_id;
@@ -428,11 +428,11 @@ Drafts = new Object;
             delete_preset(id);
         }
     });
-    
+
     var autosave_interval;
     function set_autosave_interval(evt) {
         var proceed, target_ids;
-        
+
         if ($('.change-form').length == 0) { // nothing to autosave
              ;;; carp('.change-form not present -- not setting up interval');
              clearInterval(autosave_interval);
@@ -452,9 +452,9 @@ Drafts = new Object;
             ;;; carp('no injection storage found -- interval reset forced');
             proceed = true;
         }
-        
+
         if (!proceed) return;
-        
+
         if (autosave_interval != undefined) {
             ;;; carp('clearing interval prior to setting new one');
             clearInterval(autosave_interval);
@@ -505,13 +505,13 @@ Drafts = new Object;
 
 $( function() {
     //// Ajax forms
-    
+
     function get_inputs($form) {    // all except metadata
         return $form.find(':input').filter(function() {
             return ! $(this).parent().is('.js-form-metadata');
         });
     }
-    
+
     // Validate
     var validations = {
 /*        required: function(input) {
@@ -526,9 +526,9 @@ $( function() {
             carp("Attempt to render error for empty input:", msg);
             return;
         }
-        if (msg.shift) { 
-            var msgs = msg; 
-            msg = msgs.shift(); 
+        if (msg.shift) {
+            var msgs = msg;
+            msg = msgs.shift();
         }
         var $msg = $('<span>').addClass('form-error-msg').text(msg);
         var $antecedant = $(input).closest('.markItUp').add(input).eq(0);
@@ -560,21 +560,21 @@ $( function() {
                 }
             }
         });
-        
+
         if (ok && $form.data('validation')) {
             ok = $form.data('validation')( $form );
         }
 
         return ok;
     }
-    
+
     // Submit event
     function ajax_submit($form, button_name, process_redirect) {
         if (!$form.jquery) $form = $($form);
         if ( ! validate($form) ) return false;
         NewmanLib.call_pre_submit_callbacks();
         carp(['ajax_submit: submitting... selector="', $form.selector, '"'].join(''));
-        
+
         // Hack for file inputs
         var has_files = false;
         $form.find(':file').each( function() {
@@ -598,9 +598,9 @@ $( function() {
             return true;
         }
         // End of hack for file inputs
-        
+
         lock_window(gettext('Sending')+'...');
-        
+
         var action =  $form.attr('action');
         var method = ($form.attr('method') || 'POST').toUpperCase();
         var $meta = $form.find('.js-form-metadata');
@@ -638,7 +638,7 @@ $( function() {
             }
             $inputs = $inputs.add($(this));
         });
-        
+
         if (button_name) $inputs = $inputs.add('<input type="hidden" value="1" name="'+button_name+'" />');
         var data = $inputs.serialize();
         if ($form.hasClass('js-reset-on-submit')) $form.get(0).reset();
@@ -646,7 +646,7 @@ $( function() {
             ? get_adr(action)
             :         action;
         var url = $('<a>').attr('href', address).get(0).href;
-        
+
         var request_options = {
             url: url,
             type: method,
@@ -667,14 +667,14 @@ $( function() {
                     }
                 }
                 NewmanLib.call_post_submit_callbacks(this.succeeded);
-                if (this.succeeded) { 
+                if (this.succeeded) {
                     try {
                         success.call(this, xhr.responseText, xhr);
                     } catch (e) {
                         carp('Error processing form-send success:', e);
                     }
                 }
-                else { 
+                else {
                     try {
                         error.apply(this, arguments);
                     } catch(e) {
@@ -702,18 +702,18 @@ $( function() {
         }
         return false;
     }
-    
+
     // Handle error response from the server from a form submit event.
     // In case of changeform and expected JSON response, renders the error messages.
     function ajax_submit_error(xhr) {
-        function error_blinking_input() { 
-            $(input).removeClass('blink'); 
+        function error_blinking_input() {
+            $(input).removeClass('blink');
         }
 
         var res;
         var $form = this._form;
-        try { 
-            res = JSON.parse( xhr.responseText ); 
+        try {
+            res = JSON.parse( xhr.responseText );
         }
         catch (e) {
             carp('Error parsing JSON error response text.' + e);
@@ -733,9 +733,9 @@ $( function() {
                     || $('body').get(0)
                 );
             }
-            
+
             $err_overlay.find('h6').text(res.message);
-            
+
             // Show the individual errors
             for (var i = 0; i < res.errors.length; i++) {
                 var err = res.errors[i];
@@ -744,7 +744,7 @@ $( function() {
                 var first_message = '';
                 var label = err.label;
                 var input;
-               
+
                 // assign first message
                 if (msgs.length > 0) {
                     first_message = msgs[0];
@@ -762,7 +762,7 @@ $( function() {
                         );
                     }
                     input = document.getElementById('id_non_form_errors');
-                    
+
                     show_form_error(input, msgs);
                 }
                 else {
@@ -770,7 +770,7 @@ $( function() {
                     show_form_error(input, msgs);
                     if (!input) carp('Error reported for nonexistant input #'+id);
                 }
-                
+
                 var $p_element = $('<p>');
                 // FIXME (what following 3 lines do?):
                 $p_element.data('rel_input',
@@ -833,7 +833,7 @@ $( function() {
         show_ajax_error(xhr);
     }
     AjaxFormLib.ajax_submit_error = ajax_submit_error;
-    
+
     // Collapsible fieldsets
     $('.collapse legend').live('click', function(evt) {
         if (evt.button != 0) return;
@@ -843,7 +843,7 @@ $( function() {
         if (evt.button != 0) return;
         $(this).closest('fieldset').removeClass('collapsed').addClass('collapse');
     });
-    
+
     // Submit button
     $('.js-form a.js-submit').live('click', function(evt) {
         if (evt.button != 0) return true;    // just interested in left button
@@ -851,7 +851,7 @@ $( function() {
         var $form = $(this).closest('.js-form');
         return ajax_submit($form, this.name, true);
     });
-    
+
     // Reset button
     $('.js-form a.js-reset').live('click', function(evt) {
         try {
@@ -859,7 +859,7 @@ $( function() {
         } catch(e) { }
         return false;
     });
-    
+
     // Overload default submit event
     function overload_default_submit() {
         $('.js-form')
@@ -886,7 +886,7 @@ $( function() {
     $(document).bind('content_added', overload_default_submit);
     overload_default_submit();
     //// End of ajax forms
-    
+
     // Set up returning to publishable changelist when coming to change form from it
     $('#changelist tbody th a,.actionlist a').live('click', function(evt) {
         if (evt.button != 0) return;
@@ -900,9 +900,9 @@ $( function() {
             NewmanLib.ADR_STACK = [ { from: '/core/publishable/', to: get_hashadr($(this).attr('href')) } ];
         }
     });
-    
+
     //// Filters
-    
+
     // Packing and unpacking filter list. To be removed when filters are reimplemented.
     $('#filters :header').live('click', function(evt) {
         if (evt.which != 1) return true;    // just interested in left button
@@ -912,26 +912,26 @@ $( function() {
         }
         $affected.slideToggle('slow');
     });
-    
+
     // Close filters button
     $('#filters a.cancel').live('click', function(evt) {
         if (evt.button != 0) return;
         Kobayashi.unload_content('filters');
     });
-    
+
     // Re-initialization of third party libraries
     /*
     $(document).bind('content_added', function() {
     });
     */
-    
+
     // Update document title
     var ORIGINAL_TITLE = document.title;
     $(document).bind('content_added', function(evt) {
         var newtitle = $(evt.target).find('#doc-title').text();
         document.title = (newtitle ? newtitle+' | ' : '') + ORIGINAL_TITLE;
     });
-    
+
     // Setting up proper suggesters URLs to take the hash address into account
     $(document).bind('content_added', function(evt) {
         var $new_suggest_inputs = $(evt.target).find('.GenericSuggestField,.GenericSuggestFieldMultiple');
@@ -946,7 +946,7 @@ $( function() {
             );
         });
     });
-    
+
     // Search on HP
     // The search button should send us to an address according to the thing selected in the select
     function do_search() {
@@ -967,7 +967,7 @@ $( function() {
     }
     $('#search-form input[name=q]'      ).live('keypress', search_on_enter);
     $('#search-form select[name=action]').live('keypress', search_on_enter);
-    
+
     // Search in change lists
     function changelist_search($input) {
         if ($('#changelist').length == 0) return;   // We're not in changelist
@@ -1209,14 +1209,14 @@ function save_change_form_success(text_data) {
         }
     } catch(e) { carp('invalid data received from form save:', text_data, e); }
     response_msg = response_msg || gettext('Form saved');
-  
+
     if (!redirect_to) {
         var action_table = new PostsaveActionTable({
             object_id: object_id,
             object_title: object_title,
             options: options
         });
-        
+
         // load form-specific post-save actions
         var $meta = $form.find('.js-form-metadata');
         var post_save_callback = $meta.find('input[name=post_save]').data('callback');
@@ -1232,7 +1232,7 @@ function save_change_form_success(text_data) {
         show_ok(response_msg);
         adr(redirect_to, {just_set: true, nohistory: true});
     }
-    
+
     Kobayashi.unload_content('history');
 }
 
@@ -1322,8 +1322,8 @@ $(document).bind('content_added', function(evt) {
 // Related lookup
 $(document).bind('content_added', function(evt) {
     if ($(evt.target).find('.suggest-related-lookup').length) {
-        request_media(MEDIA_URL +  'js/related_lookup.js?' +MEDIA_VERSION);
-        request_media(MEDIA_URL + 'css/related_lookup.css?'+MEDIA_VERSION);
+        request_media(MEDIA_URL +  'js/related_lookup.js');
+        request_media(MEDIA_URL + 'css/related_lookup.css');
     }
 });
 
@@ -1346,7 +1346,7 @@ $(document).ready( function() {
 // Opens an overlay with a changelist and calls supplied function on click on item.
 $( function() {
     var overlay_html;
-    
+
     open_overlay = function(content_type, selection_callback) {
         var ooargs = arguments;
         if ( ! overlay_html ) {
@@ -1356,7 +1356,7 @@ $( function() {
             });
             return;
         }
-        
+
         var top_zindex = ( function() {
             var rv = 1;
             $('.ui-widget-overlay').each( function() {
@@ -1376,16 +1376,16 @@ $( function() {
             $('#overlay-content').bind('content_added', init_overlay_content);
         }
         $overlay.css({zIndex:top_zindex});
-        
+
         $('#overlay-content').data('selection_callback', selection_callback);
-        
+
         var ct_arr = /(\w+)\W(\w+)/.exec( content_type );
         if ( ! ct_arr ) {
             carp('open_overlay: Unexpected content type: '+content_type);
             return false;
         }
         var address = '/' + ct_arr[1] + '/' + ct_arr[2] + '/?pop';
-        
+
         Kobayashi.load_content({
             address: address,
             target_id: 'overlay-content',
@@ -1399,9 +1399,9 @@ $( function() {
     });
     function init_overlay_content(evt, extras) {
         var $target = $(evt.target);
-        
+
         var target_selector = $target.attr('id') ? '#'+$target.attr('id')+' ' : '';
-        
+
         // selection
         var $target_links = $target.find('#changelist tbody a');
         $target_links.each( function() {
@@ -1419,21 +1419,21 @@ $( function() {
             $target.removeData('selection_callback');
             return false;
         });
-        
+
         function modify_getpar_href(el) {
             $(el).attr('href', $(el).attr('href').replace(/^\?/, 'overlay-content::&')).addClass('js-simpleload');
         }
-        
+
         // pagination
         $target.find('.paginator a').each( function() {
             modify_getpar_href(this);
         });
-        
+
         // sorting
         $target.find('#changelist thead a').each( function() {
             modify_getpar_href(this);
         });
-        
+
         // filters
         var $filt = $('#filters-handler .popup-filter');
         if ($filt.length) {
@@ -1445,13 +1445,13 @@ $( function() {
             }
             $('#filters').unbind('content_added', init_filters).one('content_added', init_filters);
         }
-        
+
         var $cancel = $('#filters-handler a.js-clear').not('.overlay-adapted');
         if ($cancel.length) $cancel
         .attr( 'href', $target.attr('id')+'::'+$cancel.attr('href') )
         .removeClass('js-clear')
         .addClass('js-simpleload overlay-adapted');
-        
+
         $('#changelist-overlay').show();
     };
 });
@@ -1603,7 +1603,7 @@ Timeline = new Object();
     function click_continue_dialog_ajax_success(response_text) {
         var success_callback = function() {
             // keep Save button only
-            $('#id-exportmeta div.submit-row').children().each( 
+            $('#id-exportmeta div.submit-row').children().each(
                 function() {
                      if ($(this).attr('name') != '_save') {
                         $(this).remove();
@@ -1664,10 +1664,10 @@ Timeline = new Object();
         $('#id_publishable_suggest').focus();
 
         $('#id-continue-dialog').bind(
-            'click', 
+            'click',
             function() {
                 hide_dialog();
-                return export_params.continue_click_callback(export_params); 
+                return export_params.continue_click_callback(export_params);
             }
         );
     }
@@ -1721,11 +1721,11 @@ Timeline = new Object();
         //$('.timeline-item').click(item_clicked);
         $('.timeline-item').hover(item_mouse_over, item_mouse_out);
         $('.timeline-item-navigation .insert').live(
-            'click', 
+            'click',
             show_insert_dialog
         );
         $('.timeline-item-navigation .append').live(
-            'click', 
+            'click',
             show_append_dialog
         );
 
@@ -1774,7 +1774,7 @@ PrefilledChangeForm = new Object();
 
     function fill_form_located_by_selector(selector, params) {
         var i, element, options, paramValue;
-        //for (i = 0; i < input_elements.length; i++) 
+        //for (i = 0; i < input_elements.length; i++)
         $(selector).each(function() {
             //element = input_elements[i];
             element = $(this)[0];
