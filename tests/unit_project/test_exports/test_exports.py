@@ -41,7 +41,10 @@ def placement_for_publishable_builder(**kwargs):
 def listing_for_placement(**kwargs):
     plac = kwargs.get('placement')
     dat_from = datetime.strptime(kwargs.get('publish_from'), DATE_FORMAT)
-    dat_to = datetime.strptime(kwargs.get('publish_to'), DATE_FORMAT)
+    if 'publish_to' in kwargs:
+        dat_to = datetime.strptime(kwargs.get('publish_to'), DATE_FORMAT)
+    else:
+        dat_to = None
     out = Listing.objects.create(
         placement=plac,
         category=kwargs.get('category'),
@@ -120,6 +123,7 @@ class TestExport(DatabaseTestCase):
 
     def setup_placements_listings(self):
         now = datetime.now() - timedelta(seconds=1)
+        self.now = now
         self.str_now = now.strftime(DATE_FORMAT)
         future = now + timedelta(hours=1)
         self.str_future = future.strftime(DATE_FORMAT)
@@ -134,14 +138,20 @@ class TestExport(DatabaseTestCase):
         self.str_listingA_from = now.strftime(DATE_FORMAT)
         next_three_hours = now + timedelta(hours=3)
         self.str_listingA_to = next_three_hours.strftime(DATE_FORMAT)
+
         no_future = now - timedelta(hours=2)
         self.str_listingB_from = no_future.strftime(DATE_FORMAT)
         next_hour = now + timedelta(hours=1)
         self.str_listingB_to = next_hour.strftime(DATE_FORMAT)
+
         prev_hour = now - timedelta(hours=1)
         self.str_listingC_from = prev_hour.strftime(DATE_FORMAT)
         next_two_hours = now + timedelta(hours=2)
         self.str_listingC_to = next_two_hours.strftime(DATE_FORMAT)
+
+        listing_d = now - timedelta(hours=3)
+        self.str_listingD_from = listing_d.strftime(DATE_FORMAT)
+
         self.listA = listing_for_placement(
             placement=self.placementA,
             publish_from=self.str_listingA_from,
@@ -330,7 +340,83 @@ class TestExport(DatabaseTestCase):
         self.exportA.save()
         degen = Export.objects.get_items_for_category(self.categoryH)
         out = map(None, degen)
-        self.assert_equals(len(out), 3)
+        self.assert_equals(2, len(out))
+
+    def test_overloaded_item_position(self):
+        """ 
+        Test whether item placed in export via standard category listing
+        is overloaded (including its position) and placed to the right position.
+        """
+        self.exportB = Export.objects.create(
+            category=self.categoryA,
+            use_objects_in_category=True,
+            title='blb',
+            slug='blb',
+            max_visible_items=4,
+            photo_format=self.photo_format
+        )
+        # create listings,placements
+        self.placement_for_publishableC = placement_for_publishable_builder(
+            publishable=self.publishableC,
+            publish_from=self.str_now,
+            publish_to=self.str_future
+        )
+        self.placement_for_publishableD = placement_for_publishable_builder(
+            publishable=self.publishableD,
+            publish_from=self.str_now,
+            publish_to=self.str_future
+        )
+
+        self.listing_for_publishableA = listing_for_placement(
+            placement=self.placementA,
+            publish_from=self.str_listingA_from,
+            category=self.categoryA
+        )
+        self.listing_for_publishableB = listing_for_placement(
+            placement=self.placementB,
+            publish_from=self.str_listingB_from,
+            category=self.categoryA
+        )
+        self.listing_for_publishableC = listing_for_placement(
+            placement=self.placement_for_publishableC,
+            publish_from=self.str_listingC_from,
+            category=self.categoryA
+        )
+        self.listing_for_publishableD = listing_for_placement(
+            placement=self.placement_for_publishableD,
+            publish_from=self.str_listingD_from,
+            category=self.categoryA
+        )
+
+        # Override position and time
+        self.export_meta_for_publishableB = ExportMeta.objects.create(
+            publishable=self.publishableB,
+            title=u'Second article on first position?',
+            description=u'',
+        )
+        b_from = self.now - timedelta(hours=2)
+        b_to = self.now + timedelta(hours=1)
+        ExportPosition.objects.create(
+            object=self.export_meta_for_publishableB,
+            export=self.exportB,
+            visible_from=b_from,
+            visible_to=b_to,
+            position=1
+        )
+
+        # test exported items
+        # FIXME
+        """
+        [<Publishable: Second article on first position?>, <Publishable: First Article>, <Publishable: ahoy!>, <Publishable: Second article on first position?>]
+        """
+        items = Export.objects.get_items_for_slug('blb')
+        out = map(None, items)
+        #print out
+        self.assert_equals(4, len(out))
+        self.assert_equals(self.publishableB, out[0])
+        self.assert_equals(self.publishableA, out[1])
+        self.assert_equals(self.publishableC, out[2])
+        self.assert_equals(self.publishableD, out[3])
 
     def test_(self):
         " copy/paste template "

@@ -118,7 +118,7 @@ class ExportItemizer(object):
     def __iter__(self):
         return self
 
-    def __insert_to_position(self, fix_positions, out):
+    def __insert_to_position(self, fix_positions, out, max_items):
         """ 
         Insert elements in fix_positions queryset to specified position
         in list specified by parameter out.
@@ -128,23 +128,44 @@ class ExportItemizer(object):
 
         This method changes "out" parameter.
         """
+        def get_publishable_obj(item):
+            if item is None:
+                return None
+            if type(item) == ExportPosition:
+                return item.object.publishable
+            else:
+                #Listing
+                return item.placement.publishable
+
+        from ella.ellaexports.models import ExportPosition
         tmp = list()
         positions = fix_positions.order_by('position')
-        last_position = positions[0].position
-        for i in range(len(positions)):
-            item = positions[i]
-            diff = item.position - last_position
-            if diff > 1:
-                # gap found
-                # append items from out up to diff, then append item
-                for x in range(diff - 1):
-                    tmp.append(out.pop(0))
-            tmp.append(item)
-            last_position = item.position
+        positions_publishables = map( get_publishable_obj, positions )
 
-        for remaining in range(len(out)):
-            tmp.append(out.pop(0))
+        # 1. get collision publishables
+        # 2. remove them from tmp
+        # 3. insert fix_position items to their positions
+        for i in range(len(out)):
+            item = out.pop(0)
+            pub = get_publishable_obj(item)
+            if pub not in positions_publishables:
+                tmp.append(item)
 
+        # Align len(tmp) to max_items
+        for i in range(max_items):
+            if out:
+                item = out.pop(0)
+                tmp.append(item)
+
+        for item in positions:
+            pos = item.position - 1
+            if pos >= len(tmp):
+                log.error('Cannot override export item #%d' % item.position)
+                tmp.append(item)
+                continue
+            tmp.insert(pos, item)
+
+        publishables = list()
         for t in tmp:
             out.append(t)
 
@@ -251,7 +272,7 @@ class ExportItemizer(object):
             #log.debug(remove_diacritical('Export items sorted: %s' % objects))
             if fix_positions:
                 # Assign positions of items (if position is overloaded via ExportPosition)
-                self.__insert_to_position(fix_positions, objects)
+                self.__insert_to_position(fix_positions, objects, max_items)
             #log.debug(remove_diacritical('Export items (overloaded positions): %s' % objects))
             pre_out = objects[:max_items]
         else:
@@ -301,7 +322,6 @@ class ExportManager(models.Manager):
             e.datetime_from = datetime.now()
         else:
             e.datetime_from = datetime_from
-        print 'Get Items for Category: datetime_from', e.datetime_from
         e.max_visible_items = max_visible_items
         if export:
             e.export = export
