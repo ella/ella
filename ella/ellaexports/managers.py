@@ -128,7 +128,6 @@ class ExportItemizer(object):
 
         This method changes "out" parameter.
         """
-        from ella.ellaexports.models import ExportPosition
         tmp = list()
         positions = fix_positions.order_by('position')
         positions_publishables = map( self.__get_publishable, positions )
@@ -138,7 +137,7 @@ class ExportItemizer(object):
         # 3. insert fix_position items to their positions
         for i in range(len(out)):
             item = out.pop(0)
-            pub = get_publishable_obj(item)
+            pub = self.__get_publishable(item)
             if pub not in positions_publishables:
                 tmp.append(item)
 
@@ -257,7 +256,12 @@ class ExportItemizer(object):
                     now=self._datetime_from
                 ))
             #log.debug(remove_diacritical('Items via Listing: %s' % objects))
-            map(lambda i: objects.append(i), positions)
+            # make items unique, we don't want to prioritize ExportPositions with position == 0 over Listing items
+            pos_publishables = map( self.__get_publishable, positions )
+            obj_publishables = map( self.__get_publishable, objects )
+            for item in pos_publishables:
+                if item not in obj_publishables:
+                    objects.append(item)
             #log.debug(remove_diacritical('Items via ExportPosition: %s' % positions))
             objects.sort(cmp=cmp_listing_or_meta)
             #log.debug(remove_diacritical('Export items sorted: %s' % objects))
