@@ -353,6 +353,26 @@
                 $('.js-poll-question-text-container textarea').each( function() {
                     reflect_question_input_change(this);
                 });
+                // TODO remove values from inputs when adding new
+                if ( /\/add\/$/.test(document.location) ) {
+                    // question_set-3-choices-id  (array)
+                    // question_set-3-id
+                    // question_set-3-quiz
+                    NewmanInline.remove_inlineadmin_element_value(
+                        '.js-poll-question-container input[name^=question_set-]',
+                        '[0-9]+-id$'
+                    );
+                    NewmanInline.remove_inlineadmin_element_value(
+                        '.js-poll-question-container input[name^=question_set-]',
+                        'quiz$'
+                    );
+                    NewmanInline.remove_inlineadmin_element_value(
+                        '.js-poll-question-container input[name^=question_set-]',
+                        'choices-id$',
+                        '0'
+                    );
+                }
+
             }
         );
     }
