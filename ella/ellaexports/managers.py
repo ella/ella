@@ -176,6 +176,7 @@ class ExportItemizer(object):
         Adds property obj.export_thumbnail_url, feed_updated.
         """
         from ella.ellaexports.models import FEED_DATETIME_FORMAT
+        from ella.photos.models import Format
         pub = self.__get_publishable(obj)
         field_dict = self.data_formatter(pub, export=export)
         if field_dict['title'].strip():
@@ -195,6 +196,7 @@ class ExportItemizer(object):
         pub.feed_updated_raw_datetime = feed_updated
         pub.feed_updated = feed_updated.strftime(FEED_DATETIME_FORMAT)
         if pub.photo:
+            formated = None
             try:
                 formated = pub.photo.get_formated_photo(export.photo_format.name)
             except Format.DoesNotExist:
