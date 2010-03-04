@@ -1,60 +1,5 @@
 function DateTimeInput(input) {
     this.input = input;
-    this.cursor_pos = function(evt) {
-        var input = this.input;
-        if (!this.x_pos) this.x_pos = $(input).offset().left;
-        var input_style;
-        try {
-            input_style = getComputedStyle(input, '');
-        } catch(e) {
-            input_style = input.currentStyle;
-        }
-        if (input_style == undefined) input_style = {};
-        
-        var padding = input_style.paddingLeft || input_style['padding-left'];
-        if (/^(\d+)(?:px)?$/.test(padding)) padding = new Number(RegExp.$1);
-        else padding = 0;
-        var border = input_style.borderLeftWidth || input_style['border-left-width'];
-        if (/^(\d+)(?:px)?$/.test(border )) border  = new Number(RegExp.$1);
-        else border = 0;
-        
-        var x = evt.clientX - this.x_pos - padding - border;
-        
-        var $tempspan = $('#datetime-temp');
-        if ($tempspan.length == 0) $tempspan = $('<span id="datetime-temp">').css({
-            position: 'absolute',
-            top: '-100px'
-        });
-        for (var property in input_style) {
-            
-            if (property >= 0) property = input_style[ property ];  // XXX nasty Chrome hack
-            
-            if (property.substr(0, 4) == 'font') {
-                $tempspan.css(property, input_style[property]);
-            }
-        }
-        $tempspan.insertAfter($(input));
-        
-        $tempspan.text('m');
-        var dotwidth = -$tempspan.width();
-        $tempspan.text('m.');
-        dotwidth += $tempspan.width();
-        $tempspan.text( $(input).val() + '.' );
-        
-        var text, last = '';
-        while ($tempspan.width() - dotwidth >= x) {
-            text = $tempspan.text();
-            if (text == '.') break;
-            text = text.substr(0,text.length-1);
-            last = text.substr(text.length-1);
-            $tempspan.text(
-                text.substr(0, text.length-1) + '.'
-            );
-        }
-        text = $tempspan.text();
-        text = text.substr(0, text.length-1) + last;
-        return text.length;
-    };
     this.set_date = function(d, preserve) {
         var fields = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/.exec( $(this.input).val() );
         var year, month, day, hour, minute, dow;
@@ -68,13 +13,13 @@ function DateTimeInput(input) {
             month = new Number(month) - 1;
         }
         if (!preserve) preserve = { };
-        
+
         if (preserve.year  ) d.setFullYear(year  );
         if (preserve.month ) d.setMonth   (month );
         if (preserve.day   ) d.setDate    (day   );
         if (preserve.hour  ) d.setHours   (hour  );
         if (preserve.minute) d.setMinutes (minute);
-        
+
         year = d.getFullYear();
         month = new Number(d.getMonth()) + 1;
         day = d.getDate();
@@ -83,13 +28,13 @@ function DateTimeInput(input) {
         dow = ([
             gettext('Su'), gettext('Mo'), gettext('Tu'), gettext('We'), gettext('Th'), gettext('Fr'), gettext('Sa')
         ])[ d.getDay() ];
-        
+
         function pad(str,n) {
             var s = new String(str);
             while (s.length < n) s = '0'+s;
             return s;
         }
-        
+
         var nval = ''
         + pad(  year,4) + '-'
         + pad( month,2) + '-'
@@ -99,110 +44,10 @@ function DateTimeInput(input) {
         + dow;
         $(this.input).val( nval ).change();
     };
-    this.scroll = function(pos, delta) {
-        var input = this.input;
-        var fields = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/.exec( $(input).val() );
-        if (!fields) {
-            carp('Invalid date:', $(input).val());
-            return;
-        }
-        
-        var i = ([
-            undefined,
-            1,1,1,1,
-            undefined,
-            2,2,
-            undefined,
-            3,3,
-            undefined,
-            4,4,
-            undefined,
-            5,5,
-            undefined,
-            3,3
-        ])[pos];
-        if (i == undefined) return;
-        fields[i] = new Number(fields[i]) + delta;
-        
-        var year   = fields[1];
-        var month  = fields[2];
-        var day    = fields[3];
-        var hour   = fields[4];
-        var minute = fields[5];
-        month = new Number(month) - 1;
-        
-        var d = new Date();
-        d.setFullYear(year);
-        d.setMonth(month);
-        d.setDate(day);
-        d.setHours(hour);
-        d.setMinutes(minute);
-        d.setSeconds(0);
-        d.setMilliseconds(0);
-        
-        this.set_date(d);
-        
-        input.selectionStart = input.selectionEnd = pos;
-    };
 }
 
 function DateInput(input) {
     this.input = input;
-    this.cursor_pos = function(evt) {
-        var input = this.input;
-        if (!this.x_pos) this.x_pos = $(input).offset().left;
-        var input_style;
-        try {
-            input_style = getComputedStyle(input, '');
-        } catch(e) {
-            input_style = input.currentStyle;
-        }
-        if (input_style == undefined) input_style = {};
-        
-        var padding = input_style.paddingLeft || input_style['padding-left'];
-        if (/^(\d+)(?:px)?$/.test(padding)) padding = new Number(RegExp.$1);
-        else padding = 0;
-        var border = input_style.borderLeftWidth || input_style['border-left-width'];
-        if (/^(\d+)(?:px)?$/.test(border )) border  = new Number(RegExp.$1);
-        else border = 0;
-        
-        var x = evt.clientX - this.x_pos - padding - border;
-        
-        var $tempspan = $('#datetime-temp');
-        if ($tempspan.length == 0) $tempspan = $('<span id="datetime-temp">').css({
-            position: 'absolute',
-            top: '-100px'
-        });
-        for (var property in input_style) {
-            
-            if (property >= 0) property = input_style[ property ];  // XXX nasty Chrome hack
-            
-            if (property.substr(0, 4) == 'font') {
-                $tempspan.css(property, input_style[property]);
-            }
-        }
-        $tempspan.insertAfter($(input));
-        
-        $tempspan.text('m');
-        var dotwidth = -$tempspan.width();
-        $tempspan.text('m.');
-        dotwidth += $tempspan.width();
-        $tempspan.text( $(input).val() + '.' );
-        
-        var text, last = '';
-        while ($tempspan.width() - dotwidth >= x) {
-            text = $tempspan.text();
-            if (text == '.') break;
-            text = text.substr(0,text.length-1);
-            last = text.substr(text.length-1);
-            $tempspan.text(
-                text.substr(0, text.length-1) + '.'
-            );
-        }
-        text = $tempspan.text();
-        text = text.substr(0, text.length-1) + last;
-        return text.length;
-    };
     this.set_date = function(d, preserve) {
         var fields = /^(\d{4})-(\d{2})-(\d{2})/.exec( $(this.input).val() );
         var year, month, day,  dow;
@@ -214,24 +59,24 @@ function DateInput(input) {
             month = new Number(month) - 1;
         }
         if (!preserve) preserve = { };
-        
+
         if (preserve.year ) d.setFullYear(year );
         if (preserve.month) d.setMonth   (month);
         if (preserve.day  ) d.setDate    (day  );
-        
+
         year = d.getFullYear();
         month = new Number(d.getMonth()) + 1;
         day = d.getDate();
         dow = ([
             gettext('Su'), gettext('Mo'), gettext('Tu'), gettext('We'), gettext('Th'), gettext('Fr'), gettext('Sa')
         ])[ d.getDay() ];
-        
+
         function pad(str,n) {
             var s = new String(str);
             while (s.length < n) s = '0'+s;
             return s;
         }
-        
+
         var nval = ''
         + pad(  year,4) + '-'
         + pad( month,2) + '-'
@@ -239,65 +84,26 @@ function DateInput(input) {
         + dow;
         $(this.input).val( nval ).change();
     };
-    this.scroll = function(pos, delta) {
-        var input = this.input;
-        var fields = /^(\d{4})-(\d{2})-(\d{2})/.exec( $(input).val() );
-        if (!fields) {
-            carp('Invalid date:', $(input).val());
-            return;
-        }
-        
-        var i = ([
-            undefined,
-            1,1,1,1,
-            undefined,
-            2,2,
-            undefined,
-            3,3,
-            undefined,
-            3,3
-        ])[pos];
-        if (i == undefined) return;
-        fields[i] = new Number(fields[i]) + delta;
-        
-        var year   = fields[1];
-        var month  = fields[2];
-        var day    = fields[3];
-        month = new Number(month) - 1;
-        
-        var d = new Date();
-        d.setFullYear(year);
-        d.setMonth(month);
-        d.setDate(day);
-        d.setHours(0);
-        d.setMinutes(0);
-        d.setSeconds(0);
-        d.setMilliseconds(0);
-        
-        this.set_date(d);
-        
-        input.selectionStart = input.selectionEnd = pos;
-    };
 }
 
 (function($) {
-    $('span.dtpicker-trigger').live('click', function() {
+    $('span.js-dtpicker-trigger').live('click', function() {
         var $dtp = $('.datetimepicker');
         var x = $(this).offset().left + $(this).width();
         var y = simple_offset(this).top - $('#container').offset().top; // not $(this).offset().top because of scrolling fixed #container, in which the dtpicker also is
         var $input = $(this).data('input');
-        
+
         // check if Y doesn't reach below the current screen height
         var d = y + $dtp.outerHeight()  -  $(window).outerHeight();
         if (d > 0) y -= d;
         if (y < 0) y = 0;   // But rather reach below bottom than above top
-        
+
         $('.datetimepicker').css({
             top : y + 'px',
             left: x + 'px'
         }).toggle().data( 'input', $input );
     });
-    
+
     function datetime_init() {
         $('.vDateTimeInput,.vDateInput').each( function() {
             var $input = $(this);
@@ -309,14 +115,14 @@ function DateInput(input) {
                 else {
                     $input.data('dti', new DateInput(this));
                 }
-                
-                $(  '<span class="dtpicker-trigger"><img src="'
+
+                $(  '<span class="js-dtpicker-trigger"><img src="'
                     +MEDIA_URL
                     +'ico/16/vcalendar.png" alt="cal" /></span>'
                 )
                 .data('input', $input)
                 .insertAfter(this);
-                
+
                 $input.keydown(function(evt) {
                     var delta = 0;
                     if (evt.keyCode == 38) delta =  1;
@@ -333,7 +139,7 @@ function DateInput(input) {
 
     var timepicker_html;
     function media_dependent_datetime_init(evt) {
-        
+
         if ( ! timepicker_html ) {
             var args = arguments; args._this = this;
             get_html_chunk('timepicker', function(data) {
@@ -342,17 +148,17 @@ function DateInput(input) {
             });
             return;
         }
-        
+
         // create the datetimepicker div
         if ($('.datetimepicker').length) { }    // but only if there is none yet
         else if (
                evt.type == 'content_added'  // and we added something that uses a datepicker
-            && $(evt.target).find('.dtpicker-trigger').length == 0    // if anything
+            && $(evt.target).find('.js-dtpicker-trigger').length == 0    // if anything
         ) { }
         else {
             // Container creation
             var $dtpicker = $('<div class="datetimepicker">');
-            
+
             // Date picker
             var $datepicker = $('<div class="datepicker">');
             $datepicker.datepicker(new DATEPICKER_OPTIONS({
@@ -368,18 +174,19 @@ function DateInput(input) {
                     d.setSeconds(0);
                     d.setMilliseconds(0);
                     dti.set_date(d, {/*preserve*/hour:true,minute:true});
+                    $(this).closest('.datetimepicker').hide();
                 },
                 onClose: function() {
                     $(this).closest('.datetimepicker').hide();
                 }
             }));
             $datepicker.appendTo($dtpicker);
-            
+
             // Time picker
             var $timepicker = $('<div class="timepicker">')
             .html(timepicker_html).appendTo($dtpicker);
-            
-            
+
+
             // Container placement
             $dtpicker.appendTo(
                    $('.change-form').get(0)
@@ -387,22 +194,8 @@ function DateInput(input) {
                 || $('body').get(0)
             );
         }
-        
-        // mousewheel datetime scrolling
-        function mousewheel_handler(evt, delta) {
-            var dti = $(this).data('dti');
-            var pos = dti.cursor_pos(evt);
-            dti.scroll(pos, delta / Math.abs(delta||1));
-            evt.preventDefault();
-        };
-        if (DEBUG)  // FIXME: mousewheel scrolling broken!
-        $('.vDateTimeInput,.vDateInput').not('.mwheel-enhanced').focus( function() {
-            $(this)  .bind('mousewheel', mousewheel_handler);
-        }).blur( function() {
-            $(this).unbind('mousewheel', mousewheel_handler);
-        }).addClass('mwheel-enhanced');
     }
-    
+
     $('.js-dtpicker-close').live('click', function(evt) {
         if (evt.button != 0) return;
         $(this).closest('.datetimepicker').hide();
@@ -428,24 +221,11 @@ function DateInput(input) {
             }
         }
         dti.set_date(d, {/*preserve*/year:true,month:true,day:true});
+        $(this).closest('.datetimepicker').hide();
     });
-    
+
     $( document ).bind('content_added', datetime_init);
     $( document ).bind('content_added', media_dependent_datetime_init);
     $( document ).one ('media_loaded' , media_dependent_datetime_init);
-    
-    // Close the datetimepicker when something else is clicked
-    $('body').live('click', function(evt) {
-        // ignore clicking on the datepicker triggering icon
-        if ($(evt.target).closest('.dtpicker-trigger').length) return true;
-        // ignore clicking on the datepicker itself
-        if ($(evt.target).closest('.datetimepicker').length)   return true;
-        // if there's no datepicker shown, don't attempt to hide it
-        if ($('.datetimepicker').not(':hidden').length == 0)   return true;
-        // all else failed, hide all present datepickers
-        $('.datetimepicker').hide();
-        // and let the click be processed as usual
-        return true;
-    });
 
 })(jQuery);

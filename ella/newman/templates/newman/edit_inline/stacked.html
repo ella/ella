@@ -10,6 +10,15 @@
     <b>{{ inline_admin_formset.opts.verbose_name|title }}:</b>&nbsp;{% if inline_admin_form.original %}{{ inline_admin_form.original }}{% else %} #{{ forloop.counter }}{% endif %}
   {% endif %}
     {% if inline_admin_formset.formset.can_delete and inline_admin_form.original %}<span class="delete">{{ inline_admin_form.deletion_field.field }} {{ inline_admin_form.deletion_field.label_tag }}</span>{% endif %}
+
+    {% if inline_admin_form.original and inline_admin_form.form.show_edit_url %}
+        {# show_edit_url must be defined on Form due to custom fields from InlineAdmin class are not copied... WTF #}
+        <span class="admin-url">
+            &nbsp;&nbsp;&nbsp;
+            <a class="btn" href="{% get_newman_url for inline_admin_form.original %}">{% trans 'Change' %}</a>
+        </span>
+    {% endif %}
+
   {% if inline_admin_form.show_url %}
   <p><a href="{% url newman:obj-redirect inline_admin_form.original_content_type_id inline_admin_form.original.id %}">{% trans "View on site" %}</a></p>
   {% endif %}

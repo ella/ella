@@ -86,6 +86,7 @@ class MetaInlineForm(modelforms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(MetaInlineForm, self).__init__(*args, **kwargs)
+        self.show_edit_url = True # shows edit button
         core_signals.request_finished.connect(receiver=MetaInlineForm.reset_export_enumerator)
         existing_object = False
         new_object = False
@@ -153,7 +154,10 @@ class MetaInlineForm(modelforms.ModelForm):
         """
         self.cleaned_data['position_id'] = self.data[self.get_date_field_key('position_id')]
         self.cleaned_data['position_from'] = self.data[self.get_date_field_key('position_from')]
-        self.cleaned_data['position_to'] = self.data[self.get_date_field_key('position_to')]
+        data_position_to = self.data[self.get_date_field_key('position_to')]
+        if data_position_to:
+            self.cleaned_data['position_to'] = data_position_to
+            print 'Position to: [%s]' %  self.cleaned_data['position_to']
         self.cleaned_data['export'] = self.data[self.get_date_field_key('export')]
         return self.cleaned_data
 
