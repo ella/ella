@@ -1,4 +1,5 @@
 import time
+import re
 import logging
 log = logging.getLogger('ella.core.middleware')
 
@@ -13,11 +14,20 @@ from django.conf import settings
 ECACHE_INFO = 'ella.core.middleware.ECACHE_INFO'
 
 DOUBLE_RENDER = getattr(settings, 'DOUBLE_RENDER', False)
+DOUBLE_RENDER_EXCLUDE_URLS = getattr(settings, 'DOUBLE_RENDER_EXCLUDE_URLS', None)
 
 class DoubleRenderMiddleware(object):
     def process_response(self, request, response):
-        if response.status_code != 200 or not response['Content-Type'].startswith('text') or not DOUBLE_RENDER:
+        if response.status_code != 200 \
+            or not response['Content-Type'].startswith('text') \
+            or not request.method == 'GET' \
+            or not DOUBLE_RENDER:
             return response
+
+        if DOUBLE_RENDER_EXCLUDE_URLS is not None:
+            for pattern in DOUBLE_RENDER_EXCLUDE_URLS:
+                if re.match(pattern, request.path):
+                    return response
 
         try:
             c = template.RequestContext(request, {'SECOND_RENDER': True})
