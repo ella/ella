@@ -62,6 +62,11 @@ BOX_PHOTO_FORMATS = (
     ('nudle_vyska', _('Noodle to height')),
 )
 
+BOX_TYPES = (
+    ('link', _('Link')),
+    ('inline', _('Inline')),
+)
+
 class EditorBoxForm(forms.Form):
     box_obj_ct = forms.ModelChoiceField(ContentType.objects.all(), None, cache_choices=True, required=True, widget=widgets.ContentTypeWidget, label='')
     box_obj_id = forms.IntegerField(label='', min_value=0, widget=widgets.ForeignKeyGenericRawIdWidget)
@@ -71,5 +76,6 @@ class EditorBoxForm(forms.Form):
     box_photo_meta_show_author = forms.BooleanField(required=False, label=_('Author'))
     box_photo_meta_show_description = forms.BooleanField(required=False, label=_('Description'))
     box_photo_meta_show_detail = forms.BooleanField(required=False, label=_('Magnifying'))
+    box_type = forms.ChoiceField(choices=BOX_TYPES, required=False, label=_('Box type'), initial='link')
     box_obj_params = forms.CharField(label=_('Extra parameters'), max_length=300, required=False, widget=forms.Textarea(attrs={'rows': 3, 'style': 'width:98%'}))
 
