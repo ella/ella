@@ -972,7 +972,6 @@ $( function() {
     function changelist_search($input) {
         if ($('#changelist').length == 0) return;   // We're not in changelist
         var search_terms = $input.val();
-        if (!search_terms) return;  // Nothing to search for
         var adr_term = '&q=' + search_terms;
         var loaded = Kobayashi.closest_loaded( $input.get(0) );
         if (loaded.id == 'content') {
