@@ -33,7 +33,6 @@ class DoubleRenderMiddleware(object):
     def process_response(self, request, response):
         if response.status_code != 200 \
             or not response['Content-Type'].startswith('text') \
-            or not request.method == 'GET' \
             or not DOUBLE_RENDER:
             return response
 
