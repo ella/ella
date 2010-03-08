@@ -71,6 +71,7 @@ class MetaInlineForm(modelforms.ModelForm):
     position_id = HiddenIntegerField(required=False)
     position_from =  DateTimeField(label=_('Visible From'), widget=widgets.DateTimeWidget)
     position_to =  DateTimeField(label=_('Visible To'), widget=widgets.DateTimeWidget, required=False)
+    position = IntegerField(required=False)
     export =  modelforms.ModelChoiceField(models.Export.objects.all(), label=_('Export'))
     _export_stack = dict()
     # override base_fields and include all the other declared fields
@@ -80,25 +81,27 @@ class MetaInlineForm(modelforms.ModelForm):
             ('position_id', HiddenIntegerField(label=u'', required=False)),
             ('position_from', DateTimeField(label=_('Visible From'), widget=widgets.DateTimeWidget)),
             ('position_to', DateTimeField(label=_('Visible To'), widget=widgets.DateTimeWidget, required=False)),
+            ('position', IntegerField(required=False)),
             ('export', modelforms.ModelChoiceField(models.Export.objects.all(), initial=None, label=_('Export'), show_hidden_initial=True))
         )
     )
 
     def __init__(self, *args, **kwargs):
         super(MetaInlineForm, self).__init__(*args, **kwargs)
-        self.show_edit_url = True # shows edit button
+        self.show_edit_url = False # shows edit button if set to True
         core_signals.request_finished.connect(receiver=MetaInlineForm.reset_export_enumerator)
         existing_object = False
         new_object = False
         id_initial = None
         from_initial = to_initial = ''
         export_initial = None
+        position_initial = None
         export_qs = models.Export.objects.all()
         if 'instance' in kwargs and 'data' not in kwargs:
             existing_object = True
             instance = kwargs['instance']
             if instance:
-                id_initial, from_initial, to_initial, export_initial = self.get_initial_data(instance)
+                id_initial, from_initial, to_initial, export_initial, position_initial = self.get_initial_data(instance)
         elif 'data' not in kwargs:
             new_object = True
 
@@ -115,6 +118,10 @@ class MetaInlineForm(modelforms.ModelForm):
             DateTimeField(initial=to_initial, label=_('Visible To'), widget=widgets.DateTimeWidget, required=False)
         )
         self.assign_init_field(
+            'position', 
+            IntegerField(initial=position_initial, required=False)
+        )
+        self.assign_init_field(
             'export',
             modelforms.ModelChoiceField(export_qs, initial=export_initial, label=_('Export'), show_hidden_initial=True)
         )
@@ -123,7 +130,7 @@ class MetaInlineForm(modelforms.ModelForm):
         self.fields[field_name] = self.base_fields[field_name] = value
 
     def get_initial_data(self, instance):
-        " @return tuple (visible_from, visible_to, export_initial) "
+        " @return tuple (visible_from, visible_to, export_initial, position) "
         positions = models.ExportPosition.objects.filter(object=instance)
         if not positions:
             return ('', '', None)
@@ -135,7 +142,7 @@ class MetaInlineForm(modelforms.ModelForm):
             pos = positions[0]
         elif pcount > 1:
             pos = MetaInlineForm._export_stack[instance].pop()
-        out = (pos.pk, pos.visible_from, pos.visible_to, pos.export.pk)
+        out = (pos.pk, pos.visible_from, pos.visible_to, pos.export.pk, pos.position)
         return out
 
     @staticmethod
@@ -154,6 +161,7 @@ class MetaInlineForm(modelforms.ModelForm):
         """
         self.cleaned_data['position_id'] = self.data[self.get_date_field_key('position_id')]
         self.cleaned_data['position_from'] = self.data[self.get_date_field_key('position_from')]
+        self.cleaned_data['position'] = self.data[self.get_date_field_key('position')]
         data_position_to = self.data[self.get_date_field_key('position_to')]
         if data_position_to:
             self.cleaned_data['position_to'] = data_position_to
@@ -180,6 +188,7 @@ class MetaInlineForm(modelforms.ModelForm):
             position.export = export
             position.visible_from = self.cleaned_data['position_from']
             position.visible_to = self.cleaned_data['position_to']
+            position.position = int(self.cleaned_data['position'])
             position.save()
 
         if commit:
