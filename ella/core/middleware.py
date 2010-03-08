@@ -1,4 +1,5 @@
 import time
+import re
 import logging
 log = logging.getLogger('ella.core.middleware')
 
@@ -8,16 +9,37 @@ from django.core.cache import cache
 from django.utils.cache import get_cache_key, add_never_cache_headers, learn_cache_key
 from django.conf import settings
 
-
-
 ECACHE_INFO = 'ella.core.middleware.ECACHE_INFO'
 
 DOUBLE_RENDER = getattr(settings, 'DOUBLE_RENDER', False)
+DOUBLE_RENDER_EXCLUDE_URLS = getattr(settings, 'DOUBLE_RENDER_EXCLUDE_URLS', None)
 
 class DoubleRenderMiddleware(object):
+
+    def _get_excluded_urls(self):
+        if hasattr(self, '_excluded_urls'):
+            return self._excluded_urls
+
+        if DOUBLE_RENDER_EXCLUDE_URLS is None:
+            self._excluded_urls = None
+            return None
+
+        self._excluded_urls = ()
+        for url in DOUBLE_RENDER_EXCLUDE_URLS:
+            self._excluded_urls += (re.compile(url),)
+
+        return self._excluded_urls
+
     def process_response(self, request, response):
-        if response.status_code != 200 or not response['Content-Type'].startswith('text') or not DOUBLE_RENDER:
+        if response.status_code != 200 \
+            or not response['Content-Type'].startswith('text') \
+            or not DOUBLE_RENDER:
             return response
+
+        if self._get_excluded_urls() is not None:
+            for pattern in self._get_excluded_urls():
+                if pattern.match(request.path):
+                    return response
 
         try:
             c = template.RequestContext(request, {'SECOND_RENDER': True})

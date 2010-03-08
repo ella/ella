@@ -128,9 +128,11 @@ $(function(){
         $('#rich-box').load(BASE_URL+'nm/editor-box/', function(){
             $('#id_box_obj_ct').bind('change', function(){
                 if(getTypeFromPath($('#id_box_obj_ct').val()) == 'photos.photo'){
+                    $('#rich-box-attrs').hide();
                     $('#rich-photo-format').show();
                 } else {
                     $('#rich-photo-format').hide();
+                    $('#rich-box-attrs').show();
                 }
             });
             $('#lookup_id_box_obj_id').bind('click', function(e){
@@ -148,21 +150,25 @@ $(function(){
                         var params = $('#id_box_obj_params').val().replace(/\n+/g, ' ');
                         // Add format and size info for photo
                         var addon = '';
+                        var box_type = '';
                         if(getTypeFromPath($('#id_box_obj_ct').val()) == 'photos.photo'){
                             addon = '_'+$('#id_box_photo_size').val()+'_'+$('#id_box_photo_format').val();
+                            box_type = 'inline';
                             // Add extra parameters
                             $('.photo-meta input[type=checkbox]:checked','#rich-photo-format').each(function(){
                                 params += ((params) ? '\n' : '') + $(this).attr('name').replace('box_photo_meta_','') + ':1';
                             });
+                        } else {
+                        	box_type = $('#id_box_type').val();
                         }
                         // Insert code
                         if(!edit_content){
                             $.markItUp({
-                                openWith:'{% box inline'+addon+' for '+type+' with pk '+$('#id_box_obj_id').val()+' %}'+((params) ? '\n'+params+'\n' : '')+'{% endbox %}'
+                                openWith:'\n{% box '+box_type+addon+' for '+type+' with pk '+$('#id_box_obj_id').val()+' %}'+((params) ? '\n'+params+'\n' : '')+'{% endbox %}\n'
                             });
                         } else if(focused){
                             var old = focused.val();
-                            focused.val(old.replace(edit_content,'{% box inline'+addon+' for '+type+' with pk '+$('#id_box_obj_id').val()+' %}'+((params) ? '\n'+params+'\n' : '')+'{% endbox %}'))
+                            focused.val(old.replace(edit_content,'{% box '+box_type+addon+' for '+type+' with pk '+$('#id_box_obj_id').val()+' %}'+((params) ? '\n'+params+'\n' : '')+'{% endbox %}'));
                             edit_content = '';
                         }
                         // Reset and close dialog
@@ -254,7 +260,7 @@ function markitdown_get_preview_element(evt) {
 function markitdown_trigger_preview(evt) {
     // click into preview iframe causes reload of the iframe
     var $preview_a_element = markitdown_get_preview_element(evt);
-    $preview_a_element.trigger('mouseup'); 
+    $preview_a_element.trigger('mouseup');
 }
 
 // resize appropriately after enter key is pressed inside markItUp <textarea> element.
@@ -353,23 +359,23 @@ function markitdown_register_preview_shortcut() {
     var KEY_SHORTCUT = KEY_J = 74;
     var ed = $('.rich_text_area.markItUpEditor');
     ed.keyup(
-        function (e) { 
+        function (e) {
             if (e.which == KEY_CTRL) {
-                isCtrl = false; 
+                isCtrl = false;
             }
         });
     ed.keydown(
         function (e) {
             if (e.which == KEY_CTRL) {
-                isCtrl = true; 
+                isCtrl = true;
             }
             if ( (e.which == KEY_SHORTCUT && isCtrl == true) || (e.which == KEY_ESC) ) { //run code for ALT+A
                 markitdown_trigger_preview(e);
                 isCtrl = false;
-                return false; 
+                return false;
             }
         }
-    ); 
+    );
 }
 
 $(document).bind(

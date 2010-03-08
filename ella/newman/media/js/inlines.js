@@ -1,7 +1,89 @@
 var NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER = 1000;
 
 // encapsulate functionality into NewmanInline object
-NewmanInline = new Object();
+var NewmanInline = function() {
+    var me = {};
+
+    // Newman form handler (handles form customised functionality, inline customisations, etc.)
+    var registered_handler_objects = [];
+    var active_handlers = [];
+
+    function clean_handler_registry() {
+        var i;
+        var len = registered_handler_objects.length;
+        for (i = 0; i < len; i++) {
+            registered_handler_objects.pop();
+        }
+
+        len = active_handlers.length;
+        for (i = 0; i < len; i++) {
+            active_handlers.pop();
+        }
+    }
+    me.clean_handler_registry = clean_handler_registry;
+
+    function get_handler_registry() {
+        return registered_handler_objects;
+    }
+    me.get_handler_registry = get_handler_registry;
+
+    function register_form_handler(handler_object) {
+        registered_handler_objects.push(handler_object);
+    }
+    me.register_form_handler = register_form_handler;
+
+    function run_form_handlers() {
+        var i;
+        var handler;
+        for (i = 0; i < registered_handler_objects.length; i++) {
+            handler = registered_handler_objects[i];
+            if (!handler.is_suitable()) continue;
+
+            active_handlers.push(handler);
+            handler.initialize();
+            var form = $('.change-form');
+            form.bind( 'preset_load_initiated.' + handler.name, handler.preset_load_initiated );
+            form.bind( 'preset_load_completed.' + handler.name, handler.preset_load_completed );
+        }
+    }
+    me.run_form_handlers = run_form_handlers;
+
+    return me;
+}();
+
+// TODO jednotne rozhrani pro JS osetrovani formularu, customizace plneni formu z presetu atp., osetreni specialit v inlines..
+// FormHandler class (used rather in terms of interface)
+var FormHandler = function () {
+    var me = {};
+    me.name = 'unset'; // should be set to the name useful for identifying concrete FormHandler object.
+
+    // initializes form, register custom event handlers, etc.
+    me.initialize = function () {
+    };
+
+    // detects whether form handler should be used or not.
+    me.is_suitable = function () {
+        return false;
+    };
+
+    // called when preset is being loaded into the form
+    me.preset_load_initiated = function (evt, preset) {
+    };
+
+    // called when preset loading completed
+    me.preset_load_completed = function (evt) {
+    };
+
+    me.validate_form = function ($form) {
+        return true;
+    };
+
+    // handles adding of new inline item
+    me.add_inline_item = function (evt) {
+    };
+
+    return me;
+};
 
 (function($) {
     
@@ -19,24 +101,33 @@ NewmanInline = new Object();
         $(this).closest('.inline-item').remove();
     });
 
-    function remove_inlineadmin_element_value(element_selector, name_tail) {
+    function remove_inlineadmin_element_value(element_selector, name_tail, new_value) {
+        var nval = '';
+        if (new_value) {
+            nval = new_value;
+        }
+        var regex = new RegExp(name_tail);
         // removes IDs created when preset is loaded
         function remove_element_value() {
+            /*
             var parts = this.name.split('-');
             if ( parts.length == 0 ) {
                 return;
             }
             var last_part = parts[ parts.length - 1 ];
             if (last_part == name_tail) {
-                $(this).val('');
-                carp('Blanking value for input with name: ' + this.name);
+            */
+            if ( regex.test(this.name) ) {
+                $(this).val(nval);
+                carp('Blanking value [' + nval + '] for input with name: ' + this.name);
             }
         }
 
         $(element_selector).each(
-            remove_element_value
+            remove_element_value // callback
         );
     }
+    NewmanInline.remove_inlineadmin_element_value = remove_inlineadmin_element_value;
 
     //// listings
     function add_listing(evt) {
@@ -116,6 +207,66 @@ NewmanInline = new Object();
     }
     init_main_category_button();
     $(document).bind('content_added', init_main_category_button);
+
+    // Comments (ellacomments)
+    function remove_ellacomments_ids() {
+        remove_inlineadmin_element_value(
+            'input[name^=ellacomments-commentoptionsobject-target_ct-target_id-0-]',
+            'id'
+        );
+    }
+    $('.change-form').bind('preset_load_completed', remove_ellacomments_ids);
+    carp('remove_ellacomments_ids bind');
+
+    
+})(jQuery);
+
+
+// Gallery inlines
+//var GalleryFormHandler = Object.beget(FormHandler);
+var GalleryFormHandler = function () {
+    var me = FormHandler();
+    me.name = 'gallery';
+
+    me.is_suitable = function () {
+        var sortables = $(document).find('.gallery-items-sortable').not('ui-sortable');
+        if (sortables.length == 0) {
+            return false;
+        }
+        return true;
+    };
+
+    // called when preset is being loaded into the form
+    me.preset_load_initiated = function (evt, preset) {
+        carp('Preset load initiated ' + preset);
+    };
+
+    // called when preset loading completed
+    me.preset_load_completed = function (evt) {
+        carp('Preset load completed ' + evt);
+    };
+
+    return me;
+};
+
+var TestFormHandler = function() {
+    var me = FormHandler();
+
+    function is_suitable() {
+        var found = $(document).find('.js-poll-question-container');
+        return found.length != 0;
+    }
+    me.is_suitable = is_suitable;
+
+    function preset_load_initiated(evt, preset) {
+        //alert('TEST!');
+    }
+    me.preset_load_initiated = preset_load_initiated;
+
+    return me;
+};
+
+(function($) {
 
     //// gallery items
     function max_order() {
@@ -276,11 +427,11 @@ NewmanInline = new Object();
     function remove_gallery_item_ids() {
         // remove target_ids (input with name="galleryitem_set-0-id")
         // remove gallery (input with name="galleryitem_set-0-gallery")
-        remove_inlineadmin_element_value(
+        NewmanInline.remove_inlineadmin_element_value(
             '.gallery-items-sortable input[name^=galleryitem_set-]',
             'id'
         );
-        remove_inlineadmin_element_value(
+        NewmanInline.remove_inlineadmin_element_value(
             '.gallery-items-sortable input[name^=galleryitem_set-]',
             'gallery'
         );
@@ -326,7 +477,8 @@ NewmanInline = new Object();
                 alt: ''
             });
             $heading.find('span').empty();
-            
+           
+            // remove items with deleted id
             if (!id) {
                 $heading.remove();
                 return;
@@ -395,23 +547,29 @@ NewmanInline = new Object();
             init_gallery( evt.target );
             remove_gallery_item_ids();
         });
+
+        //delete item from gallery (not saved item) FIXME
+        var $buttons = $('#gallery_form').find('a.delete-item-button');
+        carp('Buttons: ' + $buttons.length.toString());
+        $buttons.each( function (ordering) {
+            var $gi = $(this).closest('.gallery-item');
+        });
     }
     init_gallery();
+    carp('CALLED init_gallery');
     
     $(document).bind('content_added', function(evt) {
         $('#gallery_form').removeData('validation').data('validation', check_gallery_changeform);
         init_gallery( evt.target );
     });
-
-    // Comments (ellacomments)
-    function remove_ellacomments_ids() {
-        remove_inlineadmin_element_value(
-            'input[name^=ellacomments-commentoptionsobject-target_ct-target_id-0-]',
-            'id'
-        );
-    }
-    $('.change-form').bind('preset_load_completed', remove_ellacomments_ids);
-    carp('remove_ellacomments_ids bind');
-
-    
 })(jQuery);
+
+//ommit registration when running in nosetests environment
+if (typeof nosejs !== "undefined") {
+} else {
+    NewmanInline.register_form_handler( GalleryFormHandler() );
+    NewmanInline.register_form_handler( TestFormHandler() );
+
+    // Run relevant form handlers.
+    NewmanInline.run_form_handlers();
+}
