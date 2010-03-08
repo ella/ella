@@ -46,7 +46,7 @@ class DoubleRenderMiddleware(object):
             t = template.Template(response.content)
             response.content = t.render(c)
         except Exception, e:
-            log.warning('Failed to double render on (%s)', e)
+            log.warning('Failed to double render on (%s)', unicode(e).encode('utf8'))
         return response
 
 class CacheMiddleware(DjangoCacheMiddleware):
