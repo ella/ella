@@ -65,6 +65,9 @@ def get_timelined_items(slug, range_from, range_to, step=TIMELINE_STEP):
         column.append(itemizer.datetime_from.strftime(DATETIME_FORMAT))
         for i in itemizer:
             i.column_date_from = itemizer.datetime_from.strftime(DATETIME_FORMAT)
+            # add HitCounts
+            if i.main_placement and i.main_placement.hitcount_set.count() > 0:
+                i.hitcount = i.main_placement.hitcount_set.all()[0]
             column.append(i)
         if not out or (out and out[-1] != column):
             while (len(column) - 1) < itemizer.export.max_visible_items:

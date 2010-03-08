@@ -1226,6 +1226,7 @@ function save_change_form_success(text_data) {
         }
 
         show_ok(response_msg);
+        carp('Running Postsave Action Table');
         action_table.run(action);
     } else {
         show_ok(response_msg);
@@ -1702,6 +1703,15 @@ Timeline = new Object();
         $('.suggest-bubble,.suggest-list,.suggest-fields-bubble').css('z-index', '0');
     }
 
+    function remove_beginning_char(address, character) {
+        var ch = '/';
+        if (character) ch = character;
+        if (address.charAt(0) == ch) {
+            return address.substring(1);
+        }
+        return address;
+    }
+
     // register timeline events, etc. (entry point)
 
     function timeline_register() {
@@ -1719,6 +1729,22 @@ Timeline = new Object();
         //$('.timeline-ul').disableSelection();
         //$('.timeline-item').click(item_clicked);
         $('.timeline-item').hover(item_mouse_over, item_mouse_out);
+
+        $('.timeline-item-navigation a.edit').live('mousedown', function(evt) {
+            if (evt.button != 0) return;
+            var from_url = document.location.pathname + document.location.hash;
+            var to_url = $(this).attr('href');
+            // remove /#  from to_url
+            to_url = remove_beginning_char(to_url);
+            to_url = remove_beginning_char(to_url, '#'); 
+            from_url = remove_beginning_char(from_url);
+
+            NewmanLib.ADR_STACK = [
+                { from: from_url, to: to_url }
+            ];
+        });
+
+        /*
         $('.timeline-item-navigation .insert').live(
             'click',
             show_insert_dialog
@@ -1733,6 +1759,7 @@ Timeline = new Object();
             'click',
             hide_dialog
         );
+        */
     }
     Timeline.timeline_register = timeline_register;
 
