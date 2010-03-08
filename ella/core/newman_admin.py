@@ -257,11 +257,17 @@ class CategoryAdmin(newman.NewmanModelAdmin):
     suggest_fields = {'tree_parent': ('__unicode__', 'title', 'slug')}
 
 class HitCountAdmin(newman.NewmanModelAdmin):
-    list_display = ('target', 'hits', 'target_url')
+    list_display = ('target', 'hits', 'publish_from', 'target_url')
 #    list_filter = ('placement__category', 'placement__publish_from')
     raw_id_fields = ('placement',)
     search_fields = ('placement__category__title', 'placement__publishable__pk', 'placement__publishable__title', 'placement__publishable__slug' )
     ordering = ('-hits', '-last_seen',)
+
+    def publish_from(self, object):
+        return object.placement.publish_from
+    publish_from.short_description = _('Publish from')
+    publish_from.allow_tags = True
+    publish_from.order_field = 'placement__publish_from'
 
     def target_url(self, object):
         target = object.target()
@@ -394,7 +400,7 @@ class PublishableAdmin(newman.NewmanModelAdmin):
         'source': ('name', 'url',),
     }
 
-    inlines = [PlacementInlineAdmin, RelatedInlineAdmin]
+    inlines = [PlacementInlineAdmin]
 
     def admin_link(self, object):
         ct = object.content_type

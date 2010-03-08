@@ -18,6 +18,7 @@ __docformat__ = "restructuredtext en"
 # local cache for get_content_type()
 CONTENT_TYPE_MAPPING = {}
 CACHE_TIMEOUT_LONG = getattr(settings, 'CACHE_TIMEOUT_LONG', 60 * 60)
+CATEGORY_LISTINGS_PAGINATE_BY = getattr(settings, 'CATEGORY_LISTINGS_PAGINATE_BY', 20)
 
 class EllaCoreView(object):
     ' Base class for class-based views used in ella.core.views. '
@@ -216,7 +217,8 @@ class ListContentType(EllaCoreView):
                 year = now.year
         return year
 
-    def get_context(self, request, category='', year=None, month=None, day=None, content_type=None, paginate_by=20):
+    def get_context(self, request, category='', year=None, month=None, \
+        day=None, content_type=None, paginate_by=CATEGORY_LISTINGS_PAGINATE_BY):
         # pagination
         if 'p' in request.GET and request.GET['p'].isdigit():
             page_no = int(request.GET['p'])
@@ -277,7 +279,7 @@ class ListContentType(EllaCoreView):
                 'content_type_name' : content_type,
                 'listings' : listings,
                 'category' : cat,
-                'is_homepage': not bool(category),
+                'is_homepage': not bool(category) and page_no == 1 and year is None,
                 'is_title_page': category_title_page,
                 'archive_entry_year' : lambda: self._archive_entry_year(cat),
             }
