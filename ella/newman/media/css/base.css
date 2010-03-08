@@ -515,8 +515,9 @@ fieldset.collapse legend { background-image: url(../ico/16/14_layer_raiselayer.p
 /* TIMELINE */
 
 .timeline-column {
-    width: 110px;
+    width: 140px;
     float: left;
+    padding: 15px;
 }
 
 .timeline-table {
@@ -525,8 +526,21 @@ fieldset.collapse legend { background-image: url(../ico/16/14_layer_raiselayer.p
 
 .timeline-item {
     border: 1px solid gray;
+    border-radius: 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; -khtml-border-radius: 5px;
+    background: rgb(255, 255, 238);
     min-height: 80px;
     overflow: auto;
+    margin-bottom: 5px;
+    /*background: transparent url(../ico/16/foo.png) 0 50% no-repeat;
+    opacity: .7;*/
+}
+
+.timeline-item-hitcounts {
+    padding: 9px;
+}
+
+.timeline-item-navigation {
+    padding: 9px;
 }
 
 .timeline-ul { }
@@ -535,6 +549,10 @@ fieldset.collapse legend { background-image: url(../ico/16/14_layer_raiselayer.p
     text-decoration: underline;
     color: #005F00;
     cursor: pointer;
+}
+
+.timeline-ul .timeline-item p {
+    padding: 4px 9px 0 9px;
 }
 
 .timeline-table .timeline-ul .timeline-item:hover {

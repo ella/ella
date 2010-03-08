@@ -133,7 +133,7 @@ class MetaInlineForm(modelforms.ModelForm):
         " @return tuple (visible_from, visible_to, export_initial, position) "
         positions = models.ExportPosition.objects.filter(object=instance)
         if not positions:
-            return ('', '', None)
+            return ('', '', None, None)
         pcount = positions.count()
         if pcount > 1 and not MetaInlineForm._export_stack.get(instance, False):
             MetaInlineForm._export_stack[instance] = list()
