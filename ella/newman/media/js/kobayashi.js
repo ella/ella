@@ -1,5 +1,8 @@
 KOBAYASHI_VERSION = '2009-10-05';
 
+var CURRENT_HASH = '';
+var KOBAYASHI_ADDRESSBAR_CHECK_INTERVAL = 250; // msec
+
 // Debugging tools
 ;;; function alert_dump(obj, name) {
 ;;;     var s = name ? name + ":\n" : obj.toString ? obj.toString() + ":\n" : '';
@@ -598,14 +601,14 @@ Kobayashi.LOADED_MEDIA = {};
         load_by_hash();
     });
     setTimeout( function() {
-        try {
             if (location.hash != CURRENT_HASH) {
                 CURRENT_HASH = location.hash;
-                $(document).trigger('hashchange');
+                try {
+                    $(document).trigger('hashchange');
+                } catch(e) { carp(e); }
             }
-        } catch(e) { carp(e); }
-        setTimeout(arguments.callee, 500);
-    }, 500);
+        setTimeout(arguments.callee, KOBAYASHI_ADDRESSBAR_CHECK_INTERVAL);
+    }, KOBAYASHI_ADDRESSBAR_CHECK_INTERVAL);
     // End of hash-driven content management
     
     // Loads stuff from an URL to an element like load_by_hash but:
