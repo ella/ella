@@ -604,8 +604,8 @@ Kobayashi.LOADED_MEDIA = {};
                 $(document).trigger('hashchange');
             }
         } catch(e) { carp(e); }
-        setTimeout(arguments.callee, 50);
-    }, 50);
+        setTimeout(arguments.callee, 500);
+    }, 500);
     // End of hash-driven content management
     
     // Loads stuff from an URL to an element like load_by_hash but:
