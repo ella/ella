@@ -6,17 +6,68 @@ KOBAYASHI_VERSION = '2009-10-05';
 ;;;     for (var i in obj) s += i + ': ' + obj[i] + "\n";
 ;;;     alert(s);
 ;;; }
-function carp() {
-    try {
+
+LoggingLib = function () {
+    var me = {};
+    var capabilities = [];
+    var enable_debug_div = false;
+
+    function log_debug_div() {
         $('#debug').append($('<p>').text($.makeArray(arguments).join(' ')));
-    } catch(e) { }
-    try {
-        console.log.apply(this, arguments);
-    } catch(e) {
-        try {
-            console.log(arguments);
-        } catch(e) { }
     }
+
+    function log_console_apply() {
+        console.log.apply(this, arguments);
+    }
+
+    function log_console() {
+        console.log(arguments);
+    }
+
+    function first_log_attempt() {
+        if (enable_debug_div) {
+            try {
+                log_debug_div.apply(null, arguments);
+                capabilities.push(log_debug_div);
+            } catch(e) { }
+        }
+        try {
+            log_console_apply.apply(null, arguments);
+            capabilities.push(log_console_apply);
+        } catch(e) {
+            try {
+                log_console.apply(null, arguments);
+                capabilities.push(log_console);
+            } catch(e) { }
+        }
+    }
+
+    function log_it() {
+        var callback;
+        var len = capabilities.length;
+        for (var i = 0; i < len; i++) {
+            callback = capabilities[i];
+            //callback(arguments);
+            callback.apply(null, arguments);
+        }
+    }
+
+    function log() {
+        if (capabilities.length == 0) {
+            first_log_attempt.apply(null, arguments);
+        } else {
+            log_it.apply(null, arguments);
+        }
+    }
+    me.log = log;
+    me.capabilities = capabilities;
+
+    return me;
+};
+carp_logging = LoggingLib();
+
+function carp() {
+    carp_logging.log.apply(null, arguments);
 }
 
 function arr2map(arr) {
