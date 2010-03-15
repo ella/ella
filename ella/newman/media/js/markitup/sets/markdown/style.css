@@ -2,51 +2,51 @@
 // markItUp!
 // By Jay Salvat - http://markitup.jaysalvat.com/
 // ------------------------------------------------------------------*/
-.markItUp .italic a {
+.markItUpHeader .italic a {
     background-image:url(images/italic.png);
 }
-.markItUp .bold a {
+.markItUpHeader .bold a {
     background-image:url(images/bold.png);
 }
-.markItUp .url a {
+.markItUpHeader .url a {
     background-image:url(images/link.png);
 }
 
-.markItUp .h1 a {
+.markItUpHeader .h1 a {
     background-image:url(images/h1.png);
 }
-.markItUp .h2 a {
+.markItUpHeader .h2 a {
     background-image:url(images/h2.png);
 }
-.markItUp .h3 a {
+.markItUpHeader .h3 a {
     background-image:url(images/h3.png);
 }
 
-.markItUp .list-bullet a {
+.markItUpHeader .list-bullet a {
     background-image:url(images/list-bullet.png);
 }
-.markItUp .list-numeric a {
+.markItUpHeader .list-numeric a {
     background-image:url(images/list-numeric.png);
 }
 
-.markItUp .quote a {
+.markItUpHeader .quote a {
     background-image:url(images/quotes.png);
 }
 
 /* ella specific */
-.markItUp .photo a {
+.markItUpHeader .photo a {
     background-image:url(../../../../ico/ct/16/photo.png);
 }
-.markItUp .gallery a {
+.markItUpHeader .gallery a {
     background-image:url(../../../../ico/ct/16/gallery.png);
 }
-.markItUp .box a {
+.markItUpHeader .box a {
     background-image:url(images/box.png);
 }
-.markItUp .preview a {
+.markItUpHeader .preview a {
     background-image:url(../../../../ico/16/search.png);
 }
-.markItUp .preview_on_site a {
+.markItUpHeader .preview_on_site a {
     background-image:url(../../../../ico/16/web.png);
 }
 
