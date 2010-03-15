@@ -148,19 +148,21 @@ a.icn {
 }
 a.btn {
     padding-top: 4px; padding-bottom: 3px; padding-right: 4px;
-    border: 1px solid #ddd;
+    /*BUTTON FACELIFT border: 1px solid #ddd;*/
+    border: 1px solid #777;
     border-radius: 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; -khtml-border-radius: 5px;
-    background-color: #E9E8DD;
+    /*BUTTON FACELIFT background-color: #E9E8DD;*/
+    background-color: #FFF;
     margin: 3px 2px;
     text-decoration: none;
     color: #000;
 }
 a.btn.def {
     font-weight: bold;
-    border-color: #ccc;
+    /*BUTTON FACELIFT border-color: #ccc;*/
 }
 a:hover.btn {
-    background-color: #EEEEE7;
+    /*BUTTON FACELIFT background-color: #EEEEE7;*/
     border-color: #77B150;
     color: #005F00;
 }
