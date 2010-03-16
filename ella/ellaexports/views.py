@@ -3,6 +3,7 @@ from datetime import datetime
 from django.http import Http404
 from django.conf import settings
 from django.template.defaultfilters import slugify
+from django.template import RequestContext
 from django.utils.translation import ugettext as _
 
 from ella.core.models import Listing, Category, Placement
@@ -116,6 +117,14 @@ class MrssExport(EllaCoreView):
             'link': link
         })
         return context
+
+    def render(self, request, context, template):
+        return render_to_response(
+            template, 
+            context,
+            context_instance=RequestContext(request),
+            content_type='application/xml'
+        )
 
     #def __call__(self, *args, **kwargs):
     #    super(MrssExport, self).__call__(*args, **kwargs)
