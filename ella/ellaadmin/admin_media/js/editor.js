@@ -303,6 +303,11 @@ function build(box){
 						parseParameters(this.checked, 'show_description');
 					})
 				),
+                $('<div></div>').append(
+                    $('<input type="checkbox" id="source"' + ((p.indexOf('show_source') != -1) ? ' checked="checked"' : '') + ' /> <label for="description">Popis</label>').change(function(){
+                        parseParameters(this.checked, 'show_source');
+                    })
+                ),
 				$('<div></div>').append(
 					$('<input type="checkbox" id="authors"' + ((p.indexOf('show_authors') != -1) ? ' checked="checked"' : '') + ' /> <label for="authors">Autoři</label>').change(function(){
 						parseParameters(this.checked, 'show_authors');
