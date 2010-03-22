@@ -222,6 +222,9 @@ var NewmanTextAreaToolbar = function () {
  * Standard toolbar with Bold, Italic, ..., Preview buttons.
  */
 var NewmanTextAreaStandardToolbar = function () {
+    var PREVIEW_URL = BASE_URL + 'nm/editor-preview/';
+    var PREVIEW_VARIABLE = 'text';
+    var PREVIEW_LOADING_GIF = MEDIA_URL + 'ico/15/loading.gif';
     var me = NewmanTextAreaToolbar();
     // selection_handler holds text selection of textarea element.
     var selection_handler = TextAreaSelectionHandler();
@@ -240,20 +243,25 @@ var NewmanTextAreaStandardToolbar = function () {
     };
     button_handlers['list-bullet'] = handle_unordered_list;
     button_handlers['list-numeric'] = handle_ordered_list;
-    var PREVIEW_URL = BASE_URL + 'nm/editor-preview/';
-    var PREVIEW_VARIABLE = 'text';
+    var preview_window = null;
+    me.preview_window = preview_window;
 
-    function renderPreview() {				
+    function render_preview(success_callback) {				
         var res = '';
         $.ajax( 
             {
                 type: 'POST',
-                async: false,
+                async: true,
                 cache: false,
                 url: PREVIEW_URL,
                 data: [ PREVIEW_VARIABLE, '=', encodeURIComponent(me.$text_area.val()) ].join(''),
                 success: function(data) {
-                    res = data; 
+                    res = data;
+                    try {
+                        success_callback(data);
+                    } catch (e) {
+                        carp('Problem calling preview success callback.' + e);
+                    }
                 },
                 error: function(xhr, error_status, error_thrown) {
                     res = [
@@ -267,13 +275,12 @@ var NewmanTextAreaStandardToolbar = function () {
         return res;
     }
 
-    function render_preview_wait(preview_window) {
+    function render_preview_wait() {
         var wait_data = [
             '<html><body>',
             '<div style="position: fixed; left: 20%; top: 20%;">',
             '<img src="',
-            MEDIA_URL,
-            'ico/15/loading.gif',
+            PREVIEW_LOADING_GIF,
             '" alt="" />&nbsp;&nbsp;&nbsp;',
             gettext('Sending'),
             '</div>',
@@ -286,10 +293,26 @@ var NewmanTextAreaStandardToolbar = function () {
             '</body></html>'
         ];
         */
-        carp(wait_data.join(''));
-        preview_window.document.open();
-        preview_window.document.write(wait_data.join(''));
-        preview_window.document.close();
+        me.preview_window.document.open();
+        me.preview_window.document.write(wait_data.join(''));
+        me.preview_window.document.close();
+    }
+
+    function preview_show_callback(data) {
+        if (me.preview_window.document) {
+            var sp;
+            try {
+                sp = me.preview_window.document.documentElement.scrollTop
+            } catch(e) {
+                sp = 0;
+            }
+            me.preview_window.document.open();
+            me.preview_window.document.write(data);
+            me.preview_window.document.close();
+            me.preview_window.document.documentElement.scrollTop = sp;
+            carp('PREVIEW DONE');
+        }
+        //preview_window.focus();
     }
     
     function handle_preview(evt) {
@@ -298,23 +321,9 @@ var NewmanTextAreaStandardToolbar = function () {
             $iframe = $('<iframe class="markItUpPreviewFrame"></iframe>');
         }
         $iframe.insertAfter(me.$text_area);
-        var preview_window = $iframe[$iframe.length-1].contentWindow || frame[$iframe.length-1];
-        render_preview_wait(preview_window);
-        if (preview_window.document) {
-            var sp;
-            try {
-                sp = preview_window.document.documentElement.scrollTop
-            } catch(e) {
-                sp = 0;
-            }
-            var data = renderPreview();
-            preview_window.document.open();
-            preview_window.document.write(data);
-            preview_window.document.close();
-            preview_window.document.documentElement.scrollTop = sp;
-            carp('PREVIEW DONE');
-        }
-        //preview_window.focus();
+        me.preview_window = $iframe[$iframe.length-1].contentWindow || frame[$iframe.length-1];
+        render_preview_wait(me.preview_window);
+        render_preview(preview_show_callback);
     }
 
     function handle_box(evt) {
