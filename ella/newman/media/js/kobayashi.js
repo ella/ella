@@ -2,6 +2,8 @@ KOBAYASHI_VERSION = '2009-10-05';
 
 var CURRENT_HASH = '';
 var KOBAYASHI_ADDRESSBAR_CHECK_INTERVAL = 250; // msec
+var KOBAYASHI_CSS_LOAD_TRIES = 3;
+var KOBAYASHI_CSS_LOAD_TIMEOUT = 250; // msec
 
 // Debugging tools
 ;;; function alert_dump(obj, name) {
@@ -983,7 +985,7 @@ function get_hash(address, options) {
                 ;;; carp('Stylesheet already present: '+url);
                 return true;
             }
-            var tries = 100;
+            var tries = KOBAYASHI_CSS_LOAD_TRIES;
             
             setTimeout(function() {
                 if (--tries < 0) {
@@ -1008,8 +1010,8 @@ function get_hash(address, options) {
                         return;
                     }
                 }
-                else setTimeout(arguments.callee, 100);
-            }, 100);
+                else setTimeout(arguments.callee, KOBAYASHI_CSS_LOAD_TIMEOUT);
+            }, KOBAYASHI_CSS_LOAD_TIMEOUT);
             
             var $csslink = $('<link rel="stylesheet" type="text/css" href="'+url+'" />').appendTo($('head'));
             if ($.isFunction(next_fn)) next_fn(url);
