@@ -10,6 +10,34 @@ var KOBAYASHI_ADDRESSBAR_CHECK_INTERVAL = 250; // msec
 ;;;     alert(s);
 ;;; }
 
+function timer(name) {
+    try {
+        console.time(name);
+    } catch (e) {}
+}
+
+function timerEnd(name) {
+    try {
+        console.timeEnd(name);
+    } catch (e) {}
+}
+
+// timer decorator
+function timer_decorator(name, func) {
+    function wrapped() {
+        var out = null;
+        timer(name);
+        try {
+            out = func.apply(null, arguments);
+        } catch (e) {
+            carp('Error in timer_decorator:' + e.toString());
+        }
+        timerEnd(name);
+        return out;
+    }
+    return wrapped;
+}
+
 LoggingLib = function () {
     var me = {};
     var capabilities = [];
@@ -1032,7 +1060,7 @@ function get_hash(address, options) {
             return true;
         }
         var url = media_queue.shift();
-        load_media(url, {next_fn: draw_media});
+        Kobayashi.load_media(url, {next_fn: draw_media});
     }
     
     // Load a CSS / JavaScript file (given an URL) after previously requested ones have been loaded / failed loading.
