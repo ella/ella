@@ -111,11 +111,14 @@ var TextAreaSelectionHandler = function () {
 
 
 var NewmanTextAreaToolbar = function () {
+    /**
+     * Toolbar prototype. Should be overloaded by its copy (aka inheritance).
+     */ 
     var me = new Object();
+    me.toolbar_generated = false;
+    me.$header = $('<div class="markItUpHeader"></div>');
     var item_counter = 1;
-    var $header = $('<div class="markItUpHeader"></div>');
     var $ul = $('<ul></ul>');
-    var toolbar_generated = false;
 
    
     /**
@@ -145,7 +148,7 @@ var NewmanTextAreaToolbar = function () {
             item_counter, 
             ' ',
             class_name,
-            '"><a title="',
+            '"><a onclick="javascript:return false;" title="',
             accessible_title,
             '" accesskey="',
             access_key,
@@ -203,14 +206,14 @@ var NewmanTextAreaToolbar = function () {
      * @param $text_area Contains textarea for whom should be toolbar generated.
      */
     function get_toolbar($text_area) {
-        if (!toolbar_generated) {
+        if (!me.toolbar_generated) {
             me.$text_area = $text_area;
             me.toolbar_buttons();
             me.register_toolbar_event_handlers();
-            $ul.appendTo($header);
-            toolbar_generated = true;
+            $ul.appendTo(me.$header);
+            me.toolbar_generated = true;
         }
-        return $header;
+        return me.$header;
     }
     me.get_toolbar = get_toolbar;
 
@@ -559,7 +562,7 @@ var NewmanTextAreaStandardToolbar = function () {
     return me;
 };
 
-var NewmanTextArea = function ($text_area) {
+var NewmanTextArea = function ($text_area, extending_configuration_object) {
     /*
      Params:
 
@@ -570,9 +573,10 @@ var NewmanTextArea = function ($text_area) {
     var CONTAINER_HTML_CLASS = 'markItUpContainer';
     var EDITOR_HTML_CLASS = 'markItUpEditor';
     var config = {
-        toolbar: NewmanTextAreaStandardToolbar() // default toolbar generator. Consider assigning 'toolbar' via extending_configuration
+        toolbar: NewmanTextAreaStandardToolbar   // default toolbar generator. Consider assigning 'toolbar' via extending_configuration
                                                  // if toolbar can be generated only once during run-time.
     };
+    var toolbar_obj = null;
 
     function init($text_area, extending_configuration) {
         carp('Initializing NewmanTextArea.' + $text_area);
@@ -583,49 +587,17 @@ var NewmanTextArea = function ($text_area) {
         $text_area.wrap('<div ' + div_id + ' class="' + HTML_CLASS + '"></div>');
         $text_area.wrap('<div class="' + CONTAINER_HTML_CLASS + '"></div>');
         $text_area.addClass(EDITOR_HTML_CLASS);
-        var $toolbar = config.toolbar.get_toolbar($text_area);
+        toolbar_obj = config.toolbar();
+        var $toolbar = toolbar_obj.get_toolbar($text_area);
         var $header = $toolbar.insertBefore($text_area);
         //$toolbar.appendTo($header);
+        $text_area.data('newman_text_area', $text_area);
+        $text_area.data('newman_text_area_toolbar', $toolbar);
         carp('Initialized');
     }
 
-    // get the selection TODO rewrite
-    function get() {
-        textarea.focus();
-
-        scrollPosition = textarea.scrollTop;
-        if (document.selection) {
-            selection = document.selection.createRange().text;
-            if ($.browser.msie) { // ie
-                var range = document.selection.createRange(), rangeCopy = range.duplicate();
-                rangeCopy.moveToElementText(textarea);
-                caretPosition = -1;
-                while(rangeCopy.inRange(range)) { // fix most of the ie bugs with linefeeds...
-                    rangeCopy.moveStart('character');
-                    caretPosition ++;
-                }
-            } else { // opera
-                caretPosition = textarea.selectionStart;
-            }
-        } else { // gecko
-            caretPosition = textarea.selectionStart;
-            selection = $$.val().substring(caretPosition, textarea.selectionEnd);
-        } 
-        return selection;
-    }
-
-    // TODO rewrite
-    function insert(block) {
-        if (document.selection) {
-            var newSelection = document.selection.createRange();
-            newSelection.text = block;
-        } else {
-            //$$.val($$.val().substring(0, caretPosition)	+ block + $$.val().substring(caretPosition + selection.length, $$.val().length));
-        }
-    }
-
     // initialize NewmanTextArea component.
-    init($text_area);
+    init($text_area, extending_configuration_object);
 
     return me;
 };
@@ -634,14 +606,12 @@ if ( typeof(jQuery) != 'undefined' ) {
     (function () {
         function newman_textarea(config_object) {
             var $text_area = $(this);
-            var newman_text_areas = [];
             $text_area.each(
                 function() {
-                    newman_text_areas.push( NewmanTextArea($(this), config_object) );
+                    NewmanTextArea($(this), config_object);
                 }
             );
-            carp('===\nPika pika chu, pika pikapii.');
-            return newman_text_areas;
+            return $(this);
         }
         
         $.fn.markItUp = newman_textarea;
