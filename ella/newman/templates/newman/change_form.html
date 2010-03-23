@@ -35,6 +35,7 @@
 
 <form {% if has_file_field %}enctype="multipart/form-data" {% endif %}action="{{ save_url }}" method="post" id="{{ opts.module_name }}_form" class="js-form change-form">{% block form_top %}{% endblock %}
 <div>
+    <div class="js-textarea-toolbar"></div>
 {% if save_on_top %}{% submit_row %}{% endif %}
 {% if errors %}
     <p class="errornote">

@@ -303,6 +303,23 @@ textarea.vLargeTextField { min-width: 400px; }
     white-space: nowrap;
 }
 
+/* TEXTAREA EDIT TOOLBAR */
+.change-form .js-textarea-toolbar {
+    position: fixed;
+    bottom: 35px;
+    left: 10px;
+    display: none;
+    /*top: 80px;
+    z-index: 9;*/
+    border: 2px solid #d66;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    -khtml-border-radius: 10px;
+    padding: 5px;
+    background: #fff url(../img/nav-bg-reverse.gif) left top repeat-x;
+}
+/* /TEXTAREA EDIT TOOLBAR */
+
 /* TABLES */
 table {
     border-collapse: collapse;
