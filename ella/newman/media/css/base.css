@@ -20,6 +20,7 @@ body {
     font: normal normal 75%/130% Tahoma, sans-serif;
     background: #E9E8DD;
     margin-top: 105px;
+    overflow: hidden;
 }
 
 #container, .favs, #menu-top { min-width: 940px; }
