@@ -1,8 +1,85 @@
-var MARKITUP_PREVIEW_SIZE_ADDITION = 10; //px
+var NEWMAN_TEXTAREA_PREVIEW_SIZE_ADDITION = 10; //px
+var newman_textarea_focused;
+var newman_textarea_edit_content;
+
+function install_box_editor() {
+    // FIXME refactorize!
+    function getTypeFromPath(id) {
+        var path = AVAILABLE_CONTENT_TYPES[id].path;
+        return path.substring(1,path.length - 1).replace('/','.');
+    }
+
+    if( $('#rich-box').length ) {
+        return;
+    }
+
+    $('<div id="rich-box" title="Box"></div>').hide().appendTo('body');
+    $('#rich-box').load(BASE_URL+'nm/editor-box/', function(){
+        $('#id_box_obj_ct').bind('change', function(){
+            if(getTypeFromPath($('#id_box_obj_ct').val()) == 'photos.photo'){
+                $('#rich-box-attrs').hide();
+                $('#rich-photo-format').show();
+            } else {
+                $('#rich-photo-format').hide();
+                $('#rich-box-attrs').show();
+            }
+        });
+        $('#lookup_id_box_obj_id').bind('click', function(e){
+            e.preventDefault();
+            open_overlay(getTypeFromPath($('#id_box_obj_ct').val()), function(id){
+                $('#id_box_obj_id').val(id);
+            });
+        });
+        $('#rich-object').bind('submit', function(e) {
+            e.preventDefault();
+            if($('#id_box_obj_ct').val()) {
+                var type = getTypeFromPath($('#id_box_obj_ct').val());
+                if(!!type){
+                    var id = $('#id_box_obj_id').val() || '0';
+                    var params = $('#id_box_obj_params').val().replace(/\n+/g, ' ');
+                    // Add format and size info for photo
+                    var addon = '';
+                    var box_type = '';
+                    if(getTypeFromPath($('#id_box_obj_ct').val()) == 'photos.photo'){
+                        addon = '_'+$('#id_box_photo_size').val()+'_'+$('#id_box_photo_format').val();
+                        box_type = 'inline';
+                        // Add extra parameters
+                        $('.photo-meta input[type=checkbox]:checked','#rich-photo-format').each(function(){
+                            params += ((params) ? '\n' : '') + $(this).attr('name').replace('box_photo_meta_','') + ':1';
+                        });
+                    } else {
+                        box_type = $('#id_box_type').val();
+                    }
+                    // Insert code
+                    var selection_handler = TextAreaSelectionHandler();
+                    newman_textarea_focused.focus();
+                    selection_handler.init(newman_textarea_focused[0]); //newman_textarea_focused is jQuery object.
+                    var box_text = '\n{% box '+box_type+addon+' for '+type+' with pk '+$('#id_box_obj_id').val()+' %}'+((params) ? '\n'+params+'\n' : '')+'{% endbox %}\n';
+                    selection_handler.insert_after_selection(box_text);
+                    // Reset and close dialog
+                    $('#rich-object').trigger('reset');
+                    $('#rich-box').dialog('close');
+                    $('#id_box_obj_ct').trigger('change');
+                    newman_textarea_focused.focus(); // after all set focus to text area
+                }
+            }
+        });
+        $('#rich-object').bind('cancel_close', function(e) {
+            $('#rich-box').dialog('close');
+            newman_textarea_focused.focus(); // after all set focus to text area
+        });
+    });
+    $('#rich-box').dialog({
+        modal: false,
+        autoOpen: false,
+        width: 420,
+        height: 360
+    });
+}
 
 function preview_iframe_height($iFrame, $txArea) {
     if ($iFrame) {
-        $iFrame.css("height", Math.max(50, $txArea.height() + MARKITUP_PREVIEW_SIZE_ADDITION)+"px");
+        $iFrame.css("height", Math.max(50, $txArea.height() + NEWMAN_TEXTAREA_PREVIEW_SIZE_ADDITION)+"px");
     }
 }
 
@@ -86,50 +163,430 @@ function markitdown_auto_preview(evt, optional_force_preview) {
     }
 }
 
+/**
+ * Standard toolbar with Bold, Italic, ..., Preview buttons.
+ */
+var NewmanTextAreaStandardToolbar = function () {
+    var PREVIEW_URL = BASE_URL + 'nm/editor-preview/';
+    var PREVIEW_VARIABLE = 'text';
+    var PREVIEW_LOADING_GIF = MEDIA_URL + 'ico/15/loading.gif';
+    var me = NewmanTextAreaToolbar();
+    // selection_handler holds text selection of textarea element.
+    var selection_handler = TextAreaSelectionHandler();
+    me.selection_handler = selection_handler;
+    // Note: me.$text_area holds associated textarea element
+    var button_handlers = {
+        bold: handle_bold,
+        italic: handle_italic,
+        url: handle_url,
+        h1: handle_h1,
+        h2: handle_h2,
+        h3: handle_h3,
+        photo: handle_photo,
+        gallery: handle_gallery,
+        box: handle_box,
+        preview: handle_preview
+    };
+    button_handlers['list-bullet'] = handle_unordered_list;
+    button_handlers['list-numeric'] = handle_ordered_list;
+    var preview_window = null;
+    me.preview_window = preview_window;
+
+    function render_preview(success_callback) {				
+        var res = '';
+        $.ajax( 
+            {
+                type: 'POST',
+                async: true,
+                cache: false,
+                url: PREVIEW_URL,
+                data: [ PREVIEW_VARIABLE, '=', encodeURIComponent(me.$text_area.val()) ].join(''),
+                success: function(data) {
+                    res = data;
+                    try {
+                        success_callback(data);
+                    } catch (e) {
+                        carp('Problem calling preview success callback.' + e);
+                    }
+                },
+                error: function(xhr, error_status, error_thrown) {
+                    res = [
+                        gettext('Preview error.'),
+                        '\nException: ',
+                        error_thrown
+                    ].join('');
+                }
+            } 
+        );
+        return res;
+    }
+
+    function render_preview_wait() {
+        var wait_data = [
+            '<html><body>',
+            '<div style="position: fixed; left: 20%; top: 20%;">',
+            '<img src="',
+            PREVIEW_LOADING_GIF,
+            '" alt="" />&nbsp;&nbsp;&nbsp;',
+            gettext('Sending'),
+            '</div>',
+            '</body></html>'
+        ];
+        /*
+        wait_data = [
+            '<html><body>',
+            'Wait...',
+            '</body></html>'
+        ];
+        */
+        me.preview_window.document.open();
+        me.preview_window.document.write(wait_data.join(''));
+        me.preview_window.document.close();
+    }
+
+    function preview_show_callback(data) {
+        if (me.preview_window.document) {
+            var sp;
+            try {
+                sp = me.preview_window.document.documentElement.scrollTop
+            } catch(e) {
+                sp = 0;
+            }
+            me.preview_window.document.open();
+            me.preview_window.document.write(data);
+            me.preview_window.document.close();
+            me.preview_window.document.documentElement.scrollTop = sp;
+            carp('PREVIEW DONE');
+        }
+        //preview_window.focus();
+    }
+    
+    function handle_preview(evt) {
+        var $iframe = me.$text_area.closest('.markItUpContainer').find('iframe.markItUpPreviewFrame');
+        if ($iframe.length == 0) {
+            $iframe = $('<iframe class="markItUpPreviewFrame"></iframe>');
+        }
+        $iframe.insertAfter(me.$text_area);
+        me.preview_window = $iframe[$iframe.length-1].contentWindow || frame[$iframe.length-1];
+        render_preview_wait(me.preview_window);
+        render_preview(preview_show_callback);
+        me.$text_area.focus();
+    }
+    
+    function getIdFromPath(path){
+        // function used by box
+        var id;
+        $.each(AVAILABLE_CONTENT_TYPES, function(i){
+            if(this.path == '/'+path.replace('.','/')+'/'){
+                id = i;
+                return;
+            }
+        });
+        return id;
+    }
+
+    function handle_box(evt) {
+        if (!me.$text_area) {
+            carp('NO TEXT AREA');
+            return;
+        }
+        $('#rich-box').dialog('open');
+        var focused = me.$text_area;
+        var range = focused.getSelection();
+        var content = focused.val();
+        if (content.match(/\{% box(.|\n)+\{% endbox %\}/g) && range.start != -1) {
+            var start = content.substring(0,range.start).lastIndexOf('{% box');
+            var end = content.indexOf('{% endbox %}',range.end);
+            if (start != -1 && end != -1 && content.substring(start,range.start).indexOf('{% endbox %}') == -1) {
+                var box = content.substring(start,end+12);
+                newman_textarea_edit_content = box;
+                var id = box.replace(/^.+pk (\d+) (.|\n)+$/,'$1');
+                var mode = box.replace(/^.+box (\w+) for(.|\n)+$/,'$1');
+                var type = box.replace(/^.+for (\w+\.\w+) (.|\n)+$/,'$1');
+                var params = box.replace(/^.+%\}\n?((.|\n)*)\{% endbox %\}$/,'$1');
+                $('#id_box_obj_ct').val(getIdFromPath(type)).trigger('change');
+                $('#id_box_obj_id').val(id);
+                if (type == 'photos.photo') {
+                    if(box.indexOf('show_title:1') != -1){
+                        $('#id_box_photo_meta_show_title').attr('checked','checked');
+                    } else $('#id_box_photo_meta_show_title').removeAttr('checked');
+                    if(box.indexOf('show_author:1') != -1){
+                        $('#id_box_photo_meta_show_author').attr('checked','checked');
+                    } else $('#id_box_photo_meta_show_author').removeAttr('checked');
+                    if(box.indexOf('show_description:1') != -1){
+                        $('#id_box_photo_meta_show_description').attr('checked','checked');
+                    } else $('#id_box_photo_meta_show_description').removeAttr('checked');
+                    if(box.indexOf('show_detail:1') != -1){
+                        $('#id_box_photo_meta_show_detail').attr('checked','checked');
+                    } else $('#id_box_photo_meta_show_detail').removeAttr('checked');
+                    params = params.replace(/show_title:\d/,'').replace(/show_author:\d/,'').replace(/show_description:\d/,'').replace(/show_detail:\d/,'').replace(/\n{2,}/g,'\n').replace(/\s{2,}/g,' ');
+                    if(mode.indexOf('inline_velka') != -1){
+                        $('#id_box_photo_size').val('velka')
+                    } else if(mode.indexOf('inline_standard') != -1){
+                        $('#id_box_photo_size').val('standard')
+                    } else if(mode.indexOf('inline_mala') != -1){
+                        $('#id_box_photo_size').val('mala')
+                    }
+                    if(mode.indexOf('ctverec') != -1){
+                        $('#id_box_photo_format').val('ctverec')
+                    } else if(mode.indexOf('obdelnik_sirka') != -1){
+                        $('#id_box_photo_format').val('obdelnik_sirka')
+                    } else if(mode.indexOf('obdelnik_vyska') != -1){
+                        $('#id_box_photo_format').val('obdelnik_vyska')
+                    } else if(mode.indexOf('nudle_sirka') != -1){
+                        $('#id_box_photo_format').val('nudle_sirka')
+                    } else if(mode.indexOf('nudle_vyska') != -1){
+                        $('#id_box_photo_format').val('nudle_vyska')
+                    }
+                }
+                $('#id_box_obj_params').val(params);
+            }
+        } else {
+            carp('NO CONTENT MATCHED');
+        }
+    }
+
+    function handle_gallery(evt) {
+        $('#rich-box').dialog('open');
+        $('#id_box_obj_ct').val(getIdFromPath('galleries.gallery')).trigger('change');// 37 is value for galleries.gallery
+    }
+
+    function handle_photo(evt) {
+        $('#rich-box').dialog('open');
+        $('#id_box_obj_ct').val(getIdFromPath('photos.photo')).trigger('change');// 20 is value for photos.photo in the select box
+        $('#lookup_id_box_obj_id').trigger('click');
+    }
+
+    function handle_unordered_list(evt) {
+        var TEXT = '* text\n';
+        var sel = selection_handler.get_selection();
+        if (!sel) {
+            var str = [
+                '\n',
+                TEXT, 
+                TEXT, 
+                TEXT, 
+            ].join('');
+            selection_handler.replace_selection(str);
+            return;
+        }
+        var lines = sel.split(/\r\n|\n|\r/);
+        var bullet_lines = [];
+        for (var i = 0; i < lines.length; i++) {
+            if ( /^\*\s+/.test( lines[i] ) ) {
+                bullet_lines[i] = lines[i];
+                continue;
+            }
+            bullet_lines[i] = [ '* ', lines[i] ].join('');
+        }
+        var str = bullet_lines.join('\n');
+        selection_handler.replace_selection(str);
+    }
+
+    function handle_ordered_list(evt) {
+        var TEXT = ' text';
+        var sel = selection_handler.get_selection();
+        if (!sel) {
+            var str = [
+                '\n' // end line befor list begins
+            ];
+            for (var i = 1; i < 4; i++) {
+                str.push( [ i.toString(), '.', TEXT ].join('') );
+            }
+            selection_handler.replace_selection(str.join('\n'));
+            return;
+        }
+        var lines = sel.split(/\r\n|\n|\r/);
+        var numbered_lines = [];
+        var line_regex = /^(\d+)(\.\s+.*)/;
+        for (var i = 0; i < lines.length; i++) {
+            var match = lines[i].match(line_regex);
+            var counter = i + 1;
+            if ( match ) {
+                numbered_lines[i] = lines[i].replace(line_regex, counter + '$2');
+                continue;
+            }
+            numbered_lines[i] = [ counter.toString(), '. ', lines[i] ].join('');
+        }
+        var str = numbered_lines.join('\n');
+        selection_handler.replace_selection(str);
+    }
+
+    function heading_markup(heading_char, default_text) {
+        var selection = selection_handler.get_selection();
+        if (selection == '') {
+            selection = default_text;
+        }
+        var str = [
+            '\n\n',
+            selection,
+            '\n',
+            new Array( selection.length ).join(heading_char),
+            '\n'
+        ].join('');
+        selection_handler.replace_selection(str);
+    }
+
+    function handle_h1(evt) {
+        heading_markup('=', gettext('Heading H1'));
+    }
+
+    function handle_h2(evt) {
+        heading_markup('-', gettext('Heading H2'));
+    }
+
+    function handle_h3(evt) {
+        var sel = selection_handler.get_selection();
+        if (!sel) {
+            sel = gettext('Heading H3');
+        }
+        var str = [
+            '\n\n### ',
+            sel,
+            '\n'
+        ].join('');
+        selection_handler.replace_selection(str);
+    }
+
+    function handle_bold(evt) {
+        selection_handler.wrap_selection('**', '**');
+    }
+
+    function handle_italic(evt) {
+        selection_handler.wrap_selection('*', '*');
+    }
+
+    function handle_url(evt) {
+        //'[', closeWith:']([![Url:!:http://]!] "[![Title]!]")', placeHolder: 'Text odkazu'
+        var result = null;
+        var replacement = '';
+        var text = selection_handler.get_selection();
+        if (!text) {
+            text = prompt('Text:', '');
+            if (text == null) return;
+        }
+        result = prompt('URL:', 'http://');
+        if (result == null) return;
+        // if protocol is not inserted, force HTTP
+        if ( ! /:\/\//.test(result) ) {
+            result = 'http://' + result;
+        }
+        replacement = [
+            '[',
+            text,
+            ']',
+            '(',
+            result,
+            ' "',
+            text,
+            '")'
+        ].join(''); // produces [Anchor text](http://dummy.centrum.cz "Anchor text")
+        selection_handler.replace_selection(replacement);
+    }
+    
+    function toolbar_buttons() {
+        // creates NewmanTextAreaToolbar items.
+        me.add_item(gettext('Italic'), 'italic', 'I');
+        me.add_item(gettext('Bold'), 'bold', 'B');
+        me.add_separator();
+        me.add_item(gettext('Link'), 'url', 'L');
+        me.add_separator();
+        me.add_item(gettext('Head 1'), 'h1', '1');
+        me.add_item(gettext('Head 2'), 'h2', '2');
+        me.add_item(gettext('Head 3'), 'h3', '3');
+        me.add_separator();
+        me.add_item(gettext('List unordered'), 'list-bullet');
+        me.add_item(gettext('List ordered'), 'list-numeric');
+        me.add_separator();
+        //me.add_item(gettext('Quote'), 'quote');
+        //me.add_separator();
+        me.add_item(gettext('Photo'), 'photo');
+        me.add_item(gettext('Gallery'), 'gallery');
+        me.add_item(gettext('Box'), 'box');
+        me.add_separator();
+        me.add_item(gettext('Quick preview'), 'preview');
+        //me.add_item(gettext('Preview on site'), 'preview_on_site');
+    }
+    me.toolbar_buttons = toolbar_buttons;
+
+    function item_clicked(evt, button_name) {
+        var cback = button_handlers[button_name];
+        carp('item_clicked ' + button_name + ', element name:' + me.$text_area.attr('name'));
+        if (typeof(cback) == 'undefined') return;
+        try {
+            selection_handler.init(me.$text_area[0]); // init selection_handler (assigns textarea selection)
+            cback(evt);
+        } catch (e) {
+            carp('item_clicked error: ' + e);
+        }
+    }
+    me.toolbar_item_clicked = item_clicked;
+
+    return me;
+};
+
 var TextAreaFocusListener = function() {
+    /**
+     * TextAreaFocusListener manages showing and hiding of toolbar.
+     * Listens to all focus and focusout events triggered in textareas.
+     */
     var me = new Object();
     var hide_toolbar_timeout = null;
     var $last_shown_header = null;
+    var TOOLBAR_HIDE_TIMEOUT = 500; //msec
 
     function clean_toolbar_div() {
         var $bar = $('.js-textarea-toolbar');
         $bar.children().detach();
         $bar.hide();
         $last_shown_header = null;
-        carp('Toolbar cleaned');
+        //carp('Toolbar cleaned');
     }
 
     function focus_in($text_area, $header) {
         if (hide_toolbar_timeout) {
-            carp('Clearing timeout');
+            //carp('Clearing timeout');
             clearTimeout(hide_toolbar_timeout);
         }
+        newman_textarea_focused = $text_area;
 
         var $bar = $('.js-textarea-toolbar');
         if ($bar.find('.markItUpHeader').length && ($header == $last_shown_header)) {
-            carp('toolbar instances are equiv. Aborting.');
+            //carp('toolbar instances are equiv. Aborting.');
             return;
         }
         
         clean_toolbar_div();
-        $('<p class="description">Editacni lista</p>').appendTo($bar);
+        /*var p_element = [
+            '<p class="description">',
+            gettext('Edit toolbar'),
+            '</p>'
+        ].join('');
+        NewmanLib.debug_textarea = $text_area;
+        $(p_element).appendTo($bar);*/
         $header.appendTo($bar);
         $bar.show();
         $last_shown_header = $header;
-        carp('toolbar shown');
+        //carp('toolbar shown');
     }
     me.focus_in = focus_in;
 
     function focus_out($text_area, $header) {
-        hide_toolbar_timeout = setTimeout(clean_toolbar_div, 500);
+        hide_toolbar_timeout = setTimeout(clean_toolbar_div, TOOLBAR_HIDE_TIMEOUT);
     }
     me.focus_out = focus_out;
 
     return me;
 };
-textarea_focus_listener = TextAreaFocusListener();
+textarea_focus_listener = TextAreaFocusListener(); // shared object among CustomToolbar instances.
 
-var CustomToolbar = function () {
+var FloatingOneToolbar = function () {
+    /**
+     * Toolbar floats in fix-positioned <div>. textarea_focus_listener 
+     * object handles showing and hiding of appropriate toolbar.
+     * If textarea has focus (blinking caret) it's toolbar is shown, while
+     * other textarea related toolbars are hidden.
+     */
     var me = NewmanTextAreaStandardToolbar();
     var super_get_toolbar = me.get_toolbar;
 
@@ -166,7 +623,7 @@ $(function() {
     var KEY_BACKSPACE = 8;
 
     var newman_text_area_settings = {
-        toolbar: CustomToolbar
+        toolbar: FloatingOneToolbar
     };
 
     function register_markitup_editor_enter_callback() {
@@ -189,6 +646,7 @@ $(function() {
         'media_loaded',
         function () {
             // enable NewmanTextArea (replacement for markItUp!)
+            install_box_editor();
             $('.rich_text_area').newmanTextArea(newman_text_area_settings);
 
             $('.markItUpEditor').each(register_markitup_editor_enter_callback);

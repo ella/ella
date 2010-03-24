@@ -37,7 +37,7 @@
 
 <fieldset class="submit-row" style="padding-top: 5px;">
     <div style="float: left">
-        <a class="icn btn cancel" onclick="$('#rich-box').dialog('close')">{% trans 'Cancel' %}</a>
+        <a class="icn btn cancel" onclick="$('#rich-object').trigger('cancel_close');">{% trans 'Cancel' %}</a>
     </div>
     <div style="float: right">
         <a class="icn btn ok def" onclick="$('#rich-object').submit()">{% trans 'Insert box' %}</a>
