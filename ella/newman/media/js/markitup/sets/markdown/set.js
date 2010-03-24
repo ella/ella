@@ -25,7 +25,68 @@ var getIdFromPath = function(path){
     return id;
 }
 
+function markitup_box_callback() {
+
+    $('#rich-box').dialog('open');
+    // Edit box
+    if (!focused) {
+        return;
+    }
+
+    var range = focused.getSelection();
+    var content = focused.val();
+    if (content.match(/\{% box(.|\n)+\{% endbox %\}/g) && range.start != -1) {
+        var start = content.substring(0,range.start).lastIndexOf('{% box');
+        var end = content.indexOf('{% endbox %}',range.end);
+        if (start != -1 && end != -1 && content.substring(start,range.start).indexOf('{% endbox %}') == -1) {
+            var box = content.substring(start,end+12);
+            edit_content = box;
+            var id = box.replace(/^.+pk (\d+) (.|\n)+$/,'$1');
+            var mode = box.replace(/^.+box (\w+) for(.|\n)+$/,'$1');
+            var type = box.replace(/^.+for (\w+\.\w+) (.|\n)+$/,'$1');
+            var params = box.replace(/^.+%\}\n?((.|\n)*)\{% endbox %\}$/,'$1');
+            $('#id_box_obj_ct').val(getIdFromPath(type)).trigger('change');
+            $('#id_box_obj_id').val(id);
+            if (type == 'photos.photo') {
+                if(box.indexOf('show_title:1') != -1){
+                    $('#id_box_photo_meta_show_title').attr('checked','checked');
+                } else $('#id_box_photo_meta_show_title').removeAttr('checked');
+                if(box.indexOf('show_author:1') != -1){
+                    $('#id_box_photo_meta_show_author').attr('checked','checked');
+                } else $('#id_box_photo_meta_show_author').removeAttr('checked');
+                if(box.indexOf('show_description:1') != -1){
+                    $('#id_box_photo_meta_show_description').attr('checked','checked');
+                } else $('#id_box_photo_meta_show_description').removeAttr('checked');
+                if(box.indexOf('show_detail:1') != -1){
+                    $('#id_box_photo_meta_show_detail').attr('checked','checked');
+                } else $('#id_box_photo_meta_show_detail').removeAttr('checked');
+                params = params.replace(/show_title:\d/,'').replace(/show_author:\d/,'').replace(/show_description:\d/,'').replace(/show_detail:\d/,'').replace(/\n{2,}/g,'\n').replace(/\s{2,}/g,' ');
+                if(mode.indexOf('inline_velka') != -1){
+                    $('#id_box_photo_size').val('velka')
+                } else if(mode.indexOf('inline_standard') != -1){
+                    $('#id_box_photo_size').val('standard')
+                } else if(mode.indexOf('inline_mala') != -1){
+                    $('#id_box_photo_size').val('mala')
+                }
+                if(mode.indexOf('ctverec') != -1){
+                    $('#id_box_photo_format').val('ctverec')
+                } else if(mode.indexOf('obdelnik_sirka') != -1){
+                    $('#id_box_photo_format').val('obdelnik_sirka')
+                } else if(mode.indexOf('obdelnik_vyska') != -1){
+                    $('#id_box_photo_format').val('obdelnik_vyska')
+                } else if(mode.indexOf('nudle_sirka') != -1){
+                    $('#id_box_photo_format').val('nudle_sirka')
+                } else if(mode.indexOf('nudle_vyska') != -1){
+                    $('#id_box_photo_format').val('nudle_vyska')
+                }
+            }
+            $('#id_box_obj_params').val(params);
+        }
+    }
+}
+
 MARKITUP_SETTINGS = {
+    // preview temporarily disabled.
     previewParserPath:    BASE_URL + 'nm/editor-preview/',
     previewParserVar:   "text",
     previewPosition: 'afterArea',
@@ -56,62 +117,7 @@ MARKITUP_SETTINGS = {
             $('#rich-box').dialog('open');
             $('#id_box_obj_ct').val(getIdFromPath('galleries.gallery')).trigger('change');// 37 is value for galleries.gallery
         }},
-        { name: gettext('Box'), className: 'box', call: function(){
-            $('#rich-box').dialog('open');
-            // Edit box
-            if(focused){
-                var range = focused.getSelection();
-                var content = focused.val();
-                if(content.match(/\{% box(.|\n)+\{% endbox %\}/g) && range.start != -1){
-                    var start = content.substring(0,range.start).lastIndexOf('{% box');
-                    var end = content.indexOf('{% endbox %}',range.end);
-                    if(start != -1 && end != -1 && content.substring(start,range.start).indexOf('{% endbox %}') == -1){
-                        var box = content.substring(start,end+12);
-                        edit_content = box;
-                        var id = box.replace(/^.+pk (\d+) (.|\n)+$/,'$1');
-                        var mode = box.replace(/^.+box (\w+) for(.|\n)+$/,'$1');
-                        var type = box.replace(/^.+for (\w+\.\w+) (.|\n)+$/,'$1');
-                        var params = box.replace(/^.+%\}\n?((.|\n)*)\{% endbox %\}$/,'$1');
-                        $('#id_box_obj_ct').val(getIdFromPath(type)).trigger('change');
-                        $('#id_box_obj_id').val(id);
-                        if(type == 'photos.photo'){
-                            if(box.indexOf('show_title:1') != -1){
-                                $('#id_box_photo_meta_show_title').attr('checked','checked');
-                            } else $('#id_box_photo_meta_show_title').removeAttr('checked');
-                            if(box.indexOf('show_author:1') != -1){
-                                $('#id_box_photo_meta_show_author').attr('checked','checked');
-                            } else $('#id_box_photo_meta_show_author').removeAttr('checked');
-                            if(box.indexOf('show_description:1') != -1){
-                                $('#id_box_photo_meta_show_description').attr('checked','checked');
-                            } else $('#id_box_photo_meta_show_description').removeAttr('checked');
-                            if(box.indexOf('show_detail:1') != -1){
-                                $('#id_box_photo_meta_show_detail').attr('checked','checked');
-                            } else $('#id_box_photo_meta_show_detail').removeAttr('checked');
-                            params = params.replace(/show_title:\d/,'').replace(/show_author:\d/,'').replace(/show_description:\d/,'').replace(/show_detail:\d/,'').replace(/\n{2,}/g,'\n').replace(/\s{2,}/g,' ');
-                            if(mode.indexOf('inline_velka') != -1){
-                                $('#id_box_photo_size').val('velka')
-                            } else if(mode.indexOf('inline_standard') != -1){
-                                $('#id_box_photo_size').val('standard')
-                            } else if(mode.indexOf('inline_mala') != -1){
-                                $('#id_box_photo_size').val('mala')
-                            }
-                            if(mode.indexOf('ctverec') != -1){
-                                $('#id_box_photo_format').val('ctverec')
-                            } else if(mode.indexOf('obdelnik_sirka') != -1){
-                                $('#id_box_photo_format').val('obdelnik_sirka')
-                            } else if(mode.indexOf('obdelnik_vyska') != -1){
-                                $('#id_box_photo_format').val('obdelnik_vyska')
-                            } else if(mode.indexOf('nudle_sirka') != -1){
-                                $('#id_box_photo_format').val('nudle_sirka')
-                            } else if(mode.indexOf('nudle_vyska') != -1){
-                                $('#id_box_photo_format').val('nudle_vyska')
-                            }
-                        }
-                        $('#id_box_obj_params').val(params);
-                    }
-                }
-            }
-        }},
+        { name: gettext('Box'), className: 'box', call: markitup_box_callback},
         { separator: '---------------' },
         { name: gettext('Quick preview'), call: 'preview', className: 'preview'},
         { name: gettext('Preview on site'), call: 'preview_on_site', className: 'preview_on_site'}
@@ -186,9 +192,11 @@ $(function(){
             height: 360
         });
     }
+    
     $('.rich_text_area').markItUp(MARKITUP_SETTINGS).focus(function(){
         focused = $(this);
     });
+    
     // Small rich area
     function set_textarea_height() {
         $('.rich_text_area').each(function(){
@@ -272,7 +280,7 @@ function enter_pressed_callback(evt) {
 }
 
 function markitdown_auto_preview(evt, optional_force_preview) {
-    var AGE = 900;
+    var AGE = 90;
     var MIN_KEY_PRESS_DELAY = 1000;
     var $editor = markitdown_get_editor(evt);
     var existing_tm = $editor.data('auto_preview_timer');
@@ -335,15 +343,20 @@ function register_markitup_editor_enter_callback(args) {
     var KEY_Z = 90;
     var KEY_0 = 48;
     var KEY_9 = 57;
+    var KEY_BACKSPACE = 8;
+    var key_code;
     $(this).bind(
         'keyup',
         function(evt) {
-            var key_code = evt.keyCode || evt.which;
+            key_code = evt.keyCode || evt.which;
             key_code = parseInt(key_code);
             // auto refresh preview
-            /*if ((key_code >= KEY_A && key_code <= KEY_Z) || (key_code >= KEY_0 && key_code <= KEY_9) || key_code == 0) {
+            if ( $().jquery >= '1.4.2') {
                 markitdown_auto_preview(evt);
-            }*/
+                /*if ((key_code >= KEY_A && key_code <= KEY_Z) || (key_code >= KEY_0 && key_code <= KEY_9) || key_code == 0 || key_code == KEY_BACKSPACE) {
+                    markitdown_auto_preview(evt);
+                }*/
+            }
             // if not return pressed, textarea resize won't be done.
             if (key_code != ENTER) return;
             setTimeout(function() {enter_pressed_callback(evt); }, RESIZE_DELAY_MSEC);
@@ -370,6 +383,7 @@ function markitdown_register_preview_shortcut() {
                 isCtrl = true;
             }
             if ( (e.which == KEY_SHORTCUT && isCtrl == true) || (e.which == KEY_ESC) ) { //run code for ALT+A
+                // deprecated
                 markitdown_trigger_preview(e);
                 isCtrl = false;
                 return false;
@@ -378,15 +392,81 @@ function markitdown_register_preview_shortcut() {
     );
 }
 
+function markitdown_toolbar() {
+    var $submit_row = $('div.submit-row');
+    var $subbar = $submit_row.find('#id-subtoolbar-submit-row');
+
+    function event_hide_toolbar(evt) {
+        var $ed = $(evt.target);
+        setTimeout(
+            function () {
+                $submit_row.find('.markItUpHeader').remove();
+                $subbar.css('display', 'none');
+                carp('Hide Toolbar');
+            },
+            500
+       );
+    }
+
+    function create_toolbar($legacy_toolbar) {
+        var $header = $('<div class="markItUpHeader"></div>');
+        var $ul = $('<ul></ul>');
+        var $item = $('<li class="markItUpButton markItUpButton2 bold"><a title="Tučně [Ctrl+B]" accesskey="B" href=""></a></li>');
+        $item.appendTo($ul);
+        $ul.appendTo($header);
+        return $header;
+    }
+
+    function assign_header_element() {
+        function click_to_toolbar_element(evt) {
+            carp('LEGACY TOOLBAR CLICK' + $(evt.target).selector);
+            //$legacy_toolbar.trigger('mouseup', evt);
+            NewmanLib.debug_event = evt;
+            NewmanLib.debug_legacy = $legacy_toolbar;
+            evt.preventDefault();
+        }
+
+        var $my_editor = $(this).parent().find('.markItUpEditor');
+        //TODO assign to $my_editor data its header aka toolbar
+        //     then use this toolbar from event_show_toolbar event handler.
+        var $legacy_toolbar = $(this);
+        var $toolbar = create_toolbar($legacy_toolbar); // toolbar should be clonned due to nature of jQuery plugin "MarkItUp!"
+        var $anchors = $toolbar.find('li > a');
+        $anchors.text(''); // remove anchor texts from toolbar
+        $toolbar.find('a').bind( 'click', click_to_toolbar_element );
+        // assign toolbar to textareas data
+        $my_editor.data('toolbar', $toolbar);
+    }
+
+    function event_show_toolbar(evt) {
+        var $ed = $(evt.target); // evt.target contains .markItUpEditor textarea
+        var $toolbar = $ed.data('toolbar');
+        $submit_row.find('.markItUpHeader').remove();
+        $subbar.css('display', 'block');
+        $subbar.before($toolbar);
+        carp('Show Toolbar');
+    }
+
+    function bind_focus_events() {
+        var $my_editor = $(this).parent().find('.markItUpEditor');
+        $my_editor.bind('focus', event_show_toolbar); //live didn't work out
+        //$my_editor.bind('focusout', event_hide_toolbar);
+    }
+
+    var $toolbars = $('div.markItUpHeader');
+    $toolbars.each(assign_header_element);
+    $toolbars.each(bind_focus_events);
+    //$toolbars.remove();
+}
+
 $(document).bind(
     'media_loaded',
     function () {
         $('.markItUpEditor').each(register_markitup_editor_enter_callback);
         $('li.preview').bind('mouseup', preview_height_correct);
-        //$('.rich_text_area.markItUpEditor').bind('focusout', discard_auto_preview);
+        $('.rich_text_area.markItUpEditor').bind('focusout', discard_auto_preview);
         markitdown_register_preview_shortcut();
+        markitdown_toolbar();
+        $('textarea.rich_text_area').autogrow();
     }
 );
-
-
-$(document).bind('media_loaded', function(){ $('textarea.rich_text_area').autogrow() });
