@@ -217,8 +217,8 @@ $(function(){Kobayashi.reload_content('content');});
 
 //// Lock window when media are being loaded
 
-$(document).bind('media_loading_start', function() { lock_window(gettext('Loading media')+'...'); });
-$(document).bind('media_loaded', unlock_window);
+$(document).bind('media_loading_start', function() { timer('media_loading'); lock_window(gettext('Loading media')+'...'); });
+$(document).bind('media_loaded', function() {unlock_window(); timerEnd('media_loading'); });
 
 //// Drafts and templates
 Drafts = new Object;
@@ -396,9 +396,11 @@ Drafts = new Object;
     function load_draft_handler() {
         var id = $(this).val();
         if (!id) return;
+        timer('load_draft');
         lock_window();
         load_preset(id, $('.change-form'));
         unlock_window();
+        timerEnd('load_draft');
     }
 
     function set_load_draft_handler() {
@@ -1341,6 +1343,7 @@ $(document).ready( function() {
             carp('Failed to re-initialize thickbox:', e);
         }
     });
+
 });
 
 // Opens an overlay with a changelist and calls supplied function on click on item.
