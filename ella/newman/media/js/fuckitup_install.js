@@ -83,13 +83,6 @@ function preview_iframe_height($iFrame, $txArea) {
     }
 }
 
-function preview_height_correct(evt) {
-    var $container = $(evt.currentTarget).parents('.markItUpContainer');
-    var $editor = $container.find('.markItUpEditor');
-    var $iFrame = $container.find('iframe');
-    preview_iframe_height($iFrame, $editor);
-}
-
 // resize appropriately after enter key is pressed inside markItUp <textarea> element.
 function enter_pressed_callback(evt) {
     var $txArea = $(evt.currentTarget);
@@ -246,6 +239,7 @@ var NewmanTextAreaStandardToolbar = function () {
 
     function preview_show_callback(data) {
         if (me.preview_window.document) {
+            me.$preview_iframe.hide();
             var sp;
             try {
                 sp = me.preview_window.document.documentElement.scrollTop
@@ -256,7 +250,8 @@ var NewmanTextAreaStandardToolbar = function () {
             me.preview_window.document.write(data);
             me.preview_window.document.close();
             me.preview_window.document.documentElement.scrollTop = sp;
-            carp('PREVIEW DONE');
+            me.$text_area.trigger('preview_done', [me.$text_area, me.$preview_iframe, me.preview_window]); // trigger event on textarea when preview is finished
+            me.$preview_iframe.show();
         }
         //preview_window.focus();
     }
@@ -268,6 +263,7 @@ var NewmanTextAreaStandardToolbar = function () {
         }
         $iframe.insertAfter(me.$text_area);
         me.preview_window = $iframe[$iframe.length-1].contentWindow || frame[$iframe.length-1];
+        me.$preview_iframe = $iframe;
         render_preview_wait(me.preview_window);
         render_preview(preview_show_callback);
         me.$text_area.focus();
@@ -511,7 +507,7 @@ var NewmanTextAreaStandardToolbar = function () {
 
     function item_clicked(evt, button_name) {
         var cback = button_handlers[button_name];
-        carp('item_clicked ' + button_name + ', element name:' + me.$text_area.attr('name'));
+        //carp('item_clicked ' + button_name + ', element name:' + me.$text_area.attr('name'));
         if (typeof(cback) == 'undefined') return;
         try {
             selection_handler.init(me.$text_area[0]); // init selection_handler (assigns textarea selection)
@@ -525,22 +521,138 @@ var NewmanTextAreaStandardToolbar = function () {
     return me;
 };
 
+var ContentElementViewportDetector = function($watched_element) {
+    /**
+     * detects viewport for elements inside <div id="content">.
+     * Resolution of viewport: top, middle and bottom of watched element.
+     */
+    var me = new Object();
+    var _middle_in_viewport = false;
+    var _top_in_viewport = false;
+    var _bottom_in_viewport = false;
+    var $elem = $watched_element;
+
+    function is_element_in_viewport() {
+        /*var $li = $('a.saveall');
+        var content_position = $('div.#content').scrollParent().scrollTop();
+        var area_position = $elem.position().top;
+        var area_bottom = area_position + element_height;*/
+
+        var element_height = $elem.height();
+        var element_top = $elem.offset().top;
+        var from_top_visible = $('#footer').offset().top - element_top; // if var < 0, element is under #footer element.
+        var from_top_element_bottom_hidden = from_top_visible - element_height;
+        var from_top_hidden = $elem.position().top; // if var < 0, element is partialy or totally hidden under topmenu (#header).
+        _top_in_viewport = (from_top_visible >= 0) && (from_top_hidden >= 0);
+        _bottom_in_viewport = (from_top_element_bottom_hidden >= 0) && (from_top_visible >= 0)
+            && (from_top_hidden + element_height >= 0);
+        var whole_under_header = (element_height + element_top) > ($('#header').offset().top + $('#header').height());
+        _middle_in_viewport = (from_top_visible >= 0) && whole_under_header;
+    }
+
+    function in_viewport() {
+        is_element_in_viewport();
+        return _middle_in_viewport;
+    }
+    me.in_viewport = in_viewport;
+    me.middle_in_viewport = in_viewport;
+
+    function top_in_viewport() {
+        is_element_in_viewport();
+        return _top_in_viewport;
+    }
+    me.top_in_viewport = top_in_viewport;
+
+    function bottom_in_viewport() {
+        is_element_in_viewport();
+        return _bottom_in_viewport;
+    }
+    me.bottom_in_viewport = bottom_in_viewport;
+
+    return me;
+};
+
 var TextAreaFocusListener = function() {
     /**
      * TextAreaFocusListener manages showing and hiding of toolbar.
      * Listens to all focus and focusout events triggered in textareas.
      */
     var me = new Object();
+    var TOOLBAR_HIDE_TIMEOUT = 500; //msec
     var hide_toolbar_timeout = null;
     var $last_shown_header = null;
-    var TOOLBAR_HIDE_TIMEOUT = 500; //msec
+    var detector = null;
+    var main_toolbar_offset = $('#header').position().top + $('#header').height();
+    var main_toolbar_offset_px = main_toolbar_offset + 'px';
 
     function clean_toolbar_div() {
         var $bar = $('.js-textarea-toolbar');
         $bar.children().detach();
         $bar.hide();
         $last_shown_header = null;
+        $('div#container').unbind('scroll.text_area_focus_listener', scroll_handler);
+        detector = null;
         //carp('Toolbar cleaned');
+    }
+
+    function toolbar_stick_to_top($bar, $text_area) {
+        //carp('sticked to top');
+        //$bar.css('position', 'relative');
+        var pos = [
+            main_toolbar_offset + $text_area.position().top - $bar.height() - 5,
+            'px'
+        ].join('');
+        $bar.css('top', pos);
+        $bar.show();
+    }
+
+    function toolbar_stick_to_bottom($bar, $text_area) {
+        //carp('sticked to bottom');
+        //$bar.css('position', 'relative');
+        var pos = [
+            main_toolbar_offset + $text_area.height() + $text_area.position().top,
+            'px'
+        ].join('');
+        $bar.css('top', pos);
+        $bar.show();
+    }
+
+    function toolbar_float($bar) {
+        //carp('floats on top');
+        $bar.css('top', main_toolbar_offset_px);
+        $bar.show();
+    }
+
+    function scroll_handler(evt) {
+        var $bar = evt.data.$bar;
+        if ( !detector.in_viewport() ) {
+            // hide toolbar
+            //carp('hidden');
+            $bar.hide();
+        } else if (detector.top_in_viewport() && !detector.bottom_in_viewport()) {
+            // show toolbar sticked to textarea's top
+            toolbar_stick_to_top($bar, evt.data.$text_area);
+        } else if (detector.top_in_viewport() && detector.bottom_in_viewport()) {
+            toolbar_stick_to_top($bar, evt.data.$text_area);
+        } else {
+            // only middle-part of textarea is in viewport, toolbar floats on top
+            toolbar_float($bar);
+        }
+    }
+
+    function show_toolbar($bar, $header) {
+        clean_toolbar_div();
+        /*var p_element = [
+            '<p class="description">',
+            gettext('Edit toolbar'),
+            '</p>'
+        ].join('');
+        NewmanLib.debug_textarea = $text_area;
+        $(p_element).appendTo($bar);*/
+        $header.appendTo($bar);
+        $bar.show();
+        $last_shown_header = $header;
+        //carp('toolbar shown');
     }
 
     function focus_in($text_area, $header) {
@@ -555,19 +667,13 @@ var TextAreaFocusListener = function() {
             //carp('toolbar instances are equiv. Aborting.');
             return;
         }
-        
-        clean_toolbar_div();
-        /*var p_element = [
-            '<p class="description">',
-            gettext('Edit toolbar'),
-            '</p>'
-        ].join('');
-        NewmanLib.debug_textarea = $text_area;
-        $(p_element).appendTo($bar);*/
-        $header.appendTo($bar);
-        $bar.show();
-        $last_shown_header = $header;
-        //carp('toolbar shown');
+        show_toolbar($bar, $header);    
+
+        // register handler for scroll event
+        detector = ContentElementViewportDetector($text_area);
+        var $container = $('div#container');
+        $container.bind('scroll.text_area_focus_listener', {$bar: $bar, $text_area: $text_area}, scroll_handler);
+        $container.trigger('scroll.text_area_focus_listener');
     }
     me.focus_in = focus_in;
 
@@ -614,33 +720,54 @@ var FloatingOneToolbar = function () {
 };
 
 $(function() {
+    // keycode table http://www.scottklarr.com/topic/126/how-to-create-ctrl-key-shortcuts-in-javascript/
     var RESIZE_DELAY_MSEC = 1250;
     var ENTER = 13;
     var KEY_A = 65;
     var KEY_Z = 90;
     var KEY_0 = 48;
     var KEY_9 = 57;
+    var KEY_NUM_0 = 96;
+    var KEY_NUM_DIVIDE = 111;
     var KEY_BACKSPACE = 8;
+    var KEY_DELETE = 46;
 
     var newman_text_area_settings = {
         toolbar: FloatingOneToolbar
     };
 
-    function register_markitup_editor_enter_callback() {
+    function register_textarea_events() {
         var key_code;
-        $(this).bind(
+        var $tx_area = $(this);
+        $tx_area.bind(
             'keyup',
             function(evt) {
                 key_code = evt.keyCode || evt.which;
                 key_code = parseInt(key_code);
                 // auto refresh preview
-                //markitdown_auto_preview(evt);
+                if ( 
+                    (key_code >= KEY_0 && key_code <= KEY_9) ||
+                    (key_code >= KEY_NUM_0 && key_code <= KEY_NUM_DIVIDE) ||
+                    (key_code >= KEY_A && key_code <= KEY_Z) ||
+                    key_code == KEY_BACKSPACE ||
+                    key_code == KEY_DELETE ||
+                    key_code == 0 // national coded keys
+                ) {
+                    markitdown_auto_preview(evt);
+                }
                 // if not return pressed, textarea resize won't be done.
                 if (key_code != ENTER) return;
                 setTimeout(function() {enter_pressed_callback(evt); }, RESIZE_DELAY_MSEC);
             }
         );
-    }
+
+        $tx_area.bind(
+            'preview_done',
+            function (evt, $text_area, $iframe, preview_window) {
+                preview_iframe_height($iframe, $text_area);
+            }
+        );
+    } // end of register_textarea_events
 
     $(document).bind(
         'media_loaded',
@@ -649,10 +776,8 @@ $(function() {
             install_box_editor();
             $('.rich_text_area').newmanTextArea(newman_text_area_settings);
 
-            $('.markItUpEditor').each(register_markitup_editor_enter_callback);
-            $('li.preview').bind('mouseup', preview_height_correct);
+            $('.markItUpEditor').each(register_textarea_events);
             $('.rich_text_area.markItUpEditor').bind('focusout', discard_auto_preview);
-            //markitdown_toolbar();
             $('textarea.rich_text_area').autogrow();
         }
     );
