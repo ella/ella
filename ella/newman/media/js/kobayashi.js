@@ -100,7 +100,9 @@ LoggingLib = function () {
 carp_logging = LoggingLib();
 
 function carp() {
-    carp_logging.log.apply(null, arguments);
+    if (!DEBUG) {
+        carp_logging.log.apply(null, arguments);
+    }
 }
 
 function arr2map(arr) {
@@ -1054,6 +1056,7 @@ function get_hash(address, options) {
     var media_queue = [];
     $(document).data('loaded_media', {});
     function init_media() {
+        carp('media_loaded triggered');
         $(document).trigger('media_loaded').data('loaded_media', {});
     }
     function draw_media() {
@@ -1067,6 +1070,7 @@ function get_hash(address, options) {
     
     // Load a CSS / JavaScript file (given an URL) after previously requested ones have been loaded / failed loading.
     function request_media(url) {
+        carp('Request media ' + url);
         var do_start = media_queue.length == 0;
         media_queue.push(url);
         if (do_start) {
