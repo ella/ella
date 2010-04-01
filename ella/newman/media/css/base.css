@@ -307,15 +307,12 @@ textarea.vLargeTextField { min-width: 400px; }
 /* TEXTAREA EDIT TOOLBAR */
 .change-form .js-textarea-toolbar {
     position: fixed;
-    bottom: 35px;
+    top: 105px;
     left: 10px;
     display: none;
     /*top: 80px;
     z-index: 9;*/
-    border: 2px solid #d66;
-    -moz-border-radius: 10px;
-    -webkit-border-radius: 10px;
-    -khtml-border-radius: 10px;
+    border: none;
     padding: 5px;
     background: #fff url(../img/nav-bg-reverse.gif) left top repeat-x;
 }
@@ -358,7 +355,7 @@ td, th {
 p.paginator .this-page { font-weight: bold; font-size: 115%; }
 
 /* publishable changelist */
-a.cl-publishable-link { padding-left: 20px; background: transparent url(../ico/ct/16/publishable.png) 0 50% no-repeat; }
+a.cl-publishable-link { display: block; padding-left: 20px; background: transparent url(../ico/ct/16/publishable.png) 0 50% no-repeat; }
 a.cl-publishable-link.quiz { background-image: url(../ico/ct/16/quiz.png); }
 a.cl-publishable-link.gallery { background-image: url(../ico/ct/16/gallery.png); }
 a.cl-publishable-link.article { background-image: url(../ico/ct/16/article.png); }
