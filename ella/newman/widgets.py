@@ -30,8 +30,10 @@ MARKITUP_SET = getattr(settings, 'MARKDOWN', 'markdown')
 MEDIA_PREFIX = getattr(settings, 'NEWMAN_MEDIA_PREFIX', settings.ADMIN_MEDIA_PREFIX)
 
 # Rich text editor
-JS_MARKITUP = 'js/markitup/jquery.markitup.js'
-JS_MARKITUP_SET = 'js/markitup/sets/%s/set.js' % MARKITUP_SET
+#JS_MARKITUP = 'js/markitup/jquery.markitup.js'
+JS_MARKITUP = 'js/fuckitup.js'
+#JS_MARKITUP_SET = 'js/markitup/sets/%s/set.js' % MARKITUP_SET
+JS_MARKITUP_SET = 'js/fuckitup_install.js'
 CSS_MARKITUP = 'js/markitup/skins/markitup/style.css'
 CSS_MARKITUP_SET = 'js/markitup/sets/%s/style.css' % MARKITUP_SET
 CLASS_RICHTEXTAREA = 'rich_text_area'
