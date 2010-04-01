@@ -21,6 +21,7 @@ function DateTimeInput(input) {
         if (preserve.minute) d.setMinutes (minute);
 
         year = d.getFullYear();
+        // Fix 0-based month numbering:
         month = new Number(d.getMonth()) + 1;
         day = d.getDate();
         hour = d.getHours();
@@ -35,13 +36,14 @@ function DateTimeInput(input) {
             return s;
         }
 
-        var nval = ''
-        + pad(  year,4) + '-'
-        + pad( month,2) + '-'
-        + pad(   day,2) + ' '
-        + pad(  hour,2) + ':'
-        + pad(minute,2) + ' '
-        + dow;
+        var nval = [
+            pad(  year,4) , '-',
+            pad( month,2) , '-',
+            pad(   day,2) , ' ',
+            pad(  hour,2) , ':',
+            pad(minute,2) , ' ',
+            dow
+        ].join('');
         $(this.input).val( nval ).change();
     };
 }
