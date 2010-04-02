@@ -311,12 +311,11 @@ Drafts = new Object;
             return;
         }
 
-        NewmanLib.debug_response_data = response_data;
         try {
             //carp('Triggering preset_load_initiated event on ' + $form.selector);
             $form.trigger('preset_load_initiated', [response_data]);
         } catch (e) {
-            show_err('ERROR occured while triggering preset_load_initiated. id=' + id + ' Exception: ' + e.toString());
+            carp('ERROR occured while triggering preset_load_initiated. Exception: ' + e.toString());
         }
         //carp('Trigger preset_load_inititated done.');
 
@@ -324,7 +323,7 @@ Drafts = new Object;
             //carp('Triggering preset_load_process event on ' + $form.selector);
             $form.trigger('preset_load_process', [response_data]);
         } catch (e) {
-            show_err('ERROR occured while triggering preset_load_process. id=' + id + ' Exception: ' + e.toString());
+            carp('ERROR occured while triggering preset_load_process. Exception: ' + e.toString());
         }
         //carp('Trigger preset_load_process done.');
 
