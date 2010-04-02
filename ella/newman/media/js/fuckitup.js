@@ -276,8 +276,25 @@ if ( typeof(jQuery) != 'undefined' ) {
             );
             return $(this);
         }
+
+        function remove_newman_textarea() {
+            var $text_area = $(this);
+            $text_area.each(
+                function() {
+                    var $area = $(this);
+                    // install NewmanTextArea only if it's not already present for given textarea
+                    if ( typeof($area.data('newman_text_area')) != 'undefined' ) {
+                        $area.data('newman_text_area', null);
+                        $area.data('newman_text_area_toolbar', null);
+                        $area.removeData();
+                    }
+                }
+            );
+            return $(this);
+        }
         
         $.fn.markItUp = newman_textarea;
         $.fn.newmanTextArea = newman_textarea;
+        $.fn.newmanTextAreaRemove = remove_newman_textarea;
     })(jQuery);
 }
