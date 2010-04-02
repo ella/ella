@@ -51,9 +51,9 @@ class SerieNode(template.Node):
     def render(self, context):
         placement = template.Variable(self.params['for']).resolve(context)
 
-        if isinstance(placement.target, Serie):
+        if isinstance(placement.publishable.target, Serie):
             # Get all parts for serie without unpublished parts
-            parts = placement.target.parts
+            parts = placement.publishable.target.parts
         else:
             # Get parts for current part according to parameters
 
