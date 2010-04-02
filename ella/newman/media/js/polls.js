@@ -130,11 +130,14 @@
         });
         
         // reset rich text field
+        var newman_text_area_settings = {
+            toolbar: FloatingOneToolbar
+        };
         var $rich_text = $new_question.find('.rich_text_area');
         $rich_text
-        .markItUpRemove()
+        .newmanTextAreaRemove()
         .attr({ id: 'id_'+$rich_text.attr('name') })
-        .markItUp(MARKITUP_SETTINGS);
+        .newmanTextArea(newman_text_area_settings);
 
 		$new_question.find('.js-poll-question-input .markItUp').addClass('small');
         
