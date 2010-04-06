@@ -189,6 +189,7 @@ a.icn.visible { background-image: url(../ico/16/14_layer_visible.png); }
 a.icn.novisible { background-image: url(../ico/16/14_layer_novisible.png); }
 a.icn.history { background-image: url(../ico/16/history.png); }
 a.icn.web { background-image: url(../ico/16/web.png); }
+a.icn.default-button-ok { background-color: #59EA3A; color: black; }
 a.icn.save { background-image: url(../ico/16/filesave.png); }
 a.icn.saveas { background-image: url(../ico/16/filesaveas.png); }
 a.icn.saveall { background-image: url(../ico/16/save_all.png); }
