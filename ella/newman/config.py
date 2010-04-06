@@ -50,8 +50,20 @@ TAGGED_MODELS = getattr(settings, 'NEWMAN_TAGGED_MODELS', (
     'interviews.interview',
     'polls.quiz',
     'polls.contest',
+    'photos.photo',
 ))
 
+# Exportable publishables
+EXPORTABLE_MODELS = getattr(settings, 'NEWMAN_EXPORTABLE_MODELS', (
+    'core.publishable',
+    'articles.article',
+    'galleries.gallery',
+    'interviews.interview',
+    'polls.quiz',
+    'polls.contest',
+))
+
+# FIXME why  NEWMAN_FAVORITE_ITEMS have different notation than TAGGED_MODELS, NON_PUBLISHABLE_CTS, etc.?
 NEWMAN_FAVORITE_ITEMS = getattr(settings, 'NEWMAN_FAVORITE_ITEMS', (
     'publishable',
     'article',

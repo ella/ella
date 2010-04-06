@@ -224,4 +224,4 @@ newman.site.register(models.ExportPosition)
 newman.site.register(models.ExportMeta, ExportMetaAdmin)
 
 # Register ExportMetaInline in standard PublishableAdmin
-newman.site.append_inline(config.TAGGED_MODELS, ExportMetaInline) # removed due to user interface is too dificult for an user
+newman.site.append_inline(config.EXPORTABLE_MODELS, ExportMetaInline) # removed due to user interface is too dificult for an user
