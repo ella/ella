@@ -517,13 +517,11 @@ class NewmanModelAdmin(XModelAdmin):
     def register_newman_variables(self, request):
         self.user = request.user
 
-    @utils.profiled_section
     def has_view_permission(self, request, obj):
         opts = self.opts
         view_perm = '%s.view_%s' % ( opts.app_label, opts.object_name.lower() )
         return request.user.has_perm(view_perm)
 
-    @utils.profiled_section
     def has_model_view_permission(self, request, obj=None):
         """ returns True if user has permission to view this model, otherwise False. """
         # try to find view or change perm. for given user in his permissions or groups permissions
@@ -546,7 +544,6 @@ class NewmanModelAdmin(XModelAdmin):
         # no permission found
         return False
 
-    @utils.profiled_section
     def has_change_permission(self, request, obj=None):
         """
         Returns True if the given request has permission to change the given
@@ -627,7 +624,6 @@ class NewmanModelAdmin(XModelAdmin):
             media = media + inline_admin_formset.media
         return inline_admin_formsets, media
 
-    @utils.profiled_section
     def json_error_response(self, request, context):
         """
         Chyby v polich formulare
@@ -725,7 +721,6 @@ class NewmanModelAdmin(XModelAdmin):
         self.change_view_process_context(request, context, object_id)
         return context
 
-    @utils.profiled_section
     @transaction.commit_on_success
     def change_json_view(self, request, object_id, extra_context=None):
         "The 'change' admin view for this model."
@@ -758,7 +753,6 @@ class NewmanModelAdmin(XModelAdmin):
         context.update(extra_context or {})
         return self.json_error_response(request, context)  # Json response
 
-    @utils.profiled_section
     def change_view(self, request, object_id, extra_context=None):
         "The 'change' admin view for this model."
         if request.method.upper() != 'GET':
