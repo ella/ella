@@ -28,6 +28,9 @@ class Serie(Publishable):
     is_active.short_description = _('Active')
     is_active.boolean = True
 
+    def get_text(self):
+        return self.text
+
     def __unicode__(self):
         return u"%s" % self.title
 
