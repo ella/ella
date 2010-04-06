@@ -14,14 +14,15 @@ class SeriePartInlineAdmin(newman.NewmanTabularInline):
 class SerieAdmin(PublishableAdmin):
     list_filter = ('started', 'finished',)
 
+
     fieldsets = (
         (None, {'fields': ('title', 'slug', 'photo')}),
         (_("Metadata"), {'fields': ('category', 'authors', ('started', 'finished'), 'hide_newer_parts',),}),
-        (_("Description"), {'fields': ('description',), 'classes': ('small',)}),
+        (_("Description"), {'fields': ('description', 'text', ), 'classes': ('small',)}),
     )
 
     raw_id_fields = ('photo',)
-    rich_text_fields = {None: ('description',)}
+    rich_text_fields = {None: ('description', 'text',)}
 
     inlines = [PlacementInlineAdmin, SeriePartInlineAdmin]
 
