@@ -100,7 +100,7 @@ LoggingLib = function () {
 carp_logging = LoggingLib();
 
 function carp() {
-    if (!DEBUG) {
+    if (DEBUG) {
         carp_logging.log.apply(null, arguments);
     }
 }
