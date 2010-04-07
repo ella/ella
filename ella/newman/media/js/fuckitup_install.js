@@ -61,6 +61,13 @@ function install_box_editor() {
                     $('#rich-box').dialog('close');
                     $('#id_box_obj_ct').trigger('change');
                     newman_textarea_focused.focus(); // after all set focus to text area
+                    var toolbar = newman_textarea_focused.data('newman_text_area_toolbar_object');
+                    NewmanLib.debug_area = newman_textarea_focused;
+                    NewmanLib.debug_type = typeof(toolbar);
+                    NewmanLib.debug_bar = toolbar;
+                    if (typeof(toolbar) == 'object' && typeof(toolbar.trigger_preview) != 'undefined') {
+                        toolbar.trigger_preview();
+                    }
                 }
             }
         });
@@ -163,6 +170,7 @@ var NewmanTextAreaStandardToolbar = function () {
     var PREVIEW_URL = BASE_URL + 'nm/editor-preview/';
     var PREVIEW_VARIABLE = 'text';
     var PREVIEW_LOADING_GIF = MEDIA_URL + 'ico/15/loading.gif';
+    var AUTO_PREVIEW_TOOLBAR_BUTTON_CLICKED_DELAY = 250; //msec
     var me = NewmanTextAreaToolbar();
     // selection_handler holds text selection of textarea element.
     var selection_handler = TextAreaSelectionHandler();
@@ -268,6 +276,11 @@ var NewmanTextAreaStandardToolbar = function () {
         render_preview(preview_show_callback);
         me.$text_area.focus();
     }
+    
+    function trigger_preview() {
+        handle_preview();
+    }
+    me.trigger_preview = trigger_preview;
     
     function getIdFromPath(path){
         // function used by box
@@ -377,6 +390,7 @@ var NewmanTextAreaStandardToolbar = function () {
         }
         var str = bullet_lines.join('\n');
         selection_handler.replace_selection(str);
+        setTimeout(handle_preview, AUTO_PREVIEW_TOOLBAR_BUTTON_CLICKED_DELAY);
     }
 
     function handle_ordered_list(evt) {
@@ -406,6 +420,7 @@ var NewmanTextAreaStandardToolbar = function () {
         }
         var str = numbered_lines.join('\n');
         selection_handler.replace_selection(str);
+        setTimeout(handle_preview, AUTO_PREVIEW_TOOLBAR_BUTTON_CLICKED_DELAY);
     }
 
     function heading_markup(heading_char, default_text) {
@@ -425,10 +440,12 @@ var NewmanTextAreaStandardToolbar = function () {
 
     function handle_h1(evt) {
         heading_markup('=', gettext('Heading H1'));
+        setTimeout(handle_preview, AUTO_PREVIEW_TOOLBAR_BUTTON_CLICKED_DELAY);
     }
 
     function handle_h2(evt) {
         heading_markup('-', gettext('Heading H2'));
+        setTimeout(handle_preview, AUTO_PREVIEW_TOOLBAR_BUTTON_CLICKED_DELAY);
     }
 
     function handle_h3(evt) {
@@ -442,14 +459,17 @@ var NewmanTextAreaStandardToolbar = function () {
             '\n'
         ].join('');
         selection_handler.replace_selection(str);
+        setTimeout(handle_preview, AUTO_PREVIEW_TOOLBAR_BUTTON_CLICKED_DELAY);
     }
 
     function handle_bold(evt) {
         selection_handler.wrap_selection('**', '**');
+        setTimeout(handle_preview, AUTO_PREVIEW_TOOLBAR_BUTTON_CLICKED_DELAY);
     }
 
     function handle_italic(evt) {
         selection_handler.wrap_selection('*', '*');
+        setTimeout(handle_preview, AUTO_PREVIEW_TOOLBAR_BUTTON_CLICKED_DELAY);
     }
 
     function handle_url(evt) {
@@ -478,6 +498,7 @@ var NewmanTextAreaStandardToolbar = function () {
             '")'
         ].join(''); // produces [Anchor text](http://dummy.centrum.cz "Anchor text")
         selection_handler.replace_selection(replacement);
+        setTimeout(handle_preview, AUTO_PREVIEW_TOOLBAR_BUTTON_CLICKED_DELAY);
     }
     
     function toolbar_buttons() {

@@ -252,6 +252,7 @@ var NewmanTextArea = function ($text_area, extending_configuration_object) {
         //$toolbar.appendTo($header);
         $text_area.data('newman_text_area', $text_area);
         $text_area.data('newman_text_area_toolbar', $toolbar);
+        $text_area.data('newman_text_area_toolbar_object', toolbar_obj);
         carp('Initialized');
     }
 
