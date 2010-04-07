@@ -109,17 +109,9 @@ var FormHandler = function () {
         var regex = new RegExp(name_tail);
         // removes IDs created when preset is loaded
         function remove_element_value() {
-            /*
-            var parts = this.name.split('-');
-            if ( parts.length == 0 ) {
-                return;
-            }
-            var last_part = parts[ parts.length - 1 ];
-            if (last_part == name_tail) {
-            */
             if ( regex.test(this.name) ) {
                 $(this).val(nval);
-                carp('Blanking value [' + nval + '] for input with name: ' + this.name);
+                //carp('Blanking value [' + nval + '] for input with name: ' + this.name);
             }
         }
 
@@ -207,6 +199,7 @@ var FormHandler = function () {
     }
     init_main_category_button();
     $(document).bind('content_added', init_main_category_button);
+    $(document).bind('preset_load_completed', init_main_category_button);
 
     // Comments (ellacomments)
     function remove_ellacomments_ids() {
@@ -267,7 +260,6 @@ var TestFormHandler = function() {
 };
 
 (function($) {
-
     //// gallery items
     function max_order() {
         return Math.max.apply(this, $.map( $.makeArray( $('.gallery-items-sortable input.item-order') ), function(e) {

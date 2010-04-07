@@ -220,7 +220,7 @@
             
             $label.find('a').text( $area.val() || gettext('Click to edit question') );
             
-            ;;; carp('>>> label:',$label.get(0));
+            //carp('>>> label:',$label.get(0));
             if ( $area.val() == '' ) {
                 $label.addClass('js-empty-poll-question-text');
                 $label.find('a').addClass('icn btn eclear');
@@ -310,36 +310,89 @@
         
         
         //// Preset loading
-        
-        // Adjust the number of inputs (questions and their answer options) to fit the preset
-        $('#quiz_form,#contest_form').unbind('preset_load_process.poll');
-        $('#quiz_form,#contest_form').bind('preset_load_process.poll', 
-            function(evt, preset) {
-                carp('preset load initiated (poll). evt=' + evt + ' , preset=' + preset);
-                $('.js-poll-question-container:gt(0)').remove();
-                $('.js-poll-choice-container:gt(0)'  ).remove();
-                var last_q_no = 0;
-                var option_counts = [0];
-                for (var i = 0; i < preset.data.length; i++) {
-                    var name = preset.data[i].name;
-                    var q_no_match = /question_set-(\d+)/.exec( name );
-                    if ( ! q_no_match ) continue;
-                    var q_no = q_no_match[1] - 0;
-                    if (q_no > last_q_no) {
-                        add_question();
-                        option_counts.push(0);
-                        last_q_no = q_no;
-                    }
-                    if ( /question_set-\d+-choices$/.test(name) ) {
-                        var opt_count = ++option_counts[ q_no ];
-                        var $last_question = $('.js-poll-question-container:last');
-                        if ( opt_count > $last_question.find('.js-poll-choice-container').length ) {
-                            add_option( $last_question );
-                        }
+
+        function add_inline_item($inline, $last_item) {
+            var $new_item = $last_item.clone(true);
+            var no_items = $inline.find('input.target_id').length;
+
+            $new_item.find('h4').remove();
+            $new_item.insertAfter( $last_item );
+            var $no_items = $('#id_result_set-TOTAL_FORMS');
+            $no_items.val( no_items + 1 );
+        }
+
+        function recount_inline_items($inline) {
+            var no_items = 0;
+            var no_re = /result_set-\d+-/;
+
+            function process_row() {
+                var actual_result_set = ['result_set-', no_items, '-'].join('');
+                if (no_re.test( this.name )) {
+                    var newname = this.name.replace(no_re, actual_result_set);
+                    $(this).attr({name: newname});
+                }
+                if (no_re.test( this.id )) {
+                    var newid = this.id.replace(no_re, actual_result_set);
+                    $(this).attr({id: newid});
+                }
+                
+                // init values
+                if ( $(this).is('input,textarea') ) {
+                    $(this).val('');
+                }
+            }
+
+            $inline.find('tr').each( function() {
+                $(this).find('*').each( process_row );
+                if ($(this).find('th').length == 0) {
+                    no_items ++;
+                }
+            });
+        }
+
+        function load_poll_from_preset(evt, preset) {
+            carp('preset load initiated (poll). evt=' + evt + ' , preset=' + preset);
+            $('.js-poll-question-container:gt(0)').remove();
+            $('.js-poll-choice-container:gt(0)'  ).remove();
+            var last_q_no = 0;
+            var option_counts = [0];
+            var desired_no = 0;
+            for (var i = 0; i < preset.data.length; i++) {
+                var o = preset.data[i];
+                if (o.name == 'result_set-TOTAL_FORMS') {
+                    desired_no = new Number( o.value );
+                }
+                var name = preset.data[i].name;
+                var q_no_match = /question_set-(\d+)/.exec( name );
+                if ( ! q_no_match ) continue;
+                var q_no = q_no_match[1] - 0;
+                if (q_no > last_q_no) {
+                    add_question();
+                    option_counts.push(0);
+                    last_q_no = q_no;
+                }
+                if ( /question_set-\d+-choices$/.test(name) ) {
+                    var opt_count = ++option_counts[ q_no ];
+                    var $last_question = $('.js-poll-question-container:last');
+                    if ( opt_count > $last_question.find('.js-poll-choice-container').length ) {
+                        add_option( $last_question );
                     }
                 }
             }
-        );
+
+            var $inline = $('input[name=result_set-TOTAL_FORMS]').closest('.inline-related');
+            var $last_item = $inline.find('tbody tr:last');
+            var no_items = $inline.find('tbody tr').length;
+            // add gallery items if necessary
+            for (var i = no_items; i < desired_no; i++) {
+                add_inline_item($inline, $last_item);
+            }
+            recount_inline_items($inline);
+        }
+        
+        // Adjust the number of inputs (questions and their answer options) to fit the preset
+        $('#quiz_form,#contest_form').unbind('preset_load_process.poll');
+        $('#quiz_form,#contest_form').bind('preset_load_process.poll', load_poll_from_preset);
         
         // Display the loaded values
         $('#quiz_form,#contest_form').unbind('preset_load_completed.poll');
