@@ -50,7 +50,6 @@ TAGGED_MODELS = getattr(settings, 'NEWMAN_TAGGED_MODELS', (
     'interviews.interview',
     'polls.quiz',
     'polls.contest',
-    'photos.photo',
 ))
 
 # Exportable publishables
