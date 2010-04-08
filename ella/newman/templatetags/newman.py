@@ -1,6 +1,4 @@
 # -*- coding: UTF-8 -*-
-import unicodedata
-
 from django.contrib.contenttypes.models import ContentType
 from django import template
 from django.utils.encoding import smart_str
@@ -12,22 +10,10 @@ from django.core.urlresolvers import reverse
 from ella.newman import site, permission
 from ella.newman.utils import get_log_entries
 from ella.newman.config import NEWMAN_FAVORITE_ITEMS
+from ella.utils.text import cz_compare
 
 
 register = template.Library()
-
-def __unicode_to_ascii(text):
-    line = unicodedata.normalize('NFKD', text)
-    output = ''
-    for c in line:
-        if not unicodedata.combining(c):
-            output += c
-    return output
-
-def cz_compare(a, b):
-    ma = __unicode_to_ascii(unicode(a))
-    mb = __unicode_to_ascii(unicode(b))
-    return cmp(ma, mb)
 
 @register.inclusion_tag('newman/tpl_tags/newman_topmenu.html', takes_context=True)
 def newman_topmenu(context):
