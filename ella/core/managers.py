@@ -11,6 +11,7 @@ from ella.core.cache.invalidate import CACHE_DELETER
 
 
 DEFAULT_LISTING_PRIORITY = getattr(settings, 'DEFAULT_LISTING_PRIORITY', 0)
+USE_PRIORITIES = getattr(settings, 'USE_PRIORITIES', False)
 
 
 class RelatedManager(models.Manager):
@@ -158,8 +159,30 @@ class ListingManager(models.Manager):
             offset - starting with object number... 1-based
             mods - list of Models, if empty, object from all models are included
             [now] - datetime used instead of default datetime.now() value
+            [unique] - set of already listed Placement IDs
             **kwargs - rest of the parameter are passed to the queryset unchanged
         """
+        def mark_before_output(output):
+            for l in output:
+                listed_targets.add(l.placement_id)
+
+        def make_items_unique(qset):
+
+            out = []
+            listed_targets_now = set()
+            for l in qset:
+                tgt = l.placement_id
+                if tgt in listed_targets or tgt in listed_targets_now:
+                    continue
+                listed_targets_now.add(tgt)
+                out.append(l)
+                if len(out) == limit:
+                    result = out[offset:limit]
+                    mark_before_output(result)
+                    return result
+            mark_before_output(out)
+            return out 
+
         # TODO try to write  SQL (.extra())
         assert offset > 0, "Offset must be a positive integer"
         assert count >= 0, "Count must be a positive integer"
@@ -176,8 +199,16 @@ class ListingManager(models.Manager):
         offset -= 1
         limit = offset + count
 
+        # take out unwanted objects
+        if unique:
+            listed_targets = unique.copy()
+        else:
+            listed_targets = set([])
+
         # only use priorities if somebody wants them
-        if not getattr(settings, 'USE_PRIORITIES', False):
+        if not USE_PRIORITIES:
+            if unique:
+                return make_items_unique(qset)
             return qset[offset:limit]
 
 
@@ -200,24 +231,17 @@ class ListingManager(models.Manager):
 
         out = []
 
-        # take out not unwanted objects
-        if unique:
-            listed_targets = unique.copy()
-        else:
-            listed_targets = set([])
-
         # iterate through qsets until we have enough objects
         for q in qsets:
-            data = q[:limit]
-            if data:
-                for l in data:
-                    tgt = l.placement_id
-                    if tgt in listed_targets:
-                        continue
-                    listed_targets.add(tgt)
-                    out.append(l)
-                    if len(out) == limit:
-                        return out[offset:limit]
+            data = q.iterator()
+            for l in data:
+                tgt = l.placement_id
+                if tgt in listed_targets:
+                    continue
+                listed_targets.add(tgt)
+                out.append(l)
+                if len(out) == limit:
+                    return out[offset:limit]
         return out[offset:offset + count]
 
     def get_queryset_wrapper(self, kwargs):
