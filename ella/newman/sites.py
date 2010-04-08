@@ -26,6 +26,7 @@ from ella.newman.permission import has_model_list_permission, applicable_categor
 from ella.newman import config
 from ella.newman.options import NewmanModelAdmin
 from ella.newman import actions
+from ella.utils.text import cz_compare
 
 
 class NewmanSite(AdminSite):
@@ -249,6 +250,9 @@ class NewmanSite(AdminSite):
         )
 
     def newman_index(self, request, extra_context=None):
+        def translate_and_upper(text):
+            return ugettext(text).upper()
+
         """
         Displays the main Newman index page, without installed apps.
         """
@@ -282,6 +286,7 @@ class NewmanSite(AdminSite):
         future_qs_perm = permission_filtered_model_qs(future_qs, request.user)
         future_placements = user_category_filter(future_qs_perm, request.user)
 
+        cts.sort( lambda a, b: cz_compare(translate_and_upper(a.name), translate_and_upper(b.name)) )
         context = {
             'title': _('Site administration'),
             'site_filter_form': site_filter_form,

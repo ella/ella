@@ -53,7 +53,6 @@ def newman_topmenu(context):
     # Sort the apps alphabetically.
     app_list = app_dict.values()
     app_list.sort(lambda x, y: cz_compare(x['name'], y['name']))
-    print map(lambda i: i['name'], app_list)
 
     # Sort the models alphabetically within each app.
     for app in app_list:
