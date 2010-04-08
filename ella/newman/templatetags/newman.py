@@ -1,11 +1,12 @@
 # -*- coding: UTF-8 -*-
-from django.contrib.contenttypes.models import ContentType
+import unicodedata
 
+from django.contrib.contenttypes.models import ContentType
 from django import template
 from django.utils.encoding import smart_str
 from django.utils.text import capfirst
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext_lazy
+from django.utils.translation import ugettext_lazy, ugettext
 from django.core.urlresolvers import reverse
 
 from ella.newman import site, permission
@@ -14,6 +15,19 @@ from ella.newman.config import NEWMAN_FAVORITE_ITEMS
 
 
 register = template.Library()
+
+def __unicode_to_ascii(text):
+    line = unicodedata.normalize('NFKD', text)
+    output = ''
+    for c in line:
+        if not unicodedata.combining(c):
+            output += c
+    return output
+
+def cz_compare(a, b):
+    ma = __unicode_to_ascii(unicode(a))
+    mb = __unicode_to_ascii(unicode(b))
+    return cmp(ma, mb)
 
 @register.inclusion_tag('newman/tpl_tags/newman_topmenu.html', takes_context=True)
 def newman_topmenu(context):
@@ -45,18 +59,19 @@ def newman_topmenu(context):
                     app_dict[app_label]['models'].append(model_dict)
                 else:
                     app_dict[app_label] = {
-                        'name': app_label.title(),
+                        'name': ugettext( app_label.title() ),
                         'has_module_perms': has_module_perms,
                         'models': [model_dict],
                     }
 
     # Sort the apps alphabetically.
     app_list = app_dict.values()
-    app_list.sort(lambda x, y: cmp(x['name'], y['name']))
+    app_list.sort(lambda x, y: cz_compare(x['name'], y['name']))
+    print map(lambda i: i['name'], app_list)
 
     # Sort the models alphabetically within each app.
     for app in app_list:
-        app['models'].sort(lambda x, y: cmp(x['name'], y['name']))
+        app['models'].sort(lambda x, y: cz_compare(x['name'], y['name']))
 
     return {
         'NEWMAN_MEDIA_URL': context['NEWMAN_MEDIA_URL'],
