@@ -614,7 +614,7 @@ Kobayashi.LOADED_MEDIA = {};
                 URLS[address](target_id);
                 continue;
             }
-            
+           
             load_content({
                 target_id: target_id,
                 address: address,
@@ -632,15 +632,17 @@ Kobayashi.LOADED_MEDIA = {};
         $(document).trigger('hide_loading');
         load_by_hash();
     });
-    setTimeout( function() {
-            if (location.hash != CURRENT_HASH) {
-                CURRENT_HASH = location.hash;
-                try {
-                    $(document).trigger('hashchange');
-                } catch(e) { carp(e); }
-            }
+
+    function watch_location() {
+        if (location.hash != CURRENT_HASH) {
+            CURRENT_HASH = location.hash;
+            try {
+                $(document).trigger('hashchange');
+            } catch(e) { carp(e); }
+        }
         setTimeout(arguments.callee, KOBAYASHI_ADDRESSBAR_CHECK_INTERVAL);
-    }, KOBAYASHI_ADDRESSBAR_CHECK_INTERVAL);
+    }
+    setTimeout(watch_location, KOBAYASHI_ADDRESSBAR_CHECK_INTERVAL);
     // End of hash-driven content management
     
     // Loads stuff from an URL to an element like load_by_hash but:
@@ -734,14 +736,14 @@ function adr(address, options) {
     
     function set_location_hash(newhash, options) {
         if (newhash.charAt(0) != '#') newhash = '#' + newhash;
-        if (options.just_set) {
-            CURRENT_HASH = newhash;
-        }
         if (options.nohistory) {
             location.replace( newhash );
         }
         else {
             location.hash = newhash;
+        }
+        if (options.just_set) {
+            CURRENT_HASH = location.hash;
         }
     }
     
