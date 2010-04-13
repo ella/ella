@@ -32,7 +32,7 @@ function timer_decorator(name, func) {
         try {
             out = func.apply(null, arguments);
         } catch (e) {
-            carp('Error in timer_decorator:' + e.toString());
+            carp('Error in timer_decorator:' , e.toString());
         }
         timerEnd(name);
         return out;
@@ -342,7 +342,7 @@ Kobayashi.LOADED_MEDIA = {};
         while (LOAD_BUF.length > MIN_LOAD+1 && !LOAD_BUF[ ++MIN_LOAD ]) {}
         var $target = $('#'+info.target_id);
         if ($target && $target.jquery && $target.length) {} else {
-            carp('Could not find target element: #'+info.target_id);
+            carp('Could not find target element: #',info.target_id);
             if ($.isFunction(info.error_callback)) try {
                 info.error_callback.call(info);
             } catch(e) { carp('Failed error callback (load_content)', e, info); }
@@ -364,7 +364,7 @@ Kobayashi.LOADED_MEDIA = {};
         $('#'+info.target_id).removeClass('loading');
         $(document).trigger('dec_loading');
         
-        carp('Failed to load '+info.address+' into '+info.target_id);
+        carp('Failed to load ',info.address,' into ',info.target_id);
     }
     
     // Take a container and a URL. Give the container the "loading" class,
@@ -377,7 +377,7 @@ Kobayashi.LOADED_MEDIA = {};
             carp('ERROR: Kobayashi.load_content must get target_id field in its argument.');
             return;
         }
-        ;;; carp('loading '+address+' into #'+target_id);
+        ;;; carp('loading ',address,' into #',target_id);
         
         delete arg.xhr; // just in case there was one
             
@@ -872,7 +872,7 @@ function adr(address, options) {
                     var ass = assignments[i];
                     var vname = (ass.indexOf('=') < 0) ? ass : ass.substr(0, ass.indexOf('='));
                     if (vname.length == 0) {
-                        carp('invalid assignment: ' + ass);
+                        carp('invalid assignment: ' , ass);
                         continue;
                     }
                     var vname_esc = vname.replace(/\W/g, '\\$1');
@@ -952,11 +952,11 @@ function get_hash(address, options) {
         if (Kobayashi.LOADED_MEDIA[ url ]) {
             if ($.isFunction(succ_fn)) succ_fn(url);
             if ($.isFunction(next_fn)) next_fn(url);
-            ;;; carp('Skipping loaded medium: '+url);
+            ;;; carp('Skipping loaded medium: ', url);
             return true;
         }
         
-        ;;; carp('loading medium '+url);
+        ;;; carp('loading medium ',url);
         
         url.match(/(?:.*\/\/[^\/]*)?([^?]+)(?:\?.*)?/);
         $(document).data('loaded_media')[ RegExp.$1 ] = url;
@@ -986,7 +986,7 @@ function get_hash(address, options) {
             if (stylesheet_present(abs_url)) {
                 if ($.isFunction(succ_fn)) succ_fn(url);
                 if ($.isFunction(next_fn)) next_fn(url);
-                ;;; carp('Stylesheet already present: '+url);
+                ;;; carp('Stylesheet already present: ',url);
                 return true;
             }
             var tries = KOBAYASHI_CSS_LOAD_TRIES;
@@ -994,7 +994,7 @@ function get_hash(address, options) {
             setTimeout(function() {
                 if (--tries < 0) {
                     Kobayashi.LOADED_MEDIA[ url ] = false;
-                    carp('Timed out loading CSS: '+url);
+                    carp('Timed out loading CSS: ',url);
                     if ($.isFunction(err_fn)) err_fn(url);
                     return;
                 }
@@ -1004,7 +1004,7 @@ function get_hash(address, options) {
                     if (rules && rules.length) {
                         Kobayashi.LOADED_MEDIA[ url ] = true;
                         if ($.isFunction(succ_fn)) succ_fn(url);
-                        ;;; carp('CSS Successfully loaded: '+url);
+                        ;;; carp('CSS Successfully loaded: ',url);
                         
                     }
                     else {
@@ -1027,7 +1027,7 @@ function get_hash(address, options) {
                 if ($scripts.get(i).src == abs_url) {
                     if ($.isFunction(succ_fn)) succ_fn(url);
                     if ($.isFunction(next_fn)) next_fn(url);
-                    ;;; carp('Script already present: '+url);
+                    ;;; carp('Script already present: ',url);
                     return true;
                 }
             }
@@ -1039,13 +1039,13 @@ function get_hash(address, options) {
                     Kobayashi.LOADED_MEDIA[ this.url ] = true;
                     if ($.isFunction(succ_fn)) succ_fn(url);
                     if ($.isFunction(next_fn)) next_fn(url);
-                    ;;; carp('JS Successfully loaded: '+this.url);
+                    ;;; carp('JS Successfully loaded: ',this.url);
                 },
                 error: function() {
                     Kobayashi.LOADED_MEDIA[ this.url ] = false;
                     if ($.isFunction( err_fn))  err_fn(url);
                     if ($.isFunction(next_fn)) next_fn(url);
-                    carp('Failed to load JS: '+url, this);
+                    carp('Failed to load JS: ',url, this);
                 },
                 cache: true
             });
@@ -1058,8 +1058,13 @@ function get_hash(address, options) {
     var media_queue = [];
     $(document).data('loaded_media', {});
     function init_media() {
-        carp('media_loaded triggered');
-        $(document).trigger('media_loaded').data('loaded_media', {});
+        timer('trigger_ media_loaded');
+        try {
+            $(document).trigger('media_loaded').data('loaded_media', {});
+        } catch (e) {
+            carp('Error when triggering media_loaded.', e);
+        }
+        timerEnd('trigger_ media_loaded');
     }
     function draw_media() {
         if (media_queue.length == 0) {
@@ -1072,11 +1077,11 @@ function get_hash(address, options) {
     
     // Load a CSS / JavaScript file (given an URL) after previously requested ones have been loaded / failed loading.
     function request_media(url) {
-        carp('Request media ' + url);
+        carp('Request media ' , url);
         var do_start = media_queue.length == 0;
         media_queue.push(url);
         if (do_start) {
-            setTimeout(draw_media,20);
+            setTimeout(draw_media,100);
             $(document).trigger('media_loading_start');
         }
     }
