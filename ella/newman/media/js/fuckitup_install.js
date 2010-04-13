@@ -105,7 +105,7 @@ function discard_auto_preview(evt) {
         clearTimeout(existing_tm);
         $editor.data('auto_preview_timer', null);
     }
-    //carp('Discarding auto preview for: ' + $editor.selector);
+    //carp('Discarding auto preview for: ' , $editor.selector);
 }
 
 function markitdown_get_editor(evt) {
@@ -137,7 +137,7 @@ function markitdown_auto_preview(evt, optional_force_preview) {
 
         if (existing_tm) {
             clearTimeout(existing_tm);
-            //carp('Clearing timeout ' + existing_tm);
+            //carp('Clearing timeout ' , existing_tm);
             existing_tm = null;
             $editor.data('auto_preview_timer', existing_tm);
             trigger_ok = true;
@@ -146,11 +146,11 @@ function markitdown_auto_preview(evt, optional_force_preview) {
         if ( difference < MIN_KEY_PRESS_DELAY ) {
             // if key was pressed in shorter time MIN_KEY_PRESS_DELAY, re-schedule preview refresh
             set_preview_timer();
-            //carp('Update timer Re-scheduled. diff=' + difference);
+            //carp('Update timer Re-scheduled. diff=' , difference);
             return;
         }
         if (trigger_ok) {
-            //carp('Auto preview triggering preview. diff=' + difference);
+            //carp('Auto preview triggering preview. diff=' , difference);
             //markitdown_trigger_preview(evt);
             $text_area.trigger('item_clicked.newman_text_area_toolbar', 'preview');
         }
@@ -203,7 +203,7 @@ var NewmanTextAreaStandardToolbar = function () {
             try {
                 success_callback(data);
             } catch (e) {
-                carp('Problem calling preview success callback.' + e);
+                carp('Problem calling preview success callback.' , e);
             }
         }
 
@@ -535,13 +535,13 @@ var NewmanTextAreaStandardToolbar = function () {
 
     function item_clicked(evt, button_name) {
         var cback = button_handlers[button_name];
-        //carp('item_clicked ' + button_name + ', element name:' + me.$text_area.attr('name'));
+        //carp('item_clicked ' , button_name , ', element name:' , me.$text_area.attr('name'));
         if (typeof(cback) == 'undefined') return;
         try {
             selection_handler.init(me.$text_area[0]); // init selection_handler (assigns textarea selection)
             cback(evt);
         } catch (e) {
-            carp('item_clicked error: ' + e);
+            carp('item_clicked error: ' , e);
         }
     }
     me.toolbar_item_clicked = item_clicked;
