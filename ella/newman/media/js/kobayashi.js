@@ -43,28 +43,81 @@ function timerEnd(name) {
     } catch (e) {}
 }
 
-function timer_decorator(name, func) {
-    function wrapped() {
-        var out = null;
-        timer(name);
-        try {
-            out = func.apply(null, arguments);
-        } catch (e) {
-            carp('Error in timer_decorator:' , e.toString());
-        }
-        timerEnd(name);
-        return out;
+// Timer (useful for time consumption profilling)
+var accumulated_timers = {};
+var AccumulatedTimeMeasurement = function(timer_name) {
+    var me = new Object();
+    me.name = timer_name;
+    var times = [];
+    var m_begin = null;
+    var m_end = null;
+
+    function begin_measurement() {
+        m_begin = (new Date()).getTime();
     }
-    return wrapped;
+
+    function end_measurement() {
+        m_end = (new Date()).getTime();
+        times.push( (m_end - m_begin) );
+    }
+
+    function avg() {
+        var res = 0;
+        for (var i = 0; i < times.length; i++) {
+            res += times[i]; //msec
+        }
+        return res / times.length;
+    }
+    me.avg = avg;
+
+    function decorate(func) {
+        function wrapped() {
+            var out = null;
+            begin_measurement();
+            try {
+                out = func.apply(null, arguments);
+            } catch (e) {
+                carp('Error in timer_decorator:' , e.toString());
+            }
+            end_measurement();
+            return out;
+        }
+        return wrapped;
+    }
+    me.decorate = decorate;
+
+    return me;
+};
+
+// static method (like a)
+function AccumulatedTimeMeasurement__avg_all() {
+    carp('Timers:');
+    for (var timer_name in accumulated_timers) {
+        var timer = accumulated_timers[timer_name];
+        carp(timer.name, ': ', timer.avg());
+    }
+    carp('End Timers');
 }
+AccumulatedTimeMeasurement.avg_all = AccumulatedTimeMeasurement__avg_all;
+
+function timer_decorator(name, func) {
+    // create new timer object if timer does not exist
+    if (!(name in accumulated_timers)) {
+        accumulated_timers[name] = AccumulatedTimeMeasurement(name);
+    }
+    return accumulated_timers[name].decorate(func);
+}
+
+// /end of Timer
 
 StringBuffer = function() {
     var me = {};
     var buffer = [];
+    var clear_i = 0; //counter variable
 
     function clear() {
         var len = buffer.length;
-        for (var i = 0; i < len; i++) {
+        for (clear_i = 0; clear_i < len; clear_i++) {
             buffer.pop();
         }
     }
