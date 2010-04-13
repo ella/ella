@@ -169,6 +169,12 @@ function clone_form($orig_form) {
 
 // Shows a modal window and disables its close button.
 function lock_window(msg) {
+    if (lock_window.dependencies_loaded == false) {
+        lock_window.dependencies_loaded = true;
+        Kobayashi.load_media(MEDIA_URL + 'jquery/jquery-ui-smoothness.css', {callbacks: null});
+        Kobayashi.load_media(MEDIA_URL + 'jquery/jquery-ui.js', {callbacks: null});
+    }
+
     if ( ! msg ) msg = str_concat( gettext('Wait'),'...' );
 
     var $modal = $('#window-lock');
@@ -196,6 +202,7 @@ function lock_window(msg) {
 
     carp('Window Locked');
 }
+lock_window.dependencies_loaded = false;
 
 function raw_unlock_window() {
     $('#window-lock').data('close_ok', true).dialog('close');
@@ -885,8 +892,16 @@ $( function() {
     $('.js-form a.js-submit').live('click', function(evt) {
         if (evt.button != 0) return true;    // just interested in left button
         if ($(this).hasClass('js-noautosubmit')) return true;
-        var $form = $(this).closest('.js-form');
-        return ajax_submit($form, this.name, true);
+        // lock the window
+        lock_window();
+        var parent_this = this;
+        setTimeout(
+            function() {
+                var $form = $(parent_this).closest('.js-form');
+                return ajax_submit($form, parent_this.name, true);
+            },
+            200
+        );
     });
 
     // Reset button
