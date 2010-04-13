@@ -123,7 +123,10 @@ function markitdown_auto_preview(evt, optional_force_preview) {
     var now = new Date().getTime();
 
     function set_preview_timer() {
-        var tm = setTimeout(function() {markitdown_auto_preview(evt, true); }, AGE);
+        function call_markitdown_auto_preview() {
+            markitdown_auto_preview(evt, true);
+        }
+        var tm = setTimeout(call_markitdown_auto_preview, AGE);
         $editor.data('auto_preview_timer', tm);
         existing_tm = tm;
     }
@@ -193,8 +196,25 @@ var NewmanTextAreaStandardToolbar = function () {
     var preview_window = null;
     me.preview_window = preview_window;
 
-    function render_preview(success_callback) {				
+    function render_preview(success_callback) {
         var res = '';
+        function success_callback(data) {
+            res = data;
+            try {
+                success_callback(data);
+            } catch (e) {
+                carp('Problem calling preview success callback.' + e);
+            }
+        }
+
+        function error_callback(xhr, error_status, error_thrown) {
+            res = [
+                gettext('Preview error.'),
+                '\nException: ',
+                error_thrown
+            ].join('');
+        }
+
         $.ajax( 
             {
                 type: 'POST',
@@ -202,21 +222,8 @@ var NewmanTextAreaStandardToolbar = function () {
                 cache: false,
                 url: PREVIEW_URL,
                 data: [ PREVIEW_VARIABLE, '=', encodeURIComponent(me.$text_area.val()) ].join(''),
-                success: function(data) {
-                    res = data;
-                    try {
-                        success_callback(data);
-                    } catch (e) {
-                        carp('Problem calling preview success callback.' + e);
-                    }
-                },
-                error: function(xhr, error_status, error_thrown) {
-                    res = [
-                        gettext('Preview error.'),
-                        '\nException: ',
-                        error_thrown
-                    ].join('');
-                }
+                success: success_callback,
+                error: error_callback
             } 
         );
         return res;
@@ -760,27 +767,26 @@ $(function() {
     function register_textarea_events() {
         var key_code;
         var $tx_area = $(this);
-        $tx_area.bind(
-            'keyup',
-            function(evt) {
-                key_code = evt.keyCode || evt.which;
-                key_code = parseInt(key_code);
-                // auto refresh preview
-                if ( 
-                    (key_code >= KEY_0 && key_code <= KEY_9) ||
-                    (key_code >= KEY_NUM_0 && key_code <= KEY_NUM_DIVIDE) ||
-                    (key_code >= KEY_A && key_code <= KEY_Z) ||
-                    key_code == KEY_BACKSPACE ||
-                    key_code == KEY_DELETE ||
-                    key_code == 0 // national coded keys
-                ) {
-                    markitdown_auto_preview(evt);
-                }
-                // if not return pressed, textarea resize won't be done.
-                if (key_code != ENTER) return;
-                setTimeout(function() {enter_pressed_callback(evt); }, RESIZE_DELAY_MSEC);
+        function textarea_keyup_handler(evt) {
+            key_code = evt.keyCode || evt.which;
+            key_code = parseInt(key_code);
+            // auto refresh preview
+            if ( 
+                (key_code >= KEY_0 && key_code <= KEY_9) ||
+                (key_code >= KEY_NUM_0 && key_code <= KEY_NUM_DIVIDE) ||
+                (key_code >= KEY_A && key_code <= KEY_Z) ||
+                key_code == KEY_BACKSPACE ||
+                key_code == KEY_DELETE ||
+                key_code == 0 // national coded keys
+            ) {
+                markitdown_auto_preview(evt);
             }
-        );
+            // if not return pressed, textarea resize won't be done.
+            if (key_code != ENTER) return;
+            setTimeout(function() {enter_pressed_callback(evt); }, RESIZE_DELAY_MSEC);
+        }
+
+        $tx_area.bind('keyup', textarea_keyup_handler);
 
         $tx_area.bind(
             'preview_done',
@@ -790,16 +796,15 @@ $(function() {
         );
     } // end of register_textarea_events
 
-    $(document).bind(
-        'media_loaded',
-        function () {
-            // enable NewmanTextArea (replacement for markItUp!)
-            install_box_editor();
-            $('.rich_text_area').newmanTextArea(newman_text_area_settings);
+    function media_loaded_handler() {
+        // enable NewmanTextArea (replacement for markItUp!)
+        install_box_editor();
+        $('.rich_text_area').newmanTextArea(newman_text_area_settings);
 
-            $('.markItUpEditor').each(register_textarea_events);
-            $('.rich_text_area.markItUpEditor').bind('focusout', discard_auto_preview);
-            $('textarea.rich_text_area').autogrow();
-        }
-    );
+        $('.markItUpEditor').each(register_textarea_events);
+        $('.rich_text_area.markItUpEditor').bind('focusout', discard_auto_preview);
+        $('textarea.rich_text_area').autogrow();
+    }
+    
+    $(document).bind('media_loaded', media_loaded_handler);
 });
