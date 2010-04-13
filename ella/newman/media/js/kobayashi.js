@@ -12,6 +12,7 @@
  *          get_adr(),
  *          get_hash(),
  *          get_hashadr(),
+ *          timer_decorator(name, func) tracks elapsed time of called func,
  *          Kobayashi object,
  *          StringBuffer object,
  *          LoggingLib object.
@@ -143,7 +144,7 @@ StringBuffer = function() {
     me.to_string = to_string;
 
     return me;
-}
+};
 
 function str_concat() {
     if (typeof(str_concat.string_buffer) == 'undefined') {
