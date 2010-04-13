@@ -1,3 +1,17 @@
+/** 
+ * Newman inlines.
+ * requires: jQuery 1.4.2+, 
+ *          gettext() function.
+ *          carp(),
+ *          str_concat(),
+ *          NewmanLib object.
+ *
+ * provides:
+ *          NewmanInline object,
+ *          FormHandler object (interface),
+ *          GalleryFormHandler object.
+ *
+ */
 var NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER = 1000;
 
 // encapsulate functionality into NewmanInline object

@@ -1,3 +1,29 @@
+/** 
+ * Newman specific things used in conjunction with Kobayashi.
+ * requires: jQuery 1.4.2+, 
+ *          gettext() function.
+ *          carp(),
+ *          adr(),
+ *          get_adr(),
+ *          get_hashadr(),
+ *          str_concat(),
+ *          timer(), timerEnd(),
+ *          Kobayashi object.
+ *
+ * provides:
+ *          lock_window()  locks window to prevent user clicking anywhere,
+ *          unlock_window(),
+ *          show_err() shows error bubble,
+ *          show_ok() show bubble (should be used for messages like 'Object saved', 'Data loaded', etc.),
+ *          show_loading(),
+ *          hide_loading(),
+ *          show_ajax_error(xhr),
+ *          show_ajax_success(response_text),
+ *          Drafts object,
+ *          NewmanLib object,
+ *          AjaxFormLib object.
+ *
+ */
 var LF = 10;
 var CR = 13;
 var ASCII_PRINTABLE_BEGIN = 32;

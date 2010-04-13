@@ -1,3 +1,22 @@
+/** 
+ * Kobayashi AJAX powered content injection framework.
+ * requires: jQuery 1.4.2+, 
+ *          gettext() function.
+ *
+ * provides:
+ *          carp() function for logging purposes,
+ *          str_concat() effective string concatenation,
+ *          timer(), timerEnd() Firebug timer wrappers,
+ *          arr2map() conversion from array to "hashmap",
+ *          adr(),
+ *          get_adr(),
+ *          get_hash(),
+ *          get_hashadr(),
+ *          Kobayashi object,
+ *          StringBuffer object,
+ *          LoggingLib object.
+ *
+ */
 KOBAYASHI_VERSION = '2009-10-05';
 
 var CURRENT_HASH = '';

@@ -1,3 +1,10 @@
+/** 
+ * Text Area powered by callbacks.
+ * requires: jQuery 1.4.2+, 
+ *          gettext() function, 
+ *          carp() function for logging purposes located in kobayashi.js .
+ *
+ */
 var NEWMAN_TEXTAREA_PREVIEW_SIZE_ADDITION = 10; //px
 var newman_textarea_focused;
 var newman_textarea_edit_content;
