@@ -24,7 +24,6 @@ function timerEnd(name) {
     } catch (e) {}
 }
 
-// timer decorator
 function timer_decorator(name, func) {
     function wrapped() {
         var out = null;
@@ -38,6 +37,50 @@ function timer_decorator(name, func) {
         return out;
     }
     return wrapped;
+}
+
+StringBuffer = function() {
+    var me = {};
+    var buffer = [];
+
+    function clear() {
+        var len = buffer.length;
+        for (var i = 0; i < len; i++) {
+            buffer.pop();
+        }
+    }
+    me.clear = clear;
+    
+    function append(text) {
+        buffer.push(text);
+    }
+    me.append = append;
+
+    function append_array(arr) {
+        for (var i = 0; i < arr.length; i++) {
+            buffer.push(arr[i]);
+        }
+    }
+    me.append_array = append_array;
+    me.appendArray = append_array;
+
+    function to_string() {
+        return buffer.join('');
+    }
+    me.toString = to_string;
+    me.to_string = to_string;
+
+    return me;
+}
+
+function str_concat() {
+    if (typeof(str_concat.string_buffer) == 'undefined') {
+        str_concat.string_buffer = StringBuffer();
+    } else {
+        str_concat.string_buffer.clear();
+    }
+    str_concat.string_buffer.append_array(arguments);
+    return str_concat.string_buffer.to_string();
 }
 
 LoggingLib = function () {
