@@ -1,3 +1,10 @@
+/** 
+ * Flash powered photo uploader.
+ * requires: jQuery 1.4.2+, 
+ *          str_concat() function (effective string concatenation).
+ *          carp() function for logging purposes located in kobayashi.js .
+ *
+ */
 var IMAGE_OPTIONS = {
     maxWidth: 1024,
     maxHeight: 1024,
@@ -27,7 +34,7 @@ var IMAGE_OPTIONS = {
 //        AjaxFormLib.ajax_submit_error(xhr)
     }
     window.on_upload_progress = function(progress) {
-        carp(progress+' uploaded');
+        carp(progress, ' uploaded');
     }
 
     function save_photo_handler(evt) {
@@ -51,13 +58,13 @@ var IMAGE_OPTIONS = {
         $('#photo_form :input').each( function() {
             if (/_suggest/.test( this.id )) return;
             var val = $(this).val();
-            if ($('#'+this.id+'_suggest').length) {
+            if ($( str_concat('#',this.id,'_suggest') ).length) {
                 val = val.replace(/#.*/, '');
             }
             data[ this.name ] = val;
         });
         IMAGE_OPTIONS.url = $('<a>').attr('href',get_adr('json/')).get(0).href;
-        ;;; carp('URL passed to flash: ' + IMAGE_OPTIONS.url);
+        ;;; carp('URL passed to flash: ' , IMAGE_OPTIONS.url);
         var saved_data = flash_obj.saveData(data, IMAGE_OPTIONS);
         if (saved_data == 2) {
             show_err(gettext('No photo selected'));

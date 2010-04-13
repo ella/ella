@@ -1,7 +1,8 @@
 /** 
  * Text Area powered by callbacks.
- * reuires: jQuery 1.4.2+, 
+ * requires: jQuery 1.4.2+, 
  *          gettext() function, 
+ *          str_concat() function (effective string concatenation),
  *          carp() function for logging purposes located in kobayashi.js .
  *
  * Note: Generate documentation via JSDoc http://jsdoc.sourceforge.net/ .
@@ -57,8 +58,12 @@ var TextAreaSelectionHandler = function () {
 			}
 		} else if(!!area.setSelectionRange){
 			var selection_start = area.selectionStart;
-			area.value = area.value.substring(0, selection_start) + text + area.value.substring(area.selectionEnd);
-			area.setSelectionRange(selection_start + text.length,selection_start + text.length);
+			area.value = str_concat(
+                area.value.substring(0, selection_start) , text , area.value.substring(area.selectionEnd)
+            );
+			area.setSelectionRange( str_concat(
+                selection_start , text.length,selection_start , text.length
+            ) );
 		}
         // TODO trigger event text was changed? Probably no..
 		area.focus();
@@ -94,13 +99,13 @@ var TextAreaSelectionHandler = function () {
 		for(var m = 0; m < lines.length; m++){
 			txt += lines[m] + '\n';
 		}
-		me.replace_selection((before || '') + txt + (after || ''));
+		str_concat( me.replace_selection((before || '') , txt , (after || '')) );
 	}
     me.inject_each_selected_line = check_area(inject_each_selected_line);
 
 	function insert_before_each_selected_line(text, before, after){
 		me.inject_each_selected_line(function(lines, line){
-			lines.push(text + line);
+			lines.push( str_concat(text , line) );
 			return lines;
 		}, before, after);
 	}
@@ -238,13 +243,13 @@ var NewmanTextArea = function ($text_area, extending_configuration_object) {
     var toolbar_obj = null;
 
     function init($text_area, extending_configuration) {
-        carp('Initializing NewmanTextArea.' + $text_area);
+        carp('Initializing NewmanTextArea.' , $text_area);
         $.extend(config, extending_configuration);
         // wrap <textarea> element with several <div> elements
-        var div_id = 'id="markItUp' + ($text_area.attr("id").substr(0, 1).toUpperCase()) + ($text_area.attr("id").substr(1)) + '"';
+        var div_id = str_concat('id="markItUp' , ($text_area.attr("id").substr(0, 1).toUpperCase()) , ($text_area.attr("id").substr(1)) , '"');
         $text_area.wrap('<div></div>');
-        $text_area.wrap('<div ' + div_id + ' class="' + HTML_CLASS + '"></div>');
-        $text_area.wrap('<div class="' + CONTAINER_HTML_CLASS + '"></div>');
+        $text_area.wrap( str_concat('<div ' , div_id , ' class="' , HTML_CLASS , '"></div>') );
+        $text_area.wrap( str_concat('<div class="' , CONTAINER_HTML_CLASS , '"></div>') );
         $text_area.addClass(EDITOR_HTML_CLASS);
         toolbar_obj = config.toolbar();
         var $toolbar = toolbar_obj.get_toolbar($text_area);

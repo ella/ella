@@ -1,10 +1,16 @@
+/** 
+ * Generic Suggester library.
+ * requires: jQuery 1.4.2+, 
+ *          str_concat() function (effective string concatenation).
+ *
+ */
 /* TODO:
  * neukazovat vybrané hodnoty v lupičce,
  */
 GenericSuggestLib = {};
 (function($) { $( function() {
-    GenericSuggestLib.VERSION = '2009.08.05-newman';
-    var DEL_IMG = MEDIA_URL + 'ico/10/icon_deletelink.gif';
+    GenericSuggestLib.VERSION = '2010.04.13-newman';
+    var DEL_IMG = str_concat(MEDIA_URL , 'ico/10/icon_deletelink.gif');
     var MIN_LENGTH = 2;
     var SUGGEST_FIELD_SEPARATOR = '|';
     var SUGGEST_RECORD_SEPARATOR = "\n";
@@ -30,13 +36,13 @@ GenericSuggestLib = {};
     var $SUGGEST_BUBBLE = $('<div class="suggest-bubble"></div>');
     var $SUGGEST_LIST = $('<ul class="suggest-list"></ul>');
     $SUGGEST_BUBBLE.append($SUGGEST_LIST).append('<div class="suggest-next-page"><a href="#">&nabla; další strana &nabla;</a></div>');
-    var $SUGGEST_FIELDS_BUBBLE = $(
-        '<div class="suggest-fields-bubble">'           +"\n"+
-        '    <div class="suggest-fields-list">'         +"\n"+
-        '        <table></table>'                       +"\n"+
-        '    </div>'                                    +"\n"+
-        '</div>'                                        +"\n"
-    );
+    var $SUGGEST_FIELDS_BUBBLE = $( str_concat(
+        '<div class="suggest-fields-bubble">'           ,"\n",
+        '    <div class="suggest-fields-list">'         ,"\n",
+        '        <table></table>'                       ,"\n",
+        '    </div>'                                    ,"\n",
+        '</div>'                                        ,"\n"
+    ) );
     $('body').append($SUGGEST_BUBBLE).append($SUGGEST_FIELDS_BUBBLE);
 
     // ['foo', 'bar'] => { foo: 1, bar: 1 }
@@ -120,7 +126,7 @@ GenericSuggestLib = {};
         .bind(  'click.delsetinput', delete_item);
 
         // Enhance textual X's of delete links with graphical crosses used at the "delete this item from database" link
-        $('li.suggest-selected-item a').html('<img src="'+DEL_IMG+'" alt="x" />')
+        $('li.suggest-selected-item a').html( str_concat('<img src="',DEL_IMG,'" alt="x" />') )
 
         // Ensure that the initial values fit
         function restore_suggest_widget_from_value(el) {
@@ -246,7 +252,7 @@ GenericSuggestLib = {};
         if (!is_multiple($inputs.ul) && ids.length > 1) {
             //TODO: warning
         }
-        $inputs.hidden.val(ids.join(',') + '#' + repres.join(','));
+        $inputs.hidden.val( str_concat(ids.join(',') , '#' , repres.join(',')) );
         $inputs.text.data('values', arr2map(ids));
         if ( ! GenericSuggestLib.NO_TRIGGER_CHANGE ) $inputs.hidden.trigger('change');
     }
@@ -277,7 +283,7 @@ GenericSuggestLib = {};
     function new_item(item_id, item_str) {
         var $newli = $('<li class="suggest-selected-item">');
         $newli.click(set_current_input);
-        var $newdel = $('<a class="suggest-delete-link"><img src="'+DEL_IMG+'" alt="x" /></a>');
+        var $newdel = $( str_concat('<a class="suggest-delete-link"><img src="',DEL_IMG,'" alt="x" /></a>') );
         $newdel.click(set_current_input).click(delete_item);
         $newli.html( item_str ).append( $newdel ).data( 'item_id', item_id );
         return $newli;
@@ -357,7 +363,7 @@ GenericSuggestLib = {};
         if (offset == null || offset < 0)
             offset = 0;
         if (offset > 0) {
-            sug_url = sug_url.replace('&q', '&o='+offset+'&q');
+            sug_url = sug_url.replace('&q', str_concat('&o=',offset,'&q') );
         }
         $input.data('offset', offset);
 
@@ -450,7 +456,7 @@ GenericSuggestLib = {};
         for (var k in sug_result) {
             if (i++ == 1) { first = false; continue; }
             if (k == 'REPRE') continue;
-            list.push('<tr><th>' + k + '</th><td>' + sug_result[ k ] + '</td></tr>');
+            list.push( str_concat('<tr><th>' , k , '</th><td>' , sug_result[ k ] , '</td></tr>') );
         }
         if (list.length == 0) {
             $SUGGEST_FIELDS_BUBBLE.hide();
@@ -531,16 +537,17 @@ GenericSuggestLib = {};
                 var $table = $("<table></table>\n");
                 var $header = $("<tr></tr>\n");
                 for (var i = 0; i < col_names.length; i++) {
-                    $header.append('<th>' + col_names[i] + '</th>');
+                    $header.append( str_concat('<th>' , col_names[i] , '</th>') );
                 }
                 $table.append($header);
                 for (var i = 0; i < rows.length; i++) {
                     var row = rows[i];
                     var id = row.pop();
-                    $( '<tr><td>'+
+                    $( str_concat(
+                        '<tr><td>',
                         rows[i].join('</td><td>')
-                        +"</td></tr>\n"
-                    )
+                        ,"</td></tr>\n"
+                    ) )
                     .data('id',id)
                     .appendTo($table);
                 }
@@ -566,21 +573,21 @@ GenericSuggestLib = {};
             href = this.href + '?pop=1';
         }
 
-        var $related_item = $('#'+name+'_suggest').parents('.GenericSuggestField,.GenericSuggestFieldMultiple').eq(0);
+        var $related_item = $( str_concat('#',name,'_suggest') ).parents('.GenericSuggestField,.GenericSuggestFieldMultiple').eq(0);
 
         // Create the fake popup window
         dismiss_lookup_popup();
-        var $popup_w = $(                                                "\n"+
-            '<div class="lupicka-popup fakewin">'                       +"\n"+
-            '    <div class="fakewin-title">'                           +"\n"+
-            '        <div class="fakewin-titletext"></div>'             +"\n"+
-            '        <div class="fakewin-closebutton">&times;</div>'    +"\n"+
-            '        <div class="clearfix"></div>'                      +"\n"+
-            '    </div>'                                                +"\n"+
-            '    <div class="fakewin-content">'                         +"\n"+
-            '    </div>'                                                +"\n"+
-            '</div>'                                                    +"\n"
-        );
+        var $popup_w = $( str_concat(                                    "\n",
+            '<div class="lupicka-popup fakewin">'                       ,"\n",
+            '    <div class="fakewin-title">'                           ,"\n",
+            '        <div class="fakewin-titletext"></div>'             ,"\n",
+            '        <div class="fakewin-closebutton">&times;</div>'    ,"\n",
+            '        <div class="clearfix"></div>'                      ,"\n",
+            '    </div>'                                                ,"\n",
+            '    <div class="fakewin-content">'                         ,"\n",
+            '    </div>'                                                ,"\n",
+            '</div>'                                                    ,"\n"
+        ) );
         $popup_w.data('input', $related_item);
         $related_item.addClass('pod-lupickou');
         $popup_w.draggable().draggable('disable').resizable().data('input_id', name+'_suggest')

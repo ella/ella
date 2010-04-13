@@ -198,7 +198,7 @@ var NewmanTextAreaStandardToolbar = function () {
 
     function render_preview(success_callback) {
         var res = '';
-        function success_callback(data) {
+        function success_handler(data) {
             res = data;
             try {
                 success_callback(data);
@@ -207,7 +207,7 @@ var NewmanTextAreaStandardToolbar = function () {
             }
         }
 
-        function error_callback(xhr, error_status, error_thrown) {
+        function error_handler(xhr, error_status, error_thrown) {
             res = [
                 gettext('Preview error.'),
                 '\nException: ',
@@ -222,8 +222,8 @@ var NewmanTextAreaStandardToolbar = function () {
                 cache: false,
                 url: PREVIEW_URL,
                 data: [ PREVIEW_VARIABLE, '=', encodeURIComponent(me.$text_area.val()) ].join(''),
-                success: success_callback,
-                error: error_callback
+                success: success_handler,
+                error: error_handler
             } 
         );
         return res;

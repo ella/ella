@@ -279,11 +279,11 @@ var TestFormHandler = function() {
         var no_re = /galleryitem_set-\d+-/;
         $new_item.find('*').each( function() {
             if (no_re.test( this.name )) {
-                var newname = this.name.replace(no_re, 'galleryitem_set-'+no_items+'-');
+                var newname = this.name.replace(no_re, str_concat('galleryitem_set-',no_items,'-') );
                 $(this).attr({name: newname});
             }
             if (no_re.test( this.id )) {
-                var newid = this.id.replace(no_re, 'galleryitem_set-'+no_items+'-');
+                var newid = this.id.replace(no_re, str_concat('galleryitem_set-',no_items,'-') );
                 $(this).attr({id: newid});
             }
             
@@ -392,7 +392,7 @@ var TestFormHandler = function() {
                 multiplier = 1.0 / NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER;
             }
             var res = (value * multiplier).toInteger();
-            carp('Recounting ' + value + ' to ' + res + ' for element ' + this);
+            carp('Recounting ' , value , ' to ' , res , ' for element ' , this);
             this.value = res.toString();
             NewmanInline.gallery_ordering_modified = true;
             carp('GalleryItems recounted');
@@ -477,12 +477,12 @@ var TestFormHandler = function() {
             }
             
             $.ajax({
-                url: BASE_PATH + '/photos/photo/' + id + '/thumb/',
+                url: str_concat(BASE_PATH , '/photos/photo/' , id , '/thumb/'),
                 success: function(response_text) {
                     var res;
                     try { res = JSON.parse(response_text); }
                     catch(e) {
-                        carp('thumb update error: successful response container unexpected text: ' + response_text);
+                        carp('thumb update error: successful response container unexpected text: ' , response_text);
                     }
                     
                     // thumbnail
@@ -542,7 +542,7 @@ var TestFormHandler = function() {
 
         //delete item from gallery (not saved item) FIXME
         var $buttons = $('#gallery_form').find('a.delete-item-button');
-        carp('Buttons: ' + $buttons.length.toString());
+        carp('Buttons: ' , $buttons.length.toString());
         $buttons.each( function (ordering) {
             var $gi = $(this).closest('.gallery-item');
         });
