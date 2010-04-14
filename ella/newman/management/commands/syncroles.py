@@ -93,7 +93,7 @@ def denormalize(run_transaction=True, verbosity=0):
             begin_work(run_transaction)
             begin = time()
             cur.execute(
-                'DELETE FROM `%s` WHERE user_id = %d;' % 
+                'DELETE FROM %s WHERE user_id = %d;' %
                 (DenormalizedCategoryUserRole._meta.db_table, role.user.pk)
             )
             printv('Delete took %f sec.' % (time() - begin))
