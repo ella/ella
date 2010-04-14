@@ -73,6 +73,7 @@ def newman_favorites(context):
             if m['model'] in NEWMAN_FAVORITE_ITEMS:
                 global_favs.append(m)
 
+    global_favs.sort(lambda x, y: cz_compare(x['name'], y['name']))
     return {
         'NEWMAN_MEDIA_URL': context['NEWMAN_MEDIA_URL'],
         'favs': global_favs
