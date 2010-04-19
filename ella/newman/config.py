@@ -62,17 +62,16 @@ EXPORTABLE_MODELS = getattr(settings, 'NEWMAN_EXPORTABLE_MODELS', (
     'polls.contest',
 ))
 
-# FIXME why  NEWMAN_FAVORITE_ITEMS have different notation than TAGGED_MODELS, NON_PUBLISHABLE_CTS, etc.?
 NEWMAN_FAVORITE_ITEMS = getattr(settings, 'NEWMAN_FAVORITE_ITEMS', (
-    'publishable',
-    'article',
-    'photo',
-    'gallery',
-    'survey',
-    'quiz',
-    'contest',
-    'interview',
-    'position',
+    'core.publishable',
+    'articles.article',
+    'photos.photo',
+    'galleries.gallery',
+    'polls.survey',
+    'polls.quiz',
+    'polls.contest',
+    'interviews.interview',
+    'positions.position',
 ))
 
 # TODO try to load consts from django.conf.settings

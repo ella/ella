@@ -1,6 +1,6 @@
 <ul id="menu-top">
     {% for app in app_list %}
-    <li><a id="topnav-{{ app.name|slugify }}">{{ app.name }}</a>
+    <li><a id="topnav-{{ app.name|slugify }}">{% trans app.name %}</a>
         <ul>
           {% for model in app.models %}
               {% if model.perms.add and model.perms.change %}

@@ -45,14 +45,19 @@ def newman_topmenu(context):
                     app_dict[app_label]['models'].append(model_dict)
                 else:
                     app_dict[app_label] = {
-                        'name': ugettext( app_label.title() ),
+                        'name': app_label.title(),
                         'has_module_perms': has_module_perms,
                         'models': [model_dict],
                     }
 
     # Sort the apps alphabetically.
     app_list = app_dict.values()
-    app_list.sort(lambda x, y: cz_compare(x['name'], y['name']))
+    app_list.sort(
+        lambda x, y: cz_compare(
+            ugettext( x['name'] ), 
+            ugettext( y['name'] )
+        )
+    )
 
     # Sort the models alphabetically within each app.
     for app in app_list:
@@ -67,13 +72,24 @@ def newman_topmenu(context):
 @register.inclusion_tag('newman/tpl_tags/newman_favorites.html', takes_context=True)
 def newman_favorites(context):
     global_favs = []
-    all_apps = newman_topmenu(context)
-    for app in all_apps['app_list']:
+    applications = newman_topmenu(context)['app_list']
+    for model_name in NEWMAN_FAVORITE_ITEMS:
+        app_name, model_name = model_name.lower().split('.', 1)
+        app = None
+        for a in applications:
+            if a['name'].lower() == app_name:
+                app = a
+                break
+        if not app:
+            continue
+        model_found = None
         for m in app['models']:
-            if m['model'] in NEWMAN_FAVORITE_ITEMS:
+            if m['model'] == model_name:
+                model_found = m
                 global_favs.append(m)
+                break
 
-    global_favs.sort(lambda x, y: cz_compare(x['name'], y['name']))
+    #global_favs.sort(lambda x, y: cz_compare(x['name'], y['name']))
     return {
         'NEWMAN_MEDIA_URL': context['NEWMAN_MEDIA_URL'],
         'favs': global_favs
