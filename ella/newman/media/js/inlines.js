@@ -125,7 +125,7 @@ var FormHandler = function () {
         function remove_element_value() {
             if ( regex.test(this.name) ) {
                 $(this).val(nval);
-                //carp('Blanking value [' + nval + '] for input with name: ' + this.name);
+                //carp('Blanking value [' , nval , '] for input with name: ' , this.name);
             }
         }
 
@@ -431,15 +431,15 @@ var TestFormHandler = function() {
     }
 
     function remove_gallery_item_ids() {
-        // remove target_ids (input with name="galleryitem_set-0-id")
+        // remove ids (input with name="galleryitem_set-0-id")
         // remove gallery (input with name="galleryitem_set-0-gallery")
         NewmanInline.remove_inlineadmin_element_value(
             '.gallery-items-sortable input[name^=galleryitem_set-]',
-            'id'
+            '-id$'
         );
         NewmanInline.remove_inlineadmin_element_value(
             '.gallery-items-sortable input[name^=galleryitem_set-]',
-            'gallery'
+            'gallery$'
         );
     }
     
@@ -447,9 +447,12 @@ var TestFormHandler = function() {
         if ( ! root ) root = document;
         var $sortables = $(root).find('.gallery-items-sortable').not('ui-sortable');
         if ($sortables.length == 0) return;
-        $sortables.children().filter( function() {
-            return $(this).find('input.target_id').val();
-        }).addClass('sortable-item');
+        $sortables.children().filter( 
+            function() {
+                var $target_id = $(this).find('input.target_id');
+                return $target_id.length != 0;
+            }
+        ).addClass('sortable-item');
         $sortables.sortable({
             distance: 20,
             items: '.sortable-item',
@@ -460,7 +463,9 @@ var TestFormHandler = function() {
         
         // make sure only the inputs with a selected photo are sortable
         $(root).find('input.target_id').change( function() {
-            if ($(this).val()) $(this).closest('.inline-related').addClass('sortable-item');
+            if ($(this).val()) {
+                $(this).closest('.inline-related').addClass('sortable-item');
+            }
         });
         
         // initialize order for empty listing
@@ -476,7 +481,7 @@ var TestFormHandler = function() {
             var $img     = $input.siblings('img:first');
             var $heading = $input.siblings('h4:first');
             if ($heading.length == 0) {
-                $heading = $('<h4>#<span></span> &mdash; <span></span></h4>').insertAfter($img);
+                $heading = $('<h4><span></span> <span></span></h4>').insertAfter($img);
             }
             $img.attr({
                 src: '',
@@ -509,7 +514,7 @@ var TestFormHandler = function() {
                     
                     // heading
                     var order = $( '#' + $input.attr('id').replace(/-target_id$/, '-order') ).val();
-                    $heading.find('span:first').text( order );
+                    //$heading.find('span:first').text( order ); // don't show ordering value
                     $heading.find('span:eq(1)').text( title );
                 },
             });

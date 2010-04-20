@@ -22,6 +22,7 @@
                         {% comment %}
                         #<span>{{ inline_admin_form.original.order }}</span> &mdash;
                         {% endcomment %}
+                        <span></span> {# JS gallery inline compatibility glue #}
                         <span>{{ inline_admin_form.original.target }}</span>
                         {% if inline_admin_form.show_url %}
                             &nbsp;<a class="icn web" href="{% url newman:obj-redirect inline_admin_form.original_content_type_id inline_admin_form.original.id %}">{% trans "View on site" %}</a>
@@ -34,7 +35,18 @@
                             {{ field.field }}
                     {% endfor %}
                 {% endfor %}
-                {% if inline_admin_formset.formset.can_delete and inline_admin_form.original %}<span class="delete">{{ inline_admin_form.deletion_field.field }} {{ inline_admin_form.deletion_field.label_tag }}</span>{% endif %}
+                {% if inline_admin_formset.formset.can_delete and inline_admin_form.original %}
+                    <div class="delete">
+                        {{ inline_admin_form.deletion_field.field }} {{ inline_admin_form.deletion_field.label_tag }}
+                    </div>
+                {% endif %}
+
+                    {% comment %}
+                    <span class="delete-item">{# Delete button #}
+                        <a class="icn btn cancel def delete-item-button">{% trans "Delete" %}</a>
+                    </span>
+                    {% endcomment %}
+
                     <div class="cb"></div>
                 </div>
             {% endfor %}
@@ -43,7 +55,9 @@
         </div>
     {% endfor %}
 
-        <div style="margin: 5px;"><a class="icn btn add add-gallery-item-button">{% trans "Add" %}</a></div>
+        <div class="gallery-add-item">
+            <a class="icn btn add add-gallery-item-button">{% trans "Add" %}</a>
+        </div>
     </fieldset>
 
 </div>

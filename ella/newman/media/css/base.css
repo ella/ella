@@ -450,13 +450,42 @@ div.pop #filters { top: 35px }
 /* WIDGETS etc. */
 span.widget-thumb img { border: 1px solid #ccc; margin-right: 5px; }
 
+/* SORTABLE (common properties) */
+.ui-sortable {
+    min-width: 940px;
+}
+
+.sortable-item {
+    border: 1px solid gray;
+    background: rgb(255, 255, 238);
+    overflow: auto;
+    float: left;
+    min-height: 200px;
+    margin: 0 0 5px 5px;
+}
+.sortable-item { cursor: move; }
+.sortable-item:hover { border-color: #77B150; }
+/* /SORTABLE */
+
 /* SORTABLE GALLERY ITEMS */
 .gallery-items-sortable { background: #fff; border: 1px solid #ddd; -moz-border-radius: 5px; -webkit-border-radius: 5px; -khtml-border-radius: 5px; }
-.gallery-item { margin: 5px; padding: 5px; border: 1px solid #ddd; }
+.gallery-item , .gallery-add-item { 
+    margin: 5px; 
+    padding: 5px; 
+    border: 1px solid #ddd; 
+    overflow: auto;
+    float: left;
+    background: #77B150;
+}
 .gallery-item img.thumb { float: left; width: 80px; margin-right: 10px; }
 .gallery-item-error { background: #f66262; }
-.sortable-item { cursor: move; }
-.sortable-item .gallery-item:hover { background: #77B150; }
+.sortable-item .gallery-item { background: none; }
+/*.sortable-item .gallery-item:hover { background: #77B150; }*/
+.gallery-add-item {
+    margin: 10px 0 10px 0;
+    background: none; 
+    border: none;
+}
 
 /* POLLS QUESTIONS & ANSWERS */
 .js-poll-question-container {
