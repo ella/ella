@@ -461,7 +461,7 @@ span.widget-thumb img { border: 1px solid #ccc; margin-right: 5px; }
     overflow: auto;
     float: left;
     min-height: 200px;
-    margin: 0 0 5px 5px;
+    margin: 0 0 15px 5px;
 }
 .sortable-item { cursor: move; }
 .sortable-item:hover { border-color: #77B150; }
