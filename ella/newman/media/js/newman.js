@@ -615,7 +615,10 @@ $( function() {
     // Submit event
     function ajax_submit($form, button_name, process_redirect) {
         if (!$form.jquery) $form = $($form);
-        if ( ! validate($form) ) return false;
+        if ( ! validate($form) ) {
+            unlock_window();
+            return false;
+        }
         NewmanLib.call_pre_submit_callbacks();
         carp(['ajax_submit: submitting... selector="', $form.selector, '"'].join(''));
 
@@ -639,6 +642,7 @@ $( function() {
                 $form.append( str_concat('<input type="hidden" value="1" name="',button_name,'" />') );
             }
             $form.submit();
+            unlock_window();
             return true;
         }
         // End of hack for file inputs
@@ -707,6 +711,7 @@ $( function() {
                         new_req.url = redirect_to;
                         new_req.redirect_to = redirect_to;
                         $.ajax( new_req );
+                        unlock_window();
                         return;
                     }
                 }
@@ -1288,6 +1293,26 @@ function save_change_form_success(text_data) {
     Kobayashi.unload_content('history');
 }
 
+function changelist_shown_handler(evt) {
+    /** called when changelist is shown (rendered) */
+    function th_click(evt) {
+        carp('AHOJ');
+        var pass_event = jQuery.Event('click');
+        pass_event.button = 0;
+        evt.data.anchor.trigger(pass_event);
+    }
+
+    var $anchors = $('div#changelist table tr').filter('.row1,.row2').find('th a:last');
+    $anchors.each(
+        function(counter, anchor) {
+            var $th = $(anchor).closest('th');
+            $th.css('cursor', 'pointer');
+            $th.one('click', {anchor: $(anchor)}, th_click);
+        }
+    );
+}
+$(document).bind('changelist_shown', changelist_shown_handler);
+
 function changelist_batch_success(response_text) {
     var $dialog = $('<div id="confirmation-wrapper">');
     $dialog.html(response_text).find('.cancel').click(function() {
@@ -1819,10 +1844,11 @@ Timeline = new Object();
 })(); // end of Timeline
 
 
-// Prefilled values into the change-forms
-// Prefilling forms handles text input elements and select boxes
-// (including creating special hidden field used to redirect browser after change-form is saved)
-
+/** Prefilled values into the change-forms via GET parameters.
+ *  As of Django 1.1.1 no need of this functionality (server view already handles it)
+ *  Prefilling forms handles text input elements and select boxes
+ *  (including creating special hidden field used to redirect browser after change-form is saved)
+ */
 function prefill_change_form() {
     $(document).unbind('media_loaded', PrefilledChangeForm.fill_form);
     $(document).bind('media_loaded', PrefilledChangeForm.fill_form);

@@ -85,10 +85,15 @@
 
     {% if media %}
         {% cache 300 'nm-cl-js' cl %}
-        <script type="text/javascript">
-        {% for m in media %}
-            request_media('{{ m }}');
-        {% endfor %}
+            <script type="text/javascript">
+            {% for m in media %}
+                request_media('{{ m }}');
+            {% endfor %}
+
+            function trigger_changelist_shown() {
+                $(document).trigger('changelist_shown'); // bound in newman.js
+            }
+            $(document).one('media_loaded', trigger_changelist_shown);
         </script>
         {% endcache %}
     {% endif %}
