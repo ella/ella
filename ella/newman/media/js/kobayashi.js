@@ -160,6 +160,7 @@ LoggingLib = function () {
     var me = {};
     var capabilities = [];
     var enable_debug_div = false;
+    var str_buf = StringBuffer();
 
     function log_debug_div() {
         $('#debug').append($('<p>').text($.makeArray(arguments).join(' ')));
@@ -170,7 +171,22 @@ LoggingLib = function () {
     }
 
     function log_console() {
-        console.log(arguments);
+        //console.log(arguments);
+        // workaround for google chromium to see logged message immediately
+        str_buf.clear();
+        for (var i = 0; i < arguments.length; i++) {
+            str_buf.append(arguments[i]);
+        }
+        console.log(str_buf.to_string());
+    }
+
+    function workaround_opera_browser() {
+            try {
+                var log_func = window.opera.postError;
+                window.console = {};
+                window.console.log = log_func;
+            } catch (e) {
+            }
     }
 
     function first_log_attempt() {
@@ -180,6 +196,15 @@ LoggingLib = function () {
                 capabilities.push(log_debug_div);
             } catch(e) { }
         }
+
+        // Opera?
+        if (typeof(console) == 'undefined') {
+            workaround_opera_browser();
+            capabilities.push(log_console);
+            log_console.apply(null, arguments);
+            return;
+        }
+
         try {
             log_console_apply.apply(null, arguments);
             capabilities.push(log_console_apply);
@@ -187,7 +212,8 @@ LoggingLib = function () {
             try {
                 log_console.apply(null, arguments);
                 capabilities.push(log_console);
-            } catch(e) { }
+            } catch(e) { 
+            }
         }
     }
 
