@@ -1491,51 +1491,6 @@ $( function() {
     var overlay_html;
     
     open_overlay = OverlayOpener;
-    __open_overlay = function(content_type, selection_callback) {
-        var ooargs = arguments;
-        if ( ! overlay_html ) {
-            get_html_chunk('overlay', function(data) {
-                overlay_html = data;
-                ooargs.callee.apply(this, ooargs);
-            });
-            return;
-        }
-
-        var top_zindex = ( function() {
-            var rv = 1;
-            $('.ui-widget-overlay').each( function() {
-                rv = Math.max(rv, $(this).css('zIndex'));
-            });
-            return rv + 1;
-        })();
-        var $overlay = $('#changelist-overlay');
-        if ($overlay.length == 0) {
-            $overlay = $( overlay_html )
-            .css({top:0,left:0})
-            .appendTo(
-                   $('.change-form').get(0)
-                || $('#content').get(0)
-                || $('body').get(0)
-            );
-            $('#overlay-content').bind('content_added', init_overlay_content);
-        }
-        $overlay.css({zIndex:top_zindex});
-
-        $('#overlay-content').data('selection_callback', selection_callback);
-
-        var ct_arr = /(\w+)\W(\w+)/.exec( content_type );
-        if ( ! ct_arr ) {
-            carp('open_overlay: Unexpected content type: '+content_type);
-            return false;
-        }
-        var address = str_concat('/' , ct_arr[1] , '/' , ct_arr[2] , '/?pop');
-
-        Kobayashi.load_content({
-            address: address,
-            target_id: 'overlay-content',
-            selection_callback: selection_callback
-        });
-    };
     $('.overlay-closebutton').live('click', function() {
         $(this).closest('.overlay').css({zIndex:5}).hide()
         .find('.overlay-content').removeData('selection_callback');
