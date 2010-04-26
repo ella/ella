@@ -282,6 +282,52 @@ var TestFormHandler = function() {
             else return 0;
         }));
     }
+
+    function delete_unsaved_gallery_item(evt) {
+        var $item = $( evt.target ).closest('.sortable-item');
+        if ($item.length > 0) {
+            $item.remove();
+            gallery_inlines_recount_ids();
+        }
+    }
+
+    function gallery_recount_ids_and_names_callback(element, no_items, counter) {
+        var ITEM_SET = 'galleryitem_set-';
+        var no_re = /galleryitem_set-\d+-/;
+        var $element = $(element);
+        if (no_re.test( element.name )) {
+            var newname = element.name.replace(no_re, str_concat(ITEM_SET, counter,'-') );
+            $element.attr('name', newname);
+        }
+        if (no_re.test( element.id )) {
+            var newid = element.id.replace(no_re, str_concat(ITEM_SET, counter,'-') );
+            $element.attr('id', newid);
+            if (/\-DELETE/.test(newid)) {
+                $element.unbind('click', delete_unsaved_gallery_item);
+                $element.bind('click', delete_unsaved_gallery_item);
+            }
+        }
+        if (no_re.test( $element.attr('for') )) {
+            var newid = $element.attr('for').replace(no_re, str_concat(ITEM_SET, counter,'-') );
+            $element.attr('for', newid);
+        }
+    }
+
+    function gallery_inlines_recount_ids() {
+        var $items = $('.gallery-items-sortable .inline-related');
+        var no_items = $('.gallery-items-sortable input.target_id').length;
+        var counter = 0;
+        $items.each(
+            function() {
+                $(this).find('*').each( 
+                    function() {
+                        gallery_recount_ids_and_names_callback(this, no_items, counter);
+                    }
+                )
+                counter ++;
+            }
+        );
+    }
     
     function add_gallery_item(evt) {
         if (evt && evt.button != 0) return;
@@ -292,13 +338,23 @@ var TestFormHandler = function() {
         
         var no_re = /galleryitem_set-\d+-/;
         $new_item.find('*').each( function() {
+            var ITEM_SET = 'galleryitem_set-';
+            var $this = $(this);
             if (no_re.test( this.name )) {
-                var newname = this.name.replace(no_re, str_concat('galleryitem_set-',no_items,'-') );
-                $(this).attr({name: newname});
+                var newname = this.name.replace(no_re, str_concat(ITEM_SET,no_items,'-') );
+                $this.attr('name', newname);
             }
             if (no_re.test( this.id )) {
-                var newid = this.id.replace(no_re, str_concat('galleryitem_set-',no_items,'-') );
-                $(this).attr({id: newid});
+                var newid = this.id.replace(no_re, str_concat(ITEM_SET,no_items,'-') );
+                $this.attr('id', newid);
+                if (/\-DELETE/.test(newid)) {
+                    $this.unbind('click', delete_unsaved_gallery_item);
+                    $this.bind('click', delete_unsaved_gallery_item);
+                }
+            }
+            if (no_re.test( $this.attr('for') )) {
+                var newid = $this.attr('for').replace(no_re, str_concat(ITEM_SET,no_items,'-') );
+                $this.attr('for', newid);
             }
             
             // init values
@@ -329,6 +385,11 @@ var TestFormHandler = function() {
 
     // check for unique photo ID
     function check_gallery_changeform( $form ) {
+        function unhighlight_duplicates(evt) {
+            evt.data.$elems.unbind('click', unhighlight_duplicates);
+            evt.data.$elems.removeClass(ITEM_ERROR_CLASS);
+        }
+
         var used_ids = {};
         var rv = true;
         var ITEM_ERROR_CLASS = 'gallery-item-error';
@@ -350,8 +411,9 @@ var TestFormHandler = function() {
                     return;
                 }
                 // highlight red
-                $gallery_item.addClass(ITEM_ERROR_CLASS);
-                $('#' + used_ids[ val ]).closest('.gallery-item').addClass(ITEM_ERROR_CLASS);
+                var $duplicates = $(str_concat('#' , used_ids[ val ], ',', '#' , this.id)).closest('.gallery-item');
+                $duplicates.bind('click', {$elems: $duplicates}, unhighlight_duplicates);
+                $duplicates.addClass(ITEM_ERROR_CLASS);
                 alert(gettext('Duplicate photo'));
                 $(this).focus();
                 rv = false;
@@ -405,7 +467,8 @@ var TestFormHandler = function() {
             } else if (value >= NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER && value <= (99 * NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER)) {
                 multiplier = 1.0 / NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER;
             }
-            var res = (value * multiplier).toInteger();
+            var res = (Number(value) * multiplier);
+            res = res.toInteger(); // force res to be a whole number
             carp('Recounting ' , value , ' to ' , res , ' for element ' , this);
             this.value = res.toString();
             NewmanInline.gallery_ordering_modified = true;
@@ -425,6 +488,10 @@ var TestFormHandler = function() {
             ord = (i + 1) * degree;
             $(this).val( ord ).change();
             // $(this).siblings('h4:first').find('span:first').text( ord ); // hide ordering
+            var $del = $(this).siblings('.delete-item:first');
+            if ($del.hasClass('noscreen')) {
+                $del.removeClass('noscreen');
+            }
         });
         $target.children().removeClass('last-related');
         $target.children(':last').addClass('last-related');
@@ -516,6 +583,12 @@ var TestFormHandler = function() {
                     var order = $( '#' + $input.attr('id').replace(/-target_id$/, '-order') ).val();
                     //$heading.find('span:first').text( order ); // don't show ordering value
                     $heading.find('span:eq(1)').text( title );
+
+                    // enable delete fake button
+                    var $del = $input.siblings('.delete-item:first');
+                    if ($del.hasClass('noscreen')) {
+                        $del.removeClass('noscreen');
+                    }
                 },
             });
         }
@@ -559,12 +632,6 @@ var TestFormHandler = function() {
             remove_gallery_item_ids();
         });
 
-        //delete item from gallery (not saved item) FIXME
-        var $buttons = $('#gallery_form').find('a.delete-item-button');
-        carp('Buttons: ' , $buttons.length.toString());
-        $buttons.each( function (ordering) {
-            var $gi = $(this).closest('.gallery-item');
-        });
     }
     init_gallery();
     carp('CALLED init_gallery');
