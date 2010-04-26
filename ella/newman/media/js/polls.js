@@ -1,4 +1,10 @@
-// Poll change forms
+/** 
+ * Poll change forms
+ * requires: jQuery 1.4.2+, 
+ *          str_concat() function (effective string concatenation).
+ *          carp() function for logging purposes located in kobayashi.js .
+ *
+ */
 (function() {
 	// remaining-poll-question-inputs
 	$('.remaining-poll-question-inputs').remove(); 
@@ -126,7 +132,7 @@
         $new_question.find('.js-question-foreign-key-fields :input').each( function() {
             // question_set-0-id   => question_set-1-id
             // question_set-0-quiz => question_set-1-quiz
-            this.name = this.name.replace(/set-\d+-/, 'set-'+new_no+'-');
+            this.name = this.name.replace(/set-\d+-/, str_concat('set-'+new_no+'-'));
         });
         
         // reset rich text field
@@ -190,7 +196,10 @@
 	            var post_q_no = attr_parts[1];
 	            var opt_no = attr_parts[2];
 	            var tail = attr_parts[3];
-	            element.attr( attributes[i], q_prefix + post_q_no + (opt_no.length ? choice_no : '') + tail );
+	            element.attr( 
+                    attributes[i], 
+                    str_concat(q_prefix , post_q_no , (opt_no.length ? choice_no : '') , tail)
+                );
 			}
 		}
 
@@ -351,7 +360,7 @@
         }
 
         function load_poll_from_preset(evt, preset) {
-            carp('preset load initiated (poll). evt=' + evt + ' , preset=' + preset);
+            carp('preset load initiated (poll). evt=' , evt , ' , preset=' , preset);
             $('.js-poll-question-container:gt(0)').remove();
             $('.js-poll-choice-container:gt(0)'  ).remove();
             var last_q_no = 0;
