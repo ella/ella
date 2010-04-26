@@ -804,6 +804,11 @@ $(function() {
     } // end of register_textarea_events
 
     function media_loaded_handler() {
+        // install only if there is change-form displayed
+        if ($('.change-form').length == 0) {
+            return;
+        }
+        carp('INSTALLING TEXTAREA HANDLERS...');
         // enable NewmanTextArea (replacement for markItUp!)
         install_box_editor();
         $('.rich_text_area').newmanTextArea(newman_text_area_settings);

@@ -478,7 +478,7 @@ span.widget-thumb img { border: 1px solid #ccc; margin-right: 5px; }
     background: #77B150;
 }
 .gallery-item img.thumb { float: left; width: 80px; margin-right: 10px; }
-.gallery-item-error { background: #f66262; }
+.gallery-item-error { background: #f66262 !important; }
 .sortable-item .gallery-item { background: none; }
 /*.sortable-item .gallery-item:hover { background: #77B150; }*/
 .gallery-add-item {
