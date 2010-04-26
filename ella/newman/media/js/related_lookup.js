@@ -98,14 +98,16 @@
         }
         throw("Couldn't find the corresponding input to " + $i.attr('id'));
     }
-    $('.generic-related-lookup').live('click', function() {
+    function click_live_handler() {
         // Look for the corresponding content type input and target id input
+        carp('CALL.generic-related-lookup');
         var $id_input = $( '#' + this.id.replace(/^lookup_/, '') );
         var $ct_input = get_corresponding_input($id_input);
         if ($ct_input.length == 0) {
             return false;
         }
         var ct_id = $ct_input.val();
+        NewmanLib.debug_ct_input = $ct_input;
         if ( ! ct_id ) {
             $ct_input
             .addClass('highlighted')
@@ -119,7 +121,8 @@
             $id_input.trigger('change', [extras]);
         });
         return false;
-    });
+    }
+    $('.generic-related-lookup').live('click', click_live_handler);
     
     // When content-type is selected, no need to wait for lupicka to be clicked. Fire the overlay right away.
     function open_overlay_on_ct_selection() {
