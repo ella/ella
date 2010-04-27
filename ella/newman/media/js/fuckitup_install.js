@@ -808,6 +808,10 @@ $(function() {
         if ($('.change-form').length == 0) {
             return;
         }
+        if ( $('.change-form').data('textarea_handlers_installed') === true ) {
+            carp('ALREADY INSTALLED TEXTAREA HANDLERS');
+            return;
+        }
         carp('INSTALLING TEXTAREA HANDLERS...');
         // enable NewmanTextArea (replacement for markItUp!)
         install_box_editor();
@@ -816,6 +820,7 @@ $(function() {
         $('.markItUpEditor').each(register_textarea_events);
         $('.rich_text_area.markItUpEditor').bind('focusout', discard_auto_preview);
         $('textarea.rich_text_area').autogrow();
+        $('.change-form').data('textarea_handlers_installed', true);
     }
     
     $(document).bind('media_loaded', media_loaded_handler);
