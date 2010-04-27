@@ -457,7 +457,10 @@ var TestFormHandler = function() {
 
         // ordering-number magic to avoid problems with saving GalleryItems with changed ordering (unique key collision)
         var $form = $('#gallery_form');
-        if (NewmanInline.gallery_ordering_modified) return;
+        if (NewmanInline.gallery_ordering_modified) {
+            carp('GalleryItems won\'t be recounted.(reason: already recounted)');
+            return;
+        }
         $form.find('.gallery-item .item-order').each( function() {
             if (!this.value) return;
             var value = parseInt(this.value);
@@ -467,9 +470,8 @@ var TestFormHandler = function() {
             } else if (value >= NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER && value <= (99 * NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER)) {
                 multiplier = 1.0 / NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER;
             }
-            var res = (Number(value) * multiplier);
-            res = res.toInteger(); // force res to be a whole number
-            carp('Recounting ' , value , ' to ' , res , ' for element ' , this);
+            var res = Math.floor(Number(value)) * multiplier;// force res to be a whole number
+            //carp('Recounting ' , value , ' to ' , res , ' for element ' , this);
             this.value = res.toString();
             NewmanInline.gallery_ordering_modified = true;
             carp('GalleryItems recounted');
