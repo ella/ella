@@ -356,11 +356,16 @@ var TestFormHandler = function() {
                 var newid = $this.attr('for').replace(no_re, str_concat(ITEM_SET,no_items,'-') );
                 $this.attr('for', newid);
             }
-            
+           
             // init values
-            if ($(this).is('.target_id' )) $(this).val('');
-            if ($(this).is('.item-order')) $(this).val( max_order() + 1 );
-            if ($(this).is('img.thumb'  )) $(this).attr({src:'', alt:''});
+            if ($this.is('.target_id' )) $(this).val('');
+            if ($this.is('img.thumb'  )) $(this).attr({src:'', alt:''});
+            if ($this.is('.item-order')) {
+                // count order
+                var degree = get_gallery_ordering_degree( $this );
+                var ord = max_order() + (1 * degree);
+                $this.val(ord);
+            }
         });
         $new_item.find('h4').remove();
         $new_item.insertAfter( $last_item );
@@ -470,22 +475,30 @@ var TestFormHandler = function() {
             } else if (value >= NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER && value <= (99 * NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER)) {
                 multiplier = 1.0 / NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER;
             }
-            var res = Math.floor(Number(value)) * multiplier;// force res to be a whole number
-            //carp('Recounting ' , value , ' to ' , res , ' for element ' , this);
+            var res = Math.floor(Number(value) * multiplier);// force res to be a whole number
+            carp('Recounting ' , value , ' to ' , res , ' for element ' , this);
             this.value = res.toString();
             NewmanInline.gallery_ordering_modified = true;
             carp('GalleryItems recounted');
         });
     }
 
-    function gallery_sortable_update_callback(evt, ui) {
-        var $target = $( evt.target );
+    function get_gallery_ordering_degree($element) {
+        var value = parseInt( $element.val() );
+        var degree = 1;
+        if (value / NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER >= 1.0) {
+            degree = NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER;
+        }
+        return degree;
+    }
+
+    function gallery_recount_ordering($target) {
         var degree = 1;
         var ord;
         $target.find('input.item-order').each( function(i) {
             // get actual order degree
-            if (i == 0 && (parseInt(this.value) / NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER >= 1.0)) {
-                degree = NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER;
+            if (i == 0) {
+                degree = get_gallery_ordering_degree( $(this) );
             }
             ord = (i + 1) * degree;
             $(this).val( ord ).change();
@@ -497,6 +510,11 @@ var TestFormHandler = function() {
         });
         $target.children().removeClass('last-related');
         $target.children(':last').addClass('last-related');
+    }
+
+    function gallery_sortable_update_callback(evt, ui) {
+        var $target = $( evt.target );
+        gallery_recount_ordering($target);
     }
 
     function remove_gallery_item_ids() {
@@ -632,6 +650,7 @@ var TestFormHandler = function() {
             $('.gallery-items-sortable input.target_id').each( update_gallery_item_thumbnail );
             init_gallery( evt.target );
             remove_gallery_item_ids();
+            gallery_recount_ordering( $('.gallery-items-sortable') );
         });
 
     }
