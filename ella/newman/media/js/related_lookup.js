@@ -35,7 +35,14 @@
 
 // Raw ID input's lupicka
 (function($) {
-    $('.rawid-related-lookup').live('click', function(evt) {
+    function rawid_related_lookup_click_handler(evt) {
+        function overlay_callback(id, extras) {
+            $target_input.val(id);
+            $target_input.trigger('change', [extras]);
+            // try to change photo (if rawid-related-lookup is for photo)
+            carp('OVERLAY CHANGED  ID: ', id, '  EXTRAS: ', extras);
+        } 
+
         if (evt.button != 0) return;
         
         // From '../../core/author/?pop' take 'core/author'
@@ -51,14 +58,12 @@
             carp('Could not get raw id input from lupicka icon #'+this.id);
             return false;
         }
-        
-        open_overlay(content_type, function(id, extras) {
-            $target_input.val(id);
-            $target_input.trigger('change', [extras]);
-        });
+        open_overlay(content_type, overlay_callback);
         
         return false;
-    });
+    }
+
+    $('.rawid-related-lookup').live('click', rawid_related_lookup_click_handler);
 })(jQuery);
 
 // Lupicka for generic relations (content type & object id)
