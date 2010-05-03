@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.admin.options import InlineModelAdmin, IncorrectLookupParameters, FORMFIELD_FOR_DBFIELD_DEFAULTS
+from django.contrib.admin.util import unquote
 from django.forms.models import BaseInlineFormSet
 from django import template
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden
@@ -195,6 +196,9 @@ class NewmanModelAdmin(XModelAdmin):
             url(r'^(.+)/json/$',
                 wrap(self.change_json_view),
                 name='%s_%s_change_json' % info),
+            url(r'^(.+)/json/detail/$',
+                wrap(self.model_detail_json_view),
+                name='%s_%s_json_detail' % info),
         )
         urlpatterns += super(NewmanModelAdmin, self).get_urls()
         return urlpatterns
@@ -720,6 +724,26 @@ class NewmanModelAdmin(XModelAdmin):
         # Newman's additions to the context
         self.change_view_process_context(request, context, object_id)
         return context
+
+    def model_detail_json_view(self, request, object_id, extra_context=None):
+        " Outputs basic object's data. "
+        obj = None
+        try:
+            obj = self.queryset(request).get(pk=unquote(object_id))
+        except model.DoesNotExist:
+            obj = None
+        if not self.has_model_view_permission(request, obj):
+            raise PermissionDenied
+
+        result_dict = dict()
+        for field in obj._meta.fields:
+            result_dict[field.name] = field.value_to_string(obj)
+
+        return utils.JsonResponse(
+            'JSON object detail data.',
+            result_dict,
+            status=STATUS_OK
+        )
 
     @transaction.commit_on_success
     def change_json_view(self, request, object_id, extra_context=None):
