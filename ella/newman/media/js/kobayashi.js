@@ -32,6 +32,19 @@ var KOBAYASHI_CSS_LOAD_TIMEOUT = 250; // msec
 ;;;     alert(s);
 ;;; }
 
+function try_decorator(func) {
+    function wrapped() {
+        var out = null;
+        try {
+            out = func.apply(null, arguments);
+        } catch (e) {
+            carp('Error in try_decorator:' , e.toString(), ' when calling ', func);
+        }
+        return out;
+    }
+    return wrapped;
+}
+
 function timer(name) {
     try {
         console.time(name);

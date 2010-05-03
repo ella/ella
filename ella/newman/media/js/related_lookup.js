@@ -35,12 +35,48 @@
 
 // Raw ID input's lupicka
 (function($) {
+    function rawid_related_lookup_update_photo($input, id, extras) {
+        function process_update(response_text, text_status, xhr) {
+            var $img = $thumb.find('img');
+            if ($img.length == 0) return;
+            var json_result = JSON.parse(response_text);
+            if ( typeof(json_result.data) == 'undefined' ) {
+                carp('WARNING: No data in JSON received');
+                return;
+            }
+            var image_path = str_concat(DJANGO_MEDIA_URL, json_result.data.image);
+            // Because of hardcoded thumbnail filename in ella.photos.models 
+            // (neither thumbnail filename nor URL is saved in database), 
+            // we should add prefix thumb- to the received photo filename.
+            var re_photo = /(.*\/)([\w_\-\.]+.jpg)$/i;
+            NewmanLib.debug_image_path = image_path;
+            var new_path = image_path.replace( re_photo, str_concat('$1', 'thumb-', '$2') );
+            $img.attr('src', new_path);
+            
+            // change text and href of anchor element:
+            $anchor.attr( 'href', str_concat(BASE_URL, 'photos/photo/', id) );
+            $anchor.text( json_result.data.title );
+        }
+
+        carp('OVERLAY CHANGED  ID: ', id, '  EXTRAS: ', extras);
+        var $anchor = $input.siblings('a.js-hashadr:first');
+        var $thumb = $input.siblings('span.widget-thumb');
+        if ($thumb.length > 0) {
+            var ajax_parms = {
+                async: true,
+                url: str_concat(BASE_URL, 'photos/photo/', id, '/json/detail/'),
+                success: try_decorator(process_update),
+            };
+            $.ajax(ajax_parms);
+        }
+    }
+
     function rawid_related_lookup_click_handler(evt) {
         function overlay_callback(id, extras) {
             $target_input.val(id);
             $target_input.trigger('change', [extras]);
             // try to change photo (if rawid-related-lookup is for photo)
-            carp('OVERLAY CHANGED  ID: ', id, '  EXTRAS: ', extras);
+            rawid_related_lookup_update_photo($target_input, id, extras);
         } 
 
         if (evt.button != 0) return;

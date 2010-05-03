@@ -7,6 +7,7 @@
     <link rel="shortcut icon" href="{{ NEWMAN_MEDIA_URL }}ico/favicon.ico" type="image/x-icon" />
   <script type="text/javascript">
         var MEDIA_URL = '{{ NEWMAN_MEDIA_URL }}';
+        var DJANGO_MEDIA_URL = '{{ DJANGO_MEDIA_URL }}';
         var BASE_URL = '{% url newman:index %}';
         var LOGGED_IN = '{% if user.is_authenticated %}1{% endif %}';
         var DEBUG = '{% if DEBUG %}1{% endif %}';

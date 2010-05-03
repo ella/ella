@@ -11,5 +11,6 @@ def newman_media(request):
         uri = getattr(settings, 'MEDIA_URL') + 'newman_media/'
     return {
         'NEWMAN_MEDIA_URL' : uri,
+        'DJANGO_MEDIA_URL': getattr(settings, 'MEDIA_URL', ''),
         'DEBUG': settings.DEBUG
     }
