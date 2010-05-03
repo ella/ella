@@ -1426,15 +1426,18 @@ $( function() {
         var arg_content_type = content_type;
         var arg_selection_callback = selection_callback;
 
+        // 1st step
+        function init_overlay_html() {
+            get_html_chunk('overlay', init_overlay_html_chunk_callback);
+        }
+
+        // 2nd step
         function init_overlay_html_chunk_callback(data) {
             overlay_html = data;
             continue_opening_overlay(arg_content_type, arg_selection_callback);
         }
 
-        function init_overlay_html() {
-            get_html_chunk('overlay', init_overlay_html_chunk_callback);
-        }
-
+        // 3rd (final) step
         function continue_opening_overlay(content_type, selection_callback) {
             var ooargs = arguments;
             if ( ! overlay_html ) {
