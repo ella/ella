@@ -18,7 +18,7 @@
  *          LoggingLib object.
  *
  */
-KOBAYASHI_VERSION = '2009-10-05';
+KOBAYASHI_VERSION = '2010-05-03';
 
 var CURRENT_HASH = '';
 var KOBAYASHI_ADDRESSBAR_CHECK_INTERVAL = 250; // msec
