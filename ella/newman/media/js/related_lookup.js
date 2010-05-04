@@ -52,6 +52,9 @@
             NewmanLib.debug_image_path = image_path;
             var new_path = image_path.replace( re_photo, str_concat('$1', 'thumb-', '$2') );
             $img.attr('src', new_path);
+            var $img_anchor = $thumb.find('a.js-nohashadr');
+            $img_anchor.attr('href', image_path);
+            $img_anchor.attr('title', json_result.data.title);
             
             // change text and href of anchor element:
             $anchor.attr( 'href', str_concat(BASE_URL, 'photos/photo/', id) );
