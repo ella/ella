@@ -1,4 +1,5 @@
 import logging
+import re
 
 from django.conf import settings
 from django.contrib import admin
@@ -385,10 +386,33 @@ class NewmanModelAdmin(XModelAdmin):
         return render_to_response(self.get_template_list('action_log.html'), context, context_instance=template.RequestContext(request))
 
 
-    @utils.profiled_section
     #@require_AJAX
     def changelist_view(self, request, extra_context=None):
         self.register_newman_variables(request)
+
+        # save per user filtered content type.
+        is_popup = False
+        req_path = request.get_full_path()
+        ct = ContentType.objects.get_for_model(self.model)
+        # persistent filter for non-popupped changelists only
+        key = 'filter__%s__%s' % (ct.app_label, ct.model)
+        if req_path.find('pop') >= 0: # if popup is displayed, remove pop string from request path
+            is_popup = True
+            req_path = re.sub(r'(\?)(pop=&|pop=|pop&|pop)(.*)', r'\1\3', req_path)
+        if req_path.endswith('?') and is_popup: 
+            req_path = '' # if popup with no active filters is displayed, do not save empty filter settings
+        if req_path.find('?') > 0:
+            url_args = req_path.split('?', 1)[1]
+            utils.set_user_config_db(request.user, key, url_args)
+            log.debug('SAVING FILTERS %s' % url_args)
+        else:
+            user_filter = utils.get_user_config(request.user, key)
+            if user_filter:
+                if is_popup:
+                    user_filter = 'pop&%s' % user_filter
+                redirect_to = '%s?%s' % (request.path, user_filter)
+                log.debug('REDIRECTING TO %s' % redirect_to)
+                return utils.JsonResponseRedirect(redirect_to)
 
         context = super(NewmanModelAdmin, self).get_changelist_context(request)
         if type(context) != dict:
@@ -398,27 +422,11 @@ class NewmanModelAdmin(XModelAdmin):
             raw_media = self.prepare_media(context['media'])
             context['media'] = raw_media
 
-        # save per user filtered content type.
-        req_path = request.get_full_path()
-        ct = ContentType.objects.get_for_model(self.model)
-        # persistent filter for non-popupped changelists only
-        key = 'filter__%s__%s' % (ct.app_label, ct.model)
-        if req_path.find('pop') < 0:
-            if req_path.find('?') > 0:
-                url_args = req_path.split('?', 1)[1]
-                utils.set_user_config_db(request.user, key, url_args)
-            else:
-                user_filter = utils.get_user_config(request.user, key)
-                if user_filter:
-                    redirect_to = '%s?%s' % (request.path, user_filter)
-                    return utils.JsonResponseRedirect(redirect_to)
-
         context['is_filtered'] = context['cl'].is_filtered()
         context['is_user_category_filtered'] = utils.is_user_category_filtered( self.queryset(request) )
         context.update(extra_context or {})
         return render_to_response(self.change_list_template, context, context_instance=template.RequestContext(request))
 
-    @utils.profiled_section
     @require_AJAX
     def suggest_view(self, request, extra_context=None):
         self.register_newman_variables(request)
