@@ -251,9 +251,9 @@ class NewmanModelAdmin(XModelAdmin):
         """ Autosave data (dataloss-prevention) or save as (named) template """
         def delete_too_old_drafts():
             " remove autosaves too old to rock'n'roll "
-            to_delete = AdminUserDraft.objects.filter(title__exact='').order_by('-ts')
+            to_delete = AdminUserDraft.objects.filter(title__exact='', user=request.user).order_by('-ts')
             for draft in to_delete[AUTOSAVE_MAX_AMOUNT:]:
-                log.debug('Deleting too old user draft (autosave) %s' % draft)
+                log.debug('Deleting too old user draft (autosave) %d' % draft.pk)
                 draft.delete()
 
         self.register_newman_variables(request)

@@ -1299,6 +1299,7 @@ function changelist_shown_handler(evt) {
         var pass_event = jQuery.Event('click');
         pass_event.button = 0;
         evt.data.anchor.trigger(pass_event);
+        return false;
     }
 
     var $anchors = $('div#changelist table tr').filter('.row1,.row2').find('th a:last');
