@@ -61,9 +61,9 @@ var TextAreaSelectionHandler = function () {
 			area.value = str_concat(
                 area.value.substring(0, selection_start) , text , area.value.substring(area.selectionEnd)
             );
-			area.setSelectionRange( str_concat(
-                selection_start , text.length,selection_start , text.length
-            ) );
+			area.setSelectionRange( 
+                selection_start + text.length, selection_start + text.length
+            );
 		}
         // TODO trigger event text was changed? Probably no..
 		area.focus();
