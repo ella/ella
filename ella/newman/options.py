@@ -411,8 +411,9 @@ class NewmanModelAdmin(XModelAdmin):
                 if is_popup:
                     user_filter = 'pop&%s' % user_filter
                 redirect_to = '%s?%s' % (request.path, user_filter)
-                log.debug('REDIRECTING TO %s' % redirect_to)
-                return utils.JsonResponseRedirect(redirect_to)
+                if not redirect_to.endswith('?q='):
+                    log.debug('REDIRECTING TO %s' % redirect_to)
+                    return utils.JsonResponseRedirect(redirect_to)
 
         context = super(NewmanModelAdmin, self).get_changelist_context(request)
         if type(context) != dict:
