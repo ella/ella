@@ -1299,6 +1299,7 @@ function changelist_shown_handler(evt) {
         var pass_event = jQuery.Event('click');
         pass_event.button = 0;
         evt.data.anchor.trigger(pass_event);
+        evt.preventDefault();
         return false;
     }
 
@@ -1311,7 +1312,7 @@ function changelist_shown_handler(evt) {
         }
     );
 }
-$(document).bind('changelist_shown', changelist_shown_handler);
+//$(document).bind('changelist_shown', changelist_shown_handler); //FIXME buggy in Positions changelist.
 
 function changelist_batch_success(response_text) {
     var $dialog = $('<div id="confirmation-wrapper">');
