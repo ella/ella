@@ -475,6 +475,8 @@ span.widget-thumb img { border: 1px solid #ccc; margin-right: 5px; }
     border: 1px solid #ddd; 
     overflow: auto;
     float: left;
+    max-width: 180px;
+    max-height: 220px;
     background: #77B150;
 }
 .gallery-item img.thumb { float: left; width: 80px; margin-right: 10px; }
