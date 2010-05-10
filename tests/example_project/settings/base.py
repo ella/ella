@@ -55,50 +55,44 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 )
 
 INSTALLED_APPS = (
+    # django apps
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
+    'django.contrib.sitemaps',
     'django.contrib.redirects',
+    'django.contrib.admin',
+    'django.contrib.comments',
 
+    # ella apps
     'ella.core',
-    'ella.db_templates',
-    'ella.photos',
     'ella.articles',
-    'ella.positions',
-    'ella.polls',
-    'tagging',
-    'ella.ellatagging',
+    'ella.oldcomments',
+    'ella.photos',
+    'ella.db_templates',
     'ella.galleries',
-    'ella.interviews',
-    'ella.ellaexports',
+    'ella.polls',
+    'ella.ellatagging',
+    'ella.ratings',
+    'ella.newman',
+    'ella.newman.licenses',
+    'ella.ellaadmin',
     'ella.media',
+    'ella.imports',
+    'ella.interviews',
+    'ella.positions',
+    'ella.catlocks',
+    'ella.sendmail',
     'ella.attachments',
-#    'nc.cdnclient',
+    'ella.series',
+    'ella.ellacomments',
+    'ella.ellaexports',
 
     'example_project.services',
 
-#    'south',
-
-#    'ella.ellaadmin',
-    'ella.newman',
-    'ella.newman.licenses',
-    'django.contrib.admin',
+    'tagging',
     'djangomarkup',
-
-#    'nc.adverts',
-    'ella.catlocks',
-    'ella.contact_form',
-    'ella.discussions',
-    'ella.imports',
-#    'jaknato.instruction',
-    'ella.series',
-    'ella.ratings',
-#    'vanoce.writetosanta',
-#    'vanoce.xmastips',
-
-    # 3rd party apps
-    #'dbpersistconn',
 )
 
 VERSION = 1
