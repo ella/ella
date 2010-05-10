@@ -37,6 +37,14 @@ class TestGallery(NewmanTestCase):
         expected_data.update({
             'category' : [u"Africa/west-africa"],
             'authors' : [u"Barack Obama", u"King Albert II"],
+            'title' : u'马 žš experiment',
+            'description' : u'Gallery description',
+            'content' : u'šialený obsah galörie',
+            'slug' : u'experiment',
+            'galleryitem_set-0-target_id': '1',
+            'galleryitem_set-1-target_id': '2',
+            'galleryitem_set-2-target_id': '3',
+            'galleryitem_set-3-target_id': '4',
         })
 
         self.save_form()
@@ -46,19 +54,41 @@ class TestGallery(NewmanTestCase):
         s.click(self.get_listing_object_href())
         self.verify_form(expected_data)
 
-    def add_photos(self):
+    def click_item(self, no):
         sel = self.selenium
+        item_id = 'lookup_id_galleryitem_set-%d-target_id' % no
         # display overlay (click to the lupicka)
         first_item = self.elements['pages']['gallery']['item'] % \
-            {'id': 'lookup_id_galleryitem_set-0-target_id'}
+            {'id': item_id}
         sel.click(first_item)
 
+    def add_photos(self):
+        sel = self.selenium
+
         # select first item, add it to the gallery items
+        self.click_item(0)
         sel.wait_for_element_present('overlay-content-main')
         overlay = self.elements['controls']['overlay']
         first_photo = "%s/descendant::*/a[text()='First Example']" % overlay
         sel.click(first_photo)
-        pass
+
+        self.click_item(1)
+        sel.wait_for_element_present('overlay-content-main')
+        overlay = self.elements['controls']['overlay']
+        first_photo = "%s/descendant::*/a[text()='Second Example']" % overlay
+        sel.click(first_photo)
+
+        self.click_item(2)
+        sel.wait_for_element_present('overlay-content-main')
+        overlay = self.elements['controls']['overlay']
+        first_photo = "%s/descendant::*/a[text()='Third Example']" % overlay
+        sel.click(first_photo)
+
+        self.click_item(3)
+        sel.wait_for_element_present('overlay-content-main')
+        overlay = self.elements['controls']['overlay']
+        first_photo = "%s/descendant::*/a[text()='Fourth Example']" % overlay
+        sel.click(first_photo)
 
     def todo(self):
         """
