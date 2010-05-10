@@ -429,5 +429,32 @@
         <field type="TextField" name="description"></field>
         <field to="sites.site" name="site" rel="ManyToOneRel">1</field>
     </object>
+
+    <!-- Photo -->
+
+    <object pk="1" model="photos.photo">
+        <field type="CharField" name="title">First Example</field>
+        <field type="SlugField" name="slug">1-first-example</field>
+        <field to="core.author" name="authors" rel="ManyToManyRel"><object pk="4"></object></field>
+        <field type="ImageField" name="image">photos/2010/05/10/first_example.jpg</field>
+    </object>
+    <object pk="2" model="photos.photo">
+        <field type="CharField" name="title">Second Example</field>
+        <field type="SlugField" name="slug">1-second-example</field>
+        <field to="core.author" name="authors" rel="ManyToManyRel"><object pk="4"></object></field>
+        <field type="ImageField" name="image">photos/2010/05/10/second_example.jpg</field>
+    </object>
+    <object pk="3" model="photos.photo">
+        <field type="CharField" name="title">Third Example</field>
+        <field type="SlugField" name="slug">1-third-example</field>
+        <field to="core.author" name="authors" rel="ManyToManyRel"><object pk="4"></object></field>
+        <field type="ImageField" name="image">photos/2010/05/10/third_example.jpg</field>
+    </object>
+    <object pk="4" model="photos.photo">
+        <field type="CharField" name="title">Fourth Example</field>
+        <field type="SlugField" name="slug">1-fourth-example</field>
+        <field to="core.author" name="authors" rel="ManyToManyRel"><object pk="4"></object></field>
+        <field type="ImageField" name="image">photos/2010/05/10/fourth_example.jpg</field>
+    </object>
     
 </django-objects>
