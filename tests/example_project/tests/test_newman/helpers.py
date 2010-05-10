@@ -74,7 +74,7 @@ class NewmanTestCase(SeleniumTestCase):
                     'ok': "//div[@id='opmsg']/span[@class='okmsg']",
                 },
                 'add' : "//a[@class='js-hashadr icn btn add']",
-                'save' : "//a[@class='js-submit icn btn save def']",
+                'save' : "//a[@class='js-submit icn btn save def default-button-ok']",
                 'show_filters' : "//div[@id='filters-handler']/a[position()=1]",
                 'lookup_content' : "//div[@id='changelist']/form/table/tbody/tr/th/a[text()='%(text)s']",
                 'search_button' : "//a[@class='btn icn search def']",
@@ -88,7 +88,7 @@ class NewmanTestCase(SeleniumTestCase):
                     'first_object' : "//div[@id='changelist']/form/table/tbody/tr[position()='1']",
                     'object' : "//div[@id='changelist']/form/table/tbody/tr[position()='%(position)s']",
                     'object_href' : "//div[@id='changelist']/form/table/tbody/tr[position()='%(position)s']/th/a[position()=2]",
-                    'datepicker' : "//td[@class='%(field)s']/span[@class='dtpicker-trigger']",
+                    'datepicker' : "//td[@class='%(field)s']/span[@class='js-dtpicker-trigger']",
                     'calendar_day' : "//table[@class='ui-datepicker-calendar']/tbody/tr/td/a[text()='%(day)s']",
                 }
             }
