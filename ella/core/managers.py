@@ -1,7 +1,7 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.db import models
-from django.db.models import F
+from django.db.models import F, Q
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.utils.encoding import smart_str
@@ -267,9 +267,9 @@ class ListingQuerySetWrapper(object):
         return self._count
 
 
-def get_top_objects_key(func, self, count, mods=[]):
-    return 'ella.core.managers.HitCountManager.get_top_objects_key:%d:%d:%s' % (
-            settings.SITE_ID, count, ','.join('.'.join(str(model._meta) for model in mods))
+def get_top_objects_key(func, self, count, days=None, mods=[]):
+    return 'ella.core.managers.HitCountManager.get_top_objects_key:%d:%d:%s:%s' % (
+            settings.SITE_ID, count, str(days), ','.join('.'.join(str(model._meta) for model in mods))
         )
 
 class HitCountManager(models.Manager):
@@ -281,11 +281,15 @@ class HitCountManager(models.Manager):
             hc = self.create(placement=placement, hits=1)
 
     @cache_this(get_top_objects_key)
-    def get_top_objects(self, count, mods=[]):
+    def get_top_objects(self, count, days=None, mods=[]):
         """
         Return count top rated objects. Cache this for 10 minutes without any chance of cache invalidation.
         """
-        kwa = {}
+        qs = self.filter(placement__category__site=settings.SITE_ID).order_by('-hits')
         if mods:
-            kwa['placement__publishable__content_type__in'] = [ ContentType.objects.get_for_model(m) for m in mods ]
-        return list(self.filter(placement__category__site=settings.SITE_ID, **kwa).order_by('-hits')[:count])
+            qs = qs.filter(placement__publishable__content_type__in = [ ContentType.objects.get_for_model(m) for m in mods ])
+        if days is not None:
+            stop = datetime.now()
+            start = stop - timedelta(days=days)
+            qs = qs.filter(placement__publish_from__gte=start, placement__publish_from__lte=stop).filter(Q(placement__publish_to__gte=stop) | Q(placement__publish_to__isnull=True))
+        return list(qs[:count])
