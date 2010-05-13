@@ -43,7 +43,10 @@ def do_top_visited(parser, token):
         {% top_visited 10 days 30 articles.article photos.photo as top_objects %}
         {% for obj in top_objects %}   ...   {% endfor %}
     """
-    bits = token.split_contents()
+    count, result, days, mods = top_visited_parser(token.split_contents())
+    return TopVisitedNode(count, result, days, mods)
+
+def top_visited_parser(bits):
     if len(bits) < 4 or bits[-2] != 'as':
         raise template.TemplateSyntaxError, "{% top_visited 5 [days 30] [app.model ...] as var %}"
 
@@ -71,7 +74,7 @@ def do_top_visited(parser, token):
             raise template.TemplateSyntaxError, "{% top_visited 5 [days 30] [app.model ...] as var %}"
         mods.append(model)
 
-    return TopVisitedNode(count, bits[-1], days, mods)
+    return count, bits[-1], days, mods
 
 
 class HitCountNode(template.Node):
