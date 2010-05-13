@@ -6,6 +6,7 @@ from django.template import TemplateSyntaxError
 from django.contrib.sites.models import Site
 
 from ella.core.templatetags.core import listing_parse, ListingNode, _parse_box, BoxNode, EmptyNode
+from ella.core.templatetags.hits import top_visited_parser
 from ella.core.models import Listing, Category
 from ella.core import register
 
@@ -156,36 +157,44 @@ class TestBoxTag(UnitTestCase):
         t = template.Template('{% box name for var %}{% endbox %}')
         self.assert_equals('', t.render(template.Context({'var': None})))
 
-class TestBoxTagParser(UnitTestCase):
-    def test_parse_box_with_pk(self):
-        node = _parse_box([], ['box', 'box_type', 'for', 'core.category', 'with', 'pk', '1'])
-        self.assert_true(isinstance(node, BoxNode))
-        self.assert_equals('box_type', node.box_type)
-        self.assert_equals(Category, node.model)
-        self.assert_equals(('pk', '1'), node.lookup)
+class TestTopVisitedTagParser(UnitTestCase):
+    '''
+    {% top_visited <count> [days <days>] [app.model [app.model[...]]] as <result> %}
+    '''
 
-    def test_parse_box_for_varname(self):
-        node = _parse_box([], ['box', 'other_box_type', 'for', 'var_name'])
-        self.assert_true(isinstance(node, BoxNode))
-        self.assert_equals('other_box_type', node.box_type)
-        self.assert_equals('var_name', node.var_name)
+    def test_minimal_args(self):
+        count, var_name, days, mods = top_visited_parser(['top_visited', '1', 'as', 'var'])
+        self.assert_equals(1, count)
+        self.assert_equals('var', var_name)
+        self.assert_equals(None, days)
+        self.assert_equals([], mods)
 
-    def test_parse_box_with_slug(self):
-        node = _parse_box([], ['box', 'box_type', 'for', 'sites.site', 'with', 'slug', '"home"'])
-        self.assert_true(isinstance(node, BoxNode))
-        self.assert_equals('box_type', node.box_type)
-        self.assert_equals(Site, node.model)
-        self.assert_equals(('slug', '"home"'), node.lookup)
+    def test_days(self):
+        count, var_name, days, mods = top_visited_parser(['top_visited', '1', 'days', '7', 'as', 'var'])
+        self.assert_equals(7, days)
 
-    def test_parse_raises_on_too_many_arguments(self):
-        self.assert_raises(TemplateSyntaxError, _parse_box, [], ['box', 'box_type', 'for', 'core.category', 'with', 'pk', '1', '2', 'extra'])
+    def test_one_model(self):
+        from ella.articles.models import Article
+        count, var_name, days, mods = top_visited_parser(['top_visited', '1', 'articles.article', 'as', 'var'])
+        self.assert_equals([Article], mods)
 
-    def test_parse_raises_on_too_few_arguments(self):
-        self.assert_raises(TemplateSyntaxError, _parse_box, [], ['box', 'box_type', 'for'])
+    def test_more_models(self):
+        from ella.articles.models import Article
+        from ella.galleries.models import Gallery
+        count, var_name, days, mods = top_visited_parser(['top_visited', '1', 'articles.article', 'galleries.gallery', 'as', 'var'])
+        self.assert_equals([Article, Gallery], mods)
 
-    def test_parse_raises_on_incorrect_arguments(self):
-        self.assert_raises(TemplateSyntaxError, _parse_box, [], ['box', 'box_type', 'not a for', 'core.category', 'with', 'pk', '1'])
+    def test_few_params(self):
+        self.assert_raises(template.TemplateSyntaxError, top_visited_parser, ['top_visited', 'as', 'var'])
 
-    def test_parse_return_empty_node_on_incorrect_model(self):
-        node = _parse_box([], ['box', 'box_type', 'for', 'not_app.not_model', 'with', 'pk', '1'])
-        self.assert_true(isinstance(node, EmptyNode))
+    def test_raises_error_count_not_int(self):
+        self.assert_raises(template.TemplateSyntaxError, top_visited_parser, ['top_visited', 'I0', 'as', 'var'])
+
+    def test_raises_error_days_not_int(self):
+        self.assert_raises(template.TemplateSyntaxError, top_visited_parser, ['top_visited', '1', 'days', 'I0', 'as', 'var'])
+
+    def test_raises_error_on_no_as(self):
+        self.assert_raises(template.TemplateSyntaxError, top_visited_parser, ['top_visited', '1', 'articles.article', 'var'])
+
+    def test_raises_error_unknown_model(self):
+        self.assert_raises(template.TemplateSyntaxError, top_visited_parser, ['top_visited', '1', 'articles.articl', 'as', 'var'])
