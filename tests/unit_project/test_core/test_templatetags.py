@@ -11,7 +11,8 @@ from ella.core.models import Listing, Category
 from ella.core import register
 
 from unit_project.test_core import create_basic_categories, create_and_place_a_publishable, \
-        create_and_place_more_publishables, list_all_placements_in_category_by_hour
+        create_and_place_more_publishables, list_all_placements_in_category_by_hour, \
+        create_and_place_two_publishables_and_listings
 from unit_project import template_loader
 
 class TestRenderTag(UnitTestCase):
@@ -201,3 +202,14 @@ class TestTopVisitedTagParser(UnitTestCase):
 
     def test_raises_error_unknown_model(self):
         self.assert_raises(template.TemplateSyntaxError, top_visited_parser, ['top_visited', '1', 'articles.articl', 'as', 'var'])
+
+class TestTopVisitedTag(DatabaseTestCase):
+    def setUp(self):
+        super(TestTopVisitedTag, self).setUp()
+        create_basic_categories(self)
+        create_and_place_two_publishables_and_listings(self)
+
+    def test_get_all_top_visited(self):
+        t = template.Template('{% load hits %}{% top_visited 10 as var %}{{ var.placement|join:":" }}')
+        expected = ':'.join( [str(hitcount.placement) for hitcount in self.hitcounts_all] )
+        self.assert_equals( expected, t.render(template.Context()) )

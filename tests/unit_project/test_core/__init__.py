@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 from django.conf import settings
 
-from ella.core.models import Placement, Category, Listing, Publishable
+from ella.core.models import Placement, Category, Listing, Publishable, HitCount
 # choose Article as an example publishable
 from ella.articles.models import Article
 
@@ -88,3 +88,68 @@ def list_all_placements_in_category_by_hour(case, category=None):
         )
         publish_from += timedelta(seconds=3600)
     case.listings.reverse()
+
+def create_and_place_two_publishables_and_listings(case):
+    """
+    Create two articles, placements and listings
+    """
+
+    def place_article(title, slug, description, category, publish_from, hits=1):
+        pu = Article.objects.create(
+            title=title,
+            slug=slug,
+            description=description,
+            category=category
+        )
+
+        pl = Placement.objects.create(
+            publishable=pu,
+            category=c,
+            publish_from=publish_from
+        )
+
+        HitCount.objects.filter(placement=pl).update(hits=hits)
+        hc = HitCount.objects.get(placement=pl)
+
+        li = Listing.objects.create(
+            placement=pl,
+            category=c,
+            publish_from=pl.publish_from,
+        )
+
+        case.publishables.append(pu)
+        case.placements.append(pl)
+        case.listings.append(li)
+
+        return hc
+
+
+    c = case.category
+    now = datetime.now()
+
+    case.publishables = []
+    case.placements = []
+    case.listings = []
+    case.hitcounts_all = []
+    case.hitcounts_days = []
+
+    publish_from = datetime.now() - timedelta(days=8)
+    hc = place_article(
+        title=u'Article old',
+        slug=u'article-old',
+        description=u'Some\nlonger\ntext',
+        category=c,
+        publish_from=publish_from.date(),
+        hits=100
+    )
+    case.hitcounts_all.append(hc)
+
+    hc = place_article(
+        title=u'Article current',
+        slug=u'article-current',
+        description=u'Some\nlonger\ntext',
+        category=c,
+        publish_from=now.date()
+    )
+    case.hitcounts_all.append(hc)
+    case.hitcounts_days.append(hc)
