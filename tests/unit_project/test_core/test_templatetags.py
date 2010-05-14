@@ -193,6 +193,9 @@ class TestTopVisitedTagParser(UnitTestCase):
     def test_raises_error_days_not_int(self):
         self.assert_raises(template.TemplateSyntaxError, top_visited_parser, ['top_visited', '1', 'days', 'I0', 'as', 'var'])
 
+    def test_raises_error_days_less_then_1(self):
+        self.assert_raises(template.TemplateSyntaxError, top_visited_parser, ['top_visited', '1', 'days', '0', 'as', 'var'])
+
     def test_raises_error_on_no_as(self):
         self.assert_raises(template.TemplateSyntaxError, top_visited_parser, ['top_visited', '1', 'articles.article', 'var'])
 
