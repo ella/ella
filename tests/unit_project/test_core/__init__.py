@@ -94,7 +94,7 @@ def create_and_place_two_publishables_and_listings(case):
     Create two articles, placements and listings
     """
 
-    def place_article(title, slug, description, category, publish_from, hits=1):
+    def place_article(title, slug, description, category, publish_from, publish_to=None, hits=1):
         pu = Article.objects.create(
             title=title,
             slug=slug,
@@ -105,7 +105,8 @@ def create_and_place_two_publishables_and_listings(case):
         pl = Placement.objects.create(
             publishable=pu,
             category=c,
-            publish_from=publish_from
+            publish_from=publish_from,
+            publish_to=publish_to
         )
 
         HitCount.objects.filter(placement=pl).update(hits=hits)
@@ -115,6 +116,7 @@ def create_and_place_two_publishables_and_listings(case):
             placement=pl,
             category=c,
             publish_from=pl.publish_from,
+            publish_to=publish_to
         )
 
         case.publishables.append(pu)
@@ -131,25 +133,47 @@ def create_and_place_two_publishables_and_listings(case):
     case.placements = []
     case.listings = []
     case.hitcounts_all = []
-    case.hitcounts_days = []
+    case.hitcounts_age_limited = []
+
+    publish_from = now - timedelta(days=90)
+    publish_to = now - timedelta(days=30)
+    place_article(
+        title=u'Article inactive',
+        slug=u'article-inactive',
+        description=u'Some\nlonger\ntext',
+        category=c,
+        publish_from=publish_from.date(),
+        publish_to=publish_to.date(),
+        hits=1000
+    )
 
     publish_from = datetime.now() - timedelta(days=8)
     hc = place_article(
-        title=u'Article old',
-        slug=u'article-old',
+        title=u'Article older',
+        slug=u'article-older',
         description=u'Some\nlonger\ntext',
         category=c,
         publish_from=publish_from.date(),
         hits=100
     )
     case.hitcounts_all.append(hc)
+    case.hitcount_top = hc
 
     hc = place_article(
-        title=u'Article current',
-        slug=u'article-current',
+        title=u'Article newer',
+        slug=u'article-newer',
         description=u'Some\nlonger\ntext',
         category=c,
         publish_from=now.date()
     )
     case.hitcounts_all.append(hc)
-    case.hitcounts_days.append(hc)
+    case.hitcounts_age_limited.append(hc)
+
+    publish_from = now + timedelta(days=1)
+    place_article(
+        title=u'Article future',
+        slug=u'article-future',
+        description=u'Some\nlonger\ntext',
+        category=c,
+        publish_from=publish_from.date()
+    )

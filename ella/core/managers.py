@@ -285,11 +285,17 @@ class HitCountManager(models.Manager):
         """
         Return count top rated objects. Cache this for 10 minutes without any chance of cache invalidation.
         """
-        qs = self.filter(placement__category__site=settings.SITE_ID).order_by('-hits')
+        qset = self.filter(placement__category__site=settings.SITE_ID).order_by('-hits')
+
         if mods:
-            qs = qs.filter(placement__publishable__content_type__in = [ ContentType.objects.get_for_model(m) for m in mods ])
-        if days is not None:
-            stop = datetime.now()
-            start = stop - timedelta(days=days)
-            qs = qs.filter(placement__publish_from__gte=start, placement__publish_from__lte=stop).filter(Q(placement__publish_to__gte=stop) | Q(placement__publish_to__isnull=True))
-        return list(qs[:count])
+            qset = qset.filter(placement__publishable__content_type__in = [ ContentType.objects.get_for_model(m) for m in mods ])
+
+        now = datetime.now()
+        if days is None:
+            qset = qset.filter(placement__publish_from__lte=now)
+        else:
+            start = now - timedelta(days=days)
+            qset = qset.filter(placement__publish_from__range=(start, now,))
+        qset = qset.filter(Q(placement__publish_to__gt=now) | Q(placement__publish_to__isnull=True))
+
+        return list(qset[:count])

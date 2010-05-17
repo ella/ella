@@ -210,6 +210,16 @@ class TestTopVisitedTag(DatabaseTestCase):
         create_and_place_two_publishables_and_listings(self)
 
     def test_get_all_top_visited(self):
-        t = template.Template('{% load hits %}{% top_visited 10 as var %}{{ var.placement|join:":" }}')
-        expected = ':'.join( [str(hitcount.placement) for hitcount in self.hitcounts_all] )
+        t = template.Template('{% load hits %}{% top_visited 5 as var %}{% for h in var %}{{ h.placement.publishable.id }}{% if not forloop.last %}:{% endif %}{% endfor %}')
+        expected = ':'.join( [str(hitcount.placement.publishable.id) for hitcount in self.hitcounts_all] )
+        self.assert_equals( expected, t.render(template.Context()) )
+
+    def test_get_all_top_visited_limited(self):
+        t = template.Template('{% load hits %}{% top_visited 1 as var %}{% for h in var %}{{ h.placement.publishable.id }}{% if not forloop.last %}:{% endif %}{% endfor %}')
+        expected = str(self.hitcount_top.placement.publishable.id)
+        self.assert_equals( expected, t.render(template.Context()) )
+
+    def test_get_age_limited(self):
+        t = template.Template('{% load hits %}{% top_visited 5 days 8 as var %}{% for h in var %}{{ h.placement.publishable.id }}{% if not forloop.last %}:{% endif %}{% endfor %}')
+        expected = ':'.join( [str(hitcount.placement.publishable.id) for hitcount in self.hitcounts_age_limited] )
         self.assert_equals( expected, t.render(template.Context()) )
