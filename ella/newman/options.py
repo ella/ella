@@ -878,9 +878,10 @@ class NewmanModelAdmin(XModelAdmin):
         First semi-working draft of category-based permissions. It will allow permissions to be set per category
         effectively hiding the content the user has no permission to see/change.
         """
-        from time import time
+        # return cached queryset, if possible
         if self._cached_queryset_request_id == id(request) and type(self._cached_queryset) != type(None):
             return self._cached_queryset
+
         q = super(NewmanModelAdmin, self).queryset(request)
         # user category filter
         qs = utils.user_category_filter(q, request.user)
