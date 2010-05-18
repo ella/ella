@@ -9,7 +9,7 @@ from ella.core.models.main import Category
 
 
 from ella.newman import models as m
-from ella.newman.filterspecs import filter_spec
+from ella.newman.filterspecs import filter_spec, CustomFilterSpec
 from ella.newman.permission import is_category_fk, is_site_fk, applicable_categories
 from ella.newman.utils import user_category_filter, get_user_config
 from ella.newman.config import CATEGORY_FILTER
@@ -64,17 +64,36 @@ newman.site.register(m.CategoryUserRole, CategoryUserRoleAdmin)
 
 # Category filter -- restricted categories accordingly to CategoryUserRoles and categories filtered via AdminSettings.
 # custom registered DateField filter. Filter is inserted to the beginning of filter chain.
-category_lookup = lambda fspec: '%s__%s__exact' % (fspec.f.name, fspec.f.rel.get_related_field().name)
+class NewmanCategoryFilter(CustomFilterSpec):
+    " customized Category filter. "
 
-@filter_spec(lambda field: is_category_fk(field), category_lookup)
-def category_field_filter(fspec):
-    qs = Category.objects.filter(pk__in=applicable_categories(fspec.user))
-    for cat in user_category_filter(qs, fspec.user):
-        lookup_var = '%s__%s__exact' % (fspec.f.name, fspec.f.rel.to._meta.pk.name)
-        link = ( cat, {lookup_var: cat.pk})
-        fspec.links.append(link)
-    return True
+    def title(self):
+        return _('Category')
 
+    def get_lookup_kwarg(self):
+        lookup_var = '%s__%s__exact' % (self.field.name, self.field.rel.to._meta.pk.name)
+        return lookup_var
+
+    def filter_func(self):
+        qs = Category.objects.filter(pk__in=applicable_categories(self.user))
+        lookup_var = self.get_lookup_kwarg()
+        for cat in user_category_filter(qs, self.user):
+            link = ( cat, {lookup_var: cat.pk})
+            self.links.append(link)
+        return True
+
+    def generate_choice(self, **lookup_kwargs):
+        category_id = lookup_kwargs.get(self.get_lookup_kwarg(), '')
+        if not category_id or not category_id.isdigit():
+            return None
+        try:
+            thing = Category.objects.get( pk=int(category_id) )
+        except (Category.MultipleObjectsReturned, Category.DoesNotExist):
+            return None
+        return thing.__unicode__()
+NewmanCategoryFilter.register_insert(lambda field: is_category_fk(field), NewmanCategoryFilter)
+
+"""
 site_lookup = lambda fspec: '%s__%s__exact' % (fspec.f.name, fspec.f.rel.get_related_field().name)
 @filter_spec(lambda field: is_site_fk(field), site_lookup)
 def site_field_filter(fspec):
@@ -92,6 +111,45 @@ def site_field_filter(fspec):
         link = ( site, {lookup_var: site.pk})
         fspec.links.append(link)
     return True
+"""
+"""
+class NewmanSiteFilter(CustomFilterSpec):
+    " customized Site filter. "
+    def title(self):
+        return _('Site')
+
+    def get_lookup_kwarg(self):
+        lookup_var = '%s__%s__exact' % (self.field.name, self.field.rel.get_related_field().name)
+        return lookup_var
+
+    def filter_func(self):
+        print('FILTER SITE')
+        category_ids = get_user_config(self.user, CATEGORY_FILTER)
+        if not category_ids:
+            if not self.user.is_superuser:
+                category_ids = m.DenormalizedCategoryUserRole.objects.root_categories_by_user(self.user)
+            else:
+                category_ids = Category.objects.filter(tree_parent=None)
+        qs = Category.objects.filter(pk__in=category_ids)
+        sites = map(lambda c: c.site, qs)
+        lookup_var = self.get_lookup_kwarg()
+        for site in sites:
+            #category__site__id__exact=1
+            link = ( site, {lookup_var: site.pk})
+            self.links.append(link)
+        return True
+
+    def generate_choice(self, **lookup_kwargs):
+        category_id = lookup_kwargs.get(self.get_lookup_kwarg(), '')
+        if not category_id or not category_id.isdigit():
+            return None
+        try:
+            thing = Site.objects.get( pk=int(category_id) )
+        except (Site.MultipleObjectsReturned, Site.DoesNotExist):
+            return None
+        return thing.__unicode__()
+NewmanCategoryFilter.register_insert(lambda field: is_site_fk(field), NewmanSiteFilter)
+"""
 
 # TODO: register some non-ella apps, fix it
 
