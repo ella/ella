@@ -44,6 +44,21 @@
 {% block content_services %}
     {{ block.super }}
     <div id="filters"></div>
+
+        {% if is_filtered %}
+            {# Active filters listing #}
+            <div id="id-active-filters" class="active-filters">
+                <span class="filtered-by">{% trans "Filtered by" %}:</span>
+                {% for active_filter in cl.active_filters %}
+                        <span class="filter-name">{{ active_filter.0 }}:</span>
+                        <span class="filter-value">{{ active_filter.1 }}</span>
+                        {% if not forloop.last %}
+                        &nbsp;,&nbsp;
+                        {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+        
 {% endblock %}
 
 {% if cl.formset.errors %}
