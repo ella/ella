@@ -154,6 +154,9 @@ class NewmanModelAdmin(XModelAdmin):
         self.list_per_page = DEFAULT_LIST_PER_PAGE
         self.model_content_type = ContentType.objects.get_for_model(self.model)
         self.saveasnew_add_view = self.add_json_view
+        # useful when self.queryset(request) is called multiple times
+        self._cached_queryset_request_id = -1
+        self._cached_queryset = None 
 
     def get_form(self, request, obj=None, **kwargs):
         self._magic_instance = obj # adding edited object to ModelAdmin instance.
@@ -289,7 +292,6 @@ class NewmanModelAdmin(XModelAdmin):
         data = {'id': obj.pk, 'title': obj.__unicode__()}
         return utils.JsonResponse(_('Preset %s was saved.' % obj.__unicode__()), data)
 
-    @utils.profiled_section
     @require_AJAX
     def load_draft_view(self, request, extra_context=None):
         """ Returns draft identified by request.GET['id'] variable. """
@@ -876,6 +878,9 @@ class NewmanModelAdmin(XModelAdmin):
         First semi-working draft of category-based permissions. It will allow permissions to be set per category
         effectively hiding the content the user has no permission to see/change.
         """
+        from time import time
+        if self._cached_queryset_request_id == id(request) and type(self._cached_queryset) != type(None):
+            return self._cached_queryset
         q = super(NewmanModelAdmin, self).queryset(request)
         # user category filter
         qs = utils.user_category_filter(q, request.user)
@@ -895,6 +900,10 @@ class NewmanModelAdmin(XModelAdmin):
 #        return permission_filtered_model_qs(qs, request.user, perms)
         qs_tmp = permission_filtered_model_qs(qs, request.user, perms)
         utils.copy_queryset_flags(qs_tmp, qs)
+
+        # cache the result
+        self._cached_queryset_request_id = id(request)
+        self._cached_queryset = qs_tmp
         return qs_tmp
 
 
