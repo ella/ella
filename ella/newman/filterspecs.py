@@ -159,8 +159,11 @@ class CustomFilterSpec(filterspecs.FilterSpec, CommonFilter):
         lookup = self.get_lookup_kwarg()
         selected = self.is_selected_item()
         # Reset filter button/a href
+        all_query_string = cl.get_query_string(None, self.get_active(self.request_get))
+        if all_query_string.endswith('?') and len(all_query_string) == 1:
+            all_query_string = '?q='
         yield {'selected': len(selected.keys()) == 0,
-               'query_string': cl.get_query_string(None, self.get_active(self.request_get) ),
+               'query_string': all_query_string,
                'display': _('All')}
         for title, param_dict in self.links:
             params = make_unicode_params(param_dict)
