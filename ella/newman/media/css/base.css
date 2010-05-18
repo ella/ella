@@ -423,6 +423,26 @@ div.pop #filters { top: 35px }
     padding: 2px 0;
 }
 
+div.active-filters {
+    background-color: orange;
+    padding: 5px;
+}
+
+div.active-filters span.filtered-by {
+    font-size: 12pt;
+    font-weight: bold;
+}
+
+div.active-filters span.filter-name {
+    font-size: 10pt;
+    font-weight: bold;
+}
+
+div.active-filters span.filter-value {
+    font-size: 10pt;
+    font-weight: bold;
+}
+
 /* CHANGELIST CUSTOM TDs */
 #changelist td span.unpublished, #changelist td span.published {
     background: transparent url(../ico/10/icon-yes.gif) 0 50% no-repeat;

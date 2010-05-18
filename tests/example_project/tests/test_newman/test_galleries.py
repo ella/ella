@@ -7,6 +7,9 @@ from ella.galleries.models import Gallery
 from time import strftime, sleep
 from example_project.tests.test_newman.helpers import NewmanTestCase
 
+# Linux   Firefox 3.6.x fails tests 3, 5, 9.
+# Windows Firefox 3.6.x fails tests 5, 9.
+
 DRAG_SLEEP = 0.5 #in sec.
 class TestGallery(NewmanTestCase):
     """
