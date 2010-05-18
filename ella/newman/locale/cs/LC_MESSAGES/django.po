@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ella.newman (admin-ng)\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-01-09 21:16+0100\n"
+"POT-Creation-Date: 2010-05-18 14:44+0200\n"
 "PO-Revision-Date: 2010-01-09 21:18+0100\n"
 "Last-Translator: Vitek Pliska <whit@jizak.cz>\n"
 "Language-Team: Ella <ella.project@gmail.com>\n"
@@ -25,8 +25,7 @@ msgstr ""
 msgid "Successfully deleted %(count)d %(items)s."
 msgstr ""
 
-#: actions.py:67
-#: xoptions.py:446
+#: actions.py:67 xoptions.py:446
 msgid "Are you sure?"
 msgstr "Jsi si jist/á?"
 
@@ -35,12 +34,12 @@ msgstr "Jsi si jist/á?"
 msgid "Delete selected %(verbose_name_plural)s"
 msgstr ""
 
-#: changelist.py:85
+#: changelist.py:117
 #, python-format
 msgid "Select %s"
 msgstr ""
 
-#: changelist.py:85
+#: changelist.py:117
 #, python-format
 msgid "Select %s to change"
 msgstr ""
@@ -71,103 +70,110 @@ msgid "Enter a list of values."
 msgstr ""
 
 #: fields.py:191
-msgid "This image has a CMYK color profile. We can't work with CMYK. Please convert it to RGB."
+msgid ""
+"This image has a CMYK color profile. We can't work with CMYK. Please convert "
+"it to RGB."
 msgstr ""
 
-#: fields.py:253
-#: fields.py:257
-#: generic.py:75
-#: generic.py:95
+#: fields.py:253 fields.py:257 generic.py:75 generic.py:95
 msgid "Category not permitted"
 msgstr "Nepovolená kategorie."
 
-#: filterspecs.py:127
-#: templates/newman/tpl_tags/filter.html:8
+#: filterspecs.py:164 templates/newman/tpl_tags/filter.html:8
 msgid "All"
 msgstr ""
 
-#: filterspecs.py:196
+#: filterspecs.py:233
 msgid "Site"
 msgstr "Web"
 
-#: forms.py:23
+#: forms.py:24
 msgid "Presets"
 msgstr "Přednastavené"
 
-#: forms.py:47
-#: templates/newman/newman-index.html:56
+#: forms.py:48 templates/newman/newman-index.html:56
 msgid "Subject"
 msgstr "Předmět"
 
-#: forms.py:48
-#: templates/newman/newman-index.html:58
+#: forms.py:49 templates/newman/newman-index.html:58
 msgid "Message"
 msgstr "Zpráva"
 
-#: forms.py:51
+#: forms.py:52
 msgid "Big"
 msgstr "Velká"
 
-#: forms.py:52
+#: forms.py:53
 msgid "Standard"
 msgstr "Standardní"
 
-#: forms.py:53
+#: forms.py:54
 msgid "Small"
 msgstr "Malá"
 
-#: forms.py:57
+#: forms.py:58
 msgid "Square"
 msgstr "Čtverec"
 
-#: forms.py:58
+#: forms.py:59
 msgid "Rectangle to width"
 msgstr "Obdélník na šířku"
 
-#: forms.py:59
+#: forms.py:60
 msgid "Rectangle to height"
 msgstr "Obdélník na výšku"
 
-#: forms.py:60
+#: forms.py:61
 msgid "Noodle to width"
 msgstr "Nudle na šířku"
 
-#: forms.py:61
+#: forms.py:62
 msgid "Noodle to height"
 msgstr "Nudle na výšku"
 
+#: forms.py:66
+msgid "Link"
+msgstr ""
+
 #: forms.py:67
+msgid "Inline"
+msgstr ""
+
+#: forms.py:73
 msgid "Size"
 msgstr "Velikost"
 
-#: forms.py:68
+#: forms.py:74
 msgid "Format"
 msgstr "Formát"
 
-#: forms.py:69
-#: models.py:15
-#: models.py:63
-#: migrations/0001_initial.py:13
-#: migrations/0001_initial.py:39
-#: migrations/old/0001_init.py:16
+#: forms.py:75 models.py:15 models.py:63 migrations/0001_initial.py:13
+#: migrations/0001_initial.py:39 migrations/old/0001_init.py:16
 #: migrations/old/0001_init.py:39
 msgid "Title"
 msgstr "Nadpis"
 
-#: forms.py:70
-#: templates/newman/newman-index.html:100
+#: forms.py:76 templates/newman/newman-index.html:100
 msgid "Author"
 msgstr ""
 
-#: forms.py:71
+#: forms.py:77
+msgid "Source"
+msgstr "Zdroj"
+
+#: forms.py:78
 msgid "Description"
 msgstr ""
 
-#: forms.py:72
+#: forms.py:79
 msgid "Magnifying"
 msgstr "Zvětšovací"
 
-#: forms.py:73
+#: forms.py:80
+msgid "Box type"
+msgstr "Typ boxu"
+
+#: forms.py:81
 msgid "Extra parameters"
 msgstr "Extra parametry"
 
@@ -175,8 +181,7 @@ msgstr "Extra parametry"
 msgid "Creating objects is not permitted."
 msgstr "Vytvoření objektu není povoleno."
 
-#: generic.py:83
-#: generic.py:86
+#: generic.py:83 generic.py:86
 msgid "Object deletion is not permitted."
 msgstr "Smazání objektu není povoleno."
 
@@ -184,27 +189,19 @@ msgstr "Smazání objektu není povoleno."
 msgid "Object change is not permitted."
 msgstr "Změna objektu není povoleno."
 
-#: models.py:16
-#: migrations/0001_initial.py:14
-#: migrations/old/0001_init.py:23
+#: models.py:16 migrations/0001_initial.py:14 migrations/old/0001_init.py:23
 msgid "Slug"
 msgstr ""
 
-#: models.py:17
-#: migrations/0001_initial.py:15
-#: migrations/old/0001_init.py:19
+#: models.py:17 migrations/0001_initial.py:15 migrations/old/0001_init.py:19
 msgid "Summary"
 msgstr "Souhrn"
 
-#: models.py:18
-#: migrations/0001_initial.py:16
-#: migrations/old/0001_init.py:21
+#: models.py:18 migrations/0001_initial.py:16 migrations/old/0001_init.py:21
 msgid "Detail"
 msgstr "Detailní popis"
 
-#: models.py:19
-#: migrations/0001_initial.py:17
-#: migrations/old/0001_init.py:20
+#: models.py:19 migrations/0001_initial.py:17 migrations/old/0001_init.py:20
 msgid "Version"
 msgstr "Verze"
 
@@ -216,36 +213,25 @@ msgstr "Zpráva o vývoji"
 msgid "Development messages"
 msgstr "Zprávy o vývoji"
 
-#: models.py:37
-#: models.py:58
-#: migrations/0001_initial.py:36
-#: migrations/0001_initial.py:59
-#: migrations/old/0001_init.py:44
+#: models.py:37 models.py:58 migrations/0001_initial.py:36
+#: migrations/0001_initial.py:59 migrations/old/0001_init.py:44
 #: migrations/old/0001_init.py:67
 msgid "Model"
 msgstr "Model"
 
-#: models.py:38
-#: migrations/0001_initial.py:60
-#: migrations/old/0001_init.py:65
+#: models.py:38 migrations/0001_initial.py:60 migrations/old/0001_init.py:65
 msgid "Field"
 msgstr "Pole"
 
-#: models.py:39
-#: migrations/0001_initial.py:61
-#: migrations/old/0001_init.py:62
+#: models.py:39 migrations/0001_initial.py:61 migrations/old/0001_init.py:62
 msgid "Language"
 msgstr "Jazyk"
 
-#: models.py:40
-#: migrations/0001_initial.py:62
-#: migrations/old/0001_init.py:63
+#: models.py:40 migrations/0001_initial.py:62 migrations/old/0001_init.py:63
 msgid "Short help"
 msgstr "Stručná nápověda"
 
-#: models.py:41
-#: migrations/0001_initial.py:63
-#: migrations/old/0001_init.py:64
+#: models.py:41 migrations/0001_initial.py:63 migrations/old/0001_init.py:64
 msgid "Full message"
 msgstr "Celá zpráva"
 
@@ -261,19 +247,14 @@ msgstr "Položka nápovědy"
 msgid "Help items"
 msgstr "Položky nápovědy"
 
-#: models.py:59
-#: models.py:84
-#: migrations/0001_initial.py:26
-#: migrations/0001_initial.py:37
-#: migrations/old/0001_init.py:33
+#: models.py:59 models.py:84 migrations/0001_initial.py:26
+#: migrations/0001_initial.py:37 migrations/old/0001_init.py:33
 #: migrations/old/0001_init.py:41
 #: templates/newman/polls/correct-answers.html:11
 msgid "User"
 msgstr "Uživatel"
 
-#: models.py:60
-#: migrations/0001_initial.py:38
-#: migrations/old/0001_init.py:42
+#: models.py:60 migrations/0001_initial.py:38 migrations/old/0001_init.py:42
 msgid "Data"
 msgstr "Data"
 
@@ -289,21 +270,15 @@ msgstr ""
 msgid "Draft items"
 msgstr ""
 
-#: models.py:85
-#: migrations/0001_initial.py:27
-#: migrations/old/0001_init.py:30
+#: models.py:85 migrations/0001_initial.py:27 migrations/old/0001_init.py:30
 msgid "Group"
 msgstr "Skupina"
 
-#: models.py:86
-#: migrations/0001_initial.py:28
-#: migrations/old/0001_init.py:29
+#: models.py:86 migrations/0001_initial.py:28 migrations/old/0001_init.py:29
 msgid "Variable"
 msgstr "Proměnná"
 
-#: models.py:87
-#: migrations/0001_initial.py:29
-#: migrations/old/0001_init.py:32
+#: models.py:87 migrations/0001_initial.py:29 migrations/old/0001_init.py:32
 msgid "Value"
 msgstr "Hodnota"
 
@@ -315,17 +290,16 @@ msgstr "Nastavení administrátora"
 msgid "Admin user settings"
 msgstr "Nastavení administrátorů"
 
-#: models.py:119
-#: models.py:125
+#: models.py:119 models.py:125
 #, python-format
 msgid "User %(user)s is a \"%(group)s\" for %(category)s."
 msgstr "Uživatel %(user)s ve skupině \"%(group)s\" pro %(category)s."
 
-#: models.py:162
+#: models.py:170
 msgid "User role in category"
 msgstr "Uživatelská role v kategorii"
 
-#: models.py:163
+#: models.py:171
 msgid "User roles in categories"
 msgstr "Uživatelské role v kategoriích"
 
@@ -333,112 +307,105 @@ msgstr "Uživatelské role v kategoriích"
 msgid "All roles is now refreshed."
 msgstr "Všechny role jsou obnoveny."
 
-#: options.py:252
+#: newman_admin.py:71 templates/newman/newman-index.html:99
+#: templates/newman/edit_inline/placement.html:35
+#: templates/newman/positions/change_list.html:12
+msgid "Category"
+msgstr "Kategorie"
+
+#: options.py:263
 msgid "No data passed in POST variable \"data\"."
 msgstr "Žádná data v POST proměnné \"data\"."
 
-#: options.py:279
+#: options.py:290
 #, python-format
 msgid "Preset %s was saved."
 msgstr "Předvolba %s byla uložena."
 
-#: options.py:288
-#: options.py:304
+#: options.py:299 options.py:315
 msgid "No id found in GET variable \"id\"."
 msgstr "Id není v GET proměnné."
 
-#: options.py:295
-#: options.py:312
+#: options.py:306 options.py:323
 msgid "No matching draft found."
 msgstr "Předvolba neexistuje."
 
-#: options.py:297
+#: options.py:308
 #, python-format
 msgid "Loaded draft \"%s\""
 msgstr "Načtena předvolba \"%s\""
 
-#: options.py:313
+#: options.py:324
 #, python-format
 msgid "Draft %s was deleted."
 msgstr "Předvolba %s byla smazána."
 
-#: options.py:334
-#: xoptions.py:209
+#: options.py:344 xoptions.py:209
 msgid "Database error"
 msgstr "Chyba databáze"
 
-#: options.py:684
+#: options.py:701
 msgid "Please correct errors in form"
 msgstr "Prosím opravte chyby ve formuláři"
 
-#: options.py:724
-#: options.py:792
-msgid "This view is designed for saving data only, thus POST method is required."
+#: options.py:760 options.py:831
+msgid ""
+"This view is designed for saving data only, thus POST method is required."
 msgstr ""
 
-#: options.py:745
+#: options.py:781
 #, python-format
 msgid "The %(name)s \"%(obj)s\" was changed successfully."
 msgstr ""
 
-#: options.py:756
-#: options.py:815
+#: options.py:791 options.py:858
 msgid "This view is designed for viewing form, thus GET method is required."
 msgstr ""
 
-#: sites.py:180
-msgid "Please enter a correct username and password. Note that both fields are case-sensitive."
+#: sites.py:181
+msgid ""
+"Please enter a correct username and password. Note that both fields are case-"
+"sensitive."
 msgstr ""
 
-#: sites.py:186
+#: sites.py:187
 msgid "Please log in again, because your session has expired."
 msgstr ""
 
-#: sites.py:193
-msgid "Looks like your browser isn't configured to accept cookies. Please enable cookies, reload this page, and try again."
-msgstr ""
-
-#: sites.py:209
-#: sites.py:215
+#: sites.py:210 sites.py:216
 msgid "Usernames cannot contain the '@' character."
 msgstr ""
 
-#: sites.py:212
+#: sites.py:213
 #, python-format
 msgid "Your e-mail address is not your username. Try '%s' instead."
 msgstr ""
 
-#: sites.py:241
-#: sites.py:286
+#: sites.py:242 sites.py:291
 msgid "Site administration"
 msgstr "Ella správa"
 
-#: sites.py:311
+#: sites.py:316
 msgid "Your report was sent."
 msgstr "Vaše zpráva byla odeslána."
 
-#: sites.py:313
+#: sites.py:318
 msgid "SMTP error."
 msgstr "Chyba SMTP serveru."
 
-#: sites.py:318
+#: sites.py:323
 msgid "Subject or message is empty."
 msgstr "Pole předmět či zpráva je prázdné."
 
-#: sites.py:327
+#: sites.py:332
 msgid "Your settings were saved."
 msgstr "Vaše nastavení byla uložena."
 
-#: sites.py:329
+#: sites.py:334
 msgid "Error in form."
 msgstr "Chyba ve formuláři."
 
-#: widgets.py:206
-msgid "Type the first few letters for suggestions, then use the UP and DOWN arrows to select and hit ENTER to add or replace item."
-msgstr "Napište několik prvních písmen do našeptávače, použijte šipky NAHORU a DOLŮ pro výběr a stiskněte ENTER pro vložení či náhradu položky."
-
-#: xoptions.py:135
-#: xoptions.py:422
+#: xoptions.py:135 xoptions.py:422
 #, python-format
 msgid "%(name)s object with primary key %(key)r does not exist."
 msgstr ""
@@ -458,7 +425,7 @@ msgstr[1] ""
 #: xoptions.py:385
 #, python-format
 msgid "Add %s"
-msgstr ""
+msgstr "Přidat %s"
 
 #: xoptions.py:438
 #, python-format
@@ -469,18 +436,15 @@ msgstr ""
 msgid "Content type"
 msgstr "Typ objektu"
 
-#: licenses/models.py:36
-#: licenses/migrations/0001_initial.py:14
+#: licenses/models.py:36 licenses/migrations/0001_initial.py:14
 msgid "Object ID"
 msgstr "ID objektu"
 
-#: licenses/models.py:39
-#: licenses/migrations/0001_initial.py:15
+#: licenses/models.py:39 licenses/migrations/0001_initial.py:15
 msgid "Max applications"
 msgstr "Max použití"
 
-#: licenses/models.py:42
-#: licenses/migrations/0001_initial.py:17
+#: licenses/models.py:42 licenses/migrations/0001_initial.py:17
 msgid "Note"
 msgstr "Poznámka"
 
@@ -501,27 +465,23 @@ msgstr "Licence"
 msgid "Run the selected action"
 msgstr ""
 
-#: templates/admin/actions.html:3
-#: templates/newman/newman-index.html:83
+#: templates/admin/actions.html:3 templates/newman/newman-index.html:83
 #: templates/newman/positions/change_list.html:22
 msgid "Go"
 msgstr ""
 
-#: templates/admin/base_site.html:4
-#: templates/admin/base_site.html.py:7
+#: templates/admin/base_site.html:4 templates/admin/base_site.html.py:7
 #: templates/newman/base.html:4
 msgid "Ella administration"
 msgstr "Ella správa"
 
 #: templates/admin/delete_selected_confirmation.html:5
-#: templates/newman/ajax_content_base.html:3
-#: templates/newman/app_index.html:7
-#: templates/newman/change_form.html:6
-#: templates/newman/change_list.html:8
+#: templates/newman/ajax_content_base.html:3 templates/newman/app_index.html:7
+#: templates/newman/change_form.html:6 templates/newman/change_list.html:8
 #: templates/newman/delete_selected_confirmation.html:5
-#: templates/newman/positions/multi_change_form.html:6
-#: templates/newman/tpl_tags/newman_favorites.html:4
-#: templates/page/404.html:5
+#: templates/newman/ellaexports/timeline.html:8
+#: templates/newman/positions/multi_change_form.html:7
+#: templates/newman/tpl_tags/newman_favorites.html:4 templates/page/404.html:5
 #: templates/page/500.html:5
 #: templates/registration/password_change_form.html:6
 msgid "Home"
@@ -535,13 +495,18 @@ msgstr ""
 #: templates/admin/delete_selected_confirmation.html:14
 #: templates/newman/delete_selected_confirmation.html:15
 #, python-format
-msgid "Deleting the %(object_name)s would result in deleting related objects, but your account doesn't have permission to delete the following types of objects:"
+msgid ""
+"Deleting the %(object_name)s would result in deleting related objects, but "
+"your account doesn't have permission to delete the following types of "
+"objects:"
 msgstr ""
 
 #: templates/admin/delete_selected_confirmation.html:21
 #: templates/newman/delete_selected_confirmation.html:22
 #, python-format
-msgid "Are you sure you want to delete the selected %(object_name)s objects? All of the following objects and it's related items will be deleted:"
+msgid ""
+"Are you sure you want to delete the selected %(object_name)s objects? All of "
+"the following objects and it's related items will be deleted:"
 msgstr ""
 
 #: templates/admin/delete_selected_confirmation.html:32
@@ -560,7 +525,9 @@ msgstr ""
 
 #: templates/admin/auth/user/add_form.html:5
 #: templates/newman/auth/user/add_form.html:5
-msgid "First, enter a username and password. Then, you'll be able to edit more user options."
+msgid ""
+"First, enter a username and password. Then, you'll be able to edit more user "
+"options."
 msgstr ""
 
 #: templates/admin/auth/user/add_form.html:12
@@ -590,8 +557,7 @@ msgid "Enter the same password as above, for verification."
 msgstr ""
 
 #: templates/admin/auth/user/change_password.html:7
-#: templates/newman/change_form.html:41
-#: templates/newman/change_list.html:51
+#: templates/newman/change_form.html:42 templates/newman/change_list.html:78
 #: templates/newman/auth/user/change_password.html:7
 msgid "Please correct the error below."
 msgid_plural "Please correct the errors below."
@@ -605,13 +571,12 @@ msgid "Enter a new password for the user <strong>%(username)s</strong>."
 msgstr ""
 
 #: templates/admin/auth/user/change_password.html:31
-#: templates/newman/base.html:48
+#: templates/newman/base.html:51
 #: templates/newman/auth/user/change_password.html:31
 msgid "Change password"
-msgstr ""
+msgstr "Změnit heslo"
 
-#: templates/newman/action_log.html:5
-#: templates/newman/newman-index.html:116
+#: templates/newman/action_log.html:5 templates/newman/newman-index.html:117
 msgid "Last edited objects"
 msgstr "Poslední editované objekty"
 
@@ -620,39 +585,36 @@ msgid "No entries."
 msgstr "Žádné záznamy."
 
 #: templates/newman/action_log.html:32
-#: templates/newman/ajax_content_base.html:15
-#: templates/newman/filters.html:11
-#: templates/newman/model_help.html:25
-#: templates/newman/object_history.html:15
-#: templates/newman/chunks/timepicker.html:1
-#: templates/newman/exports/timeline.html:26
-#: templates/newman/widget/editor_box.html:38
+#: templates/newman/ajax_content_base.html:15 templates/newman/filters.html:11
+#: templates/newman/model_help.html:25 templates/newman/object_history.html:15
+#: templates/newman/chunks/timepicker.html:4
+#: templates/newman/ellaexports/timeline.html:42
 msgid "Close"
 msgstr "Zavřít"
 
 #: templates/newman/app_index.html:26
-#: templates/newman/edit_inline/gallery_item.html:43
+#: templates/newman/edit_inline/gallery_item.html:65
 #: templates/newman/edit_inline/placement.html:43
 #: templates/newman/edit_inline/poll_question.html:49
 #: templates/newman/tpl_tags/newman_favorites.html:9
 msgid "Add"
-msgstr ""
+msgstr " Přidat"
 
-#: templates/newman/app_index.html:29
-#: templates/newman/newman-index.html:105
+#: templates/newman/app_index.html:29 templates/newman/newman-index.html:105
+#: templates/newman/edit_inline/stacked.html:18
+#: templates/newman/ellaexports/timeline.html:68
 msgid "Change"
-msgstr ""
+msgstr "Změnit"
 
 #: templates/newman/app_index.html:37
 msgid "You don't have permission to edit anything."
 msgstr ""
 
-#: templates/newman/base.html:49
+#: templates/newman/base.html:52
 msgid "Log out"
 msgstr ""
 
-#: templates/newman/change_form.html:10
-#: templates/newman/change_form.html:12
+#: templates/newman/change_form.html:10 templates/newman/change_form.html:12
 msgid "list"
 msgstr "seznam"
 
@@ -668,17 +630,15 @@ msgstr "Nápověda"
 msgid "History"
 msgstr ""
 
-#: templates/newman/change_form.html:28
-#: templates/newman/newman-index.html:104
-#: templates/newman/edit_inline/gallery_item.html:24
+#: templates/newman/change_form.html:28 templates/newman/newman-index.html:104
+#: templates/newman/edit_inline/gallery_item.html:28
 #: templates/newman/edit_inline/poll_question.html:122
-#: templates/newman/edit_inline/stacked.html:14
+#: templates/newman/edit_inline/stacked.html:23
 #: templates/newman/edit_inline/tabular.html:39
 msgid "View on site"
 msgstr "Zobrazit na webu"
 
-#: templates/newman/change_list.html:21
-#: templates/newman/change_list.html:23
+#: templates/newman/change_list.html:21 templates/newman/change_list.html:23
 #: templates/newman/astrology/prognosis/change_list.html:8
 #: templates/newman/astrology/prognosis/change_list.html:10
 #: templates/newman/newman/categoryuserrole/change_list.html:8
@@ -692,32 +652,43 @@ msgstr "Filtry"
 msgid "on!"
 msgstr "zap."
 
-#: templates/newman/change_list.html:27
+#: templates/newman/change_list.html:28 templates/newman/change_list.html:62
+#: templates/newman/change_list.html:69
 msgid "Categories filtered by user. Click to change."
-msgstr "Kategorie filtrovány. Klikněte pro změnu."
+msgstr "Hlavní kategorie filtrovány. Klikněte pro změnu."
 
-#: templates/newman/change_list.html:36
+#: templates/newman/change_list.html:38
 #: templates/newman/astrology/prognosis/change_list.html:25
 #: templates/newman/newman/categoryuserrole/change_list.html:24
 #, python-format
 msgid "Add %(name)s"
 msgstr ""
 
-#: templates/newman/change_list.html:39
+#: templates/newman/change_list.html:41
 msgid "Last edited"
 msgstr "Poslední editace"
 
+#: templates/newman/change_list.html:53 templates/newman/change_list.html:68
+msgid "Filtered by"
+msgstr "Filtrováno"
+
 #: templates/newman/delete_confirmation.html:6
 #, python-format
-msgid "Deleting the %(object_name)s '%(escaped_object)s' would result in deleting related objects, but your account doesn't have permission to delete the following types of objects:"
+msgid ""
+"Deleting the %(object_name)s '%(escaped_object)s' would result in deleting "
+"related objects, but your account doesn't have permission to delete the "
+"following types of objects:"
 msgstr ""
 
 #: templates/newman/delete_confirmation.html:13
 #, python-format
-msgid "Are you sure you want to delete the %(object_name)s \"%(escaped_object)s\"? All of the following related items will be deleted:"
+msgid ""
+"Are you sure you want to delete the %(object_name)s \"%(escaped_object)s\"? "
+"All of the following related items will be deleted:"
 msgstr ""
 
 #: templates/newman/delete_confirmation.html:18
+#: templates/newman/widget/editor_box.html:40
 msgid "Cancel"
 msgstr "Zrušit"
 
@@ -777,8 +748,7 @@ msgstr "Rychlá nastavení"
 msgid "Category-filter"
 msgstr "Filtr kategorií"
 
-#: templates/newman/newman-index.html:38
-#: templates/newman/newman-index.html:61
+#: templates/newman/newman-index.html:38 templates/newman/newman-index.html:61
 msgid "Clear"
 msgstr "Původní"
 
@@ -796,7 +766,7 @@ msgid "Click to report a bug"
 msgstr "Klikni pro nahlášení chyby"
 
 #: templates/newman/newman-index.html:62
-#: templates/newman/exports/timeline.html:9
+#: templates/newman/ellaexports/timeline.html:20
 msgid "Send"
 msgstr "Odeslat"
 
@@ -822,22 +792,14 @@ msgstr "Žádné budoucí publikace nejsou dostupné."
 msgid "Publish from"
 msgstr "Publikovat od"
 
-#: templates/newman/newman-index.html:99
-#: templates/newman/edit_inline/placement.html:35
-#: templates/newman/positions/change_list.html:12
-msgid "Category"
-msgstr "Kategorie"
-
-#: templates/newman/newman-index.html:120
-msgid "None available"
-msgstr ""
-
 #: templates/newman/object_history.html:7
 msgid "DATETIME_FORMAT"
 msgstr ""
 
 #: templates/newman/object_history.html:11
-msgid "This object doesn't have a change history. It probably wasn't added via this admin site."
+msgid ""
+"This object doesn't have a change history. It probably wasn't added via this "
+"admin site."
 msgstr ""
 
 #: templates/newman/astrology/prognosis/change_list.html:17
@@ -845,29 +807,30 @@ msgstr ""
 msgid "Refresh"
 msgstr "Obnovit"
 
-#: templates/newman/chunks/timepicker.html:2
+#: templates/newman/chunks/timepicker.html:1
 msgid "Now"
 msgstr "Nyní"
 
-#: templates/newman/chunks/timepicker.html:3
+#: templates/newman/chunks/timepicker.html:2
 msgid "6am"
 msgstr "6:00"
 
-#: templates/newman/chunks/timepicker.html:4
+#: templates/newman/chunks/timepicker.html:3
 msgid "Noon"
 msgstr "Poledne"
+
+#: templates/newman/edit_inline/gallery_item.html:50
+#: templates/newman/edit_inline/placement.html:37
+#: templates/newman/edit_inline/poll_question.html:42
+#: templates/newman/ellaexports/timeline.html:72
+#: templates/newman/tpl_tags/submit_line.html:2
+#: templates/newman/widget/poll_choices_custom.html:6
+msgid "Delete"
+msgstr "Smazat"
 
 #: templates/newman/edit_inline/placement.html:30
 msgid "Listings"
 msgstr "Výčty"
-
-#: templates/newman/edit_inline/placement.html:37
-#: templates/newman/edit_inline/poll_question.html:42
-#: templates/newman/exports/timeline.html:54
-#: templates/newman/tpl_tags/submit_line.html:2
-#: templates/newman/widget/poll_choices_custom.html:6
-msgid "Delete"
-msgstr ""
 
 #: templates/newman/edit_inline/placement.html:52
 #: templates/newman/edit_inline/poll_question.html:60
@@ -906,27 +869,27 @@ msgstr "Kliknutím změňte otázku"
 msgid "Delete?"
 msgstr "Smazat?"
 
-#: templates/newman/exports/timeline.html:15
+#: templates/newman/ellaexports/timeline.html:31
 msgid "Publishable object"
 msgstr "Publikovatelný objekt"
 
-#: templates/newman/exports/timeline.html:25
+#: templates/newman/ellaexports/timeline.html:41
 msgid "Continue"
 msgstr "Pokračovat"
 
-#: templates/newman/exports/timeline.html:50
-msgid "Edit"
+#: templates/newman/ellaexports/timeline.html:62
+msgid "Hit Counts"
 msgstr ""
 
-#: templates/newman/exports/timeline.html:58
+#: templates/newman/ellaexports/timeline.html:78
 msgid "Append"
 msgstr "Přidat"
 
-#: templates/newman/exports/timeline.html:62
+#: templates/newman/ellaexports/timeline.html:82
 msgid "Insert"
 msgstr "Vložit"
 
-#: templates/newman/exports/export/change_list.html:4
+#: templates/newman/ellaexports/export/change_list.html:4
 msgid "Timeline view"
 msgstr "Časová osa"
 
@@ -966,13 +929,16 @@ msgstr ""
 msgid "No"
 msgstr "Ne"
 
-#: templates/newman/positions/multi_change_form.html:9
+#: templates/newman/positions/multi_change_form.html:10
 msgid "Categories"
-msgstr "kategorie"
+msgstr "Kategorie"
 
-#: templates/newman/positions/multi_change_form.html:27
-msgid "This category doesn't have any positions, or they aren't registered for multiple editation"
-msgstr "Tato kategorie nemá žádné pozice, nebo nejsou registrovány pro multi editaci"
+#: templates/newman/positions/multi_change_form.html:91
+msgid ""
+"This category doesn't have any positions, or they aren't registered for "
+"multiple editation"
+msgstr ""
+"Tato kategorie nemá žádné pozice, nebo nejsou registrovány pro multi editaci"
 
 #: templates/newman/tpl_tags/filter.html:2
 #, python-format
@@ -1008,19 +974,18 @@ msgstr ""
 msgid "Object type"
 msgstr "Typ objektu"
 
-#: templates/newman/widget/editor_box.html:12
+#: templates/newman/widget/editor_box.html:17
 msgid "Photo attributes"
 msgstr "Atributy fotky"
 
-#: templates/newman/widget/editor_box.html:34
-#: templates/newman/widget/editor_box.html:42
-#: templates/newman/widget/editor_box.html:44
+#: templates/newman/widget/editor_box.html:43
+#: templates/newman/widget/editor_box.html:47
+#: templates/newman/widget/editor_box.html:49
 msgid "Insert box"
 msgstr "Vložit box"
 
-#: templates/newman/widget/editor_box.html:37
-#: templates/newman/widget/editor_box.html:43
-#: templates/newman/widget/editor_box.html:45
+#: templates/newman/widget/editor_box.html:48
+#: templates/newman/widget/editor_box.html:50
 msgid "Reset"
 msgstr "Původní"
 
@@ -1036,8 +1001,7 @@ msgstr "Změnit odpověď"
 msgid "Mark as correct"
 msgstr "Označ jako správnou"
 
-#: templates/page/404.html:6
-#: templates/page/404.html.py:12
+#: templates/page/404.html:6 templates/page/404.html.py:12
 msgid "Page not found"
 msgstr ""
 
@@ -1054,7 +1018,9 @@ msgid "Server Error <em>(500)</em>"
 msgstr ""
 
 #: templates/page/500.html:12
-msgid "There's been an error. It's been reported to the site administrators via e-mail and should be fixed shortly. Thanks for your patience."
+msgid ""
+"There's been an error. It's been reported to the site administrators via e-"
+"mail and should be fixed shortly. Thanks for your patience."
 msgstr ""
 
 #: templates/registration/password_change_form.html:7
@@ -1062,49 +1028,66 @@ msgid "Password change"
 msgstr ""
 
 #: templates/registration/password_change_form.html:15
-msgid "Please enter your old password, for security's sake, and then enter your new password twice so we can verify you typed it in correctly."
+msgid ""
+"Please enter your old password, for security's sake, and then enter your new "
+"password twice so we can verify you typed it in correctly."
 msgstr ""
 
 #: templates/registration/password_change_form.html:20
 msgid "Old password:"
-msgstr ""
+msgstr "Staré heslo"
 
 #: templates/registration/password_change_form.html:22
 msgid "New password:"
-msgstr ""
+msgstr "Nové heslo"
 
 #: templates/registration/password_change_form.html:24
 msgid "Confirm password:"
-msgstr ""
+msgstr "Potvrďte heslo"
 
 #: templates/registration/password_change_form.html:28
 msgid "Change my password"
-msgstr ""
+msgstr "Změnit mé heslo"
+
+#~ msgid ""
+#~ "Type the first few letters for suggestions, then use the UP and DOWN "
+#~ "arrows to select and hit ENTER to add or replace item."
+#~ msgstr ""
+#~ "Napište několik prvních písmen do našeptávače, použijte šipky NAHORU a "
+#~ "DOLŮ pro výběr a stiskněte ENTER pro vložení či náhradu položky."
 
 #~ msgid "Date/time"
 #~ msgstr "Datum/čas"
+
 #~ msgid "Action"
 #~ msgstr "Akce"
+
 #~ msgid "Object was deleted."
 #~ msgstr "Objekt byl smazán."
+
 #~ msgid "You cannot edit uploaded photo."
 #~ msgstr "Není možné upravovat uložené foto."
+
 #~ msgid "Your Recent Actions"
 #~ msgstr "Vaše poslední akce"
-#~ msgid "Filter"
-#~ msgstr "Filtr"
+
 #~ msgid "Show categories"
 #~ msgstr "Zobrazit kategorie"
+
 #~ msgid "What's new?"
 #~ msgstr "Co je nového?"
+
 #~ msgid "Text processor"
 #~ msgstr "Textový procesor"
+
 #~ msgid "Text processors"
 #~ msgstr "Textové procesory"
+
 #~ msgid "Text source"
 #~ msgstr "Zdrojový text"
+
 #~ msgid "Text sources"
 #~ msgstr "Zdrojové texty"
+
 #~ msgid "Filter on."
 #~ msgstr "Jsou zapnuty filtry."
-
