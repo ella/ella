@@ -424,7 +424,7 @@ div.pop #filters { top: 35px }
 }
 
 div.active-filters {
-    background-color: orange;
+    background-color: #FFB040;
     padding: 5px;
 }
 
