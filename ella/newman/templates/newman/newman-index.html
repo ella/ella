@@ -26,7 +26,8 @@
     {% endif %}
 {% endcache %}
     {% if site_filter_form %}
-    <div class="hpbox setup">
+    <div class="hpbox setup" id="id-hpbox-setup">
+        {% comment %}
         <h3><span>{% trans "Quick Settings" %}</span></h3>
         <div class="cnt">
             <form class="js-form" action="{% url newman:save-filters %}" method="post">
@@ -46,6 +47,7 @@
                 </div>
             </form>
         </div>
+        {% endcomment %}
     </div>
     {% endif %}
 

@@ -1626,7 +1626,7 @@ function DATEPICKER_OPTIONS(opts) {
 // Timeline (ella.exports application)
 
 function timeline_init() {
-    $(document).bind('media_loaded', Timeline.timeline_register);
+    $(document).one('media_loaded', Timeline.timeline_register);
 }
 
 Timeline = new Object();
@@ -1867,6 +1867,80 @@ Timeline = new Object();
     Timeline.timeline_register = timeline_register;
 
 })(); // end of Timeline
+
+// Main category filter widget
+var __MainCategoryFilter = function() {
+    // depends on Kobayashi object, jQuery
+    var me = {};
+    //me.super_class = OtherClass;
+
+    function init() {
+        this.TARGET_ID = 'id-hpbox-setup';
+        this.CATEGORY_FILTER_URL = BASE_URL + 'nm/filter-by-main-categories/';
+        this.HP_SELECTOR  = 'div.hpcol > div.setup';
+        this.ASYNC_REGISTER_DELAY = 500;
+    }
+    me.init = init;
+
+    function redisplay() {
+        if ($(this.HP_SELECTOR).length == 0) {
+            // if not newman homepage element is found abort loading main category filter.
+            return;
+        }
+        this.display();
+    }
+    me.redisplay = redisplay;
+
+    function register_post_save() {
+        carp('REGISTER POST SAVE #1', this);
+        $frm = $(this.HP_SELECTOR);
+        if ($frm.length == 0) {
+            // if not newman homepage element is found abort loading main category filter.
+            return;
+        }
+        carp('REGISTER POST SAVE #2');
+        var me = this;
+        function wrap() {
+            me.redisplay();
+        }
+        $frm.find('input[type=hidden][name=success]').data('callback', wrap);
+        carp('CALLBACK ASSIGNED');
+        NewmanLib.debug_frm = $frm;
+    }
+    me.register_post_save = register_post_save;
+
+    function display() {
+        if ($(this.HP_SELECTOR).length == 0) {
+            // if not newman homepage element is found abort loading main category filter.
+            return;
+        }
+        var args = {
+            address: this.CATEGORY_FILTER_URL,
+            target_id: this.TARGET_ID
+        };
+        Kobayashi.load_content(args);
+        var me = this;
+        function reg_wrap() {
+            me.register_post_save(); // should by called asynchronously due to dom is not ready yet.
+        }
+        $(document).one('content_added', reg_wrap);
+    }
+    me.display = display;
+
+    return me;
+};
+var MainCategoryFilter = to_class(__MainCategoryFilter);
+
+var main_category_filter = new MainCategoryFilter();
+(function() {
+    function display_main_category_filter() {
+        // jquery changes context for display method to selector's target, so
+        // calling .display() must be wrapped in another function.
+        main_category_filter.display(); 
+    }
+    $(document).bind('media_loaded', display_main_category_filter );
+})(jQuery);
+// end of Main category filter widget
 
 
 // EOF
