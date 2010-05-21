@@ -24,7 +24,6 @@ class CommonFilter(object):
             if self.field and type(self.field) == django.db.models.fields.related.ForeignKey:
                 model = self.field.rel.to
         try:
-            import ipdb;ipdb.set_trace()
             thing = model.objects.get(**lookup_kwargs)
         except (self.model.MultipleObjectsReturned, self.model.DoesNotExist):
             return None
