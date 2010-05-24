@@ -27,27 +27,7 @@
 {% endcache %}
     {% if site_filter_form %}
     <div class="hpbox setup" id="id-hpbox-setup">
-        {% comment %}
-        <h3><span>{% trans "Quick Settings" %}</span></h3>
-        <div class="cnt">
-            <form class="js-form" action="{% url newman:save-filters %}" method="post">
-                <fieldset>
-                    <legend>{% trans "Category-filter" %}</legend>
-                    {{ site_filter_form.sites }}
-                </fieldset>
-                <div class="submit-row">
-                    <a class="icn btn eclear js-reset">{% trans "Clear" %}</a>
-                    <a class="icn btn ok def js-submit">{% trans "Save" %}</a>
-                </div>
-                <div class="js-form-metadata">
-                    <input type="hidden" name="success" id="save-filters-success" />
-                    <script type="text/javascript">
-                        $('#save-filters-success').data('callback', function() { location.reload(); })
-                    </script>
-                </div>
-            </form>
-        </div>
-        {% endcomment %}
+        {# hpbox setup div is handled by JavaScript (Ajax widget -- Filtering by main categories). #}
     </div>
     {% endif %}
 
