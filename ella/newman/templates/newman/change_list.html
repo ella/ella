@@ -59,14 +59,18 @@
                         {% endif %}
                 {% endfor %}
                 {% if is_user_category_filtered %}
+                    {% comment %}
                     <a style="background-color: #FFB040;" class="icn btn visible def" href="{% url newman:index %}#/nm/">{% trans "Categories filtered by user. Click to change." %}</a>
+                    {% endcomment %}
                 {% endif %}
             </div>
         {% else %}
             {% if is_user_category_filtered %}
                 <div id="id-active-filters" class="active-filters">
                     <span class="filtered-by">{% trans "Filtered by" %}:</span>
+                    {% comment %}
                     <a style="background-color: #FFB040;" class="icn btn visible def" href="{% url newman:index %}#/nm/">{% trans "Categories filtered by user. Click to change." %}</a>
+                    {% endcomment %}
                 </div>
             {% endif %}
         {% endif %}

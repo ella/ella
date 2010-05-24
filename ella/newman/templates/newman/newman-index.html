@@ -26,8 +26,11 @@
     {% endif %}
 {% endcache %}
     {% if site_filter_form %}
-    <div class="hpbox setup" id="id-hpbox-setup">
+    <div class="hpbox setup">
+        <h3><span>{% trans "Quick Settings" %}</span></h3>
+        <div class="cnt" id="id-hpbox-setup-main-category-filters">
         {# hpbox setup div is handled by JavaScript (Ajax widget -- Filtering by main categories). #}
+        </div>
     </div>
     {% endif %}
 

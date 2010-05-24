@@ -393,7 +393,7 @@ Kobayashi.LOADED_MEDIA = {};
                 extras.success_callback.call(extras);
             } catch(e) { carp('Failed success callback (load_content)', e, extras) };
             $target.trigger('content_added', extras);
-            carp('content_added triggered.');
+            carp('content_added triggered on element ', $target[0]);
         }
         $(document).trigger('dec_loading');
         PAGE_CHANGED++;

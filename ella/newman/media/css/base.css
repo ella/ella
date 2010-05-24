@@ -453,7 +453,7 @@ div.active-filters span.filter-value {
 }
 
 /* FILTERS (UN)PACKING - TEMPORARY */
-#filters ul {
+#filters ul.js-hashadr-container {
     display: none;
     position: absolute;
     background-color: white;

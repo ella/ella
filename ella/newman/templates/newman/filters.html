@@ -6,6 +6,16 @@
         {% for spec in cl.filter_specs %}
            {% newman_list_filter cl spec %}
         {% endfor %}
+            <div class="filter">
+                <h4>
+                <a 
+                    class="btn combo{% if is_user_category_filtered %} filter-active{% endif %}"
+                >{% blocktrans with title as filter_title %}By Category-filter{% endblocktrans %}</a>
+                </h4>
+                <div id="id-main-category-filter">
+                {# this div is handled by JavaScript (Ajax widget -- Filtering by main categories). #}
+                </div>
+            </div>
         </div>
         <div style="margin: 10px;">
             <a class="icn btn cancel">{% trans "Close" %}</a>

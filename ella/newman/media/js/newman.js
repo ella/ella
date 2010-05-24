@@ -1874,49 +1874,37 @@ var __MainCategoryFilter = function() {
     var me = {};
     //me.super_class = OtherClass;
 
-    function init() {
-        this.TARGET_ID = 'id-hpbox-setup';
+    function init(target_id, display_element_selector) {
+        this.target_id = target_id;
+        this.display_element_selector  = display_element_selector;
         this.CATEGORY_FILTER_URL = BASE_URL + 'nm/filter-by-main-categories/';
-        this.HP_SELECTOR  = 'div.hpcol > div.setup';
         this.ASYNC_REGISTER_DELAY = 500;
+        this.displayed = false;
     }
     me.init = init;
 
-    function redisplay() {
-        if ($(this.HP_SELECTOR).length == 0) {
-            // if not newman homepage element is found abort loading main category filter.
-            return;
-        }
-        this.display();
-    }
-    me.redisplay = redisplay;
-
     function register_post_save() {
-        carp('REGISTER POST SAVE #1', this);
-        $frm = $(this.HP_SELECTOR);
+        $frm = $(this.display_element_selector);
         if ($frm.length == 0) {
-            // if not newman homepage element is found abort loading main category filter.
+            // if newman homepage element is not found abort loading main category filter.
             return;
         }
-        carp('REGISTER POST SAVE #2');
         var me = this;
         function wrap() {
-            me.redisplay();
+            me.display();
         }
         $frm.find('input[type=hidden][name=success]').data('callback', wrap);
-        carp('CALLBACK ASSIGNED');
-        NewmanLib.debug_frm = $frm;
     }
     me.register_post_save = register_post_save;
 
     function display() {
-        if ($(this.HP_SELECTOR).length == 0) {
-            // if not newman homepage element is found abort loading main category filter.
+        if ($(this.display_element_selector).length == 0) {
+            // if newman homepage element is not found abort loading main category filter.
             return;
         }
         var args = {
             address: this.CATEGORY_FILTER_URL,
-            target_id: this.TARGET_ID
+            target_id: this.target_id
         };
         Kobayashi.load_content(args);
         var me = this;
@@ -1924,21 +1912,106 @@ var __MainCategoryFilter = function() {
             me.register_post_save(); // should by called asynchronously due to dom is not ready yet.
         }
         $(document).one('content_added', reg_wrap);
+        this.displayed = true;
     }
     me.display = display;
+
+    function toggle_display() {
+        var $elem = $(this.display_element_selector);
+        if ( $elem.is(':visible') ) {
+            $elem.hide();
+        } else {
+            if (!this.displayed) {
+                this.display();
+                return;
+            }
+            $elem.show();
+        }
+    }
+    me.toggle = toggle_display;
+
+    return me;
+};
+var __MainCategoryFilter4ChangeList = function() {
+    // depends on MainCategoryFilter object, Kobayashi object.
+    var me = {};
+    me.super_class = MainCategoryFilter;
+
+    function init(target_id, display_element_selector, reload_element_id) {
+        MainCategoryFilter.call(this, target_id, display_element_selector);
+        this.reload_element_id = reload_element_id;
+    }
+    me.init = init;
+
+    function register_post_save() {
+        $frm = $(this.display_element_selector);
+        if ($frm.length == 0) {
+            // if newman homepage element is not found abort loading main category filter.
+            return;
+        }
+        var me = this;
+        function wrap() {
+            Kobayashi.reload_content(me.reload_element_id);
+        }
+        $frm.find('input[type=hidden][name=success]').data('callback', wrap);
+    }
+    me.register_post_save = register_post_save;
 
     return me;
 };
 var MainCategoryFilter = to_class(__MainCategoryFilter);
+var MainCategoryFilter4ChangeList = to_class(__MainCategoryFilter4ChangeList);
 
-var main_category_filter = new MainCategoryFilter();
+// filter placed on homepage
+var hp_main_category_filter = new MainCategoryFilter(
+    'id-hpbox-setup-main-category-filters',
+    '#id-hpbox-setup-main-category-filters'
+);
+// filter placed in changelists (not popup changelists)
+var changelist_main_category_filter = null;
 (function() {
-    function display_main_category_filter() {
+    function display_main_category_filter_in_homepage() {
         // jquery changes context for display method to selector's target, so
         // calling .display() must be wrapped in another function.
-        main_category_filter.display(); 
+        hp_main_category_filter.display(); 
     }
-    $(document).bind('media_loaded', display_main_category_filter );
+
+    function display_main_category_filter_in_changelist() {
+        changelist_main_category_filter.toggle();
+        // apply css to shown div
+        var $div = $('div#id-main-category-filter');
+        $div.css('position', 'absolute');
+    }
+
+    function register_main_category_button() {
+        var $button = $('div#id-main-category-filter').siblings().find('.btn.combo');
+        if ($button.length != 1) {
+            return;
+        }
+        changelist_main_category_filter = new MainCategoryFilter4ChangeList(
+            'id-main-category-filter',
+            '#id-main-category-filter',
+            'content'
+        );
+        $button.unbind('click', display_main_category_filter_in_changelist);
+        $button.bind('click', display_main_category_filter_in_changelist);
+    }
+    function filters_content_added() {
+        register_main_category_button();
+    }
+
+    function register_filters_show_click() {
+        $('.icn.btn.filter').live( 'click', 
+            function() {
+                var $filters = $('div#filters');
+                $filters.unbind('content_added', filters_content_added);
+                $filters.one('content_added', filters_content_added);
+            }
+        );
+    }
+
+    $(document).bind( 'media_loaded', display_main_category_filter_in_homepage );
+    $(document).bind( 'changelist_shown', register_filters_show_click );
 })(jQuery);
 // end of Main category filter widget
 
