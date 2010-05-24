@@ -58,11 +58,10 @@
     <div class="hpbox search" id="search-form">
         <h3><span>{% trans "Search" %}</span></h3>
         <div class="cnt">
-            <input type="text" name="q"/>
+            <input type="search" size="50" placeholder="{% trans 'Enter search term...' %}" name="q" />
             <select name="action" size="1">
-                <option value="">{% trans 'Select' %}...</option>
                 {% for ct in searchable_content_types %}
-                    <option value="/{{ ct.app_label }}/{{ ct.model }}/">{% filter capfirst %}{% trans ct.name %}{% endfilter %}</option>
+                    <option{% ifequal ct.model 'publishable' %} selected="selected"{% endifequal %} value="/{{ ct.app_label }}/{{ ct.model }}/">{% filter capfirst %}{% trans ct.name %}{% endfilter %}</option>
                 {% endfor %}
             </select>
             <a class="icn btn search def">{% trans 'Go' %}</a>

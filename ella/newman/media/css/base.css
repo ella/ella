@@ -151,7 +151,7 @@ a.btn {
     padding-top: 4px; padding-bottom: 3px; padding-right: 4px;
     /*BUTTON FACELIFT border: 1px solid #ddd;*/
     border: 1px solid #777;
-    border-radius: 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; -khtml-border-radius: 5px;
+    border-radius: 3px; -moz-border-radius: 3px; -webkit-border-radius: 3px; -khtml-border-radius: 3px;
     /*BUTTON FACELIFT background-color: #E9E8DD;*/
     background-color: #FFF;
     margin: 3px 2px;
@@ -229,7 +229,7 @@ label.vCheckboxLabel { display: inline; margin-left: 10px; }
 label.required { font-weight: bold; color: darkorange; }
 label:hover { text-decoration: underline; }
 div.submit-row, fieldset.submit-row { border: none; clear:both; margin-top: 5px; padding: 2px 0; text-align: right; }
-input, textarea, select { padding: 2px 0; font: normal 100% Tahoma, Verdana, sans-serif; }
+input, textarea, select { padding: 3px 2px; font: normal 100% Tahoma, Verdana, sans-serif; border: 1px solid #666; -moz-border-radius: 3px; border-radius: 3px; -webkit-border-radius: 3px; }
 .js-form .js-form-metadata { display: none; }
 /* input.vTextField { width: 500px; } */
 input.vIntegerField { width: 40px; text-align: right; }
@@ -489,10 +489,10 @@ span.widget-thumb img { border: 1px solid #ccc; margin-right: 5px; }
 
 /* SORTABLE GALLERY ITEMS */
 .gallery-items-sortable { background: #fff; border: 1px solid #ddd; -moz-border-radius: 5px; -webkit-border-radius: 5px; -khtml-border-radius: 5px; }
-.gallery-item , .gallery-add-item { 
-    margin: 5px; 
-    padding: 5px; 
-    border: 1px solid #ddd; 
+.gallery-item , .gallery-add-item {
+    margin: 5px;
+    padding: 5px;
+    border: 1px solid #ddd;
     overflow: auto;
     float: left;
     max-width: 180px;
@@ -505,7 +505,7 @@ span.widget-thumb img { border: 1px solid #ccc; margin-right: 5px; }
 /*.sortable-item .gallery-item:hover { background: #77B150; }*/
 .gallery-add-item {
     margin: 10px 0 10px 0;
-    background: none; 
+    background: none;
     border: none;
 }
 
