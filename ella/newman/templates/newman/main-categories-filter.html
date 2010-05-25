@@ -1,0 +1,13 @@
+            <form class="js-form" action="{% url newman:save-filters %}" method="post">
+                <fieldset>
+                    <legend>{% trans "Category-filter" %}</legend>
+                    {{ site_filter_form.sites }}
+                </fieldset>
+                <div class="submit-row">
+                    <a class="icn btn eclear js-reset">{% trans "Clear" %}</a>
+                    <a class="icn btn ok def js-submit">{% trans "Save" %}</a>
+                </div>
+                <div class="js-form-metadata">
+                    <input type="hidden" name="success" id="save-filters-success" />
+                </div>
+            </form>
