@@ -1877,7 +1877,7 @@ var __MainCategoryFilter = function() {
     function init(target_id, display_element_selector) {
         this.target_id = target_id;
         this.display_element_selector  = display_element_selector;
-        this.CATEGORY_FILTER_URL = BASE_URL + 'nm/filter-by-main-categories/';
+        this.CATEGORY_FILTER_URL = '/nm/filter-by-main-categories/';
         this.ASYNC_REGISTER_DELAY = 500;
         this.displayed = false;
     }

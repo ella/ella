@@ -137,7 +137,9 @@ class NewmanSite(AdminSite):
         context = {'site_filter_form': site_filter_form}
         if extra_context:
             context.update(extra_context)
-        return render_to_response('newman/main-categories-filter.html', context,
+        return render_to_response(
+            'newman/main-categories-filter.html', 
+            context,
             context_instance=template.RequestContext(request)
         )
 
