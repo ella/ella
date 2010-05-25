@@ -1916,20 +1916,6 @@ var __MainCategoryFilter = function() {
     }
     me.display = display;
 
-    function toggle_display() {
-        var $elem = $(this.display_element_selector);
-        if ( $elem.is(':visible') ) {
-            $elem.hide();
-        } else {
-            if (!this.displayed) {
-                this.display();
-                return;
-            }
-            $elem.show();
-        }
-    }
-    me.toggle = toggle_display;
-
     return me;
 };
 var __MainCategoryFilter4ChangeList = function() {
@@ -1956,6 +1942,20 @@ var __MainCategoryFilter4ChangeList = function() {
         $frm.find('input[type=hidden][name=success]').data('callback', wrap);
     }
     me.register_post_save = register_post_save;
+
+    function toggle_display() {
+        var $elem = $(this.display_element_selector);
+        if ( $elem.is(':visible') && this.displayed ) {
+            $elem.hide();
+        } else {
+            if (!this.displayed) {
+                this.display();
+                return;
+            }
+            $elem.show();
+        }
+    }
+    me.toggle = toggle_display;
 
     return me;
 };
