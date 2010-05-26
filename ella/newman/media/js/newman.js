@@ -309,9 +309,11 @@ Drafts = new Object;
         });
     }
     AjaxFormLib.save_preset = save_preset;
-    $('a#save-form').live('click', function() {
-        var title = prompt(gettext('Enter template name'));
-        if (title == null) return;
+
+    function save_preset_dialog(title) {
+        if (!title) {
+            return;
+        }
         title = $.trim(title);
         // retrieve the id of template with this name
         // TODO: to be rewritten (saving interface needs a lift)
@@ -321,6 +323,9 @@ Drafts = new Object;
             : draft_id;
         save_preset($('.change-form'), {title:title, id:id});
         return false;
+    }
+    $('a#save-form').live('click', function() {
+        jPrompt(gettext('Enter template name'), '', gettext('Enter template name'), save_preset_dialog);
     });
 
     function restore_initial_forms() {
