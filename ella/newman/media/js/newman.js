@@ -1296,6 +1296,9 @@ function save_change_form_success(text_data) {
 function changelist_shown_handler(evt) {
     /** called when changelist is shown (rendered) */
     function th_click(evt) {
+        if ( !$(evt.target).is('th') ) {
+            return;
+        }
         var pass_event = jQuery.Event('click');
         pass_event.button = 0;
         evt.data.anchor.trigger(pass_event);
