@@ -5,40 +5,38 @@ Inspired by articles by Daniel Steigerwald on http://zdrojak.root.cz/clanky/oop-
 Classes can be defined in matter of following example:
 
 var __Person = function() {
-    var me = {};
     function init(name) {
         this.name = name;
     }
-    me.init =  init;
+    this.init =  init;
 
     function getName() {
         return this.name;
     }
-    me.getName = getName;
-    return me;
+    this.getName = getName;
+    return this;
 };
 var Person = create_class_from_throttle_function(__Person);
 
 var __Employee = function() {
-    var me  = {};
-    me.super_class = Person; // inheritance
+    this.super_class = Person; // inheritance
     
     function init(name, salary) {
         Person.call(this, name);
         this.salary = salary;
     }
-    me.init =  init;
+    this.init =  init;
 
     function getName() {
         var name = Employee._super.getName.call(this);
         return name + ' (zaměstnanec)';
     }
-    me.getName = getName;
+    this.getName = getName;
 
-    me.getSalary = function() {
+    this.getSalary = function() {
         return this.salary;
     };
-    return me;
+    return this;
 };
 var Employee = create_class_from_throttle_function(__Employee);
 
@@ -64,23 +62,27 @@ alert([
 var EMPTY_CONSTRUCTOR = function() { };
 
 function create_class_from_throttle_function(func) {
-    var config_obj = func();
+    var class_def = new Object();
+    var config_obj = func.call(class_def);
     var init = EMPTY_CONSTRUCTOR;
     if (config_obj.hasOwnProperty('init')) {
         init = config_obj.init;
     }
     if (config_obj.hasOwnProperty('super_class')) {
-        var par = config_obj.super_class;
+        var parent_class = config_obj.super_class;
         var F = function() { };
-        init._super = F.prototype = par.prototype;
+        F.prototype = parent_class.prototype;
+        init._super = F.prototype;
         init.prototype = new F;
     }
-    for (var i in config_obj) {
-        if (i == 'super_class') {
+    for (var member_name in config_obj) {
+        if (member_name == 'super_class') {
             continue;
         }
-        init.prototype[i] = config_obj[i];
+        init.prototype[member_name] = config_obj[member_name];
     }
+    class_def = null;
+    config_obj = null;
     return init;
 }
 var to_class = create_class_from_throttle_function; //shortcut
