@@ -10,11 +10,11 @@ register = template.Library()
 
 
 class TopVisitedNode(template.Node):
-    def __init__(self, count, name, mods=None):
-        self.count, self.name, self.mods = count, name, mods
+    def __init__(self, count, name, days=None, mods=None):
+        self.count, self.name, self.days, self.mods = count, name, days, mods
 
     def render(self, context):
-        context[self.name] = HitCount.objects.get_top_objects(self.count, self.mods)
+        context[self.name] = HitCount.objects.get_top_objects(self.count, self.days, self.mods)
         return ''
 
 @register.tag('top_visited')
@@ -24,36 +24,57 @@ def do_top_visited(parser, token):
 
     Usage::
 
-        {% top_visited 5 [app.model ...] as var %}
+        {% top_visited 5 [days 30] [app.model ...] as var %}
 
     Example::
 
         {% top_visited 10 as top_visited_objects %}
         {% for obj in top_visited_objects %}   ...   {% endfor %}
 
+        {% top_visited 10 days 30 as top_visited_objects %}
+        {% for obj in top_visited_objects %}   ...   {% endfor %}
+
         {% top_visited 10 articles.article as top_articles %}
         {% for article in top_articles %}   ...   {% endfor %}
 
-        {% top_visited 10 articles.article photos.photo as top_objects %}
+        {% top_visited 10 days 30 articles.article as top_articles %}
+        {% for article in top_articles %}   ...   {% endfor %}
+
+        {% top_visited 10 days 30 articles.article photos.photo as top_objects %}
         {% for obj in top_objects %}   ...   {% endfor %}
     """
-    bits = token.split_contents()
-    if len(bits) < 3 or bits[-2] != 'as':
-        raise template.TemplateSyntaxError, "{% top_visited 5 [app.model ...] as var %}"
+    count, result, days, mods = top_visited_parser(token.split_contents())
+    return TopVisitedNode(count, result, days, mods)
+
+def top_visited_parser(bits):
+    if len(bits) < 4 or bits[-2] != 'as':
+        raise template.TemplateSyntaxError, "{% top_visited 5 [days 30] [app.model ...] as var %}"
 
     try:
         count = int(bits[1])
     except ValueError:
-        raise template.TemplateSyntaxError, "{% top_visited 5 [app.model ...] as var %}"
+        raise template.TemplateSyntaxError, "{% top_visited 5 [days 30] [app.model ...] as var %}"
+
+    if bits[2] == 'days':
+        try:
+            days = int(bits[3])
+            if days < 1:
+                raise template.TemplateSyntaxError, "Days argument must be greater then 0"
+        except ValueError:
+            raise template.TemplateSyntaxError, "{% top_visited 5 [days 30] [app.model ...] as var %}"
+        mods_start = 4
+    else:
+        days = None
+        mods_start = 2
 
     mods = []
-    for mod in bits[2:-2]:
+    for mod in bits[mods_start:-2]:
         model = models.get_model(*mod.split('.', 1))
         if not model:
-            raise template.TemplateSyntaxError, "{% top_visited 5 [app.model ...] as var %}"
+            raise template.TemplateSyntaxError, "{% top_visited 5 [days 30] [app.model ...] as var %}"
         mods.append(model)
 
-    return TopVisitedNode(count, bits[-1], mods)
+    return count, bits[-1], days, mods
 
 
 class HitCountNode(template.Node):
