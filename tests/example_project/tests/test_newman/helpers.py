@@ -65,6 +65,7 @@ class NewmanTestCase(SeleniumTestCase):
                 'articles' : "//a[@class='app article']",
                 'article_add' : "//a[@class='app article']/../a[position()=2]",
                 'galleries' : "//a[@class='app gallery']",
+                'gallery_add' : "//a[@class='app gallery']/../a[position()=2]",
             },
             'controls' : {
                 'suggester' : "//div[@class='suggest-bubble']",
@@ -75,11 +76,17 @@ class NewmanTestCase(SeleniumTestCase):
                 },
                 'add' : "//a[@class='js-hashadr icn btn add']",
                 'save' : "//a[@class='js-submit icn btn save def default-button-ok']",
+                'save_draft' : "//a[@class='icn btn save'][@id='save-form']",
+                'combobox_drafts': "//select[@id='id_drafts']",
+                'popup_ok' : "//input[@id='popup_ok']",
+                'help' : "//a[@class='icn btn help js-simpleload']",
                 'show_filters' : "//div[@id='filters-handler']/a[position()=1]",
                 'lookup_content' : "//div[@id='changelist']/form/table/tbody/tr/th/a[text()='%(text)s']",
                 'search_button' : "//a[@class='btn icn search def']",
                 'paginator_top' : "//div[@id='changelist']/form/p[1]",
-                'overlay': "//div[@id='overlay-content-main']/div[@id='changelist']/form[@class='js-form js-dyn-adr']/table"
+                'overlay': "//div[@id='overlay-content-main']/div[@id='changelist']/form[@class='js-form js-dyn-adr']/table",
+                'message_bubble' : "//div[@id='opmsg']/span",
+                'placement_default_category_button': "//a[@class='icn btn addfav js-placement-main-category']",
             },
             'pages' : {
                 'login' : {

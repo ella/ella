@@ -24,7 +24,61 @@ class TestGallery(NewmanTestCase):
     8. Otevrit existujici galerii. Vymenit fotky. Ulozit.
     9. Otevrit existujici galerii. Vymenit fotky, zmenit jejich poradi. Ulozit.
     10. Otevrit existujici galerii. Pridat fotku. Pridanou fotku smazat (mela by zmizet okamzite po kliknuti). Ulozit.
+    11. Recycle gallery. (Make preset from existing gallery, create new gallery from the preset. Save gallery.)
     """
+    def test_recycle_gallery(self):
+        STEP_SLEEP = 2
+        s = self.selenium
+        self.test_create_gallery()
+        s.wait_for_element_present('save-form')
+        s.click(self.elements['controls']['save_draft'])
+        s.wait_for_element_present('popup_prompt')
+        s.type('popup_prompt', 'Recyclation preset')
+        s.click(self.elements['controls']['popup_ok'])
+        s.wait_for_element_present(self.elements['controls']['message_bubble'])# wait until the preset is saved
+        sleep(STEP_SLEEP)
+        s.click(self.elements['navigation']['gallery_add'])
+        when_created = strftime('%y-%m-%d %H:%M')
+        s.wait_for_element_present(self.elements['controls']['message_bubble']) # wait until the form is loaded, then load 'Recyclation preset'
+        sleep(STEP_SLEEP)
+        # focus combobox and type preset name (to select it)
+        s.select(
+            self.elements['controls']['combobox_drafts'], 
+            'label=Recyclation preset (%s)' % when_created
+        )
+        sleep(STEP_SLEEP)
+        
+        data = {
+            'title' : u'From preset 马 žš experiment',
+        }
+        self.fill_fields(data)
+        # verify all fields
+        expected_data = {
+            'category' : [u"Africa/west-africa"],
+            'authors' : [u"Barack Obama", u"King Albert II"],
+            'title' : u'From preset 马 žš experiment',
+            'description' : u'Gallery description',
+            'content' : u'šialený obsah galörie',
+            'slug' : u'experiment',
+            'galleryitem_set-0-target_id': '1',
+            'galleryitem_set-1-target_id': '2',
+            'galleryitem_set-2-target_id': '3',
+            'galleryitem_set-3-target_id': '4',
+            'tagging-taggeditem-content_type-object_id-0-tag': '1#Music',
+            'tagging-taggeditem-content_type-object_id-0-id': '', #before save should be empty
+            'tagging-taggeditem-content_type-object_id-1-tag': '2#Moovie',
+            'tagging-taggeditem-content_type-object_id-1-id': '', #before save should be empty
+        }
+        self.verify_form(expected_data)
+
+        self.save_form()
+        self.assert_equals(expected_data['title'], s.get_text(self.get_listing_object_href()))
+        s.click(self.get_listing_object_href())
+        expected_data.update({
+            'tagging-taggeditem-content_type-object_id-0-id': '2', #now should be set
+            'tagging-taggeditem-content_type-object_id-1-id': '2', #now should be set
+        })
+        self.verify_form(expected_data)
 
     def test_change_photos_swap_them_and_save(self):
         " This method covers point 9 from TODO section on top of this class. "
@@ -392,6 +446,15 @@ class TestGallery(NewmanTestCase):
         self.fill_suggest_fields(suggest_data)
         # add four photos
         self.add_photos()
+        # create placement
+        s.click(self.elements['controls']['placement_default_category_button'])
+        s.type('id_placement_set-0-publish_from', strftime('%Y-%m-%d %H:%M'))
+        # fill tags
+        suggest_data = {
+            'tagging-taggeditem-content_type-object_id-0-tag' : ('Musi',),
+            'tagging-taggeditem-content_type-object_id-1-tag' : ('Moov',),
+        }
+        self.fill_suggest_fields(suggest_data)
 
         expected_data.update({
             'category' : [u"Africa/west-africa"],

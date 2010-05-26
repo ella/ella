@@ -480,5 +480,17 @@
         <field to="core.author" name="authors" rel="ManyToManyRel"><object pk="4"></object></field>
         <field type="ImageField" name="image">photos/2010/05/10/eighth_example.jpg</field>
     </object>
+
+    <!-- Tag -->
+
+    <object pk="1" model="tagging.tag">
+        <field type="CharField" name="name">Music</field>
+    </object>
+    <object pk="2" model="tagging.tag">
+        <field type="CharField" name="name">Moovie</field>
+    </object>
+    <object pk="3" model="tagging.tag">
+        <field type="CharField" name="name">Moooo</field>
+    </object>
     
 </django-objects>
