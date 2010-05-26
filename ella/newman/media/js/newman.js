@@ -1879,7 +1879,6 @@ Timeline = new Object();
 // Main category filter widget
 var __MainCategoryFilter = function() {
     // depends on Kobayashi object, jQuery
-    var me = {};
     //me.super_class = OtherClass;
 
     function init(target_id, display_element_selector) {
@@ -1889,7 +1888,7 @@ var __MainCategoryFilter = function() {
         this.ASYNC_REGISTER_DELAY = 500;
         this.displayed = false;
     }
-    me.init = init;
+    this.init = init;
 
     function register_post_save() {
         $frm = $(this.display_element_selector);
@@ -1903,7 +1902,7 @@ var __MainCategoryFilter = function() {
         }
         $frm.find('input[type=hidden][name=success]').data('callback', wrap);
     }
-    me.register_post_save = register_post_save;
+    this.register_post_save = register_post_save;
 
     function display() {
         if ($(this.display_element_selector).length == 0) {
@@ -1922,20 +1921,19 @@ var __MainCategoryFilter = function() {
         $(document).one('content_added', reg_wrap);
         this.displayed = true;
     }
-    me.display = display;
+    this.display = display;
 
-    return me;
+    return this;
 };
 var __MainCategoryFilter4ChangeList = function() {
     // depends on MainCategoryFilter object, Kobayashi object.
-    var me = {};
-    me.super_class = MainCategoryFilter;
+    this.super_class = MainCategoryFilter;
 
     function init(target_id, display_element_selector, reload_element_id) {
         MainCategoryFilter.call(this, target_id, display_element_selector);
         this.reload_element_id = reload_element_id;
     }
-    me.init = init;
+    this.init = init;
 
     function register_post_save() {
         $frm = $(this.display_element_selector);
@@ -1949,7 +1947,7 @@ var __MainCategoryFilter4ChangeList = function() {
         }
         $frm.find('input[type=hidden][name=success]').data('callback', wrap);
     }
-    me.register_post_save = register_post_save;
+    this.register_post_save = register_post_save;
 
     function toggle_display() {
         var $elem = $(this.display_element_selector);
@@ -1963,9 +1961,9 @@ var __MainCategoryFilter4ChangeList = function() {
             $elem.show();
         }
     }
-    me.toggle = toggle_display;
+    this.toggle = toggle_display;
 
-    return me;
+    return this;
 };
 var MainCategoryFilter = to_class(__MainCategoryFilter);
 var MainCategoryFilter4ChangeList = to_class(__MainCategoryFilter4ChangeList);

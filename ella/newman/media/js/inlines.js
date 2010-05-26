@@ -66,38 +66,39 @@ var NewmanInline = function() {
 }();
 
 // TODO jednotne rozhrani pro JS osetrovani formularu, customizace plneni formu z presetu atp., osetreni specialit v inlines..
-// FormHandler class (used rather in terms of interface)
-var FormHandler = function () {
-    var me = {};
-    me.name = 'unset'; // should be set to the name useful for identifying concrete FormHandler object.
-
+// FormHandler class (used in terms of interface or abstract class)
+var __FormHandler = function () {
     // initializes form, register custom event handlers, etc.
-    me.initialize = function () {
+    this.init = function (name) {
+        if (!name) {
+            this.name = 'unset'; // should be set to the name useful for identifying concrete FormHandler object.
+        }
     };
 
     // detects whether form handler should be used or not.
-    me.is_suitable = function () {
+    this.is_suitable = function () {
         return false;
     };
 
     // called when preset is being loaded into the form
-    me.preset_load_initiated = function (evt, preset) {
+    this.preset_load_initiated = function (evt, preset) {
     };
 
     // called when preset loading completed
-    me.preset_load_completed = function (evt) {
+    this.preset_load_completed = function (evt) {
     };
 
-    me.validate_form = function ($form) {
+    this.validate_form = function ($form) {
         return true;
     };
 
     // handles adding of new inline item
-    me.add_inline_item = function (evt) {
+    this.add_inline_item = function (evt) {
     };
 
-    return me;
+    return this;
 };
+var FormHandler = to_class(__FormHandler);
 
 (function($) {
     
@@ -231,11 +232,14 @@ var FormHandler = function () {
 
 // Gallery inlines
 //var GalleryFormHandler = Object.beget(FormHandler);
-var GalleryFormHandler = function () {
-    var me = FormHandler();
-    me.name = 'gallery';
+var __GalleryFormHandler = function () {
+    this.super_class = FormHandler;
 
-    me.is_suitable = function () {
+    this.init = function() {
+        FormHandler.call(this, 'gallery');
+    };
+
+    this.is_suitable = function () {
         var sortables = $(document).find('.gallery-items-sortable').not('ui-sortable');
         if (sortables.length == 0) {
             return false;
@@ -244,34 +248,40 @@ var GalleryFormHandler = function () {
     };
 
     // called when preset is being loaded into the form
-    me.preset_load_initiated = function (evt, preset) {
+    this.preset_load_initiated = function (evt, preset) {
         carp('Preset load initiated ' + preset);
     };
 
     // called when preset loading completed
-    me.preset_load_completed = function (evt) {
+    this.preset_load_completed = function (evt) {
         carp('Preset load completed ' + evt);
     };
 
-    return me;
+    return this;
 };
+var GalleryFormHandler = to_class(__GalleryFormHandler);
 
-var TestFormHandler = function() {
-    var me = FormHandler();
+var __TestFormHandler = function() {
+    this.super_class = FormHandler;
+
+    this.init = function() {
+        FormHandler.call(this, 'testhandler');
+    };
 
     function is_suitable() {
         var found = $(document).find('.js-poll-question-container');
         return found.length != 0;
     }
-    me.is_suitable = is_suitable;
+    this.is_suitable = is_suitable;
 
     function preset_load_initiated(evt, preset) {
         //alert('TEST!');
     }
-    me.preset_load_initiated = preset_load_initiated;
+    this.preset_load_initiated = preset_load_initiated;
 
-    return me;
+    return this;
 };
+var TestFormHandler = to_class(__TestFormHandler);
 
 (function($) {
     //// gallery items
@@ -673,8 +683,8 @@ var TestFormHandler = function() {
 //ommit registration when running in nosetests environment
 if (typeof nosejs !== "undefined") {
 } else {
-    NewmanInline.register_form_handler( GalleryFormHandler() );
-    NewmanInline.register_form_handler( TestFormHandler() );
+    NewmanInline.register_form_handler( new GalleryFormHandler() );
+    NewmanInline.register_form_handler( new TestFormHandler() );
 
     // Run relevant form handlers.
     NewmanInline.run_form_handlers();
