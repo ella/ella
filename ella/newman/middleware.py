@@ -53,10 +53,10 @@ class ProfilerMiddleware(object):
         import logging
         log = logging.getLogger('ella.newman')
         if PROFILER.has_data:
-            log.debug('******** PROFILER SUMMARY:')
-            PROFILER.log_summary(log.debug)
+            log.info('******** PROFILER SUMMARY:')
+            PROFILER.log_summary(log.info)
             PROFILER.reset()
-            log.debug('******** END')
+            log.info('******** END')
         return response
 
 

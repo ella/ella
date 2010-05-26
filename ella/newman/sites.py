@@ -78,9 +78,6 @@ class NewmanSite(AdminSite):
             url(r'^%s/err-report/$' % config.NEWMAN_URL_PREFIX,
                 wrap(self.err_report),
                 name="err-report"),
-            url(r'^%s/save-filters/$' % config.NEWMAN_URL_PREFIX,
-                wrap(self.cat_filters_save),
-                name="save-filters"),
             url(r'^%s/$' % config.NEWMAN_URL_PREFIX,
                 wrap(self.newman_index),
                 name="newman-index"),
@@ -90,6 +87,12 @@ class NewmanSite(AdminSite):
             url(r'^%s/render-chunk/$' % config.NEWMAN_URL_PREFIX,
                 wrap(self.render_chunk_template_view),
                 name="render-chunk"),
+            url(r'^%s/filter-by-main-categories/$' % config.NEWMAN_URL_PREFIX,
+                wrap(self.filter_by_main_categories),
+                name="filter-by-main-categories"),
+            url(r'^%s/save-filters/$' % config.NEWMAN_URL_PREFIX,
+                wrap(self.filter_by_main_categories_save),
+                name="save-filters"),
             url(r'^r/(?P<content_type_id>\d+)/(?P<object_id>.+)/$',
                 'django.views.defaults.shortcut',
                 name='obj-redirect'),
@@ -121,6 +124,34 @@ class NewmanSite(AdminSite):
         else:
             from django.views.i18n import null_javascript_catalog as javascript_catalog
         return javascript_catalog(request, packages=('ella.newman', 'django.conf',))
+
+    @require_AJAX
+    def filter_by_main_categories(self, request, extra_context=None):
+        data = {'sites': []}
+        try:
+            data['sites'] = get_user_config(request.user, config.CATEGORY_FILTER)
+        except KeyError:
+            data['sites'] = []
+        site_filter_form = SiteFilterForm(data=data, user=request.user)
+
+        context = {'site_filter_form': site_filter_form}
+        if extra_context:
+            context.update(extra_context)
+        return render_to_response(
+            'newman/main-categories-filter.html', 
+            context,
+            context_instance=template.RequestContext(request)
+        )
+
+    @require_AJAX
+    def filter_by_main_categories_save(self, request, extra_content=None):
+        site_filter_form = SiteFilterForm(user=request.user, data=request.POST)
+        if site_filter_form.is_valid():
+            set_user_config_db(request.user, config.CATEGORY_FILTER, site_filter_form.cleaned_data['sites'])
+            set_user_config_session(request.session, config.CATEGORY_FILTER, site_filter_form.cleaned_data['sites'])
+            return JsonResponse(ugettext('Your settings were saved.'))
+        else:
+            return JsonResponseError(ugettext('Error in form.'), status=config.STATUS_FORM_ERROR)
 
     @require_AJAX
     def editor_preview(self, request, extra_context=None):
@@ -321,17 +352,6 @@ class NewmanSite(AdminSite):
             for e in form.errors:
                 error_dict[u"id_%s" % e] = [ u"%s" % ee for ee in form.errors[e] ]
             return JsonResponse(ugettext('Subject or message is empty.'), errors=error_dict, status=config.STATUS_FORM_ERROR)
-
-    @require_AJAX
-    def cat_filters_save(self, request, extra_content=None):
-
-        site_filter_form = SiteFilterForm(user=request.user, data=request.POST)
-        if site_filter_form.is_valid():
-            set_user_config_db(request.user, config.CATEGORY_FILTER, site_filter_form.cleaned_data['sites'])
-            set_user_config_session(request.session, config.CATEGORY_FILTER, site_filter_form.cleaned_data['sites'])
-            return JsonResponse(ugettext('Your settings were saved.'))
-        else:
-            return JsonResponseError(ugettext('Error in form.'), status=config.STATUS_FORM_ERROR)
 
     @property
     def applicable_content_types(self):

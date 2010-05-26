@@ -23,9 +23,11 @@
                     <a class="icn btn filter {% if is_popup %}popup-filter{% else %}js-simpleload{% endif %}" href="filters::::filters/{{ cl.get_query_string }}">{% trans 'Filters' %}</a>
                 {% endif %}
         {% endif %}
+        {% comment %}
         {% if is_user_category_filtered %}
             <a style="background-color: orange;" class="icn btn visible def" href="{% url newman:index %}#/nm/">{% trans "Categories filtered by user. Click to change." %}</a>
         {% endif %}
+        {% endcomment %}
         {% if cl.search_fields %}
             {% block search %}{% newman_search_form cl %}{% endblock %}
         {% endif %}
@@ -44,6 +46,37 @@
 {% block content_services %}
     {{ block.super }}
     <div id="filters"></div>
+
+        {% if is_filtered %}
+            {# Active filters listing #}
+            <div id="id-active-filters" class="active-filters">
+                <span class="filtered-by">{% trans "Filtered by" %}:</span>
+                {% for active_filter in cl.active_filters %}
+                        <span class="filter-name">{{ active_filter.0 }}:</span>
+                        <span class="filter-value">{{ active_filter.1 }}</span>
+                        {% if not forloop.last %}
+                        &nbsp;,&nbsp;
+                        {% endif %}
+                {% endfor %}
+                {% if is_user_category_filtered %}
+                    {% if cl.active_filters %}
+                        &nbsp;,&nbsp;
+                    {% endif %}
+                    <span class="filter-name">{% trans "Main categories filtered." %}</span>
+                {% endif %}
+            </div>
+        {% else %}
+            {% if is_user_category_filtered %}
+                <div id="id-active-filters" class="active-filters">
+                    <span class="filtered-by">{% trans "Filtered by" %}:</span>
+                    {% if cl.active_filters %}
+                        &nbsp;,&nbsp;
+                    {% endif %}
+                    <span class="filter-name">{% trans "Main categories filtered." %}</span>
+                </div>
+            {% endif %}
+        {% endif %}
+        
 {% endblock %}
 
 {% if cl.formset.errors %}

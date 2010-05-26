@@ -55,8 +55,40 @@ class FilterableChangeList(ChangeList):
 
 class NewmanChangeList(FilterableChangeList):
     """ Overridden ChangeList without filter initialization (filters do all SQL during init) """
+
     def __init__(self, request, model, list_display, list_display_links, list_filter, date_hierarchy, search_fields, list_select_related, list_per_page, list_editable, model_admin):
-        super(NewmanChangeList, self).__init__(request, model, list_display, list_display_links, list_filter, date_hierarchy, search_fields, list_select_related, list_per_page, list_editable, model_admin)
+        super(NewmanChangeList, self).__init__(
+            request, model, 
+            list_display, 
+            list_display_links, 
+            list_filter, 
+            date_hierarchy, 
+            search_fields, 
+            list_select_related, 
+            list_per_page, 
+            list_editable, 
+            model_admin
+        )
+        self.active_filters = [] # holds active filters on Change List
+        self.__go_through_active_filters(request)
+
+    def __go_through_active_filters(self, request):
+        """ 
+        Walks through active filters. 
+        Appends to self.active_fitlers list tuple(filter_title, filter_criteria).
+        """
+        active_filters = self.active_filters
+        # Print active filters:
+        def dict_items_to_str(d):
+            out = dict()
+            for key in d:
+                out[ str(key) ] = d[key]
+            return out
+
+        for filter in self._filters:
+            if filter.is_active(request.GET):
+                active = filter.generate_choice( **dict_items_to_str(filter.is_selected_item()) )
+                active_filters.append( (filter.title(), active) )
 
 
     def get_filters(self, request):

@@ -28,23 +28,8 @@
     {% if site_filter_form %}
     <div class="hpbox setup">
         <h3><span>{% trans "Quick Settings" %}</span></h3>
-        <div class="cnt">
-            <form class="js-form" action="{% url newman:save-filters %}" method="post">
-                <fieldset>
-                    <legend>{% trans "Category-filter" %}</legend>
-                    {{ site_filter_form.sites }}
-                </fieldset>
-                <div class="submit-row">
-                    <a class="icn btn eclear js-reset">{% trans "Clear" %}</a>
-                    <a class="icn btn ok def js-submit">{% trans "Save" %}</a>
-                </div>
-                <div class="js-form-metadata">
-                    <input type="hidden" name="success" id="save-filters-success" />
-                    <script type="text/javascript">
-                        $('#save-filters-success').data('callback', function() { location.reload(); })
-                    </script>
-                </div>
-            </form>
+        <div class="cnt" id="id-hpbox-setup-main-category-filters">
+        {# hpbox setup div is handled by JavaScript (Ajax widget -- Filtering by main categories). #}
         </div>
     </div>
     {% endif %}
@@ -73,11 +58,10 @@
     <div class="hpbox search" id="search-form">
         <h3><span>{% trans "Search" %}</span></h3>
         <div class="cnt">
-            <input type="text" name="q"/>
+            <input type="search" size="50" placeholder="{% trans 'Enter search term...' %}" name="q" />
             <select name="action" size="1">
-                <option value="">{% trans 'Select' %}...</option>
                 {% for ct in searchable_content_types %}
-                    <option value="/{{ ct.app_label }}/{{ ct.model }}/">{% filter capfirst %}{% trans ct.name %}{% endfilter %}</option>
+                    <option{% ifequal ct.model 'publishable' %} selected="selected"{% endifequal %} value="/{{ ct.app_label }}/{{ ct.model }}/">{% filter capfirst %}{% trans ct.name %}{% endfilter %}</option>
                 {% endfor %}
             </select>
             <a class="icn btn search def">{% trans 'Go' %}</a>

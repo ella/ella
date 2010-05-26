@@ -440,21 +440,45 @@
     </object>
     <object pk="2" model="photos.photo">
         <field type="CharField" name="title">Second Example</field>
-        <field type="SlugField" name="slug">1-second-example</field>
+        <field type="SlugField" name="slug">2-second-example</field>
         <field to="core.author" name="authors" rel="ManyToManyRel"><object pk="4"></object></field>
         <field type="ImageField" name="image">photos/2010/05/10/second_example.jpg</field>
     </object>
     <object pk="3" model="photos.photo">
         <field type="CharField" name="title">Third Example</field>
-        <field type="SlugField" name="slug">1-third-example</field>
+        <field type="SlugField" name="slug">3-third-example</field>
         <field to="core.author" name="authors" rel="ManyToManyRel"><object pk="4"></object></field>
         <field type="ImageField" name="image">photos/2010/05/10/third_example.jpg</field>
     </object>
     <object pk="4" model="photos.photo">
         <field type="CharField" name="title">Fourth Example</field>
-        <field type="SlugField" name="slug">1-fourth-example</field>
+        <field type="SlugField" name="slug">4-fourth-example</field>
         <field to="core.author" name="authors" rel="ManyToManyRel"><object pk="4"></object></field>
         <field type="ImageField" name="image">photos/2010/05/10/fourth_example.jpg</field>
+    </object>
+    <object pk="5" model="photos.photo">
+        <field type="CharField" name="title">Fifth Example</field>
+        <field type="SlugField" name="slug">5-fifth-example</field>
+        <field to="core.author" name="authors" rel="ManyToManyRel"><object pk="4"></object></field>
+        <field type="ImageField" name="image">photos/2010/05/10/fifth_example.jpg</field>
+    </object>
+    <object pk="6" model="photos.photo">
+        <field type="CharField" name="title">Sixth Example</field>
+        <field type="SlugField" name="slug">6-sixth-example</field>
+        <field to="core.author" name="authors" rel="ManyToManyRel"><object pk="4"></object></field>
+        <field type="ImageField" name="image">photos/2010/05/10/sixth_example.jpg</field>
+    </object>
+    <object pk="7" model="photos.photo">
+        <field type="CharField" name="title">Seventh Example</field>
+        <field type="SlugField" name="slug">7-seventh-example</field>
+        <field to="core.author" name="authors" rel="ManyToManyRel"><object pk="4"></object></field>
+        <field type="ImageField" name="image">photos/2010/05/10/seventh_example.jpg</field>
+    </object>
+    <object pk="8" model="photos.photo">
+        <field type="CharField" name="title">Eighth Example</field>
+        <field type="SlugField" name="slug">8-eighth-example</field>
+        <field to="core.author" name="authors" rel="ManyToManyRel"><object pk="4"></object></field>
+        <field type="ImageField" name="image">photos/2010/05/10/eighth_example.jpg</field>
     </object>
     
 </django-objects>

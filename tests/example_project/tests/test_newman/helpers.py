@@ -94,6 +94,7 @@ class NewmanTestCase(SeleniumTestCase):
                 },
                 'gallery': {
                     'item': "//div[@class='gallery-item']/a[@id='%(id)s']",
+                    'item_input': "//div[@class='gallery-item']/descendant::*/input[@id='%(id)s']",
                 }
             }
         }

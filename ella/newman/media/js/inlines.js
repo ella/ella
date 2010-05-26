@@ -291,7 +291,7 @@ var TestFormHandler = function() {
         }
     }
 
-    function gallery_recount_ids_and_names_callback(element, no_items, counter) {
+    function gallery_recount_ids_and_names_callback(element, counter) {
         var ITEM_SET = 'galleryitem_set-';
         var no_re = /galleryitem_set-\d+-/;
         var $element = $(element);
@@ -321,7 +321,7 @@ var TestFormHandler = function() {
             function() {
                 $(this).find('*').each( 
                     function() {
-                        gallery_recount_ids_and_names_callback(this, no_items, counter);
+                        gallery_recount_ids_and_names_callback(this, counter);
                     }
                 )
                 counter ++;
@@ -556,8 +556,14 @@ var TestFormHandler = function() {
         });
         
         // initialize order for empty listing
+        var degree = 0;
         $sortables.find('.item-order').each( function() {
-            if ( ! $(this).val() ) $(this).val( max_order() + 1 );
+            if (degree === 0) {
+                degree = get_gallery_ordering_degree( $(this) );
+            }
+            if ( ! $(this).val() ) $(this).val( 
+                (max_order() + 1) * degree 
+            );
         });
         
         // update the preview thumbs and headings
@@ -609,6 +615,7 @@ var TestFormHandler = function() {
                     if ($del.hasClass('noscreen')) {
                         $del.removeClass('noscreen');
                     }
+                    gallery_inlines_recount_ids();
                 },
             });
         }

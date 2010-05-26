@@ -5,14 +5,50 @@ import logging
 
 from django.utils.translation import ugettext as _
 from django.contrib.admin import filterspecs
+from django.contrib.sites.models import Site
+import django.db
 
 from ella.core.models import Category
 from ella.newman.permission import permission_filtered_model_qs
 
 log = logging.getLogger('ella.newman')
 
+class CommonFilter(object):
+    def generate_choice(self, **lookup_kwargs):
+        """ 
+        Returns representation of one choice. 
+        Suitable when rendering of all choices isn't necessary. Faster than get_selected() method.
+        """
+        model = self.model
+        if 'field' in self.__dict__:
+            if self.field and type(self.field) == django.db.models.fields.related.ForeignKey:
+                model = self.field.rel.to
+        try:
+            thing = model.objects.get(**lookup_kwargs)
+        except (self.model.MultipleObjectsReturned, self.model.DoesNotExist):
+            return None
+        return thing.__unicode__()
 
-class CustomFilterSpec(filterspecs.FilterSpec):
+    def get_selected(self):
+        " Should be used within a template to get selected item in filter. "
+        if hasattr(self, 'selected_item'):
+            return self.selected_item
+        if not hasattr(self, 'all_choices'):
+            # return the same structure with error key set
+            return {
+                'selected': False,
+                'query_string':'',
+                'display': '',
+                'error': 'TOO EARLY'
+            }
+        for item in self.all_choices:
+            if item['selected']:
+                self.selected_item = item
+                return item
+
+
+
+class CustomFilterSpec(filterspecs.FilterSpec, CommonFilter):
     """ custom defined FilterSpec """
     def __init__(self, f, request, params, model, model_admin):
         self.state = 0
@@ -122,8 +158,11 @@ class CustomFilterSpec(filterspecs.FilterSpec):
         lookup = self.get_lookup_kwarg()
         selected = self.is_selected_item()
         # Reset filter button/a href
+        all_query_string = cl.get_query_string(None, self.get_active(self.request_get))
+        if all_query_string.endswith('?') and len(all_query_string) == 1:
+            all_query_string = '?q='
         yield {'selected': len(selected.keys()) == 0,
-               'query_string': cl.get_query_string(None, self.get_active(self.request_get) ),
+               'query_string': all_query_string,
                'display': _('All')}
         for title, param_dict in self.links:
             params = make_unicode_params(param_dict)
@@ -213,32 +252,24 @@ class NewmanSiteFilter(CustomFilterSpec):
             fspec.links.append(link)
         return True
 
+    def generate_choice(self, **lookup_kwargs):
+        category_id = lookup_kwargs.get(self.site_field_path, '')
+        if not category_id or not category_id.isdigit():
+            return None
+        try:
+            thing = Site.objects.get( pk=int(category_id) )
+        except (Site.MultipleObjectsReturned, Site.DoesNotExist):
+            return None
+        return thing.__unicode__()
+
 # -------------------------------------
 # Standard django.admin filters
 # -------------------------------------
-# TODO make common parent of FilterSpecEnhancement and CustomFilterSpec
 
-class FilterSpecEnhancement(filterspecs.FilterSpec):
+class FilterSpecEnhancement(filterspecs.FilterSpec, CommonFilter):
     def filter_active(self):
         " Can be used from template. "
         return self.is_active(self.params)
-
-    def get_selected(self):
-        " Should be used within a template to get selected item in filter. "
-        if hasattr(self, 'selected_item'):
-            return self.selected_item
-        if not hasattr(self, 'all_choices'):
-            # return the same structure with error key set
-            return {
-                'selected': False,
-                'query_string':'',
-                'display': '',
-                'error': 'TOO EARLY'
-            }
-        for item in self.all_choices:
-            if item['selected']:
-                self.selected_item = item
-                return item
 
 class RelatedFilterSpec(filterspecs.RelatedFilterSpec, FilterSpecEnhancement):
     def is_active(self, request_params):
