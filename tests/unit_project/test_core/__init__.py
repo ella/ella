@@ -6,6 +6,7 @@ from django.conf import settings
 from ella.core.models import Placement, Category, Listing, Publishable, HitCount
 # choose Article as an example publishable
 from ella.articles.models import Article
+from ella.galleries.models import Gallery
 
 def create_basic_categories(case):
     case.site_id = getattr(settings, "SITE_ID", 1)
@@ -94,8 +95,8 @@ def create_and_place_two_publishables_and_listings(case):
     Create two articles, placements and listings
     """
 
-    def place_article(title, slug, description, category, publish_from, publish_to=None, hits=1):
-        pu = Article.objects.create(
+    def place_publishable(model, title, slug, description, category, publish_from, publish_to=None, hits=1):
+        pu = model.objects.create(
             title=title,
             slug=slug,
             description=description,
@@ -134,11 +135,13 @@ def create_and_place_two_publishables_and_listings(case):
     case.listings = []
     case.hitcounts_all = []
     case.hitcounts_age_limited = []
+    case.hitcounts_galleries = []
 
     publish_from = now - timedelta(days=90)
     publish_to = now - timedelta(days=30)
-    place_article(
-        title=u'Article inactive',
+    place_publishable(
+        model=Article,
+        title=u'Inactive',
         slug=u'article-inactive',
         description=u'Some\nlonger\ntext',
         category=c,
@@ -148,19 +151,22 @@ def create_and_place_two_publishables_and_listings(case):
     )
 
     publish_from = datetime.now() - timedelta(days=8)
-    hc = place_article(
-        title=u'Article older',
-        slug=u'article-older',
+    hc = place_publishable(
+        model=Gallery,
+        title=u'Older',
+        slug=u'gallery-older',
         description=u'Some\nlonger\ntext',
         category=c,
         publish_from=publish_from.date(),
         hits=100
     )
     case.hitcounts_all.append(hc)
+    case.hitcounts_galleries.append(hc)
     case.hitcount_top = hc
 
-    hc = place_article(
-        title=u'Article newer',
+    hc = place_publishable(
+        model=Article,
+        title=u'Newer',
         slug=u'article-newer',
         description=u'Some\nlonger\ntext',
         category=c,
@@ -170,8 +176,9 @@ def create_and_place_two_publishables_and_listings(case):
     case.hitcounts_age_limited.append(hc)
 
     publish_from = now + timedelta(days=1)
-    place_article(
-        title=u'Article future',
+    place_publishable(
+        model=Article,
+        title=u'Future',
         slug=u'article-future',
         description=u'Some\nlonger\ntext',
         category=c,
