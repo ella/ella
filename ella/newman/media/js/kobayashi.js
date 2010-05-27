@@ -1,7 +1,8 @@
 /** 
  * Kobayashi AJAX powered content injection framework.
  * requires: jQuery 1.4.2+, 
- *          gettext() function.
+ *          gettext() function,
+ *          to_class() function (inheritance.js).
  *
  * provides:
  *          carp() function for logging purposes,
@@ -124,7 +125,7 @@ function timer_decorator(name, func) {
 
 // /end of Timer
 
-StringBuffer = function() {
+var __StringBuffer = function() {
     var me = {};
     var buffer = [];
     var clear_i = 0; //counter variable
@@ -158,10 +159,11 @@ StringBuffer = function() {
 
     return me;
 };
+var StringBuffer = to_class(__StringBuffer);
 
 function str_concat() {
     if (typeof(str_concat.string_buffer) == 'undefined') {
-        str_concat.string_buffer = StringBuffer();
+        str_concat.string_buffer = new StringBuffer();
     } else {
         str_concat.string_buffer.clear();
     }
@@ -169,94 +171,97 @@ function str_concat() {
     return str_concat.string_buffer.to_string();
 }
 
-LoggingLib = function () {
-    var me = {};
-    var capabilities = [];
-    var enable_debug_div = false;
-    var str_buf = StringBuffer();
+var __LoggingLib = function () {
+    this.init = function (enabled) {
+        this.enabled = enabled;
+        this.capabilities = [];
+        this.enable_debug_div = false;
+        this.str_buf = new StringBuffer();
+    };
 
-    function log_debug_div() {
+    this.log_debug_div = function () {
         $('#debug').append($('<p>').text($.makeArray(arguments).join(' ')));
-    }
+    };
 
-    function log_console_apply() {
+    this.log_console_apply = function () {
         console.log.apply(this, arguments);
-    }
+    };
 
-    function log_console() {
+    this.log_console = function () {
         //console.log(arguments);
         // workaround for google chromium to see logged message immediately
-        str_buf.clear();
+        this.str_buf.clear();
         for (var i = 0; i < arguments.length; i++) {
-            str_buf.append(arguments[i]);
+            this.str_buf.append(arguments[i]);
         }
-        console.log(str_buf.to_string());
-    }
+        console.log(this.str_buf.to_string());
+    };
 
-    function workaround_opera_browser() {
+    this.workaround_opera_browser = function () {
             try {
                 var log_func = window.opera.postError;
                 window.console = {};
                 window.console.log = log_func;
             } catch (e) {
             }
-    }
+    };
 
-    function first_log_attempt() {
-        if (enable_debug_div) {
+    this.first_log_attempt = function () {
+        if (this.enable_debug_div) {
             try {
-                log_debug_div.apply(null, arguments);
-                capabilities.push(log_debug_div);
+                this.log_debug_div.apply(this, arguments);
+                this.capabilities.push(log_debug_div);
             } catch(e) { }
         }
 
         // Opera?
         if (typeof(console) == 'undefined') {
-            workaround_opera_browser();
-            capabilities.push(log_console);
-            log_console.apply(null, arguments);
+            this.workaround_opera_browser();
+            this.capabilities.push(this.log_console);
+            this.log_console.apply(this, arguments);
             return;
         }
 
         try {
-            log_console_apply.apply(null, arguments);
-            capabilities.push(log_console_apply);
+            this.log_console_apply.apply(this, arguments);
+            this.capabilities.push(this.log_console_apply);
         } catch(e) {
             try {
-                log_console.apply(null, arguments);
-                capabilities.push(log_console);
+                this.log_console.apply(this, arguments);
+                this.capabilities.push(this.log_console);
             } catch(e) { 
             }
         }
-    }
+    };
 
-    function log_it() {
+    this.log_it = function () {
         var callback;
-        var len = capabilities.length;
+        var len = this.capabilities.length;
         for (var i = 0; i < len; i++) {
-            callback = capabilities[i];
+            callback = this.capabilities[i];
             //callback(arguments);
-            callback.apply(null, arguments);
+            callback.apply(this, arguments);
         }
-    }
+    };
 
-    function log() {
-        if (capabilities.length == 0) {
-            first_log_attempt.apply(null, arguments);
+    this.log = function () {
+        if (!this.enabled) return;
+        if (this.capabilities.length == 0) {
+            this.first_log_attempt.apply(this, arguments);
         } else {
-            log_it.apply(null, arguments);
+            this.log_it.apply(this, arguments);
         }
-    }
-    me.log = log;
-    me.capabilities = capabilities;
+    };
 
-    return me;
+    return this;
 };
-carp_logging = LoggingLib();
+var LoggingLib = to_class(__LoggingLib);
+log_generic = new LoggingLib(true);
+log_kobayashi = new LoggingLib(false);
 
 function carp() {
     if (DEBUG) {
-        carp_logging.log.apply(null, arguments);
+        log_generic.log.apply(log_generic, arguments);
     }
 }
 
@@ -391,9 +396,9 @@ Kobayashi.LOADED_MEDIA = {};
             }
             if ($.isFunction( extras.success_callback )) try {
                 extras.success_callback.call(extras);
-            } catch(e) { carp('Failed success callback (load_content)', e, extras) };
+            } catch(e) { log_kobayashi.log('Failed success callback (load_content)', e, extras) };
             $target.trigger('content_added', extras);
-            carp('content_added triggered on element ', $target[0]);
+            log_kobayashi.log('content_added triggered on element ', $target[0]);
         }
         $(document).trigger('dec_loading');
         PAGE_CHANGED++;
@@ -403,7 +408,7 @@ Kobayashi.LOADED_MEDIA = {};
     // argument is a LOAD_BUF item
     function inject_error_message(info) {
         if (!info) {
-            carp('inject_error_message expect an object with target_id, xhr and address. Received:', info);
+            log_kobayashi.log('inject_error_message expect an object with target_id, xhr and address. Received:', info);
             return;
         }
         var $target = $('#'+info.target_id);
@@ -461,7 +466,7 @@ Kobayashi.LOADED_MEDIA = {};
         if (is_priority) {
             if (LOAD_BUF[MIN_LOAD] == undefined) return MIN_LOAD;
             if (MIN_LOAD <= 0) {
-                carp(new Error('Cannot make a priority request when request queue is not empty before first request has been finished.'));
+                log_kobayashi.log(new Error('Cannot make a priority request when request queue is not empty before first request has been finished.'));
                 return ++MAX_LOAD;
             }
             return --MIN_LOAD;
@@ -483,7 +488,7 @@ Kobayashi.LOADED_MEDIA = {};
         
         // If the queue is empty, clean it
         if (!LOAD_BUF[ MIN_LOAD ]) {
-//            ;;; carp("Emptying buffer");
+//            ;;; log_kobayashi.log("Emptying buffer");
             LOAD_BUF = [];
             MIN_LOAD = undefined;
             MAX_LOAD = -1;
@@ -497,10 +502,10 @@ Kobayashi.LOADED_MEDIA = {};
         while (LOAD_BUF.length > MIN_LOAD+1 && !LOAD_BUF[ ++MIN_LOAD ]) {}
         var $target = $('#'+info.target_id);
         if ($target && $target.jquery && $target.length) {} else {
-            carp('Could not find target element: #',info.target_id);
+            log_kobayashi.log('Could not find target element: #',info.target_id);
             if ($.isFunction(info.error_callback)) try {
                 info.error_callback.call(info);
-            } catch(e) { carp('Failed error callback (load_content)', e, info); }
+            } catch(e) { log_kobayashi.log('Failed error callback (load_content)', e, info); }
             $(document).trigger('dec_loading');
             draw_ready();
             return;
@@ -519,7 +524,7 @@ Kobayashi.LOADED_MEDIA = {};
         $('#'+info.target_id).removeClass('loading');
         $(document).trigger('dec_loading');
         
-        carp('Failed to load ',info.address,' into ',info.target_id);
+        log_kobayashi.log('Failed to load ',info.address,' into ',info.target_id);
     }
     
     // Take a container and a URL. Give the container the "loading" class,
@@ -529,10 +534,10 @@ Kobayashi.LOADED_MEDIA = {};
         var target_id = arg.target_id;
         var address = arg.address;
         if (target_id == undefined) {
-            carp('ERROR: Kobayashi.load_content must get target_id field in its argument.');
+            log_kobayashi.log('ERROR: Kobayashi.load_content must get target_id field in its argument.');
             return;
         }
-        ;;; carp('loading ',address,' into #',target_id);
+        ;;; log_kobayashi.log('loading ',address,' into #',target_id);
         
         delete arg.xhr; // just in case there was one
             
@@ -594,7 +599,7 @@ Kobayashi.LOADED_MEDIA = {};
                 draw_ready();
                 if ($.isFunction(this.error_callback)) try {
                     this.error_callback();
-                } catch(e) { carp('Failed error callback (load_content)', e, this); }
+                } catch(e) { log_kobayashi.log('Failed error callback (load_content)', e, this); }
             },
             load_id: load_id,
             request_no: MAX_REQUEST,
@@ -634,7 +639,7 @@ Kobayashi.LOADED_MEDIA = {};
     // and nothing else is done for this specifier.
     function load_by_hash() {
         var hash = location.hash.substr(1);
-//        ;;; carp('load #'+MAX_REQUEST+'; hash: '+hash)
+//        ;;; log_kobayashi.log('load #'+MAX_REQUEST+'; hash: '+hash)
         
         // Figure out what should be reloaded and what not by comparing the requested things with the loaded ones.
         var requested = {};
@@ -698,7 +703,7 @@ Kobayashi.LOADED_MEDIA = {};
                 }
             }
             if (!indep) {
-                carp(ids_map);
+                log_kobayashi.log(ids_map);
                 throw('Cyclic graph of elements???');
             }
             
@@ -781,7 +786,7 @@ Kobayashi.LOADED_MEDIA = {};
     // Fire hashchange event when location.hash changes
     window.CURRENT_HASH = '';
     $(document).bind('hashchange', function() {
-//        carp('hash: ' + location.hash);
+//        log_kobayashi.log('hash: ' + location.hash);
         MAX_REQUEST++;
         $('.loading').removeClass('loading');
         $(document).trigger('hide_loading');
@@ -793,7 +798,7 @@ Kobayashi.LOADED_MEDIA = {};
             CURRENT_HASH = location.hash;
             try {
                 $(document).trigger('hashchange');
-            } catch(e) { carp(e); }
+            } catch(e) { log_kobayashi.log(e); }
         }
         setTimeout(arguments.callee, KOBAYASHI_ADDRESSBAR_CHECK_INTERVAL);
     }
@@ -885,7 +890,7 @@ Kobayashi.LOADED_MEDIA = {};
 //   to compensate for hash and LOADED_URLS inconsistencies.
 function adr(address, options) {
     if (address == undefined) {
-        carp('No address given to adr()');
+        log_kobayashi.log('No address given to adr()');
         return;
     }
     
@@ -1027,7 +1032,7 @@ function adr(address, options) {
                     var ass = assignments[i];
                     var vname = (ass.indexOf('=') < 0) ? ass : ass.substr(0, ass.indexOf('='));
                     if (vname.length == 0) {
-                        carp('invalid assignment: ' , ass);
+                        log_kobayashi.log('invalid assignment: ' , ass);
                         continue;
                     }
                     var vname_esc = vname.replace(/\W/g, '\\$1');
@@ -1107,11 +1112,11 @@ function get_hash(address, options) {
         if (Kobayashi.LOADED_MEDIA[ url ]) {
             if ($.isFunction(succ_fn)) succ_fn(url);
             if ($.isFunction(next_fn)) next_fn(url);
-            ;;; carp('Skipping loaded medium: ', url);
+            ;;; log_kobayashi.log('Skipping loaded medium: ', url);
             return true;
         }
         
-        ;;; carp('loading medium ',url);
+        ;;; log_kobayashi.log('loading medium ',url);
         
         url.match(/(?:.*\/\/[^\/]*)?([^?]+)(?:\?.*)?/);
         $(document).data('loaded_media')[ RegExp.$1 ] = url;
@@ -1132,8 +1137,8 @@ function get_hash(address, options) {
             try {
                 if (stylesheet.cssRules) return stylesheet.cssRules;
                 if (stylesheet.rules   ) return stylesheet.rules;
-            } catch(e) { carp(e); }
-            carp('Could not get rules from: ', stylesheet);
+            } catch(e) { log_kobayashi.log(e); }
+            log_kobayashi.log('Could not get rules from: ', stylesheet);
             return;
         }
         
@@ -1141,7 +1146,7 @@ function get_hash(address, options) {
             if (stylesheet_present(abs_url)) {
                 if ($.isFunction(succ_fn)) succ_fn(url);
                 if ($.isFunction(next_fn)) next_fn(url);
-                ;;; carp('Stylesheet already present: ',url);
+                ;;; log_kobayashi.log('Stylesheet already present: ',url);
                 return true;
             }
             var tries = KOBAYASHI_CSS_LOAD_TRIES;
@@ -1149,7 +1154,7 @@ function get_hash(address, options) {
             setTimeout(function() {
                 if (--tries < 0) {
                     Kobayashi.LOADED_MEDIA[ url ] = false;
-                    carp('Timed out loading CSS: ',url);
+                    log_kobayashi.log('Timed out loading CSS: ',url);
                     if ($.isFunction(err_fn)) err_fn(url);
                     return;
                 }
@@ -1159,12 +1164,12 @@ function get_hash(address, options) {
                     if (rules && rules.length) {
                         Kobayashi.LOADED_MEDIA[ url ] = true;
                         if ($.isFunction(succ_fn)) succ_fn(url);
-                        ;;; carp('CSS Successfully loaded: ',url);
+                        ;;; log_kobayashi.log('CSS Successfully loaded: ',url);
                         
                     }
                     else {
                         Kobayashi.LOADED_MEDIA[ url ] = false;
-                        if (rules) carp('CSS stylesheet empty.');
+                        if (rules) log_kobayashi.log('CSS stylesheet empty.');
                         if ($.isFunction(err_fn)) err_fn(url);
                         return;
                     }
@@ -1182,7 +1187,7 @@ function get_hash(address, options) {
                 if ($scripts.get(i).src == abs_url) {
                     if ($.isFunction(succ_fn)) succ_fn(url);
                     if ($.isFunction(next_fn)) next_fn(url);
-                    ;;; carp('Script already present: ',url);
+                    ;;; log_kobayashi.log('Script already present: ',url);
                     return true;
                 }
             }
@@ -1194,13 +1199,13 @@ function get_hash(address, options) {
                     Kobayashi.LOADED_MEDIA[ this.url ] = true;
                     if ($.isFunction(succ_fn)) succ_fn(url);
                     if ($.isFunction(next_fn)) next_fn(url);
-                    ;;; carp('JS Successfully loaded: ',this.url);
+                    ;;; log_kobayashi.log('JS Successfully loaded: ',this.url);
                 },
                 error: function() {
                     Kobayashi.LOADED_MEDIA[ this.url ] = false;
                     if ($.isFunction( err_fn))  err_fn(url);
                     if ($.isFunction(next_fn)) next_fn(url);
-                    carp('Failed to load JS: ',url, this);
+                    log_kobayashi.log('Failed to load JS: ',url, this);
                 },
                 cache: true
             });
@@ -1217,7 +1222,7 @@ function get_hash(address, options) {
         try {
             $(document).trigger('media_loaded').data('loaded_media', {});
         } catch (e) {
-            carp('Error when triggering media_loaded.', e);
+            log_kobayashi.log('Error when triggering media_loaded.', e);
         }
         timerEnd('trigger_ media_loaded');
     }
@@ -1232,7 +1237,7 @@ function get_hash(address, options) {
     
     // Load a CSS / JavaScript file (given an URL) after previously requested ones have been loaded / failed loading.
     function request_media(url) {
-        carp('Request media ' , url);
+        log_kobayashi.log('Request media ' , url);
         var do_start = media_queue.length == 0;
         media_queue.push(url);
         if (do_start) {
