@@ -47,12 +47,14 @@ function try_decorator(func) {
 }
 
 function timer(name) {
+    if (!DEBUG) return;
     try {
         console.time(name);
     } catch (e) {}
 }
 
 function timerEnd(name) {
+    if (!DEBUG) return;
     try {
         console.timeEnd(name);
     } catch (e) {}
@@ -126,38 +128,37 @@ function timer_decorator(name, func) {
 // /end of Timer
 
 var __StringBuffer = function() {
-    var me = {};
-    var buffer = [];
-    var clear_i = 0; //counter variable
+    this.init = function () {
+        this.buffer = [];
+        this.clear_i = 0; //counter variable
+    };
 
-    function clear() {
-        var len = buffer.length;
-        for (clear_i = 0; clear_i < len; clear_i++) {
-            buffer.pop();
+    this.clear = function () {
+        var len = this.buffer.length;
+        for (this.clear_i = 0; this.clear_i < len; this.clear_i++) {
+            this.buffer.pop();
         }
-    }
-    me.clear = clear;
+    };
     
-    function append(text) {
-        buffer.push(text);
+    this.append = function (text) {
+        this.buffer.push(text);
     }
-    me.append = append;
 
     function append_array(arr) {
         for (var i = 0; i < arr.length; i++) {
-            buffer.push(arr[i]);
+            this.buffer.push(arr[i]);
         }
     }
-    me.append_array = append_array;
-    me.appendArray = append_array;
+    this.appendArray = append_array;
+    this.append_array = append_array;
 
     function to_string() {
-        return buffer.join('');
+        return this.buffer.join('');
     }
-    me.toString = to_string;
-    me.to_string = to_string;
+    this.toString = to_string;
+    this.to_string = to_string;
 
-    return me;
+    return this;
 };
 var StringBuffer = to_class(__StringBuffer);
 
@@ -172,7 +173,8 @@ function str_concat() {
 }
 
 var __LoggingLib = function () {
-    this.init = function (enabled) {
+    this.init = function (name, enabled) {
+        this.name = name;
         this.enabled = enabled;
         this.capabilities = [];
         this.enable_debug_div = false;
@@ -191,6 +193,7 @@ var __LoggingLib = function () {
         //console.log(arguments);
         // workaround for google chromium to see logged message immediately
         this.str_buf.clear();
+        this.str_buf.append(this.name);
         for (var i = 0; i < arguments.length; i++) {
             this.str_buf.append(arguments[i]);
         }
@@ -213,21 +216,23 @@ var __LoggingLib = function () {
                 this.capabilities.push(log_debug_div);
             } catch(e) { }
         }
+        var args = Array.prototype.slice.call(arguments);
+        args.unshift(this.name); // prepend logger name
 
         // Opera?
         if (typeof(console) == 'undefined') {
             this.workaround_opera_browser();
             this.capabilities.push(this.log_console);
-            this.log_console.apply(this, arguments);
+            this.log_console.apply(this, args);
             return;
         }
 
         try {
-            this.log_console_apply.apply(this, arguments);
+            this.log_console_apply.apply(this, args);
             this.capabilities.push(this.log_console_apply);
         } catch(e) {
             try {
-                this.log_console.apply(this, arguments);
+                this.log_console.apply(this, args);
                 this.capabilities.push(this.log_console);
             } catch(e) { 
             }
@@ -237,11 +242,14 @@ var __LoggingLib = function () {
     this.log_it = function () {
         var callback;
         var len = this.capabilities.length;
+        var args = Array.prototype.slice.call(arguments);
+        args.unshift(this.name); // prepend logger name
         for (var i = 0; i < len; i++) {
             callback = this.capabilities[i];
             //callback(arguments);
-            callback.apply(this, arguments);
+            callback.apply(this, args);
         }
+        args = null;
     };
 
     this.log = function () {
@@ -256,8 +264,10 @@ var __LoggingLib = function () {
     return this;
 };
 var LoggingLib = to_class(__LoggingLib);
-log_generic = new LoggingLib(true);
-log_kobayashi = new LoggingLib(false);
+
+// Available loggers
+log_generic = new LoggingLib('GENERIC:', true);
+log_kobayashi = new LoggingLib('KOBAYASHI:', false);
 
 function carp() {
     if (DEBUG) {
