@@ -72,7 +72,7 @@ function create_class_from_throttle_function(func) {
         var parent_class = config_obj.super_class;
         var F = function() { };
         F.prototype = parent_class.prototype;
-        init._super = F.prototype;
+        init._super = parent_class.prototype;
         init.prototype = new F;
     }
     for (var member_name in config_obj) {

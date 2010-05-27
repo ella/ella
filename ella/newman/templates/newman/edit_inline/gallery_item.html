@@ -68,17 +68,4 @@
 
 </div>
 <script type="text/javascript">request_media('{{ NEWMAN_MEDIA_URL }}jquery/jquery-ui.js');</script>
-<script type="text/javascript">request_media('{{ NEWMAN_MEDIA_URL }}js/inlines.js');</script>
-
-<script type="text/javascript">
-    function call_newman_inline_disable_gallery_target_id() {
-        // call had to be encapsulated due to NewmanInline object is not available 
-        // when binding to 'media_loaded' event
-        NewmanInline.disable_gallery_target_id();
-    }
-    $(document).one(
-        'media_loaded', 
-        call_newman_inline_disable_gallery_target_id
-    );
-</script>
 {% endspaceless %}

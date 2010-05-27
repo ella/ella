@@ -44,6 +44,22 @@ if (typeof console != 'object') {
     console.log = function(){ return; };
 }
 
+/** Useful when method of an object should be used as jQuery event handler.
+ *  Example:
+ *  $(document).bind('hashchange', this_decorator(this, this.method) );
+ * 
+ *  Is much better than:
+ *  var me = this;
+ *  $(document).bind('hashchange', function () { me.method(); } );
+ */
+function this_decorator(context, fce) {
+    var me = this;
+    function wrap() {
+        return fce.apply(context, arguments);
+    }
+    return wrap;
+}
+
 // Containers for things we need to export
 AjaxFormLib = {};
 NewmanLib = {};

@@ -14,66 +14,73 @@
  */
 var NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER = 1000;
 
+var log_inline = new LoggingLib('INLINE:', true);
+
 // encapsulate functionality into NewmanInline object
-var NewmanInline = function() {
-    var me = {};
-
+var __NewmanInline = function() {
     // Newman form handler (handles form customised functionality, inline customisations, etc.)
-    var registered_handler_objects = [];
-    var active_handlers = [];
+    this.init = function() {
+        this.registered_handler_objects = [];
+    };
 
-    function clean_handler_registry() {
+    this.clean_handler_registry = function () {
         var i;
-        var len = registered_handler_objects.length;
+        var len = this.registered_handler_objects.length;
         for (i = 0; i < len; i++) {
-            registered_handler_objects.pop();
+            this.registered_handler_objects.pop();
         }
+    };
 
-        len = active_handlers.length;
-        for (i = 0; i < len; i++) {
-            active_handlers.pop();
-        }
-    }
-    me.clean_handler_registry = clean_handler_registry;
+    this.get_handler_registry = function () {
+        return this.registered_handler_objects;
+    };
 
-    function get_handler_registry() {
-        return registered_handler_objects;
-    }
-    me.get_handler_registry = get_handler_registry;
+    this.register_form_handler = function (handler_object) {
+        this.registered_handler_objects.push(handler_object);
+    };
 
-    function register_form_handler(handler_object) {
-        registered_handler_objects.push(handler_object);
-    }
-    me.register_form_handler = register_form_handler;
-
-    function run_form_handlers() {
+    this.run_form_handlers = function () {
         var i;
         var handler;
-        for (i = 0; i < registered_handler_objects.length; i++) {
-            handler = registered_handler_objects[i];
+        var len = this.registered_handler_objects.length;
+        log_inline.log('Choosing form handlers...');
+        for (i = 0; i < len; i++) {
+            handler = this.registered_handler_objects[i];
             if (!handler.is_suitable()) continue;
 
-            active_handlers.push(handler);
-            handler.initialize();
+            log_inline.log('Handler:', handler);
+            try {
+                handler.handle_form();
+            } catch (e) {
+                log_inline.log('Error occured during handle_form() call.', e.toString());
+            }
             var form = $('.change-form');
             form.bind( 'preset_load_initiated.' + handler.name, handler.preset_load_initiated );
             form.bind( 'preset_load_completed.' + handler.name, handler.preset_load_completed );
         }
-    }
-    me.run_form_handlers = run_form_handlers;
+        log_inline.log('Form handlers done.');
+        return true;
+    };
 
-    return me;
+    return this;
+};
+var NewmanInline = function () {
+    var cls = to_class(__NewmanInline);
+    return new cls();
 }();
 
 // TODO jednotne rozhrani pro JS osetrovani formularu, customizace plneni formu z presetu atp., osetreni specialit v inlines..
 // FormHandler class (used in terms of interface or abstract class)
 var __FormHandler = function () {
-    // initializes form, register custom event handlers, etc.
+    // constructor
     this.init = function (name) {
         if (!name) {
             this.name = 'unset'; // should be set to the name useful for identifying concrete FormHandler object.
         }
     };
+
+    // initializes form, register custom event handlers, etc.
+    this.handle_form = function () { };
 
     // detects whether form handler should be used or not.
     this.is_suitable = function () {
@@ -109,7 +116,7 @@ var FormHandler = to_class(__FormHandler);
             .replace(/-#-/g, '--')
             .replace(/__NO__/g, no)
         ).parent().trigger('content_added');
-        carp('add_inline: content_added triggered');
+        log_inline.log('add_inline: content_added triggered');
     }
     $('.remove-inline-button').live('click', function(evt) {
         if (evt.button != 0) return;
@@ -126,7 +133,7 @@ var FormHandler = to_class(__FormHandler);
         function remove_element_value() {
             if ( regex.test(this.name) ) {
                 $(this).val(nval);
-                //carp('Blanking value [' , nval , '] for input with name: ' , this.name);
+                //log_inline.log('Blanking value [' , nval , '] for input with name: ' , this.name);
             }
         }
 
@@ -161,7 +168,7 @@ var FormHandler = to_class(__FormHandler);
         var desired_no = 0;
         var $template = $form.find('.listing-row-template:first');
         if ($template.length == 0) {
-            carp('add_listings_for_preset: template not found');
+            log_inline.log('add_listings_for_preset: template not found');
             return;
         }
         for (var i = 0; i < preset.data.length; i++) {
@@ -224,182 +231,49 @@ var FormHandler = to_class(__FormHandler);
         );
     }
     $('.change-form').bind('preset_load_completed', remove_ellacomments_ids);
-    carp('remove_ellacomments_ids bind');
+    log_inline.log('remove_ellacomments_ids bind');
 
     
 })(jQuery);
 
-
 // Gallery inlines
-//var GalleryFormHandler = Object.beget(FormHandler);
 var __GalleryFormHandler = function () {
     this.super_class = FormHandler;
 
     this.init = function() {
         FormHandler.call(this, 'gallery');
+        this.$doc = null;
+        this.document = null;
+        this.gallery_ordering_modified = false;
     };
 
-    this.is_suitable = function () {
-        var sortables = $(document).find('.gallery-items-sortable').not('ui-sortable');
-        if (sortables.length == 0) {
-            return false;
-        }
-        return true;
+    this.handle_form = function () {
+        this.$document = $(document);
+        this.document = document;
+        //this.$doc.unbind('content_added', this.document_content_added_handler);
+        //this.$doc.bind('content_added', {instance: this}, this.document_content_added_handler);
+        this.document_content_added_handler();
+        $('#gallery_form').data('validation', this_decorator(this, this.check_gallery_changeform) );
+        $('.add-gallery-item-button').live('click', this_decorator(this, this.add_gallery_item) );
+        this.disable_gallery_target_id();
     };
 
-    // called when preset is being loaded into the form
-    this.preset_load_initiated = function (evt, preset) {
-        carp('Preset load initiated ' + preset);
+    this.document_content_added_handler = function(evt) {
+        $('#gallery_form').removeData('validation');
+        $('#gallery_form').data('validation', this_decorator(this, this.check_gallery_changeform) );
+        this.do_gallery( this.document );
     };
 
-    // called when preset loading completed
-    this.preset_load_completed = function (evt) {
-        carp('Preset load completed ' + evt);
-    };
-
-    return this;
-};
-var GalleryFormHandler = to_class(__GalleryFormHandler);
-
-var __TestFormHandler = function() {
-    this.super_class = FormHandler;
-
-    this.init = function() {
-        FormHandler.call(this, 'testhandler');
-    };
-
-    function is_suitable() {
-        var found = $(document).find('.js-poll-question-container');
-        return found.length != 0;
-    }
-    this.is_suitable = is_suitable;
-
-    function preset_load_initiated(evt, preset) {
-        //alert('TEST!');
-    }
-    this.preset_load_initiated = preset_load_initiated;
-
-    return this;
-};
-var TestFormHandler = to_class(__TestFormHandler);
-
-(function($) {
-    //// gallery items
-    function max_order() {
+    this.max_order = function () {
         return Math.max.apply(this, $.map( $.makeArray( $('.gallery-items-sortable input.item-order') ), function(e) {
             var n = new Number( $(e).val() );
             if (n > 0) return n;
             else return 0;
         }));
-    }
-
-    function delete_unsaved_gallery_item(evt) {
-        var $item = $( evt.target ).closest('.sortable-item');
-        if ($item.length > 0) {
-            $item.remove();
-            gallery_inlines_recount_ids();
-        }
-    }
-
-    function gallery_recount_ids_and_names_callback(element, counter) {
-        var ITEM_SET = 'galleryitem_set-';
-        var no_re = /galleryitem_set-\d+-/;
-        var $element = $(element);
-        if (no_re.test( element.name )) {
-            var newname = element.name.replace(no_re, str_concat(ITEM_SET, counter,'-') );
-            $element.attr('name', newname);
-        }
-        if (no_re.test( element.id )) {
-            var newid = element.id.replace(no_re, str_concat(ITEM_SET, counter,'-') );
-            $element.attr('id', newid);
-            if (/\-DELETE/.test(newid)) {
-                $element.unbind('click', delete_unsaved_gallery_item);
-                $element.bind('click', delete_unsaved_gallery_item);
-            }
-        }
-        if (no_re.test( $element.attr('for') )) {
-            var newid = $element.attr('for').replace(no_re, str_concat(ITEM_SET, counter,'-') );
-            $element.attr('for', newid);
-        }
-    }
-
-    function gallery_inlines_recount_ids() {
-        var $items = $('.gallery-items-sortable .inline-related');
-        var no_items = $('.gallery-items-sortable input.target_id').length;
-        var counter = 0;
-        $items.each(
-            function() {
-                $(this).find('*').each( 
-                    function() {
-                        gallery_recount_ids_and_names_callback(this, counter);
-                    }
-                )
-                counter ++;
-            }
-        );
-    }
-    
-    function add_gallery_item(evt) {
-        if (evt && evt.button != 0) return;
-        var $last_item = $('.gallery-items-sortable .inline-related:last');
-        var $new_item = $last_item.clone(true);
-        var no_items = $('.gallery-items-sortable input.target_id').length;
-        $last_item.removeClass('last-related');
-        
-        var no_re = /galleryitem_set-\d+-/;
-        $new_item.find('*').each( function() {
-            var ITEM_SET = 'galleryitem_set-';
-            var $this = $(this);
-            if (no_re.test( this.name )) {
-                var newname = this.name.replace(no_re, str_concat(ITEM_SET,no_items,'-') );
-                $this.attr('name', newname);
-            }
-            if (no_re.test( this.id )) {
-                var newid = this.id.replace(no_re, str_concat(ITEM_SET,no_items,'-') );
-                $this.attr('id', newid);
-                if (/\-DELETE/.test(newid)) {
-                    $this.unbind('click', delete_unsaved_gallery_item);
-                    $this.bind('click', delete_unsaved_gallery_item);
-                }
-            }
-            if (no_re.test( $this.attr('for') )) {
-                var newid = $this.attr('for').replace(no_re, str_concat(ITEM_SET,no_items,'-') );
-                $this.attr('for', newid);
-            }
-           
-            // init values
-            if ($this.is('.target_id' )) $(this).val('');
-            if ($this.is('img.thumb'  )) $(this).attr({src:'', alt:''});
-            if ($this.is('.item-order')) {
-                // count order
-                var degree = get_gallery_ordering_degree( $this );
-                var ord = max_order() + (1 * degree);
-                $this.val(ord);
-            }
-        });
-        $new_item.find('h4').remove();
-        $new_item.insertAfter( $last_item );
-        var $no_items = $('#id_galleryitem_set-TOTAL_FORMS');
-        $no_items.val( no_items+1 );
-    }
-    $('.add-gallery-item-button').live('click', add_gallery_item);
-
-    // make target_id fields not editable
-    function disable_gallery_target_id() {
-        function disable_field() {
-            var $target_field = $(this).find('input.target_id');
-            //$target_field.attr('disabled', true); // doesn't worked out
-            $target_field.hide();
-        }
-
-        var $filter = $('.gallery-items-sortable .inline-related').each(
-            disable_field
-        );
-    }
-    NewmanInline.disable_gallery_target_id = disable_gallery_target_id;
+    };
 
     // check for unique photo ID
-    function check_gallery_changeform( $form ) {
+    this.check_gallery_changeform = function ( $form ) {
         function unhighlight_duplicates(evt) {
             evt.data.$elems.unbind('click', unhighlight_duplicates);
             evt.data.$elems.removeClass(ITEM_ERROR_CLASS);
@@ -452,28 +326,189 @@ var TestFormHandler = to_class(__TestFormHandler);
             );
         }
 
-        disable_gallery_target_id();
+        this.disable_gallery_target_id();
         
         return rv;
-    }
-    $('#gallery_form').data('validation', check_gallery_changeform);
-    NewmanInline.check_gallery_changeform = check_gallery_changeform;
-    NewmanInline.gallery_ordering_modified = false;
+    };
 
-    function gallery_ordering_recount() {
+    // make target_id fields not editable
+    this.disable_gallery_target_id = function () {
+        function disable_field() {
+            var $target_field = $(this).find('input.target_id');
+            //$target_field.attr('disabled', true); // doesn't worked out
+            $target_field.hide();
+        }
+
+        var $filter = $('.gallery-items-sortable .inline-related').each(
+            disable_field
+        );
+    };
+    
+    // update the preview thumbs and headings
+    this.update_gallery_item_thumbnail = function () {
+        // Note context this inside this scope would be set by jQuery.
+        var $input = $(this);
+        var id = $input.val();
+        
+        var $img     = $input.siblings('img:first');
+        var $heading = $input.siblings('h4:first');
+        if ($heading.length == 0) {
+            $heading = $('<h4><span></span> <span></span></h4>').insertAfter($img);
+        }
+        $img.attr({
+            src: '',
+            alt: ''
+        });
+        $heading.find('span').empty();
+       
+        // remove items with deleted id
+        if (!id) {
+            $heading.remove();
+            return;
+        }
+        
+        $.ajax({
+            url: str_concat(BASE_PATH , '/photos/photo/' , id , '/thumb/'),
+            success: function(response_text) {
+                var res;
+                try { res = JSON.parse(response_text); }
+                catch(e) {
+                    log_inline.log('thumb update error: successful response container unexpected text: ' , response_text);
+                }
+                
+                // thumbnail
+                var thumb_url = res.data.thumb_url;
+                var title     = res.data.title;
+                $img.attr({
+                    src: thumb_url,
+                    alt: title
+                });
+                
+                // heading
+                var order = $( '#' + $input.attr('id').replace(/-target_id$/, '-order') ).val();
+                //$heading.find('span:first').text( order ); // don't show ordering value
+                $heading.find('span:eq(1)').text( title );
+
+                // enable delete fake button
+                var $del = $input.siblings('.delete-item:first');
+                if ($del.hasClass('noscreen')) {
+                    $del.removeClass('noscreen');
+                }
+                gallery_inlines_recount_ids();
+            },
+        });
+    };
+
+    this.delete_unsaved_gallery_item = function (evt) {
+        var $item = $( evt.target ).closest('.sortable-item');
+        if ($item.length > 0) {
+            $item.remove();
+            this.gallery_inlines_recount_ids();
+        }
+    };
+
+    this.gallery_recount_ids_and_names_callback = function (element, counter) {
+        var ITEM_SET = 'galleryitem_set-';
+        var no_re = /galleryitem_set-\d+-/;
+        var $element = $(element);
+        if (no_re.test( element.name )) {
+            var newname = element.name.replace(no_re, str_concat(ITEM_SET, counter,'-') );
+            $element.attr('name', newname);
+        }
+        if (no_re.test( element.id )) {
+            var newid = element.id.replace(no_re, str_concat(ITEM_SET, counter,'-') );
+            $element.attr('id', newid);
+            if (/\-DELETE/.test(newid)) {
+                $element.unbind('click');
+                $element.bind('click',  this_decorator(this, this.delete_unsaved_gallery_item) );
+            }
+        }
+        if (no_re.test( $element.attr('for') )) {
+            var newid = $element.attr('for').replace(no_re, str_concat(ITEM_SET, counter,'-') );
+            $element.attr('for', newid);
+        }
+    };
+
+    this.gallery_inlines_recount_ids = function () {
+        var $items = $('.gallery-items-sortable .inline-related');
+        var no_items = $('.gallery-items-sortable input.target_id').length;
+        var counter = 0;
+        var me = this;
+        $items.each(
+            function() {
+                $(this).find('*').each( 
+                    function() {
+                        me.gallery_recount_ids_and_names_callback(this, counter);
+                    }
+                )
+                counter ++;
+            }
+        );
+    };
+    
+    this.add_gallery_item = function (evt) {
+        if (evt && evt.button != 0) return;
+        var me = this;
+        if (evt && evt.data && evt.data.instance) {
+            var me = evt.data.instance;
+        }
+        var $last_item = $('.gallery-items-sortable .inline-related:last');
+        var $new_item = $last_item.clone(true);
+        var no_items = $('.gallery-items-sortable input.target_id').length;
+        $last_item.removeClass('last-related');
+        
+        var no_re = /galleryitem_set-\d+-/;
+        $new_item.find('*').each( function() {
+            var ITEM_SET = 'galleryitem_set-';
+            var $this = $(this);
+            if (no_re.test( this.name )) {
+                var newname = this.name.replace(no_re, str_concat(ITEM_SET,no_items,'-') );
+                $this.attr('name', newname);
+            }
+            if (no_re.test( this.id )) {
+                var newid = this.id.replace(no_re, str_concat(ITEM_SET,no_items,'-') );
+                $this.attr('id', newid);
+                if (/\-DELETE/.test(newid)) {
+                    $this.unbind('click');
+                    $this.bind('click', this_decorator(me, me.delete_unsaved_gallery_item));
+                }
+            }
+            if (no_re.test( $this.attr('for') )) {
+                var newid = $this.attr('for').replace(no_re, str_concat(ITEM_SET,no_items,'-') );
+                $this.attr('for', newid);
+            }
+           
+            // init values
+            if ($this.is('.target_id' )) $(this).val('');
+            if ($this.is('img.thumb'  )) $(this).attr({src:'', alt:''});
+            if ($this.is('.item-order')) {
+                // count order
+                var degree = me.get_gallery_ordering_degree( $this );
+                var ord = me.max_order() + (1 * degree);
+                $this.val(ord);
+            }
+        });
+        $new_item.find('h4').remove();
+        $new_item.insertAfter( $last_item );
+        var $no_items = $('#id_galleryitem_set-TOTAL_FORMS');
+        $no_items.val( no_items+1 );
+    };
+
+    this.gallery_ordering_recount = function () {
+        var me = this;
         NewmanLib.register_post_submit_callback_once(function(submit_succeeded) {
             if (!submit_succeeded) {
-                carp('NewmanInline.gallery_ordering_modified not changed');
+                log_inline.log('NewmanInline.gallery_ordering_modified not changed');
                 return;
             }
-            NewmanInline.gallery_ordering_modified = false;
-            carp('NewmanInline.gallery_ordering_modified = false;');
+            me.gallery_ordering_modified = false;
+            log_inline.log('NewmanInline.gallery_ordering_modified = false;');
         });
 
         // ordering-number magic to avoid problems with saving GalleryItems with changed ordering (unique key collision)
         var $form = $('#gallery_form');
-        if (NewmanInline.gallery_ordering_modified) {
-            carp('GalleryItems won\'t be recounted.(reason: already recounted)');
+        if (this.gallery_ordering_modified) {
+            log_inline.log('GalleryItems won\'t be recounted.(reason: already recounted)');
             return;
         }
         $form.find('.gallery-item .item-order').each( function() {
@@ -486,29 +521,30 @@ var TestFormHandler = to_class(__TestFormHandler);
                 multiplier = 1.0 / NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER;
             }
             var res = Math.floor(Number(value) * multiplier);// force res to be a whole number
-            carp('Recounting ' , value , ' to ' , res , ' for element ' , this);
+            log_inline.log('Recounting ' , value , ' to ' , res , ' for element ' , this);
             this.value = res.toString();
-            NewmanInline.gallery_ordering_modified = true;
-            carp('GalleryItems recounted');
+            me.gallery_ordering_modified = true;
+            log_inline.log('GalleryItems recounted');
         });
-    }
+    };
 
-    function get_gallery_ordering_degree($element) {
+    this.get_gallery_ordering_degree = function ($element) {
         var value = parseInt( $element.val() );
         var degree = 1;
         if (value / NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER >= 1.0) {
             degree = NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER;
         }
         return degree;
-    }
+    };
 
-    function gallery_recount_ordering($target) {
+    this.gallery_recount_ordering = function ($target) {
+        var me = this;
         var degree = 1;
         var ord;
         $target.find('input.item-order').each( function(i) {
             // get actual order degree
             if (i == 0) {
-                degree = get_gallery_ordering_degree( $(this) );
+                degree = me.get_gallery_ordering_degree( $(this) );
             }
             ord = (i + 1) * degree;
             $(this).val( ord ).change();
@@ -520,14 +556,14 @@ var TestFormHandler = to_class(__TestFormHandler);
         });
         $target.children().removeClass('last-related');
         $target.children(':last').addClass('last-related');
-    }
+    };
 
-    function gallery_sortable_update_callback(evt, ui) {
+    this.gallery_sortable_update_callback = function (evt, ui) {
         var $target = $( evt.target );
-        gallery_recount_ordering($target);
-    }
+        this.gallery_recount_ordering($target);
+    };
 
-    function remove_gallery_item_ids() {
+    this.remove_gallery_item_ids = function () {
         // remove ids (input with name="galleryitem_set-0-id")
         // remove gallery (input with name="galleryitem_set-0-gallery")
         NewmanInline.remove_inlineadmin_element_value(
@@ -538,25 +574,30 @@ var TestFormHandler = to_class(__TestFormHandler);
             '.gallery-items-sortable input[name^=galleryitem_set-]',
             'gallery$'
         );
-    }
-    
-    function init_gallery(root) {
-        if ( ! root ) root = document;
+    };
+
+    this.do_gallery = function (root) {
+        var me = this;
+        if ( ! root ) root = me.document;
         var $sortables = $(root).find('.gallery-items-sortable').not('ui-sortable');
         if ($sortables.length == 0) return;
-        $sortables.children().filter( 
+        $sortables.children().filter(
             function() {
                 var $target_id = $(this).find('input.target_id');
                 return $target_id.length != 0;
             }
         ).addClass('sortable-item');
+
+        function wrap_sortable_update_callback(evt, ui) {
+            me.gallery_sortable_update_callback(evt, ui);
+        }
         $sortables.sortable({
             distance: 20,
             items: '.sortable-item',
-            update: gallery_sortable_update_callback
+            update: wrap_sortable_update_callback
         });
         // recount before save
-        NewmanLib.register_pre_submit_callback(gallery_ordering_recount);
+        NewmanLib.register_pre_submit_callback(me.gallery_ordering_recount);
         
         // make sure only the inputs with a selected photo are sortable
         $(root).find('input.target_id').change( function() {
@@ -569,76 +610,28 @@ var TestFormHandler = to_class(__TestFormHandler);
         var degree = 0;
         $sortables.find('.item-order').each( function() {
             if (degree === 0) {
-                degree = get_gallery_ordering_degree( $(this) );
+                degree = me.get_gallery_ordering_degree( $(this) );
             }
             if ( ! $(this).val() ) $(this).val( 
-                (max_order() + 1) * degree 
+                (me.max_order() + 1) * degree 
             );
         });
-        
-        // update the preview thumbs and headings
-        function update_gallery_item_thumbnail() {
-            var $input = $(this);
-            var id = $input.val();
-            
-            var $img     = $input.siblings('img:first');
-            var $heading = $input.siblings('h4:first');
-            if ($heading.length == 0) {
-                $heading = $('<h4><span></span> <span></span></h4>').insertAfter($img);
-            }
-            $img.attr({
-                src: '',
-                alt: ''
-            });
-            $heading.find('span').empty();
-           
-            // remove items with deleted id
-            if (!id) {
-                $heading.remove();
-                return;
-            }
-            
-            $.ajax({
-                url: str_concat(BASE_PATH , '/photos/photo/' , id , '/thumb/'),
-                success: function(response_text) {
-                    var res;
-                    try { res = JSON.parse(response_text); }
-                    catch(e) {
-                        carp('thumb update error: successful response container unexpected text: ' , response_text);
-                    }
-                    
-                    // thumbnail
-                    var thumb_url = res.data.thumb_url;
-                    var title     = res.data.title;
-                    $img.attr({
-                        src: thumb_url,
-                        alt: title
-                    });
-                    
-                    // heading
-                    var order = $( '#' + $input.attr('id').replace(/-target_id$/, '-order') ).val();
-                    //$heading.find('span:first').text( order ); // don't show ordering value
-                    $heading.find('span:eq(1)').text( title );
-
-                    // enable delete fake button
-                    var $del = $input.siblings('.delete-item:first');
-                    if ($del.hasClass('noscreen')) {
-                        $del.removeClass('noscreen');
-                    }
-                    gallery_inlines_recount_ids();
-                },
-            });
-        }
-        $(root).find('input.target_id').not('.js-updates-thumb').addClass('js-updates-thumb').change( update_gallery_item_thumbnail );
+        $(root).find('input.target_id').not('.js-updates-thumb').addClass('js-updates-thumb').change( me.update_gallery_item_thumbnail );
         
         // add a new empty gallery item
         $(root).find('input.target_id').not('.js-adds-empty').addClass('js-adds-empty').change( function() {
-            if ($('.gallery-item input.target_id').filter( function() { return ! $(this).val(); } ).length == 0) {
-                add_gallery_item();
+            if (
+                $('.gallery-item input.target_id').filter( 
+                function() {
+                    return ! $(this).val(); 
+                } 
+                ).length == 0
+            ) {
+                me.add_gallery_item();
             }
         });
         
-        // create desired input rows for loaded preset
+        // create desired input rows for loaded preset FIXME -- move this portion of code to preset_load_completed method.
         $('#gallery_form').bind('preset_load_initiated.gallery', function(evt, preset) {
             var desired_no;
             for (var i = 0; i < preset.data.length; i++) {
@@ -661,31 +654,74 @@ var TestFormHandler = to_class(__TestFormHandler);
             $rows.find('input.target_id,input.item-order').val('');
             $rows.find('img.thumb').attr({src:'', alt:''});
             $rows.find('h4').remove();
-        })
+        });
         // and get their thumbnails
-        .bind('preset_load_completed', function(evt) {
+        $('#gallery_form').bind('preset_load_completed', function(evt) {
             $('.gallery-items-sortable input.target_id').each( update_gallery_item_thumbnail );
             init_gallery( evt.target );
             remove_gallery_item_ids();
             gallery_recount_ordering( $('.gallery-items-sortable') );
         });
+    };
 
+    this.is_suitable = function () {
+        var sortables = $(document).find('.gallery-items-sortable').not('ui-sortable');
+        if (sortables.length == 0) {
+            return false;
+        }
+        return true;
+    };
+
+    // called when preset is being loaded into the form
+    this.preset_load_initiated = function (evt, preset) {
+        log_inline.log('Preset load initiated ' + preset);
+    };
+
+    // called when preset loading completed
+    this.preset_load_completed = function (evt) {
+        log_inline.log('Preset load completed ' + evt);
+    };
+
+    return this;
+};
+var GalleryFormHandler = to_class(__GalleryFormHandler);
+
+var __TestFormHandler = function() {
+    this.super_class = FormHandler;
+
+    this.init = function() {
+        FormHandler.call(this, 'testhandler');
+    };
+
+    this.handle_form = function () {
+    };
+
+    function is_suitable() {
+        var found = $(document).find('.js-poll-question-container');
+        return found.length != 0;
     }
-    init_gallery();
-    carp('CALLED init_gallery');
-    
-    $(document).bind('content_added', function(evt) {
-        $('#gallery_form').removeData('validation').data('validation', check_gallery_changeform);
-        init_gallery( evt.target );
-    });
-})(jQuery);
+    this.is_suitable = is_suitable;
 
-//ommit registration when running in nosetests environment
-if (typeof nosejs !== "undefined") {
-} else {
+    function preset_load_initiated(evt, preset) {
+        //alert('TEST!');
+    }
+    this.preset_load_initiated = preset_load_initiated;
+
+    return this;
+};
+var TestFormHandler = to_class(__TestFormHandler);
+
+(function($) {
+    // Inline handlers registration
     NewmanInline.register_form_handler( new GalleryFormHandler() );
     NewmanInline.register_form_handler( new TestFormHandler() );
 
+    function register_run_form_handlers() {
+        function wrap() {
+            NewmanInline.run_form_handlers();
+        }
+        $(document).bind('changeform_shown', wrap);
+    }
     // Run relevant form handlers.
-    NewmanInline.run_form_handlers();
-}
+    register_run_form_handlers();
+})(jQuery);

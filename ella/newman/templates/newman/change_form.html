@@ -87,6 +87,10 @@
     {% for m in media %}
         request_media('{{ m }}');
     {% endfor %}
+    function trigger_changelist_shown() {
+        $(document).trigger('changeform_shown'); // bound in inlines.js
+    }
+    $(document).one('media_loaded', trigger_changelist_shown);
     </script>
     {% endcache %}
 {% endblock %}

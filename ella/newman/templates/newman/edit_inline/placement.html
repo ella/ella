@@ -7,7 +7,6 @@
 {% endblock %}
 
 {% block fieldset %}
-    <script type="text/javascript">request_media('{{ NEWMAN_MEDIA_URL }}js/inlines.js');</script>
     {% for fieldset in inline_admin_form %}
       {% for line in fieldset %}
         {% for field in line %}
