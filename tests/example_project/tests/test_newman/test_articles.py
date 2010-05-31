@@ -44,6 +44,7 @@ class TestArticle(NewmanTestCase):
         self.fill_fields(data)
         # verify all fields
         expected_data = {
+            'title' : u'From preset 马 žš experiment',
             'category' : [u"Africa/west-africa"],
             'authors' : [u"Barack Obama", u"King Albert II"],
             'upper_title' : u'vyšší',
@@ -60,8 +61,9 @@ class TestArticle(NewmanTestCase):
         self.assert_equals(expected_data['title'], s.get_text(self.get_listing_object_href()))
         s.click(self.get_listing_object_href())
         expected_data.update({
-            'tagging-taggeditem-content_type-object_id-0-id': '2', #now should be set
-            'tagging-taggeditem-content_type-object_id-1-id': '2', #now should be set
+            'tagging-taggeditem-content_type-object_id-0-id': '3', #now should be set
+            'tagging-taggeditem-content_type-object_id-1-id': '4', #now should be set
+            'tagging-taggeditem-content_type-object_id-2-id': '',
         })
         self.verify_form(expected_data)
 
@@ -70,6 +72,7 @@ class TestArticle(NewmanTestCase):
 
         # go to article adding
         s.click(self.elements['navigation']['articles'])
+        s.wait_for_element_present(self.elements['controls']['add'])
         s.click(self.elements['controls']['add'])
 
         # wait for the page to fully load
@@ -90,7 +93,10 @@ class TestArticle(NewmanTestCase):
         suggest_data = {
             'category': ('we',),
             'authors':  ('Bar', 'Kin',),
-            'placement_set-0-category' : ('we',)
+            'placement_set-0-category' : ('we',),
+            # fill tags
+            'tagging-taggeditem-content_type-object_id-0-tag' : ('Musi',), 
+            'tagging-taggeditem-content_type-object_id-1-tag' : ('Moov',),
         }
         self.fill_suggest_fields(suggest_data)
 

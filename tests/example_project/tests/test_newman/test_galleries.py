@@ -75,8 +75,9 @@ class TestGallery(NewmanTestCase):
         self.assert_equals(expected_data['title'], s.get_text(self.get_listing_object_href()))
         s.click(self.get_listing_object_href())
         expected_data.update({
-            'tagging-taggeditem-content_type-object_id-0-id': '2', #now should be set
-            'tagging-taggeditem-content_type-object_id-1-id': '2', #now should be set
+            'tagging-taggeditem-content_type-object_id-0-id': '3', #now should be set
+            'tagging-taggeditem-content_type-object_id-1-id': '4', #now should be set
+            'tagging-taggeditem-content_type-object_id-2-id': '', #now should be set
         })
         self.verify_form(expected_data)
 
