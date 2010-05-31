@@ -55,8 +55,14 @@ var __NewmanInline = function() {
                 log_inline.log('Error occured during handle_form() call.', e.toString());
             }
             var form = $('.change-form');
-            form.bind( 'preset_load_initiated.' + handler.name, handler.preset_load_initiated );
-            form.bind( 'preset_load_completed.' + handler.name, handler.preset_load_completed );
+            form.bind( 
+                'preset_load_initiated.' + handler.name, 
+                this_decorator(handler, handler.preset_load_initiated) 
+            );
+            form.bind( 
+                'preset_load_completed.' + handler.name, 
+                this_decorator(handler, handler.preset_load_completed)
+            );
         }
         log_inline.log('Form handlers done.');
         return true;
@@ -76,6 +82,8 @@ var __FormHandler = function () {
     this.init = function (name) {
         if (!name) {
             this.name = 'unset'; // should be set to the name useful for identifying concrete FormHandler object.
+        } else {
+            this.name = name;
         }
     };
 
@@ -345,9 +353,10 @@ var __GalleryFormHandler = function () {
     };
     
     // update the preview thumbs and headings
-    this.update_gallery_item_thumbnail = function () {
+    this.update_gallery_item_thumbnail = function ($input) {
         // Note context this inside this scope would be set by jQuery.
-        var $input = $(this);
+        //var $input = $(this);
+        var me = this;
         var id = $input.val();
         
         var $img     = $input.siblings('img:first');
@@ -394,7 +403,7 @@ var __GalleryFormHandler = function () {
                 if ($del.hasClass('noscreen')) {
                     $del.removeClass('noscreen');
                 }
-                gallery_inlines_recount_ids();
+                me.gallery_inlines_recount_ids();
             },
         });
     };
@@ -616,7 +625,12 @@ var __GalleryFormHandler = function () {
                 (me.max_order() + 1) * degree 
             );
         });
-        $(root).find('input.target_id').not('.js-updates-thumb').addClass('js-updates-thumb').change( me.update_gallery_item_thumbnail );
+        function wrap_update_gallery_item_thumbnail() {
+            me.update_gallery_item_thumbnail($(this));
+        }
+        $(root).find('input.target_id').not('.js-updates-thumb').addClass('js-updates-thumb').change( 
+            wrap_update_gallery_item_thumbnail
+        );
         
         // add a new empty gallery item
         $(root).find('input.target_id').not('.js-adds-empty').addClass('js-adds-empty').change( function() {
@@ -631,36 +645,9 @@ var __GalleryFormHandler = function () {
             }
         });
         
-        // create desired input rows for loaded preset FIXME -- move this portion of code to preset_load_completed method.
         $('#gallery_form').bind('preset_load_initiated.gallery', function(evt, preset) {
-            var desired_no;
-            for (var i = 0; i < preset.data.length; i++) {
-                var o = preset.data[i];
-                if (o.name == 'galleryitem_set-TOTAL_FORMS') {
-                    desired_no = new Number( o.value );
-                }
-            }
-            var no_items = $('.gallery-items-sortable input.target_id').length;
-            // add gallery items if necessary
-            for (var i = no_items; i < desired_no; i++) {
-                add_gallery_item();
-            }
-            // remove gallery items if necessary
-            for (var i = no_items; i > desired_no; i--) {
-                $('.gallery-items-sortable .inline-related:last').remove();
-            }
-            // reset the fields
-            var $rows = $('.gallery-items-sortable .inline-related');
-            $rows.find('input.target_id,input.item-order').val('');
-            $rows.find('img.thumb').attr({src:'', alt:''});
-            $rows.find('h4').remove();
         });
-        // and get their thumbnails
         $('#gallery_form').bind('preset_load_completed', function(evt) {
-            $('.gallery-items-sortable input.target_id').each( update_gallery_item_thumbnail );
-            init_gallery( evt.target );
-            remove_gallery_item_ids();
-            gallery_recount_ordering( $('.gallery-items-sortable') );
         });
     };
 
@@ -674,12 +661,47 @@ var __GalleryFormHandler = function () {
 
     // called when preset is being loaded into the form
     this.preset_load_initiated = function (evt, preset) {
-        log_inline.log('Preset load initiated ' + preset);
+        log_inline.log('Preset load initiated for ', this.name);
+        // create desired input rows for loaded preset 
+        var desired_no;
+        for (var i = 0; i < preset.data.length; i++) {
+            var o = preset.data[i];
+            if (o.name == 'galleryitem_set-TOTAL_FORMS') {
+                desired_no = new Number( o.value );
+            }
+        }
+        var no_items = $('.gallery-items-sortable input.target_id').length;
+        // add gallery items if necessary
+        for (var i = no_items; i < desired_no; i++) {
+            this.add_gallery_item();
+        }
+        // remove gallery items if necessary
+        for (var i = no_items; i > desired_no; i--) {
+            $('.gallery-items-sortable .inline-related:last').remove();
+        }
+        // reset the fields
+        var $rows = $('.gallery-items-sortable .inline-related');
+        $rows.find('input.target_id,input.item-order').val('');
+        $rows.find('img.thumb').attr({src:'', alt:''});
+        $rows.find('h4').remove();
+        log_inline.log('Preset load init done for ', this.name);
     };
 
     // called when preset loading completed
     this.preset_load_completed = function (evt) {
-        log_inline.log('Preset load completed ' + evt);
+        // and get their thumbnails
+        var me = this;
+        log_inline.log('THIS:', this);
+        function each_callback() {
+            me.update_gallery_item_thumbnail($(this));
+        }
+        $('.gallery-items-sortable input.target_id').each( 
+           each_callback 
+        );
+        this.do_gallery( evt.target );
+        this.remove_gallery_item_ids();
+        this.gallery_recount_ordering( $('.gallery-items-sortable') );
+        log_inline.log('Preset load completed for ', this.name);
     };
 
     return this;
