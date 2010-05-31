@@ -43,14 +43,15 @@ var __NewmanInline = function() {
         var i;
         var handler;
         var len = this.registered_handler_objects.length;
+        var $doc = $(document);
         log_inline.log('Choosing form handlers...');
         for (i = 0; i < len; i++) {
             handler = this.registered_handler_objects[i];
-            if (!handler.is_suitable()) continue;
+            if (!handler.is_suitable(document, $doc)) continue;
 
             log_inline.log('Handler:', handler);
             try {
-                handler.handle_form();
+                handler.handle_form(document, $doc);
             } catch (e) {
                 log_inline.log('Error occured during handle_form() call.', e.toString());
             }
@@ -88,10 +89,10 @@ var __FormHandler = function () {
     };
 
     // initializes form, register custom event handlers, etc.
-    this.handle_form = function () { };
+    this.handle_form = function (document_dom_element, $document) { };
 
     // detects whether form handler should be used or not.
-    this.is_suitable = function () {
+    this.is_suitable = function (document_dom_element, $document) {
         return false;
     };
 
@@ -250,19 +251,19 @@ var __GalleryFormHandler = function () {
 
     this.init = function() {
         FormHandler.call(this, 'gallery');
-        this.$doc = null;
+        this.$document = null;
         this.document = null;
         this.gallery_ordering_modified = false;
     };
 
-    this.handle_form = function () {
-        this.$document = $(document);
-        this.document = document;
+    this.handle_form = function (document_dom_element, $document) {
+        this.$document = $document;
+        this.document = document_dom_element;
         //this.$doc.unbind('content_added', this.document_content_added_handler);
         //this.$doc.bind('content_added', {instance: this}, this.document_content_added_handler);
         this.document_content_added_handler();
         $('#gallery_form').data('validation', this_decorator(this, this.check_gallery_changeform) );
-        $('.add-gallery-item-button').live('click', this_decorator(this, this.add_gallery_item) );
+        $('.add-gallery-item-button').live('click', this_decorator(this, this.add_inline_item) );
         this.disable_gallery_target_id();
     };
 
@@ -455,7 +456,7 @@ var __GalleryFormHandler = function () {
         );
     };
     
-    this.add_gallery_item = function (evt) {
+    this.add_inline_item = function (evt) {
         if (evt && evt.button != 0) return;
         var me = this;
         if (evt && evt.data && evt.data.instance) {
@@ -507,11 +508,11 @@ var __GalleryFormHandler = function () {
         var me = this;
         NewmanLib.register_post_submit_callback_once(function(submit_succeeded) {
             if (!submit_succeeded) {
-                log_inline.log('NewmanInline.gallery_ordering_modified not changed');
+                //log_inline.log('gallery_ordering_modified not changed');
                 return;
             }
             me.gallery_ordering_modified = false;
-            log_inline.log('NewmanInline.gallery_ordering_modified = false;');
+            //log_inline.log('gallery_ordering_modified = false;');
         });
 
         // ordering-number magic to avoid problems with saving GalleryItems with changed ordering (unique key collision)
@@ -641,7 +642,7 @@ var __GalleryFormHandler = function () {
                 } 
                 ).length == 0
             ) {
-                me.add_gallery_item();
+                me.add_inline_item();
             }
         });
         
@@ -651,8 +652,8 @@ var __GalleryFormHandler = function () {
         });
     };
 
-    this.is_suitable = function () {
-        var sortables = $(document).find('.gallery-items-sortable').not('ui-sortable');
+    this.is_suitable = function (document_dom_element, $document) {
+        var sortables = $document.find('.gallery-items-sortable').not('ui-sortable');
         if (sortables.length == 0) {
             return false;
         }
@@ -673,7 +674,7 @@ var __GalleryFormHandler = function () {
         var no_items = $('.gallery-items-sortable input.target_id').length;
         // add gallery items if necessary
         for (var i = no_items; i < desired_no; i++) {
-            this.add_gallery_item();
+            this.add_inline_item();
         }
         // remove gallery items if necessary
         for (var i = no_items; i > desired_no; i--) {
@@ -708,35 +709,46 @@ var __GalleryFormHandler = function () {
 };
 var GalleryFormHandler = to_class(__GalleryFormHandler);
 
-var __TestFormHandler = function() {
+/**
+ *  handles Tagging inline forms. Esp. preset loading.
+ */
+var __TagFormHandler = function() {
     this.super_class = FormHandler;
 
     this.init = function() {
         FormHandler.call(this, 'testhandler');
     };
 
-    this.handle_form = function () {
+    this.handle_form = function (document_dom_element, $document) {
+        this.$document = $document;
+        this.document = document_dom_element;
     };
 
-    function is_suitable() {
-        var found = $(document).find('.js-poll-question-container');
+    this.is_suitable = function (document_dom_element, $document) {
+        // TagFormHandler handles input elements 
+        // named 'tagging-taggeditem-content_type-object_id-0-id' .
+        var found = $document.find('input[name=tagging-taggeditem-content_type-object_id-0-id]');
         return found.length != 0;
-    }
-    this.is_suitable = is_suitable;
+    };
 
-    function preset_load_initiated(evt, preset) {
-        //alert('TEST!');
-    }
-    this.preset_load_initiated = preset_load_initiated;
+    this.preset_load_initiated = function (evt, preset) {
+    };
+
+    this.preset_load_completed = function (evt) {
+        NewmanInline.remove_inlineadmin_element_value('input[name^=tagging-taggeditem-content_type-object_id-]', '-id');
+    };
+
+    this.each_tag_callback = function (index, elem) {
+    };
 
     return this;
 };
-var TestFormHandler = to_class(__TestFormHandler);
+var TagFormHandler = to_class(__TagFormHandler);
 
 (function($) {
     // Inline handlers registration
     NewmanInline.register_form_handler( new GalleryFormHandler() );
-    NewmanInline.register_form_handler( new TestFormHandler() );
+    NewmanInline.register_form_handler( new TagFormHandler() );
 
     function register_run_form_handlers() {
         function wrap() {
