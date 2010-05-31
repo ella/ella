@@ -439,7 +439,7 @@ Drafts = new Object;
         try {
             $form.trigger('preset_load_completed', [response_data, args]);
         } catch (e) {
-            carp('ERROR occured while triggering preset_load_completed. id=' , id , ' Exception: ' , e.toString());
+            carp('ERROR occured while triggering preset_load_completed. '  , ' Exception: ' , e.toString());
         }
     }
     NewmanLib.restore_form = restore_form;
