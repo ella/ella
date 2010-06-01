@@ -1336,7 +1336,7 @@ function changelist_shown_handler(evt) {
         }
     );
 }
-$(document).bind('changelist_shown', changelist_shown_handler); //FIXME buggy in Positions changelist.
+//$(document).bind('changelist_shown', changelist_shown_handler); //FIXME buggy in Positions changelist.
 
 function changelist_batch_success(response_text) {
     var $dialog = $('<div id="confirmation-wrapper">');
