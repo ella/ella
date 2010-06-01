@@ -66,6 +66,8 @@ class NewmanTestCase(SeleniumTestCase):
                 'article_add' : "//a[@class='app article']/../a[position()=2]",
                 'galleries' : "//a[@class='app gallery']",
                 'gallery_add' : "//a[@class='app gallery']/../a[position()=2]",
+                'surveys' : "//a[@class='app survey']",
+                'survey_add' : "//a[@class='app survey']/../a[position()=2]",
             },
             'controls' : {
                 'suggester' : "//div[@class='suggest-bubble']",
@@ -95,7 +97,7 @@ class NewmanTestCase(SeleniumTestCase):
                 'listing' : {
                     'first_object' : "//div[@id='changelist']/form/table/tbody/tr[position()='1']",
                     'object' : "//div[@id='changelist']/form/table/tbody/tr[position()='%(position)s']",
-                    'object_href' : "//div[@id='changelist']/form/table/tbody/tr[position()='%(position)s']/th/a[position()=2]",
+                    'object_href' : "//div[@id='changelist']/form/table/tbody/tr[position()='%(position)s']/th/a[position()=%(a_position)d]",
                     'datepicker' : "//td[@class='%(field)s']/span[@class='js-dtpicker-trigger']",
                     'calendar_day' : "//table[@class='ui-datepicker-calendar']/tbody/tr/td/a[text()='%(day)s']",
                 },
@@ -134,9 +136,10 @@ class NewmanTestCase(SeleniumTestCase):
             'position' : position
         }
 
-    def get_listing_object_href(self, position=1):
+    def get_listing_object_href(self, position=1, a_element_position=2):
         return self.elements['pages']['listing']['object_href'] % {
-            'position' : position
+            'position' : position,
+            'a_position': a_element_position
         }
 
     def fill_fields(self, data):
