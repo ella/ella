@@ -716,7 +716,7 @@ var __TagFormHandler = function() {
     this.super_class = FormHandler;
 
     this.init = function() {
-        FormHandler.call(this, 'testhandler');
+        FormHandler.call(this, 'taghandler');
     };
 
     this.handle_form = function (document_dom_element, $document) {
