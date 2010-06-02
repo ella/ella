@@ -325,6 +325,10 @@ class ChoicesFilterSpec(filterspecs.ChoicesFilterSpec, FilterSpecEnhancement):
 filterspecs.FilterSpec.register_insert(lambda f: bool(f.choices), ChoicesFilterSpec)
 
 class DateFieldFilterSpec(filterspecs.DateFieldFilterSpec, FilterSpecEnhancement):
+    def __init__(self, *args, **kwargs):
+        super(DateFieldFilterSpec, self).__init__(*args, **kwargs)
+        self.active_choice = None
+
     def get_lookup_kwarg(self):
         out = []
         for title, param_dict in self.links:
