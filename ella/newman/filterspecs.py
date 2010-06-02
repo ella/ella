@@ -325,8 +325,53 @@ class ChoicesFilterSpec(filterspecs.ChoicesFilterSpec, FilterSpecEnhancement):
 filterspecs.FilterSpec.register_insert(lambda f: bool(f.choices), ChoicesFilterSpec)
 
 class DateFieldFilterSpec(filterspecs.DateFieldFilterSpec, FilterSpecEnhancement):
+    def get_lookup_kwarg(self):
+        out = []
+        for title, param_dict in self.links:
+            for key in param_dict:
+                out.append(key)
+        return out
+
     def is_active(self, request_params):
-        return False
+        if self.__get_active_choice() is None:
+            return False
+        return True
+
+    def get_active(self, request_params):
+        if self.active_filter_lookup is not None: # cached result
+            return self.active_filter_lookup
+        self.active_filter_lookup = []
+        lookup_multi = 0
+        lookup = self.get_lookup_kwarg()
+        if type(lookup) == list:
+            lookup_multi = len(lookup)
+            found = 0
+        for p in request_params:
+            if not lookup_multi and p == lookup:
+                self.active_filter_lookup = [lookup]
+                break
+            elif lookup_multi:
+                if p in lookup:
+                    found += 1
+                    self.active_filter_lookup.append(p)
+        return self.active_filter_lookup
+
+    def __get_active_choice(self):
+        if self.active_choice is not None:
+            return self.active_choice
+        for title, param_dict in self.links:
+            if param_dict and self.date_params == param_dict:
+                self.active_choice = (title, param_dict)
+                return self.active_choice
+
+    def generate_choice(self, **lookup_kwargs):
+        active_title, active_param_dict = self.active_choice
+        if lookup_kwargs == active_param_dict:
+            return active_title
+        for title, param_dict in self.links:
+            if lookup_kwargs == param_dict:
+                return self.active_choice
+        return None
 
 filterspecs.FilterSpec.register_insert(lambda f: isinstance(f, models.DateField), DateFieldFilterSpec)
 
