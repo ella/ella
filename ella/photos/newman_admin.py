@@ -34,6 +34,12 @@ class PhotoSizeFilter(CustomFilterSpec):
             self.links.append(link)
         return True
 
+    def generate_choice(self, **lookup_kwargs):
+        keys = self.get_lookup_kwarg()
+        for key in keys:
+            if key in lookup_kwargs:
+                return u'>%spx' % lookup_kwargs[key]
+
 
 class FormatAdmin(newman.NewmanModelAdmin):
     list_display = ('name', 'max_width', 'max_height', 'stretch', 'resample_quality',)
