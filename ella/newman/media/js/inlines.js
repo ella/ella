@@ -738,9 +738,6 @@ var __TagFormHandler = function() {
         NewmanInline.remove_inlineadmin_element_value('input[name^=tagging-taggeditem-content_type-object_id-]', '-id');
     };
 
-    this.each_tag_callback = function (index, elem) {
-    };
-
     return this;
 };
 var TagFormHandler = to_class(__TagFormHandler);
