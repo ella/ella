@@ -742,10 +742,89 @@ var __TagFormHandler = function() {
 };
 var TagFormHandler = to_class(__TagFormHandler);
 
+/**
+ *  handles ExportMeta inline form.
+ */
+var __ExportMetaFormHandler = function() {
+    this.super_class = FormHandler;
+
+    this.init = function() {
+        FormHandler.call(this, 'exportmeta');
+    };
+
+    this.swap_fields = function(index, element) {
+        $(element).find('div.form-row.export').insertBefore(
+            $(element).find('div.noscreen')
+        );
+    };
+
+    this.move_delete_button = function(index, element) {
+    };
+
+    this.move_position_fields = function(index, noscreen_element) {
+        var $title = $(noscreen_element).find('div.form-row.title');
+        var $exp = $(noscreen_element).siblings('div.form-row.export');
+        $(noscreen_element).find('div.form-row.position_from').insertAfter($exp);
+        $(noscreen_element).find('div.form-row.position').insertAfter($exp);
+        $(noscreen_element).find('div.form-row.position_to').insertBefore($title);
+    };
+
+    this.suggest_changed_handler = function(evt) {
+        // sugg. field has class GenericSuggestField
+        // hidden field has class vForeignKeyRawIdAdminField hidden
+        log_inline.log('Export suggester changed!');
+    };
+
+    this.handle_form = function (document_dom_element, $document) {
+        this.$document = $document;
+        this.document = document_dom_element;
+        // hide several fields
+        var $noscreens = $document.find('fieldset.exportmeta-inline > div.noscreen');
+        $noscreens.hide();
+
+        // move export field to the first position
+        var $metas = $document.find('fieldset.exportmeta-inline');
+        $metas.each( this_decorator(this, this.swap_fields) );
+
+        // move position, position_from and position_to fields before title
+        $noscreens.each( this_decorator(this, this.move_position_fields) );
+
+        // move Delete button (in case of existing ExportMeta inlines)
+        //$metas.each( this_decorator(this, this.move_delete_button) );
+
+        // hide ugly hidden field's label
+        $noscreens.find('div.form-row.position_id label').hide();
+
+        // insert whole inline after Placement inline
+        var $placement = $document.find('a.js-placement-main-category').closest('div.inline-group');
+        this.$exportmeta_inline = $document.find('fieldset.exportmeta-inline:first').closest('div.inline-group');
+        this.$exportmeta_inline.insertAfter($placement);
+
+        // suggester changed event
+        var $field = this.$exportmeta_inline.find('.GenericSuggestField').siblings('.vForeignKeyRawIdAdminField');
+        $field.bind('change', this_decorator(this, this.suggest_changed_handler) );
+    };
+
+    this.is_suitable = function (document_dom_element, $document) {
+        var found = $document.find('fieldset.exportmeta-inline');
+        return found.length > 0;
+    };
+
+    this.preset_load_initiated = function (evt, preset) {
+    };
+
+    this.preset_load_completed = function (evt) {
+    };
+
+    return this;
+};
+var ExportMetaFormHandler = to_class(__ExportMetaFormHandler);
+
 (function($) {
     // Inline handlers registration
     NewmanInline.register_form_handler( new GalleryFormHandler() );
     NewmanInline.register_form_handler( new TagFormHandler() );
+    NewmanInline.register_form_handler( new ExportMetaFormHandler() );
 
     function register_run_form_handlers() {
         function wrap() {

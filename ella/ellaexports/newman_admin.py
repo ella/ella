@@ -9,7 +9,7 @@ from django.http import HttpResponse
 from django.shortcuts import render_to_response
 
 from ella import newman
-from ella.newman import widgets, config
+from ella.newman import widgets, config, fields
 from ella.ellaexports import models, timeline
 
 
@@ -68,12 +68,18 @@ class HiddenIntegerField(IntegerField):
     widget = HiddenInput
 
 class MetaInlineForm(modelforms.ModelForm):
+    _export_stack = dict()
     position_id = HiddenIntegerField(required=False)
     position_from =  DateTimeField(label=_('Visible From'), widget=widgets.DateTimeWidget)
     position_to =  DateTimeField(label=_('Visible To'), widget=widgets.DateTimeWidget, required=False)
     position = IntegerField(required=False)
-    export =  modelforms.ModelChoiceField(models.Export.objects.all(), label=_('Export'))
-    _export_stack = dict()
+    export = fields.AdminSuggestField(
+        models.ExportPosition._meta.get_field('export'),
+        required=True,
+        label=_('Export'),
+        model=models.Export,
+        lookup=('title', 'slug',),
+    )
     # override base_fields and include all the other declared fields
     declared_fields = SortedDict(
         (
@@ -82,7 +88,15 @@ class MetaInlineForm(modelforms.ModelForm):
             ('position_from', DateTimeField(label=_('Visible From'), widget=widgets.DateTimeWidget)),
             ('position_to', DateTimeField(label=_('Visible To'), widget=widgets.DateTimeWidget, required=False)),
             ('position', IntegerField(required=False)),
-            ('export', modelforms.ModelChoiceField(models.Export.objects.all(), initial=None, label=_('Export'), show_hidden_initial=True))
+            ('export', 
+                fields.AdminSuggestField(
+                    models.ExportPosition._meta.get_field('export'),
+                    required=True,
+                    label=_('Export'),
+                    model=models.Export,
+                    lookup=('title', 'slug',),
+                )
+            )
         )
     )
 
@@ -96,7 +110,7 @@ class MetaInlineForm(modelforms.ModelForm):
         from_initial = to_initial = ''
         export_initial = None
         position_initial = None
-        export_qs = models.Export.objects.all()
+        #export_qs = models.Export.objects.all()
         if 'instance' in kwargs and 'data' not in kwargs:
             existing_object = True
             instance = kwargs['instance']
@@ -119,11 +133,20 @@ class MetaInlineForm(modelforms.ModelForm):
         )
         self.assign_init_field(
             'position', 
-            IntegerField(initial=position_initial, required=False)
+            IntegerField(initial=position_initial, label=_('Position'), required=False)
         )
+        export_field = fields.AdminSuggestField(
+            models.ExportPosition._meta.get_field('export'),
+            required=True,
+            label=_('Export'),
+            model=models.Export,
+            lookup=('title', 'slug',),
+            initial=export_initial
+        )
+        #modelforms.ModelChoiceField(export_qs, initial=export_initial, label=_('Export'), show_hidden_initial=True)
         self.assign_init_field(
             'export',
-            modelforms.ModelChoiceField(export_qs, initial=export_initial, label=_('Export'), show_hidden_initial=True)
+            export_field
         )
 
     def assign_init_field(self, field_name, value):
@@ -165,7 +188,6 @@ class MetaInlineForm(modelforms.ModelForm):
         data_position_to = self.data[self.get_date_field_key('position_to')]
         if data_position_to:
             self.cleaned_data['position_to'] = data_position_to
-            print 'Position to: [%s]' %  self.cleaned_data['position_to']
         self.cleaned_data['export'] = self.data[self.get_date_field_key('export')]
         return self.cleaned_data
 
@@ -188,7 +210,8 @@ class MetaInlineForm(modelforms.ModelForm):
             position.export = export
             position.visible_from = self.cleaned_data['position_from']
             position.visible_to = self.cleaned_data['position_to']
-            position.position = int(self.cleaned_data['position'])
+            if self.cleaned_data['position'].isdigit():
+                position.position = int(self.cleaned_data['position'])
             position.save()
 
         if commit:
@@ -205,9 +228,10 @@ class MetaInlineForm(modelforms.ModelForm):
 class ExportMetaInline(newman.NewmanStackedInline):
     form = MetaInlineForm
     model = models.ExportMeta
-    #suggest_fields = {'photo': ('__unicode__', 'title', 'slug',)}
+    suggest_fields = {'export': ('title', 'slug',)}
     raw_id_fields = ('photo',)
     extra = 1
+    template = 'newman/edit_inline/exportmeta_inline.html'
     """
     fieldsets = (
         (None, {'fields': tuple()}) ,
@@ -224,4 +248,4 @@ newman.site.register(models.ExportPosition)
 newman.site.register(models.ExportMeta, ExportMetaAdmin)
 
 # Register ExportMetaInline in standard PublishableAdmin
-newman.site.append_inline(config.EXPORTABLE_MODELS, ExportMetaInline) # removed due to user interface is too dificult for an user
+newman.site.append_inline(config.EXPORTABLE_MODELS, ExportMetaInline)
