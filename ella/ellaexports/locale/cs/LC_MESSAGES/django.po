@@ -86,3 +86,7 @@ msgstr "Viditelné od"
 #: newman_admin.py:43 newman_admin.py:74
 msgid "Visible To"
 msgstr "Viditelné do"
+
+#: newman_admin.py:102
+msgid "Positions"
+msgstr "Pozice"
