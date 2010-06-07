@@ -98,6 +98,8 @@ class CommonFilter(filterspecs.FilterSpec):
                     else:
                         lookup[key] = lookup_kwargs[key]
 
+        if len(lookup.keys()) == 0:
+            return None
         try:
             thing = model.objects.get(**lookup)
         except (self.model.MultipleObjectsReturned, self.model.DoesNotExist):
