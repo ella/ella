@@ -1,0 +1,12 @@
+div.fe-admin-toolbar {
+  background-color: rgba(0,0,0,.85); color: #fff;padding: 6px; font: normal normal 10px Tahoma, Verdana, sans-serif; position: fixed; top:0;left:0;right:0;z-index:3000
+}
+div.fe-admin-toolbar strong, div.fe-admin-toolbar b { font-weight: bold; }
+button.icn { padding: 3px; }
+button.icn span {
+	padding: 3px 3px 3px 20px;
+	background: url(../ico/16/ok.png) 0 50% no-repeat;
+}
+button.icn.logout span {
+	background-image: url(../ico/16/logout.png);
+}

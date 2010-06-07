@@ -1,0 +1,33 @@
+<div class="fe-admin-toolbar" style="background-color: rgba(0,0,0,.85); color: #fff;padding: 6px; font: normal normal 10px Tahoma, Verdana, sans-serif; position: fixed; top:0;left:0;right:0;z-index:3000">
+<p>Přihlášen/a jako admin: <strong style="font-weight:bold">{{ user.get_full_name }}</strong> (<a href="http://localhost:3001/logout/?next=http://localhost:3000/">odhlásit</a>)</p>
+<p>
+{% if object %}
+  {% trans object.content_type.name %}:
+  <strong style="font-weight:bold">{{ object }}</strong>,
+  návštěv: <strong style="font-weight:bold">{{ hitcount.hits }}</strong>,
+  publikováno od: <strong style="font-weight:bold">{{ object.publish_from|date:"d.m.Y H:i:s" }}</strong>
+
+  {% if placement.listing_set.count %}
+    <select>
+      <option>výčty...</option>
+      {% for l in placement.listing_set.all %}
+        <option>{{ l.publish_from|date:"d.m.Y H:i:s" }} | {{ l.category }}</option>
+      {% endfor %}
+    </select>
+  {% endif %}
+
+  <button onclick="location.href='{{ newman_object_url }}'"><span>Edituj</span></button>
+{% endif %}
+
+
+{% if positions %}
+  <a href="http://localhost:3001/#/positions/position/category/{{ category.pk }}/" title="Upravit pozice">Pozice v kategorii {{ category.title }}</a>:
+  {% for p in positions %}
+    {{ p.name }}: {{ p.target }},
+  {% endfor %}
+{% endif %}
+</p>
+
+{{ NEWMAN_MEDIA_URL }}
+
+</div>
