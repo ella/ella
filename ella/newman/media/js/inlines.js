@@ -750,6 +750,7 @@ var __ExportMetaFormHandler = function() {
 
     this.init = function() {
         FormHandler.call(this, 'exportmeta');
+        this.INLINE_SELECTOR = '.inline-related';
     };
 
     this.swap_fields = function(index, element) {
@@ -770,9 +771,23 @@ var __ExportMetaFormHandler = function() {
     };
 
     this.suggest_changed_handler = function(evt) {
-        // sugg. field has class GenericSuggestField
+        // suggest field has class GenericSuggestField
         // hidden field has class vForeignKeyRawIdAdminField hidden
-        log_inline.log('Export suggester changed!');
+        var $target = $(evt.target);
+        var value = $target.val();
+        if (value == '#' || value == '') {
+            return true;
+        }
+        var placement_date_from = this.$document.find('#id_placement_set-0-publish_from').val();
+        if (!placement_date_from) {
+            return true;
+        }
+        var $inline = $target.closest(this.INLINE_SELECTOR);
+        var $field = $inline.find('.form-row.position_from input.vDateTimeInput');
+        if ($field.val() == '') {
+            $field.val(placement_date_from);
+        }
+        return true;
     };
 
     this.handle_form = function (document_dom_element, $document) {
