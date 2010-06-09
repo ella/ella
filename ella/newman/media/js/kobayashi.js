@@ -19,7 +19,7 @@
  *          LoggingLib object.
  *
  */
-KOBAYASHI_VERSION = '2010-05-03';
+KOBAYASHI_VERSION = '2010-06-09';
 
 var CURRENT_HASH = '';
 var KOBAYASHI_ADDRESSBAR_CHECK_INTERVAL = 250; // msec
@@ -267,7 +267,7 @@ var LoggingLib = to_class(__LoggingLib);
 
 // Available loggers
 log_generic = new LoggingLib('GENERIC:', true);
-log_kobayashi = new LoggingLib('KOBAYASHI:', false);
+log_kobayashi = new LoggingLib('KOBAYASHI:', true);
 
 function carp() {
     if (DEBUG) {
@@ -829,6 +829,7 @@ Kobayashi.LOADED_MEDIA = {};
 
     function get_simple_load_arguments(specifier) {
         var target_id;
+        var COLON_LEN = 2;
         var colon_index = specifier.indexOf('::');
         if (colon_index < 0) {
             target_id = Kobayashi.DEFAULT_TARGET;
@@ -837,7 +838,7 @@ Kobayashi.LOADED_MEDIA = {};
             target_id = specifier.substr(0, colon_index);
         }
         
-        var address = get_hashadr(specifier);
+        var address = get_hashadr(specifier, {not_correct_get_parameters: false});
         
         if (LOADED_URLS[target_id] == address) {
             $('#'+target_id).slideUp('fast');
@@ -852,9 +853,10 @@ Kobayashi.LOADED_MEDIA = {};
     // Set up event handlers
     $('.js-simpleload,.js-simpleload-container a').live('click', function(evt) {
         if (evt.button != 0) return true;    // just interested in left button
-        if ( $(this).data('hashadred') ) return true;
-        simple_load($(this).attr('href'));
-        $(this).data('simpleloaded', true);
+        var $this = $(this);
+        if ( $this.data('hashadred') ) return true;
+        simple_load($this.attr('href'));
+        $this.data('simpleloaded', true);
         evt.preventDefault();
     });
     $('.js-hashadr,.js-hashadr-container a').live('click', function(evt) {
@@ -1014,6 +1016,7 @@ function adr(address, options) {
     
     // We've not gotten the address from a previous recursive call, thus modify the address as needed.
     if (new_address == undefined) {
+        log_kobayashi.log('address:', address);
         new_address = address;
         
         // empty address -- remove the specifier
@@ -1038,6 +1041,7 @@ function adr(address, options) {
             }
             else  {
                 var assignments = address.substr(1).split(/&/);
+                newq = '';
                 for (var i = 0; i < assignments.length; i++) {
                     var ass = assignments[i];
                     var vname = (ass.indexOf('=') < 0) ? ass : ass.substr(0, ass.indexOf('='));
@@ -1045,17 +1049,12 @@ function adr(address, options) {
                         log_kobayashi.log('invalid assignment: ' , ass);
                         continue;
                     }
-                    var vname_esc = vname.replace(/\W/g, '\\$1');
-                    var vname_re = new RegExp('(^|[?&])' + vname_esc + '(?:=[^?&]*)?(&|$)');
-                    var changedq = newq.replace(vname_re, '\$1' + ass + '\$2');
-                    
-                    // vname was not in oldq -- append
-                    // the second condition is there so that when we have ?v and call &v we won't get ?v&v but still ?v
-                    if (changedq == newq && !vname_re.test(newq)) {
-                        newq = newq + '&' + ass;
+                    if (newq == '') {
+                        newq = '?';
                     }
-                    else {
-                        newq = changedq;
+                    newq = newq + ass;
+                    if (i <= (assignments.length - 1)) {
+                        newq = newq + '&';
                     }
                 }
             }
