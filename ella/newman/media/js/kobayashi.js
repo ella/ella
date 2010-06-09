@@ -1056,20 +1056,6 @@ function adr(address, options) {
                     if (i <= (assignments.length - 1)) {
                         newq = newq + '&';
                     }
-                    /*
-                    var vname_esc = vname.replace(/\W/g, '\\$1');
-                    var vname_re = new RegExp('(^|[?&])' + vname_esc + '(?:=[^?&]*)?(&|$)');
-                    var changedq = newq.replace(vname_re, '\$1' + ass + '\$2');
-                    
-                    // vname was not in oldq -- append
-                    // the second condition is there so that when we have ?v and call &v we won't get ?v&v but still ?v
-                    if (changedq == newq && !vname_re.test(newq)) {
-                        newq = newq + '&' + ass;
-                    }
-                    else {
-                        newq = changedq;
-                    }
-                    */
                 }
             }
             new_address = old_address.substr(0, qstart) + newq;
