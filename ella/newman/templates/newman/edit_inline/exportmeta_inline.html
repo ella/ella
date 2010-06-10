@@ -36,5 +36,10 @@
                 {% endfor %}
             </div>
         {% endfor %}
+        {% block collapse_button %}
+        <div class="collapse-button">
+            <a class="icn btn idea js-export-show-additional-fields">{% trans "Show additional fields" %}</a>
+        </div>
+        {% endblock %}
     </fieldset>
 {% endblock %}
