@@ -2,9 +2,12 @@
  * Flash powered photo uploader.
  * requires: jQuery 1.4.2+, 
  *          str_concat() function (effective string concatenation).
- *          carp() function for logging purposes located in kobayashi.js .
+ *          LoggingLib object (utils.js).
  *
  */
+// flash image logging
+log_fimage = new LoggingLib('FLASHIMG:', true);
+
 var IMAGE_OPTIONS = {
     maxWidth: 1024,
     maxHeight: 1024,
@@ -17,7 +20,7 @@ var IMAGE_OPTIONS = {
 };
 ( function($) {
     window.on_upload_success = function(xhr) {
-        ;;; carp('success uploading photo:', xhr);
+        ;;; log_fimage.log('success uploading photo:', xhr);
         show_ok(gettext('successfully uploaded photo'));
         var button_clicked = $('#photo_form').data('button_clicked');
         if (button_clicked) {
@@ -29,12 +32,12 @@ var IMAGE_OPTIONS = {
 //        AjaxFormLib.show_ajax_success(xhr.responseText);
     }
     window.on_upload_error = function(xhr) {
-        ;;; carp('error uploading photo:', xhr);
+        ;;; log_fimage.log('error uploading photo:', xhr);
         show_err(gettext('failed uploading photo'));
 //        AjaxFormLib.ajax_submit_error(xhr)
     }
     window.on_upload_progress = function(progress) {
-        carp(progress, ' uploaded');
+        log_fimage.log(progress, ' uploaded');
     }
 
     function save_photo_handler(evt) {
@@ -51,7 +54,7 @@ var IMAGE_OPTIONS = {
         var flash_obj = ($.browser.msie ? window : document).PhotoUploader;
         if (!flash_obj) {
             show_err(gettext('Failed to get Flash movie') + ' PhotoUploader.');
-            carp('Failed to get Flash movie PhotoUploader.');
+            log_fimage.log('Failed to get Flash movie PhotoUploader.');
             return false;
         }
         var data = {};
@@ -64,7 +67,7 @@ var IMAGE_OPTIONS = {
             data[ this.name ] = val;
         });
         IMAGE_OPTIONS.url = $('<a>').attr('href',get_adr('json/')).get(0).href;
-        ;;; carp('URL passed to flash: ' , IMAGE_OPTIONS.url);
+        ;;; log_fimage.log('URL passed to flash: ' , IMAGE_OPTIONS.url);
         var saved_data = flash_obj.saveData(data, IMAGE_OPTIONS);
         if (saved_data == 2) {
             show_err(gettext('No photo selected'));
@@ -72,7 +75,7 @@ var IMAGE_OPTIONS = {
         else if (saved_data > 0) {
             show_err(gettext('Error processing photo'));
         }
-        ;;; carp('flash returned: ', saved_data);
+        ;;; log_fimage.log('flash returned: ', saved_data);
         return false;
     }
     function set_image_form_handlers() {

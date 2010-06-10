@@ -2,9 +2,12 @@
  * Poll change forms
  * requires: jQuery 1.4.2+, 
  *          str_concat() function (effective string concatenation).
- *          carp() function for logging purposes located in kobayashi.js .
+ *          LoggingLib object (utils.js).
  *
  */
+// polls logging
+log_polls = new LoggingLib('POLLS:', false);
+
 (function() {
 	// remaining-poll-question-inputs
 	$('.remaining-poll-question-inputs').remove(); 
@@ -229,7 +232,7 @@
             
             $label.find('a').text( $area.val() || gettext('Click to edit question') );
             
-            //carp('>>> label:',$label.get(0));
+            //log_polls.log('>>> label:',$label.get(0));
             if ( $area.val() == '' ) {
                 $label.addClass('js-empty-poll-question-text');
                 $label.find('a').addClass('icn btn eclear');
@@ -360,7 +363,7 @@
         }
 
         function load_poll_from_preset(evt, preset) {
-            carp('preset load initiated (poll). evt=' , evt , ' , preset=' , preset);
+            log_polls.log('preset load initiated (poll). evt=' , evt , ' , preset=' , preset);
             $('.js-poll-question-container:gt(0)').remove();
             $('.js-poll-choice-container:gt(0)'  ).remove();
             var last_q_no = 0;
@@ -407,7 +410,7 @@
         $('#quiz_form,#contest_form').unbind('preset_load_completed.poll');
         $('#quiz_form,#contest_form').bind('preset_load_completed.poll', 
             function() {
-                carp('displaying loaded values (poll)');
+                log_polls.log('displaying loaded values (poll)');
                 $(':input.js-poll-choice-points').each( function() {
                     reflect_points_input_change(this);
                 });

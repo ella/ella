@@ -3,10 +3,13 @@
  * requires: jQuery 1.4.2+, 
  *          gettext() function, 
  *          str_concat() function (effective string concatenation),
- *          carp() function for logging purposes located in kobayashi.js .
+ *          LoggingLib() object (utils.js).
  *
  * Note: Generate documentation via JSDoc http://jsdoc.sourceforge.net/ .
  */
+
+// NewmanTextArea logging
+log_ntarea = new LoggingLib('NTEXTAREA:', false);
 
 /**
  * TextAreaSelectionHandler object is based on code snippets from Maxim Izmaylov's editor.js made for project Zenaadmin.
@@ -26,7 +29,7 @@ var TextAreaSelectionHandler = function () {
     function check_area(func) {
         function check_it() {
             if (area == null) {
-                carp('WARNING: area == null');
+                log_ntarea.log('WARNING: area == null');
                 return function () {};
             }
             return func.apply(null, arguments);
@@ -188,7 +191,7 @@ var NewmanTextAreaToolbar = function () {
      *
      * Example:
         function custom_toolbar_item_clicked(evt, button_name) {
-            carp('item_clicked');
+            log_ntarea.log('item_clicked');
         }
         me.toolbar_item_clicked = custom_toolbar_item_clicked;
      */
@@ -243,7 +246,7 @@ var NewmanTextArea = function ($text_area, extending_configuration_object) {
     var toolbar_obj = null;
 
     function init($text_area, extending_configuration) {
-        carp('Initializing NewmanTextArea.' , $text_area);
+        log_ntarea.log('Initializing NewmanTextArea.' , $text_area);
         $.extend(config, extending_configuration);
         // wrap <textarea> element with several <div> elements
         var div_id = str_concat('id="markItUp' , ($text_area.attr("id").substr(0, 1).toUpperCase()) , ($text_area.attr("id").substr(1)) , '"');
@@ -258,7 +261,7 @@ var NewmanTextArea = function ($text_area, extending_configuration_object) {
         $text_area.data('newman_text_area', $text_area);
         $text_area.data('newman_text_area_toolbar', $toolbar);
         $text_area.data('newman_text_area_toolbar_object', toolbar_obj);
-        carp('Initialized');
+        log_ntarea.log('Initialized');
     }
 
     // initialize NewmanTextArea component.

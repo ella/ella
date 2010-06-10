@@ -2,24 +2,24 @@
  * Kobayashi AJAX powered content injection framework.
  * requires: jQuery 1.4.2+, 
  *          gettext() function,
- *          to_class() function (inheritance.js).
+ *          try_decorator() (utils.js),
+ *          timer(), timerEnd() functions (utils.js),
+ *          to_class() function (inheritance.js),
+ *          LoggingLib object.
  *
  * provides:
- *          carp() function for logging purposes,
- *          str_concat() effective string concatenation,
- *          timer(), timerEnd() Firebug timer wrappers,
  *          arr2map() conversion from array to "hashmap",
  *          adr(),
  *          get_adr(),
  *          get_hash(),
  *          get_hashadr(),
- *          timer_decorator(name, func) tracks elapsed time of called func,
- *          Kobayashi object,
- *          StringBuffer object,
- *          LoggingLib object.
+ *          Kobayashi object.
  *
  */
 KOBAYASHI_VERSION = '2010-06-09';
+
+// Kobayashi logging
+log_kobayashi = new LoggingLib('KOBAYASHI:', false);
 
 var CURRENT_HASH = '';
 var KOBAYASHI_ADDRESSBAR_CHECK_INTERVAL = 250; // msec
@@ -32,248 +32,6 @@ var KOBAYASHI_CSS_LOAD_TIMEOUT = 250; // msec
 ;;;     for (var i in obj) s += i + ': ' + obj[i] + "\n";
 ;;;     alert(s);
 ;;; }
-
-function try_decorator(func) {
-    function wrapped() {
-        var out = null;
-        try {
-            out = func.apply(null, arguments);
-        } catch (e) {
-            carp('Error in try_decorator:' , e.toString(), ' when calling ', func);
-        }
-        return out;
-    }
-    return wrapped;
-}
-
-function timer(name) {
-    if (!DEBUG) return;
-    try {
-        console.time(name);
-    } catch (e) {}
-}
-
-function timerEnd(name) {
-    if (!DEBUG) return;
-    try {
-        console.timeEnd(name);
-    } catch (e) {}
-}
-
-// Timer (useful for time consumption profilling)
-var accumulated_timers = {};
-var AccumulatedTimeMeasurement = function(timer_name) {
-    var me = new Object();
-    me.name = timer_name;
-    var times = [];
-    var m_begin = null;
-    var m_end = null;
-
-    function begin_measurement() {
-        m_begin = (new Date()).getTime();
-    }
-
-    function end_measurement() {
-        m_end = (new Date()).getTime();
-        times.push( (m_end - m_begin) );
-    }
-
-    function avg() {
-        var res = 0;
-        for (var i = 0; i < times.length; i++) {
-            res += times[i]; //msec
-        }
-        return res / times.length;
-    }
-    me.avg = avg;
-
-    function decorate(func) {
-        function wrapped() {
-            var out = null;
-            begin_measurement();
-            try {
-                out = func.apply(null, arguments);
-            } catch (e) {
-                carp('Error in timer_decorator:' , e.toString());
-            }
-            end_measurement();
-            return out;
-        }
-        return wrapped;
-    }
-    me.decorate = decorate;
-
-    return me;
-};
-
-// static method (like a)
-function AccumulatedTimeMeasurement__avg_all() {
-    carp('Timers:');
-    for (var timer_name in accumulated_timers) {
-        var timer = accumulated_timers[timer_name];
-        carp(timer.name, ': ', timer.avg());
-    }
-    carp('End Timers');
-}
-AccumulatedTimeMeasurement.avg_all = AccumulatedTimeMeasurement__avg_all;
-
-function timer_decorator(name, func) {
-    // create new timer object if timer does not exist
-    if (!(name in accumulated_timers)) {
-        accumulated_timers[name] = AccumulatedTimeMeasurement(name);
-    }
-    return accumulated_timers[name].decorate(func);
-}
-
-// /end of Timer
-
-var __StringBuffer = function() {
-    this.init = function () {
-        this.buffer = [];
-        this.clear_i = 0; //counter variable
-    };
-
-    this.clear = function () {
-        var len = this.buffer.length;
-        for (this.clear_i = 0; this.clear_i < len; this.clear_i++) {
-            this.buffer.pop();
-        }
-    };
-    
-    this.append = function (text) {
-        this.buffer.push(text);
-    }
-
-    function append_array(arr) {
-        for (var i = 0; i < arr.length; i++) {
-            this.buffer.push(arr[i]);
-        }
-    }
-    this.appendArray = append_array;
-    this.append_array = append_array;
-
-    function to_string() {
-        return this.buffer.join('');
-    }
-    this.toString = to_string;
-    this.to_string = to_string;
-
-    return this;
-};
-var StringBuffer = to_class(__StringBuffer);
-
-function str_concat() {
-    if (typeof(str_concat.string_buffer) == 'undefined') {
-        str_concat.string_buffer = new StringBuffer();
-    } else {
-        str_concat.string_buffer.clear();
-    }
-    str_concat.string_buffer.append_array(arguments);
-    return str_concat.string_buffer.to_string();
-}
-
-var __LoggingLib = function () {
-    this.init = function (name, enabled) {
-        this.name = name;
-        this.enabled = enabled;
-        this.capabilities = [];
-        this.enable_debug_div = false;
-        this.str_buf = new StringBuffer();
-    };
-
-    this.log_debug_div = function () {
-        $('#debug').append($('<p>').text($.makeArray(arguments).join(' ')));
-    };
-
-    this.log_console_apply = function () {
-        console.log.apply(this, arguments);
-    };
-
-    this.log_console = function () {
-        //console.log(arguments);
-        // workaround for google chromium to see logged message immediately
-        this.str_buf.clear();
-        this.str_buf.append(this.name);
-        for (var i = 0; i < arguments.length; i++) {
-            this.str_buf.append(arguments[i]);
-        }
-        console.log(this.str_buf.to_string());
-    };
-
-    this.workaround_opera_browser = function () {
-            try {
-                var log_func = window.opera.postError;
-                window.console = {};
-                window.console.log = log_func;
-            } catch (e) {
-            }
-    };
-
-    this.first_log_attempt = function () {
-        if (this.enable_debug_div) {
-            try {
-                this.log_debug_div.apply(this, arguments);
-                this.capabilities.push(log_debug_div);
-            } catch(e) { }
-        }
-        var args = Array.prototype.slice.call(arguments);
-        args.unshift(this.name); // prepend logger name
-
-        // Opera?
-        if (typeof(console) == 'undefined') {
-            this.workaround_opera_browser();
-            this.capabilities.push(this.log_console);
-            this.log_console.apply(this, args);
-            return;
-        }
-
-        try {
-            this.log_console_apply.apply(this, args);
-            this.capabilities.push(this.log_console_apply);
-        } catch(e) {
-            try {
-                this.log_console.apply(this, args);
-                this.capabilities.push(this.log_console);
-            } catch(e) { 
-            }
-        }
-    };
-
-    this.log_it = function () {
-        var callback;
-        var len = this.capabilities.length;
-        var args = Array.prototype.slice.call(arguments);
-        args.unshift(this.name); // prepend logger name
-        for (var i = 0; i < len; i++) {
-            callback = this.capabilities[i];
-            //callback(arguments);
-            callback.apply(this, args);
-        }
-        args = null;
-    };
-
-    this.log = function () {
-        if (!this.enabled) return;
-        if (this.capabilities.length == 0) {
-            this.first_log_attempt.apply(this, arguments);
-        } else {
-            this.log_it.apply(this, arguments);
-        }
-    };
-
-    return this;
-};
-var LoggingLib = to_class(__LoggingLib);
-
-// Available loggers
-log_generic = new LoggingLib('GENERIC:', true);
-log_kobayashi = new LoggingLib('KOBAYASHI:', true);
-
-function carp() {
-    if (DEBUG) {
-        log_generic.log.apply(log_generic, arguments);
-    }
-}
 
 function arr2map(arr) {
     var rv = {};

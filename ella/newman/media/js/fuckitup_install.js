@@ -2,7 +2,8 @@
  * Text Area powered by callbacks.
  * requires: jQuery 1.4.2+, 
  *          gettext() function, 
- *          carp() function for logging purposes located in kobayashi.js .
+ *          log_ntarea object (initialized in fuckitup.js),
+ *          ContentElementViewportDetector object (utils.js).
  *
  */
 var NEWMAN_TEXTAREA_PREVIEW_SIZE_ADDITION = 10; //px
@@ -112,7 +113,7 @@ function discard_auto_preview(evt) {
         clearTimeout(existing_tm);
         $editor.data('auto_preview_timer', null);
     }
-    //carp('Discarding auto preview for: ' , $editor.selector);
+    //log_ntarea.log('Discarding auto preview for: ' , $editor.selector);
 }
 
 function markitdown_get_editor(evt) {
@@ -144,7 +145,7 @@ function markitdown_auto_preview(evt, optional_force_preview) {
 
         if (existing_tm) {
             clearTimeout(existing_tm);
-            //carp('Clearing timeout ' , existing_tm);
+            //log_ntarea.log('Clearing timeout ' , existing_tm);
             existing_tm = null;
             $editor.data('auto_preview_timer', existing_tm);
             trigger_ok = true;
@@ -153,11 +154,11 @@ function markitdown_auto_preview(evt, optional_force_preview) {
         if ( difference < MIN_KEY_PRESS_DELAY ) {
             // if key was pressed in shorter time MIN_KEY_PRESS_DELAY, re-schedule preview refresh
             set_preview_timer();
-            //carp('Update timer Re-scheduled. diff=' , difference);
+            //log_ntarea.log('Update timer Re-scheduled. diff=' , difference);
             return;
         }
         if (trigger_ok) {
-            //carp('Auto preview triggering preview. diff=' , difference);
+            //log_ntarea.log('Auto preview triggering preview. diff=' , difference);
             //markitdown_trigger_preview(evt);
             $text_area.trigger('item_clicked.newman_text_area_toolbar', 'preview');
         }
@@ -169,7 +170,7 @@ function markitdown_auto_preview(evt, optional_force_preview) {
     if (!existing_tm) {
         // schedule preview refresh
         set_preview_timer();
-        //carp('Update timer scheduled.');
+        //log_ntarea.log('Update timer scheduled.');
     }
 }
 
@@ -210,7 +211,7 @@ var NewmanTextAreaStandardToolbar = function () {
             try {
                 success_callback(data);
             } catch (e) {
-                carp('Problem calling preview success callback.' , e);
+                log_ntarea.log('Problem calling preview success callback.' , e);
             }
         }
 
@@ -310,7 +311,7 @@ var NewmanTextAreaStandardToolbar = function () {
 
     function handle_box(evt) {
         if (!me.$text_area) {
-            carp('NO TEXT AREA');
+            log_ntarea.log('NO TEXT AREA');
             return;
         }
         $('#rich-box').dialog('open');
@@ -365,7 +366,7 @@ var NewmanTextAreaStandardToolbar = function () {
                 $('#id_box_obj_params').val(params);
             }
         } else {
-            carp('NO CONTENT MATCHED');
+            log_ntarea.log('NO CONTENT MATCHED');
         }
     }
 
@@ -542,67 +543,16 @@ var NewmanTextAreaStandardToolbar = function () {
 
     function item_clicked(evt, button_name) {
         var cback = button_handlers[button_name];
-        //carp('item_clicked ' , button_name , ', element name:' , me.$text_area.attr('name'));
+        //log_ntarea.log('item_clicked ' , button_name , ', element name:' , me.$text_area.attr('name'));
         if (typeof(cback) == 'undefined') return;
         try {
             selection_handler.init(me.$text_area[0]); // init selection_handler (assigns textarea selection)
             cback(evt);
         } catch (e) {
-            carp('item_clicked error: ' , e);
+            log_ntarea.log('item_clicked error: ' , e);
         }
     }
     me.toolbar_item_clicked = item_clicked;
-
-    return me;
-};
-
-var ContentElementViewportDetector = function($watched_element) {
-    /**
-     * detects viewport for elements inside <div id="content">.
-     * Resolution of viewport: top, middle and bottom of watched element.
-     */
-    var me = new Object();
-    var _middle_in_viewport = false;
-    var _top_in_viewport = false;
-    var _bottom_in_viewport = false;
-    var $elem = $watched_element;
-
-    function is_element_in_viewport() {
-        /*var $li = $('a.saveall');
-        var content_position = $('div.#content').scrollParent().scrollTop();
-        var area_position = $elem.position().top;
-        var area_bottom = area_position + element_height;*/
-
-        var element_height = $elem.height();
-        var element_top = $elem.offset().top;
-        var from_top_visible = $('#footer').offset().top - element_top; // if var < 0, element is under #footer element.
-        var from_top_element_bottom_hidden = from_top_visible - element_height;
-        var from_top_hidden = $elem.position().top; // if var < 0, element is partialy or totally hidden under topmenu (#header).
-        _top_in_viewport = (from_top_visible >= 0) && (from_top_hidden >= 0);
-        _bottom_in_viewport = (from_top_element_bottom_hidden >= 0) && (from_top_visible >= 0)
-            && (from_top_hidden + element_height >= 0);
-        var whole_under_header = (element_height + element_top) > ($('#header').offset().top + $('#header').height());
-        _middle_in_viewport = (from_top_visible >= 0) && whole_under_header;
-    }
-
-    function in_viewport() {
-        is_element_in_viewport();
-        return _middle_in_viewport;
-    }
-    me.in_viewport = in_viewport;
-    me.middle_in_viewport = in_viewport;
-
-    function top_in_viewport() {
-        is_element_in_viewport();
-        return _top_in_viewport;
-    }
-    me.top_in_viewport = top_in_viewport;
-
-    function bottom_in_viewport() {
-        is_element_in_viewport();
-        return _bottom_in_viewport;
-    }
-    me.bottom_in_viewport = bottom_in_viewport;
 
     return me;
 };
@@ -627,11 +577,11 @@ var TextAreaFocusListener = function() {
         $last_shown_header = null;
         $('div#container').unbind('scroll.text_area_focus_listener', scroll_handler);
         detector = null;
-        //carp('Toolbar cleaned');
+        //log_ntarea.log('Toolbar cleaned');
     }
 
     function toolbar_stick_to_top($bar, $text_area) {
-        //carp('sticked to top');
+        //log_ntarea.log('sticked to top');
         //$bar.css('position', 'relative');
         var pos = [
             main_toolbar_offset + $text_area.position().top - $bar.height() - 5,
@@ -642,7 +592,7 @@ var TextAreaFocusListener = function() {
     }
 
     function toolbar_stick_to_bottom($bar, $text_area) {
-        //carp('sticked to bottom');
+        //log_ntarea.log('sticked to bottom');
         //$bar.css('position', 'relative');
         var pos = [
             main_toolbar_offset + $text_area.height() + $text_area.position().top,
@@ -653,7 +603,7 @@ var TextAreaFocusListener = function() {
     }
 
     function toolbar_float($bar) {
-        //carp('floats on top');
+        //log_ntarea.log('floats on top');
         $bar.css('top', main_toolbar_offset_px);
         $bar.show();
     }
@@ -662,7 +612,7 @@ var TextAreaFocusListener = function() {
         var $bar = evt.data.$bar;
         if ( !detector.in_viewport() ) {
             // hide toolbar
-            //carp('hidden');
+            //log_ntarea.log('hidden');
             $bar.hide();
         } else if (detector.top_in_viewport() && !detector.bottom_in_viewport()) {
             // show toolbar sticked to textarea's top
@@ -687,25 +637,25 @@ var TextAreaFocusListener = function() {
         $header.appendTo($bar);
         $bar.show();
         $last_shown_header = $header;
-        //carp('toolbar shown');
+        //log_ntarea.log('toolbar shown');
     }
 
     function focus_in($text_area, $header) {
         if (hide_toolbar_timeout) {
-            //carp('Clearing timeout');
+            //log_ntarea.log('Clearing timeout');
             clearTimeout(hide_toolbar_timeout);
         }
         newman_textarea_focused = $text_area;
 
         var $bar = $('.js-textarea-toolbar');
         if ($bar.find('.markItUpHeader').length && ($header == $last_shown_header)) {
-            //carp('toolbar instances are equiv. Aborting.');
+            //log_ntarea.log('toolbar instances are equiv. Aborting.');
             return;
         }
         show_toolbar($bar, $header);    
 
         // register handler for scroll event
-        detector = ContentElementViewportDetector($text_area);
+        detector = new ContentElementViewportDetector($text_area);
         var $container = $('div#container');
         $container.bind('scroll.text_area_focus_listener', {$bar: $bar, $text_area: $text_area}, scroll_handler);
         $container.trigger('scroll.text_area_focus_listener');
@@ -809,10 +759,10 @@ $(function() {
             return;
         }
         if ( $('.change-form').data('textarea_handlers_installed') === true ) {
-            carp('ALREADY INSTALLED TEXTAREA HANDLERS');
+            log_ntarea.log('ALREADY INSTALLED TEXTAREA HANDLERS');
             return;
         }
-        carp('INSTALLING TEXTAREA HANDLERS...');
+        log_ntarea.log('INSTALLING TEXTAREA HANDLERS...');
         // enable NewmanTextArea (replacement for markItUp!)
         install_box_editor();
         $('.rich_text_area').newmanTextArea(newman_text_area_settings);
