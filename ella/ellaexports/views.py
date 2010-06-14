@@ -149,6 +149,7 @@ class AggregatedExport(MrssExport):
         descriptions = []
         items = []
         context = dict()
+        exported_objects = []
 
         for slug in slugs:
             for i in Export.objects.get_items_for_slug(slug=slug):
@@ -162,6 +163,7 @@ class AggregatedExport(MrssExport):
             titles.append( export_object.title )
             links.append( export_object.url )
             descriptions.append( export_object.description )
+            exported_objects.append(export_object)
 
         context = {
             'export_slug': '.'.join(slugs),
@@ -170,7 +172,8 @@ class AggregatedExport(MrssExport):
             'titles': titles,
             'links': links,
             'descriptions': descriptions,
-            'category': None
+            'category': None,
+            'exported_objects': exported_objects,
         }
         return context
 

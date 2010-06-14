@@ -52,10 +52,29 @@ class Export(models.Model):
         hash = hashlib.sha1(token)
         return 'tag:%s' % hash.hexdigest()
 
+    @property
+    def items(self):
+        return Export.objects.get_items_for_slug(self.slug)
+
     class Meta:
         unique_together = ( ('title',), ('slug',) )
         verbose_name = _('Export')
         verbose_name_plural = _('Exports')
+
+
+class AggregatedExport(models.Model):
+    title = models.CharField(_('Title'), max_length=255)
+    description = models.TextField(_('Description'), blank=True)
+    slug = models.SlugField(_('Slug'), max_length=255)
+    exports = models.ManyToManyField(Export, verbose_name=_('Exports'))
+
+    def __unicode__(self):
+        return self.title
+
+    class Meta:
+        unique_together = ( ('title',), ('slug',) )
+        verbose_name = _('Aggregated export')
+        verbose_name_plural = _('Aggregated  exports')
 
 
 class ExportMeta(models.Model):

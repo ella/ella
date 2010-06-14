@@ -50,6 +50,10 @@ class ExportAdmin(newman.NewmanModelAdmin):
         """
         return timeline.timeline_view(request, extra_context)
 
+class AggregatedExportAdmin(newman.NewmanModelAdmin):
+    prepopulated_fields = {'slug': ('title',)}
+    search_fields = ('title', 'slug',)
+
 class ExportMetaAdmin(newman.NewmanModelAdmin):
     inlines = (ExportPositionInlineAdmin,)
     raw_id_fields = ('photo',)
@@ -246,6 +250,7 @@ class ExportMetaInline(newman.NewmanStackedInline):
 newman.site.register(models.Export, ExportAdmin)
 newman.site.register(models.ExportPosition)
 newman.site.register(models.ExportMeta, ExportMetaAdmin)
+newman.site.register(models.AggregatedExport, AggregatedExportAdmin)
 
 # Register ExportMetaInline in standard PublishableAdmin
 newman.site.append_inline(config.EXPORTABLE_MODELS, ExportMetaInline)
