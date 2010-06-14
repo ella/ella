@@ -863,6 +863,9 @@ var __ExportMetaFormHandler = function() {
     };
 
     this.preset_load_completed = function (evt) {
+        NewmanInline.remove_inlineadmin_element_value('input[name^=exportmeta_set-]', '-publishable');
+        NewmanInline.remove_inlineadmin_element_value('input[name^=exportmeta_set-]', '-id');
+        NewmanInline.remove_inlineadmin_element_value('input[name^=exportmeta_set-]', '-position_id');
     };
 
     return this;

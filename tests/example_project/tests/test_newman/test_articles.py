@@ -122,6 +122,12 @@ class TestArticle(NewmanTestCase):
         }
 
         self.fill_calendar_fields(calendar_data)
+        
+        # fill exports
+        export_inline_suggest_data = {
+            'exportmeta_set-0-export' : ('Example Export',),
+        }
+        self.fill_suggest_fields(export_inline_suggest_data) # fill exportinline suggest fields when placement inline is completely filled.
 
         # TODO: Replace fuzzy matching when it will be decided how to insert time
         expected_data.update({
