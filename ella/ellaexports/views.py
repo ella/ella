@@ -10,7 +10,7 @@ from ella.core.models import Listing, Category, Placement
 from ella.core.cache import get_cached_object_or_404, cache_this
 from ella.core.cache.template_loader import render_to_response
 from ella.core.views import EllaCoreView
-from ella.ellaexports.models import Export, ExportMeta, ExportPosition
+from ella.ellaexports.models import Export, AggregatedExport, ExportMeta, ExportPosition
 from ella.ellaexports.models import UnexportableException
 
 
@@ -131,53 +131,39 @@ class MrssExport(EllaCoreView):
 
 mrss_export = MrssExport()
 
-class AggregatedExport(MrssExport):
+class AggregatedMrssExport(MrssExport):
     template_name = 'aggregated_export.xml'
 
     def get_context(self, request, **kwargs):
-        remainder = kwargs.get('url_remainder', '')
-        slugs = remainder.split('/')
-        if not slugs:
-            raise Http404
-        slugs = filter(lambda s: s != '', slugs)
+        slug = kwargs.get('slug', None)
+        aggregated_export = get_cached_object_or_404(AggregatedExport, slug=slug)
 
-        now = datetime.now()
-        export = None
-        export_object = None
+        items = []
         titles = []
         links = []
         descriptions = []
-        items = []
-        context = dict()
-        exported_objects = []
 
-        for slug in slugs:
-            for i in Export.objects.get_items_for_slug(slug=slug):
+        for part in aggregated_export.parts:
+            for i in part.items:
                 items.append(i)
 
-            try:
-                export_object = Export.objects.get(slug=slug)
-            except Export.DoesNotExist:
-                raise Http404(_('Export with given slug [%s] does not exist.' % slug))
-
-            titles.append( export_object.title )
-            links.append( export_object.url )
-            descriptions.append( export_object.description )
-            exported_objects.append(export_object)
+            titles.append(part.title)
+            links.append(part.url)
+            descriptions.append(part.description)
 
         context = {
-            'export_slug': '.'.join(slugs),
-            'export_object': export_object,
+            'export_slug': slug,
+            'export_object': None,
             'exported_items': items,
             'titles': titles,
             'links': links,
             'descriptions': descriptions,
             'category': None,
-            'exported_objects': exported_objects,
+            'aggregated_export': aggregated_export,
         }
         return context
 
-aggregated_export = AggregatedExport()
+aggregated_export = AggregatedMrssExport()
 
 
 # EOF

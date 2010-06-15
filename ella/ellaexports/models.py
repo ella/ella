@@ -71,6 +71,10 @@ class AggregatedExport(models.Model):
     def __unicode__(self):
         return self.title
 
+    @property
+    def parts(self):
+        return self.exports.all()
+
     class Meta:
         unique_together = ( ('title',), ('slug',) )
         verbose_name = _('Aggregated export')
