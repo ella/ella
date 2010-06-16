@@ -1,92 +1,136 @@
 # Translations for ella.exports application.
-# Copyrycht (C) 2009, Centrumholdings s.r.o. 
+# Copyrycht (C) 2009, Centrumholdings s.r.o.
 # This file is distributed under the same license as the ella project.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: ella-exports\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-18 13:04+0200\n"
-"PO-Revision-Date: 2009-07-30 10:46+0200\n"
-"Last-Translator: Zwei Kasselbuntes <jonas.fiala@centrumholdings.com>\n"
+"POT-Creation-Date: 2010-06-16 09:34+0200\n"
+"PO-Revision-Date: 2010-06-16 09:39+0100\n"
+"Last-Translator: Jan Seifert <jan.seifert@centrumholdings.com>\n"
 "Language-Team: Ellagruppe <ella.project@gmail.com>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 
-#: models.py:19
+#: models.py:24
 msgid "Category"
 msgstr "Kategorie"
 
-#: models.py:20 models.py:50
+#: models.py:25
+msgid "Use objects listed in category"
+msgstr ""
+
+#: models.py:26
+#: models.py:66
+#: models.py:90
 msgid "Title"
 msgstr "Název"
 
-#: models.py:21
-msgid "Slug"
-msgstr ""
-
-#: models.py:22
-msgid "Maximum Visible Items"
-msgstr "Počet viditelných pozic"
-
-#: models.py:23
-msgid "Photo format"
-msgstr "Formát fotky"
-
-#: models.py:40 models.py:89 newman_admin.py:44 newman_admin.py:78
-msgid "Export"
-msgstr "Export"
-
-#: models.py:41
-msgid "Ellaexports"
-msgstr "Exporty"
-
-#: models.py:49
-msgid "Publishable object"
-msgstr "Publikovatelný objekt"
-
-#: models.py:51
-msgid "Photo"
-msgstr "Fotka"
-
-#: models.py:52
+#: models.py:27
+#: models.py:67
+#: models.py:92
 msgid "Description"
 msgstr "Popis"
 
-#: models.py:55
+#: models.py:28
+#: models.py:68
+msgid "Slug"
+msgstr ""
+
+#: models.py:29
+msgid "Maximum Visible Items"
+msgstr "Počet viditelných pozic"
+
+#: models.py:30
+msgid "Photo format"
+msgstr "Formát fotky"
+
+#: models.py:61
+#: models.py:124
+#: newman_admin.py:83
+#: newman_admin.py:99
+#: newman_admin.py:145
+#: timeline.py:50
+msgid "Export"
+msgstr "Export"
+
+#: models.py:62
+#: models.py:69
+msgid "Exports"
+msgstr "Exporty"
+
+#: models.py:80
+msgid "Aggregated export"
+msgstr "Sdružený export"
+
+#: models.py:81
+msgid "Aggregated  exports"
+msgstr "Sdružené exporty"
+
+#: models.py:89
+msgid "Publishable object"
+msgstr "Publikovatelný objekt"
+
+#: models.py:91
+msgid "Photo"
+msgstr "Fotka"
+
+#: models.py:95
 msgid "Redefined export"
 msgstr "Předefinovaný export"
 
-#: models.py:79 models.py:88
+#: models.py:114
+#: models.py:123
 msgid "Export meta"
 msgstr "Úprava exportu"
 
-#: models.py:80
+#: models.py:115
 msgid "Export metas"
 msgstr "Úpravy exportů"
 
-#: models.py:101
+#: models.py:136
 msgid "Export Position"
 msgstr "Exportní pozice"
 
-#: models.py:102
+#: models.py:137
 msgid "Export Positions"
 msgstr "Exportní pozice"
 
-#: newman_admin.py:30
+#: newman_admin.py:65
 msgid "Export meta options"
 msgstr "Nepovinné předefinování titulku, popisu, fotky"
 
-#: newman_admin.py:42 newman_admin.py:70
+#: newman_admin.py:77
+#: newman_admin.py:92
+#: newman_admin.py:132
 msgid "Visible From"
 msgstr "Viditelné od"
 
-#: newman_admin.py:43 newman_admin.py:74
+#: newman_admin.py:78
+#: newman_admin.py:93
+#: newman_admin.py:136
 msgid "Visible To"
 msgstr "Viditelné do"
 
-#: newman_admin.py:102
-msgid "Positions"
+#: newman_admin.py:140
+msgid "Position"
 msgstr "Pozice"
+
+#: timeline.py:53
+msgid "From"
+msgstr ""
+
+#: timeline.py:54
+msgid "To"
+msgstr ""
+
+#: views.py:95
+msgid "Export with given slug does not exist."
+msgstr ""
+
+#~ msgid "Ellaexports"
+#~ msgstr "Exporty"
