@@ -231,12 +231,12 @@ class TestExport(DatabaseTestCase):
         degen = Export.objects.get_items_for_category(self.categoryH)
         out = map(None, degen)
         self.assert_equals(2 , len(out))
-        self.assert_true(self.publishableA in out)
-        self.assert_true(self.publishableB in out)
+        self.assert_true(self.publishableA.target in out)
+        self.assert_true(self.publishableB.target in out)
         # ordering test
         self.assert_equals(
             out,
-            [self.publishableA, self.publishableB]
+            [self.publishableA.target, self.publishableB.target]
         )
 
     def test_get_items_for_category__placed_by_position(self):
@@ -244,8 +244,8 @@ class TestExport(DatabaseTestCase):
         degen = Export.objects.get_items_for_category(self.categoryI)
         out = map(None, degen)
         self.assert_equals(2, len(out))
-        self.assert_true(self.publishableC in out)
-        self.assert_true(self.publishableD in out)
+        self.assert_true(self.publishableC.target in out)
+        self.assert_true(self.publishableD.target in out)
 
     def test_get_items_for_category__placed_by_position_and_by_listings(self):
         """
@@ -267,14 +267,14 @@ class TestExport(DatabaseTestCase):
         degen = Export.objects.get_items_for_category(self.categoryI)
         out = map(None, degen)
         self.assert_equals(3, len(out))
-        self.assert_true(self.publishableC in out)
-        self.assert_true(self.publishableD in out)
-        self.assert_true(self.publishableA in out)
-        self.assert_true(self.publishableB not in out)
+        self.assert_true(self.publishableC.target in out)
+        self.assert_true(self.publishableD.target in out)
+        self.assert_true(self.publishableA.target in out)
+        self.assert_true(self.publishableB.target not in out)
         # ordering test
         self.assert_equals(
             out, 
-            [self.publishableD, self.publishableC, self.publishableA]
+            [self.publishableD.target, self.publishableA.target, self.publishableC.target]
         )
 
     def test_get_export_data(self):
@@ -413,10 +413,10 @@ class TestExport(DatabaseTestCase):
         out = map(None, items)
         #print out
         self.assert_equals(4, len(out))
-        self.assert_equals(self.publishableB, out[0])
-        self.assert_equals(self.publishableA, out[1])
-        self.assert_equals(self.publishableC, out[2])
-        self.assert_equals(self.publishableD, out[3])
+        self.assert_equals(self.publishableB.target, out[0])
+        self.assert_equals(self.publishableA.target, out[1])
+        self.assert_equals(self.publishableC.target, out[2])
+        self.assert_equals(self.publishableD.target, out[3])
 
     def test_(self):
         " copy/paste template "

@@ -20,7 +20,7 @@ from ella.newman import utils, widgets
 
 DATETIME_FORMAT = models.DATETIME_FORMAT
 TIME_FORMAT = models.TIME_FORMAT
-TIMELINE_STEP = timedelta(hours=2)  # two hours
+TIMELINE_STEP = getattr(settings, 'ELLAEXPORTS_TIMELINE_STEP', timedelta(hours=2))  # two hours by default
 EMPTY_TIMELINE_CELL = None
 DAY_MAX_HOUR = 23
 RANGE_DAYS = 14
@@ -48,17 +48,24 @@ def get_export_choice_form():
 
     class ExportChoiceForm(forms.Form):
         export_slug = forms.ChoiceField(label=_('Export'), choices=exports)
-        #range_from = forms.ChoiceField(choices=timerange)
-        #range_to = forms.ChoiceField(choices=timerange)
         range_from = forms.DateTimeField(label=_('From'), widget=widgets.DateTimeWidget)
-        range_to = forms.DateTimeField(label=_('To'), widget=widgets.DateTimeWidget)
     log.debug('Form generated')
     return ExportChoiceForm
 
-def get_timelined_items(slug, range_from, range_to, step=TIMELINE_STEP):
+def get_timelined_items(slug, range_from, step=TIMELINE_STEP):
+    """
+    @param  step  may contain timedelta object or list of timedelta objects.
+    """
     itemizer = ExportItemizer(slug=slug)
     itemizer.datetime_from = range_from
-    datetime_to = datetime.strptime(range_to, DATETIME_FORMAT)
+    datetime_from = datetime.strptime(range_from, DATETIME_FORMAT)
+    datetime_to = datetime_from + timedelta(days=1)
+    step_list = list()
+    if type(step) in (list, tuple,):
+        step_list = list(step)
+        # in case of steps specified by timedelta list, first step should be set from it.
+        itemizer.datetime_from = datetime_from + step_list.pop(0)
+
     out = list()
     while itemizer.datetime_from <= datetime_to:
         column = list()
@@ -76,7 +83,14 @@ def get_timelined_items(slug, range_from, range_to, step=TIMELINE_STEP):
             out.append(column)
 
         next_itemizer = ExportItemizer(slug=slug)
-        next_itemizer.datetime_from = itemizer.datetime_from + step
+        if type(step) == timedelta:
+            next_itemizer.datetime_from = itemizer.datetime_from + step
+        elif type(step) in (list, tuple,):
+            if not step_list:
+                break
+            next_itemizer.datetime_from = datetime_from + step_list.pop(0) # ..mmm pop, tadadaaa.. from beginning of the list.
+        else:
+            raise AttributeError('Wrong data type of step arg. step must be timedelta, list or tuple type.')
         itemizer = next_itemizer
 
     return out
@@ -145,14 +159,13 @@ def timeline_view(request, extra_context=None):
         log.debug('GENERATING EXPORT ITEMS')
         slug = request_data['export_slug']
         range_from = request_data['range_from']
-        range_to = request_data['range_to']
-        items = get_timelined_items(slug, range_from, range_to)
+        items = get_timelined_items(slug, range_from)
         export = models.Export.objects.get(slug=slug)
         cx.update({
             'export': export,
             #'timeline_table': reformat_list_for_table(items),
             'timeline_data': items,
-            'title': 'Timeline for "%s" (%s-%s)' % (slug, range_from, range_to)
+            'title': 'Timeline for "%s" (%s)' % (slug, range_from)
         })
     template_paths = [
         'newman/ellaexports/timeline.html',

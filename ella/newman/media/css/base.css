@@ -584,7 +584,7 @@ fieldset.collapse legend { background-image: url(../ico/16/14_layer_raiselayer.p
 /* TIMELINE */
 
 .timeline-column {
-    width: 140px;
+    width: 180px;
     float: left;
     padding: 15px;
 }
@@ -604,23 +604,31 @@ fieldset.collapse legend { background-image: url(../ico/16/14_layer_raiselayer.p
     opacity: .7;*/
 }
 
+.timeline-column p.description, .timeline-item div.timeline-item-header .counter {
+    font-size: 14pt;
+    font-weight: bold;
+    color: #005F00;
+    line-height: 1.2em;
+}
+
 .timeline-item-hitcounts {
     padding: 9px;
 }
 
 .timeline-item-navigation {
     padding: 9px;
+    font-size: 9pt;
+    font-weight: bold;
 }
 
 .timeline-ul { }
 
 .timeline-ul .timeline-item span {
-    text-decoration: underline;
     color: #005F00;
     cursor: pointer;
 }
 
-.timeline-ul .timeline-item p {
+.timeline-ul .timeline-item p, .timeline-item div.timeline-item-header  {
     padding: 4px 9px 0 9px;
 }
 
