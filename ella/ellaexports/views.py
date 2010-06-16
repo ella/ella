@@ -136,14 +136,14 @@ class AggregatedMrssExport(MrssExport):
 
     def get_context(self, request, **kwargs):
         slug = kwargs.get('slug', None)
-        aggregated_export = get_cached_object_or_404(AggregatedExport, slug=slug)
+        export_object = get_cached_object_or_404(AggregatedExport, slug=slug)
 
         items = []
         titles = []
         links = []
         descriptions = []
 
-        for part in aggregated_export.parts:
+        for part in export_object.parts:
             for i in part.items:
                 items.append(i)
 
@@ -153,13 +153,12 @@ class AggregatedMrssExport(MrssExport):
 
         context = {
             'export_slug': slug,
-            'export_object': None,
+            'export_object': export_object,
             'exported_items': items,
             'titles': titles,
             'links': links,
             'descriptions': descriptions,
             'category': None,
-            'aggregated_export': aggregated_export,
         }
         return context
 
