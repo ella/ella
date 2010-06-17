@@ -399,7 +399,7 @@ class NewmanModelAdmin(XModelAdmin):
         key = 'filter__%s__%s' % (ct.app_label, ct.model)
         if req_path.find('pop') >= 0: # if popup is displayed, remove pop string from request path
             is_popup = True
-            req_path = re.sub(r'(\?)(pop=&|pop=|pop&|pop)(.*)', r'\1\3', req_path)
+            req_path = re.sub(r'(.*)(pop=&|&pop=|pop=|pop&|&pop|pop)(.*)', r'\1\3', req_path)
         if req_path.endswith('?') and is_popup:
             req_path = '' # if popup with no active filters is displayed, do not save empty filter settings
         if req_path.find('?') > 0:

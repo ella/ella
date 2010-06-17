@@ -115,7 +115,12 @@ class MetaInlineForm(modelforms.ModelForm):
             existing_object = True
             instance = kwargs['instance']
             if instance:
-                id_initial, from_initial, to_initial, export_initial, position_initial = self.get_initial_data(instance)
+                initial = self.get_initial_data(instance)
+                id_initial = initial['pk']
+                from_initial = initial['visible_from']
+                to_initial = initial['visible_to']
+                export_initial = initial['export_pk']
+                position_initial = initial['position']
         elif 'data' not in kwargs:
             new_object = True
 
@@ -153,10 +158,17 @@ class MetaInlineForm(modelforms.ModelForm):
         self.fields[field_name] = self.base_fields[field_name] = value
 
     def get_initial_data(self, instance):
-        " @return tuple (visible_from, visible_to, export_initial, position) "
+        " @return dict (visible_from, visible_to, export_initial, position) "
         positions = models.ExportPosition.objects.filter(object=instance)
+        out = {
+            'pk': '', 
+            'visible_from': '', 
+            'visible_to': None, 
+            'export_pk': None, 
+            'position': ''
+        }
         if not positions:
-            return ('', '', None, None)
+            return out 
         pcount = positions.count()
         if pcount > 1 and not MetaInlineForm._export_stack.get(instance, False):
             MetaInlineForm._export_stack[instance] = list()
@@ -165,7 +177,13 @@ class MetaInlineForm(modelforms.ModelForm):
             pos = positions[0]
         elif pcount > 1:
             pos = MetaInlineForm._export_stack[instance].pop()
-        out = (pos.pk, pos.visible_from, pos.visible_to, pos.export.pk, pos.position)
+        out.update({
+            'pk': pos.pk, 
+            'visible_from': pos.visible_from, 
+            'visible_to': pos.visible_to, 
+            'export_pk': pos.export.pk, 
+            'position': pos.position
+        })
         return out
 
     @staticmethod

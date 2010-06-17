@@ -16,7 +16,6 @@
     <form action="/ellaexports/export/timeline/" method="get" class="js-form">
           {{ export_form.export_slug.label }}: {{ export_form.export_slug }}
           {{ export_form.range_from.label }}: {{ export_form.range_from }}
-          {{ export_form.range_to.label }}: {{ export_form.range_to }}
           <a id="id-send-timeline" class="js-submit icn btn ok">{% trans "Send" %}</a>
         <ul>
     </form>
@@ -48,42 +47,49 @@
     </div>
 
     <div class="timeline-table">
+    <!-- timeline items -->
     {% for column in timeline_data %}
         <div class="timeline-column">
-        <p class="descriotion">
+        <p class="description">
             {{ column.0 }}
         </p>
         <div class="timeline-ul">
             {% for cell in column %}
                 {% if not forloop.first %}
                     <div class="timeline-item">
+                        <div class="timeline-item-header">
+                            <span class="counter">{{ forloop.counter0 }}</span>
+                            {% if cell.pk %}
+                                &nbsp;
+                                <span class="timeline-item-navigation noscreen">
+                                    <a
+                                        id="change_{{ forloop.counter0 }};{{ cell.pk }};{{ export.pk }};{{ cell.column_date_from }}"
+                                        class="icn btn edit js-hashadr"
+                                        href="{% get_newman_url for cell %}"
+                                    >{% trans "Change" %}</a> {# odskok na editaci publishable objektu #}
+                                    {% comment %}<span
+                                        id=""
+                                        class="delete"
+                                    >{% trans "Delete" %}</span>{% endcomment %}
+
+                                    {% comment %}
+                                    <span
+                                        id="{{ forloop.counter0 }};{{ cell.pk }};{{ export.pk }};{{ cell.column_date_from }}"
+                                        class="append"
+                                    >{% trans "Append" %}</span>
+                                    <span
+                                        id="{{ forloop.counter0 }};{{ cell.pk }};{{ export.pk }};{{ cell.column_date_from }}"
+                                        class="insert"
+                                    >{% trans "Insert" %}</span>
+                                    {% endcomment %}
+
+                                    {# newmanurl newman:exports_export_timeline_insert id_item=cell.pk,id_export=export.pk,position=forloop.counter #}
+                                </span>
+                            {% endif %}
+                        </div>
                         <p>{{ cell }}</p>
                         {% if cell.pk %}
                             <div class="timeline-item-hitcounts">{% trans "Hit Counts" %}: {{ cell.hitcount.hits }}</div>
-                            <div class="timeline-item-navigation noscreen">
-                                <a
-                                    id="change_{{ forloop.counter0 }};{{ cell.pk }};{{ export.pk }};{{ cell.column_date_from }}"
-                                    class="icn btn edit js-hashadr"
-                                    href="{% get_newman_url for cell %}"
-                                >{% trans "Change" %}</a> {# odskok na editaci publishable objektu #}
-                                {% comment %}<span
-                                    id=""
-                                    class="delete"
-                                >{% trans "Delete" %}</span>{% endcomment %}
-
-                                {% comment %}
-                                <span
-                                    id="{{ forloop.counter0 }};{{ cell.pk }};{{ export.pk }};{{ cell.column_date_from }}"
-                                    class="append"
-                                >{% trans "Append" %}</span>
-                                <span
-                                    id="{{ forloop.counter0 }};{{ cell.pk }};{{ export.pk }};{{ cell.column_date_from }}"
-                                    class="insert"
-                                >{% trans "Insert" %}</span>
-                                {% endcomment %}
-
-                                {# newmanurl newman:exports_export_timeline_insert id_item=cell.pk,id_export=export.pk,position=forloop.counter #}
-                            </div>
                         {% endif %}
                     </div>
                 {% endif %}
@@ -93,6 +99,7 @@
     {% endfor %}
     <h1> {{ NEWMAN_MEDIA_URL }} </h1>
     </div> {# timeline-table #}
+    <!-- end of timeline items -->
 
     {% comment %}{# TIMELINE AS TABLE #}
     <table id="id-exported-items">

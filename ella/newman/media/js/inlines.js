@@ -750,6 +750,7 @@ var __ExportMetaFormHandler = function() {
 
     this.init = function() {
         FormHandler.call(this, 'exportmeta');
+        this.INLINE_SELECTOR = '.inline-related';
     };
 
     this.swap_fields = function(index, element) {
@@ -770,15 +771,56 @@ var __ExportMetaFormHandler = function() {
     };
 
     this.suggest_changed_handler = function(evt) {
-        // sugg. field has class GenericSuggestField
+        // suggest field has class GenericSuggestField
         // hidden field has class vForeignKeyRawIdAdminField hidden
-        log_inline.log('Export suggester changed!');
+        var $target = $(evt.target);
+        var value = $target.val();
+        if (value == '#' || value == '') {
+            return true;
+        }
+        var placement_date_from = this.$document.find('#id_placement_set-0-publish_from').val();
+        if (!placement_date_from) {
+            return true;
+        }
+        var $inline = $target.closest(this.INLINE_SELECTOR);
+        var $field = $inline.find('.form-row.position_from input.vDateTimeInput');
+        if ($field.val() == '') {
+            $field.val(placement_date_from);
+        }
+        return true;
+    };
+
+    this.show_additional_fields_handler = function(evt) {
+        var $target = $(evt.target);
+        var $noscreen = $target.parent().siblings('div.noscreen');
+        //log_inline.log('CLICK!', $target, ' noscreen:', $noscreen);
+        $noscreen.toggle();
+        var display = $noscreen.css('display');
+        if (display == 'none' || !display) {
+            $target.html( gettext('Show additional fields') );
+        } else {
+            $target.html( gettext('Hide additional fields') );
+        }
+        return false;
+    };
+
+    this.change_style = function($fieldset) {
+        function display_inline($elem) {
+            $elem.css('display', 'inline');
+            //$elem.css('max-width', '90px');
+            //$elem.css('float', 'left');
+        }
+        var $div = $fieldset.find('div.collapse-button');
+        display_inline($div);
+        $div = $fieldset.find('div.form-row.position_from');
+        display_inline($div);
     };
 
     this.handle_form = function (document_dom_element, $document) {
         this.$document = $document;
         this.document = document_dom_element;
         // hide several fields
+        var $fieldset = $document.find('fieldset.exportmeta-inline');
         var $noscreens = $document.find('fieldset.exportmeta-inline > div.noscreen');
         $noscreens.hide();
 
@@ -800,9 +842,16 @@ var __ExportMetaFormHandler = function() {
         this.$exportmeta_inline = $document.find('fieldset.exportmeta-inline:first').closest('div.inline-group');
         this.$exportmeta_inline.insertAfter($placement);
 
+        // change style for several div elements
+        this.change_style($fieldset);
+
         // suggester changed event
         var $field = this.$exportmeta_inline.find('.GenericSuggestField').siblings('.vForeignKeyRawIdAdminField');
         $field.bind('change', this_decorator(this, this.suggest_changed_handler) );
+        $fieldset.find('a.js-export-show-additional-fields').live(
+            'click', 
+            this_decorator(this, this.show_additional_fields_handler)
+        );
     };
 
     this.is_suitable = function (document_dom_element, $document) {
@@ -814,6 +863,9 @@ var __ExportMetaFormHandler = function() {
     };
 
     this.preset_load_completed = function (evt) {
+        NewmanInline.remove_inlineadmin_element_value('input[name^=exportmeta_set-]', '-publishable');
+        NewmanInline.remove_inlineadmin_element_value('input[name^=exportmeta_set-]', '-id');
+        NewmanInline.remove_inlineadmin_element_value('input[name^=exportmeta_set-]', '-position_id');
     };
 
     return this;

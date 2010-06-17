@@ -780,6 +780,24 @@ $( function() {
             $(input).removeClass('blink');
         }
 
+        function focus_errored_element(input_element) {
+            var MOVE_UP_PIXELS = 60;
+            var $inp = $(input_element);
+            var element_id = $inp.attr('id');
+            input_element.focus();
+            if (element_id != '') {
+                // try to find label and scroll div#content to viewport if neccessary
+                $label = $( str_concat('label[for=', element_id, ']') );
+                //log_generic.log('label:', $label, ' label for=', element_id);
+                var detector = new ContentElementViewportDetector($inp);
+                if (!detector.top_in_viewport()) {
+                    var $content = $('div#content');
+                    var existing_offset = $content.offset();
+                    $content.offset({top: existing_offset.top + MOVE_UP_PIXELS});
+                }
+            }
+        }
+
         var res;
         var $form = this._form;
         try {
@@ -868,7 +886,7 @@ $( function() {
                 $p_element.click( function(evt) { // focus and scroll to the input
                     if (evt.button != 0) return;
                     var input = $(this).closest('p').data('rel_input');
-                    try { input.focus(); } catch(e) {}
+                    try { focus_errored_element(input); } catch(e) { carp(e); }
                     $(input).addClass('blink')
                     .closest('.collapsed').removeClass('collapsed').addClass('collapse');
                     setTimeout( error_blinking_input, 1500 );
