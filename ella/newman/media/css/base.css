@@ -586,7 +586,7 @@ fieldset.collapse legend { background-image: url(../ico/16/14_layer_raiselayer.p
 .timeline-column {
     width: 180px;
     float: left;
-    padding: 15px;
+    padding: 0 15px;
 }
 
 .timeline-table {
