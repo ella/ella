@@ -138,27 +138,10 @@ class AggregatedMrssExport(MrssExport):
         slug = kwargs.get('slug', None)
         export_object = get_cached_object_or_404(AggregatedExport, slug=slug)
 
-        items = []
-        titles = []
-        links = []
-        descriptions = []
-
-        for part in export_object.parts:
-            for i in part.items:
-                items.append(i)
-
-            titles.append(part.title)
-            links.append(part.url)
-            descriptions.append(part.description)
-
         context = {
             'export_slug': slug,
             'export_object': export_object,
-            'exported_items': items,
-            'titles': titles,
-            'links': links,
-            'descriptions': descriptions,
-            'category': None,
+            'category': None
         }
         return context
 
