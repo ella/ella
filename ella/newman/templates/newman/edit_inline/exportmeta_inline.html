@@ -1,0 +1,45 @@
+{% extends "newman/edit_inline/stacked.html" %}
+
+{% block fieldset %}
+    <fieldset class="module aligned exportmeta-inline {{ fieldset.classes }}" style="margin: 10px;">
+        {% if fieldset.name %}
+            <legend style="font-size: 120%; font-weight: bold;">{{ fieldset.name }}</legend>
+        {% endif %}
+
+        {% if fieldset.description %}
+            <div class="description">{{ fieldset.description|safe }}</div>
+        {% endif %}
+
+        <div class="noscreen">
+        {% for line in fieldset %}
+                {% for field in line %}
+                    {% ifequal field.field.name "export" %}
+                        </div> <!-- end of div class="noscreen" -->
+                    {% endifequal %}
+                    {% if forloop.first %}
+                        <div class="form-row{% if line.errors %} errors{% endif %} {% for field in line %}{{ field.field.name }} {% endfor %} ">
+                            {{ line.errors }}
+                    {% endif %}
+                    <div class="form-row-field{% if not line.fields|length_is:"1" %} field-box{% endif %}{% if field.field.field.hint_text %} hint-enhanced{% endif %}{% if field.field.field.help_text %} help-enhanced{% endif %}">
+                        {% if field.is_checkbox %}
+                            {{ field.field }}{{ field.label_tag }}
+                        {% else  %}
+                            {{ field.label_tag }}{{ field.field }}
+                        {% endif %}
+                        {% if field.field.field.hint_text %}
+                            <p class="hint">{{ field.field.field.hint_text|safe }}</p>
+                        {% endif %}
+                        {% if field.field.field.help_text %}
+                            <p class="help">{{ field.field.field.help_text|safe }}</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+        {% block collapse_button %}
+        <div class="collapse-button">
+            <a class="icn btn idea js-export-show-additional-fields">{% trans "Show additional fields" %}</a>
+        </div>
+        {% endblock %}
+    </fieldset>
+{% endblock %}

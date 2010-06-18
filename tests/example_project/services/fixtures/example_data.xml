@@ -493,4 +493,27 @@
         <field type="CharField" name="name">Moooo</field>
     </object>
     
+
+    <!-- Photo formats -->
+    <object pk="1" model="photos.format">
+        <field type="CharField" name="name">Export format</field>
+        <field type="IntegerField" name="max_width">300</field>
+        <field type="IntegerField" name="max_height">300</field>
+        <field type="BooleanField" name="flexible_height">1</field>
+        <field type="IntegerField" name="flexible_max_height">900</field>
+        <field type="BooleanField" name="stretch">1</field>
+        <field type="BooleanField" name="nocrop">0</field>
+        <field to="sites.site" name="sites" rel="ManyToManyRel"><object pk="1"></object></field>
+    </object>
+
+    <!-- Ellaexports -->
+
+    <object pk="1" model="ellaexports.export">
+        <field to="core.category" name="category" rel="ManyToOneRel">1</field>
+        <field type="BooleanField" name="use_objects_in_category">1</field>
+        <field type="CharField" name="title">Example Export</field>
+        <field type="SlugField" name="slug">example-export</field>
+        <field type="IntegerField" name="max_visible_items">10</field>
+        <field to="photos.format" name="photo_format" rel="ManyToOneRel">1</field>
+    </object>
 </django-objects>

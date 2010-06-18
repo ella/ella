@@ -16,13 +16,14 @@ log = logging.getLogger('ella.exports')
 def cmp_listing_or_meta(x, y):
     " Sorts items in descending order. "
     from ella.ellaexports.models import ExportPosition
+    from ella.core.models import Publishable
     def return_from_datetime(obj):
-        if type(obj) == Listing:
+        if type(obj) in (Listing, Publishable):
             return obj.publish_from
         elif type(obj) == ExportPosition:
             return obj.visible_from
 
-    classes = (Listing, ExportPosition,)
+    classes = (Listing, ExportPosition, Publishable)
     if type(x) not in classes or type(y) not in classes:
         raise NotImplementedError
 
@@ -129,12 +130,12 @@ class ExportItemizer(object):
         This method changes "out" parameter.
         """
         tmp = list()
-        positions = fix_positions.order_by('position')
+        positions = list( fix_positions.filter(visible_from__lte=self._datetime_from).order_by('-visible_from', 'position') )
         positions_publishables = map( self.__get_publishable, positions )
 
         # 1. get collision publishables
         # 2. remove them from tmp
-        # 3. insert fix_position items to their positions
+        # 3. insert fix_position items to their positions (with no duplicates)
         for i in range(len(out)):
             item = out.pop(0)
             pub = self.__get_publishable(item)
@@ -147,13 +148,19 @@ class ExportItemizer(object):
                 item = out.pop(0)
                 tmp.append(item)
 
+        added_targets = list()
         for item in positions:
             pos = item.position - 1
+            target = item.object.publishable.target
+            if target in added_targets:
+                continue
             if pos >= len(tmp):
                 log.error('Cannot override export item #%d' % item.position)
-                tmp.append(item)
+                tmp.append(self.__get_publishable(item))
+                added_targets.append(target)
                 continue
-            tmp.insert(pos, item)
+            tmp.insert(pos, self.__get_publishable(item))
+            added_targets.append(target)
 
         publishables = list()
         for t in tmp:
@@ -165,8 +172,26 @@ class ExportItemizer(object):
             return obj.placement.publishable
         elif type(obj) == ExportPosition:
             return obj.object.publishable
+        elif type(obj) == Publishable:
+            return obj
+        elif isinstance(obj, Publishable): # subclass
+            return obj
         else:
             raise NotImplementedError
+
+    def __get_publishable_target(self, obj):
+        if type(obj) == Publishable:
+            ret = obj.target
+            ret.photo = obj.photo
+            ret.title = obj.title
+            ret.description = obj.description
+            ret.export_thumbnail_url = obj.export_thumbnail_url
+            ret.feed_updated_raw_datetime = obj.feed_updated_raw_datetime
+            ret.feed_updated = obj.feed_updated
+            return ret
+        elif isinstance(obj, Publishable): # subclass
+            return obj
+        return obj
 
     def __get_overloaded_publishable(self, obj, export):
         """ 
@@ -259,13 +284,14 @@ class ExportItemizer(object):
                 ))
             #log.debug(remove_diacritical('Items via Listing: %s' % objects))
             # make items unique, we don't want to prioritize ExportPositions with position == 0 over Listing items
-            pos_publishables = map( self.__get_publishable, positions )
-            obj_publishables = map( self.__get_publishable, objects )
+            pos_publishables = map( None, positions )
+            obj_publishables = map( None, objects )
             for item in pos_publishables:
                 if item not in obj_publishables:
                     objects.append(item)
             #log.debug(remove_diacritical('Items via ExportPosition: %s' % positions))
             objects.sort(cmp=cmp_listing_or_meta)
+            objects = map( self.__get_publishable, objects )
             #log.debug(remove_diacritical('Export items sorted: %s' % objects))
             if fix_positions:
                 # Assign positions of items (if position is overloaded via ExportPosition)
@@ -281,8 +307,9 @@ class ExportItemizer(object):
         # extract Publishable objects from Listing/ExportPosition objects
         self.__items = list()
         for i in pre_out:
-            pub = self.__get_overloaded_publishable(i, export=use_export)
-            self.__items.append(pub)
+            pub = self.__get_overloaded_publishable( i, export=use_export )
+            res = self.__get_publishable_target(pub)
+            self.__items.append(res)
 
 class ExportManager(models.Manager):
 
