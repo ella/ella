@@ -5,7 +5,7 @@ from ella.positions.models import Position
 
 register = template.Library()
 
-@register.inclusion_tag('newman/newman_frontend_admin.html', takes_context=True)
+@register.inclusion_tag('newman/tpl_tags/newman_frontend_admin.html', takes_context=True)
 def newman_frontend_admin(context):
     user = context['user']
     vars = {}
@@ -31,7 +31,7 @@ def newman_frontend_admin(context):
     now = datetime.datetime.now()
     lookup = (Q(active_from__isnull=True) | Q(active_from__lte=now)) & (Q(active_till__isnull=True) | Q(active_till__gt=now))
     positions = Position.objects.filter(lookup, category=vars['category'].pk, disabled=False, target_id__isnull=False)
-    print positions.query
+    #print positions.query
     vars['positions'] = positions
 
     if object:
