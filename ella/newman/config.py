@@ -32,6 +32,9 @@ STATUS_JSON_REDIRECT = 'redirect'
 HTTP_OK = 200
 HTTP_ERROR = 405
 
+# Newman base URL (suitable when newman_frontend_tags' tags is used)
+BASE_URL = getattr(settings, 'NEWMAN_BASE_URL', '')
+
 # Maximum autosave objects hold for bound object:
 AUTOSAVE_MAX_AMOUNT = getattr(settings, 'NEWMAN_AUTOSAVE_MAX_AMOUNT', 3)
 
