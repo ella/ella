@@ -59,7 +59,7 @@ def newman_frontend_admin(context):
 logout_url = newman_config.BASE_URL + 'logout/'
 class NewmanLogoutNode(template.Node):
     def render(self, context):
-        return logout_url 
+        return logout_url
 
 @register.tag
 def newman_frontend_logout(parser, token):
