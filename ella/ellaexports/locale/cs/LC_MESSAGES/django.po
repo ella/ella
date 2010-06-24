@@ -16,6 +16,14 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 
+#: templates/newman/edit_inline/exportmeta_inline.html:41
+msgid "Show additional fields"
+msgstr "Zobrazit podrobnosti"
+
+#: templates/newman/edit_inline/exportmeta_inline.html:42
+msgid "Hide additional fields"
+msgstr "Skrýt podrobnosti"
+
 #: models.py:24
 msgid "Category"
 msgstr "Kategorie"
