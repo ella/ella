@@ -50,7 +50,7 @@ msgid ""
 "There is already a Placement object published in\n"
 "                    category %(category)s with the same URL referring to %(target)s.\n"
 "                    Please change the slug or publish date."
-msgstr ""
+msgstr "Zkuste změnit slug. Publikace se shodnou URL již existuje v kategorii \"%(category)s\" pro objekt \"%(target)s\" ."
 
 #: admin.py:189
 #: newman_admin.py:197
