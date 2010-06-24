@@ -151,6 +151,21 @@ class XModelAdmin(ModelAdmin):
         media = self.media + adminForm.media
         inline_admin_formsets, media = self.get_change_view_inline_formsets(request, obj, formsets, media)
 
+        error_dict = {}
+        if not form.is_valid():
+            for e in form.errors:
+                error_dict[u"id_%s" % e] = [ u"%s" % ee for ee in form.errors[e] ]
+        prefixes = {}
+        for formset in formsets:
+            prefix = formset.get_default_prefix()
+            prefix_no = prefixes.get(prefix, 0)
+            prefixes[prefix] = prefix_no + 1
+            if prefixes[prefix] != 1:
+                prefix = "%s-%s" % (prefix, prefixes[prefix])
+            if formset.errors:
+                for e in formset.errors[prefix_no]:
+                    error_dict[u"id_%s-%d-%s" % (prefix, prefix_no, e)] = [u"%s" % ee for ee in formset.errors[prefix_no][e]]
+
         cx = {
             'title': _('Change %s') % force_unicode(opts.verbose_name),
             'adminform': adminForm,
@@ -160,6 +175,7 @@ class XModelAdmin(ModelAdmin):
             'media': media,
             'inline_admin_formsets': inline_admin_formsets,
             'errors': helpers.AdminErrorList(form, formsets),
+            'error_dict': error_dict,
             'root_path': self.admin_site.root_path,
             'app_label': opts.app_label,
         }
