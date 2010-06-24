@@ -699,6 +699,9 @@ class NewmanModelAdmin(XModelAdmin):
                         'messages': map(lambda item: item, map(give_me_unicode, err_item[key]))
                     }
                     error_list.append(err_dict)
+        # Other errors (e.g. db errors)
+        if 'error_dict' in context and 'id___all__' in context['error_dict']:
+            error_list.append({'messages': context['error_dict']['id___all__'], 'id': 'id___all__',})
 
         return utils.JsonResponse(_('Please correct errors in form'), errors=error_list, status=STATUS_FORM_ERROR)
 
