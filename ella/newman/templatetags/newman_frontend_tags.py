@@ -39,12 +39,15 @@ def newman_frontend_admin(context):
     vars['placement'] = placement
     vars['category'] = context.get('category')
     vars['newman_index_url'] = newman_config.BASE_URL
+    category = vars['category']
+    if not category or not category.pk:
+        return vars
 
     from django.db.models import Q
     import datetime
     now = datetime.datetime.now()
     lookup = (Q(active_from__isnull=True) | Q(active_from__lte=now)) & (Q(active_till__isnull=True) | Q(active_till__gt=now))
-    positions = Position.objects.filter(lookup, category=vars['category'].pk, disabled=False, target_id__isnull=False)
+    positions = Position.objects.filter(lookup, category=category.pk, disabled=False, target_id__isnull=False)
     #print positions.query
     vars['positions'] = positions
 
