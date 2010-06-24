@@ -409,6 +409,14 @@ msgstr "Rychlý náhled"
 msgid "Preview on site"
 msgstr "Náhled na webu"
 
+#: templates/newman/edit_inline/exportmeta_inline.html:41
+msgid "Show additional fields"
+msgstr "Zobrazit podrobnosti"
+
+#: templates/newman/edit_inline/exportmeta_inline.html:42
+msgid "Hide additional fields"
+msgstr "Skrýt podrobnosti"
+
 #~ msgid "Now"
 #~ msgstr "Nyní"
 #~ msgid "6am"
