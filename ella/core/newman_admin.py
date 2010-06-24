@@ -149,6 +149,9 @@ class PlacementForm(modelforms.ModelForm):
         if obj.pk:
             cat = getattr(obj, 'category', None)
         obj_slug = getattr(obj, 'slug', obj.pk)
+        # if Placement has no slug, slug from Publishable object should be considered in following checks:
+        if not obj_slug:
+            obj_slug = self.cleaned_data['publishable'].slug
 
         main = None
         d = self.cleaned_data
@@ -164,7 +167,7 @@ class PlacementForm(modelforms.ModelForm):
         qset = Placement.objects.filter(
             category=d['category'],
             slug=d['slug'],
-            publishable=obj,
+            #publishable=obj,
             static=d['static']
         )
         if d['static']: # allow placements that do not overlap
@@ -190,7 +193,7 @@ class PlacementForm(modelforms.ModelForm):
                     category %(category)s with the same URL referring to %(target)s.
                     Please change the slug or publish date.''') % {
                         'category' : plac.category,
-                        'target' : plac.target,
+                        'target' : plac.publishable,
                     })
 
         if cat and not main:

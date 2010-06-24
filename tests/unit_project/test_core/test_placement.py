@@ -6,6 +6,7 @@ from django.contrib.sites.models import Site
 from django.contrib.redirects.models import Redirect
 
 from ella.core.models import Placement, Category
+from ella.articles.models import Article
 
 from unit_project.test_core import create_basic_categories, create_and_place_a_publishable
 
@@ -44,6 +45,39 @@ class TestPlacement(DatabaseTestCase):
         )
 
         self.assert_equals(u'http://not-example.com/2008/1/10/articles/first-article/', p.get_absolute_url())
+
+    def test_duplicity(self):
+        site = Site.objects.create(
+            name='some site',
+            domain='not-example.com'
+        )
+        category = Category.objects.create(
+            title=u"再见 category",
+            description=u"example testing category, second site",
+            site=site,
+            slug=u'zai-jian-category',
+        )
+        p = Placement.objects.create(
+            publishable=self.publishable,
+            category=category,
+            publish_from=datetime(2008,1,10)
+        )
+        publishable_two = Article.objects.create(
+            title=u'First Article',
+            slug=u'first-article',
+            description=u'Some\nlonger\ntext',
+            category=category
+        )
+        raised = False
+        try:
+            p_two = Placement.objects.create(
+                publishable=publishable_two,
+                category=category,
+                publish_from=datetime(2008,1,10)
+            )
+        except ValueError:
+            raised = True #OK
+        self.assert_equals(True, raised) # ValueError should be raised as duplicity check works right way.
 
     def test_default_slug(self):
         self.assert_equals(self.publishable.slug, self.placement.slug)
