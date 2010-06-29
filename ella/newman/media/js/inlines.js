@@ -108,7 +108,7 @@ var __FormHandler = function () {
         return true;
     };
 
-    // handles adding of new inline item
+    // handles inline item addition
     this.add_inline_item = function (evt) {
     };
 

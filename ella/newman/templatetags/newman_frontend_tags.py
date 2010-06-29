@@ -54,7 +54,8 @@ def newman_frontend_admin(context):
     if obj:
         vars['object'] = obj
         vars['newman_object_url'] = get_newman_url(obj)
-        vars['hitcount'] = HitCount.objects.get(placement=placement.pk)
+        if placement:
+            vars['hitcount'] = HitCount.objects.get(placement=placement.pk)
 
     return vars
 
