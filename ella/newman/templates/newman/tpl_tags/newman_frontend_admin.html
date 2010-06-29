@@ -35,9 +35,11 @@
   {% endif %}
 
   <p>
-  {% trans object.content_type.name %}:
-  <strong style="font-weight:bold">{{ object }}</strong>,
-  návštěv: <strong style="font-weight:bold">{{ hitcount.hits }}</strong>
+  {% if object.content_type %}
+    {% trans object.content_type.name %}:
+    <strong style="font-weight:bold">{{ object }}</strong>,
+    návštěv: <strong style="font-weight:bold">{{ hitcount.hits }}</strong>
+  {% endif %}
   </p>
   
   <div style="float: right;">
