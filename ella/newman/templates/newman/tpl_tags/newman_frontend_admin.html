@@ -1,11 +1,10 @@
 {% load newman_frontend_tags %}
 <div class="fe-admin-toolbar">
     <div class="toolbar">
-
-<p>Přihlášen/a jako admin: 
-    <strong style="font-weight:bold">{{ user.get_full_name }}</strong> 
-    (<a id="js-newman-logout-button" href="{% newman_frontend_logout %}"><strong>odhlásit</strong></a>)
-</p>
+		<p>
+			Uživatel/ka: <strong>{{ user.get_full_name }}</strong>
+			(<a href="{{ newman_index_url }}">přejít do adminu</a> | <a id="js-newman-logout-button" class="newman-logout-button" href="{% newman_frontend_logout %}">odhlásit se</a>)
+		</p>
 
 {% if object %}
 
@@ -14,7 +13,7 @@
     <div class="listings-container">
         <ul class="listings">
           <li><p>
-      publikováno od: <strong style="font-weight:bold">{{ object.publish_from|date:"d.m.Y H:i:s" }}</strong>
+      publikováno od: <strong>{{ object.publish_from|date:"d.m.Y H:i:s" }}</strong>
           </p></li>
           {% for l in placement.listing_set.all %}
             <li><p>{{ l.publish_from|date:"d.m.Y H:i:s" }} | {{ l.category }}</p></li>
@@ -37,14 +36,13 @@
   <p>
   {% if object.content_type %}
     {% trans object.content_type.name %}:
-    <strong style="font-weight:bold">{{ object }}</strong>,
-    návštěv: <strong style="font-weight:bold">{{ hitcount.hits }}</strong>
+    <strong>{{ object }}</strong>,
+    zobrazení: <strong>{{ hitcount.hits }}</strong>
   {% endif %}
   </p>
   
-  <div style="float: right;">
-  <button onclick="location.href='{{ newman_object_url }}'"><span>Edituj</span></button>
-  </div>
+  <p><a class="newman-edit-button" href="{{ newman_object_url }}">Editovat článek</a></p>
+  
 {% endif %}
 
 
