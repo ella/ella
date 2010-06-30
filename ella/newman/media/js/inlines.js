@@ -521,16 +521,18 @@ var __GalleryFormHandler = function () {
             log_inline.log('GalleryItems won\'t be recounted.(reason: already recounted)');
             return;
         }
-        $form.find('.gallery-item .item-order').each( function() {
+        $form.find('.gallery-item .item-order').each( function(index, element) {
             if (!this.value) return;
             var value = parseInt(this.value);
             var multiplier = 1;
             if (value >= 1 && value <= 99) {
                 multiplier = NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER;
             } else if (value >= NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER && value <= (99 * NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER)) {
-                multiplier = 1.0 / NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER;
+                //multiplier = 1.0 / NEWMAN_GALLERY_ITEM_ORDER_DEGREE_MULTIPLIER;
+                multiplier = 1;
             }
-            var res = Math.floor(Number(value) * multiplier);// force res to be a whole number
+            //var res = Math.floor(Number(value) * multiplier);// force res to be a whole number
+            var res = Math.floor(Number(index + 1) * multiplier);// force res to be a whole number
             log_inline.log('Recounting ' , value , ' to ' , res , ' for element ' , this);
             this.value = res.toString();
             me.gallery_ordering_modified = true;
