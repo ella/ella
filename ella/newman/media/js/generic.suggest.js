@@ -3,6 +3,9 @@
  * requires: jQuery 1.4.2+, 
  *          str_concat() function (effective string concatenation).
  *
+ * provides:
+ *          GenericSuggestLib object.
+ *
  */
 /* TODO:
  * neukazovat vybrané hodnoty v lupičce,

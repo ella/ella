@@ -1,6 +1,9 @@
 {% spaceless %}
 {% if cl.search_fields %}
     {# <form class="js-form" id="changelist-search" action="." method="get" style="display: inline; margin: 0; padding: 0; vertical-align: middle;"> #}
+            {% if cl.is_popup %}
+                <input type="hidden" id="id_pop" name="pop" value="" />
+            {% endif %}
             <input type="text" size="32" name="{{ search_var }}" value="{{ cl.query }}" id="searchbar" />
             <a class="btn icn search def" href="">{% trans 'Search' %}</a>
             {% if show_result_count %}

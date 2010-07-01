@@ -1065,10 +1065,13 @@ $( function() {
     $('#search-form select[name=action]').live('keypress', search_on_enter);
 
     // Search in change lists
-    function changelist_search($input) {
+    function changelist_search($input, $pop) {
         if ($('#changelist').length == 0) return;   // We're not in changelist
         var search_terms = $input.val();
         var adr_term = str_concat('&q=' , search_terms);
+        if ($pop.length > 0) {
+            adr_term = str_concat('&pop=', adr_term);
+        }
         var loaded = Kobayashi.closest_loaded( $input.get(0) );
         if (loaded.id == 'content') {
             adr(adr_term);
@@ -1081,11 +1084,13 @@ $( function() {
     $('#filters-handler .btn.search').live('click', function(evt) {
         if (evt.button != 0) return;
         var $input = $(this).prev('input#searchbar');
-        return changelist_search( $input );
+        var $pop = $(this).siblings('input#id_pop');
+        return changelist_search( $input, $pop );
     });
     $('#filters-handler #searchbar').live('keyup', function(evt) {
         if (evt.keyCode == CR || evt.keyCode == LF) { } else return;
-        return changelist_search( $(this) );
+        var $pop = $(this).siblings('input#id_pop');
+        return changelist_search( $(this), $pop );
     });
 });
 
@@ -1579,17 +1584,30 @@ $( function() {
             modify_getpar_href(this);
         });
 
+        // search button
+        $target.find('#filters-handler .btn.icn.search').attr('href', 'filters::overlay-content::filters/');
+
         // filters
         var $filt = $('#filters-handler .popup-filter');
         if ($filt.length) {
             $filt.addClass('js-simpleload').attr( 'href', $filt.attr('href').replace(/::::/, str_concat('::',$target.attr('id'),'::') ) );
             function init_filters() {
                 $(this).find('.filter li a').each( function() {
-                    $(this).attr('href', $(this).attr('href').replace(/^\?/, 'overlay-content::&')).addClass('js-simpleload');
+                    var $this = $(this);
+                    $this.attr('href', $this.attr('href').replace(/^\?/, 'overlay-content::&')).addClass('js-simpleload');
+                    var href = $this.attr('href');
+                    var params = href.split(/&/);
+                    // params[1] is part after token 'overlay-content::'
+                    if (params.length == 2 && params[1].indexOf('pop') >= 0) {
+                        // there is no other GET parameter, addition of string '&q=' is needed
+                        $this.attr('href', href + '&q=');
+                    }
                 });
             }
+            log_generic.log('HREF: ', $filt.attr('href'));
             $('#filters').unbind('content_added', init_filters).one('content_added', init_filters);
         }
+        log_generic.log('init_overlay_content');
 
         var $cancel = $('#filters-handler a.js-clear').not('.overlay-adapted');
         if ($cancel.length) $cancel

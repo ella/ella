@@ -50,6 +50,7 @@ class TestGallery(NewmanTestCase):
         
         data = {
             'title' : u'From preset 马 žš experiment',
+            'slug': u'from-preset-zs-experiment'
         }
         self.fill_fields(data)
         # verify all fields
@@ -59,7 +60,7 @@ class TestGallery(NewmanTestCase):
             'title' : u'From preset 马 žš experiment',
             'description' : u'Gallery description',
             'content' : u'šialený obsah galörie',
-            'slug' : u'experiment',
+            'slug': u'from-preset-zs-experiment',
             'galleryitem_set-0-target_id': '1',
             'galleryitem_set-1-target_id': '2',
             'galleryitem_set-2-target_id': '3',

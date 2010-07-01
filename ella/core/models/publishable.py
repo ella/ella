@@ -206,8 +206,52 @@ class Placement(models.Model):
         self.publishable.publish_from = publish_from
         Publishable.objects.filter(pk=self.publishable_id).update(publish_from=publish_from)
 
+    @staticmethod
+    def check_placement_is_unique(placement):
+        obj = placement 
+        cat = None
+        if obj.pk:
+            cat = getattr(obj, 'category', None)
+        obj_slug = getattr(obj, 'slug', obj.pk)
+        # if Placement has no slug, slug from Publishable object should be considered in following checks:
+        if not obj_slug:
+            obj_slug = obj.publishable.slug
+
+        # try and find conflicting placement
+        qset = Placement.objects.filter(
+            category=obj.category,
+            slug=obj_slug,
+            static=obj.static
+        )
+        if obj.static: # allow placements that do not overlap
+            q = Q(publish_to__lt=obj.publish_from)
+            if obj.publish_to:
+                q |= Q(publish_from__gt=obj.publish_to)
+            qset = qset.exclude(q)
+        # check for same date in URL
+        if not obj.static:
+            qset = qset.filter(
+                publish_from__year=obj.publish_from.year,
+                publish_from__month=obj.publish_from.month,
+                publish_from__day=obj.publish_from.day,
+            )
+        # exclude current object from search
+        if obj.pk:
+            qset = qset.exclude(pk=obj.pk)
+        if qset:
+            plac = qset[0]
+            raise ValueError(
+                    _('''There is already a Placement object published in
+                    category %(category)s with the same URL referring to %(target)s.
+                    Please change the slug or publish date.''') % {
+                        'category' : plac.category,
+                        'target' : plac.publishable,
+                    })
+
     def save(self, **kwargs):
         " If Listing is created, we create HitCount object "
+        # perform validation here
+        Placement.check_placement_is_unique(self)
 
         if not self.slug:
             self.slug = self.publishable.slug

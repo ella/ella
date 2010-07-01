@@ -1,0 +1,22 @@
+.fe-admin-toolbar {
+	position: fixed; top:0; left:0; right:0; z-index:3000;
+	padding: 6px;
+	font: normal normal 10px Tahoma, Verdana, sans-serif;
+	color: #fff;
+	text-align: left;
+	line-height: 1.4em;
+	background-color: #000; filter:alpha(opacity=85); opacity: 0.85; -moz-opacity:0.85;
+}
+.fe-admin-toolbar .toolbar { max-width: 600px;}
+.fe-admin-toolbar p { line-height: 1.4em; padding-bottom: 0.2em; }
+.fe-admin-toolbar strong { font-weight: bold; }
+.fe-admin-toolbar .listings { font-size: 110%; }
+.fe-admin-toolbar .listings-container { float: right; }
+.fe-admin-toolbar a { color: #fff; font-weight: bold; }
+.fe-admin-toolbar a:hover { text-decoration: none; }
+.fe-admin-toolbar a.newman-logout-button { color: #ffcccc; }
+.fe-admin-toolbar a.newman-edit-button { font-size: 1.2em; color: #c5ffc8; }
+
+button.icn { padding: 3px; }
+button.icn span { padding: 3px 3px 3px 20px; background: url(../ico/16/ok.png) 0 50% no-repeat; }
+button.icn.logout span { background-image: url(../ico/16/logout.png); }
