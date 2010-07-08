@@ -1,5 +1,5 @@
 from django.core.files.images import get_image_dimensions
-import Image
+from PIL import Image
 from datetime import datetime
 from os import path
 import os
