@@ -208,7 +208,7 @@ class Placement(models.Model):
 
     @staticmethod
     def check_placement_is_unique(placement):
-        obj = placement 
+        obj = placement
         cat = None
         if obj.pk:
             cat = getattr(obj, 'category', None)
@@ -224,9 +224,9 @@ class Placement(models.Model):
             static=obj.static
         )
         if obj.static: # allow placements that do not overlap
-            q = Q(publish_to__lt=obj.publish_from)
+            q = models.Q(publish_to__lt=obj.publish_from)
             if obj.publish_to:
-                q |= Q(publish_from__gt=obj.publish_to)
+                q |= models.Q(publish_from__gt=obj.publish_to)
             qset = qset.exclude(q)
         # check for same date in URL
         if not obj.static:

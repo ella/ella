@@ -4,29 +4,35 @@
 {% block breadcrumbs %}{% endblock %}
 
 {% block content %}
-<div style="background: #000 url({{ NEWMAN_MEDIA_URL }}img/newman.jpg) bottom right no-repeat; position: fixed; top: 0; bottom: 0; left: 0; right: 0; line-height: 170%">
-    <div id="content-main" style="width: 400px; margin: 12em auto; padding: 5px; color: #fff;  font-size: 150%;">
-    {% if error_message %}
-    <p class="errornote" style="background: #ffc; color: #c66; padding: 5px; font-size: 80%; -moz-border-radius: 5px; margin-bottom: 1em;">{{ error_message }}</p>
-    {% endif %}
-    <form action="{{ app_path }}" method="post" id="login-form">
-      <div class="form-row">
-        <label for="id_username">{% trans 'Username:' %}</label> <input type="text" name="username" id="id_username" style="width: 98%;" />
-      </div>
-      <div class="form-row">
-        <label for="id_password">{% trans 'Password:' %}</label> <input type="password" name="password" id="id_password" style="width: 98%;" />
-        <input type="hidden" name="this_is_the_login_form" value="1" />
-        <input type="hidden" name="next" id="next" value="" />
-      </div>
-      <div class="submit-row">
-        <input type="submit" value="{% trans 'Log in' %}" style="font-size: 150%" />
-      </div>
-    </form>
+<div class="login">
+    <div id="content-main" class="content-main">
+	    {% if info_browser_message %}
+	    <div class="browser-notice">
+			<h3>Tento prohlížeč není plně podporován.</h3>
+			<p>K zaručení plné funkčnosti publikačního systému vám doporučujeme používat internetový prohlížeč <strong>Mozilla Firefox</strong> (<a href="http://firefox.mozilla.cz/stahnout/">stáhnout Firefox</a>) nebo <strong>Google Chrome</strong> (<a href="http://www.google.com/chrome/">stáhnout Chrome</a>).</p>
+		</div>
+	    {% endif %}
+	    {% if error_message %}
+	    <p class="errornote">{{ error_message }}</p>
+	    {% endif %}
+	    <form action="{{ app_path }}" method="post" id="login-form" class="login-form">
+	      <div class="form-row">
+	        <label for="id_username">{% trans 'Username:' %}</label> <input type="text" class="text" name="username" id="id_username" />
+	      </div>
+	      <div class="form-row">
+	        <label for="id_password">{% trans 'Password:' %}</label> <input type="password" class="text" name="password" id="id_password" />
+	        <input type="hidden" name="this_is_the_login_form" value="1" />
+	        <input type="hidden" name="next" id="next" value="" />
+	      </div>
+	      <div class="submit-row">
+	        <input type="submit" class="submit" value="{% trans 'Log in' %}" />
+	      </div>
+	    </form>
 
-    <script type="text/javascript">
-    document.getElementById('id_username').focus()
-    if (location.hash) { document.getElementById('next').value = location.hash; }
-    </script>
+	    <script type="text/javascript">
+	    document.getElementById('id_username').focus()
+	    if (location.hash) { document.getElementById('next').value = location.hash; }
+	    </script>
     </div>
 </div>
 {% endblock %}

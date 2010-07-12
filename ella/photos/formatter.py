@@ -1,4 +1,4 @@
-import Image
+from PIL import Image
 
 def detect_img_type(imagePath):
     try:
@@ -130,7 +130,7 @@ class Formatter(object):
 
         self.image = self.image.crop(crop_box)
         return crop_box
-    
+
     def get_resized_size(self):
         """
         Get target size for the stretched or shirnked image to fit within the

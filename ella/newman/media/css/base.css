@@ -677,3 +677,15 @@ fieldset.collapse legend { background-image: url(../ico/16/14_layer_raiselayer.p
     position: absolute; bottom: 85px; right: 10px; width: 600px; height: 400px; background: #fff; border: 2px solid #d66;
 }
 .delete-confirmation .cnt { max-height: 355px; }
+
+
+/* LOGIN PAGE */
+.login { background: #000 url(../img/newman.jpg) bottom right no-repeat; position: fixed; top: 0; left: 0; bottom: 0; right: 0; line-height: 170%; }
+.login .content-main { margin: 10em auto; padding: 5px; color: #fff; font-size: 150%; }
+.login .browser-notice { width: 600px; margin: 0 auto 3em auto; padding: 10px; color: #000; font-size: 80%; -moz-border-radius: 5px; -webkit-border-radius: 5x; -khtml-border-radius: 5px; border-radius: 5px; background: #dbba30; }
+.login .browser-notice h3 { margin-bottom: .4em; font-weight: bold; color: #ba0808; }
+.login .errornote { width: 400px; margin: 0 auto 1em auto; padding: 5px; color: #c66; font-size: 80%; -moz-border-radius: 5px; -webkit-border-radius: 5x; -khtml-border-radius: 5px; border-radius: 5px; background: #ffc; }
+.login .login-form { width: 400px; margin: 0 auto; }
+.login input.text { width: 98%; background: #fff; }
+.login input.submit { font-size: 150%; }
+/* /LOGIN PAGE */

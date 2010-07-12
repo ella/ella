@@ -1,4 +1,4 @@
-import Image
+from PIL import Image
 import logging
 
 try:

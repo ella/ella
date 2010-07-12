@@ -113,9 +113,6 @@ def post_comment(request, context, parent_id=None):
 
 
 def list_comments(request, context):
-    opts = CommentOptionsObject.objects.get_for_object(context['object'])
-    if opts.blocked:
-        raise Http404('Comments is blocked for this object.')
 
     # basic queryset
     qs = comments.get_model().objects.for_model(context['object']).order_by('tree_path')
