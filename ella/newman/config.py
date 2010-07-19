@@ -39,11 +39,11 @@ BASE_URL = getattr(settings, 'NEWMAN_BASE_URL', '')
 AUTOSAVE_MAX_AMOUNT = getattr(settings, 'NEWMAN_AUTOSAVE_MAX_AMOUNT', 3)
 
 # List of applicable ContentTypes
-NON_PUBLISHABLE_CTS = (
+NON_PUBLISHABLE_CTS = getattr(settings, 'NEWMAN_NON_PUBLISHABLE_CTS', (
     'photos.photo',
     'polls.poll',
     'polls.survey',
-)
+))
 
 # Models that have TaggingInlineAdmin in inlines
 TAGGED_MODELS = getattr(settings, 'NEWMAN_TAGGED_MODELS', (
