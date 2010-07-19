@@ -59,7 +59,7 @@ class PhotoAdmin(newman.NewmanModelAdmin):
     list_filter = ('created',)
     unbound_list_filter = (PhotoSizeFilter,)
     prepopulated_fields = {'slug': ('title',)}
-    search_fields = ('title', 'slug', 'description', 'id',)
+    search_fields = ('title', 'slug', 'id',)
     suggest_fields = {'authors': ('name', 'slug',), 'source': ('name', 'url',)}
     rich_text_fields = {'small': ('description',)}
 
