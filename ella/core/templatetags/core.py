@@ -24,6 +24,14 @@ class ListingNode(template.Node):
         self.var_name = var_name
         self.parameters = parameters
         self.parameters_to_resolve = parameters_to_resolve
+        self.resolved_parameters = self.parameters.copy()
+
+    def resolve_parameter(self, key, context):
+        value = self.parameters[key]
+        if key == 'count':
+            if type(value) in (str, unicode) and value.isdigit():
+                return int(value)
+        return template.Variable(value).resolve(context)
 
     def render(self, context):
         unique_var_name = None
@@ -31,12 +39,14 @@ class ListingNode(template.Node):
             if key == 'unique':
                 unique_var_name = self.parameters[key]
             if key == 'unique' and unique_var_name not in context.dicts[-1]: # autocreate variable in context
-                self.parameters[key] = context.dicts[-1][ unique_var_name ] = set()
+                self.resolved_parameters[key] = context.dicts[-1][ unique_var_name ] = set()
                 continue
-            self.parameters[key] = template.Variable(self.parameters[key]).resolve(context)
-        if self.parameters.has_key('category') and isinstance(self.parameters['category'], basestring):
-            self.parameters['category'] = get_cached_object(Category, tree_path=self.parameters['category'], site__id=settings.SITE_ID)
-        out = Listing.objects.get_listing(**self.parameters)
+            #self.parameters[key] = template.Variable(self.parameters[key]).resolve(context)
+            self.resolved_parameters[key] = self.resolve_parameter(key, context)
+        if self.resolved_parameters.has_key('category') and \
+            isinstance(self.resolved_parameters['category'], basestring):
+            self.resolved_parameters['category'] = get_cached_object(Category, tree_path=self.resolved_parameters['category'], site__id=settings.SITE_ID)
+        out = Listing.objects.get_listing(**self.resolved_parameters)
 
         if 'unique' in self.parameters:
             unique = self.parameters['unique'] #context[unique_var_name]
