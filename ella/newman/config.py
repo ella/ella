@@ -43,7 +43,7 @@ NON_PUBLISHABLE_CTS = getattr(settings, 'NEWMAN_NON_PUBLISHABLE_CTS', (
     'photos.photo',
     'polls.poll',
     'polls.survey',
-)
+))
 
 # Models that have TaggingInlineAdmin in inlines
 TAGGED_MODELS = getattr(settings, 'NEWMAN_TAGGED_MODELS', (
