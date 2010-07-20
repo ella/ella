@@ -49,7 +49,7 @@ class ListingNode(template.Node):
         out = Listing.objects.get_listing(**self.resolved_parameters)
 
         if 'unique' in self.parameters:
-            unique = self.parameters['unique'] #context[unique_var_name]
+            unique = self.resolved_parameters['unique'] #context[unique_var_name]
             map(lambda x: unique.add(x.placement_id),out)
         context[self.var_name] = out
         return ''
