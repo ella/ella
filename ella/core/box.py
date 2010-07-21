@@ -93,6 +93,7 @@ class Box(object):
                 'css_class' : self.params.get('css_class', ''),
                 'name' : self.params.get('name', ''),
                 'text' : self.params.get('text', ''),
+                'align' : self.params.get('align', 'left'),
                 'box' : self,
         }
 
