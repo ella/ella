@@ -7,9 +7,9 @@ from django.utils.translation import ugettext_lazy as _
 from ella.core.models import Publishable
 from ella.core.cache import get_cached_list
 
-
 class InfoBox(models.Model):
     """Defines embedable text model."""
+
     title = models.CharField(_('Title'), max_length=255)
     created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)
     updated = models.DateTimeField(_('Updated'), blank=True, null=True)
@@ -22,6 +22,7 @@ class InfoBox(models.Model):
         ordering = ('-created',)
         verbose_name = _('Info box')
         verbose_name_plural = _('Info boxes')
+
 
 class Article(Publishable):
     """Defines article model."""
