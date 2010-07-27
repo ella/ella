@@ -16,7 +16,7 @@
  *          Kobayashi object.
  *
  */
-KOBAYASHI_VERSION = '2010-06-09';
+KOBAYASHI_VERSION = '2010-07-27';
 
 // Kobayashi logging
 log_kobayashi = new LoggingLib('KOBAYASHI:', false);
@@ -607,6 +607,32 @@ Kobayashi.LOADED_MEDIA = {};
         return {target_id:target_id, address:address};
     }
     Kobayashi.get_simple_load_arguments = get_simple_load_arguments;
+
+    // Returns object containing HTTP GET parameters 
+    function split_get_arguments(url) {
+        var out = new Object();
+        var qmark_position = url.indexOf('?');
+        if (url.length == 0 || qmark_position < 0 || (qmark_position + 1) >= url.length) {
+            return out;
+        }
+        var get_parameters = url.substr(qmark_position + 1);
+        if (get_parameters.length == 0) {
+            get_parameters = url;
+        }
+        var assignments = get_parameters.split(/&/);
+        
+        for (var i = 0; i < assignments.length; i++) {
+            var ass = assignments[i];
+            var param = (ass.indexOf('=') < 0) ? ass : ass.substr(0, ass.indexOf('='));
+            if (param.length == 0) {
+                continue;
+            }
+            var value = ass.substr(ass.indexOf('=') + 1);
+            out[param] = value;
+        }
+        return out;
+    }
+    Kobayashi.split_get_arguments = split_get_arguments;
     
     // Set up event handlers
     $('.js-simpleload,.js-simpleload-container a').live('click', function(evt) {
