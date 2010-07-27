@@ -31,6 +31,7 @@ var ASCII_PRINTABLE_END = 126;
 var ASCII_BACKSPACE = 8;
 var ASCII_DELETE = 46;
 var UNICODE = 160;
+var DEFAULT_MESSAGE_BUBBLE_DURATION = 5000;
 
 // Set the default target for Kobayashi to #content
 Kobayashi.DEFAULT_TARGET = 'content';
@@ -1067,12 +1068,23 @@ $( function() {
     // Search in change lists
     function changelist_search($input, $pop) {
         if ($('#changelist').length == 0) return;   // We're not in changelist
+        var is_pop = $pop.length > 0;
         var search_terms = $input.val();
+        var loaded = Kobayashi.closest_loaded( $input.get(0) );
         var adr_term = str_concat('&q=' , search_terms);
-        if ($pop.length > 0) {
+        if (is_pop) {
             adr_term = str_concat('&pop=', adr_term);
         }
-        var loaded = Kobayashi.closest_loaded( $input.get(0) );
+
+        // append existing filter arguments to adr_term variable
+        var existing_get = Kobayashi.split_get_arguments(loaded.url);
+        for (var param in existing_get) {
+            if (param == 'q' || param == 'pop') {
+                continue;
+            }
+            adr_term = str_concat(adr_term, '&', param, '=', existing_get[param]);
+        }
+
         if (loaded.id == 'content') {
             adr(adr_term);
         }
@@ -1088,7 +1100,11 @@ $( function() {
         return changelist_search( $input, $pop );
     });
     $('#filters-handler #searchbar').live('keyup', function(evt) {
-        if (evt.keyCode == CR || evt.keyCode == LF) { } else return;
+        if (evt.keyCode == CR || evt.keyCode == LF) {
+            evt.preventDefault(); // prevent event propagation to changeform's Save button
+        } else {
+            return;
+        }
         var $pop = $(this).siblings('input#id_pop');
         return changelist_search( $(this), $pop );
     });
@@ -1097,7 +1113,7 @@ $( function() {
 // Message bubble
 function show_message(message, options) {
     if (!options) options = {};
-    var duration = (options.duration == undefined) ? 5000 : options.duration;
+    var duration = (options.duration == undefined) ? DEFAULT_MESSAGE_BUBBLE_DURATION : options.duration;
     var $span = $('<span></span>').html(message);
     var $msg = $('<br />').add($span);
     if (options.msgclass) $span.addClass(options.msgclass);
