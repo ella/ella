@@ -40,11 +40,13 @@ class TestArticle(NewmanTestCase):
         
         data = {
             'title' : u'From preset 马 žš experiment',
+            'slug' : u'from-preset-zs-experiment',
         }
         self.fill_fields(data)
         # verify all fields
         expected_data = {
             'title' : u'From preset 马 žš experiment',
+            'slug' : u'from-preset-zs-experiment',
             'category' : [u"Africa/west-africa"],
             'authors' : [u"Barack Obama", u"King Albert II"],
             'upper_title' : u'vyšší',
