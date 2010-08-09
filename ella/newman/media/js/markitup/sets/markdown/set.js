@@ -51,16 +51,16 @@ function markitup_box_callback() {
                 if(box.indexOf('show_title:1') != -1){
                     $('#id_box_photo_meta_show_title').attr('checked','checked');
                 } else $('#id_box_photo_meta_show_title').removeAttr('checked');
-                if(box.indexOf('show_author:1') != -1){
-                    $('#id_box_photo_meta_show_author').attr('checked','checked');
-                } else $('#id_box_photo_meta_show_author').removeAttr('checked');
+                if(box.indexOf('show_authors:1') != -1){
+                    $('#id_box_photo_meta_show_authors').attr('checked','checked');
+                } else $('#id_box_photo_meta_show_authors').removeAttr('checked');
                 if(box.indexOf('show_description:1') != -1){
                     $('#id_box_photo_meta_show_description').attr('checked','checked');
                 } else $('#id_box_photo_meta_show_description').removeAttr('checked');
                 if(box.indexOf('show_detail:1') != -1){
                     $('#id_box_photo_meta_show_detail').attr('checked','checked');
                 } else $('#id_box_photo_meta_show_detail').removeAttr('checked');
-                params = params.replace(/show_title:\d/,'').replace(/show_author:\d/,'').replace(/show_description:\d/,'').replace(/show_detail:\d/,'').replace(/\n{2,}/g,'\n').replace(/\s{2,}/g,' ');
+                params = params.replace(/show_title:\d/,'').replace(/show_authors:\d/,'').replace(/show_description:\d/,'').replace(/show_detail:\d/,'').replace(/\n{2,}/g,'\n').replace(/\s{2,}/g,' ');
                 if(mode.indexOf('inline_velka') != -1){
                     $('#id_box_photo_size').val('velka')
                 } else if(mode.indexOf('inline_standard') != -1){
