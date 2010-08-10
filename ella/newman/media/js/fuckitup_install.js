@@ -335,8 +335,8 @@ var NewmanTextAreaStandardToolbar = function () {
                         $('#id_box_photo_meta_show_title').attr('checked','checked');
                     } else $('#id_box_photo_meta_show_title').removeAttr('checked');
                     if(box.indexOf('show_authors:1') != -1){
-                        $('#id_box_photo_meta_show_authors').attr('checked','checked');
-                    } else $('#id_box_photo_meta_show_authors').removeAttr('checked');
+                        $('#id_box_photo_meta_show_author').attr('checked','checked');
+                    } else $('#id_box_photo_meta_show_author').removeAttr('checked');
                     if(box.indexOf('show_description:1') != -1){
                         $('#id_box_photo_meta_show_description').attr('checked','checked');
                     } else $('#id_box_photo_meta_show_description').removeAttr('checked');
