@@ -188,6 +188,11 @@ class NewmanSite(AdminSite):
         Returns rendered HTML for source text with styles
         """
 
+        if config.EDITOR_PREVIEW_TEMPLATE:
+            preview_template = config.EDITOR_PREVIEW_TEMPLATE
+        else:
+            preview_template = 'newman/editor-preview.html'
+
         context = template.RequestContext(request)
         from djangomarkup.views import transform
         rendered_response = transform(request)
@@ -197,7 +202,7 @@ class NewmanSite(AdminSite):
         if extra_context:
             context.update(extra_context)
 
-        return render_to_response('newman/editor-preview.html', context,
+        return render_to_response(preview_template, context,
             context_instance=template.RequestContext(request)
         )
 

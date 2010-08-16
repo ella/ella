@@ -2,11 +2,3 @@ body {
     font: normal 85%/130% "Trebuchet MS", Arial, sans-serif;
     background: #ffc;
 }
-
-.container-inline {
-    float: right;
-    border: 1px dotted #ddd;
-    margin: .5em 0 .5em 1em;
-}
-
-.container-inline-photo { padding: 5px; }
