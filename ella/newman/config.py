@@ -77,4 +77,6 @@ NEWMAN_FAVORITE_ITEMS = getattr(settings, 'NEWMAN_FAVORITE_ITEMS', (
     'positions.position',
 ))
 
+EDITOR_PREVIEW_CSS = getattr(settings, 'NEWMAN_EDITOR_PREVIEW_CSS', None)
+
 # TODO try to load consts from django.conf.settings

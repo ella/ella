@@ -192,7 +192,8 @@ class NewmanSite(AdminSite):
         from djangomarkup.views import transform
         rendered_response = transform(request)
         rendered_html = mark_safe(rendered_response.content)
-        context.update({'rendered_html': rendered_html})
+        preview_css = config.EDITOR_PREVIEW_CSS
+        context.update({'rendered_html': rendered_html, 'preview_css': preview_css})
         if extra_context:
             context.update(extra_context)
 

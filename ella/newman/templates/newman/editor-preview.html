@@ -4,7 +4,10 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <link rel="stylesheet" type="text/css" href="{{ NEWMAN_MEDIA_URL }}css/editor-preview.css?{{ VERSION }}" />
+    <link rel="stylesheet" type="text/css" href="{{ NEWMAN_MEDIA_URL }}css/editor-preview.css" />
+    {% if preview_css %}
+    	<link rel="stylesheet" type="text/css" href="{{ preview_css }}" />
+    {% endif %}
 </head>
 <body>
     {{ rendered_html }}
