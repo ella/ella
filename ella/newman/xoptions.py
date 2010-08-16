@@ -440,9 +440,10 @@ class XModelAdmin(ModelAdmin):
         # Populate deleted_objects, a data structure of all related objects that
         # will also be deleted.
         # FIXME <a href=""> tags hardcoded into get_deleted_objects() handled in template via template tag.
-        deleted_objects = [mark_safe(u'%s: <a href="../../%s/">%s</a>' % (escape(force_unicode(capfirst(opts.verbose_name))), object_id, escape(obj))), []]
-        perms_needed = set()
-        get_deleted_objects(deleted_objects, perms_needed, request.user, obj, opts, 1, self.admin_site)
+        #deleted_objects = [mark_safe(u'%s: <a href="../../%s/">%s</a>' % (escape(force_unicode(capfirst(opts.verbose_name))), object_id, escape(obj))), []]
+        #perms_needed = set()
+        #get_deleted_objects(deleted_objects, perms_needed, request.user, obj, opts, 1, self.admin_site)
+        (deleted_objects, perms_needed) = get_deleted_objects((obj,), opts, request.user, self.admin_site, levels_to_root=4)
 
         if request.POST: # The user has already confirmed the deletion.
             if perms_needed:
