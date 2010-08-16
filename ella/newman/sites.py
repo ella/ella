@@ -27,6 +27,7 @@ from ella.newman import config
 from ella.newman.options import NewmanModelAdmin
 from ella.newman import actions
 from ella.utils.text import cz_compare
+from django.core.urlresolvers import reverse
 
 
 class NewmanSite(AdminSite):
@@ -34,6 +35,8 @@ class NewmanSite(AdminSite):
     index_template = 'newman/index.html'
     login_template = 'newman/login.html'
     app_index_template = 'newman/app_index.html'
+    password_change_template = 'newman/password_change_form.html'
+    password_change_done_template = 'newman/password_change_done.html'
 
     def __init__(self, name=None, app_name='newman'):
         super(NewmanSite, self).__init__(name=name, app_name=app_name)
@@ -111,6 +114,32 @@ class NewmanSite(AdminSite):
 
         urlpatterns += super(NewmanSite, self).get_urls()
         return urlpatterns
+
+    def password_change(self, request):
+        """
+        Handles the "change password" task -- both form display and validation.
+        """
+        from django.contrib.auth.views import password_change
+        if self.root_path is not None:
+            url = '%spassword_change/done/' % self.root_path
+        else:
+            url = reverse('newman:password_change_done', current_app=self.name)
+        defaults = {
+            'post_change_redirect': url
+        }
+        if self.password_change_template is not None:
+            defaults['template_name'] = self.password_change_template
+        return password_change(request, **defaults)
+
+    def password_change_done(self, request):
+        """
+        Displays the "success" page after a password change.
+        """
+        from django.contrib.auth.views import password_change_done
+        defaults = {}
+        if self.password_change_done_template is not None:
+            defaults['template_name'] = self.password_change_done_template
+        return password_change_done(request, **defaults)
 
     def i18n_javascript(self, request):
         """

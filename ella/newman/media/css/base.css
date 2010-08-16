@@ -653,17 +653,21 @@ fieldset.collapse legend { background-image: url(../ico/16/14_layer_raiselayer.p
 .service-module .cnt { margin: 5px 5px 30px 5px; overflow: auto; }
 .service-module .submit-row { position: absolute; bottom: 10px; right: 5px; text-align: right; }
 
-.service-module.model-help .service-module-in, .service-module.object-history .service-module-in {
+.service-module.model-help .service-module-in, .service-module.object-history .service-module-in, .service-module.change-password .service-module-in {
     border: 1px outset #ddd;
     position: absolute;
     top: 160px; right: 10px; min-width: 400px; width: 70%;
     background: #fff url(../img/horst1.jpg) left bottom no-repeat;
     height: 410px;
 }
-.model-help .cnt, .object-history .cnt {
+.service-module.change-password .service-module-in {
+    top: auto; bottom: 50px; right: 10px; width: 600px; height: 400px;
+}
+.model-help .cnt, .object-history .cnt, .change-password .cnt {
     margin: 10px 10px 5px 200px;
     max-height: 360px;
 }
+ .change-password .cnt { max-height: 400px }
 .service-module.model-log .service-module-in {
     position: absolute;
     top: 160px; right: 10px; width: 400px; height: 500px;
