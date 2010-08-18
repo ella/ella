@@ -34,7 +34,7 @@ def create_texts(verbosity):
     from ella.articles.models import Article, ArticleContents
     ct_article = ContentType.objects.get_for_model(Article)
     ct_article_contents = ContentType.objects.get_for_model(ArticleContents)
-    markup_name = config.NEWMAN_MARKUP_DEFAULT
+    markup_name = config.MARKUP_DEFAULT
     if not markup_name:
         sys.stderr.write('No default markup specified. Please set NEWMAN_MARKUP_DEFAULT setting.\n')
         return 
