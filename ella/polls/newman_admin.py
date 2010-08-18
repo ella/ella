@@ -3,7 +3,6 @@ from django.forms.models import BaseInlineFormSet
 from django.shortcuts import render_to_response
 from django.conf import settings
 from django.forms.util import ValidationError
-from django.template.defaultfilters import striptags
 from django.forms import models as modelforms
 from django.utils.safestring import mark_safe
 from django.conf.urls.defaults import patterns, url
