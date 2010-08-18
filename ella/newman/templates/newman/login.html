@@ -15,7 +15,7 @@
 	    {% if error_message %}
 	    <p class="errornote">{{ error_message }}</p>
 	    {% endif %}
-	    <form action="{{ app_path }}" method="post" id="login-form" class="login-form">
+	    <form action="{{ app_path }}" method="post" id="login-form" class="login-form">{% csrf_token %}
 	      <div class="form-row">
 	        <label for="id_username">{% trans 'Username:' %}</label> <input type="text" class="text" name="username" id="id_username" />
 	      </div>

@@ -1,6 +1,7 @@
 import logging
 import re
 
+from django import forms
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
@@ -157,6 +158,21 @@ class NewmanModelAdmin(XModelAdmin):
         # useful when self.queryset(request) is called multiple times
         self._cached_queryset_request_id = -1
         self._cached_queryset = None 
+
+    @property
+    def _media(self):
+
+        js = []
+        if self.actions is not None:
+            js.extend(['js/actions.min.js'])
+        if self.prepopulated_fields:
+            js.append('js/urlify.js')
+            js.append('js/prepopulate.min.js')
+        if self.opts.get_ordered_objects():
+            js.extend(['js/getElementsBySelector.js', 'js/dom-drag.js' , 'js/admin/ordering.js'])
+
+        return forms.Media(js=['%s%s' % (settings.ADMIN_MEDIA_PREFIX, url) for url in js])
+
 
     def get_form(self, request, obj=None, **kwargs):
         self._magic_instance = obj # adding edited object to ModelAdmin instance.
@@ -948,6 +964,16 @@ class NewmanInlineFormSet(BaseInlineFormSet):
 
 class NewmanInlineModelAdmin(InlineModelAdmin):
     formset = NewmanInlineFormSet
+
+    def _media(self):
+        js = []
+        if self.prepopulated_fields:
+            js.append('js/urlify.js')
+            js.append('js/prepopulate.min.js')
+        if self.filter_vertical or self.filter_horizontal:
+            js.extend(['js/SelectBox.js' , 'js/SelectFilter2.js'])
+        return forms.Media(js=['%s%s' % (settings.ADMIN_MEDIA_PREFIX, url) for url in js])
+    media = property(_media)
 
     def get_formset(self, request, obj=None):
         setattr(self.form, '_magic_user', request.user) # magic variable assigned to form
