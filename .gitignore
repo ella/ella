@@ -7,4 +7,5 @@ tests/unit_project/settings/local.py
 tests/example_project/settings/local.py
 
 ella/ellaadmin/templates/admin_orig
+tests/unit_project/static/photos
 

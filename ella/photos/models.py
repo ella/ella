@@ -16,42 +16,11 @@ from ella.core.models.main import Author, Source
 from ella.core.box import Box
 from ella.core.cache.utils import get_cached_object
 from ella.utils.filemanipulation import file_rename
+from ella.photos import conf
 
 from formatter import Formatter, detect_img_type
 
 __all__ = ("Format", "FormatedPhoto", "Photo")
-
-# settings default
-PHOTOS_FORMAT_QUALITY_DEFAULT = (
-    (45, _('Low')),
-    (65, _('Medium')),
-    (75, _('Good')),
-    (85, _('Better')),
-    (95, _('High')),
-)
-
-PHOTOS_THUMB_DIMENSION_DEFAULT = (80,80)
-
-PHOTOS_FORMAT_QUALITY = getattr(settings, 'PHOTOS_FORMAT_QUALITY', PHOTOS_FORMAT_QUALITY_DEFAULT)
-PHOTOS_THUMB_DIMENSION = getattr(settings, 'PHOTOS_THUMB_DIMENSION', PHOTOS_THUMB_DIMENSION_DEFAULT)
-PHOTOS_DO_URL_CHECK = getattr(settings, 'PHOTOS_DO_URL_CHECK', False)
-IMAGE_URL_PREFIX = getattr(settings, 'IMAGE_URL_PREFIX', '')
-CUSTOM_SUBDIR = getattr(settings, 'PHOTOS_CUSTOM_SUBDIR', '')
-UPLOAD_TO = CUSTOM_SUBDIR and 'photos/%s/%%Y/%%m/%%d' % CUSTOM_SUBDIR or 'photos/%Y/%m/%d'
-
-PHOTOS_TYPE_EXTENSION = {
-    'JPEG': '.jpg',
-    'PNG': '.png',
-    'GIF': '.gif'
-}
-
-PHOTO_MIN_WIDTH=150
-PHOTO_MIN_HEIGHT=150
-
-
-PHOTO_MIN_WIDTH=150
-PHOTO_MIN_HEIGHT=150
-
 
 class PhotoBox(Box):
     def get_context(self):
@@ -76,7 +45,7 @@ class Photo(models.Model):
     title = models.CharField(_('Title'), max_length=200)
     description = models.TextField(_('Description'), blank=True)
     slug = models.SlugField(_('Slug'), max_length=255)
-    image = models.ImageField(_('Image'), upload_to=UPLOAD_TO, height_field='height', width_field='width') # save it to YYYY/MM/DD structure
+    image = models.ImageField(_('Image'), upload_to=conf.UPLOAD_TO, height_field='height', width_field='width') # save it to YYYY/MM/DD structure
     width = models.PositiveIntegerField(editable=False)
     height = models.PositiveIntegerField(editable=False)
 
@@ -128,16 +97,16 @@ class Photo(models.Model):
         # cache thumbnail for future use to avoid hitting storage.exists() every time
         # and to allow thumbnail detection after instance has been deleted
         self.thumbnail_path = self.get_thumbnail_path()
-        if IMAGE_URL_PREFIX:
+        if conf.IMAGE_URL_PREFIX:
             # custom URL prefix (debugging purposes)
-            return IMAGE_URL_PREFIX.rstrip('/') + '/' + self.thumbnail_path
+            return conf.IMAGE_URL_PREFIX.rstrip('/') + '/' + self.thumbnail_path
 
         storage = self.image.storage
 
         if not storage.exists(self.thumbnail_path):
             try:
                 im = Image.open(self.image.path)
-                im.thumbnail(PHOTOS_THUMB_DIMENSION, Image.ANTIALIAS)
+                im.thumbnail(conf.THUMB_DIMENSION, Image.ANTIALIAS)
                 im.save(storage.path(self.thumbnail_path), type)
             except IOError:
                 # TODO Logging something wrong
@@ -168,7 +137,7 @@ class Photo(models.Model):
         imageType = detect_img_type(self.image.path)
         if imageType is not None:
             # Cut slug - image field size is 200, but full path can be bigger then 200 (UPLOAD_TO + slug + extension)
-            self.image = file_rename(self.image.name.encode('utf-8'), self.slug[:64], PHOTOS_TYPE_EXTENSION[ imageType ])
+            self.image = file_rename(self.image.name.encode('utf-8'), self.slug[:64], conf.TYPE_EXTENSION[ imageType ])
         # delete formatedphotos if new image was uploaded
         if image_changed:
             super(Photo, self).save(force_insert=force_insert, force_update=force_update, **kwargs)
@@ -232,7 +201,7 @@ class Format(models.Model):
     flexible_max_height = models.PositiveIntegerField(_('Flexible max height'), blank=True, null=True)
     stretch = models.BooleanField(_('Stretch'))
     nocrop = models.BooleanField(_('Do not crop'))
-    resample_quality = models.IntegerField(_('Resample quality'), choices=PHOTOS_FORMAT_QUALITY, default=85)
+    resample_quality = models.IntegerField(_('Resample quality'), choices=conf.FORMAT_QUALITY, default=85)
     sites = models.ManyToManyField(Site, verbose_name=_('Sites'))
 
     def get_blank_img(self):
@@ -265,7 +234,7 @@ class FormatedPhoto(models.Model):
     "Specific photo of specific format."
     photo = models.ForeignKey(Photo)
     format = models.ForeignKey(Format)
-    image = models.ImageField(upload_to=UPLOAD_TO, height_field='height', width_field='width', max_length=300) # save it to YYYY/MM/DD structure
+    image = models.ImageField(upload_to=conf.UPLOAD_TO, height_field='height', width_field='width', max_length=300) # save it to YYYY/MM/DD structure
     crop_left = models.PositiveIntegerField()
     crop_top = models.PositiveIntegerField()
     crop_width = models.PositiveIntegerField()
@@ -276,11 +245,11 @@ class FormatedPhoto(models.Model):
     @property
     def url(self):
         "Returns url of the photo file."
-        if IMAGE_URL_PREFIX:
+        if conf.IMAGE_URL_PREFIX:
             # custom URL prefix (debugging purposes)
-            return IMAGE_URL_PREFIX.rstrip('/') + '/' + self.image.url
+            return conf.IMAGE_URL_PREFIX.rstrip('/') + '/' + self.image.url
 
-        if not PHOTOS_DO_URL_CHECK:
+        if not conf.DO_URL_CHECK:
             return self.image.url
 
         if not path.exists(self.image.path):
