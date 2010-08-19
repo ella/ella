@@ -12,8 +12,6 @@ from django.db.models import query, ForeignKey, ManyToManyField
 
 from ella.core.models import Category
 from ella.newman.models import CategoryUserRole, DenormalizedCategoryUserRole
-from ella.newman import utils
-
 
 CACHE_TIMEOUT = 10 * 60
 log = logging.getLogger('ella.newman.models')

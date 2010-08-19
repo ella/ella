@@ -1,7 +1,6 @@
 import logging
 import re
 
-from django.conf import settings
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.admin.options import InlineModelAdmin, IncorrectLookupParameters, FORMFIELD_FOR_DBFIELD_DEFAULTS
@@ -17,6 +16,7 @@ from django.utils.functional import update_wrapper
 from django.utils.translation import ugettext as _
 from django.utils.encoding import force_unicode
 from django.template.defaultfilters import striptags, truncatewords
+from django.conf import settings
 
 from ella.core.models.publishable import Publishable
 from ella.newman.changelist import NewmanChangeList, FilterChangeList
@@ -28,9 +28,7 @@ from ella.newman.permission import has_category_permission, get_permission, perm
 from ella.newman.forms import DraftForm
 from ella.newman.xoptions import XModelAdmin
 from ella.newman.licenses.models import License
-from ella.newman.config import STATUS_OK, STATUS_FORM_ERROR, STATUS_VAR_MISSING, STATUS_OBJECT_NOT_FOUND, AUTOSAVE_MAX_AMOUNT
-
-DEFAULT_LIST_PER_PAGE = getattr(settings, 'NEWMAN_LIST_PER_PAGE', 25)
+from ella.newman.config import config
 
 log = logging.getLogger('ella.newman')
 
@@ -151,7 +149,7 @@ class NewmanModelAdmin(XModelAdmin):
         self.change_list_template = self.get_template_list('change_list.html')
         self.filters_template = self.get_template_list('filters.html')
 
-        self.list_per_page = DEFAULT_LIST_PER_PAGE
+        self.list_per_page = config.DEFAULT_LIST_PER_PAGE
         self.model_content_type = ContentType.objects.get_for_model(self.model)
         self.saveasnew_add_view = self.add_json_view
         # useful when self.queryset(request) is called multiple times
@@ -256,14 +254,14 @@ class NewmanModelAdmin(XModelAdmin):
         def delete_too_old_drafts():
             " remove autosaves too old to rock'n'roll "
             to_delete = AdminUserDraft.objects.filter(title__exact='', user=request.user).order_by('-ts')
-            for draft in to_delete[AUTOSAVE_MAX_AMOUNT:]:
+            for draft in to_delete[config.AUTOSAVE_MAX_AMOUNT:]:
                 log.debug('Deleting too old user draft (autosave) %d' % draft.pk)
                 draft.delete()
 
         self.register_newman_variables(request)
         data = request.POST.get('data', None)
         if not data:
-            return utils.JsonResponseError(_('No data passed in POST variable "data".'), status=STATUS_VAR_MISSING)
+            return utils.JsonResponseError(_('No data passed in POST variable "data".'), status=config.STATUS_VAR_MISSING)
         title = request.POST.get('title', '')
         id = request.POST.get('id', None)
 
@@ -298,14 +296,14 @@ class NewmanModelAdmin(XModelAdmin):
         self.register_newman_variables(request)
         id = request.GET.get('id', None)
         if not id:
-            return utils.JsonResponse(_('No id found in GET variable "id".'), status=STATUS_VAR_MISSING)
+            return utils.JsonResponse(_('No id found in GET variable "id".'), status=config.STATUS_VAR_MISSING)
         drafts = AdminUserDraft.objects.filter(
             ct=self.model_content_type,
             user=request.user,
             pk=id
         )
         if not drafts:
-            return utils.JsonResponse(_('No matching draft found.'), status=STATUS_OBJECT_NOT_FOUND)
+            return utils.JsonResponse(_('No matching draft found.'), status=config.STATUS_OBJECT_NOT_FOUND)
         draft = drafts[0]
         return utils.JsonResponse(_('Loaded draft "%s"' % draft.__unicode__()), draft.data)
 
@@ -314,7 +312,7 @@ class NewmanModelAdmin(XModelAdmin):
         self.register_newman_variables(request)
         id = request.GET.get('id', None)
         if not id:
-            return utils.JsonResponse(_('No id found in GET variable "id".'), status=STATUS_VAR_MISSING)
+            return utils.JsonResponse(_('No id found in GET variable "id".'), status=config.STATUS_VAR_MISSING)
         try:
             draft = AdminUserDraft.objects.get(
                 ct=self.model_content_type,
@@ -322,7 +320,7 @@ class NewmanModelAdmin(XModelAdmin):
                 pk=id
             )
         except AdminUserDraft.DoesNotExist:
-            return utils.JsonResponse(_('No matching draft found.'), status=STATUS_OBJECT_NOT_FOUND)
+            return utils.JsonResponse(_('No matching draft found.'), status=config.STATUS_OBJECT_NOT_FOUND)
         msg = _('Draft %s was deleted.' % draft.__unicode__())
         draft.delete()
         return utils.JsonResponse(msg)
@@ -433,18 +431,15 @@ class NewmanModelAdmin(XModelAdmin):
     def suggest_view(self, request, extra_context=None):
         self.register_newman_variables(request)
 
-        SUGGEST_VIEW_LIMIT = getattr(settings, 'SUGGEST_VIEW_LIMIT', 20)
-        SUGGEST_VIEW_MIN_LENGTH = getattr(settings, 'SUGGEST_VIEW_MIN_LENGTH', 2)
-
         if not ('f' in request.GET.keys() and 'q' in request.GET.keys()):
             raise AttributeError, 'Invalid query attributes. Example: ".../?f=field_a&f=field_b&q=search_term&o=offset"'
-        elif len(request.GET.get('q')) < SUGGEST_VIEW_MIN_LENGTH:
+        elif len(request.GET.get('q')) < config.SUGGEST_VIEW_MIN_LENGTH:
             return HttpResponse( '', mimetype='text/plain;charset=utf-8' )
 
         offset = 0
         if 'o' in request.GET.keys() and request.GET.get('o'):
             offset = int(request.GET.get('o'))
-        limit = offset + SUGGEST_VIEW_LIMIT
+        limit = offset + config.SUGGEST_VIEW_LIMIT
 
         model_fields = [mf.name for mf in self.model._meta.fields]
         lookup_fields = []
@@ -703,7 +698,7 @@ class NewmanModelAdmin(XModelAdmin):
         if 'error_dict' in context and 'id___all__' in context['error_dict']:
             error_list.append({'messages': context['error_dict']['id___all__'], 'id': 'id___all__',})
 
-        return utils.JsonResponse(_('Please correct errors in form'), errors=error_list, status=STATUS_FORM_ERROR)
+        return utils.JsonResponse(_('Please correct errors in form'), errors=error_list, status=config.STATUS_FORM_ERROR)
 
     def change_view_process_context(self, request, context, object_id):
         form  = context['raw_form']
@@ -755,7 +750,7 @@ class NewmanModelAdmin(XModelAdmin):
         return utils.JsonResponse(
             'JSON object detail data.',
             result_dict,
-            status=STATUS_OK
+            status=config.STATUS_OK
         )
 
     @transaction.commit_on_success
@@ -785,7 +780,7 @@ class NewmanModelAdmin(XModelAdmin):
             return utils.JsonResponse(
                 _('The %(name)s "%(obj)s" was changed successfully.') % {'name': force_unicode(opts.verbose_name), 'obj': force_unicode(obj)},
                 {'id': obj.pk, 'title': obj.__unicode__(),},
-                status=STATUS_OK
+                status=config.STATUS_OK
             )
         context.update(extra_context or {})
         return self.json_error_response(request, context)  # Json response

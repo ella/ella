@@ -28,5 +28,5 @@ TYPE_EXTENSION = {
 PHOTO_MIN_WIDTH=150
 PHOTO_MIN_HEIGHT=150
 
-settings = Settings('ella.photos.conf', 'PHOTOS')
+config = Settings('ella.photos.conf', 'PHOTOS')
 

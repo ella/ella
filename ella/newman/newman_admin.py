@@ -1,5 +1,3 @@
-import time
-
 from django.conf.urls.defaults import *
 from django.http import HttpResponse
 from django.utils.translation import ugettext as _
@@ -7,12 +5,10 @@ from django.utils.translation import ugettext as _
 from ella import newman
 from ella.core.models.main import Category
 
-
 from ella.newman import models as m
-from ella.newman.filterspecs import filter_spec, CustomFilterSpec
-from ella.newman.permission import is_category_fk, is_site_fk, applicable_categories
-from ella.newman.utils import user_category_filter, get_user_config
-from ella.newman.config import CATEGORY_FILTER
+from ella.newman.filterspecs import CustomFilterSpec
+from ella.newman.permission import is_category_fk, applicable_categories
+from ella.newman.utils import user_category_filter
 
 class DevMessageAdmin(newman.NewmanModelAdmin):
     list_display = ('title', 'author', 'version', 'ts',)

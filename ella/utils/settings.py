@@ -26,7 +26,7 @@ class Settings(object):
         try:
             return getattr(self.module, name)
         except AttributeError:
-            raise ImproperlyConfigured("'%s' setting doesn't exist in your settings module." % p_name)
+            raise ImproperlyConfigured("'%s' setting doesn't exist in your settings module '%s'." % (p_name, self.module.__name__))
 
     def __dir__(self):
         return dir(self.module) + dir(self.settings)

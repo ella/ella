@@ -4,17 +4,12 @@ from django.db import models, IntegrityError
 from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
 from django.contrib.sites.models import Site
-from django.conf import settings
 
 from ella.core.models import Publishable, Category
 from ella.core.cache import get_cached_object
 from ella.photos.models import Photo, Format
 from ella.ellaexports.managers import ExportManager
-
-POSITION_IS_NOT_OVERLOADED = 0
-DATETIME_FORMAT = '%Y-%m-%d %H:%M'
-TIME_FORMAT = '%H:%M'
-FEED_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S+02:00' #TODO settings.py
+from ella.ellaexports.conf import config
 
 class UnexportableException(Exception):
     pass
@@ -119,7 +114,7 @@ class ExportPosition(models.Model):
     " Defines visibility of ExportMeta object. "
     visible_from = models.DateTimeField()
     visible_to = models.DateTimeField(blank=True, null=True)
-    position = models.IntegerField(blank=True, default=POSITION_IS_NOT_OVERLOADED)
+    position = models.IntegerField(blank=True, default=config.POSITION_IS_NOT_OVERLOADED)
     object = models.ForeignKey(ExportMeta, verbose_name=_('Export meta'))
     export = models.ForeignKey(Export, verbose_name=_('Export'))
 

@@ -5,18 +5,18 @@ from os import path
 import os
 
 from django.db import models, IntegrityError
-from django.conf import settings
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.contrib.sites.models import Site
 from django.utils.safestring import mark_safe
 from django.core.files.uploadedfile import UploadedFile
 from django.core.files.base import ContentFile
+from django.conf import settings
 
 from ella.core.models.main import Author, Source
 from ella.core.box import Box
 from ella.core.cache.utils import get_cached_object
 from ella.utils.filemanipulation import file_rename
-from ella.photos import conf
+from ella.photos.conf import config
 
 from formatter import Formatter, detect_img_type
 
@@ -45,7 +45,7 @@ class Photo(models.Model):
     title = models.CharField(_('Title'), max_length=200)
     description = models.TextField(_('Description'), blank=True)
     slug = models.SlugField(_('Slug'), max_length=255)
-    image = models.ImageField(_('Image'), upload_to=conf.UPLOAD_TO, height_field='height', width_field='width') # save it to YYYY/MM/DD structure
+    image = models.ImageField(_('Image'), upload_to=config.UPLOAD_TO, height_field='height', width_field='width') # save it to YYYY/MM/DD structure
     width = models.PositiveIntegerField(editable=False)
     height = models.PositiveIntegerField(editable=False)
 
@@ -97,16 +97,16 @@ class Photo(models.Model):
         # cache thumbnail for future use to avoid hitting storage.exists() every time
         # and to allow thumbnail detection after instance has been deleted
         self.thumbnail_path = self.get_thumbnail_path()
-        if conf.IMAGE_URL_PREFIX:
+        if config.IMAGE_URL_PREFIX:
             # custom URL prefix (debugging purposes)
-            return conf.IMAGE_URL_PREFIX.rstrip('/') + '/' + self.thumbnail_path
+            return config.IMAGE_URL_PREFIX.rstrip('/') + '/' + self.thumbnail_path
 
         storage = self.image.storage
 
         if not storage.exists(self.thumbnail_path):
             try:
                 im = Image.open(self.image.path)
-                im.thumbnail(conf.THUMB_DIMENSION, Image.ANTIALIAS)
+                im.thumbnail(config.THUMB_DIMENSION, Image.ANTIALIAS)
                 im.save(storage.path(self.thumbnail_path), type)
             except IOError:
                 # TODO Logging something wrong
@@ -137,7 +137,7 @@ class Photo(models.Model):
         imageType = detect_img_type(self.image.path)
         if imageType is not None:
             # Cut slug - image field size is 200, but full path can be bigger then 200 (UPLOAD_TO + slug + extension)
-            self.image = file_rename(self.image.name.encode('utf-8'), self.slug[:64], conf.TYPE_EXTENSION[ imageType ])
+            self.image = file_rename(self.image.name.encode('utf-8'), self.slug[:64], config.TYPE_EXTENSION[ imageType ])
         # delete formatedphotos if new image was uploaded
         if image_changed:
             super(Photo, self).save(force_insert=force_insert, force_update=force_update, **kwargs)
@@ -201,7 +201,7 @@ class Format(models.Model):
     flexible_max_height = models.PositiveIntegerField(_('Flexible max height'), blank=True, null=True)
     stretch = models.BooleanField(_('Stretch'))
     nocrop = models.BooleanField(_('Do not crop'))
-    resample_quality = models.IntegerField(_('Resample quality'), choices=conf.FORMAT_QUALITY, default=85)
+    resample_quality = models.IntegerField(_('Resample quality'), choices=config.FORMAT_QUALITY, default=85)
     sites = models.ManyToManyField(Site, verbose_name=_('Sites'))
 
     def get_blank_img(self):
@@ -234,7 +234,7 @@ class FormatedPhoto(models.Model):
     "Specific photo of specific format."
     photo = models.ForeignKey(Photo)
     format = models.ForeignKey(Format)
-    image = models.ImageField(upload_to=conf.UPLOAD_TO, height_field='height', width_field='width', max_length=300) # save it to YYYY/MM/DD structure
+    image = models.ImageField(upload_to=config.UPLOAD_TO, height_field='height', width_field='width', max_length=300) # save it to YYYY/MM/DD structure
     crop_left = models.PositiveIntegerField()
     crop_top = models.PositiveIntegerField()
     crop_width = models.PositiveIntegerField()
@@ -245,11 +245,11 @@ class FormatedPhoto(models.Model):
     @property
     def url(self):
         "Returns url of the photo file."
-        if conf.IMAGE_URL_PREFIX:
+        if config.IMAGE_URL_PREFIX:
             # custom URL prefix (debugging purposes)
-            return conf.IMAGE_URL_PREFIX.rstrip('/') + '/' + self.image.url
+            return config.IMAGE_URL_PREFIX.rstrip('/') + '/' + self.image.url
 
-        if not conf.DO_URL_CHECK:
+        if not config.DO_URL_CHECK:
             return self.image.url
 
         if not path.exists(self.image.path):

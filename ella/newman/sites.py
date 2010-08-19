@@ -23,7 +23,7 @@ from ella.newman.decorators import require_AJAX
 from ella.newman.utils import set_user_config_db, set_user_config_session, get_user_config,\
     JsonResponse, JsonResponseError, json_decode, user_category_filter
 from ella.newman.permission import has_model_list_permission, applicable_categories, permission_filtered_model_qs
-from ella.newman import config
+from ella.newman.config import config
 from ella.newman.options import NewmanModelAdmin
 from ella.newman import actions
 from ella.utils.text import cz_compare
