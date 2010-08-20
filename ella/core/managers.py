@@ -8,10 +8,7 @@ from django.utils.encoding import smart_str
 
 from ella.core.cache import cache_this
 from ella.core.cache.invalidate import CACHE_DELETER
-
-
-DEFAULT_LISTING_PRIORITY = getattr(settings, 'DEFAULT_LISTING_PRIORITY', 0)
-USE_PRIORITIES = getattr(settings, 'USE_PRIORITIES', False)
+from ella.core.conf import conf
 
 
 class RelatedManager(models.Manager):
@@ -206,7 +203,7 @@ class ListingManager(models.Manager):
             listed_targets = set([])
 
         # only use priorities if somebody wants them
-        if not USE_PRIORITIES:
+        if not conf.USE_PRIORITIES:
             if unique:
                 return make_items_unique(qset)
             return qset[offset:limit]
@@ -222,11 +219,11 @@ class ListingManager(models.Manager):
 
         qsets = (
             # modded-up objects
-            qset.filter(active, priority_value__gt=DEFAULT_LISTING_PRIORITY).order_by('-priority_value', '-publish_from'),
+            qset.filter(active, priority_value__gt=conf.DEFAULT_LISTING_PRIORITY).order_by('-priority_value', '-publish_from'),
             # default priority
             qset.exclude(active).order_by('-publish_from'),
             # modded-down priority
-            qset.filter(active, priority_value__lt=DEFAULT_LISTING_PRIORITY).order_by('-priority_value', '-publish_from'),
+            qset.filter(active, priority_value__lt=conf.DEFAULT_LISTING_PRIORITY).order_by('-priority_value', '-publish_from'),
         )
 
         out = []
@@ -278,7 +275,7 @@ class HitCountManager(models.Manager):
         count = self.filter(placement=placement).update(hits=F('hits')+1)
 
         if count < 1:
-            hc = self.create(placement=placement, hits=1)
+            self.create(placement=placement, hits=1)
 
     @cache_this(get_top_objects_key)
     def get_top_objects(self, count, days=None, mods=[]):

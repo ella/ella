@@ -1,7 +1,6 @@
 from itertools import chain
 
 from django import forms
-from django.conf import settings
 from django.utils.safestring import mark_safe
 from django.db.models.fields.related import ForeignKey
 from django.contrib.admin import widgets
@@ -12,10 +11,12 @@ from django.utils.encoding import force_unicode
 from django.utils.html import escape
 from django.utils.text import truncate_words
 from django.contrib.contenttypes.models import ContentType
+from django.conf import settings
 
 from ella.core.models import Listing
 from ella.photos.models import Photo
 from djangomarkup.widgets import RichTextAreaWidget
+from ella.newman.config import config
 
 __all__ = [
     'NewmanRichTextAreaWidget', 'FlashImageWidget',
@@ -26,16 +27,13 @@ __all__ = [
     'GalleryItemContentTypeWidget',
 ]
 
-MARKITUP_SET = getattr(settings, 'MARKDOWN', 'markdown')
-MEDIA_PREFIX = getattr(settings, 'NEWMAN_MEDIA_PREFIX', settings.ADMIN_MEDIA_PREFIX)
-
 # Rich text editor
 #JS_MARKITUP = 'js/markitup/jquery.markitup.js'
 JS_MARKITUP = 'js/fuckitup.js'
 #JS_MARKITUP_SET = 'js/markitup/sets/%s/set.js' % MARKITUP_SET
 JS_MARKITUP_SET = 'js/fuckitup_install.js'
 CSS_MARKITUP = 'js/markitup/skins/markitup/style.css'
-CSS_MARKITUP_SET = 'js/markitup/sets/%s/style.css' % MARKITUP_SET
+CSS_MARKITUP_SET = 'js/markitup/sets/%s/style.css' % config.MARKITUP_SET
 CLASS_RICHTEXTAREA = 'rich_text_area'
 JS_AUTOGROW = 'jquery/jquery.autogrow.js'
 
@@ -69,17 +67,17 @@ class NewmanRichTextAreaWidget(RichTextAreaWidget):
     """
     class Media:
         js = (
-            MEDIA_PREFIX + JS_MARKITUP,
-            MEDIA_PREFIX + JS_MARKITUP_SET,
-            MEDIA_PREFIX + JS_JQUERY_UI,
-            MEDIA_PREFIX + JS_JQUERY_FIELDSELECTION,
-            MEDIA_PREFIX + JS_AUTOGROW,
+            config.MEDIA_PREFIX + JS_MARKITUP,
+            config.MEDIA_PREFIX + JS_MARKITUP_SET,
+            config.MEDIA_PREFIX + JS_JQUERY_UI,
+            config.MEDIA_PREFIX + JS_JQUERY_FIELDSELECTION,
+            config.MEDIA_PREFIX + JS_AUTOGROW,
         )
         css = {
             'screen': (
-                MEDIA_PREFIX + CSS_MARKITUP,
-                MEDIA_PREFIX + CSS_MARKITUP_SET,
-                MEDIA_PREFIX + CSS_JQUERY_UI,
+                config.MEDIA_PREFIX + CSS_MARKITUP,
+                config.MEDIA_PREFIX + CSS_MARKITUP_SET,
+                config.MEDIA_PREFIX + CSS_JQUERY_UI,
             ),
         }
 
@@ -210,13 +208,13 @@ class AdminSuggestWidget(forms.TextInput):
 class DateWidget(forms.DateInput):
     class Media:
         js = (
-            settings.NEWMAN_MEDIA_PREFIX + JS_DATE_INPUT,
-            settings.NEWMAN_MEDIA_PREFIX + JS_JQUERY_UI,
-            settings.NEWMAN_MEDIA_PREFIX + JS_JQUERY_MOUSEWHEEL,
+            config.MEDIA_PREFIX + JS_DATE_INPUT,
+            config.MEDIA_PREFIX + JS_JQUERY_UI,
+            config.MEDIA_PREFIX + JS_JQUERY_MOUSEWHEEL,
         )
         css = {'screen': (
-            settings.NEWMAN_MEDIA_PREFIX + CSS_DATE_INPUT,
-            settings.NEWMAN_MEDIA_PREFIX + CSS_JQUERY_UI,
+            config.MEDIA_PREFIX + CSS_DATE_INPUT,
+            config.MEDIA_PREFIX + CSS_JQUERY_UI,
         )}
 
     def render(self, name, value, attrs=None):
@@ -227,13 +225,13 @@ class DateTimeWidget(forms.DateTimeInput):
 
     class Media:
         js = (
-            settings.NEWMAN_MEDIA_PREFIX + JS_DATE_INPUT,
-            settings.NEWMAN_MEDIA_PREFIX + JS_JQUERY_UI,
-            settings.NEWMAN_MEDIA_PREFIX + JS_JQUERY_MOUSEWHEEL,
+            config.MEDIA_PREFIX + JS_DATE_INPUT,
+            config.MEDIA_PREFIX + JS_JQUERY_UI,
+            config.MEDIA_PREFIX + JS_JQUERY_MOUSEWHEEL,
         )
         css = {'screen': (
-            settings.NEWMAN_MEDIA_PREFIX + CSS_DATE_INPUT,
-            settings.NEWMAN_MEDIA_PREFIX + CSS_JQUERY_UI,
+            config.MEDIA_PREFIX + CSS_DATE_INPUT,
+            config.MEDIA_PREFIX + CSS_JQUERY_UI,
         )}
 
     def render(self, name, value, attrs={}):
@@ -245,7 +243,7 @@ class DateTimeWidget(forms.DateTimeInput):
 class ForeignKeyRawIdWidget(forms.TextInput):
 
     class Media:
-        js = (settings.NEWMAN_MEDIA_PREFIX + JS_RELATED_LOOKUP,)
+        js = (config.MEDIA_PREFIX + JS_RELATED_LOOKUP,)
 
     def __init__(self, rel, attrs=None):
         self.rel = rel
@@ -272,7 +270,7 @@ class ForeignKeyRawIdWidget(forms.TextInput):
         output.append(super(ForeignKeyRawIdWidget, self).render(name, value, attrs))
         output.append(' <a href="%s%s?pop" class="rawid-related-lookup" id="lookup_id_%s">' % \
             (related_url, url, name))
-        output.append('<img src="%sico/16/search.png" width="16" height="16" /></a>' % settings.NEWMAN_MEDIA_PREFIX)
+        output.append('<img src="%sico/16/search.png" width="16" height="16" /></a>' % config.MEDIA_PREFIX)
         if value:
             output.append(self.label_for_value(value))
         return mark_safe(u''.join(output))
@@ -288,7 +286,7 @@ class ForeignKeyGenericRawIdWidget(forms.TextInput):
     " Custom widget adding a class to attrs. "
 
     class Media:
-        js = (settings.NEWMAN_MEDIA_PREFIX + JS_RELATED_LOOKUP,)
+        js = (config.MEDIA_PREFIX + JS_RELATED_LOOKUP,)
 
     def __init__(self, attrs={}):
         super(ForeignKeyGenericRawIdWidget, self).__init__(attrs={'class': CLASS_TARGEID})
@@ -296,7 +294,7 @@ class ForeignKeyGenericRawIdWidget(forms.TextInput):
     def render(self, name, value, attrs=None):
         output = [super(ForeignKeyGenericRawIdWidget, self).render(name, value, attrs)]
         output.append('<a class="generic-related-lookup" id="lookup_id_%s"> ' % name)
-        output.append('<img src="%sico/16/search.png" width="16" height="16" /></a>' % settings.NEWMAN_MEDIA_PREFIX)
+        output.append('<img src="%sico/16/search.png" width="16" height="16" /></a>' % config.MEDIA_PREFIX)
         return mark_safe(''.join(output))
 
 
@@ -333,7 +331,7 @@ class IncrementWidget(forms.TextInput):
     'Self incrementing widget.'
     class Media:
         js = (
-            MEDIA_PREFIX + 'js/increment.js',
+            config.MEDIA_PREFIX + 'js/increment.js',
         )
     def __init__(self, attrs={}):
         super(IncrementWidget, self).__init__(attrs={'class': 'increment'})

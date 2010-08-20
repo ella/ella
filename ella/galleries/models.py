@@ -1,12 +1,9 @@
 from datetime import datetime
 
 from django.db import models
-from django.db.models.signals import post_save
-from django.core.signals import request_finished
 from django.http import Http404
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
-from django.template.defaultfilters import slugify
 from django.utils.datastructures import SortedDict
 
 from ella.core.models import Publishable

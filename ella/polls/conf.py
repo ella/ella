@@ -24,4 +24,4 @@ USER_ALLREADY_VOTED = 2
 USER_NO_CHOICE = 3
 
 
-settings = Settings('ella.polls.conf', 'POLLS')
+config = Settings('ella.polls.conf', 'POLLS')

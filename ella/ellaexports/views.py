@@ -2,16 +2,14 @@ from datetime import datetime
 
 from django.http import Http404
 from django.conf import settings
-from django.template.defaultfilters import slugify
 from django.template import RequestContext
 from django.utils.translation import ugettext as _
 
-from ella.core.models import Listing, Category, Placement
-from ella.core.cache import get_cached_object_or_404, cache_this
+from ella.core.models import Category
+from ella.core.cache import get_cached_object_or_404
 from ella.core.cache.template_loader import render_to_response
 from ella.core.views import EllaCoreView
-from ella.ellaexports.models import Export, AggregatedExport, ExportMeta, ExportPosition
-from ella.ellaexports.models import UnexportableException
+from ella.ellaexports.models import Export, AggregatedExport
 
 
 def get_templates(name, slug=None, category=None, app_label=None, model_label=None):

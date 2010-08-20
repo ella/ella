@@ -8,9 +8,7 @@ from django.conf import settings
 from ella.core.models import Listing, Category
 from ella.core.views import get_content_type
 from ella.core.cache.utils import get_cached_object, get_cached_object_or_404
-
-
-NUM_IN_FEED = getattr(settings, 'RSS_NUM_IN_FEED', 10)
+from ella.core.conf import conf
 
 
 class RSSTopCategoryListings(Feed):
@@ -34,19 +32,19 @@ class RSSTopCategoryListings(Feed):
         if isinstance(obj, tuple):
             category, content_type = obj
             return _('Top %(count)d %(ctype)s objects in category %(cat)s.') % {
-                    'count' : NUM_IN_FEED,
+                    'count' : conf.RSS_NUM_IN_FEED,
                     'ctype' : content_type.model_class()._meta.verbose_name_plural,
                     'cat' : category.title
             }
         elif obj:
             return _('Top %(count)d objects in category %(cat)s.') % {
-                    'count' : NUM_IN_FEED,
+                    'count' : conf.RSS_NUM_IN_FEED,
                     'cat' : obj.title
             }
         else:
             obj = get_cached_object(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
             return _('Top %(count)d objects in category %(cat)s.') % {
-                    'count' : NUM_IN_FEED,
+                    'count' : conf.RSS_NUM_IN_FEED,
                     'cat' : obj.title
             }
 
@@ -69,7 +67,7 @@ class RSSTopCategoryListings(Feed):
         if kwa['category'].tree_parent != None:
             kwa['children'] = Listing.objects.ALL
         
-        return Listing.objects.get_listing(count=NUM_IN_FEED, **kwa)
+        return Listing.objects.get_listing(count=conf.RSS_NUM_IN_FEED, **kwa)
 
     def link(self, obj):
         if isinstance(obj, tuple):

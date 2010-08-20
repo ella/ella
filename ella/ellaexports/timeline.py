@@ -2,39 +2,26 @@ from datetime import datetime, timedelta
 import logging
 from urllib import urlencode
 
-from django.conf.urls.defaults import patterns, url
 from django.utils.translation import ugettext_lazy as _
-from django.forms import models as modelforms
 from django import forms
-from django.forms.fields import DateTimeField, IntegerField, HiddenInput
-from django.core import signals as core_signals
 from django.core.urlresolvers import reverse
-from django.conf import settings
-from django.http import HttpResponse
 from django.shortcuts import render_to_response
 
 from ella.ellaexports import models
 from ella.ellaexports.managers import ExportItemizer
 from ella.utils import remove_diacritical
 from ella.newman import utils, widgets
+from ella.ellaexports.conf import config
 
-DATETIME_FORMAT = models.DATETIME_FORMAT
-TIME_FORMAT = models.TIME_FORMAT
-TIMELINE_STEP = getattr(settings, 'ELLAEXPORTS_TIMELINE_STEP', timedelta(hours=2))  # two hours by default
-EMPTY_TIMELINE_CELL = None
-DAY_MAX_HOUR = 23
-RANGE_DAYS = 14
-RANGE_WIDTH_HOURS = 2
 log = logging.getLogger('ella.exports')
 
 def get_timerange(year=datetime.now().year, month=datetime.now().month, day=datetime.now().day):
-    now = datetime.now()
     out = list()
-    for d in range(-RANGE_DAYS, RANGE_DAYS):
+    for d in range(-config.RANGE_DAYS, config.RANGE_DAYS):
         dt = timedelta(days=d)
-        for h in [h for h in range(DAY_MAX_HOUR) if h % RANGE_WIDTH_HOURS == 0]:
+        for h in [h for h in range(config.DAY_MAX_HOUR) if h % config.RANGE_WIDTH_HOURS == 0]:
             t = datetime(year, month, day, h, 0) + dt
-            str_t = t.strftime(DATETIME_FORMAT)
+            str_t = t.strftime(config.DATETIME_FORMAT)
             out.append( (str_t, str_t) )
     return out
 
@@ -52,13 +39,13 @@ def get_export_choice_form():
     log.debug('Form generated')
     return ExportChoiceForm
 
-def get_timelined_items(slug, range_from, step=TIMELINE_STEP):
+def get_timelined_items(slug, range_from, step=config.TIMELINE_STEP):
     """
     @param  step  may contain timedelta object or list of timedelta objects.
     """
     itemizer = ExportItemizer(slug=slug)
     itemizer.datetime_from = range_from
-    datetime_from = datetime.strptime(range_from, DATETIME_FORMAT)
+    datetime_from = datetime.strptime(range_from, config.DATETIME_FORMAT)
     datetime_to = datetime_from + timedelta(days=1)
     step_list = list()
     if type(step) in (list, tuple,):
@@ -69,16 +56,16 @@ def get_timelined_items(slug, range_from, step=TIMELINE_STEP):
     out = list()
     while itemizer.datetime_from <= datetime_to:
         column = list()
-        column.append(itemizer.datetime_from.strftime(DATETIME_FORMAT))
+        column.append(itemizer.datetime_from.strftime(config.DATETIME_FORMAT))
         for i in itemizer:
-            i.column_date_from = itemizer.datetime_from.strftime(DATETIME_FORMAT)
+            i.column_date_from = itemizer.datetime_from.strftime(config.DATETIME_FORMAT)
             # add HitCounts
             if i.main_placement and i.main_placement.hitcount_set.count() > 0:
                 i.hitcount = i.main_placement.hitcount_set.all()[0]
             column.append(i)
         if not out or (out and out[-1] != column):
             while (len(column) - 1) < itemizer.export.max_visible_items:
-                column.append(EMPTY_TIMELINE_CELL)
+                column.append(config.EMPTY_TIMELINE_CELL)
             log.debug(remove_diacritical('COLUMN: %s' % column))
             out.append(column)
 
@@ -108,7 +95,7 @@ def reformat_list_for_table(list_data):
             if len(column) > row_index:
                 cell = column[row_index]
             else:
-                cell = EMPTY_TIMELINE_CELL
+                cell = config.EMPTY_TIMELINE_CELL
             table_row.append(cell)
         table.append(table_row)
     return table
@@ -217,13 +204,12 @@ def timeline_insert_append_view(request, **kwargs):
 
     if not (id_item and id_export and id_publishable and position and visible_from):
         raise AttributeError
-    e = models.Export.objects.get(pk=id_export)
     meta = models.ExportMeta.objects.create(
         #publishable=Publishable.objects.get(pk=id_publishable),
         publishable_id=id_publishable
     )
-    date_from = datetime.strptime(visible_from, DATETIME_FORMAT)
-    visible_to = (date_from + TIMELINE_STEP - timedelta(seconds=-1)).strftime(DATETIME_FORMAT)
+    date_from = datetime.strptime(visible_from, config.DATETIME_FORMAT)
+    visible_to = (date_from + config.TIMELINE_STEP - timedelta(seconds=-1)).strftime(config.DATETIME_FORMAT)
 #?exportposition_set-0-position=2&exportposition_set-0-visible_to=2009-08-01 20:00&exportposition_set-0-visible_from=2008-08-01 18:00
     url_parts = {
         'id_exportposition_set-0-position': int(position),

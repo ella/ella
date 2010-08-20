@@ -2,14 +2,18 @@
 This module is intended to hold default constants.
 Constants may be modified via project settings.py.
 """
+from django.conf import settings as django_settings
 from ella.utils.settings import Settings
 
 URL_PREFIX = 'nm'
+
+DEFAULT_LIST_PER_PAGE = 25
 
 # AdminSettings
 USER_CONFIG = 'newman_user_config'            # session key for AdminSettings JSON data
 CATEGORY_FILTER = 'newman_category_filter'    # user defined category filtering on newman HP
 MARKUP_DEFAULT = 'markdown'
+MARKITUP_SET = 'markdown'
 
 # list of recipients for error reporting
 ERR_REPORT_RECIPIENTS = ['ella.errors@gmail.com']
@@ -34,6 +38,11 @@ HTTP_ERROR = 405
 
 # Newman base URL (suitable when newman_frontend_tags' tags is used)
 BASE_URL = ''
+
+# Suggester
+SUGGEST_VIEW_LIMIT = 20
+SUGGEST_VIEW_MIN_LENGTH = 2
+
 
 # Maximum autosave objects hold for bound object:
 AUTOSAVE_MAX_AMOUNT = 3
@@ -80,5 +89,8 @@ FAVORITE_ITEMS = (
 EDITOR_PREVIEW_CSS = None
 EDITOR_PREVIEW_TEMPLATE = None
 
-settings = Settings('ella.newman.config', 'NEWMAN')
+# Widgets
+MEDIA_PREFIX = django_settings.ADMIN_MEDIA_PREFIX
+
+config = Settings('ella.newman.config', 'NEWMAN')
 

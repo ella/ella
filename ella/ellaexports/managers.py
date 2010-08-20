@@ -1,12 +1,11 @@
 from datetime import datetime
 import logging
 
-from django.db import models, connection
+from django.db import models
 from django.db.models import Q
-from django.conf import settings
 
-from ella.core.models import Listing, Publishable, Category
-from ella.utils import remove_diacritical
+from ella.core.models import Listing, Publishable
+from ella.ellaexports.conf import config
 
 ERROR_MESSAGES = {
     'cannot': 'This Publishable object cannot be exported'
@@ -16,7 +15,6 @@ log = logging.getLogger('ella.exports')
 def cmp_listing_or_meta(x, y):
     " Sorts items in descending order. "
     from ella.ellaexports.models import ExportPosition
-    from ella.core.models import Publishable
     def return_from_datetime(obj):
         if type(obj) in (Listing, Publishable):
             return obj.publish_from
@@ -87,11 +85,10 @@ class ExportItemizer(object):
 
     def set_datetime_from(self, value):
         " Accepts value as string, unicode or datetime. "
-        from ella.ellaexports.models import DATETIME_FORMAT
         if not value:
             return
         if type(value) in (str, unicode,):
-            self._datetime_from = datetime.strptime(value, DATETIME_FORMAT)
+            self._datetime_from = datetime.strptime(value, config.DATETIME_FORMAT)
         else:
             self._datetime_from = value
 
@@ -200,7 +197,6 @@ class ExportItemizer(object):
 
         Adds property obj.export_thumbnail_url, feed_updated.
         """
-        from ella.ellaexports.models import FEED_DATETIME_FORMAT
         from ella.photos.models import Format
         pub = self.__get_publishable(obj)
         field_dict = self.data_formatter(pub, export=export)
@@ -219,7 +215,7 @@ class ExportItemizer(object):
 
         pub.export_thumbnail_url = None
         pub.feed_updated_raw_datetime = feed_updated
-        pub.feed_updated = feed_updated.strftime(FEED_DATETIME_FORMAT)
+        pub.feed_updated = feed_updated.strftime(config.FEED_DATETIME_FORMAT)
         if pub.photo:
             formated = None
             try:
@@ -245,8 +241,7 @@ class ExportItemizer(object):
         3. Override item's title, photo, description if ExportMeta for item and Export is present.
         4. Override item's position and visibility timerange if defined.
         """
-        from ella.ellaexports.models import Export, ExportPosition, ExportMeta,\
-        POSITION_IS_NOT_OVERLOADED
+        from ella.ellaexports.models import Export, ExportPosition
         use_export = None
         use_category = self.category
         pre_out = list()
@@ -266,13 +261,13 @@ class ExportItemizer(object):
             positions = ExportPosition.objects.filter(
                 Q(visible_to__gte=self._datetime_from) | Q(visible_to__isnull=True),
                 export=use_export, 
-                position__exact=POSITION_IS_NOT_OVERLOADED,
+                position__exact=config.POSITION_IS_NOT_OVERLOADED,
                 visible_from__lte=self._datetime_from,
             )
             fix_positions = ExportPosition.objects.filter(
                 Q(visible_to__gte=self._datetime_from) | Q(visible_to__isnull=True),
                 export=use_export, 
-                position__gt=POSITION_IS_NOT_OVERLOADED,
+                position__gt=config.POSITION_IS_NOT_OVERLOADED,
                 visible_from__lte=self._datetime_from,
             )
             objects = list()
