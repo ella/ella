@@ -4,7 +4,8 @@ from djangosanetesting import DatabaseTestCase
 
 from django.contrib.sites.models import Site
 
-from ella.core.models import Placement, Category, Publishable, PUBLISH_FROM_WHEN_EMPTY
+from ella.core.models import Placement, Category, Publishable
+from ella.core.conf import conf
 from django.core.management import call_command
 
 from unit_project.test_core import create_basic_categories, create_and_place_a_publishable
@@ -22,7 +23,7 @@ class TestPublishFrom(PublishableTestCase):
 
     def test_publish_from_is_reset_when_last_placement_deleted(self):
         self.placement.delete()
-        self.assert_equals(PUBLISH_FROM_WHEN_EMPTY, self.publishable.publish_from)
+        self.assert_equals(conf.PUBLISH_FROM_WHEN_EMPTY, self.publishable.publish_from)
 
     def test_publish_from_is_updated_when_placement_moved_to_earlier(self):
         self.placement.publish_from = datetime(2000, 1, 1)
@@ -71,7 +72,7 @@ class TestPublishFrom(PublishableTestCase):
 
         call_command('update_publishable_publish_from')
         p = Publishable.objects.get(pk=self.publishable.pk)
-        self.assert_equals(PUBLISH_FROM_WHEN_EMPTY, p.publish_from)
+        self.assert_equals(conf.PUBLISH_FROM_WHEN_EMPTY, p.publish_from)
 
 
 class TestPublishableHelpers(PublishableTestCase):

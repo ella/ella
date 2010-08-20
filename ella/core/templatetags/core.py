@@ -7,17 +7,15 @@ from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
 from django.template.defaultfilters import stringfilter
 
-from ella.core.models import Listing, Category, LISTING_UNIQUE_DEFAULT_SET
+from ella.core.models import Listing, Category
 from ella.core.cache.utils import get_cached_object
 from ella.core.cache.invalidate import CACHE_DELETER
-from ella.core.box import BOX_INFO, Box
-from ella.core.middleware import ECACHE_INFO
+from ella.core.box import Box
+from ella.core.conf import conf
 
 
 log = logging.getLogger('ella.core.templatetags')
 register = template.Library()
-
-DOUBLE_RENDER = getattr(settings, 'DOUBLE_RENDER', False)
 
 class ListingNode(template.Node):
     def __init__(self, var_name, parameters, parameters_to_resolve):
@@ -159,7 +157,7 @@ def listing_parse(input):
         params['unique'] = input[-1]
         params_to_resolve.append('unique')
     elif input[-1].lower() == 'unique':
-        params['unique'] = LISTING_UNIQUE_DEFAULT_SET
+        params['unique'] = conf.LISTING_UNIQUE_DEFAULT_SET
         params_to_resolve.append('unique')
 
     return var_name, params, params_to_resolve
@@ -225,7 +223,7 @@ class BoxNode(template.Node):
 
         # push context stack
         context.push()
-        context[BOX_INFO] = box_key
+        context[conf.BOX_INFO] = box_key
 
         # render the box
         result = box.render()
@@ -233,11 +231,11 @@ class BoxNode(template.Node):
         context.pop()
 
         # record parent box dependecy on child box or cached full-page on box
-        if not (DOUBLE_RENDER and box.can_double_render) and (BOX_INFO in context or ECACHE_INFO in context):
-            if BOX_INFO in context:
-                source_key = context[BOX_INFO]
-            elif ECACHE_INFO in context:
-                source_key = context[ECACHE_INFO]
+        if not (conf.DOUBLE_RENDER and box.can_double_render) and (conf.BOX_INFO in context or conf.ECACHE_INFO in context):
+            if conf.BOX_INFO in context:
+                source_key = context[conf.BOX_INFO]
+            elif conf.ECACHE_INFO in context:
+                source_key = context[conf.ECACHE_INFO]
             CACHE_DELETER.register_dependency(source_key, box_key)
 
         return result

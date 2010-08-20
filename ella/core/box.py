@@ -7,13 +7,8 @@ from django.conf import settings
 
 from ella.core.cache.invalidate import CACHE_DELETER
 from ella.core.cache.template_loader import select_template
-from ella.core.cache.utils import normalize_key, get_cached_object
-
-
-BOX_INFO = 'ella.core.box.BOX_INFO'
-MEDIA_KEY = 'ella.core.box.MEDIA_KEY'
-
-CACHE_TIMEOUT = getattr(settings, 'CACHE_TIMEOUT', 10*60)
+from ella.core.cache.utils import normalize_key
+from ella.core.conf import conf
 
 
 class Box(object):
@@ -113,7 +108,7 @@ class Box(object):
         rend = cache.get(key)
         if rend is None:
             rend = self._render()
-            cache.set(key, rend, CACHE_TIMEOUT)
+            cache.set(key, rend, conf.CACHE_TIMEOUT)
             for model, test in self.get_cache_tests():
                 CACHE_DELETER.register_test(model, test, key)
             CACHE_DELETER.register_pk(self.obj, key)
