@@ -8,4 +8,5 @@ tests/example_project/settings/local.py
 
 ella/ellaadmin/templates/admin_orig
 tests/unit_project/static/photos
+tests/example_project/static/photos
 
