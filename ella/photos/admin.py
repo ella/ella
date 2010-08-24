@@ -8,8 +8,8 @@ from django.utils.translation import ugettext_lazy as _
 from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin
 
 from ella.photos.models import FormatedPhoto, Format, Photo
-from ella.photos.models import PHOTO_MIN_WIDTH, PHOTO_MIN_HEIGHT
 from ella.photos.views import format_photo_json, thumb_url
+from ella.photos.conf import config
 
 class FormatedPhotoForm(forms.BaseForm):
     def clean(self):
@@ -84,7 +84,7 @@ class PhotoOptions(EllaAdminOptionsMixin, EllaModelAdmin):
         return super(PhotoOptions, self).__call__(request, url)
 
     def queryset(self, request):
-        return super(PhotoOptions, self).queryset(request).filter(width__gt=PHOTO_MIN_WIDTH, height__gt=PHOTO_MIN_HEIGHT)
+        return super(PhotoOptions, self).queryset(request).filter(width__gt=config.PHOTO_MIN_WIDTH, height__gt=config.PHOTO_MIN_HEIGHT)
 
 
 class FormatedPhotoOptions(EllaAdminOptionsMixin, admin.ModelAdmin):

@@ -23,10 +23,11 @@ from ella.newman.decorators import require_AJAX
 from ella.newman.utils import set_user_config_db, set_user_config_session, get_user_config,\
     JsonResponse, JsonResponseError, json_decode, user_category_filter
 from ella.newman.permission import has_model_list_permission, applicable_categories, permission_filtered_model_qs
-from ella.newman import config
+from ella.newman.config import config
 from ella.newman.options import NewmanModelAdmin
 from ella.newman import actions
 from ella.utils.text import cz_compare
+from django.core.urlresolvers import reverse
 
 
 class NewmanSite(AdminSite):
@@ -34,6 +35,8 @@ class NewmanSite(AdminSite):
     index_template = 'newman/index.html'
     login_template = 'newman/login.html'
     app_index_template = 'newman/app_index.html'
+    password_change_template = 'newman/password_change_form.html'
+    password_change_done_template = 'newman/password_change_done.html'
 
     def __init__(self, name=None, app_name='newman'):
         super(NewmanSite, self).__init__(name=name, app_name=app_name)
@@ -75,22 +78,22 @@ class NewmanSite(AdminSite):
         # Newman specific URLs
         urlpatterns = patterns('',
             (r'^django-admin/', include(djangoadmin.site.urls)),
-            url(r'^%s/err-report/$' % config.NEWMAN_URL_PREFIX,
+            url(r'^%s/err-report/$' % config.URL_PREFIX,
                 wrap(self.err_report),
                 name="err-report"),
-            url(r'^%s/$' % config.NEWMAN_URL_PREFIX,
+            url(r'^%s/$' % config.URL_PREFIX,
                 wrap(self.newman_index),
                 name="newman-index"),
-            url(r'^%s/editor-box/$' % config.NEWMAN_URL_PREFIX,
+            url(r'^%s/editor-box/$' % config.URL_PREFIX,
                 wrap(self.editor_box_view, cacheable=True),
                 name="editor-box"),
-            url(r'^%s/render-chunk/$' % config.NEWMAN_URL_PREFIX,
+            url(r'^%s/render-chunk/$' % config.URL_PREFIX,
                 wrap(self.render_chunk_template_view),
                 name="render-chunk"),
-            url(r'^%s/filter-by-main-categories/$' % config.NEWMAN_URL_PREFIX,
+            url(r'^%s/filter-by-main-categories/$' % config.URL_PREFIX,
                 wrap(self.filter_by_main_categories),
                 name="filter-by-main-categories"),
-            url(r'^%s/save-filters/$' % config.NEWMAN_URL_PREFIX,
+            url(r'^%s/save-filters/$' % config.URL_PREFIX,
                 wrap(self.filter_by_main_categories_save),
                 name="save-filters"),
             url(r'^r/(?P<content_type_id>\d+)/(?P<object_id>.+)/$',
@@ -103,7 +106,7 @@ class NewmanSite(AdminSite):
 
         if 'djangomarkup' in settings.INSTALLED_APPS:
             urlpatterns += patterns('',
-                url(r'^%s/editor-preview/$' % config.NEWMAN_URL_PREFIX,
+                url(r'^%s/editor-preview/$' % config.URL_PREFIX,
                     wrap(self.editor_preview),
 #                    'djangomarkup.views.transform',
                     name="djangomarkup-preview"),
@@ -111,6 +114,32 @@ class NewmanSite(AdminSite):
 
         urlpatterns += super(NewmanSite, self).get_urls()
         return urlpatterns
+
+    def password_change(self, request):
+        """
+        Handles the "change password" task -- both form display and validation.
+        """
+        from django.contrib.auth.views import password_change
+        if self.root_path is not None:
+            url = '%spassword_change/done/' % self.root_path
+        else:
+            url = reverse('newman:password_change_done', current_app=self.name)
+        defaults = {
+            'post_change_redirect': url
+        }
+        if self.password_change_template is not None:
+            defaults['template_name'] = self.password_change_template
+        return password_change(request, **defaults)
+
+    def password_change_done(self, request):
+        """
+        Displays the "success" page after a password change.
+        """
+        from django.contrib.auth.views import password_change_done
+        defaults = {}
+        if self.password_change_done_template is not None:
+            defaults['template_name'] = self.password_change_done_template
+        return password_change_done(request, **defaults)
 
     def i18n_javascript(self, request):
         """
@@ -159,15 +188,21 @@ class NewmanSite(AdminSite):
         Returns rendered HTML for source text with styles
         """
 
+        if config.EDITOR_PREVIEW_TEMPLATE:
+            preview_template = config.EDITOR_PREVIEW_TEMPLATE
+        else:
+            preview_template = 'newman/editor-preview.html'
+
         context = template.RequestContext(request)
         from djangomarkup.views import transform
         rendered_response = transform(request)
         rendered_html = mark_safe(rendered_response.content)
-        context.update({'rendered_html': rendered_html})
+        preview_css = config.EDITOR_PREVIEW_CSS
+        context.update({'rendered_html': rendered_html, 'preview_css': preview_css})
         if extra_context:
             context.update(extra_context)
 
-        return render_to_response('newman/editor-preview.html', context,
+        return render_to_response(preview_template, context,
             context_instance=template.RequestContext(request)
         )
 

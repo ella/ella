@@ -1,10 +1,11 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <link rel="stylesheet" type="text/css" href="{{ NEWMAN_MEDIA_URL }}css/editor-preview.css?{{ VERSION }}" />
+    <link rel="stylesheet" type="text/css" href="{{ NEWMAN_MEDIA_URL }}css/editor-preview.css" />
+    {% if preview_css %}
+    	<link rel="stylesheet" type="text/css" href="{{ preview_css }}" />
+    {% endif %}
 </head>
 <body>
     {{ rendered_html }}

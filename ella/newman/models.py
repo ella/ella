@@ -2,8 +2,8 @@ from django.db import models, IntegrityError
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User, Group
-from django.conf import settings
 from django.template.defaultfilters import date
+from django.conf import settings
 
 from ella.core.cache.utils import CachedForeignKey
 from ella.core.models import Category

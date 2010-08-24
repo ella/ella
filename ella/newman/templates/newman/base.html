@@ -48,7 +48,7 @@
                     {% if user.is_superuser %}
                         | <a href="{% url newman:index %}django-admin/">Django admin</a>
                     {% endif %}
-                    | <a class="icn eclear js-hashadr" href="/password_change/">{% trans 'Change password' %}</a>
+                    | <a class="icn eclear js-simpleload" href="service-container::::/password_change/">{% trans 'Change password' %}</a>
                     | <a class="icn logout" href="{% url newman:logout %}?next={% url newman:index %}">{% trans 'Log out' %}</a>
                 </div>
             </div>

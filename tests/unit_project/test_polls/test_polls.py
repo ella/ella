@@ -3,14 +3,12 @@ from datetime import datetime, timedelta
 from djangosanetesting import DatabaseTestCase
 
 from django.core.urlresolvers import reverse
-from django import http
 from django.conf import settings
 from django.template import NodeList, Context
 from django.contrib.auth.models import User
 
-from ella.core.models import Placement
 from ella.polls.models import Poll, Question, Choice, Vote
-from ella.polls import views
+from ella.polls import views, conf
 
 # FIXME hack alert - we are calling the registration here, it should be dealt
 # with in the project itself somehow
@@ -73,7 +71,7 @@ class TestPollBox(DatabaseTestCase):
         box = Poll.box_class(self.poll, 'name', NodeList())
         box.prepare(Context({'request': build_request(user=user)}))
         self.assert_equals(
-            views.POLL_USER_ALLREADY_VOTED, 
+            conf.USER_ALLREADY_VOTED, 
             box.state)
 
     def test_state_is_not_set_for_poll_box_in_first_of_double_renders(self):
@@ -93,7 +91,7 @@ class TestPollBox(DatabaseTestCase):
         box = Poll.box_class(self.poll, 'name', NodeList())
         box.prepare(Context({'request': build_request(user=user), 'SECOND_RENDER': True}))
         self.assert_equals(
-            views.POLL_USER_ALLREADY_VOTED,
+            conf.USER_ALLREADY_VOTED,
             box.state)
 
 
@@ -120,39 +118,39 @@ class TestPolls(DatabaseTestCase):
 
     def test_check_vote_annonymous_user_not_yet_voted(self):
         self.assert_equals(
-            views.POLL_USER_NOT_YET_VOTED, 
+            conf.USER_NOT_YET_VOTED, 
             views.poll_check_vote(build_request(ip_address='127.0.0.1'), self.poll))
 
     def test_check_vote_authetnticated_user_not_yet_voted(self):
         user = User.objects.create(username='stickyfingaz')
         self.assert_equals(
-            views.POLL_USER_NOT_YET_VOTED, 
+            conf.USER_NOT_YET_VOTED, 
             views.poll_check_vote(build_request(user=user), self.poll))
 
     def test_check_vote_annonymous_user_allready_voted_by_vote_object(self):
         Vote.objects.create(poll=self.poll, ip_address='127.0.0.1')
         self.assert_equals(
-            views.POLL_USER_ALLREADY_VOTED, 
+            conf.USER_ALLREADY_VOTED, 
             views.poll_check_vote(build_request(ip_address='127.0.0.1'), self.poll))
 
     def test_check_vote_authetnticated_user_allready_voted_by_vote_object(self):
         user = User.objects.create(username='stickyfingaz')
         Vote.objects.create(poll=self.poll, user=user)
         self.assert_equals(
-            views.POLL_USER_ALLREADY_VOTED, 
+            conf.USER_ALLREADY_VOTED, 
             views.poll_check_vote(build_request(user=user), self.poll))
 
     def test_check_vote_annonymous_user_allready_voted_by_cookies(self):
-        cookies = {views.POLLS_COOKIE_NAME: ','.join(str(self.poll.pk))}
+        cookies = {conf.POLL_COOKIE_NAME: ','.join(str(self.poll.pk))}
         self.assert_equals(
-            views.POLL_USER_ALLREADY_VOTED,
+            conf.USER_ALLREADY_VOTED,
             views.poll_check_vote(build_request(cookies=cookies), self.poll))
 
     def test_check_vote_authetnticated_user_allready_voted_by_session(self):
         user = User.objects.create(username='stickyfingaz')
-        session = {views.POLLS_COOKIE_NAME: [self.poll.pk]}
+        session = {conf.POLL_COOKIE_NAME: [self.poll.pk]}
         self.assert_equals(
-            views.POLL_USER_ALLREADY_VOTED, 
+            conf.USER_ALLREADY_VOTED, 
             views.poll_check_vote(build_request(user=user, session=session), self.poll))
 
     def test_poll_vote(self):
@@ -174,11 +172,11 @@ class TestPolls(DatabaseTestCase):
         response = self.client.post(vote_url)
         self.assert_equals(302, response.status_code)
         self.assert_equals(0, self.poll.get_total_votes())
-        self.assert_equals([self.poll.pk], self.client.session.get(views.POLLS_NO_CHOICE_COOKIE_NAME, []))
+        self.assert_equals([self.poll.pk], self.client.session.get(conf.POLL_NO_CHOICE_COOKIE_NAME, []))
 
     def test_view_poll_vote_success(self):
         vote_url = reverse('polls_vote', kwargs={'poll_id': self.poll.pk})
         response = self.client.post(vote_url, {'choice': self.choiceB.pk})
         self.assert_equals(302, response.status_code)
         self.assert_equals(1, self.poll.get_total_votes())
-        self.assert_equals([self.poll.pk], self.client.session.get(views.POLLS_JUST_VOTED_COOKIE_NAME, [])) 
+        self.assert_equals([self.poll.pk], self.client.session.get(conf.POLL_JUST_VOTED_COOKIE_NAME, [])) 

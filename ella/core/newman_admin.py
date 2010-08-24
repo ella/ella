@@ -13,7 +13,7 @@ from django.template.defaultfilters import date
 from django.conf import settings
 
 from ella.core.models import Author, Source, Category, Listing, HitCount, Placement, Related, Publishable
-from ella.core.models import PUBLISH_FROM_WHEN_EMPTY
+from ella.core.conf import conf
 from ella import newman
 from ella.newman import options, fields
 from ella.newman.filterspecs import CustomFilterSpec, NewmanSiteFilter
@@ -313,7 +313,7 @@ class RelatedInlineAdmin(newman.GenericTabularInline):
 class IsPublishedFilter(CustomFilterSpec):
     " Published/Nonpublished objects filter"
     lookup_var = 'publish_from'
-    PUBLISH_FROM_WHEN_EMPTY = PUBLISH_FROM_WHEN_EMPTY.strftime('%Y-%m-%d')
+    PUBLISH_FROM_WHEN_EMPTY = conf.PUBLISH_FROM_WHEN_EMPTY.strftime('%Y-%m-%d')
     CAPTION_ALL_WITH_PLACEMENT = _('All with placement')
     CAPTION_YES = _('Yes')
     CAPTION_NO = _('No')

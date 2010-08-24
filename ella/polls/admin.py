@@ -2,7 +2,6 @@ from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.forms.models import BaseInlineFormSet
 from django.shortcuts import render_to_response
-from django.conf import settings
 from django.forms.util import ValidationError
 
 from ella.core.admin import PlacementInlineAdmin

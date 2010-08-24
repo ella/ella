@@ -1,11 +1,11 @@
 from django import template
 from django.db import models, transaction
-from django.conf import settings
 from django.template import Variable, VariableDoesNotExist
 
 from ella.core.models import HitCount, Placement
 from ella.core.cache import get_cached_object
-DOUBLE_RENDER = getattr(settings, 'DOUBLE_RENDER', False)
+from ella.core.conf import conf
+
 register = template.Library()
 
 
@@ -94,7 +94,7 @@ class HitCountNode(template.Node):
             except VariableDoesNotExist:
                 return ''
 
-        if DOUBLE_RENDER and 'SECOND_RENDER' not in context:
+        if conf.DOUBLE_RENDER and 'SECOND_RENDER' not in context:
             return '{%% load hits %%}{%% hitcount for pk %(place_pk)s %%}' % {
                 'place_pk' : place.pk,
             }
