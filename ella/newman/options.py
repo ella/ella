@@ -9,6 +9,7 @@ from django.forms.models import BaseInlineFormSet
 from django import template
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden
 from django.core.urlresolvers import reverse
+from django.core.exceptions import PermissionDenied
 from django.contrib.admin.views.main import ERROR_FLAG
 from django.shortcuts import render_to_response
 from django.db import transaction, models
@@ -738,7 +739,7 @@ class NewmanModelAdmin(XModelAdmin):
         obj = None
         try:
             obj = self.queryset(request).get(pk=unquote(object_id))
-        except model.DoesNotExist:
+        except obj.DoesNotExist:
             obj = None
         if not self.has_model_view_permission(request, obj):
             raise PermissionDenied
