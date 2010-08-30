@@ -28,7 +28,7 @@ def get_next_url(request):
         * POST param 'next'
         * HTTP_REFERER
     """
-    if 'next' in request.POST and request.POST['next'].startswith('/'):
+    if 'next' in request.POST: # and request.POST['next'].startswith('/'):
         return request.POST['next']
     else:
         return request.META.get('HTTP_REFERER', '/')
