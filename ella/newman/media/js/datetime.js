@@ -20,9 +20,9 @@ function DateTimeInput(input) {
         }
         if (!preserve) preserve = { };
 
-        if (preserve.year  ) d.setFullYear(year  );
-        if (preserve.month ) d.setMonth   (month );
         if (preserve.day   ) d.setDate    (day   );
+        if (preserve.month ) d.setMonth   (month );
+        if (preserve.year  ) d.setFullYear(year  );
         if (preserve.hour  ) d.setHours   (hour  );
         if (preserve.minute) d.setMinutes (minute);
 
@@ -68,9 +68,9 @@ function DateInput(input) {
         }
         if (!preserve) preserve = { };
 
-        if (preserve.year ) d.setFullYear(year );
-        if (preserve.month) d.setMonth   (month);
         if (preserve.day  ) d.setDate    (day  );
+        if (preserve.month) d.setMonth   (month);
+        if (preserve.year ) d.setFullYear(year );
 
         year = d.getFullYear();
         month = new Number(d.getMonth()) + 1;
@@ -176,13 +176,8 @@ function DateInput(input) {
                     var $dtpicker = $(this).closest('.datetimepicker');
                     var dti = $( $dtpicker.data('input') ).data('dti');
                     var d = new Date();
-                    d.setFullYear(dpick.selectedYear);
-                    d.setMonth(dpick.selectedMonth);
-                    d.setDate(dpick.selectedDay);
-                    d.setHours(0);
-                    d.setMinutes(0);
-                    d.setSeconds(0);
-                    d.setMilliseconds(0);
+                    d.setFullYear(dpick.selectedYear, dpick.selectedMonth, dpick.selectedDay);
+                    d.setHours(0, 0, 0, 0);
                     dti.set_date(d, {/*preserve*/hour:true,minute:true});
                     $(this).closest('.datetimepicker').hide();
                 },
@@ -225,10 +220,6 @@ function DateInput(input) {
             var selected_minutes = selected_time[2];
             d.setHours  (selected_hours  );
             d.setMinutes(selected_minutes);
-            // let default date be the following 24 hours
-            if (d.getTime() < new Date().getTime()) {
-                d.setDate( d.getDate() + 1 );
-            }
         }
         dti.set_date(d, {/*preserve*/year:true,month:true,day:true});
         $(this).closest('.datetimepicker').hide();

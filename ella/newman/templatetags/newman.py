@@ -7,10 +7,11 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy, ugettext
 from django.core.urlresolvers import reverse
 
-from ella.newman import site, permission, config
+from ella.newman import site, permission
 from ella.newman.utils import get_log_entries
 from ella.utils.text import cz_compare
 
+from ella.newman.config import config
 
 register = template.Library()
 
