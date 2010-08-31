@@ -176,13 +176,8 @@ function DateInput(input) {
                     var $dtpicker = $(this).closest('.datetimepicker');
                     var dti = $( $dtpicker.data('input') ).data('dti');
                     var d = new Date();
-                    d.setFullYear(dpick.selectedYear);
-                    d.setMonth(dpick.selectedMonth);
-                    d.setDate(dpick.selectedDay);
-                    d.setHours(0);
-                    d.setMinutes(0);
-                    d.setSeconds(0);
-                    d.setMilliseconds(0);
+                    d.setFullYear(dpick.selectedYear, dpick.selectedMonth, dpick.selectedDay);
+                    d.setHours(0, 0, 0, 0);
                     dti.set_date(d, {/*preserve*/hour:true,minute:true});
                     $(this).closest('.datetimepicker').hide();
                 },
