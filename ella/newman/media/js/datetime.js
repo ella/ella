@@ -220,10 +220,6 @@ function DateInput(input) {
             var selected_minutes = selected_time[2];
             d.setHours  (selected_hours  );
             d.setMinutes(selected_minutes);
-            // let default date be the following 24 hours
-            if (d.getTime() < new Date().getTime()) {
-                d.setDate( d.getDate() + 1 );
-            }
         }
         dti.set_date(d, {/*preserve*/year:true,month:true,day:true});
         $(this).closest('.datetimepicker').hide();
