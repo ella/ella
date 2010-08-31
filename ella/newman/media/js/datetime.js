@@ -20,9 +20,9 @@ function DateTimeInput(input) {
         }
         if (!preserve) preserve = { };
 
-        if (preserve.year  ) d.setFullYear(year  );
-        if (preserve.month ) d.setMonth   (month );
         if (preserve.day   ) d.setDate    (day   );
+        if (preserve.month ) d.setMonth   (month );
+        if (preserve.year  ) d.setFullYear(year  );
         if (preserve.hour  ) d.setHours   (hour  );
         if (preserve.minute) d.setMinutes (minute);
 
@@ -68,9 +68,9 @@ function DateInput(input) {
         }
         if (!preserve) preserve = { };
 
-        if (preserve.year ) d.setFullYear(year );
-        if (preserve.month) d.setMonth   (month);
         if (preserve.day  ) d.setDate    (day  );
+        if (preserve.month) d.setMonth   (month);
+        if (preserve.year ) d.setFullYear(year );
 
         year = d.getFullYear();
         month = new Number(d.getMonth()) + 1;
