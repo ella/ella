@@ -5,9 +5,8 @@ from httplib import urlsplit
 
 from django.conf import settings
 from django import template
-from django.utils.encoding import smart_str
-from django.utils.safestring import mark_safe
-from django.template.defaultfilters import stringfilter
+
+from ella.ellaexports.conf import config
 
 register = template.Library()
 
@@ -88,7 +87,6 @@ class FeedStrftimeNode(template.Node):
         self.formatstring = formatstring
 
     def render(self, context):
-        from ella.ellaexports.models import FEED_DATETIME_FORMAT
         if self.var_name == 'None':
             variable = datetime.now()
         else:
@@ -96,7 +94,7 @@ class FeedStrftimeNode(template.Node):
         if type(variable) != datetime:
             raise AttributeError('Given variable is not datetime object. %s' % variable)
 
-        formatstring = FEED_DATETIME_FORMAT
+        formatstring = config.FEED_DATETIME_FORMAT
         if self.formatstring:
             formatstring = self.formatstring
         return variable.strftime(str(formatstring))
