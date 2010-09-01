@@ -2,7 +2,7 @@ from django import template
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 
-from ella.newman import config as newman_config
+from ella.newman.config import config as newman_config
 from ella.core.models.publishable import HitCount
 from ella.positions.models import Position
 
