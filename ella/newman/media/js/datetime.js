@@ -19,12 +19,8 @@ function DateTimeInput(input) {
             month = new Number(month) - 1;
         }
         if (!preserve) preserve = { };
-
-        if (preserve.day   ) d.setDate    (day   );
-        if (preserve.month ) d.setMonth   (month );
-        if (preserve.year  ) d.setFullYear(year  );
-        if (preserve.hour  ) d.setHours   (hour  );
-        if (preserve.minute) d.setMinutes (minute);
+        if (preserve.date) d.setFullYear(year, month, day);
+        if (preserve.time) d.setHours(hour, minute, 0, 0);
 
         year = d.getFullYear();
         // Fix 0-based month numbering:
@@ -67,10 +63,7 @@ function DateInput(input) {
             month = new Number(month) - 1;
         }
         if (!preserve) preserve = { };
-
-        if (preserve.day  ) d.setDate    (day  );
-        if (preserve.month) d.setMonth   (month);
-        if (preserve.year ) d.setFullYear(year );
+        if (preserve.date) d.setFullYear(year, month, day);
 
         year = d.getFullYear();
         month = new Number(d.getMonth()) + 1;
@@ -178,7 +171,7 @@ function DateInput(input) {
                     var d = new Date();
                     d.setFullYear(dpick.selectedYear, dpick.selectedMonth, dpick.selectedDay);
                     d.setHours(0, 0, 0, 0);
-                    dti.set_date(d, {/*preserve*/hour:true,minute:true});
+                    dti.set_date(d, {/*preserve*/time:true});
                     $(this).closest('.datetimepicker').hide();
                 },
                 onClose: function() {
@@ -221,7 +214,7 @@ function DateInput(input) {
             d.setHours  (selected_hours  );
             d.setMinutes(selected_minutes);
         }
-        dti.set_date(d, {/*preserve*/year:true,month:true,day:true});
+        dti.set_date(d, {/*preserve*/date:true});
         $(this).closest('.datetimepicker').hide();
     });
 
