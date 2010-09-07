@@ -158,7 +158,6 @@ class NewmanModelAdmin(XModelAdmin):
         self._cached_queryset_request_id = -1
         self._cached_queryset = None 
 
-    @property
     def _media(self):
 
         js = []
@@ -172,6 +171,7 @@ class NewmanModelAdmin(XModelAdmin):
 
         return forms.Media(js=['%s%s' % (settings.ADMIN_MEDIA_PREFIX, url) for url in js])
 
+    media = property(_media)
 
     def get_form(self, request, obj=None, **kwargs):
         self._magic_instance = obj # adding edited object to ModelAdmin instance.
