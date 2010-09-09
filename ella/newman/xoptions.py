@@ -151,14 +151,6 @@ class XModelAdmin(ModelAdmin):
         adminForm = helpers.AdminForm(form, self.get_fieldsets(request, obj), self.prepopulated_fields)
         media = self.media + adminForm.media
         inline_admin_formsets, media = self.get_change_view_inline_formsets(request, obj, formsets, media)
-        #raise KeyError, media._js
-        if '%sjs/jquery.min.js' % settings.ADMIN_MEDIA_PREFIX in media._js:
-            media._js.remove('%sjs/jquery.min.js' % settings.ADMIN_MEDIA_PREFIX)
-        if '%sjs/jquery.init.js' % settings.ADMIN_MEDIA_PREFIX in media._js:
-            media._js.remove('%sjs/jquery.init.js' % settings.ADMIN_MEDIA_PREFIX)
-        if '%sjs/collapse.min.js' % settings.ADMIN_MEDIA_PREFIX in media._js:
-            media._js.remove('%sjs/collapse.min.js' % settings.ADMIN_MEDIA_PREFIX)
-        #, 'js/jquery.init.js', 'js/collapse.min.js'])
 
         error_dict = {}
         if not form.is_valid():
@@ -494,3 +486,6 @@ class XModelAdmin(ModelAdmin):
             "newman/%s/delete_confirmation.html" % app_label,
             "newman/delete_confirmation.html"
         ], context, context_instance=context_instance)
+
+from django import forms
+helpers.Fieldset.media = property(forms.Media)
