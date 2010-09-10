@@ -146,6 +146,7 @@ class NewmanModelAdmin(XModelAdmin):
 
         # newman's custom templates
         self.delete_confirmation_template = self.get_template_list('delete_confirmation.html')
+        self.delete_selected_confirmation_template = self.get_template_list('delete_selected_confirmation.html')
         self.object_history_template = self.get_template_list('object_history.html')
         self.change_form_template = self.get_template_list('change_form.html')
         self.change_list_template = self.get_template_list('change_list.html')

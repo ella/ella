@@ -48,6 +48,7 @@ class XModelAdmin(ModelAdmin):
     change_form_template = None
     change_list_template = None
     delete_confirmation_template = None
+    delete_selected_confirmation_template = None
     object_history_template = None
 
     # ChangeList class for view
