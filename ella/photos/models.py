@@ -130,6 +130,8 @@ class Photo(models.Model):
             super(Photo, self).save(force_insert, force_update)
             self.width, self.height = get_image_dimensions(self.image.path)
             self.slug = str(self.id) + '-' + slugify(self.title)
+            # truncate slug in order to fit in an ImageField and/or paths in Redirects
+            self.slug = self.slug[:64]
             force_insert, force_update = False, True
             image_changed = False
         else:
@@ -138,8 +140,7 @@ class Photo(models.Model):
         # rename image by slug
         imageType = detect_img_type(self.image.path)
         if imageType is not None:
-            # Cut slug - image field size is 200, but full path can be bigger then 200 (UPLOAD_TO + slug + extension)
-            self.image = file_rename(self.image.name.encode('utf-8'), self.slug[:64], config.TYPE_EXTENSION[ imageType ])
+            self.image = file_rename(self.image.name.encode('utf-8'), self.slug, config.TYPE_EXTENSION[ imageType ])
         # delete formatedphotos if new image was uploaded
         if image_changed:
             super(Photo, self).save(force_insert=force_insert, force_update=force_update, **kwargs)
