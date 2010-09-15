@@ -11,6 +11,7 @@ from django.utils.safestring import mark_safe
 from django.core.files.uploadedfile import UploadedFile
 from django.core.files.base import ContentFile
 from django.conf import settings
+from django.template.defaultfilters import slugify
 
 from ella.core.models.main import Author, Source
 from ella.core.box import Box
@@ -125,9 +126,10 @@ class Photo(models.Model):
             if isinstance(self.image, UploadedFile):
                 # due to PIL has read several bytes from image, position in file has to be reset
                 self.image.seek(0)
+            self.slug = ''
             super(Photo, self).save(force_insert, force_update)
             self.width, self.height = get_image_dimensions(self.image.path)
-            self.slug = str(self.id) + '-' + self.slug
+            self.slug = str(self.id) + '-' + slugify(self.title)
             force_insert, force_update = False, True
             image_changed = False
         else:
