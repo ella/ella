@@ -126,6 +126,7 @@ class Photo(models.Model):
             if isinstance(self.image, UploadedFile):
                 # due to PIL has read several bytes from image, position in file has to be reset
                 self.image.seek(0)
+            # FIXME: better unique identifier, supercalifragilisticexpialidocious?
             self.slug = ''
             super(Photo, self).save(force_insert, force_update)
             self.width, self.height = get_image_dimensions(self.image.path)

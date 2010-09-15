@@ -64,14 +64,13 @@ class PhotoOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     inlines = [ FormatedPhotoInlineOptions ]
     list_display = ('title', 'width', 'height', 'thumb', 'pk',) ## 'authors')
     list_filter = ('created',)
-    prepopulated_fields = {'slug': ('title',)}
     search_fields = ('title', 'image', 'description', 'id',) # FIXME: 'tags__tag__name',)
     suggest_fields = {'authors': ('name', 'slug',), 'source': ('name', 'url',)}
     rich_text_fields = {'small': ('description',)}
     ordering = ('-id',)
 
     fieldsets = (
-        (_("Photo core"), {'fields': (('title', 'slug'), 'image', 'authors')}),
+        (_("Photo core"), {'fields': ('title', 'image', 'authors')}),
         (_("Photo extra"), {'fields': ('description', 'source')}),
         (_("Metadata"), {'fields': (('important_top', 'important_left', 'important_bottom', 'important_right'),)}),
     )
