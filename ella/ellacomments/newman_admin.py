@@ -2,7 +2,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 
 from ella import newman
-from ella.ellacomments.models import CommentOptionsObject
+from ella.ellacomments.models import CommentOptionsObject, CommentIPBlocklist
 
 from threadedcomments.models import ThreadedComment
 from threadedcomments.admin import ThreadedCommentsAdmin
@@ -21,6 +21,7 @@ MODELS_WITH_COMMENTS = getattr(settings, 'MODELS_WITH_COMMENTS', ('articles.arti
 
 newman.site.register(ThreadedComment, ThreadedCommentsNewmanAdmin)
 newman.site.append_inline(MODELS_WITH_COMMENTS, CommentOptionsGenericInline)
+newman.site.register(CommentIPBlocklist)
 
 # threadedcomments translations for newman
 app, n, vn = _('Threadedcomments'), _('Threaded comment'), _('Threaded comments')

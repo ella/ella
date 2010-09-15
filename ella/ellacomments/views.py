@@ -1,4 +1,4 @@
-from ella.ellacomments.models import CommentOptionsObject
+from ella.ellacomments.models import CommentOptionsObject, CommentIPBlocklist
 import operator
 
 from django.contrib import comments
@@ -45,6 +45,10 @@ def post_comment(request, context, parent_id=None):
             context,
             RequestContext(request)
         )
+
+    ip_address = request.META.get('REMOTE_ADDR', None)
+    if ip_address and CommentIPBlocklist.objects.filter(ip_address=ip_address).count():
+        raise Http404('Your IP address is banned from commenting.')
 
     # Fill out some initial data fields from an authenticated user, if present
     data = request.POST.copy()

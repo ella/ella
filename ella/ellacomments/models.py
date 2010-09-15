@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
@@ -41,3 +42,21 @@ class CommentOptionsObject(models.Model):
         unique_together = (('target_ct', 'target_id',),)
         verbose_name = _('Comment Options')
         verbose_name_plural = _('Comment Options')
+
+class CommentIPBlocklist(models.Model):
+    """
+    """
+    created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)
+    ip_address = models.IPAddressField(_('IP Address'), unique=True)
+    reason = models.CharField(_('Reason'), max_length=255, blank=True, null=True)
+
+    def __unicode__(self):
+        if self.reason:
+            return u'%s (%s)' % (self.ip_address, self.reason)
+        else:
+            return self.ip_address
+
+    class Meta:
+        verbose_name = _('Blocked IP Address')
+        verbose_name_plural = _('Blocked IP Addresses')
+        ordering = ('-created',)
