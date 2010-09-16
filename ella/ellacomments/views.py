@@ -28,6 +28,12 @@ def post_comment(request, context, parent_id=None):
     if parent_id:
         parent = get_object_or_404(comments.get_model(), pk=parent_id)
 
+    ip_address = request.META.get('REMOTE_ADDR', None)
+    try:
+        ip_ban = CommentIPBlocklist.objects.get(ip_address=ip_address)
+    except CommentIPBlocklist.DoesNotExist:
+        ip_ban = None
+
     if request.method != 'POST':
         initial = {}
         if parent:
@@ -39,16 +45,13 @@ def post_comment(request, context, parent_id=None):
         context.update({
                 'parent': parent,
                 'form': form,
+                'ip_ban': ip_ban,
             })
         return render_to_response(
             get_templates_from_placement('comment_form.html', context['placement']),
             context,
             RequestContext(request)
         )
-
-    ip_address = request.META.get('REMOTE_ADDR', None)
-    if ip_address and CommentIPBlocklist.objects.filter(ip_address=ip_address).count():
-        raise Http404('Your IP address is banned from commenting.')
 
     # Fill out some initial data fields from an authenticated user, if present
     data = request.POST.copy()
