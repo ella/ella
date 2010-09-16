@@ -17,11 +17,15 @@ class CommentOptionsGenericInline(newman.GenericStackedInline):
 class ThreadedCommentsNewmanAdmin(ThreadedCommentsAdmin, newman.NewmanModelAdmin):
     pass
 
+class CommentIPBlocklistNewmanAdmin(newman.NewmanModelAdmin):
+    list_display = ('__unicode__', 'created', 'reason')
+    list_filter = ('created',)
+
 MODELS_WITH_COMMENTS = getattr(settings, 'MODELS_WITH_COMMENTS', ('articles.article', 'galleries.gallery', 'interviews.interview', ))
 
 newman.site.register(ThreadedComment, ThreadedCommentsNewmanAdmin)
 newman.site.append_inline(MODELS_WITH_COMMENTS, CommentOptionsGenericInline)
-newman.site.register(CommentIPBlocklist)
+newman.site.register(CommentIPBlocklist, CommentIPBlocklistNewmanAdmin)
 
 # threadedcomments translations for newman
 app, n, vn = _('Threadedcomments'), _('Threaded comment'), _('Threaded comments')

@@ -62,4 +62,9 @@ class CommentsAdmin(ThreadedCommentsAdmin):
         }
         return render_to_response("admin/comments/comment/multiple_delete_confirmation.html", context)
 
-admin.site.register(CommentIPBlocklist)
+class CommentIPBlocklistAdmin(admin.ModelAdmin):
+    date_hierarchy = 'created'
+    list_display = ('__unicode__', 'created', 'reason')
+    list_filter = ('created',)
+
+admin.site.register(CommentIPBlocklist, CommentIPBlocklistAdmin)

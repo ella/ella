@@ -51,10 +51,7 @@ class CommentIPBlocklist(models.Model):
     reason = models.CharField(_('Reason'), max_length=255, blank=True, null=True)
 
     def __unicode__(self):
-        if self.reason:
-            return u'%s (%s)' % (self.ip_address, self.reason)
-        else:
-            return self.ip_address
+        return self.ip_address
 
     class Meta:
         verbose_name = _('Blocked IP Address')
