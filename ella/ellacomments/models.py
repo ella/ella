@@ -43,7 +43,7 @@ class CommentOptionsObject(models.Model):
         verbose_name = _('Comment Options')
         verbose_name_plural = _('Comment Options')
 
-class CommentIPBlocklist(models.Model):
+class BannedIP(models.Model):
     """
     """
     created = models.DateTimeField(_('Created'), default=datetime.now, editable=False)
@@ -54,6 +54,6 @@ class CommentIPBlocklist(models.Model):
         return self.ip_address
 
     class Meta:
-        verbose_name = _('Blocked IP Address')
-        verbose_name_plural = _('Blocked IP Addresses')
+        verbose_name = _('Banned IP')
+        verbose_name_plural = _('Banned IPs')
         ordering = ('-created',)

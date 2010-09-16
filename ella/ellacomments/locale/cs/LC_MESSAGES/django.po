@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-09-16 14:28+0200\n"
+"POT-Creation-Date: 2010-09-16 16:31+0200\n"
 "PO-Revision-Date: 2010-01-09 15:23+0100\n"
 "Last-Translator: Vitek Pliska <whit@jizak.cz>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -45,7 +45,7 @@ msgstr "Zobrazit komentáře až po schválení"
 
 #: models.py:36
 msgid "Check profanities in comments"
-msgstr ""
+msgstr "Kontrolovat sprosťárny v komentářích"
 
 #: models.py:39 models.py:43 models.py:44
 msgid "Comment Options"
@@ -64,12 +64,12 @@ msgid "Reason"
 msgstr "Důvod"
 
 #: models.py:57
-msgid "Blocked IP Address"
-msgstr "Blokovaná IP Adresa"
+msgid "Banned IP"
+msgstr "Zablokovaná IP Adresa"
 
 #: models.py:58
-msgid "Blocked IP Addresses"
-msgstr "Blokované IP Adresy"
+msgid "Banned IPs"
+msgstr "Zablokované IP Adresy"
 
 #: newman_admin.py:31
 msgid "Threadedcomments"
@@ -90,6 +90,3 @@ msgstr "nový"
 #: urls.py:14 views.py:78
 msgid "comments"
 msgstr "komentáře"
-
-#~ msgid "threadedcomments"
-#~ msgstr "komentáře"

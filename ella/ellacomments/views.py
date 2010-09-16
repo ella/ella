@@ -1,4 +1,4 @@
-from ella.ellacomments.models import CommentOptionsObject, CommentIPBlocklist
+from ella.ellacomments.models import CommentOptionsObject, BannedIP
 import operator
 
 from django.contrib import comments
@@ -30,8 +30,8 @@ def post_comment(request, context, parent_id=None):
 
     ip_address = request.META.get('REMOTE_ADDR', None)
     try:
-        ip_ban = CommentIPBlocklist.objects.get(ip_address=ip_address)
-    except CommentIPBlocklist.DoesNotExist:
+        ip_ban = BannedIP.objects.get(ip_address=ip_address)
+    except BannedIP.DoesNotExist:
         ip_ban = None
 
     if request.method != 'POST':

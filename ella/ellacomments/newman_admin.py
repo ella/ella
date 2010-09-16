@@ -2,7 +2,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 
 from ella import newman
-from ella.ellacomments.models import CommentOptionsObject, CommentIPBlocklist
+from ella.ellacomments.models import CommentOptionsObject, BannedIP
 
 from threadedcomments.models import ThreadedComment
 from threadedcomments.admin import ThreadedCommentsAdmin
@@ -17,7 +17,7 @@ class CommentOptionsGenericInline(newman.GenericStackedInline):
 class ThreadedCommentsNewmanAdmin(ThreadedCommentsAdmin, newman.NewmanModelAdmin):
     pass
 
-class CommentIPBlocklistNewmanAdmin(newman.NewmanModelAdmin):
+class BannedIPNewmanAdmin(newman.NewmanModelAdmin):
     list_display = ('__unicode__', 'created', 'reason')
     list_filter = ('created',)
 
@@ -25,7 +25,7 @@ MODELS_WITH_COMMENTS = getattr(settings, 'MODELS_WITH_COMMENTS', ('articles.arti
 
 newman.site.register(ThreadedComment, ThreadedCommentsNewmanAdmin)
 newman.site.append_inline(MODELS_WITH_COMMENTS, CommentOptionsGenericInline)
-newman.site.register(CommentIPBlocklist, CommentIPBlocklistNewmanAdmin)
+newman.site.register(BannedIP, BannedIPNewmanAdmin)
 
 # threadedcomments translations for newman
 app, n, vn = _('Threadedcomments'), _('Threaded comment'), _('Threaded comments')
