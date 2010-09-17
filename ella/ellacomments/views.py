@@ -34,7 +34,7 @@ def post_comment(request, context, parent_id=None):
     except BannedIP.DoesNotExist:
         ip_ban = None
 
-    if request.method != 'POST':
+    if request.method != 'POST' or ip_ban:
         initial = {}
         if parent:
             if parent.title.startswith('Re:'):
