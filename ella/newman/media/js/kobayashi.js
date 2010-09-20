@@ -1011,13 +1011,13 @@ function get_hash(address, options) {
     var media_queue = [];
     $(document).data('loaded_media', {});
     function init_media() {
-        timer('trigger_ media_loaded');
+        //timer('trigger_ media_loaded');
         try {
             $(document).trigger('media_loaded').data('loaded_media', {});
         } catch (e) {
             log_kobayashi.log('Error when triggering media_loaded.', e);
         }
-        timerEnd('trigger_ media_loaded');
+        //timerEnd('trigger_ media_loaded');
     }
     function draw_media() {
         if (media_queue.length == 0) {
