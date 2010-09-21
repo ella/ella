@@ -97,7 +97,7 @@ class TestBannedIP(CommentViewTestCase):
         self.assert_true('ip_ban' in response.context)
         self.assert_equals(self.ip_ban, response.context['ip_ban'])
 
-    def test_get_passes_ip_ban_to_template_on_get(self):
+    def test_get_passes_ip_ban_to_template(self):
         template_loader.templates['page/comment_form.html'] = ''
         response = self.client.get(self.get_url('new'))
         self.assert_equals(200, response.status_code)
