@@ -91,16 +91,16 @@ class Photo(models.Model):
         """
         Generates thumbnail for admin site and returns its url
         """
-        type = detect_img_type(self.image.path)
-        if not type:
-            return None
-
         # cache thumbnail for future use to avoid hitting storage.exists() every time
         # and to allow thumbnail detection after instance has been deleted
         self.thumbnail_path = self.get_thumbnail_path()
         if config.IMAGE_URL_PREFIX:
             # custom URL prefix (debugging purposes)
             return config.IMAGE_URL_PREFIX.rstrip('/') + '/' + self.thumbnail_path
+
+        type = detect_img_type(self.image.path)
+        if not type:
+            return None
 
         storage = self.image.storage
 
@@ -251,7 +251,7 @@ class FormatedPhoto(models.Model):
         "Returns url of the photo file."
         if config.IMAGE_URL_PREFIX:
             # custom URL prefix (debugging purposes)
-            return config.IMAGE_URL_PREFIX.rstrip('/') + '/' + self.image.url
+            return config.IMAGE_URL_PREFIX.rstrip('/') + '/' + self.image.name
 
         if not config.DO_URL_CHECK:
             return self.image.url
