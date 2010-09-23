@@ -94,7 +94,7 @@ class Photo(models.Model):
         # cache thumbnail for future use to avoid hitting storage.exists() every time
         # and to allow thumbnail detection after instance has been deleted
         self.thumbnail_path = self.get_thumbnail_path()
-        if config.IMAGE_URL_PREFIX:
+        if config.IMAGE_URL_PREFIX and not path.exists(self.image.path):
             # custom URL prefix (debugging purposes)
             return config.IMAGE_URL_PREFIX.rstrip('/') + '/' + self.thumbnail_path
 
