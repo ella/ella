@@ -41,8 +41,11 @@
   {% endif %}
   </p>
   
-  <p><a class="newman-edit-button" href="{{ newman_object_url }}">Editovat článek</a></p>
-  
+  <p><a class="newman-edit-button" href="{{ newman_object_url }}">Editovat článek</a>
+  {% if newman_comment_moderation_url %}
+    <a class="newman-edit-button" href="{{ newman_comment_moderation_url }}">Moderovat komentáře</a>
+  {% endif %}
+  </p>
 {% endif %}
 
 

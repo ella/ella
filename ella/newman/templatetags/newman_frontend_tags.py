@@ -3,6 +3,7 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 
 from ella.newman.config import config as newman_config
+from ella.ellacomments.newman_admin import MODELS_WITH_COMMENTS
 from ella.core.models.publishable import HitCount
 from ella.positions.models import Position
 
@@ -18,6 +19,16 @@ def get_newman_url(obj):
         'pk': obj.pk
     }
     return url
+
+def get_moderation_url(obj):
+    ct = ContentType.objects.get_for_model(obj)
+    model_id = '%s.%s' % (ct.app_label, ct.model)
+    if model_id in MODELS_WITH_COMMENTS:
+        return '%(base)s#/threadedcomments/threadedcomment/?content_type=%(ct_id)d&object_pk=%(obj_pk)s' % {
+            'base': newman_config.BASE_URL,
+            'ct_id': ct.id,
+            'obj_pk': obj._get_pk_val(),
+        }
 
 @register.inclusion_tag('newman/tpl_tags/newman_frontend_admin.html', takes_context=True)
 def newman_frontend_admin(context):
@@ -54,6 +65,7 @@ def newman_frontend_admin(context):
     if obj:
         vars['object'] = obj
         vars['newman_object_url'] = get_newman_url(obj)
+        vars['newman_comment_moderation_url'] = get_moderation_url(obj)
         if placement:
             vars['hitcount'] = HitCount.objects.get(placement=placement.pk)
 
