@@ -105,6 +105,27 @@ class TestBannedIP(CommentViewTestCase):
         self.assert_equals(self.ip_ban, response.context['ip_ban'])
 
 
+class TestCommentModeration(CommentViewTestCase):
+    def setUp(self):
+        super(TestCommentModeration, self).setUp()
+        self.opts = CommentOptionsObject.objects.create(target_ct=self.publishable.content_type, target_id=self.publishable.pk, premoderated=True)
+        self.form = comments.get_form()(target_object=self.publishable)
+
+    def test_premoderated_comments_are_not_public(self):
+        response = self.client.post(self.get_url('new'), self.get_form_data(self.form))
+        self.assert_equals(302, response.status_code)
+        self.assert_equals(1, comments.get_model().objects.count())
+        comment = comments.get_model().objects.all()[0]
+        self.assert_equals(False, comment.is_public)
+
+    def test_premoderated_comments_are_not_visible_in_listing(self):
+        template_loader.templates['page/comment_list.html'] = ''
+        response = self.client.post(self.get_url('new'), self.get_form_data(self.form))
+        self.assert_equals(302, response.status_code)
+        response = self.client.get(self.get_url())
+        self.assert_true('comment_list' in response.context)
+        self.assert_equals(0, len(response.context['comment_list']))
+
 class TestCommentViews(CommentViewTestCase):
 
     def test_comments_urls_is_blocked(self):
@@ -112,7 +133,10 @@ class TestCommentViews(CommentViewTestCase):
         template_loader.templates['page/comment_list.html'] = ''
         opts = CommentOptionsObject.objects.create(target_ct=self.publishable.content_type, target_id=self.publishable.pk, blocked=True)
         response = self.client.get(self.get_url())
-        self.assert_equals(404, response.status_code)
+        self.assert_equals(200, response.status_code)
+        self.assert_true('opts' in response.context)
+        self.assert_equals(opts, response.context['opts'])
+        self.assert_equals(True, response.context['opts'].blocked)
 
     def test_post_works_for_correct_data(self):
         form = comments.get_form()(target_object=self.publishable)
