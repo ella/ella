@@ -13,5 +13,4 @@
     {% endblock %}
 {% block footer %}
 </rss>
-</xml>
 {% endblock %}
