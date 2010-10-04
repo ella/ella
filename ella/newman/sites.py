@@ -25,7 +25,6 @@ from ella.newman.utils import set_user_config_db, set_user_config_session, get_u
 from ella.newman.permission import has_model_list_permission, applicable_categories, permission_filtered_model_qs
 from ella.newman.config import config
 from ella.newman.options import NewmanModelAdmin
-from ella.newman import actions
 from ella.utils.text import cz_compare
 from django.core.urlresolvers import reverse
 
@@ -40,8 +39,6 @@ class NewmanSite(AdminSite):
 
     def __init__(self, name=None, app_name='newman'):
         super(NewmanSite, self).__init__(name=name, app_name=app_name)
-        self._actions = {'delete_selected': actions.delete_selected}
-        self._global_actions = self._actions.copy()
 
     def append_inline(self, to_models=(), inline=None):
         """
@@ -400,3 +397,4 @@ class NewmanSite(AdminSite):
         return acts
 
 site = NewmanSite(name="newman")
+site.disable_action('delete_selected')
