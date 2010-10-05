@@ -54,6 +54,7 @@ class TestViews(InterviewViewTestCase):
         self.assert_equals(404, r.status_code)
 
     def test_post_to_reply_works(self):
+        self.templates['404.html'] = ''
         u = User(username='my_user')
         u.set_password('secret')
         u.save()
@@ -75,6 +76,7 @@ class TestViews(InterviewViewTestCase):
 
 
     def test_reply_lists_questions(self):
+        self.templates['404.html'] = ''
         self.templates['page/reply.html'] = ''
         u = User(username='my_user')
         u.set_password('secret')
