@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-07-07 13:34+0200\n"
+"POT-Creation-Date: 2010-10-13 11:53+0200\n"
 "PO-Revision-Date: 2009-07-07 13:35+0100\n"
 "Last-Translator: Vitek pliska <whit@jizak.cz>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,85 +15,75 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: models.py:59
-#: migrations/0001_initial.py:17
-msgid "Category"
-msgstr "Kategorie"
-
-#: models.py:60
-#: migrations/0001_initial.py:18
-msgid "Name"
-msgstr "Jméno"
-
-#: models.py:62
-#: migrations/0001_initial.py:19
-msgid "Target content type"
-msgstr "Typ cílového objektu"
-
-#: models.py:63
-#: migrations/0001_initial.py:20
-msgid "Target id"
-msgstr "ID cílového objektu"
-
-#: models.py:67
-#: migrations/0001_initial.py:21
-msgid "Position active from"
-msgstr "Pozice aktivní od"
-
-#: models.py:68
-#: migrations/0001_initial.py:22
-msgid "Position active till"
-msgstr "Pozice aktivní do"
-
-#: models.py:70
-#: migrations/0001_initial.py:23
-msgid "Box type"
-msgstr "Typ boxu"
-
-#: models.py:71
-#: migrations/0001_initial.py:24
-msgid "Definition"
-msgstr "definice"
-
-#: models.py:72
-#: migrations/0001_initial.py:25
-msgid "Disabled"
-msgstr "Vypnuto"
-
-#: models.py:79
+#: admin.py:11 newman_admin.py:45
 msgid "empty position"
 msgstr "prázdná pozice"
 
-#: models.py:82
+#: admin.py:14 newman_admin.py:48
 msgid "Title"
 msgstr "Nadpis"
 
-#: models.py:89
+#: admin.py:21 newman_admin.py:55
 msgid "Filled"
 msgstr "Vyplněno"
 
-#: models.py:99
+#: admin.py:31 newman_admin.py:65
 msgid "Active"
 msgstr "Aktivní"
 
-#: models.py:120
+#: models.py:63 migrations/0001_initial.py:17
+msgid "Category"
+msgstr "Kategorie"
+
+#: models.py:64 migrations/0001_initial.py:18
+msgid "Name"
+msgstr "Jméno"
+
+#: models.py:66 migrations/0001_initial.py:19
+msgid "Target content type"
+msgstr "Typ cílového objektu"
+
+#: models.py:67 migrations/0001_initial.py:20
+msgid "Target id"
+msgstr "ID cílového objektu"
+
+#: models.py:71 migrations/0001_initial.py:21
+msgid "Position active from"
+msgstr "Pozice aktivní od"
+
+#: models.py:72 migrations/0001_initial.py:22
+msgid "Position active till"
+msgstr "Pozice aktivní do"
+
+#: models.py:74 migrations/0001_initial.py:23
+msgid "Box type"
+msgstr "Typ boxu"
+
+#: models.py:75 migrations/0001_initial.py:24
+msgid "Definition"
+msgstr "definice"
+
+#: models.py:76 migrations/0001_initial.py:25
+msgid "Disabled"
+msgstr "Vypnuto"
+
+#: models.py:102
 msgid "Position"
 msgstr "Pozice"
 
-#: models.py:121
+#: models.py:103
 msgid "Positions"
 msgstr "Pozice"
 
-#: newman_admin.py:25
-msgid "Active till must be greather than active from."
-msgstr "Aktivní do musí být větší než aktivní od."
+#: newman_admin.py:27
+msgid "Active till must be later than active from."
+msgstr "Aktivní do musí být později než aktivní od."
 
-#: newman_admin.py:82
+#: newman_admin.py:109
 msgid "Positions were changed successfully."
 msgstr "Pozice byly úspěšně změněny."
 
-#: newman_admin.py:105
+#: newman_admin.py:132
 #, python-format
 msgid "Positions in %s"
 msgstr "Pozice v %s"
-
