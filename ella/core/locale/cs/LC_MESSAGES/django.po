@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-10-13 12:06+0200\n"
+"POT-Creation-Date: 2010-10-13 14:15+0200\n"
 "PO-Revision-Date: 2010-02-08 16:08+0100\n"
 "Last-Translator: Vitek pliska <whit@jizak.cz>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,40 +19,6 @@ msgstr ""
 msgid "Core"
 msgstr "Základní"
 
-#: admin.py:17 admin.py:37 newman_admin.py:27 newman_admin.py:46
-#: migrations/0002_01_publishable_models.py:19
-#: migrations/new/0003_migrate_publishable.py:33
-#: migrations/new/0003_migrate_publishable.py:42 models/main.py:159
-#: models/publishable.py:39 models/publishable.py:171
-#: models/publishable.py:335
-msgid "Category"
-msgstr "Kategorie"
-
-#: admin.py:123 newman_admin.py:132
-msgid ""
-"Amount of publish_from input fields should be the same as category fields."
-msgstr ""
-"Počet políček 'publikovat od' by měl být shodný s počtem políček 'kategorie'."
-
-#: admin.py:131 newman_admin.py:140
-msgid "No listing can start sooner than main listing"
-msgstr "Žádný výčet nemůže začínat dříve než hlavní výčet."
-
-#: admin.py:180 newman_admin.py:195 models/publishable.py:243
-#, python-format
-msgid ""
-"There is already a Placement object published in\n"
-"                    category %(category)s with the same URL referring to "
-"%(target)s.\n"
-"                    Please change the slug or publish date."
-msgstr ""
-"Zkuste změnit slug nebo datum publikace. Publikace se shodnou URL již "
-"existuje v kategorii \"%(category)s\" pro objekt \"%(target)s\" ."
-
-#: admin.py:189 newman_admin.py:204
-msgid "If object has a category, it must have a main placement."
-msgstr "Pokud má objekt kategorii, musí mít i hlavní umístění."
-
 #: feeds.py:34
 #, python-format
 msgid "Top %(count)d %(ctype)s objects in category %(cat)s."
@@ -63,66 +29,104 @@ msgstr "Prvních %(count)d objektů typu %(ctype)s z kategorie %(cat)s."
 msgid "Top %(count)d objects in category %(cat)s."
 msgstr "Prvních %(count)d objektů z kategorie %(cat)s."
 
-#: newman_admin.py:166
+#: newman_admin.py:25 newman_admin.py:174
 msgid "Publish to must be later than publish from."
 msgstr "Publikovat do musí být později než publikovat od."
 
-#: newman_admin.py:275 newman_admin.py:372 newman_admin.py:472
+#: newman_admin.py:27
+msgid "Priority to must be later than priority from."
+msgstr "Konec prioritizace musí být později než začátek prioritizace."
+
+#: newman_admin.py:35 newman_admin.py:54
+#: migrations/0002_01_publishable_models.py:19
+#: migrations/new/0003_migrate_publishable.py:33
+#: migrations/new/0003_migrate_publishable.py:42 models/main.py:159
+#: models/publishable.py:39 models/publishable.py:171
+#: models/publishable.py:335
+msgid "Category"
+msgstr "Kategorie"
+
+#: newman_admin.py:140
+msgid ""
+"Amount of publish_from input fields should be the same as category fields."
+msgstr ""
+"Počet políček 'publikovat od' by měl být shodný s počtem políček 'kategorie'."
+
+#: newman_admin.py:148
+msgid "No listing can start sooner than main listing"
+msgstr "Žádný výčet nemůže začínat dříve než hlavní výčet."
+
+#: newman_admin.py:203 models/publishable.py:243
+#, python-format
+msgid ""
+"There is already a Placement object published in\n"
+"                    category %(category)s with the same URL referring to "
+"%(target)s.\n"
+"                    Please change the slug or publish date."
+msgstr ""
+"Zkuste změnit slug nebo datum publikace. Publikace se shodnou URL již "
+"existuje v kategorii \"%(category)s\" pro objekt \"%(target)s\" ."
+
+#: newman_admin.py:212
+msgid "If object has a category, it must have a main placement."
+msgstr "Pokud má objekt kategorii, musí mít i hlavní umístění."
+
+#: newman_admin.py:283 newman_admin.py:380 newman_admin.py:480
 #: migrations/0002_01_publishable_models.py:25 models/publishable.py:57
 msgid "Publish from"
 msgstr "Publikovat od"
 
-#: newman_admin.py:282
+#: newman_admin.py:290
 msgid "View on site"
 msgstr "Zobrazit na webu"
 
-#: newman_admin.py:320
+#: newman_admin.py:328
 msgid "All with placement"
 msgstr "Vše s publikací"
 
-#: newman_admin.py:321
+#: newman_admin.py:329
 msgid "Yes"
 msgstr "Ano"
 
-#: newman_admin.py:322
+#: newman_admin.py:330
 msgid "No"
 msgstr "Ne"
 
-#: newman_admin.py:325
+#: newman_admin.py:333
 msgid "Is published?"
 msgstr "Publikováno?"
 
-#: newman_admin.py:444 migrations/new/0003_migrate_publishable.py:27
+#: newman_admin.py:452 migrations/new/0003_migrate_publishable.py:27
 #: models/publishable.py:61 models/publishable.py:170
 msgid "Publishable object"
 msgstr "Publikovatelný objekt"
 
-#: newman_admin.py:448
+#: newman_admin.py:456
 msgid "site"
 msgstr "web"
 
-#: newman_admin.py:460
+#: newman_admin.py:468
 msgid "WWW"
 msgstr ""
 
-#: newman_admin.py:468
+#: newman_admin.py:476
 msgid "No placement"
 msgstr "Bez publikace"
 
-#: newman_admin.py:480
+#: newman_admin.py:488
 msgid "No main photo!"
 msgstr "Není výchozí foto!"
 
-#: newman_admin.py:482 migrations/0002_01_publishable_models.py:23
+#: newman_admin.py:490 migrations/0002_01_publishable_models.py:23
 #: models/publishable.py:50
 msgid "Photo"
 msgstr "Foto"
 
-#: newman_admin.py:487
+#: newman_admin.py:495
 msgid "No main placement"
 msgstr "Bez hlavní publikace"
 
-#: newman_admin.py:489
+#: newman_admin.py:497
 msgid "Main placement"
 msgstr "Hlavní publikace"
 
