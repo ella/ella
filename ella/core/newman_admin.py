@@ -129,7 +129,7 @@ class PlacementForm(modelforms.ModelForm):
         pub_from = data.getlist(self.get_part_id('publish_from'))
         listings = self.cleaned_data['listings']
         if len(pub_from) and (len(pub_from) != len(listings)):
-            raise ValidationError(_('Amount of publish_from input fields should be the same as category fields. With kind regards Your PlacementInline and his ListingCustomWidget.'))
+            raise ValidationError(_('Amount of publish_from input fields should be the same as category fields.'))
         for lst, pub in zip(listings, pub_from):
             if not pub:
                 #raise ValidationError(_('This field is required'))
@@ -161,6 +161,9 @@ class PlacementForm(modelforms.ModelForm):
         #if cat and cat == cat and cat: # should be equiv. if cat:...
         if cat:
             main = d
+
+        if d.get('publish_to', None) is not None and d['publish_from'] > d['publish_to']:
+            raise ValidationError(_('Publish to must be later than publish from.'))
 
         d['slug'] = obj_slug
         # try and find conflicting placement
