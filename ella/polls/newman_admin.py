@@ -257,14 +257,14 @@ class QuestionInlineAdmin(newman.NewmanTabularInline):
     fieldsets = ((None, {'fields' : ('question', 'allow_multiple', 'allow_no_choice', 'choices')}),)
     extra = 1
 
-class CleanDateSpanMixin(ModelForm):
+class DateSpanModelForm(ModelForm):
     def clean(self):
-        d = super(CleanDateSpanMixin, self).clean()
+        d = super(DateSpanModelForm, self).clean()
         if d['active_from'] and d['active_till'] and d['active_from'] > d['active_till']:
             raise ValidationError(_('Active till must be later than active from.'))
         return d
 
-class ContestForm(CleanDateSpanMixin):
+class ContestForm(DateSpanModelForm):
     class Meta:
         model = Contest
 
@@ -327,7 +327,7 @@ class ContestAdmin(PublishableAdmin):
         (_("Dates"), {'fields': (('active_from', 'active_till',),)}),
     )
 
-class QuizForm(CleanDateSpanMixin):
+class QuizForm(DateSpanModelForm):
     class Meta:
         model = Quiz
 
@@ -349,7 +349,7 @@ class QuizAdmin(PublishableAdmin):
         (_("Dates"), {'fields': (('active_from', 'active_till',),)}),
     )
 
-class PollForm(CleanDateSpanMixin):
+class PollForm(DateSpanModelForm):
     class Meta:
         model = Poll
 
@@ -374,7 +374,7 @@ class SurveyChoiceInlineAdmin(newman.NewmanTabularInline):
     # FIXME: rich text problem with inlines :(
     rich_text_fields = {'small': ('choice',)}
 
-class SurveyForm(CleanDateSpanMixin):
+class SurveyForm(DateSpanModelForm):
     class Meta:
         model = Survey
 
