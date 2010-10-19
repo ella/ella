@@ -87,7 +87,8 @@ class Server(models.Model):
         for entry in output['entries']:
             entry['updated'] = datetime.utcfromtimestamp(calendar.timegm(entry['updated_parsed']))
             img = PHOTO_REG.findall(entry.summary)
-            entry['photo_url'] = img[0]
+            if img:
+                entry['photo_url'] = img[0]
             entry['photo'] = None
 
         return output
