@@ -89,6 +89,8 @@ class Server(models.Model):
             img = PHOTO_REG.findall(entry.summary)
             if img:
                 entry['photo_url'] = img[0]
+            else:
+                entry['photo_url'] = None
             entry['photo'] = None
 
         return output
