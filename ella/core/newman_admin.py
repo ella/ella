@@ -136,8 +136,8 @@ class PlacementForm(modelforms.ModelForm):
         # get listing category, publish_from and publish_to
         pub_from = data.getlist(self.get_part_id('publish_from'))
         listings = self.cleaned_data['listings']
-        if len(pub_from) and (len(pub_from) != len(listings)):
-            raise ValidationError(_('Amount of publish_from input fields should be the same as category fields.'))
+        if pub_from and len(pub_from) != len(listings):
+            raise ValidationError(_('Duplicate listings'))
         for lst, pub in zip(listings, pub_from):
             if not pub:
                 #raise ValidationError(_('This field is required'))
