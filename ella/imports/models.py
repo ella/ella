@@ -90,7 +90,7 @@ class Server(models.Model):
             if img:
                 entry['photo_url'] = img[0]
             else:
-                entry['photo_url'] = None
+                entry['photo_url'] = ''
             entry['photo'] = None
 
         return output
