@@ -48,10 +48,6 @@ class RSSTopCategoryListings(Feed):
                     'cat' : obj.title
             }
 
-    def item_guid(self, obj):
-        ct = ContentType.objects.get_for_model(obj)
-        return str((obj._get_pk_val()<<9) + ct.id)
-
     def items(self, obj):
         kwa = {}
         if isinstance(obj, tuple):

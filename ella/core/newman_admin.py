@@ -19,6 +19,14 @@ from ella.newman import options, fields
 from ella.newman.filterspecs import CustomFilterSpec, NewmanSiteFilter
 
 class ListingForm(modelforms.ModelForm):
+    def clean(self):
+        d = super(ListingForm, self).clean()
+        if d['publish_to'] and d['publish_from'] > d['publish_to']:
+            raise ValidationError(_('Publish to must be later than publish from.'))
+        if d['priority_from'] and d['priority_to'] and d['priority_from'] > d['priority_to']:
+            raise ValidationError(_('Priority to must be later than priority from.'))
+        return d
+
     class Meta:
         model = Listing
 
@@ -129,7 +137,7 @@ class PlacementForm(modelforms.ModelForm):
         pub_from = data.getlist(self.get_part_id('publish_from'))
         listings = self.cleaned_data['listings']
         if len(pub_from) and (len(pub_from) != len(listings)):
-            raise ValidationError(_('Amount of publish_from input fields should be the same as category fields. With kind regards Your PlacementInline and his ListingCustomWidget.'))
+            raise ValidationError(_('Amount of publish_from input fields should be the same as category fields.'))
         for lst, pub in zip(listings, pub_from):
             if not pub:
                 #raise ValidationError(_('This field is required'))
@@ -161,6 +169,9 @@ class PlacementForm(modelforms.ModelForm):
         #if cat and cat == cat and cat: # should be equiv. if cat:...
         if cat:
             main = d
+
+        if d['publish_to'] and d['publish_from'] > d['publish_to']:
+            raise ValidationError(_('Publish to must be later than publish from.'))
 
         d['slug'] = obj_slug
         # try and find conflicting placement
@@ -215,6 +226,7 @@ class ListingInlineAdmin(newman.NewmanTabularInline):
     model = Listing
     extra = 2
     suggest_fields = {'category': ('__unicode__', 'title', 'slug',)}
+    form = ListingForm
     fieldsets = ((None, {'fields' : ('category','publish_from', 'publish_to', 'priority_from', 'priority_to', 'priority_value', 'commercial',)}),)
 
 class PlacementInlineAdmin(newman.NewmanTabularInline):
@@ -243,7 +255,7 @@ class HitCountInlineAdmin(newman.NewmanTabularInline):
     extra = 0
 
 class ListingAdmin(newman.NewmanModelAdmin):
-    pass
+    form = ListingForm
     '''
     list_display = ('target_admin', 'target_ct', 'publish_from', 'category', 'placement_admin', 'target_hitcounts', 'target_url',)
     list_display_links = ()

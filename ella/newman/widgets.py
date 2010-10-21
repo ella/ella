@@ -317,8 +317,9 @@ class ContentTypeWidget(forms.Select):
         # Normalize to strings.
         selected_choices = set([force_unicode(v) for v in selected_choices])
         output = []
+        applicable_ct_pks = self.applicable_ct_pks
         for option_value, option_label in chain(self.choices, choices):
-            if option_value in self.applicable_ct_pks or not option_value:
+            if option_value in applicable_ct_pks or not option_value:
                 output.append(render_option(option_value, option_label))
         return u'\n'.join(output)
 

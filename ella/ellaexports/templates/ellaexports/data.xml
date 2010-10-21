@@ -1,0 +1,9 @@
+{% spaceless %}
+{%block xmlheader %}<?xml version="1.0" encoding="utf-8"?>{% endblock %}{% endspaceless %}
+{% block header %}
+<data>
+{% endblock %}
+{% block items %}{% endblock %}
+{% block footer %}
+</data>
+{% endblock %}

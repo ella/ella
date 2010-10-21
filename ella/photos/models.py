@@ -72,10 +72,10 @@ class Photo(models.Model):
         """
         Generates html and thumbnails for admin site.
         """
-        thumbUrl = self.thumb_url()
-        if not thumbUrl:
+        thumb_url = self.thumb_url()
+        if not thumb_url:
             return mark_safe("""<strong>%s</strong>""" % ugettext('Thumbnail not available'))
-        return mark_safe("""<a href="%s" class="js-nohashadr thickbox" title="%s" target="_blank"><img src="%s" alt="Thumbnail %s" /></a>""" % (self.image.url, self.title, thumbUrl, self.title))
+        return mark_safe("""<a href="%s" class="js-nohashadr thickbox" title="%s" target="_blank"><img src="%s" alt="Thumbnail %s" /></a>""" % (self.image_url(), self.title, thumb_url, self.title))
     thumb.allow_tags = True
 
     def get_thumbnail_path(self, image_name=None):
@@ -86,6 +86,11 @@ class Photo(models.Model):
         if not image_name:
             image_name = self.image.name
         return path.dirname(image_name) + "/" + 'thumb-%s' % path.basename(image_name)
+
+    def image_url(self):
+        if config.IMAGE_URL_PREFIX and not path.exists(self.image.path):
+            return config.IMAGE_URL_PREFIX.rstrip('/') + '/' + self.image.name
+        return self.image.url
 
     def thumb_url(self):
         """

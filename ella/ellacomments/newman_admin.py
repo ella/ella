@@ -1,4 +1,4 @@
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _, ungettext
 from django.conf import settings
 
 from ella import newman
@@ -15,7 +15,23 @@ class CommentOptionsGenericInline(newman.GenericStackedInline):
     max_num = 1
 
 class ThreadedCommentsNewmanAdmin(ThreadedCommentsAdmin, newman.NewmanModelAdmin):
-    pass
+    actions = ['approve_comments', 'remove_comments']
+
+    def approve_comments(self, request, queryset):
+        n_comments = queryset.update(is_removed=False, is_public=True)
+        msg = ungettext(u'1 comment was successfully approved.',
+            u'%(count)s comments were successfully approved.',
+            n_comments)
+        self.message_user(request, msg % {'count': n_comments})
+    approve_comments.short_description = _('Approve selected comments')
+
+    def remove_comments(self, request, queryset):
+        n_comments = queryset.update(is_removed=True)
+        msg = ungettext(u'1 comment was successfully removed.',
+            u'%(count)s comments were successfully removed.',
+            n_comments)
+        self.message_user(request, msg % {'count': n_comments})
+    remove_comments.short_description = _('Remove selected comments')
 
 class BannedIPNewmanAdmin(newman.NewmanModelAdmin):
     list_display = ('__unicode__', 'created', 'reason')

@@ -1380,13 +1380,16 @@ function changelist_shown_handler(evt) {
 }
 //$(document).bind('changelist_shown', changelist_shown_handler); //FIXME buggy in Positions changelist.
 
-function changelist_batch_success(response_text) {
+function old_changelist_batch_success(response_text) {
     var $dialog = $('<div id="confirmation-wrapper">');
     $dialog.html(response_text).find('.cancel').click(function() {
         $dialog.remove();
         $('#content').show();
     });
     $('#content').hide().before($dialog);
+}
+function changelist_batch_success(response_text) {
+    Kobayashi.reload_content('content');
 }
 function batch_delete_confirm_complete(data, xhr) {
     $('#confirmation-wrapper').remove();
@@ -1460,6 +1463,15 @@ $(document).bind('content_added', function(evt) {
     // let those rich text areas alone that are in .markItUpContainer -- they are already initialized
     $target.find('.rich_text_area').not('.markItUpContainer .rich_text_area').each( function() {
         $(this).markItUp(MARKITUP_SETTINGS);
+    });
+});
+
+// Actions
+$(document).bind('content_added', function(evt) {
+    var actions_flag = false;
+    $('#action-toggle').click(function() {
+        actions_flag = !actions_flag;
+        $('input.action-select').attr('checked', actions_flag);
     });
 });
 

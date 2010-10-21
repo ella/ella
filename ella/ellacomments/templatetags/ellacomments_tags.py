@@ -26,6 +26,8 @@ class EllaMixin(object):
             object_pk    = smart_unicode(object_pk),
         )
 
+        # XXX factor out into a manager
+        qs = qs.filter(is_public=True)
         if getattr(settings, 'COMMENTS_HIDE_REMOVED', False):
             qs = qs.filter(is_removed=False)
 
