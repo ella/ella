@@ -2,15 +2,16 @@
 from south.db import db
 from django.db import models
 import datetime
+from south.v2 import SchemaMigration
 
-class Migration:
-    
+class Migration(SchemaMigration):
+
     depends_on = (
         ("core", "0001_initial"),
     )
- 
+
     def forwards(self, orm):
-        
+
         # Adding model 'Photo'
         db.create_table('photos_photo', (
             ('id', models.AutoField(primary_key=True)),
@@ -24,7 +25,7 @@ class Migration:
             ('created', models.DateTimeField(default=datetime.datetime.now, editable=False)),
         ))
         db.send_create_signal('photos', ['Photo'])
-        
+
         # Adding model 'FormatedPhoto'
         db.create_table('photos_formatedphoto', (
             ('id', models.AutoField(primary_key=True)),
@@ -39,7 +40,7 @@ class Migration:
             ('height', models.PositiveIntegerField(editable=False)),
         ))
         db.send_create_signal('photos', ['FormatedPhoto'])
-        
+
         # Adding model 'Format'
         db.create_table('photos_format', (
             ('id', models.AutoField(primary_key=True)),
@@ -54,38 +55,38 @@ class Migration:
             ('site', models.ForeignKey(orm['sites.Site'])),
         ))
         db.send_create_signal('photos', ['Format'])
-        
+
         # Adding ManyToManyField 'Photo.authors'
         db.create_table('photos_photo_authors', (
             ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
             ('photo', models.ForeignKey(orm.Photo, null=False)),
             ('author', models.ForeignKey(orm['core.Author'], null=False))
         ))
-        
+
         # Creating unique_together for [photo, format] on FormatedPhoto.
         db.create_unique('photos_formatedphoto', ['photo_id', 'format_id'])
-        
-    
-    
+
+
+
     def backwards(self, orm):
-        
+
         # Deleting model 'Photo'
         db.delete_table('photos_photo')
-        
+
         # Deleting model 'FormatedPhoto'
         db.delete_table('photos_formatedphoto')
-        
+
         # Deleting model 'Format'
         db.delete_table('photos_format')
-        
+
         # Dropping ManyToManyField 'Photo.authors'
         db.delete_table('photos_photo_authors')
-        
+
         # Deleting unique_together for [photo, format] on FormatedPhoto.
         db.delete_unique('photos_formatedphoto', ['photo_id', 'format_id'])
-        
-    
-    
+
+
+
     models = {
         'sites.site': {
             'Meta': {'ordering': "('domain',)", 'db_table': "'django_site'"},
@@ -142,5 +143,5 @@ class Migration:
             'id': ('models.AutoField', [], {'primary_key': 'True'})
         }
     }
-    
+
     complete_apps = ['photos']

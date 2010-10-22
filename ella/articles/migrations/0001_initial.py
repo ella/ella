@@ -5,14 +5,14 @@ from ella.articles.models import *
 import datetime
 
 class Migration:
-    
+
     depends_on = (
         ("core", "0001_initial"),
         ("photos", "0001_initial"),
     )
- 
+
     def forwards(self, orm):
-        
+
         # Adding model 'ArticleContents'
         db.create_table('articles_articlecontents', (
             ('id', models.AutoField(primary_key=True)),
@@ -21,7 +21,7 @@ class Migration:
             ('content', models.TextField(_('Content'))),
         ))
         db.send_create_signal('articles', ['ArticleContents'])
-        
+
         # Adding model 'InfoBox'
         db.create_table('articles_infobox', (
             ('id', models.AutoField(primary_key=True)),
@@ -31,7 +31,7 @@ class Migration:
             ('content', models.TextField(_('Content'))),
         ))
         db.send_create_signal('articles', ['InfoBox'])
-        
+
         # Adding model 'Article'
         db.create_table('articles_article', (
             ('id', models.AutoField(primary_key=True)),
@@ -46,32 +46,32 @@ class Migration:
             ('photo', models.ForeignKey(orm['photos.Photo'], null=True, verbose_name=_('Photo'), blank=True)),
         ))
         db.send_create_signal('articles', ['Article'])
-        
+
         # Adding ManyToManyField 'Article.authors'
         db.create_table('articles_article_authors', (
             ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
             ('article', models.ForeignKey(orm.Article, null=False)),
             ('author', models.ForeignKey(orm['core.Author'], null=False))
         ))
-        
-    
-    
+
+
+
     def backwards(self, orm):
-        
+
         # Deleting model 'ArticleContents'
         db.delete_table('articles_articlecontents')
-        
+
         # Deleting model 'InfoBox'
         db.delete_table('articles_infobox')
-        
+
         # Deleting model 'Article'
         db.delete_table('articles_article')
-        
+
         # Dropping ManyToManyField 'Article.authors'
         db.delete_table('articles_article_authors')
-        
-    
-    
+
+
+
     models = {
         'core.category': {
             'Meta': {'ordering': "('site','tree_path',)", 'unique_together': "(('site','tree_path'),)"},
@@ -122,5 +122,5 @@ class Migration:
             'id': ('models.AutoField', [], {'primary_key': 'True'})
         }
     }
-    
+
     complete_apps = ['articles']

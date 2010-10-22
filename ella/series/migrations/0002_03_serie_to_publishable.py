@@ -27,7 +27,7 @@ class Migration(BasePublishableDataMigration):
     publishable_uncommon_cols = {
         'description': 'perex',
     }
-    
+
     def alter_self_foreignkeys(self, orm):
         alter_foreignkey_to_int('series_seriepart', 'serie')
 
@@ -37,5 +37,5 @@ class Migration(BasePublishableDataMigration):
 
     def forwards(self, orm):
         db.rename_column('series_serie', 'description', 'text')
-        super(Migration, self).forwards(orm)
+        BasePublishableDataMigration().forwards(orm)
 
