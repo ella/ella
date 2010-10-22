@@ -1,0 +1,12 @@
+Django==1.1.1
+south
+anyjson
+
+feedparser
+PIL
+threadedcomments
+django-tagging
+
+
+git+http://github.com/Almad/django-sane-testing.git#egg=djangosanetesting
+git+http://github.com/ella/django-markup.git#egg=djangomarkup
