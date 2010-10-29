@@ -21,6 +21,8 @@ from ella.newman.filterspecs import CustomFilterSpec, NewmanSiteFilter
 class ListingForm(modelforms.ModelForm):
     def clean(self):
         d = super(ListingForm, self).clean()
+        if not self.is_valid():
+            return d
         if d['publish_to'] and d['publish_from'] > d['publish_to']:
             raise ValidationError(_('Publish to must be later than publish from.'))
         if d['priority_from'] and d['priority_to'] and d['priority_from'] > d['priority_to']:
@@ -136,8 +138,8 @@ class PlacementForm(modelforms.ModelForm):
         # get listing category, publish_from and publish_to
         pub_from = data.getlist(self.get_part_id('publish_from'))
         listings = self.cleaned_data['listings']
-        if len(pub_from) and (len(pub_from) != len(listings)):
-            raise ValidationError(_('Amount of publish_from input fields should be the same as category fields.'))
+        if pub_from and len(pub_from) != len(listings):
+            raise ValidationError(_('Duplicate listings'))
         for lst, pub in zip(listings, pub_from):
             if not pub:
                 #raise ValidationError(_('This field is required'))

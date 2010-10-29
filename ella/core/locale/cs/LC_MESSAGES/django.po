@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-10-13 14:15+0200\n"
+"POT-Creation-Date: 2010-10-19 10:55+0200\n"
 "PO-Revision-Date: 2010-02-08 16:08+0100\n"
 "Last-Translator: Vitek pliska <whit@jizak.cz>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -47,10 +47,8 @@ msgid "Category"
 msgstr "Kategorie"
 
 #: newman_admin.py:140
-msgid ""
-"Amount of publish_from input fields should be the same as category fields."
-msgstr ""
-"Počet políček 'publikovat od' by měl být shodný s počtem políček 'kategorie'."
+msgid "Duplicate listings"
+msgstr "Duplicitní listingy"
 
 #: newman_admin.py:148
 msgid "No listing can start sooner than main listing"
@@ -71,62 +69,62 @@ msgstr ""
 msgid "If object has a category, it must have a main placement."
 msgstr "Pokud má objekt kategorii, musí mít i hlavní umístění."
 
-#: newman_admin.py:283 newman_admin.py:380 newman_admin.py:480
+#: newman_admin.py:284 newman_admin.py:381 newman_admin.py:481
 #: migrations/0002_01_publishable_models.py:25 models/publishable.py:57
 msgid "Publish from"
 msgstr "Publikovat od"
 
-#: newman_admin.py:290
+#: newman_admin.py:291
 msgid "View on site"
 msgstr "Zobrazit na webu"
 
-#: newman_admin.py:328
+#: newman_admin.py:329
 msgid "All with placement"
 msgstr "Vše s publikací"
 
-#: newman_admin.py:329
+#: newman_admin.py:330
 msgid "Yes"
 msgstr "Ano"
 
-#: newman_admin.py:330
+#: newman_admin.py:331
 msgid "No"
 msgstr "Ne"
 
-#: newman_admin.py:333
+#: newman_admin.py:334
 msgid "Is published?"
 msgstr "Publikováno?"
 
-#: newman_admin.py:452 migrations/new/0003_migrate_publishable.py:27
+#: newman_admin.py:453 migrations/new/0003_migrate_publishable.py:27
 #: models/publishable.py:61 models/publishable.py:170
 msgid "Publishable object"
 msgstr "Publikovatelný objekt"
 
-#: newman_admin.py:456
+#: newman_admin.py:457
 msgid "site"
 msgstr "web"
 
-#: newman_admin.py:468
+#: newman_admin.py:469
 msgid "WWW"
 msgstr ""
 
-#: newman_admin.py:476
+#: newman_admin.py:477
 msgid "No placement"
 msgstr "Bez publikace"
 
-#: newman_admin.py:488
+#: newman_admin.py:489
 msgid "No main photo!"
 msgstr "Není výchozí foto!"
 
-#: newman_admin.py:490 migrations/0002_01_publishable_models.py:23
+#: newman_admin.py:491 migrations/0002_01_publishable_models.py:23
 #: models/publishable.py:50
 msgid "Photo"
 msgstr "Foto"
 
-#: newman_admin.py:495
+#: newman_admin.py:496
 msgid "No main placement"
 msgstr "Bez hlavní publikace"
 
-#: newman_admin.py:497
+#: newman_admin.py:498
 msgid "Main placement"
 msgstr "Hlavní publikace"
 

@@ -260,6 +260,8 @@ class QuestionInlineAdmin(newman.NewmanTabularInline):
 class DateSpanModelForm(ModelForm):
     def clean(self):
         d = super(DateSpanModelForm, self).clean()
+        if not self.is_valid():
+            return d
         if d['active_from'] and d['active_till'] and d['active_from'] > d['active_till']:
             raise ValidationError(_('Active till must be later than active from.'))
         return d
