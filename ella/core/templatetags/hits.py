@@ -4,7 +4,7 @@ from django.template import Variable, VariableDoesNotExist
 
 from ella.core.models import HitCount, Placement
 from ella.core.cache import get_cached_object
-from ella.core.conf import conf
+from ella.core.conf import core_settings
 
 register = template.Library()
 
@@ -94,7 +94,7 @@ class HitCountNode(template.Node):
             except VariableDoesNotExist:
                 return ''
 
-        if conf.DOUBLE_RENDER and 'SECOND_RENDER' not in context:
+        if core_settings.DOUBLE_RENDER and 'SECOND_RENDER' not in context:
             return '{%% load hits %%}{%% hitcount for pk %(place_pk)s %%}' % {
                 'place_pk' : place.pk,
             }

@@ -12,7 +12,7 @@ from ella.core.models import Listing, Category, Placement
 from ella.core.cache import get_cached_object_or_404, cache_this
 from ella.core import custom_urls
 from ella.core.cache.template_loader import render_to_response
-from ella.core.conf import conf
+from ella.core.conf import core_settings
 
 __docformat__ = "restructuredtext en"
 
@@ -217,7 +217,7 @@ class ListContentType(EllaCoreView):
         return year
 
     def get_context(self, request, category='', year=None, month=None, \
-        day=None, content_type=None, paginate_by=conf.CATEGORY_LISTINGS_PAGINATE_BY):
+        day=None, content_type=None, paginate_by=core_settings.CATEGORY_LISTINGS_PAGINATE_BY):
         # pagination
         if 'p' in request.GET and request.GET['p'].isdigit():
             page_no = int(request.GET['p'])
@@ -358,7 +358,7 @@ def get_export_key(func, request, count, name='', content_type=None):
             settings.SITE_ID, count, name, content_type
         )
 
-@cache_this(get_export_key, timeout=conf.CACHE_TIMEOUT_LONG)
+@cache_this(get_export_key, timeout=core_settings.CACHE_TIMEOUT_LONG)
 def export(request, count, name='', content_type=None):
     """
     Export banners.

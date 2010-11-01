@@ -11,7 +11,7 @@ from ella.core.models import Listing, Category
 from ella.core.cache.utils import get_cached_object
 from ella.core.cache.invalidate import CACHE_DELETER
 from ella.core.box import Box
-from ella.core.conf import conf
+from ella.core.conf import core_settings
 
 
 log = logging.getLogger('ella.core.templatetags')
@@ -157,7 +157,7 @@ def listing_parse(input):
         params['unique'] = input[-1]
         params_to_resolve.append('unique')
     elif input[-1].lower() == 'unique':
-        params['unique'] = conf.LISTING_UNIQUE_DEFAULT_SET
+        params['unique'] = core_settings.LISTING_UNIQUE_DEFAULT_SET
         params_to_resolve.append('unique')
 
     return var_name, params, params_to_resolve
@@ -223,7 +223,7 @@ class BoxNode(template.Node):
 
         # push context stack
         context.push()
-        context[conf.BOX_INFO] = box_key
+        context[core_settings.BOX_INFO] = box_key
 
         # render the box
         result = box.render()
@@ -231,11 +231,11 @@ class BoxNode(template.Node):
         context.pop()
 
         # record parent box dependecy on child box or cached full-page on box
-        if not (conf.DOUBLE_RENDER and box.can_double_render) and (conf.BOX_INFO in context or conf.ECACHE_INFO in context):
-            if conf.BOX_INFO in context:
-                source_key = context[conf.BOX_INFO]
-            elif conf.ECACHE_INFO in context:
-                source_key = context[conf.ECACHE_INFO]
+        if not (core_settings.DOUBLE_RENDER and box.can_double_render) and (core_settings.BOX_INFO in context or core_settings.ECACHE_INFO in context):
+            if core_settings.BOX_INFO in context:
+                source_key = context[core_settings.BOX_INFO]
+            elif core_settings.ECACHE_INFO in context:
+                source_key = context[core_settings.ECACHE_INFO]
             CACHE_DELETER.register_dependency(source_key, box_key)
 
         return result

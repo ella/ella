@@ -28,4 +28,4 @@ ECACHE_INFO = 'ella.core.middleware.ECACHE_INFO'
 DOUBLE_RENDER = False
 DOUBLE_RENDER_EXCLUDE_URLS = None
 
-conf = Settings('ella.core.conf', '')
+core_settings = Settings('ella.core.conf', '')

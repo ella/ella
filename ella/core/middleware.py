@@ -8,7 +8,7 @@ from django.middleware.cache import CacheMiddleware as DjangoCacheMiddleware
 from django.core.cache import cache
 from django.utils.cache import get_cache_key, add_never_cache_headers, learn_cache_key
 from django.conf import settings
-from ella.core.conf import conf
+from ella.core.conf import core_settings
 
 class DoubleRenderMiddleware(object):
 
@@ -16,12 +16,12 @@ class DoubleRenderMiddleware(object):
         if hasattr(self, '_excluded_urls'):
             return self._excluded_urls
 
-        if conf.DOUBLE_RENDER_EXCLUDE_URLS is None:
+        if core_settings.DOUBLE_RENDER_EXCLUDE_URLS is None:
             self._excluded_urls = None
             return None
 
         self._excluded_urls = ()
-        for url in conf.DOUBLE_RENDER_EXCLUDE_URLS:
+        for url in core_settings.DOUBLE_RENDER_EXCLUDE_URLS:
             self._excluded_urls += (re.compile(url),)
 
         return self._excluded_urls
@@ -29,7 +29,7 @@ class DoubleRenderMiddleware(object):
     def process_response(self, request, response):
         if response.status_code != 200 \
             or not response['Content-Type'].startswith('text') \
-            or not conf.DOUBLE_RENDER:
+            or not core_settings.DOUBLE_RENDER:
             return response
 
         if self._get_excluded_urls() is not None:
