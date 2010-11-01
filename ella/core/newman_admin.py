@@ -21,6 +21,8 @@ from ella.newman.filterspecs import CustomFilterSpec, NewmanSiteFilter
 class ListingForm(modelforms.ModelForm):
     def clean(self):
         d = super(ListingForm, self).clean()
+        if not self.is_valid():
+            return d
         if d['publish_to'] and d['publish_from'] > d['publish_to']:
             raise ValidationError(_('Publish to must be later than publish from.'))
         if d['priority_from'] and d['priority_to'] and d['priority_from'] > d['priority_to']:

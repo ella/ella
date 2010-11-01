@@ -1,9 +1,13 @@
+import logging
+
 from django import template
 from django.conf import settings
 from django.db import IntegrityError
 
 from ella.photos.models import Photo, Format, FormatedPhoto
 from ella.core.cache.utils import get_cached_object
+
+log = logging.getLogger('ella.photos')
 
 register = template.Library()
 
@@ -49,7 +53,13 @@ def img(parser, token):
     try:
         format = get_cached_object(Format, name=bits[1], sites__id=settings.SITE_ID)
     except Format.DoesNotExist:
-        raise template.TemplateSyntaxError, "Format with name %r does not exist" % bits[1]
+        logmsg = "Format with name %r does not exist (for site id %d)" % (bits[1], settings.SITE_ID)
+        log.error(logmsg)
+
+        if not settings.TEMPLATE_DEBUG:
+            return template.Node()
+
+        raise template.TemplateSyntaxError(logmsg)
 
     if len(bits) == 6:
         # img FORMAT for VAR_NAME
