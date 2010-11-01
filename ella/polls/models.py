@@ -12,7 +12,7 @@ from django.conf import settings
 from ella.core.models import Publishable
 from ella.core.cache import get_cached_object, get_cached_list
 from ella.core.box import Box
-from ella.polls.conf import config
+from ella.polls.conf import polls_settings
 
 
 class PollBox(Box):
@@ -43,13 +43,13 @@ class PollBox(Box):
             'photo_slug' : self.params.get('photo_slug', ''),
             'state' : self.state,
             'activity': poll.current_activity_state,
-            'state_voted' : config.USER_ALLREADY_VOTED,
-            'state_just_voted' : config.USER_JUST_VOTED,
-            'state_not_yet_voted' : config.USER_NOT_YET_VOTED,
-            'state_no_choice' : config.USER_NO_CHOICE,
-            'activity_not_yet_active' : config.ACTIVITY_NOT_YET_ACTIVE,
-            'activity_active' : config.ACTIVITY_ACTIVE,
-            'activity_closed' : config.ACTIVITY_CLOSED,})
+            'state_voted' : polls_settings.USER_ALLREADY_VOTED,
+            'state_just_voted' : polls_settings.USER_JUST_VOTED,
+            'state_not_yet_voted' : polls_settings.USER_NOT_YET_VOTED,
+            'state_no_choice' : polls_settings.USER_NO_CHOICE,
+            'activity_not_yet_active' : polls_settings.ACTIVITY_NOT_YET_ACTIVE,
+            'activity_active' : polls_settings.ACTIVITY_ACTIVE,
+            'activity_closed' : polls_settings.ACTIVITY_CLOSED,})
         return cont
 
 
@@ -81,9 +81,9 @@ class BasePoll(models.Model):
         Objects text content depends on its current life-cycle stage
         """
         a = self.current_activity_state
-        if a is config.ACTIVITY_NOT_YET_ACTIVE:
+        if a is polls_settings.ACTIVITY_NOT_YET_ACTIVE:
             return self.description
-        elif a is config.ACTIVITY_CLOSED:
+        elif a is polls_settings.ACTIVITY_CLOSED:
             return self.text_results
         else:
             return self.text
@@ -94,17 +94,17 @@ class BasePoll(models.Model):
         Objects current life-cycle stage
         """
         if self.active_till and self.active_till < datetime.now():
-            return config.ACTIVITY_CLOSED
+            return polls_settings.ACTIVITY_CLOSED
         elif self.active_from and self.active_from > datetime.now():
-            return config.ACTIVITY_NOT_YET_ACTIVE
+            return polls_settings.ACTIVITY_NOT_YET_ACTIVE
         else:
-            return config.ACTIVITY_ACTIVE
+            return polls_settings.ACTIVITY_ACTIVE
 
     def is_active(self):
         """
         Returns True if the object is in the ACTIVE life-cycle stage. Otherwise returns False
         """
-        if self.current_activity_state == config.ACTIVITY_ACTIVE:
+        if self.current_activity_state == polls_settings.ACTIVITY_ACTIVE:
             return True
         return False
 
@@ -137,7 +137,7 @@ class Poll(BasePoll):
         return Vote.objects.filter(poll=self, user=user).count() > 0
 
     def check_vote_by_ip_address(self, ip_address):
-        treshold = datetime.fromtimestamp(time.time() - config.IP_VOTE_TRESHOLD)
+        treshold = datetime.fromtimestamp(time.time() - polls_settings.IP_VOTE_TRESHOLD)
         return Vote.objects.filter(poll=self, ip_address=ip_address, time__gte=treshold).count() > 0
 
     class Meta:
@@ -314,13 +314,13 @@ class SurveyBox(Box):
             'photo_slug' : self.params.get('photo_slug', ''),
             'state' : self.state,
             'activity': poll.current_activity_state,
-            'state_voted' : config.USER_ALLREADY_VOTED,
-            'state_just_voted' : config.USER_JUST_VOTED,
-            'state_not_yet_voted' : config.USER_NOT_YET_VOTED,
-            'state_no_choice' : config.USER_NO_CHOICE,
-            'activity_not_yet_active' : config.ACTIVITY_NOT_YET_ACTIVE,
-            'activity_active' : config.ACTIVITY_ACTIVE,
-            'activity_closed' : config.ACTIVITY_CLOSED,})
+            'state_voted' : polls_settings.USER_ALLREADY_VOTED,
+            'state_just_voted' : polls_settings.USER_JUST_VOTED,
+            'state_not_yet_voted' : polls_settings.USER_NOT_YET_VOTED,
+            'state_no_choice' : polls_settings.USER_NO_CHOICE,
+            'activity_not_yet_active' : polls_settings.ACTIVITY_NOT_YET_ACTIVE,
+            'activity_active' : polls_settings.ACTIVITY_ACTIVE,
+            'activity_closed' : polls_settings.ACTIVITY_CLOSED,})
         return cont
 
 
@@ -347,17 +347,17 @@ class Survey(Question):
         Objects current life-cycle stage
         """
         if self.active_till and self.active_till < datetime.now():
-            return config.ACTIVITY_CLOSED
+            return polls_settings.ACTIVITY_CLOSED
         elif self.active_from and self.active_from > datetime.now():
-            return config.ACTIVITY_NOT_YET_ACTIVE
+            return polls_settings.ACTIVITY_NOT_YET_ACTIVE
         else:
-            return config.ACTIVITY_ACTIVE
+            return polls_settings.ACTIVITY_ACTIVE
 
     def check_vote_by_user(self, user):
         return SurveyVote.objects.filter(survey=self, user=user).count() > 0
 
     def check_vote_by_ip_address(self, ip_address):
-        treshold = datetime.fromtimestamp(time.time() - config.IP_VOTE_TRESHOLD)
+        treshold = datetime.fromtimestamp(time.time() - polls_settings.IP_VOTE_TRESHOLD)
         return SurveyVote.objects.filter(survey=self, ip_address=ip_address, time__gte=treshold).count() > 0
 
     class Meta:
