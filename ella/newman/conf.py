@@ -92,5 +92,5 @@ EDITOR_PREVIEW_TEMPLATE = None
 # Widgets
 MEDIA_PREFIX = django_settings.ADMIN_MEDIA_PREFIX
 
-config = Settings('ella.newman.config', 'NEWMAN')
+newman_settings = Settings('ella.newman.conf', 'NEWMAN')
 

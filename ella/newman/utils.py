@@ -10,8 +10,7 @@ from django.db.models.aggregates import Max
 from django.core.urlresolvers import reverse
 
 from ella.newman import models
-from ella.newman.config import STATUS_OK, STATUS_GENERIC_ERROR, HTTP_ERROR, HTTP_OK, STATUS_JSON_REDIRECT
-from ella.newman.config import CATEGORY_FILTER, USER_CONFIG, JSON_CONVERSIONS
+from ella.newman.conf import newman_settings
 from ella.core.models import Category
 
 log = logging.getLogger('ella.newman')
@@ -100,7 +99,7 @@ def json_decode(str):
 
     return anyjson.deserialize(str)
 
-def JsonResponse(message, data={}, errors={}, status=STATUS_OK, http_status=HTTP_OK):
+def JsonResponse(message, data={}, errors={}, status=newman_settings.STATUS_OK, http_status=newman_settings.HTTP_OK):
     """ Return JSON response in newman's standard format. """
 
     out_dict = {
@@ -122,18 +121,18 @@ def JsonResponse(message, data={}, errors={}, status=STATUS_OK, http_status=HTTP
     out = json_encode(out_dict)
     return HttpResponse(out, mimetype='text/plain;charset=utf-8', status=http_status)
 
-def JsonResponseError(message, status=STATUS_GENERIC_ERROR):
+def JsonResponseError(message, status=newman_settings.STATUS_GENERIC_ERROR):
     """ use this function if one message describes error well, so  """
-    return JsonResponse(message, status=status, http_status=HTTP_ERROR)
+    return JsonResponse(message, status=status, http_status=newman_settings.HTTP_ERROR)
 
 def JsonResponseRedirect(location):
     " Returns HTTP 200 response containing JSON dict with redirect_to field. "
     out_dict = {
-        'status': STATUS_JSON_REDIRECT,
+        'status': newman_settings.STATUS_JSON_REDIRECT,
         'redirect_to': location
     }
     out = json_encode(out_dict)
-    response = HttpResponse(out, mimetype='text/plain;charset=utf-8', status=HTTP_OK)
+    response = HttpResponse(out, mimetype='text/plain;charset=utf-8', status=newman_settings.HTTP_OK)
     response['Redirect-To'] = location
     return response
 
@@ -143,9 +142,9 @@ def decode_category_filter_json(data):
 
 def set_user_config(user, key, value):
     """ sets user defined configuration to  user.config and to session as well. """
-    if not hasattr(user, USER_CONFIG):
-        setattr(user, USER_CONFIG, {})
-    cfg = getattr(user, USER_CONFIG)
+    if not hasattr(user, newman_settings.USER_CONFIG):
+        setattr(user, newman_settings.USER_CONFIG, {})
+    cfg = getattr(user, newman_settings.USER_CONFIG)
     cfg[key] = value
 
 def set_user_config_db(user, key, value):
@@ -159,9 +158,9 @@ def set_user_config_db(user, key, value):
 
 def set_user_config_session(session, key, value):
     # set session data
-    if USER_CONFIG not in session:
-        session[USER_CONFIG] = dict()
-    conf = session[USER_CONFIG]
+    if newman_settings.USER_CONFIG not in session:
+        session[newman_settings.USER_CONFIG] = dict()
+    conf = session[newman_settings.USER_CONFIG]
     callback = _get_decoder(key)
     if not callback:
         conf[key] = value
@@ -171,7 +170,7 @@ def set_user_config_session(session, key, value):
     session[key] = conf
 
 def _get_decoder(key):
-    for k, v in JSON_CONVERSIONS:
+    for k, v in newman_settings.JSON_CONVERSIONS:
         if k == key:
             return getattr(sys.modules[__name__], v)
 
@@ -183,7 +182,7 @@ def get_user_config(user, key):
     from JSON to proper format (i.e. all list items convert to int). Default
     data_decode_callback only decodes data from JSON.
     """
-    cfg = getattr(user, USER_CONFIG, {})
+    cfg = getattr(user, newman_settings.USER_CONFIG, {})
     if key not in cfg:
         try:
             db_data = models.AdminSetting.objects.get(user=user, var=key)
@@ -219,7 +218,7 @@ def user_category_filter(queryset, user):
     category_fk = model_category_fk(qs.model)
     if not category_fk:
         return qs
-    root_category_ids = get_user_config(user, CATEGORY_FILTER)
+    root_category_ids = get_user_config(user, newman_settings.CATEGORY_FILTER)
     if not root_category_ids: # user has no custom category filter set or his filter set is empty.
         return qs
     if not user.is_superuser:
