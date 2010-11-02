@@ -89,13 +89,13 @@ class NewmanRichTextAreaWidget(RichTextAreaWidget):
 class FlashImageWidget(widgets.AdminFileWidget):
     class Media:
         js = (
-            settings.NEWMAN_MEDIA_PREFIX + JS_FLASH_IMAGE_INPUT,
+            newman_settings.MEDIA_PREFIX + JS_FLASH_IMAGE_INPUT,
         )
 
     def render(self, name, value, attrs=None):
         max_size = {'w': 1024, 'h': 768}
-        swf_path = '%s%s' % (settings.NEWMAN_MEDIA_PREFIX, SWF_FLASH_IMAGE_INPUT,)
-        lang_url = "%sswf/lang/%s.xml" % (settings.NEWMAN_MEDIA_PREFIX, settings.LANGUAGE_CODE,)
+        swf_path = '%s%s' % (newman_settings.MEDIA_PREFIX, SWF_FLASH_IMAGE_INPUT,)
+        lang_url = "%sswf/lang/%s.xml" % (newman_settings.MEDIA_PREFIX, settings.LANGUAGE_CODE,)
         if value:
             photo_flash_var = "&photoURL=%s" % value.url
         else:
@@ -139,8 +139,8 @@ class FlashImageWidget(widgets.AdminFileWidget):
 
 class AdminSuggestWidget(forms.TextInput):
     class Media:
-        js = (settings.NEWMAN_MEDIA_PREFIX + JS_RELATED_LOOKUP, settings.NEWMAN_MEDIA_PREFIX + JS_GENERIC_SUGGEST,)
-        css = {'screen': (settings.NEWMAN_MEDIA_PREFIX + CSS_GENERIC_SUGGEST,),}
+        js = (newman_settings.MEDIA_PREFIX + JS_RELATED_LOOKUP, newman_settings.MEDIA_PREFIX + JS_GENERIC_SUGGEST,)
+        css = {'screen': (newman_settings.MEDIA_PREFIX + CSS_GENERIC_SUGGEST,),}
 
     def __init__(self, db_field, attrs={}, **kwargs):
         self.db_field = db_field
@@ -201,7 +201,7 @@ class AdminSuggestWidget(forms.TextInput):
         # API to determine the ID dynamically.
         output.append('<a href="%s%s?pop" class="suggest-related-lookup" id="lookup_id_%s"> ' % \
             (related_url, url, name))
-        output.append('<img src="%sico/16/search.png" width="16" height="16" /></a>' % settings.NEWMAN_MEDIA_PREFIX)
+        output.append('<img src="%sico/16/search.png" width="16" height="16" /></a>' % newman_settings.MEDIA_PREFIX)
         #output.append('<div class="form-row-tooltip">%s</div>' % ugettext('Type the first few letters for suggestions, then use the UP and DOWN arrows to select and hit ENTER to add or replace item.'))
         return mark_safe(u''.join(output))
 
@@ -350,7 +350,7 @@ class ListingCustomWidget(forms.SelectMultiple):
 
     def render(self, name, value, attrs=None, choices=()):
         cx = Context()
-        cx['NEWMAN_MEDIA_PREFIX'] = settings.NEWMAN_MEDIA_PREFIX
+        cx['NEWMAN_MEDIA_PREFIX'] = newman_settings.MEDIA_PREFIX
         cx['id_prefix'] = name
         cx['verbose_name_publish_from'] = Listing._meta.get_field('publish_from').verbose_name.__unicode__()
         cx['choices'] = choices or self.choices
@@ -371,7 +371,7 @@ class ChoiceCustomWidget(forms.TextInput):
 
     def render(self, name, value, attrs=None):
         cx = Context()
-        cx['NEWMAN_MEDIA_PREFIX'] = settings.NEWMAN_MEDIA_PREFIX
+        cx['NEWMAN_MEDIA_PREFIX'] = newman_settings.MEDIA_PREFIX
         cx['id_prefix'] = name
         cx['choices'] = value
         tpl = get_template('newman/widget/poll_choices_custom.html')

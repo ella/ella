@@ -2,7 +2,7 @@
 This module is intended to hold default constants.
 Constants may be modified via project settings.py.
 """
-from django.conf import settings as django_settings
+from django.conf import settings
 from ella.utils.settings import Settings
 
 URL_PREFIX = 'nm'
@@ -90,7 +90,7 @@ EDITOR_PREVIEW_CSS = None
 EDITOR_PREVIEW_TEMPLATE = None
 
 # Widgets
-MEDIA_PREFIX = django_settings.ADMIN_MEDIA_PREFIX
+MEDIA_PREFIX = getattr(settings, 'MEDIA_URL') + 'newman_media/'
 
 newman_settings = Settings('ella.newman.conf', 'NEWMAN')
 

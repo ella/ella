@@ -1,16 +1,9 @@
 from django.contrib import admin
-from django.utils.translation import ugettext_lazy as _
 from django.forms import models as modelforms
-from django.contrib.contenttypes import generic
-from django.contrib.contenttypes.models import ContentType
-from django.db.models import Q
-from django.forms.util import ValidationError
-from django.forms.models import save_instance
-from django.forms.fields import DateTimeField
 
-from ella.ellaadmin import widgets, fields
+from ella.ellaadmin import widgets
 from ella.core.models import Author, Source, Category, Listing, HitCount, Placement
-from ella.core.newman_admin import PlacementForm, PlacementInlineFormset
+from ella.core.newman_admin import PlacementForm
 
 class PlacementInlineAdmin(admin.TabularInline):
     exclude = ('slug',)
