@@ -4,6 +4,7 @@ from django.forms.models import save_instance
 from django.utils.translation import ugettext_lazy as _
 
 from ella import newman
+from ella.newman.conf import newman_settings
 from ella.newman.generic import BaseGenericInlineFormSet
 from ella.core.models import Publishable
 
@@ -54,7 +55,7 @@ class TaggedItemAdmin(newman.NewmanModelAdmin):
 
 newman.site.register(Tag, TagAdmin)
 #newman.site.register(TaggedItem, TaggedItemAdmin)
-newman.site.append_inline(newman.config.TAGGED_MODELS, TaggingInlineAdmin)
+newman.site.append_inline(newman_settings.TAGGED_MODELS, TaggingInlineAdmin)
 
 # some translations for newman:
 
