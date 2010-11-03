@@ -14,4 +14,4 @@ RANGE_DAYS = 14
 RANGE_WIDTH_HOURS = 2
 
 
-config = Settings('ella.ellaexports.conf', 'EXPORTS')
+ellaexports_settings = Settings('ella.ellaexports.conf', 'EXPORTS')

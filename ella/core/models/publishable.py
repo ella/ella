@@ -16,7 +16,7 @@ from ella.core.cache import get_cached_object, get_cached_list, CachedGenericFor
 from ella.core.models.main import Category, Author, Source
 from ella.photos.models import Photo
 from ella.core.box import Box
-from ella.core.conf import conf
+from ella.core.conf import core_settings
 
 def PublishableBox(publishable, box_type, nodelist, model=None):
     "add some content type info of self.target"
@@ -54,7 +54,7 @@ class Publishable(models.Model):
 
     # denormalized fields
     # the placement's publish_from
-    publish_from = models.DateTimeField(_('Publish from'), editable=False, default=conf.PUBLISH_FROM_WHEN_EMPTY, db_index=True)
+    publish_from = models.DateTimeField(_('Publish from'), editable=False, default=core_settings.PUBLISH_FROM_WHEN_EMPTY, db_index=True)
 
     class Meta:
         app_label = 'core'
@@ -200,7 +200,7 @@ class Placement(models.Model):
         try:
             publish_from = Placement.objects.filter(publishable=self.publishable_id).order_by('publish_from').values('publish_from')[0]['publish_from']
         except IndexError, e:
-            publish_from = conf.PUBLISH_FROM_WHEN_EMPTY
+            publish_from = core_settings.PUBLISH_FROM_WHEN_EMPTY
 
         self.publishable.publish_from = publish_from
         Publishable.objects.filter(pk=self.publishable_id).update(publish_from=publish_from)
@@ -276,7 +276,7 @@ class Placement(models.Model):
         try:
             publish_from = Placement.objects.filter(publishable=self.publishable_id).order_by('publish_from').values('publish_from')[0]['publish_from']
         except IndexError, e:
-            publish_from = conf.PUBLISH_FROM_WHEN_EMPTY
+            publish_from = core_settings.PUBLISH_FROM_WHEN_EMPTY
         Publishable.objects.filter(pk=self.publishable_id).update(publish_from=publish_from)
         self.publishable.publish_from = publish_from
 

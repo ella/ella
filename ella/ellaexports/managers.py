@@ -5,7 +5,7 @@ from django.db import models
 from django.db.models import Q
 
 from ella.core.models import Listing, Publishable
-from ella.ellaexports.conf import config
+from ella.ellaexports.conf import ellaexports_settings
 
 ERROR_MESSAGES = {
     'cannot': 'This Publishable object cannot be exported'
@@ -35,7 +35,7 @@ def cmp_listing_or_meta(x, y):
 
 class ExportItemizer(object):
     """
-    Class encapsulates process of querying Export models, 
+    Class encapsulates process of querying Export models,
     setting query parameters and iterating over result items.
 
     One can iterate over an ExportItemizer instance.
@@ -88,7 +88,7 @@ class ExportItemizer(object):
         if not value:
             return
         if type(value) in (str, unicode,):
-            self._datetime_from = datetime.strptime(value, config.DATETIME_FORMAT)
+            self._datetime_from = datetime.strptime(value, ellaexports_settings.DATETIME_FORMAT)
         else:
             self._datetime_from = value
 
@@ -117,11 +117,11 @@ class ExportItemizer(object):
         return self
 
     def __insert_to_position(self, fix_positions, out, max_items):
-        """ 
+        """
         Insert elements in fix_positions queryset to specified position
         in list specified by parameter out.
 
-        Fixed-positioned items have higher priority than existing items in list 
+        Fixed-positioned items have higher priority than existing items in list
         given in parameter out.
 
         This method changes "out" parameter.
@@ -191,9 +191,9 @@ class ExportItemizer(object):
         return obj
 
     def __get_overloaded_publishable(self, obj, export):
-        """ 
-        @return publishable object with overloaded attributes 
-        title, photo, description. 
+        """
+        @return publishable object with overloaded attributes
+        title, photo, description.
 
         Adds property obj.export_thumbnail_url, feed_updated.
         """
@@ -215,7 +215,7 @@ class ExportItemizer(object):
 
         pub.export_thumbnail_url = None
         pub.feed_updated_raw_datetime = feed_updated
-        pub.feed_updated = feed_updated.strftime(config.FEED_DATETIME_FORMAT)
+        pub.feed_updated = feed_updated.strftime(ellaexports_settings.FEED_DATETIME_FORMAT)
         if pub.photo:
             formated = None
             try:
@@ -233,7 +233,7 @@ class ExportItemizer(object):
 
         @param   category   category asociated with Export
         @param   export     use Export object rather than category.
-        @param   datetime_from  optional parameter 
+        @param   datetime_from  optional parameter
 
         Functionality:
         1. URL format is /category/path/to/any/depth/[content_type/]
@@ -260,20 +260,20 @@ class ExportItemizer(object):
             # Find fitting ExportPositions
             positions = ExportPosition.objects.filter(
                 Q(visible_to__gte=self._datetime_from) | Q(visible_to__isnull=True),
-                export=use_export, 
-                position__exact=config.POSITION_IS_NOT_OVERLOADED,
+                export=use_export,
+                position__exact=ellaexports_settings.POSITION_IS_NOT_OVERLOADED,
                 visible_from__lte=self._datetime_from,
             )
             fix_positions = ExportPosition.objects.filter(
                 Q(visible_to__gte=self._datetime_from) | Q(visible_to__isnull=True),
-                export=use_export, 
-                position__gt=config.POSITION_IS_NOT_OVERLOADED,
+                export=use_export,
+                position__gt=ellaexports_settings.POSITION_IS_NOT_OVERLOADED,
                 visible_from__lte=self._datetime_from,
             )
             objects = list()
             if use_export.use_objects_in_category:
                 objects = list(Listing.objects.get_listing(
-                    use_category, 
+                    use_category,
                     count=max_items * 2,
                     now=self._datetime_from
                 ))
@@ -323,16 +323,16 @@ class ExportManager(models.Manager):
         return e
         """
         return self.get_items_for_category(
-            export=exports[0], 
-            datetime_from=datetime_from, 
+            export=exports[0],
+            datetime_from=datetime_from,
             max_visible_items=max_visible_items
         )
         """
-    
+
     def get_items_for_category(
-            self, 
-            category=None, 
-            export=None, 
+            self,
+            category=None,
+            export=None,
             datetime_from=None,
             max_visible_items=None
         ):
@@ -347,8 +347,8 @@ class ExportManager(models.Manager):
         return e
 
     def get_export_data(self, publishable, export=None, export_category=None):
-        """ 
-        @return dict containing keys: title, photo, description, [visible_from]. 
+        """
+        @return dict containing keys: title, photo, description, [visible_from].
         If export parameter is None, first export fitting publishable's category
         is used.
         """
@@ -364,7 +364,7 @@ class ExportManager(models.Manager):
             if not pub_export:
                 raise UnexportableException(ERROR_MESSAGES['cannot'])
             pub_export = pub_export[0]
-        
+
         # Try to find ExportMeta and ExportPosition for given publishable
         metas = ExportMeta.objects.filter(publishable=publishable)
         pos = None

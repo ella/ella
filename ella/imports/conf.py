@@ -1,3 +1,3 @@
 from ella.utils.settings import Settings
 
-conf = Settings('ella.imports.conf', 'IMPORTS')
+imports_settings = Settings('ella.imports.conf', 'IMPORTS')
