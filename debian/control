@@ -8,7 +8,7 @@ Standards-Version: 3.7.2
 
 # add Provides, Conflicts, Replaces for centrum-ella, python-ella
 Package: centrum-python-ella-auto
-Provides: centrum-python-ella
+Provides: centrum-python-ella, centrum-python-ella-auto-0.0.0.0
 Conflicts: centrum-python-ella
 Replaces: centrum-python-ella
 Architecture: all
