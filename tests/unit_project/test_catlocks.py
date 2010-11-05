@@ -37,8 +37,9 @@ class TestCatlock(DatabaseTestCase):
         resp = self.client.post(self.category_nested.get_absolute_url(), data)
         self.assert_equals(302, resp.status_code)
 
+        # ella/catlocks/middleware.py:41
         resp = self.client.get(self.category_nested.get_absolute_url())
-        self.assert_equals(200, resp.status_code)
+        self.assert_equals(302, resp.status_code)
 
     def test_sending_incorrect_password_doesnt_unlock_category(self):
         data = {CATEGORY_LOCK_FORM: self.category_nested.pk, 'password': 'not-a-secret'}
