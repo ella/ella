@@ -141,9 +141,8 @@ class CategoryUserRole(models.Model):
         #for p in self.group.permissions.all():
         for p in self.group.permissions.all().iterator():
             code = '%s.%s' % (p.content_type.app_label, p.codename)
-            # Category list is identical for every permission code in CUR's group
-            if not cats:
-                cats = compute_applicable_categories_objects(self.user, code)
+            # Category list is NOT NECESSARILY identical for every permission code in CUR's group
+            cats = compute_applicable_categories_objects(self.user, code)
             #print 'Denormalizing %s for %d categories' % (code, len(cats))
             # create denormalized roles
             for c in cats:
