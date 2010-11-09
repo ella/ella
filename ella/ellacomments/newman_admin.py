@@ -17,6 +17,13 @@ class CommentOptionsGenericInline(newman.GenericStackedInline):
 class ThreadedCommentsNewmanAdmin(ThreadedCommentsAdmin, newman.NewmanModelAdmin):
     actions = ['approve_comments', 'remove_comments']
 
+    def get_actions(self, request):
+        actions = super(ThreadedCommentsNewmanAdmin, self).get_actions(request)
+        if not request.user.has_perm('comments.can_moderate'):
+            del actions['approve_comments']
+            del actions['remove_comments']
+        return actions
+
     def approve_comments(self, request, queryset):
         n_comments = queryset.update(is_removed=False, is_public=True)
         msg = ungettext(u'1 comment was successfully approved.',
