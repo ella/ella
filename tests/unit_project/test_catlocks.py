@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+import sys
+import django
+
 from djangosanetesting import DatabaseTestCase
 
 from ella.catlocks.models import CategoryLock
@@ -37,9 +40,12 @@ class TestCatlock(DatabaseTestCase):
         resp = self.client.post(self.category_nested.get_absolute_url(), data)
         self.assert_equals(302, resp.status_code)
 
-        # ella/catlocks/middleware.py:41
+        # http://code.djangoproject.com/changeset/11821
+        if django.VERSION < (1, 2) and sys.version_info > (2, 6, 4):
+            raise self.SkipTest()
+
         resp = self.client.get(self.category_nested.get_absolute_url())
-        self.assert_equals(302, resp.status_code)
+        self.assert_equals(200, resp.status_code)
 
     def test_sending_incorrect_password_doesnt_unlock_category(self):
         data = {CATEGORY_LOCK_FORM: self.category_nested.pk, 'password': 'not-a-secret'}
