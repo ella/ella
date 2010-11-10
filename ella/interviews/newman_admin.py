@@ -35,6 +35,8 @@ class InterviewForm(ModelForm):
 
     def clean(self):
         d = super(InterviewForm, self).clean()
+        if not self.is_valid():
+            return d
         if d['reply_from'] > d['reply_to']:
             raise ValidationError(_('Reply to must be later than reply from.'))
         if d['ask_from'] > d['ask_to']:

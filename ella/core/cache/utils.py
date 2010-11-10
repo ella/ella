@@ -1,7 +1,7 @@
 from hashlib import md5
 import logging
 
-from django.db.models import ObjectDoesNotExist
+from django.db.models import ObjectDoesNotExist, signals
 from django.core.cache import cache
 from django.http import Http404
 from django.contrib.contenttypes.models import ContentType
@@ -20,7 +20,9 @@ CACHE_TIMEOUT = getattr(settings, 'CACHE_TIMEOUT', 10*60)
 
 def delete_cached_object(key, auto_normalize=True):
     """ proxy function for direct object deletion from cache. May be implemented through ActiveMQ in future. """
-    cache.delete(normalize_key(key))
+    if auto_normalize:
+        key = normalize_key(key)
+    cache.delete(key)
 
 def normalize_key(key):
     return md5(key).hexdigest()
@@ -124,11 +126,29 @@ def cache_this(key_getter, invalidator=None, timeout=CACHE_TIMEOUT):
         return wrapped_func
     return wrapped_decorator
 
+class CacheInvalidator(object):
+    def __init__(self, *filter_fields):
+        self.filter_fields = filter_fields or ('pk',)
+
+    def __call__(self, sender, instance, **kwargs):
+        if not kwargs.get('created', False):
+            filter_kwargs = dict((k, getattr(instance, k))
+                for k in self.filter_fields)
+            key = _get_key(KEY_FORMAT_OBJECT, sender, filter_kwargs)
+            delete_cached_object(key, auto_normalize=False)
+
+def register_cache_invalidator(model, *filter_fields):
+    cache_invalidator = CacheInvalidator(*filter_fields)
+    signals.post_delete.connect(cache_invalidator, sender=model, weak=False)
+    signals.post_save.connect(cache_invalidator, sender=model, weak=False)
+
 from django.db.models.fields.related import ForeignKey, ReverseSingleRelatedObjectDescriptor
+
 class CachedForeignKey(ForeignKey):
     def contribute_to_class(self, cls, name):
         super(CachedForeignKey, self).contribute_to_class(cls, name)
         setattr(cls, self.name, CachedReverseSingleRelatedObjectDescriptor(self))
+        #register_cache_invalidator(self.rel.to)
 
 class CachedReverseSingleRelatedObjectDescriptor(ReverseSingleRelatedObjectDescriptor):
     def __get__(self, instance, instance_type=None):
