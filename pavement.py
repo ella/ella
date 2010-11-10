@@ -78,7 +78,7 @@ except ImportError:
 
 @task
 def install_dependencies():
-    sh('pip install -r requirements.txt')
+    sh('pip install --upgrade -r requirements.txt')
 
 @task
 def bootstrap():
