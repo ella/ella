@@ -1,3 +1,4 @@
+from django.contrib import admin
 from django.contrib.contenttypes.generic import GenericInlineModelAdmin
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
@@ -6,7 +7,7 @@ from django.shortcuts import render_to_response
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_unicode
 
-from ella.ellacomments.models import CommentOptionsObject
+from ella.ellacomments.models import CommentOptionsObject, BannedIP
 from threadedcomments.admin import ThreadedCommentsAdmin
 from threadedcomments.models import ThreadedComment
 
@@ -60,3 +61,10 @@ class CommentsAdmin(ThreadedCommentsAdmin):
             "no_comments": comment_count == 0,
         }
         return render_to_response("admin/comments/comment/multiple_delete_confirmation.html", context)
+
+class BannedIPAdmin(admin.ModelAdmin):
+    date_hierarchy = 'created'
+    list_display = ('__unicode__', 'created', 'reason')
+    list_filter = ('created',)
+
+admin.site.register(BannedIP, BannedIPAdmin)

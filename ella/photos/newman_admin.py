@@ -5,7 +5,7 @@ from ella import newman
 
 from ella.photos.models import FormatedPhoto, Format, Photo
 from ella.newman.utils import JsonResponse, JsonResponseError
-from ella.newman.config import config as newman_conf
+from ella.newman.conf import newman_settings
 from ella.newman.filterspecs import CustomFilterSpec
 from ella.newman.licenses.models import License
 
@@ -58,13 +58,12 @@ class PhotoAdmin(newman.NewmanModelAdmin):
     list_display = photo_get_list_display()
     list_filter = ('created',)
     unbound_list_filter = (PhotoSizeFilter,)
-    prepopulated_fields = {'slug': ('title',)}
     search_fields = ('title', 'slug', 'id',)
     suggest_fields = {'authors': ('name', 'slug',), 'source': ('name', 'url',)}
     rich_text_fields = {'small': ('description',)}
 
     fieldsets = (
-        (_("Heading"), {'fields': ('title', 'slug',)}),
+        (_("Heading"), {'fields': ('title',)}),
         (_("Description"), {'fields': ('description',)}),
         (_("Metadata"), {'fields': ('authors', 'source', 'image',)}),
         (_("Important area"), {'fields': (('important_top', 'important_right'), ('important_bottom', 'important_left'),), 'classes': ('collapsed',)})
@@ -98,7 +97,7 @@ class PhotoAdmin(newman.NewmanModelAdmin):
         obj = self.get_change_view_object(object_id)
 
         if obj is None:
-            return JsonResponseError(_('Photo id %s does not exists.') % object_id, status=newman_conf.STATUS_OBJECT_NOT_FOUND)
+            return JsonResponseError(_('Photo id %s does not exists.') % object_id, status=newman_settings.STATUS_OBJECT_NOT_FOUND)
 
         out = {
             'title': obj.title,

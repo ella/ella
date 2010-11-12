@@ -217,13 +217,13 @@ function lock_window(msg) {
     $modal.data('close_ok', false)
     $modal.dialog('open');
 
-    carp('Window Locked');
+    //carp('Window Locked');
 }
 lock_window.dependencies_loaded = false;
 
 function raw_unlock_window() {
     $('#window-lock').data('close_ok', true).dialog('close');
-    carp('Window Unlocked');
+    //carp('Window Unlocked');
 }
 
 function unlock_window() {
@@ -268,13 +268,16 @@ $( function() {
 $(function(){Kobayashi.reload_content('content');});
 
 function media_loading_start_handler() { 
-    timer('media_loading'); 
+    //timer('media_loading'); 
     lock_window( str_concat(gettext('Loading media'), '...') );
 }
 
 //// Lock window when media are being loaded
 $(document).bind('media_loading_start', media_loading_start_handler);
-$(document).bind('media_loaded', function() {unlock_window(); timerEnd('media_loading'); });
+$(document).bind('media_loaded', function() {
+    unlock_window();
+    //timerEnd('media_loading');
+});
 
 //// Drafts and templates
 Drafts = new Object;
@@ -500,36 +503,36 @@ Drafts = new Object;
         var proceed, target_ids;
 
         if ($('.change-form').length == 0) { // nothing to autosave
-             ;;; carp('.change-form not present -- not setting up interval');
+             //carp('.change-form not present -- not setting up interval');
              clearInterval(autosave_interval);
              proceed = false;
         }
         else if ( evt && evt.type == 'content_added' ) {
             if ( $(evt.target).find('.change-form').length ) {
-                ;;; carp('waiting for form to change to set up autosave interval');
+                //carp('waiting for form to change to set up autosave interval');
                 proceed = true; // .change-form was just loaded
             }
             else {  // .change-form was there before -- don't touch it
-                ;;; carp('.change-form not in loaded stuff -- letting it alone');
+                //carp('.change-form not in loaded stuff -- letting it alone');
                 proceed = false;
             }
         }
         else {
-            ;;; carp('no injection storage found -- interval reset forced');
+            //carp('no injection storage found -- interval reset forced');
             proceed = true;
         }
 
         if (!proceed) return;
 
         if (autosave_interval != undefined) {
-            ;;; carp('clearing interval prior to setting new one');
+            //carp('clearing interval prior to setting new one');
             clearInterval(autosave_interval);
         }
         var $inputs = $('.change-form :input');
         // start auto-saving when an input's value changes
         function onchange_autosave_handler() {
             $('.change-form :input').unbind('change', onchange_autosave_handler).unbind('keypress', onkeypress_autosave_handler);
-            ;;; carp('.change-form changed -- setting up autosave interval');
+            //carp('.change-form changed -- setting up autosave interval');
             autosave_interval = setInterval( function() {
                 var $change_form = $('.change-form');
                 if ($change_form.length == 0) {
@@ -538,7 +541,7 @@ Drafts = new Object;
                     autosave_interval = undefined;
                     return;
                 }
-                carp('Saving draft ', new Date());
+                //carp('Saving draft ', new Date());
                 save_preset($change_form, {id: draft_id});
             }, 60 * 1000 );
         }
@@ -642,7 +645,7 @@ $( function() {
             return false;
         }
         NewmanLib.call_pre_submit_callbacks();
-        carp(['ajax_submit: submitting... selector="', $form.selector, '"'].join(''));
+        //carp(['ajax_submit: submitting... selector="', $form.selector, '"'].join(''));
 
         // Hack for file inputs
         var has_files = false;
@@ -761,7 +764,7 @@ $( function() {
         //NewmanLib.call_pre_submit_callbacks();
 
         $.ajax( request_options );
-        carp('ajax_submit: request sent (async)');
+        //carp('ajax_submit: request sent (async)');
         return false;
     }
     AjaxFormLib.ajax_submit = ajax_submit;
@@ -1377,13 +1380,16 @@ function changelist_shown_handler(evt) {
 }
 //$(document).bind('changelist_shown', changelist_shown_handler); //FIXME buggy in Positions changelist.
 
-function changelist_batch_success(response_text) {
+function old_changelist_batch_success(response_text) {
     var $dialog = $('<div id="confirmation-wrapper">');
     $dialog.html(response_text).find('.cancel').click(function() {
         $dialog.remove();
         $('#content').show();
     });
     $('#content').hide().before($dialog);
+}
+function changelist_batch_success(response_text) {
+    Kobayashi.reload_content('content');
 }
 function batch_delete_confirm_complete(data, xhr) {
     $('#confirmation-wrapper').remove();
@@ -1457,6 +1463,15 @@ $(document).bind('content_added', function(evt) {
     // let those rich text areas alone that are in .markItUpContainer -- they are already initialized
     $target.find('.rich_text_area').not('.markItUpContainer .rich_text_area').each( function() {
         $(this).markItUp(MARKITUP_SETTINGS);
+    });
+});
+
+// Actions
+$(document).bind('content_added', function(evt) {
+    var actions_flag = false;
+    $('#action-toggle').click(function() {
+        actions_flag = !actions_flag;
+        $('input.action-select').attr('checked', actions_flag);
     });
 });
 

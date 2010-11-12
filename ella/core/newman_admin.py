@@ -13,12 +13,22 @@ from django.template.defaultfilters import date
 from django.conf import settings
 
 from ella.core.models import Author, Source, Category, Listing, HitCount, Placement, Related, Publishable
-from ella.core.conf import conf
+from ella.core.conf import core_settings
 from ella import newman
 from ella.newman import options, fields
 from ella.newman.filterspecs import CustomFilterSpec, NewmanSiteFilter
 
 class ListingForm(modelforms.ModelForm):
+    def clean(self):
+        d = super(ListingForm, self).clean()
+        if not self.is_valid():
+            return d
+        if d['publish_to'] and d['publish_from'] > d['publish_to']:
+            raise ValidationError(_('Publish to must be later than publish from.'))
+        if d['priority_from'] and d['priority_to'] and d['priority_from'] > d['priority_to']:
+            raise ValidationError(_('Priority to must be later than priority from.'))
+        return d
+
     class Meta:
         model = Listing
 
@@ -128,8 +138,8 @@ class PlacementForm(modelforms.ModelForm):
         # get listing category, publish_from and publish_to
         pub_from = data.getlist(self.get_part_id('publish_from'))
         listings = self.cleaned_data['listings']
-        if len(pub_from) and (len(pub_from) != len(listings)):
-            raise ValidationError(_('Amount of publish_from input fields should be the same as category fields. With kind regards Your PlacementInline and his ListingCustomWidget.'))
+        if pub_from and len(pub_from) != len(listings):
+            raise ValidationError(_('Duplicate listings'))
         for lst, pub in zip(listings, pub_from):
             if not pub:
                 #raise ValidationError(_('This field is required'))
@@ -161,6 +171,9 @@ class PlacementForm(modelforms.ModelForm):
         #if cat and cat == cat and cat: # should be equiv. if cat:...
         if cat:
             main = d
+
+        if d['publish_to'] and d['publish_from'] > d['publish_to']:
+            raise ValidationError(_('Publish to must be later than publish from.'))
 
         d['slug'] = obj_slug
         # try and find conflicting placement
@@ -215,6 +228,7 @@ class ListingInlineAdmin(newman.NewmanTabularInline):
     model = Listing
     extra = 2
     suggest_fields = {'category': ('__unicode__', 'title', 'slug',)}
+    form = ListingForm
     fieldsets = ((None, {'fields' : ('category','publish_from', 'publish_to', 'priority_from', 'priority_to', 'priority_value', 'commercial',)}),)
 
 class PlacementInlineAdmin(newman.NewmanTabularInline):
@@ -243,7 +257,7 @@ class HitCountInlineAdmin(newman.NewmanTabularInline):
     extra = 0
 
 class ListingAdmin(newman.NewmanModelAdmin):
-    pass
+    form = ListingForm
     '''
     list_display = ('target_admin', 'target_ct', 'publish_from', 'category', 'placement_admin', 'target_hitcounts', 'target_url',)
     list_display_links = ()
@@ -313,7 +327,7 @@ class RelatedInlineAdmin(newman.GenericTabularInline):
 class IsPublishedFilter(CustomFilterSpec):
     " Published/Nonpublished objects filter"
     lookup_var = 'publish_from'
-    PUBLISH_FROM_WHEN_EMPTY = conf.PUBLISH_FROM_WHEN_EMPTY.strftime('%Y-%m-%d')
+    PUBLISH_FROM_WHEN_EMPTY = core_settings.PUBLISH_FROM_WHEN_EMPTY.strftime('%Y-%m-%d')
     CAPTION_ALL_WITH_PLACEMENT = _('All with placement')
     CAPTION_YES = _('Yes')
     CAPTION_NO = _('No')
@@ -339,8 +353,8 @@ class IsPublishedFilter(CustomFilterSpec):
         self.links.append(link)
         link = ( self.CAPTION_YES, {lookup_var_published: now})
         self.links.append(link)
-        link = ( 
-            self.CAPTION_ALL_WITH_PLACEMENT, 
+        link = (
+            self.CAPTION_ALL_WITH_PLACEMENT,
             {
                 lookup_var_has_placement: self.PUBLISH_FROM_WHEN_EMPTY
             }
@@ -358,7 +372,7 @@ class IsPublishedFilter(CustomFilterSpec):
         elif param.startswith('%s__gt' % self.lookup_var):
             return self.CAPTION_NO
         elif param.startswith('%s__lte' % self.lookup_var):
-            return self.CAPTION_YES 
+            return self.CAPTION_YES
         return None
 
 class PublishFromFilter(CustomFilterSpec):

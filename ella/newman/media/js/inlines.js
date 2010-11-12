@@ -44,12 +44,12 @@ var __NewmanInline = function() {
         var handler;
         var len = this.registered_handler_objects.length;
         var $doc = $(document);
-        log_inline.log('Choosing form handlers...');
+        //log_inline.log('Choosing form handlers...');
         for (i = 0; i < len; i++) {
             handler = this.registered_handler_objects[i];
             if (!handler.is_suitable(document, $doc)) continue;
 
-            log_inline.log('Handler:', handler);
+            //log_inline.log('Handler:', handler);
             try {
                 handler.handle_form(document, $doc);
             } catch (e) {
@@ -65,7 +65,7 @@ var __NewmanInline = function() {
                 this_decorator(handler, handler.preset_load_completed)
             );
         }
-        log_inline.log('Form handlers done.');
+        //log_inline.log('Form handlers done.');
         return true;
     };
 
@@ -125,7 +125,7 @@ var FormHandler = to_class(__FormHandler);
             .replace(/-#-/g, '--')
             .replace(/__NO__/g, no)
         ).parent().trigger('content_added');
-        log_inline.log('add_inline: content_added triggered');
+        //log_inline.log('add_inline: content_added triggered');
     }
     $('.remove-inline-button').live('click', function(evt) {
         if (evt.button != 0) return;
@@ -240,7 +240,7 @@ var FormHandler = to_class(__FormHandler);
         );
     }
     $('.change-form').bind('preset_load_completed', remove_ellacomments_ids);
-    log_inline.log('remove_ellacomments_ids bind');
+    //log_inline.log('remove_ellacomments_ids bind');
 
     
 })(jQuery);

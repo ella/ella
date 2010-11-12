@@ -6,6 +6,7 @@ from ella.core.newman_admin import PublishableAdmin
 from ella.interviews.models import Interview, Question, Interviewee, Answer
 from django.utils.safestring import mark_safe
 from django.core.urlresolvers import reverse
+from django.forms import ModelForm, ValidationError
 
 class AnswerInlineAdmin(newman.NewmanStackedInline):
     model = Answer
@@ -30,7 +31,27 @@ class IntervieweeAdmin(newman.NewmanModelAdmin):
     search_fields = ('user__first_name', 'user__last_name', 'name', 'description', 'slug', 'author__name',)
     prepopulated_fields = {'slug' : ('name',)}
 
+class InterviewForm(ModelForm):
+
+    def clean(self):
+        d = super(InterviewForm, self).clean()
+        if not self.is_valid():
+            return d
+        if d['reply_from'] > d['reply_to']:
+            raise ValidationError(_('Reply to must be later than reply from.'))
+        if d['ask_from'] > d['ask_to']:
+            raise ValidationError(_('Ask to must be later than ask from.'))
+        if d['ask_from'] > d['reply_from']:
+            raise ValidationError(_('Reply from must be later than ask from.'))
+        if d['ask_to'] > d['reply_to']:
+            raise ValidationError(_('Reply to must be later than ask to.'))
+        return d
+
+    class Meta:
+        model = Interview
+
 class InterviewAdmin(PublishableAdmin):
+    form = InterviewForm
 
     list_display = list(PublishableAdmin.list_display[:])
     list_display.insert(-2, 'interview_questions_link')

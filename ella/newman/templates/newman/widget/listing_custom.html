@@ -38,7 +38,7 @@
                         type="text"
                         id="{{ id_prefix }}-{{ forloop.counter }}-publish_from"
                         name="{{ id_prefix }}-publish_from"
-                        value="{% if listing.publish_from %}{{ listing.publish_from|date:"Y-m-d H:i" }}{% endif %}"
+                        value="{% if listing.publish_from %}{% if listing.publish_from.second %}{{ listing.publish_from }}{% else %}{{ listing.publish_from|date:"Y-m-d H:i" }}{% endif %}{% endif %}"
                         class="vDateTimeInput"
                     />
                 </div>

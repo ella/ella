@@ -6,7 +6,7 @@ from httplib import urlsplit
 from django.conf import settings
 from django import template
 
-from ella.ellaexports.conf import config
+from ella.ellaexports.conf import ellaexports_settings
 
 register = template.Library()
 
@@ -35,8 +35,8 @@ class AtomIdNode(template.Node):
         self.hashed_output = hashed_output
 
     def render(self, context):
-        """ 
-        Example output: tag:zena.cz,2004-05-27:/12/10245 
+        """
+        Example output: tag:zena.cz,2004-05-27:/12/10245
         2004-05-27 ... publication date
         12 ... content type
         10245 ... publishable ID
@@ -94,7 +94,7 @@ class FeedStrftimeNode(template.Node):
         if type(variable) != datetime:
             raise AttributeError('Given variable is not datetime object. %s' % variable)
 
-        formatstring = config.FEED_DATETIME_FORMAT
+        formatstring = ellaexports_settings.FEED_DATETIME_FORMAT
         if self.formatstring:
             formatstring = self.formatstring
         return variable.strftime(str(formatstring))

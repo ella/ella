@@ -21,11 +21,11 @@ class PositionForm(ModelForm):
 
     def clean(self):
         cleaned_data = super(PositionForm, self).clean()
-
+        if not self.is_valid():
+            return cleaned_data
         if cleaned_data['active_from'] and cleaned_data['active_till']:
             if cleaned_data['active_from'] > cleaned_data['active_till']:
-                raise ValidationError(_('Active till must be greather than active from.'))
-
+                raise ValidationError(_('Active till must be later than active from.'))
         return cleaned_data
 
     class Meta:

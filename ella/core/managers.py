@@ -8,7 +8,7 @@ from django.utils.encoding import smart_str
 
 from ella.core.cache import cache_this
 from ella.core.cache.invalidate import CACHE_DELETER
-from ella.core.conf import conf
+from ella.core.conf import core_settings
 
 
 class RelatedManager(models.Manager):
@@ -178,7 +178,7 @@ class ListingManager(models.Manager):
                     mark_before_output(result)
                     return result
             mark_before_output(out)
-            return out 
+            return out
 
         # TODO try to write  SQL (.extra())
         assert offset > 0, "Offset must be a positive integer"
@@ -203,7 +203,7 @@ class ListingManager(models.Manager):
             listed_targets = set([])
 
         # only use priorities if somebody wants them
-        if not conf.USE_PRIORITIES:
+        if not core_settings.USE_PRIORITIES:
             if unique:
                 return make_items_unique(qset)
             return qset[offset:limit]
@@ -219,11 +219,11 @@ class ListingManager(models.Manager):
 
         qsets = (
             # modded-up objects
-            qset.filter(active, priority_value__gt=conf.DEFAULT_LISTING_PRIORITY).order_by('-priority_value', '-publish_from'),
+            qset.filter(active, priority_value__gt=core_settings.DEFAULT_LISTING_PRIORITY).order_by('-priority_value', '-publish_from'),
             # default priority
             qset.exclude(active).order_by('-publish_from'),
             # modded-down priority
-            qset.filter(active, priority_value__lt=conf.DEFAULT_LISTING_PRIORITY).order_by('-priority_value', '-publish_from'),
+            qset.filter(active, priority_value__lt=core_settings.DEFAULT_LISTING_PRIORITY).order_by('-priority_value', '-publish_from'),
         )
 
         out = []

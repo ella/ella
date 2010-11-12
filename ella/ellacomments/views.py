@@ -1,4 +1,4 @@
-from ella.ellacomments.models import CommentOptionsObject
+from ella.ellacomments.models import CommentOptionsObject, BannedIP
 import operator
 
 from django.contrib import comments
@@ -22,13 +22,20 @@ def post_comment(request, context, parent_id=None):
     'Mostly copy-pasted from django.contrib.comments.views.comments'
     opts = CommentOptionsObject.objects.get_for_object(context['object'])
     if opts.blocked:
-        raise Http404('Comments is blocked for this object.')
+        raise Http404('Comments are blocked for this object.')
+    context['opts'] = opts
 
     parent = None
     if parent_id:
         parent = get_object_or_404(comments.get_model(), pk=parent_id)
 
-    if request.method != 'POST':
+    ip_address = request.META.get('REMOTE_ADDR', None)
+    try:
+        ip_ban = BannedIP.objects.get(ip_address=ip_address)
+    except BannedIP.DoesNotExist:
+        ip_ban = None
+
+    if request.method != 'POST' or ip_ban:
         initial = {}
         if parent:
             if parent.title.startswith('Re:'):
@@ -39,6 +46,7 @@ def post_comment(request, context, parent_id=None):
         context.update({
                 'parent': parent,
                 'form': form,
+                'ip_ban': ip_ban,
             })
         return render_to_response(
             get_templates_from_placement('comment_form.html', context['placement']),
@@ -101,6 +109,9 @@ def post_comment(request, context, parent_id=None):
             return CommentPostBadRequest(
                 "comment_will_be_posted receiver %r killed the comment" % receiver.__name__)
 
+    if opts.premoderated:
+        comment.is_public = False
+
     # Save the comment and signal that it was saved
     comment.save()
     signals.comment_was_posted.send(
@@ -116,6 +127,11 @@ def list_comments(request, context):
 
     # basic queryset
     qs = comments.get_model().objects.for_model(context['object']).order_by('tree_path')
+
+    # XXX factor out into a manager
+    qs = qs.filter(is_public=True)
+    if getattr(settings, 'COMMENTS_HIDE_REMOVED', False):
+        qs = qs.filter(is_removed=False)
 
     # only individual branches requested
     if 'ids' in request.GET:

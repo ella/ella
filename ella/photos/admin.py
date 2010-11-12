@@ -9,7 +9,7 @@ from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin
 
 from ella.photos.models import FormatedPhoto, Format, Photo
 from ella.photos.views import format_photo_json, thumb_url
-from ella.photos.conf import config
+from ella.photos.conf import photos_settings
 
 class FormatedPhotoForm(forms.BaseForm):
     def clean(self):
@@ -64,14 +64,13 @@ class PhotoOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     inlines = [ FormatedPhotoInlineOptions ]
     list_display = ('title', 'width', 'height', 'thumb', 'pk',) ## 'authors')
     list_filter = ('created',)
-    prepopulated_fields = {'slug': ('title',)}
     search_fields = ('title', 'image', 'description', 'id',) # FIXME: 'tags__tag__name',)
     suggest_fields = {'authors': ('name', 'slug',), 'source': ('name', 'url',)}
     rich_text_fields = {'small': ('description',)}
     ordering = ('-id',)
 
     fieldsets = (
-        (_("Photo core"), {'fields': (('title', 'slug'), 'image', 'authors')}),
+        (_("Photo core"), {'fields': ('title', 'image', 'authors')}),
         (_("Photo extra"), {'fields': ('description', 'source')}),
         (_("Metadata"), {'fields': (('important_top', 'important_left', 'important_bottom', 'important_right'),)}),
     )
@@ -84,7 +83,7 @@ class PhotoOptions(EllaAdminOptionsMixin, EllaModelAdmin):
         return super(PhotoOptions, self).__call__(request, url)
 
     def queryset(self, request):
-        return super(PhotoOptions, self).queryset(request).filter(width__gt=config.PHOTO_MIN_WIDTH, height__gt=config.PHOTO_MIN_HEIGHT)
+        return super(PhotoOptions, self).queryset(request).filter(width__gt=photos_settings.PHOTO_MIN_WIDTH, height__gt=photos_settings.PHOTO_MIN_HEIGHT)
 
 
 class FormatedPhotoOptions(EllaAdminOptionsMixin, admin.ModelAdmin):

@@ -9,13 +9,27 @@ from django.http import HttpResponse
 from django.shortcuts import render_to_response
 
 from ella import newman
-from ella.newman import widgets, config, fields
+from ella.newman import widgets, fields
+from ella.newman.conf import newman_settings
 from ella.ellaexports import models, timeline
 
+
+class ExportPositionForm(forms.ModelForm):
+    def clean(self):
+        d = super(ExportPositionForm, self).clean()
+        if not self.is_valid():
+            return d
+        if d['visible_to'] and d['visible_from'] > d['visible_to']:
+            raise forms.ValidationError(_('Visible to must be later than visible from.'))
+        return d
+
+    class Meta:
+        model = models.ExportPosition
 
 class ExportPositionInlineAdmin(newman.NewmanTabularInline):
     model = models.ExportPosition
     extra = 1
+    form = ExportPositionForm
 
 class ExportAdmin(newman.NewmanModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
@@ -271,4 +285,4 @@ newman.site.register(models.ExportMeta, ExportMetaAdmin)
 newman.site.register(models.AggregatedExport, AggregatedExportAdmin)
 
 # Register ExportMetaInline in standard PublishableAdmin
-newman.site.append_inline(config.EXPORTABLE_MODELS, ExportMetaInline)
+newman.site.append_inline(newman_settings.EXPORTABLE_MODELS, ExportMetaInline)

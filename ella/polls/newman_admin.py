@@ -1,9 +1,10 @@
+import types
+
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.forms.models import BaseInlineFormSet
 from django.shortcuts import render_to_response
 from django.conf import settings
-from django.forms.util import ValidationError
-from django.forms import models as modelforms
+from django.forms import ModelForm, ValidationError
 from django.utils.safestring import mark_safe
 from django.conf.urls.defaults import patterns, url
 
@@ -40,7 +41,7 @@ class ResultFormset(BaseInlineFormSet):
                 raise ValidationError, ugettext('Score %s is not covered by any answer.') % (intervals[i][1] + 1)
         return self.cleaned_data
 
-class ResultForm(modelforms.ModelForm):
+class ResultForm(ModelForm):
 
     class Meta:
         model = Result
@@ -134,7 +135,7 @@ def save_source_text(model_field, instance, text):
         src.save()
         return tp.convert(text)
 
-class QuestionForm(modelforms.ModelForm):
+class QuestionForm(ModelForm):
     # create the field here to pass validation
     choices =  fields.ChoiceCustomField([], label=_('Choices'), required=False, initial=(Choice(id=0, choice=fields.ChoiceCustomField.default_text, points=0),))
 
@@ -208,7 +209,7 @@ class QuestionForm(modelforms.ModelForm):
     changed_data = property(_get_changed_data)
 
     def save(self, commit=True):
-        out = super(modelforms.ModelForm, self).save(commit=commit)
+        out = super(ModelForm, self).save(commit=commit)
         instance = self.cleaned_data['id']
 
         def save_them():
@@ -256,6 +257,19 @@ class QuestionInlineAdmin(newman.NewmanTabularInline):
     fieldsets = ((None, {'fields' : ('question', 'allow_multiple', 'allow_no_choice', 'choices')}),)
     extra = 1
 
+class DateSpanModelForm(ModelForm):
+    def clean(self):
+        d = super(DateSpanModelForm, self).clean()
+        if not self.is_valid():
+            return d
+        if d['active_from'] and d['active_till'] and d['active_from'] > d['active_till']:
+            raise ValidationError(_('Active till must be later than active from.'))
+        return d
+
+class ContestForm(DateSpanModelForm):
+    class Meta:
+        model = Contest
+
 class ContestAdmin(PublishableAdmin):
 #    def __call__(self, request, url):
 #        if url and url.endswith('correct_answers'):
@@ -268,6 +282,8 @@ class ContestAdmin(PublishableAdmin):
 #                {'contestants' : contestants, 'title' : title, 'module_name' : module_name})
 #        return super(ContestAdmin, self).__call__(request, url)
 
+    form = ContestForm
+    
     list_display = ('admin_link', 'category', 'active_from', 'correct_answers', 'get_all_answers_count', 'pk', \
                     'publish_from_nice', 'placement_link', 'site_icon', 'fe_link',)
     list_filter = ('category', 'active_from',)
@@ -313,7 +329,13 @@ class ContestAdmin(PublishableAdmin):
         (_("Dates"), {'fields': (('active_from', 'active_till',),)}),
     )
 
+class QuizForm(DateSpanModelForm):
+    class Meta:
+        model = Quiz
+
 class QuizAdmin(PublishableAdmin):
+    form = QuizForm
+
 #    list_display = ('admin_link', 'category', 'active_from')
     list_filter = ('category', 'active_from',)
     search_fields = ('title', 'text',)
@@ -329,7 +351,13 @@ class QuizAdmin(PublishableAdmin):
         (_("Dates"), {'fields': (('active_from', 'active_till',),)}),
     )
 
+class PollForm(DateSpanModelForm):
+    class Meta:
+        model = Poll
+
 class PollAdmin(newman.NewmanModelAdmin):
+    form = PollForm
+
     list_display = ('title', 'question', 'get_total_votes', 'pk',)
     list_filter = ('active_from', 'active_till',)
     search_fields = ('title', 'text', 'text_results', 'question__question',)
@@ -348,8 +376,13 @@ class SurveyChoiceInlineAdmin(newman.NewmanTabularInline):
     # FIXME: rich text problem with inlines :(
     rich_text_fields = {'small': ('choice',)}
 
+class SurveyForm(DateSpanModelForm):
+    class Meta:
+        model = Survey
 
 class SurveyAdmin(newman.NewmanModelAdmin):
+    form = SurveyForm
+
     exclude = ('quiz', 'contest', 'allow_no_choice', 'allow_multiple')
     list_display = ('__unicode__', 'get_total_votes',)
     list_filter = ('active_from', 'active_till',)
