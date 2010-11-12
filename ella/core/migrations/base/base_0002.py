@@ -156,13 +156,13 @@ class BasePublishableDataMigration:
 
     def forwards(self, orm):
         print "Old data migration is disabled"
-#        # migrate publishables
-#        self.forwards_publishable(orm)
-#        # migrate generic relations
+        # migrate publishables
+        self.forwards_publishable(orm)
+        # migrate generic relations
 #        self.forwards_generic_relations(orm)
-#        # migrate placements
+        # migrate placements
 #        self.forwards_placements(orm)
-#        # migrate related
+        # migrate related
 #        self.forwards_related(orm)
 
     def forwards_publishable(self, orm):
@@ -173,34 +173,34 @@ class BasePublishableDataMigration:
         '''
 
         # move the data
-        db.execute('''
-            INSERT INTO
-                `core_publishable` (old_id, content_type_id, %(cols_to)s)
-            SELECT
-                a.id, ct.id, %(cols_from)s
-            FROM
-                `%(table)s` a, `django_content_type` ct
-            WHERE
-                ct.`app_label` = '%(app_label)s' AND  ct.`model` = '%(model)s';
-            ''' % self.substitute
-        )
+#        db.execute('''
+#            INSERT INTO
+#                `core_publishable` (old_id, content_type_id, %(cols_to)s)
+#            SELECT
+#                a.id, ct.id, %(cols_from)s
+#            FROM
+#                `%(table)s` a, `django_content_type` ct
+#            WHERE
+#                ct.`app_label` = '%(app_label)s' AND  ct.`model` = '%(model)s';
+#            ''' % self.substitute
+#        )
 
         # add link to parent
         db.add_column(self.table, 'publishable_ptr', models.IntegerField(null=True, blank=True))
 
         # update the link
-        db.execute('''
-            UPDATE
-                `core_publishable` pub
-                JOIN `%(table)s` art ON (art.`id` = pub.`old_id`)
-                JOIN `django_content_type` ct ON (pub.`content_type_id` = ct.`id` AND ct.`app_label` = '%(app_label)s' AND ct.`model` = '%(model)s')
-            SET
-                art.`publishable_ptr` = pub.`id`;
-            ''' % self.substitute
-        )
+#        db.execute('''
+#            UPDATE
+#                `core_publishable` pub
+#                JOIN `%(table)s` art ON (art.`id` = pub.`old_id`)
+#                JOIN `django_content_type` ct ON (pub.`content_type_id` = ct.`id` AND ct.`app_label` = '%(app_label)s' AND ct.`model` = '%(model)s')
+#            SET
+#                art.`publishable_ptr` = pub.`id`;
+#            ''' % self.substitute
+#        )
 
         # remove constraints from all models reffering to us
-        self.alter_self_foreignkeys(orm)
+#        self.alter_self_foreignkeys(orm)
 
         # drop primary key
         db.alter_column(self.table, 'id', models.IntegerField())
@@ -208,19 +208,19 @@ class BasePublishableDataMigration:
 
         # replace it with a link to parent
         db.rename_column(self.table, 'publishable_ptr', 'publishable_ptr_id')
-        db.alter_column(self.table, 'publishable_ptr_id', models.ForeignKey(orm['core.Publishable'], null=False, blank=False, unique=True))
+        db.alter_column(self.table, 'publishable_ptr_id', models.ForeignKey(orm['core.Publishable'], unique=True))
         db.create_primary_key(self.table, 'publishable_ptr_id')
 
         #  make it a FK
-        db.execute(
-            'ALTER TABLE `%s` ADD CONSTRAINT `publishable_ptr_id_refs_id_%s` FOREIGN KEY (`publishable_ptr_id`) REFERENCES `core_publishable` (`id`);' % (
-                self.table,
-                abs(hash((self.table, 'core_publishable'))),
-            )
-        )
+#        db.execute(
+#            'ALTER TABLE `%s` ADD CONSTRAINT `publishable_ptr_id_refs_id_%s` FOREIGN KEY (`publishable_ptr_id`) REFERENCES `core_publishable` (`id`);' % (
+#                self.table,
+#                abs(hash((self.table, 'core_publishable'))),
+#            )
+#        )
 
         # move data, that were pointing to us
-        self.move_self_foreignkeys(orm)
+#        self.move_self_foreignkeys(orm)
 
         # drop duplicate columns
         db.delete_column(self.table, 'id')
