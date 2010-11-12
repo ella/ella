@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
+import sys
 
+import django
 from django.contrib.auth.models import User
 
 from ella.interviews.models import Question, Answer
@@ -54,6 +56,10 @@ class TestViews(InterviewViewTestCase):
         self.assert_equals(404, r.status_code)
 
     def test_post_to_reply_works(self):
+        # http://code.djangoproject.com/changeset/11821
+        if django.VERSION < (1, 2) and sys.version_info > (2, 6, 4):
+            raise self.SkipTest()
+
         self.templates['404.html'] = ''
         u = User(username='my_user')
         u.set_password('secret')
@@ -76,6 +82,10 @@ class TestViews(InterviewViewTestCase):
 
 
     def test_reply_lists_questions(self):
+        # http://code.djangoproject.com/changeset/11821
+        if django.VERSION < (1, 2) and sys.version_info > (2, 6, 4):
+            raise self.SkipTest()
+
         self.templates['404.html'] = ''
         self.templates['page/reply.html'] = ''
         u = User(username='my_user')

@@ -68,7 +68,7 @@ INSTALLED_APPS = (
     # ella apps
     'ella.core',
     'ella.articles',
-    'ella.oldcomments',
+#    'ella.oldcomments',
     'ella.photos',
     'ella.db_templates',
     'ella.galleries',
@@ -91,8 +91,11 @@ INSTALLED_APPS = (
 
     'example_project.services',
 
+    'south',
+
     'tagging',
     'djangomarkup',
+    'threadedcomments',
 )
 
 VERSION = 1

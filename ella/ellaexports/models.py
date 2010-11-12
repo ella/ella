@@ -9,7 +9,7 @@ from ella.core.models import Publishable, Category
 from ella.core.cache import get_cached_object
 from ella.photos.models import Photo, Format
 from ella.ellaexports.managers import ExportManager
-from ella.ellaexports.conf import config
+from ella.ellaexports.conf import ellaexports_settings
 
 class UnexportableException(Exception):
     pass
@@ -114,7 +114,7 @@ class ExportPosition(models.Model):
     " Defines visibility of ExportMeta object. "
     visible_from = models.DateTimeField()
     visible_to = models.DateTimeField(blank=True, null=True)
-    position = models.IntegerField(blank=True, default=config.POSITION_IS_NOT_OVERLOADED)
+    position = models.IntegerField(blank=True, default=ellaexports_settings.POSITION_IS_NOT_OVERLOADED)
     object = models.ForeignKey(ExportMeta, verbose_name=_('Export meta'))
     export = models.ForeignKey(Export, verbose_name=_('Export'))
 

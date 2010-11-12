@@ -8,14 +8,14 @@ from django.core.paginator import QuerySetPaginator
 from ella.core.views import get_templates_from_placement
 from ella.interviews.models import Question, Answer
 from ella.utils.paginator import paginate_qset, get_page_no
-from ella.interviews.conf import conf
+from ella.interviews.conf import interviews_settings
 
 def detail(request, context):
     """ Custom object detail function that adds a QuestionForm to the context. """
     interview = context['object']
     page_no = get_page_no(request)
     qset = interview.get_questions()
-    paginator = QuerySetPaginator(qset, conf.PAGINATION_PER_PAGE)
+    paginator = QuerySetPaginator(qset, interviews_settings.PAGINATION_PER_PAGE)
 
     if page_no > paginator.num_pages or page_no < 1:
         raise Http404
@@ -26,7 +26,7 @@ def detail(request, context):
     context.update({
         'interviewees': interviewees,
         'is_paginated': paginator.num_pages > 1,
-        'results_per_page': conf.PAGINATION_PER_PAGE,
+        'results_per_page': interviews_settings.PAGINATION_PER_PAGE,
         'page': page,
         'form' : QuestionForm(request),
         'questions' : page.object_list,

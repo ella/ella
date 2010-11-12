@@ -39,8 +39,6 @@ class CategoryLockMiddleware(object):
 
         url = request.META.get('HTTP_REFERER', '/')
         return HttpResponseRedirect(url)
-        # render password form
-        return HttpResponseForbidden(render_to_string('page/category_lock/form.html', {'category': cl.category, 'form': form}))
 
     def process_request(self, request):
         if self.reg.match(request.path):

@@ -11,7 +11,7 @@ from ella.newman import site, permission
 from ella.newman.utils import get_log_entries
 from ella.utils.text import cz_compare
 
-from ella.newman.config import config
+from ella.newman.conf import newman_settings
 
 register = template.Library()
 
@@ -54,7 +54,7 @@ def newman_topmenu(context):
     app_list = app_dict.values()
     app_list.sort(
         lambda x, y: cz_compare(
-            ugettext( x['name'] ), 
+            ugettext( x['name'] ),
             ugettext( y['name'] )
         )
     )
@@ -73,7 +73,7 @@ def newman_topmenu(context):
 def newman_favorites(context):
     global_favs = []
     applications = newman_topmenu(context)['app_list']
-    for model_name in config.FAVORITE_ITEMS:
+    for model_name in newman_settings.FAVORITE_ITEMS:
         app_name, model_name = model_name.lower().split('.', 1)
         app = None
         for a in applications:
