@@ -4,7 +4,6 @@ from django.db import models
 from django.utils.datastructures import SortedDict
 from django.conf import settings
 
-
 def alter_foreignkey_to_int(table, field, null=True):
     '''
     real alter foreignkeyField to integerField
@@ -32,7 +31,7 @@ def migrate_foreignkey(app_label, model, table, field, orm, null=False):
     }
     db.execute('''
         UPDATE
-            `%(table)s` tbl 
+            `%(table)s` tbl
             JOIN `core_publishable` pub ON (tbl.`%(field)s` = pub.`old_id`)
             JOIN `django_content_type` ct ON (pub.`content_type_id` = ct.`id` AND ct.`app_label` = '%(app_label)s' AND ct.`model` = '%(model)s')
         SET
@@ -60,7 +59,7 @@ def migrate_foreignkey(app_label, model, table, field, orm, null=False):
     )
 
 
-class BasePublishableDataMigration(object):
+class BasePublishableDataMigration:
     depends_on = (
         ('core', '0002_02_publishable_columns'),
     )
@@ -156,14 +155,15 @@ class BasePublishableDataMigration(object):
         pass
 
     def forwards(self, orm):
-        # migrate publishables
-        self.forwards_publishable(orm)
-        # migrate generic relations
-        self.forwards_generic_relations(orm)
-        # migrate placements
-        self.forwards_placements(orm)
-        # migrate related
-        self.forwards_related(orm)
+        print "Old data migration is disabled"
+#        # migrate publishables
+#        self.forwards_publishable(orm)
+#        # migrate generic relations
+#        self.forwards_generic_relations(orm)
+#        # migrate placements
+#        self.forwards_placements(orm)
+#        # migrate related
+#        self.forwards_related(orm)
 
     def forwards_publishable(self, orm):
         '''
@@ -253,7 +253,7 @@ class BasePublishableDataMigration(object):
         '''
         db.execute('''
             UPDATE
-                `core_placement` plac 
+                `core_placement` plac
                 JOIN `core_publishable` pub ON (plac.`target_ct_id` = pub.`content_type_id` AND plac.`target_id` = pub.`old_id`)
                 JOIN `django_content_type` ct ON (pub.`content_type_id` = ct.`id` AND ct.`app_label` = '%(app_label)s' AND  ct.`model` = '%(model)s')
             SET

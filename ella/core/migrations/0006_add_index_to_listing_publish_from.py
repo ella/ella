@@ -2,18 +2,19 @@ from south.db import db
 from django.db import models
 from ella.core.models import *
 import datetime
+from south.v2 import SchemaMigration
 
-class Migration:
-    
+class Migration(SchemaMigration):
+
     def forwards(self, orm):
         "Write your forwards migration here"
         db.create_index('core_listing', ['publish_from'])
-    
-    
+
+
     def backwards(self, orm):
         "Write your backwards migration here"
-    
-    
+
+
     models = {
         'core.placement': {
             'Meta': {'unique_together': "(('publishable','category',),)", 'app_label': "'core'"},
@@ -118,5 +119,5 @@ class Migration:
             'user': ('models.ForeignKey', ["orm['auth.User']"], {'null': 'True', 'verbose_name': "_('User')", 'blank': 'True'})
         }
     }
-    
+
     complete_apps = ['core']

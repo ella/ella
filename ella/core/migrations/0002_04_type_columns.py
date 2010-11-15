@@ -1,8 +1,9 @@
 
 from south.db import db
 from django.db import models
+from south.v2 import SchemaMigration
 
-class Migration:
+class Migration(SchemaMigration):
 
     def forwards(self, orm):
         db.alter_column('core_placement', 'publishable_id', models.ForeignKey(orm['core.Publishable'], null=False))
