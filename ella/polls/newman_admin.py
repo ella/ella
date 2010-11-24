@@ -158,11 +158,12 @@ class QuestionForm(ModelForm):
             # custom field is added when existing-question-form is generated
             inst = kwargs['instance']
             ex_initial = tuple(Choice.objects.filter(question=inst))
-            if not ex_initial:
+            if ex_initial:
+                # FIXME loading SourceText manually
+                for choice in ex_initial:
+                    choice.choice = get_source_text('choice', choice)
+            else:
                 ex_initial = initial
-            #FIXME loading SourceText manualy
-            for choice in ex_initial:
-                choice.choice = get_source_text('choice', choice)
             self.fields['choices'] = fields.ChoiceCustomField(label=_('Choices'), initial=ex_initial, required=False)
         elif new_object:
             #self.initial['choices'] = initial
