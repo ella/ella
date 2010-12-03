@@ -1,39 +1,64 @@
+from xml.sax.saxutils import quoteattr
+
 from django.utils.feedgenerator import Rss201rev2Feed
 from django.utils.xmlutils import SimplerXMLGenerator
+
+CDATA_CHARS = set('&<>')
 
 class MediaElement(object):
     """
     """
-    def __init__(self, tag_name, attrs=None, contents=None, children=None):
+    def __init__(self, tag_name, contents=None, attrs=None):
         self.tag_name = tag_name
-        self.attrs = attrs or {}
         self.contents = contents
-        self.children = children or []
+        self.attrs = attrs or {}
+        self.children = []
+        #self.append = self.children.append
+
+    def append(self, element):
+        self.children.append(element)
 
     def add_to(self, handler):
-        handler.startElement(self.tag_name, self.attrs)
-        for element in self.children:
-            element.add_to(handler)
-        if self.contents is not None:
-            # TODO: CDATA
-            handler.characters(self.contents)
-        handler.endElement(self.tag_name)
+        if self.contents or self.children:
+            handler.startElement(self.tag_name, self.attrs)
+            for element in self.children:
+                element.add_to(handler)
+            if self.contents is not None:
+                handler.characters(self.contents)
+            handler.endElement(self.tag_name)
+        else:
+            handler.addEmptyElement(self.tag_name, self.attrs)
 
-class CDataXMLGenerator(SimplerXMLGenerator):
+class CustomXMLGenerator(SimplerXMLGenerator):
     """
     """
-    def addCDataElement(self, name, contents=None, attrs=None):
+    def addEmptyElement(self, name, attrs=None):
         if attrs is None: attrs = {}
-        self.startElement(name, attrs)
-        if contents is not None:
-            self._write('<![CDATA[' + contents + ']]>')
-        self.endElement(name)
+        self._write('<' + name)
+        for name, value in attrs.iteritems():
+            self._write(' %s=%s' % (name, quoteattr(value)))
+        self._write('/>')
+
+    def characters(self, content):
+        # TODO: figure out how to do this explicitly rather than implicitly
+        if any(c in content for c in CDATA_CHARS):
+            self._write('<![CDATA[' + content + ']]>')
+        else:
+            # can't use super, XMLGenerator is an old style class
+            SimplerXMLGenerator.characters(self, content)
 
 class MediaRSSFeed(Rss201rev2Feed):
     """
     """
-    # TODO: Use CDataXMLGenerator as handler.
-    #def write(self, outfile, encoding): pass
+    def write(self, outfile, encoding):
+        handler = CustomXMLGenerator(outfile, encoding)
+        handler.startDocument()
+        handler.startElement(u'rss', self.rss_attributes())
+        handler.startElement(u'channel', self.root_attributes())
+        self.add_root_elements(handler)
+        self.write_items(handler)
+        self.endChannelElement(handler)
+        handler.endElement(u'rss')
 
     def rss_attributes(self):
         attrs = super(MediaRSSFeed, self).rss_attributes()
@@ -42,6 +67,5 @@ class MediaRSSFeed(Rss201rev2Feed):
 
     def add_item_elements(self, handler, item):
         super(MediaRSSFeed, self).add_item_elements(handler, item)
-        if 'media_list' in item:
-            for media_elem in item['media_list']:
-                media_elem.add_to(handler)
+        for media_elem in item.get('media_list', ()):
+            media_elem.add_to(handler)
