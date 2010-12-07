@@ -5,6 +5,7 @@ from httplib import urlsplit
 
 from django.conf import settings
 from django import template
+from django.utils.feedgenerator import rfc2822_date
 
 from ella.ellaexports.conf import ellaexports_settings
 
@@ -154,3 +155,5 @@ def feed_replace_datetime_czech(value):
             out = first_pass.replace(en, cz)
             break
     return out
+
+register.filter(rfc2822_date)
