@@ -65,9 +65,8 @@ class TestMediaFeed(UnitTestCase):
 
     def test_media_feed(self):
         outfile = StringIO()
-        args = ('title', 'link', 'description')
-        feed = MediaRSSFeed(*args)
-        feed.add_item(*args, pubdate=PUB_DATE)
+        feed = MediaRSSFeed('title', 'link', 'description')
+        feed.add_item('title', 'link', 'description', pubdate=PUB_DATE)
         feed.write(outfile, ENCODING)
         self.assert_equals(outfile.getvalue(), MEDIA_FEED)
         outfile.close()
