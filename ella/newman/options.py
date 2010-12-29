@@ -105,7 +105,7 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
         kwargs['widget'] = widgets.ForeignKeyGenericRawIdWidget
         return db_field.formfield(**kwargs)
 
-    if db_field.name == 'order':
+    if db_field.name == 'order_automagic':
         kwargs['widget'] = widgets.OrderFieldWidget
         return db_field.formfield(**kwargs)
 
