@@ -115,7 +115,7 @@ class PublishableAdmin(admin.ModelAdmin):
         'source': ('name', 'url',),
     }
 
-    inlines = [PlacementInlineAdmin]
+    #inlines = [PlacementInlineAdmin]
 
 
 admin.site.register(HitCount, HitCountAdmin)
