@@ -151,9 +151,19 @@ class EllaAdminOptionsMixin(object):
                     'instance': custom_params.get('instance', None),
                     'model': custom_params.get('model'),
                 })
-                rich_text_field = fields.RichTextAreaField(**kwargs)
-                if css_class:
-                    rich_text_field.widget.attrs['class'] += ' %s' % css_class
+                if 'ella.newman' in settings.INSTALLED_APPS:
+                    rich_text_field = fields.RichTextAreaField(**kwargs)
+                    if css_class:
+                        rich_text_field.widget.attrs['class'] += ' %s' % css_class
+                else:
+                    # remove arguments specific to RichTextAreaField
+                    specific_args = ('model', 'field_name', 'instance', 'syntax_processor_name')
+                    for arg in specific_args:
+                        if arg in kwargs:
+                            del kwargs[arg]
+                    rich_text_field = forms.CharField(**kwargs)
+                    if css_class:
+                        rich_text_field.widget.attrs['class'] += ' %s' % css_class
                 return rich_text_field
 
         if db_field.name in self.raw_id_fields and isinstance(db_field, ForeignKey):
