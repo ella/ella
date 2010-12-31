@@ -41,8 +41,10 @@ class DoubleRenderMiddleware(object):
             c = template.RequestContext(request, {'SECOND_RENDER': True})
             t = template.Template(response.content)
             response.content = t.render(c)
+            response['Content-Length'] = len(response.content)
         except Exception, e:
             log.warning('Failed to double render on (%s)', unicode(e).encode('utf8'))
+
         return response
 
 class CacheMiddleware(DjangoCacheMiddleware):
