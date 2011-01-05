@@ -105,10 +105,6 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
         kwargs['widget'] = widgets.ForeignKeyGenericRawIdWidget
         return db_field.formfield(**kwargs)
 
-    if db_field.name == 'order_automagic':
-        kwargs['widget'] = widgets.OrderFieldWidget
-        return db_field.formfield(**kwargs)
-
     # magic around restricting category choices in all ForeignKey (related to Category) fields
     if is_category_fk(db_field) and 'model' in custom_params:
         kwargs.update({
@@ -120,6 +116,10 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
 
     if db_field.__class__ in formfield_overrides:
         kwargs = dict(formfield_overrides[db_field.__class__], **kwargs)
+        return db_field.formfield(**kwargs)
+
+    if db_field.name == 'order':
+        kwargs['widget'] = widgets.OrderFieldWidget
         return db_field.formfield(**kwargs)
 
     return db_field.formfield(**kwargs)
