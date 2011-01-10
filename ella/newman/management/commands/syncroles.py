@@ -72,13 +72,17 @@ def demoralize(run_transaction=True, verbosity=0):
     # commit changes to database
     commit_work(run_transaction)
 
-def denormalize(run_transaction=True, verbosity=0):
+def denormalize(username_list, run_transaction=True, verbosity=0):
     cur = connection.cursor()
     group_category = dict()
     denormalized = None
     prev_user = None
 
-    for role in CategoryUserRole.objects.select_related().order_by('user').iterator():
+    queryset = CategoryUserRole.objects.select_related().order_by('user')
+    if username_list:
+        queryset = queryset.filter(user__username__in=username_list)
+
+    for role in queryset.iterator():
         # Optimalization -- create dict for set of categories and certain group. Then copy this denorm. data and change only user field.
         key = u'%s_' % role.group
         for cat in role.category.order_by('-title').all():
@@ -135,13 +139,13 @@ class Command(BaseCommand):
             help='If specified synchronization won\'t be performed inside transaction.'),
     )
     help = 'Synchronizes CategoryUserRole objects to DenormalizedCategoryUserRole objects.'
-    args = ""
+    args = "[username ...]"
 
-    def handle(self, *fixture_labels, **options):
+    def handle(self, *username_list, **options):
         global verbosity
         check_settings()
         verbosity = int(options.get('verbosity', 1))
         run_transaction = not options.get('start_transaction', False)
         printv('Run in transaction: %s' % run_transaction)
 
-        denormalize(run_transaction, verbosity)
+        denormalize(username_list, run_transaction, verbosity)

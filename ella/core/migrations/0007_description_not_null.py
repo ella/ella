@@ -1,6 +1,5 @@
 from django.db import models
 from south.db import db
-from south import orm
 from south.v2 import SchemaMigration
 
 class Migration(SchemaMigration):

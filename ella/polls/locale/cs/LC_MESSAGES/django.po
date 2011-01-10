@@ -213,7 +213,7 @@ msgstr "E-mail"
 
 #: models.py:414 migrations/0001_initial.py:112
 msgid "Phone number"
-msgstr "Telefoní číslo"
+msgstr "Telefonní číslo"
 
 #: models.py:415 migrations/0001_initial.py:113
 msgid "Address"
@@ -221,7 +221,7 @@ msgstr "Adresa"
 
 #: models.py:417 migrations/0001_initial.py:115
 msgid "Count guess"
-msgstr "Kolik soutěžících tipujete že se zúčastní?"
+msgstr "Kolik soutěžících tipujete, že se zúčastní?"
 
 #: models.py:418 migrations/0001_initial.py:116
 msgid "Winner"
