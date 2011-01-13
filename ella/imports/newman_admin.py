@@ -2,6 +2,7 @@ import logging
 
 from django import http
 from django.conf.urls.defaults import patterns, url
+from django.contrib.admin import widgets
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
 
@@ -44,6 +45,11 @@ class ServerAdmin(newman.NewmanModelAdmin):
             return http.HttpResponse('OK')
         except Exception, e:
             return http.HttpResponse('KO ' + str(e))
+
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        if db_field.name == 'category':
+            kwargs['required'] = False
+        return super(ServerAdmin, self).formfield_for_dbfield(db_field, **kwargs)
 
 class ServerItemAdmin(newman.NewmanModelAdmin):
     list_display = ('title', 'server', 'updated','priority')
