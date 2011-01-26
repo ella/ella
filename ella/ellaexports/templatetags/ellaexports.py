@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import hashlib
+import random
 from datetime import datetime
 from httplib import urlsplit
 
@@ -155,5 +156,11 @@ def feed_replace_datetime_czech(value):
             out = first_pass.replace(en, cz)
             break
     return out
+
+@register.filter
+def shuffle(value):
+    result = list(value)
+    random.shuffle(result)
+    return result
 
 register.filter(rfc2822_date)
