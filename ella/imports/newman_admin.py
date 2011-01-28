@@ -2,7 +2,6 @@ import logging
 
 from django import http
 from django.conf.urls.defaults import patterns, url
-from django.contrib.admin import widgets
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
 
