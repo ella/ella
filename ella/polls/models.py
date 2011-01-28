@@ -279,6 +279,9 @@ class Choice(models.Model):
             p = int((100.0/t)*self.votes)
         return p
 
+    def get_percentage_bar_width(self, max_width_percent=80):
+        return self.get_percentage() / 100.0 * max_width_percent
+
     def __unicode__(self):
         return mark_safe(u'%s' % self.choice)
 
