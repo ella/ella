@@ -273,6 +273,9 @@ class Choice(models.Model):
         """
         Compute and return percentage representation of choice object to its question's total votes
         """
+        if hasattr(self, 'percentage'):
+            return self.percentage
+
         t = get_cached_object(Question, pk=self.question_id).get_total_votes()
         p = 0
         if self.votes:
