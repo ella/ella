@@ -317,7 +317,10 @@ class FormatedPhoto(models.Model):
         - Generates new file.
         """
         self.remove_file()
-        self.generate(save=False)
+        if not self.image:
+            self.generate(save=False)
+        else:
+            self.image.name = self.file(relative=True)
         super(FormatedPhoto, self).save(**kwargs)
 
     def delete(self):
