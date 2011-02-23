@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from itertools import chain
+from itertools import chain, cycle
 
 from django.shortcuts import render_to_response
 from django.utils.translation import ugettext, ugettext_lazy as _
@@ -302,6 +302,22 @@ class MyRadioSelect(forms.RadioSelect):
     def render(self, name, value, attrs=None, choices=()):
         return self.get_renderer(name, value, attrs, choices)
 
+def fudge_choice_percentages(choices):
+    percent_sum = 0
+    choice_list = list(choices)
+    for choice in choice_list:
+        choice.percentage = choice.get_percentage()
+        percent_sum += choice.percentage
+
+    choice_iter = cycle(choice_list)
+    step = cmp(100, percent_sum)
+    while percent_sum != 100:
+        choice = choice_iter.next()
+        choice.percentage += step
+        percent_sum += step
+
+    return choice_list
+
 def QuestionForm(question):
     if  question.allow_multiple:
         choice_field = forms.ModelMultipleChoiceField(
@@ -325,8 +341,9 @@ def QuestionForm(question):
         def choices(self):
             field = self['choice']
             # TODO: move choice percentage to question and use it here!!
-            for choice, input in  zip(field.field.queryset, field.as_widget(field.field.widget)):
-                yield (choice, input)
+            choice_list = fudge_choice_percentages(field.field.queryset)
+            for choice, input in  zip(choice_list, field.as_widget(field.field.widget)):
+                yield choice, input
 
     return _QuestionForm
 
