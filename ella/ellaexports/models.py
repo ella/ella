@@ -19,6 +19,7 @@ class Export(models.Model):
     category = models.ForeignKey(Category, verbose_name=_('Category'))
     use_objects_in_category = models.BooleanField(_('Use objects listed in category'))
     title = models.CharField(_('Title'), max_length=255)
+    link = models.URLField(_('Link'), max_length=255, blank=True)
     description = models.TextField(_('Description'), blank=True)
     slug = models.SlugField(_('Slug'), max_length=255)
     max_visible_items = models.IntegerField(_('Maximum Visible Items'))
@@ -30,6 +31,8 @@ class Export(models.Model):
 
     @property
     def url(self):
+        if self.link:
+            return self.link
         if not self.slug:
             return ''
         url = reverse('ella_exports_by_slug', args=(self.slug,))
@@ -59,6 +62,7 @@ class Export(models.Model):
 
 class AggregatedExport(models.Model):
     title = models.CharField(_('Title'), max_length=255)
+    link = models.URLField(_('Link'), max_length=255, blank=True)
     description = models.TextField(_('Description'), blank=True)
     slug = models.SlugField(_('Slug'), max_length=255)
     exports = models.ManyToManyField(Export, verbose_name=_('Exports'))
