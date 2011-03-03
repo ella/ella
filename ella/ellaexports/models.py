@@ -24,6 +24,7 @@ class Export(models.Model):
     slug = models.SlugField(_('Slug'), max_length=255)
     max_visible_items = models.IntegerField(_('Maximum Visible Items'))
     photo_format = models.ForeignKey(Format, verbose_name=_('Photo format'))
+
     objects = ExportManager()
 
     def __unicode__(self):
