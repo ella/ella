@@ -41,7 +41,7 @@ class ExportItemizer(object):
     One can iterate over an ExportItemizer instance.
     """
 
-    def __init__(self, slug=None, category=None, data_formatter=None):
+    def __init__(self, slug=None, category=None, data_formatter=None, photo_format=None):
         """
         Creates ExportItemizer instance. Export items can be queried by slug
         or by category parameters.
@@ -61,6 +61,7 @@ class ExportItemizer(object):
         self.data_formatter = data_formatter
         if not data_formatter:
             self.data_formatter = Export.objects.get_export_data #default data formatter
+        self.photo_format = photo_format
 
         if slug:
             self.exports = Export.objects.filter(slug=slug)
@@ -219,7 +220,8 @@ class ExportItemizer(object):
         if pub.photo:
             formated = None
             try:
-                formated = pub.photo.get_formated_photo(export.photo_format.name)
+                photo_format = self.photo_format or export.photo_format
+                formated = pub.photo.get_formated_photo(photo_format.name)
             except Format.DoesNotExist:
                 pass
             #pub.export_thumbnail_url = u'%s%s' % (settings.MEDIA_URL, formated.url)
@@ -308,12 +310,13 @@ class ExportItemizer(object):
 
 class ExportManager(models.Manager):
 
-    def get_items_for_slug(self, slug, datetime_from=None, max_visible_items=None):
+    def get_items_for_slug(self, slug, datetime_from=None, max_visible_items=None,
+                           photo_format=None):
         from ella.ellaexports.models import Export
         exports = Export.objects.filter(slug=slug)
         if not exports:
             return list()
-        e = ExportItemizer(slug=slug)
+        e = ExportItemizer(slug=slug, photo_format=photo_format)
         if datetime_from:
             e.datetime_from = datetime_from
         else:
@@ -334,9 +337,10 @@ class ExportManager(models.Manager):
             category=None,
             export=None,
             datetime_from=None,
-            max_visible_items=None
+            max_visible_items=None,
+            photo_format=None
         ):
-        e = ExportItemizer(category=category)
+        e = ExportItemizer(category=category, photo_format=photo_format)
         if not datetime_from:
             e.datetime_from = datetime.now()
         else:
