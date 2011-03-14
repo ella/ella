@@ -559,7 +559,7 @@ input.js-poll-choice-points {
 
 /* CUSTOM FORM IMPROVEMENTS */
 #id_title { font: normal 140% "Trebuchet MS", arial, sans-serif; width: 70%; }
-#id_upper_title, #id_slug { font-size: 90%; width: 70%; color: #666; }
+#id_upper_title, #id_slug, #id_link { font-size: 90%; width: 70%; color: #666; }
 
 /* db_template form */
 #dbtemplate_form #id_name { font: normal 140% "Trebuchet MS", arial, sans-serif; width: 90%; }
