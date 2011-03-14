@@ -82,9 +82,6 @@ class PhotoOptions(EllaAdminOptionsMixin, EllaModelAdmin):
             return thumb_url(request, *url.split('/')[-3:-1])
         return super(PhotoOptions, self).__call__(request, url)
 
-    def queryset(self, request):
-        return super(PhotoOptions, self).queryset(request).filter(width__gt=photos_settings.PHOTO_MIN_WIDTH, height__gt=photos_settings.PHOTO_MIN_HEIGHT)
-
 
 class FormatedPhotoOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
     base_form = FormatedPhotoForm
