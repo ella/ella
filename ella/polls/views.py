@@ -394,9 +394,12 @@ RESULT_FIELD = 'results'
 class QuizWizard(FormWizard):
     def __init__(self, quiz):
         form_list = [ QuestionForm(q) for q in quiz.questions ]
+        super(QuizWizard, self).__init__(form_list)
         self.quiz = quiz
         self.extra_context = {'object' : quiz, 'question' : quiz.questions[0], 'category' : quiz.category,}
-        super(QuizWizard, self).__init__(form_list)
+        # ?? ?? ?? ??
+        #super(QuizWizard, self).__init__(form_list)
+        # ?? ?? ?? ??
 
     def get_template(self, step):
         return get_templates_from_placement('step.html', self.extra_context['placement'])
