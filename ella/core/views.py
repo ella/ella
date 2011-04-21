@@ -7,11 +7,12 @@ from django.conf import settings
 from django.template.defaultfilters import slugify
 from django.db import models
 from django.http import Http404
+from django.shortcuts import render_to_response
 
 from ella.core.models import Listing, Category, Placement
 from ella.core.cache import get_cached_object_or_404, cache_this
 from ella.core import custom_urls
-from ella.core.cache.template_loader import render_to_response
+#from ella.core.cache.template_loader import render_to_response
 from ella.core.conf import core_settings
 
 __docformat__ = "restructuredtext en"
