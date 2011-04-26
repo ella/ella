@@ -251,6 +251,7 @@ class NewmanSite(AdminSite):
             else:
                 message = ""
             return self.display_login_form(request, message)
+            #return self.login(request)
 
         # Check that the user accepts cookies.
         if not request.session.test_cookie_worked():
@@ -299,6 +300,20 @@ class NewmanSite(AdminSite):
                 return HttpResponseRedirect(next_path)
             else:
                 return self.display_login_form(request, ERROR_MESSAGE)
+
+    def display_login_form(self, request, error_message='', extra_context=None):
+        request.session.set_test_cookie()
+        context = {
+            'title': _('Log in'),
+            'app_path': request.get_full_path(),
+            'error_message': error_message,
+            'root_path': self.root_path,
+        }
+        context.update(extra_context or {})
+        context_instance = template.RequestContext(request, current_app=self.name)
+        return render_to_response(self.login_template or 'admin/login.html', context,
+            context_instance=context_instance
+        )
 
     def norole(self, request, user):
         context = {

@@ -1,4 +1,5 @@
             <form class="js-form" action="{% url newman:save-filters %}" method="post">
+                {% csrf_token %}
                 <fieldset>
                     <legend>{% trans "Category-filter" %}</legend>
                     {{ site_filter_form.sites }}

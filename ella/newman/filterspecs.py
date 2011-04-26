@@ -14,7 +14,7 @@ from ella.newman.permission import permission_filtered_model_qs
 log = logging.getLogger('ella.newman')
 
 class CommonFilter(filterspecs.FilterSpec):
-    def __init__(self, f, request, params, model, model_admin):
+    def __init__(self, f, request, params, model, model_admin, field_path=None):
         self.state = 0
         self.params = params
         self.model = model
@@ -127,7 +127,7 @@ class CommonFilter(filterspecs.FilterSpec):
 
 class CustomFilterSpec(CommonFilter):
     """ custom defined FilterSpec """
-    def __init__(self, f, request, params, model, model_admin):
+    def __init__(self, f, request, params, model, model_admin, field_path=None):
         self.state = 0
         self.params = params
         self.model = model

@@ -38,6 +38,7 @@
         <h3><span>{% trans "Report Error" %}</span></h3>
         <div class="cnt">
             <form class="js-form js-reset-on-submit" action="{% url newman:err-report %}" method="post">
+                {% csrf_token %}
                 <label for="id_err_subject" class="required">{% trans "Subject" %} <span class="help"></span></label>
                 <input id="id_err_subject" name="err_subject" type="text" />
                 <label for="id_err_message" class="required">{% trans "Message" %}</label>

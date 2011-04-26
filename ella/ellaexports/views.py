@@ -2,13 +2,13 @@ from datetime import datetime
 
 from django.http import Http404
 from django.conf import settings
-from django.shortcuts import render_to_response
+#from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.utils.translation import ugettext as _
 
 from ella.core.models import Category
 from ella.core.cache import get_cached_object_or_404
-#from ella.core.cache.template_loader import render_to_response
+from ella.core.cache.template_loader import render_to_response
 from ella.core.views import EllaCoreView
 from ella.ellaexports.models import Export, AggregatedExport
 

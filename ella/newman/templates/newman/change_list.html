@@ -90,6 +90,7 @@
     <div class="js-hashadr-container js-app-{{ cl.opts }}" id="changelist">
 
         <form class="js-form js-dyn-adr" action="" method="post"{% if cl.formset.is_multipart %} enctype="multipart/form-data"{% endif %}>
+            {% csrf_token %}
             {% if cl.formset %}
                 {{ cl.formset.management_form }}
             {% endif %}
