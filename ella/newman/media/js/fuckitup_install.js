@@ -222,6 +222,12 @@ var NewmanTextAreaStandardToolbar = function () {
                 error_thrown
             ].join('');
         }
+        
+        var csrf_token = $('input[name=csrfmiddlewaretoken]').val();
+        //alert(csrf_token);
+        var csrf_data = [ 'csrfmiddlewaretoken', '=', encodeURIComponent(csrf_token) ].join('');
+        var preview_data = [ PREVIEW_VARIABLE, '=', encodeURIComponent(me.$text_area.val()) ].join('');
+        var final_data = [ preview_data, '&', csrf_data ].join('')
 
         $.ajax( 
             {
@@ -229,7 +235,8 @@ var NewmanTextAreaStandardToolbar = function () {
                 async: true,
                 cache: false,
                 url: PREVIEW_URL,
-                data: [ PREVIEW_VARIABLE, '=', encodeURIComponent(me.$text_area.val()) ].join(''),
+                //data: [ PREVIEW_VARIABLE, '=', encodeURIComponent(me.$text_area.val()) ].join(''),
+                data: final_data,
                 success: success_handler,
                 error: error_handler
             } 
