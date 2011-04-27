@@ -15,6 +15,8 @@ from django.utils.translation import ugettext as _
 from django.utils.translation import ngettext
 from django.utils.encoding import force_unicode
 from django.conf import settings
+from django.db import connection
+from django.db import router
 try:
     set
 except NameError:
@@ -445,7 +447,11 @@ class XModelAdmin(ModelAdmin):
         #deleted_objects = [mark_safe(u'%s: <a href="../../%s/">%s</a>' % (escape(force_unicode(capfirst(opts.verbose_name))), object_id, escape(obj))), []]
         #perms_needed = set()
         #get_deleted_objects(deleted_objects, perms_needed, request.user, obj, opts, 1, self.admin_site)
-        (deleted_objects, perms_needed) = get_deleted_objects((obj,), opts, request.user, self.admin_site, levels_to_root=4)
+        #(deleted_objects, perms_needed) = get_deleted_objects((obj,), opts, request.user, self.admin_site, levels_to_root=4)
+
+        # Django 1.3
+        using = router.db_for_write(self.model)
+        (deleted_objects, perms_needed, protected) = get_deleted_objects((obj,), opts, request.user, self.admin_site, using)
 
         if request.POST: # The user has already confirmed the deletion.
             if perms_needed:
