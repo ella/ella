@@ -18,6 +18,7 @@ DO_URL_CHECK = False
 IMAGE_URL_PREFIX = ''
 CUSTOM_SUBDIR = ''
 UPLOAD_TO = CUSTOM_SUBDIR and 'photos/%s/%%Y/%%m/%%d' % CUSTOM_SUBDIR or 'photos/%Y/%m/%d'
+EMPTY_IMAGE_SITE_PREFIX = ''
 
 TYPE_EXTENSION = {
     'JPEG': '.jpg',

@@ -222,7 +222,7 @@ class Format(models.Model):
             'height' : self.max_height,
             'filename' : 'img/empty/%s.png' % (self.name),
             'format' : self,
-            'url' : settings.MEDIA_URL + 'img/empty/%s.png' % (self.name),
+            'url' : settings.STATIC_URL + photos_settings.EMPTY_IMAGE_SITE_PREFIX + 'img/empty/%s.png' % (self.name),
         }
         return out
 
