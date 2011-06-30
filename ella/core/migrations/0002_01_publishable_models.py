@@ -9,7 +9,7 @@ class Migration:
     depends_on = (
         ('photos', '0001_initial'),
     )
- 
+
     def forwards(self, orm):
 
         # Adding model 'Publishable'

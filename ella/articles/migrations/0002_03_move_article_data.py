@@ -13,13 +13,13 @@ class Migration(BasePublishableDataMigration):
     # TODO:
     # this is only temporary, it should be constructed dynamically
     # from each migration in installed_apps, that contains run_before
-    _depends_on = (
-        ('recepty.recipes', 'recipes', '0001_initial'),
-    )
-    depends_on = []
-    for app, label, migration in _depends_on:
-        if app in settings.INSTALLED_APPS:
-            depends_on.append((label, migration))
+#    _depends_on = (
+#        ('recepty.recipes', 'recipes', '0001_initial'),
+#    )
+#    depends_on = []
+#    for app, label, migration in _depends_on:
+#        if app in settings.INSTALLED_APPS:
+#            depends_on.append((label, migration))
 
     models = dict.copy(BasePublishableDataMigration.models)
     models.update(

@@ -1,5 +1,5 @@
 Django==1.1.1
-south
+south>=0.7
 anyjson
 
 feedparser

@@ -4,7 +4,6 @@ from django.db import models
 from django.utils.datastructures import SortedDict
 from django.conf import settings
 
-
 def alter_foreignkey_to_int(table, field, null=True):
     '''
     real alter foreignkeyField to integerField
@@ -32,7 +31,7 @@ def migrate_foreignkey(app_label, model, table, field, orm, null=False):
     }
     db.execute('''
         UPDATE
-            `%(table)s` tbl 
+            `%(table)s` tbl
             JOIN `core_publishable` pub ON (tbl.`%(field)s` = pub.`old_id`)
             JOIN `django_content_type` ct ON (pub.`content_type_id` = ct.`id` AND ct.`app_label` = '%(app_label)s' AND ct.`model` = '%(model)s')
         SET
@@ -60,7 +59,7 @@ def migrate_foreignkey(app_label, model, table, field, orm, null=False):
     )
 
 
-class BasePublishableDataMigration(object):
+class BasePublishableDataMigration:
     depends_on = (
         ('core', '0002_02_publishable_columns'),
     )
@@ -156,14 +155,15 @@ class BasePublishableDataMigration(object):
         pass
 
     def forwards(self, orm):
+        print "Old data migration is disabled"
         # migrate publishables
         self.forwards_publishable(orm)
         # migrate generic relations
-        self.forwards_generic_relations(orm)
+#        self.forwards_generic_relations(orm)
         # migrate placements
-        self.forwards_placements(orm)
+#        self.forwards_placements(orm)
         # migrate related
-        self.forwards_related(orm)
+#        self.forwards_related(orm)
 
     def forwards_publishable(self, orm):
         '''
@@ -173,34 +173,34 @@ class BasePublishableDataMigration(object):
         '''
 
         # move the data
-        db.execute('''
-            INSERT INTO
-                `core_publishable` (old_id, content_type_id, %(cols_to)s)
-            SELECT
-                a.id, ct.id, %(cols_from)s
-            FROM
-                `%(table)s` a, `django_content_type` ct
-            WHERE
-                ct.`app_label` = '%(app_label)s' AND  ct.`model` = '%(model)s';
-            ''' % self.substitute
-        )
+#        db.execute('''
+#            INSERT INTO
+#                `core_publishable` (old_id, content_type_id, %(cols_to)s)
+#            SELECT
+#                a.id, ct.id, %(cols_from)s
+#            FROM
+#                `%(table)s` a, `django_content_type` ct
+#            WHERE
+#                ct.`app_label` = '%(app_label)s' AND  ct.`model` = '%(model)s';
+#            ''' % self.substitute
+#        )
 
         # add link to parent
         db.add_column(self.table, 'publishable_ptr', models.IntegerField(null=True, blank=True))
 
         # update the link
-        db.execute('''
-            UPDATE
-                `core_publishable` pub
-                JOIN `%(table)s` art ON (art.`id` = pub.`old_id`)
-                JOIN `django_content_type` ct ON (pub.`content_type_id` = ct.`id` AND ct.`app_label` = '%(app_label)s' AND ct.`model` = '%(model)s')
-            SET
-                art.`publishable_ptr` = pub.`id`;
-            ''' % self.substitute
-        )
+#        db.execute('''
+#            UPDATE
+#                `core_publishable` pub
+#                JOIN `%(table)s` art ON (art.`id` = pub.`old_id`)
+#                JOIN `django_content_type` ct ON (pub.`content_type_id` = ct.`id` AND ct.`app_label` = '%(app_label)s' AND ct.`model` = '%(model)s')
+#            SET
+#                art.`publishable_ptr` = pub.`id`;
+#            ''' % self.substitute
+#        )
 
         # remove constraints from all models reffering to us
-        self.alter_self_foreignkeys(orm)
+#        self.alter_self_foreignkeys(orm)
 
         # drop primary key
         db.alter_column(self.table, 'id', models.IntegerField())
@@ -208,19 +208,19 @@ class BasePublishableDataMigration(object):
 
         # replace it with a link to parent
         db.rename_column(self.table, 'publishable_ptr', 'publishable_ptr_id')
-        db.alter_column(self.table, 'publishable_ptr_id', models.ForeignKey(orm['core.Publishable'], null=False, blank=False, unique=True))
+        db.alter_column(self.table, 'publishable_ptr_id', models.ForeignKey(orm['core.Publishable'], unique=True))
         db.create_primary_key(self.table, 'publishable_ptr_id')
 
         #  make it a FK
-        db.execute(
-            'ALTER TABLE `%s` ADD CONSTRAINT `publishable_ptr_id_refs_id_%s` FOREIGN KEY (`publishable_ptr_id`) REFERENCES `core_publishable` (`id`);' % (
-                self.table,
-                abs(hash((self.table, 'core_publishable'))),
-            )
-        )
+#        db.execute(
+#            'ALTER TABLE `%s` ADD CONSTRAINT `publishable_ptr_id_refs_id_%s` FOREIGN KEY (`publishable_ptr_id`) REFERENCES `core_publishable` (`id`);' % (
+#                self.table,
+#                abs(hash((self.table, 'core_publishable'))),
+#            )
+#        )
 
         # move data, that were pointing to us
-        self.move_self_foreignkeys(orm)
+#        self.move_self_foreignkeys(orm)
 
         # drop duplicate columns
         db.delete_column(self.table, 'id')
@@ -253,7 +253,7 @@ class BasePublishableDataMigration(object):
         '''
         db.execute('''
             UPDATE
-                `core_placement` plac 
+                `core_placement` plac
                 JOIN `core_publishable` pub ON (plac.`target_ct_id` = pub.`content_type_id` AND plac.`target_id` = pub.`old_id`)
                 JOIN `django_content_type` ct ON (pub.`content_type_id` = ct.`id` AND ct.`app_label` = '%(app_label)s' AND  ct.`model` = '%(model)s')
             SET

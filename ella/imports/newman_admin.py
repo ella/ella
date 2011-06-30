@@ -45,6 +45,11 @@ class ServerAdmin(newman.NewmanModelAdmin):
         except Exception, e:
             return http.HttpResponse('KO ' + str(e))
 
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        if db_field.name == 'category':
+            kwargs['required'] = False
+        return super(ServerAdmin, self).formfield_for_dbfield(db_field, **kwargs)
+
 class ServerItemAdmin(newman.NewmanModelAdmin):
     list_display = ('title', 'server', 'updated','priority')
     list_filter = ('server', 'updated',)

@@ -6,140 +6,145 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ella-exports\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-06-16 09:34+0200\n"
-"PO-Revision-Date: 2010-06-17 10:37+0100\n"
-"Last-Translator: Jan Seifert <jan.seifert@centrumholdings.com>\n"
+"POT-Creation-Date: 2011-03-03 12:38+0100\n"
+"PO-Revision-Date: 2011-03-03 13:36+0100\n"
+"Last-Translator: Jan Seifert <jan.seifert@fotkyzcest.net>\n"
 "Language-Team: Ellagruppe <ella.project@gmail.com>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+"X-Poedit-Language: Czech\n"
+"X-Poedit-Country: CZECH REPUBLIC\n"
+"X-Poedit-SourceCharset: utf-8\n"
 
-#: templates/newman/edit_inline/exportmeta_inline.html:41
-msgid "Show additional fields"
-msgstr "Zobrazit podrobnosti"
-
-#: templates/newman/edit_inline/exportmeta_inline.html:42
-msgid "Hide additional fields"
-msgstr "Skrýt podrobnosti"
-
-#: models.py:24
+#: models.py:19
 msgid "Category"
 msgstr "Kategorie"
 
-#: models.py:25
+#: models.py:20
 msgid "Use objects listed in category"
-msgstr ""
+msgstr "Použít objekty v kategorii"
 
-#: models.py:26
-#: models.py:66
-#: models.py:90
+#: models.py:21
+#: models.py:64
+#: models.py:89
 msgid "Title"
 msgstr "Název"
 
-#: models.py:27
-#: models.py:67
-#: models.py:92
+#: models.py:22
+#: models.py:65
+msgid "Link"
+msgstr "Odkaz"
+
+#: models.py:23
+#: models.py:66
+#: models.py:91
 msgid "Description"
 msgstr "Popis"
 
-#: models.py:28
-#: models.py:68
+#: models.py:24
+#: models.py:67
 msgid "Slug"
-msgstr ""
+msgstr "Slug"
 
-#: models.py:29
+#: models.py:25
 msgid "Maximum Visible Items"
 msgstr "Počet viditelných pozic"
 
-#: models.py:30
+#: models.py:26
 msgid "Photo format"
 msgstr "Formát fotky"
 
-#: models.py:61
-#: models.py:124
-#: newman_admin.py:83
-#: newman_admin.py:99
-#: newman_admin.py:145
-#: timeline.py:50
+#: models.py:59
+#: models.py:123
+#: newman_admin.py:97
+#: newman_admin.py:113
+#: newman_admin.py:164
+#: timeline.py:37
 msgid "Export"
 msgstr "Export"
 
-#: models.py:62
-#: models.py:69
+#: models.py:60
+#: models.py:68
 msgid "Exports"
 msgstr "Exporty"
 
-#: models.py:80
+#: models.py:79
 msgid "Aggregated export"
 msgstr "Sdružený export"
 
-#: models.py:81
+#: models.py:80
 msgid "Aggregated  exports"
 msgstr "Sdružené exporty"
 
-#: models.py:89
+#: models.py:88
 msgid "Publishable object"
 msgstr "Publikovatelný objekt"
 
-#: models.py:91
+#: models.py:90
 msgid "Photo"
 msgstr "Fotka"
 
-#: models.py:95
+#: models.py:94
 msgid "Redefined export"
 msgstr "Předefinovaný export"
 
-#: models.py:114
-#: models.py:123
+#: models.py:113
+#: models.py:122
 msgid "Export meta"
 msgstr "Úprava exportu"
 
-#: models.py:115
+#: models.py:114
 msgid "Export metas"
 msgstr "Úpravy exportů"
 
-#: models.py:136
+#: models.py:135
 msgid "Export Position"
 msgstr "Exportní pozice"
 
-#: models.py:137
+#: models.py:136
 msgid "Export Positions"
 msgstr "Exportní pozice"
 
-#: newman_admin.py:65
+#: newman_admin.py:23
+msgid "Visible to must be later than visible from."
+msgstr "Viditelné do musí být větší než viditelné od."
+
+#: newman_admin.py:79
 msgid "Export meta options"
 msgstr "Nepovinné předefinování titulku, popisu, fotky"
 
-#: newman_admin.py:77
-#: newman_admin.py:92
-#: newman_admin.py:132
+#: newman_admin.py:91
+#: newman_admin.py:106
+#: newman_admin.py:151
 msgid "Visible From"
 msgstr "Viditelné od"
 
-#: newman_admin.py:78
-#: newman_admin.py:93
-#: newman_admin.py:136
+#: newman_admin.py:92
+#: newman_admin.py:107
+#: newman_admin.py:155
 msgid "Visible To"
 msgstr "Viditelné do"
 
-#: newman_admin.py:140
+#: newman_admin.py:159
 msgid "Position"
 msgstr "Pozice"
 
-#: timeline.py:53
+#: timeline.py:38
 msgid "From"
-msgstr ""
+msgstr "Od"
 
-#: timeline.py:54
-msgid "To"
-msgstr ""
-
-#: views.py:95
+#: views.py:93
 msgid "Export with given slug does not exist."
-msgstr ""
+msgstr "Export neexistuje."
 
-msgid "Ellaexports"
-msgstr "Exporty"
+#~ msgid "Show additional fields"
+#~ msgstr "Zobrazit podrobnosti"
 
+#~ msgid "Hide additional fields"
+#~ msgstr "Skrýt podrobnosti"
+
+#~ msgid "Ellaexports"
+#~ msgstr "Exporty"

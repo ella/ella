@@ -10,6 +10,7 @@ from ella.core.models import Category
 from ella.core.cache import get_cached_object_or_404
 from ella.core.cache.template_loader import render_to_response
 from ella.core.views import EllaCoreView
+from ella.photos.models import Format
 from ella.ellaexports.models import Export, AggregatedExport
 
 
@@ -86,8 +87,17 @@ class MrssExport(EllaCoreView):
         items = tuple()
         context = dict()
 
+        photo_format = request.GET.get('photo_format', None)
+        if photo_format:
+            try:
+                photo_format = get_cached_object_or_404(Format, name=photo_format, sites=settings.SITE_ID)
+            except ValueError, Format.DoesNotExist:
+                raise Http404
+        else:
+            photo_format = None
+
         if slug:
-            items = Export.objects.get_items_for_slug(slug=slug)
+            items = Export.objects.get_items_for_slug(slug=slug, photo_format=photo_format)
             try:
                 export_object = Export.objects.get(slug=slug)
             except Export.DoesNotExist:
@@ -97,8 +107,12 @@ class MrssExport(EllaCoreView):
                 cat = get_cached_object_or_404(Category, tree_path=category, site__id=settings.SITE_ID)
             else:
                 cat = get_cached_object_or_404(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
-            items = Export.objects.get_items_for_category(category=cat)
+            items = Export.objects.get_items_for_category(category=cat, photo_format=photo_format)
             export_object = Export.objects.get(category=cat)
+
+        # Ugly hack how to force photo format passed in GET params
+        if photo_format:
+            export_object.photo_format = photo_format
 
         title = export_object.title
         link = export_object.url

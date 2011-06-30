@@ -222,7 +222,7 @@ class Format(models.Model):
             'height' : self.max_height,
             'filename' : 'img/empty/%s.png' % (self.name),
             'format' : self,
-            'url' : settings.MEDIA_URL + 'img/empty/%s.png' % (self.name),
+            'url' : settings.STATIC_URL + photos_settings.EMPTY_IMAGE_SITE_PREFIX + 'img/empty/%s.png' % (self.name),
         }
         return out
 
@@ -254,7 +254,7 @@ class FormatedPhoto(models.Model):
     @property
     def url(self):
         "Returns url of the photo file."
-        if photos_settings.IMAGE_URL_PREFIX:
+        if photos_settings.IMAGE_URL_PREFIX and not path.exists(self.image.path):
             # custom URL prefix (debugging purposes)
             return photos_settings.IMAGE_URL_PREFIX.rstrip('/') + '/' + self.image.name
 
@@ -317,7 +317,10 @@ class FormatedPhoto(models.Model):
         - Generates new file.
         """
         self.remove_file()
-        self.generate(save=False)
+        if not self.image:
+            self.generate(save=False)
+        else:
+            self.image.name = self.file(relative=True)
         super(FormatedPhoto, self).save(**kwargs)
 
     def delete(self):

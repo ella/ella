@@ -273,11 +273,17 @@ class Choice(models.Model):
         """
         Compute and return percentage representation of choice object to its question's total votes
         """
+        if hasattr(self, 'percentage'):
+            return self.percentage
+
         t = get_cached_object(Question, pk=self.question_id).get_total_votes()
         p = 0
         if self.votes:
             p = int((100.0/t)*self.votes)
         return p
+
+    def get_percentage_bar_width(self, max_width_percent=80):
+        return self.get_percentage() / 100.0 * max_width_percent
 
     def __unicode__(self):
         return mark_safe(u'%s' % self.choice)

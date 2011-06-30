@@ -336,6 +336,7 @@ log_polls = new LoggingLib('POLLS:', false);
         function recount_inline_items($inline) {
             var no_items = 0;
             var no_re = /result_set-\d+-/;
+            var row_class = /row\d+/;
 
             function process_row() {
                 var actual_result_set = ['result_set-', no_items, '-'].join('');
@@ -356,7 +357,7 @@ log_polls = new LoggingLib('POLLS:', false);
 
             $inline.find('tr').each( function() {
                 $(this).find('*').each( process_row );
-                if ($(this).find('th').length == 0) {
+                if ($(this).find('th').length == 0 && row_class.test($(this).attr('class'))) {
                     no_items ++;
                 }
             });
