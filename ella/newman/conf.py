@@ -92,5 +92,8 @@ EDITOR_PREVIEW_TEMPLATE = None
 # Widgets
 MEDIA_PREFIX = getattr(settings, 'MEDIA_URL') + 'newman_media/'
 
+# tagging
+MAX_TAGS_INLINE = 3
+
 newman_settings = Settings('ella.newman.conf', 'NEWMAN')
 
