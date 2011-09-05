@@ -91,7 +91,7 @@ class RSSTopCategoryListings(Feed):
         if getattr(item.target, 'photo'):
             if item.target.photo.image.name.endswith('.jpg'):
                 return 'image/jpeg'
-            elif item.target.photo.image.name.endswith('.jpg'):
+            elif item.target.photo.image.name.endswith('.png'):
                 return 'image/png'
             return 'image/gif'
 
