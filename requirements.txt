@@ -7,6 +7,7 @@ PIL
 threadedcomments
 django-tagging
 
+nose==1.1.2
+djangosanetesting==0.5.10
 
-git+http://github.com/Almad/django-sane-testing.git#egg=djangosanetesting
 git+http://github.com/ella/django-markup.git#egg=djangomarkup
