@@ -1,3 +1,5 @@
+nose==1.1.2
+djangosanetesting==0.5.10
 Django==1.1.1
 south>=0.7
 anyjson
@@ -6,8 +8,5 @@ feedparser
 PIL
 threadedcomments
 django-tagging
-
-nose==1.1.2
-djangosanetesting==0.5.10
 
 git+http://github.com/ella/django-markup.git#egg=djangomarkup
