@@ -13,6 +13,7 @@ from django.utils.text import truncate_words
 from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 
+from ella.core.conf import core_settings
 from ella.core.models import Listing
 from ella.photos.models import Photo
 from djangomarkup.widgets import RichTextAreaWidget
@@ -354,6 +355,7 @@ class ListingCustomWidget(forms.SelectMultiple):
         cx['id_prefix'] = name
         cx['verbose_name_publish_from'] = Listing._meta.get_field('publish_from').verbose_name.__unicode__()
         cx['choices'] = choices or self.choices
+        cx['render_commercial_switch'] = core_settings.LISTING_USE_COMMERCIAL_FLAG
         if type(value) == dict:
             # modifying existing object, so value is dict containing Listings and selected category IDs
             # cx['selected'] = Category.objects.filter(pk__in=value['selected_categories']).values('id') or []
