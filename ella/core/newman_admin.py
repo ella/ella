@@ -255,10 +255,6 @@ class PlacementInlineAdmin(newman.NewmanTabularInline):
 
     form = PlacementForm
     formset = PlacementInlineFormset
-
-    def __init__(self, *args, **kwargs):
-        # self.render_commercial_switch = newman.conf.LISTING_SHOW_COMMERCIAL_SWITCH
-        return super(PlacementInlineAdmin, self).__init__(*args, **kwargs)
     '''
     ct_field = 'target_ct'
     ct_fk_field = 'target_id'
