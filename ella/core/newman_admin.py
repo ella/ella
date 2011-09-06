@@ -109,7 +109,7 @@ class PlacementForm(modelforms.ModelForm):
                         continue
                     l = lst[0]
                     # if publish_from differs, modify Listing object
-                    if l.publish_from != publish_from or l.commercial != commercial:
+                    if l.publish_from != publish_from or (commercial is not None and l.commercial != commercial):
                         l.publish_from = publish_from
                         if commercial is not None:
                             l.commercial = commercial
