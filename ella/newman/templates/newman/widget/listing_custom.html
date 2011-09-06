@@ -43,13 +43,30 @@
                     />
                 </div>
             </td>
-            <td class="listing-delete">
-                <input
-                    type="checkbox"
-                    id="{{ id_prefix }}-{{ forloop.counter }}-delete"
-                    name="{{ id_prefix }}-{{ forloop.counter }}-DELETE"
-                />
-            </td>
+
+            {% if render_commercial_switch %}
+                <td class="listing-commercial">
+                    <input type="hidden"
+                        id="{{ id_prefix }}-{{ forloop.counter }}-commercial"
+                        name="{{ id_prefix }}-commercial"
+                        value="{% if listing.commercial %}1{% else %}0{% endif %}"
+                        />
+                    <input
+                        onClick="$('#{{ id_prefix }}-{{ forloop.counter }}-commercial').val(this.checked ? 1 : 0);"
+                        type="checkbox"
+                        id="{{ id_prefix }}-{{ forloop.counter }}-commercial-checkbox"
+                        name="{{ id_prefix }}-commercial-checkbox"
+                        {% if listing.commercial %}checked="checked"{% endif %}
+                    />
+                </td>
+                <td class="listing-delete">
+                    <input
+                        type="checkbox"
+                        id="{{ id_prefix }}-{{ forloop.counter }}-delete"
+                        name="{{ id_prefix }}-{{ forloop.counter }}-DELETE"
+                    />
+                </td>
+            {% endif %}
 
             <td colspan="2">&nbsp;</td>
 
@@ -96,6 +113,22 @@
                     />
                 </div>
             </td>
+
+            {% if render_commercial_switch %}
+            <td class="listing-commercial">
+                <input type="hidden"
+                    id="{{ id_prefix }}-__NO__-commercial"
+                    name="{{ id_prefix }}-commercial"
+                    value="{% if listing.commercial %}1{% else %}0{% endif %}"
+                    />
+                <input
+                    onClick="$('#{{ id_prefix }}-__NO__-commercial').val(this.checked ? 1 : 0);"
+                    type="checkbox"
+                    id="{{ id_prefix }}-__NO__-commercial-checkbox"
+                    name="{{ id_prefix }}-commercial-checkbox"
+                />
+            </td>
+            {% endif %}
 
             <td><a class="icn btn cancel remove-inline-button">{% trans 'Remove' %}</a></td>
 

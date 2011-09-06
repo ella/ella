@@ -14,6 +14,7 @@ from django.conf import settings
 
 from ella.core.models import Author, Source, Category, Listing, HitCount, Placement, Related, Publishable
 from ella.core.conf import core_settings
+
 from ella import newman
 from ella.newman import options, fields
 from ella.newman.filterspecs import CustomFilterSpec, NewmanSiteFilter
@@ -70,6 +71,13 @@ class PlacementForm(modelforms.ModelForm):
         for pk in self.data.getlist( self.get_part_id('') ):
             list_cats.append(Category.objects.get(pk=int(pk)))
         publish_from_fields = self.data.getlist(self.get_part_id('publish_from'))
+        commercial_fields = self.data.getlist(self.get_part_id('commercial'))
+        # commercial_fields are optionul thus
+        if len(commercial_fields) != len(list_cats):
+            commercial_fields = [ None for c in list_cats ]
+        else:
+            commercial_fields = [ int(f) for f in commercial_fields ]
+
         instance = self.instance
 
         def save_them():
@@ -77,7 +85,7 @@ class PlacementForm(modelforms.ModelForm):
                 return
             listings = dict([ (l.category, l) for l in Listing.objects.filter(placement=instance.pk) ])
             forloop_counter = 0 # used for counting delete checkboxes
-            for c, pub in zip(list_cats, publish_from_fields):
+            for c, pub, commercial in zip(list_cats, publish_from_fields, commercial_fields):
                 forloop_counter += 1
                 delete_listing = self.data.get(self.get_part_id('%d-DELETE' % forloop_counter), 'off')
                 if delete_listing == 'on':
@@ -91,6 +99,8 @@ class PlacementForm(modelforms.ModelForm):
                         category=c,
                         publish_from=publish_from
                     )
+                    if commercial is not None:
+                        l.commercial = commercial
                     l.save()
                 else:
                     del listings[c]
@@ -99,8 +109,10 @@ class PlacementForm(modelforms.ModelForm):
                         continue
                     l = lst[0]
                     # if publish_from differs, modify Listing object
-                    if l.publish_from != publish_from:
+                    if l.publish_from != publish_from or l.commercial != commercial:
                         l.publish_from = publish_from
+                        if commercial is not None:
+                            l.commercial = commercial
                         l.save()
             for l in listings.values():
                 l.delete()
@@ -219,8 +231,11 @@ class PlacementForm(modelforms.ModelForm):
 
 class PlacementInlineFormset(options.NewmanInlineFormSet):
 
+
     def __init__(self, data=None, files=None, instance=None, save_as_new=None, prefix=None):
         self.can_delete = True
+        self.show_commercial_switch = core_settings.LISTING_USE_COMMERCIAL_FLAG
+
         super(PlacementInlineFormset, self).__init__(instance=instance, data=data, files=files, prefix=prefix)
 
 
@@ -240,6 +255,10 @@ class PlacementInlineAdmin(newman.NewmanTabularInline):
 
     form = PlacementForm
     formset = PlacementInlineFormset
+
+    def __init__(self, *args, **kwargs):
+        # self.render_commercial_switch = newman.conf.LISTING_SHOW_COMMERCIAL_SWITCH
+        return super(PlacementInlineAdmin, self).__init__(*args, **kwargs)
     '''
     ct_field = 'target_ct'
     ct_fk_field = 'target_id'
