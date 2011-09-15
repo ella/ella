@@ -5,7 +5,7 @@ from django.utils.translation import ugettext_lazy as _, ugettext
 from django.db import models
 from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
-from django.template import Template
+from django.template import Template, TemplateSyntaxError
 
 from ella.core.models import Category
 from ella.core.box import Box
@@ -84,7 +84,11 @@ class Position(models.Model):
                 # broken Generic FK:
                 log.warning('Broken target for position with pk %r', self.pk)
                 return ''
-            return Template(self.text, name="position-%s" % self.name).render(context)
+            try:
+                return Template(self.text, name="position-%s" % self.name).render(context)
+            except TemplateSyntaxError, e:
+                log.error('Broken definition for position with pk %r', self.pk)
+                return ''
 
         if self.box_type:
             box_type = self.box_type
