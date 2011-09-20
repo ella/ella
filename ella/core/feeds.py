@@ -1,5 +1,4 @@
 from django.contrib.syndication.feeds import Feed
-from django.contrib.contenttypes.models import ContentType
 from django.utils.feedgenerator import Atom1Feed
 from django.utils.translation import ugettext_lazy as _
 from django.http import Http404
@@ -9,7 +8,6 @@ from ella.core.models import Listing, Category
 from ella.core.views import get_content_type
 from ella.core.cache.utils import get_cached_object, get_cached_object_or_404
 from ella.core.conf import core_settings
-
 
 class RSSTopCategoryListings(Feed):
     def get_object(self, bits):
@@ -78,20 +76,37 @@ class RSSTopCategoryListings(Feed):
 
     def item_pubdate(self, item):
         return item.publish_from
+    
+    def get_enclosure_image(self, item):
+        if getattr(item.target, 'photo'):
+            enc_format = core_settings.RSS_ENCLOSURE_PHOTO_FORMAT 
+            if enc_format is not None:
+                formated_photo = item.target.photo.get_formated_photo(enc_format)
+                if formated_photo is not None:
+                    return formated_photo.image 
+            return item.target.photo.image
+
+    def get_enclosure_image_attr(self, item, attr):
+        image = self.get_enclosure_image(item)
+        if image is not None:
+            return getattr(image, attr)
+        return None
 
     def item_enclosure_url(self, item):
-        if getattr(item.target, 'photo'):
-            return item.target.photo.image.url
+        return self.get_enclosure_image_attr(item, 'url')
 
     def item_enclosure_length(self, item):
-        if getattr(item.target, 'photo'):
-            return item.target.photo.image.size
+        try:
+            return self.get_enclosure_image_attr(item, 'size')
+        except OSError:
+            pass
 
     def item_enclosure_mime_type(self, item):
-        if getattr(item.target, 'photo'):
-            if item.target.photo.image.name.endswith('.jpg'):
+        image = self.get_enclosure_image(item)
+        if image is not None:
+            if image.name.endswith('.jpg'):
                 return 'image/jpeg'
-            elif item.target.photo.image.name.endswith('.png'):
+            elif image.name.endswith('.png'):
                 return 'image/png'
             return 'image/gif'
 
