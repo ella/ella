@@ -41,28 +41,17 @@
 {% block content_js %}
     <script type="text/javascript">
         $(document).ready(function() {
-            /**
-             * Adds serializeObject method to elements. When called on forms, it results
-             * in form being serialized into JSON object {name:value, name2: value2}.
-             */
-            // $.fn.serializePostObject = function() {
-                // var o = {};
-                // var a = this.serializeArray();
-                // $.each(a, function() {
-                    // if (o[this.name] !== undefined) {
-                        // if (!o[this.name].push) {
-                            // o[this.name] = [o[this.name]];
-                        // }
-                        // o[this.name].push(String(this.value) || '');
-                    // } else {
-                        // o[this.name] = String(this.value) || '';
-                    // }
-                // });
-                // return o;
-            // };
-            
             var $uploadifyTarget = $('#id_image');
             var originalObjectId = null;
+            var index = 1;
+            
+            function getFormData() {
+                var formData = $('form').serializeObject();
+                formData.title = formData.title + ' ' + index ;
+                formData.slug = formData.slug + '-' + index; 
+                console.log('Appending data to send along with upload:' + JSON.stringify(formData));
+                $uploadifyTarget.uploadifySettings('scriptData', formData, true);
+            }
             
             $uploadifyTarget.uploadify({
                 'uploader'       : '{{ NEWMAN_MEDIA_URL }}swf/uploadify.swf',
@@ -80,6 +69,10 @@
                     console.log(event);
                     show_err('{% trans "Photo upload failed. Check for form errors." %}');
                 },
+                'onComplete': function (event, ID, fileObj, reponse, data) {
+                    index++;
+                    $uploadifyTarget.uploadifySettings('scriptData', getFormData(), true);
+                },
                 'onAllComplete': function (event, data) {
                     show_ok('{% trans "All images have been uploaded." %}');
                     adr('{% url newman:photos_photo_changelist %}', {just_set: true, nohistory: true});
@@ -87,14 +80,7 @@
             });
             
             function startUpload () {
-                var formData = $('form').serializeObject();
-                // var ar = $('form').serializePostObject();
-                // console.log(ar);
-                // formData['id_authors[]'] = formData['authors'];
-                // delete formData.authors;
-                
-                console.log('Appending data to send along with upload:' + JSON.stringify(formData));
-                $uploadifyTarget.uploadifySettings('scriptData', formData, true);
+                $uploadifyTarget.uploadifySettings('scriptData', getFormData(), true);
                 $uploadifyTarget.uploadifyUpload();                
             }
             

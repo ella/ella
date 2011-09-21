@@ -162,6 +162,7 @@ class PhotoAdmin(newman.NewmanModelAdmin):
             'errors': helpers.AdminErrorList(form, ()),
             'root_path': self.admin_site.root_path,
             'app_label': opts.app_label,
+            'opts': opts
         })
 
         context['raw_form'] = form
@@ -178,7 +179,7 @@ class PhotoAdmin(newman.NewmanModelAdmin):
     
     def mass_upload_view(self, request):
         context = self.get_mass_upload_context(request)
-        return render_to_response('newman/photos/mass_upload.html', context,
+        return render_to_response('newman/photos/photo/mass_upload.html', context,
             context_instance=RequestContext(request, current_app=self.admin_site.name)
         )
 
