@@ -160,9 +160,7 @@ class PhotoAdmin(newman.NewmanModelAdmin):
             'root_path': self.admin_site.root_path,
             'app_label': opts.app_label,
             'opts': opts,
-            'has_add_permission': self.has_add_permission(request),
-            'has_change_permission': self.has_change_permission(request),
-            'has_delete_permission': self.has_delete_permission(request)
+            'has_change_permission': self.has_change_permission(request, None),
         })
 
         context['raw_form'] = form

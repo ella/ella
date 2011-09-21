@@ -56,8 +56,8 @@
             $uploadifyTarget.uploadify({
                 'uploader'       : '{{ NEWMAN_MEDIA_URL }}swf/uploadify.swf',
                 'script'         : '{% url newman:photo-mass-upload-file %}',
-                'scriptAccess'   : 'always',
                 'cancelImg'      : '{{ NEWMAN_MEDIA_URL }}img/cancel.png',
+                'scriptAccess'   : 'always',
                 'buttonText'     : '{% trans "Choose images" %}',
                 'fileExt'        : '*.png;*.jpg;*.jpeg',
                 'fileDesc'       : '{% trans "Image files (*.png, *.jpg, *.jpeg)" %}',
