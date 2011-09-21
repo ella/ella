@@ -124,9 +124,6 @@ class PhotoAdmin(newman.NewmanModelAdmin):
         model = self.model
         opts = model._meta
 
-#        if not self.has_add_permission(request):
-#            raise PermissionDenied
-
         context = {}
         if request.method == 'POST':
             error_dict = {}
@@ -162,7 +159,10 @@ class PhotoAdmin(newman.NewmanModelAdmin):
             'errors': helpers.AdminErrorList(form, ()),
             'root_path': self.admin_site.root_path,
             'app_label': opts.app_label,
-            'opts': opts
+            'opts': opts,
+            'has_add_permission': self.has_add_permission(request),
+            'has_change_permission': self.has_change_permission(request),
+            'has_delete_permission': self.has_delete_permission(request)
         })
 
         context['raw_form'] = form
