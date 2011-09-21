@@ -194,6 +194,7 @@ var NewmanTextAreaStandardToolbar = function () {
         h1: handle_h1,
         h2: handle_h2,
         h3: handle_h3,
+        table: handle_table,
         photo: handle_photo,
         gallery: handle_gallery,
         box: handle_box,
@@ -516,6 +517,30 @@ var NewmanTextAreaStandardToolbar = function () {
         setTimeout(handle_preview, AUTO_PREVIEW_TOOLBAR_BUTTON_CLICKED_DELAY);
     }
     
+    function handle_table(evt) {
+        var headers = prompt(gettext('Enter column headings (split by ";"):'));
+        var rowCount = prompt(gettext('Row count (excluding header):', 2));
+
+        if (! headers || ! rowCount) return;
+
+        function makeRow(length, content) {
+            var contentArr = [];
+            while (length--) { contentArr.push(content); }
+            return contentArr.join(' | ') + "\n";   
+        }
+
+        headers = headers.split(';');
+        source = [
+            headers.join(' | '),
+            '\n',
+            makeRow(headers.length, new Array(gettext('REPLACE').length + 1).join('-')),
+            new Array(parseInt(rowCount) + 1).join(makeRow(headers.length, gettext('REPLACE'))),
+        ].join('');
+        
+        selection_handler.insert_after_selection(source);
+        setTimeout(handle_preview, AUTO_PREVIEW_TOOLBAR_BUTTON_CLICKED_DELAY);
+    }
+    
     function toolbar_buttons() {
         // creates NewmanTextAreaToolbar items.
         me.add_item(gettext('Italic'), 'italic', 'I');
@@ -529,6 +554,7 @@ var NewmanTextAreaStandardToolbar = function () {
         me.add_separator();
         me.add_item(gettext('List unordered'), 'list-bullet');
         me.add_item(gettext('List ordered'), 'list-numeric');
+        me.add_item(gettext('Table'), 'table');
         me.add_separator();
         //me.add_item(gettext('Quote'), 'quote');
         //me.add_separator();
