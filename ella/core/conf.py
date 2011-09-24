@@ -18,6 +18,7 @@ LISTING_USE_COMMERCIAL_FLAG = False
 
 # context_processor
 MEDIA_URL = ''
+STATIC_URL = MEDIA_URL
 VERSION = 1
 SERVER_INFO = {}
 
