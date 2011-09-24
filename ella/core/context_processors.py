@@ -14,6 +14,7 @@ def url_info(request):
 
     return {
         'MEDIA_URL' : core_settings.MEDIA_URL,
+        'STATIC_URL': core_settings.STATIC_URL,
         'VERSION' : core_settings.VERSION,
         'SERVER_INFO' : core_settings.SERVER_INFO,
         'SITE_NAME' : current_site_name,

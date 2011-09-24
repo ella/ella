@@ -17,6 +17,7 @@ PUBLISH_FROM_WHEN_EMPTY = datetime(3000, 1, 1)
 
 # context_processor
 MEDIA_URL = ''
+STATIC_URL = MEDIA_URL
 VERSION = 1
 SERVER_INFO = {}
 
