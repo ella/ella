@@ -8,6 +8,7 @@ from ella.core.models import Listing, Category
 from ella.core.views import get_content_type
 from ella.core.cache.utils import get_cached_object, get_cached_object_or_404
 from ella.core.conf import core_settings
+from ella.photos.models import Format
 
 class RSSTopCategoryListings(Feed):
     def get_object(self, bits):
@@ -77,13 +78,15 @@ class RSSTopCategoryListings(Feed):
     def item_pubdate(self, item):
         return item.publish_from
     
-    def get_enclosure_image(self, item):
+    def get_enclosure_image(self, item, enc_format=core_settings.RSS_ENCLOSURE_PHOTO_FORMAT):
         if getattr(item.target, 'photo'):
-            enc_format = core_settings.RSS_ENCLOSURE_PHOTO_FORMAT 
             if enc_format is not None:
-                formated_photo = item.target.photo.get_formated_photo(enc_format)
-                if formated_photo is not None:
-                    return formated_photo.image 
+                try:
+                    formated_photo = item.target.photo.get_formated_photo(enc_format)
+                    if formated_photo is not None:
+                        return formated_photo.image
+                except Format.DoesNotExist:
+                    pass
             return item.target.photo.image
 
     def get_enclosure_image_attr(self, item, attr):
