@@ -1,4 +1,4 @@
-Django==1.1.1
+Django==1.3.1
 south>=0.7
 anyjson
 
@@ -7,6 +7,7 @@ PIL
 threadedcomments
 django-tagging
 
+nose
+djangosanetesting
 
-git+http://github.com/Almad/django-sane-testing.git#egg=djangosanetesting
 git+http://github.com/ella/django-markup.git#egg=djangomarkup
