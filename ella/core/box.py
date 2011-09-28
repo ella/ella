@@ -130,7 +130,6 @@ class Box(object):
         " Get the hierarchy of templates belonging to the object/box_type given. "
         t_list = []
         if hasattr(self.obj, 'category_id') and self.obj.category_id:
-            from ella.core.models import Category
             cat = self.obj.category
             base_path = 'box/category/%s/content_type/%s/' % (cat.path, self.opts)
             if hasattr(self.obj, 'slug'):
