@@ -1,0 +1,2 @@
+markdown2
+git+http://github.com/ella/django-markup.git#egg=djangomarkup
