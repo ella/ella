@@ -91,3 +91,7 @@ class TestPosition(DatabaseTestCase):
         p = Position.objects.create(category=self.category, name='position-name', text='some text', disabled=True)
         self.assert_raises(Position.DoesNotExist, Position.objects.get_active_position, self.category, 'position-name')
 
+    def test_position_with_broken_definition_dont_raise_big_500(self):
+        p = Position.objects.create(category=self.category, name='position-name', text='{% load nonexistent_tags %}', disabled=False)
+        self.assert_equals('', p.render(Context({}), NodeList(), ''))
+

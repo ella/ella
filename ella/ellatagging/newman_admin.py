@@ -37,7 +37,7 @@ class TaggingInlineFormset(BaseGenericInlineFormSet):
 
 class TaggingInlineAdmin(newman.GenericTabularInline):
     model = TaggedItem
-    max_num = 3
+    max_num = newman_settings.MAX_TAGS_INLINE
     ct_field = 'content_type'
     ct_fk_field = 'object_id'
     suggest_fields = {'tag': ('name',)}

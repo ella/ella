@@ -4,10 +4,10 @@ anyjson
 
 feedparser
 PIL
-threadedcomments
 django-tagging
 
 nose
 djangosanetesting
 
+git+http://github.com/HonzaKral/django-threadedcomments.git#egg=threadedcomments
 git+http://github.com/ella/django-markup.git#egg=djangomarkup

@@ -33,6 +33,9 @@
                 <th></th>
                 <th>{% trans 'Category' %}</th>
                 <th>{% trans 'Publish from' %}</th>
+                {% if inline_admin_formset.formset.show_commercial_switch %}
+                    <th>{% trans 'Commercial' %}?</th>
+                {% endif %}
                 <th>{% trans 'Delete' %}?</th>
                 <th colspan="2"></th>
               </tr>

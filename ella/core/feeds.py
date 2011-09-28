@@ -79,6 +79,21 @@ class RSSTopCategoryListings(Feed):
     def item_pubdate(self, item):
         return item.publish_from
 
+    def item_enclosure_url(self, item):
+        if getattr(item.target, 'photo'):
+            return item.target.photo.image.url
+
+    def item_enclosure_length(self, item):
+        if getattr(item.target, 'photo'):
+            return item.target.photo.image.size
+
+    def item_enclosure_mime_type(self, item):
+        if getattr(item.target, 'photo'):
+            if item.target.photo.image.name.endswith('.jpg'):
+                return 'image/jpeg'
+            elif item.target.photo.image.name.endswith('.png'):
+                return 'image/png'
+            return 'image/gif'
 
 class AtomTopCategoryListings(RSSTopCategoryListings):
     feed_type = Atom1Feed
