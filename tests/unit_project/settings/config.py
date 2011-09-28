@@ -13,14 +13,13 @@ TEMPLATE_DEBUG = DEBUG
 DISABLE_CACHE_TEMPLATE = DEBUG
 
 
-DATABASE_ENGINE = 'sqlite3'
-DATABASE_NAME = join(gettempdir(), 'ella_unit_project.db')
-TEST_DATABASE_NAME =join(gettempdir(), 'test_ella_unit_project.db')
-DATABASE_USER = ''
-DATABASE_PASSWORD = ''
-DATABASE_HOST = ''
-DATABASE_PORT = ''
-
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+	'NAME': join(gettempdir(), 'ella_unit_project.db'),
+	'TEST_NAME': join(gettempdir(), 'test_ella_unit_project.db'),
+    }
+}
 
 TIME_ZONE = 'Europe/Prague'
 
