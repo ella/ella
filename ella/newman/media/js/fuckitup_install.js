@@ -537,7 +537,7 @@ var NewmanTextAreaStandardToolbar = function () {
             new Array(parseInt(rowCount) + 1).join(makeRow(headers.length, gettext('REPLACE'))),
         ].join('');
         
-        selection_handler.insert_after_selection(source);
+        selection_handler.replace_selection(source);
         setTimeout(handle_preview, AUTO_PREVIEW_TOOLBAR_BUTTON_CLICKED_DELAY);
     }
     
