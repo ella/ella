@@ -1,5 +1,6 @@
 from django.utils.translation import ugettext_lazy as _
 from django.conf.urls.defaults import patterns, url
+from django.contrib.admin import helpers
 
 from ella import newman
 
@@ -8,6 +9,14 @@ from ella.newman.utils import JsonResponse, JsonResponseError
 from ella.newman.conf import newman_settings
 from ella.newman.filterspecs import CustomFilterSpec
 from ella.newman.licenses.models import License
+from django.shortcuts import render_to_response
+from django.template.context import RequestContext
+from ella.photos.forms import MassUploadForm
+from django.core.exceptions import PermissionDenied
+from django.http import HttpResponse, Http404
+from django.core.files.uploadhandler import TemporaryFileUploadHandler
+from django.contrib.csrf.middleware import csrf_exempt
+from django.views.decorators.http import require_POST
 
 class PhotoSizeFilter(CustomFilterSpec):
 
@@ -68,6 +77,11 @@ class PhotoAdmin(newman.NewmanModelAdmin):
         (_("Metadata"), {'fields': ('authors', 'source', 'image',)}),
         (_("Important area"), {'fields': (('important_top', 'important_right'), ('important_bottom', 'important_left'),), 'classes': ('collapsed',)})
     )
+    mass_upload_fieldsets = (
+        (_("Heading"), {'fields': ('title', 'slug')}),
+        (_("Description"), {'fields': ('description',)}),
+        (_("Metadata"), {'fields': ('authors', 'source', 'image')}),
+    )
 
     def size(self, obj):
         return "%dx%d px" % (obj.width, obj.height)
@@ -86,13 +100,13 @@ class PhotoAdmin(newman.NewmanModelAdmin):
 
     def get_urls(self):
         urlpatterns = patterns('',
-            url(r'^(\d+)/thumb/$',
-                self.json_photo_info,
-                name='photo-json-info'),
+            url(r'^(\d+)/thumb/$', self.json_photo_info, name='photo-json-info'),
+            url(r'^mass-upload/$', self.mass_upload_view, name='photo-mass-upload'),
+            url(r'^mass-upload/upload-file/$', self.upload_file_view, name='photo-mass-upload-file'),
         )
         urlpatterns += super(PhotoAdmin, self).get_urls()
         return urlpatterns
-
+    
     def json_photo_info(self, request, object_id, extra_context=None):
         obj = self.get_change_view_object(object_id)
 
@@ -105,6 +119,67 @@ class PhotoAdmin(newman.NewmanModelAdmin):
         }
 
         return JsonResponse('', out)
+    
+    def get_mass_upload_context(self, request):
+        model = self.model
+        opts = model._meta
+
+        context = {}
+        if request.method == 'POST':
+            error_dict = {}
+            # Unfortunately, FLASH uploader sends array data in weird format
+            # so that Django doesn't recognize it as array of values, but 
+            # as one string with commas inside. The only way to expect it
+            # and preprocess the values by ourselves.
+            data = dict((key, val) for key, val in request.POST.items())
+            data['authors'] = data['authors'].split(',')
+            
+            form = MassUploadForm(data, request.FILES)
+            if form.is_valid():
+                new_object = form.save()
+                context.update({'object': new_object})
+            else:
+                for e in form.errors:
+                    error_dict[u"id_%s" % e] = [ u"%s" % ee for ee in form.errors[e] ]
+                context.update({'error_dict': error_dict})
+        else:
+            form = MassUploadForm()
+
+        adminForm = helpers.AdminForm(form, list(self.mass_upload_fieldsets),
+            self.prepopulated_fields)
+        media = self.media + adminForm.media
+
+        context.update({
+            'title': _('Mass upload'),
+            'adminform': adminForm,
+            'is_popup': request.REQUEST.has_key('_popup'),
+            'show_delete': False,
+            'media': media,
+            'inline_admin_formsets': [],
+            'errors': helpers.AdminErrorList(form, ()),
+            'root_path': self.admin_site.root_path,
+            'app_label': opts.app_label,
+            'opts': opts,
+            'has_change_permission': self.has_change_permission(request, None),
+        })
+
+        context['raw_form'] = form
+        return context
+    
+    @csrf_exempt
+    def upload_file_view(self, request):
+        context = self.get_mass_upload_context(request)
+        if 'error_dict' in context:
+            return self.json_error_response(request, context)
+        else:
+            return JsonResponse('OK')
+        raise Http404
+    
+    def mass_upload_view(self, request):
+        context = self.get_mass_upload_context(request)
+        return render_to_response('newman/photos/photo/mass_upload.html', context,
+            context_instance=RequestContext(request, current_app=self.admin_site.name)
+        )
 
 
 class FormatedPhotoAdmin(newman.NewmanModelAdmin):
