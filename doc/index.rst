@@ -30,6 +30,7 @@ Core application handling URLs, publication logic and provides all the tools for
     * box templatetag that can display object of any type via a common interface
     * mechanism for publishing objects (defining URLs, listing objects in categories according to date and priorities)
     * various caching tools
+    * support for lightweight markup languages to write content (markdown, reST, textile) - see :ref:`markdown`
 
 Several content providing apps:
 
@@ -59,6 +60,8 @@ Reference: :ref:`core-views` | :ref:`core-templatetags`
 
 Applications: :ref:`positions`
 
+Using markdown: :ref:`markdown`
+
 
 License
 =======
@@ -79,4 +82,5 @@ community and hope that somebody will find this project helpfull.
    tutorial/*  
    core/*
    positions
+   markdown
 
