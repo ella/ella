@@ -304,7 +304,7 @@ class FormatedPhoto(models.Model):
         self.width, self.height = stretched_photo.size
         stretched_photo.save(self.file(), quality=self.format.resample_quality)
 
-        f = open(self.file())
+        f = open(self.file(), 'rb')
         file = ContentFile(f.read())
         f.close()
 
