@@ -125,6 +125,18 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
 
     return db_field.formfield(**kwargs)
 
+from django.contrib.admin.helpers import InlineAdminForm, InlineAdminFormSet
+class InlineNewmanFormset(InlineAdminFormSet):
+    
+    def __iter__(self):
+        for form, original in zip(self.formset.initial_forms, self.formset.get_queryset()):
+            yield InlineAdminForm(self.formset, form, self.fieldsets,
+                self.opts.prepopulated_fields, original, self.readonly_fields,
+                model_admin=self.opts)
+        for form in self.formset.extra_forms:
+            yield InlineAdminForm(self.formset, form, self.fieldsets,
+                self.opts.prepopulated_fields, None, self.readonly_fields,
+                model_admin=self.opts)
 
 class NewmanModelAdmin(XModelAdmin):
     changelist_view_cl = NewmanChangeList
@@ -646,7 +658,7 @@ class NewmanModelAdmin(XModelAdmin):
         for inline, formset in zip(self.inline_instances, formsets):
             self._raw_inlines[str(inline.model._meta).replace('.', '__')] = formset
             fieldsets = list(inline.get_fieldsets(request, obj))
-            inline_admin_formset = admin.helpers.InlineAdminFormSet(inline, formset, fieldsets)
+            inline_admin_formset = InlineNewmanFormset(inline, formset, fieldsets)
             inline_admin_formsets.append(inline_admin_formset)
             media = media + inline_admin_formset.media
         return inline_admin_formsets, media

@@ -38,23 +38,6 @@ from ella.core.admin import PlacementForm as DjangoAdminPlacementForm
 class PlacementForm(DjangoAdminPlacementForm):
     # create the field here to pass validation
     listings =  fields.ListingCustomField(Category.objects.all(), label=_('Category'), cache_choices=True, required=False)
-    
-    def __init__(self, *args, **kwargs):
-        initial = []
-        # args[data] -> instance
-        if 'initial' in kwargs:
-            initial = [ c.pk for c in Category.objects.distinct().filter(listing__placement=kwargs['initial']['id']) ]
-        elif 'instance' in kwargs:
-            initial = {
-                'selected_categories': [
-                    c.pk for c in Category.objects.distinct().filter(listing__placement=kwargs['instance'].pk)
-                ],
-                'listings': list(kwargs['instance'].listing_set.all())
-            }
-
-        self.base_fields['listings'] = fields.ListingCustomField(
-                Category.objects.all(), label=_('Category'), cache_choices=True, required=False, initial=initial)
-        super(PlacementForm, self).__init__(*args, **kwargs)
 
     def get_publish_date(self, pub_from):
         " Tries to save publish_from field specified either by POST parameter or by Placement (self.instance). "
