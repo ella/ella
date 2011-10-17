@@ -356,7 +356,8 @@ class ListingCustomWidget(forms.SelectMultiple):
         cx['verbose_name_publish_from'] = Listing._meta.get_field('publish_from').verbose_name.__unicode__()
         cx['choices'] = choices or self.choices
         cx['render_commercial_switch'] = core_settings.LISTING_USE_COMMERCIAL_FLAG
-        cx['listings'] = value[0] or []
+        if len(value) == 1:
+            cx['listings'] = value[0] or []
         tpl = get_template('newman/widget/listing_custom.html')
         return mark_safe(tpl.render(cx))
 
