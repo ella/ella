@@ -6,6 +6,7 @@ from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.admin.options import InlineModelAdmin, IncorrectLookupParameters, FORMFIELD_FOR_DBFIELD_DEFAULTS
 from django.contrib.admin.util import unquote
+from django.contrib import messages
 from django.forms.models import BaseInlineFormSet
 from django import template
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden
@@ -852,7 +853,7 @@ class NewmanModelAdmin(XModelAdmin):
         context.update(extra_context or {})
         if 'object_added' in context:
             obj = context['object']
-            msg = request.user.message_set.all()[0].message
+            msg = unicode(list(messages.get_messages(request))[0])
 
             if request.FILES and not request.is_ajax():
                 return_url = '%s#/%s/%s/' % (reverse('newman:index'), obj._meta.app_label, obj._meta.module_name)
