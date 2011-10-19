@@ -10,4 +10,4 @@ nose
 djangosanetesting
 
 git+http://github.com/HonzaKral/django-threadedcomments.git#egg=threadedcomments
-git+http://github.com/ella/django-markup.git#egg=djangomarkup
+-e git+http://github.com/ella/django-markup.git#egg=djangomarkup
