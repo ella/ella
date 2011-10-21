@@ -225,7 +225,7 @@ class QuestionForm(ModelForm):
                     new_ch = Choice(points=points, choice=text, votes=0, question=instance)
                     new_ch.save()
                     # FIXME saving SourceText manualy
-                    new_ch.choice = save_source_text('choice', new_ch, text)
+                    new_ch.choice = unicode(save_source_text('choice', new_ch, text))
                     new_ch.save()
                     continue
                 remove = self.data.get(self.get_part_id('%d-DELETE' % i), 'off')
@@ -234,7 +234,7 @@ class QuestionForm(ModelForm):
                     ch.delete()
                 elif get_source_text('choice', ch) != text or ch.points != points:
                     # FIXME saving SourceText manualy
-                    ch.choice = save_source_text('choice', ch, text)
+                    ch.choice = unicode(save_source_text('choice', ch, text))
                     ch.points = points
                     ch.save()
 
