@@ -17,7 +17,7 @@
               {{ field.field }}
               </td>
           {% else %}
-
+{% if inline_admin_form.form.prefix != "placement_set-__prefix__" %}
             {% if inline_admin_formset.formset.can_delete %}
               <td class="delete">{% if inline_admin_form.original %}{{ inline_admin_form.deletion_field.field }}{% endif %}</td>
             {% endif %}
@@ -26,7 +26,7 @@
               {# custom row for ListingCustomWidget #}
               <tr class="listing-head">
                 <td colspan="{{ inline_admin_form.field_count }}">
-                  <h3>{% trans 'Listings' %}</h3>
+                    <h3>{% trans 'Listings' %}</h3>
                 </td>
               </tr>
               <tr class="listing-head">
@@ -39,10 +39,13 @@
                 <th>{% trans 'Delete' %}?</th>
                 <th colspan="2"></th>
               </tr>
+{% endif %}
                   {{ field.field.errors.as_ul }}
                   {{ field.field }}
+{% if inline_admin_form.form.prefix != "placement_set-__prefix__" %}
               <tr> {# open new row due to tabular.html will close row after fieldset block #}
                 <td colspan="3"><a class="icn btn add add-listing-button">{% trans "Add" %}</a></td>
+{% endif %}
           {% endifnotequal %}
 
         {% endfor %}

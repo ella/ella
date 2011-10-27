@@ -223,11 +223,7 @@ class ListingCustomWidget(forms.SelectMultiple):
         cx['id_prefix'] = name
         cx['verbose_name_publish_from'] = Listing._meta.get_field('publish_from').verbose_name.__unicode__()
         cx['choices'] = choices or self.choices
-        
-        if type(value) == dict:
-            # modifying existing object, so value is dict containing Listings and selected category IDs
-            # cx['selected'] = Category.objects.filter(pk__in=value['selected_categories']).values('id') or []
-            cx['listings'] = list(value['listings']) or []
+        cx['listings'] = list(value[0]) or []
         
         tpl = get_template('admin/widget/listing_custom.html')
         return mark_safe(tpl.render(cx))

@@ -356,10 +356,8 @@ class ListingCustomWidget(forms.SelectMultiple):
         cx['verbose_name_publish_from'] = Listing._meta.get_field('publish_from').verbose_name.__unicode__()
         cx['choices'] = choices or self.choices
         cx['render_commercial_switch'] = core_settings.LISTING_USE_COMMERCIAL_FLAG
-        if type(value) == dict:
-            # modifying existing object, so value is dict containing Listings and selected category IDs
-            # cx['selected'] = Category.objects.filter(pk__in=value['selected_categories']).values('id') or []
-            cx['listings'] = list(value['listings']) or []
+        if len(value) == 1:
+            cx['listings'] = value[0] or []
         tpl = get_template('newman/widget/listing_custom.html')
         return mark_safe(tpl.render(cx))
 

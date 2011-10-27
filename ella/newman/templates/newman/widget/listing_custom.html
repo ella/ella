@@ -1,4 +1,3 @@
-    <input type="hidden" name="placement_listing_widget" value="{{ id_prefix }}" />
     {% for listing in listings %}
         <tr class="listing-row inline-item">
             <td><span style="display:none;">&nbsp;</span></td>{# vertical align with placement's first (empty) td #}
@@ -74,6 +73,8 @@
         </tr>
     {% endfor %}
 
+{% if id_prefix != "placement_set-__prefix__-listings" %}
+    <input type="hidden" name="placement_listing_widget" value="{{ id_prefix }}" />
 {# Template for creating listings #}
     <tr class="listing-row-template" style="display:none;"><!--
         <tr class="listing-row inline-item">
@@ -139,3 +140,4 @@
     --></tr>
 
 {# End of template #}
+{% endif %}
