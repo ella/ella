@@ -24,16 +24,11 @@ class PlacementForm(modelforms.ModelForm):
         if 'initial' in kwargs:
             initial = [ c.pk for c in Category.objects.distinct().filter(listing__placement=kwargs['initial']['id']) ]
         elif 'instance' in kwargs:
-            initial = {
-                'selected_categories': [
-                    c.pk for c in Category.objects.distinct().filter(listing__placement=kwargs['instance'].pk)
-                ],
-                'listings': list(kwargs['instance'].listing_set.all())
-            }
+            initial = [ list(kwargs['instance'].listing_set.all()) ]
 
         #self.base_fields['listings'] = fields.ListingCustomField(
         #        Category.objects.all(), label=_('Category'), cache_choices=True, required=False, initial=initial)
-        self.base_fields['listings'] = ModelMultipleChoiceField(
+        self.base_fields['listings'] = self.base_fields['listings'].__class__(
                  Category.objects.all(), label=_('Category'), cache_choices=True, required=False, initial=initial)
         super(PlacementForm, self).__init__(*args, **kwargs)
 
