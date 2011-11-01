@@ -43,3 +43,5 @@ CACHE_BACKEND = 'dummy://'
 NEWMAN_MEDIA_PREFIX = '/static/newman_media/'
 
 USE_PRIORITIES = True
+
+TAG_LISTINGS_PAGINATE_BY = 1

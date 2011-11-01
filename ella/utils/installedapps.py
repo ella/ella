@@ -1,11 +1,11 @@
-from os.path import isfile, exists, sep as path_separator
-import logging, logging.config
-import traceback
+from os.path import isfile
+import logging
+import logging.config
 
 from django.utils.itercompat import is_iterable
 from django.conf import settings
 from django.utils.importlib import import_module
-
+from django.utils.module_loading import module_has_submodule
 
 INSTALLED_APPS_REGISTER = {}
 
@@ -25,37 +25,26 @@ def register(app_name, modules):
 
     INSTALLED_APPS_REGISTER[app_name] = mod_list
 
+
 def call_modules(auto_discover=()):
     """
     this is called in project urls.py
     for registering desired modules (eg.: admin.py)
     """
-    log = logging.getLogger('ella.utils.installedapps.call_modules')
-
     for app in settings.INSTALLED_APPS:
         modules = set(auto_discover)
         if app in INSTALLED_APPS_REGISTER:
             modules.update(INSTALLED_APPS_REGISTER[app])
         for module in modules:
+            mod = import_module(app)
             try:
-                imp = '%s.%s' % (app, module)
-                mod = import_module(imp)
-                inst = getattr(mod, '__install__', lambda:None)
+                import_module('%s.%s' % (app, module))
+                inst = getattr(mod, '__install__', lambda: None)
                 inst()
-            except ImportError, e:
-                msg = 'problem during discovering %s - %s\n%s' % (imp, e, traceback.format_exc())
-                # check if problem is inside autodiscovered file (i.e. mispelled module name) OR autodiscovered file does not exists
-                mod = __import__(app, {}, {}, [''])
-                app_path = mod.__file__.split(path_separator)[:-1]
-                app_path.append('%s.py' % module)
-                mod_path = path_separator.join(app_path)
-                if not exists(mod_path):
-                    # autodiscovered file does not exist
-                    log.debug(msg)
-                else:
-                    # ImportError inside autodiscovered file
-                    log.error(msg)
-                    logging.error(msg)
+            except:
+                if module_has_submodule(mod, module):
+                    raise
+
 
 def init_logger():
     """init logger with LOGGING_CONFIG_FILE settings option"""
