@@ -61,25 +61,96 @@ JS_RELATED_LOOKUP = 'js/related_lookup.js'
 CLASS_TARGECT = 'target_ct'
 CLASS_TARGEID = 'target_id'
 
+class NewmanRichTextAreaExtensions(object):
+    """
+    Singleton object to keep track of RichTextArea extensions for markdown.
+    """
+    
+    def __init__(self):
+        self.js_extensions = []
+        self.css_extensions = []
+    
+    def register(self, path, type='js'):
+        """
+        Add JS extension path to load for RichTextArea
+        """
+        if not type in ('js', 'css'):
+            raise ValueError('Only js or css types are supported.')
+        if type == 'js':
+            self.js_extensions.append(path)
+        else:
+            self.css_extensions.append(path)
+    
+    def unregister(self, path, type):
+        """
+        Remove previously added JS extension path to load for RichTextArea
+        """
+        if not type in ('js', 'css'):
+            raise ValueError('Only js or css types are supported.')
+        if type == 'js':
+            if path in self.js_extensions:
+                self.js_extensions.remove(path)
+        else:
+            if path in self.css_extensions:
+                self.css_extensions.remove(path)
+            
+    def get_js_extensions(self):
+        """
+        Get list of all JS extension paths
+        """
+        return self.js_extensions
+    
+    def get_css_extensions(self):
+        """
+        Get list of all CSS extension paths
+        """
+        return self.css_extensions
+
+
+rich_text_extensions = NewmanRichTextAreaExtensions()
+
+try:
+    import markdown
+    rich_text_extensions.register(
+        newman_settings.MEDIA_PREFIX + 'js/fuckitup_extensions/markdown_tables.js',
+        type='js'
+    )
+    rich_text_extensions.register(
+        newman_settings.MEDIA_PREFIX + 'css/fuckitup_extensions/markdown_tables.css',
+        type='css'
+    )
+except ImportError:
+    try:
+        import markdown2
+        rich_text_extensions.register(
+            newman_settings.MEDIA_PREFIX + 'js/fuckitup_extensions/markdown2_tables.js',
+            type='js'
+        )
+        rich_text_extensions.register(
+            newman_settings.MEDIA_PREFIX + 'css/fuckitup_extensions/markdown_tables.css',
+            type='css'
+        )
+    except ImportError:
+        pass
 
 class NewmanRichTextAreaWidget(RichTextAreaWidget):
     """
     Newman's implementation of markup, based on markitup editor.
     """
     class Media:
-        js = (
+        js = [
             newman_settings.MEDIA_PREFIX + JS_MARKITUP,
             newman_settings.MEDIA_PREFIX + JS_MARKITUP_SET,
             newman_settings.MEDIA_PREFIX + JS_JQUERY_UI,
             newman_settings.MEDIA_PREFIX + JS_JQUERY_FIELDSELECTION,
             newman_settings.MEDIA_PREFIX + JS_AUTOGROW,
-        )
+        ] + rich_text_extensions.get_js_extensions()
         css = {
-            'screen': (
+            'screen': [
                 newman_settings.MEDIA_PREFIX + CSS_MARKITUP,
                 newman_settings.MEDIA_PREFIX + CSS_MARKITUP_SET,
                 newman_settings.MEDIA_PREFIX + CSS_JQUERY_UI,
-            ),
+            ] + rich_text_extensions.get_css_extensions(),
         }
 
     def __init__(self, attrs={}):
