@@ -56,27 +56,32 @@ class NewmanRichTextAreaExtensions(object):
 
 rich_text_extensions = NewmanRichTextAreaExtensions()
 
+use_markdown = False
+
 try:
-    import markdown
-    rich_text_extensions.register(
-        newman_settings.MEDIA_PREFIX + 'js/fuckitup_extensions/markdown_tables.js',
-        type='js'
-    )
+    import markdown as m
+    use_markdown = True
+except ImportError:
+    try:
+        import markdown2 as m
+        use_markdown = True
+    except ImportError:
+        pass
+    
+if use_markdown:
+    if hasattr(m, 'extensions'):
+        rich_text_extensions.register(
+            newman_settings.MEDIA_PREFIX + 'js/fuckitup_extensions/markdown_extensions_tables.js',
+            type='js'
+        )
+    elif hasattr(m, 'extras'):
+        rich_text_extensions.register(
+            newman_settings.MEDIA_PREFIX + 'js/fuckitup_extensions/markdown_extras_tables.js',
+            type='js'
+        )
+    
     rich_text_extensions.register(
         newman_settings.MEDIA_PREFIX + 'css/fuckitup_extensions/markdown_tables.css',
         type='css'
     )
-except ImportError:
-    try:
-        import markdown2
-        rich_text_extensions.register(
-            newman_settings.MEDIA_PREFIX + 'js/fuckitup_extensions/markdown2_tables.js',
-            type='js'
-        )
-        rich_text_extensions.register(
-            newman_settings.MEDIA_PREFIX + 'css/fuckitup_extensions/markdown_tables.css',
-            type='css'
-        )
-    except ImportError:
-        pass
     

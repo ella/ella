@@ -7,14 +7,13 @@ function handle_table(evt, toolbar) {
     function makeRow(length, content) {
         var contentArr = [];
         while (length--) { contentArr.push(content); }
-        return contentArr.join(' | ') + "\n";   
+        return '|| ' + contentArr.join(' || ') + ' ||' + "\n";   
     }
-
+    
     headers = headers.split(';');
     source = [
-        headers.join(' | '),
+        '|| *' + headers.join('* || *') + '* ||',
         '\n',
-        makeRow(headers.length, new Array(gettext('REPLACE').length + 1).join('-')),
         new Array(parseInt(rowCount) + 1).join(makeRow(headers.length, gettext('REPLACE'))),
     ].join('');
  
