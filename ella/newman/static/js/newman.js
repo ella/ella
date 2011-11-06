@@ -289,6 +289,7 @@ Drafts = new Object;
         if (!options) options = {};
         if (options.title) things_to_send.title = options.title;
         if (options.id   ) things_to_send.id    = options.id;
+	things_to_send.csrfmiddlewaretoken = $('input[name=csrfmiddlewaretoken]').val();
         var message = options.msg || gettext('Saved');
         var url = get_adr('draft/save/');
         var $saving_msg = show_message( str_concat(gettext('Saving'), '...'), {duration: 0});
