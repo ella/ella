@@ -18,6 +18,7 @@ from ella.core.models import Listing
 from ella.photos.models import Photo
 from djangomarkup.widgets import RichTextAreaWidget
 from ella.newman.conf import newman_settings
+from ella.newman.widget_extensions import rich_text_extensions
 
 __all__ = [
     'NewmanRichTextAreaWidget', 'FlashImageWidget',
@@ -61,31 +62,33 @@ JS_RELATED_LOOKUP = 'js/related_lookup.js'
 CLASS_TARGECT = 'target_ct'
 CLASS_TARGEID = 'target_id'
 
-
 class NewmanRichTextAreaWidget(RichTextAreaWidget):
     """
     Newman's implementation of markup, based on markitup editor.
     """
-    class Media:
-        js = (
-            newman_settings.MEDIA_PREFIX + JS_MARKITUP,
-            newman_settings.MEDIA_PREFIX + JS_MARKITUP_SET,
-            newman_settings.MEDIA_PREFIX + JS_JQUERY_UI,
-            newman_settings.MEDIA_PREFIX + JS_JQUERY_FIELDSELECTION,
-            newman_settings.MEDIA_PREFIX + JS_AUTOGROW,
-        )
-        css = {
-            'screen': (
-                newman_settings.MEDIA_PREFIX + CSS_MARKITUP,
-                newman_settings.MEDIA_PREFIX + CSS_MARKITUP_SET,
-                newman_settings.MEDIA_PREFIX + CSS_JQUERY_UI,
-            ),
-        }
 
     def __init__(self, attrs={}):
         css_class = CLASS_RICHTEXTAREA
         super(RichTextAreaWidget, self).__init__(attrs={'class': css_class})
-
+        
+    def _media(self):
+        return forms.Media(
+            js=[
+                newman_settings.MEDIA_PREFIX + JS_MARKITUP,
+                newman_settings.MEDIA_PREFIX + JS_MARKITUP_SET,
+                newman_settings.MEDIA_PREFIX + JS_JQUERY_UI,
+                newman_settings.MEDIA_PREFIX + JS_JQUERY_FIELDSELECTION,
+                newman_settings.MEDIA_PREFIX + JS_AUTOGROW,
+            ] + rich_text_extensions.get_js_extensions(),
+            css={
+                'screen': [
+                    newman_settings.MEDIA_PREFIX + CSS_MARKITUP,
+                    newman_settings.MEDIA_PREFIX + CSS_MARKITUP_SET,
+                    newman_settings.MEDIA_PREFIX + CSS_JQUERY_UI,
+                ] + rich_text_extensions.get_css_extensions(),
+            }
+        )
+    media = property(_media)
 
 class FlashImageWidget(widgets.AdminFileWidget):
     class Media:

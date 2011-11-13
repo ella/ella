@@ -113,7 +113,6 @@ function discard_auto_preview(evt) {
         clearTimeout(existing_tm);
         $editor.data('auto_preview_timer', null);
     }
-    //log_ntarea.log('Discarding auto preview for: ' , $editor.selector);
 }
 
 function markitdown_get_editor(evt) {
@@ -174,6 +173,265 @@ function markitdown_auto_preview(evt, optional_force_preview) {
     }
 }
 
+var toolbarButtonRegister = (function() {
+    var buttons = {};
+
+    return { // public interface
+        addButton: function (title, name, callback, alt) {
+            buttons[name] = ({'title': title, 'callback': callback, 'alt': alt});
+        },
+        getButton: function (name) {
+            return buttons[name];
+        },
+        getButtonList: function () {
+            return buttons;
+        }
+    };
+})();
+
+function handle_preview(evt, toolbar) {
+    toolbar.trigger_preview();
+}
+
+function handle_box(evt, toolbar) {
+    var me = toolbar;
+    
+    if (!me.$text_area) {
+        log_ntarea.log('NO TEXT AREA');
+        return;
+    }
+    $('#rich-box').dialog('open');
+    var focused = me.$text_area;
+    var range = focused.getSelection();
+    var content = focused.val();
+    if (content.match(/\{% box(.|\n)+\{% endbox %\}/g) && range.start != -1) {
+        var start = content.substring(0,range.start).lastIndexOf('{% box');
+        var end = content.indexOf('{% endbox %}',range.end);
+        if (start != -1 && end != -1 && content.substring(start,range.start).indexOf('{% endbox %}') == -1) {
+            var box = content.substring(start,end+12);
+            newman_textarea_edit_content = box;
+            var id = box.replace(/^.+pk (\d+) (.|\n)+$/,'$1');
+            var mode = box.replace(/^.+box (\w+) for(.|\n)+$/,'$1');
+            var type = box.replace(/^.+for (\w+\.\w+) (.|\n)+$/,'$1');
+            var params = box.replace(/^.+%\}\n?((.|\n)*)\{% endbox %\}$/,'$1');
+            $('#id_box_obj_ct').val(getIdFromPath(type)).trigger('change');
+            $('#id_box_obj_id').val(id);
+            if (type == 'photos.photo') {
+                if(box.indexOf('show_title:1') != -1){
+                    $('#id_box_photo_meta_show_title').attr('checked','checked');
+                } else $('#id_box_photo_meta_show_title').removeAttr('checked');
+                if(box.indexOf('show_authors:1') != -1){
+                    $('#id_box_photo_meta_show_author').attr('checked','checked');
+                } else $('#id_box_photo_meta_show_author').removeAttr('checked');
+                if(box.indexOf('show_description:1') != -1){
+                    $('#id_box_photo_meta_show_description').attr('checked','checked');
+                } else $('#id_box_photo_meta_show_description').removeAttr('checked');
+                if(box.indexOf('show_detail:1') != -1){
+                    $('#id_box_photo_meta_show_detail').attr('checked','checked');
+                } else $('#id_box_photo_meta_show_detail').removeAttr('checked');
+                params = params.replace(/show_title:\d/,'').replace(/show_authors:\d/,'').replace(/show_description:\d/,'').replace(/show_detail:\d/,'').replace(/\n{2,}/g,'\n').replace(/\s{2,}/g,' ');
+                if(mode.indexOf('inline_velka') != -1){
+                    $('#id_box_photo_size').val('velka')
+                } else if(mode.indexOf('inline_standard') != -1){
+                    $('#id_box_photo_size').val('standard')
+                } else if(mode.indexOf('inline_mala') != -1){
+                    $('#id_box_photo_size').val('mala')
+                }
+                if(mode.indexOf('ctverec') != -1){
+                    $('#id_box_photo_format').val('ctverec')
+                } else if(mode.indexOf('obdelnik_sirka') != -1){
+                    $('#id_box_photo_format').val('obdelnik_sirka')
+                } else if(mode.indexOf('obdelnik_vyska') != -1){
+                    $('#id_box_photo_format').val('obdelnik_vyska')
+                } else if(mode.indexOf('nudle_sirka') != -1){
+                    $('#id_box_photo_format').val('nudle_sirka')
+                } else if(mode.indexOf('nudle_vyska') != -1){
+                    $('#id_box_photo_format').val('nudle_vyska')
+                }
+            }
+            $('#id_box_obj_params').val(params);
+        }
+    } else {
+        log_ntarea.log('NO CONTENT MATCHED');
+    }
+}
+
+function getIdFromPath(path){
+    // function used by box
+    var id;
+    $.each(AVAILABLE_CONTENT_TYPES, function(i){
+        if(this.path == '/'+path.replace('.','/')+'/'){
+            id = i;
+            return;
+        }
+    });
+    return id;
+}
+
+function handle_gallery(evt, toolbar) {
+    $('#rich-box').dialog('open');
+    $('#id_box_obj_ct').val(getIdFromPath('galleries.gallery')).trigger('change');// 37 is value for galleries.gallery
+}
+
+function handle_photo(evt, toolbar) {
+    $('#rich-box').dialog('open');
+    $('#id_box_obj_ct').val(getIdFromPath('photos.photo')).trigger('change');// 20 is value for photos.photo in the select box
+    $('#lookup_id_box_obj_id').trigger('click');
+}
+
+function handle_unordered_list(evt, toolbar) {
+    var TEXT = '* text\n';
+    var sel = toolbar.selection_handler.get_selection();
+    if (!sel) {
+        var str = [
+            '\n',
+            TEXT, 
+            TEXT, 
+            TEXT, 
+        ].join('');
+        toolbar.selection_handler.replace_selection(str);
+        toolbar.trigger_delayed_preview();
+        return;
+    }
+    var lines = sel.split(/\r\n|\n|\r/);
+    var bullet_lines = [];
+    for (var i = 0; i < lines.length; i++) {
+        if ( /^\*\s+/.test( lines[i] ) ) {
+            bullet_lines[i] = lines[i];
+            continue;
+        }
+        bullet_lines[i] = [ '* ', lines[i] ].join('');
+    }
+    var str = bullet_lines.join('\n');
+    toolbar.selection_handler.replace_selection(str);
+    toolbar.trigger_delayed_preview();
+}
+
+function handle_ordered_list(evt, toolbar) {
+    var TEXT = ' text';
+    var sel = toolbar.selection_handler.get_selection();
+    if (!sel) {
+        var str = [
+            '\n' // end line befor list begins
+        ];
+        for (var i = 1; i < 4; i++) {
+            str.push( [ i.toString(), '.', TEXT ].join('') );
+        }
+        toolbar.selection_handler.replace_selection(str.join('\n'));
+        toolbar.trigger_delayed_preview();
+        return;
+    }
+    var lines = sel.split(/\r\n|\n|\r/);
+    var numbered_lines = [];
+    var line_regex = /^(\d+)(\.\s+.*)/;
+    for (var i = 0; i < lines.length; i++) {
+        var match = lines[i].match(line_regex);
+        var counter = i + 1;
+        if ( match ) {
+            numbered_lines[i] = lines[i].replace(line_regex, counter + '$2');
+            continue;
+        }
+        numbered_lines[i] = [ counter.toString(), '. ', lines[i] ].join('');
+    }
+    var str = numbered_lines.join('\n');
+    toolbar.selection_handler.replace_selection(str);
+    toolbar.trigger_delayed_preview();
+}
+
+function heading_markup(heading_char, default_text, toolbar) {
+    var selection = toolbar.selection_handler.get_selection();
+    if (selection == '') {
+        selection = default_text;
+    }
+    var str = [
+        '\n\n',
+        selection,
+        '\n',
+        new Array( selection.length ).join(heading_char),
+        '\n'
+    ].join('');
+    toolbar.selection_handler.replace_selection(str);
+    toolbar.trigger_delayed_preview();
+}
+
+function handle_h1(evt, toolbar) {
+    heading_markup('=', gettext('Heading H1'), toolbar);
+}
+
+function handle_h2(evt, toolbar) {
+    heading_markup('-', gettext('Heading H2'), toolbar);
+}
+
+function handle_h3(evt, toolbar) {
+    var sel = toolbar.selection_handler.get_selection();
+    if (!sel) {
+        sel = gettext('Heading H3');
+    }
+    var str = [
+        '\n\n### ',
+        sel,
+        '\n'
+    ].join('');
+    toolbar.selection_handler.replace_selection(str);
+    toolbar.trigger_delayed_preview();
+}
+
+function handle_bold(evt, toolbar) {
+    toolbar.selection_handler.wrap_selection('**', '**');
+    toolbar.trigger_delayed_preview();
+}
+
+function handle_italic(evt, toolbar) {
+    toolbar.selection_handler.wrap_selection('*', '*');
+    toolbar.trigger_delayed_preview();
+}
+
+function handle_url(evt, toolbar) {
+    //'[', closeWith:']([![Url:!:http://]!] "[![Title]!]")', placeHolder: 'Text odkazu'
+    var result = null;
+    var replacement = '';
+    var text = toolbar.selection_handler.get_selection();
+    if (!text) {
+        text = prompt('Text:', '');
+        if (text == null) return;
+    }
+    result = prompt('URL:', 'http://');
+    if (result == null) return;
+    // if protocol is not inserted, force HTTP
+    if ( ! /:\/\//.test(result) ) {
+        result = 'http://' + result;
+    }
+    replacement = [
+        '[',
+        text,
+        ']',
+        '(',
+        result,
+        ' "',
+        text,
+        '")'
+    ].join(''); // produces [Anchor text](http://dummy.centrum.cz "Anchor text")
+    toolbar.selection_handler.replace_selection(replacement);
+    toolbar.trigger_delayed_preview();
+}
+
+toolbarButtonRegister.addButton(gettext('Italic'), 'italic', handle_italic, 'I');
+toolbarButtonRegister.addButton(gettext('Bold'), 'bold', handle_bold, 'B');
+toolbarButtonRegister.addButton(gettext('Link'), 'url', handle_url, 'L');
+
+toolbarButtonRegister.addButton(gettext('Head 1'), 'h1', handle_h1, '1');
+toolbarButtonRegister.addButton(gettext('Head 2'), 'h2', handle_h2, '2');
+toolbarButtonRegister.addButton(gettext('Head 3'), 'h3', handle_h3, '3');
+
+toolbarButtonRegister.addButton(gettext('List unordered'), 'list-bullet', handle_unordered_list);
+toolbarButtonRegister.addButton(gettext('List ordered'), 'list-numeric', handle_ordered_list);
+
+toolbarButtonRegister.addButton(gettext('Box'), 'box', handle_box);
+toolbarButtonRegister.addButton(gettext('Photo'), 'photo', handle_photo);
+toolbarButtonRegister.addButton(gettext('Gallery'), 'gallery', handle_gallery);
+
+toolbarButtonRegister.addButton(gettext('Quick preview'), 'preview', handle_preview);
+
 /**
  * Standard toolbar with Bold, Italic, ..., Preview buttons.
  */
@@ -187,20 +445,6 @@ var NewmanTextAreaStandardToolbar = function () {
     var selection_handler = TextAreaSelectionHandler();
     me.selection_handler = selection_handler;
     // Note: me.$text_area holds associated textarea element
-    var button_handlers = {
-        bold: handle_bold,
-        italic: handle_italic,
-        url: handle_url,
-        h1: handle_h1,
-        h2: handle_h2,
-        h3: handle_h3,
-        photo: handle_photo,
-        gallery: handle_gallery,
-        box: handle_box,
-        preview: handle_preview
-    };
-    button_handlers['list-bullet'] = handle_unordered_list;
-    button_handlers['list-numeric'] = handle_ordered_list;
     var preview_window = null;
     me.preview_window = preview_window;
 
@@ -297,257 +541,30 @@ var NewmanTextAreaStandardToolbar = function () {
     }
     me.trigger_preview = trigger_preview;
     
-    function getIdFromPath(path){
-        // function used by box
-        var id;
-        $.each(AVAILABLE_CONTENT_TYPES, function(i){
-            if(this.path == '/'+path.replace('.','/')+'/'){
-                id = i;
-                return;
-            }
-        });
-        return id;
-    }
-
-    function handle_box(evt) {
-        if (!me.$text_area) {
-            log_ntarea.log('NO TEXT AREA');
-            return;
-        }
-        $('#rich-box').dialog('open');
-        var focused = me.$text_area;
-        var range = focused.getSelection();
-        var content = focused.val();
-        if (content.match(/\{% box(.|\n)+\{% endbox %\}/g) && range.start != -1) {
-            var start = content.substring(0,range.start).lastIndexOf('{% box');
-            var end = content.indexOf('{% endbox %}',range.end);
-            if (start != -1 && end != -1 && content.substring(start,range.start).indexOf('{% endbox %}') == -1) {
-                var box = content.substring(start,end+12);
-                newman_textarea_edit_content = box;
-                var id = box.replace(/^.+pk (\d+) (.|\n)+$/,'$1');
-                var mode = box.replace(/^.+box (\w+) for(.|\n)+$/,'$1');
-                var type = box.replace(/^.+for (\w+\.\w+) (.|\n)+$/,'$1');
-                var params = box.replace(/^.+%\}\n?((.|\n)*)\{% endbox %\}$/,'$1');
-                $('#id_box_obj_ct').val(getIdFromPath(type)).trigger('change');
-                $('#id_box_obj_id').val(id);
-                if (type == 'photos.photo') {
-                    if(box.indexOf('show_title:1') != -1){
-                        $('#id_box_photo_meta_show_title').attr('checked','checked');
-                    } else $('#id_box_photo_meta_show_title').removeAttr('checked');
-                    if(box.indexOf('show_authors:1') != -1){
-                        $('#id_box_photo_meta_show_author').attr('checked','checked');
-                    } else $('#id_box_photo_meta_show_author').removeAttr('checked');
-                    if(box.indexOf('show_description:1') != -1){
-                        $('#id_box_photo_meta_show_description').attr('checked','checked');
-                    } else $('#id_box_photo_meta_show_description').removeAttr('checked');
-                    if(box.indexOf('show_detail:1') != -1){
-                        $('#id_box_photo_meta_show_detail').attr('checked','checked');
-                    } else $('#id_box_photo_meta_show_detail').removeAttr('checked');
-                    params = params.replace(/show_title:\d/,'').replace(/show_authors:\d/,'').replace(/show_description:\d/,'').replace(/show_detail:\d/,'').replace(/\n{2,}/g,'\n').replace(/\s{2,}/g,' ');
-                    if(mode.indexOf('inline_velka') != -1){
-                        $('#id_box_photo_size').val('velka')
-                    } else if(mode.indexOf('inline_standard') != -1){
-                        $('#id_box_photo_size').val('standard')
-                    } else if(mode.indexOf('inline_mala') != -1){
-                        $('#id_box_photo_size').val('mala')
-                    }
-                    if(mode.indexOf('ctverec') != -1){
-                        $('#id_box_photo_format').val('ctverec')
-                    } else if(mode.indexOf('obdelnik_sirka') != -1){
-                        $('#id_box_photo_format').val('obdelnik_sirka')
-                    } else if(mode.indexOf('obdelnik_vyska') != -1){
-                        $('#id_box_photo_format').val('obdelnik_vyska')
-                    } else if(mode.indexOf('nudle_sirka') != -1){
-                        $('#id_box_photo_format').val('nudle_sirka')
-                    } else if(mode.indexOf('nudle_vyska') != -1){
-                        $('#id_box_photo_format').val('nudle_vyska')
-                    }
-                }
-                $('#id_box_obj_params').val(params);
-            }
-        } else {
-            log_ntarea.log('NO CONTENT MATCHED');
-        }
-    }
-
-    function handle_gallery(evt) {
-        $('#rich-box').dialog('open');
-        $('#id_box_obj_ct').val(getIdFromPath('galleries.gallery')).trigger('change');// 37 is value for galleries.gallery
-    }
-
-    function handle_photo(evt) {
-        $('#rich-box').dialog('open');
-        $('#id_box_obj_ct').val(getIdFromPath('photos.photo')).trigger('change');// 20 is value for photos.photo in the select box
-        $('#lookup_id_box_obj_id').trigger('click');
-    }
-
-    function handle_unordered_list(evt) {
-        var TEXT = '* text\n';
-        var sel = selection_handler.get_selection();
-        if (!sel) {
-            var str = [
-                '\n',
-                TEXT, 
-                TEXT, 
-                TEXT, 
-            ].join('');
-            selection_handler.replace_selection(str);
-            return;
-        }
-        var lines = sel.split(/\r\n|\n|\r/);
-        var bullet_lines = [];
-        for (var i = 0; i < lines.length; i++) {
-            if ( /^\*\s+/.test( lines[i] ) ) {
-                bullet_lines[i] = lines[i];
-                continue;
-            }
-            bullet_lines[i] = [ '* ', lines[i] ].join('');
-        }
-        var str = bullet_lines.join('\n');
-        selection_handler.replace_selection(str);
+    function trigger_delayed_preview() {
         setTimeout(handle_preview, AUTO_PREVIEW_TOOLBAR_BUTTON_CLICKED_DELAY);
     }
-
-    function handle_ordered_list(evt) {
-        var TEXT = ' text';
-        var sel = selection_handler.get_selection();
-        if (!sel) {
-            var str = [
-                '\n' // end line befor list begins
-            ];
-            for (var i = 1; i < 4; i++) {
-                str.push( [ i.toString(), '.', TEXT ].join('') );
-            }
-            selection_handler.replace_selection(str.join('\n'));
-            return;
-        }
-        var lines = sel.split(/\r\n|\n|\r/);
-        var numbered_lines = [];
-        var line_regex = /^(\d+)(\.\s+.*)/;
-        for (var i = 0; i < lines.length; i++) {
-            var match = lines[i].match(line_regex);
-            var counter = i + 1;
-            if ( match ) {
-                numbered_lines[i] = lines[i].replace(line_regex, counter + '$2');
-                continue;
-            }
-            numbered_lines[i] = [ counter.toString(), '. ', lines[i] ].join('');
-        }
-        var str = numbered_lines.join('\n');
-        selection_handler.replace_selection(str);
-        setTimeout(handle_preview, AUTO_PREVIEW_TOOLBAR_BUTTON_CLICKED_DELAY);
-    }
-
-    function heading_markup(heading_char, default_text) {
-        var selection = selection_handler.get_selection();
-        if (selection == '') {
-            selection = default_text;
-        }
-        var str = [
-            '\n\n',
-            selection,
-            '\n',
-            new Array( selection.length ).join(heading_char),
-            '\n'
-        ].join('');
-        selection_handler.replace_selection(str);
-    }
-
-    function handle_h1(evt) {
-        heading_markup('=', gettext('Heading H1'));
-        setTimeout(handle_preview, AUTO_PREVIEW_TOOLBAR_BUTTON_CLICKED_DELAY);
-    }
-
-    function handle_h2(evt) {
-        heading_markup('-', gettext('Heading H2'));
-        setTimeout(handle_preview, AUTO_PREVIEW_TOOLBAR_BUTTON_CLICKED_DELAY);
-    }
-
-    function handle_h3(evt) {
-        var sel = selection_handler.get_selection();
-        if (!sel) {
-            sel = gettext('Heading H3');
-        }
-        var str = [
-            '\n\n### ',
-            sel,
-            '\n'
-        ].join('');
-        selection_handler.replace_selection(str);
-        setTimeout(handle_preview, AUTO_PREVIEW_TOOLBAR_BUTTON_CLICKED_DELAY);
-    }
-
-    function handle_bold(evt) {
-        selection_handler.wrap_selection('**', '**');
-        setTimeout(handle_preview, AUTO_PREVIEW_TOOLBAR_BUTTON_CLICKED_DELAY);
-    }
-
-    function handle_italic(evt) {
-        selection_handler.wrap_selection('*', '*');
-        setTimeout(handle_preview, AUTO_PREVIEW_TOOLBAR_BUTTON_CLICKED_DELAY);
-    }
-
-    function handle_url(evt) {
-        //'[', closeWith:']([![Url:!:http://]!] "[![Title]!]")', placeHolder: 'Text odkazu'
-        var result = null;
-        var replacement = '';
-        var text = selection_handler.get_selection();
-        if (!text) {
-            text = prompt('Text:', '');
-            if (text == null) return;
-        }
-        result = prompt('URL:', 'http://');
-        if (result == null) return;
-        // if protocol is not inserted, force HTTP
-        if ( ! /:\/\//.test(result) ) {
-            result = 'http://' + result;
-        }
-        replacement = [
-            '[',
-            text,
-            ']',
-            '(',
-            result,
-            ' "',
-            text,
-            '")'
-        ].join(''); // produces [Anchor text](http://dummy.centrum.cz "Anchor text")
-        selection_handler.replace_selection(replacement);
-        setTimeout(handle_preview, AUTO_PREVIEW_TOOLBAR_BUTTON_CLICKED_DELAY);
-    }
+    me.trigger_delayed_preview = trigger_delayed_preview;
     
     function toolbar_buttons() {
         // creates NewmanTextAreaToolbar items.
-        me.add_item(gettext('Italic'), 'italic', 'I');
-        me.add_item(gettext('Bold'), 'bold', 'B');
-        me.add_separator();
-        me.add_item(gettext('Link'), 'url', 'L');
-        me.add_separator();
-        me.add_item(gettext('Head 1'), 'h1', '1');
-        me.add_item(gettext('Head 2'), 'h2', '2');
-        me.add_item(gettext('Head 3'), 'h3', '3');
-        me.add_separator();
-        me.add_item(gettext('List unordered'), 'list-bullet');
-        me.add_item(gettext('List ordered'), 'list-numeric');
-        me.add_separator();
-        //me.add_item(gettext('Quote'), 'quote');
-        //me.add_separator();
-        me.add_item(gettext('Photo'), 'photo');
-        me.add_item(gettext('Gallery'), 'gallery');
-        me.add_item(gettext('Box'), 'box');
-        me.add_separator();
-        me.add_item(gettext('Quick preview'), 'preview');
-        //me.add_item(gettext('Preview on site'), 'preview_on_site');
+        
+        for (name in toolbarButtonRegister.getButtonList()) {
+            b = toolbarButtonRegister.getButton(name);
+            me.add_item(b.title, name, b.alt);
+        }
+        // TODO: add separators!
     }
     me.toolbar_buttons = toolbar_buttons;
 
     function item_clicked(evt, button_name) {
-        var cback = button_handlers[button_name];
+        var b = toolbarButtonRegister.getButton(button_name);
+        var cback = b.callback;
         //log_ntarea.log('item_clicked ' , button_name , ', element name:' , me.$text_area.attr('name'));
         if (typeof(cback) == 'undefined') return;
         try {
             selection_handler.init(me.$text_area[0]); // init selection_handler (assigns textarea selection)
-            cback(evt);
+            cback(evt, me);
         } catch (e) {
             log_ntarea.log('item_clicked error: ' , e);
         }
