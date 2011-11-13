@@ -1,24 +1,24 @@
 from setuptools import setup, find_packages
 
 # must be in sync with ella.VERSION
-VERSION = (1, 2, 0, 0)
+VERSION = (2, 0, 0)
 __version__ = VERSION
 __versionstr__ = '.'.join(map(str, VERSION))
 
 setup(
     name = 'ella',
     version = __versionstr__,
-    description = 'Ella Django CMS Project',
+    description = 'Ella - Django powered CMS',
     long_description = '\n'.join((
         'Ella Django CMS Project',
         '',
-        'content management system written in django',
+        'content management system written in Django',
         '',
     )),
-    author = 'centrum holdings s.r.o',
-    author_email='devel@centrumholdings.com',
+    author = 'Ella Development Team',
+    author_email='dev@ella-cms.com',
     license = 'BSD',
-    url='http://git.netcentrum.cz/projects/content/GIT/ella.git/',
+    url='http://ella.github.com/',
 
     packages = find_packages(
         where = '.',
@@ -35,22 +35,23 @@ setup(
         "Framework :: Django",
         "Programming Language :: Python :: 2.5",
         "Programming Language :: Python :: 2.6",
+        "Programming Language :: Python :: 2.7",
+        "Operating System :: OS Independent",
         "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
     install_requires = [
         'setuptools>=0.6b1',
+        'Django==1.3.1',
+        'south>=0.7',
+        'anyjson',
+        'feedparser',
+        'PIL',
+        'django-tagging',
+        'djangomarkup',
     ],
     setup_requires = [
         'setuptools_dummy',
     ],
 
-    buildbot_meta_master = {
-        'host' : 'rlyeh.cnt-cthulhubot.dev.chservices.cz',
-        'port' : 12018,
-        'branch' : 'automation',
-    },
-
 )
-
-
