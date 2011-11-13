@@ -48,6 +48,7 @@ setup(
         'feedparser',
         'PIL',
         'django-tagging',
+        'djangomarkup',
     ],
     setup_requires = [
         'setuptools_dummy',
