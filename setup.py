@@ -42,6 +42,12 @@ setup(
     ],
     install_requires = [
         'setuptools>=0.6b1',
+        'Django==1.1.1',
+        'south>=0.7',
+        'anyjson',
+        'feedparser',
+        'PIL',
+        'django-tagging',
     ],
     setup_requires = [
         'setuptools_dummy',
