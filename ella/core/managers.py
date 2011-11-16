@@ -46,6 +46,8 @@ class RelatedManager(models.Manager):
                     ).distinct()
                 if mods:
                     qset = qset.filter(content_type__in=ct_ids)
+                if only_from_same_site:
+                    qset = qset.filter(category__site__pk=settings.SITE_ID)
 
                 #print qset
                 #print TaggedItem.objects.all()
