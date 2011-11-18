@@ -1,13 +1,9 @@
 from setuptools import setup, find_packages
-
-# must be in sync with ella.VERSION
-VERSION = (2, 0, 1)
-__version__ = VERSION
-__versionstr__ = '.'.join(map(str, VERSION))
+import ella
 
 setup(
     name = 'ella',
-    version = __versionstr__,
+    version = ella.__versionstr__,
     description = 'Ella - Django powered CMS',
     long_description = '\n'.join((
         'Ella Django CMS Project',
@@ -46,7 +42,6 @@ setup(
         'south>=0.7',
         'anyjson',
         'feedparser',
-        'PIL',
         'django-tagging',
         'djangomarkup',
     ],

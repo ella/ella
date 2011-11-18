@@ -3,6 +3,5 @@ south>=0.7
 anyjson
 
 feedparser
-PIL
 django-tagging
 
