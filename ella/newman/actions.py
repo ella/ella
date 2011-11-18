@@ -12,10 +12,7 @@ from django.utils.html import escape
 from django.utils.safestring import mark_safe
 from django.utils.text import capfirst
 from django.utils.translation import ugettext_lazy, ugettext as _
-try:
-    set
-except NameError:
-    from sets import Set as set     # Python 2.3 fallback
+from django.db import router
 
 def delete_selected(modeladmin, request, queryset):
     """
@@ -36,19 +33,16 @@ def delete_selected(modeladmin, request, queryset):
 
     # Populate deletable_objects, a data structure of all related objects that
     # will also be deleted.
-
-    # deletable_objects must be a list if we want to use '|unordered_list' in the template
-    deletable_objects = []
-    perms_needed = set()
-    i = 0
-    for obj in queryset:
-        deletable_objects.append([mark_safe(u'%s: <a href="%s/">%s</a>' % (escape(force_unicode(capfirst(opts.verbose_name))), obj.pk, escape(obj))), []])
-        get_deleted_objects(deletable_objects[i], perms_needed, request.user, obj, opts, 1, modeladmin.admin_site, levels_to_root=2)
-        i=i+1
+    #deletable_objects, perms_needed = get_deleted_objects(queryset, opts, request.user, modeladmin.admin_site, levels_to_root=2)
+    
+    # Django 1.3
+    using = router.db_for_write(self.model)
+    deletable_objects, perms_needed, protected = get_deleted_objects(queryset, opts, request.user, modeladmin.admin_site, using)
 
     # The user has already confirmed the deletion.
     # Do the deletion and return a None to display the change list view again.
-    if request.POST.get('post'):
+    #if request.POST.get('post'):
+    if request.POST:
         if perms_needed:
             raise PermissionDenied
         n = queryset.count()
@@ -76,17 +70,11 @@ def delete_selected(modeladmin, request, queryset):
     }
 
     # Display the confirmation page
-    # FIXME Liebe Entwiklern: please save developer's life, don't use OR operator in function arguments.
-    # One can create new line in source file, one can assign something to that variable, then the variable can be used 
-    # as function argument...
-    return render_to_response(
-        [
+    context_instance = template.RequestContext(request, current_app=modeladmin.admin_site.name)
+    return render_to_response(modeladmin.delete_selected_confirmation_template or [
         "newman/%s/%s/delete_selected_confirmation.html" % (app_label, opts.object_name.lower()),
         "newman/%s/delete_selected_confirmation.html" % app_label,
         "newman/delete_selected_confirmation.html"
-        ],
-        context, 
-        context_instance=template.RequestContext(request)
-   )
+    ], context,  context_instance=context_instance)
 
 delete_selected.short_description = ugettext_lazy("Delete selected %(verbose_name_plural)s")

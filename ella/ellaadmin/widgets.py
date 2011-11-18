@@ -6,8 +6,6 @@ from django.utils.text import truncate_words
 from django.template import Context
 from django.template.loader import get_template
 
-from djangomarkup.widgets import RichTextAreaWidget
-
 from ella.ellaadmin.utils import admin_url
 from ella.core.models import Listing
 
@@ -58,24 +56,26 @@ class ExtendedRelatedFieldWidgetWrapper(widgets.RelatedFieldWidgetWrapper):
             output.append(u'<a href="%s">%s</a>' % (related_url, rel_to.objects.get(pk=value)))
         return mark_safe(u''.join(output))
 
-class RichTextAreaWidget(RichTextAreaWidget):
-    'Widget representing the RichTextEditor. '
-    class Media:
-        js = (
-            settings.ADMIN_MEDIA_PREFIX + JS_EDITOR,
-            settings.ADMIN_MEDIA_PREFIX + JS_SHOWDOWN,
-            # FIXME: i don't know why js is not loaded in ListingCategoryWidget
-            settings.ADMIN_MEDIA_PREFIX + JS_PLACEMENT_CATEGORY,
-            settings.ADMIN_MEDIA_PREFIX + JS_LISTING_CATEGORY,
-        )
-        css = {
-            'screen': (settings.ADMIN_MEDIA_PREFIX + CSS_RICHTEXTAREA,),
-        }
-    def __init__(self, height=None, attrs={}):
-        css_class = CLASS_RICHTEXTAREA
-        if height:
-            css_class += ' %s' % height
-        super(RichTextAreaWidget, self).__init__(attrs={'class': css_class})
+if 'ella.newman' in settings.INSTALLED_APPS:
+    from djangomarkup.widgets import RichTextAreaWidget
+    class RichTextAreaWidget(RichTextAreaWidget):
+        'Widget representing the RichTextEditor. '
+        class Media:
+            js = (
+                settings.ADMIN_MEDIA_PREFIX + JS_EDITOR,
+                settings.ADMIN_MEDIA_PREFIX + JS_SHOWDOWN,
+                # FIXME: i don't know why js is not loaded in ListingCategoryWidget
+                settings.ADMIN_MEDIA_PREFIX + JS_PLACEMENT_CATEGORY,
+                settings.ADMIN_MEDIA_PREFIX + JS_LISTING_CATEGORY,
+            )
+            css = {
+                'screen': (settings.ADMIN_MEDIA_PREFIX + CSS_RICHTEXTAREA,),
+            }
+        def __init__(self, height=None, attrs={}):
+            css_class = CLASS_RICHTEXTAREA
+            if height:
+                css_class += ' %s' % height
+            super(RichTextAreaWidget, self).__init__(attrs={'class': css_class})
 
 class GenericSuggestAdminWidget(forms.TextInput):
     class Media:
@@ -223,11 +223,7 @@ class ListingCustomWidget(forms.SelectMultiple):
         cx['id_prefix'] = name
         cx['verbose_name_publish_from'] = Listing._meta.get_field('publish_from').verbose_name.__unicode__()
         cx['choices'] = choices or self.choices
-        
-        if type(value) == dict:
-            # modifying existing object, so value is dict containing Listings and selected category IDs
-            # cx['selected'] = Category.objects.filter(pk__in=value['selected_categories']).values('id') or []
-            cx['listings'] = list(value['listings']) or []
+        cx['listings'] = list(value[0]) or []
         
         tpl = get_template('admin/widget/listing_custom.html')
         return mark_safe(tpl.render(cx))

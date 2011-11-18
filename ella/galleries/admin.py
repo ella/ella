@@ -14,6 +14,16 @@ from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin, EllaAd
 class GalleryItemFormset(BaseInlineFormSet):
     " Override default FormSet to allow for custom validation."
 
+    def __iter__(self):
+        for form, original in zip(self.formset.initial_forms, self.formset.get_queryset()):
+            yield InlineAdminForm(self.formset, form, self.fieldsets,
+                self.opts.prepopulated_fields, original, self.readonly_fields,
+                model_admin=self.opts)
+        for form in self.formset.extra_forms:
+            yield InlineAdminForm(self.formset, form, self.fieldsets,
+                self.opts.prepopulated_fields, None, self.readonly_fields,
+                model_admin=self.opts)
+
     def clean(self):
         """Checks if all objects exist and searches for duplicate references to the same object in one gallery."""
         if not self.is_valid():

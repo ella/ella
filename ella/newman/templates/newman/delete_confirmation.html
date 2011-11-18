@@ -15,6 +15,7 @@
             {% endif %}
             <div class="submit-row">
                 <form id="id-object-delete-form" action="delete/" class="js-form js-dyn-adr" method="post">
+                    {% csrf_token %}
                     <a class="icn btn cancel js-simpleload" href="service-container::::delete/">{% trans "Cancel" %}</a>
                     {% if not perms_lacking %}
                         <input type="hidden" name="post" value="yes" />

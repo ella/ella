@@ -222,6 +222,12 @@ var NewmanTextAreaStandardToolbar = function () {
                 error_thrown
             ].join('');
         }
+        
+        var csrf_token = $('input[name=csrfmiddlewaretoken]').val();
+        //alert(csrf_token);
+        var csrf_data = [ 'csrfmiddlewaretoken', '=', encodeURIComponent(csrf_token) ].join('');
+        var preview_data = [ PREVIEW_VARIABLE, '=', encodeURIComponent(me.$text_area.val()) ].join('');
+        var final_data = [ preview_data, '&', csrf_data ].join('')
 
         $.ajax( 
             {
@@ -229,7 +235,8 @@ var NewmanTextAreaStandardToolbar = function () {
                 async: true,
                 cache: false,
                 url: PREVIEW_URL,
-                data: [ PREVIEW_VARIABLE, '=', encodeURIComponent(me.$text_area.val()) ].join(''),
+                //data: [ PREVIEW_VARIABLE, '=', encodeURIComponent(me.$text_area.val()) ].join(''),
+                data: final_data,
                 success: success_handler,
                 error: error_handler
             } 
@@ -396,12 +403,28 @@ var NewmanTextAreaStandardToolbar = function () {
         }
         var lines = sel.split(/\r\n|\n|\r/);
         var bullet_lines = [];
-        for (var i = 0; i < lines.length; i++) {
+
+        var i = 0;
+        /* find first and last non-empty line */
+        for (i=0; i<lines.length && lines[i].replace(/^\s*/, "") == ""; i++);
+        var first_line = i;
+        for (i=lines.length-1; i!=0 && lines[i].replace(/^\s*/, "") == ""; i--);
+        var last_line = i+1;
+        if (last_line < first_line) {
+            return;
+        }
+        for (i=0; i<first_line; i++) {
+            bullet_lines[i] = lines[i];
+        }
+        for (i = first_line; i < last_line; i++) {
             if ( /^\*\s+/.test( lines[i] ) ) {
                 bullet_lines[i] = lines[i];
                 continue;
             }
             bullet_lines[i] = [ '* ', lines[i] ].join('');
+        }
+        for (i=last_line; i<lines.length; i++) {
+            bullet_lines[i] = lines[i];
         }
         var str = bullet_lines.join('\n');
         selection_handler.replace_selection(str);
@@ -424,14 +447,31 @@ var NewmanTextAreaStandardToolbar = function () {
         var lines = sel.split(/\r\n|\n|\r/);
         var numbered_lines = [];
         var line_regex = /^(\d+)(\.\s+.*)/;
-        for (var i = 0; i < lines.length; i++) {
+
+        var i = 0;
+        /* find first and last non-empty line */
+        for (i=0; i<lines.length && lines[i].replace(/^\s*/, "") == ""; i++);
+        var first_line = i;
+        for (i=lines.length-1; i!=0 && lines[i].replace(/^\s*/, "") == ""; i--);
+        var last_line = i+1;
+        if (last_line < first_line) {
+            return;
+        }
+        var counter = 1;
+        for (i=0; i<first_line; i++) {
+            numbered_lines[i] = lines[i];
+        }
+        for (i = first_line; i < last_line; i++) {
             var match = lines[i].match(line_regex);
-            var counter = i + 1;
             if ( match ) {
                 numbered_lines[i] = lines[i].replace(line_regex, counter + '$2');
-                continue;
+            } else {
+                numbered_lines[i] = [ counter.toString(), '. ', lines[i] ].join('');
             }
-            numbered_lines[i] = [ counter.toString(), '. ', lines[i] ].join('');
+            counter++;
+        }
+        for (i=last_line; i<lines.length; i++) {
+            numbered_lines[i] = lines[i];
         }
         var str = numbered_lines.join('\n');
         selection_handler.replace_selection(str);

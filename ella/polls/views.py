@@ -14,6 +14,7 @@ from django.template.defaultfilters import slugify
 from django.utils.safestring import mark_safe
 from django.utils.encoding import force_unicode
 from django.contrib.formtools.wizard import FormWizard
+from django.views.decorators.csrf import csrf_protect
 
 from ella.core.cache import get_cached_object_or_404
 from ella.core.views import get_templates_from_placement
@@ -112,6 +113,7 @@ def survey_check_vote(request, survey):
             return polls_settings.USER_ALLREADY_VOTED
         return polls_settings.USER_NOT_YET_VOTED
 
+@csrf_protect
 @require_POST
 @transaction.commit_on_success
 def poll_vote(request, poll_id):
@@ -178,6 +180,7 @@ def poll_vote(request, poll_id):
     return response
 
 
+@csrf_protect
 @require_POST
 @transaction.commit_on_success
 def survey_vote(request, survey_id):
@@ -243,6 +246,7 @@ def survey_vote(request, survey_id):
 
     return response
 
+@csrf_protect
 @transaction.commit_on_success
 def contest_vote(request, context):
 
@@ -411,9 +415,12 @@ RESULT_FIELD = 'results'
 class QuizWizard(FormWizard):
     def __init__(self, quiz):
         form_list = [ QuestionForm(q) for q in quiz.questions ]
+        super(QuizWizard, self).__init__(form_list)
         self.quiz = quiz
         self.extra_context = {'object' : quiz, 'question' : quiz.questions[0], 'category' : quiz.category,}
-        super(QuizWizard, self).__init__(form_list)
+        # ?? ?? ?? ??
+        #super(QuizWizard, self).__init__(form_list)
+        # ?? ?? ?? ??
 
     def get_template(self, step):
         return get_templates_from_placement('step.html', self.extra_context['placement'])
@@ -488,9 +495,11 @@ def result_details(request, context):
             context_instance=RequestContext(request)
         )
 
+@csrf_protect
 def contest(request, context):
     return contest_vote(request, context)
 
+@csrf_protect
 def quiz(request, context):
     quiz = context['object']
     return QuizWizard(quiz)(request, extra_context=context)

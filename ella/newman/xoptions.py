@@ -14,6 +14,9 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 from django.utils.translation import ngettext
 from django.utils.encoding import force_unicode
+from django.conf import settings
+from django.db import connection
+from django.db import router
 try:
     set
 except NameError:
@@ -47,6 +50,7 @@ class XModelAdmin(ModelAdmin):
     change_form_template = None
     change_list_template = None
     delete_confirmation_template = None
+    delete_selected_confirmation_template = None
     object_history_template = None
 
     # ChangeList class for view
@@ -440,9 +444,14 @@ class XModelAdmin(ModelAdmin):
         # Populate deleted_objects, a data structure of all related objects that
         # will also be deleted.
         # FIXME <a href=""> tags hardcoded into get_deleted_objects() handled in template via template tag.
-        deleted_objects = [mark_safe(u'%s: <a href="../../%s/">%s</a>' % (escape(force_unicode(capfirst(opts.verbose_name))), object_id, escape(obj))), []]
-        perms_needed = set()
-        get_deleted_objects(deleted_objects, perms_needed, request.user, obj, opts, 1, self.admin_site)
+        #deleted_objects = [mark_safe(u'%s: <a href="../../%s/">%s</a>' % (escape(force_unicode(capfirst(opts.verbose_name))), object_id, escape(obj))), []]
+        #perms_needed = set()
+        #get_deleted_objects(deleted_objects, perms_needed, request.user, obj, opts, 1, self.admin_site)
+        #(deleted_objects, perms_needed) = get_deleted_objects((obj,), opts, request.user, self.admin_site, levels_to_root=4)
+
+        # Django 1.3
+        using = router.db_for_write(self.model)
+        (deleted_objects, perms_needed, protected) = get_deleted_objects((obj,), opts, request.user, self.admin_site, using)
 
         if request.POST: # The user has already confirmed the deletion.
             if perms_needed:
@@ -484,3 +493,6 @@ class XModelAdmin(ModelAdmin):
             "newman/%s/delete_confirmation.html" % app_label,
             "newman/delete_confirmation.html"
         ], context, context_instance=context_instance)
+
+from django import forms
+helpers.Fieldset.media = property(forms.Media)

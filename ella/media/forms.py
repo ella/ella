@@ -1,6 +1,7 @@
 from django.contrib.admin import widgets
 from django import forms
-from django.template import mark_safe
+#from django.template import mark_safe
+from django.utils.safestring import mark_safe
 
 from ella.media.models import Media
 

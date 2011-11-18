@@ -90,7 +90,7 @@ EDITOR_PREVIEW_CSS = None
 EDITOR_PREVIEW_TEMPLATE = None
 
 # Widgets
-MEDIA_PREFIX = getattr(settings, 'MEDIA_URL') + 'newman_media/'
+MEDIA_PREFIX = getattr(settings, 'STATIC_URL')
 
 # tagging
 MAX_TAGS_INLINE = 3

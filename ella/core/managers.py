@@ -12,7 +12,7 @@ from ella.core.conf import core_settings
 
 
 class RelatedManager(models.Manager):
-    def get_related_for_object(self, obj, count, mods=[]):
+    def get_related_for_object(self, obj, count, mods=[], only_from_same_site=True):
         from ella.core.models import Publishable
 
         # manually entered dependencies
@@ -24,6 +24,8 @@ class RelatedManager(models.Manager):
         if mods:
             ct_ids = [ContentType.objects.get_for_model(m).pk for m in mods]
             qset = qset.filter(content_type__in=ct_ids)
+        if only_from_same_site:
+            qset = qset.filter(category__site__pk=settings.SITE_ID)
         related = list(qset[:count])
 
         if len(related) >= count:
@@ -44,6 +46,8 @@ class RelatedManager(models.Manager):
                     ).distinct()
                 if mods:
                     qset = qset.filter(content_type__in=ct_ids)
+                if only_from_same_site:
+                    qset = qset.filter(category__site__pk=settings.SITE_ID)
 
                 #print qset
                 #print TaggedItem.objects.all()

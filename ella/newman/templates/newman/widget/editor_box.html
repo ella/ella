@@ -3,6 +3,7 @@
 {% spaceless %}
 {% cache 600 boxform user %}
 <form id="rich-object">
+{% csrf_token %}
 <fieldset style="margin-bottom: 3px">
     <legend>{% trans 'Object type' %}</legend>
     {{ boxform.box_obj_ct }} {{ boxform.box_obj_id }}

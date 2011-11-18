@@ -247,8 +247,8 @@ def is_user_category_filtered(queryset):
     return get_queryset_flag(queryset, 'user_category_filtered')
 
 def get_log_entries(limit=15, filters={}):
-    entry_ids = LogEntry.objects.values('object_id', 'content_type_id').annotate(last_edit=Max('action_time'), id=Max('id')).filter(**filters).order_by('-last_edit')[:limit]
-    return LogEntry.objects.filter(pk__in=[i['id'] for i in entry_ids])
+    entry_ids = LogEntry.objects.values('object_id', 'content_type_id').annotate(last_edit=Max('action_time'), max_id=Max('id')).filter(**filters).order_by('-last_edit')[:limit]
+    return LogEntry.objects.filter(pk__in=[i['max_id'] for i in entry_ids])
 
 # newman url for object for other apps, FEs...
 def get_newman_url(obj):

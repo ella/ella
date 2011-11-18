@@ -1,17 +1,16 @@
 from datetime import datetime, date
 
 from django.contrib.contenttypes.models import ContentType
-from django.template import RequestContext
 from django.core.paginator import Paginator
 from django.conf import settings
 from django.template.defaultfilters import slugify
 from django.db import models
 from django.http import Http404
+from django.shortcuts import render
 
 from ella.core.models import Listing, Category, Placement
 from ella.core.cache import get_cached_object_or_404, cache_this
 from ella.core import custom_urls
-from ella.core.cache.template_loader import render_to_response
 from ella.core.conf import core_settings
 
 __docformat__ = "restructuredtext en"
@@ -54,8 +53,7 @@ class EllaCoreView(object):
         return get_templates(template_name, category=context['category'], **kw)
 
     def render(self, request, context, template):
-        return render_to_response(template, context,
-            context_instance=RequestContext(request))
+        return render(request, template, context)
 
     def __call__(self, request, **kwargs):
         context = self.get_context(request, **kwargs)
@@ -375,10 +373,10 @@ def export(request, count, name='', content_type=None):
 
     cat = get_cached_object_or_404(Category, tree_path='', site__id=settings.SITE_ID)
     listing = Listing.objects.get_listing(count=count, category=cat)
-    return render_to_response(
+    return render(
+            request,
             t_list,
             { 'category' : cat, 'listing' : listing },
-            context_instance=RequestContext(request),
             content_type=content_type
         )
 
@@ -387,11 +385,11 @@ def export(request, count, name='', content_type=None):
 # Error handlers
 ##
 def page_not_found(request):
-    response = render_to_response('page/404.html', {}, context_instance=RequestContext(request))
+    response = render(request, 'page/404.html', {})
     response.status_code = 404
     return response
 
 def handle_error(request):
-    response = render_to_response('page/500.html', {}, context_instance=RequestContext(request))
+    response = render(request, 'page/500.html', {})
     response.status_code = 500
     return response

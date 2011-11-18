@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 # must be in sync with ella.VERSION
-VERSION = (1, 2, 0)
+VERSION = (2, 0, 1)
 __version__ = VERSION
 __versionstr__ = '.'.join(map(str, VERSION))
 
@@ -22,7 +22,7 @@ setup(
 
     packages = find_packages(
         where = '.',
-        exclude = ('docs', 'tests')
+        exclude = ('doc', 'tests', 'debian',)
     ),
 
     include_package_data = True,
@@ -42,7 +42,7 @@ setup(
     ],
     install_requires = [
         'setuptools>=0.6b1',
-        'Django==1.1.1',
+        'Django==1.3.1',
         'south>=0.7',
         'anyjson',
         'feedparser',
@@ -55,5 +55,3 @@ setup(
     ],
 
 )
-
-

@@ -63,7 +63,8 @@ def get_sel_template_key(func, template_list):
 def find_template(template_list):
     for template in template_list:
         try:
-            source, origin = loader.find_template_source(template)
+            #source, origin = loader.find_template_source(template)
+            source, origin = loader.find_template(template) # Django 1.3
             return (source, origin, template)
         except loader.TemplateDoesNotExist:
             pass
@@ -71,7 +72,8 @@ def find_template(template_list):
 
 def select_template(template_list):
     source, origin, template_name = find_template(template_list)
-    return loader.get_template_from_string(source, origin, template_name)
+    return source
+    #return loader.get_template_from_string(source, origin, template_name)
 
 def render_to_response(template_name, dictionary=None, context_instance=None, content_type=None):
     if isinstance(template_name, (list, tuple)):

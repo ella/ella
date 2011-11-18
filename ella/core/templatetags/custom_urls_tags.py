@@ -5,7 +5,7 @@ from django.core.urlresolvers import NoReverseMatch
 from django.template import Node, TemplateSyntaxError, Library
 from django.utils.encoding import smart_str
 
-from ella.core.custom_urls import resolver
+from ella.core import custom_urls
 
 register = Library()
 
@@ -25,7 +25,7 @@ class CustomURLNode(Node):
       
         url = ''
         try:
-            url = resolver.reverse(obj, self.view_name, *args, **kwargs)
+            url = custom_urls.resolver.reverse(obj, self.view_name, *args, **kwargs)
         except NoReverseMatch, e:
             if self.asvar is None:
                 raise e

@@ -8,13 +8,10 @@ from django.utils.translation import ugettext_lazy as _
 from django.template import Template, TextNode, TemplateSyntaxError
 from django.contrib.admin.widgets import AdminFileWidget
 from django.contrib.contenttypes.models import ContentType
-from djangomarkup.fields import post_save_listener
+from django.conf import settings
 
 from ella.core.models import Dependency
 from ella.ellaadmin import widgets
-from ella.newman.licenses.models import License
-
-from djangomarkup.fields import RichTextField
 
 
 DEP_SRC_TEXT_ATTR = '__dep_src_text'
@@ -48,124 +45,129 @@ class OnlyRGBImageField(fields.ImageField):
             f.seek(0)
         return f
 
-def dependency_post_save_listener(sender, instance, **kwargs):
-    from ella.core.templatetags.core import BoxNode
-    src_texts = post_save_listener(sender, instance, src_text_attr=DEP_SRC_TEXT_ATTR)
-    if not src_texts:
-        return
-
-    ct = ContentType.objects.get_for_model(instance)
-
-    deps = list(Dependency.objects.filter(dependent_ct=ct, dependent_id=instance.pk))
-
-    kw = {
-        'dependent_ct': ct,
-        'dependent_id': instance.pk,
-    }
-
-    # gather objects used id all texts
-    objs = []
-    for st in src_texts:
-        content = getattr(instance, st.field)
-        t = Template(content)
-        objs.extend(box.get_obj() for box in t.nodelist.get_nodes_by_type(BoxNode))
-    objs = set(objs)
-
-
-    add = []
-    for obj in objs:
-        dep, created = Dependency.objects.get_or_create(
-                target_ct=ContentType.objects.get_for_model(obj),
-                target_id=obj.pk,
-                **kw
-            )
-        if created:
-            add.append(dep)
-        else:
-            deps.remove(dep)
-
-    # delete outdated dependencies
-    Dependency.objects.filter(pk__in=map(lambda d: d.pk, deps)).delete()
-
-    if License._meta.installed:
-        License.objects.reflect_added_dependencies(add)
-        License.objects.reflect_removed_dependencies(deps)
-
-class RichTextAreaField(RichTextField):
-    post_save_listener = staticmethod(dependency_post_save_listener)
-    src_text_attr = DEP_SRC_TEXT_ATTR
-    #post_save_listener = staticmethod(post_save_listener)
-    widget = widgets.RichTextAreaWidget
-    default_error_messages = {
-        'syntax_error': _('Bad syntax in markdown formatting or template tags.'),
-        'invalid_object': _('Object does not exist or is not right inserted.'),
-        'invalid_tag': _('You can use only box template tag.'),
-        'url_error':  _('Some links are invalid: %s.'),
-        'link_error':  _('Some links are broken: %s.'),
-    }
-
-    def validate_rendered(self, rendered):
-        """
-        Validate that the target text composes only of text and boxes
-        """
-        from ella.core.templatetags.core import BoxNode, ObjectNotFoundOrInvalid
-
-        try:
-            t = Template(rendered)
-        except TemplateSyntaxError, e:
-            raise ValidationError(self.error_messages['syntax_error'])
-
-        for n in t.nodelist:
-            if isinstance(n, TextNode):
-                continue
-            elif isinstance(n, BoxNode):
-                try:
-                    o = n.get_obj()
-                except ObjectNotFoundOrInvalid, e:
-                    # TODO: pass lookup into error message
-                    # this raises UnicodeEncodeError
-                    # error_msg = self.error_messages['invalid_object'] % {
-                    #    'model': n.model._meta.verbose_name,
-                    #    'field': n.lookup[0],
-                    #    'value': n.lookup[1]
-                    #}
-                    raise ValidationError(self.error_messages['invalid_object'])
-            else:
-                raise ValidationError(self.error_messages['invalid_tag'])
-
-    def _check_url(self, match):
-
-        # FIXME: (?) I have problem testing development urls (future listngs) http://localhost:3000/...
-
-        link = match.group(1)
-
-        import urllib2
-        headers = {
-            "Accept": "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5",
-            "Accept-Language": "en-us,en;q=0.5",
-            "Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
-            "Connection": "close",
-            "User-Agent": fields.URL_VALIDATOR_USER_AGENT,
+if 'ella.newman' in settings.INSTALLED_APPS:
+    def dependency_post_save_listener(sender, instance, **kwargs):
+        from ella.core.templatetags.core import BoxNode
+        from ella.newman.licenses.models import License
+        from djangomarkup.fields import post_save_listener
+        
+        src_texts = post_save_listener(sender, instance, src_text_attr=DEP_SRC_TEXT_ATTR)
+        if not src_texts:
+            return
+    
+        ct = ContentType.objects.get_for_model(instance)
+    
+        deps = list(Dependency.objects.filter(dependent_ct=ct, dependent_id=instance.pk))
+    
+        kw = {
+            'dependent_ct': ct,
+            'dependent_id': instance.pk,
         }
-
-        try:
-            req = urllib2.Request(link, None, headers)
-            urllib2.urlopen(req)
-        except ValueError:
-            self.invalid_links.append(link)
-        except:
-
-            # try with GET parameter "ift=t" for our objects with future listing
-            if '?' in link:
-                tlink = link + '&ift=t'
+    
+        # gather objects used id all texts
+        objs = []
+        for st in src_texts:
+            content = getattr(instance, st.field)
+            t = Template(content)
+            objs.extend(box.get_obj() for box in t.nodelist.get_nodes_by_type(BoxNode))
+        objs = set(objs)
+    
+    
+        add = []
+        for obj in objs:
+            dep, created = Dependency.objects.get_or_create(
+                    target_ct=ContentType.objects.get_for_model(obj),
+                    target_id=obj.pk,
+                    **kw
+                )
+            if created:
+                add.append(dep)
             else:
-                tlink = link + '?ift=t'
+                deps.remove(dep)
+    
+        # delete outdated dependencies
+        Dependency.objects.filter(pk__in=map(lambda d: d.pk, deps)).delete()
+    
+        if License._meta.installed:
+            License.objects.reflect_added_dependencies(add)
+            License.objects.reflect_removed_dependencies(deps)
 
+    from djangomarkup.fields import RichTextField
+    class RichTextAreaField(RichTextField):
+        post_save_listener = staticmethod(dependency_post_save_listener)
+        src_text_attr = DEP_SRC_TEXT_ATTR
+        #post_save_listener = staticmethod(post_save_listener)
+        widget = widgets.RichTextAreaWidget
+        default_error_messages = {
+            'syntax_error': _('Bad syntax in markdown formatting or template tags.'),
+            'invalid_object': _('Object does not exist or is not right inserted.'),
+            'invalid_tag': _('You can use only box template tag.'),
+            'url_error':  _('Some links are invalid: %s.'),
+            'link_error':  _('Some links are broken: %s.'),
+        }
+    
+        def validate_rendered(self, rendered):
+            """
+            Validate that the target text composes only of text and boxes
+            """
+            from ella.core.templatetags.core import BoxNode, ObjectNotFoundOrInvalid
+    
             try:
-                req = urllib2.Request(tlink, None, headers)
+                t = Template(rendered)
+            except TemplateSyntaxError, e:
+                raise ValidationError(self.error_messages['syntax_error'])
+    
+            for n in t.nodelist:
+                if isinstance(n, TextNode):
+                    continue
+                elif isinstance(n, BoxNode):
+                    try:
+                        o = n.get_obj()
+                    except ObjectNotFoundOrInvalid, e:
+                        # TODO: pass lookup into error message
+                        # this raises UnicodeEncodeError
+                        # error_msg = self.error_messages['invalid_object'] % {
+                        #    'model': n.model._meta.verbose_name,
+                        #    'field': n.lookup[0],
+                        #    'value': n.lookup[1]
+                        #}
+                        raise ValidationError(self.error_messages['invalid_object'])
+                else:
+                    raise ValidationError(self.error_messages['invalid_tag'])
+    
+        def _check_url(self, match):
+    
+            # FIXME: (?) I have problem testing development urls (future listngs) http://localhost:3000/...
+    
+            link = match.group(1)
+    
+            import urllib2
+            headers = {
+                "Accept": "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5",
+                "Accept-Language": "en-us,en;q=0.5",
+                "Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+                "Connection": "close",
+                "User-Agent": fields.URL_VALIDATOR_USER_AGENT,
+            }
+    
+            try:
+                req = urllib2.Request(link, None, headers)
                 urllib2.urlopen(req)
+            except ValueError:
+                self.invalid_links.append(link)
             except:
-                self.broken_links.append(link)
+    
+                # try with GET parameter "ift=t" for our objects with future listing
+                if '?' in link:
+                    tlink = link + '&ift=t'
+                else:
+                    tlink = link + '?ift=t'
+    
+                try:
+                    req = urllib2.Request(tlink, None, headers)
+                    urllib2.urlopen(req)
+                except:
+                    self.broken_links.append(link)
 
 class GenericSuggestField(fields.ChoiceField):
 

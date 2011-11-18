@@ -1,4 +1,3 @@
-
 from django.template import loader
 from django.utils.datastructures import MultiValueDict
 from django.utils.encoding import smart_str
@@ -6,7 +5,6 @@ from django.core.cache import cache
 from django.conf import settings
 
 from ella.core.cache.invalidate import CACHE_DELETER
-from ella.core.cache.template_loader import select_template
 from ella.core.cache.utils import normalize_key
 from ella.core.conf import core_settings
 
@@ -118,7 +116,7 @@ class Box(object):
         if self.template_name:
             t_name = self.template_name
         else:
-            t_name = select_template(self._get_template_list()).name
+            t_name = loader.select_template(self._get_template_list()).name
 
         return '''{%% box %(box_type)s for %(opts)s with pk %(pk)s %%}template_name: %(template_name)s\n%(params)s{%% endbox %%}''' % {
                 'box_type' : self.box_type,
@@ -132,7 +130,6 @@ class Box(object):
         " Get the hierarchy of templates belonging to the object/box_type given. "
         t_list = []
         if hasattr(self.obj, 'category_id') and self.obj.category_id:
-            from ella.core.models import Category
             cat = self.obj.category
             base_path = 'box/category/%s/content_type/%s/' % (cat.path, self.opts)
             if hasattr(self.obj, 'slug'):
@@ -157,7 +154,7 @@ class Box(object):
             t = loader.get_template(self.template_name)
         else:
             t_list = self._get_template_list()
-            t = select_template(t_list)
+            t = loader.select_template(t_list)
 
         self._context.update(self.get_context())
         resp = t.render(self._context)

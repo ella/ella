@@ -1,10 +1,12 @@
 import logging
 import re
 
+from django import forms
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.admin.options import InlineModelAdmin, IncorrectLookupParameters, FORMFIELD_FOR_DBFIELD_DEFAULTS
 from django.contrib.admin.util import unquote
+from django.contrib import messages
 from django.forms.models import BaseInlineFormSet
 from django import template
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden
@@ -124,6 +126,18 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
 
     return db_field.formfield(**kwargs)
 
+from django.contrib.admin.helpers import InlineAdminForm, InlineAdminFormSet
+class InlineNewmanFormset(InlineAdminFormSet):
+    
+    def __iter__(self):
+        for form, original in zip(self.formset.initial_forms, self.formset.get_queryset()):
+            yield InlineAdminForm(self.formset, form, self.fieldsets,
+                self.opts.prepopulated_fields, original, self.readonly_fields,
+                model_admin=self.opts)
+        for form in self.formset.extra_forms:
+            yield InlineAdminForm(self.formset, form, self.fieldsets,
+                self.opts.prepopulated_fields, None, self.readonly_fields,
+                model_admin=self.opts)
 
 class NewmanModelAdmin(XModelAdmin):
     changelist_view_cl = NewmanChangeList
@@ -145,6 +159,7 @@ class NewmanModelAdmin(XModelAdmin):
 
         # newman's custom templates
         self.delete_confirmation_template = self.get_template_list('delete_confirmation.html')
+        self.delete_selected_confirmation_template = self.get_template_list('delete_selected_confirmation.html')
         self.object_history_template = self.get_template_list('object_history.html')
         self.change_form_template = self.get_template_list('change_form.html')
         self.change_list_template = self.get_template_list('change_list.html')
@@ -156,6 +171,21 @@ class NewmanModelAdmin(XModelAdmin):
         # useful when self.queryset(request) is called multiple times
         self._cached_queryset_request_id = -1
         self._cached_queryset = None
+
+    def _media(self):
+
+        js = []
+        if self.actions is not None:
+            js.extend(['js/actions.min.js'])
+        if self.prepopulated_fields:
+            js.append('js/urlify.js')
+            js.append('js/prepopulate.min.js')
+        if self.opts.get_ordered_objects():
+            js.extend(['js/getElementsBySelector.js', 'js/dom-drag.js' , 'js/admin/ordering.js'])
+
+        return forms.Media(js=['%s%s' % (settings.ADMIN_MEDIA_PREFIX, url) for url in js])
+
+    media = property(_media)
 
     def get_form(self, request, obj=None, **kwargs):
         self._magic_instance = obj # adding edited object to ModelAdmin instance.
@@ -629,7 +659,7 @@ class NewmanModelAdmin(XModelAdmin):
         for inline, formset in zip(self.inline_instances, formsets):
             self._raw_inlines[str(inline.model._meta).replace('.', '__')] = formset
             fieldsets = list(inline.get_fieldsets(request, obj))
-            inline_admin_formset = admin.helpers.InlineAdminFormSet(inline, formset, fieldsets)
+            inline_admin_formset = InlineNewmanFormset(inline, formset, fieldsets)
             inline_admin_formsets.append(inline_admin_formset)
             media = media + inline_admin_formset.media
         return inline_admin_formsets, media
@@ -835,7 +865,7 @@ class NewmanModelAdmin(XModelAdmin):
         context.update(extra_context or {})
         if 'object_added' in context:
             obj = context['object']
-            msg = request.user.message_set.all()[0].message
+            msg = unicode(list(messages.get_messages(request))[0])
 
             if request.FILES and not request.is_ajax():
                 return_url = '%s#/%s/%s/' % (reverse('newman:index'), obj._meta.app_label, obj._meta.module_name)
@@ -944,6 +974,16 @@ class NewmanInlineFormSet(BaseInlineFormSet):
 
 class NewmanInlineModelAdmin(InlineModelAdmin):
     formset = NewmanInlineFormSet
+
+    def _media(self):
+        js = []
+        if self.prepopulated_fields:
+            js.append('js/urlify.js')
+            js.append('js/prepopulate.min.js')
+        if self.filter_vertical or self.filter_horizontal:
+            js.extend(['js/SelectBox.js' , 'js/SelectFilter2.js'])
+        return forms.Media(js=['%s%s' % (settings.ADMIN_MEDIA_PREFIX, url) for url in js])
+    media = property(_media)
 
     def get_formset(self, request, obj=None):
         setattr(self.form, '_magic_user', request.user) # magic variable assigned to form
