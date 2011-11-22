@@ -10,3 +10,5 @@ ella/ellaadmin/templates/admin_orig
 tests/unit_project/static/photos
 tests/example_project/static/photos
 
+.project
+.pydevproject
