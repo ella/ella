@@ -12,3 +12,4 @@ tests/example_project/static/photos
 
 .project
 .pydevproject
+.settings
