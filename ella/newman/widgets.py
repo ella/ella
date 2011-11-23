@@ -18,6 +18,7 @@ from ella.core.models import Listing
 from ella.photos.models import Photo
 from djangomarkup.widgets import RichTextAreaWidget
 from ella.newman.conf import newman_settings
+from ella.newman.widget_extensions import rich_text_extensions
 
 __all__ = [
     'NewmanRichTextAreaWidget', 'FlashImageWidget',
@@ -61,31 +62,33 @@ JS_RELATED_LOOKUP = 'js/related_lookup.js'
 CLASS_TARGECT = 'target_ct'
 CLASS_TARGEID = 'target_id'
 
-
 class NewmanRichTextAreaWidget(RichTextAreaWidget):
     """
     Newman's implementation of markup, based on markitup editor.
     """
-    class Media:
-        js = (
-            newman_settings.MEDIA_PREFIX + JS_MARKITUP,
-            newman_settings.MEDIA_PREFIX + JS_MARKITUP_SET,
-            newman_settings.MEDIA_PREFIX + JS_JQUERY_UI,
-            newman_settings.MEDIA_PREFIX + JS_JQUERY_FIELDSELECTION,
-            newman_settings.MEDIA_PREFIX + JS_AUTOGROW,
-        )
-        css = {
-            'screen': (
-                newman_settings.MEDIA_PREFIX + CSS_MARKITUP,
-                newman_settings.MEDIA_PREFIX + CSS_MARKITUP_SET,
-                newman_settings.MEDIA_PREFIX + CSS_JQUERY_UI,
-            ),
-        }
 
     def __init__(self, attrs={}):
         css_class = CLASS_RICHTEXTAREA
         super(RichTextAreaWidget, self).__init__(attrs={'class': css_class})
-
+        
+    def _media(self):
+        return forms.Media(
+            js=[
+                newman_settings.MEDIA_PREFIX + JS_MARKITUP,
+                newman_settings.MEDIA_PREFIX + JS_MARKITUP_SET,
+                newman_settings.MEDIA_PREFIX + JS_JQUERY_UI,
+                newman_settings.MEDIA_PREFIX + JS_JQUERY_FIELDSELECTION,
+                newman_settings.MEDIA_PREFIX + JS_AUTOGROW,
+            ] + rich_text_extensions.get_js_extensions(),
+            css={
+                'screen': [
+                    newman_settings.MEDIA_PREFIX + CSS_MARKITUP,
+                    newman_settings.MEDIA_PREFIX + CSS_MARKITUP_SET,
+                    newman_settings.MEDIA_PREFIX + CSS_JQUERY_UI,
+                ] + rich_text_extensions.get_css_extensions(),
+            }
+        )
+    media = property(_media)
 
 class FlashImageWidget(widgets.AdminFileWidget):
     class Media:
@@ -356,8 +359,10 @@ class ListingCustomWidget(forms.SelectMultiple):
         cx['verbose_name_publish_from'] = Listing._meta.get_field('publish_from').verbose_name.__unicode__()
         cx['choices'] = choices or self.choices
         cx['render_commercial_switch'] = core_settings.LISTING_USE_COMMERCIAL_FLAG
-        if len(value) == 1:
-            cx['listings'] = value[0] or []
+        if type(value) == dict:
+            # modifying existing object, so value is dict containing Listings and selected category IDs
+            # cx['selected'] = Category.objects.filter(pk__in=value['selected_categories']).values('id') or []
+            cx['listings'] = list(value['listings']) or []
         tpl = get_template('newman/widget/listing_custom.html')
         return mark_safe(tpl.render(cx))
 

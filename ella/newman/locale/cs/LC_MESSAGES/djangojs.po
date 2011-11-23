@@ -7,426 +7,269 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-09-18 12:36+0200\n"
+"POT-Creation-Date: 2011-11-23 04:49-0500\n"
 "PO-Revision-Date: 2009-09-18 12:37+0100\n"
 "Last-Translator: Vitek pliska <whit@jizak.cz>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: media/js/datetime.js:84
-#: media/js/datetime.js.py:226
-#: media/js/newman.js:1185
+#: static/js/datetime.js:32
+#: static/js/datetime.js.py:72
 msgid "Su"
 msgstr "Ne"
 
-#: media/js/datetime.js:84
-#: media/js/datetime.js.py:226
-#: media/js/newman.js:1186
+#: static/js/datetime.js:32
+#: static/js/datetime.js.py:72
 msgid "Mo"
 msgstr "Po"
 
-#: media/js/datetime.js:84
-#: media/js/datetime.js.py:226
-#: media/js/newman.js:1187
+#: static/js/datetime.js:32
+#: static/js/datetime.js.py:72
 msgid "Tu"
 msgstr "Út"
 
-#: media/js/datetime.js:84
-#: media/js/datetime.js.py:226
-#: media/js/newman.js:1188
+#: static/js/datetime.js:32
+#: static/js/datetime.js.py:72
 msgid "We"
 msgstr "St"
 
-#: media/js/datetime.js:84
-#: media/js/datetime.js.py:226
-#: media/js/newman.js:1189
+#: static/js/datetime.js:32
+#: static/js/datetime.js.py:72
 msgid "Th"
 msgstr "Čt"
 
-#: media/js/datetime.js:84
-#: media/js/datetime.js.py:226
-#: media/js/newman.js:1190
+#: static/js/datetime.js:32
+#: static/js/datetime.js.py:72
 msgid "Fr"
 msgstr "Pá"
 
-#: media/js/datetime.js:84
-#: media/js/datetime.js.py:226
-#: media/js/newman.js:1191
+#: static/js/datetime.js:32
+#: static/js/datetime.js.py:72
 msgid "Sa"
 msgstr "So"
 
-#: media/js/flash_image.js:14
+#: static/js/flash_image.js:24
 msgid "successfully uploaded photo"
 msgstr "Foto úspěšně nahráno"
 
-#: media/js/flash_image.js:26
+#: static/js/flash_image.js:36
 msgid "failed uploading photo"
 msgstr "Nahrání fota selhalo"
 
-#: media/js/flash_image.js:46
-msgid "Failed to get Flash movie"
-msgstr "Načtení flashe selhalo"
-
-#: media/js/flash_image.js:63
-msgid "No photo selected"
-msgstr "Nebyla vybrána fotografie"
-
-#: media/js/flash_image.js:66
-msgid "Error processing photo"
-msgstr "Chyba při zpracování fotky"
-
-#: media/js/inlines.js:136
-msgid "Duplicate photo"
-msgstr "Duplikátní foto"
-
-#: media/js/kobayashi.js:156
-msgid "Rendering error..."
-msgstr "Zobrazuji chybu..."
-
-#: media/js/newman.js:49
-msgid "Wait"
-msgstr "Čekejte"
-
-#: media/js/newman.js:103
-msgid "Loading media"
-msgstr "Načítám média"
-
-#: media/js/newman.js:114
-msgid "Saved"
-msgstr "Uloženo"
-
-#: media/js/newman.js:116
-msgid "Saving"
-msgstr "Ukládám"
-
-#: media/js/newman.js:140
-msgid "Preset saved but erroneous result received."
-msgstr "Záloha uložena, avšak odpověď serveru chybná"
-
-#: media/js/newman.js:140
-msgid "Reload to see the preset."
-msgstr "Obnovte stránku pro pohled na zálohu"
-
-#: media/js/newman.js:151
-msgid "Enter template name"
-msgstr "Vložte jméno šablony"
-
-#: media/js/newman.js:169
-msgid "Failed loading preset"
-msgstr "Chyba při načítání šablony"
-
-#: media/js/newman.js:410
-msgid "Sending"
-msgstr "Posílám"
-
-#: media/js/newman.js:532
-msgid "Form errors"
-msgstr "Formulářové chyby"
-
-#: media/js/newman.js:572
-msgid "Error sending form."
-msgstr "Nastala chyba při odesílání formuláře."
-
-#: media/js/newman.js:573
-msgid "Moreover, failed to handle the error gracefully."
-msgstr "Navíc se nepodařilo chybu ošetřit."
-
-#: media/js/newman.js:574
-msgid "Reloading page"
-msgstr "Stránka se obnovuje"
-
-#: media/js/newman.js:579
-msgid "crash save"
-msgstr "záloha po pádu"
-
-#: media/js/newman.js:579
-msgid "Form content backed up"
-msgstr "Obsah formuláře zazálohován"
-
-#: media/js/newman.js:775
-msgid "Loading"
-msgstr "Načítám"
-
-#: media/js/newman.js:809
-msgid "Request failed"
-msgstr "Chyba serveru"
-
-#: media/js/newman.js:823
-msgid "Successfully sent"
-msgstr "Úspěšně odesláno"
-
-#: media/js/newman.js:886
-msgid "Cannot continue editing"
-msgstr "Nelze pokračovat v editaci"
-
-#: media/js/newman.js:886
-msgid "object ID not received"
-msgstr "Nebylo přijato ID objektu"
-
-#: media/js/newman.js:901
-msgid "Failed to redirect to newly added object."
-msgstr "Nezdařilo se přesměrování na nově přidaný objekt."
-
-#: media/js/newman.js:915
-msgid "Unrecognized post-save action: "
-msgstr "Neznámá akce po uložení"
-
-#: media/js/newman.js:916
-msgid "No post-save action, redirecting to homepage"
-msgstr "Žádná akce po uložení, přesměrovávám na domovskou stránku"
-
-#: media/js/newman.js:933
-msgid "Failed to follow form save with a requested action"
-msgstr "Nezdařilo se provést požadovanou akci po uložení formuláře"
-
-#: media/js/newman.js:945
-msgid "Form saved"
-msgstr "Formulář uložen"
-
-#: media/js/newman.js:1176
-msgid "Sunday"
-msgstr "Neděle"
-
-#: media/js/newman.js:1177
-msgid "Monday"
-msgstr "Pondělí"
-
-#: media/js/newman.js:1178
-msgid "Tuesday"
-msgstr "Úterý"
-
-#: media/js/newman.js:1179
-msgid "Wednesday"
-msgstr "Středa"
-
-#: media/js/newman.js:1180
-msgid "Thursday"
-msgstr "Čtvrtek"
-
-#: media/js/newman.js:1181
-msgid "Friday"
-msgstr "Pátek"
-
-#: media/js/newman.js:1182
-msgid "Saturday"
-msgstr "Sobota"
-
-#: media/js/newman.js:1194
-msgid "Sun"
-msgstr "Ne"
-
-#: media/js/newman.js:1195
-msgid "Mon"
-msgstr "Po"
-
-#: media/js/newman.js:1196
-msgid "Tue"
-msgstr "Út"
-
-#: media/js/newman.js:1197
-msgid "Wed"
-msgstr "St"
-
-#: media/js/newman.js:1198
-msgid "Thu"
-msgstr "Čt"
-
-#: media/js/newman.js:1199
-msgid "Fri"
-msgstr "Pá"
-
-#: media/js/newman.js:1200
-msgid "Sat"
-msgstr "So"
-
-#: media/js/newman.js:1203
-msgid "January"
-msgstr "Leden"
-
-#: media/js/newman.js:1204
-msgid "February"
-msgstr "Únor"
-
-#: media/js/newman.js:1205
-msgid "March"
-msgstr "Březen"
-
-#: media/js/newman.js:1206
-msgid "April"
-msgstr "Duben"
-
-#: media/js/newman.js:1207
-#: media/js/newman.js.py:1221
-msgid "May"
-msgstr "Květen"
-
-#: media/js/newman.js:1208
-msgid "June"
-msgstr "Červen"
-
-#: media/js/newman.js:1209
-msgid "July"
-msgstr "Červenec"
-
-#: media/js/newman.js:1210
-msgid "August"
-msgstr "Srpen"
-
-#: media/js/newman.js:1211
-msgid "September"
-msgstr "Září"
-
-#: media/js/newman.js:1212
-msgid "October"
-msgstr "Říjen"
-
-#: media/js/newman.js:1213
-msgid "November"
-msgstr "Listopad"
-
-#: media/js/newman.js:1214
-msgid "December"
-msgstr "Prosinec"
-
-#: media/js/newman.js:1217
-msgid "Jan"
-msgstr "Led"
-
-#: media/js/newman.js:1218
-msgid "Feb"
-msgstr "Úno"
-
-#: media/js/newman.js:1219
-msgid "Mar"
-msgstr "Bře"
-
-#: media/js/newman.js:1220
-msgid "Apr"
-msgstr "Dub"
-
-#: media/js/newman.js:1222
-msgid "Jun"
-msgstr "Čvn"
-
-#: media/js/newman.js:1223
-msgid "Jul"
-msgstr "Čvc"
-
-#: media/js/newman.js:1224
-msgid "Aug"
-msgstr "Srp"
-
-#: media/js/newman.js:1225
-msgid "Sep"
-msgstr "Zář"
-
-#: media/js/newman.js:1226
-msgid "Oct"
-msgstr "Říj"
-
-#: media/js/newman.js:1227
-msgid "Nov"
-msgstr "Lis"
-
-#: media/js/newman.js:1228
-msgid "Dec"
-msgstr "Pro"
-
-#: media/js/polls.js:19
-#: media/js/polls.js.py:156
-msgid "Delete"
-msgstr "Smazat"
-
-#: media/js/polls.js:27
-msgid "Undelete"
-msgstr "Zrušit smazání"
-
-#: media/js/polls.js:103
-#: media/js/polls.js.py:201
-msgid "Click to edit question"
-msgstr "Kliknutím změňte otázku"
-
-#: media/js/polls.js:147
-#: media/js/polls.js.py:243
-msgid "Click to edit option"
-msgstr "Změnit odpověď"
-
-#: media/js/markitup/sets/markdown/set.js:33
+#: static/js/fuckitup_install.js:358
+msgid "Heading H1"
+msgstr "Nadpis 1"
+
+#: static/js/fuckitup_install.js:362
+msgid "Heading H2"
+msgstr "Nadpis 2"
+
+#: static/js/fuckitup_install.js:368
+msgid "Heading H3"
+msgstr "Nadpis 3"
+
+#: static/js/fuckitup_install.js:418
+#: static/js/markitup/sets/markdown/set.js:96
 msgid "Italic"
 msgstr "Kurzíva"
 
-#: media/js/markitup/sets/markdown/set.js:34
+#: static/js/fuckitup_install.js:419
+#: static/js/markitup/sets/markdown/set.js:97
 msgid "Bold"
 msgstr "Tučně"
 
-#: media/js/markitup/sets/markdown/set.js:36
+#: static/js/fuckitup_install.js:420
+#: static/js/markitup/sets/markdown/set.js:99
 msgid "Link"
 msgstr "Odkaz"
 
-#: media/js/markitup/sets/markdown/set.js:38
+#: static/js/fuckitup_install.js:422
+#: static/js/markitup/sets/markdown/set.js:101
 msgid "Head 1"
 msgstr "Nadpis 1"
 
-#: media/js/markitup/sets/markdown/set.js:39
+#: static/js/fuckitup_install.js:423
+#: static/js/markitup/sets/markdown/set.js:102
 msgid "Head 2"
 msgstr "Nadpis 2"
 
-#: media/js/markitup/sets/markdown/set.js:40
+#: static/js/fuckitup_install.js:424
+#: static/js/markitup/sets/markdown/set.js:103
 msgid "Head 3"
 msgstr "Nadpis 3"
 
-#: media/js/markitup/sets/markdown/set.js:42
+#: static/js/fuckitup_install.js:426
+#: static/js/markitup/sets/markdown/set.js:105
 msgid "List unordered"
 msgstr "Nečíslovaný seznam"
 
-#: media/js/markitup/sets/markdown/set.js:43
+#: static/js/fuckitup_install.js:427
+#: static/js/markitup/sets/markdown/set.js:106
 msgid "List ordered"
 msgstr "Číslovaný seznam"
 
-#: media/js/markitup/sets/markdown/set.js:47
-msgid "Quote"
-msgstr "Citace"
-
-#: media/js/markitup/sets/markdown/set.js:49
-msgid "Photo"
-msgstr "Foto"
-
-#: media/js/markitup/sets/markdown/set.js:54
-msgid "Gallery"
-msgstr "Galerie"
-
-#: media/js/markitup/sets/markdown/set.js:58
+#: static/js/fuckitup_install.js:429
+#: static/js/markitup/sets/markdown/set.js:121
 msgid "Box"
 msgstr "Box"
 
-#: media/js/markitup/sets/markdown/set.js:115
+#: static/js/fuckitup_install.js:430
+#: static/js/markitup/sets/markdown/set.js:112
+msgid "Photo"
+msgstr "Foto"
+
+#: static/js/fuckitup_install.js:431
+#: static/js/markitup/sets/markdown/set.js:117
+msgid "Gallery"
+msgstr "Galerie"
+
+#: static/js/fuckitup_install.js:433
+#: static/js/markitup/sets/markdown/set.js:123
 msgid "Quick preview"
 msgstr "Rychlý náhled"
 
-#: media/js/markitup/sets/markdown/set.js:116
-msgid "Preview on site"
-msgstr "Náhled na webu"
+#: static/js/fuckitup_install.js:478
+msgid "Preview error."
+msgstr "Chyba náhledu."
 
-#: templates/newman/edit_inline/exportmeta_inline.html:41
+#: static/js/fuckitup_install.js:512
+msgid "Sending"
+msgstr "Posílám"
+
+#: static/js/inlines.js:299
+msgid "Duplicate photo"
+msgstr "Duplikátní foto"
+
+#: static/js/inlines.js:773
 msgid "Show additional fields"
 msgstr "Zobrazit podrobnosti"
 
-#: templates/newman/edit_inline/exportmeta_inline.html:42
+#: static/js/inlines.js:775
 msgid "Hide additional fields"
 msgstr "Skrýt podrobnosti"
 
-#~ msgid "Now"
-#~ msgstr "Nyní"
-#~ msgid "6am"
-#~ msgstr "6 ráno"
-#~ msgid "Noon"
-#~ msgstr "Poledne"
-#~ msgid "Midnight"
-#~ msgstr "Půlnoc"
-#~ msgid "Prev"
-#~ msgstr "Předchozí"
-#~ msgid "Next"
-#~ msgstr "Následující"
+#: static/js/newman.js:188
+msgid "Wait"
+msgstr "Čekejte"
+
+#: static/js/newman.js:262
+msgid "Loading media"
+msgstr "Načítám média"
+
+#: static/js/newman.js:281
+msgid "Saved"
+msgstr "Uloženo"
+
+#: static/js/newman.js:283
+msgid "Saving"
+msgstr "Ukládám"
+
+#: static/js/newman.js:308
+msgid "Preset saved but erroneous result received."
+msgstr "Záloha uložena, avšak odpověď serveru chybná"
+
+#: static/js/newman.js:310
+msgid "Reload to see the preset."
+msgstr "Obnovte stránku pro pohled na zálohu"
+
+#: static/js/newman.js:833
+msgid "Form errors"
+msgstr "Formulářové chyby"
+
+#: static/js/newman.js:887
+msgid "Error sending form."
+msgstr "Nastala chyba při odesílání formuláře."
+
+#: static/js/newman.js:888
+msgid "Moreover, failed to handle the error gracefully."
+msgstr "Navíc se nepodařilo chybu ošetřit."
+
+#: static/js/newman.js:889
+msgid "Reloading page"
+msgstr "Stránka se obnovuje"
+
+#: static/js/newman.js:894
+msgid "crash save"
+msgstr "záloha po pádu"
+
+#: static/js/newman.js:894
+msgid "Form content backed up"
+msgstr "Obsah formuláře zazálohován"
+
+#: static/js/newman.js:1116
+msgid "Loading"
+msgstr "Načítám"
+
+#: static/js/newman.js:1150
+msgid "Request failed"
+msgstr "Chyba serveru"
+
+#: static/js/newman.js:1164
+msgid "Successfully sent"
+msgstr "Úspěšně odesláno"
+
+#: static/js/newman.js:1228
+msgid "Cannot continue editing"
+msgstr "Nelze pokračovat v editaci"
+
+#: static/js/newman.js:1228
+msgid "object ID not received"
+msgstr "Nebylo přijato ID objektu"
+
+#: static/js/newman.js:1243
+msgid "Failed to redirect to newly added object."
+msgstr "Nezdařilo se přesměrování na nově přidaný objekt."
+
+#: static/js/polls.js:28
+#: static/js/polls.js.py:168
+msgid "Delete"
+msgstr "Smazat"
+
+#: static/js/polls.js:36
+msgid "Undelete"
+msgstr "Zrušit smazání"
+
+#: static/js/polls.js:112
+msgid "Click to edit question"
+msgstr "Kliknutím změňte otázku"
+
+#: static/js/polls.js:159
+msgid "Click to edit option"
+msgstr "Změnit odpověď"
+
+#: static/js/fuckitup_extensions/markdown_extensions_tables.js:2
+#: static/js/fuckitup_extensions/markdown_extras_tables.js:2
+msgid "Enter column headings (split by \";\"):"
+msgstr "Zadejte hlavičky sloupců (oddělené pomocí \";\"):"
+
+#: static/js/fuckitup_extensions/markdown_extensions_tables.js:3
+#: static/js/fuckitup_extensions/markdown_extras_tables.js:3
+msgid "Row count (excluding header):"
+msgstr "Počet řádků (bez hlavičky):"
+
+#: static/js/fuckitup_extensions/markdown_extensions_tables.js:17
+#: static/js/fuckitup_extensions/markdown_extensions_tables.js:18
+#: static/js/fuckitup_extensions/markdown_extras_tables.js:17
+msgid "REPLACE"
+msgstr "NAHRAĎTE"
+
+#: static/js/fuckitup_extensions/markdown_extensions_tables.js:25
+#: static/js/fuckitup_extensions/markdown_extras_tables.js:24
+msgid "Table"
+msgstr "Tabulka"
+
+#: static/js/markitup/sets/markdown/set.js:110
+msgid "Quote"
+msgstr "Citace"
+
+#: static/js/markitup/sets/markdown/set.js:124
+msgid "Preview on site"
+msgstr "Náhled na webu"
+
+#: static/js/markitup/sets/markdown/set.js:230
+msgid "Category field must be filled for preview on site!"
+msgstr "Categorie musí být vyplněna pro zobrazení na stránce!"
 
