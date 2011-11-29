@@ -16,9 +16,10 @@ newman.autodiscover()
 admin.autodiscover()
 installedapps.init_logger()
 
+from os.path import dirname, join, normpath
 
 ADMIN_ROOTS = (
-    normpath(join(dirname(ella.__file__), 'newman', 'media')),
+    normpath(join(dirname(ella.__file__), 'newman', 'static', 'newman')),
     normpath(join(dirname(django.__file__), 'contrib', 'admin', 'media')),
 )
 
