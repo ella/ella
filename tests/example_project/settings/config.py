@@ -50,6 +50,7 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 DOUBLE_RENDER = False
 
 MEDIA_ROOT = join(dirname(example_project.__file__), 'static')
+MEDIA_URL = '/media/'
 
 STATIC_URL = '/static/'
 
