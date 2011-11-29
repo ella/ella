@@ -575,6 +575,26 @@ Drafts = new Object;
 
 $( function() {
     //// Ajax forms
+    
+    /**
+     * Adds serializeObject method to elements. When called on forms, it results
+     * in form being serialized into JSON object {name:value, name2: value2}.
+     */
+    $.fn.serializeObject = function() {
+        var o = {};
+        var a = this.serializeArray();
+        $.each(a, function() {
+            if (o[this.name] !== undefined) {
+                if (!o[this.name].push) {
+                    o[this.name] = [o[this.name]];
+                }
+                o[this.name].push(this.value || '');
+            } else {
+                o[this.name] = this.value || '';
+            }
+        });
+        return o;
+    };
 
     function get_inputs($form) {    // all except metadata
         return $form.find(':input').filter(function() {
@@ -637,6 +657,42 @@ $( function() {
 
         return ok;
     }
+    
+    function clean_inputs($form) {
+        var $inputs = $('#absolutely#_nothing');
+        get_inputs($form).each( function() {
+            // Don't send suggest inputs
+            if ( /(.*)_suggest$/.test($(this).attr('id')) ) {
+                return;
+            }
+            // Shave off the names from suggest-enhanced hidden inputs
+            if ( $(this).is('input:hidden') && $form.find( str_concat('#',$(this).attr('id'),'_suggest') ).length ) {
+                $inputs = $inputs.add(   $(this).clone().val( $(this).val().replace(/#.*/, '') )   );
+                return;
+            }
+            // Shave off the days of week from date-time inputs
+            if ( $(this).is('.vDateTimeInput,.vDateInput') ) {
+                $inputs = $inputs.add(   $(this).clone().val( $(this).val().replace(/ \D{2}$/, '') )   );
+                return;
+            }
+            $inputs = $inputs.add($(this));
+        });
+        return $inputs;
+    }
+    AjaxFormLib.clean_inputs = clean_inputs;
+    
+    function clean_inputs_with_files($form) {
+        // Shave off the names from suggest-enhanced hidden inputs
+        $form.find('input:hidden').each( function() {
+            if ($form.find( str_concat('#',$(this).attr('id'),'_suggest') ).length == 0) return;
+            $(this).val( $(this).val().replace(/#.*/, '') );
+        });
+        // Shave off the days of week from date-time inputs
+        $form.find('.vDateTimeInput,.vDateInput').each( function() {
+            $(this).val( $(this).val().replace(/ \D{2}$/, '') );
+        } );
+    }
+    AjaxFormLib.clean_inputs_with_files = clean_inputs_with_files;
 
     // Submit event
     function ajax_submit($form, button_name, process_redirect) {
@@ -654,15 +710,7 @@ $( function() {
             if ( $(this).val() ) has_files = true;
         });
         if (has_files) {
-            // Shave off the names from suggest-enhanced hidden inputs
-            $form.find('input:hidden').each( function() {
-                if ($form.find( str_concat('#',$(this).attr('id'),'_suggest') ).length == 0) return;
-                $(this).val( $(this).val().replace(/#.*/, '') );
-            });
-            // Shave off the days of week from date-time inputs
-            $form.find('.vDateTimeInput,.vDateInput').each( function() {
-                $(this).val( $(this).val().replace(/ \D{2}$/, '') );
-            } );
+            clean_inputs_with_files($form);
             $form.data('standard_submit', true);
             if (button_name) {
                 $form.append( str_concat('<input type="hidden" value="1" name="',button_name,'" />') );
@@ -694,24 +742,7 @@ $( function() {
             error = ajax_submit_error;
         }
         // Process the inputs prior to sending
-        var $inputs = $('#absolutely#_nothing');
-        get_inputs($form).each( function() {
-            // Don't send suggest inputs
-            if ( /(.*)_suggest$/.test($(this).attr('id')) ) {
-                return;
-            }
-            // Shave off the names from suggest-enhanced hidden inputs
-            if ( $(this).is('input:hidden') && $form.find( str_concat('#',$(this).attr('id'),'_suggest') ).length ) {
-                $inputs = $inputs.add(   $(this).clone().val( $(this).val().replace(/#.*/, '') )   );
-                return;
-            }
-            // Shave off the days of week from date-time inputs
-            if ( $(this).is('.vDateTimeInput,.vDateInput') ) {
-                $inputs = $inputs.add(   $(this).clone().val( $(this).val().replace(/ \D{2}$/, '') )   );
-                return;
-            }
-            $inputs = $inputs.add($(this));
-        });
+        var $inputs = clean_inputs($form);
 
         if (button_name) $inputs = $inputs.add( str_concat('<input type="hidden" value="1" name="',button_name,'" />') );
         var data = $inputs.serialize();
