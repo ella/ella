@@ -53,6 +53,7 @@ MEDIA_ROOT = join(dirname(example_project.__file__), 'static')
 MEDIA_URL = '/media/'
 
 STATIC_URL = '/static/'
+NEWMAN_MEDIA_PREFIX = '/%s/newman/' % STATIC_URL.strip('/')
 
 # markup settings
 DEFAULT_MARKUP = 'markdown'
