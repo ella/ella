@@ -208,10 +208,7 @@ class ListingManager(models.Manager):
 
         # only use priorities if somebody wants them
         if not core_settings.USE_PRIORITIES:
-            if unique:
-                return make_items_unique(qset)
-            return qset[offset:limit]
-
+            return make_items_unique(qset)[offset:limit]
 
         # listings with active priority override
         active = models.Q(
