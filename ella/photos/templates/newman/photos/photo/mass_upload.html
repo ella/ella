@@ -1,0 +1,91 @@
+{% extends "newman/change_form.html" %}
+{% load newman_modify cache i18n %}
+
+{% block content %}
+{{ media }}
+
+<form {% if has_file_field %}enctype="multipart/form-data" {% endif %}action="." method="post" id="{{ opts.module_name }}_form" class="change-form">{% block form_top %}{% endblock %}
+<div>
+    <div class="js-textarea-toolbar"></div>
+{% if errors %}
+    <p class="errornote">
+    {% blocktrans count errors|length as counter %}Please correct the error below.{% plural %}Please correct the errors below.{% endblocktrans %}
+    </p>
+    <ul class="errorlist">{% for error in adminform.form.non_field_errors %}<li>{{ error }}</li>{% endfor %}</ul>
+{% endif %}
+
+{% block fieldsets %}
+{% for fieldset in adminform %}
+  {% include "newman/includes/fieldset.html" %}
+{% endfor %}
+{% endblock %}
+
+
+<div class="submit-row">
+    <a id="start-upload" class="js-submit icn btn save def default-button-ok" name="_save">{% trans "Upload photos" %}</a>
+</div>
+
+</div>
+
+</form>
+
+{% endblock %}
+
+{% block content_js %}
+    <script type="text/javascript">
+        $(document).ready(function() {
+            var $uploadifyTarget = $('#id_image_file');
+            var originalObjectId = null;
+            var index = 1;
+            
+            function getFormData() {
+                var formData = $('form').serializeObject();
+                formData.title = formData.title + ' ' + index ;
+                formData.slug = formData.slug + '-' + index; 
+                console.log('Appending data to send along with upload:' + JSON.stringify(formData));
+                $uploadifyTarget.uploadifySettings('scriptData', formData, true);
+            }
+            
+            $uploadifyTarget.uploadify({
+                'uploader'       : '{{ NEWMAN_MEDIA_URL }}swf/uploadify.swf',
+                'script'         : '{% url newman:photo-mass-upload-file %}',
+                'cancelImg'      : '{{ NEWMAN_MEDIA_URL }}img/cancel.png',
+                'buttonText'     : '{% trans "Choose images" %}',
+                'fileExt'        : '*.png;*.jpg;*.jpeg',
+                'fileDesc'       : '{% trans "Image files (*.png, *.jpg, *.jpeg)" %}',
+                'fileDataName'   : 'image_file',
+                'multi'          : true,
+                'onError'        : function (event, ID, fileObj, errorObj) {
+                    $uploadifyTarget.uploadifyClearQueue();
+                    console.log(ID);
+                    console.log(fileObj);
+                    console.log(errorObj);
+                    console.log(event);
+                    show_err('{% trans "Photo upload failed. Check for form errors." %}');
+                },
+                'onComplete': function (event, ID, fileObj, reponse, data) {
+                    index++;
+                    $uploadifyTarget.uploadifySettings('scriptData', getFormData(), true);
+                },
+                'onAllComplete': function (event, data) {
+                    show_ok('{% trans "All images have been uploaded." %}');
+                    adr('/photos/photo/', {nohistory: true});
+                }
+            });
+            
+            function startUpload () {
+                AjaxFormLib.clean_inputs_with_files($('form'));
+                $uploadifyTarget.uploadifySettings('scriptData', getFormData(), true);
+                $uploadifyTarget.uploadifyUpload();                
+            }
+            
+            $('#start-upload').unbind('click').click(startUpload);
+        });
+    </script>
+    <script type="text/javascript">
+    function trigger_changelist_shown() {
+        $(document).trigger('changeform_shown'); // bound in inlines.js
+    }
+    $(document).one('media_loaded', trigger_changelist_shown);
+    </script>
+{% endblock %}

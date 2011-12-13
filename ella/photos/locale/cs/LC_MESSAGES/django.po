@@ -7,180 +7,219 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-07-08 08:04+0200\n"
+"POT-Creation-Date: 2011-11-29 14:07+0100\n"
 "PO-Revision-Date: 2009-07-08 08:13+0100\n"
 "Last-Translator: Vitek Pliska <whit@jizak.cz>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: admin.py:26
+#: admin.py:28
 msgid "The specified crop coordinates do not fit into the source photo."
 msgstr "Zadané souřadnice leží mimo zdrojovou fotku."
 
-#: models.py:26
-msgid "Low"
-msgstr "Nízká"
+#: admin.py:73
+msgid "Photo core"
+msgstr "Základní info"
 
-#: models.py:27
-msgid "Medium"
-msgstr "Střední"
+#: admin.py:74
+msgid "Photo extra"
+msgstr "Extra info"
 
-#: models.py:28
-msgid "Good"
-msgstr "Dobrá"
-
-#: models.py:29
-msgid "Better"
-msgstr "Lepší"
-
-#: models.py:30
-msgid "High"
-msgstr "Vysoká"
-
-#: models.py:67
-#: migrations/0001_initial.py:17
-#: migrations/old/0001_init.py:17
-msgid "Title"
-msgstr "Nadpis"
-
-#: models.py:68
-#: newman_admin.py:28
-#: migrations/0001_initial.py:18
-#: migrations/old/0001_init.py:16
-msgid "Description"
-msgstr "Popis"
-
-#: models.py:69
-#: migrations/0001_initial.py:19
-#: migrations/old/0001_init.py:20
-msgid "Slug"
-msgstr ""
-
-#: models.py:70
-msgid "Image"
-msgstr "Obrázek"
-
-#: models.py:81
-msgid "Authors"
-msgstr "Autoři"
-
-#: models.py:82
-#: migrations/0001_initial.py:23
-#: migrations/old/0001_init.py:27
-msgid "Source"
-msgstr "Zdroj"
-
-#: models.py:98
-msgid "Thumbnail not available"
-msgstr "Náhled není k dispozici"
-
-#: models.py:207
-msgid "Photo"
-msgstr "Foto"
-
-#: models.py:208
-msgid "Photos"
-msgstr "Fotky"
-
-#: models.py:214
-#: migrations/0001_initial.py:46
-#: migrations/old/0001_init.py:49
-msgid "Name"
-msgstr "Jméno"
-
-#: models.py:215
-#: migrations/0001_initial.py:47
-#: migrations/old/0001_init.py:56
-msgid "Max width"
-msgstr "Max šířka"
-
-#: models.py:216
-#: migrations/0001_initial.py:48
-#: migrations/old/0001_init.py:53
-msgid "Max height"
-msgstr "Max výška"
-
-#: models.py:217
-#: migrations/0001_initial.py:49
-#: migrations/old/0001_init.py:55
-msgid "Flexible height"
-msgstr "Pružná výška"
-
-#: models.py:219
-#: migrations/0001_initial.py:50
-#: migrations/old/0001_init.py:51
-msgid "Flexible max height"
-msgstr "Pružná max výška"
-
-#: models.py:220
-#: migrations/0001_initial.py:51
-#: migrations/old/0001_init.py:50
-msgid "Stretch"
-msgstr "Roztáhnout"
-
-#: models.py:221
-#: migrations/0001_initial.py:52
-#: migrations/old/0001_init.py:54
-msgid "Do not crop"
-msgstr "Neořezávat"
-
-#: models.py:222
-#: migrations/0001_initial.py:53
-#: migrations/old/0001_init.py:57
-msgid "Resample quality"
-msgstr "Kvalita vzorkování"
-
-#: models.py:223
-msgid "Sites"
-msgstr "Weby"
-
-#: models.py:246
-msgid "Format"
-msgstr "Formát"
-
-#: models.py:247
-msgid "Formats"
-msgstr "Formáty"
-
-#: models.py:344
-msgid "Formated photo"
-msgstr "Foto ve formátu"
-
-#: models.py:345
-msgid "Formated photos"
-msgstr "Fotky ve formátu"
-
-#: newman_admin.py:27
-msgid "Heading"
-msgstr "Hlavička"
-
-#: newman_admin.py:29
+#: admin.py:75
+#: newman_admin.py:80
+#: newman_admin.py:86
 msgid "Metadata"
 msgstr "Metadata"
 
-#: newman_admin.py:30
-msgid "Important area"
-msgstr "Důležitá oblast"
+#: conf.py:6
+msgid "Low"
+msgstr "Nízká"
 
-#: newman_admin.py:35
+#: conf.py:7
+msgid "Medium"
+msgstr "Střední"
+
+#: conf.py:8
+msgid "Good"
+msgstr "Dobrá"
+
+#: conf.py:9
+msgid "Better"
+msgstr "Lepší"
+
+#: conf.py:10
+msgid "High"
+msgstr "Vysoká"
+
+#: forms.py:20
+msgid "Image files"
+msgstr "Obrázky"
+
+#: models.py:46
+#: migrations/0001_initial.py:18
+msgid "Title"
+msgstr "Nadpis"
+
+#: models.py:47
+#: newman_admin.py:79
+#: newman_admin.py:85
+#: migrations/0001_initial.py:19
+msgid "Description"
+msgstr "Popis"
+
+#: models.py:48
+#: migrations/0001_initial.py:20
+msgid "Slug"
+msgstr "Slug"
+
+#: models.py:49
+msgid "Image"
+msgstr "Obrázek"
+
+#: models.py:60
+msgid "Authors"
+msgstr "Autoři"
+
+#: models.py:61
+#: migrations/0001_initial.py:24
+msgid "Source"
+msgstr "Zdroj"
+
+#: models.py:77
+msgid "Thumbnail not available"
+msgstr "Náhled není k dispozici"
+
+#: models.py:198
+msgid "Photo"
+msgstr "Foto"
+
+#: models.py:199
+msgid "Photos"
+msgstr "Fotky"
+
+#: models.py:205
+#: migrations/0001_initial.py:47
+msgid "Name"
+msgstr "Jméno"
+
+#: models.py:206
+#: migrations/0001_initial.py:48
+msgid "Max width"
+msgstr "Max šířka"
+
+#: models.py:207
+#: migrations/0001_initial.py:49
+msgid "Max height"
+msgstr "Max výška"
+
+#: models.py:208
+#: migrations/0001_initial.py:50
+msgid "Flexible height"
+msgstr "Pružná výška"
+
+#: models.py:210
+#: migrations/0001_initial.py:51
+msgid "Flexible max height"
+msgstr "Pružná max výška"
+
+#: models.py:211
+#: migrations/0001_initial.py:52
+msgid "Stretch"
+msgstr "Roztáhnout"
+
+#: models.py:212
+#: migrations/0001_initial.py:53
+msgid "Do not crop"
+msgstr "Neořezávat"
+
+#: models.py:213
+#: migrations/0001_initial.py:54
+msgid "Resample quality"
+msgstr "Kvalita vzorkování"
+
+#: models.py:214
+msgid "Sites"
+msgstr "Weby"
+
+#: models.py:237
+msgid "Format"
+msgstr "Formát"
+
+#: models.py:238
+msgid "Formats"
+msgstr "Formáty"
+
+#: models.py:346
+msgid "Formated photo"
+msgstr "Foto ve formátu"
+
+#: models.py:347
+msgid "Formated photos"
+msgstr "Fotky ve formátu"
+
+#: newman_admin.py:30
+#: newman_admin.py:91
 msgid "Size"
 msgstr "Velikost"
 
-#: newman_admin.py:50
+#: newman_admin.py:78
+#: newman_admin.py:84
+msgid "Heading"
+msgstr "Hlavička"
+
+#: newman_admin.py:81
+msgid "Important area"
+msgstr "Důležitá oblast"
+
+#: newman_admin.py:101
+msgid "Max applications"
+msgstr "Maximum použití"
+
+#: newman_admin.py:117
 #, python-format
 msgid "Photo id %s does not exists."
 msgstr "Foto id %s neexistuje."
 
-#~ msgid "Category"
-#~ msgstr "Kategorie"
-#~ msgid ""
-#~ "Determines whether max_height is an absolute maximum, or the formatted "
-#~ "photo can vary from max_height for flexible_max_height."
-#~ msgstr ""
-#~ "Rozhoduje zda výška max_height je absolutní maximum , nebo výška "
-#~ "formatovanéfotky může být i flexible_max_height."
-#~ msgid "The specified crop ratio does not agree with the defined format."
-#~ msgstr "Zadané souřadnice leží mimo zdrojovou fotku."
+#: newman_admin.py:168
+#: templates/newman/photos/photo/change_list.html:7
+msgid "Mass upload"
+msgstr "Hromadné nahrávání"
+
+#: templates/newman/photos/photo/change_list.html:6
+#, python-format
+msgid "Add %(name)s"
+msgstr "Přidat %(name)s"
+
+#: templates/newman/photos/photo/change_list.html:10
+msgid "Last edited"
+msgstr "Naposledy upraveno"
+
+#: templates/newman/photos/photo/mass_upload.html:12
+msgid "Please correct the error below."
+msgid_plural "Please correct the errors below."
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/newman/photos/photo/mass_upload.html:25
+msgid "Upload photos"
+msgstr "Nahrát fotky"
+
+#: templates/newman/photos/photo/mass_upload.html:53
+msgid "Choose images"
+msgstr "Vybrat fotky"
+
+#: templates/newman/photos/photo/mass_upload.html:55
+msgid "Image files (*.png, *.jpg, *.jpeg)"
+msgstr "Soubory obrázků (*.png, *jpg, *.jpeg)"
+
+#: templates/newman/photos/photo/mass_upload.html:64
+msgid "Photo upload failed. Check for form errors."
+msgstr "Nahrávání selhalo. Zkontrolujte chyby ve formuláři."
+
+#: templates/newman/photos/photo/mass_upload.html:71
+msgid "All images have been uploaded."
+msgstr "Všechny fotky byly nahrány."
 
