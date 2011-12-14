@@ -77,25 +77,41 @@ class Command(BaseCommand):
         self.print_message(message, self.VERBOSITY_DEBUG)
 
     def handle(self, *args, **options):
+
         self.process_options(options)
         self.print_debug("Options: ")
         self.print_debug(options)
+
+        subdir = re.sub(
+            '[^('+re.escape(os.sep)+')]*%[^%].*',
+            '',
+            photos_settings.UPLOAD_TO
+            ).strip(os.sep)
+
         from ella.photos.models import Photo
-        subdir = re.sub('[^('+re.escape(os.sep)+')]*%[^%].*', '', photos_settings.UPLOAD_TO).strip(os.sep)
         storage = Photo().image.storage
+
         extensions = self.extensions or photos_settings.TYPE_EXTENSION.values()
         self.print_info('Accepted extensions: ' +str(extensions))
-        photo_extension_re = re.compile('(%s)$' % ('|'.join([re.escape(ex) for ex in extensions])), self.extensions_ic and re.IGNORECASE or 0)
+        photo_extension_re = re.compile(
+                '(%s)$' % ('|'.join([re.escape(ex) for ex in extensions])),
+                self.extensions_ic and re.IGNORECASE or 0)
+
+        # breadth-first search
         files = []
         nodes = [subdir]
         while nodes:
             current = nodes.pop()
             self.print_debug("Entering directory '%s'" % current)
             current_dirs, current_files = storage.listdir(current)
+
             if not (current_dirs or current_files):
                 self.print_info("Directory '%s' is empty" % current)
             else:
-                nodes += ['%s%s%s' % (current, os.sep, directory) for directory in current_dirs]
+                nodes += [
+                        '%s%s%s' % (current, os.sep, directory)
+                        for directory in current_dirs]
+
                 for current_file in current_files:
                     f = '%s%s%s' % (current, os.sep, current_file)
                     is_image = bool(photo_extension_re.search(current_file))
@@ -104,23 +120,41 @@ class Command(BaseCommand):
                     if is_image or self.all:
                         files.append(f)
                         self.print_debug("Appending file '%s'" % f)
+
             self.print_debug("Leaving directory '%s'" % current)
+
         photo_files_set = set(files)
         db_files_set = set([photo.image.url for photo in Photo.objects.all()])
-        self.print_stat("Count of files on disk (selected extensions): %d" % len(photo_files_set))
-        self.print_stat("Count of files in database (all extensions): %d" % len(db_files_set))
-        self.print_info("Files only in database (all extensions):")
-        only_in_database = db_files_set -photo_files_set
-        self.print_info(only_in_database)
-        self.print_stat("Count of files only in database (all extensions): %d" % len(only_in_database))
-        self.print_info("Files only on disk (selected extensions):")
-        only_on_disk = photo_files_set -db_files_set
-        self.print_info(only_on_disk)
-        self.print_stat("Count of files only on disk (selected extensions): %d" 
-                % len(only_on_disk))
-        self.print_stat("Count of paired files (selected extensions): %d" % len(photo_files_set & db_files_set))
+        self.print_summarization(photo_files_set, db_files_set)
+
         if self.delete:
-            to_delete = photo_files_set -db_files_set
+            self.delete_files(storage, photo_files_set -db_files_set)
+
+    def print_summarization(self, photo_files_set, db_files_set):
+
+        self.print_stat("Count of files on disk (selected extensions): %d"
+                % len(photo_files_set))
+
+        self.print_stat("Count of files in database (all extensions): %d"
+                % len(db_files_set))
+
+        only_in_database = db_files_set -photo_files_set
+        self.print_info("Files only in database (all extensions):")
+        self.print_info(only_in_database)
+        self.print_stat("Count of files only in database (all extensions): %d"
+                % len(only_in_database))
+
+        only_on_disk = photo_files_set -db_files_set
+        self.print_info("Files only on disk (selected extensions):")
+        self.print_info(only_on_disk)
+        self.print_stat("Count of files only on disk (selected extensions): %d"
+                % len(only_on_disk))
+
+        self.print_stat("Count of paired files (selected extensions): %d"
+                % len(photo_files_set & db_files_set))
+
+
+    def delete_files(self, storage, to_delete):
             for f in to_delete:
                 self.print_info("Delete file '%s'" % f)
                 storage.delete(f)
