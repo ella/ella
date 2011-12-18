@@ -1017,6 +1017,16 @@ $( function() {
     }
     $(document).bind('content_added', overload_default_submit);
     overload_default_submit();
+
+    // set focus to first field of just-added form
+    $(document).bind('content_added', function(evt, extras) {
+        var $cont = $('#' + extras.target_id);
+        if ($cont && $cont.length) {} else {
+            log_generic.log('Error setting focus to form field: content_added provided no target_id');
+            return;
+        }
+        $cont.find('.js-form :input').not(':hidden').first().focus();
+    });
     //// End of ajax forms
 
     // Set up returning to publishable changelist when coming to change form from it

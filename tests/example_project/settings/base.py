@@ -52,7 +52,6 @@ INSTALLED_APPS = (
     'ella.newman',
     'ella.newman.licenses',
     'ella.ellaadmin',
-#    'ella.media',
     'ella.imports',
     'ella.interviews',
     'ella.positions',
