@@ -14,7 +14,6 @@ class Migration:
 #        ('ella.articles', 'articles', '0002_03_move_article_data'),
 #        ('ella.galleries', 'galleries', '0002_03_gallery_to_publishable'),
 #        ('ella.interviews', 'interviews', '0002_03_interview_to_publishable'),
-#        ('ella.media', 'media', '0002_03_media_to_publishable'),
 #        ('ella.polls', 'polls', '0002_03_01_contest_to_publishable'),
 #        ('ella.polls', 'polls', '0002_03_02_quiz_to_publishable'),
 #        ('ella.series', 'series', '0002_03_serie_to_publishable'),
