@@ -64,7 +64,7 @@ INSTALLED_APPS = (
 
     'example_project.services',
 
-    'south',
+#    'south',
 
     'tagging',
     'djangomarkup',
