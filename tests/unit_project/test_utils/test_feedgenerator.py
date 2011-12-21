@@ -11,11 +11,12 @@ ENCODING = locale.getpreferredencoding()
 
 MEDIA_FEED = """\
 <?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/">\
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0" xmlns:media="http://search.yahoo.com/mrss/">\
 <channel>\
 <title>title</title>\
 <link>link</link>\
 <description>description</description>\
+<atom:link href="url" rel="self"></atom:link>\
 <lastBuildDate>Sun, 23 Dec 2012 00:00:00 -0000</lastBuildDate>\
 <item>\
 <title>title</title>\
@@ -65,7 +66,7 @@ class TestMediaFeed(UnitTestCase):
 
     def test_media_feed(self):
         outfile = StringIO()
-        feed = MediaRSSFeed('title', 'link', 'description')
+        feed = MediaRSSFeed('title', 'link', 'description', feed_url='url')
         feed.add_item('title', 'link', 'description', pubdate=PUB_DATE)
         feed.write(outfile, ENCODING)
         self.assert_equals(outfile.getvalue(), MEDIA_FEED)
