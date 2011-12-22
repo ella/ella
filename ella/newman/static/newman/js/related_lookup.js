@@ -211,18 +211,22 @@ log_lookup = new LoggingLib('RELATED LOOKUP:', true);
         else {
             onsave_callback = function(popped, action_table_obj) {
                 if (!action_table_obj.vars.object_id) {
-                    ADR_STACK = [];
-                    log_lookup.log('Did not get ID of newly added object -- breaking ADR_STACK');
-                    return;
+                    log_lookup.log('Did not get ID of newly added object -- not selecting added object');
                 }
-                popped.oid = action_table_obj.vars.object_id;
-                popped.str = action_table_obj.vars.object_title;
+                else {
+                    popped.oid = action_table_obj.vars.object_id;
+                    popped.str = action_table_obj.vars.object_title;
+                }
             };
             onreturn_callback = function(popped, action_table_obj) {
                 $(document).one('content_added', function(evt) {
                     NewmanLib.restore_form(popped.form_data, $('.change-form'), {});
                 });
-                $(document).one('media_loaded', function(){popped.selection_callback(popped.oid,{str: popped.str});});
+                if (popped.oid) {
+                    $(document).one('media_loaded', function(){
+                        popped.selection_callback(popped.oid,{str: popped.str});
+                    });
+                }
             };
         }
         
