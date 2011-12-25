@@ -46,6 +46,7 @@
                 $uploadifyTarget.uploadifySettings('scriptData', formData, true);
             }
             
+            $uploadifyTarget.data('photos', [])
             $uploadifyTarget.uploadify({
                 'uploader'       : '{{ NEWMAN_MEDIA_URL }}swf/uploadify.swf',
                 'script'         : '{% url newman:photo-mass-upload-file %}',
@@ -63,8 +64,17 @@
                     console.log(event);
                     show_err('{% trans "Photo upload failed. Check for form errors." %}');
                 },
-                'onComplete': function (event, ID, fileObj, reponse, data) {
+                'onComplete': function (event, ID, fileObj, raw_response, data) {
                     index++;
+                    try {
+                        response = JSON.parse(raw_response);
+                        $uploadifyTarget.data('photos').push({
+                            oid:   response.data.object_id,
+                            title: response.data.object_title
+                        });
+                    } catch(e) {
+                        console.log("Failed to parse object_id and object_title from response:", raw_response, e);
+                    }
                     $uploadifyTarget.uploadifySettings('scriptData', getFormData(), true);
                 },
                 'onAllComplete': function (event, data) {
@@ -72,9 +82,12 @@
                     // This is a custom form, thus default newman callbacks are not called.
                     // Call save callback of ajax form action table as if handling a normal
                     // newman save button to return to proper page.
-                    // FIXME: We should collect the IDs of mass-uploaded photos in onComplete
-                    // and make use of them in related_lookup.js. #27
-                    new PostsaveActionTable({}).run('_save');
+                    // The photos' IDs and titles (superfluous atm) are passed so the
+                    // photos can be automatically added to gallery, as done in
+                    // related_lookup.js.
+                    new PostsaveActionTable({
+                        photos: $uploadifyTarget.data('photos')
+                    }).run('_save');
                 }
             });
             

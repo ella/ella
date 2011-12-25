@@ -185,7 +185,8 @@ class PhotoAdmin(newman.NewmanModelAdmin):
         if 'error_dict' in context:
             return self.json_error_response(request, context)
         else:
-            return JsonResponseRedirect('..')
+            obj = context['object']
+            return JsonResponse('', {'object_id': obj.id, 'object_title': obj.title})
         raise Http404
     
     def mass_upload_view(self, request):

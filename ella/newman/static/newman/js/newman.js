@@ -1544,7 +1544,7 @@ $(document).ready( function() {
 
 // Opens an overlay with a changelist and calls supplied function on click on item.
 $( function() {
-    function OverlayOpener(content_type, selection_callback) {
+    function OverlayOpener(content_type, selection_callback, overlay_data) {
         var arg_content_type = content_type;
         var arg_selection_callback = selection_callback;
 
@@ -1590,7 +1590,11 @@ $( function() {
             }
             $overlay.css({zIndex:top_zindex});
 
-            $('#overlay-content').data('selection_callback', selection_callback);
+            if (typeof(overlay_data) !== 'object') {
+                overlay_data = {};
+            }
+            overlay_data.selection_callback = selection_callback;
+            $('#overlay-content').data(overlay_data);
 
             var ct_arr = /(\w+)\W(\w+)/.exec( content_type );
             if ( ! ct_arr ) {

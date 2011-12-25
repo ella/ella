@@ -154,7 +154,6 @@ log_lookup = new LoggingLib('RELATED LOOKUP:', true);
     }
     function click_live_handler() {
         // Look for the corresponding content type input and target id input
-        log_lookup.log('CALL.generic-related-lookup');
         var $id_input = $( '#' + this.id.replace(/^lookup_/, '') );
         var $ct_input = get_corresponding_input($id_input);
         if ($ct_input.length == 0) {
@@ -173,7 +172,7 @@ log_lookup = new LoggingLib('RELATED LOOKUP:', true);
         open_overlay(content_type, function(id, extras) {
             $id_input.val(id);
             $id_input.trigger('change', [extras]);
-        });
+        }, {input_id: $id_input.attr('id')});
         return false;
     }
     $('.generic-related-lookup').live('click', click_live_handler);
@@ -209,21 +208,21 @@ log_lookup = new LoggingLib('RELATED LOOKUP:', true);
             // Define no callbacks
         }
         else {
-            onsave_callback = function(popped, action_table_obj) {
-                if (!action_table_obj.vars.object_id) {
+            onsave_callback = function(popped, action_table) {
+                if (!action_table.vars.object_id) {
                     log_lookup.log('Did not get ID of newly added object -- not selecting added object');
                 }
                 else {
-                    popped.oid = action_table_obj.vars.object_id;
-                    popped.str = action_table_obj.vars.object_title;
+                    popped.oid = action_table.vars.object_id;
+                    popped.str = action_table.vars.object_title;
                 }
             };
-            onreturn_callback = function(popped, action_table_obj) {
+            onreturn_callback = function(popped, action_table) {
                 $(document).one('content_added', function(evt) {
                     NewmanLib.restore_form(popped.form_data, $('.change-form'), {});
                 });
                 if (popped.oid) {
-                    $(document).one('media_loaded', function(){
+                    $(document).one('media_loaded', function() {
                         popped.selection_callback(popped.oid,{str: popped.str});
                     });
                 }
@@ -247,9 +246,37 @@ log_lookup = new LoggingLib('RELATED LOOKUP:', true);
         }
     }
     $('.js-adrstack-push').live('click', default_adrstack_push_callback);
-    /*$('.js-adrstack-push.js-custom-adrstack-callbacks.js-multi-upload').live('click', function(evt) {
-        // FIXME: Add all the mass-uploaded photos to the gallery.
-        // Would have to collect photo IDs from mass_upload.html
-        // and write custom onsave and onreturn callbacks. #27
-    });*/
+    // set up handling of mass-uploaded photos when coming from gallery-edit page
+    $('.js-adrstack-push.js-custom-adrstack-callbacks.js-multi-upload').live('click', function(evt) {
+        var stack_top = NewmanLib.ADR_STACK[ NewmanLib.ADR_STACK.length - 1 ];
+        stack_top.input_id = $('#overlay-content').data('input_id');
+        stack_top.onsave = function(popped, action_table) {
+            if (!action_table.vars.photos) {
+                log_lookup.log('Did not get IDs and titles of mass-uploaded photos -- not adding them to form');
+                popped.photos = [];
+            }
+            else {
+                popped.photos = action_table.vars.photos;
+            }
+        };
+        stack_top.onreturn = function(popped, action_table) {
+            $(document).one('content_added', function(evt) {
+                NewmanLib.restore_form(popped.form_data, $('.change-form'), {});
+            });
+            // add the photos to the gallery
+            $(document).one('media_loaded', function() {
+                var $input = $('#'+popped.input_id);
+                if (!$input || !$input.length) {
+                    log_lookup.log('#overlay-content has no input attached -- not adding mass-uploaded photos');
+                    return;
+                }
+                for (var i = 0; i < popped.photos.length; i++) {
+                    var photo = popped.photos[i];
+                    $input.val(photo.oid);
+                    $input.change();
+                    $input = $input.closest('.gallery-items-sortable').find(':input.target_id:last');
+                }
+            });
+        }
+    });
 })(jQuery);
