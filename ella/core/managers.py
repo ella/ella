@@ -201,14 +201,16 @@ class ListingManager(models.Manager):
         limit = offset + count
 
         # take out unwanted objects
-        if unique:
+        if unique is not None:
             listed_targets = unique.copy()
         else:
             listed_targets = set([])
 
         # only use priorities if somebody wants them
         if not core_settings.USE_PRIORITIES:
-            return make_items_unique(qset)[offset:limit]
+            if unique is not None:
+                return make_items_unique(qset)
+            return qset[offset:limit]
 
         # listings with active priority override
         active = models.Q(
