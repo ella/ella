@@ -373,8 +373,8 @@ class NewmanModelAdmin(XModelAdmin):
             # is screwed up with the database, so display an error page.
             if ERROR_FLAG in request.GET.keys():
                 return render_to_response('newman/invalid_setup.html', {'title': _('Database error')})
-            return HttpResponseRedirect(request.path + '?' + ERROR_FLAG + '=1')
-            #return utils.JsonResponseRedirect(request.path + '?' + ERROR_FLAG + '=1')
+            #return HttpResponseRedirect(request.path + '?' + ERROR_FLAG + '=1')
+            return utils.JsonResponseRedirect(request.path + '?' + ERROR_FLAG + '=1')
         cl.formset = None
 
         context = {
@@ -852,8 +852,8 @@ class NewmanModelAdmin(XModelAdmin):
             # in case of exception return JSON error dict instead of 500.html
             return utils.JsonResponseError(str(e))
         # create JsonResponse containing success message
-        #return utils.JsonResponse(_('Object was deleted.'))
-        return utils.JsonResponseRedirect(result['Location'])
+        return utils.JsonResponse(_('Object was deleted.'))
+        #return utils.JsonResponseRedirect(result['Location'])
 
     @transaction.commit_on_success
     def add_json_view(self, request, form_url='', extra_context=None):
