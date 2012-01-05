@@ -429,10 +429,11 @@ class Contestant(models.Model):
         Parse choices represented as a string and returns reached points count
         """
         points = 0
-        for q in self.choices.split('|'):
-            vs = q.split(':')
-            for v in vs[1].split(','):
-                points += get_cached_object(Choice, pk=v).points
+        if self.choices:
+            for q in self.choices.split('|'):
+                vs = q.split(':')
+                for v in vs[1].split(','):
+                    points += get_cached_object(Choice, pk=v).points
         return points
 
     def __unicode__(self):
