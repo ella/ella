@@ -49,6 +49,9 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
     for key in custom_param_names:
         kwargs.pop(key, None)
 
+    if db_field.choices:
+        return db_field.formfield(**kwargs)
+
     for css_class, rich_text_fields in getattr(cls, 'rich_text_fields', {}).iteritems():
         if db_field.name in rich_text_fields:
             kwargs.update({
