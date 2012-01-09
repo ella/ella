@@ -2,7 +2,9 @@
 from django.forms import ValidationError
 from django.db.models import signals
 
-from djangosanetesting.cases import DatabaseTestCase
+from django.test import TestCase
+
+from nose import tools
 
 from ella.newman import fields
 from ella.newman.licenses.models import License
@@ -11,7 +13,7 @@ from ella.core.models import Dependency
 from unit_project.test_core import create_basic_categories, create_and_place_a_publishable
 
 DROP_SIGNALS = [signals.pre_save, signals.post_save]
-class RichTextFieldTestCase(DatabaseTestCase):
+class RichTextFieldTestCase(TestCase):
     def setUp(self):
         super(RichTextFieldTestCase, self).setUp()
 
@@ -40,25 +42,25 @@ class TestRichTextFieldValidation(RichTextFieldTestCase):
             s.receivers = rec
 
     def test_field_doesnt_validate_invalid_template(self):
-        self.assert_raises(ValidationError, self.field.clean, '{% not-a-tag %}')
+        tools.assert_raises(ValidationError, self.field.clean, '{% not-a-tag %}')
 
     def test_field_doesnt_validate_tamplate_with_tags(self):
-        self.assert_raises(ValidationError, self.field.clean, '{% if 1 %}XX {% endif %}')
+        tools.assert_raises(ValidationError, self.field.clean, '{% if 1 %}XX {% endif %}')
 
 
     def test_field_doesnt_validate_template_with_boxes_with_variables(self):
-        self.assert_raises(ValidationError, self.field.clean, '{% box name for var %}{% endbox %}')
+        tools.assert_raises(ValidationError, self.field.clean, '{% box name for var %}{% endbox %}')
 
 
     def test_field_doesnt_validate_boxes_for_missing_objects(self):
-        self.assert_raises(ValidationError, self.field.clean, '{% box name for articles.article with pk 10000 %}{% endbox %}')
+        tools.assert_raises(ValidationError, self.field.clean, '{% box name for articles.article with pk 10000 %}{% endbox %}')
 
     def test_field_validates_pure_text(self):
-        self.assert_equals(self.field.processor.convert('some-text'), self.field.clean('some-text'))
+        tools.assert_equals(self.field.processor.convert('some-text'), self.field.clean('some-text'))
 
     def test_field_validates_text_and_correct_boxes(self):
         text = 'some-text {%% box inline for core.category with pk %s %%}{%% endbox %%}' % self.category.pk
-        self.assert_equals(self.field.processor.convert(text), self.field.clean(text))
+        tools.assert_equals(self.field.processor.convert(text), self.field.clean(text))
 
 class TestRichTextFieldDependencyHandling(RichTextFieldTestCase):
 
@@ -67,10 +69,10 @@ class TestRichTextFieldDependencyHandling(RichTextFieldTestCase):
         self.publishable.description = self.field.clean(text)
         self.publishable.save()
 
-        self.assert_equals(1, Dependency.objects.all().count())
+        tools.assert_equals(1, Dependency.objects.all().count())
         dep = Dependency.objects.all()[0]
-        self.assert_equals(self.category, dep.target)
-        self.assert_equals(self.publishable, dep.dependent)
+        tools.assert_equals(self.category, dep.target)
+        tools.assert_equals(self.publishable, dep.dependent)
 
     def test_field_drops_dependencies_on_update(self):
         dep = Dependency()
@@ -82,7 +84,7 @@ class TestRichTextFieldDependencyHandling(RichTextFieldTestCase):
         self.publishable.description = self.field.clean(text)
         self.publishable.save()
 
-        self.assert_equals(0, Dependency.objects.all().count())
+        tools.assert_equals(0, Dependency.objects.all().count())
 
     def test_two_dependencies_in_two_fields_get_picked_up(self):
         field2 = fields.NewmanRichTextField(
@@ -99,8 +101,8 @@ class TestRichTextFieldDependencyHandling(RichTextFieldTestCase):
 
         self.publishable.save()
 
-        self.assert_equals(2, Dependency.objects.all().count())
-        self.assert_equals(sorted([self.category.pk, self.category_nested.pk]), [dep.target_id for dep in Dependency.objects.order_by('target_id')])
+        tools.assert_equals(2, Dependency.objects.all().count())
+        tools.assert_equals(sorted([self.category.pk, self.category_nested.pk]), [dep.target_id for dep in Dependency.objects.order_by('target_id')])
 
     def test_object_still_used_in_one_field_doesnt_affect_dependencies(self):
         dep = Dependency()
@@ -120,10 +122,10 @@ class TestRichTextFieldDependencyHandling(RichTextFieldTestCase):
         self.publishable.description = self.field.clean(text)
         self.publishable.save()
 
-        self.assert_equals(1, Dependency.objects.all().count())
+        tools.assert_equals(1, Dependency.objects.all().count())
         dep = Dependency.objects.all()[0]
-        self.assert_equals(self.category, dep.target)
-        self.assert_equals(self.publishable, dep.dependent)
+        tools.assert_equals(self.category, dep.target)
+        tools.assert_equals(self.publishable, dep.dependent)
 
 
 class TestRichTextFieldLicenseHandling(RichTextFieldTestCase):
@@ -133,7 +135,7 @@ class TestRichTextFieldLicenseHandling(RichTextFieldTestCase):
         self.publishable.description = self.field.clean(text)
         self.publishable.save()
 
-        self.assert_equals(0, License.objects.count())
+        tools.assert_equals(0, License.objects.count())
 
     def test_use_of_licensed_object_raises_the_applications_counter(self):
         l = License(max_applications=2)
@@ -143,7 +145,7 @@ class TestRichTextFieldLicenseHandling(RichTextFieldTestCase):
         text = 'some-text {%% box inline for core.category with pk %s %%}{%% endbox %%}' % self.category.pk
         self.publishable.description = self.field.clean(text)
         self.publishable.save()
-        self.assert_equals(1, License.objects.get(pk=l.pk).applications)
+        tools.assert_equals(1, License.objects.get(pk=l.pk).applications)
 
     def test_still_using_licensed_object_doesnt_change_its_applications(self):
         l = License(max_applications=2, applications=2)
@@ -159,7 +161,7 @@ class TestRichTextFieldLicenseHandling(RichTextFieldTestCase):
         self.publishable.description = self.field.clean(text)
         self.publishable.save()
 
-        self.assert_equals(2, License.objects.get(pk=l.pk).applications)
+        tools.assert_equals(2, License.objects.get(pk=l.pk).applications)
 
     def test_no_longer_using_licensed_object_lowers_its_applications(self):
         l = License(max_applications=2, applications=2)
@@ -175,7 +177,7 @@ class TestRichTextFieldLicenseHandling(RichTextFieldTestCase):
         self.publishable.description = self.field.clean(text)
         self.publishable.save()
 
-        self.assert_equals(1, License.objects.get(pk=l.pk).applications)
+        tools.assert_equals(1, License.objects.get(pk=l.pk).applications)
 
     def test_two_uses_in_two_fields_on_one_object_count_as_one(self):
         l = License(max_applications=2, applications=1)
@@ -193,7 +195,7 @@ class TestRichTextFieldLicenseHandling(RichTextFieldTestCase):
         self.publishable.title = field2.clean(text)
         self.publishable.save()
 
-        self.assert_equals(2, License.objects.get(pk=l.pk).applications)
+        tools.assert_equals(2, License.objects.get(pk=l.pk).applications)
 
 
     def test_object_still_used_in_one_field_doesnt_affect_applications(self):
@@ -217,6 +219,6 @@ class TestRichTextFieldLicenseHandling(RichTextFieldTestCase):
         self.publishable.title = field2.clean('no box here')
         self.publishable.save()
 
-        self.assert_equals(1, License.objects.get(pk=l.pk).applications)
+        tools.assert_equals(1, License.objects.get(pk=l.pk).applications)
 
 

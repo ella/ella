@@ -3,7 +3,9 @@ from datetime import datetime, timedelta
 
 from django.core.urlresolvers import reverse
 
-from djangosanetesting import DatabaseTestCase
+from django.test import TestCase
+
+from nose import tools
 
 from ella.ellatagging import views
 from ella.core.models import Publishable
@@ -11,7 +13,7 @@ from ella.core.models import Publishable
 from unit_project.test_core import create_basic_categories, create_and_place_a_publishable
 from unit_project import template_loader
 
-class TestTaggingViews(DatabaseTestCase):
+class TestTaggingViews(TestCase):
     def setUp(self):
         try:
             import tagging
@@ -34,39 +36,39 @@ class TestTaggingViews(DatabaseTestCase):
         from tagging.models import Tag, TaggedItem
 
         Tag.objects.update_tags(self.only_publishable, 'tag1 tag2')
-        self.assert_equals(2, TaggedItem.objects.count())
+        tools.assert_equals(2, TaggedItem.objects.count())
 
         t = Tag.objects.get(name='tag1')
-        self.assert_equals([self.publishable], [p.target for p in views.get_tagged_publishables(t)])
+        tools.assert_equals([self.publishable], [p.target for p in views.get_tagged_publishables(t)])
 
     def test_get_tagged_publishables_doesnt_return_tagged_publishable_with_future_placement(self):
         from tagging.models import Tag, TaggedItem
 
         Tag.objects.update_tags(self.only_publishable, 'tag1 tag2')
-        self.assert_equals(2, TaggedItem.objects.count())
+        tools.assert_equals(2, TaggedItem.objects.count())
 
         self.placement.publish_from = datetime.now() + timedelta(days=2)
         self.placement.save()
 
         t = Tag.objects.get(name='tag1')
-        self.assert_equals([], list(views.get_tagged_publishables(t)))
+        tools.assert_equals([], list(views.get_tagged_publishables(t)))
 
     def test_get_tagged_publishables_returns_no_objects_when_none_tagged(self):
         from tagging.models import Tag
         t = Tag.objects.create(name='tag1')
-        self.assert_equals([], list(views.get_tagged_publishables(t)))
+        tools.assert_equals([], list(views.get_tagged_publishables(t)))
 
     def test_tagged_publishables_view(self):
         from tagging.models import Tag, TaggedItem
 
         Tag.objects.update_tags(self.only_publishable, 'tag1 tag2')
-        self.assert_equals(2, TaggedItem.objects.count())
+        tools.assert_equals(2, TaggedItem.objects.count())
 
         t = Tag.objects.get(name='tag1')
         url = reverse('tag_list', kwargs={'tag':'tag1'})
         template_loader.templates['page/tagging/listing.html'] = ''
         response = self.client.get(url)
 
-        self.assert_equals([self.publishable], [p.target for p in response.context['object_list']])
-        self.assert_equals(t, response.context['tag'])
+        tools.assert_equals([self.publishable], [p.target for p in response.context['object_list']])
+        tools.assert_equals(t, response.context['tag'])
 

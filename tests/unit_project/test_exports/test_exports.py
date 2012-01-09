@@ -2,9 +2,11 @@
 from time import time, gmtime, localtime, strftime, sleep
 from datetime import datetime, timedelta
 
-from djangosanetesting import DatabaseTestCase
+from django.test import TestCase
 from django.contrib.sites.models import Site
 from django.template.defaultfilters import slugify
+
+from nose import tools
 
 from ella.core.models import Category, Listing, Placement, Author, Publishable
 from ella.articles.models import Article
@@ -59,7 +61,7 @@ def listing_for_placement(**kwargs):
         out.priority_to = prio_dat_to
         out.priority_value = kwargs.get('priority_value')
 
-class TestExport(DatabaseTestCase):
+class TestExport(TestCase):
     " Export model and its manager test. "
 
     def setUp(self):
@@ -230,11 +232,11 @@ class TestExport(DatabaseTestCase):
         " basic test getting items for certain export category. "
         degen = Export.objects.get_items_for_category(self.categoryH)
         out = map(None, degen)
-        self.assert_equals(2 , len(out))
-        self.assert_true(self.publishableA.target in out)
-        self.assert_true(self.publishableB.target in out)
+        tools.assert_equals(2 , len(out))
+        tools.assert_true(self.publishableA.target in out)
+        tools.assert_true(self.publishableB.target in out)
         # ordering test
-        self.assert_equals(
+        tools.assert_equals(
             out,
             [self.publishableA.target, self.publishableB.target]
         )
@@ -243,9 +245,9 @@ class TestExport(DatabaseTestCase):
         " test get_items_for_category() method to overloaded item position "
         degen = Export.objects.get_items_for_category(self.categoryI)
         out = map(None, degen)
-        self.assert_equals(2, len(out))
-        self.assert_true(self.publishableC.target in out)
-        self.assert_true(self.publishableD.target in out)
+        tools.assert_equals(2, len(out))
+        tools.assert_true(self.publishableC.target in out)
+        tools.assert_true(self.publishableD.target in out)
 
     def test_get_items_for_category__placed_by_position_and_by_listings(self):
         """
@@ -266,13 +268,13 @@ class TestExport(DatabaseTestCase):
         )
         degen = Export.objects.get_items_for_category(self.categoryI)
         out = map(None, degen)
-        self.assert_equals(3, len(out))
-        self.assert_true(self.publishableC.target in out)
-        self.assert_true(self.publishableD.target in out)
-        self.assert_true(self.publishableA.target in out)
-        self.assert_true(self.publishableB.target not in out)
+        tools.assert_equals(3, len(out))
+        tools.assert_true(self.publishableC.target in out)
+        tools.assert_true(self.publishableD.target in out)
+        tools.assert_true(self.publishableA.target in out)
+        tools.assert_true(self.publishableB.target not in out)
         # ordering test
-        self.assert_equals(
+        tools.assert_equals(
             out, 
             [self.publishableD.target, self.publishableA.target, self.publishableC.target]
         )
@@ -287,11 +289,11 @@ class TestExport(DatabaseTestCase):
             'description': u'Some\nlonger\ntext',
             'photo': None
         }
-        self.assert_equals(out, right_out)
+        tools.assert_equals(out, right_out)
         # test unexportable publishable (Export object for publishable's category is not present) as well.
         try:
             out = Export.objects.get_export_data(self.publishableD)
-            self.assert_equals('Object should not be exportable!', '')
+            tools.assert_equals('Object should not be exportable!', '')
         except UnexportableException:
             pass #OK
 
@@ -307,7 +309,7 @@ class TestExport(DatabaseTestCase):
             #'visible_from': datetime(2010, 1, 18, 14, 59)
         }
         del out['visible_from']
-        self.assert_equals(out, right_out)
+        tools.assert_equals(out, right_out)
 
     def test_unique(self):
         "test uniqness of items returned from get_items_for_category() method."
@@ -321,7 +323,7 @@ class TestExport(DatabaseTestCase):
         self.exportA.save()
         degen = Export.objects.get_items_for_category(self.categoryH)
         out = map(None, degen)
-        self.assert_equals(2, len(out))
+        tools.assert_equals(2, len(out))
 
     def test_unique_positions(self):
         self.export_metaC = ExportMeta.objects.create(
@@ -340,7 +342,7 @@ class TestExport(DatabaseTestCase):
         self.exportA.save()
         degen = Export.objects.get_items_for_category(self.categoryH)
         out = map(None, degen)
-        self.assert_equals(2, len(out))
+        tools.assert_equals(2, len(out))
 
     def test_overloaded_item_position(self):
         """ 
@@ -412,11 +414,11 @@ class TestExport(DatabaseTestCase):
         items = Export.objects.get_items_for_slug('blb')
         out = map(None, items)
         #print out
-        self.assert_equals(4, len(out))
-        self.assert_equals(self.publishableB.target, out[0])
-        self.assert_equals(self.publishableA.target, out[1])
-        self.assert_equals(self.publishableC.target, out[2])
-        self.assert_equals(self.publishableD.target, out[3])
+        tools.assert_equals(4, len(out))
+        tools.assert_equals(self.publishableB.target, out[0])
+        tools.assert_equals(self.publishableA.target, out[1])
+        tools.assert_equals(self.publishableC.target, out[2])
+        tools.assert_equals(self.publishableD.target, out[3])
 
     def test_(self):
         " copy/paste template "

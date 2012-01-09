@@ -1,10 +1,10 @@
-from djangosanetesting.cases import DatabaseTestCase
+from django.test import TestCase
 from django.contrib.sites.models import Site
 from django.contrib.auth.models import User
 from ella.core.models import Author, Category
 
 
-class NewmanTestCase(DatabaseTestCase):
+class NewmanTestCase(TestCase):
 
     def setUp(self):
         super(NewmanTestCase, self).setUp()

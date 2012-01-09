@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from PIL import Image
 
-from djangosanetesting import DatabaseTestCase
+from django.test import TestCase
+
+from nose import tools
 
 from django.core.urlresolvers import reverse
 from django.http import HttpRequest
@@ -13,7 +15,7 @@ from ella.photos.models import Photo, Format
 from unit_project.test_core import create_basic_categories, create_and_place_a_publishable, \
         create_and_place_more_publishables, list_all_placements_in_category_by_hour
 
-class TestFeeds(DatabaseTestCase):
+class TestFeeds(TestCase):
 
     def setUp(self):
         try:
@@ -61,10 +63,10 @@ class TestFeeds(DatabaseTestCase):
         c = self.client
 
         response = c.get(url)
-        self.assert_equals(200, response.status_code)
+        tools.assert_equals(200, response.status_code)
         d = feedparser.parse(response.content)
 
-        self.assert_equals(len(self.placements), len(d['items']))
+        tools.assert_equals(len(self.placements), len(d['items']))
 
     def test_atom(self):
         import feedparser
@@ -73,25 +75,25 @@ class TestFeeds(DatabaseTestCase):
         c = self.client
 
         response = c.get(url)
-        self.assert_equals(200, response.status_code)
+        tools.assert_equals(200, response.status_code)
         d = feedparser.parse(response.content)
 
-        self.assert_equals(len(self.placements), len(d['items']))
+        tools.assert_equals(len(self.placements), len(d['items']))
 
     def test_get_enclosure_uses_original_when_format_not_set(self):
         self._set_photo()
-        self.assert_true(self.publishable.photo is not None)
+        tools.assert_true(self.publishable.photo is not None)
         original = self.publishable.photo.image
         new = self._feeder.get_enclosure_image(self.only_publishable, enc_format=None)
-        self.assert_equals(unicode(original), unicode(new))
+        tools.assert_equals(unicode(original), unicode(new))
     
     def test_get_enclosure_uses_original_when_format_not_found(self):
         non_existent_format_name = 'aaa'
         self._set_photo()
-        self.assert_true(self.publishable.photo is not None)
+        tools.assert_true(self.publishable.photo is not None)
         original = self.publishable.photo.image
         new = self._feeder.get_enclosure_image(self.only_publishable, enc_format=non_existent_format_name)
-        self.assert_equals(unicode(original), unicode(new))
+        tools.assert_equals(unicode(original), unicode(new))
     
     def test_get_enclosure_uses_formated_photo_when_format_available(self):
         existent_format_name = 'enc_format'
@@ -100,13 +102,13 @@ class TestFeeds(DatabaseTestCase):
         f.sites = [self.site_id]
         
         self._set_photo()
-        self.assert_true(self.publishable.photo is not None)
+        tools.assert_true(self.publishable.photo is not None)
         original = self.publishable.photo.image
         new = self._feeder.get_enclosure_image(self.only_publishable, enc_format=existent_format_name)
-        self.assert_not_equals(unicode(original), unicode(new))
+        tools.assert_not_equals(unicode(original), unicode(new))
     
     def test_get_enclosure_returns_none_when_no_image_set(self):
-        self.assert_equals(self._feeder.get_enclosure_image(self.only_publishable), None)
+        tools.assert_equals(self._feeder.get_enclosure_image(self.only_publishable), None)
     
     
 

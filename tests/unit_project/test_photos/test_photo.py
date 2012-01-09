@@ -6,15 +6,17 @@ from tempfile import mkstemp
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.utils.translation import ugettext
-from djangosanetesting import DatabaseTestCase
+from django.test import TestCase
 from django.contrib.sites.models import Site
 from PIL import Image
+
+from nose import tools
 
 from ella.photos.models import Photo, Format, FormatedPhoto
 
 from unit_project.test_photos.fixtures import create_photo_formats
 
-class TestPhoto(DatabaseTestCase):
+class TestPhoto(TestCase):
 
     def setUp(self):
         super(TestPhoto, self).setUp()
@@ -58,7 +60,7 @@ class TestPhoto(DatabaseTestCase):
 
         fp = FormatedPhoto(photo=self.photo, format=format)
         fp.generate(False)
-        self.assert_equals((0,0,0,0), (fp.crop_left, fp.crop_top, fp.crop_width, fp.crop_height))
+        tools.assert_equals((0,0,0,0), (fp.crop_left, fp.crop_top, fp.crop_width, fp.crop_height))
 
 
 
@@ -78,24 +80,24 @@ class TestPhoto(DatabaseTestCase):
             "title" : u"Example 中文 photo",
             'name' : u"Thumbnail Example 中文 photo",
         }
-        self.assert_equals(expected_html, self.photo.thumb())
+        tools.assert_equals(expected_html, self.photo.thumb())
 
     def test_retrieving_thumbnail_url_creates_image(self):
         url = self.photo.thumb_url()
-        self.assert_equals(True, self.photo.image.storage.exists(self.thumbnail_path))
+        tools.assert_equals(True, self.photo.image.storage.exists(self.thumbnail_path))
 
     def test_thumbnail_not_retrieved_prematurely(self):
         # aka thumbnail not created because thumb_url was not called
-        self.assert_equals(False, self.photo.image.storage.exists(self.thumbnail_path))
+        tools.assert_equals(False, self.photo.image.storage.exists(self.thumbnail_path))
 
     def test_thumbnail_path_creation(self):
-        self.assert_equals("photos/2008/12/31/thumb-foo.jpg", self.photo.get_thumbnail_path("photos/2008/12/31/foo.jpg"))
+        tools.assert_equals("photos/2008/12/31/thumb-foo.jpg", self.photo.get_thumbnail_path("photos/2008/12/31/foo.jpg"))
 
     def test_thumbnail_deleted(self):
         url = self.photo.thumb_url()
         self.photo.delete()
 
-        self.assert_equals(False, self.photo.image.storage.exists(self.thumbnail_path))
+        tools.assert_equals(False, self.photo.image.storage.exists(self.thumbnail_path))
 
     def test_thumbnail_html_for_invalid_image(self):
         # be sneaky and delete image
@@ -103,19 +105,19 @@ class TestPhoto(DatabaseTestCase):
 
         # now we are not able to detect it's format, BWAHAHA
         expected_html = """<strong>%s</strong>""" % ugettext('Thumbnail not available')
-        self.assert_equals(expected_html, self.photo.thumb())
+        tools.assert_equals(expected_html, self.photo.thumb())
 
     def test_thumbnail_thumburl_for_nonexisting_image(self):
         self.photo.image.storage.delete(self.photo.image.path)
-        self.assert_equals(None, self.photo.thumb_url())
+        tools.assert_equals(None, self.photo.thumb_url())
 
     def test_retrieving_formatted_photos_on_fly(self):
         formatted = self.photo.get_formated_photo("basic")
-        self.assert_equals(self.photo, formatted.photo)
+        tools.assert_equals(self.photo, formatted.photo)
 
     def test_formattedphoto_cleared_when_image_changed(self):
         formatted = self.photo.get_formated_photo("basic")
-        self.assert_equals(1, len(self.photo.formatedphoto_set.all()))
+        tools.assert_equals(1, len(self.photo.formatedphoto_set.all()))
 
         # let us create image again
         f = open(self.image_file_name)
@@ -125,15 +127,15 @@ class TestPhoto(DatabaseTestCase):
         self.photo.image.save("newzaaah", file)
         self.photo.save()
 
-        self.assert_equals(0, len(self.photo.formatedphoto_set.all()))
+        tools.assert_equals(0, len(self.photo.formatedphoto_set.all()))
 
     def test_formattedphoto_is_none_when_image_destroyed(self):
         # be sneaky and delete image
         self.photo.image.storage.delete(self.photo.image.path)
-        self.assert_equals(None, self.photo.get_formated_photo("basic"))
+        tools.assert_equals(None, self.photo.get_formated_photo("basic"))
 
     def test_retrieving_ratio(self):
-        self.assert_equals(2, self.photo.ratio())
+        tools.assert_equals(2, self.photo.ratio())
 
     def tearDown(self):
         os.remove(self.image_file_name)

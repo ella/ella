@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime, timedelta
 
-from djangosanetesting import DatabaseTestCase
+from django.test import TestCase
+
+from nose import tools
 
 from ella.core.models import Listing, Category
 
 from unit_project.test_core import create_basic_categories, create_and_place_a_publishable, \
         create_and_place_more_publishables, list_all_placements_in_category_by_hour
 
-class TestListing(DatabaseTestCase):
+class TestListing(TestCase):
 
     def setUp(self):
         super(TestListing, self).setUp()
@@ -27,12 +29,12 @@ class TestListing(DatabaseTestCase):
         )
 
         l = Listing.objects.get_listing(category=c)
-        self.assert_equals(0, len(l))
+        tools.assert_equals(0, len(l))
 
     def test_get_listing_with_immediate_children(self):
         l = Listing.objects.get_listing(category=self.category, children=Listing.objects.IMMEDIATE)
         expected = [listing for listing in self.listings if listing.category in (self.category, self.category_nested)]
-        self.assert_equals(expected, l)
+        tools.assert_equals(expected, l)
 
     def test_get_listing_with_immediate_children_no_duplicates(self):
         expected = [listing for listing in self.listings if listing.category in (self.category, self.category_nested)]
@@ -44,7 +46,7 @@ class TestListing(DatabaseTestCase):
             )
         expected[0] = listing
         l = Listing.objects.get_listing(category=self.category, children=Listing.objects.IMMEDIATE)
-        self.assert_equals(expected, l)
+        tools.assert_equals(expected, l)
 
     def test_get_listing_with_all_children_no_duplicates(self):
         listing = Listing.objects.create(
@@ -54,12 +56,12 @@ class TestListing(DatabaseTestCase):
             )
 
         l = Listing.objects.get_listing(category=self.category, children=Listing.objects.ALL)
-        self.assert_equals(len(self.listings), len(l))
-        self.assert_equals(listing, l[0])
+        tools.assert_equals(len(self.listings), len(l))
+        tools.assert_equals(listing, l[0])
 
     def test_get_listing_with_all_children(self):
         l = Listing.objects.get_listing(category=self.category, children=Listing.objects.ALL)
-        self.assert_equals(self.listings, l)
+        tools.assert_equals(self.listings, l)
 
     def test_inactive_istings_wont_show(self):
         l = self.listings[0]
@@ -68,7 +70,7 @@ class TestListing(DatabaseTestCase):
 
         l = Listing.objects.get_listing(category=self.category, children=Listing.objects.ALL)
 
-        self.assert_equals(self.listings[1:], l)
+        tools.assert_equals(self.listings[1:], l)
 
     def test_prioritized_listing_will_be_first(self):
         l = self.listings[-1]
@@ -81,7 +83,7 @@ class TestListing(DatabaseTestCase):
 
         l = Listing.objects.get_listing(category=self.category, children=Listing.objects.ALL)
 
-        self.assert_equals(expected, l)
+        tools.assert_equals(expected, l)
 
     def test_de_prioritized_listing_will_be_last(self):
         l = self.listings[0]
@@ -94,7 +96,7 @@ class TestListing(DatabaseTestCase):
 
         l = Listing.objects.get_listing(category=self.category, children=Listing.objects.ALL)
 
-        self.assert_equals(expected, l)
+        tools.assert_equals(expected, l)
 
 
     def test_inactive_priority_wont_affect_things(self):
@@ -106,7 +108,7 @@ class TestListing(DatabaseTestCase):
 
         l = Listing.objects.get_listing(category=self.category, children=Listing.objects.ALL)
 
-        self.assert_equals(self.listings, l)
+        tools.assert_equals(self.listings, l)
 
     def test_count_works_accross_priorities(self):
         l = self.listings[-1]
@@ -119,7 +121,7 @@ class TestListing(DatabaseTestCase):
 
         l = Listing.objects.get_listing(category=self.category, children=Listing.objects.ALL, offset=1, count=2)
 
-        self.assert_equals(expected, l)
+        tools.assert_equals(expected, l)
 
     def test_offset_and_count_works_accross_priorities(self):
         l = self.listings[-1]
@@ -133,4 +135,4 @@ class TestListing(DatabaseTestCase):
 
         l = Listing.objects.get_listing(category=self.category, children=Listing.objects.ALL, offset=2, count=2)
 
-        self.assert_equals(expected, l)
+        tools.assert_equals(expected, l)

@@ -3,7 +3,9 @@
 from django.core.urlresolvers import reverse
 from django.test.client import RequestFactory
 
-from djangosanetesting import DatabaseTestCase
+from django.test import TestCase
+
+from nose import tools
 
 from ella.ellatagging.views import TaggedPublishablesView
 from ella.articles.models import Article
@@ -14,7 +16,7 @@ from unit_project.test_core import (create_basic_categories,
 from unit_project import template_loader
 from datetime import datetime
 
-class TestTaggingPagination(DatabaseTestCase):
+class TestTaggingPagination(TestCase):
     """Tests depends on setttings TAG_LISTINGS_PAGINATE_BY = 1"""
     def setUp(self):
         try:
@@ -55,12 +57,12 @@ class TestTaggingPagination(DatabaseTestCase):
         request = self.factory.get(url)
         tpv = TaggedPublishablesView.as_view()
         response = tpv(request, tag='tag1')
-        self.assert_true(200, response.status_code)
-        self.assert_true(response.context_data['is_paginated'])
-        self.assert_equals(1, response.context_data['results_per_page'])
-        self.assert_equals(self.tag, response.context_data['tag'])
-        self.assert_equals(1, len(response.context_data['object_list']))
-        self.assert_equals(self.only_publishable,
+        tools.assert_true(200, response.status_code)
+        tools.assert_true(response.context_data['is_paginated'])
+        tools.assert_equals(1, response.context_data['results_per_page'])
+        tools.assert_equals(self.tag, response.context_data['tag'])
+        tools.assert_equals(1, len(response.context_data['object_list']))
+        tools.assert_equals(self.only_publishable,
                            response.context_data['object_list'][0])
 
 
@@ -69,12 +71,12 @@ class TestTaggingPagination(DatabaseTestCase):
         request = self.factory.get(url, {'p': 1})
         tpv = TaggedPublishablesView.as_view()
         response = tpv(request, tag='tag1')
-        self.assert_true(200, response.status_code)
-        self.assert_true(response.context_data['is_paginated'])
-        self.assert_equals(1, response.context_data['results_per_page'])
-        self.assert_equals(self.tag, response.context_data['tag'])
-        self.assert_equals(1, len(response.context_data['object_list']))
-        self.assert_equals(self.only_publishable,
+        tools.assert_true(200, response.status_code)
+        tools.assert_true(response.context_data['is_paginated'])
+        tools.assert_equals(1, response.context_data['results_per_page'])
+        tools.assert_equals(self.tag, response.context_data['tag'])
+        tools.assert_equals(1, len(response.context_data['object_list']))
+        tools.assert_equals(self.only_publishable,
                            response.context_data['object_list'][0])
 
 
@@ -83,10 +85,10 @@ class TestTaggingPagination(DatabaseTestCase):
         request = self.factory.get(url, {'p': 2})
         tpv = TaggedPublishablesView.as_view()
         response = tpv(request, tag='tag1')
-        self.assert_true(200, response.status_code)
-        self.assert_true(response.context_data['is_paginated'])
-        self.assert_equals(1, response.context_data['results_per_page'])
-        self.assert_equals(self.tag, response.context_data['tag'])
-        self.assert_equals(1, len(response.context_data['object_list']))
-        self.assert_equals(self.only_pub,
+        tools.assert_true(200, response.status_code)
+        tools.assert_true(response.context_data['is_paginated'])
+        tools.assert_equals(1, response.context_data['results_per_page'])
+        tools.assert_equals(self.tag, response.context_data['tag'])
+        tools.assert_equals(1, len(response.context_data['object_list']))
+        tools.assert_equals(self.only_pub,
                            response.context_data['object_list'][0])

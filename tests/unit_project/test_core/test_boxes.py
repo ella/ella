@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-from djangosanetesting import DatabaseTestCase
+from django.test import TestCase
+
+from nose import tools
 
 from ella.core.models import Publishable
 from ella.core.box import Box
@@ -11,7 +13,7 @@ from unit_project.test_core import create_basic_categories, create_and_place_a_p
 class ArticleBox(Box):
     pass
 
-class TestPublishableBox(DatabaseTestCase):
+class TestPublishableBox(TestCase):
     def setUp(self):
         super(TestPublishableBox, self).setUp()
         create_basic_categories(self)
@@ -35,12 +37,12 @@ class TestPublishableBox(DatabaseTestCase):
             'box/box.html',
         ]
 
-        self.assert_equals(template_list, box_publishable._get_template_list())
-        self.assert_equals(template_list, box_article._get_template_list())
+        tools.assert_equals(template_list, box_publishable._get_template_list())
+        tools.assert_equals(template_list, box_article._get_template_list())
 
     def test_box_class_is_specific_to_subclass(self):
         publishable = Publishable.objects.get(pk=self.publishable.pk)
         Article.box_class = ArticleBox
         box = publishable.box_class(publishable, 'box_type', [])
-        self.assert_equals(ArticleBox, box.__class__)
+        tools.assert_equals(ArticleBox, box.__class__)
 

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
-from djangosanetesting import DatabaseTestCase
+from django.test import TestCase
+
+from nose import tools
 
 from ella.core.models import Placement
 from ella.galleries.models import Gallery, GalleryItem
@@ -44,7 +46,7 @@ def create_and_publish_gallery(case):
         order=1 
     )
 
-class TestGalleries(DatabaseTestCase):
+class TestGalleries(TestCase):
 
     def setUp(self):
         super(TestGalleries, self).setUp()
@@ -57,67 +59,67 @@ class TestGalleries(DatabaseTestCase):
         template_loader.templates = {}
 
     def test_gallery_url(self):
-        self.assert_equals('/nested-category/2008/1/10/galleries/first-gallery/', self.publishable.get_absolute_url())
+        tools.assert_equals('/nested-category/2008/1/10/galleries/first-gallery/', self.publishable.get_absolute_url())
 
     def test_gallery_custom_url_first_item(self):
-        self.assert_equals('/nested-category/2008/1/10/galleries/first-gallery/', self.galitem.get_absolute_url())
+        tools.assert_equals('/nested-category/2008/1/10/galleries/first-gallery/', self.galitem.get_absolute_url())
 
     def test_gallery_custom_url_item(self):
-        self.assert_equals('/nested-category/2008/1/10/galleries/first-gallery/item/second-gallery/', self.galitem2.get_absolute_url())
+        tools.assert_equals('/nested-category/2008/1/10/galleries/first-gallery/item/second-gallery/', self.galitem2.get_absolute_url())
 
     def test_two_items_with_same_slug(self):
         galitem3 = self.publishable.galleryitem_set.create(
                 target=self.publishable2,
                 order=2
             )
-        self.assert_equals('second-gallery', self.galitem2.get_slug())
-        self.assert_equals('second-gallery1', galitem3.get_slug())
-        self.assert_equals('/nested-category/2008/1/10/galleries/first-gallery/item/second-gallery1/', galitem3.get_absolute_url())
+        tools.assert_equals('second-gallery', self.galitem2.get_slug())
+        tools.assert_equals('second-gallery1', galitem3.get_slug())
+        tools.assert_equals('/nested-category/2008/1/10/galleries/first-gallery/item/second-gallery1/', galitem3.get_absolute_url())
 
     def test_gallery_custom_view_first_item(self):
         response = self.client.get('/nested-category/2008/1/10/galleries/first-gallery/')
 
-        self.assert_true('previous' in response.context)
-        self.assert_equals(None, response.context['previous'])
+        tools.assert_true('previous' in response.context)
+        tools.assert_equals(None, response.context['previous'])
 
-        self.assert_true('next' in response.context)
-        self.assert_equals(self.galitem2, response.context['next'])
+        tools.assert_true('next' in response.context)
+        tools.assert_equals(self.galitem2, response.context['next'])
 
-        self.assert_true('item' in response.context)
-        self.assert_equals(self.galitem, response.context['item'])
+        tools.assert_true('item' in response.context)
+        tools.assert_equals(self.galitem, response.context['item'])
 
-        self.assert_true('object' in response.context)
-        self.assert_equals(self.galitem.target, response.context['object'])
+        tools.assert_true('object' in response.context)
+        tools.assert_equals(self.galitem.target, response.context['object'])
 
-        self.assert_true('position' in response.context)
-        self.assert_equals(1, response.context['position'])
+        tools.assert_true('position' in response.context)
+        tools.assert_equals(1, response.context['position'])
 
-        self.assert_true('count' in response.context)
-        self.assert_equals(2, response.context['count'])
+        tools.assert_true('count' in response.context)
+        tools.assert_equals(2, response.context['count'])
 
     def test_gallery_custom_view_item_raises_404_on_non_existent_slug(self):
         template_loader.templates['404.html'] = ''
         response = self.client.get('/nested-category/2008/1/10/galleries/first-gallery/non-existent-slug/')
-        self.assert_equals(404, response.status_code)
+        tools.assert_equals(404, response.status_code)
 
     def test_gallery_custom_view_item(self):
         response = self.client.get('/nested-category/2008/1/10/galleries/first-gallery/item/second-gallery/')
 
-        self.assert_true('previous' in response.context)
-        self.assert_equals(self.galitem, response.context['previous'])
+        tools.assert_true('previous' in response.context)
+        tools.assert_equals(self.galitem, response.context['previous'])
 
-        self.assert_true('next' in response.context)
-        self.assert_equals(None, response.context['next'])
+        tools.assert_true('next' in response.context)
+        tools.assert_equals(None, response.context['next'])
 
-        self.assert_true('item' in response.context)
-        self.assert_equals(self.galitem2, response.context['item'])
+        tools.assert_true('item' in response.context)
+        tools.assert_equals(self.galitem2, response.context['item'])
 
-        self.assert_true('object' in response.context)
-        self.assert_equals(self.galitem2.target, response.context['object'])
+        tools.assert_true('object' in response.context)
+        tools.assert_equals(self.galitem2.target, response.context['object'])
 
-        self.assert_true('position' in response.context)
-        self.assert_equals(2, response.context['position'])
+        tools.assert_true('position' in response.context)
+        tools.assert_equals(2, response.context['position'])
 
-        self.assert_true('count' in response.context)
-        self.assert_equals(2, response.context['count'])
+        tools.assert_true('count' in response.context)
+        tools.assert_equals(2, response.context['count'])
 

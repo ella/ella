@@ -11,6 +11,8 @@ from ella.newman.permission import applicable_categories, permission_filtered_mo
 from ella.newman.permission import model_category_fk, model_category_fk_value, has_model_list_permission
 from unit_project.test_newman import NewmanTestCase
 
+from nose import tools
+
 class UserWithPermissionTestCase(NewmanTestCase):
 
     def setUp(self):
@@ -55,7 +57,7 @@ class UserWithPermissionTestCase(NewmanTestCase):
         ArticleContents.objects.create(title=u'Testable rabbit, 你好', content=u'Long vehicle', article=article)
         article.authors.add(self.author)
         article.save()
-        self.assert_equals(1, Article.objects.count())
+        tools.assert_equals(1, Article.objects.count())
 
         return article
 
@@ -66,19 +68,19 @@ class TestArticleForeignKeys(UserWithPermissionTestCase):
         self.article_fields = dict([(field.name, field) for field in Article._meta.fields])
 
     def test_is_category_fk_success(self):
-        self.assert_true(is_category_fk(self.article_fields['category']))
+        tools.assert_true(is_category_fk(self.article_fields['category']))
 
     def test_is_category_fk_title_not_fk(self):
-        self.assert_false(is_category_fk(self.article_fields['title']))
+        tools.assert_false(is_category_fk(self.article_fields['title']))
 
     def test_model_category_fk_from_article(self):
-        self.assert_equals(self.article_fields['category'], model_category_fk(Article))
+        tools.assert_equals(self.article_fields['category'], model_category_fk(Article))
 
     def test_model_category_fk_from_contents(self):
-        self.assert_equals(None, model_category_fk(ArticleContents))
+        tools.assert_equals(None, model_category_fk(ArticleContents))
 
     def test_model_category_fk_value_parent_category_value(self):
-        self.assert_equals(self.nested_first_level, model_category_fk_value(self.nested_second_level))
+        tools.assert_equals(self.nested_first_level, model_category_fk_value(self.nested_second_level))
 
 class TestCategoryPermissions(UserWithPermissionTestCase):
 
@@ -90,7 +92,7 @@ class TestCategoryPermissions(UserWithPermissionTestCase):
         denormalized_categories = applicable_categories(self.user)
         denormalized_categories.sort()
 
-        self.assert_equals(computed_categories, denormalized_categories)
+        tools.assert_equals(computed_categories, denormalized_categories)
 
     def test_denormalized_applicable_categories_same_as_computed_ones_using_permissions(self):
         computed_categories = compute_applicable_categories(self.user, 'articles.view_article')
@@ -99,7 +101,7 @@ class TestCategoryPermissions(UserWithPermissionTestCase):
         denormalized_categories = applicable_categories(self.user, 'articles.view_article')
         denormalized_categories.sort()
 
-        self.assert_equals(computed_categories, denormalized_categories)
+        tools.assert_equals(computed_categories, denormalized_categories)
 
     def test_applicable_categories_for_user(self):
         categories = applicable_categories(self.user)
@@ -108,7 +110,7 @@ class TestCategoryPermissions(UserWithPermissionTestCase):
         expected_categories = [self.nested_first_level_two.pk, self.nested_second_level_two.pk]
         expected_categories.sort()
 
-        self.assert_equals(expected_categories, categories)
+        tools.assert_equals(expected_categories, categories)
 
     def test_applicable_categories_for_user_permission_view(self):
         categories = applicable_categories(self.user, 'articles.view_article')
@@ -118,37 +120,37 @@ class TestCategoryPermissions(UserWithPermissionTestCase):
         expected_categories = [self.nested_first_level_two.pk, self.nested_second_level_two.pk]
         expected_categories.sort()
 
-        self.assert_equals(expected_categories, categories)
+        tools.assert_equals(expected_categories, categories)
 
     def test_applicable_categories_for_user_permission_delete(self):
         categories = applicable_categories(self.user, 'articles.delete_article')
-        #self.assert_equals(self.nested_second_level_two.pk, categories[0])
-        self.assert_true(self.nested_second_level_two.pk in categories)
+        #tools.assert_equals(self.nested_second_level_two.pk, categories[0])
+        tools.assert_true(self.nested_second_level_two.pk in categories)
 
     def test_has_category_permission_success(self):
-        self.assert_true(has_category_permission(self.user, self.nested_second_level_two, 'articles.view_article'))
-        self.assert_true(has_category_permission(self.user, self.nested_second_level_two, 'articles.add_article'))
-        self.assert_true(has_category_permission(self.user, self.nested_second_level_two, 'articles.change_article'))
-        self.assert_true(has_category_permission(self.user, self.nested_second_level_two, 'articles.delete_article'))
+        tools.assert_true(has_category_permission(self.user, self.nested_second_level_two, 'articles.view_article'))
+        tools.assert_true(has_category_permission(self.user, self.nested_second_level_two, 'articles.add_article'))
+        tools.assert_true(has_category_permission(self.user, self.nested_second_level_two, 'articles.change_article'))
+        tools.assert_true(has_category_permission(self.user, self.nested_second_level_two, 'articles.delete_article'))
 
     def test_has_category_permission_invalid_permission_name(self):
-        self.assert_false(has_category_permission(self.user, self.nested_second_level_two, 'articles.nonexistent'))
+        tools.assert_false(has_category_permission(self.user, self.nested_second_level_two, 'articles.nonexistent'))
 
     def test_has_category_permission_permission_not_given(self):
-        self.assert_false(has_category_permission(self.user, self.nested_first_level_two, 'articles.delete_article'))
+        tools.assert_false(has_category_permission(self.user, self.nested_first_level_two, 'articles.delete_article'))
 
 class TestObjectPermission(UserWithPermissionTestCase):
 
     def test_has_object_permission_success(self):
         article = self._create_author_and_article()
         # test
-        self.assert_true(has_object_permission(self.user, article, 'articles.view_article'))
-        self.assert_true(has_object_permission(self.user, article, 'articles.change_article'))
-        self.assert_true(has_object_permission(self.user, article, 'articles.add_article'))
+        tools.assert_true(has_object_permission(self.user, article, 'articles.view_article'))
+        tools.assert_true(has_object_permission(self.user, article, 'articles.change_article'))
+        tools.assert_true(has_object_permission(self.user, article, 'articles.add_article'))
 
     def test_has_object_permission_not_given(self):
         article = self._create_author_and_article()
-        self.assert_false(has_object_permission(self.user, article, 'articles.delete_article'))
+        tools.assert_false(has_object_permission(self.user, article, 'articles.delete_article'))
 
 class TestAdminChangelistQuerySet(UserWithPermissionTestCase):
 
@@ -171,15 +173,15 @@ class TestAdminChangelistQuerySet(UserWithPermissionTestCase):
 
         available_articles = list(filtered_qs.all())
 
-        self.assert_equals(accessible_article, available_articles[0])
-        self.assert_equals(1, len(available_articles))
+        tools.assert_equals(accessible_article, available_articles[0])
+        tools.assert_equals(1, len(available_articles))
 
 
 class TestModelPermission(UserWithPermissionTestCase):
 
     def test_has_model_list_permission(self):
-        self.assert_false(has_model_list_permission(self.user, Category))
-        self.assert_true(has_model_list_permission(self.user, Article))
-        self.assert_false(has_model_list_permission(self.user, CategoryUserRole))
+        tools.assert_false(has_model_list_permission(self.user, Category))
+        tools.assert_true(has_model_list_permission(self.user, Article))
+        tools.assert_false(has_model_list_permission(self.user, CategoryUserRole))
 
 

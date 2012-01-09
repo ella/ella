@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime, timedelta
 
-from djangosanetesting import DatabaseTestCase
+from django.test import TestCase
 
 from ella.interviews.models import Interview, Interviewee
 
 from unit_project.test_core import create_basic_categories
 
-class InterviewTestCase(DatabaseTestCase):
+class InterviewTestCase(TestCase):
     def setUp(self):
         super(InterviewTestCase, self).setUp()
         create_basic_categories(self)

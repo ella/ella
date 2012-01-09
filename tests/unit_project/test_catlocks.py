@@ -2,7 +2,8 @@
 import sys
 import django
 
-from djangosanetesting import DatabaseTestCase
+from django.test import TestCase
+from nose import tools
 
 from ella.catlocks.models import CategoryLock
 from ella.catlocks.forms import CATEGORY_LOCK_FORM
@@ -11,7 +12,7 @@ from ella.catlocks.middleware import CATEGORY_LOCK_ERR_CAT
 from unit_project.test_core import create_basic_categories
 from unit_project import template_loader
 
-class TestCatlock(DatabaseTestCase):
+class TestCatlock(TestCase):
     def setUp(self):
         create_basic_categories(self)
         self.cl1 = CategoryLock.objects.create(category=self.category_nested, password='secret')
@@ -24,34 +25,34 @@ class TestCatlock(DatabaseTestCase):
 
     def test_not_locked_category_is_uneffected(self):
         resp = self.client.get(self.category.get_absolute_url())
-        self.assert_equals(200, resp.status_code)
+        tools.assert_equals(200, resp.status_code)
 
     def test_locked_category_returns_302(self):
         resp = self.client.get(self.category_nested.get_absolute_url())
-        self.assert_equals(302, resp.status_code)
+        tools.assert_equals(302, resp.status_code)
 
     def test_locked_category_subpage_returns_302(self):
         resp = self.client.get(self.category_nested_second.get_absolute_url())
-        self.assert_equals(302, resp.status_code)
+        tools.assert_equals(302, resp.status_code)
 
     def test_sending_correct_password_unlocks_category(self):
         data = {CATEGORY_LOCK_FORM: self.category_nested.pk, 'password': 'secret'}
 
         resp = self.client.post(self.category_nested.get_absolute_url(), data)
-        self.assert_equals(302, resp.status_code)
+        tools.assert_equals(302, resp.status_code)
 
         # http://code.djangoproject.com/changeset/11821
         if django.VERSION < (1, 2) and sys.version_info > (2, 6, 4):
             raise self.SkipTest()
 
         resp = self.client.get(self.category_nested.get_absolute_url())
-        self.assert_equals(200, resp.status_code)
+        tools.assert_equals(200, resp.status_code)
 
     def test_sending_incorrect_password_doesnt_unlock_category(self):
         data = {CATEGORY_LOCK_FORM: self.category_nested.pk, 'password': 'not-a-secret'}
 
         resp = self.client.post(self.category_nested.get_absolute_url(), data)
-        self.assert_equals(302, resp.status_code)
+        tools.assert_equals(302, resp.status_code)
 
         resp = self.client.get(self.category_nested.get_absolute_url())
 
@@ -59,7 +60,7 @@ class TestCatlock(DatabaseTestCase):
         data = {CATEGORY_LOCK_FORM: self.category_nested.pk, 'password': 'not-a-secret'}
 
         resp = self.client.post(self.category_nested.get_absolute_url(), data)
-        self.assert_equals(302, resp.status_code)
-        self.assert_true(CATEGORY_LOCK_ERR_CAT in self.client.session)
-        self.assert_equals(self.category_nested.pk, self.client.session[CATEGORY_LOCK_ERR_CAT].pk)
+        tools.assert_equals(302, resp.status_code)
+        tools.assert_true(CATEGORY_LOCK_ERR_CAT in self.client.session)
+        tools.assert_equals(self.category_nested.pk, self.client.session[CATEGORY_LOCK_ERR_CAT].pk)
 

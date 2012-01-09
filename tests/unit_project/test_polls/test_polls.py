@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime, timedelta
-from djangosanetesting import DatabaseTestCase
+from django.test import TestCase
+
+from nose import tools
 
 from django.core.urlresolvers import reverse
 from django.conf import settings
@@ -55,7 +57,7 @@ def build_request(user=None, session={}, cookies={}, ip_address=None):
     request.META['REMOTE_ADDR'] = ip_address or '0.0.0.0'
     return request
 
-class TestPollBox(DatabaseTestCase):
+class TestPollBox(TestCase):
     def setUp(self):
         super(TestPollBox, self).setUp()
         create_poll(self)
@@ -70,7 +72,7 @@ class TestPollBox(DatabaseTestCase):
         Vote.objects.create(poll=self.poll, user=user)
         box = Poll.box_class(self.poll, 'name', NodeList())
         box.prepare(Context({'request': build_request(user=user)}))
-        self.assert_equals(
+        tools.assert_equals(
             conf.USER_ALLREADY_VOTED, 
             box.state)
 
@@ -80,7 +82,7 @@ class TestPollBox(DatabaseTestCase):
         Vote.objects.create(poll=self.poll, user=user)
         box = Poll.box_class(self.poll, 'name', NodeList())
         box.prepare(Context({'request': build_request(user=user)}))
-        self.assert_equals(
+        tools.assert_equals(
             None,
             box.state)
 
@@ -90,12 +92,12 @@ class TestPollBox(DatabaseTestCase):
         Vote.objects.create(poll=self.poll, user=user)
         box = Poll.box_class(self.poll, 'name', NodeList())
         box.prepare(Context({'request': build_request(user=user), 'SECOND_RENDER': True}))
-        self.assert_equals(
+        tools.assert_equals(
             conf.USER_ALLREADY_VOTED,
             box.state)
 
 
-class TestPolls(DatabaseTestCase):
+class TestPolls(TestCase):
 
     def setUp(self):
         super(TestPolls, self).setUp()
@@ -106,7 +108,7 @@ class TestPolls(DatabaseTestCase):
         #template_loader.templates = {}
 
     def test_poll_get_total_votes_no_votes(self):
-        self.assert_equals(0, self.poll.get_total_votes())
+        tools.assert_equals(0, self.poll.get_total_votes())
 
     def test_poll_get_total_votes(self):
         user = User.objects.create(username='stickyfingaz')
@@ -114,42 +116,42 @@ class TestPolls(DatabaseTestCase):
         self.choiceA.save()
         self.choiceB.votes = 3
         self.choiceB.save()
-        self.assert_equals(4, self.poll.get_total_votes())
+        tools.assert_equals(4, self.poll.get_total_votes())
 
     def test_check_vote_annonymous_user_not_yet_voted(self):
-        self.assert_equals(
+        tools.assert_equals(
             conf.USER_NOT_YET_VOTED, 
             views.poll_check_vote(build_request(ip_address='127.0.0.1'), self.poll))
 
     def test_check_vote_authetnticated_user_not_yet_voted(self):
         user = User.objects.create(username='stickyfingaz')
-        self.assert_equals(
+        tools.assert_equals(
             conf.USER_NOT_YET_VOTED, 
             views.poll_check_vote(build_request(user=user), self.poll))
 
     def test_check_vote_annonymous_user_allready_voted_by_vote_object(self):
         Vote.objects.create(poll=self.poll, ip_address='127.0.0.1')
-        self.assert_equals(
+        tools.assert_equals(
             conf.USER_ALLREADY_VOTED, 
             views.poll_check_vote(build_request(ip_address='127.0.0.1'), self.poll))
 
     def test_check_vote_authetnticated_user_allready_voted_by_vote_object(self):
         user = User.objects.create(username='stickyfingaz')
         Vote.objects.create(poll=self.poll, user=user)
-        self.assert_equals(
+        tools.assert_equals(
             conf.USER_ALLREADY_VOTED, 
             views.poll_check_vote(build_request(user=user), self.poll))
 
     def test_check_vote_annonymous_user_allready_voted_by_cookies(self):
         cookies = {conf.POLL_COOKIE_NAME: ','.join(str(self.poll.pk))}
-        self.assert_equals(
+        tools.assert_equals(
             conf.USER_ALLREADY_VOTED,
             views.poll_check_vote(build_request(cookies=cookies), self.poll))
 
     def test_check_vote_authetnticated_user_allready_voted_by_session(self):
         user = User.objects.create(username='stickyfingaz')
         session = {conf.POLL_COOKIE_NAME: [self.poll.pk]}
-        self.assert_equals(
+        tools.assert_equals(
             conf.USER_ALLREADY_VOTED, 
             views.poll_check_vote(build_request(user=user, session=session), self.poll))
 
@@ -157,7 +159,7 @@ class TestPolls(DatabaseTestCase):
         user = User.objects.create(username='stickyfingaz')
         choice = self.choiceA
         self.poll.vote(choice=choice, user=user)
-        self.assert_equals(1, self.poll.get_total_votes())
+        tools.assert_equals(1, self.poll.get_total_votes())
 
 
     ### View testing
@@ -165,18 +167,18 @@ class TestPolls(DatabaseTestCase):
     def test_view_poll_vote_method_not_allowed_error(self):
         vote_url = reverse('polls_vote', kwargs={'poll_id': self.poll.pk})
         response = self.client.get(vote_url)
-        self.assert_equals(405, response.status_code)
+        tools.assert_equals(405, response.status_code)
 
     def test_view_poll_vote_no_choice_error(self):
         vote_url = reverse('polls_vote', kwargs={'poll_id': self.poll.pk})
         response = self.client.post(vote_url)
-        self.assert_equals(302, response.status_code)
-        self.assert_equals(0, self.poll.get_total_votes())
-        self.assert_equals([self.poll.pk], self.client.session.get(conf.POLL_NO_CHOICE_COOKIE_NAME, []))
+        tools.assert_equals(302, response.status_code)
+        tools.assert_equals(0, self.poll.get_total_votes())
+        tools.assert_equals([self.poll.pk], self.client.session.get(conf.POLL_NO_CHOICE_COOKIE_NAME, []))
 
     def test_view_poll_vote_success(self):
         vote_url = reverse('polls_vote', kwargs={'poll_id': self.poll.pk})
         response = self.client.post(vote_url, {'choice': self.choiceB.pk})
-        self.assert_equals(302, response.status_code)
-        self.assert_equals(1, self.poll.get_total_votes())
-        self.assert_equals([self.poll.pk], self.client.session.get(conf.POLL_JUST_VOTED_COOKIE_NAME, [])) 
+        tools.assert_equals(302, response.status_code)
+        tools.assert_equals(1, self.poll.get_total_votes())
+        tools.assert_equals([self.poll.pk], self.client.session.get(conf.POLL_JUST_VOTED_COOKIE_NAME, [])) 

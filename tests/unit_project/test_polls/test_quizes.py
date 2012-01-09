@@ -2,7 +2,9 @@
 import re
 from datetime import datetime, timedelta
 
-from djangosanetesting import DatabaseTestCase
+from django.test import TestCase
+
+from nose import tools
 
 from ella.polls.models import Quiz, Question, Choice, Result
 from ella.core.models import Placement
@@ -12,7 +14,7 @@ from unit_project import template_loader
 
 QCOUNT = 3
 CCOUNT = 2
-class QuizTestCase(DatabaseTestCase):
+class QuizTestCase(TestCase):
     def setUp(self):
         super(QuizTestCase, self).setUp()
         now = datetime.now()
@@ -75,8 +77,8 @@ class TestWizard(QuizTestCase):
         response = c.get(self.url)
 
         for x in range(QCOUNT):
-            self.assert_equals(200, response.status_code)
-            self.assert_equals('page/step.html', response.template.name)
+            tools.assert_equals(200, response.status_code)
+            tools.assert_equals('page/step.html', response.template.name)
 
             data = {
                 response.context['step_field']: response.context['step0'],
@@ -88,9 +90,9 @@ class TestWizard(QuizTestCase):
             data[form.add_prefix('choice')] = self.choices[int(response.context['step0'])][0].pk
             response = c.post(self.url, data)
 
-        self.assert_equals(200, response.status_code)
-        self.assert_equals('page/result.html', response.template.name)
+        tools.assert_equals(200, response.status_code)
+        tools.assert_equals('page/result.html', response.template.name)
         result = Result.objects.get(pk=self.results[0].pk)
-        self.assert_equals(1, result.count)
+        tools.assert_equals(1, result.count)
 
 

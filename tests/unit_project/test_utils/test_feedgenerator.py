@@ -2,7 +2,9 @@ import datetime
 import locale
 from cStringIO import StringIO
 
-from djangosanetesting import UnitTestCase
+from unittest import TestCase
+
+from nose import tools
 
 from ella.utils.feedgenerator import MediaElement, CustomXMLGenerator, MediaRSSFeed
 
@@ -27,31 +29,31 @@ MEDIA_FEED = """\
 </channel>\
 </rss>"""
 
-class TestFeedGenerator(UnitTestCase):
+class TestFeedGenerator(TestCase):
     """
     """
     def test_empty_tag(self):
         outfile = StringIO()
         handler = CustomXMLGenerator(outfile, ENCODING)
         handler.addEmptyElement(u'a')
-        self.assert_equals('<a/>', outfile.getvalue())
+        tools.assert_equals('<a/>', outfile.getvalue())
         outfile.close()
 
     def test_empty_tag_with_attributes(self):
         outfile = StringIO()
         handler = CustomXMLGenerator(outfile, ENCODING)
         handler.addEmptyElement(u'a', {'b': 'c'})
-        self.assert_equals('<a b="c"/>', outfile.getvalue())
+        tools.assert_equals('<a b="c"/>', outfile.getvalue())
         outfile.close()
 
     def test_cdata_contents(self):
         outfile = StringIO()
         handler = CustomXMLGenerator(outfile, ENCODING)
         handler.addQuickElement(u'a', '<>')
-        self.assert_equals('<a><![CDATA[<>]]></a>', outfile.getvalue())
+        tools.assert_equals('<a><![CDATA[<>]]></a>', outfile.getvalue())
         outfile.close()
 
-class TestMediaFeed(UnitTestCase):
+class TestMediaFeed(TestCase):
     """
     """
     def test_media_element(self):
@@ -61,7 +63,7 @@ class TestMediaFeed(UnitTestCase):
         elem = MediaElement('a', 'd', {'b': 'c'})
         root.append(elem)
         root.add_to(handler)
-        self.assert_equals('<root><a b="c">d</a></root>', outfile.getvalue())
+        tools.assert_equals('<root><a b="c">d</a></root>', outfile.getvalue())
         outfile.close()
 
     def test_media_feed(self):
@@ -69,5 +71,5 @@ class TestMediaFeed(UnitTestCase):
         feed = MediaRSSFeed('title', 'link', 'description', feed_url='url')
         feed.add_item('title', 'link', 'description', pubdate=PUB_DATE)
         feed.write(outfile, ENCODING)
-        self.assert_equals(outfile.getvalue(), MEDIA_FEED)
+        tools.assert_equals(outfile.getvalue(), MEDIA_FEED)
         outfile.close()
