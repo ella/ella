@@ -67,10 +67,6 @@ class Publishable(models.Model):
             self._target = self.content_type.get_object_for_this_type(pk=self.pk)
         return self._target
 
-    if 'ella.oldcomments' in settings.INSTALLED_APPS:
-        from ella.oldcomments.models import Comment
-        comments = generic.GenericRelation(Comment, object_id_field='target_id', content_type_field='target_ct')
-
     @property
     def main_placement(self):
         " Return object's main placement, that is the object's placement in its primary category "
@@ -159,12 +155,6 @@ class Publishable(models.Model):
     def __unicode__(self):
         return self.title
 
-# FIXME find another way to register!
-if 'tagging' in settings.INSTALLED_APPS:
-    import tagging
-    tagging.register(Publishable)
-
-
 class Placement(models.Model):
     # listing's target - a Publishable object
     publishable = models.ForeignKey(Publishable, verbose_name=_('Publishable object'))
@@ -208,9 +198,6 @@ class Placement(models.Model):
     @staticmethod
     def check_placement_is_unique(placement):
         obj = placement
-        cat = None
-        if obj.pk:
-            cat = getattr(obj, 'category', None)
         obj_slug = getattr(obj, 'slug', obj.pk)
         # if Placement has no slug, slug from Publishable object should be considered in following checks:
         if not obj_slug:
