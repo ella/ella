@@ -845,6 +845,9 @@ class NewmanModelAdmin(XModelAdmin):
         })
         return context
 
+    def get_inline_admin_formset(self, inline, formset, fieldsets):
+        return InlineNewmanFormset(inline, formset, fieldsets)
+
     @require_AJAX
     def delete_view(self, request, object_id, extra_context=None):
         try:

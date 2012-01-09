@@ -398,6 +398,7 @@ class XModelAdmin(ModelAdmin):
         for inline, formset in zip(self.inline_instances, formsets):
             fieldsets = list(inline.get_fieldsets(request))
             inline_admin_formset = helpers.InlineAdminFormSet(inline, formset, fieldsets)
+            inline_admin_formset = self.get_inline_admin_formset(inline, formset, fieldsets)
             inline_admin_formsets.append(inline_admin_formset)
             media = media + inline_admin_formset.media
 
@@ -415,6 +416,9 @@ class XModelAdmin(ModelAdmin):
 
         context['raw_form'] = form
         return context
+
+    def get_inline_admin_formset(self, inline, formset, fieldsets):
+        return helpers.InlineAdminFormSet(inline, formset, fieldsets)
 
     def add_view(self, request, form_url='', extra_context=None):
         "The 'add' admin view for this model."
