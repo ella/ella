@@ -9,7 +9,7 @@ from django.template import Template, TemplateSyntaxError
 
 from ella.core.models import Category
 from ella.core.box import Box
-from ella.core.cache import CACHE_DELETER, cache_this, CachedGenericForeignKey
+from ella.core.cache import cache_this, CachedGenericForeignKey
 
 
 log = logging.getLogger('ella.positions.models')
@@ -18,11 +18,9 @@ def get_position_key(func, self, category, name, nofallback=False):
     return 'ella.positions.models.PositionManager.get_active_position:%d:%s:%s' % (
             category.pk, name, nofallback and '1' or '0'
     )
-def invalidate_cache(key,  self, category, name, nofallback=False):
-    CACHE_DELETER.register_test(Position, "category_id:%s;name:%s" % (category.pk, name) , key)
 
 class PositionManager(models.Manager):
-    @cache_this(get_position_key, invalidate_cache)
+    @cache_this(get_position_key)
     def get_active_position(self, category, name, nofallback=False):
         """
         Get active position for given position name.

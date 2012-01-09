@@ -7,7 +7,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.encoding import smart_str
 
 from ella.core.cache import cache_this
-from ella.core.cache.invalidate import CACHE_DELETER
 from ella.core.conf import core_settings
 
 
@@ -79,9 +78,6 @@ class RelatedManager(models.Manager):
         return related
 
 
-def invalidate_listing(key, self, *args, **kwargs):
-    CACHE_DELETER.register_test(self.model, '', key)
-
 def get_listings_key(func, self, category=None, count=10, offset=1, mods=[], content_types=[], **kwargs):
     c = category and  category.id or ''
 
@@ -149,7 +145,7 @@ class ListingManager(models.Manager):
 
         return qset.exclude(publish_to__lt=now)
 
-    @cache_this(get_listings_key, invalidate_listing)
+    @cache_this(get_listings_key)
     def get_listing(self, category=None, children=NONE, count=10, offset=1, mods=[], content_types=[], unique=None, **kwargs):
         """
         Get top objects for given category and potentionally also its child categories.

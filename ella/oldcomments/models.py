@@ -6,7 +6,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_str
 
-from ella.core.cache.invalidate import CACHE_DELETER
 from ella.core.cache.utils import get_cached_object, CachedGenericForeignKey
 from ella.ellaadmin.utils import admin_url
 
@@ -55,10 +54,6 @@ def get_count_key(func, self, object, **kwargs):
 
 def get_list_key(func, self, object, **kwargs):
     return get_key(object, 'list', **kwargs)
-
-def invalidate_cache(key,  self, object, **kwargs):
-    target_ct = ContentType.objects.get_for_model(object)
-    CACHE_DELETER.register_test(Comment, "target_id:%s;target_ct_id:%s" % (object.pk, target_ct.pk) , key)
 
 class CommentManager(models.Manager):
     def get_count_for_object(self, object, **kwargs):

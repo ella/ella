@@ -4,7 +4,6 @@ from django.utils.encoding import smart_str
 from django.core.cache import cache
 from django.conf import settings
 
-from ella.core.cache.invalidate import CACHE_DELETER
 from ella.core.cache.utils import normalize_key
 from ella.core.conf import core_settings
 
@@ -90,13 +89,6 @@ class Box(object):
                 'box' : self,
         }
 
-    def get_cache_tests(self):
-        " Return tests for ella.core.cache.invalidate "
-        from ella.db_templates.models import DbTemplate
-        if not DbTemplate._meta.installed:
-            return []
-        return [ (DbTemplate, 'name:%s' % t) for t in self._get_template_list() ]
-
     def render(self):
         " Cached wrapper around self._render(). "
         if getattr(settings, 'DOUBLE_RENDER', False) and self.can_double_render:
@@ -107,9 +99,6 @@ class Box(object):
         if rend is None:
             rend = self._render()
             cache.set(key, rend, core_settings.CACHE_TIMEOUT)
-            for model, test in self.get_cache_tests():
-                CACHE_DELETER.register_test(model, test, key)
-            CACHE_DELETER.register_pk(self.obj, key)
         return rend
 
     def double_render(self):

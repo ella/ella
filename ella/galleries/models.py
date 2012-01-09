@@ -8,15 +8,9 @@ from django.utils.datastructures import SortedDict
 
 from ella.core.models import Publishable
 from ella.core.cache.utils import cache_this, CachedGenericForeignKey
-from ella.core.cache.invalidate import CACHE_DELETER
 from ella.core.custom_urls import resolver
 from ella.photos.models import Photo
 
-
-def gallery_cache_invalidator(key, gallery, *args, **kwargs):
-    """Registers gallery cache invalidator test in the cache system."""
-    CACHE_DELETER.register_pk(gallery, key)
-    CACHE_DELETER.register_test(GalleryItem, 'gallery_id:%s' % gallery.pk, key)
 
 def get_gallery_key(func, gallery):
     return 'ella.galleries.models.Gallery.items:%d' % gallery.id
@@ -43,7 +37,7 @@ class Gallery(Publishable):
             return self._get_gallery_items()
         return SortedDict()
 
-    @cache_this(get_gallery_key, gallery_cache_invalidator)
+    @cache_this(get_gallery_key)
     def _get_gallery_items(self):
         """
         Returns sorted dict of gallery items. Unique items slugs are used as keys.

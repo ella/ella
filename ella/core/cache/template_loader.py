@@ -6,8 +6,6 @@ from django.conf import settings
 from django.http import HttpResponse
 
 from ella.core.cache.utils import cache_this
-from ella.core.cache.invalidate import CACHE_DELETER
-
 
 CACHE_TIMEOUT = getattr(settings, 'CACHE_TIMEOUT', 10*60)
 template_source_loaders = None
@@ -41,12 +39,7 @@ load_template_source.is_usable = True
 def get_key(func, template_name, template_dirs=None):
     return 'ella.core.cache.template_loader:%d:%s' % (settings.SITE_ID, template_name,)
 
-def invalidate_cache(key, template_name, template_dirs=None):
-    from ella.db_templates.models import DbTemplate
-    if DbTemplate._meta.installed:
-        CACHE_DELETER.register_test(DbTemplate, "name:%s" % template_name, key)
-
-@cache_this(get_key, invalidate_cache)
+@cache_this(get_key)
 def get_cache_template(template_name, template_dirs):
     for l in template_source_loaders:
         try:

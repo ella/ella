@@ -1,14 +1,12 @@
 from hashlib import md5
 import logging
 
-from django.db.models import ObjectDoesNotExist, signals
+from django.db.models import ObjectDoesNotExist
 from django.core.cache import cache
 from django.http import Http404
 from django.contrib.contenttypes.models import ContentType
 from django.utils.encoding import smart_str
 from django.conf import settings
-
-from ella.core.cache.invalidate import CACHE_DELETER
 
 
 log = logging.getLogger('ella.core.cache.utils')
@@ -44,8 +42,7 @@ def _get_key(start, model, kwargs):
 
 def get_cached_list(model, *args, **kwargs):
     """
-    Return a cached list. If the list does not exist in the cache, create it
-    and register it for invalidation if any object from the list is updated (check via _get_pk_val()).
+    Return a cached list. If the list does not exist in the cache, create it.
 
     Params:
         model - Model class ContentType instance representing the model's class
@@ -62,15 +59,11 @@ def get_cached_list(model, *args, **kwargs):
         log.debug('get_cached_list(model=%s), object not cached.' % str(model))
         l = list(model._default_manager.filter(*args, **kwargs))
         cache.set(key, l, CACHE_TIMEOUT)
-        for o in l:
-            CACHE_DELETER.register_pk(o, key)
-        #CACHE_DELETER.register_test(model, lambda x: model._default_manager.filter(**kwargs).filter(pk=x._get_pk_val()) == 1, key)
     return l
 
 def get_cached_object(model, **kwargs):
     """
-    Return a cached object. If the object does not exist in the cache, create it
-    and register it for invalidation if the object is updated (check via _get_pk_val().
+    Return a cached object. If the object does not exist in the cache, create it.
 
     Params:
         model - Model class ContentType instance representing the model's class
@@ -88,7 +81,6 @@ def get_cached_object(model, **kwargs):
     if obj is None:
         obj = model._default_manager.get(**kwargs)
         cache.set(key, obj, CACHE_TIMEOUT)
-        CACHE_DELETER.register_pk(obj, key)
     return obj
 
 def get_cached_object_or_404(model, **kwargs):
@@ -102,7 +94,7 @@ def get_cached_object_or_404(model, **kwargs):
     except ObjectDoesNotExist, e:
         raise Http404('Reason: %s' % str(e))
 
-def cache_this(key_getter, invalidator=None, timeout=CACHE_TIMEOUT):
+def cache_this(key_getter, timeout=CACHE_TIMEOUT):
     def wrapped_decorator(func):
         def wrapped_func(*args, **kwargs):
             key = key_getter(func, *args, **kwargs)
@@ -115,8 +107,6 @@ def cache_this(key_getter, invalidator=None, timeout=CACHE_TIMEOUT):
                 log.debug('cache_this(key=%s), object not cached.' % key)
                 result = func(*args, **kwargs)
                 cache.set(key, result, timeout)
-                if invalidator:
-                    invalidator(key, *args, **kwargs)
             return result
 
         wrapped_func.__dict__ = func.__dict__
@@ -137,18 +127,12 @@ class CacheInvalidator(object):
             key = _get_key(KEY_FORMAT_OBJECT, sender, filter_kwargs)
             delete_cached_object(key, auto_normalize=False)
 
-def register_cache_invalidator(model, *filter_fields):
-    cache_invalidator = CacheInvalidator(*filter_fields)
-    signals.post_delete.connect(cache_invalidator, sender=model, weak=False)
-    signals.post_save.connect(cache_invalidator, sender=model, weak=False)
-
 from django.db.models.fields.related import ForeignKey, ReverseSingleRelatedObjectDescriptor
 
 class CachedForeignKey(ForeignKey):
     def contribute_to_class(self, cls, name):
         super(CachedForeignKey, self).contribute_to_class(cls, name)
         setattr(cls, self.name, CachedReverseSingleRelatedObjectDescriptor(self))
-        #register_cache_invalidator(self.rel.to)
 
 class CachedReverseSingleRelatedObjectDescriptor(ReverseSingleRelatedObjectDescriptor):
     def __get__(self, instance, instance_type=None):

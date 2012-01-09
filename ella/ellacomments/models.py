@@ -3,8 +3,7 @@ from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 
-from ella.core.cache.utils import CachedGenericForeignKey, get_cached_object,\
-    register_cache_invalidator
+from ella.core.cache.utils import CachedGenericForeignKey, get_cached_object
 
 class DefaultCommentOptions(object):
 
@@ -14,10 +13,6 @@ class DefaultCommentOptions(object):
 
 
 class CommentOptionsManager(models.Manager):
-
-    def contribute_to_class(self, model, name):
-        super(CommentOptionsManager, self).contribute_to_class(model, name)
-        register_cache_invalidator(model, 'target_ct', 'target_id')
 
     def get_for_object(self, object):
         ct, id = ContentType.objects.get_for_model(object), object.pk
