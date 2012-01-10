@@ -324,10 +324,6 @@ class Listing(models.Model):
     publish_from = models.DateTimeField(_("Start of listing"), db_index=True)
     publish_to = models.DateTimeField(_("End of listing"), null=True, blank=True)
 
-    priority_from = models.DateTimeField(_("Start of prioritized listing"), null=True, blank=True)
-    priority_to = models.DateTimeField(_("End of prioritized listing"), null=True, blank=True)
-    priority_value = models.IntegerField(_("Priority"), blank=True, null=True)
-
     commercial = models.BooleanField(_("Commercial"), default=False, help_text=_("Check this if the listing is of a commercial content."))
 
     objects = ListingManager()

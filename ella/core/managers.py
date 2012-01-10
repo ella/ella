@@ -159,27 +159,6 @@ class ListingManager(models.Manager):
             [unique] - set of already listed Placement IDs
             **kwargs - rest of the parameter are passed to the queryset unchanged
         """
-        def mark_before_output(output):
-            for l in output:
-                listed_targets.add(l.placement_id)
-
-        def make_items_unique(qset):
-
-            out = []
-            listed_targets_now = set()
-            for l in qset:
-                tgt = l.placement_id
-                if tgt in listed_targets or tgt in listed_targets_now:
-                    continue
-                listed_targets_now.add(tgt)
-                out.append(l)
-                if len(out) == limit:
-                    result = out[offset:limit]
-                    mark_before_output(result)
-                    return result
-            mark_before_output(out)
-            return out
-
         # TODO try to write  SQL (.extra())
         assert offset > 0, "Offset must be a positive integer"
         assert count >= 0, "Count must be a positive integer"
@@ -196,49 +175,29 @@ class ListingManager(models.Manager):
         offset -= 1
         limit = offset + count
 
-        # take out unwanted objects
-        if unique is not None:
-            listed_targets = unique.copy()
-        else:
-            listed_targets = set([])
-
-        # only use priorities if somebody wants them
-        if not core_settings.USE_PRIORITIES:
-            if unique is not None:
-                return make_items_unique(qset)
+        # direct listings, we don't need to check for duplicates
+        if children == self.NONE:
             return qset[offset:limit]
 
-        # listings with active priority override
-        active = models.Q(
-                    priority_value__isnull=False,
-                    priority_from__isnull=False,
-                    priority_from__lte=now,
-                    priority_to__gte=now
-        )
-
-        qsets = (
-            # modded-up objects
-            qset.filter(active, priority_value__gt=core_settings.DEFAULT_LISTING_PRIORITY).order_by('-priority_value', '-publish_from'),
-            # default priority
-            qset.exclude(active).order_by('-publish_from'),
-            # modded-down priority
-            qset.filter(active, priority_value__lt=core_settings.DEFAULT_LISTING_PRIORITY).order_by('-priority_value', '-publish_from'),
-        )
-
+        seen = set()
         out = []
+        while len(out) < count:
+            skip = 0
+            # 2 i a reasonable value for padding, wouldn't you say dear Watson?
+            for l in qset[offset:limit+2]:
+                if l.placement_id not in seen:
+                    seen.add(l.placement_id)
+                    out.append(l)
+                    if len(out) == count:
+                        break
+                else:
+                    skip += 1
+            if skip <= 2:
+                break
 
-        # iterate through qsets until we have enough objects
-        for q in qsets:
-            data = q.iterator()
-            for l in data:
-                tgt = l.placement_id
-                if tgt in listed_targets:
-                    continue
-                listed_targets.add(tgt)
-                out.append(l)
-                if len(out) == limit:
-                    return out[offset:limit]
-        return out[offset:offset + count]
+        return out
+
+
 
     def get_queryset_wrapper(self, kwargs):
         return ListingQuerySetWrapper(self, kwargs)

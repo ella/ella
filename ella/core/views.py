@@ -168,7 +168,7 @@ class ListContentType(EllaCoreView):
     The context contains:
 
     * ``category``
-    * ``listings``: list of ``Listing`` objects ordered by date and priority
+    * ``listings``: list of ``Listing`` objects ordered by date
 
     * ``page``: ``django.core.paginator.Page`` instance
     * ``is_paginated``: ``True`` if there are more pages

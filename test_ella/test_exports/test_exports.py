@@ -47,19 +47,12 @@ def listing_for_placement(**kwargs):
         dat_to = datetime.strptime(kwargs.get('publish_to'), DATE_FORMAT)
     else:
         dat_to = None
-    out = Listing.objects.create(
+    Listing.objects.create(
         placement=plac,
         category=kwargs.get('category'),
         publish_from=dat_from,
         publish_to=dat_to,
     )
-    if 'priority_from' in kwargs and 'priority_to' in kwargs \
-        and 'priority_value' in kwargs:
-        prio_dat_from = datetime.strptime(kwargs.get('priority_from'), DATE_FORMAT)
-        prio_dat_to = datetime.strptime(kwargs.get('priority_to'), DATE_FORMAT)
-        out.priority_from = prio_dat_from
-        out.priority_to = prio_dat_to
-        out.priority_value = kwargs.get('priority_value')
 
 class TestExport(TestCase):
     " Export model and its manager test. "

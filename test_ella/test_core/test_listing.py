@@ -61,7 +61,7 @@ class TestListing(TestCase):
 
     def test_get_listing_with_all_children(self):
         l = Listing.objects.get_listing(category=self.category, children=Listing.objects.ALL)
-        tools.assert_equals(self.listings, l)
+        tools.assert_equals(self.listings, list(l))
 
     def test_inactive_istings_wont_show(self):
         l = self.listings[0]
@@ -72,67 +72,3 @@ class TestListing(TestCase):
 
         tools.assert_equals(self.listings[1:], l)
 
-    def test_prioritized_listing_will_be_first(self):
-        l = self.listings[-1]
-        l.priority_value = 10
-        l.priority_from = datetime.now() - timedelta(days=1)
-        l.priority_to = datetime.now() + timedelta(days=1)
-        l.save()
-
-        expected = [l] + self.listings[:-1]
-
-        l = Listing.objects.get_listing(category=self.category, children=Listing.objects.ALL)
-
-        tools.assert_equals(expected, l)
-
-    def test_de_prioritized_listing_will_be_last(self):
-        l = self.listings[0]
-        l.priority_value = -10
-        l.priority_from = datetime.now() - timedelta(days=1)
-        l.priority_to = datetime.now() + timedelta(days=1)
-        l.save()
-
-        expected = self.listings[1:] + [l]
-
-        l = Listing.objects.get_listing(category=self.category, children=Listing.objects.ALL)
-
-        tools.assert_equals(expected, l)
-
-
-    def test_inactive_priority_wont_affect_things(self):
-        l = self.listings[0]
-        l.priority_value = -10
-        l.priority_from = datetime.now() - timedelta(days=2)
-        l.priority_to = datetime.now() - timedelta(days=1)
-        l.save()
-
-        l = Listing.objects.get_listing(category=self.category, children=Listing.objects.ALL)
-
-        tools.assert_equals(self.listings, l)
-
-    def test_count_works_accross_priorities(self):
-        l = self.listings[-1]
-        l.priority_value = 10
-        l.priority_from = datetime.now() - timedelta(days=1)
-        l.priority_to = datetime.now() + timedelta(days=1)
-        l.save()
-
-        expected = [l, self.listings[0]]
-
-        l = Listing.objects.get_listing(category=self.category, children=Listing.objects.ALL, offset=1, count=2)
-
-        tools.assert_equals(expected, l)
-
-    def test_offset_and_count_works_accross_priorities(self):
-        l = self.listings[-1]
-        for l in self.listings[-2:]:
-            l.priority_value = 10
-            l.priority_from = datetime.now() - timedelta(days=1)
-            l.priority_to = datetime.now() + timedelta(days=1)
-            l.save()
-
-        expected = [l, self.listings[0]]
-
-        l = Listing.objects.get_listing(category=self.category, children=Listing.objects.ALL, offset=2, count=2)
-
-        tools.assert_equals(expected, l)

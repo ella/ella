@@ -54,7 +54,7 @@ class ListingNode(template.Node):
 @register.tag
 def listing(parser, token):
     """
-    Tag that will obtain listing of top (priority-wise) objects for a given category and store them in context under given name.
+    Tag that will obtain listing of top objects for a given category and store them in context under given name.
 
     Usage::
 

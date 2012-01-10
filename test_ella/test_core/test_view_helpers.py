@@ -128,38 +128,27 @@ class TestListContentType(ViewHelpersTestCase):
 
     def test_only_category_and_year_returns_all_listings(self):
         c = self.list_content_type.get_context(self.request, '', '2008')
-        tools.assert_equals(self.listings, c['listings'])
+        tools.assert_equals(self.listings, list(c['listings']))
         
     def test_only_nested_category_and_year_returns_all_listings(self):
         Listing.objects.all().update(category=self.category_nested_second)
         c = self.list_content_type.get_context(self.request, 'nested-category/second-nested-category', '2008')
-        tools.assert_equals(self.listings, c['listings'])
+        tools.assert_equals(self.listings, list(c['listings']))
 
     def test_return_first_2_listings_if_paginate_by_2(self):
         c = self.list_content_type.get_context(self.request, '', '2008', paginate_by=2)
-        tools.assert_equals(self.listings[:2], c['listings'])
+        tools.assert_equals(self.listings[:2], list(c['listings']))
         tools.assert_true(c['is_paginated'])
         
     def test_return_second_2_listings_if_paginate_by_2_and_page_2(self):
         self.request.GET['p'] = '2'
         c = self.list_content_type.get_context(self.request, '', '2008', paginate_by=2)
-        tools.assert_equals(self.listings[2:4], c['listings'])
+        tools.assert_equals(self.listings[2:4], list(c['listings']))
         tools.assert_true(c['is_paginated'])
-
-    def test_reflect_priorities(self):
-        l = self.listings[-1]
-        l.priority_value = 10
-        l.priority_from = datetime.now() - timedelta(days=1)
-        l.priority_to = datetime.now() + timedelta(days=1)
-        l.save()
-
-        c = self.list_content_type.get_context(self.request, '', '2008')
-        expected = [l] + self.listings[:-1]
-        tools.assert_equals(expected, c['listings'])
 
     def test_returns_empty_list_if_no_listing_found(self):
         c = self.list_content_type.get_context(self.request, '', '2007')
-        tools.assert_equals([], c['listings'])
+        tools.assert_equals([], list(c['listings']))
 
     def test_raises404_for_incorrect_page(self):
         self.request.GET['p'] = '200'

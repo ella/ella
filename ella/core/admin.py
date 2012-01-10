@@ -233,7 +233,7 @@ class ListingForm(modelforms.ModelForm):
 class ListingInlineAdmin(admin.TabularInline):
     model = Listing
     extra = 2
-    fieldsets = ((None, {'fields' : ('category','publish_from', 'priority_from', 'priority_to', 'priority_value', 'commercial',)}),)
+    fieldsets = ((None, {'fields' : ('category','publish_from', 'commercial',)}),)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'category':

@@ -26,8 +26,6 @@ class ListingForm(modelforms.ModelForm):
             return d
         if d['publish_to'] and d['publish_from'] > d['publish_to']:
             raise ValidationError(_('Publish to must be later than publish from.'))
-        if d['priority_from'] and d['priority_to'] and d['priority_from'] > d['priority_to']:
-            raise ValidationError(_('Priority to must be later than priority from.'))
         return d
 
     class Meta:
@@ -226,7 +224,7 @@ class ListingInlineAdmin(newman.NewmanTabularInline):
     extra = 2
     suggest_fields = {'category': ('__unicode__', 'title', 'slug',)}
     form = ListingForm
-    fieldsets = ((None, {'fields' : ('category','publish_from', 'publish_to', 'priority_from', 'priority_to', 'priority_value', 'commercial',)}),)
+    fieldsets = ((None, {'fields' : ('category','publish_from', 'publish_to', 'commercial',)}),)
 
 class PlacementInlineAdmin(newman.NewmanTabularInline):
     exclude = ('slug',)
