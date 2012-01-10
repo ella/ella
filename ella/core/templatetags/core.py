@@ -10,7 +10,6 @@ from django.template.defaultfilters import stringfilter
 from ella.core.models import Listing, Category
 from ella.core.cache.utils import get_cached_object
 from ella.core.box import Box
-from ella.core.conf import core_settings
 
 
 log = logging.getLogger('ella.core.templatetags')
@@ -31,13 +30,7 @@ class ListingNode(template.Node):
         return template.Variable(value).resolve(context)
 
     def render(self, context):
-        unique_var_name = None
         for key in self.parameters_to_resolve:
-            if key == 'unique':
-                unique_var_name = self.parameters[key]
-            if key == 'unique' and unique_var_name not in context.dicts[-1]: # autocreate variable in context
-                self.resolved_parameters[key] = context.dicts[-1][ unique_var_name ] = set()
-                continue
             #self.parameters[key] = template.Variable(self.parameters[key]).resolve(context)
             self.resolved_parameters[key] = self.resolve_parameter(key, context)
         if self.resolved_parameters.has_key('category') and \
@@ -45,9 +38,6 @@ class ListingNode(template.Node):
             self.resolved_parameters['category'] = get_cached_object(Category, tree_path=self.resolved_parameters['category'], site__id=settings.SITE_ID)
         out = Listing.objects.get_listing(**self.resolved_parameters)
 
-        if 'unique' in self.parameters:
-            unique = self.resolved_parameters['unique'] #context[unique_var_name]
-            map(lambda x: unique.add(x.placement_id),out)
         context[self.var_name] = out
         return ''
 
@@ -58,7 +48,7 @@ def listing(parser, token):
 
     Usage::
 
-        {% listing <limit>[ from <offset>][of <app.model>[, <app.model>[, ...]]][ for <category> ] [with children|descendents] as <result> [unique [unique_set_name]] %}
+        {% listing <limit>[ from <offset>][of <app.model>[, <app.model>[, ...]]][ for <category> ] [with children|descendents] as <result> %}
 
     Parameters:
 
@@ -76,8 +66,6 @@ def listing(parser, token):
         ``descendents``                     Include items from all descend subcategories.
         ``result``                          Store the resulting list in context under given
                                             name.
-        ``unique``                          Unique items across multiple listings.
-        ``unique_set_name``                 Name of context variable used to hold the data is optional.
         ==================================  ================================================
 
     Examples::
@@ -89,11 +77,6 @@ def listing(parser, token):
         {% listing 10 from 10 of articles.article as obj_list %}
         {% listing 10 of articles.article, photos.photo as obj_list %}
 
-        Unique items across multiple listnings::
-        {% listing 10 for category_uno as obj_list unique %}
-        {% listing 4 for category_duo as obj_list unique %}
-        {% listing 10 for category_uno as obj_list unique unique_set_name %}
-        {% listing 4 for category_duo as obj_list unique unique_set_name %}
     """
     var_name, parameters, parameters_to_resolve = listing_parse(token.split_contents())
     return ListingNode(var_name, parameters, parameters_to_resolve)
@@ -150,14 +133,6 @@ def listing_parse(input):
         var_name = input[o+1]
     else:
         raise template.TemplateSyntaxError, "%r tag requires 'as' argument" % input[0]
-
-    # unique
-    if input[-2].lower() == 'unique':
-        params['unique'] = input[-1]
-        params_to_resolve.append('unique')
-    elif input[-1].lower() == 'unique':
-        params['unique'] = core_settings.LISTING_UNIQUE_DEFAULT_SET
-        params_to_resolve.append('unique')
 
     return var_name, params, params_to_resolve
 

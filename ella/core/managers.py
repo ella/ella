@@ -146,7 +146,7 @@ class ListingManager(models.Manager):
         return qset.exclude(publish_to__lt=now)
 
     @cache_this(get_listings_key)
-    def get_listing(self, category=None, children=NONE, count=10, offset=1, mods=[], content_types=[], unique=None, **kwargs):
+    def get_listing(self, category=None, children=NONE, count=10, offset=1, mods=[], content_types=[], **kwargs):
         """
         Get top objects for given category and potentionally also its child categories.
 
@@ -156,7 +156,6 @@ class ListingManager(models.Manager):
             offset - starting with object number... 1-based
             mods - list of Models, if empty, object from all models are included
             [now] - datetime used instead of default datetime.now() value
-            [unique] - set of already listed Placement IDs
             **kwargs - rest of the parameter are passed to the queryset unchanged
         """
         # TODO try to write  SQL (.extra())
@@ -196,8 +195,6 @@ class ListingManager(models.Manager):
                 break
 
         return out
-
-
 
     def get_queryset_wrapper(self, kwargs):
         return ListingQuerySetWrapper(self, kwargs)
