@@ -57,4 +57,3 @@ class BannedIP(models.Model):
     class Meta:
         verbose_name = _('Banned IP')
         verbose_name_plural = _('Banned IPs')
-        ordering = ('-created',)

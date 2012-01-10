@@ -143,7 +143,7 @@ class ListingManager(models.Manager):
         if mods or content_types:
             qset = qset.filter(placement__publishable__content_type__in=([ ContentType.objects.get_for_model(m) for m in mods ] + content_types))
 
-        return qset.exclude(publish_to__lt=now)
+        return qset.exclude(publish_to__lt=now).order_by('-publish_from')
 
     @cache_this(get_listings_key)
     def get_listing(self, category=None, children=NONE, count=10, offset=1, mods=[], content_types=[], **kwargs):

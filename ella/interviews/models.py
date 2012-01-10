@@ -18,7 +18,6 @@ class Interviewee(models.Model):
     class Meta:
         verbose_name = _('Interviewee')
         verbose_name_plural = _('Interviewees')
-        ordering = ('name',)
 
     def __unicode__(self):
         if self.author_id:
@@ -128,7 +127,6 @@ class Interview(Publishable):
     class Meta:
         verbose_name = _('Interview')
         verbose_name_plural = _('Interviews')
-        ordering = ('-ask_from',)
 
     def __unicode__(self):
         return self.title
@@ -168,7 +166,6 @@ class Question(models.Model):
     answered.boolean = True
 
     class Meta:
-        ordering = ('submit_date',)
         verbose_name = _('Question')
         verbose_name_plural = _('Questions')
 

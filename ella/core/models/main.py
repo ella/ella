@@ -158,7 +158,6 @@ class Category(models.Model):
         unique_together = (('site', 'tree_path'),)
         verbose_name = _('Category')
         verbose_name_plural = _('Categories')
-        ordering = ('site__name', 'tree_path',)
 
     @cache_this(get_category_key)
     def __unicode__(self):
@@ -184,4 +183,3 @@ class Dependency(models.Model):
         app_label = 'core'
         verbose_name = _('Dependency')
         verbose_name_plural = _('Dependencies')
-        ordering = ('dependent_ct', 'dependent_id',)

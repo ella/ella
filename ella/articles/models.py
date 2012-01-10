@@ -19,7 +19,6 @@ class InfoBox(models.Model):
         return u"%s" % self.title
 
     class Meta:
-        ordering = ('-created',)
         verbose_name = _('Info box')
         verbose_name_plural = _('Info boxes')
 

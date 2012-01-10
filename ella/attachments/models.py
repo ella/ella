@@ -53,7 +53,6 @@ class Type(models.Model):
             help_text=_('consult http://www.sfsu.edu/training/mimetype.htm'))
 
     class Meta:
-        ordering=('name',)
         unique_together = (('name', 'mimetype'),)
         verbose_name = _('Type')
         verbose_name_plural = _('Types')
@@ -77,7 +76,6 @@ class Attachment(models.Model):
     type = models.ForeignKey(Type, verbose_name=_('Attachment type'))
 
     class Meta:
-        ordering=('created',)
         verbose_name = _('Attachment')
         verbose_name_plural = _('Attachments')
 

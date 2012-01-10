@@ -27,7 +27,6 @@ class DevMessage(models.Model):
     class Meta:
         verbose_name = _('Development message')
         verbose_name_plural = _('Development messages')
-        ordering = ('-ts',)
         unique_together = (('slug', 'ts',),)
 
 
@@ -48,7 +47,6 @@ class AdminHelpItem(models.Model):
     class Meta:
         verbose_name = _('Help item')
         verbose_name_plural = _('Help items')
-        ordering = ('ct', 'field',)
         unique_together = (('ct', 'field', 'lang',),)
 
 
@@ -75,7 +73,6 @@ class AdminUserDraft(models.Model):
     class Meta:
         verbose_name = _('Draft item')
         verbose_name_plural = _('Draft items')
-        ordering = ('-ts',)
 
 
 class AdminSetting(models.Model):

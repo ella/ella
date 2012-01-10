@@ -351,7 +351,6 @@ class Listing(models.Model):
         app_label = 'core'
         verbose_name = _('Listing')
         verbose_name_plural = _('Listings')
-        ordering = ('-publish_from',)
 
 class HitCount(models.Model):
     """

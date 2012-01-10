@@ -127,7 +127,7 @@ class GalleryItem(models.Model):
         return resolver.reverse(self.gallery, 'gallery-item-detail', self.get_slug())
 
     class Meta:
-        ordering = ('order',)
+        ordering = ('order', )
         verbose_name = _('Gallery item')
         verbose_name_plural = _('Gallery items')
         unique_together = (('gallery', 'order',),)

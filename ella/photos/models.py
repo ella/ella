@@ -197,7 +197,6 @@ class Photo(models.Model):
     class Meta:
         verbose_name = _('Photo')
         verbose_name_plural = _('Photos')
-        ordering = ('-created',)
 
 
 class Format(models.Model):
@@ -236,7 +235,6 @@ class Format(models.Model):
     class Meta:
         verbose_name = _('Format')
         verbose_name_plural = _('Formats')
-        ordering = ('name', '-max_width',)
 
 
 class FormatedPhoto(models.Model):
