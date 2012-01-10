@@ -7,7 +7,7 @@ from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 
 from ella.ellaadmin import widgets
-from ella.core.models import Author, Source, Category, Listing, HitCount, Placement
+from ella.core.models import Author, Source, Category, Listing, Placement
 
 class PlacementForm(modelforms.ModelForm):
     """PlacementForm from ella.core.newman_admin without djangomarkup dependency (and default Django fields)."""
@@ -241,10 +241,6 @@ class ListingInlineAdmin(admin.TabularInline):
         return super(ListingInlineAdmin, self).formfield_for_dbfield(db_field, **kwargs)
 
 
-class HitCountInlineAdmin(admin.TabularInline):
-    model = HitCount
-    extra = 0
-
 class PlacementAdmin(admin.ModelAdmin):
     pass
     '''
@@ -274,10 +270,6 @@ class CategoryAdmin(admin.ModelAdmin):
     #ordering = ('site', 'tree_path',)
     prepopulated_fields = {'slug': ('title',)}
 
-class HitCountAdmin(admin.ModelAdmin):
-    list_display = ('target', 'hits',)
-    ordering = ('-hits', '-last_seen',)
-
 class AuthorAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
     search_fields = ('name',)
@@ -305,7 +297,6 @@ class PublishableAdmin(admin.ModelAdmin):
     #inlines = [PlacementInlineAdmin]
 
 
-admin.site.register(HitCount, HitCountAdmin)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Source, SourceAdmin)
 admin.site.register(Author, AuthorAdmin)

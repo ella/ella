@@ -9,7 +9,6 @@ from django.template import TemplateSyntaxError
 from django.contrib.sites.models import Site
 
 from ella.core.templatetags.core import listing_parse, ListingNode, _parse_box, BoxNode, EmptyNode
-from ella.core.templatetags.hits import top_visited_parser
 from ella.core.models import Listing, Category
 from ella.core import register
 
@@ -195,73 +194,3 @@ class TestBoxTagParser(UnitTestCase):
         node = _parse_box([], ['box', 'box_type', 'for', 'not_app.not_model', 'with', 'pk', '1'])
         tools.assert_true(isinstance(node, EmptyNode))
 
-class TestTopVisitedTagParser(UnitTestCase):
-    '''
-    {% top_visited <count> [days <days>] [app.model [app.model[...]]] as <result> %}
-    '''
-
-    def test_minimal_args(self):
-        count, var_name, days, mods = top_visited_parser(['top_visited', '1', 'as', 'var'])
-        tools.assert_equals(1, count)
-        tools.assert_equals('var', var_name)
-        tools.assert_equals(None, days)
-        tools.assert_equals([], mods)
-
-    def test_days(self):
-        count, var_name, days, mods = top_visited_parser(['top_visited', '1', 'days', '7', 'as', 'var'])
-        tools.assert_equals(7, days)
-
-    def test_one_model(self):
-        from ella.articles.models import Article
-        count, var_name, days, mods = top_visited_parser(['top_visited', '1', 'articles.article', 'as', 'var'])
-        tools.assert_equals([Article], mods)
-
-    def test_more_models(self):
-        from ella.articles.models import Article
-        from ella.galleries.models import Gallery
-        count, var_name, days, mods = top_visited_parser(['top_visited', '1', 'articles.article', 'galleries.gallery', 'as', 'var'])
-        tools.assert_equals([Article, Gallery], mods)
-
-    def test_few_params(self):
-        tools.assert_raises(template.TemplateSyntaxError, top_visited_parser, ['top_visited', 'as', 'var'])
-
-    def test_raises_error_count_not_int(self):
-        tools.assert_raises(template.TemplateSyntaxError, top_visited_parser, ['top_visited', 'I0', 'as', 'var'])
-
-    def test_raises_error_days_not_int(self):
-        tools.assert_raises(template.TemplateSyntaxError, top_visited_parser, ['top_visited', '1', 'days', 'I0', 'as', 'var'])
-
-    def test_raises_error_days_less_then_1(self):
-        tools.assert_raises(template.TemplateSyntaxError, top_visited_parser, ['top_visited', '1', 'days', '0', 'as', 'var'])
-
-    def test_raises_error_on_no_as(self):
-        tools.assert_raises(template.TemplateSyntaxError, top_visited_parser, ['top_visited', '1', 'articles.article', 'var'])
-
-    def test_raises_error_unknown_model(self):
-        tools.assert_raises(template.TemplateSyntaxError, top_visited_parser, ['top_visited', '1', 'articles.articl', 'as', 'var'])
-
-class TestTopVisitedTag(TestCase):
-    def setUp(self):
-        super(TestTopVisitedTag, self).setUp()
-        create_basic_categories(self)
-        create_and_place_two_publishables_and_listings(self)
-
-    def test_get_all_top_visited(self):
-        t = template.Template('{% load hits %}{% top_visited 5 as var %}{% for h in var %}{{ h.placement.publishable.id }}{% if not forloop.last %}:{% endif %}{% endfor %}')
-        expected = ':'.join( [str(hitcount.placement.publishable.id) for hitcount in self.hitcounts_all] )
-        tools.assert_equals( expected, t.render(template.Context()) )
-
-    def test_get_top_visited_count_limited(self):
-        t = template.Template('{% load hits %}{% top_visited 1 as var %}{% for h in var %}{{ h.placement.publishable.id }}{% if not forloop.last %}:{% endif %}{% endfor %}')
-        expected = str(self.hitcount_top.placement.publishable.id)
-        tools.assert_equals( expected, t.render(template.Context()) )
-
-    def test_get_top_visited_age_limited(self):
-        t = template.Template('{% load hits %}{% top_visited 5 days 8 as var %}{% for h in var %}{{ h.placement.publishable.id }}{% if not forloop.last %}:{% endif %}{% endfor %}')
-        expected = ':'.join( [str(hitcount.placement.publishable.id) for hitcount in self.hitcounts_age_limited] )
-        tools.assert_equals( expected, t.render(template.Context()) )
-
-    def test_get_top_visited_model_limited(self):
-        t = template.Template('{% load hits %}{% top_visited 5 galleries.gallery as var %}{% for h in var %}{{ h.placement.publishable.id }}{% if not forloop.last %}:{% endif %}{% endfor %}')
-        expected = ':'.join( [str(hitcount.placement.publishable.id) for hitcount in self.hitcounts_galleries] )
-        tools.assert_equals( expected, t.render(template.Context()) )

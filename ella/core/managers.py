@@ -218,36 +218,3 @@ class ListingQuerySetWrapper(object):
             self._count = self.manager.get_listing_queryset(**self._kwargs).count()
         return self._count
 
-
-def get_top_objects_key(func, self, count, days=None, mods=[]):
-    return 'ella.core.managers.HitCountManager.get_top_objects_key:%d:%d:%s:%s' % (
-            settings.SITE_ID, count, str(days), ','.join('.'.join(str(model._meta) for model in mods))
-        )
-
-class HitCountManager(models.Manager):
-
-    def hit(self, placement):
-        count = self.filter(placement=placement).update(hits=F('hits')+1)
-
-        if count < 1:
-            self.create(placement=placement, hits=1)
-
-    @cache_this(get_top_objects_key)
-    def get_top_objects(self, count, days=None, mods=[]):
-        """
-        Return count top rated objects. Cache this for 10 minutes without any chance of cache invalidation.
-        """
-        qset = self.filter(placement__category__site=settings.SITE_ID).order_by('-hits')
-
-        if mods:
-            qset = qset.filter(placement__publishable__content_type__in = [ ContentType.objects.get_for_model(m) for m in mods ])
-
-        now = datetime.now()
-        if days is None:
-            qset = qset.filter(placement__publish_from__lte=now)
-        else:
-            start = now - timedelta(days=days)
-            qset = qset.filter(placement__publish_from__range=(start, now,))
-        qset = qset.filter(Q(placement__publish_to__gt=now) | Q(placement__publish_to__isnull=True))
-
-        return list(qset[:count])

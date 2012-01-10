@@ -12,7 +12,7 @@ from django.utils.safestring import mark_safe
 from django.template.defaultfilters import date
 from django.conf import settings
 
-from ella.core.models import Author, Source, Category, Listing, HitCount, Placement, Related, Publishable
+from ella.core.models import Author, Source, Category, Listing, Placement, Related, Publishable
 from ella.core.conf import core_settings
 
 from ella import newman
@@ -247,10 +247,6 @@ class PlacementInlineAdmin(newman.NewmanTabularInline):
     '''
 
 
-class HitCountInlineAdmin(newman.NewmanTabularInline):
-    model = HitCount
-    extra = 0
-
 class ListingAdmin(newman.NewmanModelAdmin):
     form = ListingForm
     '''
@@ -268,40 +264,6 @@ class CategoryAdmin(newman.NewmanModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
     ordering = ('site', 'tree_path',)
     suggest_fields = {'tree_parent': ('__unicode__', 'title', 'slug')}
-
-class HitCountAdmin(newman.NewmanModelAdmin):
-    list_display = ('target', 'hits', 'publish_from', 'target_url')
-#    list_filter = ('placement__category', 'placement__publish_from')
-    raw_id_fields = ('placement',)
-    search_fields = ('placement__category__title', 'placement__publishable__pk', 'placement__publishable__title', 'placement__publishable__slug' )
-    ordering = ('-hits', '-last_seen',)
-
-    def publish_from(self, object):
-        return object.placement.publish_from
-    publish_from.short_description = _('Publish from')
-    publish_from.allow_tags = True
-    publish_from.order_field = 'placement__publish_from'
-
-    def target_url(self, object):
-        target = object.target()
-        return mark_safe('<a class="icn web" href="%s">%s</a>' % (target.get_absolute_url(), target))
-    target_url.short_description = _('View on site')
-    target_url.allow_tags = True
-
-    def get_urls(self):
-
-        info = self.admin_site.name, self.model._meta.app_label, self.model._meta.module_name
-
-        urlpatterns = patterns('',
-            url(r'^by-category/$',
-                self.by_category_view,
-                name='%sadmin_%s_%s_by_category' % info),
-        )
-        urlpatterns += super(HitCountAdmin, self).get_urls()
-        return urlpatterns
-
-    def by_category_view(self, request, extra_context={}):
-        pass
 
 class AuthorAdmin(newman.NewmanModelAdmin):
     list_display = ('name', 'user', 'email',)
@@ -499,7 +461,6 @@ class PublishableAdmin(newman.NewmanModelAdmin):
 #        qs = super(PublishableAdmin, self).queryset(request)
 #        return qs.select_related()
 
-newman.site.register(HitCount, HitCountAdmin)
 newman.site.register(Category, CategoryAdmin)
 newman.site.register(Source, SourceAdmin)
 newman.site.register(Author, AuthorAdmin)

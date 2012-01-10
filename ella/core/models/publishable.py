@@ -11,7 +11,7 @@ from django.template.defaultfilters import slugify
 from django.core.urlresolvers import reverse
 from django.contrib.redirects.models import Redirect
 
-from ella.core.managers import ListingManager, HitCountManager, PlacementManager, RelatedManager
+from ella.core.managers import ListingManager, PlacementManager, RelatedManager
 from ella.core.cache import get_cached_object, get_cached_list, CachedGenericForeignKey
 from ella.core.models.main import Category, Author, Source
 from ella.photos.models import Photo
@@ -235,7 +235,6 @@ class Placement(models.Model):
                     })
 
     def save(self, **kwargs):
-        " If Listing is created, we create HitCount object "
         # perform validation here
         Placement.check_placement_is_unique(self)
 
@@ -256,8 +255,6 @@ class Placement(models.Model):
 
         # First, save Placement
         super(Placement, self).save(**kwargs)
-        # Then, save HitCount (needs placement_id)
-        hc, created = HitCount.objects.get_or_create(placement=self, defaults={'hits': 0})
 
         # store the publish_from on the publishable for performance in the admin
         try:
@@ -351,30 +348,6 @@ class Listing(models.Model):
         app_label = 'core'
         verbose_name = _('Listing')
         verbose_name_plural = _('Listings')
-
-class HitCount(models.Model):
-    """
-    Count hits for individual objects.
-    """
-    placement = models.ForeignKey(Placement, primary_key=True)
-
-    last_seen = models.DateTimeField(_('Last seen'), editable=False)
-    hits = models.PositiveIntegerField(_('Hits'), default=1)
-
-    objects = HitCountManager()
-
-    def save(self, **kwargs):
-        "update last seen automaticaly"
-        self.last_seen = datetime.now()
-        super(HitCount, self).save(**kwargs)
-
-    def target(self):
-        return self.placement.publishable
-
-    class Meta:
-        app_label = 'core'
-        verbose_name = _('Hit Count')
-        verbose_name_plural = _('Hit Counts')
 
 class Related(models.Model):
     """

@@ -3,7 +3,6 @@ from django.contrib.contenttypes.models import ContentType
 
 from ella.newman.conf import newman_settings
 from ella.ellacomments.newman_admin import MODELS_WITH_COMMENTS
-from ella.core.models.publishable import HitCount
 from ella.positions.models import Position
 
 register = template.Library()
@@ -65,8 +64,6 @@ def newman_frontend_admin(context):
         vars['object'] = obj
         vars['newman_object_url'] = get_newman_url(obj)
         vars['newman_comment_moderation_url'] = get_moderation_url(obj)
-        if placement:
-            vars['hitcount'] = HitCount.objects.get(placement=placement.pk)
 
     return vars
 

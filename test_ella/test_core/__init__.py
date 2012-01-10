@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 from django.conf import settings
 
-from ella.core.models import Placement, Category, Listing, Publishable, HitCount
+from ella.core.models import Placement, Category, Listing, Publishable
 # choose Article as an example publishable
 from ella.articles.models import Article
 from ella.galleries.models import Gallery
@@ -109,9 +109,6 @@ def create_and_place_two_publishables_and_listings(case):
             publish_from=publish_from,
             publish_to=publish_to
         )
-
-        HitCount.objects.filter(placement=pl).update(hits=hits)
-        hc = HitCount.objects.get(placement=pl)
 
         li = Listing.objects.create(
             placement=pl,
