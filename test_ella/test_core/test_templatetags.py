@@ -11,6 +11,8 @@ from django.contrib.sites.models import Site
 from ella.core.templatetags.core import listing_parse, ListingNode, _parse_box, BoxNode, EmptyNode
 from ella.core.models import Listing, Category
 from ella.core import register
+from ella.articles.models import Article
+from ella.photos.models import Photo
 
 from test_ella.test_core import create_basic_categories, create_and_place_a_publishable, \
         create_and_place_more_publishables, list_all_publishables_in_category_by_hour, \
@@ -92,26 +94,23 @@ class TestListingTagParser(UnitTestCase):
         tools.assert_equals('10', parameters['offset'])
 
     def test_limit_by_model(self):
-        from ella.articles.models import Article, ArticleContents
+        from ella.articles.models import Article
         var_name, parameters, parameters_to_resolve = listing_parse(['listing', '1', 'of', 'articles.article', 'as', 'var'])
         tools.assert_equals('var', var_name)
         tools.assert_equals('1', parameters['count'])
         tools.assert_equals([Article], parameters['mods'])
 
     def test_limit_bu_more_models(self):
-        from ella.articles.models import Article, ArticleContents
-        var_name, parameters, parameters_to_resolve = listing_parse(['listing', '1', 'of', 'articles.article,articles.articlecontents', 'as', 'var'])
-        tools.assert_equals([Article, ArticleContents], parameters['mods'])
+        var_name, parameters, parameters_to_resolve = listing_parse(['listing', '1', 'of', 'articles.article,photos.photo', 'as', 'var'])
+        tools.assert_equals([Article, Photo], parameters['mods'])
 
     def test_limit_bu_more_models_space(self):
-        from ella.articles.models import Article, ArticleContents
-        var_name, parameters, parameters_to_resolve = listing_parse(['listing', '1', 'of', 'articles.article,', 'articles.articlecontents', 'as', 'var'])
-        tools.assert_equals([Article, ArticleContents], parameters['mods'])
+        var_name, parameters, parameters_to_resolve = listing_parse(['listing', '1', 'of', 'articles.article,', 'photos.photo', 'as', 'var'])
+        tools.assert_equals([Article, Photo], parameters['mods'])
 
     def test_limit_bu_more_models_space_around_comma(self):
-        from ella.articles.models import Article, ArticleContents
-        var_name, parameters, parameters_to_resolve = listing_parse(['listing', '1', 'of', 'articles.article', ',', 'articles.articlecontents', 'as', 'var'])
-        tools.assert_equals([Article, ArticleContents], parameters['mods'])
+        var_name, parameters, parameters_to_resolve = listing_parse(['listing', '1', 'of', 'articles.article', ',', 'photos.photo', 'as', 'var'])
+        tools.assert_equals([Article, Photo], parameters['mods'])
 
     def test_limit_by_category(self):
         var_name, parameters, parameters_to_resolve = listing_parse(['listing', '1', 'for', 'category', 'as', 'var'])

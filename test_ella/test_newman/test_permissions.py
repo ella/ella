@@ -3,7 +3,7 @@ from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 
 from ella.core.models import Category
-from ella.articles.models import Article, ArticleContents
+from ella.articles.models import Article
 
 from ella.newman.models import CategoryUserRole
 from ella.newman.permission import has_category_permission, has_object_permission, compute_applicable_categories
@@ -53,8 +53,7 @@ class UserWithPermissionTestCase(NewmanTestCase):
         self.role_all.save(sync_role=True)
 
     def _create_author_and_article(self):
-        article = Article.objects.create(title=u'Testable rabbit', description=u'Perex', category=self.nested_first_level_two)
-        ArticleContents.objects.create(title=u'Testable rabbit, 你好', content=u'Long vehicle', article=article)
+        article = Article.objects.create(title=u'Testable rabbit', description=u'Perex', category=self.nested_first_level_two, content=u'Long vehicle')
         article.authors.add(self.author)
         article.save()
         tools.assert_equals(1, Article.objects.count())
@@ -75,9 +74,6 @@ class TestArticleForeignKeys(UserWithPermissionTestCase):
 
     def test_model_category_fk_from_article(self):
         tools.assert_equals(self.article_fields['category'], model_category_fk(Article))
-
-    def test_model_category_fk_from_contents(self):
-        tools.assert_equals(None, model_category_fk(ArticleContents))
 
     def test_model_category_fk_value_parent_category_value(self):
         tools.assert_equals(self.nested_first_level, model_category_fk_value(self.nested_second_level))

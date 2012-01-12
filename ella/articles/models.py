@@ -29,15 +29,7 @@ class Article(Publishable):
     created = models.DateTimeField(_('Created'), default=datetime.now, editable=False, db_index=True)
     updated = models.DateTimeField(_('Updated'), blank=True, null=True)
 
-    @property
-    def content(self):
-        """Returns first item from ArticleContents linked to current article"""
-        if not hasattr(self, '_contents'):
-            self._contents = get_cached_list(ArticleContents, article=self)
-        if self._contents:
-            return self._contents[0]
-        else:
-            return None
+    content = models.TextField(_('Content'), default='')
 
     class Meta:
         verbose_name = _('Article')
@@ -52,23 +44,6 @@ class Article(Publishable):
     article_age.short_description = _('Article Age')
 
     def get_text(self):
-        return self.content.content
+        return self.content
 
-
-
-class ArticleContents(models.Model):
-    """Defines article's contents model.
-
-    One article can have multiple contets. (1:N)"""
-    article = models.ForeignKey(Article, verbose_name=_('Article'))
-    title = models.CharField(_('Title'), max_length=200, blank=True)
-    content = models.TextField(_('Content'))
-
-    class Meta:
-        verbose_name = _('Article content')
-        verbose_name_plural = _('Article contents')
-        #order_with_respect_to = 'article'
-
-    def __unicode__(self):
-        return self.title or unicode(self.article)
 

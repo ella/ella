@@ -6,6 +6,8 @@ from nose import tools
 
 from ella.core.templatetags.related import parse_related_tag, RelatedNode
 from ella.core.models import Related, Publishable
+from ella.articles.models import Article
+from ella.photos.models import Photo
 
 from test_ella.test_core import create_basic_categories, create_and_place_a_publishable, \
         create_and_place_more_publishables, list_all_publishables_in_category_by_hour
@@ -106,7 +108,6 @@ class TestRelatedTagParser(UnitTestCase):
         tools.assert_equals([], mods)
 
     def test_limit_bu_model(self):
-        from ella.articles.models import Article, ArticleContents
         self.minimal_args.insert(2, 'articles.article')
         obj_var, count, var_name, mods = parse_related_tag(self.minimal_args)
         tools.assert_equals('obj_var', obj_var)
@@ -115,32 +116,29 @@ class TestRelatedTagParser(UnitTestCase):
         tools.assert_equals([Article], mods)
 
     def test_limit_bu_more_models(self):
-        from ella.articles.models import Article, ArticleContents
-        self.minimal_args.insert(2, 'articles.article,articles.articlecontents')
+        self.minimal_args.insert(2, 'articles.article,photos.photo')
         obj_var, count, var_name, mods = parse_related_tag(self.minimal_args)
         tools.assert_equals('obj_var', obj_var)
         tools.assert_equals(10, count)
         tools.assert_equals('some_var', var_name)
-        tools.assert_equals([Article, ArticleContents], mods)
+        tools.assert_equals([Article, Photo], mods)
 
     def test_limit_bu_more_models_with_space(self):
-        from ella.articles.models import Article, ArticleContents
         self.minimal_args.insert(2, 'articles.article,')
-        self.minimal_args.insert(3, 'articles.articlecontents')
+        self.minimal_args.insert(3, 'photos.photo')
         obj_var, count, var_name, mods = parse_related_tag(self.minimal_args)
         tools.assert_equals('obj_var', obj_var)
         tools.assert_equals(10, count)
         tools.assert_equals('some_var', var_name)
-        tools.assert_equals([Article, ArticleContents], mods)
+        tools.assert_equals([Article, Photo], mods)
 
     def test_limit_bu_more_models_with_spaces_around_comma(self):
-        from ella.articles.models import Article, ArticleContents
         self.minimal_args.insert(2, 'articles.article')
         self.minimal_args.insert(3, ',')
-        self.minimal_args.insert(4, 'articles.articlecontents')
+        self.minimal_args.insert(4, 'photos.photo')
         obj_var, count, var_name, mods = parse_related_tag(self.minimal_args)
         tools.assert_equals('obj_var', obj_var)
         tools.assert_equals(10, count)
         tools.assert_equals('some_var', var_name)
-        tools.assert_equals([Article, ArticleContents], mods)
+        tools.assert_equals([Article, Photo], mods)
 
