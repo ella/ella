@@ -15,7 +15,7 @@ class CustomURLResolver(object):
     Usage:
         Register your own view function for some specific URL that is appended to object's absolute url.
         This view will then be called when this URL is used. A small dictionary containing the object,
-        it's placement, category, content_type and content_type_name will be passed to the view.
+        it's category, content_type and content_type_name will be passed to the view.
 
     Example:
         dispatcher.register(urlpatterns, prefix='rate')

@@ -4,7 +4,6 @@ from django.test import TestCase
 
 from nose import tools
 
-from ella.core.models import Placement
 from ella.galleries.models import Gallery, GalleryItem
 
 # FIXME hack alert - we are calling the registration here, it should be dealt
@@ -21,6 +20,7 @@ def create_and_publish_gallery(case):
         description=u'Some\nlonger\ntext',
         category=case.category_nested,
         content=u'Some\neven\nlonger\ntext',
+        publish_from=datetime(2008,1,10)
     )
     case.publishable2 = Gallery.objects.create(
         title=u'Second Gallery',
@@ -28,12 +28,6 @@ def create_and_publish_gallery(case):
         description=u'Some\nlonger\ntext',
         category=case.category,
         content=u'Some\neven\nlonger\ntext',
-    )
-
-    case.placement = Placement.objects.create(
-        publishable=case.publishable,
-        category=case.category_nested,
-        publish_from=datetime(2008,1,10)
     )
 
     case.galitem = case.publishable.galleryitem_set.create(

@@ -23,7 +23,7 @@ class CommentViewTestCase(TestCase):
         create_and_place_a_publishable(self)
 
     def get_url(self, *bits):
-        url = [self.placement.get_absolute_url(), slugify(_('comments')), '/']
+        url = [self.publishable.get_absolute_url(), slugify(_('comments')), '/']
         if bits:
             url.append('/'.join(map(lambda x: slugify(_(str(x))), bits)))
             url.append('/')

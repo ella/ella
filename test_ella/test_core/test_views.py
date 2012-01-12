@@ -10,7 +10,7 @@ from django.template import TemplateDoesNotExist
 from ella.core.models import Listing
 
 from test_ella.test_core import create_basic_categories, create_and_place_a_publishable, \
-        create_and_place_more_publishables, list_all_placements_in_category_by_hour
+        create_and_place_more_publishables, list_all_publishables_in_category_by_hour
 from test_ella import template_loader
 
 class ViewsTestCase(TestCase):
@@ -57,7 +57,7 @@ class TestListContentType(ViewsTestCase):
     def setUp(self):
         super(TestListContentType, self).setUp()
         create_and_place_more_publishables(self)
-        list_all_placements_in_category_by_hour(self, category=self.category)
+        list_all_publishables_in_category_by_hour(self, category=self.category)
 
     def test_only_nested_category_and_year_returns_all_listings(self):
         template_loader.templates['page/listing.html'] = ''
@@ -119,9 +119,6 @@ class TestObjectDetail(ViewsTestCase):
     def test_object_detail(self):
         response = self.client.get('/nested-category/2008/1/10/articles/first-article/')
 
-        tools.assert_true('placement' in response.context)
-        tools.assert_equals(self.placement, response.context['placement'])
-
         tools.assert_true('category' in response.context)
         tools.assert_equals(self.publishable.category, response.context['category'])
 
@@ -141,12 +138,9 @@ class TestObjectDetail(ViewsTestCase):
         )
 
     def test_static_object_detail(self):
-        self.placement.static = True
-        self.placement.save()
+        self.publishable.static = True
+        self.publishable.save()
         response = self.client.get('/nested-category/static/articles/first-article/')
-
-        tools.assert_true('placement' in response.context)
-        tools.assert_equals(self.placement, response.context['placement'])
 
         tools.assert_true('category' in response.context)
         tools.assert_equals(self.publishable.category, response.context['category'])

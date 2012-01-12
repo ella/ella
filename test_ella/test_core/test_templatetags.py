@@ -13,7 +13,7 @@ from ella.core.models import Listing, Category
 from ella.core import register
 
 from test_ella.test_core import create_basic_categories, create_and_place_a_publishable, \
-        create_and_place_more_publishables, list_all_placements_in_category_by_hour, \
+        create_and_place_more_publishables, list_all_publishables_in_category_by_hour, \
         create_and_place_two_publishables_and_listings
 from test_ella import template_loader
 
@@ -53,7 +53,7 @@ class TestListingTag(TestCase):
         create_basic_categories(self)
         create_and_place_a_publishable(self)
         create_and_place_more_publishables(self)
-        list_all_placements_in_category_by_hour(self)
+        list_all_publishables_in_category_by_hour(self)
 
     def test_get_listing(self):
         t = template.Template('{% listing 10 for category as var %}{{ var|join:":" }}')

@@ -7,7 +7,6 @@ from django.test import TestCase
 from nose import tools
 
 from ella.polls.models import Quiz, Question, Choice, Result
-from ella.core.models import Placement
 
 from test_ella.test_core import create_basic_categories
 from test_ella import template_loader
@@ -30,6 +29,7 @@ class QuizTestCase(TestCase):
                 text='Some text',
                 active_from=now-day,
                 active_till=now+day,
+                publish_from=now - day,
             )
         self.questions = [
                 Question.objects.create(
@@ -63,12 +63,7 @@ input_re = re.compile('name="([^"]+)" value="([^"]+)"')
 class TestWizard(QuizTestCase):
     def setUp(self):
         super(TestWizard, self).setUp()
-        self.placement = Placement.objects.create(
-                publishable=self.quiz,
-                category=self.category,
-                publish_from=datetime.now()-timedelta(days=1),
-            )
-        self.url = self.placement.get_absolute_url()
+        self.url = self.quiz.get_absolute_url()
 
     def test_step(self):
         template_loader.templates['page/step.html'] = ''

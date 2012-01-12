@@ -14,7 +14,7 @@ from ella.core.views import ObjectDetail, get_content_type, ListContentType
 from ella.core.models import Listing, Publishable
 
 from test_ella.test_core import create_basic_categories, create_and_place_a_publishable, \
-        create_and_place_more_publishables, list_all_placements_in_category_by_hour
+        create_and_place_more_publishables, list_all_publishables_in_category_by_hour
 
 class ViewHelpersTestCase(TestCase):
     def setUp(self):
@@ -89,16 +89,15 @@ class TestObjectDetail(ViewHelpersTestCase):
     def test_returns_correct_context(self):
         c = self.object_detail.get_context(*self.correct_args)
 
-        tools.assert_equals(5, len(c.keys()))
+        tools.assert_equals(4, len(c.keys()))
         tools.assert_equals(self.publishable, c['object'])
-        tools.assert_equals(self.placement, c['placement'])
         tools.assert_equals(self.category_nested, c['category'])
         tools.assert_equals('articles', c['content_type_name'])
         tools.assert_equals(self.publishable.content_type, c['content_type'])
 
     def test_doesnt_match_static_placement_if_date_is_supplied(self):
-        self.placement.static = True
-        self.placement.save()
+        self.publishable.static = True
+        self.publishable.save()
         tools.assert_raises(Http404, self.object_detail.get_context, *self.correct_args)
 
     def test_doesnt_match_placement_if_date_is_not_supplied(self):
@@ -106,15 +105,14 @@ class TestObjectDetail(ViewHelpersTestCase):
         tools.assert_raises(Http404, self.object_detail.get_context, *self.correct_args)
 
     def test_matches_static_placement_if_date_is_not_supplied(self):
-        self.placement.static = True
-        self.placement.save()
+        self.publishable.static = True
+        self.publishable.save()
         self.correct_args = self.correct_args[:4] + [None, None, None]
 
         c = self.object_detail.get_context(*self.correct_args)
 
-        tools.assert_equals(5, len(c.keys()))
+        tools.assert_equals(4, len(c.keys()))
         tools.assert_equals(self.publishable, c['object'])
-        tools.assert_equals(self.placement, c['placement'])
         tools.assert_equals(self.category_nested, c['category'])
         tools.assert_equals('articles', c['content_type_name'])
         tools.assert_equals(self.publishable.content_type, c['content_type'])
@@ -123,7 +121,7 @@ class TestListContentType(ViewHelpersTestCase):
     def setUp(self):
         super(TestListContentType, self).setUp()
         create_and_place_more_publishables(self)
-        list_all_placements_in_category_by_hour(self, category=self.category)
+        list_all_publishables_in_category_by_hour(self, category=self.category)
         self.list_content_type = ListContentType()
 
     def test_only_category_and_year_returns_all_listings(self):

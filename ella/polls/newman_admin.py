@@ -1,5 +1,3 @@
-import types
-
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.forms.models import BaseInlineFormSet
 from django.shortcuts import render_to_response
@@ -11,7 +9,7 @@ from django.conf.urls.defaults import patterns, url
 from ella import newman
 from ella.newman import fields
 
-from ella.core.newman_admin import PlacementInlineAdmin, PublishableAdmin
+from ella.core.newman_admin import ListingInlineAdmin, PublishableAdmin
 from ella.core.cache import get_cached_object_or_404
 from ella.polls.models import Contest, Contestant, Quiz, Result, Choice, Vote, Question, Survey, Poll
 
@@ -286,10 +284,10 @@ class ContestAdmin(PublishableAdmin):
     form = ContestForm
     
     list_display = ('admin_link', 'category', 'active_from', 'correct_answers', 'get_all_answers_count', 'pk', \
-                    'publish_from_nice', 'placement_link', 'site_icon', 'fe_link',)
+                    'publish_from_nice', 'site_icon', 'fe_link',)
     list_filter = ('category', 'active_from',)
     search_fields = ('title', 'text',)
-    inlines = [PlacementInlineAdmin, QuestionInlineAdmin]
+    inlines = [ListingInlineAdmin, QuestionInlineAdmin]
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
     rich_text_fields = {'small': ('description',), None: ('text', 'text_results', )}
@@ -340,7 +338,7 @@ class QuizAdmin(PublishableAdmin):
 #    list_display = ('admin_link', 'category', 'active_from')
     list_filter = ('category', 'active_from',)
     search_fields = ('title', 'text',)
-    inlines = [QuestionInlineAdmin, ResultTabularAdmin, PlacementInlineAdmin]
+    inlines = [QuestionInlineAdmin, ResultTabularAdmin, ListingInlineAdmin]
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
     rich_text_fields = {'small': ('description',), None: ('text',)}

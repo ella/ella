@@ -8,7 +8,7 @@ from ella.core.templatetags.related import parse_related_tag, RelatedNode
 from ella.core.models import Related, Publishable
 
 from test_ella.test_core import create_basic_categories, create_and_place_a_publishable, \
-        create_and_place_more_publishables, list_all_placements_in_category_by_hour
+        create_and_place_more_publishables, list_all_publishables_in_category_by_hour
 
 class GetRelatedTestCase(TestCase):
     def setUp(self):
@@ -19,7 +19,7 @@ class GetRelatedTestCase(TestCase):
 
         Publishable.objects.all().update(category=self.publishable.category)
 
-        list_all_placements_in_category_by_hour(self, category=self.publishable.category)
+        list_all_publishables_in_category_by_hour(self, category=self.publishable.category)
 
 class TestGetRelated(GetRelatedTestCase):
     def test_returns_publishables_listed_in_same_cat_if_no_related(self):

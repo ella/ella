@@ -8,7 +8,7 @@ from django.db import models
 from django.http import Http404
 from django.shortcuts import render
 
-from ella.core.models import Listing, Category, Placement
+from ella.core.models import Listing, Category, Publishable
 from ella.core.cache import get_cached_object_or_404, cache_this
 from ella.core import custom_urls
 from ella.core.conf import core_settings
@@ -61,15 +61,14 @@ class EllaCoreView(object):
 
 class ObjectDetail(EllaCoreView):
     """
-    Renders a page for placement.  If ``url_remainder`` is specified, tries to
+    Renders a page for publishable.  If ``url_remainder`` is specified, tries to
     locate custom view via :meth:`DetailDispatcher.call_view`. If
     :meth:`DetailDispatcher.has_custom_detail` returns ``True``, calls
     :meth:`DetailDispatcher.call_custom_detail`. Otherwise renders a template
     with context containing:
 
-    * placement: ``Placement`` instance representing the URL accessed
-    * object: ``Publishable`` instance bound to the ``placement``
-    * category: ``Category`` of the ``placement``
+    * object: ``Publishable`` instance representing the URL accessed
+    * category: ``Category`` of the ``object``
     * content_type_name: slugified plural verbose name of the publishable's content type
     * content_type: ``ContentType`` of the publishable
 
@@ -81,19 +80,14 @@ class ObjectDetail(EllaCoreView):
     * ``page/content_type/<app>.<model>/object.html``
     * ``page/object.html``
 
-    .. note::
-        The category being used in selecting a template is taken from the object's
-        ``Placement``, thus one object published in many categories (even sites)
-        can have a different template every time.
-
     :param request: ``HttpRequest`` from Django
     :param category: ``Category.tree_path`` (empty if home category)
     :param content_type: slugified ``verbose_name_plural`` of the target model
-    :param year month day: date matching the `publish_from` field of the `Placement` object
-    :param slug: slug of the `Placement`
+    :param year month day: date matching the `publish_from` field of the `Publishable` object
+    :param slug: slug of the `Publishable`
     :param url_remainder: url after the object's url, used to locate custom views in `custom_urls.resolver`
 
-    :raises Http404: if the URL is not valid and/or doesn't correspond to any valid `Placement`
+    :raises Http404: if the URL is not valid and/or doesn't correspond to any valid `Publishable`
     """
     template_name = 'object.html'
     def __call__(self, request, category, content_type, slug, year=None, month=None, day=None, url_remainder=None):
@@ -114,31 +108,30 @@ class ObjectDetail(EllaCoreView):
         cat = get_cached_object_or_404(Category, tree_path=category, site__id=settings.SITE_ID)
 
         if year:
-            placement = get_cached_object_or_404(Placement,
+            publishable = get_cached_object_or_404(Publishable,
                         publish_from__year=year,
                         publish_from__month=month,
                         publish_from__day=day,
-                        publishable__content_type=ct,
+                        content_type=ct,
                         category=cat,
                         slug=slug,
                         static=False
                     )
         else:
-            placement = get_cached_object_or_404(Placement, category=cat, publishable__content_type=ct, slug=slug, static=True)
+            publishable = get_cached_object_or_404(Publishable, category=cat, content_type=ct, slug=slug, static=True)
 
         # save existing object to preserve memory and SQL
-        placement.category = cat
-        placement.publishable.content_type = ct
+        publishable.category = cat
+        publishable.content_type = ct
 
 
-        if not (placement.is_active() or request.user.is_staff):
-            # future placement, render if accessed by logged in staff member
+        if not (publishable.is_published() or request.user.is_staff):
+            # future publish, render if accessed by logged in staff member
             raise Http404
 
-        obj = placement.publishable.target
+        obj = publishable.target
 
         context = {
-                'placement' : placement,
                 'object' : obj,
                 'category' : cat,
                 'content_type_name' : content_type,
@@ -336,18 +329,14 @@ def get_templates(name, slug=None, category=None, app_label=None, model_label=No
     return templates
 
 
-def get_templates_from_placement(name, placement, slug=None, category=None, app_label=None, model_label=None):
+def get_templates_from_publishable(name, publishable):
     """
-    Returns the same template list as `get_templates` but generates the missing values from `Placement` instance.
+    Returns the same template list as `get_templates` but gets values from `Publishable` instance.
     """
-    if slug is None:
-        slug = placement.slug
-    if category is None:
-        category = placement.category
-    if app_label is None:
-        app_label = placement.publishable.content_type.app_label
-    if model_label is None:
-        model_label = placement.publishable.content_type.model
+    slug = publishable.slug
+    category = publishable.category
+    app_label = publishable.content_type.app_label
+    model_label = publishable.content_type.model
     return get_templates(name, slug, category, app_label, model_label)
 
 

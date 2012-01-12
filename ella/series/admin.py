@@ -3,13 +3,13 @@ from django.utils.translation import ugettext_lazy as _
 
 from ella.series.models import Serie, SeriePart
 from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin
-from ella.core.admin import PlacementInlineAdmin
+from ella.core.admin import ListingInlineAdmin
 
 
 class SeriePartInlineAdmin(EllaAdminOptionsMixin, admin.TabularInline):
     model = SeriePart
     extra = 5
-    raw_id_fields = ('placement',)
+    raw_id_fields = ('publishable',)
 
 
 class SerieAdmin(EllaAdminOptionsMixin, EllaModelAdmin):
@@ -27,14 +27,14 @@ class SerieAdmin(EllaAdminOptionsMixin, EllaModelAdmin):
     raw_id_fields = ('photo',)
     rich_text_fields = {None: ('description',)}
 
-    inlines = [PlacementInlineAdmin, SeriePartInlineAdmin]
+    inlines = [ListingInlineAdmin, SeriePartInlineAdmin]
 
 
 
 class SeriePartAdmin(EllaAdminOptionsMixin, admin.ModelAdmin):
     # TODO: admin
     list_display = ('target_admin', 'serie', 'published',)
-    raw_id_fields = ('placement',)
+    raw_id_fields = ('publishable',)
     list_filter = ('serie',)
 
     def target_admin(self, obj):

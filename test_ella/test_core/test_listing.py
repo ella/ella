@@ -8,7 +8,7 @@ from nose import tools
 from ella.core.models import Listing, Category
 
 from test_ella.test_core import create_basic_categories, create_and_place_a_publishable, \
-        create_and_place_more_publishables, list_all_placements_in_category_by_hour
+        create_and_place_more_publishables, list_all_publishables_in_category_by_hour
 
 class TestListing(TestCase):
 
@@ -17,7 +17,7 @@ class TestListing(TestCase):
         create_basic_categories(self)
         create_and_place_a_publishable(self)
         create_and_place_more_publishables(self)
-        list_all_placements_in_category_by_hour(self)
+        list_all_publishables_in_category_by_hour(self)
 
     def test_get_listing_empty(self):
         c = Category.objects.create(
@@ -40,7 +40,7 @@ class TestListing(TestCase):
         expected = [listing for listing in self.listings if listing.category in (self.category, self.category_nested)]
 
         listing = Listing.objects.create(
-                placement=expected[0].placement,
+                publishable=expected[0].publishable,
                 category=expected[0].category,
                 publish_from=datetime.now() - timedelta(days=2),
             )
@@ -50,7 +50,7 @@ class TestListing(TestCase):
 
     def test_get_listing_with_all_children_no_duplicates(self):
         listing = Listing.objects.create(
-                placement=self.placements[0],
+                publishable=self.publishables[0],
                 category=self.category_nested_second,
                 publish_from=datetime.now() - timedelta(days=2),
             )

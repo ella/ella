@@ -13,7 +13,7 @@ from ella.core.feeds import RSSTopCategoryListings
 from ella.photos.models import Photo, Format
 
 from test_ella.test_core import create_basic_categories, create_and_place_a_publishable, \
-        create_and_place_more_publishables, list_all_placements_in_category_by_hour
+        create_and_place_more_publishables, list_all_publishables_in_category_by_hour
 
 class TestFeeds(TestCase):
 
@@ -27,7 +27,7 @@ class TestFeeds(TestCase):
         create_basic_categories(self)
         create_and_place_a_publishable(self)
         create_and_place_more_publishables(self)
-        list_all_placements_in_category_by_hour(self)
+        list_all_publishables_in_category_by_hour(self)
         
         self._feeder = RSSTopCategoryListings('test', HttpRequest())
 
@@ -66,7 +66,7 @@ class TestFeeds(TestCase):
         tools.assert_equals(200, response.status_code)
         d = feedparser.parse(response.content)
 
-        tools.assert_equals(len(self.placements), len(d['items']))
+        tools.assert_equals(len(self.publishables), len(d['items']))
 
     def test_atom(self):
         import feedparser
@@ -78,7 +78,7 @@ class TestFeeds(TestCase):
         tools.assert_equals(200, response.status_code)
         d = feedparser.parse(response.content)
 
-        tools.assert_equals(len(self.placements), len(d['items']))
+        tools.assert_equals(len(self.publishables), len(d['items']))
 
     def test_get_enclosure_uses_original_when_format_not_set(self):
         self._set_photo()

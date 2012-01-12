@@ -7,7 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 
 from ella.galleries.models import Gallery, GalleryItem
-from ella.core.admin import PlacementInlineAdmin
+from ella.core.admin import ListingInlineAdmin
 from ella.core.cache import get_cached_object
 from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin, EllaAdminInline
 
@@ -62,7 +62,7 @@ class GalleryOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     )
     list_filter = ('created', 'category',)
     search_fields = ('title', 'description', 'slug',) # FIXME: 'tags__tag__name',)
-    inlines = [ GalleryItemTabularOptions, PlacementInlineAdmin ]
+    inlines = [ GalleryItemTabularOptions, ListingInlineAdmin ]
     prepopulated_fields = {'slug': ('title',)}
     rich_text_fields = {None: ('description', 'content',)}
 #    suggest_fields = {'category': ('tree_path', 'title', 'slug',), 'owner': ('name', 'slug',),}

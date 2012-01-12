@@ -5,7 +5,7 @@ from django.template import RequestContext
 from django.contrib.formtools.preview import FormPreview
 from django.core.paginator import QuerySetPaginator
 
-from ella.core.views import get_templates_from_placement
+from ella.core.views import get_templates_from_publishable
 from ella.interviews.models import Question, Answer
 from ella.utils.paginator import paginate_qset, get_page_no
 from ella.interviews.conf import interviews_settings
@@ -33,7 +33,7 @@ def detail(request, context):
     })
 
     return render_to_response(
-        get_templates_from_placement('object.html', context['placement']),
+        get_templates_from_publishable('object.html', context['object']),
         context,
         context_instance=RequestContext(request)
     )
@@ -48,7 +48,7 @@ def unanswered(request, context):
     qset = interview.unanswered_questions()
     context.update(paginate_qset(request, qset))
     return render_to_response(
-        get_templates_from_placement('unanswered.html', context['placement']),
+        get_templates_from_publishable('unanswered.html', context['object']),
         context,
         context_instance=RequestContext(request)
     )
@@ -71,7 +71,7 @@ def list_questions(request, context):
     qset = interview.question_set.all()
     context.update(paginate_qset(request, qset))
     return render_to_response(
-        get_templates_from_placement('reply.html', context['placement']),
+        get_templates_from_publishable('reply.html', context['object']),
         context,
         context_instance=RequestContext(request)
     )
@@ -115,7 +115,7 @@ def reply(request, context, question_id):
     context['question'] = question
 
     return render_to_response(
-        get_templates_from_placement('answer_form.html', context['placement']),
+        get_templates_from_publishable('answer_form.html', context['object']),
         context,
         context_instance=RequestContext(request)
     )
@@ -201,11 +201,11 @@ class QuestionFormPreview(FormPreview):
 
     @property
     def preview_template(self):
-        return get_templates_from_placement('ask_preview.html', self.state['placement'])
+        return get_templates_from_publishable('ask_preview.html', self.state['object'])
 
     @property
     def form_template(self):
-        return get_templates_from_placement('ask_form.html', self.state['placement'])
+        return get_templates_from_publishable('ask_form.html', self.state['object'])
 
     def parse_params(self, context):
         """ Store the context provided by ella to self.state. """

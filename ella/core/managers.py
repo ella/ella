@@ -41,7 +41,7 @@ class RelatedManager(models.Manager):
                     obj = obj.publishable_ptr
 
                 qset = Publishable.objects.filter(
-                        placement__publish_from__lte=datetime.now(),
+                        publish_from__lte=datetime.now(),
                     ).distinct()
                 if mods:
                     qset = qset.filter(content_type__in=ct_ids)
@@ -88,15 +88,6 @@ def get_listings_key(func, self, category=None, count=10, offset=1, mods=[], con
             ','.join(':'.join((k, smart_str(v))) for k, v in kwargs.items()),
     )
 
-class PlacementManager(models.Manager):
-    def get_query_set(self, *args, **kwargs):
-        qset = super(PlacementManager, self).get_query_set(*args, **kwargs).select_related('publishable')
-        return qset
-
-    def get_static_placements(self, category):
-        now = datetime.now()
-        return self.filter(models.Q(publish_to__gt=now) | models.Q(publish_to__isnull=True),  publish_from__lt=now, category=category, static=True)
-
 class ListingManager(models.Manager):
     NONE = 0
     IMMEDIATE = 1
@@ -112,11 +103,9 @@ class ListingManager(models.Manager):
     def get_query_set(self, *args, **kwargs):
         # get all the fields you typically need to render listing
         qset = super(ListingManager, self).get_query_set(*args, **kwargs).select_related(
-                'placement',
-                'placement__category',
-                'placement__publishable',
-                'placement__publishable__category',
-                'placement__publishable__content_type'
+                'publishable',
+                'publishable__category',
+                'publishable__content_type'
             )
         return qset
 
@@ -141,7 +130,7 @@ class ListingManager(models.Manager):
 
         # filtering based on Model classes
         if mods or content_types:
-            qset = qset.filter(placement__publishable__content_type__in=([ ContentType.objects.get_for_model(m) for m in mods ] + content_types))
+            qset = qset.filter(publishable__content_type__in=([ ContentType.objects.get_for_model(m) for m in mods ] + content_types))
 
         return qset.exclude(publish_to__lt=now).order_by('-publish_from')
 
@@ -184,8 +173,8 @@ class ListingManager(models.Manager):
             skip = 0
             # 2 i a reasonable value for padding, wouldn't you say dear Watson?
             for l in qset[offset:limit+2]:
-                if l.placement_id not in seen:
-                    seen.add(l.placement_id)
+                if l.publishable_id not in seen:
+                    seen.add(l.publishable_id)
                     out.append(l)
                     if len(out) == count:
                         break

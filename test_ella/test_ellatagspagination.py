@@ -9,11 +9,10 @@ from nose import tools
 
 from ella.ellatagging.views import TaggedPublishablesView
 from ella.articles.models import Article
-from ella.core.models import Placement, Publishable
+from ella.core.models import Publishable
 
 from test_ella.test_core import (create_basic_categories,
                                     create_and_place_a_publishable)
-from test_ella import template_loader
 from datetime import datetime
 
 class TestTaggingPagination(TestCase):
@@ -36,15 +35,11 @@ class TestTaggingPagination(TestCase):
             title=u'Paggination',
             slug=u'paggination',
             description=u'Testing paggination',
-            category=self.category_nested
-            )
-
-        self.only_pub = Publishable.objects.get(pk=self.pub.pk)
-        self.place = Placement.objects.create(
-            publishable=self.pub,
             category=self.category_nested,
             publish_from=datetime(2008, 1, 20)
-            )
+        )
+
+        self.only_pub = Publishable.objects.get(pk=self.pub.pk)
         Tag.objects.update_tags(self.only_pub, 'tag1')
         Tag.objects.update_tags(self.only_publishable, 'tag1')
         self.tag = Tag.objects.get(name='tag1')

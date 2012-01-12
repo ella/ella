@@ -17,7 +17,7 @@ from django.contrib.formtools.wizard import FormWizard
 from django.views.decorators.csrf import csrf_protect
 
 from ella.core.cache import get_cached_object_or_404
-from ella.core.views import get_templates_from_placement
+from ella.core.views import get_templates_from_publishable
 from ella.polls.models import Poll, Contestant, Survey
 from ella.polls.conf import polls_settings
 
@@ -280,7 +280,7 @@ def contest_vote(request, context):
             'activity_closed' : polls_settings.ACTIVITY_CLOSED
         })
     return render_to_response(
-        get_templates_from_placement('form.html', context['placement']),
+        get_templates_from_publishable('form.html', context['object']),
         context,
         context_instance=RequestContext(request)
     )
@@ -376,7 +376,7 @@ def contest_finish(request, context, qforms, contestant_form):
                 'contestant_form' : contestant_form,
             })
         return render_to_response(
-            get_templates_from_placement('form.html', context['placement']),
+            get_templates_from_publishable('form.html', context['object']),
             context,
             context_instance=RequestContext(request)
         )
@@ -399,14 +399,14 @@ def contest_finish(request, context, qforms, contestant_form):
 
 def contest_result(request, context):
     return render_to_response(
-        get_templates_from_placement('result.html', context['placement']),
+        get_templates_from_publishable('result.html', context['object']),
         context,
         context_instance=RequestContext(request)
     )
 
 def contest_conditions(request, context):
     return render_to_response(
-        get_templates_from_placement('conditions.html', context['placement']),
+        get_templates_from_publishable('conditions.html', context['object']),
         context,
         context_instance=RequestContext(request)
     )
@@ -423,7 +423,7 @@ class QuizWizard(FormWizard):
         # ?? ?? ?? ??
 
     def get_template(self, step):
-        return get_templates_from_placement('step.html', self.extra_context['placement'])
+        return get_templates_from_publishable('step.html', self.extra_context['object'])
 
     def process_step(self, request, form, step):
         if (step + 1) < len(self.form_list):
@@ -458,7 +458,7 @@ class QuizWizard(FormWizard):
                 }
             )
         return render_to_response(
-                get_templates_from_placement('result.html', self.extra_context['placement']),
+                get_templates_from_publishable('result.html', self.extra_context['object']),
                 self.extra_context,
                 context_instance=RequestContext(request)
             )
@@ -490,7 +490,7 @@ def result_details(request, context):
     context['questions'] = questions
 
     return render_to_response(
-            get_templates_from_placement('result_detail.html', context['placement']),
+            get_templates_from_publishable('result_detail.html', context['object']),
             context,
             context_instance=RequestContext(request)
         )

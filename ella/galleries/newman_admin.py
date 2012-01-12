@@ -4,7 +4,7 @@ from django.forms import models as modelforms
 from ella import newman
 
 from ella.galleries.models import Gallery, GalleryItem
-from ella.core.newman_admin import PlacementInlineAdmin, PublishableAdmin
+from ella.core.newman_admin import ListingInlineAdmin, PublishableAdmin
 
 
 class GalleryItemForm(modelforms.ModelForm):
@@ -49,7 +49,7 @@ class GalleryAdmin(PublishableAdmin):
     )
     list_filter = ('created', 'category',)
     search_fields = ('title', 'description', 'slug',)
-    inlines = [GalleryItemInline, PlacementInlineAdmin]
+    inlines = [GalleryItemInline, ListingInlineAdmin]
     rich_text_fields = {'small': ('description',), None: ('content',)}
     prepopulated_fields = {'slug': ('title',)}
 

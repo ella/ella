@@ -17,8 +17,8 @@ from ella.core.models import Publishable
 def get_tagged_publishables(tag):
     now = datetime.now()
     queryset = Publishable.objects.filter(
-        Q(placement__publish_to__isnull=True) | Q(placement__publish_to__gt=now),
-        placement__publish_from__lt=now).distinct()
+        Q(publish_to__isnull=True) | Q(publish_to__gt=now),
+        publish_from__lt=now).distinct()
     return TaggedItem.objects.get_by_model(queryset, tag)
 
 

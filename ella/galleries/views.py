@@ -4,7 +4,7 @@ from django.http import Http404
 from django.utils.translation import ungettext
 from django.utils.cache import patch_vary_headers
 
-from ella.core.views import get_templates_from_placement
+from ella.core.views import get_templates_from_publishable
 
 
 def gallery_item_detail(request, context, item_slug=None):
@@ -58,7 +58,7 @@ def gallery_item_detail(request, context, item_slug=None):
         template_name = "item.html"
 
     response = render_to_response(
-        get_templates_from_placement(template_name, context['placement']),
+        get_templates_from_publishable(template_name, context['object']),
         context,
         context_instance=RequestContext(request),
     )

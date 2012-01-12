@@ -1,6 +1,6 @@
 from django.utils.translation import ugettext_lazy as _
 
-from ella.core.newman_admin import PlacementInlineAdmin, PublishableAdmin,\
+from ella.core.newman_admin import ListingInlineAdmin, PublishableAdmin,\
     RelatedInlineAdmin
 from ella.articles.models import ArticleContents, Article, InfoBox
 from ella import newman
@@ -26,7 +26,7 @@ class ArticleAdmin(PublishableAdmin):
         (_("Perex"), {'fields': ('description',)}),
     )
 
-    inlines = [ArticleContentInlineAdmin, PlacementInlineAdmin, RelatedInlineAdmin]
+    inlines = [ArticleContentInlineAdmin, ListingInlineAdmin, RelatedInlineAdmin]
 
 
 newman.site.register(InfoBox, InfoBoxAdmin)

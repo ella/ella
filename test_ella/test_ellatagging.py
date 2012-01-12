@@ -47,8 +47,8 @@ class TestTaggingViews(TestCase):
         Tag.objects.update_tags(self.only_publishable, 'tag1 tag2')
         tools.assert_equals(2, TaggedItem.objects.count())
 
-        self.placement.publish_from = datetime.now() + timedelta(days=2)
-        self.placement.save()
+        self.publishable.publish_from = datetime.now() + timedelta(days=2)
+        self.publishable.save()
 
         t = Tag.objects.get(name='tag1')
         tools.assert_equals([], list(views.get_tagged_publishables(t)))

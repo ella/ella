@@ -8,7 +8,6 @@ from django.contrib.auth.models import User
 from ella.interviews.models import Question, Answer
 # register interviews' urls
 from ella.interviews import register 
-from ella.core.models import Placement
 
 from test_ella.test_interviews import InterviewTestCase
 from test_ella import template_loader
@@ -19,11 +18,6 @@ from nose import tools
 class InterviewViewTestCase(InterviewTestCase):
     def setUp(self):
         super(InterviewViewTestCase, self).setUp()
-        self.placement = Placement.objects.create(
-                category=self.interview.category,
-                publishable=self.interview,
-                publish_from=datetime.now(),
-            )
         self.templates = template_loader.templates
 
 

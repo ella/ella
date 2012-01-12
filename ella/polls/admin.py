@@ -4,7 +4,7 @@ from django.forms.models import BaseInlineFormSet
 from django.shortcuts import render_to_response
 from django.forms.util import ValidationError
 
-from ella.core.admin import PlacementInlineAdmin
+from ella.core.admin import ListingInlineAdmin
 
 from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin, EllaAdminInline
 
@@ -102,7 +102,7 @@ class ContestOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     list_display = ('title', 'category', 'active_from', 'correct_answers', 'get_all_answers_count', 'pk', 'get_domain_url',)
     list_filter = ('category', 'active_from',)
     search_fields = ('title', 'text', 'text_results',)
-    inlines = [ QuestionInlineOptions, PlacementInlineAdmin ]
+    inlines = [ QuestionInlineOptions, ListingInlineAdmin ]
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
     # rich_text_fields = {'small': ('text_announcement', 'text', 'text_results',)}
@@ -124,7 +124,7 @@ class QuizOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     list_display = ('title', 'category', 'active_from', 'pk', 'get_domain_url',)
     list_filter = ('category', 'active_from',)
     search_fields = ('title', 'desc', 'text', 'text_results',)
-    inlines = [ QuestionInlineOptions, ResultTabularOptions, PlacementInlineAdmin ]
+    inlines = [ QuestionInlineOptions, ResultTabularOptions, ListingInlineAdmin ]
     raw_id_fields = ('photo',)
     prepopulated_fields = {'slug' : ('title',)}
     # rich_text_fields = {'small': ('text', 'text_results',)}

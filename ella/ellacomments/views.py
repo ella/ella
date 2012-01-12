@@ -16,7 +16,7 @@ from django.core.paginator import Paginator
 from django.conf import settings
 from django.views.decorators.csrf import csrf_protect
 
-from ella.core.views import get_templates_from_placement
+from ella.core.views import get_templates_from_publishable
 
 @csrf_protect
 @transaction.commit_on_success
@@ -51,7 +51,7 @@ def post_comment(request, context, parent_id=None):
                 'ip_ban': ip_ban,
             })
         return render_to_response(
-            get_templates_from_placement('comment_form.html', context['placement']),
+            get_templates_from_publishable('comment_form.html', context['object']),
             context,
             RequestContext(request)
         )
@@ -78,7 +78,7 @@ def post_comment(request, context, parent_id=None):
     preview = "preview" in data
 
     # Check to see if the POST data overrides the view's next argument.
-    next = data.get("next", "%s%s/" % (context['placement'].get_absolute_url(), slugify(_('comments'))))
+    next = data.get("next", "%s%s/" % (context['object'].get_absolute_url(), slugify(_('comments'))))
 
     # If there are errors or if we requested a preview show the comment
     if form.errors or preview:
@@ -88,7 +88,7 @@ def post_comment(request, context, parent_id=None):
                 "next": next,
             })
         return render_to_response(
-            get_templates_from_placement(form.errors and 'comment_form.html' or 'comment_preview.html', context['placement']),
+            get_templates_from_publishable(form.errors and 'comment_form.html' or 'comment_preview.html', context['object']),
             context,
             RequestContext(request)
         )
@@ -162,7 +162,7 @@ def list_comments(request, context):
     })
 
     return render_to_response(
-        get_templates_from_placement('comment_list.html', context['placement']),
+        get_templates_from_publishable('comment_list.html', context['object']),
         context,
         RequestContext(request)
     )

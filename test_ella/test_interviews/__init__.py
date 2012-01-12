@@ -30,6 +30,7 @@ class InterviewTestCase(TestCase):
                 ask_from=now-day,
                 ask_to=now+day,
                 content='Some Text content',
+                publish_from=datetime.now()
             )
         self.interview.save()
         self.interview.interviewees.add(self.interviewee)

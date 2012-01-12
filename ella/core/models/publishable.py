@@ -3,16 +3,15 @@ from datetime import datetime
 from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
-from django.utils.safestring import mark_safe, mark_for_escaping
+from django.utils.safestring import mark_safe
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import generic
 from django.contrib.sites.models import Site
 from django.template.defaultfilters import slugify
 from django.core.urlresolvers import reverse
 from django.contrib.redirects.models import Redirect
 
-from ella.core.managers import ListingManager, PlacementManager, RelatedManager
-from ella.core.cache import get_cached_object, get_cached_list, CachedGenericForeignKey
+from ella.core.managers import ListingManager, RelatedManager
+from ella.core.cache import get_cached_object, CachedGenericForeignKey
 from ella.core.models.main import Category, Author, Source
 from ella.photos.models import Photo
 from ella.core.box import Box
@@ -35,6 +34,7 @@ class Publishable(models.Model):
     box_class = staticmethod(PublishableBox)
 
     content_type = models.ForeignKey(ContentType)
+    target = CachedGenericForeignKey('content_type', 'id')
 
     category = models.ForeignKey(Category, verbose_name=_('Category'))
 
@@ -52,224 +52,22 @@ class Publishable(models.Model):
     # Description
     description = models.TextField(_('Description'), blank=True)
 
-    # denormalized fields
-    # the placement's publish_from
-    publish_from = models.DateTimeField(_('Publish from'), editable=False, default=core_settings.PUBLISH_FROM_WHEN_EMPTY, db_index=True)
+    # Publish data
+    publish_from = models.DateTimeField(_('Publish from'), default=core_settings.PUBLISH_FROM_WHEN_EMPTY, db_index=True)
+    publish_to = models.DateTimeField(_("End of visibility"), null=True, blank=True)
+    static = models.BooleanField(_('static'), default=False)
 
     class Meta:
         app_label = 'core'
         verbose_name = _('Publishable object')
         verbose_name_plural = _('Publishable objects')
 
-    @property
-    def target(self):
-        if not hasattr(self, '_target'):
-            self._target = self.content_type.get_object_for_this_type(pk=self.pk)
-        return self._target
-
-    @property
-    def main_placement(self):
-        " Return object's main placement, that is the object's placement in its primary category "
-        if hasattr(self, '_main_placement'):
-            return self._main_placement
-
-        current_site = Site.objects.get_current()
-
-        # TODO: what if have got multiple listings on one site?
-        placements = get_cached_list(
-                Placement,
-                publishable=self.pk,
-                category__site=current_site,
-            )
-        if placements:
-            if len(placements) == 1:
-                self._main_placement = placements[0]
-            else:
-                # with multiple listings, one with first publish_from
-                # primary
-                first_published = None
-                for placement in placements:
-                    if first_published is None or placement.publish_from < first_published.publish_from:
-                        first_published = placement
-
-                assert first_published is not None
-                self._main_placement = first_published
-
-        else:
-            try:
-                # TODO - check and if we don't have category, take the only placement that exists in current site
-                self._main_placement = get_cached_object(
-                        Placement,
-                        publishable=self.pk,
-                        category=self.category_id
-                    )
-            except Placement.DoesNotExist:
-                self._main_placement = None
-
-        if self._main_placement:
-            # preserve memory and SQL queries by using the same object
-            self._main_placement.publishable = self
-
-        return self._main_placement
-
     def get_absolute_url(self, domain=False):
         " Get object's URL. "
-        placement = self.main_placement
-        if placement:
-            return placement.get_absolute_url(domain=domain)
-
-    def get_domain_url(self):
-        return self.get_absolute_url(domain=True)
-
-    def get_domain_url_admin_tag(self):
-        if self.get_domain_url() is not None:
-            #return mark_safe(u'<a href="%s">url</a>' % ( self.get_domain_url() ) )
-            return mark_safe(u'<a href="%s">url</a>' % ( self.get_domain_url() ) )
-        else:
-            return self.get_domain_url()
-    get_domain_url_admin_tag.short_description = _('URL')
-    get_domain_url_admin_tag.allow_tags = True
-
-    def get_admin_url(self):
-        from ella.ellaadmin.utils import admin_url
-        return admin_url(self)
-
-    def save(self, **kwargs):
-        self.content_type = ContentType.objects.get_for_model(self)
-        if self.pk and hasattr(self, 'slug'): # only run on update
-            # get old self
-            old_slug = self.__class__._default_manager.get(pk=self.pk).slug
-            # the slug has changed
-            if old_slug != self.slug:
-                for plc in Placement.objects.filter(publishable=self):
-                    if plc.slug == old_slug:
-                        plc.slug = self.slug
-                        plc.save(force_update=True)
-        return super(Publishable, self).save(**kwargs)
-
-    def delete(self):
-        url = self.get_absolute_url()
-        Redirect.objects.filter(new_path=url).delete()
-        return super(Publishable, self).delete()
-
-    def __unicode__(self):
-        return self.title
-
-class Placement(models.Model):
-    # listing's target - a Publishable object
-    publishable = models.ForeignKey(Publishable, verbose_name=_('Publishable object'))
-    category = models.ForeignKey(Category, verbose_name=_('Category'), db_index=True)
-    publish_from = models.DateTimeField(_("Start of visibility")) #, default=datetime.now)
-    publish_to = models.DateTimeField(_("End of visibility"), null=True, blank=True)
-    slug = models.SlugField(_('Slug'), max_length=255, blank=True)
-
-    static = models.BooleanField(_('static'), default=False)
-
-    objects = PlacementManager()
-
-    class Meta:
-        app_label = 'core'
-        # FIXME: after model-validation, allow more placements in different time
-        unique_together = (('publishable', 'category',),)
-        verbose_name = _('Placement')
-        verbose_name_plural = _('Placements')
-
-    def __unicode__(self):
-        try:
-            return u'%s placed in %s' % (self.publishable, self.category)
-        except:
-            return 'Broken placement'
-
-    def is_active(self):
-        "Return True if the Placement is currently active."
-        now = datetime.now()
-        return now > self.publish_from and (self.publish_to is None or now < self.publish_to)
-
-    def delete(self):
-        super(Placement, self).delete()
-        try:
-            publish_from = Placement.objects.filter(publishable=self.publishable_id).order_by('publish_from').values('publish_from')[0]['publish_from']
-        except IndexError, e:
-            publish_from = core_settings.PUBLISH_FROM_WHEN_EMPTY
-
-        self.publishable.publish_from = publish_from
-        Publishable.objects.filter(pk=self.publishable_id).update(publish_from=publish_from)
-
-    @staticmethod
-    def check_placement_is_unique(placement):
-        obj = placement
-        obj_slug = getattr(obj, 'slug', obj.pk)
-        # if Placement has no slug, slug from Publishable object should be considered in following checks:
-        if not obj_slug:
-            obj_slug = obj.publishable.slug
-
-        # try and find conflicting placement
-        qset = Placement.objects.filter(
-            category=obj.category,
-            slug=obj_slug,
-            static=obj.static
-        )
-        if obj.static: # allow placements that do not overlap
-            q = models.Q(publish_to__lt=obj.publish_from)
-            if obj.publish_to:
-                q |= models.Q(publish_from__gt=obj.publish_to)
-            qset = qset.exclude(q)
-        # check for same date in URL
-        if not obj.static:
-            qset = qset.filter(
-                publish_from__year=obj.publish_from.year,
-                publish_from__month=obj.publish_from.month,
-                publish_from__day=obj.publish_from.day,
-            )
-        # exclude current object from search
-        if obj.pk:
-            qset = qset.exclude(pk=obj.pk)
-        if qset:
-            plac = qset[0]
-            raise ValueError(
-                    _('''There is already a Placement object published in
-                    category %(category)s with the same URL referring to %(target)s.
-                    Please change the slug or publish date.''') % {
-                        'category' : plac.category,
-                        'target' : plac.publishable,
-                    })
-
-    def save(self, **kwargs):
-        # perform validation here
-        Placement.check_placement_is_unique(self)
-
-        if not self.slug:
-            self.slug = self.publishable.slug
-
-        if self.pk:
-            old_self = Placement.objects.get(pk=self.pk)
-
-            old_path = old_self.get_absolute_url()
-            new_path = self.get_absolute_url()
-
-            if old_path != new_path and new_path:
-                redirect, created = Redirect.objects.get_or_create(old_path=old_path, site=self.category.site)
-                redirect.new_path=new_path
-                redirect.save(force_update=True)
-                Redirect.objects.filter(new_path=old_path).exclude(pk=redirect.pk).update(new_path=new_path)
-
-        # First, save Placement
-        super(Placement, self).save(**kwargs)
-
-        # store the publish_from on the publishable for performance in the admin
-        try:
-            publish_from = Placement.objects.filter(publishable=self.publishable_id).order_by('publish_from').values('publish_from')[0]['publish_from']
-        except IndexError, e:
-            publish_from = core_settings.PUBLISH_FROM_WHEN_EMPTY
-        Publishable.objects.filter(pk=self.publishable_id).update(publish_from=publish_from)
-        self.publishable.publish_from = publish_from
-
-    def get_absolute_url(self, domain=False):
-        obj = self.publishable
         category = self.category
 
         kwargs = {
-            'content_type' : slugify(obj.content_type.model_class()._meta.verbose_name_plural),
+            'content_type' : slugify(self.content_type.model_class()._meta.verbose_name_plural),
             'slug' : self.slug,
         }
 
@@ -297,11 +95,54 @@ class Placement(models.Model):
         return url
 
 
+    def get_domain_url(self):
+        return self.get_absolute_url(domain=True)
+
+    def get_domain_url_admin_tag(self):
+        if self.get_domain_url() is not None:
+            #return mark_safe(u'<a href="%s">url</a>' % ( self.get_domain_url() ) )
+            return mark_safe(u'<a href="%s">url</a>' % ( self.get_domain_url() ) )
+        else:
+            return self.get_domain_url()
+    get_domain_url_admin_tag.short_description = _('URL')
+    get_domain_url_admin_tag.allow_tags = True
+
+    def get_admin_url(self):
+        from ella.ellaadmin.utils import admin_url
+        return admin_url(self)
+
+    def save(self, **kwargs):
+        self.content_type = ContentType.objects.get_for_model(self)
+        if self.pk:
+            old_self = Publishable.objects.get(pk=self.pk)
+
+            old_path = old_self.get_absolute_url()
+            new_path = self.get_absolute_url()
+
+            if old_path != new_path and new_path:
+                redirect, created = Redirect.objects.get_or_create(old_path=old_path, site=self.category.site)
+                redirect.new_path=new_path
+                redirect.save(force_update=True)
+                Redirect.objects.filter(new_path=old_path).exclude(pk=redirect.pk).update(new_path=new_path)
+        return super(Publishable, self).save(**kwargs)
+
+    def delete(self):
+        url = self.get_absolute_url()
+        Redirect.objects.filter(new_path=url).delete()
+        return super(Publishable, self).delete()
+
+    def __unicode__(self):
+        return self.title
+
+    def is_published(self):
+        "Return True if the Publishable is currently active."
+        now = datetime.now()
+        return now > self.publish_from and (self.publish_to is None or now < self.publish_to)
+
+
 def ListingBox(listing, *args, **kwargs):
     " Delegate the boxing to the target's Box class. "
-    obj = listing.placement.publishable
-    # little hack display proper URL for the object
-    obj._main_placement = listing.placement
+    obj = listing.publishable
     return obj.box_class(obj, *args, **kwargs)
 
 class Listing(models.Model):
@@ -315,7 +156,7 @@ class Listing(models.Model):
     """
     box_class = staticmethod(ListingBox)
 
-    placement = models.ForeignKey(Placement, verbose_name=_('Placement'))
+    publishable = models.ForeignKey(Publishable, verbose_name=_('Publishable'))
     category = models.ForeignKey(Category, verbose_name=_('Category'), db_index=True)
 
     publish_from = models.DateTimeField(_("Start of listing"), db_index=True)
@@ -327,10 +168,10 @@ class Listing(models.Model):
 
     @property
     def target(self):
-        return self.placement.publishable
+        return self.publishable
 
     def get_absolute_url(self, domain=False):
-        return self.placement.get_absolute_url(domain)
+        return self.publishable.get_absolute_url(domain)
 
     def get_domain_url(self):
         return self.get_absolute_url(domain=True)
@@ -340,7 +181,7 @@ class Listing(models.Model):
 
     def __unicode__(self):
         try:
-            return u'%s listed in %s' % (self.placement.publishable, self.category)
+            return u'%s listed in %s' % (self.publishable, self.category)
         except:
             return 'Broken listing'
 

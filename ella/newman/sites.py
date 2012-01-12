@@ -16,7 +16,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 
 from ella.core.cache.utils import get_cached_list
-from ella.core.models.publishable import Placement, Publishable
+from ella.core.models.publishable import Publishable
 from ella.newman.forms import SiteFilterForm, ErrorReportForm, EditorBoxForm
 from ella.newman.models import AdminSetting
 from ella.newman.decorators import require_AJAX
@@ -360,9 +360,10 @@ class NewmanSite(AdminSite):
                 if last_filter:
                     last_filters[key] = '?%s' % json_decode(last_filter[0].value)
 
-        future_qs = Placement.objects.select_related().filter(publish_from__gt=datetime.datetime.now()).order_by('publish_from', 'category__tree_path')
+
+        future_qs = Publishable.objects.select_related().filter(publish_from__gt=datetime.datetime.now()).order_by('publish_from', 'category__tree_path')
         future_qs_perm = permission_filtered_model_qs(future_qs, request.user)
-        future_placements = user_category_filter(future_qs_perm, request.user)
+        future_publishables = user_category_filter(future_qs_perm, request.user)
 
         cts.sort( lambda a, b: cz_compare(translate_and_upper(a.name), translate_and_upper(b.name)) )
         context = {
@@ -370,7 +371,7 @@ class NewmanSite(AdminSite):
             'site_filter_form': site_filter_form,
             'searchable_content_types': cts,
             'last_filters': last_filters,
-            'future_placements': future_placements,
+            'future_publishables': future_publishables,
             'publishable_lookup_fields': publishable_lookup_fields,
             'show_calendar': has_model_list_permission(request.user, Publishable),
         }

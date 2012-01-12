@@ -2,13 +2,13 @@ from ella import newman
 from django.utils.translation import ugettext_lazy as _
 
 from ella.series.models import Serie, SeriePart
-from ella.core.newman_admin import PlacementInlineAdmin, PublishableAdmin
+from ella.core.newman_admin import ListingInlineAdmin, PublishableAdmin
 
 
 class SeriePartInlineAdmin(newman.NewmanTabularInline):
     model = SeriePart
     extra = 5
-    raw_id_fields = ('placement',)
+    raw_id_fields = ('publishable',)
 
 
 class SerieAdmin(PublishableAdmin):
@@ -24,14 +24,14 @@ class SerieAdmin(PublishableAdmin):
     raw_id_fields = ('photo',)
     rich_text_fields = {None: ('description', 'text',)}
 
-    inlines = [PlacementInlineAdmin, SeriePartInlineAdmin]
+    inlines = [ListingInlineAdmin, SeriePartInlineAdmin]
 
 
 
 class SeriePartAdmin(newman.NewmanModelAdmin):
     # TODO: admin
     list_display = ('target_admin', 'serie', 'published',)
-    raw_id_fields = ('placement',)
+    raw_id_fields = ('publishable',)
     list_filter = ('serie',)
 
     def target_admin(self, obj):
