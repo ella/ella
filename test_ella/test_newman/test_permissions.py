@@ -53,7 +53,7 @@ class UserWithPermissionTestCase(NewmanTestCase):
         self.role_all.save(sync_role=True)
 
     def _create_author_and_article(self):
-        article = Article.objects.create(title=u'Testable rabbit', description=u'Perex', category=self.nested_first_level_two, content=u'Long vehicle')
+        article = Article.objects.create(title=u'Testable rabbit', slug='testable-rabbit', description=u'Perex', category=self.nested_first_level_two, content=u'Long vehicle')
         article.authors.add(self.author)
         article.save()
         tools.assert_equals(1, Article.objects.count())
@@ -152,11 +152,11 @@ class TestAdminChangelistQuerySet(UserWithPermissionTestCase):
 
     def test_only_viewable_articles_retrieved(self):
         # article1
-        accessible_article = Article.objects.create(title=u'Testable rabbit', description='Perex', category=self.nested_first_level_two)
+        accessible_article = Article.objects.create(title=u'Testable rabbit', slug='testable-rabbit', description='Perex', category=self.nested_first_level_two)
         accessible_article.authors.add(self.author)
         accessible_article.save()
 
-        inaccessible_article = Article.objects.create(title='Lost rabbit', description='Perex', category=self.nested_first_level)
+        inaccessible_article = Article.objects.create(title='Lost rabbit', slug='testable-rabbit', description='Perex', category=self.nested_first_level)
         inaccessible_article.authors.add(self.author)
         inaccessible_article.save()
 
