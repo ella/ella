@@ -3,10 +3,9 @@ from django.utils.translation import ugettext_lazy as _
 
 from ella.core.admin import PublishableAdmin, ListingInlineAdmin
 from ella.articles.models import Article, InfoBox
-from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin, EllaAdminInline
 
 
-class InfoBoxAdmin(EllaAdminOptionsMixin, EllaModelAdmin):
+class InfoBoxAdmin(admin.ModelAdmin):
     list_display = ('title', 'created',)
     date_hierarchy = 'created'
     list_filter = ('created', 'updated',)

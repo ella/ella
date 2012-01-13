@@ -4,12 +4,11 @@ from django.forms.models import BaseInlineFormSet
 from django import forms
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
-from django.conf import settings
+from django.contrib.admin.helpers import InlineAdminForm
 
 from ella.galleries.models import Gallery, GalleryItem
 from ella.core.admin import ListingInlineAdmin
 from ella.core.cache import get_cached_object
-from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin, EllaAdminInline
 
 class GalleryItemFormset(BaseInlineFormSet):
     " Override default FormSet to allow for custom validation."
@@ -48,12 +47,12 @@ class GalleryItemFormset(BaseInlineFormSet):
 
         return self.cleaned_data
 
-class GalleryItemTabularOptions(EllaAdminOptionsMixin, admin.TabularInline):
+class GalleryItemTabularOptions(admin.TabularInline):
     model = GalleryItem
     extra = 10
     formset = GalleryItemFormset
 
-class GalleryOptions(EllaAdminOptionsMixin, EllaModelAdmin):
+class GalleryOptions(admin.ModelAdmin):
     list_display = ('title', 'created', 'category',)
     ordering = ('-created',)
     fieldsets = (

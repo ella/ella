@@ -6,8 +6,6 @@ from django.forms.util import ValidationError
 
 from ella.core.admin import ListingInlineAdmin
 
-from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin, EllaAdminInline
-
 from ella.core.cache import get_cached_object_or_404
 from ella.polls.models import Poll, Contest, Contestant, Quiz, Result, Choice, Vote, Question
 from django.utils.safestring import mark_safe
@@ -38,16 +36,19 @@ class ResultFormset(BaseInlineFormSet):
                 raise ValidationError, ugettext('Score %s is not covered by any answer.') % (intervals[i][1] + 1)
         return self.cleaned_data
 
+
 class ResultTabularOptions(admin.TabularInline):
     model = Result
     extra = 5
     formset = ResultFormset
 
+
 class ChoiceTabularOptions(admin.TabularInline):
     model = Choice
     extra = 5
 
-class QuestionOptions(EllaAdminOptionsMixin, EllaModelAdmin):
+
+class QuestionOptions(admin.ModelAdmin):
     """
     Admin options for Question model:
         * edit inline choices
@@ -57,6 +58,7 @@ class QuestionOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     search_fields = ('question',)
     rich_text_fields = {'small': ('question',)}
 
+
 class ChoiceOptions(admin.ModelAdmin):
     """
     Admin options for Choices
@@ -65,6 +67,7 @@ class ChoiceOptions(admin.ModelAdmin):
     list_display = ('question', 'choice', 'votes', 'points')
     search_fields = ('choice',)
 
+
 class VoteOptions(admin.ModelAdmin):
     """
     Admin options for votes
@@ -72,14 +75,16 @@ class VoteOptions(admin.ModelAdmin):
     ordering = ('time',)
     list_display = ('time', 'poll', 'user', 'ip_address')
 
-class ContestantOptions(EllaAdminOptionsMixin, EllaModelAdmin):
+
+class ContestantOptions(admin.ModelAdmin):
     """
     Admin options for Contestant
     """
     ordering = ('datetime',)
     list_display = ('name', 'surname', 'user', 'datetime', 'contest', 'points', 'winner')
 
-class QuestionInlineOptions(EllaAdminInline, admin.TabularInline):
+
+class QuestionInlineOptions(admin.ModelAdmin):
     model = Question
     inlines = (ChoiceTabularOptions,)
     template = 'admin/polls/question/edit_inline/tabular.html'
@@ -87,7 +92,8 @@ class QuestionInlineOptions(EllaAdminInline, admin.TabularInline):
     rich_text_fields = {'small': ('question',)}
     fieldsets = ((None, {'fields' : ('question', 'allow_multiple', 'allow_no_choice',)}),)
 
-class ContestOptions(EllaAdminOptionsMixin, EllaModelAdmin):
+
+class ContestOptions(admin.ModelAdmin):
     def __call__(self, request, url):
         if url and url.endswith('correct_answers'):
             pk = url.split('/')[-2]
@@ -120,7 +126,7 @@ class ContestOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     get_all_answers_count.short_description = _('Participants in total')
 
 
-class QuizOptions(EllaAdminOptionsMixin, EllaModelAdmin):
+class QuizOptions(admin.ModelAdmin):
     list_display = ('title', 'category', 'active_from', 'pk', 'get_domain_url',)
     list_filter = ('category', 'active_from',)
     search_fields = ('title', 'desc', 'text', 'text_results',)
@@ -134,7 +140,7 @@ class QuizOptions(EllaAdminOptionsMixin, EllaModelAdmin):
     suggest_fields = {'authors': ('name', 'slug',),}
 
 
-class PollOptions(EllaAdminOptionsMixin, EllaModelAdmin):
+class PollOptions(admin.ModelAdmin):
     # rich_text_fields = {'small': ('text', 'text_results',)}
     rich_text_fields = {'small': ('text', )}
     list_display = ('title', 'question', 'get_total_votes', 'pk',)

@@ -2,17 +2,16 @@ from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
 
 from ella.series.models import Serie, SeriePart
-from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin
 from ella.core.admin import ListingInlineAdmin
 
 
-class SeriePartInlineAdmin(EllaAdminOptionsMixin, admin.TabularInline):
+class SeriePartInlineAdmin(admin.TabularInline):
     model = SeriePart
     extra = 5
     raw_id_fields = ('publishable',)
 
 
-class SerieAdmin(EllaAdminOptionsMixin, EllaModelAdmin):
+class SerieAdmin(admin.ModelAdmin):
     list_display = ('title', 'photo_thumbnail', 'started', 'is_active', 'parts_count',)
     list_filter = ('started', 'finished',)
     prepopulated_fields = {'slug': ('title',)}
@@ -30,8 +29,7 @@ class SerieAdmin(EllaAdminOptionsMixin, EllaModelAdmin):
     inlines = [ListingInlineAdmin, SeriePartInlineAdmin]
 
 
-
-class SeriePartAdmin(EllaAdminOptionsMixin, admin.ModelAdmin):
+class SeriePartAdmin(admin.ModelAdmin):
     # TODO: admin
     list_display = ('target_admin', 'serie', 'published',)
     raw_id_fields = ('publishable',)

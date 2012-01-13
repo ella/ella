@@ -2,10 +2,10 @@ from datetime import datetime
 from django.contrib import admin
 from django.utils.translation import ugettext, ugettext_lazy as _
 
-from ella.ellaadmin.options import EllaAdminOptionsMixin
 from ella.positions.models import Position
 
-class PositionOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
+
+class PositionOptions(admin.ModelAdmin):
     def show_title(self, obj):
         if not obj.target:
             return '-- %s --' % ugettext('empty position')

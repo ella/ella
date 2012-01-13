@@ -5,11 +5,9 @@ from django.utils.translation import ugettext
 from django.forms.util import ValidationError
 from django.utils.translation import ugettext_lazy as _
 
-from ella.ellaadmin.options import EllaAdminOptionsMixin, EllaModelAdmin
-
 from ella.photos.models import FormatedPhoto, Format, Photo
 from ella.photos.views import format_photo_json, thumb_url
-from ella.photos.conf import photos_settings
+
 
 class FormatedPhotoForm(forms.BaseForm):
     def clean(self):
@@ -19,7 +17,7 @@ class FormatedPhotoForm(forms.BaseForm):
         data = self.cleaned_data
         photo = data['photo']
         if (
-            (data['crop_left'] >  photo.width) or
+            (data['crop_left'] > photo.width) or
             (data['crop_top'] > photo.height) or
             ((data['crop_left'] + data['crop_width']) > photo.width) or
             ((data['crop_top'] + data['crop_height']) > photo.height)
@@ -54,17 +52,19 @@ class CropAreaWidget(forms.TextInput):
 
 class FormatedPhotoInlineOptions(admin.TabularInline):
     model = FormatedPhoto
+
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name in ['crop_width', 'crop_height', 'crop_left', 'crop_top']:
             kwargs['widget'] = CropAreaWidget
         return super(FormatedPhotoInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
 
-class PhotoOptions(EllaAdminOptionsMixin, EllaModelAdmin):
-    inlines = [ FormatedPhotoInlineOptions ]
-    list_display = ('title', 'width', 'height', 'thumb', 'pk',) ## 'authors')
+class PhotoOptions(admin.ModelAdmin):
+
+    inlines = [FormatedPhotoInlineOptions]
+    list_display = ('title', 'width', 'height', 'thumb', 'pk',)
     list_filter = ('created',)
-    search_fields = ('title', 'image', 'description', 'id',) # FIXME: 'tags__tag__name',)
+    search_fields = ('title', 'image', 'description', 'id',)  # FIXME: 'tags__tag__name',)
     suggest_fields = {'authors': ('name', 'slug',), 'source': ('name', 'url',)}
     rich_text_fields = {'small': ('description',)}
     ordering = ('-id',)
@@ -83,7 +83,7 @@ class PhotoOptions(EllaAdminOptionsMixin, EllaModelAdmin):
         return super(PhotoOptions, self).__call__(request, url)
 
 
-class FormatedPhotoOptions(EllaAdminOptionsMixin, admin.ModelAdmin):
+class FormatedPhotoOptions(admin.ModelAdmin):
     base_form = FormatedPhotoForm
     list_display = ('image', 'format', 'width', 'height')
     list_filter = ('format',)
