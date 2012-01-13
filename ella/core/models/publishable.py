@@ -107,10 +107,6 @@ class Publishable(models.Model):
     get_domain_url_admin_tag.short_description = _('URL')
     get_domain_url_admin_tag.allow_tags = True
 
-    def get_admin_url(self):
-        from ella.ellaadmin.utils import admin_url
-        return admin_url(self)
-
     def save(self, **kwargs):
         self.content_type = ContentType.objects.get_for_model(self)
         if self.pk:
@@ -121,7 +117,7 @@ class Publishable(models.Model):
 
             if old_path != new_path and new_path:
                 redirect, created = Redirect.objects.get_or_create(old_path=old_path, site=self.category.site)
-                redirect.new_path=new_path
+                redirect.new_path = new_path
                 redirect.save(force_update=True)
                 Redirect.objects.filter(new_path=old_path).exclude(pk=redirect.pk).update(new_path=new_path)
         return super(Publishable, self).save(**kwargs)
