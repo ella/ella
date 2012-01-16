@@ -1,4 +1,4 @@
-from django.core.files.images import get_image_dimensions
+import logging
 from PIL import Image
 from datetime import datetime
 from os import path
@@ -9,6 +9,7 @@ from django.utils.translation import ugettext, ugettext_lazy as _
 from django.contrib.sites.models import Site
 from django.utils.safestring import mark_safe
 from django.core.files.uploadedfile import UploadedFile
+from django.core.files.images import get_image_dimensions
 from django.core.files.base import ContentFile
 from django.conf import settings
 from django.template.defaultfilters import slugify
@@ -22,6 +23,9 @@ from ella.photos.conf import photos_settings
 from formatter import Formatter, detect_img_type
 
 __all__ = ("Format", "FormatedPhoto", "Photo")
+
+log = logging.getLogger('ella.photos')
+
 
 class PhotoBox(Box):
     def get_context(self):
@@ -237,6 +241,19 @@ class Format(models.Model):
         verbose_name_plural = _('Formats')
 
 
+class FormatedPhotoManager(models.Manager):
+    def get_photo_in_format(self, photo, format):
+        try:
+            formated_photo = get_cached_object(FormatedPhoto, photo=photo, format=format)
+        except FormatedPhoto.DoesNotExist:
+            try:
+                formated_photo = self.create(photo=photo, format=format)
+            except (IOError, SystemError, IntegrityError), e:
+                log.error("Cannot create formatted photo: %s" % e)
+                return format.get_blank_img()
+        return formated_photo
+
+
 class FormatedPhoto(models.Model):
     "Specific photo of specific format."
     photo = models.ForeignKey(Photo)
@@ -248,6 +265,8 @@ class FormatedPhoto(models.Model):
     crop_height = models.PositiveIntegerField()
     width = models.PositiveIntegerField(editable=False)
     height = models.PositiveIntegerField(editable=False)
+
+    objects = FormatedPhotoManager()
 
     @property
     def url(self):

@@ -2,7 +2,6 @@ import logging
 
 from django import template
 from django.conf import settings
-from django.db import IntegrityError
 
 from ella.photos.models import Photo, Format, FormatedPhoto
 from ella.core.cache.utils import get_cached_object
@@ -19,19 +18,10 @@ class ImgTag(template.Node):
         if isinstance(self.photo, basestring):
             try:
                 photo = template.Variable(self.photo).resolve(context)
-                if not photo:
-                    return ''
             except template.VariableDoesNotExist:
                 return ''
-            try:
-                formated_photo = get_cached_object(FormatedPhoto, photo=photo, format=self.format)
-            except FormatedPhoto.DoesNotExist:
-                try:
-                    formated_photo = FormatedPhoto.objects.create(photo=photo, format=self.format)
-                except (IOError, SystemError, IntegrityError), e:
-                    log.error("Cannot create formatted photo: %s" % e)
-                    context[self.var_name] = self.format.get_blank_img()
-                    return ''
+
+            formated_photo = FormatedPhoto.objects.get_photo_in_format(photo, self.format)
         else:
             formated_photo = self.photo
 
@@ -76,10 +66,7 @@ def img(parser, token):
         except photo.DoesNotExist:
             raise template.TemplateSyntaxError, "Photo with %r of %r does not exist" % (bits[3],  bits[4])
 
-        try:
-            formated_photo = get_cached_object(FormatedPhoto, photo=photo, format=format)
-        except FormatedPhoto.DoesNotExist:
-            formated_photo = FormatedPhoto.objects.create(photo=photo, format=format)
+        formated_photo = FormatedPhoto.objects.get_photo_in_format(photo, format)
     else:
         raise template.TemplateSyntaxError, "{% img FORMAT for VAR as VAR_NAME %} or {% img FORMAT with FIELD VALUE as VAR_NAME %}"
 
