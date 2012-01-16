@@ -2,6 +2,7 @@
 *.py[co]
 .*.swp
 *~
+ella.egg-info
 
 test_ella/settings/local.py
 
