@@ -1,20 +1,18 @@
 # -*- coding: utf-8 -*-
 import os
 from time import strftime
-from tempfile import mkstemp
 
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.utils.translation import ugettext
 from django.test import TestCase
 from django.contrib.sites.models import Site
-from PIL import Image
 
 from nose import tools
 
-from ella.photos.models import Photo, Format, FormatedPhoto
+from ella.photos.models import Format, FormatedPhoto
 
-from test_ella.test_photos.fixtures import create_photo_formats
+from test_ella.test_photos.fixtures import create_photo_formats, create_photo
 
 class TestPhoto(TestCase):
 
@@ -24,26 +22,7 @@ class TestPhoto(TestCase):
         # fixtures
         create_photo_formats(self)
 
-        # "fixtures" aka example photo
-
-        # prepare image in temporary directory
-        self.image_file_name = mkstemp(suffix=".jpg", prefix="ella-photo-tests-")[1]
-        self.image = Image.new('RGB', (200, 100), "black")
-        self.image.save(self.image_file_name, format="jpeg")
-
-        f = open(self.image_file_name)
-        file = ContentFile(f.read())
-        f.close()
-
-        self.photo = Photo(
-            title = u"Example 中文 photo",
-            slug = u"example-photo",
-            height = 200,
-            width = 100,
-        )
-
-        self.photo.image.save("bazaaah", file)
-        self.photo.save()
+        create_photo(self)
 
         self.thumbnail_path = self.photo.get_thumbnail_path()
 

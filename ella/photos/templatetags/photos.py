@@ -37,7 +37,9 @@ def img(parser, token):
         {% img FORMAT with FIELD VALUE as VAR_NAME %}
     """
     bits = token.split_contents()
+    return _parse_img(bits)
 
+def _parse_img(bits):
     if len(bits) < 2 or bits[-2] != 'as':
         raise template.TemplateSyntaxError, "{% img FORMAT for VAR as VAR_NAME %} or {% img FORMAT with FIELD VALUE as VAR_NAME %}"
 
