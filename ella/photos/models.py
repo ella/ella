@@ -73,12 +73,6 @@ class Photo(models.Model):
 
     created = models.DateTimeField(default=datetime.now, editable=False)
 
-    def __init__(self, *args, **kwargs):
-        super(Photo, self).__init__(*args, **kwargs)
-
-        # path to thumbnail, cached when thumbnail is generated for the first time
-        self.thumbnail_path = None
-
     def get_image_info(self):
         return {
             'url': self.image.url,
@@ -86,56 +80,10 @@ class Photo(models.Model):
             'height': self.height,
         }
 
-    def thumb(self):
-        """
-        Generates html and thumbnails for admin site.
-        """
-        thumb_url = self.thumb_url()
-        if not thumb_url:
-            return mark_safe("""<strong>%s</strong>""" % ugettext('Thumbnail not available'))
-        return mark_safe("""<a href="%s" class="js-nohashadr thickbox" title="%s" target="_blank"><img src="%s" alt="Thumbnail %s" /></a>""" % (self.image_url(), self.title, thumb_url, self.title))
-    thumb.allow_tags = True
-
-    def get_thumbnail_path(self, image_name=None):
-        """
-        Return relative path for thumbnail file for storage
-        photos/2008/12/31/foo.jpg => photos/2008/12/31/thumb-foo.jpg
-        """
-        if not image_name:
-            image_name = self.image.name
-        return path.dirname(image_name) + "/" + 'thumb-%s' % path.basename(image_name)
-
     def image_url(self):
         if photos_settings.IMAGE_URL_PREFIX and not path.exists(self.image.path):
             return photos_settings.IMAGE_URL_PREFIX.rstrip('/') + '/' + self.image.name
         return self.image.url
-
-    def thumb_url(self):
-        """
-        Generates thumbnail for admin site and returns its url
-        """
-        # cache thumbnail for future use to avoid hitting storage.exists() every time
-        # and to allow thumbnail detection after instance has been deleted
-        self.thumbnail_path = self.get_thumbnail_path()
-        if photos_settings.IMAGE_URL_PREFIX and not path.exists(self.image.path):
-            # custom URL prefix (debugging purposes)
-            return photos_settings.IMAGE_URL_PREFIX.rstrip('/') + '/' + self.thumbnail_path
-
-        type = detect_img_type(self.image.path)
-        if not type:
-            return None
-
-        storage = self.image.storage
-
-        if not storage.exists(self.thumbnail_path):
-            try:
-                im = Image.open(self.image.path)
-                im.thumbnail(photos_settings.THUMB_DIMENSION, Image.ANTIALIAS)
-                im.save(storage.path(self.thumbnail_path), type)
-            except IOError:
-                # TODO Logging something wrong
-                return None
-        return storage.url(self.thumbnail_path)
 
     def save(self, force_insert=False, force_update=False, **kwargs):
         """Overrides models.Model.save.
@@ -176,19 +124,10 @@ class Photo(models.Model):
         if redis:
             redis.hmset(REDIS_PHOTO_KEY % self.pk, self.get_image_info())
 
-    def delete_thumbnail(self):
-        """
-        If thumbnail was generated for this photo, delete it
-        """
-        if self.image.storage.exists(self.thumbnail_path):
-            self.image.storage.delete(self.thumbnail_path)
-        self.thumbnail_path = None
-
     def delete(self, *args, **kwargs):
         if redis:
             redis.delete(REDIS_PHOTO_KEY % self.id)
         super(Photo, self).delete(*args, **kwargs)
-        self.delete_thumbnail()
 
     def ratio(self):
         "Return photo's width to height ratio"

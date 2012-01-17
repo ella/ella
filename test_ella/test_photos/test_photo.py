@@ -24,15 +24,6 @@ class TestPhoto(TestCase):
 
         create_photo(self)
 
-        self.thumbnail_path = self.photo.get_thumbnail_path()
-        if redis:
-            redis.flushdb()
-
-    def tearDown(self):
-        super(TestPhoto, self).tearDown()
-        if redis:
-            redis.flushdb()
-
     def test_formatted_photo_has_zero_crop_box_if_smaller_than_format(self):
         format = Format.objects.create(
             name='sample',
@@ -49,53 +40,6 @@ class TestPhoto(TestCase):
         tools.assert_equals((0,0,0,0), (fp.crop_left, fp.crop_top, fp.crop_width, fp.crop_height))
 
 
-
-    def test_thumbnail_html_retrieval_success(self):
-        #TODO: This should be in adimn, not models
-        expected_html = u'<a href="%(full)s" class="js-nohashadr thickbox" title="%(title)s" target="_blank"><img src="%(thumb)s" alt="%(name)s" /></a>' % {
-            'full' : "%(media)sphotos/%(date)s/%(name)s.jpg" % {
-                "name" : u'%s-example-photo' % self.photo.pk,
-                "media" : settings.MEDIA_URL,
-                "date" : strftime("%Y/%m/%d"),
-            },
-            'thumb' : "%(media)sphotos/%(date)s/thumb-%(name)s.jpg" % {
-                "name" : u'%s-example-photo' % self.photo.pk,
-                "media" : settings.MEDIA_URL,
-                "date" : strftime("%Y/%m/%d"),
-            },
-            "title" : u"Example 中文 photo",
-            'name' : u"Thumbnail Example 中文 photo",
-        }
-        tools.assert_equals(expected_html, self.photo.thumb())
-
-    def test_retrieving_thumbnail_url_creates_image(self):
-        url = self.photo.thumb_url()
-        tools.assert_equals(True, self.photo.image.storage.exists(self.thumbnail_path))
-
-    def test_thumbnail_not_retrieved_prematurely(self):
-        # aka thumbnail not created because thumb_url was not called
-        tools.assert_equals(False, self.photo.image.storage.exists(self.thumbnail_path))
-
-    def test_thumbnail_path_creation(self):
-        tools.assert_equals("photos/2008/12/31/thumb-foo.jpg", self.photo.get_thumbnail_path("photos/2008/12/31/foo.jpg"))
-
-    def test_thumbnail_deleted(self):
-        url = self.photo.thumb_url()
-        self.photo.delete()
-
-        tools.assert_equals(False, self.photo.image.storage.exists(self.thumbnail_path))
-
-    def test_thumbnail_html_for_invalid_image(self):
-        # be sneaky and delete image
-        self.photo.image.storage.delete(self.photo.image.path)
-
-        # now we are not able to detect it's format, BWAHAHA
-        expected_html = """<strong>%s</strong>""" % ugettext('Thumbnail not available')
-        tools.assert_equals(expected_html, self.photo.thumb())
-
-    def test_thumbnail_thumburl_for_nonexisting_image(self):
-        self.photo.image.storage.delete(self.photo.image.path)
-        tools.assert_equals(None, self.photo.thumb_url())
 
     def test_retrieving_formatted_photos_on_fly(self):
         formatted = FormatedPhoto.objects.get_photo_in_format(self.photo, self.basic_format)
@@ -123,3 +67,5 @@ class TestPhoto(TestCase):
         if self.photo.pk:
             self.photo.delete()
         super(TestPhoto, self).tearDown()
+        if redis:
+            redis.flushdb()
