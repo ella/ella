@@ -77,22 +77,20 @@ class RSSTopCategoryListings(Feed):
 
     def item_pubdate(self, item):
         return item.publish_from
-    
+
     def get_enclosure_image(self, item, enc_format=core_settings.RSS_ENCLOSURE_PHOTO_FORMAT):
         if getattr(item.target, 'photo'):
             if enc_format is not None:
                 try:
-                    formated_photo = item.target.photo.get_formated_photo(enc_format)
-                    if formated_photo is not None:
-                        return formated_photo.image
+                    return item.target.photo.get_formated_photo(enc_format)
                 except Format.DoesNotExist:
                     pass
-            return item.target.photo.image
+            return item.target.photo.get_image_info()
 
     def get_enclosure_image_attr(self, item, attr):
         image = self.get_enclosure_image(item)
         if image is not None:
-            return getattr(image, attr)
+            return image.get(attr, None)
         return None
 
     def item_enclosure_url(self, item):
@@ -107,9 +105,9 @@ class RSSTopCategoryListings(Feed):
     def item_enclosure_mime_type(self, item):
         image = self.get_enclosure_image(item)
         if image is not None:
-            if image.name.endswith('.jpg'):
+            if image['url'].endswith('.jpg'):
                 return 'image/jpeg'
-            elif image.name.endswith('.png'):
+            elif image['url'].endswith('.png'):
                 return 'image/png'
             return 'image/gif'
 

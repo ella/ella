@@ -28,13 +28,13 @@ class TestFeeds(TestCase):
         create_and_place_a_publishable(self)
         create_and_place_more_publishables(self)
         list_all_publishables_in_category_by_hour(self)
-        
+
         self._feeder = RSSTopCategoryListings('test', HttpRequest())
 
     def _set_photo(self):
         from tempfile import mkstemp
         from django.core.files.base import ContentFile
-        
+
         image_file_name = mkstemp(suffix=".jpg", prefix="ella-feeds-tests-")[1]
         image = Image.new('RGB', (200, 100), "black")
         image.save(image_file_name, format="jpeg")
@@ -52,7 +52,7 @@ class TestFeeds(TestCase):
 
         photo.image.save("bazaaah", file)
         photo.save()
-        
+
         self.publishable.photo = photo
         self.publishable.save()
 
@@ -83,18 +83,18 @@ class TestFeeds(TestCase):
     def test_get_enclosure_uses_original_when_format_not_set(self):
         self._set_photo()
         tools.assert_true(self.publishable.photo is not None)
-        original = self.publishable.photo.image
+        original = self.publishable.photo.get_image_info()
         new = self._feeder.get_enclosure_image(self.only_publishable, enc_format=None)
-        tools.assert_equals(unicode(original), unicode(new))
-    
+        tools.assert_equals(original, new)
+
     def test_get_enclosure_uses_original_when_format_not_found(self):
         non_existent_format_name = 'aaa'
         self._set_photo()
         tools.assert_true(self.publishable.photo is not None)
-        original = self.publishable.photo.image
+        original = self.publishable.photo.get_image_info()
         new = self._feeder.get_enclosure_image(self.only_publishable, enc_format=non_existent_format_name)
-        tools.assert_equals(unicode(original), unicode(new))
-    
+        tools.assert_equals(original, new)
+
     def test_get_enclosure_uses_formated_photo_when_format_available(self):
         existent_format_name = 'enc_format'
         f = Format.objects.create(name=existent_format_name, max_width=10, max_height=10,

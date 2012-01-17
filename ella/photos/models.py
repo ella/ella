@@ -72,6 +72,13 @@ class Photo(models.Model):
         # path to thumbnail, cached when thumbnail is generated for the first time
         self.thumbnail_path = None
 
+    def get_image_info(self):
+        return {
+            'url': self.image.url,
+            'width': self.width,
+            'height': self.height,
+        }
+
     def thumb(self):
         """
         Generates html and thumbnails for admin site.
@@ -211,12 +218,9 @@ class Format(models.Model):
         """
         Return fake FormatedPhoto object to be used in templates when an error occurs in image generation.
         """
-        print settings.STATIC_URL, photos_settings.EMPTY_IMAGE_SITE_PREFIX, self.name
         out = {
             'width' : self.max_width,
             'height' : self.max_height,
-            'filename' : 'img/empty/%s.png' % (self.name),
-            'format' : self,
             'url' : settings.STATIC_URL + photos_settings.EMPTY_IMAGE_SITE_PREFIX + 'img/empty/%s.png' % (self.name),
         }
         return out
@@ -243,7 +247,11 @@ class FormatedPhotoManager(models.Manager):
             except (IOError, SystemError, IntegrityError), e:
                 log.error("Cannot create formatted photo: %s" % e)
                 return format.get_blank_img()
-        return formated_photo
+        return {
+            'url': formated_photo.url,
+            'width': formated_photo.width,
+            'height': formated_photo.height,
+        }
 
 
 class FormatedPhoto(models.Model):

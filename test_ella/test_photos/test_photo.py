@@ -92,7 +92,7 @@ class TestPhoto(TestCase):
 
     def test_retrieving_formatted_photos_on_fly(self):
         formatted = FormatedPhoto.objects.get_photo_in_format(self.photo, self.basic_format)
-        tools.assert_equals(self.photo, formatted.photo)
+        tools.assert_in('url', formatted)
 
     def test_formattedphoto_cleared_when_image_changed(self):
         FormatedPhoto.objects.get_photo_in_format(self.photo, self.basic_format)
