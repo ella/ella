@@ -2,7 +2,7 @@ import logging
 from PIL import Image
 from datetime import datetime
 from os import path
-import os
+from cStringIO import StringIO
 
 from django.db import models, IntegrityError
 from django.utils.translation import ugettext, ugettext_lazy as _
@@ -276,7 +276,8 @@ class FormatedPhoto(models.Model):
             p = self.photo
             important_box = (p.important_left, p.important_top, p.important_right, p.important_bottom)
 
-        formatter = Formatter(Image.open(self.photo.image.path), self.format, crop_box=crop_box, important_box=important_box)
+        self.photo.image.open()
+        formatter = Formatter(Image.open(self.photo.image), self.format, crop_box=crop_box, important_box=important_box)
 
         stretched_photo, crop_box = formatter.format()
 
@@ -289,13 +290,12 @@ class FormatedPhoto(models.Model):
         self.crop_height = bottom - self.crop_top
 
         self.width, self.height = stretched_photo.size
-        stretched_photo.save(self.file(), quality=self.format.resample_quality)
 
-        f = open(self.file(), 'rb')
-        file = ContentFile(f.read())
-        f.close()
+        f = StringIO()
+        stretched_photo.save(f, format=Image.EXTENSION[path.splitext(self.photo.image.name)[1]], quality=self.format.resample_quality)
+        f.seek(0)
 
-        self.image.save(self.file(relative=True), file, save)
+        self.image.save(self.file(), ContentFile(f.read()), save)
 
     def save(self, **kwargs):
         """Overrides models.Model.save
@@ -307,7 +307,7 @@ class FormatedPhoto(models.Model):
         if not self.image:
             self.generate(save=False)
         else:
-            self.image.name = self.file(relative=True)
+            self.image.name = self.file()
         super(FormatedPhoto, self).save(**kwargs)
         if redis:
             redis.hmset(
@@ -326,15 +326,12 @@ class FormatedPhoto(models.Model):
         super(FormatedPhoto, self).delete()
 
     def remove_file(self):
-        if path.exists(path.join(settings.MEDIA_ROOT, self.file(relative=True))):
-            os.remove(path.join(settings.MEDIA_ROOT, self.file(relative=True)))
+        if self.image.name:
+            self.image.delete()
 
-    def file(self, relative=False):
+    def file(self):
         """ Method returns formated photo path - derived from format.id and source Photo filename """
-        if relative:
-            source_file = path.split(self.photo.image.name)
-        else:
-            source_file = path.split(self.photo.image.path)
+        source_file = path.split(self.photo.image.name)
         return path.join(source_file[0],  str (self.format.id) + '-' + source_file[1])
 
     def __unicode__(self):
