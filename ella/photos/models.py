@@ -28,7 +28,7 @@ log = logging.getLogger('ella.photos')
 
 redis = None
 REDIS_PHOTO_KEY = 'photo:%d'
-REDIS_FORMATTED_PHOTO_KEY = 'photo:%d:%s'
+REDIS_FORMATTED_PHOTO_KEY = 'photo:%d:%d'
 
 if hasattr(settings, 'PHOTOS_REDIS'):
     from redis import Redis
@@ -257,16 +257,13 @@ class FormatedPhotoManager(models.Manager):
             photo_id = photo
             photo = None
 
-        if isinstance(format, Format):
-            format_name = format.name
-        else:
-            format_name = format
-            format = None
+        if not isinstance(format, Format):
+            format = get_cached_object(Format, name=format, sites__id=settings.SITE_ID)
 
         if redis:
             p = redis.pipeline()
             p.hgetall(REDIS_PHOTO_KEY % photo_id)
-            p.hgetall(REDIS_FORMATTED_PHOTO_KEY % (photo_id, format_name))
+            p.hgetall(REDIS_FORMATTED_PHOTO_KEY % (photo_id, format.id))
             original, formatted = p.execute()
             if formatted:
                 formatted['original'] = original
@@ -274,9 +271,6 @@ class FormatedPhotoManager(models.Manager):
 
         if not photo:
             photo = get_cached_object(Photo, pk=photo_id)
-
-        if not format:
-            format = get_cached_object(Format, name=format_name, sites__id=settings.SITE_ID)
 
         try:
             formated_photo = get_cached_object(FormatedPhoto, photo=photo, format=format)
@@ -383,7 +377,7 @@ class FormatedPhoto(models.Model):
         super(FormatedPhoto, self).save(**kwargs)
         if redis:
             redis.hmset(
-                REDIS_FORMATTED_PHOTO_KEY % (self.photo_id, self.format.name),
+                REDIS_FORMATTED_PHOTO_KEY % (self.photo_id, self.format.id),
                 {
                     'url': self.url,
                     'width': self.width,
@@ -394,7 +388,7 @@ class FormatedPhoto(models.Model):
     def delete(self):
         self.remove_file()
         if redis:
-            redis.delete(REDIS_FORMATTED_PHOTO_KEY % (self.photo_id, self.format.name))
+            redis.delete(REDIS_FORMATTED_PHOTO_KEY % (self.photo_id, self.format.id))
         super(FormatedPhoto, self).delete()
 
     def remove_file(self):
