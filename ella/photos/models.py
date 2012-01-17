@@ -181,16 +181,7 @@ class Photo(models.Model):
 
     def get_formated_photo(self, format):
         "Return formated photo"
-        format_object = Format.objects.get(name=format, sites=settings.SITE_ID)
-        try:
-            formated_photo = get_cached_object(FormatedPhoto, photo=self, format=format_object)
-        except FormatedPhoto.DoesNotExist:
-            try:
-                formated_photo = FormatedPhoto.objects.create(photo=self, format=format_object)
-            except (IOError, SystemError, IntegrityError):
-                return None
-
-        return formated_photo
+        return FormatedPhoto.objects.get_photo_in_format(self, get_cached_object(Format, name=format, sites=settings.SITE_ID))
 
     def __unicode__(self):
         return self.title
@@ -220,6 +211,7 @@ class Format(models.Model):
         """
         Return fake FormatedPhoto object to be used in templates when an error occurs in image generation.
         """
+        print settings.STATIC_URL, photos_settings.EMPTY_IMAGE_SITE_PREFIX, self.name
         out = {
             'width' : self.max_width,
             'height' : self.max_height,

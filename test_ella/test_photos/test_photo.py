@@ -91,11 +91,11 @@ class TestPhoto(TestCase):
         tools.assert_equals(None, self.photo.thumb_url())
 
     def test_retrieving_formatted_photos_on_fly(self):
-        formatted = self.photo.get_formated_photo("basic")
+        formatted = FormatedPhoto.objects.get_photo_in_format(self.photo, self.basic_format)
         tools.assert_equals(self.photo, formatted.photo)
 
     def test_formattedphoto_cleared_when_image_changed(self):
-        formatted = self.photo.get_formated_photo("basic")
+        FormatedPhoto.objects.get_photo_in_format(self.photo, self.basic_format)
         tools.assert_equals(1, len(self.photo.formatedphoto_set.all()))
 
         # let us create image again
@@ -111,7 +111,8 @@ class TestPhoto(TestCase):
     def test_formattedphoto_is_none_when_image_destroyed(self):
         # be sneaky and delete image
         self.photo.image.storage.delete(self.photo.image.path)
-        tools.assert_equals(None, self.photo.get_formated_photo("basic"))
+        formatted = FormatedPhoto.objects.get_photo_in_format(self.photo, self.basic_format)
+        tools.assert_equals(self.basic_format.get_blank_img(), formatted)
 
     def test_retrieving_ratio(self):
         tools.assert_equals(2, self.photo.ratio())
