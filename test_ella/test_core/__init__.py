@@ -104,8 +104,6 @@ def create_and_place_two_publishables_and_listings(case):
         case.publishables.append(pu)
         case.listings.append(li)
 
-        return hc
-
 
     c = case.category
     now = datetime.now()
@@ -129,7 +127,7 @@ def create_and_place_two_publishables_and_listings(case):
     )
 
     publish_from = datetime.now() - timedelta(days=8)
-    hc = place_publishable(
+    place_publishable(
         model=Gallery,
         title=u'Older',
         slug=u'gallery-older',
@@ -137,11 +135,8 @@ def create_and_place_two_publishables_and_listings(case):
         category=c,
         publish_from=publish_from.date(),
     )
-    case.hitcounts_all.append(hc)
-    case.hitcounts_galleries.append(hc)
-    case.hitcount_top = hc
 
-    hc = place_publishable(
+    place_publishable(
         model=Article,
         title=u'Newer',
         slug=u'article-newer',
@@ -149,8 +144,6 @@ def create_and_place_two_publishables_and_listings(case):
         category=c,
         publish_from=now.date()
     )
-    case.hitcounts_all.append(hc)
-    case.hitcounts_age_limited.append(hc)
 
     publish_from = now + timedelta(days=1)
     place_publishable(
