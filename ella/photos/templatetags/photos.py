@@ -17,9 +17,13 @@ class ImgTag(template.Node):
     def render(self, context):
         if isinstance(self.photo, basestring):
             try:
-                photo = template.Variable(self.photo).resolve(context)
+                # try retrieving just the ID first to avoid DB lookup
+                photo = template.Variable(self.photo + '_id').resolve(context)
             except template.VariableDoesNotExist:
-                return ''
+                try:
+                    photo = template.Variable(self.photo).resolve(context)
+                except template.VariableDoesNotExist:
+                    return ''
 
             formated_photo = FormatedPhoto.objects.get_photo_in_format(photo, self.format)
         else:
