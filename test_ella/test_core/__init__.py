@@ -40,7 +40,8 @@ def create_and_place_a_publishable(case):
         slug=u'first-article',
         description=u'Some\nlonger\ntext',
         category=case.category_nested,
-        publish_from=datetime(2008,1,10)
+        publish_from=datetime(2008,1,10),
+        published=True
     )
     case.only_publishable = Publishable.objects.get(pk=case.publishable.pk)
 
@@ -56,7 +57,8 @@ def create_and_place_more_publishables(case):
                 slug=u'article-' + chr(ord('a')+i),
                 description=u'Some\nlonger\ntext',
                 category=c,
-                publish_from=datetime(2008,1,10)
+                publish_from=datetime(2008,1,10),
+                published=True
             )
         case.publishables.append(p)
 
@@ -81,14 +83,15 @@ def create_and_place_two_publishables_and_listings(case):
     Create two articles and listings
     """
 
-    def place_publishable(model, title, slug, description, category, publish_from, publish_to=None, hits=1):
+    def place_publishable(model, title, slug, description, category, publish_from, publish_to=None, published=True):
         pu = model.objects.create(
             title=title,
             slug=slug,
             description=description,
             category=category,
             publish_from=publish_from,
-            publish_to=publish_to
+            publish_to=publish_to,
+            published=published
         )
 
         li = Listing.objects.create(
@@ -123,7 +126,6 @@ def create_and_place_two_publishables_and_listings(case):
         category=c,
         publish_from=publish_from.date(),
         publish_to=publish_to.date(),
-        hits=1000
     )
 
     publish_from = datetime.now() - timedelta(days=8)
@@ -134,7 +136,6 @@ def create_and_place_two_publishables_and_listings(case):
         description=u'Some\nlonger\ntext',
         category=c,
         publish_from=publish_from.date(),
-        hits=100
     )
     case.hitcounts_all.append(hc)
     case.hitcounts_galleries.append(hc)

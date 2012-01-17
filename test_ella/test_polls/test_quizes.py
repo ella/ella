@@ -30,6 +30,7 @@ class QuizTestCase(TestCase):
                 active_from=now-day,
                 active_till=now+day,
                 publish_from=now - day,
+                published=True
             )
         self.questions = [
                 Question.objects.create(

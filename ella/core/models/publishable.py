@@ -53,6 +53,7 @@ class Publishable(models.Model):
     description = models.TextField(_('Description'), blank=True)
 
     # Publish data
+    published = models.BooleanField(_('Published'))
     publish_from = models.DateTimeField(_('Publish from'), default=core_settings.PUBLISH_FROM_WHEN_EMPTY, db_index=True)
     publish_to = models.DateTimeField(_("End of visibility"), null=True, blank=True)
     static = models.BooleanField(_('static'), default=False)
@@ -133,7 +134,7 @@ class Publishable(models.Model):
     def is_published(self):
         "Return True if the Publishable is currently active."
         now = datetime.now()
-        return now > self.publish_from and (self.publish_to is None or now < self.publish_to)
+        return self.published and now > self.publish_from and (self.publish_to is None or now < self.publish_to)
 
 
 def ListingBox(listing, *args, **kwargs):

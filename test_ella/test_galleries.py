@@ -21,7 +21,8 @@ def create_and_publish_gallery(case):
         description=u'Some\nlonger\ntext',
         category=case.category_nested,
         content=u'Some\neven\nlonger\ntext',
-        publish_from=datetime(2008,1,10)
+        publish_from=datetime(2008,1,10),
+        published=True
     )
 
     case.p1 = create_photo(case)

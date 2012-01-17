@@ -42,6 +42,7 @@ class RelatedManager(models.Manager):
 
                 qset = Publishable.objects.filter(
                         publish_from__lte=datetime.now(),
+                        published=True,
                     ).distinct()
                 if mods:
                     qset = qset.filter(content_type__in=ct_ids)
@@ -112,7 +113,7 @@ class ListingManager(models.Manager):
     def get_listing_queryset(self, category=None, children=NONE, mods=[], content_types=[], now=None, **kwargs):
         if not now:
             now = datetime.now()
-        qset = self.filter(publish_from__lte=now, **kwargs)
+        qset = self.filter(publish_from__lte=now, publishable__published=True, **kwargs)
 
         if category:
             if children == self.NONE:
