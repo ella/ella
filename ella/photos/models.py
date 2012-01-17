@@ -26,6 +26,13 @@ __all__ = ("Format", "FormatedPhoto", "Photo")
 
 log = logging.getLogger('ella.photos')
 
+redis = None
+REDIS_PHOTO_KEY = 'photo:%d'
+REDIS_FORMATTED_PHOTO_KEY = 'photo:%d:%s'
+
+if hasattr(settings, 'PHOTOS_REDIS'):
+    from redis import Redis
+    redis = Redis(**getattr(settings, 'PHOTOS_REDIS'))
 
 class PhotoBox(Box):
     def get_context(self):
@@ -166,6 +173,8 @@ class Photo(models.Model):
             for f_photo in self.formatedphoto_set.all():
                 f_photo.delete()
         super(Photo, self).save(force_insert=force_insert, force_update=force_update, **kwargs)
+        if redis:
+            redis.hmset(REDIS_PHOTO_KEY % self.pk, self.get_image_info())
 
     def delete_thumbnail(self):
         """
@@ -188,7 +197,7 @@ class Photo(models.Model):
 
     def get_formated_photo(self, format):
         "Return formated photo"
-        return FormatedPhoto.objects.get_photo_in_format(self, get_cached_object(Format, name=format, sites=settings.SITE_ID))
+        return FormatedPhoto.objects.get_photo_in_format(self, format)
 
     def __unicode__(self):
         return self.title
@@ -219,6 +228,7 @@ class Format(models.Model):
         Return fake FormatedPhoto object to be used in templates when an error occurs in image generation.
         """
         out = {
+            'blank': True,
             'width' : self.max_width,
             'height' : self.max_height,
             'url' : settings.STATIC_URL + photos_settings.EMPTY_IMAGE_SITE_PREFIX + 'img/empty/%s.png' % (self.name),
@@ -239,15 +249,45 @@ class Format(models.Model):
 
 class FormatedPhotoManager(models.Manager):
     def get_photo_in_format(self, photo, format):
+        if isinstance(photo, Photo):
+            photo_id = photo.id
+        else:
+            photo_id = photo
+            photo = None
+
+        if isinstance(format, Format):
+            format_name = format.name
+        else:
+            format_name = format
+            format = None
+
+        if redis:
+            p = redis.pipe()
+            p.hgetall(REDIS_PHOTO_KEY % photo_id)
+            p.hgetall(REDIS_FORMATTED_PHOTO_KEY % (photo_id, format_name))
+            original, formatted = p.execute()
+            if formatted:
+                formatted['original'] = original
+                return formatted
+
+        if not photo:
+            photo = get_cached_object(Photo, pk=photo_id)
+
+        if not format:
+            format = get_cached_object(Format, name=format_name, sites__id=settings.SITE_ID)
+
         try:
             formated_photo = get_cached_object(FormatedPhoto, photo=photo, format=format)
         except FormatedPhoto.DoesNotExist:
             try:
                 formated_photo = self.create(photo=photo, format=format)
             except (IOError, SystemError, IntegrityError), e:
-                log.error("Cannot create formatted photo: %s" % e)
+                log.error("Cannot create formatted photo.", e)
                 return format.get_blank_img()
+
         return {
+            'original': photo.get_image_info(),
+
             'url': formated_photo.url,
             'width': formated_photo.width,
             'height': formated_photo.height,
@@ -339,6 +379,15 @@ class FormatedPhoto(models.Model):
         else:
             self.image.name = self.file(relative=True)
         super(FormatedPhoto, self).save(**kwargs)
+        if redis:
+            redis.hmset(
+                REDIS_FORMATTED_PHOTO_KEY % (self.photo_id, self.format.name),
+                {
+                    'url': self.url,
+                    'width': self.width,
+                    'height': self.height,
+                }
+            )
 
     def delete(self):
         self.remove_file()
