@@ -241,28 +241,7 @@ class FormatedPhoto(models.Model):
     @property
     def url(self):
         "Returns url of the photo file."
-        if photos_settings.IMAGE_URL_PREFIX and not path.exists(self.image.path):
-            # custom URL prefix (debugging purposes)
-            return photos_settings.IMAGE_URL_PREFIX.rstrip('/') + '/' + self.image.name
-
-        if not photos_settings.DO_URL_CHECK:
-            return self.image.url
-
-        if not path.exists(self.image.path):
-            # NFS not available - we have no chance of creating it
-            return self.format.get_blank_img()['url']
-
-        if path.exists(self.image.path):
-            # image exists
-            return self.image.url
-
-        # image does not exist - try and create it
-        try:
-            self.generate()
-            return self.image.url
-        except (IOError, SystemError):
-            return self.format.get_blank_img()['url']
-
+        return self.image.url
 
     def generate(self, save=True):
         "Generates photo file in current format"
