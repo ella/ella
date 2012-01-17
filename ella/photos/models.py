@@ -185,6 +185,8 @@ class Photo(models.Model):
         self.thumbnail_path = None
 
     def delete(self, *args, **kwargs):
+        if redis:
+            redis.delete(REDIS_PHOTO_KEY % self.id)
         super(Photo, self).delete(*args, **kwargs)
         self.delete_thumbnail()
 
@@ -262,7 +264,7 @@ class FormatedPhotoManager(models.Manager):
             format = None
 
         if redis:
-            p = redis.pipe()
+            p = redis.pipeline()
             p.hgetall(REDIS_PHOTO_KEY % photo_id)
             p.hgetall(REDIS_FORMATTED_PHOTO_KEY % (photo_id, format_name))
             original, formatted = p.execute()
@@ -391,6 +393,8 @@ class FormatedPhoto(models.Model):
 
     def delete(self):
         self.remove_file()
+        if redis:
+            redis.delete(REDIS_FORMATTED_PHOTO_KEY % (self.photo_id, self.format.name))
         super(FormatedPhoto, self).delete()
 
     def remove_file(self):

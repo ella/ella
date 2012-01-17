@@ -10,7 +10,7 @@ from django.contrib.sites.models import Site
 
 from nose import tools
 
-from ella.photos.models import Format, FormatedPhoto
+from ella.photos.models import Format, FormatedPhoto, redis
 
 from test_ella.test_photos.fixtures import create_photo_formats, create_photo
 
@@ -25,6 +25,13 @@ class TestPhoto(TestCase):
         create_photo(self)
 
         self.thumbnail_path = self.photo.get_thumbnail_path()
+        if redis:
+            redis.flushdb()
+
+    def tearDown(self):
+        super(TestPhoto, self).tearDown()
+        if redis:
+            redis.flushdb()
 
     def test_formatted_photo_has_zero_crop_box_if_smaller_than_format(self):
         format = Format.objects.create(
@@ -107,12 +114,6 @@ class TestPhoto(TestCase):
         self.photo.save()
 
         tools.assert_equals(0, len(self.photo.formatedphoto_set.all()))
-
-    def test_formattedphoto_is_none_when_image_destroyed(self):
-        # be sneaky and delete image
-        self.photo.image.storage.delete(self.photo.image.path)
-        formatted = FormatedPhoto.objects.get_photo_in_format(self.photo, self.basic_format)
-        tools.assert_equals(self.basic_format.get_blank_img(), formatted)
 
     def test_retrieving_ratio(self):
         tools.assert_equals(2, self.photo.ratio())
