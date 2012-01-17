@@ -80,11 +80,6 @@ class Photo(models.Model):
             'height': self.height,
         }
 
-    def image_url(self):
-        if photos_settings.IMAGE_URL_PREFIX and not path.exists(self.image.path):
-            return photos_settings.IMAGE_URL_PREFIX.rstrip('/') + '/' + self.image.name
-        return self.image.url
-
     def save(self, force_insert=False, force_update=False, **kwargs):
         """Overrides models.Model.save.
 
