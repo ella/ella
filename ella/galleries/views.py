@@ -22,28 +22,26 @@ def gallery_item_detail(request, context, item_slug=None):
         # TODO: log empty gallery
 
     if item_slug is None:
-        item, target = item_sorted_dict.value_for_index(0)
+        item = item_sorted_dict.value_for_index(0)
         if count > 1:
-            next = item_sorted_dict.value_for_index(1)[0]
+            next = item_sorted_dict.value_for_index(1)
         position = 1
     else:
         try:
-            item, target = item_sorted_dict[item_slug]
-        except KeyError, e:
+            item = item_sorted_dict[item_slug]
+        except KeyError:
             raise Http404()
         item_index = item_sorted_dict.keyOrder.index(item_slug)
         if item_index > 0:
-            previous = item_sorted_dict.value_for_index(item_index-1)[0]
+            previous = item_sorted_dict.value_for_index(item_index-1)
         if (item_index+1) < count:
-            next = item_sorted_dict.value_for_index(item_index+1)[0]
+            next = item_sorted_dict.value_for_index(item_index+1)
         position = item_index + 1
 
-    context['object'] = target
 
     context.update({
             'gallery': gallery,
             'item': item,
-            'object' : target,
             'item_list' : item_sorted_dict.values(),
             'next' : next,
             'previous' : previous,

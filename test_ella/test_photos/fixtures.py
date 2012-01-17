@@ -25,7 +25,7 @@ def create_photo_formats(case):
     case.basic_format.save()
 
 # "fixtures" aka example photo
-def create_photo(case):
+def create_photo(case, **kwargs):
     # prepare image in temporary directory
     case.image_file_name = mkstemp(suffix=".jpg", prefix="ella-photo-tests-")[1]
     case.image = Image.new('RGB', (200, 100), "black")
@@ -35,13 +35,17 @@ def create_photo(case):
     file = ContentFile(f.read())
     f.close()
 
-    case.photo = Photo(
+    data = dict(
         title = u"Example 中文 photo",
         slug = u"example-photo",
         height = 200,
         width = 100,
     )
+    data.update(kwargs)
+
+    case.photo = Photo(**data)
 
     case.photo.image.save("bazaaah", file)
     case.photo.save()
 
+    return case.photo
