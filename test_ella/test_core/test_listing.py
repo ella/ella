@@ -36,6 +36,20 @@ class TestListing(TestCase):
         expected = [listing for listing in self.listings if listing.category in (self.category, self.category_nested)]
         tools.assert_equals(expected, l)
 
+    def test_listing_only_contains_published_items(self):
+        potential = [listing for listing in self.listings if listing.category in (self.category, self.category_nested)]
+        actual = potential.pop()
+        expected = [actual]
+        for l in potential:
+            if l.publishable != actual.publishable:
+                l.publishable.published = False
+                l.publishable.save()
+            else:
+                expected.append(l)
+        l = Listing.objects.get_listing(category=self.category, children=Listing.objects.IMMEDIATE)
+        tools.assert_equals(expected, l)
+
+
     def test_get_listing_with_immediate_children_no_duplicates(self):
         expected = [listing for listing in self.listings if listing.category in (self.category, self.category_nested)]
 
