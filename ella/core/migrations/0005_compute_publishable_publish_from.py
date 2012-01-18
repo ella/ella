@@ -8,7 +8,10 @@ from south.v2 import SchemaMigration
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        call_command('update_publishable_publish_from')
+        try:
+            call_command('update_publishable_publish_from')
+        except:
+            pass
 
     def backwards(self, orm):
         pass
