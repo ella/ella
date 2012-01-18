@@ -13,6 +13,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'ella.newman.middleware.AdminSettingsMiddleware',
     'ella.newman.middleware.ErrorOutputMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
 )
 
 ROOT_URLCONF = 'example_project.urls'
