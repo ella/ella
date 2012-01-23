@@ -31,8 +31,13 @@ REDIS_PHOTO_KEY = 'photo:%d'
 REDIS_FORMATTED_PHOTO_KEY = 'photo:%d:%d'
 
 if hasattr(settings, 'PHOTOS_REDIS'):
-    from redis import Redis
-    redis = Redis(**getattr(settings, 'PHOTOS_REDIS'))
+    try:
+        from redis import Redis
+    except:
+        log.error('Redis support requested but Redis client not installed.')
+        redis = None
+    else:
+        redis = Redis(**getattr(settings, 'PHOTOS_REDIS'))
 
 class PhotoBox(Box):
     def get_context(self):

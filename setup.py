@@ -43,7 +43,6 @@ setup(
         'anyjson',
         'feedparser',
         'django-tagging',
-        'djangomarkup',
     ],
     setup_requires = [
         'setuptools_dummy',

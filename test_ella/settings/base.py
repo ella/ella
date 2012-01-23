@@ -43,7 +43,6 @@ INSTALLED_APPS = (
     'ella.positions',
     'ella.galleries',
     'ella.polls',
-    'djangomarkup',
     'tagging',
     'threadedcomments',
     'ella.ellacomments',
