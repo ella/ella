@@ -45,7 +45,6 @@ INSTALLED_APPS = (
     'ella.newman.licenses',
     'ella.galleries',
     'ella.polls',
-    'ella.interviews',
     'djangomarkup',
     'tagging',
     'threadedcomments',
