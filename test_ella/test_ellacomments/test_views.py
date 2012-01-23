@@ -131,15 +131,10 @@ class TestCommentModeration(CommentViewTestCase):
 class TestCommentViews(CommentViewTestCase):
 
     def test_comments_urls_is_blocked(self):
-        import nose
-        raise nose.SkipTest()
-#        template_loader.templates['404.html'] = ''
-#        template_loader.templates['page/comment_list.html'] = ''
-#        opts = CommentOptionsObject.objects.create(target_ct=self.publishable.content_type, target_id=self.publishable.pk, blocked=True)
-#        response = self.client.get(self.get_url())
-#        tools.assert_equals(200, response.status_code)
-#        tools.assert_true('comment_list' in response.context)
-#        tools.assert_equals(0, len(response.context['comment_list']))
+        template_loader.templates['404.html'] = ''
+        opts = CommentOptionsObject.objects.create(target_ct=self.publishable.content_type, target_id=self.publishable.pk, blocked=True)
+        response = self.client.post(self.get_url('new'))
+        tools.assert_equals(404, response.status_code)
 
     def test_post_works_for_correct_data(self):
         form = comments.get_form()(target_object=self.publishable)

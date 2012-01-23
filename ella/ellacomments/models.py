@@ -17,8 +17,7 @@ class CommentOptionsManager(models.Manager):
     def get_for_object(self, object):
         ct, id = ContentType.objects.get_for_model(object), object.pk
         try:
-            #return get_cached_object(CommentOptionsObject, target_ct=ct, target_id=id)
-            return self.get(target_ct=ct, target_id=id)
+            return get_cached_object(CommentOptionsObject, target_ct=ct, target_id=id)
         except CommentOptionsObject.DoesNotExist:
             return DefaultCommentOptions()
 
