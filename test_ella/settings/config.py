@@ -42,8 +42,6 @@ SECRET_KEY = '88b-01f^x4lh$-s5-hdccnicekg07)niir2g6)93!0#k(=mfv$'
 # until we do that, don't use cache
 CACHE_BACKEND = 'dummy://'
 
-NEWMAN_MEDIA_PREFIX = '/static/newman_media/'
-
 USE_PRIORITIES = True
 
 TAG_LISTINGS_PAGINATE_BY = 1

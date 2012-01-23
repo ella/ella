@@ -13,7 +13,7 @@ from ella import newman
 
 from ella.positions.models import Position
 from ella.core.models import Category
-from ella.newman.utils import JsonResponse
+from newman.utils import JsonResponse
 from django.forms.models import ModelForm
 from django.forms.util import ValidationError
 

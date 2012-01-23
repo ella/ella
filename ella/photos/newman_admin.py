@@ -5,10 +5,10 @@ from django.contrib.admin import helpers
 from ella import newman
 
 from ella.photos.models import FormatedPhoto, Format, Photo
-from ella.newman.utils import JsonResponse, JsonResponseRedirect, JsonResponseError
-from ella.newman.conf import newman_settings
-from ella.newman.filterspecs import CustomFilterSpec
-from ella.newman.licenses.models import License
+from newman.utils import JsonResponse, JsonResponseRedirect, JsonResponseError
+from newman.conf import newman_settings
+from newman.filterspecs import CustomFilterSpec
+from newman.licenses.models import License
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from ella.photos.forms import MassUploadForm

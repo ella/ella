@@ -1,8 +1,0 @@
-<div class="submit-row" {% if is_popup %}style="overflow: auto;"{% endif %}>
-    {% if show_delete_link %}<a href="service-container::::delete/" class="icn cancel js-simpleload">{% trans "Delete" %}</a>{% endif %}
-
-    {% if show_save_as_new %}<a class="js-submit icn btn saveas" name="_saveasnew">{% trans 'Save as new' %}</a>{%endif%}
-    {% if show_save_and_add_another %}<a class="js-submit icn btn saveall" name="_addanother">{% trans 'Save and add another' %}</a>{% endif %}
-    {% if show_save_and_continue %}<a class="js-submit icn btn saveas" name="_continue">{% trans 'Save and continue editing' %}</a>{% endif %}
-    {% if show_save %}<a class="js-submit icn btn save def default-button-ok" name="_save">{% trans "Save" %}</a>{% endif %}
-</div>

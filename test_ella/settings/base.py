@@ -41,8 +41,6 @@ INSTALLED_APPS = (
     'ella.articles',
     'ella.photos',
     'ella.positions',
-    'ella.newman',
-    'ella.newman.licenses',
     'ella.galleries',
     'ella.polls',
     'djangomarkup',

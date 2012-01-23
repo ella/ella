@@ -7,8 +7,8 @@ from django import forms
 from django.utils.translation import ugettext_lazy as _
 
 from ella.photos.models import Photo
-from ella.newman.conf import newman_settings
-from ella.newman.fields import RGBImageField
+from newman.conf import newman_settings
+from newman.fields import RGBImageField
 
 # Flash image uploader / editor
 CSS_UPLOADIFY_LIB = 'css/uploadify.css'

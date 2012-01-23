@@ -7,7 +7,7 @@ from django.utils.safestring import mark_safe
 from django.conf.urls.defaults import patterns, url
 
 from ella import newman
-from ella.newman import fields
+from newman import fields
 
 from ella.core.newman_admin import ListingInlineAdmin, PublishableAdmin
 from ella.core.cache import get_cached_object_or_404

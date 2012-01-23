@@ -16,8 +16,8 @@ from ella.core.models import Author, Source, Category, Listing, Related, Publish
 from ella.core.conf import core_settings
 
 from ella import newman
-from ella.newman import options, fields
-from ella.newman.filterspecs import CustomFilterSpec, NewmanSiteFilter
+from newman import options, fields
+from newman.filterspecs import CustomFilterSpec, NewmanSiteFilter
 
 class ListingForm(modelforms.ModelForm):
     def clean(self):

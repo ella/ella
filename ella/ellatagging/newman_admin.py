@@ -4,8 +4,8 @@ from django.forms.models import save_instance
 from django.utils.translation import ugettext_lazy as _
 
 from ella import newman
-from ella.newman.conf import newman_settings
-from ella.newman.generic import BaseGenericInlineFormSet
+from newman.conf import newman_settings
+from newman.generic import BaseGenericInlineFormSet
 from ella.core.models import Publishable
 
 from tagging.models import TaggedItem, Tag
