@@ -11,7 +11,6 @@ from newman.filterspecs import CustomFilterSpec
 from newman.licenses.models import License
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
-from ella.photos.forms import MassUploadForm
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse, Http404
 from django.core.files.uploadhandler import TemporaryFileUploadHandler
@@ -20,6 +19,37 @@ from django.views.decorators.http import require_POST
 from django.forms.models import modelform_factory
 from django.contrib.admin.util import flatten_fieldsets
 from django.utils.functional import curry
+from django import forms
+from django.utils.translation import ugettext_lazy as _
+
+from ella.photos.models import Photo
+from newman.conf import newman_settings
+from newman.fields import RGBImageField
+
+# Flash image uploader / editor
+CSS_UPLOADIFY_LIB = 'css/uploadify.css'
+JS_SWFOBJECT = 'js/swfobject.js'
+JS_UPLOADIFY_LIB = 'js/jquery.uploadify.min.js' 
+SWF_FLASH_UPLOADER = 'swf/uploadify.swf'
+
+class MassUploadForm(forms.ModelForm):
+    image_file = forms.ImageField(label=_('Image files'))
+     
+    class Media:
+        js = (
+            newman_settings.MEDIA_PREFIX + JS_SWFOBJECT,
+            newman_settings.MEDIA_PREFIX + JS_UPLOADIFY_LIB,
+            newman_settings.MEDIA_PREFIX + SWF_FLASH_UPLOADER,
+        )
+        css = {
+            'screen': (newman_settings.MEDIA_PREFIX + CSS_UPLOADIFY_LIB,),
+        }
+    
+    class Meta:
+        model = Photo
+        exclude = ('image', 'important_top', 'important_left', 'important_bottom',
+            'important_right')
+        
 
 class PhotoSizeFilter(CustomFilterSpec):
 
