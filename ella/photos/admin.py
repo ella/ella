@@ -3,10 +3,13 @@ from django.contrib import admin
 from django.conf import settings
 from django.utils.translation import ugettext
 from django.forms.util import ValidationError
+from django.utils import simplejson
 from django.utils.translation import ugettext_lazy as _
+from django.utils.safestring import mark_safe
+from django.http import HttpResponse
 
 from ella.photos.models import FormatedPhoto, Format, Photo
-from ella.photos.views import format_photo_json, thumb_url
+from ella.core.cache.utils import get_cached_object
 
 
 class FormatedPhotoForm(forms.BaseForm):
@@ -60,11 +63,32 @@ class FormatedPhotoInlineOptions(admin.TabularInline):
 
 
 class PhotoOptions(admin.ModelAdmin):
+    @property
+    def thumb_format(self):
+        if not hasattr(self, '_thumb_format'):
+            if not hasattr(settings, 'PHOTOS_THUMB_FORMAT'):
+                self._thumb_format = None
+            else:
+                self._thumb_format = get_cached_object(Format, id=settings.PHOTOS_THUMB_FORMAT)
+
+        return self._thumb_format
+
+    def thumb(self, photo):
+        if not self.thumb_format:
+            return ''
+
+        thumb_info = FormatedPhoto.objects.get_formated_photo(photo, self.thumb_format)
+
+        return mark_safe("""
+            <a href="%s" title="%s" target="_blank">
+                <img src="%s" alt="Thumbnail %s" />
+            </a>""" % (photo.image.url, photo.title, thumb_info['url'], photo.title))
+    thumb.allow_tags = True
 
     inlines = [FormatedPhotoInlineOptions]
-    list_display = ('title', 'width', 'height', 'thumb', 'pk',)
+    list_display = ('title', 'width', 'height', 'thumb', )
     list_filter = ('created',)
-    search_fields = ('title', 'image', 'description', 'id',)  # FIXME: 'tags__tag__name',)
+    search_fields = ('title', 'image', 'description', 'id',)
     suggest_fields = {'authors': ('name', 'slug',), 'source': ('name', 'url',)}
     rich_text_fields = {'small': ('description',)}
     ordering = ('-id',)
@@ -77,10 +101,26 @@ class PhotoOptions(admin.ModelAdmin):
 
     def __call__(self, request, url):
         if url and url.endswith('json'):
-            return format_photo_json(request, *url.split('/')[-3:-1])
-        if url and url.endswith('thumburl'):
-            return thumb_url(request, *url.split('/')[-3:-1])
+            return self.format_photo_json(request, *url.split('/')[-3:-1])
         return super(PhotoOptions, self).__call__(request, url)
+
+    def format_photo_json(self, request, photo, format):
+        "Used in admin image 'crop tool'."
+        try:
+            photo = get_cached_object(Photo, pk=photo)
+            format = get_cached_object(Format, pk=format)
+            content = {
+                'error': False,
+                'image':settings.MEDIA_URL + photo.image,
+                'width':photo.width,
+                'height': photo.height,
+                'format_width':format.max_width,
+                'format_height':format.max_height
+            }
+        except (Photo.DoesNotExist, Format.DoesNotExist):
+            content = {'error':True}
+        return HttpResponse(simplejson.dumps(content))
+
 
 
 class FormatedPhotoOptions(admin.ModelAdmin):
