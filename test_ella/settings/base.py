@@ -34,6 +34,7 @@ TEMPLATE_DIRS = (
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.media',
+    'django.core.context_processors.auth',
 )
 
 INSTALLED_APPS = (
@@ -61,5 +62,4 @@ COMMENTS_APP = 'ella.ellacomments'
 DEFAULT_PAGE_ID = 1
 
 VERSION = 1
-
 
