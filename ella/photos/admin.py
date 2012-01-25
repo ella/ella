@@ -77,7 +77,7 @@ class PhotoOptions(admin.ModelAdmin):
         if not self.thumb_format:
             return ''
 
-        thumb_info = FormatedPhoto.objects.get_formated_photo(photo, self.thumb_format)
+        thumb_info = FormatedPhoto.objects.get_photo_in_format(photo, self.thumb_format)
 
         return mark_safe("""
             <a href="%s" title="%s" target="_blank">
