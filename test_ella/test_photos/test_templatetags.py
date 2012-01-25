@@ -1,6 +1,8 @@
 from django.template import Node
 from django.test import TestCase
-from nose import tools
+from django.conf import settings
+
+from nose import tools, SkipTest
 
 from ella.photos.templatetags.photos import _parse_img, ImgTag
 
@@ -17,5 +19,7 @@ class TestImgParsing(TestCase):
         tools.assert_equals(self.basic_format, img_node.format)
 
     def test_return_empty_node_on_unknown_format(self):
+        if settings.TEMPLATE_DEBUG:
+            raise SkipTest()
         img_node = _parse_img('img unknownformat for VAR as VAR_NAME'.split())
         tools.assert_equals(Node, img_node.__class__)
