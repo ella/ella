@@ -5,9 +5,8 @@ from os import path
 from cStringIO import StringIO
 
 from django.db import models, IntegrityError
-from django.utils.translation import ugettext, ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _
 from django.contrib.sites.models import Site
-from django.utils.safestring import mark_safe
 from django.core.files.uploadedfile import UploadedFile
 from django.core.files.images import get_image_dimensions
 from django.core.files.base import ContentFile
@@ -172,7 +171,7 @@ class Format(models.Model):
             'blank': True,
             'width' : self.max_width,
             'height' : self.max_height,
-            'url' : settings.STATIC_URL + photos_settings.EMPTY_IMAGE_SITE_PREFIX + 'img/empty/%s.png' % (self.name),
+            'url' : photos_settings.EMPTY_IMAGE_SITE_PREFIX + 'img/empty/%s.png' % (self.name),
         }
         return out
 
