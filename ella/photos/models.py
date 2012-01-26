@@ -208,7 +208,10 @@ class FormatedPhotoManager(models.Manager):
                 return formatted
 
         if not photo:
-            photo = get_cached_object(Photo, pk=photo_id)
+            try:
+                photo = get_cached_object(Photo, pk=photo_id)
+            except Photo.DoesNotExist:
+                return format.get_blank_img()
 
         try:
             formated_photo = get_cached_object(FormatedPhoto, photo=photo, format=format)
