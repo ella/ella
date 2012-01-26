@@ -34,12 +34,13 @@ def _get_key(start, model, kwargs):
                 ','.join(':'.join((key, dump_param(kwargs[key]))) for key in sorted(kwargs.keys()))
     )))
 
-def get_cached_list(model, *args, **kwargs):
+def get_cached_list(model, timeout=CACHE_TIMEOUT, **kwargs):
     """
     Return a cached list. If the list does not exist in the cache, create it.
 
     Params:
         model - Model class ContentType instance representing the model's class
+        timeout - TTL for the item in cache, defaults to CACHE_TIMEOUT
         **kwargs - lookup parameters for content_type.get_object_for_this_type and for key creation
 
     """
@@ -51,16 +52,17 @@ def get_cached_list(model, *args, **kwargs):
     l = cache.get(key)
     if l is None:
         log.debug('get_cached_list(model=%s), object not cached.', str(model))
-        l = list(model._default_manager.filter(*args, **kwargs))
-        cache.set(key, l, CACHE_TIMEOUT)
+        l = list(model._default_manager.filter(**kwargs))
+        cache.set(key, l, timeout)
     return l
 
-def get_cached_object(model, **kwargs):
+def get_cached_object(model, timeout=CACHE_TIMEOUT, **kwargs):
     """
     Return a cached object. If the object does not exist in the cache, create it.
 
     Params:
         model - Model class ContentType instance representing the model's class
+        timeout - TTL for the item in cache, defaults to CACHE_TIMEOUT
         **kwargs - lookup parameters for content_type.get_object_for_this_type and for key creation
 
     Throws:
@@ -74,17 +76,17 @@ def get_cached_object(model, **kwargs):
     obj = cache.get(key)
     if obj is None:
         obj = model._default_manager.get(**kwargs)
-        cache.set(key, obj, CACHE_TIMEOUT)
+        cache.set(key, obj, timeout)
     return obj
 
-def get_cached_object_or_404(model, **kwargs):
+def get_cached_object_or_404(model, timeout=CACHE_TIMEOUT, **kwargs):
     """
     Shortcut that will raise Http404 if there is no object matching the query
 
     see get_cached_object for params description
     """
     try:
-        return get_cached_object(model, **kwargs)
+        return get_cached_object(model, timeout=timeout, **kwargs)
     except ObjectDoesNotExist, e:
         raise Http404('Reason: %s' % str(e))
 

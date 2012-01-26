@@ -105,7 +105,7 @@ class ObjectDetail(EllaCoreView):
     def get_context(self, request, category, content_type, slug, year, month, day):
         ct = get_content_type(content_type)
 
-        cat = get_cached_object_or_404(Category, tree_path=category, site__id=settings.SITE_ID)
+        cat = get_cached_object_or_404(Category, timeout=3600, tree_path=category, site__id=settings.SITE_ID)
 
         if year:
             publishable = get_cached_object_or_404(Publishable,
@@ -240,7 +240,7 @@ class ListContentType(EllaCoreView):
                 raise Http404()
             kwa['publish_from__day'] = day
 
-        cat = get_cached_object_or_404(Category, tree_path=category, site__id=settings.SITE_ID)
+        cat = get_cached_object_or_404(Category, timeout=3600, tree_path=category, site__id=settings.SITE_ID)
         kwa['category'] = cat
         if category:
             kwa['children'] = Listing.objects.ALL
@@ -360,7 +360,7 @@ def export(request, count, name='', content_type=None):
         t_list.append('page/export/%s.html' % name)
     t_list.append('page/export/banner.html')
 
-    cat = get_cached_object_or_404(Category, tree_path='', site__id=settings.SITE_ID)
+    cat = get_cached_object_or_404(Category, timeout=3600, tree_path='', site__id=settings.SITE_ID)
     listing = Listing.objects.get_listing(count=count, category=cat)
     return render(
             request,
