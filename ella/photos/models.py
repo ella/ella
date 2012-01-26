@@ -250,8 +250,7 @@ class FormatedPhoto(models.Model):
         "Returns url of the photo file."
         return self.image.url
 
-    def generate(self, save=True):
-        "Generates photo file in current format"
+    def _generate_img(self):
         crop_box = None
         if self.crop_left:
             crop_box = (self.crop_left, self.crop_top, \
@@ -265,7 +264,11 @@ class FormatedPhoto(models.Model):
         self.photo.image.open()
         formatter = Formatter(Image.open(self.photo.image), self.format, crop_box=crop_box, important_box=important_box)
 
-        stretched_photo, crop_box = formatter.format()
+        return formatter.format()
+
+    def generate(self, save=True):
+        "Generates photo file in current format"
+        stretched_photo, crop_box = self._generate_img()
 
         # set crop_box to (0,0,0,0) if photo not cropped
         if not crop_box:
