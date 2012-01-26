@@ -16,12 +16,6 @@ KEY_FORMAT_OBJECT = 'ella.core.cache.utils.get_cached_object'
 CACHE_TIMEOUT = getattr(settings, 'CACHE_TIMEOUT', 10*60)
 
 
-def delete_cached_object(key, auto_normalize=True):
-    """ proxy function for direct object deletion from cache. May be implemented through ActiveMQ in future. """
-    if auto_normalize:
-        key = normalize_key(key)
-    cache.delete(key)
-
 def normalize_key(key):
     return md5(key).hexdigest()
 
@@ -56,7 +50,7 @@ def get_cached_list(model, *args, **kwargs):
 
     l = cache.get(key)
     if l is None:
-        log.debug('get_cached_list(model=%s), object not cached.' % str(model))
+        log.debug('get_cached_list(model=%s), object not cached.', str(model))
         l = list(model._default_manager.filter(*args, **kwargs))
         cache.set(key, l, CACHE_TIMEOUT)
     return l
@@ -104,7 +98,7 @@ def cache_this(key_getter, timeout=CACHE_TIMEOUT):
             else:
                 result = None
             if result is None:
-                log.debug('cache_this(key=%s), object not cached.' % key)
+                log.debug('cache_this(key=%s), object not cached.', key)
                 result = func(*args, **kwargs)
                 cache.set(key, result, timeout)
             return result
@@ -115,15 +109,4 @@ def cache_this(key_getter, timeout=CACHE_TIMEOUT):
 
         return wrapped_func
     return wrapped_decorator
-
-class CacheInvalidator(object):
-    def __init__(self, *filter_fields):
-        self.filter_fields = filter_fields or ('pk',)
-
-    def __call__(self, sender, instance, **kwargs):
-        if not kwargs.get('created', False):
-            filter_kwargs = dict((k, getattr(instance, k))
-                for k in self.filter_fields)
-            key = _get_key(KEY_FORMAT_OBJECT, sender, filter_kwargs)
-            delete_cached_object(key, auto_normalize=False)
 
