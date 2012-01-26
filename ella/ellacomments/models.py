@@ -3,7 +3,7 @@ from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 
-from ella.core.cache.utils import CachedGenericForeignKey, get_cached_object
+from ella.core.cache import CachedGenericForeignKey, get_cached_object
 
 class DefaultCommentOptions(object):
 

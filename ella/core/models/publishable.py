@@ -11,7 +11,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.redirects.models import Redirect
 
 from ella.core.managers import ListingManager, RelatedManager
-from ella.core.cache import get_cached_object, CachedGenericForeignKey
+from ella.core.cache import get_cached_object, CachedGenericForeignKey, CachedForeignKey
 from ella.core.models.main import Category, Author, Source
 from ella.photos.models import Photo
 from ella.core.box import Box
@@ -36,7 +36,7 @@ class Publishable(models.Model):
     content_type = models.ForeignKey(ContentType)
     target = CachedGenericForeignKey('content_type', 'id')
 
-    category = models.ForeignKey(Category, verbose_name=_('Category'))
+    category = CachedForeignKey(Category, verbose_name=_('Category'))
 
     # Titles
     title = models.CharField(_('Title'), max_length=255)
@@ -47,7 +47,7 @@ class Publishable(models.Model):
     source = models.ForeignKey(Source, blank=True, null=True, verbose_name=_('Source'))
 
     # Main Photo
-    photo = models.ForeignKey(Photo, blank=True, null=True, verbose_name=_('Photo'))
+    photo = CachedForeignKey(Photo, blank=True, null=True, verbose_name=_('Photo'))
 
     # Description
     description = models.TextField(_('Description'), blank=True)
