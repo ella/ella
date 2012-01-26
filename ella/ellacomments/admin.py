@@ -18,7 +18,6 @@ class CommentOptionsGenericInline(GenericInlineModelAdmin):
 
 class CommentsAdmin(ThreadedCommentsAdmin):
     def __call__( self, request, url ):
-        import sys
         if url and url.startswith( 'deleterelated' ):
             return self.delete_related( request, *url.split('/')[1:] )
         if url and url.startswith( 'info' ):
@@ -27,7 +26,7 @@ class CommentsAdmin(ThreadedCommentsAdmin):
 
     def delete_related(self, request, ct, id):
         comments = ThreadedComment.objects.filter(content_type=ct, object_pk=id)
-        ct = ContentType.objects.get(pk=ct)
+        ct = ContentType.objects.get_for_id(pk=ct)
         model = ct.model_class()
         obj = model.objects.get(pk=id)
         comment_count = comments.count()
