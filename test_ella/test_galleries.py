@@ -8,7 +8,7 @@ from ella.galleries.models import Gallery
 
 # FIXME hack alert - we are calling the registration here, it should be dealt
 # with in the project itself somehow
-from ella.galleries import urls
+from ella.galleries import register
 
 from test_ella.test_core import create_basic_categories
 from test_ella.test_photos.fixtures import create_photo
@@ -36,6 +36,11 @@ def create_and_publish_gallery(case):
     case.galitem2 = case.publishable.galleryitem_set.create(
         photo = case.p2,
         order=1
+    )
+
+    case.galitem3 = case.publishable.galleryitem_set.create(
+        photo = case.p1,
+        order=2
     )
 
 class TestGalleries(TestCase):
@@ -75,7 +80,7 @@ class TestGalleries(TestCase):
         tools.assert_equals(1, response.context['position'])
 
         tools.assert_true('count' in response.context)
-        tools.assert_equals(2, response.context['count'])
+        tools.assert_equals(3, response.context['count'])
 
     def test_gallery_custom_view_item_raises_404_on_non_existent_slug(self):
         template_loader.templates['404.html'] = ''
@@ -89,7 +94,7 @@ class TestGalleries(TestCase):
         tools.assert_equals(self.galitem, response.context['previous'])
 
         tools.assert_true('next' in response.context)
-        tools.assert_equals(None, response.context['next'])
+        tools.assert_equals(self.galitem3, response.context['next'])
 
         tools.assert_true('item' in response.context)
         tools.assert_equals(self.galitem2, response.context['item'])
@@ -98,5 +103,26 @@ class TestGalleries(TestCase):
         tools.assert_equals(2, response.context['position'])
 
         tools.assert_true('count' in response.context)
-        tools.assert_equals(2, response.context['count'])
+        tools.assert_equals(3, response.context['count'])
+
+    def test_duplicit_photo_works_and_gets_updated_slug(self):
+        tools.assert_equals(self.p1.slug + '1', self.galitem3.get_slug())
+        response = self.client.get('/nested-category/2008/1/10/galleries/first-gallery/item/%s1/' % self.p1.slug)
+
+        tools.assert_true('previous' in response.context)
+        tools.assert_equals(self.galitem2, response.context['previous'])
+
+        tools.assert_true('next' in response.context)
+        tools.assert_equals(None, response.context['next'])
+
+        tools.assert_true('item' in response.context)
+        tools.assert_equals(self.galitem3, response.context['item'])
+
+        tools.assert_true('position' in response.context)
+        tools.assert_equals(3, response.context['position'])
+
+        tools.assert_true('count' in response.context)
+        tools.assert_equals(3, response.context['count'])
+
+
 

@@ -16,12 +16,6 @@ KEY_FORMAT_OBJECT = 'ella.core.cache.utils.get_cached_object'
 CACHE_TIMEOUT = getattr(settings, 'CACHE_TIMEOUT', 10*60)
 
 
-def delete_cached_object(key, auto_normalize=True):
-    """ proxy function for direct object deletion from cache. May be implemented through ActiveMQ in future. """
-    if auto_normalize:
-        key = normalize_key(key)
-    cache.delete(key)
-
 def normalize_key(key):
     return md5(key).hexdigest()
 
@@ -40,12 +34,13 @@ def _get_key(start, model, kwargs):
                 ','.join(':'.join((key, dump_param(kwargs[key]))) for key in sorted(kwargs.keys()))
     )))
 
-def get_cached_list(model, *args, **kwargs):
+def get_cached_list(model, timeout=CACHE_TIMEOUT, **kwargs):
     """
     Return a cached list. If the list does not exist in the cache, create it.
 
     Params:
         model - Model class ContentType instance representing the model's class
+        timeout - TTL for the item in cache, defaults to CACHE_TIMEOUT
         **kwargs - lookup parameters for content_type.get_object_for_this_type and for key creation
 
     """
@@ -56,17 +51,18 @@ def get_cached_list(model, *args, **kwargs):
 
     l = cache.get(key)
     if l is None:
-        log.debug('get_cached_list(model=%s), object not cached.' % str(model))
-        l = list(model._default_manager.filter(*args, **kwargs))
-        cache.set(key, l, CACHE_TIMEOUT)
+        log.debug('get_cached_list(model=%s), object not cached.', str(model))
+        l = list(model._default_manager.filter(**kwargs))
+        cache.set(key, l, timeout)
     return l
 
-def get_cached_object(model, **kwargs):
+def get_cached_object(model, timeout=CACHE_TIMEOUT, **kwargs):
     """
     Return a cached object. If the object does not exist in the cache, create it.
 
     Params:
         model - Model class ContentType instance representing the model's class
+        timeout - TTL for the item in cache, defaults to CACHE_TIMEOUT
         **kwargs - lookup parameters for content_type.get_object_for_this_type and for key creation
 
     Throws:
@@ -80,17 +76,17 @@ def get_cached_object(model, **kwargs):
     obj = cache.get(key)
     if obj is None:
         obj = model._default_manager.get(**kwargs)
-        cache.set(key, obj, CACHE_TIMEOUT)
+        cache.set(key, obj, timeout)
     return obj
 
-def get_cached_object_or_404(model, **kwargs):
+def get_cached_object_or_404(model, timeout=CACHE_TIMEOUT, **kwargs):
     """
     Shortcut that will raise Http404 if there is no object matching the query
 
     see get_cached_object for params description
     """
     try:
-        return get_cached_object(model, **kwargs)
+        return get_cached_object(model, timeout=timeout, **kwargs)
     except ObjectDoesNotExist, e:
         raise Http404('Reason: %s' % str(e))
 
@@ -104,7 +100,7 @@ def cache_this(key_getter, timeout=CACHE_TIMEOUT):
             else:
                 result = None
             if result is None:
-                log.debug('cache_this(key=%s), object not cached.' % key)
+                log.debug('cache_this(key=%s), object not cached.', key)
                 result = func(*args, **kwargs)
                 cache.set(key, result, timeout)
             return result
@@ -116,68 +112,3 @@ def cache_this(key_getter, timeout=CACHE_TIMEOUT):
         return wrapped_func
     return wrapped_decorator
 
-class CacheInvalidator(object):
-    def __init__(self, *filter_fields):
-        self.filter_fields = filter_fields or ('pk',)
-
-    def __call__(self, sender, instance, **kwargs):
-        if not kwargs.get('created', False):
-            filter_kwargs = dict((k, getattr(instance, k))
-                for k in self.filter_fields)
-            key = _get_key(KEY_FORMAT_OBJECT, sender, filter_kwargs)
-            delete_cached_object(key, auto_normalize=False)
-
-from django.db.models.fields.related import ForeignKey, ReverseSingleRelatedObjectDescriptor
-
-class CachedForeignKey(ForeignKey):
-    def contribute_to_class(self, cls, name):
-        super(CachedForeignKey, self).contribute_to_class(cls, name)
-        setattr(cls, self.name, CachedReverseSingleRelatedObjectDescriptor(self))
-
-class CachedReverseSingleRelatedObjectDescriptor(ReverseSingleRelatedObjectDescriptor):
-    def __get__(self, instance, instance_type=None):
-        if instance is None:
-            raise AttributeError, "%s must be accessed via instance" % self.field.name
-        cache_name = self.field.get_cache_name()
-        try:
-            return getattr(instance, cache_name)
-        except AttributeError:
-            val = getattr(instance, self.field.attname)
-            if val is None:
-                # If NULL is an allowed value, return it.
-                if self.field.null:
-                    return None
-                raise self.field.rel.to.DoesNotExist
-            rel_obj = get_cached_object(self.field.rel.to, pk=val)
-            setattr(instance, cache_name, rel_obj)
-            return rel_obj
-
-from django.contrib.contenttypes.generic import GenericForeignKey
-
-class CachedGenericForeignKey(GenericForeignKey):
-    def __get__(self, instance, instance_type=None):
-        # Fix for django 1.0 Admin Validation
-        if instance is None:
-            # TODO: hotfixed
-            #raise AttributeError, u"%s must be accessed via instance" % self.name
-            return
-
-        try:
-            return getattr(instance, self.cache_attr)
-        except AttributeError:
-            rel_obj = None
-
-            # Make sure to use ContentType.objects.get_for_id() to ensure that
-            # lookups are cached (see ticket #5570). This takes more code than
-            # the naive ``getattr(instance, self.ct_field)``, but has better
-            # performance when dealing with GFKs in loops and such.
-            f = self.model._meta.get_field(self.ct_field)
-            ct_id = getattr(instance, f.get_attname(), None)
-            if ct_id:
-                ct = self.get_content_type(id=ct_id)
-                try:
-                    rel_obj = get_cached_object(ct, pk = getattr(instance, self.fk_field))
-                except ObjectDoesNotExist:
-                    pass
-            setattr(instance, self.cache_attr, rel_obj)
-            return rel_obj
