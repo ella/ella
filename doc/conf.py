@@ -8,7 +8,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Ella'
-copyright = '2009, Centrum Holdings'
+copyright = '2012 Ella team'
 
 import ella
 
