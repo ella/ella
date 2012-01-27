@@ -73,6 +73,8 @@ class GalleryItem(models.Model):
     gallery = models.ForeignKey(Gallery, verbose_name=_("Parent gallery"))
     photo = CachedForeignKey(Photo, verbose_name=_("Photo"))
     order = models.IntegerField(_('Object order')) # TODO: order with respect to
+
+    title = models.CharField(_('Title'), max_length=255, blank=True)
     text = models.TextField(blank=True)
 
     def __unicode__(self):
