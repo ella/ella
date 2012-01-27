@@ -29,7 +29,6 @@ class Gallery(Publishable):
     def items(self):
         """
         Returns sorted dict of gallery items. Unique items slugs are used as keys.
-        Values are tuples of items and their targets.
         """
         if self.id:
             return self._get_gallery_items()
@@ -37,10 +36,6 @@ class Gallery(Publishable):
 
     @cache_this(get_gallery_key)
     def _get_gallery_items(self):
-        """
-        Returns sorted dict of gallery items. Unique items slugs are used as keys.
-        Values are tuples of items and their targets.
-        """
         slugs_count = {}
         itms = [ (item, item.photo) for item in self.galleryitem_set.all() ]
         slugs_unique = set((i[1].slug for i in itms))
