@@ -27,6 +27,12 @@ class CachedReverseSingleRelatedObjectDescriptor(ReverseSingleRelatedObjectDescr
             setattr(instance, cache_name, rel_obj)
             return rel_obj
 
+try:
+    from south.modelsinspector import add_introspection_rules
+    add_introspection_rules([], ["^ella\.core\.cache\.fields\.CachedForeignKey"])
+except ImportError:
+    pass
+
 
 class CachedGenericForeignKey(GenericForeignKey):
     def __get__(self, instance, instance_type=None):
