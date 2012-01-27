@@ -1,5 +1,15 @@
-.. _core-views:
+.. _design:
 
+Design
+######
+
+============
+Templatetags
+============
+
+.. automodule:: ella.core.templatetags.core
+    :members: do_box, listing, do_render
+    
 =====
 Views
 =====
@@ -14,5 +24,4 @@ Views
 
 .. automodule:: ella.core.views
     :members: ListContentType, ObjectDetail
-
 
