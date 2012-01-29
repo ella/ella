@@ -2,15 +2,7 @@ from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
 
 from ella.core.admin import PublishableAdmin, ListingInlineAdmin
-from ella.articles.models import Article, InfoBox
-
-
-class InfoBoxAdmin(admin.ModelAdmin):
-    list_display = ('title', 'created',)
-    date_hierarchy = 'created'
-    list_filter = ('created', 'updated',)
-    search_fields = ('title', 'content',)
-    rich_text_fields = {None: ('content',)}
+from ella.articles.models import Article
 
 
 class ArticleAdmin(PublishableAdmin):
@@ -24,5 +16,4 @@ class ArticleAdmin(PublishableAdmin):
     inlines = [ListingInlineAdmin]
 
 
-admin.site.register(InfoBox, InfoBoxAdmin)
 admin.site.register(Article, ArticleAdmin)
