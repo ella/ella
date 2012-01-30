@@ -7,6 +7,8 @@ from django.conf import settings
 from django.utils.safestring import mark_safe
 from django.contrib.auth.models import User
 
+from jsonfield.fields import JSONField
+
 from ella.core.box import Box
 from ella.core.cache import get_cached_object, cache_this, CachedGenericForeignKey
 
@@ -83,6 +85,9 @@ class Category(models.Model):
     tree_path = models.CharField(verbose_name=_("Path from root category"), max_length=255, editable=False)
     description = models.TextField(_("Category Description"), blank=True)
     site = models.ForeignKey(Site)
+
+    # generic JSON field to store app cpecific data
+    app_data = JSONField(default='{}', blank=True, editable=False)
 
     def save(self, **kwargs):
         "Override save() to construct tree_path based on the category's parent."

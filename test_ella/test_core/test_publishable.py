@@ -18,12 +18,21 @@ class PublishableTestCase(TestCase):
         create_and_place_a_publishable(self)
 
 
+
 class TestPublishableHelpers(PublishableTestCase):
     def test_url(self):
         tools.assert_equals('/nested-category/2008/1/10/articles/first-article/', self.publishable.get_absolute_url())
 
     def test_domain_url(self):
         tools.assert_equals('http://example.com/nested-category/2008/1/10/articles/first-article/', self.publishable.get_domain_url())
+
+    def test_app_data(self):
+        tools.assert_equals({}, self.publishable.app_data)
+        self.publishable.app_data['core'] = 'testing'
+        self.publishable.save()
+
+        p = self.publishable.content_type.get_object_for_this_type(pk=self.publishable.pk)
+        tools.assert_equals({'core': 'testing'}, self.publishable.app_data)
 
 class TestRedirects(TestCase):
 

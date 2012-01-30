@@ -10,6 +10,8 @@ from django.template.defaultfilters import slugify
 from django.core.urlresolvers import reverse
 from django.contrib.redirects.models import Redirect
 
+from jsonfield.fields import JSONField
+
 from ella.core.managers import ListingManager, RelatedManager
 from ella.core.cache import get_cached_object, CachedGenericForeignKey, CachedForeignKey
 from ella.core.models.main import Category, Author, Source
@@ -57,6 +59,9 @@ class Publishable(models.Model):
     publish_from = models.DateTimeField(_('Publish from'), default=core_settings.PUBLISH_FROM_WHEN_EMPTY, db_index=True)
     publish_to = models.DateTimeField(_("End of visibility"), null=True, blank=True)
     static = models.BooleanField(_('static'), default=False)
+
+    # generic JSON field to store app cpecific data
+    app_data = JSONField(default='{}', blank=True, editable=False)
 
     class Meta:
         app_label = 'core'
