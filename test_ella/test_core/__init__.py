@@ -6,7 +6,6 @@ from django.conf import settings
 from ella.core.models import Category, Listing, Publishable
 # choose Article as an example publishable
 from ella.articles.models import Article
-from ella.galleries.models import Gallery
 
 def create_basic_categories(case):
     case.site_id = getattr(settings, "SITE_ID", 1)
@@ -14,7 +13,7 @@ def create_basic_categories(case):
     case.category = Category.objects.create(
         title=u"你好 category",
         description=u"exmple testing category",
-        site_id = case.site_id,
+        site_id=case.site_id,
         slug=u"ni-hao-category",
     )
 
@@ -22,7 +21,7 @@ def create_basic_categories(case):
         title=u"nested category",
         description=u"category nested in case.category",
         tree_parent=case.category,
-        site_id = case.site_id,
+        site_id=case.site_id,
         slug=u"nested-category",
     )
 
@@ -30,7 +29,7 @@ def create_basic_categories(case):
         title=u" second nested category",
         description=u"category nested in case.category_nested",
         tree_parent=case.category_nested,
-        site_id = case.site_id,
+        site_id=case.site_id,
         slug=u"second-nested-category",
     )
 
@@ -40,7 +39,7 @@ def create_and_place_a_publishable(case):
         slug=u'first-article',
         description=u'Some\nlonger\ntext',
         category=case.category_nested,
-        publish_from=datetime(2008,1,10),
+        publish_from=datetime(2008, 1, 10),
         published=True
     )
     case.only_publishable = Publishable.objects.get(pk=case.publishable.pk)
@@ -54,10 +53,10 @@ def create_and_place_more_publishables(case):
 
         p = Article.objects.create(
                 title=u'Article number %d.' % i,
-                slug=u'article-' + chr(ord('a')+i),
+                slug=u'article-' + chr(ord('a') + i),
                 description=u'Some\nlonger\ntext',
                 category=c,
-                publish_from=datetime(2008,1,10),
+                publish_from=datetime(2008, 1, 10),
                 published=True
             )
         case.publishables.append(p)
@@ -127,14 +126,6 @@ def create_and_place_two_publishables_and_listings(case):
     )
 
     publish_from = datetime.now() - timedelta(days=8)
-    place_publishable(
-        model=Gallery,
-        title=u'Older',
-        slug=u'gallery-older',
-        description=u'Some\nlonger\ntext',
-        category=c,
-        publish_from=publish_from.date(),
-    )
 
     place_publishable(
         model=Article,
