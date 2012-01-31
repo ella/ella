@@ -7,13 +7,7 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        for ac in orm.ArticleContents.all():
-            a = ac.article
-            if a.content:
-                a.content += '\n\n'
-            a.content += ac.content
-            a.save()
-        db.delete_table('article_articlecontents')
+        db.delete_table('articles_articlecontents')
 
 
     def backwards(self, orm):

@@ -7,6 +7,10 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
+        # Adding field 'Publishable.publish_to'
+        db.add_column('core_publishable', 'publish_to', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True), keep_default=False)
+        # Adding field 'Publishable.static'
+        db.add_column('core_publishable', 'static', self.gf('django.db.models.fields.BooleanField')(default=False), keep_default=False)
         # Adding field 'Publishable.published'
         db.add_column('core_publishable', 'published', self.gf('django.db.models.fields.BooleanField')(default=True), keep_default=False)
 

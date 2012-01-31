@@ -10,6 +10,12 @@ class Migration(SchemaMigration):
         
         # Adding field 'Article.content'
         db.add_column('articles_article', 'content', self.gf('django.db.models.fields.TextField')(default=''), keep_default=False)
+        for ac in orm['articles.ArticleContents'].objects.all():
+            a = ac.article
+            if a.content:
+                a.content += '\n\n'
+            a.content += ac.content
+            a.save()
 
 
     def backwards(self, orm):
@@ -26,6 +32,12 @@ class Migration(SchemaMigration):
             'publishable_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['core.Publishable']", 'unique': 'True', 'primary_key': 'True'}),
             'updated': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'upper_title': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'})
+        },
+        'articles.articlecontents': {
+            'article': ('models.ForeignKey', ["orm['articles.Article']"], {'verbose_name': "_('Article')"}),
+            'content': ('models.TextField', ["_('Content')"], {}),
+            'id': ('models.AutoField', [], {'primary_key': 'True'}),
+            'title': ('models.CharField', ["_('Title')"], {'max_length': '200', 'blank': 'True'})
         },
         'articles.infobox': {
             'Meta': {'object_name': 'InfoBox'},

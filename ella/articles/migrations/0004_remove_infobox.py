@@ -5,7 +5,7 @@ from south.v2 import SchemaMigration
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        db.delete_table('article_infobox')
+        db.delete_table('articles_infobox')
 
 
     def backwards(self, orm):
