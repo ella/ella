@@ -11,6 +11,22 @@ class Migration(SchemaMigration):
         db.delete_column('core_listing', 'priority_to')
         db.delete_column('core_listing', 'priority_value')
 
+        # Adding field 'Publishable.publish_to'
+        db.add_column('core_publishable', 'publish_to', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True), keep_default=False)
+        # Adding field 'Publishable.static'
+        db.add_column('core_publishable', 'static', self.gf('django.db.models.fields.BooleanField')(default=False), keep_default=False)
+        db.alter_column('core_listing', 'publishable_id', models.ForeignKey(orm['core.Publishable'], null=False))
+
+        for pl in orm['core.Placement'].objects.all():
+            pl.listing_set.update(publishable=pl.publishable)
+            pl.publishable.publish_from = pl.publish_from
+            pl.publishable.static = pl.static
+            pl.publishable.publish_to = pl.publish_to
+
+        db.delete_column('core_listing', 'placement_id')
+        db.delete_table('core_placement')
+        db.delete_table('core_hitcount')
+
 
     def backwards(self, orm):
         pass
