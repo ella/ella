@@ -1,10 +1,11 @@
 
 from south.db import db
 from django.db import models
-from ella.articles.models import *
 import datetime
+from south.v2 import SchemaMigration
+from ella.core.models import Publishable
 
-class Migration:
+class Migration(SchemaMigration):
 
     depends_on = (
         ("core", "0001_initial"),
@@ -12,11 +13,19 @@ class Migration:
     )
 
     def forwards(self, orm):
+        # Adding model 'Article'
+        db.create_table('articles_article', (
+            ('publishable_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=Publishable, unique=True, primary_key=True)),
+            ('upper_title', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True)),
+            ('created', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime.now, db_index=True)),
+            ('updated', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
+        ))
+        db.send_create_signal('articles', ['Article'])
 
         # Adding model 'ArticleContents'
         db.create_table('articles_articlecontents', (
             ('id', models.AutoField(primary_key=True)),
-            ('article', models.ForeignKey(orm.Article, verbose_name=_('Article'))),
+            ('article', models.ForeignKey(orm['articles.Article'], verbose_name=_('Article'))),
             ('title', models.CharField(_('Title'), max_length=200, blank=True)),
             ('content', models.TextField(_('Content'))),
         ))
@@ -31,21 +40,6 @@ class Migration:
             ('content', models.TextField(_('Content'))),
         ))
         db.send_create_signal('articles', ['InfoBox'])
-
-        # Adding model 'Article'
-        db.create_table('articles_article', (
-            ('id', models.AutoField(primary_key=True)),
-            ('title', models.CharField(_('Title'), max_length=255)),
-            ('upper_title', models.CharField(_('Upper title'), max_length=255, blank=True)),
-            ('slug', models.SlugField(_('Slug'), max_length=255)),
-            ('perex', models.TextField(_('Perex'))),
-            ('created', models.DateTimeField(_('Created'), default=datetime.datetime.now, editable=False, db_index=True)),
-            ('updated', models.DateTimeField(_('Updated'), null=True, blank=True)),
-            ('source', models.ForeignKey(orm['core.Source'], null=True, verbose_name=_('Source'), blank=True)),
-            ('category', models.ForeignKey(orm['core.Category'], verbose_name=_('Category'))),
-            ('photo', models.ForeignKey(orm['photos.Photo'], null=True, verbose_name=_('Photo'), blank=True)),
-        ))
-        db.send_create_signal('articles', ['Article'])
 
         # Adding ManyToManyField 'Article.authors'
         db.create_table('articles_article_authors', (
