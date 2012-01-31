@@ -42,8 +42,6 @@ INSTALLED_APPS = (
     'ella.articles',
     'ella.photos',
     'ella.positions',
-    'ella.galleries',
-    'ella.polls',
     'tagging',
 
     'django.contrib.auth',
