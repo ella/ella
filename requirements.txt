@@ -5,6 +5,5 @@ PIL
 
 feedparser
 django-tagging
-git+https://github.com/HonzaKral/django-threadedcomments.git#egg=django-threadedcomments
 git+https://github.com/bradjasper/django-jsonfield.git#egg=django-jsonfield
 
