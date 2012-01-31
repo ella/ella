@@ -13,6 +13,8 @@ from django.core.files.base import ContentFile
 from django.conf import settings
 from django.template.defaultfilters import slugify
 
+from jsonfield.fields import JSONField
+
 from ella.core.models.main import Author, Source
 from ella.core.box import Box
 from ella.core.cache.utils import get_cached_object
@@ -76,6 +78,9 @@ class Photo(models.Model):
     source = models.ForeignKey(Source, blank=True, null=True, verbose_name=_('Source'))
 
     created = models.DateTimeField(default=datetime.now, editable=False)
+
+    # generic JSON field to store app cpecific data
+    app_data = JSONField(default='{}', blank=True, editable=False)
 
     def get_image_info(self):
         return {
