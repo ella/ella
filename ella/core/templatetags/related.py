@@ -70,10 +70,26 @@ def do_related(parser, token):
     Get N related models into a context variable optionally specifying a 
     named related finder.
 
-    Usage::
-        {% related N [query_type] [app_label.Model, ...] for object as var_name %}
+    **Usage**::
+    
+        {% related <limit>[ query_type] [app.model, ...] for <object> as <result> %}
+        
+    **Parameters**::
+        ==================================  ================================================
+        Option                              Description
+        ==================================  ================================================
+        ``limit``                           Number of objects to retrieve.
+        ``query_type``                      Named finder to resolve the related objects,
+                                            falls back to ``settings.DEFAULT_RELATED_FINDER``
+                                            when not specified.
+        ``app.model``, ...                  List of allowed models, all if omitted.
+        ``object``                          Object to get the related for.
+        ``result``                          Store the resulting list in context under given
+                                            name.
+        ==================================  ================================================
 
-    Example::
+    **Examples**::
+    
         {% related 10 for object as related_list %}
         {% related 10 directly articles.article, galleries.gallery for object as related_list %}
     """

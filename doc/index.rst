@@ -34,6 +34,7 @@ Contents:
    
     tutorial
     core
+    plugins
     positions
 
 

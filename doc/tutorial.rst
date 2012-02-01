@@ -44,7 +44,13 @@ covered in it's setup, so it's fairly sufficent to run following command using
 
     pip install ella
     
-Along with Ella, Django is installed too. This allows us to create a new Django
+    
+Along with Ella, Django is installed too. To get Ella's customized admin called
+Newman, it is necessary to install it too::
+
+    pip install django-newman
+    
+After these steps, everything required is ready and we can create a new Django
 project using Ella in standard `Django`_ way::
 
     mkdir ellablog
@@ -75,8 +81,9 @@ Our first step in actual code will be adding Ella to your project's
                                 
         'ella.core',
         'ella.photos',
-        'ella.newman',
-        'ella.articles',     
+        'ella.articles',
+        
+        'newman',   
 
         'djangomarkup',
     )
@@ -85,7 +92,7 @@ Our first step in actual code will be adding Ella to your project's
         'django.core.context_processors.media',
         'django.core.context_processors.auth',
         'django.core.context_processors.request',
-        'ella.newman.context_processors.newman_media',
+        'newman.context_processors.newman_media',
     )
     NEWMAN_MEDIA_PREFIX = MEDIA_URL + 'newman/'
 
@@ -132,7 +139,7 @@ serve also media files discussed in previous paragraph::
     from django.conf import settings 
     from django.contrib.staticfiles.urls import staticfiles_urlpatterns
     
-    from ella import newman
+    import newman
     
     # make sure to import ella error handlers
     from ella.core.urls import handler404, handler500
@@ -186,6 +193,8 @@ development server by typing::
 try to load the site's root. You should get a 404 error.
 Don't panic, that's the correct behavior because we haven't created the site in
 the admin interface yet, this will be covered next.
+
+.. _tutorial-admin:
 
 =====================
 Newman - Ella's admin
@@ -329,6 +338,8 @@ will know that you were succesful if you manage to create and publish an
 article whose URL gives you a ``TemplateDoesNotExist`` exception upon accessing
 - that means we are ready to **create some templates**.
 
+.. _tutorial-basic-templates:
+
 ===============
 Basic templates
 ===============
@@ -338,7 +349,7 @@ the templates we need to get the site running.
 
 .. note::
     For more information on what templates Ella uses and what context is passed
-    in, see :ref:`core-views`.
+    in, have a look at :ref:`core-views`.
 
 
 ``page/category.html``
@@ -368,8 +379,8 @@ The basic template will look like::
 
 That will render the category title, description and a list of objects
 published in that category. Upon accessing ``/`` you should then see the name
-of the category and the article you created in :ref:`previous step
-<tutorial-1>`.
+of the category and the article you created when :ref:`getting familiar with admin
+<tutorial-admin>`.
 
 .. note::
 
@@ -491,7 +502,7 @@ If you still struggle, why the bloody ``Box`` is used instead of standard
 Template fallback mechanisms
 ============================
 
-In :ref:`last step <tutorial-2>` we created a few templates that should suffice
+In :ref:`last step <tutorial-basic-templates>` we created a few templates that should suffice
 for an entire site based on Ella. In real life you probably wouldn't want every
 category and every object to share the same template. Ella provides a simple
 mechanism to target your templates more directly.
@@ -538,8 +549,7 @@ look of your boxes for individual objects as well.
 
 .. note::
     For more detailed explanation of all the possible template names, have a
-    look at :ref:`views <core-views>` and :ref:`templatetags
-    <core-templatetags>` documentation.
+    look at :ref:`core-views` and :ref:`core-templatetags` documentation.
 
 
 

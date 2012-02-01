@@ -51,7 +51,6 @@ def listing(parser, token):
         {% listing <limit>[ from <offset>][of <app.model>[, <app.model>[, ...]]][ for <category> ] [with children|descendents] as <result> %}
 
     Parameters:
-
         ==================================  ================================================
         Option                              Description
         ==================================  ================================================
@@ -82,23 +81,23 @@ def listing(parser, token):
     return ListingNode(var_name, parameters, parameters_to_resolve)
 
 def listing_parse(input):
-    params={}
-    params_to_resolve=[]
+    params = {}
+    params_to_resolve = []
     if len(input) < 4:
         raise template.TemplateSyntaxError, "%r tag argument should have at least 4 arguments" % input[0]
-    o=1
+    o = 1
     # limit
     params['count'] = input[o]
     params_to_resolve.append('count')
-    o=2
+    o = 2
     # offset
     if input[o] == 'from':
-        params['offset'] = input[o+1]
+        params['offset'] = input[o + 1]
         params_to_resolve.append('offset')
-        o=o+2
+        o = o + 2
     # from - models definition
     if input[o] == 'of':
-        o=o+1
+        o = o + 1
         if 'for' in input:
             mc = input.index('for')
         elif 'as' in input:
@@ -111,26 +110,26 @@ def listing_parse(input):
                     raise template.TemplateSyntaxError, "%r tag cannot list objects of unknown model %r" % (input[0], mod)
                 l.append(m)
             params['mods'] = l
-        o=mc
+        o = mc
     # for - category definition
     if input[o] == 'for':
-        params['category'] = input[o+1]
+        params['category'] = input[o + 1]
         params_to_resolve.append('category')
-        o=o+2
+        o = o + 2
     # with
     if input[o] == 'with':
-        o=o+1
+        o = o + 1
         if input[o] == 'children':
             params['children'] = Listing.objects.IMMEDIATE
         elif input[o] == 'descendents':
             params['children'] = Listing.objects.ALL
         else:
             raise template.TemplateSyntaxError, "%r tag's argument 'with' required specification (with children|with descendents)" % input[0]
-        o=o+1
+        o = o + 1
 
     # as
     if input[o] == 'as':
-        var_name = input[o+1]
+        var_name = input[o + 1]
     else:
         raise template.TemplateSyntaxError, "%r tag requires 'as' argument" % input[0]
 
