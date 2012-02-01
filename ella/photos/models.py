@@ -8,7 +8,6 @@ from django.db import models, IntegrityError
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.sites.models import Site
 from django.core.files.uploadedfile import UploadedFile
-from django.core.files.images import get_image_dimensions
 from django.core.files.base import ContentFile
 from django.conf import settings
 from django.template.defaultfilters import slugify
@@ -89,6 +88,11 @@ class Photo(models.Model):
             'height': self.height,
         }
 
+    def _get_image(self):
+        if not hasattr(self, '_pil_image'):
+            self._pil_image = Image.open(self.image)
+        return self._pil_image
+
     def save(self, force_insert=False, force_update=False, **kwargs):
         """Overrides models.Model.save.
 
@@ -104,7 +108,6 @@ class Photo(models.Model):
             # FIXME: better unique identifier, supercalifragilisticexpialidocious?
             self.slug = ''
             super(Photo, self).save(force_insert, force_update)
-            #self.width, self.height = get_image_dimensions(self.image)
             self.width, self.height = self.image.width, self.image.height
             self.slug = str(self.id) + '-' + slugify(self.title)
             # truncate slug in order to fit in an ImageField and/or paths in Redirects
@@ -267,8 +270,7 @@ class FormatedPhoto(models.Model):
             p = self.photo
             important_box = (p.important_left, p.important_top, p.important_right, p.important_bottom)
 
-        self.photo.image.open()
-        formatter = Formatter(Image.open(self.photo.image), self.format, crop_box=crop_box, important_box=important_box)
+        formatter = Formatter(self.photo._get_image(), self.format, crop_box=crop_box, important_box=important_box)
 
         return formatter.format()
 
