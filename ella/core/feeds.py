@@ -28,24 +28,22 @@ class RSSTopCategoryListings(Feed):
         return cat
 
     def title(self, obj):
+        def syndication_title(category):
+            if 'syndication' in category.app_data and 'title' in category.app_data['syndication']:
+                return category.app_data['syndication']['title']
+            return category.title
+
         if isinstance(obj, tuple):
             category, content_type = obj
-            return _('Top %(count)d %(ctype)s objects in category %(cat)s.') % {
-                    'count' : core_settings.RSS_NUM_IN_FEED,
+            return _('%(ctype)s from %(cat)s.') % {
                     'ctype' : content_type.model_class()._meta.verbose_name_plural,
-                    'cat' : category.title
+                    'cat' : syndication_title(category)
             }
         elif obj:
-            return _('Top %(count)d objects in category %(cat)s.') % {
-                    'count' : core_settings.RSS_NUM_IN_FEED,
-                    'cat' : obj.title
-            }
+            return syndication_title(obj)
         else:
             obj = get_cached_object(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
-            return _('Top %(count)d objects in category %(cat)s.') % {
-                    'count' : core_settings.RSS_NUM_IN_FEED,
-                    'cat' : obj.title
-            }
+            return syndication_title(obj)
 
     def items(self, obj):
         kwa = {}
@@ -73,6 +71,8 @@ class RSSTopCategoryListings(Feed):
             return '/'
 
     def description(self, obj):
+        if 'syndication' in obj.app_data and 'description' in obj.app_data['syndication']:
+            return obj.app_data['syndication']['description']
         return self.title(obj)
 
     def item_pubdate(self, item):

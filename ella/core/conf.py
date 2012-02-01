@@ -2,8 +2,8 @@ from ella.utils.settings import Settings
 from django.utils.datetime_safe import datetime
 
 # caching
-CACHE_TIMEOUT = 10*60
-CACHE_TIMEOUT_LONG = 60*60
+CACHE_TIMEOUT = 10 * 60
+CACHE_TIMEOUT_LONG = 60 * 60
 
 # Box
 BOX_INFO = 'ella.core.box.BOX_INFO'
@@ -30,5 +30,11 @@ ECACHE_INFO = 'ella.core.middleware.ECACHE_INFO'
 
 DOUBLE_RENDER = False
 DOUBLE_RENDER_EXCLUDE_URLS = None
+
+RELATED_FINDERS = {
+    'default': 'ella.core.related_finders.related_and_category',
+    'directly': 'ella.core.related_finders.related_only'
+}
+DEFAULT_RELATED_FINDER = 'default'
 
 core_settings = Settings('ella.core.conf', '')

@@ -70,10 +70,15 @@ def get_category_key(func, category):
 
 class Category(models.Model):
     """
-    Basic building block of ella-based sites. All the published content is divided into categories -
-    every Publishable object
-        has a ForeignKey to it's primary Category
-        can be published in other categories (aka "secondary" categories) via Listing
+    ``Category`` is the **basic building block of Ella-based sites**. All the
+    published content is divided into categories -
+    every ``Publishable`` object has a ``ForeignKey`` to it's primary ``Category``.
+    
+    This primary category is then used to build up object's URL when using
+    `Category.get_absolute_url` method. 
+    
+    Besides that, objects can be published in other categories
+    (aka "secondary" categories) via ``Listing``.
 
     Every site has exactly one root category (without a parent) that serve's as the sites's homepage.
 
@@ -102,7 +107,7 @@ class Category(models.Model):
         super(Category, self).save(**kwargs)
         if old_tree_path != self.tree_path:
             # the tree_path has changed, update children
-            children = Category.objects.filter(tree_path__startswith=old_tree_path+'/').order_by('tree_path')
+            children = Category.objects.filter(tree_path__startswith=old_tree_path + '/').order_by('tree_path')
             for child in children:
                 child.save(force_update=True)
 

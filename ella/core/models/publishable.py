@@ -12,12 +12,13 @@ from django.contrib.redirects.models import Redirect
 
 from jsonfield.fields import JSONField
 
-from ella.core.managers import ListingManager, RelatedManager
-from ella.core.cache import get_cached_object, CachedGenericForeignKey, CachedForeignKey
-from ella.core.models.main import Category, Author, Source
-from ella.photos.models import Photo
 from ella.core.box import Box
 from ella.core.conf import core_settings
+from ella.core.cache import get_cached_object, CachedGenericForeignKey, \
+    CachedForeignKey
+from ella.core.managers import ListingManager, RelatedManager
+from ella.core.models.main import Category, Author, Source
+from ella.photos.models import Photo
 
 def PublishableBox(publishable, box_type, nodelist, model=None):
     "add some content type info of self.target"
@@ -28,6 +29,7 @@ def PublishableBox(publishable, box_type, nodelist, model=None):
     if box_class == PublishableBox:
         box_class = Box
     return box_class(publishable, box_type, nodelist, model=model)
+
 
 class Publishable(models.Model):
     """
@@ -46,17 +48,20 @@ class Publishable(models.Model):
 
     # Authors and Sources
     authors = models.ManyToManyField(Author, verbose_name=_('Authors'))
-    source = models.ForeignKey(Source, blank=True, null=True, verbose_name=_('Source'))
+    source = models.ForeignKey(Source, blank=True, null=True,
+        verbose_name=_('Source'))
 
     # Main Photo
-    photo = CachedForeignKey(Photo, blank=True, null=True, verbose_name=_('Photo'))
+    photo = CachedForeignKey(Photo, blank=True, null=True, on_delete=models.SET_NULL,
+        verbose_name=_('Photo'))
 
     # Description
     description = models.TextField(_('Description'), blank=True)
 
     # Publish data
     published = models.BooleanField(_('Published'))
-    publish_from = models.DateTimeField(_('Publish from'), default=core_settings.PUBLISH_FROM_WHEN_EMPTY, db_index=True)
+    publish_from = models.DateTimeField(_('Publish from'),
+        default=core_settings.PUBLISH_FROM_WHEN_EMPTY, db_index=True)
     publish_to = models.DateTimeField(_("End of visibility"), null=True, blank=True)
     static = models.BooleanField(_('static'), default=False)
 
@@ -67,6 +72,9 @@ class Publishable(models.Model):
         app_label = 'core'
         verbose_name = _('Publishable object')
         verbose_name_plural = _('Publishable objects')
+
+    def __unicode__(self):
+        return self.title
 
     def get_absolute_url(self, domain=False):
         " Get object's URL. "
@@ -106,8 +114,7 @@ class Publishable(models.Model):
 
     def get_domain_url_admin_tag(self):
         if self.get_domain_url() is not None:
-            #return mark_safe(u'<a href="%s">url</a>' % ( self.get_domain_url() ) )
-            return mark_safe(u'<a href="%s">url</a>' % ( self.get_domain_url() ) )
+            return mark_safe(u'<a href="%s">url</a>' % (self.get_domain_url()))
         else:
             return self.get_domain_url()
     get_domain_url_admin_tag.short_description = _('URL')
@@ -122,10 +129,12 @@ class Publishable(models.Model):
             new_path = self.get_absolute_url()
 
             if old_path != new_path and new_path:
-                redirect, created = Redirect.objects.get_or_create(old_path=old_path, site=self.category.site)
+                redirect = Redirect.objects.get_or_create(old_path=old_path,
+                    site=self.category.site)[0]
                 redirect.new_path = new_path
                 redirect.save(force_update=True)
-                Redirect.objects.filter(new_path=old_path).exclude(pk=redirect.pk).update(new_path=new_path)
+                Redirect.objects.filter(new_path=old_path).exclude(
+                    pk=redirect.pk).update(new_path=new_path)
         return super(Publishable, self).save(**kwargs)
 
     def delete(self):
@@ -133,13 +142,11 @@ class Publishable(models.Model):
         Redirect.objects.filter(new_path=url).delete()
         return super(Publishable, self).delete()
 
-    def __unicode__(self):
-        return self.title
-
     def is_published(self):
         "Return True if the Publishable is currently active."
         now = datetime.now()
-        return self.published and now > self.publish_from and (self.publish_to is None or now < self.publish_to)
+        return self.published and now > self.publish_from and \
+            (self.publish_to is None or now < self.publish_to)
 
 
 def ListingBox(listing, *args, **kwargs):
@@ -147,14 +154,15 @@ def ListingBox(listing, *args, **kwargs):
     obj = listing.publishable
     return obj.box_class(obj, *args, **kwargs)
 
+
 class Listing(models.Model):
     """
-    Listing of an object in a category. Each and every object that have it's own detail page must have a Listing object
-    that is valid (not expired) and places him in the object's main category. Any object can be listed in any number of
-    categories (but only once per category). Even if the object is listed in other categories besides its main category,
-    its detail page's url still belongs to the main one.
-
-    see doc/listing.txt for more details on Listings
+    Listing of an ``Publishable`` in a ``Category``. Each and every object that have it's 
+    own detail page must have a ``Listing`` object that is valid (not expired) and
+    places him in the object's main category. Any object can be listed in any
+    number of categories (but only once per category). Even if the object is
+    listed in other categories besides its main category, its detail page's url
+    still belongs to the main one.
     """
     box_class = staticmethod(ListingBox)
 
@@ -164,9 +172,21 @@ class Listing(models.Model):
     publish_from = models.DateTimeField(_("Start of listing"), db_index=True)
     publish_to = models.DateTimeField(_("End of listing"), null=True, blank=True)
 
-    commercial = models.BooleanField(_("Commercial"), default=False, help_text=_("Check this if the listing is of a commercial content."))
+    commercial = models.BooleanField(_("Commercial"), default=False,
+        help_text=_("Check this if the listing is of a commercial content."))
 
     objects = ListingManager()
+
+    class Meta:
+        app_label = 'core'
+        verbose_name = _('Listing')
+        verbose_name_plural = _('Listings')
+
+    def __unicode__(self):
+        try:
+            return _(u'%s listed in %s') % (self.publishable, self.category)
+        except:
+            return _('Broken listing')
 
     @property
     def target(self):
@@ -181,20 +201,14 @@ class Listing(models.Model):
     def get_publish_from(self):
         return self.publish_from
 
-    def __unicode__(self):
-        try:
-            return u'%s listed in %s' % (self.publishable, self.category)
-        except:
-            return 'Broken listing'
-
-    class Meta:
-        app_label = 'core'
-        verbose_name = _('Listing')
-        verbose_name_plural = _('Listings')
 
 class Related(models.Model):
     """
-    Related objects - model for recording related items. For example related articles.
+    Related objects - model for recording related ``Publishable`` objects.
+    
+    An example would be two articles sharing a similar topic. When something
+    like this happens, a ``Related`` instance connecting the objects should
+    be created.
     """
     publishable = models.ForeignKey(Publishable, verbose_name=_('Publishable'))
 
@@ -204,11 +218,12 @@ class Related(models.Model):
 
     objects = RelatedManager()
 
-    def __unicode__(self):
-        return u'%s relates to %s' % (self.publishable, self.related)
-
     class Meta:
         app_label = 'core'
         verbose_name = _('Related')
         verbose_name_plural = _('Related')
+
+    def __unicode__(self):
+        return _(u'%s relates to %s') % (self.publishable, self.related)
+
 

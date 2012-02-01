@@ -4,6 +4,5 @@ anyjson
 PIL
 
 feedparser
-django-tagging
 git+https://github.com/bradjasper/django-jsonfield.git#egg=django-jsonfield
 

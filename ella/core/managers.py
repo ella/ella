@@ -1,9 +1,9 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from django.db import models
-from django.db.models import F, Q
-from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.contrib.contenttypes.models import ContentType
+from django.utils.importlib import import_module
 from django.utils.encoding import smart_str
 
 from ella.core.cache import cache_this
@@ -11,72 +11,38 @@ from ella.core.conf import core_settings
 
 
 class RelatedManager(models.Manager):
-    def get_related_for_object(self, obj, count, mods=[], only_from_same_site=True):
-        from ella.core.models import Publishable
+    def get_related_for_object(self, obj, count, finder=core_settings.DEFAULT_RELATED_FINDER,
+        mods=[], only_from_same_site=True):
+        """
+        Returns at most ``count`` publishable objects related to ``obj`` using
+        named related finder ``finder``.
+        
+        If only specific type of publishable is prefered, use ``mods`` attribute
+        to list required classes.
+        
+        Finally, use ``only_from_same_site`` if you don't want cross-site
+        content.
+        
+        ``finder`` atribute uses ``RELATED_FINDERS`` settings to find out
+        what finder function to use. If none is specified, ``DEFAULT_RELATED_FINDER``
+        is used to perform the query.  
+        """
+        if not core_settings.RELATED_FINDERS.has_key(finder):
+            raise ImproperlyConfigured('Named finder %r specified but cannot be '
+                'found in RELATED_FINDERS settings.' % finder)
 
-        # manually entered dependencies
-
-        qset = Publishable.objects.filter(
-                related__related_ct=ContentType.objects.get_for_model(obj),
-                related__related_id=obj.pk
-            )
-        if mods:
-            ct_ids = [ContentType.objects.get_for_model(m).pk for m in mods]
-            qset = qset.filter(content_type__in=ct_ids)
-        if only_from_same_site:
-            qset = qset.filter(category__site__pk=settings.SITE_ID)
-        related = list(qset[:count])
-
-        if len(related) >= count:
-            return related
-
-        count -= len(related)
-
-        # related objects via tags
+        finder_modstr = core_settings.RELATED_FINDERS[finder]
+        module, attr = finder_modstr.rsplit('.', 1)
         try:
-            from tagging.models import TaggedItem
-            if TaggedItem._meta.installed:
-                # we are only tagging Publishables, not individual content types
-                if isinstance(obj, Publishable):
-                    obj = obj.publishable_ptr
-
-                qset = Publishable.objects.filter(
-                        publish_from__lte=datetime.now(),
-                        published=True,
-                    ).distinct()
-                if mods:
-                    qset = qset.filter(content_type__in=ct_ids)
-                if only_from_same_site:
-                    qset = qset.filter(category__site__pk=settings.SITE_ID)
-
-                #print qset
-                #print TaggedItem.objects.all()
-                to_add = TaggedItem.objects.get_related(obj, qset, num=count+len(related))
-                #print to_add
-                for rel in to_add:
-                    if rel != obj and rel not in related:
-                        count -= 1
-                        related.append(rel)
-                    if count <= 0:
-                        return related
+            mod = import_module(module)
         except ImportError, e:
-            pass
+            raise ImproperlyConfigured('Error importing related finder %s: "%s"' % (finder_modstr, e))
+        try:
+            finder_func = getattr(mod, attr)
+        except AttributeError, e:
+            raise ImproperlyConfigured('Error importing related finder %s: "%s"' % (finder_modstr, e))
 
-        # top objects in given category
-        if count > 0:
-            from ella.core.models import Listing
-            cat = obj.category
-            listings = Listing.objects.get_listing(category=cat, count=count+len(related), mods=mods)
-            for l in listings:
-                t = l.target
-                if t != obj and t not in related:
-                    related.append(t)
-                    count -= 1
-
-                if count <= 0:
-                    return related
-
-        return related
+        return finder_func(obj, count, mods, only_from_same_site)
 
 
 def get_listings_key(func, self, category=None, count=10, offset=1, mods=[], content_types=[], **kwargs):
@@ -173,7 +139,7 @@ class ListingManager(models.Manager):
         while len(out) < count:
             skip = 0
             # 2 i a reasonable value for padding, wouldn't you say dear Watson?
-            for l in qset[offset:limit+2]:
+            for l in qset[offset:limit + 2]:
                 if l.publishable_id not in seen:
                     seen.add(l.publishable_id)
                     out.append(l)

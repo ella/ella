@@ -44,10 +44,10 @@ class TestFeeds(TestCase):
         f.close()
 
         photo = Photo(
-            title = u"Example 中文 photo",
-            slug = u"example-photo",
-            height = 200,
-            width = 100,
+            title=u"Example 中文 photo",
+            slug=u"example-photo",
+            height=200,
+            width=100,
         )
 
         photo.image.save("bazaaah", file)
@@ -80,6 +80,20 @@ class TestFeeds(TestCase):
 
         tools.assert_equals(len(self.publishables), len(d['items']))
 
+    def test_title_defaults_to_category_title(self):
+        tools.assert_true(self._feeder.title(self.category), self.category.title)
+
+    def test_title_uses_app_data_when_set(self):
+        self.category.app_data = {'syndication': {'title': 'SYNDICATION_TITLE'}}
+        tools.assert_true(self._feeder.title(self.category), 'SYNDICATION_TITLE')
+
+    def test_description_defaults_to_category_title(self):
+        tools.assert_true(self._feeder.title(self.category), self.category.title)
+
+    def test_description_uses_app_data_when_set(self):
+        self.category.app_data = {'syndication': {'description': 'SYNDICATION_DESCRIPTION'}}
+        tools.assert_true(self._feeder.description(self.category), 'SYNDICATION_DESCRIPTION')
+
     def test_get_enclosure_uses_original_when_format_not_set(self):
         self._set_photo()
         tools.assert_true(self.publishable.photo is not None)
@@ -100,16 +114,16 @@ class TestFeeds(TestCase):
         f = Format.objects.create(name=existent_format_name, max_width=10, max_height=10,
             flexible_height=False, stretch=False, nocrop=False)
         f.sites = [self.site_id]
-        
+
         self._set_photo()
         tools.assert_true(self.publishable.photo is not None)
         original = self.publishable.photo.image
         new = self._feeder.get_enclosure_image(self.only_publishable, enc_format=existent_format_name)
         tools.assert_not_equals(unicode(original), unicode(new))
-    
+
     def test_get_enclosure_returns_none_when_no_image_set(self):
         tools.assert_equals(self._feeder.get_enclosure_image(self.only_publishable), None)
-    
-    
+
+
 
 
