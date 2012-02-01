@@ -104,7 +104,8 @@ class Photo(models.Model):
             # FIXME: better unique identifier, supercalifragilisticexpialidocious?
             self.slug = ''
             super(Photo, self).save(force_insert, force_update)
-            self.width, self.height = get_image_dimensions(self.image.path)
+            #self.width, self.height = get_image_dimensions(self.image)
+            self.width, self.height = self.image.width, self.image.height
             self.slug = str(self.id) + '-' + slugify(self.title)
             # truncate slug in order to fit in an ImageField and/or paths in Redirects
             self.slug = self.slug[:64]
@@ -114,13 +115,13 @@ class Photo(models.Model):
             old = Photo.objects.get(pk = self.pk)
             image_changed = old.image != self.image
         # rename image by slug
-        imageType = detect_img_type(self.image.path)
+        imageType = detect_img_type(self.image)
         if imageType is not None:
             self.image = file_rename(self.image.name.encode('utf-8'), self.slug, photos_settings.TYPE_EXTENSION[ imageType ])
         # delete formatedphotos if new image was uploaded
         if image_changed:
             super(Photo, self).save(force_insert=force_insert, force_update=force_update, **kwargs)
-            self.width, self.height = get_image_dimensions(self.image.path)
+            self.width, self.height = self.image.width, self.image.height
             force_insert, force_update = False, True
             for f_photo in self.formatedphoto_set.all():
                 f_photo.delete()

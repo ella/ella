@@ -1,8 +1,8 @@
 from PIL import Image
 
-def detect_img_type(imagePath):
+def detect_img_type(file_or_path):
     try:
-        im = Image.open(imagePath)
+        im = Image.open(file_or_path)
         return im.format
     except IOError:
         return None
