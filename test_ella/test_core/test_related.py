@@ -11,6 +11,7 @@ from ella.photos.models import Photo
 
 from test_ella.test_core import create_basic_categories, create_and_place_a_publishable, \
         create_and_place_more_publishables, list_all_publishables_in_category_by_hour
+from ella.core.related_finders import fillup_from_category
 
 class GetRelatedTestCase(TestCase):
     def setUp(self):
@@ -30,6 +31,7 @@ class TestGetRelated(GetRelatedTestCase):
                 expected,
                 [p.pk for p in Related.objects.get_related_for_object(self.publishable, len(expected))]
             )
+
 
     def test_returns_at_most_count_objects(self):
         tools.assert_equals(
@@ -57,6 +59,16 @@ class TestGetRelated(GetRelatedTestCase):
                 [p.pk for p in Related.objects.get_related_for_object(self.publishable, 2)]
             )
 
+    def test_returns_only_manual_objects_when_direct_finder_specified(self):
+        r = Related(publishable=self.publishables[0])
+        r.related = self.publishable
+        r.save()
+
+        tools.assert_equals(
+                [self.publishables[0].pk],
+                [p.pk for p in Related.objects.get_related_for_object(self.publishable, 2, finder='directly')]
+            )
+
     def test_returns_unique_objects(self):
         r = Related(publishable=self.publishables[-2])
         r.related = self.publishable
@@ -72,6 +84,21 @@ class TestGetRelated(GetRelatedTestCase):
         r.related = self.publishable
         r.save()
         tools.assert_equals([], Related.objects.get_related_for_object(self.publishable, 3, mods=[Related]))
+
+
+    def test_fillup_from_category_fills_up_to_the_limit(self):
+        expected = map(lambda x: x.pk, reversed(self.publishables))
+        tools.assert_equals(
+                expected,
+                [p.pk for p in fillup_from_category([], self.publishable, count=len(expected))]
+            )
+
+    def test_fillup_from_category_does_nothing_when_count_is_satisfied(self):
+        expected = [p for p in reversed(self.publishables)]
+        tools.assert_equals(
+                [p.pk for p in expected],
+                [p.pk for p in fillup_from_category(expected, self.publishable, count=len(expected))]
+            )
 
 
 class TestRelatedTagParser(UnitTestCase):
