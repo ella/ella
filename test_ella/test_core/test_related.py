@@ -4,14 +4,14 @@ from django.test import TestCase
 
 from nose import tools
 
-from ella.core.templatetags.related import parse_related_tag, RelatedNode
-from ella.core.models import Related, Publishable
 from ella.articles.models import Article
+from ella.core.models import Related, Publishable
+from ella.core.related_finders import fillup_from_category
+from ella.core.templatetags.related import parse_related_tag
 from ella.photos.models import Photo
 
 from test_ella.test_core import create_basic_categories, create_and_place_a_publishable, \
         create_and_place_more_publishables, list_all_publishables_in_category_by_hour
-from ella.core.related_finders import fillup_from_category
 
 class GetRelatedTestCase(TestCase):
     def setUp(self):
