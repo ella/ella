@@ -16,8 +16,8 @@ DISABLE_CACHE_TEMPLATE = DEBUG
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-	'NAME': join(gettempdir(), 'ella_test_ella.db'),
-	'TEST_NAME': join(gettempdir(), 'test_ella_test_ella.db'),
+    	'NAME': join(gettempdir(), 'ella_test_ella.db'),
+    	'TEST_NAME': join(gettempdir(), 'test_ella_test_ella.db'),
     }
 }
 
@@ -43,5 +43,3 @@ SECRET_KEY = '88b-01f^x4lh$-s5-hdccnicekg07)niir2g6)93!0#k(=mfv$'
 CACHE_BACKEND = 'dummy://'
 
 USE_PRIORITIES = True
-
-TAG_LISTINGS_PAGINATE_BY = 1

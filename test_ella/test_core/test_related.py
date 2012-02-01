@@ -74,24 +74,6 @@ class TestGetRelated(GetRelatedTestCase):
         tools.assert_equals([], Related.objects.get_related_for_object(self.publishable, 3, mods=[Related]))
 
 
-class TestGetRelatedWithtagging(GetRelatedTestCase):
-    def setUp(self):
-        try:
-            import tagging
-        except ImportError, e:
-            raise self.SkipTest()
-        super(TestGetRelatedWithtagging, self).setUp()
-        from tagging.models import Tag, TaggedItem
-        self.Tag = Tag
-        self.TaggedItem = TaggedItem
-
-    def test_returns_object_with_similar_tags(self):
-        self.Tag.objects.update_tags(self.only_publishable, 'tag1 tag2')
-        p = Publishable.objects.get(pk=self.publishables[0].pk)
-        self.Tag.objects.update_tags(p, 'tag1 tag2')
-
-        tools.assert_equals([p], Related.objects.get_related_for_object(self.publishable, 1))
-
 class TestRelatedTagParser(UnitTestCase):
     '''
     {% related N [app_label.Model, ...] for object as var_name %}
@@ -101,44 +83,61 @@ class TestRelatedTagParser(UnitTestCase):
         self.minimal_args = ['related', '10', 'for', 'obj_var', 'as', 'some_var']
 
     def test_minimal_args(self):
-        obj_var, count, var_name, mods = parse_related_tag(self.minimal_args)
+        obj_var, count, var_name, mods, finder = parse_related_tag(self.minimal_args)
         tools.assert_equals('obj_var', obj_var)
         tools.assert_equals(10, count)
         tools.assert_equals('some_var', var_name)
         tools.assert_equals([], mods)
+        tools.assert_equals(None, finder)
 
     def test_limit_bu_model(self):
         self.minimal_args.insert(2, 'articles.article')
-        obj_var, count, var_name, mods = parse_related_tag(self.minimal_args)
+        obj_var, count, var_name, mods, finder = parse_related_tag(self.minimal_args)
         tools.assert_equals('obj_var', obj_var)
         tools.assert_equals(10, count)
         tools.assert_equals('some_var', var_name)
         tools.assert_equals([Article], mods)
+        tools.assert_equals(None, finder)
 
     def test_limit_bu_more_models(self):
         self.minimal_args.insert(2, 'articles.article,photos.photo')
-        obj_var, count, var_name, mods = parse_related_tag(self.minimal_args)
+        obj_var, count, var_name, mods, finder = parse_related_tag(self.minimal_args)
         tools.assert_equals('obj_var', obj_var)
         tools.assert_equals(10, count)
         tools.assert_equals('some_var', var_name)
         tools.assert_equals([Article, Photo], mods)
+        tools.assert_equals(None, finder)
 
     def test_limit_bu_more_models_with_space(self):
         self.minimal_args.insert(2, 'articles.article,')
         self.minimal_args.insert(3, 'photos.photo')
-        obj_var, count, var_name, mods = parse_related_tag(self.minimal_args)
+        obj_var, count, var_name, mods, finder = parse_related_tag(self.minimal_args)
         tools.assert_equals('obj_var', obj_var)
         tools.assert_equals(10, count)
         tools.assert_equals('some_var', var_name)
         tools.assert_equals([Article, Photo], mods)
+        tools.assert_equals(None, finder)
 
     def test_limit_bu_more_models_with_spaces_around_comma(self):
         self.minimal_args.insert(2, 'articles.article')
         self.minimal_args.insert(3, ',')
         self.minimal_args.insert(4, 'photos.photo')
-        obj_var, count, var_name, mods = parse_related_tag(self.minimal_args)
+        obj_var, count, var_name, mods, finder = parse_related_tag(self.minimal_args)
         tools.assert_equals('obj_var', obj_var)
         tools.assert_equals(10, count)
         tools.assert_equals('some_var', var_name)
         tools.assert_equals([Article, Photo], mods)
+        tools.assert_equals(None, finder)
+
+    def test_finder_is_defined_before_model_specs(self):
+        self.minimal_args.insert(2, 'directly')
+        self.minimal_args.insert(3, 'articles.article')
+        self.minimal_args.insert(4, ',')
+        self.minimal_args.insert(5, 'photos.photo')
+        obj_var, count, var_name, mods, finder = parse_related_tag(self.minimal_args)
+        tools.assert_equals('obj_var', obj_var)
+        tools.assert_equals(10, count)
+        tools.assert_equals('some_var', var_name)
+        tools.assert_equals([Article, Photo], mods)
+        tools.assert_equals("directly", finder)
 
