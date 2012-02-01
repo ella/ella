@@ -52,7 +52,8 @@ class Publishable(models.Model):
         verbose_name=_('Source'))
 
     # Main Photo
-    photo = CachedForeignKey(Photo, blank=True, null=True, verbose_name=_('Photo'))
+    photo = CachedForeignKey(Photo, blank=True, null=True, on_delete=models.SET_NULL,
+        verbose_name=_('Photo'))
 
     # Description
     description = models.TextField(_('Description'), blank=True)
