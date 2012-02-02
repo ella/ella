@@ -120,7 +120,7 @@ The first thing you need to do is to define the box sublcass itself::
             })
             return context
 
-Note the ``get_context`` method. Since ``width`` and ``height`` parameters are specific to our ``VideoBox`` and not recognized by other boxes, we need to handle them a pass them **into the include context**. ``self.params`` is a dictionary holding parameters used to call the box. We provide sane defaults when the parameters are not provided so that we can still call the box by using simple ``{% box video_player for video_object %}{% endbox %}``.
+Note the ``get_context`` method. Since ``width`` and ``height`` parameters are specific to our ``VideoBox`` and not recognized by other boxes, we need to handle them and pass them **into the include context**. ``self.params`` is a dictionary holding parameters used to call the box. We provide sane defaults when the parameters are not provided so that we can still call the box by using simple ``{% box video_player for video_object %}{% endbox %}``.
 
 Next step is to let Ella know, that we want a **special type** of box to be used with our ``Video``. If we didn't do that, Ella would use a basic ``Box`` class which is missing the ``width`` and ``height`` parameters. To tie our model with the ``VideoBox`` set the ``box_class`` class variable on the ``Video`` model::
 
@@ -150,7 +150,7 @@ Overriding Publishable URLs
 Adding custom actions
 =====================
 
-Consider a situation, when we would like to rate to have discussion about the video on a separate page while **keeping the nice URL** prefix Ella creates for it's publishable objects. There is a simple solution for that. Ella's custom URL resolver allows us to **add actions** for the Publishable objects easily.
+Consider a situation, when we would like to have discussion about the video on a separate page while **keeping the nice URL** prefix Ella creates for it's publishable objects. There is a simple solution for that. Ella's custom URL resolver allows us to **add actions** for the Publishable objects easily.
 
 We would like our URL to have following form::
 
@@ -205,7 +205,7 @@ Views that are used with Ella's resolver always accept ``request`` (which is a n
 Overriding objects' detail
 ==========================
 
-Besides custom action, it is also possible to completely override the view which handles rendering of objects' detail. Such a requirement might occur in there situations:
+Besides custom actions, it is also possible to completely override the view which handles rendering of object detail page. Such a requirement might occur in these situations:
 
 * You need to add custom object-related data to the **context** in the detail template.
 * You wish to change the way the view itself **works**. This can be used for advanced behavior changes which are needed only rarely.
