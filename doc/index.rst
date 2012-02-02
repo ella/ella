@@ -33,6 +33,8 @@ Contents:
     :glob: 
    
     quickstart
+    developer
+    html_coder
     core
     features
     plugins
