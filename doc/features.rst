@@ -8,20 +8,40 @@ Features
 Template overview
 *****************
 
-.. _features-taking-advantage-of-inheritance:
+Basic templates
+===============
 
-Taking advantage of template inheritance
-****************************************
+Advanced templates
+==================
+
+Fallback mechanisms
+===================
 
 .. _features-category-detail:
 
 Category detail page
 ********************
 
+Homepage
+========
+
+Other categories
+================
+
 .. _features-object-detail:
 
 Object detail page
 ******************
+
+.. _features-category-archives:
+
+Archive pages
+*************
+
+.. _features-custom-views:
+
+Integrating custom views
+************************
 
 .. _features-positions:
 
@@ -39,8 +59,6 @@ can also be used to insert raw HTML into the template.
 Features
 ========
 
-Basic features:
-
 **inheritance**
     When called from the template tag, the application will first try and
     locate the active position for the given category, then, if such position
@@ -57,14 +75,14 @@ Basic features:
     You can check if any position for a given set of names is active using the
     ifposition templatetag.
 
-Usage
-=====
+Using positions in your pages
+=============================
 
 Position is defined in the admin interface and used from the templates via two
 templatetags.
 
-{% position %}
---------------
+``{% position %}`` template tag
+-------------------------------
 
 Render a given position for category.
 
@@ -94,8 +112,8 @@ passed to ``Box`` used for rendering the object. This can also be overriden
 from the database.
 
     
-{% ifposition %}
-----------------
+``{% ifposition %}`` template tag
+---------------------------------
 
 Render template according to the availability of given position names within
 given category.
@@ -116,20 +134,50 @@ given category, 'not there' otherwise.
 Working with photos
 *******************
 
+.. _features-photos-formats:
+
+Photo formats
+=============
+
+.. _features-photo-boxes:
+
+Boxes
+=====
+
+.. _features-using-other-backends:
+
+Using other backends
+====================
+
 .. _features-related:
 
 Working with related objects
 ****************************
+
+.. _features-what-are-related-objects:
+
+What are related objects?
+=========================
 
 .. _features-related-finders:
 
 Related finders
 ===============
 
+.. _features-related-templatetag:
+
+``{% related %}`` template tag
+==============================
+
 .. _features-incorporating-plugins:
 
 Incorporating plugins
 *********************
+
+.. _features-extending-metadata:
+
+Extending category/publishable metadata
+***************************************
 
 .. _features-caching:
 

@@ -12,3 +12,13 @@ Creating site menus
 
 Category-specific sidebars
 **************************
+
+.. _common-gotchas-taking-advantage-of-inheritance:
+
+Taking advantage of template inheritance
+****************************************
+
+.. _common-gotchas-static-pages:
+
+Static pages that ever don't change
+***********************************
