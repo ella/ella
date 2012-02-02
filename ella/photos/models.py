@@ -172,6 +172,14 @@ class Photo(models.Model):
         verbose_name = _('Photo')
         verbose_name_plural = _('Photos')
 
+FORMAT_CACHE = {}
+class FormatManager(models.Manager):
+    def get_for_name(self, name):
+        try:
+            return FORMAT_CACHE[name]
+        except KeyError:
+            FORMAT_CACHE[name] = format = get_cached_object(Format, name=name, sites__id=settings.SITE_ID)
+        return format
 
 class Format(models.Model):
     "Defines per-site photo sizes"
@@ -185,6 +193,8 @@ class Format(models.Model):
     nocrop = models.BooleanField(_('Do not crop'))
     resample_quality = models.IntegerField(_('Resample quality'), choices=photos_settings.FORMAT_QUALITY, default=85)
     sites = models.ManyToManyField(Site, verbose_name=_('Sites'))
+
+    objects = FormatManager()
 
     def get_blank_img(self):
         """
@@ -219,7 +229,7 @@ class FormatedPhotoManager(models.Manager):
             photo = None
 
         if not isinstance(format, Format):
-            format = get_cached_object(Format, name=format, sites__id=settings.SITE_ID)
+            format = Format.objects.get_for_name(format)
 
         if redis:
             p = redis.pipeline()
