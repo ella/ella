@@ -1,12 +1,5 @@
 from PIL import Image
 
-def detect_img_type(file_or_path):
-    try:
-        im = Image.open(file_or_path)
-        return im.format
-    except IOError:
-        return None
-
 class Formatter(object):
     def __init__(self, image, format, crop_box=None, important_box=None):
         self.image = image
