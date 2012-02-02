@@ -1,8 +1,32 @@
-.. _positions:
+.. _features:
 
-=========
-Positions
-=========
+Features
+########
+
+.. _features-template-overview:
+
+Template overview
+*****************
+
+.. _features-taking-advantage-of-inheritance:
+
+Taking advantage of template inheritance
+****************************************
+
+.. _features-category-detail:
+
+Category detail page
+********************
+
+.. _features-object-detail:
+
+Object detail page
+******************
+
+.. _features-positions:
+
+Defining positions on the page
+******************************
 
 Position as understood by this application is a part of the template with
 content specific for category in which the template is rendered. It allows
@@ -11,7 +35,6 @@ admin interface. Position is identified by it's name.
 
 Purpose of a position is primarilly to display objects in form of a box, but it
 can also be used to insert raw HTML into the template.
-
 
 Features
 ========
@@ -53,17 +76,17 @@ Syntax::
 
 Parameters:
 
-    ==========================  ================================================
-    Name                        Description
-    ==========================  ================================================
-    ``POSITION_NAME``           Name of the position to lookup 
-    ``CATEGORY``                The category for which to render the position - 
-                                either a ``Category`` instance or category's
-                                ``slug``.
-    ``BOX_TYPE``                Default type of the box to use, can be overriden 
-                                from the admin.
-    ``nofallback``              If present, do not fall back to parent categories
-    ==========================  ================================================
+==========================  ================================================
+Name                        Description
+==========================  ================================================
+``POSITION_NAME``           Name of the position to lookup 
+``CATEGORY``                The category for which to render the position - 
+                            either a ``Category`` instance or category's
+                            ``slug``.
+``BOX_TYPE``                Default type of the box to use, can be overriden 
+                            from the admin.
+``nofallback``              If present, do not fall back to parent categories
+==========================  ================================================
 
 
 Text inside the tag (between ``{% position %}`` and ``{% endposition %}``) is
@@ -88,3 +111,37 @@ Syntax::
 Renders 'present' if any of the space separated position name is active for the
 given category, 'not there' otherwise.
 
+.. _features-photos:
+
+Working with photos
+*******************
+
+.. _features-related:
+
+Working with related objects
+****************************
+
+.. _features-related-finders:
+
+Related finders
+===============
+
+.. _features-incorporating-plugins:
+
+Incorporating plugins
+*********************
+
+.. _features-caching:
+
+Caching
+*******
+
+.. _features-double-render:
+
+Double rendering
+================
+
+.. _features-deployments:
+
+Deployment
+**********
