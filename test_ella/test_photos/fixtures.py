@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from tempfile import mkstemp
 from PIL import Image
+from cStringIO import StringIO
 
 from django.conf import settings
 from django.contrib.sites.models import Site
-from django.core.files.base import ContentFile
+from django.core.files.uploadedfile import InMemoryUploadedFile
 
 from ella.photos.models import Format, Photo
 
@@ -32,8 +33,17 @@ def create_photo(case, **kwargs):
     case.image.save(case.image_file_name, format="jpeg")
 
     f = open(case.image_file_name)
-    file = ContentFile(f.read())
+    file = StringIO(f.read())
     f.close()
+
+    f = InMemoryUploadedFile(
+            file = file,
+            field_name = 'image',
+            name = 'example-photo.jpg',
+            content_type = 'image/jpeg',
+            size = len(file.getvalue()),
+            charset = None
+        )
 
     data = dict(
         title = u"Example 中文 photo",
@@ -44,8 +54,10 @@ def create_photo(case, **kwargs):
     data.update(kwargs)
 
     case.photo = Photo(**data)
+    image_field = Photo._meta.get_field('image')
+    image_field.save_form_data(case.photo, f)
 
-    case.photo.image.save("bazaaah", file)
     case.photo.save()
+    case.photo._pil_image = case.image
 
     return case.photo
