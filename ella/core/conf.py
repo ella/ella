@@ -32,9 +32,13 @@ DOUBLE_RENDER = False
 DOUBLE_RENDER_EXCLUDE_URLS = None
 
 RELATED_FINDERS = {
-    'default': 'ella.core.related_finders.related_and_category',
-    'directly': 'ella.core.related_finders.related_only'
+    'default': (
+        'ella.core.related_finders.directly_related',
+        'ella.core.related_finders.related_by_category',
+    ),
+    'directly': (
+        'ella.core.related_finders.directly_related',
+    )
 }
-DEFAULT_RELATED_FINDER = 'default'
 
 core_settings = Settings('ella.core.conf', '')

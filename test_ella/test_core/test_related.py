@@ -6,7 +6,6 @@ from nose import tools
 
 from ella.articles.models import Article
 from ella.core.models import Related, Publishable
-from ella.core.related_finders import fillup_from_category
 from ella.core.templatetags.related import parse_related_tag
 from ella.photos.models import Photo
 
@@ -24,7 +23,7 @@ class GetRelatedTestCase(TestCase):
 
         list_all_publishables_in_category_by_hour(self, category=self.publishable.category)
 
-class TestGetRelated(GetRelatedTestCase):
+class TestDefaultRelatedFinder(GetRelatedTestCase):
     def test_returns_publishables_listed_in_same_cat_if_no_related(self):
         expected = map(lambda x: x.pk, reversed(self.publishables))
         tools.assert_equals(
@@ -79,26 +78,12 @@ class TestGetRelated(GetRelatedTestCase):
                 [p.pk for p in Related.objects.get_related_for_object(self.publishable, 3)]
             )
 
-    def test_returns_empty_if_no_object_of_given_model_is_availible(self):
+    def test_returns_empty_if_no_object_of_given_model_is_available(self):
         r = Related(publishable=self.publishables[0])
         r.related = self.publishable
         r.save()
         tools.assert_equals([], Related.objects.get_related_for_object(self.publishable, 3, mods=[Related]))
 
-
-    def test_fillup_from_category_fills_up_to_the_limit(self):
-        expected = map(lambda x: x.pk, reversed(self.publishables))
-        tools.assert_equals(
-                expected,
-                [p.pk for p in fillup_from_category([], self.publishable, count=len(expected))]
-            )
-
-    def test_fillup_from_category_does_nothing_when_count_is_satisfied(self):
-        expected = [p for p in reversed(self.publishables)]
-        tools.assert_equals(
-                [p.pk for p in expected],
-                [p.pk for p in fillup_from_category(expected, self.publishable, count=len(expected))]
-            )
 
 
 class TestRelatedTagParser(UnitTestCase):

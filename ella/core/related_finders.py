@@ -8,16 +8,12 @@ from django.contrib.contenttypes.models import ContentType
 
 from ella.core.models import Publishable
 
-def fillup_from_category(related, obj, count, mods=[], only_from_same_site=True):
+def related_by_category(obj, count, collected_so_far, mods=[], only_from_same_site=True):
     """
-    Given a ``related`` list, fills that list up to the ``count`` by top objects
-    listed in same category as ``obj``.
+    Returns other Publishable objects related to ``obj`` by using the same
+    category principle. Returns up to ``count`` objects.
     """
-    if len(related) >= count:
-        return related
-
-    count -= len(related)
-
+    related = collected_so_far
     # top objects in given category
     if count > 0:
         from ella.core.models import Listing
@@ -31,11 +27,10 @@ def fillup_from_category(related, obj, count, mods=[], only_from_same_site=True)
 
             if count <= 0:
                 return related
-
     return related
 
 
-def related_only(obj, count, mods=[], only_from_same_site=True):
+def directly_related(obj, count, collected_so_far, mods=[], only_from_same_site=True):
     """
     Returns objects related to ``obj`` up to ``count`` by searching 
     ``Related`` instances for the ``obj``. 
@@ -53,13 +48,5 @@ def related_only(obj, count, mods=[], only_from_same_site=True):
     return list(qset[:count])
 
 
-def related_and_category(obj, count, mods=[], only_from_same_site=True):
-    """
-    Returns objects related to ``obj`` up to ``count`` by searching 
-    ``Related`` instances for the ``obj`` and filling up missing items
-    from top objects listed in same category as ``obj``.
-    """
-    related = related_only(obj, count, mods, only_from_same_site)
-    return fillup_from_category(related, obj, count, mods, only_from_same_site)
 
 

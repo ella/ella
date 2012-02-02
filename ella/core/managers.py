@@ -11,8 +11,22 @@ from ella.core.conf import core_settings
 
 
 class RelatedManager(models.Manager):
-    def get_related_for_object(self, obj, count, finder=core_settings.DEFAULT_RELATED_FINDER,
-        mods=[], only_from_same_site=True):
+    def collect_related(self, finder_funcs, obj, count, *args, **kwargs):
+        """
+        Collects objects related to ``obj`` using a list of ``finder_funcs``.
+        Stops when required count is collected or the function list is 
+        exhausted. 
+        """
+        collected = []
+        for func in finder_funcs:
+            gathered = func(obj, count, collected, *args, **kwargs)
+            if gathered: collected += gathered
+            if len(collected) >= count:
+                return collected[:count]
+
+        return collected
+
+    def get_related_for_object(self, obj, count, finder=None, mods=[], only_from_same_site=True):
         """
         Returns at most ``count`` publishable objects related to ``obj`` using
         named related finder ``finder``.
@@ -24,25 +38,37 @@ class RelatedManager(models.Manager):
         content.
         
         ``finder`` atribute uses ``RELATED_FINDERS`` settings to find out
-        what finder function to use. If none is specified, ``DEFAULT_RELATED_FINDER``
-        is used to perform the query.  
+        what finder function to use. If none is specified, ``default``
+        is used to perform the query.
         """
+        if finder is None:
+            finder = 'default'
+
         if not core_settings.RELATED_FINDERS.has_key(finder):
             raise ImproperlyConfigured('Named finder %r specified but cannot be '
                 'found in RELATED_FINDERS settings.' % finder)
 
-        finder_modstr = core_settings.RELATED_FINDERS[finder]
-        module, attr = finder_modstr.rsplit('.', 1)
-        try:
-            mod = import_module(module)
-        except ImportError, e:
-            raise ImproperlyConfigured('Error importing related finder %s: "%s"' % (finder_modstr, e))
-        try:
-            finder_func = getattr(mod, attr)
-        except AttributeError, e:
-            raise ImproperlyConfigured('Error importing related finder %s: "%s"' % (finder_modstr, e))
+        # accept non-iterables too (single member named finders) 
+        finders_modstr = core_settings.RELATED_FINDERS[finder]
+        if not hasattr(finders_modstr, '__iter__'):
+            finders_modstr = (finders_modstr,)
 
-        return finder_func(obj, count, mods, only_from_same_site)
+        # gather all functions before actual use to prevent import errors
+        # during the real process
+        finder_funcs = []
+        for finder_modstr in finders_modstr:
+            module, attr = finder_modstr.rsplit('.', 1)
+            try:
+                mod = import_module(module)
+            except ImportError, e:
+                raise ImproperlyConfigured('Error importing related finder %s: "%s"' % (finder_modstr, e))
+            try:
+                finder_func = getattr(mod, attr)
+            except AttributeError, e:
+                raise ImproperlyConfigured('Error importing related finder %s: "%s"' % (finder_modstr, e))
+            finder_funcs.append(finder_func)
+
+        return self.collect_related(finder_funcs, obj, count, mods, only_from_same_site)
 
 
 def get_listings_key(func, self, category=None, count=10, offset=1, mods=[], content_types=[], **kwargs):
