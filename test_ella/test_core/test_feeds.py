@@ -32,26 +32,9 @@ class TestFeeds(TestCase):
         self._feeder = RSSTopCategoryListings('test', HttpRequest())
 
     def _set_photo(self):
-        from tempfile import mkstemp
-        from django.core.files.base import ContentFile
+        from test_ella.test_photos.fixtures import create_photo
 
-        image_file_name = mkstemp(suffix=".jpg", prefix="ella-feeds-tests-")[1]
-        image = Image.new('RGB', (200, 100), "black")
-        image.save(image_file_name, format="jpeg")
-
-        f = open(image_file_name)
-        file = ContentFile(f.read())
-        f.close()
-
-        photo = Photo(
-            title=u"Example 中文 photo",
-            slug=u"example-photo",
-            height=200,
-            width=100,
-        )
-
-        photo.image.save("bazaaah", file)
-        photo.save()
+        photo = create_photo(self)
 
         self.publishable.photo = photo
         self.publishable.save()

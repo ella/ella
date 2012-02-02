@@ -3,12 +3,12 @@ from PIL import Image
 from datetime import datetime
 from os import path
 from cStringIO import StringIO
+import os.path
 
 from django.db import models, IntegrityError
 from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import force_unicode, smart_str
 from django.contrib.sites.models import Site
-from django.core.files.uploadedfile import UploadedFile
-from django.core.files.images import get_image_dimensions
 from django.core.files.base import ContentFile
 from django.conf import settings
 from django.template.defaultfilters import slugify
@@ -18,10 +18,9 @@ from jsonfield.fields import JSONField
 from ella.core.models.main import Author, Source
 from ella.core.box import Box
 from ella.core.cache.utils import get_cached_object
-from ella.utils.filemanipulation import file_rename
 from ella.photos.conf import photos_settings
 
-from formatter import Formatter, detect_img_type
+from formatter import Formatter
 
 __all__ = ("Format", "FormatedPhoto", "Photo")
 
@@ -57,13 +56,24 @@ class PhotoBox(Box):
             })
         return cont
 
+def upload_to(instance, filename):
+    name, ext = os.path.splitext(filename)
+    if instance.slug:
+        name = instance.slug
+    ext = photos_settings.TYPE_EXTENSION.get(instance._get_image().format, ext.lower())
+
+    return os.path.join(
+        force_unicode(datetime.now().strftime(smart_str(photos_settings.UPLOAD_TO))),
+        name + ext
+    )
+
 class Photo(models.Model):
     "Represents original (unformated) photo."
     box_class = PhotoBox
     title = models.CharField(_('Title'), max_length=200)
     description = models.TextField(_('Description'), blank=True)
     slug = models.SlugField(_('Slug'), max_length=255)
-    image = models.ImageField(_('Image'), upload_to=photos_settings.UPLOAD_TO, height_field='height', width_field='width') # save it to YYYY/MM/DD structure
+    image = models.ImageField(_('Image'), upload_to=upload_to, height_field='height', width_field='width') # save it to YYYY/MM/DD structure
     width = models.PositiveIntegerField(editable=False)
     height = models.PositiveIntegerField(editable=False)
 
@@ -89,42 +99,50 @@ class Photo(models.Model):
             'height': self.height,
         }
 
-    def save(self, force_insert=False, force_update=False, **kwargs):
+    def _get_image(self):
+        if not hasattr(self, '_pil_image'):
+            self._pil_image = Image.open(self.image)
+        return self._pil_image
+
+    def save(self, **kwargs):
         """Overrides models.Model.save.
 
         - Generates slug.
         - Saves image file.
         """
+        if not self.width or not self.height:
+            self.width, self.height = self.image.width, self.image.height
 
         # prefill the slug with the ID, it requires double save
         if not self.id:
-            if isinstance(self.image, UploadedFile):
-                # due to PIL has read several bytes from image, position in file has to be reset
-                self.image.seek(0)
-            # FIXME: better unique identifier, supercalifragilisticexpialidocious?
+            img = self.image
+
+            # store dummy values first...
+            w, h = self.width, self.height
+            self.image = ''
+            self.width, self.height = w, h
             self.slug = ''
-            super(Photo, self).save(force_insert, force_update)
-            self.width, self.height = get_image_dimensions(self.image.path)
+
+            super(Photo, self).save(force_insert=True)
+
+            # ... so that we can generate the slug
             self.slug = str(self.id) + '-' + slugify(self.title)
             # truncate slug in order to fit in an ImageField and/or paths in Redirects
             self.slug = self.slug[:64]
-            force_insert, force_update = False, True
-            image_changed = False
+            # .. tha will be used in the image's upload_to function
+            self.image = img
+            # and the image will be saved properly
+            super(Photo, self).save(force_update=True)
         else:
-            old = Photo.objects.get(pk = self.pk)
-            image_changed = old.image != self.image
-        # rename image by slug
-        imageType = detect_img_type(self.image.path)
-        if imageType is not None:
-            self.image = file_rename(self.image.name.encode('utf-8'), self.slug, photos_settings.TYPE_EXTENSION[ imageType ])
-        # delete formatedphotos if new image was uploaded
-        if image_changed:
-            super(Photo, self).save(force_insert=force_insert, force_update=force_update, **kwargs)
-            self.width, self.height = get_image_dimensions(self.image.path)
-            force_insert, force_update = False, True
-            for f_photo in self.formatedphoto_set.all():
-                f_photo.delete()
-        super(Photo, self).save(force_insert=force_insert, force_update=force_update, **kwargs)
+            old = Photo.objects.get(pk=self.pk)
+
+            # delete formatedphotos if new image was uploaded
+            if old.image != self.image:
+                for f_photo in self.formatedphoto_set.all():
+                    f_photo.delete()
+
+            super(Photo, self).save(force_update=True)
+
         if redis:
             redis.hmset(REDIS_PHOTO_KEY % self.pk, self.get_image_info())
 
@@ -266,8 +284,7 @@ class FormatedPhoto(models.Model):
             p = self.photo
             important_box = (p.important_left, p.important_top, p.important_right, p.important_bottom)
 
-        self.photo.image.open()
-        formatter = Formatter(Image.open(self.photo.image), self.format, crop_box=crop_box, important_box=important_box)
+        formatter = Formatter(self.photo._get_image(), self.format, crop_box=crop_box, important_box=important_box)
 
         return formatter.format()
 
