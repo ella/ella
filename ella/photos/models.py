@@ -57,13 +57,14 @@ class PhotoBox(Box):
         return cont
 
 def upload_to(instance, filename):
+    name, ext = os.path.splitext(filename)
     if instance.slug:
-        name, ext = os.path.splitext(filename)
-        filename = instance.slug + ext
+        name = instance.slug
+    ext = photos_settings.TYPE_EXTENSION.get(instance._get_image().format, ext.lower())
 
     return os.path.join(
         force_unicode(datetime.now().strftime(smart_str(photos_settings.UPLOAD_TO))),
-        filename
+        name + ext
     )
 
 class Photo(models.Model):
