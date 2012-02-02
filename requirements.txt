@@ -4,5 +4,5 @@ anyjson
 PIL
 
 feedparser
-git+https://github.com/bradjasper/django-jsonfield.git
+-e git+https://github.com/bradjasper/django-jsonfield.git#egg=django-jsonfield
 
