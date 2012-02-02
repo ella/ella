@@ -18,7 +18,7 @@ setup(
 
     packages=find_packages(
         where='.',
-        exclude=('doc', 'test_ella', 'debian',)
+        exclude=('doc', 'debian',)
     ),
 
     include_package_data=True,
