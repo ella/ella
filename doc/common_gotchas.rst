@@ -22,3 +22,8 @@ Taking advantage of template inheritance
 
 Static pages that ever don't change
 ***********************************
+
+.. _common-gotchas-integrating-search:
+
+Integrating searching
+*********************

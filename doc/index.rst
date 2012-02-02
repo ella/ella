@@ -40,7 +40,18 @@ Contents:
     plugins
     common_gotchas
     settings
+    
+    
+Sites using Ella
+****************
 
+Ella is getting more and more popular. Here are some sites that take advantage 
+of it:
+
+* `Investicniweb.cz <http://www.investicniweb.cz>`_
+* `Dumazahrada.cz <http://www.dumazahrada.cz>`_
+* `Crazycafe.cz <http://www.crazycafe.cz>`_
+* `pyvec.cz <http://pyvec.cz>`_
 
 License
 *******

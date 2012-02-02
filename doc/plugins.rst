@@ -13,6 +13,27 @@ very good reasons:
   
 Because of this philosophy, **plugins** were introduced in version **3.0.0**.
 
+Where to get 'em?
+*****************
+
+Currently, there are only plugins that were created by us directly. 3rd party
+plugins are hopefully on the way -- it depends more o less on you, Mr. Reader :)
+
+Our plugins can be found in our `GitHub repository <http://github.com/ella>`_. 
+Here is a list of some interesting ones:
+
+* `Newman <http://github.com/ella/django-newman>`_ - use admin forged directly
+  for Ella needs
+* `Tagging <http://github.com/ella/ella-tagging>`_ - provides tagging functionality
+* `Comments <http://github.com/ella/ella-comments>`_ - simple threaded comments
+* `Galleries <http://github.com/ella/ella-galleries>`_ - create galleries from
+  your photos
+* `Polls <http://github.com/ella/ella-polls>`_ - let users vote for things and 
+  compete
+* `Imports <http://github.com/ella/ella-imports>`_ - load stuff from other sites
+* `Series <http://github.com/ella/ella-series>`_ - create series from articles 
+  covering same topic
+
 Basic plugin structure
 **********************
 

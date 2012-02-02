@@ -169,6 +169,11 @@ Related finders
 ``{% related %}`` template tag
 ==============================
 
+.. _features-syndication:
+
+Syndication - ATOM and his RSS friend
+*************************************
+
 .. _features-incorporating-plugins:
 
 Incorporating plugins
