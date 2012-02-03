@@ -3,15 +3,17 @@ from datetime import datetime, date
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator
 from django.conf import settings
-from django.template.defaultfilters import slugify
-from django.template.response import TemplateResponse
 from django.db import models
 from django.http import Http404
+from django.template.defaultfilters import slugify
+from django.template.response import TemplateResponse
+from django.utils.translation import ugettext_lazy as _
 
 from ella.core.models import Listing, Category, Publishable
 from ella.core.cache import get_cached_object_or_404, cache_this
 from ella.core import custom_urls
 from ella.core.conf import core_settings
+from ella.core.cache.utils import get_cached_object
 
 __docformat__ = "restructuredtext en"
 
@@ -190,13 +192,24 @@ class ListContentType(EllaCoreView):
     :raises Http404: if the specified category or content_type does not exist or if the given date is malformed.
     """
     template_name = 'listing.html'
+    empty_homepage_template_name = 'debug/empty_homepage.html'
+
+    class EmptyHomepageException(Exception): pass
 
     def __call__(self, request, **kwargs):
-        context = self.get_context(request, **kwargs)
-        template_name = self.template_name
-        if context.get('is_title_page'):
-            template_name = context['category'].template
-        return self.render(request, context, self.get_templates(context, template_name))
+        try:
+            context = self.get_context(request, **kwargs)
+            template_name = self.template_name
+            if context.get('is_title_page'):
+                template_name = context['category'].template
+            return self.render(request, context, self.get_templates(context, template_name))
+        except self.EmptyHomepageException:
+            return self.render(request, {}, self.empty_homepage_template_name)
+
+    def _handle_404(self, explanation, is_homepage):
+        if settings.DEBUG is True and is_homepage:
+            raise self.EmptyHomepageException()
+        raise Http404(explanation)
 
     @cache_this(archive_year_cache_key, timeout=60 * 60 * 24)
     def _archive_entry_year(self, category):
@@ -231,12 +244,24 @@ class ListContentType(EllaCoreView):
             year = int(year)
             kwa['publish_from__year'] = year
 
+        # Homepage is considered when category is empty (~ no slug) and no
+        # filtering is used.
+        # 
+        # Homepage behaves differently on 404 with DEBUG mode to let user 
+        # know everything is fine instead of 404. Also, indication of 
+        # homepage is added to context, it's usually good to know, if your
+        # on homepage, right? :)
+        #
+        # @see: _handle_404()
+        is_homepage = not bool(category) and page_no == 1 and year is None
+
         if month:
             try:
                 month = int(month)
                 date(year, month, 1)
             except ValueError:
-                raise Http404()
+                return self._handle_404(_('Invalid month value %r') % month,
+                    is_homepage)
             kwa['publish_from__month'] = month
 
         if day:
@@ -244,17 +269,25 @@ class ListContentType(EllaCoreView):
                 day = int(day)
                 date(year, month, day)
             except ValueError:
-                raise Http404()
+                return self._handle_404(_('Invalid year value %r') % year,
+                    is_homepage)
             kwa['publish_from__day'] = day
 
-        cat = get_cached_object_or_404(Category, timeout=3600, tree_path=category, site__id=settings.SITE_ID)
+        try:
+            cat = get_cached_object(Category, timeout=3600, tree_path=category,
+                site__id=settings.SITE_ID)
+        except Category.DoesNotExist:
+            return self._handle_404(_('Category with tree path %(path)r does not '
+                'exist on site %(site)s') %
+                    {'path': category, 'site': settings.SITE_ID}, is_homepage)
+
         kwa['category'] = cat
         if category:
             kwa['children'] = Listing.objects.ALL
 
         if content_type:
             ct = get_content_type(content_type)
-            kwa['content_types'] = [ ct ]
+            kwa['content_types'] = (ct,)
         else:
             ct = False
 
@@ -262,25 +295,25 @@ class ListContentType(EllaCoreView):
         paginator = Paginator(qset, paginate_by)
 
         if page_no > paginator.num_pages or page_no < 1:
-            raise Http404()
+            return self._handle_404(_('Invalid page number %r') % page_no,
+                is_homepage)
 
         page = paginator.page(page_no)
         listings = page.object_list
 
         context = {
-                'page': page,
-                'is_paginated': paginator.num_pages > 1,
-                'results_per_page': paginate_by,
+            'page': page,
+            'is_paginated': paginator.num_pages > 1,
+            'results_per_page': paginate_by,
 
-                'content_type' : ct,
-                'content_type_name' : content_type,
-                'listings' : listings,
-                'category' : cat,
-                'is_homepage': not bool(category) and page_no == 1 and year is None,
-                'is_title_page': category_title_page,
-                'archive_entry_year' : lambda: self._archive_entry_year(cat),
-            }
-
+            'content_type' : ct,
+            'content_type_name' : content_type,
+            'listings' : listings,
+            'category' : cat,
+            'is_homepage': is_homepage,
+            'is_title_page': category_title_page,
+            'archive_entry_year' : lambda: self._archive_entry_year(cat),
+        }
         return context
 
 # backwards compatibility

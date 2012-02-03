@@ -62,6 +62,26 @@ class TestCategoryDetail(ViewsTestCase):
         tools.assert_equals('static_page.html', response.content)
 
 
+class TestEmptyHomepage(TestCase):
+    def test_404_is_shown_on_debug_off(self):
+        from django.conf import settings
+        orig_debug = settings.DEBUG
+        settings.DEBUG = False
+        template_loader.templates['404.html'] = '404.html'
+        response = self.client.get('/')
+        tools.assert_equals('404.html', response.content)
+        settings.DEBUG = orig_debug
+
+    def test_welcome_page_is_shown_as_hompage_on_debug(self):
+        from django.conf import settings
+        orig_debug = settings.DEBUG
+        settings.DEBUG = True
+        template_loader.templates['debug/empty_homepage.html'] = 'empty_homepage.html'
+        response = self.client.get('/')
+        tools.assert_equals('empty_homepage.html', response.content)
+        settings.DEBUG = orig_debug
+
+
 class TestListContentType(ViewsTestCase):
     def setUp(self):
         super(TestListContentType, self).setUp()
