@@ -51,7 +51,7 @@ of it:
 * `Investicniweb.cz <http://www.investicniweb.cz>`_
 * `Dumazahrada.cz <http://www.dumazahrada.cz>`_
 * `Crazycafe.cz <http://www.crazycafe.cz>`_
-* `pyvec.cz <http://pyvec.cz>`_
+* `pyvec.org <http://pyvec.org>`_
 
 License
 *******
