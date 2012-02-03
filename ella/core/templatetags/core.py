@@ -192,13 +192,8 @@ class BoxNode(template.Node):
         # render the box itself
         box.prepare(context)
 
-        # push context stack
-        context.push()
-
         # render the box
         result = box.render()
-        # restore the context
-        context.pop()
 
         return result
 
