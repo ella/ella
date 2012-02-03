@@ -188,9 +188,7 @@ class BoxNode(template.Node):
         box.prepare(context)
 
         # render the box
-        result = box.render()
-
-        return result
+        return box.render()
 
 @register.tag('box')
 def do_box(parser, token):
