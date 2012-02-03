@@ -302,17 +302,17 @@ class ListContentType(EllaCoreView):
         listings = page.object_list
 
         context = {
-            'page': page,
-            'is_paginated': paginator.num_pages > 1,
-            'results_per_page': paginate_by,
-
-            'content_type' : ct,
-            'content_type_name' : content_type,
-            'listings' : listings,
             'category' : cat,
             'is_homepage': is_homepage,
             'is_title_page': category_title_page,
+            'is_paginated': paginator.num_pages > 1,
+            'results_per_page': paginate_by,
+            'page': page,
+            'listings' : listings,
             'archive_entry_year' : lambda: self._archive_entry_year(cat),
+
+            'content_type' : ct,
+            'content_type_name' : content_type,
         }
         return context
 
