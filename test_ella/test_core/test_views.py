@@ -12,6 +12,7 @@ from ella.core.models import Listing
 from test_ella.test_core import create_basic_categories, create_and_place_a_publishable, \
         create_and_place_more_publishables, list_all_publishables_in_category_by_hour
 from test_ella import template_loader
+from ella.core.views import get_templates
 
 class ViewsTestCase(TestCase):
     def setUp(self):
@@ -99,6 +100,7 @@ class TestListContentType(ViewsTestCase):
         template_loader.templates['404.html'] = ''
         response = self.client.get('/2008/', {'p': 200})
         tools.assert_equals(404, response.status_code)
+
 
 class TestObjectDetailTemplateOverride(ViewsTestCase):
     def setUp(self):
@@ -189,3 +191,21 @@ class TestObjectDetail(ViewsTestCase):
                 response.context['content_type_name']
         )
 
+class TestGetTemplates(ViewsTestCase):
+    def test_homepage_uses_only_path(self):
+        tools.assert_equals(
+            [u'page/category/ni-hao-category/category.html', u'page/category.html'],
+            get_templates('category.html', category=self.category)
+        )
+
+    def test_first_nested_uses_only_path(self):
+        tools.assert_equals(
+            [u'page/category/nested-category/category.html', u'page/category.html'],
+            get_templates('category.html', category=self.category_nested)
+        )
+
+    def test_more_nested_uses_fallback_to_parents(self):
+        tools.assert_equals(
+            [u'page/category/nested-category/second-nested-category/category.html', u'page/category/nested-category/category.html', u'page/category.html'],
+            get_templates('category.html', category=self.category_nested_second)
+        )

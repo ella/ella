@@ -350,22 +350,71 @@ def get_templates(name, slug=None, category=None, app_label=None, model_label=No
     """
     Returns templates in following format and order:
 
-        - 'page/category/%s/content_type/%s.%s/%s/%s' % ( category.path, app_label, model_label, slug, name ),
-        - 'page/category/%s/content_type/%s.%s/%s' % ( category.path, app_label, model_label, name ),
-        - 'page/category/%s/%s' % ( category.path, name ),
-        - 'page/content_type/%s.%s/%s' % ( app_label, model_label, name ),
-        - 'page/%s' % name,
+    * ``'page/category/%s/content_type/%s.%s/%s/%s' % (<CATEGORY_PART>, app_label, model_label, slug, name)``
+    * ``'page/category/%s/content_type/%s.%s/%s' % (<CATEGORY_PART>, app_label, model_label, name)``
+    * ``'page/category/%s/%s' % (<CATEGORY_PART>, name)``
+    * ``'page/content_type/%s.%s/%s' % (app_label, model_label, name)``
+    * ``'page/%s' % name``
+    
+    Where ``<CATEGORY_PART>`` is derived from ``path`` attribute by these rules:
+    
+    * When **no** parent exists (this is therfore root category) ``<CATEGORY_PART> = path``
+    * When exactly **one** parent exists: ``<CATEGORY_PART> = path``
+    * When multiple parent exist (category nestedN is deep in the tree)::
+          
+          <CATEGORY_PART> = (
+              'nested1/nested2/../nestedN/',
+              'nested1/nested2/../nestedN-1/',
+              ...
+              'nested1'
+          )
+       
+    Examples. Three categories exist having slugs **ROOT**, **NESTED1**,
+    **NESTED2** where **NESTED2**'s parent is **NESTED1**.::
+    
+        ROOT
+           \
+         NESTED1
+             \
+            NESTED2 
+    
+    * For **ROOT**, ``<CATEGORY_PART>`` is only one - "ROOT".
+    * For **NESTED1**, ``<CATEGORY_PART>`` is only one - "NESTED1".
+    * For **NESTED2**, ``<CATEGORY_PART>`` has two elements: "NESTED1/NESTED2" and "NESTED1".
     """
+    def category_templates(category, incomplete_template, params):
+        paths = []
+        parts = category.path.split('/')
+        for i in reversed(range(1, len(parts) + 1)):
+            params.update({'pth': '/'.join(parts[:i])})
+            paths.append(incomplete_template % params)
+        return paths
+
+    FULL = 'page/category/%(pth)s/content_type/%(app_label)s.%(model_label)s/%(slug)s/%(name)s'
+    FULL_NO_SLUG = 'page/category/%(pth)s/content_type/%(app_label)s.%(model_label)s/%(name)s'
+    BY_CATEGORY = 'page/category/%(pth)s/%(name)s'
+    BY_CONTENT_TYPE = 'page/content_type/%(app_label)s.%(model_label)s/%(name)s'
+
     templates = []
+    params = {'name': name}
+
+    if app_label and model_label:
+        params.update({'app_label': app_label, 'model_label': model_label})
+
+    if slug:
+        params.update({'slug': slug})
+
     if category:
         if app_label and model_label:
             if slug:
-                templates.append('page/category/%s/content_type/%s.%s/%s/%s' % (category.path, app_label, model_label, slug, name))
-            templates.append('page/category/%s/content_type/%s.%s/%s' % (category.path, app_label, model_label, name))
-        templates.append('page/category/%s/%s' % (category.path, name))
+                templates += category_templates(category, FULL, params)
+            templates += category_templates(category, FULL_NO_SLUG, params)
+        templates += category_templates(category, BY_CATEGORY, params)
+
     if app_label and model_label:
-        templates.append('page/content_type/%s.%s/%s' % (app_label, model_label, name))
-    templates.append('page/%s' % name)
+        templates.append(BY_CONTENT_TYPE % params)
+
+    templates.append('page/%(name)s' % params)
     return templates
 
 
