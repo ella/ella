@@ -10,7 +10,6 @@ from django.contrib.sites.models import Site
 
 from ella.core.templatetags.core import listing_parse, ListingNode, _parse_box, BoxNode, EmptyNode
 from ella.core.models import Listing, Category
-from ella.core import register
 from ella.articles.models import Article
 from ella.photos.models import Photo
 

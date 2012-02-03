@@ -146,14 +146,11 @@ class BoxNode(template.Node):
     def __init__(self, box_type, nodelist, model=None, lookup=None, var_name=None):
         self.box_type, self.nodelist, self.var_name, self.lookup, self.model = box_type, nodelist, var_name, lookup, model
 
-    def get_obj(self, context=None):
+    def get_obj(self, context):
         if self.model and self.lookup:
-            if context:
-                try:
-                    lookup_val = template.Variable(self.lookup[1]).resolve(context)
-                except template.VariableDoesNotExist:
-                    lookup_val = self.lookup[1]
-            else:
+            try:
+                lookup_val = template.Variable(self.lookup[1]).resolve(context)
+            except template.VariableDoesNotExist:
                 lookup_val = self.lookup[1]
 
             try:
@@ -165,8 +162,6 @@ class BoxNode(template.Node):
                 log.error('BoxNode: %s (%s : %s)' % (str(e), self.lookup[0], lookup_val))
                 raise ObjectNotFoundOrInvalid()
         else:
-            if not context:
-                raise ObjectNotFoundOrInvalid()
             try:
                 obj = template.Variable(self.var_name).resolve(context)
             except template.VariableDoesNotExist, e:
@@ -192,15 +187,8 @@ class BoxNode(template.Node):
         # render the box itself
         box.prepare(context)
 
-        # push context stack
-        context.push()
-
         # render the box
-        result = box.render()
-        # restore the context
-        context.pop()
-
-        return result
+        return box.render()
 
 @register.tag('box')
 def do_box(parser, token):

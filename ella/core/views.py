@@ -4,9 +4,9 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator
 from django.conf import settings
 from django.template.defaultfilters import slugify
+from django.template.response import TemplateResponse
 from django.db import models
 from django.http import Http404
-from django.shortcuts import render
 
 from ella.core.models import Listing, Category, Publishable
 from ella.core.cache import get_cached_object_or_404, cache_this
@@ -53,7 +53,7 @@ class EllaCoreView(object):
         return get_templates(template_name, category=context['category'], **kw)
 
     def render(self, request, context, template):
-        return render(request, template, context)
+        return TemplateResponse(request, template, context)
 
     def __call__(self, request, **kwargs):
         context = self.get_context(request, **kwargs)
@@ -369,7 +369,7 @@ def export(request, count, name='', content_type=None):
 
     cat = get_cached_object_or_404(Category, timeout=3600, tree_path='', site__id=settings.SITE_ID)
     listing = Listing.objects.get_listing(count=count, category=cat)
-    return render(
+    return TemplateResponse(
             request,
             t_list,
             { 'category' : cat, 'listing' : listing },
@@ -381,11 +381,11 @@ def export(request, count, name='', content_type=None):
 # Error handlers
 ##
 def page_not_found(request):
-    response = render(request, 'page/404.html', {})
+    response = TemplateResponse(request, 'page/404.html', {})
     response.status_code = 404
     return response
 
 def handle_error(request):
-    response = render(request, 'page/500.html', {})
+    response = TemplateResponse(request, 'page/500.html', {})
     response.status_code = 500
     return response

@@ -48,7 +48,7 @@ def _parse_img(bits):
         raise template.TemplateSyntaxError, "{% img FORMAT for VAR as VAR_NAME %} or {% img FORMAT with FIELD VALUE as VAR_NAME %}"
 
     try:
-        format = get_cached_object(Format, name=bits[1], sites__id=settings.SITE_ID)
+        format = Format.objects.get_for_name(bits[1])
     except Format.DoesNotExist:
         logmsg = "Format with name %r does not exist (for site id %d)" % (bits[1], settings.SITE_ID)
         log.error(logmsg)
