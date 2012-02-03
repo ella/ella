@@ -11,6 +11,7 @@ from jsonfield.fields import JSONField
 
 from ella.core.box import Box
 from ella.core.cache import get_cached_object, cache_this, CachedGenericForeignKey
+from ella.core import conf
 
 
 class Author(models.Model):
@@ -58,7 +59,6 @@ class Source(models.Model):
         return self.name
 
 
-
 class CategoryBox(Box):
     """
     Special Box class for category that adds 'photo_slug' parameter
@@ -92,17 +92,27 @@ class Category(models.Model):
     Every site has exactly one root category (without a parent) that serve's as
     the sites's homepage.
     """
-    title = models.CharField(_("Category Title"), max_length=200)
+    template_choices = ((x, _(y)) for x, y in conf.CATEGORY_TEMPLATES)
+
+    title = models.CharField(_("Title"), max_length=200)
+    description = models.TextField(_("Description"), blank=True, help_text=_(
+        'Description which can be used in link titles, syndication etc.'))
+    content = models.TextField(_('Content'), default='', blank=True, help_text=_(
+        'Optional content to use when rendering this category.'))
+    template = models.CharField(_('Template'), max_length=100, help_text=_(
+        'Template to use to render detail page of this category.'),
+        choices=template_choices, default=conf.DEFAULT_CATEGORY_TEMPLATE)
     slug = models.SlugField(_('Slug'), max_length=255)
     tree_parent = models.ForeignKey('self', null=True, blank=True,
-        verbose_name=_("Parent Category"))
+        verbose_name=_("Parent category"))
     tree_path = models.CharField(verbose_name=_("Path from root category"),
         max_length=255, editable=False)
-    description = models.TextField(_("Category Description"), blank=True)
     site = models.ForeignKey(Site)
 
     # generic JSON field to store app cpecific data
-    app_data = JSONField(default='{}', blank=True, editable=False)
+    app_data = JSONField(_('Custom meta data'), default='{}', blank=True,
+        editable=False, help_text=_('If you need to define custom data for '
+        'category objects, you can use this field to do so.'))
 
     class Meta:
         app_label = 'core'
@@ -127,7 +137,8 @@ class Category(models.Model):
         super(Category, self).save(**kwargs)
         if old_tree_path != self.tree_path:
             # the tree_path has changed, update children
-            children = Category.objects.filter(tree_path__startswith=old_tree_path + '/').order_by('tree_path')
+            children = Category.objects.filter(
+                tree_path__startswith=old_tree_path + '/').order_by('tree_path')
             for child in children:
                 child.save(force_update=True)
 
@@ -186,12 +197,7 @@ class Category(models.Model):
         if not self.tree_parent_id:
             url = reverse('root_homepage')
         else:
-            url = reverse(
-                    'category_detail',
-                    kwargs={
-                        'category' : self.tree_path,
-                    }
-                )
+            url = reverse('category_detail', kwargs={'category' : self.tree_path})
         if self.site_id != settings.SITE_ID:
             # prepend the domain if it doesn't match current Site
             site = get_cached_object(Site, pk=self.site_id)

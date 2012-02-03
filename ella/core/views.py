@@ -146,12 +146,20 @@ def archive_year_cache_key(func, self, category):
 class ListContentType(EllaCoreView):
     """
     List objects' listings according to the parameters. If no filtering is
-    applied (including pagination), the category's title page is rendered:
+    applied (including pagination), the category's title page is rendered. The
+    template used depends on ``template`` attribute for category being rendered.
+    Default template is ``category.html``, so it would look like this:
 
     * ``page/category/<tree_path>/category.html``
     * ``page/category.html``
+    
+    If custom template is selected, let's say ``static_page.html``, it would
+    result in:
+    
+    * ``page/category/<tree_path>/static_page.html``
+    * ``page/static_page.html``
 
-    Otherwise an archive template gets rendered:
+    If filtering is active, an archive template gets rendered:
 
     * ``page/category/<tree_path>/content_type/<app>.<model>/listing.html``
     * ``page/category/<tree_path>/listing.html``
@@ -182,16 +190,15 @@ class ListContentType(EllaCoreView):
     :raises Http404: if the specified category or content_type does not exist or if the given date is malformed.
     """
     template_name = 'listing.html'
-    title_template_name = 'category.html'
 
     def __call__(self, request, **kwargs):
         context = self.get_context(request, **kwargs)
         template_name = self.template_name
         if context.get('is_title_page'):
-            template_name = self.title_template_name
+            template_name = context['category'].template
         return self.render(request, context, self.get_templates(context, template_name))
 
-    @cache_this(archive_year_cache_key, timeout=60*60*24)
+    @cache_this(archive_year_cache_key, timeout=60 * 60 * 24)
     def _archive_entry_year(self, category):
         " Return ARCHIVE_ENTRY_YEAR from settings (if exists) or year of the newest object in category "
         year = getattr(settings, 'ARCHIVE_ENTRY_YEAR', None)
@@ -228,7 +235,7 @@ class ListContentType(EllaCoreView):
             try:
                 month = int(month)
                 date(year, month, 1)
-            except ValueError, e:
+            except ValueError:
                 raise Http404()
             kwa['publish_from__month'] = month
 
@@ -236,7 +243,7 @@ class ListContentType(EllaCoreView):
             try:
                 day = int(day)
                 date(year, month, day)
-            except ValueError, e:
+            except ValueError:
                 raise Http404()
             kwa['publish_from__day'] = day
 

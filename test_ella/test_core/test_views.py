@@ -29,16 +29,17 @@ class TestCategoryDetail(ViewsTestCase):
 
     def test_template_overloading(self):
         template_loader.templates['page/category.html'] = 'page/category.html'
-        template_loader.templates['page/category/ni-hao-category/category.html'] = 'page/category/ni-hao-category/category.html'
+        template_loader.templates['page/category/ni-hao-category/%s' % self.category.template] = 'page/category/ni-hao-category/category.html'
         response = self.client.get('/')
         tools.assert_equals('page/category/ni-hao-category/category.html', response.content)
 
     def test_second_nested_template_overloading(self):
         tp = 'nested-category/second-nested-category'
+        ctp = self.category_nested_second.template
         template_loader.templates['page/category.html'] = 'page/category.html'
-        template_loader.templates['page/category/%s/category.html'%tp] = 'page/category/%s/category.html'%tp
-        response = self.client.get('/%s/'%tp)
-        tools.assert_equals('page/category/%s/category.html'%tp, response.content)
+        template_loader.templates['page/category/%s/%s' % (tp, ctp)] = 'page/category/%s/category.html' % tp
+        response = self.client.get('/%s/' % tp)
+        tools.assert_equals('page/category/%s/category.html' % tp, response.content)
 
     def test_homepage_context(self):
         template_loader.templates['page/category.html'] = ''
@@ -51,6 +52,14 @@ class TestCategoryDetail(ViewsTestCase):
         response = self.client.get('/nested-category/second-nested-category/')
         tools.assert_true('category' in response.context)
         tools.assert_equals(self.category_nested_second, response.context['category'])
+
+    def test_category_template_is_used_in_view(self):
+        self.category.template = 'static_page.html'
+        self.category.save()
+        template_loader.templates['page/category.html'] = 'category.html'
+        template_loader.templates['page/static_page.html'] = 'static_page.html'
+        response = self.client.get('/')
+        tools.assert_equals('static_page.html', response.content)
 
 
 class TestListContentType(ViewsTestCase):
