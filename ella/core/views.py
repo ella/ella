@@ -269,7 +269,7 @@ class ListContentType(EllaCoreView):
                 day = int(day)
                 date(year, month, day)
             except ValueError:
-                return self._handle_404(_('Invalid day value %r') % year,
+                return self._handle_404(_('Invalid day value %r') % day,
                     is_homepage)
             kwa['publish_from__day'] = day
 
