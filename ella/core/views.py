@@ -7,6 +7,7 @@ from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
 from django.db import models
 from django.http import Http404
+from django.shortcuts import redirect
 
 from ella.core.models import Listing, Category, Publishable
 from ella.core.cache import get_cached_object_or_404, cache_this
@@ -90,8 +91,8 @@ class ObjectDetail(EllaCoreView):
     :raises Http404: if the URL is not valid and/or doesn't correspond to any valid `Publishable`
     """
     template_name = 'object.html'
-    def __call__(self, request, category, content_type, slug, year=None, month=None, day=None, url_remainder=None):
-        context = self.get_context(request, category, content_type, slug, year, month, day)
+    def __call__(self, request, category, content_type, slug, year=None, month=None, day=None, id=None, url_remainder=None):
+        context = self.get_context(request, category, content_type, slug, year, month, day, id)
 
         obj = context['object']
         # check for custom actions
@@ -102,7 +103,7 @@ class ObjectDetail(EllaCoreView):
 
         return self.render(request, context, self.get_templates(context))
 
-    def get_context(self, request, category, content_type, slug, year, month, day):
+    def get_context(self, request, category, content_type, slug, year, month, day, id):
         ct = get_content_type(content_type)
 
         cat = get_cached_object_or_404(Category, timeout=3600, tree_path=category, site__id=settings.SITE_ID)
@@ -118,7 +119,12 @@ class ObjectDetail(EllaCoreView):
                         static=False
                     )
         else:
-            publishable = get_cached_object_or_404(Publishable, category=cat, content_type=ct, slug=slug, static=True)
+            publishable = get_cached_object_or_404(Publishable, pk=id)
+            if publishable.category_id != cat.pk or publishable.content_type_id != ct.id or not publishable.static:
+                raise Http404()
+
+            if slug != publishable.slug:
+                return redirect(publishable.get_absolute_url(), permanent=True)
 
         # save existing object to preserve memory and SQL
         publishable.category = cat

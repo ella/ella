@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime, timedelta
 from unittest import TestCase as UnitTestCase
 from django.test import TestCase
 
@@ -63,7 +62,7 @@ class TestCategoryDetail(ViewHelpersTestCase):
 class TestObjectDetail(ViewHelpersTestCase):
     def setUp(self):
         super(TestObjectDetail, self).setUp()
-        self.correct_args = [self.request, 'nested-category', 'articles', 'first-article', '2008', '1', '10']
+        self.correct_args = [self.request, 'nested-category', 'articles', 'first-article', '2008', '1', '10', None]
         self.object_detail = ObjectDetail()
 
     def test_raises_404_on_incorrect_category(self):
@@ -101,13 +100,13 @@ class TestObjectDetail(ViewHelpersTestCase):
         tools.assert_raises(Http404, self.object_detail.get_context, *self.correct_args)
 
     def test_doesnt_match_placement_if_date_is_not_supplied(self):
-        self.correct_args = self.correct_args[:4] + [None, None, None]
+        self.correct_args = self.correct_args[:4] + [None, None, None, None]
         tools.assert_raises(Http404, self.object_detail.get_context, *self.correct_args)
 
     def test_matches_static_placement_if_date_is_not_supplied(self):
         self.publishable.static = True
         self.publishable.save()
-        self.correct_args = self.correct_args[:4] + [None, None, None]
+        self.correct_args = self.correct_args[:4] + [None, None, None, self.publishable.id]
 
         c = self.object_detail.get_context(*self.correct_args)
 
@@ -127,7 +126,7 @@ class TestListContentType(ViewHelpersTestCase):
     def test_only_category_and_year_returns_all_listings(self):
         c = self.list_content_type.get_context(self.request, '', '2008')
         tools.assert_equals(self.listings, list(c['listings']))
-        
+
     def test_only_nested_category_and_year_returns_all_listings(self):
         Listing.objects.all().update(category=self.category_nested_second)
         c = self.list_content_type.get_context(self.request, 'nested-category/second-nested-category', '2008')
@@ -137,7 +136,7 @@ class TestListContentType(ViewHelpersTestCase):
         c = self.list_content_type.get_context(self.request, '', '2008', paginate_by=2)
         tools.assert_equals(self.listings[:2], list(c['listings']))
         tools.assert_true(c['is_paginated'])
-        
+
     def test_return_second_2_listings_if_paginate_by_2_and_page_2(self):
         self.request.GET['p'] = '2'
         c = self.list_content_type.get_context(self.request, '', '2008', paginate_by=2)
@@ -151,7 +150,7 @@ class TestListContentType(ViewHelpersTestCase):
     def test_raises404_for_incorrect_page(self):
         self.request.GET['p'] = '200'
         tools.assert_raises(Http404, self.list_content_type.get_context, self.request, '', '2008', paginate_by=2)
-        
+
     def test_raises404_for_incorrect_category(self):
         tools.assert_raises(Http404, self.list_content_type.get_context, self.request, 'XXX', '2008')
 

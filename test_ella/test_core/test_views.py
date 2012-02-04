@@ -140,7 +140,7 @@ class TestObjectDetail(ViewsTestCase):
     def test_static_object_detail(self):
         self.publishable.static = True
         self.publishable.save()
-        response = self.client.get('/nested-category/static/articles/first-article/')
+        response = self.client.get('/nested-category/articles/%d-first-article/' % self.publishable.id)
 
         tools.assert_true('category' in response.context)
         tools.assert_equals(self.publishable.category, response.context['category'])

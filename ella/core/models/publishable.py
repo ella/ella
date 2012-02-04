@@ -86,6 +86,7 @@ class Publishable(models.Model):
         }
 
         if self.static:
+            kwargs['id'] = self.pk
             if category.tree_parent_id:
                 kwargs['category'] = category.tree_path
                 url = reverse('static_detail', kwargs=kwargs)
