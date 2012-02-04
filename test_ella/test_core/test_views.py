@@ -137,6 +137,17 @@ class TestObjectDetail(ViewsTestCase):
                 response.context['content_type_name']
         )
 
+    def test_static_object_detail_redirects_to_correct_url_on_wrong_slug(self):
+        self.publishable.static = True
+        self.publishable.save()
+        response = self.client.get('/nested-category/articles/%d-not-the-first-article/' % self.publishable.id)
+
+        tools.assert_equals(301, response.status_code)
+        tools.assert_equals(
+            'http://testserver/nested-category/articles/%d-first-article/' % self.publishable.id,
+            response['Location']
+        )
+
     def test_static_object_detail(self):
         self.publishable.static = True
         self.publishable.save()

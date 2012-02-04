@@ -95,6 +95,10 @@ class ObjectDetail(EllaCoreView):
         context = self.get_context(request, category, content_type, slug, year, month, day, id)
 
         obj = context['object']
+
+        if obj.static and slug != obj.slug:
+            return redirect(obj.get_absolute_url(), permanent=True)
+
         # check for custom actions
         if url_remainder:
             return custom_urls.resolver.call_custom_view(request, obj, url_remainder, context)
@@ -122,9 +126,6 @@ class ObjectDetail(EllaCoreView):
             publishable = get_cached_object_or_404(Publishable, pk=id)
             if publishable.category_id != cat.pk or publishable.content_type_id != ct.id or not publishable.static:
                 raise Http404()
-
-            if slug != publishable.slug:
-                return redirect(publishable.get_absolute_url(), permanent=True)
 
         # save existing object to preserve memory and SQL
         publishable.category = cat
