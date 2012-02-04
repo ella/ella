@@ -12,6 +12,7 @@ from ella.core.models import Listing
 from test_ella.test_core import create_basic_categories, create_and_place_a_publishable, \
         create_and_place_more_publishables, list_all_publishables_in_category_by_hour
 from test_ella import template_loader
+from ella.core.views import get_templates
 
 class ViewsTestCase(TestCase):
     def setUp(self):
@@ -29,16 +30,17 @@ class TestCategoryDetail(ViewsTestCase):
 
     def test_template_overloading(self):
         template_loader.templates['page/category.html'] = 'page/category.html'
-        template_loader.templates['page/category/ni-hao-category/category.html'] = 'page/category/ni-hao-category/category.html'
+        template_loader.templates['page/category/ni-hao-category/%s' % self.category.template] = 'page/category/ni-hao-category/category.html'
         response = self.client.get('/')
         tools.assert_equals('page/category/ni-hao-category/category.html', response.content)
 
     def test_second_nested_template_overloading(self):
         tp = 'nested-category/second-nested-category'
+        ctp = self.category_nested_second.template
         template_loader.templates['page/category.html'] = 'page/category.html'
-        template_loader.templates['page/category/%s/category.html'%tp] = 'page/category/%s/category.html'%tp
-        response = self.client.get('/%s/'%tp)
-        tools.assert_equals('page/category/%s/category.html'%tp, response.content)
+        template_loader.templates['page/category/%s/%s' % (tp, ctp)] = 'page/category/%s/category.html' % tp
+        response = self.client.get('/%s/' % tp)
+        tools.assert_equals('page/category/%s/category.html' % tp, response.content)
 
     def test_homepage_context(self):
         template_loader.templates['page/category.html'] = ''
@@ -51,6 +53,34 @@ class TestCategoryDetail(ViewsTestCase):
         response = self.client.get('/nested-category/second-nested-category/')
         tools.assert_true('category' in response.context)
         tools.assert_equals(self.category_nested_second, response.context['category'])
+
+    def test_category_template_is_used_in_view(self):
+        self.category.template = 'static_page.html'
+        self.category.save()
+        template_loader.templates['page/category.html'] = 'category.html'
+        template_loader.templates['page/static_page.html'] = 'static_page.html'
+        response = self.client.get('/')
+        tools.assert_equals('static_page.html', response.content)
+
+
+class TestEmptyHomepage(TestCase):
+    def test_404_is_shown_on_debug_off(self):
+        from django.conf import settings
+        orig_debug = settings.DEBUG
+        settings.DEBUG = False
+        template_loader.templates['404.html'] = '404.html'
+        response = self.client.get('/')
+        tools.assert_equals('404.html', response.content)
+        settings.DEBUG = orig_debug
+
+    def test_welcome_page_is_shown_as_hompage_on_debug(self):
+        from django.conf import settings
+        orig_debug = settings.DEBUG
+        settings.DEBUG = True
+        template_loader.templates['debug/empty_homepage.html'] = 'empty_homepage.html'
+        response = self.client.get('/')
+        tools.assert_equals('empty_homepage.html', response.content)
+        settings.DEBUG = orig_debug
 
 
 class TestListContentType(ViewsTestCase):
@@ -70,6 +100,7 @@ class TestListContentType(ViewsTestCase):
         template_loader.templates['404.html'] = ''
         response = self.client.get('/2008/', {'p': 200})
         tools.assert_equals(404, response.status_code)
+
 
 class TestObjectDetailTemplateOverride(ViewsTestCase):
     def setUp(self):
@@ -171,3 +202,21 @@ class TestObjectDetail(ViewsTestCase):
                 response.context['content_type_name']
         )
 
+class TestGetTemplates(ViewsTestCase):
+    def test_homepage_uses_only_path(self):
+        tools.assert_equals(
+            [u'page/category/ni-hao-category/category.html', u'page/category.html'],
+            get_templates('category.html', category=self.category)
+        )
+
+    def test_first_nested_uses_only_path(self):
+        tools.assert_equals(
+            [u'page/category/nested-category/category.html', u'page/category.html'],
+            get_templates('category.html', category=self.category_nested)
+        )
+
+    def test_more_nested_uses_fallback_to_parents(self):
+        tools.assert_equals(
+            [u'page/category/nested-category/second-nested-category/category.html', u'page/category/nested-category/category.html', u'page/category.html'],
+            get_templates('category.html', category=self.category_nested_second)
+        )

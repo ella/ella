@@ -1,20 +1,42 @@
 from ella.utils.settings import Settings
 from django.utils.datetime_safe import datetime
 
-# caching
+gettext = lambda s: s
+
+# Caching-related
 CACHE_TIMEOUT = 10 * 60
 CACHE_TIMEOUT_LONG = 60 * 60
+
+DOUBLE_RENDER = False
+DOUBLE_RENDER_EXCLUDE_URLS = None
 
 # Box
 BOX_INFO = 'ella.core.box.BOX_INFO'
 MEDIA_KEY = 'ella.core.box.MEDIA_KEY'
 
+# Publishing configuration
 CATEGORY_LISTINGS_PAGINATE_BY = 20
 DEFAULT_LISTING_PRIORITY = 0
 USE_PRIORITIES = False
 LISTING_UNIQUE_DEFAULT_SET = 'unique_set_default'
 PUBLISH_FROM_WHEN_EMPTY = datetime(3000, 1, 1)
 LISTING_USE_COMMERCIAL_FLAG = False
+
+RELATED_FINDERS = {
+    'default': (
+        'ella.core.related_finders.directly_related',
+        'ella.core.related_finders.related_by_category',
+    ),
+    'directly': (
+        'ella.core.related_finders.directly_related',
+    )
+}
+
+# Category settings
+DEFAULT_CATEGORY_TEMPLATE = 'category.html'
+CATEGORY_TEMPLATES = (
+    (DEFAULT_CATEGORY_TEMPLATE, gettext('default (%s)') % DEFAULT_CATEGORY_TEMPLATE),
+)
 
 # context_processor
 MEDIA_URL = ''
@@ -27,18 +49,5 @@ RSS_ENCLOSURE_PHOTO_FORMAT = None
 
 # middlewares
 ECACHE_INFO = 'ella.core.middleware.ECACHE_INFO'
-
-DOUBLE_RENDER = False
-DOUBLE_RENDER_EXCLUDE_URLS = None
-
-RELATED_FINDERS = {
-    'default': (
-        'ella.core.related_finders.directly_related',
-        'ella.core.related_finders.related_by_category',
-    ),
-    'directly': (
-        'ella.core.related_finders.directly_related',
-    )
-}
 
 core_settings = Settings('ella.core.conf', '')

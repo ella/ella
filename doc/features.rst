@@ -22,11 +22,76 @@ Fallback mechanisms
 Category detail page
 ********************
 
-Homepage
-========
+Category detail is the very main page of most content websites. In Ella, we do
+not make any difference for homepages and other categories except for the 
+different URLs. In Ella, categories can be used in several ways:
+
+* For showing your homepage
+* For listing content that is published in the category
+* As a static page, e.g. for your contact page
+
+Last use case scenario might be little awkward, but the design decision was 
+made to make this as easy as possible. Because main focus of Ella is content-rich
+websites and online news, static pages are usually not as often as the content
+listings.
+
+Working with category templates
+===============================
+
+When creating category templates, here are some basic rules you can count on:
+
+**Context** will contain:
+
+==================================  ================================================
+Key                                 Value
+==================================  ================================================
+``category``                        ``Category`` object itself.
+``is_homepage``                     Flag telling you if this is a homepage, see
+                                    :ref:`features-category-homepages`.
+``is_title_page``                   Boolean telling you if this is the first
+                                    page of the listing/archive.
+``is_paginated``                    Boolean which is ``True`` more pages are available.
+``results_per_page``                Number of objects per page.
+``page``                            Current page shown.
+``listings``                        Objects listed in the ``category`` for this page.
+``content_type``                    If filtering by Content Type is active,
+                                    this will hold the ``ContentType`` instance.
+``content_type_name``               Verbose name of content type if Content Type
+                                    filtering takes place.
+==================================  ================================================
+
+.. _features-category-homepages:
+
+Homepages
+=========
+
+In Ella, a homepage is recognized as the category, that has **no parent**. Therefore,
+it is also the **root category**. Only one such page is allowed for each site
+that is contained in database.
+
+The **URL** of homepage is always **"/"**, so for a domain example.com, this
+would result in::
+
+    http://www.example.com/
+
+When working with category templates, homepage will set the variable ``is_homepage``
+in the template's context to ``True``. Something like this is possible:
+
+.. code-block:: html+django
+
+     <!-- in category.html -->
+     {% if is_homepage %}
+        This is homepage category.
+     {% else %}
+        This is not a homepage. 
+     {% endif %}
+
 
 Other categories
 ================
+
+Defining custom template for category
+=====================================
 
 .. _features-object-detail:
 
