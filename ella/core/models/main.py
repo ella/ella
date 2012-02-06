@@ -11,6 +11,7 @@ from jsonfield.fields import JSONField
 
 from ella.core.box import Box
 from ella.core.cache import get_cached_object, cache_this, CachedGenericForeignKey
+from ella.core.conf import core_settings
 
 
 class Author(models.Model):
@@ -91,7 +92,7 @@ class Category(models.Model):
     Every site has exactly one root category (without a parent) that serve's as
     the sites's homepage.
     """
-    template_choices = tuple((x, _(y)) for x, y in settings.CATEGORY_TEMPLATES)
+    template_choices = tuple((x, _(y)) for x, y in core_settings.CATEGORY_TEMPLATES)
 
     title = models.CharField(_("Title"), max_length=200)
     description = models.TextField(_("Description"), blank=True, help_text=_(
