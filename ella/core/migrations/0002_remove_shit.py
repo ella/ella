@@ -15,13 +15,17 @@ class Migration(SchemaMigration):
         db.add_column('core_publishable', 'publish_to', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True), keep_default=False)
         # Adding field 'Publishable.static'
         db.add_column('core_publishable', 'static', self.gf('django.db.models.fields.BooleanField')(default=False), keep_default=False)
-        db.alter_column('core_listing', 'publishable_id', models.ForeignKey(orm['core.Publishable'], null=False))
+        # Adding field 'Listing.publishable'
+        db.add_column('core_listing', 'publishable', models.ForeignKey(orm['core.Publishable'], null=True))
 
-        for pl in orm['core.Placement'].objects.all():
-            pl.listing_set.update(publishable=pl.publishable)
-            pl.publishable.publish_from = pl.publish_from
-            pl.publishable.static = pl.static
-            pl.publishable.publish_to = pl.publish_to
+        if not db.dry_run:
+            for pl in orm['core.Placement'].objects.all():
+                pl.listing_set.update(publishable=pl.publishable)
+                pl.publishable.publish_from = pl.publish_from
+                pl.publishable.static = pl.static
+                pl.publishable.publish_to = pl.publish_to
+
+        db.alter_column('core_listing', 'publishable', models.ForeignKey(orm['core.Publishable'], null=False))
 
         db.delete_column('core_listing', 'placement_id')
         db.delete_table('core_placement')

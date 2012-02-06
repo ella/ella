@@ -11,7 +11,6 @@ from jsonfield.fields import JSONField
 
 from ella.core.box import Box
 from ella.core.cache import get_cached_object, cache_this, CachedGenericForeignKey
-from ella.core import conf
 
 
 class Author(models.Model):
@@ -92,7 +91,7 @@ class Category(models.Model):
     Every site has exactly one root category (without a parent) that serve's as
     the sites's homepage.
     """
-    template_choices = ((x, _(y)) for x, y in conf.CATEGORY_TEMPLATES)
+    template_choices = tuple((x, _(y)) for x, y in settings.CATEGORY_TEMPLATES)
 
     title = models.CharField(_("Title"), max_length=200)
     description = models.TextField(_("Description"), blank=True, help_text=_(
@@ -101,7 +100,7 @@ class Category(models.Model):
         'Optional content to use when rendering this category.'))
     template = models.CharField(_('Template'), max_length=100, help_text=_(
         'Template to use to render detail page of this category.'),
-        choices=template_choices, default=conf.DEFAULT_CATEGORY_TEMPLATE)
+        choices=template_choices, default=template_choices[0][0])
     slug = models.SlugField(_('Slug'), max_length=255)
     tree_parent = models.ForeignKey('self', null=True, blank=True,
         verbose_name=_("Parent category"))
@@ -111,7 +110,7 @@ class Category(models.Model):
 
     # generic JSON field to store app cpecific data
     app_data = JSONField(_('Custom meta data'), default='{}', blank=True,
-        editable=False, help_text=_('If you need to define custom data for '
+        help_text=_('If you need to define custom data for '
         'category objects, you can use this field to do so.'))
 
     class Meta:

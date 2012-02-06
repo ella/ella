@@ -33,9 +33,8 @@ RELATED_FINDERS = {
 }
 
 # Category settings
-DEFAULT_CATEGORY_TEMPLATE = 'category.html'
 CATEGORY_TEMPLATES = (
-    (DEFAULT_CATEGORY_TEMPLATE, gettext('default (%s)') % DEFAULT_CATEGORY_TEMPLATE),
+    ('category.html', gettext('default (category.html)')),
 )
 
 # context_processor
