@@ -230,7 +230,7 @@ log_lookup = new LoggingLib('RELATED LOOKUP:', true);
         }
         
         NewmanLib.ADR_STACK.push( {
-            from: get_hashadr(''),
+            from: evt.referer || get_hashadr(''),
             to: get_hashadr($(this).attr('href')),
             selection_callback: $(Kobayashi.closest_loaded(this).container).data('selection_callback'),
             form_data: JSON.stringify({ data: $('.change-form').serializeArray() }),

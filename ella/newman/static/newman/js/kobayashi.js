@@ -648,6 +648,7 @@ Kobayashi.LOADED_MEDIA = {};
         if ( $(this).data('simpleloaded') ) return true;
         if ( $(this).data('hashadred') ) return false;
         if ($(this).is('.js-nohashadr')) return true;   // override hashadr-container
+        evt.referer = get_hashadr('');
         adr($(this).attr('href'));
         $(this).data('hashadred', true);
         evt.preventDefault();
