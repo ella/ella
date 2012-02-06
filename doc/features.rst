@@ -165,6 +165,11 @@ the templates in your ``settings.py``::
         ('category_10_no_perex.html', 'top 10 w/o perexes'),
     )
     
+.. note::
+    
+    To be consistent with the Ella guidelines, please always use ``category.html``
+    as your base category template.
+    
 Next, create the **base template**. That would be ``category.html``. It would 
 be used, when not set otherwise in your Ella administration:
 
@@ -403,8 +408,8 @@ Syntax:
         NO POSITION DEFINED!
     {% endifposition %}
 
-Renders 'POSITION EXISTS!' if any of the space separated position name is active for the
-given category, 'NO POSITION DEFINED!' otherwise.
+Renders '*POSITION EXISTS*!' if any of the space separated position name is active for the
+given category, '*NO POSITION DEFINED!*' otherwise.
 
 Real world examples
 -------------------
@@ -505,7 +510,7 @@ photos. Format defines following attributes:
   rendering.
 * ``max_width`` and ``max_height``
 * ``flexible_height`` determines whether ``max_height`` is an absolute maximum, or
-    the formatted photo can vary from ``max_height`` for ``flexible_max_height``.
+  the formatted photo can vary from ``max_height`` for ``flexible_max_height``.
 * ``flexible_max_height``
 * ``stretch`` describes if photo can be stretched if necessary.
 * ``nocrop`` if set to ``True``, no cropping will occur for this format.
@@ -585,12 +590,13 @@ The basic workflow when using photos goes like this:
            <img src="{{ image.url }}" alt="{% firstof title object.title %}" width="{{ image.width }}" height="{{ image.height }}" />
        {% endblock %}
    
+.. note::
    It's a good habit to use format naming convention which describes the used
-   dimensions (like the "200x100" used in example above) and attributes because:
+   dimensions (like the "*200x100*" used in example above) and attributes because:
    
    * It will minimize the number of formats you use and eliminate duplicates.
-   * It will eliminate the threat that the same image is formatted twice
-      with same parameters. 
+   * It will eliminate the threat that the same image is formatted twice with
+     same parameters. 
    
    
 .. _initial data: https://docs.djangoproject.com/en/dev/howto/initial-data/
@@ -653,7 +659,7 @@ in your ``settings.py`` and add your own related finders to involve advanced
 searching (haystack, ...) or your very custom relations. For more info on this
 topic, see :ref:`common-gotchas-integrating-search`.
 
-.. note::
+.. warning::
 
     Be sure to always include the ``default`` key in ``RELATED_FINDERS`` setting,
     it is expected to be there. 
@@ -668,8 +674,8 @@ Parameter                   Description
 ==========================  ================================================
 ``obj``                     Object we are finding the related for.
 ``count``                   Collect at most this number of related objects.
-``collected_so_far``        Default type of the box to use, can be overriden 
-                            from the admin.
+``collected_so_far``        List of object, that the controller has collected
+                            so far. Can come handy when dealing with duplicates.
 ``only_from_same_site``     Boolean telling the function if only the objects
                             from the same site as ``obj`` is are required.
 ==========================  ================================================
@@ -692,7 +698,9 @@ within your templates. It fills up a given variable with list of publishable
 objects that were collected by finder functions. When no ``query_type`` is 
 given, ``default`` will be used.
 
-**Usage**::
+**Usage**:
+
+.. code-block:: html+django
 
     {% related <limit>[ query_type] [app.model, ...] for <object> as <result> %}
         
@@ -703,23 +711,64 @@ Option                              Description
 ==================================  ================================================
 ``limit``                           Number of objects to retrieve.
 ``query_type``                      Named finder to resolve the related objects,
-                                    falls back to ``settings.DEFAULT_RELATED_FINDER``
-                                    when not specified.
+                                    falls back to ``default`` when not specified.
 ``app.model``, ...                  List of allowed models, all if omitted.
 ``object``                          Object to get the related for.
 ``result``                          Store the resulting list in context under given
                                     name.
 ==================================  ================================================
 
-**Examples**::
+**Examples**:
+
+.. code-block:: html+django
     
     {% related 10 for object as related_list %}
     {% related 10 directly articles.article, galleries.gallery for object as related_list %}
+    
+.. note::
+
+    Please note that you can define new related finders very easily and instantly
+    call them in your templates. Whenever you need to query for some object
+    list by some relation, it's the use case for a *custom related finder*.  
 
 .. _features-syndication:
 
 Syndication - ATOM and his RSS friend
 *************************************
+
+Ella has automatic syndication support **out of the box**. For each category,
+there are RSS a ATOM feeds automatically available on::
+
+    www.example.com/feeds/[CATEGORY_TREE_PATH]/rss/
+    
+and::
+
+    www.example.com/feeds/[CATEGORY_TREE_PATH]/atom/
+    
+respectively.
+
+Ella uses `Django syndication feed framework`_ internally to render the feeds. 
+Default number of objects in feed is set to **10** by ``RSS_NUM_IN_FEED``
+setting. You can override this setting it to different value in your
+``settings.py``. Also, you can define an `enclosure`_ format by setting
+``RSS_ENCLOSURE_PHOTO_FORMAT`` which defaults to ``None``.
+The value is expected as ``Format`` instance name. If you set this to ``None``
+(or don't set it at all), no enclosures will be used.
+
+The feed title and description defaults to category ``title`` attribute. If you
+need to override this, use :ref:`app_data <features-extending-metadata>` and
+make sure you set following::
+
+    category.app_data['syndication'] = {
+        'title': 'My feed title',
+        'description': 'My feed description' 
+    }
+    
+You can do this through Django administration.
+
+.. _Django syndication feed framework: https://docs.djangoproject.com/en/dev/ref/contrib/syndication/
+.. _enclosure: https://docs.djangoproject.com/en/dev/ref/contrib/syndication/#enclosures
+
 
 .. _features-incorporating-plugins:
 
