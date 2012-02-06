@@ -51,7 +51,7 @@ class PhotoBox(Box):
                 'show_description' : self.params.get('show_description', ''),
                 'show_authors' : self.params.get('show_authors', ''),
                 'show_detail' : self.params.get('show_detail', ''),
-                'show_source' : self.params.get('show_source', ''),###
+                'show_source' : self.params.get('show_source', ''), ###
                 'link_url': self.params.get('link_url', ''),
             })
         return cont
@@ -186,8 +186,9 @@ class Format(models.Model):
     name = models.CharField(_('Name'), max_length=80)
     max_width = models.PositiveIntegerField(_('Max width'))
     max_height = models.PositiveIntegerField(_('Max height'))
-    flexible_height = models.BooleanField(_('Flexible height'), help_text=_(('Determines whether max_height is an absolute maximum, '
-                                                                                 'or the formatted photo can vary from max_height for flexible_max_height.')))
+    flexible_height = models.BooleanField(_('Flexible height'), help_text=_((
+        'Determines whether max_height is an absolute maximum, or the formatted'
+        'photo can vary from max_height for flexible_max_height.')))
     flexible_max_height = models.PositiveIntegerField(_('Flexible max height'), blank=True, null=True)
     stretch = models.BooleanField(_('Stretch'))
     nocrop = models.BooleanField(_('Do not crop'))
@@ -304,7 +305,7 @@ class FormatedPhoto(models.Model):
 
         # set crop_box to (0,0,0,0) if photo not cropped
         if not crop_box:
-            crop_box = 0,0,0,0
+            crop_box = 0, 0, 0, 0
 
         self.crop_left, self.crop_top, right, bottom = crop_box
         self.crop_width = right - self.crop_left
@@ -353,7 +354,7 @@ class FormatedPhoto(models.Model):
     def file(self):
         """ Method returns formated photo path - derived from format.id and source Photo filename """
         source_file = path.split(self.photo.image.name)
-        return path.join(source_file[0],  str (self.format.id) + '-' + source_file[1])
+        return path.join(source_file[0], str (self.format.id) + '-' + source_file[1])
 
     def __unicode__(self):
         return u"%s - %s" % (self.photo, self.format)
@@ -361,5 +362,5 @@ class FormatedPhoto(models.Model):
     class Meta:
         verbose_name = _('Formated photo')
         verbose_name_plural = _('Formated photos')
-        unique_together = (('photo','format'),)
+        unique_together = (('photo', 'format'),)
 

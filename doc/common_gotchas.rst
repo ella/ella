@@ -20,7 +20,7 @@ Taking advantage of template inheritance
 
 .. _common-gotchas-static-pages:
 
-Static pages that ever don't change
+Static pages that don't ever change
 ***********************************
 
 .. _common-gotchas-integrating-search:

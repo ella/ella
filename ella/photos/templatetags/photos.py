@@ -35,10 +35,18 @@ class ImgTag(template.Node):
 @register.tag
 def img(parser, token):
     """
-    Examples:
+    Generates thumbnails for ``Photo`` instances.
+    
+    syntax::
+        
+        {% img <format> for <var> as <var_name> %}
+        {% img <format> with <field_value> as <var_name> %} 
+    
+    examples::
 
-        {% img FORMAT for VAR as VAR_NAME %}
-        {% img FORMAT with FIELD VALUE as VAR_NAME %}
+        {% img category_listing for object.photo as thumb %}
+        {% img category_listing with pk 1150 as thumb %}
+        
     """
     bits = token.split_contents()
     return _parse_img(bits)
@@ -70,7 +78,7 @@ def _parse_img(bits):
         try:
             photo = get_cached_object(Photo, **{str(bits[3]) : bits[4]})
         except photo.DoesNotExist:
-            raise template.TemplateSyntaxError, "Photo with %r of %r does not exist" % (bits[3],  bits[4])
+            raise template.TemplateSyntaxError, "Photo with %r of %r does not exist" % (bits[3], bits[4])
 
         formated_photo = FormatedPhoto.objects.get_photo_in_format(photo, format)
     else:
