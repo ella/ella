@@ -299,7 +299,11 @@ class RenderNode(template.Node):
 @register.tag('render')
 def do_render(parser, token):
     """
-    {% render some_var %}
+    Renders a rich-text field using defined markup.
+    
+    Example::
+        
+        {% render some_var %}
     """
     bits = token.split_contents()
 

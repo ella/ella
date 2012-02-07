@@ -35,9 +35,9 @@ Contents:
     quickstart
     developer
     html_coder
-    core
     features
     plugins
+    reference
     common_gotchas
     settings
     

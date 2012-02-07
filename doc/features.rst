@@ -3,50 +3,93 @@
 Features
 ########
 
-.. _features-data-model-overview:
+This section presents **core Ella features**. It's recommended to all of the 
+user base. Some parts might be a little heavy for html coders though. It goes
+from the most basic aspects to the more and more specialized ones. It tries to
+show the concepts by examples and doesn't go into the deep descriptions of 
+the API. If you are looking for reference instead, go to the :ref:`reference`.
 
-Data model overview
-*******************
-
-Ella core module consist of four apps, two of them contain the main logic and
-the second two provide basic CMS capabilities.
-
-Core logic modules
-==================
-
-The core logic is provided by ``ella.core`` and ``ella.photos`` applications,
-see the image below for quick overview of models used.
-
-.. image:: img/core_models.png
-    :width: 1000px
-
-.. image:: img/photos_models.png
-    :width: 450px
-    
-Basic CMS capabilities
-======================
-
-Ella ships with two basic CMS apps you can use: **articles** and **positions**.
-Quick overview image follows.
-
-.. image:: img/cms_models.png
-    :width: 850px
-
-.. _features-template-overview:
-
-Template overview
-*****************
-
-Basic templates
-===============
-
-Advanced templates
-==================
+As a rule of the thumb, all sections up to the :ref:`features-related` are
+recommended for an every-day Ella user. 
 
 .. _features-template-fallback-mechanisms:
 
-Fallback mechanisms
-===================
+Template fallback mechanisms
+****************************
+
+Templates for rendering categories and publishable objects use fallback mechanism
+to provide you full control over what is rendered with minimum effort required.
+
+When selecting template to use for given URL, Ella does several things based
+on what we are dealing with. However, in both cases there is final fallback to 
+default templates which are:
+
+* **category.html** for a category template
+* **object.html** for an object template
+
+.. note::
+    
+    Under some circumstances, **category.html** can be overriden, see
+    :ref:`features-category-custom-templates` for more details.
+
+Selecting template for a category
+=================================
+
+When selecting templates for a rendering of category, Ella uses this set of 
+rules:
+
+#. Look at the ``tree_path``. Try to find a template in
+   ``page/category/[TREE_PATH]/category.html``.
+   
+   Example:
+   
+       **http://www.example.com/category/subcategory/**
+           Ella would first try to find ``page/category/category/subcategory/category.html``.
+           
+#. If template was not found in previous step, try to find the template
+   of an direct ancestor providing we have one and it's not the root category.
+   
+   Examples:
+   
+       **http://www.example.com/category/subcategory/subsubcategory/**
+           First, try ``page/category/category/subcategory/category.html``,
+           next try ``page/category/category/category.html`` and stop because the
+           category ``"category"`` is the main one.
+   
+       **http://www.example.com/category/subcategory/**
+           Try ``page/category/category/category.html`` and stop.
+           
+       **http://www.example.com/category/**
+           Would not try anything, we are already in main category.
+           
+       **http://www.example.com/**
+           Would not try anything, we are in root.
+       
+#. If template wasn't found yet, use default template (which is
+   ``page/category.html`` in most cases).    
+
+Selecting template for an object
+================================
+
+Selecting template for an object adds even more possibilities for the developer.
+It also uses ``content_type`` in form of ``app_label.model_label`` (both
+lowercased). Example would be: ``articles.article``, ``videos.video`` and so on.
+
+#. Try to find a template in
+   ``page/category/[TREE_PATH]/content_type/[CONTENT_TYPE]/object.html``.
+   
+#. Try to find a template in
+   ``page/content_type/[CONTENT_TYPE]/object.html``.
+   
+#. Continue in the same way as when selecting a category template except for
+   using ``object.html`` instead of ``category.html``.
+   
+Selecting template for a box
+============================
+
+Lookup for boxes is done in ``"box"`` subdirectory. It then works exactly
+the same as for objects, except that the template name is the **name of the 
+box** being rendered and last resort is template ``box/box.html``.  
 
 .. _features-category-detail:
 
@@ -79,23 +122,25 @@ For details and explanation of the whole concept, have a look at
 
 **Context** will always contain at least:
 
-==================================  ================================================
+==================================  ============================================
 Key                                 Value
-==================================  ================================================
+==================================  ============================================
 ``category``                        ``Category`` object itself.
 ``is_homepage``                     Flag telling you if this is a homepage, see
                                     :ref:`features-category-homepages`.
 ``is_title_page``                   Boolean telling you if this is the first
                                     page of the listing/archive.
-``is_paginated``                    Boolean which is ``True`` more pages are available.
+``is_paginated``                    Boolean which is ``True`` more pages are
+                                    available.
 ``results_per_page``                Number of objects per page.
 ``page``                            Current page shown.
-``listings``                        Objects listed in the ``category`` for this page.
+``listings``                        Objects listed in the ``category`` for this
+                                    page.
 ``content_type``                    If filtering by Content Type is active,
                                     this will hold the ``ContentType`` instance.
 ``content_type_name``               Verbose name of content type if Content Type
                                     filtering takes place.
-==================================  ================================================
+==================================  ============================================
 
 The basic scenario when building up site's category templates is following:
 
@@ -356,6 +401,14 @@ Archive pages
 Integrating custom views
 ************************
 
+Ella doesn't force you to make your views any prescribed way. You can easily
+create any Django application and add it to your project standard Django way
+and Ella won't stand in way.
+
+However, if you try to extend the functionality of the framework itself, 
+you might want to have a look at :ref:`Ella plugins <features-incorporating-plugins>`
+which offer several simple interface for extending the Ella.
+
 .. _features-positions:
 
 Defining positions on the page
@@ -505,51 +558,8 @@ Photo module is composed from several important parts:
     and abstracts the process of thumbnail creation.  
 
 
-.. _features-photos-photo:
-
-The ``Photo`` model
-===================
-
-A ``Photo`` class represents original photo uploaded by user. It keeps all the
-meta information:
-
-* ``title``, ``description``, ``slug``
-* ``image`` - this is the path to a `Django file storage`_.
-* ``width`` and ``height``
-* ``important_*`` describes important box on the ``Photo``. This is used when
-  cropping images and marks area which should not be cropped in any circumstances.
-* ``authors`` - lists photo authors
-* ``source`` - a related ``Source`` instance
-
-The original photo is always kept and never altered. All formatting occurs on 
-``FormatedPhoto`` instances, which are also kept to keep track of already-formated
-photos.
-
-.. _Django file storage: https://docs.djangoproject.com/en/dev/ref/files/storage/ 
-
-.. _features-photos-formats:
-
-Photo formats
-=============
-
-For easier administration, Ella uses set of user-defined formats to render the
-photos. Format defines following attributes:
-
-* ``name`` is used mainly in templates when referencing a format to use for
-  rendering.
-* ``max_width`` and ``max_height``
-* ``flexible_height`` determines whether ``max_height`` is an absolute maximum, or
-  the formatted photo can vary from ``max_height`` for ``flexible_max_height``.
-* ``flexible_max_height``
-* ``stretch`` describes if photo can be stretched if necessary.
-* ``nocrop`` if set to ``True``, no cropping will occur for this format.
-* ``resample_quality`` defines quality used for operations over the photo
-  (default is 85).
-* ``sites`` is list of Ella sites, where the format should be available for use. 
-
-
-``{% img %}`` template tag
-==========================
+Generating thumbnails in the tempalates
+=======================================
 
 The ``{% img %}`` template tag is used to get a thumbnail for original ``Photo``
 object. It is smart enough to use all the meta info defined on ``Photo``, so 
@@ -873,3 +883,4 @@ Double rendering
 
 Deployment
 **********
+

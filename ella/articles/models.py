@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from django.db import models
 from django.utils.timesince import timesince
 from django.utils.translation import ugettext_lazy as _
@@ -13,8 +11,7 @@ class Article(Publishable):
     news on an organization's home page.
     """
     upper_title = models.CharField(_('Upper title'), max_length=255, blank=True)
-    created = models.DateTimeField(_('Created'), default=datetime.now,
-        editable=False, db_index=True)
+    created = models.DateTimeField(_('Created'), auto_now_add=True, db_index=True)
     updated = models.DateTimeField(_('Updated'), blank=True, null=True)
 
     content = models.TextField(_('Content'), default='')
@@ -22,9 +19,6 @@ class Article(Publishable):
     class Meta:
         verbose_name = _('Article')
         verbose_name_plural = _('Articles')
-
-    def __unicode__(self):
-        return self.title
 
     def article_age(self):
         """Returns time since article was created in **localized, verbose form**."""

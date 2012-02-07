@@ -68,12 +68,18 @@ def upload_to(instance, filename):
     )
 
 class Photo(models.Model):
-    "Represents original (unformated) photo."
+    """
+    Represents original (unformated) photo uploaded by user. Used as source
+    object for all the formatting stuff and to keep the metadata common to 
+    all related ``FormatedPhoto`` objects.
+    """
     box_class = PhotoBox
     title = models.CharField(_('Title'), max_length=200)
     description = models.TextField(_('Description'), blank=True)
     slug = models.SlugField(_('Slug'), max_length=255)
-    image = models.ImageField(_('Image'), upload_to=upload_to, height_field='height', width_field='width') # save it to YYYY/MM/DD structure
+    # save it to YYYY/MM/DD structure
+    image = models.ImageField(_('Image'), upload_to=upload_to,
+        height_field='height', width_field='width')
     width = models.PositiveIntegerField(editable=False)
     height = models.PositiveIntegerField(editable=False)
 
@@ -87,10 +93,20 @@ class Photo(models.Model):
     authors = models.ManyToManyField(Author, verbose_name=_('Authors') , related_name='photo_set')
     source = models.ForeignKey(Source, blank=True, null=True, verbose_name=_('Source'))
 
-    created = models.DateTimeField(default=datetime.now, editable=False)
+    created = models.DateTimeField(auto_now_add=True)
 
     # generic JSON field to store app cpecific data
     app_data = JSONField(default='{}', blank=True, editable=False)
+
+    class Meta:
+        verbose_name = _('Photo')
+        verbose_name_plural = _('Photos')
+
+    def __unicode__(self):
+        return self.title
+
+    def get_absolute_url(self):
+        return self.image.url
 
     def get_image_info(self):
         return {
@@ -162,15 +178,6 @@ class Photo(models.Model):
         "Return formated photo"
         return FormatedPhoto.objects.get_photo_in_format(self, format)
 
-    def __unicode__(self):
-        return self.title
-
-    def get_absolute_url(self):
-        return self.image.url
-
-    class Meta:
-        verbose_name = _('Photo')
-        verbose_name_plural = _('Photos')
 
 FORMAT_CACHE = {}
 class FormatManager(models.Manager):
@@ -182,24 +189,43 @@ class FormatManager(models.Manager):
         return format
 
 class Format(models.Model):
-    "Defines per-site photo sizes"
+    """
+    Defines per-site photo sizes together with rules how to adhere to them.
+    
+    This includes:
+    
+    * maximum width and height
+    * cropping settings
+    * stretch (rescale) settings
+    * sample quality
+    """
     name = models.CharField(_('Name'), max_length=80)
     max_width = models.PositiveIntegerField(_('Max width'))
     max_height = models.PositiveIntegerField(_('Max height'))
     flexible_height = models.BooleanField(_('Flexible height'), help_text=_((
         'Determines whether max_height is an absolute maximum, or the formatted'
-        'photo can vary from max_height for flexible_max_height.')))
-    flexible_max_height = models.PositiveIntegerField(_('Flexible max height'), blank=True, null=True)
+        'photo can vary from max_height to flexible_max_height.')))
+    flexible_max_height = models.PositiveIntegerField(_('Flexible max height'),
+        blank=True, null=True)
     stretch = models.BooleanField(_('Stretch'))
     nocrop = models.BooleanField(_('Do not crop'))
-    resample_quality = models.IntegerField(_('Resample quality'), choices=photos_settings.FORMAT_QUALITY, default=85)
+    resample_quality = models.IntegerField(_('Resample quality'),
+        choices=photos_settings.FORMAT_QUALITY, default=85)
     sites = models.ManyToManyField(Site, verbose_name=_('Sites'))
 
     objects = FormatManager()
 
+    class Meta:
+        verbose_name = _('Format')
+        verbose_name_plural = _('Formats')
+
+    def __unicode__(self):
+        return  u"%s (%sx%s) " % (self.name, self.max_width, self.max_height)
+
     def get_blank_img(self):
         """
-        Return fake FormatedPhoto object to be used in templates when an error occurs in image generation.
+        Return fake ``FormatedPhoto`` object to be used in templates when an error
+        occurs in image generation.
         """
         out = {
             'blank': True,
@@ -210,15 +236,8 @@ class Format(models.Model):
         return out
 
     def ratio(self):
-        "Return photo's width to height ratio"
+        """Return photo's width to height ratio"""
         return float(self.max_width) / self.max_height
-
-    def __unicode__(self):
-        return  u"%s (%sx%s) " % (self.name, self.max_width, self.max_height)
-
-    class Meta:
-        verbose_name = _('Format')
-        verbose_name_plural = _('Formats')
 
 
 class FormatedPhotoManager(models.Manager):
@@ -266,10 +285,16 @@ class FormatedPhotoManager(models.Manager):
 
 
 class FormatedPhoto(models.Model):
-    "Specific photo of specific format."
+    """
+    Cache-like container of specific photo of specific format. Besides
+    the path to the generated image file, crop used is also stored together
+    with new ``width`` and ``height`` attributes.
+    """
     photo = models.ForeignKey(Photo)
     format = models.ForeignKey(Format)
-    image = models.ImageField(upload_to=photos_settings.UPLOAD_TO, height_field='height', width_field='width', max_length=300) # save it to YYYY/MM/DD structure
+    # save it to YYYY/MM/DD structure
+    image = models.ImageField(upload_to=photos_settings.UPLOAD_TO,
+        height_field='height', width_field='width', max_length=300)
     crop_left = models.PositiveIntegerField()
     crop_top = models.PositiveIntegerField()
     crop_width = models.PositiveIntegerField()
@@ -278,6 +303,14 @@ class FormatedPhoto(models.Model):
     height = models.PositiveIntegerField(editable=False)
 
     objects = FormatedPhotoManager()
+
+    class Meta:
+        verbose_name = _('Formated photo')
+        verbose_name_plural = _('Formated photos')
+        unique_together = (('photo', 'format'),)
+
+    def __unicode__(self):
+        return u"%s - %s" % (self.photo, self.format)
 
     @property
     def url(self):
@@ -300,7 +333,11 @@ class FormatedPhoto(models.Model):
         return formatter.format()
 
     def generate(self, save=True):
-        "Generates photo file in current format"
+        """
+        Generates photo file in current format.
+        
+        If ``save`` is ``True``, file is saved too.
+        """
         stretched_photo, crop_box = self._generate_img()
 
         # set crop_box to (0,0,0,0) if photo not cropped
@@ -314,7 +351,8 @@ class FormatedPhoto(models.Model):
         self.width, self.height = stretched_photo.size
 
         f = StringIO()
-        stretched_photo.save(f, format=Image.EXTENSION[path.splitext(self.photo.image.name)[1]], quality=self.format.resample_quality)
+        stretched_photo.save(f, format=Image.EXTENSION[path.splitext(self.photo.image.name)[1]],
+            quality=self.format.resample_quality)
         f.seek(0)
 
         self.image.save(self.file(), ContentFile(f.read()), save)
@@ -355,12 +393,4 @@ class FormatedPhoto(models.Model):
         """ Method returns formated photo path - derived from format.id and source Photo filename """
         source_file = path.split(self.photo.image.name)
         return path.join(source_file[0], str (self.format.id) + '-' + source_file[1])
-
-    def __unicode__(self):
-        return u"%s - %s" % (self.photo, self.format)
-
-    class Meta:
-        verbose_name = _('Formated photo')
-        verbose_name_plural = _('Formated photos')
-        unique_together = (('photo', 'format'),)
 
