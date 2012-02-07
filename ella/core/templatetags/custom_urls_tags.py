@@ -1,5 +1,5 @@
 """
-Lot of what you see here has been stolen from django's {% url %} tag
+Lot of what you see here has been stolen from Django's ``{% url %}`` tag.
 """
 from django.core.urlresolvers import NoReverseMatch
 from django.template import Node, TemplateSyntaxError, Library
@@ -16,20 +16,20 @@ class CustomURLNode(Node):
         self.args = args
         self.kwargs = kwargs
         self.asvar = asvar
-      
+
     def render(self, context):
         args = [arg.resolve(context) for arg in self.args]
-        kwargs = dict([(smart_str(k,'ascii'), v.resolve(context))
+        kwargs = dict([(smart_str(k, 'ascii'), v.resolve(context))
                        for k, v in self.kwargs.items()])
         obj = self.obj.resolve(context)
-      
+
         url = ''
         try:
             url = custom_urls.resolver.reverse(obj, self.view_name, *args, **kwargs)
         except NoReverseMatch, e:
             if self.asvar is None:
                 raise e
-      
+
         if self.asvar:
             context[self.asvar] = url
             return ''
@@ -38,8 +38,24 @@ class CustomURLNode(Node):
 
 @register.tag
 def custom_url(parser, token):
+    """
+    Get URL using Ella custom URL resolver and return it or save it in 
+    context variable.
+    
+    Syntax::
+    
+        {% custom_url <FOR_VARIABLE> <VIEWNAME>[[[ <ARGS>] <KWARGS>] as <VAR>] %}
+    
+    Examples::
+    
+        {% custom_url object send_by_email %}
+        {% custom_url object send_by_email 1 %}
+        {% custom_url object send_by_email pk=1 %}
+        {% custom_url object send_by_email pk=1 as saved_url %}
+    
+    """
     bits = token.split_contents()
-    if len(bits) < 3: 
+    if len(bits) < 3:
         raise TemplateSyntaxError("'%s' takes at least one argument"
                                   " (path to a view)" % bits[0])
     obj = parser.compile_filter(bits[1])
@@ -47,7 +63,7 @@ def custom_url(parser, token):
     args = []
     kwargs = {}
     asvar = None
- 
+
     if len(bits) > 3:
         bits = iter(bits[3:])
         for bit in bits:

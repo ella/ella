@@ -7,14 +7,24 @@ register = template.Library()
 @register.inclusion_tag('inclusion_tags/paginator.html', takes_context=True)
 def paginator(context, adjacent_pages=2):
     """
-    To be used in conjunction with the object_list generic view.
+    Renders a ``inclusion_tags/paginator.html`` template with additional
+    pagination context. To be used in conjunction with the ``object_list`` generic
+    view.
 
-    Adds pagination context variables for use in displaying first, adjacent_pages and
-    last page links in addition to those created by the object_list generic
+    Adds pagination context variables for use in displaying first, adjacent pages and
+    last page links in addition to those created by the ``object_list`` generic
     view.
 
     Taken from http://www.djangosnippets.org/snippets/73/
+    
+    Syntax::
+    
+        {% paginator[ <NUMBER_OF_ADJACENT_PAGES] %}
+        
+    Examples::
 
+        {% paginator %}
+        {% paginator 5 %}
     """
     if not 'page' in context:
         # improper use of paginator tag, bail out
@@ -23,8 +33,9 @@ def paginator(context, adjacent_pages=2):
     page = context['page']
     page_no = int(page.number)
 
-    s = max(1, page_no - adjacent_pages - max(0, page_no+adjacent_pages-page.paginator.num_pages))
-    page_numbers = range(s, min(page.paginator.num_pages, s+2*adjacent_pages)+1)
+    s = max(1, page_no - adjacent_pages - max(0, page_no + adjacent_pages -
+        page.paginator.num_pages))
+    page_numbers = range(s, min(page.paginator.num_pages, s + 2 * adjacent_pages) + 1)
 
     return {
         'page': page,
