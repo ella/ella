@@ -15,7 +15,7 @@ from django.conf import settings
 from ella.core.models import Author, Source, Category, Listing, Related, Publishable
 from ella.core.conf import core_settings
 
-from ella import newman
+import newman
 from newman import options, fields
 from newman.filterspecs import CustomFilterSpec, NewmanSiteFilter
 
