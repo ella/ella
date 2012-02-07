@@ -2,8 +2,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.conf.urls.defaults import patterns, url
 from django.contrib.admin import helpers
 
-from ella import newman
-
 from ella.photos.models import FormatedPhoto, Format, Photo
 from newman.utils import JsonResponse, JsonResponseRedirect, JsonResponseError
 from newman.conf import newman_settings
@@ -23,6 +21,8 @@ from django import forms
 from django.utils.translation import ugettext_lazy as _
 
 from ella.photos.models import Photo
+
+import newman
 from newman.conf import newman_settings
 from newman.fields import RGBImageField
 
@@ -115,6 +115,16 @@ class PhotoAdmin(newman.NewmanModelAdmin):
         (_("Description"), {'fields': ('description',)}),
         (_("Metadata"), {'fields': ('authors', 'source', 'image_file')}),
     )
+
+    def thumb(self):
+        """
+        Generates html and thumbnails for admin site.
+        """
+        thumb_url = self.thumb_url()
+        if not thumb_url:
+            return mark_safe("""<strong>%s</strong>""" % ugettext('Thumbnail not available'))
+        return mark_safe("""<a href="%s" class="js-nohashadr thickbox" title="%s" target="_blank"><img src="%s" alt="Thumbnail %s" /></a>""" % (self.image_url(), self.title, thumb_url, self.title))
+    thumb.allow_tags = True
 
     def size(self, obj):
         return "%dx%d px" % (obj.width, obj.height)
