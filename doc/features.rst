@@ -879,7 +879,7 @@ Caching
 Double rendering
 ================
 
-.. _features-deployments:
+.. _features-deployment:
 
 Deployment
 **********
