@@ -3,6 +3,35 @@
 Features
 ########
 
+.. _features-data-model-overview:
+
+Data model overview
+*******************
+
+Ella core module consist of four apps, two of them contain the main logic and
+the second two provide basic CMS capabilities.
+
+Core logic modules
+==================
+
+The core logic is provided by ``ella.core`` and ``ella.photos`` applications,
+see the image below for quick overview of models used.
+
+.. image:: img/core_models.png
+    :width: 1000px
+
+.. image:: img/photos_models.png
+    :width: 450px
+    
+Basic CMS capabilities
+======================
+
+Ella ships with two basic CMS apps you can use: **articles** and **positions**.
+Quick overview image follows.
+
+.. image:: img/cms_models.png
+    :width: 850px
+
 .. _features-template-overview:
 
 Template overview
@@ -739,11 +768,11 @@ Syndication - ATOM and his RSS friend
 Ella has automatic syndication support **out of the box**. For each category,
 there are RSS a ATOM feeds automatically available on::
 
-    www.example.com/feeds/[CATEGORY_TREE_PATH]/rss/
+    www.example.com/feeds/rss/[CATEGORY_TREE_PATH]/
     
 and::
 
-    www.example.com/feeds/[CATEGORY_TREE_PATH]/atom/
+    www.example.com/feeds/atom/[CATEGORY_TREE_PATH]/
     
 respectively.
 
@@ -775,10 +804,60 @@ You can do this through Django administration.
 Incorporating plugins
 *********************
 
+Ella design is as lightweight as possible. Prefered way of extending it's 
+functions is via **plugins**. Ella provides great flexibility when it comes
+to plugin possibilities. You can for example:
+
+* Add your custom ``Publishable`` subclasses.
+* Create custom ``Box`` classes for the new publishables.
+* Add new actions over the ``Publishable`` objects.
+* Customize bundled workflow when rendering the content.
+
+We've dedicated :ref:`whole section for plugins <plugins>`, because it's an
+important topic and almost every project has it's specific needs. So, for
+details, go to :ref:`plugins`.
+
 .. _features-extending-metadata:
 
 Extending category/publishable metadata
 ***************************************
+
+Since Ella has quite a long history behind it, we've gathered lot of experience
+from previous fails. One such experience is that **almost every project needs
+to add aditional data on the bundled models**. This can be done in lot of 
+various ways because of Python's great possibilities, but more or less, it's
+a dark magic or monkey patching. This is not nice and violates the Django 
+core principle: *explicit is better then implicit*. To fix this up, we've
+added possibility to add arbitrary data on ``Publishable``, ``Category`` and ``Photo``
+models programatically.
+
+Each of the mentioned models has one `JSONField`_ called ``app_data`` which
+can hold any information you need. It has some limitations though:
+
+* It's not possible to **perform efficent queries** over the defined fiels. If
+  you needed it, add ``OneToOne`` relation to your custom model instead.
+* You are **responsible of setting the fields correctly**, no validation measures
+  are placed on that field so that the data might be corrupted if not used 
+  properly.
+  
+`JSONField`_ acts the same way as regular Python ``dict`` object. You can
+store any data structure you like provided it's serializable by Django's JSON
+`encoder`_.
+
+To avoid name clashes, we beg you to use a **namespace convention** that all your
+custom data is stored by using a **key** which coresponds to the app label
+of aplication storing the data, such as::
+
+    # in app "emailing"
+    p = Publishable()
+    p.app_data['emailing'] = {'sent': False}
+    
+    # in app "my_articles"
+    p = Publishable()
+    p.app_data['my_articles'] = {'custom_title': 'Foobar'} 
+
+.. _JSONField: https://github.com/bradjasper/django-jsonfield
+.. _encoder: https://docs.djangoproject.com/en/dev/topics/serialization/#id2
 
 .. _features-caching:
 
