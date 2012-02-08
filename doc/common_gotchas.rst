@@ -1,6 +1,6 @@
-.. _common-gotchas:
-
 .. highlightlang:: html+django
+
+.. _common-gotchas:
 
 Common gotchas & FAQs
 #####################
@@ -106,6 +106,86 @@ If you are not sure how to do it, please refer to :ref:`features-positions`.
 
 Taking advantage of template inheritance
 ****************************************
+
+One of the best things about Django is undoubtedly it's templating framework. 
+And one of it's most powerful features is the `template inheritance`_. When
+building up Django templates, you use so-called **blocks** which can then
+be overriden in the child template which inherits from the parent template. 
+When using Ella, it's very beneficial to take the full advantage of the
+inheritance concept since the number of templates in large Ella websites
+can grow up significantly. Using the inheritance, you can very effectively
+write as little code as possible. Here are some hints you may found useful:
+
+* Always write the base template for object and category detail pages. Try 
+  to put there as much shared code as possible.
+* In you base template, don't be hesitate to define many blocks so the child
+  templates won't need to override big pieces of code. 
+* It often make sense to put almost each parts of the base template into blocks.
+  This applies for titles, descriptions, perexes, comment sections, object tools
+  and so on. The more you allow to override, the smaller the child template will
+  be.
+* When dealing with content used in more than one template type or
+  when it's hard to keep the inheritance scheme for some reason, use
+  ``{% include %}`` and put those pieces of content in reusable snippets in 
+  your ``inclusion_tags`` template subdirectory. A common use case scenario
+  for this can be a right sidebar. Consider following example of reusable
+  right col template. First, define the base ``rightcol.html`` template::
+  
+        <!-- in page/inclusion_tags/rightcol.html -->
+        {% block rightcol_top %}{% endblock %}
+        
+        {% block rightcol_top_articles %}
+            ... code showing top articles ..
+        {% endblock %}
+        
+        {% block rightcol_category_poll %}
+            ... code showing poll related to the category ...
+        {% endblock %}
+        
+        {% block rightcol_bottom %}{% endblock %}
+        
+  This template contains the the stuff a sidebar can contain with possibility
+  to add your own stuff to the top and to the bottom of it. Next define
+  child templates of the ``rightcol.html`` for homepage and common category:: 
+        
+        <!-- in page/inclusion_tags/rightcol_hp.html -->
+        {% extends "page/inclusion_tags/rightcol.html" %}
+        
+        {% block rightcol_top %}
+            ... some special code to add on top of the right col ...
+        {% endblock %}
+        
+        <!-- in page/inclusion_tags/rightcol_category.html -->
+        {% extends "page/inclusion_tags/rightcol.html" %}
+        
+        {% block rightcol_top_articles %}{% endblock %}
+  
+  For the purpose of this example, we added a special piece of code at the top
+  of the sidebar in homepage and turned off the displaying of top articles
+  in common categories. In real-world situation, your intents will be probably 
+  little different, but for the need of demonstration, this is sufficent. 
+  Finally, put following piece of code in your base ``category.html``::
+  
+        <!-- in page/category.html -->
+        {% block rightcol %}
+            <div id="sidebar">
+                {% block rightcol_content %}
+                    {% if is_homepage %}
+                        {% include "inc/rightcol_hp.html" %}
+                    {% else %}
+                        {% include "inc/rightcol_category.html" %}
+                    {% endif %}
+                {% endblock %}
+            </div>
+        {% endblock %}
+
+  In the main category template, we can easily implement a default behavior
+  without need to duplicate a single line of code.
+* Every time you find yourself duplicating a HTML code, try to think if some
+  kind of inheritance wouldn't help you avoid doing so. In most cases, this
+  would be true.
+
+.. _template inheritance: https://docs.djangoproject.com/en/dev/topics/templates/#template-inheritance 
 
 .. _common-gotchas-static-pages:
 
