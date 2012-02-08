@@ -2,7 +2,8 @@ Ella CMS
 ########
 
 `Ella`_ is a Content Management System based on `Python`_ web framework
-`Django`_.
+`Django`_ with a main focus on high-traffic news websites and Internet
+magazines.
 
 It is composed from several modules:
 
