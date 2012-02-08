@@ -7,11 +7,15 @@ Ella CMS
 It is composed from several modules:
 
     * **Ella core** is the main module which links the rest together. It
-      defines architecture on which other modules are build but doesn't do
+      defines architecture on which other modules are built but doesn't do
       anything really usefull all alone.
-    * **Ella plugins** are standalone applications that provide some
-      specific functionality using **Ella's architecture**. We can list for
-      e.g. articles, polls, galleries, quizes.
+    * **Ella core plugins** are plugins that are shipped in one package
+      together with Ella. There are **articles** and **positions** which 
+      we consider to be a basic toolbox for each Ella site.
+    * **Other Ella plugins** are standalone applications (and therfore
+      not shipped with the core) that provide some
+      specific functionality using **Ella's architecture**. We can mention
+      polls, galleries, quizes and many more.
 
 For creating site using Ella, working knowledge of Django and its templating
 language is required. It is therfore highly recommended to get familiar with
