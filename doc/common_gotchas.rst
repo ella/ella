@@ -11,8 +11,8 @@ doing the things Ella-way.
 
 .. _common-gotchas-creating-site-menus:
 
-Creating site menus
-*******************
+Creating site navigation
+************************
 
 A common situation. Site needs a **global menu which consists of links** to categories
 and/or static pages. The question is: how do we do such a thing in Ella? The
