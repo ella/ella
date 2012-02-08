@@ -16,6 +16,20 @@ It is composed from several modules:
       not shipped with the core) that provide some
       specific functionality using **Ella's architecture**. We can mention
       polls, galleries, quizes and many more.
+      
+Feature highlights:
+
+    * Simple organization of content based on categories
+    * Efficent implementation of the published content
+    * In-build photo formating backend
+    * Django-admin ready
+    * Plugin system
+    * Flexibile
+    * Scalable
+    * Extensible
+    * Caching-friendly
+    * Well tested
+    * Proven in production environment
 
 For creating site using Ella, working knowledge of Django and its templating
 language is required. It is therfore highly recommended to get familiar with
