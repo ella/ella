@@ -30,8 +30,8 @@ Contents:
 
 .. toctree::
     :maxdepth: 2
-    :glob: 
-   
+    :glob:
+
     quickstart
     developer
     html_coder
@@ -40,17 +40,22 @@ Contents:
     reference
     common_gotchas
     settings
-    
-    
+
+
 Sites using Ella
 ****************
 
-Ella is getting more and more popular. Here are some sites that take advantage 
+Ella is getting more and more popular. Here are some sites that take advantage
 of it:
 
 * `Investicniweb.cz <http://www.investicniweb.cz>`_
 * `Dumazahrada.cz <http://www.dumazahrada.cz>`_
+* `Květy <http://kvety.kafe.cz>`_
+* `Vlasta <http://vlasta.kafe.cz>`_
 * `Crazycafe.cz <http://www.crazycafe.cz>`_
+* `EquiTV.cz <http://equitv.cz/>`_
+* `Vaquero.cz <http://vaquero.cz/>`_
+* `Ranch Bystrá <http://ranchbystra.cz/>`_
 * `pyvec.org <http://pyvec.org>`_
 
 License
