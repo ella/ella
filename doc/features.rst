@@ -391,6 +391,35 @@ Most likely, you would also add following things to the base object template:
 * Tags for the object
 * Comments
 
+Object detail URL
+=================
+
+The URL of ``Publishable`` object detail depends on publication type. As we 
+already mentioned in :ref:`quickstart`, there are two:
+
+* **time-based** publication is limited by ``publish_from`` - ``publish_to``
+  period. Outside of these time boundaries, object won't be reachable
+  on the website. Most websites only use ``publish_from`` so that the object
+  won't disappear.
+* **static** publication is not limited by time and thus it is unlimited and
+  permanent. Such object will be always reachable on the website.
+  
+With **time-based** publications, objects are given a date stamp in the URL
+so the namespaces clashes doesn't happen very often. URL structure goes like::
+
+    /category/tree/path/[YEAR]/[MONTH]/[DAY]/[CONTENT_TYPE_NAME]/slug/
+    
+So for an example, ``/about/2007/08/11/articles/ella-first-in-production/`` could
+be proper result of **time-based** publication.
+
+With **static** publication, no date stamp is used. Instead, **object's primary
+key is prepended before slug** to avoid name conflicts. URL structure looks like
+this::
+
+    /category/tree/path/[CONTENT_TYPE_NAME]/[PK]-slug/
+
+And a valid result could be ``/about/articles/1-ella-first-in-production/``.
+
 .. _features-category-archives:
 
 Archive pages

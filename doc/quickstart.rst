@@ -286,7 +286,7 @@ of publication with slightly different use cases:
   presumably since Ella was designed to power magazines and news sites). The
   URL of an object published in time-based way will look like::
   
-      /category/tree/path/YEAR/MONTH/DAY/content_type_name/slug/
+      /category/tree/path/[YEAR]/[MONTH]/[DAY]/[CONTENT_TYPE_NAME]/slug/
       
   so for example::
   
