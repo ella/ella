@@ -396,6 +396,11 @@ Most likely, you would also add following things to the base object template:
 Archive pages
 *************
 
+.. _features-markup:
+
+Rich-text fields: using WYSIWYG editors or a markup language
+************************************************************
+
 .. _features-custom-views:
 
 Integrating custom views

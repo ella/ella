@@ -118,9 +118,9 @@ write as little code as possible. Here are some hints you may found useful:
 
 * Always write the base template for object and category detail pages. Try 
   to put there as much shared code as possible.
-* In you base template, don't be hesitate to define many blocks so the child
+* In you base template, don't hesitate to define many blocks so the child
   templates won't need to override big pieces of code. 
-* It often make sense to put almost each parts of the base template into blocks.
+* It often make sense to put almost all parts of the base template into blocks.
   This applies for titles, descriptions, perexes, comment sections, object tools
   and so on. The more you allow to override, the smaller the child template will
   be.
