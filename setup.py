@@ -42,6 +42,7 @@ setup(
         'south>=0.7',
         'anyjson',
         'feedparser',
+        'jsonfield'
     ],
     setup_requires=[
         'setuptools_dummy',
