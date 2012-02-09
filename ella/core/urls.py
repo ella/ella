@@ -24,6 +24,17 @@ feeds = {
     'atom' : AtomTopCategoryListings,
 }
 
+res = {
+    'ct': r'(?P<content_type>[a-z][a-z0-9-]+)',
+    'cat': r'(?P<category>[a-z][a-z0-9-/]+)',
+    'slug': r'(?P<slug>[a-z0-9-]+)',
+    'year': r'(?P<year>\d{4})',
+    'month': r'(?P<month>\d{1,2})',
+    'day': r'(?P<day>\d{1,2})',
+    'rest': r'(?P<url_remainder>.+/)',
+    'id': r'(?P<id>\d+)',
+}
+
 urlpatterns = patterns( '',
     # home page
     url( r'^$', home, name="root_homepage" ),
@@ -37,56 +48,42 @@ urlpatterns = patterns( '',
     url( r'^feeds/(?P<url>.*)/$', 'django.contrib.syndication.views.feed', { 'feed_dict': feeds }, name="feeds" ),
 
     # list of objects regadless of category and content type
-    url( r'^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/$',
-        list_content_type, name="list_day" ),
-    url( r'^(?P<year>\d{4})/(?P<month>\d{1,2})/$', list_content_type, name="list_month" ),
-    url( r'^(?P<year>\d{4})/$', list_content_type, name="list_year" ),
+    url( r'^%(year)s/%(month)s/%(day)s/$' % res, list_content_type, name="list_day" ),
+    url( r'^%(year)s/%(month)s/$' % res, list_content_type, name="list_month" ),
+    url( r'^%(year)s/$' % res, list_content_type, name="list_year" ),
 
     # list of objects regardless of category
-    url( r'^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<content_type>[a-z0-9-]+)/$',
-        list_content_type, name="list_content_type_day" ),
-    url( r'^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<content_type>[a-z0-9-]+)/$', list_content_type, name="list_content_type_month" ),
-    url( r'^(?P<year>\d{4})/(?P<content_type>[a-z0-9-]+)/$', list_content_type, name="list_content_type_year" ),
-
-    # static detail
-    url( r'^(?P<category>[a-z0-9-/]+)/(?P<content_type>[a-z0-9-]+)/(?P<id>\d+)-(?P<slug>[a-z0-9-]+)/$', object_detail, name='static_detail' ),
-    url( r'^(?P<content_type>[a-z0-9-]+)/(?P<id>\d+)-(?P<slug>[a-z0-9-]+)/$', object_detail, { 'category' : '' }, name='home_static_detail' ),
+    url( r'^%(year)s/%(month)s/%(day)s/%(ct)s/$' % res, list_content_type, name="list_content_type_day" ),
+    url( r'^%(year)s/%(month)s/%(ct)s/$' % res, list_content_type, name="list_content_type_month" ),
+    url( r'^%(year)s/%(ct)s/$' % res, list_content_type, name="list_content_type_year" ),
 
     # static detail with custom action
-    url( r'^(?P<category>[a-z0-9-/]+)/(?P<content_type>[a-z0-9-]+)/(?P<id>\d+)-(?P<slug>[a-z0-9-]+)/(?P<url_remainder>.*)$',
-        object_detail, name='static_detail_action' ),
-    url( r'^(?P<content_type>[a-z0-9-]+)/(?P<id>\d+)-(?P<slug>[a-z0-9-]+)/(?P<url_remainder>.*)$',
-        object_detail, { 'category' : '' }, name='home_static_detail_action' ),
+    url( r'^%(cat)s/%(ct)s/%(id)s-%(slug)s/%(rest)s$' % res, object_detail, name='static_detail_action' ),
+    url( r'^%(ct)s/%(id)s-%(slug)s/%(rest)s$' % res, object_detail, { 'category' : '' }, name='home_static_detail_action' ),
+
+    # static detail
+    url( r'^%(cat)s/%(ct)s/%(id)s-%(slug)s/$' % res, object_detail, name='static_detail' ),
+    url( r'^%(ct)s/%(id)s-%(slug)s/$' % res, object_detail, { 'category' : '' }, name='home_static_detail' ),
 
     # object detail
-    url( r'^(?P<category>[a-z0-9-/]+)/(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<content_type>[a-z0-9-]+)/(?P<slug>[a-z0-9-]+)/$',
-        object_detail, name="object_detail" ),
-    url( r'^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<content_type>[a-z0-9-]+)/(?P<slug>[a-z0-9-]+)/$',
-        object_detail, { 'category' : '' }, name="home_object_detail" ),
+    url( r'^%(cat)s/%(year)s/%(month)s/%(day)s/%(ct)s/%(slug)s/$' % res, object_detail, name="object_detail" ),
+    url( r'^%(year)s/%(month)s/%(day)s/%(ct)s/%(slug)s/$' % res, object_detail, { 'category' : '' }, name="home_object_detail" ),
 
     # object detail with custom action
-    url( r'^(?P<category>[a-z0-9-/]+)/(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<content_type>[a-z0-9-]+)/(?P<slug>[a-z0-9-]+)/(?P<url_remainder>.*)$',
-        object_detail, name="object_detail_action" ),
-    url( r'^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<content_type>[a-z0-9-]+)/(?P<slug>[a-z0-9-]+)/(?P<url_remainder>.*)$',
-        object_detail, { 'category' : '' }, name="home_object_detail_action" ),
+    url( r'^%(cat)s/%(year)s/%(month)s/%(day)s/%(ct)s/%(slug)s/%(rest)s$' % res, object_detail, name="object_detail_action" ),
+    url( r'^%(year)s/%(month)s/%(day)s/%(ct)s/%(slug)s/%(rest)s$' % res, object_detail, { 'category' : '' }, name="home_object_detail_action" ),
 
     # category listings
-    url( r'^(?P<category>[a-z0-9-/]+)/(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/$',
-        list_content_type, name="category_list_day" ),
-    url( r'^(?P<category>[a-z0-9-/]+)/(?P<year>\d{4})/(?P<month>\d{1,2})/$',
-        list_content_type, name="category_list_month" ),
-    url( r'^(?P<category>[a-z0-9-/]+)/(?P<year>\d{4})/$',
-        list_content_type, name="category_list_year" ),
+    url( r'^%(cat)s/%(year)s/%(month)s/%(day)s/$' % res, list_content_type, name="category_list_day" ),
+    url( r'^%(cat)s/%(year)s/%(month)s/$' % res, list_content_type, name="category_list_month" ),
+    url( r'^%(cat)s/%(year)s/$' % res, list_content_type, name="category_list_year" ),
 
     # category listings for content_type
-    url( r'^(?P<category>[a-z0-9-/]+)/(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<content_type>[a-z0-9-]+)/$',
-        list_content_type, name="category_list_content_type_day" ),
-    url( r'^(?P<category>[a-z0-9-/]+)/(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<content_type>[a-z0-9-]+)/$',
-        list_content_type, name="category_list_content_type_month" ),
-    url( r'^(?P<category>[a-z0-9-/]+)/(?P<year>\d{4})/(?P<content_type>[a-z0-9-]+)/$',
-        list_content_type, name="category_list_content_type_year" ),
+    url( r'^%(cat)s/%(year)s/%(month)s/%(day)s/%(ct)s/$' % res, list_content_type, name="category_list_content_type_day" ),
+    url( r'^%(cat)s/%(year)s/%(month)s/%(ct)s/$' % res, list_content_type, name="category_list_content_type_month" ),
+    url( r'^%(cat)s/%(year)s/%(ct)s/$' % res, list_content_type, name="category_list_content_type_year" ),
 
     # category homepage
-    url( r'^(?P<category>[a-z0-9-/]+)/$', category_detail, name="category_detail" ),
+    url( r'^%(cat)s/$' % res, category_detail, name="category_detail" ),
 
 )
