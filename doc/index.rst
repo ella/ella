@@ -2,16 +2,35 @@ Ella CMS
 ########
 
 `Ella`_ is a Content Management System based on `Python`_ web framework
-`Django`_.
+`Django`_ with a main focus on high-traffic news websites and Internet
+magazines.
 
 It is composed from several modules:
 
     * **Ella core** is the main module which links the rest together. It
-      defines architecture on which other modules are build but doesn't do
+      defines architecture on which other modules are built but doesn't do
       anything really usefull all alone.
-    * **Ella plugins** are standalone applications that provide some
-      specific functionality using **Ella's architecture**. We can list for
-      e.g. articles, polls, galleries, quizes.
+    * **Ella core plugins** are plugins that are shipped in one package
+      together with Ella. There are **articles** and **positions** which 
+      we consider to be a basic toolbox for each Ella site.
+    * **Other Ella plugins** are standalone applications (and therfore
+      not shipped with the core) that provide some
+      specific functionality using **Ella's architecture**. We can mention
+      polls, galleries, quizes and many more.
+      
+Feature highlights:
+
+    * Simple organization of content based on categories
+    * Efficent implementation of the published content
+    * In-build photo formating backend
+    * Django-admin ready
+    * Plugin system
+    * Flexibile
+    * Scalable
+    * Extensible
+    * Caching-friendly
+    * Well tested
+    * Proven in production environment
 
 For creating site using Ella, working knowledge of Django and its templating
 language is required. It is therfore highly recommended to get familiar with
@@ -30,27 +49,32 @@ Contents:
 
 .. toctree::
     :maxdepth: 2
-    :glob: 
-   
+    :glob:
+
     quickstart
     developer
     html_coder
-    core
     features
     plugins
+    reference
     common_gotchas
     settings
-    
-    
+
+
 Sites using Ella
 ****************
 
-Ella is getting more and more popular. Here are some sites that take advantage 
+Ella is getting more and more popular. Here are some sites that take advantage
 of it:
 
 * `Investicniweb.cz <http://www.investicniweb.cz>`_
 * `Dumazahrada.cz <http://www.dumazahrada.cz>`_
+* `Květy <http://kvety.kafe.cz>`_
+* `Vlasta <http://vlasta.kafe.cz>`_
 * `Crazycafe.cz <http://www.crazycafe.cz>`_
+* `EquiTV.cz <http://equitv.cz/>`_
+* `Vaquero.cz <http://vaquero.cz/>`_
+* `Ranch Bystrá <http://ranchbystra.cz/>`_
 * `pyvec.org <http://pyvec.org>`_
 
 License

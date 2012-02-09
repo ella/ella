@@ -81,13 +81,10 @@ class Category(models.Model):
     """
     ``Category`` is the **basic building block of Ella-based sites**. All the
     published content is divided into categories - every ``Publishable`` object
-    has a ``ForeignKey`` to it's primary ``Category``.
-    
-    Primary category is then used to build up object's URL when using
-    `Category.get_absolute_url` method. 
-    
-    Besides that, objects can be published in other categories
-    (aka "secondary" categories) via ``Listing``.
+    has a ``ForeignKey`` to it's primary ``Category``. Primary category is then
+    used to build up object's URL when using `Category.get_absolute_url` method. 
+    Besides that, objects can be published in other categories (aka "secondary"
+    categories) via ``Listing``.
 
     Every site has exactly one root category (without a parent) that serve's as
     the sites's homepage.

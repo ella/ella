@@ -3,6 +3,9 @@
 List of configuration settings
 ##############################
 
+Core settings
+*************
+
 **CACHE_TIMEOUT**
     Timeout used for cache persistence for most of cached function Ella uses.
     
@@ -56,3 +59,32 @@ List of configuration settings
                 'ella.core.related_finders.directly_related',
             )
         }
+        
+Photos settings
+***************
+**PHOTOS_FORMAT_QUALITY_DEFAULT**
+    Sampling quality choices to use in administration when defining
+    :func:`photo formats <ella.photos.models.Format>`.
+    
+    Default::
+    
+        PHOTOS_FORMAT_QUALITY = (
+            (45, _('Low')),
+            (65, _('Medium')),
+            (75, _('Good')),
+            (85, _('Better')),
+            (95, _('High')),
+        )
+        
+**PHOTOS_CUSTOM_SUBDIR**
+    Custom subdirectory in ``photos`` directory where to place the photos.
+    
+    Default: ``''``
+    
+**PHOTOS_UPLOAD_TO**
+    Completely override where the photos are uploaded to. Symbols ``%Y``,
+    ``%m`` and ``%d`` are replaced by integer value of year, month and day
+    respectively.
+    
+    Default: ``'photos/%Y/%m/%d'``
+        

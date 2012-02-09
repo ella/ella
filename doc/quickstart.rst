@@ -6,10 +6,10 @@ Quickstart
 Setting up Ella
 ***************
 
-This tutorial will guide you through the process of creating and deploying an
-Ella-based site. Since Ella is a CMS, we will create a blog. This first step
+This tutorial will guide you through the process of creating and deploying your
+first Ella-based site. Since Ella is a CMS, we will create a blog. This first step
 will take us through setting up our environment, installing all the dependencies
-and creating the actual project. Before you dive into it, we suggest you go
+and kicking off the project. Before you dive into it, we suggest you go
 through the official `Django tutorial`_ to get yourself familiar with Django
 since we will be relying on that.
 
@@ -23,9 +23,8 @@ python way. We will be working with `pip`_ and `virtualenv`_ which are great
 tools for any Python project.
 
 .. note::
-    We will not cover any version control, but we
-    strongly advise you use some (we prefer `GIT`_) to keep track of your emerging
-    project. Also the code examples supplied are available as a GIT repository.
+    We will not cover any version control, but we strongly advise you use some
+    (we prefer `GIT`_) to keep track of your emerging project.
 
 First we need to install ``virtualenv`` (under root):
 
@@ -41,21 +40,13 @@ code will reside:
     virtualenv ella_sandbox
     source ella_sandbox/bin/activate
 
-Next, install ella into your fresh virtualenv. Ella has all it's dependencies
+Next, install Ella into your fresh virtualenv. Ella has all it's dependencies
 covered in it's setup, so it's fairly sufficent to run following command
 using ``pip``:
 
 .. code-block:: bash
 
     pip install ella
-    
-    
-Along with Ella, Django is installed too. To get Ella's customized admin called
-Newman, it is necessary to install it too:
-
-.. code-block:: bash
-
-    pip install django-newman
     
 After these steps, everything required is ready and we can create a new Django
 project using Ella in standard `Django`_ way:
@@ -91,30 +82,23 @@ Our first step in actual code will be adding Ella to your project's
         'ella.core',
         'ella.photos',
         'ella.articles',
-        
-        'newman',   
-
-        'djangomarkup',
     )
-
-    TEMPLATE_CONTEXT_PROCESSORS = ( 
-        'django.core.context_processors.media',
-        'django.core.context_processors.auth',
-        'django.core.context_processors.request',
-        'newman.context_processors.newman_media',
-    )
-    NEWMAN_MEDIA_PREFIX = MEDIA_URL + 'newman/'
-
-    DEFAULT_MARKUP = 'markdown'
     ...
 
 In order to create our new blog, we are gonna need some HTML templates showing
-the article listings, article details, hompage etc. Therefore, we have to tell
+post listings, post details, hompage etc. Therefore, we have to tell
 Django, where to look for those templates. This settings are kept in
 ``settings.py`` contained in root of our project. Second, we need to specify
-a directory + URL used to serve media files (these are different from *static*
-files, we consider media files those, that are **uploaded dynamically by users**,
-e.g. main article photos)::
+a directory + URL used to serve media files from:
+
+.. note:: 
+    Media files and static files are not the very same thing.
+    We consider media files those, that are **uploaded dynamically by users**,
+    e.g. main article photos. On the other hand, static files usually don't
+    change and their common representatives include CSS styleseets, JS sources
+    etc.
+
+.. code-block:: python
 
     from os.path import join, dirname
     
@@ -130,14 +114,15 @@ e.g. main article photos)::
     MEDIA_URL = '/media/'
 
 This will tell Django, that it should look for the templates in directory
-``templates`` which is located in the root of the project directory.
+``templates`` which is located in the root of the project directory. And
+store the media in ``PROJECT_ROOT/media/`` directory.
 
 
 ``urls.py``
 ===========
 
-Last thing to configure is the URL mappings. We want to include ``newman``
-(Ella's admin) and ``ella.core.urls`` but also create some mappings that will
+Last thing to configure is the URL mappings. We want to include ``ella.core.urls``
+which handle all the Ella magic but also create some mappings that will
 serve our static files (and static files for admin) in the development server.
 Note that these patterns for static files will work only when ``DEBUG`` mode
 is turned on since it would be rather inefficent in production (for more on
@@ -145,16 +130,15 @@ this topic, see `Managing static files`_ section in Django docs). In similar
 fashion, serve also media files discussed in previous paragraph::
     
     from django.conf.urls.defaults import *
-    from django.conf import settings 
+    from django.conf import settings
+    from django.contrib import admin 
     from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-    
-    import newman
     
     # make sure to import ella error handlers
     from ella.core.urls import handler404, handler500
     
-    # register ella's admin
-    newman.autodiscover()
+    # register apps for Django admin
+    admin.autodiscover()
     
     urlpatterns = patterns('',)
     
@@ -162,8 +146,11 @@ fashion, serve also media files discussed in previous paragraph::
     urlpatterns += patterns('',
         # serve media files
         (r'^%s/(?P<path>.*)$' % settings.MEDIA_URL, 'django.views.static.serve', { 'document_root': settings.MEDIA_ROOT, 'show_indexes': True }),
-    
-        (r'^newman/', include(newman.site.urls)),
+        
+        # run Django admin
+        (r'^admin/', include(admin.site.urls)),
+        
+        # enable Ella
         (r'^', include('ella.core.urls')),
     ) + staticfiles_urlpatterns()
     
@@ -178,12 +165,12 @@ DB backends. Example configuration for MySQL can look like this::
 
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-            'NAME': 'ellablog',                      # Or path to database file if using sqlite3.
-            'USER': 'root',                      # Not used with sqlite3.
-            'PASSWORD': '',                  # Not used with sqlite3.
-            'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-            'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'ellablog',
+            'USER': 'root',
+            'PASSWORD': '',
+            'HOST': '',
+            'PORT': '',
         }
     }
 
@@ -203,19 +190,17 @@ development server by typing:
 
     python manage.py runserver
 
-try to load the site's root. You should get a 404 error. Don't panic, that's the
-correct behavior because we haven't created the site in the admin interface
-yet, this will be covered next.
+try to load the site's root. If everything worked out, you should get a
+welcome screen looking similar to this:
 
-.. _tutorial-admin:
+.. image:: img/welcomescreen.png
 
-Newman - Ella's admin
-*********************
-
-Now when we have a working project from the previous part of the tutorial, we
-need to actually create the site in the admin interface. While being there we
-will also create an article - our very first blog post so that we can actually
-have something to work with in our templates in the next step of the tutorial.
+Now when we have a working project, we need to actually create the site in the
+admin interface. To use it, go to ``/admin/`` and log in using credentials
+you entered when creating your superuser account during the ``syncdb`` command.
+While being there we will also create an article - our very first blog post so
+that we can actually have something to work with in our templates in the next
+step of the tutorial.
 
 .. note::
     If you are impatient to start, just play around with the admin to create
@@ -231,7 +216,7 @@ objects though.
 Ella sites and categories
 =========================
 
-Ella was designed to server several sites from a single database. It does so by
+Ella was designed to serve several sites from a single database. It does so by
 using Django's built-in `sites framework`_. The ``sites`` app creates a
 default ``Site`` called ``example.com`` during the ``syncdb`` command. Just
 rename the domain name to relevant value and you will have an Ella site,
@@ -240,7 +225,7 @@ just empty.
 Within sites, Ella organizes content into **categories**. Categories (instances
 of ``ella.core.models.Category``) are organized in a tree for each site. Every
 site needs to have exactly one what we call `root category` - a category without
-a parent. This category then represents the root of the web (``/``).
+a parent. This category then represents the root of the website (``/``).
 
 Categories are represented by their ``tree_path`` - a path of ``slugs`` from
 root category, for example with categories layout::
@@ -256,7 +241,7 @@ root category, for example with categories layout::
 the ``tree_path`` values would be:
 
 ======================= ======================================
-Category                tree_path
+Category                ``tree_path`` attribute
 ======================= ======================================
 Ella Blog
 About                   about
@@ -269,7 +254,7 @@ Typical deployment env  technology/typical-deployment-env
 
 ``Category``'s URL is it's ``tree_path`` (which is what makes the root category
 the root of the site) and every post in Ella belongs to one or more categories,
-nothing should exist outside of the category tree.
+nothing shall exist outside of the category tree.
 
 .. _sites framework: http://docs.djangoproject.com/en/dev/ref/contrib/sites/
 
@@ -277,46 +262,47 @@ nothing should exist outside of the category tree.
 ``Publishable`` object
 ======================
 
-The main objective of Ella is **publishing content**. Ella itself provides
+The main objective of Ella is **publishing content**. Ella together with it's
+:ref:`plugins <plugins>` provides
 several types of content (``Article``, ``Gallery``, ``Quiz``, ...) and can be
 easily extended to add more (just define the model) or used with existing
 models.
 
-For ease of manipulation and efficiency all content models inherit from
+For ease of manipulation and efficiency, all content models inherit from
 ``ella.core.models.Publishable``. This base class has all the fields needed to
 display a listing of the content object (``title``, ``description``, ``slug``,
 ``photo``), basic metadata (``category``, ``authors``, ``source``) and provides
 easy access (property ``target``) to the actual instance of the proper class if
-needed (it holds a reference to it's ``ContentType``).
-
-Information about publication are also kept on the ``Publishable`` model
+needed (it holds a reference to it's ``ContentType``). Information about
+publication are also kept on the ``Publishable`` model
 (attributes ``published``, ``publish_from``, ``publish_to`` and ``static``).
 
 All these information together are used to **create an URL for the object**
-which will point to it's detail (e.g. article content).
-
-There are **two types** of publication with slightly different use cases:
+which will point to it's detail (e.g. article content). There are **two types**
+of publication with slightly different use cases:
 
 * **time-based** has URL containing the date of publishing and should be
   used for objects that have some relevance to date (most of the content
   presumably since Ella was designed to power magazines and news sites). The
   URL of an object published in time-based way will look like::
   
-      /category/tree/path/YEAR/MONTH/DAY/content_type_name/slug/
+      /category/tree/path/[YEAR]/[MONTH]/[DAY]/[CONTENT_TYPE_NAME]/slug/
       
   so for example::
   
       /about/2007/08/11/articles/ella-first-in-production/
       
 * **static** has no date in it's URL and should be used for objects with
-  universal validity. Since the absence of date limits the
-  namespace for such objects we do not recommend using those for large
-  amount of objects. URL of statically published objects contain word
-  *static* instead of the date information::
+  universal validity. URL of statically published objects contains a primary
+  key reference to avoid namespace clashes::
 
-        /category/tree/path/static/content_type_name/slug/
+        /category/tree/path/[CONTENT_TYPE_NAME]/[PK]-slug/
+        
+  for example::
+    
+        /about/articles/1-ella-first-in-production/
 
-The ``content_type_name`` in the URL schema represents slugified translated
+The ``[CONTENT_TYPE_NAME]`` in the URL schema represents slugified translated
 version of the model's `verbose_name_plural`_.
 
 Just setting up publish information for a ``Publishable`` object makes it
@@ -327,15 +313,15 @@ you want it listed**.
 .. _verbose_name_plural: https://docs.djangoproject.com/en/dev/ref/models/options/#verbose-name-plural
     
 
-``Listing``
-===========
+``Listing`` object
+==================
 
 ``ella.core.models.Listing`` instances carry the information in which ``Category``
 and when should be a publishable object listed - it enables users to list the
 object in as many categories as they wish at arbitrary times (but not sooner
-that the ``Placement.publish_from``).
+that the ``Publishable.publish_from``).
 
-By default listings in the root category only contain ``Listings`` specifically
+By default, listings in the root category only contain ``Listings`` specifically
 targeted there whereas listings for any subcategory also contains all the
 listings of it's subcategories. This is a model we found most useful when
 working with large sites where the site's homepage needs to be controlled
@@ -346,9 +332,9 @@ the content published in them either directly or via a subcategory.
 Creating a site
 ===============
 
-Now you should have enough information to be able to start exploring Ella's
-admin (found on ``/newman/``) and create your own site and it's first post.
-You will know that you were succesful if you manage to create and publish an
+Now you should have enough information to be able to start exploring the
+admin (found on ``/admin/``) and create your own site and it's first post.
+You will know that you were succesfull if you manage to create and publish an
 article whose URL gives you a ``TemplateDoesNotExist`` exception upon
 accessing - that means we are ready to **create some templates**.
 
@@ -362,7 +348,7 @@ the templates we need to get the site running.
 
 .. note::
     For more information on what templates Ella uses and what context is passed
-    in, have a look at :ref:`core-views`.
+    in, have a look at :ref:`reference-templates`.
 
 
 ``page/category.html``
@@ -392,8 +378,7 @@ The basic template will look like::
 
 That will render the category title, description and a list of objects published
 in that category. Upon accessing ``/`` you should then see the name of the
-category and the article you created when
-:ref:`getting familiar with admin <tutorial-admin>`.
+category and the article you created in administration.
 
 .. note::
 
@@ -426,11 +411,14 @@ be enough::
 
     <h1>{{ object.title }}</h1>
     <p>Published on {{ placement.publish_from|date }} in category: <a href="{{ category.get_absolute_url }}">{{ category }}</a></p>
-    {{ object.description|safe }}
+    {% render object.description %}
 
 This template will have access to the actual ``Publishable`` subclass instance
 (``Article`` in our case), as opposed to ``page/category.html`` and
 ``page/listing.html`` which only gets instance of ``Publishable`` by default.
+
+Note the use of ``{% render %}`` templatetag that is used to render **rich-text
+fields** (which object.description is) thorought Ella.
 
 
 Error pages
@@ -453,7 +441,8 @@ Enhancing templates
 *******************
 
 Since Ella is a regular Django application, even it's templates are just plain
-Django templates. Therefore we just refer you to `other sources`_ to learn more
+Django templates. Therefore we just refer you to `other sources`_ and
+:ref:`common-gotchas` section to learn more
 about the templating language and it's best practices, we will try to focus 
 just on Ella-specific parts.
 
@@ -487,7 +476,7 @@ To create our first box, we just need to create a template called
 
     <p>
         <a href="{{ object.get_absolute_url }}">{{ object.title }}</a>
-        {{ object.description|safe }}
+        {% render object.description %}
     </p>
 
 And change ``page/category.html`` to use the box instead of manually specifying
@@ -524,14 +513,15 @@ good place to render the text of an article for example::
     
     {% extends "page/object.html" %}
     {% block content %}
-        {{ object.content|safe }}
+        {% render object.content %}
     {% endblock %}
 
 Now if you just define the appropriate block in your ``page/object.html``::
 
     <h1>{{ object.title }}</h1>
-    <p>Published on {{ placement.publish_from|date }} in category: <a href="{{ category.get_absolute_url }}">{{ category }}</a></p>
-    {{ object.description|safe }}
+    <p>Published on {{ object.publish_from|date }} in category: <a href="{{ category.get_absolute_url }}">{{ category }}</a></p>
+    {% render object.description %}
+    
     {% block content %}{% endblock %}
 
 You should be able to see your article's text on the web.
@@ -557,7 +547,8 @@ of your boxes for individual objects as well.
 
 .. note::
     For more detailed explanation of all the possible template names, have a
-    look at :ref:`core-views` and :ref:`core-templatetags` documentation.
+    look at :ref:`reference-views`, :ref:`reference-templates` and
+    :ref:`reference-templatetags` documentation.
 
 
 

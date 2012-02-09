@@ -33,7 +33,7 @@ def PublishableBox(publishable, box_type, nodelist, model=None):
 
 class Publishable(models.Model):
     """
-    Base class for all object that can be published in ella
+    Base class for all objects that can be published in Ella.
     """
     box_class = staticmethod(PublishableBox)
 
@@ -160,7 +160,7 @@ class Listing(models.Model):
     """
     Listing of an ``Publishable`` in a ``Category``. Each and every object that have it's 
     own detail page must have a ``Listing`` object that is valid (not expired) and
-    places him in the object's main category. Any object can be listed in any
+    places it in the object's main category. Any object can be listed in any
     number of categories (but only once per category). Even if the object is
     listed in other categories besides its main category, its detail page's url
     still belongs to the main one.
@@ -206,7 +206,6 @@ class Listing(models.Model):
 class Related(models.Model):
     """
     Related objects - model for recording related ``Publishable`` objects.
-    
     An example would be two articles sharing a similar topic. When something
     like this happens, a ``Related`` instance connecting the objects should
     be created.

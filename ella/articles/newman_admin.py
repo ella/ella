@@ -3,7 +3,7 @@ from django.utils.translation import ugettext_lazy as _
 from ella.core.newman_admin import ListingInlineAdmin, PublishableAdmin,\
     RelatedInlineAdmin
 from ella.articles.models import Article
-from ella import newman
+import newman
 
 
 class ArticleAdmin(PublishableAdmin):
