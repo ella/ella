@@ -17,18 +17,10 @@ For development, we recommend use virtualenv (and wrapper) like this:
     $ git clone git://github.com/ella/ella.git
     $ cd ella
     $ mkvirtualenv ella
-    $ pip install -r requirements/base.txt -r requirements/with-markup.txt \
-      -r requirements/with-comments.txt -r requirements/testing.txt
-
+    $ pip install -r dev_requirements.txt
 
 Then you can test this installation:
 
-    $ ./tests/unit_project/run_tests.py
-
-
-And start playing with example project:
-
-    $ cd tests/example_project
-    $ ./manage.py syncdb
-    $ ./manage.py runserver
+    $ cd test_ella
+    $ ./test_ella/run_tests.py
 
