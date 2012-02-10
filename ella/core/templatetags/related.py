@@ -19,7 +19,7 @@ class RelatedNode(template.Node):
         except template.VariableDoesNotExist:
             return ''
         related = Related.objects.get_related_for_object(obj, self.count,
-            self.models, finder=self.finder)
+            mods=self.models, finder=self.finder)
         context[self.var_name] = related
         return ''
 
