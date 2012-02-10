@@ -1091,19 +1091,19 @@ $( function() {
 
     // Search on HP
     // The search button should send us to an address according to the thing selected in the select
-    function do_search() {
+    function do_search(evt) {
         var $form = $('#search-form');
         var option = $form.find('select[name=action] option[selected]').val();
         if (!option) return false;
         var search_terms = $form.find('input[name=q]').val();
         var url = str_concat(option , '?q=' , search_terms);
-        adr(url);
+        adr(url, {evt:evt});
         return false;
     }
     $('#search-form a.search.btn').live('click', do_search);
     function search_on_enter(evt) {
         if (evt.keyCode == CR || evt.keyCode == LF) {
-            do_search();
+            do_search(evt);
             return false;
         }
     }
@@ -1111,7 +1111,7 @@ $( function() {
     $('#search-form select[name=action]').live('keypress', search_on_enter);
 
     // Search in change lists
-    function changelist_search($input, $pop) {
+    function changelist_search($input, $pop, evt) {
         if ($('#changelist').length == 0) return;   // We're not in changelist
         var is_pop = $pop.length > 0;
         var search_terms = $input.val();
@@ -1131,7 +1131,7 @@ $( function() {
         }
 
         if (loaded.id == 'content') {
-            adr(adr_term);
+            adr(adr_term, {evt:evt});
         }
         else {
             Kobayashi.simple_load( str_concat(loaded.id , '::' , adr_term) );
@@ -1142,7 +1142,7 @@ $( function() {
         if (evt.button != 0) return;
         var $input = $(this).prev('input#searchbar');
         var $pop = $(this).siblings('input#id_pop');
-        return changelist_search( $input, $pop );
+        return changelist_search( $input, $pop, evt );
     });
     $('#filters-handler #searchbar').live('keyup', function(evt) {
         if (evt.keyCode == CR || evt.keyCode == LF) {
@@ -1151,7 +1151,7 @@ $( function() {
             return;
         }
         var $pop = $(this).siblings('input#id_pop');
-        return changelist_search( $(this), $pop );
+        return changelist_search( $(this), $pop, evt );
     });
 });
 

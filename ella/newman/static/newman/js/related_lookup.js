@@ -242,7 +242,7 @@ log_lookup = new LoggingLib('RELATED LOOKUP:', true);
             Kobayashi.reload_content(Kobayashi.DEFAULT_TARGET);
         }
         else {
-            adr( $(this).attr('href') );
+            adr( $(this).attr('href'), {evt: evt} );
         }
     }
     $('.js-adrstack-push').live('click', default_adrstack_push_callback);

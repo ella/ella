@@ -648,8 +648,7 @@ Kobayashi.LOADED_MEDIA = {};
         if ( $(this).data('simpleloaded') ) return true;
         if ( $(this).data('hashadred') ) return false;
         if ($(this).is('.js-nohashadr')) return true;   // override hashadr-container
-        evt.referer = get_hashadr('');
-        adr($(this).attr('href'));
+        adr($(this).attr('href'), {evt: evt});
         $(this).data('hashadred', true);
         evt.preventDefault();
     });
@@ -686,6 +685,11 @@ Kobayashi.LOADED_MEDIA = {};
 //   (location.replace will be used).
 // - _hash_preproc: Internal. Set when adr is used to preprocess the hash
 //   to compensate for hash and LOADED_URLS inconsistencies.
+// - evt: a related event (like a link click) that initiated the function call.
+//   If there is such an event, it is a good idea to pass it to adr() because then it can set
+//   the 'referer' field for the event to the original address, which enables other handlers
+//   of the event to see where we're coming from.
+//   The field can also be an array of related events.
 function adr(address, options) {
     if (address == undefined) {
         log_kobayashi.log('No address given to adr()');
@@ -714,6 +718,14 @@ function adr(address, options) {
     
     if (!options) options = {};
     var hash = (options.hash == undefined) ? location.hash : options.hash;
+    
+    // Save the original address into the related event(s)
+    var related_events = $.makeArray(options.evt);
+    var original_address;
+    for (var i = 0; i < related_events.length; i++) {
+        if (original_address === undefined) original_address = get_hashadr('');
+        related_events[i].referer = original_address;
+    }
     
     // Figure out which specifier is concerned.
     var target_id = '';
