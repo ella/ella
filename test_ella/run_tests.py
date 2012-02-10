@@ -15,9 +15,12 @@ import nose
 def run_all(argv=None):
     os.environ['DJANGO_SETTINGS_MODULE'] = 'test_ella.settings'
 
+    # called by setuptools
+    if argv is None:
+        argv = ['nosetests']
+
     if len(argv) == 1:  # only the command itself is in argv
-        argv = [
-            '--with-django',
+        argv += [
             '--with-coverage', '--cover-package=ella', '--cover-erase',
         ]
 
