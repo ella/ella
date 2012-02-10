@@ -2,7 +2,6 @@
 {% load newman_modify cache i18n %}
 
 {% block content %}
-{{ media }}
 
 <form {% if has_file_field %}enctype="multipart/form-data" {% endif %}action="." method="post" id="{{ opts.module_name }}_form" class="change-form">{% block form_top %}{% endblock %}
 <div>
@@ -33,7 +32,7 @@
 
 {% block content_js %}
     <script type="text/javascript">
-        $(document).ready(function() {
+        function initialize_mass_upload() {
             var $uploadifyTarget = $('#id_image_file');
             var originalObjectId = null;
             var index = 1;
@@ -98,12 +97,30 @@
             }
             
             $('#start-upload').unbind('click').click(startUpload);
-        });
-    </script>
-    <script type="text/javascript">
-    function trigger_changelist_shown() {
-        $(document).trigger('changeform_shown'); // bound in inlines.js
-    }
-    $(document).one('media_loaded', trigger_changelist_shown);
+        }
+
+        function trigger_changelist_shown() {
+            $(document).trigger('changeform_shown'); // bound in inlines.js
+        }
+
+        request_media(MEDIA_URL + 'js/markitup/skins/markitup/style.css');
+        request_media(MEDIA_URL + 'js/markitup/sets/markdown/style.css');
+        request_media(MEDIA_URL + 'jquery/jquery-ui-smoothness.css');
+        request_media(MEDIA_URL + 'css/fuckitup_extensions/markdown_tables.css');
+        request_media(MEDIA_URL + 'css/generic.suggest.css');
+        request_media(MEDIA_URL + 'css/uploadify.css');
+        request_media(MEDIA_URL + 'js/fuckitup.js');
+        request_media(MEDIA_URL + 'js/fuckitup_install.js');
+        request_media(MEDIA_URL + 'jquery/jquery-ui.js');
+        request_media(MEDIA_URL + 'jquery/jquery-fieldselection.js');
+        request_media(MEDIA_URL + 'jquery/jquery.autogrow.js');
+        request_media(MEDIA_URL + 'js/fuckitup_extensions/markdown_extras_tables.js');
+        request_media(MEDIA_URL + 'js/related_lookup.js');
+        request_media(MEDIA_URL + 'js/generic.suggest.js');
+        request_media(MEDIA_URL + 'js/swfobject.js');
+        request_media(MEDIA_URL + 'js/jquery.uploadify.min.js');
+
+        $(document).one('media_loaded', trigger_changelist_shown);
+        $(document).one('media_loaded', initialize_mass_upload);
     </script>
 {% endblock %}
