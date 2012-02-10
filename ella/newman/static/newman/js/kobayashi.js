@@ -912,6 +912,11 @@ function get_hash(address, options) {
     
     // Get an URL to a CSS or JS file, attempt to load it into the document and call callback on success.
     function load_media(url, callbacks) {
+        if (!url) {
+            log_kobayashi.log('Error: No URL given to Kobayashi.load_media');
+            return;
+        }
+        
         var succ_fn = callbacks.succ_fn;
         var err_fn  = callbacks.err_fn;
         var next_fn = callbacks.next_fn;
@@ -925,10 +930,10 @@ function get_hash(address, options) {
         
         ;;; log_kobayashi.log('loading medium ',url);
         
-        url.match(/(?:.*\/\/[^\/]*)?([^?]+)(?:\?.*)?/);
+        /(?:.*\/\/[^\/]*)?([^?]+)(?:\?.*)?/.exec(url);
         $(document).data('loaded_media')[ RegExp.$1 ] = url;
         
-        if (url.match(/\.(\w+)(?:$|\?)/))
+        if (/\.(\w+)(?:$|\?)/.exec(url))
             var ext = RegExp.$1;
         else throw('Unexpected URL format: '+url);
         
@@ -1044,6 +1049,10 @@ function get_hash(address, options) {
     
     // Load a CSS / JavaScript file (given an URL) after previously requested ones have been loaded / failed loading.
     function request_media(url) {
+        if (!url) {
+            log_kobayashi.log('No URL given to request_media');
+            return;
+        }
         log_kobayashi.log('Request media ' , url);
         var do_start = media_queue.length == 0;
         media_queue.push(url);
