@@ -5,21 +5,19 @@ from django.contrib.admin import helpers
 from ella import newman
 
 from ella.photos.models import FormatedPhoto, Format, Photo
-from ella.newman.utils import JsonResponse, JsonResponseRedirect, JsonResponseError
+from ella.newman.utils import JsonResponse, JsonResponseError
 from ella.newman.conf import newman_settings
 from ella.newman.filterspecs import CustomFilterSpec
 from ella.newman.licenses.models import License
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from ella.photos.forms import MassUploadForm
-from django.core.exceptions import PermissionDenied
-from django.http import HttpResponse, Http404
-from django.core.files.uploadhandler import TemporaryFileUploadHandler
+from django.http import Http404
 from django.contrib.csrf.middleware import csrf_exempt
-from django.views.decorators.http import require_POST
 from django.forms.models import modelform_factory
 from django.contrib.admin.util import flatten_fieldsets
 from django.utils.functional import curry
+
 
 class PhotoSizeFilter(CustomFilterSpec):
 
@@ -122,29 +120,29 @@ class PhotoAdmin(newman.NewmanModelAdmin):
         }
 
         return JsonResponse('', out)
-    
+
     def get_mass_upload_context(self, request):
         model = self.model
         opts = model._meta
         self.register_newman_variables(request)
-        
+
         # To enable admin-specific fields, we need to run the form class
         # through modelform_factory using curry
         FormClass = modelform_factory(Photo, form=MassUploadForm,
             fields=flatten_fieldsets(self.mass_upload_fieldsets),
             formfield_callback=curry(self.formfield_for_dbfield,request=request)
         )
-        
+
         context = {}
         if request.method == 'POST':
             error_dict = {}
             # Unfortunately, FLASH uploader sends array data in weird format
-            # so that Django doesn't recognize it as array of values, but 
+            # so that Django doesn't recognize it as array of values, but
             # as one string with commas inside. The only way to expect it
             # and preprocess the values by ourselves.
             data = dict((key, val) for key, val in request.POST.items())
             form = FormClass(data, request.FILES)
-            
+
             if form.is_valid():
                 # To prevent newman from handling our field by common flash editor
                 # we need to use a different mechanism
@@ -179,7 +177,8 @@ class PhotoAdmin(newman.NewmanModelAdmin):
             'raw_form': form
         })
         return context
-    
+
+    @csrf_exempt
     def upload_file_view(self, request):
         context = self.get_mass_upload_context(request)
         if 'error_dict' in context:
@@ -188,7 +187,7 @@ class PhotoAdmin(newman.NewmanModelAdmin):
             obj = context['object']
             return JsonResponse('', {'object_id': obj.id, 'object_title': obj.title})
         raise Http404
-    
+
     def mass_upload_view(self, request):
         context = self.get_mass_upload_context(request)
         return render_to_response('newman/photos/photo/mass_upload.html', context,

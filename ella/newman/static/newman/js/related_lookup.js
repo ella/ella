@@ -230,7 +230,7 @@ log_lookup = new LoggingLib('RELATED LOOKUP:', true);
         }
         
         NewmanLib.ADR_STACK.push( {
-            from: get_hashadr(''),
+            from: evt.referer || get_hashadr(''),
             to: get_hashadr($(this).attr('href')),
             selection_callback: $(Kobayashi.closest_loaded(this).container).data('selection_callback'),
             form_data: JSON.stringify({ data: $('.change-form').serializeArray() }),
@@ -242,7 +242,7 @@ log_lookup = new LoggingLib('RELATED LOOKUP:', true);
             Kobayashi.reload_content(Kobayashi.DEFAULT_TARGET);
         }
         else {
-            adr( $(this).attr('href') );
+            adr( $(this).attr('href'), {evt: evt} );
         }
     }
     $('.js-adrstack-push').live('click', default_adrstack_push_callback);
@@ -260,23 +260,46 @@ log_lookup = new LoggingLib('RELATED LOOKUP:', true);
             }
         };
         stack_top.onreturn = function(popped, action_table) {
-            $(document).one('content_added', function(evt) {
+            $(document).one('media_loaded', function(evt) {
+                // restore everything but gallery items
                 NewmanLib.restore_form(popped.form_data, $('.change-form'), {});
-            });
-            // add the photos to the gallery
-            $(document).one('media_loaded', function() {
-                var $input = $('#'+popped.input_id);
-                if (!$input || !$input.length) {
-                    log_lookup.log('#overlay-content has no input attached -- not adding mass-uploaded photos');
-                    return;
-                }
-                for (var i = 0; i < popped.photos.length; i++) {
-                    var photo = popped.photos[i];
-                    $input.val(photo.oid);
-                    $input.change();
-                    $input = $input.closest('.gallery-items-sortable').find(':input.target_id:last');
-                }
+                // restore previously-present gallery items
+                restore_gallery_items(
+                    $('.change-form'),
+                    get_gallery_item_ids_from_form_data(popped.form_data)
+                );
+                // add the mass-uploaded photos to the gallery
+                restore_gallery_items(
+                    $('.change-form'),
+                    $.map(popped.photos, function(i){ if (i.oid) return i.oid })
+                );
             });
         }
     });
+    
+    function restore_gallery_items($form, data) {
+        var inputs_container_selector = '.gallery-items-sortable';
+        var last_input_selector = ':input.target_id:last';
+        
+        var $input = $form.find(inputs_container_selector + ' ' + last_input_selector);
+        if ($input.length == 0) {
+            log_lookup.log('No gallery item input found; not restoring gallery items');
+            return;
+        }
+        for (var i = 0; i < data.length; i++) {
+            $input.val(data[i]);
+            $input.change();
+            $input = $input.closest(inputs_container_selector).find(last_input_selector);
+        }
+    }
+    function get_gallery_item_ids_from_form_data(form_data) {
+        var rv = [];
+        for (var i = 0; i < form_data.length; i++) {
+            var item = form_data[i];
+            if (/^galleryitem_set-\d+-target_id$/.test(item.name)) {
+                rv.push(item.value);
+            }
+        }
+        return rv;
+    }
 })(jQuery);
