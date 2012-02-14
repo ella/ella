@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 from jsonfield.fields import JSONField
 
 from ella.core.box import Box
-from ella.core.cache import get_cached_object, cache_this, CachedGenericForeignKey
+from ella.core.cache import get_cached_object, CachedGenericForeignKey
 from ella.core.conf import core_settings
 
 
@@ -70,13 +70,6 @@ class CategoryBox(Box):
             cont['photo_slug'] = self.params['photo_slug']
         return cont
 
-def get_category_key(func, category):
-    "Get key for caching category's __unicode__ method."
-    if category.id is None:
-        return None
-    return 'ella.core.models.Category:%d' % category.id
-
-
 class Category(models.Model):
     """
     ``Category`` is the **basic building block of Ella-based sites**. All the
@@ -117,7 +110,6 @@ class Category(models.Model):
         verbose_name = _('Category')
         verbose_name_plural = _('Categories')
 
-    @cache_this(get_category_key)
     def __unicode__(self):
         return '%s/%s' % (self.site.name, self.tree_path)
 

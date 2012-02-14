@@ -14,8 +14,8 @@ from ella.core.cache import cache_this, CachedGenericForeignKey
 
 log = logging.getLogger('ella.positions.models')
 
-def get_position_key(func, self, category, name, nofallback=False):
-    return 'ella.positions.models.PositionManager.get_active_position:%d:%s:%s' % (
+def get_position_key(self, category, name, nofallback=False):
+    return 'positions:%d:%s:%s' % (
             category.pk, name, nofallback and '1' or '0'
     )
 

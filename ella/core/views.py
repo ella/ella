@@ -149,8 +149,8 @@ class ObjectDetail(EllaCoreView):
 
         return context
 
-def archive_year_cache_key(func, self, category):
-    return 'archive_year:%d' % category.pk
+def archive_year_cache_key(self, category):
+    return 'core.archive_year:%d' % category.pk
 
 class ListContentType(EllaCoreView):
     """
@@ -436,8 +436,8 @@ def get_templates_from_publishable(name, publishable):
     return get_templates(name, slug, category, app_label, model_label)
 
 
-def get_export_key(func, request, count, name='', content_type=None):
-    return 'ella.core.views.export:%d:%d:%s:%s' % (
+def get_export_key(request, count, name='', content_type=None):
+    return 'core.export:%d:%d:%s:%s' % (
             settings.SITE_ID, count, name, content_type
         )
 

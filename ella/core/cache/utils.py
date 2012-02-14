@@ -11,26 +11,27 @@ from django.conf import settings
 
 log = logging.getLogger('ella.core.cache.utils')
 
-KEY_FORMAT_OBJECT = 'get_cached_object'
+KEY_PREFIX = 'core.gco'
 CACHE_TIMEOUT = getattr(settings, 'CACHE_TIMEOUT', 10*60)
 
 
 def normalize_key(key):
     return md5(key).hexdigest()
 
-def dump_param(param):
-    if hasattr(param, 'pk'):
-        return '|'.join((param._meta.app_label, param._meta.object_name, str(param.pk)))
-    return smart_str(param)
-
 def _get_key(start, model, kwargs):
+    if kwargs.keys() == ['pk']:
+        return ':'.join((
+            start, str(model.pk), str(kwargs['pk'])
+        ))
+
     for key, val in kwargs.iteritems():
         if hasattr(val, 'pk'):
             kwargs[key] = val.pk
-    return normalize_key(start + ':'.join((
-                model._meta.app_label,
-                model._meta.object_name,
-                ','.join(':'.join((key, dump_param(kwargs[key]))) for key in sorted(kwargs.keys()))
+
+    return normalize_key(':'.join((
+                start,
+                str(model.pk),
+                ','.join(':'.join((key, smart_str(kwargs[key]))) for key in sorted(kwargs.keys()))
     )))
 
 def get_cached_object(model, timeout=CACHE_TIMEOUT, **kwargs):
@@ -38,21 +39,21 @@ def get_cached_object(model, timeout=CACHE_TIMEOUT, **kwargs):
     Return a cached object. If the object does not exist in the cache, create it.
 
     Params:
-        model - Model class ContentType instance representing the model's class
+        model - ContentType instance representing the model's class or the model class itself
         timeout - TTL for the item in cache, defaults to CACHE_TIMEOUT
         **kwargs - lookup parameters for content_type.get_object_for_this_type and for key creation
 
     Throws:
         model.DoesNotExist is propagated from content_type.get_object_for_this_type
     """
-    if isinstance(model, ContentType):
-        model = model.model_class()
+    if not isinstance(model, ContentType):
+        model = ContentType.objects.get_for_model(model)
 
-    key = _get_key(KEY_FORMAT_OBJECT, model, kwargs)
+    key = _get_key(KEY_PREFIX, model, kwargs)
 
     obj = cache.get(key)
     if obj is None:
-        obj = model._default_manager.get(**kwargs)
+        obj = model.get_object_for_this_type(**kwargs)
         cache.set(key, obj, timeout)
     return obj
 
@@ -70,9 +71,8 @@ def get_cached_object_or_404(model, timeout=CACHE_TIMEOUT, **kwargs):
 def cache_this(key_getter, timeout=CACHE_TIMEOUT):
     def wrapped_decorator(func):
         def wrapped_func(*args, **kwargs):
-            key = key_getter(func, *args, **kwargs)
+            key = key_getter(*args, **kwargs)
             if key is not None:
-                key = normalize_key(key)
                 result = cache.get(key)
             else:
                 result = None

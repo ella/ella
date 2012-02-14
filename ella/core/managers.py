@@ -71,10 +71,10 @@ class RelatedManager(models.Manager):
         return self.collect_related(finder_funcs, obj, count, mods, only_from_same_site)
 
 
-def get_listings_key(func, self, category=None, count=10, offset=1, mods=[], content_types=[], **kwargs):
+def get_listings_key(self, category=None, count=10, offset=1, mods=[], content_types=[], **kwargs):
     c = category and  category.id or ''
 
-    return 'ella.core.managers.ListingManager.get_listing:%s:%d:%d:%s:%s:%s' % (
+    return 'core.get_listing:%s:%d:%d:%s:%s:%s' % (
             c, count, offset,
             ','.join(str(model._meta) for model in mods),
             ','.join(map(str, content_types)),
