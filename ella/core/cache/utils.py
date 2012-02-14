@@ -57,6 +57,35 @@ def get_cached_object(model, timeout=CACHE_TIMEOUT, **kwargs):
         cache.set(key, obj, timeout)
     return obj
 
+def get_cached_objects(model, pks, timeout=CACHE_TIMEOUT):
+    """
+    Return a list of objects with given PKs using cache.
+
+    Params:
+        model - ContentType instance representing the model's class or the model class itself
+        pks - list of Primary Key values to look up
+        timeout - TTL for the items in cache, defaults to CACHE_TIMEOUT
+
+    Throws:
+        model.DoesNotExist is propagated from content_type.get_object_for_this_type
+    """
+    if isinstance(model, ContentType):
+        model = model.model_class()
+
+    keys = [_get_key(KEY_PREFIX, model, {'pk': pk}) for pk in pks]
+
+    out = []
+    cached = cache.get_many(keys)
+    for key, pk in zip(keys, pks):
+        if key in cached:
+            obj = cached[key]
+        else:
+            obj = model._default_manager.get(pk=pk)
+            cache.set(key, obj, timeout)
+        out.append(obj)
+    return out
+
+
 def get_cached_object_or_404(model, timeout=CACHE_TIMEOUT, **kwargs):
     """
     Shortcut that will raise Http404 if there is no object matching the query
