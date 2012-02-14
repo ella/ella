@@ -19,16 +19,16 @@ CACHE_TIMEOUT = getattr(settings, 'CACHE_TIMEOUT', 10*60)
 @receiver(post_save)
 @receiver(post_delete)
 def invalidate_cache(sender, instance, **kwargs):
-    key = _get_key(KEY_PREFIX, ContentType.objects.get_for_model(sender), {'pk': instance.pk})
+    key = _get_key(KEY_PREFIX, ContentType.objects.get_for_model(sender), pk=instance.pk)
     cache.delete(key)
 
 def normalize_key(key):
     return md5(key).hexdigest()
 
-def _get_key(start, model, kwargs):
-    if kwargs.keys() == ['pk']:
+def _get_key(start, model, pk=None, **kwargs):
+    if pk and not kwargs:
         return ':'.join((
-            start, str(model.pk), str(kwargs['pk'])
+            start, str(model.pk), str(pk)
         ))
 
     for key, val in kwargs.iteritems():
@@ -56,7 +56,7 @@ def get_cached_object(model, timeout=CACHE_TIMEOUT, **kwargs):
     if not isinstance(model, ContentType):
         model = ContentType.objects.get_for_model(model)
 
-    key = _get_key(KEY_PREFIX, model, kwargs)
+    key = _get_key(KEY_PREFIX, model, **kwargs)
 
     obj = cache.get(key)
     if obj is None:
@@ -80,7 +80,7 @@ def get_cached_objects(model, pks, timeout=CACHE_TIMEOUT):
     if isinstance(model, ContentType):
         model = ContentType.objects.get_for_model(model)
 
-    keys = [_get_key(KEY_PREFIX, model, {'pk': pk}) for pk in pks]
+    keys = [_get_key(KEY_PREFIX, model, pk=pk) for pk in pks]
 
     cached = cache.get_many(keys)
 

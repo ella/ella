@@ -16,9 +16,9 @@ class TestCacheInvalidation(TestCase):
         ct = utils.get_cached_object(self.ct, pk=self.ct.pk)
 
         tools.assert_equals(ct, self.ct)
-        tools.assert_equals(self.ct, local_cache.get(utils._get_key(utils.KEY_PREFIX, self.ct, {'pk': self.ct.pk})))
+        tools.assert_equals(self.ct, local_cache.get(utils._get_key(utils.KEY_PREFIX, self.ct, pk=self.ct.pk)))
         self.ct.save()
-        tools.assert_equals(None, local_cache.get(utils._get_key(utils.KEY_PREFIX, self.ct, {'pk': self.ct.pk})))
+        tools.assert_equals(None, local_cache.get(utils._get_key(utils.KEY_PREFIX, self.ct, pkr=self.ct.pk)))
 
 
 old_cache = None
