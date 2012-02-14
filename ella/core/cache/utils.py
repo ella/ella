@@ -1,7 +1,9 @@
 from hashlib import md5
 import logging
 
+from django.dispatch import receiver
 from django.db.models import ObjectDoesNotExist
+from django.db.models.signals import post_save, post_delete
 from django.core.cache import cache
 from django.http import Http404
 from django.contrib.contenttypes.models import ContentType
@@ -14,6 +16,11 @@ log = logging.getLogger('ella.core.cache.utils')
 KEY_PREFIX = 'core.gco'
 CACHE_TIMEOUT = getattr(settings, 'CACHE_TIMEOUT', 10*60)
 
+@receiver(post_save)
+@receiver(post_delete)
+def invalidate_cache(sender, instance, **kwargs):
+    key = _get_key(KEY_PREFIX, ContentType.objects.get_for_model(sender), {'pk': instance.pk})
+    cache.delete(key)
 
 def normalize_key(key):
     return md5(key).hexdigest()
@@ -53,7 +60,8 @@ def get_cached_object(model, timeout=CACHE_TIMEOUT, **kwargs):
 
     obj = cache.get(key)
     if obj is None:
-        obj = model.get_object_for_this_type(**kwargs)
+        mclass = model.model_class()
+        obj = mclass._default_manager.get(**kwargs)
         cache.set(key, obj, timeout)
     return obj
 
@@ -70,20 +78,22 @@ def get_cached_objects(model, pks, timeout=CACHE_TIMEOUT):
         model.DoesNotExist is propagated from content_type.get_object_for_this_type
     """
     if isinstance(model, ContentType):
-        model = model.model_class()
+        model = ContentType.objects.get_for_model(model)
 
     keys = [_get_key(KEY_PREFIX, model, {'pk': pk}) for pk in pks]
 
-    out = []
     cached = cache.get_many(keys)
-    for key, pk in zip(keys, pks):
-        if key in cached:
-            obj = cached[key]
-        else:
-            obj = model._default_manager.get(pk=pk)
-            cache.set(key, obj, timeout)
-        out.append(obj)
-    return out
+
+    keys_to_set = set(keys) - set(cached.keys())
+    if keys_to_set:
+        mclass = model.model_class()
+        lookup = dict(zip(keys, pks))
+        to_set = {}
+        for k in keys_to_set:
+            to_set[k] = cached[k] = mclass._default_manager.get(pk=lookup[k])
+        cache.set_many(to_set, timeout=timeout)
+
+    return [cached[k] for k in keys]
 
 
 def get_cached_object_or_404(model, timeout=CACHE_TIMEOUT, **kwargs):
