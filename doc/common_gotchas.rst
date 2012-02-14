@@ -57,7 +57,7 @@ it's **slug**.
             'root': root,
             'current_root': current_root,    
             'current': category,
-            'sub': get_cached_list(Category, tree_parent=root)
+            'sub': Category.objects.filter(tree_parent=root)
         }
 
 Next, create the template for the menu part itself::

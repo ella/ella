@@ -11,8 +11,7 @@ from django.conf import settings
 
 log = logging.getLogger('ella.core.cache.utils')
 
-KEY_FORMAT_LIST = 'ella.core.cache.utils.get_cached_list'
-KEY_FORMAT_OBJECT = 'ella.core.cache.utils.get_cached_object'
+KEY_FORMAT_OBJECT = 'get_cached_object'
 CACHE_TIMEOUT = getattr(settings, 'CACHE_TIMEOUT', 10*60)
 
 
@@ -33,28 +32,6 @@ def _get_key(start, model, kwargs):
                 model._meta.object_name,
                 ','.join(':'.join((key, dump_param(kwargs[key]))) for key in sorted(kwargs.keys()))
     )))
-
-def get_cached_list(model, timeout=CACHE_TIMEOUT, **kwargs):
-    """
-    Return a cached list. If the list does not exist in the cache, create it.
-
-    Params:
-        model - Model class ContentType instance representing the model's class
-        timeout - TTL for the item in cache, defaults to CACHE_TIMEOUT
-        **kwargs - lookup parameters for content_type.get_object_for_this_type and for key creation
-
-    """
-    if isinstance(model, ContentType):
-        model = model.model_class()
-
-    key = _get_key(KEY_FORMAT_LIST, model, kwargs)
-
-    l = cache.get(key)
-    if l is None:
-        log.debug('get_cached_list(model=%s), object not cached.', str(model))
-        l = list(model._default_manager.filter(**kwargs))
-        cache.set(key, l, timeout)
-    return l
 
 def get_cached_object(model, timeout=CACHE_TIMEOUT, **kwargs):
     """
