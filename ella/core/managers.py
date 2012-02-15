@@ -9,7 +9,6 @@ from django.utils.encoding import smart_str
 from ella.core.cache import cache_this
 from ella.core.conf import core_settings
 
-
 class RelatedManager(models.Manager):
     def collect_related(self, finder_funcs, obj, count, *args, **kwargs):
         """
@@ -140,21 +139,21 @@ class ListingManager(models.Manager):
             [now] - datetime used instead of default datetime.now() value
             **kwargs - rest of the parameter are passed to the queryset unchanged
         """
-        # TODO try to write  SQL (.extra())
         assert offset > 0, "Offset must be a positive integer"
         assert count >= 0, "Count must be a positive integer"
 
         if not count:
             return []
 
-        now = datetime.now()
+        now = datetime.now().replace(second=0, microsecond=0)
         if 'now' in kwargs:
             now = kwargs.pop('now')
-        qset = self.get_listing_queryset(category, children, mods, content_types, now, **kwargs)
 
         # templates are 1-based, compensate
         offset -= 1
         limit = offset + count
+
+        qset = self.get_listing_queryset(category, children, mods, content_types, now, **kwargs)
 
         # direct listings, we don't need to check for duplicates
         if children == self.NONE:
