@@ -70,13 +70,13 @@ class RelatedManager(models.Manager):
         return self.collect_related(finder_funcs, obj, count, mods, only_from_same_site)
 
 
-def get_listings_key(self, category=None, count=10, offset=1, mods=[], content_types=[], date_range=(), **kwargs):
+def get_listings_key(self, category=None, count=10, offset=1, content_types=[], date_range=(), **kwargs):
     c = category and  category.id or ''
 
     return 'core.get_listing:%s:%d:%d:%s:%s:%s' % (
             c, count, offset,
-            ','.join(str(model._meta) for model in mods),
-            ','.join(map(str, content_types)),
+            ','.join(map(lambda ct: str(ct.pk), content_types)),
+            ','.join(map(lambda d: d.strftime('%Y%m%d'), date_range)),
             ','.join(':'.join((k, smart_str(v))) for k, v in kwargs.items()),
     )
 
@@ -101,7 +101,7 @@ class ListingManager(models.Manager):
             )
         return qset
 
-    def get_listing_queryset(self, category=None, children=NONE, mods=[], content_types=[], date_range=(), now=None, **kwargs):
+    def get_listing_queryset(self, category=None, children=NONE, content_types=[], date_range=(), now=None, **kwargs):
         if not now:
             now = datetime.now()
 
@@ -125,13 +125,13 @@ class ListingManager(models.Manager):
                 raise AttributeError('Invalid children value (%s) - should be one of (%s, %s, %s)' % (children, self.NONE, self.IMMEDIATE, self.ALL))
 
         # filtering based on Model classes
-        if mods or content_types:
-            qset = qset.filter(publishable__content_type__in=([ ContentType.objects.get_for_model(m) for m in mods ] + content_types))
+        if content_types:
+            qset = qset.filter(publishable__content_type__in=content_types)
 
         return qset.exclude(publish_to__lt=now).order_by('-publish_from')
 
     @cache_this(get_listings_key)
-    def get_listing(self, category=None, children=NONE, count=10, offset=1, mods=[], content_types=[], date_range=(), **kwargs):
+    def get_listing(self, category=None, children=NONE, count=10, offset=1, content_types=[], date_range=(), **kwargs):
         """
         Get top objects for given category and potentionally also its child categories.
 
@@ -139,7 +139,8 @@ class ListingManager(models.Manager):
             category - Category object to list objects for. None if any category will do
             count - number of objects to output, defaults to 10
             offset - starting with object number... 1-based
-            mods - list of Models, if empty, object from all models are included
+            content_types - list of ContentTypes to list, if empty, object from all models are included
+            date_range - range for listing's publish_from field
             [now] - datetime used instead of default datetime.now() value
             **kwargs - rest of the parameter are passed to the queryset unchanged
         """
@@ -157,7 +158,7 @@ class ListingManager(models.Manager):
         offset -= 1
         limit = offset + count
 
-        qset = self.get_listing_queryset(category, children, mods, content_types, date_range, **kwargs)
+        qset = self.get_listing_queryset(category, children, content_types, date_range, **kwargs)
 
         # direct listings, we don't need to check for duplicates
         if children == self.NONE:

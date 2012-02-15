@@ -7,6 +7,7 @@ from nose import tools
 from django import template
 from django.template import TemplateSyntaxError
 from django.contrib.sites.models import Site
+from django.contrib.contenttypes.models import ContentType
 
 from ella.core.templatetags.core import listing_parse, ListingNode, _parse_box, BoxNode, EmptyNode
 from ella.core.models import Listing, Category
@@ -81,6 +82,11 @@ class TestListingTagParser(UnitTestCase):
     {% listing <limit>[ from <offset>][of <app.model>[, <app.model>[, ...]]][ for <category> ] [with children|descendents] as <result> %}
     '''
 
+    def setUp(self):
+        self.act = ContentType.objects.get_for_model(Article)
+        self.pct = ContentType.objects.get_for_model(Photo)
+        super(TestListingTagParser, self).setUp()
+
     def test_minimal_args(self):
         var_name, parameters, parameters_to_resolve = listing_parse(['listing', '1', 'as', 'var'])
         tools.assert_equals('var', var_name)
@@ -93,23 +99,22 @@ class TestListingTagParser(UnitTestCase):
         tools.assert_equals('10', parameters['offset'])
 
     def test_limit_by_model(self):
-        from ella.articles.models import Article
         var_name, parameters, parameters_to_resolve = listing_parse(['listing', '1', 'of', 'articles.article', 'as', 'var'])
         tools.assert_equals('var', var_name)
         tools.assert_equals('1', parameters['count'])
-        tools.assert_equals([Article], parameters['mods'])
+        tools.assert_equals([self.act], parameters['content_types'])
 
     def test_limit_bu_more_models(self):
         var_name, parameters, parameters_to_resolve = listing_parse(['listing', '1', 'of', 'articles.article,photos.photo', 'as', 'var'])
-        tools.assert_equals([Article, Photo], parameters['mods'])
+        tools.assert_equals([self.act, self.pct], parameters['content_types'])
 
     def test_limit_bu_more_models_space(self):
         var_name, parameters, parameters_to_resolve = listing_parse(['listing', '1', 'of', 'articles.article,', 'photos.photo', 'as', 'var'])
-        tools.assert_equals([Article, Photo], parameters['mods'])
+        tools.assert_equals([self.act, self.pct], parameters['content_types'])
 
     def test_limit_bu_more_models_space_around_comma(self):
         var_name, parameters, parameters_to_resolve = listing_parse(['listing', '1', 'of', 'articles.article', ',', 'photos.photo', 'as', 'var'])
-        tools.assert_equals([Article, Photo], parameters['mods'])
+        tools.assert_equals([self.act, self.pct], parameters['content_types'])
 
     def test_limit_by_category(self):
         var_name, parameters, parameters_to_resolve = listing_parse(['listing', '1', 'for', 'category', 'as', 'var'])

@@ -6,6 +6,7 @@ from django.db import models
 from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
 from django.template.defaultfilters import stringfilter
+from django.contrib.contenttypes.models import ContentType
 
 from ella.core.models import Listing, Category
 from ella.core.cache.utils import get_cached_object
@@ -108,8 +109,8 @@ def listing_parse(input):
                 m = models.get_model(*mod.split('.'))
                 if m is None:
                     raise template.TemplateSyntaxError, "%r tag cannot list objects of unknown model %r" % (input[0], mod)
-                l.append(m)
-            params['mods'] = l
+                l.append(ContentType.objects.get_for_model(m))
+            params['content_types'] = l
         o = mc
     # for - category definition
     if input[o] == 'for':
