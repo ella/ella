@@ -70,7 +70,7 @@ class RelatedManager(models.Manager):
         return self.collect_related(finder_funcs, obj, count, mods, only_from_same_site)
 
 
-def get_listings_key(self, category=None, count=10, offset=1, mods=[], content_types=[], **kwargs):
+def get_listings_key(self, category=None, count=10, offset=1, mods=[], content_types=[], date_range=(), **kwargs):
     c = category and  category.id or ''
 
     return 'core.get_listing:%s:%d:%d:%s:%s:%s' % (
@@ -101,10 +101,14 @@ class ListingManager(models.Manager):
             )
         return qset
 
-    def get_listing_queryset(self, category=None, children=NONE, mods=[], content_types=[], now=None, **kwargs):
+    def get_listing_queryset(self, category=None, children=NONE, mods=[], content_types=[], date_range=(), now=None, **kwargs):
         if not now:
             now = datetime.now()
-        qset = self.filter(publish_from__lte=now, publishable__published=True, **kwargs)
+
+        if date_range:
+            qset = self.filter(publish_from__range=date_range, publishable__published=True, **kwargs)
+        else:
+            qset = self.filter(publish_from__lte=now, publishable__published=True, **kwargs)
 
         if category:
             if children == self.NONE:
@@ -127,7 +131,7 @@ class ListingManager(models.Manager):
         return qset.exclude(publish_to__lt=now).order_by('-publish_from')
 
     @cache_this(get_listings_key)
-    def get_listing(self, category=None, children=NONE, count=10, offset=1, mods=[], content_types=[], **kwargs):
+    def get_listing(self, category=None, children=NONE, count=10, offset=1, mods=[], content_types=[], date_range=(), **kwargs):
         """
         Get top objects for given category and potentionally also its child categories.
 
@@ -145,15 +149,15 @@ class ListingManager(models.Manager):
         if not count:
             return []
 
-        now = datetime.now().replace(second=0, microsecond=0)
-        if 'now' in kwargs:
-            now = kwargs.pop('now')
+        if not date_range and 'now' not in kwargs:
+            # give the database some chance to cache this query
+            kwargs['now'] = datetime.now().replace(second=0, microsecond=0)
 
         # templates are 1-based, compensate
         offset -= 1
         limit = offset + count
 
-        qset = self.get_listing_queryset(category, children, mods, content_types, now, **kwargs)
+        qset = self.get_listing_queryset(category, children, mods, content_types, date_range, **kwargs)
 
         # direct listings, we don't need to check for duplicates
         if children == self.NONE:

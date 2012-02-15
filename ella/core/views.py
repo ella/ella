@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime, timedelta
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator
@@ -243,13 +243,7 @@ class ListContentType(EllaCoreView):
             page_no = 1
 
         # if we are not on the first page, display a different template
-        category_title_page = page_no == 1
-
-        kwa = {}
-        if year:
-            category_title_page = False
-            year = int(year)
-            kwa['publish_from__year'] = year
+        category_title_page = page_no == 1 and not year
 
         # Homepage is considered when category is empty (~ no slug) and no
         # filtering is used.
@@ -262,23 +256,28 @@ class ListContentType(EllaCoreView):
         # @see: _handle_404()
         is_homepage = not bool(category) and page_no == 1 and year is None
 
-        if month:
-            try:
-                month = int(month)
-                date(year, month, 1)
-            except ValueError:
-                return self._handle_404(_('Invalid month value %r') % month,
-                    is_homepage)
-            kwa['publish_from__month'] = month
-
+        kwa = {}
         if day:
             try:
-                day = int(day)
-                date(year, month, day)
+                start_day = datetime(int(year), int(month), int(day))
             except ValueError:
                 return self._handle_404(_('Invalid day value %r') % day,
                     is_homepage)
-            kwa['publish_from__day'] = day
+            kwa['date_range'] = (start_day, start_day + timedelta(seconds=24 * 3600 - 1))
+        elif month:
+            try:
+                start_day = datetime(int(year), int(month), 1)
+            except ValueError:
+                return self._handle_404(_('Invalid month value %r') % month,
+                    is_homepage)
+            kwa['date_range'] = (start_day, (start_day + timedelta(days=32)).replace(day=1) - timedelta(seconds=1))
+        elif year:
+            try:
+                start_day = datetime(int(year), 1, 1)
+            except ValueError:
+                return self._handle_404(_('Invalid year value %r') % month,
+                    is_homepage)
+            kwa['date_range'] = (start_day, (start_day + timedelta(days=370)).replace(day=1) - timedelta(seconds=1))
 
         try:
             cat = get_cached_object(Category, timeout=3600, tree_path=category,
