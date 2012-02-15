@@ -2,11 +2,10 @@ from datetime import datetime
 
 from django.db import models
 from django.core.exceptions import ImproperlyConfigured
-from django.contrib.contenttypes.models import ContentType
 from django.utils.importlib import import_module
 from django.utils.encoding import smart_str
 
-from ella.core.cache import cache_this
+from ella.core.cache import cache_this, redis
 from ella.core.conf import core_settings
 
 class RelatedManager(models.Manager):
@@ -150,15 +149,17 @@ class ListingManager(models.Manager):
         if not count:
             return []
 
-        if not date_range and 'now' not in kwargs:
-            # give the database some chance to cache this query
-            kwargs['now'] = datetime.now().replace(second=0, microsecond=0)
+        # give the database some chance to cache this query
+        now = kwargs.pop('now', datetime.now().replace(second=0, microsecond=0))
 
         # templates are 1-based, compensate
         offset -= 1
         limit = offset + count
 
-        qset = self.get_listing_queryset(category, children, content_types, date_range, **kwargs)
+        if redis.client and not kwargs and len(content_types) <= 1:
+            return redis.get_listing(self.model, category, children, count, offset, content_types, date_range, now)
+
+        qset = self.get_listing_queryset(category, children, content_types, date_range, now=now, **kwargs)
 
         # direct listings, we don't need to check for duplicates
         if children == self.NONE:

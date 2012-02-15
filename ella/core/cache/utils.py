@@ -65,32 +65,36 @@ def get_cached_object(model, timeout=CACHE_TIMEOUT, **kwargs):
         cache.set(key, obj, timeout)
     return obj
 
-def get_cached_objects(model, pks, timeout=CACHE_TIMEOUT):
+def get_cached_objects(pks, model=None, timeout=CACHE_TIMEOUT):
     """
     Return a list of objects with given PKs using cache.
 
     Params:
+        pks - list of Primary Key values to look up or list of content_type_id, pk tuples
         model - ContentType instance representing the model's class or the model class itself
-        pks - list of Primary Key values to look up
         timeout - TTL for the items in cache, defaults to CACHE_TIMEOUT
 
     Throws:
         model.DoesNotExist is propagated from content_type.get_object_for_this_type
     """
-    if isinstance(model, ContentType):
-        model = ContentType.objects.get_for_model(model)
+    if model is not None:
+        if not isinstance(model, ContentType):
+            model = ContentType.objects.get_for_model(model)
+        pks = [(model, pk) for pk in pks]
+    else:
+        pks = [(ContentType.objects.get_for_id(ct_id), pk) for (ct_id, pk) in pks]
 
-    keys = [_get_key(KEY_PREFIX, model, pk=pk) for pk in pks]
+    keys = [_get_key(KEY_PREFIX, model, pk=pk) for (model, pk) in pks]
 
     cached = cache.get_many(keys)
 
     keys_to_set = set(keys) - set(cached.keys())
     if keys_to_set:
-        mclass = model.model_class()
         lookup = dict(zip(keys, pks))
         to_set = {}
         for k in keys_to_set:
-            to_set[k] = cached[k] = mclass._default_manager.get(pk=lookup[k])
+            ct, pk = lookup[k]
+            to_set[k] = cached[k] = ct.get_object_for_this_type(pk=pk)
         cache.set_many(to_set, timeout=timeout)
 
     return [cached[k] for k in keys]
