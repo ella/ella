@@ -20,7 +20,7 @@ def related_by_category(obj, count, collected_so_far, mods=[], only_from_same_si
         cat = obj.category
         listings = Listing.objects.get_listing(category=cat, count=count + len(related), mods=mods)
         for l in listings:
-            t = l.target
+            t = l.publishable
             if t != obj and t not in related:
                 related.append(t)
                 count -= 1

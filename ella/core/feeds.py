@@ -79,13 +79,13 @@ class RSSTopCategoryListings(Feed):
         return item.publish_from
 
     def get_enclosure_image(self, item, enc_format=core_settings.RSS_ENCLOSURE_PHOTO_FORMAT):
-        if getattr(item.target, 'photo'):
+        if getattr(item.publishable, 'photo'):
             if enc_format is not None:
                 try:
-                    return item.target.photo.get_formated_photo(enc_format)
+                    return item.publishable.photo.get_formated_photo(enc_format)
                 except Format.DoesNotExist:
                     pass
-            return item.target.photo.get_image_info()
+            return item.publishable.photo.get_image_info()
 
     def get_enclosure_image_attr(self, item, attr):
         image = self.get_enclosure_image(item)

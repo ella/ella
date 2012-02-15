@@ -189,18 +189,11 @@ class Listing(models.Model):
         except:
             return _('Broken listing')
 
-    @property
-    def target(self):
-        return self.publishable
-
     def get_absolute_url(self, domain=False):
         return self.publishable.get_absolute_url(domain)
 
     def get_domain_url(self):
         return self.get_absolute_url(domain=True)
-
-    def get_publish_from(self):
-        return self.publish_from
 
 
 class Related(models.Model):
