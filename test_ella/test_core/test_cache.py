@@ -7,6 +7,10 @@ from django.db.models.signals import pre_save, post_save, post_delete
 from ella.core.cache import utils, redis
 from ella.core.models import Listing
 
+from test_ella.test_core import create_basic_categories, \
+        create_and_place_more_publishables, list_all_publishables_in_category_by_hour
+
+
 from nose import tools, SkipTest
 
 class TestCacheInvalidation(TestCase):
@@ -55,7 +59,36 @@ class TestRedisListings(TestCase):
         self.redis.flushdb()
 
     def test_listing_save_adds_itself_to_relevant_zsets(self):
-        raise SkipTest()
+        create_basic_categories(self)
+        create_and_place_more_publishables(self)
+        list_all_publishables_in_category_by_hour(self)
+        ct_id = self.publishables[0].content_type_id
+        tools.assert_equals(sorted([
+                'listing:1',
+                'listing:2',
+                'listing:3',
+                'listing:1:%d' % ct_id,
+                'listing:2:%d' % ct_id,
+                'listing:3:%d' % ct_id,
+
+                'listing:1:all',
+                'listing:2:all',
+                'listing:3:all',
+                'listing:1:all:%d' % ct_id,
+                'listing:2:all:%d' % ct_id,
+                'listing:3:all:%d' % ct_id,
+
+                'listing:1:children',
+                'listing:2:children',
+                'listing:3:children',
+                'listing:1:children:%d' % ct_id,
+                'listing:2:children:%d' % ct_id,
+                'listing:3:children:%d' % ct_id,
+            ]),
+            sorted(self.redis.keys())
+        )
+        tools.assert_equals(['17:1:0', '17:2:0', '17:3:0'], self.redis.zrange('listing:1:%d' % ct_id, 0, 100))
+        tools.assert_equals(['17:3:0'], self.redis.zrange('listing:3', 0, 100))
 
     def test_get_listing_uses_data_from_redis(self):
         raise SkipTest()
