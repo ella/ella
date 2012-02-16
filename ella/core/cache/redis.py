@@ -87,7 +87,7 @@ def listing_pre_save(sender, instance, **kwargs):
 def listing_post_save(sender, instance, **kwargs):
     pipe = instance.__redis_pipe
     v, keys = get_redis_values(instance)
-    score = time.mktime(instance.publish_from.timetuple())
+    score = repr(time.mktime(instance.publish_from.timetuple()))
     for k in keys:
         pipe = pipe.zadd(k, v, score)
     pipe.execute()
@@ -113,14 +113,14 @@ def get_listing(Listing, category, children, count, offset, content_types, date_
     else:
         max_score = time.mktime(now.timetuple())
 
-    ids = client.zrevrangebyscore(key, max_score, 0, start=offset, num=count, withscores=True)
+    ids = client.zrevrangebyscore(key, repr(max_score), 0, start=offset, num=count, withscores=True)
 
-    ids = map(lambda s: s.plit(':'), ids)
+    ids = map(lambda (s, ts): s.split(':') + [ts], ids)
 
-    publishables = get_cached_objects([(ct_id, pk) for (ct_id, pk, commercial) in ids])
+    publishables = get_cached_objects([(ct_id, pk) for (ct_id, pk, commercial, ts) in ids])
 
     out = []
-    for (p, tstamp), (ct_id, pk, commercial) in zip(publishables, ids):
+    for p, (ct_id, pk, commercial, tstamp) in zip(publishables, ids):
         publish_from = datetime.fromtimestamp(tstamp)
         if date_range and publish_from < date_range[0]:
             break
