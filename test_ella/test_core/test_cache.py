@@ -1,8 +1,11 @@
 from django.core.cache import get_cache
+from django.conf import settings
 from django.test import TestCase
 from django.contrib.contenttypes.models import ContentType
+from django.db.models.signals import pre_save, post_save, post_delete
 
-from ella.core.cache import utils
+from ella.core.cache import utils, redis
+from ella.core.models import Listing
 
 from nose import tools, SkipTest
 
@@ -27,3 +30,32 @@ class TestCacheInvalidation(TestCase):
         self.ct.save()
         tools.assert_equals(None, self.cache.get(utils._get_key(utils.KEY_PREFIX, self.ct, pkr=self.ct.pk)))
 
+class TestRedisListings(TestCase):
+    def setUp(self):
+        super(TestRedisListings, self).setUp()
+        try:
+            import redis as redis_client
+        except ImportError:
+            raise SkipTest()
+
+        self.redis = redis_client.Redis(**settings.TEST_CORE_REDIS)
+
+        redis.client = self.redis
+        pre_save.connect(redis.listing_pre_save, sender=Listing)
+        post_save.connect(redis.listing_post_save, sender=Listing)
+        post_delete.connect(redis.listing_post_delete, sender=Listing)
+
+    def tearDown(self):
+        redis.client = None
+        pre_save.disconnect(redis.listing_pre_save, sender=Listing)
+        post_save.disconnect(redis.listing_post_save, sender=Listing)
+        post_delete.disconnect(redis.listing_post_delete, sender=Listing)
+
+        super(TestRedisListings, self).tearDown()
+        self.redis.flushdb()
+
+    def test_listing_save_adds_itself_to_relevant_zsets(self):
+        raise SkipTest()
+
+    def test_get_listing_uses_data_from_redis(self):
+        raise SkipTest()

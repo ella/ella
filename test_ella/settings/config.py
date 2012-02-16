@@ -21,7 +21,7 @@ DATABASES = {
     }
 }
 
-PHOTOS_REDIS = {'db': 15}
+TEST_CORE_REDIS = PHOTOS_REDIS = {'db': 15}
 
 TIME_ZONE = 'Europe/Prague'
 
