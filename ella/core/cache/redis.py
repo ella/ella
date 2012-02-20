@@ -64,7 +64,7 @@ def listing_post_save(sender, instance, **kwargs):
     pipe.execute()
 
 
-def get_listing(Listing, category, children, count, offset, content_types, date_range, now):
+def get_listing(Listing, category, children, count, offset, content_types, date_range):
     # store all the key sets we will want to ZUNIONSTORE
     unions = []
     if content_types:
@@ -81,9 +81,11 @@ def get_listing(Listing, category, children, count, offset, content_types, date_
         cat_keys.extend(REDIS_CAT_LISTING % d['id'] for d in category.__class__.objects.filter(tree_path__startswith=category.tree_path + '/').values('id'))
     unions.append(cat_keys)
 
+    # do everything in one pipeline
+    pipe = client.pipeline()
+
     # do all the unions if required and output a list of keys to intersect
     inter_keys = []
-    pipe = client.pipeline()
     for union_keys in unions:
         if len(union_keys) > 1:
             result_key = 'listings:zus:' + md5(','.join(union_keys)).hexdigest()
@@ -100,6 +102,7 @@ def get_listing(Listing, category, children, count, offset, content_types, date_
         key = inter_keys[0]
 
     # get the score range based on the date range
+    now = datetime.now()
     if date_range:
         max_score = time.mktime(min(date_range[1], now).timetule())
         min_score = repr(date_range[0].timetuple())

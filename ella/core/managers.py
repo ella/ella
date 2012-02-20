@@ -100,9 +100,9 @@ class ListingManager(models.Manager):
             )
         return qset
 
-    def get_listing_queryset(self, category=None, children=NONE, content_types=[], date_range=(), now=None, **kwargs):
-        if not now:
-            now = datetime.now()
+    def get_listing_queryset(self, category=None, children=NONE, content_types=[], date_range=(), **kwargs):
+        # give the database some chance to cache this query
+        now = datetime.now().replace(second=0, microsecond=0)
 
         if date_range:
             qset = self.filter(publish_from__range=date_range, publishable__published=True, **kwargs)
@@ -140,7 +140,6 @@ class ListingManager(models.Manager):
             offset - starting with object number... 1-based
             content_types - list of ContentTypes to list, if empty, object from all models are included
             date_range - range for listing's publish_from field
-            [now] - datetime used instead of default datetime.now() value
             **kwargs - rest of the parameter are passed to the queryset unchanged
         """
         assert offset > 0, "Offset must be a positive integer"
@@ -149,17 +148,14 @@ class ListingManager(models.Manager):
         if not count:
             return []
 
-        # give the database some chance to cache this query
-        now = kwargs.pop('now', datetime.now().replace(second=0, microsecond=0))
-
         # templates are 1-based, compensate
         offset -= 1
         limit = offset + count
 
         if redis.client and not kwargs and len(content_types) <= 1:
-            return redis.get_listing(self.model, category, children, count, offset, content_types, date_range, now)
+            return redis.get_listing(self.model, category, children, count, offset, content_types, date_range)
 
-        qset = self.get_listing_queryset(category, children, content_types, date_range, now=now, **kwargs)
+        qset = self.get_listing_queryset(category, children, content_types, date_range, **kwargs)
 
         # direct listings, we don't need to check for duplicates
         if children == self.NONE:
