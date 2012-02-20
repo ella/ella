@@ -14,6 +14,7 @@ from jsonfield.fields import JSONField
 
 from ella.core.box import Box
 from ella.core.conf import core_settings
+from ella.core.signals import content_published, content_unpublished
 from ella.core.cache import get_cached_object, CachedGenericForeignKey, \
     CachedForeignKey
 from ella.core.managers import ListingManager, RelatedManager
@@ -123,20 +124,38 @@ class Publishable(models.Model):
 
     def save(self, **kwargs):
         self.content_type = ContentType.objects.get_for_model(self)
+        send_signal = None
         if self.pk:
             old_self = Publishable.objects.get(pk=self.pk)
 
             old_path = old_self.get_absolute_url()
             new_path = self.get_absolute_url()
 
+            # detect change in URL
             if old_path != new_path and new_path:
+                # and create a redirect
                 redirect = Redirect.objects.get_or_create(old_path=old_path,
                     site=self.category.site)[0]
                 redirect.new_path = new_path
                 redirect.save(force_update=True)
+                # also update all potentially already existing redirects
                 Redirect.objects.filter(new_path=old_path).exclude(
                     pk=redirect.pk).update(new_path=new_path)
-        return super(Publishable, self).save(**kwargs)
+
+            # detect change in publication status
+            if old_self.is_published() != self.is_published():
+                if self.is_published():
+                    send_signal = content_published
+                else:
+                    send_signal = content_unpublished
+        # published, send the proper signal
+        elif self.is_published():
+            send_signal = content_published
+
+        super(Publishable, self).save(**kwargs)
+
+        if send_signal:
+            send_signal.send(sender=self.__class__, publishable=self)
 
     def delete(self):
         url = self.get_absolute_url()
