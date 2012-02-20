@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import logging
 import time
 from datetime import datetime
+from hashlib import md5
 
 from django.conf import settings
 
@@ -21,12 +22,8 @@ if hasattr(settings, 'LISTINGS_REDIS'):
     else:
         client = Redis(**getattr(settings, 'LISTINGS_REDIS'))
 
-REDIS_LISTING = 'listing:%d'
-REDIS_CT_LISTING = 'listing:%d:%s'
-CHILD_REDIS_LISTING = 'listing:%d:children'
-CHILD_REDIS_CT_LISTING = 'listing:%d:children:%s'
-ALL_REDIS_LISTING = 'listing:%d:all'
-ALL_REDIS_CT_LISTING = 'listing:%d:all:%s'
+REDIS_CAT_LISTING = 'listing:cat:%d'
+REDIS_CT_LISTING = 'listing:ct:%d'
 
 def get_redis_values(listing):
     v = '%d:%d:%d' % (
@@ -34,36 +31,10 @@ def get_redis_values(listing):
         listing.publishable_id,
         1 if listing.commercial else 0
     )
-    ct_id = listing.publishable.content_type_id
-
-    keys = []
-
-    cat = listing.category
-    keys.append(REDIS_LISTING % (cat.id))
-    keys.append(REDIS_CT_LISTING % (cat.id, ct_id))
-
-    keys.append(CHILD_REDIS_LISTING % (cat.id))
-    keys.append(CHILD_REDIS_CT_LISTING % (cat.id, ct_id))
-
-    keys.append(ALL_REDIS_LISTING % (cat.id))
-    keys.append(ALL_REDIS_CT_LISTING % (cat.id, ct_id))
-
-    if cat.tree_parent_id:
-        cat = cat.get_tree_parent()
-        keys.append(CHILD_REDIS_LISTING % (cat.id))
-        keys.append(CHILD_REDIS_CT_LISTING % (cat.id, ct_id))
-
-        keys.append(ALL_REDIS_LISTING % (cat.id))
-        keys.append(ALL_REDIS_CT_LISTING % (cat.id, ct_id))
-
-    while cat.tree_parent_id:
-        cat = cat.get_tree_parent()
-        keys.append(ALL_REDIS_LISTING % (cat.id))
-        keys.append(ALL_REDIS_CT_LISTING % (cat.id, ct_id))
-
-    return v, keys
-
-
+    return v, (
+        REDIS_CAT_LISTING % (listing.category_id),
+        REDIS_CT_LISTING % (listing.publishable.content_type_id)
+    )
 
 def listing_post_delete(sender, instance, **kwargs):
     pipe = client.pipeline()
@@ -92,37 +63,65 @@ def listing_post_save(sender, instance, **kwargs):
         pipe = pipe.zadd(k, v, score)
     pipe.execute()
 
-def get_listing(Listing, category, children, count, offset, content_types, date_range, now):
-    if content_types:
-        ct_id = content_types[0].pk
-        if children == Listing.objects.IMMEDIATE:
-            key = CHILD_REDIS_CT_LISTING % (category.pk, ct_id)
-        elif children == Listing.objects.ALL:
-            key = ALL_REDIS_CT_LISTING % (category.pk, ct_id)
-        else:
-            key = REDIS_CT_LISTING % (category.pk, ct_id)
-    elif children == Listing.objects.IMMEDIATE:
-        key = CHILD_REDIS_LISTING % category.pk
-    elif children == Listing.objects.ALL:
-        key = ALL_REDIS_LISTING % category.pk
-    else:
-        key = REDIS_LISTING % category.pk
 
+def get_listing(Listing, category, children, count, offset, content_types, date_range, now):
+    # store all the key sets we will want to ZUNIONSTORE
+    unions = []
+    if content_types:
+        # get the union of all content_type listings
+        ct_keys = [REDIS_CT_LISTING % ct.pk for ct in content_types]
+        unions.append(ct_keys)
+
+    # get the union of all category listings
+    # FIXME: cache the category hierarchy somewhere
+    cat_keys = [REDIS_CAT_LISTING % category.id]
+    if children == Listing.objects.IMMEDIATE:
+        cat_keys.extend(REDIS_CAT_LISTING % d['id'] for d in category.__class__.objects.filter(tree_parent=category).values('id'))
+    elif children == Listing.objects.ALL:
+        cat_keys.extend(REDIS_CAT_LISTING % d['id'] for d in category.__class__.objects.filter(tree_path__startswith=category.tree_path + '/').values('id'))
+    unions.append(cat_keys)
+
+    # do all the unions if required and output a list of keys to intersect
+    inter_keys = []
+    pipe = client.pipeline()
+    for union_keys in unions:
+        if len(union_keys) > 1:
+            result_key = 'listings:zus:' + md5(','.join(union_keys)).hexdigest()
+            pipe = pipe.zunionstore(result_key, union_keys)
+            inter_keys.append(result_key)
+        else:
+            inter_keys.append(union_keys[0])
+
+    # do the intersect if required and output a single key
+    if len(inter_keys) > 1:
+        key = 'listings:zis:' + md5(','.join(inter_keys)).hexdigest()
+        pipe = pipe.zinterstore(key, inter_keys)
+    else:
+        key = inter_keys[0]
+
+    # get the score range based on the date range
     if date_range:
         max_score = time.mktime(min(date_range[1], now).timetule())
+        min_score = repr(date_range[0].timetuple())
     else:
         max_score = time.mktime(now.timetuple())
+        min_score = 0
 
-    ids = client.zrevrangebyscore(key, repr(max_score), 0, start=offset, num=count, withscores=True)
+    # get all the relevant records
+    pipe = pipe.zrevrangebyscore(key,
+        repr(max_score), min_score,
+        start=offset, num=count,
+        withscores=True, score_cast_func=lambda s: datetime.fromtimestamp(float(s))
+    )
+    results = pipe.execute()
 
-    ids = map(lambda (s, ts): s.split(':') + [ts], ids)
-
+    # get the data from redis into proper format
+    ids = map(lambda (s, ts): s.split(':') + [ts], results[-1])
+    # and retrieve publishables from cache
     publishables = get_cached_objects([(ct_id, pk) for (ct_id, pk, commercial, ts) in ids])
 
+    # create mock Listing objects to return
     out = []
     for p, (ct_id, pk, commercial, tstamp) in zip(publishables, ids):
-        publish_from = datetime.fromtimestamp(tstamp)
-        if date_range and publish_from < date_range[0]:
-            break
-        out.append(Listing(publishable=p, commercial=commercial, publish_from=publish_from))
+        out.append(Listing(publishable=p, commercial=commercial, publish_from=tstamp))
     return out

@@ -70,36 +70,20 @@ class TestRedisListings(TestCase):
         list_all_publishables_in_category_by_hour(self)
         ct_id = self.publishables[0].content_type_id
         tools.assert_equals(set([
-                'listing:1',
-                'listing:2',
-                'listing:3',
-                'listing:1:%d' % ct_id,
-                'listing:2:%d' % ct_id,
-                'listing:3:%d' % ct_id,
-
-                'listing:1:all',
-                'listing:2:all',
-                'listing:3:all',
-                'listing:1:all:%d' % ct_id,
-                'listing:2:all:%d' % ct_id,
-                'listing:3:all:%d' % ct_id,
-
-                'listing:1:children',
-                'listing:2:children',
-                'listing:3:children',
-                'listing:1:children:%d' % ct_id,
-                'listing:2:children:%d' % ct_id,
-                'listing:3:children:%d' % ct_id,
+                'listing:cat:1',
+                'listing:cat:2',
+                'listing:cat:3',
+                'listing:ct:%d' % ct_id,
             ]),
             set(self.redis.keys())
         )
-        tools.assert_equals(['17:1:0', '17:2:0', '17:3:0'], self.redis.zrange('listing:1:all:%d' % ct_id, 0, 100))
-        tools.assert_equals(['17:3:0'], self.redis.zrange('listing:3', 0, 100))
+        tools.assert_equals(['17:3:0'], self.redis.zrange('listing:cat:3', 0, 100))
+        tools.assert_equals(['17:1:0', '17:2:0', '17:3:0'], self.redis.zrange('listing:ct:%d' % ct_id, 0, 100))
 
     def test_get_listing_uses_data_from_redis(self):
         t1, t2 = time.time()-90, time.time()-100
-        self.redis.zadd('listing:2:children', '17:1:0', repr(t1))
-        self.redis.zadd('listing:2:children', '17:3:0', repr(t2))
+        self.redis.zadd('listing:cat:3', '17:1:0', repr(t1))
+        self.redis.zadd('listing:cat:2', '17:3:0', repr(t2))
         dt1, dt2 = datetime.fromtimestamp(t1), datetime.fromtimestamp(t2)
 
         l = Listing.objects.get_listing(category=self.category_nested, children=Listing.objects.IMMEDIATE)
