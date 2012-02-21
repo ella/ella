@@ -18,20 +18,20 @@ from nose import tools, SkipTest
 # Django 1.3 has a bug with Dummy cache where set_many doesn't accept timeout, "fix" it
 utils.cache.__class__.set_many = lambda *a, **kw: None
 
-class TestCacheInvalidation(TestCase):
+class CacheTestCase(TestCase):
     def setUp(self):
-        self.ct = ContentType.objects.get_for_model(ContentType)
-
         self.old_cache = utils.cache
         self.cache = get_cache('locmem://')
         utils.cache = self.cache
-        super(TestCacheInvalidation, self).setUp()
+        super(CacheTestCase, self).setUp()
 
     def tearDown(self):
-        super(TestCacheInvalidation, self).tearDown()
+        super(CacheTestCase, self).tearDown()
         utils.cache = self.old_cache
 
+class TestCacheInvalidation(CacheTestCase):
     def test_save_invalidates_object(self):
+        self.ct = ContentType.objects.get_for_model(ContentType)
         ct = utils.get_cached_object(self.ct, pk=self.ct.pk)
 
         tools.assert_equals(ct, self.ct)
