@@ -153,7 +153,7 @@ class ListingManager(models.Manager):
         limit = offset + count
 
         if redis.client and not kwargs and len(content_types) <= 1:
-            return redis.get_listing(self.model, category, children, count, offset, content_types, date_range)
+            return redis.get_listing(category, children, count, offset, content_types, date_range)
 
         qset = self.get_listing_queryset(category, children, content_types, date_range, **kwargs)
 

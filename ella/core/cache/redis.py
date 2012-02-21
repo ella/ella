@@ -6,6 +6,7 @@ from datetime import datetime
 from hashlib import md5
 
 from django.conf import settings
+from django.db.models.loading import get_model
 
 from ella.core.cache.utils import get_cached_objects
 
@@ -64,7 +65,8 @@ def listing_post_save(sender, instance, **kwargs):
     pipe.execute()
 
 
-def get_listing(Listing, category, children, count, offset, content_types, date_range):
+def get_listing(category, children, count, offset, content_types, date_range):
+    Listing = get_model('core', 'listing')
     # store all the key sets we will want to ZUNIONSTORE
     unions = []
     if content_types:
