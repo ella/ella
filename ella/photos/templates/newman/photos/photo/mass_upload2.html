@@ -1,0 +1,122 @@
+{% extends "newman/change_form.html" %}
+{% load newman_modify cache i18n %}
+
+{% block content %}
+
+<div class="mass-upload2-wrapper">
+
+    <fieldset class="module aligned js-common-image-fields mass-upload2-content-starter">
+        <legend>{% trans "Images metadata" %}</legend>
+    </fieldset>
+
+    <fieldset class="mass-upload2 module aligned">
+        <legend>{% trans "Images" %}</legend>
+        <form action="{% url newman:photo-mass-upload-file %}" enctype="multipart/form-data" method="post" class="js-mass-file-upload change-form">
+            <span class="fileinput">
+                <a class="btn icn add">{% trans "choose photos" %}</a>
+                <input type="file" multiple="multiple" name="image_file" class="" />
+            </span>
+
+            <div class="submit-row">
+                <a class="icn btn add js-upload-to-gallery" name="_save">{% trans "Upload to new gallery" %}</a>
+                <a class="icn btn save def default-button-ok js-start-upload" name="_save">{% trans "Upload photos" %}</a>
+            </div>
+
+            {% csrf_token %}
+        </form>
+
+        <ul class="photos js-photos-container"> </ul>
+    </fieldset>
+
+</div>
+
+{% block fieldsets %}
+<ul style="display: none">
+    <li class="template row">
+        <div class="Img C C1"></div>
+        <div class="C C2">
+            {% for fieldset in mass_upload2_form %}
+                {% include "newman/includes/microfieldset.html" %}
+            {% endfor %}
+        </div>
+        <div class="C C3 Del">
+            <a class="btn icn cancel">{% trans "delete" %}</a>
+        </div>
+        <input type="hidden" name="file-id" class="file-id" />
+    </li>
+</ul>
+{% endblock %}
+
+<style type="text/css">
+    .template { display: none; }
+    .photos {
+        margin: 2px;
+        overflow: hidden;
+    }
+    .photos .row {
+        overflow: hidden;
+        margin: 10px 0;
+        padding: 10px;
+        background-color: #F5F5F5;
+        border: 2px solid #E5E5E5;
+        float: left;
+        clear: both;
+    }
+    .photos .C {
+        float: left;
+    }
+    .photos .C1 {
+        width: 220px;
+    }
+    .photos .C2 {
+        padding-top: 3px;
+    }
+    .photos .Del a.icn.btn {
+        display: block;
+    }
+    .rich_text_area.small {
+        height: 1.3em;
+        width: 300px;
+    }
+    .mass-upload2 .fileinput {
+        overflow: hidden;
+        position: relative;
+        display: inline-block;
+    }
+    .mass-upload2 .fileinput a {
+        display: inline-block;
+    }
+    .mass-upload2 .fileinput input {
+        position: absolute;
+        top: 0;
+        left: 0;
+        border: solid transparent;
+        border-width: 0 0 100px 200px;
+        opacity: 0;
+        filter: alpha(opacity=0);
+        -moz-transform: translate(-300px, 0) scale(4);
+    }
+    .mass-upload2-wrapper {
+        margin-left: 5px;
+    }
+    .mass-upload2-wrapper fieldset {
+        margin-top: 10px;
+    }
+    .mass-upload2-wrapper fieldset legend {
+        font-size: 120%;
+        font-weight: bold;
+    }
+</style>
+
+{% endblock %}
+
+{% block content_js %}
+<script type="text/javascript">
+    request_media(MEDIA_URL + 'css/generic.suggest.css');
+    request_media(MEDIA_URL + 'js/generic.suggest.js');
+    request_media(MEDIA_URL + 'jquery/jquery.iframe-transport.js');
+    request_media(MEDIA_URL + 'js/jquery.fileupload.js');
+    request_media(MEDIA_URL + 'js/load-image.js');
+    request_media(MEDIA_URL + 'js/mass-upload.js');
+</script>
+{% endblock %}
