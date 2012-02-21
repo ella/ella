@@ -1341,7 +1341,6 @@ PostsaveActionTable.prototype = {
     }
 };
 
-
 // submit line (save, save as new, etc)
 function save_change_form_success(text_data) {
     var options = this;
@@ -1375,14 +1374,15 @@ function save_change_form_success(text_data) {
         var action_table = new PostsaveActionTable({
             object_id: object_id,
             object_title: object_title,
-            options: options
+            options: options,
+            response_data: data
         });
 
         // load form-specific post-save actions
         var $meta = $form.find('.js-form-metadata');
         var post_save_callback = $meta.find('input[name=post_save]').data('callback');
         var post_save = {};
-        if (post_save_callback) post_save = post_save_callback($form);
+        if (post_save_callback) post_save = post_save_callback.call(action_table, $form);
         for (var act in post_save) {
             action_table[ act ] = post_save[ act ];
         }
@@ -2149,6 +2149,66 @@ var changelist_main_category_filter = null;
     $(document).bind( 'changelist_shown', register_filters_show_click );
 })(jQuery);
 // end of Main category filter widget
+
+
+// address stack
+NewmanLib.adr_stack_default_push_callback = function(evt) {
+    if (evt.button != 0) return;
+    evt.preventDefault();   // FIXME: remove
+    
+    var onsave_callback, onreturn_callback;
+    if ($(this).is('.js-custom-adrstack-callbacks')) {
+        // Define no callbacks
+    }
+    else {
+        onsave_callback   = NewmanLib.adr_stack_default_onsave_callback;
+        onreturn_callback = NewmanLib.adr_stack_default_onreturn_callback;
+    }
+    
+    NewmanLib.ADR_STACK.push( {
+        from: evt.referer || get_hashadr(''),
+        to: get_hashadr($(this).attr('href')),
+        selection_callback: $(Kobayashi.closest_loaded(this).container).data('selection_callback'),
+        form_data: JSON.stringify({ data: $('.change-form').serializeArray() }),
+        onsave: onsave_callback,
+        onreturn: onreturn_callback
+    } );
+    
+    // FIXME: remove block (.js-hashadr or another class should take care of this)
+    if (adr( $(this).attr('href'), {just_get: 'hash'} ) == location.hash) {
+        Kobayashi.reload_content(Kobayashi.DEFAULT_TARGET);
+    }
+    else {
+        adr( $(this).attr('href'), {evt: evt} );
+    }
+}
+$('.js-adrstack-push').live('click', NewmanLib.adr_stack_default_push_callback);
+
+NewmanLib.adr_stack_default_onsave_callback = function(popped, action_table) {
+    if (!action_table.vars.object_id) {
+        log_lookup.log('Did not get ID of newly added object -- not selecting added object');
+    }
+    else {
+        popped.oid = action_table.vars.object_id;
+        popped.str = action_table.vars.object_title;
+    }
+};
+NewmanLib.adr_stack_default_onreturn_callback = function(popped, action_table) {
+    $(document).one('content_added', function(evt) {
+        NewmanLib.restore_form(popped.form_data, $('.change-form'), {});
+    });
+    if (popped.oid) {
+        $(document).one('media_loaded', function() {
+            popped.selection_callback(popped.oid,{str: popped.str});
+        });
+    }
+};
+
+NewmanLib.pop_adrstack = function(opt) {
+    if (!opt) opt = {};
+    return new PostsaveActionTable(opt).run('_save');
+};
+// end of address stack
 
 
 // EOF

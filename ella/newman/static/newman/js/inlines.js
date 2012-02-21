@@ -37,6 +37,7 @@ var __NewmanInline = function() {
 
     this.register_form_handler = function (handler_object) {
         this.registered_handler_objects.push(handler_object);
+        this.registered_handler_objects[handler_object.name] = handler_object;
     };
 
     this.run_form_handlers = function () {
@@ -53,7 +54,7 @@ var __NewmanInline = function() {
             try {
                 handler.handle_form(document, $doc);
             } catch (e) {
-                log_inline.log('Error occured during handle_form() call.', e.toString());
+                log_inline.log('Error occured during handle_form() call.', e);
             }
             var form = $('.change-form');
             form.bind( 
@@ -655,6 +656,7 @@ var __GalleryFormHandler = function () {
     };
 
     this.is_suitable = function (document_dom_element, $document) {
+                                                                  // FIXME: selector stinks of typo
         var sortables = $document.find('.gallery-items-sortable').not('ui-sortable');
         if (sortables.length == 0) {
             return false;
@@ -694,7 +696,6 @@ var __GalleryFormHandler = function () {
     this.preset_load_completed = function (evt) {
         // and get their thumbnails
         var me = this;
-        log_inline.log('THIS:', this);
         function each_callback() {
             me.update_gallery_item_thumbnail($(this));
         }
@@ -705,6 +706,23 @@ var __GalleryFormHandler = function () {
         this.remove_gallery_item_ids();
         this.gallery_recount_ordering( $('.gallery-items-sortable') );
         log_inline.log('Preset load completed for ', this.name);
+    };
+
+    this.restore_gallery_items = function(data, $form) {
+        if (!$form) $form = $(document);
+        var inputs_container_selector = '.gallery-items-sortable';
+        var last_input_selector = ':input.target_id:last';
+        
+        var $input = $form.find(inputs_container_selector + ' ' + last_input_selector);
+        if ($input.length == 0) {
+            log_inline.log('No gallery item input found; not restoring gallery items');
+            return;
+        }
+        for (var i = 0; i < data.length; i++) {
+            $input.val(data[i]);
+            $input.change();
+            $input = $input.closest(inputs_container_selector).find(last_input_selector);
+        }
     };
 
     return this;
