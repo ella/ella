@@ -56,7 +56,7 @@ class CachedGenericForeignKey(GenericForeignKey):
             if ct_id:
                 ct = self.get_content_type(id=ct_id)
                 try:
-                    rel_obj = get_cached_object(ct, pk = getattr(instance, self.fk_field))
+                    rel_obj = get_cached_object(ct, pk=getattr(instance, self.fk_field))
                 except ObjectDoesNotExist:
                     pass
             setattr(instance, self.cache_attr, rel_obj)
