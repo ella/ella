@@ -69,6 +69,9 @@ class Publishable(models.Model):
     # generic JSON field to store app cpecific data
     app_data = JSONField(default='{}', blank=True, editable=False)
 
+    # has the content_published signal been sent for this instance?
+    announced = models.BooleanField(help_text='Publish signal sent', default=False, editable=False)
+
     class Meta:
         app_label = 'core'
         verbose_name = _('Publishable object')
@@ -146,11 +149,14 @@ class Publishable(models.Model):
             if old_self.is_published() != self.is_published():
                 if self.is_published():
                     send_signal = content_published
+                    self.announced = True
                 else:
                     send_signal = content_unpublished
+                    self.announced = False
         # published, send the proper signal
         elif self.is_published():
             send_signal = content_published
+            self.announced = True
 
         super(Publishable, self).save(**kwargs)
 
