@@ -1,0 +1,18 @@
+"""
+If celery is installed, register our maintenance commands as periodic tasks to
+avoid the requirement for external crond.
+"""
+
+try:
+    import celery
+except ImportError:
+    # celery not installed
+    pass
+else:
+    from datetime import timedelta
+
+    from celery.task import periodic_task
+
+    from ella.core.management import generate_publish_signals
+
+    periodic_task(run_every=timedelta(hours=1))(generate_publish_signals)
