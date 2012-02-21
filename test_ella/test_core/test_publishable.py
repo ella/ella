@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.test import TestCase
 from django.contrib.sites.models import Site
 from django.contrib.redirects.models import Redirect
 
 from ella.core.models import Category
+from ella.core import signals
+from ella.core.management import generate_publish_signals
 
 from nose import tools
 
@@ -104,4 +106,68 @@ class TestUrl(TestCase):
         self.publishable.save()
 
         tools.assert_equals(u'http://not-example.com/2008/1/10/articles/first-article/', self.publishable.get_absolute_url())
+
+class TestSignals(TestCase):
+    def setUp(self):
+        super(TestSignals, self).setUp()
+        signals.content_published.connect(self.publish)
+        signals.content_unpublished.connect(self.unpublish)
+        self._signal_clear()
+        create_basic_categories(self)
+        create_and_place_a_publishable(self)
+
+    def tearDown(self):
+        super(TestSignals, self).tearDown()
+        signals.content_published.disconnect(self.publish)
+        signals.content_unpublished.disconnect(self.unpublish)
+
+    def _signal_clear(self):
+        self.publish_received = []
+        self.unpublish_received = []
+
+    # signal handlers
+    def publish(self, **kwargs):
+        self.publish_received.append(kwargs)
+
+    def unpublish(self, **kwargs):
+        self.unpublish_received.append(kwargs)
+
+    def test_publishable_is_announced_on_save(self):
+        tools.assert_true(self.publishable.announced)
+        tools.assert_equals(1, len(self.publish_received))
+        tools.assert_equals(0, len(self.unpublish_received))
+        tools.assert_equals(self.publishable, self.publish_received[0]['publishable'])
+
+    def test_unpublish_sent_when_takedown_occurs(self):
+        self._signal_clear()
+        self.publishable.published = False
+        self.publishable.save()
+        tools.assert_false(self.publishable.announced)
+        tools.assert_equals(0, len(self.publish_received))
+        tools.assert_equals(1, len(self.unpublish_received))
+        tools.assert_equals(self.publishable, self.unpublish_received[0]['publishable'])
+
+    def test_generate_doesnt_issue_signal_tice(self):
+        self._signal_clear()
+        generate_publish_signals()
+        tools.assert_equals(0, len(self.publish_received))
+        tools.assert_equals(0, len(self.unpublish_received))
+
+    def test_generate_picks_up_on_takedown(self):
+        self.publishable.publish_to = datetime.now() + timedelta(days=1)
+        self.publishable.save()
+        self._signal_clear()
+        generate_publish_signals(datetime.now() + timedelta(days=1, seconds=2))
+        tools.assert_equals(0, len(self.publish_received))
+        tools.assert_equals(1, len(self.unpublish_received))
+        tools.assert_equals(self.publishable, self.unpublish_received[0]['publishable'].target)
+
+    def test_generate_picks_up_on_publish(self):
+        self.publishable.publish_from = datetime.now() + timedelta(days=1)
+        self.publishable.save()
+        self._signal_clear()
+        generate_publish_signals(datetime.now() + timedelta(days=1, seconds=2))
+        tools.assert_equals(1, len(self.publish_received))
+        tools.assert_equals(0, len(self.unpublish_received))
+        tools.assert_equals(self.publishable, self.publish_received[0]['publishable'].target)
 
