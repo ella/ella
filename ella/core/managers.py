@@ -4,6 +4,7 @@ from django.db import models
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.importlib import import_module
 from django.utils.encoding import smart_str
+from django.db.models.loading import get_model
 
 from ella.core.cache import cache_this, redis
 from ella.core.conf import core_settings
@@ -69,7 +70,7 @@ class RelatedManager(models.Manager):
         return self.collect_related(finder_funcs, obj, count, mods, only_from_same_site)
 
 
-def get_listings_key(self, category=None, count=10, offset=1, content_types=[], date_range=(), **kwargs):
+def get_listings_key(self, category=None, count=10, offset=0, content_types=[], date_range=(), **kwargs):
     c = category and  category.id or ''
 
     return 'core.get_listing:%s:%d:%d:%s:%s:%s' % (
@@ -130,7 +131,7 @@ class ListingManager(models.Manager):
         return qset.exclude(publish_to__lt=now).order_by('-publish_from')
 
     @cache_this(get_listings_key)
-    def get_listing(self, category=None, children=NONE, count=10, offset=1, content_types=[], date_range=(), **kwargs):
+    def get_listing(self, category=None, children=NONE, count=10, offset=0, content_types=[], date_range=(), **kwargs):
         """
         Get top objects for given category and potentionally also its child categories.
 
@@ -142,14 +143,12 @@ class ListingManager(models.Manager):
             date_range - range for listing's publish_from field
             **kwargs - rest of the parameter are passed to the queryset unchanged
         """
-        assert offset > 0, "Offset must be a positive integer"
+        assert offset >= 0, "Offset must be a positive integer"
         assert count >= 0, "Count must be a positive integer"
 
         if not count:
             return []
 
-        # templates are 1-based, compensate
-        offset -= 1
         limit = offset + count
 
         if redis.client and not kwargs and len(content_types) <= 1:
@@ -179,25 +178,49 @@ class ListingManager(models.Manager):
 
         return out
 
-    def get_queryset_wrapper(self, kwargs):
-        return ListingQuerySetWrapper(self, kwargs)
+    def get_queryset_wrapper(self, category, children=NONE, content_types=[], date_range=()):
+        return ListingQuerySetWrapper(
+            category, children, content_types, date_range
+        )
 
-class ListingQuerySetWrapper(object):
-    def __init__(self, manager, kwargs):
-        self.manager = manager
-        self._kwargs = kwargs
+
+class ListingHandler(object):
+    def __init__(self, category, children=None, content_types=[], date_range=()):
+        self.category = category
+        self.children = children
+        self.content_types = content_types
+        self.date_range = date_range
 
     def __getitem__(self, k):
         if not isinstance(k, slice) or (k.start is None or k.start < 0) or (k.stop is None  or k.stop < k.start):
             raise TypeError, '%s, %s' % (k.start, k.stop)
 
-        offset = k.start + 1
+        offset = k.start
         count = k.stop - k.start
 
-        return self.manager.get_listing(offset=offset, count=count, **self._kwargs)
+        return self.get_listings(offset, count)
+
+
+class ListingQuerySetWrapper(ListingHandler):
+    def get_listings(self, offset, count):
+        Listing = get_model('core', 'listing')
+        return Listing.objects.get_listing(
+                self.category,
+                children=self.children,
+                content_types=self.content_types,
+                date_range=self.date_range,
+                offset=offset,
+                count=count
+            )
 
     def count(self):
         if not hasattr(self, '_count'):
-            self._count = self.manager.get_listing_queryset(**self._kwargs).count()
+            Listing = get_model('core', 'listing')
+            self._count = Listing.objects.get_listing_queryset(
+                self.category,
+                children=self.children,
+                content_types=self.content_types,
+                date_range=self.date_range,
+            ).count()
         return self._count
 

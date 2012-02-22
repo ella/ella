@@ -297,7 +297,7 @@ class ListContentType(EllaCoreView):
         else:
             ct = False
 
-        qset = Listing.objects.get_queryset_wrapper(kwa)
+        qset = Listing.objects.get_queryset_wrapper(**kwa)
         paginator = Paginator(qset, paginate_by)
 
         if page_no > paginator.num_pages or page_no < 1:
