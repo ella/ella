@@ -37,40 +37,46 @@ class RelatedManager(models.Manager):
 
         return collected
 
+    def _get_finders(self, finder):
+        if not hasattr(self, '_finders'):
+            self._finders = {}
+            for key, finders_modstr in core_settings.RELATED_FINDERS.items():
+                # accept non-iterables too (single member named finders) 
+                if not hasattr(finders_modstr, '__iter__'):
+                    finders_modstr = (finders_modstr,)
+
+                # gather all functions before actual use to prevent import errors
+                # during the real process
+                finder_funcs = []
+                for finder_modstr in finders_modstr:
+                    finder_funcs.append(_import_module_member(finder_modstr, 'related finder'))
+
+                self._finders[key] = finder_funcs
+
+        if finder is None:
+            finder = 'default'
+
+        if not finder in self._finders:
+            raise ImproperlyConfigured('Named finder %r specified but cannot be '
+                'found in RELATED_FINDERS settings.' % finder)
+        return self._finders[finder]
+
     def get_related_for_object(self, obj, count, finder=None, mods=[], only_from_same_site=True):
         """
         Returns at most ``count`` publishable objects related to ``obj`` using
         named related finder ``finder``.
-        
+
         If only specific type of publishable is prefered, use ``mods`` attribute
         to list required classes.
-        
+
         Finally, use ``only_from_same_site`` if you don't want cross-site
         content.
-        
+
         ``finder`` atribute uses ``RELATED_FINDERS`` settings to find out
         what finder function to use. If none is specified, ``default``
         is used to perform the query.
         """
-        if finder is None:
-            finder = 'default'
-
-        if not core_settings.RELATED_FINDERS.has_key(finder):
-            raise ImproperlyConfigured('Named finder %r specified but cannot be '
-                'found in RELATED_FINDERS settings.' % finder)
-
-        # accept non-iterables too (single member named finders) 
-        finders_modstr = core_settings.RELATED_FINDERS[finder]
-        if not hasattr(finders_modstr, '__iter__'):
-            finders_modstr = (finders_modstr,)
-
-        # gather all functions before actual use to prevent import errors
-        # during the real process
-        finder_funcs = []
-        for finder_modstr in finders_modstr:
-            finder_funcs.append(_import_module_member(finder_modstr, 'related finder'))
-
-        return self.collect_related(finder_funcs, obj, count, mods, only_from_same_site)
+        return self.collect_related(self._get_finders(finder), obj, count, mods, only_from_same_site)
 
 
 def get_listings_key(self, category=None, count=10, offset=0, content_types=[], date_range=(), **kwargs):
