@@ -1,7 +1,16 @@
 from datetime import datetime
 
-from ella.core.models import Publishable
+from django.db.models.signals import pre_save, post_save, post_delete
+from django.dispatch import receiver
+
+from ella.core.models import Publishable, Listing
 from ella.core.signals import content_published, content_unpublished
+from ella.core.cache import redis
+
+if redis.client:
+    receiver(pre_save, sender=Listing)(redis.listing_pre_save)
+    receiver(post_save, sender=Listing)(redis.listing_post_save)
+    receiver(post_delete, sender=Listing)(redis.listing_post_delete)
 
 def generate_publish_signals(now=None):
     if now is None:
