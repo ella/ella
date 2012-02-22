@@ -96,9 +96,9 @@ class TestRedisListings(TestCase):
         self.redis.zadd('listing:cat:2', '17:3:0', repr(t2))
         dt1, dt2 = datetime.fromtimestamp(t1), datetime.fromtimestamp(t2)
 
-        l = Listing.objects.get_listing(category=self.category_nested, children=Listing.objects.IMMEDIATE)
-        tools.assert_equals(2, len(l))
-        l1, l2 = l
+        lh = Listing.objects.get_queryset_wrapper(category=self.category_nested, children=Listing.objects.IMMEDIATE, source='redis')
+        tools.assert_equals(2, lh.count())
+        l1, l2 = lh.get_listings(0, 10)
 
         tools.assert_equals(l1.publishable, self.publishables[0])
         tools.assert_equals(l2.publishable, self.publishables[2])
