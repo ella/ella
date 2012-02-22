@@ -4,6 +4,7 @@ from datetime import datetime
 from django.core.cache import get_cache
 from django.conf import settings
 from django.test import TestCase
+from django.contrib.sites.models import Site
 from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import pre_save, post_save, post_delete
 
@@ -28,6 +29,15 @@ class CacheTestCase(TestCase):
     def tearDown(self):
         super(CacheTestCase, self).tearDown()
         utils.cache = self.old_cache
+
+class TestCacheUtils(CacheTestCase):
+    def test_get_many_objects(self):
+        ct_ct = ContentType.objects.get_for_model(ContentType)
+        site_ct = ContentType.objects.get_for_model(Site)
+
+        objs = utils.get_cached_objects([(ct_ct.id, ct_ct.id), (ct_ct.id, site_ct.id), (site_ct.id, 1)])
+
+        tools.assert_equals([ct_ct, site_ct, Site.objects.get(pk=1)], objs)
 
 class TestCacheInvalidation(CacheTestCase):
     def test_save_invalidates_object(self):

@@ -88,13 +88,26 @@ def get_cached_objects(pks, model=None, timeout=CACHE_TIMEOUT):
 
     cached = cache.get_many(keys)
 
+    # keys not in cache
     keys_to_set = set(keys) - set(cached.keys())
     if keys_to_set:
+        # build lookup to get model and pks from the key
         lookup = dict(zip(keys, pks))
-        to_set = {}
+
+        to_get = {}
+        # group lookups by CT so we can do in_bulk
         for k in keys_to_set:
             ct, pk = lookup[k]
-            to_set[k] = cached[k] = ct.get_object_for_this_type(pk=pk)
+            to_get.setdefault(ct, {})[int(pk)] = k
+
+        to_set = {}
+        # retrieve all the models from DB
+        for ct, vals in to_get.items():
+            models = ct.model_class()._default_manager.in_bulk(vals.keys())
+            for pk, m in models.items():
+                k = vals[pk]
+                cached[k] = to_set[k] = m
+        # write them into cache
         cache.set_many(to_set, timeout=timeout)
 
     return [cached[k] for k in keys]
