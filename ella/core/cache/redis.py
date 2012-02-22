@@ -75,7 +75,7 @@ class RedisListingHandler(ListingHandler):
         results = pipe.execute()
         return results[-1]
 
-    def get_listings(self, offset, count):
+    def get_listings(self, offset=0, count=10):
         Listing = get_model('core', 'listing')
         key, pipe = self._get_key()
 

@@ -31,13 +31,17 @@ class ListingNode(template.Node):
         if 'category' in params and isinstance(params['category'], basestring):
             params['category'] = get_cached_object(Category, tree_path=self.resolved_parameters['category'], site__id=settings.SITE_ID)
 
+        limits = {}
         if 'offset' in params:
             # templates are 1-based, compensate
-            params['offset'] -= 1
+            limits['offset'] = params.pop('offset') - 1
 
-        out = Listing.objects.get_listing(**params)
+        if 'count' in params:
+            limits['count'] = params.pop('count')
 
-        context[self.var_name] = out
+        lh = Listing.objects.get_queryset_wrapper(**params)
+
+        context[self.var_name] = lh.get_listings(**limits)
         return ''
 
 @register.tag
@@ -47,7 +51,7 @@ def listing(parser, token):
 
     Usage::
 
-        {% listing <limit>[ from <offset>][of <app.model>[, <app.model>[, ...]]][ for <category> ] [with children|descendents] as <result> %}
+        {% listing <limit>[ from <offset>][of <app.model>[, <app.model>[, ...]]][ for <category> ] [with children|descendents] [using listing_handler] as <result> %}
 
     Parameters:
         ==================================  ================================================
@@ -62,6 +66,7 @@ def listing(parser, token):
                                             or variable containing a Category object.
         ``children``                        Include items from direct subcategories.
         ``descendents``                     Include items from all descend subcategories.
+        ``using``                           Name of Listing Handler ro use
         ``result``                          Store the resulting list in context under given
                                             name.
         ==================================  ================================================
@@ -121,6 +126,11 @@ def listing_parse(input):
         else:
             raise template.TemplateSyntaxError, "%r tag's argument 'with' required specification (with children|with descendents)" % input[0]
         o = o + 1
+
+    # using (isting handlers)
+    if input[o] == 'using':
+        params['source'] = template.Variable(input[o + 1])
+        o = o + 2
 
     # as
     if input[o] == 'as':

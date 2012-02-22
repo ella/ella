@@ -222,7 +222,7 @@ class ListingHandler(object):
 
 
 class ModelListingHandler(ListingHandler):
-    def get_listings(self, offset, count):
+    def get_listings(self, offset=0, count=10):
         Listing = get_model('core', 'listing')
         return Listing.objects.get_listing(
                 self.category,
