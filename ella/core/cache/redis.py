@@ -69,6 +69,8 @@ def listing_post_save(sender, instance, **kwargs):
 class RedisListingHandler(ListingHandler):
     def count(self):
         key, pipe = self._get_key()
+        if pipe is None:
+            pipe = client.pipeline()
         pipe = pipe.zcard(key)
         results = pipe.execute()
         return results[-1]
@@ -86,6 +88,8 @@ class RedisListingHandler(ListingHandler):
             min_score = 0
 
         # get all the relevant records
+        if pipe is None:
+            pipe = client.pipeline()
         pipe = pipe.zrevrangebyscore(key,
             repr(max_score), repr(min_score),
             start=offset, num=count,
@@ -104,10 +108,19 @@ class RedisListingHandler(ListingHandler):
             out.append(Listing(publishable=p, commercial=commercial, publish_from=tstamp))
         return out
 
-    def _get_key(self):
-        # do everything in one pipeline
-        pipe = client.pipeline()
+    def _union(self, unions, pipe):
+        inter_keys = []
+        for union_keys in unions:
+            if len(union_keys) > 1:
+                result_key = 'listings:zus:' + md5(','.join(union_keys)).hexdigest()
+                pipe.zunionstore(result_key, union_keys)
+                inter_keys.append(result_key)
+            else:
+                inter_keys.append(union_keys[0])
+        return inter_keys
 
+    def _get_key(self):
+        pipe = None
         if not hasattr(self, '_key'):
             Listing = get_model('core', 'listing')
             # store all the key sets we will want to ZUNIONSTORE
@@ -126,20 +139,16 @@ class RedisListingHandler(ListingHandler):
                 cat_keys.extend(REDIS_CAT_LISTING % d['id'] for d in self.category.__class__.objects.filter(tree_path__startswith=self.category.tree_path + '/').values('id'))
             unions.append(cat_keys)
 
+            # do everything in one pipeline
+            pipe = client.pipeline()
+
             # do all the unions if required and output a list of keys to intersect
-            inter_keys = []
-            for union_keys in unions:
-                if len(union_keys) > 1:
-                    result_key = 'listings:zus:' + md5(','.join(union_keys)).hexdigest()
-                    pipe = pipe.zunionstore(result_key, union_keys)
-                    inter_keys.append(result_key)
-                else:
-                    inter_keys.append(union_keys[0])
+            inter_keys = self._union(unions, pipe)
 
             # do the intersect if required and output a single key
             if len(inter_keys) > 1:
                 key = 'listings:zis:' + md5(','.join(inter_keys)).hexdigest()
-                pipe = pipe.zinterstore(key, inter_keys)
+                pipe.zinterstore(key, inter_keys)
             else:
                 key = inter_keys[0]
 
