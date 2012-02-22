@@ -35,7 +35,7 @@ log_lookup = new LoggingLib('RELATED LOOKUP:', true);
             if ($(inp).closest('body').length == 0) inp = document.getElementById(inp.id);
             
             GenericSuggestLib.insert_value(id, str, inp);
-            delete input;
+            delete input;   // FIXME: stinks of typo
         });
         return false;
     });

@@ -22,6 +22,7 @@ function install_box_editor() {
     }
 
     $('<div id="rich-box" title="Box"></div>').hide().appendTo('body');
+
     $('#rich-box').load(BASE_URL+'nm/editor-box/', function(){
         $('#id_box_obj_ct').bind('change', function(){
             if(getTypeFromPath($('#id_box_obj_ct').val()) == 'photos.photo'){
@@ -89,6 +90,13 @@ function install_box_editor() {
         autoOpen: false,
         width: 420,
         height: 360
+    });
+
+    // make the box go away when new content is loaded
+    $( '#' + Kobayashi.DEFAULT_TARGET ).bind('content_added', function(evt, data) {
+        if (data.target_id === $(this).prop('id')) {
+            $('#rich-box').dialog('close');
+        }
     });
 }
 

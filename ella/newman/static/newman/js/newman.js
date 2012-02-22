@@ -2165,13 +2165,29 @@ NewmanLib.adr_stack_default_push_callback = function(evt) {
         onreturn_callback = NewmanLib.adr_stack_default_onreturn_callback;
     }
     
+    var came_from_rich_editor = (function() {
+        var initial_input_id = $('#overlay-content').data('input_id');
+        var $initial_input = $( '#' + initial_input_id );
+        if ($initial_input.is('#rich-box *') && newman_textarea_focused) {
+            return {
+                // newman_textarea_focused comes from fuckitup
+                textarea_id: newman_textarea_focused.attr('id'),
+                // need to know this to insert the box into the textarea on return
+                content_type: $('#id_box_obj_ct').val(),
+                box_type:     $('#id_box_type'  ).val()
+            };
+        }
+        else return false;
+    })();
+    
     NewmanLib.ADR_STACK.push( {
         from: evt.referer || get_hashadr(''),
         to: get_hashadr($(this).attr('href')),
         selection_callback: $(Kobayashi.closest_loaded(this).container).data('selection_callback'),
         form_data: JSON.stringify({ data: $('.change-form').serializeArray() }),
         onsave: onsave_callback,
-        onreturn: onreturn_callback
+        onreturn: onreturn_callback,
+        invoked_from_rich_textarea: came_from_rich_editor
     } );
     
     // FIXME: remove block (.js-hashadr or another class should take care of this)
@@ -2199,7 +2215,39 @@ NewmanLib.adr_stack_default_onreturn_callback = function(popped, action_table) {
     });
     if (popped.oid) {
         $(document).one('media_loaded', function() {
+            
             popped.selection_callback(popped.oid,{str: popped.str});
+            
+            // .rich_text_area (like article's perex) can insert boxes
+            // in case we're coming with a new object that's to be inserted
+            // into a rich textarea as a box, do insert it, focus and fetch preview
+            if (popped.invoked_from_rich_textarea) {
+                var $rta = $( '#' + popped.invoked_from_rich_textarea.textarea_id );
+                if ($rta.length == 1) {
+                    
+                    var ct = AVAILABLE_CONTENT_TYPES[
+                        popped.invoked_from_rich_textarea.content_type
+                    ]
+                    .path
+                    .split('/')
+                    .slice(1,3)
+                    .join('.');
+                    
+                    $rta.val(
+                        $rta.val()
+                        + '{% box '
+                        + popped.invoked_from_rich_textarea.box_type
+                        + ' for '
+                        + ct
+                        + ' with pk '
+                        + popped.oid
+                        + ' %}{% endbox %}'
+                    );
+                    
+                    $rta.focus();
+                    $('.markItUpButton.preview').click();
+                }
+            }
         });
     }
 };
