@@ -32,6 +32,10 @@ RELATED_FINDERS = {
     )
 }
 
+LISTING_HANDLERS = {
+    'default': 'ella.core.managers.ModelListingHandler',
+}
+
 # Category settings
 CATEGORY_TEMPLATES = (
     ('category.html', gettext('default (category.html)')),

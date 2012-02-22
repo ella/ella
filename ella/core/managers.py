@@ -6,8 +6,20 @@ from django.utils.importlib import import_module
 from django.utils.encoding import smart_str
 from django.db.models.loading import get_model
 
-from ella.core.cache import cache_this, redis
+from ella.core.cache import cache_this
 from ella.core.conf import core_settings
+
+def _import_module_member(modstr, noun):
+    module, attr = modstr.rsplit('.', 1)
+    try:
+        mod = import_module(module)
+    except ImportError, e:
+        raise ImproperlyConfigured('Error importing %s %s: "%s"' % (noun, modstr, e))
+    try:
+        member = getattr(mod, attr)
+    except AttributeError, e:
+        raise ImproperlyConfigured('Error importing %s %s: "%s"' % (noun, modstr, e))
+    return member
 
 class RelatedManager(models.Manager):
     def collect_related(self, finder_funcs, obj, count, *args, **kwargs):
@@ -56,16 +68,7 @@ class RelatedManager(models.Manager):
         # during the real process
         finder_funcs = []
         for finder_modstr in finders_modstr:
-            module, attr = finder_modstr.rsplit('.', 1)
-            try:
-                mod = import_module(module)
-            except ImportError, e:
-                raise ImproperlyConfigured('Error importing related finder %s: "%s"' % (finder_modstr, e))
-            try:
-                finder_func = getattr(mod, attr)
-            except AttributeError, e:
-                raise ImproperlyConfigured('Error importing related finder %s: "%s"' % (finder_modstr, e))
-            finder_funcs.append(finder_func)
+            finder_funcs.append(_import_module_member(finder_modstr, 'related finder'))
 
         return self.collect_related(finder_funcs, obj, count, mods, only_from_same_site)
 
@@ -151,9 +154,6 @@ class ListingManager(models.Manager):
 
         limit = offset + count
 
-        if redis.client and not kwargs and len(content_types) <= 1:
-            return redis.get_listing(category, children, count, offset, content_types, date_range)
-
         qset = self.get_listing_queryset(category, children, content_types, date_range, **kwargs)
 
         # direct listings, we don't need to check for duplicates
@@ -178,8 +178,22 @@ class ListingManager(models.Manager):
 
         return out
 
-    def get_queryset_wrapper(self, category, children=NONE, content_types=[], date_range=()):
-        return ListingQuerySetWrapper(
+    def _get_listing_handler(self, source):
+        if not hasattr(self, '_listing_handlers'):
+            self._listing_handlers = {}
+            for k, v in core_settings.LISTING_HANDLERS.items():
+                self._listing_handlers[k] = _import_module_member(v, 'Listing Handler')
+
+            if 'default' not in self._listing_handlers:
+                raise ImproperlyConfigured('You didn\'t specify any default Listing Handler.')
+
+        if source in self._listing_handlers:
+            return self._listing_handlers[source]
+        return self._listing_handlers['default']
+
+    def get_queryset_wrapper(self, category, children=NONE, content_types=[], date_range=(), source='default'):
+        ListingHandler = self._get_listing_handler(source)
+        return ListingHandler(
             category, children, content_types, date_range
         )
 
@@ -201,7 +215,7 @@ class ListingHandler(object):
         return self.get_listings(offset, count)
 
 
-class ListingQuerySetWrapper(ListingHandler):
+class ModelListingHandler(ListingHandler):
     def get_listings(self, offset, count):
         Listing = get_model('core', 'listing')
         return Listing.objects.get_listing(
