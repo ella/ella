@@ -297,6 +297,9 @@ class ListContentType(EllaCoreView):
         else:
             ct = False
 
+        if 'using' in request.GET:
+            kwa['source'] = request.GET['using']
+
         qset = Listing.objects.get_queryset_wrapper(**kwa)
         paginator = Paginator(qset, paginate_by)
 

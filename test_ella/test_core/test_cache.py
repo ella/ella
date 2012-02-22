@@ -4,12 +4,14 @@ from datetime import datetime
 from django.core.cache import get_cache
 from django.conf import settings
 from django.test import TestCase
+from django.test.client import RequestFactory
 from django.contrib.sites.models import Site
 from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import pre_save, post_save, post_delete
 
 from ella.core.cache import utils, redis
 from ella.core.models import Listing
+from ella.core.views import ListContentType
 
 from test_ella.test_core import create_basic_categories, \
         create_and_place_more_publishables, list_all_publishables_in_category_by_hour
@@ -105,3 +107,21 @@ class TestRedisListings(TestCase):
         tools.assert_equals(l1.publish_from, dt1)
         tools.assert_equals(l2.publish_from, dt2)
 
+    def test_redis_listing_handler_used_from_view_when_requested(self):
+        t1, t2 = time.time()-90, time.time()-100
+        self.redis.zadd('listing:cat:3', '17:1:0', repr(t1))
+        self.redis.zadd('listing:cat:2', '17:3:0', repr(t2))
+        dt1, dt2 = datetime.fromtimestamp(t1), datetime.fromtimestamp(t2)
+
+        rf = RequestFactory()
+        request = rf.get(self.category_nested.get_absolute_url(), {'using': 'redis'})
+        lct = ListContentType()
+
+        context = lct.get_context(request, self.category_nested.tree_path)
+        tools.assert_equals(2, len(context['listings']))
+        l1, l2 = context['listings']
+
+        tools.assert_equals(l1.publishable, self.publishables[0])
+        tools.assert_equals(l2.publishable, self.publishables[2])
+        tools.assert_equals(l1.publish_from, dt1)
+        tools.assert_equals(l2.publish_from, dt2)
