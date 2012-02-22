@@ -88,49 +88,44 @@ class TestListingTagParser(UnitTestCase):
         super(TestListingTagParser, self).setUp()
 
     def test_minimal_args(self):
-        var_name, parameters, parameters_to_resolve = listing_parse(['listing', '1', 'as', 'var'])
+        var_name, parameters = listing_parse(['listing', '1', 'as', 'var'])
         tools.assert_equals('var', var_name)
-        tools.assert_equals({'count': '1'}, parameters)
-        tools.assert_equals(['count'], parameters_to_resolve)
+        tools.assert_equals(1, parameters['count'].literal)
 
     def test_offset(self):
-        var_name, parameters, parameters_to_resolve = listing_parse(['listing', '1', 'from', '10', 'as', 'var'])
-        tools.assert_true('offset' in parameters_to_resolve)
-        tools.assert_equals('10', parameters['offset'])
+        var_name, parameters = listing_parse(['listing', '1', 'from', '10', 'as', 'var'])
+        tools.assert_equals(10, parameters['offset'].literal)
 
     def test_limit_by_model(self):
-        var_name, parameters, parameters_to_resolve = listing_parse(['listing', '1', 'of', 'articles.article', 'as', 'var'])
+        var_name, parameters = listing_parse(['listing', '1', 'of', 'articles.article', 'as', 'var'])
         tools.assert_equals('var', var_name)
-        tools.assert_equals('1', parameters['count'])
+        tools.assert_equals(1, parameters['count'].literal)
         tools.assert_equals([self.act], parameters['content_types'])
 
     def test_limit_bu_more_models(self):
-        var_name, parameters, parameters_to_resolve = listing_parse(['listing', '1', 'of', 'articles.article,photos.photo', 'as', 'var'])
+        var_name, parameters = listing_parse(['listing', '1', 'of', 'articles.article,photos.photo', 'as', 'var'])
         tools.assert_equals([self.act, self.pct], parameters['content_types'])
 
     def test_limit_bu_more_models_space(self):
-        var_name, parameters, parameters_to_resolve = listing_parse(['listing', '1', 'of', 'articles.article,', 'photos.photo', 'as', 'var'])
+        var_name, parameters = listing_parse(['listing', '1', 'of', 'articles.article,', 'photos.photo', 'as', 'var'])
         tools.assert_equals([self.act, self.pct], parameters['content_types'])
 
     def test_limit_bu_more_models_space_around_comma(self):
-        var_name, parameters, parameters_to_resolve = listing_parse(['listing', '1', 'of', 'articles.article', ',', 'photos.photo', 'as', 'var'])
+        var_name, parameters = listing_parse(['listing', '1', 'of', 'articles.article', ',', 'photos.photo', 'as', 'var'])
         tools.assert_equals([self.act, self.pct], parameters['content_types'])
 
     def test_limit_by_category(self):
-        var_name, parameters, parameters_to_resolve = listing_parse(['listing', '1', 'for', 'category', 'as', 'var'])
-        tools.assert_equals('category', parameters['category'])
-        tools.assert_equals(['count', 'category'], parameters_to_resolve)
+        var_name, parameters = listing_parse(['listing', '1', 'for', 'category', 'as', 'var'])
+        tools.assert_equals('category', parameters['category'].var)
 
     def test_limit_by_category_with_descendents(self):
-        var_name, parameters, parameters_to_resolve = listing_parse(['listing', '1', 'for', 'category', 'with', 'descendents', 'as', 'var'])
-        tools.assert_equals('category', parameters['category'])
-        tools.assert_equals(['count', 'category'], parameters_to_resolve)
+        var_name, parameters = listing_parse(['listing', '1', 'for', 'category', 'with', 'descendents', 'as', 'var'])
+        tools.assert_equals('category', parameters['category'].var)
         tools.assert_equals(Listing.objects.ALL, parameters['children'])
 
     def test_limit_by_category_with_children(self):
-        var_name, parameters, parameters_to_resolve = listing_parse(['listing', '1', 'for', 'category', 'with', 'children', 'as', 'var'])
-        tools.assert_equals('category', parameters['category'])
-        tools.assert_equals(['count', 'category'], parameters_to_resolve)
+        var_name, parameters = listing_parse(['listing', '1', 'for', 'category', 'with', 'children', 'as', 'var'])
+        tools.assert_equals('category', parameters['category'].var)
         tools.assert_equals(Listing.objects.IMMEDIATE, parameters['children'])
 
 class TestBoxTag(UnitTestCase):

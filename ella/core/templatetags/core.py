@@ -17,27 +17,25 @@ log = logging.getLogger('ella.core.templatetags')
 register = template.Library()
 
 class ListingNode(template.Node):
-    def __init__(self, var_name, parameters, parameters_to_resolve):
+    def __init__(self, var_name, parameters):
         self.var_name = var_name
         self.parameters = parameters
-        self.parameters_to_resolve = parameters_to_resolve
-        self.resolved_parameters = self.parameters.copy()
-
-    def resolve_parameter(self, key, context):
-        value = self.parameters[key]
-        if key == 'count':
-            if type(value) in (str, unicode) and value.isdigit():
-                return int(value)
-        return template.Variable(value).resolve(context)
 
     def render(self, context):
-        for key in self.parameters_to_resolve:
-            #self.parameters[key] = template.Variable(self.parameters[key]).resolve(context)
-            self.resolved_parameters[key] = self.resolve_parameter(key, context)
-        if self.resolved_parameters.has_key('category') and \
-            isinstance(self.resolved_parameters['category'], basestring):
-            self.resolved_parameters['category'] = get_cached_object(Category, tree_path=self.resolved_parameters['category'], site__id=settings.SITE_ID)
-        out = Listing.objects.get_listing(**self.resolved_parameters)
+        params = {}
+        for key, value in self.parameters.items():
+            if isinstance(value, template.Variable):
+                value = value.resolve(context)
+            params[key] = value
+
+        if 'category' in params and isinstance(params['category'], basestring):
+            params['category'] = get_cached_object(Category, tree_path=self.resolved_parameters['category'], site__id=settings.SITE_ID)
+
+        if 'offset' in params:
+            # templates are 1-based, compensate
+            params['offset'] -= 1
+
+        out = Listing.objects.get_listing(**params)
 
         context[self.var_name] = out
         return ''
@@ -78,23 +76,20 @@ def listing(parser, token):
         {% listing 10 of articles.article, photos.photo as obj_list %}
 
     """
-    var_name, parameters, parameters_to_resolve = listing_parse(token.split_contents())
-    return ListingNode(var_name, parameters, parameters_to_resolve)
+    var_name, parameters = listing_parse(token.split_contents())
+    return ListingNode(var_name, parameters)
 
 def listing_parse(input):
     params = {}
-    params_to_resolve = []
     if len(input) < 4:
         raise template.TemplateSyntaxError, "%r tag argument should have at least 4 arguments" % input[0]
     o = 1
     # limit
-    params['count'] = input[o]
-    params_to_resolve.append('count')
+    params['count'] = template.Variable(input[o])
     o = 2
     # offset
     if input[o] == 'from':
-        params['offset'] = input[o + 1]
-        params_to_resolve.append('offset')
+        params['offset'] = template.Variable(input[o + 1])
         o = o + 2
     # from - models definition
     if input[o] == 'of':
@@ -114,8 +109,7 @@ def listing_parse(input):
         o = mc
     # for - category definition
     if input[o] == 'for':
-        params['category'] = input[o + 1]
-        params_to_resolve.append('category')
+        params['category'] = template.Variable(input[o + 1])
         o = o + 2
     # with
     if input[o] == 'with':
@@ -134,7 +128,7 @@ def listing_parse(input):
     else:
         raise template.TemplateSyntaxError, "%r tag requires 'as' argument" % input[0]
 
-    return var_name, params, params_to_resolve
+    return var_name, params
 
 class EmptyNode(template.Node):
     def render(self, context):
