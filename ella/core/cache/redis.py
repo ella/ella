@@ -131,7 +131,6 @@ class RedisListingHandler(ListingHandler):
                 unions.append(ct_keys)
 
             # get the union of all category listings
-            # FIXME: cache the category hierarchy somewhere
             cat_keys = [REDIS_CAT_LISTING % self.category.id]
             if self.children == Listing.objects.IMMEDIATE:
                 cat_keys.extend(REDIS_CAT_LISTING % c.id for c in self.category.get_children())
