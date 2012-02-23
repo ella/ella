@@ -142,6 +142,12 @@ class Category(models.Model):
             return get_cached_object(Category, pk=self.tree_parent_id)
         return None
 
+    def get_children(self, recursive=False):
+        # TODO: proper caching
+        if recursive:
+            return list(self.__class__.objects.filter(tree_path__startswith=self.tree_path + '/'))
+        return list(self.__class__.objects.filter(tree_parent=self))
+
     @property
     def main_parent(self):
         """

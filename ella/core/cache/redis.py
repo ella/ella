@@ -134,9 +134,9 @@ class RedisListingHandler(ListingHandler):
             # FIXME: cache the category hierarchy somewhere
             cat_keys = [REDIS_CAT_LISTING % self.category.id]
             if self.children == Listing.objects.IMMEDIATE:
-                cat_keys.extend(REDIS_CAT_LISTING % d['id'] for d in self.category.__class__.objects.filter(tree_parent=self.category).values('id'))
+                cat_keys.extend(REDIS_CAT_LISTING % c.id for c in self.category.get_children())
             elif self.children == Listing.objects.ALL:
-                cat_keys.extend(REDIS_CAT_LISTING % d['id'] for d in self.category.__class__.objects.filter(tree_path__startswith=self.category.tree_path + '/').values('id'))
+                cat_keys.extend(REDIS_CAT_LISTING % c.id for c in self.category.get_children(True))
             unions.append(cat_keys)
 
             # do everything in one pipeline
