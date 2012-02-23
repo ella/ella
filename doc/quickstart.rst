@@ -167,7 +167,7 @@ DB backends. Example configuration for MySQL can look like this::
         'default': {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'ellablog',
-            'USER': 'root',
+            'USER': 'user',
             'PASSWORD': '',
             'HOST': '',
             'PORT': '',
