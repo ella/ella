@@ -6,37 +6,101 @@ from django.db import models
 
 class Migration(SchemaMigration):
     depends_on = (
-        ('core', '0002_initial_publishable'),
+        ('photos', '0001_initial'),
     )
 
     def forwards(self, orm):
-        db.delete_column('core_listing', 'priority_from')
-        db.delete_column('core_listing', 'priority_to')
-        db.delete_column('core_listing', 'priority_value')
+        # Adding model 'Publishable'
+        db.create_table('core_publishable', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('content_type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['contenttypes.ContentType'])),
+            ('category', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.Category'])),
+            ('title', self.gf('django.db.models.fields.CharField')(max_length=255)),
+            ('slug', self.gf('django.db.models.fields.SlugField')(max_length=255, db_index=True)),
+            ('source', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.Source'], null=True, blank=True)),
+            ('photo', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['photos.Photo'], null=True, blank=True)),
+            ('description', self.gf('django.db.models.fields.TextField')(blank=True)),
+            ('publish_from', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime(3000, 1, 1, 0, 0, 0, 2), db_index=True)),
+        ))
+        db.send_create_signal('core', ['Publishable'])
 
-        # Adding field 'Publishable.publish_to'
-        db.add_column('core_publishable', 'publish_to', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True), keep_default=False)
-        # Adding field 'Publishable.static'
-        db.add_column('core_publishable', 'static', self.gf('django.db.models.fields.BooleanField')(default=False), keep_default=False)
-        # Adding field 'Listing.publishable'
-        db.add_column('core_listing', 'publishable_id', models.IntegerField(null=True))
+        # Adding M2M table for field authors on 'Publishable'
+        db.create_table('core_publishable_authors', (
+            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
+            ('publishable', models.ForeignKey(orm['core.publishable'], null=False)),
+            ('author', models.ForeignKey(orm['core.author'], null=False))
+        ))
+        db.create_unique('core_publishable_authors', ['publishable_id', 'author_id'])
 
-        if not db.dry_run:
-            for pl in orm['core.Placement'].objects.all():
-                pl.listing_set.update(publishable=pl.publishable)
-                pl.publishable.publish_from = pl.publish_from
-                pl.publishable.static = pl.static
-                pl.publishable.publish_to = pl.publish_to
+        # Adding model 'Placement'
+        db.create_table('core_placement', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('publishable', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.Publishable'])),
+            ('category', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.Category'])),
+            ('publish_from', self.gf('django.db.models.fields.DateTimeField')()),
+            ('publish_to', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
+            ('slug', self.gf('django.db.models.fields.SlugField')(db_index=True, max_length=255, blank=True)),
+            ('static', self.gf('django.db.models.fields.BooleanField')(default=False)),
+        ))
+        db.send_create_signal('core', ['Placement'])
 
-        db.alter_column('core_listing', 'publishable_id', models.ForeignKey(orm['core.Publishable'], null=False))
+        # Adding unique constraint on 'Placement', fields ['publishable', 'category']
+        db.create_unique('core_placement', ['publishable_id', 'category_id'])
 
-        db.delete_column('core_listing', 'placement_id')
-        db.delete_table('core_placement')
-        db.delete_table('core_hitcount')
+        # Adding model 'Listing'
+        db.create_table('core_listing', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('placement', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.Placement'])),
+            ('category', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.Category'])),
+            ('publish_from', self.gf('django.db.models.fields.DateTimeField')(db_index=True)),
+            ('publish_to', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
+            ('priority_from', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
+            ('priority_to', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
+            ('priority_value', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
+            ('commercial', self.gf('django.db.models.fields.BooleanField')(default=False)),
+        ))
+        db.send_create_signal('core', ['Listing'])
+
+        # Adding model 'HitCount'
+        db.create_table('core_hitcount', (
+            ('placement', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.Placement'], primary_key=True)),
+            ('last_seen', self.gf('django.db.models.fields.DateTimeField')()),
+            ('hits', self.gf('django.db.models.fields.PositiveIntegerField')(default=1)),
+        ))
+        db.send_create_signal('core', ['HitCount'])
+
+        # Adding model 'Related'
+        db.create_table('core_related', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('publishable', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.Publishable'])),
+            ('related_ct', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['contenttypes.ContentType'])),
+            ('related_id', self.gf('django.db.models.fields.IntegerField')()),
+        ))
+        db.send_create_signal('core', ['Related'])
+
 
 
     def backwards(self, orm):
-        pass
+        # Removing unique constraint on 'Placement', fields ['publishable', 'category']
+        db.delete_unique('core_placement', ['publishable_id', 'category_id'])
+
+        # Deleting model 'Publishable'
+        db.delete_table('core_publishable')
+
+        # Removing M2M table for field authors on 'Publishable'
+        db.delete_table('core_publishable_authors')
+
+        # Deleting model 'Placement'
+        db.delete_table('core_placement')
+
+        # Deleting model 'Listing'
+        db.delete_table('core_listing')
+
+        # Deleting model 'HitCount'
+        db.delete_table('core_hitcount')
+
+        # Deleting model 'Related'
+        db.delete_table('core_related')
 
 
     models = {
@@ -116,6 +180,9 @@ class Migration(SchemaMigration):
             'commercial': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'placement': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['core.Placement']"}),
+            'priority_from': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
+            'priority_to': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
+            'priority_value': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
             'publish_from': ('django.db.models.fields.DateTimeField', [], {'db_index': 'True'}),
             'publish_to': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'})
         },
@@ -181,4 +248,5 @@ class Migration(SchemaMigration):
         }
     }
 
-    complete_apps = ['core', 'core']
+    complete_apps = ['core']
+
