@@ -40,7 +40,8 @@ def create_and_place_a_publishable(case):
         description=u'Some\nlonger\ntext',
         category=case.category_nested,
         publish_from=datetime(2008, 1, 10),
-        published=True
+        published=True,
+        content='Some even longer test. \n' * 5
     )
     case.only_publishable = Publishable.objects.get(pk=case.publishable.pk)
 
@@ -57,7 +58,8 @@ def create_and_place_more_publishables(case):
                 description=u'Some\nlonger\ntext',
                 category=c,
                 publish_from=datetime(2008, 1, 10),
-                published=True
+                published=True,
+                content='Some even longer test. \n' * 5
             )
         case.publishables.append(p)
 

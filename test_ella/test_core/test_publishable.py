@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from django.test import TestCase
 from django.contrib.sites.models import Site
 from django.contrib.redirects.models import Redirect
+from django.core.exceptions import ValidationError
 
 from ella.core.models import Category
 from ella.core import signals
@@ -106,6 +107,10 @@ class TestUrl(TestCase):
         self.publishable.save()
 
         tools.assert_equals(u'http://not-example.com/2008/1/10/articles/first-article/', self.publishable.get_absolute_url())
+
+    def test_unique_url_validation(self):
+        self.publishable.pk = None
+        tools.assert_raises(ValidationError, self.publishable.save)
 
 class TestSignals(TestCase):
     def setUp(self):

@@ -1,6 +1,5 @@
 from django.conf.urls.defaults import *
-from django.template.defaultfilters import slugify
-from django.utils.translation import ugettext as _
+from django.core.validators import slug_re
 from django.conf import settings
 
 from ella.core.views import object_detail, list_content_type, category_detail, home
@@ -27,7 +26,7 @@ feeds = {
 res = {
     'ct': r'(?P<content_type>[a-z][a-z0-9-]+)',
     'cat': r'(?P<category>[a-z][a-z0-9-/]+)',
-    'slug': r'(?P<slug>[a-z0-9-]+)',
+    'slug': r'(?P<slug>%s)' % slug_re.pattern.strip('^$'),
     'year': r'(?P<year>\d{4})',
     'month': r'(?P<month>\d{1,2})',
     'day': r'(?P<day>\d{1,2})',

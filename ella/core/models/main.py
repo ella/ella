@@ -6,6 +6,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from django.utils.safestring import mark_safe
 from django.contrib.auth.models import User
+from django.core.validators import validate_slug
+
 
 from jsonfield.fields import JSONField
 
@@ -27,7 +29,7 @@ class Author(models.Model):
     """
     user = models.ForeignKey(User, verbose_name=_('User'), blank=True, null=True)
     name = models.CharField(_('Name'), max_length=200, blank=True)
-    slug = models.SlugField(_('Slug'), max_length=255, unique=True)
+    slug = models.SlugField(_('Slug'), max_length=255, unique=True, validators=[validate_slug])
     description = models.TextField(_('Description'), blank=True)
     text = models.TextField(_('Text'), blank=True)
     email = models.EmailField(_('Email'), blank=True)
@@ -36,6 +38,10 @@ class Author(models.Model):
         app_label = 'core'
         verbose_name = _('Author')
         verbose_name_plural = _('Authors')
+
+    def save(self, **kwargs):
+        self.full_clean()
+        super(Author, self).save(**kwargs)
 
     def __unicode__(self):
         return self.name
@@ -92,7 +98,7 @@ class Category(models.Model):
     template = models.CharField(_('Template'), max_length=100, help_text=_(
         'Template to use to render detail page of this category.'),
         choices=template_choices, default=template_choices[0][0])
-    slug = models.SlugField(_('Slug'), max_length=255)
+    slug = models.SlugField(_('Slug'), max_length=255, validators=[validate_slug])
     tree_parent = models.ForeignKey('self', null=True, blank=True,
         verbose_name=_("Parent category"))
     tree_path = models.CharField(verbose_name=_("Path from root category"),
@@ -123,6 +129,7 @@ class Category(models.Model):
                 self.tree_path = self.slug
         else:
             self.tree_path = ''
+        self.full_clean()
         super(Category, self).save(**kwargs)
         if old_tree_path != self.tree_path:
             # the tree_path has changed, update children

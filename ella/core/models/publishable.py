@@ -9,6 +9,8 @@ from django.contrib.sites.models import Site
 from django.template.defaultfilters import slugify
 from django.core.urlresolvers import reverse
 from django.contrib.redirects.models import Redirect
+from django.core.validators import validate_slug
+from django.core.exceptions import ValidationError
 
 from jsonfield.fields import JSONField
 
@@ -45,7 +47,7 @@ class Publishable(models.Model):
 
     # Titles
     title = models.CharField(_('Title'), max_length=255)
-    slug = models.SlugField(_('Slug'), max_length=255)
+    slug = models.SlugField(_('Slug'), max_length=255, validators=[validate_slug])
 
     # Authors and Sources
     authors = models.ManyToManyField(Author, verbose_name=_('Authors'))
@@ -125,6 +127,24 @@ class Publishable(models.Model):
     get_domain_url_admin_tag.short_description = _('URL')
     get_domain_url_admin_tag.allow_tags = True
 
+    def clean(self):
+        if self.static:
+            return
+
+        qset = self.__class__.objects.filter(
+                category=self.category,
+                publish_from__day=self.publish_from.day,
+                publish_from__month=self.publish_from.month,
+                publish_from__year=self.publish_from.year,
+                slug = self.slug
+            )
+
+        if self.pk:
+            qset = qset.exclude(pk=self.pk)
+
+        if qset:
+            raise ValidationError(_('Another %s already published at this URL.') % self._meta.verbose_name)
+
     def save(self, **kwargs):
         self.content_type = ContentType.objects.get_for_model(self)
         send_signal = None
@@ -153,11 +173,13 @@ class Publishable(models.Model):
                 else:
                     send_signal = content_unpublished
                     self.announced = False
+            #TODO: shift Listing in case publish_(to|from) changes
         # published, send the proper signal
         elif self.is_published():
             send_signal = content_published
             self.announced = True
 
+        self.full_clean()
         super(Publishable, self).save(**kwargs)
 
         if send_signal:
@@ -213,6 +235,18 @@ class Listing(models.Model):
             return _(u'%s listed in %s') % (self.publishable, self.category)
         except:
             return _('Broken listing')
+
+    def clean(self):
+        if self.publish_from < self.publishable.publish_from:
+            raise ValidationError(_('A publishable cannot be listed before it\'s published.'))
+
+        if self.publishable.publish_to:
+            if not self.publish_to or self.publish_to > self.publishable.publish_to:
+                raise ValidationError(_('A publishable cannot be listed longer than it\'s published.'))
+
+    def save(self, **kwargs):
+        self.full_clean()
+        super(Listing, self).save(**kwargs)
 
     def get_absolute_url(self, domain=False):
         return self.publishable.get_absolute_url(domain)

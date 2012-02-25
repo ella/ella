@@ -60,3 +60,8 @@ DEFAULT_PAGE_ID = 1
 
 VERSION = 1
 
+
+CATEGORY_TEMPLATES = [
+    ('category.html', ''),
+    ('static_page.html', ''),
+]
