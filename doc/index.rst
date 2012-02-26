@@ -55,7 +55,7 @@ Contents:
     developer
     html_coder
     features
-    plugins
+    plugins/index
     reference
     common_gotchas
     settings

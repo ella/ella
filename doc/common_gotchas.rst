@@ -215,3 +215,5 @@ for that purpose. Then simply use something like this::
 
 Integrating searching
 *********************
+
+TODO: create ella-haystack and be done with it.
