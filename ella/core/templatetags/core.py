@@ -9,6 +9,7 @@ from django.template.defaultfilters import stringfilter
 from django.contrib.contenttypes.models import ContentType
 
 from ella.core.models import Listing, Category
+from ella.core.managers import ListingHandler
 from ella.core.cache.utils import get_cached_object
 from ella.core.box import Box
 
@@ -120,9 +121,9 @@ def listing_parse(input):
     if input[o] == 'with':
         o = o + 1
         if input[o] == 'children':
-            params['children'] = Listing.objects.IMMEDIATE
+            params['children'] = ListingHandler.IMMEDIATE
         elif input[o] == 'descendents':
-            params['children'] = Listing.objects.ALL
+            params['children'] = ListingHandler.ALL
         else:
             raise template.TemplateSyntaxError, "%r tag's argument 'with' required specification (with children|with descendents)" % input[0]
         o = o + 1

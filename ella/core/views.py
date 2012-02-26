@@ -15,6 +15,7 @@ from ella.core.cache import get_cached_object_or_404, cache_this
 from ella.core import custom_urls
 from ella.core.conf import core_settings
 from ella.core.cache.utils import get_cached_object
+from ella.core.managers import ListingHandler
 
 __docformat__ = "restructuredtext en"
 
@@ -289,7 +290,7 @@ class ListContentType(EllaCoreView):
 
         kwa['category'] = cat
         if category:
-            kwa['children'] = Listing.objects.ALL
+            kwa['children'] = ListingHandler.ALL
 
         if content_type:
             ct = get_content_type(content_type)

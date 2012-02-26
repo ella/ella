@@ -10,7 +10,8 @@ from django.contrib.sites.models import Site
 from django.contrib.contenttypes.models import ContentType
 
 from ella.core.templatetags.core import listing_parse, ListingNode, _parse_box, BoxNode, EmptyNode
-from ella.core.models import Listing, Category
+from ella.core.models import Category
+from ella.core.managers import ListingHandler
 from ella.articles.models import Article
 from ella.photos.models import Photo
 
@@ -121,12 +122,12 @@ class TestListingTagParser(UnitTestCase):
     def test_limit_by_category_with_descendents(self):
         var_name, parameters = listing_parse(['listing', '1', 'for', 'category', 'with', 'descendents', 'as', 'var'])
         tools.assert_equals('category', parameters['category'].var)
-        tools.assert_equals(Listing.objects.ALL, parameters['children'])
+        tools.assert_equals(ListingHandler.ALL, parameters['children'])
 
     def test_limit_by_category_with_children(self):
         var_name, parameters = listing_parse(['listing', '1', 'for', 'category', 'with', 'children', 'as', 'var'])
         tools.assert_equals('category', parameters['category'].var)
-        tools.assert_equals(Listing.objects.IMMEDIATE, parameters['children'])
+        tools.assert_equals(ListingHandler.IMMEDIATE, parameters['children'])
 
 class TestBoxTag(UnitTestCase):
 

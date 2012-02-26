@@ -6,6 +6,7 @@ from django.test import TestCase
 from nose import tools
 
 from ella.core.models import Listing, Category
+from ella.core.managers import ListingHandler
 
 from test_ella.test_core import create_basic_categories, create_and_place_a_publishable, \
         create_and_place_more_publishables, list_all_publishables_in_category_by_hour
@@ -32,7 +33,7 @@ class TestListing(TestCase):
         tools.assert_equals(0, len(l))
 
     def test_get_listing_with_immediate_children(self):
-        l = Listing.objects.get_listing(category=self.category, children=Listing.objects.IMMEDIATE)
+        l = Listing.objects.get_listing(category=self.category, children=ListingHandler.IMMEDIATE)
         expected = [listing for listing in self.listings if listing.category in (self.category, self.category_nested)]
         tools.assert_equals(expected, l)
 
@@ -46,7 +47,7 @@ class TestListing(TestCase):
                 l.publishable.save()
             else:
                 expected.append(l)
-        l = Listing.objects.get_listing(category=self.category, children=Listing.objects.IMMEDIATE)
+        l = Listing.objects.get_listing(category=self.category, children=ListingHandler.IMMEDIATE)
         tools.assert_equals(expected, l)
 
 
@@ -59,7 +60,7 @@ class TestListing(TestCase):
                 publish_from=datetime.now() - timedelta(days=2),
             )
         expected[0] = listing
-        l = Listing.objects.get_listing(category=self.category, children=Listing.objects.IMMEDIATE)
+        l = Listing.objects.get_listing(category=self.category, children=ListingHandler.IMMEDIATE)
         tools.assert_equals(expected, l)
 
     def test_get_listing_with_all_children_no_duplicates(self):
@@ -69,12 +70,12 @@ class TestListing(TestCase):
                 publish_from=datetime.now() - timedelta(days=2),
             )
 
-        l = Listing.objects.get_listing(category=self.category, children=Listing.objects.ALL)
+        l = Listing.objects.get_listing(category=self.category, children=ListingHandler.ALL)
         tools.assert_equals(len(self.listings), len(l))
         tools.assert_equals(listing, l[0])
 
     def test_get_listing_with_all_children(self):
-        l = Listing.objects.get_listing(category=self.category, children=Listing.objects.ALL)
+        l = Listing.objects.get_listing(category=self.category, children=ListingHandler.ALL)
         tools.assert_equals(self.listings, list(l))
 
     def test_inactive_istings_wont_show(self):
@@ -82,7 +83,7 @@ class TestListing(TestCase):
         l.publish_to = datetime.now() - timedelta(days=1)
         l.save()
 
-        l = Listing.objects.get_listing(category=self.category, children=Listing.objects.ALL)
+        l = Listing.objects.get_listing(category=self.category, children=ListingHandler.ALL)
 
         tools.assert_equals(self.listings[1:], l)
 

@@ -12,6 +12,7 @@ from django.db.models.signals import pre_save, post_save, post_delete
 from ella.core.cache import utils, redis
 from ella.core.models import Listing
 from ella.core.views import ListContentType
+from ella.core.managers import ListingHandler
 
 from test_ella.test_core import create_basic_categories, \
         create_and_place_more_publishables, list_all_publishables_in_category_by_hour
@@ -98,7 +99,7 @@ class TestRedisListings(TestCase):
         self.redis.zadd('listing:cat:2', '17:3:0', repr(t2))
         dt1, dt2 = datetime.fromtimestamp(t1), datetime.fromtimestamp(t2)
 
-        lh = Listing.objects.get_queryset_wrapper(category=self.category_nested, children=Listing.objects.IMMEDIATE, source='redis')
+        lh = Listing.objects.get_queryset_wrapper(category=self.category_nested, children=ListingHandler.IMMEDIATE, source='redis')
         tools.assert_equals(2, lh.count())
         l1, l2 = lh.get_listings(0, 10)
 

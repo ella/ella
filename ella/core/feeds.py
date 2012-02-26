@@ -8,6 +8,7 @@ from ella.core.models import Listing, Category
 from ella.core.views import get_content_type
 from ella.core.cache.utils import get_cached_object, get_cached_object_or_404
 from ella.core.conf import core_settings
+from ella.core.managers import ListingHandler
 from ella.photos.models import Format
 
 class RSSTopCategoryListings(Feed):
@@ -58,7 +59,7 @@ class RSSTopCategoryListings(Feed):
 
         # TODO: In ella based application children attr can be NONE, IMMEDIATE and ALL
         if kwa['category'].tree_parent != None:
-            kwa['children'] = Listing.objects.ALL
+            kwa['children'] = ListingHandler.ALL
 
         return Listing.objects.get_listing(count=core_settings.RSS_NUM_IN_FEED, **kwa)
 

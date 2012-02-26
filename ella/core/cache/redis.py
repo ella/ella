@@ -76,7 +76,6 @@ class RedisListingHandler(ListingHandler):
         return results[-1]
 
     def get_listings(self, offset=0, count=10):
-        Listing = get_model('core', 'listing')
         key, pipe = self._get_key()
 
         # get the score range based on the date range
@@ -104,6 +103,7 @@ class RedisListingHandler(ListingHandler):
 
         # create mock Listing objects to return
         out = []
+        Listing = get_model('core', 'listing')
         for p, (ct_id, pk, commercial, tstamp) in zip(publishables, ids):
             out.append(Listing(publishable=p, commercial=commercial, publish_from=tstamp))
         return out
@@ -122,7 +122,6 @@ class RedisListingHandler(ListingHandler):
     def _get_key(self):
         pipe = None
         if not hasattr(self, '_key'):
-            Listing = get_model('core', 'listing')
             # store all the key sets we will want to ZUNIONSTORE
             unions = []
             if self.content_types:
@@ -132,9 +131,9 @@ class RedisListingHandler(ListingHandler):
 
             # get the union of all category listings
             cat_keys = [REDIS_CAT_LISTING % self.category.id]
-            if self.children == Listing.objects.IMMEDIATE:
+            if self.children == ListingHandler.IMMEDIATE:
                 cat_keys.extend(REDIS_CAT_LISTING % c.id for c in self.category.get_children())
-            elif self.children == Listing.objects.ALL:
+            elif self.children == ListingHandler.ALL:
                 cat_keys.extend(REDIS_CAT_LISTING % c.id for c in self.category.get_children(True))
             unions.append(cat_keys)
 
