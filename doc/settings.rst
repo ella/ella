@@ -46,7 +46,7 @@ Core settings
 
 **RELATED_FINDERS**
     List of named related finders. For instructions how to use it, see
-    :ref:`features-related-finders`.
+    :ref:`features-related`.
     
     Default::
     

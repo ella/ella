@@ -542,7 +542,7 @@ You will be greeted into the site and not your root category next time you visit
 the root of your blog. Just create any subcategory to check it will remain
 unaffected.
 
-You can use the same simple mechanism (creating new templates) to cange the look
+You can use the same simple mechanism (creating new templates) to change the look
 of your boxes for individual objects as well.
 
 .. note::

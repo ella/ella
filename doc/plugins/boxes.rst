@@ -71,7 +71,7 @@ is, please refer to the `Docs`_). The name of the box also serves as name of
 the template to use. In our case, the name of the box is ``video_player`` so
 the template name is going to be ``video_player.html``. Boxes provide a
 template search fallback which we're not gonna discuss here to keep the thing
-simple. For further information, see :ref:`core-templatetags`. 
+simple. For further information, see :ref:`reference-templatetags`. 
 
 Our box is fairly simple. We are gonna use the code provided by YouTube and it
 will look like this:

@@ -95,6 +95,6 @@ To define a custom view, we will use the Ella's URL resolver again::
 
 This will result in calling our ``article_detail`` view instead of the default
 one. Custom detail views are called with same arguments as custom action views.
-For reference, see :ref:`plugins-custom-view-arguments`. For further information
-on Ella's ``ObjectDetailView``, see :ref:`core-views`.
+For reference, see the table with custom view arguments above. For further information
+on Ella's ``ObjectDetailView``, see :ref:`reference-views`.
 
