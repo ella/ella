@@ -1,38 +1,60 @@
 from django.db.models import ObjectDoesNotExist
 from django.db.models.fields.related import ForeignKey, ReverseSingleRelatedObjectDescriptor
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.generic import GenericForeignKey
+from django.contrib.sites.models import SITE_CACHE, Site
 
 from ella.core.cache.utils import get_cached_object
 
-class CachedForeignKey(ForeignKey):
-    def contribute_to_class(self, cls, name):
-        super(CachedForeignKey, self).contribute_to_class(cls, name)
-        setattr(cls, self.name, CachedReverseSingleRelatedObjectDescriptor(self))
+def generate_fk_class(name, retrieve_func, limit_to_model=None):
+    class CustomForeignKey(ForeignKey):
+        def __init__(self, *args, **kwargs):
+            if limit_to_model:
+                args = (limit_to_model, ) + args
+            super(CustomForeignKey, self).__init__(*args, **kwargs)
 
-class CachedReverseSingleRelatedObjectDescriptor(ReverseSingleRelatedObjectDescriptor):
-    def __get__(self, instance, instance_type=None):
-        if instance is None:
-            raise AttributeError, "%s must be accessed via instance" % self.field.name
-        cache_name = self.field.get_cache_name()
-        try:
-            return getattr(instance, cache_name)
-        except AttributeError:
-            val = getattr(instance, self.field.attname)
-            if val is None:
-                # If NULL is an allowed value, return it.
-                if self.field.null:
-                    return None
-                raise self.field.rel.to.DoesNotExist
-            rel_obj = get_cached_object(self.field.rel.to, pk=val)
-            setattr(instance, cache_name, rel_obj)
-            return rel_obj
+        def contribute_to_class(self, cls, name):
+            super(CustomForeignKey, self).contribute_to_class(cls, name)
+            setattr(cls, self.name, CachedReverseSingleRelatedObjectDescriptor(self))
 
-try:
-    from south.modelsinspector import add_introspection_rules
-    add_introspection_rules([], ["^ella\.core\.cache\.fields\.CachedForeignKey"])
-except ImportError:
-    pass
+    class CachedReverseSingleRelatedObjectDescriptor(ReverseSingleRelatedObjectDescriptor):
+        def __get__(self, instance, instance_type=None):
+            if instance is None:
+                raise AttributeError, "%s must be accessed via instance" % self.field.name
+            cache_name = self.field.get_cache_name()
+            try:
+                return getattr(instance, cache_name)
+            except AttributeError:
+                val = getattr(instance, self.field.attname)
+                if val is None:
+                    # If NULL is an allowed value, return it.
+                    if self.field.null:
+                        return None
+                    raise self.field.rel.to.DoesNotExist
+                rel_obj = retrieve_func(self.field.rel.to, val)
+                setattr(instance, cache_name, rel_obj)
+                return rel_obj
 
+    try:
+        from south.modelsinspector import add_introspection_rules
+        add_introspection_rules([], ["^ella\.core\.cache\.fields\.%s" % name])
+    except ImportError:
+        pass
+
+    CustomForeignKey.__name__ = name
+    return CustomForeignKey
+
+CachedForeignKey = generate_fk_class('CachedForeignKey', lambda m, pk: get_cached_object(m, pk=pk))
+
+def get_site(model, pk):
+    try:
+        return SITE_CACHE[pk]
+    except KeyError:
+        SITE_CACHE[pk] = get_cached_object(model, pk=pk)
+        return SITE_CACHE[pk]
+
+SiteForeignKey = generate_fk_class('SiteForeignKey', get_site, Site)
+ContentTypeForeignKey = generate_fk_class('ContentTypeForeignKey', lambda m, pk: m._default_manager.get_for_id(pk), ContentType)
 
 class CachedGenericForeignKey(GenericForeignKey):
     def __get__(self, instance, instance_type=None):

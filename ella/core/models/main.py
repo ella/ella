@@ -1,7 +1,5 @@
 from django.db import models
 from django.core.urlresolvers import reverse
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.sites.models import Site
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from django.utils.safestring import mark_safe
@@ -12,7 +10,7 @@ from django.core.validators import validate_slug
 from jsonfield.fields import JSONField
 
 from ella.core.box import Box
-from ella.core.cache import get_cached_object, CachedGenericForeignKey
+from ella.core.cache import get_cached_object, CachedGenericForeignKey, SiteForeignKey, ContentTypeForeignKey
 from ella.core.conf import core_settings
 
 
@@ -103,7 +101,7 @@ class Category(models.Model):
         verbose_name=_("Parent category"))
     tree_path = models.CharField(verbose_name=_("Path from root category"),
         max_length=255, editable=False)
-    site = models.ForeignKey(Site)
+    site = SiteForeignKey()
 
     # generic JSON field to store app cpecific data
     app_data = JSONField(_('Custom meta data'), default='{}', blank=True,
@@ -202,8 +200,7 @@ class Category(models.Model):
             url = reverse('category_detail', kwargs={'category' : self.tree_path})
         if self.site_id != settings.SITE_ID:
             # prepend the domain if it doesn't match current Site
-            site = get_cached_object(Site, pk=self.site_id)
-            return 'http://' + site.domain + url
+            return 'http://' + self.site.domain + url
         return url
 
     def draw_title(self):
@@ -235,11 +232,11 @@ class Dependency(models.Model):
     information which objects have been embedded in article content using
     **boxes** for example (these might be photos, galleries, ...).
     """
-    target_ct = models.ForeignKey(ContentType, related_name='dependency_for_set')
+    target_ct = ContentTypeForeignKey(related_name='dependency_for_set')
     target_id = models.IntegerField()
     target = CachedGenericForeignKey('target_ct', 'target_id')
 
-    dependent_ct = models.ForeignKey(ContentType, related_name='depends_on_set')
+    dependent_ct = ContentTypeForeignKey(related_name='depends_on_set')
     dependent_id = models.IntegerField()
     dependent = CachedGenericForeignKey('dependent_ct', 'dependent_id')
 

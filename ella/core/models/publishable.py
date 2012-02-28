@@ -5,7 +5,6 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.utils.safestring import mark_safe
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.sites.models import Site
 from django.template.defaultfilters import slugify
 from django.core.urlresolvers import reverse
 from django.contrib.redirects.models import Redirect
@@ -17,8 +16,8 @@ from jsonfield.fields import JSONField
 from ella.core.box import Box
 from ella.core.conf import core_settings
 from ella.core.signals import content_published, content_unpublished
-from ella.core.cache import get_cached_object, CachedGenericForeignKey, \
-    CachedForeignKey
+from ella.core.cache import CachedGenericForeignKey, \
+    CachedForeignKey, ContentTypeForeignKey
 from ella.core.managers import ListingManager, RelatedManager
 from ella.core.models.main import Category, Author, Source
 from ella.photos.models import Photo
@@ -40,7 +39,7 @@ class Publishable(models.Model):
     """
     box_class = staticmethod(PublishableBox)
 
-    content_type = models.ForeignKey(ContentType)
+    content_type = ContentTypeForeignKey()
     target = CachedGenericForeignKey('content_type', 'id')
 
     category = CachedForeignKey(Category, verbose_name=_('Category'))
@@ -111,8 +110,7 @@ class Publishable(models.Model):
                 url = reverse('home_object_detail', kwargs=kwargs)
 
         if category.site_id != settings.SITE_ID or domain:
-            site = get_cached_object(Site, pk=category.site_id)
-            return 'http://' + site.domain + url
+            return 'http://' + category.site.domain + url
         return url
 
 
@@ -271,7 +269,7 @@ class Related(models.Model):
     """
     publishable = models.ForeignKey(Publishable, verbose_name=_('Publishable'))
 
-    related_ct = models.ForeignKey(ContentType, verbose_name=_('Content type'))
+    related_ct = ContentTypeForeignKey(verbose_name=_('Content type'))
     related_id = models.IntegerField(_('Object ID'))
     related = CachedGenericForeignKey('related_ct', 'related_id')
 
