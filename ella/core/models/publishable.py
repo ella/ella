@@ -181,7 +181,6 @@ class Publishable(models.Model):
             send_signal = content_published
             self.announced = True
 
-        self.full_clean()
         super(Publishable, self).save(**kwargs)
 
         if send_signal:
@@ -248,10 +247,6 @@ class Listing(models.Model):
         if self.publishable.publish_to:
             if not self.publish_to or self.publish_to > self.publishable.publish_to:
                 raise ValidationError(_('A publishable cannot be listed longer than it\'s published.'))
-
-    def save(self, **kwargs):
-        self.full_clean()
-        super(Listing, self).save(**kwargs)
 
     def get_absolute_url(self, domain=False):
         return self.publishable.get_absolute_url(domain)

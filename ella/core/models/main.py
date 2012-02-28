@@ -37,10 +37,6 @@ class Author(models.Model):
         verbose_name = _('Author')
         verbose_name_plural = _('Authors')
 
-    def save(self, **kwargs):
-        self.full_clean()
-        super(Author, self).save(**kwargs)
-
     def __unicode__(self):
         return self.name
 
@@ -127,7 +123,6 @@ class Category(models.Model):
                 self.tree_path = self.slug
         else:
             self.tree_path = ''
-        self.full_clean()
         super(Category, self).save(**kwargs)
         if old_tree_path != self.tree_path:
             # the tree_path has changed, update children

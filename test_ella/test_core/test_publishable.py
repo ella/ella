@@ -110,7 +110,7 @@ class TestUrl(TestCase):
 
     def test_unique_url_validation(self):
         self.publishable.pk = None
-        tools.assert_raises(ValidationError, self.publishable.save)
+        tools.assert_raises(ValidationError, self.publishable.full_clean)
 
 class TestSignals(TestCase):
     def setUp(self):
