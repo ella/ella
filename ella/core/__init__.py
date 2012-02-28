@@ -3,3 +3,13 @@ trans_app_label = _('Core')
 
 # add some of our templatetags to builtins
 from ella.core import templatetags
+
+from ella.core.cache import redis
+
+if redis.client:
+    from django.db.models.signals import pre_save, post_save, post_delete
+    from django.dispatch import receiver
+    from ella.core.models import Listing
+    receiver(pre_save, sender=Listing)(redis.listing_pre_save)
+    receiver(post_save, sender=Listing)(redis.listing_post_save)
+    receiver(post_delete, sender=Listing)(redis.listing_post_delete)
