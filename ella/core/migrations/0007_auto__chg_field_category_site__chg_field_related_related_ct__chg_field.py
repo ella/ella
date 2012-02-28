@@ -7,21 +7,20 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        
         # Changing field 'Category.site'
-        db.alter_column('core_category', 'site_id', self.gf('ella.core.cache.fields.SiteForeignKey')(to=orm['sites.Site']))
+        db.alter_column('core_category', 'site_id', self.gf('ella.core.cache.fields.SiteForeignKey')())
 
         # Changing field 'Related.related_ct'
-        db.alter_column('core_related', 'related_ct_id', self.gf('ella.core.cache.fields.ContentTypeForeignKey')(to=orm['contenttypes.ContentType']))
+        db.alter_column('core_related', 'related_ct_id', self.gf('ella.core.cache.fields.ContentTypeForeignKey')())
 
         # Changing field 'Publishable.content_type'
-        db.alter_column('core_publishable', 'content_type_id', self.gf('ella.core.cache.fields.ContentTypeForeignKey')(to=orm['contenttypes.ContentType']))
+        db.alter_column('core_publishable', 'content_type_id', self.gf('ella.core.cache.fields.ContentTypeForeignKey')())
 
         # Changing field 'Dependency.dependent_ct'
-        db.alter_column('core_dependency', 'dependent_ct_id', self.gf('ella.core.cache.fields.ContentTypeForeignKey')(to=orm['contenttypes.ContentType']))
+        db.alter_column('core_dependency', 'dependent_ct_id', self.gf('ella.core.cache.fields.ContentTypeForeignKey')())
 
         # Changing field 'Dependency.target_ct'
-        db.alter_column('core_dependency', 'target_ct_id', self.gf('ella.core.cache.fields.ContentTypeForeignKey')(to=orm['contenttypes.ContentType']))
+        db.alter_column('core_dependency', 'target_ct_id', self.gf('ella.core.cache.fields.ContentTypeForeignKey')())
 
 
     def backwards(self, orm):
