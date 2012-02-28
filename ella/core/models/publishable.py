@@ -131,6 +131,10 @@ class Publishable(models.Model):
         if self.static:
             return
 
+        # fields are missing, validating uniqueness is pointless
+        if not self.category_id or not self.publish_from or not self.slug:
+            return
+
         qset = self.__class__.objects.filter(
                 category=self.category,
                 publish_from__day=self.publish_from.day,
@@ -237,7 +241,10 @@ class Listing(models.Model):
             return _('Broken listing')
 
     def clean(self):
-        if self.publish_from < self.publishable.publish_from:
+        if not self.publishable:
+            return
+
+        if self.publish_from and self.publish_from < self.publishable.publish_from:
             raise ValidationError(_('A publishable cannot be listed before it\'s published.'))
 
         if self.publishable.publish_to:
