@@ -94,7 +94,7 @@ class Migration(SchemaMigration):
             'content': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'site': ('ella.core.cache.fields.SiteForeignKey', [], {'to': "orm['sites.Site']"}),
+            'site': ('ella.core.cache.fields.SiteForeignKey', [], {}),
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '255', 'db_index': 'True'}),
             'template': ('django.db.models.fields.CharField', [], {'default': "'category.html'", 'max_length': '100'}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
@@ -103,10 +103,10 @@ class Migration(SchemaMigration):
         },
         'core.dependency': {
             'Meta': {'object_name': 'Dependency'},
-            'dependent_ct': ('ella.core.cache.fields.ContentTypeForeignKey', [], {'related_name': "'depends_on_set'", 'to': "orm['contenttypes.ContentType']"}),
+            'dependent_ct': ('ella.core.cache.fields.ContentTypeForeignKey', [], {'related_name': "'depends_on_set'"}),
             'dependent_id': ('django.db.models.fields.IntegerField', [], {}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'target_ct': ('ella.core.cache.fields.ContentTypeForeignKey', [], {'related_name': "'dependency_for_set'", 'to': "orm['contenttypes.ContentType']"}),
+            'target_ct': ('ella.core.cache.fields.ContentTypeForeignKey', [], {'related_name': "'dependency_for_set'"}),
             'target_id': ('django.db.models.fields.IntegerField', [], {})
         },
         'core.listing': {
@@ -124,7 +124,7 @@ class Migration(SchemaMigration):
             'app_data': ('jsonfield.fields.JSONField', [], {'default': "'{}'", 'blank': 'True'}),
             'authors': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['core.Author']", 'symmetrical': 'False'}),
             'category': ('ella.core.cache.fields.CachedForeignKey', [], {'to': "orm['core.Category']"}),
-            'content_type': ('ella.core.cache.fields.ContentTypeForeignKey', [], {'to': "orm['contenttypes.ContentType']"}),
+            'content_type': ('ella.core.cache.fields.ContentTypeForeignKey', [], {}),
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'photo': ('ella.core.cache.fields.CachedForeignKey', [], {'to': "orm['photos.Photo']", 'null': 'True', 'blank': 'True'}),
@@ -140,7 +140,7 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'Related'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'publishable': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['core.Publishable']"}),
-            'related_ct': ('ella.core.cache.fields.ContentTypeForeignKey', [], {'to': "orm['contenttypes.ContentType']"}),
+            'related_ct': ('ella.core.cache.fields.ContentTypeForeignKey', [], {}),
             'related_id': ('django.db.models.fields.IntegerField', [], {})
         },
         'core.source': {
