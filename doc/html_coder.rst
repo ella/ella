@@ -34,7 +34,7 @@ to consume as much as possible from these topics:
 
 If all those topics make sense, you will probably feel at home when going 
 to :ref:`common-gotchas` section, which will hopefully give you last remaining
-pieces of the puzzle. If still having questions, please contact us a give us the
+pieces of the puzzle. If still having questions, please contact us and give us the
 very welcomed feedback what is **missing in the docs**!
 
 .. _Django templates: https://docs.djangoproject.com/en/dev/topics/templates/

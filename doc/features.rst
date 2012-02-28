@@ -395,7 +395,7 @@ Object detail URL
 =================
 
 The URL of ``Publishable`` object detail depends on publication type. As we 
-already mentioned in :ref:`quickstart`, there are two:
+already mentioned in :ref:`tutorial`, there are two:
 
 * **time-based** publication is limited by ``publish_from`` - ``publish_to``
   period. Outside of these time boundaries, object won't be reachable
@@ -617,7 +617,7 @@ tries to find a ``Photo`` you describe by ``FIELD_VALUE``. See the examples:
 
 The result (stored as ``thumb`` in the example above) then contains a
 ``FormatedPhoto`` instance. This means you can access it's attributes,
-particularly ``url`` method and ``with`` and ``height``.
+particularly ``url`` method and ``width`` and ``height``.
 
 .. _features-photo-workflow:
 
