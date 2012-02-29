@@ -19,9 +19,6 @@ from test_ella.test_core import create_basic_categories, \
 
 from nose import tools, SkipTest
 
-# Django 1.3 has a bug with Dummy cache where set_many doesn't accept timeout, "fix" it
-utils.cache.__class__.set_many = lambda *a, **kw: None
-
 class CacheTestCase(TestCase):
     def setUp(self):
         self.old_cache = utils.cache

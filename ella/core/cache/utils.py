@@ -5,6 +5,7 @@ from django.dispatch import receiver
 from django.db.models import ObjectDoesNotExist
 from django.db.models.signals import post_save, post_delete
 from django.core.cache import cache
+from django.core.cache.backends.dummy import DummyCache
 from django.http import Http404
 from django.contrib.contenttypes.models import ContentType
 from django.utils.encoding import smart_str
@@ -107,8 +108,11 @@ def get_cached_objects(pks, model=None, timeout=CACHE_TIMEOUT):
             for pk, m in models.items():
                 k = vals[pk]
                 cached[k] = to_set[k] = m
+        kw = {}
+        if not isinstance(cache, DummyCache):
+            kw['timeout'] = timeout
         # write them into cache
-        cache.set_many(to_set, timeout=timeout)
+        cache.set_many(to_set, **kw)
 
     return [cached[k] for k in keys]
 
