@@ -14,11 +14,11 @@ setup(
     author='Ella Development Team',
     author_email='dev@ella-cms.com',
     license='BSD',
-    url='http://ella.github.com/',
+    url='https://github.com/ella/ella',
 
     packages=find_packages(
         where='.',
-        exclude=('doc', 'debian',)
+        exclude=('doc', 'test_ella', )
     ),
 
     include_package_data=True,
@@ -40,8 +40,6 @@ setup(
         'setuptools>=0.6b1',
         'Django==1.3.1',
         'south>=0.7',
-        'anyjson',
-        'feedparser',
         'jsonfield'
     ],
     setup_requires=[
