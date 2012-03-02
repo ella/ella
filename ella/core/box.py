@@ -167,7 +167,13 @@ class Box(object):
             pars = ','.join(':'.join((smart_str(key), smart_str(self.params[key]))) for key in sorted(self.params.keys()))
         else:
             pars = ''
-        return normalize_key('ella.core.box.Box.render:%d:%s:%s:%d:%s' % (
-                    settings.SITE_ID, self.obj.__class__.__name__, str(self.box_type), self.obj.pk, pars
+        
+        placement_id = '-'
+        if core_settings.BOX_CACHE_PER_PLACEMENT:
+            placement_id = getattr(self._context.get('placement', None), 'pk', '-')
+
+
+        return normalize_key('ella.core.box.Box.render:%d:%s:%s:%d:%s:%s' % (
+                    settings.SITE_ID, self.obj.__class__.__name__, str(self.box_type), self.obj.pk, placement_id, pars
                 ))
 
