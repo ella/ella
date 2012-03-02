@@ -42,9 +42,6 @@ setup(
         'south>=0.7',
         'jsonfield'
     ],
-    setup_requires=[
-        'setuptools_dummy',
-    ],
     test_suite='test_ella.run_tests.run_all'
 
 )
