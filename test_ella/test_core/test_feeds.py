@@ -29,7 +29,7 @@ class TestFeeds(TestCase):
         list_all_publishables_in_category_by_hour(self)
 
 
-        self._feeder = RSSTopCategoryListings('test', HttpRequest())
+        self._feeder = RSSTopCategoryListings()
 
     def _set_photo(self):
         from test_ella.test_photos.fixtures import create_photo
@@ -44,7 +44,7 @@ class TestFeeds(TestCase):
     def test_rss(self):
         import feedparser
         Listing.objects.all().update(category=self.category)
-        url = reverse('feeds', kwargs={'url':'rss'})
+        url = reverse('home_rss_feed')
         c = self.client
 
         response = c.get(url)
@@ -56,7 +56,7 @@ class TestFeeds(TestCase):
     def test_atom(self):
         import feedparser
         Listing.objects.all().update(category=self.category)
-        url = reverse('feeds', kwargs={'url':'atom'})
+        url = reverse('home_atom_feed')
         c = self.client
 
         response = c.get(url)

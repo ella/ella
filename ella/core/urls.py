@@ -18,11 +18,6 @@ except:
 from ella.core.feeds import RSSTopCategoryListings, AtomTopCategoryListings
 
 
-feeds = {
-    'rss' : RSSTopCategoryListings,
-    'atom' : AtomTopCategoryListings,
-}
-
 res = {
     'ct': r'(?P<content_type>[a-z][a-z0-9-]+)',
     'cat': r'(?P<category>[a-z][a-z0-9-/]+)',
@@ -44,7 +39,10 @@ urlpatterns = patterns( '',
     url( r'^export/(?P<name>[a-z0-9-]+)/$', 'ella.core.views.export', { 'count' : 3 }, name="named_export" ),
 
     # rss feeds
-    url( r'^feeds/(?P<url>.*)/$', 'django.contrib.syndication.views.feed', { 'feed_dict': feeds }, name="feeds" ),
+    url( r'^feeds/rss/$', RSSTopCategoryListings(), name='home_rss_feed'),
+    url( r'^feeds/atom/$', AtomTopCategoryListings(), name='home_atom_feed'),
+    url( r'^feeds/rss/%(cat)s/$' % res, RSSTopCategoryListings(), name='rss_feed'),
+    url( r'^feeds/atom/%(cat)s/$' % res, AtomTopCategoryListings(), name='atom_feed'),
 
     # list of objects regadless of category and content type
     url( r'^%(year)s/%(month)s/%(day)s/$' % res, list_content_type, name="list_day" ),

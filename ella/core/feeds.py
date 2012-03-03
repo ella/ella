@@ -1,4 +1,4 @@
-from django.contrib.syndication.feeds import Feed
+from django.contrib.syndication.views import Feed
 from django.utils.feedgenerator import Atom1Feed
 from django.utils.translation import ugettext_lazy as _
 from django.http import Http404
@@ -12,7 +12,8 @@ from ella.core.managers import ListingHandler
 from ella.photos.models import Format
 
 class RSSTopCategoryListings(Feed):
-    def get_object(self, bits):
+    def get_object(self, request, category=''):
+        bits = category.split('/')
         try:
             ct = get_content_type(bits[-1])
             bits = bits[:-1]
