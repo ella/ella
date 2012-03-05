@@ -150,14 +150,19 @@ class Photo(models.Model):
             # and the image will be saved properly
             super(Photo, self).save(force_update=True)
         else:
-            old = Photo.objects.get(pk=self.pk)
+            try:
+                old = Photo.objects.get(pk=self.pk)
 
-            # delete formatedphotos if new image was uploaded
-            if old.image != self.image:
-                for f_photo in self.formatedphoto_set.all():
-                    f_photo.delete()
+                force_update = True
+                # delete formatedphotos if new image was uploaded
+                if old.image != self.image:
+                    for f_photo in self.formatedphoto_set.all():
+                        f_photo.delete()
+            except Photo.DoesNotExist:
+                # somebody is just trying to create new model with given PK
+                force_update = False
 
-            super(Photo, self).save(force_update=True)
+            super(Photo, self).save(force_update=force_update)
 
         if redis:
             redis.hmset(REDIS_PHOTO_KEY % self.pk, self.get_image_info())
