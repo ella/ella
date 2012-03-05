@@ -17,6 +17,13 @@ def generate_fk_class(name, retrieve_func, limit_to_model=None):
             super(CustomForeignKey, self).contribute_to_class(cls, name)
             setattr(cls, self.name, CachedReverseSingleRelatedObjectDescriptor(self))
 
+        def south_field_triple(self):
+            from south.modelsinspector import introspector
+            args, kwargs = introspector(self)
+            if limit_to_model:
+                del kwargs['to']
+            return ('ella.core.cache.fields.%s' % name, args, kwargs)
+
     class CachedReverseSingleRelatedObjectDescriptor(ReverseSingleRelatedObjectDescriptor):
         def __get__(self, instance, instance_type=None):
             if instance is None:
@@ -34,12 +41,6 @@ def generate_fk_class(name, retrieve_func, limit_to_model=None):
                 rel_obj = retrieve_func(self.field.rel.to, val)
                 setattr(instance, cache_name, rel_obj)
                 return rel_obj
-
-    try:
-        from south.modelsinspector import add_introspection_rules
-        add_introspection_rules([], ["^ella\.core\.cache\.fields\.%s" % name])
-    except ImportError:
-        pass
 
     CustomForeignKey.__name__ = name
     return CustomForeignKey
