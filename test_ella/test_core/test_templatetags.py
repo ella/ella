@@ -80,8 +80,7 @@ class TestListingTag(TestCase):
 
     def test_get_listing_without_a_publishable(self):
         t = template.Template('{% listing 10 for category without p as var %}{{ var|join:":" }}')
-        expected = ':'.join([str(listing) for listing in self.listings if listing.category == self.category and listing.publishable != self.publishables[0]])
-        tools.assert_equals(expected, t.render(template.Context({'category': self.category, 'p': self.publishables[0]})))
+        tools.assert_equals('', t.render(template.Context({'category': self.category, 'p': self.publishables[0]})))
 
 class TestListingTagParser(UnitTestCase):
     '''
