@@ -126,6 +126,20 @@ class TestRedisListings(TestCase):
         tools.assert_equals(l1.publish_from, dt1)
         tools.assert_equals(l2.publish_from, dt2)
 
+    def test_get_listing_omits_excluded_publishable(self):
+        ct_id = self.publishables[0].content_type_id
+        t1, t2 = time.time()-90, time.time()-100
+        self.redis.zadd('listing:cat:3', '%d:1:0' % ct_id, repr(t1))
+        self.redis.zadd('listing:cat:2', '%d:3:0' % ct_id, repr(t2))
+        dt1, dt2 = datetime.fromtimestamp(t1), datetime.fromtimestamp(t2)
+
+        lh = Listing.objects.get_queryset_wrapper(category=self.category_nested, children=ListingHandler.IMMEDIATE, exclude=self.publishables[0], source='redis')
+        tools.assert_equals(1, lh.count())
+        l = lh.get_listings(0, 10)
+
+        tools.assert_equals(l[0].publishable, self.publishables[2])
+        tools.assert_equals(l[0].publish_from, dt2)
+
     def test_redis_listing_handler_used_from_view_when_requested(self):
         ct_id = self.publishables[0].content_type_id
         t1, t2 = time.time()-90, time.time()-100

@@ -159,6 +159,22 @@ class RedisListingHandler(ListingHandler):
             else:
                 key = inter_keys[0]
 
+            if self.exclude:
+                v = '%d:%d:' % (self.exclude.content_type_id, self.exclude.id)
+                v1, v2 = v + '0', v + '1'
+
+                # we made the key, safe to delete stuff from it
+                if key.startswith(('listings:zis:',  'listings:zus:')):
+                    pipe.zrem(key, v1)
+                    pipe.zrem(key, v2)
+
+                # we are using some existing key, copy it before removing stuff
+                else:
+                    exclude_key = '%s:exclude:%s' % (key, v)
+                    pipe.zunionstore(exclude_key, (key, ))
+                    pipe.zrem(exclude_key, v1, v2)
+                    key = exclude_key
+
             self._key = key
         return self._key, pipe
 

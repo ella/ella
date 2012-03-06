@@ -45,7 +45,7 @@ Interface
             ...
 
 The ``__init__`` method of the class accepts folowing aguments:
-category, children=None, content_types=[], date_range=()
+category, children=None, content_types=[], date_range=(), exclude=None
 
 .. table:: ``ListingHandler.__init__`` arguments
 
@@ -59,6 +59,8 @@ category, children=None, content_types=[], date_range=()
                                         children/descendants. 
     ``content_types``    []             ``ContentType`` instances to filter on.
     ``date_range``       ()             Optional date range to list.
+    ``exclude``          None           A ``Publishable`` instance to omit from the
+                                        result.
     ==================== =============  ================================================
 
 

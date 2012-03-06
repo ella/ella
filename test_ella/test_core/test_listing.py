@@ -87,3 +87,8 @@ class TestListing(TestCase):
 
         tools.assert_equals(self.listings[1:], l)
 
+    def test_excluded_publishable_wont_show(self):
+        l = self.listings[0]
+        l = Listing.objects.get_listing(category=self.category, children=ListingHandler.ALL, exclude=l.publishable)
+        tools.assert_equals(self.listings[1:], l)
+

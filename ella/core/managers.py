@@ -84,11 +84,12 @@ class ListingHandler(object):
     IMMEDIATE = 1
     ALL = 2
 
-    def __init__(self, category, children=NONE, content_types=[], date_range=()):
+    def __init__(self, category, children=NONE, content_types=[], date_range=(), exclude=None):
         self.category = category
         self.children = children
         self.content_types = content_types
         self.date_range = date_range
+        self.exclude = exclude
 
     def __getitem__(self, k):
         if not isinstance(k, slice) or (k.start is None or k.start < 0) or (k.stop is None  or k.stop < k.start):
@@ -100,11 +101,11 @@ class ListingHandler(object):
         return self.get_listings(offset, count)
 
 
-def get_listings_key(self, category=None, children=ListingHandler.NONE, count=10, offset=0, content_types=[], date_range=(), **kwargs):
+def get_listings_key(self, category=None, children=ListingHandler.NONE, count=10, offset=0, content_types=[], date_range=(), exclude=None, **kwargs):
     c = category and  category.id or ''
 
-    return 'core.get_listing:%s:%d:%d:%d:%s:%s:%s' % (
-            c, count, offset, children,
+    return 'core.get_listing:%s:%d:%d:%d:%d:%s:%s:%s' % (
+            c, count, offset, children, exclude.id if exclude else 0,
             ','.join(map(lambda ct: str(ct.pk), content_types)),
             ','.join(map(lambda d: d.strftime('%Y%m%d'), date_range)),
             ','.join(':'.join((k, smart_str(v))) for k, v in kwargs.items()),
@@ -127,7 +128,7 @@ class ListingManager(models.Manager):
             )
         return qset
 
-    def get_listing_queryset(self, category=None, children=ListingHandler.NONE, content_types=[], date_range=(), **kwargs):
+    def get_listing_queryset(self, category=None, children=ListingHandler.NONE, content_types=[], date_range=(), exclude=None, **kwargs):
         # give the database some chance to cache this query
         now = datetime.now().replace(second=0, microsecond=0)
 
@@ -154,10 +155,14 @@ class ListingManager(models.Manager):
         if content_types:
             qset = qset.filter(publishable__content_type__in=content_types)
 
+        # we were asked to omit certain Publishable
+        if exclude:
+            qset = qset.exclude(publishable=exclude)
+
         return qset.exclude(publish_to__lt=now).order_by('-publish_from')
 
     @cache_this(get_listings_key)
-    def get_listing(self, category=None, children=ListingHandler.NONE, count=10, offset=0, content_types=[], date_range=(), **kwargs):
+    def get_listing(self, category=None, children=ListingHandler.NONE, count=10, offset=0, content_types=[], date_range=(), exclude=None, **kwargs):
         """
         Get top objects for given category and potentionally also its child categories.
 
@@ -177,7 +182,7 @@ class ListingManager(models.Manager):
 
         limit = offset + count
 
-        qset = self.get_listing_queryset(category, children, content_types, date_range, **kwargs)
+        qset = self.get_listing_queryset(category, children, content_types, date_range, exclude, **kwargs)
 
         # direct listings, we don't need to check for duplicates
         if children == ListingHandler.NONE:
@@ -214,10 +219,10 @@ class ListingManager(models.Manager):
             return self._listing_handlers[source]
         return self._listing_handlers['default']
 
-    def get_queryset_wrapper(self, category, children=ListingHandler.NONE, content_types=[], date_range=(), source='default'):
+    def get_queryset_wrapper(self, category, children=ListingHandler.NONE, content_types=[], date_range=(), exclude=None, source='default'):
         ListingHandler = self._get_listing_handler(source)
         return ListingHandler(
-            category, children, content_types, date_range
+            category, children, content_types, date_range, exclude
         )
 
 
