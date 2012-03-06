@@ -235,7 +235,8 @@ class ModelListingHandler(ListingHandler):
                 content_types=self.content_types,
                 date_range=self.date_range,
                 offset=offset,
-                count=count
+                count=count,
+                exclude=self.exclude
             )
 
     def count(self):
@@ -246,6 +247,7 @@ class ModelListingHandler(ListingHandler):
                 children=self.children,
                 content_types=self.content_types,
                 date_range=self.date_range,
+                exclude=self.exclude
             ).count()
         return self._count
 

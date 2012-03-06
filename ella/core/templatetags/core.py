@@ -67,6 +67,7 @@ def listing(parser, token):
                                             or variable containing a Category object.
         ``children``                        Include items from direct subcategories.
         ``descendents``                     Include items from all descend subcategories.
+        ``exclude``                         Variable including a ``Publishable`` to omit.
         ``using``                           Name of Listing Handler ro use
         ``result``                          Store the resulting list in context under given
                                             name.
@@ -127,6 +128,11 @@ def listing_parse(input):
         else:
             raise template.TemplateSyntaxError, "%r tag's argument 'with' required specification (with children|with descendents)" % input[0]
         o = o + 1
+
+    # without (exclude publishable
+    if input[o] == 'without':
+        params['exclude'] = template.Variable(input[o + 1])
+        o = o + 2
 
     # using (isting handlers)
     if input[o] == 'using':
