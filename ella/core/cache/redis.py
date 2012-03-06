@@ -38,6 +38,15 @@ def get_redis_values(listing):
         REDIS_CT_LISTING % (listing.publishable.content_type_id)
     )
 
+def publishable_published(publishable, **kwargs):
+    for l in publishable.listing_set.all():
+        listing_post_save(l.__class__, l)
+
+def publishable_unpublished(publishable, **kwargs):
+    for l in publishable.listing_set.all():
+        listing_post_delete(l.__class__, l)
+
+
 def listing_post_delete(sender, instance, **kwargs):
     pipe = client.pipeline()
     v, keys = get_redis_values(instance)
