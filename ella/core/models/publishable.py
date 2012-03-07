@@ -150,9 +150,14 @@ class Publishable(models.Model):
     def save(self, **kwargs):
         self.content_type = ContentType.objects.get_for_model(self)
         send_signal = None
+        old_self = None
         if self.pk:
-            old_self = Publishable.objects.get(pk=self.pk)
+            try:
+                old_self = Publishable.objects.get(pk=self.pk)
+            except Publishable.DoesNotExist:
+                pass
 
+        if old_self:
             old_path = old_self.get_absolute_url()
             new_path = self.get_absolute_url()
 
