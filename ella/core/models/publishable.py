@@ -153,7 +153,7 @@ class Publishable(models.Model):
         old_self = None
         if self.pk:
             try:
-                old_self = Publishable.objects.get(pk=self.pk)
+                old_self = self.__class__.objects.get(pk=self.pk)
             except Publishable.DoesNotExist:
                 pass
 
