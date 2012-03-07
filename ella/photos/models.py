@@ -79,7 +79,7 @@ class Photo(models.Model):
     slug = models.SlugField(_('Slug'), max_length=255)
     # save it to YYYY/MM/DD structure
     image = models.ImageField(_('Image'), upload_to=upload_to,
-        height_field='height', width_field='width')
+        max_length=255, height_field='height', width_field='width')
     width = models.PositiveIntegerField(editable=False)
     height = models.PositiveIntegerField(editable=False)
 
