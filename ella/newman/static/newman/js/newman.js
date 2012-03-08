@@ -1020,6 +1020,7 @@ $( function() {
 
     // set focus to first field of just-added form
     $(document).bind('content_added', function(evt, extras) {
+        if (!extras) return;
         var $cont = $('#' + extras.target_id);
         if ($cont && $cont.length) {} else {
             log_generic.log('Error setting focus to form field: content_added provided no target_id');

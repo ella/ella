@@ -94,6 +94,7 @@ function install_box_editor() {
 
     // make the box go away when new content is loaded
     $( '#' + Kobayashi.DEFAULT_TARGET ).bind('content_added', function(evt, data) {
+        if (!data) return;
         if (data.target_id === $(this).prop('id')) {
             $('#rich-box').dialog('close');
         }
@@ -199,6 +200,7 @@ var toolbarButtonRegister = (function() {
 })();
 
 function handle_preview(evt, toolbar) {
+    if (!toolbar) return;
     toolbar.trigger_preview();
 }
 
