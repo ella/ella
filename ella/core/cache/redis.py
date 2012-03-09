@@ -67,7 +67,10 @@ def listing_pre_save(sender, instance, **kwargs):
 
 
 def listing_post_save(sender, instance, **kwargs):
-    pipe = instance.__redis_pipe
+    if hasattr(instance, '__redis_pipe'):
+        pipe = instance.__redis_pipe
+    else:
+        pipe = client.pipeline()
     v, keys = get_redis_values(instance)
     score = repr(time.mktime(instance.publish_from.timetuple()))
     for k in keys:
@@ -76,6 +79,9 @@ def listing_post_save(sender, instance, **kwargs):
 
 
 class RedisListingHandler(ListingHandler):
+    CT_LISTING = REDIS_CT_LISTING
+    CAT_LISTING = REDIS_CAT_LISTING
+
     def count(self):
         key, pipe = self._get_key()
         if pipe is None:
@@ -84,38 +90,54 @@ class RedisListingHandler(ListingHandler):
         results = pipe.execute()
         return results[-1]
 
-    def get_listings(self, offset=0, count=10):
-        key, pipe = self._get_key()
+    def _get_listing(self, publishable, score, data):
+        Listing = get_model('core', 'listing')
+        return Listing(publishable=publishable, commercial=data[0], publish_from=datetime.fromtimestamp(score))
 
-        # get the score range based on the date range
+    def _get_score_limits(self):
+        max_score = None
+        min_score = None
+
         if self.date_range:
             max_score = time.mktime(min(self.date_range[1], datetime.now()).timetule())
             min_score = time.mktime(self.date_range[0].timetuple())
-        else:
-            max_score = time.time()
-            min_score = 0
+        return min_score, max_score
 
-        # get all the relevant records
+    def get_listings(self, offset=0, count=10):
+        key, pipe = self._get_key()
         if pipe is None:
             pipe = client.pipeline()
-        pipe = pipe.zrevrangebyscore(key,
-            repr(max_score), repr(min_score),
-            start=offset, num=count,
-            withscores=True, score_cast_func=lambda s: datetime.fromtimestamp(float(s))
-        )
+
+        # get the score range based on the date range
+        min_score, max_score = self._get_score_limits()
+
+        # get all the relevant records
+        if min_score or max_score:
+            pipe = pipe.zrevrangebyscore(key,
+                repr(max_score), repr(min_score),
+                start=offset, num=count,
+                withscores=True
+            )
+        else:
+            pipe = pipe.zrevrange(key,
+                start=offset, num=count,
+                withscores=True
+            )
         results = pipe.execute()
 
         # get the data from redis into proper format
-        ids = map(lambda (s, ts): s.split(':') + [ts], results[-1])
+        data = []
+        ids = []
+        for value, score in results[-1]:
+            value = value.split(':')
+            ids.append((value[0], value[1]))
+            data.append((score, value[2:]))
+
         # and retrieve publishables from cache
-        publishables = get_cached_objects([(ct_id, pk) for (ct_id, pk, commercial, ts) in ids])
+        publishables = get_cached_objects(ids)
 
         # create mock Listing objects to return
-        out = []
-        Listing = get_model('core', 'listing')
-        for p, (ct_id, pk, commercial, tstamp) in zip(publishables, ids):
-            out.append(Listing(publishable=p, commercial=commercial, publish_from=tstamp))
-        return out
+        return map(lambda (p, (score, d)): self._get_listing(p, score, d), zip(publishables, data))
 
     def _union(self, unions, pipe):
         inter_keys = []
@@ -135,15 +157,15 @@ class RedisListingHandler(ListingHandler):
             unions = []
             if self.content_types:
                 # get the union of all content_type listings
-                ct_keys = [REDIS_CT_LISTING % ct.pk for ct in self.content_types]
+                ct_keys = [self.CT_LISTING % ct.pk for ct in self.content_types]
                 unions.append(ct_keys)
 
             # get the union of all category listings
-            cat_keys = [REDIS_CAT_LISTING % self.category.id]
+            cat_keys = [self.CAT_LISTING % self.category.id]
             if self.children == ListingHandler.IMMEDIATE:
-                cat_keys.extend(REDIS_CAT_LISTING % c.id for c in self.category.get_children())
+                cat_keys.extend(self.CAT_LISTING % c.id for c in self.category.get_children())
             elif self.children == ListingHandler.ALL:
-                cat_keys.extend(REDIS_CAT_LISTING % c.id for c in self.category.get_children(True))
+                cat_keys.extend(self.CAT_LISTING % c.id for c in self.category.get_children(True))
             unions.append(cat_keys)
 
             # do everything in one pipeline
@@ -165,8 +187,7 @@ class RedisListingHandler(ListingHandler):
 
                 # we made the key, safe to delete stuff from it
                 if key.startswith(('listings:zis:',  'listings:zus:')):
-                    pipe.zrem(key, v1)
-                    pipe.zrem(key, v2)
+                    pipe.zrem(key, v1, v2)
 
                 # we are using some existing key, copy it before removing stuff
                 else:
