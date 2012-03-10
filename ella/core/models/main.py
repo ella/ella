@@ -135,12 +135,18 @@ class Category(models.Model):
         """
         Returns parent category, if such exists. If this category doesn't have
         a parent, None is returned.
-        
+
         Result of this method is cached.
         """
         if self.tree_parent_id:
             return get_cached_object(Category, pk=self.tree_parent_id)
         return None
+
+    def get_root_category(self):
+        if '/' not in self.tree_path:
+            return self
+        path = self.tree_path.split('/')[0]
+        return get_cached_object(Category, site__id=self.site, tree_path=path)
 
     def get_children(self, recursive=False):
         # TODO: proper caching
@@ -153,7 +159,7 @@ class Category(models.Model):
         """
         Returns parent category, which is considered as **main**. That means
         that the category's parent is the root category.
-        
+
         Result of this method is cached.
         """
         def _get_main_parent(category):
