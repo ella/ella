@@ -385,7 +385,11 @@ class FormatedPhoto(models.Model):
             )
 
     def delete(self):
-        self.remove_file()
+        try:
+            self.remove_file()
+        except:
+            log.warning('Error deleting FormatedPhoto %d-%s (%s).', self.photo_id, self.format.name, self.image.name)
+
         if redis:
             redis.delete(REDIS_FORMATTED_PHOTO_KEY % (self.photo_id, self.format.id))
         super(FormatedPhoto, self).delete()
