@@ -82,7 +82,8 @@
         $('.template .field:has(#id_authors,#id_source)')
         .clone(true)
         .each(function() { add_suffices($(this), '_common') })
-        .appendTo('.js-common-image-fields');
+        .appendTo('.js-common-image-fields')
+        .trigger('common_fields_populated');
         
         // save photos received from server to action table
         $('#mass-upload2-form-post-save').data({ callback: function() {
@@ -93,6 +94,47 @@
             }   
             return {};
         }});
+        
+        // mass-upload form is tricky to restore -- we need custom serialization routine
+        $('.change-form').data({
+            get_form_data_for_restoring: function() {
+                var rv = {
+                    images: [],
+                    common_fields: $('.js-common-image-fields :input').serializeArray()
+                };
+                $('.js-photos-container .row').each( function() {
+                    rv.images.push({
+                        row_form_data: $(this).find(':input').serializeArray(),
+                        add_file_args: [
+                            $(this).data('jfu_file'),
+                            $(this).data('jfu_data')
+                        ]
+                    });
+                });
+                return rv;
+            },
+            onreturn_callback: function(popped) {
+                var form_data;
+                form_data = popped.form_data;
+                
+                $(document).one('content_added', function(evt) {
+                    $.each( form_data.images, function(i,data) {
+                        var $row = add_file.apply(this, data.add_file_args);
+                        NewmanLib.restore_form(JSON.stringify({data: data.row_form_data}), $row, {});
+                    });
+                    
+                    $(document).one('common_fields_populated', function(evt) {
+                        NewmanLib.restore_form(JSON.stringify({data: form_data.common_fields}), $('.js-common-image-fields'), {});
+                        
+                        if (popped.oid) {
+                            popped.selection_callback(popped.oid,{str: popped.str});
+                        }
+                        
+                    });
+                    
+                });
+            }
+        });
     });
 
     $('.js-photos-container .Del').live('click', function(evt) {
@@ -179,6 +221,8 @@
             if ($(img).is('img')) {} else return;
             $row.find('.Img').append(img);
         }
+        
+        return $row;
     }
 
     function add_suffices($el, suf) {

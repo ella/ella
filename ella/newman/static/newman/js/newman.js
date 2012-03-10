@@ -396,8 +396,14 @@ Drafts = new Object;
         }
         //carp('Trigger preset_load_process done.');
 
-        $form.get(0).reset();
-        $form.find(':checkbox,:radio').removeAttr('checked');
+        if ($form.is('form')) {
+            $form.get(0).reset()
+        }
+        else {
+            $form.wrap('<form>').closest('form').get(0).reset();
+            $form.unwrap();
+        }
+        $form.find(':checkbox,:radio').prop('checked', false);
         $form.find(':text,textarea,:password').val('');
         var form_data = response_data.data;
         if (response_data.message) show_message( response_data.message );
@@ -2157,19 +2163,10 @@ NewmanLib.adr_stack_default_push_callback = function(evt) {
     if (evt.button != 0) return;
     evt.preventDefault();   // FIXME: remove
     
-    var onsave_callback, onreturn_callback;
-    if ($(this).is('.js-custom-adrstack-callbacks')) {
-        // Define no callbacks
-    }
-    else {
-        onsave_callback   = NewmanLib.adr_stack_default_onsave_callback;
-        onreturn_callback = NewmanLib.adr_stack_default_onreturn_callback;
-    }
-    
     var came_from_rich_editor = (function() {
         var initial_input_id = $('#overlay-content').data('input_id');
         var $initial_input = $( '#' + initial_input_id );
-        if ($initial_input.is('#rich-box *') && newman_textarea_focused) {
+        if ($initial_input.is('#rich-box *') && typeof(newman_textarea_focused) !== 'undefined' && newman_textarea_focused) {
             return {
                 // newman_textarea_focused comes from fuckitup
                 textarea_id: newman_textarea_focused.attr('id'),
@@ -2181,11 +2178,39 @@ NewmanLib.adr_stack_default_push_callback = function(evt) {
         else return false;
     })();
     
+    var $change_form = $('.change-form');
+    var onsave_callback, onreturn_callback;
+    if ($(this).is('.js-custom-adrstack-callbacks')) {
+        // Define no callbacks
+    }
+    else {
+        onsave_callback   = NewmanLib.adr_stack_default_onsave_callback;
+        onreturn_callback = $change_form.data('onreturn_callback');
+        if (!$.isFunction(onreturn_callback)) {
+            onreturn_callback = NewmanLib.adr_stack_default_onreturn_callback;
+        }
+    }
+    var form_data;
+    var get_form_data_callback = $change_form.data('get_form_data_for_restoring');
+    if ($.isFunction(get_form_data_callback)) {
+        try {
+            form_data = get_form_data_callback();
+        } catch(e) {
+            log_generic.log(
+                'error executing custom form-data-serializing callback for change form',
+                e, $change_form, get_form_data_callback
+            );
+        }
+    }
+    if (form_data === undefined) {
+        form_data = JSON.stringify( {data: $change_form.serializeArray()} );
+    }
+    
     NewmanLib.ADR_STACK.push( {
         from: evt.referer || get_hashadr(''),
         to: get_hashadr($(this).attr('href')),
         selection_callback: $(Kobayashi.closest_loaded(this).container).data('selection_callback'),
-        form_data: JSON.stringify({ data: $('.change-form').serializeArray() }),
+        form_data: form_data,
         onsave: onsave_callback,
         onreturn: onreturn_callback,
         invoked_from_rich_textarea: came_from_rich_editor
