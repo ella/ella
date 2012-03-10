@@ -144,7 +144,7 @@ class RedisListingHandler(ListingHandler):
         for union_keys in unions:
             if len(union_keys) > 1:
                 result_key = 'listings:zus:' + md5(','.join(union_keys)).hexdigest()
-                pipe.zunionstore(result_key, union_keys)
+                pipe.zunionstore(result_key, union_keys, 'MAX')
                 inter_keys.append(result_key)
             else:
                 inter_keys.append(union_keys[0])
@@ -177,7 +177,7 @@ class RedisListingHandler(ListingHandler):
             # do the intersect if required and output a single key
             if len(inter_keys) > 1:
                 key = 'listings:zis:' + md5(','.join(inter_keys)).hexdigest()
-                pipe.zinterstore(key, inter_keys)
+                pipe.zinterstore(key, inter_keys, 'MAX')
             else:
                 key = inter_keys[0]
 
