@@ -30,7 +30,7 @@ class ListingNode(template.Node):
             params[key] = value
 
         if 'category' in params and isinstance(params['category'], basestring):
-            params['category'] = get_cached_object(Category, tree_path=self.resolved_parameters['category'], site__id=settings.SITE_ID)
+            params['category'] = get_cached_object(Category, tree_path=params['category'], site__id=settings.SITE_ID)
 
         limits = {}
         if 'offset' in params:
