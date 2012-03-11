@@ -201,7 +201,7 @@ class ListContentType(EllaCoreView):
 
     :raises Http404: if the specified category or content_type does not exist or if the given date is malformed.
     """
-    template_name = 'listing.html'
+    template_name = core_settings.ARCHIVE_TEMPLATE
     empty_homepage_template_name = 'debug/empty_homepage.html'
 
     class EmptyHomepageException(Exception): pass
