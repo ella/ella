@@ -154,30 +154,33 @@ class ObjectNotFoundOrInvalid(Exception): pass
 
 class BoxNode(template.Node):
 
-    def __init__(self, box_type, nodelist, model=None, lookup=None, var_name=None):
-        self.box_type, self.nodelist, self.var_name, self.lookup, self.model = box_type, nodelist, var_name, lookup, model
+    def __init__(self, box_type, nodelist, model=None, lookup=None, var=None):
+        self.box_type, self.nodelist, self.var, self.lookup, self.model = box_type, nodelist, var, lookup, model
 
     def get_obj(self, context):
         if self.model and self.lookup:
-            try:
-                lookup_val = template.Variable(self.lookup[1]).resolve(context)
-            except template.VariableDoesNotExist:
+            if isinstance(self.lookup[1], template.Variable):
+                try:
+                    lookup_val = self.lookup[1].resolve(context)
+                except template.VariableDoesNotExist, e:
+                    log.error('BoxNode: Template variable does not exist. var_name=%s' % self.lookup[1].var)
+                    raise ObjectNotFoundOrInvalid()
+
+            else:
                 lookup_val = self.lookup[1]
 
             try:
                 obj = get_cached_object(self.model, **{self.lookup[0] : lookup_val})
-            except models.ObjectDoesNotExist, e:
-                log.error('BoxNode: %s (%s : %s)' % (str(e), self.lookup[0], lookup_val))
-                raise ObjectNotFoundOrInvalid()
-            except AssertionError, e:
+            except (models.ObjectDoesNotExist, AssertionError), e:
                 log.error('BoxNode: %s (%s : %s)' % (str(e), self.lookup[0], lookup_val))
                 raise ObjectNotFoundOrInvalid()
         else:
             try:
-                obj = template.Variable(self.var_name).resolve(context)
+                obj = self.var.resolve(context)
             except template.VariableDoesNotExist, e:
-                log.error('BoxNode: Template variable does not exist. var_name=%s' % self.var_name)
+                log.error('BoxNode: Template variable does not exist. var_name=%s' % self.var.var)
                 raise ObjectNotFoundOrInvalid()
+
             if not obj:
                 raise ObjectNotFoundOrInvalid()
         return obj
@@ -195,11 +198,8 @@ class BoxNode(template.Node):
             log.warning('BoxNode: Box does not exists.')
             return ''
 
-        # render the box itself
-        box.prepare(context)
-
         # render the box
-        return box.render()
+        return box.render(context)
 
 @register.tag('box')
 def do_box(parser, token):
@@ -286,13 +286,18 @@ def _parse_box(nodelist, bits):
 
     if len(bits) == 4:
         # var_name
-        return BoxNode(bits[1], nodelist, var_name=bits[3])
+        return BoxNode(bits[1], nodelist, var=template.Variable(bits[3]))
     else:
         model = models.get_model(*bits[3].split('.'))
         if model is None:
             return EmptyNode()
 
-        return BoxNode(bits[1], nodelist, model=model, lookup=(smart_str(bits[5]), bits[6]))
+        lookup_val = template.Variable(bits[6])
+        try:
+            lookup_val = lookup_val.resolve({})
+        except template.VariableDoesNotExist:
+            pass
+        return BoxNode(bits[1], nodelist, model=model, lookup=(smart_str(bits[5]), lookup_val))
 
 class RenderNode(template.Node):
     def __init__(self, var):

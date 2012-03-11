@@ -24,6 +24,8 @@ def invalidate_cache(sender, instance, **kwargs):
     cache.delete(key)
 
 def normalize_key(key):
+    if len(key) < 255:
+        return key
     return md5(key).hexdigest()
 
 def _get_key(start, model, pk=None, **kwargs):

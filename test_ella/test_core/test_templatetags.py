@@ -169,20 +169,20 @@ class TestBoxTagParser(UnitTestCase):
         tools.assert_true(isinstance(node, BoxNode))
         tools.assert_equals('box_type', node.box_type)
         tools.assert_equals(Category, node.model)
-        tools.assert_equals(('pk', '1'), node.lookup)
+        tools.assert_equals(('pk', 1), node.lookup)
 
     def test_parse_box_for_varname(self):
         node = _parse_box([], ['box', 'other_box_type', 'for', 'var_name'])
         tools.assert_true(isinstance(node, BoxNode))
         tools.assert_equals('other_box_type', node.box_type)
-        tools.assert_equals('var_name', node.var_name)
+        tools.assert_equals('var_name', node.var.var)
 
     def test_parse_box_with_slug(self):
         node = _parse_box([], ['box', 'box_type', 'for', 'sites.site', 'with', 'slug', '"home"'])
         tools.assert_true(isinstance(node, BoxNode))
         tools.assert_equals('box_type', node.box_type)
         tools.assert_equals(Site, node.model)
-        tools.assert_equals(('slug', '"home"'), node.lookup)
+        tools.assert_equals(('slug', 'home'), node.lookup)
 
     def test_parse_raises_on_too_many_arguments(self):
         tools.assert_raises(TemplateSyntaxError, _parse_box, [], ['box', 'box_type', 'for', 'core.category', 'with', 'pk', '1', '2', 'extra'])
