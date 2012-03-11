@@ -53,6 +53,7 @@ RSS_ENCLOSURE_PHOTO_FORMAT = None
 # middlewares
 ECACHE_INFO = 'ella.core.middleware.ECACHE_INFO'
 
-ARCHIVE_TEMPLATE = 'listing.html'
+# templates
+ARCHIVE_TEMPLATE = True
 
 core_settings = Settings('ella.core.conf', '')
