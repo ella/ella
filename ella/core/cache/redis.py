@@ -145,6 +145,7 @@ class RedisListingHandler(ListingHandler):
             if len(union_keys) > 1:
                 result_key = 'listings:zus:' + md5(','.join(union_keys)).hexdigest()
                 pipe.zunionstore(result_key, union_keys, 'MAX')
+                pipe.expire(result_key, 60)
                 inter_keys.append(result_key)
             else:
                 inter_keys.append(union_keys[0])
@@ -178,6 +179,7 @@ class RedisListingHandler(ListingHandler):
             if len(inter_keys) > 1:
                 key = 'listings:zis:' + md5(','.join(inter_keys)).hexdigest()
                 pipe.zinterstore(key, inter_keys, 'MAX')
+                pipe.expire(key, 60)
             else:
                 key = inter_keys[0]
 
@@ -187,6 +189,7 @@ class RedisListingHandler(ListingHandler):
 
                 # we are using some existing key, copy it before removing stuff
                 exclude_key = '%s:exclude:%s' % (key, v)
+                pipe.expire(exclude_key, 60)
                 pipe.zunionstore(exclude_key, (key, ))
                 pipe.zrem(exclude_key, v1, v2)
                 key = exclude_key
