@@ -17,9 +17,9 @@ from ella.core.box import Box
 from ella.core.conf import core_settings
 from ella.core.signals import content_published, content_unpublished
 from ella.core.cache import CachedGenericForeignKey, \
-    CachedForeignKey, ContentTypeForeignKey
+    CachedForeignKey, ContentTypeForeignKey, CategoryForeignKey
 from ella.core.managers import ListingManager, RelatedManager
-from ella.core.models.main import Category, Author, Source
+from ella.core.models.main import Author, Source
 from ella.photos.models import Photo
 
 def PublishableBox(publishable, box_type, nodelist, model=None):
@@ -42,7 +42,7 @@ class Publishable(models.Model):
     content_type = ContentTypeForeignKey()
     target = CachedGenericForeignKey('content_type', 'id')
 
-    category = CachedForeignKey(Category, verbose_name=_('Category'))
+    category = CategoryForeignKey(verbose_name=_('Category'))
 
     # Titles
     title = models.CharField(_('Title'), max_length=255)
@@ -221,7 +221,7 @@ class Listing(models.Model):
     box_class = staticmethod(ListingBox)
 
     publishable = models.ForeignKey(Publishable, verbose_name=_('Publishable'))
-    category = models.ForeignKey(Category, verbose_name=_('Category'), db_index=True)
+    category = CategoryForeignKey(verbose_name=_('Category'), db_index=True)
 
     publish_from = models.DateTimeField(_("Start of listing"), db_index=True)
     publish_to = models.DateTimeField(_("End of listing"), null=True, blank=True)

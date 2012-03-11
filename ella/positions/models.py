@@ -7,9 +7,8 @@ from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
 from django.template import Template, TemplateSyntaxError
 
-from ella.core.models import Category
 from ella.core.box import Box
-from ella.core.cache import cache_this, CachedGenericForeignKey
+from ella.core.cache import cache_this, CachedGenericForeignKey, CategoryForeignKey
 
 
 log = logging.getLogger('ella.positions.models')
@@ -64,7 +63,7 @@ class Position(models.Model):
     box_class = staticmethod(PositionBox)
 
     name = models.CharField(_('Name'), max_length=200)
-    category = models.ForeignKey(Category, verbose_name=_('Category'))
+    category = CategoryForeignKey(verbose_name=_('Category'))
 
     target_ct = models.ForeignKey(ContentType, verbose_name=_('Target content type'),
         null=True, blank=True)

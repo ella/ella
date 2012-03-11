@@ -56,6 +56,7 @@ def get_site(model, pk):
 
 SiteForeignKey = generate_fk_class('SiteForeignKey', get_site, Site)
 ContentTypeForeignKey = generate_fk_class('ContentTypeForeignKey', lambda m, pk: m._default_manager.get_for_id(pk), ContentType)
+CategoryForeignKey = generate_fk_class('CategoryForeignKey', lambda m, pk: m._default_manager.get_for_id(pk), 'core.Category')
 
 class CachedGenericForeignKey(GenericForeignKey):
     def __get__(self, instance, instance_type=None):

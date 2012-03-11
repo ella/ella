@@ -6,7 +6,7 @@ from django.conf import settings
 
 from ella.core.models import Listing, Category
 from ella.core.views import get_content_type
-from ella.core.cache.utils import get_cached_object, get_cached_object_or_404
+from ella.core.cache.utils import get_cached_object
 from ella.core.conf import core_settings
 from ella.core.managers import ListingHandler
 from ella.photos.models import Format
@@ -21,9 +21,12 @@ class RSSTopCategoryListings(Feed):
             ct = False
 
         if bits:
-            cat = get_cached_object_or_404(Category, tree_path=u'/'.join(bits), site__id=settings.SITE_ID)
+            try:
+                cat = Category.objects.get_by_tree_path(u'/'.join(bits))
+            except Category.DoesNotExist:
+                raise Http404()
         else:
-            cat = get_cached_object(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
+            cat = Category.objects.get_by_tree_path('')
 
         if ct:
             return (cat, ct)
@@ -44,7 +47,7 @@ class RSSTopCategoryListings(Feed):
         elif obj:
             return syndication_title(obj)
         else:
-            obj = get_cached_object(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
+            obj = Category.objects.get_by_tree_path('')
             return syndication_title(obj)
 
     def items(self, obj):
@@ -56,7 +59,7 @@ class RSSTopCategoryListings(Feed):
         elif obj:
             kwa['category'] = obj
         else:
-            kwa['category'] = get_cached_object(Category, tree_parent__isnull=True, site__id=settings.SITE_ID)
+            kwa['category'] = Category.objects.get_by_tree_path('')
 
         # TODO: In ella based application children attr can be NONE, IMMEDIATE and ALL
         if kwa['category'].tree_parent != None:

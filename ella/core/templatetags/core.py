@@ -1,6 +1,5 @@
 import logging
 
-from django.conf import settings
 from django import template
 from django.db import models
 from django.utils.encoding import smart_str
@@ -30,7 +29,7 @@ class ListingNode(template.Node):
             params[key] = value
 
         if 'category' in params and isinstance(params['category'], basestring):
-            params['category'] = get_cached_object(Category, tree_path=params['category'], site__id=settings.SITE_ID)
+            params['category'] = Category.objects.get_by_tree_path(params['category'])
 
         limits = {}
         if 'offset' in params:

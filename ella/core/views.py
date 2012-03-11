@@ -14,7 +14,6 @@ from ella.core.models import Listing, Category, Publishable
 from ella.core.cache import get_cached_object_or_404, cache_this
 from ella.core import custom_urls
 from ella.core.conf import core_settings
-from ella.core.cache.utils import get_cached_object
 from ella.core.managers import ListingHandler
 
 __docformat__ = "restructuredtext en"
@@ -113,7 +112,10 @@ class ObjectDetail(EllaCoreView):
     def get_context(self, request, category, content_type, slug, year, month, day, id):
         ct = get_content_type(content_type)
 
-        cat = get_cached_object_or_404(Category, timeout=3600, tree_path=category, site__id=settings.SITE_ID)
+        try:
+            cat = Category.objects.get_by_tree_path(category)
+        except Category.DoesNotExist:
+            raise Http404('Category with given tree_path doesn\'t exist.')
 
         if year:
             publishable = get_cached_object_or_404(Publishable,
@@ -281,8 +283,7 @@ class ListContentType(EllaCoreView):
             kwa['date_range'] = (start_day, (start_day + timedelta(days=370)).replace(day=1) - timedelta(seconds=1))
 
         try:
-            cat = get_cached_object(Category, timeout=3600, tree_path=category,
-                site__id=settings.SITE_ID)
+            cat = Category.objects.get_by_tree_path(category)
         except Category.DoesNotExist:
             return self._handle_404(_('Category with tree path %(path)r does not '
                 'exist on site %(site)s') %
@@ -459,7 +460,10 @@ def export(request, count, name='', content_type=None):
         t_list.append('page/export/%s.html' % name)
     t_list.append('page/export/banner.html')
 
-    cat = get_cached_object_or_404(Category, timeout=3600, tree_path='', site__id=settings.SITE_ID)
+    try:
+        cat = Category.objects.get_by_tree_path('')
+    except Category.DoesNotExist:
+        raise Http404()
     listing = Listing.objects.get_listing(count=count, category=cat)
     return TemplateResponse(
             request,

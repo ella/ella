@@ -32,6 +32,7 @@ def create_basic_categories(case):
         site_id=case.site_id,
         slug=u"second-nested-category",
     )
+    case.addCleanup(Category.objects.clear_cache)
 
 def create_and_place_a_publishable(case):
     case.publishable = Article.objects.create(

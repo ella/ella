@@ -5,6 +5,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.utils.importlib import import_module
 from django.utils.encoding import smart_str
 from django.db.models.loading import get_model
+from django.conf import settings
 
 from ella.core.cache import cache_this
 from ella.core.conf import core_settings
@@ -20,6 +21,33 @@ def _import_module_member(modstr, noun):
     except AttributeError, e:
         raise ImproperlyConfigured('Error importing %s %s: "%s"' % (noun, modstr, e))
     return member
+
+class CategoryManager(models.Manager):
+    _cache = {}
+    def get_for_id(self, pk):
+        try:
+            return self.__class__._cache[settings.SITE_ID][pk]
+        except KeyError:
+            cat = self.get(pk=pk)
+            self._add_to_cache(cat)
+            return cat
+
+    def get_by_tree_path(self, tree_path):
+        try:
+            return self.__class__._cache[settings.SITE_ID][tree_path]
+        except KeyError:
+            cat = self.get(site=settings.SITE_ID, tree_path=tree_path)
+            self._add_to_cache(cat)
+            return cat
+
+    def _add_to_cache(self, category):
+        cache = self.__class__._cache.setdefault(category.site_id, {})
+        # pk and tree_path can never clash, safe to store in one dict
+        cache[category.pk] = category
+        cache[category.tree_path] = category
+
+    def clear_cache(self):
+        self.__class__._cache.clear()
 
 class RelatedManager(models.Manager):
     def collect_related(self, finder_funcs, obj, count, *args, **kwargs):

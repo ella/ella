@@ -10,8 +10,9 @@ from django.core.validators import validate_slug
 from jsonfield.fields import JSONField
 
 from ella.core.box import Box
-from ella.core.cache import get_cached_object, CachedGenericForeignKey, SiteForeignKey, ContentTypeForeignKey
+from ella.core.cache import CachedGenericForeignKey, SiteForeignKey, ContentTypeForeignKey
 from ella.core.conf import core_settings
+from ella.core.managers import CategoryManager
 
 
 class Author(models.Model):
@@ -104,6 +105,9 @@ class Category(models.Model):
         help_text=_('If you need to define custom data for '
         'category objects, you can use this field to do so.'))
 
+
+    objects = CategoryManager()
+
     class Meta:
         app_label = 'core'
         unique_together = (('site', 'tree_path'),)
@@ -123,6 +127,7 @@ class Category(models.Model):
                 self.tree_path = self.slug
         else:
             self.tree_path = ''
+        Category.objects.clear_cache()
         super(Category, self).save(**kwargs)
         if old_tree_path != self.tree_path:
             # the tree_path has changed, update children
@@ -139,14 +144,14 @@ class Category(models.Model):
         Result of this method is cached.
         """
         if self.tree_parent_id:
-            return get_cached_object(Category, pk=self.tree_parent_id)
+            return Category.objects.get_for_id(self.tree_parent_id)
         return None
 
     def get_root_category(self):
         if '/' not in self.tree_path:
             return self
         path = self.tree_path.split('/')[0]
-        return get_cached_object(Category, site__id=self.site, tree_path=path)
+        return Category.objects.get_by_tree_path(path)
 
     def get_children(self, recursive=False):
         # TODO: proper caching
