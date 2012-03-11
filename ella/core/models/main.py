@@ -154,10 +154,7 @@ class Category(models.Model):
         return Category.objects.get_by_tree_path(path)
 
     def get_children(self, recursive=False):
-        # TODO: proper caching
-        if recursive:
-            return list(self.__class__.objects.filter(tree_path__startswith=self.tree_path + '/'))
-        return list(self.__class__.objects.filter(tree_parent=self))
+        return Category.objects.get_children(self, recursive)
 
     @property
     def main_parent(self):

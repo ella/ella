@@ -24,6 +24,7 @@ def _import_module_member(modstr, noun):
 
 class CategoryManager(models.Manager):
     _cache = {}
+    _hierarchy = {}
     def get_for_id(self, pk):
         try:
             return self.__class__._cache[settings.SITE_ID][pk]
@@ -48,6 +49,32 @@ class CategoryManager(models.Manager):
 
     def clear_cache(self):
         self.__class__._cache.clear()
+        self.__class__._hierarchy.clear()
+
+    def _load_hierarchy(self, site_id):
+        cache = self.__class__._cache.setdefault(site_id, {})
+        hierarchy = self.__class__._hierarchy.setdefault(site_id, {})
+        for c in self.filter(site=site_id):
+            # make sure we are working with the instance already in cache
+            c = cache.setdefault(c.id, c)
+            hierarchy.setdefault(c.tree_parent_id, []).append(c)
+
+    def _retrieve_children(self, category):
+        if not self.__class__._hierarchy:
+            self._load_hierarchy(category.site_id)
+        return self.__class__._hierarchy[category.site_id].get(category.pk, [])
+
+    def get_children(self, category, recursive=False):
+        #make sure this is the instance stored in our cache
+        self._add_to_cache(category)
+        children = self._retrieve_children(category)
+        if recursive:
+            to_process = children[:]
+            while to_process:
+                grand_children = self._retrieve_children(to_process.pop())
+                children.extend(grand_children)
+                to_process.extend(grand_children)
+        return children
 
 class RelatedManager(models.Manager):
     def collect_related(self, finder_funcs, obj, count, *args, **kwargs):

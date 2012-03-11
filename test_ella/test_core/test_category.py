@@ -15,6 +15,12 @@ class TestCategory(TestCase):
         super(TestCategory, self).setUp()
         create_basic_categories(self)
 
+    def test_get_children(self):
+        tools.assert_equals([u'nested-category', ], [c.tree_path for c in self.category.get_children()])
+
+    def test_get_children_recursive(self):
+        tools.assert_equals([u'nested-category', u'nested-category/second-nested-category'], [c.tree_path for c in self.category.get_children(recursive=True)])
+
     def test_proper_root_path(self):
         tools.assert_equals("", self.category.tree_path)
 
