@@ -47,27 +47,24 @@ it's **slug**.
     @register.inclusion_tag('inc/menu_part.html', takes_context=True)
     def render_menu_part(context, slug):
         category = context.get('category', None)
-        current_root = category.tree_parent \
-            if category is not None and category.tree_parent_id and category.tree_parent.tree_parent_id \
-            else category
-        root = get_cached_object(Category, tree_path=slug)
+        root = Category.objects.get_by_tree_path(slug)
         
         return {
             'slug': slug,
             'root': root,
-            'current_root': current_root,    
+            'current_root': category.get_root_category() if category is not None else None,    
             'current': category,
-            'sub': Category.objects.filter(tree_parent=root)
+            'sub': root.get_children()
         }
 
 Next, create the template for the menu part itself::
 
     {% load my_tags %}
-    <li{% ifequal current_root.slug root.slug %} class="active"{% endifequal %}>
+    <li{% ifequal current.get_root_category root %} class="active"{% endifequal %}>
         <a href='{{ root.get_absolute_url }}'>{{ root.title }}</a>
         
         {% if sub %}
-            <ul{% ifnotequal current_root.slug root.slug %} class="hidden"{% endifnotequal %}>
+            <ul{% ifnotequal current_root root %} class="hidden"{% endifnotequal %}>
                 {% for cat in sub %}
                     <li{% ifequal current cat %} class="active"{% endifequal %}>
                         <a href="{{ cat.get_absolute_url }}">{{ cat.title }}</a>
