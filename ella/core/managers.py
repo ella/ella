@@ -124,7 +124,6 @@ class ListingManager(models.Manager):
         qset = super(ListingManager, self).get_query_set(*args, **kwargs).select_related(
                 'publishable',
                 'publishable__category',
-                'publishable__content_type'
             )
         return qset
 
