@@ -189,9 +189,9 @@ class RedisListingHandler(ListingHandler):
 
                 # we are using some existing key, copy it before removing stuff
                 exclude_key = '%s:exclude:%s' % (key, v)
-                pipe.expire(exclude_key, 60)
                 pipe.zunionstore(exclude_key, (key, ))
                 pipe.zrem(exclude_key, v1, v2)
+                pipe.expire(exclude_key, 60)
                 key = exclude_key
 
             self._key = key
