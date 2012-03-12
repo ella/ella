@@ -159,3 +159,17 @@ class TestRedisListings(TestCase):
         tools.assert_equals(l2.publishable, self.publishables[2])
         tools.assert_equals(l1.publish_from, dt1)
         tools.assert_equals(l2.publish_from, dt2)
+
+    def test_get_listing_uses_data_from_redis_correctly_for_pagination(self):
+        ct_id = self.publishables[0].content_type_id
+        t1, t2, t3 = time.time()-90, time.time()-100, time.time() - 110
+        self.redis.zadd('listing:cat:3', '%d:1:0' % ct_id, repr(t1))
+        self.redis.zadd('listing:cat:2', '%d:3:0' % ct_id, repr(t2))
+        self.redis.zadd('listing:cat:2', '%d:2:0' % ct_id, repr(t3))
+
+        lh = Listing.objects.get_queryset_wrapper(category=self.category_nested, children=ListingHandler.IMMEDIATE, source='redis')
+        tools.assert_equals(3, lh.count())
+        l = lh.get_listings(2, 1)
+
+        tools.assert_equals(1, len(l))
+        tools.assert_equals(l[0].publishable, self.publishables[1])
