@@ -6,6 +6,7 @@ from cStringIO import StringIO
 import os.path
 
 from django.db import models, IntegrityError
+from django.db.models import signals
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_unicode, smart_str
 from django.contrib.sites.models import Site
@@ -164,14 +165,6 @@ class Photo(models.Model):
 
             super(Photo, self).save(force_update=force_update)
 
-        if redis:
-            redis.hmset(REDIS_PHOTO_KEY % self.pk, self.get_image_info())
-
-    def delete(self, *args, **kwargs):
-        if redis:
-            redis.delete(REDIS_PHOTO_KEY % self.id)
-        super(Photo, self).delete(*args, **kwargs)
-
     def ratio(self):
         "Return photo's width to height ratio"
         if self.height:
@@ -182,6 +175,7 @@ class Photo(models.Model):
     def get_formated_photo(self, format):
         "Return formated photo"
         return FormatedPhoto.objects.get_photo_in_format(self, format)
+
 
 
 FORMAT_CACHE = {}
@@ -374,15 +368,6 @@ class FormatedPhoto(models.Model):
         else:
             self.image.name = self.file()
         super(FormatedPhoto, self).save(**kwargs)
-        if redis:
-            redis.hmset(
-                REDIS_FORMATTED_PHOTO_KEY % (self.photo_id, self.format.id),
-                {
-                    'url': self.url,
-                    'width': self.width,
-                    'height': self.height,
-                }
-            )
 
     def delete(self):
         try:
@@ -390,8 +375,6 @@ class FormatedPhoto(models.Model):
         except:
             log.warning('Error deleting FormatedPhoto %d-%s (%s).', self.photo_id, self.format.name, self.image.name)
 
-        if redis:
-            redis.delete(REDIS_FORMATTED_PHOTO_KEY % (self.photo_id, self.format.id))
         super(FormatedPhoto, self).delete()
 
     def remove_file(self):
@@ -403,3 +386,28 @@ class FormatedPhoto(models.Model):
         source_file = path.split(self.photo.image.name)
         return path.join(source_file[0], str (self.format.id) + '-' + source_file[1])
 
+if redis:
+    def store_photo(instance, **kwargs):
+        if instance.image:
+            redis.hmset(REDIS_PHOTO_KEY % instance.pk, instance.get_image_info())
+
+    def remove_photo(instance, **kwargs):
+        redis.delete(REDIS_PHOTO_KEY % instance.id)
+
+    def store_formated_photo(instance, **kwargs):
+        redis.hmset(
+            REDIS_FORMATTED_PHOTO_KEY % (instance.photo_id, instance.format.id),
+            {
+                'url': instance.url,
+                'width': instance.width,
+                'height': instance.height,
+            }
+        )
+
+    def remove_formated_photo(instance, **kwargs):
+        redis.delete(REDIS_FORMATTED_PHOTO_KEY % (instance.photo_id, instance.format.id))
+
+    signals.post_save.connect(store_photo, sender=Photo)
+    signals.post_delete.connect(remove_photo, sender=Photo)
+    signals.post_save.connect(store_formated_photo, sender=FormatedPhoto)
+    signals.post_delete.connect(remove_formated_photo, sender=FormatedPhoto)
