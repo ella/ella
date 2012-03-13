@@ -42,6 +42,14 @@ def _get_key(start, model, kwargs):
                 ','.join(':'.join((key, dump_param(kwargs[key]))) for key in sorted(kwargs.keys()))
     )))
 
+def delete_cached_list(model, *args, **kwargs):
+    if isinstance(model, ContentType):
+        model = model.model_class()
+
+    key = _get_key(KEY_FORMAT_LIST, model, kwargs)
+    cache.delete(key)
+
+
 def get_cached_list(model, *args, **kwargs):
     """
     Return a cached list. If the list does not exist in the cache, create it
