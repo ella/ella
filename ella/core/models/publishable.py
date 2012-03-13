@@ -2,7 +2,7 @@ from datetime import datetime
 
 from django.db import models
 from django.conf import settings
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _, ugettext
 from django.utils.safestring import mark_safe
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import slugify
@@ -238,9 +238,9 @@ class Listing(models.Model):
 
     def __unicode__(self):
         try:
-            return _(u'%s listed in %s') % (self.publishable, self.category)
+            return ugettext(u'%s listed in %s') % (self.publishable, self.category)
         except:
-            return _('Broken listing')
+            return ugettext('Broken listing')
 
     def clean(self):
         if not self.publishable:
