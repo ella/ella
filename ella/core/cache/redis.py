@@ -44,16 +44,22 @@ def publishable_published(publishable, **kwargs):
 
 def publishable_unpublished(publishable, **kwargs):
     for l in publishable.listing_set.all():
+        listing_pre_delete(l.__class__, l)
         listing_post_delete(l.__class__, l)
 
 
-def listing_post_delete(sender, instance, **kwargs):
+def listing_pre_delete(sender, instance, **kwargs):
     pipe = client.pipeline()
     v, keys = get_redis_values(instance)
     for k in keys:
         for k in keys:
             pipe = pipe.zrem(k, v)
-    pipe.execute()
+    instance.__redis_pipe = pipe
+
+def listing_post_delete(sender, instance, **kwargs):
+    if hasattr(instance, '__redis_pipe'):
+        pipe = instance.__redis_pipe
+        pipe.execute()
 
 def listing_pre_save(sender, instance, **kwargs):
     pipe = client.pipeline()

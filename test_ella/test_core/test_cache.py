@@ -7,7 +7,7 @@ from django.test import TestCase
 from django.test.client import RequestFactory
 from django.contrib.sites.models import Site
 from django.contrib.contenttypes.models import ContentType
-from django.db.models.signals import pre_save, post_save, post_delete
+from django.db.models.signals import pre_save, post_save, post_delete, pre_delete
 
 from ella.core.cache import utils, redis
 from ella.core.models import Listing
@@ -63,6 +63,7 @@ class TestRedisListings(TestCase):
         redis.client = self.redis
         pre_save.connect(redis.listing_pre_save, sender=Listing)
         post_save.connect(redis.listing_post_save, sender=Listing)
+        pre_delete.connect(redis.listing_pre_delete, sender=Listing)
         post_delete.connect(redis.listing_post_delete, sender=Listing)
         content_published.connect(redis.publishable_published)
         content_unpublished.connect(redis.publishable_unpublished)
@@ -74,6 +75,7 @@ class TestRedisListings(TestCase):
         redis.client = None
         pre_save.disconnect(redis.listing_pre_save, sender=Listing)
         post_save.disconnect(redis.listing_post_save, sender=Listing)
+        pre_delete.disconnect(redis.listing_pre_delete, sender=Listing)
         post_delete.disconnect(redis.listing_post_delete, sender=Listing)
         content_published.disconnect(redis.publishable_published)
         content_unpublished.disconnect(redis.publishable_unpublished)
@@ -109,6 +111,20 @@ class TestRedisListings(TestCase):
         )
         tools.assert_equals(['%d:3:0' % ct_id], self.redis.zrange('listing:cat:3', 0, 100))
         tools.assert_equals(['%d:1:0' % ct_id, '%d:2:0' % ct_id, '%d:3:0' % ct_id], self.redis.zrange('listing:ct:%d' % ct_id, 0, 100))
+
+    def test_listing_delete_removes_itself_from_redis(self):
+        list_all_publishables_in_category_by_hour(self)
+        self.listings[1].delete()
+        ct_id = self.publishables[0].content_type_id
+        tools.assert_equals(set([
+                'listing:cat:1',
+                'listing:cat:3',
+                'listing:ct:%d' % ct_id,
+            ]),
+            set(self.redis.keys())
+        )
+        tools.assert_equals(['%d:3:0' % ct_id], self.redis.zrange('listing:cat:3', 0, 100))
+        tools.assert_equals(['%d:1:0' % ct_id, '%d:3:0' % ct_id], self.redis.zrange('listing:ct:%d' % ct_id, 0, 100))
 
     def test_get_listing_uses_data_from_redis(self):
         ct_id = self.publishables[0].content_type_id
