@@ -5,7 +5,7 @@ from django.utils.timesince import timesince
 from django.utils.translation import ugettext_lazy as _
 
 from ella.core.models import Publishable
-from ella.core.cache import get_cached_list
+from ella.core.cache import get_cached_list, delete_cached_list
 
 class InfoBox(models.Model):
     """Defines embedable text model."""
@@ -72,4 +72,8 @@ class ArticleContents(models.Model):
 
     def __unicode__(self):
         return self.title or unicode(self.article)
+
+    def save(self, *args, **kwargs):
+        delete_cached_list(ArticleContents, article=self.article)
+        return super(ArticleContents, self).save(*args, **kwargs)
 
