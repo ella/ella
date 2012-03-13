@@ -92,7 +92,7 @@ class RedisListingHandler(ListingHandler):
 
     def _get_listing(self, publishable, score, data):
         Listing = get_model('core', 'listing')
-        return Listing(publishable=publishable, commercial=data[0], publish_from=datetime.fromtimestamp(score))
+        return Listing(publishable=publishable, category=publishable.category, commercial=data[0], publish_from=datetime.fromtimestamp(score))
 
     def _get_score_limits(self):
         max_score = None
