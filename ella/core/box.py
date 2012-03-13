@@ -108,17 +108,11 @@ class Box(object):
         return rend
 
     def double_render(self):
-        if self.template_name:
-            t_name = self.template_name
-        else:
-            t_name = loader.select_template(self._get_template_list()).name
-
-        return '''{%% box %(box_type)s for %(opts)s with pk %(pk)s %%}template_name: %(template_name)s\n%(params)s{%% endbox %%}''' % {
+        return '''{%% box %(box_type)s for %(opts)s with pk %(pk)s %%}%(params)s{%% endbox %%}''' % {
                 'box_type' : self.box_type,
                 'opts' : self.opts,
                 'pk' : self.obj.pk,
                 'params' : '\n'.join(('%s:%s' % item for item in self.params.items())),
-                'template_name' : t_name,
         }
 
     def _get_template_list(self):
