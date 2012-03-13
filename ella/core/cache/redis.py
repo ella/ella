@@ -130,7 +130,7 @@ class RedisListingHandler(ListingHandler):
         ids = []
         for value, score in results[-1]:
             value = value.split(':')
-            ids.append((value[0], value[1]))
+            ids.append((int(value[0]), int(value[1])))
             data.append((score, value[2:]))
 
         # and retrieve publishables from cache
