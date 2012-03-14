@@ -61,12 +61,7 @@ class TestRedisListings(TestCase):
         self.redis = redis_client.Redis(**settings.TEST_CORE_REDIS)
 
         redis.client = self.redis
-        pre_save.connect(redis.listing_pre_save, sender=Listing)
-        post_save.connect(redis.listing_post_save, sender=Listing)
-        pre_delete.connect(redis.listing_pre_delete, sender=Listing)
-        post_delete.connect(redis.listing_post_delete, sender=Listing)
-        content_published.connect(redis.publishable_published)
-        content_unpublished.connect(redis.publishable_unpublished)
+        redis.connect_signals()
 
         create_basic_categories(self)
         create_and_place_more_publishables(self)

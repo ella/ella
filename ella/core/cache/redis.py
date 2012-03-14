@@ -229,3 +229,18 @@ class RedisListingHandler(ListingHandler):
             self._key = key
         return self._key, pipe
 
+def connect_signals():
+    from django.db.models.signals import pre_save, post_save, post_delete, pre_delete
+    from ella.core.signals import content_published, content_unpublished
+    from ella.core.models import Listing
+    content_published.connect(publishable_published)
+    content_unpublished.connect(publishable_unpublished)
+
+    pre_save.connect(listing_pre_save, sender=Listing)
+    post_save.connect(listing_post_save, sender=Listing)
+
+    pre_delete.connect(listing_pre_delete, sender=Listing)
+    post_delete.connect(listing_post_delete, sender=Listing)
+
+if client:
+    connect_signals()
