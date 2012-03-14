@@ -10,7 +10,7 @@ from django.core.validators import validate_slug
 from jsonfield.fields import JSONField
 
 from ella.core.box import Box
-from ella.core.cache import CachedGenericForeignKey, SiteForeignKey, ContentTypeForeignKey
+from ella.core.cache import CachedGenericForeignKey, SiteForeignKey, ContentTypeForeignKey, CategoryForeignKey, CachedForeignKey
 from ella.core.conf import core_settings
 from ella.core.managers import CategoryManager
 
@@ -26,7 +26,7 @@ class Author(models.Model):
     All the fields except for ``slug`` are optional to enable maximum of 
     flexibility.
     """
-    user = models.ForeignKey(User, verbose_name=_('User'), blank=True, null=True)
+    user = CachedForeignKey(User, verbose_name=_('User'), blank=True, null=True)
     name = models.CharField(_('Name'), max_length=200, blank=True)
     slug = models.SlugField(_('Slug'), max_length=255, unique=True, validators=[validate_slug])
     description = models.TextField(_('Description'), blank=True)
@@ -94,7 +94,7 @@ class Category(models.Model):
         'Template to use to render detail page of this category.'),
         choices=template_choices, default=template_choices[0][0])
     slug = models.SlugField(_('Slug'), max_length=255, validators=[validate_slug])
-    tree_parent = models.ForeignKey('self', null=True, blank=True,
+    tree_parent = CategoryForeignKey(null=True, blank=True,
         verbose_name=_("Parent category"))
     tree_path = models.CharField(verbose_name=_("Path from root category"),
         max_length=255, editable=False)
