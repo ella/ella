@@ -1,27 +1,44 @@
-from django.core.files.images import get_image_dimensions
+import logging
 from PIL import Image
 from datetime import datetime
 from os import path
-import os
+from cStringIO import StringIO
+import os.path
 
 from django.db import models, IntegrityError
-from django.utils.translation import ugettext, ugettext_lazy as _
+from django.db.models import signals
+from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import force_unicode, smart_str
 from django.contrib.sites.models import Site
-from django.utils.safestring import mark_safe
-from django.core.files.uploadedfile import UploadedFile
 from django.core.files.base import ContentFile
 from django.conf import settings
 from django.template.defaultfilters import slugify
 
+from jsonfield.fields import JSONField
+
 from ella.core.models.main import Author, Source
 from ella.core.box import Box
 from ella.core.cache.utils import get_cached_object
-from ella.utils.filemanipulation import file_rename
 from ella.photos.conf import photos_settings
 
-from formatter import Formatter, detect_img_type
+from formatter import Formatter
 
 __all__ = ("Format", "FormatedPhoto", "Photo")
+
+log = logging.getLogger('ella.photos')
+
+redis = None
+REDIS_PHOTO_KEY = 'photo:%d'
+REDIS_FORMATTED_PHOTO_KEY = 'photo:%d:%d'
+
+if hasattr(settings, 'PHOTOS_REDIS'):
+    try:
+        from redis import Redis
+    except:
+        log.error('Redis support requested but Redis client not installed.')
+        redis = None
+    else:
+        redis = Redis(**getattr(settings, 'PHOTOS_REDIS'))
 
 class PhotoBox(Box):
     def get_context(self):
@@ -35,18 +52,35 @@ class PhotoBox(Box):
                 'show_description' : self.params.get('show_description', ''),
                 'show_authors' : self.params.get('show_authors', ''),
                 'show_detail' : self.params.get('show_detail', ''),
-                'show_source' : self.params.get('show_source', ''),###
+                'show_source' : self.params.get('show_source', ''), ###
                 'link_url': self.params.get('link_url', ''),
             })
         return cont
 
+def upload_to(instance, filename):
+    name, ext = os.path.splitext(filename)
+    if instance.slug:
+        name = instance.slug
+    ext = photos_settings.TYPE_EXTENSION.get(instance._get_image().format, ext.lower())
+
+    return os.path.join(
+        force_unicode(datetime.now().strftime(smart_str(photos_settings.UPLOAD_TO))),
+        name + ext
+    )
+
 class Photo(models.Model):
-    "Represents original (unformated) photo."
+    """
+    Represents original (unformated) photo uploaded by user. Used as source
+    object for all the formatting stuff and to keep the metadata common to 
+    all related ``FormatedPhoto`` objects.
+    """
     box_class = PhotoBox
     title = models.CharField(_('Title'), max_length=200)
     description = models.TextField(_('Description'), blank=True)
     slug = models.SlugField(_('Slug'), max_length=255)
-    image = models.ImageField(_('Image'), upload_to=photos_settings.UPLOAD_TO, height_field='height', width_field='width') # save it to YYYY/MM/DD structure
+    # save it to YYYY/MM/DD structure
+    image = models.ImageField(_('Image'), upload_to=upload_to,
+        max_length=255, height_field='height', width_field='width')
     width = models.PositiveIntegerField(editable=False)
     height = models.PositiveIntegerField(editable=False)
 
@@ -60,113 +94,76 @@ class Photo(models.Model):
     authors = models.ManyToManyField(Author, verbose_name=_('Authors') , related_name='photo_set')
     source = models.ForeignKey(Source, blank=True, null=True, verbose_name=_('Source'))
 
-    created = models.DateTimeField(default=datetime.now, editable=False)
+    created = models.DateTimeField(auto_now_add=True)
 
-    def __init__(self, *args, **kwargs):
-        super(Photo, self).__init__(*args, **kwargs)
+    # generic JSON field to store app cpecific data
+    app_data = JSONField(default='{}', blank=True, editable=False)
 
-        # path to thumbnail, cached when thumbnail is generated for the first time
-        self.thumbnail_path = None
+    class Meta:
+        verbose_name = _('Photo')
+        verbose_name_plural = _('Photos')
 
-    def thumb(self):
-        """
-        Generates html and thumbnails for admin site.
-        """
-        thumb_url = self.thumb_url()
-        if not thumb_url:
-            return mark_safe("""<strong>%s</strong>""" % ugettext('Thumbnail not available'))
-        return mark_safe("""<a href="%s" class="js-nohashadr thickbox" title="%s" target="_blank"><img src="%s" alt="Thumbnail %s" /></a>""" % (self.image_url(), self.title, thumb_url, self.title))
-    thumb.allow_tags = True
+    def __unicode__(self):
+        return self.title
 
-    def get_thumbnail_path(self, image_name=None):
-        """
-        Return relative path for thumbnail file for storage
-        photos/2008/12/31/foo.jpg => photos/2008/12/31/thumb-foo.jpg
-        """
-        if not image_name:
-            image_name = self.image.name
-        return path.dirname(image_name) + "/" + 'thumb-%s' % path.basename(image_name)
-
-    def image_url(self):
-        if photos_settings.IMAGE_URL_PREFIX and not path.exists(self.image.path):
-            return photos_settings.IMAGE_URL_PREFIX.rstrip('/') + '/' + self.image.name
+    def get_absolute_url(self):
         return self.image.url
 
-    def thumb_url(self):
-        """
-        Generates thumbnail for admin site and returns its url
-        """
-        # cache thumbnail for future use to avoid hitting storage.exists() every time
-        # and to allow thumbnail detection after instance has been deleted
-        self.thumbnail_path = self.get_thumbnail_path()
-        if photos_settings.IMAGE_URL_PREFIX and not path.exists(self.image.path):
-            # custom URL prefix (debugging purposes)
-            return photos_settings.IMAGE_URL_PREFIX.rstrip('/') + '/' + self.thumbnail_path
+    def get_image_info(self):
+        return {
+            'url': self.image.url,
+            'width': self.width,
+            'height': self.height,
+        }
 
-        type = detect_img_type(self.image.path)
-        if not type:
-            return None
+    def _get_image(self):
+        if not hasattr(self, '_pil_image'):
+            self._pil_image = Image.open(self.image)
+        return self._pil_image
 
-        storage = self.image.storage
-
-        if not storage.exists(self.thumbnail_path):
-            try:
-                im = Image.open(self.image.path)
-                im.thumbnail(photos_settings.THUMB_DIMENSION, Image.ANTIALIAS)
-                im.save(storage.path(self.thumbnail_path), type)
-            except IOError:
-                # TODO Logging something wrong
-                return None
-        return storage.url(self.thumbnail_path)
-
-    def save(self, force_insert=False, force_update=False, **kwargs):
+    def save(self, **kwargs):
         """Overrides models.Model.save.
 
         - Generates slug.
         - Saves image file.
         """
+        if not self.width or not self.height:
+            self.width, self.height = self.image.width, self.image.height
 
         # prefill the slug with the ID, it requires double save
         if not self.id:
-            if isinstance(self.image, UploadedFile):
-                # due to PIL has read several bytes from image, position in file has to be reset
-                self.image.seek(0)
-            # FIXME: better unique identifier, supercalifragilisticexpialidocious?
+            img = self.image
+
+            # store dummy values first...
+            w, h = self.width, self.height
+            self.image = ''
+            self.width, self.height = w, h
             self.slug = ''
-            super(Photo, self).save(force_insert, force_update)
-            self.width, self.height = get_image_dimensions(self.image.path)
+
+            super(Photo, self).save(force_insert=True)
+
+            # ... so that we can generate the slug
             self.slug = str(self.id) + '-' + slugify(self.title)
             # truncate slug in order to fit in an ImageField and/or paths in Redirects
             self.slug = self.slug[:64]
-            force_insert, force_update = False, True
-            image_changed = False
+            # .. tha will be used in the image's upload_to function
+            self.image = img
+            # and the image will be saved properly
+            super(Photo, self).save(force_update=True)
         else:
-            old = Photo.objects.get(pk = self.pk)
-            image_changed = old.image != self.image
-        # rename image by slug
-        imageType = detect_img_type(self.image.path)
-        if imageType is not None:
-            self.image = file_rename(self.image.name.encode('utf-8'), self.slug, photos_settings.TYPE_EXTENSION[ imageType ])
-        # delete formatedphotos if new image was uploaded
-        if image_changed:
-            super(Photo, self).save(force_insert=force_insert, force_update=force_update, **kwargs)
-            self.width, self.height = get_image_dimensions(self.image.path)
-            force_insert, force_update = False, True
-            for f_photo in self.formatedphoto_set.all():
-                f_photo.delete()
-        super(Photo, self).save(force_insert=force_insert, force_update=force_update, **kwargs)
+            try:
+                old = Photo.objects.get(pk=self.pk)
 
-    def delete_thumbnail(self):
-        """
-        If thumbnail was generated for this photo, delete it
-        """
-        if self.image.storage.exists(self.thumbnail_path):
-            self.image.storage.delete(self.thumbnail_path)
-        self.thumbnail_path = None
+                force_update = True
+                # delete formatedphotos if new image was uploaded
+                if old.image != self.image:
+                    for f_photo in self.formatedphoto_set.all():
+                        f_photo.delete()
+            except Photo.DoesNotExist:
+                # somebody is just trying to create new model with given PK
+                force_update = False
 
-    def delete(self, *args, **kwargs):
-        super(Photo, self).delete(*args, **kwargs)
-        self.delete_thumbnail()
+            super(Photo, self).save(force_update=force_update)
 
     def ratio(self):
         "Return photo's width to height ratio"
@@ -177,73 +174,126 @@ class Photo(models.Model):
 
     def get_formated_photo(self, format):
         "Return formated photo"
-        format_object = Format.objects.get(name=format, sites=settings.SITE_ID)
+        return FormatedPhoto.objects.get_photo_in_format(self, format)
+
+
+
+FORMAT_CACHE = {}
+class FormatManager(models.Manager):
+    def get_for_name(self, name):
         try:
-            formated_photo = get_cached_object(FormatedPhoto, photo=self, format=format_object)
-        except FormatedPhoto.DoesNotExist:
-            try:
-                formated_photo = FormatedPhoto.objects.create(photo=self, format=format_object)
-            except (IOError, SystemError, IntegrityError):
-                return None
-
-        return formated_photo
-
-    def __unicode__(self):
-        return self.title
-
-    def get_absolute_url(self):
-        return self.image.url
-
-    class Meta:
-        verbose_name = _('Photo')
-        verbose_name_plural = _('Photos')
-        ordering = ('-created',)
-
+            return FORMAT_CACHE[name]
+        except KeyError:
+            FORMAT_CACHE[name] = format = get_cached_object(Format, name=name, sites__id=settings.SITE_ID)
+        return format
 
 class Format(models.Model):
-    "Defines per-site photo sizes"
+    """
+    Defines per-site photo sizes together with rules how to adhere to them.
+    
+    This includes:
+    
+    * maximum width and height
+    * cropping settings
+    * stretch (rescale) settings
+    * sample quality
+    """
     name = models.CharField(_('Name'), max_length=80)
     max_width = models.PositiveIntegerField(_('Max width'))
     max_height = models.PositiveIntegerField(_('Max height'))
-    flexible_height = models.BooleanField(_('Flexible height'), help_text=_(('Determines whether max_height is an absolute maximum, '
-                                                                                 'or the formatted photo can vary from max_height for flexible_max_height.')))
-    flexible_max_height = models.PositiveIntegerField(_('Flexible max height'), blank=True, null=True)
+    flexible_height = models.BooleanField(_('Flexible height'), help_text=_((
+        'Determines whether max_height is an absolute maximum, or the formatted'
+        'photo can vary from max_height to flexible_max_height.')))
+    flexible_max_height = models.PositiveIntegerField(_('Flexible max height'),
+        blank=True, null=True)
     stretch = models.BooleanField(_('Stretch'))
     nocrop = models.BooleanField(_('Do not crop'))
-    resample_quality = models.IntegerField(_('Resample quality'), choices=photos_settings.FORMAT_QUALITY, default=85)
+    resample_quality = models.IntegerField(_('Resample quality'),
+        choices=photos_settings.FORMAT_QUALITY, default=85)
     sites = models.ManyToManyField(Site, verbose_name=_('Sites'))
 
-    def get_blank_img(self):
-        """
-        Return fake FormatedPhoto object to be used in templates when an error occurs in image generation.
-        """
-        out = {
-            'width' : self.max_width,
-            'height' : self.max_height,
-            'filename' : 'img/empty/%s.png' % (self.name),
-            'format' : self,
-            'url' : settings.STATIC_URL + photos_settings.EMPTY_IMAGE_SITE_PREFIX + 'img/empty/%s.png' % (self.name),
-        }
-        return out
-
-    def ratio(self):
-        "Return photo's width to height ratio"
-        return float(self.max_width) / self.max_height
-
-    def __unicode__(self):
-        return  u"%s (%sx%s) " % (self.name, self.max_width, self.max_height)
+    objects = FormatManager()
 
     class Meta:
         verbose_name = _('Format')
         verbose_name_plural = _('Formats')
-        ordering = ('name', '-max_width',)
+
+    def __unicode__(self):
+        return  u"%s (%sx%s) " % (self.name, self.max_width, self.max_height)
+
+    def get_blank_img(self):
+        """
+        Return fake ``FormatedPhoto`` object to be used in templates when an error
+        occurs in image generation.
+        """
+        out = {
+            'blank': True,
+            'width' : self.max_width,
+            'height' : self.max_height,
+            'url' : photos_settings.EMPTY_IMAGE_SITE_PREFIX + 'img/empty/%s.png' % (self.name),
+        }
+        return out
+
+    def ratio(self):
+        """Return photo's width to height ratio"""
+        return float(self.max_width) / self.max_height
+
+
+class FormatedPhotoManager(models.Manager):
+    def get_photo_in_format(self, photo, format):
+        if isinstance(photo, Photo):
+            photo_id = photo.id
+        else:
+            photo_id = photo
+            photo = None
+
+        if not isinstance(format, Format):
+            format = Format.objects.get_for_name(format)
+
+        if redis:
+            p = redis.pipeline()
+            p.hgetall(REDIS_PHOTO_KEY % photo_id)
+            p.hgetall(REDIS_FORMATTED_PHOTO_KEY % (photo_id, format.id))
+            original, formatted = p.execute()
+            if formatted:
+                formatted['original'] = original
+                return formatted
+
+        if not photo:
+            try:
+                photo = get_cached_object(Photo, pk=photo_id)
+            except Photo.DoesNotExist:
+                return format.get_blank_img()
+
+        try:
+            formated_photo = get_cached_object(FormatedPhoto, photo=photo, format=format)
+        except FormatedPhoto.DoesNotExist:
+            try:
+                formated_photo = self.create(photo=photo, format=format)
+            except (IOError, SystemError, IntegrityError), e:
+                log.error("Cannot create formatted photo due to %s.", e)
+                return format.get_blank_img()
+
+        return {
+            'original': photo.get_image_info(),
+
+            'url': formated_photo.url,
+            'width': formated_photo.width,
+            'height': formated_photo.height,
+        }
 
 
 class FormatedPhoto(models.Model):
-    "Specific photo of specific format."
+    """
+    Cache-like container of specific photo of specific format. Besides
+    the path to the generated image file, crop used is also stored together
+    with new ``width`` and ``height`` attributes.
+    """
     photo = models.ForeignKey(Photo)
     format = models.ForeignKey(Format)
-    image = models.ImageField(upload_to=photos_settings.UPLOAD_TO, height_field='height', width_field='width', max_length=300) # save it to YYYY/MM/DD structure
+    # save it to YYYY/MM/DD structure
+    image = models.ImageField(upload_to=photos_settings.UPLOAD_TO,
+        height_field='height', width_field='width', max_length=300)
     crop_left = models.PositiveIntegerField()
     crop_top = models.PositiveIntegerField()
     crop_width = models.PositiveIntegerField()
@@ -251,34 +301,22 @@ class FormatedPhoto(models.Model):
     width = models.PositiveIntegerField(editable=False)
     height = models.PositiveIntegerField(editable=False)
 
+    objects = FormatedPhotoManager()
+
+    class Meta:
+        verbose_name = _('Formated photo')
+        verbose_name_plural = _('Formated photos')
+        unique_together = (('photo', 'format'),)
+
+    def __unicode__(self):
+        return u"%s - %s" % (self.photo, self.format)
+
     @property
     def url(self):
         "Returns url of the photo file."
-        if photos_settings.IMAGE_URL_PREFIX and not path.exists(self.image.path):
-            # custom URL prefix (debugging purposes)
-            return photos_settings.IMAGE_URL_PREFIX.rstrip('/') + '/' + self.image.name
+        return self.image.url
 
-        if not photos_settings.DO_URL_CHECK:
-            return self.image.url
-
-        if not path.exists(self.image.path):
-            # NFS not available - we have no chance of creating it
-            return self.format.get_blank_img()['url']
-
-        if path.exists(self.image.path):
-            # image exists
-            return self.image.url
-
-        # image does not exist - try and create it
-        try:
-            self.generate()
-            return self.image.url
-        except (IOError, SystemError):
-            return self.format.get_blank_img()['url']
-
-
-    def generate(self, save=True):
-        "Generates photo file in current format"
+    def _generate_img(self):
         crop_box = None
         if self.crop_left:
             crop_box = (self.crop_left, self.crop_top, \
@@ -289,26 +327,34 @@ class FormatedPhoto(models.Model):
             p = self.photo
             important_box = (p.important_left, p.important_top, p.important_right, p.important_bottom)
 
-        formatter = Formatter(Image.open(self.photo.image.path), self.format, crop_box=crop_box, important_box=important_box)
+        formatter = Formatter(self.photo._get_image(), self.format, crop_box=crop_box, important_box=important_box)
 
-        stretched_photo, crop_box = formatter.format()
+        return formatter.format()
+
+    def generate(self, save=True):
+        """
+        Generates photo file in current format.
+        
+        If ``save`` is ``True``, file is saved too.
+        """
+        stretched_photo, crop_box = self._generate_img()
 
         # set crop_box to (0,0,0,0) if photo not cropped
         if not crop_box:
-            crop_box = 0,0,0,0
+            crop_box = 0, 0, 0, 0
 
         self.crop_left, self.crop_top, right, bottom = crop_box
         self.crop_width = right - self.crop_left
         self.crop_height = bottom - self.crop_top
 
         self.width, self.height = stretched_photo.size
-        stretched_photo.save(self.file(), quality=self.format.resample_quality)
 
-        f = open(self.file(), 'rb')
-        file = ContentFile(f.read())
-        f.close()
+        f = StringIO()
+        stretched_photo.save(f, format=Image.EXTENSION[path.splitext(self.photo.image.name)[1]],
+            quality=self.format.resample_quality)
+        f.seek(0)
 
-        self.image.save(self.file(relative=True), file, save)
+        self.image.save(self.file(), ContentFile(f.read()), save)
 
     def save(self, **kwargs):
         """Overrides models.Model.save
@@ -320,30 +366,48 @@ class FormatedPhoto(models.Model):
         if not self.image:
             self.generate(save=False)
         else:
-            self.image.name = self.file(relative=True)
+            self.image.name = self.file()
         super(FormatedPhoto, self).save(**kwargs)
 
     def delete(self):
-        self.remove_file()
+        try:
+            self.remove_file()
+        except:
+            log.warning('Error deleting FormatedPhoto %d-%s (%s).', self.photo_id, self.format.name, self.image.name)
+
         super(FormatedPhoto, self).delete()
 
     def remove_file(self):
-        if path.exists(path.join(settings.MEDIA_ROOT, self.file(relative=True))):
-            os.remove(path.join(settings.MEDIA_ROOT, self.file(relative=True)))
+        if self.image.name:
+            self.image.delete()
 
-    def file(self, relative=False):
+    def file(self):
         """ Method returns formated photo path - derived from format.id and source Photo filename """
-        if relative:
-            source_file = path.split(self.photo.image.name)
-        else:
-            source_file = path.split(self.photo.image.path)
-        return path.join(source_file[0],  str (self.format.id) + '-' + source_file[1])
+        source_file = path.split(self.photo.image.name)
+        return path.join(source_file[0], str (self.format.id) + '-' + source_file[1])
 
-    def __unicode__(self):
-        return u"%s - %s" % (self.photo, self.format)
+if redis:
+    def store_photo(instance, **kwargs):
+        if instance.image:
+            redis.hmset(REDIS_PHOTO_KEY % instance.pk, instance.get_image_info())
 
-    class Meta:
-        verbose_name = _('Formated photo')
-        verbose_name_plural = _('Formated photos')
-        unique_together = (('photo','format'),)
+    def remove_photo(instance, **kwargs):
+        redis.delete(REDIS_PHOTO_KEY % instance.id)
 
+    def store_formated_photo(instance, **kwargs):
+        redis.hmset(
+            REDIS_FORMATTED_PHOTO_KEY % (instance.photo_id, instance.format.id),
+            {
+                'url': instance.url,
+                'width': instance.width,
+                'height': instance.height,
+            }
+        )
+
+    def remove_formated_photo(instance, **kwargs):
+        redis.delete(REDIS_FORMATTED_PHOTO_KEY % (instance.photo_id, instance.format.id))
+
+    signals.post_save.connect(store_photo, sender=Photo)
+    signals.post_delete.connect(remove_photo, sender=Photo)
+    signals.post_save.connect(store_formated_photo, sender=FormatedPhoto)
+    signals.post_delete.connect(remove_formated_photo, sender=FormatedPhoto)

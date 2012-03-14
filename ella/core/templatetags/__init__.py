@@ -8,3 +8,6 @@ template.add_to_builtins('ella.core.templatetags.related')
 template.add_to_builtins('ella.core.templatetags.custom_urls_tags')
 # and the same for i18n
 template.add_to_builtins('django.templatetags.i18n')
+# and photos are always useful
+template.add_to_builtins('ella.photos.templatetags.photos')
+

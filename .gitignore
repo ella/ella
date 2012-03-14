@@ -2,14 +2,15 @@
 *.py[co]
 .*.swp
 *~
+ella.egg-info
 
-tests/unit_project/settings/local.py
-tests/example_project/settings/local.py
+test_ella/settings/local.py
 
 ella/ellaadmin/templates/admin_orig
-tests/unit_project/static/photos
-tests/example_project/static/photos
+test_ella/static/photos
+test_ella/cover
 
 .project
 .pydevproject
 .settings
+.coverage

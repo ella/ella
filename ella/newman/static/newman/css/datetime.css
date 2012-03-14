@@ -1,8 +1,0 @@
-div.timepicker {
-    background: #fff; border: 1px solid #999; margin-top: 2px; padding: 3px 2px;
-    border-radius: 3px; -moz-border-radius: 3px;
-    font-size: 90%;
-}
-div.timepicker a.fr { float: right; display: block; width: 16px; height: 16px; padding: 0; }
-div.datetimepicker { display: none; position: absolute; }
-span.dtpicker-trigger { margin-left: 3px; }

@@ -1,68 +1,59 @@
 import logging
 
-from django.conf import settings
 from django import template
 from django.db import models
 from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
 from django.template.defaultfilters import stringfilter
+from django.contrib.contenttypes.models import ContentType
 
 from ella.core.models import Listing, Category
+from ella.core.managers import ListingHandler
 from ella.core.cache.utils import get_cached_object
-from ella.core.cache.invalidate import CACHE_DELETER
 from ella.core.box import Box
-from ella.core.conf import core_settings
 
 
 log = logging.getLogger('ella.core.templatetags')
 register = template.Library()
 
 class ListingNode(template.Node):
-    def __init__(self, var_name, parameters, parameters_to_resolve):
+    def __init__(self, var_name, parameters):
         self.var_name = var_name
         self.parameters = parameters
-        self.parameters_to_resolve = parameters_to_resolve
-        self.resolved_parameters = self.parameters.copy()
-
-    def resolve_parameter(self, key, context):
-        value = self.parameters[key]
-        if key == 'count':
-            if type(value) in (str, unicode) and value.isdigit():
-                return int(value)
-        return template.Variable(value).resolve(context)
 
     def render(self, context):
-        unique_var_name = None
-        for key in self.parameters_to_resolve:
-            if key == 'unique':
-                unique_var_name = self.parameters[key]
-            if key == 'unique' and unique_var_name not in context.dicts[-1]: # autocreate variable in context
-                self.resolved_parameters[key] = context.dicts[-1][ unique_var_name ] = set()
-                continue
-            #self.parameters[key] = template.Variable(self.parameters[key]).resolve(context)
-            self.resolved_parameters[key] = self.resolve_parameter(key, context)
-        if self.resolved_parameters.has_key('category') and \
-            isinstance(self.resolved_parameters['category'], basestring):
-            self.resolved_parameters['category'] = get_cached_object(Category, tree_path=self.resolved_parameters['category'], site__id=settings.SITE_ID)
-        out = Listing.objects.get_listing(**self.resolved_parameters)
+        params = {}
+        for key, value in self.parameters.items():
+            if isinstance(value, template.Variable):
+                value = value.resolve(context)
+            params[key] = value
 
-        if 'unique' in self.parameters:
-            unique = self.resolved_parameters['unique'] #context[unique_var_name]
-            map(lambda x: unique.add(x.placement_id),out)
-        context[self.var_name] = out
+        if 'category' in params and isinstance(params['category'], basestring):
+            params['category'] = Category.objects.get_by_tree_path(params['category'])
+
+        limits = {}
+        if 'offset' in params:
+            # templates are 1-based, compensate
+            limits['offset'] = params.pop('offset') - 1
+
+        if 'count' in params:
+            limits['count'] = params.pop('count')
+
+        lh = Listing.objects.get_queryset_wrapper(**params)
+
+        context[self.var_name] = lh.get_listings(**limits)
         return ''
 
 @register.tag
 def listing(parser, token):
     """
-    Tag that will obtain listing of top (priority-wise) objects for a given category and store them in context under given name.
+    Tag that will obtain listing of top objects for a given category and store them in context under given name.
 
     Usage::
 
-        {% listing <limit>[ from <offset>][of <app.model>[, <app.model>[, ...]]][ for <category> ] [with children|descendents] as <result> [unique [unique_set_name]] %}
+        {% listing <limit>[ from <offset>][of <app.model>[, <app.model>[, ...]]][ for <category> ] [with children|descendents] [using listing_handler] as <result> %}
 
     Parameters:
-
         ==================================  ================================================
         Option                              Description
         ==================================  ================================================
@@ -75,10 +66,10 @@ def listing(parser, token):
                                             or variable containing a Category object.
         ``children``                        Include items from direct subcategories.
         ``descendents``                     Include items from all descend subcategories.
+        ``exclude``                         Variable including a ``Publishable`` to omit.
+        ``using``                           Name of Listing Handler ro use
         ``result``                          Store the resulting list in context under given
                                             name.
-        ``unique``                          Unique items across multiple listings.
-        ``unique_set_name``                 Name of context variable used to hold the data is optional.
         ==================================  ================================================
 
     Examples::
@@ -90,33 +81,25 @@ def listing(parser, token):
         {% listing 10 from 10 of articles.article as obj_list %}
         {% listing 10 of articles.article, photos.photo as obj_list %}
 
-        Unique items across multiple listnings::
-        {% listing 10 for category_uno as obj_list unique %}
-        {% listing 4 for category_duo as obj_list unique %}
-        {% listing 10 for category_uno as obj_list unique unique_set_name %}
-        {% listing 4 for category_duo as obj_list unique unique_set_name %}
     """
-    var_name, parameters, parameters_to_resolve = listing_parse(token.split_contents())
-    return ListingNode(var_name, parameters, parameters_to_resolve)
+    var_name, parameters = listing_parse(token.split_contents())
+    return ListingNode(var_name, parameters)
 
 def listing_parse(input):
-    params={}
-    params_to_resolve=[]
+    params = {}
     if len(input) < 4:
         raise template.TemplateSyntaxError, "%r tag argument should have at least 4 arguments" % input[0]
-    o=1
+    o = 1
     # limit
-    params['count'] = input[o]
-    params_to_resolve.append('count')
-    o=2
+    params['count'] = template.Variable(input[o])
+    o = 2
     # offset
     if input[o] == 'from':
-        params['offset'] = input[o+1]
-        params_to_resolve.append('offset')
-        o=o+2
+        params['offset'] = template.Variable(input[o + 1])
+        o = o + 2
     # from - models definition
     if input[o] == 'of':
-        o=o+1
+        o = o + 1
         if 'for' in input:
             mc = input.index('for')
         elif 'as' in input:
@@ -127,40 +110,41 @@ def listing_parse(input):
                 m = models.get_model(*mod.split('.'))
                 if m is None:
                     raise template.TemplateSyntaxError, "%r tag cannot list objects of unknown model %r" % (input[0], mod)
-                l.append(m)
-            params['mods'] = l
-        o=mc
+                l.append(ContentType.objects.get_for_model(m))
+            params['content_types'] = l
+        o = mc
     # for - category definition
     if input[o] == 'for':
-        params['category'] = input[o+1]
-        params_to_resolve.append('category')
-        o=o+2
+        params['category'] = template.Variable(input[o + 1])
+        o = o + 2
     # with
     if input[o] == 'with':
-        o=o+1
+        o = o + 1
         if input[o] == 'children':
-            params['children'] = Listing.objects.IMMEDIATE
+            params['children'] = ListingHandler.IMMEDIATE
         elif input[o] == 'descendents':
-            params['children'] = Listing.objects.ALL
+            params['children'] = ListingHandler.ALL
         else:
             raise template.TemplateSyntaxError, "%r tag's argument 'with' required specification (with children|with descendents)" % input[0]
-        o=o+1
+        o = o + 1
+
+    # without (exclude publishable
+    if input[o] == 'without':
+        params['exclude'] = template.Variable(input[o + 1])
+        o = o + 2
+
+    # using (isting handlers)
+    if input[o] == 'using':
+        params['source'] = template.Variable(input[o + 1])
+        o = o + 2
 
     # as
     if input[o] == 'as':
-        var_name = input[o+1]
+        var_name = input[o + 1]
     else:
         raise template.TemplateSyntaxError, "%r tag requires 'as' argument" % input[0]
 
-    # unique
-    if input[-2].lower() == 'unique':
-        params['unique'] = input[-1]
-        params_to_resolve.append('unique')
-    elif input[-1].lower() == 'unique':
-        params['unique'] = core_settings.LISTING_UNIQUE_DEFAULT_SET
-        params_to_resolve.append('unique')
-
-    return var_name, params, params_to_resolve
+    return var_name, params
 
 class EmptyNode(template.Node):
     def render(self, context):
@@ -170,35 +154,33 @@ class ObjectNotFoundOrInvalid(Exception): pass
 
 class BoxNode(template.Node):
 
-    def __init__(self, box_type, nodelist, model=None, lookup=None, var_name=None):
-        self.box_type, self.nodelist, self.var_name, self.lookup, self.model = box_type, nodelist, var_name, lookup, model
+    def __init__(self, box_type, nodelist, model=None, lookup=None, var=None):
+        self.box_type, self.nodelist, self.var, self.lookup, self.model = box_type, nodelist, var, lookup, model
 
-    def get_obj(self, context=None):
+    def get_obj(self, context):
         if self.model and self.lookup:
-            if context:
+            if isinstance(self.lookup[1], template.Variable):
                 try:
-                    lookup_val = template.Variable(self.lookup[1]).resolve(context)
-                except template.VariableDoesNotExist:
-                    lookup_val = self.lookup[1]
+                    lookup_val = self.lookup[1].resolve(context)
+                except template.VariableDoesNotExist, e:
+                    log.error('BoxNode: Template variable does not exist. var_name=%s' % self.lookup[1].var)
+                    raise ObjectNotFoundOrInvalid()
+
             else:
                 lookup_val = self.lookup[1]
 
             try:
                 obj = get_cached_object(self.model, **{self.lookup[0] : lookup_val})
-            except models.ObjectDoesNotExist, e:
-                log.error('BoxNode: %s (%s : %s)' % (str(e), self.lookup[0], lookup_val))
-                raise ObjectNotFoundOrInvalid()
-            except AssertionError, e:
+            except (models.ObjectDoesNotExist, AssertionError), e:
                 log.error('BoxNode: %s (%s : %s)' % (str(e), self.lookup[0], lookup_val))
                 raise ObjectNotFoundOrInvalid()
         else:
-            if not context:
-                raise ObjectNotFoundOrInvalid()
             try:
-                obj = template.Variable(self.var_name).resolve(context)
+                obj = self.var.resolve(context)
             except template.VariableDoesNotExist, e:
-                log.error('BoxNode: Template variable does not exist. var_name=%s' % self.var_name)
+                log.error('BoxNode: Template variable does not exist. var_name=%s' % self.var.var)
                 raise ObjectNotFoundOrInvalid()
+
             if not obj:
                 raise ObjectNotFoundOrInvalid()
         return obj
@@ -216,29 +198,8 @@ class BoxNode(template.Node):
             log.warning('BoxNode: Box does not exists.')
             return ''
 
-        # render the box itself
-        box.prepare(context)
-        # set the name of this box so that its children can pick up the dependencies
-        box_key = box.get_cache_key()
-
-        # push context stack
-        context.push()
-        context[core_settings.BOX_INFO] = box_key
-
         # render the box
-        result = box.render()
-        # restore the context
-        context.pop()
-
-        # record parent box dependecy on child box or cached full-page on box
-        if not (core_settings.DOUBLE_RENDER and box.can_double_render) and (core_settings.BOX_INFO in context or core_settings.ECACHE_INFO in context):
-            if core_settings.BOX_INFO in context:
-                source_key = context[core_settings.BOX_INFO]
-            elif core_settings.ECACHE_INFO in context:
-                source_key = context[core_settings.ECACHE_INFO]
-            CACHE_DELETER.register_dependency(source_key, box_key)
-
-        return result
+        return box.render(context)
 
 @register.tag('box')
 def do_box(parser, token):
@@ -325,13 +286,18 @@ def _parse_box(nodelist, bits):
 
     if len(bits) == 4:
         # var_name
-        return BoxNode(bits[1], nodelist, var_name=bits[3])
+        return BoxNode(bits[1], nodelist, var=template.Variable(bits[3]))
     else:
         model = models.get_model(*bits[3].split('.'))
         if model is None:
             return EmptyNode()
 
-        return BoxNode(bits[1], nodelist, model=model, lookup=(smart_str(bits[5]), bits[6]))
+        lookup_val = template.Variable(bits[6])
+        try:
+            lookup_val = lookup_val.resolve({})
+        except template.VariableDoesNotExist:
+            pass
+        return BoxNode(bits[1], nodelist, model=model, lookup=(smart_str(bits[5]), lookup_val))
 
 class RenderNode(template.Node):
     def __init__(self, var):
@@ -349,7 +315,11 @@ class RenderNode(template.Node):
 @register.tag('render')
 def do_render(parser, token):
     """
-    {% render some_var %}
+    Renders a rich-text field using defined markup.
+    
+    Example::
+        
+        {% render some_var %}
     """
     bits = token.split_contents()
 

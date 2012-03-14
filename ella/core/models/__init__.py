@@ -1,2 +1,2 @@
-from main import *
-from publishable import *
+from ella.core.models.main import *
+from ella.core.models.publishable import *

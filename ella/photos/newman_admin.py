@@ -1,22 +1,48 @@
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _, ugettext
 from django.conf.urls.defaults import patterns, url
 from django.contrib.admin import helpers
-
-from ella import newman
-
-from ella.photos.models import FormatedPhoto, Format, Photo
-from ella.newman.utils import JsonResponse, JsonResponseError
-from ella.newman.conf import newman_settings
-from ella.newman.filterspecs import CustomFilterSpec
-from ella.newman.licenses.models import License
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
-from ella.photos.forms import MassUploadForm
 from django.http import Http404
 from django.contrib.csrf.middleware import csrf_exempt
 from django.forms.models import modelform_factory
 from django.contrib.admin.util import flatten_fieldsets
 from django.utils.functional import curry
+from django.utils.safestring import mark_safe
+from django import forms
+
+from ella.photos.models import FormatedPhoto, Format, Photo
+
+import newman
+from newman.utils import JsonResponse, JsonResponseError
+from newman.conf import newman_settings
+from newman.filterspecs import CustomFilterSpec
+from newman.licenses.models import License
+
+# Flash image uploader / editor
+CSS_UPLOADIFY_LIB = 'css/uploadify.css'
+JS_SWFOBJECT = 'js/swfobject.js'
+JS_UPLOADIFY_LIB = 'js/jquery.uploadify.min.js' 
+SWF_FLASH_UPLOADER = 'swf/uploadify.swf'
+
+class MassUploadForm(forms.ModelForm):
+    image_file = forms.ImageField(label=_('Image files'))
+     
+    class Media:
+        js = (
+            newman_settings.MEDIA_PREFIX + JS_SWFOBJECT,
+            newman_settings.MEDIA_PREFIX + JS_UPLOADIFY_LIB,
+            newman_settings.MEDIA_PREFIX + SWF_FLASH_UPLOADER,
+        )
+        css = {
+            'screen': (newman_settings.MEDIA_PREFIX + CSS_UPLOADIFY_LIB,),
+        }
+    
+    class Meta:
+        model = Photo
+        exclude = ('image', 'important_top', 'important_left', 'important_bottom',
+            'important_right')
+        
 
 
 class PhotoSizeFilter(CustomFilterSpec):
@@ -83,6 +109,16 @@ class PhotoAdmin(newman.NewmanModelAdmin):
         (_("Description"), {'fields': ('description',)}),
         (_("Metadata"), {'fields': ('authors', 'source', 'image_file')}),
     )
+
+    def thumb(self):
+        """
+        Generates html and thumbnails for admin site.
+        """
+        thumb_url = self.thumb_url()
+        if not thumb_url:
+            return mark_safe("""<strong>%s</strong>""" % ugettext('Thumbnail not available'))
+        return mark_safe("""<a href="%s" class="js-nohashadr thickbox" title="%s" target="_blank"><img src="%s" alt="Thumbnail %s" /></a>""" % (self.image_url(), self.title, thumb_url, self.title))
+    thumb.allow_tags = True
 
     def size(self, obj):
         return "%dx%d px" % (obj.width, obj.height)

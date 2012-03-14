@@ -1,9 +1,0 @@
-#lupicka-overlay {
-    background-color: white;
-    border: solid 2px blue;
-    border-top-width: 20px;
-    -moz-border-radius: 3px;
-}
-select.highlighted {
-    border: solid 2px red;
-}

@@ -1,9 +1,7 @@
 from django import template
 from django.template import TemplateSyntaxError
-from django.conf import settings
 
 from ella.core.models import Category
-from ella.core.cache import get_cached_object
 from ella.positions.models import Position
 
 
@@ -57,9 +55,9 @@ class PositionNode(template.Node):
         try:
             cat = template.Variable(self.category).resolve(context)
             if not isinstance(cat, Category):
-                cat = get_cached_object(Category, site=settings.SITE_ID, slug=self.category)
+                cat = Category.objects.get_by_tree_path(self.category)
         except (template.VariableDoesNotExist, Category.DoesNotExist):
-            cat = get_cached_object(Category, site=settings.SITE_ID, tree_parent__isnull=True)
+            cat = Category.objects.get_by_tree_path('')
 
         try:
             pos = Position.objects.get_active_position(cat, self.position, self.nofallback)
@@ -113,9 +111,9 @@ class IfPositionNode(template.Node):
         try:
             cat = template.Variable(self.category).resolve(context)
             if not isinstance(cat, Category):
-                cat = get_cached_object(Category, site=settings.SITE_ID, slug=self.category)
+                cat = Category.objects.get_by_tree_path(self.category)
         except (template.VariableDoesNotExist, Category.DoesNotExist):
-            cat = get_cached_object(Category, site=settings.SITE_ID, tree_parent__isnull=True)
+            cat = Category.objects.get_by_tree_path('')
 
         for pos in self.positions:
             try:

@@ -4,7 +4,6 @@ from django.utils.encoding import smart_str
 from django.core.cache import cache
 from django.conf import settings
 
-from ella.core.cache.invalidate import CACHE_DELETER
 from ella.core.cache.utils import normalize_key
 from ella.core.conf import core_settings
 
@@ -36,22 +35,13 @@ class Box(object):
         self.verbose_name = model._meta.verbose_name
         self.verbose_name_plural = model._meta.verbose_name_plural
 
-
-    def parse_params(self, definition):
-        " A helper function to parse the parameters inside the box tag. "
-        for line in definition.split('\n'):
-            pair = line.split(':', 1)
-            if len(pair) == 2:
-                yield (pair[0].strip(), pair[1].strip())
-            else:
-                pass
-                # TODO log warning
-
-    def resolve_params(self, context):
+    def resolve_params(self, text):
         " Parse the parameters into a dict. "
         params = MultiValueDict()
-        for key, value in self.parse_params(self.nodelist.render(context)):
-            params.appendlist(key, value)
+        for line in text.split('\n'):
+            pair = line.split(':', 1)
+            if len(pair) == 2:
+                params.appendlist(pair[0].strip(), pair[1].strip())
         return params
 
     def prepare(self, context):
@@ -59,11 +49,25 @@ class Box(object):
         Do the pre-processing - render and parse the parameters and
         store them for further use in self.params.
         """
-        context.push()
-        context['object'] = self.obj
-        self.params = self.resolve_params(context)
-        context.pop()
-        self._context = context
+        self.params = {}
+
+        # no params, not even a newline
+        if not self.nodelist:
+            return
+
+        # just static text, no vars, assume one TextNode
+        if not self.nodelist.contains_nontext:
+            text = self.nodelist[0].s.strip()
+
+        # vars in params, we have to render
+        else:
+            context.push()
+            context['object'] = self.obj
+            text = self.nodelist.render(context)
+            context.pop()
+
+        if text:
+            self.params = self.resolve_params(text)
 
         # override the default template from the parameters
         if 'template_name' in self.params:
@@ -90,40 +94,25 @@ class Box(object):
                 'box' : self,
         }
 
-    def get_cache_tests(self):
-        " Return tests for ella.core.cache.invalidate "
-        from ella.db_templates.models import DbTemplate
-        if not DbTemplate._meta.installed:
-            return []
-        return [ (DbTemplate, 'name:%s' % t) for t in self._get_template_list() ]
-
-    def render(self):
+    def render(self, context):
+        self.prepare(context)
         " Cached wrapper around self._render(). "
         if getattr(settings, 'DOUBLE_RENDER', False) and self.can_double_render:
-            if 'SECOND_RENDER' not in self._context:
+            if 'SECOND_RENDER' not in context:
                 return self.double_render()
         key = self.get_cache_key()
         rend = cache.get(key)
         if rend is None:
-            rend = self._render()
+            rend = self._render(context)
             cache.set(key, rend, core_settings.CACHE_TIMEOUT)
-            for model, test in self.get_cache_tests():
-                CACHE_DELETER.register_test(model, test, key)
-            CACHE_DELETER.register_pk(self.obj, key)
         return rend
 
     def double_render(self):
-        if self.template_name:
-            t_name = self.template_name
-        else:
-            t_name = loader.select_template(self._get_template_list()).name
-
-        return '''{%% box %(box_type)s for %(opts)s with pk %(pk)s %%}template_name: %(template_name)s\n%(params)s{%% endbox %%}''' % {
+        return '''{%% box %(box_type)s for %(opts)s with pk %(pk)s %%}%(params)s{%% endbox %%}''' % {
                 'box_type' : self.box_type,
                 'opts' : self.opts,
                 'pk' : self.obj.pk,
                 'params' : '\n'.join(('%s:%s' % item for item in self.params.items())),
-                'template_name' : t_name,
         }
 
     def _get_template_list(self):
@@ -148,7 +137,7 @@ class Box(object):
 
         return t_list
 
-    def _render(self):
+    def _render(self, context):
         " The main function that takes care of the rendering. "
         if self.template_name:
             t = loader.get_template(self.template_name)
@@ -156,9 +145,9 @@ class Box(object):
             t_list = self._get_template_list()
             t = loader.select_template(t_list)
 
-        self._context.update(self.get_context())
-        resp = t.render(self._context)
-        self._context.pop()
+        context.update(self.get_context())
+        resp = t.render(context)
+        context.pop()
         return resp
 
     def get_cache_key(self):
@@ -167,13 +156,7 @@ class Box(object):
             pars = ','.join(':'.join((smart_str(key), smart_str(self.params[key]))) for key in sorted(self.params.keys()))
         else:
             pars = ''
-        
-        placement_id = '-'
-        if core_settings.BOX_CACHE_PER_PLACEMENT:
-            placement_id = getattr(self._context.get('placement', None), 'pk', '-')
-
-
-        return normalize_key('ella.core.box.Box.render:%d:%s:%s:%d:%s:%s' % (
-                    settings.SITE_ID, self.obj.__class__.__name__, str(self.box_type), self.obj.pk, placement_id, pars
-                ))
+        return normalize_key('core.box:%d:%s:%s:%d:%s' % (
+                settings.SITE_ID, self.obj.__class__.__name__, str(self.box_type), self.obj.pk, pars
+            ))
 

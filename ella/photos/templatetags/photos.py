@@ -2,7 +2,6 @@ import logging
 
 from django import template
 from django.conf import settings
-from django.db import IntegrityError
 
 from ella.photos.models import Photo, Format, FormatedPhoto
 from ella.core.cache.utils import get_cached_object
@@ -18,20 +17,15 @@ class ImgTag(template.Node):
     def render(self, context):
         if isinstance(self.photo, basestring):
             try:
-                photo = template.Variable(self.photo).resolve(context)
-                if not photo:
-                    return ''
+                # try retrieving just the ID first to avoid DB lookup
+                photo = template.Variable(self.photo + '_id').resolve(context)
             except template.VariableDoesNotExist:
-                return ''
-            try:
-                formated_photo = get_cached_object(FormatedPhoto, photo=photo, format=self.format)
-            except FormatedPhoto.DoesNotExist:
                 try:
-                    formated_photo = FormatedPhoto.objects.create(photo=photo, format=self.format)
-                except (IOError, SystemError, IntegrityError), e:
-                    log.error("Cannot create formatted photo: %s" % e)
-                    context[self.var_name] = self.format.get_blank_img()
+                    photo = template.Variable(self.photo).resolve(context)
+                except template.VariableDoesNotExist:
                     return ''
+
+            formated_photo = FormatedPhoto.objects.get_photo_in_format(photo, self.format)
         else:
             formated_photo = self.photo
 
@@ -41,18 +35,28 @@ class ImgTag(template.Node):
 @register.tag
 def img(parser, token):
     """
-    Examples:
+    Generates thumbnails for ``Photo`` instances.
+    
+    syntax::
+        
+        {% img <format> for <var> as <var_name> %}
+        {% img <format> with <field_value> as <var_name> %} 
+    
+    examples::
 
-        {% img FORMAT for VAR as VAR_NAME %}
-        {% img FORMAT with FIELD VALUE as VAR_NAME %}
+        {% img category_listing for object.photo as thumb %}
+        {% img category_listing with pk 1150 as thumb %}
+        
     """
     bits = token.split_contents()
+    return _parse_img(bits)
 
+def _parse_img(bits):
     if len(bits) < 2 or bits[-2] != 'as':
         raise template.TemplateSyntaxError, "{% img FORMAT for VAR as VAR_NAME %} or {% img FORMAT with FIELD VALUE as VAR_NAME %}"
 
     try:
-        format = get_cached_object(Format, name=bits[1], sites__id=settings.SITE_ID)
+        format = Format.objects.get_for_name(bits[1])
     except Format.DoesNotExist:
         logmsg = "Format with name %r does not exist (for site id %d)" % (bits[1], settings.SITE_ID)
         log.error(logmsg)
@@ -74,12 +78,9 @@ def img(parser, token):
         try:
             photo = get_cached_object(Photo, **{str(bits[3]) : bits[4]})
         except photo.DoesNotExist:
-            raise template.TemplateSyntaxError, "Photo with %r of %r does not exist" % (bits[3],  bits[4])
+            raise template.TemplateSyntaxError, "Photo with %r of %r does not exist" % (bits[3], bits[4])
 
-        try:
-            formated_photo = get_cached_object(FormatedPhoto, photo=photo, format=format)
-        except FormatedPhoto.DoesNotExist:
-            formated_photo = FormatedPhoto.objects.create(photo=photo, format=format)
+        formated_photo = FormatedPhoto.objects.get_photo_in_format(photo, format)
     else:
         raise template.TemplateSyntaxError, "{% img FORMAT for VAR as VAR_NAME %} or {% img FORMAT with FIELD VALUE as VAR_NAME %}"
 
