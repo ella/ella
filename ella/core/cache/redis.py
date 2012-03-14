@@ -24,69 +24,83 @@ if hasattr(settings, 'LISTINGS_REDIS'):
     else:
         client = Redis(**getattr(settings, 'LISTINGS_REDIS'))
 
-REDIS_CAT_LISTING = 'listing:cat:%d'
-REDIS_CT_LISTING = 'listing:ct:%d'
-
-def get_redis_values(listing):
-    v = '%d:%d:%d' % (
-        listing.publishable.content_type_id,
-        listing.publishable_id,
-        1 if listing.commercial else 0
-    )
-    return v, (
-        REDIS_CAT_LISTING % (listing.category_id),
-        REDIS_CT_LISTING % (listing.publishable.content_type_id)
-    )
-
 def publishable_published(publishable, **kwargs):
     for l in publishable.listing_set.all():
-        listing_post_save(l.__class__, l)
+        RedisListingHandler.add_publishable(
+            publishable,
+            repr(time.mktime(l.publish_from.timetuple())),
+            ['1' if l.commercial else '0'],
+        )
 
 def publishable_unpublished(publishable, **kwargs):
     for l in publishable.listing_set.all():
-        listing_pre_delete(l.__class__, l)
-        listing_post_delete(l.__class__, l)
+        RedisListingHandler.remove_publishable(publishable, ['1' if l.commercial else '0'])
 
 
 def listing_pre_delete(sender, instance, **kwargs):
-    pipe = client.pipeline()
-    v, keys = get_redis_values(instance)
-    for k in keys:
-        for k in keys:
-            pipe = pipe.zrem(k, v)
-    instance.__redis_pipe = pipe
+    RedisListingHandler.remove_publishable(instance.publishable, ['1' if instance.commercial else '0'])
 
 def listing_post_delete(sender, instance, **kwargs):
-    if hasattr(instance, '__redis_pipe'):
-        pipe = instance.__redis_pipe
-        pipe.execute()
+    pass
 
 def listing_pre_save(sender, instance, **kwargs):
-    pipe = client.pipeline()
     if instance.pk:
         old_listing = instance.__class__.objects.get(pk=instance.pk)
-        v, keys = get_redis_values(old_listing)
-        for k in keys:
-            pipe = pipe.zrem(k, v)
-
-    instance.__redis_pipe = pipe
-
+        RedisListingHandler.remove_publishable(old_listing.publishable, ['1' if old_listing.commercial else '0'])
 
 def listing_post_save(sender, instance, **kwargs):
-    if hasattr(instance, '__redis_pipe'):
-        pipe = instance.__redis_pipe
-    else:
-        pipe = client.pipeline()
-    v, keys = get_redis_values(instance)
-    score = repr(time.mktime(instance.publish_from.timetuple()))
-    for k in keys:
-        pipe = pipe.zadd(k, v, score)
-    pipe.execute()
+    RedisListingHandler.add_publishable(
+        instance.publishable,
+        repr(time.mktime(instance.publish_from.timetuple())),
+        ['1' if instance.commercial else '0'],
+    )
 
 
 class RedisListingHandler(ListingHandler):
-    CT_LISTING = REDIS_CT_LISTING
-    CAT_LISTING = REDIS_CAT_LISTING
+    PREFIX = 'listing'
+
+    @classmethod
+    def get_value(cls, publishable, data):
+        return ':'.join([str(publishable.content_type_id), str(publishable.pk)] + data)
+
+    @classmethod
+    def get_keys(cls, publishable):
+        cat = publishable.category
+        # main cat
+        keys = [':'.join((cls.PREFIX, str(cat.id)))]
+
+        # children
+        keys.append(':'.join((cls.PREFIX, 'c', str(cat.id))))
+        if cat.tree_parent_id:
+            keys.append(':'.join((cls.PREFIX, 'c', str(cat.tree_parent_id))))
+
+        # all children
+        keys.append(':'.join((cls.PREFIX, 'd', str(cat.id))))
+        while cat.tree_parent_id:
+            cat = cat.tree_parent
+            keys.append(':'.join((cls.PREFIX, 'd', str(cat.id))))
+
+        # content_type
+        keys.append(':'.join((cls.PREFIX, 'ct', str(publishable.content_type_id))))
+
+        return keys
+
+
+    @classmethod
+    def add_publishable(cls, publishable, score, data=[]):
+        pipe = client.pipeline()
+        for k in cls.get_keys(publishable):
+            pipe.zadd(k, cls.get_value(publishable, data), score)
+        pipe.execute()
+
+    @classmethod
+    def remove_publishable(cls, publishable, data):
+        pipe = client.pipeline()
+        for k in cls.get_keys(publishable):
+            pipe.zrem(k, cls.get_value(publishable, data))
+        pipe.execute()
+
+
 
     def count(self):
         key, pipe = self._get_key()
@@ -145,49 +159,44 @@ class RedisListingHandler(ListingHandler):
         # create mock Listing objects to return
         return map(lambda (p, (score, d)): self._get_listing(p, score, d), zip(publishables, data))
 
-    def _union(self, unions, pipe):
-        inter_keys = []
-        for union_keys in unions:
-            if len(union_keys) > 1:
-                result_key = 'listings:zus:' + md5(','.join(union_keys)).hexdigest()
-                pipe.zunionstore(result_key, union_keys, 'MAX')
-                pipe.expire(result_key, 60)
-                inter_keys.append(result_key)
-            else:
-                inter_keys.append(union_keys[0])
-        return inter_keys
+    def _union(self, union_keys, pipe):
+        if len(union_keys) > 1:
+            result_key = '%s:zus:%s' % (self.PREFIX, md5(','.join(union_keys)).hexdigest())
+            pipe.zunionstore(result_key, union_keys, 'MAX')
+            pipe.expire(result_key, 60)
+            return result_key
+        else:
+            return union_keys[0]
 
     def _get_key(self):
         pipe = None
         if not hasattr(self, '_key'):
-            # store all the key sets we will want to ZUNIONSTORE
-            unions = []
-            if self.content_types:
-                # get the union of all content_type listings
-                ct_keys = [self.CT_LISTING % ct.pk for ct in self.content_types]
-                unions.append(ct_keys)
-
-            # get the union of all category listings
-            cat_keys = [self.CAT_LISTING % self.category.id]
+            key_parts = [self.PREFIX]
+            # get the proper key for category
             if self.children == ListingHandler.IMMEDIATE:
-                cat_keys.extend(self.CAT_LISTING % c.id for c in self.category.get_children())
+                key_parts.append('c')
             elif self.children == ListingHandler.ALL:
-                cat_keys.extend(self.CAT_LISTING % c.id for c in self.category.get_children(True))
-            unions.append(cat_keys)
+                key_parts.append('d')
+            key_parts.append(str(self.category.id))
+
+            key = ':'.join(key_parts)
 
             # do everything in one pipeline
             pipe = client.pipeline()
 
-            # do all the unions if required and output a list of keys to intersect
-            inter_keys = self._union(unions, pipe)
+            # store all the key sets we will want to ZUNIONSTORE
+            ct_key = None
+            if self.content_types:
+                # get the union of all content_type listings
+                ct_key = self._union([':'.join(self.PREFIX, 'ct', str(ct.pk)) for ct in self.content_types], pipe)
+
 
             # do the intersect if required and output a single key
-            if len(inter_keys) > 1:
-                key = 'listings:zis:' + md5(','.join(inter_keys)).hexdigest()
-                pipe.zinterstore(key, inter_keys, 'MAX')
-                pipe.expire(key, 60)
-            else:
-                key = inter_keys[0]
+            if ct_key:
+                inter_key = '%s:zis:%s' % (self.PREFIX, md5(','.join((ct_key, key))).hexdigest())
+                pipe.zinterstore(inter_key, (ct_key, key), 'MAX')
+                pipe.expire(inter_key, 60)
+                key = inter_key
 
             if self.exclude:
                 v = '%d:%d:' % (self.exclude.content_type_id, self.exclude.id)
