@@ -20,9 +20,7 @@ def generate_fk_class(name, retrieve_func, limit_to_model=None):
         def south_field_triple(self):
             from south.modelsinspector import introspector
             args, kwargs = introspector(self)
-            if limit_to_model:
-                del kwargs['to']
-            return ('ella.core.cache.fields.%s' % name, args, kwargs)
+            return ('django.db.models.fields.related.ForeignKey', args, kwargs)
 
     class CachedReverseSingleRelatedObjectDescriptor(ReverseSingleRelatedObjectDescriptor):
         def __get__(self, instance, instance_type=None):
