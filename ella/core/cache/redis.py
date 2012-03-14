@@ -222,7 +222,7 @@ class RedisListingHandler(ListingHandler):
             ct_key = None
             if self.content_types:
                 # get the union of all content_type listings
-                ct_key = self._union([':'.join(self.PREFIX, 'ct', str(ct.pk)) for ct in self.content_types], pipe)
+                ct_key = self._union([':'.join((self.PREFIX, 'ct', str(ct.pk))) for ct in self.content_types], pipe)
 
 
             # do the intersect if required and output a single key
