@@ -28,6 +28,7 @@ def publishable_published(publishable, **kwargs):
     pipe = client.pipeline()
     for l in publishable.listing_set.all():
         RedisListingHandler.add_publishable(
+            l.category,
             publishable,
             repr(time.mktime(l.publish_from.timetuple())),
             ['1' if l.commercial else '0'],
@@ -39,12 +40,23 @@ def publishable_published(publishable, **kwargs):
 def publishable_unpublished(publishable, **kwargs):
     pipe = client.pipeline()
     for l in publishable.listing_set.all():
-        RedisListingHandler.remove_publishable(publishable, ['1' if l.commercial else '0'], pipe=pipe, commit=False)
+        RedisListingHandler.remove_publishable(
+            l.category,
+            publishable,
+            ['1' if l.commercial else '0'],
+            pipe=pipe,
+            commit=False
+        )
     pipe.execute()
 
 def listing_pre_delete(sender, instance, **kwargs):
     # prepare redis pipe for deletion...
-    instance.__pipe = RedisListingHandler.remove_publishable(instance.publishable, ['1' if instance.commercial else '0'], commit=False)
+    instance.__pipe = RedisListingHandler.remove_publishable(
+        instance.category,
+        instance.publishable,
+        ['1' if instance.commercial else '0'],
+        commit=False
+    )
 
 def listing_post_delete(sender, instance, **kwargs):
     # but only delete it if the model delete went through
@@ -54,10 +66,16 @@ def listing_pre_save(sender, instance, **kwargs):
     if instance.pk:
         # prepare deletion of stale data
         old_listing = instance.__class__.objects.get(pk=instance.pk)
-        instance.__pipe = RedisListingHandler.remove_publishable(old_listing.publishable, ['1' if old_listing.commercial else '0'], commit=False)
+        instance.__pipe = RedisListingHandler.remove_publishable(
+            instance.category,
+            old_listing.publishable,
+            ['1' if old_listing.commercial else '0'],
+            commit=False
+        )
 
 def listing_post_save(sender, instance, **kwargs):
     RedisListingHandler.add_publishable(
+        instance.category,
         instance.publishable,
         repr(time.mktime(instance.publish_from.timetuple())),
         ['1' if instance.commercial else '0'],
@@ -72,21 +90,20 @@ class RedisListingHandler(ListingHandler):
         return ':'.join([str(publishable.content_type_id), str(publishable.pk)] + data)
 
     @classmethod
-    def get_keys(cls, publishable):
-        cat = publishable.category
-        # main cat
-        keys = [':'.join((cls.PREFIX, str(cat.id)))]
+    def get_keys(cls, category, publishable):
+        # main category
+        keys = [':'.join((cls.PREFIX, str(category.id)))]
 
         # children
-        keys.append(':'.join((cls.PREFIX, 'c', str(cat.id))))
-        if cat.tree_parent_id:
-            keys.append(':'.join((cls.PREFIX, 'c', str(cat.tree_parent_id))))
+        keys.append(':'.join((cls.PREFIX, 'c', str(category.id))))
+        if category.tree_parent_id:
+            keys.append(':'.join((cls.PREFIX, 'c', str(category.tree_parent_id))))
 
         # all children
-        keys.append(':'.join((cls.PREFIX, 'd', str(cat.id))))
-        while cat.tree_parent_id:
-            cat = cat.tree_parent
-            keys.append(':'.join((cls.PREFIX, 'd', str(cat.id))))
+        keys.append(':'.join((cls.PREFIX, 'd', str(category.id))))
+        while category.tree_parent_id:
+            category = category.tree_parent
+            keys.append(':'.join((cls.PREFIX, 'd', str(category.id))))
 
         # content_type
         keys.append(':'.join((cls.PREFIX, 'ct', str(publishable.content_type_id))))
@@ -94,11 +111,11 @@ class RedisListingHandler(ListingHandler):
         return keys
 
     @classmethod
-    def add_publishable(cls, publishable, score, data=[], pipe=None, commit=True):
+    def add_publishable(cls, category, publishable, score, data=[], pipe=None, commit=True):
         if pipe is None:
             pipe = client.pipeline()
 
-        for k in cls.get_keys(publishable):
+        for k in cls.get_keys(category, publishable):
             pipe.zadd(k, cls.get_value(publishable, data), score)
 
         if commit:
@@ -107,11 +124,11 @@ class RedisListingHandler(ListingHandler):
             return pipe
 
     @classmethod
-    def remove_publishable(cls, publishable, data=[], pipe=None, commit=False):
+    def remove_publishable(cls, category, publishable, data=[], pipe=None, commit=False):
         if pipe is None:
             pipe = client.pipeline()
 
-        for k in cls.get_keys(publishable):
+        for k in cls.get_keys(category, publishable):
             pipe.zrem(k, cls.get_value(publishable, data))
 
         if commit:
