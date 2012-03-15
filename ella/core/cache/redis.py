@@ -31,7 +31,6 @@ def publishable_published(publishable, **kwargs):
             l.category,
             publishable,
             repr(time.mktime(l.publish_from.timetuple())),
-            ['1' if l.commercial else '0'],
             pipe=pipe,
             commit=False
         )
@@ -43,7 +42,6 @@ def publishable_unpublished(publishable, **kwargs):
         RedisListingHandler.remove_publishable(
             l.category,
             publishable,
-            ['1' if l.commercial else '0'],
             pipe=pipe,
             commit=False
         )
@@ -54,7 +52,6 @@ def listing_pre_delete(sender, instance, **kwargs):
     instance.__pipe = RedisListingHandler.remove_publishable(
         instance.category,
         instance.publishable,
-        ['1' if instance.commercial else '0'],
         commit=False
     )
 
@@ -69,7 +66,6 @@ def listing_pre_save(sender, instance, **kwargs):
         instance.__pipe = RedisListingHandler.remove_publishable(
             instance.category,
             old_listing.publishable,
-            ['1' if old_listing.commercial else '0'],
             commit=False
         )
 
@@ -78,7 +74,6 @@ def listing_post_save(sender, instance, **kwargs):
         instance.category,
         instance.publishable,
         repr(time.mktime(instance.publish_from.timetuple())),
-        ['1' if instance.commercial else '0'],
         pipe=getattr(instance, '__pipe', None)
     )
 
@@ -86,8 +81,8 @@ class RedisListingHandler(ListingHandler):
     PREFIX = 'listing'
 
     @classmethod
-    def get_value(cls, publishable, data):
-        return ':'.join([str(publishable.content_type_id), str(publishable.pk)] + data)
+    def get_value(cls, publishable):
+        return ':'.join((str(publishable.content_type_id), str(publishable.pk)))
 
     @classmethod
     def get_keys(cls, category, publishable):
@@ -111,12 +106,12 @@ class RedisListingHandler(ListingHandler):
         return keys
 
     @classmethod
-    def add_publishable(cls, category, publishable, score, data=[], pipe=None, commit=True):
+    def add_publishable(cls, category, publishable, score, pipe=None, commit=True):
         if pipe is None:
             pipe = client.pipeline()
 
         for k in cls.get_keys(category, publishable):
-            pipe.zadd(k, cls.get_value(publishable, data), score)
+            pipe.zadd(k, cls.get_value(publishable), score)
 
         if commit:
             pipe.execute()
@@ -124,12 +119,12 @@ class RedisListingHandler(ListingHandler):
             return pipe
 
     @classmethod
-    def remove_publishable(cls, category, publishable, data=[], pipe=None, commit=False):
+    def remove_publishable(cls, category, publishable, pipe=None, commit=False):
         if pipe is None:
             pipe = client.pipeline()
 
         for k in cls.get_keys(category, publishable):
-            pipe.zrem(k, cls.get_value(publishable, data))
+            pipe.zrem(k, cls.get_value(publishable))
 
         if commit:
             pipe.execute()
@@ -144,9 +139,9 @@ class RedisListingHandler(ListingHandler):
         results = pipe.execute()
         return results[-1]
 
-    def _get_listing(self, publishable, score, data):
+    def _get_listing(self, publishable, score):
         Listing = get_model('core', 'listing')
-        return Listing(publishable=publishable, category=publishable.category, commercial=data[0], publish_from=datetime.fromtimestamp(score))
+        return Listing(publishable=publishable, category=publishable.category, publish_from=datetime.fromtimestamp(score))
 
     def _get_score_limits(self):
         max_score = None
@@ -183,15 +178,15 @@ class RedisListingHandler(ListingHandler):
         data = []
         ids = []
         for value, score in results[-1]:
-            value = value.split(':')
-            ids.append((int(value[0]), int(value[1])))
-            data.append((score, value[2:]))
+            ct_id, pk = value.split(':')
+            ids.append((int(ct_id), int(pk)))
+            data.append(score)
 
         # and retrieve publishables from cache
         publishables = get_cached_objects(ids)
 
         # create mock Listing objects to return
-        return map(lambda (p, (score, d)): self._get_listing(p, score, d), zip(publishables, data))
+        return map(lambda (p, score): self._get_listing(p, score), zip(publishables, data))
 
     def _union(self, union_keys, pipe):
         if len(union_keys) > 1:
@@ -233,13 +228,12 @@ class RedisListingHandler(ListingHandler):
                 key = inter_key
 
             if self.exclude:
-                v = '%d:%d:' % (self.exclude.content_type_id, self.exclude.id)
-                v1, v2 = v + '0', v + '1'
+                v = '%d:%d' % (self.exclude.content_type_id, self.exclude.id)
 
                 # we are using some existing key, copy it before removing stuff
                 exclude_key = '%s:exclude:%s' % (key, v)
                 pipe.zunionstore(exclude_key, (key, ))
-                pipe.zrem(exclude_key, v1, v2)
+                pipe.zrem(exclude_key, v)
                 pipe.expire(exclude_key, 60)
                 key = exclude_key
 

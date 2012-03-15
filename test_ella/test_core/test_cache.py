@@ -100,9 +100,9 @@ class TestRedisListings(TestCase):
             ]),
             set(self.redis.keys())
         )
-        tools.assert_equals(['%d:2:0' % ct_id, '%d:3:0' % ct_id], self.redis.zrange('listing:ct:%d' % ct_id, 0, 100))
-        tools.assert_equals(['%d:2:0' % ct_id, '%d:3:0' % ct_id], self.redis.zrange('listing:d:1', 0, 100))
-        tools.assert_equals(['%d:2:0' % ct_id], self.redis.zrange('listing:c:1', 0, 100))
+        tools.assert_equals(['%d:2' % ct_id, '%d:3' % ct_id], self.redis.zrange('listing:ct:%d' % ct_id, 0, 100))
+        tools.assert_equals(['%d:2' % ct_id, '%d:3' % ct_id], self.redis.zrange('listing:d:1', 0, 100))
+        tools.assert_equals(['%d:2' % ct_id], self.redis.zrange('listing:c:1', 0, 100))
 
     def test_listing_save_adds_itself_to_relevant_zsets(self):
         list_all_publishables_in_category_by_hour(self)
@@ -124,9 +124,9 @@ class TestRedisListings(TestCase):
             ]),
             set(self.redis.keys())
         )
-        tools.assert_equals(['%d:3:0' % ct_id], self.redis.zrange('listing:3', 0, 100))
-        tools.assert_equals(['%d:1:0' % ct_id, '%d:2:0' % ct_id, '%d:3:0' % ct_id], self.redis.zrange('listing:ct:%d' % ct_id, 0, 100))
-        tools.assert_equals(['%d:1:0' % ct_id, '%d:2:0' % ct_id, '%d:3:0' % ct_id], self.redis.zrange('listing:d:1', 0, 100))
+        tools.assert_equals(['%d:3' % ct_id], self.redis.zrange('listing:3', 0, 100))
+        tools.assert_equals(['%d:1' % ct_id, '%d:2' % ct_id, '%d:3' % ct_id], self.redis.zrange('listing:ct:%d' % ct_id, 0, 100))
+        tools.assert_equals(['%d:1' % ct_id, '%d:2' % ct_id, '%d:3' % ct_id], self.redis.zrange('listing:d:1', 0, 100))
 
     def test_listing_delete_removes_itself_from_redis(self):
         list_all_publishables_in_category_by_hour(self)
@@ -148,18 +148,18 @@ class TestRedisListings(TestCase):
             ]),
             set(self.redis.keys())
         )
-        tools.assert_equals(['%d:3:0' % ct_id], self.redis.zrange('listing:3', 0, 100))
-        tools.assert_equals(['%d:3:0' % ct_id], self.redis.zrange('listing:c:2', 0, 100))
-        tools.assert_equals(['%d:3:0' % ct_id], self.redis.zrange('listing:d:2', 0, 100))
-        tools.assert_equals(['%d:1:0' % ct_id, '%d:3:0' % ct_id], self.redis.zrange('listing:d:1', 0, 100))
-        tools.assert_equals(['%d:1:0' % ct_id], self.redis.zrange('listing:c:1', 0, 100))
-        tools.assert_equals(['%d:1:0' % ct_id, '%d:3:0' % ct_id], self.redis.zrange('listing:ct:%d' % ct_id, 0, 100))
+        tools.assert_equals(['%d:3' % ct_id], self.redis.zrange('listing:3', 0, 100))
+        tools.assert_equals(['%d:3' % ct_id], self.redis.zrange('listing:c:2', 0, 100))
+        tools.assert_equals(['%d:3' % ct_id], self.redis.zrange('listing:d:2', 0, 100))
+        tools.assert_equals(['%d:1' % ct_id, '%d:3' % ct_id], self.redis.zrange('listing:d:1', 0, 100))
+        tools.assert_equals(['%d:1' % ct_id], self.redis.zrange('listing:c:1', 0, 100))
+        tools.assert_equals(['%d:1' % ct_id, '%d:3' % ct_id], self.redis.zrange('listing:ct:%d' % ct_id, 0, 100))
 
     def test_get_listing_uses_data_from_redis(self):
         ct_id = self.publishables[0].content_type_id
         t1, t2 = time.time()-90, time.time()-100
-        self.redis.zadd('listing:c:2', '%d:1:0' % ct_id, repr(t1))
-        self.redis.zadd('listing:c:2', '%d:3:0' % ct_id, repr(t2))
+        self.redis.zadd('listing:c:2', '%d:1' % ct_id, repr(t1))
+        self.redis.zadd('listing:c:2', '%d:3' % ct_id, repr(t2))
         dt1, dt2 = datetime.fromtimestamp(t1), datetime.fromtimestamp(t2)
 
         lh = Listing.objects.get_queryset_wrapper(category=self.category_nested, children=ListingHandler.IMMEDIATE, source='redis')
@@ -174,8 +174,8 @@ class TestRedisListings(TestCase):
     def test_get_listing_omits_excluded_publishable(self):
         ct_id = self.publishables[0].content_type_id
         t1, t2 = time.time()-90, time.time()-100
-        self.redis.zadd('listing:c:2', '%d:1:0' % ct_id, repr(t1))
-        self.redis.zadd('listing:c:2', '%d:3:0' % ct_id, repr(t2))
+        self.redis.zadd('listing:c:2', '%d:1' % ct_id, repr(t1))
+        self.redis.zadd('listing:c:2', '%d:3' % ct_id, repr(t2))
         dt1, dt2 = datetime.fromtimestamp(t1), datetime.fromtimestamp(t2)
 
         lh = Listing.objects.get_queryset_wrapper(category=self.category_nested, children=ListingHandler.IMMEDIATE, exclude=self.publishables[0], source='redis')
@@ -188,8 +188,8 @@ class TestRedisListings(TestCase):
     def test_redis_listing_handler_used_from_view_when_requested(self):
         ct_id = self.publishables[0].content_type_id
         t1, t2 = time.time()-90, time.time()-100
-        self.redis.zadd('listing:d:2', '%d:1:0' % ct_id, repr(t1))
-        self.redis.zadd('listing:d:2', '%d:3:0' % ct_id, repr(t2))
+        self.redis.zadd('listing:d:2', '%d:1' % ct_id, repr(t1))
+        self.redis.zadd('listing:d:2', '%d:3' % ct_id, repr(t2))
         dt1, dt2 = datetime.fromtimestamp(t1), datetime.fromtimestamp(t2)
 
         rf = RequestFactory()
@@ -208,9 +208,9 @@ class TestRedisListings(TestCase):
     def test_get_listing_uses_data_from_redis_correctly_for_pagination(self):
         ct_id = self.publishables[0].content_type_id
         t1, t2, t3 = time.time()-90, time.time()-100, time.time() - 110
-        self.redis.zadd('listing:c:2', '%d:1:0' % ct_id, repr(t1))
-        self.redis.zadd('listing:c:2', '%d:3:0' % ct_id, repr(t2))
-        self.redis.zadd('listing:c:2', '%d:2:0' % ct_id, repr(t3))
+        self.redis.zadd('listing:c:2', '%d:1' % ct_id, repr(t1))
+        self.redis.zadd('listing:c:2', '%d:3' % ct_id, repr(t2))
+        self.redis.zadd('listing:c:2', '%d:2' % ct_id, repr(t3))
 
         lh = Listing.objects.get_queryset_wrapper(category=self.category_nested, children=ListingHandler.IMMEDIATE, source='redis')
         tools.assert_equals(3, lh.count())
