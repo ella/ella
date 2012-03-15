@@ -96,7 +96,7 @@ class CacheDeleterCache(object):
 
     @staticmethod
     def _get_key(obj):
-        from md5 import md5
+        from hashlib import md5
         return md5(repr(('ella.core.cache.invalidate.CacheDeleterCache', obj.__class__, obj.pk,))).hexdigest()
 
     def _signal_handler(self, sender, **kwargs):
