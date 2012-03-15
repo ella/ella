@@ -1,5 +1,6 @@
-from django import template
+from urllib import urlencode
 
+from django import template
 
 register = template.Library()
 
@@ -30,6 +31,12 @@ def paginator(context, adjacent_pages=2):
         # improper use of paginator tag, bail out
         return {}
 
+    query_params = '?p='
+    if 'request' in context:
+        get = context['request'].GET
+        if 'using' in get:
+            query_params = '?%s&p=' % urlencode({'using': get['using']})
+
     page = context['page']
     page_no = int(page.number)
 
@@ -38,6 +45,7 @@ def paginator(context, adjacent_pages=2):
     page_numbers = range(s, min(page.paginator.num_pages, s + 2 * adjacent_pages) + 1)
 
     return {
+        'query_params': query_params,
         'page': page,
         'results_per_page': context['results_per_page'],
         'page_numbers': page_numbers,
