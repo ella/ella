@@ -14,3 +14,4 @@ test_ella/cover
 .pydevproject
 .settings
 .coverage
+nosetests.xml
