@@ -17,6 +17,21 @@ AMQ_DESTINATION = getattr(settings, 'CI_AMQ_DESTINATION', '/topic/ella')
 AMQ_HOST = getattr(settings, 'ACTIVE_MQ_HOST', None)
 AMQ_PORT = getattr(settings, 'ACTIVE_MQ_PORT', 61613)
 
+def load_cache_deleter(cache_deleter=None):
+    '''
+    Loads cache deleter (invalidator) and calls its method connect.
+    '''
+    if cache_deleter is None:
+        cache_deleter = 'ella.core.cache.invalidate.CacheDeleterCache'
+
+    from django.utils.importlib import import_module
+    path, obj_name = cache_deleter.rsplit('.', 1)
+    module = import_module(path)
+    deleter =  getattr(module, obj_name)()
+    if hasattr(deleter, 'connect'):
+        deleter.connect()
+    return deleter
+
 
 class MsgWrapper(object):
     pass
@@ -76,14 +91,15 @@ class CacheDeleterAmq(object):
 class CacheDeleterCache(object):
 
     def connect(self):
-        post_save.connect(self.post_save)
+        signals.post_save.connect(self._signal_handler)
+        signals.post_delete.connect(self._signal_handler)
 
     @staticmethod
     def _get_key(obj):
         from md5 import md5
         return md5(repr((obj.__class__, obj.pk,))).hexdigest()
 
-    def post_save(self, sender, **kwargs):
+    def _signal_handler(self, sender, **kwargs):
             self.clear_for_obj(kwargs['instance'])
 
     def register_pk(self, obj, key):
@@ -110,23 +126,8 @@ class CacheDeleterCache(object):
     def _set_obj(self, obj, data):
         cache.set(self._get_key(obj), data, CACHE_TIMEOUT)
 
-def load_cache_deleter(cache_deleter=None):
-    '''
-    Loads cache deleter (invalidator) and calls its method connect.
-    '''
-    if cache_deleter is None:
-        return CacheDeleterCache()
-    else:
-        from django.utils.importlib import import_module
-        path, obj_name = cache_deleter.rsplit('.', 1)
-        module = import_module(path)
-        deleter =  getattr(module, obj_name)()
-        if hasattr(deleter, 'connect'):
-            deleter.connect()
-        return deleter
 
 CACHE_DELETER = load_cache_deleter(getattr(settings, 'ELLA_CACHE_DELETER', None))
-
 
 if AMQ_HOST and isinstance(CACHE_DELETER, CacheDeleterAmq):
     try:
