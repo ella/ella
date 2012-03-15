@@ -23,6 +23,9 @@ class CustomURLNode(Node):
                        for k, v in self.kwargs.items()])
         obj = self.obj.resolve(context)
 
+        if not obj:
+            return
+
         url = ''
         try:
             url = custom_urls.resolver.reverse(obj, self.view_name, *args, **kwargs)
