@@ -7,10 +7,12 @@ import logging
 from django.dispatch import dispatcher
 from django.db.models import signals
 from django.conf import settings
+from django.core.cache import cache
 
 
 log = logging.getLogger('cache')
 
+CACHE_TIMEOUT = getattr(settings, 'CACHE_TIMEOUT', 10*60)
 AMQ_DESTINATION = getattr(settings, 'CI_AMQ_DESTINATION', '/topic/ella')
 AMQ_HOST = getattr(settings, 'ACTIVE_MQ_HOST', None)
 AMQ_PORT = getattr(settings, 'ACTIVE_MQ_PORT', 61613)
@@ -19,7 +21,7 @@ AMQ_PORT = getattr(settings, 'ACTIVE_MQ_PORT', 61613)
 class MsgWrapper(object):
     pass
 
-class CacheDeleter(object):
+class CacheDeleterAmq(object):
     def __init__(self):
         self.signal_handler = self
         self.conn = None
@@ -70,10 +72,63 @@ class CacheDeleter(object):
     def disconnect(self):
         self.conn.stop()
 
-CACHE_DELETER = CacheDeleter()
+
+class CacheDeleterCache(object):
+
+    def connect(self):
+        post_save.connect(self.post_save)
+
+    @staticmethod
+    def _get_key(obj):
+        from md5 import md5
+        return md5(repr((obj.__class__, obj.pk,))).hexdigest()
+
+    def post_save(self, sender, **kwargs):
+            self.clear_for_obj(kwargs['instance'])
+
+    def register_pk(self, obj, key):
+        self._append_key(obj, key)
+
+    def register_test(self, model, test, key):
+        pass
+
+    def clear_for_obj(self, obj):
+        for key in self.get_keys(obj):
+            cache.delete(key)
+        cache.delete(self._get_key(obj))
+
+    def get_keys(self, obj):
+        return self._get_obj(obj).split('/')
+
+    def _append_key(self, obj, key):
+        self._set_obj(obj, self._get_obj(obj) + '/' + key)
+
+    def _get_obj(self, obj):
+        ret = cache.get(self._get_key(obj), '')
+        return ret
+
+    def _set_obj(self, obj, data):
+        cache.set(self._get_key(obj), data, CACHE_TIMEOUT)
+
+def load_cache_deleter(cache_deleter=None):
+    '''
+    Loads cache deleter (invalidator) and calls its method connect.
+    '''
+    if cache_deleter is None:
+        return CacheDeleterCache()
+    else:
+        from django.utils.importlib import import_module
+        path, obj_name = cache_deleter.rsplit('.', 1)
+        module = import_module(path)
+        deleter =  getattr(module, obj_name)()
+        if hasattr(deleter, 'connect'):
+            deleter.connect()
+        return deleter
+
+CACHE_DELETER = load_cache_deleter(getattr(settings, 'ELLA_CACHE_DELETER', None))
 
 
-if AMQ_HOST:
+if AMQ_HOST and isinstance(CACHE_DELETER, CacheDeleterAmq):
     try:
         import stomp
         import socket
