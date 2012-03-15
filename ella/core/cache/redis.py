@@ -164,12 +164,12 @@ class RedisListingHandler(ListingHandler):
         if min_score or max_score:
             pipe = pipe.zrevrangebyscore(key,
                 repr(max_score), repr(min_score),
-                start=offset, num=offset+count,
+                start=offset, num=offset+count-1,
                 withscores=True
             )
         else:
             pipe = pipe.zrevrange(key,
-                start=offset, num=offset+count,
+                start=offset, num=offset+count-1,
                 withscores=True
             )
         results = pipe.execute()
