@@ -21,7 +21,7 @@ from ella.core.conf import core_settings
 def PublishableBox(publishable, box_type, nodelist, model=None):
     "add some content type info of self.target"
     if not model:
-        model = publishable.content_type.model_class()
+        model = publishable.get_target_model_class()
     box_class = model.box_class
 
     if box_class == PublishableBox:
@@ -61,10 +61,13 @@ class Publishable(models.Model):
         verbose_name = _('Publishable object')
         verbose_name_plural = _('Publishable objects')
 
+    def get_target_model_class(self):
+        return get_cached_object(ContentType, pk=self.content_type_id).model_class()
+
     @property
     def target(self):
         if not hasattr(self, '_target'):
-            self._target = self.content_type.get_object_for_this_type(pk=self.pk)
+            self._target = get_cached_object(self.content_type, pk=self.pk)
         return self._target
 
     if 'ella.oldcomments' in settings.INSTALLED_APPS:
