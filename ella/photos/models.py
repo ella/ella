@@ -271,7 +271,7 @@ class FormatedPhotoManager(models.Manager):
             try:
                 formated_photo = self.create(photo=photo, format=format)
             except (IOError, SystemError, IntegrityError), e:
-                log.error("Cannot create formatted photo due to %s.", e)
+                log.warning("Cannot create formatted photo due to %s.", e)
                 return format.get_blank_img()
 
         return {
