@@ -107,6 +107,5 @@ class Position(models.Model):
                 name="position-%s" % self.name).nodelist
 
         b = self.box_class(self, box_type, nodelist)
-        b.prepare(context)
-        return b.render()
+        return b.render(context)
 
