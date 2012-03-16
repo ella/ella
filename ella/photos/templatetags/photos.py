@@ -25,6 +25,9 @@ class ImgTag(template.Node):
                 except template.VariableDoesNotExist:
                     return ''
 
+            if not photo:
+                return ''
+
             formated_photo = FormatedPhoto.objects.get_photo_in_format(photo, self.format)
         else:
             formated_photo = self.photo
