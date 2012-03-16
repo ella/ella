@@ -79,12 +79,17 @@ def listing_pre_save(sender, instance, **kwargs):
         )
 
 def listing_post_save(sender, instance, **kwargs):
-    RedisListingHandler.add_publishable(
-        instance.category,
-        instance.publishable,
-        repr(time.mktime(instance.publish_from.timetuple())),
-        pipe=getattr(instance, '__pipe', None)
-    )
+    pipe = getattr(instance, '__pipe', None)
+    if instance.publishable.is_published():
+        pipe = RedisListingHandler.add_publishable(
+            instance.category,
+            instance.publishable,
+            repr(time.mktime(instance.publish_from.timetuple())),
+            pipe=pipe,
+            commit=False
+        )
+    if pipe:
+        pipe.execute()
 
 class RedisListingHandler(ListingHandler):
     PREFIX = 'listing'
