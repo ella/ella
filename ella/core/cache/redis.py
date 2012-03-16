@@ -57,7 +57,16 @@ def listing_pre_delete(sender, instance, **kwargs):
 
 def listing_post_delete(sender, instance, **kwargs):
     # but only delete it if the model delete went through
-    instance.__pipe.execute()
+    pipe = instance.__pipe
+    for l in instance.publishable.listing_set.all():
+        RedisListingHandler.add_publishable(
+            l.category,
+            instance.publishable,
+            repr(time.mktime(l.publish_from.timetuple())),
+            pipe=pipe,
+            commit=False
+        )
+    pipe.execute()
 
 def listing_pre_save(sender, instance, **kwargs):
     if instance.pk:
