@@ -31,6 +31,7 @@ class ListingNode(template.Node):
         if 'category' in params and isinstance(params['category'], basestring):
             params['category'] = Category.objects.get_by_tree_path(params['category'])
 
+
         limits = {}
         if 'offset' in params:
             # templates are 1-based, compensate
@@ -117,6 +118,9 @@ def listing_parse(input):
     if input[o] == 'for':
         params['category'] = template.Variable(input[o + 1])
         o = o + 2
+    else:
+        params['category'] = Category.objects.get_by_tree_path('')
+
     # with
     if input[o] == 'with':
         o = o + 1

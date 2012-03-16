@@ -82,7 +82,7 @@ class TestListingTag(TestCase):
         t = template.Template('{% listing 10 for category without p as var %}{{ var|join:":" }}')
         tools.assert_equals('', t.render(template.Context({'category': self.category, 'p': self.publishables[0]})))
 
-class TestListingTagParser(UnitTestCase):
+class TestListingTagParser(TestCase):
     '''
     {% listing <limit>[ from <offset>][of <app.model>[, <app.model>[, ...]]][ for <category> ] [with children|descendents] as <result> %}
     '''
@@ -91,6 +91,7 @@ class TestListingTagParser(UnitTestCase):
         self.act = ContentType.objects.get_for_model(Article)
         self.pct = ContentType.objects.get_for_model(Photo)
         super(TestListingTagParser, self).setUp()
+        create_basic_categories(self)
 
     def test_minimal_args(self):
         var_name, parameters = listing_parse(['listing', '1', 'as', 'var'])
