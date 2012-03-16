@@ -194,6 +194,8 @@ class Publishable(models.Model):
     def delete(self):
         url = self.get_absolute_url()
         Redirect.objects.filter(new_path=url).delete()
+        if self.announced:
+            content_unpublished.send(sender=self.__class__, publishable=self)
         return super(Publishable, self).delete()
 
     def is_published(self):
