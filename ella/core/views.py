@@ -263,24 +263,24 @@ class ListContentType(EllaCoreView):
         if day:
             try:
                 start_day = datetime(int(year), int(month), int(day))
-            except ValueError:
+                kwa['date_range'] = (start_day, start_day + timedelta(seconds=24 * 3600 - 1))
+            except (ValueError, OverflowError):
                 return self._handle_404(_('Invalid day value %r') % day,
                     is_homepage)
-            kwa['date_range'] = (start_day, start_day + timedelta(seconds=24 * 3600 - 1))
         elif month:
             try:
                 start_day = datetime(int(year), int(month), 1)
-            except ValueError:
+                kwa['date_range'] = (start_day, (start_day + timedelta(days=32)).replace(day=1) - timedelta(seconds=1))
+            except (ValueError, OverflowError):
                 return self._handle_404(_('Invalid month value %r') % month,
                     is_homepage)
-            kwa['date_range'] = (start_day, (start_day + timedelta(days=32)).replace(day=1) - timedelta(seconds=1))
         elif year:
             try:
                 start_day = datetime(int(year), 1, 1)
-            except ValueError:
+                kwa['date_range'] = (start_day, (start_day + timedelta(days=370)).replace(day=1) - timedelta(seconds=1))
+            except (ValueError, OverflowError):
                 return self._handle_404(_('Invalid year value %r') % month,
                     is_homepage)
-            kwa['date_range'] = (start_day, (start_day + timedelta(days=370)).replace(day=1) - timedelta(seconds=1))
 
         try:
             cat = Category.objects.get_by_tree_path(category)
