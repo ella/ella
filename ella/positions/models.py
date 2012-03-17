@@ -6,9 +6,11 @@ from django.db import models
 from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
 from django.template import Template, TemplateSyntaxError
+from django.core.exceptions import ValidationError
 
 from ella.core.box import Box
-from ella.core.cache import cache_this, CachedGenericForeignKey, CategoryForeignKey
+from ella.core.cache import cache_this, CachedGenericForeignKey, \
+    CategoryForeignKey, ContentTypeForeignKey, get_cached_object
 
 
 log = logging.getLogger('ella.positions.models')
@@ -65,7 +67,7 @@ class Position(models.Model):
     name = models.CharField(_('Name'), max_length=200)
     category = CategoryForeignKey(verbose_name=_('Category'))
 
-    target_ct = models.ForeignKey(ContentType, verbose_name=_('Target content type'),
+    target_ct = ContentTypeForeignKey(verbose_name=_('Target content type'),
         null=True, blank=True)
     target_id = models.PositiveIntegerField(_('Target id'), null=True, blank=True)
     target = CachedGenericForeignKey('target_ct', 'target_id')
@@ -83,6 +85,30 @@ class Position(models.Model):
     class Meta:
         verbose_name = _('Position')
         verbose_name_plural = _('Positions')
+
+    def clean(self):
+        if not self.category or not self.name:
+            return
+
+        if self.target_ct:
+            try:
+                get_cached_object(self.target_ct, pk=self.target_id)
+            except self.target_ct.model_class().DoesNotExist:
+                raise ValidationError(_('This position doesn\'t point to a valid object.'))
+
+        qset = Position.objects.filter(category=self.category, name=self.name)
+
+        if self.pk:
+            qset = qset.exclude(pk=self.pk)
+
+        if self.active_from:
+            qset = qset.exclude(active_till__lte=self.active_from)
+
+        if self.active_till:
+            qset = qset.exclude(active_from__gt=self.active_till)
+
+        if qset.count():
+            raise ValidationError(_('There already is a postion for %(cat)s named %(name)s fo this time.') % {'cat': self.category, 'name': self.name})
 
     def __unicode__(self):
         return u'%s:%s' % (self.category, self.name)
