@@ -10,12 +10,13 @@ class Migration(SchemaMigration):
         
         # Adding field 'Article.content'
         db.add_column('articles_article', 'content', self.gf('django.db.models.fields.TextField')(default=''), keep_default=False)
-        for ac in orm['articles.ArticleContents'].objects.all():
-            a = ac.article
-            if a.content:
-                a.content += '\n\n'
-            a.content += ac.content
-            a.save()
+        if not db.dry_run:
+            for ac in orm['articles.ArticleContents'].objects.all():
+                a = ac.article
+                if a.content:
+                    a.content += '\n\n'
+                a.content += ac.content
+                a.save()
 
 
     def backwards(self, orm):
