@@ -35,7 +35,7 @@ def paginator(context, adjacent_pages=2):
     if 'request' in context:
         get = context['request'].GET
         if 'using' in get:
-            query_params = '?%s&p=' % urlencode({'using': get['using']})
+            query_params = '?%s&p=' % urlencode(dict((k, v) for (k, v) in get.iteritems() if k != 'p'))
 
     page = context['page']
     page_no = int(page.number)
