@@ -47,7 +47,7 @@ def paginator(context, adjacent_pages=2):
     return {
         'query_params': query_params,
         'page': page,
-        'results_per_page': context['results_per_page'],
+        'results_per_page': page.paginator.per_page,
         'page_numbers': page_numbers,
         'show_first': 1 not in page_numbers,
         'show_last': page.paginator.num_pages not in page_numbers,

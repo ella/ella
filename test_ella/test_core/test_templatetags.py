@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from unittest import TestCase as UnitTestCase
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
 
 from nose import tools
 
@@ -8,8 +8,10 @@ from django import template
 from django.template import TemplateSyntaxError
 from django.contrib.sites.models import Site
 from django.contrib.contenttypes.models import ContentType
+from django.core.paginator import Paginator
 
 from ella.core.templatetags.core import listing_parse, ListingNode, _parse_box, BoxNode, EmptyNode
+from ella.core.templatetags.pagination import paginator
 from ella.core.models import Category
 from ella.core.managers import ListingHandler
 from ella.articles.models import Article
@@ -19,6 +21,45 @@ from test_ella.test_core import create_basic_categories, create_and_place_a_publ
         create_and_place_more_publishables, list_all_publishables_in_category_by_hour, \
         create_and_place_two_publishables_and_listings
 from test_ella import template_loader
+
+class TestPaginate(UnitTestCase):
+    def setUp(self):
+        super(TestPaginate, self).setUp()
+        self.rf = RequestFactory()
+
+    def test_all_querysting_is_included(self):
+        req = self.rf.get('/', {'using': 'custom_lh', 'other': 'param with spaces'})
+        page = Paginator(range(100), 10).page(2)
+
+        context = {
+            'request': req,
+            'page': page
+        }
+
+        tools.assert_equals({
+            'page': page,
+            'page_numbers': [1, 2, 3, 4, 5],
+            'query_params': '?using=custom_lh&other=param+with+spaces&p=',
+            'results_per_page': 10,
+            'show_first': False,
+            'show_last': True
+        }, paginator(context, 2))
+
+    def test_always_include_given_number_of_pages(self):
+        page = Paginator(range(100), 9).page(1)
+        tools.assert_equals({
+            'page': page,
+            'page_numbers': [1, 2, 3, 4, 5, 6, 7],
+            'query_params': '?p=',
+            'results_per_page': 9,
+            'show_first': False,
+            'show_last': True
+        }, paginator({'page': page}, 3))
+
+    def test_dont_fail_on_missing_page(self):
+        tools.assert_equals({},  paginator({}))
+
+
 
 class TestRenderTag(UnitTestCase):
     def test_raises_error_on_no_args(self):
