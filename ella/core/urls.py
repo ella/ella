@@ -54,14 +54,6 @@ urlpatterns = patterns( '',
     url( r'^%(year)s/%(month)s/%(ct)s/$' % res, list_content_type, name="list_content_type_month" ),
     url( r'^%(year)s/%(ct)s/$' % res, list_content_type, name="list_content_type_year" ),
 
-    # static detail with custom action
-    url( r'^%(cat)s/%(ct)s/%(id)s-%(slug)s/%(rest)s$' % res, object_detail, name='static_detail_action' ),
-    url( r'^%(ct)s/%(id)s-%(slug)s/%(rest)s$' % res, object_detail, { 'category' : '' }, name='home_static_detail_action' ),
-
-    # static detail
-    url( r'^%(cat)s/%(ct)s/%(id)s-%(slug)s/$' % res, object_detail, name='static_detail' ),
-    url( r'^%(ct)s/%(id)s-%(slug)s/$' % res, object_detail, { 'category' : '' }, name='home_static_detail' ),
-
     # object detail
     url( r'^%(cat)s/%(year)s/%(month)s/%(day)s/%(ct)s/%(slug)s/$' % res, object_detail, name="object_detail" ),
     url( r'^%(year)s/%(month)s/%(day)s/%(ct)s/%(slug)s/$' % res, object_detail, { 'category' : '' }, name="home_object_detail" ),
@@ -79,6 +71,14 @@ urlpatterns = patterns( '',
     url( r'^%(cat)s/%(year)s/%(month)s/%(day)s/%(ct)s/$' % res, list_content_type, name="category_list_content_type_day" ),
     url( r'^%(cat)s/%(year)s/%(month)s/%(ct)s/$' % res, list_content_type, name="category_list_content_type_month" ),
     url( r'^%(cat)s/%(year)s/%(ct)s/$' % res, list_content_type, name="category_list_content_type_year" ),
+
+    # static detail with custom action
+    url( r'^%(cat)s/%(ct)s/%(id)s-%(slug)s/%(rest)s$' % res, object_detail, name='static_detail_action' ),
+    url( r'^%(ct)s/%(id)s-%(slug)s/%(rest)s$' % res, object_detail, { 'category' : '' }, name='home_static_detail_action' ),
+
+    # static detail
+    url( r'^%(cat)s/%(ct)s/%(id)s-%(slug)s/$' % res, object_detail, name='static_detail' ),
+    url( r'^%(ct)s/%(id)s-%(slug)s/$' % res, object_detail, { 'category' : '' }, name='home_static_detail' ),
 
     # category homepage
     url( r'^%(cat)s/$' % res, category_detail, name="category_detail" ),
