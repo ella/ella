@@ -396,8 +396,14 @@ Drafts = new Object;
         }
         //carp('Trigger preset_load_process done.');
 
-        $form.get(0).reset();
-        $form.find(':checkbox,:radio').removeAttr('checked');
+        if ($form.is('form')) {
+            $form.get(0).reset()
+        }
+        else {
+            $form.wrap('<form>').closest('form').get(0).reset();
+            $form.unwrap();
+        }
+        $form.find(':checkbox,:radio').prop('checked', false);
         $form.find(':text,textarea,:password').val('');
         var form_data = response_data.data;
         if (response_data.message) show_message( response_data.message );
@@ -1020,6 +1026,7 @@ $( function() {
 
     // set focus to first field of just-added form
     $(document).bind('content_added', function(evt, extras) {
+        if (!extras) return;
         var $cont = $('#' + extras.target_id);
         if ($cont && $cont.length) {} else {
             log_generic.log('Error setting focus to form field: content_added provided no target_id');
@@ -1341,7 +1348,6 @@ PostsaveActionTable.prototype = {
     }
 };
 
-
 // submit line (save, save as new, etc)
 function save_change_form_success(text_data) {
     var options = this;
@@ -1375,14 +1381,15 @@ function save_change_form_success(text_data) {
         var action_table = new PostsaveActionTable({
             object_id: object_id,
             object_title: object_title,
-            options: options
+            options: options,
+            response_data: data
         });
 
         // load form-specific post-save actions
         var $meta = $form.find('.js-form-metadata');
         var post_save_callback = $meta.find('input[name=post_save]').data('callback');
         var post_save = {};
-        if (post_save_callback) post_save = post_save_callback($form);
+        if (post_save_callback) post_save = post_save_callback.call(action_table, $form);
         for (var act in post_save) {
             action_table[ act ] = post_save[ act ];
         }
@@ -2149,6 +2156,133 @@ var changelist_main_category_filter = null;
     $(document).bind( 'changelist_shown', register_filters_show_click );
 })(jQuery);
 // end of Main category filter widget
+
+
+// address stack
+NewmanLib.adr_stack_default_push_callback = function(evt) {
+    if (evt.button != 0) return;
+    evt.preventDefault();   // FIXME: remove
+    
+    var came_from_rich_editor = (function() {
+        var initial_input_id = $('#overlay-content').data('input_id');
+        var $initial_input = $( '#' + initial_input_id );
+        if ($initial_input.is('#rich-box *') && typeof(newman_textarea_focused) !== 'undefined' && newman_textarea_focused) {
+            return {
+                // newman_textarea_focused comes from fuckitup
+                textarea_id: newman_textarea_focused.attr('id'),
+                // need to know this to insert the box into the textarea on return
+                content_type: $('#id_box_obj_ct').val(),
+                box_type:     $('#id_box_type'  ).val()
+            };
+        }
+        else return false;
+    })();
+    
+    var $change_form = $('.change-form');
+    var onsave_callback, onreturn_callback;
+    if ($(this).is('.js-custom-adrstack-callbacks')) {
+        // Define no callbacks
+    }
+    else {
+        onsave_callback   = NewmanLib.adr_stack_default_onsave_callback;
+        onreturn_callback = $change_form.data('onreturn_callback');
+        if (!$.isFunction(onreturn_callback)) {
+            onreturn_callback = NewmanLib.adr_stack_default_onreturn_callback;
+        }
+    }
+    var form_data;
+    var get_form_data_callback = $change_form.data('get_form_data_for_restoring');
+    if ($.isFunction(get_form_data_callback)) {
+        try {
+            form_data = get_form_data_callback();
+        } catch(e) {
+            log_generic.log(
+                'error executing custom form-data-serializing callback for change form',
+                e, $change_form, get_form_data_callback
+            );
+        }
+    }
+    if (form_data === undefined) {
+        form_data = JSON.stringify( {data: $change_form.serializeArray()} );
+    }
+    
+    NewmanLib.ADR_STACK.push( {
+        from: evt.referer || get_hashadr(''),
+        to: get_hashadr($(this).attr('href')),
+        selection_callback: $(Kobayashi.closest_loaded(this).container).data('selection_callback'),
+        form_data: form_data,
+        onsave: onsave_callback,
+        onreturn: onreturn_callback,
+        invoked_from_rich_textarea: came_from_rich_editor
+    } );
+    
+    // FIXME: remove block (.js-hashadr or another class should take care of this)
+    if (adr( $(this).attr('href'), {just_get: 'hash'} ) == location.hash) {
+        Kobayashi.reload_content(Kobayashi.DEFAULT_TARGET);
+    }
+    else {
+        adr( $(this).attr('href'), {evt: evt} );
+    }
+}
+$('.js-adrstack-push').live('click', NewmanLib.adr_stack_default_push_callback);
+
+NewmanLib.adr_stack_default_onsave_callback = function(popped, action_table) {
+    if (!action_table.vars.object_id) {
+        log_lookup.log('Did not get ID of newly added object -- not selecting added object');
+    }
+    else {
+        popped.oid = action_table.vars.object_id;
+        popped.str = action_table.vars.object_title;
+    }
+};
+NewmanLib.adr_stack_default_onreturn_callback = function(popped, action_table) {
+    $(document).one('content_added', function(evt) {
+        NewmanLib.restore_form(popped.form_data, $('.change-form'), {});
+    });
+    if (popped.oid) {
+        $(document).one('media_loaded', function() {
+            
+            popped.selection_callback(popped.oid,{str: popped.str});
+            
+            // .rich_text_area (like article's perex) can insert boxes
+            // in case we're coming with a new object that's to be inserted
+            // into a rich textarea as a box, do insert it, focus and fetch preview
+            if (popped.invoked_from_rich_textarea) {
+                var $rta = $( '#' + popped.invoked_from_rich_textarea.textarea_id );
+                if ($rta.length == 1) {
+                    
+                    var ct = AVAILABLE_CONTENT_TYPES[
+                        popped.invoked_from_rich_textarea.content_type
+                    ]
+                    .path
+                    .split('/')
+                    .slice(1,3)
+                    .join('.');
+                    
+                    $rta.val(
+                        $rta.val()
+                        + '{% box '
+                        + popped.invoked_from_rich_textarea.box_type
+                        + ' for '
+                        + ct
+                        + ' with pk '
+                        + popped.oid
+                        + ' %}{% endbox %}'
+                    );
+                    
+                    $rta.focus();
+                    $('.markItUpButton.preview').click();
+                }
+            }
+        });
+    }
+};
+
+NewmanLib.pop_adrstack = function(opt) {
+    if (!opt) opt = {};
+    return new PostsaveActionTable(opt).run('_save');
+};
+// end of address stack
 
 
 // EOF

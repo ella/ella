@@ -68,7 +68,7 @@
                     try {
                         response = JSON.parse(raw_response);
                         $uploadifyTarget.data('photos').push({
-                            oid:   response.data.object_id,
+                            id:   response.data.object_id,
                             title: response.data.object_title
                         });
                     } catch(e) {

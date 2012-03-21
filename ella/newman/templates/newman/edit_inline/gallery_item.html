@@ -63,9 +63,14 @@
 
         <div class="gallery-add-item">
             <a class="icn btn add add-gallery-item-button">{% trans "Add" %}</a>
+            <br />
+            <a class="icn btn add js-adrstack-push js-custom-adrstack-callbacks js-multi-upload js-hashadr" href="/photos/photo/mass-upload2/">{% trans "Mass upload" %}</a>
         </div>
     </fieldset>
 
 </div>
-<script type="text/javascript">request_media('{{ NEWMAN_MEDIA_URL }}jquery/jquery-ui.js');</script>
+<script type="text/javascript">
+    request_media('{{ NEWMAN_MEDIA_URL }}jquery/jquery-ui.js');
+    request_media('{{ NEWMAN_MEDIA_URL }}js/mass-upload.js');
+</script>
 {% endspaceless %}

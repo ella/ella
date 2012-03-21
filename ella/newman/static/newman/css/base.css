@@ -157,6 +157,7 @@ a.btn {
     margin: 3px 2px;
     text-decoration: none;
     color: #000;
+    display: inline-block;
 }
 a.btn.def {
     font-weight: bold;
