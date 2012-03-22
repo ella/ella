@@ -101,10 +101,13 @@ class Box(object):
             if 'SECOND_RENDER' not in context:
                 return self.double_render()
         key = self.get_cache_key()
-        rend = cache.get(key)
-        if rend is None:
+        if key:
+            rend = cache.get(key)
+            if rend is None:
+                rend = self._render(context)
+                cache.set(key, rend, core_settings.CACHE_TIMEOUT)
+        else:
             rend = self._render(context)
-            cache.set(key, rend, core_settings.CACHE_TIMEOUT)
         return rend
 
     def double_render(self):
