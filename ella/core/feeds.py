@@ -76,8 +76,14 @@ class RSSTopCategoryListings(Feed):
             return '/'
 
     def description(self, obj):
-        if 'syndication' in obj.app_data and 'description' in obj.app_data['syndication']:
-            return obj.app_data['syndication']['description']
+        if isinstance(obj, tuple):
+            category, content_type = obj
+        else:
+            category = obj
+
+        if 'syndication' in category.app_data and 'description' in category.app_data['syndication']:
+            return category.app_data['syndication']['description']
+
         return self.title(obj)
 
     def item_pubdate(self, item):
