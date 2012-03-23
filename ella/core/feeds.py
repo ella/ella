@@ -2,11 +2,9 @@ from django.contrib.syndication.views import Feed
 from django.utils.feedgenerator import Atom1Feed
 from django.utils.translation import ugettext_lazy as _
 from django.http import Http404
-from django.conf import settings
 
 from ella.core.models import Listing, Category
 from ella.core.views import get_content_type
-from ella.core.cache.utils import get_cached_object
 from ella.core.conf import core_settings
 from ella.core.managers import ListingHandler
 from ella.photos.models import Format
@@ -65,7 +63,8 @@ class RSSTopCategoryListings(Feed):
         if kwa['category'].tree_parent != None:
             kwa['children'] = ListingHandler.ALL
 
-        return Listing.objects.get_listing(count=core_settings.RSS_NUM_IN_FEED, **kwa)
+        qset = Listing.objects.get_queryset_wrapper(**kwa)
+        return qset.get_listings(count=core_settings.RSS_NUM_IN_FEED)
 
     def link(self, obj):
         if isinstance(obj, tuple):
