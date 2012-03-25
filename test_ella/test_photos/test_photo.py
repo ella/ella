@@ -40,7 +40,7 @@ class TestPhoto(TestCase):
 
     def test_retrieving_formatted_photos_on_fly(self):
         formatted = FormatedPhoto.objects.get_photo_in_format(self.photo, self.basic_format)
-        tools.assert_in('url', formatted)
+        tools.assert_true('url' in formatted)
         if redis:
             expected = {
                 'height': '20',

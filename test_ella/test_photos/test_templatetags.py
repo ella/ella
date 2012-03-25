@@ -15,7 +15,7 @@ class TestImgParsing(TestCase):
 
     def test_node_gets_passed_correct_params(self):
         img_node = _parse_img('img basic for VAR as VAR_NAME'.split())
-        tools.assert_is_instance(img_node, ImgTag)
+        tools.assert_true(isinstance(img_node, ImgTag))
         tools.assert_equals(self.basic_format, img_node.format)
 
     def test_return_empty_node_on_unknown_format(self):
