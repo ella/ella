@@ -23,9 +23,11 @@ class ImgTag(template.Node):
                 try:
                     photo = template.Variable(self.photo).resolve(context)
                 except template.VariableDoesNotExist:
+                    context[self.var_name] = None
                     return ''
 
             if not photo:
+                context[self.var_name] = None
                 return ''
 
             formated_photo = FormatedPhoto.objects.get_photo_in_format(photo, self.format)
