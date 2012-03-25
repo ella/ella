@@ -50,7 +50,7 @@ class RSSTopCategoryListings(Feed):
         return obj.get_absolute_url()
 
     def description(self, obj):
-        return obj.app_data.get('syndication', {}).get('title', obj.description)
+        return obj.app_data.get('syndication', {}).get('description', obj.description)
 
     # Item metadata
     ###########################################################################
