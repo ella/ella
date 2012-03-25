@@ -80,34 +80,28 @@ class TestFeeds(TestCase):
         tools.assert_true(self._feeder.description(self.category), 'SYNDICATION_DESCRIPTION')
 
     def test_get_enclosure_uses_original_when_format_not_set(self):
+        feeder = RSSTopCategoryListings()
+        feeder.format = None
         self._set_photo()
         tools.assert_true(self.publishables[0].photo is not None)
-        original = self.publishables[0].photo.get_image_info()
-        new = self._feeder.get_enclosure_image(self.listings[0], enc_format=None)
-        tools.assert_equals(original, new)
-
-    def test_get_enclosure_uses_original_when_format_not_found(self):
-        non_existent_format_name = 'aaa'
-        self._set_photo()
-        tools.assert_true(self.publishables[0].photo is not None)
-        original = self.publishables[0].photo.get_image_info()
-        new = self._feeder.get_enclosure_image(self.listings[0], enc_format=non_existent_format_name)
-        tools.assert_equals(original, new)
+        original = self.publishables[0].photo.image.url
+        tools.assert_equals(original, feeder.item_enclosure_url(self.listings[0]))
 
     def test_get_enclosure_uses_formated_photo_when_format_available(self):
-        existent_format_name = 'enc_format'
-        f = Format.objects.create(name=existent_format_name, max_width=10, max_height=10,
+        f = Format.objects.create(name='enc_format', max_width=10, max_height=10,
             flexible_height=False, stretch=False, nocrop=False)
-        f.sites = [self.site_id]
+
+        feeder = RSSTopCategoryListings()
+        feeder.format = f
 
         self._set_photo()
         tools.assert_true(self.publishables[0].photo is not None)
         original = self.publishables[0].photo.image
-        new = self._feeder.get_enclosure_image(self.listings[0], enc_format=existent_format_name)
+        new = self._feeder.item_enclosure_url(self.listings[0])
         tools.assert_not_equals(unicode(original), unicode(new))
 
     def test_get_enclosure_returns_none_when_no_image_set(self):
-        tools.assert_equals(self._feeder.get_enclosure_image(self.listings[0]), None)
+        tools.assert_equals(self._feeder.item_enclosure_url(self.listings[0]), None)
 
 
 

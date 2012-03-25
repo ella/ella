@@ -1,63 +1,35 @@
+from mimetypes import guess_type
+
 from django.contrib.syndication.views import Feed
 from django.utils.feedgenerator import Atom1Feed
-from django.utils.translation import ugettext_lazy as _
 from django.http import Http404
+from django.conf import settings
 
 from ella.core.models import Listing, Category
-from ella.core.views import get_content_type
 from ella.core.conf import core_settings
 from ella.core.managers import ListingHandler
-from ella.photos.models import Format
+from ella.photos.models import Format, FormatedPhoto
 
 class RSSTopCategoryListings(Feed):
+    def __init__(self, *args, **kwargs):
+        super(RSSTopCategoryListings, self).__init__(*args, **kwargs)
+        if core_settings.RSS_ENCLOSURE_PHOTO_FORMAT:
+            self.format = Format.objects.get_for_name(core_settings.RSS_ENCLOSURE_PHOTO_FORMAT)
+        else:
+            self.format = None
+
     def get_object(self, request, category=''):
         bits = category.split('/')
         try:
-            ct = get_content_type(bits[-1])
-            bits = bits[:-1]
-        except (Http404, IndexError):
-            ct = False
+            cat = Category.objects.get_by_tree_path(u'/'.join(bits))
+        except Category.DoesNotExist:
+            raise Http404()
 
-        if bits:
-            try:
-                cat = Category.objects.get_by_tree_path(u'/'.join(bits))
-            except Category.DoesNotExist:
-                raise Http404()
-        else:
-            cat = Category.objects.get_by_tree_path('')
-
-        if ct:
-            return (cat, ct)
         return cat
-
-    def title(self, obj):
-        def syndication_title(category):
-            if 'syndication' in category.app_data and 'title' in category.app_data['syndication']:
-                return category.app_data['syndication']['title']
-            return category.title
-
-        if isinstance(obj, tuple):
-            category, content_type = obj
-            return _('%(ctype)s from %(cat)s.') % {
-                    'ctype' : content_type.model_class()._meta.verbose_name_plural,
-                    'cat' : syndication_title(category)
-            }
-        elif obj:
-            return syndication_title(obj)
-        else:
-            obj = Category.objects.get_by_tree_path('')
-            return syndication_title(obj)
 
     def items(self, obj):
         kwa = {}
-        if isinstance(obj, tuple):
-            category, content_type = obj
-            kwa['content_types'] = [ content_type ]
-            kwa['category'] = category
-        elif obj:
-            kwa['category'] = obj
-        else:
-            kwa['category'] = Category.objects.get_by_tree_path('')
+        kwa['category'] = obj
 
         # TODO: In ella based application children attr can be NONE, IMMEDIATE and ALL
         if kwa['category'].tree_parent != None:
@@ -66,60 +38,57 @@ class RSSTopCategoryListings(Feed):
         qset = Listing.objects.get_queryset_wrapper(**kwa)
         return qset.get_listings(count=core_settings.RSS_NUM_IN_FEED)
 
+    # Feed metadata
+    ###########################################################################
+    def title(self, obj):
+        return obj.app_data.get('syndication', {}).get('title', obj.title)
+
     def link(self, obj):
-        if isinstance(obj, tuple):
-            return obj[0].get_absolute_url()
-        elif obj:
-            return obj.get_absolute_url()
-        else:
-            return '/'
+        return obj.get_absolute_url()
 
     def description(self, obj):
-        if isinstance(obj, tuple):
-            category, content_type = obj
-        else:
-            category = obj
+        return obj.app_data.get('syndication', {}).get('title', obj.description)
 
-        if 'syndication' in category.app_data and 'description' in category.app_data['syndication']:
-            return category.app_data['syndication']['description']
-
-        return self.title(obj)
-
+    # Item metadata
+    ###########################################################################
     def item_pubdate(self, item):
         return item.publish_from
 
-    def get_enclosure_image(self, item, enc_format=core_settings.RSS_ENCLOSURE_PHOTO_FORMAT):
-        if getattr(item.publishable, 'photo'):
-            if enc_format is not None:
-                try:
-                    return item.publishable.photo.get_formated_photo(enc_format)
-                except Format.DoesNotExist:
-                    pass
-            return item.publishable.photo.get_image_info()
+    def item_title(self, item):
+        return item.publishable.title
 
-    def get_enclosure_image_attr(self, item, attr):
-        image = self.get_enclosure_image(item)
-        if image is not None:
-            return image.get(attr, None)
-        return None
+    def item_link(self, item):
+        return item.get_absolute_url()
 
+    def item_description(self, item):
+        return item.publishable.description
+
+    # Enclosure - Photo
+    ###########################################################################
     def item_enclosure_url(self, item):
-        return self.get_enclosure_image_attr(item, 'url')
+        if not hasattr(item, '__enclosure_url'):
+            if item.publishable.photo_id:
+                if self.format:
+                    item.__enclosure_url = FormatedPhoto.objects.get_photo_in_format(item.publishable.photo_id, self.format)['url']
+                else:
+                    item.__enclosure_url = item.publishable.photo.image.url
+            else:
+                item.__enclosure_url = None
 
-    def item_enclosure_length(self, item):
-        try:
-            return self.get_enclosure_image_attr(item, 'size')
-        except OSError:
-            pass
+        return item.__enclosure_url
 
     def item_enclosure_mime_type(self, item):
-        image = self.get_enclosure_image(item)
-        if image is not None:
-            if image['url'].endswith('.jpg'):
-                return 'image/jpeg'
-            elif image['url'].endswith('.png'):
-                return 'image/png'
-            return 'image/gif'
+        im = self.item_enclosure_url(item)
+        if im:
+            return guess_type(im)[0]
+
+    def item_enclosure_size(self, item):
+        # make sure get_photo_in_format was called
+        if self.item_enclosure_url(item):
+            if self.format:
+                return FormatedPhoto.objects.get(photo=item.publishable.photo_id, format=self.format).image.size
+            else:
+                return item.publishable.photo.image.size
 
 class AtomTopCategoryListings(RSSTopCategoryListings):
     feed_type = Atom1Feed

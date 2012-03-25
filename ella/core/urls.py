@@ -38,12 +38,6 @@ urlpatterns = patterns( '',
     url( r'^export/$', 'ella.core.views.export', { 'count' : 3 }, name="export" ),
     url( r'^export/(?P<name>[a-z0-9-]+)/$', 'ella.core.views.export', { 'count' : 3 }, name="named_export" ),
 
-    # rss feeds
-    url( r'^feeds/rss/$', RSSTopCategoryListings(), name='home_rss_feed'),
-    url( r'^feeds/atom/$', AtomTopCategoryListings(), name='home_atom_feed'),
-    url( r'^feeds/rss/%(cat)s/$' % res, RSSTopCategoryListings(), name='rss_feed'),
-    url( r'^feeds/atom/%(cat)s/$' % res, AtomTopCategoryListings(), name='atom_feed'),
-
     # list of objects regadless of category and content type
     url( r'^%(year)s/%(month)s/%(day)s/$' % res, list_content_type, name="list_day" ),
     url( r'^%(year)s/%(month)s/$' % res, list_content_type, name="list_month" ),
@@ -79,6 +73,12 @@ urlpatterns = patterns( '',
     # static detail
     url( r'^%(cat)s/%(ct)s/%(id)s-%(slug)s/$' % res, object_detail, name='static_detail' ),
     url( r'^%(ct)s/%(id)s-%(slug)s/$' % res, object_detail, { 'category' : '' }, name='home_static_detail' ),
+
+    # rss feeds
+    url( r'^feeds/$', RSSTopCategoryListings(), name='home_rss_feed'),
+    url( r'^feeds/atom/$', AtomTopCategoryListings(), name='home_atom_feed'),
+    url( r'^%(cat)s/feeds/$' % res, RSSTopCategoryListings(), name='rss_feed'),
+    url( r'^%(cat)s/feeds/atom/$' % res, AtomTopCategoryListings(), name='atom_feed'),
 
     # category homepage
     url( r'^%(cat)s/$' % res, category_detail, name="category_detail" ),
