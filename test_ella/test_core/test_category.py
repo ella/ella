@@ -45,13 +45,13 @@ class TestCategory(TestCase):
         tools.assert_equals(u"new-nested-category/second-nested-category", category_nested_second.tree_path)
 
     def test_proper_parent(self):
-        tools.assert_equals(self.category, self.category_nested.get_tree_parent())
+        tools.assert_equals(self.category, self.category_nested.tree_parent)
 
     def test_main_parent_nested_second_level(self):
-        tools.assert_equals(self.category_nested, self.category_nested_second.main_parent)
+        tools.assert_equals(self.category_nested, self.category_nested_second.get_root_category())
 
     def test_main_parent_nested(self):
-        tools.assert_equals(self.category_nested, self.category_nested.main_parent)
+        tools.assert_equals(self.category_nested, self.category_nested.get_root_category())
 
     def test_main_parent_nested_third(self):
         category_nested_third = Category.objects.create(
@@ -61,7 +61,7 @@ class TestCategory(TestCase):
             site_id = self.site_id,
             slug=u"third-nested-category",
         )
-        tools.assert_equals(self.category_nested, category_nested_third.main_parent)
+        tools.assert_equals(self.category_nested, category_nested_third.get_root_category())
 
     def test_root_url(self):
         url = reverse('root_homepage')

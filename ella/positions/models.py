@@ -45,7 +45,7 @@ class PositionManager(models.Manager):
                     raise
 
                 # traverse the category tree to the top otherwise
-                category = category.get_tree_parent()
+                category = category.tree_parent
 
                 # we reached the top and still haven't found the position - raise
                 if category is None:

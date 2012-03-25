@@ -59,18 +59,6 @@ class Source(models.Model):
     def __unicode__(self):
         return self.name
 
-
-class CategoryBox(Box):
-    """
-    Special Box class for category that adds 'photo_slug' parameter
-    to the box's context (if supplied).
-    """
-    def get_context(self):
-        cont = super(CategoryBox, self).get_context()
-        if 'photo_slug' in self.params:
-            cont['photo_slug'] = self.params['photo_slug']
-        return cont
-
 class Category(models.Model):
     """
     ``Category`` is the **basic building block of Ella-based sites**. All the
@@ -136,17 +124,6 @@ class Category(models.Model):
             for child in children:
                 child.save(force_update=True)
 
-    def get_tree_parent(self):
-        """
-        Returns parent category, if such exists. If this category doesn't have
-        a parent, None is returned.
-
-        Result of this method is cached.
-        """
-        if self.tree_parent_id:
-            return Category.objects.get_for_id(self.tree_parent_id)
-        return None
-
     def get_root_category(self):
         if '/' not in self.tree_path:
             return self
@@ -157,41 +134,17 @@ class Category(models.Model):
         return Category.objects.get_children(self, recursive)
 
     @property
-    def main_parent(self):
-        """
-        Returns parent category, which is considered as **main**. That means
-        that the category's parent is the root category.
-
-        Result of this method is cached.
-        """
-        def _get_main_parent(category):
-            if not category.get_tree_parent():
-                return None
-            if not category.get_tree_parent().get_tree_parent():
-                return category
-            else:
-                return _get_main_parent(category.get_tree_parent())
-        return _get_main_parent(self)
-
-    @property
     def path(self):
         """
         Returns tree path of the category. Tree path is string that describes
         the whole path from the category root to the position of this category.
-        
+
         @see: Category.tree_path
         """
         if self.tree_parent_id:
             return self.tree_path
         else:
             return self.slug
-
-    def Box(self, box_type, nodelist):
-        """
-        Returns instance of ``CategoryBox`` -- a custom ``Box`` subclass
-        with additional context.
-        """
-        return CategoryBox(self, box_type, nodelist)
 
     def get_absolute_url(self):
         """
@@ -210,12 +163,12 @@ class Category(models.Model):
         """
         Returns title indented by *&nbsp;* elements that can be used to show
         users a category tree.
-        
+
         Examples:
-        
+
         **Category with no direct parent (the category root)**
             TITLE
-            
+
         **Category with one parent**
             &nsbp;TITLE
 
