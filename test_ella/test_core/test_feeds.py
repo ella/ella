@@ -1,19 +1,18 @@
 # -*- coding: utf-8 -*-
-from PIL import Image
-
 from django.test import TestCase
 
 from nose import tools, SkipTest
 
 from django.core.urlresolvers import reverse
-from django.http import HttpRequest
+from django.template import Context
 
 from ella.core.models import Listing
 from ella.core.feeds import RSSTopCategoryListings
-from ella.photos.models import Photo, Format
+from ella.photos.models import Format
 
 from test_ella.test_core import create_basic_categories, \
         create_and_place_more_publishables, list_all_publishables_in_category_by_hour
+from test_ella import template_loader
 
 class TestFeeds(TestCase):
 
@@ -30,6 +29,10 @@ class TestFeeds(TestCase):
 
 
         self._feeder = RSSTopCategoryListings()
+
+    def tearDown(self):
+        super(TestFeeds, self).tearDown()
+        template_loader.templates.clear()
 
     def _set_photo(self):
         from test_ella.test_photos.fixtures import create_photo
@@ -102,6 +105,17 @@ class TestFeeds(TestCase):
 
     def test_get_enclosure_returns_none_when_no_image_set(self):
         tools.assert_equals(self._feeder.item_enclosure_url(self.listings[0]), None)
+
+    def test_item_description_defaults_to_publishable_description(self):
+        feeder = RSSTopCategoryListings()
+        feeder.box_context = {}
+        tools.assert_equals(self.publishables[0].description, feeder.item_description(self.listings[0]))
+
+    def test_box_rss_description_can_override_rss_description(self):
+        template_loader.templates['box/rss_description.html'] = 'XXX'
+        feeder = RSSTopCategoryListings()
+        feeder.box_context = Context({})
+        tools.assert_equals('XXX', feeder.item_description(self.listings[0]))
 
 
 

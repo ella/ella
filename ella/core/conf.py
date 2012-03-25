@@ -49,6 +49,7 @@ SERVER_INFO = {}
 
 RSS_NUM_IN_FEED = 10
 RSS_ENCLOSURE_PHOTO_FORMAT = None
+RSS_DESCRIPTION_BOX_TYPE = 'rss_description'
 
 # middlewares
 ECACHE_INFO = 'ella.core.middleware.ECACHE_INFO'

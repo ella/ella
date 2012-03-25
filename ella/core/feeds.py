@@ -3,11 +3,12 @@ from mimetypes import guess_type
 from django.contrib.syndication.views import Feed
 from django.utils.feedgenerator import Atom1Feed
 from django.http import Http404
-from django.conf import settings
+from django.template import TemplateDoesNotExist, RequestContext, NodeList
 
 from ella.core.models import Listing, Category
 from ella.core.conf import core_settings
 from ella.core.managers import ListingHandler
+from ella.core.box import Box
 from ella.photos.models import Format, FormatedPhoto
 
 class RSSTopCategoryListings(Feed):
@@ -24,6 +25,8 @@ class RSSTopCategoryListings(Feed):
             cat = Category.objects.get_by_tree_path(u'/'.join(bits))
         except Category.DoesNotExist:
             raise Http404()
+
+        self.box_context = RequestContext(request)
 
         return cat
 
@@ -61,7 +64,15 @@ class RSSTopCategoryListings(Feed):
         return item.get_absolute_url()
 
     def item_description(self, item):
-        return item.publishable.description
+        if not core_settings.RSS_DESCRIPTION_BOX_TYPE:
+            return item.publishable.description
+
+        p = item.publishable
+        box = p.box_class(p, core_settings.RSS_DESCRIPTION_BOX_TYPE, NodeList())
+        try:
+            return box.render(self.box_context)
+        except TemplateDoesNotExist:
+            return item.publishable.description
 
     # Enclosure - Photo
     ###########################################################################
