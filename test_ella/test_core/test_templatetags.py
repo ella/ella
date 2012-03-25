@@ -175,6 +175,11 @@ class TestListingTagParser(TestCase):
         tools.assert_equals('category', parameters['category'].var)
         tools.assert_equals(ListingHandler.IMMEDIATE, parameters['children'])
 
+    def test_ct_with_desc_using(self):
+        var_name, parameters = listing_parse("listing 10 of articles.article with descendents using 'most-viewed' as most_viewed_listings".split())
+        tools.assert_equals(ListingHandler.ALL, parameters['children'])
+        tools.assert_equals(Category.objects.get_by_tree_path(''), parameters['category'])
+
 class TestBoxTag(UnitTestCase):
 
     def tearDown(self):

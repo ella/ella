@@ -86,6 +86,8 @@ def listing(parser, token):
     var_name, parameters = listing_parse(token.split_contents())
     return ListingNode(var_name, parameters)
 
+LISTING_PARAMS = set(['of', 'for', 'from', 'as', 'using', 'with', 'without', ])
+
 def listing_parse(input):
     params = {}
     if len(input) < 4:
@@ -94,59 +96,68 @@ def listing_parse(input):
     # limit
     params['count'] = template.Variable(input[o])
     o = 2
-    # offset
-    if input[o] == 'from':
-        params['offset'] = template.Variable(input[o + 1])
-        o = o + 2
-    # from - models definition
-    if input[o] == 'of':
-        o = o + 1
-        if 'for' in input:
-            mc = input.index('for')
-        elif 'as' in input:
-            mc = input.index('as')
-        if mc > 0:
+
+    params['category'] = Category.objects.get_by_tree_path('')
+    while o < len(input):
+        # offset
+        if input[o] == 'from':
+            params['offset'] = template.Variable(input[o + 1])
+            o = o + 2
+
+        # from - models definition
+        elif input[o] == 'of':
+            o = o + 1
+            mods = []
+            while input[o] not in LISTING_PARAMS:
+                mods.append(input[o])
+                o += 1
+
             l = []
-            for mod in ''.join(input[o:mc]).split(','):
+            for mod in ''.join(mods).split(','):
                 m = models.get_model(*mod.split('.'))
                 if m is None:
                     raise template.TemplateSyntaxError, "%r tag cannot list objects of unknown model %r" % (input[0], mod)
                 l.append(ContentType.objects.get_for_model(m))
             params['content_types'] = l
-        o = mc
-    # for - category definition
-    if input[o] == 'for':
-        params['category'] = template.Variable(input[o + 1])
-        o = o + 2
-    else:
-        params['category'] = Category.objects.get_by_tree_path('')
 
-    # with
-    if input[o] == 'with':
-        o = o + 1
-        if input[o] == 'children':
-            params['children'] = ListingHandler.IMMEDIATE
-        elif input[o] == 'descendents':
-            params['children'] = ListingHandler.ALL
+        # for - category definition
+        elif input[o] == 'for':
+            params['category'] = template.Variable(input[o + 1])
+            o = o + 2
+
+        # with
+        elif input[o] == 'with':
+            o = o + 1
+            if input[o] == 'children':
+                params['children'] = ListingHandler.IMMEDIATE
+            elif input[o] == 'descendents':
+                params['children'] = ListingHandler.ALL
+            else:
+                raise template.TemplateSyntaxError, "%r tag's argument 'with' required specification (with children|with descendents)" % input[0]
+            o = o + 1
+
+        # without (exclude publishable
+        elif input[o] == 'without':
+            params['exclude'] = template.Variable(input[o + 1])
+            o = o + 2
+
+        # using (isting handlers)
+        elif input[o] == 'using':
+            params['source'] = template.Variable(input[o + 1])
+            o = o + 2
+
+        # as
+        elif input[o] == 'as':
+            var_name = input[o + 1]
+            o = o + 2
+            break
         else:
-            raise template.TemplateSyntaxError, "%r tag's argument 'with' required specification (with children|with descendents)" % input[0]
-        o = o + 1
-
-    # without (exclude publishable
-    if input[o] == 'without':
-        params['exclude'] = template.Variable(input[o + 1])
-        o = o + 2
-
-    # using (isting handlers)
-    if input[o] == 'using':
-        params['source'] = template.Variable(input[o + 1])
-        o = o + 2
-
-    # as
-    if input[o] == 'as':
-        var_name = input[o + 1]
+            raise template.TemplateSyntaxError('Unknown param for %s: %r' % (input[0], input[o]))
     else:
         raise template.TemplateSyntaxError, "%r tag requires 'as' argument" % input[0]
+
+    if o < len(input):
+        raise template.TemplateSyntaxError, "%r tag requires 'as' as last argument" % input[0]
 
     return var_name, params
 
