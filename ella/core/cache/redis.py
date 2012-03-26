@@ -8,7 +8,7 @@ from hashlib import md5
 from django.conf import settings
 from django.db.models.loading import get_model
 
-from ella.core.cache.utils import get_cached_objects
+from ella.core.cache.utils import get_cached_objects, SKIP
 from ella.core.managers import ListingHandler
 
 log = logging.getLogger('ella.core')
@@ -197,7 +197,7 @@ class RedisListingHandler(ListingHandler):
             data.append(score)
 
         # and retrieve publishables from cache
-        publishables = get_cached_objects(ids)
+        publishables = get_cached_objects(ids, missing=SKIP)
 
         # create mock Listing objects to return
         return map(lambda (p, score): self._get_listing(p, score), zip(publishables, data))
