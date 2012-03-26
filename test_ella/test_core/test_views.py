@@ -12,17 +12,31 @@ from ella.core.models import Listing
 from test_ella.test_core import create_basic_categories, create_and_place_a_publishable, \
         create_and_place_more_publishables, list_all_publishables_in_category_by_hour
 from test_ella import template_loader
+
+from ella.core.models import Category
 from ella.core.views import get_templates
+from ella.core.signals import object_rendering, object_rendered
 
 class ViewsTestCase(TestCase):
     def setUp(self):
         super(ViewsTestCase, self).setUp()
         create_basic_categories(self)
         create_and_place_a_publishable(self)
+        self.signals_received = {}
+        object_rendering.connect(self.object_rendering)
+        object_rendered.connect(self.object_rendered)
+
+    def object_rendered(self, *args, **kwargs):
+        self.signals_received.setdefault('object_rendered', []).append((args, kwargs))
+
+    def object_rendering(self, *args, **kwargs):
+        self.signals_received.setdefault('object_rendering', []).append((args, kwargs))
 
     def tearDown(self):
         super(ViewsTestCase, self).tearDown()
         template_loader.templates = {}
+        object_rendering.disconnect(self.object_rendering)
+        object_rendered.disconnect(self.object_rendered)
 
 class TestCategoryDetail(ViewsTestCase):
     def test_fail_on_no_template(self):
@@ -33,6 +47,18 @@ class TestCategoryDetail(ViewsTestCase):
         template_loader.templates['page/category/ni-hao-category/%s' % self.category.template] = 'page/category/ni-hao-category/category.html'
         response = self.client.get('/')
         tools.assert_equals('page/category/ni-hao-category/category.html', response.content)
+
+    def test_signals_fired_for_homepage(self):
+        template_loader.templates['page/category.html'] = 'page/category.html'
+        self.client.get('/')
+        tools.assert_equals(1, len(self.signals_received['object_rendering']))
+        tools.assert_equals(1, len(self.signals_received['object_rendered']))
+
+        kwargs = self.signals_received['object_rendered'][0][1]
+        tools.assert_equals(set(['sender', 'request', 'category', 'publishable', 'signal']), set(kwargs.keys()))
+        tools.assert_equals(self.category, kwargs['category'])
+        tools.assert_equals(Category, kwargs['sender'])
+        tools.assert_equals(None, kwargs['publishable'])
 
     def test_second_nested_template_overloading(self):
         tp = 'nested-category/second-nested-category'
@@ -146,6 +172,17 @@ class TestObjectDetail(ViewsTestCase):
     def setUp(self):
         super(TestObjectDetail, self).setUp()
         template_loader.templates['page/object.html'] = ''
+
+    def test_signals_fired_for_detail(self):
+        self.client.get('/nested-category/2008/1/10/articles/first-article/')
+        tools.assert_equals(1, len(self.signals_received['object_rendering']))
+        tools.assert_equals(1, len(self.signals_received['object_rendered']))
+
+        kwargs = self.signals_received['object_rendered'][0][1]
+        tools.assert_equals(set(['sender', 'request', 'category', 'publishable', 'signal']), set(kwargs.keys()))
+        tools.assert_equals(self.category_nested, kwargs['category'])
+        tools.assert_equals(self.publishable.__class__, kwargs['sender'])
+        tools.assert_equals(self.publishable, kwargs['publishable'])
 
     def test_object_detail(self):
         response = self.client.get('/nested-category/2008/1/10/articles/first-article/')

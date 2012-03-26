@@ -15,6 +15,7 @@ from ella.core.cache import get_cached_object_or_404, cache_this
 from ella.core import custom_urls
 from ella.core.conf import core_settings
 from ella.core.managers import ListingHandler
+from ella.core.signals import object_rendering, object_rendered
 
 __docformat__ = "restructuredtext en"
 
@@ -101,11 +102,15 @@ class ObjectDetail(EllaCoreView):
         if obj.static and slug != obj.slug:
             return redirect(obj.get_absolute_url(), permanent=True)
 
+        object_rendering.send(sender=context['content_type'].model_class(), request=request, category=context['category'], publishable=context['object'])
+
         # check for custom actions
         if url_remainder:
             return custom_urls.resolver.call_custom_view(request, obj, url_remainder, context)
         elif custom_urls.resolver.has_custom_detail(obj):
             return custom_urls.resolver.call_custom_detail(request, context)
+
+        object_rendered.send(sender=context['content_type'].model_class(), request=request, category=context.get('category'), publishable=context.get('object'))
 
         return self.render(request, context, self.get_templates(context))
 
@@ -212,6 +217,8 @@ class ListContentType(EllaCoreView):
             template_name = context['category'].template
             if core_settings.ARCHIVE_TEMPLATE and not context.get('is_title_page'):
                 template_name = self.template_name
+            object_rendering.send(sender=Category, request=request, category=context['category'], publishable=None)
+            object_rendered.send(sender=Category, request=request, category=context.get('category'), publishable=None)
             return self.render(request, context, self.get_templates(context, template_name))
         except self.EmptyHomepageException:
             return self.render(request, {}, self.empty_homepage_template_name)
