@@ -31,14 +31,7 @@ class RSSTopCategoryListings(Feed):
         return cat
 
     def items(self, obj):
-        kwa = {}
-        kwa['category'] = obj
-
-        # TODO: In ella based application children attr can be NONE, IMMEDIATE and ALL
-        if kwa['category'].tree_parent != None:
-            kwa['children'] = ListingHandler.ALL
-
-        qset = Listing.objects.get_queryset_wrapper(**kwa)
+        qset = Listing.objects.get_queryset_wrapper(category=obj, children=ListingHandler.ALL)
         return qset.get_listings(count=core_settings.RSS_NUM_IN_FEED)
 
     # Feed metadata
