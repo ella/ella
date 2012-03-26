@@ -68,7 +68,8 @@ def get_cached_object(model, timeout=CACHE_TIMEOUT, **kwargs):
         cache.set(key, obj, timeout)
     return obj
 
-def get_cached_objects(pks, model=None, timeout=CACHE_TIMEOUT):
+RAISE, SKIP, NONE = 0, 1, 2
+def get_cached_objects(pks, model=None, timeout=CACHE_TIMEOUT, missing=RAISE):
     """
     Return a list of objects with given PKs using cache.
 
@@ -116,7 +117,20 @@ def get_cached_objects(pks, model=None, timeout=CACHE_TIMEOUT):
         # write them into cache
         cache.set_many(to_set, **kw)
 
-    return [cached[k] for k in keys]
+    out = []
+    for k in keys:
+        try:
+            out.append(cached[k])
+        except KeyError:
+            if missing == NONE:
+                out.append(None)
+            elif missing == SKIP:
+                pass
+            elif missing == RAISE:
+                ct = ContentType.objects.get_for_id(int(k.split(':')[1]))
+                raise ct.model_class().DoesNotExist(
+                    '%s matching query does not exist.' % ct.model_class()._meta.object_name)
+    return out
 
 
 def get_cached_object_or_404(model, timeout=CACHE_TIMEOUT, **kwargs):

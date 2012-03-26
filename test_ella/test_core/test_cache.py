@@ -40,6 +40,26 @@ class TestCacheUtils(CacheTestCase):
 
         tools.assert_equals([ct_ct, site_ct, Site.objects.get(pk=1)], objs)
 
+    def test_get_many_objects_raises_by_default(self):
+        ct_ct = ContentType.objects.get_for_model(ContentType)
+        site_ct = ContentType.objects.get_for_model(Site)
+
+        tools.assert_raises(Site.DoesNotExist, utils.get_cached_objects, [(ct_ct.id, ct_ct.id), (ct_ct.id, site_ct.id), (site_ct.id, 1), (site_ct.id, 100)])
+
+    def test_get_many_objects_can_replace_missing_with_none(self):
+        ct_ct = ContentType.objects.get_for_model(ContentType)
+        site_ct = ContentType.objects.get_for_model(Site)
+
+        objs = utils.get_cached_objects([(ct_ct.id, ct_ct.id), (ct_ct.id, site_ct.id), (site_ct.id, 1), (site_ct.id, 100)], missing=utils.NONE)
+        tools.assert_equals([ct_ct, site_ct, Site.objects.get(pk=1), None], objs)
+
+    def test_get_many_objects_can_skip(self):
+        ct_ct = ContentType.objects.get_for_model(ContentType)
+        site_ct = ContentType.objects.get_for_model(Site)
+
+        objs = utils.get_cached_objects([(ct_ct.id, ct_ct.id), (ct_ct.id, site_ct.id), (site_ct.id, 1), (site_ct.id, 100)], missing=utils.SKIP)
+        tools.assert_equals([ct_ct, site_ct, Site.objects.get(pk=1)], objs)
+
 class TestCacheInvalidation(CacheTestCase):
     def test_save_invalidates_object(self):
         self.ct = ContentType.objects.get_for_model(ContentType)
