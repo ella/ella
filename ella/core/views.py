@@ -102,7 +102,7 @@ class ObjectDetail(EllaCoreView):
         if obj.static and slug != obj.slug:
             return redirect(obj.get_absolute_url(), permanent=True)
 
-        object_rendering.send(sender=context['content_type'].model_class(), request=request, category=context['category'], publishable=context['object'])
+        object_rendering.send(sender=context['object'].__class__, request=request, category=context['category'], publishable=context['object'])
 
         # check for custom actions
         if url_remainder:
@@ -110,7 +110,7 @@ class ObjectDetail(EllaCoreView):
         elif custom_urls.resolver.has_custom_detail(obj):
             return custom_urls.resolver.call_custom_detail(request, context)
 
-        object_rendered.send(sender=context['content_type'].model_class(), request=request, category=context.get('category'), publishable=context.get('object'))
+        object_rendered.send(sender=context['object'].__class__, request=request, category=context['category'], publishable=context['object'])
 
         return self.render(request, context, self.get_templates(context))
 
@@ -218,7 +218,7 @@ class ListContentType(EllaCoreView):
             if core_settings.ARCHIVE_TEMPLATE and not context.get('is_title_page'):
                 template_name = self.template_name
             object_rendering.send(sender=Category, request=request, category=context['category'], publishable=None)
-            object_rendered.send(sender=Category, request=request, category=context.get('category'), publishable=None)
+            object_rendered.send(sender=Category, request=request, category=context['category'], publishable=None)
             return self.render(request, context, self.get_templates(context, template_name))
         except self.EmptyHomepageException:
             return self.render(request, {}, self.empty_homepage_template_name)
