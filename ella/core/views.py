@@ -308,8 +308,8 @@ class ListContentType(EllaCoreView):
 
         if 'using' in request.GET:
             kwa['source'] = request.GET['using']
-        elif 'listing_handler' in cat.app_data:
-            kwa['source'] = cat.app_data['listing_handler']
+        else:
+            kwa['source'] = cat.app_data.get('ella', {}).get('listing_handler', 'default')
 
         qset = Listing.objects.get_queryset_wrapper(**kwa)
         paginator = Paginator(qset, paginate_by)
