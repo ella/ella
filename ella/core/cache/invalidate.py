@@ -126,7 +126,7 @@ class CacheDeleterCache(object):
     def _set_obj(self, obj, data):
         cache.set(self._get_key(obj), data, CACHE_TIMEOUT)
 
-    def register_dependency(self):
+    def register_dependency(self, src_key, obj_key):
         pass
 
 
