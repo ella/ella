@@ -198,9 +198,18 @@ class ListingManager(models.Manager):
             elif children == ListingHandler.IMMEDIATE:
                 # this category and its children
                 qset = qset.filter(models.Q(category__tree_parent=category) | models.Q(category=category))
+
+                for c in category.get_children():
+                    if not c.app_data.get('ella', {}).get('propagate_listings', True):
+                        qset = qset.exclude(category=c)
+
             elif children == ListingHandler.ALL:
                 # this category and all its descendants
                 qset = qset.filter(category__tree_path__startswith=category.tree_path, category__site=category.site_id)
+
+                for c in category.get_children(True):
+                    if not c.app_data.get('ella', {}).get('propagate_listings', True):
+                        qset = qset.exclude(category__tree_path__startswith=c.tree_path)
 
             else:
                 raise AttributeError('Invalid children value (%s) - should be one of (%s, %s, %s)' % (children, self.NONE, self.IMMEDIATE, self.ALL))

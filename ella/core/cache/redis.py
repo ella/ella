@@ -102,20 +102,26 @@ class RedisListingHandler(ListingHandler):
     def get_keys(cls, category, publishable):
         # main category
         keys = [':'.join((cls.PREFIX, str(category.id)))]
+        keys.append(':'.join((cls.PREFIX, 'c', str(category.id))))
+        keys.append(':'.join((cls.PREFIX, 'd', str(category.id))))
+
+        # content_type
+        keys.append(':'.join((cls.PREFIX, 'ct', str(publishable.content_type_id))))
+
+        # category shouldn't be propagated
+        if not category.app_data.get('ella', {}).get('propagate_listings', True):
+            return keys
 
         # children
-        keys.append(':'.join((cls.PREFIX, 'c', str(category.id))))
         if category.tree_parent_id:
             keys.append(':'.join((cls.PREFIX, 'c', str(category.tree_parent_id))))
 
         # all children
-        keys.append(':'.join((cls.PREFIX, 'd', str(category.id))))
         while category.tree_parent_id:
             category = category.tree_parent
             keys.append(':'.join((cls.PREFIX, 'd', str(category.id))))
-
-        # content_type
-        keys.append(':'.join((cls.PREFIX, 'ct', str(publishable.content_type_id))))
+            if not category.app_data.get('ella', {}).get('propagate_listings', True):
+                break
 
         return keys
 

@@ -74,6 +74,20 @@ class TestListing(TestCase):
         tools.assert_equals(len(self.listings), len(l))
         tools.assert_equals(listing, l[0])
 
+    def test_get_listing_IMMEDIATE_without_limited_categories(self):
+        self.category_nested.app_data = {'ella': {'propagate_listings': False}}
+        self.category_nested.save()
+        l = Listing.objects.get_listing(category=self.category, children=ListingHandler.IMMEDIATE)
+        tools.assert_equals(1, len(l))
+        tools.assert_equals([listing for listing in self.listings if listing.category == self.category], l)
+
+    def test_get_listing_ALL_without_limited_categories(self):
+        self.category_nested.app_data = {'ella': {'propagate_listings': False}}
+        self.category_nested.save()
+        l = Listing.objects.get_listing(category=self.category, children=ListingHandler.ALL)
+        tools.assert_equals(1, len(l))
+        tools.assert_equals([listing for listing in self.listings if listing.category == self.category], l)
+
     def test_get_listing_with_all_children(self):
         l = Listing.objects.get_listing(category=self.category, children=ListingHandler.ALL)
         tools.assert_equals(self.listings, list(l))

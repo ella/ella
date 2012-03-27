@@ -98,6 +98,21 @@ class TestRedisListings(TestCase):
         super(TestRedisListings, self).tearDown()
         self.redis.flushdb()
 
+    def test_listings_dont_propagate_where_they_shouldnt(self):
+        self.category_nested.app_data = {'ella': {'propagate_listings': False}}
+        self.category_nested.save()
+
+        # small hack to remove the cached category on Publishable
+        for p in self.publishables:
+            del p._category_cache
+
+        list_all_publishables_in_category_by_hour(self)
+        ct_id = self.publishables[0].content_type_id
+        tools.assert_equals(['%d:1' % ct_id], self.redis.zrange('listing:d:1', 0, 100))
+        tools.assert_equals(['%d:1' % ct_id], self.redis.zrange('listing:c:1', 0, 100))
+        tools.assert_equals(['%d:2' % ct_id, '%d:3' % ct_id], self.redis.zrange('listing:c:2', 0, 100))
+        tools.assert_equals(['%d:2' % ct_id, '%d:3' % ct_id], self.redis.zrange('listing:d:2', 0, 100))
+
     def test_listing_gets_removed_when_publishable_goes_unpublished(self):
         list_all_publishables_in_category_by_hour(self)
         p = self.publishables[0]
