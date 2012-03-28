@@ -126,6 +126,9 @@ class CacheDeleterCache(object):
     def _set_obj(self, obj, data):
         cache.set(self._get_key(obj), data, CACHE_TIMEOUT)
 
+    def register_dependency(self, src_key, obj_key):
+        pass
+
 
 CACHE_DELETER = load_cache_deleter(getattr(settings, 'ELLA_CACHE_DELETER', None))
 
