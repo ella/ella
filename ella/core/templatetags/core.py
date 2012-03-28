@@ -236,7 +236,9 @@ class BoxNode(template.Node):
                 source_key = context[core_settings.BOX_INFO]
             elif core_settings.ECACHE_INFO in context:
                 source_key = context[core_settings.ECACHE_INFO]
-            CACHE_DELETER.register_dependency(source_key, box_key)
+            
+            if hasattr(CACHE_DELETER, 'register_dependency'):
+                CACHE_DELETER.register_dependency(source_key, box_key)
 
         return result
 
