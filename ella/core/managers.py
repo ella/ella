@@ -280,6 +280,10 @@ class ListingManager(models.Manager):
 
         if source in self._listing_handlers:
             return self._listing_handlers[source]
+
+        if settings.DEBUG:
+            raise ImproperlyConfigured('ListingHandler %s is not defined in settings.' % source)
+
         return self._listing_handlers['default']
 
     def get_queryset_wrapper(self, category, children=ListingHandler.NONE, content_types=[], date_range=(), exclude=None, source='default'):
