@@ -1,6 +1,7 @@
 from urllib import urlencode
 
 from django import template
+from django.utils.encoding import smart_str
 
 register = template.Library()
 
@@ -17,11 +18,11 @@ def paginator(context, adjacent_pages=2):
     view.
 
     Taken from http://www.djangosnippets.org/snippets/73/
-    
+
     Syntax::
-    
+
         {% paginator[ <NUMBER_OF_ADJACENT_PAGES] %}
-        
+
     Examples::
 
         {% paginator %}
@@ -34,7 +35,7 @@ def paginator(context, adjacent_pages=2):
     query_params = '?p='
     if 'request' in context:
         get = context['request'].GET
-        query_params = '?%s&p=' % urlencode(dict((k, v) for (k, v) in get.iteritems() if k != 'p'))
+        query_params = '?%s&p=' % urlencode(dict((k, smart_str(v)) for (k, v) in get.iteritems() if k != 'p'))
 
     page = context['page']
     page_no = int(page.number)
