@@ -48,11 +48,33 @@
                 var $fileupload = $(this);
                 
                 var $rows = $('.js-photos-container .row').not('.Done.OK');
-                var default_values = AjaxFormLib.clean_inputs($('.js-common-image-fields')).serializeObject();
+                var $common_fields_cleaned = AjaxFormLib.clean_inputs($('.js-common-image-fields'));
+                var default_values = $common_fields_cleaned.serializeObject();
+                
+                var incrementable_names = {};
+                $common_fields_cleaned.filter('.js-Incrementable *').each(function() {
+                    incrementable_names[ $(this).prop('name') ] = true;
+                });
+                var default_valued_field_counter = 0;
+                
                 $rows.each( function() {
                     var values = AjaxFormLib.clean_inputs($(this)).serializeObject();
+                    var incremented_default_valued_field_counter = false;
+                    
                     for (k in values) {
-                        values[k] = values[k] || default_values[k] || values[k];
+                        if (!values[k] && default_values[k]) {
+                            
+                            var suffix = '';
+                            if (k in incrementable_names) {
+                                if (!incremented_default_valued_field_counter) {
+                                    default_valued_field_counter++;
+                                    incremented_default_valued_field_counter = true;
+                                }
+                                suffix = ' ' + default_valued_field_counter;
+                            }
+                            
+                            values[k] = default_values[k] + suffix;
+                        }
                     }
                     
                     var file = $(this).data('jfu_file');
@@ -79,11 +101,14 @@
         })(NewmanLib.ADR_STACK[NewmanLib.ADR_STACK.length-1]);
 
         // populate the "common image data" fieldset
-        $('.template .field:has(#id_authors,#id_source)')
-        .clone(true)
+        var $common_fields = $('.template .field').clone(true);
+        $common_fields
         .each(function() { add_suffices($(this), '_common') })
-        .appendTo('.js-common-image-fields')
-        .trigger('common_fields_populated');
+        .appendTo('.js-common-image-fields');
+        $common_fields
+        .filter(':has(#id_description_common,#id_title_common)')
+        .addClass('js-Incrementable');
+        $common_fields.trigger('common_fields_populated');
         
         // save photos received from server to action table
         $('#mass-upload2-form-post-save').data({ callback: function() {
