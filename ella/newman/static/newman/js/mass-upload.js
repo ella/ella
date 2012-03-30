@@ -99,6 +99,11 @@
                 $('.js-mass-file-upload .js-upload-to-gallery').hide();
             }
         })(NewmanLib.ADR_STACK[NewmanLib.ADR_STACK.length-1]);
+        
+        // for some reason, textareas in template retain values from
+        // previously-rendered textareas of identical fields from change-form
+        // (probably a backend issue)
+        $('.template textarea').val('').html('');
 
         // populate the "common image data" fieldset
         var $common_fields = $('.template .field').clone(true);
@@ -106,7 +111,7 @@
         .each(function() { add_suffices($(this), '_common') })
         .appendTo('.js-common-image-fields');
         $common_fields
-        .filter(':has(#id_description_common,#id_title_common)')
+        .filter(':has(#id_title_common)')
         .addClass('js-Incrementable');
         $common_fields.trigger('common_fields_populated');
         
