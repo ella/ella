@@ -84,7 +84,7 @@ class RSSTopCategoryListings(Feed):
         if enc_url:
             return guess_type(enc_url)[0]
 
-    def item_enclosure_size(self, item):
+    def item_enclosure_length(self, item):
         # make sure get_photo_in_format was called
         if hasattr(item.publishable, 'feed_enclosure'):
             return item.publishable.feed_enclosure()['size']

@@ -99,7 +99,7 @@ class TestFeeds(TestCase):
                 return {'url': 'URL', 'size': 1000}
 
         tools.assert_equals('URL', self._feeder.item_enclosure_url(A()))
-        tools.assert_equals(1000, self._feeder.item_enclosure_size(A()))
+        tools.assert_equals(1000, self._feeder.item_enclosure_length(A()))
 
     def test_get_enclosure_uses_formated_photo_when_format_available(self):
         f = Format.objects.create(name='enc_format', max_width=10, max_height=10,
