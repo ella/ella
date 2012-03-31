@@ -8,7 +8,6 @@ from django.template import TemplateDoesNotExist, RequestContext, NodeList
 from ella.core.models import Listing, Category
 from ella.core.conf import core_settings
 from ella.core.managers import ListingHandler
-from ella.core.box import Box
 from ella.photos.models import Format, FormatedPhoto
 
 class RSSTopCategoryListings(Feed):
