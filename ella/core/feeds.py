@@ -66,6 +66,9 @@ class RSSTopCategoryListings(Feed):
         except TemplateDoesNotExist:
             return item.publishable.description
 
+    def item_author_name(self, item):
+        return ', '.join(map(unicode, item.publishable.authors.all()))
+
     # Enclosure - Photo
     ###########################################################################
     def item_enclosure_url(self, item):
