@@ -82,13 +82,24 @@ class TestFeeds(TestCase):
         self.category.app_data = {'syndication': {'description': 'SYNDICATION_DESCRIPTION'}}
         tools.assert_true(self._feeder.description(self.category), 'SYNDICATION_DESCRIPTION')
 
-    def test_get_enclosure_uses_original_when_format_not_set(self):
+    def test_no_enclosure_when_format_not_set(self):
         feeder = RSSTopCategoryListings()
         feeder.format = None
         self._set_photo()
         tools.assert_true(self.publishables[0].photo is not None)
-        original = self.publishables[0].photo.image.url
-        tools.assert_equals(original, feeder.item_enclosure_url(self.listings[0]))
+        tools.assert_equals(None, feeder.item_enclosure_url(self.listings[0]))
+
+    def test_get_enclosure_uses_optional_hook_on_publishable(self):
+        class A(object):
+            @property
+            def publishable(self):
+                return self
+
+            def feed_enclosure(self):
+                return {'url': 'URL', 'size': 1000}
+
+        tools.assert_equals('URL', self._feeder.item_enclosure_url(A()))
+        tools.assert_equals(1000, self._feeder.item_enclosure_size(A()))
 
     def test_get_enclosure_uses_formated_photo_when_format_available(self):
         f = Format.objects.create(name='enc_format', max_width=10, max_height=10,

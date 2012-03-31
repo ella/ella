@@ -71,28 +71,26 @@ class RSSTopCategoryListings(Feed):
     ###########################################################################
     def item_enclosure_url(self, item):
         if not hasattr(item, '__enclosure_url'):
-            if item.publishable.photo_id:
-                if self.format:
-                    item.__enclosure_url = FormatedPhoto.objects.get_photo_in_format(item.publishable.photo_id, self.format)['url']
-                else:
-                    item.__enclosure_url = item.publishable.photo.image.url
+            if hasattr(item.publishable, 'feed_enclosure'):
+                item.__enclosure_url = item.publishable.feed_enclosure()['url']
+            elif self.format and  item.publishable.photo_id:
+                item.__enclosure_url = FormatedPhoto.objects.get_photo_in_format(item.publishable.photo_id, self.format)['url']
             else:
                 item.__enclosure_url = None
 
         return item.__enclosure_url
 
     def item_enclosure_mime_type(self, item):
-        im = self.item_enclosure_url(item)
-        if im:
-            return guess_type(im)[0]
+        enc_url = self.item_enclosure_url(item)
+        if enc_url:
+            return guess_type(enc_url)[0]
 
     def item_enclosure_size(self, item):
         # make sure get_photo_in_format was called
-        if self.item_enclosure_url(item):
-            if self.format:
-                return FormatedPhoto.objects.get(photo=item.publishable.photo_id, format=self.format).image.size
-            else:
-                return item.publishable.photo.image.size
+        if hasattr(item.publishable, 'feed_enclosure'):
+            return item.publishable.feed_enclosure()['size']
+        elif self.format:
+            return FormatedPhoto.objects.get(photo=item.publishable.photo_id, format=self.format).image.size
 
 class AtomTopCategoryListings(RSSTopCategoryListings):
     feed_type = Atom1Feed
