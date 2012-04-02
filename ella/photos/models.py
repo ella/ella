@@ -28,8 +28,8 @@ __all__ = ("Format", "FormatedPhoto", "Photo")
 log = logging.getLogger('ella.photos')
 
 redis = None
-REDIS_PHOTO_KEY = 'photo:%d'
-REDIS_FORMATTED_PHOTO_KEY = 'photo:%d:%d'
+REDIS_PHOTO_KEY = 'photo:%s'
+REDIS_FORMATTED_PHOTO_KEY = 'photo:%s:%s'
 
 if hasattr(settings, 'PHOTOS_REDIS'):
     try:
