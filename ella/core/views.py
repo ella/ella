@@ -5,7 +5,7 @@ from django.core.paginator import Paginator
 from django.conf import settings
 from django.db import models
 from django.http import Http404
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
 from django.utils.translation import ugettext_lazy as _
@@ -474,7 +474,7 @@ def export(request, count, name='', content_type=None):
     except Category.DoesNotExist:
         raise Http404()
     listing = Listing.objects.get_listing(count=count, category=cat)
-    return TemplateResponse(
+    return render(
             request,
             t_list,
             { 'category' : cat, 'listing' : listing },
