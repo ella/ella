@@ -245,7 +245,7 @@ class ListContentType(EllaCoreView):
         return year
 
     def get_context(self, request, category='', year=None, month=None, \
-        day=None, content_type=None, paginate_by=core_settings.CATEGORY_LISTINGS_PAGINATE_BY):
+        day=None, content_type=None, paginate_by=None):
         # pagination
         if 'p' in request.GET and request.GET['p'].isdigit():
             page_no = int(request.GET['p'])
@@ -311,6 +311,8 @@ class ListContentType(EllaCoreView):
         else:
             kwa['source'] = cat.app_data.get('ella', {}).get('listing_handler', 'default')
 
+        if paginate_by is None:
+            paginate_by = cat.app_data.get('ella', {}).get('paginate_by', core_settings.CATEGORY_LISTINGS_PAGINATE_BY)
         qset = Listing.objects.get_queryset_wrapper(**kwa)
         paginator = Paginator(qset, paginate_by)
 
