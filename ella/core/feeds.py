@@ -62,9 +62,13 @@ class RSSTopCategoryListings(Feed):
         p = item.publishable
         box = p.box_class(p, core_settings.RSS_DESCRIPTION_BOX_TYPE, NodeList())
         try:
-            return box.render(self.box_context)
+            desc =  box.render(self.box_context)
         except TemplateDoesNotExist:
-            return item.publishable.description
+            desc = None
+
+        if not desc:
+            desc = item.publishable.description
+        return desc
 
     def item_author_name(self, item):
         return ', '.join(map(unicode, item.publishable.authors.all()))
