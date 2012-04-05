@@ -47,7 +47,7 @@ class Publishable(models.Model):
     source = models.ForeignKey(Source, blank=True, null=True, verbose_name=_('Source'))
 
     # Main Photo
-    photo = models.ForeignKey(Photo, blank=True, null=True, verbose_name=_('Photo'))
+    photo = models.ForeignKey(Photo, blank=True, null=True, verbose_name=_('Photo'), on_delete=models.SET_NULL)
 
     # Description
     description = models.TextField(_('Description'), blank=True)
