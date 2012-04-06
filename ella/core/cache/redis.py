@@ -73,7 +73,7 @@ def listing_pre_save(sender, instance, **kwargs):
         # prepare deletion of stale data
         old_listing = instance.__class__.objects.get(pk=instance.pk)
         instance.__pipe = RedisListingHandler.remove_publishable(
-            instance.category,
+            old_listing.category,
             old_listing.publishable,
             commit=False
         )
