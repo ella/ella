@@ -289,6 +289,7 @@ class TestSlidingListings(TestCase):
         ]
         expected = expected_base + [k + ':' + day for k in expected_base] + ['sliding:KEYS', 'sliding:WINDOWS']
         tools.assert_equals(set(expected), set(self.redis.keys(SlidingLH.PREFIX + '*')))
+        tools.assert_equals(self.redis.zrange('sliding:d:1', 0, -1, withscores=True), self.redis.zrange('sliding:d:1' + ':' + day, 0, -1, withscores=True))
 
     def test_slide_windows_regenerates_aggregates(self):
         SlidingLH.add_publishable(self.category, self.publishables[0], 10)
