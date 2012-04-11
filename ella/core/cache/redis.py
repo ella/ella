@@ -287,7 +287,7 @@ class SlidingListingHandler(RedisListingHandler):
         return base_keys + day_keys
 
     @classmethod
-    def slide_window(cls, today=None):
+    def regenerate(cls, today=None):
         if today is None:
             today = date.today()
 

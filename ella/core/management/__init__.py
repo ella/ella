@@ -1,7 +1,7 @@
-from datetime import datetime
+from datetime import datetime, date
 
 from ella.core.signals import content_published, content_unpublished
-from ella.core.models import Publishable
+from ella.core.models import Publishable, Listing
 
 def generate_publish_signals(now=None):
     if now is None:
@@ -19,3 +19,10 @@ def generate_publish_signals(now=None):
         content_unpublished.send(sender=p.content_type.model_class(), publishable=p)
     qset.update(announced=False)
 
+def regenerate_listing_handlers(today=None):
+    if today is None:
+        today = date.today()
+
+    Listing.objects._get_listing_handler('default')
+    for lh in Listing.objects._listing_handlers.values():
+        lh.regenerate(today)

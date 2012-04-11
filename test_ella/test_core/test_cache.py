@@ -300,5 +300,5 @@ class TestSlidingListings(TestCase):
         self.redis.zadd('sliding:1:20101007', **{'17:1': 8, '17:2': 3, '17:3': 11})
         self.redis.zadd('sliding:1:20101001', **{'17:1': 8, '17:2': 3, '17:3': 11})
 
-        SlidingLH.slide_window(date(2010, 10, 10))
+        SlidingLH.regenerate(date(2010, 10, 10))
         tools.assert_equals([('17:2', 6.0), ('17:3', 11.0), ('17:1', 27.0)], self.redis.zrange('sliding:1', 0, -1, withscores=True))
