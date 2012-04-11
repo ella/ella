@@ -262,6 +262,7 @@ class RedisListingHandler(ListingHandler):
 
 class SlidingListingHandler(RedisListingHandler):
     WINDOW_SIZE = 7
+    REMOVE_OLD_SLOTS = True
 
     @classmethod
     def base_key_set(cls):
@@ -292,12 +293,26 @@ class SlidingListingHandler(RedisListingHandler):
             today = date.today()
 
         days = []
+        last_day = None
         for d in xrange(cls.WINDOW_SIZE):
-            days.append((today - timedelta(days=d)).strftime('%Y%m%d'))
+            last_day = (today - timedelta(days=d)).strftime('%Y%m%d')
+            days.append(last_day)
 
         pipe = client.pipeline()
+
+        if cls.REMOVE_OLD_SLOTS:
+            # get all the day keys older than last day requested
+            to_remove = client.zrangebyscore(cls.window_key_zset(), 0, '(' + last_day)
+            if to_remove:
+                # delete those keys
+                pipe.delete(*to_remove)
+                # and remove them from the zset index
+                pipe.zremrangebyscore(cls.window_key_zset(), 0, '(' + last_day)
+
         for k in client.smembers(cls.base_key_set()):
+            # store the aggregate for all keys over WINDOW_SIZE days
             pipe.zunionstore(k, ['%s:%s' % (k, day) for day in days], aggregate='SUM')
+
         pipe.execute()
 
 def connect_signals():

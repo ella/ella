@@ -301,5 +301,29 @@ class TestSlidingListings(TestCase):
         self.redis.zadd('sliding:1:20101007', **{'17:1': 8, '17:2': 3, '17:3': 11})
         self.redis.zadd('sliding:1:20101001', **{'17:1': 8, '17:2': 3, '17:3': 11})
 
+
         SlidingLH.regenerate(date(2010, 10, 10))
         tools.assert_equals([('17:2', 6.0), ('17:3', 11.0), ('17:1', 27.0)], self.redis.zrange('sliding:1', 0, -1, withscores=True))
+
+    def test_regenerate_removes_old_slots(self):
+        self.redis.zadd('sliding:WINDOWS', **{
+                'sliding:1:20101010': 20101010,
+                'sliding:1:20101009': 20101009,
+                'sliding:1:20101007': 20101007,
+                'sliding:1:20101001': 20101001
+            })
+        self.redis.zadd('sliding:1:20101010', **{'17:1': 10, '17:2': 1})
+        self.redis.zadd('sliding:1:20101009', **{'17:1': 9, '17:2': 2})
+        self.redis.zadd('sliding:1:20101007', **{'17:1': 8, '17:2': 3, '17:3': 11})
+        self.redis.zadd('sliding:1:20101001', **{'17:1': 8, '17:2': 3, '17:3': 11})
+
+        SlidingLH.regenerate(date(2010, 10, 10))
+        tools.assert_false(self.redis.exists('sliding:1:20101001'))
+        tools.assert_true(self.redis.exists('sliding:1:20101007'))
+        tools.assert_equals([
+                ('sliding:1:20101007', 20101007),
+                ('sliding:1:20101009', 20101009),
+                ('sliding:1:20101010', 20101010)
+            ],
+            self.redis.zrange('sliding:WINDOWS', 0, -1, withscores=True)
+        )
