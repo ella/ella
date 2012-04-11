@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 import logging
 import time
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from hashlib import md5
 
 from django.conf import settings
@@ -259,6 +259,46 @@ class RedisListingHandler(ListingHandler):
 
             self._key = key
         return self._key, pipe
+
+class SlidingListingHandler(RedisListingHandler):
+    WINDOW_SIZE = 7
+
+    @classmethod
+    def base_key_set(cls):
+        return ':'.join((cls.PREFIX, 'KEYS'))
+
+    @classmethod
+    def window_key_zset(cls):
+        return ':'.join((cls.PREFIX, 'WINDOWS'))
+
+    @classmethod
+    def get_keys(cls, category, publishable):
+        base_keys = super(SlidingListingHandler, cls).get_keys(category, publishable)
+        day = date.today().strftime('%Y%m%d')
+        day_mask = '%%s:%s' % day
+        day_keys = [day_mask % k for k in base_keys]
+
+        # store all the keys somewhere so that we can construct windows
+        pipe = client.pipeline()
+        pipe.sadd(cls.base_key_set(), *base_keys)
+        pipe.zadd(cls.window_key_zset(), **dict((k, day) for k in day_keys))
+        pipe.execute()
+
+        return base_keys + day_keys
+
+    @classmethod
+    def slide_window(cls, today=None):
+        if today is None:
+            today = date.today()
+
+        days = []
+        for d in xrange(cls.WINDOW_SIZE):
+            days.append((today - timedelta(days=d)).strftime('%Y%m%d'))
+
+        pipe = client.pipeline()
+        for k in client.smembers(cls.base_key_set()):
+            pipe.zunionstore(k, ['%s:%s' % (k, day) for day in days], aggregate='SUM')
+        pipe.execute()
 
 def connect_signals():
     from django.db.models.signals import pre_save, post_save, post_delete, pre_delete

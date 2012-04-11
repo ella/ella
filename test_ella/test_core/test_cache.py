@@ -1,5 +1,5 @@
 import time
-from datetime import datetime
+from datetime import datetime, date
 
 from django.core.cache import get_cache
 from django.conf import settings
@@ -253,3 +253,52 @@ class TestRedisListings(TestCase):
 
         tools.assert_equals(1, len(l))
         tools.assert_equals(l[0].publishable, self.publishables[1])
+
+class SlidingLH(redis.SlidingListingHandler):
+    PREFIX = 'sliding'
+
+class TestSlidingListings(TestCase):
+    def setUp(self):
+        super(TestSlidingListings, self).setUp()
+        try:
+            import redis as redis_client
+        except ImportError:
+            raise SkipTest()
+
+        self.redis = redis_client.Redis(**settings.TEST_CORE_REDIS)
+
+        redis.client = self.redis
+
+        create_basic_categories(self)
+        create_and_place_more_publishables(self)
+        self.ct_id = self.publishables[0].content_type_id
+
+    def tearDown(self):
+        redis.client = None
+        super(TestSlidingListings, self).tearDown()
+        self.redis.flushdb()
+
+    def test_add_publishable_pushes_to_day_and_global_keys(self):
+        SlidingLH.add_publishable(self.category, self.publishables[0], 10)
+        day = date.today().strftime('%Y%m%d')
+        expected_base = [
+            'sliding:1',
+            'sliding:c:1',
+            'sliding:d:1',
+            'sliding:ct:%s' % self.ct_id,
+        ]
+        expected = expected_base + [k + ':' + day for k in expected_base] + ['sliding:KEYS', 'sliding:WINDOWS']
+        tools.assert_equals(set(expected), set(self.redis.keys(SlidingLH.PREFIX + '*')))
+
+    def test_slide_windows_regenerates_aggregates(self):
+        SlidingLH.add_publishable(self.category, self.publishables[0], 10)
+        # register the keys that should exist
+        self.redis.sadd('sliding:KEYS', 'sliding:1', 'sliding:c:1')
+
+        self.redis.zadd('sliding:1:20101010', **{'17:1': 10, '17:2': 1})
+        self.redis.zadd('sliding:1:20101009', **{'17:1': 9, '17:2': 2})
+        self.redis.zadd('sliding:1:20101007', **{'17:1': 8, '17:2': 3, '17:3': 11})
+        self.redis.zadd('sliding:1:20101001', **{'17:1': 8, '17:2': 3, '17:3': 11})
+
+        SlidingLH.slide_window(date(2010, 10, 10))
+        tools.assert_equals([('17:2', 6.0), ('17:3', 11.0), ('17:1', 27.0)], self.redis.zrange('sliding:1', 0, -1, withscores=True))
