@@ -139,7 +139,21 @@ class RedisListingHandler(ListingHandler):
             return pipe
 
     @classmethod
-    def remove_publishable(cls, category, publishable, pipe=None, commit=False):
+    def incr_score(cls, category, publishable, incr_by=1, pipe=None, commit=True):
+        if pipe is None:
+            pipe = client.pipeline()
+
+        v = cls.get_value(publishable)
+        for k in cls.get_keys(category, publishable):
+            pipe.zincrby(k, v, incr_by)
+
+        if commit:
+            pipe.execute()
+        else:
+            return pipe
+
+    @classmethod
+    def remove_publishable(cls, category, publishable, pipe=None, commit=True):
         if pipe is None:
             pipe = client.pipeline()
 
