@@ -45,6 +45,9 @@ def paginator(context, adjacent_pages=2, template_name=None):
     pagination context. To be used in conjunction with the ``object_list`` generic
     view.
 
+    If ``TEMPLATE_NAME`` parameter is given,
+    ``inclusion_tags/paginator_TEMPLATE_NAME.html`` will be used instead.
+
     Adds pagination context variables for use in displaying first, adjacent pages and
     last page links in addition to those created by the ``object_list`` generic
     view.
@@ -53,12 +56,14 @@ def paginator(context, adjacent_pages=2, template_name=None):
 
     Syntax::
 
-        {% paginator[ <NUMBER_OF_ADJACENT_PAGES] %}
+        {% paginator [NUMBER_OF_ADJACENT_PAGES] [TEMPLATE_NAME] %}
 
     Examples::
 
         {% paginator %}
         {% paginator 5 %}
+        {% paginator 5 "special" %}
+        {% paginator template_name="special" %}
     """
     tname, context = _do_paginator(context, adjacent_pages, template_name)
     return render_to_string(tname, context)
