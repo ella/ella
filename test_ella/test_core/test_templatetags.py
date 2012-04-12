@@ -11,7 +11,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator
 
 from ella.core.templatetags.core import listing_parse, ListingNode, _parse_box, BoxNode, EmptyNode
-from ella.core.templatetags.pagination import paginator
+from ella.core.templatetags.pagination import _do_paginator
 from ella.core.models import Category
 from ella.core.managers import ListingHandler
 from ella.articles.models import Article
@@ -27,6 +27,10 @@ class TestPaginate(UnitTestCase):
         super(TestPaginate, self).setUp()
         self.rf = RequestFactory()
 
+    def tearDown(self):
+        super(TestPaginate, self).tearDown()
+        template_loader.templates = {}
+
     def test_all_querysting_is_included(self):
         req = self.rf.get('/', {'using': 'custom_lh', 'other': 'param with spaces'})
         page = Paginator(range(100), 10).page(2)
@@ -36,28 +40,40 @@ class TestPaginate(UnitTestCase):
             'page': page
         }
 
-        tools.assert_equals({
+        tools.assert_equals(('inclusion_tags/paginator.html', {
             'page': page,
             'page_numbers': [1, 2, 3, 4, 5],
             'query_params': '?using=custom_lh&other=param+with+spaces&p=',
             'results_per_page': 10,
             'show_first': False,
             'show_last': True
-        }, paginator(context, 2))
+        }), _do_paginator(context, 2, None))
 
     def test_always_include_given_number_of_pages(self):
         page = Paginator(range(100), 9).page(1)
-        tools.assert_equals({
+        tools.assert_equals(('inclusion_tags/paginator_special.html',{
             'page': page,
             'page_numbers': [1, 2, 3, 4, 5, 6, 7],
             'query_params': '?p=',
             'results_per_page': 9,
             'show_first': False,
             'show_last': True
-        }, paginator({'page': page}, 3))
+        }), _do_paginator({'page': page}, 3, 'special'))
 
     def test_dont_fail_on_missing_page(self):
-        tools.assert_equals({},  paginator({}))
+        tools.assert_equals(('inclusion_tags/paginator.html', {}),  _do_paginator({}, 2, None))
+
+    def test_proper_template_gets_rendered(self):
+        template_loader.templates['inclusion_tags/paginator_special.html'] = 'special'
+        t = template.Template('{% load pagination %}{% paginator template_name="special" %}')
+        tools.assert_equals('special', t.render(template.Context()))
+
+    def test_adjacent_places_get_passed_from_template(self):
+        page = Paginator(range(100), 9).page(1)
+        template_loader.templates['inclusion_tags/paginator.html'] = '{{ page_numbers|join:", "}}'
+        t = template.Template('{% load pagination %}{% paginator 1 %}')
+        tools.assert_equals('1, 2, 3', t.render(template.Context({'page': page})))
+
 
 
 

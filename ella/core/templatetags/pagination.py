@@ -1,13 +1,45 @@
 from urllib import urlencode
 
 from django import template
+from django.template.loader import render_to_string
 from django.utils.encoding import smart_str
 
 register = template.Library()
 
+def _do_paginator(context, adjacent_pages, template_name):
+    if template_name is None:
+        template_name = 'inclusion_tags/paginator.html'
+    else:
+        template_name = 'inclusion_tags/paginator_%s.html' % template_name
 
-@register.inclusion_tag('inclusion_tags/paginator.html', takes_context=True)
-def paginator(context, adjacent_pages=2):
+    if not 'page' in context:
+        # improper use of paginator tag, bail out
+        return template_name, {}
+
+    query_params = '?p='
+    if 'request' in context:
+        get = context['request'].GET
+        query_params = '?%s&p=' % urlencode(dict((k, smart_str(v)) for (k, v) in get.iteritems() if k != 'p'))
+
+    page = context['page']
+    page_no = int(page.number)
+
+    s = max(1, page_no - adjacent_pages - max(0, page_no + adjacent_pages -
+        page.paginator.num_pages))
+    page_numbers = range(s, min(page.paginator.num_pages, s + 2 * adjacent_pages) + 1)
+
+    return template_name, {
+        'query_params': query_params,
+        'page': page,
+        'results_per_page': page.paginator.per_page,
+        'page_numbers': page_numbers,
+        'show_first': 1 not in page_numbers,
+        'show_last': page.paginator.num_pages not in page_numbers,
+    }
+
+
+@register.simple_tag(takes_context=True)
+def paginator(context, adjacent_pages=2, template_name=None):
     """
     Renders a ``inclusion_tags/paginator.html`` template with additional
     pagination context. To be used in conjunction with the ``object_list`` generic
@@ -28,28 +60,5 @@ def paginator(context, adjacent_pages=2):
         {% paginator %}
         {% paginator 5 %}
     """
-    if not 'page' in context:
-        # improper use of paginator tag, bail out
-        return {}
-
-    query_params = '?p='
-    if 'request' in context:
-        get = context['request'].GET
-        query_params = '?%s&p=' % urlencode(dict((k, smart_str(v)) for (k, v) in get.iteritems() if k != 'p'))
-
-    page = context['page']
-    page_no = int(page.number)
-
-    s = max(1, page_no - adjacent_pages - max(0, page_no + adjacent_pages -
-        page.paginator.num_pages))
-    page_numbers = range(s, min(page.paginator.num_pages, s + 2 * adjacent_pages) + 1)
-
-    return {
-        'query_params': query_params,
-        'page': page,
-        'results_per_page': page.paginator.per_page,
-        'page_numbers': page_numbers,
-        'show_first': 1 not in page_numbers,
-        'show_last': page.paginator.num_pages not in page_numbers,
-    }
-
+    tname, context = _do_paginator(context, adjacent_pages, template_name)
+    return render_to_string(tname, context)
