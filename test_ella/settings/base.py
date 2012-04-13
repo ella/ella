@@ -8,9 +8,6 @@ MEDIA_ROOT = join(FILE_ROOT, 'static')
 
 STATIC_URL = MEDIA_URL = '/static/'
 
-ADMIN_MEDIA_PREFIX = '/admin_media/'
-
-
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
     'test_ella.template_loader.load_template_source',
