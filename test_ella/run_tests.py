@@ -14,6 +14,7 @@ import nose
 
 def run_all(argv=None):
     os.environ['DJANGO_SETTINGS_MODULE'] = 'test_ella.settings'
+    sys.exitfunc = lambda msg='Process shutting down...': sys.stderr.write(msg + '\n')
 
     # called by setuptools
     if argv is None:
