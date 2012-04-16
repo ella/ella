@@ -29,7 +29,7 @@ class Formatter(object):
         """
         f = self.fmt
 
-        if f.flexible_height:
+        if f.flexible_height and f.flexible_max_height:
             flexw, flexh = self.fw, f.flexible_max_height
             flex_ratio = float(flexw) / flexh
 

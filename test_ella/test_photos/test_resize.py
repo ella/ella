@@ -83,6 +83,15 @@ class TestPhotoResize(TestCase):
         tools.assert_equals((50, 0, 150, 100), crop_box)
         tools.assert_equals((100, 100), i.size)
 
+    def test_flexible_height_doesnt_raise_exception_no_max_height(self):
+        i = Image.new('RGB', (200, 100), "black")
+        self.format.flexible_max_height = None
+        self.format.flexible_height = True
+        f = Formatter(i, self.format)
+
+        i, crop_box = f.format()
+        tools.assert_equals((100, 100), i.size)
+
     def test_flexible_height_saves_taller_images(self):
         i = Image.new('RGB', (100, 200), "black")
         self.format.flexible_max_height = 200
