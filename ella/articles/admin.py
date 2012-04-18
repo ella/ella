@@ -6,9 +6,9 @@ from ella.articles.models import Article
 
 
 class ArticleAdmin(PublishableAdmin):
-    ordering = ('-created',)
+    ordering = ('-publish_from',)
     fieldsets = (
-        (_("Article heading"), {'fields': ('title', 'upper_title', 'updated', 'slug')}),
+        (_("Article heading"), {'fields': ('title', 'slug')}),
         (_("Article contents"), {'fields': ('description', 'content')}),
         (_("Metadata"), {'fields': ('category', 'authors', 'source', 'photo')}),
         (_("Publication"), {'fields': (('publish_from', 'publish_to'), 'published', 'static')}),
