@@ -7,38 +7,19 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Changing field 'Category.site'
-        db.alter_column('core_category', 'site_id', self.gf('ella.core.cache.fields.SiteForeignKey')())
+        # Changing field 'Publishable.category'
+        db.alter_column('core_publishable', 'category_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.Category']))
 
-        # Changing field 'Related.related_ct'
-        db.alter_column('core_related', 'related_ct_id', self.gf('ella.core.cache.fields.ContentTypeForeignKey')())
-
-        # Changing field 'Publishable.content_type'
-        db.alter_column('core_publishable', 'content_type_id', self.gf('ella.core.cache.fields.ContentTypeForeignKey')())
-
-        # Changing field 'Dependency.dependent_ct'
-        db.alter_column('core_dependency', 'dependent_ct_id', self.gf('ella.core.cache.fields.ContentTypeForeignKey')())
-
-        # Changing field 'Dependency.target_ct'
-        db.alter_column('core_dependency', 'target_ct_id', self.gf('ella.core.cache.fields.ContentTypeForeignKey')())
+        # Changing field 'Publishable.photo'
+        db.alter_column('core_publishable', 'photo_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['photos.Photo'], null=True))
 
 
     def backwards(self, orm):
-        
-        # Changing field 'Category.site'
-        db.alter_column('core_category', 'site_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['sites.Site']))
+        # Changing field 'Publishable.category'
+        db.alter_column('core_publishable', 'category_id', self.gf('ella.core.cache.fields.CachedForeignKey')(to=orm['core.Category']))
 
-        # Changing field 'Related.related_ct'
-        db.alter_column('core_related', 'related_ct_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['contenttypes.ContentType']))
-
-        # Changing field 'Publishable.content_type'
-        db.alter_column('core_publishable', 'content_type_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['contenttypes.ContentType']))
-
-        # Changing field 'Dependency.dependent_ct'
-        db.alter_column('core_dependency', 'dependent_ct_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['contenttypes.ContentType']))
-
-        # Changing field 'Dependency.target_ct'
-        db.alter_column('core_dependency', 'target_ct_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['contenttypes.ContentType']))
+        # Changing field 'Publishable.photo'
+        db.alter_column('core_publishable', 'photo_id', self.gf('ella.core.cache.fields.CachedForeignKey')(to=orm['photos.Photo'], null=True))
 
 
     models = {
@@ -57,7 +38,7 @@ class Migration(SchemaMigration):
         },
         'auth.user': {
             'Meta': {'object_name': 'User'},
-            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
+            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2012, 4, 18, 12, 41, 29, 718089)'}),
             'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
             'first_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
             'groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Group']", 'symmetrical': 'False', 'blank': 'True'}),
@@ -65,7 +46,7 @@ class Migration(SchemaMigration):
             'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'is_staff': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'is_superuser': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
+            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2012, 4, 18, 12, 41, 29, 718004)'}),
             'last_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
             'password': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
             'user_permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Permission']", 'symmetrical': 'False', 'blank': 'True'}),
@@ -94,7 +75,7 @@ class Migration(SchemaMigration):
             'content': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'site': ('ella.core.cache.fields.SiteForeignKey', [], {}),
+            'site': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['sites.Site']"}),
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '255', 'db_index': 'True'}),
             'template': ('django.db.models.fields.CharField', [], {'default': "'category.html'", 'max_length': '100'}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
@@ -103,10 +84,10 @@ class Migration(SchemaMigration):
         },
         'core.dependency': {
             'Meta': {'object_name': 'Dependency'},
-            'dependent_ct': ('ella.core.cache.fields.ContentTypeForeignKey', [], {'related_name': "'depends_on_set'"}),
+            'dependent_ct': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'depends_on_set'", 'to': "orm['contenttypes.ContentType']"}),
             'dependent_id': ('django.db.models.fields.IntegerField', [], {}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'target_ct': ('ella.core.cache.fields.ContentTypeForeignKey', [], {'related_name': "'dependency_for_set'"}),
+            'target_ct': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'dependency_for_set'", 'to': "orm['contenttypes.ContentType']"}),
             'target_id': ('django.db.models.fields.IntegerField', [], {})
         },
         'core.listing': {
@@ -123,11 +104,11 @@ class Migration(SchemaMigration):
             'announced': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'app_data': ('jsonfield.fields.JSONField', [], {'default': "'{}'", 'blank': 'True'}),
             'authors': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['core.Author']", 'symmetrical': 'False'}),
-            'category': ('ella.core.cache.fields.CachedForeignKey', [], {'to': "orm['core.Category']"}),
-            'content_type': ('ella.core.cache.fields.ContentTypeForeignKey', [], {}),
+            'category': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['core.Category']"}),
+            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']"}),
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'photo': ('ella.core.cache.fields.CachedForeignKey', [], {'to': "orm['photos.Photo']", 'null': 'True', 'blank': 'True'}),
+            'photo': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['photos.Photo']", 'null': 'True', 'blank': 'True'}),
             'publish_from': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(3000, 1, 1, 0, 0, 0, 2)', 'db_index': 'True'}),
             'publish_to': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'published': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
@@ -140,7 +121,7 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'Related'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'publishable': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['core.Publishable']"}),
-            'related_ct': ('ella.core.cache.fields.ContentTypeForeignKey', [], {}),
+            'related_ct': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']"}),
             'related_id': ('django.db.models.fields.IntegerField', [], {})
         },
         'core.source': {
@@ -158,7 +139,7 @@ class Migration(SchemaMigration):
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'height': ('django.db.models.fields.PositiveIntegerField', [], {}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'image': ('django.db.models.fields.files.ImageField', [], {'max_length': '100'}),
+            'image': ('django.db.models.fields.files.ImageField', [], {'max_length': '255'}),
             'important_bottom': ('django.db.models.fields.PositiveIntegerField', [], {'null': 'True', 'blank': 'True'}),
             'important_left': ('django.db.models.fields.PositiveIntegerField', [], {'null': 'True', 'blank': 'True'}),
             'important_right': ('django.db.models.fields.PositiveIntegerField', [], {'null': 'True', 'blank': 'True'}),
