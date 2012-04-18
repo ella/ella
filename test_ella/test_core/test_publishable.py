@@ -37,13 +37,7 @@ class TestPublishableHelpers(PublishableTestCase):
         p = self.publishable.content_type.get_object_for_this_type(pk=self.publishable.pk)
         tools.assert_equals({'core': 'testing'}, self.publishable.app_data)
 
-class TestRedirects(TestCase):
-
-    def setUp(self):
-        super(TestRedirects, self).setUp()
-        create_basic_categories(self)
-        create_and_place_a_publishable(self)
-
+class TestRedirects(PublishableTestCase):
     def test_url_change_creates_redirect(self):
         self.publishable.slug = 'old-article-new-slug'
         self.publishable.save()
@@ -74,13 +68,7 @@ class TestRedirects(TestCase):
         self.publishable.save()
 
 
-class TestUrl(TestCase):
-
-    def setUp(self):
-        super(TestUrl, self).setUp()
-        create_basic_categories(self)
-        create_and_place_a_publishable(self)
-
+class TestUrl(PublishableTestCase):
     def test_home_url(self):
         self.publishable.category = self.category
         self.publishable.save()
