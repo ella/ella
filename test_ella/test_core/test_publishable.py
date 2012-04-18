@@ -20,7 +20,19 @@ class PublishableTestCase(TestCase):
         create_basic_categories(self)
         create_and_place_a_publishable(self)
 
+class TestLastUpdated(PublishableTestCase):
+    def test_last_updated_moved_if_default(self):
+        now = datetime.now()
+        self.publishable.publish_from = now
+        self.publishable.save(force_update=True)
+        tools.assert_equals(now, self.publishable.last_updated)
 
+    def test_last_updated_isnt_moved_if_changed(self):
+        now = datetime.now()
+        self.publishable.last_updated = now + timedelta(days=1)
+        self.publishable.publish_from = now
+        self.publishable.save(force_update=True)
+        tools.assert_equals(now + timedelta(days=1), self.publishable.last_updated)
 
 class TestPublishableHelpers(PublishableTestCase):
     def test_url(self):
