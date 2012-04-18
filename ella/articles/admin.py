@@ -11,7 +11,7 @@ class ArticleAdmin(PublishableAdmin):
         (_("Article heading"), {'fields': ('title', 'upper_title', 'updated', 'slug')}),
         (_("Article contents"), {'fields': ('description', 'content')}),
         (_("Metadata"), {'fields': ('category', 'authors', 'source', 'photo')}),
-        (_("Publication"), {'fields': (('publish_from', 'publish_to'), 'static')}),
+        (_("Publication"), {'fields': (('publish_from', 'publish_to'), 'published', 'static')}),
     )
     inlines = [ListingInlineAdmin]
 
