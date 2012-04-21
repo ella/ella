@@ -138,6 +138,10 @@ class ListingHandler(object):
     NONE = 0
     IMMEDIATE = 1
     ALL = 2
+    @classmethod
+    def regenerate(cls, today=None):
+        pass
+
 
     def __init__(self, category, children=NONE, content_types=[], date_range=(), exclude=None):
         self.category = category
@@ -167,10 +171,6 @@ def get_listings_key(self, category=None, children=ListingHandler.NONE, count=10
     )
 
 class ListingManager(models.Manager):
-    @classmethod
-    def regenerate(cls, today=None):
-        pass
-
     def clean_listings(self):
         """
         Method that cleans the Listing model by deleting all listings that are no longer valid.
