@@ -273,7 +273,7 @@ class ListingManager(models.Manager):
 
         return out
 
-    def _get_listing_handler(self, source):
+    def get_listing_handler(self, source):
         if not hasattr(self, '_listing_handlers'):
             self._listing_handlers = {}
             for k, v in core_settings.LISTING_HANDLERS.items():
@@ -291,7 +291,7 @@ class ListingManager(models.Manager):
         return self._listing_handlers['default']
 
     def get_queryset_wrapper(self, category, children=ListingHandler.NONE, content_types=[], date_range=(), exclude=None, source='default'):
-        ListingHandler = self._get_listing_handler(source)
+        ListingHandler = self.get_listing_handler(source)
         return ListingHandler(
             category, children, content_types, date_range, exclude
         )

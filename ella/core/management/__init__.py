@@ -23,6 +23,6 @@ def regenerate_listing_handlers(today=None):
     if today is None:
         today = date.today()
 
-    Listing.objects._get_listing_handler('default')
+    Listing.objects.get_listing_handler('default')
     for lh in Listing.objects._listing_handlers.values():
         lh.regenerate(today)
