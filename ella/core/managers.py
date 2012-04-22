@@ -273,7 +273,7 @@ class ListingManager(models.Manager):
 
         return out
 
-    def get_listing_handler(self, source):
+    def get_listing_handler(self, source, fallback=True):
         if not hasattr(self, '_listing_handlers'):
             self._listing_handlers = {}
             for k, v in core_settings.LISTING_HANDLERS.items():
@@ -284,6 +284,8 @@ class ListingManager(models.Manager):
 
         if source in self._listing_handlers:
             return self._listing_handlers[source]
+        elif not fallback:
+            return None
 
         if settings.DEBUG:
             raise ImproperlyConfigured('ListingHandler %s is not defined in settings.' % source)
