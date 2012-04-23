@@ -153,9 +153,6 @@ changelistFilters["{{ fname }}"] = "{{ qstring }}";
     var pubYear = '{{ publishable_lookup_fields.year }}';
     var pubMonth = '{{ publishable_lookup_fields.month }}';
     var pubDay = '{{ publishable_lookup_fields.day }}';
-    var selectedYear = 0;
-    var selectedMonth = 0;
-    var selectedDay = 0;
     $( document ).one('media_loaded', function() {
         var options = new DATEPICKER_OPTIONS({
             onChangeMonthYear: function(year, month, inst) {
@@ -163,10 +160,13 @@ changelistFilters["{{ fname }}"] = "{{ qstring }}";
                 selectedYear = year;
             },
             onSelect: function(dateText, inst) {
+                var d =  dateText;
+                var m = +inst.selectedMonth + 1;
+                var y =  inst.selectedYear;
                 adr('/core/publishable/?' +
-                    pubYear  + '=' + selectedYear  + '&' +
-                    pubMonth + '=' + selectedMonth + '&' +
-                    pubDay   + '=' + dateText
+                    pubYear  + '=' + y + '&' +
+                    pubMonth + '=' + m + '&' +
+                    pubDay   + '=' + d
                 );
             }
         });
