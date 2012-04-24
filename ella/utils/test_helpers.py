@@ -7,10 +7,10 @@ from cStringIO import StringIO
 from django.conf import settings
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
-from ella.photos.models import Photo
 from ella.core.models import Category, Publishable
 # choose Article as an example publishable
 from ella.articles.models import Article
+from ella.photos.models import Photo
 
 def create_basic_categories(case):
     case.site_id = getattr(settings, "SITE_ID", 1)
