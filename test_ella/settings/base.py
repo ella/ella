@@ -7,6 +7,7 @@ USE_I18N = True
 MEDIA_ROOT = join(FILE_ROOT, 'static')
 
 STATIC_URL = MEDIA_URL = '/static/'
+ADMIN_MEDIA_PREFIX = '/static/admin/'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (

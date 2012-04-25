@@ -5,21 +5,18 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
+    depends_on = [
+        ('articles', '0005_move_updated_to_publishable'),
+    ]
 
     def forwards(self, orm):
-        # Changing field 'Publishable.category'
-        db.alter_column('core_publishable', 'category_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.Category']))
-
-        # Changing field 'Publishable.photo'
-        db.alter_column('core_publishable', 'photo_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['photos.Photo'], null=True))
+        # Changing field 'Publishable.last_updated'
+        db.alter_column('core_publishable', 'last_updated', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime(2012, 4, 18, 13, 34, 49, 495278)))
 
 
     def backwards(self, orm):
-        # Changing field 'Publishable.category'
-        db.alter_column('core_publishable', 'category_id', self.gf('ella.core.cache.fields.CachedForeignKey')(to=orm['core.Category']))
-
-        # Changing field 'Publishable.photo'
-        db.alter_column('core_publishable', 'photo_id', self.gf('ella.core.cache.fields.CachedForeignKey')(to=orm['photos.Photo'], null=True))
+        # Changing field 'Publishable.last_updated'
+        db.alter_column('core_publishable', 'last_updated', self.gf('django.db.models.fields.DateTimeField')(null=True))
 
 
     models = {
@@ -38,7 +35,7 @@ class Migration(SchemaMigration):
         },
         'auth.user': {
             'Meta': {'object_name': 'User'},
-            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2012, 4, 18, 12, 41, 29, 718089)'}),
+            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2012, 4, 18, 13, 34, 49, 499815)'}),
             'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
             'first_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
             'groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Group']", 'symmetrical': 'False', 'blank': 'True'}),
@@ -46,7 +43,7 @@ class Migration(SchemaMigration):
             'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'is_staff': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'is_superuser': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2012, 4, 18, 12, 41, 29, 718004)'}),
+            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2012, 4, 18, 13, 34, 49, 499730)'}),
             'last_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
             'password': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
             'user_permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Permission']", 'symmetrical': 'False', 'blank': 'True'}),
@@ -108,6 +105,7 @@ class Migration(SchemaMigration):
             'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']"}),
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'last_updated': ('django.db.models.fields.DateTimeField', [], {'blank': 'True'}),
             'photo': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['photos.Photo']", 'null': 'True', 'blank': 'True'}),
             'publish_from': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(3000, 1, 1, 0, 0, 0, 2)', 'db_index': 'True'}),
             'publish_to': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),

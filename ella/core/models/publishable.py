@@ -66,6 +66,9 @@ class Publishable(models.Model):
     publish_to = models.DateTimeField(_("End of visibility"), null=True, blank=True)
     static = models.BooleanField(_('static'), default=False)
 
+    # Last updated
+    last_updated = models.DateTimeField(_('Last updated'), blank=True)
+
     # generic JSON field to store app cpecific data
     app_data = JSONField(default='{}', blank=True, editable=False)
 
@@ -171,11 +174,19 @@ class Publishable(models.Model):
                 else:
                     send_signal = content_unpublished
                     self.announced = False
+
+            # changed publish_from and last_updated was default, change it too
+            if old_self.last_updated == old_self.publish_from and self.last_updated == old_self.last_updated:
+                self.last_updated = self.publish_from
+
             #TODO: shift Listing in case publish_(to|from) changes
         # published, send the proper signal
         elif self.is_published():
             send_signal = content_published
             self.announced = True
+
+        if not self.last_updated:
+            self.last_updated = self.publish_from
 
         super(Publishable, self).save(**kwargs)
 

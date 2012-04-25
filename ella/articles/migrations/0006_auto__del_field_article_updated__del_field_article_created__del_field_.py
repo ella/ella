@@ -7,22 +7,35 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Changing field 'Publishable.category'
-        db.alter_column('core_publishable', 'category_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.Category']))
+        
+        # Deleting field 'Article.updated'
+        db.delete_column('articles_article', 'updated')
 
-        # Changing field 'Publishable.photo'
-        db.alter_column('core_publishable', 'photo_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['photos.Photo'], null=True))
+        # Deleting field 'Article.created'
+        db.delete_column('articles_article', 'created')
+
+        # Deleting field 'Article.upper_title'
+        db.delete_column('articles_article', 'upper_title')
 
 
     def backwards(self, orm):
-        # Changing field 'Publishable.category'
-        db.alter_column('core_publishable', 'category_id', self.gf('ella.core.cache.fields.CachedForeignKey')(to=orm['core.Category']))
+        
+        # Adding field 'Article.updated'
+        db.add_column('articles_article', 'updated', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True), keep_default=False)
 
-        # Changing field 'Publishable.photo'
-        db.alter_column('core_publishable', 'photo_id', self.gf('ella.core.cache.fields.CachedForeignKey')(to=orm['photos.Photo'], null=True))
+        # User chose to not deal with backwards NULL issues for 'Article.created'
+        raise RuntimeError("Cannot reverse this migration. 'Article.created' and its values cannot be restored.")
+
+        # Adding field 'Article.upper_title'
+        db.add_column('articles_article', 'upper_title', self.gf('django.db.models.fields.CharField')(default='', max_length=255, blank=True), keep_default=False)
 
 
     models = {
+        'articles.article': {
+            'Meta': {'object_name': 'Article', '_ormbases': ['core.Publishable']},
+            'content': ('django.db.models.fields.TextField', [], {'default': "''"}),
+            'publishable_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['core.Publishable']", 'unique': 'True', 'primary_key': 'True'})
+        },
         'auth.group': {
             'Meta': {'object_name': 'Group'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
@@ -38,7 +51,7 @@ class Migration(SchemaMigration):
         },
         'auth.user': {
             'Meta': {'object_name': 'User'},
-            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2012, 4, 18, 12, 41, 29, 718089)'}),
+            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2012, 4, 18, 13, 41, 41, 218702)'}),
             'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
             'first_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
             'groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Group']", 'symmetrical': 'False', 'blank': 'True'}),
@@ -46,7 +59,7 @@ class Migration(SchemaMigration):
             'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'is_staff': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'is_superuser': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2012, 4, 18, 12, 41, 29, 718004)'}),
+            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2012, 4, 18, 13, 41, 41, 218611)'}),
             'last_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
             'password': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
             'user_permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Permission']", 'symmetrical': 'False', 'blank': 'True'}),
@@ -82,23 +95,6 @@ class Migration(SchemaMigration):
             'tree_parent': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['core.Category']", 'null': 'True', 'blank': 'True'}),
             'tree_path': ('django.db.models.fields.CharField', [], {'max_length': '255'})
         },
-        'core.dependency': {
-            'Meta': {'object_name': 'Dependency'},
-            'dependent_ct': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'depends_on_set'", 'to': "orm['contenttypes.ContentType']"}),
-            'dependent_id': ('django.db.models.fields.IntegerField', [], {}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'target_ct': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'dependency_for_set'", 'to': "orm['contenttypes.ContentType']"}),
-            'target_id': ('django.db.models.fields.IntegerField', [], {})
-        },
-        'core.listing': {
-            'Meta': {'object_name': 'Listing'},
-            'category': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['core.Category']"}),
-            'commercial': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'publish_from': ('django.db.models.fields.DateTimeField', [], {'db_index': 'True'}),
-            'publish_to': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
-            'publishable': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['core.Publishable']"})
-        },
         'core.publishable': {
             'Meta': {'object_name': 'Publishable'},
             'announced': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
@@ -108,6 +104,7 @@ class Migration(SchemaMigration):
             'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']"}),
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'last_updated': ('django.db.models.fields.DateTimeField', [], {'blank': 'True'}),
             'photo': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['photos.Photo']", 'null': 'True', 'blank': 'True'}),
             'publish_from': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(3000, 1, 1, 0, 0, 0, 2)', 'db_index': 'True'}),
             'publish_to': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
@@ -116,13 +113,6 @@ class Migration(SchemaMigration):
             'source': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['core.Source']", 'null': 'True', 'blank': 'True'}),
             'static': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '255'})
-        },
-        'core.related': {
-            'Meta': {'object_name': 'Related'},
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'publishable': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['core.Publishable']"}),
-            'related_ct': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']"}),
-            'related_id': ('django.db.models.fields.IntegerField', [], {})
         },
         'core.source': {
             'Meta': {'object_name': 'Source'},
@@ -157,4 +147,4 @@ class Migration(SchemaMigration):
         }
     }
 
-    complete_apps = ['core']
+    complete_apps = ['articles']

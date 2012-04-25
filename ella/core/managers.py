@@ -1,4 +1,5 @@
 from datetime import datetime
+from operator import attrgetter
 
 from django.db import models
 from django.core.exceptions import ImproperlyConfigured
@@ -54,7 +55,7 @@ class CategoryManager(models.Manager):
     def _load_hierarchy(self, site_id):
         cache = self.__class__._cache.setdefault(site_id, {})
         hierarchy = self.__class__._hierarchy.setdefault(site_id, {})
-        for c in self.filter(site=site_id):
+        for c in self.filter(site=site_id).order_by('title'):
             # make sure we are working with the instance already in cache
             c = cache.setdefault(c.id, c)
             hierarchy.setdefault(c.tree_parent_id, []).append(c)
@@ -74,6 +75,7 @@ class CategoryManager(models.Manager):
                 grand_children = self._retrieve_children(to_process.pop())
                 children.extend(grand_children)
                 to_process.extend(grand_children)
+            children = sorted(children, key=attrgetter('tree_path'))
         return children
 
 class RelatedManager(models.Manager):
@@ -138,6 +140,10 @@ class ListingHandler(object):
     NONE = 0
     IMMEDIATE = 1
     ALL = 2
+    @classmethod
+    def regenerate(cls, today=None):
+        pass
+
 
     def __init__(self, category, children=NONE, content_types=[], date_range=(), exclude=None):
         self.category = category
@@ -167,10 +173,6 @@ def get_listings_key(self, category=None, children=ListingHandler.NONE, count=10
     )
 
 class ListingManager(models.Manager):
-    @classmethod
-    def regenerate(cls, today=None):
-        pass
-
     def clean_listings(self):
         """
         Method that cleans the Listing model by deleting all listings that are no longer valid.
@@ -273,7 +275,7 @@ class ListingManager(models.Manager):
 
         return out
 
-    def _get_listing_handler(self, source):
+    def get_listing_handler(self, source, fallback=True):
         if not hasattr(self, '_listing_handlers'):
             self._listing_handlers = {}
             for k, v in core_settings.LISTING_HANDLERS.items():
@@ -284,6 +286,8 @@ class ListingManager(models.Manager):
 
         if source in self._listing_handlers:
             return self._listing_handlers[source]
+        elif not fallback:
+            return None
 
         if settings.DEBUG:
             raise ImproperlyConfigured('ListingHandler %s is not defined in settings.' % source)
@@ -291,7 +295,7 @@ class ListingManager(models.Manager):
         return self._listing_handlers['default']
 
     def get_queryset_wrapper(self, category, children=ListingHandler.NONE, content_types=[], date_range=(), exclude=None, source='default'):
-        ListingHandler = self._get_listing_handler(source)
+        ListingHandler = self.get_listing_handler(source)
         return ListingHandler(
             category, children, content_types, date_range, exclude
         )
