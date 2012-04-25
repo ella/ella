@@ -53,28 +53,32 @@ class FilterableChangeList(ChangeList):
                     filter_specs.append(spec)
         return filter_specs, bool(filter_specs)
 
+    def lookup_allowed(self, *args, **kwargs):
+        # legacy behavior to get rid of SuspiciousOperation errors
+        return True
+
 class NewmanChangeList(FilterableChangeList):
     """ Overridden ChangeList without filter initialization (filters do all SQL during init) """
 
     def __init__(self, request, model, list_display, list_display_links, list_filter, date_hierarchy, search_fields, list_select_related, list_per_page, list_editable, model_admin):
         super(NewmanChangeList, self).__init__(
-            request, model, 
-            list_display, 
-            list_display_links, 
-            list_filter, 
-            date_hierarchy, 
-            search_fields, 
-            list_select_related, 
-            list_per_page, 
-            list_editable, 
+            request, model,
+            list_display,
+            list_display_links,
+            list_filter,
+            date_hierarchy,
+            search_fields,
+            list_select_related,
+            list_per_page,
+            list_editable,
             model_admin
         )
         self.active_filters = [] # holds active filters on Change List
         self.__go_through_active_filters(request)
 
     def __go_through_active_filters(self, request):
-        """ 
-        Walks through active filters. 
+        """
+        Walks through active filters.
         Appends to self.active_fitlers list tuple(filter_title, filter_criteria).
         """
         active_filters = self.active_filters
