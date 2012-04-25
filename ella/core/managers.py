@@ -1,4 +1,5 @@
 from datetime import datetime
+from operator import attrgetter
 
 from django.db import models
 from django.core.exceptions import ImproperlyConfigured
@@ -54,7 +55,7 @@ class CategoryManager(models.Manager):
     def _load_hierarchy(self, site_id):
         cache = self.__class__._cache.setdefault(site_id, {})
         hierarchy = self.__class__._hierarchy.setdefault(site_id, {})
-        for c in self.filter(site=site_id):
+        for c in self.filter(site=site_id).order_by('title'):
             # make sure we are working with the instance already in cache
             c = cache.setdefault(c.id, c)
             hierarchy.setdefault(c.tree_parent_id, []).append(c)
@@ -74,6 +75,7 @@ class CategoryManager(models.Manager):
                 grand_children = self._retrieve_children(to_process.pop())
                 children.extend(grand_children)
                 to_process.extend(grand_children)
+            children = sorted(children, key=attrgetter('tree_path'))
         return children
 
 class RelatedManager(models.Manager):
