@@ -53,10 +53,6 @@ class FilterableChangeList(ChangeList):
                     filter_specs.append(spec)
         return filter_specs, bool(filter_specs)
 
-    def lookup_allowed(self, *args, **kwargs):
-        # legacy behavior to get rid of SuspiciousOperation errors
-        return True
-
 class NewmanChangeList(FilterableChangeList):
     """ Overridden ChangeList without filter initialization (filters do all SQL during init) """
 

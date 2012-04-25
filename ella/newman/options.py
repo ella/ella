@@ -131,7 +131,7 @@ def formfield_for_dbfield_factory(cls, db_field, **kwargs):
 
 from django.contrib.admin.helpers import InlineAdminForm, InlineAdminFormSet
 class InlineNewmanFormset(InlineAdminFormSet):
-    
+
     def __iter__(self):
         for form, original in zip(self.formset.initial_forms, self.formset.get_queryset()):
             yield InlineAdminForm(self.formset, form, self.fieldsets,
@@ -238,6 +238,10 @@ class NewmanModelAdmin(XModelAdmin):
         )
         urlpatterns += super(NewmanModelAdmin, self).get_urls()
         return urlpatterns
+
+    def lookup_allowed(self, *args, **kwargs):
+        # legacy behavior to get rid of SuspiciousOperation errors
+        return True
 
     @require_AJAX
     def model_help_view(self, request, extra_context=None):
