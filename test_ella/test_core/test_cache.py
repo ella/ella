@@ -10,12 +10,13 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import pre_save, post_save, post_delete, pre_delete
 
 from ella.core.cache import utils, redis
-from ella.core.models import Listing
+from ella.core.models import Listing, Publishable
 from ella.core.views import ListContentType
 from ella.core.managers import ListingHandler
 from ella.core.signals import content_published, content_unpublished
+from ella.articles.models import Article
 
-from test_ella.test_core import create_basic_categories, \
+from test_ella.test_core import create_basic_categories, create_and_place_a_publishable, \
         create_and_place_more_publishables, list_all_publishables_in_category_by_hour
 
 from nose import tools, SkipTest
@@ -25,6 +26,8 @@ class CacheTestCase(TestCase):
         self.old_cache = utils.cache
         self.cache = get_cache('locmem://')
         utils.cache = self.cache
+        # reset CT cache on utils because of db resets it will break shit
+        utils.PUBLISHABLE_CT = None
         super(CacheTestCase, self).setUp()
 
     def tearDown(self):
@@ -59,6 +62,18 @@ class TestCacheUtils(CacheTestCase):
 
         objs = utils.get_cached_objects([(ct_ct.id, ct_ct.id), (ct_ct.id, site_ct.id), (site_ct.id, 1), (site_ct.id, 100)], missing=utils.SKIP)
         tools.assert_equals([ct_ct, site_ct, Site.objects.get(pk=1)], objs)
+
+    def test_get_publishable_returns_subclass(self):
+        create_basic_categories(self)
+        create_and_place_a_publishable(self)
+
+        tools.assert_equals(self.publishable, utils.get_cached_object(Publishable, pk=self.publishable.pk))
+
+    def test_get_article_uses_the_publishable_key(self):
+        tools.assert_equals(
+            ':'.join((utils.KEY_PREFIX, str(ContentType.objects.get_for_model(Publishable).pk), '123')),
+            utils._get_key(utils.KEY_PREFIX, ContentType.objects.get_for_model(Article), pk=123)
+        )
 
 class TestCacheInvalidation(CacheTestCase):
     def test_save_invalidates_object(self):
