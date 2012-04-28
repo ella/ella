@@ -49,12 +49,12 @@ urlpatterns = patterns( '',
     url( r'^%(year)s/%(ct)s/$' % res, list_content_type, name="list_content_type_year" ),
 
     # object detail
-    url( r'^%(cat)s/%(year)s/%(month)s/%(day)s/%(ct)s/%(slug)s/$' % res, object_detail, name="object_detail" ),
-    url( r'^%(year)s/%(month)s/%(day)s/%(ct)s/%(slug)s/$' % res, object_detail, { 'category' : '' }, name="home_object_detail" ),
+    url( r'^%(cat)s/%(year)s/%(month)s/%(day)s/%(slug)s/$' % res, object_detail, name="object_detail" ),
+    url( r'^%(year)s/%(month)s/%(day)s/%(slug)s/$' % res, object_detail, { 'category' : '' }, name="home_object_detail" ),
 
     # object detail with custom action
-    url( r'^%(cat)s/%(year)s/%(month)s/%(day)s/%(ct)s/%(slug)s/%(rest)s$' % res, object_detail, name="object_detail_action" ),
-    url( r'^%(year)s/%(month)s/%(day)s/%(ct)s/%(slug)s/%(rest)s$' % res, object_detail, { 'category' : '' }, name="home_object_detail_action" ),
+    url( r'^%(cat)s/%(year)s/%(month)s/%(day)s/%(slug)s/%(rest)s$' % res, object_detail, name="object_detail_action" ),
+    url( r'^%(year)s/%(month)s/%(day)s/%(slug)s/%(rest)s$' % res, object_detail, { 'category' : '' }, name="home_object_detail_action" ),
 
     # category listings
     url( r'^%(cat)s/%(year)s/%(month)s/%(day)s/$' % res, list_content_type, name="category_list_day" ),
@@ -67,12 +67,12 @@ urlpatterns = patterns( '',
     url( r'^%(cat)s/%(year)s/%(ct)s/$' % res, list_content_type, name="category_list_content_type_year" ),
 
     # static detail with custom action
-    url( r'^%(cat)s/%(ct)s/%(id)s-%(slug)s/%(rest)s$' % res, object_detail, name='static_detail_action' ),
-    url( r'^%(ct)s/%(id)s-%(slug)s/%(rest)s$' % res, object_detail, { 'category' : '' }, name='home_static_detail_action' ),
+    url( r'^%(cat)s/%(id)s-%(slug)s/%(rest)s$' % res, object_detail, name='static_detail_action' ),
+    url( r'^%(id)s-%(slug)s/%(rest)s$' % res, object_detail, { 'category' : '' }, name='home_static_detail_action' ),
 
     # static detail
-    url( r'^%(cat)s/%(ct)s/%(id)s-%(slug)s/$' % res, object_detail, name='static_detail' ),
-    url( r'^%(ct)s/%(id)s-%(slug)s/$' % res, object_detail, { 'category' : '' }, name='home_static_detail' ),
+    url( r'^%(cat)s/%(id)s-%(slug)s/$' % res, object_detail, name='static_detail' ),
+    url( r'^%(id)s-%(slug)s/$' % res, object_detail, { 'category' : '' }, name='home_static_detail' ),
 
     # rss feeds
     url( r'^feeds/$', RSSTopCategoryListings(), name='home_rss_feed'),

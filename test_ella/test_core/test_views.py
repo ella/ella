@@ -174,7 +174,7 @@ class TestObjectDetail(ViewsTestCase):
         template_loader.templates['page/object.html'] = ''
 
     def test_signals_fired_for_detail(self):
-        self.client.get('/nested-category/2008/1/10/articles/first-article/')
+        self.client.get('/nested-category/2008/1/10/first-article/')
         tools.assert_equals(1, len(self.signals_received['object_rendering']))
         tools.assert_equals(1, len(self.signals_received['object_rendered']))
 
@@ -185,7 +185,7 @@ class TestObjectDetail(ViewsTestCase):
         tools.assert_equals(self.publishable, kwargs['publishable'])
 
     def test_object_detail(self):
-        response = self.client.get('/nested-category/2008/1/10/articles/first-article/')
+        response = self.client.get('/nested-category/2008/1/10/first-article/')
 
         tools.assert_true('category' in response.context)
         tools.assert_equals(self.publishable.category, response.context['category'])
@@ -208,18 +208,18 @@ class TestObjectDetail(ViewsTestCase):
     def test_static_object_detail_redirects_to_correct_url_on_wrong_slug(self):
         self.publishable.static = True
         self.publishable.save()
-        response = self.client.get('/nested-category/articles/%d-not-the-first-article/' % self.publishable.id)
+        response = self.client.get('/nested-category/%d-not-the-first-article/' % self.publishable.id)
 
         tools.assert_equals(301, response.status_code)
         tools.assert_equals(
-            'http://testserver/nested-category/articles/%d-first-article/' % self.publishable.id,
+            'http://testserver/nested-category/%d-first-article/' % self.publishable.id,
             response['Location']
         )
 
     def test_static_object_detail(self):
         self.publishable.static = True
         self.publishable.save()
-        response = self.client.get('/nested-category/articles/%d-first-article/' % self.publishable.id)
+        response = self.client.get('/nested-category/%d-first-article/' % self.publishable.id)
 
         tools.assert_true('category' in response.context)
         tools.assert_equals(self.publishable.category, response.context['category'])
