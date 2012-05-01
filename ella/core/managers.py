@@ -68,7 +68,8 @@ class CategoryManager(models.Manager):
     def get_children(self, category, recursive=False):
         #make sure this is the instance stored in our cache
         self._add_to_cache(category)
-        children = self._retrieve_children(category)
+        # copy the returned list. if recursive, we extend it below
+        children = self._retrieve_children(category)[:]
         if recursive:
             to_process = children[:]
             while to_process:
