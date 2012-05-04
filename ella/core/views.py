@@ -118,7 +118,7 @@ class ObjectDetail(EllaCoreView):
         try:
             cat = Category.objects.get_by_tree_path(category)
         except Category.DoesNotExist:
-            raise Http404('Category with given tree_path doesn\'t exist.')
+            raise Http404("Category with tree_path '%s' doesn't exist." % category)
 
         if year:
             publishable = get_cached_object_or_404(Publishable,
