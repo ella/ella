@@ -4,6 +4,7 @@ from django.test import TestCase
 from nose import tools
 
 from django.core.urlresolvers import reverse
+from django.core.exceptions import ValidationError
 
 from ella.core.models import Category
 
@@ -14,6 +15,11 @@ class TestCategory(TestCase):
     def setUp(self):
         super(TestCategory, self).setUp()
         create_basic_categories(self)
+
+    def test_slug_validates_correctly(self):
+        self.category_nested.slug = '123-slug'
+        tools.assert_raises(ValidationError, self.category_nested.full_clean)
+
 
     def test_get_children(self):
         tools.assert_equals([u'nested-category', ], [c.tree_path for c in self.category.get_children()])
