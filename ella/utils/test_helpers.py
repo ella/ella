@@ -19,7 +19,7 @@ def create_category(title, tree_parent=None, **kwargs):
         'slug': slugify(title),
     }
     defaults.update(kwargs)
-    if tree_parent is not None:
+    if isinstance(tree_parent, basestring):
         tree_parent = Category.objects.get_by_tree_path(tree_parent)
     cat, created = Category.objects.get_or_create(tree_parent=tree_parent, title=title, defaults=defaults)
     return cat
@@ -34,7 +34,7 @@ def create_basic_categories(case):
 
     case.category_nested = create_category(
         u"nested category",
-        tree_parent='',
+        tree_parent=case.category,
         description=u"category nested in case.category",
     )
 
