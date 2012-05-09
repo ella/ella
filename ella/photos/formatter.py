@@ -154,8 +154,6 @@ class Formatter(object):
         Get target size for a cropped image and do the resizing if we got
         anything usable.
         """
-        target_size = self.get_resized_size()
-
         resized_size = self.get_resized_size()
         if not resized_size:
             return
