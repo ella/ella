@@ -154,11 +154,15 @@ class ListingHandler(object):
         self.exclude = exclude
 
     def __getitem__(self, k):
-        if not isinstance(k, slice) or (k.start is None or k.start < 0) or (k.stop is None  or k.stop < k.start):
+        if not isinstance(k, slice) or k.step:
             raise TypeError, '%s, %s' % (k.start, k.stop)
 
-        offset = k.start
-        count = k.stop - k.start
+        offset = k.start or 0
+
+        if offset < 0 or k.stop is None  or k.stop < offset:
+            raise TypeError, '%s, %s' % (k.start, k.stop)
+
+        count = k.stop - offset
 
         return self.get_listings(offset, count)
 
