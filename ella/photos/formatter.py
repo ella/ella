@@ -123,10 +123,16 @@ class Formatter(object):
 
         crop_box = self.center_important_part(crop_box)
 
-        if photos_settings.DEFAULT_BG_COLOR == 'black' or not any(map(lambda x: x < 0, crop_box)):
+        iw, ih = self.image.size
+        out_of_photo = min(crop_box[0], crop_box[1]) < 0 or crop_box[2] > iw or crop_box[3] > ih
+
+        if photos_settings.DEFAULT_BG_COLOR == 'black' or not out_of_photo:
             self.image = self.image.crop(crop_box)
         else:
-            cropped = self.image.crop(map(lambda x: max(x, 0), crop_box))
+            updated_crop_box = map(lambda x: max(x, 0), crop_box)
+            updated_crop_box[2] = min(iw, updated_crop_box[2])
+            updated_crop_box[3] = min(ih, updated_crop_box[3])
+            cropped = self.image.crop(map(lambda x: max(x, 0), updated_crop_box))
             self.image = Image.new('RGB', (crop_box[2] - crop_box[0], crop_box[3] - crop_box[1]), photos_settings.DEFAULT_BG_COLOR)
             self.image.paste(cropped, (abs(min(crop_box[0], 0)), abs(min(crop_box[1], 0))))
         return crop_box
