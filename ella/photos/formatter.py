@@ -124,17 +124,23 @@ class Formatter(object):
         crop_box = self.center_important_part(crop_box)
 
         iw, ih = self.image.size
+        # see if we want to crop something from outside of the image
         out_of_photo = min(crop_box[0], crop_box[1]) < 0 or crop_box[2] > iw or crop_box[3] > ih
 
-        if photos_settings.DEFAULT_BG_COLOR == 'black' or not out_of_photo:
-            self.image = self.image.crop(crop_box)
-        else:
-            updated_crop_box = map(lambda x: max(x, 0), crop_box)
-            updated_crop_box[2] = min(iw, updated_crop_box[2])
-            updated_crop_box[3] = min(ih, updated_crop_box[3])
-            cropped = self.image.crop(map(lambda x: max(x, 0), updated_crop_box))
+        if photos_settings.DEFAULT_BG_COLOR != 'black' and out_of_photo:
+            # if we do, just crop the image to the portion that will be visible
+            updated_crop_box = (
+                max(0, crop_box[0]), max(0, crop_box[1]), min(iw, crop_box[2]), min(ih, crop_box[3]),
+            )
+            cropped = self.image.crop(updated_crop_box)
+
+            # create new image of the proper size and color
             self.image = Image.new('RGB', (crop_box[2] - crop_box[0], crop_box[3] - crop_box[1]), photos_settings.DEFAULT_BG_COLOR)
+            # and paste the cropped part into it's proper position
             self.image.paste(cropped, (abs(min(crop_box[0], 0)), abs(min(crop_box[1], 0))))
+        else:
+            # crop normally if not the case
+            self.image = self.image.crop(crop_box)
         return crop_box
 
     def get_resized_size(self):
