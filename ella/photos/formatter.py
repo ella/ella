@@ -1,5 +1,7 @@
 from PIL import Image
 
+from ella.photos.conf import photos_settings
+
 class Formatter(object):
     def __init__(self, image, format, crop_box=None, important_box=None):
         self.image = image
@@ -121,7 +123,12 @@ class Formatter(object):
 
         crop_box = self.center_important_part(crop_box)
 
-        self.image = self.image.crop(crop_box)
+        if photos_settings.DEFAULT_BG_COLOR == 'black' or not any(map(lambda x: x < 0, crop_box)):
+            self.image = self.image.crop(crop_box)
+        else:
+            cropped = self.image.crop(map(lambda x: max(x, 0), crop_box))
+            self.image = Image.new('RGB', (crop_box[2] - crop_box[0], crop_box[3] - crop_box[1]), photos_settings.DEFAULT_BG_COLOR)
+            self.image.paste(cropped, (abs(min(crop_box[0], 0)), abs(min(crop_box[1], 0))))
         return crop_box
 
     def get_resized_size(self):
