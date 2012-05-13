@@ -127,7 +127,7 @@ class Formatter(object):
         # see if we want to crop something from outside of the image
         out_of_photo = min(crop_box[0], crop_box[1]) < 0 or crop_box[2] > iw or crop_box[3] > ih
         # check whether there's transparent information in the image
-        transparent = self.image.mode in ('RGBA', 'LA') or (self.image.mode == 'P' and 'transparency' in self.image.info)
+        transparent = self.image.mode in ('RGBA', 'LA')
 
         if photos_settings.DEFAULT_BG_COLOR != 'black' and out_of_photo and not transparent:
             # if we do, just crop the image to the portion that will be visible
