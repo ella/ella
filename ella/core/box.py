@@ -39,7 +39,7 @@ class Box(object):
         self.is_model = issubclass(model, Model)
 
         if hasattr(model, '_meta'):
-            self.name = model._meta
+            self.name = str(model._meta)
             self.verbose_name = model._meta.verbose_name
             self.verbose_name_plural = model._meta.verbose_name_plural
 
