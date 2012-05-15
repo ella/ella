@@ -68,7 +68,8 @@ class CategoryManager(models.Manager):
     def get_children(self, category, recursive=False):
         #make sure this is the instance stored in our cache
         self._add_to_cache(category)
-        children = self._retrieve_children(category)
+        # copy the returned list. if recursive, we extend it below
+        children = self._retrieve_children(category)[:]
         if recursive:
             to_process = children[:]
             while to_process:
@@ -153,11 +154,15 @@ class ListingHandler(object):
         self.exclude = exclude
 
     def __getitem__(self, k):
-        if not isinstance(k, slice) or (k.start is None or k.start < 0) or (k.stop is None  or k.stop < k.start):
+        if not isinstance(k, slice) or k.step:
             raise TypeError, '%s, %s' % (k.start, k.stop)
 
-        offset = k.start
-        count = k.stop - k.start
+        offset = k.start or 0
+
+        if offset < 0 or k.stop is None  or k.stop < offset:
+            raise TypeError, '%s, %s' % (k.start, k.stop)
+
+        count = k.stop - offset
 
         return self.get_listings(offset, count)
 

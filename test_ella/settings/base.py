@@ -63,3 +63,5 @@ CATEGORY_TEMPLATES = [
     ('category.html', ''),
     ('static_page.html', ''),
 ]
+
+PHOTOS_DEFAULT_BG_COLOR = 'blue'

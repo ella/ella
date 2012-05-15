@@ -14,6 +14,19 @@ class TestPhotoResize(TestCase):
         super(TestPhotoResize, self).setUp()
         self.format = Format(max_height=100, max_width=100)
 
+    def test_custom_bg_color_is_used_for_neg_coords(self):
+        i = Image.new('RGB', (200, 200), "red")
+        f = Formatter(i, self.format, crop_box=(-50, -50, 50, 50))
+
+        i, crop_box = f.format()
+        tools.assert_equals((-50, -50, 50, 50), crop_box)
+        tools.assert_equals((100, 100), i.size)
+        tools.assert_equals((0,0,255), i.getpixel((0, 0)))
+        tools.assert_equals((255,0,0), i.getpixel((51, 51)))
+        tools.assert_equals((255,0,0), i.getpixel((50, 50)))
+        tools.assert_equals((255,0,0), i.getpixel((99, 99)))
+
+
     def test_taller_image_gets_cropped_to_ratio(self):
         i = Image.new('RGB', (100, 200), "black")
         f = Formatter(i, self.format)

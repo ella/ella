@@ -3,6 +3,7 @@ import logging
 
 from django.dispatch import receiver
 from django.db.models import ObjectDoesNotExist
+from django.db.models.loading import get_model
 from django.db.models.signals import post_save, post_delete
 from django.core.cache import cache
 from django.core.cache.backends.dummy import DummyCache
@@ -17,6 +18,14 @@ log = logging.getLogger('ella.core.cache.utils')
 KEY_PREFIX = 'core.gco'
 CACHE_TIMEOUT = getattr(settings, 'CACHE_TIMEOUT', 10*60)
 
+
+PUBLISHABLE_CT = None
+def _get_publishable_ct():
+    global PUBLISHABLE_CT
+    if PUBLISHABLE_CT is None:
+        PUBLISHABLE_CT = ContentType.objects.get_for_model(get_model('core', 'publishable'))
+    return PUBLISHABLE_CT
+
 @receiver(post_save)
 @receiver(post_delete)
 def invalidate_cache(sender, instance, **kwargs):
@@ -29,6 +38,9 @@ def normalize_key(key):
     return md5(key).hexdigest()
 
 def _get_key(start, model, pk=None, **kwargs):
+    if issubclass(model.model_class(), _get_publishable_ct().model_class()):
+        model = PUBLISHABLE_CT
+
     if pk and not kwargs:
         return ':'.join((
             start, str(model.pk), str(pk)
@@ -65,6 +77,8 @@ def get_cached_object(model, timeout=CACHE_TIMEOUT, **kwargs):
     if obj is None:
         mclass = model.model_class()
         obj = mclass._default_manager.get(**kwargs)
+        if model == _get_publishable_ct():
+            return obj.target
         cache.set(key, obj, timeout)
     return obj
 

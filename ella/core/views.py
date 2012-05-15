@@ -86,7 +86,6 @@ class ObjectDetail(EllaCoreView):
 
     :param request: ``HttpRequest`` from Django
     :param category: ``Category.tree_path`` (empty if home category)
-    :param content_type: slugified ``verbose_name_plural`` of the target model
     :param year month day: date matching the `publish_from` field of the `Publishable` object
     :param slug: slug of the `Publishable`
     :param url_remainder: url after the object's url, used to locate custom views in `custom_urls.resolver`
@@ -94,8 +93,8 @@ class ObjectDetail(EllaCoreView):
     :raises Http404: if the URL is not valid and/or doesn't correspond to any valid `Publishable`
     """
     template_name = 'object.html'
-    def __call__(self, request, category, content_type, slug, year=None, month=None, day=None, id=None, url_remainder=None):
-        context = self.get_context(request, category, content_type, slug, year, month, day, id)
+    def __call__(self, request, category, slug, year=None, month=None, day=None, id=None, url_remainder=None):
+        context = self.get_context(request, category, slug, year, month, day, id)
 
         obj = context['object']
 
@@ -114,32 +113,29 @@ class ObjectDetail(EllaCoreView):
 
         return self.render(request, context, self.get_templates(context))
 
-    def get_context(self, request, category, content_type, slug, year, month, day, id):
-        ct = get_content_type(content_type)
+    def get_context(self, request, category, slug, year, month, day, id):
 
         try:
             cat = Category.objects.get_by_tree_path(category)
         except Category.DoesNotExist:
-            raise Http404('Category with given tree_path doesn\'t exist.')
+            raise Http404("Category with tree_path '%s' doesn't exist." % category)
 
         if year:
             publishable = get_cached_object_or_404(Publishable,
                         publish_from__year=year,
                         publish_from__month=month,
                         publish_from__day=day,
-                        content_type=ct,
                         category=cat,
                         slug=slug,
                         static=False
                     )
         else:
             publishable = get_cached_object_or_404(Publishable, pk=id)
-            if publishable.category_id != cat.pk or publishable.content_type_id != ct.id or not publishable.static:
+            if publishable.category_id != cat.pk or not publishable.static:
                 raise Http404()
 
         # save existing object to preserve memory and SQL
         publishable.category = cat
-        publishable.content_type = ct
 
 
         if not (publishable.is_published() or request.user.is_staff):
@@ -151,8 +147,8 @@ class ObjectDetail(EllaCoreView):
         context = {
                 'object' : obj,
                 'category' : cat,
-                'content_type_name' : content_type,
-                'content_type' : ct,
+                'content_type_name' : slugify(obj.content_type.model_class()._meta.verbose_name_plural),
+                'content_type' : obj.content_type
             }
 
         return context
@@ -244,8 +240,7 @@ class ListContentType(EllaCoreView):
                 year = now.year
         return year
 
-    def get_context(self, request, category='', year=None, month=None, \
-        day=None, content_type=None):
+    def get_context(self, request, category='', year=None, month=None, day=None):
         # pagination
         if 'p' in request.GET and request.GET['p'].isdigit():
             page_no = int(request.GET['p'])
@@ -300,12 +295,6 @@ class ListContentType(EllaCoreView):
         if category:
             kwa['children'] = ListingHandler.ALL
 
-        if content_type:
-            ct = get_content_type(content_type)
-            kwa['content_types'] = (ct,)
-        else:
-            ct = False
-
         if 'using' in request.GET:
             kwa['source'] = request.GET['using']
         else:
@@ -331,9 +320,6 @@ class ListContentType(EllaCoreView):
             'page': page,
             'listings' : listings,
             'archive_entry_year' : lambda: self._archive_entry_year(cat),
-
-            'content_type' : ct,
-            'content_type_name' : content_type,
         }
         return context
 

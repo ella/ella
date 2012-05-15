@@ -296,10 +296,10 @@ class FormatedPhoto(models.Model):
     # save it to YYYY/MM/DD structure
     image = models.ImageField(upload_to=photos_settings.UPLOAD_TO,
         height_field='height', width_field='width', max_length=300)
-    crop_left = models.PositiveIntegerField()
-    crop_top = models.PositiveIntegerField()
-    crop_width = models.PositiveIntegerField()
-    crop_height = models.PositiveIntegerField()
+    crop_left = models.IntegerField()
+    crop_top = models.IntegerField()
+    crop_width = models.IntegerField()
+    crop_height = models.IntegerField()
     width = models.PositiveIntegerField(editable=False)
     height = models.PositiveIntegerField(editable=False)
 

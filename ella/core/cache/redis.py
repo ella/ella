@@ -182,7 +182,7 @@ class RedisListingHandler(ListingHandler):
         min_score = None
 
         if self.date_range:
-            max_score = time.mktime(min(self.date_range[1], datetime.now()).timetule())
+            max_score = time.mktime(min(self.date_range[1], datetime.now()).timetuple())
             min_score = time.mktime(self.date_range[0].timetuple())
         return min_score, max_score
 

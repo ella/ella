@@ -88,7 +88,6 @@ class Publishable(models.Model):
         category = self.category
 
         kwargs = {
-            'content_type' : slugify(self.content_type.model_class()._meta.verbose_name_plural),
             'slug' : self.slug,
         }
 

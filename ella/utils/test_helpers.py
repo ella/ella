@@ -6,35 +6,42 @@ from cStringIO import StringIO
 
 from django.conf import settings
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.template.defaultfilters import slugify
 
 from ella.core.models import Category, Publishable
 # choose Article as an example publishable
 from ella.articles.models import Article
 from ella.photos.models import Photo
 
+def create_category(title, tree_parent=None, **kwargs):
+    defaults = {
+        'site_id': getattr(settings, "SITE_ID", 1),
+        'slug': slugify(title),
+    }
+    defaults.update(kwargs)
+    if isinstance(tree_parent, basestring):
+        tree_parent = Category.objects.get_by_tree_path(tree_parent)
+    cat, created = Category.objects.get_or_create(tree_parent=tree_parent, title=title, defaults=defaults)
+    return cat
+
 def create_basic_categories(case):
     case.site_id = getattr(settings, "SITE_ID", 1)
 
-    case.category = Category.objects.create(
-        title=u"你好 category",
+    case.category = create_category(u"你好 category",
         description=u"exmple testing category",
-        site_id=case.site_id,
         slug=u"ni-hao-category",
     )
 
-    case.category_nested = Category.objects.create(
-        title=u"nested category",
-        description=u"category nested in case.category",
+    case.category_nested = create_category(
+        u"nested category",
         tree_parent=case.category,
-        site_id=case.site_id,
-        slug=u"nested-category",
+        description=u"category nested in case.category",
     )
 
-    case.category_nested_second = Category.objects.create(
-        title=u" second nested category",
+    case.category_nested_second = create_category(
+        u" second nested category",
+        tree_parent='nested-category',
         description=u"category nested in case.category_nested",
-        tree_parent=case.category_nested,
-        site_id=case.site_id,
         slug=u"second-nested-category",
     )
     case.addCleanup(Category.objects.clear_cache)

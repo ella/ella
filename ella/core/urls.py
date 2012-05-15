@@ -20,7 +20,7 @@ from ella.core.feeds import RSSTopCategoryListings, AtomTopCategoryListings
 
 res = {
     'ct': r'(?P<content_type>[a-z][a-z0-9-]+)',
-    'cat': r'(?P<category>[a-z][a-z0-9-/]+)',
+    'cat': r'(?P<category>(?:[a-z][a-z0-9-]+/)*[a-z][a-z0-9-]+)',
     'slug': r'(?P<slug>%s)' % slug_re.pattern.strip('^$'),
     'year': r'(?P<year>\d{4})',
     'month': r'(?P<month>\d{1,2})',
@@ -43,36 +43,26 @@ urlpatterns = patterns( '',
     url( r'^%(year)s/%(month)s/$' % res, list_content_type, name="list_month" ),
     url( r'^%(year)s/$' % res, list_content_type, name="list_year" ),
 
-    # list of objects regardless of category
-    url( r'^%(year)s/%(month)s/%(day)s/%(ct)s/$' % res, list_content_type, name="list_content_type_day" ),
-    url( r'^%(year)s/%(month)s/%(ct)s/$' % res, list_content_type, name="list_content_type_month" ),
-    url( r'^%(year)s/%(ct)s/$' % res, list_content_type, name="list_content_type_year" ),
-
     # object detail
-    url( r'^%(cat)s/%(year)s/%(month)s/%(day)s/%(ct)s/%(slug)s/$' % res, object_detail, name="object_detail" ),
-    url( r'^%(year)s/%(month)s/%(day)s/%(ct)s/%(slug)s/$' % res, object_detail, { 'category' : '' }, name="home_object_detail" ),
+    url( r'^%(cat)s/%(year)s/%(month)s/%(day)s/%(slug)s/$' % res, object_detail, name="object_detail" ),
+    url( r'^%(year)s/%(month)s/%(day)s/%(slug)s/$' % res, object_detail, { 'category' : '' }, name="home_object_detail" ),
 
     # object detail with custom action
-    url( r'^%(cat)s/%(year)s/%(month)s/%(day)s/%(ct)s/%(slug)s/%(rest)s$' % res, object_detail, name="object_detail_action" ),
-    url( r'^%(year)s/%(month)s/%(day)s/%(ct)s/%(slug)s/%(rest)s$' % res, object_detail, { 'category' : '' }, name="home_object_detail_action" ),
+    url( r'^%(cat)s/%(year)s/%(month)s/%(day)s/%(slug)s/%(rest)s$' % res, object_detail, name="object_detail_action" ),
+    url( r'^%(year)s/%(month)s/%(day)s/%(slug)s/%(rest)s$' % res, object_detail, { 'category' : '' }, name="home_object_detail_action" ),
 
     # category listings
     url( r'^%(cat)s/%(year)s/%(month)s/%(day)s/$' % res, list_content_type, name="category_list_day" ),
     url( r'^%(cat)s/%(year)s/%(month)s/$' % res, list_content_type, name="category_list_month" ),
     url( r'^%(cat)s/%(year)s/$' % res, list_content_type, name="category_list_year" ),
 
-    # category listings for content_type
-    url( r'^%(cat)s/%(year)s/%(month)s/%(day)s/%(ct)s/$' % res, list_content_type, name="category_list_content_type_day" ),
-    url( r'^%(cat)s/%(year)s/%(month)s/%(ct)s/$' % res, list_content_type, name="category_list_content_type_month" ),
-    url( r'^%(cat)s/%(year)s/%(ct)s/$' % res, list_content_type, name="category_list_content_type_year" ),
-
     # static detail with custom action
-    url( r'^%(cat)s/%(ct)s/%(id)s-%(slug)s/%(rest)s$' % res, object_detail, name='static_detail_action' ),
-    url( r'^%(ct)s/%(id)s-%(slug)s/%(rest)s$' % res, object_detail, { 'category' : '' }, name='home_static_detail_action' ),
+    url( r'^%(cat)s/%(id)s-%(slug)s/%(rest)s$' % res, object_detail, name='static_detail_action' ),
+    url( r'^%(id)s-%(slug)s/%(rest)s$' % res, object_detail, { 'category' : '' }, name='home_static_detail_action' ),
 
     # static detail
-    url( r'^%(cat)s/%(ct)s/%(id)s-%(slug)s/$' % res, object_detail, name='static_detail' ),
-    url( r'^%(ct)s/%(id)s-%(slug)s/$' % res, object_detail, { 'category' : '' }, name='home_static_detail' ),
+    url( r'^%(cat)s/%(id)s-%(slug)s/$' % res, object_detail, name='static_detail' ),
+    url( r'^%(id)s-%(slug)s/$' % res, object_detail, { 'category' : '' }, name='home_static_detail' ),
 
     # rss feeds
     url( r'^feeds/$', RSSTopCategoryListings(), name='home_rss_feed'),

@@ -1,15 +1,16 @@
+import re
+
 from django.db import models
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from django.utils.safestring import mark_safe
 from django.contrib.auth.models import User
-from django.core.validators import validate_slug
+from django.core.validators import validate_slug, RegexValidator
 
 
 from jsonfield.fields import JSONField
 
-from ella.core.box import Box
 from ella.core.cache import CachedGenericForeignKey, SiteForeignKey, ContentTypeForeignKey, CategoryForeignKey, CachedForeignKey
 from ella.core.conf import core_settings
 from ella.core.managers import CategoryManager
@@ -59,6 +60,8 @@ class Source(models.Model):
     def __unicode__(self):
         return self.name
 
+category_slug_validator = RegexValidator(re.compile('^[a-z][a-z0-9-]+$'), _('Please enter a valid slug composed of lowecase letter, numbers and hyphens. First character must be a letter.'), 'invalid')
+
 class Category(models.Model):
     """
     ``Category`` is the **basic building block of Ella-based sites**. All the
@@ -81,7 +84,7 @@ class Category(models.Model):
     template = models.CharField(_('Template'), max_length=100, help_text=_(
         'Template to use to render detail page of this category.'),
         choices=template_choices, default=template_choices[0][0])
-    slug = models.SlugField(_('Slug'), max_length=255, validators=[validate_slug])
+    slug = models.SlugField(_('Slug'), max_length=255, validators=[category_slug_validator])
     tree_parent = CategoryForeignKey(null=True, blank=True,
         verbose_name=_("Parent category"))
     tree_path = models.CharField(verbose_name=_("Path from root category"),

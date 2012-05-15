@@ -62,7 +62,7 @@ class TestCategoryDetail(ViewHelpersTestCase):
 class TestObjectDetail(ViewHelpersTestCase):
     def setUp(self):
         super(TestObjectDetail, self).setUp()
-        self.correct_args = [self.request, 'nested-category', 'articles', 'first-article', '2008', '1', '10', None]
+        self.correct_args = [self.request, 'nested-category', 'first-article', '2008', '1', '10', None]
         self.object_detail = ObjectDetail()
 
     def test_raises_404_on_incorrect_category(self):
@@ -73,16 +73,12 @@ class TestObjectDetail(ViewHelpersTestCase):
         self.correct_args[1] = ''
         tools.assert_raises(Http404, self.object_detail.get_context, *self.correct_args)
 
-    def test_raises_404_on_incorrect_content_type(self):
-        self.correct_args[2] = 'not-a-content-type'
-        tools.assert_raises(Http404, self.object_detail.get_context, *self.correct_args)
-
     def test_raises_404_on_incorrect_slug(self):
-        self.correct_args[3] = 'not-an-existing-slug'
+        self.correct_args[2] = 'not-an-existing-slug'
         tools.assert_raises(Http404, self.object_detail.get_context, *self.correct_args)
 
     def test_raises_404_on_incorrect_date(self):
-        self.correct_args[4] = '2000'
+        self.correct_args[3] = '2000'
         tools.assert_raises(Http404, self.object_detail.get_context, *self.correct_args)
 
     def test_returns_correct_context(self):
@@ -100,13 +96,13 @@ class TestObjectDetail(ViewHelpersTestCase):
         tools.assert_raises(Http404, self.object_detail.get_context, *self.correct_args)
 
     def test_doesnt_match_placement_if_date_is_not_supplied(self):
-        self.correct_args = self.correct_args[:4] + [None, None, None, None]
+        self.correct_args = self.correct_args[:3] + [None, None, None, None]
         tools.assert_raises(Http404, self.object_detail.get_context, *self.correct_args)
 
     def test_matches_static_placement_if_date_is_not_supplied(self):
         self.publishable.static = True
         self.publishable.save()
-        self.correct_args = self.correct_args[:4] + [None, None, None, self.publishable.id]
+        self.correct_args = self.correct_args[:3] + [None, None, None, self.publishable.id]
 
         c = self.object_detail.get_context(*self.correct_args)
 
@@ -166,8 +162,5 @@ class TestListContentType(ViewHelpersTestCase):
 
     def test_raises404_for_incorrect_date(self):
         tools.assert_raises(Http404, self.list_content_type.get_context, self.request, '', '2008', '2', '30')
-
-    def test_raises404_for_incorrect_content_type(self):
-        tools.assert_raises(Http404, self.list_content_type.get_context, self.request, '', '2008', '2', '3', 'not-a-content-type')
 
 

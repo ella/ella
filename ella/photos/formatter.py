@@ -1,5 +1,7 @@
 from PIL import Image
 
+from ella.photos.conf import photos_settings
+
 class Formatter(object):
     def __init__(self, image, format, crop_box=None, important_box=None):
         self.image = image
@@ -121,7 +123,26 @@ class Formatter(object):
 
         crop_box = self.center_important_part(crop_box)
 
-        self.image = self.image.crop(crop_box)
+        iw, ih = self.image.size
+        # see if we want to crop something from outside of the image
+        out_of_photo = min(crop_box[0], crop_box[1]) < 0 or crop_box[2] > iw or crop_box[3] > ih
+        # check whether there's transparent information in the image
+        transparent = self.image.mode in ('RGBA', 'LA')
+
+        if photos_settings.DEFAULT_BG_COLOR != 'black' and out_of_photo and not transparent:
+            # if we do, just crop the image to the portion that will be visible
+            updated_crop_box = (
+                max(0, crop_box[0]), max(0, crop_box[1]), min(iw, crop_box[2]), min(ih, crop_box[3]),
+            )
+            cropped = self.image.crop(updated_crop_box)
+
+            # create new image of the proper size and color
+            self.image = Image.new('RGB', (crop_box[2] - crop_box[0], crop_box[3] - crop_box[1]), photos_settings.DEFAULT_BG_COLOR)
+            # and paste the cropped part into it's proper position
+            self.image.paste(cropped, (abs(min(crop_box[0], 0)), abs(min(crop_box[1], 0))))
+        else:
+            # crop normally if not the case
+            self.image = self.image.crop(crop_box)
         return crop_box
 
     def get_resized_size(self):
@@ -154,8 +175,6 @@ class Formatter(object):
         Get target size for a cropped image and do the resizing if we got
         anything usable.
         """
-        target_size = self.get_resized_size()
-
         resized_size = self.get_resized_size()
         if not resized_size:
             return
