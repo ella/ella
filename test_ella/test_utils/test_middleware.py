@@ -19,12 +19,12 @@ class TestLegacyRedirectMiddleware(TestCase):
     def test_middleware_ignores_non_404_responses(self):
         request = self.rf.get('/articles/10-w-t-f/')
         response = DummyResponse(200)
-        tools.assert_is(response, self.m.process_response(request, response))
+        tools.assert_true(response is self.m.process_response(request, response))
 
     def test_middleware_ignores_valid_404_responses(self):
         request = self.rf.get('/this/url/does/not/exist/')
         response = DummyResponse(404)
-        tools.assert_is(response, self.m.process_response(request, response))
+        tools.assert_true(response is self.m.process_response(request, response))
 
     def test_middleware_redirects_static_home(self):
         request = self.rf.get('/articles/10-w-t-f/')
