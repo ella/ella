@@ -43,11 +43,6 @@ urlpatterns = patterns( '',
     url( r'^%(year)s/%(month)s/$' % res, list_content_type, name="list_month" ),
     url( r'^%(year)s/$' % res, list_content_type, name="list_year" ),
 
-    # list of objects regardless of category
-    url( r'^%(year)s/%(month)s/%(day)s/%(ct)s/$' % res, list_content_type, name="list_content_type_day" ),
-    url( r'^%(year)s/%(month)s/%(ct)s/$' % res, list_content_type, name="list_content_type_month" ),
-    url( r'^%(year)s/%(ct)s/$' % res, list_content_type, name="list_content_type_year" ),
-
     # object detail
     url( r'^%(cat)s/%(year)s/%(month)s/%(day)s/%(slug)s/$' % res, object_detail, name="object_detail" ),
     url( r'^%(year)s/%(month)s/%(day)s/%(slug)s/$' % res, object_detail, { 'category' : '' }, name="home_object_detail" ),
@@ -60,11 +55,6 @@ urlpatterns = patterns( '',
     url( r'^%(cat)s/%(year)s/%(month)s/%(day)s/$' % res, list_content_type, name="category_list_day" ),
     url( r'^%(cat)s/%(year)s/%(month)s/$' % res, list_content_type, name="category_list_month" ),
     url( r'^%(cat)s/%(year)s/$' % res, list_content_type, name="category_list_year" ),
-
-    # category listings for content_type
-    url( r'^%(cat)s/%(year)s/%(month)s/%(day)s/%(ct)s/$' % res, list_content_type, name="category_list_content_type_day" ),
-    url( r'^%(cat)s/%(year)s/%(month)s/%(ct)s/$' % res, list_content_type, name="category_list_content_type_month" ),
-    url( r'^%(cat)s/%(year)s/%(ct)s/$' % res, list_content_type, name="category_list_content_type_year" ),
 
     # static detail with custom action
     url( r'^%(cat)s/%(id)s-%(slug)s/%(rest)s$' % res, object_detail, name='static_detail_action' ),

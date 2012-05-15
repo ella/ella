@@ -163,7 +163,4 @@ class TestListContentType(ViewHelpersTestCase):
     def test_raises404_for_incorrect_date(self):
         tools.assert_raises(Http404, self.list_content_type.get_context, self.request, '', '2008', '2', '30')
 
-    def test_raises404_for_incorrect_content_type(self):
-        tools.assert_raises(Http404, self.list_content_type.get_context, self.request, '', '2008', '2', '3', 'not-a-content-type')
-
 

@@ -240,8 +240,7 @@ class ListContentType(EllaCoreView):
                 year = now.year
         return year
 
-    def get_context(self, request, category='', year=None, month=None, \
-        day=None, content_type=None):
+    def get_context(self, request, category='', year=None, month=None, day=None):
         # pagination
         if 'p' in request.GET and request.GET['p'].isdigit():
             page_no = int(request.GET['p'])
@@ -296,12 +295,6 @@ class ListContentType(EllaCoreView):
         if category:
             kwa['children'] = ListingHandler.ALL
 
-        if content_type:
-            ct = get_content_type(content_type)
-            kwa['content_types'] = (ct,)
-        else:
-            ct = False
-
         if 'using' in request.GET:
             kwa['source'] = request.GET['using']
         else:
@@ -327,9 +320,6 @@ class ListContentType(EllaCoreView):
             'page': page,
             'listings' : listings,
             'archive_entry_year' : lambda: self._archive_entry_year(cat),
-
-            'content_type' : ct,
-            'content_type_name' : content_type,
         }
         return context
 
