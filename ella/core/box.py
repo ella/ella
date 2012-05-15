@@ -1,6 +1,7 @@
 from django.template import loader
 from django.utils.datastructures import MultiValueDict
 from django.utils.encoding import smart_str
+from django.db.models import Model
 from django.core.cache import cache
 from django.conf import settings
 
@@ -31,9 +32,16 @@ class Box(object):
         if not model:
             model = obj.__class__
 
-        self.opts = model._meta
-        self.verbose_name = model._meta.verbose_name
-        self.verbose_name_plural = model._meta.verbose_name_plural
+        self.name = model.__name__.lower()
+        self.verbose_name = model.__name__
+        self.verbose_name_plural = model.__name__
+
+        self.is_model = issubclass(model, Model)
+
+        if hasattr(model, '_meta'):
+            self.name = model._meta
+            self.verbose_name = model._meta.verbose_name
+            self.verbose_name_plural = model._meta.verbose_name_plural
 
     def resolve_params(self, text):
         " Parse the parameters into a dict. "
@@ -81,7 +89,7 @@ class Box(object):
             level = 1
 
         return {
-                'content_type_name' : str(self.opts),
+                'content_type_name' : str(self.name),
                 'content_type_verbose_name' : self.verbose_name,
                 'content_type_verbose_name_plural' : self.verbose_name_plural,
                 'object' : self.obj,
@@ -111,9 +119,9 @@ class Box(object):
         return rend
 
     def double_render(self):
-        return '''{%% box %(box_type)s for %(opts)s with pk %(pk)s %%}%(params)s{%% endbox %%}''' % {
+        return '''{%% box %(box_type)s for %(name)s with pk %(pk)s %%}%(params)s{%% endbox %%}''' % {
                 'box_type' : self.box_type,
-                'opts' : self.opts,
+                'name' : self.name,
                 'pk' : self.obj.pk,
                 'params' : '\n'.join(('%s:%s' % item for item in self.params.items())),
         }
@@ -123,13 +131,13 @@ class Box(object):
         t_list = []
         if hasattr(self.obj, 'category_id') and self.obj.category_id:
             cat = self.obj.category
-            base_path = 'box/category/%s/content_type/%s/' % (cat.path, self.opts)
+            base_path = 'box/category/%s/content_type/%s/' % (cat.path, self.name)
             if hasattr(self.obj, 'slug'):
                 t_list.append(base_path + '%s/%s.html' % (self.obj.slug, self.box_type,))
             t_list.append(base_path + '%s.html' % (self.box_type,))
             t_list.append(base_path + 'box.html')
 
-        base_path = 'box/content_type/%s/' % self.opts
+        base_path = 'box/content_type/%s/' % self.name
         if hasattr(self.obj, 'slug'):
             t_list.append(base_path + '%s/%s.html' % (self.obj.slug, self.box_type,))
         t_list.append(base_path + '%s.html' % (self.box_type,))
@@ -155,6 +163,9 @@ class Box(object):
 
     def get_cache_key(self):
         " Return a cache key constructed from the box's parameters. "
+        if not self.is_model:
+            return None
+
         if self.params:
             pars = ','.join(':'.join((smart_str(key), smart_str(self.params[key]))) for key in sorted(self.params.keys()))
         else:

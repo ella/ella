@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.test import TestCase
+from django.template import Context
 
 from nose import tools
 
@@ -8,6 +9,7 @@ from ella.core.box import Box
 from ella.articles.models import Article
 
 from test_ella.test_core import create_basic_categories, create_and_place_a_publishable
+from test_ella import template_loader
 
 
 class ArticleBox(Box):
@@ -18,6 +20,26 @@ class TestPublishableBox(TestCase):
         super(TestPublishableBox, self).setUp()
         create_basic_categories(self)
         create_and_place_a_publishable(self)
+
+    def tearDown(self):
+        super(TestPublishableBox, self).tearDown()
+        template_loader.templates = {}
+
+    def test_box_works_for_any_class(self):
+        class TestClass(object):
+            title = 'Heyoo'
+        test_obj = TestClass()
+        test_box = Box(test_obj, 'box_type', [])
+
+        tools.assert_equals([
+            'box/content_type/testclass/box_type.html',
+            'box/content_type/testclass/box.html',
+            'box/box_type.html',
+            'box/box.html'
+        ], test_box._get_template_list())
+
+        template_loader.templates['box/content_type/testclass/box_type.html'] = '{{ object.title}}'
+        tools.assert_equals('Heyoo', test_box.render(Context({})))
 
     def test_box_template_path_contains_correct_content_type(self):
         publishable = Publishable.objects.get(pk=self.publishable.pk)
