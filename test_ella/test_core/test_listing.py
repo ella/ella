@@ -106,3 +106,8 @@ class TestListing(TestCase):
         l = Listing.objects.get_listing(category=self.category, children=ListingHandler.ALL, exclude=l.publishable)
         tools.assert_equals(self.listings[1:], l)
 
+    def test_queryset_wrapper_can_get_individual_listings(self):
+        lh = Listing.objects.get_queryset_wrapper(self.category, children=ListingHandler.ALL)
+        l = lh[0]
+        tools.assert_equals(self.listings[0], l)
+

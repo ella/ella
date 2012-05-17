@@ -113,6 +113,13 @@ class TestRedisListings(TestCase):
         super(TestRedisListings, self).tearDown()
         self.redis.flushdb()
 
+    def test_access_to_individual_listings(self):
+        list_all_publishables_in_category_by_hour(self)
+        lh = Listing.objects.get_queryset_wrapper(category=self.category, children=ListingHandler.ALL, source='redis')
+        l = lh[0]
+
+        tools.assert_equals(l.publishable, self.listings[0].publishable)
+
     def test_listings_dont_propagate_where_they_shouldnt(self):
         self.category_nested.app_data = {'ella': {'propagate_listings': False}}
         self.category_nested.save()

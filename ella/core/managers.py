@@ -141,10 +141,10 @@ class ListingHandler(object):
     NONE = 0
     IMMEDIATE = 1
     ALL = 2
+
     @classmethod
     def regenerate(cls, today=None):
         pass
-
 
     def __init__(self, category, children=NONE, content_types=[], date_range=(), exclude=None):
         self.category = category
@@ -154,6 +154,9 @@ class ListingHandler(object):
         self.exclude = exclude
 
     def __getitem__(self, k):
+        if isinstance(k, int):
+            return self.get_listing(k)
+
         if not isinstance(k, slice) or k.step:
             raise TypeError, '%s, %s' % (k.start, k.stop)
 
@@ -165,6 +168,9 @@ class ListingHandler(object):
         count = k.stop - offset
 
         return self.get_listings(offset, count)
+
+    def get_listing(self, i):
+        return self.get_listings(i, i+1)[0]
 
 
 def get_listings_key(self, category=None, children=ListingHandler.NONE, count=10, offset=0, content_types=[], date_range=(), exclude=None, **kwargs):
@@ -307,6 +313,16 @@ class ListingManager(models.Manager):
 
 
 class ModelListingHandler(ListingHandler):
+    def get_listing(self, i):
+        Listing = get_model('core', 'listing')
+        return Listing.objects.get_listing_queryset(
+                self.category,
+                children=self.children,
+                content_types=self.content_types,
+                date_range=self.date_range,
+                exclude=self.exclude
+            )[i]
+
     def get_listings(self, offset=0, count=10):
         Listing = get_model('core', 'listing')
         return Listing.objects.get_listing(
