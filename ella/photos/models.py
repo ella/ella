@@ -385,6 +385,8 @@ class FormatedPhoto(models.Model):
 
     def file(self):
         """ Method returns formated photo path - derived from format.id and source Photo filename """
+        if photos_settings.FORMATED_PHOTO_FILENAME is not None:
+            return photos_settings.FORMATED_PHOTO_FILENAME(self)
         source_file = path.split(self.photo.image.name)
         return path.join(source_file[0], str (self.format.id) + '-' + source_file[1])
 

@@ -8,6 +8,7 @@ from django.contrib.sites.models import Site
 from nose import tools
 
 from ella.photos.models import Format, FormatedPhoto, redis, REDIS_FORMATTED_PHOTO_KEY
+from ella.photos.conf import photos_settings
 
 from test_ella.test_photos.fixtures import create_photo_formats, create_photo
 
@@ -20,6 +21,10 @@ class TestPhoto(TestCase):
         create_photo_formats(self)
 
         create_photo(self)
+
+    def tearDown(self):
+        super(TestPhoto, self).tearDown()
+        photos_settings.FORMATED_PHOTO_FILENAME = None
 
     def test_formatted_photo_has_zero_crop_box_if_smaller_than_format(self):
         format = Format.objects.create(
@@ -36,7 +41,11 @@ class TestPhoto(TestCase):
         fp.generate(False)
         tools.assert_equals((0,0,0,0), (fp.crop_left, fp.crop_top, fp.crop_width, fp.crop_height))
 
-
+    def test_formated_filename_can_be_overridden(self):
+        photos_settings.FORMATED_PHOTO_FILENAME = lambda fp: 'XXX.jpg'
+        formatted = FormatedPhoto.objects.get_photo_in_format(self.photo, self.basic_format)
+        tools.assert_true('url' in formatted)
+        tools.assert_true(formatted['url'].endswith('XXX.jpg'))
 
     def test_retrieving_formatted_photos_on_fly(self):
         formatted = FormatedPhoto.objects.get_photo_in_format(self.photo, self.basic_format)

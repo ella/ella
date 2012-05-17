@@ -27,5 +27,7 @@ PHOTO_MIN_HEIGHT=150
 
 DEFAULT_BG_COLOR = 'black'
 
+FORMATED_PHOTO_FILENAME = None
+
 photos_settings = Settings('ella.photos.conf', 'PHOTOS')
 
