@@ -72,8 +72,8 @@ def find_template(template_list):
 
 def select_template(template_list):
     source, origin, template_name = find_template(template_list)
-    return source
-    #return loader.get_template_from_string(source, origin, template_name)
+    #return source
+    return loader.get_template_from_string(source, origin, template_name)
 
 def render_to_response(template_name, dictionary=None, context_instance=None, content_type=None):
     if isinstance(template_name, (list, tuple)):
