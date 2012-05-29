@@ -23,8 +23,12 @@ class TestPhoto(TestCase):
         create_photo(self)
 
     def tearDown(self):
-        super(TestPhoto, self).tearDown()
         photos_settings.FORMATED_PHOTO_FILENAME = None
+        if self.photo.pk:
+            self.photo.delete()
+        super(TestPhoto, self).tearDown()
+        if redis:
+            redis.flushdb()
 
     def test_formatted_photo_has_zero_crop_box_if_smaller_than_format(self):
         format = Format.objects.create(
@@ -66,9 +70,8 @@ class TestPhoto(TestCase):
         tools.assert_equals(1, len(self.photo.formatedphoto_set.all()))
 
         # let us create image again
-        f = open(self.image_file_name)
-        file = ContentFile(f.read())
-        f.close()
+        self.photo.image.open()
+        file = ContentFile(self.photo.image.read())
 
         self.photo.image.save("newzaaah", file)
         self.photo.save()
@@ -78,10 +81,3 @@ class TestPhoto(TestCase):
     def test_retrieving_ratio(self):
         tools.assert_equals(2, self.photo.ratio())
 
-    def tearDown(self):
-        os.remove(self.image_file_name)
-        if self.photo.pk:
-            self.photo.delete()
-        super(TestPhoto, self).tearDown()
-        if redis:
-            redis.flushdb()

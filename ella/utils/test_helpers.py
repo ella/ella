@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
-from tempfile import mkstemp
 from PIL import Image
 from cStringIO import StringIO
 
@@ -62,13 +61,10 @@ def create_and_place_a_publishable(case, **kwargs):
 
 def create_photo(case, **kwargs):
     # prepare image in temporary directory
-    case.image_file_name = mkstemp(suffix=".jpg", prefix="ella-photo-tests-")[1]
+    file = StringIO()
     case.image = Image.new('RGB', (200, 100), "black")
-    case.image.save(case.image_file_name, format="jpeg")
+    case.image.save(file, format="jpeg")
 
-    f = open(case.image_file_name)
-    file = StringIO(f.read())
-    f.close()
 
     f = InMemoryUploadedFile(
             file = file,
