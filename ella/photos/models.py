@@ -211,7 +211,10 @@ class Format(models.Model):
     resample_quality = models.IntegerField(_('Resample quality'),
         choices=photos_settings.FORMAT_QUALITY, default=85)
     sites = models.ManyToManyField(Site, verbose_name=_('Sites'))
-    master = models.ForeignKey('self', verbose_name=_('Master'), null=True, blank=True)
+    master = models.ForeignKey('self', verbose_name=_('Master'), null=True, blank=True, help_text=_((
+        'When generating formatted image, use the image formatted to master format instead of the original.'
+        'Useful when editors crop certain formats by hand and you wish to re-use those coordinates automatically.'
+    )))
 
     objects = FormatManager()
 
