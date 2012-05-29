@@ -17,6 +17,9 @@ def setup():
     old_config = test_runner.setup_databases()
 
 def teardown():
+    from shutil import rmtree
+    from django.conf import settings
     test_runner.teardown_databases(old_config)
     test_runner.teardown_test_environment()
+    rmtree(settings.MEDIA_ROOT)
 
