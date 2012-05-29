@@ -59,10 +59,10 @@ def create_and_place_a_publishable(case, **kwargs):
     case.publishable = Article.objects.create(**defaults)
     case.only_publishable = Publishable.objects.get(pk=case.publishable.pk)
 
-def create_photo(case, **kwargs):
+def create_photo(case, color="black", size=(200, 100), **kwargs):
     # prepare image in temporary directory
     file = StringIO()
-    case.image = Image.new('RGB', (200, 100), "black")
+    case.image = Image.new('RGB', size, color)
     case.image.save(file, format="jpeg")
 
 
@@ -78,8 +78,8 @@ def create_photo(case, **kwargs):
     data = dict(
         title = u"Example 中文 photo",
         slug = u"example-photo",
-        height = 200,
-        width = 100,
+        height = size[0],
+        width = size[1],
     )
     data.update(kwargs)
 

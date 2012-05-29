@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import os
+from PIL import Image
 
 from django.core.files.base import ContentFile
 from django.test import TestCase
@@ -29,6 +29,38 @@ class TestPhoto(TestCase):
         super(TestPhoto, self).tearDown()
         if redis:
             redis.flushdb()
+
+    def test_formated_photo_from_master_format_is_used(self):
+        master_format = Format.objects.create(
+            name='sample',
+            max_width=300,
+            max_height=200,
+            flexible_height=False,
+            stretch=False,
+            nocrop=False
+        )
+        slave_format = Format.objects.create(
+            name='slave',
+            max_width=300,
+            max_height=100,
+            flexible_height=False,
+            stretch=False,
+            nocrop=False,
+            master=master_format
+        )
+        master_fp = FormatedPhoto(photo=self.photo, format=master_format)
+        p2 = create_photo(self, color=(123, 123, 123), size=(300, 200))
+        p2.image.open()
+        master_fp.image.save(p2.image.name, p2.image)
+        master_fp.save()
+
+        fp = FormatedPhoto(photo=self.photo, format=slave_format)
+        fp.save()
+
+        fp.image.open()
+        i = Image.open(fp.image)
+        tools.assert_equals((123, 123, 123), i.getpixel((10, 10)))
+        tools.assert_equals((300, 100), i.size)
 
     def test_formatted_photo_has_zero_crop_box_if_smaller_than_format(self):
         format = Format.objects.create(

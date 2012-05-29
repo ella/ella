@@ -211,6 +211,7 @@ class Format(models.Model):
     resample_quality = models.IntegerField(_('Resample quality'),
         choices=photos_settings.FORMAT_QUALITY, default=85)
     sites = models.ManyToManyField(Site, verbose_name=_('Sites'))
+    master = models.ForeignKey('self', verbose_name=_('Master'), null=True, blank=True)
 
     objects = FormatManager()
 
@@ -329,14 +330,24 @@ class FormatedPhoto(models.Model):
             p = self.photo
             important_box = (p.important_left, p.important_top, p.important_right, p.important_bottom)
 
-        formatter = Formatter(self.photo._get_image(), self.format, crop_box=crop_box, important_box=important_box)
+        image = None
+        if crop_box is None and self.format.master_id:
+            try:
+                fp = FormatedPhoto.objects.get(format=self.format.master_id, photo=self.photo)
+                image = Image.open(fp.image)
+            except FormatedPhoto.DoesNotExist:
+                pass
+
+        if image is None:
+            image = self.photo._get_image()
+        formatter = Formatter(image, self.format, crop_box=crop_box, important_box=important_box)
 
         return formatter.format()
 
     def generate(self, save=True):
         """
         Generates photo file in current format.
-        
+
         If ``save`` is ``True``, file is saved too.
         """
         stretched_photo, crop_box = self._generate_img()
