@@ -11,15 +11,20 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import os
-import sys
 
-from django.core.management import setup_environ
+from django.conf import settings
 
 import ella
-from test_ella import settings
 
-setup_environ(settings)
+settings.configure(
+    DATABASES={
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',
+        }
+    },
+)
+
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
