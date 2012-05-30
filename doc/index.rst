@@ -67,6 +67,8 @@ Sites using Ella
 Ella is getting more and more popular. Here are some sites that take advantage
 of it:
 
+* `tested.com <http://www.tested.com>`_
+* `mom.me <http://mom.me>`_
 * `Investicniweb.cz <http://www.investicniweb.cz>`_
 * `Dumazahrada.cz <http://www.dumazahrada.cz>`_
 * `Květy <http://kvety.kafe.cz>`_
