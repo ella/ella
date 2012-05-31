@@ -48,34 +48,9 @@
                 var $fileupload = $(this);
                 
                 var $rows = $('.js-photos-container .row').not('.Done.OK');
-                var $common_fields_cleaned = AjaxFormLib.clean_inputs($('.js-common-image-fields'));
-                var default_values = $common_fields_cleaned.serializeObject();
-                
-                var incrementable_names = {};
-                $common_fields_cleaned.filter('.js-Incrementable *').each(function() {
-                    incrementable_names[ $(this).prop('name') ] = true;
-                });
-                var default_valued_field_counter = 0;
                 
                 $rows.each( function() {
                     var values = AjaxFormLib.clean_inputs($(this)).serializeObject();
-                    var incremented_default_valued_field_counter = false;
-                    
-                    for (k in values) {
-                        if (!values[k] && default_values[k]) {
-                            
-                            var suffix = '';
-                            if (k in incrementable_names) {
-                                if (!incremented_default_valued_field_counter) {
-                                    default_valued_field_counter++;
-                                    incremented_default_valued_field_counter = true;
-                                }
-                                suffix = ' ' + default_valued_field_counter;
-                            }
-                            
-                            values[k] = default_values[k] + suffix;
-                        }
-                    }
                     
                     var file = $(this).data('jfu_file');
                     values.file_name = file.name;
@@ -229,7 +204,9 @@
         var $row = $('.template').clone(true).removeClass('template');
         
         // suffix ID's, so that they stay unique
-        var id_suf = '_' + $cont.find('.row').length;
+        var id_max = $cont.find('.row').length;
+        while ( $('#id_title_'+id_max).length ) id_max++;
+        var id_suf = '_'+id_max;
         add_suffices($row,  id_suf);
         
         // the file-id is sent along with each file upload in a header,
@@ -243,7 +220,26 @@
         });
         $row.find('.file-id').val(file_id);
         
+        // populate fields with values from common fields
+        $('.js-common-image-fields :input').each( function() {
+            if ($(this).val() == '') return;
+            var paired_id = $(this).attr('id').replace(/_common($|_)/, id_suf + '$1');
+            var $paired = $row.find('#'+paired_id);
+            if ($paired.length == 0) return;
+            var val = $(this).val();
+            if ($(this).is('.js-Incrementable *')) {
+                val += ' ' + (id_max+1);
+            }
+            $paired.val(val);
+        });
+        
         $row.appendTo($cont);
+        
+        $row.find(':input').each(function() {
+            if (/_suggest$/.test($(this).attr('id'))) {
+                restore_suggest_widget_from_value(this);
+            }
+        });
         
         loadImage(file, add_image, {maxWidth: 200});
         
