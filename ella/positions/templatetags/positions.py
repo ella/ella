@@ -8,18 +8,14 @@ from ella.positions.models import Position
 register = template.Library()
 
 
-def _try_to_get_variable(possible_var):
+def _get_category_from_pars_var(template_var, context):
+    '''
+    get category from template variable or from tree_path
+    '''
     try:
-        var = template.Variable(possible_var)
-        return var
+        cat = template_var.resolve(context)
     except template.VariableDoesNotExist:
-        return possible_var
-
-
-def _get_category(parse_var, context):
-    cat = parse_var
-    if isinstance(cat, template.Variable):
-        cat = parse_var.resolve(context)
+        cat = template_var.literal
     if not isinstance(cat, Category):
         cat = Category.objects.get_by_tree_path(cat)
     return cat
@@ -54,10 +50,10 @@ def _parse_position_tag(bits, nodelist):
         bits.pop()
 
     if len(bits) == 4 and bits[2] == 'for':
-        pos_name, category = bits[1], _try_to_get_variable(bits[3])
+        pos_name, category = bits[1], template.Variable(bits[3])
         box_type = None
     elif len(bits) == 6 and bits[2] == 'for' and bits[4] == 'using':
-        pos_name, category, box_type = bits[1], _try_to_get_variable(bits[3]), bits[5]
+        pos_name, category, box_type = bits[1], template.Variable(bits[3]), bits[5]
     else:
         raise TemplateSyntaxError('Invalid syntax: {% position POSITION_NAME for CATEGORY [nofallback] %}')
 
@@ -71,7 +67,7 @@ class PositionNode(template.Node):
         self.nofallback = nofallback
 
     def render(self, context):
-        cat = _get_category(self.category)
+        cat = _get_category_from_pars_var(self.category)
 
         try:
             pos = Position.objects.get_active_position(cat, self.position, self.nofallback)
@@ -100,7 +96,7 @@ def ifposition(parser, token):
         bits.pop()
 
     if len(bits) >= 4 and bits[-2] == 'for':
-        category = _try_to_get_variable(bits.pop())
+        category = template.Variable(bits.pop())
         pos_names = bits[1:-1]
     else:
         raise TemplateSyntaxError('Invalid syntax: {% ifposition POSITION_NAME ... for CATEGORY [nofallback] %}')
@@ -123,7 +119,7 @@ class IfPositionNode(template.Node):
         self.nofallback, self.nodelist_true, self.nodelist_false = nofallback, nodelist_true, nodelist_false
 
     def render(self, context):
-        cat = _get_category(self.category)
+        cat = _get_category_from_pars_var(self.category)
 
         for pos in self.positions:
             try:
