@@ -2,21 +2,14 @@ from django.conf.urls.defaults import *
 from django.core.validators import slug_re
 from django.conf import settings
 
-from ella.core.views import object_detail, list_content_type, category_detail, home
-
-try:
-    # TODO: Robin - use django import utils:
-    if settings.CUSTOM_VIEWS:
-        views = settings.VIEWS
-        temp = __import__(views, globals(), locals(), ['object_detail', 'list_content_type', 'category_detail', 'home'])
-        object_detail = temp.object_detail
-        list_content_type = temp.list_content_type
-        category_detail = temp.category_detail
-        home = temp.home
-except:
-    pass
-
 from ella.core.feeds import RSSTopCategoryListings, AtomTopCategoryListings
+
+if getattr(settings, 'CUSTOM_VIEWS', None):
+    from django.utils.importlib import import_module
+    custom_views = import_module(settings.CUSTOM_VIEWS)
+    ListContentType, ObjectDetail = custom_views.ListContentType, custom_views.ObjectDetail
+else:
+    from ella.core.views import ListContentType, ObjectDetail
 
 
 res = {
@@ -30,15 +23,13 @@ res = {
     'id': r'(?P<id>\d+)',
 }
 
+# pre-create views used many times
+list_content_type = ListContentType()
+object_detail = ObjectDetail()
+
 urlpatterns = patterns( '',
     # home page
-    url( r'^$', home, name="root_homepage" ),
-
-    # TODO - delete
-    # export banners
-    url( r'^export/xml/(?P<name>[a-z0-9-]+)/$', 'ella.core.views.export', { 'count' : 3, 'content_type' : 'text/xml' }, name="named_export_xml" ),
-    url( r'^export/$', 'ella.core.views.export', { 'count' : 3 }, name="export" ),
-    url( r'^export/(?P<name>[a-z0-9-]+)/$', 'ella.core.views.export', { 'count' : 3 }, name="named_export" ),
+    url( r'^$', list_content_type, name="root_homepage" ),
 
     # list of objects regadless of category and content type
     url( r'^%(year)s/%(month)s/%(day)s/$' % res, list_content_type, name="list_day" ),
@@ -73,6 +64,6 @@ urlpatterns = patterns( '',
     url( r'^%(cat)s/feeds/atom/$' % res, AtomTopCategoryListings(), name='atom_feed'),
 
     # category homepage
-    url( r'^%(cat)s/$' % res, category_detail, name="category_detail" ),
+    url( r'^%(cat)s/$' % res, list_content_type, name="category_detail" ),
 
 )

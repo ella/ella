@@ -19,6 +19,7 @@ from ella.core.signals import object_rendering, object_rendered
 
 __docformat__ = "restructuredtext en"
 
+
 # local cache for get_content_type()
 CONTENT_TYPE_MAPPING = {}
 
