@@ -67,7 +67,7 @@ class PositionNode(template.Node):
         self.nofallback = nofallback
 
     def render(self, context):
-        cat = _get_category_from_pars_var(self.category)
+        cat = _get_category_from_pars_var(self.category, context)
 
         try:
             pos = Position.objects.get_active_position(cat, self.position, self.nofallback)
@@ -119,7 +119,7 @@ class IfPositionNode(template.Node):
         self.nofallback, self.nodelist_true, self.nodelist_false = nofallback, nodelist_true, nodelist_false
 
     def render(self, context):
-        cat = _get_category_from_pars_var(self.category)
+        cat = _get_category_from_pars_var(self.category, context)
 
         for pos in self.positions:
             try:
