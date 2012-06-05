@@ -9,7 +9,7 @@ from django.db.models import get_models
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import slugify
 
-from ella.core.views import ObjectDetail, get_content_type, ListContentType
+from ella.core.views import ObjectDetail, ListContentType
 from ella.core.models import Listing, Publishable
 
 from test_ella.test_core import create_basic_categories, create_and_place_a_publishable, \
@@ -29,16 +29,6 @@ class ViewHelpersTestCase(TestCase):
         self.request = self
         setattr(self.user, 'GET', {})
 
-class TestGetContentType(UnitTestCase):
-    def test_by_brute_force(self):
-        for m in get_models():
-            if issubclass(m, Publishable):
-                ct = ContentType.objects.get_for_model(m)
-                tools.assert_equals(ct, get_content_type(slugify(m._meta.verbose_name_plural)))
-
-    def test_raises_404_on_non_existing_model(self):
-        tools.assert_raises(Http404, get_content_type, '')
-
 class TestCategoryDetail(ViewHelpersTestCase):
     def setUp(self):
         super(TestCategoryDetail, self).setUp()
@@ -48,12 +38,12 @@ class TestCategoryDetail(ViewHelpersTestCase):
         c = self.category_detail.get_context(self.request, 'nested-category')
         tools.assert_equals(self.category_nested, c['category'])
         tools.assert_false(c['is_homepage'])
-        
+
     def test_returns_home_page_with_no_args(self):
         c = self.category_detail.get_context(self.request)
         tools.assert_equals(self.category, c['category'])
         tools.assert_true(c['is_homepage'])
-        
+
     def test_returns_nested_category_by_tree_path(self):
         c = self.category_detail.get_context(self.request, 'nested-category/second-nested-category')
         tools.assert_equals(self.category_nested_second, c['category'])
