@@ -5,6 +5,7 @@ from django.conf import settings
 from ella.core.views import object_detail, list_content_type, category_detail, home
 
 try:
+    # TODO: Robin - use django import utils:
     if settings.CUSTOM_VIEWS:
         views = settings.VIEWS
         temp = __import__(views, globals(), locals(), ['object_detail', 'list_content_type', 'category_detail', 'home'])
@@ -33,6 +34,7 @@ urlpatterns = patterns( '',
     # home page
     url( r'^$', home, name="root_homepage" ),
 
+    # TODO - delete
     # export banners
     url( r'^export/xml/(?P<name>[a-z0-9-]+)/$', 'ella.core.views.export', { 'count' : 3, 'content_type' : 'text/xml' }, name="named_export_xml" ),
     url( r'^export/$', 'ella.core.views.export', { 'count' : 3 }, name="export" ),

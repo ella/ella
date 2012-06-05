@@ -425,6 +425,7 @@ def get_templates(name, slug=None, category=None, app_label=None, model_label=No
     return templates
 
 
+# TODO: remove (not used anywhere)
 def get_templates_from_publishable(name, publishable):
     """
     Returns the same template list as `get_templates` but gets values from `Publishable` instance.
@@ -436,11 +437,14 @@ def get_templates_from_publishable(name, publishable):
     return get_templates(name, slug, category, app_label, model_label)
 
 
+
+# TODO: remove
 def get_export_key(request, count, name='', content_type=None):
     return 'core.export:%d:%d:%s:%s' % (
             settings.SITE_ID, count, name, content_type
         )
 
+# TODO: remove
 @cache_this(get_export_key, timeout=core_settings.CACHE_TIMEOUT_LONG)
 def export(request, count, name='', content_type=None):
     """
