@@ -12,11 +12,8 @@ def _get_category_from_pars_var(template_var, context):
     '''
     get category from template variable or from tree_path
     '''
-    try:
-        cat = template_var.resolve(context)
-    except template.VariableDoesNotExist:
-        cat = template_var.literal
-    if not isinstance(cat, Category):
+    cat = template_var.resolve(context)
+    if isinstance(cat, basestring):
         cat = Category.objects.get_by_tree_path(cat)
     return cat
 
