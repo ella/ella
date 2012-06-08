@@ -475,9 +475,9 @@ def export(request, count, name='', content_type=None):
 def page_not_found(request):
     response = TemplateResponse(request, 'page/404.html', {})
     response.status_code = 404
-    return response
+    return response.render()
 
 def handle_error(request):
     response = TemplateResponse(request, 'page/500.html', {})
     response.status_code = 500
-    return response
+    return response.render()
