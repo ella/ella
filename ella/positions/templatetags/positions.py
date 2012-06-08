@@ -8,6 +8,16 @@ from ella.positions.models import Position
 register = template.Library()
 
 
+def _get_category_from_pars_var(template_var, context):
+    '''
+    get category from template variable or from tree_path
+    '''
+    cat = template_var.resolve(context)
+    if isinstance(cat, basestring):
+        cat = Category.objects.get_by_tree_path(cat)
+    return cat
+
+
 @register.tag
 def position(parser, token):
     """
@@ -29,6 +39,7 @@ def position(parser, token):
     parser.delete_first_token()
     return _parse_position_tag(bits, nodelist)
 
+
 def _parse_position_tag(bits, nodelist):
     nofallback = False
     if bits[-1] == 'nofallback':
@@ -36,14 +47,15 @@ def _parse_position_tag(bits, nodelist):
         bits.pop()
 
     if len(bits) == 4 and bits[2] == 'for':
-        pos_name, category = bits[1], bits[3]
+        pos_name, category = bits[1], template.Variable(bits[3])
         box_type = None
     elif len(bits) == 6 and bits[2] == 'for' and bits[4] == 'using':
-        pos_name, category, box_type = bits[1], bits[3], bits[5]
+        pos_name, category, box_type = bits[1], template.Variable(bits[3]), bits[5]
     else:
-        raise TemplateSyntaxError, 'Invalid syntax: {% position POSITION_NAME for CATEGORY [nofallback] %}'
+        raise TemplateSyntaxError('Invalid syntax: {% position POSITION_NAME for CATEGORY [nofallback] %}')
 
     return PositionNode(category, pos_name, nodelist, box_type, nofallback)
+
 
 class PositionNode(template.Node):
     def __init__(self, category, position, nodelist, box_type, nofallback):
@@ -52,12 +64,7 @@ class PositionNode(template.Node):
         self.nofallback = nofallback
 
     def render(self, context):
-        try:
-            cat = template.Variable(self.category).resolve(context)
-            if not isinstance(cat, Category):
-                cat = Category.objects.get_by_tree_path(self.category)
-        except (template.VariableDoesNotExist, Category.DoesNotExist):
-            cat = Category.objects.get_by_tree_path('')
+        cat = _get_category_from_pars_var(self.category, context)
 
         try:
             pos = Position.objects.get_active_position(cat, self.position, self.nofallback)
@@ -86,10 +93,10 @@ def ifposition(parser, token):
         bits.pop()
 
     if len(bits) >= 4 and bits[-2] == 'for':
-        category = bits.pop()
+        category = template.Variable(bits.pop())
         pos_names = bits[1:-1]
     else:
-        raise TemplateSyntaxError, 'Invalid syntax: {% position POSITION_NAME ... for CATEGORY [nofallback] %}'
+        raise TemplateSyntaxError('Invalid syntax: {% ifposition POSITION_NAME ... for CATEGORY [nofallback] %}')
 
     nodelist_true = parser.parse(('else', end_tag))
     token = parser.next_token()
@@ -102,18 +109,14 @@ def ifposition(parser, token):
 
     return IfPositionNode(category, pos_names, nofallback, nodelist_true, nodelist_false)
 
+
 class IfPositionNode(template.Node):
     def __init__(self, category, positions, nofallback, nodelist_true, nodelist_false):
         self.category, self.positions = category, positions
         self.nofallback, self.nodelist_true, self.nodelist_false = nofallback, nodelist_true, nodelist_false
 
     def render(self, context):
-        try:
-            cat = template.Variable(self.category).resolve(context)
-            if not isinstance(cat, Category):
-                cat = Category.objects.get_by_tree_path(self.category)
-        except (template.VariableDoesNotExist, Category.DoesNotExist):
-            cat = Category.objects.get_by_tree_path('')
+        cat = _get_category_from_pars_var(self.category, context)
 
         for pos in self.positions:
             try:
@@ -122,4 +125,3 @@ class IfPositionNode(template.Node):
             except Position.DoesNotExist:
                 pass
         return self.nodelist_false.render(context)
-
