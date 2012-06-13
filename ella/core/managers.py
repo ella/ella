@@ -89,7 +89,8 @@ class RelatedManager(models.Manager):
         collected = []
         for func in finder_funcs:
             gathered = func(obj, count, collected, *args, **kwargs)
-            if gathered: collected += gathered
+            if gathered:
+                collected += gathered
             if len(collected) >= count:
                 return collected[:count]
 
