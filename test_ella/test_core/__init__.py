@@ -31,11 +31,11 @@ def list_all_publishables_in_category_by_hour(case, category=None):
 
     for p in case.publishables:
         case.listings.append(
-            Listing.objects.create(
+            Listing.objects.get_or_create(
                 publishable=p,
                 category=category or p.category,
                 publish_from=publish_from,
-            )
+            )[0]
         )
         publish_from += timedelta(seconds=3600)
     case.listings.reverse()

@@ -20,6 +20,12 @@ class TestListing(TestCase):
         create_and_place_more_publishables(self)
         list_all_publishables_in_category_by_hour(self)
 
+    def test_nested_listings(self):
+        list_all_publishables_in_category_by_hour(self, category=self.category_nested_second)
+        list_all_publishables_in_category_by_hour(self, category=self.category_nested)
+        l = Listing.objects.get_listing(category=self.category_nested, children=ListingHandler.ALL)
+        tools.assert_equals(self.listings, list(l))
+
     def test_get_listing_empty(self):
         c = Category.objects.create(
             title=u"third nested category",

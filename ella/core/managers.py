@@ -282,8 +282,14 @@ class ListingManager(models.Manager):
                         break
                 else:
                     skip += 1
-            if skip <= 2:
+
+            # no enough skipped, or not enough listings to work with, no need for another try
+            if skip <= 2 or (len(out) + skip) < (count + 2):
                 break
+
+            # get another page to fill in the gaps
+            offset += count
+            limit += count
 
         return out
 
