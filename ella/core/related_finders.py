@@ -13,7 +13,7 @@ def related_by_category(obj, count, collected_so_far, mods=[], only_from_same_si
     Returns other Publishable objects related to ``obj`` by using the same
     category principle. Returns up to ``count`` objects.
     """
-    related = collected_so_far
+    related = []
     # top objects in given category
     if count > 0:
         from ella.core.models import Listing
@@ -24,7 +24,7 @@ def related_by_category(obj, count, collected_so_far, mods=[], only_from_same_si
         )
         for l in listings[0:count + len(related)]:
             t = l.publishable
-            if t != obj and t not in related:
+            if t != obj and t not in collected_so_far and t not in related:
                 related.append(t)
                 count -= 1
 
