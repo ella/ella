@@ -1,8 +1,3 @@
-'''
-Created on 1.2.2012
-
-@author: xaralis
-'''
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 
