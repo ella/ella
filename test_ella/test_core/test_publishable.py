@@ -4,9 +4,10 @@ from datetime import datetime, timedelta
 from django.test import TestCase
 from django.contrib.sites.models import Site
 from django.contrib.redirects.models import Redirect
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 
-from ella.core.models import Category
+from ella.core.models import Category, Publishable
 from ella.core import signals
 from ella.core.management import generate_publish_signals
 
@@ -48,6 +49,16 @@ class TestPublishableHelpers(PublishableTestCase):
 
         p = self.publishable.content_type.get_object_for_this_type(pk=self.publishable.pk)
         tools.assert_equals({'core': 'testing'}, self.publishable.app_data)
+
+    def test_saving_base_publishable_does_not_update_content_type(self):
+        publishable_ct = ContentType.objects.get_for_model(Publishable)
+        current_ct = self.publishable.content_type
+        tools.assert_not_equals(publishable_ct, current_ct)
+
+        p = Publishable.objects.get(pk=self.publishable.pk)
+        p.save()
+        tools.assert_equals(current_ct, p.content_type)
+
 
 class TestRedirects(PublishableTestCase):
     def test_url_change_creates_redirect(self):

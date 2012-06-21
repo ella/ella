@@ -141,7 +141,9 @@ class Publishable(models.Model):
             raise ValidationError(_('Another %s already published at this URL.') % self._meta.verbose_name)
 
     def save(self, **kwargs):
-        self.content_type = ContentType.objects.get_for_model(self)
+        # update the content_type if it isn't already set
+        if not self.content_type_id:
+            self.content_type = ContentType.objects.get_for_model(self)
         send_signal = None
         old_self = None
         if self.pk:
@@ -214,7 +216,7 @@ def ListingBox(listing, *args, **kwargs):
 
 class Listing(models.Model):
     """
-    Listing of an ``Publishable`` in a ``Category``. Each and every object that have it's 
+    Listing of an ``Publishable`` in a ``Category``. Each and every object that have it's
     own detail page must have a ``Listing`` object that is valid (not expired) and
     places it in the object's main category. Any object can be listed in any
     number of categories (but only once per category). Even if the object is
