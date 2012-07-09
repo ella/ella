@@ -9,7 +9,7 @@ from nose import tools
 from ella.utils.feedgenerator import MediaElement, CustomXMLGenerator, MediaRSSFeed
 
 PUB_DATE = datetime.datetime(2012, 12, 23)
-ENCODING = locale.getpreferredencoding()
+ENCODING = 'UTF-8'
 
 MEDIA_FEED = """\
 <?xml version="1.0" encoding="UTF-8"?>
