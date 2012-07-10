@@ -2,6 +2,8 @@ import time
 from datetime import datetime, date
 
 from django.core.cache import get_cache
+from ella.core.cache.utils import normalize_key
+from hashlib import md5
 from django.conf import settings
 from django.test import TestCase
 from django.test.client import RequestFactory
@@ -349,3 +351,11 @@ class TestSlidingListings(TestCase):
             ],
             self.redis.zrange('sliding:WINDOWS', 0, -1, withscores=True)
         )
+def test_normalize_key_doesnt_touch_short_key():
+    key = "thisistest"
+    tools.assert_equals(key,normalize_key(key))
+
+def test_normalize_key_md5s_long_key():
+    key = "0123456789" * 30
+    tools.assert_equals(md5(key).hexdigest(),normalize_key(key))
+
