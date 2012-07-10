@@ -61,6 +61,7 @@ class TestPhoto(TestCase):
         i = Image.open(fp.image)
         tools.assert_equals((123, 123, 123), i.getpixel((10, 10)))
         tools.assert_equals((300, 100), i.size)
+        p2.image.close()
 
     def test_formatted_photo_has_zero_crop_box_if_smaller_than_format(self):
         format = Format.objects.create(
