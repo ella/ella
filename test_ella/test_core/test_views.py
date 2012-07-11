@@ -227,6 +227,18 @@ class TestObjectDetail(ViewsTestCase):
             response['Location']
         )
 
+    def test_static_redirects_preserve_custom_url_remainder(self):
+        self.publishable.static = True
+        self.publishable.save()
+        response = self.client.get('/nested-category/second-nested-category/%d-%s/some/custom/url/action/' % (self.publishable.id, self.publishable.slug))
+
+        tools.assert_equals(301, response.status_code)
+        tools.assert_equals(
+            'http://testserver/nested-category/%d-first-article/some/custom/url/action/' % self.publishable.id,
+            response['Location']
+        )
+
+
     def test_static_object_detail(self):
         self.publishable.static = True
         self.publishable.save()

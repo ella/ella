@@ -99,7 +99,10 @@ class ObjectDetail(EllaCoreView):
         obj = context['object']
 
         if obj.static and (slug != obj.slug or obj.category_id != context['category'].pk):
-            return redirect(obj.get_absolute_url(), permanent=True)
+            url = obj.get_absolute_url()
+            if url_remainder:
+                url += url_remainder
+            return redirect(url, permanent=True)
 
         # save existing object to preserve memory and SQL
         obj.category = context['category']
