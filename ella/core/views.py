@@ -98,8 +98,11 @@ class ObjectDetail(EllaCoreView):
 
         obj = context['object']
 
-        if obj.static and slug != obj.slug:
+        if obj.static and (slug != obj.slug or obj.category_id != context['category'].pk):
             return redirect(obj.get_absolute_url(), permanent=True)
+
+        # save existing object to preserve memory and SQL
+        obj.category = context['category']
 
         object_rendering.send(sender=context['object'].__class__, request=request, category=context['category'], publishable=context['object'])
 
@@ -131,12 +134,8 @@ class ObjectDetail(EllaCoreView):
                     )
         else:
             publishable = get_cached_object_or_404(Publishable, pk=id)
-            if publishable.category_id != cat.pk or not publishable.static:
+            if not publishable.static:
                 raise Http404()
-
-        # save existing object to preserve memory and SQL
-        publishable.category = cat
-
 
         if not (publishable.is_published() or request.user.is_staff):
             # future publish, render if accessed by logged in staff member
