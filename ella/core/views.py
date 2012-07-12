@@ -213,7 +213,7 @@ class ListContentType(EllaCoreView):
             context = self.get_context(request, **kwargs)
             cat = context['category']
             template_name = cat.template
-            if (core_settings.ARCHIVE_TEMPLATE or cat.app_data.get('ella', {}).get('archive_template', False)) and not context.get('is_title_page'):
+            if cat.app_data.get('ella', {}).get('archive_template', core_settings.ARCHIVE_TEMPLATE) and not context.get('is_title_page'):
                 template_name = self.template_name
             object_rendering.send(sender=Category, request=request, category=cat, publishable=None)
             object_rendered.send(sender=Category, request=request, category=cat, publishable=None)
@@ -250,7 +250,8 @@ class ListContentType(EllaCoreView):
                     {'path': category, 'site': settings.SITE_ID})
 
         ella_data = cat.app_data.get('ella', {})
-        no_home_listings = ella_data.get('no_home_listings') or core_settings.CATEGORY_NO_HOME_LISTINGS
+
+        no_home_listings = ella_data.get('no_home_listings', core_settings.CATEGORY_NO_HOME_LISTINGS)
 
         # pagination
         page_no = None
