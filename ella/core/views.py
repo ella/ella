@@ -250,19 +250,18 @@ class ListContentType(EllaCoreView):
                     {'path': category, 'site': settings.SITE_ID})
 
         ella_data = cat.app_data.get('ella', {})
+        no_home_listings = ella_data.get('no_home_listings') or core_settings.CATEGORY_NO_HOME_LISTINGS
 
         # pagination
-        page_no = 1
+        page_no = None
         if 'p' in request.GET and request.GET['p'].isdigit():
             page_no = int(request.GET['p'])
 
         # if we are not on the first page, display a different template
-        category_title_page = page_no == 1 and not year
+        category_title_page = page_no is None and not year
 
-        # no listings wanted on the category title page, compensate for it
-        no_home_listings = ella_data.get('no_home_listings') or core_settings.CATEGORY_NO_HOME_LISTINGS
-        if no_home_listings:
-            page_no -= 1
+        if page_no is None:
+            page_no = 1
 
         kwa = {'category': cat}
         if category:

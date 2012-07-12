@@ -115,12 +115,12 @@ class TestListContentType(ViewsTestCase):
         create_and_place_more_publishables(self)
         list_all_publishables_in_category_by_hour(self, category=self.category)
 
-    def test_without_home_listings_listings_start_on_second_page(self):
+    def test_without_home_listings_first_page_is_an_archive(self):
         self.category_nested_second.app_data.setdefault('ella', {})['no_home_listings'] = True
         self.category_nested_second.save()
         template_loader.templates['page/listing.html'] = ''
         Listing.objects.all().update(category=self.category_nested_second)
-        response = self.client.get('/nested-category/second-nested-category/?p=2')
+        response = self.client.get('/nested-category/second-nested-category/?p=1')
         tools.assert_true('listings' in response.context)
         tools.assert_equals(self.listings, response.context['listings'])
 
