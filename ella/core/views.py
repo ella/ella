@@ -198,7 +198,6 @@ class ListContentType(EllaCoreView):
     :param year, month, day: date matching the ``publish_from`` field of the ``Listing`` object.
     :param content_type: slugified verbose_name_plural of the target model, if omitted all content_types are listed
     :param page_no: which page to display
-    :keyword paginate_by: number of records in one page
 
     All parameters are optional, filtering is done on those supplied
 
@@ -212,19 +211,15 @@ class ListContentType(EllaCoreView):
     def __call__(self, request, **kwargs):
         try:
             context = self.get_context(request, **kwargs)
-            template_name = context['category'].template
-            if core_settings.ARCHIVE_TEMPLATE and not context.get('is_title_page'):
+            cat = context['category']
+            template_name = cat.template
+            if (core_settings.ARCHIVE_TEMPLATE or cat.app_data.get('ella', {}).get('archive_template', False)) and not context.get('is_title_page'):
                 template_name = self.template_name
-            object_rendering.send(sender=Category, request=request, category=context['category'], publishable=None)
-            object_rendered.send(sender=Category, request=request, category=context['category'], publishable=None)
+            object_rendering.send(sender=Category, request=request, category=cat, publishable=None)
+            object_rendered.send(sender=Category, request=request, category=cat, publishable=None)
             return self.render(request, context, self.get_templates(context, template_name))
         except self.EmptyHomepageException:
             return self.render(request, {}, self.empty_homepage_template_name)
-
-    def _handle_404(self, explanation, is_homepage):
-        if settings.DEBUG is True and is_homepage:
-            raise self.EmptyHomepageException()
-        raise Http404(explanation)
 
     @cache_this(archive_year_cache_key, timeout=60 * 60 * 24)
     def _archive_entry_year(self, category):
@@ -249,80 +244,75 @@ class ListContentType(EllaCoreView):
         else:
             page_no = 1
 
-        # if we are not on the first page, display a different template
-        category_title_page = page_no == 1 and not year
-
-        # Homepage is considered when category is empty (~ no slug) and no
-        # filtering is used.
-        # 
-        # Homepage behaves differently on 404 with DEBUG mode to let user 
-        # know everything is fine instead of 404. Also, indication of 
-        # homepage is added to context, it's usually good to know, if your
-        # on homepage, right? :)
-        #
-        # @see: _handle_404()
-        is_homepage = not bool(category) and page_no == 1 and year is None
-
-        kwa = {}
-        if day:
-            try:
-                start_day = datetime(int(year), int(month), int(day))
-                kwa['date_range'] = (start_day, start_day + timedelta(seconds=24 * 3600 - 1))
-            except (ValueError, OverflowError):
-                return self._handle_404(_('Invalid day value %r') % day,
-                    is_homepage)
-        elif month:
-            try:
-                start_day = datetime(int(year), int(month), 1)
-                kwa['date_range'] = (start_day, (start_day + timedelta(days=32)).replace(day=1) - timedelta(seconds=1))
-            except (ValueError, OverflowError):
-                return self._handle_404(_('Invalid month value %r') % month,
-                    is_homepage)
-        elif year:
-            try:
-                start_day = datetime(int(year), 1, 1)
-                kwa['date_range'] = (start_day, (start_day + timedelta(days=370)).replace(day=1) - timedelta(seconds=1))
-            except (ValueError, OverflowError):
-                return self._handle_404(_('Invalid year value %r') % month,
-                    is_homepage)
-
         try:
             cat = Category.objects.get_by_tree_path(category)
         except Category.DoesNotExist:
-            return self._handle_404(_('Category with tree path %(path)r does not '
-                'exist on site %(site)s') %
-                    {'path': category, 'site': settings.SITE_ID}, is_homepage)
+            # Homepage behaves differently on 404 with DEBUG mode to let user 
+            # know everything is fine instead of 404.
+            if settings.DEBUG is True and not category and not year:
+                raise self.EmptyHomepageException()
 
-        kwa['category'] = cat
+            raise Http404(_('Category with tree path %(path)r does not exist on site %(site)s') %
+                    {'path': category, 'site': settings.SITE_ID})
+
+        ella_data = cat.app_data.get('ella', {})
+
+        # if we are not on the first page, display a different template
+        category_title_page = page_no == 1 and not year
+
+        kwa = {'category': cat}
         if category:
             kwa['children'] = ListingHandler.ALL
 
         if 'using' in request.GET:
             kwa['source'] = request.GET['using']
         else:
-            kwa['source'] = cat.app_data.get('ella', {}).get('listing_handler', 'default')
+            kwa['source'] = ella_data.get('listing_handler', 'default')
 
-        paginate_by = cat.app_data.get('ella', {}).get('paginate_by', core_settings.CATEGORY_LISTINGS_PAGINATE_BY)
+        if day:
+            try:
+                start_day = datetime(int(year), int(month), int(day))
+                kwa['date_range'] = (start_day, start_day + timedelta(seconds=24 * 3600 - 1))
+            except (ValueError, OverflowError):
+                raise Http404(_('Invalid day value %r') % day)
+        elif month:
+            try:
+                start_day = datetime(int(year), int(month), 1)
+                kwa['date_range'] = (start_day, (start_day + timedelta(days=32)).replace(day=1) - timedelta(seconds=1))
+            except (ValueError, OverflowError):
+                raise Http404(_('Invalid month value %r') % month)
+        elif year:
+            try:
+                start_day = datetime(int(year), 1, 1)
+                kwa['date_range'] = (start_day, (start_day + timedelta(days=370)).replace(day=1) - timedelta(seconds=1))
+            except (ValueError, OverflowError):
+                raise Http404(_('Invalid year value %r') % year)
+
+        # basic context
+        context = {
+            'category' : cat,
+            'is_homepage': category_title_page and not category,
+            'is_title_page': category_title_page,
+            'archive_entry_year' : lambda: self._archive_entry_year(cat),
+        }
+
+        # add pagination
+        paginate_by = ella_data.get('paginate_by', core_settings.CATEGORY_LISTINGS_PAGINATE_BY)
         qset = Listing.objects.get_queryset_wrapper(**kwa)
         paginator = Paginator(qset, paginate_by)
 
         if page_no > paginator.num_pages or page_no < 1:
-            return self._handle_404(_('Invalid page number %r') % page_no,
-                is_homepage)
+            raise Http404(_('Invalid page number %r') % page_no)
 
         page = paginator.page(page_no)
-        listings = page.object_list
 
-        context = {
-            'category' : cat,
-            'is_homepage': is_homepage,
-            'is_title_page': category_title_page,
+        context.update({
             'is_paginated': paginator.num_pages > 1,
             'results_per_page': paginate_by,
             'page': page,
-            'listings' : listings,
-            'archive_entry_year' : lambda: self._archive_entry_year(cat),
-        }
+            'listings' : page.object_list,
+        })
+
         return context
 
 # backwards compatibility
