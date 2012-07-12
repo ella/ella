@@ -52,6 +52,6 @@ RSS_DESCRIPTION_BOX_TYPE = 'rss_description'
 ECACHE_INFO = 'ella.core.middleware.ECACHE_INFO'
 
 # templates
-ARCHIVE_TEMPLATE = True
+ARCHIVE_TEMPLATE = 'listing.html'
 
 core_settings = Settings('ella.core.conf', '')

@@ -203,7 +203,6 @@ class ListContentType(EllaCoreView):
 
     :raises Http404: if the specified category or content_type does not exist or if the given date is malformed.
     """
-    template_name = 'listing.html'
     empty_homepage_template_name = 'debug/empty_homepage.html'
 
     class EmptyHomepageException(Exception): pass
@@ -213,8 +212,9 @@ class ListContentType(EllaCoreView):
             context = self.get_context(request, **kwargs)
             cat = context['category']
             template_name = cat.template
-            if cat.app_data.get('ella', {}).get('archive_template', core_settings.ARCHIVE_TEMPLATE) and not context.get('is_title_page'):
-                template_name = self.template_name
+            archive_template = cat.app_data.get('ella', {}).get('archive_template', core_settings.ARCHIVE_TEMPLATE)
+            if archive_template and not context.get('is_title_page'):
+                template_name = archive_template
             object_rendering.send(sender=Category, request=request, category=cat, publishable=None)
             object_rendered.send(sender=Category, request=request, category=cat, publishable=None)
             return self.render(request, context, self.get_templates(context, template_name))
