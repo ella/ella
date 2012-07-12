@@ -238,12 +238,6 @@ class ListContentType(EllaCoreView):
         return year
 
     def get_context(self, request, category='', year=None, month=None, day=None):
-        # pagination
-        if 'p' in request.GET and request.GET['p'].isdigit():
-            page_no = int(request.GET['p'])
-        else:
-            page_no = 1
-
         try:
             cat = Category.objects.get_by_tree_path(category)
         except Category.DoesNotExist:
@@ -257,8 +251,18 @@ class ListContentType(EllaCoreView):
 
         ella_data = cat.app_data.get('ella', {})
 
+        # pagination
+        page_no = 1
+        if 'p' in request.GET and request.GET['p'].isdigit():
+            page_no = int(request.GET['p'])
+
         # if we are not on the first page, display a different template
         category_title_page = page_no == 1 and not year
+
+        # no listings wanted on the category title page, compensate for it
+        no_home_listings = ella_data.get('no_home_listings') or core_settings.CATEGORY_NO_HOME_LISTINGS
+        if no_home_listings:
+            page_no -= 1
 
         kwa = {'category': cat}
         if category:
@@ -295,6 +299,10 @@ class ListContentType(EllaCoreView):
             'is_title_page': category_title_page,
             'archive_entry_year' : lambda: self._archive_entry_year(cat),
         }
+
+        # no listings wanted on title page
+        if category_title_page and no_home_listings:
+            return context
 
         # add pagination
         paginate_by = ella_data.get('paginate_by', core_settings.CATEGORY_LISTINGS_PAGINATE_BY)
