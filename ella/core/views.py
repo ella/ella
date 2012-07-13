@@ -259,7 +259,7 @@ class ListContentType(EllaCoreView):
             page_no = int(request.GET['p'])
 
         # if we are not on the first page, display a different template
-        category_title_page = page_no is None and not year
+        category_title_page = (page_no is None or (not no_home_listings and page_no == 1)) and not year
 
         if page_no is None:
             page_no = 1
