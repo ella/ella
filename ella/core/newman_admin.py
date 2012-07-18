@@ -220,7 +220,7 @@ class PublishableAdmin(newman.NewmanModelAdmin):
 
     def photo_thumbnail(self, object):
         if object.photo:
-            return mark_safe(object.photo.thumb())
+            return mark_safe(options.thumb_html(object.photo))
         else:
             return mark_safe('<span class="form-error-msg">%s</span>' % ugettext('No main photo!'))
     photo_thumbnail.allow_tags = True

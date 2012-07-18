@@ -1,4 +1,5 @@
 from django.utils.translation import ugettext_lazy as _, ugettext
+from django.conf import settings
 from django.conf.urls.defaults import patterns, url
 from django.contrib.admin import helpers
 from django.shortcuts import render_to_response
@@ -11,6 +12,7 @@ from django.utils.functional import curry
 from django.utils.safestring import mark_safe
 from django import forms
 
+from ella.core.cache.utils import get_cached_object
 from ella.photos.models import FormatedPhoto, Format, Photo
 
 import newman
@@ -110,10 +112,25 @@ class PhotoAdmin(newman.NewmanModelAdmin):
         (_("Metadata"), {'fields': ('authors', 'source', 'image_file')}),
     )
 
-    def thumb(self):
+
+    def thumb(self, photo):
         """
         Generates html and thumbnails for admin site.
         """
+        from newman import options
+        thumb_format = options.get_thumb_format()
+
+        if not thumb_format:
+            return ''
+
+        thumb_info = photo.get_formated_photo(thumb_format)
+
+        return mark_safe("""
+            <a href="%s" class="js-nohashadr thickbox" title="%s" target="_blank">
+                <img src="%s" alt="Thumbnail %s" />
+            </a>""" % (photo.image.url, photo.title, thumb_info['url'], photo.title))
+
+
         thumb_url = self.thumb_url()
         if not thumb_url:
             return mark_safe("""<strong>%s</strong>""" % ugettext('Thumbnail not available'))

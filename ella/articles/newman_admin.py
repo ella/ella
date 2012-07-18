@@ -8,8 +8,8 @@ import newman
 
 class ArticleAdmin(PublishableAdmin):
     fieldsets = (
-        (_("Article heading"), {'fields': ('title', 'upper_title',)}),
-        (_("Updated, slug"), {'fields': ('updated', 'slug',), 'classes': ('collapsed',)}),
+        (_("Article heading"), {'fields': ('title', )}),
+        (_("Updated, slug"), {'fields': ('last_updated', 'slug',), 'classes': ('collapsed',)}),
         (_("Metadata"), {'fields': ('photo', 'category', 'authors', 'source')}),
         (_("Dates"), {'fields': (('publish_from', 'publish_to'), 'static')}),
         (_("Content"), {'fields': ('description', 'content')}),
