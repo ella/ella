@@ -33,8 +33,8 @@ It is composed from several modules:
 News
 ****
 
-Currently, we are getting ready to launch the **3.0.0 version** which features a
-**major cleanup** of the code a **removal of unneeded dependencies**.
+Currently, we released the **3.x version** which features a **major cleanup** 
+of the code a **removal of unneeded dependencies**.
 
 More news are on the way as we are going to make a nicely-tailored admin 
 specifically made for the need of news writers and editors. 
