@@ -1,8 +1,7 @@
-from datetime import datetime
-
 from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _, ugettext
+from django.utils import timezone
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import slugify
 from django.core.urlresolvers import reverse
@@ -203,7 +202,7 @@ class Publishable(models.Model):
 
     def is_published(self):
         "Return True if the Publishable is currently active."
-        now = datetime.now()
+        now = timezone.now()
         return self.published and now > self.publish_from and \
             (self.publish_to is None or now < self.publish_to)
 
