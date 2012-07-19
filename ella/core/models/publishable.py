@@ -1,4 +1,10 @@
-from datetime import datetime
+try:
+    # try import offset-aware datetime from Django >= 1.4
+    from django.utils.timezone import now as datetime_now
+except ImportError:
+    # backward compatibility with Django < 1.4 (offset-naive datetimes)
+    from datetime import datetime
+    datetime_now = datetime.now
 
 from django.db import models
 from django.conf import settings
@@ -203,7 +209,7 @@ class Publishable(models.Model):
 
     def is_published(self):
         "Return True if the Publishable is currently active."
-        now = datetime.now()
+        now = datetime_now()
         return self.published and now > self.publish_from and \
             (self.publish_to is None or now < self.publish_to)
 
