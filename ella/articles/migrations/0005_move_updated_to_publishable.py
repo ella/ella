@@ -9,6 +9,10 @@ class Migration(DataMigration):
         ('core', '0008_add_last_updated'),
     ]
 
+    needed_by = [
+        ('core', '0009_auto__chg_field_publishable_last_updated'),
+    ]
+
     def forwards(self, orm):
         "Write your forwards methods here."
         for a in orm.Article.objects.all():

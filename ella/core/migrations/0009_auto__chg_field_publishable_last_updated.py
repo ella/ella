@@ -5,9 +5,6 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    depends_on = [
-        ('articles', '0005_move_updated_to_publishable'),
-    ]
 
     def forwards(self, orm):
         # Changing field 'Publishable.last_updated'
