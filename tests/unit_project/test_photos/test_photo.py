@@ -14,6 +14,7 @@ from ella.photos.models import Photo, Format, FormatedPhoto
 
 from unit_project.test_photos.fixtures import create_photo_formats
 
+
 class TestPhoto(DatabaseTestCase):
 
     def setUp(self):
@@ -34,10 +35,10 @@ class TestPhoto(DatabaseTestCase):
         f.close()
 
         self.photo = Photo(
-            title = u"Example 中文 photo",
-            slug = u"example-photo",
-            height = 200,
-            width = 100,
+            title=u"Example 中文 photo",
+            slug=u"example-photo",
+            height=200,
+            width=100,
         )
 
         self.photo.image.save("bazaaah", file)
@@ -58,25 +59,23 @@ class TestPhoto(DatabaseTestCase):
 
         fp = FormatedPhoto(photo=self.photo, format=format)
         fp.generate(False)
-        self.assert_equals((0,0,0,0), (fp.crop_left, fp.crop_top, fp.crop_width, fp.crop_height))
-
-
+        self.assert_equals((0, 0, 0, 0), (fp.crop_left, fp.crop_top, fp.crop_width, fp.crop_height))
 
     def test_thumbnail_html_retrieval_success(self):
         #TODO: This should be in adimn, not models
         expected_html = u'<a href="%(full)s" class="js-nohashadr thickbox" title="%(title)s" target="_blank"><img src="%(thumb)s" alt="%(name)s" /></a>' % {
-            'full' : "%(media)sphotos/%(date)s/%(name)s.jpg" % {
-                "name" : u'%s-example-photo' % self.photo.pk,
-                "media" : settings.MEDIA_URL,
-                "date" : strftime("%Y/%m/%d"),
+            'full': "%(media)sphotos/%(date)s/%(name)s.jpg" % {
+                "name": u'%s-example-photo' % self.photo.pk,
+                "media": settings.MEDIA_URL,
+                "date": strftime("%Y/%m/%d"),
             },
-            'thumb' : "%(media)sphotos/%(date)s/thumb-%(name)s.jpg" % {
-                "name" : u'%s-example-photo' % self.photo.pk,
-                "media" : settings.MEDIA_URL,
-                "date" : strftime("%Y/%m/%d"),
+            'thumb': "%(media)sphotos/%(date)s/thumb-%(name)s.jpg" % {
+                "name": u'%s-example-photo' % self.photo.pk,
+                "media": settings.MEDIA_URL,
+                "date": strftime("%Y/%m/%d"),
             },
-            "title" : u"Example 中文 photo",
-            'name' : u"Thumbnail Example 中文 photo",
+            "title": u"Example 中文 photo",
+            'name': u"Thumbnail Example 中文 photo",
         }
         self.assert_equals(expected_html, self.photo.thumb())
 
@@ -134,6 +133,17 @@ class TestPhoto(DatabaseTestCase):
 
     def test_retrieving_ratio(self):
         self.assert_equals(2, self.photo.ratio())
+
+    def test_formattedphoto_cleared_when_format_changed(self):
+        self.photo.get_formated_photo("basic")
+        self.assert_equals(1, len(self.photo.formatedphoto_set.all()))
+        self.assert_equals(1, len(self.basic_format.formatedphoto_set.all()))
+        self.basic_format.nocrop = True
+        self.basic_format.save()
+        self.assert_true(self.basic_format.nocrop, True)
+
+        self.assert_equals(0, len(self.photo.formatedphoto_set.all()))
+        self.assert_equals(0, len(self.basic_format.formatedphoto_set.all()))
 
     def tearDown(self):
         os.remove(self.image_file_name)

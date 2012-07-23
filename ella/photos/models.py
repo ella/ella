@@ -11,6 +11,7 @@ from django.utils.safestring import mark_safe
 from django.core.files.uploadedfile import UploadedFile
 from django.core.files.base import ContentFile
 from django.conf import settings
+from django.db.models import signals
 from django.template.defaultfilters import slugify
 
 from ella.core.models.main import Author, Source
@@ -23,22 +24,24 @@ from formatter import Formatter, detect_img_type
 
 __all__ = ("Format", "FormatedPhoto", "Photo")
 
+
 class PhotoBox(Box):
     def get_context(self):
         "Updates box context with photo-specific variables."
         cont = super(PhotoBox, self).get_context()
         cont.update({
-                'title' : self.params.get('title', self.obj.title),
-                'alt' : self.params.get('alt', ''),
-                'description' : self.params.get('description', self.obj.description),
-                'show_title' : self.params.get('show_title', ''),
-                'show_description' : self.params.get('show_description', ''),
-                'show_authors' : self.params.get('show_authors', ''),
-                'show_detail' : self.params.get('show_detail', ''),
-                'show_source' : self.params.get('show_source', ''),###
+                'title': self.params.get('title', self.obj.title),
+                'alt': self.params.get('alt', ''),
+                'description': self.params.get('description', self.obj.description),
+                'show_title': self.params.get('show_title', ''),
+                'show_description': self.params.get('show_description', ''),
+                'show_authors': self.params.get('show_authors', ''),
+                'show_detail': self.params.get('show_detail', ''),
+                'show_source': self.params.get('show_source', ''),
                 'link_url': self.params.get('link_url', ''),
             })
         return cont
+
 
 class Photo(models.Model):
     "Represents original (unformated) photo."
@@ -46,7 +49,7 @@ class Photo(models.Model):
     title = models.CharField(_('Title'), max_length=200)
     description = models.TextField(_('Description'), blank=True)
     slug = models.SlugField(_('Slug'), max_length=255)
-    image = models.ImageField(_('Image'), upload_to=photos_settings.UPLOAD_TO, height_field='height', width_field='width') # save it to YYYY/MM/DD structure
+    image = models.ImageField(_('Image'), upload_to=photos_settings.UPLOAD_TO, height_field='height', width_field='width')  # save it to YYYY/MM/DD structure
     width = models.PositiveIntegerField(editable=False)
     height = models.PositiveIntegerField(editable=False)
 
@@ -57,7 +60,7 @@ class Photo(models.Model):
     important_right = models.PositiveIntegerField(null=True, blank=True)
 
     # Authors and Sources
-    authors = models.ManyToManyField(Author, verbose_name=_('Authors') , related_name='photo_set')
+    authors = models.ManyToManyField(Author, verbose_name=_('Authors'), related_name='photo_set')
     source = models.ForeignKey(Source, blank=True, null=True, verbose_name=_('Source'))
 
     created = models.DateTimeField(default=datetime.now, editable=False)
@@ -141,12 +144,12 @@ class Photo(models.Model):
             force_insert, force_update = False, True
             image_changed = False
         else:
-            old = Photo.objects.get(pk = self.pk)
+            old = Photo.objects.get(pk=self.pk)
             image_changed = old.image != self.image
         # rename image by slug
         imageType = detect_img_type(self.image.path)
         if imageType is not None:
-            self.image = file_rename(self.image.name.encode('utf-8'), self.slug, photos_settings.TYPE_EXTENSION[ imageType ])
+            self.image = file_rename(self.image.name.encode('utf-8'), self.slug, photos_settings.TYPE_EXTENSION[imageType])
         # delete formatedphotos if new image was uploaded
         if image_changed:
             super(Photo, self).save(force_insert=force_insert, force_update=force_update, **kwargs)
@@ -218,11 +221,11 @@ class Format(models.Model):
         Return fake FormatedPhoto object to be used in templates when an error occurs in image generation.
         """
         out = {
-            'width' : self.max_width,
-            'height' : self.max_height,
-            'filename' : 'img/empty/%s.png' % (self.name),
-            'format' : self,
-            'url' : settings.STATIC_URL + photos_settings.EMPTY_IMAGE_SITE_PREFIX + 'img/empty/%s.png' % (self.name),
+            'width': self.max_width,
+            'height': self.max_height,
+            'filename': 'img/empty/%s.png' % (self.name),
+            'format': self,
+            'url': settings.STATIC_URL + photos_settings.EMPTY_IMAGE_SITE_PREFIX + 'img/empty/%s.png' % (self.name),
         }
         return out
 
@@ -243,7 +246,7 @@ class FormatedPhoto(models.Model):
     "Specific photo of specific format."
     photo = models.ForeignKey(Photo)
     format = models.ForeignKey(Format)
-    image = models.ImageField(upload_to=photos_settings.UPLOAD_TO, height_field='height', width_field='width', max_length=300) # save it to YYYY/MM/DD structure
+    image = models.ImageField(upload_to=photos_settings.UPLOAD_TO, height_field='height', width_field='width', max_length=300)  # save it to YYYY/MM/DD structure
     crop_left = models.PositiveIntegerField()
     crop_top = models.PositiveIntegerField()
     crop_width = models.PositiveIntegerField()
@@ -276,7 +279,6 @@ class FormatedPhoto(models.Model):
         except (IOError, SystemError):
             return self.format.get_blank_img()['url']
 
-
     def generate(self, save=True):
         "Generates photo file in current format"
         crop_box = None
@@ -295,7 +297,7 @@ class FormatedPhoto(models.Model):
 
         # set crop_box to (0,0,0,0) if photo not cropped
         if not crop_box:
-            crop_box = 0,0,0,0
+            crop_box = 0, 0, 0, 0
 
         self.crop_left, self.crop_top, right, bottom = crop_box
         self.crop_width = right - self.crop_left
@@ -337,7 +339,7 @@ class FormatedPhoto(models.Model):
             source_file = path.split(self.photo.image.name)
         else:
             source_file = path.split(self.photo.image.path)
-        return path.join(source_file[0],  str (self.format.id) + '-' + source_file[1])
+        return path.join(source_file[0], str(self.format.id) + '-' + source_file[1])
 
     def __unicode__(self):
         return u"%s - %s" % (self.photo, self.format)
@@ -345,5 +347,16 @@ class FormatedPhoto(models.Model):
     class Meta:
         verbose_name = _('Formated photo')
         verbose_name_plural = _('Formated photos')
-        unique_together = (('photo','format'),)
+        unique_together = (('photo', 'format'),)
 
+
+def remove_formatted_photos(sender, **kwargs):
+    '''
+    Remove formatted photos if format save (becouse of possible changes)
+    '''
+    if not kwargs.get('created', False) and not kwargs.get('raw', False):
+        instance = kwargs['instance']
+        instance.formatedphoto_set.all().delete()
+
+
+signals.post_save.connect(remove_formatted_photos, sender=Format)
