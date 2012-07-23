@@ -135,7 +135,9 @@ class TestPhoto(DatabaseTestCase):
         self.assert_equals(2, self.photo.ratio())
 
     def test_formattedphoto_cleared_when_format_changed(self):
-        self.photo.get_formated_photo("basic")
+        f_photo = self.photo.get_formated_photo("basic")
+        image_path_f_photo = os.path.join(settings.MEDIA_ROOT, f_photo.file(relative=True))
+        self.assert_true(os.path.exists(image_path_f_photo))
         self.assert_equals(1, len(self.photo.formatedphoto_set.all()))
         self.assert_equals(1, len(self.basic_format.formatedphoto_set.all()))
         self.basic_format.nocrop = True
@@ -144,6 +146,7 @@ class TestPhoto(DatabaseTestCase):
 
         self.assert_equals(0, len(self.photo.formatedphoto_set.all()))
         self.assert_equals(0, len(self.basic_format.formatedphoto_set.all()))
+        self.assert_false(os.path.exists(image_path_f_photo))
 
     def tearDown(self):
         os.remove(self.image_file_name)

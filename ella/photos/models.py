@@ -356,7 +356,8 @@ def remove_formatted_photos(sender, **kwargs):
     '''
     if not kwargs.get('created', False) and not kwargs.get('raw', False):
         instance = kwargs['instance']
-        instance.formatedphoto_set.all().delete()
+        for f_photo in instance.formatedphoto_set.all():
+            f_photo.delete()
 
 
 signals.post_save.connect(remove_formatted_photos, sender=Format)
