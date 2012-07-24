@@ -1,16 +1,28 @@
 from setuptools import setup, find_packages
 import ella
 
+install_requires = [
+    'setuptools>=0.6b1',
+    'Django>=1.3.1',
+    'south>=0.7',
+    'jsonfield',
+]
+
+test_requires = [
+    'nose',
+    'coverage',
+    'feedparser',
+    'redis',
+]
+
+with open('README.rst') as file:
+    long_description = file.read()
+
 setup(
     name='ella',
     version=ella.__versionstr__,
     description='Ella - Django powered CMS',
-    long_description='\n'.join((
-        'Ella Django CMS Project',
-        '',
-        'content management system written in Django',
-        '',
-    )),
+    long_description=long_description,
     author='Ella Development Team',
     author_email='dev@ella-cms.com',
     license='BSD',
@@ -36,12 +48,8 @@ setup(
         "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
-    install_requires=[
-        'setuptools>=0.6b1',
-        'Django>=1.3.1',
-        'south>=0.7',
-        'jsonfield'
-    ],
-    test_suite='test_ella.run_tests.run_all'
+    install_requires=install_requires,
 
+    test_suite='test_ella.run_tests.run_all',
+    test_requires=test_requires,
 )
