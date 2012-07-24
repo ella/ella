@@ -8,10 +8,10 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         # Adding field 'Category.app_data'
-        db.add_column('core_category', 'app_data', self.gf('jsonfield.fields.JSONField')(default='{}', blank=True), keep_default=False)
+        db.add_column('core_category', 'app_data', self.gf('jsonfield.fields.JSONField')(default='{}', blank=True), keep_default=True)
 
         # Adding field 'Publishable.app_data'
-        db.add_column('core_publishable', 'app_data', self.gf('jsonfield.fields.JSONField')(default='{}', blank=True), keep_default=False)
+        db.add_column('core_publishable', 'app_data', self.gf('jsonfield.fields.JSONField')(default='{}', blank=True), keep_default=True)
 
 
     def backwards(self, orm):
