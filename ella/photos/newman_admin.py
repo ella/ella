@@ -15,11 +15,11 @@ from django import forms
 from ella.core.cache.utils import get_cached_object
 from ella.photos.models import FormatedPhoto, Format, Photo
 
-import newman
-from newman.utils import JsonResponse, JsonResponseError
-from newman.conf import newman_settings
-from newman.filterspecs import CustomFilterSpec
-from newman.licenses.models import License
+import ella_newman as newman
+from ella_newman.utils import JsonResponse, JsonResponseError
+from ella_newman.conf import newman_settings
+from ella_newman.filterspecs import CustomFilterSpec
+from ella_newman.licenses.models import License
 
 # Flash image uploader / editor
 CSS_UPLOADIFY_LIB = 'css/uploadify.css'
@@ -117,7 +117,7 @@ class PhotoAdmin(newman.NewmanModelAdmin):
         """
         Generates html and thumbnails for admin site.
         """
-        from newman import options
+        from ella_newman import options
         thumb_format = options.get_thumb_format()
 
         if not thumb_format:

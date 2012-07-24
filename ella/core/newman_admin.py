@@ -15,9 +15,9 @@ from django.conf import settings
 from ella.core.models import Author, Source, Category, Listing, Related, Publishable
 from ella.core.conf import core_settings
 
-import newman
-from newman import options, fields
-from newman.filterspecs import CustomFilterSpec, NewmanSiteFilter
+import ella_newman as newman
+from ella_newman import options, fields
+from ella_newman.filterspecs import CustomFilterSpec, NewmanSiteFilter
 
 class ListingForm(modelforms.ModelForm):
     def clean(self):

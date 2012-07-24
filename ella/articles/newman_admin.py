@@ -3,7 +3,7 @@ from django.utils.translation import ugettext_lazy as _
 from ella.core.newman_admin import ListingInlineAdmin, PublishableAdmin,\
     RelatedInlineAdmin
 from ella.articles.models import Article
-import newman
+import ella_newman
 
 
 class ArticleAdmin(PublishableAdmin):
@@ -19,5 +19,5 @@ class ArticleAdmin(PublishableAdmin):
     rich_text_fields = {'small': ('description',), None: ('content',)}
 
 
-newman.site.register(Article, ArticleAdmin)
+ella_newman.site.register(Article, ArticleAdmin)
 

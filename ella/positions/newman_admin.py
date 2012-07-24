@@ -9,11 +9,11 @@ from django.shortcuts import render_to_response
 from django.contrib.admin import helpers
 from django.contrib.contenttypes.models import ContentType
 
-import newman
+import ella_newman as newman
 
+from ella_newman.utils import JsonResponse
 from ella.positions.models import Position
 from ella.core.models import Category
-from newman.utils import JsonResponse
 from django.forms.models import ModelForm
 from django.forms.util import ValidationError
 
