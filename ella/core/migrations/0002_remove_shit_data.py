@@ -13,10 +13,11 @@ class Migration(DataMigration):
         if not db.dry_run:
             for pl in orm['core.Placement'].objects.all():
                 pl.listing_set.update(publishable=pl.publishable)
-                pl.publishable.publish_from = pl.publish_from
-                pl.publishable.static = pl.static
-                pl.publishable.publish_to = pl.publish_to
-                pl.save(force_update=True)
+                publishable = pl.publishable
+                publishable.publish_from = pl.publish_from
+                publishable.static = pl.static
+                publishable.publish_to = pl.publish_to
+                publishable.save(force_update=True)
 
     def backwards(self, orm):
         "Write your backwards methods here."
