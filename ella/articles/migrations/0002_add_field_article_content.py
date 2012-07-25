@@ -10,13 +10,22 @@ class Migration(SchemaMigration):
         
         # Adding field 'Article.content'
         db.add_column('articles_article', 'content', self.gf('django.db.models.fields.TextField')(default=''), keep_default=False)
+
         if not db.dry_run:
+            source_text_ct = orm['contenttypes.ContentType'].objects.filter(app_label='djangomarkup', model='sourcetext')
+            article_ct = orm['contenttypes.ContentType'].objects.get(app_label='articles', model='article')
+            if source_text_ct.count():
+                source_text_ct = source_text_ct[0]
+            else:
+                source_text_ct = None
             for ac in orm['articles.ArticleContents'].objects.all():
                 a = ac.article
                 if a.content:
                     a.content += '\n\n'
                 a.content += ac.content
                 a.save()
+                if source_text_ct:
+                    orm['djangomarkup.SourceText'].objects.filter(content_type=source_text_ct, object_id=ac.id, field='content').update(content_type=article_ct, object_id=a.id)
 
 
     def backwards(self, orm):
@@ -148,7 +157,22 @@ class Migration(SchemaMigration):
             'domain': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '50'})
-        }
+        },
+        'djangomarkup.textprocessor': {
+            'Meta': {'object_name': 'TextProcessor'},
+            'function': ('django.db.models.fields.CharField', [], {'max_length':'96', 'unique':'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length':'96', 'blank':'True'}),
+            'processor_options': ('django.db.models.fields.CharField', [], {'max_length':'255', 'blank':'True'}),
+        },
+        'djangomarkup.sourcetext': {
+            'Meta': {'object_name': 'SourceText', 'unique_together': "(('content_type', 'object_id', 'field'),)",},
+            'processor': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['djangomarkup.TextProcessor']"}),
+            'content_type' : ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']"}),
+            'object_id' : ('django.db.models.fields.PositiveIntegerField', [], {}),
+            'field' : ('django.db.models.fields.CharField', [], {'max_length': "64"}),
+            'modification_time' : ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True'}),
+            'content' : ('django.db.models.fields.TextField', [], {}),
+        },
     }
 
     complete_apps = ['articles']
