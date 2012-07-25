@@ -26,7 +26,7 @@ class FormatedPhotoForm(forms.BaseForm):
             ((data['crop_top'] + data['crop_height']) > photo.height)
         ):
             # raise forms.ValidationError, ugettext("The specified crop coordinates do not fit into the source photo.")
-            raise ValidationError, ugettext("The specified crop coordinates do not fit into the source photo.")
+            raise ValidationError(ugettext("The specified crop coordinates do not fit into the source photo."))
         return data
 
 
@@ -36,30 +36,8 @@ class FormatOptions(admin.ModelAdmin):
     search_fields = ('name',)
 
 
-class CropAreaWidget(forms.TextInput):
-    class Media:
-        JS_INTERFACE = 'js/interface.js'
-        JS_CROP = 'js/crop.js'
-        CSS_CROP = 'css/crop.css'
-        js = (
-            settings.ADMIN_MEDIA_PREFIX + JS_INTERFACE,
-            settings.ADMIN_MEDIA_PREFIX + JS_CROP,
-        )
-        css = {
-            'screen': (settings.ADMIN_MEDIA_PREFIX + CSS_CROP,),
-        }
-
-    def __init__(self, attrs={}):
-        super(CropAreaWidget, self).__init__(attrs={'class': 'crop'})
-
-
 class FormatedPhotoInlineOptions(admin.TabularInline):
     model = FormatedPhoto
-
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name in ['crop_width', 'crop_height', 'crop_left', 'crop_top']:
-            kwargs['widget'] = CropAreaWidget
-        return super(FormatedPhotoInlineOptions, self).formfield_for_dbfield(db_field, **kwargs)
 
 
 class PhotoOptions(admin.ModelAdmin):
