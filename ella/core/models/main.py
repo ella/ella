@@ -92,7 +92,7 @@ class Category(models.Model):
     site = SiteForeignKey()
 
     # generic JSON field to store app cpecific data
-    app_data = JSONField(_('Custom meta data'), default='{}', blank=True,
+    app_data = JSONField(_('Custom meta data'), default='{}',
         help_text=_('If you need to define custom data for '
         'category objects, you can use this field to do so.'))
 

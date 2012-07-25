@@ -76,7 +76,7 @@ class Publishable(models.Model):
     last_updated = models.DateTimeField(_('Last updated'), blank=True)
 
     # generic JSON field to store app cpecific data
-    app_data = JSONField(default='{}', blank=True, editable=False)
+    app_data = JSONField(default='{}', editable=False)
 
     # has the content_published signal been sent for this instance?
     announced = models.BooleanField(help_text='Publish signal sent', default=False, editable=False)
