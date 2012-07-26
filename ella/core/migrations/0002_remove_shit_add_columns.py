@@ -1,8 +1,6 @@
 # encoding: utf-8
-import datetime
 from south.db import db
 from south.v2 import SchemaMigration
-from django.db import models
 
 class Migration(SchemaMigration):
     depends_on = (
@@ -19,20 +17,7 @@ class Migration(SchemaMigration):
         # Adding field 'Publishable.static'
         db.add_column('core_publishable', 'static', self.gf('django.db.models.fields.BooleanField')(default=False), keep_default=False)
         # Adding field 'Listing.publishable'
-        db.add_column('core_listing', 'publishable_id', models.IntegerField(null=True))
-
-        if not db.dry_run:
-            for pl in orm['core.Placement'].objects.all():
-                pl.listing_set.update(publishable=pl.publishable)
-                pl.publishable.publish_from = pl.publish_from
-                pl.publishable.static = pl.static
-                pl.publishable.publish_to = pl.publish_to
-
-        db.alter_column('core_listing', 'publishable_id', models.ForeignKey(orm['core.Publishable'], null=False))
-
-        db.delete_column('core_listing', 'placement_id')
-        db.delete_table('core_placement')
-        db.delete_table('core_hitcount')
+        db.add_column('core_listing', 'publishable', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.Publishable'], default=None, null=True), keep_default=False)
 
 
     def backwards(self, orm):
