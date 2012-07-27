@@ -247,6 +247,19 @@ class Format(models.Model):
         """Return photo's width to height ratio"""
         return float(self.max_width) / self.max_height
 
+    def save(self, **kwargs):
+        """Overrides models.Model.save.
+
+        - Delete formatted photos if format save and not now created
+          (becouse of possible changes)
+        """
+
+        if self.id:
+            for f_photo in self.formatedphoto_set.all():
+                f_photo.delete()
+            kwargs.update({'force_update': True})
+        super(Format, self).save(**kwargs)
+
 
 class FormatedPhotoManager(models.Manager):
     def get_photo_in_format(self, photo, format):
