@@ -12,6 +12,7 @@ from ella.photos.conf import photos_settings
 
 from test_ella.test_photos.fixtures import create_photo_formats, create_photo
 
+
 class TestPhoto(TestCase):
 
     def setUp(self):
@@ -76,7 +77,7 @@ class TestPhoto(TestCase):
 
         fp = FormatedPhoto(photo=self.photo, format=format)
         fp.generate(False)
-        tools.assert_equals((0,0,0,0), (fp.crop_left, fp.crop_top, fp.crop_width, fp.crop_height))
+        tools.assert_equals((0, 0, 0, 0), (fp.crop_left, fp.crop_top, fp.crop_width, fp.crop_height))
 
     def test_formated_filename_can_be_overridden(self):
         photos_settings.FORMATED_PHOTO_FILENAME = lambda fp: 'XXX.jpg'
@@ -111,6 +112,12 @@ class TestPhoto(TestCase):
 
         tools.assert_equals(0, len(self.photo.formatedphoto_set.all()))
 
+    def test_formattedphoto_cleared_when_format_changed(self):
+        FormatedPhoto.objects.get_photo_in_format(self.photo, self.basic_format)
+        tools.assert_equals(1, len(self.basic_format.formatedphoto_set.all()))
+        self.basic_format.nocrop = True
+        self.basic_format.save()
+        tools.assert_equals(0, len(self.basic_format.formatedphoto_set.all()))
+
     def test_retrieving_ratio(self):
         tools.assert_equals(2, self.photo.ratio())
-
