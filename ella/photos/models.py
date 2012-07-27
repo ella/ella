@@ -5,7 +5,7 @@ from os import path
 from cStringIO import StringIO
 import os.path
 
-from django.db import models, IntegrityError
+from django.db import models
 from django.db.models import signals
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_unicode, smart_str
@@ -40,22 +40,24 @@ if hasattr(settings, 'PHOTOS_REDIS'):
     else:
         redis = Redis(**getattr(settings, 'PHOTOS_REDIS'))
 
+
 class PhotoBox(Box):
     def get_context(self):
         "Updates box context with photo-specific variables."
         cont = super(PhotoBox, self).get_context()
         cont.update({
-                'title' : self.params.get('title', self.obj.title),
-                'alt' : self.params.get('alt', ''),
-                'description' : self.params.get('description', self.obj.description),
-                'show_title' : self.params.get('show_title', ''),
-                'show_description' : self.params.get('show_description', ''),
-                'show_authors' : self.params.get('show_authors', ''),
-                'show_detail' : self.params.get('show_detail', ''),
-                'show_source' : self.params.get('show_source', ''), ###
+                'title': self.params.get('title', self.obj.title),
+                'alt': self.params.get('alt', ''),
+                'description': self.params.get('description', self.obj.description),
+                'show_title': self.params.get('show_title', ''),
+                'show_description': self.params.get('show_description', ''),
+                'show_authors': self.params.get('show_authors', ''),
+                'show_detail': self.params.get('show_detail', ''),
+                'show_source': self.params.get('show_source', ''),  ###
                 'link_url': self.params.get('link_url', ''),
             })
         return cont
+
 
 def upload_to(instance, filename):
     name, ext = os.path.splitext(filename)
@@ -68,10 +70,11 @@ def upload_to(instance, filename):
         name + ext
     )
 
+
 class Photo(models.Model):
     """
     Represents original (unformated) photo uploaded by user. Used as source
-    object for all the formatting stuff and to keep the metadata common to 
+    object for all the formatting stuff and to keep the metadata common to
     all related ``FormatedPhoto`` objects.
     """
     box_class = PhotoBox
@@ -91,7 +94,7 @@ class Photo(models.Model):
     important_right = models.PositiveIntegerField(null=True, blank=True)
 
     # Authors and Sources
-    authors = models.ManyToManyField(Author, verbose_name=_('Authors') , related_name='photo_set')
+    authors = models.ManyToManyField(Author, verbose_name=_('Authors'), related_name='photo_set')
     source = models.ForeignKey(Source, blank=True, null=True, verbose_name=_('Source'))
 
     created = models.DateTimeField(auto_now_add=True)
@@ -177,8 +180,9 @@ class Photo(models.Model):
         return FormatedPhoto.objects.get_photo_in_format(self, format)
 
 
-
 FORMAT_CACHE = {}
+
+
 class FormatManager(models.Manager):
     def get_for_name(self, name):
         try:
@@ -187,12 +191,13 @@ class FormatManager(models.Manager):
             FORMAT_CACHE[name] = format = get_cached_object(Format, name=name, sites__id=settings.SITE_ID)
         return format
 
+
 class Format(models.Model):
     """
     Defines per-site photo sizes together with rules how to adhere to them.
-    
+
     This includes:
-    
+
     * maximum width and height
     * cropping settings
     * stretch (rescale) settings
@@ -232,15 +237,28 @@ class Format(models.Model):
         """
         out = {
             'blank': True,
-            'width' : self.max_width,
-            'height' : self.max_height,
-            'url' : photos_settings.EMPTY_IMAGE_SITE_PREFIX + 'img/empty/%s.png' % (self.name),
+            'width': self.max_width,
+            'height': self.max_height,
+            'url': photos_settings.EMPTY_IMAGE_SITE_PREFIX + 'img/empty/%s.png' % (self.name),
         }
         return out
 
     def ratio(self):
         """Return photo's width to height ratio"""
         return float(self.max_width) / self.max_height
+
+    def save(self, **kwargs):
+        """Overrides models.Model.save.
+
+        - Delete formatted photos if format save and not now created
+          (becouse of possible changes)
+        """
+
+        if self.id:
+            for f_photo in self.formatedphoto_set.all():
+                f_photo.delete()
+            kwargs.update({'force_update': True})
+        super(Format, self).save(**kwargs)
 
 
 class FormatedPhotoManager(models.Manager):
@@ -402,7 +420,7 @@ class FormatedPhoto(models.Model):
         if photos_settings.FORMATED_PHOTO_FILENAME is not None:
             return photos_settings.FORMATED_PHOTO_FILENAME(self)
         source_file = path.split(self.photo.image.name)
-        return path.join(source_file[0], str (self.format.id) + '-' + source_file[1])
+        return path.join(source_file[0], str(self.format.id) + '-' + source_file[1])
 
 if redis:
     def store_photo(instance, **kwargs):
