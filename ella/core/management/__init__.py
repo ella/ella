@@ -1,11 +1,10 @@
-from datetime import datetime, date
-
 from ella.core.signals import content_published, content_unpublished
 from ella.core.models import Publishable, Listing
+from ella.utils import timezone
 
 def generate_publish_signals(now=None):
     if now is None:
-        now = datetime.now()
+        now = timezone.now()
 
     # content that went live and isn't announced yet
     qset = Publishable.objects.filter(announced=False, publish_from__lt=now, published=True).exclude(publish_to__lt=now)
@@ -21,7 +20,7 @@ def generate_publish_signals(now=None):
 
 def regenerate_listing_handlers(today=None):
     if today is None:
-        today = date.today()
+        today = timezone.now().date()
 
     Listing.objects.get_listing_handler('default')
     for lh in Listing.objects._listing_handlers.values():

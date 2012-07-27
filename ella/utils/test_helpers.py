@@ -11,6 +11,9 @@ from ella.core.models import Category, Publishable
 # choose Article as an example publishable
 from ella.articles.models import Article
 from ella.photos.models import Photo
+from ella.utils.timezone import localize
+
+default_time = localize(datetime(2008, 1, 10))
 
 def create_category(title, tree_parent=None, **kwargs):
     defaults = {
@@ -51,7 +54,7 @@ def create_and_place_a_publishable(case, **kwargs):
         slug=u'first-article',
         description=u'Some\nlonger\ntext',
         category=case.category_nested,
-        publish_from=datetime(2008, 1, 10),
+        publish_from=default_time,
         published=True,
         content='Some even longer test. \n' * 5
     )

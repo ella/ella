@@ -6,6 +6,7 @@ install_requires = [
     'Django>=1.3.1',
     'south>=0.7',
     'jsonfield',
+    'pytz',
 ]
 
 test_requires = [

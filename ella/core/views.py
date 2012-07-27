@@ -16,6 +16,7 @@ from ella.core import custom_urls
 from ella.core.conf import core_settings
 from ella.core.managers import ListingHandler
 from ella.core.signals import object_rendering, object_rendered
+from ella.utils.timezone import now, localize
 
 __docformat__ = "restructuredtext en"
 
@@ -226,15 +227,15 @@ class ListContentType(EllaCoreView):
         " Return ARCHIVE_ENTRY_YEAR from settings (if exists) or year of the newest object in category "
         year = getattr(settings, 'ARCHIVE_ENTRY_YEAR', None)
         if not year:
-            now = datetime.now()
+            n = now()
             try:
                 year = Listing.objects.filter(
                         category__site__id=settings.SITE_ID,
                         category__tree_path__startswith=category.tree_path,
-                        publish_from__lte=now
+                        publish_from__lte=n
                     ).values('publish_from')[0]['publish_from'].year
             except:
-                year = now.year
+                year = n.year
         return year
 
     def get_context(self, request, category='', year=None, month=None, day=None):
@@ -291,6 +292,9 @@ class ListContentType(EllaCoreView):
                 kwa['date_range'] = (start_day, (start_day + timedelta(days=370)).replace(day=1) - timedelta(seconds=1))
             except (ValueError, OverflowError):
                 raise Http404(_('Invalid year value %r') % year)
+
+        if 'date_range' in kwa:
+            kwa['date_range'] = tuple(map(localize, kwa['date_range']))
 
         # basic context
         context = {
