@@ -83,22 +83,11 @@ class Box(object):
 
     def get_context(self):
         " Get context to render the template. "
-        if 'level' in self.params and self.params['level'].isdigit():
-            level = int(self.params['level'])
-        else:
-            level = 1
-
         return {
                 'content_type_name' : str(self.name),
                 'content_type_verbose_name' : self.verbose_name,
                 'content_type_verbose_name_plural' : self.verbose_name_plural,
                 'object' : self.obj,
-                'level' : level,
-                'next_level' : level + 1,
-                'css_class' : self.params.get('css_class', ''),
-                'name' : self.params.get('name', ''),
-                'text' : self.params.get('text', ''),
-                'align' : self.params.get('align', 'left'),
                 'box' : self,
         }
 

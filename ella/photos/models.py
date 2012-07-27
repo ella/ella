@@ -17,7 +17,6 @@ from django.template.defaultfilters import slugify
 from jsonfield.fields import JSONField
 
 from ella.core.models.main import Author, Source
-from ella.core.box import Box
 from ella.core.cache.utils import get_cached_object
 from ella.photos.conf import photos_settings
 
@@ -41,24 +40,6 @@ if hasattr(settings, 'PHOTOS_REDIS'):
         redis = Redis(**getattr(settings, 'PHOTOS_REDIS'))
 
 
-class PhotoBox(Box):
-    def get_context(self):
-        "Updates box context with photo-specific variables."
-        cont = super(PhotoBox, self).get_context()
-        cont.update({
-                'title': self.params.get('title', self.obj.title),
-                'alt': self.params.get('alt', ''),
-                'description': self.params.get('description', self.obj.description),
-                'show_title': self.params.get('show_title', ''),
-                'show_description': self.params.get('show_description', ''),
-                'show_authors': self.params.get('show_authors', ''),
-                'show_detail': self.params.get('show_detail', ''),
-                'show_source': self.params.get('show_source', ''),  ###
-                'link_url': self.params.get('link_url', ''),
-            })
-        return cont
-
-
 def upload_to(instance, filename):
     name, ext = os.path.splitext(filename)
     if instance.slug:
@@ -77,7 +58,6 @@ class Photo(models.Model):
     object for all the formatting stuff and to keep the metadata common to
     all related ``FormatedPhoto`` objects.
     """
-    box_class = PhotoBox
     title = models.CharField(_('Title'), max_length=200)
     description = models.TextField(_('Description'), blank=True)
     slug = models.SlugField(_('Slug'), max_length=255)
