@@ -1,4 +1,5 @@
 from ella.utils.settings import Settings
+from ella.utils.timezone import localize
 from django.utils.datetime_safe import datetime
 
 gettext = lambda s: s
@@ -17,7 +18,7 @@ MEDIA_KEY = 'ella.core.box.MEDIA_KEY'
 # Publishing configuration
 CATEGORY_LISTINGS_PAGINATE_BY = 20
 CATEGORY_NO_HOME_LISTINGS = False
-PUBLISH_FROM_WHEN_EMPTY = datetime(3000, 1, 1)
+PUBLISH_FROM_WHEN_EMPTY = localize(datetime(3000, 1, 1))
 
 RELATED_FINDERS = {
     'default': (
