@@ -2,7 +2,6 @@ from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.contrib.contenttypes.models import ContentType
-from django.template.defaultfilters import slugify
 from django.core.urlresolvers import reverse
 from django.contrib.redirects.models import Redirect
 from django.core.validators import validate_slug
