@@ -24,7 +24,7 @@ def utc_localize(dtime):
 def to_timestamp(dtime):
     if use_tz:
         return calendar.timegm(dtime.utctimetuple()) + float(dtime.microsecond)/1000000
-    return time.mktime(dtime.timetuple())
+    return time.mktime(dtime.timetuple()) + float(dtime.microsecond)/1000000
 
 def from_timestamp(tstamp):
     if use_tz:
