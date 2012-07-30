@@ -1,8 +1,7 @@
 from __future__ import absolute_import
 
 import logging
-import time
-from datetime import datetime, date, timedelta
+from datetime import date, timedelta
 from hashlib import md5
 
 from django.conf import settings
@@ -184,8 +183,8 @@ class RedisListingHandler(ListingHandler):
         min_score = None
 
         if self.date_range:
-            max_score = to_timestamp(min(self.date_range[1], now()))
-            min_score = to_timestamp(self.date_range[0])
+            max_score = repr(to_timestamp(min(self.date_range[1], now())))
+            min_score = repr(to_timestamp(self.date_range[0]))
         return min_score, max_score
 
     def get_listings(self, offset=0, count=10):

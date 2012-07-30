@@ -28,5 +28,5 @@ def to_timestamp(dtime):
 
 def from_timestamp(tstamp):
     if use_tz:
-        return datetime.fromtimestamp(tstamp, tz=utc)
-    return datetime.fromtimestamp(tstamp)
+        return datetime.fromtimestamp(float(tstamp), tz=utc)
+    return datetime.fromtimestamp(float(tstamp))
