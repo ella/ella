@@ -1,4 +1,7 @@
+import time
+import calendar
 from pytz import utc
+from datetime import datetime
 
 from django.conf import settings
 
@@ -17,3 +20,13 @@ def localize(dtime):
     if use_tz:
         return utc.localize(dtime)
     return dtime
+
+def to_timestamp(dtime):
+    if use_tz:
+        return calendar.timegm(dtime.utctimetuple()) + float(dtime.microsecond)/1000000
+    return time.mktime(dtime.timetuple())
+
+def from_timestamp(tstamp):
+    if use_tz:
+        return datetime.fromtimestamp(tstamp, tz=utc)
+    return datetime.fromtimestamp(tstamp)
