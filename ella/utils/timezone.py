@@ -16,7 +16,7 @@ except ImportError:
     use_tz = False
 
 
-def localize(dtime):
+def utc_localize(dtime):
     if use_tz:
         return utc.localize(dtime)
     return dtime

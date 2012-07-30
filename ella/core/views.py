@@ -16,7 +16,7 @@ from ella.core import custom_urls
 from ella.core.conf import core_settings
 from ella.core.managers import ListingHandler
 from ella.core.signals import object_rendering, object_rendered
-from ella.utils.timezone import now, localize
+from ella.utils.timezone import now, utc_localize
 
 __docformat__ = "restructuredtext en"
 
@@ -294,7 +294,7 @@ class ListContentType(EllaCoreView):
                 raise Http404(_('Invalid year value %r') % year)
 
         if 'date_range' in kwa:
-            kwa['date_range'] = tuple(map(localize, kwa['date_range']))
+            kwa['date_range'] = tuple(map(utc_localize, kwa['date_range']))
 
         # basic context
         context = {

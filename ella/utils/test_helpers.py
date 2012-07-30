@@ -11,9 +11,9 @@ from ella.core.models import Category, Publishable
 # choose Article as an example publishable
 from ella.articles.models import Article
 from ella.photos.models import Photo
-from ella.utils.timezone import localize
+from ella.utils.timezone import utc_localize
 
-default_time = localize(datetime(2008, 1, 10))
+default_time = utc_localize(datetime(2008, 1, 10))
 
 def create_category(title, tree_parent=None, **kwargs):
     defaults = {

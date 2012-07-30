@@ -12,7 +12,7 @@ from django.core.exceptions import ValidationError
 from test_ella.test_core import create_basic_categories
 
 from ella.positions.models import Position
-from ella.utils.timezone import now, localize
+from ella.utils.timezone import now, utc_localize
 
 class TestPosition(TestCase):
 
@@ -26,23 +26,23 @@ class TestPosition(TestCase):
         tools.assert_raises(ValidationError, p.full_clean)
 
     def test_validation_fails_for_overlapping_positions(self):
-        Position.objects.create(category=self.category, name='position-name', text='some text', active_till=localize(datetime(2010, 10, 10)))
+        Position.objects.create(category=self.category, name='position-name', text='some text', active_till=utc_localize(datetime(2010, 10, 10)))
         p = Position(category=self.category, name='position-name', text='other text')
         tools.assert_raises(ValidationError, p.full_clean)
 
     def test_validation_fails_for_overlapping_positions2(self):
-        Position.objects.create(category=self.category, name='position-name', text='some text', active_till=localize(datetime(2010, 10, 10)))
-        p = Position(category=self.category, name='position-name', text='other text', active_from=localize(datetime(2010, 9, 10)))
+        Position.objects.create(category=self.category, name='position-name', text='some text', active_till=utc_localize(datetime(2010, 10, 10)))
+        p = Position(category=self.category, name='position-name', text='other text', active_from=utc_localize(datetime(2010, 9, 10)))
         tools.assert_raises(ValidationError, p.full_clean)
 
     def test_validation_fails_for_overlapping_positions3(self):
-        Position.objects.create(category=self.category, name='position-name', text='some text', active_from=localize(datetime(2010, 10, 10)))
-        p = Position(category=self.category, name='position-name', text='other text', active_till=localize(datetime(2010, 10, 11)))
+        Position.objects.create(category=self.category, name='position-name', text='some text', active_from=utc_localize(datetime(2010, 10, 10)))
+        p = Position(category=self.category, name='position-name', text='other text', active_till=utc_localize(datetime(2010, 10, 11)))
         tools.assert_raises(ValidationError, p.full_clean)
 
     def test_validation_passes_for_nonoverlapping_positions(self):
-        Position.objects.create(category=self.category, name='position-name', text='some text', active_till=localize(datetime(2010, 10, 10, 10, 10, 10)))
-        p = Position(category=self.category, name='position-name', text='other text', active_from=localize(datetime(2010, 10, 10, 10, 10, 10)))
+        Position.objects.create(category=self.category, name='position-name', text='some text', active_till=utc_localize(datetime(2010, 10, 10, 10, 10, 10)))
+        p = Position(category=self.category, name='position-name', text='other text', active_from=utc_localize(datetime(2010, 10, 10, 10, 10, 10)))
         p.full_clean()
 
     def test_validation_fails_for_incorrect_generic_fk(self):
