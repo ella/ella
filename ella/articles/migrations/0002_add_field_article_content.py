@@ -3,17 +3,19 @@ import datetime
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
+from django.contrib.contenttypes.models import ContentType
+
 
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        
+
         # Adding field 'Article.content'
         db.add_column('articles_article', 'content', self.gf('django.db.models.fields.TextField')(default=''), keep_default=False)
 
         if not db.dry_run:
             source_text_ct = orm['contenttypes.ContentType'].objects.filter(app_label='djangomarkup', model='sourcetext')
-            article_ct = orm['contenttypes.ContentType'].objects.get(app_label='articles', model='article')
+            article_ct = ContentType.objects.get_for_model(orm['articles.Article'])
             if source_text_ct.count():
                 source_text_ct = source_text_ct[0]
             else:
@@ -27,12 +29,10 @@ class Migration(SchemaMigration):
                 if source_text_ct:
                     orm['djangomarkup.SourceText'].objects.filter(content_type=source_text_ct, object_id=ac.id, field='content').update(content_type=article_ct, object_id=a.id)
 
-
     def backwards(self, orm):
-        
+
         # Deleting field 'Article.content'
         db.delete_column('articles_article', 'content')
-
 
     models = {
         'articles.article': {
