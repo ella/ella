@@ -38,7 +38,7 @@ setup(
     ],
     install_requires = [
         'setuptools>=0.6b1',
-        'Django==1.3.1',
+        'Django>=1.3,<1.4',
         'south>=0.7',
         'anyjson',
         'feedparser',
