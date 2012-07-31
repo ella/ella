@@ -22,6 +22,7 @@ __docformat__ = "restructuredtext en"
 # local cache for get_content_type()
 CONTENT_TYPE_MAPPING = {}
 
+
 class EllaCoreView(object):
     ' Base class for class-based views used in ella.core.views. '
 
@@ -44,6 +45,7 @@ class EllaCoreView(object):
         " Extract parameters for `get_templates` from the context. "
         if not template_name:
             template_name = self.template_name
+
         kw = {}
         if 'object' in context:
             o = context['object']
@@ -62,6 +64,7 @@ class EllaCoreView(object):
     def __call__(self, request, **kwargs):
         context = self.get_context(request, **kwargs)
         return self.render(request, context, self.get_templates(context))
+
 
 class ObjectDetail(EllaCoreView):
     """
@@ -93,6 +96,7 @@ class ObjectDetail(EllaCoreView):
     :raises Http404: if the URL is not valid and/or doesn't correspond to any valid `Publishable`
     """
     template_name = 'object.html'
+
     def __call__(self, request, category, slug, year=None, month=None, day=None, id=None, url_remainder=None):
         context = self.get_context(request, category, slug, year, month, day, id)
 
@@ -155,8 +159,10 @@ class ObjectDetail(EllaCoreView):
 
         return context
 
+
 def archive_year_cache_key(self, category):
     return 'core.archive_year:%d' % category.pk
+
 
 class ListContentType(EllaCoreView):
     """
@@ -213,10 +219,13 @@ class ListContentType(EllaCoreView):
             cat = context['category']
             template_name = cat.template
             archive_template = cat.app_data.get('ella', {}).get('archive_template', core_settings.ARCHIVE_TEMPLATE)
+
             if archive_template and not context.get('is_title_page'):
                 template_name = archive_template
+
             object_rendering.send(sender=Category, request=request, category=cat, publishable=None)
             object_rendered.send(sender=Category, request=request, category=cat, publishable=None)
+
             return self.render(request, context, self.get_templates(context, template_name))
         except self.EmptyHomepageException:
             return self.render(request, {}, self.empty_homepage_template_name)
@@ -326,6 +335,7 @@ class ListContentType(EllaCoreView):
 # backwards compatibility
 object_detail = ObjectDetail()
 home = category_detail = list_content_type = ListContentType()
+
 
 def get_content_type(ct_name):
     """

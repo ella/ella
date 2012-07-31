@@ -7,16 +7,16 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        
+
         # Adding field 'Category.content'
         db.add_column('core_category', 'content', self.gf('django.db.models.fields.TextField')(default='', blank=True), keep_default=False)
 
         # Adding field 'Category.template'
-        db.add_column('core_category', 'template', self.gf('django.db.models.fields.CharField')(default='', max_length=100), keep_default=False)
+        db.add_column('core_category', 'template', self.gf('django.db.models.fields.CharField')(default='category.html', max_length=100), keep_default=False)
 
 
     def backwards(self, orm):
-        
+
         # Deleting field 'Category.content'
         db.delete_column('core_category', 'content')
 
