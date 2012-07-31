@@ -1,16 +1,7 @@
-try:
-    # try import offset-aware datetime from Django >= 1.4
-    from django.utils.timezone import now as datetime_now
-except ImportError:
-    # backward compatibility with Django < 1.4 (offset-naive datetimes)
-    from datetime import datetime
-    datetime_now = datetime.now
-
 from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.contrib.contenttypes.models import ContentType
-from django.template.defaultfilters import slugify
 from django.core.urlresolvers import reverse
 from django.contrib.redirects.models import Redirect
 from django.core.validators import validate_slug
@@ -26,6 +17,7 @@ from ella.core.cache import CachedGenericForeignKey, \
 from ella.core.managers import ListingManager, RelatedManager
 from ella.core.models.main import Author, Source
 from ella.photos.models import Photo
+from ella.utils.timezone import now
 
 def PublishableBox(publishable, box_type, nodelist, model=None):
     "add some content type info of self.target"
@@ -209,9 +201,9 @@ class Publishable(models.Model):
 
     def is_published(self):
         "Return True if the Publishable is currently active."
-        now = datetime_now()
-        return self.published and now > self.publish_from and \
-            (self.publish_to is None or now < self.publish_to)
+        cur_time = now()
+        return self.published and cur_time > self.publish_from and \
+            (self.publish_to is None or cur_time < self.publish_to)
 
 
 def ListingBox(listing, *args, **kwargs):

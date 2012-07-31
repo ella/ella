@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from django.test import TestCase
 from django.contrib.sites.models import Site
@@ -10,10 +10,11 @@ from django.core.exceptions import ValidationError
 from ella.core.models import Category, Publishable
 from ella.core import signals
 from ella.core.management import generate_publish_signals
+from ella.utils import timezone
 
 from nose import tools
 
-from test_ella.test_core import create_basic_categories, create_and_place_a_publishable
+from test_ella.test_core import create_basic_categories, create_and_place_a_publishable, default_time
 
 class PublishableTestCase(TestCase):
     def setUp(self):
@@ -23,13 +24,13 @@ class PublishableTestCase(TestCase):
 
 class TestLastUpdated(PublishableTestCase):
     def test_last_updated_moved_if_default(self):
-        now = datetime.now()
+        now = timezone.now()
         self.publishable.publish_from = now
         self.publishable.save(force_update=True)
         tools.assert_equals(now, self.publishable.last_updated)
 
     def test_last_updated_isnt_moved_if_changed(self):
-        now = datetime.now()
+        now = timezone.now()
         self.publishable.last_updated = now + timedelta(days=1)
         self.publishable.publish_from = now
         self.publishable.save(force_update=True)
@@ -114,7 +115,7 @@ class TestUrl(PublishableTestCase):
         )
 
         self.publishable.category = category
-        self.publishable.publish_from = datetime(2008,1,10)
+        self.publishable.publish_from = default_time
         self.publishable.save()
 
         tools.assert_equals(u'http://not-example.com/2008/1/10/first-article/', self.publishable.get_absolute_url())
@@ -170,19 +171,19 @@ class TestSignals(TestCase):
         tools.assert_equals(0, len(self.unpublish_received))
 
     def test_generate_picks_up_on_takedown(self):
-        self.publishable.publish_to = datetime.now() + timedelta(days=1)
+        self.publishable.publish_to = timezone.now() + timedelta(days=1)
         self.publishable.save()
         self._signal_clear()
-        generate_publish_signals(datetime.now() + timedelta(days=1, seconds=2))
+        generate_publish_signals(timezone.now() + timedelta(days=1, seconds=2))
         tools.assert_equals(0, len(self.publish_received))
         tools.assert_equals(1, len(self.unpublish_received))
         tools.assert_equals(self.publishable, self.unpublish_received[0]['publishable'].target)
 
     def test_generate_picks_up_on_publish(self):
-        self.publishable.publish_from = datetime.now() + timedelta(days=1)
+        self.publishable.publish_from = timezone.now() + timedelta(days=1)
         self.publishable.save()
         self._signal_clear()
-        generate_publish_signals(datetime.now() + timedelta(days=1, seconds=2))
+        generate_publish_signals(timezone.now() + timedelta(days=1, seconds=2))
         tools.assert_equals(1, len(self.publish_received))
         tools.assert_equals(0, len(self.unpublish_received))
         tools.assert_equals(self.publishable, self.publish_received[0]['publishable'].target)

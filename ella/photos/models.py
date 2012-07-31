@@ -1,6 +1,5 @@
 import logging
 from PIL import Image
-from datetime import datetime
 from os import path
 from cStringIO import StringIO
 import os.path
@@ -19,6 +18,7 @@ from jsonfield.fields import JSONField
 from ella.core.models.main import Author, Source
 from ella.core.cache.utils import get_cached_object
 from ella.photos.conf import photos_settings
+from ella.utils.timezone import now
 
 from formatter import Formatter
 
@@ -47,7 +47,7 @@ def upload_to(instance, filename):
     ext = photos_settings.TYPE_EXTENSION.get(instance._get_image().format, ext.lower())
 
     return os.path.join(
-        force_unicode(datetime.now().strftime(smart_str(photos_settings.UPLOAD_TO))),
+        force_unicode(now().strftime(smart_str(photos_settings.UPLOAD_TO))),
         name + ext
     )
 

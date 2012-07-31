@@ -1,5 +1,4 @@
 import logging
-from datetime import datetime
 
 from django.utils.translation import ugettext_lazy as _
 from django.db import models
@@ -11,6 +10,7 @@ from django.core.exceptions import ValidationError
 from ella.core.box import Box
 from ella.core.cache import cache_this, CachedGenericForeignKey, \
     CategoryForeignKey, ContentTypeForeignKey, get_cached_object
+from ella.utils import timezone
 
 
 log = logging.getLogger('ella.positions.models')
@@ -32,7 +32,7 @@ class PositionManager(models.Manager):
             nofallback - if True than do not fall back to parent
                         category if active position is not found for category
         """
-        now = datetime.now()
+        now = timezone.now()
         lookup = (Q(active_from__isnull=True) | Q(active_from__lte=now)) & \
                  (Q(active_till__isnull=True) | Q(active_till__gt=now))
         while True:

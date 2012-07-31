@@ -1,4 +1,3 @@
-from datetime import datetime
 from operator import attrgetter
 
 from django.db import models
@@ -10,6 +9,7 @@ from django.conf import settings
 
 from ella.core.cache import cache_this
 from ella.core.conf import core_settings
+from ella.utils import timezone
 
 def _import_module_member(modstr, noun):
     module, attr = modstr.rsplit('.', 1)
@@ -190,7 +190,7 @@ class ListingManager(models.Manager):
         Method that cleans the Listing model by deleting all listings that are no longer valid.
         Should be run periodicaly to purge the DB from unneeded data.
         """
-        self.filter(publish_to__lt=datetime.now()).delete()
+        self.filter(publish_to__lt=timezone.now()).delete()
 
     def get_query_set(self, *args, **kwargs):
         # get all the fields you typically need to render listing
@@ -202,7 +202,7 @@ class ListingManager(models.Manager):
 
     def get_listing_queryset(self, category=None, children=ListingHandler.NONE, content_types=[], date_range=(), exclude=None, **kwargs):
         # give the database some chance to cache this query
-        now = datetime.now().replace(second=0, microsecond=0)
+        now = timezone.now().replace(second=0, microsecond=0)
 
         if date_range:
             qset = self.filter(publish_from__range=date_range, publishable__published=True, **kwargs)

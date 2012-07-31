@@ -1,8 +1,7 @@
 from __future__ import absolute_import
 
 import logging
-import time
-from datetime import datetime, date, timedelta
+from datetime import date, timedelta
 from hashlib import md5
 
 from django.conf import settings
@@ -10,6 +9,7 @@ from django.db.models.loading import get_model
 
 from ella.core.cache.utils import get_cached_objects, SKIP
 from ella.core.managers import ListingHandler
+from ella.utils.timezone import now, to_timestamp, from_timestamp
 
 log = logging.getLogger('ella.core')
 
@@ -30,7 +30,7 @@ def publishable_published(publishable, **kwargs):
         RedisListingHandler.add_publishable(
             l.category,
             publishable,
-            repr(time.mktime(l.publish_from.timetuple())),
+            repr(to_timestamp(l.publish_from)),
             pipe=pipe,
             commit=False
         )
@@ -62,7 +62,7 @@ def listing_post_delete(sender, instance, **kwargs):
         RedisListingHandler.add_publishable(
             l.category,
             instance.publishable,
-            repr(time.mktime(l.publish_from.timetuple())),
+            repr(to_timestamp(l.publish_from)),
             pipe=pipe,
             commit=False
         )
@@ -84,7 +84,7 @@ def listing_post_save(sender, instance, **kwargs):
         pipe = RedisListingHandler.add_publishable(
             instance.category,
             instance.publishable,
-            repr(time.mktime(instance.publish_from.timetuple())),
+            repr(to_timestamp(instance.publish_from)),
             pipe=pipe,
             commit=False
         )
@@ -175,15 +175,16 @@ class RedisListingHandler(ListingHandler):
 
     def _get_listing(self, publishable, score):
         Listing = get_model('core', 'listing')
-        return Listing(publishable=publishable, category=publishable.category, publish_from=datetime.fromtimestamp(score))
+        publish_from = from_timestamp(score)
+        return Listing(publishable=publishable, category=publishable.category, publish_from=publish_from)
 
     def _get_score_limits(self):
         max_score = None
         min_score = None
 
         if self.date_range:
-            max_score = time.mktime(min(self.date_range[1], datetime.now()).timetuple())
-            min_score = time.mktime(self.date_range[0].timetuple())
+            max_score = repr(to_timestamp(min(self.date_range[1], now())))
+            min_score = repr(to_timestamp(self.date_range[0]))
         return min_score, max_score
 
     def get_listings(self, offset=0, count=10):

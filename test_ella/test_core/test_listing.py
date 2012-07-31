@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from django.test import TestCase
 
@@ -7,6 +7,7 @@ from nose import tools
 
 from ella.core.models import Listing, Category
 from ella.core.managers import ListingHandler
+from ella.utils.timezone import now
 
 from test_ella.test_core import create_basic_categories, create_and_place_a_publishable, \
         create_and_place_more_publishables, list_all_publishables_in_category_by_hour
@@ -63,7 +64,7 @@ class TestListing(TestCase):
         listing = Listing.objects.create(
                 publishable=expected[0].publishable,
                 category=expected[0].category,
-                publish_from=datetime.now() - timedelta(days=2),
+                publish_from=now() - timedelta(days=2),
             )
         expected[0] = listing
         l = Listing.objects.get_listing(category=self.category, children=ListingHandler.IMMEDIATE)
@@ -73,7 +74,7 @@ class TestListing(TestCase):
         listing = Listing.objects.create(
                 publishable=self.publishables[0],
                 category=self.category_nested_second,
-                publish_from=datetime.now() - timedelta(days=2),
+                publish_from=now() - timedelta(days=2),
             )
 
         l = Listing.objects.get_listing(category=self.category, children=ListingHandler.ALL)
@@ -100,7 +101,7 @@ class TestListing(TestCase):
 
     def test_inactive_istings_wont_show(self):
         l = self.listings[0]
-        l.publish_to = datetime.now() - timedelta(days=1)
+        l.publish_to = now() - timedelta(days=1)
         l.save()
 
         l = Listing.objects.get_listing(category=self.category, children=ListingHandler.ALL)
