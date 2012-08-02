@@ -15,5 +15,5 @@ else:
 
     from ella.core.management import generate_publish_signals, regenerate_listing_handlers
 
-    periodic_task(run_every=timedelta(hours=1))(generate_publish_signals)
+    periodic_task(run_every=timedelta(minutes=5))(generate_publish_signals)
     periodic_task(run_every=timedelta(hours=3))(regenerate_listing_handlers)
