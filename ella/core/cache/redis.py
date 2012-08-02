@@ -169,12 +169,7 @@ class RedisListingHandler(ListingHandler):
         key, pipe = self._get_key()
         if pipe is None:
             pipe = client.pipeline()
-
-        min_score, max_score = self._get_score_limits()
-        if min_score or max_score:
-            pipe = pipe.zcount(key, min_score, max_score)
-        else:
-            pipe = pipe.zcard(key)
+        pipe = pipe.zcard(key)
         results = pipe.execute()
         return results[-1]
 
@@ -184,12 +179,12 @@ class RedisListingHandler(ListingHandler):
         return Listing(publishable=publishable, category=publishable.category, publish_from=publish_from)
 
     def _get_score_limits(self):
-        max_score = to_timestamp(now())
-        min_score = 0
+        max_score = None
+        min_score = None
 
         if self.date_range:
-            max_score = to_timestamp(min(self.date_range[1], now()))
-            min_score = to_timestamp(self.date_range[0])
+            max_score = repr(to_timestamp(min(self.date_range[1], now())))
+            min_score = repr(to_timestamp(self.date_range[0]))
         return min_score, max_score
 
     def get_listings(self, offset=0, count=10):
@@ -204,12 +199,12 @@ class RedisListingHandler(ListingHandler):
         if min_score or max_score:
             pipe = pipe.zrevrangebyscore(key,
                 repr(max_score), repr(min_score),
-                start=offset, num=offset+count,
+                start=offset, num=offset+count-1,
                 withscores=True
             )
         else:
             pipe = pipe.zrevrange(key,
-                start=offset, num=offset+count,
+                start=offset, num=offset+count-1,
                 withscores=True
             )
         results = pipe.execute()
