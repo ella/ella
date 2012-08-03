@@ -16,6 +16,7 @@ from ella.core.box import Box
 log = logging.getLogger('ella.core.templatetags')
 register = template.Library()
 
+
 class ListingNode(template.Node):
     def __init__(self, var_name, parameters):
         self.var_name = var_name
@@ -31,7 +32,6 @@ class ListingNode(template.Node):
         if 'category' in params and isinstance(params['category'], basestring):
             params['category'] = Category.objects.get_by_tree_path(params['category'])
 
-
         limits = {}
         if 'offset' in params:
             # templates are 1-based, compensate
@@ -44,6 +44,7 @@ class ListingNode(template.Node):
 
         context[self.var_name] = lh.get_listings(**limits)
         return ''
+
 
 @register.tag
 def listing(parser, token):

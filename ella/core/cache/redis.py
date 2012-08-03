@@ -24,17 +24,23 @@ if hasattr(settings, 'LISTINGS_REDIS'):
     else:
         client = Redis(**getattr(settings, 'LISTINGS_REDIS'))
 
+
+def make_score(date_):
+    return repr(time.mktime(date_.timetuple()))
+
+
 def publishable_published(publishable, **kwargs):
     pipe = client.pipeline()
     for l in publishable.listing_set.all():
         RedisListingHandler.add_publishable(
             l.category,
             publishable,
-            repr(time.mktime(l.publish_from.timetuple())),
+            make_score(l.publish_from),
             pipe=pipe,
             commit=False
         )
     pipe.execute()
+
 
 def publishable_unpublished(publishable, **kwargs):
     pipe = client.pipeline()
@@ -47,6 +53,7 @@ def publishable_unpublished(publishable, **kwargs):
         )
     pipe.execute()
 
+
 def listing_pre_delete(sender, instance, **kwargs):
     # prepare redis pipe for deletion...
     instance.__pipe = RedisListingHandler.remove_publishable(
@@ -55,6 +62,7 @@ def listing_pre_delete(sender, instance, **kwargs):
         commit=False
     )
 
+
 def listing_post_delete(sender, instance, **kwargs):
     # but only delete it if the model delete went through
     pipe = instance.__pipe
@@ -62,11 +70,12 @@ def listing_post_delete(sender, instance, **kwargs):
         RedisListingHandler.add_publishable(
             l.category,
             instance.publishable,
-            repr(time.mktime(l.publish_from.timetuple())),
+            make_score(l.publish_from),
             pipe=pipe,
             commit=False
         )
     pipe.execute()
+
 
 def listing_pre_save(sender, instance, **kwargs):
     if instance.pk:
@@ -78,18 +87,20 @@ def listing_pre_save(sender, instance, **kwargs):
             commit=False
         )
 
+
 def listing_post_save(sender, instance, **kwargs):
     pipe = getattr(instance, '__pipe', None)
     if instance.publishable.is_published():
         pipe = RedisListingHandler.add_publishable(
             instance.category,
             instance.publishable,
-            repr(time.mktime(instance.publish_from.timetuple())),
+            make_score(instance.publish_from),
             pipe=pipe,
             commit=False
         )
     if pipe:
         pipe.execute()
+
 
 class RedisListingHandler(ListingHandler):
     PREFIX = 'listing'
@@ -198,12 +209,12 @@ class RedisListingHandler(ListingHandler):
         if min_score or max_score:
             pipe = pipe.zrevrangebyscore(key,
                 repr(max_score), repr(min_score),
-                start=offset, num=offset+count-1,
+                start=offset, num=offset + count - 1,
                 withscores=True
             )
         else:
             pipe = pipe.zrevrange(key,
-                start=offset, num=offset+count-1,
+                start=offset, num=offset + count - 1,
                 withscores=True
             )
         results = pipe.execute()
@@ -266,13 +277,14 @@ class RedisListingHandler(ListingHandler):
 
                 # we are using some existing key, copy it before removing stuff
                 exclude_key = '%s:exclude:%s' % (key, v)
-                pipe.zunionstore(exclude_key, (key, ))
+                pipe.zunionstore(exclude_key, (key,))
                 pipe.zrem(exclude_key, v)
                 pipe.expire(exclude_key, 60)
                 key = exclude_key
 
             self._key = key
         return self._key, pipe
+
 
 class SlidingListingHandler(RedisListingHandler):
     WINDOW_SIZE = 7
@@ -328,6 +340,7 @@ class SlidingListingHandler(RedisListingHandler):
             pipe.zunionstore(k, ['%s:%s' % (k, day) for day in days], aggregate='SUM')
 
         pipe.execute()
+
 
 def connect_signals():
     from django.db.models.signals import pre_save, post_save, post_delete, pre_delete

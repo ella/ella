@@ -79,6 +79,7 @@ class CategoryManager(models.Manager):
             children = sorted(children, key=attrgetter('tree_path'))
         return children
 
+
 class RelatedManager(models.Manager):
     def collect_related(self, finder_funcs, obj, count, *args, **kwargs):
         """
@@ -170,8 +171,14 @@ class ListingHandler(object):
 
         return self.get_listings(offset, count)
 
+    def get_listings(self, offset=0, count=10):
+        raise NotImplementedError
+
     def get_listing(self, i):
-        return self.get_listings(i, i+1)[0]
+        return self.get_listings(i, i + 1)[0]
+
+    def count(self):
+        raise NotImplementedError
 
 
 def get_listings_key(self, category=None, children=ListingHandler.NONE, count=10, offset=0, content_types=[], date_range=(), exclude=None, **kwargs):
@@ -183,6 +190,7 @@ def get_listings_key(self, category=None, children=ListingHandler.NONE, count=10
             ','.join(map(lambda d: d.strftime('%Y%m%d'), date_range)),
             ','.join(':'.join((k, smart_str(v))) for k, v in kwargs.items()),
     )
+
 
 class ListingManager(models.Manager):
     def clean_listings(self):

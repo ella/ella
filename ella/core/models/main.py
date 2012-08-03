@@ -14,6 +14,7 @@ from jsonfield.fields import JSONField
 from ella.core.cache import CachedGenericForeignKey, SiteForeignKey, ContentTypeForeignKey, CategoryForeignKey, CachedForeignKey
 from ella.core.conf import core_settings
 from ella.core.managers import CategoryManager
+from ella.core.models.appdata import AppDataMixin
 
 
 class Author(models.Model):
@@ -63,7 +64,7 @@ class Source(models.Model):
 category_slug_validator = RegexValidator(re.compile('^[a-z][a-z0-9-]+$'), _('Please enter a valid slug composed of lowecase letter, numbers and hyphens. First character must be a letter.'), 'invalid')
 
 
-class Category(models.Model):
+class Category(AppDataMixin, models.Model):
     """
     ``Category`` is the **basic building block of Ella-based sites**. All the
     published content is divided into categories - every ``Publishable`` object
@@ -96,7 +97,6 @@ class Category(models.Model):
     app_data = JSONField(_('Custom meta data'), default='{}',
         help_text=_('If you need to define custom data for '
         'category objects, you can use this field to do so.'))
-
 
     objects = CategoryManager()
 

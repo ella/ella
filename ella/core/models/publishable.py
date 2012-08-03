@@ -1,3 +1,4 @@
+from ella.core.models.appdata import AppDataMixin
 try:
     # try import offset-aware datetime from Django >= 1.4
     from django.utils.timezone import now as datetime_now
@@ -27,6 +28,7 @@ from ella.core.managers import ListingManager, RelatedManager
 from ella.core.models.main import Author, Source
 from ella.photos.models import Photo
 
+
 def PublishableBox(publishable, box_type, nodelist, model=None):
     "add some content type info of self.target"
     if not model:
@@ -38,7 +40,7 @@ def PublishableBox(publishable, box_type, nodelist, model=None):
     return box_class(publishable, box_type, nodelist, model=model)
 
 
-class Publishable(models.Model):
+class Publishable(AppDataMixin):
     """
     Base class for all objects that can be published in Ella.
     """
@@ -137,7 +139,7 @@ class Publishable(models.Model):
                 publish_from__day=self.publish_from.day,
                 publish_from__month=self.publish_from.month,
                 publish_from__year=self.publish_from.year,
-                slug = self.slug
+                slug=self.slug
             )
 
         if self.pk:
@@ -231,7 +233,7 @@ class Listing(models.Model):
     """
     box_class = staticmethod(ListingBox)
 
-    publishable = models.ForeignKey(Publishable, verbose_name=_('Publishable'))
+    publishable = models.ForeignKey('core.Publishable', verbose_name=_('Publishable'))
     category = CategoryForeignKey(verbose_name=_('Category'), db_index=True)
 
     publish_from = models.DateTimeField(_("Start of listing"), db_index=True)
