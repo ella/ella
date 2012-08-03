@@ -814,8 +814,9 @@ core principle: *explicit is better then implicit*. To fix this up, we've
 added possibility to add arbitrary data on ``Publishable``, ``Category`` and ``Photo``
 models programatically.
 
-Each of the mentioned models has one `JSONField`_ called ``app_data`` which
-can hold any information you need. It has some limitations though:
+Each of the mentioned models has one `JSONField`_ subclass ``AppDataField``
+called ``app_data`` which can hold any information you need. It has some
+limitations though:
 
 * It's not possible to **perform efficent queries** over the defined fiels. If
   you needed it, add ``OneToOne`` relation to your custom model instead.
@@ -823,11 +824,19 @@ can hold any information you need. It has some limitations though:
   are placed on that field so that the data might be corrupted if not used 
   properly.
   
-`JSONField`_ acts the same way as regular Python ``dict`` object. You can
+``AppDataField`` acts the same way as regular Python ``dict`` object. You can
 store any data structure you like provided it's serializable by Django's JSON
 `encoder`_.
 
-To avoid name clashes, we beg you to use a **namespace convention** that all your
+Conventions
+===========
+
+``AppDataField`` recognizes namespaces for different applications. The access
+is not limited though so that any application can access any namespace. The
+namespace is a simple first-level dict key (e.g. 'emailing' or 'my_articles'
+in the following examples).
+
+To avoid name clashes, we encourage you to follow this convention so that all your
 custom data is stored by using a **key** which coresponds to the app label
 of aplication storing the data, such as::
 
@@ -841,6 +850,27 @@ of aplication storing the data, such as::
 
 .. _JSONField: https://github.com/bradjasper/django-jsonfield
 .. _encoder: https://docs.djangoproject.com/en/dev/topics/serialization/#id2
+
+
+Custom container classes
+========================
+
+By default, Ella returns an ``AppDataContainer`` class when you access a 
+namespace. This is simpy a dict subclass with no additional data except
+for the information about the model class it is bound to. However, you
+can provide you on classess for the namespaces. This allows you to create
+methods working with the your custom data. For example, you can have 
+``CommentsDataContainer`` for your comments application which can provide
+methods like ``comment_count``.
+
+Registering your custom container class is very simple. The formula is::
+
+    Publishable.app_data_registry.register('comments', CommentsDataContainer)
+    
+Unregistration works the same way::
+
+    Publishable.app_data_registry.unregister('comments')
+    Publishable.app_data_registry.register('comments', SomeOtherDataContainer)
 
 .. _features-caching:
 
