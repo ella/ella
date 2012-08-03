@@ -4,6 +4,8 @@ FILE_ROOT = normpath(join(dirname(__file__), pardir))
 
 USE_I18N = True
 
+USE_TZ = True
+
 MEDIA_ROOT = join(FILE_ROOT, 'static')
 
 STATIC_URL = MEDIA_URL = '/static/'

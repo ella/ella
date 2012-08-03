@@ -17,6 +17,7 @@ from ella.core.views import ListContentType
 from ella.core.managers import ListingHandler
 from ella.core.signals import content_published, content_unpublished
 from ella.articles.models import Article
+from ella.utils.timezone import from_timestamp
 
 from test_ella.test_core import create_basic_categories, create_and_place_a_publishable, \
         create_and_place_more_publishables, list_all_publishables_in_category_by_hour
@@ -219,7 +220,7 @@ class TestRedisListings(TestCase):
         t1, t2 = time.time()-90, time.time()-100
         self.redis.zadd('listing:c:2', '%d:1' % ct_id, repr(t1))
         self.redis.zadd('listing:c:2', '%d:3' % ct_id, repr(t2))
-        dt1, dt2 = datetime.fromtimestamp(t1), datetime.fromtimestamp(t2)
+        dt1, dt2 = from_timestamp(t1), from_timestamp(t2)
 
         lh = Listing.objects.get_queryset_wrapper(category=self.category_nested, children=ListingHandler.IMMEDIATE, source='redis')
         tools.assert_equals(2, lh.count())
@@ -235,7 +236,7 @@ class TestRedisListings(TestCase):
         t1, t2 = time.time()-90, time.time()-100
         self.redis.zadd('listing:c:2', '%d:1' % ct_id, repr(t1))
         self.redis.zadd('listing:c:2', '%d:3' % ct_id, repr(t2))
-        dt1, dt2 = datetime.fromtimestamp(t1), datetime.fromtimestamp(t2)
+        dt1, dt2 = from_timestamp(t1), from_timestamp(t2)
 
         lh = Listing.objects.get_queryset_wrapper(category=self.category_nested, children=ListingHandler.IMMEDIATE, exclude=self.publishables[0], source='redis')
         tools.assert_equals(1, lh.count())
@@ -249,7 +250,7 @@ class TestRedisListings(TestCase):
         t1, t2 = time.time()-90, time.time()-100
         self.redis.zadd('listing:d:2', '%d:1' % ct_id, repr(t1))
         self.redis.zadd('listing:d:2', '%d:3' % ct_id, repr(t2))
-        dt1, dt2 = datetime.fromtimestamp(t1), datetime.fromtimestamp(t2)
+        dt1, dt2 = from_timestamp(t1), from_timestamp(t2)
 
         rf = RequestFactory()
         request = rf.get(self.category_nested.get_absolute_url(), {'using': 'redis'})

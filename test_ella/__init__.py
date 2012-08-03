@@ -21,5 +21,5 @@ def teardown():
     from django.conf import settings
     test_runner.teardown_databases(old_config)
     test_runner.teardown_test_environment()
-    rmtree(settings.MEDIA_ROOT)
+    rmtree(settings.MEDIA_ROOT, ignore_errors=True)
 

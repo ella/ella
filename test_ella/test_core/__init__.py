@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from ella.core.models import Category, Listing
 # choose Article as an example publishable
 from ella.articles.models import Article
-from ella.utils.test_helpers import create_basic_categories, create_and_place_a_publishable
+from ella.utils.test_helpers import create_basic_categories, create_and_place_a_publishable, default_time
+from ella.utils import timezone
 
 def create_and_place_more_publishables(case):
     """
@@ -18,7 +19,7 @@ def create_and_place_more_publishables(case):
                 slug=u'article-' + chr(ord('a') + i),
                 description=u'Some\nlonger\ntext',
                 category=c,
-                publish_from=datetime(2008, 1, 10),
+                publish_from=default_time,
                 published=True,
                 content='Some even longer test. \n' * 5
             )
@@ -68,7 +69,7 @@ def create_and_place_two_publishables_and_listings(case):
 
 
     c = case.category
-    now = datetime.now()
+    now = timezone.now()
 
     case.publishables = []
     case.listings = []
@@ -88,7 +89,7 @@ def create_and_place_two_publishables_and_listings(case):
         publish_to=publish_to.date(),
     )
 
-    publish_from = datetime.now() - timedelta(days=8)
+    publish_from = timezone.now() - timedelta(days=8)
 
     place_publishable(
         model=Article,

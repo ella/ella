@@ -1,4 +1,3 @@
-from ella.core.models.appdata import AppDataMixin
 try:
     # try import offset-aware datetime from Django >= 1.4
     from django.utils.timezone import now as datetime_now
@@ -11,22 +10,21 @@ from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.contrib.contenttypes.models import ContentType
-from django.template.defaultfilters import slugify
 from django.core.urlresolvers import reverse
 from django.contrib.redirects.models import Redirect
 from django.core.validators import validate_slug
 from django.core.exceptions import ValidationError
 
-from jsonfield.fields import JSONField
-
 from ella.core.box import Box
-from ella.core.conf import core_settings
-from ella.core.signals import content_published, content_unpublished
 from ella.core.cache import CachedGenericForeignKey, \
     CachedForeignKey, ContentTypeForeignKey, CategoryForeignKey
+from ella.core.conf import core_settings
 from ella.core.managers import ListingManager, RelatedManager
+from ella.core.models.appdata import AppDataField
 from ella.core.models.main import Author, Source
+from ella.core.signals import content_published, content_unpublished
 from ella.photos.models import Photo
+from ella.utils.timezone import now
 
 
 def PublishableBox(publishable, box_type, nodelist, model=None):
@@ -40,7 +38,7 @@ def PublishableBox(publishable, box_type, nodelist, model=None):
     return box_class(publishable, box_type, nodelist, model=model)
 
 
-class Publishable(AppDataMixin):
+class Publishable(models.Model):
     """
     Base class for all objects that can be published in Ella.
     """
@@ -78,7 +76,7 @@ class Publishable(AppDataMixin):
     last_updated = models.DateTimeField(_('Last updated'), blank=True)
 
     # generic JSON field to store app cpecific data
-    app_data = JSONField(default='{}', editable=False)
+    app_data = AppDataField(default='{}', editable=False)
 
     # has the content_published signal been sent for this instance?
     announced = models.BooleanField(help_text='Publish signal sent', default=False, editable=False)
@@ -211,9 +209,9 @@ class Publishable(AppDataMixin):
 
     def is_published(self):
         "Return True if the Publishable is currently active."
-        now = datetime_now()
-        return self.published and now > self.publish_from and \
-            (self.publish_to is None or now < self.publish_to)
+        cur_time = now()
+        return self.published and cur_time > self.publish_from and \
+            (self.publish_to is None or cur_time < self.publish_to)
 
 
 def ListingBox(listing, *args, **kwargs):
@@ -233,7 +231,7 @@ class Listing(models.Model):
     """
     box_class = staticmethod(ListingBox)
 
-    publishable = models.ForeignKey('core.Publishable', verbose_name=_('Publishable'))
+    publishable = models.ForeignKey(Publishable, verbose_name=_('Publishable'))
     category = CategoryForeignKey(verbose_name=_('Category'), db_index=True)
 
     publish_from = models.DateTimeField(_("Start of listing"), db_index=True)
