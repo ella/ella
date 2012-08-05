@@ -1,8 +1,3 @@
-'''
-Created on 3.8.2012
-
-@author: xaralis
-'''
 from django.utils import simplejson as json
 
 from jsonfield.fields import JSONField

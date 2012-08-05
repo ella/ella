@@ -1,8 +1,3 @@
-'''
-Created on 3.8.2012
-
-@author: xaralis
-'''
 from django.db import models
 from django.test import TestCase
 
