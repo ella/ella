@@ -13,12 +13,11 @@ from django.core.files.base import ContentFile
 from django.conf import settings
 from django.template.defaultfilters import slugify
 
-from jsonfield.fields import JSONField
-
 from ella.core.models.main import Author, Source
 from ella.core.cache.utils import get_cached_object
 from ella.photos.conf import photos_settings
 from ella.utils.timezone import now
+from ella.core.app_data import AppDataField
 
 from formatter import Formatter
 
@@ -80,7 +79,7 @@ class Photo(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     # generic JSON field to store app cpecific data
-    app_data = JSONField(default='{}', blank=True, editable=False)
+    app_data = AppDataField()
 
     class Meta:
         verbose_name = _('Photo')
