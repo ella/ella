@@ -3,12 +3,17 @@ from django.utils import simplejson as json
 from jsonfield.fields import JSONField
 
 class AppDataField(JSONField):
+    def __init__(self, *args, **kwargs):
+        self.app_registry = kwargs.pop('app_registry', app_registry)
+        # TODO editable=False, default='{}' etc
+        super(AppDataField, self).__init__(*args, **kwargs)
+
     def to_python(self, value):
         """Convert string value to JSON and wrap it in AppDataContainerFactory"""
         if isinstance(value, basestring):
             try:
                 val = json.loads(value, **self.load_kwargs)
-                return AppDataContainerFactory(self.model, val)
+                return AppDataContainerFactory(self.model, val, app_registry=self.app_registry)
             except ValueError:
                 pass
         return value
@@ -30,22 +35,24 @@ class AppDataContainerFactory(dict):
         # get the value, let the possible KeyError propagate
         val = super(AppDataContainerFactory, self).__getitem__(name)
         class_ = self.app_registry.get_class(name, self.model)
-        if class_ is not None:
-            return class_(val)
+        if class_ is not None and not isinstance(val, class_):
+            val = class_(val)
+            self[name] = val
 
         return val
 
     def get(self, name, default=None):
-        if name not in self and default is None:
-            return
+        if name in self:
+            return self[name]
 
-        val = super(AppDataContainerFactory, self).get(name, default)
+        if default is None:
+            return None
+
         class_ = self.app_registry.get_class(name, self.model)
-        # convert value to class_ if defined and not already an instance
-        if class_ is not None and not isinstance(val, class_):
-            return class_(val)
+        if class_ is not None:
+            return class_(default)
 
-        return val
+        return default
 
 class AppDataContainer(dict):
     """
@@ -71,7 +78,7 @@ class NamespaceRegistry(object):
     """
     Global registry of app_specific storage classes in app_data field
     """
-    def __init__(self, default_class=AppDataContainer):
+    def __init__(self, default_class=None):
         self.default_class = default_class
         self._reset()
 
@@ -102,20 +109,19 @@ class NamespaceRegistry(object):
     def register(self, namespace, class_, model=None):
         registry = self._model_registry.setdefault(model, {}) if model is not None else self._global_registry
         if namespace in registry:
-            raise self.NamespaceConflict(
+            raise NamespaceConflict(
                 'Namespace %r already assigned to class %r%s.' % (
                     namespace,
-                    self.__getitem__(namespace),
+                    registry[namespace],
                     '' if model is None else ' for model %s' % model._meta
                 )
             )
         registry[namespace] = class_
-        return class_
 
     def unregister(self, namespace, model=None):
         registry = self._model_registry.setdefault(model, {}) if model is not None else self._global_registry
         if namespace not in registry:
-            raise self.NamespaceMissing(
+            raise NamespaceMissing(
                 'Namespace %r is not registered yet.' % namespace)
 
         del registry[namespace]

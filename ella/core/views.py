@@ -219,7 +219,7 @@ class ListContentType(EllaCoreView):
             context = self.get_context(request, **kwargs)
             cat = context['category']
             template_name = cat.template
-            archive_template = cat.app_data['ella'].get('archive_template', core_settings.ARCHIVE_TEMPLATE)
+            archive_template = cat.app_data.get('ella', {}).get('archive_template', core_settings.ARCHIVE_TEMPLATE)
 
             if archive_template and not context.get('is_title_page'):
                 template_name = archive_template

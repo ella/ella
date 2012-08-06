@@ -226,7 +226,7 @@ class ListingManager(models.Manager):
                 qset = qset.filter(models.Q(category__tree_parent=category) | models.Q(category=category))
 
                 for c in category.get_children():
-                    if not c.app_data['ella'].get('propagate_listings', True):
+                    if not c.app_data.get('ella', {}).get('propagate_listings', True):
                         qset = qset.exclude(category=c)
 
             elif children == ListingHandler.ALL:
@@ -234,7 +234,7 @@ class ListingManager(models.Manager):
                 qset = qset.filter(category__tree_path__startswith=category.tree_path, category__site=category.site_id)
 
                 for c in category.get_children(True):
-                    if not c.app_data['ella'].get('propagate_listings', True):
+                    if not c.app_data.get('ella', {}).get('propagate_listings', True):
                         qset = qset.exclude(category__tree_path__startswith=c.tree_path)
 
             else:

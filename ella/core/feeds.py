@@ -36,13 +36,13 @@ class RSSTopCategoryListings(Feed):
     # Feed metadata
     ###########################################################################
     def title(self, obj):
-        return obj.app_data['syndication'].get('title', obj.title)
+        return obj.app_data.get('syndication', {}).get('title', obj.title)
 
     def link(self, obj):
         return obj.get_absolute_url()
 
     def description(self, obj):
-        return obj.app_data['syndication'].get('description', obj.description)
+        return obj.app_data.get('syndication', {}).get('description', obj.description)
 
     # Item metadata
     ###########################################################################
