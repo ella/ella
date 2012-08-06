@@ -2,6 +2,9 @@ from django.utils import simplejson as json
 
 from jsonfield.fields import JSONField
 
+from ella.core.conf import core_settings
+from ella.utils import import_module_member
+
 class AppDataField(JSONField):
     def __init__(self, *args, **kwargs):
         self.app_registry = kwargs.pop('app_registry', app_registry)
@@ -80,9 +83,19 @@ class NamespaceRegistry(object):
         self._global_registry = {}
         self._model_registry = {}
 
-        # TODO: overrides from settings
         self._global_overrides = {}
         self._model_overrides = {}
+        # overrides from settings
+        for key, value in core_settings.APP_DATA_CLASSES.iteritems():
+            if key == 'global':
+                self._global_overrides.update(value)
+            else:
+                # use str for models to avoid import-time mess
+                self._model_overrides[key] = value.copy()
+
+        for d in [self._global_overrides] + self._model_overrides.values():
+            for k in d:
+                d[k] = import_module_member(d[k], 'app data container')
 
     def get_class(self, namespace, model):
         """
@@ -90,7 +103,8 @@ class NamespaceRegistry(object):
         then into registered classes.
         """
         for registry in (
-            self._model_overrides.get(model, {}),
+            # use str for models to avoid import-time mess
+            self._model_overrides.get(str(model._meta), {}),
             self._global_overrides,
             self._model_registry.get(model, {}),
             self._global_registry
