@@ -46,7 +46,7 @@ class CategoryUserRoleAdmin(newman.NewmanModelAdmin):
     def refresh_view(self, request, extra_context=None):
         from ella.newman.management.commands.syncroles import denormalize
         # TODO: don't wait for denormalize()
-        denormalize()
+        denormalize(None)
         return HttpResponse(_('All roles is now refreshed.'))
 
 class CategoryUserRoleInline(newman.NewmanTabularInline):
