@@ -11,6 +11,7 @@ from ella.core.cache import cache_this
 from ella.core.conf import core_settings
 from ella.utils import timezone
 
+
 def _import_module_member(modstr, noun):
     module, attr = modstr.rsplit('.', 1)
     try:
@@ -22,6 +23,7 @@ def _import_module_member(modstr, noun):
     except AttributeError, e:
         raise ImproperlyConfigured('Error importing %s %s: "%s"' % (noun, modstr, e))
     return member
+
 
 class CategoryManager(models.Manager):
     _cache = {}
@@ -179,6 +181,9 @@ class ListingHandler(object):
 
     def count(self):
         raise NotImplementedError
+
+    def __len__(self):
+        return self.count()
 
 
 def get_listings_key(self, category=None, children=ListingHandler.NONE, count=10, offset=0, content_types=[], date_range=(), exclude=None, **kwargs):
