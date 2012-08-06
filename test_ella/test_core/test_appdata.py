@@ -36,10 +36,22 @@ class TestAppData(TestCase):
         app_registry.unregister('dummy')
         app_registry.unregister('dummy')
 
+    def test_override_class_for_model_only(self):
+        app_registry.register('dummy', DummyAppDataContainer)
+        app_registry.register('dummy', DummyAppDataContainer2, model=DummyAppDataClass)
+        inst = DummyAppDataClass()
+        tools.assert_true(isinstance(inst.app_data.get('dummy', {}), DummyAppDataContainer2))
+
     def test_get_app_data_returns_registered_class_instance(self):
         app_registry.register('dummy', DummyAppDataContainer)
         inst = DummyAppDataClass()
         tools.assert_true(isinstance(inst.app_data.get('dummy', {}), DummyAppDataContainer))
+
+    def test_existing_values_get_wrapped_in_proper_class(self):
+        app_registry.register('dummy', DummyAppDataContainer)
+        inst = DummyAppDataClass()
+        inst.app_data = {'dummy': {'hullo': 'there'}}
+        tools.assert_true(isinstance(inst.app_data['dummy'], DummyAppDataContainer))
 
     def test_get_app_data_returns_default_class_if_not_registered(self):
         inst = DummyAppDataClass()
