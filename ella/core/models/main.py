@@ -11,7 +11,7 @@ from django.utils.translation import ugettext_lazy as _
 from ella.core.cache import CachedGenericForeignKey, SiteForeignKey, ContentTypeForeignKey, CategoryForeignKey, CachedForeignKey
 from ella.core.conf import core_settings
 from ella.core.managers import CategoryManager
-from ella.core.models.appdata import AppDataField
+from ella.core.app_data import AppDataField
 
 
 class Author(models.Model):

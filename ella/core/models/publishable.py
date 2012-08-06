@@ -1,11 +1,3 @@
-try:
-    # try import offset-aware datetime from Django >= 1.4
-    from django.utils.timezone import now as datetime_now
-except ImportError:
-    # backward compatibility with Django < 1.4 (offset-naive datetimes)
-    from datetime import datetime
-    datetime_now = datetime.now
-
 from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _, ugettext
@@ -20,7 +12,7 @@ from ella.core.cache import CachedGenericForeignKey, \
     CachedForeignKey, ContentTypeForeignKey, CategoryForeignKey
 from ella.core.conf import core_settings
 from ella.core.managers import ListingManager, RelatedManager
-from ella.core.models.appdata import AppDataField
+from ella.core.app_data import AppDataField
 from ella.core.models.main import Author, Source
 from ella.core.signals import content_published, content_unpublished
 from ella.photos.models import Photo
