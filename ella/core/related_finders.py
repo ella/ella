@@ -3,6 +3,7 @@ from django.contrib.contenttypes.models import ContentType
 
 from ella.core.models import Publishable
 
+
 def related_by_category(obj, count, collected_so_far, mods=[], only_from_same_site=True):
     """
     Returns other Publishable objects related to ``obj`` by using the same
@@ -44,7 +45,6 @@ def directly_related(obj, count, collected_so_far, mods=[], only_from_same_site=
     if only_from_same_site:
         qset = qset.filter(category__site__pk=settings.SITE_ID)
     return list(qset[:count])
-
 
 
 
