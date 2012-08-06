@@ -61,20 +61,6 @@ class AppDataContainerFactory(dict):
 
         return default
 
-class AppDataContainer(dict):
-    """
-    Base class for creating custom app data containers.
-    """
-    def __init__(self, model, *args, **kwargs):
-        self.model = model
-        super(AppDataContainer, self).__init__(*args, **kwargs)
-
-    def validate(self, value, model_instance):
-        """
-        Hook for custom validation logic. Will be called from the Field's .validate()
-        """
-        pass
-
 class NamespaceConflict(Exception):
     pass
 

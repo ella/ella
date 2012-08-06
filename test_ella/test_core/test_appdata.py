@@ -3,8 +3,11 @@ from django.test import TestCase
 
 from nose import tools
 
-from ella.core.app_data import AppDataContainer, \
+from ella.core.app_data import \
     NamespaceRegistry, AppDataField, NamespaceConflict, NamespaceMissing
+
+class AppDataContainer(dict):
+    pass
 
 app_registry = NamespaceRegistry(default_class=AppDataContainer)
 
