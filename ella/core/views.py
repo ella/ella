@@ -23,6 +23,8 @@ from ella.core.models import Category, Publishable, Listing
 from ella.core.signals import object_rendering, object_rendered
 
 
+__docformat__ = "restructuredtext en"
+
 # local cache for get_content_type()
 CONTENT_TYPE_MAPPING = {}
 
@@ -263,19 +265,26 @@ class ListContentType(EllaTemplateResponseMixin, View):
         month = self.kwargs.get(self.month_url_kwarg)
         day = self.kwargs.get(self.day_url_kwarg)
 
+        ella_data = self.category.app_data['ella']
+        no_home_listings = ella_data.get('no_home_listings',
+                                         core_settings.CATEGORY_NO_HOME_LISTINGS)
+
         # pagination
         if (self.pagination_url_arg in self.request.GET and
             self.request.GET[self.pagination_url_arg].isdigit()):
             self.page_no = int(self.request.GET[self.pagination_url_arg])
-        else:
-            self.page_no = 1
 
-        self.is_title_page = self.page_no == 1 and not year
+        self.is_title_page = ((self.page_no is None or
+                              (not no_home_listings and self.page_no == 1))
+                              and not year)
         self.is_homepage = (not bool(self.category) and
                             self.page_no == 1 and
                             year is None)
 
-        kwa = {}
+        if self.page_no is None:
+            self.page_no = 1
+
+        kwa = {'category': self.category}
         if day:
             try:
                 sday = datetime(int(year), int(month), int(day))
@@ -300,20 +309,18 @@ class ListContentType(EllaTemplateResponseMixin, View):
             except (ValueError, OverflowError):
                 raise Http404(_('Invalid year value %r') % month)
 
-        if self.category:
+        if 'date_range' in kwa:
+            kwa['date_range'] = tuple(map(utc_localize, kwa['date_range']))
+
+        if self.kwargs[self.category_url_kwarg]:
             kwa['children'] = ListingHandler.ALL
 
         if 'using' in self.kwargs:
             kwa['source'] = self.kwargs.get('using')
         else:
-            kwa['source'] = self.category.app_data.get('ella', {}) \
-                                                  .get('listing_handler',
-                                                       'default')
+            kwa['source'] = ella_data.get('listing_handler', 'default')
 
-        self.paginate_by = self.category.app_data \
-                        .get('ella', {}) \
-                        .get('paginate_by',
-                             core_settings.CATEGORY_LISTINGS_PAGINATE_BY)
+        self.paginate_by = ella_data.get('paginate_by', core_settings.CATEGORY_LISTINGS_PAGINATE_BY)
 
         # Collect all the objects. Store paginator and page objects.
         self.paginator = Paginator(Listing.objects.get_queryset_wrapper(**kwa),
