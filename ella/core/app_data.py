@@ -53,12 +53,6 @@ class AppDataContainerFactory(dict):
             return self[name]
         raise AttributeError()
 
-    def __setattr__(self, name, value):
-        if name.startswith('_') or self._app_registry.get_class(name, self._model) is None:
-            super(AppDataContainerFactory, self).__setattr__(name, value)
-        else:
-            self[name] = value
-
     def __getitem__(self, name):
         class_ = self._app_registry.get_class(name, self._model)
         try:
