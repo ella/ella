@@ -1,5 +1,3 @@
-from UserDict import DictMixin
-
 from django.utils import simplejson as json
 
 from south.modelsinspector import add_introspection_rules
@@ -43,19 +41,37 @@ class AppDataField(JSONField):
 add_introspection_rules([], ["^ella\.core\.app_data\.AppDataField"])
 
 
-class AppDataContainerFactory(DictMixin, dict):
+class AppDataContainerFactory(dict):
     def __init__(self, model, *args, **kwargs):
-        self.model = model
-        self.app_registry = kwargs.pop('app_registry', app_registry)
+        self._model = model
+        self._app_registry = kwargs.pop('app_registry', app_registry)
         super(AppDataContainerFactory, self).__init__(*args, **kwargs)
 
+    def __getattr__(self, name):
+        class_ = self._app_registry.get_class(name, self._model)
+        if class_ is not None:
+            return self[name]
+        raise AttributeError()
+
+    def __setattr__(self, name, value):
+        if name.startswith('_') or self._app_registry.get_class(name, self._model) is None:
+            super(AppDataContainerFactory, self).__setattr__(name, value)
+        else:
+            self[name] = value
+
     def __getitem__(self, name):
-        # get the value, let the possible KeyError propagate
-        val = super(AppDataContainerFactory, self).__getitem__(name)
-        class_ = self.app_registry.get_class(name, self.model)
-        if class_ is not None and not isinstance(val, class_):
-            val = class_(val)
+        class_ = self._app_registry.get_class(name, self._model)
+        try:
+            val = super(AppDataContainerFactory, self).__getitem__(name)
+        except KeyError:
+            if class_ is None:
+                raise
+            val = class_()
             self[name] = val
+        else:
+            if class_ is not None and not isinstance(val, class_):
+                val = class_(val)
+                self[name] = val
 
         return val
 
@@ -66,18 +82,11 @@ class AppDataContainerFactory(DictMixin, dict):
         if default is None:
             return None
 
-        class_ = self.app_registry.get_class(name, self.model)
+        class_ = self._app_registry.get_class(name, self._model)
         if class_ is not None and not isinstance(default, class_):
             return class_(default)
 
         return default
-
-    def setdefault(self, key, default=None):
-        # override the default from DictMixin to return wrapped object by going through __getitem__
-        if key not in self:
-            self[key] = default
-        return self[key]
-
 
 class NamespaceConflict(Exception):
     pass
