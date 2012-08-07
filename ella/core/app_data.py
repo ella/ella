@@ -1,3 +1,5 @@
+from copy import copy
+
 from django.utils import simplejson as json
 
 from south.modelsinspector import add_introspection_rules
@@ -46,6 +48,12 @@ class AppDataContainerFactory(dict):
         self._model = model
         self._app_registry = kwargs.pop('app_registry', app_registry)
         super(AppDataContainerFactory, self).__init__(*args, **kwargs)
+
+    def __setattr__(self, name, value):
+        if name.startswith('_') or self._app_registry.get_class(name, self._model) is None:
+            super(AppDataContainerFactory, self).__setattr__(name, value)
+        else:
+            self[name] = copy(value)
 
     def __getattr__(self, name):
         class_ = self._app_registry.get_class(name, self._model)
