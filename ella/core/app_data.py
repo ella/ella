@@ -1,6 +1,9 @@
 from django.utils import simplejson as json
 
+from south.modelsinspector import add_introspection_rules
+
 from jsonfield.fields import JSONField
+
 
 class AppDataField(JSONField):
     def __init__(self, *args, **kwargs):
@@ -32,8 +35,11 @@ class AppDataField(JSONField):
                 data.validate(value, model_instance)
 
 
+add_introspection_rules([], ["^ella\.core\.app_data\.AppDataField"])
+
+
 class AppDataContainerFactory(dict):
-    def __init__(self, model,  *args, **kwargs):
+    def __init__(self, model, *args, **kwargs):
         self.model = model
         self.app_registry = kwargs.pop('app_registry', app_registry)
         super(AppDataContainerFactory, self).__init__(*args, **kwargs)
@@ -61,6 +67,7 @@ class AppDataContainerFactory(dict):
 
         return default
 
+
 class AppDataContainer(dict):
     """
     Base class for creating custom app data containers.
@@ -75,11 +82,14 @@ class AppDataContainer(dict):
         """
         pass
 
+
 class NamespaceConflict(Exception):
     pass
 
+
 class NamespaceMissing(KeyError):
     pass
+
 
 class NamespaceRegistry(object):
     """
