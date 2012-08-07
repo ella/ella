@@ -1,3 +1,5 @@
+from UserDict import DictMixin
+
 from django.utils import simplejson as json
 
 from south.modelsinspector import add_introspection_rules
@@ -41,7 +43,7 @@ class AppDataField(JSONField):
 add_introspection_rules([], ["^ella\.core\.app_data\.AppDataField"])
 
 
-class AppDataContainerFactory(dict):
+class AppDataContainerFactory(DictMixin, dict):
     def __init__(self, model, *args, **kwargs):
         self.model = model
         self.app_registry = kwargs.pop('app_registry', app_registry)
@@ -65,10 +67,16 @@ class AppDataContainerFactory(dict):
             return None
 
         class_ = self.app_registry.get_class(name, self.model)
-        if class_ is not None:
+        if class_ is not None and not isinstance(default, class_):
             return class_(default)
 
         return default
+
+    def setdefault(self, key, default=None):
+        # override the default from DictMixin to return wrapped object by going through __getitem__
+        if key not in self:
+            self[key] = default
+        return self[key]
 
 
 class NamespaceConflict(Exception):
