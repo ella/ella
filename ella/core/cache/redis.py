@@ -115,7 +115,6 @@ class RedisListingHandler(ListingHandler):
         # content_type
         keys.append(':'.join((cls.PREFIX, 'ct', str(publishable.content_type_id))))
 
-        print category.app_data
         # category shouldn't be propagated
         if not category.app_data.get('ella', {}).get('propagate_listings', True):
             return keys

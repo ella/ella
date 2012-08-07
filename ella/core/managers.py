@@ -2,27 +2,14 @@ from operator import attrgetter
 
 from django.db import models
 from django.core.exceptions import ImproperlyConfigured
-from django.utils.importlib import import_module
 from django.utils.encoding import smart_str
 from django.db.models.loading import get_model
 from django.conf import settings
 
 from ella.core.cache import cache_this
 from ella.core.conf import core_settings
-from ella.utils import timezone
+from ella.utils import timezone, import_module_member
 
-
-def _import_module_member(modstr, noun):
-    module, attr = modstr.rsplit('.', 1)
-    try:
-        mod = import_module(module)
-    except ImportError, e:
-        raise ImproperlyConfigured('Error importing %s %s: "%s"' % (noun, modstr, e))
-    try:
-        member = getattr(mod, attr)
-    except AttributeError, e:
-        raise ImproperlyConfigured('Error importing %s %s: "%s"' % (noun, modstr, e))
-    return member
 
 
 class CategoryManager(models.Manager):
@@ -111,7 +98,7 @@ class RelatedManager(models.Manager):
                 # during the real process
                 finder_funcs = []
                 for finder_modstr in finders_modstr:
-                    finder_funcs.append(_import_module_member(finder_modstr, 'related finder'))
+                    finder_funcs.append(import_module_member(finder_modstr, 'related finder'))
 
                 self._finders[key] = finder_funcs
 
@@ -310,7 +297,7 @@ class ListingManager(models.Manager):
         if not hasattr(self, '_listing_handlers'):
             self._listing_handlers = {}
             for k, v in core_settings.LISTING_HANDLERS.items():
-                self._listing_handlers[k] = _import_module_member(v, 'Listing Handler')
+                self._listing_handlers[k] = import_module_member(v, 'Listing Handler')
 
             if 'default' not in self._listing_handlers:
                 raise ImproperlyConfigured('You didn\'t specify any default Listing Handler.')
