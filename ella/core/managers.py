@@ -11,10 +11,10 @@ from ella.core.conf import core_settings
 from ella.utils import timezone, import_module_member
 
 
-
 class CategoryManager(models.Manager):
     _cache = {}
     _hierarchy = {}
+
     def get_for_id(self, pk):
         try:
             return self.__class__._cache[settings.SITE_ID][pk]

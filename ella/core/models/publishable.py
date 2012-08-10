@@ -86,7 +86,7 @@ class Publishable(models.Model):
         category = self.category
 
         kwargs = {
-            'slug' : self.slug,
+            'slug': self.slug,
         }
 
         if self.static:
@@ -98,9 +98,9 @@ class Publishable(models.Model):
                 url = reverse('home_static_detail', kwargs=kwargs)
         else:
             kwargs.update({
-                    'year' : self.publish_from.year,
-                    'month' : self.publish_from.month,
-                    'day' : self.publish_from.day,
+                    'year': self.publish_from.year,
+                    'month': self.publish_from.month,
+                    'day': self.publish_from.day,
                 })
             if category.tree_parent_id:
                 kwargs['category'] = category.tree_path
@@ -111,7 +111,6 @@ class Publishable(models.Model):
         if category.site_id != settings.SITE_ID or domain:
             return 'http://' + category.site.domain + url
         return url
-
 
     def get_domain_url(self):
         return self.get_absolute_url(domain=True)

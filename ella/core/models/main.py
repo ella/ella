@@ -1,3 +1,4 @@
+from datetime import datetime
 import re
 
 from django.conf import settings
@@ -5,6 +6,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.core.validators import validate_slug, RegexValidator
 from django.db import models
+from django.db.models.loading import get_model
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
@@ -17,11 +19,11 @@ from ella.core.app_data import AppDataField
 class Author(models.Model):
     """
     Describes an Author of the published content. Author can be:
-    
+
     * Human
     * Organization
     * ...
-    
+
     All the fields except for ``slug`` are optional to enable maximum of 
     flexibility.
     """
@@ -39,6 +41,18 @@ class Author(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    @models.permalink
+    def get_absolute_url(self):
+        return ('author_detail', [self.slug])
+
+    def recently_published(self):
+        Publishable = get_model('core', 'Publishable')
+        now = datetime.now()
+        return Publishable.objects.filter(
+            models.Q(publish_to__isnull=True) | models.Q(publish_to__gt=now),
+            authors__in=[self], published=True, publish_from__lte=now
+        )
 
 
 class Source(models.Model):
