@@ -49,6 +49,25 @@ class TestAppData(TestCase):
         tools.assert_true(isinstance(art.app_data['testing'], DummyAppDataContainer2))
         tools.assert_true(isinstance(inst.app_data['testing'], DummyAppDataContainer))
 
+    def test_registered_classes_can_behave_as_attrs(self):
+        global_app_registry.register('dummy', DummyAppDataContainer)
+        art = Article()
+        tools.assert_true(isinstance(art.app_data.dummy, DummyAppDataContainer))
+
+    def test_registered_classes_can_be_set_as_attrs(self):
+        global_app_registry.register('dummy', DummyAppDataContainer)
+        art = Article()
+        art.app_data.dummy = {'answer': 42}
+        tools.assert_true(isinstance(art.app_data.dummy, DummyAppDataContainer))
+        tools.assert_equals(DummyAppDataContainer({'answer': 42}), art.app_data.dummy)
+        tools.assert_equals({'dummy': {'answer': 42}}, art.app_data)
+
+    def test_registered_classes_get_stored_on_access(self):
+        global_app_registry.register('dummy', DummyAppDataContainer)
+        art = Article()
+        art.app_data['dummy']
+        tools.assert_equals({'dummy': {}}, art.app_data)
+
     @tools.raises(NamespaceConflict)
     def test_namespace_can_only_be_registered_once(self):
         app_registry.register('dummy', DummyAppDataContainer)

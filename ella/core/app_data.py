@@ -1,3 +1,5 @@
+from copy import copy
+
 from django.utils import simplejson as json
 
 from south.modelsinspector import add_introspection_rules
@@ -43,17 +45,34 @@ add_introspection_rules([], ["^ella\.core\.app_data\.AppDataField"])
 
 class AppDataContainerFactory(dict):
     def __init__(self, model, *args, **kwargs):
-        self.model = model
-        self.app_registry = kwargs.pop('app_registry', app_registry)
+        self._model = model
+        self._app_registry = kwargs.pop('app_registry', app_registry)
         super(AppDataContainerFactory, self).__init__(*args, **kwargs)
 
+    def __setattr__(self, name, value):
+        if name.startswith('_') or self._app_registry.get_class(name, self._model) is None:
+            super(AppDataContainerFactory, self).__setattr__(name, value)
+        else:
+            self[name] = copy(value)
+
+    def __getattr__(self, name):
+        if name.startswith('_') or self._app_registry.get_class(name, self._model) is None:
+            raise AttributeError()
+        return self[name]
+
     def __getitem__(self, name):
-        # get the value, let the possible KeyError propagate
-        val = super(AppDataContainerFactory, self).__getitem__(name)
-        class_ = self.app_registry.get_class(name, self.model)
-        if class_ is not None and not isinstance(val, class_):
-            val = class_(val)
+        class_ = self._app_registry.get_class(name, self._model)
+        try:
+            val = super(AppDataContainerFactory, self).__getitem__(name)
+        except KeyError:
+            if class_ is None:
+                raise
+            val = class_()
             self[name] = val
+        else:
+            if class_ is not None and not isinstance(val, class_):
+                val = class_(val)
+                self[name] = val
 
         return val
 
@@ -64,12 +83,11 @@ class AppDataContainerFactory(dict):
         if default is None:
             return None
 
-        class_ = self.app_registry.get_class(name, self.model)
-        if class_ is not None:
+        class_ = self._app_registry.get_class(name, self._model)
+        if class_ is not None and not isinstance(default, class_):
             return class_(default)
 
         return default
-
 
 class NamespaceConflict(Exception):
     pass
