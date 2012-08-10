@@ -1,14 +1,16 @@
 from datetime import datetime, timedelta
 
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator
-from django.conf import settings
 from django.db import models
+from django.db.models.loading import get_model
 from django.http import Http404
 from django.shortcuts import redirect, render
 from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
 from django.utils.translation import ugettext_lazy as _
+from django.views.generic.list import ListView
 
 from ella.core.models import Listing, Category, Publishable
 from ella.core.cache import get_cached_object_or_404, cache_this
@@ -22,6 +24,40 @@ __docformat__ = "restructuredtext en"
 
 # local cache for get_content_type()
 CONTENT_TYPE_MAPPING = {}
+
+
+class AuthorView(ListView):
+    model = Publishable
+    context_object_name = 'listings'
+    allow_empty = True
+    paginate_by = core_settings.CATEGORY_LISTINGS_PAGINATE_BY
+    template_name = 'page/author.html'
+
+    def get(self, request, *args, **kwargs):
+        if 'slug' not in kwargs:
+            raise Http404
+
+        # Compatibility with `paginator` tag.
+        if request.GET.get('p', False) is not False:
+            self.kwargs.update({'page': request.GET['p']})
+
+        Author = get_model('core', 'Author')
+        self.author = Author.objects.get(slug=kwargs['slug'])
+
+        return super(AuthorView, self).get(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return self.author.recently_published()
+
+    def get_context_data(self, **kwargs):
+        base = super(AuthorView, self).get_context_data(**kwargs)
+        base.update({'object': self.author})
+
+        # Compatibility with `paginator` tag.
+        if base['page_obj']:
+            base.update({'page': base['page_obj']})
+
+        return base
 
 
 class EllaCoreView(object):
