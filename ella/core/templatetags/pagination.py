@@ -9,10 +9,11 @@ register = template.Library()
 
 def _do_paginator(context, adjacent_pages, template_name):
     if template_name is None:
-        template_name = ('inclusion_tags/paginator.html', 'inc/paginator.html')
+        template_name = ('inclusion_tags/paginator.html',
+                         'inc/paginator.html')
     else:
         template_name = ('inclusion_tags/paginator_%s.html' % template_name,
-                         'inc/paginator.html' % template_name)
+                         'inc/paginator_%s.html' % template_name)
 
     if not 'page' in context:
         # improper use of paginator tag, bail out
@@ -43,12 +44,14 @@ def _do_paginator(context, adjacent_pages, template_name):
 @register.simple_tag(takes_context=True)
 def paginator(context, adjacent_pages=2, template_name=None):
     """
-    Renders a ``inclusion_tags/paginator.html`` template with additional
-    pagination context. To be used in conjunction with the ``object_list`` generic
+    Renders a ``inclusion_tags/paginator.html`` or ``inc/paginator.html``
+    template with additional pagination context. To be used in conjunction
+    with the ``object_list`` generic
     view.
 
     If ``TEMPLATE_NAME`` parameter is given,
-    ``inclusion_tags/paginator_TEMPLATE_NAME.html`` will be used instead.
+    ``inclusion_tags/paginator_TEMPLATE_NAME.html`` or 
+    ``inc/paginator_TEMPLATE_NAME.html`` will be used instead.
 
     Adds pagination context variables for use in displaying first, adjacent pages and
     last page links in addition to those created by the ``object_list`` generic

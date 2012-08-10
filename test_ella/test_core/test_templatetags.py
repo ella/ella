@@ -40,7 +40,7 @@ class TestPaginate(UnitTestCase):
             'page': page
         }
 
-        tools.assert_equals(('inclusion_tags/paginator.html', {
+        tools.assert_equals((('inclusion_tags/paginator.html', 'inc/paginator.html'), {
             'page': page,
             'page_numbers': [1, 2, 3, 4, 5],
             'query_params': '?using=custom_lh&other=param+with+spaces&p=',
@@ -51,7 +51,7 @@ class TestPaginate(UnitTestCase):
 
     def test_always_include_given_number_of_pages(self):
         page = Paginator(range(100), 9).page(1)
-        tools.assert_equals(('inclusion_tags/paginator_special.html',{
+        tools.assert_equals((('inclusion_tags/paginator_special.html', 'inc/paginator_special.html'), {
             'page': page,
             'page_numbers': [1, 2, 3, 4, 5, 6, 7],
             'query_params': '?p=',
@@ -61,7 +61,7 @@ class TestPaginate(UnitTestCase):
         }), _do_paginator({'page': page}, 3, 'special'))
 
     def test_dont_fail_on_missing_page(self):
-        tools.assert_equals(('inclusion_tags/paginator.html', {}),  _do_paginator({}, 2, None))
+        tools.assert_equals((('inclusion_tags/paginator.html', 'inc/paginator.html'), {}), _do_paginator({}, 2, None))
 
     def test_proper_template_gets_rendered(self):
         template_loader.templates['inclusion_tags/paginator_special.html'] = 'special'
