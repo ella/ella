@@ -12,7 +12,7 @@ def _do_paginator(context, adjacent_pages, template_name):
         template_name = ('inclusion_tags/paginator.html', 'inc/paginator.html')
     else:
         template_name = ('inclusion_tags/paginator_%s.html' % template_name,
-                         'inc/paginator.html' % template_name)
+                         'inc/paginator_%s.html' % template_name)
 
     if not 'page' in context:
         # improper use of paginator tag, bail out
