@@ -52,7 +52,7 @@ class Author(models.Model):
         return Publishable.objects.filter(
             models.Q(publish_to__isnull=True) | models.Q(publish_to__gt=now),
             authors__in=[self], published=True, publish_from__lte=now
-        )
+        ).order_by('-publish_from')
 
 
 class Source(models.Model):
