@@ -11,6 +11,16 @@ from ella.core.conf import core_settings
 from ella.utils import timezone, import_module_member
 
 
+class PublishableManager(models.Manager):
+    def current(self, now=None):
+        now = timezone.now().replace(second=0, microsecond=0)
+
+        return self.filter(
+            models.Q(publish_to__isnull=True) | models.Q(publish_to__gt=now),
+            published=True, publish_from__lte=now
+        )
+
+
 class CategoryManager(models.Manager):
     _cache = {}
     _hierarchy = {}
