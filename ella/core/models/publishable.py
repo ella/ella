@@ -11,7 +11,8 @@ from ella.core.box import Box
 from ella.core.cache import CachedGenericForeignKey, \
     CachedForeignKey, ContentTypeForeignKey, CategoryForeignKey
 from ella.core.conf import core_settings
-from ella.core.managers import ListingManager, RelatedManager
+from ella.core.managers import ListingManager, RelatedManager, \
+    PublishableManager
 from ella.core.app_data import AppDataField
 from ella.core.models.main import Author, Source
 from ella.core.signals import content_published, content_unpublished
@@ -72,6 +73,8 @@ class Publishable(models.Model):
 
     # has the content_published signal been sent for this instance?
     announced = models.BooleanField(help_text='Publish signal sent', default=False, editable=False)
+
+    objects = PublishableManager()
 
     class Meta:
         app_label = 'core'

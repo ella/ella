@@ -1,4 +1,3 @@
-from datetime import datetime
 import re
 
 from django.conf import settings
@@ -12,7 +11,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from ella.core.cache import CachedGenericForeignKey, SiteForeignKey, ContentTypeForeignKey, CategoryForeignKey, CachedForeignKey
 from ella.core.conf import core_settings
-from ella.core.managers import CategoryManager
+from ella.core.managers import CategoryManager, ListingHandler
 from ella.core.app_data import AppDataField
 
 
@@ -46,13 +45,11 @@ class Author(models.Model):
     def get_absolute_url(self):
         return ('author_detail', [self.slug])
 
-    def recently_published(self):
-        Publishable = get_model('core', 'Publishable')
-        now = datetime.now()
-        return Publishable.objects.filter(
-            models.Q(publish_to__isnull=True) | models.Q(publish_to__gt=now),
-            authors__in=[self], published=True, publish_from__lte=now
-        ).order_by('-publish_from')
+    def recently_published(self, **kwargs):
+        Listing = get_model('core', 'Listing')
+        return Listing.objects.get_listing(children=ListingHandler.ALL,
+                                           publishable__authors__in=[self],
+                                           **kwargs)
 
 
 class Source(models.Model):
