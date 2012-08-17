@@ -26,7 +26,7 @@ class RelatedManager(models.Manager):
             qset = qset.filter(content_type__in=ct_ids)
         if only_from_same_site:
             qset = qset.filter(category__site__pk=settings.SITE_ID)
-        related = list(qset[:count])
+        related = list(qset.order_by('related_related_id')[:count])
 
         if len(related) >= count:
             return related
