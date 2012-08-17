@@ -3,5 +3,5 @@ south>=0.7
 PIL
 pytz
 
-jsonfield
+jsonfield>=0.8.10
 

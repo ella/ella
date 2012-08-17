@@ -21,7 +21,7 @@ class AppDataField(JSONField):
         """Convert string value to JSON and wrap it in AppDataContainerFactory"""
         if isinstance(value, basestring):
             try:
-                val = json.loads(value, **self.load_kwargs)
+                val = json.loads(value)
                 return AppDataContainerFactory(self.model, val, app_registry=self.app_registry)
             except ValueError:
                 pass
