@@ -79,6 +79,9 @@ def get_cached_object(model, timeout=CACHE_TIMEOUT, **kwargs):
     if obj is None:
         obj = model_ct.model_class()._default_manager.get(**kwargs)
         if model_ct == _get_publishable_ct():
+            # Let the original key set to the subclass. Otherwise the
+            # cache key wouldn't eventually be set in case the query is 
+            # not by PK, but by different filter args.
             obj = obj.target
         cache.set(key, obj, timeout)
     return obj
