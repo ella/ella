@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.forms import models as modelforms
 
-from ella.core.models import Author, Source, Category, Listing
+from ella.core.models import Author, Source, Category, Listing, Related
 
 
 class ListingForm(modelforms.ModelForm):
@@ -13,6 +13,12 @@ class ListingInlineAdmin(admin.TabularInline):
     model = Listing
     extra = 2
     fieldsets = ((None, {'fields': ('category', 'publish_from', 'commercial',)}),)
+
+
+class RelatedInlineAdmin(admin.TabularInline):
+    model = Related
+    extra = 3
+#    raw_id_fields = ('publishable_id',)
 
 
 class CategoryAdmin(admin.ModelAdmin):
