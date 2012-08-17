@@ -16,7 +16,7 @@ from django.conf import settings
 log = logging.getLogger('ella.core.cache.utils')
 
 KEY_PREFIX = 'core.gco'
-CACHE_TIMEOUT = getattr(settings, 'CACHE_TIMEOUT', 10*60)
+CACHE_TIMEOUT = getattr(settings, 'CACHE_TIMEOUT', 10 * 60)
 
 
 PUBLISHABLE_CT = None
@@ -69,15 +69,16 @@ def get_cached_object(model, timeout=CACHE_TIMEOUT, **kwargs):
         model.DoesNotExist is propagated from content_type.get_object_for_this_type
     """
     if not isinstance(model, ContentType):
-        model = ContentType.objects.get_for_model(model)
+        model_ct = ContentType.objects.get_for_model(model)
+    else:
+        model_ct = model
 
-    key = _get_key(KEY_PREFIX, model, **kwargs)
+    key = _get_key(KEY_PREFIX, model_ct, **kwargs)
 
     obj = cache.get(key)
     if obj is None:
-        mclass = model.model_class()
-        obj = mclass._default_manager.get(**kwargs)
-        if model == _get_publishable_ct():
+        obj = model_ct.model_class()._default_manager.get(**kwargs)
+        if model_ct == _get_publishable_ct():
             return obj.target
         cache.set(key, obj, timeout)
     return obj
