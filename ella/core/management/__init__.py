@@ -2,6 +2,16 @@ from ella.core.signals import content_published, content_unpublished
 from ella.core.models import Publishable, Listing
 from ella.utils import timezone
 
+
+def regenerate_publish_signals(now=None):
+    if now is None:
+        now = timezone.now()
+
+    qset = Publishable.objects.filter(publish_from__lt=now, published=True).exclude(publish_to__lt=now)
+    for p in qset:
+        content_published.send(sender=p.content_type.model_class(), publishable=p)
+
+
 def generate_publish_signals(now=None):
     if now is None:
         now = timezone.now()
@@ -17,6 +27,7 @@ def generate_publish_signals(now=None):
     for p in qset:
         content_unpublished.send(sender=p.content_type.model_class(), publishable=p)
     qset.update(announced=False)
+
 
 def regenerate_listing_handlers(today=None):
     if today is None:
