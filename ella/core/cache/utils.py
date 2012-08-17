@@ -79,7 +79,7 @@ def get_cached_object(model, timeout=CACHE_TIMEOUT, **kwargs):
     if obj is None:
         obj = model_ct.model_class()._default_manager.get(**kwargs)
         if model_ct == _get_publishable_ct():
-            return obj.target
+            obj = obj.target
         cache.set(key, obj, timeout)
     return obj
 

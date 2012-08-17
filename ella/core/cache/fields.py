@@ -10,7 +10,7 @@ def generate_fk_class(name, retrieve_func, limit_to_model=None):
     class CustomForeignKey(ForeignKey):
         def __init__(self, *args, **kwargs):
             if limit_to_model:
-                args = (limit_to_model, ) + args
+                args = (limit_to_model,) + args
             super(CustomForeignKey, self).__init__(*args, **kwargs)
 
         def contribute_to_class(self, cls, name):
