@@ -82,7 +82,10 @@ def get_cached_object(model, timeout=CACHE_TIMEOUT, **kwargs):
             # Let the original key set to the subclass. Otherwise the
             # cache key wouldn't eventually be set in case the query is 
             # not by PK, but by different filter args.
-            obj = obj.target
+            if 'pk' in kwargs:
+                return obj.target
+            else:
+                obj = obj.target
         cache.set(key, obj, timeout)
     return obj
 
