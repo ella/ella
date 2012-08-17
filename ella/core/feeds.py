@@ -10,11 +10,18 @@ from ella.core.conf import core_settings
 from ella.core.managers import ListingHandler
 from ella.photos.models import Format, FormatedPhoto
 
+
 class RSSTopCategoryListings(Feed):
+    format_name = None
+
     def __init__(self, *args, **kwargs):
         super(RSSTopCategoryListings, self).__init__(*args, **kwargs)
+
         if core_settings.RSS_ENCLOSURE_PHOTO_FORMAT:
-            self.format = Format.objects.get_for_name(core_settings.RSS_ENCLOSURE_PHOTO_FORMAT)
+            self.format_name = core_settings.RSS_ENCLOSURE_PHOTO_FORMAT
+
+        if self.format_name is not None:
+            self.format = Format.objects.get_for_name(self.format_name)
         else:
             self.format = None
 
@@ -46,6 +53,9 @@ class RSSTopCategoryListings(Feed):
 
     # Item metadata
     ###########################################################################
+    def item_guid(self, item):
+        return str(item.pk)
+
     def item_pubdate(self, item):
         return item.publish_from
 
@@ -79,7 +89,7 @@ class RSSTopCategoryListings(Feed):
         if not hasattr(item, '__enclosure_url'):
             if hasattr(item.publishable, 'feed_enclosure'):
                 item.__enclosure_url = item.publishable.feed_enclosure()['url']
-            elif self.format and  item.publishable.photo_id:
+            elif self.format is not None and item.publishable.photo_id:
                 item.__enclosure_url = FormatedPhoto.objects.get_photo_in_format(item.publishable.photo_id, self.format)['url']
             else:
                 item.__enclosure_url = None
