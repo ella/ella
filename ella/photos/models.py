@@ -214,11 +214,32 @@ class Format(models.Model):
         Return fake ``FormatedPhoto`` object to be used in templates when an error
         occurs in image generation.
         """
+        if photos_settings.DEBUG:
+            return self.get_placeholder_img()
+
         out = {
             'blank': True,
             'width': self.max_width,
             'height': self.max_height,
             'url': photos_settings.EMPTY_IMAGE_SITE_PREFIX + 'img/empty/%s.png' % (self.name),
+        }
+        return out
+
+    def get_placeholder_img(self):
+        """
+        Returns fake ``FormatedPhoto`` object grabbed from image placeholder
+        generator service for the purpose of debugging when images
+        are not available but we still want to see something.
+        """
+        pars = {
+            'width': self.max_width,
+            'height': self.max_height
+        }
+        out = {
+            'placeholder': True,
+            'width': self.max_width,
+            'height': self.max_height,
+            'url': photos_settings.DEBUG_PLACEHOLDER_PROVIDER_TEMPLATE % pars
         }
         return out
 

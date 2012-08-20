@@ -22,12 +22,15 @@ TYPE_EXTENSION = {
     'GIF': '.gif'
 }
 
-PHOTO_MIN_WIDTH=150
-PHOTO_MIN_HEIGHT=150
+PHOTO_MIN_WIDTH = 150
+PHOTO_MIN_HEIGHT = 150
 
 DEFAULT_BG_COLOR = 'black'
 
 FORMATED_PHOTO_FILENAME = None
+
+DEBUG = False
+DEBUG_PLACEHOLDER_PROVIDER_TEMPLATE = 'http://placehold.it/%(width)sx%(height)s'
 
 photos_settings = Settings('ella.photos.conf', 'PHOTOS')
 
