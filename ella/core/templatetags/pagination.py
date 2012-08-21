@@ -68,6 +68,7 @@ def paginator(context, adjacent_pages=2, template_name=None):
         {% paginator %}
         {% paginator 5 %}
         {% paginator 5 "special" %}
+        # with Django 1.4 and above you can also do:
         {% paginator template_name="special" %}
     """
     tname, context = _do_paginator(context, adjacent_pages, template_name)

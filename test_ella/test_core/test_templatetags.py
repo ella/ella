@@ -2,8 +2,9 @@
 from unittest import TestCase as UnitTestCase
 from django.test import TestCase, RequestFactory
 
-from nose import tools
+from nose import tools, SkipTest
 
+import django
 from django import template
 from django.template import TemplateSyntaxError
 from django.contrib.sites.models import Site
@@ -64,6 +65,13 @@ class TestPaginate(UnitTestCase):
         tools.assert_equals((('inclusion_tags/paginator.html', 'inc/paginator.html'), {}), _do_paginator({}, 2, None))
 
     def test_proper_template_gets_rendered(self):
+        template_loader.templates['inclusion_tags/paginator_special.html'] = 'special'
+        t = template.Template('{% load pagination %}{% paginator 1 "special" %}')
+        tools.assert_equals('special', t.render(template.Context()))
+
+    def test_proper_template_gets_rendered_via_kwargs(self):
+        if django.VERSION[:2] < (1, 4):
+            raise SkipTest()
         template_loader.templates['inclusion_tags/paginator_special.html'] = 'special'
         t = template.Template('{% load pagination %}{% paginator template_name="special" %}')
         tools.assert_equals('special', t.render(template.Context()))
