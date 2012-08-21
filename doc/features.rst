@@ -674,6 +674,25 @@ The basic workflow when using photos goes like this:
    
 .. _initial data: https://docs.djangoproject.com/en/dev/howto/initial-data/
 
+.. _features-photo-placeholders:
+
+Using placeholder images during development
+===========================================
+
+It is quite common that during development of the Ella application, one doesn't
+always have all the photos stated in database on his HDD. This can happen
+when you share one database dump with co-workers and someone adds new articles
+etc.
+
+In order to show at least something, Ella provides debugging setting which
+will replace the missing image files by **placeholder images**. You can enable
+this by setting ``PHOTOS_DEBUG = True`` in your project settings. By default,
+Ella will use web service http://placehold.it to generate the images. Optionally,
+you can use your custom placeholder service by changing the ``PHOTOS_DEBUG_PLACEHOLDER_PROVIDER_TEMPLATE``
+to your own. Use something like this::
+
+    DEBUG_PLACEHOLDER_PROVIDER_TEMPLATE = 'http://placehold.it/%(width)sx%(height)s' 
+
 .. _features-related:
 
 Working with related objects
