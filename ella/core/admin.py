@@ -32,6 +32,7 @@ class CategoryAdmin(admin.ModelAdmin):
 class AuthorAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
     search_fields = ('name',)
+    raw_id_fields = ('photo',)
 
 
 class SourceAdmin(admin.ModelAdmin):
