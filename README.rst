@@ -57,5 +57,9 @@ Have a look at the docs: http://readthedocs.org/docs/ella/en/latest/quickstart.h
 Build status
 ************
 
-:Master branch: .. image:: https://secure.travis-ci.org/ella/ella.png?branch=master
+:Master branch:
+
+  .. image:: https://secure.travis-ci.org/ella/ella.png?branch=master
+     :alt: Travis CI - Distributed build platform for the open source community
+     :target: http://travis-ci.org/#!/ella/ella
 
