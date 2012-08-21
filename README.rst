@@ -53,3 +53,9 @@ Quickstart
 **********
 
 Have a look at the docs: http://readthedocs.org/docs/ella/en/latest/quickstart.html.
+
+Build status
+************
+
+Master branch: .. image:: https://secure.travis-ci.org/ella/ella.png?branch=master
+
