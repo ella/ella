@@ -32,6 +32,8 @@ class Author(models.Model):
     description = models.TextField(_('Description'), blank=True)
     text = models.TextField(_('Text'), blank=True)
     email = models.EmailField(_('Email'), blank=True)
+    photo = CachedForeignKey('photos.Photo', blank=True, null=True,
+                             on_delete=models.SET_NULL, verbose_name=_('Photo'))
 
     class Meta:
         app_label = 'core'
