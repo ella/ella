@@ -70,9 +70,10 @@ of it:
 * `tested.com <http://www.tested.com>`_
 * `mom.me <http://mom.me>`_
 * `Investicniweb.cz <http://www.investicniweb.cz>`_
+* `MarieClaire.cz <http://www.marieclaire.cz>`_
 * `Dumazahrada.cz <http://www.dumazahrada.cz>`_
 * `Květy <http://kvety.kafe.cz>`_
-* `Vlasta <http://vlasta.kafe.cz>`_
+* `Vlasta <http://www.vlasta.cz>`_
 * `Crazycafe.cz <http://www.crazycafe.cz>`_
 * `EquiTV.cz <http://equitv.cz/>`_
 * `Vaquero.cz <http://vaquero.cz/>`_
