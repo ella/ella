@@ -12,8 +12,8 @@ from django.template.response import TemplateResponse
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic.list import ListView
 
-from ella.core.models import Listing, Category, Publishable
-from ella.core.cache import get_cached_object_or_404, cache_this
+from ella.core.models import Listing, Category, Publishable, Author
+from ella.core.cache import get_cached_object_or_404, cache_this, get_cached_object
 from ella.core import custom_urls
 from ella.core.conf import core_settings
 from ella.core.managers import ListingHandler
@@ -38,11 +38,10 @@ class AuthorView(ListView):
             raise Http404
 
         # Compatibility with `paginator` tag.
-        if request.GET.get('p', False) is not False:
+        if 'p' in request.GET:
             self.kwargs.update({'page': request.GET['p']})
 
-        Author = get_model('core', 'Author')
-        self.author = Author.objects.get(slug=kwargs['slug'])
+        self.author = get_cached_object(Author, slug=kwargs['slug'])
 
         return super(AuthorView, self).get(request, *args, **kwargs)
 
