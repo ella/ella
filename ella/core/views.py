@@ -249,19 +249,20 @@ class ListContentType(EllaCoreView):
     def __call__(self, request, **kwargs):
         try:
             context = self.get_context(request, **kwargs)
-            cat = context['category']
-            template_name = cat.template
-            archive_template = cat.app_data.get('ella', {}).get('archive_template', core_settings.ARCHIVE_TEMPLATE)
-
-            if archive_template and not context.get('is_title_page'):
-                template_name = archive_template
-
-            object_rendering.send(sender=Category, request=request, category=cat, publishable=None)
-            object_rendered.send(sender=Category, request=request, category=cat, publishable=None)
-
-            return self.render(request, context, self.get_templates(context, template_name))
         except self.EmptyHomepageException:
             return self.render(request, {}, self.empty_homepage_template_name)
+
+        cat = context['category']
+        template_name = cat.template
+        archive_template = cat.app_data.get('ella', {}).get('archive_template', core_settings.ARCHIVE_TEMPLATE)
+
+        if archive_template and not context.get('is_title_page'):
+            template_name = archive_template
+
+        object_rendering.send(sender=Category, request=request, category=cat, publishable=None)
+        object_rendered.send(sender=Category, request=request, category=cat, publishable=None)
+
+        return self.render(request, context, self.get_templates(context, template_name))
 
     @cache_this(archive_year_cache_key, timeout=60 * 60 * 24)
     def _archive_entry_year(self, category):
