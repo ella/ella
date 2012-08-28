@@ -183,13 +183,11 @@ class ObjectDetail(EllaCoreView):
             # future publish, render if accessed by logged in staff member
             raise Http404
 
-        obj = publishable.target
-
         context = {
-                'object' : obj,
+                'object' : publishable,
                 'category' : cat,
-                'content_type_name' : slugify(obj.content_type.model_class()._meta.verbose_name_plural),
-                'content_type' : obj.content_type
+                'content_type_name' : slugify(publishable.content_type.model_class()._meta.verbose_name_plural),
+                'content_type' : publishable.content_type
             }
 
         return context
