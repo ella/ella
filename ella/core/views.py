@@ -132,19 +132,19 @@ class ObjectDetail(EllaCoreView):
     """
     template_name = 'object.html'
 
+    class WrongUrl(Http404): pass
+
     def __call__(self, request, category, slug, year=None, month=None, day=None, id=None, url_remainder=None):
-        context = self.get_context(request, category, slug, year, month, day, id)
-
-        obj = context['object']
-
-        if obj.static and (slug != obj.slug or obj.category_id != context['category'].pk):
+        try:
+            context = self.get_context(request, category, slug, year, month, day, id)
+        except self.WrongUrl, e:
+            message, obj = e.args
             url = obj.get_absolute_url()
             if url_remainder:
                 url += url_remainder
             return redirect(url, permanent=True)
 
-        # save existing object to preserve memory and SQL
-        obj.category = context['category']
+        obj = context['object']
 
         object_rendering.send(sender=context['object'].__class__, request=request, category=context['category'], publishable=context['object'])
 
@@ -163,7 +163,11 @@ class ObjectDetail(EllaCoreView):
         try:
             cat = Category.objects.get_by_tree_path(category)
         except Category.DoesNotExist:
-            raise Http404("Category with tree_path '%s' doesn't exist." % category)
+            # non-static url, no way to recover
+            if year:
+                raise Http404("Category with tree_path '%s' doesn't exist." % category)
+            else:
+                cat = None
 
         if year:
             publishable = get_cached_object_or_404(Publishable,
@@ -176,12 +180,21 @@ class ObjectDetail(EllaCoreView):
                     )
         else:
             publishable = get_cached_object_or_404(Publishable, pk=id)
-            if not publishable.static:
-                raise Http404()
+            if cat is None:
+                raise self.WrongUrl('Category with tree_path %r does not exist.' % category, publishable)
+            elif not publishable.static:
+                raise self.WrongUrl('%s is not static.' % publishable, publishable)
+            elif slug != publishable.slug:
+                raise self.WrongUrl('Wrong slug in URL (%r).' % slug, publishable)
+            elif publishable.category_id != cat.pk:
+                raise self.WrongUrl('Wrong category for %s.' % publishable, publishable)
 
         if not (publishable.is_published() or request.user.is_staff):
             # future publish, render if accessed by logged in staff member
             raise Http404
+
+        # save existing object to preserve memory and SQL
+        publishable.category = cat
 
         context = {
                 'object' : publishable,

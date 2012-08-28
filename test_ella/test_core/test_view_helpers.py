@@ -63,6 +63,7 @@ class TestObjectDetail(ViewHelpersTestCase):
     def setUp(self):
         super(TestObjectDetail, self).setUp()
         self.correct_args = [self.request, 'nested-category', 'first-article', '2008', '1', '10', None]
+        self.correct_static_args = self.correct_args[:3] + [None, None, None, self.publishable.id]
         self.object_detail = ObjectDetail()
 
     def test_raises_404_on_incorrect_category(self):
@@ -102,15 +103,38 @@ class TestObjectDetail(ViewHelpersTestCase):
     def test_matches_static_placement_if_date_is_not_supplied(self):
         self.publishable.static = True
         self.publishable.save()
-        self.correct_args = self.correct_args[:3] + [None, None, None, self.publishable.id]
 
-        c = self.object_detail.get_context(*self.correct_args)
+        c = self.object_detail.get_context(*self.correct_static_args)
 
         tools.assert_equals(4, len(c.keys()))
         tools.assert_equals(self.publishable, c['object'])
         tools.assert_equals(self.category_nested, c['category'])
         tools.assert_equals('articles', c['content_type_name'])
         tools.assert_equals(self.publishable.content_type, c['content_type'])
+
+    def test_raises_wrong_url_on_missing_category(self):
+        self.publishable.static = True
+        self.publishable.save()
+
+        self.correct_static_args[1] = 'non-existent/category'
+        tools.assert_raises(self.object_detail.WrongUrl, self.object_detail.get_context, *self.correct_static_args)
+
+    def test_raises_wrong_url_on_wong_slug(self):
+        self.publishable.static = True
+        self.publishable.save()
+
+        self.correct_static_args[2] = 'not a slug'
+        tools.assert_raises(self.object_detail.WrongUrl, self.object_detail.get_context, *self.correct_static_args)
+
+    def test_raises_wrong_url_on_not_static(self):
+        tools.assert_raises(self.object_detail.WrongUrl, self.object_detail.get_context, *self.correct_static_args)
+
+    def test_raises_wrong_url_on_wong_category(self):
+        self.publishable.static = True
+        self.publishable.save()
+
+        self.correct_static_args[1] = ''
+        tools.assert_raises(self.object_detail.WrongUrl, self.object_detail.get_context, *self.correct_static_args)
 
 class TestListContentType(ViewHelpersTestCase):
     def setUp(self):
