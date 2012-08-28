@@ -4,7 +4,6 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator
 from django.db import models
-from django.db.models.loading import get_model
 from django.http import Http404
 from django.shortcuts import redirect, render
 from django.template.defaultfilters import slugify
