@@ -156,8 +156,8 @@ class Publishable(models.Model):
             old_path = old_self.get_absolute_url()
             new_path = self.get_absolute_url()
 
-            # detect change in URL
-            if old_path != new_path and new_path:
+            # detect change in URL and not a static one
+            if old_path != new_path and new_path and not old_self.static:
                 # and create a redirect
                 redirect = Redirect.objects.get_or_create(old_path=old_path,
                     site=self.category.site)[0]
