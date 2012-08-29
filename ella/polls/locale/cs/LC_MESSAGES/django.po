@@ -7,10 +7,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-11-15 18:14+0100\n"
-"PO-Revision-Date: 2009-06-18 15:22+0100\n"
+"POT-Creation-Date: 2012-08-29 11:12+0200\n"
+"PO-Revision-Date: 2012-08-29 11:15+0200\n"
 "Last-Translator: Vitek pliska <whit@jizak.cz>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -38,11 +39,11 @@ msgstr "Výsledeku %s odpovídají dvě odpovědi."
 msgid "Score %s is not covered by any answer."
 msgstr "Pro výsledek %s neexistuje žádná odpověď."
 
-#: admin.py:96 admin.py:115 newman_admin.py:308 newman_admin.py:318
+#: admin.py:96 admin.py:115 newman_admin.py:314 newman_admin.py:324
 msgid "Correct Answers"
 msgstr "Soutěžící se správnými odpověďmi"
 
-#: admin.py:120 newman_admin.py:323
+#: admin.py:120 newman_admin.py:329
 msgid "Participants in total"
 msgstr "Účastníků celkem"
 
@@ -68,7 +69,7 @@ msgstr "Text"
 msgid "Text with results"
 msgstr "Text s výsledky"
 
-#: models.py:72 models.py:334 migrations/0001_initial.py:35
+#: models.py:72 models.py:340 migrations/0001_initial.py:35
 #: migrations/0001_initial.py:81 migrations/0001_initial.py:96
 #: migrations/0004_inheritance_from_basepoll_abstract_model.py:20
 #: migrations/0004_inheritance_from_basepoll_abstract_model.py:32
@@ -79,7 +80,7 @@ msgstr "Text s výsledky"
 msgid "Active from"
 msgstr "Aktivní od"
 
-#: models.py:73 models.py:335 migrations/0001_initial.py:36
+#: models.py:73 models.py:341 migrations/0001_initial.py:36
 #: migrations/0001_initial.py:82 migrations/0001_initial.py:97
 #: migrations/0004_inheritance_from_basepoll_abstract_model.py:23
 #: migrations/0004_inheritance_from_basepoll_abstract_model.py:46
@@ -89,7 +90,7 @@ msgstr "Aktivní od"
 msgid "Active till"
 msgstr "Aktivní do"
 
-#: models.py:114 models.py:447 migrations/0001_initial.py:29
+#: models.py:114 models.py:454 migrations/0001_initial.py:29
 #: migrations/0001_initial.py:55 migrations/0001_initial.py:77
 msgid "Title"
 msgstr "Titulek"
@@ -103,7 +104,7 @@ msgstr "Otázka"
 msgid "Votes in total"
 msgstr "Hlasů celkem"
 
-#: models.py:144 models.py:390 migrations/0001_initial.py:44
+#: models.py:144 models.py:396 migrations/0001_initial.py:44
 msgid "Poll"
 msgstr "Anketa"
 
@@ -111,7 +112,7 @@ msgstr "Anketa"
 msgid "Polls"
 msgstr "Ankety"
 
-#: models.py:179 models.py:220 models.py:408 migrations/0001_initial.py:70
+#: models.py:179 models.py:220 models.py:414 migrations/0001_initial.py:70
 #: migrations/0001_initial.py:106
 msgid "Contest"
 msgstr "Soutěž"
@@ -124,7 +125,7 @@ msgstr "Soutěže"
 msgid "Has correct answers"
 msgstr "Má správné odpovědi"
 
-#: models.py:209 models.py:219 models.py:446 migrations/0001_initial.py:54
+#: models.py:209 models.py:219 models.py:453 migrations/0001_initial.py:54
 #: migrations/0001_initial.py:69
 msgid "Quiz"
 msgstr "Test"
@@ -157,142 +158,146 @@ msgstr "Text volby/odpovědi"
 msgid "Points"
 msgstr "Body"
 
-#: models.py:264 models.py:382 models.py:400 migrations/0001_initial.py:22
+#: models.py:264 models.py:388 models.py:406 migrations/0001_initial.py:22
 msgid "Votes"
 msgstr "Hlasy"
 
-#: models.py:286
+#: models.py:292
 msgid "Choice"
 msgstr "Volba/odpověď"
 
-#: models.py:287 models.py:416 newman_admin.py:140 newman_admin.py:166
+#: models.py:293 models.py:422 newman_admin.py:145 newman_admin.py:172
 #: migrations/0001_initial.py:114
 msgid "Choices"
 msgstr "Volby/odpovědi"
 
-#: models.py:364 models.py:372
+#: models.py:370 models.py:378
 msgid "Survey"
 msgstr "Průzkum"
 
-#: models.py:365
+#: models.py:371
 msgid "Surveys"
 msgstr "Průzkumy"
 
-#: models.py:373 models.py:391 models.py:410 migrations/0001_initial.py:45
+#: models.py:379 models.py:397 models.py:416 migrations/0001_initial.py:45
 #: migrations/0001_initial.py:108
 msgid "User"
 msgstr "Uživatel"
 
-#: models.py:374 models.py:392 migrations/0001_initial.py:46
+#: models.py:380 models.py:398 migrations/0001_initial.py:46
 msgid "Time"
 msgstr "Čas"
 
-#: models.py:375 models.py:393 migrations/0001_initial.py:47
+#: models.py:381 models.py:399 migrations/0001_initial.py:47
 msgid "IP Address"
 msgstr "IP adresa"
 
-#: models.py:381 models.py:399
+#: models.py:387 models.py:405
 msgid "Vote"
 msgstr "Hlas"
 
-#: models.py:409 migrations/0001_initial.py:107
+#: models.py:415 migrations/0001_initial.py:107
 msgid "Date and time"
 msgstr "Datum a čas"
 
-#: models.py:411 migrations/0001_initial.py:109
+#: models.py:417 migrations/0001_initial.py:109
 msgid "First name"
 msgstr "Jméno"
 
-#: models.py:412 migrations/0001_initial.py:110
+#: models.py:418 migrations/0001_initial.py:110
 msgid "Last name"
 msgstr "Příjmení"
 
-#: models.py:413 migrations/0001_initial.py:111
+#: models.py:419 migrations/0001_initial.py:111
 msgid "email"
 msgstr "E-mail"
 
-#: models.py:414 migrations/0001_initial.py:112
+#: models.py:420 migrations/0001_initial.py:112
 msgid "Phone number"
 msgstr "Telefonní číslo"
 
-#: models.py:415 migrations/0001_initial.py:113
+#: models.py:421 migrations/0001_initial.py:113
 msgid "Address"
 msgstr "Adresa"
 
-#: models.py:417 migrations/0001_initial.py:115
+#: models.py:423 migrations/0001_initial.py:115
 msgid "Count guess"
 msgstr "Kolik soutěžících tipujete, že se zúčastní?"
 
-#: models.py:418 migrations/0001_initial.py:116
+#: models.py:424 migrations/0001_initial.py:116
 msgid "Winner"
 msgstr "Vítěz"
 
-#: models.py:436
+#: models.py:443
 msgid "Contestant"
 msgstr "Soutěžící"
 
-#: models.py:437
+#: models.py:444
 msgid "Contestants"
 msgstr "Soutěžící"
 
-#: models.py:448 migrations/0001_initial.py:56
+#: models.py:455 migrations/0001_initial.py:56
 msgid "Quiz results text"
 msgstr "Text s výsledkem testu"
 
-#: models.py:449 migrations/0001_initial.py:57
+#: models.py:456 migrations/0001_initial.py:57
 msgid "Points dimension from"
 msgstr "Rozsah bodů od"
 
-#: models.py:450 migrations/0001_initial.py:58
+#: models.py:457 migrations/0001_initial.py:58
 msgid "Points dimension to"
 msgstr "Rozsah bodů do"
 
-#: models.py:451 migrations/0001_initial.py:59
+#: models.py:458 migrations/0001_initial.py:59
 msgid "Count"
 msgstr "Počet"
 
-#: models.py:475
+#: models.py:482
 msgid "Result"
 msgstr "Výsledek"
 
-#: models.py:476 urls.py:31 views.py:433
+#: models.py:483 urls.py:31 views.py:457
 msgid "results"
 msgstr "Výsledky"
 
-#: newman_admin.py:191
+#: newman_admin.py:111
+msgid "Get count guess"
+msgstr "Odhad počtu soutěžících"
+
+#: newman_admin.py:197
 msgid "Enter a whole number."
 msgstr "Vložte celé číslo."
 
-#: newman_admin.py:266
+#: newman_admin.py:272
 msgid "Active till must be later than active from."
 msgstr "Aktivní od musí být později než aktivní od."
 
-#: newman_admin.py:326 newman_admin.py:348
+#: newman_admin.py:332 newman_admin.py:354
 msgid "Heading"
 msgstr "Hlavička"
 
-#: newman_admin.py:327 newman_admin.py:349
+#: newman_admin.py:333 newman_admin.py:355
 #, fuzzy
 msgid "Content"
 msgstr "Soutěž"
 
-#: newman_admin.py:328 newman_admin.py:350
+#: newman_admin.py:334 newman_admin.py:356
 msgid "Metadata"
 msgstr ""
 
-#: newman_admin.py:329 newman_admin.py:351
+#: newman_admin.py:335 newman_admin.py:357
 msgid "Dates"
 msgstr "Data"
 
-#: newman_admin.py:368
+#: newman_admin.py:374
 msgid "Basic"
 msgstr "Základní"
 
-#: newman_admin.py:369
+#: newman_admin.py:375
 msgid "Texts"
 msgstr "Texty"
 
-#: urls.py:37 views.py:377
+#: urls.py:37 views.py:398
 msgid "result"
 msgstr "Výsledek"
 

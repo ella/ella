@@ -102,9 +102,14 @@ class ContestantAdmin(newman.NewmanModelAdmin):
     Admin options for Contestant
     """
     ordering = ('datetime',)
-    list_display = ('name', 'surname', 'user', 'datetime', 'contest', 'points', 'winner')
+    list_display = ('name', 'surname', 'user', 'datetime', 'contest', 'points',
+                    'get_count_guess', 'winner')
     list_filter = ('contest',)
 
+    def get_count_guess(self, obj):
+        return obj.count_guess
+    get_count_guess.short_description = _('Get count guess')
+    get_count_guess.admin_order_field = 'count_guess'
 
 def get_source_text(model_field, instance):
     from djangomarkup.models import SourceText, TextProcessor
