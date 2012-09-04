@@ -194,7 +194,7 @@ class EllaAdminOptionsMixin(object):
             kwargs['widget'] = widgets.IncrementWidget
             return db_field.formfield(**kwargs)
 
-
+        kwargs['request'] = custom_params.get('request', None)
         return super(EllaAdminOptionsMixin, self).formfield_for_dbfield(db_field, **kwargs)
 
 
