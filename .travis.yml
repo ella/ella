@@ -1,0 +1,9 @@
+language: python
+python:
+  - "2.5"
+  - "2.6"
+  - "2.7"
+install:
+   - pip install --use-mirrors -r requirements/base.txt -r requirements/testing.txt -r requirements/with-comments.txt
+   - python setup.py develop
+script: ./tests/unit_project/run_tests.py
