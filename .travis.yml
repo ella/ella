@@ -4,12 +4,11 @@ python:
   - "2.6"
   - "2.7"
 install:
-   - [[ $DJANGO == dev ]] || pip install Django==$DJANGO --use-mirrors
-   - [[ $DJANGO == dev ]] && pip install https://nodeload.github.com/django/django/zipball/master#egg=Django
+   - pip install $DJANGO --use-mirrors
    - pip install -r dev_requirements.txt --use-mirrors
    - python setup.py develop
 env:
   - DJANGO="Django==1.3.3"
   - DJANGO="Django==1.4.1"
-  - DJANGO="dev"
+  - DJANGO="https://nodeload.github.com/django/django/zipball/master#egg=Django"
 script: python setup.py test
