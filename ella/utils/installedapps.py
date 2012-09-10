@@ -1,10 +1,12 @@
+from django.dispatch import Signal
 from django.utils.itercompat import is_iterable
 from django.conf import settings
 from django.utils.importlib import import_module
 from django.utils.module_loading import module_has_submodule
 
-INSTALLED_APPS_REGISTER = {}
+app_modules_loaded = Signal()
 
+INSTALLED_APPS_REGISTER = {}
 
 def register(app_name, modules):
     """
@@ -40,4 +42,5 @@ def call_modules(auto_discover=()):
             except:
                 if module_has_submodule(mod, module):
                     raise
+    app_modules_loaded.send(sender=None)
 

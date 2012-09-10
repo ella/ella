@@ -49,6 +49,7 @@ INSTALLED_APPS = (
     'ella.articles',
     'ella.photos',
     'ella.positions',
+    'test_ella.test_app',
 )
 
 LISTING_HANDLERS = {
