@@ -13,11 +13,12 @@ from django.core.files.base import ContentFile
 from django.conf import settings
 from django.template.defaultfilters import slugify
 
+from app_data import AppDataField
+
 from ella.core.models.main import Author, Source
 from ella.core.cache.utils import get_cached_object
 from ella.photos.conf import photos_settings
 from ella.utils.timezone import now
-from ella.core.app_data import AppDataField
 
 from formatter import Formatter
 

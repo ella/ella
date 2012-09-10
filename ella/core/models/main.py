@@ -9,10 +9,11 @@ from django.db.models.loading import get_model
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
+from app_data import AppDataField
+
 from ella.core.cache import CachedGenericForeignKey, SiteForeignKey, ContentTypeForeignKey, CategoryForeignKey, CachedForeignKey
 from ella.core.conf import core_settings
 from ella.core.managers import CategoryManager, ListingHandler
-from ella.core.app_data import AppDataField
 
 
 class Author(models.Model):

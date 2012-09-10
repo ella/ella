@@ -7,13 +7,14 @@ from django.contrib.redirects.models import Redirect
 from django.core.validators import validate_slug
 from django.core.exceptions import ValidationError
 
+from app_data import AppDataField
+
 from ella.core.box import Box
 from ella.core.cache import CachedGenericForeignKey, \
     CachedForeignKey, ContentTypeForeignKey, CategoryForeignKey
 from ella.core.conf import core_settings
 from ella.core.managers import ListingManager, RelatedManager, \
     PublishableManager
-from ella.core.app_data import AppDataField
 from ella.core.models.main import Author, Source
 from ella.core.signals import content_published, content_unpublished
 from ella.photos.models import Photo
