@@ -267,7 +267,7 @@ class ListContentType(EllaCoreView):
 
         cat = context['category']
         template_name = cat.template
-        archive_template = cat.app_data.get('ella', {}).get('archive_template', core_settings.ARCHIVE_TEMPLATE)
+        archive_template = cat.app_data.ella.get('archive_template')
 
         if archive_template and not context.get('is_title_page'):
             template_name = archive_template
@@ -305,9 +305,9 @@ class ListContentType(EllaCoreView):
             raise Http404(_('Category with tree path %(path)r does not exist on site %(site)s') %
                     {'path': category, 'site': settings.SITE_ID})
 
-        ella_data = cat.app_data.get('ella', {})
+        ella_data = cat.app_data.ella
 
-        no_home_listings = ella_data.get('no_home_listings', core_settings.CATEGORY_NO_HOME_LISTINGS)
+        no_home_listings = ella_data.get('no_home_listings')
 
         # pagination
         page_no = None
@@ -327,7 +327,7 @@ class ListContentType(EllaCoreView):
         if 'using' in request.GET:
             kwa['source'] = request.GET['using']
         else:
-            kwa['source'] = ella_data.get('listing_handler', 'default')
+            kwa['source'] = ella_data.get('listing_handler')
 
         if day:
             try:
@@ -364,7 +364,7 @@ class ListContentType(EllaCoreView):
             return context
 
         # add pagination
-        paginate_by = ella_data.get('paginate_by', core_settings.CATEGORY_LISTINGS_PAGINATE_BY)
+        paginate_by = ella_data.get('paginate_by')
         qset = Listing.objects.get_queryset_wrapper(**kwa)
         paginator = Paginator(qset, paginate_by)
 
