@@ -5,3 +5,4 @@ pytz
 
 jsonfield>=0.8.10
 
+git+https://github.com/ella/django-appdata.git#egg=app_data
