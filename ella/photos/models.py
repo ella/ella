@@ -74,7 +74,7 @@ class Photo(models.Model):
 
     # Authors and Sources
     authors = models.ManyToManyField(Author, verbose_name=_('Authors'), related_name='photo_set')
-    source = models.ForeignKey(Source, blank=True, null=True, verbose_name=_('Source'))
+    source = models.ForeignKey(Source, blank=True, null=True, verbose_name=_('Source'), on_delete=models.SET_NULL)
 
     created = models.DateTimeField(auto_now_add=True)
 
