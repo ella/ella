@@ -7,10 +7,11 @@ from django.contrib.redirects.models import Redirect
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 
-from ella.core.models import Category, Publishable
+from ella.core.models import Category, Publishable, Source
 from ella.core import signals
 from ella.core.management import generate_publish_signals
 from ella.utils import timezone
+from ella.utils.test_helpers import create_category
 
 from nose import tools
 
@@ -60,7 +61,6 @@ class TestPublishableHelpers(PublishableTestCase):
         p.save()
         tools.assert_equals(current_ct, p.content_type)
 
-
 class TestRedirects(PublishableTestCase):
     def test_url_change_creates_redirect(self):
         self.publishable.slug = 'old-article-new-slug'
@@ -90,7 +90,6 @@ class TestRedirects(PublishableTestCase):
         self.publishable.save()
         self.publishable.slug = 'old-article-new-slug'
         self.publishable.save()
-
 
 class TestUrl(PublishableTestCase):
     def test_home_url(self):
@@ -188,3 +187,37 @@ class TestSignals(TestCase):
         tools.assert_equals(0, len(self.unpublish_received))
         tools.assert_equals(self.publishable, self.publish_received[0]['publishable'].target)
 
+class TestPublishableModel(TestCase):
+    " Unit tests for `ella.core.models.publishable.Publishable`. "
+    def setUp(self):
+        super(TestPublishableModel, self).setUp()
+
+        # Make a few simple assertions regarding the state of the test data
+        tools.assert_equals(Source.objects.count(), 0)
+        tools.assert_equals(Publishable.objects.count(), 0)
+
+        # Create a Source and Category for the tests
+        self.source_foo = Source.objects.create(name='foo')
+        self.category_root = create_category('')
+        tools.assert_equals(Source.objects.count(), 1)
+
+    def test_source_is_nulled_on_delete(self):
+        """
+        Assert that the Source field for Publishables are
+        set to null (and not deleted) when a `Source` is deleted.
+        """
+        # Create a new Publishable and associate it to the `foo` source
+        publishable = Publishable.objects.create(
+            category=self.category_root,
+            source=self.source_foo
+        )
+        tools.assert_equals(Publishable.objects.count(), 1)
+
+        # Delete the `source`
+        self.source_foo.delete()
+
+        # Assert that the publishable remains, but the `source` field is nulled
+        tools.assert_equals(Publishable.objects.count(), 1)
+        tools.assert_equals(Source.objects.count(), 0)
+        publishable = Publishable.objects.get(id=publishable.id)
+        tools.assert_equals(publishable.source, None)
