@@ -116,7 +116,7 @@ class RedisListingHandler(ListingHandler):
         keys.append(':'.join((cls.PREFIX, 'ct', str(publishable.content_type_id))))
 
         # category shouldn't be propagated
-        if not category.app_data.ella.get('propagate_listings'):
+        if not category.app_data.ella.propagate_listings:
             return keys
 
         # children
@@ -127,7 +127,7 @@ class RedisListingHandler(ListingHandler):
         while category.tree_parent_id:
             category = category.tree_parent
             keys.append(':'.join((cls.PREFIX, 'd', str(category.id))))
-            if not category.app_data.ella.get('propagate_listings'):
+            if not category.app_data.ella.propagate_listings:
                 break
 
         return keys
