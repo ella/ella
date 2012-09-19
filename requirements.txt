@@ -3,6 +3,4 @@ south>=0.7
 PIL
 pytz
 
-jsonfield>=0.8.10
-
-git+https://github.com/ella/django-appdata.git#egg=app_data
+django-appdata==0.0.1

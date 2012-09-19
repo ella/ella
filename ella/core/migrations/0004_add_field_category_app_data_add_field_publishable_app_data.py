@@ -8,12 +8,12 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         # Adding field 'Category.app_data'
-        db.add_column('core_category', 'app_data', self.gf('jsonfield.fields.JSONField')(default='{}'), keep_default=True)
+        db.add_column('core_category', 'app_data', self.gf('app_data.fields.AppDataField')(default='{}'), keep_default=True)
         if not db.dry_run:
             orm['core.Category'].objects.filter(app_data='').update(app_data='{}')
 
         # Adding field 'Publishable.app_data'
-        db.add_column('core_publishable', 'app_data', self.gf('jsonfield.fields.JSONField')(default='{}'), keep_default=True)
+        db.add_column('core_publishable', 'app_data', self.gf('app_data.fields.AppDataField')(default='{}'), keep_default=True)
         if not db.dry_run:
             orm['core.Publishable'].objects.filter(app_data='').update(app_data='{}')
 
@@ -75,7 +75,7 @@ class Migration(SchemaMigration):
         },
         'core.category': {
             'Meta': {'unique_together': "(('site', 'tree_path'),)", 'object_name': 'Category'},
-            'app_data': ('jsonfield.fields.JSONField', [], {'default': "'{}'", 'blank': 'True'}),
+            'app_data': ('app_data.fields.AppDataField', [], {'default': "'{}'", 'blank': 'True'}),
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'site': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['sites.Site']"}),
@@ -103,7 +103,7 @@ class Migration(SchemaMigration):
         },
         'core.publishable': {
             'Meta': {'object_name': 'Publishable'},
-            'app_data': ('jsonfield.fields.JSONField', [], {'default': "'{}'", 'blank': 'True'}),
+            'app_data': ('app_data.fields.AppDataField', [], {'default': "'{}'", 'blank': 'True'}),
             'authors': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['core.Author']", 'symmetrical': 'False'}),
             'category': ('ella.core.cache.fields.CachedForeignKey', [], {'to': "orm['core.Category']"}),
             'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']"}),

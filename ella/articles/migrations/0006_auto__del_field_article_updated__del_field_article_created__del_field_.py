@@ -7,7 +7,7 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        
+
         # Deleting field 'Article.updated'
         db.delete_column('articles_article', 'updated')
 
@@ -19,7 +19,7 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
-        
+
         # Adding field 'Article.updated'
         db.add_column('articles_article', 'updated', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True), keep_default=False)
 
@@ -84,7 +84,7 @@ class Migration(SchemaMigration):
         },
         'core.category': {
             'Meta': {'unique_together': "(('site', 'tree_path'),)", 'object_name': 'Category'},
-            'app_data': ('jsonfield.fields.JSONField', [], {'default': "'{}'", 'blank': 'True'}),
+            'app_data': ('app_data.fields.AppDataField', [], {'default': "'{}'", 'blank': 'True'}),
             'content': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
@@ -98,7 +98,7 @@ class Migration(SchemaMigration):
         'core.publishable': {
             'Meta': {'object_name': 'Publishable'},
             'announced': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'app_data': ('jsonfield.fields.JSONField', [], {'default': "'{}'", 'blank': 'True'}),
+            'app_data': ('app_data.fields.AppDataField', [], {'default': "'{}'", 'blank': 'True'}),
             'authors': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['core.Author']", 'symmetrical': 'False'}),
             'category': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['core.Category']"}),
             'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']"}),
@@ -123,7 +123,7 @@ class Migration(SchemaMigration):
         },
         'photos.photo': {
             'Meta': {'object_name': 'Photo'},
-            'app_data': ('jsonfield.fields.JSONField', [], {'default': "'{}'", 'blank': 'True'}),
+            'app_data': ('app_data.fields.AppDataField', [], {'default': "'{}'", 'blank': 'True'}),
             'authors': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'photo_set'", 'symmetrical': 'False', 'to': "orm['core.Author']"}),
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),

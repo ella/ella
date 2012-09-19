@@ -7,13 +7,13 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        
+
         # Adding field 'Photo.app_data'
-        db.add_column('photos_photo', 'app_data', self.gf('jsonfield.fields.JSONField')(default='{}', blank=True), keep_default=False)
+        db.add_column('photos_photo', 'app_data', self.gf('app_data.fields.AppDataField')(default='{}', blank=True), keep_default=False)
 
 
     def backwards(self, orm):
-        
+
         # Deleting field 'Photo.app_data'
         db.delete_column('photos_photo', 'app_data')
 
@@ -100,7 +100,7 @@ class Migration(SchemaMigration):
         },
         'photos.photo': {
             'Meta': {'object_name': 'Photo'},
-            'app_data': ('jsonfield.fields.JSONField', [], {'default': "'{}'", 'blank': 'True'}),
+            'app_data': ('app_data.fields.AppDataField', [], {'default': "'{}'", 'blank': 'True'}),
             'authors': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'photo_set'", 'symmetrical': 'False', 'to': "orm['core.Author']"}),
             'created': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),

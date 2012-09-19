@@ -99,7 +99,7 @@ class Migration(SchemaMigration):
         },
         'photos.photo': {
             'Meta': {'object_name': 'Photo'},
-            'app_data': ('jsonfield.fields.JSONField', [], {'default': "'{}'", 'blank': 'True'}),
+            'app_data': ('app_data.fields.AppDataField', [], {'default': "'{}'", 'blank': 'True'}),
             'authors': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'photo_set'", 'symmetrical': 'False', 'to': "orm['core.Author']"}),
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
