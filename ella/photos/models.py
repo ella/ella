@@ -100,6 +100,7 @@ class Photo(models.Model):
 
     def _get_image(self):
         if not hasattr(self, '_pil_image'):
+            self.image.open()
             self._pil_image = Image.open(self.image)
         return self._pil_image
 
