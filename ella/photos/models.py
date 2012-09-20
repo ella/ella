@@ -258,7 +258,7 @@ class Format(models.Model):
         if self.id:
             for f_photo in self.formatedphoto_set.all():
                 f_photo.delete()
-            kwargs.update({'force_update': True})
+
         super(Format, self).save(**kwargs)
 
 
