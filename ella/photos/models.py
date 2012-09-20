@@ -252,7 +252,7 @@ class Format(models.Model):
         """Overrides models.Model.save.
 
         - Delete formatted photos if format save and not now created
-          (becouse of possible changes)
+          (because of possible changes)
         """
 
         if self.id:
