@@ -101,6 +101,7 @@ class Photo(models.Model):
 
     def _get_image(self):
         if not hasattr(self, '_pil_image'):
+            self.image.open()
             self._pil_image = Image.open(self.image)
         return self._pil_image
 
@@ -252,13 +253,13 @@ class Format(models.Model):
         """Overrides models.Model.save.
 
         - Delete formatted photos if format save and not now created
-          (becouse of possible changes)
+          (because of possible changes)
         """
 
         if self.id:
             for f_photo in self.formatedphoto_set.all():
                 f_photo.delete()
-            kwargs.update({'force_update': True})
+
         super(Format, self).save(**kwargs)
 
 
