@@ -57,7 +57,15 @@ class PublishableAdmin(admin.ModelAdmin):
     }
 
 
+class ListingAdmin(admin.ModelAdmin):
+    date_hierarchy = 'publish_from'
+    list_display = ('__unicode__', 'publish_from', 'publish_to',)
+    list_filter = ('category',)
+    search_fields = ('publishable__title', 'publishable__slug',
+                     'publishable__description',)
+
+
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Source, SourceAdmin)
 admin.site.register(Author, AuthorAdmin)
-admin.site.register(Listing)
+admin.site.register(Listing, ListingAdmin)
