@@ -11,7 +11,7 @@ from ella.core.views import object_detail, list_content_type, category_detail, \
 try:
     if settings.CUSTOM_VIEWS:
         views = settings.VIEWS
-        temp = __import__(views, globals(), locals(), ['object_detail', 'list_content_type', 'category_detail', 'home'])
+        temp = __import__(views, globals(), locals(), ['object_detail', 'list_content_type', 'category_detail', 'home', 'AuthorView'])
         object_detail = temp.object_detail
         list_content_type = temp.list_content_type
         category_detail = temp.category_detail
