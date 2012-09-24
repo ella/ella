@@ -11,7 +11,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from app_data import AppDataField
 
-from ella.core.cache import CachedGenericForeignKey, SiteForeignKey, ContentTypeForeignKey, CategoryForeignKey, CachedForeignKey
+from ella.core.cache import CachedGenericForeignKey, SiteForeignKey, ContentTypeForeignKey, CategoryForeignKey, CachedForeignKey, get_cached_object
 from ella.core.conf import core_settings
 from ella.core.managers import CategoryManager, ListingHandler
 
@@ -24,7 +24,7 @@ class Author(models.Model):
     * Organization
     * ...
 
-    All the fields except for ``slug`` are optional to enable maximum of 
+    All the fields except for ``slug`` are optional to enable maximum of
     flexibility.
     """
     user = CachedForeignKey(User, verbose_name=_('User'), blank=True, null=True)
@@ -50,9 +50,9 @@ class Author(models.Model):
 
     def recently_published(self, **kwargs):
         Listing = get_model('core', 'Listing')
-        return Listing.objects.get_listing(children=ListingHandler.ALL,
-                                           publishable__authors__in=[self],
-                                           **kwargs)
+        root = get_cached_object(Category, tree_path='', site=settings.SITE_ID)
+        return Listing.objects.get_queryset_wrapper(
+            children=ListingHandler.ALL, category=root, author=self, **kwargs)
 
 
 class Source(models.Model):
@@ -80,7 +80,7 @@ class Category(models.Model):
     ``Category`` is the **basic building block of Ella-based sites**. All the
     published content is divided into categories - every ``Publishable`` object
     has a ``ForeignKey`` to it's primary ``Category``. Primary category is then
-    used to build up object's URL when using `Category.get_absolute_url` method. 
+    used to build up object's URL when using `Category.get_absolute_url` method.
     Besides that, objects can be published in other categories (aka "secondary"
     categories) via ``Listing``.
 
@@ -198,7 +198,7 @@ class Dependency(models.Model):
     """
     Captures relations between objects to simplify finding out what other objects
     my object depend on.
-    
+
     This sounds mysterious, but the common use case is quite simple: keeping
     information which objects have been embedded in article content using
     **boxes** for example (these might be photos, galleries, ...).

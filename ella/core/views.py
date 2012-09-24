@@ -219,10 +219,10 @@ class ListContentType(EllaCoreView):
 
     * ``page/category/<tree_path>/category.html``
     * ``page/category.html``
-    
+
     If custom template is selected, let's say ``static_page.html``, it would
     result in:
-    
+
     * ``page/category/<tree_path>/static_page.html``
     * ``page/static_page.html``
 
@@ -297,7 +297,7 @@ class ListContentType(EllaCoreView):
         try:
             cat = Category.objects.get_by_tree_path(category)
         except Category.DoesNotExist:
-            # Homepage behaves differently on 404 with DEBUG mode to let user 
+            # Homepage behaves differently on 404 with DEBUG mode to let user
             # know everything is fine instead of 404.
             if settings.DEBUG is True and not category and not year:
                 raise self.EmptyHomepageException()
@@ -422,29 +422,29 @@ def get_templates(name, slug=None, category=None, app_label=None, model_label=No
     * ``'page/category/%s/%s' % (<CATEGORY_PART>, name)``
     * ``'page/content_type/%s.%s/%s' % (app_label, model_label, name)``
     * ``'page/%s' % name``
-    
+
     Where ``<CATEGORY_PART>`` is derived from ``path`` attribute by these rules:
-    
+
     * When **no** parent exists (this is therfore root category) ``<CATEGORY_PART> = path``
     * When exactly **one** parent exists: ``<CATEGORY_PART> = path``
     * When multiple parent exist (category nestedN is deep in the tree)::
-          
+
           <CATEGORY_PART> = (
               'nested1/nested2/../nestedN/',
               'nested1/nested2/../nestedN-1/',
               ...
               'nested1'
           )
-       
+
     Examples. Three categories exist having slugs **ROOT**, **NESTED1**,
     **NESTED2** where **NESTED2**'s parent is **NESTED1**.::
-    
+
         ROOT
            \
          NESTED1
              \
-            NESTED2 
-    
+            NESTED2
+
     * For **ROOT**, ``<CATEGORY_PART>`` is only one - "ROOT".
     * For **NESTED1**, ``<CATEGORY_PART>`` is only one - "NESTED1".
     * For **NESTED2**, ``<CATEGORY_PART>`` has two elements: "NESTED1/NESTED2" and "NESTED1".

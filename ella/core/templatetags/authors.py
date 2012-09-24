@@ -26,12 +26,11 @@ class AuthorListingNode(template.Node):
             omit = None
 
         if omit is not None:
-            published = author.recently_published(count=self.count,
-                                                  exclude=omit)
+            published = author.recently_published(exclude=omit)
         else:
-            published = author.recently_published(count=self.count)
+            published = author.recently_published()
 
-        context[self.var_name] = published
+        context[self.var_name] = published[:self.count]
         return ''
 
 
