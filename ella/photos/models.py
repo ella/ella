@@ -263,7 +263,7 @@ class Format(models.Model):
 
 
 class FormatedPhotoManager(models.Manager):
-    def get_photo_in_format(self, photo, format):
+    def get_photo_in_format(self, photo, format, include_original=True):
         if isinstance(photo, Photo):
             photo_id = photo.id
         else:
@@ -279,7 +279,8 @@ class FormatedPhotoManager(models.Manager):
             p.hgetall(REDIS_FORMATTED_PHOTO_KEY % (photo_id, format.id))
             original, formatted = p.execute()
             if formatted:
-                formatted['original'] = original
+                if include_original:
+                    formatted['original'] = original
                 return formatted
 
         if not photo:
@@ -299,13 +300,16 @@ class FormatedPhotoManager(models.Manager):
                 log.warning("Cannot create formatted photo due to %s.", e)
                 return format.get_blank_img()
 
-        return {
-            'original': photo.get_image_info(),
+        info = {
 
             'url': formated_photo.url,
             'width': formated_photo.width,
             'height': formated_photo.height,
         }
+        if include_original:
+            info['original'] = photo.get_image_info()
+
+        return info
 
 
 class FormatedPhoto(models.Model):
