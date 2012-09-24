@@ -25,10 +25,17 @@ if hasattr(settings, 'LISTINGS_REDIS'):
         client = Redis(**getattr(settings, 'LISTINGS_REDIS'))
 
 
+DEFAULT_REDIS_HANDLER = 'redis'
+
+
+def ListingHandlerClass():
+    return get_model('core', 'Listing').objects.get_listing_handler(DEFAULT_REDIS_HANDLER)
+
+
 def publishable_published(publishable, **kwargs):
     pipe = client.pipeline()
     for l in publishable.listing_set.all():
-        RedisListingHandler.add_publishable(
+        ListingHandlerClass().add_publishable(
             l.category,
             publishable,
             repr(to_timestamp(l.publish_from)),
@@ -41,7 +48,7 @@ def publishable_published(publishable, **kwargs):
 def publishable_unpublished(publishable, **kwargs):
     pipe = client.pipeline()
     for l in publishable.listing_set.all():
-        RedisListingHandler.remove_publishable(
+        ListingHandlerClass().remove_publishable(
             l.category,
             publishable,
             pipe=pipe,
@@ -52,7 +59,7 @@ def publishable_unpublished(publishable, **kwargs):
 
 def listing_pre_delete(sender, instance, **kwargs):
     # prepare redis pipe for deletion...
-    instance.__pipe = RedisListingHandler.remove_publishable(
+    instance.__pipe = ListingHandlerClass().remove_publishable(
         instance.category,
         instance.publishable,
         commit=False
@@ -62,8 +69,9 @@ def listing_pre_delete(sender, instance, **kwargs):
 def listing_post_delete(sender, instance, **kwargs):
     # but only delete it if the model delete went through
     pipe = instance.__pipe
+
     for l in instance.publishable.listing_set.all():
-        RedisListingHandler.add_publishable(
+        ListingHandlerClass().add_publishable(
             l.category,
             instance.publishable,
             repr(to_timestamp(l.publish_from)),
@@ -77,7 +85,7 @@ def listing_pre_save(sender, instance, **kwargs):
     if instance.pk:
         # prepare deletion of stale data
         old_listing = instance.__class__.objects.get(pk=instance.pk)
-        instance.__pipe = RedisListingHandler.remove_publishable(
+        instance.__pipe = ListingHandlerClass().remove_publishable(
             old_listing.category,
             old_listing.publishable,
             commit=False
@@ -86,8 +94,9 @@ def listing_pre_save(sender, instance, **kwargs):
 
 def listing_post_save(sender, instance, **kwargs):
     pipe = getattr(instance, '__pipe', None)
+
     if instance.publishable.is_published():
-        pipe = RedisListingHandler.add_publishable(
+        pipe = ListingHandlerClass().add_publishable(
             instance.category,
             instance.publishable,
             repr(to_timestamp(instance.publish_from)),
@@ -280,6 +289,35 @@ class RedisListingHandler(ListingHandler):
                 key = exclude_key
 
             self._key = key
+        return self._key, pipe
+
+
+class AuthorListingHandler(RedisListingHandler):
+    @classmethod
+    def get_keys(cls, category, publishable):
+        keys = super(AuthorListingHandler, cls).get_keys(category, publishable)
+
+        # Add keys for all the authors.
+        for a in publishable.authors.all():
+            keys.append(':'.join((cls.PREFIX, 'a', str(a.pk))))
+
+        return keys
+
+    def _get_key(self):
+        pipe = None
+
+        if not hasattr(self, '_key'):
+            key, pipe = super(AuthorListingHandler, self)._get_key()
+
+            # If author filtering is requested, perform another intersect
+            # over what has been filtered out before.
+            if 'author' in self.kwargs:
+                a_key = '%s:a:%s' % (self.PREFIX, self.kwargs['author'].pk)
+                a_inter_key = '%s:azis:%s' % (self.PREFIX, md5(','.join((a_key, key))).hexdigest())
+                pipe.zinterstore(a_inter_key, (a_key, key), 'MAX')
+                pipe.expire(a_inter_key, 60)
+                self._key = a_inter_key
+
         return self._key, pipe
 
 

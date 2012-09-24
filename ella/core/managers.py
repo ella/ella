@@ -83,8 +83,8 @@ class RelatedManager(models.Manager):
     def collect_related(self, finder_funcs, obj, count, *args, **kwargs):
         """
         Collects objects related to ``obj`` using a list of ``finder_funcs``.
-        Stops when required count is collected or the function list is 
-        exhausted. 
+        Stops when required count is collected or the function list is
+        exhausted.
         """
         collected = []
         for func in finder_funcs:
@@ -100,7 +100,7 @@ class RelatedManager(models.Manager):
         if not hasattr(self, '_finders'):
             self._finders = {}
             for key, finders_modstr in core_settings.RELATED_FINDERS.items():
-                # accept non-iterables too (single member named finders) 
+                # accept non-iterables too (single member named finders)
                 if not hasattr(finders_modstr, '__iter__'):
                     finders_modstr = (finders_modstr,)
 
@@ -147,12 +147,14 @@ class ListingHandler(object):
     def regenerate(cls, today=None):
         pass
 
-    def __init__(self, category, children=NONE, content_types=[], date_range=(), exclude=None):
+    def __init__(self, category, children=NONE, content_types=[],
+                 date_range=(), exclude=None, **kwargs):
         self.category = category
         self.children = children
         self.content_types = content_types
         self.date_range = date_range
         self.exclude = exclude
+        self.kwargs = kwargs
 
     def __getitem__(self, k):
         if isinstance(k, int):
@@ -322,10 +324,12 @@ class ListingManager(models.Manager):
 
         return self._listing_handlers['default']
 
-    def get_queryset_wrapper(self, category, children=ListingHandler.NONE, content_types=[], date_range=(), exclude=None, source='default'):
+    def get_queryset_wrapper(self, category, children=ListingHandler.NONE,
+                             content_types=[], date_range=(), exclude=None,
+                             source='default', **kwargs):
         ListingHandler = self.get_listing_handler(source)
         return ListingHandler(
-            category, children, content_types, date_range, exclude
+            category, children, content_types, date_range, exclude, **kwargs
         )
 
 

@@ -2,6 +2,7 @@ import time
 from datetime import datetime, date
 
 from django.core.cache import get_cache
+from ella.core.cache.redis import DEFAULT_REDIS_HANDLER
 from ella.core.cache.utils import normalize_key
 from hashlib import md5
 from django.conf import settings
@@ -279,8 +280,78 @@ class TestRedisListings(TestCase):
         tools.assert_equals(1, len(l))
         tools.assert_equals(l[0].publishable, self.publishables[1])
 
+
+class TestAuthorLH(TestCase):
+    def setUp(self):
+        from ella.core.models import Author
+
+        super(TestAuthorLH, self).setUp()
+
+        try:
+            import redis as redis_client
+        except ImportError:
+            raise SkipTest()
+
+        self.redis = redis_client.Redis(**settings.TEST_CORE_REDIS)
+
+        redis.client = self.redis
+        redis.connect_signals()
+
+        create_basic_categories(self)
+        create_and_place_more_publishables(self)
+
+        self.author = Author.objects.create(slug='testauthor')
+
+        settings.LISTING_HANDLERS[DEFAULT_REDIS_HANDLER] = 'ella.core.cache.redis.AuthorListingHandler'
+
+        for p in self.publishables:
+            p.authors = [self.author]
+            p.save()
+
+
+    def tearDown(self):
+        redis.client = None
+        pre_save.disconnect(redis.listing_pre_save, sender=Listing)
+        post_save.disconnect(redis.listing_post_save, sender=Listing)
+        pre_delete.disconnect(redis.listing_pre_delete, sender=Listing)
+        post_delete.disconnect(redis.listing_post_delete, sender=Listing)
+        content_published.disconnect(redis.publishable_published)
+        content_unpublished.disconnect(redis.publishable_unpublished)
+
+        super(TestAuthorLH, self).tearDown()
+        self.redis.flushdb()
+
+
+    def test_listing_save_adds_itself_to_relevant_zsets(self):
+        list_all_publishables_in_category_by_hour(self)
+        ct_id = self.publishables[0].content_type_id
+        tools.assert_equals(set([
+            'listing:1',
+            'listing:2',
+            'listing:3',
+
+            'listing:c:1',
+            'listing:c:2',
+            'listing:c:3',
+
+            'listing:d:1',
+            'listing:d:2',
+            'listing:d:3',
+
+            'listing:a:%d' % self.author.pk,
+
+            'listing:ct:%d' % ct_id,
+
+            ]),
+            set(self.redis.keys())
+        )
+        tools.assert_equals(['%d:1' % ct_id, '%d:2' % ct_id, '%d:3' % ct_id],
+                            self.redis.zrange('listing:a:1', 0, 100))
+
+
 class SlidingLH(redis.SlidingListingHandler):
     PREFIX = 'sliding'
+
 
 class TestSlidingListings(TestCase):
     def setUp(self):
