@@ -28,35 +28,31 @@ class ObjectSerializer(object):
     def __init__(self):
         self._registry = {}
 
-    def register(self, model, serializer, context=PARTIAL):
-        self._registry.setdefault(model, {})[context] = serializer
+    def register(self, cls, serializer, context=PARTIAL):
+        self._registry.setdefault(cls, {})[context] = serializer
 
-    def serialize(self, model_instance, context=PARTIAL):
-        model = model_instance.__class__
-
+    def serialize(self, data, context=PARTIAL):
         # collect relevant registries
         rs = []
-        for c in model.mro():
+        for c in data.__class__.mro():
             if c in self._registry:
                 rs.append(self._registry[c])
                 break
         if not rs:
-            log.warn('Unable to serialize model %s.', model._meta)
-            return model_instance
+            return data
 
         # registered context
         for r in rs:
             if context in r:
-                return r[context](model_instance)
+                return r[context](data)
 
         # fall back to PARTIAL context
         if context is not PARTIAL:
             for r in rs:
                 if PARTIAL in r:
-                    return r[PARTIAL](model_instance)
+                    return r[PARTIAL](data)
 
-        log.warn('Unable to serialize model %s as %s.', model._meta, {PARTIAL: 'PARTIAL', FULL: 'FULL'}.get(context, context))
-        return model_instance
+        return data
 
 response_serializer = ResponseSerializer()
 object_serializer = ObjectSerializer()
