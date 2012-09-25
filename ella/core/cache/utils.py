@@ -19,13 +19,6 @@ KEY_PREFIX = 'core.gco'
 CACHE_TIMEOUT = getattr(settings, 'CACHE_TIMEOUT', 10 * 60)
 
 
-PUBLISHABLE_CT = None
-def _get_publishable_ct():
-    global PUBLISHABLE_CT
-    if PUBLISHABLE_CT is None:
-        PUBLISHABLE_CT = ContentType.objects.get_for_model(get_model('core', 'publishable'))
-    return PUBLISHABLE_CT
-
 @receiver(post_save)
 @receiver(post_delete)
 def invalidate_cache(sender, instance, **kwargs):
@@ -38,8 +31,9 @@ def normalize_key(key):
     return md5(key).hexdigest()
 
 def _get_key(start, model, pk=None, **kwargs):
-    if issubclass(model.model_class(), _get_publishable_ct().model_class()):
-        model = PUBLISHABLE_CT
+    Publishable = get_model('core', 'publishable')
+    if issubclass(model.model_class(), Publishable) and model.model_class() != Publishable:
+        model = ContentType.objects.get_for_model(Publishable)
 
     if pk and not kwargs:
         return ':'.join((
@@ -78,7 +72,7 @@ def get_cached_object(model, timeout=CACHE_TIMEOUT, **kwargs):
     obj = cache.get(key)
     if obj is None:
         obj = model_ct.model_class()._default_manager.get(**kwargs)
-        if model_ct == _get_publishable_ct():
+        if obj.__class__ == get_model('core', 'publishable'):
             # Let the original key set to the subclass. Otherwise the
             # cache key wouldn't eventually be set in case the query is 
             # not by PK, but by different filter args.

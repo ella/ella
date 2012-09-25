@@ -30,8 +30,6 @@ class CacheTestCase(TestCase):
         self.old_cache = utils.cache
         self.cache = get_cache('locmem://')
         utils.cache = self.cache
-        # reset CT cache on utils because of db resets it will break shit
-        utils.PUBLISHABLE_CT = None
         super(CacheTestCase, self).setUp()
 
     def tearDown(self):
