@@ -285,7 +285,7 @@ class ListContentType(EllaCoreView):
         if api_settings.ENABLED:
             for mimetype in (a.split(';')[0] for a in request.META.get('HTTP_ACCEPT', '').split(',')):
                 if response_serializer.serializable(mimetype):
-                    return response_serializer.serialize(object_serializer.serialize({'category': cat, 'listings': context['listings']}, FULL), mimetype)
+                    return response_serializer.serialize(object_serializer.serialize({'category': cat, 'listings': context.get('page', None)}, FULL), mimetype)
 
         return self.render(request, context, self.get_templates(context, template_name))
 

@@ -34,7 +34,6 @@ class ObjectSerializer(object):
     def serialize(self, model_instance, context=PARTIAL):
         model = model_instance.__class__
 
-        print model, context, model_instance
         # collect relevant registries
         rs = []
         for c in model.mro():
@@ -43,7 +42,7 @@ class ObjectSerializer(object):
                 break
         if not rs:
             log.warn('Unable to serialize model %s.', model._meta)
-            return None
+            return model_instance
 
         # registered context
         for r in rs:
@@ -57,7 +56,7 @@ class ObjectSerializer(object):
                     return r[PARTIAL](model_instance)
 
         log.warn('Unable to serialize model %s as %s.', model._meta, {PARTIAL: 'PARTIAL', FULL: 'FULL'}.get(context, context))
-        return None
+        return model_instance
 
 response_serializer = ResponseSerializer()
 object_serializer = ObjectSerializer()
