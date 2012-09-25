@@ -153,15 +153,15 @@ class ObjectDetail(EllaCoreView):
         # check for custom actions
         if url_remainder:
             return custom_urls.resolver.call_custom_view(request, obj, url_remainder, context)
-        elif custom_urls.resolver.has_custom_detail(obj):
-            return custom_urls.resolver.call_custom_detail(request, context)
-
-        object_rendered.send(sender=context['object'].__class__, request=request, category=context['category'], publishable=context['object'])
-
-        if api_settings.ENABLED:
+        elif api_settings.ENABLED:
             for mimetype in (a.split(';')[0] for a in request.META.get('HTTP_ACCEPT', '').split(',')):
                 if response_serializer.serializable(mimetype):
                     return response_serializer.serialize(object_serializer.serialize(obj, FULL), mimetype)
+
+        if custom_urls.resolver.has_custom_detail(obj):
+            return custom_urls.resolver.call_custom_detail(request, context)
+
+        object_rendered.send(sender=context['object'].__class__, request=request, category=context['category'], publishable=context['object'])
 
         return self.render(request, context, self.get_templates(context))
 
