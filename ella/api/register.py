@@ -1,1 +1,1 @@
-import .serializers
+from ella.api import serializers
