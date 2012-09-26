@@ -1,6 +1,6 @@
 from ella.api import object_serializer, response_serializer, PARTIAL, FULL
 from ella.api.conf import api_settings
-from ella.core.models import Category, Publishable, Listing
+from ella.core.models import Category, Publishable, Listing, Author
 from ella.photos.models import FormatedPhoto, Photo
 
 from django.core.paginator import Page
@@ -28,6 +28,12 @@ def serialize_category(category):
         'tree_path': category.tree_path,
     }
 
+def serialize_author(author):
+    return {
+        'name': author.name,
+        'url': author.get_absolute_url(),
+    }
+
 def serialize_photo(photo, formats=None):
     if formats is None:
         formats = api_settings.DEFAULT_PHOTO_FORMATS
@@ -52,6 +58,7 @@ object_serializer.register(list, serialize_list)
 object_serializer.register(dict, serialize_dict)
 object_serializer.register(tuple, serialize_list)
 object_serializer.register(Page, serialize_page)
+object_serializer.register(Author, serialize_author)
 object_serializer.register(Category, serialize_category)
 object_serializer.register(Photo, serialize_photo)
 object_serializer.register(Publishable, serialize_publishable)
