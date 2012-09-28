@@ -1,7 +1,6 @@
 import logging
 
 from django.http import HttpResponse
-from django.utils.cache import patch_vary_headers
 
 __all__ = ['response_serializer', 'object_serializer', 'FULL', 'PARTIAL']
 
@@ -22,10 +21,7 @@ class ResponseSerializer(object):
         return mimetype in self._registry
 
     def serialize(self, data, mimetype):
-        response = HttpResponse(self._registry[mimetype](data), content_type=mimetype)
-        # signalize to the cache middleware that this responds depends on the Accept http header
-        patch_vary_headers(response, ('Accept', ))
-        return response
+        return HttpResponse(self._registry[mimetype](data), content_type=mimetype)
 
 class ObjectSerializer(object):
     def __init__(self):
