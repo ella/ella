@@ -9,6 +9,7 @@ from django.shortcuts import redirect, render
 from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
 from django.utils.translation import ugettext_lazy as _
+from django.utils.cache import patch_vary_headers
 from django.views.generic.list import ListView
 
 from ella.core.models import Listing, Category, Publishable, Author
@@ -17,6 +18,8 @@ from ella.core import custom_urls
 from ella.core.conf import core_settings
 from ella.core.managers import ListingHandler
 from ella.core.signals import object_rendering, object_rendered
+from ella.api.conf import api_settings
+from ella.api import object_serializer, response_serializer, FULL
 from ella.utils.timezone import now, utc_localize
 
 __docformat__ = "restructuredtext en"
@@ -151,7 +154,12 @@ class ObjectDetail(EllaCoreView):
         # check for custom actions
         if url_remainder:
             return custom_urls.resolver.call_custom_view(request, obj, url_remainder, context)
-        elif custom_urls.resolver.has_custom_detail(obj):
+        elif api_settings.ENABLED:
+            for mimetype in (a.split(';')[0] for a in request.META.get('HTTP_ACCEPT', '').split(',')):
+                if response_serializer.serializable(mimetype):
+                    return response_serializer.serialize(object_serializer.serialize(obj, FULL), mimetype)
+
+        if custom_urls.resolver.has_custom_detail(obj):
             return custom_urls.resolver.call_custom_detail(request, context)
 
         object_rendered.send(sender=context['object'].__class__, request=request, category=context['category'], publishable=context['object'])
@@ -274,6 +282,14 @@ class ListContentType(EllaCoreView):
 
         object_rendering.send(sender=Category, request=request, category=cat, publishable=None)
         object_rendered.send(sender=Category, request=request, category=cat, publishable=None)
+
+        if api_settings.ENABLED:
+            for mimetype in (a.split(';')[0] for a in request.META.get('HTTP_ACCEPT', '').split(',')):
+                if response_serializer.serializable(mimetype):
+                    # signalize to the cache middleware that this responds depends on the Accept http header
+                    response = response_serializer.serialize(object_serializer.serialize({'category': cat, 'listings': context.get('page', None)}, FULL), mimetype)
+                    patch_vary_headers(response, ('Accept', ))
+                    return response
 
         return self.render(request, context, self.get_templates(context, template_name))
 
