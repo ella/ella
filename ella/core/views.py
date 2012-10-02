@@ -9,7 +9,6 @@ from django.shortcuts import redirect, render
 from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
 from django.utils.translation import ugettext_lazy as _
-from django.utils.cache import patch_vary_headers
 from django.views.generic.list import ListView
 
 from ella.core.models import Listing, Category, Publishable, Author
@@ -286,10 +285,7 @@ class ListContentType(EllaCoreView):
         if api_settings.ENABLED:
             for mimetype in (a.split(';')[0] for a in request.META.get('HTTP_ACCEPT', '').split(',')):
                 if response_serializer.serializable(mimetype):
-                    # signalize to the cache middleware that this responds depends on the Accept http header
-                    response = response_serializer.serialize(object_serializer.serialize({'category': cat, 'listings': context.get('page', None)}, FULL), mimetype)
-                    patch_vary_headers(response, ('Accept', ))
-                    return response
+                    return response_serializer.serialize(object_serializer.serialize({'category': cat, 'listings': context.get('page', None)}, FULL), mimetype)
 
         return self.render(request, context, self.get_templates(context, template_name))
 
