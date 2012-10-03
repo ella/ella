@@ -38,7 +38,7 @@ class Publishable(models.Model):
     """
     box_class = staticmethod(PublishableBox)
 
-    content_type = ContentTypeForeignKey()
+    content_type = ContentTypeForeignKey(editable=False)
     target = CachedGenericForeignKey('content_type', 'id')
 
     category = CategoryForeignKey(verbose_name=_('Category'))
