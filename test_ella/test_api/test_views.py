@@ -1,4 +1,4 @@
-import json
+from django.utils import simplejson as json
 
 from ella.api import object_serializer, FULL
 from ella.articles.models import Article
