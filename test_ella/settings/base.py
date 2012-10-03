@@ -45,6 +45,7 @@ INSTALLED_APPS = (
     'django.contrib.redirects',
     'django.contrib.admin',
 
+    'ella.api',
     'ella.core',
     'ella.articles',
     'ella.photos',
@@ -68,3 +69,5 @@ CATEGORY_TEMPLATES = [
 ]
 
 PHOTOS_DEFAULT_BG_COLOR = 'blue'
+
+API_ENABLED = True

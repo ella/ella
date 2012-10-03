@@ -16,6 +16,7 @@ from test_ella import template_loader
 from ella.core.models import Category
 from ella.core.views import get_templates
 from ella.core.signals import object_rendering, object_rendered
+from ella.core.cache import utils
 
 class ViewsTestCase(TestCase):
     def setUp(self):
@@ -37,6 +38,7 @@ class ViewsTestCase(TestCase):
         template_loader.templates = {}
         object_rendering.disconnect(self.object_rendering)
         object_rendered.disconnect(self.object_rendered)
+        utils.PUBLISHABLE_CT = None
 
 class TestCategoryDetail(ViewsTestCase):
     def test_fail_on_no_template(self):
