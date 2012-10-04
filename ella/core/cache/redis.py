@@ -35,7 +35,7 @@ DEFAULT_REDIS_HANDLER = 'redis'
 
 
 def ListingHandlerClass():
-    return get_model('core', 'Listing').objects.get_listing_handler(DEFAULT_REDIS_HANDLER, fallback=False)
+    return get_model('core', 'Listing').objects.get_listing_handler(DEFAULT_REDIS_HANDLER)
 
 
 def publishable_published(publishable, **kwargs):
