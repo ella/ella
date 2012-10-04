@@ -11,7 +11,7 @@ def serialize_list(l):
     return [object_serializer.serialize(o, 'list') for o in l]
 
 def serialize_dict(d):
-    return dict((k, object_serializer.serialize(v, FULL)) for k, v in d.iteritems())
+    return dict((k, object_serializer.serialize(v)) for k, v in d.iteritems())
 
 def serialize_page(page):
     return {
@@ -21,6 +21,10 @@ def serialize_page(page):
         'current_page': page.number,
         'objects': serialize_list(page.object_list),
     }
+
+def serialize_full_category(category):
+    # FIXME: need to pass in request so we can access page param
+    return {'category': serialize_category(category), 'listings': serialize_page(category.app_data.ella.get_listings_page(1))}
 
 def serialize_category(category):
     return {
@@ -64,7 +68,8 @@ object_serializer.register(tuple, serialize_list)
 object_serializer.register(Page, serialize_page)
 object_serializer.register(Author, serialize_author)
 object_serializer.register(Category, serialize_category)
+object_serializer.register(Category, serialize_full_category, FULL)
 object_serializer.register(Photo, serialize_photo)
 object_serializer.register(Publishable, serialize_publishable)
-object_serializer.register(Listing, serialize_listing, PARTIAL)
+object_serializer.register(Listing, serialize_listing)
 

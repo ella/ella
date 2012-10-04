@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.core.paginator import Paginator
 from django.db import models
 from django.http import Http404
 from django.shortcuts import redirect, render
@@ -267,25 +266,29 @@ class ListContentType(EllaCoreView):
     class EmptyHomepageException(Exception): pass
 
     def __call__(self, request, **kwargs):
+        # get the category
         try:
-            context = self.get_context(request, **kwargs)
+            cat = self.get_category(request, kwargs.pop('category', ''))
         except self.EmptyHomepageException:
             return self.render(request, {}, self.empty_homepage_template_name)
 
-        cat = context['category']
+        # mark it as being rendered
+        object_rendering.send(sender=Category, request=request, category=cat, publishable=None)
+        object_rendered.send(sender=Category, request=request, category=cat, publishable=None)
+
+        # if API enabled and active, return a serialized category
+        if api_settings.ENABLED:
+            for mimetype in (a.split(';')[0] for a in request.META.get('HTTP_ACCEPT', '').split(',')):
+                if response_serializer.serializable(mimetype):
+                    return response_serializer.serialize(object_serializer.serialize(cat, FULL), mimetype)
+
+        context = self.get_context(request, cat, **kwargs)
+
         template_name = cat.template
         archive_template = cat.app_data.ella.archive_template
 
         if archive_template and not context.get('is_title_page'):
             template_name = archive_template
-
-        object_rendering.send(sender=Category, request=request, category=cat, publishable=None)
-        object_rendered.send(sender=Category, request=request, category=cat, publishable=None)
-
-        if api_settings.ENABLED:
-            for mimetype in (a.split(';')[0] for a in request.META.get('HTTP_ACCEPT', '').split(',')):
-                if response_serializer.serializable(mimetype):
-                    return response_serializer.serialize(object_serializer.serialize({'category': cat, 'listings': context.get('page', None)}, FULL), mimetype)
 
         return self.render(request, context, self.get_templates(context, template_name))
 
@@ -305,19 +308,22 @@ class ListContentType(EllaCoreView):
                 year = n.year
         return year
 
-    def get_context(self, request, category='', year=None, month=None, day=None):
+    def get_category(self, request, category_path):
         try:
-            cat = Category.objects.get_by_tree_path(category)
+            cat = Category.objects.get_by_tree_path(category_path)
         except Category.DoesNotExist:
             # Homepage behaves differently on 404 with DEBUG mode to let user
             # know everything is fine instead of 404.
-            if settings.DEBUG is True and not category and not year:
+            if settings.DEBUG is True and not category_path:
                 raise self.EmptyHomepageException()
 
             raise Http404(_('Category with tree path %(path)r does not exist on site %(site)s') %
-                    {'path': category, 'site': settings.SITE_ID})
+                    {'path': category_path, 'site': settings.SITE_ID})
+        return cat
 
-        ella_data = cat.app_data.ella
+    def get_context(self, request, category, year=None, month=None, day=None):
+
+        ella_data = category.app_data.ella
 
         no_home_listings = ella_data.no_home_listings
 
@@ -332,8 +338,8 @@ class ListContentType(EllaCoreView):
         if page_no is None:
             page_no = 1
 
-        kwa = {'category': cat}
-        if category:
+        kwa = {}
+        if category.tree_parent_id:
             kwa['children'] = ListingHandler.ALL
 
         if 'using' in request.GET:
@@ -365,10 +371,10 @@ class ListContentType(EllaCoreView):
 
         # basic context
         context = {
-            'category' : cat,
-            'is_homepage': category_title_page and not category,
+            'category' : category,
+            'is_homepage': category_title_page and not category.tree_parent_id,
             'is_title_page': category_title_page,
-            'archive_entry_year' : lambda: self._archive_entry_year(cat),
+            'archive_entry_year' : lambda: self._archive_entry_year(category),
         }
 
         # no listings wanted on title page
@@ -376,18 +382,10 @@ class ListContentType(EllaCoreView):
             return context
 
         # add pagination
-        paginate_by = ella_data.paginate_by
-        qset = Listing.objects.get_queryset_wrapper(**kwa)
-        paginator = Paginator(qset, paginate_by)
-
-        if page_no > paginator.num_pages or page_no < 1:
-            raise Http404(_('Invalid page number %r') % page_no)
-
-        page = paginator.page(page_no)
-
+        page = ella_data.get_listings_page(page_no, **kwa)
         context.update({
-            'is_paginated': paginator.num_pages > 1,
-            'results_per_page': paginate_by,
+            'is_paginated': page.paginator.num_pages > 1,
+            'results_per_page': page.paginator.per_page,
             'page': page,
             'listings' : page.object_list,
         })

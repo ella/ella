@@ -45,17 +45,20 @@ class TestCategoryDetail(ViewHelpersTestCase):
         self.category_detail = ListContentType()
 
     def test_returns_category_by_tree_path(self):
-        c = self.category_detail.get_context(self.request, 'nested-category')
+        cat = self.category_detail.get_category(self.request, 'nested-category')
+        c = self.category_detail.get_context(self.request, cat)
         tools.assert_equals(self.category_nested, c['category'])
         tools.assert_false(c['is_homepage'])
-        
+
     def test_returns_home_page_with_no_args(self):
-        c = self.category_detail.get_context(self.request)
+        cat = self.category_detail.get_category(self.request, '')
+        c = self.category_detail.get_context(self.request, cat)
         tools.assert_equals(self.category, c['category'])
         tools.assert_true(c['is_homepage'])
-        
+
     def test_returns_nested_category_by_tree_path(self):
-        c = self.category_detail.get_context(self.request, 'nested-category/second-nested-category')
+        cat = self.category_detail.get_category(self.request, 'nested-category/second-nested-category')
+        c = self.category_detail.get_context(self.request, cat)
         tools.assert_equals(self.category_nested_second, c['category'])
         tools.assert_false(c['is_homepage'])
 
@@ -144,18 +147,18 @@ class TestListContentType(ViewHelpersTestCase):
         self.list_content_type = ListContentType()
 
     def test_only_category_and_year_returns_all_listings(self):
-        c = self.list_content_type.get_context(self.request, '', '2008')
+        c = self.list_content_type.get_context(self.request, self.category, '2008')
         tools.assert_equals(self.listings, list(c['listings']))
 
     def test_only_nested_category_and_year_returns_all_listings(self):
         Listing.objects.all().update(category=self.category_nested_second)
-        c = self.list_content_type.get_context(self.request, 'nested-category/second-nested-category', '2008')
+        c = self.list_content_type.get_context(self.request, self.category_nested_second, '2008')
         tools.assert_equals(self.listings, list(c['listings']))
 
     def test_return_first_2_listings_if_paginate_by_2(self):
         self.category.app_data = {'ella': {'paginate_by': 2}}
         self.category.save()
-        c = self.list_content_type.get_context(self.request, '', '2008')
+        c = self.list_content_type.get_context(self.request, self.category, '2008')
         tools.assert_equals(self.listings[:2], list(c['listings']))
         tools.assert_true(c['is_paginated'])
 
@@ -163,28 +166,28 @@ class TestListContentType(ViewHelpersTestCase):
         self.category.app_data = {'ella': {'paginate_by': 2}}
         self.category.save()
         self.request.GET['p'] = '2'
-        c = self.list_content_type.get_context(self.request, '', '2008')
+        c = self.list_content_type.get_context(self.request, self.category, '2008')
         tools.assert_equals(self.listings[2:4], list(c['listings']))
         tools.assert_true(c['is_paginated'])
 
     def test_returns_empty_list_if_no_listing_found(self):
-        c = self.list_content_type.get_context(self.request, '', '2007')
+        c = self.list_content_type.get_context(self.request, self.category, '2007')
         tools.assert_equals([], list(c['listings']))
 
     def test_raises404_for_incorrect_page(self):
         self.request.GET['p'] = '200'
-        tools.assert_raises(Http404, self.list_content_type.get_context, self.request, '', '2008')
+        tools.assert_raises(Http404, self.list_content_type.get_context, self.request, self.category, '2008')
 
     def test_raises404_for_incorrect_category(self):
-        tools.assert_raises(Http404, self.list_content_type.get_context, self.request, 'XXX', '2008')
+        tools.assert_raises(Http404, self.list_content_type.get_category, self.request, 'XXX')
 
     def test_raises404_for_incorrect_month(self):
-        tools.assert_raises(Http404, self.list_content_type.get_context, self.request, '', '2008', '13')
+        tools.assert_raises(Http404, self.list_content_type.get_context, self.request, self.category, '2008', '13')
 
     def test_raises404_for_incorrect_day(self):
-        tools.assert_raises(Http404, self.list_content_type.get_context, self.request, '', '2008', '1', '42')
+        tools.assert_raises(Http404, self.list_content_type.get_context, self.request, self.category, '2008', '1', '42')
 
     def test_raises404_for_incorrect_date(self):
-        tools.assert_raises(Http404, self.list_content_type.get_context, self.request, '', '2008', '2', '30')
+        tools.assert_raises(Http404, self.list_content_type.get_context, self.request, self.category, '2008', '2', '30')
 
 

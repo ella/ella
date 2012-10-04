@@ -255,7 +255,7 @@ class TestRedisListings(TestCase):
         request = rf.get(self.category_nested.get_absolute_url(), {'using': 'redis'})
         lct = ListContentType()
 
-        context = lct.get_context(request, self.category_nested.tree_path)
+        context = lct.get_context(request, self.category_nested)
         tools.assert_equals(2, len(context['listings']))
         l1, l2 = context['listings']
 

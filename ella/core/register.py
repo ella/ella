@@ -1,9 +1,11 @@
 from django import forms
+from django.http import Http404
 from django.utils.translation import ugettext_lazy as _
+from django.core.paginator import Paginator
 
 from app_data import app_registry, AppDataForm, AppDataContainer
 
-from ella.core.models import Category
+from ella.core.models import Category, Listing
 from ella.core.conf import core_settings
 
 class CategoryAppForm(AppDataForm):
@@ -17,5 +19,21 @@ class CategoryAppForm(AppDataForm):
         initial=True, required=False, help_text=_('Should propagate listings '
         'from child categories?'))
 
-app_registry.register('ella', AppDataContainer.from_form(CategoryAppForm), Category)
+class EllaAppDataContainer(AppDataContainer):
+    form_class = CategoryAppForm
+
+    def get_listings(self, **kwargs):
+        return Listing.objects.get_queryset_wrapper(self._instance, **kwargs)
+
+    def get_listings_page(self, page_no, **kwargs):
+        paginate_by = self.paginate_by
+        paginator = Paginator(self.get_listings, paginate_by)
+
+        if page_no > paginator.num_pages or page_no < 1:
+            raise Http404(_('Invalid page number %r') % page_no)
+
+        return paginator.page(page_no)
+
+
+app_registry.register('ella', EllaAppDataContainer, Category)
 
