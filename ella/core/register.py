@@ -27,7 +27,7 @@ class EllaAppDataContainer(AppDataContainer):
 
     def get_listings_page(self, page_no, **kwargs):
         paginate_by = self.paginate_by
-        paginator = Paginator(self.get_listings, paginate_by)
+        paginator = Paginator(self.get_listings(**kwargs), paginate_by)
 
         if page_no > paginator.num_pages or page_no < 1:
             raise Http404(_('Invalid page number %r') % page_no)
