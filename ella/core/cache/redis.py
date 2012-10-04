@@ -35,7 +35,7 @@ DEFAULT_REDIS_HANDLER = 'redis'
 
 
 def ListingHandlerClass():
-    return get_model('core', 'Listing').objects.get_listing_handler(DEFAULT_REDIS_HANDLER)
+    return get_model('core', 'Listing').objects.get_listing_handler(DEFAULT_REDIS_HANDLER, fallback=False)
 
 
 def publishable_published(publishable, **kwargs):
@@ -384,6 +384,9 @@ class SlidingListingHandler(RedisListingHandler):
 
 
 def connect_signals():
+    LH = ListingHandlerClass()
+    if LH is None or not hasattr(LH, 'add_publishable') or not hasattr(LH, 'remove_publishable'):
+        return
     from django.db.models.signals import pre_save, post_save, post_delete, pre_delete
     from ella.core.signals import content_published, content_unpublished
     from ella.core.models import Listing
