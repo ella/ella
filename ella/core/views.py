@@ -384,7 +384,7 @@ class ListContentType(EllaCoreView):
         # add pagination
         page = ella_data.get_listings_page(page_no, **kwa)
         context.update({
-            'is_paginated': page.paginator.num_pages > 1,
+            'is_paginated': page.has_other_pages(),
             'results_per_page': page.paginator.per_page,
             'page': page,
             'listings' : page.object_list,
