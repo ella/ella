@@ -30,7 +30,7 @@ class ObjectSerializer(object):
     def register(self, cls, serializer, context=PARTIAL):
         self._registry.setdefault(cls, {})[context] = serializer
 
-    def serialize(self, data, context=PARTIAL):
+    def serialize(self, request, data, context=PARTIAL):
         # collect relevant registries
         rs = []
         for c in data.__class__.mro():
@@ -43,13 +43,13 @@ class ObjectSerializer(object):
         # registered context
         for r in rs:
             if context in r:
-                return r[context](data)
+                return r[context](request, data)
 
         # fall back to PARTIAL context
         if context is not PARTIAL:
             for r in rs:
                 if PARTIAL in r:
-                    return r[PARTIAL](data)
+                    return r[PARTIAL](request, data)
 
         return data
 

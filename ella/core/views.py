@@ -155,7 +155,7 @@ class ObjectDetail(EllaCoreView):
         elif api_settings.ENABLED:
             for mimetype in (a.split(';')[0] for a in request.META.get('HTTP_ACCEPT', '').split(',')):
                 if response_serializer.serializable(mimetype):
-                    return response_serializer.serialize(object_serializer.serialize(obj, FULL), mimetype)
+                    return response_serializer.serialize(object_serializer.serialize(request, obj, FULL), mimetype)
 
         if custom_urls.resolver.has_custom_detail(obj):
             return custom_urls.resolver.call_custom_detail(request, context)
@@ -280,7 +280,7 @@ class ListContentType(EllaCoreView):
         if api_settings.ENABLED:
             for mimetype in (a.split(';')[0] for a in request.META.get('HTTP_ACCEPT', '').split(',')):
                 if response_serializer.serializable(mimetype):
-                    return response_serializer.serialize(object_serializer.serialize(cat, FULL), mimetype)
+                    return response_serializer.serialize(object_serializer.serialize(request, cat, FULL), mimetype)
 
         context = self.get_context(request, cat, **kwargs)
 

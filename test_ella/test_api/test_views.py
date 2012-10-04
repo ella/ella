@@ -30,7 +30,7 @@ class TestObjectDetail(ViewsTestCase):
     def setUp(self):
         super(TestObjectDetail, self).setUp()
         self.old_registry = object_serializer._registry.copy()
-        object_serializer.register(Article, lambda a: 'Article %s' % a.pk, FULL)
+        object_serializer.register(Article, lambda r, a: 'Article %s' % a.pk, FULL)
 
     def tearDown(self):
         super(TestObjectDetail, self).tearDown()
