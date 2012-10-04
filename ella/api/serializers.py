@@ -5,6 +5,7 @@ from ella.photos.models import FormatedPhoto, Photo
 
 from django.core.paginator import Page
 from django.utils import simplejson
+from django.conf import settings
 
 def serialize_list(l):
     return [object_serializer.serialize(o, 'list') for o in l]
@@ -37,7 +38,10 @@ def serialize_author(author):
 def serialize_photo(photo, formats=None):
     if formats is None:
         formats = api_settings.DEFAULT_PHOTO_FORMATS
-    return dict((f, FormatedPhoto.objects.get_photo_in_format(photo, f, False)) for f in formats)
+    out = dict((f, FormatedPhoto.objects.get_photo_in_format(photo, f, False)) for f in formats)
+    for fp in out.itervalues():
+        fp['url'] = settings.MEDIA_URL + fp['url']
+    return out
 
 def serialize_publishable(publishable):
     return {
