@@ -14,7 +14,7 @@ class TestCategoryDetail(ViewsTestCase):
         tools.assert_equals('application/json', response['Content-Type'])
         tools.assert_equals(
             {
-                "category": {"tree_path": "", "id": 1, "title": u"\u4f60\u597d category"},
+                "category": {"url": "/", "id": 1, "title": u"\u4f60\u597d category"},
                 "listings": {
                     u'current_page': 1,
                     u'num_pages': 1,

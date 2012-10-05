@@ -31,7 +31,7 @@ def serialize_category(request, category):
     return {
         'id': category.pk,
         'title': category.title,
-        'tree_path': category.tree_path,
+        'url': category.get_absolute_url(),
     }
 
 def serialize_author(request, author):
