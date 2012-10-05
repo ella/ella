@@ -36,7 +36,6 @@ class ObjectSerializer(object):
         for c in data.__class__.mro():
             if c in self._registry:
                 rs.append(self._registry[c])
-                break
         if not rs:
             return data
 
