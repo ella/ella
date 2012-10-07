@@ -14,7 +14,7 @@ class TestCategoryDetail(ViewsTestCase):
         tools.assert_equals('application/json', response['Content-Type'])
         tools.assert_equals(
             {
-                "category": {"tree_path": "", "id": 1, "title": u"\u4f60\u597d category"},
+                "category": {"url": "/", "id": 1, "title": u"\u4f60\u597d category"},
                 "listings": {
                     u'current_page': 1,
                     u'num_pages': 1,
@@ -30,7 +30,7 @@ class TestObjectDetail(ViewsTestCase):
     def setUp(self):
         super(TestObjectDetail, self).setUp()
         self.old_registry = object_serializer._registry.copy()
-        object_serializer.register(Article, lambda a: 'Article %s' % a.pk, FULL)
+        object_serializer.register(Article, lambda r, a: 'Article %s' % a.pk, FULL)
 
     def tearDown(self):
         super(TestObjectDetail, self).tearDown()
