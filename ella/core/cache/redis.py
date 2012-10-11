@@ -25,14 +25,7 @@ if hasattr(settings, 'LISTINGS_REDIS'):
         client = Redis(**getattr(settings, 'LISTINGS_REDIS'))
 
 
-# TODO: Brainstorm if this aliasing is really required. It might be
-# sufficent to test if ListingHandler object has coresponding methods
-# (add_publishable, ...) and call them if it does.
-#
-# Moreover, consider a situation when ListingHandler can be None.
-
 DEFAULT_REDIS_HANDLER = 'redis'
-
 
 def ListingHandlerClass():
     return get_model('core', 'Listing').objects.get_listing_handler(DEFAULT_REDIS_HANDLER)
