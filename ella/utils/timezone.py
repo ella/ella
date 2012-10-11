@@ -8,7 +8,7 @@ from django.conf import settings
 use_tz = getattr(settings, 'USE_TZ', False)
 try:
     # try import offset-aware datetime from Django >= 1.4
-    from django.utils.timezone import now, localtime
+    from django.utils.timezone import now, localtime, get_current_timezone, make_aware
 except ImportError:
     # backward compatibility with Django < 1.4 (offset-naive datetimes)
     from datetime import datetime
@@ -23,7 +23,7 @@ def utc_localize(dtime):
 
 def localize(dtime):
     if use_tz:
-        return localtime(dtime)
+        return make_aware(dtime, get_current_timezone())
     return dtime
 
 def to_timestamp(dtime):
