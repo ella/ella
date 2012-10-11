@@ -18,12 +18,18 @@ except ImportError:
 
 def utc_localize(dtime):
     if use_tz:
-        return utc.localize(dtime)
+        if dtime.tzinfo:
+            return utc.normalize(dtime)
+        else:
+            return utc.localize(dtime)
     return dtime
 
 def localize(dtime):
     if use_tz:
-        return make_aware(dtime, get_current_timezone())
+        if dtime.tzinfo:
+            return localtime(dtime)
+        else:
+            return make_aware(dtime, get_current_timezone())
     return dtime
 
 def to_timestamp(dtime):
