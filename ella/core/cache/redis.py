@@ -310,19 +310,16 @@ class AuthorListingHandler(RedisListingHandler):
         return keys
 
     def _get_key(self):
-        pipe = None
+        key, pipe = super(AuthorListingHandler, self)._get_key()
 
-        if not hasattr(self, '_key'):
-            key, pipe = super(AuthorListingHandler, self)._get_key()
-
+        if pipe is None and 'author' in self.kwargs:
             # If author filtering is requested, perform another intersect
             # over what has been filtered out before.
-            if 'author' in self.kwargs:
-                a_key = '%s:a:%s' % (self.PREFIX, self.kwargs['author'].pk)
-                a_inter_key = '%s:azis:%s' % (self.PREFIX, md5(','.join((a_key, key))).hexdigest())
-                pipe.zinterstore(a_inter_key, (a_key, key), 'MAX')
-                pipe.expire(a_inter_key, 60)
-                self._key = a_inter_key
+            a_key = '%s:a:%s' % (self.PREFIX, self.kwargs['author'].pk)
+            a_inter_key = '%s:azis:%s' % (self.PREFIX, md5(','.join((a_key, key))).hexdigest())
+            pipe.zinterstore(a_inter_key, (a_key, key), 'MAX')
+            pipe.expire(a_inter_key, 60)
+            self._key = a_inter_key
 
         return self._key, pipe
 
