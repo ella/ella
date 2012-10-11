@@ -25,8 +25,8 @@ class EllaAppDataContainer(AppDataContainer):
     def get_listings(self, **kwargs):
         return Listing.objects.get_queryset_wrapper(self._instance, **kwargs)
 
-    def get_listings_page(self, page_no, **kwargs):
-        paginate_by = self.paginate_by
+    def get_listings_page(self, page_no, paginate_by=None, **kwargs):
+        paginate_by = paginate_by or self.paginate_by
         paginator = Paginator(self.get_listings(**kwargs), paginate_by)
 
         if page_no > paginator.num_pages or page_no < 1:
