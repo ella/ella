@@ -374,6 +374,8 @@ class SlidingListingHandler(RedisListingHandler):
 
 
 def connect_signals():
+    if not client:
+        return
     LH = ListingHandlerClass()
     if LH is None or not hasattr(LH, 'add_publishable') or not hasattr(LH, 'remove_publishable'):
         return
@@ -389,5 +391,3 @@ def connect_signals():
     pre_delete.connect(listing_pre_delete, sender=Listing)
     post_delete.connect(listing_post_delete, sender=Listing)
 
-if client:
-    connect_signals()
