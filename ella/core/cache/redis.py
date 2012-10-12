@@ -305,7 +305,7 @@ class AuthorListingHandler(RedisListingHandler):
     def _get_key(self):
         key, pipe = super(AuthorListingHandler, self)._get_key()
 
-        if pipe is None and 'author' in self.kwargs:
+        if pipe is not None and 'author' in self.kwargs:
             # If author filtering is requested, perform another intersect
             # over what has been filtered out before.
             a_key = '%s:a:%s' % (self.PREFIX, self.kwargs['author'].pk)
