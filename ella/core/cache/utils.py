@@ -119,6 +119,17 @@ def get_cached_objects(pks, model=None, timeout=CACHE_TIMEOUT, missing=RAISE):
             ct, pk = lookup[k]
             to_get.setdefault(ct, {})[int(pk)] = k
 
+        # take out all the publishables
+        publishable_ct = ContentType.objects.get_for_model(get_model('core', 'publishable'))
+        if publishable_ct in to_get:
+            publishable_keys = to_get.pop(publishable_ct)
+            models = publishable_ct.model_class()._default_manager.values('content_type_id', 'id').filter(id__in=publishable_keys.keys())
+            for m in models:
+                ct = ContentType.objects.get_for_id(m['content_type_id'])
+                pk = m['id']
+                # and put them back as their native content_type
+                to_get.setdefault(ct, {})[pk] = publishable_keys[pk]
+
         to_set = {}
         # retrieve all the models from DB
         for ct, vals in to_get.items():
