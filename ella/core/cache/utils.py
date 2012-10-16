@@ -84,7 +84,7 @@ def get_cached_object(model, timeout=CACHE_TIMEOUT, **kwargs):
         # that lookup even if we retrieved it using a different one.
         if 'pk' in kwargs:
             cache.set(key, obj, timeout)
-        else:
+        elif not isinstance(cache, DummyCache):
             cache.set_many({key: obj, _get_key(KEY_PREFIX, model_ct, pk=obj.pk): obj}, timeout=timeout)
 
     return obj
@@ -143,11 +143,10 @@ def get_cached_objects(pks, model=None, timeout=CACHE_TIMEOUT, missing=RAISE):
             for pk, m in models.items():
                 k = vals[pk]
                 cached[k] = to_set[k] = m
-        kw = {}
+
         if not isinstance(cache, DummyCache):
-            kw['timeout'] = timeout
-        # write them into cache
-        cache.set_many(to_set, **kw)
+            # write them into cache
+            cache.set_many(to_set, timeout=timeout)
 
     out = []
     for k in keys:
