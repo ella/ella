@@ -71,16 +71,22 @@ def get_cached_object(model, timeout=CACHE_TIMEOUT, **kwargs):
 
     obj = cache.get(key)
     if obj is None:
+        # if we are looking for a publishable, fetch just the actual content
+        # type and then fetch the actual object
+        if model_ct.app_label == 'core' and model_ct.model == 'publishable':
+            actual_ct_id = model_ct.model_class()._default_manager.values('content_type_id').get(**kwargs)['content_type_id']
+            model_ct = ContentType.objects.get_for_id(actual_ct_id)
+
+        # fetch the actual object we want
         obj = model_ct.model_class()._default_manager.get(**kwargs)
-        if obj.__class__ == get_model('core', 'publishable'):
-            # Let the original key set to the subclass. Otherwise the
-            # cache key wouldn't eventually be set in case the query is 
-            # not by PK, but by different filter args.
-            if 'pk' in kwargs:
-                return obj.target
-            else:
-                obj = obj.target
-        cache.set(key, obj, timeout)
+
+        # since 99% of lookups are done via PK make sure we set the cache for
+        # that lookup even if we retrieved it using a different one.
+        if 'pk' in kwargs:
+            cache.set(key, obj, timeout)
+        else:
+            cache.set_many({key: obj, _get_key(KEY_PREFIX, model_ct, pk=obj.pk): obj}, timeout=timeout)
+
     return obj
 
 RAISE, SKIP, NONE = 0, 1, 2
