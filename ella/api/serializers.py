@@ -2,9 +2,11 @@ from ella.api import object_serializer, response_serializer, FULL
 from ella.api.conf import api_settings
 from ella.core.models import Category, Publishable, Listing, Author
 from ella.photos.models import FormatedPhoto, Photo
+from ella.core.conf import core_settings
 
-from django.core.paginator import Page
+from django.core.paginator import Page, Paginator
 from django.utils import simplejson
+from django.http import Http404
 
 def serialize_list(request, l):
     return [object_serializer.serialize(request, o) for o in l]
@@ -33,6 +35,15 @@ def serialize_category(request, category):
         'title': category.title,
         'url': category.get_absolute_url(),
     }
+
+def serialize_full_author(request, author):
+    page_no = 1
+    if 'p' in request.GET and request.GET['p'].isdigit():
+        page_no = int(request.GET['p'])
+    paginator = Paginator(author.recently_published(), core_settings.CATEGORY_LISTINGS_PAGINATE_BY)
+    if page_no > paginator.num_pages or page_no < 1:
+        raise Http404('Invalid page number %r' % page_no)
+    return object_serializer.serialize(request, {'author': author, 'listings': paginator.page(page_no)})
 
 def serialize_author(request, author):
     return {
@@ -64,6 +75,7 @@ object_serializer.register(list, serialize_list)
 object_serializer.register(dict, serialize_dict)
 object_serializer.register(tuple, serialize_list)
 object_serializer.register(Page, serialize_page)
+object_serializer.register(Author, serialize_full_author, FULL)
 object_serializer.register(Author, serialize_author)
 object_serializer.register(Category, serialize_category)
 object_serializer.register(Category, serialize_full_category, FULL)

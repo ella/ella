@@ -16,8 +16,7 @@ from ella.core import custom_urls
 from ella.core.conf import core_settings
 from ella.core.managers import ListingHandler
 from ella.core.signals import object_rendering, object_rendered
-from ella.api.conf import api_settings
-from ella.api import object_serializer, response_serializer, FULL
+from ella.api import render_as_api
 from ella.utils.timezone import now, utc_localize
 
 __docformat__ = "restructuredtext en"
@@ -42,6 +41,10 @@ class AuthorView(ListView):
             self.kwargs.update({'page': request.GET['p']})
 
         self.author = get_cached_object(Author, slug=kwargs['slug'])
+
+        response = render_as_api(request, self.author)
+        if response:
+            return response
 
         return super(AuthorView, self).get(request, *args, **kwargs)
 
@@ -152,10 +155,9 @@ class ObjectDetail(EllaCoreView):
         # check for custom actions
         if url_remainder:
             return custom_urls.resolver.call_custom_view(request, obj, url_remainder, context)
-        elif api_settings.ENABLED:
-            for mimetype in (a.split(';')[0] for a in request.META.get('HTTP_ACCEPT', '').split(',')):
-                if response_serializer.serializable(mimetype):
-                    return response_serializer.serialize(object_serializer.serialize(request, obj, FULL), mimetype)
+        response = render_as_api(request, obj)
+        if response:
+            return response
 
         if custom_urls.resolver.has_custom_detail(obj):
             return custom_urls.resolver.call_custom_detail(request, context)
@@ -277,10 +279,9 @@ class ListContentType(EllaCoreView):
         object_rendered.send(sender=Category, request=request, category=cat, publishable=None)
 
         # if API enabled and active, return a serialized category
-        if api_settings.ENABLED:
-            for mimetype in (a.split(';')[0] for a in request.META.get('HTTP_ACCEPT', '').split(',')):
-                if response_serializer.serializable(mimetype):
-                    return response_serializer.serialize(object_serializer.serialize(request, cat, FULL), mimetype)
+        response = render_as_api(request, cat)
+        if response:
+            return response
 
         context = self.get_context(request, cat, **kwargs)
 

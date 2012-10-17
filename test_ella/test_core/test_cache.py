@@ -1,5 +1,5 @@
 import time
-from datetime import datetime, date
+from datetime import date
 
 from django.core.cache import get_cache
 from ella.core.cache.redis import DEFAULT_REDIS_HANDLER
@@ -44,6 +44,13 @@ class TestCacheUtils(CacheTestCase):
         objs = utils.get_cached_objects([(ct_ct.id, ct_ct.id), (ct_ct.id, site_ct.id), (site_ct.id, 1)])
 
         tools.assert_equals([ct_ct, site_ct, Site.objects.get(pk=1)], objs)
+
+    def test_get_many_publishables_will_respect_their_content_type(self):
+        create_basic_categories(self)
+        create_and_place_a_publishable(self)
+        objs = utils.get_cached_objects([self.publishable.pk], Publishable)
+
+        tools.assert_true(isinstance(objs[0], Article))
 
     def test_get_many_objects_raises_by_default(self):
         ct_ct = ContentType.objects.get_for_model(ContentType)

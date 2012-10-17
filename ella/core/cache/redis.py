@@ -25,14 +25,7 @@ if hasattr(settings, 'LISTINGS_REDIS'):
         client = Redis(**getattr(settings, 'LISTINGS_REDIS'))
 
 
-# TODO: Brainstorm if this aliasing is really required. It might be
-# sufficent to test if ListingHandler object has coresponding methods
-# (add_publishable, ...) and call them if it does.
-#
-# Moreover, consider a situation when ListingHandler can be None.
-
 DEFAULT_REDIS_HANDLER = 'redis'
-
 
 def ListingHandlerClass():
     return get_model('core', 'Listing').objects.get_listing_handler(DEFAULT_REDIS_HANDLER)
@@ -310,19 +303,16 @@ class AuthorListingHandler(RedisListingHandler):
         return keys
 
     def _get_key(self):
-        pipe = None
+        key, pipe = super(AuthorListingHandler, self)._get_key()
 
-        if not hasattr(self, '_key'):
-            key, pipe = super(AuthorListingHandler, self)._get_key()
-
+        if pipe is not None and 'author' in self.kwargs:
             # If author filtering is requested, perform another intersect
             # over what has been filtered out before.
-            if 'author' in self.kwargs:
-                a_key = '%s:a:%s' % (self.PREFIX, self.kwargs['author'].pk)
-                a_inter_key = '%s:azis:%s' % (self.PREFIX, md5(','.join((a_key, key))).hexdigest())
-                pipe.zinterstore(a_inter_key, (a_key, key), 'MAX')
-                pipe.expire(a_inter_key, 60)
-                self._key = a_inter_key
+            a_key = '%s:a:%s' % (self.PREFIX, self.kwargs['author'].pk)
+            a_inter_key = '%s:azis:%s' % (self.PREFIX, md5(','.join((a_key, key))).hexdigest())
+            pipe.zinterstore(a_inter_key, (a_key, key), 'MAX')
+            pipe.expire(a_inter_key, 60)
+            self._key = a_inter_key
 
         return self._key, pipe
 
@@ -384,6 +374,8 @@ class SlidingListingHandler(RedisListingHandler):
 
 
 def connect_signals():
+    if not client:
+        return
     LH = ListingHandlerClass()
     if LH is None or not hasattr(LH, 'add_publishable') or not hasattr(LH, 'remove_publishable'):
         return
@@ -399,5 +391,3 @@ def connect_signals():
     pre_delete.connect(listing_pre_delete, sender=Listing)
     post_delete.connect(listing_post_delete, sender=Listing)
 
-if client:
-    connect_signals()

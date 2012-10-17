@@ -5,13 +5,12 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.core.validators import validate_slug, RegexValidator
 from django.db import models
-from django.db.models.loading import get_model
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
 from app_data import AppDataField
 
-from ella.core.cache import CachedGenericForeignKey, SiteForeignKey, ContentTypeForeignKey, CategoryForeignKey, CachedForeignKey, get_cached_object
+from ella.core.cache import CachedGenericForeignKey, SiteForeignKey, ContentTypeForeignKey, CategoryForeignKey, CachedForeignKey
 from ella.core.conf import core_settings
 from ella.core.managers import CategoryManager, ListingHandler
 
@@ -49,10 +48,8 @@ class Author(models.Model):
         return ('author_detail', [self.slug])
 
     def recently_published(self, **kwargs):
-        Listing = get_model('core', 'Listing')
-        root = get_cached_object(Category, tree_path='', site=settings.SITE_ID)
-        return Listing.objects.get_queryset_wrapper(
-            children=ListingHandler.ALL, category=root, author=self, **kwargs)
+        root = Category.objects.get_by_tree_path('')
+        return root.app_data.ella.get_listings(children=ListingHandler.ALL, author=self, **kwargs)
 
 
 class Source(models.Model):
