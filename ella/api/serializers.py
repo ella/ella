@@ -1,6 +1,6 @@
 from ella.api import object_serializer, response_serializer, FULL
 from ella.api.conf import api_settings
-from ella.core.models import Category, Publishable, Listing, Author
+from ella.core.models import Category, Publishable, Listing, Author, Source
 from ella.photos.models import FormatedPhoto, Photo
 from ella.core.conf import core_settings
 
@@ -51,10 +51,17 @@ def serialize_author(request, author):
         'url': author.get_absolute_url(),
     }
 
+def serialize_source(request, source):
+    return {
+        'name': source.name,
+        'description': source.description,
+        'url': source.url,
+    }
+
 def serialize_photo(request, photo, formats=None):
     if formats is None:
         formats = api_settings.DEFAULT_PHOTO_FORMATS
-    return dict((f, FormatedPhoto.objects.get_photo_in_format(photo, f, False)) for f in formats)
+    return {'source': object_serializer.serialize(request, photo.source), 'formats': dict((f, FormatedPhoto.objects.get_photo_in_format(photo, f, False)) for f in formats)}
 
 def serialize_publishable(request, publishable):
     return {
@@ -62,8 +69,7 @@ def serialize_publishable(request, publishable):
         'url': publishable.get_absolute_url(),
         'content_type': publishable.content_type.name,
         'description': publishable.description,
-        # don't use object_serializer to avoid fetching Photo model instance
-        'photo': serialize_photo(request, publishable.photo_id, formats=api_settings.PUBLISHABLE_PHOTO_FORMATS),
+        'photo': serialize_photo(request, publishable.photo, formats=api_settings.PUBLISHABLE_PHOTO_FORMATS),
     }
 
 def serialize_listing(request, listing):
@@ -77,6 +83,7 @@ object_serializer.register(tuple, serialize_list)
 object_serializer.register(Page, serialize_page)
 object_serializer.register(Author, serialize_full_author, FULL)
 object_serializer.register(Author, serialize_author)
+object_serializer.register(Source, serialize_source)
 object_serializer.register(Category, serialize_category)
 object_serializer.register(Category, serialize_full_category, FULL)
 object_serializer.register(Photo, serialize_photo)
