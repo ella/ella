@@ -59,6 +59,9 @@ def serialize_source(request, source):
     }
 
 def serialize_photo(request, photo, formats=None):
+    if not photo:
+        return None
+
     if formats is None:
         formats = api_settings.DEFAULT_PHOTO_FORMATS
     return {'source': object_serializer.serialize(request, photo.source), 'formats': dict((f, FormatedPhoto.objects.get_photo_in_format(photo, f, False)) for f in formats)}
