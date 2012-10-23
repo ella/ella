@@ -7,8 +7,16 @@ from django.core.paginator import Paginator
 from app_data import app_registry, AppDataForm, AppDataContainer
 
 from ella.core.models import Category, Listing
+from ella.core.managers import ListingHandler
 from ella.core.conf import core_settings
 from ella.core.cache.redis import connect_signals
+
+
+LISTING_CHOICES = (
+    (ListingHandler.NONE, 'No Children'),
+    (ListingHandler.IMMEDIATE, 'Immediate Children'),
+    (ListingHandler.ALL, 'All Children'),
+)
 
 
 class CategoryAppForm(AppDataForm):
@@ -21,6 +29,10 @@ class CategoryAppForm(AppDataForm):
     propagate_listings = forms.BooleanField(label=_('Propagate listings'),
         initial=True, required=False, help_text=_('Should propagate listings '
         'from child categories?'))
+    child_listings = forms.TypedChoiceField(choices=LISTING_CHOICES, coerce=int,
+                                            required=False, initial=None,
+                                            empty_value=None)
+
 
 class EllaAppDataContainer(AppDataContainer):
     form_class = CategoryAppForm
@@ -36,6 +48,13 @@ class EllaAppDataContainer(AppDataContainer):
             raise Http404(_('Invalid page number %r') % page_no)
 
         return paginator.page(page_no)
+
+    @property
+    def child_behavior(self):
+        if self.child_listings is None:
+            return ListingHandler.ALL if self._instance.tree_parent_id else ListingHandler.NONE
+        return self.child_listings
+
 app_registry.register('ella', EllaAppDataContainer, Category)
 
 
@@ -54,4 +73,3 @@ template.add_to_builtins('ella.core.templatetags.custom_urls_tags')
 template.add_to_builtins('django.templatetags.i18n')
 # and photos are always useful
 template.add_to_builtins('ella.photos.templatetags.photos')
-

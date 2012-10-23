@@ -340,8 +340,7 @@ class ListContentType(EllaCoreView):
             page_no = 1
 
         kwa = {}
-        if category.tree_parent_id:
-            kwa['children'] = ListingHandler.ALL
+        kwa['children'] = category.app_data.ella.child_behavior
 
         if 'using' in request.GET:
             kwa['source'] = request.GET['using']
