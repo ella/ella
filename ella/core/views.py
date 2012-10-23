@@ -339,8 +339,7 @@ class ListContentType(EllaCoreView):
         if page_no is None:
             page_no = 1
 
-        kwa = {}
-        kwa['children'] = category.app_data.ella.child_behavior
+        kwa = {'children': ella_data.child_behavior}
 
         if 'using' in request.GET:
             kwa['source'] = request.GET['using']
