@@ -41,6 +41,8 @@ class Author(models.Model):
         verbose_name_plural = _('Authors')
 
     def __unicode__(self):
+        if not self.name:
+            return self.slug
         return self.name
 
     @models.permalink
