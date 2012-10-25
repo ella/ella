@@ -9,6 +9,7 @@ include requirements.txt
 recursive-include doc *
 recursive-include test_ella *
 recursive-include ella/*/locale *
+recursive-include ella/*/templates *
 
 prune test_ella/static/photos
 global-exclude .coverage
