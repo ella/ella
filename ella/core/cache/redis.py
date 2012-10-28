@@ -214,7 +214,7 @@ class RedisListingHandler(ListingHandler):
             )
         else:
             pipe = pipe.zrevrange(key,
-                start=offset, num=offset + count,
+                start=offset, num=offset + count - 1,
                 withscores=True
             )
         results = pipe.execute()
