@@ -37,7 +37,7 @@ def publishable_published(publishable, **kwargs):
         ListingHandlerClass().add_publishable(
             l.category,
             publishable,
-            repr(to_timestamp(l.publish_from)),
+            publish_from=l.publish_from,
             pipe=pipe,
             commit=False
         )
@@ -73,7 +73,7 @@ def listing_post_delete(sender, instance, **kwargs):
         ListingHandlerClass().add_publishable(
             l.category,
             instance.publishable,
-            repr(to_timestamp(l.publish_from)),
+            publish_from=l.publish_from,
             pipe=pipe,
             commit=False
         )
@@ -94,16 +94,13 @@ def listing_pre_save(sender, instance, **kwargs):
 def listing_post_save(sender, instance, **kwargs):
     pipe = getattr(instance, '__pipe', None)
 
-    if instance.publishable.is_published():
-        pipe = ListingHandlerClass().add_publishable(
-            instance.category,
-            instance.publishable,
-            repr(to_timestamp(instance.publish_from)),
-            pipe=pipe,
-            commit=False
-        )
-    if pipe:
-        pipe.execute()
+    pipe = ListingHandlerClass().add_publishable(
+        instance.category,
+        instance.publishable,
+        publish_from=instance.publish_from,
+        pipe=pipe,
+        commit=True
+    )
 
 
 class RedisListingHandler(ListingHandler):
@@ -190,16 +187,14 @@ class RedisListingHandler(ListingHandler):
 
     def _get_listing(self, publishable, score):
         Listing = get_model('core', 'listing')
-        publish_from = from_timestamp(score)
-        return Listing(publishable=publishable, category=publishable.category, publish_from=publish_from)
+        return Listing(publishable=publishable, category=publishable.category)
 
     def _get_score_limits(self):
         max_score = None
         min_score = None
 
         if self.date_range:
-            max_score = repr(to_timestamp(min(self.date_range[1], now())))
-            min_score = repr(to_timestamp(self.date_range[0]))
+            raise NotImplemented()
         return min_score, max_score
 
     def get_listings(self, offset=0, count=10):
@@ -213,13 +208,13 @@ class RedisListingHandler(ListingHandler):
         # get all the relevant records
         if min_score or max_score:
             pipe = pipe.zrevrangebyscore(key,
-                repr(max_score), repr(min_score),
-                start=offset, num=offset + count - 1,
+                max_score, min_score,
+                start=offset, num=offset + count,
                 withscores=True
             )
         else:
             pipe = pipe.zrevrange(key,
-                start=offset, num=offset + count - 1,
+                start=offset, num=offset + count,
                 withscores=True
             )
         results = pipe.execute()
@@ -291,7 +286,30 @@ class RedisListingHandler(ListingHandler):
         return self._key, pipe
 
 
-class AuthorListingHandler(RedisListingHandler):
+class TimeBasedListingHandler(RedisListingHandler):
+    @classmethod
+    def add_publishable(cls, category, publishable, score=None, publish_from=None, pipe=None, commit=True):
+        if score is None:
+            score = repr(to_timestamp(publish_from or now()))
+        return super(TimeBasedListingHandler, cls).add_publishable(category, publishable, score, pipe=pipe, commit=commit)
+
+    def _get_score_limits(self):
+        max_score = repr(to_timestamp(now()))
+        min_score = 0
+
+        if self.date_range:
+            max_score = repr(to_timestamp(min(self.date_range[1], now())))
+            min_score = repr(to_timestamp(self.date_range[0]))
+        return min_score, max_score
+
+    def _get_listing(self, publishable, score):
+        Listing = get_model('core', 'listing')
+        publish_from = from_timestamp(score)
+        return Listing(publishable=publishable, category=publishable.category, publish_from=publish_from)
+
+
+
+class AuthorListingHandler(TimeBasedListingHandler):
     @classmethod
     def get_keys(cls, category, publishable):
         keys = super(AuthorListingHandler, cls).get_keys(category, publishable)
