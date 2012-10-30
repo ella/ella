@@ -58,6 +58,7 @@ LISTING_HANDLERS = {
     'redis': 'ella.core.cache.redis.TimeBasedListingHandler',
 }
 LISTINGS_REDIS = {}
+USE_REDIS_FOR_LISTINGS = True
 REDIS_LISTING_HANDLER = 'redis'
 
 DEFAULT_PAGE_ID = 1

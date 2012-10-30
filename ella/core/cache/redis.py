@@ -28,8 +28,7 @@ if hasattr(settings, 'LISTINGS_REDIS'):
 
 
 def ListingHandlerClass():
-    if core_settings.REDIS_LISTING_HANDLER:
-        return get_model('core', 'Listing').objects.get_listing_handler(core_settings.REDIS_LISTING_HANDLER)
+    return get_model('core', 'Listing').objects.get_listing_handler(core_settings.REDIS_LISTING_HANDLER)
 
 
 def publishable_published(publishable, **kwargs):
@@ -420,14 +419,11 @@ def connect_signals():
     from ella.core.signals import content_published, content_unpublished
     from ella.core.models import Listing, Publishable
 
-    if not client:
+    if not core_settings.USE_REDIS_FOR_LISTINGS:
         return
     # when redis is availible, use it for authors
     m2m_changed.connect(update_authors, sender=Publishable._meta.get_field('authors').rel.through)
 
-    LH = ListingHandlerClass()
-    if LH is None or not hasattr(LH, 'add_publishable') or not hasattr(LH, 'remove_publishable'):
-        return
     content_published.connect(publishable_published)
     content_unpublished.connect(publishable_unpublished)
 

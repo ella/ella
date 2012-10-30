@@ -35,7 +35,8 @@ RELATED_FINDERS = {
 LISTING_HANDLERS = {
     'default': 'ella.core.managers.ModelListingHandler',
 }
-REDIS_LISTING_HANDLER = None
+USE_REDIS_FOR_LISTINGS = False
+REDIS_LISTING_HANDLER = 'default'
 
 # Category settings
 CATEGORY_TEMPLATES = (
