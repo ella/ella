@@ -9,6 +9,7 @@ from django.db.models.loading import get_model
 
 from ella.core.cache.utils import get_cached_objects, SKIP
 from ella.core.managers import ListingHandler
+from ella.core.conf import core_settings
 from ella.utils.timezone import now, to_timestamp, from_timestamp
 
 log = logging.getLogger('ella.core')
@@ -25,10 +26,10 @@ if hasattr(settings, 'LISTINGS_REDIS'):
         client = Redis(**getattr(settings, 'LISTINGS_REDIS'))
 
 
-DEFAULT_REDIS_HANDLER = 'redis'
 
 def ListingHandlerClass():
-    return get_model('core', 'Listing').objects.get_listing_handler(DEFAULT_REDIS_HANDLER)
+    if core_settings.REDIS_LISTING_HANDLER:
+        return get_model('core', 'Listing').objects.get_listing_handler(core_settings.REDIS_LISTING_HANDLER)
 
 
 def publishable_published(publishable, **kwargs):
@@ -415,14 +416,18 @@ class SlidingListingHandler(RedisListingHandler):
 
 
 def connect_signals():
-    if not client:
-        return
-    LH = ListingHandlerClass()
-    if LH is None or not hasattr(LH, 'add_publishable') or not hasattr(LH, 'remove_publishable'):
-        return
     from django.db.models.signals import pre_save, post_save, post_delete, pre_delete, m2m_changed
     from ella.core.signals import content_published, content_unpublished
     from ella.core.models import Listing, Publishable
+
+    if not client:
+        return
+    # when redis is availible, use it for authors
+    m2m_changed.connect(update_authors, sender=Publishable._meta.get_field('authors').rel.through)
+
+    LH = ListingHandlerClass()
+    if LH is None or not hasattr(LH, 'add_publishable') or not hasattr(LH, 'remove_publishable'):
+        return
     content_published.connect(publishable_published)
     content_unpublished.connect(publishable_unpublished)
 
@@ -431,5 +436,4 @@ def connect_signals():
 
     pre_delete.connect(listing_pre_delete, sender=Listing)
     post_delete.connect(listing_post_delete, sender=Listing)
-    m2m_changed.connect(update_authors, sender=Publishable._meta.get_field('authors').rel.through)
 

@@ -2,7 +2,6 @@ import time
 from datetime import date
 
 from django.core.cache import get_cache
-from ella.core.cache.redis import DEFAULT_REDIS_HANDLER
 from ella.core.cache.utils import normalize_key
 from hashlib import md5
 from django.conf import settings
@@ -97,29 +96,12 @@ class TestCacheInvalidation(CacheTestCase):
 class TestRedisListings(TestCase):
     def setUp(self):
         super(TestRedisListings, self).setUp()
-        try:
-            import redis as redis_client
-        except ImportError:
-            raise SkipTest()
-
-        self.redis = redis_client.Redis(**settings.TEST_CORE_REDIS)
-
-        redis.client = self.redis
-        redis.connect_signals()
-
         create_basic_categories(self)
         create_and_place_more_publishables(self)
 
     def tearDown(self):
-        pre_save.disconnect(redis.listing_pre_save, sender=Listing)
-        post_save.disconnect(redis.listing_post_save, sender=Listing)
-        pre_delete.disconnect(redis.listing_pre_delete, sender=Listing)
-        post_delete.disconnect(redis.listing_post_delete, sender=Listing)
-        content_published.disconnect(redis.publishable_published)
-        content_unpublished.disconnect(redis.publishable_unpublished)
-
         super(TestRedisListings, self).tearDown()
-        self.redis.flushdb()
+        redis.client.flushdb()
 
     def test_access_to_individual_listings(self):
         list_all_publishables_in_category_by_hour(self)
@@ -138,10 +120,10 @@ class TestRedisListings(TestCase):
 
         list_all_publishables_in_category_by_hour(self)
         ct_id = self.publishables[0].content_type_id
-        tools.assert_equals(['%d:1' % ct_id], self.redis.zrange('listing:d:1', 0, 100))
-        tools.assert_equals(['%d:1' % ct_id], self.redis.zrange('listing:c:1', 0, 100))
-        tools.assert_equals(['%d:2' % ct_id, '%d:3' % ct_id], self.redis.zrange('listing:c:2', 0, 100))
-        tools.assert_equals(['%d:2' % ct_id, '%d:3' % ct_id], self.redis.zrange('listing:d:2', 0, 100))
+        tools.assert_equals(['%d:1' % ct_id], redis.client.zrange('listing:d:1', 0, 100))
+        tools.assert_equals(['%d:1' % ct_id], redis.client.zrange('listing:c:1', 0, 100))
+        tools.assert_equals(['%d:2' % ct_id, '%d:3' % ct_id], redis.client.zrange('listing:c:2', 0, 100))
+        tools.assert_equals(['%d:2' % ct_id, '%d:3' % ct_id], redis.client.zrange('listing:d:2', 0, 100))
 
     def test_listing_gets_removed_when_publishable_goes_unpublished(self):
         list_all_publishables_in_category_by_hour(self)
@@ -163,11 +145,11 @@ class TestRedisListings(TestCase):
 
                 'listing:ct:%d' % ct_id,
             ]),
-            set(self.redis.keys())
+            set(redis.client.keys())
         )
-        tools.assert_equals(['%d:2' % ct_id, '%d:3' % ct_id], self.redis.zrange('listing:ct:%d' % ct_id, 0, 100))
-        tools.assert_equals(['%d:2' % ct_id, '%d:3' % ct_id], self.redis.zrange('listing:d:1', 0, 100))
-        tools.assert_equals(['%d:2' % ct_id], self.redis.zrange('listing:c:1', 0, 100))
+        tools.assert_equals(['%d:2' % ct_id, '%d:3' % ct_id], redis.client.zrange('listing:ct:%d' % ct_id, 0, 100))
+        tools.assert_equals(['%d:2' % ct_id, '%d:3' % ct_id], redis.client.zrange('listing:d:1', 0, 100))
+        tools.assert_equals(['%d:2' % ct_id], redis.client.zrange('listing:c:1', 0, 100))
 
     def test_listing_save_adds_itself_to_relevant_zsets(self):
         list_all_publishables_in_category_by_hour(self)
@@ -187,11 +169,11 @@ class TestRedisListings(TestCase):
 
                 'listing:ct:%d' % ct_id,
             ]),
-            set(self.redis.keys())
+            set(redis.client.keys())
         )
-        tools.assert_equals(['%d:3' % ct_id], self.redis.zrange('listing:3', 0, 100))
-        tools.assert_equals(['%d:1' % ct_id, '%d:2' % ct_id, '%d:3' % ct_id], self.redis.zrange('listing:ct:%d' % ct_id, 0, 100))
-        tools.assert_equals(['%d:1' % ct_id, '%d:2' % ct_id, '%d:3' % ct_id], self.redis.zrange('listing:d:1', 0, 100))
+        tools.assert_equals(['%d:3' % ct_id], redis.client.zrange('listing:3', 0, 100))
+        tools.assert_equals(['%d:1' % ct_id, '%d:2' % ct_id, '%d:3' % ct_id], redis.client.zrange('listing:ct:%d' % ct_id, 0, 100))
+        tools.assert_equals(['%d:1' % ct_id, '%d:2' % ct_id, '%d:3' % ct_id], redis.client.zrange('listing:d:1', 0, 100))
 
     def test_listing_delete_removes_itself_from_redis(self):
         list_all_publishables_in_category_by_hour(self)
@@ -211,20 +193,20 @@ class TestRedisListings(TestCase):
 
                 'listing:ct:%d' % ct_id,
             ]),
-            set(self.redis.keys())
+            set(redis.client.keys())
         )
-        tools.assert_equals(['%d:3' % ct_id], self.redis.zrange('listing:3', 0, 100))
-        tools.assert_equals(['%d:3' % ct_id], self.redis.zrange('listing:c:2', 0, 100))
-        tools.assert_equals(['%d:3' % ct_id], self.redis.zrange('listing:d:2', 0, 100))
-        tools.assert_equals(['%d:1' % ct_id, '%d:3' % ct_id], self.redis.zrange('listing:d:1', 0, 100))
-        tools.assert_equals(['%d:1' % ct_id], self.redis.zrange('listing:c:1', 0, 100))
-        tools.assert_equals(['%d:1' % ct_id, '%d:3' % ct_id], self.redis.zrange('listing:ct:%d' % ct_id, 0, 100))
+        tools.assert_equals(['%d:3' % ct_id], redis.client.zrange('listing:3', 0, 100))
+        tools.assert_equals(['%d:3' % ct_id], redis.client.zrange('listing:c:2', 0, 100))
+        tools.assert_equals(['%d:3' % ct_id], redis.client.zrange('listing:d:2', 0, 100))
+        tools.assert_equals(['%d:1' % ct_id, '%d:3' % ct_id], redis.client.zrange('listing:d:1', 0, 100))
+        tools.assert_equals(['%d:1' % ct_id], redis.client.zrange('listing:c:1', 0, 100))
+        tools.assert_equals(['%d:1' % ct_id, '%d:3' % ct_id], redis.client.zrange('listing:ct:%d' % ct_id, 0, 100))
 
     def test_get_listing_uses_data_from_redis(self):
         ct_id = self.publishables[0].content_type_id
         t1, t2 = time.time()-90, time.time()-100
-        self.redis.zadd('listing:c:2', '%d:1' % ct_id, repr(t1))
-        self.redis.zadd('listing:c:2', '%d:3' % ct_id, repr(t2))
+        redis.client.zadd('listing:c:2', '%d:1' % ct_id, repr(t1))
+        redis.client.zadd('listing:c:2', '%d:3' % ct_id, repr(t2))
         dt1, dt2 = from_timestamp(t1), from_timestamp(t2)
 
         lh = Listing.objects.get_queryset_wrapper(category=self.category_nested, children=ListingHandler.IMMEDIATE, source='redis')
@@ -239,8 +221,8 @@ class TestRedisListings(TestCase):
     def test_get_listing_omits_excluded_publishable(self):
         ct_id = self.publishables[0].content_type_id
         t1, t2 = time.time()-90, time.time()-100
-        self.redis.zadd('listing:c:2', '%d:1' % ct_id, repr(t1))
-        self.redis.zadd('listing:c:2', '%d:3' % ct_id, repr(t2))
+        redis.client.zadd('listing:c:2', '%d:1' % ct_id, repr(t1))
+        redis.client.zadd('listing:c:2', '%d:3' % ct_id, repr(t2))
         dt1, dt2 = from_timestamp(t1), from_timestamp(t2)
 
         lh = Listing.objects.get_queryset_wrapper(category=self.category_nested, children=ListingHandler.IMMEDIATE, exclude=self.publishables[0], source='redis')
@@ -253,8 +235,8 @@ class TestRedisListings(TestCase):
     def test_redis_listing_handler_used_from_view_when_requested(self):
         ct_id = self.publishables[0].content_type_id
         t1, t2 = time.time()-90, time.time()-100
-        self.redis.zadd('listing:d:2', '%d:1' % ct_id, repr(t1))
-        self.redis.zadd('listing:d:2', '%d:3' % ct_id, repr(t2))
+        redis.client.zadd('listing:d:2', '%d:1' % ct_id, repr(t1))
+        redis.client.zadd('listing:d:2', '%d:3' % ct_id, repr(t2))
         dt1, dt2 = from_timestamp(t1), from_timestamp(t2)
 
         rf = RequestFactory()
@@ -273,9 +255,9 @@ class TestRedisListings(TestCase):
     def test_get_listing_uses_data_from_redis_correctly_for_pagination(self):
         ct_id = self.publishables[0].content_type_id
         t1, t2, t3 = time.time()-90, time.time()-100, time.time() - 110
-        self.redis.zadd('listing:c:2', '%d:1' % ct_id, repr(t1))
-        self.redis.zadd('listing:c:2', '%d:3' % ct_id, repr(t2))
-        self.redis.zadd('listing:c:2', '%d:2' % ct_id, repr(t3))
+        redis.client.zadd('listing:c:2', '%d:1' % ct_id, repr(t1))
+        redis.client.zadd('listing:c:2', '%d:3' % ct_id, repr(t2))
+        redis.client.zadd('listing:c:2', '%d:2' % ct_id, repr(t3))
 
         lh = Listing.objects.get_queryset_wrapper(category=self.category_nested, children=ListingHandler.IMMEDIATE, source='redis')
         tools.assert_equals(3, lh.count())
@@ -291,22 +273,10 @@ class TestAuthorLH(TestCase):
 
         super(TestAuthorLH, self).setUp()
 
-        try:
-            import redis as redis_client
-        except ImportError:
-            raise SkipTest()
-
-        self.redis = redis_client.Redis(**settings.TEST_CORE_REDIS)
-
-        redis.client = self.redis
-        redis.connect_signals()
-
         create_basic_categories(self)
         create_and_place_more_publishables(self)
 
         self.author = Author.objects.create(slug='testauthor')
-
-        settings.LISTING_HANDLERS[DEFAULT_REDIS_HANDLER] = 'ella.core.cache.redis.AuthorListingHandler'
 
         for p in self.publishables:
             p.authors = [self.author]
@@ -314,15 +284,8 @@ class TestAuthorLH(TestCase):
 
 
     def tearDown(self):
-        pre_save.disconnect(redis.listing_pre_save, sender=Listing)
-        post_save.disconnect(redis.listing_post_save, sender=Listing)
-        pre_delete.disconnect(redis.listing_pre_delete, sender=Listing)
-        post_delete.disconnect(redis.listing_post_delete, sender=Listing)
-        content_published.disconnect(redis.publishable_published)
-        content_unpublished.disconnect(redis.publishable_unpublished)
-
         super(TestAuthorLH, self).tearDown()
-        self.redis.flushdb()
+        redis.client.flushdb()
 
 
     def test_listing_save_adds_itself_to_relevant_zsets(self):
@@ -346,10 +309,10 @@ class TestAuthorLH(TestCase):
             'listing:ct:%d' % ct_id,
 
             ]),
-            set(self.redis.keys())
+            set(redis.client.keys())
         )
         tools.assert_equals(['%d:1' % ct_id, '%d:2' % ct_id, '%d:3' % ct_id],
-                            self.redis.zrange('listing:a:1', 0, 100))
+                            redis.client.zrange('listing:a:1', 0, 100))
 
 
 class SlidingLH(redis.SlidingListingHandler):
@@ -359,22 +322,13 @@ class SlidingLH(redis.SlidingListingHandler):
 class TestSlidingListings(TestCase):
     def setUp(self):
         super(TestSlidingListings, self).setUp()
-        try:
-            import redis as redis_client
-        except ImportError:
-            raise SkipTest()
-
-        self.redis = redis_client.Redis(**settings.TEST_CORE_REDIS)
-
-        redis.client = self.redis
-
         create_basic_categories(self)
         create_and_place_more_publishables(self)
         self.ct_id = self.publishables[0].content_type_id
 
     def tearDown(self):
         super(TestSlidingListings, self).tearDown()
-        self.redis.flushdb()
+        redis.client.flushdb()
 
     def test_add_publishable_pushes_to_day_and_global_keys(self):
         SlidingLH.add_publishable(self.category, self.publishables[0], 10)
@@ -386,44 +340,44 @@ class TestSlidingListings(TestCase):
             'sliding:ct:%s' % self.ct_id,
         ]
         expected = expected_base + [k + ':' + day for k in expected_base] + ['sliding:KEYS', 'sliding:WINDOWS']
-        tools.assert_equals(set(expected), set(self.redis.keys(SlidingLH.PREFIX + '*')))
-        tools.assert_equals(self.redis.zrange('sliding:d:1', 0, -1, withscores=True), self.redis.zrange('sliding:d:1' + ':' + day, 0, -1, withscores=True))
+        tools.assert_equals(set(expected), set(redis.client.keys(SlidingLH.PREFIX + '*')))
+        tools.assert_equals(redis.client.zrange('sliding:d:1', 0, -1, withscores=True), redis.client.zrange('sliding:d:1' + ':' + day, 0, -1, withscores=True))
 
     def test_slide_windows_regenerates_aggregates(self):
         SlidingLH.add_publishable(self.category, self.publishables[0], 10)
         # register the keys that should exist
-        self.redis.sadd('sliding:KEYS', 'sliding:1', 'sliding:c:1')
+        redis.client.sadd('sliding:KEYS', 'sliding:1', 'sliding:c:1')
 
-        self.redis.zadd('sliding:1:20101010', **{'17:1': 10, '17:2': 1})
-        self.redis.zadd('sliding:1:20101009', **{'17:1': 9, '17:2': 2})
-        self.redis.zadd('sliding:1:20101007', **{'17:1': 8, '17:2': 3, '17:3': 11})
-        self.redis.zadd('sliding:1:20101001', **{'17:1': 8, '17:2': 3, '17:3': 11})
+        redis.client.zadd('sliding:1:20101010', **{'17:1': 10, '17:2': 1})
+        redis.client.zadd('sliding:1:20101009', **{'17:1': 9, '17:2': 2})
+        redis.client.zadd('sliding:1:20101007', **{'17:1': 8, '17:2': 3, '17:3': 11})
+        redis.client.zadd('sliding:1:20101001', **{'17:1': 8, '17:2': 3, '17:3': 11})
 
 
         SlidingLH.regenerate(date(2010, 10, 10))
-        tools.assert_equals([('17:2', 6.0), ('17:3', 11.0), ('17:1', 27.0)], self.redis.zrange('sliding:1', 0, -1, withscores=True))
+        tools.assert_equals([('17:2', 6.0), ('17:3', 11.0), ('17:1', 27.0)], redis.client.zrange('sliding:1', 0, -1, withscores=True))
 
     def test_regenerate_removes_old_slots(self):
-        self.redis.zadd('sliding:WINDOWS', **{
+        redis.client.zadd('sliding:WINDOWS', **{
                 'sliding:1:20101010': 20101010,
                 'sliding:1:20101009': 20101009,
                 'sliding:1:20101007': 20101007,
                 'sliding:1:20101001': 20101001
             })
-        self.redis.zadd('sliding:1:20101010', **{'17:1': 10, '17:2': 1})
-        self.redis.zadd('sliding:1:20101009', **{'17:1': 9, '17:2': 2})
-        self.redis.zadd('sliding:1:20101007', **{'17:1': 8, '17:2': 3, '17:3': 11})
-        self.redis.zadd('sliding:1:20101001', **{'17:1': 8, '17:2': 3, '17:3': 11})
+        redis.client.zadd('sliding:1:20101010', **{'17:1': 10, '17:2': 1})
+        redis.client.zadd('sliding:1:20101009', **{'17:1': 9, '17:2': 2})
+        redis.client.zadd('sliding:1:20101007', **{'17:1': 8, '17:2': 3, '17:3': 11})
+        redis.client.zadd('sliding:1:20101001', **{'17:1': 8, '17:2': 3, '17:3': 11})
 
         SlidingLH.regenerate(date(2010, 10, 10))
-        tools.assert_false(self.redis.exists('sliding:1:20101001'))
-        tools.assert_true(self.redis.exists('sliding:1:20101007'))
+        tools.assert_false(redis.client.exists('sliding:1:20101001'))
+        tools.assert_true(redis.client.exists('sliding:1:20101007'))
         tools.assert_equals([
                 ('sliding:1:20101007', 20101007),
                 ('sliding:1:20101009', 20101009),
                 ('sliding:1:20101010', 20101010)
             ],
-            self.redis.zrange('sliding:WINDOWS', 0, -1, withscores=True)
+            redis.client.zrange('sliding:WINDOWS', 0, -1, withscores=True)
         )
 def test_normalize_key_doesnt_touch_short_key():
     key = "thisistest"
