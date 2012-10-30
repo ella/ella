@@ -41,7 +41,6 @@ class ViewsTestCase(TestCase):
         utils.PUBLISHABLE_CT = None
 
 class TestAuthorView(ViewsTestCase):
-
     def test_author_view(self):
         author = Author.objects.create(slug='some-author')
         create_and_place_more_publishables(self)

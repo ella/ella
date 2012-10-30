@@ -55,7 +55,7 @@ INSTALLED_APPS = (
 
 LISTING_HANDLERS = {
     'default': 'ella.core.managers.ModelListingHandler',
-    'redis': 'ella.core.cache.redis.AuthorListingHandler',
+    'redis': 'ella.core.cache.redis.TimeBasedListingHandler',
 }
 
 DEFAULT_PAGE_ID = 1

@@ -41,6 +41,7 @@ def publishable_published(publishable, **kwargs):
             pipe=pipe,
             commit=False
         )
+    AuthorListingHandler.add_publishable(publishable, pipe=pipe, commit=False)
     pipe.execute()
 
 
@@ -53,6 +54,7 @@ def publishable_unpublished(publishable, **kwargs):
             pipe=pipe,
             commit=False
         )
+    AuthorListingHandler.remove_publishable(publishable, pipe=pipe, commit=False)
     pipe.execute()
 
 
@@ -102,6 +104,11 @@ def listing_post_save(sender, instance, **kwargs):
         commit=True
     )
 
+def update_authors(sender, action, instance, reverse, model, pk_set, **kwargs):
+    if action == 'pre_remove':
+        instance.__pipe = AuthorListingHandler.remove_publishable(instance, commit=False)
+    elif action in ('post_remove', 'post_add'):
+        AuthorListingHandler.add_publishable(instance, pipe=getattr(instance, '__pipe', None))
 
 class RedisListingHandler(ListingHandler):
     PREFIX = 'listing'
@@ -242,19 +249,23 @@ class RedisListingHandler(ListingHandler):
         else:
             return union_keys[0]
 
+    def _get_base_key(self):
+        key_parts = [self.PREFIX]
+        # get the proper key for category
+        if self.children == ListingHandler.IMMEDIATE:
+            key_parts.append('c')
+        elif self.children == ListingHandler.ALL:
+            key_parts.append('d')
+        key_parts.append(str(self.category.id))
+
+        key = ':'.join(key_parts)
+        return key
+
+
     def _get_key(self):
         pipe = None
         if not hasattr(self, '_key'):
-            key_parts = [self.PREFIX]
-            # get the proper key for category
-            if self.children == ListingHandler.IMMEDIATE:
-                key_parts.append('c')
-            elif self.children == ListingHandler.ALL:
-                key_parts.append('d')
-            key_parts.append(str(self.category.id))
-
-            key = ':'.join(key_parts)
-
+            key = self._get_base_key()
             # do everything in one pipeline
             pipe = client.pipeline()
 
@@ -308,31 +319,43 @@ class TimeBasedListingHandler(RedisListingHandler):
         return Listing(publishable=publishable, category=publishable.category, publish_from=publish_from)
 
 
-
 class AuthorListingHandler(TimeBasedListingHandler):
     @classmethod
-    def get_keys(cls, category, publishable):
-        keys = super(AuthorListingHandler, cls).get_keys(category, publishable)
+    def remove_publishable(cls, publishable, pipe=None, commit=True):
+        if pipe is None:
+            pipe = client.pipeline()
 
-        # Add keys for all the authors.
-        for a in publishable.authors.all():
-            keys.append(':'.join((cls.PREFIX, 'a', str(a.pk))))
+        for k in cls.get_keys(publishable):
+            pipe.zrem(k, cls.get_value(publishable))
 
-        return keys
+        if commit:
+            pipe.execute()
+        else:
+            return pipe
 
-    def _get_key(self):
-        key, pipe = super(AuthorListingHandler, self)._get_key()
+    @classmethod
+    def add_publishable(cls, publishable, pipe=None, commit=True):
+        if pipe is None:
+            pipe = client.pipeline()
 
-        if pipe is not None and 'author' in self.kwargs:
-            # If author filtering is requested, perform another intersect
-            # over what has been filtered out before.
-            a_key = '%s:a:%s' % (self.PREFIX, self.kwargs['author'].pk)
-            a_inter_key = '%s:azis:%s' % (self.PREFIX, md5(','.join((a_key, key))).hexdigest())
-            pipe.zinterstore(a_inter_key, (a_key, key), 'MAX')
-            pipe.expire(a_inter_key, 60)
-            self._key = a_inter_key
+        for k in cls.get_keys(publishable):
+            pipe.zadd(k, cls.get_value(publishable), repr(to_timestamp(publishable.publish_from)))
 
-        return self._key, pipe
+        if commit:
+            pipe.execute()
+        else:
+            return pipe
+
+    @classmethod
+    def get_keys(cls, publishable):
+        return [':'.join((cls.PREFIX, 'a', str(a.pk))) for a in publishable.authors.all()]
+
+    def __init__(self, author, **kwargs):
+        self.author = author
+        super(AuthorListingHandler, self).__init__(None, **kwargs)
+
+    def _get_base_key(self):
+        return ':'.join((self.PREFIX, 'a', str(self.author.pk)))
 
 
 class SlidingListingHandler(RedisListingHandler):
@@ -397,9 +420,9 @@ def connect_signals():
     LH = ListingHandlerClass()
     if LH is None or not hasattr(LH, 'add_publishable') or not hasattr(LH, 'remove_publishable'):
         return
-    from django.db.models.signals import pre_save, post_save, post_delete, pre_delete
+    from django.db.models.signals import pre_save, post_save, post_delete, pre_delete, m2m_changed
     from ella.core.signals import content_published, content_unpublished
-    from ella.core.models import Listing
+    from ella.core.models import Listing, Publishable
     content_published.connect(publishable_published)
     content_unpublished.connect(publishable_unpublished)
 
@@ -408,4 +431,5 @@ def connect_signals():
 
     pre_delete.connect(listing_pre_delete, sender=Listing)
     post_delete.connect(listing_post_delete, sender=Listing)
+    m2m_changed.connect(update_authors, sender=Publishable._meta.get_field('authors').rel.through)
 

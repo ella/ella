@@ -111,7 +111,6 @@ class TestRedisListings(TestCase):
         create_and_place_more_publishables(self)
 
     def tearDown(self):
-        redis.client = None
         pre_save.disconnect(redis.listing_pre_save, sender=Listing)
         post_save.disconnect(redis.listing_post_save, sender=Listing)
         pre_delete.disconnect(redis.listing_pre_delete, sender=Listing)
@@ -315,7 +314,6 @@ class TestAuthorLH(TestCase):
 
 
     def tearDown(self):
-        redis.client = None
         pre_save.disconnect(redis.listing_pre_save, sender=Listing)
         post_save.disconnect(redis.listing_post_save, sender=Listing)
         pre_delete.disconnect(redis.listing_pre_delete, sender=Listing)
@@ -375,7 +373,6 @@ class TestSlidingListings(TestCase):
         self.ct_id = self.publishables[0].content_type_id
 
     def tearDown(self):
-        redis.client = None
         super(TestSlidingListings, self).tearDown()
         self.redis.flushdb()
 
