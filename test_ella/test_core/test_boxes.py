@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.test import TestCase
+from test_ella.cases import RedisTestCase as TestCase
 from django.template import Context
 
 from nose import tools

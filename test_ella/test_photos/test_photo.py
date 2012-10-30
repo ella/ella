@@ -2,7 +2,7 @@
 from PIL import Image
 
 from django.core.files.base import ContentFile
-from django.test import TestCase
+from test_ella.cases import RedisTestCase as TestCase
 from django.contrib.sites.models import Site
 
 from nose import tools

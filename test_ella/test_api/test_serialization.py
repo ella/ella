@@ -1,4 +1,4 @@
-from django.test import TestCase
+from test_ella.cases import RedisTestCase as TestCase
 
 from ella.api import object_serializer, FULL
 from ella.core.models import Publishable

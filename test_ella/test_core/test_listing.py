@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from datetime import timedelta
 
-from django.test import TestCase
+from test_ella.cases import RedisTestCase as TestCase
 
 from nose import tools
 

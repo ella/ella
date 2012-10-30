@@ -5,7 +5,7 @@ from django.core.cache import get_cache
 from ella.core.cache.utils import normalize_key
 from hashlib import md5
 from django.conf import settings
-from django.test import TestCase
+from test_ella.cases import RedisTestCase as TestCase
 from django.test.client import RequestFactory
 from django.contrib.sites.models import Site
 from django.contrib.contenttypes.models import ContentType
@@ -98,10 +98,6 @@ class TestRedisListings(TestCase):
         super(TestRedisListings, self).setUp()
         create_basic_categories(self)
         create_and_place_more_publishables(self)
-
-    def tearDown(self):
-        super(TestRedisListings, self).tearDown()
-        redis.client.flushdb()
 
     def test_access_to_individual_listings(self):
         list_all_publishables_in_category_by_hour(self)
@@ -282,12 +278,6 @@ class TestAuthorLH(TestCase):
             p.authors = [self.author]
             p.save()
 
-
-    def tearDown(self):
-        super(TestAuthorLH, self).tearDown()
-        redis.client.flushdb()
-
-
     def test_listing_save_adds_itself_to_relevant_zsets(self):
         list_all_publishables_in_category_by_hour(self)
         ct_id = self.publishables[0].content_type_id
@@ -325,10 +315,6 @@ class TestSlidingListings(TestCase):
         create_basic_categories(self)
         create_and_place_more_publishables(self)
         self.ct_id = self.publishables[0].content_type_id
-
-    def tearDown(self):
-        super(TestSlidingListings, self).tearDown()
-        redis.client.flushdb()
 
     def test_add_publishable_pushes_to_day_and_global_keys(self):
         SlidingLH.add_publishable(self.category, self.publishables[0], 10)
