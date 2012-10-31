@@ -71,14 +71,15 @@ def listing_post_delete(sender, instance, **kwargs):
     # but only delete it if the model delete went through
     pipe = instance.__pipe
 
-    for l in instance.publishable.listing_set.all():
-        ListingHandlerClass().add_publishable(
-            l.category,
-            instance.publishable,
-            publish_from=l.publish_from,
-            pipe=pipe,
-            commit=False
-        )
+    if instance.publishable.published:
+        for l in instance.publishable.listing_set.all():
+            ListingHandlerClass().add_publishable(
+                l.category,
+                instance.publishable,
+                publish_from=l.publish_from,
+                pipe=pipe,
+                commit=False
+            )
     pipe.execute()
 
 
@@ -96,18 +97,19 @@ def listing_pre_save(sender, instance, **kwargs):
 def listing_post_save(sender, instance, **kwargs):
     pipe = getattr(instance, '__pipe', None)
 
-    pipe = ListingHandlerClass().add_publishable(
-        instance.category,
-        instance.publishable,
-        publish_from=instance.publish_from,
-        pipe=pipe,
-        commit=True
-    )
+    if instance.publishable.published:
+        ListingHandlerClass().add_publishable(
+            instance.category,
+            instance.publishable,
+            publish_from=instance.publish_from,
+            pipe=pipe,
+            commit=True
+        )
 
 def update_authors(sender, action, instance, reverse, model, pk_set, **kwargs):
     if action == 'pre_remove':
         instance.__pipe = AuthorListingHandler.remove_publishable(instance, commit=False)
-    elif action in ('post_remove', 'post_add'):
+    elif action in ('post_remove', 'post_add') and instance.is_published():
         AuthorListingHandler.add_publishable(instance, pipe=getattr(instance, '__pipe', None))
 
 class RedisListingHandler(ListingHandler):
