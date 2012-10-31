@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import logging
 from datetime import date, timedelta
 from hashlib import md5
+from itertools import chain
 
 from django.conf import settings
 from django.db.models.loading import get_model
@@ -388,7 +389,24 @@ class SlidingListingHandler(RedisListingHandler):
         return base_keys + day_keys
 
     @classmethod
-    def regenerate(cls, today=None):
+    def remove_publishable(cls, category, publishable, pipe=None, commit=True):
+        if pipe is None:
+            pipe = client.pipeline()
+
+        days, last_day = cls._get_days()
+        base_keys = super(SlidingListingHandler, cls).get_keys(category, publishable)
+
+        v = cls.get_value(publishable)
+        for k in chain(base_keys, ('%s:%s' % (k, day) for k in base_keys for day in days)):
+            pipe.zrem(k, v)
+
+        if commit:
+            pipe.execute()
+        else:
+            return pipe
+
+    @classmethod
+    def _get_days(cls, today=None):
         if today is None:
             today = date.today()
 
@@ -397,6 +415,11 @@ class SlidingListingHandler(RedisListingHandler):
         for d in xrange(cls.WINDOW_SIZE):
             last_day = (today - timedelta(days=d)).strftime('%Y%m%d')
             days.append(last_day)
+        return days, last_day
+
+    @classmethod
+    def regenerate(cls, today=None):
+        days, last_day = cls._get_days(today)
 
         pipe = client.pipeline()
 

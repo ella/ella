@@ -316,6 +316,11 @@ class TestSlidingListings(TestCase):
         create_and_place_more_publishables(self)
         self.ct_id = self.publishables[0].content_type_id
 
+    def test_remove_publishable_clears_all_windows(self):
+        SlidingLH.add_publishable(self.category, self.publishables[0], 10)
+        SlidingLH.remove_publishable(self.category, self.publishables[0])
+        tools.assert_equals(set(['sliding:KEYS', 'sliding:WINDOWS']), set(redis.client.keys(SlidingLH.PREFIX + '*')))
+
     def test_add_publishable_pushes_to_day_and_global_keys(self):
         SlidingLH.add_publishable(self.category, self.publishables[0], 10)
         day = date.today().strftime('%Y%m%d')
