@@ -25,7 +25,7 @@ from ella.core.feeds import RSSTopCategoryListings, AtomTopCategoryListings
 
 res = {
     'ct': r'(?P<content_type>[a-z][a-z0-9-]+)',
-    'cat': r'(?P<category>(?:[a-z][a-z0-9-]+/)*[a-z][a-z0-9-]+)',
+    'cat': r'(?P<category>(?:[a-z][a-z0-9-]*/)*[a-z][a-z0-9-]*)',
     'slug': r'(?P<slug>%s)' % slug_re.pattern.strip('^$'),
     'year': r'(?P<year>\d{4})',
     'month': r'(?P<month>\d{1,2})',
