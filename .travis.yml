@@ -4,7 +4,7 @@ python:
   - "2.6"
   - "2.7"
 install:
-   - "if [[ $DJANGO == 'dev' ]]; then pip install https://nodeload.github.com/django/django/zipball/master#egg=Django; else pip install Django==$DJANGO --use-mirrors; fi"
+   - "if [[ $DJANGO == 'dev' ]]; then pip install https://github.com/django/django/archive/master.tar.gz#egg=Django; else pip install Django==$DJANGO --use-mirrors; fi"
    - pip install -r dev_requirements.txt --use-mirrors
    - python setup.py develop
 env:
