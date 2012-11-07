@@ -1,0 +1,12 @@
+{% extends "newman/change_list.html" %}
+{% load i18n %}
+
+{% block content_toolbar_right %}
+    {% if has_add_permission %}
+            <a href="{% if is_popup %}::overlay-content::{% endif %}add/" class="js-{% if is_popup %}adrstack-push{% else %}hashadr{% endif %} icn btn add">{% blocktrans with cl.opts.verbose_name as name %}Add {{ name }}{% endblocktrans %}</a>
+            <a href="{% if is_popup %}::overlay-content::{% endif %}mass-upload/" class="{% if is_popup %}js-adrstack-push js-custom-adrstack-callbacks js-multi-upload{% else %}js-hashadr{% endif %} icn btn add">{% trans "Mass upload" %}</a>
+    {% endif %}
+    {% if not is_popup %}
+        <a href="service-container::::log/" class="icn btn history js-simpleload">{% trans "Last edited" %}</a>
+    {% endif %}
+{% endblock %}
