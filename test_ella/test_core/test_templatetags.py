@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from unittest import TestCase as UnitTestCase
-from django.test import TestCase, RequestFactory
 
 from nose import tools, SkipTest
 
@@ -10,8 +9,9 @@ from django.template import TemplateSyntaxError
 from django.contrib.sites.models import Site
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator
+from django.test import RequestFactory
 
-from ella.core.templatetags.core import listing_parse, ListingNode, _parse_box, BoxNode, EmptyNode
+from ella.core.templatetags.core import listing_parse, _parse_box, BoxNode, EmptyNode
 from ella.core.templatetags.pagination import _do_paginator
 from ella.core.models import Category
 from ella.core.managers import ListingHandler
@@ -19,9 +19,9 @@ from ella.articles.models import Article
 from ella.photos.models import Photo
 
 from test_ella.test_core import create_basic_categories, create_and_place_a_publishable, \
-        create_and_place_more_publishables, list_all_publishables_in_category_by_hour, \
-        create_and_place_two_publishables_and_listings
+        create_and_place_more_publishables, list_all_publishables_in_category_by_hour
 from test_ella import template_loader
+from test_ella.cases import RedisTestCase as TestCase
 
 class TestPaginate(UnitTestCase):
     def setUp(self):

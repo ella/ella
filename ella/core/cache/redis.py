@@ -3,12 +3,14 @@ from __future__ import absolute_import
 import logging
 from datetime import date, timedelta
 from hashlib import md5
+from itertools import chain
 
 from django.conf import settings
 from django.db.models.loading import get_model
 
 from ella.core.cache.utils import get_cached_objects, SKIP
 from ella.core.managers import ListingHandler
+from ella.core.conf import core_settings
 from ella.utils.timezone import now, to_timestamp, from_timestamp
 
 log = logging.getLogger('ella.core')
@@ -25,10 +27,9 @@ if hasattr(settings, 'LISTINGS_REDIS'):
         client = Redis(**getattr(settings, 'LISTINGS_REDIS'))
 
 
-DEFAULT_REDIS_HANDLER = 'redis'
 
 def ListingHandlerClass():
-    return get_model('core', 'Listing').objects.get_listing_handler(DEFAULT_REDIS_HANDLER)
+    return get_model('core', 'Listing').objects.get_listing_handler(core_settings.REDIS_LISTING_HANDLER)
 
 
 def publishable_published(publishable, **kwargs):
@@ -37,10 +38,11 @@ def publishable_published(publishable, **kwargs):
         ListingHandlerClass().add_publishable(
             l.category,
             publishable,
-            repr(to_timestamp(l.publish_from)),
+            publish_from=l.publish_from,
             pipe=pipe,
             commit=False
         )
+    AuthorListingHandler.add_publishable(publishable, pipe=pipe, commit=False)
     pipe.execute()
 
 
@@ -53,6 +55,7 @@ def publishable_unpublished(publishable, **kwargs):
             pipe=pipe,
             commit=False
         )
+    AuthorListingHandler.remove_publishable(publishable, pipe=pipe, commit=False)
     pipe.execute()
 
 
@@ -69,14 +72,15 @@ def listing_post_delete(sender, instance, **kwargs):
     # but only delete it if the model delete went through
     pipe = instance.__pipe
 
-    for l in instance.publishable.listing_set.all():
-        ListingHandlerClass().add_publishable(
-            l.category,
-            instance.publishable,
-            repr(to_timestamp(l.publish_from)),
-            pipe=pipe,
-            commit=False
-        )
+    if instance.publishable.published:
+        for l in instance.publishable.listing_set.all():
+            ListingHandlerClass().add_publishable(
+                l.category,
+                instance.publishable,
+                publish_from=l.publish_from,
+                pipe=pipe,
+                commit=False
+            )
     pipe.execute()
 
 
@@ -94,17 +98,20 @@ def listing_pre_save(sender, instance, **kwargs):
 def listing_post_save(sender, instance, **kwargs):
     pipe = getattr(instance, '__pipe', None)
 
-    if instance.publishable.is_published():
-        pipe = ListingHandlerClass().add_publishable(
+    if instance.publishable.published:
+        ListingHandlerClass().add_publishable(
             instance.category,
             instance.publishable,
-            repr(to_timestamp(instance.publish_from)),
+            publish_from=instance.publish_from,
             pipe=pipe,
-            commit=False
+            commit=True
         )
-    if pipe:
-        pipe.execute()
 
+def update_authors(sender, action, instance, reverse, model, pk_set, **kwargs):
+    if action == 'pre_remove':
+        instance.__pipe = AuthorListingHandler.remove_publishable(instance, commit=False)
+    elif action in ('post_remove', 'post_add') and instance.is_published():
+        AuthorListingHandler.add_publishable(instance, pipe=getattr(instance, '__pipe', None))
 
 class RedisListingHandler(ListingHandler):
     PREFIX = 'listing'
@@ -190,16 +197,14 @@ class RedisListingHandler(ListingHandler):
 
     def _get_listing(self, publishable, score):
         Listing = get_model('core', 'listing')
-        publish_from = from_timestamp(score)
-        return Listing(publishable=publishable, category=publishable.category, publish_from=publish_from)
+        return Listing(publishable=publishable, category=publishable.category)
 
     def _get_score_limits(self):
         max_score = None
         min_score = None
 
         if self.date_range:
-            max_score = repr(to_timestamp(min(self.date_range[1], now())))
-            min_score = repr(to_timestamp(self.date_range[0]))
+            raise NotImplemented()
         return min_score, max_score
 
     def get_listings(self, offset=0, count=10):
@@ -213,8 +218,8 @@ class RedisListingHandler(ListingHandler):
         # get all the relevant records
         if min_score or max_score:
             pipe = pipe.zrevrangebyscore(key,
-                repr(max_score), repr(min_score),
-                start=offset, num=offset + count - 1,
+                max_score, min_score,
+                start=offset, num=offset + count,
                 withscores=True
             )
         else:
@@ -247,19 +252,23 @@ class RedisListingHandler(ListingHandler):
         else:
             return union_keys[0]
 
+    def _get_base_key(self):
+        key_parts = [self.PREFIX]
+        # get the proper key for category
+        if self.children == ListingHandler.IMMEDIATE:
+            key_parts.append('c')
+        elif self.children == ListingHandler.ALL:
+            key_parts.append('d')
+        key_parts.append(str(self.category.id))
+
+        key = ':'.join(key_parts)
+        return key
+
+
     def _get_key(self):
         pipe = None
         if not hasattr(self, '_key'):
-            key_parts = [self.PREFIX]
-            # get the proper key for category
-            if self.children == ListingHandler.IMMEDIATE:
-                key_parts.append('c')
-            elif self.children == ListingHandler.ALL:
-                key_parts.append('d')
-            key_parts.append(str(self.category.id))
-
-            key = ':'.join(key_parts)
-
+            key = self._get_base_key()
             # do everything in one pipeline
             pipe = client.pipeline()
 
@@ -291,30 +300,65 @@ class RedisListingHandler(ListingHandler):
         return self._key, pipe
 
 
-class AuthorListingHandler(RedisListingHandler):
+class TimeBasedListingHandler(RedisListingHandler):
     @classmethod
-    def get_keys(cls, category, publishable):
-        keys = super(AuthorListingHandler, cls).get_keys(category, publishable)
+    def add_publishable(cls, category, publishable, score=None, publish_from=None, pipe=None, commit=True):
+        if score is None:
+            score = repr(to_timestamp(publish_from or now()))
+        return super(TimeBasedListingHandler, cls).add_publishable(category, publishable, score, pipe=pipe, commit=commit)
 
-        # Add keys for all the authors.
-        for a in publishable.authors.all():
-            keys.append(':'.join((cls.PREFIX, 'a', str(a.pk))))
+    def _get_score_limits(self):
+        max_score = repr(to_timestamp(now()))
+        min_score = 0
 
-        return keys
+        if self.date_range:
+            max_score = repr(to_timestamp(min(self.date_range[1], now())))
+            min_score = repr(to_timestamp(self.date_range[0]))
+        return min_score, max_score
 
-    def _get_key(self):
-        key, pipe = super(AuthorListingHandler, self)._get_key()
+    def _get_listing(self, publishable, score):
+        Listing = get_model('core', 'listing')
+        publish_from = from_timestamp(score)
+        return Listing(publishable=publishable, category=publishable.category, publish_from=publish_from)
 
-        if pipe is not None and 'author' in self.kwargs:
-            # If author filtering is requested, perform another intersect
-            # over what has been filtered out before.
-            a_key = '%s:a:%s' % (self.PREFIX, self.kwargs['author'].pk)
-            a_inter_key = '%s:azis:%s' % (self.PREFIX, md5(','.join((a_key, key))).hexdigest())
-            pipe.zinterstore(a_inter_key, (a_key, key), 'MAX')
-            pipe.expire(a_inter_key, 60)
-            self._key = a_inter_key
 
-        return self._key, pipe
+class AuthorListingHandler(TimeBasedListingHandler):
+    @classmethod
+    def remove_publishable(cls, publishable, pipe=None, commit=True):
+        if pipe is None:
+            pipe = client.pipeline()
+
+        for k in cls.get_keys(publishable):
+            pipe.zrem(k, cls.get_value(publishable))
+
+        if commit:
+            pipe.execute()
+        else:
+            return pipe
+
+    @classmethod
+    def add_publishable(cls, publishable, pipe=None, commit=True):
+        if pipe is None:
+            pipe = client.pipeline()
+
+        for k in cls.get_keys(publishable):
+            pipe.zadd(k, cls.get_value(publishable), repr(to_timestamp(publishable.publish_from)))
+
+        if commit:
+            pipe.execute()
+        else:
+            return pipe
+
+    @classmethod
+    def get_keys(cls, publishable):
+        return [':'.join((cls.PREFIX, 'a', str(a.pk))) for a in publishable.authors.all()]
+
+    def __init__(self, author, **kwargs):
+        self.author = author
+        super(AuthorListingHandler, self).__init__(None, **kwargs)
+
+    def _get_base_key(self):
+        return ':'.join((self.PREFIX, 'a', str(self.author.pk)))
 
 
 class SlidingListingHandler(RedisListingHandler):
@@ -345,7 +389,24 @@ class SlidingListingHandler(RedisListingHandler):
         return base_keys + day_keys
 
     @classmethod
-    def regenerate(cls, today=None):
+    def remove_publishable(cls, category, publishable, pipe=None, commit=True):
+        if pipe is None:
+            pipe = client.pipeline()
+
+        days, last_day = cls._get_days()
+        base_keys = super(SlidingListingHandler, cls).get_keys(category, publishable)
+
+        v = cls.get_value(publishable)
+        for k in chain(base_keys, ('%s:%s' % (k, day) for k in base_keys for day in days)):
+            pipe.zrem(k, v)
+
+        if commit:
+            pipe.execute()
+        else:
+            return pipe
+
+    @classmethod
+    def _get_days(cls, today=None):
         if today is None:
             today = date.today()
 
@@ -354,6 +415,11 @@ class SlidingListingHandler(RedisListingHandler):
         for d in xrange(cls.WINDOW_SIZE):
             last_day = (today - timedelta(days=d)).strftime('%Y%m%d')
             days.append(last_day)
+        return days, last_day
+
+    @classmethod
+    def regenerate(cls, today=None):
+        days, last_day = cls._get_days(today)
 
         pipe = client.pipeline()
 
@@ -374,14 +440,15 @@ class SlidingListingHandler(RedisListingHandler):
 
 
 def connect_signals():
-    if not client:
-        return
-    LH = ListingHandlerClass()
-    if LH is None or not hasattr(LH, 'add_publishable') or not hasattr(LH, 'remove_publishable'):
-        return
-    from django.db.models.signals import pre_save, post_save, post_delete, pre_delete
+    from django.db.models.signals import pre_save, post_save, post_delete, pre_delete, m2m_changed
     from ella.core.signals import content_published, content_unpublished
-    from ella.core.models import Listing
+    from ella.core.models import Listing, Publishable
+
+    if not core_settings.USE_REDIS_FOR_LISTINGS:
+        return
+    # when redis is availible, use it for authors
+    m2m_changed.connect(update_authors, sender=Publishable._meta.get_field('authors').rel.through)
+
     content_published.connect(publishable_published)
     content_unpublished.connect(publishable_unpublished)
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from datetime import timedelta
 
-from django.test import TestCase
+from test_ella.cases import RedisTestCase as TestCase
 from django.contrib.sites.models import Site
 from django.contrib.redirects.models import Redirect
 from django.contrib.contenttypes.models import ContentType

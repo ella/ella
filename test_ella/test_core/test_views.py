@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.test import TestCase
+from test_ella.cases import RedisTestCase as TestCase
 
 from nose import tools
 
@@ -13,7 +13,7 @@ from test_ella.test_core import create_basic_categories, create_and_place_a_publ
         create_and_place_more_publishables, list_all_publishables_in_category_by_hour
 from test_ella import template_loader
 
-from ella.core.models import Category
+from ella.core.models import Category, Author
 from ella.core.views import get_templates
 from ella.core.signals import object_rendering, object_rendered
 from ella.core.cache import utils
@@ -39,6 +39,19 @@ class ViewsTestCase(TestCase):
         object_rendering.disconnect(self.object_rendering)
         object_rendered.disconnect(self.object_rendered)
         utils.PUBLISHABLE_CT = None
+
+class TestAuthorView(ViewsTestCase):
+    def test_author_view(self):
+        author = Author.objects.create(slug='some-author')
+        create_and_place_more_publishables(self)
+        for p in self.publishables:
+            p.authors.add(author)
+        list_all_publishables_in_category_by_hour(self)
+
+        template_loader.templates['page/author.html'] = 'page/category.html'
+        response = self.client.get(author.get_absolute_url())
+        tools.assert_true('listings' in response.context)
+        tools.assert_equals(set(p.pk for p in self.publishables), set(l.publishable.pk for l in response.context['listings']))
 
 class TestCategoryDetail(ViewsTestCase):
     def test_fail_on_no_template(self):

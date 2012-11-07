@@ -10,7 +10,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from app_data import AppDataField
 
-from ella.core.cache import CachedGenericForeignKey, SiteForeignKey, ContentTypeForeignKey, CategoryForeignKey, CachedForeignKey
+from ella.core.cache import CachedGenericForeignKey, SiteForeignKey, ContentTypeForeignKey, CategoryForeignKey, CachedForeignKey, redis
 from ella.core.conf import core_settings
 from ella.core.managers import CategoryManager, ListingHandler
 
@@ -50,6 +50,9 @@ class Author(models.Model):
         return ('author_detail', [self.slug])
 
     def recently_published(self, **kwargs):
+        if core_settings.USE_REDIS_FOR_LISTINGS:
+            return redis.AuthorListingHandler(self)
+
         root = Category.objects.get_by_tree_path('')
         return root.app_data.ella.get_listings(children=ListingHandler.ALL, author=self, **kwargs)
 

@@ -1,5 +1,5 @@
 from django.template import Node, Context
-from django.test import TestCase
+from test_ella.cases import RedisTestCase as TestCase
 from django.conf import settings
 
 from nose import tools, SkipTest
