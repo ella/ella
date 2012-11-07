@@ -72,8 +72,6 @@ class RelatedInlineAdmin(newman.GenericTabularInline):
 class IsPublishedFilter(CustomFilterSpec):
     " Published/Nonpublished objects filter"
     lookup_var = 'publish_from'
-    PUBLISH_FROM_WHEN_EMPTY = core_settings.PUBLISH_FROM_WHEN_EMPTY.strftime('%Y-%m-%d')
-    CAPTION_ALL_WITH_PLACEMENT = _('All with placement')
     CAPTION_YES = _('Yes')
     CAPTION_NO = _('No')
 
@@ -98,13 +96,6 @@ class IsPublishedFilter(CustomFilterSpec):
         self.links.append(link)
         link = ( self.CAPTION_YES, {lookup_var_published: now})
         self.links.append(link)
-        link = (
-            self.CAPTION_ALL_WITH_PLACEMENT,
-            {
-                lookup_var_has_placement: self.PUBLISH_FROM_WHEN_EMPTY
-            }
-        )
-        self.links.append(link)
         self.remove_from_querystring = [lookup_var_published, lookup_var_not_published, lookup_var_has_placement]
         return True
 
@@ -112,8 +103,6 @@ class IsPublishedFilter(CustomFilterSpec):
         param = self.get_lookup_kwarg()
         if not param:
             return None
-        if lookup_kwargs[param] == self.PUBLISH_FROM_WHEN_EMPTY:
-            return self.CAPTION_ALL_WITH_PLACEMENT
         elif param.startswith('%s__gt' % self.lookup_var):
             return self.CAPTION_NO
         elif param.startswith('%s__lte' % self.lookup_var):
@@ -143,7 +132,7 @@ class PublishFromFilter(CustomFilterSpec):
         YEAR = 365*24*60*60
         ts = time.time() - YEAR
         last_year = time.strftime('%Y-%m-%d %H:%M', time.localtime(ts))
-        qs = Placement.objects.filter(listing__publish_from__gte=last_year)
+        qs = Listing.objects.filter(publish_from__gte=last_year)
         dates = qs.dates('publish_from', 'day', 'DESC')
         for date in dates:
             lookup_dict = dict()
@@ -165,7 +154,6 @@ class PublishFromFilter(CustomFilterSpec):
 class PublishableAdmin(newman.NewmanModelAdmin):
     """ Default admin options for all publishables """
 
-    exclude = ('content_type',)
     list_display = ('admin_link', 'category', 'photo_thumbnail', 'publish_from_nice', 'site_icon', 'fe_link',)
     list_filter = ('category', 'content_type')
     unbound_list_filter = (NewmanSiteFilter, PublishFromFilter, IsPublishedFilter,)
