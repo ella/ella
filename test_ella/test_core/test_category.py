@@ -16,10 +16,13 @@ class TestCategory(TestCase):
         super(TestCategory, self).setUp()
         create_basic_categories(self)
 
-    def test_slug_validates_correctly(self):
+    def test_slug_cannot_start_as_publishable_url(self):
         self.category_nested.slug = '123-slug'
         tools.assert_raises(ValidationError, self.category_nested.full_clean)
 
+    def test_slug_can_start_with_number(self):
+        self.category_nested.slug = '3d-slug'
+        self.category_nested.full_clean()
 
     def test_get_children(self):
         tools.assert_equals([u'nested-category', ], [c.tree_path for c in self.category.get_children()])
