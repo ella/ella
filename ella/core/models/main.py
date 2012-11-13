@@ -74,7 +74,7 @@ class Source(models.Model):
     def __unicode__(self):
         return self.name
 
-category_slug_validator = RegexValidator(re.compile('^[a-z][a-z0-9-]+$'), _('Please enter a valid slug composed of lowecase letter, numbers and hyphens. First character must be a letter.'), 'invalid')
+category_slug_validator = RegexValidator(re.compile('^(?:[0-9]+[^0-9-]|[a-z])[a-z0-9-]*$'), _('Please enter a valid slug composed of lowecase letter, numbers and hyphens. First character must be a letter.'), 'invalid')
 
 
 class Category(models.Model):
