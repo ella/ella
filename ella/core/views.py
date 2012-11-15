@@ -188,6 +188,12 @@ class ObjectDetail(EllaCoreView):
                     )
         else:
             publishable = get_cached_object_or_404(Publishable, pk=id)
+
+        if not (publishable.is_published() or request.user.is_staff):
+            # future publish, render if accessed by logged in staff member
+            raise Http404
+
+        if not year:
             if cat is None:
                 raise self.WrongUrl('Category with tree_path %r does not exist.' % category, publishable)
             elif not publishable.static:
@@ -196,10 +202,6 @@ class ObjectDetail(EllaCoreView):
                 raise self.WrongUrl('Wrong slug in URL (%r).' % slug, publishable)
             elif publishable.category_id != cat.pk:
                 raise self.WrongUrl('Wrong category for %s.' % publishable, publishable)
-
-        if not (publishable.is_published() or request.user.is_staff):
-            # future publish, render if accessed by logged in staff member
-            raise Http404
 
         # save existing object to preserve memory and SQL
         publishable.category = cat
