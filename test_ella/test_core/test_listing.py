@@ -11,8 +11,7 @@ from ella.core.managers import ListingHandler
 from ella.utils.timezone import now
 
 from test_ella.test_core import create_basic_categories, create_and_place_a_publishable, \
-        create_and_place_more_publishables, list_all_publishables_in_category_by_hour, \
-        create_category
+        create_and_place_more_publishables, list_all_publishables_in_category_by_hour
 
 class TestListing(TestCase):
 
