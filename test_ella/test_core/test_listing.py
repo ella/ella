@@ -5,12 +5,14 @@ from test_ella.cases import RedisTestCase as TestCase
 
 from nose import tools
 
+from ella.core.cache.redis import RedisListingHandler, TimeBasedListingHandler
 from ella.core.models import Listing, Category
 from ella.core.managers import ListingHandler
 from ella.utils.timezone import now
 
 from test_ella.test_core import create_basic_categories, create_and_place_a_publishable, \
-        create_and_place_more_publishables, list_all_publishables_in_category_by_hour
+        create_and_place_more_publishables, list_all_publishables_in_category_by_hour, \
+        create_category
 
 class TestListing(TestCase):
 
@@ -118,3 +120,122 @@ class TestListing(TestCase):
         l = lh[0]
         tools.assert_equals(self.listings[0], l)
 
+
+class TestRedisListingHandler(TestCase):
+    " Unit tests for the RedisListingHandler. "
+    def setUp(self):
+        super(TestRedisListingHandler, self).setUp()
+        create_basic_categories(self)
+        create_and_place_a_publishable(self)
+        create_and_place_more_publishables(self)
+        list_all_publishables_in_category_by_hour(self)
+
+    def test_get_listings(self):
+        " Assert that `get_listings` returns the appropriate data. "
+        # Instantiate the RedisListingHandler and have it fetch all children
+        lh = RedisListingHandler(self.category, ListingHandler.ALL)
+        all_listings = lh.get_listings()
+        tools.assert_equals(len(all_listings), len(self.listings))
+
+        # Assert that the offset and count are returning the correct data
+        # Fetch 10 results - only 3 listings
+        partial = lh.get_listings(offset=0, count=10)
+        tools.assert_equals(len(partial), 3)
+        tools.assert_equals(
+            [l.publishable for l in partial],
+            [l.publishable for l in self.listings]
+        )
+
+        # Only fetch the first result
+        partial = lh.get_listings(offset=0, count=1)
+        tools.assert_equals(len(partial), 1)
+        tools.assert_equals(
+            [l.publishable for l in partial],
+            [self.listings[0].publishable]
+        )
+
+        # Fetch the first 2 results results
+        partial = lh.get_listings(offset=0, count=2)
+        tools.assert_equals(len(partial), 2)
+        tools.assert_equals(
+            [l.publishable for l in partial],
+            [l.publishable for l in self.listings[0:2]]
+        )
+
+        # Fetch 2 results offset by 1
+        partial = lh.get_listings(offset=1, count=2)
+        tools.assert_equals(len(partial), 2)
+        tools.assert_equals(
+            [l.publishable for l in partial],
+            [l.publishable for l in self.listings[1:3]]
+        )
+
+        # Fetch 3 offset by 2, only 1 returned
+        partial = lh.get_listings(offset=2, count=3)
+        tools.assert_equals(len(partial), 1)
+        tools.assert_equals(
+            [l.publishable for l in partial],
+            [self.listings[2].publishable]
+        )
+
+        # Fetch 3 offset by 3 - returns 0
+        partial = lh.get_listings(offset=3, count=3)
+        tools.assert_equals(len(partial), 0)
+
+        # Essentially no limit (fetch all)
+        partial = lh.get_listings(offset=0, count=0)
+        tools.assert_equals(len(partial), 3)
+        tools.assert_equals(
+            [l.publishable for l in partial],
+            [l.publishable for l in self.listings]
+        )
+
+class TestTimeBasedListingHandler(TestRedisListingHandler):
+    " Unit tests for the TimeBasedListingHandler."
+    def test_get_listings(self):
+        " Assert that `get_listings` returns the appropriate data. "
+        # Instantiate the RedisListingHandler and have it fetch all children
+        lh = TimeBasedListingHandler(self.category, ListingHandler.ALL)
+        all_listings = lh.get_listings()
+        tools.assert_equals(len(all_listings), len(self.listings))
+
+        # Assert that the offset and count are returning the correct data
+        # Fetch 10 results - only 3 listings
+        partial = lh.get_listings(offset=0, count=10)
+        tools.assert_equals(len(partial), 3)
+        tools.assert_equals(
+            [l.publishable for l in partial],
+            [l.publishable for l in self.listings]
+        )
+
+        # Only fetch the first result
+        partial = lh.get_listings(offset=0, count=1)
+        tools.assert_equals(len(partial), 1)
+        tools.assert_equals(
+            [l.publishable for l in partial],
+            [self.listings[0].publishable]
+        )
+
+        # Fetch the first 2 results results
+        partial = lh.get_listings(offset=0, count=2)
+        tools.assert_equals(len(partial), 2)
+        tools.assert_equals(
+            [l.publishable for l in partial],
+            [l.publishable for l in self.listings[0:2]]
+        )
+
+        # Fetch 2 results offset by 1
+        partial = lh.get_listings(offset=1, count=2)
+        tools.assert_equals(len(partial), 2)
+        tools.assert_equals(
+            [l.publishable for l in partial],
+            [l.publishable for l in self.listings[1:3]]
+        )
+
+        # Fetch 3 offset by 2, only 1 returned
+        partial = lh.get_listings(offset=2, count=3)
+        tools.assert_equals(len(partial), 1)
+        tools.assert_equals(
+            [l.publishable for l in partial],
+            [self.listings[2].publishable]
+        )
