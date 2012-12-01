@@ -4,25 +4,22 @@ from datetime import date
 from django.core.cache import get_cache
 from ella.core.cache.utils import normalize_key
 from hashlib import md5
-from django.conf import settings
 from test_ella.cases import RedisTestCase as TestCase
 from django.test.client import RequestFactory
 from django.contrib.sites.models import Site
 from django.contrib.contenttypes.models import ContentType
-from django.db.models.signals import pre_save, post_save, post_delete, pre_delete
 
 from ella.core.cache import utils, redis
 from ella.core.models import Listing, Publishable
 from ella.core.views import ListContentType
 from ella.core.managers import ListingHandler
-from ella.core.signals import content_published, content_unpublished
 from ella.articles.models import Article
 from ella.utils.timezone import from_timestamp
 
 from test_ella.test_core import create_basic_categories, create_and_place_a_publishable, \
         create_and_place_more_publishables, list_all_publishables_in_category_by_hour
 
-from nose import tools, SkipTest
+from nose import tools
 
 class CacheTestCase(TestCase):
     def setUp(self):
@@ -262,6 +259,29 @@ class TestRedisListings(TestCase):
         tools.assert_equals(1, len(l))
         tools.assert_equals(l[0].publishable, self.publishables[1])
 
+    def test_redis_lh_slicing(self):
+        list_all_publishables_in_category_by_hour(self)
+        # Instantiate the RedisListingHandler and have it fetch all children
+        lh = redis.RedisListingHandler(self.category, ListingHandler.ALL)
+
+        for offset, count in [(0, 10), (0, 1), (0, 2), (1, 2), (2, 3), (3, 3)]:
+            partial = lh.get_listings(offset=offset, count=count)
+            tools.assert_equals(
+                [l.publishable for l in partial],
+                [l.publishable for l in self.listings[offset:offset + count]]
+            )
+
+    def test_time_based_lh_slicing(self):
+        list_all_publishables_in_category_by_hour(self)
+        # Instantiate the RedisListingHandler and have it fetch all children
+        lh = redis.TimeBasedListingHandler(self.category, ListingHandler.ALL)
+
+        for offset, count in [(0, 10), (0, 1), (0, 2), (1, 2), (2, 3), (3, 3)]:
+            partial = lh.get_listings(offset=offset, count=count)
+            tools.assert_equals(
+                [l.publishable for l in partial],
+                [l.publishable for l in self.listings[offset:offset + count]]
+            )
 
 class TestAuthorLH(TestCase):
     def setUp(self):
@@ -303,7 +323,6 @@ class TestAuthorLH(TestCase):
         )
         tools.assert_equals(['%d:1' % ct_id, '%d:2' % ct_id, '%d:3' % ct_id],
                             redis.client.zrange('listing:a:1', 0, 100))
-
 
 class SlidingLH(redis.SlidingListingHandler):
     PREFIX = 'sliding'
@@ -377,4 +396,5 @@ def test_normalize_key_doesnt_touch_short_key():
 def test_normalize_key_md5s_long_key():
     key = "0123456789" * 30
     tools.assert_equals(md5(key).hexdigest(),normalize_key(key))
+
 
