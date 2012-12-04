@@ -14,7 +14,7 @@ class ListingForm(modelforms.ModelForm):
 class ListingInlineAdmin(admin.TabularInline):
     model = Listing
     extra = 2
-    fieldsets = ((None, {'fields': ('category', 'publish_from', 'commercial',)}),)
+    fieldsets = ((None, {'fields': ('category', 'publish_from', 'publish_to', 'commercial',)}),)
 
 
 class RelatedInlineAdmin(admin.TabularInline):
