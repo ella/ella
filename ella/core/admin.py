@@ -22,7 +22,7 @@ class RelatedInlineAdmin(admin.TabularInline):
     extra = 3
 #    raw_id_fields = ('publishable_id',)
 
-CategoryMultiForm = multiform_factory(modelforms.modelform_factory(Category))
+CategoryMultiForm = multiform_factory(Category)
 CategoryMultiForm.add_form('ella', {'fields': ('paginate_by', 'propagate_listings')})
 
 
