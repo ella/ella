@@ -49,7 +49,7 @@ class Publishable(models.Model):
 
     # Authors and Sources
     authors = models.ManyToManyField(Author, verbose_name=_('Authors'))
-    source = models.ForeignKey(Source, blank=True, null=True,
+    source = CachedForeignKey(Source, blank=True, null=True,
         verbose_name=_('Source'), on_delete=models.SET_NULL)
 
     # Main Photo
