@@ -51,6 +51,7 @@ def serialize_author(request, author):
     return {
         'name': author.name,
         'url': author.get_absolute_url(),
+        'photo': serialize_photo(request, author.photo, formats=api_settings.PUBLISHABLE_PHOTO_FORMATS),
     }
 
 def serialize_source(request, source):
