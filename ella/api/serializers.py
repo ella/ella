@@ -7,6 +7,8 @@ from ella.core.conf import core_settings
 from django.core.paginator import Page, Paginator
 from django.utils import simplejson
 from django.http import Http404
+from ella.utils.timezone import to_timestamp
+
 
 def serialize_list(request, l):
     return [object_serializer.serialize(request, o) for o in l]
@@ -68,6 +70,7 @@ def serialize_publishable(request, publishable):
         'id': publishable.id,
         'url': publishable.get_absolute_url(),
         'title': publishable.title,
+        'publish_from': to_timestamp(publishable.publish_from) * 1000,
         'content_type': publishable.content_type.name,
         'description': publishable.description,
         'photo': serialize_photo(request, publishable.photo, formats=api_settings.PUBLISHABLE_PHOTO_FORMATS),
