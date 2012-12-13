@@ -9,7 +9,7 @@ install_requires = [
     'django-appdata>=0.1.0',
 ]
 
-test_requires = [
+tests_require = [
     'nose',
     'coverage',
     'feedparser',
@@ -51,5 +51,5 @@ setup(
     install_requires=install_requires,
 
     test_suite='test_ella.run_tests.run_all',
-    test_requires=test_requires,
+    tests_require=tests_require,
 )
