@@ -22,8 +22,8 @@ class RelatedInlineAdmin(admin.TabularInline):
     extra = 3
 #    raw_id_fields = ('publishable_id',)
 
-CategoryMultiForm = multiform_factory(Category)
-CategoryMultiForm.add_form('ella', {'fields': ('paginate_by', 'propagate_listings')})
+#CategoryMultiForm = multiform_factory(Category)
+#CategoryMultiForm.add_form('ella', {'fields': ('paginate_by', 'propagate_listings')})
 
 
 class CategoryAdmin(AppDataModelAdmin):
@@ -37,7 +37,7 @@ class CategoryAdmin(AppDataModelAdmin):
                                              'template', ('site', 'tree_parent'),
                                              'ella.paginate_by',
                                              'ella.propagate_listings')}),)
-    multiform = CategoryMultiForm
+    #multiform = CategoryMultiForm
 
 
 class AuthorAdmin(admin.ModelAdmin):

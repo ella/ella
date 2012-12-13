@@ -67,15 +67,21 @@ def serialize_publishable(request, publishable):
     return {
         'id': publishable.id,
         'url': publishable.get_absolute_url(),
+        'title': publishable.title,
         'content_type': publishable.content_type.name,
         'description': publishable.description,
         'photo': serialize_photo(request, publishable.photo, formats=api_settings.PUBLISHABLE_PHOTO_FORMATS),
+        'authors': [serialize_author(request, a) for a in publishable.authors.all()],
+        'source': serialize_source(request, publishable.source) if publishable.source_id else None
     }
 
 def serialize_listing(request, listing):
     return object_serializer.serialize(request, listing.publishable)
 
+
+
 response_serializer.register('application/json', simplejson.dumps)
+
 
 object_serializer.register(list, serialize_list)
 object_serializer.register(dict, serialize_dict)

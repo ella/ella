@@ -14,9 +14,8 @@ from ella.core.models import Listing, Category, Publishable, Author
 from ella.core.cache import get_cached_object_or_404, cache_this, get_cached_object
 from ella.core import custom_urls
 from ella.core.conf import core_settings
-from ella.core.managers import ListingHandler
 from ella.core.signals import object_rendering, object_rendered
-from ella.api import render_as_api
+from ella.api import render_as_api, FULL, PARTIAL
 from ella.utils.timezone import now, utc_localize
 
 __docformat__ = "restructuredtext en"
@@ -155,7 +154,7 @@ class ObjectDetail(EllaCoreView):
         # check for custom actions
         if url_remainder:
             return custom_urls.resolver.call_custom_view(request, obj, url_remainder, context)
-        response = render_as_api(request, obj)
+        response = render_as_api(request, obj, FULL)
         if response:
             return response
 
