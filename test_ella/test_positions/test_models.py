@@ -74,18 +74,18 @@ class TestPosition(TestCase):
 
     def test_get_active_position_inherit_nofallback(self):
         p = Position.objects.create(category=self.category, name='position-name', text='some text')
-        tools.assert_raises(Position.DoesNotExist, Position.objects.get_active_position, self.category_nested, 'position-name', nofallback=True)
+        tools.assert_false(Position.objects.get_active_position(self.category_nested, 'position-name', nofallback=True))
 
     def test_get_active_position_empty(self):
-        tools.assert_raises(Position.DoesNotExist, Position.objects.get_active_position, self.category, 'position-name')
+        tools.assert_false(Position.objects.get_active_position(self.category, 'position-name'))
 
     def test_active_till_past(self):
         p = Position.objects.create(category=self.category, name='position-name', text='some text', active_till=now()-timedelta(days=1))
-        tools.assert_raises(Position.DoesNotExist, Position.objects.get_active_position, self.category, 'position-name')
+        tools.assert_false(Position.objects.get_active_position(self.category, 'position-name'))
 
     def test_active_from_future(self):
         p = Position.objects.create(category=self.category, name='position-name', text='some text', active_from=now()+timedelta(days=1))
-        tools.assert_raises(Position.DoesNotExist, Position.objects.get_active_position, self.category, 'position-name')
+        tools.assert_false(Position.objects.get_active_position(self.category, 'position-name'))
 
     def test_active_till_future(self):
         p = Position.objects.create(category=self.category, name='position-name', text='some text', active_till=now()+timedelta(days=1))
@@ -107,7 +107,7 @@ class TestPosition(TestCase):
                 active_from=now()-timedelta(days=3),
                 active_till=now()-timedelta(days=1),
             )
-        tools.assert_raises(Position.DoesNotExist, Position.objects.get_active_position, self.category, 'position-name')
+        tools.assert_false(Position.objects.get_active_position(self.category, 'position-name'))
 
     def test_more_positions_one_active(self):
         n = now()
@@ -123,7 +123,7 @@ class TestPosition(TestCase):
 
     def test_disabled(self):
         p = Position.objects.create(category=self.category, name='position-name', text='some text', disabled=True)
-        tools.assert_raises(Position.DoesNotExist, Position.objects.get_active_position, self.category, 'position-name')
+        tools.assert_false(Position.objects.get_active_position(self.category, 'position-name'))
 
     def test_position_with_broken_definition_dont_raise_big_500(self):
         p = Position.objects.create(category=self.category, name='position-name', text='{% load nonexistent_tags %}', disabled=False)
