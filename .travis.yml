@@ -4,15 +4,15 @@ python:
   - "2.6"
   - "2.7"
 install:
-   - "if [[ $DJANGO == 'dev' ]]; then pip install https://github.com/django/django/archive/master.tar.gz#egg=Django; else pip install Django==$DJANGO --use-mirrors; fi"
+   - "if [[ $DJANGO == '1.5.x' ]]; then pip install https://github.com/django/django/archive/stable/1.5.x.zip#egg=Django; else pip install Django==$DJANGO --use-mirrors; fi"
    - pip install -r dev_requirements.txt --use-mirrors
    - python setup.py develop
 env:
   - DJANGO="1.3.3"
   - DJANGO="1.4.1"
-  - DJANGO="dev"
+  - DJANGO="1.5.x"
 script: python setup.py test
 matrix:
     exclude:
        - python: "2.5"
-         env: DJANGO="dev"
+         env: DJANGO="1.5.x"
