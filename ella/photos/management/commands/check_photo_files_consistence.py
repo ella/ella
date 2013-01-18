@@ -4,7 +4,6 @@ import sys
 from optparse import make_option
 from django.core.management.base import CommandError, BaseCommand
 from ella.photos.conf import photos_settings
-from pprint import pprint
 
 
 class Command(BaseCommand):
