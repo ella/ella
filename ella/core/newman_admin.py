@@ -3,7 +3,6 @@ import time
 
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.forms import models as modelforms
-from django.forms.fields import DateTimeField
 from django.db.models import Q
 from django.forms.util import ValidationError
 from django.forms.models import save_instance
