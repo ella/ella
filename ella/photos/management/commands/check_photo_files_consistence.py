@@ -2,7 +2,7 @@ import re
 import os
 import sys
 from optparse import make_option
-from django.core.management.base import CommandError, BaseCommand
+from django.core.management.base import BaseCommand
 from ella.photos.conf import photos_settings
 
 
