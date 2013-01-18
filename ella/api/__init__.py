@@ -1,4 +1,4 @@
-from serialization import object_serializer, response_serializer, PARTIAL, FULL
+from serialization import object_serializer, response_serializer, FULL
 from .conf import api_settings
 
 def render_as_api(request, obj):
