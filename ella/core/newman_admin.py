@@ -3,20 +3,16 @@ import time
 
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.forms import models as modelforms
-from django.db.models import Q
 from django.forms.util import ValidationError
-from django.forms.models import save_instance
-from django.conf.urls.defaults import patterns, url
 from django.utils.safestring import mark_safe
 from django.template.defaultfilters import date
 from django.conf import settings
 
 from ella.core.models import Author, Source, Category, Listing, Related, Publishable
-from ella.core.conf import core_settings
 from ella.utils.timezone import now
 
 import ella_newman as newman
-from ella_newman import options, fields
+from ella_newman import options
 from ella_newman.filterspecs import CustomFilterSpec, NewmanSiteFilter
 
 class ListingForm(modelforms.ModelForm):
