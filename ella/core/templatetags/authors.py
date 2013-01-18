@@ -1,5 +1,4 @@
 from django import template
-from ella.core.cache.utils import cache_this
 
 register = template.Library()
 
