@@ -4,11 +4,6 @@ avoid the requirement for external crond.
 """
 
 try:
-    import celery
-except ImportError:
-    # celery not installed
-    pass
-else:
     from datetime import timedelta
 
     from celery.task import periodic_task
@@ -17,3 +12,7 @@ else:
 
     periodic_task(run_every=timedelta(minutes=5))(generate_publish_signals)
     periodic_task(run_every=timedelta(hours=3))(regenerate_listing_handlers)
+except ImportError:
+    # celery not installed
+    pass
+
