@@ -31,7 +31,8 @@ class FormatedPhotoForm(forms.BaseForm):
 
 
 class FormatForm(forms.ModelForm):
-    model = Format
+    class Meta:
+        model = Format
 
     def clean(self):
         """
