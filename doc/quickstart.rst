@@ -133,12 +133,13 @@ fashion, serve also media files discussed in previous paragraph::
     from django.conf import settings
     from django.contrib import admin 
     from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-    
+
     # make sure to import ella error handlers
     from ella.core.urls import handler404, handler500
     
-    # register apps for Django admin
-    admin.autodiscover()
+    # register apps for Django admin and let the apps do any initialization they need
+    from ella.utils.installedapps import call_modules
+    call_modules(('admin', 'register', ))
     
     urlpatterns = patterns('',)
     
@@ -153,6 +154,15 @@ fashion, serve also media files discussed in previous paragraph::
         # enable Ella
         (r'^', include('ella.core.urls')),
     ) + staticfiles_urlpatterns()
+
+
+.. note::
+    Instead of calling ``admin.autodiscover`` we are using Ella's
+    ``call_modules`` which is a more generic version of the same thing. and
+    allows us to load additional modules - namely ``register.py`` where, by
+    convention all Ella apps put the codethey need for their initialization
+    (connecting signal handlers, registering :ref:`custom
+    urls<plugins-overriding-publishable-urls>` etc.)
     
 .. _Managing static files: https://docs.djangoproject.com/en/dev/howto/static-files/
 
@@ -533,8 +543,8 @@ of your boxes for individual objects as well.
 
 .. note::
     For more detailed explanation of all the possible template names, have a
-    look at :ref:`reference-views`, :ref:`reference-templates` and
-    :ref:`reference-templatetags` documentation.
+    look at :ref:`reference-views`, :ref:`reference-templates`
+    and :ref:`reference-templatetags` documentation.
 
 
 
