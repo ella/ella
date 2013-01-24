@@ -291,7 +291,7 @@ of publication with slightly different use cases:
       
   so for example::
   
-      /about/2007/08/11/articles/ella-first-in-production/
+      /about/2007/08/11/ella-first-in-production/
       
 * **static** has no date in it's URL and should be used for objects with
   universal validity. URL of statically published objects contains a primary
