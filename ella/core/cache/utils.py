@@ -15,7 +15,7 @@ from django.conf import settings
 
 log = logging.getLogger('ella.core.cache.utils')
 
-KEY_PREFIX = 'core.gco'
+KEY_PREFIX = 'ella.obj'
 CACHE_TIMEOUT = getattr(settings, 'CACHE_TIMEOUT', 10 * 60)
 
 

@@ -4,8 +4,9 @@ from django.utils.encoding import smart_str
 from django.db.models import Model
 from django.core.cache import cache
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 
-from ella.core.cache.utils import normalize_key
+from ella.core.cache.utils import normalize_key, _get_key, KEY_PREFIX
 from ella.core.conf import core_settings
 
 
@@ -37,6 +38,8 @@ class Box(object):
         self.verbose_name_plural = model.__name__
 
         self.is_model = issubclass(model, Model)
+        if self.is_model:
+            self.ct = ContentType.objects.get_for_model(model)
 
         if hasattr(model, '_meta'):
             self.name = str(model._meta)
@@ -155,11 +158,11 @@ class Box(object):
         if not self.is_model:
             return None
 
+        pars = ''
         if self.params:
             pars = ','.join(':'.join((smart_str(key), smart_str(self.params[key]))) for key in sorted(self.params.keys()))
-        else:
-            pars = ''
-        return normalize_key('core.box:%d:%s:%s:%d:%s' % (
-                settings.SITE_ID, self.obj.__class__.__name__, str(self.box_type), self.obj.pk, pars
+
+        return normalize_key('%s:box:%d:%s:%s' % (
+                _get_key(KEY_PREFIX, self.ct, pk=self.obj.pk), settings.SITE_ID, str(self.box_type), pars
             ))
 
