@@ -18,27 +18,36 @@ log = logging.getLogger('ella.core.cache.utils')
 KEY_PREFIX = 'ella.obj'
 CACHE_TIMEOUT = getattr(settings, 'CACHE_TIMEOUT', 10 * 60)
 
-
 @receiver(post_save)
 @receiver(post_delete)
 def invalidate_cache(sender, instance, **kwargs):
-    key = _get_key(KEY_PREFIX, ContentType.objects.get_for_model(sender), pk=instance.pk)
-    cache.delete(key)
+    invalidate_cache_for_object(instance)
+
+def invalidate_cache_for_object(obj):
+    key = _get_key(KEY_PREFIX, ContentType.objects.get_for_model(obj), pk=obj.pk, version_key=True)
+    try:
+        cache.incr(key)
+    except ValueError:
+        cache.set(key, 1, timeout=CACHE_TIMEOUT)
 
 def normalize_key(key):
     if len(key) < 250:
         return key
     return md5(key).hexdigest()
 
-def _get_key(start, model, pk=None, **kwargs):
+def _get_key(start, model, pk=None, version_key=False, **kwargs):
     Publishable = get_model('core', 'publishable')
     if issubclass(model.model_class(), Publishable) and model.model_class() != Publishable:
         model = ContentType.objects.get_for_model(Publishable)
 
     if pk and not kwargs:
-        return ':'.join((
+        key = ':'.join((
             start, str(model.pk), str(pk)
         ))
+        if version_key:
+            return key + ':VER'
+        version = cache.get(key + ':VER') or '0'
+        return '%s:%s' % (key, version)
 
     for key, val in kwargs.iteritems():
         if hasattr(val, 'pk'):

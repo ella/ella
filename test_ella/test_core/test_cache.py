@@ -74,9 +74,17 @@ class TestCacheUtils(CacheTestCase):
 
         tools.assert_equals(self.publishable, utils.get_cached_object(Publishable, pk=self.publishable.pk))
 
-    def test_get_article_uses_the_publishable_key(self):
+    def test_get_article_uses_the_publishable_key_and_0_for_version(self):
         tools.assert_equals(
-            ':'.join((utils.KEY_PREFIX, str(ContentType.objects.get_for_model(Publishable).pk), '123')),
+            ':'.join((utils.KEY_PREFIX, str(ContentType.objects.get_for_model(Publishable).pk), '123', '0')),
+            utils._get_key(utils.KEY_PREFIX, ContentType.objects.get_for_model(Article), pk=123)
+        )
+
+    def test_get_article_uses_the_publishable_key_and_version_from_cache(self):
+        key = utils._get_key(utils.KEY_PREFIX, ContentType.objects.get_for_model(Article), pk=123, version_key=True)
+        self.cache.set(key, 3)
+        tools.assert_equals(
+            ':'.join((utils.KEY_PREFIX, str(ContentType.objects.get_for_model(Publishable).pk), '123', '3')),
             utils._get_key(utils.KEY_PREFIX, ContentType.objects.get_for_model(Article), pk=123)
         )
 
