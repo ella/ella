@@ -2,6 +2,7 @@ import logging
 
 from django.http import HttpResponse
 
+
 __all__ = ['response_serializer', 'object_serializer', 'FULL', 'PARTIAL']
 
 log = logging.getLogger('ella.api.serialization')
@@ -9,6 +10,7 @@ log = logging.getLogger('ella.api.serialization')
 
 FULL = object()
 PARTIAL = object()
+
 
 class ResponseSerializer(object):
     def __init__(self):
@@ -22,6 +24,7 @@ class ResponseSerializer(object):
 
     def serialize(self, data, mimetype):
         return HttpResponse(self._registry[mimetype](data), content_type=mimetype)
+
 
 class ObjectSerializer(object):
     def __init__(self):

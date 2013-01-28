@@ -20,4 +20,3 @@ class ArticleAdmin(PublishableAdmin):
 
 
 ella_newman.site.register(Article, ArticleAdmin)
-

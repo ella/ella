@@ -65,13 +65,12 @@ class PositionNode(template.Node):
 
     def render(self, context):
         cat = _get_category_from_pars_var(self.category, context)
+        pos = Position.objects.get_active_position(cat, self.position, self.nofallback)
 
-        try:
-            pos = Position.objects.get_active_position(cat, self.position, self.nofallback)
-        except Position.DoesNotExist:
-            return ''
+        if pos:
+            return pos.render(context, self.nodelist, self.box_type)
 
-        return pos.render(context, self.nodelist, self.box_type)
+        return ''
 
 
 @register.tag
@@ -119,9 +118,7 @@ class IfPositionNode(template.Node):
         cat = _get_category_from_pars_var(self.category, context)
 
         for pos in self.positions:
-            try:
-                Position.objects.get_active_position(cat, pos, self.nofallback)
+            if Position.objects.get_active_position(cat, pos, self.nofallback):
                 return self.nodelist_true.render(context)
-            except Position.DoesNotExist:
-                pass
+
         return self.nodelist_false.render(context)

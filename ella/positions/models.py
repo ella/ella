@@ -3,7 +3,6 @@ import logging
 from django.utils.translation import ugettext_lazy as _
 from django.db import models
 from django.db.models import Q
-from django.contrib.contenttypes.models import ContentType
 from django.template import Template, TemplateSyntaxError
 from django.core.exceptions import ValidationError
 
@@ -15,10 +14,12 @@ from ella.utils import timezone
 
 log = logging.getLogger('ella.positions.models')
 
+
 def get_position_key(self, category, name, nofallback=False):
     return 'positions:%d:%s:%s' % (
             category.pk, name, nofallback and '1' or '0'
     )
+
 
 class PositionManager(models.Manager):
     @cache_this(get_position_key)
@@ -35,6 +36,7 @@ class PositionManager(models.Manager):
         now = timezone.now()
         lookup = (Q(active_from__isnull=True) | Q(active_from__lte=now)) & \
                  (Q(active_till__isnull=True) | Q(active_till__gt=now))
+
         while True:
             try:
                 return self.get(lookup, category=category, name=name,
@@ -42,14 +44,15 @@ class PositionManager(models.Manager):
             except Position.DoesNotExist:
                 # if nofallback was specified, do not look into parent categories
                 if nofallback:
-                    raise
+                    return False
 
                 # traverse the category tree to the top otherwise
                 category = category.tree_parent
 
-                # we reached the top and still haven't found the position - raise
+                # we reached the top and still haven't found the position - return
                 if category is None:
-                    raise
+                    return False
+
 
 def PositionBox(position, *args, **kwargs):
     " Delegate the boxing. "
@@ -134,4 +137,3 @@ class Position(models.Model):
 
         b = self.box_class(self, box_type, nodelist)
         return b.render(context)
-

@@ -133,12 +133,13 @@ fashion, serve also media files discussed in previous paragraph::
     from django.conf import settings
     from django.contrib import admin 
     from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-    
+
     # make sure to import ella error handlers
     from ella.core.urls import handler404, handler500
     
-    # register apps for Django admin
-    admin.autodiscover()
+    # register apps for Django admin and let the apps do any initialization they need
+    from ella.utils.installedapps import call_modules
+    call_modules(('admin', 'register', ))
     
     urlpatterns = patterns('',)
     
@@ -153,6 +154,15 @@ fashion, serve also media files discussed in previous paragraph::
         # enable Ella
         (r'^', include('ella.core.urls')),
     ) + staticfiles_urlpatterns()
+
+
+.. note::
+    Instead of calling ``admin.autodiscover`` we are using Ella's
+    ``call_modules`` which is a more generic version of the same thing. and
+    allows us to load additional modules - namely ``register.py`` where, by
+    convention all Ella apps put the codethey need for their initialization
+    (connecting signal handlers, registering :ref:`custom
+    urls<plugins-overriding-publishable-urls>` etc.)
     
 .. _Managing static files: https://docs.djangoproject.com/en/dev/howto/static-files/
 
@@ -263,20 +273,21 @@ nothing shall exist outside of the category tree.
 ======================
 
 The main objective of Ella is **publishing content**. Ella together with it's
-:ref:`plugins <plugins>` provides
-several types of content (``Article``, ``Gallery``, ``Quiz``, ...) and can be
-easily extended to add more (just define the model) or used with existing
-models.
+:ref:`plugins <plugins>` provides several types of content (``Article``,
+``Gallery``, ``Quiz``, ...) and can be easily extended to add more (just define
+the model) or used with existing models.
 
 For ease of manipulation and efficiency, all content models inherit from
 ``ella.core.models.Publishable``. This base class has all the fields needed to
 display a listing of the content object (``title``, ``description``, ``slug``,
-``photo``), basic metadata (``category``, ``authors``, ``source``) and provides
-easy access (property ``target``) to the actual instance of the proper class if
-needed (it holds a reference to it's ``ContentType``). Information about
-publication are also kept on the ``Publishable`` model
-(attributes ``published``, ``publish_from``, ``publish_to`` and ``static``).
+``photo``), basic metadata (``category``, ``authors``, ``source``).  When using
+Ella API you will always receive an instance of the actual class (``Article``)
+and not the base class (``Publishable``). If you have access to only a
+``Publishable`` instance the ``target`` property will return instance of the
+correct class (it holds a reference to it's ``ContentType``).
 
+Information about publication are also kept on the ``Publishable`` model
+(attributes ``published``, ``publish_from``, ``publish_to`` and ``static``).
 All these information together are used to **create an URL for the object**
 which will point to it's detail (e.g. article content). There are **two types**
 of publication with slightly different use cases:
@@ -290,27 +301,22 @@ of publication with slightly different use cases:
       
   so for example::
   
-      /about/2007/08/11/articles/ella-first-in-production/
+      /about/2007/08/11/ella-first-in-production/
       
 * **static** has no date in it's URL and should be used for objects with
   universal validity. URL of statically published objects contains a primary
   key reference to avoid namespace clashes::
 
-        /category/tree/path/[CONTENT_TYPE_NAME]/[PK]-slug/
+        /category/tree/path/[PK]-slug/
         
   for example::
     
-        /about/articles/1-ella-first-in-production/
-
-The ``[CONTENT_TYPE_NAME]`` in the URL schema represents slugified translated
-version of the model's `verbose_name_plural`_.
+        /about/1-ella-first-in-production/
 
 Just setting up publish information for a ``Publishable`` object makes it
 visible (starting from ``publish_from``) but doesn't make it appear in any
 listing in any ``Category``. For that you need to specify in **which categories
 you want it listed**.
-    
-.. _verbose_name_plural: https://docs.djangoproject.com/en/dev/ref/models/options/#verbose-name-plural
     
 
 ``Listing`` object
@@ -371,24 +377,14 @@ The basic template will look like::
 
     {% for listing in listings %}
         <p>
-            <a href="{{ listing.get_absolute_url }}">{{ listing.target.title }}</a>
-            {{ listing.target.description|safe }}
+            <a href="{{ listing.get_absolute_url }}">{{ listing.publishable.title }}</a>
+            {{ listing.publishable.description|safe }}
         </p>
     {% endfor %}
 
 That will render the category title, description and a list of objects published
 in that category. Upon accessing ``/`` you should then see the name of the
 category and the article you created in administration.
-
-.. note::
-
-    ``{{ listing.target }}`` gives you access to the ``Publishable`` instance.
-    It gives you an instance of ``Publishable`` even if the object is actually a
-    subclass, like (in our case) ``Article``. This is done for performance
-    reasons, but if you want the access to the actual object in it's proper
-    class, you can use ``{{ listing.target.target }}`` at the cost of an
-    additional DB query. For lot of use cases, picking up only ``Publishable``
-    is completely sufficent (it has the means to tell it's URL, title, etc.).
 
 
 ``page/listing.html``
@@ -486,7 +482,7 @@ the output::
     <p>{{ category.description }}</p>
     
     {% for listing in listings %}
-        {% box listing for listing.target %}{% endbox %}
+        {% box listing for listing %}{% endbox %}
     {% endfor %}
 
 If you still struggle, why the bloody ``Box`` is used instead of standard
@@ -535,7 +531,7 @@ your root category's slug is ``ella-blog``), just create one called
     <p>{{ category.description }}</p>  
                                     
     {% for listing in listings %}
-        {% box listing for listing.target %}{% endbox %}
+        {% box listing for listing %}{% endbox %}
     {% endfor %}
 
 You will be greeted into the site and not your root category next time you visit
@@ -547,8 +543,8 @@ of your boxes for individual objects as well.
 
 .. note::
     For more detailed explanation of all the possible template names, have a
-    look at :ref:`reference-views`, :ref:`reference-templates` and
-    :ref:`reference-templatetags` documentation.
+    look at :ref:`reference-views`, :ref:`reference-templates`
+    and :ref:`reference-templatetags` documentation.
 
 
 

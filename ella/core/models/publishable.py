@@ -226,7 +226,7 @@ class Listing(models.Model):
     """
     box_class = staticmethod(ListingBox)
 
-    publishable = models.ForeignKey(Publishable, verbose_name=_('Publishable'))
+    publishable = CachedForeignKey(Publishable, verbose_name=_('Publishable'))
     category = CategoryForeignKey(verbose_name=_('Category'), db_index=True)
 
     publish_from = models.DateTimeField(_("Start of listing"), db_index=True)
