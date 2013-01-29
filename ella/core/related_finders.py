@@ -1,7 +1,7 @@
-from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
+from ella.core.cache.utils import get_cached_objects, SKIP
 
-from ella.core.models import Publishable
+from ella.core.models import Related
 
 
 def related_by_category(obj, count, collected_so_far, mods=[], only_from_same_site=True):
@@ -31,20 +31,17 @@ def related_by_category(obj, count, collected_so_far, mods=[], only_from_same_si
 
 def directly_related(obj, count, collected_so_far, mods=[], only_from_same_site=True):
     """
-    Returns objects related to ``obj`` up to ``count`` by searching 
-    ``Related`` instances for the ``obj``. 
+    Returns objects related to ``obj`` up to ``count`` by searching
+    ``Related`` instances for the ``obj``.
     """
     # manually entered dependencies
-    qset = Publishable.objects.filter(
-        related__related_ct=ContentType.objects.get_for_model(obj),
-        related__related_id=obj.pk
-    )
+    qset = Related.objects.filter(publishable=obj)
+
     if mods:
-        qset = qset.filter(content_type__in=[
+        qset = qset.filter(related_ct__in=[
             ContentType.objects.get_for_model(m).pk for m in mods])
-    if only_from_same_site:
-        qset = qset.filter(category__site__pk=settings.SITE_ID)
-    return list(qset[:count])
+
+    return get_cached_objects(qset.values_list('related_ct', 'related_id')[:count], missing=SKIP)
 
 
 

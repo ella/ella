@@ -85,6 +85,9 @@ class Publishable(models.Model):
     def __unicode__(self):
         return self.title
 
+    def __eq__(self, other):
+        return isinstance(other, Publishable) and self.pk == other.pk
+
     def get_absolute_url(self, domain=False):
         " Get object's URL. "
         category = self.category
