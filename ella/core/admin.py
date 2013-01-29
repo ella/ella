@@ -1,4 +1,5 @@
 from app_data.admin import AppDataModelAdmin
+from django.contrib.contenttypes import generic
 from django.contrib import admin
 from django.forms import models as modelforms
 
@@ -16,10 +17,13 @@ class ListingInlineAdmin(admin.TabularInline):
     fieldsets = ((None, {'fields': ('category', 'publish_from', 'publish_to', 'commercial',)}),)
 
 
-class RelatedInlineAdmin(admin.TabularInline):
+class RelatedInlineAdmin(generic.GenericTabularInline):
     model = Related
+    ct_field = "related_ct"
+    ct_fk_field = "related_id"
     extra = 3
-#    raw_id_fields = ('publishable_id',)
+    raw_id_fields = ('publishable',)
+
 
 class CategoryAdmin(AppDataModelAdmin):
     list_filter = ('site',)
