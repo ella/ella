@@ -46,8 +46,8 @@ class TestDefaultRelatedFinder(GetRelatedTestCase):
             )
 
     def test_returns_manual_objects_of_correct_model_type_first(self):
-        r = Related(publishable=self.publishables[0])
-        r.related = self.publishable
+        r = Related(publishable=self.publishable)
+        r.related = self.publishables[0]
         r.save()
 
         tools.assert_equals(
@@ -56,18 +56,18 @@ class TestDefaultRelatedFinder(GetRelatedTestCase):
             )
 
     def test_returns_manual_objects_first(self):
-        r = Related(publishable=self.publishables[0])
-        r.related = self.publishable
+        r = Related(publishable=self.publishable)
+        r.related = self.category
         r.save()
 
         tools.assert_equals(
-                [self.publishables[0].pk, self.publishables[-1].pk],
-                [p.pk for p in Related.objects.get_related_for_object(self.publishable, 2)]
+                [self.category, self.publishables[-1]],
+                Related.objects.get_related_for_object(self.publishable, 2)
             )
 
     def test_returns_only_manual_objects_when_direct_finder_specified(self):
-        r = Related(publishable=self.publishables[0])
-        r.related = self.publishable
+        r = Related(publishable=self.publishable)
+        r.related = self.publishables[0]
         r.save()
 
         tools.assert_equals(
@@ -76,8 +76,8 @@ class TestDefaultRelatedFinder(GetRelatedTestCase):
             )
 
     def test_returns_unique_objects(self):
-        r = Related(publishable=self.publishables[-2])
-        r.related = self.publishable
+        r = Related(publishable=self.publishable)
+        r.related = self.publishables[-2]
         r.save()
 
         tools.assert_equals(
@@ -90,7 +90,6 @@ class TestDefaultRelatedFinder(GetRelatedTestCase):
         r.related = self.publishable
         r.save()
         tools.assert_equals([], Related.objects.get_related_for_object(self.publishable, 3, mods=[Related]))
-
 
 
 class TestRelatedTagParser(UnitTestCase):
