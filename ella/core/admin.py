@@ -1,4 +1,3 @@
-from app_data import multiform_factory
 from app_data.admin import AppDataModelAdmin
 from django.contrib import admin
 from django.forms import models as modelforms
@@ -22,9 +21,6 @@ class RelatedInlineAdmin(admin.TabularInline):
     extra = 3
 #    raw_id_fields = ('publishable_id',)
 
-#CategoryMultiForm = multiform_factory(Category)
-#CategoryMultiForm.add_form('ella', {'fields': ('paginate_by', 'propagate_listings')})
-
 
 class CategoryAdmin(AppDataModelAdmin):
     list_filter = ('site',)
@@ -37,7 +33,6 @@ class CategoryAdmin(AppDataModelAdmin):
                                              'template', ('site', 'tree_parent'),
                                              'ella.paginate_by',
                                              'ella.propagate_listings')}),)
-    #multiform = CategoryMultiForm
 
 
 class AuthorAdmin(admin.ModelAdmin):

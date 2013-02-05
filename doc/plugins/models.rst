@@ -67,6 +67,4 @@ needed. Of course, in real world, you would probably need to do some polishing
 
 .. _Django model inheritance: https://docs.djangoproject.com/en/dev/topics/db/models/#model-inheritance
 
-.. _plugins-custom-boxes:
-
 

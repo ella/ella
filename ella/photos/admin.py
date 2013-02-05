@@ -30,7 +30,36 @@ class FormatedPhotoForm(forms.BaseForm):
         return data
 
 
+class FormatForm(forms.ModelForm):
+    class Meta:
+        model = Format
+
+    def clean(self):
+        """
+        Check format name uniqueness for sites
+
+        :return: cleaned_data
+        """
+
+        data = self.cleaned_data
+        formats = Format.objects.filter(name=data['name'])
+        if self.instance:
+            formats = formats.exclude(pk=self.instance.pk)
+
+        exists_sites = []
+        for f in formats:
+            for s in f.sites.all():
+                if s in data['sites']:
+                    exists_sites.append(s.__unicode__())
+
+        if len(exists_sites):
+            raise ValidationError(ugettext("Format with this name exists for site(s): %s" % ", ".join(exists_sites)))
+
+        return data
+
+
 class FormatOptions(admin.ModelAdmin):
+    form = FormatForm
     list_display = ('name', 'max_width', 'max_height', 'stretch', 'resample_quality',)
     list_filter = ('sites', 'stretch', 'nocrop',)
     search_fields = ('name',)
@@ -98,7 +127,6 @@ class PhotoOptions(admin.ModelAdmin):
         except (Photo.DoesNotExist, Format.DoesNotExist):
             content = {'error':True}
         return HttpResponse(simplejson.dumps(content))
-
 
 
 class FormatedPhotoOptions(admin.ModelAdmin):

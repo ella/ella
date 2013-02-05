@@ -205,7 +205,7 @@ class BoxNode(template.Node):
 
         try:
             obj = self.get_obj(context)
-        except ObjectNotFoundOrInvalid, e:
+        except ObjectNotFoundOrInvalid:
             return ''
 
         box = getattr(obj, 'box_class', Box)(obj, self.box_type, self.nodelist)

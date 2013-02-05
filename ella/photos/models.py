@@ -45,6 +45,7 @@ def upload_to(instance, filename):
     if instance.slug:
         name = instance.slug
     ext = photos_settings.TYPE_EXTENSION.get(instance._get_image().format, ext.lower())
+    instance.image.file.seek(0)
 
     return os.path.join(
         force_unicode(now().strftime(smart_str(photos_settings.UPLOAD_TO))),

@@ -6,6 +6,7 @@ from nose import tools
 
 from ella.core.models import Publishable
 from ella.core.box import Box
+from ella.core.cache.utils import _get_key, KEY_PREFIX
 from ella.articles.models import Article
 
 from test_ella.test_core import create_basic_categories, create_and_place_a_publishable
@@ -40,6 +41,12 @@ class TestPublishableBox(TestCase):
 
         template_loader.templates['box/content_type/testclass/box_type.html'] = '{{ object.title}}'
         tools.assert_equals('Heyoo', test_box.render(Context({})))
+
+    def test_box_cache_key_is_prefixed_by_objects_key(self):
+        box = Box(self.publishable, 'box_type', [])
+        # initialize the box's .params attribute
+        box.prepare({})
+        tools.assert_true(box.get_cache_key().startswith(_get_key(KEY_PREFIX, self.publishable.content_type, pk=self.publishable.pk)))
 
     def test_box_template_path_contains_correct_content_type(self):
         publishable = Publishable.objects.get(pk=self.publishable.pk)

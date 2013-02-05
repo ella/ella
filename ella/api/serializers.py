@@ -10,11 +10,14 @@ from django.http import Http404
 from ella.utils.timezone import to_timestamp
 
 
+
 def serialize_list(request, l):
     return [object_serializer.serialize(request, o) for o in l]
 
+
 def serialize_dict(request, d):
     return dict((k, object_serializer.serialize(request, v)) for k, v in d.iteritems())
+
 
 def serialize_page(request, page):
     return {
@@ -25,11 +28,13 @@ def serialize_page(request, page):
         'objects': serialize_list(request, page.object_list),
     }
 
+
 def serialize_full_category(request, category):
     page_no = 1
     if 'p' in request.GET and request.GET['p'].isdigit():
         page_no = int(request.GET['p'])
     return object_serializer.serialize(request, {'category': category, 'listings': category.app_data.ella.get_listings_page(page_no)})
+
 
 def serialize_category(request, category):
     return {
@@ -37,6 +42,7 @@ def serialize_category(request, category):
         'title': category.title,
         'url': category.get_absolute_url(),
     }
+
 
 def serialize_full_author(request, author):
     page_no = 1
@@ -47,12 +53,14 @@ def serialize_full_author(request, author):
         raise Http404('Invalid page number %r' % page_no)
     return object_serializer.serialize(request, {'author': author, 'listings': paginator.page(page_no)})
 
+
 def serialize_author(request, author):
     return {
         'name': author.name,
         'url': author.get_absolute_url(),
         'photo': serialize_photo(request, author.photo, formats=api_settings.PUBLISHABLE_PHOTO_FORMATS),
     }
+
 
 def serialize_source(request, source):
     return {
@@ -61,10 +69,12 @@ def serialize_source(request, source):
         'url': source.url,
     }
 
+
 def serialize_photo(request, photo, formats=None):
     if formats is None:
         formats = api_settings.DEFAULT_PHOTO_FORMATS
     return dict((f, FormatedPhoto.objects.get_photo_in_format(photo, f, False)) for f in formats)
+
 
 def serialize_publishable(request, publishable):
     return {
@@ -79,9 +89,9 @@ def serialize_publishable(request, publishable):
         'source': serialize_source(request, publishable.source) if publishable.source_id else None
     }
 
+
 def serialize_listing(request, listing):
     return object_serializer.serialize(request, listing.publishable)
-
 
 
 response_serializer.register('application/json', simplejson.dumps)
@@ -99,4 +109,3 @@ object_serializer.register(Category, serialize_full_category, FULL)
 object_serializer.register(Photo, serialize_photo)
 object_serializer.register(Publishable, serialize_publishable)
 object_serializer.register(Listing, serialize_listing)
-

@@ -20,5 +20,4 @@ def create_photo_formats(case):
     )
     case.basic_format.save()
     case.basic_format.sites.add(Site.objects.get(pk=getattr(settings, "SITE_ID", 1)))
-    case.basic_format.save()
 

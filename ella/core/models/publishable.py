@@ -85,6 +85,9 @@ class Publishable(models.Model):
     def __unicode__(self):
         return self.title
 
+    def __eq__(self, other):
+        return isinstance(other, Publishable) and self.pk == other.pk
+
     def get_absolute_url(self, domain=False):
         " Get object's URL. "
         category = self.category
@@ -226,7 +229,7 @@ class Listing(models.Model):
     """
     box_class = staticmethod(ListingBox)
 
-    publishable = models.ForeignKey(Publishable, verbose_name=_('Publishable'))
+    publishable = CachedForeignKey(Publishable, verbose_name=_('Publishable'))
     category = CategoryForeignKey(verbose_name=_('Category'), db_index=True)
 
     publish_from = models.DateTimeField(_("Start of listing"), db_index=True)
