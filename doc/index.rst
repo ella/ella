@@ -80,6 +80,12 @@ of it:
 * `Ranch Bystrá <http://ranchbystra.cz/>`_
 * `pyvec.org <http://pyvec.org>`_
 
+Community
+*********
+
+* Mailing list: ella-project@googlegroups.com
+* IRC channel: #ellacms@freenode.net
+
 License
 *******
 
