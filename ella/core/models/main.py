@@ -136,8 +136,7 @@ class Category(models.Model):
         super(Category, self).save(**kwargs)
         if old_tree_path != self.tree_path:
             # the tree_path has changed, update children
-            children = Category.objects.filter(
-                tree_path__startswith=old_tree_path + '/').order_by('tree_path')
+            children = Category.objects.filter(tree_parent=self)
             for child in children:
                 child.save(force_update=True)
 
