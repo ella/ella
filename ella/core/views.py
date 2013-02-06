@@ -154,7 +154,7 @@ class ObjectDetail(EllaCoreView):
         # check for custom actions
         if url_remainder:
             return custom_urls.resolver.call_custom_view(request, obj, url_remainder, context)
-        response = render_as_api(request, obj, FULL)
+        response = render_as_api(request, obj)
         if response:
             return response
 
