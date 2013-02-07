@@ -471,6 +471,10 @@ HTML can be used as well.
     ``{% ifposition %}`` templatetag. It behaves in same way as common ``{% if %}``
     templatetag.
 
+.. note::
+    This feature is part of `ella.positions` app and thus needs to be added to
+    `INSTALLED_APPS` before use.
+
 Using positions in your pages
 =============================
 
