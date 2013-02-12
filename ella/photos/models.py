@@ -3,6 +3,7 @@ from PIL import Image
 from os import path
 from cStringIO import StringIO
 import os.path
+import string
 
 from django.db import models
 from django.db.models import signals
@@ -391,8 +392,7 @@ class FormatedPhoto(models.Model):
         self.width, self.height = stretched_photo.size
 
         f = StringIO()
-        stretched_photo.save(f, format=Image.EXTENSION[path.splitext(self.photo.image.name)[1]],
-            quality=self.format.resample_quality)
+        stretched_photo.save(f, format=self.photo._get_image().format, quality=self.format.resample_quality)
         f.seek(0)
 
         self.image.save(self.file(), ContentFile(f.read()), save)
