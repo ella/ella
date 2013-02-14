@@ -247,7 +247,7 @@ class Listing(models.Model):
 
     def __unicode__(self):
         try:
-            return ugettext(u'%s listed in %s') % (self.publishable, self.category)
+            return ugettext(u'%(pub)s listed in %(cat)s') % {'pub': self.publishable, 'cat': self.category}
         except:
             return ugettext('Broken listing')
 
@@ -290,6 +290,6 @@ class Related(models.Model):
         verbose_name_plural = _('Related')
 
     def __unicode__(self):
-        return _(u'%s relates to %s') % (self.publishable, self.related)
+        return _(u'%(pub)s relates to %(rel)s') % {'pub': self.publishable, 'rel': self.related}
 
 
