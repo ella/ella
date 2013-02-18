@@ -11,12 +11,12 @@ class FirstPagePaginator(Paginator):
     Extends standard django paginator by possibility of having different
     number of items on the first page.
     """
-    def __init__(self, object_list, first_page_count, per_page, orphans=0,
-                 allow_empty_first_page=True):
+    def __init__(self, object_list, per_page, orphans=0,
+                 allow_empty_first_page=True, first_page_count=None):
         super(FirstPagePaginator, self).__init__(object_list, per_page,
                                                  orphans,
                                                  allow_empty_first_page)
-        self.first_page_count = first_page_count
+        self.first_page_count = first_page_count or per_page
 
     def page(self, number):
         number = self.validate_number(number)
