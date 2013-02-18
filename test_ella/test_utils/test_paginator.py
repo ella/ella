@@ -4,9 +4,6 @@ from nose import tools
 from ella.utils.pagination import FirstPagePaginator
 
 
-__author__ = 'xaralis'
-
-
 OBJECTS = ['1', '2', '3', '4', '5']
 
 
