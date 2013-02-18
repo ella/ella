@@ -3,9 +3,6 @@ from math import ceil
 from django.core.paginator import Paginator, Page
 
 
-__author__ = 'xaralis'
-
-
 class FirstPagePaginator(Paginator):
     """
     Extends standard django paginator by possibility of having different
