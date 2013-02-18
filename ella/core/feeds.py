@@ -54,7 +54,9 @@ class RSSTopCategoryListings(Feed):
     # Item metadata
     ###########################################################################
     def item_guid(self, item):
-        return str(item.pk)
+        if item.pk:
+            return str(item.pk)
+        return '%s-%s' % (str(item.publishable.pk), str(item.category.slug))
 
     def item_pubdate(self, item):
         return item.publish_from
