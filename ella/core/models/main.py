@@ -218,5 +218,5 @@ class Dependency(models.Model):
         verbose_name_plural = _('Dependencies')
 
     def __unicode__(self):
-        return _(u'%s depends on %s') % (self.dependent, self.target)
+        return _(u'%(obj)s depends on %(dep)s') % {'obj': self.dependent, 'dep': self.target}
 

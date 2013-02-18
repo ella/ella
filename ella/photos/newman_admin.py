@@ -161,6 +161,8 @@ class PhotoAdmin(newman.NewmanModelAdmin):
         return urlpatterns
 
     def json_photo_info(self, request, object_id, extra_context=None):
+        from ella_newman.conf import PHOTOS_THUMB_FORMAT
+
         obj = self.get_change_view_object(object_id)
 
         if obj is None:
@@ -170,7 +172,7 @@ class PhotoAdmin(newman.NewmanModelAdmin):
 
         out = {
             'title': obj.title,
-            'thumb_url': obj.thumb_url()
+            'thumb_url': obj.get_formated_photo(PHOTOS_THUMB_FORMAT)['url']
         }
 
         return JsonResponse('', out)

@@ -15,3 +15,5 @@ test_ella/cover
 .settings
 .coverage
 nosetests.xml
+
+.idea

@@ -16,6 +16,9 @@ class AuthorListingNode(template.Node):
         except template.VariableDoesNotExist:
             return ''
 
+        if not author:
+            return ''
+
         if self.omit_var is not None:
             try:
                 omit = template.Variable(self.omit_var).resolve(context)
