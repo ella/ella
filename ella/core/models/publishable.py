@@ -17,7 +17,6 @@ from ella.core.managers import ListingManager, RelatedManager, \
     PublishableManager
 from ella.core.models.main import Author, Source
 from ella.core.signals import content_published, content_unpublished
-from ella.photos.models import Photo
 from ella.utils.timezone import now
 
 
@@ -53,7 +52,7 @@ class Publishable(models.Model):
         verbose_name=_('Source'), on_delete=models.SET_NULL)
 
     # Main Photo
-    photo = CachedForeignKey(Photo, blank=True, null=True, on_delete=models.SET_NULL,
+    photo = CachedForeignKey('photos.Photo', blank=True, null=True, on_delete=models.SET_NULL,
         verbose_name=_('Photo'))
 
     # Description
@@ -247,7 +246,7 @@ class Listing(models.Model):
 
     def __unicode__(self):
         try:
-            return ugettext(u'%s listed in %s') % (self.publishable, self.category)
+            return ugettext(u'%(pub)s listed in %(cat)s') % {'pub': self.publishable, 'cat': self.category}
         except:
             return ugettext('Broken listing')
 
@@ -290,6 +289,6 @@ class Related(models.Model):
         verbose_name_plural = _('Related')
 
     def __unicode__(self):
-        return _(u'%s relates to %s') % (self.publishable, self.related)
+        return _(u'%(pub)s relates to %(rel)s') % {'pub': self.publishable, 'rel': self.related}
 
 

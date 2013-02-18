@@ -21,6 +21,7 @@ class RelatedInlineAdmin(admin.TabularInline):
     extra = 3
 #    raw_id_fields = ('publishable_id',)
 
+
 class CategoryAdmin(AppDataModelAdmin):
     list_filter = ('site',)
     list_display = ('draw_title', 'tree_path', '__unicode__')

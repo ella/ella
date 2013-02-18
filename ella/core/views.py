@@ -14,9 +14,8 @@ from ella.core.models import Listing, Category, Publishable, Author
 from ella.core.cache import get_cached_object_or_404, cache_this, get_cached_object
 from ella.core import custom_urls
 from ella.core.conf import core_settings
-from ella.core.managers import ListingHandler
 from ella.core.signals import object_rendering, object_rendered
-from ella.api import render_as_api
+from ella.api import render_as_api, FULL, PARTIAL
 from ella.utils.timezone import now, utc_localize
 
 __docformat__ = "restructuredtext en"
@@ -388,7 +387,7 @@ class ListContentType(EllaCoreView):
             'is_paginated': page.has_other_pages(),
             'results_per_page': page.paginator.per_page,
             'page': page,
-            'listings' : page.object_list,
+            'listings': page.object_list,
         })
 
         return context
