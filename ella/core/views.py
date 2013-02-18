@@ -387,7 +387,7 @@ class ListContentType(EllaCoreView):
             'is_paginated': page.has_other_pages(),
             'results_per_page': page.paginator.per_page,
             'page': page,
-            'listings' : page.object_list,
+            'listings': page.object_list,
         })
 
         return context

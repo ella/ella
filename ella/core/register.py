@@ -2,7 +2,6 @@ from django import forms
 from django import template
 from django.http import Http404
 from django.utils.translation import ugettext_lazy as _
-from django.core.paginator import Paginator
 
 from app_data import app_registry, AppDataForm, AppDataContainer
 
@@ -10,6 +9,7 @@ from ella.core.models import Category, Listing
 from ella.core.managers import ListingHandler
 from ella.core.conf import core_settings
 from ella.core.cache.redis import connect_signals
+from ella.utils.pagination import FirstPagePaginator
 
 
 LISTING_CHOICES = (
@@ -26,6 +26,9 @@ class CategoryAppForm(AppDataForm):
     paginate_by = forms.IntegerField(label=_('Paginate by'),
         initial=core_settings.CATEGORY_LISTINGS_PAGINATE_BY, required=False,
         help_text=_('How many records to show on one listing page.'))
+    first_page_count = forms.IntegerField(label=_('First page count'),
+        initial=core_settings.CATEGORY_LISTINGS_ON_FIRST_PAGE, required=False,
+        help_text=_('How many records to show on the first page only.'))
     propagate_listings = forms.BooleanField(label=_('Propagate listings'),
         initial=True, required=False, help_text=_('Should propagate listings '
         'from child categories?'))
@@ -40,9 +43,10 @@ class EllaAppDataContainer(AppDataContainer):
     def get_listings(self, **kwargs):
         return Listing.objects.get_queryset_wrapper(self._instance, **kwargs)
 
-    def get_listings_page(self, page_no, paginate_by=None, **kwargs):
+    def get_listings_page(self, page_no, paginate_by=None, first_page_count=None, **kwargs):
         paginate_by = paginate_by or self.paginate_by
-        paginator = Paginator(self.get_listings(**kwargs), paginate_by)
+        first_page_count = first_page_count or self.first_page_count
+        paginator = FirstPagePaginator(self.get_listings(**kwargs), first_page_count, paginate_by)
 
         if page_no > paginator.num_pages or page_no < 1:
             raise Http404(_('Invalid page number %r') % page_no)
