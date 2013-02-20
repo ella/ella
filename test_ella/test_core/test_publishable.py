@@ -124,6 +124,12 @@ class TestUrl(PublishableTestCase):
         self.publishable.pk = None
         tools.assert_raises(ValidationError, self.publishable.full_clean)
 
+    def test_url_is_tested_for_published_objects_only(self):
+        self.publishable.pk = None
+        self.publishable.published = False
+        self.publishable.full_clean()
+
+
 class TestSignals(TestCase):
     def setUp(self):
         super(TestSignals, self).setUp()

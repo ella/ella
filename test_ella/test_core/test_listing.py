@@ -99,7 +99,7 @@ class TestListing(TestCase):
         l = Listing.objects.get_listing(category=self.category, children=ListingHandler.ALL)
         tools.assert_equals(self.listings, list(l))
 
-    def test_inactive_istings_wont_show(self):
+    def test_inactive_listings_wont_show(self):
         l = self.listings[0]
         l.publish_to = now() - timedelta(days=1)
         l.save()

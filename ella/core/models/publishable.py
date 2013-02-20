@@ -122,7 +122,7 @@ class Publishable(models.Model):
         return self.get_absolute_url(domain=True)
 
     def clean(self):
-        if self.static:
+        if self.static or not self.published:
             return
 
         # fields are missing, validating uniqueness is pointless
@@ -131,6 +131,7 @@ class Publishable(models.Model):
 
         qset = self.__class__.objects.filter(
                 category=self.category,
+                published=True,
                 publish_from__day=self.publish_from.day,
                 publish_from__month=self.publish_from.month,
                 publish_from__year=self.publish_from.year,
