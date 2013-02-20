@@ -32,6 +32,7 @@ class CategoryAdmin(AppDataModelAdmin):
                                              ('description', 'content'),
                                              'template', ('site', 'tree_parent'),
                                              'ella.paginate_by',
+                                             'ella.first_page_count',
                                              'ella.propagate_listings')}),)
 
 
