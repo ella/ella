@@ -12,7 +12,8 @@ from app_data import AppDataField
 
 from ella.core.cache import CachedGenericForeignKey, SiteForeignKey, ContentTypeForeignKey, CategoryForeignKey, CachedForeignKey, redis
 from ella.core.conf import core_settings
-from ella.core.managers import CategoryManager, ListingHandler
+from ella.core.managers import CategoryManager, ListingHandler, CampaignManager
+from ella.utils.timezone import now
 
 
 class Author(models.Model):
@@ -221,3 +222,28 @@ class Dependency(models.Model):
     def __unicode__(self):
         return _(u'%s depends on %s') % (self.dependent, self.target)
 
+
+class Campaign(models.Model):
+    objects = CampaignManager()
+
+    name = models.TextField()
+    active = models.BooleanField()
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+    mpu = models.CharField(max_length=64, null=True, blank=True, help_text='Magic Number for MPU slot')
+    leader = models.CharField(max_length=64, null=True, blank=True, help_text='Magic Number for LeaderBoard slot')
+    coupon = models.CharField(max_length=64, null=True, blank=True, help_text='Magic Number for Coupon slot')
+    sponsorship = models.CharField(max_length=64, null=True, blank=True, help_text='Magic Number for Sponsorship slot')
+
+    def __unicode__(self):
+        return self.name
+
+    def is_active(self):
+        n = now()
+        return self.active and self.start_date <= n and self.end_date >= n
+        
+    class Meta:
+        app_label = 'core'
+        verbose_name = _('Campaign')
+        verbose_name_plural = _('Campaigns')
+    

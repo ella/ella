@@ -15,11 +15,10 @@ from ella.core.cache import CachedGenericForeignKey, \
 from ella.core.conf import core_settings
 from ella.core.managers import ListingManager, RelatedManager, \
     PublishableManager
-from ella.core.models.main import Author, Source
+from ella.core.models.main import Author, Source, Campaign
 from ella.core.signals import content_published, content_unpublished
 from ella.photos.models import Photo
 from ella.utils.timezone import now
-
 
 def PublishableBox(publishable, box_type, nodelist, model=None):
     "add some content type info of self.target"
@@ -75,6 +74,9 @@ class Publishable(models.Model):
     # has the content_published signal been sent for this instance?
     announced = models.BooleanField(help_text='Publish signal sent', default=False, editable=False)
 
+    # Ad campaign
+    campaign = models.ForeignKey(Campaign, null=True)
+    
     objects = PublishableManager()
 
     class Meta:
@@ -95,7 +97,7 @@ class Publishable(models.Model):
         kwargs = {
             'slug': self.slug,
         }
-
+        
         if self.static:
             kwargs['id'] = self.pk
             if category.tree_parent_id:
@@ -291,5 +293,3 @@ class Related(models.Model):
 
     def __unicode__(self):
         return _(u'%s relates to %s') % (self.publishable, self.related)
-
-
