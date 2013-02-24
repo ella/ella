@@ -368,8 +368,3 @@ class ModelListingHandler(ListingHandler):
             ).count()
         return self._count
 
-
-class CampaignManager(models.Manager):
-    def active(self):
-        return self.get_query_set().filter(active=True, start_date__lte=timezone.now(), end_date__gte=timezone.now()).order_by('name')
-                                           
