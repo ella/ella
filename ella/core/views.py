@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.http import Http404
 from django.shortcuts import redirect, render
@@ -177,14 +178,26 @@ class ObjectDetail(EllaCoreView):
                 cat = None
 
         if year:
-            publishable = get_cached_object_or_404(Publishable,
-                        publish_from__year=year,
-                        publish_from__month=month,
-                        publish_from__day=day,
-                        category=cat,
-                        slug=slug,
-                        static=False
-                    )
+            lookup = {
+                'publish_from__year': year,
+                'publish_from__month': month,
+                'publish_from__day': day,
+                'category': cat,
+                'slug': slug,
+                'static': False
+            }
+            try:
+                publishable = get_cached_object(Publishable, published=True, **lookup)
+            except Publishable.DoesNotExist:
+                # Fallback for staff members in case there are multiple
+                # objects with same URL.
+                if request.user.is_staff:
+                    try:
+                        publishable = Publishable.objects.filter(published=False, **lookup)[0]
+                    except IndexError:
+                        raise Http404
+                else:
+                    raise Http404
         else:
             publishable = get_cached_object_or_404(Publishable, pk=id)
 
