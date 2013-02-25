@@ -47,7 +47,7 @@ class SourceAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 
-class PublishableAdmin(admin.ModelAdmin):
+class PublishableAdmin(AppDataModelAdmin):
     """ Default admin options for all publishables """
 
     list_display = ('title', 'category', 'publish_from')
