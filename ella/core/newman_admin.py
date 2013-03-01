@@ -34,6 +34,7 @@ class ListingInlineAdmin(newman.NewmanTabularInline):
     suggest_fields = {'category': ('__unicode__', 'title', 'slug',)}
     form = ListingForm
     fieldsets = ((None, {'fields' : ('category','publish_from', 'publish_to', 'commercial',)}),)
+    template = 'newman/edit_inline/listing.html'
 
 
 
