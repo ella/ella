@@ -58,8 +58,9 @@ def serialize_author(request, author):
     return {
         'name': author.name,
         'url': author.get_absolute_url(),
-        'photo': serialize_photo(request, author.photo, formats=api_settings.PUBLISHABLE_PHOTO_FORMATS),
+        'photo': serialize_photo(request, author.photo, formats=api_settings.PUBLISHABLE_PHOTO_FORMATS) if author.photo_id else None,
     }
+
 
 
 def serialize_source(request, source):
@@ -84,7 +85,7 @@ def serialize_publishable(request, publishable):
         'publish_from': to_timestamp(publishable.publish_from) * 1000,
         'content_type': publishable.content_type.name,
         'description': publishable.description,
-        'photo': serialize_photo(request, publishable.photo, formats=api_settings.PUBLISHABLE_PHOTO_FORMATS),
+        'photo': serialize_photo(request, publishable.photo, formats=api_settings.PUBLISHABLE_PHOTO_FORMATS) if publishable.photo_id else None,
         'authors': [serialize_author(request, a) for a in publishable.authors.all()],
         'source': serialize_source(request, publishable.source) if publishable.source_id else None
     }
