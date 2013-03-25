@@ -17,7 +17,7 @@ from ella.core.managers import ListingManager, RelatedManager, \
     PublishableManager
 from ella.core.models.main import Author, Source
 from ella.core.signals import content_published, content_unpublished
-from ella.utils.timezone import now
+from ella.utils.timezone import now, localize
 
 
 def PublishableBox(publishable, box_type, nodelist, model=None):
@@ -103,10 +103,11 @@ class Publishable(models.Model):
             else:
                 url = reverse('home_static_detail', kwargs=kwargs)
         else:
+            publish_from = localize(self.publish_from)
             kwargs.update({
-                    'year': self.publish_from.year,
-                    'month': self.publish_from.month,
-                    'day': self.publish_from.day,
+                    'year': publish_from.year,
+                    'month': publish_from.month,
+                    'day': publish_from.day,
                 })
             if category.tree_parent_id:
                 kwargs['category'] = category.tree_path
