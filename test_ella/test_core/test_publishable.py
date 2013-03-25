@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from datetime import timedelta
+from datetime import timedelta, datetime
+import pytz
 
 from test_ella.cases import RedisTestCase as TestCase
 from django.contrib.sites.models import Site
@@ -38,6 +39,11 @@ class TestLastUpdated(PublishableTestCase):
 
 class TestPublishableHelpers(PublishableTestCase):
     def test_url(self):
+        tools.assert_equals('/nested-category/2008/1/10/first-article/', self.publishable.get_absolute_url())
+
+    def test_tz_aware_url(self):
+        utc = pytz.timezone('UTC')
+        self.publishable.publish_from = datetime(2008, 1, 9, 23, 50, 0, tzinfo=utc)
         tools.assert_equals('/nested-category/2008/1/10/first-article/', self.publishable.get_absolute_url())
 
     def test_domain_url(self):
