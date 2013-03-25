@@ -13,7 +13,7 @@ from ella.core import signals
 from ella.core.management import generate_publish_signals
 from ella.utils import timezone
 
-from nose import tools
+from nose import tools, SkipTest
 
 from test_ella.test_core import create_basic_categories, create_and_place_a_publishable, default_time
 
@@ -42,6 +42,8 @@ class TestPublishableHelpers(PublishableTestCase):
         tools.assert_equals('/nested-category/2008/1/10/first-article/', self.publishable.get_absolute_url())
 
     def test_tz_aware_url(self):
+        if not timezone.use_tz:
+            raise SkipTest()
         utc = pytz.timezone('UTC')
         self.publishable.publish_from = datetime(2008, 1, 9, 23, 50, 0, tzinfo=utc)
         tools.assert_equals('/nested-category/2008/1/10/first-article/', self.publishable.get_absolute_url())
