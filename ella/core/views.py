@@ -298,6 +298,13 @@ class ListContentType(EllaCoreView):
 
         context = self.get_context(request, cat, **kwargs)
 
+        # custom view for category
+        if custom_urls.resolver.has_custom_detail(cat):
+            # custom_urls depend on the main rendered object being stored as
+            # 'object' in context
+            context['object'] = cat
+            return custom_urls.resolver.call_custom_detail(request, context)
+
         template_name = cat.template
         archive_template = cat.app_data.ella.archive_template
 
