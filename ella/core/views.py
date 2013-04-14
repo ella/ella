@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.http import Http404
 from django.shortcuts import redirect, render
@@ -16,7 +15,7 @@ from ella.core.cache import get_cached_object_or_404, cache_this, get_cached_obj
 from ella.core import custom_urls
 from ella.core.conf import core_settings
 from ella.core.signals import object_rendering, object_rendered
-from ella.api import render_as_api, FULL, PARTIAL
+from ella.api import render_as_api
 from ella.utils.timezone import now, utc_localize
 
 __docformat__ = "restructuredtext en"
