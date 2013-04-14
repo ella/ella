@@ -1,6 +1,5 @@
 language: python
 python:
-  - "2.5"
   - "2.6"
   - "2.7"
 install:
@@ -12,7 +11,3 @@ env:
   - DJANGO="1.4.1"
   - DJANGO="1.5.x"
 script: python setup.py test
-matrix:
-    exclude:
-       - python: "2.5"
-         env: DJANGO="1.5.x"
