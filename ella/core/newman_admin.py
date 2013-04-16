@@ -34,6 +34,7 @@ class ListingInlineAdmin(newman.NewmanTabularInline):
     suggest_fields = {'category': ('__unicode__', 'title', 'slug',)}
     form = ListingForm
     fieldsets = ((None, {'fields' : ('category','publish_from', 'publish_to', 'commercial',)}),)
+    template = 'newman/edit_inline/listing.html'
 
 
 
@@ -57,12 +58,9 @@ class SourceAdmin(newman.NewmanModelAdmin):
     list_display = ('name', 'url',)
     search_fields = ('name',)
 
-class RelatedInlineAdmin(newman.GenericTabularInline):
+class RelatedInlineAdmin(newman.NewmanTabularInline):
     extra = 3
     model = Related
-    ct_field = 'related_ct'
-    ct_fk_field = 'related_id'
-    suggest_fields = {'publishable': ('__unicode__', 'title', 'slug')}
 
 class IsPublishedFilter(CustomFilterSpec):
     " Published/Nonpublished objects filter"

@@ -21,6 +21,7 @@ class RelatedInlineAdmin(admin.TabularInline):
     extra = 3
 #    raw_id_fields = ('publishable_id',)
 
+
 class CategoryAdmin(AppDataModelAdmin):
     list_filter = ('site',)
     list_display = ('draw_title', 'tree_path', '__unicode__')
@@ -31,6 +32,7 @@ class CategoryAdmin(AppDataModelAdmin):
                                              ('description', 'content'),
                                              'template', ('site', 'tree_parent'),
                                              'ella.paginate_by',
+                                             'ella.first_page_count',
                                              'ella.propagate_listings')}),)
 
 
@@ -45,7 +47,7 @@ class SourceAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 
-class PublishableAdmin(admin.ModelAdmin):
+class PublishableAdmin(AppDataModelAdmin):
     """ Default admin options for all publishables """
 
     list_display = ('title', 'category', 'publish_from')

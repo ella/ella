@@ -56,6 +56,18 @@ class TestFeeds(TestCase):
 
         tools.assert_equals(len(self.publishables), len(d['items']))
 
+    def test_guids_set_properly_in_rss(self):
+        import feedparser
+        Listing.objects.all().update(category=self.category)
+        url = reverse('home_atom_feed')
+        c = self.client
+
+        response = c.get(url)
+        tools.assert_equals(200, response.status_code)
+        d = feedparser.parse(response.content)
+
+        tools.assert_equals(len(d['items']), len(set(i['guid'] for i in d['items'])))
+
     def test_atom(self):
         import feedparser
         Listing.objects.all().update(category=self.category)
@@ -120,7 +132,7 @@ class TestFeeds(TestCase):
     def test_item_description_defaults_to_publishable_description(self):
         feeder = RSSTopCategoryListings()
         feeder.box_context = {}
-        tools.assert_equals(self.publishables[0].description, feeder.item_description(self.listings[0]))
+        tools.assert_equals(self.publishables[-1].description, feeder.item_description(self.listings[0]))
 
     def test_box_rss_description_can_override_rss_description(self):
         template_loader.templates['box/rss_description.html'] = 'XXX'
@@ -128,6 +140,7 @@ class TestFeeds(TestCase):
         feeder.box_context = Context({})
         tools.assert_equals('XXX', feeder.item_description(self.listings[0]))
 
-
-
+    def test_guid_is_set_properly(self):
+        feeder = RSSTopCategoryListings()
+        tools.assert_equals(str(self.publishables[-1].pk), feeder.item_guid(self.listings[0]))
 

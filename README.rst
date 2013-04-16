@@ -44,10 +44,12 @@ Docs
 
 Docs are hosted on readthedocs.org, go to http://ella.rtfd.org.
 
-Bugtracker
-**********
+Community
+*********
 
-We stick with github to manage the issues, see https://github.com/ella/ella/issues.
+* We stick with github to manage the issues, see https://github.com/ella/ella/issues.
+* mailing list can be found at ella-project@googlegroups.com
+* IRC channel #ellacms on freenode.net
 
 Quickstart
 **********

@@ -13,6 +13,7 @@ from django.template import Template, Context
 
 from ella.core.custom_urls import CustomURLResolver
 from ella.core import custom_urls
+from ella.core.models import Category
 
 from test_ella.test_core import create_basic_categories, create_and_place_a_publishable
 from test_ella import template_loader
@@ -73,6 +74,16 @@ class TestCustomURLTemplateTag(CustomObjectDetailTestCase):
 
 
 class TestObjectDetail(CustomObjectDetailTestCase):
+    def test_categories_can_also_have_custom_defail(self):
+        def my_custom_view(request, context):
+            return HttpResponse('OK')
+
+        custom_urls.resolver.register_custom_detail(Category, my_custom_view)
+
+        response = self.client.get('/')
+        tools.assert_equals(200, response.status_code)
+        tools.assert_equals('OK', response.content)
+
     def test_custom_detail_view_called_when_registered(self):
         def my_custom_view(request, context):
             return HttpResponse('OK')

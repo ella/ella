@@ -136,8 +136,7 @@ class Category(models.Model):
         super(Category, self).save(**kwargs)
         if old_tree_path != self.tree_path:
             # the tree_path has changed, update children
-            children = Category.objects.filter(
-                tree_path__startswith=old_tree_path + '/').order_by('tree_path')
+            children = Category.objects.filter(tree_parent=self)
             for child in children:
                 child.save(force_update=True)
 
@@ -219,5 +218,5 @@ class Dependency(models.Model):
         verbose_name_plural = _('Dependencies')
 
     def __unicode__(self):
-        return _(u'%s depends on %s') % (self.dependent, self.target)
+        return _(u'%(obj)s depends on %(dep)s') % {'obj': self.dependent, 'dep': self.target}
 

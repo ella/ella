@@ -14,7 +14,6 @@ from ella.core.models import Listing, Category, Publishable, Author
 from ella.core.cache import get_cached_object_or_404, cache_this, get_cached_object
 from ella.core import custom_urls
 from ella.core.conf import core_settings
-from ella.core.managers import ListingHandler
 from ella.core.signals import object_rendering, object_rendered
 from ella.api import render_as_api
 from ella.utils.timezone import now, utc_localize
@@ -178,14 +177,26 @@ class ObjectDetail(EllaCoreView):
                 cat = None
 
         if year:
-            publishable = get_cached_object_or_404(Publishable,
-                        publish_from__year=year,
-                        publish_from__month=month,
-                        publish_from__day=day,
-                        category=cat,
-                        slug=slug,
-                        static=False
-                    )
+            lookup = {
+                'publish_from__year': year,
+                'publish_from__month': month,
+                'publish_from__day': day,
+                'category': cat,
+                'slug': slug,
+                'static': False
+            }
+            try:
+                publishable = get_cached_object(Publishable, published=True, **lookup)
+            except Publishable.DoesNotExist:
+                # Fallback for staff members in case there are multiple
+                # objects with same URL.
+                if request.user.is_staff:
+                    try:
+                        publishable = Publishable.objects.filter(published=False, **lookup)[0]
+                    except IndexError:
+                        raise Http404
+                else:
+                    raise Http404
         else:
             publishable = get_cached_object_or_404(Publishable, pk=id)
 
@@ -286,6 +297,13 @@ class ListContentType(EllaCoreView):
             return response
 
         context = self.get_context(request, cat, **kwargs)
+
+        # custom view for category
+        if custom_urls.resolver.has_custom_detail(cat):
+            # custom_urls depend on the main rendered object being stored as
+            # 'object' in context
+            context['object'] = cat
+            return custom_urls.resolver.call_custom_detail(request, context)
 
         template_name = cat.template
         archive_template = cat.app_data.ella.archive_template
@@ -388,7 +406,7 @@ class ListContentType(EllaCoreView):
             'is_paginated': page.has_other_pages(),
             'results_per_page': page.paginator.per_page,
             'page': page,
-            'listings' : page.object_list,
+            'listings': page.object_list,
         })
 
         return context

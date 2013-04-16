@@ -286,6 +286,14 @@ class TestObjectDetail(ViewsTestCase):
                 response.context['content_type_name']
         )
 
+    def test_multiple_same_publications_can_live_while_not_published(self):
+        self.publishable.published = True
+        self.publishable.save()
+        orig_publishable = self.publishable
+        create_and_place_a_publishable(self, published=False)
+        self.client.get('/nested-category/%d-first-article/' % orig_publishable.id)
+
+
 class TestGetTemplates(ViewsTestCase):
     def test_homepage_uses_only_path(self):
         tools.assert_equals(

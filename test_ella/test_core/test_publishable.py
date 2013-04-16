@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from datetime import timedelta
+from datetime import timedelta, datetime
+import pytz
 
 from test_ella.cases import RedisTestCase as TestCase
 from django.contrib.sites.models import Site
@@ -12,7 +13,7 @@ from ella.core import signals
 from ella.core.management import generate_publish_signals
 from ella.utils import timezone
 
-from nose import tools
+from nose import tools, SkipTest
 
 from test_ella.test_core import create_basic_categories, create_and_place_a_publishable, default_time
 
@@ -38,6 +39,13 @@ class TestLastUpdated(PublishableTestCase):
 
 class TestPublishableHelpers(PublishableTestCase):
     def test_url(self):
+        tools.assert_equals('/nested-category/2008/1/10/first-article/', self.publishable.get_absolute_url())
+
+    def test_tz_aware_url(self):
+        if not timezone.use_tz:
+            raise SkipTest()
+        utc = pytz.timezone('UTC')
+        self.publishable.publish_from = datetime(2008, 1, 9, 23, 50, 0, tzinfo=utc)
         tools.assert_equals('/nested-category/2008/1/10/first-article/', self.publishable.get_absolute_url())
 
     def test_domain_url(self):
@@ -123,6 +131,12 @@ class TestUrl(PublishableTestCase):
     def test_unique_url_validation(self):
         self.publishable.pk = None
         tools.assert_raises(ValidationError, self.publishable.full_clean)
+
+    def test_url_is_tested_for_published_objects_only(self):
+        self.publishable.pk = None
+        self.publishable.published = False
+        self.publishable.full_clean()
+
 
 class TestSignals(TestCase):
     def setUp(self):

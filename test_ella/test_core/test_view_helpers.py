@@ -156,14 +156,14 @@ class TestListContentType(ViewHelpersTestCase):
         tools.assert_equals(self.listings, list(c['listings']))
 
     def test_return_first_2_listings_if_paginate_by_2(self):
-        self.category.app_data = {'ella': {'paginate_by': 2}}
+        self.category.app_data = {'ella': {'paginate_by': 2, 'first_page_count': 2}}
         self.category.save()
         c = self.list_content_type.get_context(self.request, self.category, '2008')
         tools.assert_equals(self.listings[:2], list(c['listings']))
         tools.assert_true(c['is_paginated'])
 
     def test_return_second_2_listings_if_paginate_by_2_and_page_2(self):
-        self.category.app_data = {'ella': {'paginate_by': 2}}
+        self.category.app_data = {'ella': {'paginate_by': 2, 'first_page_count': 2}}
         self.category.save()
         self.request.GET['p'] = '2'
         c = self.list_content_type.get_context(self.request, self.category, '2008')

@@ -17,8 +17,7 @@ from ella.core.managers import ListingManager, RelatedManager, \
     PublishableManager
 from ella.core.models.main import Author, Source
 from ella.core.signals import content_published, content_unpublished
-from ella.photos.models import Photo
-from ella.utils.timezone import now
+from ella.utils.timezone import now, localize
 
 
 def PublishableBox(publishable, box_type, nodelist, model=None):
@@ -53,7 +52,7 @@ class Publishable(models.Model):
         verbose_name=_('Source'), on_delete=models.SET_NULL)
 
     # Main Photo
-    photo = CachedForeignKey(Photo, blank=True, null=True, on_delete=models.SET_NULL,
+    photo = CachedForeignKey('photos.Photo', blank=True, null=True, on_delete=models.SET_NULL,
         verbose_name=_('Photo'))
 
     # Description
@@ -104,10 +103,11 @@ class Publishable(models.Model):
             else:
                 url = reverse('home_static_detail', kwargs=kwargs)
         else:
+            publish_from = localize(self.publish_from)
             kwargs.update({
-                    'year': self.publish_from.year,
-                    'month': self.publish_from.month,
-                    'day': self.publish_from.day,
+                    'year': publish_from.year,
+                    'month': publish_from.month,
+                    'day': publish_from.day,
                 })
             if category.tree_parent_id:
                 kwargs['category'] = category.tree_path
@@ -123,7 +123,7 @@ class Publishable(models.Model):
         return self.get_absolute_url(domain=True)
 
     def clean(self):
-        if self.static:
+        if self.static or not self.published:
             return
 
         # fields are missing, validating uniqueness is pointless
@@ -132,6 +132,7 @@ class Publishable(models.Model):
 
         qset = self.__class__.objects.filter(
                 category=self.category,
+                published=True,
                 publish_from__day=self.publish_from.day,
                 publish_from__month=self.publish_from.month,
                 publish_from__year=self.publish_from.year,
@@ -247,7 +248,7 @@ class Listing(models.Model):
 
     def __unicode__(self):
         try:
-            return ugettext(u'%s listed in %s') % (self.publishable, self.category)
+            return ugettext(u'%(pub)s listed in %(cat)s') % {'pub': self.publishable, 'cat': self.category}
         except:
             return ugettext('Broken listing')
 
@@ -290,6 +291,6 @@ class Related(models.Model):
         verbose_name_plural = _('Related')
 
     def __unicode__(self):
-        return _(u'%s relates to %s') % (self.publishable, self.related)
+        return _(u'%(pub)s relates to %(rel)s') % {'pub': self.publishable, 'rel': self.related}
 
 
