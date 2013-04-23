@@ -40,7 +40,7 @@ class AuthorView(ListView):
         if 'p' in request.GET:
             self.kwargs.update({'page': request.GET['p']})
 
-        self.author = get_cached_object(Author, slug=kwargs['slug'])
+        self.author = get_cached_object_or_404(Author, slug=kwargs['slug'])
 
         response = render_as_api(request, self.author)
         if response:
