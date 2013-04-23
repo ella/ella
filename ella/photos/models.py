@@ -304,7 +304,6 @@ class FormatedPhotoManager(models.Manager):
                 return format.get_blank_img()
 
         info = {
-
             'url': formated_photo.url,
             'width': formated_photo.width,
             'height': formated_photo.height,

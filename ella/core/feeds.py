@@ -106,7 +106,8 @@ class RSSTopCategoryListings(Feed):
         if hasattr(item.publishable, 'feed_enclosure'):
             return item.publishable.feed_enclosure()['size']
         elif self.format:
-            return FormatedPhoto.objects.get(photo=item.publishable.photo_id, format=self.format).image.size
+            fp, created = FormatedPhoto.objects.get_or_create(photo=item.publishable.photo_id, format=self.format)
+            return fp.image.size
 
 class AtomTopCategoryListings(RSSTopCategoryListings):
     feed_type = Atom1Feed
