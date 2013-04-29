@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
+
+from datetime import datetime
 from test_ella.cases import RedisTestCase as TestCase
 
-from nose import tools
+from nose import tools, SkipTest
 
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import slugify
 from django.template import TemplateDoesNotExist
 
 from ella.core.models import Listing
+from ella.utils import timezone
 
 from test_ella.test_core import create_basic_categories, create_and_place_a_publishable, \
         create_and_place_more_publishables, list_all_publishables_in_category_by_hour
@@ -196,6 +199,17 @@ class TestObjectDetail(ViewsTestCase):
     def setUp(self):
         super(TestObjectDetail, self).setUp()
         template_loader.templates['page/object.html'] = ''
+
+    def test_timezone_localized_url(self):
+        if not timezone.use_tz:
+            raise SkipTest()
+        from test_ella import template_loader
+        template_loader.templates['page/object.html'] = 'object.html'
+        self.publishable.publish_from = timezone.localize(datetime(2013, 4, 25, 0, 0, 0))
+        self.publishable.save()
+
+        tools.assert_equals('/nested-category/2013/4/25/first-article/', self.publishable.get_absolute_url())
+        tools.assert_equals(200, self.client.get('/nested-category/2013/4/25/first-article/').status_code)
 
     def test_signals_fired_for_detail(self):
         self.client.get('/nested-category/2008/1/10/first-article/')
