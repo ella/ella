@@ -5,8 +5,9 @@ from datetime import date, timedelta
 from hashlib import md5
 from itertools import chain
 
-from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.db.models.loading import get_model
+from django.utils.importlib import import_module
 
 from ella.core.cache.utils import get_cached_objects, SKIP
 from ella.core.managers import ListingHandler
@@ -17,19 +18,25 @@ log = logging.getLogger('ella.core')
 
 client = None
 
-if hasattr(settings, 'LISTINGS_REDIS'):
+if core_settings.REDIS['listings']['ENABLED'] is True:
     try:
-        from redis import Redis
-    except:
-        log.error('Redis support requested but Redis client not installed.')
-        client = None
-    else:
-        client = Redis(**getattr(settings, 'LISTINGS_REDIS'))
-
+        mod, cls = core_settings.REDIS['listings']['BACKEND'].rsplit('.', 1)
+        RedisClientClass = getattr(import_module(mod), cls)
+        client = RedisClientClass(**core_settings.REDIS['listings']['OPTIONS'])
+    except ImportError:
+        raise ImproperlyConfigured('Cannot load redis client class %r.' %
+                                   core_settings.REDIS['listings']['BACKEND'])
 
 
 def ListingHandlerClass():
-    return get_model('core', 'Listing').objects.get_listing_handler(core_settings.REDIS_LISTING_HANDLER)
+    handler = get_model('core', 'Listing').objects.get_listing_handler(
+        core_settings.REDIS['listings']['HANDLER'])
+
+    if not handler.IS_REDIS:
+        raise ImproperlyConfigured('Redis support requested, but specified '
+                                   'listing handler is not redis-based.')
+
+    return handler
 
 
 def publishable_published(publishable, **kwargs):
@@ -113,7 +120,9 @@ def update_authors(sender, action, instance, reverse, model, pk_set, **kwargs):
     elif action in ('post_remove', 'post_add') and instance.is_published():
         AuthorListingHandler.add_publishable(instance, pipe=getattr(instance, '__pipe', None))
 
+
 class RedisListingHandler(ListingHandler):
+    IS_REDIS = True
     PREFIX = 'listing'
 
     @classmethod
@@ -444,8 +453,9 @@ def connect_signals():
     from ella.core.signals import content_published, content_unpublished
     from ella.core.models import Listing, Publishable
 
-    if not core_settings.USE_REDIS_FOR_LISTINGS:
+    if not core_settings.REDIS['listings']['ENABLED'] is True:
         return
+
     # when redis is availible, use it for authors
     m2m_changed.connect(update_authors, sender=Publishable._meta.get_field('authors').rel.through)
 

@@ -5,8 +5,10 @@ from cStringIO import StringIO
 import os.path
 import string
 
+from django.core.exceptions import ImproperlyConfigured
 from django.db import models
 from django.db.models import signals
+from django.utils.importlib import import_module
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_unicode, smart_str
 from django.contrib.sites.models import Site
@@ -16,8 +18,9 @@ from django.template.defaultfilters import slugify
 
 from app_data import AppDataField
 
-from ella.core.models.main import Author, Source
+from ella.core.conf import core_settings
 from ella.core.cache.utils import get_cached_object
+from ella.core.models.main import Author, Source
 from ella.photos.conf import photos_settings
 from ella.utils.timezone import now
 
@@ -31,14 +34,14 @@ redis = None
 REDIS_PHOTO_KEY = 'photo:%s'
 REDIS_FORMATTED_PHOTO_KEY = 'photo:%s:%s'
 
-if hasattr(settings, 'PHOTOS_REDIS'):
+if core_settings.REDIS['photos']['ENABLED'] is True:
     try:
-        from redis import Redis
-    except:
-        log.error('Redis support requested but Redis client not installed.')
-        redis = None
-    else:
-        redis = Redis(**getattr(settings, 'PHOTOS_REDIS'))
+        mod, cls = core_settings.REDIS['photos']['BACKEND'].rsplit('.', 1)
+        RedisClientClass = getattr(import_module(mod), cls)
+        redis = RedisClientClass(**core_settings.REDIS['photos']['OPTIONS'])
+    except ImportError:
+        raise ImproperlyConfigured('Cannot load redis client class %r.' %
+                                   core_settings.REDIS['listings']['BACKEND'])
 
 
 def upload_to(instance, filename):

@@ -17,8 +17,6 @@ DATABASES = {
     }
 }
 
-TEST_CORE_REDIS = PHOTOS_REDIS = {'db': 15}
-
 TIME_ZONE = 'Europe/Prague'
 
 LANGUAGE_CODE = 'en-us'

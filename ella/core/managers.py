@@ -139,6 +139,8 @@ class RelatedManager(models.Manager):
 
 
 class ListingHandler(object):
+    IS_REDIS = False
+
     NONE = 0
     IMMEDIATE = 1
     ALL = 2

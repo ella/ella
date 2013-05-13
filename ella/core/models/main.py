@@ -50,7 +50,7 @@ class Author(models.Model):
         return ('author_detail', [self.slug])
 
     def recently_published(self, **kwargs):
-        if core_settings.USE_REDIS_FOR_LISTINGS:
+        if core_settings.REDIS['listings']['ENABLED']:
             return redis.AuthorListingHandler(self)
 
         root = Category.objects.get_by_tree_path('')

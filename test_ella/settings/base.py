@@ -57,6 +57,21 @@ LISTING_HANDLERS = {
     'default': 'ella.core.managers.ModelListingHandler',
     'redis': 'ella.core.cache.redis.TimeBasedListingHandler',
 }
+
+REDIS = {
+    'photos': {
+        'BACKEND': 'redis.client.Redis',
+        'OPTIONS': {'db': 15},
+        'ENABLED': True
+    },
+    'listings': {
+        'BACKEND': 'redis.client.Redis',
+        'OPTIONS': {'db': 15},
+        'ENABLED': True,
+        'HANDLER': 'redis'
+    }
+}
+
 LISTINGS_REDIS = {}
 USE_REDIS_FOR_LISTINGS = True
 REDIS_LISTING_HANDLER = 'redis'
