@@ -242,7 +242,7 @@ class ListingManager(models.Manager):
                         qset = qset.exclude(category__tree_path__startswith=c.tree_path)
 
             else:
-                raise AttributeError('Invalid children value (%s) - should be one of (%s, %s, %s)' % (children, self.NONE, self.IMMEDIATE, self.ALL))
+                raise AttributeError('Invalid children value (%s) - should be one of (%s, %s, %s)' % (children, ListingHandler.NONE, ListingHandler.IMMEDIATE, ListingHandler.ALL))
 
         # filtering based on Model classes
         if content_types:
