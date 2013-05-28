@@ -888,12 +888,13 @@ methods like ``comment_count``.
 
 Registering your custom container class is very simple. The formula is::
 
-    Publishable.app_data_registry.register('comments', CommentsDataContainer)
+    from app_data import app_registry
+    app_registry.register('comments', CommentsDataContainer, Publishable)
 
 Unregistration works the same way::
 
-    Publishable.app_data_registry.unregister('comments')
-    Publishable.app_data_registry.register('comments', SomeOtherDataContainer)
+    app_registry.unregister('comments', Publishable)
+    app_registry.register('comments', SomeOtherDataContainer, Publishable)
 
 .. _features-caching:
 
