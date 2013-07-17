@@ -19,9 +19,11 @@ class ImageTag(template.Node):
         if isinstance(self.format, template.Variable):
             try:
                 format = self.format.resolve(context)
+                if format is None:
+                    raise ValueError
                 if isinstance(format, basestring):
                     format = Format.objects.get_for_name(format)
-            except (template.VariableDoesNotExist, Format.DoesNotExist):
+            except (template.VariableDoesNotExist, Format.DoesNotExist, ValueError):
                 context[self.var_name] = None
                 return ''
         else:
