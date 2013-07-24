@@ -178,7 +178,7 @@ class TestSignals(TestCase):
         tools.assert_equals(1, len(self.unpublish_received))
         tools.assert_equals(self.publishable, self.unpublish_received[0]['publishable'])
 
-    def test_generate_doesnt_issue_signal_tice(self):
+    def test_generate_doesnt_issue_signal_twice(self):
         self._signal_clear()
         generate_publish_signals()
         tools.assert_equals(0, len(self.publish_received))
