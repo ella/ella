@@ -188,7 +188,6 @@ class ObjectDetail(EllaCoreView):
             }
             try:
                 publishable = get_cached_object(Publishable, published=True, **lookup)
-                print type(publishable)
             except Publishable.DoesNotExist:
                 # Fallback for staff members in case there are multiple
                 # objects with same URL.
