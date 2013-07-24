@@ -1,12 +1,16 @@
 from django.conf import settings
-from django.conf.urls.defaults import *
 from django.core.validators import slug_re
-from django.db.models.loading import get_model
 from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext_lazy as _
 
+try:
+    from django.conf.urls import patterns, include, url
+except ImportError:
+    from django.conf.urls.defaults import patterns, include, url
+
 from ella.core.views import object_detail, list_content_type, category_detail, \
                             home, AuthorView
+
 
 try:
     if settings.CUSTOM_VIEWS:

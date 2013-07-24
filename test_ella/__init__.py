@@ -5,8 +5,12 @@ database et al) are there, there is not much setup around.
 
 If You're looking for example project, take a look into example_project directory.
 """
+import os
 test_runner = None
 old_config = None
+
+os.environ['DJANGO_SETTINGS_MODULE'] = 'test_ella.settings'
+
 
 def setup():
     global test_runner
@@ -17,6 +21,7 @@ def setup():
     test_runner.setup_test_environment()
     old_config = test_runner.setup_databases()
     call_modules(('register', ))
+
 
 def teardown():
     from shutil import rmtree

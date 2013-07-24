@@ -1,7 +1,6 @@
 import re
 
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.core.validators import validate_slug, RegexValidator
 from django.db import models
@@ -13,6 +12,11 @@ from app_data import AppDataField
 from ella.core.cache import CachedGenericForeignKey, SiteForeignKey, ContentTypeForeignKey, CategoryForeignKey, CachedForeignKey, redis
 from ella.core.conf import core_settings
 from ella.core.managers import CategoryManager, ListingHandler
+
+if hasattr(settings, 'AUTH_USER_MODEL'):
+    User = settings.AUTH_USER_MODEL
+else:
+    from django.contrib.auth.models import User
 
 
 class Author(models.Model):

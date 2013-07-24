@@ -1,8 +1,12 @@
 import re
 
 from django.http import Http404
-from django.conf.urls.defaults import patterns, url, include
 from django.core.urlresolvers import RegexURLResolver
+
+try:
+    from django.conf.urls import patterns, url, include
+except ImportError:
+    from django.conf.urls.defaults import patterns, url, include
 
 
 ALL = '__ALL__'

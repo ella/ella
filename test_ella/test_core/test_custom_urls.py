@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from copy import deepcopy
 
 from unittest import TestCase as UnitTestCase
 from test_ella.cases import RedisTestCase as TestCase
@@ -7,9 +6,13 @@ from test_ella.cases import RedisTestCase as TestCase
 from nose import tools
 
 from django.http import Http404, HttpResponse
-from django.conf.urls.defaults import patterns, url
 from django.core.urlresolvers import NoReverseMatch
 from django.template import Template, Context
+
+try:
+    from django.conf.urls import patterns, url
+except ImportError:
+    from django.conf.urls.defaults import patterns, url
 
 from ella.core.custom_urls import CustomURLResolver
 from ella.core import custom_urls

@@ -71,7 +71,7 @@ def _get_key(start, model, pk=None, version_key=False, **kwargs):
     return normalize_key(':'.join((
                 start,
                 str(model.pk),
-                ','.join(':'.join((key, smart_str(kwargs[key]))) for key in sorted(kwargs.keys()))
+                ','.join(':'.join((key, smart_str(kwargs[key]).replace(' ', '_'))) for key in sorted(kwargs.keys()))
     )))
 
 

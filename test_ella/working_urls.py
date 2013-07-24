@@ -1,6 +1,10 @@
-from django.conf.urls.defaults import *
 from django.contrib import admin
 from django.conf import settings
+
+try:
+    from django.conf.urls import *
+except ImportError:
+    from django.conf.urls.defaults import *
 
 from test_ella.urls import urlpatterns
 

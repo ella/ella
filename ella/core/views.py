@@ -16,7 +16,7 @@ from ella.core import custom_urls
 from ella.core.conf import core_settings
 from ella.core.signals import object_rendering, object_rendered
 from ella.api import render_as_api
-from ella.utils.timezone import now, utc_localize
+from ella.utils.timezone import now, localize
 
 __docformat__ = "restructuredtext en"
 
@@ -177,10 +177,12 @@ class ObjectDetail(EllaCoreView):
                 cat = None
 
         if year:
+            start_date = localize(datetime(int(year), int(month), int(day)))
+            end_date = start_date + timedelta(days=1)
+
             lookup = {
-                'publish_from__year': year,
-                'publish_from__month': month,
-                'publish_from__day': day,
+                'publish_from__gte': start_date,
+                'publish_from__lt': end_date,
                 'category': cat,
                 'slug': slug,
                 'static': False
@@ -386,7 +388,7 @@ class ListContentType(EllaCoreView):
                 raise Http404(_('Invalid year value %r') % year)
 
         if 'date_range' in kwa:
-            kwa['date_range'] = tuple(map(utc_localize, kwa['date_range']))
+            kwa['date_range'] = tuple(map(localize, kwa['date_range']))
 
         # basic context
         context = {

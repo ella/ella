@@ -50,6 +50,6 @@ setup(
     ],
     install_requires=install_requires,
 
-    test_suite='test_ella.run_tests.run_all',
+    test_suite='nose.collector',
     tests_require=tests_require,
 )
