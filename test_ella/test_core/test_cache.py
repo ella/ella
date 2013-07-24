@@ -14,7 +14,7 @@ from ella.core.models import Listing, Publishable
 from ella.core.views import ListContentType
 from ella.core.managers import ListingHandler
 from ella.articles.models import Article
-from ella.utils.timezone import from_timestamp
+from ella.utils.timezone import from_timestamp, now
 
 from test_ella.test_core import create_basic_categories, create_and_place_a_publishable, \
         create_and_place_more_publishables, list_all_publishables_in_category_by_hour
@@ -153,7 +153,7 @@ class TestRedisListings(TestCase):
         tools.assert_equals(['%d:2' % ct_id], redis.client.zrange('listing:c:1', 0, 100))
 
     def test_listing_gets_removed_when_publishable_marked_unpublished_even_if_not_published_yet(self):
-        future = datetime.now() + timedelta(days=1)
+        future = now() + timedelta(days=1)
 
         p = self.publishables[0]
         p.publish_from = future
