@@ -4,9 +4,9 @@ from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext_lazy as _
 
 try:
-    from django.conf.urls import *
+    from django.conf.urls import patterns, include, url
 except ImportError:
-    from django.conf.urls.defaults import *
+    from django.conf.urls.defaults import patterns, include, url
 
 from ella.core.views import object_detail, list_content_type, category_detail, \
                             home, AuthorView
