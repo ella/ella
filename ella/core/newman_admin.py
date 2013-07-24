@@ -193,7 +193,7 @@ class PublishableAdmin(newman.NewmanModelAdmin):
 
         if obj.publish_from.year >= 3000:
             return mark_safe(span_str % ('unpublished', ugettext('No placement')))
-        elif obj.publish_from > now():
+        elif not obj.is_published():
             return span_str % ('unpublished', date_str)
         return span_str % ('published', date_str)
     publish_from_nice.short_description = _('Publish from')
