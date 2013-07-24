@@ -1,5 +1,5 @@
 import time
-from datetime import date
+from datetime import date, datetime, timedelta
 
 from django.core.cache import get_cache
 from ella.core.cache.utils import normalize_key
@@ -129,6 +129,37 @@ class TestRedisListings(TestCase):
     def test_listing_gets_removed_when_publishable_goes_unpublished(self):
         list_all_publishables_in_category_by_hour(self)
         p = self.publishables[0]
+        p.published = False
+        p.save()
+        ct_id = p.content_type_id
+        tools.assert_equals(set([
+                'listing:2',
+                'listing:3',
+
+                'listing:c:1',
+                'listing:c:2',
+                'listing:c:3',
+
+                'listing:d:1',
+                'listing:d:2',
+                'listing:d:3',
+
+                'listing:ct:%d' % ct_id,
+            ]),
+            set(redis.client.keys())
+        )
+        tools.assert_equals(['%d:2' % ct_id, '%d:3' % ct_id], redis.client.zrange('listing:ct:%d' % ct_id, 0, 100))
+        tools.assert_equals(['%d:2' % ct_id, '%d:3' % ct_id], redis.client.zrange('listing:d:1', 0, 100))
+        tools.assert_equals(['%d:2' % ct_id], redis.client.zrange('listing:c:1', 0, 100))
+
+    def test_listing_gets_removed_when_publishable_marked_unpublished_even_if_not_published_yet(self):
+        future = datetime.now() + timedelta(days=1)
+
+        p = self.publishables[0]
+        p.publish_from = future
+        p.save()
+
+        list_all_publishables_in_category_by_hour(self)
         p.published = False
         p.save()
         ct_id = p.content_type_id

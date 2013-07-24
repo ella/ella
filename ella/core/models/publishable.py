@@ -181,6 +181,15 @@ class Publishable(models.Model):
                     send_signal = content_unpublished
                     self.announced = False
 
+            # @note: We also need to check for `published` flag even if both
+            # old and new self `is_published()` method returns false.
+            # This method can report false since we might be in time *before*
+            # publication should take place but we still need to fire signal
+            # that content has been unpublished.
+            if old_self.published != self.published and self.published is False:
+                send_signal= content_unpublished
+                self.announced = False
+
             # changed publish_from and last_updated was default, change it too
             if old_self.last_updated == old_self.publish_from and self.last_updated == old_self.last_updated:
                 self.last_updated = self.publish_from
