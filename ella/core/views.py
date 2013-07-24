@@ -166,7 +166,6 @@ class ObjectDetail(EllaCoreView):
         return self.render(request, context, self.get_templates(context))
 
     def get_context(self, request, category, slug, year, month, day, id):
-
         try:
             cat = Category.objects.get_by_tree_path(category)
         except Category.DoesNotExist:
@@ -189,12 +188,16 @@ class ObjectDetail(EllaCoreView):
             }
             try:
                 publishable = get_cached_object(Publishable, published=True, **lookup)
+                print type(publishable)
             except Publishable.DoesNotExist:
                 # Fallback for staff members in case there are multiple
                 # objects with same URL.
                 if request.user.is_staff:
                     try:
-                        publishable = Publishable.objects.filter(published=False, **lookup)[0]
+                        # Make sure we return specific publishable subclass
+                        # like when using `get_cached_object` if possible.
+                        p = Publishable.objects.filter(published=False, **lookup)[0]
+                        publishable = p.content_type.model_class()._default_manager.get(pk=p.pk)
                     except IndexError:
                         raise Http404
                 else:
@@ -220,11 +223,11 @@ class ObjectDetail(EllaCoreView):
         publishable.category = cat
 
         context = {
-                'object' : publishable,
-                'category' : cat,
-                'content_type_name' : slugify(publishable.content_type.model_class()._meta.verbose_name_plural),
-                'content_type' : publishable.content_type
-            }
+            'object': publishable,
+            'category': cat,
+            'content_type_name': slugify(publishable.content_type.model_class()._meta.verbose_name_plural),
+            'content_type': publishable.content_type
+        }
 
         return context
 
