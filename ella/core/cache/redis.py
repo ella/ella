@@ -34,7 +34,9 @@ def ListingHandlerClass():
 
 def publishable_published(publishable, **kwargs):
     pipe = client.pipeline()
-    for l in publishable.listing_set.all():
+    listings = publishable.listing_set.all()
+
+    for l in listings:
         ListingHandlerClass().add_publishable(
             l.category,
             publishable,
@@ -42,7 +44,10 @@ def publishable_published(publishable, **kwargs):
             pipe=pipe,
             commit=False
         )
-    AuthorListingHandler.add_publishable(publishable, pipe=pipe, commit=False)
+
+    if len(listings) > 0:
+        AuthorListingHandler.add_publishable(publishable, pipe=pipe, commit=False)
+
     pipe.execute()
 
 
@@ -55,6 +60,7 @@ def publishable_unpublished(publishable, **kwargs):
             pipe=pipe,
             commit=False
         )
+
     AuthorListingHandler.remove_publishable(publishable, pipe=pipe, commit=False)
     pipe.execute()
 
@@ -71,9 +77,10 @@ def listing_pre_delete(sender, instance, **kwargs):
 def listing_post_delete(sender, instance, **kwargs):
     # but only delete it if the model delete went through
     pipe = instance.__pipe
+    listings = instance.publishable.listing_set.all()
 
     if instance.publishable.published:
-        for l in instance.publishable.listing_set.all():
+        for l in listings:
             ListingHandlerClass().add_publishable(
                 l.category,
                 instance.publishable,
@@ -81,6 +88,11 @@ def listing_post_delete(sender, instance, **kwargs):
                 pipe=pipe,
                 commit=False
             )
+
+    # If this is the last Listing that is being deleted, delete from author too.
+    if not listings.exists():
+        AuthorListingHandler.remove_publishable(instance.publishable, pipe=pipe,
+                                                commit=False)
     pipe.execute()
 
 
@@ -96,7 +108,7 @@ def listing_pre_save(sender, instance, **kwargs):
 
 
 def listing_post_save(sender, instance, **kwargs):
-    pipe = getattr(instance, '__pipe', None)
+    pipe = getattr(instance, '__pipe', client.pipeline())
 
     if instance.publishable.published:
         ListingHandlerClass().add_publishable(
@@ -104,13 +116,21 @@ def listing_post_save(sender, instance, **kwargs):
             instance.publishable,
             publish_from=instance.publish_from,
             pipe=pipe,
-            commit=True
+            commit=False
         )
+
+        # This is the first listing being added.
+        if instance.publishable.listing_set.count() == 1:
+            AuthorListingHandler.add_publishable(instance.publishable, pipe=pipe,
+                                                 commit=False)
+
+        pipe.execute()
+
 
 def update_authors(sender, action, instance, reverse, model, pk_set, **kwargs):
     if action == 'pre_remove':
         instance.__pipe = AuthorListingHandler.remove_publishable(instance, commit=False)
-    elif action in ('post_remove', 'post_add') and instance.is_published():
+    elif action in ('post_remove', 'post_add') and instance.published and instance.listing_set.exists():
         AuthorListingHandler.add_publishable(instance, pipe=getattr(instance, '__pipe', None))
 
 class RedisListingHandler(ListingHandler):
