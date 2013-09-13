@@ -5,6 +5,7 @@ from ella.core.models import Related
 
 register = template.Library()
 
+
 class RelatedNode(template.Node):
     def __init__(self, obj_var, count, var_name, models, finder):
         self.obj_var = obj_var
@@ -22,6 +23,7 @@ class RelatedNode(template.Node):
             mods=self.models, finder=self.finder)
         context[self.var_name] = related
         return ''
+
 
 def parse_related_tag(bits):
     if len(bits) < 6:
@@ -67,13 +69,13 @@ def parse_related_tag(bits):
 @register.tag('related')
 def do_related(parser, token):
     """
-    Get N related models into a context variable optionally specifying a 
+    Get N related models into a context variable optionally specifying a
     named related finder.
 
     **Usage**::
-    
+
         {% related <limit>[ query_type] [app.model, ...] for <object> as <result> %}
-        
+
     **Parameters**::
         ==================================  ================================================
         Option                              Description
@@ -89,13 +91,10 @@ def do_related(parser, token):
         ==================================  ================================================
 
     **Examples**::
-    
+
         {% related 10 for object as related_list %}
         {% related 10 directly articles.article, galleries.gallery for object as related_list %}
     """
     bits = token.split_contents()
     obj_var, count, var_name, mods, finder = parse_related_tag(bits)
     return RelatedNode(obj_var, count, var_name, mods, finder)
-
-
-

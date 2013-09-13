@@ -16,11 +16,12 @@ def related_by_category(obj, count, collected_so_far, mods=[], only_from_same_si
         cat = obj.category
         listings = Listing.objects.get_queryset_wrapper(
             category=cat,
-            content_types=[ContentType.objects.get_for_model(m) for m in mods]
+            content_types=[ContentType.objects.get_for_model(m) for m in mods],
+            exclude=obj
         )
-        for l in listings[0:count + len(related)]:
+        for l in listings[0:count + len(collected_so_far)]:
             t = l.publishable
-            if t != obj and t not in collected_so_far and t not in related:
+            if t not in collected_so_far and t not in related:
                 related.append(t)
                 count -= 1
 
@@ -42,6 +43,3 @@ def directly_related(obj, count, collected_so_far, mods=[], only_from_same_site=
             ContentType.objects.get_for_model(m).pk for m in mods])
 
     return get_cached_objects(qset.values_list('related_ct', 'related_id')[:count], missing=SKIP)
-
-
-
