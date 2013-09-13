@@ -16,12 +16,15 @@ from ella.utils import timezone
 from nose import tools, SkipTest
 
 from test_ella.test_core import create_basic_categories, create_and_place_a_publishable, default_time
+from test_ella.test_app.models import XArticle
+
 
 class PublishableTestCase(TestCase):
     def setUp(self):
         super(PublishableTestCase, self).setUp()
         create_basic_categories(self)
         create_and_place_a_publishable(self)
+
 
 class TestLastUpdated(PublishableTestCase):
     def test_last_updated_moved_if_default(self):
@@ -36,6 +39,7 @@ class TestLastUpdated(PublishableTestCase):
         self.publishable.publish_from = now
         self.publishable.save(force_update=True)
         tools.assert_equals(now + timedelta(days=1), self.publishable.last_updated)
+
 
 class TestPublishableHelpers(PublishableTestCase):
     def test_url(self):
@@ -132,6 +136,18 @@ class TestUrl(PublishableTestCase):
         self.publishable.pk = None
         tools.assert_raises(ValidationError, self.publishable.full_clean)
 
+    def test_unique_url_validation_for_different_content_types(self):
+        xarticle = XArticle(
+            title=self.publishable.title,
+            slug=self.publishable.slug,
+            description=self.publishable.description,
+            category=self.publishable.category,
+            publish_from=self.publishable.publish_from,
+            published=True,
+            content=self.publishable.content
+        )
+        tools.assert_raises(ValidationError, xarticle.full_clean)
+
     def test_url_is_tested_for_published_objects_only(self):
         self.publishable.pk = None
         self.publishable.published = False
@@ -201,4 +217,3 @@ class TestSignals(TestCase):
         tools.assert_equals(1, len(self.publish_received))
         tools.assert_equals(0, len(self.unpublish_received))
         tools.assert_equals(self.publishable, self.publish_received[0]['publishable'].target)
-
