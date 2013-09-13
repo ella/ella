@@ -130,7 +130,7 @@ class Publishable(models.Model):
         if not self.category_id or not self.publish_from or not self.slug:
             return
 
-        qset = self.__class__.objects.filter(
+        qset = Publishable.objects.filter(
                 category=self.category,
                 published=True,
                 publish_from__day=self.publish_from.day,
@@ -143,7 +143,7 @@ class Publishable(models.Model):
             qset = qset.exclude(pk=self.pk)
 
         if qset:
-            raise ValidationError(_('Another %s already published at this URL.') % self._meta.verbose_name)
+            raise ValidationError(_('Another %s already published at this URL.') % Publishable._meta.verbose_name)
 
     def save(self, **kwargs):
         # update the content_type if it isn't already set
