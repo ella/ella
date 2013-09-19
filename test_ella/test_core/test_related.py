@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from datetime import timedelta
 from unittest import TestCase as UnitTestCase
 from test_ella.cases import RedisTestCase as TestCase
 
@@ -10,34 +9,26 @@ from ella.core.models import Related, Publishable
 from ella.core.templatetags.related import parse_related_tag
 from ella.photos.models import Photo
 
-from ella.utils.test_helpers import list_publishable_in_category
-from test_ella.test_core import (
-    create_basic_categories,
-    create_and_place_a_publishable,
-    create_and_place_more_publishables,
-    list_all_publishables_in_category_by_hour,
-    default_time,
-)
-
+from test_ella.test_core import create_basic_categories, create_and_place_a_publishable, \
+        create_and_place_more_publishables, list_all_publishables_in_category_by_hour
 
 class GetRelatedTestCase(TestCase):
     def setUp(self):
         super(GetRelatedTestCase, self).setUp()
         create_basic_categories(self)
-        create_and_place_a_publishable(self, publish_from=default_time + timedelta(days=1))
+        create_and_place_a_publishable(self)
         create_and_place_more_publishables(self)
 
         Publishable.objects.all().update(category=self.publishable.category)
 
         list_all_publishables_in_category_by_hour(self, category=self.publishable.category)
 
-
 class TestDefaultRelatedFinder(GetRelatedTestCase):
     def test_returns_unique_objects_or_shorter_list_if_not_available(self):
         expected = map(lambda x: x.pk, reversed(self.publishables))
         tools.assert_equals(
                 expected,
-                [p.pk for p in Related.objects.get_related_for_object(self.publishable, len(expected) * 3)]
+                [p.pk for p in Related.objects.get_related_for_object(self.publishable, len(expected)*3)]
             )
 
     def test_returns_publishables_listed_in_same_cat_if_no_related(self):
@@ -47,14 +38,6 @@ class TestDefaultRelatedFinder(GetRelatedTestCase):
                 [p.pk for p in Related.objects.get_related_for_object(self.publishable, len(expected))]
             )
 
-    def test_returns_publishables_listed_in_same_cat_if_no_related_and_target_obj_is_listed_too(self):
-        expected = map(lambda x: x.pk, reversed(self.publishables))
-        publish_from = self.publishable.publish_from + timedelta(days=1)
-        list_publishable_in_category(self, self.publishable, publish_from=publish_from)
-        tools.assert_equals(
-                expected,
-                [p.pk for p in Related.objects.get_related_for_object(self.publishable, len(expected))]
-            )
 
     def test_returns_at_most_count_objects(self):
         tools.assert_equals(
