@@ -16,6 +16,7 @@ from ella.utils import timezone
 from nose import tools, SkipTest
 
 from test_ella.test_core import create_basic_categories, create_and_place_a_publishable, default_time
+from test_ella.test_app.models import XArticle
 
 
 class PublishableTestCase(TestCase):
@@ -134,6 +135,24 @@ class TestUrl(PublishableTestCase):
     def test_unique_url_validation(self):
         self.publishable.pk = None
         tools.assert_raises(ValidationError, self.publishable.full_clean)
+
+    def test_unique_url_validation_for_non_static_objects_with_different_content_types(self):
+        publishable = self.publishable
+        if publishable.static:
+            publishable.static = False
+            publishable.save()
+
+        xarticle = XArticle(
+            title=self.publishable.title,
+            slug=self.publishable.slug,
+            description=self.publishable.description,
+            category=self.publishable.category,
+            publish_from=self.publishable.publish_from,
+            published=True,
+            static=False,
+            content=self.publishable.content
+        )
+        tools.assert_raises(ValidationError, xarticle.full_clean)
 
     def test_url_is_tested_for_published_objects_only(self):
         self.publishable.pk = None
