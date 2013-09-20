@@ -17,11 +17,13 @@ from nose import tools, SkipTest
 
 from test_ella.test_core import create_basic_categories, create_and_place_a_publishable, default_time
 
+
 class PublishableTestCase(TestCase):
     def setUp(self):
         super(PublishableTestCase, self).setUp()
         create_basic_categories(self)
         create_and_place_a_publishable(self)
+
 
 class TestLastUpdated(PublishableTestCase):
     def test_last_updated_moved_if_default(self):
@@ -36,6 +38,7 @@ class TestLastUpdated(PublishableTestCase):
         self.publishable.publish_from = now
         self.publishable.save(force_update=True)
         tools.assert_equals(now + timedelta(days=1), self.publishable.last_updated)
+
 
 class TestPublishableHelpers(PublishableTestCase):
     def test_url(self):
@@ -56,7 +59,7 @@ class TestPublishableHelpers(PublishableTestCase):
         self.publishable.app_data['core'] = 'testing'
         self.publishable.save()
 
-        p = self.publishable.content_type.get_object_for_this_type(pk=self.publishable.pk)
+        self.publishable.content_type.get_object_for_this_type(pk=self.publishable.pk)
         tools.assert_equals({'core': 'testing'}, self.publishable.app_data)
 
     def test_saving_base_publishable_does_not_update_content_type(self):
@@ -201,4 +204,3 @@ class TestSignals(TestCase):
         tools.assert_equals(1, len(self.publish_received))
         tools.assert_equals(0, len(self.unpublish_received))
         tools.assert_equals(self.publishable, self.publish_received[0]['publishable'].target)
-
