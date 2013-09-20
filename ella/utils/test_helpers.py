@@ -7,7 +7,7 @@ from django.conf import settings
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.template.defaultfilters import slugify
 
-from ella.core.models import Category, Publishable
+from ella.core.models import Category, Publishable, Listing
 # choose Article as an example publishable
 from ella.articles.models import Article
 from ella.photos.models import Photo
@@ -97,3 +97,12 @@ def create_photo(case, color="black", size=(200, 100), **kwargs):
     case.photo._pil_image = case.image
 
     return case.photo
+
+
+def list_publishable_in_category(case, publishable, category=None, publish_from=None):
+
+    case.listing = Listing.objects.get_or_create(
+        publishable=publishable,
+        category=category or publishable.category,
+        publish_from=publish_from or publishable.publish_from,
+    )[0]
