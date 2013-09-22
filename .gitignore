@@ -17,3 +17,4 @@ test_ella/cover
 nosetests.xml
 
 .idea
+.DS_Store
