@@ -1,5 +1,5 @@
 import logging
-from PIL import Image
+from PIL import Image, ExifTags
 from os import path
 from cStringIO import StringIO
 import os.path
@@ -52,6 +52,8 @@ def upload_to(instance, filename):
         force_unicode(now().strftime(smart_str(photos_settings.UPLOAD_TO))),
         name + ext
     )
+
+EXIF_ORIENTATION_KEY = [k for k in ExifTags.TAGS.keys() if ExifTags.TAGS[k] == 'Orientation'][0]
 
 
 class Photo(models.Model):
@@ -107,6 +109,30 @@ class Photo(models.Model):
             self._pil_image = Image.open(self.image)
         return self._pil_image
 
+    def _fix_orientation(self, image):
+        """
+        Rotates JPEG image according to EXIF metadata if Orientation tag is set.
+        """
+        # Exif only present in JPEGs.
+        if hasattr(image, '_getexif'):
+            # Returns None if no EXIF data present.
+            exif = image._getexif()
+            if exif is not None:
+                orientation = dict(exif.items())[EXIF_ORIENTATION_KEY]
+
+                if orientation == 3:
+                    image = image.transpose(Image.ROTATE_180)
+                elif orientation == 6:
+                    image = image.transpose(Image.ROTATE_270)
+                elif orientation == 8:
+                    image = image.transpose(Image.ROTATE_90)
+                else:
+                    return False
+
+                image.save(self.image.path)
+
+                return True
+
     def save(self, **kwargs):
         """Overrides models.Model.save.
 
@@ -118,6 +144,11 @@ class Photo(models.Model):
 
         # prefill the slug with the ID, it requires double save
         if not self.id:
+            rotated = self._fix_orientation(self._get_image())
+
+            if rotated:
+                self.width, self.height = self.image.width, self.image.height
+
             img = self.image
 
             # store dummy values first...
