@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from unittest import TestCase
+from os import path
 
 from nose import tools
 
@@ -154,4 +155,57 @@ class TestPhotoResize(TestCase):
         tools.assert_equals((0,100,100,200), crop_box)
         tools.assert_equals((100, 100), i.size)
         tools.assert_equals((0,0,0), i.getpixel((0,0)))
+
+class TestPhotoResizeWithRotate(TestCase):
+
+    def setUp(self):
+        super(TestPhotoResizeWithRotate, self).setUp()
+        self.base = path.dirname(path.abspath(__file__))
+        self.format = Format(max_height=100, max_width=100)
+        self.WHITE = (255, 255, 255)
+        self.BLACK = (0, 0, 0)
+
+    def get_image_and_formatter(self, name):
+        o = Image.open(path.join(self.base, 'data', name))
+        f = Formatter(o, self.format)
+        return o, f
+
+    def test_as_data_we_have_white_box_on_the_left_black_box_on_the_right(self):
+        i, f = self.get_image_and_formatter('rotate1.jpeg')
+
+        tools.assert_equals((20, 10), i.size)
+        tools.assert_equals(self.WHITE, i.getpixel((5, 5)))
+        tools.assert_equals(self.BLACK, i.getpixel((15, 5)))
+
+    def test_plain_jpeg_is_not_rotated(self):
+        o, f = self.get_image_and_formatter('rotate1.jpeg')
+        i, c = f.format()
+
+        tools.assert_equals((20, 10), i.size)
+        tools.assert_equals(self.WHITE, i.getpixel((5, 5)))
+        tools.assert_equals(self.BLACK, i.getpixel((15, 5)))
+
+    def test_jpeg_with_exit_rotation_info_3_is_rotated_180_degrees(self):
+        o, f = self.get_image_and_formatter('rotate3.jpeg')
+        i, c = f.format()
+
+        tools.assert_equals((20, 10), i.size)
+        tools.assert_equals(self.BLACK, i.getpixel((5, 5)))
+        tools.assert_equals(self.WHITE, i.getpixel((15, 5)))
+
+    def test_jpeg_with_exit_rotation_info_6_is_rotated_90_degrees_clockwise(self):
+        o, f = self.get_image_and_formatter('rotate6.jpeg')
+        i, c = f.format()
+
+        tools.assert_equals((10, 20), i.size)
+        tools.assert_equals(self.WHITE, i.getpixel((5, 5)))
+        tools.assert_equals(self.BLACK, i.getpixel((5, 15)))
+
+    def test_jpeg_with_exit_rotation_info_8_is_rotated_90_degrees_counter_clockwise(self):
+        o, f = self.get_image_and_formatter('rotate8.jpeg')
+        i, c = f.format()
+
+        tools.assert_equals((10, 20), i.size)
+        tools.assert_equals(self.BLACK, i.getpixel((5, 5)))
+        tools.assert_equals(self.WHITE, i.getpixel((5, 15)))
 
