@@ -1,6 +1,8 @@
-from PIL import Image
+from PIL import Image, ExifTags
 
 from ella.photos.conf import photos_settings
+
+TAGS = dict((b,a) for a,b in ExifTags.TAGS.items())
 
 class Formatter(object):
     def __init__(self, image, format, crop_box=None, important_box=None):
@@ -18,7 +20,12 @@ class Formatter(object):
         self.image_ratio = float(iw) / ih
 
     def format(self):
-        " Crop and resize the supplied image. Return the image and the crop_box used. "
+        """
+        Crop and resize the supplied image. Return the image and the crop_box used.
+        If the input format is JPEG and in EXIF there is information about rotation, use it and rotate resulting image.
+        """
+        if hasattr(self.image, '_getexif'):
+            self.rotate_exif()
         crop_box = self.crop_to_ratio()
         self.resize()
         return self.image, crop_box
@@ -180,4 +187,30 @@ class Formatter(object):
             return
 
         self.image = self.image.resize(resized_size, Image.ANTIALIAS)
+
+    def rotate_exif(self):
+        "rotate image via exif information - only 90, 180 and 270 rotations are supported"
+        exif = self.image._getexif() or {}
+        rotation = exif.get(TAGS['Orientation'], 1)
+
+        def nothing(): pass
+        rotations = {
+            6: self.rotate_90,
+            3: self.rotate_180,
+            8: self.rotate_270,
+        }
+        rotate = rotations.get(rotation, nothing)
+        rotate()
+
+    def rotate_90(self):
+        "rotate 90 degrees clockwise"
+        self.image = self.image.rotate(-90)
+
+    def rotate_180(self):
+        "rotate 180 degrees clockwise"
+        self.image = self.image.rotate(-180)
+
+    def rotate_270(self):
+        "rotate 270 degrees clockwise"
+        self.image = self.image.rotate(-270)
 
