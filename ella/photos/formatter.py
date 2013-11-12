@@ -189,28 +189,20 @@ class Formatter(object):
         self.image = self.image.resize(resized_size, Image.ANTIALIAS)
 
     def rotate_exif(self):
-        "rotate image via exif information - only 90, 180 and 270 rotations are supported"
+        """
+        Rotate image via exif information.
+        Only 90, 180 and 270 rotations are supported.
+        """
         exif = self.image._getexif() or {}
         rotation = exif.get(TAGS['Orientation'], 1)
 
-        def nothing(): pass
         rotations = {
-            6: self.rotate_90,
-            3: self.rotate_180,
-            8: self.rotate_270,
+            6: -90,
+            3: -180,
+            8: -270,
         }
-        rotate = rotations.get(rotation, nothing)
-        rotate()
+        if rotation not in rotations:
+            return
 
-    def rotate_90(self):
-        "rotate 90 degrees clockwise"
-        self.image = self.image.rotate(-90)
-
-    def rotate_180(self):
-        "rotate 180 degrees clockwise"
-        self.image = self.image.rotate(-180)
-
-    def rotate_270(self):
-        "rotate 270 degrees clockwise"
-        self.image = self.image.rotate(-270)
+        self.image = self.image.rotate(rotations[rotation])
 
