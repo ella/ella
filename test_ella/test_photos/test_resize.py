@@ -9,6 +9,9 @@ from PIL import Image
 from ella.photos.models import Format
 from ella.photos.formatter import Formatter
 
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+
 class TestPhotoResize(TestCase):
 
     def setUp(self):
@@ -162,8 +165,6 @@ class TestPhotoResizeWithRotate(TestCase):
         super(TestPhotoResizeWithRotate, self).setUp()
         self.base = path.dirname(path.abspath(__file__))
         self.format = Format(max_height=100, max_width=100)
-        self.WHITE = (255, 255, 255)
-        self.BLACK = (0, 0, 0)
 
     def get_image_and_formatter(self, name):
         o = Image.open(path.join(self.base, 'data', name))
@@ -174,38 +175,38 @@ class TestPhotoResizeWithRotate(TestCase):
         i, f = self.get_image_and_formatter('rotate1.jpeg')
 
         tools.assert_equals((20, 10), i.size)
-        tools.assert_equals(self.WHITE, i.getpixel((5, 5)))
-        tools.assert_equals(self.BLACK, i.getpixel((15, 5)))
+        tools.assert_equals(WHITE, i.getpixel((5, 5)))
+        tools.assert_equals(BLACK, i.getpixel((15, 5)))
 
     def test_plain_jpeg_is_not_rotated(self):
         o, f = self.get_image_and_formatter('rotate1.jpeg')
         i, c = f.format()
 
         tools.assert_equals((20, 10), i.size)
-        tools.assert_equals(self.WHITE, i.getpixel((5, 5)))
-        tools.assert_equals(self.BLACK, i.getpixel((15, 5)))
+        tools.assert_equals(WHITE, i.getpixel((5, 5)))
+        tools.assert_equals(BLACK, i.getpixel((15, 5)))
 
     def test_jpeg_with_exit_rotation_info_3_is_rotated_180_degrees(self):
         o, f = self.get_image_and_formatter('rotate3.jpeg')
         i, c = f.format()
 
         tools.assert_equals((20, 10), i.size)
-        tools.assert_equals(self.BLACK, i.getpixel((5, 5)))
-        tools.assert_equals(self.WHITE, i.getpixel((15, 5)))
+        tools.assert_equals(BLACK, i.getpixel((5, 5)))
+        tools.assert_equals(WHITE, i.getpixel((15, 5)))
 
     def test_jpeg_with_exit_rotation_info_6_is_rotated_90_degrees_clockwise(self):
         o, f = self.get_image_and_formatter('rotate6.jpeg')
         i, c = f.format()
 
         tools.assert_equals((10, 20), i.size)
-        tools.assert_equals(self.WHITE, i.getpixel((5, 5)))
-        tools.assert_equals(self.BLACK, i.getpixel((5, 15)))
+        tools.assert_equals(WHITE, i.getpixel((5, 5)))
+        tools.assert_equals(BLACK, i.getpixel((5, 15)))
 
     def test_jpeg_with_exit_rotation_info_8_is_rotated_90_degrees_counter_clockwise(self):
         o, f = self.get_image_and_formatter('rotate8.jpeg')
         i, c = f.format()
 
         tools.assert_equals((10, 20), i.size)
-        tools.assert_equals(self.BLACK, i.getpixel((5, 5)))
-        tools.assert_equals(self.WHITE, i.getpixel((5, 15)))
+        tools.assert_equals(BLACK, i.getpixel((5, 5)))
+        tools.assert_equals(WHITE, i.getpixel((5, 15)))
 
