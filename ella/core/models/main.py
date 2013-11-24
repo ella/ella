@@ -146,8 +146,8 @@ class Category(models.Model):
         path = self.tree_path.split('/')[0]
         return Category.objects.get_by_tree_path(path)
 
-    def get_children(self, recursive=False):
-        return Category.objects.get_children(self, recursive)
+    def get_children(self, recursive=False, order='title'):
+        return Category.objects.get_children(self, recursive, order)
 
     @property
     def path(self):

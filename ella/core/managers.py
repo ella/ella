@@ -51,28 +51,28 @@ class CategoryManager(models.Manager):
         self.__class__._cache.clear()
         self.__class__._hierarchy.clear()
 
-    def _load_hierarchy(self, site_id):
+    def _load_hierarchy(self, site_id, order):
         cache = self.__class__._cache.setdefault(site_id, {})
-        hierarchy = self.__class__._hierarchy.setdefault(site_id, {})
-        for c in self.filter(site=site_id).order_by('title'):
+        hierarchy = self.__class__._hierarchy[site_id].setdefault(order, {})
+        for c in self.filter(site=site_id).order_by(order):
             # make sure we are working with the instance already in cache
             c = cache.setdefault(c.id, c)
             hierarchy.setdefault(c.tree_parent_id, []).append(c)
 
-    def _retrieve_children(self, category):
-        if not self.__class__._hierarchy:
-            self._load_hierarchy(category.site_id)
-        return self.__class__._hierarchy[category.site_id].get(category.pk, [])
+    def _retrieve_children(self, category, order):
+        if not order in self.__class__._hierarchy.setdefault(category.site_id, {}):
+            self._load_hierarchy(category.site_id, order)
+        return self.__class__._hierarchy[category.site_id][order].get(category.pk, [])
 
-    def get_children(self, category, recursive=False):
+    def get_children(self, category, recursive=False, order='title'):
         #make sure this is the instance stored in our cache
         self._add_to_cache(category)
         # copy the returned list. if recursive, we extend it below
-        children = self._retrieve_children(category)[:]
+        children = self._retrieve_children(category, order)[:]
         if recursive:
             to_process = children[:]
             while to_process:
-                grand_children = self._retrieve_children(to_process.pop())
+                grand_children = self._retrieve_children(to_process.pop(), order)
                 children.extend(grand_children)
                 to_process.extend(grand_children)
             children = sorted(children, key=attrgetter('tree_path'))
