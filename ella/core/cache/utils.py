@@ -18,10 +18,14 @@ log = logging.getLogger('ella.core.cache.utils')
 KEY_PREFIX = 'ella.obj'
 CACHE_TIMEOUT = getattr(settings, 'CACHE_TIMEOUT', 10 * 60)
 
-@receiver(post_save)
-@receiver(post_delete)
+
 def invalidate_cache(sender, instance, **kwargs):
     invalidate_cache_for_object(instance)
+
+
+def connect_invalidation_signals():
+    post_save.connect(invalidate_cache)
+    post_delete.connect(invalidate_cache)
 
 
 def invalidate_cache_for_object(obj):

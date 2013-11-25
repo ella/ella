@@ -98,6 +98,18 @@ class TestCacheInvalidation(CacheTestCase):
         self.ct.save()
         tools.assert_equals(None, self.cache.get(utils._get_key(utils.KEY_PREFIX, self.ct, pkr=self.ct.pk)))
 
+    def test_save_increases_version(self):
+        self.ct = ContentType.objects.get_for_model(ContentType)
+        key = utils._get_key(utils.KEY_PREFIX, self.ct, pk=self.ct.pk, version_key=True)
+
+        self.ct.save()
+        initial_version = self.cache.get(key)
+        self.ct.save()
+        new_version = self.cache.get(key)
+
+        tools.assert_equals(new_version, initial_version + 1)
+
+
 class TestRedisListings(TestCase):
     def setUp(self):
         super(TestRedisListings, self).setUp()

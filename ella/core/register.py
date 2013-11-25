@@ -9,6 +9,7 @@ from ella.core.models import Category, Listing
 from ella.core.managers import ListingHandler
 from ella.core.conf import core_settings
 from ella.core.cache.redis import connect_signals
+from ella.core.cache.utils import connect_invalidation_signals
 from ella.utils.pagination import FirstPagePaginator
 
 
@@ -67,7 +68,8 @@ app_registry.register('ella', EllaAppDataContainer, Category)
 # connect redis listing handler signals
 connect_signals()
 
-# add some of our templatetags to builtins
+# connect cache invalidation signals
+connect_invalidation_signals()
 
 # add core templatetags to builtin so that you don't have to invoke {% load core %} in every template
 template.add_to_builtins('ella.core.templatetags.core')
