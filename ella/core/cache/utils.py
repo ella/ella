@@ -23,6 +23,7 @@ CACHE_TIMEOUT = getattr(settings, 'CACHE_TIMEOUT', 10 * 60)
 def invalidate_cache(sender, instance, **kwargs):
     invalidate_cache_for_object(instance)
 
+
 def invalidate_cache_for_object(obj):
     key = _get_key(KEY_PREFIX, ContentType.objects.get_for_model(obj), pk=obj.pk, version_key=True)
     try:
@@ -30,10 +31,12 @@ def invalidate_cache_for_object(obj):
     except ValueError:
         cache.set(key, 1, timeout=CACHE_TIMEOUT)
 
+
 def normalize_key(key):
     if len(key) < 250:
         return key
     return md5(key).hexdigest()
+
 
 def _get_key(start, model, pk=None, version_key=False, **kwargs):
     Publishable = get_model('core', 'publishable')
@@ -58,6 +61,7 @@ def _get_key(start, model, pk=None, version_key=False, **kwargs):
                 str(model.pk),
                 ','.join(':'.join((key, smart_str(kwargs[key]).replace(' ', '_'))) for key in sorted(kwargs.keys()))
     )))
+
 
 def get_cached_object(model, timeout=CACHE_TIMEOUT, **kwargs):
     """
@@ -98,7 +102,10 @@ def get_cached_object(model, timeout=CACHE_TIMEOUT, **kwargs):
 
     return obj
 
+
 RAISE, SKIP, NONE = 0, 1, 2
+
+
 def get_cached_objects(pks, model=None, timeout=CACHE_TIMEOUT, missing=RAISE):
     """
     Return a list of objects with given PKs using cache.
@@ -183,6 +190,7 @@ def get_cached_object_or_404(model, timeout=CACHE_TIMEOUT, **kwargs):
         return get_cached_object(model, timeout=timeout, **kwargs)
     except ObjectDoesNotExist, e:
         raise Http404('Reason: %s' % str(e))
+
 
 def cache_this(key_getter, timeout=CACHE_TIMEOUT):
     def wrapped_decorator(func):
