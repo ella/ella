@@ -11,7 +11,7 @@
 
     <fieldset class="mass-upload2 module aligned">
         <legend>{% trans "Images" %}</legend>
-        <form action="{% url newman:photo-mass-upload-file %}" enctype="multipart/form-data" method="post" class="js-mass-file-upload change-form">
+        <form action="{% url "newman:photo-mass-upload-file" %}" enctype="multipart/form-data" method="post" class="js-mass-file-upload change-form">
             <span class="fileinput">
                 <a class="btn icn add">{% trans "choose photos" %}</a>
                 <input type="file" multiple="multiple" name="image_file" class="" />
