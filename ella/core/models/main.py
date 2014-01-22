@@ -58,7 +58,7 @@ class Author(models.Model):
             return redis.AuthorListingHandler(self)
 
         root = Category.objects.get_by_tree_path('')
-        return root.app_data.ella.get_listings(children=ListingHandler.ALL, author=self)
+        return root.app_data.ella.get_listings(children=ListingHandler.ALL, author=self, **kwargs)
 
 
 class Source(models.Model):
