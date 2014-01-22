@@ -2,4 +2,4 @@
 nose
 coverage
 feedparser
-redis
+redis==2.9.0
