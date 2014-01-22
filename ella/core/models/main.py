@@ -55,10 +55,10 @@ class Author(models.Model):
 
     def recently_published(self, **kwargs):
         if core_settings.USE_REDIS_FOR_LISTINGS:
-            return redis.AuthorListingHandler(self).get_listings(**kwargs)
+            return redis.AuthorListingHandler(self)
 
         root = Category.objects.get_by_tree_path('')
-        return root.app_data.ella.get_listings(children=ListingHandler.ALL, author=self, **kwargs)
+        return root.app_data.ella.get_listings(children=ListingHandler.ALL, author=self)
 
 
 class Source(models.Model):
