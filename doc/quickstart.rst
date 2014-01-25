@@ -134,9 +134,6 @@ fashion, serve also media files discussed in previous paragraph::
     from django.contrib import admin 
     from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
-    # make sure to import ella error handlers
-    from ella.core.urls import handler404, handler500
-    
     # register apps for Django admin and let the apps do any initialization they need
     from ella.utils.installedapps import call_modules
     call_modules(('admin', 'register', ))
@@ -415,20 +412,6 @@ This template will have access to the actual ``Publishable`` subclass instance
 
 Note the use of ``{% render %}`` templatetag that is used to render **rich-text
 fields** (which object.description is) thorought Ella.
-
-
-Error pages
-===========
-
-By importing ``handler404`` and ``handler500`` in our ``urls.py``, we turned
-over the control of error pages to Ella. This means that we need to create two
-additional templates: ``page/404.html``::
-
-    <h1>Oops, nothing here</h1>
-
-and ``page/500.html``::
-
-    <h1>If you see this, let us please know how you did it, thanks!</h1>
 
 Now that we have a set of rudimentary templates, we can try
 **doing something useful** with them.
