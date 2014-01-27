@@ -1,5 +1,8 @@
 from django.conf import settings
-from django.conf.urls.defaults import *
+try:
+    from django.conf.urls import *
+except:
+    from django.conf.urls.defaults import *
 from django.core.validators import slug_re
 from django.db.models.loading import get_model
 from django.template.defaultfilters import slugify
