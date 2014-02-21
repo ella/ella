@@ -10,7 +10,10 @@ class PositionOptions(admin.ModelAdmin):
         if not obj.target:
             return '-- %s --' % ugettext('empty position')
         else:
-            return u'%s [%s]' % (obj.target.title, ugettext(obj.target_ct.name),)
+            return u'%s [%s]' % (
+                getattr(obj.target, 'title', obj.target),
+                ugettext(obj.target_ct.name),
+            )
     show_title.short_description = _('Title')
 
     def is_filled(self, obj):
