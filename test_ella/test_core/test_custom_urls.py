@@ -7,7 +7,10 @@ from test_ella.cases import RedisTestCase as TestCase
 from nose import tools
 
 from django.http import Http404, HttpResponse
-from django.conf.urls.defaults import patterns, url
+try:
+    from django.conf.urls import patterns, url
+except:
+    from django.conf.urls.defaults import patterns, url
 from django.core.urlresolvers import NoReverseMatch
 from django.template import Template, Context
 
