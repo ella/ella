@@ -41,14 +41,25 @@ class TestPaginate(UnitTestCase):
             'page': page
         }
 
-        tools.assert_equals((('inclusion_tags/paginator.html', 'inc/paginator.html'), {
+        tname, context = _do_paginator(context, 2, None)
+
+        tools.assert_equals(
+            ('inclusion_tags/paginator.html', 'inc/paginator.html'),
+            tname,
+        )
+
+        query_params = context.pop('query_params')
+        tools.assert_equals({
             'page': page,
             'page_numbers': [1, 2, 3, 4, 5],
-            'query_params': '?using=custom_lh&other=param+with+spaces&p=',
             'results_per_page': 10,
             'show_first': False,
             'show_last': True
-        }), _do_paginator(context, 2, None))
+        }, context)
+        tools.assert_in(query_params, (
+            '?using=custom_lh&other=param+with+spaces&p=',
+            '?other=param+with+spaces&using=custom_lh&p=',
+        ))
 
     def test_always_include_given_number_of_pages(self):
         page = Paginator(range(100), 9).page(1)
@@ -221,7 +232,10 @@ class TestBoxTag(UnitTestCase):
                 level: 2
                 some_other_param: xxx
             {% endbox %}''')
-        tools.assert_equals('some_other_param:xxx|level:2|', t.render(template.Context()))
+        tools.assert_in(t.render(template.Context()), (
+                'some_other_param:xxx|level:2|',
+                'level:2|some_other_param:xxx|',
+            ))
 
     def test_box_wirks_with_variable_instead_of_lookup(self):
         site = Site.objects.get(pk=1)

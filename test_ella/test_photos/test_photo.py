@@ -95,7 +95,7 @@ class TestPhoto(TestCase):
                 'url': '/static/photos/2012/02/14/1-1-example-photo_12.jpg',
             }
             actual = redis.hgetall(REDIS_FORMATTED_PHOTO_KEY % (self.photo.id, self.basic_format.id))
-            tools.assert_equals(expected.keys(), actual.keys())
+            tools.assert_equals(set(expected.keys()), set(actual.keys()))
             tools.assert_equals(expected['width'], actual['width'])
             tools.assert_equals(expected['height'], actual['height'])
 
