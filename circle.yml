@@ -1,0 +1,14 @@
+checkout:
+  post:
+    - git submodule sync
+    - git submodule update --init
+    - git clone git@github.com:WhiskeyMedia/scout.git scout.git
+dependencies:
+  override:
+
+  cache_directories:
+    - venv/src
+    - ~/.pip/cache
+test:
+  override:
+#    - python setup.py test
