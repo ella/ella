@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
+import os
+
 from PIL import Image
 
 from django.core.files.base import ContentFile
 from test_ella.cases import RedisTestCase as TestCase
 from django.contrib.sites.models import Site
+from django.conf import settings
 
 from nose import tools
 
@@ -121,3 +124,16 @@ class TestPhoto(TestCase):
 
     def test_retrieving_ratio(self):
         tools.assert_equals(2, self.photo.ratio())
+    
+    def test_formattedphoto_gets_regenerated_with_correct_filename(self):
+        FormatedPhoto.objects.get_photo_in_format(self.photo, self.basic_format)
+        formatted_photo = FormatedPhoto.objects.get(photo=self.photo, format=self.basic_format)
+        image_file_path = os.path.join(settings.MEDIA_ROOT, formatted_photo.image.name)
+        self.assertTrue(os.path.exists(image_file_path), "FormatedPhoto image file doesn't exist!")
+        # now change some aspects of formatted_photo and save it
+        formatted_photo.crop_left = formatted_photo.crop_left + 2
+        formatted_photo.crop_top = formatted_photo.crop_top + 2
+        formatted_photo.save()
+        new_image_file_path = os.path.join(settings.MEDIA_ROOT, formatted_photo.image.name)
+        self.assertNotEquals(image_file_path, new_image_file_path, "FormatedPhoto image file didn't get regenerated when saved.")
+        self.assertTrue(os.path.exists(new_image_file_path), "FormatedPhoto image file path is wrong after a change and re-save.")
