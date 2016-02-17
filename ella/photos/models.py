@@ -23,6 +23,9 @@ from ella.utils.timezone import now
 
 from formatter import Formatter
 
+from .settings import DELETE_FORMATTED_PHOTOS_ON_FORMAT_SAVE
+
+
 __all__ = ("Format", "FormatedPhoto", "Photo")
 
 log = logging.getLogger('ella.photos')
@@ -258,7 +261,7 @@ class Format(models.Model):
           (because of possible changes)
         """
 
-        if self.id:
+        if self.id and DELETE_FORMATTED_PHOTOS_ON_FORMAT_SAVE:
             for f_photo in self.formatedphoto_set.all():
                 f_photo.delete()
 
