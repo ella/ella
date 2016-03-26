@@ -145,6 +145,9 @@ class ObjectDetail(EllaCoreView):
             url = obj.get_absolute_url()
             if url_remainder:
                 url += url_remainder
+            query_string = request.META.get('QUERY_STRING', '')
+            if query_string:
+                url += '?' + query_string
             return redirect(url, permanent=True)
 
         obj = context['object']
