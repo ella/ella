@@ -1,9 +1,9 @@
+import json
 from django import forms
 from django.contrib import admin
 from django.conf import settings
 from django.utils.translation import ugettext
 from django.forms.util import ValidationError
-from django.utils import simplejson
 from django.utils.translation import ugettext_lazy as _
 from django.utils.safestring import mark_safe
 from django.http import HttpResponse
@@ -118,15 +118,15 @@ class PhotoOptions(admin.ModelAdmin):
             format = get_cached_object(Format, pk=format)
             content = {
                 'error': False,
-                'image':settings.MEDIA_URL + photo.image,
-                'width':photo.width,
+                'image': settings.MEDIA_URL + photo.image,
+                'width': photo.width,
                 'height': photo.height,
-                'format_width':format.max_width,
-                'format_height':format.max_height
+                'format_width': format.max_width,
+                'format_height': format.max_height
             }
         except (Photo.DoesNotExist, Format.DoesNotExist):
-            content = {'error':True}
-        return HttpResponse(simplejson.dumps(content))
+            content = {'error': True}
+        return HttpResponse(json.dumps(content))
 
 
 class FormatedPhotoOptions(admin.ModelAdmin):
@@ -140,4 +140,3 @@ class FormatedPhotoOptions(admin.ModelAdmin):
 admin.site.register(Format, FormatOptions)
 admin.site.register(Photo, PhotoOptions)
 admin.site.register(FormatedPhoto, FormatedPhotoOptions)
-
