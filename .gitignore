@@ -17,3 +17,5 @@ test_ella/cover
 nosetests.xml
 
 .idea
+.tox/*
+.eggs/

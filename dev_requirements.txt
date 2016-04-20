@@ -1,5 +1,0 @@
--r requirements.txt
-nose
-coverage
-feedparser
-redis
