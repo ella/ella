@@ -98,7 +98,7 @@ class TestPhoto(TestCase):
                 'url': '/static/photos/2012/02/14/1-1-example-photo_12.jpg',
             }
             actual = redis.hgetall(REDIS_FORMATTED_PHOTO_KEY % (self.photo.id, self.basic_format.id))
-            tools.assert_equals(expected.keys(), actual.keys())
+            tools.assert_equals(sorted(expected.keys()), sorted(actual.keys()))
             tools.assert_equals(expected['width'], actual['width'])
             tools.assert_equals(expected['height'], actual['height'])
 
@@ -124,7 +124,7 @@ class TestPhoto(TestCase):
 
     def test_retrieving_ratio(self):
         tools.assert_equals(2, self.photo.ratio())
-    
+
     def test_formattedphoto_gets_regenerated_with_correct_filename(self):
         FormatedPhoto.objects.get_photo_in_format(self.photo, self.basic_format)
         formatted_photo = FormatedPhoto.objects.get(photo=self.photo, format=self.basic_format)
