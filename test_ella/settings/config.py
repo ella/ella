@@ -1,3 +1,5 @@
+import os
+
 ADMINS = (
     # ('Your Name', 'your_email@domain.com'),
 )
@@ -17,7 +19,10 @@ DATABASES = {
     }
 }
 
-TEST_CORE_REDIS = PHOTOS_REDIS = {'db': 15}
+LISTINGS_REDIS = TEST_CORE_REDIS = PHOTOS_REDIS = {
+    'db': 15,
+    'host': os.getenv('REDIS_HOST', 'localhost'),
+}
 
 TIME_ZONE = 'Europe/Prague'
 
