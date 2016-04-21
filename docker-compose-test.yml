@@ -5,10 +5,7 @@ redis:
     - "6379:6379"
 
 tests:
-  image: python:2.7
+  build: .
   links:
     - redis:redis
-  volumes:
-    - .:/app
-  working_dir: /app
   command: bash -c "pip install tox && tox"
