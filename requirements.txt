@@ -2,5 +2,7 @@ Django<1.7
 south>=0.7
 Pillow
 pytz
+feedparser
+redis
 
 django-appdata>=0.1.0
