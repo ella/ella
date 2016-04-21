@@ -7,6 +7,8 @@ install_requires = [
     'south>=0.7',
     'Pillow',
     'pytz',
+    'feedparser',
+    'redis',
     'django-appdata>=0.1.0',
 ]
 
@@ -14,8 +16,6 @@ tests_require = [
     'nose',
     'coverage',
     'mock',
-    'feedparser',
-    'redis',
 ]
 
 long_description = open('README.rst').read()
