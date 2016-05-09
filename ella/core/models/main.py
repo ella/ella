@@ -166,7 +166,7 @@ class Category(models.Model):
         else:
             return self.slug
 
-    def get_absolute_url(self):
+    def get_absolute_url(self, domain=False):
         """
         Returns absolute URL for the category.
         """
@@ -174,10 +174,16 @@ class Category(models.Model):
             url = reverse('root_homepage')
         else:
             url = reverse('category_detail', kwargs={'category' : self.tree_path})
-        if self.site_id != settings.SITE_ID:
+        if self.site_id != settings.SITE_ID or domain:
             # prepend the domain if it doesn't match current Site
             return 'http://' + self.site.domain + url
         return url
+
+    def get_domain_url(self):
+        """
+        Returns absolute URL for the category.
+        """
+        return self.get_absolute_url(domain=True)
 
     def draw_title(self):
         """
