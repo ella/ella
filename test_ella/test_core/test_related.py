@@ -35,7 +35,7 @@ class TestDefaultRelatedFinder(GetRelatedTestCase):
         expected = map(lambda x: x.pk, reversed(self.publishables))
         tools.assert_equals(
                 expected,
-                [p.pk for p in Related.objects.get_related_for_object(self.publishable, len(expected))]
+                [p.pk for p in Related.objects.get_related_for_object(self.publishable, len(expected)*2)]
             )
 
 
